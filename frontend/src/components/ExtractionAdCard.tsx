@@ -49,13 +49,15 @@ export default function ExtractionAdCard() {
     const positionBanner = () => {
       if (cancelled || !slotRef.current) return;
       const rect = slotRef.current.getBoundingClientRect();
-      // Distance from the top of the webview to the top of the slot ≈ the
-      // banner's margin-top (both density-independent px on Android).
+      // BOTTOM_CENTER expects the distance from the viewport's bottom edge to
+      // the banner's bottom edge. CSS px map to the plugin's logical dp units.
+      const bottomMargin = Math.max(0, Math.round(window.innerHeight - rect.bottom));
       console.log(
         `[AdMob] slot rect top=${Math.round(rect.top)} bottom=${Math.round(rect.bottom)} ` +
-          `height=${Math.round(rect.height)} innerH=${window.innerHeight} dpr=${window.devicePixelRatio}`,
+          `height=${Math.round(rect.height)} innerH=${window.innerHeight} ` +
+          `marginBottom=${bottomMargin} dpr=${window.devicePixelRatio}`,
       );
-      showExtractionBanner(rect.top);
+      void showExtractionBanner(bottomMargin);
     };
 
     (async () => {

@@ -90,17 +90,22 @@ export async function initAds(): Promise<void> {
 }
 
 /**
- * Show the extraction MEDIUM_RECTANGLE banner anchored `marginTopPx` from the
- * top of the webview so it lines up with the `ExtractionAdCard` slot. Any
- * existing banner is removed first so this doubles as a reposition. No-op on web
- * or if the user declined consent.
+ * Show the extraction MEDIUM_RECTANGLE banner anchored to the bottom-centre of
+ * the screen and align it with the React ad slot using a measured bottom
+ * margin. The plugin interprets this value as density-independent pixels on
+ * Android, which matches CSS pixels in the WebView; do not multiply by DPR.
+ * Any existing banner is recreated when the margin changes so rotation and
+ * viewport resizing remain aligned. No-op on web or if consent was declined.
  */
-export async function showExtractionBanner(marginTopPx: number): Promise<void> {
+export async function showExtractionBanner(bottomMarginDp: number): Promise<void> {
   if (!isNative()) return;
   await initAds();
   if (!canRequestAds) return;
 
-  // Remove any previous banner so repositioning (e.g. rotation) is clean.
+  const margin = Math.max(0, Math.round(bottomMarginDp));
+
+  // The plugin reloads an existing banner but does not update its layout
+  // margins, so remove it before applying a newly measured position.
   if (bannerShown) {
     try {
       await AdMob.removeBanner();
@@ -114,15 +119,15 @@ export async function showExtractionBanner(marginTopPx: number): Promise<void> {
     await AdMob.showBanner({
       adId: BANNER_AD_ID,
       adSize: BannerAdSize.MEDIUM_RECTANGLE,
-      position: BannerAdPosition.TOP_CENTER,
-      margin: Math.max(0, Math.round(marginTopPx)),
+      position: BannerAdPosition.BOTTOM_CENTER,
+      margin,
       isTesting: IS_TESTING,
       npa: !personalizedAllowed,
     });
     bannerShown = true;
     console.log(
-      `[AdMob] showBanner requested (id=${BANNER_AD_ID}, testing=${IS_TESTING}, ` +
-        `marginTop=${Math.round(marginTopPx)}, npa=${!personalizedAllowed})`,
+      `[AdMob] showBanner requested (BOTTOM_CENTER, margin=${margin}, ` +
+        `testing=${IS_TESTING}, npa=${!personalizedAllowed})`,
     );
   } catch (err) {
     console.warn('[AdMob] showBanner failed:', err);
