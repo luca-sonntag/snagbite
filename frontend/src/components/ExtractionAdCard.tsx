@@ -51,6 +51,10 @@ export default function ExtractionAdCard() {
       const rect = slotRef.current.getBoundingClientRect();
       // Distance from the top of the webview to the top of the slot ≈ the
       // banner's margin-top (both density-independent px on Android).
+      console.log(
+        `[AdMob] slot rect top=${Math.round(rect.top)} bottom=${Math.round(rect.bottom)} ` +
+          `height=${Math.round(rect.height)} innerH=${window.innerHeight} dpr=${window.devicePixelRatio}`,
+      );
       showExtractionBanner(rect.top);
     };
 
@@ -59,8 +63,9 @@ export default function ExtractionAdCard() {
         if (cancelled) return;
         setStatus(next);
       });
-      removeSizeListener = await addBannerSizeListener(({ height }) => {
+      removeSizeListener = await addBannerSizeListener(({ width, height }) => {
         if (cancelled || height <= 0) return;
+        console.log(`[AdMob] banner size w=${width} h=${height}`);
         setSlotHeight(height);
       });
       if (cancelled) {
