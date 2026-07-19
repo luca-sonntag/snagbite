@@ -168,6 +168,9 @@ export function getCategoryIcon(category: string): string {
 
 export const uiTranslations = {
   de: {
+    ads: {
+      label: 'Werbung',
+    },
     onboarding: {
       skip: 'Überspringen',
       back: 'Zurück',
@@ -1036,6 +1039,9 @@ export const uiTranslations = {
     }
   },
   en: {
+    ads: {
+      label: 'Advertisement',
+    },
     onboarding: {
       skip: 'Skip',
       back: 'Back',
@@ -1530,10 +1536,8 @@ export const uiTranslations = {
       tabIngredients: 'Ingredients',
       tabInstructions: 'Instructions',
       ingredientsTitle: 'Ingredients Checklist',
-      ingredientsSubtitle: 'Check ingredients you already have',
-      staplePillLabel: 'staple',
-      parentDerivedLabel: 'from {parent}',
-      showNutritionPerIngredient: 'Nutrition',
+      ingredientsSubtitle: 'Check ingredients you have prepared',
+      showNutritionPerIngredient: 'Nutrition per ingredient',
       addedToShopping: 'Added to shopping list!',
       addToShopping: 'Add to shopping list',
       goToShoppingList: 'Add to shopping list',

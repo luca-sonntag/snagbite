@@ -280,8 +280,8 @@ export default function App() {
       // Already at root — let Capacitor exit the app.
       return false;
     });
-  // Note: activeView, selectedJob and recipe are intentionally in the dep array
-  // so the handler always closes over the latest state.
+    // Note: activeView, selectedJob and recipe are intentionally in the dep array
+    // so the handler always closes over the latest state.
   }, [activeView, selectedJob, isCatalogList, recipe, navigate, setRecipe, setUrl]);
 
   // Fetch history on load. Waits for AuthContext's own initial getSession()
@@ -302,6 +302,12 @@ export default function App() {
     import('./utils/purchase').then(({ initBilling }) => {
       initBilling(user.id);
     }).catch(err => console.error('Failed to load billing module:', err));
+
+    // Initialize AdMob (+ EU consent) once so the extraction ad can render for
+    // free users. No-op on web and idempotent across re-runs.
+    import('./utils/ads').then(({ initAds }) => {
+      initAds();
+    }).catch(err => console.error('Failed to load ads module:', err));
   }, [authLoading, user, fetchHistory]);
 
   // Initial sync on startup/login
@@ -663,7 +669,22 @@ export default function App() {
           pinned. */}
       <div ref={setStickyTopEl} className="sticky top-0 z-40 w-full">
         {/* Status bar background filler for devices with safe-area-inset-top (e.g. Android 15 Edge-to-Edge) */}
-        <div className="w-full h-[var(--safe-area-inset-top)] bg-[#064e3b]" />
+        <div className="w-full h-[env(safe-area-inset-top)] bg-[#064e3b]" />
+
+        {activeView === 'extract' && !recipe && (
+          <header className="w-full bg-gray-50/85 dark:bg-gray-950/85 backdrop-blur-md transition-colors duration-300">
+            <div className="relative w-full max-w-md mx-auto px-4 py-3 flex justify-center items-center">
+              <div className="flex items-center gap-2">
+                <div className="flex-shrink-0">
+                  <img src="/logo-login.png" alt="App Logo" className="w-7 h-7 object-contain" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white m-0 leading-none">{t('app.title')}</h1>
+                </div>
+              </div>
+            </div>
+          </header>
+        )}
 
         {/* Active Cooking Timers Banner */}
         <TimerBanner />
@@ -673,13 +694,12 @@ export default function App() {
       </div>
 
       {/* Main content body */}
-      <main className={`w-full max-w-md mx-auto px-4 mt-1 flex-1 flex flex-col gap-6 ${
-        activeView === 'admin'
+      <main className={`w-full max-w-md mx-auto px-4 mt-1 flex-1 flex flex-col gap-6 ${activeView === 'admin'
           ? 'pb-12'
           : isViewingRecipe || activeView === 'shopping-list' || (activeView === 'history' && isCatalogSelectMode)
             ? 'pb-48'
             : 'pb-24'
-      } ${(activeView === 'extract' && !recipe) ? 'pt-6' : (!isViewingRecipe ? 'pt-4' : '')}`}>
+      } ${(!isViewingRecipe && activeView !== 'extract') ? 'pt-4' : ''}`}>
 
         {/* One-time trial banner for free users */}
         {!(isPending && !isPremium) && <TrialBanner onOpenPremium={() => setIsPremiumModalOpen(true)} />}
