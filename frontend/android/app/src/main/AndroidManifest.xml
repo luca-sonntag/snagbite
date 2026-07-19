@@ -37,6 +37,13 @@
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
         </provider>
 
+        <!-- Google AdMob app id. Currently Google's public TEST app id — replace
+             with the real ca-app-pub-xxx~yyy before shipping ads to production.
+             AdMob crashes on startup if this meta-data is missing. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713" />
+
         <!-- FCM (smart AI push notifications): status-bar icon, tint color and the
              default channel used when a data-less push arrives before the app has
              created its own channel. The channel id matches PUSH_CHANNEL_ID in push.ts. -->

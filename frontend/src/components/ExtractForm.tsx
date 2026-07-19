@@ -13,6 +13,7 @@ import PremiumHint from './PremiumHint';
 import PremiumUpgradeCard from './PremiumUpgradeCard';
 import type { ProgressData } from '../types';
 import ExtractionAnimation from './ExtractionAnimation';
+import ExtractionAdCard from './ExtractionAdCard';
 
 import { InstagramIcon, ShareStep1Mockup, ShareStep2Mockup, ShareStep3Mockup } from './ShareMockups';
 
@@ -226,13 +227,17 @@ export default function ExtractForm({
       {errorBanner}
       {/* Input Card or Extraction Animation Card */}
       {isPending ? (
-        <ExtractionAnimation
-          url={url}
-          isPending={isPending}
-          jobStatus={jobStatus}
-          progress={progress}
-          variant={mode === 'photo' ? 'photo' : 'link'}
+        <>
+          <ExtractionAnimation
+            url={url}
+            isPending={isPending}
+            jobStatus={jobStatus}
+            progress={progress}
+            variant={mode === 'photo' ? 'photo' : 'link'}
         />
+          {/* Freemium ad in the empty space below the animation (native only). */}
+          {!isPremium && <ExtractionAdCard />}
+        </>
       ) : (
         <Card className="!bg-white dark:!bg-gray-900 p-6 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
           <form
