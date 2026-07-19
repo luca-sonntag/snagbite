@@ -5,10 +5,11 @@ import {
   showExtractionBanner,
   removeExtractionBanner,
   addBannerSizeListener,
+  addBannerLoadListener,
 } from '../utils/ads';
 
 /**
- * Freemium ad slot shown in the empty space below the extraction animation.
+ * Ad slot shown in the empty space below the extraction animation.
  *
  * The AdMob plugin can't render "native advanced" ads, so we draw an app-styled
  * glass card with a small "Werbung" label and reserve a centered slot; a native
@@ -20,6 +21,11 @@ import {
  * unmounts, so the ad disappears the instant extraction finishes — keeping it
  * non-intrusive.
  *
+ * The card frame is laid out (so we can measure where to place the native
+ * banner) but stays invisible until a real ad actually loads — so a slow load
+ * or an empty fill never leaves a blank grey box on screen. If the ad fails to
+ * load, the card renders nothing at all.
+ *
  * On web there is no native ad, so this renders nothing.
  */
 export default function ExtractionAdCard() {
@@ -27,6 +33,7 @@ export default function ExtractionAdCard() {
   const slotRef = useRef<HTMLDivElement>(null);
   // Default MREC height (300×250) until the real banner reports its size.
   const [slotHeight, setSlotHeight] = useState(250);
+  const [status, setStatus] = useState<'pending' | 'loaded' | 'failed'>('pending');
 
   const native = isNative();
 
@@ -37,6 +44,7 @@ export default function ExtractionAdCard() {
 
     let cancelled = false;
     let removeSizeListener: (() => void) | null = null;
+    let removeLoadListener: (() => void) | null = null;
 
     const positionBanner = () => {
       if (cancelled || !slotRef.current) return;
@@ -47,11 +55,16 @@ export default function ExtractionAdCard() {
     };
 
     (async () => {
+      removeLoadListener = await addBannerLoadListener((next) => {
+        if (cancelled) return;
+        setStatus(next);
+      });
       removeSizeListener = await addBannerSizeListener(({ height }) => {
         if (cancelled || height <= 0) return;
         setSlotHeight(height);
       });
       if (cancelled) {
+        removeLoadListener?.();
         removeSizeListener?.();
         return;
       }
@@ -66,15 +79,23 @@ export default function ExtractionAdCard() {
     return () => {
       cancelled = true;
       window.removeEventListener('resize', onResize);
+      removeLoadListener?.();
       removeSizeListener?.();
       removeExtractionBanner();
     };
   }, [native]);
 
   if (!native) return null;
+  // No ad filled — don't leave an empty card behind.
+  if (status === 'failed') return null;
 
   return (
-    <div className="glass-panel p-4 rounded-2xl border border-black/5 dark:border-white/5 shadow-xl w-full animate-in fade-in duration-500">
+    <div
+      className={`glass-panel p-4 rounded-2xl border border-black/5 dark:border-white/5 shadow-xl w-full transition-opacity duration-500 ${
+        status === 'loaded' ? 'opacity-100' : 'opacity-0'
+      }`}
+      aria-hidden={status !== 'loaded'}
+    >
       <div className="flex items-center mb-2">
         <span className="text-[10px] font-semibold uppercase tracking-wider text-black/40 dark:text-white/40">
           {t('ads.label')}

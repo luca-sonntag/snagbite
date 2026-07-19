@@ -120,6 +120,10 @@ export async function showExtractionBanner(marginTopPx: number): Promise<void> {
       npa: !personalizedAllowed,
     });
     bannerShown = true;
+    console.log(
+      `[AdMob] showBanner requested (id=${BANNER_AD_ID}, testing=${IS_TESTING}, ` +
+        `marginTop=${Math.round(marginTopPx)}, npa=${!personalizedAllowed})`,
+    );
   } catch (err) {
     console.warn('[AdMob] showBanner failed:', err);
   }
@@ -149,5 +153,28 @@ export async function addBannerSizeListener(
   );
   return () => {
     handle.remove().catch(() => {});
+  };
+}
+
+/**
+ * Subscribe to banner load success/failure so the UI can reveal the card only
+ * once a real ad is on screen (and stay hidden if none fills). Returns an
+ * unsubscribe function. No-op on web.
+ */
+export async function addBannerLoadListener(
+  onChange: (status: 'loaded' | 'failed') => void,
+): Promise<() => void> {
+  if (!isNative()) return () => {};
+  const loaded = await AdMob.addListener(BannerAdPluginEvents.Loaded, () => {
+    console.log('[AdMob] banner loaded');
+    onChange('loaded');
+  });
+  const failed = await AdMob.addListener(BannerAdPluginEvents.FailedToLoad, (err) => {
+    console.warn('[AdMob] banner failed to load:', err);
+    onChange('failed');
+  });
+  return () => {
+    loaded.remove().catch(() => {});
+    failed.remove().catch(() => {});
   };
 }
