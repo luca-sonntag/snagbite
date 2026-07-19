@@ -15,9 +15,10 @@ import {
  * MEDIUM_RECTANGLE (300×250) banner is positioned as an overlay on top of that
  * slot so the whole thing reads as an integrated card rather than a floating ad.
  *
- * Rendering is gated by the parent (active extraction + free user). The banner
- * is torn down automatically when this component unmounts, so the ad disappears
- * the instant extraction finishes — keeping it non-intrusive.
+ * Rendering is gated by the parent (active extraction + non-premium user, i.e.
+ * free or beta). The banner is torn down automatically when this component
+ * unmounts, so the ad disappears the instant extraction finishes — keeping it
+ * non-intrusive.
  *
  * On web there is no native ad, so this renders nothing.
  */
