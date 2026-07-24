@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Tabs, Card, Button, Spinner } from '@heroui/react';
+import { Tabs, Button, Spinner } from '@heroui/react';
 import {
   Shield,
   Save,
@@ -384,7 +384,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
             {/* Panel: Settings */}
             <Tabs.Panel id="settings">
               <div className="flex flex-col gap-6">
-                <Card className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+                <div className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
                   <div className="flex flex-col gap-6">
                     {settings.length === 0 ? (
                       <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4 font-medium">
@@ -400,11 +400,11 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                           <div key={setting.key} className="flex flex-col gap-2 pb-5 border-b border-gray-100 dark:border-gray-800 last:border-0 last:pb-0">
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex flex-col gap-0.5">
-                                <label className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                <label className="text-sm font-extrabold text-gray-900 dark:text-white">
                                   {setting.key}
                                 </label>
                                 {setting.description && (
-                                  <span className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                                  <span className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed font-semibold">
                                     {setting.description}
                                   </span>
                                 )}
@@ -442,7 +442,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                                 name={setting.key}
                                 value={currentValue}
                                 onChange={(e) => handleSettingChange(setting.key, e.target.value)}
-                                className="w-full bg-gray-50/80 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 focus:bg-white transition-all shadow-sm"
+                                className="w-full bg-gray-50/80 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 focus:bg-white transition-all shadow-sm"
                                 aria-label={setting.key}
                               />
                             )}
@@ -451,7 +451,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                       })
                     )}
                   </div>
-                </Card>
+                </div>
 
                 {settings.length > 0 && (
                   <Button
@@ -495,7 +495,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                     const isExpanded = expandedFeedbackId === item.id;
 
                     return (
-                      <Card key={item.id} className="border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-3xl shadow-sm overflow-hidden p-5">
+                      <div key={item.id} className="border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-3xl shadow-sm overflow-hidden p-5">
                         <div className="flex flex-col gap-3">
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex flex-col gap-1.5">
@@ -591,7 +591,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                             </div>
                           )}
                         </div>
-                      </Card>
+                      </div>
                     );
                   })
                 )}
@@ -633,7 +633,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                   <div className={`flex flex-col gap-6 transition-opacity ${metricsLoading ? 'opacity-50 pointer-events-none' : ''}`}>
                     {/* 1. Top Level Metrics Cards Grid (5 Cards) */}
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                      <Card
+                      <div
                         className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2 cursor-pointer hover:ring-2 hover:ring-emerald-500/40 transition-all hover:shadow-md"
                         onClick={() => { setError(null); setActiveTab('users'); }}
                       >
@@ -651,9 +651,9 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                             {metricsRange === 'all' ? (isDe ? 'Registriert' : 'Registered') : rangeLabel[metricsRange]}
                           </span>
                         </div>
-                      </Card>
+                      </div>
 
-                      <Card className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
+                      <div className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
                         <div className="flex items-center justify-between text-gray-500 dark:text-gray-400">
                           <span className="text-[10px] font-extrabold uppercase tracking-wider">{isDe ? 'Rezepte' : 'Recipes'}</span>
                           <BookOpen className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -664,9 +664,9 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                           </span>
                           <span className="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5 font-bold">{isDe ? 'Extraktionen' : 'Extractions'}</span>
                         </div>
-                      </Card>
+                      </div>
 
-                      <Card className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
+                      <div className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
                         <div className="flex items-center justify-between text-gray-500 dark:text-gray-400">
                           <span className="text-[10px] font-extrabold uppercase tracking-wider">{isDe ? 'LLM Kosten' : 'LLM Costs'}</span>
                           <Coins className="w-4 h-4 text-amber-600 dark:text-amber-500" />
@@ -677,9 +677,9 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                           </span>
                           <span className="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5 font-bold">{rangeLabel[metricsRange]}</span>
                         </div>
-                      </Card>
+                      </div>
 
-                      <Card className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
+                      <div className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
                         <div className="flex items-center justify-between text-gray-500 dark:text-gray-400">
                           <span className="text-[10px] font-extrabold uppercase tracking-wider">{isDe ? 'Anfragen' : 'Requests'}</span>
                           <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -690,9 +690,9 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                           </span>
                           <span className="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5 font-bold">Gemini Calls</span>
                         </div>
-                      </Card>
+                      </div>
 
-                      <Card className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
+                      <div className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
                         <div className="flex items-center justify-between text-gray-500 dark:text-gray-400">
                           <span className="text-[10px] font-extrabold uppercase tracking-wider">{isDe ? 'Medien-Download' : 'Media Download'}</span>
                           <HardDriveDownload className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
@@ -703,11 +703,11 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                           </span>
                           <span className="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5 font-bold">{rangeLabel[metricsRange]}</span>
                         </div>
-                      </Card>
+                      </div>
                     </div>
 
                     {/* 2. Job Status Queue breakdown card */}
-                    <Card className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4">
+                    <div className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4">
                       <h3 className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-none">
                         Queue Status Breakdown
                       </h3>
@@ -741,11 +741,11 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                           <span className="text-2xl font-black text-amber-700 dark:text-amber-300 mt-1">{metrics.jobs?.pending ?? 0}</span>
                         </div>
                       </div>
-                    </Card>
+                    </div>
 
                     {/* 2b. Failed Job Details Card (Shown on click of Failed Queue Status) */}
                     {showFailedJobs && (
-                      <Card className="p-6 rounded-3xl border border-rose-300 dark:border-rose-500/30 bg-white dark:bg-gray-900 shadow-md flex flex-col gap-4">
+                      <div className="p-6 rounded-3xl border border-rose-300 dark:border-rose-500/30 bg-white dark:bg-gray-900 shadow-md flex flex-col gap-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <div className="p-1.5 rounded-lg bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400">
@@ -821,12 +821,12 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                             ))}
                           </div>
                         )}
-                      </Card>
+                      </div>
                     )}
 
                     {/* 3. LLM Breakdown Table */}
                     {metrics.llm?.breakdown && Object.keys(metrics.llm.breakdown).length > 0 && (
-                      <Card className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4 overflow-hidden">
+                      <div className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4 overflow-hidden">
                         <h3 className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-none">
                           {isDe ? 'LLM Kosten nach Funktion' : 'LLM Costs by Function'}
                         </h3>
@@ -852,13 +852,13 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                             </tbody>
                           </table>
                         </div>
-                      </Card>
+                      </div>
                     )}
 
                     {/* 4. Daily stats list acting as elegant visual bar-charts */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Daily Extractions */}
-                      <Card className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4">
+                      <div className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4">
                         <h3 className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-none">
                           {isDe ? 'Extraktionen' : 'Extractions'} ({rangeLabel[metricsRange]})
                         </h3>
@@ -886,10 +886,10 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                             {isDe ? 'Keine Extraktionen im Zeitraum.' : 'No extractions in timeframe.'}
                           </p>
                         )}
-                      </Card>
+                      </div>
 
                       {/* Daily Costs */}
-                      <Card className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4">
+                      <div className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4">
                         <h3 className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-none">
                           {isDe ? 'LLM Kosten' : 'LLM Costs'} ({rangeLabel[metricsRange]})
                         </h3>
@@ -919,11 +919,11 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                             {isDe ? 'Keine Kosten im Zeitraum.' : 'No costs in timeframe.'}
                           </p>
                         )}
-                      </Card>
+                      </div>
                     </div>
 
                     {/* 5. Extracted recipes per user (only users with >0 in range) */}
-                    <Card className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4">
+                    <div className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4">
                       <h3 className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-none">
                         {isDe ? 'Extrahierte Rezepte pro Nutzer' : 'Extracted Recipes per User'} ({rangeLabel[metricsRange]})
                       </h3>
@@ -956,7 +956,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                           {isDe ? 'Keine Extraktionen im Zeitraum.' : 'No extractions in timeframe.'}
                         </p>
                       )}
-                    </Card>
+                    </div>
                   </div>
                 ) : null}
               </div>
@@ -988,7 +988,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                   ))}
                 </div>
 
-                <Card className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+                <div className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
                       <span className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -1063,7 +1063,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                       </div>
                     )}
                   </div>
-                </Card>
+                </div>
               </div>
             </Tabs.Panel>
           </Tabs>
