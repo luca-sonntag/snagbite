@@ -5,7 +5,6 @@ import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../hooks/useTheme';
 import { useDialog } from '../context/DialogContext';
-import { useHashRouter } from '../hooks/useHashRouter';
 import PremiumModal from './PremiumModal';
 import { FeedbackDrawer } from './FeedbackDrawer';
 import { APP_VERSION_LABEL } from '../version';
@@ -46,7 +45,6 @@ export default function SettingsView() {
   const { t, language, setLanguage } = useI18n();
   const { signOut, user, autoSignedIn, updateUserMetadata, deleteAccount, isPremium, isAdmin } = useAuth();
   const dialog = useDialog();
-  const { navigate } = useHashRouter();
   const [theme, setTheme] = useTheme();
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -354,16 +352,21 @@ export default function SettingsView() {
       <NotificationSettings />
 
       {/* Section: Admin */}
-      {isAdmin && (
-        <div className="flex flex-col gap-2">
-          <h3 className="px-4 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-1">
-            <Shield className="w-3.5 h-3.5 text-emerald-500" />
-            {language === 'de' ? 'Verwaltung' : 'Administration'}
-          </h3>
+      {isAdmin && (() => {
+        const websiteUrl = (import.meta.env.VITE_WEBSITE_URL as string | undefined) || 'http://localhost:5174';
+        const adminPanelUrl = `${websiteUrl.replace(/\/$/, '')}/admin`;
+        return (
+          <div className="flex flex-col gap-2">
+            <h3 className="px-4 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-1">
+              <Shield className="w-3.5 h-3.5 text-emerald-500" />
+              {language === 'de' ? 'Verwaltung' : 'Administration'}
+            </h3>
 
           <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
-            <button
-              onClick={() => navigate('admin')}
+            <a
+              href={adminPanelUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-full p-4 flex items-center justify-between hover:bg-black/5 dark:hover:bg-white/5 transition-all active:scale-[0.99] text-left cursor-pointer group"
             >
               <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -371,19 +374,21 @@ export default function SettingsView() {
                   <Shield className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-955 dark:text-white text-sm">
-                    {language === 'de' ? 'Admin-Bereich' : 'Admin Panel'}
+                  <p className="font-semibold text-gray-900 dark:text-white text-sm flex items-center gap-1.5">
+                    <span>{language === 'de' ? 'Admin-Bereich' : 'Admin Panel'}</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-gray-400" />
                   </p>
                   <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-medium">
-                    {language === 'de' ? 'Globale Einstellungen verwalten & Feedback ansehen' : 'Manage global settings & view feedback'}
+                    {language === 'de' ? 'Öffnet das Admin Dashboard auf der Website' : 'Opens the Admin Dashboard on the website'}
                   </p>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 shrink-0 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
-            </button>
+            </a>
           </div>
         </div>
-      )}
+      );
+    })()}
 
       {/* Section: Help */}
       <div className="flex flex-col gap-2">

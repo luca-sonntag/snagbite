@@ -21,7 +21,6 @@ import TimerBanner from './components/TimerBanner';
 import OtaUpdateBanner from './components/OtaUpdateBanner';
 import WelcomeGuide from './components/WelcomeGuide';
 import AlphaWelcome from './components/AlphaWelcome';
-import AdminView from './components/AdminView';
 import TrialBanner from './components/TrialBanner';
 import NotificationPrompt from './components/NotificationPrompt';
 import PremiumModal from './components/PremiumModal';
@@ -758,9 +757,8 @@ export default function App() {
       </div>
 
       {/* Main content body */}
-      <main className={`w-full max-w-md mx-auto px-4 mt-1 flex-1 flex flex-col gap-6 ${activeView === 'admin'
-        ? 'pb-12'
-        : (activeView === 'extract' && isPending && !recipe)
+      <main className={`w-full max-w-md mx-auto px-4 mt-1 flex-1 flex flex-col gap-6 ${
+        (activeView === 'extract' && isPending && !recipe)
           ? 'pb-6 my-auto justify-center'
           : isViewingRecipe || (activeView === 'history' && isCatalogSelectMode)
             ? 'pb-48'
@@ -943,9 +941,6 @@ export default function App() {
         <div hidden={activeView !== 'settings'} aria-hidden={activeView !== 'settings' || undefined}>
           <SettingsView />
         </div>
-
-        {/* ADMIN TAB — stays conditional: large (61 KB), rarely used, no state worth preserving */}
-        {activeView === 'admin' && <AdminView onBack={() => navigate('settings')} />}
       </main>
 
       {/* Global Premium Modal (shared by TrialBanner and other components) */}
@@ -955,7 +950,6 @@ export default function App() {
       {(() => {
         const isBottomBarHidden =
           (activeView === 'history' && (isCatalogSelectMode || isCatalogSheetOpen)) ||
-          activeView === 'admin' ||
           (isPending && !isPremium) ||
           isPremiumModalOpen;
         const bottomBarClasses = `fixed bottom-0 inset-x-0 z-40 transition-all duration-300 ease-in-out pb-safe ${isBottomBarHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
@@ -965,7 +959,6 @@ export default function App() {
           !isPremium &&
           !isViewingRecipe &&
           activeView !== 'settings' &&
-          activeView !== 'admin' &&
           adStatus !== 'failed';
 
         // The bottom-bar banner is destroyed on real teardown (premium / no fill)
