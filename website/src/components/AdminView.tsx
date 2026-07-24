@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Tabs, Card, Button, Spinner } from '@heroui/react';
-import { Shield, Save, MessageSquare, Settings, AlertCircle, Bug, Lightbulb, X, Terminal, BarChart3, Users, BookOpen, Coins, HardDriveDownload, ChevronDown, LogOut, Globe } from 'lucide-react';
+import { Shield, Save, MessageSquare, Settings, AlertCircle, Bug, Lightbulb, X, Terminal, BarChart3, Users, BookOpen, Coins, HardDriveDownload, ChevronDown, LogOut, Globe, Sun, Moon } from 'lucide-react';
 import { apiUrl } from '../api';
 
 interface GlobalSetting {
@@ -33,8 +33,22 @@ function formatDownloadSize(mb: number): string {
 }
 
 export default function AdminView({ getAccessToken, onSignOut, userEmail }: AdminViewProps) {
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return 'light';
+  });
   const [language, setLanguage] = useState<'de' | 'en'>('de');
   const [activeTab, setActiveTab] = useState<'settings' | 'feedback' | 'metrics' | 'users'>('settings');
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
   const [settings, setSettings] = useState<GlobalSetting[]>([]);
   const [localSettings, setLocalSettings] = useState<Record<string, string>>({});
   const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
@@ -269,6 +283,14 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+            className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center gap-1.5 cursor-pointer"
+            aria-label="Toggle Theme"
+          >
+            {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-indigo-500" />}
+            <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+          </button>
           <button
             onClick={() => setLanguage(l => l === 'de' ? 'en' : 'de')}
             className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center gap-1.5 cursor-pointer"
@@ -702,13 +724,13 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                         ) : (
                           <div className="flex flex-col gap-3 max-h-96 overflow-y-auto pr-1">
                             {metrics.jobs.failedJobs.map((job: any) => (
-                              <div key={job.id} className="p-4 bg-rose-500/5 border border-rose-500/15 rounded-2xl flex flex-col gap-2">
+                              <div key={job.id} className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 rounded-2xl flex flex-col gap-2">
                                 <div className="flex items-center justify-between gap-2">
-                                  <span className="font-bold text-xs text-gray-900 dark:text-gray-100">{job.email || job.userId}</span>
-                                  <span className="text-[10px] font-mono text-gray-400">{formatDate(job.createdAt)}</span>
+                                  <span className="font-bold text-xs text-rose-950 dark:text-rose-100">{job.email || job.userId}</span>
+                                  <span className="text-[10px] font-mono text-rose-800/80 dark:text-rose-300/70">{formatDate(job.createdAt)}</span>
                                 </div>
                                 {job.errorReason && (
-                                  <p className="text-xs text-rose-600 dark:text-rose-400 font-mono bg-rose-500/10 p-2 rounded-xl">
+                                  <p className="text-xs text-rose-800 dark:text-rose-300 font-mono bg-rose-100/70 dark:bg-rose-900/30 p-2.5 rounded-xl border border-rose-200 dark:border-rose-800/50">
                                     {job.errorReason}
                                   </p>
                                 )}
