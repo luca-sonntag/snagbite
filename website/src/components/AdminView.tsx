@@ -1,6 +1,28 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Tabs, Card, Button, Spinner } from '@heroui/react';
-import { Shield, Save, MessageSquare, Settings, AlertCircle, Bug, Lightbulb, X, Terminal, BarChart3, Users, BookOpen, Coins, HardDriveDownload, ChevronDown, LogOut, Globe, Sun, Moon } from 'lucide-react';
+import {
+  Shield,
+  Save,
+  MessageSquare,
+  Settings,
+  AlertCircle,
+  Bug,
+  Lightbulb,
+  X,
+  Terminal,
+  BarChart3,
+  Users,
+  BookOpen,
+  TrendingUp,
+  Coins,
+  HardDriveDownload,
+  ExternalLink,
+  ChevronDown,
+  LogOut,
+  Globe,
+  Sun,
+  Moon
+} from 'lucide-react';
 import { apiUrl } from '../api';
 
 interface GlobalSetting {
@@ -41,14 +63,6 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
   });
   const [language, setLanguage] = useState<'de' | 'en'>('de');
   const [activeTab, setActiveTab] = useState<'settings' | 'feedback' | 'metrics' | 'users'>('settings');
-
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [theme]);
   const [settings, setSettings] = useState<GlobalSetting[]>([]);
   const [localSettings, setLocalSettings] = useState<Record<string, string>>({});
   const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
@@ -66,6 +80,14 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
   const [showFailedJobs, setShowFailedJobs] = useState(false);
 
   const isDe = language === 'de';
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
 
   const rangeLabel: Record<'all' | 'today' | '3d' | '7d' | '30d', string> = {
     all: isDe ? 'Gesamt' : 'All time',
@@ -261,21 +283,22 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 py-8 flex flex-col gap-6 font-sans">
-      {/* Top Header */}
+      {/* Top Header Bar */}
       <div className="flex items-center justify-between gap-4 pb-4 border-b border-gray-200 dark:border-gray-800">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
             <Shield className="w-6 h-6" />
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+            <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-1">
+              <Shield className="w-3.5 h-3.5 text-emerald-500" />
               Administration
             </span>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
+            <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white leading-tight">
               {isDe ? 'Admin Dashboard' : 'Admin Dashboard'}
             </h1>
             {userEmail && (
-              <span className="text-xs text-gray-500 dark:text-gray-400">
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-0.5">
                 {userEmail}
               </span>
             )}
@@ -381,7 +404,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                                   {setting.key}
                                 </label>
                                 {setting.description && (
-                                  <span className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                                  <span className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
                                     {setting.description}
                                   </span>
                                 )}
@@ -608,9 +631,10 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                   </div>
                 ) : metrics ? (
                   <div className={`flex flex-col gap-6 transition-opacity ${metricsLoading ? 'opacity-50 pointer-events-none' : ''}`}>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {/* 1. Top Level Metrics Cards Grid (5 Cards) */}
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                       <Card
-                        className="p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2 cursor-pointer hover:ring-2 hover:ring-emerald-500/30 transition-all"
+                        className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2 cursor-pointer hover:ring-2 hover:ring-emerald-500/30 transition-all"
                         onClick={() => { setError(null); setActiveTab('users'); }}
                       >
                         <div className="flex items-center justify-between text-gray-400 dark:text-gray-500">
@@ -629,7 +653,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                         </div>
                       </Card>
 
-                      <Card className="p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
+                      <Card className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
                         <div className="flex items-center justify-between text-gray-400 dark:text-gray-500">
                           <span className="text-[10px] font-bold uppercase tracking-wider">{isDe ? 'Rezepte' : 'Recipes'}</span>
                           <BookOpen className="w-4 h-4 text-emerald-500" />
@@ -642,7 +666,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                         </div>
                       </Card>
 
-                      <Card className="p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
+                      <Card className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
                         <div className="flex items-center justify-between text-gray-400 dark:text-gray-500">
                           <span className="text-[10px] font-bold uppercase tracking-wider">{isDe ? 'LLM Kosten' : 'LLM Costs'}</span>
                           <Coins className="w-4 h-4 text-amber-500" />
@@ -655,7 +679,20 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                         </div>
                       </Card>
 
-                      <Card className="p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
+                      <Card className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
+                        <div className="flex items-center justify-between text-gray-400 dark:text-gray-500">
+                          <span className="text-[10px] font-bold uppercase tracking-wider">{isDe ? 'Anfragen' : 'Requests'}</span>
+                          <TrendingUp className="w-4 h-4 text-emerald-500" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-2xl font-extrabold text-gray-900 dark:text-white leading-tight">
+                            {metrics.llm?.count ?? 0}
+                          </span>
+                          <span className="text-[9px] text-gray-400 dark:text-gray-500 mt-0.5">Gemini Calls</span>
+                        </div>
+                      </Card>
+
+                      <Card className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
                         <div className="flex items-center justify-between text-gray-400 dark:text-gray-500">
                           <span className="text-[10px] font-bold uppercase tracking-wider">{isDe ? 'Medien-Download' : 'Media Download'}</span>
                           <HardDriveDownload className="w-4 h-4 text-indigo-500" />
@@ -669,6 +706,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                       </Card>
                     </div>
 
+                    {/* 2. Job Status Queue breakdown card */}
                     <Card className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4">
                       <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">
                         Queue Status Breakdown
@@ -690,6 +728,9 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                             <ChevronDown className={`w-3.5 h-3.5 text-rose-500 transition-transform ${showFailedJobs ? 'rotate-180' : ''}`} />
                           </div>
                           <span className="text-2xl font-extrabold text-rose-600 dark:text-rose-400 mt-1">{metrics.jobs?.failed ?? 0}</span>
+                          <span className="text-[10px] font-bold text-rose-500 dark:text-rose-400 underline mt-0.5">
+                            {showFailedJobs ? (isDe ? 'Verbergen' : 'Hide') : (isDe ? 'Details' : 'Details')}
+                          </span>
                         </button>
                         <div className="bg-blue-500/10 rounded-2xl p-4 flex flex-col items-center">
                           <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">{isDe ? 'Aktiv' : 'Processing'}</span>
@@ -702,44 +743,184 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                       </div>
                     </Card>
 
+                    {/* 2b. Failed Job Details Card (Shown on click of Failed Queue Status) */}
                     {showFailedJobs && (
                       <Card className="p-6 rounded-3xl border border-rose-500/20 bg-white dark:bg-gray-900 shadow-lg flex flex-col gap-4">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
-                            {isDe ? 'Fehlgeschlagene Jobs' : 'Failed Jobs'} ({metrics.jobs?.failedJobs?.length ?? 0})
-                          </h3>
+                          <div className="flex items-center gap-2">
+                            <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-500">
+                              <AlertCircle className="w-4 h-4" />
+                            </div>
+                            <div className="flex flex-col">
+                              <h3 className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider leading-none">
+                                {isDe ? 'Fehlgeschlagene Jobs' : 'Failed Jobs'}
+                              </h3>
+                              <span className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
+                                {isDe ? `Zeitraum: ${rangeLabel[metricsRange]}` : `Timeframe: ${rangeLabel[metricsRange]}`}
+                              </span>
+                            </div>
+                            <span className="ml-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400 font-bold">
+                              {metrics.jobs?.failedJobs?.length ?? 0}
+                            </span>
+                          </div>
                           <button
                             type="button"
                             onClick={() => setShowFailedJobs(false)}
-                            className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                            className="p-1.5 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                            aria-label="Close"
                           >
                             <X className="w-4 h-4" />
                           </button>
                         </div>
 
                         {(!metrics.jobs?.failedJobs || metrics.jobs.failedJobs.length === 0) ? (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-4">
-                            {isDe ? 'Keine fehlgeschlagenen Jobs im gewählten Zeitraum.' : 'No failed jobs found.'}
-                          </p>
+                          <div className="text-center py-8 px-4 bg-gray-50 dark:bg-gray-950/50 rounded-xl border border-black/5 dark:border-white/5">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {isDe ? 'Keine fehlgeschlagenen Jobs im gewählten Zeitraum vorhanden.' : 'No failed jobs found in the selected timeframe.'}
+                            </p>
+                          </div>
                         ) : (
                           <div className="flex flex-col gap-3 max-h-96 overflow-y-auto pr-1">
                             {metrics.jobs.failedJobs.map((job: any) => (
-                              <div key={job.id} className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 rounded-2xl flex flex-col gap-2">
-                                <div className="flex items-center justify-between gap-2">
-                                  <span className="font-bold text-xs text-rose-950 dark:text-rose-100">{job.email || job.userId}</span>
-                                  <span className="text-[10px] font-mono text-rose-800/80 dark:text-rose-300/70">{formatDate(job.createdAt)}</span>
+                              <div key={job.id} className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 rounded-2xl flex flex-col gap-2.5">
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="flex flex-col gap-1 min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap text-xs">
+                                      <span className="font-bold text-rose-950 dark:text-rose-100 truncate" title={job.email || job.userId}>
+                                        {job.email || job.userId}
+                                      </span>
+                                      <span className="text-[10px] font-mono text-gray-500 dark:text-gray-400 bg-black/5 dark:bg-white/5 px-1.5 py-0.5 rounded">
+                                        ID: {job.id.slice(0, 8)}...
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] text-rose-800/80 dark:text-rose-300/70 font-mono">
+                                      {formatDate(job.createdAt)}
+                                    </span>
+                                  </div>
+                                  {job.url && (
+                                    <a
+                                      href={job.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 hover:underline shrink-0 bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 rounded-lg transition-all"
+                                    >
+                                      <span>{isDe ? 'Reel öffnen' : 'Open Reel'}</span>
+                                      <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                  )}
                                 </div>
-                                {job.errorReason && (
-                                  <p className="text-xs text-rose-800 dark:text-rose-300 font-mono bg-rose-100/70 dark:bg-rose-900/30 p-2.5 rounded-xl border border-rose-200 dark:border-rose-800/50">
-                                    {job.errorReason}
-                                  </p>
-                                )}
+
+                                {/* Error Details Container */}
+                                <div className="p-3 bg-white/80 dark:bg-gray-950 border border-rose-200 dark:border-rose-900/50 rounded-xl text-[11px] font-mono text-rose-800 dark:text-rose-300 break-words leading-relaxed whitespace-pre-wrap">
+                                  <span className="font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider text-[9px] block mb-1">
+                                    {isDe ? 'Fehlergrund:' : 'Error details:'}
+                                  </span>
+                                  {job.error || (isDe ? 'Keine genauere Fehlermeldung hinterlegt.' : 'No detailed error message provided.')}
+                                </div>
                               </div>
                             ))}
                           </div>
                         )}
                       </Card>
                     )}
+
+                    {/* 3. LLM Breakdown Table */}
+                    {metrics.llm?.breakdown && Object.keys(metrics.llm.breakdown).length > 0 && (
+                      <Card className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4 overflow-hidden">
+                        <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">
+                          {isDe ? 'LLM Kosten nach Funktion' : 'LLM Costs by Function'}
+                        </h3>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left text-xs text-gray-600 dark:text-gray-400 border-collapse">
+                            <thead>
+                              <tr className="border-b border-gray-200 dark:border-gray-800 text-[10px] font-bold uppercase text-gray-400 tracking-wider">
+                                <th className="pb-2.5 font-bold">{isDe ? 'Funktion' : 'Function'}</th>
+                                <th className="pb-2.5 text-right font-bold">{isDe ? 'Anfragen' : 'Requests'}</th>
+                                <th className="pb-2.5 text-right font-bold">Tokens</th>
+                                <th className="pb-2.5 text-right font-bold">{isDe ? 'Kosten (USD)' : 'Costs (USD)'}</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 dark:divide-gray-800 font-semibold">
+                              {Object.entries(metrics.llm.breakdown).map(([key, value]: [string, any]) => (
+                                <tr key={key} className="text-gray-900 dark:text-gray-200">
+                                  <td className="py-2.5 font-mono text-[11px] text-gray-600 dark:text-gray-400">{key}</td>
+                                  <td className="py-2.5 text-right">{value.count}</td>
+                                  <td className="py-2.5 text-right font-mono">{value.tokens.toLocaleString()}</td>
+                                  <td className="py-2.5 text-right font-mono text-amber-600 dark:text-amber-400">${value.cost.toFixed(4)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </Card>
+                    )}
+
+                    {/* 4. Daily stats list acting as elegant visual bar-charts */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Daily Extractions */}
+                      <Card className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4">
+                        <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">
+                          {isDe ? 'Extraktionen' : 'Extractions'} ({rangeLabel[metricsRange]})
+                        </h3>
+                        {metrics.jobs?.dailyStats && metrics.jobs.dailyStats.length > 0 ? (
+                          <div className="flex flex-col gap-2 max-h-64 overflow-y-auto pr-1">
+                            {metrics.jobs.dailyStats.map((stat: any) => {
+                              const maxCount = Math.max(...metrics.jobs.dailyStats.map((s: any) => s.count), 1);
+                              const pct = (stat.count / maxCount) * 100;
+                              return (
+                                <div key={stat.date} className="flex items-center gap-3 text-[11px]">
+                                  <span className="w-20 text-gray-500 dark:text-gray-400 font-mono shrink-0">{stat.date.slice(5)}</span>
+                                  <div className="flex-1 bg-gray-100 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden">
+                                    <div
+                                      className="bg-emerald-500 dark:bg-emerald-600 h-full rounded-full transition-all duration-500"
+                                      style={{ width: `${pct}%` }}
+                                    />
+                                  </div>
+                                  <span className="w-6 text-right font-bold text-gray-900 dark:text-white shrink-0">{stat.count}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-center text-xs text-gray-400 py-8">
+                            {isDe ? 'Keine Extraktionen im Zeitraum.' : 'No extractions in timeframe.'}
+                          </p>
+                        )}
+                      </Card>
+
+                      {/* Daily Costs */}
+                      <Card className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4">
+                        <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">
+                          {isDe ? 'LLM Kosten' : 'LLM Costs'} ({rangeLabel[metricsRange]})
+                        </h3>
+                        {metrics.llm?.dailyStats && metrics.llm.dailyStats.length > 0 ? (
+                          <div className="flex flex-col gap-2 max-h-64 overflow-y-auto pr-1">
+                            {metrics.llm.dailyStats.map((stat: any) => {
+                              const maxCost = Math.max(...metrics.llm.dailyStats.map((s: any) => s.cost), 0.0001);
+                              const pct = (stat.cost / maxCost) * 100;
+                              return (
+                                <div key={stat.date} className="flex items-center gap-3 text-[11px]">
+                                  <span className="w-20 text-gray-500 dark:text-gray-400 font-mono shrink-0">{stat.date.slice(5)}</span>
+                                  <div className="flex-1 bg-gray-100 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden">
+                                    <div
+                                      className="bg-amber-500 dark:bg-amber-600 h-full rounded-full transition-all duration-500"
+                                      style={{ width: `${pct}%` }}
+                                    />
+                                  </div>
+                                  <span className="w-16 text-right font-bold font-mono text-gray-900 dark:text-white shrink-0">
+                                    ${stat.cost.toFixed(3)}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-center text-xs text-gray-400 py-8">
+                            {isDe ? 'Keine Kosten im Zeitraum.' : 'No costs in timeframe.'}
+                          </p>
+                        )}
+                      </Card>
+                    </div>
                   </div>
                 ) : null}
               </div>
@@ -775,7 +956,10 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
                       <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                        {isDe ? `Nutzerliste (${filteredUsers.length})` : `User Directory (${filteredUsers.length})`}
+                        {filteredUsers.length}{' '}
+                        {usersRange === 'all'
+                          ? (isDe ? 'registrierte Nutzer' : 'registered users')
+                          : (isDe ? 'neue Nutzer' : 'new users')}
                       </span>
                     </div>
 
@@ -785,26 +969,58 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                       </p>
                     ) : (
                       <div className="flex flex-col gap-3">
-                        {filteredUsers.map((u: any) => (
-                          <div key={u.id} className="p-4 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/60 rounded-2xl flex items-center justify-between gap-4">
-                            <div className="flex flex-col min-w-0">
-                              <span className="font-bold text-sm text-gray-900 dark:text-white truncate">
-                                {u.email}
-                              </span>
-                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-mono">
-                                ID: {u.id}
-                              </span>
+                        {filteredUsers.map((user: any) => {
+                          const tierColor =
+                            user.tier === 'premium'
+                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                              : user.tier === 'alpha'
+                                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                                : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
+
+                          const fmt = (iso: string | null) => {
+                            if (!iso) return '—';
+                            const d = new Date(iso);
+                            return d.toLocaleDateString(isDe ? 'de-DE' : 'en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+                          };
+
+                          return (
+                            <div key={user.id} className="p-4 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/60 rounded-2xl flex items-start gap-3">
+                              {/* Avatar circle */}
+                              <div className="shrink-0 w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+                                <Users className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                {/* Email + tier badge */}
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                                    {user.email}
+                                  </span>
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${tierColor}`}>
+                                    {user.tier || 'free'}
+                                  </span>
+                                  {user.custom_limit !== null && user.custom_limit !== undefined && (
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                                      limit: {user.custom_limit === -1 ? '∞' : user.custom_limit}
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* Dates */}
+                                <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                                  <span>
+                                    <span className="font-semibold text-gray-600 dark:text-gray-300">{isDe ? 'Registriert:' : 'Joined:'}</span>{' '}
+                                    {fmt(user.created_at)}
+                                  </span>
+                                  <span>
+                                    <span className="font-semibold text-gray-600 dark:text-gray-300">{isDe ? 'Letzter Login:' : 'Last login:'}</span>{' '}
+                                    {fmt(user.last_sign_in_at)}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-3 shrink-0">
-                              <span className="text-[10px] font-bold uppercase px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                                {u.app_metadata?.tier || 'free'}
-                              </span>
-                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-mono">
-                                {formatDate(u.created_at)}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </div>
