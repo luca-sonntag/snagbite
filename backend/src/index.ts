@@ -62,7 +62,7 @@ async function bootstrap() {
       origin: (origin, callback) => {
         // Non-browser clients (curl, server-to-server) send no Origin header.
         if (!origin || nativeOrigins.includes(origin)) return callback(null, true);
-        if (!isProduction) return callback(null, origin === 'http://localhost:5173');
+        if (!isProduction) return callback(null, ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'].includes(origin));
         // Production: allow the configured web origin(s); if none set, allow all.
         if (configuredOrigins.length === 0 || configuredOrigins.includes(origin)) {
           return callback(null, true);
