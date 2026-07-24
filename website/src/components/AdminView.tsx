@@ -999,6 +999,9 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${tierColor}`}>
                                     {user.tier || 'free'}
                                   </span>
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+                                    {user.extractions_count ?? 0} {isDe ? 'Extraktionen' : 'extractions'}
+                                  </span>
                                   {user.custom_limit !== null && user.custom_limit !== undefined && (
                                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
                                       limit: {user.custom_limit === -1 ? '∞' : user.custom_limit}
