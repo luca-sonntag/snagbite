@@ -101,7 +101,7 @@ export default function AdminPage() {
     return (
       <div className="w-full max-w-md mx-auto px-4 py-16 flex flex-col items-center">
         <div className="w-full bg-white border border-gray-200 rounded-3xl p-8 shadow-xl flex flex-col items-center text-center gap-6">
-          <div className="p-4 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200">
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30">
             <Lock className="w-8 h-8" />
           </div>
 

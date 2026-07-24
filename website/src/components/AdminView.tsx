@@ -275,7 +275,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
       {/* Top Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-200">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200 shrink-0">
+          <div className="p-2.5 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/25 shrink-0">
             <Shield className="w-6 h-6" />
           </div>
           <div className="flex flex-col min-w-0">
@@ -335,7 +335,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                   <Tabs.Tab
                     key={id}
                     id={id}
-                    className="flex-1 py-2.5 text-center font-bold transition-all cursor-pointer rounded-xl text-gray-500 data-[selected=true]:bg-white data-[selected=true]:text-emerald-700 data-[selected=true]:shadow-sm hover:text-gray-900"
+                    className="flex-1 py-2.5 text-center font-bold transition-all cursor-pointer rounded-xl text-gray-500 data-[selected=true]:bg-gradient-to-r data-[selected=true]:from-emerald-600 data-[selected=true]:to-teal-500 data-[selected=true]:text-white data-[selected=true]:shadow-md data-[selected=true]:shadow-emerald-500/25 hover:text-gray-900"
                   >
                     <div className="flex items-center justify-center gap-2 text-xs sm:text-sm">
                       {icon}
@@ -439,9 +439,9 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                     type="button"
                     isDisabled={saving}
                     onPress={handleSaveSettings}
-                    className={`py-3.5 h-12 text-sm rounded-2xl font-bold shadow-md shadow-emerald-600/20 text-white ${saving
+                    className={`py-3.5 h-12 text-sm rounded-2xl font-bold shadow-md shadow-emerald-600/25 text-white ${saving
                         ? 'bg-emerald-800 shadow-none'
-                        : 'bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] transition-all cursor-pointer'
+                        : 'bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 active:scale-[0.98] transition-all cursor-pointer'
                       } w-full`}
                   >
                     <span className="flex items-center gap-2 justify-center">
@@ -623,7 +623,9 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                           <span className="text-[10px] font-extrabold uppercase tracking-wider">
                             {metricsRange === 'all' ? (isDe ? 'Nutzer' : 'Users') : (isDe ? 'Neue Nutzer' : 'New Users')}
                           </span>
-                          <Users className="w-4 h-4 text-emerald-600" />
+                          <div className="p-1.5 rounded-lg bg-emerald-50">
+                            <Users className="w-4 h-4 text-emerald-600" />
+                          </div>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-2xl font-black text-gray-900 leading-tight">
@@ -638,7 +640,9 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                       <div className="p-4 rounded-2xl border border-gray-200 shadow-sm bg-white flex flex-col gap-2">
                         <div className="flex items-center justify-between text-gray-400">
                           <span className="text-[10px] font-extrabold uppercase tracking-wider">{isDe ? 'Rezepte' : 'Recipes'}</span>
-                          <BookOpen className="w-4 h-4 text-emerald-600" />
+                          <div className="p-1.5 rounded-lg bg-teal-50">
+                            <BookOpen className="w-4 h-4 text-teal-600" />
+                          </div>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-2xl font-black text-gray-900 leading-tight">
@@ -651,7 +655,9 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                       <div className="p-4 rounded-2xl border border-gray-200 shadow-sm bg-white flex flex-col gap-2">
                         <div className="flex items-center justify-between text-gray-400">
                           <span className="text-[10px] font-extrabold uppercase tracking-wider">{isDe ? 'LLM Kosten' : 'LLM Costs'}</span>
-                          <Coins className="w-4 h-4 text-amber-500" />
+                          <div className="p-1.5 rounded-lg bg-amber-50">
+                            <Coins className="w-4 h-4 text-amber-600" />
+                          </div>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-2xl font-black text-gray-900 leading-tight">
@@ -664,7 +670,9 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                       <div className="p-4 rounded-2xl border border-gray-200 shadow-sm bg-white flex flex-col gap-2">
                         <div className="flex items-center justify-between text-gray-400">
                           <span className="text-[10px] font-extrabold uppercase tracking-wider">{isDe ? 'Anfragen' : 'Requests'}</span>
-                          <TrendingUp className="w-4 h-4 text-emerald-600" />
+                          <div className="p-1.5 rounded-lg bg-sky-50">
+                            <TrendingUp className="w-4 h-4 text-sky-600" />
+                          </div>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-2xl font-black text-gray-900 leading-tight">
@@ -677,7 +685,9 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                       <div className="p-4 rounded-2xl border border-gray-200 shadow-sm bg-white flex flex-col gap-2 col-span-2 sm:col-span-1">
                         <div className="flex items-center justify-between text-gray-400">
                           <span className="text-[10px] font-extrabold uppercase tracking-wider">{isDe ? 'Medien-Download' : 'Media Download'}</span>
-                          <HardDriveDownload className="w-4 h-4 text-indigo-600" />
+                          <div className="p-1.5 rounded-lg bg-indigo-50">
+                            <HardDriveDownload className="w-4 h-4 text-indigo-600" />
+                          </div>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-2xl font-black text-gray-900 leading-tight">
@@ -854,7 +864,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                                   <span className="w-12 sm:w-20 text-gray-500 font-mono font-medium shrink-0">{stat.date.slice(5)}</span>
                                   <div className="flex-1 bg-gray-100 h-2.5 rounded-full overflow-hidden">
                                     <div
-                                      className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                                      className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500"
                                       style={{ width: `${pct}%` }}
                                     />
                                   </div>
@@ -885,7 +895,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                                   <span className="w-12 sm:w-20 text-gray-500 font-mono font-medium shrink-0">{stat.date.slice(5)}</span>
                                   <div className="flex-1 bg-gray-100 h-2.5 rounded-full overflow-hidden">
                                     <div
-                                      className="bg-amber-500 h-full rounded-full transition-all duration-500"
+                                      className="bg-gradient-to-r from-amber-500 to-orange-400 h-full rounded-full transition-all duration-500"
                                       style={{ width: `${pct}%` }}
                                     />
                                   </div>
@@ -924,7 +934,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                                 </span>
                                 <div className="flex-1 bg-gray-100 h-2.5 rounded-full overflow-hidden">
                                   <div
-                                    className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                                    className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500"
                                     style={{ width: `${pct}%` }}
                                   />
                                 </div>
@@ -1004,7 +1014,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                           return (
                             <div key={user.id} className="p-4 bg-white border border-gray-200 rounded-2xl flex items-start gap-3 shadow-sm hover:border-gray-300 transition-all">
                               {/* Avatar circle */}
-                              <div className="hidden sm:flex shrink-0 w-9 h-9 rounded-full bg-emerald-100 items-center justify-center border border-emerald-200">
+                              <div className="hidden sm:flex shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 items-center justify-center border border-emerald-200">
                                 <Users className="w-4 h-4 text-emerald-700" />
                               </div>
 
