@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Tabs, Card, TextField, Label, Input, Button, Spinner } from '@heroui/react';
+import { Tabs, Card, Button, Spinner } from '@heroui/react';
 import { Shield, Save, MessageSquare, Settings, AlertCircle, Bug, Lightbulb, X, Terminal, BarChart3, Users, BookOpen, Coins, HardDriveDownload, ChevronDown, LogOut, Globe } from 'lucide-react';
 import { apiUrl } from '../api';
 
@@ -392,19 +392,14 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                             </div>
 
                             {!isBoolean && (
-                              <TextField
-                                fullWidth
+                              <input
+                                type={isNumber ? 'number' : 'text'}
                                 name={setting.key}
                                 value={currentValue}
-                                onChange={(val) => handleSettingChange(setting.key, val)}
-                              >
-                                <Label className="sr-only">{setting.key}</Label>
-                                <Input
-                                  type={isNumber ? 'number' : 'text'}
-                                  className="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                  aria-label={setting.key}
-                                />
-                              </TextField>
+                                onChange={(e) => handleSettingChange(setting.key, e.target.value)}
+                                className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors shadow-sm"
+                                aria-label={setting.key}
+                              />
                             )}
                           </div>
                         );
@@ -481,7 +476,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                             </div>
                           </div>
 
-                          <div className="p-4 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-2xl">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/60 rounded-2xl">
                             <p className="text-xs text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed">
                               {item.message}
                             </p>
@@ -523,7 +518,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                               </button>
 
                               {isExpanded && (
-                                <div className="mt-3 p-4 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-2xl flex flex-col gap-2 font-mono text-[11px] text-gray-600 dark:text-gray-400 overflow-x-auto">
+                                <div className="mt-3 p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/60 rounded-2xl flex flex-col gap-2 font-mono text-[11px] text-gray-600 dark:text-gray-400 overflow-x-auto">
                                   <div><span className="font-bold text-gray-400">Platform:</span> {item.context.platform} ({item.context.isNative ? 'Native' : 'Web'})</div>
                                   <div><span className="font-bold text-gray-400">App Version:</span> v{item.context.appVersion} (Build {item.context.appBuild})</div>
                                   <div><span className="font-bold text-gray-400">Tier / Language:</span> lang: {item.context.language} | tier: {item.context.tier}</div>
@@ -769,7 +764,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                     ) : (
                       <div className="flex flex-col gap-3">
                         {filteredUsers.map((u: any) => (
-                          <div key={u.id} className="p-4 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-2xl flex items-center justify-between gap-4">
+                          <div key={u.id} className="p-4 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/60 rounded-2xl flex items-center justify-between gap-4">
                             <div className="flex flex-col min-w-0">
                               <span className="font-bold text-sm text-gray-900 dark:text-white truncate">
                                 {u.email}
