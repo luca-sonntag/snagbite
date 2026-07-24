@@ -19,9 +19,7 @@ import {
   ExternalLink,
   ChevronDown,
   LogOut,
-  Globe,
-  Sun,
-  Moon
+  Globe
 } from 'lucide-react';
 import { apiUrl } from '../api';
 
@@ -55,12 +53,6 @@ function formatDownloadSize(mb: number): string {
 }
 
 export default function AdminView({ getAccessToken, onSignOut, userEmail }: AdminViewProps) {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    if (typeof window !== 'undefined') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    return 'light';
-  });
   const [language, setLanguage] = useState<'de' | 'en'>('de');
   const [activeTab, setActiveTab] = useState<'settings' | 'feedback' | 'metrics' | 'users'>('settings');
   const [settings, setSettings] = useState<GlobalSetting[]>([]);
@@ -81,13 +73,10 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
 
   const isDe = language === 'de';
 
+  // The admin panel is light-only; clear any dark class left on <html> by older builds.
   useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [theme]);
+    document.documentElement.classList.remove('dark');
+  }, []);
 
   const rangeLabel: Record<'all' | 'today' | '3d' | '7d' | '30d', string> = {
     all: isDe ? 'Gesamt' : 'All time',
@@ -282,50 +271,41 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 py-8 flex flex-col gap-6 font-sans text-gray-900 dark:text-gray-100">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex flex-col gap-6 font-sans text-gray-900">
       {/* Top Header Bar */}
-      <div className="flex items-center justify-between gap-4 pb-4 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-200">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+          <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200 shrink-0">
             <Shield className="w-6 h-6" />
           </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest flex items-center gap-1">
-              <Shield className="w-3.5 h-3.5 text-emerald-500" />
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">
               Administration
             </span>
-            <h1 className="text-2xl font-black text-gray-900 dark:text-white leading-tight">
-              {isDe ? 'Admin Dashboard' : 'Admin Dashboard'}
+            <h1 className="text-xl sm:text-2xl font-black text-gray-900 leading-tight">
+              Admin Dashboard
             </h1>
             {userEmail && (
-              <span className="text-xs text-gray-600 dark:text-gray-400 font-mono mt-0.5">
+              <span className="text-xs text-gray-500 font-mono mt-0.5 truncate">
                 {userEmail}
               </span>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
-            className="px-3.5 py-2 text-xs font-bold rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
-            aria-label="Toggle Theme"
-          >
-            {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
-            <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
-          </button>
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => setLanguage(l => l === 'de' ? 'en' : 'de')}
-            className="px-3.5 py-2 text-xs font-bold rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+            className="px-3.5 py-2 text-xs font-bold rounded-xl bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
           >
-            <Globe className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <Globe className="w-4 h-4 text-emerald-600" />
             {language.toUpperCase()}
           </button>
           <button
             onClick={onSignOut}
-            className="px-3.5 py-2 text-xs font-bold rounded-xl bg-rose-50 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/30 border border-rose-200 dark:border-rose-500/30 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+            className="px-3.5 py-2 text-xs font-bold rounded-xl bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
           >
-            <LogOut className="w-4 h-4 text-rose-600" />
+            <LogOut className="w-4 h-4" />
             {isDe ? 'Abmelden' : 'Sign Out'}
           </button>
         </div>
@@ -334,7 +314,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24 gap-3">
           <Spinner color="success" size="lg" />
-          <span className="text-sm font-bold text-gray-600 dark:text-gray-400">
+          <span className="text-sm font-bold text-gray-500">
             {isDe ? 'Lade Daten...' : 'Loading data...'}
           </span>
         </div>
@@ -343,23 +323,24 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
           {/* Tabs Navigation */}
           <Tabs selectedKey={activeTab} onSelectionChange={(key) => { setError(null); setActiveTab(key as any); }} className="w-full">
             <Tabs.ListContainer className="w-full">
-              <Tabs.List className="flex w-full mb-6 bg-gray-100 dark:bg-gray-900 p-1.5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-inner">
+              <Tabs.List className="flex w-full mb-6 bg-gray-100 p-1 sm:p-1.5 rounded-2xl border border-gray-200">
                 {(
                   [
-                    { id: 'settings', icon: <Settings className="w-4 h-4" />, label: isDe ? 'Konfiguration' : 'Config' },
-                    { id: 'feedback', icon: <MessageSquare className="w-4 h-4" />, label: 'Feedback' },
-                    { id: 'metrics', icon: <BarChart3 className="w-4 h-4" />, label: isDe ? 'Metriken' : 'Metrics' },
-                    { id: 'users', icon: <Users className="w-4 h-4" />, label: isDe ? 'Nutzer' : 'Users' },
+                    { id: 'settings', icon: <Settings className="w-4 h-4 shrink-0" />, label: isDe ? 'Konfiguration' : 'Config' },
+                    { id: 'feedback', icon: <MessageSquare className="w-4 h-4 shrink-0" />, label: 'Feedback' },
+                    { id: 'metrics', icon: <BarChart3 className="w-4 h-4 shrink-0" />, label: isDe ? 'Metriken' : 'Metrics' },
+                    { id: 'users', icon: <Users className="w-4 h-4 shrink-0" />, label: isDe ? 'Nutzer' : 'Users' },
                   ] as const
                 ).map(({ id, icon, label }) => (
                   <Tabs.Tab
                     key={id}
                     id={id}
-                    className="flex-1 py-2.5 text-center font-bold transition-all cursor-pointer rounded-xl text-gray-600 dark:text-gray-400 data-[selected=true]:bg-white dark:data-[selected=true]:bg-gray-800 data-[selected=true]:text-emerald-700 dark:data-[selected=true]:text-emerald-400 data-[selected=true]:shadow-md hover:text-gray-900 dark:hover:text-white"
+                    className="flex-1 py-2.5 text-center font-bold transition-all cursor-pointer rounded-xl text-gray-500 data-[selected=true]:bg-white data-[selected=true]:text-emerald-700 data-[selected=true]:shadow-sm hover:text-gray-900"
                   >
-                    <div className="flex items-center justify-center gap-2 text-sm">
+                    <div className="flex items-center justify-center gap-2 text-xs sm:text-sm">
                       {icon}
-                      <span>{label}</span>
+                      <span className="hidden sm:inline">{label}</span>
+                      <span className="sm:hidden sr-only">{label}</span>
                     </div>
                   </Tabs.Tab>
                 ))}
@@ -368,14 +349,14 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
 
             {/* Notification Alerts */}
             {error && (
-              <div className="mb-4 p-4 bg-rose-50 border border-rose-200 text-rose-800 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400 rounded-2xl flex items-start gap-3 shadow-sm">
+              <div className="mb-4 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl flex items-start gap-3 shadow-sm">
                 <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-rose-600" />
                 <span className="text-xs font-bold">{error}</span>
               </div>
             )}
 
             {successMessage && (
-              <div className="mb-4 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 rounded-2xl flex items-start gap-3 shadow-sm">
+              <div className="mb-4 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl flex items-start gap-3 shadow-sm">
                 <Shield className="w-5 h-5 shrink-0 mt-0.5 text-emerald-600" />
                 <span className="text-xs font-bold">{successMessage}</span>
               </div>
@@ -384,10 +365,10 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
             {/* Panel: Settings */}
             <Tabs.Panel id="settings">
               <div className="flex flex-col gap-6">
-                <div className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+                <div className="p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white shadow-sm">
                   <div className="flex flex-col gap-6">
                     {settings.length === 0 ? (
-                      <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4 font-medium">
+                      <p className="text-sm text-gray-500 text-center py-4 font-medium">
                         {isDe ? 'Keine Einstellungen vorhanden.' : 'No settings available.'}
                       </p>
                     ) : (
@@ -397,27 +378,27 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                         const currentValue = localSettings[setting.key] ?? setting.value;
 
                         return (
-                          <div key={setting.key} className="flex flex-col gap-2 pb-5 border-b border-gray-100 dark:border-gray-800 last:border-0 last:pb-0">
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex flex-col gap-0.5">
-                                <label className="text-sm font-extrabold text-gray-900 dark:text-white">
+                          <div key={setting.key} className="flex flex-col gap-2 pb-5 border-b border-gray-100 last:border-0 last:pb-0">
+                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
+                              <div className="flex flex-col gap-0.5 min-w-0">
+                                <label className="text-sm font-extrabold text-gray-900 break-words">
                                   {setting.key}
                                 </label>
                                 {setting.description && (
-                                  <span className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed font-semibold">
+                                  <span className="text-xs text-gray-500 leading-relaxed font-medium">
                                     {setting.description}
                                   </span>
                                 )}
                               </div>
 
                               {isBoolean && (
-                                <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl shrink-0 border border-gray-200 dark:border-gray-700">
+                                <div className="flex bg-gray-100 p-1 rounded-xl shrink-0 border border-gray-200 self-start">
                                   <button
                                     type="button"
                                     onClick={() => handleSettingChange(setting.key, 'true')}
                                     className={`px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all cursor-pointer ${currentValue === 'true'
-                                        ? 'bg-white dark:bg-gray-700 text-emerald-700 dark:text-emerald-400 shadow-sm'
-                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                        ? 'bg-white text-emerald-700 shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-900'
                                       }`}
                                   >
                                     {isDe ? 'Ja' : 'Yes'}
@@ -426,8 +407,8 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                                     type="button"
                                     onClick={() => handleSettingChange(setting.key, 'false')}
                                     className={`px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all cursor-pointer ${currentValue === 'false'
-                                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 shadow-sm'
-                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                        ? 'bg-white text-gray-900 shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-900'
                                       }`}
                                   >
                                     {isDe ? 'Nein' : 'No'}
@@ -442,7 +423,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                                 name={setting.key}
                                 value={currentValue}
                                 onChange={(e) => handleSettingChange(setting.key, e.target.value)}
-                                className="w-full bg-gray-50/80 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 focus:bg-white transition-all shadow-sm"
+                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 focus:bg-white transition-all"
                                 aria-label={setting.key}
                               />
                             )}
@@ -485,7 +466,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
             <Tabs.Panel id="feedback">
               <div className="flex flex-col gap-4">
                 {feedback.length === 0 ? (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 text-center py-12 font-medium">
+                  <p className="text-sm text-gray-500 text-center py-12 font-medium">
                     {isDe ? 'Bisher kein Feedback eingegangen.' : 'No feedback submissions received yet.'}
                   </p>
                 ) : (
@@ -495,41 +476,41 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                     const isExpanded = expandedFeedbackId === item.id;
 
                     return (
-                      <div key={item.id} className="border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-3xl shadow-sm overflow-hidden p-5">
+                      <div key={item.id} className="border border-gray-200 bg-white rounded-3xl shadow-sm overflow-hidden p-4 sm:p-5">
                         <div className="flex flex-col gap-3">
                           <div className="flex items-start justify-between gap-2">
-                            <div className="flex flex-col gap-1.5">
+                            <div className="flex flex-col gap-1.5 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
                                 {isBug ? (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 uppercase tracking-wider">
-                                    <Bug className="w-3 h-3 text-rose-600" />
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200 uppercase tracking-wider">
+                                    <Bug className="w-3 h-3" />
                                     Bug
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-400 border border-teal-200 dark:border-teal-500/20 uppercase tracking-wider">
-                                    <Lightbulb className="w-3 h-3 text-teal-600" />
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-100 text-teal-700 border border-teal-200 uppercase tracking-wider">
+                                    <Lightbulb className="w-3 h-3" />
                                     Idea
                                   </span>
                                 )}
-                                <span className="text-[10px] text-gray-500 dark:text-gray-500 font-bold font-mono">
+                                <span className="text-[10px] text-gray-400 font-bold font-mono">
                                   {formatDate(item.created_at)}
                                 </span>
                               </div>
-                              <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                              <span className="text-sm font-bold text-gray-900 truncate">
                                 {email}
                               </span>
                             </div>
                           </div>
 
-                          <div className="p-4 bg-gray-50/80 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/60 rounded-2xl">
-                            <p className="text-xs text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed font-medium">
+                          <div className="p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+                            <p className="text-xs text-gray-800 whitespace-pre-wrap leading-relaxed font-medium">
                               {item.message}
                             </p>
                           </div>
 
                           {item.screenshot_urls && item.screenshot_urls.length > 0 && (
                             <div className="flex flex-col gap-1.5 mt-1">
-                              <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                                 {isDe ? 'Screenshots / Anhänge:' : 'Screenshots / Attachments:'}
                               </span>
                               <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-thin">
@@ -538,7 +519,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                                     key={idx}
                                     type="button"
                                     onClick={() => setLightboxImage(url)}
-                                    className="w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shrink-0 active:scale-95 hover:brightness-95 transition-all cursor-pointer bg-gray-100 dark:bg-gray-800 shadow-sm"
+                                    className="w-16 h-16 rounded-xl border border-gray-200 overflow-hidden shrink-0 active:scale-95 hover:brightness-95 transition-all cursor-pointer bg-gray-100 shadow-sm"
                                   >
                                     <img src={url} alt={`Screenshot ${idx}`} className="w-full h-full object-cover" />
                                   </button>
@@ -552,8 +533,9 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                               <button
                                 type="button"
                                 onClick={() => toggleFeedbackExpand(item.id)}
-                                className="text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:text-emerald-600 transition-colors flex items-center gap-1 cursor-pointer outline-none"
+                                className="text-xs font-bold text-emerald-700 hover:text-emerald-600 transition-colors flex items-center gap-1 cursor-pointer outline-none"
                               >
+                                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                                 <span>
                                   {isExpanded
                                     ? (isDe ? 'Details ausblenden' : 'Hide Details')
@@ -563,7 +545,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                               </button>
 
                               {isExpanded && (
-                                <div className="mt-3 p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/60 rounded-2xl flex flex-col gap-2 font-mono text-[11px] text-gray-700 dark:text-gray-300 overflow-x-auto">
+                                <div className="mt-3 p-4 bg-gray-50 border border-gray-200 rounded-2xl flex flex-col gap-2 font-mono text-[11px] text-gray-700 overflow-x-auto">
                                   <div><span className="font-bold text-gray-500">Platform:</span> {item.context.platform} ({item.context.isNative ? 'Native' : 'Web'})</div>
                                   <div><span className="font-bold text-gray-500">App Version:</span> v{item.context.appVersion} (Build {item.context.appBuild})</div>
                                   <div><span className="font-bold text-gray-500">Tier / Language:</span> lang: {item.context.language} | tier: {item.context.tier}</div>
@@ -572,7 +554,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                                   <div className="break-all"><span className="font-bold text-gray-500">User Agent:</span> {item.context.userAgent}</div>
 
                                   {item.context.logs && item.context.logs.length > 0 && (
-                                    <div className="mt-2 border-t border-gray-200 dark:border-gray-800 pt-2 flex flex-col gap-1.5">
+                                    <div className="mt-2 border-t border-gray-200 pt-2 flex flex-col gap-1.5">
                                       <div className="font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1 text-[9px] mb-1">
                                         <Terminal className="w-3.5 h-3.5" />
                                         {isDe ? 'Konsolen-Protokoll:' : 'Console Logs:'}
@@ -601,23 +583,23 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
             {/* Panel: Metrics */}
             <Tabs.Panel id="metrics">
               <div className="flex flex-col gap-6">
-                <div className="flex bg-gray-100 dark:bg-gray-900 p-1.5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-inner">
+                <div className="flex flex-wrap sm:flex-nowrap gap-1 bg-gray-100 p-1 sm:p-1.5 rounded-2xl border border-gray-200">
                   {(
                     [
                       { id: 'all', label: isDe ? 'Alle' : 'All' },
                       { id: 'today', label: isDe ? 'Heute' : 'Today' },
-                      { id: '3d', label: isDe ? '3 Tage' : 'Last 3 days' },
-                      { id: '7d', label: isDe ? '7 Tage' : 'Last 7 days' },
-                      { id: '30d', label: isDe ? '30 Tage' : 'Last 30 days' },
+                      { id: '3d', label: isDe ? '3 Tage' : '3 days' },
+                      { id: '7d', label: isDe ? '7 Tage' : '7 days' },
+                      { id: '30d', label: isDe ? '30 Tage' : '30 days' },
                     ] as const
                   ).map(({ id, label }) => (
                     <button
                       key={id}
                       type="button"
                       onClick={() => setMetricsRange(id)}
-                      className={`flex-1 px-3 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${metricsRange === id
-                          ? 'bg-white dark:bg-gray-800 text-emerald-700 dark:text-emerald-400 shadow-md'
-                          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                      className={`flex-1 min-w-[30%] sm:min-w-0 px-3 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap ${metricsRange === id
+                          ? 'bg-white text-emerald-700 shadow-sm'
+                          : 'text-gray-500 hover:text-gray-900'
                         }`}
                     >
                       {label}
@@ -632,141 +614,141 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                 ) : metrics ? (
                   <div className={`flex flex-col gap-6 transition-opacity ${metricsLoading ? 'opacity-50 pointer-events-none' : ''}`}>
                     {/* 1. Top Level Metrics Cards Grid (5 Cards) */}
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                       <div
-                        className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2 cursor-pointer hover:ring-2 hover:ring-emerald-500/40 transition-all hover:shadow-md"
+                        className="p-4 rounded-2xl border border-gray-200 shadow-sm bg-white flex flex-col gap-2 cursor-pointer hover:ring-2 hover:ring-emerald-500/40 transition-all hover:shadow-md"
                         onClick={() => { setError(null); setActiveTab('users'); }}
                       >
-                        <div className="flex items-center justify-between text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center justify-between text-gray-400">
                           <span className="text-[10px] font-extrabold uppercase tracking-wider">
                             {metricsRange === 'all' ? (isDe ? 'Nutzer' : 'Users') : (isDe ? 'Neue Nutzer' : 'New Users')}
                           </span>
-                          <Users className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          <Users className="w-4 h-4 text-emerald-600" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-2xl font-black text-gray-900 dark:text-white leading-tight">
+                          <span className="text-2xl font-black text-gray-900 leading-tight">
                             {metricsRange === 'all' ? (metrics.users?.total ?? 0) : (metrics.users?.newInRange ?? 0)}
                           </span>
-                          <span className="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5 font-bold">
+                          <span className="text-[9px] text-gray-500 mt-0.5 font-bold">
                             {metricsRange === 'all' ? (isDe ? 'Registriert' : 'Registered') : rangeLabel[metricsRange]}
                           </span>
                         </div>
                       </div>
 
-                      <div className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
-                        <div className="flex items-center justify-between text-gray-500 dark:text-gray-400">
+                      <div className="p-4 rounded-2xl border border-gray-200 shadow-sm bg-white flex flex-col gap-2">
+                        <div className="flex items-center justify-between text-gray-400">
                           <span className="text-[10px] font-extrabold uppercase tracking-wider">{isDe ? 'Rezepte' : 'Recipes'}</span>
-                          <BookOpen className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          <BookOpen className="w-4 h-4 text-emerald-600" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-2xl font-black text-gray-900 dark:text-white leading-tight">
+                          <span className="text-2xl font-black text-gray-900 leading-tight">
                             {metrics.jobs?.total ?? 0}
                           </span>
-                          <span className="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5 font-bold">{isDe ? 'Extraktionen' : 'Extractions'}</span>
+                          <span className="text-[9px] text-gray-500 mt-0.5 font-bold">{isDe ? 'Extraktionen' : 'Extractions'}</span>
                         </div>
                       </div>
 
-                      <div className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
-                        <div className="flex items-center justify-between text-gray-500 dark:text-gray-400">
+                      <div className="p-4 rounded-2xl border border-gray-200 shadow-sm bg-white flex flex-col gap-2">
+                        <div className="flex items-center justify-between text-gray-400">
                           <span className="text-[10px] font-extrabold uppercase tracking-wider">{isDe ? 'LLM Kosten' : 'LLM Costs'}</span>
-                          <Coins className="w-4 h-4 text-amber-600 dark:text-amber-500" />
+                          <Coins className="w-4 h-4 text-amber-500" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-2xl font-black text-gray-900 dark:text-white leading-tight">
+                          <span className="text-2xl font-black text-gray-900 leading-tight">
                             ${metrics.llm?.totalCostUsd?.toFixed(4) ?? '0.0000'}
                           </span>
-                          <span className="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5 font-bold">{rangeLabel[metricsRange]}</span>
+                          <span className="text-[9px] text-gray-500 mt-0.5 font-bold">{rangeLabel[metricsRange]}</span>
                         </div>
                       </div>
 
-                      <div className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
-                        <div className="flex items-center justify-between text-gray-500 dark:text-gray-400">
+                      <div className="p-4 rounded-2xl border border-gray-200 shadow-sm bg-white flex flex-col gap-2">
+                        <div className="flex items-center justify-between text-gray-400">
                           <span className="text-[10px] font-extrabold uppercase tracking-wider">{isDe ? 'Anfragen' : 'Requests'}</span>
-                          <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          <TrendingUp className="w-4 h-4 text-emerald-600" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-2xl font-black text-gray-900 dark:text-white leading-tight">
+                          <span className="text-2xl font-black text-gray-900 leading-tight">
                             {metrics.llm?.count ?? 0}
                           </span>
-                          <span className="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5 font-bold">Gemini Calls</span>
+                          <span className="text-[9px] text-gray-500 mt-0.5 font-bold">Gemini Calls</span>
                         </div>
                       </div>
 
-                      <div className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-2">
-                        <div className="flex items-center justify-between text-gray-500 dark:text-gray-400">
+                      <div className="p-4 rounded-2xl border border-gray-200 shadow-sm bg-white flex flex-col gap-2 col-span-2 sm:col-span-1">
+                        <div className="flex items-center justify-between text-gray-400">
                           <span className="text-[10px] font-extrabold uppercase tracking-wider">{isDe ? 'Medien-Download' : 'Media Download'}</span>
-                          <HardDriveDownload className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                          <HardDriveDownload className="w-4 h-4 text-indigo-600" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-2xl font-black text-gray-900 dark:text-white leading-tight">
+                          <span className="text-2xl font-black text-gray-900 leading-tight">
                             {formatDownloadSize(metrics.jobs?.mediaMb ?? 0)}
                           </span>
-                          <span className="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5 font-bold">{rangeLabel[metricsRange]}</span>
+                          <span className="text-[9px] text-gray-500 mt-0.5 font-bold">{rangeLabel[metricsRange]}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* 2. Job Status Queue breakdown card */}
-                    <div className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4">
-                      <h3 className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-none">
+                    <div className="p-4 sm:p-6 rounded-3xl border border-gray-200 shadow-sm bg-white flex flex-col gap-4">
+                      <h3 className="text-xs font-extrabold text-gray-500 uppercase tracking-widest leading-none">
                         Queue Status Breakdown
                       </h3>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
-                        <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-4 flex flex-col items-center">
-                          <span className="text-xs font-bold text-emerald-800 dark:text-emerald-400">{isDe ? 'Erfolgreich' : 'Succeeded'}</span>
-                          <span className="text-2xl font-black text-emerald-700 dark:text-emerald-300 mt-1">{metrics.jobs?.completed ?? 0}</span>
+                        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex flex-col items-center">
+                          <span className="text-xs font-bold text-emerald-800">{isDe ? 'Erfolgreich' : 'Succeeded'}</span>
+                          <span className="text-2xl font-black text-emerald-700 mt-1">{metrics.jobs?.completed ?? 0}</span>
                         </div>
                         <button
                           type="button"
                           onClick={() => setShowFailedJobs((prev) => !prev)}
-                          className={`bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-2xl p-4 flex flex-col items-center cursor-pointer transition-all ${
-                            showFailedJobs ? 'ring-2 ring-rose-500 bg-rose-100/80 dark:bg-rose-500/20' : 'hover:scale-[1.02]'
+                          className={`bg-rose-50 border border-rose-200 rounded-2xl p-4 flex flex-col items-center cursor-pointer transition-all ${
+                            showFailedJobs ? 'ring-2 ring-rose-500 bg-rose-100' : 'hover:scale-[1.02]'
                           }`}
                         >
                           <div className="flex items-center justify-center gap-1">
-                            <span className="text-xs font-bold text-rose-800 dark:text-rose-400">{isDe ? 'Fehlgeschlagen' : 'Failed'}</span>
+                            <span className="text-xs font-bold text-rose-800">{isDe ? 'Fehlgeschlagen' : 'Failed'}</span>
                             <ChevronDown className={`w-3.5 h-3.5 text-rose-600 transition-transform ${showFailedJobs ? 'rotate-180' : ''}`} />
                           </div>
-                          <span className="text-2xl font-black text-rose-700 dark:text-rose-300 mt-1">{metrics.jobs?.failed ?? 0}</span>
-                          <span className="text-[10px] font-bold text-rose-700 dark:text-rose-400 underline mt-0.5">
+                          <span className="text-2xl font-black text-rose-700 mt-1">{metrics.jobs?.failed ?? 0}</span>
+                          <span className="text-[10px] font-bold text-rose-700 underline mt-0.5">
                             {showFailedJobs ? (isDe ? 'Verbergen' : 'Hide') : (isDe ? 'Details' : 'Details')}
                           </span>
                         </button>
-                        <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-2xl p-4 flex flex-col items-center">
-                          <span className="text-xs font-bold text-blue-800 dark:text-blue-400">{isDe ? 'Aktiv' : 'Processing'}</span>
-                          <span className="text-2xl font-black text-blue-700 dark:text-blue-300 mt-1">{metrics.jobs?.processing ?? 0}</span>
+                        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex flex-col items-center">
+                          <span className="text-xs font-bold text-blue-800">{isDe ? 'Aktiv' : 'Processing'}</span>
+                          <span className="text-2xl font-black text-blue-700 mt-1">{metrics.jobs?.processing ?? 0}</span>
                         </div>
-                        <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl p-4 flex flex-col items-center">
-                          <span className="text-xs font-bold text-amber-800 dark:text-amber-400">{isDe ? 'Wartend' : 'Pending'}</span>
-                          <span className="text-2xl font-black text-amber-700 dark:text-amber-300 mt-1">{metrics.jobs?.pending ?? 0}</span>
+                        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-col items-center">
+                          <span className="text-xs font-bold text-amber-800">{isDe ? 'Wartend' : 'Pending'}</span>
+                          <span className="text-2xl font-black text-amber-700 mt-1">{metrics.jobs?.pending ?? 0}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* 2b. Failed Job Details Card (Shown on click of Failed Queue Status) */}
                     {showFailedJobs && (
-                      <div className="p-6 rounded-3xl border border-rose-300 dark:border-rose-500/30 bg-white dark:bg-gray-900 shadow-md flex flex-col gap-4">
+                      <div className="p-4 sm:p-6 rounded-3xl border border-rose-200 bg-white shadow-md flex flex-col gap-4">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-lg bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="p-1.5 rounded-lg bg-rose-100 text-rose-700 shrink-0">
                               <AlertCircle className="w-4 h-4" />
                             </div>
-                            <div className="flex flex-col">
-                              <h3 className="text-xs font-extrabold text-rose-800 dark:text-rose-400 uppercase tracking-wider leading-none">
+                            <div className="flex flex-col min-w-0">
+                              <h3 className="text-xs font-extrabold text-rose-800 uppercase tracking-wider leading-none">
                                 {isDe ? 'Fehlgeschlagene Jobs' : 'Failed Jobs'}
                               </h3>
-                              <span className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 font-semibold">
+                              <span className="text-[10px] text-gray-500 mt-0.5 font-semibold">
                                 {isDe ? `Zeitraum: ${rangeLabel[metricsRange]}` : `Timeframe: ${rangeLabel[metricsRange]}`}
                               </span>
                             </div>
-                            <span className="ml-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-400 font-bold">
+                            <span className="ml-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-bold shrink-0">
                               {metrics.jobs?.failedJobs?.length ?? 0}
                             </span>
                           </div>
                           <button
                             type="button"
                             onClick={() => setShowFailedJobs(false)}
-                            className="p-1.5 rounded-xl text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-xl text-gray-400 hover:text-gray-800 transition-colors cursor-pointer shrink-0"
                             aria-label="Close"
                           >
                             <X className="w-4 h-4" />
@@ -774,26 +756,26 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                         </div>
 
                         {(!metrics.jobs?.failedJobs || metrics.jobs.failedJobs.length === 0) ? (
-                          <div className="text-center py-8 px-4 bg-gray-50 dark:bg-gray-950/50 rounded-xl border border-gray-200 dark:border-gray-800">
-                            <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                          <div className="text-center py-8 px-4 bg-gray-50 rounded-xl border border-gray-200">
+                            <p className="text-xs text-gray-500 font-medium">
                               {isDe ? 'Keine fehlgeschlagenen Jobs im gewählten Zeitraum vorhanden.' : 'No failed jobs found in the selected timeframe.'}
                             </p>
                           </div>
                         ) : (
                           <div className="flex flex-col gap-3 max-h-96 overflow-y-auto pr-1">
                             {metrics.jobs.failedJobs.map((job: any) => (
-                              <div key={job.id} className="p-4 bg-rose-50/70 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 rounded-2xl flex flex-col gap-2.5">
-                                <div className="flex items-start justify-between gap-3">
+                              <div key={job.id} className="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex flex-col gap-2.5">
+                                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-3">
                                   <div className="flex flex-col gap-1 min-w-0">
                                     <div className="flex items-center gap-2 flex-wrap text-xs">
-                                      <span className="font-bold text-rose-950 dark:text-rose-100 truncate" title={job.email || job.userId}>
+                                      <span className="font-bold text-rose-950 truncate" title={job.email || job.userId}>
                                         {job.email || job.userId}
                                       </span>
-                                      <span className="text-[10px] font-mono text-gray-600 dark:text-gray-400 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 px-1.5 py-0.5 rounded">
+                                      <span className="text-[10px] font-mono text-gray-600 bg-white border border-gray-200 px-1.5 py-0.5 rounded">
                                         ID: {job.id.slice(0, 8)}...
                                       </span>
                                     </div>
-                                    <span className="text-[10px] text-rose-800 dark:text-rose-300 font-mono font-medium">
+                                    <span className="text-[10px] text-rose-800 font-mono font-medium">
                                       {formatDate(job.createdAt)}
                                     </span>
                                   </div>
@@ -802,7 +784,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                                       href={job.url}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 hover:text-emerald-600 hover:underline shrink-0 bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/20 rounded-lg transition-all shadow-sm"
+                                      className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-emerald-700 hover:text-emerald-600 hover:underline shrink-0 self-start bg-emerald-100 border border-emerald-200 rounded-lg transition-all shadow-sm"
                                     >
                                       <span>{isDe ? 'Reel öffnen' : 'Open Reel'}</span>
                                       <ExternalLink className="w-3 h-3" />
@@ -811,8 +793,8 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                                 </div>
 
                                 {/* Error Details Container */}
-                                <div className="p-3 bg-white dark:bg-gray-950 border border-rose-200 dark:border-rose-900/50 rounded-xl text-[11px] font-mono text-rose-900 dark:text-rose-300 break-words leading-relaxed whitespace-pre-wrap shadow-inner">
-                                  <span className="font-extrabold text-rose-700 dark:text-rose-400 uppercase tracking-wider text-[9px] block mb-1">
+                                <div className="p-3 bg-white border border-rose-200 rounded-xl text-[11px] font-mono text-rose-900 break-words leading-relaxed whitespace-pre-wrap">
+                                  <span className="font-extrabold text-rose-700 uppercase tracking-wider text-[9px] block mb-1">
                                     {isDe ? 'Fehlergrund:' : 'Error details:'}
                                   </span>
                                   {job.error || (isDe ? 'Keine genauere Fehlermeldung hinterlegt.' : 'No detailed error message provided.')}
@@ -826,27 +808,27 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
 
                     {/* 3. LLM Breakdown Table */}
                     {metrics.llm?.breakdown && Object.keys(metrics.llm.breakdown).length > 0 && (
-                      <div className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4 overflow-hidden">
-                        <h3 className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-none">
+                      <div className="p-4 sm:p-6 rounded-3xl border border-gray-200 shadow-sm bg-white flex flex-col gap-4 overflow-hidden">
+                        <h3 className="text-xs font-extrabold text-gray-500 uppercase tracking-widest leading-none">
                           {isDe ? 'LLM Kosten nach Funktion' : 'LLM Costs by Function'}
                         </h3>
                         <div className="overflow-x-auto">
-                          <table className="w-full text-left text-xs text-gray-700 dark:text-gray-300 border-collapse">
+                          <table className="w-full text-left text-xs text-gray-700 border-collapse">
                             <thead>
-                              <tr className="border-b border-gray-200 dark:border-gray-800 text-[10px] font-bold uppercase text-gray-500 tracking-wider">
+                              <tr className="border-b border-gray-200 text-[10px] font-bold uppercase text-gray-400 tracking-wider">
                                 <th className="pb-2.5 font-bold">{isDe ? 'Funktion' : 'Function'}</th>
                                 <th className="pb-2.5 text-right font-bold">{isDe ? 'Anfragen' : 'Requests'}</th>
                                 <th className="pb-2.5 text-right font-bold">Tokens</th>
                                 <th className="pb-2.5 text-right font-bold">{isDe ? 'Kosten (USD)' : 'Costs (USD)'}</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100 dark:divide-gray-800 font-semibold">
+                            <tbody className="divide-y divide-gray-100 font-semibold">
                               {Object.entries(metrics.llm.breakdown).map(([key, value]: [string, any]) => (
-                                <tr key={key} className="text-gray-900 dark:text-gray-200">
-                                  <td className="py-2.5 font-mono text-[11px] text-gray-700 dark:text-gray-300">{key}</td>
+                                <tr key={key} className="text-gray-900">
+                                  <td className="py-2.5 font-mono text-[11px] text-gray-700">{key}</td>
                                   <td className="py-2.5 text-right">{value.count}</td>
                                   <td className="py-2.5 text-right font-mono">{value.tokens.toLocaleString()}</td>
-                                  <td className="py-2.5 text-right font-mono text-amber-700 dark:text-amber-400">${value.cost.toFixed(4)}</td>
+                                  <td className="py-2.5 text-right font-mono text-amber-700">${value.cost.toFixed(4)}</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -858,8 +840,8 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                     {/* 4. Daily stats list acting as elegant visual bar-charts */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Daily Extractions */}
-                      <div className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4">
-                        <h3 className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-none">
+                      <div className="p-4 sm:p-6 rounded-3xl border border-gray-200 shadow-sm bg-white flex flex-col gap-4">
+                        <h3 className="text-xs font-extrabold text-gray-500 uppercase tracking-widest leading-none">
                           {isDe ? 'Extraktionen' : 'Extractions'} ({rangeLabel[metricsRange]})
                         </h3>
                         {metrics.jobs?.dailyStats && metrics.jobs.dailyStats.length > 0 ? (
@@ -869,14 +851,14 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                               const pct = (stat.count / maxCount) * 100;
                               return (
                                 <div key={stat.date} className="flex items-center gap-3 text-[11px]">
-                                  <span className="w-20 text-gray-600 dark:text-gray-400 font-mono font-medium shrink-0">{stat.date.slice(5)}</span>
-                                  <div className="flex-1 bg-gray-100 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden">
+                                  <span className="w-12 sm:w-20 text-gray-500 font-mono font-medium shrink-0">{stat.date.slice(5)}</span>
+                                  <div className="flex-1 bg-gray-100 h-2.5 rounded-full overflow-hidden">
                                     <div
-                                      className="bg-emerald-500 dark:bg-emerald-600 h-full rounded-full transition-all duration-500"
+                                      className="bg-emerald-500 h-full rounded-full transition-all duration-500"
                                       style={{ width: `${pct}%` }}
                                     />
                                   </div>
-                                  <span className="w-6 text-right font-black text-gray-900 dark:text-white shrink-0">{stat.count}</span>
+                                  <span className="w-6 text-right font-black text-gray-900 shrink-0">{stat.count}</span>
                                 </div>
                               );
                             })}
@@ -889,8 +871,8 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                       </div>
 
                       {/* Daily Costs */}
-                      <div className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4">
-                        <h3 className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-none">
+                      <div className="p-4 sm:p-6 rounded-3xl border border-gray-200 shadow-sm bg-white flex flex-col gap-4">
+                        <h3 className="text-xs font-extrabold text-gray-500 uppercase tracking-widest leading-none">
                           {isDe ? 'LLM Kosten' : 'LLM Costs'} ({rangeLabel[metricsRange]})
                         </h3>
                         {metrics.llm?.dailyStats && metrics.llm.dailyStats.length > 0 ? (
@@ -900,14 +882,14 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                               const pct = (stat.cost / maxCost) * 100;
                               return (
                                 <div key={stat.date} className="flex items-center gap-3 text-[11px]">
-                                  <span className="w-20 text-gray-600 dark:text-gray-400 font-mono font-medium shrink-0">{stat.date.slice(5)}</span>
-                                  <div className="flex-1 bg-gray-100 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden">
+                                  <span className="w-12 sm:w-20 text-gray-500 font-mono font-medium shrink-0">{stat.date.slice(5)}</span>
+                                  <div className="flex-1 bg-gray-100 h-2.5 rounded-full overflow-hidden">
                                     <div
-                                      className="bg-amber-500 dark:bg-amber-600 h-full rounded-full transition-all duration-500"
+                                      className="bg-amber-500 h-full rounded-full transition-all duration-500"
                                       style={{ width: `${pct}%` }}
                                     />
                                   </div>
-                                  <span className="w-16 text-right font-black font-mono text-gray-900 dark:text-white shrink-0">
+                                  <span className="w-16 text-right font-black font-mono text-gray-900 shrink-0">
                                     ${stat.cost.toFixed(3)}
                                   </span>
                                 </div>
@@ -923,8 +905,8 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                     </div>
 
                     {/* 5. Extracted recipes per user (only users with >0 in range) */}
-                    <div className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 flex flex-col gap-4">
-                      <h3 className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-none">
+                    <div className="p-4 sm:p-6 rounded-3xl border border-gray-200 shadow-sm bg-white flex flex-col gap-4">
+                      <h3 className="text-xs font-extrabold text-gray-500 uppercase tracking-widest leading-none">
                         {isDe ? 'Extrahierte Rezepte pro Nutzer' : 'Extracted Recipes per User'} ({rangeLabel[metricsRange]})
                       </h3>
                       {metrics.extractionsPerUser && metrics.extractionsPerUser.length > 0 ? (
@@ -937,22 +919,22 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                             const pct = (entry.count / maxCount) * 100;
                             return (
                               <div key={entry.userId} className="flex items-center gap-3 text-[11px]">
-                                <span className="w-48 truncate text-gray-700 dark:text-gray-300 font-semibold shrink-0" title={entry.email || entry.userId}>
+                                <span className="w-28 sm:w-48 truncate text-gray-700 font-semibold shrink-0" title={entry.email || entry.userId}>
                                   {entry.email || entry.userId}
                                 </span>
-                                <div className="flex-1 bg-gray-100 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden">
+                                <div className="flex-1 bg-gray-100 h-2.5 rounded-full overflow-hidden">
                                   <div
-                                    className="bg-emerald-500 dark:bg-emerald-600 h-full rounded-full transition-all duration-500"
+                                    className="bg-emerald-500 h-full rounded-full transition-all duration-500"
                                     style={{ width: `${pct}%` }}
                                   />
                                 </div>
-                                <span className="w-8 text-right font-black text-gray-900 dark:text-white shrink-0">{entry.count}</span>
+                                <span className="w-8 text-right font-black text-gray-900 shrink-0">{entry.count}</span>
                               </div>
                             );
                           })}
                         </div>
                       ) : (
-                        <p className="text-center text-xs text-gray-500 dark:text-gray-400 py-8 font-medium">
+                        <p className="text-center text-xs text-gray-500 py-8 font-medium">
                           {isDe ? 'Keine Extraktionen im Zeitraum.' : 'No extractions in timeframe.'}
                         </p>
                       )}
@@ -965,22 +947,22 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
             {/* Panel: Users */}
             <Tabs.Panel id="users">
               <div className="flex flex-col gap-6">
-                <div className="flex bg-gray-100 dark:bg-gray-900 p-1.5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-inner">
+                <div className="flex flex-wrap sm:flex-nowrap gap-1 bg-gray-100 p-1 sm:p-1.5 rounded-2xl border border-gray-200">
                   {(
                     [
                       { id: 'all', label: isDe ? 'Alle Nutzer' : 'All Users' },
-                      { id: 'today', label: isDe ? 'Heute registriert' : 'Registered Today' },
-                      { id: '7d', label: isDe ? 'Letzte 7 Tage' : 'Last 7 days' },
-                      { id: '30d', label: isDe ? 'Letzte 30 Tage' : 'Last 30 days' },
+                      { id: 'today', label: isDe ? 'Heute' : 'Today' },
+                      { id: '7d', label: isDe ? '7 Tage' : '7 days' },
+                      { id: '30d', label: isDe ? '30 Tage' : '30 days' },
                     ] as const
                   ).map(({ id, label }) => (
                     <button
                       key={id}
                       type="button"
                       onClick={() => setUsersRange(id)}
-                      className={`flex-1 px-3 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${usersRange === id
-                          ? 'bg-white dark:bg-gray-800 text-emerald-700 dark:text-emerald-400 shadow-md'
-                          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                      className={`flex-1 min-w-[40%] sm:min-w-0 px-3 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap ${usersRange === id
+                          ? 'bg-white text-emerald-700 shadow-sm'
+                          : 'text-gray-500 hover:text-gray-900'
                         }`}
                     >
                       {label}
@@ -988,10 +970,10 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                   ))}
                 </div>
 
-                <div className="p-6 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+                <div className="p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white shadow-sm">
                   <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
-                      <span className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                      <span className="text-xs font-extrabold text-gray-500 uppercase tracking-wider">
                         {filteredUsers.length}{' '}
                         {usersRange === 'all'
                           ? (isDe ? 'registrierte Nutzer' : 'registered users')
@@ -1000,7 +982,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                     </div>
 
                     {filteredUsers.length === 0 ? (
-                      <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8 font-medium">
+                      <p className="text-sm text-gray-500 text-center py-8 font-medium">
                         {isDe ? 'Keine Nutzer im gewählten Zeitraum.' : 'No users found for this timeframe.'}
                       </p>
                     ) : (
@@ -1008,10 +990,10 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                         {filteredUsers.map((user: any) => {
                           const tierColor =
                             user.tier === 'premium'
-                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-800'
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                               : user.tier === 'alpha'
-                                ? 'bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-800'
-                                : 'bg-gray-100 text-gray-700 border border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700';
+                                ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                                : 'bg-gray-100 text-gray-700 border border-gray-200';
 
                           const fmt = (iso: string | null) => {
                             if (!iso) return '—';
@@ -1020,39 +1002,39 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                           };
 
                           return (
-                            <div key={user.id} className="p-4 bg-white dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/60 rounded-2xl flex items-start gap-3 shadow-sm hover:border-gray-300 transition-all">
+                            <div key={user.id} className="p-4 bg-white border border-gray-200 rounded-2xl flex items-start gap-3 shadow-sm hover:border-gray-300 transition-all">
                               {/* Avatar circle */}
-                              <div className="shrink-0 w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center border border-emerald-200 dark:border-emerald-800">
-                                <Users className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                              <div className="hidden sm:flex shrink-0 w-9 h-9 rounded-full bg-emerald-100 items-center justify-center border border-emerald-200">
+                                <Users className="w-4 h-4 text-emerald-700" />
                               </div>
 
                               <div className="flex-1 min-w-0">
                                 {/* Email + tier badge */}
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                  <span className="text-sm font-bold text-gray-900 truncate max-w-full">
                                     {user.email}
                                   </span>
                                   <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wide ${tierColor}`}>
                                     {user.tier || 'free'}
                                   </span>
-                                  <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wide bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800">
+                                  <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wide bg-blue-50 text-blue-700 border border-blue-200">
                                     {user.extractions_count ?? 0} {isDe ? 'Extraktionen' : 'extractions'}
                                   </span>
                                   {user.custom_limit !== null && user.custom_limit !== undefined && (
-                                    <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wide bg-violet-50 text-violet-700 border border-violet-200 dark:bg-violet-900/40 dark:text-violet-300 dark:border-violet-800">
+                                    <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wide bg-violet-50 text-violet-700 border border-violet-200">
                                       limit: {user.custom_limit === -1 ? '∞' : user.custom_limit}
                                     </span>
                                   )}
                                 </div>
 
                                 {/* Dates */}
-                                <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-gray-600 dark:text-gray-400 font-medium">
+                                <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-gray-500 font-medium">
                                   <span>
-                                    <span className="font-bold text-gray-700 dark:text-gray-300">{isDe ? 'Registriert:' : 'Joined:'}</span>{' '}
+                                    <span className="font-bold text-gray-700">{isDe ? 'Registriert:' : 'Joined:'}</span>{' '}
                                     {fmt(user.created_at)}
                                   </span>
                                   <span>
-                                    <span className="font-bold text-gray-700 dark:text-gray-300">{isDe ? 'Letzter Login:' : 'Last login:'}</span>{' '}
+                                    <span className="font-bold text-gray-700">{isDe ? 'Letzter Login:' : 'Last login:'}</span>{' '}
                                     {fmt(user.last_sign_in_at)}
                                   </span>
                                 </div>
