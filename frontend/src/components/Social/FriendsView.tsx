@@ -45,7 +45,11 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
     return msg === key ? t('app.social.friends.genericError') : msg;
   };
 
-  const inviteLink = profile ? `snagbite://invite/${profile.friendCode}` : '';
+  const inviteBaseUrl = window.location.origin.includes('localhost')
+    ? 'https://snagbite.app'
+    : window.location.origin;
+
+  const inviteLink = profile ? `${inviteBaseUrl}/invite/${profile.friendCode}` : '';
   const inviteMessage = profile ? t('app.social.friends.inviteText', { code: profile.friendCode }) : '';
   const fullInviteText = profile ? `${inviteMessage}\n${inviteLink}` : '';
 
