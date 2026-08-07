@@ -30,15 +30,6 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Prefill the code from an invite link, then clear it so it doesn't re-apply.
-  useEffect(() => {
-    if (pendingInviteCode) {
-      setCodeInput(pendingInviteCode.toUpperCase());
-      onInviteConsumed?.();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingInviteCode]);
-
   const localizeError = (code: string) => {
     const key = `error.codes.${code}`;
     const msg = t(key);
@@ -101,8 +92,8 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
     }
   };
 
-  const handleAdd = async () => {
-    const code = codeInput.trim();
+  const submitCode = async (targetCode: string) => {
+    const code = targetCode.trim().toUpperCase();
     if (!code || busy) return;
     setBusy(true);
     setFeedback(null);
@@ -122,6 +113,19 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
       setBusy(false);
     }
   };
+
+  const handleAdd = () => submitCode(codeInput);
+
+  // Auto-submit and prefill the code from an invite link, then clear it so it doesn't re-apply.
+  useEffect(() => {
+    if (pendingInviteCode) {
+      const code = pendingInviteCode.toUpperCase();
+      setCodeInput(code);
+      onInviteConsumed?.();
+      submitCode(code);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingInviteCode]);
 
   const startEdit = () => {
     setNameDraft(profile?.displayName ?? '');
