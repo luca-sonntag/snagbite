@@ -196,4 +196,42 @@ export interface GamificationSnapshot {
   recentPhotos?: CookPhotoItem[];
 }
 
+// ── Social (profiles, friends, leaderboard) ─────────────────────────────────
+// Mirror of the backend shapes returned by the social endpoints.
+
+export interface Profile {
+  userId: string;
+  displayName: string;
+  avatarUrl: string | null;
+  friendCode: string;
+}
+
+export interface FriendSummary {
+  friendshipId: string;
+  userId: string;
+  displayName: string;
+  avatarUrl: string | null;
+  level: number;
+  currentStreak: number;
+}
+
+export interface FriendRequest {
+  friendshipId: string;
+  userId: string;
+  displayName: string;
+  avatarUrl: string | null;
+}
+
+export type LeaderboardWindow = 'weekly' | 'all';
+
+export interface LeaderboardEntry {
+  rank: number;
+  userId: string;
+  displayName: string;
+  avatarUrl: string | null;
+  level: number;
+  value: number;
+  isMe: boolean;
+}
+
 
