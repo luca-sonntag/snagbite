@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-export type AppTab = 'extract' | 'history' | 'shopping-list' | 'progress' | 'settings' | 'admin';
+export type AppTab = 'extract' | 'history' | 'shopping-list' | 'progress' | 'settings' | 'admin' | 'invite';
 
 export interface ParsedRoute {
   /** The active bottom-nav tab */
@@ -26,6 +26,9 @@ function parseHash(hash: string): ParsedRoute {
       return { tab: 'shopping-list', subPath };
     case 'progress':
       return { tab: 'progress', subPath };
+    case 'invite':
+      // Deep link #/invite/<code> — App redirects to the progress/friends tab.
+      return { tab: 'invite', subPath };
     case 'settings':
       return { tab: 'settings', subPath };
     case 'admin':
