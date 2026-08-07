@@ -24,6 +24,7 @@ export default function Avatar({ name, avatarUrl, size = 40, className = '' }: A
         src={avatarUrl}
         alt={name}
         style={dim}
+        referrerPolicy="no-referrer"
         onError={() => setFailed(true)}
         className={`shrink-0 rounded-full object-cover ring-2 ring-black/5 dark:ring-white/10 shadow-xs ${className}`}
       />
