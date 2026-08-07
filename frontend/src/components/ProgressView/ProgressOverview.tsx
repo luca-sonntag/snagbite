@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { Button, Card } from '@heroui/react';
 import { Flame, Coins, Utensils, Trophy, Lock, Sparkles, X, Camera, Check, ChefHat, UtensilsCrossed, Crown, Award } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useGamification } from '../../context/GamificationContext';
@@ -145,7 +146,7 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
             value={stats?.coins ?? 0}
             label="Punkte"
             accent="text-amber-500 bg-amber-500/10 dark:bg-amber-500/20"
-            onClick={() => {
+            onPress={() => {
               setShowCoinsNotice(true);
               setTimeout(() => setShowCoinsNotice(false), 3000);
             }}
@@ -168,32 +169,33 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
 
       {/* Leaderboard teaser */}
       <div className="relative">
-        <button
-          type="button"
-          onClick={() => {
+        <Button
+          onPress={() => {
             setShowLeaderboardNotice(true);
             setTimeout(() => setShowLeaderboardNotice(false), 3000);
           }}
-          className="w-full flex items-center gap-3.5 rounded-3xl bg-white dark:bg-gray-900 p-4 text-left border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] transition-all active:scale-[0.98] cursor-pointer outline-none"
+          className="w-full flex items-center justify-between gap-3.5 rounded-3xl bg-white dark:bg-gray-900 p-4 h-auto text-left border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] transition-all active:scale-[0.98] cursor-pointer outline-none min-h-[72px]"
         >
-          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-amber-500 bg-amber-500/10 dark:bg-amber-500/20">
-            <Trophy className="h-5 w-5" />
-            <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-white">
-              <Lock className="h-2.5 w-2.5" />
+          <div className="flex items-center gap-3.5 min-w-0 flex-1">
+            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-amber-500 bg-amber-500/10 dark:bg-amber-500/20">
+              <Trophy className="h-5 w-5" />
+              <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-white">
+                <Lock className="h-2.5 w-2.5" />
+              </div>
             </div>
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-sm font-bold text-gray-900 dark:text-white">
-              {t('app.gamification.leaderboardTitle')}
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-              {t('app.gamification.leaderboardSubtitle', { xp })}
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-bold text-gray-900 dark:text-white">
+                {t('app.gamification.leaderboardTitle')}
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                {t('app.gamification.leaderboardSubtitle', { xp })}
+              </div>
             </div>
           </div>
           <div className="shrink-0 text-[10px] font-extrabold text-amber-600 dark:text-amber-400 bg-amber-500/10 dark:bg-amber-500/20 px-2.5 py-1 rounded-full leading-tight">
             {t('app.gamification.leaderboardComingSoon')}
           </div>
-        </button>
+        </Button>
 
         {showLeaderboardNotice && (
           <div className="absolute left-1/2 -bottom-10 -translate-x-1/2 z-20 max-w-[90%] w-max text-center rounded-xl bg-gray-900 dark:bg-gray-100 px-3 py-1.5 text-xs font-bold text-white dark:text-gray-900 shadow-lg animate-in fade-in zoom-in-95 duration-150">
@@ -219,11 +221,10 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
         {recentPhotos.length > 0 ? (
           <div className="flex gap-3 overflow-x-auto pb-1 pt-1 scrollbar-none">
             {recentPhotos.map((item) => (
-              <button
+              <Button
                 key={item.id}
-                type="button"
-                onClick={() => onSelectRecipe?.(item.jobId)}
-                className="group relative h-40 w-32 shrink-0 overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800 transition-transform active:scale-95 text-left cursor-pointer outline-none border-none"
+                onPress={() => onSelectRecipe?.(item.jobId)}
+                className="group relative h-40 w-32 shrink-0 p-0 overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800 transition-transform active:scale-95 text-left cursor-pointer outline-none border-none"
               >
                 <img
                   src={item.photoUrl}
@@ -238,7 +239,7 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
                     {new Date(item.cookedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                   </p>
                 </div>
-              </button>
+              </Button>
             ))}
           </div>
         ) : (
@@ -268,11 +269,10 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
             const progress = getBadgeProgressInfo(key, stats);
 
             return (
-              <button
+              <Button
                 key={key}
-                type="button"
-                onClick={() => setSelectedBadgeKey(key)}
-                className={`flex flex-col items-center justify-center min-h-[115px] gap-1.5 p-3 text-center transition-all cursor-pointer outline-none active:scale-95 rounded-2xl ${isEarned
+                onPress={() => setSelectedBadgeKey(key)}
+                className={`flex flex-col items-center justify-center min-h-[115px] h-auto gap-1.5 p-3 text-center transition-all cursor-pointer outline-none active:scale-95 rounded-2xl border-none ${isEarned
                   ? 'bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-200'
                   : 'bg-gray-100 dark:bg-white/5 opacity-65 hover:opacity-85 text-gray-400'
                   }`}
@@ -288,7 +288,7 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
                   )}
                 </div>
 
-                <span className={`text-[10.5px] font-bold leading-tight ${isEarned ? 'text-emerald-950 dark:text-emerald-100' : 'text-gray-500 dark:text-gray-400'}`}>
+                <span className={`text-[10.5px] font-bold leading-tight whitespace-normal ${isEarned ? 'text-emerald-950 dark:text-emerald-100' : 'text-gray-500 dark:text-gray-400'}`}>
                   {t(`app.gamification.badges.${key}`)}
                 </span>
 
@@ -297,7 +297,7 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
                     {progress.current}/{progress.total}
                   </span>
                 )}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -321,13 +321,13 @@ function StatTile({
   value,
   label,
   accent,
-  onClick,
+  onPress,
 }: {
   icon: ReactNode;
   value: number;
   label: string;
   accent: string;
-  onClick?: () => void;
+  onPress?: () => void;
 }) {
   const content = (
     <>
@@ -339,15 +339,14 @@ function StatTile({
     </>
   );
 
-  if (onClick) {
+  if (onPress) {
     return (
-      <button
-        type="button"
-        onClick={onClick}
-        className="flex flex-col items-center justify-between gap-1.5 rounded-3xl bg-white dark:bg-gray-900 p-4 text-center border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] transition-all active:scale-95 cursor-pointer w-full h-full"
+      <Button
+        onPress={onPress}
+        className="flex flex-col items-center justify-between gap-1.5 rounded-3xl bg-white dark:bg-gray-900 p-4 h-full text-center border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] transition-all active:scale-95 cursor-pointer w-full"
       >
         {content}
-      </button>
+      </Button>
     );
   }
 
@@ -380,12 +379,14 @@ function BadgeDetailModal({
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6 transition-opacity animate-in fade-in duration-200">
       <div className="relative w-full max-w-sm rounded-3xl bg-white dark:bg-gray-900 p-6 text-gray-900 dark:text-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 text-center space-y-4">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
+        <Button
+          onPress={onClose}
+          isIconOnly
+          aria-label={t('dialog.cancelDefault') || 'Schließen'}
+          className="absolute top-4 right-4 h-9 w-9 p-0 text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors border-none min-w-0"
         >
           <X className="w-5 h-5" />
-        </button>
+        </Button>
 
         {/* Badge Icon */}
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-4xl shadow-inner">
@@ -446,3 +447,4 @@ function BadgeDetailModal({
     document.body,
   );
 }
+
