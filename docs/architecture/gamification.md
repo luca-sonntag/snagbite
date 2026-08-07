@@ -65,7 +65,43 @@ inaktiv (kein Cuisine-Signal).
 
 ## 6. Für später freigehalten
 
-Leaderboard (Query über `point_ledger`, `leaderboard_eligible` steht schon),
 Coin-Shop (`coins` akkumulieren bereits), Foto-KI-/Peer-Verifizierung (hebt
 `trust_score`), Challenges/Seasonal, Schwierigkeits-/Cuisine-Tuning
 (Config-Werte vorhanden) — alles ohne Schema-Änderung andockbar.
+(Freundesliste & Leaderboard sind inzwischen gebaut — siehe §7.)
+
+## 7. Social — Freundesliste & Leaderboard
+
+Aufbau auf dem Gamification-Fundament (`point_ledger` trägt die wöchentliche,
+`user_stats.xp` die Allzeit-Wertung). Additiv, server-autoritativ.
+
+**Datenmodell** (`backend/supabase_schema.sql`):
+* **`profiles`** — `user_id`, selbstgewählter `display_name`, `avatar_url`
+  (optional, aus Google-`user_metadata`), eindeutiger `friend_code`. Anzeigename/
+  Avatar sind `SELECT`-bar für alle Authenticated (Freundssicht); die E-Mail wird
+  **nie** an Freunde ausgeliefert.
+* **`friendships`** — mutual (`pending`/`accepted`), eine Zeile pro (requester,
+  addressee)-Paar; „meine Freunde" prüft beide Richtungen.
+* **RPC `weekly_xp_for_users(uids, since)`** — `SUM(delta_xp)` aus `point_ledger`
+  für das Wochenfenster (Muster wie `claim_next_job`).
+
+**Backend:** `ensureProfile` legt bei Erstzugriff ein Profil an (Anzeigename aus
+`full_name` ?? E-Mail-Localpart, Avatar aus Metadaten, kollisionsgeprüfter
+`friend_code`). Wochenfenster via reinem, getestetem `socialTime.ts` (`weekStartUtc`,
+Montag 00:00 UTC). Endpoints (`routes.ts`): `GET/PATCH /api/me/profile`,
+`GET /api/friends`, `GET /api/friends/requests`, `POST /api/friends/request`
+(per Code, Auto-Accept bei Reverse-Pending), `POST /api/friends/:id/respond`,
+`DELETE /api/friends/:id`, `GET /api/leaderboard?window=weekly|all` (Scope:
+Freunde + ich). Neue Error-Codes in `errors.ts` ↔ `frontend/src/errorCodes.ts` synchron.
+
+**Frontend:** `SocialContext` (profile/friends/requests + Methoden) neben dem
+Gamification-Provider. Der „Fortschritt"-Tab ist ein Container mit Segmented-Nav
+**Übersicht | Rangliste | Freunde** (kein neuer Bottom-Tab): `ProgressOverview`,
+`Social/LeaderboardView` (Woche/Gesamt), `Social/FriendsView` (Profilkarte +
+teilbarer Freundescode, per-Code hinzufügen, Anfragen, Liste), `Social/Avatar`.
+Einladung: teilbarer Code + Web-Hash-Route `#/invite/<code>` (in `useHashRouter`;
+`App.tsx` leitet auf den Freunde-Tab um und füllt vor). **Native https-Deeplinks**
+bleiben späterer Ausbau.
+
+**Freigehalten:** globale/Liga-Ranglisten (verified-only via `leaderboard_eligible`),
+native Deeplinks, Blockieren/Melden.
