@@ -27,6 +27,14 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
             </intent-filter>
+
+            <!-- App Links: Auto-open https://snagbite.app URLs directly in Snagbite app -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="snagbite.app" />
+            </intent-filter>
         </activity>
 
         <provider

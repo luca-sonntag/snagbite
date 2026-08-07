@@ -307,3 +307,26 @@ export function registerShareIntent(onUrl: (url: string) => void): () => void {
   window.addEventListener('sendIntentReceived', eventHandler);
   return () => window.removeEventListener('sendIntentReceived', eventHandler);
 }
+
+/**
+ * Register a listener for Capacitor App URL open events (Deep Links & App Links).
+ * Handles URLs opened while app is running or on cold start.
+ */
+export function registerAppUrlOpen(onUrl: (url: string) => void): () => void {
+  if (!isNative()) return () => { };
+
+  try {
+    const handlePromise = App.addListener('appUrlOpen', (data) => {
+      if (data?.url) {
+        onUrl(data.url);
+      }
+    });
+
+    return () => {
+      handlePromise.then((handle) => handle.remove()).catch(() => { });
+    };
+  } catch (err) {
+    console.warn('Failed to register appUrlOpen listener:', err);
+    return () => { };
+  }
+}

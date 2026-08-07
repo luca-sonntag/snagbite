@@ -3,7 +3,7 @@ import { Sparkles, BookOpen, ShoppingCart, User, Trophy } from 'lucide-react';
 
 import type { Job } from './types';
 import { apiUrl } from './api';
-import { registerShareIntent, registerNotificationTap, hideSplashScreen, registerBackButtonHandler } from './native';
+import { registerShareIntent, registerNotificationTap, hideSplashScreen, registerBackButtonHandler, registerAppUrlOpen } from './native';
 import { registerPushTapHandler, enablePushNotifications } from './push';
 import { parseSharedUrl } from './utils/shareUrl';
 import ExtractForm, { type ExtractMode } from './components/ExtractForm';
@@ -651,6 +651,20 @@ export default function App() {
       }
     });
   }, [authLoading, user, replace, setUrl, triggerExtraction, limitStatus]);
+
+  // Handle Capacitor native App Links / Deep Links (e.g. https://snagbite.app/#/invite/CODE)
+  useEffect(() => {
+    return registerAppUrlOpen((openUrl) => {
+      try {
+        const urlObj = new URL(openUrl);
+        if (urlObj.hash) {
+          window.location.hash = urlObj.hash;
+        }
+      } catch (err) {
+        console.warn('Failed to parse openUrl:', err);
+      }
+    });
+  }, []);
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
