@@ -30,7 +30,7 @@ import { useRecipeExtraction } from './hooks/useRecipeExtraction';
 import { useShoppingList } from './hooks/useShoppingList';
 import { useDialog } from './context/DialogContext';
 import { useI18n } from './context/I18nContext';
-import { useAuth } from './context/AuthContext';
+import { useSocial } from './context/SocialContext';
 import { useGamification } from './context/GamificationContext';
 import { useHashRouter } from './hooks/useHashRouter';
 import { EXTRACTION_COMPLETE_EVENT, OPEN_RECIPE_EVENT, useExtractionJobs } from './context/ExtractionJobsContext';
@@ -50,7 +50,9 @@ export default function App() {
   const { t } = useI18n();
   const { user, isPremium, loading: authLoading, getAccessToken } = useAuth();
   const { snapshot: gamificationSnapshot } = useGamification();
+  const { incomingRequests } = useSocial();
   const userLevel = gamificationSnapshot?.stats?.level ?? null;
+  const incomingRequestsCount = incomingRequests.length;
 
   // ── URL-based routing ────────────────────────────────────────────────────
   const { tab: activeView, subPath, navigate, replace } = useHashRouter();
@@ -1044,7 +1046,11 @@ export default function App() {
               >
                 <div className="relative">
                   <Trophy className="w-5.5 h-5.5 mb-1" />
-                  {userLevel !== null && (
+                  {incomingRequestsCount > 0 ? (
+                    <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-black text-white leading-none ring-2 ring-white dark:ring-gray-900 animate-pulse">
+                      {incomingRequestsCount}
+                    </span>
+                  ) : userLevel !== null && (
                     <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-emerald-600 px-1 text-[9px] font-black text-white leading-none ring-2 ring-white dark:ring-gray-900 animate-pulse-slow">
                       {userLevel}
                     </span>

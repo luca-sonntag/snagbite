@@ -5,6 +5,8 @@ import ProgressOverview from './ProgressOverview';
 import LeaderboardView from '../Social/LeaderboardView';
 import FriendsView from '../Social/FriendsView';
 
+import { useSocial } from '../../context/SocialContext';
+
 export type SocialSection = 'overview' | 'leaderboard' | 'friends';
 
 interface ProgressViewProps {
@@ -20,7 +22,10 @@ interface ProgressViewProps {
  */
 export default function ProgressView({ pendingInviteCode, onInviteConsumed, onSelectRecipe }: ProgressViewProps) {
   const { t } = useI18n();
+  const { incomingRequests } = useSocial();
   const [section, setSection] = useState<SocialSection>('overview');
+
+  const incomingCount = incomingRequests.length;
 
   // An incoming invite link jumps straight to the Friends section.
   useEffect(() => {
@@ -47,13 +52,20 @@ export default function ProgressView({ pendingInviteCode, onInviteConsumed, onSe
             <Button
               key={tab.key}
               onPress={() => setSection(tab.key)}
-              className={`flex-1 rounded-xl py-2 h-9 text-sm font-semibold border-none transition-all duration-200 cursor-pointer ${
+              className={`relative flex-1 rounded-xl py-2 h-9 text-sm font-semibold border-none transition-all duration-200 cursor-pointer ${
                 isActive
                   ? 'bg-white text-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] dark:bg-gray-800 dark:text-white'
                   : 'bg-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
               }`}
             >
-              {tab.label}
+              <span className="flex items-center justify-center gap-1.5">
+                {tab.label}
+                {tab.key === 'friends' && incomingCount > 0 && (
+                  <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-black text-white shadow-xs">
+                    {incomingCount}
+                  </span>
+                )}
+              </span>
             </Button>
           );
         })}

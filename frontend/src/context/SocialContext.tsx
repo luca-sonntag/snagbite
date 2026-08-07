@@ -80,15 +80,17 @@ export function SocialProvider({ children }: { children: React.ReactNode }) {
     }
   }, [authedFetch]);
 
-  // Load the profile once a session exists so the friend code is ready.
+  // Load profile and friends once a session exists so friend code and request badges are ready.
   useEffect(() => {
-    if (session) refreshProfile();
-    else {
+    if (session) {
+      refreshProfile();
+      refreshFriends();
+    } else {
       setProfile(null);
       setFriends([]);
       setIncomingRequests([]);
     }
-  }, [session, refreshProfile]);
+  }, [session, refreshProfile, refreshFriends]);
 
   const updateDisplayName = useCallback(
     async (name: string) => {
