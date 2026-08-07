@@ -49,7 +49,20 @@ import {
   uploadCookPhoto,
   getUserStats,
   getUserBadgesDetailed,
-  getGamificationConfig
+  getGamificationConfig,
+  ensureProfile,
+  updateDisplayName,
+  findProfileByFriendCode,
+  getProfilesByIds,
+  getAcceptedFriends,
+  getIncomingRequests,
+  findFriendshipBetween,
+  getFriendshipById,
+  createFriendship,
+  acceptFriendship,
+  deleteFriendship,
+  getUserStatsForIds,
+  getWeeklyXp
 } from './db.js';
 import { config } from './config.js';
 import { requireAuth, requireAdmin } from './auth.js';
@@ -61,6 +74,8 @@ import { MAX_IMPORT_PHOTOS, deleteImportPhotos, photoJobUrl, uploadImportPhoto }
 
 import { notificationTick } from './notifications/worker.js';
 import { recordCook } from './gamification.js';
+import { weekStartUtc } from './socialTime.js';
+import type { FriendSummary, FriendRequest, LeaderboardEntry } from './types.js';
 
 export const apiRouter = Router();
 
@@ -1231,6 +1246,251 @@ apiRouter.get('/me/gamification', async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     if (!(error instanceof AppError)) console.error('Error fetching gamification state:', error);
+    sendAppError(res, error);
+  }
+});
+
+// ── Social: profiles & friends ───────────────────────────────────────────────
+
+const MAX_DISPLAY_NAME_LEN = 40;
+
+/** Build the profile seed (display name + avatar) from a Supabase auth user. */
+function profileSeedFromUser(user: any, fallbackEmail?: string): { displayName: string | null; avatarUrl: string | null } {
+  const meta = user?.user_metadata ?? {};
+  const email = user?.email ?? fallbackEmail ?? '';
+  const displayName = meta.full_name || meta.name || (email ? String(email).split('@')[0] : null);
+  const avatarUrl = meta.avatar_url || meta.picture || null;
+  return { displayName: displayName ?? null, avatarUrl };
+}
+
+/** Ensure the authenticated user has a profile row, seeding it from auth metadata. */
+async function ensureMyProfile(userId: string, fallbackEmail?: string) {
+  let seed: { displayName: string | null; avatarUrl: string | null } = { displayName: null, avatarUrl: null };
+  try {
+    const { data } = await getClient().auth.admin.getUserById(userId);
+    if (data?.user) seed = profileSeedFromUser(data.user, fallbackEmail);
+  } catch {
+    // Fall back to the JWT email if the admin lookup fails.
+    if (fallbackEmail) seed = { displayName: fallbackEmail.split('@')[0], avatarUrl: null };
+  }
+  return ensureProfile(userId, seed);
+}
+
+/**
+ * Returns the authenticated user's social profile, creating it on first access.
+ * GET /api/me/profile
+ */
+apiRouter.get('/me/profile', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const profile = await ensureMyProfile(req.userId!, req.userEmail);
+    res.status(200).json({ success: true, profile });
+  } catch (error: any) {
+    if (!(error instanceof AppError)) console.error('Error fetching profile:', error);
+    sendAppError(res, error);
+  }
+});
+
+/**
+ * Updates the authenticated user's display name. PATCH /api/me/profile
+ */
+apiRouter.patch('/me/profile', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const raw = typeof req.body?.displayName === 'string' ? req.body.displayName.trim() : '';
+    if (raw.length < 1 || raw.length > MAX_DISPLAY_NAME_LEN) {
+      throw new AppError('PROFILE_NAME_INVALID', { params: { max: MAX_DISPLAY_NAME_LEN } });
+    }
+    await ensureMyProfile(req.userId!, req.userEmail);
+    const profile = await updateDisplayName(req.userId!, raw);
+    res.status(200).json({ success: true, profile });
+  } catch (error: any) {
+    if (!(error instanceof AppError)) console.error('Error updating profile:', error);
+    sendAppError(res, error);
+  }
+});
+
+/**
+ * Accepted friends with light stats for display. GET /api/friends
+ */
+apiRouter.get('/friends', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const friends = await getAcceptedFriends(req.userId!);
+    const ids = friends.map((f) => f.friendId);
+    const [profiles, stats] = await Promise.all([getProfilesByIds(ids), getUserStatsForIds(ids)]);
+
+    const list: FriendSummary[] = friends
+      .map((f) => {
+        const profile = profiles.get(f.friendId);
+        if (!profile) return null;
+        const s = stats.get(f.friendId);
+        return {
+          friendshipId: f.friendshipId,
+          userId: f.friendId,
+          displayName: profile.displayName,
+          avatarUrl: profile.avatarUrl,
+          level: s?.level ?? 1,
+          currentStreak: s?.currentStreak ?? 0,
+        } satisfies FriendSummary;
+      })
+      .filter((x): x is FriendSummary => x !== null)
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
+
+    res.status(200).json({ success: true, friends: list });
+  } catch (error: any) {
+    if (!(error instanceof AppError)) console.error('Error fetching friends:', error);
+    sendAppError(res, error);
+  }
+});
+
+/**
+ * Incoming pending friend requests. GET /api/friends/requests
+ */
+apiRouter.get('/friends/requests', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const incoming = await getIncomingRequests(req.userId!);
+    const ids = incoming.map((r) => r.requesterId);
+    const profiles = await getProfilesByIds(ids);
+
+    const list: FriendRequest[] = incoming
+      .map((r) => {
+        const profile = profiles.get(r.requesterId);
+        if (!profile) return null;
+        return {
+          friendshipId: r.friendshipId,
+          userId: r.requesterId,
+          displayName: profile.displayName,
+          avatarUrl: profile.avatarUrl,
+        } satisfies FriendRequest;
+      })
+      .filter((x): x is FriendRequest => x !== null);
+
+    res.status(200).json({ success: true, requests: list });
+  } catch (error: any) {
+    if (!(error instanceof AppError)) console.error('Error fetching friend requests:', error);
+    sendAppError(res, error);
+  }
+});
+
+/**
+ * Send a friend request by friend code. Auto-accepts if the other user already
+ * requested us. POST /api/friends/request  { code }
+ */
+apiRouter.post('/friends/request', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const code = typeof req.body?.code === 'string' ? req.body.code.trim().toUpperCase() : '';
+    if (!code) throw new AppError('FRIEND_CODE_INVALID');
+
+    // Make sure I have a profile (and thus a code) before befriending anyone.
+    await ensureMyProfile(req.userId!, req.userEmail);
+
+    const target = await findProfileByFriendCode(code);
+    if (!target) throw new AppError('FRIEND_CODE_INVALID');
+    if (target.userId === req.userId!) throw new AppError('FRIEND_SELF');
+
+    const existing = await findFriendshipBetween(req.userId!, target.userId);
+    if (existing?.status === 'accepted') throw new AppError('ALREADY_FRIENDS');
+    if (existing?.status === 'pending') {
+      if (existing.addressee_id === req.userId!) {
+        // They already requested me → accept it.
+        await acceptFriendship(existing.id);
+        res.status(200).json({ success: true, status: 'accepted' });
+        return;
+      }
+      throw new AppError('REQUEST_EXISTS');
+    }
+
+    await createFriendship(req.userId!, target.userId, 'pending');
+    res.status(200).json({ success: true, status: 'pending' });
+  } catch (error: any) {
+    if (!(error instanceof AppError)) console.error('Error sending friend request:', error);
+    sendAppError(res, error);
+  }
+});
+
+/**
+ * Accept or decline an incoming friend request. POST /api/friends/:id/respond
+ * { accept: boolean }
+ */
+apiRouter.post('/friends/:id/respond', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const accept = req.body?.accept === true;
+
+    const friendship = await getFriendshipById(id);
+    // Only the addressee of a still-pending request may respond.
+    if (!friendship || friendship.addressee_id !== req.userId! || friendship.status !== 'pending') {
+      throw new AppError('FRIENDSHIP_NOT_FOUND');
+    }
+
+    if (accept) await acceptFriendship(id);
+    else await deleteFriendship(id);
+
+    res.status(200).json({ success: true, status: accept ? 'accepted' : 'declined' });
+  } catch (error: any) {
+    if (!(error instanceof AppError)) console.error('Error responding to friend request:', error);
+    sendAppError(res, error);
+  }
+});
+
+/**
+ * Remove a friend (or cancel an outgoing request). DELETE /api/friends/:id
+ */
+apiRouter.delete('/friends/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const friendship = await getFriendshipById(id);
+    if (!friendship || (friendship.requester_id !== req.userId! && friendship.addressee_id !== req.userId!)) {
+      throw new AppError('FRIENDSHIP_NOT_FOUND');
+    }
+    await deleteFriendship(id);
+    res.status(200).json({ success: true });
+  } catch (error: any) {
+    if (!(error instanceof AppError)) console.error('Error removing friend:', error);
+    sendAppError(res, error);
+  }
+});
+
+/**
+ * Friends-and-me leaderboard. GET /api/leaderboard?window=weekly|all
+ * `value` is weekly XP (from point_ledger) or all-time XP (from user_stats).
+ */
+apiRouter.get('/leaderboard', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const window = req.query.window === 'all' ? 'all' : 'weekly';
+    await ensureMyProfile(req.userId!, req.userEmail);
+
+    const friends = await getAcceptedFriends(req.userId!);
+    const ids = [req.userId!, ...friends.map((f) => f.friendId)];
+
+    const [profiles, stats, weekly] = await Promise.all([
+      getProfilesByIds(ids),
+      getUserStatsForIds(ids),
+      window === 'weekly' ? getWeeklyXp(ids, weekStartUtc(new Date())) : Promise.resolve(null),
+    ]);
+
+    const entries: LeaderboardEntry[] = ids
+      .map((uid) => {
+        const profile = profiles.get(uid);
+        if (!profile) return null;
+        const s = stats.get(uid);
+        const value = window === 'weekly' ? (weekly?.get(uid) ?? 0) : (s?.xp ?? 0);
+        return {
+          rank: 0,
+          userId: uid,
+          displayName: profile.displayName,
+          avatarUrl: profile.avatarUrl,
+          level: s?.level ?? 1,
+          value,
+          isMe: uid === req.userId!,
+        } satisfies LeaderboardEntry;
+      })
+      .filter((x): x is LeaderboardEntry => x !== null)
+      .sort((a, b) => b.value - a.value || a.displayName.localeCompare(b.displayName));
+
+    entries.forEach((e, i) => { e.rank = i + 1; });
+
+    res.status(200).json({ success: true, window, entries });
+  } catch (error: any) {
+    if (!(error instanceof AppError)) console.error('Error building leaderboard:', error);
     sendAppError(res, error);
   }
 });
