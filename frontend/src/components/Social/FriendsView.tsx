@@ -10,6 +10,15 @@ interface FriendsViewProps {
   onInviteConsumed?: () => void;
 }
 
+function getCulinaryRankKey(level: number): string {
+  if (level <= 1) return 'level_1';
+  if (level === 2) return 'level_2';
+  if (level === 3) return 'level_3';
+  if (level === 4) return 'level_4';
+  if (level === 5) return 'level_5';
+  return 'level_6';
+}
+
 /** Friends section: your profile + code, add-by-code, incoming requests, list. */
 export default function FriendsView({ pendingInviteCode, onInviteConsumed }: FriendsViewProps) {
   const { t } = useI18n();
@@ -291,26 +300,47 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
             {t('app.social.friends.none')}
           </p>
         ) : (
-          friends.map((f) => (
-            <div key={f.friendshipId} className="flex items-center gap-3 rounded-2xl border-none bg-white p-3.5 shadow-[0_2px_6px_rgba(0,0,0,0.03)] dark:bg-gray-900">
-              <Avatar name={f.displayName} avatarUrl={f.avatarUrl} size={36} />
-              <div className="min-w-0 flex-1">
-                <div className="truncate font-bold text-gray-900 dark:text-white">{f.displayName}</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  {t('app.gamification.level', { level: f.level })}
-                  {f.currentStreak > 0 && ` · 🔥 ${f.currentStreak}`}
-                </div>
-              </div>
-              <Button
-                onPress={() => removeFriend(f.friendshipId)}
-                isIconOnly
-                aria-label={t('app.social.friends.remove')}
-                className="h-8 w-8 min-w-0 p-0 text-gray-400 hover:text-rose-500 bg-transparent hover:bg-rose-500/10 rounded-xl border-none active:scale-95 transition-all"
+          friends.map((f) => {
+            const rankKey = getCulinaryRankKey(f.level);
+            const rankTitle = t(`app.gamification.ranks.${rankKey}`);
+            const totalCooks = f.totalCooks ?? 0;
+
+            return (
+              <div
+                key={f.friendshipId}
+                className="flex items-center gap-3.5 rounded-3xl border-none bg-white p-4 shadow-[0_2px_6px_rgba(0,0,0,0.03)] dark:bg-gray-900 transition-all"
               >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))
+                <Avatar name={f.displayName} avatarUrl={f.avatarUrl} size={44} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="truncate font-bold text-gray-900 dark:text-white text-base">
+                      {f.displayName}
+                    </span>
+                    <span className="shrink-0 text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/15 px-2 py-0.5 rounded-full">
+                      {t('app.gamification.level', { level: f.level })} · {rankTitle}
+                    </span>
+                  </div>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500 dark:text-gray-400 font-medium">
+                    {f.currentStreak > 0 && (
+                      <span className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
+                        🔥 {f.currentStreak} {f.currentStreak === 1 ? 'Tag' : 'Tage'}
+                      </span>
+                    )}
+                    <span>🍳 {totalCooks} {totalCooks === 1 ? 'Gericht' : 'Gerichte'}</span>
+                    {f.xp !== undefined && <span>⭐ {f.xp} XP</span>}
+                  </div>
+                </div>
+                <Button
+                  onPress={() => removeFriend(f.friendshipId)}
+                  isIconOnly
+                  aria-label={t('app.social.friends.remove')}
+                  className="h-9 w-9 min-w-0 p-0 text-gray-400 hover:text-rose-500 bg-transparent hover:bg-rose-500/10 rounded-xl border-none active:scale-95 transition-all shrink-0"
+                >
+                  <Trash2 className="h-4.5 w-4.5" />
+                </Button>
+              </div>
+            );
+          })
         )}
       </div>
     </div>

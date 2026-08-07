@@ -212,7 +212,9 @@ export interface FriendSummary {
   displayName: string;
   avatarUrl: string | null;
   level: number;
+  xp?: number;
   currentStreak: number;
+  totalCooks?: number;
 }
 
 export interface FriendRequest {

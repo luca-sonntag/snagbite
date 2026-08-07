@@ -1326,7 +1326,9 @@ apiRouter.get('/friends', async (req: Request, res: Response): Promise<void> => 
           displayName: profile.displayName,
           avatarUrl: profile.avatarUrl,
           level: s?.level ?? 1,
+          xp: s?.xp ?? 0,
           currentStreak: s?.currentStreak ?? 0,
+          totalCooks: s?.totalCooks ?? 0,
         } satisfies FriendSummary;
       })
       .filter((x): x is FriendSummary => x !== null)
