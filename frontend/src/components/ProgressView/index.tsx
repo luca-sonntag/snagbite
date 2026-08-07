@@ -22,10 +22,15 @@ interface ProgressViewProps {
  */
 export default function ProgressView({ pendingInviteCode, onInviteConsumed, onSelectRecipe }: ProgressViewProps) {
   const { t } = useI18n();
-  const { incomingRequests } = useSocial();
+  const { incomingRequests, refreshFriends } = useSocial();
   const [section, setSection] = useState<SocialSection>('overview');
 
   const incomingCount = incomingRequests.length;
+
+  // Refresh friends and incoming requests when Progress tab is opened
+  useEffect(() => {
+    refreshFriends();
+  }, [refreshFriends]);
 
   // An incoming invite link jumps straight to the Friends section.
   useEffect(() => {
@@ -61,7 +66,7 @@ export default function ProgressView({ pendingInviteCode, onInviteConsumed, onSe
               <span className="flex items-center justify-center gap-1.5">
                 {tab.label}
                 {tab.key === 'friends' && incomingCount > 0 && (
-                  <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-black text-white shadow-xs">
+                  <span className="flex h-4 min-w-[16px] items-center justify-center text-center leading-none rounded-full bg-rose-500 px-1 text-[10px] font-black text-white shadow-xs">
                     {incomingCount}
                   </span>
                 )}
