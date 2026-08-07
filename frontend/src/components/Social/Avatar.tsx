@@ -25,7 +25,7 @@ export default function Avatar({ name, avatarUrl, size = 40, className = '' }: A
         alt={name}
         style={dim}
         onError={() => setFailed(true)}
-        className={`shrink-0 rounded-full object-cover ${className}`}
+        className={`shrink-0 rounded-full object-cover ring-2 ring-black/5 dark:ring-white/10 shadow-xs ${className}`}
       />
     );
   }
@@ -34,9 +34,10 @@ export default function Avatar({ name, avatarUrl, size = 40, className = '' }: A
   return (
     <div
       style={{ ...dim, backgroundColor: `hsl(${hue} 55% 45%)`, fontSize: size * 0.4 }}
-      className={`flex shrink-0 items-center justify-center rounded-full font-bold text-white ${className}`}
+      className={`flex shrink-0 items-center justify-center rounded-full font-bold text-white ring-2 ring-black/5 dark:ring-white/10 shadow-xs ${className}`}
     >
       {initialsOf(name)}
     </div>
   );
 }
+
