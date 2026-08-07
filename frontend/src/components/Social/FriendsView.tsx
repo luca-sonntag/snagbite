@@ -45,10 +45,13 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
     return msg === key ? t('app.social.friends.genericError') : msg;
   };
 
-  const inviteLink = profile ? `${window.location.origin}/#/invite/${profile.friendCode}` : '';
-  const inviteText = profile
-    ? `${t('app.social.friends.inviteText', { code: profile.friendCode })}\n${inviteLink}`
-    : '';
+  const inviteBaseUrl = window.location.origin.includes('localhost')
+    ? 'https://snagbite.app'
+    : window.location.origin;
+
+  const inviteLink = profile ? `${inviteBaseUrl}/#/invite/${profile.friendCode}` : '';
+  const inviteMessage = profile ? t('app.social.friends.inviteText', { code: profile.friendCode }) : '';
+  const fullInviteText = profile ? `${inviteMessage}\n${inviteLink}` : '';
 
   const handleCopyCode = async () => {
     if (!profile) return;
@@ -70,7 +73,7 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
       if (canShare.value) {
         await Share.share({
           title: 'Snagbite',
-          text: inviteText,
+          text: inviteMessage,
           url: inviteLink,
           dialogTitle: t('app.social.friends.share'),
         });
@@ -82,7 +85,7 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
 
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'Snagbite', text: inviteText, url: inviteLink });
+        await navigator.share({ title: 'Snagbite', text: inviteMessage, url: inviteLink });
         return;
       }
     } catch {
@@ -91,7 +94,7 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
 
     try {
       const { Clipboard } = await import('@capacitor/clipboard');
-      await Clipboard.write({ string: inviteText });
+      await Clipboard.write({ string: fullInviteText });
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1500);
     } catch {
