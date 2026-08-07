@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Button, Input } from '@heroui/react';
 import { Copy, Check, Share2, UserPlus, X, Pencil, Trash2 } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useSocial, SocialError } from '../../context/SocialContext';
@@ -130,23 +131,38 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
                   onChange={(e) => setNameDraft(e.target.value)}
                   maxLength={40}
                   autoFocus
-                  className="min-w-0 flex-1 rounded-lg border border-black/10 bg-transparent px-2 py-1 text-sm dark:border-white/15"
+                  className="min-w-0 flex-1 rounded-xl border border-black/10 bg-transparent px-3 py-1.5 text-sm dark:border-white/15 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
-                <button type="button" onClick={saveName} className="text-emerald-600 dark:text-emerald-400">
+                <Button
+                  onPress={saveName}
+                  isIconOnly
+                  aria-label="Speichern"
+                  className="h-8 w-8 min-w-0 p-0 text-emerald-600 dark:text-emerald-400 bg-transparent hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg border-none"
+                >
                   <Check className="h-5 w-5" />
-                </button>
-                <button type="button" onClick={() => setEditing(false)} className="text-gray-400">
+                </Button>
+                <Button
+                  onPress={() => setEditing(false)}
+                  isIconOnly
+                  aria-label="Abbrechen"
+                  className="h-8 w-8 min-w-0 p-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 bg-transparent hover:bg-black/5 dark:hover:bg-white/5 rounded-lg border-none"
+                >
                   <X className="h-5 w-5" />
-                </button>
+                </Button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <span className="truncate text-lg font-bold text-gray-900 dark:text-white">
                   {profile?.displayName ?? '…'}
                 </span>
-                <button type="button" onClick={startEdit} aria-label={t('app.social.friends.editName')} className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                <Button
+                  onPress={startEdit}
+                  isIconOnly
+                  aria-label={t('app.social.friends.editName')}
+                  className="h-7 w-7 min-w-0 p-0 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 bg-transparent hover:bg-black/5 dark:hover:bg-white/5 rounded-lg border-none"
+                >
                   <Pencil className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
             )}
             <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
@@ -157,24 +173,23 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
 
         {/* Friend code + share */}
         <div className="mt-4 flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleCopyCode}
-            className="flex flex-1 items-center justify-between rounded-2xl border border-dashed border-emerald-500/40 bg-emerald-500/5 px-4 py-3"
+          <Button
+            onPress={handleCopyCode}
+            className="flex flex-1 items-center justify-between rounded-2xl border border-dashed border-emerald-500/40 bg-emerald-500/5 px-4 py-3 h-auto border-emerald-500/40 hover:bg-emerald-500/10 transition-colors"
           >
             <span className="font-mono text-lg font-bold tracking-[0.3em] text-emerald-700 dark:text-emerald-300">
               {profile?.friendCode ?? '••••••'}
             </span>
             {copied ? <Check className="h-5 w-5 text-emerald-500" /> : <Copy className="h-5 w-5 text-emerald-500" />}
-          </button>
-          <button
-            type="button"
-            onClick={handleShare}
+          </Button>
+          <Button
+            onPress={handleShare}
             aria-label={t('app.social.friends.share')}
-            className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-lg active:scale-95"
+            isIconOnly
+            className="flex h-12 w-12 min-w-0 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-md active:scale-95 border-none p-0"
           >
             <Share2 className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -184,26 +199,25 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
           {t('app.social.friends.addTitle')}
         </h2>
         <div className="flex items-center gap-2">
-          <input
+          <Input
             value={codeInput}
             onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
             onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
             placeholder={t('app.social.friends.addPlaceholder')}
             maxLength={12}
-            className="min-w-0 flex-1 rounded-2xl border border-black/10 bg-transparent px-4 py-3 font-mono uppercase tracking-widest dark:border-white/15"
+            className="min-w-0 flex-1 font-mono uppercase tracking-widest"
           />
-          <button
-            type="button"
-            onClick={handleAdd}
-            disabled={busy || !codeInput.trim()}
-            className="flex h-12 items-center gap-1.5 rounded-2xl bg-emerald-600 px-4 font-semibold text-white disabled:opacity-50"
+          <Button
+            onPress={handleAdd}
+            isDisabled={busy || !codeInput.trim()}
+            className="flex h-12 items-center gap-1.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 px-4 font-semibold text-white border-none shrink-0"
           >
             <UserPlus className="h-5 w-5" />
             {t('app.social.friends.add')}
-          </button>
+          </Button>
         </div>
         {feedback && (
-          <p className={`mt-2 text-xs ${feedback.ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'}`}>
+          <p className={`mt-2 text-xs font-medium ${feedback.ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'}`}>
             {feedback.msg}
           </p>
         )}
@@ -216,26 +230,25 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
             {t('app.social.friends.requests')}
           </h2>
           {incomingRequests.map((r) => (
-            <div key={r.friendshipId} className="flex items-center gap-3 rounded-2xl border border-black/5 bg-white p-3 dark:border-white/10 dark:bg-gray-900">
+            <div key={r.friendshipId} className="flex items-center gap-3 rounded-2xl border border-black/5 bg-white p-3 dark:border-white/10 dark:bg-gray-900 shadow-sm">
               <Avatar name={r.displayName} avatarUrl={r.avatarUrl} size={36} />
               <span className="min-w-0 flex-1 truncate font-semibold text-gray-900 dark:text-white">
                 {r.displayName}
               </span>
-              <button
-                type="button"
-                onClick={() => respondRequest(r.friendshipId, true)}
-                className="rounded-xl bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white"
+              <Button
+                onPress={() => respondRequest(r.friendshipId, true)}
+                className="rounded-xl bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 h-8 text-xs font-semibold text-white border-none"
               >
                 {t('app.social.friends.accept')}
-              </button>
-              <button
-                type="button"
-                onClick={() => respondRequest(r.friendshipId, false)}
+              </Button>
+              <Button
+                onPress={() => respondRequest(r.friendshipId, false)}
+                isIconOnly
                 aria-label={t('app.social.friends.decline')}
-                className="text-gray-400 hover:text-rose-500"
+                className="h-8 w-8 min-w-0 p-0 text-gray-400 hover:text-rose-500 bg-transparent hover:bg-rose-500/10 rounded-xl border-none"
               >
                 <X className="h-5 w-5" />
-              </button>
+              </Button>
             </div>
           ))}
         </div>
@@ -252,7 +265,7 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
           </p>
         ) : (
           friends.map((f) => (
-            <div key={f.friendshipId} className="flex items-center gap-3 rounded-2xl border border-black/5 bg-white p-3 dark:border-white/10 dark:bg-gray-900">
+            <div key={f.friendshipId} className="flex items-center gap-3 rounded-2xl border border-black/5 bg-white p-3 dark:border-white/10 dark:bg-gray-900 shadow-sm">
               <Avatar name={f.displayName} avatarUrl={f.avatarUrl} size={36} />
               <div className="min-w-0 flex-1">
                 <div className="truncate font-semibold text-gray-900 dark:text-white">{f.displayName}</div>
@@ -261,14 +274,14 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
                   {f.currentStreak > 0 && ` · 🔥 ${f.currentStreak}`}
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => removeFriend(f.friendshipId)}
+              <Button
+                onPress={() => removeFriend(f.friendshipId)}
+                isIconOnly
                 aria-label={t('app.social.friends.remove')}
-                className="text-gray-400 hover:text-rose-500"
+                className="h-8 w-8 min-w-0 p-0 text-gray-400 hover:text-rose-500 bg-transparent hover:bg-rose-500/10 rounded-xl border-none"
               >
                 <Trash2 className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
           ))
         )}
@@ -276,3 +289,4 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
     </div>
   );
 }
+
