@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Button } from '@heroui/react';
 import { useI18n } from '../../context/I18nContext';
 import ProgressOverview from './ProgressOverview';
 import LeaderboardView from '../Social/LeaderboardView';
@@ -40,20 +41,22 @@ export default function ProgressView({ pendingInviteCode, onInviteConsumed, onSe
       </h1>
 
       <div className="flex rounded-2xl bg-black/5 p-1 dark:bg-white/5">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            onClick={() => setSection(tab.key)}
-            className={`flex-1 rounded-xl py-2 text-sm font-semibold transition-colors ${
-              section === tab.key
-                ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-white'
-                : 'text-gray-500 dark:text-gray-400'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+        {tabs.map((tab) => {
+          const isActive = section === tab.key;
+          return (
+            <Button
+              key={tab.key}
+              onPress={() => setSection(tab.key)}
+              className={`flex-1 rounded-xl py-2 h-9 text-sm font-semibold border-none transition-all duration-200 cursor-pointer ${
+                isActive
+                  ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-white'
+                  : 'bg-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+              }`}
+            >
+              {tab.label}
+            </Button>
+          );
+        })}
       </div>
 
       {section === 'overview' && <ProgressOverview onSelectRecipe={onSelectRecipe} />}
@@ -64,3 +67,4 @@ export default function ProgressView({ pendingInviteCode, onInviteConsumed, onSe
     </div>
   );
 }
+
