@@ -1,7 +1,7 @@
 import { createClient, SupabaseClient, PostgrestError } from '@supabase/supabase-js';
 import { randomUUID } from 'node:crypto';
 import { config } from './config.js';
-import type { Job, JobStatus, Recipe, ProgressData, Collection, GamificationConfig, UserStats } from './types.js';
+import type { Job, JobStatus, Recipe, ProgressData, Collection, GamificationConfig, UserStats, Profile } from './types.js';
 import { DEFAULT_GAMIFICATION_CONFIG } from './types.js';
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -1747,4 +1747,241 @@ export async function uploadCookPhoto(
     .upload(storagePath, buffer, { contentType: 'image/jpeg', upsert: true });
   if (error) throw wrapError('Failed to upload cook photo', error as any);
   return storagePath;
+}
+
+// ── Social: profiles ─────────────────────────────────────────────────────────
+
+interface ProfileRow {
+  user_id: string;
+  display_name: string;
+  avatar_url: string | null;
+  friend_code: string;
+}
+
+function rowToProfile(row: ProfileRow): Profile {
+  return {
+    userId: row.user_id,
+    displayName: row.display_name,
+    avatarUrl: row.avatar_url,
+    friendCode: row.friend_code,
+  };
+}
+
+// Crockford-ish base32 without ambiguous chars (no I, L, O, 0, 1).
+const FRIEND_CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
+function generateFriendCode(len = 6): string {
+  let out = '';
+  for (let i = 0; i < len; i++) {
+    out += FRIEND_CODE_ALPHABET[Math.floor(Math.random() * FRIEND_CODE_ALPHABET.length)];
+  }
+  return out;
+}
+
+/** Fetch a user's profile, or null if none exists yet. */
+export async function getProfile(userId: string): Promise<Profile | null> {
+  const { data, error } = await getClient()
+    .from('profiles')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (error) throw wrapError(`Failed to get profile for ${userId}`, error);
+  return data ? rowToProfile(data as ProfileRow) : null;
+}
+
+/**
+ * Ensure a profile row exists for the user, creating one on first access with a
+ * seeded display name/avatar and a unique friend code (retried on collision).
+ */
+export async function ensureProfile(
+  userId: string,
+  seed: { displayName?: string | null; avatarUrl?: string | null },
+): Promise<Profile> {
+  const existing = await getProfile(userId);
+  if (existing) return existing;
+
+  const displayName = (seed.displayName || '').trim().slice(0, 40) || 'Chef';
+
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const { data, error } = await getClient()
+      .from('profiles')
+      .insert({
+        user_id: userId,
+        display_name: displayName,
+        avatar_url: seed.avatarUrl ?? null,
+        friend_code: generateFriendCode(6),
+      })
+      .select('*')
+      .single();
+
+    if (!error && data) return rowToProfile(data as ProfileRow);
+
+    // A unique violation is either the user_id PK (a concurrent create won the
+    // race → return that) or a friend_code collision (→ retry a new code).
+    if (error && (error as any).code === PG_UNIQUE_VIOLATION) {
+      const now = await getProfile(userId);
+      if (now) return now;
+      continue;
+    }
+    if (error) throw wrapError('Failed to create profile', error);
+  }
+  throw new Error('Failed to allocate a unique friend code after several attempts');
+}
+
+/** Update the user's display name (returns the updated profile). */
+export async function updateDisplayName(userId: string, name: string): Promise<Profile> {
+  const { data, error } = await getClient()
+    .from('profiles')
+    .update({ display_name: name, updated_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .select('*')
+    .maybeSingle();
+  if (error) throw wrapError('Failed to update display name', error);
+  if (!data) throw wrapError('Profile not found', { message: 'no profile row' } as any);
+  return rowToProfile(data as ProfileRow);
+}
+
+/** Resolve a friend code to its profile, or null if unknown. Case-insensitive. */
+export async function findProfileByFriendCode(code: string): Promise<Profile | null> {
+  const { data, error } = await getClient()
+    .from('profiles')
+    .select('*')
+    .eq('friend_code', code.toUpperCase())
+    .maybeSingle();
+  if (error) throw wrapError('Failed to look up friend code', error);
+  return data ? rowToProfile(data as ProfileRow) : null;
+}
+
+/** Batch-fetch profiles by user id, keyed by user id. */
+export async function getProfilesByIds(ids: string[]): Promise<Map<string, Profile>> {
+  const map = new Map<string, Profile>();
+  if (ids.length === 0) return map;
+  const { data, error } = await getClient().from('profiles').select('*').in('user_id', ids);
+  if (error) throw wrapError('Failed to batch-fetch profiles', error);
+  for (const row of (data || []) as ProfileRow[]) map.set(row.user_id, rowToProfile(row));
+  return map;
+}
+
+// ── Social: friendships ──────────────────────────────────────────────────────
+
+interface FriendshipRow {
+  id: string;
+  requester_id: string;
+  addressee_id: string;
+  status: 'pending' | 'accepted';
+  created_at: string;
+  responded_at: string | null;
+}
+
+/** Accepted friends of a user (both directions): the friend id + friendship id. */
+export async function getAcceptedFriends(
+  userId: string,
+): Promise<{ friendId: string; friendshipId: string }[]> {
+  const { data, error } = await getClient()
+    .from('friendships')
+    .select('id, requester_id, addressee_id')
+    .eq('status', 'accepted')
+    .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
+  if (error) throw wrapError('Failed to fetch friends', error);
+  return (data || []).map((r: any) => ({
+    friendshipId: r.id,
+    friendId: r.requester_id === userId ? r.addressee_id : r.requester_id,
+  }));
+}
+
+/** Pending requests addressed to the user: friendship id + requester id. */
+export async function getIncomingRequests(
+  userId: string,
+): Promise<{ friendshipId: string; requesterId: string }[]> {
+  const { data, error } = await getClient()
+    .from('friendships')
+    .select('id, requester_id')
+    .eq('addressee_id', userId)
+    .eq('status', 'pending');
+  if (error) throw wrapError('Failed to fetch friend requests', error);
+  return (data || []).map((r: any) => ({ friendshipId: r.id, requesterId: r.requester_id }));
+}
+
+/** Any friendship row between two users (either direction), preferring accepted. */
+export async function findFriendshipBetween(
+  a: string,
+  b: string,
+): Promise<FriendshipRow | null> {
+  const { data, error } = await getClient()
+    .from('friendships')
+    .select('*')
+    .or(`and(requester_id.eq.${a},addressee_id.eq.${b}),and(requester_id.eq.${b},addressee_id.eq.${a})`);
+  if (error) throw wrapError('Failed to look up friendship', error);
+  const rows = (data || []) as FriendshipRow[];
+  if (rows.length === 0) return null;
+  return rows.find((r) => r.status === 'accepted') ?? rows[0];
+}
+
+export async function getFriendshipById(id: string): Promise<FriendshipRow | null> {
+  const { data, error } = await getClient()
+    .from('friendships')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+  if (error) throw wrapError('Failed to get friendship', error);
+  return (data as FriendshipRow) ?? null;
+}
+
+export async function createFriendship(
+  requesterId: string,
+  addresseeId: string,
+  status: 'pending' | 'accepted',
+): Promise<FriendshipRow> {
+  const { data, error } = await getClient()
+    .from('friendships')
+    .insert({
+      requester_id: requesterId,
+      addressee_id: addresseeId,
+      status,
+      responded_at: status === 'accepted' ? new Date().toISOString() : null,
+    })
+    .select('*')
+    .single();
+  if (error) throw wrapError('Failed to create friendship', error);
+  return data as FriendshipRow;
+}
+
+export async function acceptFriendship(id: string): Promise<void> {
+  const { error } = await getClient()
+    .from('friendships')
+    .update({ status: 'accepted', responded_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) throw wrapError('Failed to accept friendship', error);
+}
+
+export async function deleteFriendship(id: string): Promise<void> {
+  const { error } = await getClient().from('friendships').delete().eq('id', id);
+  if (error) throw wrapError('Failed to delete friendship', error);
+}
+
+// ── Social: leaderboard data ─────────────────────────────────────────────────
+
+/** Batch-fetch user_stats by id, keyed by user id (missing users omitted). */
+export async function getUserStatsForIds(ids: string[]): Promise<Map<string, UserStats>> {
+  const map = new Map<string, UserStats>();
+  if (ids.length === 0) return map;
+  const { data, error } = await getClient().from('user_stats').select('*').in('user_id', ids);
+  if (error) throw wrapError('Failed to batch-fetch user_stats', error);
+  for (const row of (data || []) as UserStatsRow[]) map.set(row.user_id, rowToUserStats(row));
+  return map;
+}
+
+/** Sum of point_ledger XP per user since `sinceIso` (weekly leaderboard), via RPC. */
+export async function getWeeklyXp(userIds: string[], sinceIso: string): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  if (userIds.length === 0) return map;
+  const { data, error } = await getClient().rpc('weekly_xp_for_users', {
+    uids: userIds,
+    since: sinceIso,
+  });
+  if (error) throw wrapError('Failed to fetch weekly xp', error);
+  for (const row of (data || []) as { user_id: string; xp: number }[]) {
+    map.set(row.user_id, Number(row.xp));
+  }
+  return map;
 }
