@@ -30,6 +30,7 @@ import { useRecipeExtraction } from './hooks/useRecipeExtraction';
 import { useShoppingList } from './hooks/useShoppingList';
 import { useDialog } from './context/DialogContext';
 import { useI18n } from './context/I18nContext';
+import { useAuth } from './context/AuthContext';
 import { useSocial } from './context/SocialContext';
 import { useGamification } from './context/GamificationContext';
 import { useHashRouter } from './hooks/useHashRouter';
