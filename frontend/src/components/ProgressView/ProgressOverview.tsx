@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { Button, Card } from '@heroui/react';
+import { Button } from '@heroui/react';
 import { Flame, Coins, Utensils, Trophy, Lock, Sparkles, X, Camera, Check, ChefHat, UtensilsCrossed, Crown, Award } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useGamification } from '../../context/GamificationContext';

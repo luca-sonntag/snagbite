@@ -50,7 +50,7 @@ export default function LeaderboardView() {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <Spinner size="md" color="emerald" />
+          <Spinner size="md" color="success" />
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">
