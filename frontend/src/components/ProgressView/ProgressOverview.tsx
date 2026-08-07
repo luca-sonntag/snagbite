@@ -270,12 +270,12 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
               <Button
                 key={key}
                 onPress={() => setSelectedBadgeKey(key)}
-                className={`flex flex-col items-center justify-between h-[124px] w-full p-2.5 text-center transition-all cursor-pointer outline-none active:scale-95 rounded-2xl border-none ${isEarned
+                className={`flex flex-col items-center justify-center h-[120px] w-full p-2 gap-1 text-center transition-all cursor-pointer outline-none active:scale-95 rounded-2xl border-none ${isEarned
                   ? 'bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-200'
                   : 'bg-gray-100 dark:bg-white/5 opacity-65 hover:opacity-85 text-gray-400'
                   }`}
               >
-                <div className="relative flex items-center justify-center h-8 shrink-0">
+                <div className="relative flex items-center justify-center shrink-0">
                   <div className={`text-2xl ${!isEarned ? 'grayscale opacity-75' : ''}`}>
                     {badgeEmoji(key)}
                   </div>
@@ -286,19 +286,15 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
                   )}
                 </div>
 
-                <div className="flex-1 flex items-center justify-center px-0.5 min-h-0">
-                  <span className={`text-[10.5px] font-bold leading-tight text-center line-clamp-2 whitespace-normal ${isEarned ? 'text-emerald-950 dark:text-emerald-100' : 'text-gray-500 dark:text-gray-400'}`}>
-                    {t(`app.gamification.badges.${key}`)}
-                  </span>
-                </div>
+                <span className={`text-[10.5px] font-bold leading-tight text-center line-clamp-2 whitespace-normal px-0.5 ${isEarned ? 'text-emerald-950 dark:text-emerald-100' : 'text-gray-500 dark:text-gray-400'}`}>
+                  {t(`app.gamification.badges.${key}`)}
+                </span>
 
-                <div className="h-4.5 flex items-center justify-center shrink-0">
-                  {!isEarned && progress && progress.total > 1 ? (
-                    <span className="text-[9px] font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/20 px-1.5 py-0.5 rounded-full leading-none">
-                      {progress.current}/{progress.total}
-                    </span>
-                  ) : null}
-                </div>
+                {!isEarned && progress && progress.total > 1 && (
+                  <span className="text-[9px] font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/20 px-1.5 py-0.5 rounded-full leading-none shrink-0 mt-0.5">
+                    {progress.current}/{progress.total}
+                  </span>
+                )}
               </Button>
             );
           })}
