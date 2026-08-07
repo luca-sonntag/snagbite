@@ -65,17 +65,38 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
   const handleShare = async () => {
     if (!profile) return;
     try {
-      if (navigator.share) {
-        await navigator.share({ title: 'Snagbite', text: inviteText });
+      const { Share } = await import('@capacitor/share');
+      const canShare = await Share.canShare();
+      if (canShare.value) {
+        await Share.share({
+          title: 'Snagbite',
+          text: inviteText,
+          url: inviteLink,
+          dialogTitle: t('app.social.friends.share'),
+        });
         return;
       }
-    } catch { /* user cancelled or unsupported → fall through to copy */ }
+    } catch {
+      /* user cancelled or unsupported → fall through */
+    }
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Snagbite', text: inviteText, url: inviteLink });
+        return;
+      }
+    } catch {
+      /* user cancelled or unsupported → fall through to copy */
+    }
+
     try {
       const { Clipboard } = await import('@capacitor/clipboard');
       await Clipboard.write({ string: inviteText });
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1500);
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   };
 
   const handleAdd = async () => {
