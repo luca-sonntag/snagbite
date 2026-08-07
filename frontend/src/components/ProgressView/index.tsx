@@ -40,7 +40,7 @@ export default function ProgressView({ pendingInviteCode, onInviteConsumed, onSe
         {t('app.gamification.tabTitle')}
       </h1>
 
-      <div className="flex rounded-2xl bg-black/5 p-1 dark:bg-white/5">
+      <div className="flex rounded-2xl bg-gray-100 p-1 dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
         {tabs.map((tab) => {
           const isActive = section === tab.key;
           return (
@@ -49,7 +49,7 @@ export default function ProgressView({ pendingInviteCode, onInviteConsumed, onSe
               onPress={() => setSection(tab.key)}
               className={`flex-1 rounded-xl py-2 h-9 text-sm font-semibold border-none transition-all duration-200 cursor-pointer ${
                 isActive
-                  ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-white'
+                  ? 'bg-white text-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] dark:bg-gray-800 dark:text-white'
                   : 'bg-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
               }`}
             >
@@ -67,4 +67,3 @@ export default function ProgressView({ pendingInviteCode, onInviteConsumed, onSe
     </div>
   );
 }
-

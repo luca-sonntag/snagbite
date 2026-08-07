@@ -107,7 +107,7 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
 
           <div className="text-right">
             <div className="text-2xl font-black tracking-tight text-emerald-600 dark:text-emerald-400">{xp}</div>
-            <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
               {t('app.gamification.xp')}
             </div>
           </div>
@@ -174,22 +174,20 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
             setShowLeaderboardNotice(true);
             setTimeout(() => setShowLeaderboardNotice(false), 3000);
           }}
-          className="w-full flex items-center justify-between gap-3.5 rounded-3xl bg-white dark:bg-gray-900 p-4 h-auto text-left border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] transition-all active:scale-[0.98] cursor-pointer outline-none min-h-[72px]"
+          className="w-full flex items-center justify-start gap-3.5 rounded-3xl bg-white dark:bg-gray-900 p-4 h-auto text-left border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] transition-all active:scale-[0.98] cursor-pointer outline-none"
         >
-          <div className="flex items-center gap-3.5 min-w-0 flex-1">
-            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-amber-500 bg-amber-500/10 dark:bg-amber-500/20">
-              <Trophy className="h-5 w-5" />
-              <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-white">
-                <Lock className="h-2.5 w-2.5" />
-              </div>
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-amber-500 bg-amber-500/10 dark:bg-amber-500/20">
+            <Trophy className="h-5 w-5" />
+            <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-white">
+              <Lock className="h-2.5 w-2.5" />
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-bold text-gray-900 dark:text-white">
-                {t('app.gamification.leaderboardTitle')}
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                {t('app.gamification.leaderboardSubtitle', { xp })}
-              </div>
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-bold text-gray-900 dark:text-white">
+              {t('app.gamification.leaderboardTitle')}
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+              {t('app.gamification.leaderboardSubtitle', { xp })}
             </div>
           </div>
           <div className="shrink-0 text-[10px] font-extrabold text-amber-600 dark:text-amber-400 bg-amber-500/10 dark:bg-amber-500/20 px-2.5 py-1 rounded-full leading-tight">
