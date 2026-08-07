@@ -652,12 +652,17 @@ export default function App() {
     });
   }, [authLoading, user, replace, setUrl, triggerExtraction, limitStatus]);
 
-  // Handle Capacitor native App Links / Deep Links (e.g. https://snagbite.app/#/invite/CODE or https://snagbite.app/invite/CODE)
+  // Handle Capacitor native App Links / Deep Links (e.g. https://snagbite.app/#/invite/CODE or snagbite://invite/CODE)
   useEffect(() => {
     return registerAppUrlOpen((openUrl) => {
       try {
         const urlObj = new URL(openUrl);
-        if (urlObj.hash) {
+        if (urlObj.protocol === 'snagbite:') {
+          // snagbite://invite/CODE -> #/invite/CODE
+          const host = urlObj.hostname;
+          const path = urlObj.pathname;
+          window.location.hash = `#/${host}${path}`.replace(/\/$/, '');
+        } else if (urlObj.hash) {
           window.location.hash = urlObj.hash;
         } else if (urlObj.pathname && urlObj.pathname !== '/') {
           window.location.hash = `#${urlObj.pathname}`;

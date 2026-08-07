@@ -37,6 +37,14 @@
                 <data android:scheme="https" android:host="snagbite.app" android:pathPrefix="/history" />
                 <data android:scheme="https" android:host="snagbite.app" android:pathPrefix="/recipe" />
             </intent-filter>
+
+            <!-- Custom URL Scheme: snagbite:// for direct instant app links -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="snagbite" />
+            </intent-filter>
         </activity>
 
         <provider
