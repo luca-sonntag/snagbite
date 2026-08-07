@@ -69,8 +69,7 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
       if (canShare.value) {
         await Share.share({
           title: 'Snagbite',
-          text: inviteMessage,
-          url: inviteLink,
+          text: fullInviteText,
           dialogTitle: t('app.social.friends.share'),
         });
         return;
@@ -81,7 +80,7 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
 
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'Snagbite', text: inviteMessage, url: inviteLink });
+        await navigator.share({ title: 'Snagbite', text: fullInviteText });
         return;
       }
     } catch {
