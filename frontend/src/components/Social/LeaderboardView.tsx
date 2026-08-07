@@ -5,7 +5,13 @@ import { useSocial } from '../../context/SocialContext';
 import type { LeaderboardEntry, LeaderboardWindow } from '../../types';
 import Avatar from './Avatar';
 
-/** Friends-and-me leaderboard with a weekly / all-time toggle. */
+function medal(rank: number): string | null {
+  if (rank === 1) return '🥇';
+  if (rank === 2) return '🥈';
+  if (rank === 3) return '🥉';
+  return null;
+}
+
 export default function LeaderboardView() {
   const { t } = useI18n();
   const { fetchLeaderboard } = useSocial();
@@ -17,19 +23,17 @@ export default function LeaderboardView() {
     let active = true;
     setLoading(true);
     fetchLeaderboard(range)
-      .then((e) => { if (active) setEntries(e); })
-      .catch(() => { /* handled in context */ })
+      .then((data) => { if (active) setEntries(data); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [range, fetchLeaderboard]);
+  }, [fetchLeaderboard, range]);
 
-  const medal = (rank: number) => (rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : null);
   const onlyMe = !loading && entries.length <= 1;
 
   return (
     <div className="flex flex-col gap-4">
       {/* Weekly / all-time toggle */}
-      <div className="flex rounded-2xl bg-black/5 p-1 dark:bg-white/5">
+      <div className="flex rounded-2xl bg-gray-100 p-1 dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
         {(['weekly', 'all'] as LeaderboardWindow[]).map((w) => {
           const isActive = range === w;
           return (
@@ -38,7 +42,7 @@ export default function LeaderboardView() {
               onPress={() => setRange(w)}
               className={`flex-1 rounded-xl py-2 h-9 text-sm font-semibold border-none transition-all duration-200 cursor-pointer ${
                 isActive
-                  ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-white'
+                  ? 'bg-white text-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] dark:bg-gray-800 dark:text-white'
                   : 'bg-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
               }`}
             >
@@ -57,10 +61,10 @@ export default function LeaderboardView() {
           {entries.map((e) => (
             <div
               key={e.userId}
-              className={`flex items-center gap-3 rounded-2xl border p-3.5 transition-all shadow-xs ${
+              className={`flex items-center gap-3 rounded-2xl border-none p-3.5 transition-all shadow-[0_2px_6px_rgba(0,0,0,0.03)] ${
                 e.isMe
-                  ? 'border-emerald-500/40 bg-emerald-500/10 dark:bg-emerald-500/15'
-                  : 'border-black/5 bg-white dark:border-white/10 dark:bg-gray-900'
+                  ? 'bg-emerald-500/10 dark:bg-emerald-500/15'
+                  : 'bg-white dark:bg-gray-900'
               }`}
             >
               <div className="w-7 text-center text-base font-extrabold text-gray-500 dark:text-gray-400 shrink-0">
@@ -82,7 +86,7 @@ export default function LeaderboardView() {
               </div>
               <div className="text-right shrink-0">
                 <div className="text-base font-black text-emerald-600 dark:text-emerald-400">{e.value}</div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
                   {t('app.gamification.xp')}
                 </div>
               </div>
@@ -99,4 +103,3 @@ export default function LeaderboardView() {
     </div>
   );
 }
-
