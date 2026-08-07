@@ -326,8 +326,8 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
                         🔥 {f.currentStreak} {f.currentStreak === 1 ? 'Tag' : 'Tage'}
                       </span>
                     )}
-                    <span>🍳 {totalCooks} {totalCooks === 1 ? 'Gericht' : 'Gerichte'}</span>
-                    {f.xp !== undefined && <span>⭐ {f.xp} XP</span>}
+                    <span>{totalCooks} {totalCooks === 1 ? 'Gericht' : 'Gerichte'}</span>
+                    {f.xp !== undefined && <span>{f.xp} XP</span>}
                   </div>
                 </div>
                 <Button
