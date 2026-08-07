@@ -1800,16 +1800,17 @@ export async function ensureProfile(
   const existing = await getProfile(userId);
   if (existing) return existing;
 
-  const displayName = (seed.displayName || '').trim().slice(0, 40) || 'Chef';
-
   for (let attempt = 0; attempt < 6; attempt++) {
+    const friendCode = generateFriendCode(6);
+    const displayName = (seed.displayName || '').trim().slice(0, 40) || `Chef #${friendCode}`;
+
     const { data, error } = await getClient()
       .from('profiles')
       .insert({
         user_id: userId,
         display_name: displayName,
         avatar_url: seed.avatarUrl ?? null,
-        friend_code: generateFriendCode(6),
+        friend_code: friendCode,
       })
       .select('*')
       .single();

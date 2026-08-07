@@ -1255,23 +1255,21 @@ apiRouter.get('/me/gamification', async (req: Request, res: Response): Promise<v
 const MAX_DISPLAY_NAME_LEN = 40;
 
 /** Build the profile seed (display name + avatar) from a Supabase auth user. */
-function profileSeedFromUser(user: any, fallbackEmail?: string): { displayName: string | null; avatarUrl: string | null } {
+function profileSeedFromUser(user: any): { displayName: string | null; avatarUrl: string | null } {
   const meta = user?.user_metadata ?? {};
-  const email = user?.email ?? fallbackEmail ?? '';
-  const displayName = meta.full_name || meta.name || (email ? String(email).split('@')[0] : null);
+  const displayName = meta.full_name || meta.name || null;
   const avatarUrl = meta.avatar_url || meta.picture || null;
   return { displayName: displayName ?? null, avatarUrl };
 }
 
 /** Ensure the authenticated user has a profile row, seeding it from auth metadata. */
-async function ensureMyProfile(userId: string, fallbackEmail?: string) {
+async function ensureMyProfile(userId: string) {
   let seed: { displayName: string | null; avatarUrl: string | null } = { displayName: null, avatarUrl: null };
   try {
     const { data } = await getClient().auth.admin.getUserById(userId);
-    if (data?.user) seed = profileSeedFromUser(data.user, fallbackEmail);
+    if (data?.user) seed = profileSeedFromUser(data.user);
   } catch {
-    // Fall back to the JWT email if the admin lookup fails.
-    if (fallbackEmail) seed = { displayName: fallbackEmail.split('@')[0], avatarUrl: null };
+    // Fall back to empty seed if admin lookup fails (ensureProfile uses Chef #CODE).
   }
   return ensureProfile(userId, seed);
 }
@@ -1282,7 +1280,7 @@ async function ensureMyProfile(userId: string, fallbackEmail?: string) {
  */
 apiRouter.get('/me/profile', async (req: Request, res: Response): Promise<void> => {
   try {
-    const profile = await ensureMyProfile(req.userId!, req.userEmail);
+    const profile = await ensureMyProfile(req.userId!);
     res.status(200).json({ success: true, profile });
   } catch (error: any) {
     if (!(error instanceof AppError)) console.error('Error fetching profile:', error);
@@ -1299,7 +1297,7 @@ apiRouter.patch('/me/profile', async (req: Request, res: Response): Promise<void
     if (raw.length < 1 || raw.length > MAX_DISPLAY_NAME_LEN) {
       throw new AppError('PROFILE_NAME_INVALID', { params: { max: MAX_DISPLAY_NAME_LEN } });
     }
-    await ensureMyProfile(req.userId!, req.userEmail);
+    await ensureMyProfile(req.userId!);
     const profile = await updateDisplayName(req.userId!, raw);
     res.status(200).json({ success: true, profile });
   } catch (error: any) {
@@ -1380,7 +1378,7 @@ apiRouter.post('/friends/request', async (req: Request, res: Response): Promise<
     if (!code) throw new AppError('FRIEND_CODE_INVALID');
 
     // Make sure I have a profile (and thus a code) before befriending anyone.
-    await ensureMyProfile(req.userId!, req.userEmail);
+    await ensureMyProfile(req.userId!);
 
     const target = await findProfileByFriendCode(code);
     if (!target) throw new AppError('FRIEND_CODE_INVALID');
@@ -1456,7 +1454,7 @@ apiRouter.delete('/friends/:id', async (req: Request, res: Response): Promise<vo
 apiRouter.get('/leaderboard', async (req: Request, res: Response): Promise<void> => {
   try {
     const window = req.query.window === 'all' ? 'all' : 'weekly';
-    await ensureMyProfile(req.userId!, req.userEmail);
+    await ensureMyProfile(req.userId!);
 
     const friends = await getAcceptedFriends(req.userId!);
     const ids = [req.userId!, ...friends.map((f) => f.friendId)];
