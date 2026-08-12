@@ -17,7 +17,11 @@ import {
  * On web (browser), the same styled ad card container (300x250 slot) is rendered
  * to maintain UI parity.
  */
-export default function ExtractionAdCard() {
+interface ExtractionAdCardProps {
+  isActive?: boolean;
+}
+
+export default function ExtractionAdCard({ isActive = true }: ExtractionAdCardProps) {
   const { t } = useI18n();
   const slotRef = useRef<HTMLDivElement>(null);
   // Default MREC height (300×250) until the real banner reports its size.
@@ -29,6 +33,10 @@ export default function ExtractionAdCard() {
 
   useEffect(() => {
     if (!native) return;
+    if (!isActive) {
+      void removeExtractionBanner();
+      return;
+    }
     const slot = slotRef.current;
     if (!slot) return;
 
@@ -37,8 +45,9 @@ export default function ExtractionAdCard() {
     let removeLoadListener: (() => void) | null = null;
 
     const positionBanner = () => {
-      if (cancelled || !slotRef.current) return;
+      if (cancelled || !slotRef.current || !isActive) return;
       const rect = slotRef.current.getBoundingClientRect();
+      if (rect.width === 0 && rect.height === 0) return;
       // BOTTOM_CENTER expects the distance from the viewport's bottom edge to
       // the banner's bottom edge. CSS px map to the plugin's logical dp units.
       const bottomMargin = Math.max(0, Math.round(window.innerHeight - rect.bottom));
@@ -78,18 +87,17 @@ export default function ExtractionAdCard() {
       window.removeEventListener('resize', onResize);
       removeLoadListener?.();
       removeSizeListener?.();
-      removeExtractionBanner();
+      void removeExtractionBanner();
     };
-  }, [native]);
+  }, [native, isActive]);
 
   // No ad filled on native — don't leave an empty card behind.
   if (native && status === 'failed') return null;
 
   return (
     <div
-      className={`glass-panel p-4 mb-4 rounded-2xl border border-black/5 dark:border-white/5 shadow-xl w-full transition-opacity duration-500 ${
-        status === 'loaded' ? 'opacity-100' : 'opacity-0'
-      }`}
+      className={`glass-panel p-4 mb-4 rounded-2xl border border-black/5 dark:border-white/5 shadow-xl w-full transition-opacity duration-500 ${status === 'loaded' ? 'opacity-100' : 'opacity-0'
+        }`}
       aria-hidden={status !== 'loaded'}
     >
       <div className="flex items-center mb-2">

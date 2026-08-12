@@ -53,6 +53,7 @@ const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export type ExtractMode = 'link' | 'photo';
 
 interface ExtractFormProps {
+  isActive?: boolean;
   url: string;
   setUrl: (url: string) => void;
   urlError: string;
@@ -72,6 +73,7 @@ interface ExtractFormProps {
 }
 
 export default function ExtractForm({
+  isActive = true,
   url,
   setUrl,
   urlError,
@@ -236,7 +238,7 @@ export default function ExtractForm({
             variant={mode === 'photo' ? 'photo' : 'link'}
           />
           {/* Freemium ad in the empty space below the animation (native only). */}
-          {!isRealPremium && <ExtractionAdCard />}
+          {!isRealPremium && <ExtractionAdCard isActive={isActive} />}
         </div>
       ) : (
         <Card className="!bg-white dark:!bg-gray-900 p-6 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">

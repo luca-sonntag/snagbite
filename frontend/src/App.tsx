@@ -39,6 +39,7 @@ import { deleteCachedImage } from './utils/imageStore';
 import { useTimerManager } from './hooks/useTimerManager';
 import { useOnboarding } from './hooks/useOnboarding';
 import { useAlphaWelcome } from './hooks/useAlphaWelcome';
+import { removeExtractionBanner } from './utils/ads';
 
 // Module-level flag to ensure the Web Share Target is only processed once per page load.
 // This prevents re-triggering the interceptor when the user's auth state or metadata updates.
@@ -333,6 +334,13 @@ export default function App() {
     sync();
     return () => { active = false; };
   }, [authLoading, user, fetchLimitStatus]);
+
+  // Remove native AdMob banner overlay whenever the user navigates away from the extract tab or opens a recipe details view
+  useEffect(() => {
+    if (activeView !== 'extract' || recipe) {
+      void removeExtractionBanner();
+    }
+  }, [activeView, recipe]);
 
   // After an interactive login, always land on the catalog (history) tab.
   // Only fires on a genuine logged-out → logged-in transition, not on the
@@ -773,6 +781,7 @@ export default function App() {
           ) : (
             /* Extraction Form & Error Banner */
             <ExtractForm
+              isActive={activeView === 'extract' && !recipe}
               url={url}
               setUrl={setUrl}
               urlError={urlError}
