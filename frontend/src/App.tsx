@@ -669,9 +669,9 @@ export default function App() {
           pinned. */}
       <div ref={setStickyTopEl} className="sticky top-0 z-40 w-full">
         {/* Status bar background filler for devices with safe-area-inset-top (e.g. Android 15 Edge-to-Edge) */}
-        <div className="w-full h-[env(safe-area-inset-top)] bg-[#064e3b]" />
+        <div className="w-full h-[var(--safe-area-inset-top)] bg-[#064e3b]" />
 
-        {activeView === 'extract' && !recipe && (
+        {activeView === 'extract' && !isPending && !recipe && (
           <header className="w-full bg-gray-50/85 dark:bg-gray-950/85 backdrop-blur-md transition-colors duration-300">
             <div className="relative w-full max-w-md mx-auto px-4 py-3 flex justify-center items-center">
               <div className="flex items-center gap-2">
@@ -695,11 +695,11 @@ export default function App() {
 
       {/* Main content body */}
       <main className={`w-full max-w-md mx-auto px-4 mt-1 flex-1 flex flex-col gap-6 ${activeView === 'admin'
-          ? 'pb-12'
-          : isViewingRecipe || activeView === 'shopping-list' || (activeView === 'history' && isCatalogSelectMode)
-            ? 'pb-48'
-            : 'pb-24'
-      } ${(!isViewingRecipe && activeView !== 'extract') ? 'pt-4' : ''}`}>
+        ? 'pb-12'
+        : isViewingRecipe || activeView === 'shopping-list' || (activeView === 'history' && isCatalogSelectMode)
+          ? 'pb-48'
+          : 'pb-24'
+        } ${(!isViewingRecipe && activeView !== 'extract') ? 'pt-4' : ''}`}>
 
         {/* One-time trial banner for free users */}
         {!(isPending && !isPremium) && <TrialBanner onOpenPremium={() => setIsPremiumModalOpen(true)} />}
@@ -712,7 +712,11 @@ export default function App() {
             scroll positions, and avoids costly re-mounts on every tab switch. */}
 
         {/* EXTRACT TAB */}
-        <div hidden={activeView !== 'extract'} aria-hidden={activeView !== 'extract' || undefined}>
+        <div
+          hidden={activeView !== 'extract'}
+          aria-hidden={activeView !== 'extract' || undefined}
+          className={activeView === 'extract' ? 'flex-1 flex flex-col min-h-0' : ''}
+        >
           {recipe ? (
             /* Recipe Detail View — hides extract inputs once extraction is done */
             <RecipeDetails

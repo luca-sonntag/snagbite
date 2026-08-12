@@ -218,19 +218,21 @@ export default function ExtractForm({
     }
   ];
 
+  const activePending = isPending || isPendingFake;
+
   return (
-    <div className={`flex flex-col gap-4 w-full ${isPending ? 'flex-1 min-h-0' : ''}`}>
+    <div className={`flex flex-col gap-4 w-full ${activePending ? 'flex-1 min-h-0' : ''}`}>
       {/* Premium Upgrade Promotion — displayed at very top */}
-      {!isPending && !hideUpgradeCard && (
+      {!isPendingFake && !hideUpgradeCard && (
         <PremiumUpgradeCard onUpgradeClick={() => setIsPremiumModalOpen(true)} />
       )}
       {errorBanner}
       {/* Input Card or Extraction Animation Card */}
-      {isPending ? (
+      {isPendingFake ? (
         <div className="flex-1 flex flex-col justify-between min-h-0 w-full gap-3">
           <ExtractionAnimation
             url={url}
-            isPending={isPending}
+            isPending={isPendingFake}
             jobStatus={jobStatus}
             progress={progress}
             variant={mode === 'photo' ? 'photo' : 'link'}
@@ -504,7 +506,7 @@ export default function ExtractForm({
       )}
 
       {/* Other cards & accordions — hidden during active extraction */}
-      {!isPending && (
+      {!isPendingFake && (
         <>
           {/* Link-only guidance: sharing a post and the per-platform help below
               have no meaning for a photo import. */}
