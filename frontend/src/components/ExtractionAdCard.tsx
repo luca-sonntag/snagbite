@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { isNative } from '../native';
 import {
@@ -11,31 +12,21 @@ import {
 /**
  * Ad slot shown in the empty space below the extraction animation.
  *
- * The AdMob plugin can't render "native advanced" ads, so we draw an app-styled
- * glass card with a small "Werbung" label and reserve a centered slot; a native
- * MEDIUM_RECTANGLE (300×250) banner is positioned as an overlay on top of that
- * slot so the whole thing reads as an integrated card rather than a floating ad.
+ * On native (Android/iOS), AdMob displays a MEDIUM_RECTANGLE (300×250) banner overlay
+ * on top of the slot.
  *
- * Rendering is gated by the parent (active extraction + non-premium user, i.e.
- * free or beta). The banner is torn down automatically when this component
- * unmounts, so the ad disappears the instant extraction finishes — keeping it
- * non-intrusive.
- *
- * The card frame is laid out (so we can measure where to place the native
- * banner) but stays invisible until a real ad actually loads — so a slow load
- * or an empty fill never leaves a blank grey box on screen. If the ad fails to
- * load, the card renders nothing at all.
- *
- * On web there is no native ad, so this renders nothing.
+ * On web (browser), a styled web ad box is rendered in the 300x250 slot,
+ * maintaining consistent layout and UX across platforms.
  */
 export default function ExtractionAdCard() {
   const { t } = useI18n();
   const slotRef = useRef<HTMLDivElement>(null);
   // Default MREC height (300×250) until the real banner reports its size.
   const [slotHeight, setSlotHeight] = useState(250);
-  const [status, setStatus] = useState<'pending' | 'loaded' | 'failed'>('pending');
-
   const native = isNative();
+  const [status, setStatus] = useState<'pending' | 'loaded' | 'failed'>(
+    native ? 'pending' : 'loaded',
+  );
 
   useEffect(() => {
     if (!native) return;
@@ -54,8 +45,8 @@ export default function ExtractionAdCard() {
       const bottomMargin = Math.max(0, Math.round(window.innerHeight - rect.bottom));
       console.log(
         `[AdMob] slot rect top=${Math.round(rect.top)} bottom=${Math.round(rect.bottom)} ` +
-          `height=${Math.round(rect.height)} innerH=${window.innerHeight} ` +
-          `marginBottom=${bottomMargin} dpr=${window.devicePixelRatio}`,
+        `height=${Math.round(rect.height)} innerH=${window.innerHeight} ` +
+        `marginBottom=${bottomMargin} dpr=${window.devicePixelRatio}`,
       );
       void showExtractionBanner(bottomMargin);
     };
@@ -92,9 +83,8 @@ export default function ExtractionAdCard() {
     };
   }, [native]);
 
-  if (!native) return null;
-  // No ad filled — don't leave an empty card behind.
-  if (status === 'failed') return null;
+  // No ad filled on native — don't leave an empty card behind.
+  if (native && status === 'failed') return null;
 
   return (
     <div
@@ -103,18 +93,66 @@ export default function ExtractionAdCard() {
       }`}
       aria-hidden={status !== 'loaded'}
     >
-      <div className="flex items-center mb-2">
+      <div className="flex items-center justify-between mb-2">
         <span className="text-[10px] font-semibold uppercase tracking-wider text-black/40 dark:text-white/40">
           {t('ads.label')}
         </span>
+        {!native && (
+          <span className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider">
+            Anzeige
+          </span>
+        )}
       </div>
-      {/* Reserved slot the native banner overlays. Sized to the 300px MREC and
-          centered so the banner lines up with it horizontally. */}
-      <div
-        ref={slotRef}
-        className="w-full max-w-[300px] mx-auto flex items-center justify-center rounded-xl bg-black/5 dark:bg-white/5"
-        style={{ minHeight: slotHeight }}
-      />
+      {native ? (
+        /* Reserved slot the native AdMob banner overlays. Sized to the 300px MREC and
+            centered so the banner lines up with it horizontally. */
+        <div
+          ref={slotRef}
+          className="w-full max-w-[300px] mx-auto flex items-center justify-center rounded-xl bg-black/5 dark:bg-white/5"
+          style={{ minHeight: slotHeight }}
+        />
+      ) : (
+        /* Web ad box fallback */
+        <div
+          ref={slotRef}
+          className="w-full max-w-[300px] h-[250px] mx-auto flex flex-col justify-between p-5 rounded-xl bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-800 text-white shadow-lg relative overflow-hidden group cursor-pointer"
+        >
+          {/* Background decorative glow */}
+          <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-emerald-400/25 rounded-full blur-xl group-hover:scale-110 transition-transform duration-500 pointer-events-none" />
+          <div className="absolute -left-6 -top-6 w-24 h-24 bg-teal-300/20 rounded-full blur-lg pointer-events-none" />
+
+          <div className="relative z-10 flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-white/15 backdrop-blur-md shrink-0">
+              <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
+            </div>
+            <div>
+              <span className="text-[10px] font-bold text-emerald-200 uppercase tracking-wider block">
+                Snagbite Pro
+              </span>
+              <h4 className="font-bold text-sm leading-snug text-white">
+                Schneller kochen ohne Wartezeit
+              </h4>
+            </div>
+          </div>
+
+          <div className="relative z-10 my-auto">
+            <p className="text-xs text-emerald-100/90 leading-relaxed">
+              Unbegrenzte KI-Rezept-Extraktionen, Offline-Modus & automatischer Einkaufszettel.
+            </p>
+          </div>
+
+          <div className="relative z-10 flex items-center justify-between pt-2.5 border-t border-white/15">
+            <span className="text-[11px] font-medium text-emerald-200">
+              7 Tage kostenlos
+            </span>
+            <div className="flex items-center gap-1 text-xs font-bold bg-white text-emerald-900 px-3 py-1.5 rounded-lg shadow-sm hover:bg-emerald-50 active:scale-95 transition-all">
+              <span>Jetzt entdecken</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
