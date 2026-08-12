@@ -87,7 +87,7 @@ export default function ExtractionAdCard() {
 
   return (
     <div
-      className={`glass-panel p-4 rounded-2xl border border-black/5 dark:border-white/5 shadow-xl w-full transition-opacity duration-500 ${
+      className={`glass-panel p-4 mb-4 rounded-2xl border border-black/5 dark:border-white/5 shadow-xl w-full transition-opacity duration-500 ${
         status === 'loaded' ? 'opacity-100' : 'opacity-0'
       }`}
       aria-hidden={status !== 'loaded'}

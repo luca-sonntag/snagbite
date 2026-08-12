@@ -218,6 +218,7 @@ export default function ExtractForm({
     }
   ];
 
+  const isPendingFake = true;
   const activePending = isPending || isPendingFake;
 
   return (
@@ -228,11 +229,11 @@ export default function ExtractForm({
       )}
       {errorBanner}
       {/* Input Card or Extraction Animation Card */}
-      {isPendingFake ? (
-        <div className="flex-1 flex flex-col justify-between min-h-0 w-full gap-3">
+      {activePending ? (
+        <div className="flex-1 flex flex-col justify-between min-h-0 w-full gap-3 pb-2">
           <ExtractionAnimation
             url={url}
-            isPending={isPendingFake}
+            isPending={activePending}
             jobStatus={jobStatus}
             progress={progress}
             variant={mode === 'photo' ? 'photo' : 'link'}
