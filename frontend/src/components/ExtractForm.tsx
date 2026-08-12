@@ -439,9 +439,21 @@ export default function ExtractForm({
               </p>
             )}
 
-            {blockedByLimit ? (
+            {cookbookFull ? (
+              <div className="flex flex-col gap-1.5 -mt-1">
+                <PremiumHint
+                  variant="banner"
+                  onClick={() => setIsPremiumModalOpen(true)}
+                  label={t('premium.hint.catalogFull', {
+                    count: limitStatus?.savedRecipes ?? 0,
+                    limit: limitStatus?.maxSavedRecipes ?? 5
+                  })}
+                  cta={t('premium.hint.upgrade')}
+                />
+              </div>
+            ) : extractionLimitReached ? (
               <div className="flex flex-col gap-2.5 -mt-1">
-                {/* Rewarded Video Ad Card for +1 Free Extraction & Recipe Slot */}
+                {/* Rewarded Video Ad Card for +1 Free Extraction */}
                 <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-teal-500/10 to-emerald-600/10 border border-emerald-500/20 dark:border-emerald-500/30 flex flex-col gap-2.5 shadow-sm">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex gap-2.5 items-center">
@@ -509,10 +521,7 @@ export default function ExtractForm({
                 <PremiumHint
                   variant="banner"
                   onClick={() => setIsPremiumModalOpen(true)}
-                  label={cookbookFull ? t('premium.hint.catalogFull', {
-                    count: limitStatus?.savedRecipes ?? 0,
-                    limit: limitStatus?.maxSavedRecipes ?? 5
-                  }) : t('premium.hint.extractionLimitReached', {
+                  label={t('premium.hint.extractionLimitReached', {
                     used: limitStatus?.used ?? 0,
                     limit: limitStatus?.limit ?? 0
                   })}

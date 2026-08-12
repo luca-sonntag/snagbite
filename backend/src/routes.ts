@@ -223,9 +223,7 @@ async function enforceExtractionQuota(req: Request): Promise<void> {
   if (!premium) {
     const savedCount = await countCompletedRecipesForUser(userId);
     const isAlpha = user?.app_metadata?.tier === 'alpha';
-    const bonus = typeof user?.app_metadata?.bonus_extractions === 'number' ? user.app_metadata.bonus_extractions : 0;
-    const baseLimit = isAlpha ? await getAlphaMaxSavedRecipes() : await getFreeMaxSavedRecipes();
-    const limit = baseLimit < 0 ? -1 : baseLimit + bonus;
+    const limit = isAlpha ? await getAlphaMaxSavedRecipes() : await getFreeMaxSavedRecipes();
     if (limit >= 0 && savedCount >= limit) {
       throw new AppError('COOKBOOK_FULL', { params: { count: savedCount, limit } });
     }
@@ -652,9 +650,9 @@ apiRouter.get('/extractions/limit', async (req: Request, res: Response): Promise
     // extract screen can proactively show a "cookbook full" state.
     const premium = isPremiumUser(user);
     const savedRecipes = await countCompletedRecipesForUser(req.userId!);
-    const bonus = typeof user?.app_metadata?.bonus_extractions === 'number' ? user.app_metadata.bonus_extractions : 0;
-    const baseMaxSaved = user?.app_metadata?.tier === 'alpha' ? await getAlphaMaxSavedRecipes() : await getFreeMaxSavedRecipes();
-    const maxSavedRecipes = premium ? -1 : (baseMaxSaved < 0 ? -1 : baseMaxSaved + bonus);
+    const maxSavedRecipes = premium
+      ? -1
+      : (user?.app_metadata?.tier === 'alpha' ? await getAlphaMaxSavedRecipes() : await getFreeMaxSavedRecipes());
     const cookbookFull = maxSavedRecipes >= 0 && savedRecipes >= maxSavedRecipes;
 
     // Concurrency budget: how many extractions may run in parallel and how many
