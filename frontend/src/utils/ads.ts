@@ -222,19 +222,23 @@ export async function showRewardedAd(): Promise<boolean> {
       failedHandle?.remove?.().catch(() => {});
     };
 
+    const EVENT_REWARDED = typeof RewardAdPluginEvents !== 'undefined' ? RewardAdPluginEvents.Rewarded : 'onRewardedVideoAdReward';
+    const EVENT_DISMISSED = typeof RewardAdPluginEvents !== 'undefined' ? RewardAdPluginEvents.Dismissed : 'onRewardedVideoAdDismissed';
+    const EVENT_FAILED_TO_SHOW = typeof RewardAdPluginEvents !== 'undefined' ? RewardAdPluginEvents.FailedToShow : 'onRewardedVideoAdFailedToShow';
+
     try {
-      rewardedHandle = await AdMob.addListener(RewardAdPluginEvents.Rewarded, (reward) => {
+      rewardedHandle = await AdMob.addListener(EVENT_REWARDED as any, (reward: unknown) => {
         console.log('[AdMob] user earned reward:', reward);
         earned = true;
       });
 
-      dismissedHandle = await AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
+      dismissedHandle = await AdMob.addListener(EVENT_DISMISSED as any, () => {
         console.log('[AdMob] rewarded ad dismissed. earned =', earned);
         cleanup();
         resolve(earned);
       });
 
-      failedHandle = await AdMob.addListener(RewardAdPluginEvents.FailedToShow, (err) => {
+      failedHandle = await AdMob.addListener(EVENT_FAILED_TO_SHOW as any, (err: unknown) => {
         console.warn('[AdMob] rewarded ad failed to show:', err);
         cleanup();
         resolve(false);
