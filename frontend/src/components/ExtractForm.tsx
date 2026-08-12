@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Card, TextField, Label, Input, Button, FieldError, Spinner, Accordion } from '@heroui/react';
-import { BookOpen, Camera, Clipboard, Globe, HelpCircle, ImagePlus, Link2, X } from 'lucide-react';
+import { BookOpen, Camera, Clipboard, Globe, HelpCircle, ImagePlus, Link2, Play, Video, X } from 'lucide-react';
 import { MAX_IMPORT_PHOTOS } from '../hooks/useRecipeExtraction';
 import { Clipboard as CapClipboard } from '@capacitor/clipboard';
 import { Capacitor } from '@capacitor/core';
@@ -14,6 +14,7 @@ import PremiumUpgradeCard from './PremiumUpgradeCard';
 import type { ProgressData } from '../types';
 import ExtractionAnimation from './ExtractionAnimation';
 import ExtractionAdCard from './ExtractionAdCard';
+import { showRewardedAd } from '../utils/ads';
 
 import { InstagramIcon, ShareStep1Mockup, ShareStep2Mockup, ShareStep3Mockup } from './ShareMockups';
 
@@ -70,6 +71,7 @@ interface ExtractFormProps {
   photos: File[];
   setPhotos: (photos: File[]) => void;
   isUploadingPhotos: boolean;
+  claimRewardedCredit?: () => Promise<boolean>;
 }
 
 export default function ExtractForm({
@@ -89,12 +91,15 @@ export default function ExtractForm({
   setMode,
   photos,
   setPhotos,
-  isUploadingPhotos
+  isUploadingPhotos,
+  claimRewardedCredit
 }: ExtractFormProps) {
   const { t } = useI18n();
   const { user, isPremium, hasTrialAvailable, trialDays, trialLoading } = useAuth();
   const { activeCount: liveActiveCount } = useExtractionJobs();
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  const [isWatchingAd, setIsWatchingAd] = useState(false);
+  const [adNotice, setAdNotice] = useState<string | null>(null);
   const [canPaste, setCanPaste] = useState(false);
   // React to TrialBanner dismissal so the upgrade card re-appears as soon
   // as the banner is closed.
@@ -447,7 +452,72 @@ export default function ExtractForm({
                 />
               </div>
             ) : extractionLimitReached ? (
-              <div className="flex flex-col gap-1.5 -mt-1">
+              <div className="flex flex-col gap-2.5 -mt-1">
+                {/* Rewarded Video Ad Card for +1 Free Extraction */}
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-teal-500/10 to-emerald-600/10 border border-emerald-500/20 dark:border-emerald-500/30 flex flex-col gap-2.5 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex gap-2.5 items-center">
+                      <div className="p-2 rounded-xl bg-emerald-500 text-white shrink-0 shadow-sm">
+                        <Video className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-xs text-gray-900 dark:text-white leading-tight">
+                          {t('ads.rewardedTitle')}
+                        </h4>
+                        <p className="text-[11px] text-gray-600 dark:text-gray-300 leading-normal mt-0.5">
+                          {t('ads.rewardedDesc')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    fullWidth
+                    isDisabled={isWatchingAd}
+                    onClick={async () => {
+                      setIsWatchingAd(true);
+                      setAdNotice(null);
+                      try {
+                        const earned = await showRewardedAd();
+                        if (earned && claimRewardedCredit) {
+                          const claimed = await claimRewardedCredit();
+                          if (claimed) {
+                            setAdNotice(t('ads.rewardedSuccess'));
+                          } else {
+                            setAdNotice(t('ads.rewardedFailed'));
+                          }
+                        } else if (!earned) {
+                          setAdNotice(t('ads.rewardedFailed'));
+                        }
+                      } catch {
+                        setAdNotice(t('ads.rewardedFailed'));
+                      } finally {
+                        setIsWatchingAd(false);
+                      }
+                    }}
+                    className="py-2.5 h-10 text-xs rounded-xl font-bold border-none text-white bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    {isWatchingAd ? (
+                      <>
+                        <Spinner color="current" size="sm" />
+                        <span>{t('ads.rewardedLoading')}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        <span>{t('ads.rewardedBtn')}</span>
+                      </>
+                    )}
+                  </Button>
+
+                  {adNotice && (
+                    <p className={`text-center text-xs font-medium ${adNotice.includes('erfolgreich') || adNotice.includes('successfully') ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
+                      {adNotice}
+                    </p>
+                  )}
+                </div>
+
                 <PremiumHint
                   variant="banner"
                   onClick={() => setIsPremiumModalOpen(true)}

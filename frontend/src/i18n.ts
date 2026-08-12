@@ -170,6 +170,12 @@ export const uiTranslations = {
   de: {
     ads: {
       label: 'Werbung',
+      rewardedTitle: 'Gratis-Extraktion freischalten',
+      rewardedDesc: 'Schau ein kurzes Video an, um sofort +1 Extraktion zu erhalten.',
+      rewardedBtn: 'Video ansehen (+1 Extraktion)',
+      rewardedLoading: 'Video wird geladen...',
+      rewardedSuccess: '+1 Extraktion erfolgreich freigeschaltet!',
+      rewardedFailed: 'Video konnte nicht geladen werden. Bitte versuche es später erneut.',
     },
     onboarding: {
       skip: 'Überspringen',
@@ -1041,6 +1047,12 @@ export const uiTranslations = {
   en: {
     ads: {
       label: 'Advertisement',
+      rewardedTitle: 'Unlock Free Extraction',
+      rewardedDesc: 'Watch a short video to instantly get +1 extraction credit.',
+      rewardedBtn: 'Watch Video (+1 Credit)',
+      rewardedLoading: 'Loading video ad...',
+      rewardedSuccess: '+1 extraction credit successfully unlocked!',
+      rewardedFailed: 'Failed to load video ad. Please try again later.',
     },
     onboarding: {
       skip: 'Skip',

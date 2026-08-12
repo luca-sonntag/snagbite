@@ -223,7 +223,8 @@ export default function App() {
     isUploadingPhotos,
     triggerPhotoExtraction,
     limitStatus,
-    fetchLimitStatus
+    fetchLimitStatus,
+    claimRewardedCredit
   } = useRecipeExtraction(getAccessToken, handleExtractionSuccess);
 
   // Which input channel the Extract tab is showing (shared link vs. own photos).
@@ -797,6 +798,7 @@ export default function App() {
               photos={photos}
               setPhotos={setPhotos}
               isUploadingPhotos={isUploadingPhotos}
+              claimRewardedCredit={claimRewardedCredit}
               errorBanner={
                 (extractionJobs.length > 0 || (jobStatus === 'failed' && jobErrorCode !== 'RATE_LIMIT_EXCEEDED')) ? (
                   <div className="flex flex-col gap-3">

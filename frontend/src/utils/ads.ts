@@ -22,10 +22,15 @@ import { isNative } from '../native';
 /** Google's public TEST banner ad unit (valid for all banner sizes incl. MREC). */
 const TEST_BANNER_AD_ID = 'ca-app-pub-3940256099942544/6300978111';
 
+/** Google's public TEST rewarded video ad unit ID. */
+const TEST_REWARDED_AD_ID = 'ca-app-pub-3940256099942544/5224354917';
+
 const CONFIGURED_BANNER_AD_ID = import.meta.env.VITE_ADMOB_BANNER_ID as string | undefined;
+const CONFIGURED_REWARDED_AD_ID = import.meta.env.VITE_ADMOB_REWARDED_ID as string | undefined;
 
 /** Real ad unit if configured, otherwise Google's test unit. */
 const BANNER_AD_ID = CONFIGURED_BANNER_AD_ID || TEST_BANNER_AD_ID;
+const REWARDED_AD_ID = CONFIGURED_REWARDED_AD_ID || TEST_REWARDED_AD_ID;
 
 /**
  * Serve test ads unless a real ad unit id is configured. Requesting live ads on
@@ -182,4 +187,72 @@ export async function addBannerLoadListener(
     loaded.remove().catch(() => {});
     failed.remove().catch(() => {});
   };
+}
+
+/**
+ * Show a Rewarded Video Ad.
+ * Returns a promise that resolves to `true` if the user successfully completed
+ * watching the video ad and earned the reward, or `false` if dismissed/failed/cancelled.
+ *
+ * In web / non-native environment, simulates a rewarded video delay (2s) and returns `true`
+ * so the feature can be tested in browser development mode.
+ */
+export async function showRewardedAd(): Promise<boolean> {
+  if (!isNative()) {
+    console.log('[AdMob] Web dev mode: simulating rewarded video ad (2s)...');
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    return true;
+  }
+
+  await initAds();
+  if (!canRequestAds) {
+    console.warn('[AdMob] cannot request ads (consent declined)');
+    return false;
+  }
+
+  return new Promise<boolean>(async (resolve) => {
+    let earned = false;
+    let rewardedHandle: any = null;
+    let dismissedHandle: any = null;
+    let failedHandle: any = null;
+
+    const cleanup = () => {
+      rewardedHandle?.remove?.().catch(() => {});
+      dismissedHandle?.remove?.().catch(() => {});
+      failedHandle?.remove?.().catch(() => {});
+    };
+
+    try {
+      rewardedHandle = await AdMob.addListener(RewardAdPluginEvents.Rewarded, (reward) => {
+        console.log('[AdMob] user earned reward:', reward);
+        earned = true;
+      });
+
+      dismissedHandle = await AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
+        console.log('[AdMob] rewarded ad dismissed. earned =', earned);
+        cleanup();
+        resolve(earned);
+      });
+
+      failedHandle = await AdMob.addListener(RewardAdPluginEvents.FailedToShow, (err) => {
+        console.warn('[AdMob] rewarded ad failed to show:', err);
+        cleanup();
+        resolve(false);
+      });
+
+      console.log('[AdMob] preparing rewarded video ad...');
+      await AdMob.prepareRewardVideoAd({
+        adId: REWARDED_AD_ID,
+        isTesting: IS_TESTING,
+        npa: !personalizedAllowed,
+      });
+
+      console.log('[AdMob] showing rewarded video ad...');
+      await AdMob.showRewardVideoAd();
+    } catch (err) {
+      console.error('[AdMob] error during rewarded ad flow:', err);
+      cleanup();
+      resolve(false);
+    }
+  });
 }
