@@ -153,7 +153,7 @@ export async function addBannerSizeListener(
   cb: (size: { width: number; height: number }) => void,
 ): Promise<() => void> {
   if (!isNative()) return () => {};
-  const handle = await AdMob.addListener(BannerAdPluginEvents.SizeChanged, (size) =>
+  const handle = await AdMob.addListener(BannerAdPluginEvents.SizeChanged, (size: { width: number; height: number }) =>
     cb({ width: size.width, height: size.height }),
   );
   return () => {
@@ -174,7 +174,7 @@ export async function addBannerLoadListener(
     console.log('[AdMob] banner loaded');
     onChange('loaded');
   });
-  const failed = await AdMob.addListener(BannerAdPluginEvents.FailedToLoad, (err) => {
+  const failed = await AdMob.addListener(BannerAdPluginEvents.FailedToLoad, (err: unknown) => {
     console.warn('[AdMob] banner failed to load:', err);
     onChange('failed');
   });
