@@ -32,7 +32,7 @@ const FUNNY_TEXTS: Record<SupportedLanguage, Record<'pending' | 'scraping' | 'pr
     scraping: [
       'Video-Küche wird durchwühlt...',
       'Video-Zutaten werden digital eingescannt...',
-      'Die Tonspur wird aus dem Video gefiltered...',
+      'Die Tonspur wird aus dem Video gefiltert...',
       'Untertitel werden entziffert...',
       'Video-Metadaten werden analysiert...',
       'Audio-Frequenzen werden glattgebügelt...',
