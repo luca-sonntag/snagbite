@@ -57,15 +57,11 @@ export default function ExtractionAdCard({
       if (cancelled || !slotRef.current || !isActive) return;
       const rect = slotRef.current.getBoundingClientRect();
 
-      // Do not attempt to position until the slot container has finished its CSS expansion transition (>35px height)
-      const minRequiredHeight = variant === 'banner' ? 35 : 150;
+      // Do not position until the container has completed its CSS expansion transition (>45px height)
+      const minRequiredHeight = variant === 'banner' ? 45 : 150;
       if (rect.height < minRequiredHeight) return;
 
       const bottomMargin = Math.max(0, Math.round(window.innerHeight - rect.bottom));
-
-      // For embedded bottom dock banner, bottomMargin MUST be above the bottom menu buttons (> 45dp)
-      // Ignore transient near-zero margin measurements during CSS expansion transitions.
-      if (embedded && bottomMargin < 45) return;
 
       const adSize = variant === 'banner' ? BannerAdSize.BANNER : BannerAdSize.MEDIUM_RECTANGLE;
       console.log(
@@ -76,7 +72,9 @@ export default function ExtractionAdCard({
       void showExtractionBanner(bottomMargin, adSize);
     };
 
-    let timerId: ReturnType<typeof setTimeout> | null = null;
+    let t1: ReturnType<typeof setTimeout> | null = null;
+    let t2: ReturnType<typeof setTimeout> | null = null;
+    let t3: ReturnType<typeof setTimeout> | null = null;
 
     (async () => {
       removeLoadListener = await addBannerLoadListener((next) => {
@@ -94,7 +92,9 @@ export default function ExtractionAdCard({
         return;
       }
       requestAnimationFrame(positionBanner);
-      timerId = setTimeout(positionBanner, 320);
+      t1 = setTimeout(positionBanner, 150);
+      t2 = setTimeout(positionBanner, 350);
+      t3 = setTimeout(positionBanner, 500);
     })();
 
     // Reposition on viewport changes (rotation / keyboard / resize) and CSS transition completion
@@ -108,7 +108,9 @@ export default function ExtractionAdCard({
 
     return () => {
       cancelled = true;
-      if (timerId) clearTimeout(timerId);
+      if (t1) clearTimeout(t1);
+      if (t2) clearTimeout(t2);
+      if (t3) clearTimeout(t3);
       window.removeEventListener('resize', onResize);
       if (parentBar) {
         parentBar.removeEventListener('transitionend', onResize);
