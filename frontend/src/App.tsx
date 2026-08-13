@@ -621,13 +621,16 @@ export default function App() {
         // Clear query parameters, strip /share pathname, and switch to extract view
         replace('extract');
         setUrl(extractedUrl);
-        triggerExtraction(extractedUrl);
+        const isBlocked = limitStatus && (limitStatus.cookbookFull || (limitStatus.limit >= 0 && limitStatus.remaining <= 0));
+        if (!isBlocked) {
+          triggerExtraction(extractedUrl);
+        }
       } else {
         // Clear query parameters anyway so they don't linger in the browser address bar
         replace(activeView);
       }
     }
-  }, [authLoading, user, replace, setUrl, triggerExtraction, activeView]);
+  }, [authLoading, user, replace, setUrl, triggerExtraction, activeView, limitStatus]);
 
   // Native (Capacitor) share intent: route a shared Instagram link into the
   // same extraction flow as the Web Share Target above.
@@ -636,9 +639,12 @@ export default function App() {
     return registerShareIntent((sharedUrl) => {
       replace('extract');
       setUrl(sharedUrl);
-      triggerExtraction(sharedUrl);
+      const isBlocked = limitStatus && (limitStatus.cookbookFull || (limitStatus.limit >= 0 && limitStatus.remaining <= 0));
+      if (!isBlocked) {
+        triggerExtraction(sharedUrl);
+      }
     });
-  }, [authLoading, user, replace, setUrl, triggerExtraction]);
+  }, [authLoading, user, replace, setUrl, triggerExtraction, limitStatus]);
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
