@@ -2054,13 +2054,28 @@ apiRouter.get('/admin/users', requireAdmin, async (req: Request, res: Response):
       throw error;
     }
 
+    // Fetch extraction counts per user from jobs table
+    const { data: jobs } = await getClient()
+      .from('jobs')
+      .select('user_id');
+
+    const countsByUser: Record<string, number> = {};
+    if (jobs) {
+      jobs.forEach((j: { user_id: string }) => {
+        if (j.user_id) {
+          countsByUser[j.user_id] = (countsByUser[j.user_id] || 0) + 1;
+        }
+      });
+    }
+
     const users = (data?.users || []).map(user => ({
       id: user.id,
       email: user.email,
       created_at: user.created_at,
       last_sign_in_at: user.last_sign_in_at,
       tier: user.app_metadata?.tier || 'free',
-      custom_limit: user.app_metadata?.custom_extraction_limit ?? user.app_metadata?.max_extractions_per_window ?? null
+      custom_limit: user.app_metadata?.custom_extraction_limit ?? user.app_metadata?.max_extractions_per_window ?? null,
+      extractions_count: countsByUser[user.id] || 0,
     }));
 
     res.json({ success: true, users });

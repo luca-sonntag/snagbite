@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local env overrides (points builds at dev backend; must not ship)
+.env.production
