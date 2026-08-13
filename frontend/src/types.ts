@@ -225,6 +225,7 @@ export interface FriendRequest {
 }
 
 export type LeaderboardWindow = 'weekly' | 'all';
+export type LeaderboardScope = 'friends' | 'global';
 
 export interface LeaderboardEntry {
   rank: number;
@@ -234,6 +235,8 @@ export interface LeaderboardEntry {
   level: number;
   value: number;
   isMe: boolean;
+  friendshipStatus?: 'none' | 'pending_sent' | 'pending_received' | 'friends' | 'self';
+  friendshipId?: string;
 }
 
 

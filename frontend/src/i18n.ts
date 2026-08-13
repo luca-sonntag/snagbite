@@ -358,8 +358,16 @@ export const uiTranslations = {
         leaderboard: {
           weekly: 'Diese Woche',
           allTime: 'Gesamt',
+          scopeFriends: 'Freunde',
+          scopeGlobal: 'Global',
           you: 'Du',
           empty: 'Füge Freunde hinzu, um euch zu messen.',
+          emptyGlobal: 'Noch keine Einträge im globalen Leaderboard.',
+          addFriend: '+ Freund',
+          requested: 'Angefragt',
+          friends: 'Freunde',
+          accept: 'Annehmen',
+          requestSuccess: 'Freundschaftsanfrage gesendet!',
         },
         friends: {
           yourCode: 'Dein Freundescode',
@@ -1268,8 +1276,16 @@ export const uiTranslations = {
         leaderboard: {
           weekly: 'This week',
           allTime: 'All time',
+          scopeFriends: 'Friends',
+          scopeGlobal: 'Global',
           you: 'You',
           empty: 'Add friends to compete.',
+          emptyGlobal: 'No entries in the global leaderboard yet.',
+          addFriend: '+ Add',
+          requested: 'Requested',
+          friends: 'Friends',
+          accept: 'Accept',
+          requestSuccess: 'Friend request sent!',
         },
         friends: {
           yourCode: 'Your friend code',

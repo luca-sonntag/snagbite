@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { apiUrl } from '../api';
 import { useAuth } from './AuthContext';
-import type { Profile, FriendSummary, FriendRequest, LeaderboardEntry, LeaderboardWindow } from '../types';
+import type { Profile, FriendSummary, FriendRequest, LeaderboardEntry, LeaderboardWindow, LeaderboardScope } from '../types';
 
 /** Error carrying the backend error `code` so the UI can localize it. */
 export class SocialError extends Error {
@@ -22,9 +22,11 @@ interface SocialState {
   updateDisplayName: (name: string) => Promise<void>;
   /** Send a friend request by code. Returns 'pending' or 'accepted'. Throws SocialError. */
   sendRequest: (code: string) => Promise<'pending' | 'accepted'>;
+  /** Send a friend request directly by user ID (from global leaderboard). */
+  sendRequestByUserId: (targetUserId: string) => Promise<'pending' | 'accepted'>;
   respondRequest: (friendshipId: string, accept: boolean) => Promise<void>;
   removeFriend: (friendshipId: string) => Promise<void>;
-  fetchLeaderboard: (window: LeaderboardWindow) => Promise<LeaderboardEntry[]>;
+  fetchLeaderboard: (window: LeaderboardWindow, scope?: LeaderboardScope) => Promise<LeaderboardEntry[]>;
 }
 
 const SocialContext = createContext<SocialState | undefined>(undefined);
@@ -115,6 +117,18 @@ export function SocialProvider({ children }: { children: React.ReactNode }) {
     [authedFetch, refreshFriends],
   );
 
+  const sendRequestByUserId = useCallback(
+    async (targetUserId: string): Promise<'pending' | 'accepted'> => {
+      const data = await authedFetch('/api/friends/request', {
+        method: 'POST',
+        body: JSON.stringify({ targetUserId }),
+      });
+      await refreshFriends();
+      return data.status;
+    },
+    [authedFetch, refreshFriends],
+  );
+
   const respondRequest = useCallback(
     async (friendshipId: string, accept: boolean) => {
       await authedFetch(`/api/friends/${friendshipId}/respond`, {
@@ -135,8 +149,8 @@ export function SocialProvider({ children }: { children: React.ReactNode }) {
   );
 
   const fetchLeaderboard = useCallback(
-    async (window: LeaderboardWindow): Promise<LeaderboardEntry[]> => {
-      const data = await authedFetch(`/api/leaderboard?window=${window}`);
+    async (window: LeaderboardWindow, scope: LeaderboardScope = 'friends'): Promise<LeaderboardEntry[]> => {
+      const data = await authedFetch(`/api/leaderboard?window=${window}&scope=${scope}`);
       return data.entries ?? [];
     },
     [authedFetch],
@@ -153,6 +167,7 @@ export function SocialProvider({ children }: { children: React.ReactNode }) {
         refreshFriends,
         updateDisplayName,
         sendRequest,
+        sendRequestByUserId,
         respondRequest,
         removeFriend,
         fetchLeaderboard,
