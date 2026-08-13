@@ -46,6 +46,7 @@ export default function ExtractionAdCard({
       void removeExtractionBanner();
       return;
     }
+    setStatus('pending');
     const slot = slotRef.current;
     if (!slot) return;
 
