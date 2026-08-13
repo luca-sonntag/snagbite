@@ -1,5 +1,7 @@
-import { Button, Card, Accordion } from "@heroui/react";
-import { ArrowRight, Smartphone, ChefHat, HeartPulse, Clock, Utensils, HelpCircle } from "lucide-react";
+import { Card, Accordion } from "@heroui/react";
+import { ArrowRight, Smartphone, ChefHat, HeartPulse, Clock, Utensils, HelpCircle, Download } from "lucide-react";
+
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=at.snagbite.app';
 
 // --- Mockup Components from the App ---
 
@@ -150,11 +152,14 @@ export default function LandingPage() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <Button 
-              className="w-full sm:w-auto font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-500/25 px-8 h-12"
+            <a 
+              href={PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-500/25 px-8 h-12 rounded-xl inline-flex items-center justify-center transition-all hover:scale-[1.02] cursor-pointer"
             >
               App herunterladen <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+            </a>
             
             <a 
               href="#how-it-works"
@@ -365,6 +370,30 @@ export default function LandingPage() {
         </Accordion>
       </section>
       
+      {/* Bottom CTA Banner */}
+      <section className="relative rounded-3xl p-8 sm:p-12 overflow-hidden bg-gradient-to-tr from-emerald-900/20 via-emerald-800/10 to-teal-900/20 border border-emerald-500/20 shadow-xl flex flex-col items-center text-center gap-6">
+        <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+          <ChefHat className="w-8 h-8" />
+        </div>
+        <div className="max-w-md">
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2 text-gray-900 dark:text-white">
+            Bereit für dein nächstes Gericht?
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            Hol dir Snagbite jetzt kostenlos im Google Play Store und verwandle Rezept-Videos in strukturierte Kochrezepte.
+          </p>
+        </div>
+        <a 
+          href={PLAY_STORE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 px-8 h-12 rounded-xl inline-flex items-center justify-center gap-2 transition-all hover:scale-[1.02] cursor-pointer"
+        >
+          <Download className="w-4 h-4" />
+          Im Google Play Store laden
+        </a>
+      </section>
+
       <div className="h-4"></div>
     </div>
   );
