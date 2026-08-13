@@ -714,7 +714,7 @@ export default function App() {
         ? 'pb-12'
         : isViewingRecipe || activeView === 'shopping-list' || (activeView === 'history' && isCatalogSelectMode)
           ? 'pb-48'
-          : activeView === 'history' && !isPremium
+          : activeView === 'history' && !selectedJob && !isPremium
             ? 'pb-44'
             : 'pb-24'
         } ${(!isViewingRecipe && activeView !== 'extract') ? 'pt-4' : ''}`}>
@@ -906,10 +906,10 @@ export default function App() {
 
         return (
           <div className={bottomBarClasses}>
-            {/* Banner ad displayed statically above bottom menu when on recipe history for free users */}
-            {activeView === 'history' && !isPremium && (
+            {/* Banner ad displayed statically above bottom menu only in recipe history (catalog view) for free users */}
+            {activeView === 'history' && !selectedJob && !isPremium && (
               <div className="w-full max-w-md mx-auto px-3 mb-2">
-                <ExtractionAdCard isActive={activeView === 'history' && !isBottomBarHidden} variant="banner" />
+                <ExtractionAdCard isActive={activeView === 'history' && !selectedJob && !isBottomBarHidden} variant="banner" />
               </div>
             )}
 
