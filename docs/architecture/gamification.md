@@ -99,9 +99,10 @@ Gamification-Provider. Der „Fortschritt"-Tab ist ein Container mit Segmented-N
 **Übersicht | Rangliste | Freunde** (kein neuer Bottom-Tab): `ProgressOverview`,
 `Social/LeaderboardView` (Woche/Gesamt), `Social/FriendsView` (Profilkarte +
 teilbarer Freundescode, per-Code hinzufügen, Anfragen, Liste), `Social/Avatar`.
-Einladung: teilbarer Code + Web-Hash-Route `#/invite/<code>` (in `useHashRouter`;
-`App.tsx` leitet auf den Freunde-Tab um und füllt vor). **Native https-Deeplinks**
-bleiben späterer Ausbau.
+Einladung: teilbarer Freundescode + HTTPS-URL `https://snagbite.app/invite/<code>` sowie Custom Scheme `snagbite://invite/<code>`.
+- **Deep Linking & App Links:** Android App Links via `/.well-known/assetlinks.json` (SHA-256 Fingerprints hinterlegt) und Custom Schemes (`snagbite://`, `at.snagbite.app://`) in `AndroidManifest.xml`.
+- **Native Routing:** `native.ts` lauscht auf Cold-Start (`App.getLaunchUrl()`) und Warm-Start (`App.addListener('appUrlOpen')`). `App.tsx` & `useHashRouter` werten den Code aus und navigieren direkt in den Freunde-Tab (`FriendsView`) mit Auto-Submit.
+- **Web Landingpage:** `website` stellt unter `/invite/:code` eine Landingpage bereit, die die native App per Intent / Custom Scheme aufruft, den Code anzeigt und Download-Links zum Google Play Store anbietet.
 
-**Freigehalten:** globale/Liga-Ranglisten (verified-only via `leaderboard_eligible`),
-native Deeplinks, Blockieren/Melden.
+**Freigehalten:** globale/Liga-Ranglisten (verified-only via `leaderboard_eligible`), Blockieren/Melden.
+
