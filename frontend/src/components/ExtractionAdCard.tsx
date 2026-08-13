@@ -67,9 +67,6 @@ export default function ExtractionAdCard({
       void showExtractionBanner(bottomMargin, adSize);
     };
 
-    let timerId: ReturnType<typeof setTimeout> | null = null;
-    let timerId2: ReturnType<typeof setTimeout> | null = null;
-
     (async () => {
       removeLoadListener = await addBannerLoadListener((next) => {
         if (cancelled) return;
@@ -85,29 +82,16 @@ export default function ExtractionAdCard({
         removeSizeListener?.();
         return;
       }
-      // Measure immediately and after CSS animations settle (e.g. bottom bar slide-up transition)
       requestAnimationFrame(positionBanner);
-      timerId = setTimeout(positionBanner, 150);
-      timerId2 = setTimeout(positionBanner, 350);
     })();
 
-    // Reposition on viewport changes (rotation / keyboard / resize) and transition end
+    // Reposition on viewport changes (rotation / keyboard / resize)
     const onResize = () => requestAnimationFrame(positionBanner);
     window.addEventListener('resize', onResize);
 
-    const parentBar = slot.closest('.fixed') || slot.parentElement;
-    if (parentBar) {
-      parentBar.addEventListener('transitionend', onResize);
-    }
-
     return () => {
       cancelled = true;
-      if (timerId) clearTimeout(timerId);
-      if (timerId2) clearTimeout(timerId2);
       window.removeEventListener('resize', onResize);
-      if (parentBar) {
-        parentBar.removeEventListener('transitionend', onResize);
-      }
       removeLoadListener?.();
       removeSizeListener?.();
       void removeExtractionBanner();

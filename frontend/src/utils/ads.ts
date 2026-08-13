@@ -46,10 +46,8 @@ let initPromise: Promise<void> | null = null;
 let canRequestAds = true;
 /** Whether the user consented to personalized ads; otherwise we request npa. */
 let personalizedAllowed = true;
-/** Track whether a banner is currently on screen so we can reposition cleanly. */
+/** Track whether a banner is currently on screen. */
 let bannerShown = false;
-let lastMargin: number | null = null;
-let lastSize: BannerAdSize | null = null;
 
 /**
  * Initialize the AdMob SDK once and run the EU consent (UMP) flow. Idempotent
@@ -109,24 +107,10 @@ export async function showExtractionBanner(
   await initAds();
   if (!canRequestAds) return;
 
+  // If a banner is already active on screen, keep it active without recreating it.
+  if (bannerShown) return;
+
   const margin = Math.max(0, Math.round(bottomMarginDp));
-
-  // If an active banner of the exact same size is already showing at roughly the same position (within 20dp tolerance),
-  // do not destroy and re-fetch. This keeps the ad perfectly stable during tab navigation across views.
-  const isMarginSimilar = lastMargin !== null && Math.abs(lastMargin - margin) <= 20;
-  if (bannerShown && isMarginSimilar && lastSize === size) {
-    return;
-  }
-
-  // Remove previous banner if margin actually changed significantly (e.g. keyboard open / screen rotation)
-  if (bannerShown) {
-    try {
-      await AdMob.removeBanner();
-    } catch {
-      /* nothing to remove */
-    }
-    bannerShown = false;
-  }
 
   try {
     await AdMob.showBanner({
@@ -138,8 +122,6 @@ export async function showExtractionBanner(
       npa: !personalizedAllowed,
     });
     bannerShown = true;
-    lastMargin = margin;
-    lastSize = size;
     console.log(
       `[AdMob] showBanner requested (BOTTOM_CENTER, size=${size}, margin=${margin}, ` +
         `testing=${IS_TESTING}, npa=${!personalizedAllowed})`,
@@ -158,8 +140,6 @@ export async function removeExtractionBanner(): Promise<void> {
     /* nothing to remove */
   }
   bannerShown = false;
-  lastMargin = null;
-  lastSize = null;
 }
 
 /**
