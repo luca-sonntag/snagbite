@@ -227,8 +227,8 @@ export default function ExtractForm({
 
   return (
     <div className={`flex flex-col gap-4 w-full ${isPending ? 'flex-1 min-h-0' : ''}`}>
-      {/* Premium Upgrade Promotion — displayed at very top */}
-      {!isPending && !hideUpgradeCard && (
+      {/* Premium Upgrade Promotion — displayed at very top (only when no contextual limit banner is shown) */}
+      {!isPending && !hideUpgradeCard && !blockedByLimit && (
         <PremiumUpgradeCard onUpgradeClick={() => setIsPremiumModalOpen(true)} />
       )}
       {errorBanner}
@@ -400,34 +400,94 @@ export default function ExtractForm({
               </TextField>
             )}
 
-            <Button
-              type="submit"
-              fullWidth
-              isPending={isPending || isUploadingPhotos}
-              isDisabled={submitDisabled}
-              className={`py-3.5 h-12 text-sm rounded-2xl font-semibold border-none text-white ${submitDisabled
-                ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed opacity-70 shadow-none'
-                : isPending
-                  ? 'bg-emerald-800 shadow-none'
-                  : 'bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition-all shadow-none'
-                }`}
-            >
-              {({ isPending }) => (
-                <span className="flex items-center gap-2 justify-center">
-                  {isPending ? (
+            {extractionLimitReached && !cookbookFull ? (
+              <div className="flex flex-col gap-2">
+                <Button
+                  type="button"
+                  fullWidth
+                  isDisabled={isWatchingAd || isPending}
+                  onClick={async () => {
+                    setIsWatchingAd(true);
+                    setAdNotice(null);
+                    try {
+                      const earned = await showRewardedAd();
+                      if (earned && claimRewardedCredit) {
+                        const claimed = await claimRewardedCredit();
+                        if (claimed) {
+                          setAdNotice(t('ads.rewardedSuccess'));
+                          if (url.trim() || photos.length > 0) {
+                            setTimeout(() => {
+                              const form = document.querySelector('form');
+                              if (form) form.requestSubmit();
+                            }, 100);
+                          }
+                        } else {
+                          setAdNotice(t('ads.rewardedFailed'));
+                        }
+                      } else if (!earned) {
+                        setAdNotice(t('ads.rewardedFailed'));
+                      }
+                    } catch {
+                      setAdNotice(t('ads.rewardedFailed'));
+                    } finally {
+                      setIsWatchingAd(false);
+                    }
+                  }}
+                  className="py-3.5 h-12 text-sm rounded-2xl font-bold border-none text-white bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 active:scale-95 transition-all shadow-none flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {isWatchingAd ? (
                     <>
                       <Spinner color="current" size="sm" />
-                      <span>{isUploadingPhotos ? t('form.photo.btnUploading') : t('form.btnPending')}</span>
+                      <span>{t('ads.rewardedLoading')}</span>
                     </>
                   ) : (
                     <>
-                      <BookOpen className="w-4 h-4" />
-                      <span>{t('form.btnSubmit')}</span>
+                      <Play className="w-4 h-4 fill-current" />
+                      <span>
+                        {(url.trim() || photos.length > 0)
+                          ? 'Video ansehen & Rezept erstellen (+1)'
+                          : 'Video ansehen (+1 Rezept)'}
+                      </span>
                     </>
                   )}
-                </span>
-              )}
-            </Button>
+                </Button>
+
+                {adNotice && (
+                  <p className={`text-center text-xs font-semibold ${adNotice.includes('erfolgreich') || adNotice.includes('successfully') ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'}`}>
+                    {adNotice}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <Button
+                type="submit"
+                fullWidth
+                isPending={isPending || isUploadingPhotos}
+                isDisabled={submitDisabled}
+                className={`py-3.5 h-12 text-sm rounded-2xl font-semibold border-none text-white ${submitDisabled
+                  ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed opacity-70 shadow-none'
+                  : isPending
+                    ? 'bg-emerald-800 shadow-none'
+                    : 'bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition-all shadow-none'
+                  }`}
+              >
+                {({ isPending }) => (
+                  <span className="flex items-center gap-2 justify-center">
+                    {isPending ? (
+                      <>
+                        <Spinner color="current" size="sm" />
+                        <span>{isUploadingPhotos ? t('form.photo.btnUploading') : t('form.btnPending')}</span>
+                      </>
+                    ) : (
+                      <>
+                        <BookOpen className="w-4 h-4" />
+                        <span>{t('form.btnSubmit')}</span>
+                      </>
+                    )}
+                  </span>
+                )}
+              </Button>
+            )}
 
             {/* Premium parallel-extraction counter — how many run at once. */}
             {showConcurrency && (liveActiveCount > 0 || atConcurrencyLimit) && (
@@ -439,100 +499,29 @@ export default function ExtractForm({
               </p>
             )}
 
-            {blockedByLimit ? (
+            {cookbookFull ? (
               <div className="flex flex-col gap-2.5 -mt-1">
-                {/* Rewarded Video Ad Card for +1 Free Extraction (shown whenever daily extractions limit is reached) */}
-                {extractionLimitReached && (
-                  <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-teal-500/10 to-emerald-600/10 border border-emerald-500/20 dark:border-emerald-500/30 flex flex-col gap-2.5 shadow-sm">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex gap-2.5 items-center">
-                        <div className="p-2 rounded-xl bg-emerald-500 text-white shrink-0 shadow-sm">
-                          <Video className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-xs text-gray-900 dark:text-white leading-tight">
-                            {t('ads.rewardedTitle')}
-                          </h4>
-                          <p className="text-[11px] text-gray-600 dark:text-gray-300 leading-normal mt-0.5">
-                            {t('ads.rewardedDesc')}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <Button
-                      type="button"
-                      fullWidth
-                      isDisabled={isWatchingAd}
-                      onClick={async () => {
-                        setIsWatchingAd(true);
-                        setAdNotice(null);
-                        try {
-                          const earned = await showRewardedAd();
-                          if (earned && claimRewardedCredit) {
-                            const claimed = await claimRewardedCredit();
-                            if (claimed) {
-                              setAdNotice(t('ads.rewardedSuccess'));
-                            } else {
-                              setAdNotice(t('ads.rewardedFailed'));
-                            }
-                          } else if (!earned) {
-                            setAdNotice(t('ads.rewardedFailed'));
-                          }
-                        } catch {
-                          setAdNotice(t('ads.rewardedFailed'));
-                        } finally {
-                          setIsWatchingAd(false);
-                        }
-                      }}
-                      className="py-2.5 h-10 text-xs rounded-xl font-bold border-none text-white bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      {isWatchingAd ? (
-                        <>
-                          <Spinner color="current" size="sm" />
-                          <span>{t('ads.rewardedLoading')}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Play className="w-3.5 h-3.5 fill-current" />
-                          <span>{t('ads.rewardedBtn')}</span>
-                        </>
-                      )}
-                    </Button>
-
-                    {adNotice && (
-                      <p className={`text-center text-xs font-medium ${adNotice.includes('erfolgreich') || adNotice.includes('successfully') ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
-                        {adNotice}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* Cookbook Full Banner */}
-                {cookbookFull && (
-                  <PremiumHint
-                    variant="banner"
-                    onClick={() => setIsPremiumModalOpen(true)}
-                    label={t('premium.hint.catalogFull', {
-                      count: limitStatus?.savedRecipes ?? 0,
-                      limit: limitStatus?.maxSavedRecipes ?? 5
-                    })}
-                    cta={t('premium.hint.upgrade')}
-                  />
-                )}
-
-                {/* Extraction Limit Reached Banner (when cookbook is not full) */}
-                {extractionLimitReached && !cookbookFull && (
-                  <PremiumHint
-                    variant="banner"
-                    onClick={() => setIsPremiumModalOpen(true)}
-                    label={t('premium.hint.extractionLimitReached', {
-                      used: limitStatus?.used ?? 0,
-                      limit: limitStatus?.limit ?? 0
-                    })}
-                    cta={t('premium.hint.upgrade')}
-                  />
-                )}
+                <PremiumHint
+                  variant="banner"
+                  onClick={() => setIsPremiumModalOpen(true)}
+                  label={t('premium.hint.catalogFull', {
+                    count: limitStatus?.savedRecipes ?? 0,
+                    limit: limitStatus?.maxSavedRecipes ?? 5
+                  })}
+                  cta={t('premium.hint.upgrade')}
+                />
+              </div>
+            ) : extractionLimitReached ? (
+              <div className="flex flex-col gap-2.5 -mt-1">
+                <PremiumHint
+                  variant="banner"
+                  onClick={() => setIsPremiumModalOpen(true)}
+                  label={t('premium.hint.extractionLimitReached', {
+                    used: limitStatus?.used ?? 0,
+                    limit: limitStatus?.limit ?? 0
+                  })}
+                  cta={t('premium.hint.upgrade')}
+                />
               </div>
             ) : limitStatus && limitStatus.limit >= 0 ? (
               <div className="flex flex-col items-center gap-1.5 -mt-1">
