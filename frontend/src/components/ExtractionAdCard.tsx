@@ -56,14 +56,22 @@ export default function ExtractionAdCard({
       void hideExtractionBanner();
       return;
     }
-    void resumeExtractionBanner();
+
+    // Delay un-hiding native banner until bottom bar 300ms CSS slide-up transition completes
+    const resumeTimer = setTimeout(() => {
+      void resumeExtractionBanner();
+    }, 300);
+
     if (!isAdLoaded()) {
       setStatus('pending');
     } else {
       setStatus('loaded');
     }
+
     const slot = slotRef.current;
-    if (!slot) return;
+    if (!slot) {
+      return () => clearTimeout(resumeTimer);
+    }
 
     let cancelled = false;
     let removeSizeListener: (() => void) | null = null;
@@ -124,6 +132,7 @@ export default function ExtractionAdCard({
 
     return () => {
       cancelled = true;
+      clearTimeout(resumeTimer);
       if (timerId) clearTimeout(timerId);
       window.removeEventListener('resize', onResize);
       if (parentBar) {
