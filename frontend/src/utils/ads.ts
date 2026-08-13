@@ -26,8 +26,12 @@ const TEST_BANNER_AD_ID = 'ca-app-pub-3940256099942544/6300978111';
 /** Google's public TEST rewarded video ad unit ID. */
 const TEST_REWARDED_AD_ID = 'ca-app-pub-3940256099942544/5224354917';
 
-const CONFIGURED_BANNER_AD_ID = import.meta.env.VITE_ADMOB_BANNER_ID as string | undefined;
-const CONFIGURED_REWARDED_AD_ID = import.meta.env.VITE_ADMOB_REWARDED_ID as string | undefined;
+/** Production AdMob Ad Unit IDs */
+const PROD_BANNER_AD_ID = 'ca-app-pub-4240071009231066/2224290300';
+const PROD_REWARDED_AD_ID = 'ca-app-pub-4240071009231066/6605604621';
+
+const CONFIGURED_BANNER_AD_ID = (import.meta.env.VITE_ADMOB_BANNER_ID as string | undefined) || (import.meta.env.PROD ? PROD_BANNER_AD_ID : undefined);
+const CONFIGURED_REWARDED_AD_ID = (import.meta.env.VITE_ADMOB_REWARDED_ID as string | undefined) || (import.meta.env.PROD ? PROD_REWARDED_AD_ID : undefined);
 
 /** Real ad unit if configured, otherwise Google's test unit. */
 const BANNER_AD_ID = CONFIGURED_BANNER_AD_ID || TEST_BANNER_AD_ID;
