@@ -919,7 +919,8 @@ export default function App() {
               {/* Banner ad displayed seamlessly attached to top of bottom menu for free users */}
               <div className={`w-full pt-2 pb-1.5 px-3 border-b border-gray-100/60 dark:border-gray-800/60 flex flex-col items-center justify-center ${shouldShowBannerAd ? '' : 'hidden'}`}>
                 <ExtractionAdCard
-                  isActive={shouldShowBannerAd && !isBottomBarHidden}
+                  isActive={shouldShowBannerAd}
+                  hidden={isBottomBarHidden}
                   variant="banner"
                   embedded
                   onStatusChange={setAdStatus}

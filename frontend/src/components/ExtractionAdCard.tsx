@@ -6,6 +6,8 @@ import { isNative } from '../native';
 import {
   showAdBanner,
   removeAdBanner,
+  hideAdBanner,
+  resumeAdBanner,
   addBannerSizeListener,
   addBannerLoadListener,
   isAdLoaded,
@@ -19,6 +21,13 @@ import {
  */
 interface ExtractionAdCardProps {
   isActive?: boolean;
+  /**
+   * Temporarily hide the native banner without destroying it (e.g. while the
+   * bottom bar is slid away by an overlay, select mode, or a running extraction).
+   * Drives hideBanner/resumeBanner so the ad is preserved in memory and resumed
+   * cleanly instead of being reloaded.
+   */
+  hidden?: boolean;
   variant?: 'mrec' | 'banner';
   embedded?: boolean;
   onStatusChange?: (status: 'pending' | 'loaded' | 'failed') => void;
@@ -26,6 +35,7 @@ interface ExtractionAdCardProps {
 
 export default function ExtractionAdCard({
   isActive = true,
+  hidden = false,
   variant = 'mrec',
   embedded = false,
   onStatusChange,
@@ -132,6 +142,18 @@ export default function ExtractionAdCard({
       removeSizeListener?.();
     };
   }, [native, isActive, variant]);
+
+  // Temporarily hide/resume the banner (without destroying it) while `hidden`
+  // toggles — e.g. an overlay opened, select mode, or an extraction is running.
+  // Keeps the loaded ad in memory so it resumes cleanly instead of reloading.
+  useEffect(() => {
+    if (!native || !isActive) return;
+    if (hidden) {
+      void hideAdBanner();
+    } else {
+      void resumeAdBanner();
+    }
+  }, [native, isActive, hidden]);
 
   // Only destroy the native AdMob banner when the component actually unmounts on page exit
   useEffect(() => {
