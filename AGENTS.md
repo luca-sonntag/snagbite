@@ -24,6 +24,7 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
    * Admin-Bereich (`/api/admin/*`), RLS-Bypass, Metriken & Failed Jobs Drilldown
    * Security Hardening (Helmet, Rate Limits, CORS) & Health Check (`/health`)
    * Rolling Timeframe Rate Limiting & Subscription Tiers (`free`, `premium`, `alpha`)
+   * Rewarded Video Ad Credits (`app_metadata.bonus_credits`, `POST /api/me/rewarded-ad-claimed`, Quota-Verrechnung)
    * Health Check & Push Monitoring (`healthcheck/`, ntfy.sh / Telegram)
 
 3. 🤖 [**KI-Layer (Google Gemini Integration)**](file:///c:/Users/lucas/source/repos/cookbook/docs/architecture/ai-gemini.md)
@@ -34,17 +35,18 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
 
 4. 🎨 [**Frontend-Layer (React 19 & HeroUI v3)**](file:///c:/Users/lucas/source/repos/cookbook/docs/architecture/frontend.md)
    * React 19, HeroUI v3, Tailwind CSS v4 PWA & Capacitor Android-App Shell
-   * Centralized Contexts (`AuthContext`, `DialogContext`, `I18nContext`) & App-weite Hooks
+   * Centralized Contexts (`AuthContext`, `DialogContext`, `I18nContext`, `OverlayStackContext`) & App-weite Hooks
    * Error-Code Registry (`errorCodes.ts`) & Lokalisierung (DE/EN)
    * 3-Ebenen-Katalog (`CookbookHome`, List-Ebene mit Facetten-Filtern, Detail-Ansicht)
    * Client-seitiges Image Caching (IndexedDB `recipe-image-cache` + `/api/image` Proxy)
    * In-App Koch-Timer (`TimerContext`, `TimerBanner`, `TimerConfirmSheet`) & Share Target Integration
    * In-App Bug-Reports & Feedback (`FeedbackDrawer.tsx` & Console Ring Buffer)
+   * AdMob Monetarisierung (Bottom-Dock `BANNER`, MREC `ExtractionAdCard`, Rewarded Video Ads, UMP Consent, Patched Plugin)
 
 5. 🚀 [**Deployment, Play Store & OTA Updates**](file:///c:/Users/lucas/source/repos/cookbook/docs/architecture/deployment-and-ota.md)
    * Play Store Build Pipeline (Fastlane in Docker, `version.properties`, `release.ps1`, `deploy-playstore.ps1`)
    * Self-Hosted Capgo OTA Live Updates (`@capgo/capacitor-updater`, Supabase `app_bundles`, Rollback-Strategien)
-   * Gradle `reversePorts` Task & Splash Screen Hang Diagnosen
+   * Gradle `reversePorts` Task, AdMob App-ID Setup & Splash Screen Hang Diagnosen
 
 6. 🎮 [**Gamification (Koch-Belohnungen, XP, Streaks)**](file:///c:/Users/lucas/source/repos/cookbook/docs/architecture/gamification.md)
    * `cook_events` / `point_ledger` / `user_stats` / `user_badges` & `cook-photos` Bucket
@@ -62,3 +64,4 @@ Dieses Projekt analysiert Rezept-Reels (Instagram, TikTok, YouTube Shorts, Websi
 3. **Queue & Processing:** Worker claimt Job atomar (`claim_next_job`), führt Scraping/Downloader oder Photo-Fetch durch, baut Video-Grid und ruft Gemini Multimodal API auf.
 4. **Structured Recipe Output:** Gemini liefert standardisierte Zutaten, Supermarktkategorien, Nährwerte per Portion und Schritte.
 5. **Dashboard & PWA:** Interaktive Checklisten, Portionsrechner, In-App Timers, 3-Ebenen-Katalog mit Sammlungen/Labels, Einkaufsliste, Offline-Bildercache & Recipe Copilot Chat.
+6. **Monetarisierung & Freemium:** AdMob Banner-Integration (Bottom Dock & MREC), Rewarded Video Ads für Extraktions-Aufstockung (+1 Credit) und RevenueCat In-App Purchases für das werbefreie Premium-Abonnement.
