@@ -1,0 +1,18 @@
+diff --git a/node_modules/@capacitor-community/admob/android/src/main/java/com/getcapacitor/community/admob/banner/BannerExecutor.java b/node_modules/@capacitor-community/admob/android/src/main/java/com/getcapacitor/community/admob/banner/BannerExecutor.java
+index c629139..9a23565 100644
+--- a/node_modules/@capacitor-community/admob/android/src/main/java/com/getcapacitor/community/admob/banner/BannerExecutor.java
++++ b/node_modules/@capacitor-community/admob/android/src/main/java/com/getcapacitor/community/admob/banner/BannerExecutor.java
+@@ -226,8 +226,12 @@ public class BannerExecutor extends Executor {
+         activitySupplier
+             .get()
+             .runOnUiThread(() -> {
+-                final AdRequest adRequest = RequestHelper.createRequest(adOptions);
+-                mAdView.loadAd(adRequest);
++                if (mAdViewLayout != null) {
++                    mAdViewLayout.setVisibility(View.VISIBLE);
++                    if (mAdView != null) {
++                        mAdView.resume();
++                    }
++                }
+             });
+     }
