@@ -500,7 +500,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
   }, [getAccessToken, fetchLimitStatus]);
 
   return {
-    isPending: isPending || false,
+    isPending: isPending || true,
     jobStatus,
     jobError,
     jobErrorCode,

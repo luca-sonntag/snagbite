@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Card } from '@heroui/react';
 import { Camera, ChefHat, Video } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
@@ -314,30 +315,30 @@ export default function ExtractionAnimation({ url: _url, jobStatus, progress, va
   };
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col items-center justify-center w-full text-center px-4 py-2 gap-3 transition-all duration-300">
-      {/* Infographic Area */}
-      <div className="flex items-center justify-center w-full py-4">
+    <Card className="!bg-white dark:!bg-gray-900 p-6 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col items-center w-full gap-5">
+      {/* Infographic Visual Area */}
+      <div className="flex items-center justify-center w-full py-2 min-h-[120px]">
         <div key={displayedIndex} className="animate-fade-in flex flex-col items-center justify-center w-full">
           {renderInfographic(displayedStage)}
         </div>
       </div>
 
       {/* Progress & Status Area */}
-      <div className="flex flex-col gap-4 w-full max-w-xs">
+      <div className="flex flex-col gap-3 w-full">
         {/* Stage details */}
         <div className="flex justify-between items-center text-xs font-semibold">
-          <span className="text-gray-950 dark:text-white/95 tracking-wide uppercase">
+          <span className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">
             {t(`job.progress.stages.${displayedStage}`)}
           </span>
-          <span className="text-emerald-600 dark:text-emerald-400 tabular-nums">
+          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
             {percent}%
           </span>
         </div>
 
-        {/* Progress Bar */}
-        <div className="w-full bg-emerald-500/10 dark:bg-emerald-500/10 h-2.5 rounded-full overflow-hidden relative shadow-inner">
+        {/* Progress Bar - Clean Flat Style */}
+        <div className="w-full bg-gray-100 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden relative">
           <div
-            className="bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600 h-full rounded-full transition-all duration-500 ease-out relative"
+            className="bg-emerald-500 h-full rounded-full transition-all duration-500 ease-out relative"
             style={{ width: `${percent}%` }}
           >
             <div className="absolute inset-0 bg-white/20 animate-pulse" />
@@ -345,10 +346,10 @@ export default function ExtractionAnimation({ url: _url, jobStatus, progress, va
         </div>
 
         {/* Funny Rotating Copy */}
-        <div className="pt-3 border-t border-black/5 dark:border-white/5 min-h-[40px] flex items-center justify-center text-center">
+        <div className="pt-3 border-t border-gray-100 dark:border-gray-800/60 min-h-[38px] flex items-center justify-center text-center">
           <p
             key={funnyText}
-            className="text-xs text-gray-500 dark:text-gray-400 italic opacity-95 animate-fade-in max-w-xs"
+            className="text-xs text-gray-500 dark:text-gray-400 italic opacity-95 animate-fade-in"
           >
             {funnyText}
           </p>
@@ -357,12 +358,12 @@ export default function ExtractionAnimation({ url: _url, jobStatus, progress, va
 
       {/* Background Notification Notice — only for Premium users who have background processing */}
       {isPremium && (
-        <div className="max-w-xs text-center px-4 pt-3 border-t border-black/5 dark:border-white/5">
+        <div className="w-full text-center pt-2 border-t border-gray-100 dark:border-gray-800/60">
           <p className="text-[11px] leading-relaxed text-gray-400 dark:text-gray-500">
             {t('job.backgroundNotice')}
           </p>
         </div>
       )}
-    </div>
+    </Card>
   );
 }
