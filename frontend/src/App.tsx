@@ -707,7 +707,7 @@ export default function App() {
         ? 'pb-12'
         : isViewingRecipe || (activeView === 'history' && isCatalogSelectMode)
           ? 'pb-48'
-          : !isPremium && (activeView === 'history' || activeView === 'extract' || activeView === 'shopping-list')
+          : !isPremium && activeView !== 'settings'
             ? 'pb-44'
             : 'pb-24'
         } ${(!isViewingRecipe && activeView !== 'extract') ? 'pt-4' : ''}`}>
@@ -900,7 +900,8 @@ export default function App() {
         const shouldShowBannerAd =
           !isPremium &&
           !isViewingRecipe &&
-          (activeView === 'history' || activeView === 'extract' || activeView === 'shopping-list');
+          activeView !== 'settings' &&
+          activeView !== 'admin';
 
         return (
           <div className={bottomBarClasses}>
