@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Spinner } from '@heroui/react';
 import { useI18n } from '../context/I18nContext';
 import { isNative } from '../native';
 import {
@@ -9,7 +10,7 @@ import {
 } from '../utils/ads';
 
 /**
- * Ad slot shown in the empty space below the extraction animation.
+ * Ad slot shown in the space below the extraction animation.
  *
  * On native (Android/iOS), AdMob displays a MEDIUM_RECTANGLE (300×250) banner overlay
  * on top of the slot.
@@ -95,22 +96,27 @@ export default function ExtractionAdCard({ isActive = true }: ExtractionAdCardPr
   if (native && status === 'failed') return null;
 
   return (
-    <div
-      className={`glass-panel p-4 mb-4 rounded-2xl border border-black/5 dark:border-white/5 shadow-xl w-full transition-opacity duration-500 ${status === 'loaded' ? 'opacity-100' : 'opacity-0'
-        }`}
-      aria-hidden={status !== 'loaded'}
-    >
-      <div className="flex items-center mb-2">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-black/40 dark:text-white/40">
+    <div className="bg-white dark:bg-gray-900 p-5 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] w-full transition-all duration-300">
+      <div className="flex items-center mb-3">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
           {t('ads.label')}
         </span>
       </div>
       {/* Reserved slot the native AdMob banner overlays (or web ad container box). */}
       <div
         ref={slotRef}
-        className="w-full max-w-[300px] mx-auto flex items-center justify-center rounded-xl bg-black/5 dark:bg-white/5"
+        className="w-full max-w-[300px] mx-auto flex flex-col items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800/60 transition-all"
         style={{ minHeight: slotHeight }}
-      />
+      >
+        {status === 'pending' && (
+          <div className="flex flex-col items-center justify-center gap-2.5 p-4 text-center">
+            <Spinner size="sm" color="success" />
+            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500">
+              {t('ads.rewardedLoading')}
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
