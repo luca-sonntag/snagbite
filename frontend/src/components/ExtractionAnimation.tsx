@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Camera, ChefHat, Video } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
+import { useAuth } from '../context/AuthContext';
 import type { SupportedLanguage } from '../i18n';
 import type { ProgressData, ProgressStage } from '../types';
 
@@ -138,6 +139,7 @@ const SCENE_TARGET_PERCENT: Record<ProgressStage, number> = {
 
 export default function ExtractionAnimation({ url: _url, jobStatus, progress, variant = 'link', compact = false }: ExtractionAnimationProps) {
   const { t, language } = useI18n();
+  const { isPremium } = useAuth();
   const [displayedIndex, setDisplayedIndex] = useState(0);
   const [funnyText, setFunnyText] = useState('');
 
@@ -353,12 +355,14 @@ export default function ExtractionAnimation({ url: _url, jobStatus, progress, va
         </div>
       </div>
 
-      {/* Background Notification Notice */}
-      <div className="max-w-xs text-center px-4 pt-3 border-t border-black/5 dark:border-white/5">
-        <p className="text-[11px] leading-relaxed text-gray-400 dark:text-gray-500">
-          {t('job.backgroundNotice')}
-        </p>
-      </div>
+      {/* Background Notification Notice — only for Premium users who have background processing */}
+      {isPremium && (
+        <div className="max-w-xs text-center px-4 pt-3 border-t border-black/5 dark:border-white/5">
+          <p className="text-[11px] leading-relaxed text-gray-400 dark:text-gray-500">
+            {t('job.backgroundNotice')}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
