@@ -58,49 +58,49 @@ export default function InviteLandingPage() {
   return (
     <div className="w-full min-h-[calc(100vh-6rem)] flex items-center justify-center px-4 py-8">
       {/* Ambient background glow */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/15 dark:bg-emerald-500/20 rounded-full blur-3xl pointer-events-none -z-10" />
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full blur-3xl pointer-events-none -z-10" />
 
-      <Card className="max-w-md w-full p-6 sm:p-8 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-emerald-500/20 shadow-2xl rounded-3xl text-center flex flex-col items-center">
+      <Card className="max-w-md w-full p-6 sm:p-8 bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] text-center flex flex-col items-center">
         {/* Friends Badge Icon */}
-        <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-500/25 shadow-sm flex items-center justify-center mb-5">
-          <Users className="w-9 h-9 sm:w-10 sm:h-10 text-emerald-600 dark:text-emerald-400" />
+        <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-5">
+          <Users className="w-7 h-7" />
         </div>
 
-        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-gray-900 dark:text-white mb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">
           Freundschaftsanfrage
         </h1>
 
-        <p className="text-sm text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-          Du wurdest eingeladen, dich auf <strong className="text-emerald-600 dark:text-emerald-400 font-semibold">Snagbite</strong> zu vernetzen! Sammelt Rezepte, kocht gemeinsam und vergleicht euren Koch-Fortschritt.
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+          Du wurdest eingeladen, dich auf <strong className="text-emerald-600 dark:text-emerald-400 font-bold">Snagbite</strong> zu vernetzen! Sammelt Rezepte, kocht gemeinsam und vergleicht euren Fortschritt.
         </p>
 
         {rawCode ? (
-          <div className="w-full bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-4 mb-6 flex flex-col items-center gap-2">
-            <span className="text-xs uppercase tracking-widest font-bold text-emerald-800 dark:text-emerald-300">
+          <div className="w-full bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4 mb-6 flex flex-col items-center gap-2 border-none">
+            <span className="text-xs uppercase tracking-widest font-bold text-emerald-600 dark:text-emerald-400">
               Einladungscode
             </span>
             <div className="flex items-center justify-center gap-3 w-full">
-              <span className="font-mono text-3xl font-extrabold tracking-wider text-emerald-950 dark:text-emerald-100 selection:bg-emerald-300">
+              <span className="font-mono text-3xl font-black tracking-wider text-gray-900 dark:text-white selection:bg-emerald-300">
                 {rawCode}
               </span>
               <Button
                 size="sm"
                 variant="outline"
-                className="bg-white dark:bg-gray-800 shadow-xs border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 min-w-9 h-9 p-0"
+                className="bg-white dark:bg-gray-700 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none text-emerald-600 dark:text-emerald-400 min-w-9 h-9 p-0 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-xl"
                 onPress={handleCopy}
                 aria-label="Code kopieren"
               >
-                {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                {copied ? <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-4 h-4" />}
               </Button>
             </div>
             {copied && (
-              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium animate-fade-in">
+              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold animate-fade-in">
                 Code in Zwischenablage kopiert!
               </span>
             )}
           </div>
         ) : (
-          <div className="w-full bg-amber-50 dark:bg-amber-950/30 border border-amber-500/30 rounded-2xl p-4 mb-6 text-xs text-amber-800 dark:text-amber-300">
+          <div className="w-full bg-amber-500/10 border-none rounded-2xl p-4 mb-6 text-xs text-amber-600 dark:text-amber-400 font-medium">
             Kein Einladungscode im Link gefunden. Bitte öffne die App und gib den Code deines Freundes manuell ein.
           </div>
         )}
@@ -109,10 +109,10 @@ export default function InviteLandingPage() {
         <div className="w-full flex flex-col gap-3">
           <Button
             size="lg"
-            className="w-full font-bold bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 rounded-xl h-12 text-base cursor-pointer"
+            className="w-full font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl h-13 text-base flex items-center justify-center gap-2 border-none active:scale-95 transition-all shadow-none cursor-pointer"
             onPress={handleOpenApp}
           >
-            <ExternalLink className="w-5 h-5" />
+            <ExternalLink className="w-4 h-4" />
             In Snagbite öffnen
           </Button>
 
@@ -120,30 +120,30 @@ export default function InviteLandingPage() {
             href={PLAY_STORE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full font-medium bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 flex items-center justify-center gap-2 rounded-xl h-12 text-sm transition-colors"
+            className="w-full font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-2xl h-13 text-sm flex items-center justify-center gap-2 border-none active:scale-95 transition-all shadow-none"
           >
-            <Download className="w-4 h-4 text-emerald-500" />
+            <Download className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             App im Google Play Store laden
           </a>
         </div>
 
         {/* How-to Guide */}
-        <div className="w-full mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-left">
-          <div className="flex items-center gap-2 mb-3">
-            <ChefHat className="w-4 h-4 text-emerald-500" />
+        <div className="w-full mt-6 p-4 bg-gray-50 dark:bg-gray-800/30 rounded-2xl border-none text-left">
+          <div className="flex items-center gap-2 mb-2">
+            <ChefHat className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             <h2 className="text-xs uppercase tracking-wider font-bold text-gray-500 dark:text-gray-400">
               So funktioniert's
             </h2>
           </div>
-          <ol className="text-xs text-gray-600 dark:text-gray-300 space-y-2 list-decimal list-inside leading-relaxed">
+          <ol className="text-xs text-gray-600 dark:text-gray-400 space-y-1.5 list-decimal list-inside leading-relaxed">
             <li>Snagbite-App installieren oder öffnen</li>
-            <li>Tab <strong className="font-semibold text-gray-900 dark:text-white">Fortschritt</strong> → <strong className="font-semibold text-gray-900 dark:text-white">Freunde</strong> wählen</li>
-            <li>Code einfügen oder direkt über den Einladungslink annehmen</li>
+            <li>Tab <strong className="font-bold text-gray-900 dark:text-white">Fortschritt</strong> → <strong className="font-bold text-gray-900 dark:text-white">Freunde</strong> wählen</li>
+            <li>Code einfügen oder Einladungslink annehmen</li>
           </ol>
         </div>
 
         <div className="mt-6">
-          <Link to="/" className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline">
+          <Link to="/" className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
             ← Zurück zur Startseite
           </Link>
         </div>
