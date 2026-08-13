@@ -920,16 +920,14 @@ export default function App() {
           <div className={bottomBarClasses}>
             <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] w-full max-w-md mx-auto flex flex-col rounded-t-3xl overflow-hidden">
               {/* Banner ad displayed seamlessly attached to top of bottom menu for free users */}
-              {shouldShowBannerAd && (
-                <div className="w-full pt-2 pb-1.5 px-3 border-b border-gray-100/60 dark:border-gray-800/60 flex flex-col items-center justify-center">
-                  <ExtractionAdCard
-                    isActive={shouldShowBannerAd && !isBottomBarHidden}
-                    variant="banner"
-                    embedded
-                    onStatusChange={setAdStatus}
-                  />
-                </div>
-              )}
+              <div className={`w-full pt-2 pb-1.5 px-3 border-b border-gray-100/60 dark:border-gray-800/60 flex flex-col items-center justify-center ${shouldShowBannerAd ? '' : 'hidden'}`}>
+                <ExtractionAdCard
+                  isActive={shouldShowBannerAd && !isBottomBarHidden}
+                  variant="banner"
+                  embedded
+                  onStatusChange={setAdStatus}
+                />
+              </div>
 
               <div className="w-full flex justify-around items-center pt-3 pb-[calc(1.25rem_+_var(--safe-area-inset-bottom))] px-3">
               {/* Extract / New Recipe Tab */}

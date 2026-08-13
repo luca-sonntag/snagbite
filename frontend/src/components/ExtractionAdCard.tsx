@@ -124,9 +124,15 @@ export default function ExtractionAdCard({
       }
       removeLoadListener?.();
       removeSizeListener?.();
-      void removeExtractionBanner();
     };
   }, [native, isActive, variant]);
+
+  // Only destroy the native AdMob banner when the component actually unmounts on page exit
+  useEffect(() => {
+    return () => {
+      void removeExtractionBanner();
+    };
+  }, []);
 
   // No ad filled on native — don't leave empty card frame behind.
   if (native && status === 'failed') return null;
