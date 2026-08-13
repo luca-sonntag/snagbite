@@ -142,7 +142,7 @@ let isBannerCurrentlyHidden = false;
 /** Destroy the ad banner. Safe to call when none is shown / on web. */
 export async function removeAdBanner(): Promise<void> {
   if (!isNative()) return;
-  if (!bannerShown) return;
+  if (!bannerShown && !isBannerCurrentlyHidden) return;
   try {
     await AdMob.removeBanner();
     console.log('[AdMob] removeBanner requested');
@@ -156,7 +156,8 @@ export async function removeAdBanner(): Promise<void> {
 /** Temporarily hide the active banner without destroying it (e.g. while an overlay is open). */
 export async function hideAdBanner(): Promise<void> {
   if (!isNative()) return;
-  if (!bannerShown || isBannerCurrentlyHidden) return;
+  if (!bannerShown) return;
+  if (isBannerCurrentlyHidden) return;
   isBannerCurrentlyHidden = true;
   try {
     await AdMob.hideBanner();
