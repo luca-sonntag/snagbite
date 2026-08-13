@@ -154,8 +154,7 @@ export default function ExtractionAdCard({
       {/* Reserved slot the native AdMob banner overlays (or web ad container box). */}
       <div
         ref={slotRef}
-        className="w-full max-w-[320px] mx-auto flex flex-col items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800/60 transition-all"
-        style={{ minHeight: slotHeight }}
+        className="w-[300px] h-[250px] mx-auto flex flex-col items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800/60 transition-all overflow-hidden"
       >
         {status === 'pending' && (
           <Spinner size="sm" color="success" />
