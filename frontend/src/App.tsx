@@ -38,6 +38,7 @@ import { useMobileNavigationBack } from './hooks/useMobileNavigationBack';
 import { deleteCachedImage } from './utils/imageStore';
 import { useTimerManager } from './hooks/useTimerManager';
 import { useOnboarding } from './hooks/useOnboarding';
+import { useOverlayActive } from './hooks/useOverlayActive';
 import { useAlphaWelcome } from './hooks/useAlphaWelcome';
 import ExtractionAdCard from './components/ExtractionAdCard';
 
@@ -127,6 +128,7 @@ export default function App() {
   const newlyExtractedJobIdRef = useRef<string | null>(null);
   const [isCatalogSheetOpen, setIsCatalogSheetOpen] = useState(false);
   const [adStatus, setAdStatus] = useState<'pending' | 'loaded' | 'failed'>('pending');
+  const isOverlayActive = useOverlayActive();
 
   // Remembers the last open state of the history tab (recipe detail or list),
   // so the bottom-nav "Recipes" button returns to the recipe that was open
@@ -898,7 +900,12 @@ export default function App() {
 
       {/* Mobile Bottom Navigation Bar */}
       {(() => {
-        const isBottomBarHidden = (activeView === 'history' && (isCatalogSelectMode || isCatalogSheetOpen)) || activeView === 'admin' || (isPending && !isPremium);
+        const isBottomBarHidden =
+          (activeView === 'history' && (isCatalogSelectMode || isCatalogSheetOpen)) ||
+          activeView === 'admin' ||
+          (isPending && !isPremium) ||
+          isPremiumModalOpen ||
+          isOverlayActive;
         const bottomBarClasses = `fixed bottom-0 inset-x-0 z-40 transition-all duration-300 ease-in-out pb-safe ${isBottomBarHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
           }`;
 
