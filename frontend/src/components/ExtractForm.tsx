@@ -233,7 +233,7 @@ export default function ExtractForm({
       {errorBanner}
       {/* Input Card or Extraction Animation Card */}
       {isPending ? (
-        <div className="flex-1 flex flex-col justify-between min-h-0 w-full gap-3">
+        <div className="flex flex-col w-full gap-4">
           <ExtractionAnimation
             url={url}
             isPending={isPending}
