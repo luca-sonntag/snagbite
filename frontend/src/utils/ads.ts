@@ -48,8 +48,6 @@ let canRequestAds = true;
 let personalizedAllowed = true;
 /** Track whether a banner is currently on screen. */
 let bannerShown = false;
-let lastMargin: number | null = null;
-let lastSize: BannerAdSize | null = null;
 
 /**
  * Initialize the AdMob SDK once and run the EU consent (UMP) flow. Idempotent
@@ -109,20 +107,11 @@ export async function showExtractionBanner(
   await initAds();
   if (!canRequestAds) return;
 
+  // Strict guard: Never call showBanner if a banner is already active in memory.
+  // Calling setAdUnitId on an existing native Android AdView causes an IllegalStateException crash.
+  if (bannerShown) return;
+
   const margin = Math.max(0, Math.round(bottomMarginDp));
-
-  // If a banner of the exact same size is already active at the exact same position (within 3dp), do nothing.
-  const isMarginIdentical = lastMargin !== null && Math.abs(lastMargin - margin) < 3;
-  if (bannerShown && isMarginIdentical && lastSize === size) return;
-
-  if (bannerShown) {
-    try {
-      await AdMob.removeBanner();
-    } catch {
-      /* nothing to remove */
-    }
-    bannerShown = false;
-  }
 
   try {
     await AdMob.showBanner({
@@ -134,8 +123,6 @@ export async function showExtractionBanner(
       npa: !personalizedAllowed,
     });
     bannerShown = true;
-    lastMargin = margin;
-    lastSize = size;
     console.log(
       `[AdMob] showBanner requested (BOTTOM_CENTER, size=${size}, margin=${margin}, ` +
         `testing=${IS_TESTING}, npa=${!personalizedAllowed})`,
@@ -155,8 +142,6 @@ export async function removeExtractionBanner(): Promise<void> {
     /* nothing to remove */
   }
   bannerShown = false;
-  lastMargin = null;
-  lastSize = null;
 }
 
 /**
