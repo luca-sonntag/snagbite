@@ -70,6 +70,22 @@ function clearStaleHideTimer(): void {
   }
 }
 
+/**
+ * Delay before the banner actually reappears on resume. The bottom bar slides
+ * up with a 300ms CSS transition; showing the banner earlier makes it pop in
+ * before the bar has settled. Wait out the transition (+ small buffer) so the
+ * ad reveals cleanly once the bar is in place. Hiding stays instant.
+ */
+const RESUME_DELAY_MS = 350;
+let resumeTimer: ReturnType<typeof setTimeout> | null = null;
+
+function clearResumeTimer(): void {
+  if (resumeTimer) {
+    clearTimeout(resumeTimer);
+    resumeTimer = null;
+  }
+}
+
 /** Check whether a banner is already active in memory. */
 export function isAdLoaded(): boolean {
   return bannerShown;
@@ -141,8 +157,9 @@ export async function showAdBanner(
   // Remember placement so a stale-destroyed banner can reload at the same spot.
   lastBannerMargin = margin;
   lastBannerSize = size;
-  // A fresh show cancels any pending stale-destroy and clears the reload flag.
+  // A fresh show cancels any pending stale-destroy/resume and clears the flag.
   clearStaleHideTimer();
+  clearResumeTimer();
   bannerDestroyedWhileHidden = false;
 
   try {
@@ -171,6 +188,7 @@ let isBannerCurrentlyHidden = false;
 export async function removeAdBanner(): Promise<void> {
   if (!isNative()) return;
   clearStaleHideTimer();
+  clearResumeTimer();
   bannerDestroyedWhileHidden = false;
   if (!bannerShown && !isBannerCurrentlyHidden) return;
   try {
@@ -187,6 +205,8 @@ export async function removeAdBanner(): Promise<void> {
 export async function hideAdBanner(): Promise<void> {
   if (!isNative()) return;
   if (!bannerShown) return;
+  // Cancel any pending (delayed) resume so re-hiding wins immediately.
+  clearResumeTimer();
   if (isBannerCurrentlyHidden) return;
   isBannerCurrentlyHidden = true;
 
@@ -209,11 +229,24 @@ export async function hideAdBanner(): Promise<void> {
   }
 }
 
-/** Resume/unhide the active banner after an overlay closes. */
+/**
+ * Resume/unhide the active banner after an overlay closes. Deferred by
+ * RESUME_DELAY_MS so the banner reveals only once the bottom bar's slide-up
+ * transition has settled (avoids the ad popping in mid-animation). A re-hide
+ * during the delay cancels the pending resume.
+ */
 export async function resumeAdBanner(): Promise<void> {
   if (!isNative()) return;
   clearStaleHideTimer();
+  clearResumeTimer();
+  resumeTimer = setTimeout(() => {
+    resumeTimer = null;
+    void doResumeAdBanner();
+  }, RESUME_DELAY_MS);
+}
 
+/** Perform the actual resume/reload once the resume delay elapses. */
+async function doResumeAdBanner(): Promise<void> {
   // Hidden long enough that the stale timer destroyed the banner — reload a
   // fresh ad at the last placement instead of resuming a gone/stale one.
   if (bannerDestroyedWhileHidden) {
