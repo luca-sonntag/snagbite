@@ -66,10 +66,7 @@ async function bootstrap() {
           if (
             origin.startsWith('http://localhost') ||
             origin.startsWith('https://localhost') ||
-            origin.startsWith('http://127.0.0.1') ||
-            origin.startsWith('http://192.168.') ||
-            origin.startsWith('http://10.') ||
-            ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'].includes(origin)
+            origin.startsWith('http://127.0.0.1')
           ) {
             return callback(null, true);
           }
