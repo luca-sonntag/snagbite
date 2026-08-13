@@ -64,6 +64,10 @@ export default function ExtractionAdCard({
 
       const bottomMargin = Math.max(0, Math.round(window.innerHeight - rect.bottom));
 
+      // For embedded bottom dock banner, bottomMargin MUST be above the bottom menu buttons (> 45dp)
+      // Ignore transient near-zero margin measurements during translate-y slide-up transitions.
+      if (embedded && bottomMargin < 45) return;
+
       const adSize = variant === 'banner' ? BannerAdSize.BANNER : BannerAdSize.MEDIUM_RECTANGLE;
       console.log(
         `[AdMob] slot rect top=${Math.round(rect.top)} bottom=${Math.round(rect.bottom)} ` +
@@ -90,8 +94,8 @@ export default function ExtractionAdCard({
         removeSizeListener?.();
         return;
       }
-      requestAnimationFrame(positionBanner);
-      timerId = setTimeout(positionBanner, 100);
+      // Measure clean position after 350ms translate-y slide-up transition settles
+      timerId = setTimeout(positionBanner, 350);
     })();
 
     // Reposition on viewport changes (rotation / keyboard / resize) and CSS transition completion
