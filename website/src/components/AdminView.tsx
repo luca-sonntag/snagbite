@@ -984,32 +984,39 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">
                           {isDe ? 'LLM Kosten' : 'LLM Costs'} ({rangeLabel[metricsRange]})
                         </h3>
-                        {metrics.llm?.dailyStats && metrics.llm.dailyStats.length > 0 ? (
-                          <div className="flex flex-col gap-2 max-h-64 overflow-y-auto pr-1">
-                            {metrics.llm.dailyStats.map((stat: any) => {
-                              const maxCost = Math.max(...metrics.llm.dailyStats.map((s: any) => s.cost), 0.0001);
-                              const pct = (stat.cost / maxCost) * 100;
-                              return (
-                                <div key={stat.date} className="flex items-center gap-3 text-[11px]">
-                                  <span className="w-12 sm:w-20 text-gray-500 font-mono font-medium shrink-0">{stat.date.slice(5)}</span>
-                                  <div className="flex-1 bg-gray-100 h-2.5 rounded-full overflow-hidden">
-                                    <div
-                                      className="bg-amber-500 h-full rounded-full transition-all duration-500"
-                                      style={{ width: `${pct}%` }}
-                                    />
+                        {(() => {
+                          const dailyCosts = metrics.llm?.dailyCost || metrics.llm?.dailyStats;
+                          if (!dailyCosts || dailyCosts.length === 0) {
+                            return (
+                              <p className="text-center text-xs text-gray-500 py-8 font-medium">
+                                {isDe ? 'Keine Kosten im Zeitraum.' : 'No costs in timeframe.'}
+                              </p>
+                            );
+                          }
+                          const maxCost = Math.max(...dailyCosts.map((s: any) => Number(s.cost || 0)), 0.0001);
+                          return (
+                            <div className="flex flex-col gap-2 max-h-64 overflow-y-auto pr-1">
+                              {dailyCosts.map((stat: any) => {
+                                const costVal = Number(stat.cost || 0);
+                                const pct = (costVal / maxCost) * 100;
+                                return (
+                                  <div key={stat.date} className="flex items-center gap-3 text-[11px]">
+                                    <span className="w-12 sm:w-20 text-gray-500 font-mono font-medium shrink-0">{stat.date.slice(5)}</span>
+                                    <div className="flex-1 bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                                      <div
+                                        className="bg-amber-500 h-full rounded-full transition-all duration-500"
+                                        style={{ width: `${Math.min(pct, 100)}%` }}
+                                      />
+                                    </div>
+                                    <span className="w-16 text-right font-black font-mono text-gray-900 shrink-0">
+                                      ${costVal.toFixed(4)}
+                                    </span>
                                   </div>
-                                  <span className="w-16 text-right font-black font-mono text-gray-900 shrink-0">
-                                    ${stat.cost.toFixed(3)}
-                                  </span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <p className="text-center text-xs text-gray-500 py-8 font-medium">
-                            {isDe ? 'Keine Kosten im Zeitraum.' : 'No costs in timeframe.'}
-                          </p>
-                        )}
+                                );
+                              })}
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
 

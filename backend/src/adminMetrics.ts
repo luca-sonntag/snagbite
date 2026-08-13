@@ -8,6 +8,7 @@ export interface LlmMetricsSummary {
   count: number;
   breakdown: Record<string, { count: number; cost: number; tokens: number }>;
   dailyCost: { date: string; cost: number }[];
+  dailyStats: { date: string; cost: number }[];
 }
 
 /** Row shape selected from the `gemini_logs` table for metrics aggregation. */
@@ -41,6 +42,7 @@ export async function getLlmMetrics(
     count: 0,
     breakdown: {},
     dailyCost: [],
+    dailyStats: [],
   };
 
   const now = new Date();
@@ -116,6 +118,8 @@ export async function getLlmMetrics(
       });
     }
   }
+
+  summary.dailyStats = summary.dailyCost;
 
   return summary;
 }
