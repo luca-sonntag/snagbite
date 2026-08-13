@@ -48,8 +48,6 @@ let canRequestAds = true;
 let personalizedAllowed = true;
 /** Track whether a banner is currently on screen so we can reposition cleanly. */
 let bannerShown = false;
-let lastMargin: number | null = null;
-let lastSize: BannerAdSize | null = null;
 
 /**
  * Initialize the AdMob SDK once and run the EU consent (UMP) flow. Idempotent
@@ -109,30 +107,11 @@ export async function showExtractionBanner(
   await initAds();
   if (!canRequestAds) return;
 
+  // Once a banner is active on screen, do not recreate or reposition it
+  // until explicitly destroyed via removeExtractionBanner().
+  if (bannerShown) return;
+
   const margin = Math.max(0, Math.round(bottomMarginDp));
-
-  // If a banner of the exact same size and roughly the same bottom margin (within 25dp tolerance)
-  // is already active on screen, do not destroy and re-fetch to prevent flickering and comply with AdMob policy.
-  const isMarginSimilar = lastMargin !== null && Math.abs(lastMargin - margin) <= 25;
-  if (bannerShown && isMarginSimilar && lastSize === size) {
-    return;
-  }
-
-  // Ignore transient near-zero margin measurements during CSS layout transitions if a valid banner is already showing.
-  if (bannerShown && margin < 30 && (lastMargin ?? 0) >= 30 && lastSize === size) {
-    return;
-  }
-
-  // The plugin reloads an existing banner but does not update its layout
-  // margins, so remove it before applying a newly measured position.
-  if (bannerShown) {
-    try {
-      await AdMob.removeBanner();
-    } catch {
-      /* nothing to remove */
-    }
-    bannerShown = false;
-  }
 
   try {
     await AdMob.showBanner({
@@ -144,8 +123,6 @@ export async function showExtractionBanner(
       npa: !personalizedAllowed,
     });
     bannerShown = true;
-    lastMargin = margin;
-    lastSize = size;
     console.log(
       `[AdMob] showBanner requested (BOTTOM_CENTER, size=${size}, margin=${margin}, ` +
         `testing=${IS_TESTING}, npa=${!personalizedAllowed})`,
@@ -164,8 +141,6 @@ export async function removeExtractionBanner(): Promise<void> {
     /* nothing to remove */
   }
   bannerShown = false;
-  lastMargin = null;
-  lastSize = null;
 }
 
 /**
