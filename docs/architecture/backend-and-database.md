@@ -43,6 +43,11 @@ Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()` (
   * `PREMIUM_MAX_EXTRACTIONS_PER_WINDOW` (Default: `50`): Maximale Anzahl an Extraktionen für Premium-User.
 * **Subscription Tiers:** Standardmäßig im `free` Tier. Sobald Premium gekauft wird, wird das Tier in `app_metadata.tier` auf `premium` gesetzt. Im Alpha-Modus werden Nutzer automatisch in `alpha` eingestuft.
 * **Benutzerbezogene Overrides:** In Supabase Auth `app_metadata` gesteuert (`custom_extraction_limit` bzw. `max_extractions_per_window`, z. B. `-1` für unbegrenzt).
+* **Rewarded Video Ad Bonus-Credits (`app_metadata.bonus_credits`):**
+  * Nutzer können durch das Ansehen von Rewarded Video Ads verzehrbare Extraktions-Credits sammeln.
+  * **Claim-Endpunkt (`POST /api/me/rewarded-ad-claimed`):** Inkrementiert `app_metadata.bonus_credits` in Supabase Auth (`updateUserById`) atomar um `+1`.
+  * **Verfügbarkeits-Berechnung (`GET /api/extractions/limit`):** Addiert Bonus-Credits auf verbleibende Basis-Extraktionen (`remaining = baseRemaining + bonusCredits`).
+  * **Quota-Verbrauch (`enforceExtractionQuota` in `routes.ts`):** Wenn das zeitfensterbasierte Limit erreicht ist, aber `bonus_credits > 0` vorliegt, wird 1 Bonus-Credit abgebucht (`bonus_credits - 1`), anstatt die Extraktion mit `RATE_LIMIT_EXCEEDED` (429) zu blockieren.
 * **Nutzererfahrung:** Bei Erreichen des Limits berechnet das Backend die verbleibende Wartezeit minutengenau. Das Frontend übersetzt dies dynamisch und zeigt die genaue Restdauer an.
 
 ---
