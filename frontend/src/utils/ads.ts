@@ -111,9 +111,15 @@ export async function showExtractionBanner(
 
   const margin = Math.max(0, Math.round(bottomMarginDp));
 
-  // If a banner of the exact same size and margin is already active on screen,
-  // do not destroy and re-fetch to prevent flickering and comply with AdMob policy.
-  if (bannerShown && lastMargin === margin && lastSize === size) {
+  // If a banner of the exact same size and roughly the same bottom margin (within 12dp tolerance)
+  // is already active on screen, do not destroy and re-fetch to prevent flickering and comply with AdMob policy.
+  const isMarginSimilar = lastMargin !== null && Math.abs(lastMargin - margin) <= 12;
+  if (bannerShown && isMarginSimilar && lastSize === size) {
+    return;
+  }
+
+  // Ignore transient near-zero margin measurements during CSS layout transitions if a valid banner is already showing.
+  if (bannerShown && margin < 30 && (lastMargin ?? 0) >= 30 && lastSize === size) {
     return;
   }
 
