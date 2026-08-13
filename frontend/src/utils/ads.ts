@@ -144,6 +144,30 @@ export async function removeExtractionBanner(): Promise<void> {
   bannerShown = false;
 }
 
+/** Temporarily hide the active banner without destroying it (e.g. while an overlay is open). */
+export async function hideExtractionBanner(): Promise<void> {
+  if (!isNative()) return;
+  if (!bannerShown) return;
+  try {
+    await AdMob.hideBanner();
+    console.log('[AdMob] hideBanner requested');
+  } catch (err) {
+    console.warn('[AdMob] hideBanner failed:', err);
+  }
+}
+
+/** Resume/unhide the active banner after an overlay closes. */
+export async function resumeExtractionBanner(): Promise<void> {
+  if (!isNative()) return;
+  if (!bannerShown) return;
+  try {
+    await AdMob.resumeBanner();
+    console.log('[AdMob] resumeBanner requested');
+  } catch (err) {
+    console.warn('[AdMob] resumeBanner failed:', err);
+  }
+}
+
 /**
  * Subscribe to banner size changes (fired once the ad loads with its real
  * rendered size). Returns an unsubscribe function. No-op on web.
