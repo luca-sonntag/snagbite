@@ -301,22 +301,22 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex flex-col gap-6 font-sans text-gray-900 dark:text-white">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex flex-col gap-6 font-sans text-gray-900">
       {/* Top Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-none">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+          <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-600 shrink-0">
             <Shield className="w-6 h-6" />
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
               Administration
             </span>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight leading-tight">
               Admin Dashboard
             </h1>
             {userEmail && (
-              <span className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-0.5 truncate">
+              <span className="text-xs text-gray-500 font-mono mt-0.5 truncate">
                 {userEmail}
               </span>
             )}
@@ -326,14 +326,14 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => setLanguage(l => l === 'de' ? 'en' : 'de')}
-            className="px-3.5 py-2 text-xs font-bold rounded-2xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-none transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-2 text-xs font-bold rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-700 border-none transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
           >
-            <Globe className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <Globe className="w-4 h-4 text-emerald-600" />
             {language.toUpperCase()}
           </button>
           <button
             onClick={onSignOut}
-            className="px-3.5 py-2 text-xs font-bold rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border-none transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-2 text-xs font-bold rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border-none transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             {isDe ? 'Abmelden' : 'Sign Out'}
@@ -344,7 +344,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24 gap-3">
           <Spinner color="success" size="lg" />
-          <span className="text-sm font-bold text-gray-500 dark:text-gray-400">
+          <span className="text-sm font-bold text-gray-500">
             {isDe ? 'Lade Daten...' : 'Loading data...'}
           </span>
         </div>
@@ -353,7 +353,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
           {/* Tabs Navigation */}
           <Tabs selectedKey={activeTab} onSelectionChange={(key) => { setError(null); setActiveTab(key as any); }} className="w-full">
             <Tabs.ListContainer className="w-full">
-              <Tabs.List className="flex w-full mb-6 bg-gray-100 dark:bg-gray-800/80 p-1 sm:p-1.5 rounded-2xl border-none">
+              <Tabs.List className="flex w-full mb-6 bg-gray-100 p-1 sm:p-1.5 rounded-2xl border-none">
                 {(
                   [
                     { id: 'settings', icon: <Settings className="w-4 h-4 shrink-0" />, label: isDe ? 'Konfiguration' : 'Config' },
@@ -365,7 +365,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                   <Tabs.Tab
                     key={id}
                     id={id}
-                    className="flex-1 py-2.5 text-center font-bold transition-all cursor-pointer rounded-xl !text-gray-500 dark:!text-gray-400 data-[selected=true]:bg-white dark:data-[selected=true]:bg-gray-900 data-[selected=true]:!text-emerald-600 dark:data-[selected=true]:!text-emerald-400 data-[selected=true]:shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:!text-gray-900 dark:hover:!text-white border-none"
+                    className="flex-1 py-2.5 text-center font-bold transition-all cursor-pointer rounded-xl !text-gray-500 data-[selected=true]:bg-white data-[selected=true]:!text-emerald-600 data-[selected=true]:shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:!text-gray-900 border-none"
                   >
                     <div className="flex items-center justify-center gap-2 text-xs sm:text-sm">
                       {icon}
@@ -379,14 +379,14 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
 
             {/* Notification Alerts */}
             {error && (
-              <div className="mb-4 p-4 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-2xl md:rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex items-start gap-3">
+              <div className="mb-4 p-4 bg-rose-500/10 text-rose-600 rounded-2xl md:rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                 <span className="text-xs font-bold">{error}</span>
               </div>
             )}
 
             {successMessage && (
-              <div className="mb-4 p-4 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl md:rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex items-start gap-3">
+              <div className="mb-4 p-4 bg-emerald-500/10 text-emerald-600 rounded-2xl md:rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex items-start gap-3">
                 <Shield className="w-5 h-5 shrink-0 mt-0.5" />
                 <span className="text-xs font-bold">{successMessage}</span>
               </div>
@@ -395,10 +395,10 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
             {/* Panel: Settings */}
             <Tabs.Panel id="settings">
               <div className="flex flex-col gap-6">
-                <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
+                <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none bg-white shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
                   <div className="flex flex-col gap-6">
                     {settings.length === 0 ? (
-                      <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4 font-medium">
+                      <p className="text-sm text-gray-500 text-center py-4 font-medium">
                         {isDe ? 'Keine Einstellungen vorhanden.' : 'No settings available.'}
                       </p>
                     ) : (
@@ -408,27 +408,27 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                         const currentValue = localSettings[setting.key] ?? setting.value;
 
                         return (
-                          <div key={setting.key} className="flex flex-col gap-2 pb-5 border-b border-black/5 dark:border-white/5 last:border-0 last:pb-0">
+                          <div key={setting.key} className="flex flex-col gap-2 pb-5 border-b border-black/5 last:border-0 last:pb-0">
                             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
                               <div className="flex flex-col gap-0.5 min-w-0">
-                                <label className="text-sm font-bold text-gray-900 dark:text-white break-words">
+                                <label className="text-sm font-bold text-gray-900 break-words">
                                   {setting.key}
                                 </label>
                                 {setting.description && (
-                                  <span className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
+                                  <span className="text-xs text-gray-500 leading-relaxed font-medium">
                                     {setting.description}
                                   </span>
                                 )}
                               </div>
 
                               {isBoolean && (
-                                <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl shrink-0 border-none self-start">
+                                <div className="flex bg-gray-100 p-1 rounded-xl shrink-0 border-none self-start">
                                   <button
                                     type="button"
                                     onClick={() => handleSettingChange(setting.key, 'true')}
                                     className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${currentValue === 'true'
-                                        ? 'bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 shadow-[0_2px_6px_rgba(0,0,0,0.03)]'
-                                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                                        ? 'bg-white text-emerald-600 shadow-[0_2px_6px_rgba(0,0,0,0.03)]'
+                                        : 'text-gray-500 hover:text-gray-900'
                                       }`}
                                   >
                                     {isDe ? 'Ja' : 'Yes'}
@@ -437,8 +437,8 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                                     type="button"
                                     onClick={() => handleSettingChange(setting.key, 'false')}
                                     className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${currentValue === 'false'
-                                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-[0_2px_6px_rgba(0,0,0,0.03)]'
-                                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                                        ? 'bg-white text-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)]'
+                                        : 'text-gray-500 hover:text-gray-900'
                                       }`}
                                   >
                                     {isDe ? 'Nein' : 'No'}
@@ -453,7 +453,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                                 name={setting.key}
                                 value={currentValue}
                                 onChange={(e) => handleSettingChange(setting.key, e.target.value)}
-                                className="w-full bg-gray-100 dark:bg-gray-800/90 border-none rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-white font-medium shadow-[0_2px_6px_rgba(0,0,0,0.03)] focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all"
+                                className="w-full bg-gray-100 border-none rounded-xl px-4 py-2.5 text-sm text-gray-900 font-medium shadow-[0_2px_6px_rgba(0,0,0,0.03)] focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all"
                                 aria-label={setting.key}
                               />
                             )}
@@ -491,17 +491,17 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                 )}
 
                 {/* Push Notification Trigger Card */}
-                <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col gap-3">
+                <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none bg-white shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col gap-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+                      <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-600 shrink-0">
                         <Bell className="w-5 h-5" />
                       </div>
                       <div>
-                        <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+                        <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">
                           {isDe ? 'Push-Notifications Testen' : 'Test Push Notifications'}
                         </h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5 leading-snug">
+                        <p className="text-xs text-gray-500 font-medium mt-0.5 leading-snug">
                           {isDe
                             ? 'Führt sofort einen KI-Push-Notification Worker-Durchlauf im Hintergrund aus.'
                             : 'Triggers a push notification worker tick in the background.'}
@@ -523,12 +523,12 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                   </div>
 
                   {pushResult && pushResult.logs && pushResult.logs.length > 0 && (
-                    <div className="mt-2 pt-3 border-t border-black/5 dark:border-white/5 flex flex-col gap-2">
-                      <div className="flex items-center justify-between text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                    <div className="mt-2 pt-3 border-t border-black/5 flex flex-col gap-2">
+                      <div className="flex items-center justify-between text-[11px] font-bold text-gray-500">
                         <span>{isDe ? 'Ergebnis-Protokoll:' : 'Execution Logs:'}</span>
-                        <span className="text-emerald-600 dark:text-emerald-400 font-mono">{pushResult.deliveredCount} {isDe ? 'Zugestellt' : 'Delivered'}</span>
+                        <span className="text-emerald-600 font-mono">{pushResult.deliveredCount} {isDe ? 'Zugestellt' : 'Delivered'}</span>
                       </div>
-                      <div className="max-h-48 overflow-y-auto bg-gray-950 dark:bg-black text-gray-200 p-3.5 rounded-2xl text-[10px] leading-relaxed space-y-1 font-mono border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
+                      <div className="max-h-48 overflow-y-auto bg-gray-950 text-gray-200 p-3.5 rounded-2xl text-[10px] leading-relaxed space-y-1 font-mono border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
                         {pushResult.logs.map((log, idx) => (
                           <div key={idx} className={log.startsWith('DELIVERED') ? 'text-emerald-400 font-bold' : log.includes('No registered') || log.includes('Outside') || log.includes('Already') ? 'text-amber-300' : 'text-gray-300'}>
                             {log}
@@ -545,7 +545,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
             <Tabs.Panel id="feedback">
               <div className="flex flex-col gap-4">
                 {feedback.length === 0 ? (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-12 font-medium">
+                  <p className="text-sm text-gray-500 text-center py-12 font-medium">
                     {isDe ? 'Bisher kein Feedback eingegangen.' : 'No feedback submissions received yet.'}
                   </p>
                 ) : (
@@ -555,41 +555,41 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                     const isExpanded = expandedFeedbackId === item.id;
 
                     return (
-                      <div key={item.id} className="border-none bg-white dark:bg-gray-900 rounded-2xl md:rounded-3xl shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden p-4 sm:p-5">
+                      <div key={item.id} className="border-none bg-white rounded-2xl md:rounded-3xl shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden p-4 sm:p-5">
                         <div className="flex flex-col gap-3">
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex flex-col gap-1.5 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
                                 {isBug ? (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border-none uppercase tracking-wider">
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-600 border-none uppercase tracking-wider">
                                     <Bug className="w-3 h-3" />
                                     Bug
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-500/10 text-teal-600 dark:text-teal-400 border-none uppercase tracking-wider">
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-500/10 text-teal-600 border-none uppercase tracking-wider">
                                     <Lightbulb className="w-3 h-3" />
                                     Idea
                                   </span>
                                 )}
-                                <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold font-mono">
+                                <span className="text-[10px] text-gray-400 font-bold font-mono">
                                   {formatDate(item.created_at)}
                                 </span>
                               </div>
-                              <span className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                              <span className="text-sm font-bold text-gray-900 truncate">
                                 {email}
                               </span>
                             </div>
                           </div>
 
-                          <div className="p-4 bg-gray-50 dark:bg-gray-800/60 border-none rounded-2xl">
-                            <p className="text-xs text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed font-medium">
+                          <div className="p-4 bg-gray-50 border-none rounded-2xl">
+                            <p className="text-xs text-gray-800 whitespace-pre-wrap leading-relaxed font-medium">
                               {item.message}
                             </p>
                           </div>
 
                           {item.screenshot_urls && item.screenshot_urls.length > 0 && (
                             <div className="flex flex-col gap-1.5 mt-1">
-                              <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                                 {isDe ? 'Screenshots / Anhänge:' : 'Screenshots / Attachments:'}
                               </span>
                               <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-none">
@@ -598,7 +598,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                                     key={idx}
                                     type="button"
                                     onClick={() => setLightboxImage(url)}
-                                    className="w-16 h-16 rounded-xl border-none overflow-hidden shrink-0 active:scale-95 hover:brightness-95 transition-all cursor-pointer bg-gray-100 dark:bg-gray-800 shadow-[0_2px_6px_rgba(0,0,0,0.03)]"
+                                    className="w-16 h-16 rounded-xl border-none overflow-hidden shrink-0 active:scale-95 hover:brightness-95 transition-all cursor-pointer bg-gray-100 shadow-[0_2px_6px_rgba(0,0,0,0.03)]"
                                   >
                                     <img src={url} alt={`Screenshot ${idx}`} className="w-full h-full object-cover" />
                                   </button>
@@ -612,7 +612,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                               <button
                                 type="button"
                                 onClick={() => toggleFeedbackExpand(item.id)}
-                                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 transition-colors flex items-center gap-1 cursor-pointer outline-none border-none"
+                                className="text-xs font-bold text-emerald-600 hover:text-emerald-500 transition-colors flex items-center gap-1 cursor-pointer outline-none border-none"
                               >
                                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                                 <span>
@@ -624,21 +624,21 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                               </button>
 
                               {isExpanded && (
-                                <div className="mt-3 p-4 bg-gray-50 dark:bg-gray-800/60 border-none rounded-2xl flex flex-col gap-2 font-mono text-[11px] text-gray-700 dark:text-gray-300 overflow-x-auto">
-                                  <div><span className="font-bold text-gray-500 dark:text-gray-400">Platform:</span> {item.context.platform} ({item.context.isNative ? 'Native' : 'Web'})</div>
-                                  <div><span className="font-bold text-gray-500 dark:text-gray-400">App Version:</span> v{item.context.appVersion} (Build {item.context.appBuild})</div>
-                                  <div><span className="font-bold text-gray-500 dark:text-gray-400">Tier / Language:</span> lang: {item.context.language} | tier: {item.context.tier}</div>
-                                  <div><span className="font-bold text-gray-500 dark:text-gray-400">Viewport:</span> {item.context.viewport}</div>
-                                  <div><span className="font-bold text-gray-500 dark:text-gray-400">Route:</span> {item.context.route}</div>
-                                  <div className="break-all"><span className="font-bold text-gray-500 dark:text-gray-400">User Agent:</span> {item.context.userAgent}</div>
+                                <div className="mt-3 p-4 bg-gray-50 border-none rounded-2xl flex flex-col gap-2 font-mono text-[11px] text-gray-700 overflow-x-auto">
+                                  <div><span className="font-bold text-gray-500">Platform:</span> {item.context.platform} ({item.context.isNative ? 'Native' : 'Web'})</div>
+                                  <div><span className="font-bold text-gray-500">App Version:</span> v{item.context.appVersion} (Build {item.context.appBuild})</div>
+                                  <div><span className="font-bold text-gray-500">Tier / Language:</span> lang: {item.context.language} | tier: {item.context.tier}</div>
+                                  <div><span className="font-bold text-gray-500">Viewport:</span> {item.context.viewport}</div>
+                                  <div><span className="font-bold text-gray-500">Route:</span> {item.context.route}</div>
+                                  <div className="break-all"><span className="font-bold text-gray-500">User Agent:</span> {item.context.userAgent}</div>
 
                                   {item.context.logs && item.context.logs.length > 0 && (
-                                    <div className="mt-2 border-t border-black/5 dark:border-white/5 pt-2 flex flex-col gap-1.5">
-                                      <div className="font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1 text-[9px] mb-1">
+                                    <div className="mt-2 border-t border-black/5 pt-2 flex flex-col gap-1.5">
+                                      <div className="font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1 text-[9px] mb-1">
                                         <Terminal className="w-3.5 h-3.5" />
                                         {isDe ? 'Konsolen-Protokoll:' : 'Console Logs:'}
                                       </div>
-                                      <div className="max-h-48 overflow-y-auto bg-gray-950 dark:bg-black text-gray-300 p-3 rounded-xl text-[9px] leading-tight space-y-1 font-mono border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
+                                      <div className="max-h-48 overflow-y-auto bg-gray-950 text-gray-300 p-3 rounded-xl text-[9px] leading-tight space-y-1 font-mono border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
                                         {item.context.logs.map((log: any, idx: number) => (
                                           <div key={idx} className={log.level === 'error' || log.level === 'warn' ? 'text-rose-400' : 'text-emerald-400'}>
                                             <span className="text-gray-500 font-semibold">[{log.level.toUpperCase()}]</span> {log.text}
@@ -662,7 +662,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
             {/* Panel: Metrics */}
             <Tabs.Panel id="metrics">
               <div className="flex flex-col gap-6">
-                <div className="flex flex-wrap sm:flex-nowrap gap-1 bg-gray-100 dark:bg-gray-800/80 p-1 sm:p-1.5 rounded-2xl border-none">
+                <div className="flex flex-wrap sm:flex-nowrap gap-1 bg-gray-100 p-1 sm:p-1.5 rounded-2xl border-none">
                   {(
                     [
                       { id: 'all', label: isDe ? 'Alle' : 'All' },
@@ -677,8 +677,8 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                       type="button"
                       onClick={() => setMetricsRange(id)}
                       className={`flex-1 min-w-[30%] sm:min-w-0 px-3 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap ${metricsRange === id
-                          ? 'bg-white dark:bg-gray-900 text-emerald-600 dark:text-emerald-400 shadow-[0_2px_6px_rgba(0,0,0,0.03)]'
-                          : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                          ? 'bg-white text-emerald-600 shadow-[0_2px_6px_rgba(0,0,0,0.03)]'
+                          : 'text-gray-500 hover:text-gray-900'
                         }`}
                     >
                       {label}
@@ -695,103 +695,103 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                     {/* 1. Top Level Metrics Cards Grid (5 Cards) */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                       <div
-                        className="p-4 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white dark:bg-gray-900 flex flex-col gap-2 cursor-pointer active:scale-95 transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
+                        className="p-4 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white flex flex-col gap-2 cursor-pointer active:scale-95 transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
                         onClick={() => { setError(null); setActiveTab('users'); }}
                       >
-                        <div className="flex items-center justify-between text-gray-400 dark:text-gray-500">
+                        <div className="flex items-center justify-between text-gray-400">
                           <span className="text-[10px] font-bold uppercase tracking-wider">
                             {metricsRange === 'all' ? (isDe ? 'Nutzer' : 'Users') : (isDe ? 'Neue Nutzer' : 'New Users')}
                           </span>
-                          <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                          <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-600">
                             <Users className="w-4 h-4" />
                           </div>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-2xl font-black text-gray-900 dark:text-white leading-tight">
+                          <span className="text-2xl font-black text-gray-900 leading-tight">
                             {metricsRange === 'all' ? (metrics.users?.total ?? 0) : (metrics.users?.newInRange ?? 0)}
                           </span>
-                          <span className="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5 font-bold">
+                          <span className="text-[9px] text-gray-500 mt-0.5 font-bold">
                             {metricsRange === 'all' ? (isDe ? 'Registriert' : 'Registered') : rangeLabel[metricsRange]}
                           </span>
                         </div>
                       </div>
 
-                      <div className="p-4 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white dark:bg-gray-900 flex flex-col gap-2">
-                        <div className="flex items-center justify-between text-gray-400 dark:text-gray-500">
+                      <div className="p-4 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white flex flex-col gap-2">
+                        <div className="flex items-center justify-between text-gray-400">
                           <span className="text-[10px] font-bold uppercase tracking-wider">{isDe ? 'Rezepte' : 'Recipes'}</span>
-                          <div className="p-1.5 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400">
+                          <div className="p-1.5 rounded-xl bg-teal-500/10 text-teal-600">
                             <BookOpen className="w-4 h-4" />
                           </div>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-2xl font-black text-gray-900 dark:text-white leading-tight">
+                          <span className="text-2xl font-black text-gray-900 leading-tight">
                             {metrics.jobs?.total ?? 0}
                           </span>
-                          <span className="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5 font-bold">{isDe ? 'Extraktionen' : 'Extractions'}</span>
+                          <span className="text-[9px] text-gray-500 mt-0.5 font-bold">{isDe ? 'Extraktionen' : 'Extractions'}</span>
                         </div>
                       </div>
 
-                      <div className="p-4 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white dark:bg-gray-900 flex flex-col gap-2">
-                        <div className="flex items-center justify-between text-gray-400 dark:text-gray-500">
+                      <div className="p-4 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white flex flex-col gap-2">
+                        <div className="flex items-center justify-between text-gray-400">
                           <span className="text-[10px] font-bold uppercase tracking-wider">{isDe ? 'LLM Kosten' : 'LLM Costs'}</span>
-                          <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                          <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-600">
                             <Coins className="w-4 h-4" />
                           </div>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-2xl font-black text-gray-900 dark:text-white leading-tight">
+                          <span className="text-2xl font-black text-gray-900 leading-tight">
                             ${metrics.llm?.totalCostUsd?.toFixed(4) ?? '0.0000'}
                           </span>
-                          <span className="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5 font-bold">{rangeLabel[metricsRange]}</span>
+                          <span className="text-[9px] text-gray-500 mt-0.5 font-bold">{rangeLabel[metricsRange]}</span>
                         </div>
                       </div>
 
-                      <div className="p-4 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white dark:bg-gray-900 flex flex-col gap-2">
-                        <div className="flex items-center justify-between text-gray-400 dark:text-gray-500">
+                      <div className="p-4 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white flex flex-col gap-2">
+                        <div className="flex items-center justify-between text-gray-400">
                           <span className="text-[10px] font-bold uppercase tracking-wider">{isDe ? 'Anfragen' : 'Requests'}</span>
-                          <div className="p-1.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                          <div className="p-1.5 rounded-xl bg-blue-500/10 text-blue-600">
                             <TrendingUp className="w-4 h-4" />
                           </div>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-2xl font-black text-gray-900 dark:text-white leading-tight">
+                          <span className="text-2xl font-black text-gray-900 leading-tight">
                             {metrics.llm?.count ?? 0}
                           </span>
-                          <span className="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5 font-bold">Gemini Calls</span>
+                          <span className="text-[9px] text-gray-500 mt-0.5 font-bold">Gemini Calls</span>
                         </div>
                       </div>
 
-                      <div className="p-4 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white dark:bg-gray-900 flex flex-col gap-2 col-span-2 sm:col-span-1">
-                        <div className="flex items-center justify-between text-gray-400 dark:text-gray-500">
+                      <div className="p-4 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white flex flex-col gap-2 col-span-2 sm:col-span-1">
+                        <div className="flex items-center justify-between text-gray-400">
                           <span className="text-[10px] font-bold uppercase tracking-wider">{isDe ? 'Medien-Download' : 'Media Download'}</span>
-                          <div className="p-1.5 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                          <div className="p-1.5 rounded-xl bg-indigo-500/10 text-indigo-600">
                             <HardDriveDownload className="w-4 h-4" />
                           </div>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-2xl font-black text-gray-900 dark:text-white leading-tight">
+                          <span className="text-2xl font-black text-gray-900 leading-tight">
                             {formatDownloadSize(metrics.jobs?.mediaMb ?? 0)}
                           </span>
-                          <span className="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5 font-bold">{rangeLabel[metricsRange]}</span>
+                          <span className="text-[9px] text-gray-500 mt-0.5 font-bold">{rangeLabel[metricsRange]}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* 2. Job Status Queue breakdown card */}
-                    <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white dark:bg-gray-900 flex flex-col gap-4">
-                      <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">
+                    <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white flex flex-col gap-4">
+                      <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">
                         Queue Status Breakdown
                       </h3>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
-                        <div className="bg-emerald-500/10 dark:bg-emerald-500/15 rounded-2xl p-4 flex flex-col items-center border-none">
-                          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{isDe ? 'Erfolgreich' : 'Succeeded'}</span>
-                          <span className="text-2xl font-black text-emerald-700 dark:text-emerald-300 mt-1">{metrics.jobs?.completed ?? 0}</span>
+                        <div className="bg-emerald-500/10 rounded-2xl p-4 flex flex-col items-center border-none">
+                          <span className="text-xs font-bold text-emerald-600">{isDe ? 'Erfolgreich' : 'Succeeded'}</span>
+                          <span className="text-2xl font-black text-emerald-700 mt-1">{metrics.jobs?.completed ?? 0}</span>
                         </div>
                         <button
                           type="button"
                           onClick={() => setShowFailedJobs((prev) => !prev)}
                           className={`rounded-2xl p-4 flex flex-col items-center cursor-pointer transition-all border-none active:scale-95 ${
-                            showFailedJobs ? 'bg-rose-500/20 ring-2 ring-rose-500/30 text-rose-700 dark:text-rose-300' : 'bg-rose-500/10 hover:bg-rose-500/15 text-rose-600 dark:text-rose-400'
+                            showFailedJobs ? 'bg-rose-500/20 ring-2 ring-rose-500/30 text-rose-700' : 'bg-rose-500/10 hover:bg-rose-500/15 text-rose-600'
                           }`}
                         >
                           <div className="flex items-center justify-center gap-1">
@@ -803,41 +803,41 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                             {showFailedJobs ? (isDe ? 'Verbergen' : 'Hide') : (isDe ? 'Details' : 'Details')}
                           </span>
                         </button>
-                        <div className="bg-blue-500/10 dark:bg-blue-500/15 rounded-2xl p-4 flex flex-col items-center border-none">
-                          <span className="text-xs font-bold text-blue-600 dark:text-blue-400">{isDe ? 'Aktiv' : 'Processing'}</span>
-                          <span className="text-2xl font-black text-blue-700 dark:text-blue-300 mt-1">{metrics.jobs?.processing ?? 0}</span>
+                        <div className="bg-blue-500/10 rounded-2xl p-4 flex flex-col items-center border-none">
+                          <span className="text-xs font-bold text-blue-600">{isDe ? 'Aktiv' : 'Processing'}</span>
+                          <span className="text-2xl font-black text-blue-700 mt-1">{metrics.jobs?.processing ?? 0}</span>
                         </div>
-                        <div className="bg-amber-500/10 dark:bg-amber-500/15 rounded-2xl p-4 flex flex-col items-center border-none">
-                          <span className="text-xs font-bold text-amber-600 dark:text-amber-400">{isDe ? 'Wartend' : 'Pending'}</span>
-                          <span className="text-2xl font-black text-amber-700 dark:text-amber-300 mt-1">{metrics.jobs?.pending ?? 0}</span>
+                        <div className="bg-amber-500/10 rounded-2xl p-4 flex flex-col items-center border-none">
+                          <span className="text-xs font-bold text-amber-600">{isDe ? 'Wartend' : 'Pending'}</span>
+                          <span className="text-2xl font-black text-amber-700 mt-1">{metrics.jobs?.pending ?? 0}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* 2b. Failed Job Details Card (Shown on click of Failed Queue Status) */}
                     {showFailedJobs && (
-                      <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col gap-4">
+                      <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none bg-white shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col gap-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2 min-w-0">
-                            <div className="p-1.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 shrink-0">
+                            <div className="p-1.5 rounded-xl bg-rose-500/10 text-rose-600 shrink-0">
                               <AlertCircle className="w-4 h-4" />
                             </div>
                             <div className="flex flex-col min-w-0">
-                              <h3 className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider leading-none">
+                              <h3 className="text-xs font-bold text-rose-600 uppercase tracking-wider leading-none">
                                 {isDe ? 'Fehlgeschlagene Jobs' : 'Failed Jobs'}
                               </h3>
-                              <span className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 font-semibold">
+                              <span className="text-[10px] text-gray-500 mt-0.5 font-semibold">
                                 {isDe ? `Zeitraum: ${rangeLabel[metricsRange]}` : `Timeframe: ${rangeLabel[metricsRange]}`}
                               </span>
                             </div>
-                            <span className="ml-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold shrink-0 border-none">
+                            <span className="ml-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 font-bold shrink-0 border-none">
                               {metrics.jobs?.failedJobs?.length ?? 0}
                             </span>
                           </div>
                           <button
                             type="button"
                             onClick={() => setShowFailedJobs(false)}
-                            className="p-1.5 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer shrink-0 border-none"
+                            className="p-1.5 rounded-xl text-gray-400 hover:text-gray-600 transition-colors cursor-pointer shrink-0 border-none"
                             aria-label="Close"
                           >
                             <X className="w-4 h-4" />
@@ -845,26 +845,26 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                         </div>
 
                         {(!metrics.jobs?.failedJobs || metrics.jobs.failedJobs.length === 0) ? (
-                          <div className="text-center py-8 px-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border-none">
-                            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                          <div className="text-center py-8 px-4 bg-gray-50 rounded-2xl border-none">
+                            <p className="text-xs text-gray-500 font-medium">
                               {isDe ? 'Keine fehlgeschlagenen Jobs im gewählten Zeitraum vorhanden.' : 'No failed jobs found in the selected timeframe.'}
                             </p>
                           </div>
                         ) : (
                           <div className="flex flex-col gap-3 max-h-96 overflow-y-auto pr-1">
                             {metrics.jobs.failedJobs.map((job: any) => (
-                              <div key={job.id} className="p-4 bg-gray-50 dark:bg-gray-800/60 rounded-2xl border-none flex flex-col gap-2.5 shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
+                              <div key={job.id} className="p-4 bg-gray-50 rounded-2xl border-none flex flex-col gap-2.5 shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
                                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-3">
                                   <div className="flex flex-col gap-1 min-w-0">
                                     <div className="flex items-center gap-2 flex-wrap text-xs">
-                                      <span className="font-bold text-gray-900 dark:text-white truncate" title={job.email || job.userId}>
+                                      <span className="font-bold text-gray-900 truncate" title={job.email || job.userId}>
                                         {job.email || job.userId}
                                       </span>
-                                      <span className="text-[10px] font-mono text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-900 px-1.5 py-0.5 rounded-lg border-none shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                                      <span className="text-[10px] font-mono text-gray-600 bg-white px-1.5 py-0.5 rounded-lg border-none shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
                                         ID: {job.id.slice(0, 8)}...
                                       </span>
                                     </div>
-                                    <span className="text-[10px] text-rose-600 dark:text-rose-400 font-mono font-medium">
+                                    <span className="text-[10px] text-rose-600 font-mono font-medium">
                                       {formatDate(job.createdAt)}
                                     </span>
                                   </div>
@@ -873,7 +873,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                                       href={job.url}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 shrink-0 self-start bg-emerald-500/10 dark:bg-emerald-500/20 rounded-xl transition-all border-none active:scale-95"
+                                      className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-emerald-600 hover:text-emerald-500 shrink-0 self-start bg-emerald-500/10 rounded-xl transition-all border-none active:scale-95"
                                     >
                                       <span>{isDe ? 'Reel öffnen' : 'Open Reel'}</span>
                                       <ExternalLink className="w-3 h-3" />
@@ -882,8 +882,8 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                                 </div>
 
                                 {/* Error Details Container */}
-                                <div className="p-3 bg-white dark:bg-gray-900/90 rounded-xl text-[11px] font-mono text-rose-600 dark:text-rose-400 break-words leading-relaxed whitespace-pre-wrap border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
-                                  <span className="font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider text-[9px] block mb-1">
+                                <div className="p-3 bg-white rounded-xl text-[11px] font-mono text-rose-600 break-words leading-relaxed whitespace-pre-wrap border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
+                                  <span className="font-bold text-rose-600 uppercase tracking-wider text-[9px] block mb-1">
                                     {isDe ? 'Fehlergrund:' : 'Error details:'}
                                   </span>
                                   {job.error || (isDe ? 'Keine genauere Fehlermeldung hinterlegt.' : 'No detailed error message provided.')}
@@ -897,27 +897,27 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
 
                     {/* 3. LLM Breakdown Table */}
                     {metrics.llm?.breakdown && Object.keys(metrics.llm.breakdown).length > 0 && (
-                      <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white dark:bg-gray-900 flex flex-col gap-4 overflow-hidden">
-                        <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">
+                      <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white flex flex-col gap-4 overflow-hidden">
+                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">
                           {isDe ? 'LLM Kosten nach Funktion' : 'LLM Costs by Function'}
                         </h3>
                         <div className="overflow-x-auto">
-                          <table className="w-full text-left text-xs text-gray-700 dark:text-gray-300 border-collapse">
+                          <table className="w-full text-left text-xs text-gray-700 border-collapse">
                             <thead>
-                              <tr className="border-b border-black/5 dark:border-white/5 text-[10px] font-bold uppercase text-gray-400 dark:text-gray-500 tracking-wider">
+                              <tr className="border-b border-black/5 text-[10px] font-bold uppercase text-gray-400 tracking-wider">
                                 <th className="pb-2.5 font-bold">{isDe ? 'Funktion' : 'Function'}</th>
                                 <th className="pb-2.5 text-right font-bold">{isDe ? 'Anfragen' : 'Requests'}</th>
                                 <th className="pb-2.5 text-right font-bold">Tokens</th>
                                 <th className="pb-2.5 text-right font-bold">{isDe ? 'Kosten (USD)' : 'Costs (USD)'}</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-black/5 dark:divide-white/5 font-medium">
+                            <tbody className="divide-y divide-black/5 font-medium">
                               {Object.entries(metrics.llm.breakdown).map(([key, value]: [string, any]) => (
-                                <tr key={key} className="text-gray-900 dark:text-white">
-                                  <td className="py-2.5 font-mono text-[11px] text-gray-700 dark:text-gray-300">{key}</td>
+                                <tr key={key} className="text-gray-900">
+                                  <td className="py-2.5 font-mono text-[11px] text-gray-700">{key}</td>
                                   <td className="py-2.5 text-right">{value.count}</td>
                                   <td className="py-2.5 text-right font-mono">{value.tokens.toLocaleString()}</td>
-                                  <td className="py-2.5 text-right font-mono text-amber-600 dark:text-amber-400">${value.cost.toFixed(4)}</td>
+                                  <td className="py-2.5 text-right font-mono text-amber-600">${value.cost.toFixed(4)}</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -929,8 +929,8 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                     {/* 4. Daily stats list acting as elegant visual bar-charts */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Daily Extractions */}
-                      <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white dark:bg-gray-900 flex flex-col gap-4">
-                        <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">
+                      <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white flex flex-col gap-4">
+                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">
                           {isDe ? 'Extraktionen' : 'Extractions'} ({rangeLabel[metricsRange]})
                         </h3>
                         {metrics.jobs?.dailyStats && metrics.jobs.dailyStats.length > 0 ? (
@@ -940,28 +940,28 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                               const pct = (stat.count / maxCount) * 100;
                               return (
                                 <div key={stat.date} className="flex items-center gap-3 text-[11px]">
-                                  <span className="w-12 sm:w-20 text-gray-500 dark:text-gray-400 font-mono font-medium shrink-0">{stat.date.slice(5)}</span>
-                                  <div className="flex-1 bg-gray-100 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden">
+                                  <span className="w-12 sm:w-20 text-gray-500 font-mono font-medium shrink-0">{stat.date.slice(5)}</span>
+                                  <div className="flex-1 bg-gray-100 h-2.5 rounded-full overflow-hidden">
                                     <div
-                                      className="bg-emerald-600 dark:bg-emerald-500 h-full rounded-full transition-all duration-500"
+                                      className="bg-emerald-600 h-full rounded-full transition-all duration-500"
                                       style={{ width: `${pct}%` }}
                                     />
                                   </div>
-                                  <span className="w-6 text-right font-black text-gray-900 dark:text-white shrink-0">{stat.count}</span>
+                                  <span className="w-6 text-right font-black text-gray-900 shrink-0">{stat.count}</span>
                                 </div>
                               );
                             })}
                           </div>
                         ) : (
-                          <p className="text-center text-xs text-gray-500 dark:text-gray-400 py-8 font-medium">
+                          <p className="text-center text-xs text-gray-500 py-8 font-medium">
                             {isDe ? 'Keine Extraktionen im Zeitraum.' : 'No extractions in timeframe.'}
                           </p>
                         )}
                       </div>
 
                       {/* Daily Costs */}
-                      <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white dark:bg-gray-900 flex flex-col gap-4">
-                        <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">
+                      <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white flex flex-col gap-4">
+                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">
                           {isDe ? 'LLM Kosten' : 'LLM Costs'} ({rangeLabel[metricsRange]})
                         </h3>
                         {metrics.llm?.dailyStats && metrics.llm.dailyStats.length > 0 ? (
@@ -971,14 +971,14 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                               const pct = (stat.cost / maxCost) * 100;
                               return (
                                 <div key={stat.date} className="flex items-center gap-3 text-[11px]">
-                                  <span className="w-12 sm:w-20 text-gray-500 dark:text-gray-400 font-mono font-medium shrink-0">{stat.date.slice(5)}</span>
-                                  <div className="flex-1 bg-gray-100 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden">
+                                  <span className="w-12 sm:w-20 text-gray-500 font-mono font-medium shrink-0">{stat.date.slice(5)}</span>
+                                  <div className="flex-1 bg-gray-100 h-2.5 rounded-full overflow-hidden">
                                     <div
                                       className="bg-amber-500 h-full rounded-full transition-all duration-500"
                                       style={{ width: `${pct}%` }}
                                     />
                                   </div>
-                                  <span className="w-16 text-right font-black font-mono text-gray-900 dark:text-white shrink-0">
+                                  <span className="w-16 text-right font-black font-mono text-gray-900 shrink-0">
                                     ${stat.cost.toFixed(3)}
                                   </span>
                                 </div>
@@ -986,7 +986,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                             })}
                           </div>
                         ) : (
-                          <p className="text-center text-xs text-gray-500 dark:text-gray-400 py-8 font-medium">
+                          <p className="text-center text-xs text-gray-500 py-8 font-medium">
                             {isDe ? 'Keine Kosten im Zeitraum.' : 'No costs in timeframe.'}
                           </p>
                         )}
@@ -994,8 +994,8 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                     </div>
 
                     {/* 5. Extracted recipes per user (only users with >0 in range) */}
-                    <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white dark:bg-gray-900 flex flex-col gap-4">
-                      <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">
+                    <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white flex flex-col gap-4">
+                      <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">
                         {isDe ? 'Extrahierte Rezepte pro Nutzer' : 'Extracted Recipes per User'} ({rangeLabel[metricsRange]})
                       </h3>
                       {metrics.extractionsPerUser && metrics.extractionsPerUser.length > 0 ? (
@@ -1008,22 +1008,22 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                             const pct = (entry.count / maxCount) * 100;
                             return (
                               <div key={entry.userId} className="flex items-center gap-3 text-[11px]">
-                                <span className="w-28 sm:w-48 truncate text-gray-700 dark:text-gray-300 font-semibold shrink-0" title={entry.email || entry.userId}>
+                                <span className="w-28 sm:w-48 truncate text-gray-700 font-semibold shrink-0" title={entry.email || entry.userId}>
                                   {entry.email || entry.userId}
                                 </span>
-                                <div className="flex-1 bg-gray-100 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden">
+                                <div className="flex-1 bg-gray-100 h-2.5 rounded-full overflow-hidden">
                                   <div
-                                    className="bg-emerald-600 dark:bg-emerald-500 h-full rounded-full transition-all duration-500"
+                                    className="bg-emerald-600 h-full rounded-full transition-all duration-500"
                                     style={{ width: `${pct}%` }}
                                   />
                                 </div>
-                                <span className="w-8 text-right font-black text-gray-900 dark:text-white shrink-0">{entry.count}</span>
+                                <span className="w-8 text-right font-black text-gray-900 shrink-0">{entry.count}</span>
                               </div>
                             );
                           })}
                         </div>
                       ) : (
-                        <p className="text-center text-xs text-gray-500 dark:text-gray-400 py-8 font-medium">
+                        <p className="text-center text-xs text-gray-500 py-8 font-medium">
                           {isDe ? 'Keine Extraktionen im Zeitraum.' : 'No extractions in timeframe.'}
                         </p>
                       )}
@@ -1036,7 +1036,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
             {/* Panel: Users */}
             <Tabs.Panel id="users">
               <div className="flex flex-col gap-6">
-                <div className="flex flex-wrap sm:flex-nowrap gap-1 bg-gray-100 dark:bg-gray-800/80 p-1 sm:p-1.5 rounded-2xl border-none">
+                <div className="flex flex-wrap sm:flex-nowrap gap-1 bg-gray-100 p-1 sm:p-1.5 rounded-2xl border-none">
                   {(
                     [
                       { id: 'all', label: isDe ? 'Alle Nutzer' : 'All Users' },
@@ -1050,8 +1050,8 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                       type="button"
                       onClick={() => setUsersRange(id)}
                       className={`flex-1 min-w-[40%] sm:min-w-0 px-3 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap ${usersRange === id
-                          ? 'bg-white dark:bg-gray-900 text-emerald-600 dark:text-emerald-400 shadow-[0_2px_6px_rgba(0,0,0,0.03)]'
-                          : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                          ? 'bg-white text-emerald-600 shadow-[0_2px_6px_rgba(0,0,0,0.03)]'
+                          : 'text-gray-500 hover:text-gray-900'
                         }`}
                     >
                       {label}
@@ -1059,10 +1059,10 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                   ))}
                 </div>
 
-                <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
+                <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none bg-white shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
                   <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between pb-3 border-b border-black/5 dark:border-white/5">
-                      <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                    <div className="flex items-center justify-between pb-3 border-b border-black/5">
+                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
                         {filteredUsers.length}{' '}
                         {usersRange === 'all'
                           ? (isDe ? 'registrierte Nutzer' : 'registered users')
@@ -1071,7 +1071,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                     </div>
 
                     {filteredUsers.length === 0 ? (
-                      <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8 font-medium">
+                      <p className="text-sm text-gray-500 text-center py-8 font-medium">
                         {isDe ? 'Keine Nutzer im gewählten Zeitraum.' : 'No users found for this timeframe.'}
                       </p>
                     ) : (
@@ -1079,10 +1079,10 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                         {filteredUsers.map((user: any) => {
                           const tierColor =
                             user.tier === 'premium'
-                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                              ? 'bg-emerald-500/10 text-emerald-600'
                               : user.tier === 'alpha'
-                                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                                : 'bg-gray-200/60 dark:bg-gray-700/60 text-gray-600 dark:text-gray-400';
+                                ? 'bg-amber-500/10 text-amber-600'
+                                : 'bg-gray-100 text-gray-600';
 
                           const fmt = (iso: string | null) => {
                             if (!iso) return '—';
@@ -1091,39 +1091,39 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                           };
 
                           return (
-                            <div key={user.id} className="p-4 bg-gray-50 dark:bg-gray-800/60 border-none rounded-2xl flex items-start gap-3 shadow-[0_2px_6px_rgba(0,0,0,0.03)] transition-all">
+                            <div key={user.id} className="p-4 bg-gray-50 border-none rounded-2xl flex items-start gap-3 shadow-[0_2px_6px_rgba(0,0,0,0.03)] transition-all">
                               {/* Avatar circle */}
-                              <div className="hidden sm:flex shrink-0 w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 items-center justify-center border-none">
+                              <div className="hidden sm:flex shrink-0 w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-600 items-center justify-center border-none">
                                 <Users className="w-4 h-4" />
                               </div>
 
                               <div className="flex-1 min-w-0">
                                 {/* Email + tier badge */}
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="text-sm font-bold text-gray-900 dark:text-white truncate max-w-full">
+                                  <span className="text-sm font-bold text-gray-900 truncate max-w-full">
                                     {user.email}
                                   </span>
                                   <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wide border-none ${tierColor}`}>
                                     {user.tier || 'free'}
                                   </span>
-                                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wide bg-blue-500/10 text-blue-600 dark:text-blue-400 border-none">
+                                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wide bg-blue-500/10 text-blue-600 border-none">
                                     {user.extractions_count ?? 0} {isDe ? 'Extraktionen' : 'extractions'}
                                   </span>
                                   {user.custom_limit !== null && user.custom_limit !== undefined && (
-                                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wide bg-purple-500/10 text-purple-600 dark:text-purple-400 border-none">
+                                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wide bg-purple-500/10 text-purple-600 border-none">
                                       limit: {user.custom_limit === -1 ? '∞' : user.custom_limit}
                                     </span>
                                   )}
                                 </div>
 
                                 {/* Dates */}
-                                <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+                                <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-gray-500 font-medium">
                                   <span>
-                                    <span className="font-bold text-gray-700 dark:text-gray-300">{isDe ? 'Registriert:' : 'Joined:'}</span>{' '}
+                                    <span className="font-bold text-gray-700">{isDe ? 'Registriert:' : 'Joined:'}</span>{' '}
                                     {fmt(user.created_at)}
                                   </span>
                                   <span>
-                                    <span className="font-bold text-gray-700 dark:text-gray-300">{isDe ? 'Letzter Login:' : 'Last login:'}</span>{' '}
+                                    <span className="font-bold text-gray-700">{isDe ? 'Letzter Login:' : 'Last login:'}</span>{' '}
                                     {fmt(user.last_sign_in_at)}
                                   </span>
                                 </div>
