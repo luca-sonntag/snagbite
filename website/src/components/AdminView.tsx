@@ -19,7 +19,8 @@ import {
   ExternalLink,
   ChevronDown,
   LogOut,
-  Globe
+  Globe,
+  Bell
 } from 'lucide-react';
 import { apiUrl } from '../api';
 
@@ -70,6 +71,8 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
   const [expandedFeedbackId, setExpandedFeedbackId] = useState<string | null>(null);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [showFailedJobs, setShowFailedJobs] = useState(false);
+  const [triggeringPush, setTriggeringPush] = useState(false);
+  const [pushResult, setPushResult] = useState<{ usersScanned: number; deliveredCount: number; logs: string[] } | null>(null);
 
   const isDe = language === 'de';
 
@@ -241,6 +244,33 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
       setError(isDe ? 'Speichern fehlgeschlagen.' : 'Failed to save settings.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleTriggerPush = async () => {
+    setTriggeringPush(true);
+    setError(null);
+    setSuccessMessage(null);
+    setPushResult(null);
+    try {
+      const token = await getAccessToken();
+      const res = await fetch(apiUrl('/api/admin/notifications/trigger'), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setPushResult(data.result || null);
+        setSuccessMessage(isDe ? `Push-Notification Worker getriggert! (${data.result?.deliveredCount ?? 0} zugestellt)` : `Push notification worker executed! (${data.result?.deliveredCount ?? 0} delivered)`);
+      } else {
+        setError(data.message || (isDe ? 'Fehler beim Triggern.' : 'Failed to trigger notifications.'));
+      }
+    } catch (err: any) {
+      setError(err?.message || (isDe ? 'Netzwerkfehler.' : 'Network error.'));
+    } finally {
+      setTriggeringPush(false);
     }
   };
 
@@ -459,6 +489,55 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                     </span>
                   </Button>
                 )}
+
+                {/* Push Notification Trigger Card */}
+                <div className="p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white shadow-sm flex flex-col gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-600 shrink-0">
+                        <Bell className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-xs font-extrabold text-gray-900 uppercase tracking-wider">
+                          {isDe ? 'Push-Notifications Testen' : 'Test Push Notifications'}
+                        </h3>
+                        <p className="text-xs text-gray-500 font-medium mt-0.5 leading-snug">
+                          {isDe
+                            ? 'Führt sofort einen KI-Push-Notification Worker-Durchlauf im Hintergrund aus.'
+                            : 'Triggers a push notification worker tick in the background.'}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      isDisabled={triggeringPush}
+                      onPress={handleTriggerPush}
+                      className="py-2.5 px-4 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white shadow-sm transition-all cursor-pointer shrink-0"
+                    >
+                      {triggeringPush ? (
+                        <Spinner color="current" size="sm" />
+                      ) : (
+                        isDe ? 'Jetzt triggern' : 'Trigger now'
+                      )}
+                    </Button>
+                  </div>
+
+                  {pushResult && pushResult.logs && pushResult.logs.length > 0 && (
+                    <div className="mt-2 pt-3 border-t border-gray-100 flex flex-col gap-2">
+                      <div className="flex items-center justify-between text-[11px] font-bold text-gray-500">
+                        <span>{isDe ? 'Ergebnis-Protokoll:' : 'Execution Logs:'}</span>
+                        <span className="text-emerald-600 font-mono">{pushResult.deliveredCount} {isDe ? 'Zugestellt' : 'Delivered'}</span>
+                      </div>
+                      <div className="max-h-48 overflow-y-auto bg-gray-950 text-gray-200 p-3 rounded-2xl text-[10px] leading-relaxed space-y-1 font-mono border border-gray-800">
+                        {pushResult.logs.map((log, idx) => (
+                          <div key={idx} className={log.startsWith('DELIVERED') ? 'text-emerald-400 font-bold' : log.includes('No registered') || log.includes('Outside') || log.includes('Already') ? 'text-amber-300' : 'text-gray-300'}>
+                            {log}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </Tabs.Panel>
 
@@ -789,7 +868,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                                       {formatDate(job.createdAt)}
                                     </span>
                                   </div>
-                                  {job.url && (
+                                  {job.url && !job.url.startsWith('photo://') && (
                                     <a
                                       href={job.url}
                                       target="_blank"
