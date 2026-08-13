@@ -224,7 +224,7 @@ export interface FriendRequest {
   avatarUrl: string | null;
 }
 
-export type LeaderboardWindow = 'weekly' | 'all';
+export type LeaderboardWindow = 'monthly' | 'all';
 export type LeaderboardScope = 'friends' | 'global';
 
 export interface LeaderboardEntry {

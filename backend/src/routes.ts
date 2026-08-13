@@ -77,7 +77,7 @@ import { MAX_IMPORT_PHOTOS, deleteImportPhotos, photoJobUrl, uploadImportPhoto }
 
 import { notificationTick } from './notifications/worker.js';
 import { recordCook } from './gamification.js';
-import { weekStartUtc } from './socialTime.js';
+import { monthStartUtc } from './socialTime.js';
 import type { Profile, FriendSummary, FriendRequest, LeaderboardEntry, LeaderboardScope } from './types.js';
 
 export const apiRouter = Router();
@@ -1462,12 +1462,12 @@ apiRouter.delete('/friends/:id', async (req: Request, res: Response): Promise<vo
 });
 
 /**
- * Friends or Global leaderboard. GET /api/leaderboard?window=weekly|all&scope=friends|global
- * `value` is weekly XP (from point_ledger) or all-time XP (from user_stats).
+ * Friends or Global leaderboard. GET /api/leaderboard?window=monthly|all&scope=friends|global
+ * `value` is monthly XP (from point_ledger) or all-time XP (from user_stats).
  */
 apiRouter.get('/leaderboard', async (req: Request, res: Response): Promise<void> => {
   try {
-    const window = req.query.window === 'all' ? 'all' : 'weekly';
+    const window = req.query.window === 'all' ? 'all' : 'monthly';
     const scope = req.query.scope === 'global' ? 'global' : 'friends';
     await ensureMyProfile(req.userId!);
 
@@ -1491,13 +1491,13 @@ apiRouter.get('/leaderboard', async (req: Request, res: Response): Promise<void>
     let rawEntries: { userId: string; value: number; level?: number }[] = [];
 
     if (scope === 'global') {
-      if (window === 'weekly') {
-        const topWeekly = await getGlobalWeeklyXp(weekStartUtc(new Date()), 50);
-        const uids = topWeekly.map((x) => x.userId);
+      if (window === 'monthly') {
+        const topMonthly = await getGlobalWeeklyXp(monthStartUtc(new Date()), 50);
+        const uids = topMonthly.map((x) => x.userId);
         const [stats] = await Promise.all([
           getUserStatsForIds(uids),
         ]);
-        rawEntries = topWeekly.map((item) => ({
+        rawEntries = topMonthly.map((item) => ({
           userId: item.userId,
           value: item.xp,
           level: stats.get(item.userId)?.level ?? 1,
@@ -1515,14 +1515,14 @@ apiRouter.get('/leaderboard', async (req: Request, res: Response): Promise<void>
       const friends = await getAcceptedFriends(req.userId!);
       const ids = [req.userId!, ...friends.map((f) => f.friendId)];
 
-      const [stats, weekly] = await Promise.all([
+      const [stats, monthly] = await Promise.all([
         getUserStatsForIds(ids),
-        window === 'weekly' ? getWeeklyXp(ids, weekStartUtc(new Date())) : Promise.resolve(null),
+        window === 'monthly' ? getWeeklyXp(ids, monthStartUtc(new Date())) : Promise.resolve(null),
       ]);
 
       rawEntries = ids.map((uid) => ({
         userId: uid,
-        value: window === 'weekly' ? (weekly?.get(uid) ?? 0) : (stats.get(uid)?.xp ?? 0),
+        value: window === 'monthly' ? (monthly?.get(uid) ?? 0) : (stats.get(uid)?.xp ?? 0),
         level: stats.get(uid)?.level ?? 1,
       }));
     }

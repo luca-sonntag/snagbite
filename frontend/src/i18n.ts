@@ -356,6 +356,7 @@ export const uiTranslations = {
       social: {
         sections: { overview: 'Übersicht', leaderboard: 'Rangliste', friends: 'Freunde' },
         leaderboard: {
+          monthly: 'Diesen Monat',
           weekly: 'Diese Woche',
           allTime: 'Gesamt',
           scopeFriends: 'Freunde',
@@ -1274,6 +1275,7 @@ export const uiTranslations = {
       social: {
         sections: { overview: 'Overview', leaderboard: 'Leaderboard', friends: 'Friends' },
         leaderboard: {
+          monthly: 'This month',
           weekly: 'This week',
           allTime: 'All time',
           scopeFriends: 'Friends',

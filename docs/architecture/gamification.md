@@ -82,23 +82,23 @@ Aufbau auf dem Gamification-Fundament (`point_ledger` trägt die wöchentliche,
   **nie** an Freunde ausgeliefert.
 * **`friendships`** — mutual (`pending`/`accepted`), eine Zeile pro (requester,
   addressee)-Paar; „meine Freunde" prüft beide Richtungen.
-* **RPC `weekly_xp_for_users(uids, since)`** — `SUM(delta_xp)` aus `point_ledger` für das Wochenfenster im Freundeskreis.
-* **RPC `global_weekly_xp(since, limit_count)`** — `SUM(delta_xp)` aus `point_ledger` über alle Nutzer sortiert nach XP für das globale Wochen-Leaderboard.
+* **RPC `weekly_xp_for_users(uids, since)`** — `SUM(delta_xp)` aus `point_ledger` für das Zeitfenster (z.B. Monatsanfang) im Freundeskreis.
+* **RPC `global_weekly_xp(since, limit_count)`** — `SUM(delta_xp)` aus `point_ledger` über alle Nutzer sortiert nach XP für das globale Monats-Leaderboard.
 
 **Backend:** `ensureProfile` legt bei Erstzugriff ein Profil an (Anzeigename aus
 `full_name` ?? E-Mail-Localpart, Avatar aus Metadaten, kollisionsgeprüfter
-`friend_code`). Wochenfenster via reinem, getestetem `socialTime.ts` (`weekStartUtc`,
-Montag 00:00 UTC). Endpoints (`routes.ts`):
+`friend_code`). Monatsfenster via reinem, getestetem `socialTime.ts` (`monthStartUtc`,
+1. des Monats 00:00 UTC). Endpoints (`routes.ts`):
 * `GET/PATCH /api/me/profile` — Profil laden & Namen anpassen.
 * `GET /api/friends`, `GET /api/friends/requests` — Freundesliste & Anfragen.
 * `POST /api/friends/request` — Freundschaftsanfrage per Code (`code`) oder per User-ID (`targetUserId`, z.B. direkt aus dem globalen Leaderboard; Auto-Accept bei beidseitigen Anfragen).
 * `POST /api/friends/:id/respond` — Anfragen annehmen/ablehnen.
 * `DELETE /api/friends/:id` — Freund entfernen oder offene Anfrage abbrechen.
-* `GET /api/leaderboard?window=weekly|all&scope=friends|global` — Rangliste mit Scope (Freunde oder alle Nutzer) und Zeitfenster (diese Woche oder Gesamt). Liefert Einträge inklusive berechnetem Beziehungsstatus (`friendshipStatus: 'none' | 'pending_sent' | 'pending_received' | 'friends' | 'self'`).
+* `GET /api/leaderboard?window=monthly|all&scope=friends|global` — Rangliste mit Scope (Freunde oder alle Nutzer) und Zeitfenster (diesen Monat oder Gesamt). Liefert Einträge inklusive berechnetem Beziehungsstatus (`friendshipStatus: 'none' | 'pending_sent' | 'pending_received' | 'friends' | 'self'`).
 
 **Frontend:** `SocialContext` (profile/friends/requests + Methoden `sendRequest`, `sendRequestByUserId`, `respondRequest`, `fetchLeaderboard`) neben dem Gamification-Provider.
 * **Segmented-Nav:** **Übersicht | Rangliste | Freunde** im Fortschritt-Tab.
-* **LeaderboardView:** Bietet Umschalter zwischen **Freunde** und **Global** sowie **Diese Woche** und **Gesamt**. In der globalen Ansicht kann direkt pro Zeile eine Freundschaftsanfrage gesendet (`+ Freund`), eine offene Anfrage angenommen (`Annehmen`) oder der Status (`Angefragt`, `Freunde ✓`) eingesehen werden.
+* **LeaderboardView:** Bietet Umschalter zwischen **Freunde** und **Global** sowie **Diesen Monat** und **Gesamt**. In der globalen Ansicht kann direkt pro Zeile eine Freundschaftsanfrage gesendet (`+ Freund`), eine offene Anfrage angenommen (`Annehmen`) oder der Status (`Angefragt`, `Freunde ✓`) eingesehen werden.
 * **FriendsView:** Profilkarte + teilbarer Freundescode, per-Code hinzufügen, Anfragen, Liste, `Social/Avatar`.
 * **Deep Linking & App Links:** Android App Links via `/.well-known/assetlinks.json` und Custom Schemes (`snagbite://`, `at.snagbite.app://`).
 * **Web Landingpage:** `website` unter `/invite/:code` öffnet die native App per Intent / Custom Scheme.
