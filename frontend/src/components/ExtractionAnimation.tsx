@@ -11,6 +11,8 @@ interface ExtractionAnimationProps {
   progress: ProgressData | null;
   /** Which stage sequence to walk — photo imports never scrape or download. */
   variant?: 'link' | 'photo';
+  /** Compact height layout for free users when an ad banner is rendered below. */
+  compact?: boolean;
 }
 
 const FUNNY_TEXTS: Record<SupportedLanguage, Record<'pending' | 'scraping' | 'processing' | 'completed' | 'failed', string[]>> = {
@@ -30,7 +32,7 @@ const FUNNY_TEXTS: Record<SupportedLanguage, Record<'pending' | 'scraping' | 'pr
     scraping: [
       'Video-Küche wird durchwühlt...',
       'Video-Zutaten werden digital eingescannt...',
-      'Die Tonspur wird aus dem Video gefiltert...',
+      'Die Tonspur wird aus dem Video gefiltered...',
       'Untertitel werden entziffert...',
       'Video-Metadaten werden analysiert...',
       'Audio-Frequenzen werden glattgebügelt...',
@@ -134,7 +136,7 @@ const SCENE_TARGET_PERCENT: Record<ProgressStage, number> = {
   finalizing: 90,
 };
 
-export default function ExtractionAnimation({ url: _url, jobStatus, progress, variant = 'link' }: ExtractionAnimationProps) {
+export default function ExtractionAnimation({ url: _url, jobStatus, progress, variant = 'link', compact = false }: ExtractionAnimationProps) {
   const { t, language } = useI18n();
   const [displayedIndex, setDisplayedIndex] = useState(0);
   const [funnyText, setFunnyText] = useState('');
@@ -267,7 +269,6 @@ export default function ExtractionAnimation({ url: _url, jobStatus, progress, va
       case 'reading_photos':
         return (
           <div className="relative flex items-center justify-center h-28">
-            {/* A recipe card with handwriting lines, swept by the scan line. */}
             <div className="w-20 h-24 rounded-lg bg-white dark:bg-gray-900 border border-black/10 dark:border-white/10 shadow-sm rotate-[-4deg] relative overflow-hidden flex flex-col gap-1.5 p-3">
               <div className="absolute inset-x-0 h-1 bg-emerald-400 dark:bg-emerald-500 shadow-[0_0_8px_#34d399] animate-scan z-10" />
               <div className="h-1.5 w-3/4 rounded-full bg-emerald-500/30" />
@@ -311,7 +312,7 @@ export default function ExtractionAnimation({ url: _url, jobStatus, progress, va
   };
 
   return (
-    <div className="flex flex-col items-center justify-center flex-1 min-h-[55dvh] w-full text-center py-6 px-4 gap-6">
+    <div className="flex-1 min-h-0 flex flex-col items-center justify-center w-full text-center px-4 py-2 gap-3 transition-all duration-300">
       {/* Infographic Area */}
       <div className="flex items-center justify-center w-full py-4">
         <div key={displayedIndex} className="animate-fade-in flex flex-col items-center justify-center w-full">
