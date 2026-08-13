@@ -56,7 +56,7 @@ export default function ExtractionAdCard({
     const positionBanner = () => {
       if (cancelled || !slotRef.current || !isActive) return;
       const rect = slotRef.current.getBoundingClientRect();
-      const bottomMargin = embedded ? 68 : Math.max(0, Math.round(window.innerHeight - rect.bottom));
+      const bottomMargin = Math.max(0, Math.round(window.innerHeight - rect.bottom));
 
       const adSize = variant === 'banner' ? BannerAdSize.BANNER : BannerAdSize.MEDIUM_RECTANGLE;
       console.log(
