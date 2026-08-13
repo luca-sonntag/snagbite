@@ -19,6 +19,7 @@ Exponiert administrative API-Routen unter `/api/admin/*`, die über die Middlewa
 * **Endpunkte:**
   * `GET /api/admin/check`: Prüft Admin-Status.
   * `GET /api/admin/settings` & `PATCH /api/admin/settings`: Liefert und aktualisiert Werte in `global_settings` (invalidiert den internen Cache).
+  * `POST /api/admin/notifications/trigger`: Führt manuell einen Durchlauf des Push-Notification Workers für Tests aus und liefert detaillierte Ausführungsprotokolle.
   * `GET /api/admin/feedback`: Ruft alle In-App Bug-Reports und Feedback chronologisch ab.
   * `GET /api/admin/metrics`: Aggregiert Benutzerzahlen, Rezept-Queue-Status inklusive `failedJobs` Details, sowie Gemini-Token- und Kostenstatistiken. Acceptiert einen `range`-Query-Parameter (`all`, `today`, `3d`, `7d`, `30d`).
 * Klickt der Admin in der Queue-Status-Karte auf "Fehlgeschlagen", klappt im Frontend eine Details-Karte mit Fehlergründen, User-E-Mail, Reel-Link und Zeitstempel aller gescheiterten Jobs im ausgewählten Zeitfenster auf.
