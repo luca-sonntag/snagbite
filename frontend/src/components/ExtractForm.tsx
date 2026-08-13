@@ -411,20 +411,22 @@ export default function ExtractForm({
                     setAdNotice(null);
                     try {
                       const earned = await showRewardedAd();
-                      if (earned && claimRewardedCredit) {
-                        const claimed = await claimRewardedCredit();
-                        if (claimed) {
-                          setAdNotice(t('ads.rewardedSuccess'));
-                          if (url.trim() || photos.length > 0) {
-                            setTimeout(() => {
-                              const form = document.querySelector('form');
-                              if (form) form.requestSubmit();
-                            }, 100);
+                      if (earned) {
+                        setAdNotice(t('ads.rewardedSuccess'));
+                        if (claimRewardedCredit) {
+                          const claimed = await claimRewardedCredit();
+                          if (claimed) {
+                            if (url.trim() || photos.length > 0) {
+                              setTimeout(() => {
+                                const form = document.querySelector('form');
+                                if (form) form.requestSubmit();
+                              }, 100);
+                            }
+                          } else {
+                            setAdNotice(t('ads.rewardedFailed'));
                           }
-                        } else {
-                          setAdNotice(t('ads.rewardedFailed'));
                         }
-                      } else if (!earned) {
+                      } else {
                         setAdNotice(t('ads.rewardedFailed'));
                       }
                     } catch {
