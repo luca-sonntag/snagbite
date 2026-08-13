@@ -5,6 +5,7 @@ import DataDeletionPage from './pages/DataDeletionPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import LegalPage from './pages/LegalPage';
 import TermsPage from './pages/TermsPage';
+import InviteLandingPage from './pages/InviteLandingPage';
 
 export default function App() {
   return (
@@ -21,6 +22,8 @@ export default function App() {
       <main className="flex-1 flex flex-col items-center w-full">
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/invite/:code" element={<InviteLandingPage />} />
+          <Route path="/invite" element={<InviteLandingPage />} />
           <Route path="/delete-data" element={<DataDeletionPage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
           <Route path="/legal" element={<LegalPage />} />
