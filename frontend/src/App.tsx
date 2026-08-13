@@ -705,11 +705,13 @@ export default function App() {
       {/* Main content body */}
       <main className={`w-full max-w-md mx-auto px-4 mt-1 flex-1 flex flex-col gap-6 ${activeView === 'admin'
         ? 'pb-12'
-        : isViewingRecipe || (activeView === 'history' && isCatalogSelectMode)
-          ? 'pb-48'
-          : !isPremium && activeView !== 'settings'
-            ? 'pb-44'
-            : 'pb-24'
+        : (activeView === 'extract' && isPending && !recipe)
+          ? 'pb-6 my-auto justify-center'
+          : isViewingRecipe || (activeView === 'history' && isCatalogSelectMode)
+            ? 'pb-48'
+            : !isPremium && activeView !== 'settings'
+              ? 'pb-44'
+              : 'pb-24'
         } ${(!isViewingRecipe && activeView !== 'extract') ? 'pt-4' : ''}`}>
 
         {/* One-time trial banner for free users */}
@@ -726,7 +728,7 @@ export default function App() {
         <div
           hidden={activeView !== 'extract'}
           aria-hidden={activeView !== 'extract' || undefined}
-          className={activeView === 'extract' ? 'flex-1 flex flex-col min-h-0' : ''}
+          className={activeView === 'extract' ? `flex-1 flex flex-col min-h-0 ${isPending ? 'justify-center my-auto' : ''}` : ''}
         >
           {recipe ? (
             /* Recipe Detail View — hides extract inputs once extraction is done */
