@@ -63,6 +63,10 @@ export default function ExtractionAdCard({
 
       const bottomMargin = Math.max(0, Math.round(window.innerHeight - rect.bottom));
 
+      // For embedded bottom dock banner, bottomMargin MUST be above the bottom menu buttons (> 45dp)
+      // Ignore transient near-zero margin measurements during CSS expansion transitions.
+      if (embedded && bottomMargin < 45) return;
+
       const adSize = variant === 'banner' ? BannerAdSize.BANNER : BannerAdSize.MEDIUM_RECTANGLE;
       console.log(
         `[AdMob] slot rect top=${Math.round(rect.top)} bottom=${Math.round(rect.bottom)} ` +
