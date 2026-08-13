@@ -913,14 +913,20 @@ export default function App() {
           activeView !== 'admin' &&
           adStatus !== 'failed';
 
+        // The banner is destroyed only on real teardown — premium purchased or
+        // no ad filled. Temporary contexts (recipe view, settings, admin,
+        // overlays, select mode, running extraction) hide/resume it instead so
+        // the loaded ad is preserved in memory rather than reloaded.
+        const bannerCanExist = !isPremium && adStatus !== 'failed';
+
         return (
           <div className={bottomBarClasses}>
             <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] w-full max-w-md mx-auto flex flex-col rounded-t-3xl overflow-hidden">
               {/* Banner ad displayed seamlessly attached to top of bottom menu for free users */}
               <div className={`w-full pt-2 pb-1.5 px-3 border-b border-gray-100/60 dark:border-gray-800/60 flex flex-col items-center justify-center ${shouldShowBannerAd ? '' : 'hidden'}`}>
                 <ExtractionAdCard
-                  isActive={shouldShowBannerAd}
-                  hidden={isBottomBarHidden}
+                  isActive={bannerCanExist}
+                  hidden={!shouldShowBannerAd || isBottomBarHidden}
                   variant="banner"
                   embedded
                   onStatusChange={setAdStatus}
