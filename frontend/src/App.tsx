@@ -3,7 +3,7 @@ import { Sparkles, BookOpen, ShoppingCart, User, Trophy } from 'lucide-react';
 
 import type { Job } from './types';
 import { apiUrl } from './api';
-import { registerShareIntent, registerNotificationTap, hideSplashScreen, registerBackButtonHandler } from './native';
+import { registerShareIntent, registerNotificationTap, hideSplashScreen, registerBackButtonHandler, registerAppUrlOpen } from './native';
 import { registerPushTapHandler, enablePushNotifications } from './push';
 import { parseSharedUrl } from './utils/shareUrl';
 import ExtractForm, { type ExtractMode } from './components/ExtractForm';
@@ -31,6 +31,7 @@ import { useShoppingList } from './hooks/useShoppingList';
 import { useDialog } from './context/DialogContext';
 import { useI18n } from './context/I18nContext';
 import { useAuth } from './context/AuthContext';
+import { useSocial } from './context/SocialContext';
 import { useGamification } from './context/GamificationContext';
 import { useHashRouter } from './hooks/useHashRouter';
 import { EXTRACTION_COMPLETE_EVENT, OPEN_RECIPE_EVENT, useExtractionJobs } from './context/ExtractionJobsContext';
@@ -50,10 +51,22 @@ export default function App() {
   const { t } = useI18n();
   const { user, isPremium, loading: authLoading, getAccessToken } = useAuth();
   const { snapshot: gamificationSnapshot } = useGamification();
+  const { incomingRequests } = useSocial();
   const userLevel = gamificationSnapshot?.stats?.level ?? null;
+  const incomingRequestsCount = incomingRequests.length;
 
   // ── URL-based routing ────────────────────────────────────────────────────
   const { tab: activeView, subPath, navigate, replace } = useHashRouter();
+
+  // Invite deep link (#/invite/<code>): capture the code, then redirect to the
+  // friends section of the progress tab (the 'invite' tab has no view of its own).
+  const [pendingInviteCode, setPendingInviteCode] = useState<string | null>(null);
+  useEffect(() => {
+    if (activeView === 'invite') {
+      if (subPath) setPendingInviteCode(subPath.toUpperCase());
+      navigate('progress');
+    }
+  }, [activeView, subPath, navigate]);
 
   // History & multi-view states
   const [history, setHistory] = useState<Job[]>([]);
@@ -642,6 +655,46 @@ export default function App() {
     });
   }, [authLoading, user, replace, setUrl, triggerExtraction, limitStatus]);
 
+  // Handle Capacitor native App Links / Deep Links (e.g. snagbite://invite/CODE or https://snagbite.app/invite/CODE)
+  useEffect(() => {
+    return registerAppUrlOpen((openUrl) => {
+      try {
+        const urlObj = new URL(openUrl);
+        let targetHash: string | null = null;
+
+        if (urlObj.protocol === 'snagbite:' || urlObj.protocol === 'at.snagbite.app:') {
+          const codeParam = urlObj.searchParams.get('code');
+          const host = urlObj.hostname;
+          const path = urlObj.pathname.replace(/^\/+/, '');
+          if (codeParam) {
+            targetHash = `#/invite/${codeParam}`;
+          } else if (host === 'invite') {
+            targetHash = path ? `#/invite/${path}` : '#/progress';
+          } else if (path.startsWith('invite/')) {
+            targetHash = `#/${path}`;
+          } else {
+            const full = [host, path].filter(Boolean).join('/');
+            if (full) targetHash = `#/${full}`;
+          }
+        } else if (urlObj.hash && urlObj.hash !== '#' && urlObj.hash !== '#/') {
+          targetHash = urlObj.hash;
+        } else if (urlObj.pathname && urlObj.pathname !== '/' && !urlObj.pathname.endsWith('.html')) {
+          targetHash = `#${urlObj.pathname}`;
+        }
+
+        if (targetHash) {
+          if (window.location.hash === targetHash) {
+            window.dispatchEvent(new HashChangeEvent('hashchange'));
+          } else {
+            window.location.hash = targetHash;
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to parse openUrl:', err);
+      }
+    });
+  }, []);
+
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (extractMode === 'photo') {
@@ -878,6 +931,8 @@ export default function App() {
         {/* PROGRESS TAB */}
         <div hidden={activeView !== 'progress'} aria-hidden={activeView !== 'progress' || undefined}>
           <ProgressView
+            pendingInviteCode={pendingInviteCode}
+            onInviteConsumed={() => setPendingInviteCode(null)}
             onSelectRecipe={(jobId) => {
               navigate('history', jobId);
             }}
@@ -1016,8 +1071,12 @@ export default function App() {
               >
                 <div className="relative">
                   <Trophy className="w-5.5 h-5.5 mb-1" />
-                  {userLevel !== null && (
-                    <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-emerald-600 px-1 text-[9px] font-black text-white leading-none ring-2 ring-white dark:ring-gray-900 animate-pulse-slow">
+                  {incomingRequestsCount > 0 ? (
+                    <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center text-center leading-none rounded-full bg-rose-500 px-1 text-[9px] font-black text-white ring-2 ring-white dark:ring-gray-900 animate-pulse">
+                      {incomingRequestsCount}
+                    </span>
+                  ) : userLevel !== null && (
+                    <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center text-center leading-none rounded-full bg-emerald-600 px-1 text-[9px] font-black text-white ring-2 ring-white dark:ring-gray-900 animate-pulse-slow">
                       {userLevel}
                     </span>
                   )}

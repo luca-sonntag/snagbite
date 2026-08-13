@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { legal } from '../legal';
 import { Card } from '@heroui/react';
 import { Smartphone, ShieldCheck, Mail, CreditCard } from 'lucide-react';
@@ -13,9 +14,14 @@ export default function DataDeletionPage() {
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 py-8 md:py-12 flex flex-col gap-8">
-      
+      <div>
+        <Link to="/" className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1">
+          ← Zurück zur Startseite
+        </Link>
+      </div>
+
       {/* Page Header */}
-      <div className="bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/15 rounded-2xl p-6 md:p-8 flex flex-col gap-2">
+      <div className="bg-rose-500/5 dark:bg-rose-500/10 border-none rounded-2xl p-6 md:p-8 flex flex-col gap-2">
         <span className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Account-Verwaltung</span>
         <h1 className="text-3xl font-black text-gray-900 dark:text-white leading-tight">
           Daten löschen
@@ -29,7 +35,7 @@ export default function DataDeletionPage() {
         
         {/* Step by step Card */}
         <div className="md:col-span-7 flex flex-col gap-6">
-          <Card className="p-6 border-none shadow-sm glass-panel">
+          <Card className="p-6 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] bg-white dark:bg-gray-900 rounded-3xl">
             <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
               <Smartphone className="w-5 h-5 text-emerald-500" />
               Löschung direkt in der App

@@ -10,6 +10,7 @@ import { TimerProvider } from './context/TimerContext.tsx'
 import { GamificationProvider } from './context/GamificationContext.tsx'
 import { ExtractionJobsProvider } from './context/ExtractionJobsContext.tsx'
 import ErrorBoundary from './components/ErrorBoundary.tsx'
+import { SocialProvider } from './context/SocialContext.tsx'
 import { initNativeUi } from './native'
 import { installConsoleBuffer } from './utils/consoleBuffer'
 import { initOtaUpdates } from './utils/otaUpdater'
@@ -32,9 +33,11 @@ createRoot(document.getElementById('root')!).render(
             <TimerProvider>
               <GamificationProvider>
                 <ExtractionJobsProvider>
-                  <ErrorBoundary>
-                    <App />
-                  </ErrorBoundary>
+                  <SocialProvider>
+                    <ErrorBoundary>
+                      <App />
+                    </ErrorBoundary>
+                  </SocialProvider>
                 </ExtractionJobsProvider>
               </GamificationProvider>
             </TimerProvider>

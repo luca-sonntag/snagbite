@@ -27,6 +27,25 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
             </intent-filter>
+
+            <!-- App Links: Auto-open specific https://snagbite.app URLs directly in Snagbite app -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="snagbite.app" android:pathPrefix="/invite" />
+                <data android:scheme="https" android:host="snagbite.app" android:pathPrefix="/history" />
+                <data android:scheme="https" android:host="snagbite.app" android:pathPrefix="/recipe" />
+            </intent-filter>
+
+            <!-- Custom URL Schemes: snagbite:// and at.snagbite.app:// for instant deep links -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="snagbite" />
+                <data android:scheme="at.snagbite.app" />
+            </intent-filter>
         </activity>
 
         <provider

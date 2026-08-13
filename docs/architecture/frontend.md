@@ -13,6 +13,7 @@
 * **`AuthContext.tsx`:** Verwaltet Supabase Auth Session (`signIn`, `signUp`, `signInWithGoogle`, `signOut`, `getAccessToken`, `isPremium`).
 * **`DialogContext.tsx`:** Stellt globalen Dialog-Service (`useDialog()`) bereit, um native Browser-Dialoge durch moderne HeroUI-Dialoge zu ersetzen.
 * **`I18nContext.tsx`:** Verwaltet Internationalisierung (Deutsch/Englisch) mit `localStorage`-Persistenz und Browsersprachen-Erkennung.
+* **`OverlayStackContext.tsx`:** Globaler Ref-Counted Overlay-Stack (`pushOverlay`, `popOverlay`, `isAnyOverlayOpen`) und Convenience-Hook `useAdOverlay(isOpen)`. Blendet das native AdMob-Banner synchron aus, sobald ein beliebiges Modal, Sheet oder Drawer geöffnet wird, und stellt es nach dem Schließen wieder her.
 
 ### Lokalisierung & Error-Code System
 * **Lokalisierung (`frontend/src/i18n.ts`):** Übersetzungen für Supermarktabteilungen, Emojis, Sortierung, UI-Texte und Auth.
@@ -79,7 +80,7 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
 
 ---
 
-## 5. 💎 Freemium Gating System
+## 6. 💎 Freemium Gating System
 
 * **Tiers:** Free, Alpha, Premium (`user.app_metadata.tier`).
 * **Gating-Punkte:**
@@ -90,10 +91,53 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
 
 ---
 
-## 6. 🐛 In-App Feedback & Bug-Reports
+## 7. 🐛 In-App Feedback & Bug-Reports
 
 * **Accessibility:** Erreichbar über SettingsView ("Hilfe" -> `FeedbackDrawer.tsx`).
 * **`FeedbackDrawer.tsx`:** Bug/Idee-Toggle, Textarea (max. 4000 Zeichen), Multi-Screenshot-Anhang (max. 6 Bilder).
 * **Kontext-Erfassung (`feedbackContext.ts`):** Hängt App-Version, Plattform, UserAgent, Route, UserId, Tier und Konsolen-Logs an.
 * **Console-Ring-Buffer (`consoleBuffer.ts`):** Hält die letzten ~50 Konsolen-Einträge im Speicher.
 * **Backend (`POST /api/feedback`):** Lädt Screenshots in privaten Supabase Bucket `feedback-screenshots` (10-Jahres Signed URLs) und speichert Report in `feedback`-Tabelle.
+
+---
+
+## 8. 📢 AdMob Monetarisierung & Native Ad-Steuerung (`frontend/src/utils/ads.ts`)
+
+Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird für Free-User ausgespielt. Auf Non-Native/Web fungieren alle Aufrufe als sichere No-Ops bzw. simulieren Video-Delays im Dev-Modus.
+
+### Banner-Formate & Platzierung
+* **Bottom-Dock Banner (`BANNER` 320×50):** Integriert in der Haupt-App-Shell (`App.tsx`) direkt oberhalb der Bottom-Navigation.
+  * **Sichtbarkeit:** Sichtbar auf den Tabs `extract`, `history`, `shopping-list` und `progress` für Free-User.
+  * **Unterdrückung:** Ausgeblendet im `settings`- und `admin`-Tab, während einer geöffneten Rezept-Detailansicht (`isViewingRecipe`) sowie während einer aktiven Extraktion.
+* **Extraktions-Fortschrittsbanner (`MEDIUM_RECTANGLE` / MREC 300×250):** Wird in `ExtractForm.tsx` / `ExtractionAnimation.tsx` unterhalb des Fortschritts-Skeletts eingeblendet, während Gemini das Rezept analysiert.
+
+### Dynamische Layout-Messung (`ExtractionAdCard.tsx`)
+* Da AdMob-Banner als native OS-Views über der Capacitor WebView gerendert werden, berechnet `ExtractionAdCard` per `getBoundingClientRect()` dynamisch den exakten Abstand (`bottomMargin`) zum Viewport-Boden.
+* Berücksichtigt DPR, Orientation-Changes, Resize-Events und wartet 350ms auf das Einschwingen von CSS-Transitionen (`translate-y` Slide-Up).
+* Verhindert Layout-Flicker durch Status-Listener (`pending` ➔ Spinner, `loaded` ➔ Ad einblenden, `failed` ➔ Container kollabieren).
+
+### Rewarded Video Ads (+1 Extraktions-Credit)
+* **Trigger:** Wenn ein Free-User sein tägliches Extraktionslimit erreicht (`remaining === 0`), wandelt sich der Primär-Button in `ExtractForm.tsx` in *"Video ansehen (+1 Rezept-Extraktion)"*.
+* **Ablauf (`showRewardedAd()`):**
+  1. Bereitet das AdMob Rewarded Video Ad vor (`prepareRewardVideoAd`) und zeigt es an (`showRewardVideoAd`).
+  2. Lauscht auf `RewardAdPluginEvents.Rewarded` und `Dismissed`.
+  3. Nach erfolgreichem Reward ruft der Client `claimRewardedCredit()` auf (`POST /api/me/rewarded-ad-claimed`).
+  4. Backend erhöht `app_metadata.bonus_credits` in Supabase Auth um `+1`.
+  5. Die Rezept-Extraktion wird direkt und ohne weiteren Benutzerklick gestartet.
+* **Web-Dev-Simulation:** Im Browser-Entwicklungsmodus wird eine 2-Sekunden-Verzögerung simuliert und `true` zurückgegeben.
+
+### Overlay-Stack & Z-Index-Konflikt-Schutz (`OverlayStackContext.tsx`)
+* **Problem:** Native Android AdViews schweben systembedingt über jedem Web-DOM-Inhalt und würden HeroUI-Dialoge, Bottom-Sheets und Menüs überdecken.
+* **Lösung:** Globaler ref-counted Stack. Jeder geöffnete Overlay-Dialog (z. B. `PremiumModal`, `FeedbackDrawer`, `CollectionSheet`, `FilterSheet`, `FlagSheet`, `TimerConfirmSheet`, `DialogContext`) ruft `useAdOverlay(isOpen)` auf.
+* **Verhalten:**
+  * Stack-Tiefe `0 ➔ 1`: Ruft `hideAdBanner()` auf.
+  * Stack-Tiefe `1 ➔ 0`: Ruft `resumeAdBanner()` auf.
+  * Sofortige Pointerdown-Interzeption vor Abschluss von Klickanimationen.
+
+### Stale Impression & Resume Delay Logik
+* **`STALE_HIDE_MS` (60s):** Bleibt das Banner länger als 60 Sekunden versteckt (z. B. langes Lesen eines Rezepts), wird es zerstört. Beim nächsten Einblenden wird ein frischer Ad-Request abgesetzt (neue bezahlte Impression statt alter Standbild-Banner).
+* **`RESUME_DELAY_MS` (500ms):** Das Wiedereinblenden nach Schließen von Overlays wird verzögert, bis die CSS-Slide-Up-Animation der Bottom-Bar vollständig abgeschlossen ist.
+
+### DSGVO / UMP Consent Flow & Plugin-Patch
+* **Google UMP SDK:** In `initAds()` wird vor dem ersten Ad-Request `AdMob.requestConsentInfo()` und bei Bedarf `AdMob.showConsentForm()` ausgeführt. Bei Ablehnung oder fehlendem Consent wird `npa: true` (Non-Personalized Ads) angefordert.
+* **Patched Plugin:** `@capacitor-community/admob` v8.0.0 wurde via `patch-package` angepasst, um echte Java-seitige `hideBanner()` / `resumeBanner()` Methoden auf dem Android UI-Thread ohne Deadlocks und Neuladen bereitzustellen.
