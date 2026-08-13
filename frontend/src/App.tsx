@@ -126,6 +126,7 @@ export default function App() {
   // effect doesn't clear its subPath before the history state catches up.
   const newlyExtractedJobIdRef = useRef<string | null>(null);
   const [isCatalogSheetOpen, setIsCatalogSheetOpen] = useState(false);
+  const [adStatus, setAdStatus] = useState<'pending' | 'loaded' | 'failed'>('pending');
 
   // Remembers the last open state of the history tab (recipe detail or list),
   // so the bottom-nav "Recipes" button returns to the recipe that was open
@@ -905,7 +906,8 @@ export default function App() {
           !isPremium &&
           !isViewingRecipe &&
           activeView !== 'settings' &&
-          activeView !== 'admin';
+          activeView !== 'admin' &&
+          adStatus !== 'failed';
 
         return (
           <div className={bottomBarClasses}>
@@ -913,7 +915,12 @@ export default function App() {
               {/* Banner ad displayed seamlessly attached to top of bottom menu for free users */}
               {shouldShowBannerAd && (
                 <div className="w-full pt-2 pb-1.5 px-3 border-b border-gray-100/60 dark:border-gray-800/60 flex flex-col items-center justify-center">
-                  <ExtractionAdCard isActive={shouldShowBannerAd && !isBottomBarHidden} variant="banner" embedded />
+                  <ExtractionAdCard
+                    isActive={shouldShowBannerAd && !isBottomBarHidden}
+                    variant="banner"
+                    embedded
+                    onStatusChange={setAdStatus}
+                  />
                 </div>
               )}
 

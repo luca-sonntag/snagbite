@@ -20,21 +20,28 @@ interface ExtractionAdCardProps {
   isActive?: boolean;
   variant?: 'mrec' | 'banner';
   embedded?: boolean;
+  onStatusChange?: (status: 'pending' | 'loaded' | 'failed') => void;
 }
 
 export default function ExtractionAdCard({
   isActive = true,
   variant = 'mrec',
   embedded = false,
+  onStatusChange,
 }: ExtractionAdCardProps) {
   const { t } = useI18n();
   const slotRef = useRef<HTMLDivElement>(null);
   const defaultHeight = variant === 'banner' ? 50 : 250;
   const [slotHeight, setSlotHeight] = useState(defaultHeight);
   const native = isNative();
-  const [status, setStatus] = useState<'pending' | 'loaded' | 'failed'>(
+  const [status, setStatusState] = useState<'pending' | 'loaded' | 'failed'>(
     native ? 'pending' : 'loaded',
   );
+
+  const setStatus = (next: 'pending' | 'loaded' | 'failed') => {
+    setStatusState(next);
+    onStatusChange?.(next);
+  };
 
   useEffect(() => {
     setSlotHeight(variant === 'banner' ? 50 : 250);
@@ -120,8 +127,8 @@ export default function ExtractionAdCard({
     };
   }, [native, isActive, variant]);
 
-  // No ad filled on native — don't leave empty MREC card frame behind for MREC variant.
-  if (native && status === 'failed' && variant === 'mrec') return null;
+  // No ad filled on native — don't leave empty card frame behind.
+  if (native && status === 'failed') return null;
 
   if (embedded) {
     return (
