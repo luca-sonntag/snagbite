@@ -6,7 +6,6 @@ import { isNative } from '../native';
 import {
   showAdBanner,
   removeAdBanner,
-  resumeAdBanner,
   addBannerSizeListener,
   addBannerLoadListener,
   isAdLoaded,
@@ -56,11 +55,6 @@ export default function ExtractionAdCard({
       return;
     }
 
-    // Delay un-hiding native banner until bottom bar 300ms CSS slide-up transition completes
-    const resumeTimer = setTimeout(() => {
-      void resumeAdBanner();
-    }, 300);
-
     if (!isAdLoaded()) {
       setStatus('pending');
     } else {
@@ -68,9 +62,7 @@ export default function ExtractionAdCard({
     }
 
     const slot = slotRef.current;
-    if (!slot) {
-      return () => clearTimeout(resumeTimer);
-    }
+    if (!slot) return;
 
     let cancelled = false;
     let removeSizeListener: (() => void) | null = null;
@@ -131,7 +123,6 @@ export default function ExtractionAdCard({
 
     return () => {
       cancelled = true;
-      clearTimeout(resumeTimer);
       if (timerId) clearTimeout(timerId);
       window.removeEventListener('resize', onResize);
       if (parentBar) {

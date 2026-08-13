@@ -3,6 +3,7 @@ import { Button, Drawer } from '@heroui/react';
 import { Tag, X } from 'lucide-react';
 import type { Job } from '../../types';
 import { useI18n } from '../../context/I18nContext';
+import { useAdOverlay } from '../../context/OverlayStackContext';
 
 interface FlagSheetProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export const FlagSheet: React.FC<FlagSheetProps> = ({
   onSave
 }) => {
   const { t, language } = useI18n();
+  useAdOverlay(isOpen);
   const [tags, setTags] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);

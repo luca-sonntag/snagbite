@@ -179,11 +179,6 @@ export async function resumeAdBanner(): Promise<void> {
   }
 }
 
-// Backward compatibility aliases
-export const showExtractionBanner = showAdBanner;
-export const removeExtractionBanner = removeAdBanner;
-export const hideExtractionBanner = hideAdBanner;
-export const resumeExtractionBanner = resumeAdBanner;
 
 /**
  * Subscribe to banner size changes (fired once the ad loads with its real
