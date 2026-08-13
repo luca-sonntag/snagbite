@@ -16,7 +16,7 @@ interface ThemePalette {
   glowColor: string;
 }
 
-const THEME_PALETTES: Record<BannerTheme, ThemePalette> = {
+export const THEME_PALETTES: Record<BannerTheme, ThemePalette> = {
   italian: {
     startColor: '#D9381E',
     endColor: '#F39C12',
@@ -59,52 +59,109 @@ const THEME_PALETTES: Record<BannerTheme, ThemePalette> = {
   },
 };
 
-/** Convert emoji string into hex code for Noto Emoji URL */
-function emojiToNotoHex(emoji: string): string {
-  const codePoints: string[] = [];
+export const THEME_DEFAULT_EMOJIS: Record<BannerTheme, string> = {
+  italian: '🍕',
+  fresh: '🥗',
+  asian: '🍜',
+  hearty: '🍔',
+  sweet: '🍰',
+  breakfast: '🥞',
+  seafood: '🐟',
+  emerald: '🥪',
+};
+
+/**
+ * Extracts the first emoji grapheme cluster from a string.
+ * Strips surrounding text, whitespace, or extra trailing emojis.
+ */
+export function extractFirstEmoji(raw: string | undefined | null): string | null {
+  if (!raw || typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+
+  // Match single emoji including skin tones, variation selectors, and ZWJ sequences
+  const match = trimmed.match(/\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic}|\uD83C[\uDFFB-\uDFFF])*/u);
+  return match ? match[0] : null;
+}
+
+/**
+ * Generate candidate hex codes for Noto / Twemoji URL lookup.
+ * Returns variants with and without variation selector \uFE0F, plus fallback if ZWJ sequence.
+ */
+export function getHexVariants(emoji: string): string[] {
+  const allCodes: string[] = [];
+  const noFe0fCodes: string[] = [];
+
   for (const char of emoji) {
     const cp = char.codePointAt(0);
-    if (cp !== undefined && cp !== 0xfe0f) {
-      codePoints.push(cp.toString(16).toLowerCase());
+    if (cp !== undefined) {
+      const hex = cp.toString(16).toLowerCase();
+      allCodes.push(hex);
+      if (cp !== 0xfe0f) {
+        noFe0fCodes.push(hex);
+      }
     }
   }
-  return codePoints.join('_');
+
+  const variants = new Set<string>();
+  if (noFe0fCodes.length > 0) variants.add(noFe0fCodes.join('_'));
+  if (allCodes.length > 0) variants.add(allCodes.join('_'));
+
+  // If ZWJ sequence, also add the base emoji as a fallback
+  if (noFe0fCodes.length > 1 && noFe0fCodes.includes('200d')) {
+    const firstPart = noFe0fCodes[0];
+    if (firstPart) variants.add(firstPart);
+  }
+
+  return Array.from(variants);
 }
 
 /** In-memory cache for fetched Google Noto Color Emoji PNG buffers */
-const emojiPngCache = new Map<string, Buffer | null>();
+export const emojiPngCache = new Map<string, Buffer | null>();
 
-/** Fetch official Google Noto Color Emoji PNG (128x128) with fallback to Twemoji */
-async function fetchEmojiPng(emoji: string): Promise<Buffer | null> {
-  const notoHex = emojiToNotoHex(emoji);
-  if (emojiPngCache.has(notoHex)) {
-    return emojiPngCache.get(notoHex)!;
-  }
-
-  // Official Google Noto Color Emoji PNG (Android style)
-  const primaryUrl = `https://raw.githubusercontent.com/googlefonts/noto-emoji/main/png/128/emoji_u${notoHex}.png`;
-  // Fallback to Twemoji PNG
-  const fallbackUrl = `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/${notoHex}.png`;
-
+async function fetchWithTimeout(url: string, timeoutMs = 3500): Promise<Buffer | null> {
   try {
-    let res = await fetch(primaryUrl);
-    if (!res.ok) {
-      res = await fetch(fallbackUrl);
-    }
-    if (!res.ok) {
-      console.warn(`[bannerGenerator] Failed to fetch emoji for ${emoji} (${notoHex})`);
-      emojiPngCache.set(notoHex, null);
-      return null;
-    }
+    const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
+    if (!res.ok) return null;
     const arrayBuffer = await res.arrayBuffer();
-    const buf = Buffer.from(arrayBuffer);
-    emojiPngCache.set(notoHex, buf);
-    return buf;
-  } catch (err) {
-    console.warn('[bannerGenerator] Failed to fetch emoji PNG:', err);
-    emojiPngCache.set(notoHex, null);
+    return Buffer.from(arrayBuffer);
+  } catch {
     return null;
   }
+}
+
+/** Fetch official Google Noto Color Emoji PNG (128x128) with fallback to Twemoji */
+export async function fetchEmojiPng(emoji: string): Promise<Buffer | null> {
+  const cleanedEmoji = extractFirstEmoji(emoji);
+  if (!cleanedEmoji) return null;
+
+  if (emojiPngCache.has(cleanedEmoji)) {
+    return emojiPngCache.get(cleanedEmoji)!;
+  }
+
+  const variants = getHexVariants(cleanedEmoji);
+
+  for (const hex of variants) {
+    // 1. Google Noto Color Emoji (raw GitHub)
+    const primaryUrl = `https://raw.githubusercontent.com/googlefonts/noto-emoji/main/png/128/emoji_u${hex}.png`;
+    let buf = await fetchWithTimeout(primaryUrl);
+    if (buf) {
+      emojiPngCache.set(cleanedEmoji, buf);
+      return buf;
+    }
+
+    // 2. Twemoji PNG (jsDelivr CDN)
+    const fallbackUrl = `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/${hex}.png`;
+    buf = await fetchWithTimeout(fallbackUrl);
+    if (buf) {
+      emojiPngCache.set(cleanedEmoji, buf);
+      return buf;
+    }
+  }
+
+  console.warn(`[bannerGenerator] Failed to fetch emoji for "${emoji}" (cleaned: "${cleanedEmoji}", variants: ${variants.join(', ')})`);
+  emojiPngCache.set(cleanedEmoji, null);
+  return null;
 }
 
 export interface IconOptions {
@@ -142,12 +199,20 @@ export async function generateIconPNG(options: IconOptions): Promise<Buffer> {
 
   let instance = sharp(Buffer.from(svgString));
 
+  let emojiPng: Buffer | null = null;
   if (options.emoji) {
-    const emojiPng = await fetchEmojiPng(options.emoji);
-    if (emojiPng) {
-      const resizedEmoji = await sharp(emojiPng).resize(160, 160).toBuffer();
-      instance = instance.composite([{ input: resizedEmoji, top: 48, left: 48 }]);
-    }
+    emojiPng = await fetchEmojiPng(options.emoji);
+  }
+
+  // If specified emoji wasn't found / invalid, fallback to theme default emoji
+  if (!emojiPng) {
+    const defaultEmoji = THEME_DEFAULT_EMOJIS[themeKey] || '🥪';
+    emojiPng = await fetchEmojiPng(defaultEmoji);
+  }
+
+  if (emojiPng) {
+    const resizedEmoji = await sharp(emojiPng).resize(160, 160).toBuffer();
+    instance = instance.composite([{ input: resizedEmoji, top: 48, left: 48 }]);
   }
 
   return instance.png({ quality: 90 }).toBuffer();
