@@ -90,8 +90,8 @@ export default function ExtractionAdCard({
         removeSizeListener?.();
         return;
       }
-      // Measure single clean position after 350ms CSS transition settles
-      timerId = setTimeout(positionBanner, 350);
+      requestAnimationFrame(positionBanner);
+      timerId = setTimeout(positionBanner, 100);
     })();
 
     // Reposition on viewport changes (rotation / keyboard / resize) and CSS transition completion
