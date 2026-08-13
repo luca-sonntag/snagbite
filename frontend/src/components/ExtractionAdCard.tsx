@@ -49,6 +49,10 @@ export default function ExtractionAdCard({
   const [status, setStatusState] = useState<'pending' | 'loaded' | 'failed'>(
     native ? 'pending' : 'loaded',
   );
+  // Bumped to force the main effect to re-measure and re-show this card's banner
+  // when it becomes visible but no banner exists to resume (e.g. it was removed
+  // by an extraction handoff while this card was hidden).
+  const [showNonce, setShowNonce] = useState(0);
 
   const setStatus = (next: 'pending' | 'loaded' | 'failed') => {
     setStatusState(next);
@@ -142,7 +146,7 @@ export default function ExtractionAdCard({
       removeLoadListener?.();
       removeSizeListener?.();
     };
-  }, [native, isActive, variant]);
+  }, [native, isActive, variant, showNonce]);
 
   // Temporarily hide/resume the banner (without destroying it) while `hidden`
   // toggles — e.g. an overlay opened, select mode, or an extraction is running.
@@ -159,11 +163,20 @@ export default function ExtractionAdCard({
     // main effect already handles with its own loading state).
     if (!wasHidden.current) return;
     wasHidden.current = false;
-    // The resume is deferred by RESUME_DELAY_MS and a plain resume fires no load
-    // event — so the slot would sit empty during the gap. Show the loading
-    // spinner until the ad is actually back (or the load listener resolves a
-    // fresh reload).
     setStatus('pending');
+
+    if (!isAdLoaded()) {
+      // No banner in memory to resume (e.g. it was removed by an extraction
+      // handoff while we were hidden). Re-run the main effect to measure and
+      // show this card's own banner fresh — resuming would no-op and leave the
+      // slot stuck on the spinner forever.
+      setShowNonce((n) => n + 1);
+      return;
+    }
+
+    // A banner is in memory: the resume is deferred by RESUME_DELAY_MS and fires
+    // no load event — so the slot would sit empty during the gap. Keep the
+    // spinner until the ad is actually back.
     void resumeAdBanner();
     const revealTimer = setTimeout(() => {
       if (isAdLoaded()) setStatus('loaded');
