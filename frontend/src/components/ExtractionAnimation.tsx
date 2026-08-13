@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { Card } from '@heroui/react';
 import { Camera, ChefHat, Video } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
@@ -315,7 +314,7 @@ export default function ExtractionAnimation({ url: _url, jobStatus, progress, va
   };
 
   return (
-    <Card className="!bg-white dark:!bg-gray-900 p-6 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col items-center w-full gap-5">
+    <div className="flex flex-col items-center w-full gap-5 p-2">
       {/* Infographic Visual Area */}
       <div className="flex items-center justify-center w-full py-2 min-h-[120px]">
         <div key={displayedIndex} className="animate-fade-in flex flex-col items-center justify-center w-full">
@@ -364,6 +363,6 @@ export default function ExtractionAnimation({ url: _url, jobStatus, progress, va
           </p>
         </div>
       )}
-    </Card>
+    </div>
   );
 }
