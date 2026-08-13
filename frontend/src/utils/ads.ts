@@ -132,9 +132,6 @@ export async function showExtractionBanner(
   }
 }
 
-/** Track whether a banner is currently hidden via hideBanner. */
-let bannerHidden = false;
-
 /** Destroy the extraction banner. Safe to call when none is shown / on web. */
 export async function removeExtractionBanner(): Promise<void> {
   if (!isNative()) return;
@@ -145,35 +142,6 @@ export async function removeExtractionBanner(): Promise<void> {
     /* nothing to remove */
   }
   bannerShown = false;
-  bannerHidden = false;
-}
-
-/** Temporarily hide the active banner without destroying it (e.g. while an overlay is open). */
-export async function hideExtractionBanner(): Promise<void> {
-  if (!isNative()) return;
-  if (!bannerShown || bannerHidden) return;
-  try {
-    bannerHidden = true;
-    await AdMob.hideBanner();
-    console.log('[AdMob] hideBanner requested');
-  } catch (err) {
-    bannerHidden = false;
-    console.warn('[AdMob] hideBanner failed:', err);
-  }
-}
-
-/** Resume/unhide the active banner after an overlay closes. */
-export async function resumeExtractionBanner(): Promise<void> {
-  if (!isNative()) return;
-  if (!bannerShown || !bannerHidden) return;
-  try {
-    bannerHidden = false;
-    await AdMob.resumeBanner();
-    console.log('[AdMob] resumeBanner requested');
-  } catch (err) {
-    bannerHidden = true;
-    console.warn('[AdMob] resumeBanner failed:', err);
-  }
 }
 
 /**
