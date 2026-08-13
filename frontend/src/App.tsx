@@ -39,6 +39,7 @@ import { deleteCachedImage } from './utils/imageStore';
 import { useTimerManager } from './hooks/useTimerManager';
 import { useOnboarding } from './hooks/useOnboarding';
 import { useAlphaWelcome } from './hooks/useAlphaWelcome';
+import ExtractionAdCard from './components/ExtractionAdCard';
 import { removeExtractionBanner } from './utils/ads';
 
 // Module-level flag to ensure the Web Share Target is only processed once per page load.
@@ -713,7 +714,9 @@ export default function App() {
         ? 'pb-12'
         : isViewingRecipe || activeView === 'shopping-list' || (activeView === 'history' && isCatalogSelectMode)
           ? 'pb-48'
-          : 'pb-24'
+          : activeView === 'history' && !isPremium
+            ? 'pb-44'
+            : 'pb-24'
         } ${(!isViewingRecipe && activeView !== 'extract') ? 'pt-4' : ''}`}>
 
         {/* One-time trial banner for free users */}
@@ -903,6 +906,13 @@ export default function App() {
 
         return (
           <div className={bottomBarClasses}>
+            {/* Banner ad displayed statically above bottom menu when on recipe history for free users */}
+            {activeView === 'history' && !isPremium && (
+              <div className="w-full max-w-md mx-auto px-3 mb-2">
+                <ExtractionAdCard isActive={activeView === 'history' && !isBottomBarHidden} variant="banner" />
+              </div>
+            )}
+
             <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-none shadow-[0_-2px_10px_rgba(0,0,0,0.03)] w-full max-w-md mx-auto flex justify-around items-center pt-3 pb-[calc(1.25rem_+_var(--safe-area-inset-bottom))] px-3">
               {/* Extract / New Recipe Tab */}
               <button

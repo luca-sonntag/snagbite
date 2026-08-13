@@ -2,8 +2,6 @@ import React from 'react';
 import { Star, Zap, History, Sparkles, Plus, Tag, ChevronRight, Settings2 } from 'lucide-react';
 import type { Collection, Job } from '../../types';
 import { useI18n } from '../../context/I18nContext';
-import { useAuth } from '../../context/AuthContext';
-import ExtractionAdCard from '../ExtractionAdCard';
 import CollectionTile from './CollectionTile';
 import RecipeShelf from './RecipeShelf';
 import type { CatalogPreset } from './catalogRoutes';
@@ -55,8 +53,6 @@ export default function CookbookHome({
   bindLongPress,
 }: CookbookHomeProps) {
   const { t } = useI18n();
-  const { user } = useAuth();
-  const isRealPremium = user?.app_metadata?.tier === 'premium';
 
   return (
     <div className="flex flex-col gap-7 pb-4 pt-1">
@@ -123,12 +119,6 @@ export default function CookbookHome({
         )}
       </section>
 
-      {/* 300x50 Banner Ad slot for Free users between Collections and catalog shelves */}
-      {!isRealPremium && (
-        <div className="-my-1">
-          <ExtractionAdCard isActive={true} variant="banner" />
-        </div>
-      )}
 
       {/* Shelves — only shown when the shelf has more than 5 recipes */}
       {shelves.recent.total > 5 && (
