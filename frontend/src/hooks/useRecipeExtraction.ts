@@ -482,7 +482,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       const token = await getAccessToken();
       if (!token) return false;
 
-      const res = await fetch(`${apiUrl}/api/me/rewarded-ad-claimed`, {
+      const res = await fetch(apiUrl('/api/me/rewarded-ad-claimed'), {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
