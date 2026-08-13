@@ -138,7 +138,7 @@ const SCENE_TARGET_PERCENT: Record<ProgressStage, number> = {
   finalizing: 90,
 };
 
-export default function ExtractionAnimation({ url: _url, jobStatus, progress, variant = 'link', compact = false }: ExtractionAnimationProps) {
+export default function ExtractionAnimation({ url: _url, jobStatus, progress, variant = 'link', compact: _compact = false }: ExtractionAnimationProps) {
   const { t, language } = useI18n();
   const { isPremium } = useAuth();
   const [displayedIndex, setDisplayedIndex] = useState(0);

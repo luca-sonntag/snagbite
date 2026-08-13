@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Card, TextField, Label, Input, Button, FieldError, Spinner, Accordion } from '@heroui/react';
-import { BookOpen, Camera, Clipboard, Globe, HelpCircle, ImagePlus, Link2, Play, Video, X } from 'lucide-react';
+import { BookOpen, Camera, Clipboard, Globe, HelpCircle, ImagePlus, Link2, Play, X } from 'lucide-react';
 import { MAX_IMPORT_PHOTOS } from '../hooks/useRecipeExtraction';
 import { Clipboard as CapClipboard } from '@capacitor/clipboard';
 import { Capacitor } from '@capacitor/core';

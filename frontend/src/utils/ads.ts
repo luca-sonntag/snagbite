@@ -3,6 +3,7 @@ import {
   BannerAdSize,
   BannerAdPosition,
   BannerAdPluginEvents,
+  RewardAdPluginEvents,
   AdmobConsentStatus,
 } from '@capacitor-community/admob';
 import { isNative } from '../native';
