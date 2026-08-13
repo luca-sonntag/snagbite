@@ -21,6 +21,8 @@ import java.util.Map;
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "MyFcmService";
     private static final String CHANNEL_ID = "ai-suggestions";
+    private static final int HTTP_TIMEOUT_MS = 10000;
+    private static final int MAX_REDIRECTS = 3;
 
     @Override
     public void onNewToken(String token) {
@@ -99,6 +101,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 .setSmallIcon(R.drawable.ic_stat_icon)
                 .setContentTitle(title)
                 .setContentText(body)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setContentIntent(pendingIntent);
@@ -115,23 +118,55 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     private Bitmap fetchBitmap(String src) {
-        try {
-            URL url = new URL(src);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoInput(true);
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(5000);
-            connection.connect();
-            int resCode = connection.getResponseCode();
-            if (resCode != 200) {
-                Log.e(TAG, "HTTP " + resCode + " downloading image: " + src);
+        String currentUrl = src;
+        int redirects = 0;
+
+        while (redirects < MAX_REDIRECTS) {
+            HttpURLConnection connection = null;
+            try {
+                URL url = new URL(currentUrl);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setDoInput(true);
+                connection.setConnectTimeout(HTTP_TIMEOUT_MS);
+                connection.setReadTimeout(HTTP_TIMEOUT_MS);
+                connection.setInstanceFollowRedirects(true);
+                connection.connect();
+
+                int resCode = connection.getResponseCode();
+
+                // Check for HTTP -> HTTPS or cross-protocol redirects
+                if (resCode == HttpURLConnection.HTTP_MOVED_PERM ||
+                    resCode == HttpURLConnection.HTTP_MOVED_TEMP ||
+                    resCode == HttpURLConnection.HTTP_SEE_OTHER ||
+                    resCode == 307 || resCode == 308) {
+                    String location = connection.getHeaderField("Location");
+                    if (location != null && !location.isEmpty()) {
+                        URL nextUrl = new URL(url, location);
+                        currentUrl = nextUrl.toExternalForm();
+                        redirects++;
+                        connection.disconnect();
+                        continue;
+                    }
+                }
+
+                if (resCode != HttpURLConnection.HTTP_OK) {
+                    Log.e(TAG, "HTTP " + resCode + " downloading image: " + currentUrl);
+                    return null;
+                }
+
+                try (InputStream input = connection.getInputStream()) {
+                    return BitmapFactory.decodeStream(input);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to download notification image (" + currentUrl + "): " + e.getMessage());
                 return null;
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
             }
-            InputStream input = connection.getInputStream();
-            return BitmapFactory.decodeStream(input);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to download notification image: " + e.getMessage());
-            return null;
         }
+        Log.e(TAG, "Too many redirects downloading image: " + src);
+        return null;
     }
 }
