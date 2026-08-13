@@ -72,7 +72,8 @@ export default function ExtractionAdCard({
       void showExtractionBanner(bottomMargin, adSize);
     };
 
-    let timerId: ReturnType<typeof setTimeout> | null = null;
+    let t1: ReturnType<typeof setTimeout> | null = null;
+    let t2: ReturnType<typeof setTimeout> | null = null;
 
     (async () => {
       removeLoadListener = await addBannerLoadListener((next) => {
@@ -89,8 +90,9 @@ export default function ExtractionAdCard({
         removeSizeListener?.();
         return;
       }
-      // Single clean measurement after 350ms CSS transition settles
-      timerId = setTimeout(positionBanner, 350);
+      // Measure at 300ms (bottom dock expand) AND at 600ms (RecipeDetail modal slide-down exit)
+      t1 = setTimeout(positionBanner, 300);
+      t2 = setTimeout(positionBanner, 600);
     })();
 
     // Reposition on viewport changes (rotation / keyboard / resize) and CSS transition completion
@@ -104,7 +106,8 @@ export default function ExtractionAdCard({
 
     return () => {
       cancelled = true;
-      if (timerId) clearTimeout(timerId);
+      if (t1) clearTimeout(t1);
+      if (t2) clearTimeout(t2);
       window.removeEventListener('resize', onResize);
       if (parentBar) {
         parentBar.removeEventListener('transitionend', onResize);
