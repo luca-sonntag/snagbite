@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { Button, Card } from '@heroui/react';
-import { Users, Copy, Check, ExternalLink, Download, Sparkles, ChefHat } from 'lucide-react';
+import { Users, Copy, Check, ExternalLink, Download, ChefHat } from 'lucide-react';
 
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=at.snagbite.app';
 
@@ -56,21 +56,14 @@ export default function InviteLandingPage() {
   };
 
   return (
-    <div className="w-full min-h-[calc(100vh-8rem)] flex items-center justify-center px-4 py-12">
+    <div className="w-full min-h-[calc(100vh-6rem)] flex items-center justify-center px-4 py-8">
       {/* Ambient background glow */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/15 dark:bg-emerald-500/20 rounded-full blur-3xl pointer-events-none -z-10" />
 
       <Card className="max-w-md w-full p-6 sm:p-8 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-emerald-500/20 shadow-2xl rounded-3xl text-center flex flex-col items-center">
-        {/* Animated Badge Icon */}
-        <div className="relative mb-5">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 p-0.5 shadow-lg shadow-emerald-500/25 flex items-center justify-center">
-            <div className="w-full h-full bg-emerald-950/40 backdrop-blur-sm rounded-[14px] flex items-center justify-center text-white">
-              <Users className="w-10 h-10 text-emerald-300 animate-pulse" />
-            </div>
-          </div>
-          <div className="absolute -top-1 -right-1 bg-amber-400 text-amber-950 p-1.5 rounded-full shadow-md">
-            <Sparkles className="w-4 h-4" />
-          </div>
+        {/* Friends Badge Icon */}
+        <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-500/25 shadow-sm flex items-center justify-center mb-5">
+          <Users className="w-9 h-9 sm:w-10 sm:h-10 text-emerald-600 dark:text-emerald-400" />
         </div>
 
         <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-gray-900 dark:text-white mb-2">
