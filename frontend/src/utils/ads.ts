@@ -48,6 +48,8 @@ let canRequestAds = true;
 let personalizedAllowed = true;
 /** Track whether a banner is currently on screen so we can reposition cleanly. */
 let bannerShown = false;
+let lastMargin: number | null = null;
+let lastSize: BannerAdSize | null = null;
 
 /**
  * Initialize the AdMob SDK once and run the EU consent (UMP) flow. Idempotent
@@ -96,12 +98,8 @@ export async function initAds(): Promise<void> {
 }
 
 /**
- * Show the extraction MEDIUM_RECTANGLE banner anchored to the bottom-centre of
- * the screen and align it with the React ad slot using a measured bottom
- * margin. The plugin interprets this value as density-independent pixels on
- * Android, which matches CSS pixels in the WebView; do not multiply by DPR.
- * Any existing banner is recreated when the margin changes so rotation and
- * viewport resizing remain aligned. No-op on web or if consent was declined.
+ * Show the extraction banner anchored to the bottom-centre of the screen and
+ * align it with the React ad slot using a measured bottom margin.
  */
 export async function showExtractionBanner(
   bottomMarginDp: number,
@@ -112,6 +110,12 @@ export async function showExtractionBanner(
   if (!canRequestAds) return;
 
   const margin = Math.max(0, Math.round(bottomMarginDp));
+
+  // If a banner of the exact same size and margin is already active on screen,
+  // do not destroy and re-fetch to prevent flickering and comply with AdMob policy.
+  if (bannerShown && lastMargin === margin && lastSize === size) {
+    return;
+  }
 
   // The plugin reloads an existing banner but does not update its layout
   // margins, so remove it before applying a newly measured position.
@@ -134,6 +138,8 @@ export async function showExtractionBanner(
       npa: !personalizedAllowed,
     });
     bannerShown = true;
+    lastMargin = margin;
+    lastSize = size;
     console.log(
       `[AdMob] showBanner requested (BOTTOM_CENTER, size=${size}, margin=${margin}, ` +
         `testing=${IS_TESTING}, npa=${!personalizedAllowed})`,
@@ -152,6 +158,8 @@ export async function removeExtractionBanner(): Promise<void> {
     /* nothing to remove */
   }
   bannerShown = false;
+  lastMargin = null;
+  lastSize = null;
 }
 
 /**
