@@ -77,7 +77,7 @@ export default function InviteLandingPage() {
         {rawCode ? (
           <div className="w-full bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-4 mb-6 flex flex-col items-center gap-2">
             <span className="text-xs uppercase tracking-widest font-bold text-emerald-800 dark:text-emerald-300">
-              Dein Freundescode
+              Einladungscode
             </span>
             <div className="flex items-center justify-center gap-3 w-full">
               <span className="font-mono text-3xl font-extrabold tracking-wider text-emerald-950 dark:text-emerald-100 selection:bg-emerald-300">
@@ -101,7 +101,7 @@ export default function InviteLandingPage() {
           </div>
         ) : (
           <div className="w-full bg-amber-50 dark:bg-amber-950/30 border border-amber-500/30 rounded-2xl p-4 mb-6 text-xs text-amber-800 dark:text-amber-300">
-            Kein Freundescode im Link gefunden. Bitte öffne die App und gib den Code manuell ein.
+            Kein Einladungscode im Link gefunden. Bitte öffne die App und gib den Code deines Freundes manuell ein.
           </div>
         )}
 
