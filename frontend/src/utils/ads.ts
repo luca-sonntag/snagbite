@@ -71,12 +71,13 @@ function clearStaleHideTimer(): void {
 }
 
 /**
- * Delay before the banner actually reappears on resume. The bottom bar slides
- * up with a 300ms CSS transition; showing the banner earlier makes it pop in
- * before the bar has settled. Wait out the transition (+ small buffer) so the
- * ad reveals cleanly once the bar is in place. Hiding stays instant.
+ * Delay before the banner actually reappears on resume. The bottom bar (and the
+ * longer bulk-select action bar) slides back in with a CSS transition; showing
+ * the banner earlier makes it pop in before the bar has settled. Sized to cover
+ * the longest slide-in so the ad reveals cleanly once the bar is in place.
+ * Hiding stays instant.
  */
-export const RESUME_DELAY_MS = 350;
+export const RESUME_DELAY_MS = 500;
 let resumeTimer: ReturnType<typeof setTimeout> | null = null;
 
 function clearResumeTimer(): void {
