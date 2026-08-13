@@ -57,10 +57,13 @@ export default function ExtractionAdCard({
       if (cancelled || !slotRef.current || !isActive) return;
       const rect = slotRef.current.getBoundingClientRect();
       if (rect.width === 0 && rect.height === 0) return;
-      const bottomMargin = Math.max(0, Math.round(window.innerHeight - rect.bottom));
+      let bottomMargin = Math.max(0, Math.round(window.innerHeight - rect.bottom));
       
-      // For banner variant anchored to bottom dock, do not request ad until slot is positioned above bottom bar (> 20dp)
-      if (variant === 'banner' && bottomMargin < 20) return;
+      // If embedded in bottom bar dock and measured margin is transiently 0/invalid on mount,
+      // fallback to standard bottom bar button-row height (68dp) so banner renders immediately.
+      if (embedded && bottomMargin < 20) {
+        bottomMargin = 68;
+      }
 
       const adSize = variant === 'banner' ? BannerAdSize.BANNER : BannerAdSize.MEDIUM_RECTANGLE;
       console.log(
