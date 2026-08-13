@@ -655,15 +655,39 @@ export default function App() {
     });
   }, [authLoading, user, replace, setUrl, triggerExtraction, limitStatus]);
 
-  // Handle Capacitor native App Links / Deep Links (e.g. https://snagbite.app/invite/CODE or https://snagbite.app/#/invite/CODE)
+  // Handle Capacitor native App Links / Deep Links (e.g. snagbite://invite/CODE or https://snagbite.app/invite/CODE)
   useEffect(() => {
     return registerAppUrlOpen((openUrl) => {
       try {
         const urlObj = new URL(openUrl);
-        if (urlObj.hash) {
-          window.location.hash = urlObj.hash;
-        } else if (urlObj.pathname && urlObj.pathname !== '/') {
-          window.location.hash = `#${urlObj.pathname}`;
+        let targetHash: string | null = null;
+
+        if (urlObj.protocol === 'snagbite:' || urlObj.protocol === 'at.snagbite.app:') {
+          const codeParam = urlObj.searchParams.get('code');
+          const host = urlObj.hostname;
+          const path = urlObj.pathname.replace(/^\/+/, '');
+          if (codeParam) {
+            targetHash = `#/invite/${codeParam}`;
+          } else if (host === 'invite') {
+            targetHash = path ? `#/invite/${path}` : '#/progress';
+          } else if (path.startsWith('invite/')) {
+            targetHash = `#/${path}`;
+          } else {
+            const full = [host, path].filter(Boolean).join('/');
+            if (full) targetHash = `#/${full}`;
+          }
+        } else if (urlObj.hash && urlObj.hash !== '#' && urlObj.hash !== '#/') {
+          targetHash = urlObj.hash;
+        } else if (urlObj.pathname && urlObj.pathname !== '/' && !urlObj.pathname.endsWith('.html')) {
+          targetHash = `#${urlObj.pathname}`;
+        }
+
+        if (targetHash) {
+          if (window.location.hash === targetHash) {
+            window.dispatchEvent(new HashChangeEvent('hashchange'));
+          } else {
+            window.location.hash = targetHash;
+          }
         }
       } catch (err) {
         console.warn('Failed to parse openUrl:', err);

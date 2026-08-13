@@ -50,13 +50,17 @@ function buildHash(tab: AppTab, subPath?: string | null): string {
 
 export function useHashRouter() {
   const [route, setRoute] = useState<ParsedRoute>(() => {
-    // Initialise from current URL hash; default to history tab
+    // Initialise from current URL hash; fallback to pathname if hash is missing (e.g. direct web navigation)
     const hash = window.location.hash;
-    if (!hash || hash === '#' || hash === '#/') {
-      // Default tab on first visit
-      return { tab: 'history', subPath: null };
+    if (hash && hash !== '#' && hash !== '#/') {
+      return parseHash(hash);
     }
-    return parseHash(hash);
+    const pathname = window.location.pathname;
+    if (pathname && pathname !== '/' && !pathname.endsWith('.html')) {
+      return parseHash(pathname);
+    }
+    // Default tab on first visit
+    return { tab: 'history', subPath: null };
   });
 
   // Sync URL → state on external hash changes (browser back/forward)
