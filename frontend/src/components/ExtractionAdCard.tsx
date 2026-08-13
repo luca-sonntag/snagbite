@@ -56,6 +56,11 @@ export default function ExtractionAdCard({
     const positionBanner = () => {
       if (cancelled || !slotRef.current || !isActive) return;
       const rect = slotRef.current.getBoundingClientRect();
+
+      // Do not attempt to position until the slot container has finished its CSS expansion transition (>35px height)
+      const minRequiredHeight = variant === 'banner' ? 35 : 150;
+      if (rect.height < minRequiredHeight) return;
+
       const bottomMargin = Math.max(0, Math.round(window.innerHeight - rect.bottom));
 
       const adSize = variant === 'banner' ? BannerAdSize.BANNER : BannerAdSize.MEDIUM_RECTANGLE;
@@ -66,6 +71,8 @@ export default function ExtractionAdCard({
       );
       void showExtractionBanner(bottomMargin, adSize);
     };
+
+    let timerId: ReturnType<typeof setTimeout> | null = null;
 
     (async () => {
       removeLoadListener = await addBannerLoadListener((next) => {
@@ -83,15 +90,25 @@ export default function ExtractionAdCard({
         return;
       }
       requestAnimationFrame(positionBanner);
+      timerId = setTimeout(positionBanner, 320);
     })();
 
-    // Reposition on viewport changes (rotation / keyboard / resize)
+    // Reposition on viewport changes (rotation / keyboard / resize) and CSS transition completion
     const onResize = () => requestAnimationFrame(positionBanner);
     window.addEventListener('resize', onResize);
 
+    const parentBar = slot.closest('.fixed') || slot.parentElement;
+    if (parentBar) {
+      parentBar.addEventListener('transitionend', onResize);
+    }
+
     return () => {
       cancelled = true;
+      if (timerId) clearTimeout(timerId);
       window.removeEventListener('resize', onResize);
+      if (parentBar) {
+        parentBar.removeEventListener('transitionend', onResize);
+      }
       removeLoadListener?.();
       removeSizeListener?.();
       void removeExtractionBanner();
