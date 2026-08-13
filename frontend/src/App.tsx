@@ -712,9 +712,9 @@ export default function App() {
       {/* Main content body */}
       <main className={`w-full max-w-md mx-auto px-4 mt-1 flex-1 flex flex-col gap-6 ${activeView === 'admin'
         ? 'pb-12'
-        : isViewingRecipe || activeView === 'shopping-list' || (activeView === 'history' && isCatalogSelectMode)
+        : isViewingRecipe || (activeView === 'history' && isCatalogSelectMode)
           ? 'pb-48'
-          : activeView === 'history' && !selectedJob && !isPremium
+          : !isPremium && (activeView === 'history' || activeView === 'extract' || activeView === 'shopping-list')
             ? 'pb-44'
             : 'pb-24'
         } ${(!isViewingRecipe && activeView !== 'extract') ? 'pt-4' : ''}`}>
@@ -904,13 +904,18 @@ export default function App() {
         const bottomBarClasses = `fixed bottom-0 inset-x-0 z-40 transition-all duration-300 ease-in-out pb-safe ${isBottomBarHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
           }`;
 
+        const shouldShowBannerAd =
+          !isPremium &&
+          !isViewingRecipe &&
+          (activeView === 'history' || activeView === 'extract' || activeView === 'shopping-list');
+
         return (
           <div className={bottomBarClasses}>
             <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] w-full max-w-md mx-auto flex flex-col rounded-t-3xl overflow-hidden">
-              {/* Banner ad displayed seamlessly attached to top of bottom menu for free users in history catalog view */}
-              {activeView === 'history' && !selectedJob && !isPremium && (
+              {/* Banner ad displayed seamlessly attached to top of bottom menu for free users */}
+              {shouldShowBannerAd && (
                 <div className="w-full pt-2 pb-1.5 px-3 border-b border-gray-100/60 dark:border-gray-800/60 flex flex-col items-center justify-center">
-                  <ExtractionAdCard isActive={activeView === 'history' && !selectedJob && !isBottomBarHidden} variant="banner" embedded />
+                  <ExtractionAdCard isActive={shouldShowBannerAd && !isBottomBarHidden} variant="banner" embedded />
                 </div>
               )}
 
