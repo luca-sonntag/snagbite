@@ -1316,7 +1316,7 @@ apiRouter.get('/friends', async (req: Request, res: Response): Promise<void> => 
     const [profiles, stats] = await Promise.all([getProfilesByIds(ids), getUserStatsForIds(ids)]);
 
     const list: FriendSummary[] = friends
-      .map((f) => {
+      .map((f): FriendSummary | null => {
         const profile = profiles.get(f.friendId);
         if (!profile) return null;
         const s = stats.get(f.friendId);
@@ -1329,7 +1329,7 @@ apiRouter.get('/friends', async (req: Request, res: Response): Promise<void> => 
           xp: s?.xp ?? 0,
           currentStreak: s?.currentStreak ?? 0,
           totalCooks: s?.totalCooks ?? 0,
-        } satisfies FriendSummary;
+        };
       })
       .filter((x): x is FriendSummary => x !== null)
       .sort((a, b) => a.displayName.localeCompare(b.displayName));

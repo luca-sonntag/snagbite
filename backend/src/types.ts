@@ -264,7 +264,9 @@ export interface FriendSummary {
   displayName: string;
   avatarUrl: string | null;
   level: number;
+  xp?: number;
   currentStreak: number;
+  totalCooks?: number;
 }
 
 /** An incoming pending friend request (the requester's identity). */
