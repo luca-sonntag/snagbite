@@ -6,6 +6,16 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-13: Legacy `removeExtractionBanner` Tab-Switch Effect in `App.tsx`
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Dediziertes `useEffect` in `App.tsx` (`if (activeView !== 'extract' || recipe) void removeExtractionBanner();`), das die Werbung jedes Mal manuell zerstörte, wenn man den `extract`-Tab verließ.
+* **Ersetzt durch:**
+  - Integrierter Werbe-Slot in der Bottom-Bar ([`ExtractionAdCard`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ExtractionAdCard.tsx)), der sein eigenes Banner-Lifecycle autonom über den Prop `isActive` (`shouldShowBannerAd && !isBottomBarHidden`) steuert.
+* **Betroffene Dateien:** `frontend/src/App.tsx`.
+
+---
+
 ### 2026-08-05: Photo-Bonus (`photoBonusPct`) aus der Gamification-Formel entfernt
 
 * **Ersetzter Code / Anti-Pattern:**
