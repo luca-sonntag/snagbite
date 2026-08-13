@@ -425,3 +425,18 @@ AS $function$
     AND pl.created_at >= since
   GROUP BY pl.user_id;
 $function$;
+
+-- Global Weekly XP across all users from the point ledger.
+CREATE OR REPLACE FUNCTION public.global_weekly_xp(since timestamptz, limit_count int DEFAULT 50)
+ RETURNS TABLE (user_id uuid, xp bigint)
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+  SELECT pl.user_id, COALESCE(SUM(pl.delta_xp), 0)::bigint AS xp
+  FROM point_ledger pl
+  WHERE pl.created_at >= since
+  GROUP BY pl.user_id
+  ORDER BY xp DESC
+  LIMIT limit_count;
+$function$;

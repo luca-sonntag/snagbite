@@ -62,7 +62,10 @@ import {
   acceptFriendship,
   deleteFriendship,
   getUserStatsForIds,
-  getWeeklyXp
+  getWeeklyXp,
+  getAllFriendshipsForUser,
+  getGlobalAllTimeStats,
+  getGlobalWeeklyXp
 } from './db.js';
 import { config } from './config.js';
 import { requireAuth, requireAdmin } from './auth.js';
@@ -75,7 +78,7 @@ import { MAX_IMPORT_PHOTOS, deleteImportPhotos, photoJobUrl, uploadImportPhoto }
 import { notificationTick } from './notifications/worker.js';
 import { recordCook } from './gamification.js';
 import { weekStartUtc } from './socialTime.js';
-import type { FriendSummary, FriendRequest, LeaderboardEntry } from './types.js';
+import type { Profile, FriendSummary, FriendRequest, LeaderboardEntry, LeaderboardScope } from './types.js';
 
 export const apiRouter = Router();
 
@@ -1371,18 +1374,27 @@ apiRouter.get('/friends/requests', async (req: Request, res: Response): Promise<
 });
 
 /**
- * Send a friend request by friend code. Auto-accepts if the other user already
- * requested us. POST /api/friends/request  { code }
+ * Send a friend request by friend code or directly by target user id.
+ * Auto-accepts if the other user already requested us.
+ * POST /api/friends/request  { code?: string, targetUserId?: string }
  */
 apiRouter.post('/friends/request', async (req: Request, res: Response): Promise<void> => {
   try {
     const code = typeof req.body?.code === 'string' ? req.body.code.trim().toUpperCase() : '';
-    if (!code) throw new AppError('FRIEND_CODE_INVALID');
+    const targetUserId = typeof req.body?.targetUserId === 'string' ? req.body.targetUserId.trim() : '';
+    if (!code && !targetUserId) throw new AppError('FRIEND_CODE_INVALID');
 
     // Make sure I have a profile (and thus a code) before befriending anyone.
     await ensureMyProfile(req.userId!);
 
-    const target = await findProfileByFriendCode(code);
+    let target: Profile | null = null;
+    if (targetUserId) {
+      const profiles = await getProfilesByIds([targetUserId]);
+      target = profiles.get(targetUserId) ?? null;
+    } else {
+      target = await findProfileByFriendCode(code);
+    }
+
     if (!target) throw new AppError('FRIEND_CODE_INVALID');
     if (target.userId === req.userId!) throw new AppError('FRIEND_SELF');
 
@@ -1450,45 +1462,98 @@ apiRouter.delete('/friends/:id', async (req: Request, res: Response): Promise<vo
 });
 
 /**
- * Friends-and-me leaderboard. GET /api/leaderboard?window=weekly|all
+ * Friends or Global leaderboard. GET /api/leaderboard?window=weekly|all&scope=friends|global
  * `value` is weekly XP (from point_ledger) or all-time XP (from user_stats).
  */
 apiRouter.get('/leaderboard', async (req: Request, res: Response): Promise<void> => {
   try {
     const window = req.query.window === 'all' ? 'all' : 'weekly';
+    const scope = req.query.scope === 'global' ? 'global' : 'friends';
     await ensureMyProfile(req.userId!);
 
-    const friends = await getAcceptedFriends(req.userId!);
-    const ids = [req.userId!, ...friends.map((f) => f.friendId)];
+    // Fetch friendships for current user to decorate each row with friendship status
+    const allFriendships = await getAllFriendshipsForUser(req.userId!);
+    const friendshipByPartnerId = new Map<string, { status: 'pending' | 'accepted'; id: string; isSender: boolean }>();
+    for (const f of allFriendships) {
+      const isSender = f.requester_id === req.userId!;
+      const partnerId = isSender ? f.addressee_id : f.requester_id;
+      friendshipByPartnerId.set(partnerId, { status: f.status, id: f.id, isSender });
+    }
 
-    const [profiles, stats, weekly] = await Promise.all([
-      getProfilesByIds(ids),
-      getUserStatsForIds(ids),
-      window === 'weekly' ? getWeeklyXp(ids, weekStartUtc(new Date())) : Promise.resolve(null),
-    ]);
+    const getFriendshipStatus = (uid: string): { status: 'none' | 'pending_sent' | 'pending_received' | 'friends' | 'self'; id?: string } => {
+      if (uid === req.userId!) return { status: 'self' };
+      const rel = friendshipByPartnerId.get(uid);
+      if (!rel) return { status: 'none' };
+      if (rel.status === 'accepted') return { status: 'friends', id: rel.id };
+      return { status: rel.isSender ? 'pending_sent' : 'pending_received', id: rel.id };
+    };
 
-    const entries: LeaderboardEntry[] = ids
-      .map((uid) => {
-        const profile = profiles.get(uid);
+    let rawEntries: { userId: string; value: number; level?: number }[] = [];
+
+    if (scope === 'global') {
+      if (window === 'weekly') {
+        const topWeekly = await getGlobalWeeklyXp(weekStartUtc(new Date()), 50);
+        const uids = topWeekly.map((x) => x.userId);
+        const [stats] = await Promise.all([
+          getUserStatsForIds(uids),
+        ]);
+        rawEntries = topWeekly.map((item) => ({
+          userId: item.userId,
+          value: item.xp,
+          level: stats.get(item.userId)?.level ?? 1,
+        }));
+      } else {
+        const topAllTime = await getGlobalAllTimeStats(50);
+        rawEntries = topAllTime.map((s) => ({
+          userId: s.userId,
+          value: s.xp,
+          level: s.level,
+        }));
+      }
+    } else {
+      // Friends scope
+      const friends = await getAcceptedFriends(req.userId!);
+      const ids = [req.userId!, ...friends.map((f) => f.friendId)];
+
+      const [stats, weekly] = await Promise.all([
+        getUserStatsForIds(ids),
+        window === 'weekly' ? getWeeklyXp(ids, weekStartUtc(new Date())) : Promise.resolve(null),
+      ]);
+
+      rawEntries = ids.map((uid) => ({
+        userId: uid,
+        value: window === 'weekly' ? (weekly?.get(uid) ?? 0) : (stats.get(uid)?.xp ?? 0),
+        level: stats.get(uid)?.level ?? 1,
+      }));
+    }
+
+    // Ensure profiles are fetched for all entry IDs
+    const allEntryIds = rawEntries.map((e) => e.userId);
+    const profilesMap = await getProfilesByIds(allEntryIds);
+
+    const entries: LeaderboardEntry[] = rawEntries
+      .map((r): LeaderboardEntry | null => {
+        const profile = profilesMap.get(r.userId);
         if (!profile) return null;
-        const s = stats.get(uid);
-        const value = window === 'weekly' ? (weekly?.get(uid) ?? 0) : (s?.xp ?? 0);
+        const rel = getFriendshipStatus(r.userId);
         return {
           rank: 0,
-          userId: uid,
+          userId: r.userId,
           displayName: profile.displayName,
           avatarUrl: profile.avatarUrl,
-          level: s?.level ?? 1,
-          value,
-          isMe: uid === req.userId!,
-        } satisfies LeaderboardEntry;
+          level: r.level ?? 1,
+          value: r.value,
+          isMe: r.userId === req.userId!,
+          friendshipStatus: rel.status,
+          friendshipId: rel.id,
+        };
       })
       .filter((x): x is LeaderboardEntry => x !== null)
       .sort((a, b) => b.value - a.value || a.displayName.localeCompare(b.displayName));
 
     entries.forEach((e, i) => { e.rank = i + 1; });
 
-    res.status(200).json({ success: true, window, entries });
+    res.status(200).json({ success: true, window, scope, entries });
   } catch (error: any) {
     if (!(error instanceof AppError)) console.error('Error building leaderboard:', error);
     sendAppError(res, error);

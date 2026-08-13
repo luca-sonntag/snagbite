@@ -1986,3 +1986,38 @@ export async function getWeeklyXp(userIds: string[], sinceIso: string): Promise<
   }
   return map;
 }
+
+/** All friendships involving the user (both pending and accepted). */
+export async function getAllFriendshipsForUser(userId: string): Promise<FriendshipRow[]> {
+  const { data, error } = await getClient()
+    .from('friendships')
+    .select('*')
+    .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
+  if (error) throw wrapError('Failed to fetch friendships for user', error);
+  return (data || []) as FriendshipRow[];
+}
+
+/** Top users by all-time XP. */
+export async function getGlobalAllTimeStats(limit = 50): Promise<UserStats[]> {
+  const { data, error } = await getClient()
+    .from('user_stats')
+    .select('*')
+    .order('xp', { ascending: false })
+    .limit(limit);
+  if (error) throw wrapError('Failed to fetch global all-time stats', error);
+  return (data || []).map((row: any) => rowToUserStats(row));
+}
+
+/** Top users by weekly XP across all users, via RPC. */
+export async function getGlobalWeeklyXp(sinceIso: string, limit = 50): Promise<{ userId: string; xp: number }[]> {
+  const { data, error } = await getClient().rpc('global_weekly_xp', {
+    since: sinceIso,
+    limit_count: limit,
+  });
+  if (error) throw wrapError('Failed to fetch global weekly xp', error);
+  return (data || []).map((row: any) => ({
+    userId: row.user_id,
+    xp: Number(row.xp),
+  }));
+}
+
