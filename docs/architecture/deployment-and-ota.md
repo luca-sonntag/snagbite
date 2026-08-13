@@ -17,6 +17,14 @@
   * `frontend/scripts/deploy-playstore.ps1`: Baut und lädt die `.aab` via Fastlane in Docker (`ruby:3.3-slim`) auf den gewählten Play Store Track (`internal`, `alpha`, `beta`, `production`).
   * `deploy.ps1` (Root): Orchestriert Backend-Deploy (Git Merge `develop` -> `master` + Tagging für Railway) und Play Store App-Release nacheinander oder parallel.
 
+### AdMob Konfiguration & Native Android Setup
+* **`AndroidManifest.xml`:** Konfiguriert die Google Mobile Ads App-ID via `<meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-..." />`.
+* **Umgebungsvariablen (`frontend/.env.production`):**
+  * `VITE_ADMOB_BANNER_ID`: Live Ad-Unit-ID für Standard- & MREC-Banner (fällt bei fehlender Angabe auf Googles öffentliche Test-Ad-Unit zurück).
+  * `VITE_ADMOB_REWARDED_ID`: Live Ad-Unit-ID für Rewarded Video Ads.
+  * `VITE_ADMOB_TEST_DEVICES`: Kommagetrennte Liste registrierter Test-Device-IDs, um versehentliche Eigen-Impressionen während des Debuggings zu verhindern.
+* **WebView Overscroll Fix (`MainActivity.java`):** Das standardmäßige Android 12+ Stretch-Overscroll-Verhalten der WebView wurde deaktiviert (`setOverScrollMode(View.OVER_SCROLL_NEVER)`), um unruhige Verschiebungen fixierter nativer AdMob-Banner bei Scroll-Gesten zu verhindern.
+
 ---
 
 ## 2. Self-Hosted OTA Live Updates (Capgo)
