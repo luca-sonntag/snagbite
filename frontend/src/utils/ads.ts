@@ -49,6 +49,27 @@ let personalizedAllowed = true;
 /** Track whether a banner is currently on screen. */
 let bannerShown = false;
 
+/**
+ * After the banner has been continuously hidden this long, destroy it so the
+ * next resume loads a *fresh* ad — yielding a new (viewable) impression instead
+ * of resuming a stale creative. Short hides (quick overlays/sheets) resume
+ * instantly as before; only long hides (e.g. a lengthy stay in settings) reload.
+ */
+const STALE_HIDE_MS = 60_000;
+let staleHideTimer: ReturnType<typeof setTimeout> | null = null;
+/** Set when the stale timer destroyed the banner; resume then reloads fresh. */
+let bannerDestroyedWhileHidden = false;
+/** Last placement passed to showAdBanner, reused to reload after stale-destroy. */
+let lastBannerMargin = 0;
+let lastBannerSize: BannerAdSize = BannerAdSize.MEDIUM_RECTANGLE;
+
+function clearStaleHideTimer(): void {
+  if (staleHideTimer) {
+    clearTimeout(staleHideTimer);
+    staleHideTimer = null;
+  }
+}
+
 /** Check whether a banner is already active in memory. */
 export function isAdLoaded(): boolean {
   return bannerShown;
@@ -117,6 +138,13 @@ export async function showAdBanner(
 
   const margin = Math.max(0, Math.round(bottomMarginDp));
 
+  // Remember placement so a stale-destroyed banner can reload at the same spot.
+  lastBannerMargin = margin;
+  lastBannerSize = size;
+  // A fresh show cancels any pending stale-destroy and clears the reload flag.
+  clearStaleHideTimer();
+  bannerDestroyedWhileHidden = false;
+
   try {
     await AdMob.showBanner({
       adId: BANNER_AD_ID,
@@ -142,6 +170,8 @@ let isBannerCurrentlyHidden = false;
 /** Destroy the ad banner. Safe to call when none is shown / on web. */
 export async function removeAdBanner(): Promise<void> {
   if (!isNative()) return;
+  clearStaleHideTimer();
+  bannerDestroyedWhileHidden = false;
   if (!bannerShown && !isBannerCurrentlyHidden) return;
   try {
     await AdMob.removeBanner();
@@ -159,6 +189,18 @@ export async function hideAdBanner(): Promise<void> {
   if (!bannerShown) return;
   if (isBannerCurrentlyHidden) return;
   isBannerCurrentlyHidden = true;
+
+  // Arm the stale-destroy: if the banner stays hidden past STALE_HIDE_MS, tear
+  // it down so the next resume reloads a fresh ad (new impression).
+  clearStaleHideTimer();
+  staleHideTimer = setTimeout(() => {
+    staleHideTimer = null;
+    console.log(`[AdMob] banner hidden >${STALE_HIDE_MS}ms — destroying for fresh impression`);
+    void removeAdBanner().then(() => {
+      bannerDestroyedWhileHidden = true;
+    });
+  }, STALE_HIDE_MS);
+
   try {
     await AdMob.hideBanner();
     console.log('[AdMob] hideBanner requested');
@@ -170,6 +212,16 @@ export async function hideAdBanner(): Promise<void> {
 /** Resume/unhide the active banner after an overlay closes. */
 export async function resumeAdBanner(): Promise<void> {
   if (!isNative()) return;
+  clearStaleHideTimer();
+
+  // Hidden long enough that the stale timer destroyed the banner — reload a
+  // fresh ad at the last placement instead of resuming a gone/stale one.
+  if (bannerDestroyedWhileHidden) {
+    bannerDestroyedWhileHidden = false;
+    await showAdBanner(lastBannerMargin, lastBannerSize);
+    return;
+  }
+
   if (!bannerShown || !isBannerCurrentlyHidden) return;
   isBannerCurrentlyHidden = false;
   try {
