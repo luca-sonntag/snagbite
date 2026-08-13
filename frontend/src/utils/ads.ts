@@ -76,7 +76,7 @@ function clearStaleHideTimer(): void {
  * before the bar has settled. Wait out the transition (+ small buffer) so the
  * ad reveals cleanly once the bar is in place. Hiding stays instant.
  */
-const RESUME_DELAY_MS = 350;
+export const RESUME_DELAY_MS = 350;
 let resumeTimer: ReturnType<typeof setTimeout> | null = null;
 
 function clearResumeTimer(): void {

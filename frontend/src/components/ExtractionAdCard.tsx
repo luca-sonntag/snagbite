@@ -11,6 +11,7 @@ import {
   addBannerSizeListener,
   addBannerLoadListener,
   isAdLoaded,
+  RESUME_DELAY_MS,
 } from '../utils/ads';
 
 /**
@@ -146,13 +147,28 @@ export default function ExtractionAdCard({
   // Temporarily hide/resume the banner (without destroying it) while `hidden`
   // toggles — e.g. an overlay opened, select mode, or an extraction is running.
   // Keeps the loaded ad in memory so it resumes cleanly instead of reloading.
+  const wasHidden = useRef(false);
   useEffect(() => {
     if (!native || !isActive) return;
     if (hidden) {
+      wasHidden.current = true;
       void hideAdBanner();
-    } else {
-      void resumeAdBanner();
+      return;
     }
+    // Only act on a genuine un-hide transition (not the initial mount, which the
+    // main effect already handles with its own loading state).
+    if (!wasHidden.current) return;
+    wasHidden.current = false;
+    // The resume is deferred by RESUME_DELAY_MS and a plain resume fires no load
+    // event — so the slot would sit empty during the gap. Show the loading
+    // spinner until the ad is actually back (or the load listener resolves a
+    // fresh reload).
+    setStatus('pending');
+    void resumeAdBanner();
+    const revealTimer = setTimeout(() => {
+      if (isAdLoaded()) setStatus('loaded');
+    }, RESUME_DELAY_MS + 100);
+    return () => clearTimeout(revealTimer);
   }, [native, isActive, hidden]);
 
   // Only destroy the native AdMob banner when the component actually unmounts on page exit
