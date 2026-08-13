@@ -82,27 +82,27 @@ Aufbau auf dem Gamification-Fundament (`point_ledger` trägt die wöchentliche,
   **nie** an Freunde ausgeliefert.
 * **`friendships`** — mutual (`pending`/`accepted`), eine Zeile pro (requester,
   addressee)-Paar; „meine Freunde" prüft beide Richtungen.
-* **RPC `weekly_xp_for_users(uids, since)`** — `SUM(delta_xp)` aus `point_ledger`
-  für das Wochenfenster (Muster wie `claim_next_job`).
+* **RPC `weekly_xp_for_users(uids, since)`** — `SUM(delta_xp)` aus `point_ledger` für das Wochenfenster im Freundeskreis.
+* **RPC `global_weekly_xp(since, limit_count)`** — `SUM(delta_xp)` aus `point_ledger` über alle Nutzer sortiert nach XP für das globale Wochen-Leaderboard.
 
 **Backend:** `ensureProfile` legt bei Erstzugriff ein Profil an (Anzeigename aus
 `full_name` ?? E-Mail-Localpart, Avatar aus Metadaten, kollisionsgeprüfter
 `friend_code`). Wochenfenster via reinem, getestetem `socialTime.ts` (`weekStartUtc`,
-Montag 00:00 UTC). Endpoints (`routes.ts`): `GET/PATCH /api/me/profile`,
-`GET /api/friends`, `GET /api/friends/requests`, `POST /api/friends/request`
-(per Code, Auto-Accept bei Reverse-Pending), `POST /api/friends/:id/respond`,
-`DELETE /api/friends/:id`, `GET /api/leaderboard?window=weekly|all` (Scope:
-Freunde + ich). Neue Error-Codes in `errors.ts` ↔ `frontend/src/errorCodes.ts` synchron.
+Montag 00:00 UTC). Endpoints (`routes.ts`):
+* `GET/PATCH /api/me/profile` — Profil laden & Namen anpassen.
+* `GET /api/friends`, `GET /api/friends/requests` — Freundesliste & Anfragen.
+* `POST /api/friends/request` — Freundschaftsanfrage per Code (`code`) oder per User-ID (`targetUserId`, z.B. direkt aus dem globalen Leaderboard; Auto-Accept bei beidseitigen Anfragen).
+* `POST /api/friends/:id/respond` — Anfragen annehmen/ablehnen.
+* `DELETE /api/friends/:id` — Freund entfernen oder offene Anfrage abbrechen.
+* `GET /api/leaderboard?window=weekly|all&scope=friends|global` — Rangliste mit Scope (Freunde oder alle Nutzer) und Zeitfenster (diese Woche oder Gesamt). Liefert Einträge inklusive berechnetem Beziehungsstatus (`friendshipStatus: 'none' | 'pending_sent' | 'pending_received' | 'friends' | 'self'`).
 
-**Frontend:** `SocialContext` (profile/friends/requests + Methoden) neben dem
-Gamification-Provider. Der „Fortschritt"-Tab ist ein Container mit Segmented-Nav
-**Übersicht | Rangliste | Freunde** (kein neuer Bottom-Tab): `ProgressOverview`,
-`Social/LeaderboardView` (Woche/Gesamt), `Social/FriendsView` (Profilkarte +
-teilbarer Freundescode, per-Code hinzufügen, Anfragen, Liste), `Social/Avatar`.
-Einladung: teilbarer Freundescode + HTTPS-URL `https://snagbite.app/invite/<code>` sowie Custom Scheme `snagbite://invite/<code>`.
-- **Deep Linking & App Links:** Android App Links via `/.well-known/assetlinks.json` (SHA-256 Fingerprints hinterlegt) und Custom Schemes (`snagbite://`, `at.snagbite.app://`) in `AndroidManifest.xml`.
-- **Native Routing:** `native.ts` lauscht auf Cold-Start (`App.getLaunchUrl()`) und Warm-Start (`App.addListener('appUrlOpen')`). `App.tsx` & `useHashRouter` werten den Code aus und navigieren direkt in den Freunde-Tab (`FriendsView`) mit Auto-Submit.
-- **Web Landingpage:** `website` stellt unter `/invite/:code` eine Landingpage bereit, die die native App per Intent / Custom Scheme aufruft, den Code anzeigt und Download-Links zum Google Play Store anbietet.
+**Frontend:** `SocialContext` (profile/friends/requests + Methoden `sendRequest`, `sendRequestByUserId`, `respondRequest`, `fetchLeaderboard`) neben dem Gamification-Provider.
+* **Segmented-Nav:** **Übersicht | Rangliste | Freunde** im Fortschritt-Tab.
+* **LeaderboardView:** Bietet Umschalter zwischen **Freunde** und **Global** sowie **Diese Woche** und **Gesamt**. In der globalen Ansicht kann direkt pro Zeile eine Freundschaftsanfrage gesendet (`+ Freund`), eine offene Anfrage angenommen (`Annehmen`) oder der Status (`Angefragt`, `Freunde ✓`) eingesehen werden.
+* **FriendsView:** Profilkarte + teilbarer Freundescode, per-Code hinzufügen, Anfragen, Liste, `Social/Avatar`.
+* **Deep Linking & App Links:** Android App Links via `/.well-known/assetlinks.json` und Custom Schemes (`snagbite://`, `at.snagbite.app://`).
+* **Web Landingpage:** `website` unter `/invite/:code` öffnet die native App per Intent / Custom Scheme.
 
-**Freigehalten:** globale/Liga-Ranglisten (verified-only via `leaderboard_eligible`), Blockieren/Melden.
+**Freigehalten:** Liga-Ranglisten (verified-only via `leaderboard_eligible`), Blockieren/Melden.
+
 
