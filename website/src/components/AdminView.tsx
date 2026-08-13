@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Tabs, Button, Spinner } from '@heroui/react';
+import { Button, Spinner } from '@heroui/react';
 import {
   Shield,
   Save,
@@ -351,31 +351,36 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
       ) : (
         <div className="flex flex-col gap-6">
           {/* Tabs Navigation */}
-          <Tabs selectedKey={activeTab} onSelectionChange={(key) => { setError(null); setActiveTab(key as any); }} className="w-full">
-            <Tabs.ListContainer className="w-full">
-              <Tabs.List className="flex w-full mb-6 bg-gray-100 p-1 sm:p-1.5 rounded-2xl border-none">
-                {(
-                  [
-                    { id: 'settings', icon: <Settings className="w-4 h-4 shrink-0" />, label: isDe ? 'Konfiguration' : 'Config' },
-                    { id: 'feedback', icon: <MessageSquare className="w-4 h-4 shrink-0" />, label: 'Feedback' },
-                    { id: 'metrics', icon: <BarChart3 className="w-4 h-4 shrink-0" />, label: isDe ? 'Metriken' : 'Metrics' },
-                    { id: 'users', icon: <Users className="w-4 h-4 shrink-0" />, label: isDe ? 'Nutzer' : 'Users' },
-                  ] as const
-                ).map(({ id, icon, label }) => (
-                  <Tabs.Tab
-                    key={id}
-                    id={id}
-                    className="flex-1 py-2.5 text-center font-bold transition-all cursor-pointer rounded-xl !text-gray-500 data-[selected=true]:bg-white data-[selected=true]:!text-emerald-600 data-[selected=true]:shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:!text-gray-900 border-none"
-                  >
-                    <div className="flex items-center justify-center gap-2 text-xs sm:text-sm">
-                      {icon}
-                      <span className="hidden sm:inline">{label}</span>
-                      <span className="sm:hidden sr-only">{label}</span>
-                    </div>
-                  </Tabs.Tab>
-                ))}
-              </Tabs.List>
-            </Tabs.ListContainer>
+          <div className="flex w-full mb-6 bg-gray-100 p-1 sm:p-1.5 rounded-2xl">
+            {(
+              [
+                { id: 'settings', icon: <Settings className="w-4 h-4 shrink-0" />, label: isDe ? 'Konfiguration' : 'Config' },
+                { id: 'feedback', icon: <MessageSquare className="w-4 h-4 shrink-0" />, label: 'Feedback' },
+                { id: 'metrics', icon: <BarChart3 className="w-4 h-4 shrink-0" />, label: isDe ? 'Metriken' : 'Metrics' },
+                { id: 'users', icon: <Users className="w-4 h-4 shrink-0" />, label: isDe ? 'Nutzer' : 'Users' },
+              ] as const
+            ).map(({ id, icon, label }) => {
+              const isSelected = activeTab === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => { setError(null); setActiveTab(id); }}
+                  className={`flex-1 py-2.5 text-center font-bold transition-all cursor-pointer rounded-xl border-none ${
+                    isSelected
+                      ? 'bg-white text-emerald-600 shadow-[0_2px_6px_rgba(0,0,0,0.03)]'
+                      : 'text-gray-500 hover:text-gray-900'
+                  }`}
+                >
+                  <div className="flex items-center justify-center gap-2 text-xs sm:text-sm">
+                    {icon}
+                    <span className="hidden sm:inline">{label}</span>
+                    <span className="sm:hidden sr-only">{label}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
 
             {/* Notification Alerts */}
             {error && (
@@ -393,7 +398,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
             )}
 
             {/* Panel: Settings */}
-            <Tabs.Panel id="settings">
+            {activeTab === 'settings' && (
               <div className="flex flex-col gap-6">
                 <div className="p-4 sm:p-6 rounded-2xl md:rounded-3xl border-none bg-white shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
                   <div className="flex flex-col gap-6">
@@ -539,10 +544,10 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                   )}
                 </div>
               </div>
-            </Tabs.Panel>
+            )}
 
             {/* Panel: Feedback */}
-            <Tabs.Panel id="feedback">
+            {activeTab === 'feedback' && (
               <div className="flex flex-col gap-4">
                 {feedback.length === 0 ? (
                   <p className="text-sm text-gray-500 text-center py-12 font-medium">
@@ -657,10 +662,10 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                   })
                 )}
               </div>
-            </Tabs.Panel>
+            )}
 
             {/* Panel: Metrics */}
-            <Tabs.Panel id="metrics">
+            {activeTab === 'metrics' && (
               <div className="flex flex-col gap-6">
                 <div className="flex flex-wrap sm:flex-nowrap gap-1 bg-gray-100 p-1 sm:p-1.5 rounded-2xl border-none">
                   {(
@@ -1031,10 +1036,10 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                   </div>
                 ) : null}
               </div>
-            </Tabs.Panel>
+            )}
 
             {/* Panel: Users */}
-            <Tabs.Panel id="users">
+            {activeTab === 'users' && (
               <div className="flex flex-col gap-6">
                 <div className="flex flex-wrap sm:flex-nowrap gap-1 bg-gray-100 p-1 sm:p-1.5 rounded-2xl border-none">
                   {(
@@ -1136,8 +1141,7 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
                   </div>
                 </div>
               </div>
-            </Tabs.Panel>
-          </Tabs>
+            )}
         </div>
       )}
 
