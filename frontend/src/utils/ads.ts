@@ -49,6 +49,11 @@ let personalizedAllowed = true;
 /** Track whether a banner is currently on screen. */
 let bannerShown = false;
 
+/** Check whether a banner is already active in memory. */
+export function isAdLoaded(): boolean {
+  return bannerShown;
+}
+
 /**
  * Initialize the AdMob SDK once and run the EU consent (UMP) flow. Idempotent
  * and concurrency-safe. Safe to call on web (no-op). `at.snagbite.app` targets

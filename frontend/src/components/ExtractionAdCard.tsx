@@ -8,6 +8,7 @@ import {
   removeExtractionBanner,
   addBannerSizeListener,
   addBannerLoadListener,
+  isAdLoaded,
 } from '../utils/ads';
 
 /**
@@ -49,7 +50,11 @@ export default function ExtractionAdCard({
 
   useEffect(() => {
     if (!native || !isActive) return;
-    setStatus('pending');
+    if (!isAdLoaded()) {
+      setStatus('pending');
+    } else {
+      setStatus('loaded');
+    }
     const slot = slotRef.current;
     if (!slot) return;
 
