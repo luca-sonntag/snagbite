@@ -39,6 +39,15 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
         mainHandler.postDelayed(splashSafetyTimeout, SPLASH_SAFETY_TIMEOUT_MS);
         bridgeSafeAreaInsets();
+        disableWebViewOverScroll();
+    }
+
+    private void disableWebViewOverScroll() {
+        try {
+            if (getBridge() != null && getBridge().getWebView() != null) {
+                getBridge().getWebView().setOverScrollMode(android.view.View.OVER_SCROLL_NEVER);
+            }
+        } catch (Throwable ignored) { }
     }
 
     /**

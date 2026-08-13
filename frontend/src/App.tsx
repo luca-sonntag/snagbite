@@ -135,16 +135,7 @@ export default function App() {
   useEffect(() => {
     if (activeView === 'history') {
       lastHistorySubPathRef.current = subPath;
-      document.documentElement.style.overscrollBehaviorY = 'none';
-      document.body.style.overscrollBehaviorY = 'none';
-    } else {
-      document.documentElement.style.removeProperty('overscroll-behavior-y');
-      document.body.style.removeProperty('overscroll-behavior-y');
     }
-    return () => {
-      document.documentElement.style.removeProperty('overscroll-behavior-y');
-      document.body.style.removeProperty('overscroll-behavior-y');
-    };
   }, [activeView, subPath]);
 
   // Tracks auth transitions so we can land on the catalog after an interactive
@@ -837,7 +828,7 @@ export default function App() {
         </div>
 
         {/* HISTORY / SAVED RECIPES TAB */}
-        <div hidden={activeView !== 'history'} aria-hidden={activeView !== 'history' || undefined} className="[overscroll-behavior-y:none]">
+        <div hidden={activeView !== 'history'} aria-hidden={activeView !== 'history' || undefined}>
           <SavedCatalog
             history={history}
             historyLoaded={historyLoaded}
