@@ -1,4 +1,4 @@
-import { Link, Route, Routes, useLocation } from 'react-router-dom';
+import { Link, Route, Routes } from 'react-router-dom';
 
 import LandingPage from './pages/LandingPage';
 import DataDeletionPage from './pages/DataDeletionPage';
@@ -8,22 +8,8 @@ import TermsPage from './pages/TermsPage';
 import InviteLandingPage from './pages/InviteLandingPage';
 
 export default function App() {
-  const location = useLocation();
-  const isInvitePage = location.pathname.startsWith('/invite');
-
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col font-sans transition-colors dark:bg-gray-950 dark:text-gray-100">
-      {!isInvitePage && (
-        <header className="w-full bg-white/85 dark:bg-gray-950/85 backdrop-blur-md sticky top-0 z-50">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-            <Link to="/" className="flex items-center hover:opacity-90 transition-opacity">
-              <img src="/icon-192.png" alt="Snagbite Logo" className="w-8 h-8 mr-2 rounded-lg" />
-              <span className="font-bold text-inherit text-xl bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent dark:from-emerald-400 dark:to-teal-300">Snagbite</span>
-            </Link>
-          </div>
-        </header>
-      )}
-
       <main className="flex-1 flex flex-col items-center w-full">
         <Routes>
           <Route path="/" element={<LandingPage />} />

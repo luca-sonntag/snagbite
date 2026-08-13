@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { legal } from '../legal';
 import { Card } from '@heroui/react';
 import { Mail, Phone, MapPin, Building, ShieldAlert } from 'lucide-react';
@@ -5,9 +6,14 @@ import { Mail, Phone, MapPin, Building, ShieldAlert } from 'lucide-react';
 export default function LegalPage() {
   return (
     <div className="w-full max-w-3xl mx-auto px-4 py-8 md:py-12 flex flex-col gap-8">
-      
+      <div>
+        <Link to="/" className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1">
+          ← Zurück zur Startseite
+        </Link>
+      </div>
+
       {/* Page Header */}
-      <div className="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/15 rounded-2xl p-6 md:p-8 flex flex-col gap-2">
+      <div className="bg-emerald-500/5 dark:bg-emerald-500/10 border-none rounded-2xl p-6 md:p-8 flex flex-col gap-2">
         <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Rechtliches</span>
         <h1 className="text-3xl font-black text-gray-900 dark:text-white leading-tight">
           Impressum
