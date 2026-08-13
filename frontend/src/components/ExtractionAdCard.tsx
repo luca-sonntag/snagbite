@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Spinner } from '@heroui/react';
+import { BannerAdSize } from '@capacitor-community/admob';
 import { useI18n } from '../context/I18nContext';
 import { isNative } from '../native';
 import {
@@ -10,27 +11,29 @@ import {
 } from '../utils/ads';
 
 /**
- * Ad slot shown in the space below the extraction animation.
+ * Ad slot shown in the space below the extraction animation or in the cookbook catalog.
  *
- * On native (Android/iOS), AdMob displays a MEDIUM_RECTANGLE (300×250) banner overlay
+ * On native (Android/iOS), AdMob displays a banner overlay (300×250 MREC or 320x50 Banner)
  * on top of the slot.
- *
- * On web (browser), the same styled ad card container (300x250 slot) is rendered
- * to maintain UI parity.
  */
 interface ExtractionAdCardProps {
   isActive?: boolean;
+  variant?: 'mrec' | 'banner';
 }
 
-export default function ExtractionAdCard({ isActive = true }: ExtractionAdCardProps) {
+export default function ExtractionAdCard({ isActive = true, variant = 'mrec' }: ExtractionAdCardProps) {
   const { t } = useI18n();
   const slotRef = useRef<HTMLDivElement>(null);
-  // Default MREC height (300×250) until the real banner reports its size.
-  const [slotHeight, setSlotHeight] = useState(250);
+  const defaultHeight = variant === 'banner' ? 50 : 250;
+  const [slotHeight, setSlotHeight] = useState(defaultHeight);
   const native = isNative();
   const [status, setStatus] = useState<'pending' | 'loaded' | 'failed'>(
     native ? 'pending' : 'loaded',
   );
+
+  useEffect(() => {
+    setSlotHeight(variant === 'banner' ? 50 : 250);
+  }, [variant]);
 
   useEffect(() => {
     if (!native) return;
@@ -52,12 +55,13 @@ export default function ExtractionAdCard({ isActive = true }: ExtractionAdCardPr
       // BOTTOM_CENTER expects the distance from the viewport's bottom edge to
       // the banner's bottom edge. CSS px map to the plugin's logical dp units.
       const bottomMargin = Math.max(0, Math.round(window.innerHeight - rect.bottom));
+      const adSize = variant === 'banner' ? BannerAdSize.BANNER : BannerAdSize.MEDIUM_RECTANGLE;
       console.log(
         `[AdMob] slot rect top=${Math.round(rect.top)} bottom=${Math.round(rect.bottom)} ` +
         `height=${Math.round(rect.height)} innerH=${window.innerHeight} ` +
         `marginBottom=${bottomMargin} dpr=${window.devicePixelRatio}`,
       );
-      void showExtractionBanner(bottomMargin);
+      void showExtractionBanner(bottomMargin, adSize);
     };
 
     (async () => {
@@ -90,14 +94,14 @@ export default function ExtractionAdCard({ isActive = true }: ExtractionAdCardPr
       removeSizeListener?.();
       void removeExtractionBanner();
     };
-  }, [native, isActive]);
+  }, [native, isActive, variant]);
 
   // No ad filled on native — don't leave an empty card behind.
   if (native && status === 'failed') return null;
 
   return (
-    <div className="bg-white dark:bg-gray-900 p-5 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] w-full transition-all duration-300">
-      <div className="flex items-center mb-3">
+    <div className={`bg-white dark:bg-gray-900 ${variant === 'banner' ? 'p-3' : 'p-5'} rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] w-full transition-all duration-300`}>
+      <div className="flex items-center mb-2">
         <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
           {t('ads.label')}
         </span>
@@ -105,7 +109,7 @@ export default function ExtractionAdCard({ isActive = true }: ExtractionAdCardPr
       {/* Reserved slot the native AdMob banner overlays (or web ad container box). */}
       <div
         ref={slotRef}
-        className="w-full max-w-[300px] mx-auto flex flex-col items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800/60 transition-all"
+        className="w-full max-w-[320px] mx-auto flex flex-col items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800/60 transition-all"
         style={{ minHeight: slotHeight }}
       >
         {status === 'pending' && (

@@ -102,7 +102,10 @@ export async function initAds(): Promise<void> {
  * Any existing banner is recreated when the margin changes so rotation and
  * viewport resizing remain aligned. No-op on web or if consent was declined.
  */
-export async function showExtractionBanner(bottomMarginDp: number): Promise<void> {
+export async function showExtractionBanner(
+  bottomMarginDp: number,
+  size: BannerAdSize = BannerAdSize.MEDIUM_RECTANGLE,
+): Promise<void> {
   if (!isNative()) return;
   await initAds();
   if (!canRequestAds) return;
@@ -123,7 +126,7 @@ export async function showExtractionBanner(bottomMarginDp: number): Promise<void
   try {
     await AdMob.showBanner({
       adId: BANNER_AD_ID,
-      adSize: BannerAdSize.MEDIUM_RECTANGLE,
+      adSize: size,
       position: BannerAdPosition.BOTTOM_CENTER,
       margin,
       isTesting: IS_TESTING,
@@ -131,7 +134,7 @@ export async function showExtractionBanner(bottomMarginDp: number): Promise<void
     });
     bannerShown = true;
     console.log(
-      `[AdMob] showBanner requested (BOTTOM_CENTER, margin=${margin}, ` +
+      `[AdMob] showBanner requested (BOTTOM_CENTER, size=${size}, margin=${margin}, ` +
         `testing=${IS_TESTING}, npa=${!personalizedAllowed})`,
     );
   } catch (err) {
