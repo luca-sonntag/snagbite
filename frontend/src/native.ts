@@ -316,6 +316,14 @@ export function registerAppUrlOpen(onUrl: (url: string) => void): () => void {
   if (!isNative()) return () => { };
 
   try {
+    // Cold start: App launched while process was closed/killed
+    App.getLaunchUrl().then((launchUrl) => {
+      if (launchUrl?.url) {
+        onUrl(launchUrl.url);
+      }
+    }).catch(() => { });
+
+    // Warm start: App already running when URL is opened
     const handlePromise = App.addListener('appUrlOpen', (data) => {
       if (data?.url) {
         onUrl(data.url);
