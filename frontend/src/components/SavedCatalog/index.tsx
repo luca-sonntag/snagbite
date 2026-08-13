@@ -38,6 +38,7 @@ interface SavedCatalogProps {
   onRemixSuccess?: (newRecipe: Recipe, newJobId?: string) => void;
   onReplaceCurrent?: (newRecipe: Recipe) => void;
   onSelectModeChange?: (active: boolean) => void;
+  onOverlaySheetChange?: (isOpen: boolean) => void;
   /** Current `#/history/...` sub-path — `null` = cookbook home. */
   catalogSubPath?: string | null;
   /** Navigates within the catalog tab (`null` returns to the cookbook home). */
@@ -69,6 +70,7 @@ export default function SavedCatalog({
   shoppingListCount,
   onRemixSuccess,
   onSelectModeChange,
+  onOverlaySheetChange,
   catalogSubPath = null,
   onNavigateCatalog,
   limitStatus
@@ -178,6 +180,11 @@ export default function SavedCatalog({
   // FlagSheet states
   const [isFlagSheetOpen, setIsFlagSheetOpen] = useState(false);
   const [flagSheetJob, setFlagSheetJob] = useState<Job | null>(null);
+
+  const isAnySheetOpen = isFilterSheetOpen || isCollectionSheetOpen || isFlagSheetOpen || !!currentBulkShoppingJob;
+  useEffect(() => {
+    onOverlaySheetChange?.(isAnySheetOpen);
+  }, [isAnySheetOpen, onOverlaySheetChange]);
 
   // Memoize all distinct flags in catalog to pass as suggestions
   const allExistingFlags = useMemo(() => {

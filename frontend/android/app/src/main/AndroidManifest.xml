@@ -37,6 +37,11 @@
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
         </provider>
 
+        <!-- Google AdMob app id (production). -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-4240071009231066~4004275838" />
+
         <!-- FCM (smart AI push notifications): status-bar icon, tint color and the
              default channel used when a data-less push arrives before the app has
              created its own channel. The channel id matches PUSH_CHANNEL_ID in push.ts. -->

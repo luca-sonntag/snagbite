@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Camera, ChefHat, Video } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
+import { useAuth } from '../context/AuthContext';
 import type { SupportedLanguage } from '../i18n';
 import type { ProgressData, ProgressStage } from '../types';
 
@@ -11,6 +12,8 @@ interface ExtractionAnimationProps {
   progress: ProgressData | null;
   /** Which stage sequence to walk — photo imports never scrape or download. */
   variant?: 'link' | 'photo';
+  /** Compact height layout for free users when an ad banner is rendered below. */
+  compact?: boolean;
 }
 
 const FUNNY_TEXTS: Record<SupportedLanguage, Record<'pending' | 'scraping' | 'processing' | 'completed' | 'failed', string[]>> = {
@@ -134,8 +137,9 @@ const SCENE_TARGET_PERCENT: Record<ProgressStage, number> = {
   finalizing: 90,
 };
 
-export default function ExtractionAnimation({ url: _url, jobStatus, progress, variant = 'link' }: ExtractionAnimationProps) {
+export default function ExtractionAnimation({ url: _url, jobStatus, progress, variant = 'link', compact: _compact = false }: ExtractionAnimationProps) {
   const { t, language } = useI18n();
+  const { isPremium } = useAuth();
   const [displayedIndex, setDisplayedIndex] = useState(0);
   const [funnyText, setFunnyText] = useState('');
 
@@ -267,7 +271,6 @@ export default function ExtractionAnimation({ url: _url, jobStatus, progress, va
       case 'reading_photos':
         return (
           <div className="relative flex items-center justify-center h-28">
-            {/* A recipe card with handwriting lines, swept by the scan line. */}
             <div className="w-20 h-24 rounded-lg bg-white dark:bg-gray-900 border border-black/10 dark:border-white/10 shadow-sm rotate-[-4deg] relative overflow-hidden flex flex-col gap-1.5 p-3">
               <div className="absolute inset-x-0 h-1 bg-emerald-400 dark:bg-emerald-500 shadow-[0_0_8px_#34d399] animate-scan z-10" />
               <div className="h-1.5 w-3/4 rounded-full bg-emerald-500/30" />
@@ -311,30 +314,30 @@ export default function ExtractionAnimation({ url: _url, jobStatus, progress, va
   };
 
   return (
-    <div className="flex flex-col items-center justify-center flex-1 min-h-[55dvh] w-full text-center py-6 px-4 gap-6">
-      {/* Infographic Area */}
-      <div className="flex items-center justify-center w-full py-4">
+    <div className="flex flex-col items-center w-full gap-5 p-2">
+      {/* Infographic Visual Area */}
+      <div className="flex items-center justify-center w-full py-2 min-h-[120px]">
         <div key={displayedIndex} className="animate-fade-in flex flex-col items-center justify-center w-full">
           {renderInfographic(displayedStage)}
         </div>
       </div>
 
       {/* Progress & Status Area */}
-      <div className="flex flex-col gap-4 w-full max-w-xs">
+      <div className="flex flex-col gap-3 w-full">
         {/* Stage details */}
         <div className="flex justify-between items-center text-xs font-semibold">
-          <span className="text-gray-950 dark:text-white/95 tracking-wide uppercase">
+          <span className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">
             {t(`job.progress.stages.${displayedStage}`)}
           </span>
-          <span className="text-emerald-600 dark:text-emerald-400 tabular-nums">
+          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
             {percent}%
           </span>
         </div>
 
-        {/* Progress Bar */}
-        <div className="w-full bg-emerald-500/10 dark:bg-emerald-500/10 h-2.5 rounded-full overflow-hidden relative shadow-inner">
+        {/* Progress Bar - Clean Flat Style */}
+        <div className="w-full bg-gray-100 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden relative">
           <div
-            className="bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600 h-full rounded-full transition-all duration-500 ease-out relative"
+            className="bg-emerald-500 h-full rounded-full transition-all duration-500 ease-out relative"
             style={{ width: `${percent}%` }}
           >
             <div className="absolute inset-0 bg-white/20 animate-pulse" />
@@ -342,22 +345,24 @@ export default function ExtractionAnimation({ url: _url, jobStatus, progress, va
         </div>
 
         {/* Funny Rotating Copy */}
-        <div className="pt-3 border-t border-black/5 dark:border-white/5 min-h-[40px] flex items-center justify-center text-center">
+        <div className="pt-3 border-t border-gray-100 dark:border-gray-800/60 min-h-[38px] flex items-center justify-center text-center">
           <p
             key={funnyText}
-            className="text-xs text-gray-500 dark:text-gray-400 italic opacity-95 animate-fade-in max-w-xs"
+            className="text-xs text-gray-500 dark:text-gray-400 italic opacity-95 animate-fade-in"
           >
             {funnyText}
           </p>
         </div>
       </div>
 
-      {/* Background Notification Notice */}
-      <div className="max-w-xs text-center px-4 pt-3 border-t border-black/5 dark:border-white/5">
-        <p className="text-[11px] leading-relaxed text-gray-400 dark:text-gray-500">
-          {t('job.backgroundNotice')}
-        </p>
-      </div>
+      {/* Background Notification Notice — only for Premium users who have background processing */}
+      {isPremium && (
+        <div className="w-full text-center pt-2 border-t border-gray-100 dark:border-gray-800/60">
+          <p className="text-[11px] leading-relaxed text-gray-400 dark:text-gray-500">
+            {t('job.backgroundNotice')}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

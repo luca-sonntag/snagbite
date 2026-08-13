@@ -31,9 +31,11 @@
     "deploy:production:patch": "powershell -ExecutionPolicy Bypass -File scripts/deploy-playstore.ps1 -Track production -Bump patch",
     "deploy:production:upload": "powershell -ExecutionPolicy Bypass -File scripts/deploy-playstore.ps1 -Track production -SkipBuild",
     "deploy:ota": "powershell -ExecutionPolicy Bypass -File scripts/deploy-ota.ps1 -Channel production",
-    "deploy:ota:alpha": "powershell -ExecutionPolicy Bypass -File scripts/deploy-ota.ps1 -Channel alpha"
+    "deploy:ota:alpha": "powershell -ExecutionPolicy Bypass -File scripts/deploy-ota.ps1 -Channel alpha",
+    "postinstall": "patch-package"
   },
   "dependencies": {
+    "@capacitor-community/admob": "^8.0.0",
     "@capacitor/android": "^8.4.1",
     "@capacitor/app": "^8.1.0",
     "@capacitor/cli": "^8.4.1",
@@ -70,6 +72,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "patch-package": "^8.0.0",
     "serve": "^14.2.4",
     "tailwindcss": "^4.3.1",
     "typescript": "~6.0.2",

@@ -1,5 +1,7 @@
 # 🚀 Projekt: Instagram Reel Rezept-Extraktor (Google Antigravityx)
 
+> Wenn nur eine Frage gestellt wird, anstworte einfach, anstatt direkt Änderungen vorzunehmen. Ich werde dann sagen, ob ich die Änderung haben möchte oder nicht.
+>
 > **🔁 Commit-Strategie:** Während JEDER Session musst du kontinuierlich atomic commits machen. Nach jedem abgeschlossenen logischen Änderungsblock (Feature, Fix, Refactor, Datei-Addition) sofort `git add` der betroffenen Dateien und `git commit` mit einer [Conventional Commits](https://www.conventionalcommits.org/) Nachricht (`feat:`, `fix:`, `refactor:`, `docs:`, `chore:`, `test:`). Niemals `git add -A` — nur selektiv die Dateien staggen, die zum aktuellen logischen Change gehören. Siehe Skill `atomic-commits` für vollständige Regeln.
 >
 > **📝 Doku & OBSOLETE.md aktuell halten:** Nach JEDER relevanten Code-Änderung (neues Feature, Architekturänderung, neue Komponente, etc.) musst du prüfen, ob die Dokumentation angepasst werden muss. Wenn durch Refactorings oder neue Ansätze alter Code, Heuristiken oder Hilfsfunktionen obsolet werden, musst du diese im Dokument [`docs/OBSOLETE.md`](file:///c:/Users/lucas/source/repos/cookbook/docs/OBSOLETE.md) festhalten.

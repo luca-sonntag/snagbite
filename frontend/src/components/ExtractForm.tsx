@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Card, TextField, Label, Input, Button, FieldError, Spinner, Accordion } from '@heroui/react';
-import { BookOpen, Camera, Clipboard, Globe, HelpCircle, ImagePlus, Link2, X } from 'lucide-react';
+import { BookOpen, Camera, Clipboard, Globe, HelpCircle, ImagePlus, Link2, Play, X } from 'lucide-react';
 import { MAX_IMPORT_PHOTOS } from '../hooks/useRecipeExtraction';
 import { Clipboard as CapClipboard } from '@capacitor/clipboard';
 import { Capacitor } from '@capacitor/core';
@@ -13,6 +13,8 @@ import PremiumHint from './PremiumHint';
 import PremiumUpgradeCard from './PremiumUpgradeCard';
 import type { ProgressData } from '../types';
 import ExtractionAnimation from './ExtractionAnimation';
+import ExtractionAdCard from './ExtractionAdCard';
+import { showRewardedAd } from '../utils/ads';
 
 import { InstagramIcon, ShareStep1Mockup, ShareStep2Mockup, ShareStep3Mockup } from './ShareMockups';
 
@@ -52,6 +54,7 @@ const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export type ExtractMode = 'link' | 'photo';
 
 interface ExtractFormProps {
+  isActive?: boolean;
   url: string;
   setUrl: (url: string) => void;
   urlError: string;
@@ -68,9 +71,11 @@ interface ExtractFormProps {
   photos: File[];
   setPhotos: (photos: File[]) => void;
   isUploadingPhotos: boolean;
+  claimRewardedCredit?: () => Promise<boolean>;
 }
 
 export default function ExtractForm({
+  isActive = true,
   url,
   setUrl,
   urlError,
@@ -86,12 +91,14 @@ export default function ExtractForm({
   setMode,
   photos,
   setPhotos,
-  isUploadingPhotos
+  isUploadingPhotos,
+  claimRewardedCredit
 }: ExtractFormProps) {
   const { t } = useI18n();
   const { user, isPremium, hasTrialAvailable, trialDays, trialLoading } = useAuth();
   const { activeCount: liveActiveCount } = useExtractionJobs();
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  const [isWatchingAd, setIsWatchingAd] = useState(false);
   const [canPaste, setCanPaste] = useState(false);
   // React to TrialBanner dismissal so the upgrade card re-appears as soon
   // as the banner is closed.
@@ -218,21 +225,25 @@ export default function ExtractForm({
   ];
 
   return (
-    <div className="flex flex-col gap-4 w-full">
-      {/* Premium Upgrade Promotion — displayed at very top */}
-      {!isPending && !hideUpgradeCard && (
+    <div className={`flex flex-col gap-4 w-full ${isPending ? 'flex-1 justify-center my-auto min-h-0' : ''}`}>
+      {/* Premium Upgrade Promotion — displayed at very top (only when no contextual limit banner is shown) */}
+      {!isPending && !hideUpgradeCard && !blockedByLimit && (
         <PremiumUpgradeCard onUpgradeClick={() => setIsPremiumModalOpen(true)} />
       )}
       {errorBanner}
       {/* Input Card or Extraction Animation Card */}
       {isPending ? (
-        <ExtractionAnimation
-          url={url}
-          isPending={isPending}
-          jobStatus={jobStatus}
-          progress={progress}
-          variant={mode === 'photo' ? 'photo' : 'link'}
-        />
+        <div className="flex flex-col w-full gap-4 my-auto justify-center">
+          <ExtractionAnimation
+            url={url}
+            isPending={isPending}
+            jobStatus={jobStatus}
+            progress={progress}
+            variant={mode === 'photo' ? 'photo' : 'link'}
+          />
+          {/* Freemium ad in the empty space below the animation (native only). */}
+          {!isRealPremium && <ExtractionAdCard isActive={isActive} />}
+        </div>
       ) : (
         <Card className="!bg-white dark:!bg-gray-900 p-6 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
           <form
@@ -342,86 +353,128 @@ export default function ExtractForm({
                 </p>
               </div>
             ) : (
-            <TextField
-              fullWidth
-              name="url"
-              value={url}
-              onChange={(val) => {
-                setUrl(val);
-                if (urlError) validateUrl(val);
-              }}
-              isInvalid={!!urlError}
-            >
-              <Label className="sr-only">{t('form.urlLabel')}</Label>
-              <div className="relative">
-                <Link2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400 dark:text-gray-500 pointer-events-none" />
-                <Input
-                  placeholder={t('form.urlPlaceholderShort')}
-                  className="w-full !bg-gray-100 dark:!bg-gray-800 border-none rounded-2xl pl-11 !pr-12 py-3.5 text-sm text-gray-900 dark:text-white shadow-[0_1px_3px_rgba(0,0,0,0.02)] focus:ring-2 focus:ring-emerald-500/30 focus:outline-none transition-all"
-                  disabled={isPending}
-                />
-                <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                  {url && (
-                    <button
-                      type="button"
-                      className="text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-none"
-                      onClick={() => setUrl('')}
-                      disabled={isPending}
-                    >
-                      ×
-                    </button>
-                  )}
-                  {canPaste && !url && (
-                    <button
-                      type="button"
-                      className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 w-8 h-8 flex items-center justify-center rounded-full hover:bg-emerald-500/10 transition-colors border-none"
-                      onClick={handlePaste}
-                      disabled={isPending}
-                      title={t('form.pasteTooltip')}
-                    >
-                      <Clipboard className="w-4 h-4" />
-                    </button>
-                  )}
+              <TextField
+                fullWidth
+                name="url"
+                value={url}
+                onChange={(val) => {
+                  setUrl(val);
+                  if (urlError) validateUrl(val);
+                }}
+                isInvalid={!!urlError}
+              >
+                <Label className="sr-only">{t('form.urlLabel')}</Label>
+                <div className="relative">
+                  <Link2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400 dark:text-gray-500 pointer-events-none" />
+                  <Input
+                    placeholder={t('form.urlPlaceholderShort')}
+                    className="w-full !bg-gray-100 dark:!bg-gray-800 border-none rounded-2xl pl-11 !pr-12 py-3.5 text-sm text-gray-900 dark:text-white shadow-[0_1px_3px_rgba(0,0,0,0.02)] focus:ring-2 focus:ring-emerald-500/30 focus:outline-none transition-all"
+                    disabled={isPending}
+                  />
+                  <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    {url && (
+                      <button
+                        type="button"
+                        className="text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-none"
+                        onClick={() => setUrl('')}
+                        disabled={isPending}
+                      >
+                        ×
+                      </button>
+                    )}
+                    {canPaste && !url && (
+                      <button
+                        type="button"
+                        className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 w-8 h-8 flex items-center justify-center rounded-full hover:bg-emerald-500/10 transition-colors border-none"
+                        onClick={handlePaste}
+                        disabled={isPending}
+                        title={t('form.pasteTooltip')}
+                      >
+                        <Clipboard className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-              {urlError && <FieldError className="text-xs text-red-500 mt-1">{urlError}</FieldError>}
-            </TextField>
+                {urlError && <FieldError className="text-xs text-red-500 mt-1">{urlError}</FieldError>}
+              </TextField>
             )}
 
-            <Button
-              type="submit"
-              fullWidth
-              isPending={isPending || isUploadingPhotos}
-              isDisabled={submitDisabled}
-              className={`py-3.5 h-12 text-sm rounded-2xl font-semibold border-none text-white ${submitDisabled
-                ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed opacity-70 shadow-none'
-                : isPending
-                  ? 'bg-emerald-800 shadow-none'
-                  : 'bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition-all shadow-none'
-                }`}
-            >
-              {({ isPending }) => (
-                <span className="flex items-center gap-2 justify-center">
-                  {isPending ? (
+            {extractionLimitReached && !cookbookFull ? (
+              <div className="flex flex-col gap-2">
+                <Button
+                  type="button"
+                  fullWidth
+                  isDisabled={isWatchingAd || isPending}
+                  onClick={async () => {
+                    setIsWatchingAd(true);
+                    try {
+                      const earned = await showRewardedAd();
+                      if (earned && claimRewardedCredit) {
+                        const claimed = await claimRewardedCredit();
+                        if (claimed && (url.trim() || photos.length > 0)) {
+                          handleFormSubmit({ preventDefault: () => {} } as React.FormEvent);
+                        }
+                      }
+                    } catch (err) {
+                      console.error('Error during rewarded ad flow:', err);
+                    } finally {
+                      setIsWatchingAd(false);
+                    }
+                  }}
+                  className="py-3.5 h-12 text-sm rounded-2xl font-bold border-none text-white bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 active:scale-95 transition-all shadow-none flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {isWatchingAd ? (
                     <>
                       <Spinner color="current" size="sm" />
-                      <span>{isUploadingPhotos ? t('form.photo.btnUploading') : t('form.btnPending')}</span>
+                      <span>{t('ads.rewardedLoading')}</span>
                     </>
                   ) : (
                     <>
-                      <BookOpen className="w-4 h-4" />
-                      <span>{t('form.btnSubmit')}</span>
+                      <Play className="w-4 h-4 fill-current" />
+                      <span>
+                        {(url.trim() || photos.length > 0)
+                          ? 'Video ansehen & Rezept erstellen (+1)'
+                          : 'Video ansehen (+1 Rezept)'}
+                      </span>
                     </>
                   )}
-                </span>
-              )}
-            </Button>
+                </Button>
+              </div>
+            ) : (
+              <Button
+                type="submit"
+                fullWidth
+                isPending={isPending || isUploadingPhotos}
+                isDisabled={submitDisabled}
+                className={`py-3.5 h-12 text-sm rounded-2xl font-semibold border-none text-white ${submitDisabled
+                  ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed opacity-70 shadow-none'
+                  : isPending
+                    ? 'bg-emerald-800 shadow-none'
+                    : 'bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition-all shadow-none'
+                  }`}
+              >
+                {({ isPending }) => (
+                  <span className="flex items-center gap-2 justify-center">
+                    {isPending ? (
+                      <>
+                        <Spinner color="current" size="sm" />
+                        <span>{isUploadingPhotos ? t('form.photo.btnUploading') : t('form.btnPending')}</span>
+                      </>
+                    ) : (
+                      <>
+                        <BookOpen className="w-4 h-4" />
+                        <span>{t('form.btnSubmit')}</span>
+                      </>
+                    )}
+                  </span>
+                )}
+              </Button>
+            )}
 
             {/* Premium parallel-extraction counter — how many run at once. */}
             {showConcurrency && (liveActiveCount > 0 || atConcurrencyLimit) && (
-              <p className={`text-center text-xs font-medium -mt-1 ${
-                atConcurrencyLimit ? 'text-amber-600 dark:text-amber-400' : 'text-gray-500 dark:text-gray-400'
-              }`}>
+              <p className={`text-center text-xs font-medium -mt-1 ${atConcurrencyLimit ? 'text-amber-600 dark:text-amber-400' : 'text-gray-500 dark:text-gray-400'
+                }`}>
                 {atConcurrencyLimit
                   ? t('form.concurrentLimitReached', { max: maxConcurrent })
                   : t('form.concurrentCounter', { active: liveActiveCount, max: maxConcurrent })}
@@ -429,7 +482,7 @@ export default function ExtractForm({
             )}
 
             {cookbookFull ? (
-              <div className="flex flex-col gap-1.5 -mt-1">
+              <div className="flex flex-col gap-2.5 -mt-1">
                 <PremiumHint
                   variant="banner"
                   onClick={() => setIsPremiumModalOpen(true)}
@@ -441,7 +494,7 @@ export default function ExtractForm({
                 />
               </div>
             ) : extractionLimitReached ? (
-              <div className="flex flex-col gap-1.5 -mt-1">
+              <div className="flex flex-col gap-2.5 -mt-1">
                 <PremiumHint
                   variant="banner"
                   onClick={() => setIsPremiumModalOpen(true)}
@@ -505,164 +558,164 @@ export default function ExtractForm({
           {/* Link-only guidance: sharing a post and the per-platform help below
               have no meaning for a photo import. */}
           {mode === 'link' && (<>
-          {/* Share Directly Accordion */}
-          <Accordion variant="surface" className="w-full bg-white/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-black/5 dark:border-white/5 overflow-hidden" defaultExpandedKeys={['share']}>
-            <Accordion.Item className="border-none" id="share">
-              <Accordion.Heading>
-                <Accordion.Trigger className="px-5 py-4 flex items-center justify-between text-gray-800 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5">
-                  <span className="flex items-center gap-2 text-sm font-semibold">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                      <polyline points="16 6 12 2 8 6" />
-                      <line x1="12" y1="2" x2="12" y2="15" />
-                    </svg>
-                    {t('form.helpShareTitle')}
-                  </span>
-                  <Accordion.Indicator />
-                </Accordion.Trigger>
-              </Accordion.Heading>
-              <Accordion.Panel>
-                <Accordion.Body className="px-5 pb-5 pt-3 text-xs text-gray-600 dark:text-gray-400 flex flex-col gap-4 border-t border-black/5 dark:border-white/5">
-                  <p className="leading-relaxed">{t('form.helpShareDesc')}</p>
+            {/* Share Directly Accordion */}
+            <Accordion variant="surface" className="w-full bg-white/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-black/5 dark:border-white/5 overflow-hidden" defaultExpandedKeys={['share']}>
+              <Accordion.Item className="border-none" id="share">
+                <Accordion.Heading>
+                  <Accordion.Trigger className="px-5 py-4 flex items-center justify-between text-gray-800 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5">
+                    <span className="flex items-center gap-2 text-sm font-semibold">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                        <polyline points="16 6 12 2 8 6" />
+                        <line x1="12" y1="2" x2="12" y2="15" />
+                      </svg>
+                      {t('form.helpShareTitle')}
+                    </span>
+                    <Accordion.Indicator />
+                  </Accordion.Trigger>
+                </Accordion.Heading>
+                <Accordion.Panel>
+                  <Accordion.Body className="px-5 pb-5 pt-3 text-xs text-gray-600 dark:text-gray-400 flex flex-col gap-4 border-t border-black/5 dark:border-white/5">
+                    <p className="leading-relaxed">{t('form.helpShareDesc')}</p>
 
-                  {/* Visual Step-by-Step Guide */}
-                  <div className="flex flex-col gap-3 pt-1">
-                    {/* Step 1 */}
-                    <div className="flex gap-4 p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 items-center justify-between">
-                      <div className="flex-1 flex flex-col gap-1">
-                        <h4 className="font-semibold text-gray-800 dark:text-gray-200 text-xs">
-                          {t('form.helpShareStep1Title')}
-                        </h4>
-                        <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-normal">
-                          {t('form.helpShareStep1Desc')}
-                        </p>
+                    {/* Visual Step-by-Step Guide */}
+                    <div className="flex flex-col gap-3 pt-1">
+                      {/* Step 1 */}
+                      <div className="flex gap-4 p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 items-center justify-between">
+                        <div className="flex-1 flex flex-col gap-1">
+                          <h4 className="font-semibold text-gray-800 dark:text-gray-200 text-xs">
+                            {t('form.helpShareStep1Title')}
+                          </h4>
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-normal">
+                            {t('form.helpShareStep1Desc')}
+                          </p>
+                        </div>
+                        <ShareStep1Mockup />
                       </div>
-                      <ShareStep1Mockup />
-                    </div>
 
-                    {/* Step 2 */}
-                    <div className="flex gap-4 p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 items-center justify-between">
-                      <div className="flex-1 flex flex-col gap-1">
-                        <h4 className="font-semibold text-gray-800 dark:text-gray-200 text-xs">
-                          {t('form.helpShareStep2Title')}
-                        </h4>
-                        <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-normal">
-                          {t('form.helpShareStep2Desc')}
-                        </p>
+                      {/* Step 2 */}
+                      <div className="flex gap-4 p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 items-center justify-between">
+                        <div className="flex-1 flex flex-col gap-1">
+                          <h4 className="font-semibold text-gray-800 dark:text-gray-200 text-xs">
+                            {t('form.helpShareStep2Title')}
+                          </h4>
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-normal">
+                            {t('form.helpShareStep2Desc')}
+                          </p>
+                        </div>
+                        <ShareStep2Mockup />
                       </div>
-                      <ShareStep2Mockup />
-                    </div>
 
-                    {/* Step 3 */}
-                    <div className="flex gap-4 p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 items-center justify-between">
-                      <div className="flex-1 flex flex-col gap-1">
-                        <h4 className="font-semibold text-gray-800 dark:text-gray-200 text-xs">
-                          {t('form.helpShareStep3Title')}
-                        </h4>
-                        <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-normal">
-                          {t('form.helpShareStep3Desc')}
-                        </p>
+                      {/* Step 3 */}
+                      <div className="flex gap-4 p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 items-center justify-between">
+                        <div className="flex-1 flex flex-col gap-1">
+                          <h4 className="font-semibold text-gray-800 dark:text-gray-200 text-xs">
+                            {t('form.helpShareStep3Title')}
+                          </h4>
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-normal">
+                            {t('form.helpShareStep3Desc')}
+                          </p>
+                        </div>
+                        <ShareStep3Mockup />
                       </div>
-                      <ShareStep3Mockup />
                     </div>
-                  </div>
 
-                  <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center italic mt-1 leading-normal">
-                    {t('form.helpShareStep')}
-                  </p>
-                </Accordion.Body>
-              </Accordion.Panel>
-            </Accordion.Item>
-          </Accordion>
+                    <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center italic mt-1 leading-normal">
+                      {t('form.helpShareStep')}
+                    </p>
+                  </Accordion.Body>
+                </Accordion.Panel>
+              </Accordion.Item>
+            </Accordion>
 
-          {/* Help / Instructions Accordion */}
-          <Accordion variant="surface" className="w-full bg-white/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-black/5 dark:border-white/5 overflow-hidden">
-            <Accordion.Item className="border-none">
-              <Accordion.Heading>
-                <Accordion.Trigger className="px-5 py-4 flex items-center justify-between text-gray-800 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5">
-                  <span className="flex items-center gap-2 text-sm font-semibold">
-                    <HelpCircle className="w-4 h-4 text-emerald-500" />
-                    {t('form.helpTitle')}
-                  </span>
-                  <Accordion.Indicator />
-                </Accordion.Trigger>
-              </Accordion.Heading>
-              <Accordion.Panel>
-                <Accordion.Body className="px-5 pb-5 pt-1 text-xs text-gray-600 dark:text-gray-400 flex flex-col gap-3.5 border-t border-black/5 dark:border-white/5">
-                  <div className="flex gap-2.5 items-start">
-                    <div className="p-1.5 rounded-lg bg-pink-500/10 text-pink-600 dark:text-pink-400 shrink-0">
-                      <InstagramIcon className="w-3.5 h-3.5" />
+            {/* Help / Instructions Accordion */}
+            <Accordion variant="surface" className="w-full bg-white/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-black/5 dark:border-white/5 overflow-hidden">
+              <Accordion.Item className="border-none">
+                <Accordion.Heading>
+                  <Accordion.Trigger className="px-5 py-4 flex items-center justify-between text-gray-800 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5">
+                    <span className="flex items-center gap-2 text-sm font-semibold">
+                      <HelpCircle className="w-4 h-4 text-emerald-500" />
+                      {t('form.helpTitle')}
+                    </span>
+                    <Accordion.Indicator />
+                  </Accordion.Trigger>
+                </Accordion.Heading>
+                <Accordion.Panel>
+                  <Accordion.Body className="px-5 pb-5 pt-1 text-xs text-gray-600 dark:text-gray-400 flex flex-col gap-3.5 border-t border-black/5 dark:border-white/5">
+                    <div className="flex gap-2.5 items-start">
+                      <div className="p-1.5 rounded-lg bg-pink-500/10 text-pink-600 dark:text-pink-400 shrink-0">
+                        <InstagramIcon className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-0.5">Instagram Reel</h4>
+                        <p>{t('form.helpSteps.instagram')}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-0.5">Instagram Reel</h4>
-                      <p>{t('form.helpSteps.instagram')}</p>
+                    <div className="flex gap-2.5 items-start">
+                      <div className="p-1.5 rounded-lg bg-black/10 dark:bg-white/10 text-gray-800 dark:text-gray-200 shrink-0">
+                        <TikTokIcon className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-0.5">TikTok Video</h4>
+                        <p>{t('form.helpSteps.tiktok')}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex gap-2.5 items-start">
-                    <div className="p-1.5 rounded-lg bg-black/10 dark:bg-white/10 text-gray-800 dark:text-gray-200 shrink-0">
-                      <TikTokIcon className="w-3.5 h-3.5" />
+                    <div className="flex gap-2.5 items-start">
+                      <div className="p-1.5 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 shrink-0">
+                        <YoutubeIcon className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-0.5">YouTube Shorts</h4>
+                        <p>{t('form.helpSteps.youtube')}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-0.5">TikTok Video</h4>
-                      <p>{t('form.helpSteps.tiktok')}</p>
+                    <div className="flex gap-2.5 items-start">
+                      <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
+                        <FacebookIcon className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-0.5">Facebook Video</h4>
+                        <p>{t('form.helpSteps.facebook')}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex gap-2.5 items-start">
-                    <div className="p-1.5 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 shrink-0">
-                      <YoutubeIcon className="w-3.5 h-3.5" />
+                    <div className="flex gap-2.5 items-start">
+                      <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+                        <Globe className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-0.5">Recipe Website</h4>
+                        <p>{t('form.helpSteps.website')}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-0.5">YouTube Shorts</h4>
-                      <p>{t('form.helpSteps.youtube')}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2.5 items-start">
-                    <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
-                      <FacebookIcon className="w-3.5 h-3.5" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-0.5">Facebook Video</h4>
-                      <p>{t('form.helpSteps.facebook')}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2.5 items-start">
-                    <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-                      <Globe className="w-3.5 h-3.5" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-0.5">Recipe Website</h4>
-                      <p>{t('form.helpSteps.website')}</p>
-                    </div>
-                  </div>
-                </Accordion.Body>
-              </Accordion.Panel>
-            </Accordion.Item>
-          </Accordion>
+                  </Accordion.Body>
+                </Accordion.Panel>
+              </Accordion.Item>
+            </Accordion>
 
-          {/* Demo Recipes Card */}
-          <Card className="glass-panel p-5 mb-3 rounded-2xl border border-black/5 dark:border-white/5 shadow-md flex flex-col gap-3">
-            <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              {t('form.demoTitle')}
-            </span>
-            <div className="grid grid-cols-2 gap-2">
-              {DEMO_RECIPES.map((demo, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => handleDemoClick(demo.url)}
-                  disabled={isPending}
-                  className="flex flex-col items-center justify-center p-3 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 hover:bg-black/10 dark:hover:bg-white/10 active:scale-95 transition-all text-center gap-1.5 group"
-                >
-                  <div className={`p-2 rounded-lg bg-gradient-to-br ${demo.color} shadow-sm group-hover:scale-110 transition-transform`}>
-                    {demo.icon}
-                  </div>
-                  <span className="text-[11px] font-semibold text-gray-700 dark:text-gray-300">
-                    {demo.name}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </Card>
+            {/* Demo Recipes Card */}
+            <Card className="glass-panel p-5 mb-3 rounded-2xl border border-black/5 dark:border-white/5 shadow-md flex flex-col gap-3">
+              <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                {t('form.demoTitle')}
+              </span>
+              <div className="grid grid-cols-2 gap-2">
+                {DEMO_RECIPES.map((demo, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleDemoClick(demo.url)}
+                    disabled={isPending}
+                    className="flex flex-col items-center justify-center p-3 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 hover:bg-black/10 dark:hover:bg-white/10 active:scale-95 transition-all text-center gap-1.5 group"
+                  >
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${demo.color} shadow-sm group-hover:scale-110 transition-transform`}>
+                      {demo.icon}
+                    </div>
+                    <span className="text-[11px] font-semibold text-gray-700 dark:text-gray-300">
+                      {demo.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </Card>
           </>)}
         </>
       )}

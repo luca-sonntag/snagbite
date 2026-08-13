@@ -119,6 +119,7 @@ export default function CookbookHome({
         )}
       </section>
 
+
       {/* Shelves — only shown when the shelf has more than 5 recipes */}
       {shelves.recent.total > 5 && (
         <RecipeShelf
@@ -166,17 +167,17 @@ export default function CookbookHome({
       )}
 
       <RecipeShelf
-          title={t('catalog.shelfNewest')}
-          icon={<Sparkles className="w-4 h-4 text-emerald-500" />}
-          jobs={shelves.newest.items}
-          totalCount={shelves.newest.total}
-          formatTotalTime={formatTotalTime}
-          onOpenAll={() => onOpenList({ kind: 'all' })}
-          onOpenRecipe={onOpenRecipe}
-          isSelectMode={isSelectMode}
-          selectedIds={selectedIds}
-          bindLongPress={bindLongPress}
-        />
+        title={t('catalog.shelfNewest')}
+        icon={<Sparkles className="w-4 h-4 text-emerald-500" />}
+        jobs={shelves.newest.items}
+        totalCount={shelves.newest.total}
+        formatTotalTime={formatTotalTime}
+        onOpenAll={() => onOpenList({ kind: 'all' })}
+        onOpenRecipe={onOpenRecipe}
+        isSelectMode={isSelectMode}
+        selectedIds={selectedIds}
+        bindLongPress={bindLongPress}
+      />
 
       {/* Labels */}
       {allFlags.length > 0 && (

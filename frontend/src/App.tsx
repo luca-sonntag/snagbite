@@ -39,6 +39,7 @@ import { deleteCachedImage } from './utils/imageStore';
 import { useTimerManager } from './hooks/useTimerManager';
 import { useOnboarding } from './hooks/useOnboarding';
 import { useAlphaWelcome } from './hooks/useAlphaWelcome';
+import ExtractionAdCard from './components/ExtractionAdCard';
 
 // Module-level flag to ensure the Web Share Target is only processed once per page load.
 // This prevents re-triggering the interceptor when the user's auth state or metadata updates.
@@ -124,6 +125,8 @@ export default function App() {
   // Tracks the jobId of a just-completed extraction so the history validity
   // effect doesn't clear its subPath before the history state catches up.
   const newlyExtractedJobIdRef = useRef<string | null>(null);
+  const [isCatalogSheetOpen, setIsCatalogSheetOpen] = useState(false);
+  const [adStatus, setAdStatus] = useState<'pending' | 'loaded' | 'failed'>('pending');
 
   // Remembers the last open state of the history tab (recipe detail or list),
   // so the bottom-nav "Recipes" button returns to the recipe that was open
@@ -222,7 +225,8 @@ export default function App() {
     isUploadingPhotos,
     triggerPhotoExtraction,
     limitStatus,
-    fetchLimitStatus
+    fetchLimitStatus,
+    claimRewardedCredit
   } = useRecipeExtraction(getAccessToken, handleExtractionSuccess);
 
   // Which input channel the Extract tab is showing (shared link vs. own photos).
@@ -280,8 +284,8 @@ export default function App() {
       // Already at root — let Capacitor exit the app.
       return false;
     });
-  // Note: activeView, selectedJob and recipe are intentionally in the dep array
-  // so the handler always closes over the latest state.
+    // Note: activeView, selectedJob and recipe are intentionally in the dep array
+    // so the handler always closes over the latest state.
   }, [activeView, selectedJob, isCatalogList, recipe, navigate, setRecipe, setUrl]);
 
   // Fetch history on load. Waits for AuthContext's own initial getSession()
@@ -302,6 +306,12 @@ export default function App() {
     import('./utils/purchase').then(({ initBilling }) => {
       initBilling(user.id);
     }).catch(err => console.error('Failed to load billing module:', err));
+
+    // Initialize AdMob (+ EU consent) once so the extraction ad can render for
+    // free users. No-op on web and idempotent across re-runs.
+    import('./utils/ads').then(({ initAds }) => {
+      initAds();
+    }).catch(err => console.error('Failed to load ads module:', err));
   }, [authLoading, user, fetchHistory]);
 
   // Initial sync on startup/login
@@ -327,6 +337,7 @@ export default function App() {
     sync();
     return () => { active = false; };
   }, [authLoading, user, fetchLimitStatus]);
+
 
   // After an interactive login, always land on the catalog (history) tab.
   // Only fires on a genuine logged-out → logged-in transition, not on the
@@ -606,13 +617,16 @@ export default function App() {
         // Clear query parameters, strip /share pathname, and switch to extract view
         replace('extract');
         setUrl(extractedUrl);
-        triggerExtraction(extractedUrl);
+        const isBlocked = limitStatus && (limitStatus.cookbookFull || (limitStatus.limit >= 0 && limitStatus.remaining <= 0));
+        if (!isBlocked) {
+          triggerExtraction(extractedUrl);
+        }
       } else {
         // Clear query parameters anyway so they don't linger in the browser address bar
         replace(activeView);
       }
     }
-  }, [authLoading, user, replace, setUrl, triggerExtraction, activeView]);
+  }, [authLoading, user, replace, setUrl, triggerExtraction, activeView, limitStatus]);
 
   // Native (Capacitor) share intent: route a shared Instagram link into the
   // same extraction flow as the Web Share Target above.
@@ -621,9 +635,12 @@ export default function App() {
     return registerShareIntent((sharedUrl) => {
       replace('extract');
       setUrl(sharedUrl);
-      triggerExtraction(sharedUrl);
+      const isBlocked = limitStatus && (limitStatus.cookbookFull || (limitStatus.limit >= 0 && limitStatus.remaining <= 0));
+      if (!isBlocked) {
+        triggerExtraction(sharedUrl);
+      }
     });
-  }, [authLoading, user, replace, setUrl, triggerExtraction]);
+  }, [authLoading, user, replace, setUrl, triggerExtraction, limitStatus]);
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -665,6 +682,21 @@ export default function App() {
         {/* Status bar background filler for devices with safe-area-inset-top (e.g. Android 15 Edge-to-Edge) */}
         <div className="w-full h-[var(--safe-area-inset-top)] bg-[#064e3b]" />
 
+        {activeView === 'extract' && !isPending && !recipe && (
+          <header className="w-full bg-gray-50/85 dark:bg-gray-950/85 backdrop-blur-md transition-colors duration-300">
+            <div className="relative w-full max-w-md mx-auto px-4 py-3 flex justify-center items-center">
+              <div className="flex items-center gap-2">
+                <div className="flex-shrink-0">
+                  <img src="/logo-login.png" alt="App Logo" className="w-7 h-7 object-contain" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white m-0 leading-none">{t('app.title')}</h1>
+                </div>
+              </div>
+            </div>
+          </header>
+        )}
+
         {/* Active Cooking Timers Banner */}
         <TimerBanner />
 
@@ -673,13 +705,16 @@ export default function App() {
       </div>
 
       {/* Main content body */}
-      <main className={`w-full max-w-md mx-auto px-4 mt-1 flex-1 flex flex-col gap-6 ${
-        activeView === 'admin'
-          ? 'pb-12'
-          : isViewingRecipe || activeView === 'shopping-list' || (activeView === 'history' && isCatalogSelectMode)
+      <main className={`w-full max-w-md mx-auto px-4 mt-1 flex-1 flex flex-col gap-6 ${activeView === 'admin'
+        ? 'pb-12'
+        : (activeView === 'extract' && isPending && !recipe)
+          ? 'pb-6 my-auto justify-center'
+          : isViewingRecipe || (activeView === 'history' && isCatalogSelectMode)
             ? 'pb-48'
-            : 'pb-24'
-      } ${(activeView === 'extract' && !recipe) ? 'pt-6' : (!isViewingRecipe ? 'pt-4' : '')}`}>
+            : !isPremium && activeView !== 'settings'
+              ? 'pb-44'
+              : 'pb-24'
+        } ${(!isViewingRecipe && activeView !== 'extract') ? 'pt-4' : ''}`}>
 
         {/* One-time trial banner for free users */}
         {!(isPending && !isPremium) && <TrialBanner onOpenPremium={() => setIsPremiumModalOpen(true)} />}
@@ -692,7 +727,11 @@ export default function App() {
             scroll positions, and avoids costly re-mounts on every tab switch. */}
 
         {/* EXTRACT TAB */}
-        <div hidden={activeView !== 'extract'} aria-hidden={activeView !== 'extract' || undefined}>
+        <div
+          hidden={activeView !== 'extract'}
+          aria-hidden={activeView !== 'extract' || undefined}
+          className={activeView === 'extract' ? `flex-1 flex flex-col min-h-0 ${isPending ? 'justify-center my-auto' : ''}` : ''}
+        >
           {recipe ? (
             /* Recipe Detail View — hides extract inputs once extraction is done */
             <RecipeDetails
@@ -749,6 +788,7 @@ export default function App() {
           ) : (
             /* Extraction Form & Error Banner */
             <ExtractForm
+              isActive={activeView === 'extract' && !recipe}
               url={url}
               setUrl={setUrl}
               urlError={urlError}
@@ -764,6 +804,7 @@ export default function App() {
               photos={photos}
               setPhotos={setPhotos}
               isUploadingPhotos={isUploadingPhotos}
+              claimRewardedCredit={claimRewardedCredit}
               errorBanner={
                 (extractionJobs.length > 0 || (jobStatus === 'failed' && jobErrorCode !== 'RATE_LIMIT_EXCEEDED')) ? (
                   <div className="flex flex-col gap-3">
@@ -813,6 +854,7 @@ export default function App() {
               fetchHistory();
             }}
             onSelectModeChange={setIsCatalogSelectMode}
+            onOverlaySheetChange={setIsCatalogSheetOpen}
             catalogSubPath={subPath}
             onNavigateCatalog={navigateCatalog}
             limitStatus={limitStatus}
@@ -856,13 +898,44 @@ export default function App() {
 
       {/* Mobile Bottom Navigation Bar */}
       {(() => {
-        const isBottomBarHidden = (activeView === 'history' && isCatalogSelectMode) || activeView === 'admin' || (isPending && !isPremium);
+        const isBottomBarHidden =
+          (activeView === 'history' && (isCatalogSelectMode || isCatalogSheetOpen)) ||
+          activeView === 'admin' ||
+          (isPending && !isPremium) ||
+          isPremiumModalOpen;
         const bottomBarClasses = `fixed bottom-0 inset-x-0 z-40 transition-all duration-300 ease-in-out pb-safe ${isBottomBarHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
           }`;
 
+        const shouldShowBannerAd =
+          !isPremium &&
+          !isViewingRecipe &&
+          activeView !== 'settings' &&
+          activeView !== 'admin' &&
+          adStatus !== 'failed';
+
+        // The bottom-bar banner is destroyed on real teardown (premium / no fill)
+        // and while an extraction runs: the form then shows its own larger MREC
+        // ad, and the single native banner can't be reused across sizes — so we
+        // release it here, letting the MREC load fresh with its own spinner.
+        // Other temporary contexts (recipe view, settings, admin, overlays,
+        // select mode) hide/resume it instead, preserving the loaded ad.
+        const bannerCanExist = !isPremium && !isPending && adStatus !== 'failed';
+
         return (
           <div className={bottomBarClasses}>
-            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-none shadow-[0_-2px_10px_rgba(0,0,0,0.03)] w-full max-w-md mx-auto flex justify-around items-center pt-3 pb-[calc(1.25rem_+_var(--safe-area-inset-bottom))] px-3">
+            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] w-full max-w-md mx-auto flex flex-col rounded-t-3xl overflow-hidden">
+              {/* Banner ad displayed seamlessly attached to top of bottom menu for free users */}
+              <div className={`w-full pt-2 pb-1.5 px-3 border-b border-gray-100/60 dark:border-gray-800/60 flex flex-col items-center justify-center ${shouldShowBannerAd ? '' : 'hidden'}`}>
+                <ExtractionAdCard
+                  isActive={bannerCanExist}
+                  hidden={!shouldShowBannerAd || isBottomBarHidden}
+                  variant="banner"
+                  embedded
+                  onStatusChange={setAdStatus}
+                />
+              </div>
+
+              <div className="w-full flex justify-around items-center pt-3 pb-[calc(1.25rem_+_var(--safe-area-inset-bottom))] px-3">
               {/* Extract / New Recipe Tab */}
               <button
                 onClick={() => navigate('extract')}
@@ -973,7 +1046,8 @@ export default function App() {
               </button>
             </div>
           </div>
-        );
+        </div>
+      );
       })()}
 
       {/* First-launch onboarding overlay (rendered via portal) */}

@@ -144,7 +144,7 @@ async function resolveUserRateLimit(user: any): Promise<number> {
     return parseInt(meta.max_extractions_per_window, 10);
   }
 
-  // 2. Subscription tier check
+  // 2. Base limit according to subscription tier
   if (meta.tier === 'premium') {
     return await getPremiumMaxExtractions();
   }
@@ -152,7 +152,6 @@ async function resolveUserRateLimit(user: any): Promise<number> {
     return await getAlphaMaxExtractions();
   }
 
-  // 3. Fallback to free tier
   return await getFreeMaxExtractions();
 }
 
@@ -236,17 +235,34 @@ async function enforceExtractionQuota(req: Request): Promise<void> {
     const windowDays = config.EXTRACTION_LIMIT_WINDOW_DAYS;
     const extractions = await getExtractionsForUserInTimeframe(userId, windowDays);
     if (extractions.length >= limit) {
-      const oldestJob = extractions[0];
-      let minutesRemaining = 0;
-      if (oldestJob) {
-        const resetTime = new Date(new Date(oldestJob.createdAt).getTime() + windowDays * 24 * 60 * 60 * 1000);
-        const msRemaining = resetTime.getTime() - Date.now();
-        minutesRemaining = Math.max(1, Math.ceil(msRemaining / (60 * 1000)));
-      }
+      const bonusCredits = typeof user?.app_metadata?.bonus_credits === 'number' ? user.app_metadata.bonus_credits : 0;
+      if (bonusCredits > 0) {
+        // Consume 1 bonus credit granted from watching a Rewarded Video Ad
+        const newCredits = bonusCredits - 1;
+        const { error } = await getClient().auth.admin.updateUserById(userId, {
+          app_metadata: {
+            ...(user.app_metadata || {}),
+            bonus_credits: newCredits,
+          },
+        });
+        if (error) {
+          console.error(`Failed to consume bonus credit for user ${userId}:`, error.message);
+        } else {
+          console.log(`[RewardedAd] Consumed 1 bonus credit for user ${userId}. Remaining bonus_credits=${newCredits}`);
+        }
+      } else {
+        const oldestJob = extractions[0];
+        let minutesRemaining = 0;
+        if (oldestJob) {
+          const resetTime = new Date(new Date(oldestJob.createdAt).getTime() + windowDays * 24 * 60 * 60 * 1000);
+          const msRemaining = resetTime.getTime() - Date.now();
+          minutesRemaining = Math.max(1, Math.ceil(msRemaining / (60 * 1000)));
+        }
 
-      throw new AppError('RATE_LIMIT_EXCEEDED', {
-        params: { limit, days: windowDays, minutes: minutesRemaining },
-      });
+        throw new AppError('RATE_LIMIT_EXCEEDED', {
+          params: { limit, days: windowDays, minutes: minutesRemaining },
+        });
+      }
     }
   }
 }
@@ -679,7 +695,9 @@ apiRouter.get('/extractions/limit', async (req: Request, res: Response): Promise
 
     const extractions = await getExtractionsForUserInTimeframe(req.userId!, windowDays);
     const used = extractions.length;
-    const remaining = Math.max(0, limit - used);
+    const bonusCredits = typeof user?.app_metadata?.bonus_credits === 'number' ? user.app_metadata.bonus_credits : 0;
+    const baseRemaining = Math.max(0, limit - used);
+    const remaining = limit < 0 ? -1 : baseRemaining + bonusCredits;
 
     res.status(200).json({
       success: true,
@@ -696,6 +714,54 @@ apiRouter.get('/extractions/limit', async (req: Request, res: Response): Promise
     });
   } catch (error) {
     if (!(error instanceof AppError)) console.error('Error fetching rate limit status:', error);
+    sendAppError(res, error);
+  }
+});
+
+/**
+ * Endpoint triggered after a user completes watching a Rewarded Video Ad.
+ * Increments `app_metadata.bonus_credits` by +1 in Supabase Auth.
+ * POST /api/me/rewarded-ad-claimed
+ */
+apiRouter.post('/me/rewarded-ad-claimed', requireAuth, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.userId!;
+    const user = await fetchAndSyncUser(userId);
+    const currentMeta = user?.app_metadata || {};
+
+    const currentCredits = typeof currentMeta.bonus_credits === 'number' ? currentMeta.bonus_credits : 0;
+    const newCredits = currentCredits + 1;
+
+    const { error } = await getClient().auth.admin.updateUserById(userId, {
+      app_metadata: {
+        ...currentMeta,
+        bonus_credits: newCredits,
+      },
+    });
+
+    if (error) {
+      console.error(`Failed to grant bonus credit for user ${userId}:`, error.message);
+      throw new AppError('INTERNAL_ERROR', { message: 'Failed to update bonus credits' });
+    }
+
+    const limit = await resolveUserRateLimit(user);
+    const windowDays = config.EXTRACTION_LIMIT_WINDOW_DAYS;
+    const extractions = await getExtractionsForUserInTimeframe(userId, windowDays);
+    const used = extractions.length;
+    const baseRemaining = Math.max(0, limit - used);
+    const remaining = limit < 0 ? -1 : baseRemaining + newCredits;
+
+    console.log(`[RewardedAd] Granted +1 extraction credit to user ${userId}. Total bonus_credits=${newCredits}, remaining=${remaining}`);
+
+    res.status(200).json({
+      success: true,
+      bonusCredits: newCredits,
+      limit,
+      used,
+      remaining,
+    });
+  } catch (error) {
+    if (!(error instanceof AppError)) console.error('Error handling rewarded ad claim:', error);
     sendAppError(res, error);
   }
 });

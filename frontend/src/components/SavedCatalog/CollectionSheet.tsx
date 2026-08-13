@@ -4,6 +4,7 @@ import { Folder, Plus, Edit2, Trash2, Check, X } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useCollections } from '../../hooks/useCollections';
 import type { Job, Collection } from '../../types';
+import { useAdOverlay } from '../../context/OverlayStackContext';
 
 interface CollectionSheetProps {
   isOpen: boolean;
@@ -35,6 +36,7 @@ export default function CollectionSheet({
   onAssign
 }: CollectionSheetProps) {
   const { t, language } = useI18n();
+  useAdOverlay(isOpen);
   const {
     collections,
     refreshCollections,

@@ -4,6 +4,7 @@ import { Clock, Minus, Play, Plus } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useTimerManager } from '../hooks/useTimerManager';
 import { stripInlineIngredientTags } from '../utils/ingredientMatch';
+import { useAdOverlay } from '../context/OverlayStackContext';
 
 interface TimerConfirmSheetProps {
   isOpen: boolean;
@@ -42,6 +43,7 @@ export default function TimerConfirmSheet({
 }: TimerConfirmSheetProps) {
   const { t } = useI18n();
   const { addTimer } = useTimerManager();
+  useAdOverlay(isOpen);
 
   const [adjusted, setAdjusted] = useState(durationSeconds);
 

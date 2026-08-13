@@ -147,12 +147,13 @@ export function useSavedCatalog({
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  // Notify parent of select mode changes
+  // Notify parent of select mode changes (only when value actually changes)
+  const prevSelectModeRef = useRef(isSelectMode);
   useEffect(() => {
-    onSelectModeChange?.(isSelectMode);
-    return () => {
-      onSelectModeChange?.(false);
-    };
+    if (prevSelectModeRef.current !== isSelectMode) {
+      prevSelectModeRef.current = isSelectMode;
+      onSelectModeChange?.(isSelectMode);
+    }
   }, [isSelectMode, onSelectModeChange]);
 
   // Direct shopping list addition success states (mapping job.id -> isAdded)

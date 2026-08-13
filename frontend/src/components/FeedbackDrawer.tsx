@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
 import { useFeedback } from '../hooks/useFeedback';
 import { collectFeedbackContext, compressScreenshot } from '../utils/feedbackContext';
+import { useAdOverlay } from '../context/OverlayStackContext';
 
 interface FeedbackDrawerProps {
   isOpen: boolean;
@@ -21,6 +22,8 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
   const { user } = useAuth();
   const dialog = useDialog();
   const { submitFeedback } = useFeedback();
+
+  useAdOverlay(isOpen);
 
   const [type, setType] = useState<FeedbackType>('bug');
   const [message, setMessage] = useState('');

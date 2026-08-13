@@ -3,6 +3,7 @@ import { Button, Drawer } from '@heroui/react';
 import { Plus, X, Check } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { uiTranslations } from '../../i18n';
+import { useAdOverlay } from '../../context/OverlayStackContext';
 
 interface CustomItemFormProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface CustomItemFormProps {
 
 export default function CustomItemForm({ isOpen, addCustomItem, onClose }: CustomItemFormProps) {
   const { t, language } = useI18n();
+  useAdOverlay(isOpen);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   // Manual item state

@@ -168,6 +168,15 @@ export function getCategoryIcon(category: string): string {
 
 export const uiTranslations = {
   de: {
+    ads: {
+      label: 'Werbung',
+      rewardedTitle: 'Gratis-Rezept freischalten',
+      rewardedDesc: 'Schau ein kurzes Video an, um sofort +1 Rezept zu erhalten.',
+      rewardedBtn: 'Video ansehen (+1 Rezept)',
+      rewardedLoading: 'Video wird geladen...',
+      rewardedSuccess: '+1 Rezept erfolgreich freigeschaltet!',
+      rewardedFailed: 'Video konnte nicht geladen werden. Bitte versuche es später erneut.',
+    },
     onboarding: {
       skip: 'Überspringen',
       back: 'Zurück',
@@ -1000,7 +1009,7 @@ export const uiTranslations = {
         extractUnlimited: 'Premium: Unbegrenzt freischalten',
         catalogFull: 'Kochbuch voll ({count}/{limit}) – Lösche ein Rezept oder upgrade.',
         catalogAlmostFull: 'Kochbuch fast voll ({count}/{limit})',
-        extractionLimitReached: 'Tageslimit erreicht ({used}/{limit}) – Upgrade auf Premium für unbegrenzte Rezepte.',
+        extractionLimitReached: 'Tageslimit ({used}/{limit}) erreicht – Schau ein kurzes Video zum Erstellen oder upgrade auf Premium.',
         unlockNutrition: 'Nährwerte freischalten',
         upgrade: 'Upgrade'
       }
@@ -1036,6 +1045,15 @@ export const uiTranslations = {
     }
   },
   en: {
+    ads: {
+      label: 'Advertisement',
+      rewardedTitle: 'Unlock Free Recipe',
+      rewardedDesc: 'Watch a short video to instantly get +1 free recipe.',
+      rewardedBtn: 'Watch Video (+1 Recipe)',
+      rewardedLoading: 'Loading video ad...',
+      rewardedSuccess: '+1 recipe credit successfully unlocked!',
+      rewardedFailed: 'Failed to load video ad. Please try again later.',
+    },
     onboarding: {
       skip: 'Skip',
       back: 'Back',
@@ -1530,10 +1548,8 @@ export const uiTranslations = {
       tabIngredients: 'Ingredients',
       tabInstructions: 'Instructions',
       ingredientsTitle: 'Ingredients Checklist',
-      ingredientsSubtitle: 'Check ingredients you already have',
-      staplePillLabel: 'staple',
-      parentDerivedLabel: 'from {parent}',
-      showNutritionPerIngredient: 'Nutrition',
+      ingredientsSubtitle: 'Check ingredients you have prepared',
+      showNutritionPerIngredient: 'Nutrition per ingredient',
       addedToShopping: 'Added to shopping list!',
       addToShopping: 'Add to shopping list',
       goToShoppingList: 'Add to shopping list',
@@ -1868,7 +1884,7 @@ export const uiTranslations = {
         extractUnlimited: 'Premium: Unlock unlimited',
         catalogFull: 'Cookbook full ({count}/{limit}) – Delete a recipe or upgrade.',
         catalogAlmostFull: 'Cookbook almost full ({count}/{limit})',
-        extractionLimitReached: 'Daily limit reached ({used}/{limit}) – Upgrade to Premium for unlimited recipes.',
+        extractionLimitReached: 'Daily limit reached ({used}/{limit}) – Watch a short video to create or upgrade to Premium.',
         unlockNutrition: 'Unlock nutrition',
         upgrade: 'Upgrade'
       }

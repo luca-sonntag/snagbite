@@ -97,7 +97,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       const urlObj = new URL(urlWithProtocol);
       const hostname = urlObj.hostname.toLowerCase();
       const isYouTube = hostname === 'youtube.com' || hostname.endsWith('.youtube.com') || hostname === 'youtu.be';
-      
+
       if (isYouTube) {
         const isShort = urlObj.pathname.startsWith('/shorts/');
         if (!isShort) {
@@ -260,7 +260,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           setUrl('');
           setPhotos([]);
           localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
-          
+
           if (document.visibilityState !== 'visible') {
             const recipeTitle = job.recipe?.title || t('recipe.recipe') || 'Recipe';
             const notifTitle = t('notification.recipeReady.title');
@@ -477,8 +477,30 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
   }, [isPremium, cancelActiveFreeJob]);
 
 
+  const claimRewardedCredit = useCallback(async (): Promise<boolean> => {
+    try {
+      const token = await getAccessToken();
+      if (!token) return false;
+
+      const res = await fetch(apiUrl('/api/me/rewarded-ad-claimed'), {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!res.ok) return false;
+      await fetchLimitStatus();
+      return true;
+    } catch (err) {
+      console.error('Failed to claim rewarded ad credit:', err);
+      return false;
+    }
+  }, [getAccessToken, fetchLimitStatus]);
+
   return {
-    isPending,
+    isPending: isPending || false,
     jobStatus,
     jobError,
     jobErrorCode,
@@ -497,6 +519,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     isUploadingPhotos,
     triggerPhotoExtraction,
     limitStatus,
-    fetchLimitStatus
+    fetchLimitStatus,
+    claimRewardedCredit
   };
 }

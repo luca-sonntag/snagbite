@@ -6,6 +6,7 @@ import { buyPremium, getSubscriptionOfferings } from '../utils/purchase';
 import { useAuth } from '../context/AuthContext';
 import { apiUrl } from '../api';
 import { LEGAL_URLS } from '../legal';
+import { useAdOverlay } from '../context/OverlayStackContext';
 
 interface PremiumModalProps {
   isOpen: boolean;
@@ -24,6 +25,9 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
   const [packages, setPackages] = useState<any[]>([]);
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
   const [isLoadingPackages, setIsLoadingPackages] = useState(false);
+
+  // Register with overlay stack for ad hide/resume
+  useAdOverlay(isOpen);
 
   useEffect(() => {
     if (isOpen) {

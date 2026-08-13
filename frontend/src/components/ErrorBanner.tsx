@@ -35,28 +35,32 @@ export default function ErrorBanner({
   const canRetry = isRetryableError(jobErrorCode, jobError);
 
   return (
-    <div className="p-4 rounded-2xl bg-rose-500/5 dark:bg-rose-500/10">
+    <div className="p-5 rounded-3xl bg-white dark:bg-gray-900 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col gap-3.5">
       <div className="flex items-start gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-500/15 text-rose-500 dark:text-rose-400">
-          <AlertCircle className="h-5 w-5" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-rose-900 dark:text-rose-100">{t('error.title')}</h3>
-          <p className="mt-0.5 text-xs leading-relaxed text-rose-700 dark:text-rose-300 font-medium">
+        <div className="p-2.5 rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-400 shrink-0 flex items-center justify-center">
+          <AlertCircle className="w-5 h-5" />
+        </div>
+        <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+          <h4 className="font-bold text-sm text-gray-900 dark:text-white leading-tight">
+            {t('error.title')}
+          </h4>
+          <p className="text-xs text-gray-500 dark:text-gray-400 leading-snug">
             {resolveErrorCode(jobErrorCode, jobErrorParams ?? undefined, jobError, language) || t('error.default')}
           </p>
-          {canRetry && (
-            <Button
-              size="sm"
-              variant="tertiary"
-              onPress={onRetry}
-              className="mt-3 h-8 gap-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 px-3 text-xs font-bold text-rose-600 dark:text-rose-300 border-none outline-none"
-            >
-              <RefreshCw className="h-3.5 w-3.5" /> {t('error.retry')}
-            </Button>
-          )}
         </div>
       </div>
+
+      {canRetry && (
+        <Button
+          type="button"
+          isDisabled={isPending}
+          onClick={onRetry}
+          className="h-10 text-xs rounded-2xl font-bold border-none text-rose-600 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 active:scale-95 transition-all shadow-none flex items-center justify-center gap-2 cursor-pointer w-fit px-4"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          <span>{t('error.retry')}</span>
+        </Button>
+      )}
     </div>
   );
 }
