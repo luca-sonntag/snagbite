@@ -5,6 +5,8 @@ import { useI18n } from '../context/I18nContext';
 import { isNative } from '../native';
 import {
   showExtractionBanner,
+  hideExtractionBanner,
+  resumeExtractionBanner,
   removeExtractionBanner,
   addBannerSizeListener,
   addBannerLoadListener,
@@ -49,7 +51,12 @@ export default function ExtractionAdCard({
   }, [variant]);
 
   useEffect(() => {
-    if (!native || !isActive) return;
+    if (!native) return;
+    if (!isActive) {
+      void hideExtractionBanner();
+      return;
+    }
+    void resumeExtractionBanner();
     if (!isAdLoaded()) {
       setStatus('pending');
     } else {
