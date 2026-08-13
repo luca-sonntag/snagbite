@@ -19,9 +19,14 @@ import {
 interface ExtractionAdCardProps {
   isActive?: boolean;
   variant?: 'mrec' | 'banner';
+  embedded?: boolean;
 }
 
-export default function ExtractionAdCard({ isActive = true, variant = 'mrec' }: ExtractionAdCardProps) {
+export default function ExtractionAdCard({
+  isActive = true,
+  variant = 'mrec',
+  embedded = false,
+}: ExtractionAdCardProps) {
   const { t } = useI18n();
   const slotRef = useRef<HTMLDivElement>(null);
   const defaultHeight = variant === 'banner' ? 50 : 250;
@@ -98,6 +103,28 @@ export default function ExtractionAdCard({ isActive = true, variant = 'mrec' }: 
 
   // No ad filled on native — don't leave an empty card behind.
   if (native && status === 'failed') return null;
+
+  if (embedded) {
+    return (
+      <div className="w-full flex flex-col items-center justify-center transition-all duration-300">
+        <div className="flex items-center justify-center mb-1">
+          <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+            {t('ads.label')}
+          </span>
+        </div>
+        {/* Reserved slot the native AdMob banner overlays (or web ad container box). */}
+        <div
+          ref={slotRef}
+          className="w-full max-w-[320px] mx-auto flex flex-col items-center justify-center rounded-xl bg-gray-100/80 dark:bg-gray-800/50 transition-all"
+          style={{ minHeight: slotHeight }}
+        >
+          {status === 'pending' && (
+            <Spinner size="sm" color="success" />
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`bg-white dark:bg-gray-900 ${variant === 'banner' ? 'p-3' : 'p-5'} rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] w-full transition-all duration-300`}>

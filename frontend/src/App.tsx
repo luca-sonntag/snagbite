@@ -906,14 +906,15 @@ export default function App() {
 
         return (
           <div className={bottomBarClasses}>
-            {/* Banner ad displayed statically above bottom menu only in recipe history (catalog view) for free users */}
-            {activeView === 'history' && !selectedJob && !isPremium && (
-              <div className="w-full max-w-md mx-auto px-3 mb-2">
-                <ExtractionAdCard isActive={activeView === 'history' && !selectedJob && !isBottomBarHidden} variant="banner" />
-              </div>
-            )}
+            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] w-full max-w-md mx-auto flex flex-col rounded-t-3xl overflow-hidden">
+              {/* Banner ad displayed seamlessly attached to top of bottom menu for free users in history catalog view */}
+              {activeView === 'history' && !selectedJob && !isPremium && (
+                <div className="w-full pt-2 pb-1.5 px-3 border-b border-gray-100/60 dark:border-gray-800/60 flex flex-col items-center justify-center">
+                  <ExtractionAdCard isActive={activeView === 'history' && !selectedJob && !isBottomBarHidden} variant="banner" embedded />
+                </div>
+              )}
 
-            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-none shadow-[0_-2px_10px_rgba(0,0,0,0.03)] w-full max-w-md mx-auto flex justify-around items-center pt-3 pb-[calc(1.25rem_+_var(--safe-area-inset-bottom))] px-3">
+              <div className="w-full flex justify-around items-center pt-3 pb-[calc(1.25rem_+_var(--safe-area-inset-bottom))] px-3">
               {/* Extract / New Recipe Tab */}
               <button
                 onClick={() => navigate('extract')}
@@ -1024,7 +1025,8 @@ export default function App() {
               </button>
             </div>
           </div>
-        );
+        </div>
+      );
       })()}
 
       {/* First-launch onboarding overlay (rendered via portal) */}
