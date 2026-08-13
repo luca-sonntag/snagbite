@@ -66,11 +66,11 @@ export default function ExtractionAdCard({
       return;
     }
 
-    if (!isAdLoaded()) {
-      setStatus('pending');
-    } else {
-      setStatus('loaded');
-    }
+    // Always show the loading spinner on (re)activation until THIS slot's ad
+    // actually loads (resolved by the load listener below). The shared global
+    // isAdLoaded() flag is unreliable across the two ad slots (bottom bar vs
+    // extraction form) and could wrongly suppress the spinner on an empty slot.
+    setStatus('pending');
 
     const slot = slotRef.current;
     if (!slot) return;

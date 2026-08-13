@@ -166,8 +166,14 @@ export async function showAdBanner(
   await initAds();
   if (!canRequestAds) return;
 
-  // Strict guard: Never re-call showBanner if a banner is already active in memory.
-  if (bannerShown) return;
+  // If a banner is already in memory (shown or hidden): keep it when it matches
+  // the requested size, but replace it on a size change. A size change means a
+  // slot handoff (bottom-bar BANNER ↔ extraction-form MREC) and only one native
+  // banner can exist — so tear the old one down and load the new size fresh.
+  if (bannerShown || isBannerCurrentlyHidden) {
+    if (size === lastBannerSize) return;
+    await removeAdBanner();
+  }
 
   const margin = Math.max(0, Math.round(bottomMarginDp));
 
