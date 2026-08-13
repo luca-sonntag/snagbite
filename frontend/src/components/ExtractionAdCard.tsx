@@ -57,9 +57,11 @@ export default function ExtractionAdCard({
       if (cancelled || !slotRef.current || !isActive) return;
       const rect = slotRef.current.getBoundingClientRect();
       if (rect.width === 0 && rect.height === 0) return;
-      // BOTTOM_CENTER expects the distance from the viewport's bottom edge to
-      // the banner's bottom edge. CSS px map to the plugin's logical dp units.
       const bottomMargin = Math.max(0, Math.round(window.innerHeight - rect.bottom));
+      
+      // For banner variant anchored to bottom dock, do not request ad until slot is positioned above bottom bar (> 20dp)
+      if (variant === 'banner' && bottomMargin < 20) return;
+
       const adSize = variant === 'banner' ? BannerAdSize.BANNER : BannerAdSize.MEDIUM_RECTANGLE;
       console.log(
         `[AdMob] slot rect top=${Math.round(rect.top)} bottom=${Math.round(rect.bottom)} ` +
@@ -116,8 +118,8 @@ export default function ExtractionAdCard({
     };
   }, [native, isActive, variant]);
 
-  // No ad filled on native — don't leave an empty card behind.
-  if (native && status === 'failed') return null;
+  // No ad filled on native — don't leave empty MREC card frame behind for MREC variant.
+  if (native && status === 'failed' && variant === 'mrec') return null;
 
   if (embedded) {
     return (
