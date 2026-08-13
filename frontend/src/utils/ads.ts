@@ -29,6 +29,18 @@ const TEST_REWARDED_AD_ID = 'ca-app-pub-3940256099942544/5224354917';
 const CONFIGURED_BANNER_AD_ID = import.meta.env.VITE_ADMOB_BANNER_ID as string | undefined;
 const CONFIGURED_REWARDED_AD_ID = import.meta.env.VITE_ADMOB_REWARDED_ID as string | undefined;
 
+/**
+ * Comma-separated AdMob test-device IDs (from the "Use setTestDeviceIds(...)"
+ * logcat line on first ad load). Registering a device makes AdMob serve *test*
+ * ads to it even with the real ad unit IDs configured — so you can verify the
+ * production config/consent/fill and safely tap ads without risking the account.
+ * Leave unset in production.
+ */
+const CONFIGURED_TEST_DEVICES = (import.meta.env.VITE_ADMOB_TEST_DEVICES as string | undefined)
+  ?.split(',')
+  .map((id) => id.trim())
+  .filter(Boolean) ?? [];
+
 /** Real ad unit if configured in environment, otherwise Google's test unit. */
 const BANNER_AD_ID = CONFIGURED_BANNER_AD_ID || TEST_BANNER_AD_ID;
 const REWARDED_AD_ID = CONFIGURED_REWARDED_AD_ID || TEST_REWARDED_AD_ID;
@@ -104,7 +116,11 @@ export async function initAds(): Promise<void> {
 
   initPromise = (async () => {
     try {
-      await AdMob.initialize({ initializeForTesting: IS_TESTING });
+      await AdMob.initialize({
+        initializeForTesting: IS_TESTING,
+        // Real ad IDs but registered test devices → SDK serves safe test ads.
+        ...(CONFIGURED_TEST_DEVICES.length > 0 && { testingDevices: CONFIGURED_TEST_DEVICES }),
+      });
 
       // EU consent / UMP. Failing open to non-personalized ads keeps the app
       // compliant even if the consent form can't be shown for any reason.
