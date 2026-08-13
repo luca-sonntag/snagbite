@@ -58,12 +58,12 @@ function formatDownloadSize(mb: number): string {
 
 export default function AdminView({ getAccessToken, onSignOut, userEmail }: AdminViewProps) {
   const [language, setLanguage] = useState<'de' | 'en'>('de');
-  const [activeTab, setActiveTab] = useState<'settings' | 'feedback' | 'metrics' | 'users'>('settings');
+  const [activeTab, setActiveTab] = useState<'settings' | 'feedback' | 'metrics' | 'users'>('metrics');
   const [settings, setSettings] = useState<GlobalSetting[]>([]);
   const [localSettings, setLocalSettings] = useState<Record<string, string>>({});
   const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
   const [metrics, setMetrics] = useState<any | null>(null);
-  const [metricsRange, setMetricsRange] = useState<'all' | 'today' | '3d' | '7d' | '30d'>('all');
+  const [metricsRange, setMetricsRange] = useState<'all' | 'today' | '3d' | '7d' | '30d'>('today');
   const [users, setUsers] = useState<any[]>([]);
   const [usersRange, setUsersRange] = useState<'all' | 'today' | '7d' | '30d'>('all');
   const [userSearchQuery, setUserSearchQuery] = useState('');
@@ -369,10 +369,10 @@ export default function AdminView({ getAccessToken, onSignOut, userEmail }: Admi
           <div className="flex w-full mb-6 bg-gray-100 p-1 sm:p-1.5 rounded-2xl">
             {(
               [
-                { id: 'settings', icon: <Settings className="w-4 h-4 shrink-0" />, label: isDe ? 'Konfiguration' : 'Config' },
-                { id: 'feedback', icon: <MessageSquare className="w-4 h-4 shrink-0" />, label: 'Feedback' },
                 { id: 'metrics', icon: <BarChart3 className="w-4 h-4 shrink-0" />, label: isDe ? 'Metriken' : 'Metrics' },
                 { id: 'users', icon: <Users className="w-4 h-4 shrink-0" />, label: isDe ? 'Nutzer' : 'Users' },
+                { id: 'feedback', icon: <MessageSquare className="w-4 h-4 shrink-0" />, label: 'Feedback' },
+                { id: 'settings', icon: <Settings className="w-4 h-4 shrink-0" />, label: isDe ? 'Konfiguration' : 'Config' },
               ] as const
             ).map(({ id, icon, label }) => {
               const isSelected = activeTab === id;
