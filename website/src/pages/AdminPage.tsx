@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Lock, LogOut, AlertOctagon, ArrowLeft } from 'lucide-react';
+import { Lock, LogOut, AlertOctagon, ArrowLeft, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Spinner } from '@heroui/react';
-import { supabase } from '../supabase';
+import { supabase, isSupabaseConfigured } from '../supabase';
 import { apiUrl } from '../api';
 import AdminView from '../components/AdminView';
 
@@ -36,6 +36,11 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setLoading(false);
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.access_token) {
@@ -92,6 +97,38 @@ export default function AdminPage() {
         <p className="text-sm font-semibold text-gray-500">
           Verifying credentials...
         </p>
+      </div>
+    );
+  }
+
+  // Case 0: Supabase is not configured
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="light w-full min-h-screen bg-gray-50 text-gray-900 flex flex-col items-center" style={{ colorScheme: 'light' }}>
+        <div className="w-full max-w-md mx-auto px-4 py-16 flex flex-col items-center">
+          <div className="w-full bg-white border-none rounded-3xl p-8 shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col items-center text-center gap-6">
+            <div className="p-3.5 rounded-2xl bg-amber-500/10 text-amber-600">
+              <AlertCircle className="w-7 h-7" />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                Configuration Required
+              </h1>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Supabase environment variables (<code className="font-mono text-emerald-700 bg-emerald-500/10 px-1 py-0.5 rounded">VITE_SUPABASE_URL</code> and <code className="font-mono text-emerald-700 bg-emerald-500/10 px-1 py-0.5 rounded">VITE_SUPABASE_ANON_KEY</code>) were not provided at build time.
+              </p>
+            </div>
+
+            <Link
+              to="/"
+              className="text-xs text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-1.5"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Back to Website
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
