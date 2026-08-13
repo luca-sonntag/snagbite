@@ -101,10 +101,10 @@ export async function initAds(): Promise<void> {
 }
 
 /**
- * Show the extraction banner anchored to the bottom-centre of the screen and
+ * Show the ad banner anchored to the bottom-centre of the screen and
  * align it with the React ad slot using a measured bottom margin.
  */
-export async function showExtractionBanner(
+export async function showAdBanner(
   bottomMarginDp: number,
   size: BannerAdSize = BannerAdSize.MEDIUM_RECTANGLE,
 ): Promise<void> {
@@ -113,7 +113,6 @@ export async function showExtractionBanner(
   if (!canRequestAds) return;
 
   // Strict guard: Never re-call showBanner if a banner is already active in memory.
-  // Re-calling showBanner on an existing banner triggers buggy Android LayoutParams recalculations.
   if (bannerShown) return;
 
   const margin = Math.max(0, Math.round(bottomMarginDp));
@@ -140,8 +139,8 @@ export async function showExtractionBanner(
 /** Track whether a banner is currently hidden via hideBanner. */
 let isBannerCurrentlyHidden = false;
 
-/** Destroy the extraction banner. Safe to call when none is shown / on web. */
-export async function removeExtractionBanner(): Promise<void> {
+/** Destroy the ad banner. Safe to call when none is shown / on web. */
+export async function removeAdBanner(): Promise<void> {
   if (!isNative()) return;
   if (!bannerShown) return;
   try {
@@ -155,7 +154,7 @@ export async function removeExtractionBanner(): Promise<void> {
 }
 
 /** Temporarily hide the active banner without destroying it (e.g. while an overlay is open). */
-export async function hideExtractionBanner(): Promise<void> {
+export async function hideAdBanner(): Promise<void> {
   if (!isNative()) return;
   if (!bannerShown || isBannerCurrentlyHidden) return;
   isBannerCurrentlyHidden = true;
@@ -168,7 +167,7 @@ export async function hideExtractionBanner(): Promise<void> {
 }
 
 /** Resume/unhide the active banner after an overlay closes. */
-export async function resumeExtractionBanner(): Promise<void> {
+export async function resumeAdBanner(): Promise<void> {
   if (!isNative()) return;
   if (!bannerShown || !isBannerCurrentlyHidden) return;
   isBannerCurrentlyHidden = false;
@@ -179,6 +178,12 @@ export async function resumeExtractionBanner(): Promise<void> {
     console.warn('[AdMob] resumeBanner failed:', err);
   }
 }
+
+// Backward compatibility aliases
+export const showExtractionBanner = showAdBanner;
+export const removeExtractionBanner = removeAdBanner;
+export const hideExtractionBanner = hideAdBanner;
+export const resumeExtractionBanner = resumeAdBanner;
 
 /**
  * Subscribe to banner size changes (fired once the ad loads with its real

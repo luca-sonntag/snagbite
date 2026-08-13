@@ -4,10 +4,9 @@ import { BannerAdSize } from '@capacitor-community/admob';
 import { useI18n } from '../context/I18nContext';
 import { isNative } from '../native';
 import {
-  showExtractionBanner,
-  hideExtractionBanner,
-  resumeExtractionBanner,
-  removeExtractionBanner,
+  showAdBanner,
+  removeAdBanner,
+  resumeAdBanner,
   addBannerSizeListener,
   addBannerLoadListener,
   isAdLoaded,
@@ -53,13 +52,13 @@ export default function ExtractionAdCard({
   useEffect(() => {
     if (!native) return;
     if (!isActive) {
-      void hideExtractionBanner();
+      void removeAdBanner();
       return;
     }
 
     // Delay un-hiding native banner until bottom bar 300ms CSS slide-up transition completes
     const resumeTimer = setTimeout(() => {
-      void resumeExtractionBanner();
+      void resumeAdBanner();
     }, 300);
 
     if (!isAdLoaded()) {
@@ -97,7 +96,7 @@ export default function ExtractionAdCard({
         `height=${Math.round(rect.height)} innerH=${window.innerHeight} ` +
         `marginBottom=${bottomMargin} dpr=${window.devicePixelRatio}`,
       );
-      void showExtractionBanner(bottomMargin, adSize);
+      void showAdBanner(bottomMargin, adSize);
     };
 
     let timerId: ReturnType<typeof setTimeout> | null = null;
@@ -146,7 +145,7 @@ export default function ExtractionAdCard({
   // Only destroy the native AdMob banner when the component actually unmounts on page exit
   useEffect(() => {
     return () => {
-      void removeExtractionBanner();
+      void removeAdBanner();
     };
   }, []);
 

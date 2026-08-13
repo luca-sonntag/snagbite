@@ -6,6 +6,7 @@ import { buyPremium, getSubscriptionOfferings } from '../utils/purchase';
 import { useAuth } from '../context/AuthContext';
 import { apiUrl } from '../api';
 import { LEGAL_URLS } from '../legal';
+import { removeAdBanner } from '../utils/ads';
 
 interface PremiumModalProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
 
   useEffect(() => {
     if (isOpen) {
+      void removeAdBanner();
       setSuccess(false);
       setErrorMsg(null);
       setLoading(false);

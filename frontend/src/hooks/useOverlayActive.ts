@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { hideExtractionBanner } from '../utils/ads';
+import { removeAdBanner } from '../utils/ads';
 
 /**
  * Automatically detects whether any overlay (HeroUI Modal, Drawer, Dialog,
@@ -18,9 +18,9 @@ export function useOverlayActive(): boolean {
       );
       const active = !!dialog;
 
-      // If an overlay DOM node is present, trigger native hide immediately in 0ms microtask
+      // If an overlay DOM node is present, trigger native remove immediately in 0ms microtask
       if (active) {
-        void hideExtractionBanner();
+        void removeAdBanner();
       }
 
       if (rafId !== null) cancelAnimationFrame(rafId);
@@ -47,7 +47,7 @@ export function useOverlayActive(): boolean {
         'button, [role="button"], [data-slot="trigger"], [data-paywall], a, [onclick]'
       );
       if (isInteractive) {
-        void hideExtractionBanner();
+        void removeAdBanner();
       }
     };
 
