@@ -125,6 +125,7 @@ export default function App() {
   // Tracks the jobId of a just-completed extraction so the history validity
   // effect doesn't clear its subPath before the history state catches up.
   const newlyExtractedJobIdRef = useRef<string | null>(null);
+  const [isCatalogSheetOpen, setIsCatalogSheetOpen] = useState(false);
 
   // Remembers the last open state of the history tab (recipe detail or list),
   // so the bottom-nav "Recipes" button returns to the recipe that was open
@@ -852,6 +853,7 @@ export default function App() {
               fetchHistory();
             }}
             onSelectModeChange={setIsCatalogSelectMode}
+            onOverlaySheetChange={setIsCatalogSheetOpen}
             catalogSubPath={subPath}
             onNavigateCatalog={navigateCatalog}
             limitStatus={limitStatus}
@@ -895,7 +897,7 @@ export default function App() {
 
       {/* Mobile Bottom Navigation Bar */}
       {(() => {
-        const isBottomBarHidden = (activeView === 'history' && isCatalogSelectMode) || activeView === 'admin' || (isPending && !isPremium);
+        const isBottomBarHidden = (activeView === 'history' && (isCatalogSelectMode || isCatalogSheetOpen)) || activeView === 'admin' || (isPending && !isPremium);
         const bottomBarClasses = `fixed bottom-0 inset-x-0 z-40 transition-all duration-300 ease-in-out pb-safe ${isBottomBarHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
           }`;
 
