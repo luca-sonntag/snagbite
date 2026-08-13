@@ -913,11 +913,13 @@ export default function App() {
           activeView !== 'admin' &&
           adStatus !== 'failed';
 
-        // The banner is destroyed only on real teardown — premium purchased or
-        // no ad filled. Temporary contexts (recipe view, settings, admin,
-        // overlays, select mode, running extraction) hide/resume it instead so
-        // the loaded ad is preserved in memory rather than reloaded.
-        const bannerCanExist = !isPremium && adStatus !== 'failed';
+        // The bottom-bar banner is destroyed on real teardown (premium / no fill)
+        // and while an extraction runs: the form then shows its own larger MREC
+        // ad, and the single native banner can't be reused across sizes — so we
+        // release it here, letting the MREC load fresh with its own spinner.
+        // Other temporary contexts (recipe view, settings, admin, overlays,
+        // select mode) hide/resume it instead, preserving the loaded ad.
+        const bannerCanExist = !isPremium && !isPending && adStatus !== 'failed';
 
         return (
           <div className={bottomBarClasses}>
