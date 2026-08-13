@@ -39,9 +39,26 @@ export function useOverlayActive(): boolean {
       subtree: true,
     });
 
+    // Instant touch capture: Hide banner the exact millisecond the user touches any button/trigger
+    const handleInstantTouch = (e: Event) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      const isInteractive = target.closest(
+        'button, [role="button"], [data-slot="trigger"], [data-paywall], a, [onclick]'
+      );
+      if (isInteractive) {
+        void hideExtractionBanner();
+      }
+    };
+
+    window.addEventListener('pointerdown', handleInstantTouch, { capture: true, passive: true });
+    window.addEventListener('touchstart', handleInstantTouch, { capture: true, passive: true });
+
     return () => {
       if (rafId !== null) cancelAnimationFrame(rafId);
       observer.disconnect();
+      window.removeEventListener('pointerdown', handleInstantTouch, { capture: true });
+      window.removeEventListener('touchstart', handleInstantTouch, { capture: true });
     };
   }, []);
 
