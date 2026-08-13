@@ -9,12 +9,16 @@ export function useOverlayActive(): boolean {
   const [isOverlayActive, setIsOverlayActive] = useState(false);
 
   useEffect(() => {
+    let rafId: number | null = null;
+
     const checkOverlay = () => {
-      // Check for any visible dialogs, aria-modal elements, or HeroUI backdrops
-      const dialog = document.querySelector(
-        '[role="dialog"], [aria-modal="true"], [data-slot="backdrop"]'
-      );
-      setIsOverlayActive(!!dialog);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const dialog = document.querySelector(
+          '[role="dialog"], [aria-modal="true"], [data-slot="backdrop"]'
+        );
+        setIsOverlayActive(!!dialog);
+      });
     };
 
     // Initial check
@@ -25,11 +29,12 @@ export function useOverlayActive(): boolean {
     observer.observe(document.body, {
       childList: true,
       subtree: true,
-      attributes: true,
-      attributeFilter: ['role', 'aria-modal', 'data-slot'],
     });
 
-    return () => observer.disconnect();
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      observer.disconnect();
+    };
   }, []);
 
   return isOverlayActive;
