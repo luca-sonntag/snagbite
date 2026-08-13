@@ -109,12 +109,7 @@ export default function ExtractionAdCard({ isActive = true }: ExtractionAdCardPr
         style={{ minHeight: slotHeight }}
       >
         {status === 'pending' && (
-          <div className="flex flex-col items-center justify-center gap-2.5 p-4 text-center">
-            <Spinner size="sm" color="success" />
-            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500">
-              {t('ads.rewardedLoading')}
-            </span>
-          </div>
+          <Spinner size="sm" color="success" />
         )}
       </div>
     </div>
