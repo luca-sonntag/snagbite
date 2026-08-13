@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { hideExtractionBanner } from '../utils/ads';
 
 /**
  * Automatically detects whether any overlay (HeroUI Modal, Drawer, Dialog,
@@ -12,12 +13,19 @@ export function useOverlayActive(): boolean {
     let rafId: number | null = null;
 
     const checkOverlay = () => {
+      const dialog = document.querySelector(
+        '[role="dialog"], [aria-modal="true"], [data-slot="backdrop"]'
+      );
+      const active = !!dialog;
+
+      // If an overlay DOM node is present, trigger native hide immediately in 0ms microtask
+      if (active) {
+        void hideExtractionBanner();
+      }
+
       if (rafId !== null) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
-        const dialog = document.querySelector(
-          '[role="dialog"], [aria-modal="true"], [data-slot="backdrop"]'
-        );
-        setIsOverlayActive(!!dialog);
+        setIsOverlayActive(active);
       });
     };
 
