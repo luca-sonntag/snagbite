@@ -412,8 +412,7 @@ export default function ExtractForm({
                       if (earned && claimRewardedCredit) {
                         const claimed = await claimRewardedCredit();
                         if (claimed && (url.trim() || photos.length > 0)) {
-                          const form = document.querySelector('form');
-                          if (form) form.requestSubmit();
+                          handleFormSubmit({ preventDefault: () => {} } as React.FormEvent);
                         }
                       }
                     } catch (err) {
