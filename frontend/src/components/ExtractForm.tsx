@@ -99,7 +99,6 @@ export default function ExtractForm({
   const { activeCount: liveActiveCount } = useExtractionJobs();
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isWatchingAd, setIsWatchingAd] = useState(false);
-  const [adNotice, setAdNotice] = useState<string | null>(null);
   const [canPaste, setCanPaste] = useState(false);
   // React to TrialBanner dismissal so the upgrade card re-appears as soon
   // as the banner is closed.
@@ -408,29 +407,19 @@ export default function ExtractForm({
                   isDisabled={isWatchingAd || isPending}
                   onClick={async () => {
                     setIsWatchingAd(true);
-                    setAdNotice(null);
                     try {
                       const earned = await showRewardedAd();
-                      if (earned) {
-                        setAdNotice(t('ads.rewardedSuccess'));
-                        if (claimRewardedCredit) {
-                          const claimed = await claimRewardedCredit();
-                          if (claimed) {
-                            if (url.trim() || photos.length > 0) {
-                              setTimeout(() => {
-                                const form = document.querySelector('form');
-                                if (form) form.requestSubmit();
-                              }, 100);
-                            }
-                          } else {
-                            setAdNotice(t('ads.rewardedFailed'));
-                          }
+                      if (earned && claimRewardedCredit) {
+                        const claimed = await claimRewardedCredit();
+                        if (claimed && (url.trim() || photos.length > 0)) {
+                          setTimeout(() => {
+                            const form = document.querySelector('form');
+                            if (form) form.requestSubmit();
+                          }, 100);
                         }
-                      } else {
-                        setAdNotice(t('ads.rewardedFailed'));
                       }
-                    } catch {
-                      setAdNotice(t('ads.rewardedFailed'));
+                    } catch (err) {
+                      console.error('Error during rewarded ad flow:', err);
                     } finally {
                       setIsWatchingAd(false);
                     }
@@ -453,12 +442,6 @@ export default function ExtractForm({
                     </>
                   )}
                 </Button>
-
-                {adNotice && (
-                  <p className={`text-center text-xs font-semibold ${adNotice.includes('erfolgreich') || adNotice.includes('successfully') ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'}`}>
-                    {adNotice}
-                  </p>
-                )}
               </div>
             ) : (
               <Button
