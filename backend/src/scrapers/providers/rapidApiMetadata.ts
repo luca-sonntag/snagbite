@@ -16,6 +16,13 @@ import type { SocialScrapeContext, SocialScrapeProvider } from './types.js';
  * the legacy video-downloading provider.
  */
 
+interface RapidMedia {
+  url?: string;
+  type?: string; // "video" | "audio" | "image"
+  quality?: string;
+  extension?: string;
+}
+
 interface RapidResponse {
   url?: string;
   source?: string;
@@ -23,6 +30,7 @@ interface RapidResponse {
   title?: string;
   thumbnail?: string;
   duration?: number;
+  medias?: RapidMedia[];
   error?: boolean | string;
   owner?: {
     username?: string;
@@ -31,6 +39,16 @@ interface RapidResponse {
 
 const BROWSER_UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36';
+
+const MAX_CAROUSEL_IMAGES = 15;
+
+function isType(m: RapidMedia, type: string): boolean {
+  return (m.type ?? '').toLowerCase().includes(type);
+}
+
+function pickImages(medias: RapidMedia[]): RapidMedia[] {
+  return medias.filter((m) => m.url && isType(m, 'image')).slice(0, MAX_CAROUSEL_IMAGES);
+}
 
 /** RapidAPI often returns a generic/placeholder author (e.g. "youtube", "User"); prefer yt-dlp's when so. */
 function isGenericAuthor(handle?: string): boolean {
@@ -68,6 +86,11 @@ export const rapidApiMetadataProvider: SocialScrapeProvider = {
 
     if (data.error) throw new Error(`RapidAPI error: ${typeof data.error === 'string' ? data.error : 'unknown'}`);
 
+    const medias = Array.isArray(data.medias) ? data.medias : [];
+    // Image-carousel posts (IG/TikTok photo slideshows) contain static image slides
+    const hasVideo = medias.some((m) => m.url && (isType(m, 'video') || /\.mp4|mp4/i.test(m.extension ?? '')));
+    const carouselImages = hasVideo ? [] : pickImages(medias);
+
     let caption = (data.title ?? '').toString();
     let authorHandle = (data.owner?.username ?? data.author ?? '').toString();
     if (authorHandle && !authorHandle.startsWith('@')) authorHandle = `@${authorHandle}`;
@@ -81,22 +104,22 @@ export const rapidApiMetadataProvider: SocialScrapeProvider = {
       if (meta.authorHandle && isGenericAuthor(authorHandle)) authorHandle = meta.authorHandle;
     }
 
-    // Hybrid logic fallback:
-    // If the caption is still extremely short after enrichment, it's highly likely
-    // the recipe is ONLY spoken in the video or shown on screen.
-    // Throwing here falls back to the legacy rapidApiProvider which downloads the video.
-    if (caption.length < 40) {
-      throw new Error(`Caption too short (${caption.length} chars) for metadata-only extraction. Falling back to video extraction.`);
-    }
+    const headers = { 'User-Agent': BROWSER_UA };
 
     return {
       caption,
       imageUrl: (data.thumbnail ?? '').toString(),
       authorHandle: authorHandle || undefined,
       durationSeconds: normalizeDurationToSeconds(data.duration),
-      media: {
-        kind: 'none',
-      },
+      media: carouselImages.length > 0
+        ? {
+            kind: 'images',
+            imageUrls: carouselImages.map((m) => m.url!),
+            headers,
+          }
+        : {
+            kind: 'none',
+          },
     };
   },
 };

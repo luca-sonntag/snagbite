@@ -15,13 +15,10 @@ export { detectPlatform } from './types.js';
  * {@link SocialScrapeProvider} under `providers/` and inserting it here — order is
  * priority, and `isEnabled()` gates it on configuration.
  *
- * Order rationale:
- *  1. rapidApiMetadata — Metadata only, no video downloads, extremely legally safe.
- *  2. rapidApi         — Fallback: direct CDN URLs + video download if metadata was insufficient.
+ * Mode: Metadata & Image Carousel Only (no video downloads to respect ToS and copyright).
  */
 export const socialProviders: SocialScrapeProvider[] = [
   rapidApiMetadataProvider,
-  rapidApiProvider,
 ];
 
 /**
