@@ -39,6 +39,11 @@ export default defineConfig({
       },
     }
   },
+  resolve: {
+    alias: {
+      '@cookbook/shared': resolve(configDir, '../shared/src'),
+    },
+  },
   plugins: [
     react(),
     tailwindcss()

@@ -4,6 +4,7 @@ import { useI18n } from '../context/I18nContext';
 import { useDialog } from '../context/DialogContext';
 import { deleteCachedImage } from '../utils/imageStore';
 import { markRecipeOpened, pruneRecentMap, readRecentMap, type RecentMap } from '../utils/recentRecipes';
+import { getRecommendedShelf } from '@cookbook/shared';
 import { apiUrl } from '../api';
 
 /**
@@ -313,13 +314,30 @@ export function useSavedCatalog({
     });
     const opened = completedJobs.filter(j => recentMap[j.id]);
 
+    const recResult = getRecommendedShelf<Job>(completedJobs, {
+      now: new Date(),
+      recentMap,
+      limit: SHELF_SIZE,
+    });
+
+    const recommended = recResult && recResult.jobs.length >= 2
+      ? {
+          items: recResult.jobs,
+          total: recResult.totalCount,
+          themeId: recResult.themeId,
+          title: t(recResult.titleKey as any) || recResult.defaultTitle,
+          badgeEmoji: recResult.badgeEmoji,
+        }
+      : null;
+
     return {
+      recommended,
       recent: { items: sortJobs(opened, 'recent').slice(0, SHELF_SIZE), total: opened.length },
       favorites: { items: sortJobs(favorites, 'newest').slice(0, SHELF_SIZE), total: favorites.length },
       quick: { items: sortJobs(quick, 'time').slice(0, SHELF_SIZE), total: quick.length },
       newest: { items: sortJobs(completedJobs, 'newest').slice(0, SHELF_VERTICAL_SIZE), total: completedJobs.length }
     };
-  }, [completedJobs, recentMap, sortJobs]);
+  }, [completedJobs, recentMap, sortJobs, t]);
 
   /** jobId list per collection, used for the collection tiles' cover mosaic. */
   const jobsByCollection = useMemo(() => {

@@ -12,11 +12,18 @@ interface Shelf {
   total: number;
 }
 
+interface RecommendedShelf extends Shelf {
+  themeId: string;
+  title: string;
+  badgeEmoji?: string;
+}
+
 interface CookbookHomeProps {
   totalRecipes: number;
   collections: Collection[];
   jobsByCollection: Record<string, Job[]>;
   shelves: {
+    recommended?: RecommendedShelf | null;
     recent: Shelf;
     favorites: Shelf;
     quick: Shelf;
@@ -120,6 +127,21 @@ export default function CookbookHome({
         )}
       </section>
 
+
+      {/* Empfohlene Rezepte (Einzeilig horizontal, kontextbasiert) */}
+      {shelves.recommended && shelves.recommended.items.length >= 2 && (
+        <RecipeShelf
+          title={shelves.recommended.title}
+          jobs={shelves.recommended.items}
+          totalCount={shelves.recommended.total}
+          formatTotalTime={formatTotalTime}
+          onOpenAll={() => onOpenList({ kind: 'all' })}
+          onOpenRecipe={onOpenRecipe}
+          isSelectMode={isSelectMode}
+          selectedIds={selectedIds}
+          bindLongPress={bindLongPress}
+        />
+      )}
 
       {/* Zuletzt gespeichert / Neueste Rezepte (2 Zeilen, horizontal scrollbar) */}
       <TwoRowRecipeShelf
