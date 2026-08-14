@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import type { Recipe, Ingredient } from '../types';
 import { useCookingMode } from '../hooks/useCookingMode';
-import { extractInlineIngredientTags, textMentionsTerm } from '../utils/ingredientMatch';
+import { extractInlineIngredientTags, textMentionsTerm, stripInlineIngredientTags } from '../utils/ingredientMatch';
 import RecipeInstructionText from './RecipeInstructionText';
 import { useI18n } from '../context/I18nContext';
 import { useTimerManager } from '../hooks/useTimerManager';
@@ -267,7 +267,7 @@ export default function CookingMode({
                   {/* Label + countdown */}
                   <div className="relative flex-1 min-w-0 text-left">
                     <p className="text-[9px] text-white/70 font-semibold leading-none">
-                      {timer.label}
+                      {stripInlineIngredientTags(timer.label)}
                     </p>
                     <p className="text-xs font-black tabular-nums mt-0.5 leading-none">
                       {countdownStr}

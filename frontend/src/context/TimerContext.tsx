@@ -6,6 +6,7 @@ import {
   isTimerNotificationDelivered,
   clearTimerNotification,
 } from '../native';
+import { stripInlineIngredientTags } from '../utils/ingredientMatch';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -379,7 +380,7 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
     const endAt = Date.now() + durationSeconds * 1000;
     const entry: TimerEntry = {
       id,
-      label,
+      label: stripInlineIngredientTags(label),
       durationSeconds,
       endAt,
       isFinished: false,
