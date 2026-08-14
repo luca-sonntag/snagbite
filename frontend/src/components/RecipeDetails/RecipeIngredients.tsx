@@ -3,6 +3,7 @@ import { Check, Plus, Flame, Crown, Salad } from 'lucide-react';
 import type { Ingredient, Recipe } from '../../types';
 import AiNotice from '../AiNotice';
 import { useI18n } from '../../context/I18nContext';
+import { getCategoryTheme } from '../../i18n';
 import { getParentIngredient } from '../../utils/ingredientTaxonomy';
 
 interface RecipeIngredientsProps {
@@ -71,14 +72,17 @@ export default function RecipeIngredients({
         </div>
         <Card className="glass-panel p-5 rounded-2xl flex flex-col gap-4">
           <div className="flex flex-col gap-4">
-            {sortedIngredients.map(({ group, originalIdx }, sortedIdx) => (
-              <div key={sortedIdx} className="flex flex-col gap-1.5">
-                {recipe.ingredients.length > 1 && (
-                  <h4 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-2.5 border-l-2 border-gray-300 dark:border-gray-700 flex items-center gap-1.5 mt-2">
-                    <span>{translateCategory(group.name)}</span>
-                  </h4>
-                )}
-                <ul className="flex flex-col gap-1">
+            {sortedIngredients.map(({ group, originalIdx }, sortedIdx) => {
+              const theme = getCategoryTheme(group.name);
+              return (
+                <div key={sortedIdx} className="flex flex-col gap-1.5">
+                  {recipe.ingredients.length > 1 && (
+                    <h4 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-2 mt-2">
+                      <span className={`w-1 h-3.5 rounded-full ${theme.barClass} shrink-0`} />
+                      <span>{translateCategory(group.name)}</span>
+                    </h4>
+                  )}
+                  <ul className="flex flex-col gap-1">
                   {group.items.map((ing, idx) => {
                     const scaledAmount = formatAmount(ing.amount, ing.unit);
                     const amountStr = scaledAmount ? `${scaledAmount} ` : '';
@@ -132,8 +136,9 @@ export default function RecipeIngredients({
                   })}
                 </ul>
               </div>
-            ))}
-          </div>
+            );
+          })}
+        </div>
         </Card>
         {onAddIngredients && (
           <Button

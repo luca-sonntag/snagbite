@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button, Drawer } from '@heroui/react';
 import { Check, Salad } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
+import { getCategoryTheme } from '../../i18n';
 import type { Ingredient, Recipe } from '../../types';
 
 interface ShoppingConfirmSheetProps {
@@ -114,11 +115,13 @@ export default function ShoppingConfirmSheet({
                   {sortedIngredients.map(({ group, originalIdx }, sortedIdx) => {
                     // Check if any items in this group are displayed
                     if (group.items.length === 0) return null;
+                    const theme = getCategoryTheme(group.name);
 
                     return (
                       <div key={sortedIdx} className="flex flex-col gap-1.5">
                         {recipe.ingredients.length > 1 && (
-                          <h4 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-2 border-l-2 border-gray-300 dark:border-gray-700 flex items-center gap-1.5 mt-2">
+                          <h4 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-2 mt-2">
+                            <span className={`w-1 h-3.5 rounded-full ${theme.barClass} shrink-0`} />
                             <span>{translateCategory(group.name)}</span>
                           </h4>
                         )}
