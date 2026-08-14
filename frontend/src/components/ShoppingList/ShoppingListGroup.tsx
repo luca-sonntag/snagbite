@@ -1,6 +1,6 @@
 import { CheckCheck } from 'lucide-react';
 import type { AggregatedShoppingItem } from '../../types';
-import { translateCategory, getCategoryIcon } from '../../i18n';
+import { translateCategory, getCategoryTheme } from '../../i18n';
 import { useI18n } from '../../context/I18nContext';
 import ShoppingListItem from './ShoppingListItem';
 
@@ -36,7 +36,7 @@ export default function ShoppingListGroup({
     <div className="flex flex-col gap-2">
       {groupedCategories.map((group) => {
         const isGroupCollapsing = collapsingKeys.has(`group-${group.category}`);
-        const icon = getCategoryIcon(group.category);
+        const theme = getCategoryTheme(group.category);
         const openCount = group.items.length;
 
         return (
@@ -46,19 +46,17 @@ export default function ShoppingListGroup({
               isGroupCollapsing ? 'animate-group-collapse' : 'animate-group-expand'
             }`}
           >
-            <div className="flex items-center justify-between gap-2 px-2 pt-1 pb-2 mb-0.5">
-              <div className="flex items-center gap-2.5 select-none flex-1 min-w-0 text-left">
-                <span className="w-5 h-5 flex items-center justify-center flex-shrink-0 text-base">
-                  {icon}
-                </span>
-                <span className="flex flex-col min-w-0">
-                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 truncate">
+            <div className="flex items-center justify-between gap-2 px-2 pt-1 pb-1.5 mb-0.5">
+              <div className="flex flex-col gap-1.5 select-none flex-1 min-w-0 text-left">
+                <div className={`w-8 h-1 rounded-full ${theme.barClass}`} />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-gray-100 truncate">
                     {translateCategory(group.category)}
                   </span>
                   <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
                     {openCount} {t('shopping.toBuyCount', { defaultValue: 'offen' })}
                   </span>
-                </span>
+                </div>
               </div>
 
               <button

@@ -135,7 +135,7 @@ export const categoryOrder: IngredientCategory[] = [
   IngredientCategory.OTHER
 ];
 
-// Icons for each category
+// Icons for each category (legacy)
 export const categoryIcons: Record<IngredientCategory, string> = {
   [IngredientCategory.PRODUCE]: '🥦',
   [IngredientCategory.BAKERY]: '🍞',
@@ -165,6 +165,82 @@ export function getCategoryIcon(category: string): string {
   }
   return '🛍️'; // Default
 }
+
+export interface CategoryTheme {
+  barClass: string;
+  hex: string;
+}
+
+// Dedicated accent colors for each supermarket aisle/category
+export const categoryColors: Record<IngredientCategory, CategoryTheme> = {
+  [IngredientCategory.PRODUCE]: {
+    barClass: 'bg-emerald-500',
+    hex: '#10b981',
+  },
+  [IngredientCategory.BAKERY]: {
+    barClass: 'bg-amber-500',
+    hex: '#f59e0b',
+  },
+  [IngredientCategory.MEAT_POULTRY]: {
+    barClass: 'bg-rose-500',
+    hex: '#f43f5e',
+  },
+  [IngredientCategory.SEAFOOD]: {
+    barClass: 'bg-cyan-500',
+    hex: '#06b6d4',
+  },
+  [IngredientCategory.DAIRY_EGGS]: {
+    barClass: 'bg-blue-500',
+    hex: '#3b82f6',
+  },
+  [IngredientCategory.PANTRY]: {
+    barClass: 'bg-orange-500',
+    hex: '#f97316',
+  },
+  [IngredientCategory.GRAINS_PASTA]: {
+    barClass: 'bg-yellow-500',
+    hex: '#eab308',
+  },
+  [IngredientCategory.SPICES_HERBS]: {
+    barClass: 'bg-teal-500',
+    hex: '#14b8a6',
+  },
+  [IngredientCategory.BAKING]: {
+    barClass: 'bg-pink-500',
+    hex: '#ec4899',
+  },
+  [IngredientCategory.CONDIMENTS_OILS]: {
+    barClass: 'bg-violet-500',
+    hex: '#8b5cf6',
+  },
+  [IngredientCategory.FROZEN]: {
+    barClass: 'bg-sky-400',
+    hex: '#38bdf8',
+  },
+  [IngredientCategory.BEVERAGES]: {
+    barClass: 'bg-lime-500',
+    hex: '#84cc16',
+  },
+  [IngredientCategory.OTHER]: {
+    barClass: 'bg-slate-400',
+    hex: '#94a3b8',
+  },
+};
+
+export function getCategoryTheme(category: string): CategoryTheme {
+  if (!category) return categoryColors[IngredientCategory.OTHER];
+  const cleanCategory = category.trim().toUpperCase();
+  if (cleanCategory in IngredientCategory) {
+    return categoryColors[cleanCategory as IngredientCategory];
+  }
+  const lowerCategory = category.trim().toLowerCase();
+  const mappedKey = legacyCategoryMap[lowerCategory];
+  if (mappedKey && categoryColors[mappedKey]) {
+    return categoryColors[mappedKey];
+  }
+  return categoryColors[IngredientCategory.OTHER];
+}
+
 
 export const uiTranslations = {
   de: {
