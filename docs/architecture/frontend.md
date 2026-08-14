@@ -78,6 +78,11 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
   * **Kategorie-Farb-Pills (`getCategoryTheme` in `i18n.ts`)**: Statt unruhiger Emojis sitzt über jeder Kategorie-Überschrift ein schmaler, langgezogener abgerundeter Farb-Balken (`w-8 h-1 rounded-full`) mit einer harmonisch abgestimmten Farbe pro Abteilung (z. B. Smaragdgrün für Obst & Gemüse, Bernstein für Brot & Backwaren, Rosé für Fleisch & Geflügel, etc.).
   * **Erledigt-Accordion**: Abgehakte Artikel wohnen in einem standardmäßig eingeklappten Accordion (`Erledigt (X)`), um kognitive Unruhe im Laden zu minimieren.
   * **Expliziter Gruppen-Check**: Die "Ganzes Regal abhaken"-Aktion ist als separater `CheckCheck`-Button abgetrennt, um versehentliches Abhaken beim Antippen von Kategorienamen zu verhindern.
+* **Rezept-Kacheln & Kontext-Karussell (`ShoppingRecipeCarousel.tsx` & `ShoppingRecipeCard.tsx`):**
+  * Zeigt am oberen Bildschirmrand (unter der Toolbar) alle Gerichte, deren Zutaten aktuell auf der Einkaufsliste stehen.
+  * **Kompakte Kacheln:** 16:10 Split/Cover-Bild (`CachedImage`), Rezepttitel, Zutaten-Zähler (`checked/total`), dezenter Mini-Fortschrittsbalken und `✓ Alle im Korb`-Badge bei vollständigem Einkauf.
+  * **1-Tap-Sprung:** Antippen navigiert direkt zum entsprechenden Rezept im Kochbuch (`#/history/<jobId>`).
+  * **Rezept entfernen:** Über das `X`-Icon können alle Zutaten eines Rezepts mit einem Klick nach Sicherheitsabfrage von der Liste gelöscht werden.
 * **Add-Formular (`CustomItemForm.tsx`):** Sanftes Einblenden mit automatischem Eingabefokus (`autoFocus`) und Schließen-Option (`X`).
 
 ---
