@@ -3,7 +3,9 @@ import { useI18n } from '../../context/I18nContext';
 import CachedImage from '../CachedImage';
 
 interface CollectionTileProps {
-  collection: Collection;
+  collection?: Collection;
+  title?: string;
+  emoji?: string | null;
   /** Members of this collection, newest first — the first two provide the cover images. */
   jobs: Job[];
   onClick: () => void;
@@ -14,9 +16,10 @@ interface CollectionTileProps {
  * (1 row high, 2 recipes side-by-side) with real recipe images,
  * and the collection badge emoji at the bottom left.
  */
-export default function CollectionTile({ collection, jobs, onClick }: CollectionTileProps) {
+export default function CollectionTile({ collection, title, emoji, jobs, onClick }: CollectionTileProps) {
   const { t } = useI18n();
-  const collectionEmoji = collection.emoji || null;
+  const displayName = title || collection?.name || '';
+  const collectionEmoji = emoji !== undefined ? emoji : (collection?.emoji || null);
 
   const validJobs = jobs.filter(j => j.recipe);
   const displayJobs = validJobs.slice(0, 2);
@@ -66,7 +69,7 @@ export default function CollectionTile({ collection, jobs, onClick }: Collection
 
       <div className="flex flex-col px-0.5">
         <span className="text-xs font-bold text-gray-900 dark:text-white line-clamp-2 leading-snug">
-          {collection.name}
+          {displayName}
         </span>
         <span className="text-[11px] text-gray-500 dark:text-gray-400">
           {t('catalog.recipeCount', { count: jobs.length })}

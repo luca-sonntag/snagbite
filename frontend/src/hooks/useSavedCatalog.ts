@@ -364,6 +364,21 @@ export function useSavedCatalog({
     return map;
   }, [completedJobs, sortJobs]);
 
+  /** jobId list per flag/label, used for label counts on CookbookHome. */
+  const jobsByFlag = useMemo(() => {
+    const map: Record<string, Job[]> = {};
+    sortJobs(completedJobs, 'newest').forEach(job => {
+      (job.flags ?? []).forEach(flag => {
+        (map[flag] ||= []).push(job);
+      });
+    });
+    return map;
+  }, [completedJobs, sortJobs]);
+
+  const favoriteJobs = useMemo(() => {
+    return sortJobs(completedJobs.filter(j => j.isFavorite), 'newest');
+  }, [completedJobs, sortJobs]);
+
 
   // Helper to check if event target is inside an interactive element
   const isInteractiveTarget = (target: HTMLElement) => {
@@ -706,6 +721,8 @@ export function useSavedCatalog({
     // Shelves + recency
     shelves,
     jobsByCollection,
+    jobsByFlag,
+    favoriteJobs,
     recentMap,
     markOpened
   };

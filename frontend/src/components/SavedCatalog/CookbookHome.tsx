@@ -22,6 +22,8 @@ interface CookbookHomeProps {
   totalRecipes: number;
   collections: Collection[];
   jobsByCollection: Record<string, Job[]>;
+  jobsByFlag?: Record<string, Job[]>;
+  favoriteJobs?: Job[];
   shelves: {
     recommended?: RecommendedShelf | null;
     recent: Shelf;
@@ -42,13 +44,15 @@ interface CookbookHomeProps {
 
 /**
  * Level 1 of the catalog: a browsable cookbook home instead of one long list.
- * Collections get a real home here (cover tiles rather than chip #7 in a
- * scroll row), and each shelf is a shortcut into the pre-filtered full list.
+ * Unifies Collections, Favorites, and Labels at the top, followed by
+ * context-recommended and recent shelves.
  */
 export default function CookbookHome({
   totalRecipes,
   collections,
   jobsByCollection,
+  jobsByFlag = {},
+  favoriteJobs = [],
   shelves,
   allFlags,
   formatTotalTime,
@@ -65,13 +69,13 @@ export default function CookbookHome({
   return (
     <div className="flex flex-col gap-7 pb-4 pt-1">
 
-      {/* Collections */}
+      {/* 📂 Unified Organization Hub: Sammlungen, Favoriten & Labels */}
       <section className="flex flex-col gap-2.5">
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-base font-bold text-gray-900 dark:text-white">
             {t('catalog.collectionsTitle')}
           </h3>
-          {collections.length > 0 && (
+          {(collections.length > 0 || allFlags.length > 0) && (
             <button
               type="button"
               onClick={onManageCollections}
@@ -83,46 +87,63 @@ export default function CookbookHome({
           )}
         </div>
 
-        {collections.length === 0 ? (
+        {/* Row of Tiles: 1. ⭐ Favoriten Smart-Folder + 2. User Collections + 3. ➕ Neue Sammlung */}
+        <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
+          {/* ⭐ Favoriten Smart-Tile (Always 1st tile) */}
+          <CollectionTile
+            title={t('catalog.favoritesFilter')}
+            emoji="⭐"
+            jobs={favoriteJobs.length > 0 ? favoriteJobs : shelves.favorites.items}
+            onClick={() => onOpenList({ kind: 'favorites' })}
+          />
+
+          {/* User Collections */}
+          {collections.map(col => (
+            <CollectionTile
+              key={col.id}
+              collection={col}
+              jobs={jobsByCollection[col.id] ?? []}
+              onClick={() => onOpenList({ kind: 'collection', id: col.id })}
+            />
+          ))}
+
+          {/* ➕ Add Collection Button */}
           <button
             type="button"
             onClick={onAddCollection}
-            className="flex items-center gap-3 w-full p-4 rounded-2xl border border-dashed border-emerald-600/30 text-left hover:bg-emerald-500/5 active:scale-[0.99] transition-all cursor-pointer"
+            className="w-[8.5rem] shrink-0 flex flex-col gap-1.5 text-left active:scale-[0.97] transition-transform cursor-pointer"
           >
-            <span className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+            <span className="w-full aspect-[2/1] rounded-2xl border border-dashed border-emerald-600/30 flex items-center justify-center hover:bg-emerald-500/5 transition-colors">
               <Plus className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             </span>
-            <span className="flex flex-col min-w-0">
-              <span className="text-sm font-bold text-gray-900 dark:text-white">
-                {t('catalog.addCollection')}
-              </span>
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                {t('catalog.collectionsEmptyHint')}
-              </span>
+            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 px-0.5 line-clamp-1 leading-snug">
+              {t('catalog.addCollection')}
             </span>
           </button>
-        ) : (
-          <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
-            {collections.map(col => (
-              <CollectionTile
-                key={col.id}
-                collection={col}
-                jobs={jobsByCollection[col.id] ?? []}
-                onClick={() => onOpenList({ kind: 'collection', id: col.id })}
-              />
-            ))}
-            <button
-              type="button"
-              onClick={onAddCollection}
-              className="w-[8.5rem] shrink-0 flex flex-col gap-1.5 text-left active:scale-[0.97] transition-transform cursor-pointer"
-            >
-              <span className="w-full aspect-[2/1] rounded-2xl border border-dashed border-emerald-600/30 flex items-center justify-center hover:bg-emerald-500/5 transition-colors">
-                <Plus className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-              </span>
-              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 px-0.5 line-clamp-1 leading-snug">
-                {t('catalog.addCollection')}
-              </span>
-            </button>
+        </div>
+
+        {/* 🏷️ Labels / Tags Chip Bar (directly under tiles) */}
+        {allFlags.length > 0 && (
+          <div className="flex gap-1.5 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-0.5 scroll-smooth">
+            {allFlags.map(flag => {
+              const count = jobsByFlag[flag]?.length ?? 0;
+              return (
+                <button
+                  key={flag}
+                  type="button"
+                  onClick={() => onOpenList({ kind: 'flag', name: flag })}
+                  className="px-3 py-1 text-xs font-semibold rounded-full border-none bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 active:scale-95 transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 shrink-0"
+                >
+                  <Tag className="w-3 h-3 text-amber-500" />
+                  <span>{flag}</span>
+                  {count > 0 && (
+                    <span className="text-[10px] font-bold opacity-75">
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         )}
       </section>
@@ -171,20 +192,6 @@ export default function CookbookHome({
         />
       )}
 
-      {shelves.favorites.total > 5 && (
-        <RecipeShelf
-          title={t('catalog.favoritesFilter')}
-          jobs={shelves.favorites.items}
-          totalCount={shelves.favorites.total}
-          formatTotalTime={formatTotalTime}
-          onOpenAll={() => onOpenList({ kind: 'favorites' })}
-          onOpenRecipe={onOpenRecipe}
-          isSelectMode={isSelectMode}
-          selectedIds={selectedIds}
-          bindLongPress={bindLongPress}
-        />
-      )}
-
       {shelves.quick.total > 5 && (
         <RecipeShelf
           title={t('catalog.shelfQuick')}
@@ -197,29 +204,6 @@ export default function CookbookHome({
           selectedIds={selectedIds}
           bindLongPress={bindLongPress}
         />
-      )}
-
-      {/* Labels */}
-      {allFlags.length > 0 && (
-        <section className="flex flex-col gap-2.5">
-          <h3 className="flex items-center gap-2 text-base font-bold text-gray-900 dark:text-white">
-            <Tag className="w-4 h-4 text-amber-500" />
-            {t('catalog.flagsTitle')}
-          </h3>
-          <div className="flex flex-wrap gap-1.5">
-            {allFlags.map(flag => (
-              <button
-                key={flag}
-                type="button"
-                onClick={() => onOpenList({ kind: 'flag', name: flag })}
-                className="px-3.5 py-1.5 text-xs font-semibold rounded-full border-none bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 active:scale-95 transition-all whitespace-nowrap cursor-pointer flex items-center gap-1"
-              >
-                <Tag className="w-2.5 h-2.5 text-amber-500" />
-                {flag}
-              </button>
-            ))}
-          </div>
-        </section>
       )}
 
       {/* Escape hatch into the unfiltered list */}

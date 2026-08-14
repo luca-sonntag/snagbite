@@ -148,6 +148,8 @@ export default function SavedCatalog({
     assignCollections,
     shelves,
     jobsByCollection,
+    jobsByFlag,
+    favoriteJobs,
     markOpened
   } = useSavedCatalog({
     history,
@@ -496,6 +498,8 @@ export default function SavedCatalog({
           totalRecipes={completedJobs.length}
           collections={collections}
           jobsByCollection={jobsByCollection}
+          jobsByFlag={jobsByFlag}
+          favoriteJobs={favoriteJobs}
           shelves={shelves}
           allFlags={allFlags}
           formatTotalTime={formatTotalTime}
