@@ -268,7 +268,7 @@ export default function ShoppingList({
       {totalCount === 0 ? (
         <ShoppingEmptyState />
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 pb-28">
           {/* Active Recipe Tiles Carousel */}
           {activeRecipes.length > 0 && onSelectRecipe && (
             <ShoppingRecipeCarousel
