@@ -13,12 +13,25 @@ import ShoppingListGroup from './ShoppingListGroup';
 import ShoppingCheckedDrawer from './ShoppingCheckedDrawer';
 import ShoppingEmptyState from './ShoppingEmptyState';
 import ShoppingAllDoneState from './ShoppingAllDoneState';
+import ShoppingRecipeCarousel from './ShoppingRecipeCarousel';
+import type { Job } from '../../types';
+
+interface ActiveShoppingRecipe {
+  recipeId: string;
+  recipeTitle: string;
+  totalItems: number;
+  checkedItems: number;
+}
 
 interface ShoppingListProps {
   aggregatedList: {
     unchecked: AggregatedShoppingItem[];
     checked: AggregatedShoppingItem[];
   };
+  activeRecipes?: ActiveShoppingRecipe[];
+  history?: Job[];
+  onSelectRecipe?: (jobId: string) => void;
+  onRemoveRecipe?: (recipeId: string) => void;
   addCustomItem: (name: string, amount: number, unit: string) => void;
   toggleItemIds?: (itemIds: string[], targetChecked: boolean) => void;
   deleteItemIds?: (itemIds: string[]) => void;
@@ -30,6 +43,10 @@ interface ShoppingListProps {
 
 export default function ShoppingList({
   aggregatedList,
+  activeRecipes = [],
+  history = [],
+  onSelectRecipe,
+  onRemoveRecipe,
   addCustomItem,
   toggleItemIds,
   deleteItemIds,
@@ -139,6 +156,19 @@ export default function ShoppingList({
     clearChecked();
   };
 
+  const handleRemoveRecipe = async (recipeId: string, recipeTitle: string) => {
+    const confirmed = await dialog.confirm({
+      title: t('shopping.removeRecipeConfirmTitle'),
+      message: t('shopping.removeRecipeConfirmMessage', { title: recipeTitle }),
+      confirmLabel: t('shopping.removeRecipeConfirmBtn'),
+      cancelLabel: t('shopping.dialogClear.cancel'),
+      status: 'danger'
+    });
+    if (confirmed && onRemoveRecipe) {
+      onRemoveRecipe(recipeId);
+    }
+  };
+
   const toggleAddForm = () => {
     setShowAddForm((prev) => !prev);
   };
@@ -239,6 +269,16 @@ export default function ShoppingList({
         <ShoppingEmptyState />
       ) : (
         <div className="flex flex-col gap-3">
+          {/* Active Recipe Tiles Carousel */}
+          {activeRecipes.length > 0 && onSelectRecipe && (
+            <ShoppingRecipeCarousel
+              recipes={activeRecipes}
+              history={history}
+              onSelectRecipe={onSelectRecipe}
+              onRemoveRecipe={handleRemoveRecipe}
+            />
+          )}
+
           {activeGroups.length > 0 ? (
             <ShoppingListGroup
               groupedCategories={activeGroups}

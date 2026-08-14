@@ -274,9 +274,39 @@ export function useShoppingList() {
     };
   }, [shoppingList]);
 
+  // Aggregate active recipes that have ingredients on the shopping list
+  const activeRecipes = useMemo(() => {
+    const recipeMap = new Map<string, { recipeId: string; recipeTitle: string; totalItems: number; checkedItems: number }>();
+
+    shoppingList.forEach(item => {
+      if (!item.recipeId) return;
+      const existing = recipeMap.get(item.recipeId);
+      if (existing) {
+        existing.totalItems += 1;
+        if (item.checked) existing.checkedItems += 1;
+      } else {
+        recipeMap.set(item.recipeId, {
+          recipeId: item.recipeId,
+          recipeTitle: item.recipeTitle || '',
+          totalItems: 1,
+          checkedItems: item.checked ? 1 : 0,
+        });
+      }
+    });
+
+    return Array.from(recipeMap.values());
+  }, [shoppingList]);
+
+  // Remove all ingredients of a specific recipe from the list
+  const removeRecipeFromList = (recipeId: string) => {
+    saveList(prevList => prevList.filter(item => item.recipeId !== recipeId));
+  };
+
   return {
     shoppingList,
     aggregatedList,
+    activeRecipes,
+    removeRecipeFromList,
     addRecipeIngredients,
     addCustomItem,
     toggleItemIds,

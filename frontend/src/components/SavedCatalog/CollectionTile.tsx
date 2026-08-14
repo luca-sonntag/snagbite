@@ -72,7 +72,7 @@ export default function CollectionTile({ collection, title, emoji, jobs, onClick
           {displayName}
         </span>
         <span className="text-[11px] text-gray-500 dark:text-gray-400">
-          {t('catalog.recipeCount', { count: jobs.length })}
+          {jobs.length === 1 ? t('catalog.recipeCountSingle') : t('catalog.recipeCount', { count: jobs.length })}
         </span>
       </div>
     </button>

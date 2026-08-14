@@ -124,7 +124,7 @@ export default function CookbookHome({
 
         {/* 🏷️ Labels / Tags Chip Bar (directly under tiles) */}
         {allFlags.length > 0 && (
-          <div className="flex gap-1.5 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-0.5 scroll-smooth">
+          <div className="flex gap-1.5 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 pt-1 pb-0.5 scroll-smooth">
             {allFlags.map(flag => {
               const count = jobsByFlag[flag]?.length ?? 0;
               return (
@@ -138,7 +138,7 @@ export default function CookbookHome({
                   <span>{flag}</span>
                   {count > 0 && (
                     <span className="text-[10px] font-bold opacity-75">
-                      {count}
+                      ({count})
                     </span>
                   )}
                 </button>

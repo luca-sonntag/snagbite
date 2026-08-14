@@ -124,6 +124,8 @@ export default function App() {
   // Custom Hooks for Recipe Extraction and Shopping List
   const {
     aggregatedList,
+    activeRecipes,
+    removeRecipeFromList,
     addRecipeIngredients,
     addCustomItem,
     toggleItemIds,
@@ -916,6 +918,12 @@ export default function App() {
         <div hidden={activeView !== 'shopping-list'} aria-hidden={activeView !== 'shopping-list' || undefined}>
           <ShoppingList
             aggregatedList={aggregatedList}
+            activeRecipes={activeRecipes}
+            history={history}
+            onSelectRecipe={(jobId) => {
+              navigate('history', jobId);
+            }}
+            onRemoveRecipe={removeRecipeFromList}
             addCustomItem={addCustomItem}
             toggleItemIds={toggleItemIds}
             deleteItemIds={deleteItemIds}
