@@ -17,7 +17,7 @@ const recipeSchema = {
   properties: {
     isRecipe: {
       type: FunctionDeclarationSchemaType.BOOLEAN,
-      description: 'Whether the source content contains a food recipe. Set to false if it is unrelated content (e.g. vlog, comedy).',
+      description: 'Whether the source content contains an actual, extractable food recipe with specific ingredients or preparation instructions. Set to false if it is unrelated content (e.g. vlog, comedy), OR if the source is merely a teaser/announcement/caption-bait (e.g. "Comment RECIPE for DM", "Link in bio", "DM me for ingredients", or marketing descriptions without the actual recipe ingredients/instructions). NEVER invent, guess, or hallucinate a recipe when the ingredients and steps are not present in the provided input.',
     },
     containsMultipleRecipes: {
       type: FunctionDeclarationSchemaType.BOOLEAN,
@@ -457,32 +457,37 @@ export async function extractRecipe(
 Reconstruct the complete recipe, resolving any contradictions culinary-wise. Ensure to follow the field-level guidelines specified in the descriptions of the output schema.
 
 Key Constraints:
-1. Multi-Recipe Ambiguity: Before attempting to extract a recipe, evaluate if the content represents a multi-recipe collection, roundup, or compilation. You MUST set "containsMultipleRecipes" to true if ANY of the following apply:
+1. Recipe Existence & Anti-Hallucination: The source content MUST contain the actual recipe details (specific ingredients with quantities and/or step-by-step cooking instructions). You MUST set "isRecipe" to false if:
+   a) The content is unrelated (comedy, vlogs, fitness motivation, general chat, etc.).
+   b) The content is merely a teaser, promo, or engagement bait without the full recipe (e.g. "Comment BUCKEYE and I'll send you the recipe", "Recipe in my ebook", "Link in bio", "DM for full recipe", or appetizing marketing descriptions/macros without the actual list of ingredients and preparation steps).
+   c) The source mentions only the dish name/concept but completely omits the concrete ingredients and instructions.
+   NEVER under any circumstances invent, fabricate, or hallucinate ingredients, amounts, or cooking steps when they are not present in the provided source text, audio, or images.
+2. Multi-Recipe Ambiguity: Before attempting to extract a recipe, evaluate if the content represents a multi-recipe collection, roundup, or compilation. You MUST set "containsMultipleRecipes" to true if ANY of the following apply:
    a) The title, caption, or cover image text indicates multiple dishes/recipes (e.g. "High protein dinners...", "5 meals to get lean", "3 lunch ideas", "What I eat in a day", "4 low-calorie recipes").
    b) The carousel images or video scenes present multiple distinct standalone main dishes across different slides/segments (e.g. Slide 2 is "Smash Burger & Sweet Potato Fries", Slide 4 is "Bang Bang Chicken", Slide 6 is "Beef Burrito Bowl").
    c) Multiple distinct nutrition/macro cards exist for different dishes throughout the slides/segments.
    If "containsMultipleRecipes" is true, do NOT attempt to merge the dishes into one recipe.
    Set "containsMultipleRecipes" to false ONLY if the entire post is dedicated to ONE single recipe (including its sub-components like sauce, marinade, side dish, or garnishes cooked together as one meal).
-2. Category Ordering: ${CATEGORY_ORDERING_INSTRUCTION}
-3. Translation: ${languageInstruction}
-4. Preferred Units:
+3. Category Ordering: ${CATEGORY_ORDERING_INSTRUCTION}
+4. Translation: ${languageInstruction}
+5. Preferred Units:
    - Temperature Units: ${tempInstruction}
    - Weight & Volume Units: ${unitSystemInstruction}
-5. Missing Data & Nutrition: If any information for a specific field is missing, leave it empty (empty string "", null, or empty array []). You MUST set "hasExplicitNutritionalValues" to true ONLY IF the recipe nutritional values are explicitly stated in the source text or audio. If they are not, set it to false and set "nutritionalValues" to null (do NOT estimate or calculate overall nutritional values at the recipe level). Note that "nutritionalValues" MUST represent values per single serving/portion. If the source lists total values for the entire recipe, divide them by the number of servings/portions first.
-6. Clean Ingredient Names: ${CLEAN_INGREDIENT_NAMES_INSTRUCTION}
-7. Ingredient Decomposition: ${INGREDIENT_DECOMPOSITION_INSTRUCTION}
-8. Ingredient-level Nutritional Values: For each ingredient, you MUST estimate its nutritional values (calories, protein, carbs, fat) based on the ENTIRE specified quantity (amount * unit). Do NOT output per-100g, per-100ml, or single-unit values unless the quantity is exactly 100g, 100ml, or 1 unit. E.g., if chicken breast has 165 kcal per 100g and the recipe specifies 500g, the calories field MUST be 825, NOT 165. If a potato has 150 kcal and the amount is 6, the calories field MUST be 900, NOT 150. If olive oil has 14g fat/EL and the amount is 3 EL, the fat field MUST be 42, NOT 14.
-9. Infer Missing Ingredients from Title/Visuals: If the title or the provided images explicitly show or mention an ingredient/component (e.g., 'Air-Fried Broccolini' in the title and green broccolini on the plate) but the caption text omits it from the ingredients list, you MUST infer its presence. Add it to the ingredients list (with a reasonable estimated quantity, e.g., '1 bunch' or '200g') and add a cooking step in the instructions so the recipe is complete and matches the final plated dish.
-10. Serving Size Estimation: Identify the number of servings or portions the recipe makes. Look for clues like 'serves 4' or estimate based on the ingredient amounts (e.g., 500g chicken and 6 potatoes typically serves 3-4 people). Avoid defaulting to 1 serving if the ingredient amounts are clearly meant for a family-sized meal.
-11. Zero-Calorie & Low-Calorie Ingredients: Ingredients like water, ice, salt, or baking soda MUST have 0 calories, protein, carbs, and fat. For spices, seasonings, or herbs in small quantities (like teaspoons), focus your calculation energy on the high-calorie/high-macro ingredients (meats, oils, dairy, grains, starches) and estimate very small values (e.g., 5 kcal) or 0.
-12. Cooked vs. Raw/Dry States of Expandable Ingredients: ${COOKED_VS_RAW_INSTRUCTION}
-13. Common Pantry Staples: ${STAPLE_INGREDIENT_INSTRUCTION}${photoSourceRules}
-14. Inline Ingredient Tagging: In every step description, whenever an ingredient from the ingredients list is used or referenced, you MUST format its mention using the inline syntax '[exact word used in text](ing:baseName)'. 'baseName' MUST match the English 'baseName' (or 'name' if 'baseName' is not set) of the corresponding ingredient in the ingredients list. Examples:
+6. Missing Data & Nutrition: If any information for a specific field is missing, leave it empty (empty string "", null, or empty array []). You MUST set "hasExplicitNutritionalValues" to true ONLY IF the recipe nutritional values are explicitly stated in the source text or audio. If they are not, set it to false and set "nutritionalValues" to null (do NOT estimate or calculate overall nutritional values at the recipe level). Note that "nutritionalValues" MUST represent values per single serving/portion. If the source lists total values for the entire recipe, divide them by the number of servings/portions first.
+7. Clean Ingredient Names: ${CLEAN_INGREDIENT_NAMES_INSTRUCTION}
+8. Ingredient Decomposition: ${INGREDIENT_DECOMPOSITION_INSTRUCTION}
+9. Ingredient-level Nutritional Values: For each ingredient, you MUST estimate its nutritional values (calories, protein, carbs, fat) based on the ENTIRE specified quantity (amount * unit). Do NOT output per-100g, per-100ml, or single-unit values unless the quantity is exactly 100g, 100ml, or 1 unit. E.g., if chicken breast has 165 kcal per 100g and the recipe specifies 500g, the calories field MUST be 825, NOT 165. If a potato has 150 kcal and the amount is 6, the calories field MUST be 900, NOT 150. If olive oil has 14g fat/EL and the amount is 3 EL, the fat field MUST be 42, NOT 14.
+10. Infer Minor Missing Components (Only for Existing Recipes): If the source already contains a full recipe with ingredients and instructions, but the title or visual images explicitly show an obvious missing minor garnish or component (e.g., 'Air-Fried Broccolini' in the title and green broccolini on the plate) that was accidentally omitted from the written list, you may infer that specific item. NEVER use this rule to fabricate an entire recipe from a title or teaser when no base recipe is provided.
+11. Serving Size Estimation: Identify the number of servings or portions the recipe makes. Look for clues like 'serves 4' or estimate based on the ingredient amounts (e.g., 500g chicken and 6 potatoes typically serves 3-4 people). Avoid defaulting to 1 serving if the ingredient amounts are clearly meant for a family-sized meal.
+12. Zero-Calorie & Low-Calorie Ingredients: Ingredients like water, ice, salt, or baking soda MUST have 0 calories, protein, carbs, and fat. For spices, seasonings, or herbs in small quantities (like teaspoons), focus your calculation energy on the high-calorie/high-macro ingredients (meats, oils, dairy, grains, starches) and estimate very small values (e.g., 5 kcal) or 0.
+13. Cooked vs. Raw/Dry States of Expandable Ingredients: ${COOKED_VS_RAW_INSTRUCTION}
+14. Common Pantry Staples: ${STAPLE_INGREDIENT_INSTRUCTION}${photoSourceRules}
+15. Inline Ingredient Tagging: In every step description, whenever an ingredient from the ingredients list is used or referenced, you MUST format its mention using the inline syntax '[exact word used in text](ing:baseName)'. 'baseName' MUST match the English 'baseName' (or 'name' if 'baseName' is not set) of the corresponding ingredient in the ingredients list. Examples:
    - Ingredients: Eigelb (baseName: egg yolk), Ei (baseName: egg), Parmesan (baseName: parmesan)
    - Step description: "Die [Eigelbe](ing:egg yolk) und das [Ei](ing:egg) zusammen mit dem [Parmesan](ing:parmesan) verrühren."
    - Do NOT tag equipment or non-ingredient words. Make sure the brackets wrap the natural word as it appears in the sentence.
-15. Concise, Direct Instruction Steps: Write instruction step descriptions as short, clear, action-oriented sentences. Eliminate conversational filler words, narrative transitions, and redundancies. Split long multi-action steps into distinct, bite-sized steps so each step is easy to follow while cooking.
-16. Inline Timer Tagging: In every step description, whenever a cooking duration or time span is mentioned (e.g. "15 Minuten", "1,5 Stunden", "30 Sekunden"), you MUST format it using the inline syntax '[exact time text](timer:duration_in_seconds)'. Calculate the total duration in seconds and put it in the timer parameter. Examples:
+16. Concise, Direct Instruction Steps: Write instruction step descriptions as short, clear, action-oriented sentences. Eliminate conversational filler words, narrative transitions, and redundancies. Split long multi-action steps into distinct, bite-sized steps so each step is easy to follow while cooking.
+17. Inline Timer Tagging: In every step description, whenever a cooking duration or time span is mentioned (e.g. "15 Minuten", "1,5 Stunden", "30 Sekunden"), you MUST format it using the inline syntax '[exact time text](timer:duration_in_seconds)'. Calculate the total duration in seconds and put it in the timer parameter. Examples:
    - "Ca. [15 Minuten](timer:900) garen."
    - "Für [1,5 Stunden](timer:5400) köcheln lassen."
    - "Etwa [45 Sekunden](timer:45) anbraten."
@@ -507,7 +512,7 @@ ${caption.trim() ? `\nDescription/Caption:\n"""\n${caption}\n"""` : ''}${htmlCon
       if (isPhotoSource) {
         throw new AppError('PHOTO_UNREADABLE', { message: 'No legible recipe could be read from the submitted photos.' });
       }
-      throw new AppError('NOT_A_RECIPE', { message: 'The provided video does not appear to contain a food recipe.' });
+      throw new AppError('NOT_A_RECIPE', { message: 'The provided content does not appear to contain a complete food recipe.' });
     }
 
     // Ambiguous source: several distinct dishes (e.g. "5 meals" roundups) cannot be
