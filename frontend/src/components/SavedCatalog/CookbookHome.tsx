@@ -107,12 +107,12 @@ export default function CookbookHome({
             <button
               type="button"
               onClick={onAddCollection}
-              className="w-[6.5rem] shrink-0 flex flex-col gap-1.5 text-left active:scale-[0.97] transition-transform cursor-pointer"
+              className="w-[8.5rem] shrink-0 flex flex-col gap-1.5 text-left active:scale-[0.97] transition-transform cursor-pointer"
             >
-              <span className="w-full aspect-square rounded-2xl border border-dashed border-emerald-600/30 flex items-center justify-center hover:bg-emerald-500/5 transition-colors">
-                <Plus className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+              <span className="w-full aspect-[2/1] rounded-2xl border border-dashed border-emerald-600/30 flex items-center justify-center hover:bg-emerald-500/5 transition-colors">
+                <Plus className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               </span>
-              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 px-0.5 line-clamp-2 leading-snug">
+              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 px-0.5 line-clamp-1 leading-snug">
                 {t('catalog.addCollection')}
               </span>
             </button>
