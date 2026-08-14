@@ -29,7 +29,7 @@
 ## 2. 📚 3-Ebenen-Katalog (SavedCatalog)
 
 Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
-1. **Kochbuch-Home (`#/history`, `CookbookHome.tsx`):** Browsebare Startseite. Sucheinstieg, Sammlungs-Karussell (`CollectionTile`), Regale (`RecipeShelf.tsx`, `RecipePosterCard` für "Zuletzt geöffnet", "Favoriten", "Schnell gekocht", "Zuletzt gespeichert"), Label-Chips und "Alle N Rezepte ansehen".
+1. **Kochbuch-Home (`#/history`, `CookbookHome.tsx`):** Browsebare Startseite. Sucheinstieg, Sammlungs-Karussell (`CollectionTile`), oberstes 2-reihiges horizontales Karussell (`TwoRowRecipeShelf.tsx` für "Zuletzt gespeichert"), weitere thematische Regale (`RecipeShelf.tsx`, `RecipePosterCard` für "Zuletzt geöffnet", "Favoriten", "Schnell gekocht"), Label-Chips und "Alle N Rezepte ansehen".
 2. **Listen-Ebene (`#/history/list...`, `SavedCatalog/index.tsx`):** Vollständige, filter-/sortierbare Liste mit `CatalogFilters.tsx` als Sticky-Header, `FilterSheet` und wahlweise 2-Spalten-Poster-Grid (`viewMode: 'card'`) oder dichten Zeilen (`viewMode: 'compact'`). Nur hier existieren Multi-Select und `BulkActionBar`.
 3. **Detailansicht (`#/history/<jobId>`):** `RecipeDetails`.
 

@@ -6,6 +6,17 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-14: Verschachtelter vertikaler Scroll im Cookbook-Home durch 2-reihiges horizontales Karussell ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Verschachtelter vertikaler 2-Spalten-Scrollcontainer (`VerticalRecipeShelf.tsx` mit `overflow-y-auto max-h-[...]`) auf der Rezept-Übersichtsseite.
+  - Führte zu "Scroll-Traps" (Abfangen der vertikalen Wischgeste beim Durchblättern des Dashboards) und unruhigem Scrollbalken mitten auf der Seite.
+* **Ersetzt durch:**
+  - 2-reihiges horizontales Karussell ([`TwoRowRecipeShelf.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/TwoRowRecipeShelf.tsx) mit `grid-rows-2 grid-flow-col overflow-x-auto`), das 4+ Rezepte gleichzeitig darstellt, aber horizontal wischt und den vertikalen Seitenfluss zu 100% frei lässt.
+* **Betroffene Dateien:** `frontend/src/components/SavedCatalog/TwoRowRecipeShelf.tsx`, `frontend/src/components/SavedCatalog/CookbookHome.tsx`.
+
+---
+
 ### 2026-08-14: Emojis in Einkaufslisten-Kategorien durch schlanke Farb-Pills ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
