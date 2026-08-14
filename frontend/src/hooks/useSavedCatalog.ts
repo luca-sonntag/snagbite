@@ -33,6 +33,9 @@ export type CatalogSort = 'newest' | 'recent' | 'title' | 'time';
 /** Number of recipes shown per horizontal shelf on the cookbook home. */
 export const SHELF_SIZE = 12;
 
+/** Number of recipes shown in the vertical 2-column shelf on the cookbook home. */
+export const SHELF_VERTICAL_SIZE = 24;
+
 /** Total prep + cook time in minutes; tolerates legacy string values. */
 export function getTotalTime(recipe: Pick<Recipe, 'prepTime' | 'cookTime'> | undefined | null): number {
   if (!recipe) return 0;
@@ -314,7 +317,7 @@ export function useSavedCatalog({
       recent: { items: sortJobs(opened, 'recent').slice(0, SHELF_SIZE), total: opened.length },
       favorites: { items: sortJobs(favorites, 'newest').slice(0, SHELF_SIZE), total: favorites.length },
       quick: { items: sortJobs(quick, 'time').slice(0, SHELF_SIZE), total: quick.length },
-      newest: { items: sortJobs(completedJobs, 'newest').slice(0, SHELF_SIZE), total: completedJobs.length }
+      newest: { items: sortJobs(completedJobs, 'newest').slice(0, SHELF_VERTICAL_SIZE), total: completedJobs.length }
     };
   }, [completedJobs, recentMap, sortJobs]);
 

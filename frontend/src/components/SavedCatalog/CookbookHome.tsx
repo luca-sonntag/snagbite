@@ -4,6 +4,7 @@ import type { Collection, Job } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import CollectionTile from './CollectionTile';
 import RecipeShelf from './RecipeShelf';
+import TwoRowRecipeShelf from './TwoRowRecipeShelf';
 import type { CatalogPreset } from './catalogRoutes';
 
 interface Shelf {
@@ -120,7 +121,21 @@ export default function CookbookHome({
       </section>
 
 
-      {/* Shelves — only shown when the shelf has more than 5 recipes */}
+      {/* Zuletzt gespeichert / Neueste Rezepte (2 Zeilen, horizontal scrollbar) */}
+      <TwoRowRecipeShelf
+        title={t('catalog.shelfNewest')}
+        icon={<Sparkles className="w-4 h-4 text-emerald-500" />}
+        jobs={shelves.newest.items}
+        totalCount={shelves.newest.total}
+        formatTotalTime={formatTotalTime}
+        onOpenAll={() => onOpenList({ kind: 'all' })}
+        onOpenRecipe={onOpenRecipe}
+        isSelectMode={isSelectMode}
+        selectedIds={selectedIds}
+        bindLongPress={bindLongPress}
+      />
+
+      {/* Weitere Shelves (horizontal) — nur angezeigt, wenn mehr als 5 Rezepte vorhanden sind */}
       {shelves.recent.total > 5 && (
         <RecipeShelf
           title={t('catalog.shelfRecent')}
@@ -165,19 +180,6 @@ export default function CookbookHome({
           bindLongPress={bindLongPress}
         />
       )}
-
-      <RecipeShelf
-        title={t('catalog.shelfNewest')}
-        icon={<Sparkles className="w-4 h-4 text-emerald-500" />}
-        jobs={shelves.newest.items}
-        totalCount={shelves.newest.total}
-        formatTotalTime={formatTotalTime}
-        onOpenAll={() => onOpenList({ kind: 'all' })}
-        onOpenRecipe={onOpenRecipe}
-        isSelectMode={isSelectMode}
-        selectedIds={selectedIds}
-        bindLongPress={bindLongPress}
-      />
 
       {/* Labels */}
       {allFlags.length > 0 && (
