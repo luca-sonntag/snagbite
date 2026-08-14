@@ -6,6 +6,20 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-14: Verstreute Organisations-Elemente (Favoriten-Shelf & Bottom-Labels) durch einheitlichen Top-Hub ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Unteres Favoriten-Shelf (`shelves.favorites.total > 5` in [`CookbookHome.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CookbookHome.tsx)), das bei $\le 5$ Favoriten gar nicht sichtbar war.
+  - Separater Labels-Block ganz unten am Seitenende (`allFlags.length > 0`), der langes Scrollen erforderte.
+* **Ersetzt durch:**
+  - **Einheitlicher Organisations-Hub ganz oben auf der Startseite:**
+    1. ⭐ **Favoriten als permanenter Smart-Folder (Kachel #1)** im gleichen 2:1 Split-Cover-Format wie Sammlungen.
+    2. 📂 **Eigene Sammlungen & ➕ "Neue Sammlung"** nahtlos in der gleichen horizontalen Zeile.
+    3. 🏷️ **Labels / Tags** direkt unter den Sammlungs-Kacheln als kompakte, horizontal scrollbare Chip-Leiste mit Rezept-Anzahl.
+* **Betroffene Dateien:** `frontend/src/components/SavedCatalog/CookbookHome.tsx`, `frontend/src/components/SavedCatalog/CollectionTile.tsx`, `frontend/src/components/SavedCatalog/index.tsx`, `frontend/src/hooks/useSavedCatalog.ts`.
+
+---
+
 ### 2026-08-14: Verschachtelter vertikaler Scroll im Cookbook-Home durch 2-reihiges horizontales Karussell ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
