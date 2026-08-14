@@ -25,9 +25,10 @@ Videos und Bilderkarussells können mehrere eigenständige Rezepte enthalten (z.
 
 ---
 
-## 3. Rekonstruktion, Mengenanpassung & Präferenzen
+## 3. Rekonstruktion, Anti-Halluzination & Präferenzen
 
-* **Rekonstruktion fehlender Zutaten:** Falls Zutaten im Videotitel oder in den extrahierten Frames visuell auftauchen (z. B. Brokkolini), aber in der Videobeschreibung vergessen wurden, rekonstruiert Gemini diese mit geschätzten Mengen und passenden Arbeitsschritten.
+* **Anti-Halluzination & Teaser-Post-Erkennung:** Wenn ein Social-Media-Post nur Teaser-Text oder DM-Bait enthält (z. B. *"Kommentiere X für das Rezept"* oder Beschreibungen ohne konkrete Zutaten/Mengen/Schritte), zwingt das Schema (`isRecipe: false`) und Prompt-Constraint #1 Gemini dazu, den Post abzulehnen (`NOT_A_RECIPE`), anstatt frei erfundene Rezepte zu halluzinieren.
+* **Rekonstruktion nur bei vorhandenem Grundrezept:** Falls ein vollständiges Grundrezept existiert, aber eine offensichtliche Kleinkomponente (z. B. Brokkolini als Beilage im Titel/Bild) in der Auflistung vergessen wurde, darf diese ergänzt werden. Das Erfinden eines Rezepts aus dem Nichts ist strikt untersagt.
 * **Portions- und Nährwertoptimierung:** Verbessertes Schätzen der Portionen anhand der Gesamtmengen (statt pauschalem Servings-Default von 1). Gewürze werden mit Kleinstwerten (z. B. 5 kcal) versehen, während Wasser, Eis oder Salz zwingend auf 0 Kalorien/Makronährstoffe gesetzt werden.
 * **Gekochte vs. Ungekochte Zustände:** Erkennt, ob die Mengenangaben von quellenden Zutaten (z. B. Reis, Nudeln, Linsen) sich auf den rohen oder gekochten Zustand beziehen (z. B. 250g gekochter Reis vs. 250g ungekochter Reis).
 * **Sprach- & Unit-System-Steuerung:** Bevorzugte Rezeptsprache, Temperatureinheit (Celsius, Fahrenheit oder beides) und Maßsystem (metrisch oder imperial) werden primär per-Benutzer im Profil/Settings-Tab konfiguriert und in Supabase Auth `user_metadata` gespeichert. Der Worker ruft diese Präferenzen via Admin Auth API ab und weist Gemini an, das Rezept entsprechend zu übersetzen und umzurechnen. Values in `.env` dienen als serverweiter Fallback.

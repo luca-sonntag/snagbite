@@ -2,13 +2,11 @@
 
 ## 1. Social-Media Scraping-Layer
 
-* **Pluggable Provider-Chain (`backend/src/scrapers/providers/`):** Das Social-Media-Scraping ist als erweiterbare Provider-Kette implementiert. Jeder Provider kapselt einen Scraper über das `SocialScrapeProvider`-Interface (`name`, `scrape()`) und liefert ein normalisiertes `ScrapingResult` (`caption`, `videoUrl`, `imageUrl`, `authorHandle`).
-* **Orchestrator & Prioritäten (`backend/src/scrapers/providers/index.ts`):** `scrapeWithProviders()` probiert die registrierten Provider in fester Prioritätsreihenfolge:
-  1. **RapidAPI Provider (Primary):** `rapidApiProvider` (`backend/src/scrapers/providers/rapidApi.ts`). Erfasst direkte CDN-URLs, Cover-Thumbnail, Author-Handle und Caption ohne Proxy-Latenz in ca. 2–7 Sekunden. Behandelt den Standardfall für Instagram, TikTok & YouTube Shorts und unterstützt auch Bilderkarussells (`type: "multiple"`).
-  2. **Local yt-dlp Fallback:** `localYtdlpProvider` (`backend/src/scrapers/providers/localYtdlp.ts`). Kostenloser Fallback per CLI für YouTube Shorts, TikTok und Facebook.
-  3. **Apify Actor Fallback (Paid Residential Proxy):** `apifyActorProvider` (`backend/src/scrapers/providers/apifyActor.ts`). Unser eigener Apify-Actor (`social-video-downloader`, Quellcode in `../apify-actor`), der `yt-dlp` hinter Apify **Residential-Proxies** umschließt. Dient als übergeordneter Fallback bei IP-Sperren des Server-Hosts. Aktiviert sobald `APIFY_SOCIAL_ACTOR_ID` konfiguriert ist.
-* **Fehlerbehandlung:** Jeder Provider wird bei transienten Fehlern bis zu 3-mal mit exponentiellem Backoff wiederholt. Erst wenn **alle** aktivierten Provider scheitern, wirft der Orchestrator einen aggregierten Fehler `SCRAPE_FAILED`.
-* **Ergebnis:** Die Scraper-Pipeline liefert ein standardisiertes `ScrapingResult`-Objekt mit Caption, Cover-Bild-URL (`imageUrl`) und einem direkt abspielbaren Medien-Link (`audioUrl` / `videoUrl`) für Transkription und Frame-Extraktion.
+* **Pluggable Provider-Chain (`backend/src/scrapers/providers/`):** Das Social-Media-Scraping ist als erweiterbare Provider-Kette implementiert. Jeder Provider kapselt einen Scraper über das `SocialScrapeProvider`-Interface (`name`, `scrape()`) und liefert ein normalisiertes `ScrapingResult` (`caption`, `imageUrl`, `authorHandle`, `media`).
+* **Metadata & Image Carousel Mode (`backend/src/scrapers/providers/index.ts`):** Aus Urheberrechts- und ToS-Gründen werden keine Video-Streams mehr heruntergeladen. Das Scraping arbeitet rein metadatenbasiert (`rapidApiMetadataProvider`) und unterstützt statische Bilderserien (Karussells):
+  1. **RapidAPI Metadata Provider (Primary):** `rapidApiMetadataProvider` (`backend/src/scrapers/providers/rapidApiMetadata.ts`). Ruft Metadaten (Titel, Caption, Handle, Thumbnail) sowie Bild-URLs von Slideshows ab. Für reine Text- und Videoposts wird `media: { kind: 'none' }` zurückgegeben, sodass Gemini Rezepte direkt aus dem Text extrahiert. Enthält der Post keine echten Rezeptdetails (z. B. nur Teaser / DM-Bait), lehnt Gemini den Post sauber mit `NOT_A_RECIPE` ab.
+  2. **Bilderkarussell-Unterstützung:** Bei Slide-Posts (`medias[].type: "image"`) werden die statischen Folien als `media: { kind: 'images' }` heruntergeladen und von Gemini Vision per OCR in voller Auflösung gelesen.
+* **Fehlerbehandlung:** Scheitert der Provider, wirft der Orchestrator `SCRAPE_FAILED`. Enthält der Post keine Rezeptangaben, wirft Gemini `NOT_A_RECIPE`.
 
 ### Bilderkarussell-Posts (Image Carousels)
 Neben reinen Video-Reels unterstützt die Extraction Queue auch Instagram-/TikTok-Posts, die aus einer Bilderreihe bestehen (RapidAPI `type: "multiple"` mit `medias[].type: "image"` — eine häufige Form von Rezept-Posts, bei der Zutaten und Schritte als Text auf den Slides stehen).

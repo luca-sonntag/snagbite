@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-15: Video-Download-Pipeline & fehlerhafte Textlängen-Heuristik (`caption.length < 40`) entfernt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `rapidApiProvider` und Video-Download-Fallback in `backend/src/scrapers/providers/index.ts`.
+  - Naive Längenprüfung `caption.length < 40` in [`rapidApiMetadata.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/scrapers/providers/rapidApiMetadata.ts), die bei längeren Teaser-Posts (> 40 Zeichen, aber ohne Zutaten) zu Rezept-Halluzinationen in Gemini führte.
+  - "Infer Missing Ingredients"-Regel im Prompt, die Gemini dazu verleitete, aus reinen Titeln/Teasern ganze Rezepte zu erfinden.
+* **Ersetzt durch:**
+  - Ausschließlicher Metadaten- & Bildkarussell-Modus (`rapidApiMetadataProvider` mit `media: { kind: 'none' }` bzw. `images`).
+  - Strenge Anti-Halluzinations-Constraint im Gemini-Prompt (`isRecipe: false` bei Teasern, DM-Bait und fehlenden Mengenangaben/Schritten -> Fehlercode `NOT_A_RECIPE`).
+* **Betroffene Dateien:** `backend/src/gemini.ts`, `backend/src/scrapers/providers/index.ts`, `backend/src/scrapers/providers/rapidApiMetadata.ts`, `frontend/src/i18n.ts`.
+
+---
+
 ### 2026-08-14: Verstreute Organisations-Elemente (Favoriten-Shelf & Bottom-Labels) durch einheitlichen Top-Hub ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**

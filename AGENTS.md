@@ -15,7 +15,7 @@
 Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/architecture/`](file:///c:/Users/lucas/source/repos/cookbook/docs/architecture) ausgelagert. Greife gezielt auf die entsprechenden Dateien zu, wenn du an den jeweiligen Modulen arbeitest:
 
 1. 📸 [**Scraping-Layer & Import-Kanäle**](file:///c:/Users/lucas/source/repos/cookbook/docs/architecture/scraping-and-imports.md)
-   * RapidAPI Scraper Provider (Primary), local `yt-dlp` & Apify Actor Fallbacks
+   * RapidAPI Metadata Provider (Metadata & Image Carousel Only, ToS/Copyright-sicher)
    * Bilderkarussell-Posts (Multi-Image Slides) & Handle-Extraktion
    * Foto-Import (Rezeptkarten/Kochbuchseiten OCR, `photo://` synthetische URLs, Supabase `recipe-photos` Storage Hand-off)
 
@@ -29,6 +29,7 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
 
 3. 🤖 [**KI-Layer (Google Gemini Integration)**](file:///c:/Users/lucas/source/repos/cookbook/docs/architecture/ai-gemini.md)
    * `@google/generative-ai` SDK, Structured JSON Schemas, Kategorisierung & Mengennormalisierung
+   * Anti-Halluzination & Teaser-Post-Erkennung (`isRecipe: false` & `NOT_A_RECIPE` Error Code)
    * Mehrfachrezept-Erkennung (`containsMultipleRecipes` & `MULTIPLE_RECIPES` 422 Error Code)
    * Recipe Copilot (AI Function Calling, Two-Phase Remix Confirmation, LLM Quick Chips)
    * Dynamische Frame-Extraktion & Persistentes Gemini Logging (`gemini_logs` DB Table)
