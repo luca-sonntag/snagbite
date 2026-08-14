@@ -7,7 +7,8 @@
     "backend",
     "frontend",
     "healthcheck",
-    "website"
+    "website",
+    "shared"
   ],
   "scripts": {
     "dev": "concurrently -n \"backend,frontend,website\" -c \"blue,green,magenta\" \"npm run dev -w backend\" \"npm run dev -w frontend\" \"npm run dev -w website\"",
