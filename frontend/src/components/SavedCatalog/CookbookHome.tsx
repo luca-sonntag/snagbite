@@ -231,8 +231,8 @@ export default function CookbookHome({
                     />
                   </button>
 
-                  {/* Show all link button on the right */}
-                  {isOpen && shelf.total > 0 && (
+                  {/* Show all link button on the right (always visible for all shelves) */}
+                  {shelf.total > 0 && (
                     <button
                       type="button"
                       onClick={() => onOpenList(shelf.preset)}
