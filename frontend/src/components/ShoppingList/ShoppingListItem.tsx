@@ -86,7 +86,7 @@ export default function ShoppingListItem({
   // Compact, dimmed row used inside the "Erledigt" drawer.
   if (isChecked) {
     return (
-      <li className={`rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors group ${animationClass}`}>
+      <li className={`rounded-xl hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors group ${animationClass}`}>
         <div className="flex items-center justify-between gap-2 py-1.5 px-2 min-h-[40px]">
           <button
             type="button"
@@ -94,19 +94,27 @@ export default function ShoppingListItem({
             className="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0 text-left outline-none"
             aria-label={t('shopping.restoreItem')}
           >
-            <span className="w-5 h-5 rounded-md bg-emerald-500 border border-emerald-500 flex items-center justify-center flex-shrink-0">
-              <Check className="w-3.5 h-3.5 text-white stroke-[3px]" />
+            <span className="w-5 h-5 rounded-md bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 transition-colors">
+              <Check className="w-3.5 h-3.5 stroke-[2.5]" />
             </span>
-            <span className="text-sm text-gray-400 dark:text-gray-500 line-through min-w-0 break-words">
-              {amountStr && <span className="font-semibold mr-1.5">{amountStr}</span>}
-              <span>{item.name}</span>
-              {extraNote && <span className="ml-1 font-normal opacity-75">{extraNote}</span>}
+            {amountStr && (
+              <span className="flex-shrink-0 bg-black/5 dark:bg-white/5 text-gray-400 dark:text-gray-500 font-semibold tabular-nums rounded-md px-1.5 py-0.5 text-[11px] whitespace-nowrap line-through opacity-70">
+                {amountStr}
+              </span>
+            )}
+            <span className="text-sm text-gray-400 dark:text-gray-500 line-through min-w-0 leading-tight flex flex-wrap items-baseline gap-x-1.5">
+              <span className="break-words">{item.name}</span>
+              {extraNote && (
+                <span className="text-xs font-normal opacity-70">
+                  {extraNote}
+                </span>
+              )}
             </span>
           </button>
           <button
             type="button"
             onClick={onDelete}
-            className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-500 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer flex-shrink-0"
+            className="w-7 h-7 flex items-center justify-center text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer flex-shrink-0"
             aria-label={t('shopping.deleteItem')}
           >
             <Trash2 className="w-4 h-4" />
