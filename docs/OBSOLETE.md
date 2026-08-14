@@ -6,6 +6,16 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-14: Emojis in Einkaufslisten-Kategorien durch schlanke Farb-Pills ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Emojis in den Kategorie-Headern der Einkaufsliste ([`ShoppingListGroup.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ShoppingList/ShoppingListGroup.tsx) mit `getCategoryIcon`).
+* **Ersetzt durch:**
+  - Schmale, langgezogene abgerundete Farb-Rechtecke (`w-8 h-1 rounded-full`) über den Kategorie-Überschriften mit dedizierten harmonischen Farbwerten pro Supermarkt-Kategorie (`categoryColors` & `getCategoryTheme` in [`frontend/src/i18n.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/i18n.ts)).
+* **Betroffene Dateien:** `frontend/src/components/ShoppingList/ShoppingListGroup.tsx`, `frontend/src/i18n.ts`.
+
+---
+
 ### 2026-08-13: Legacy `removeExtractionBanner` Tab-Switch Effect in `App.tsx`
 
 * **Ersetzter Code / Anti-Pattern:**

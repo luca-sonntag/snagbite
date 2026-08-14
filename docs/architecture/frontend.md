@@ -72,8 +72,9 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
   * Blendet unter der aggregierten Hauptzeile die Zusammensetzung transparent ein.
   * **Smart Deduplication**: Entfernt doppelte Mengen (z. B. `2 Stück`) und Hauptzutatennamen in Klammern (z. B. `[2 Stück] Französisches Baguette (klein)` statt redundanter Doppelnennung).
   * Zeilenumbrüche (`break-words`) verhindern harte Wortkürzungen (`truncate`).
-* **Supermarkt-Supergruppen & Einklappbare Erledigt-Liste (`ShoppingListGroup.tsx` & `ShoppingCheckedDrawer.tsx`):**
+* **Supermarkt-Supergruppen, Kategorie-Farb-Pills & Einklappbare Erledigt-Liste (`ShoppingListGroup.tsx` & `ShoppingCheckedDrawer.tsx`):**
   * Sortierung nach echter Markt-Reihenfolge (Obst & Gemüse ➔ Brot ➔ Konserven etc.).
+  * **Kategorie-Farb-Pills (`getCategoryTheme` in `i18n.ts`)**: Statt unruhiger Emojis sitzt über jeder Kategorie-Überschrift ein schmaler, langgezogener abgerundeter Farb-Balken (`w-8 h-1 rounded-full`) mit einer harmonisch abgestimmten Farbe pro Abteilung (z. B. Smaragdgrün für Obst & Gemüse, Bernstein für Brot & Backwaren, Rosé für Fleisch & Geflügel, etc.).
   * **Erledigt-Accordion**: Abgehakte Artikel wohnen in einem standardmäßig eingeklappten Accordion (`Erledigt (X)`), um kognitive Unruhe im Laden zu minimieren.
   * **Expliziter Gruppen-Check**: Die "Ganzes Regal abhaken"-Aktion ist als separater `CheckCheck`-Button abgetrennt, um versehentliches Abhaken beim Antippen von Kategorienamen zu verhindern.
 * **Add-Formular (`CustomItemForm.tsx`):** Sanftes Einblenden mit automatischem Eingabefokus (`autoFocus`) und Schließen-Option (`X`).
