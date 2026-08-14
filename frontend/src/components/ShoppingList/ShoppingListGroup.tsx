@@ -12,6 +12,7 @@ interface ShoppingListGroupProps {
   onDelete: (item: AggregatedShoppingItem) => void;
   formatItemAmount: (amount: number, unit: string) => string;
   collapsingKeys: Set<string>;
+  checkingKeys?: Set<string>;
 }
 
 /**
@@ -26,7 +27,8 @@ export default function ShoppingListGroup({
   onGroupHeaderClick,
   onDelete,
   formatItemAmount,
-  collapsingKeys
+  collapsingKeys,
+  checkingKeys
 }: ShoppingListGroupProps) {
   const { t } = useI18n();
 
@@ -79,6 +81,7 @@ export default function ShoppingListGroup({
                     key={displayKey}
                     item={item}
                     isChecked={false}
+                    isCheckingOff={checkingKeys?.has(displayKey)}
                     isCollapsing={collapsingKeys.has(displayKey)}
                     onClick={() => onItemToggle(item)}
                     onDelete={() => onDelete(item)}

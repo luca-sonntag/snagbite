@@ -61,6 +61,7 @@ export default function ShoppingList({
   // Local UI states
   const [showAddForm, setShowAddForm] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [checkingKeys, setCheckingKeys] = useState<Set<string>>(new Set());
   const [collapsingKeys, setCollapsingKeys] = useState<Set<string>>(new Set());
 
   const getItemKey = (item: AggregatedShoppingItem) =>
@@ -71,22 +72,62 @@ export default function ShoppingList({
     return idx === -1 ? 999 : idx;
   };
 
-  const triggerCollapseAndAction = (keys: string[], action: () => void) => {
-    setCollapsingKeys((prev) => {
-      const next = new Set(prev);
-      keys.forEach((k) => next.add(k));
-      return next;
-    });
-    setTimeout(() => {
-      action();
-      requestAnimationFrame(() => {
+  const triggerCollapseAndAction = (
+    keysToCollapse: string[],
+    action: () => void,
+    keysToMarkChecking?: string[]
+  ) => {
+    if (keysToMarkChecking && keysToMarkChecking.length > 0) {
+      // 1. Immediately show checkmark & strikethrough feedback so user sees it
+      setCheckingKeys((prev) => {
+        const next = new Set(prev);
+        keysToMarkChecking.forEach((k) => next.add(k));
+        return next;
+      });
+
+      // 2. Brief satisfying pause (280ms) to perceive the checkmark animation
+      setTimeout(() => {
+        // 3. Smooth collapse animation (200ms)
         setCollapsingKeys((prev) => {
           const next = new Set(prev);
-          keys.forEach((k) => next.delete(k));
+          keysToCollapse.forEach((k) => next.add(k));
           return next;
         });
+
+        setTimeout(() => {
+          action();
+          requestAnimationFrame(() => {
+            setCheckingKeys((prev) => {
+              const next = new Set(prev);
+              keysToMarkChecking.forEach((k) => next.delete(k));
+              return next;
+            });
+            setCollapsingKeys((prev) => {
+              const next = new Set(prev);
+              keysToCollapse.forEach((k) => next.delete(k));
+              return next;
+            });
+          });
+        }, 200);
+      }, 280);
+    } else {
+      // Direct collapse for unchecking / deleting
+      setCollapsingKeys((prev) => {
+        const next = new Set(prev);
+        keysToCollapse.forEach((k) => next.add(k));
+        return next;
       });
-    }, 200);
+      setTimeout(() => {
+        action();
+        requestAnimationFrame(() => {
+          setCollapsingKeys((prev) => {
+            const next = new Set(prev);
+            keysToCollapse.forEach((k) => next.delete(k));
+            return next;
+          });
+        });
+      }, 200);
+    }
   };
 
   const handleItemToggle = (item: AggregatedShoppingItem) => {
@@ -96,7 +137,9 @@ export default function ShoppingList({
 
     // Checking an item off: if it's the last open item in its aisle, collapse the
     // whole aisle so it disappears cleanly as the item moves to the "Erledigt" drawer.
+    let keysToMarkChecking: string[] | undefined;
     if (!item.checked) {
+      keysToMarkChecking = [displayKey];
       const cat = item.category || 'OTHER';
       const openInCat = aggregatedList.unchecked.filter((i) => (i.category || 'OTHER') === cat);
       if (openInCat.length === 1) {
@@ -110,14 +153,14 @@ export default function ShoppingList({
       } else {
         toggleItemGroup(item.baseName || item.name, item.modifier, item.unit, !item.checked);
       }
-    });
+    }, keysToMarkChecking);
   };
 
   // Check off every item in an aisle at once (aisle groups only ever hold open items).
   const handleGroupHeaderClick = (items: AggregatedShoppingItem[]) => {
     if (items.length === 0) return;
-    const keysToCollapse = items.map((i) => `unchecked-${getItemKey(i)}`);
-    keysToCollapse.push(`group-${items[0].category || 'OTHER'}`);
+    const keys = items.map((i) => `unchecked-${getItemKey(i)}`);
+    const keysToCollapse = [...keys, `group-${items[0].category || 'OTHER'}`];
 
     triggerCollapseAndAction(keysToCollapse, () => {
       if (toggleItemIds) {
@@ -126,7 +169,7 @@ export default function ShoppingList({
       } else {
         items.forEach((i) => toggleItemGroup(i.baseName || i.name, i.modifier, i.unit, true));
       }
-    });
+    }, keys);
   };
 
   const formatItemAmount = (amount: number, unit: string) => {
@@ -288,6 +331,7 @@ export default function ShoppingList({
               onDelete={(item) => (deleteItemIds && item.itemIds?.length ? deleteItemIds(item.itemIds) : deleteItemGroup(item.baseName || item.name, item.modifier, item.unit))}
               formatItemAmount={formatItemAmount}
               collapsingKeys={collapsingKeys}
+              checkingKeys={checkingKeys}
             />
           ) : (
             <ShoppingAllDoneState onClear={handleClearChecked} />

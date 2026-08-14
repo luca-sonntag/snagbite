@@ -7,6 +7,7 @@ import { getCategoryTheme } from '../../i18n';
 interface ShoppingListItemProps {
   item: AggregatedShoppingItem;
   isChecked: boolean;
+  isCheckingOff?: boolean;
   isCollapsing?: boolean;
   onClick: () => void;
   onDelete: () => void;
@@ -16,6 +17,7 @@ interface ShoppingListItemProps {
 export default function ShoppingListItem({
   item,
   isChecked,
+  isCheckingOff = false,
   isCollapsing = false,
   onClick,
   onDelete,
@@ -143,16 +145,40 @@ export default function ShoppingListItem({
           className="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0 text-left outline-none"
           aria-label={item.name}
         >
-          <span className="w-5 h-5 rounded-md border-2 border-black/15 dark:border-white/20 group-hover:border-emerald-500/60 flex items-center justify-center flex-shrink-0 transition-colors" />
+          {isCheckingOff ? (
+            <span className="w-5 h-5 rounded-md bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 transition-all duration-200 scale-105">
+              <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+            </span>
+          ) : (
+            <span className="w-5 h-5 rounded-md border-2 border-black/15 dark:border-white/20 group-hover:border-emerald-500/60 flex items-center justify-center flex-shrink-0 transition-colors" />
+          )}
+
           {amountStr && (
-            <span className="flex-shrink-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold tabular-nums rounded-md px-1.5 py-0.5 text-[11px] whitespace-nowrap">
+            <span
+              className={`flex-shrink-0 tabular-nums rounded-md px-1.5 py-0.5 text-[11px] whitespace-nowrap transition-all duration-200 ${
+                isCheckingOff
+                  ? 'bg-black/5 dark:bg-white/5 text-gray-400 dark:text-gray-500 font-semibold line-through opacity-70'
+                  : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold'
+              }`}
+            >
               {amountStr}
             </span>
           )}
-          <span className="text-sm font-medium text-gray-800 dark:text-gray-100 min-w-0 leading-tight flex flex-wrap items-baseline gap-x-1.5">
+
+          <span
+            className={`text-sm min-w-0 leading-tight flex flex-wrap items-baseline gap-x-1.5 transition-all duration-200 ${
+              isCheckingOff
+                ? 'text-gray-400 dark:text-gray-500 line-through'
+                : 'font-medium text-gray-800 dark:text-gray-100'
+            }`}
+          >
             <span className="break-words">{item.name}</span>
             {extraNote && (
-              <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">
+              <span
+                className={`text-xs font-normal ${
+                  isCheckingOff ? 'opacity-70' : 'text-gray-500 dark:text-gray-400'
+                }`}
+              >
                 {extraNote}
               </span>
             )}
