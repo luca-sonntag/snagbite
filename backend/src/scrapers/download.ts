@@ -3,11 +3,7 @@ import { createWriteStream } from 'fs';
 import path from 'path';
 import https from 'https';
 import http from 'http';
-import yt from 'youtube-dl-exec';
-import { getYtdlpCookieOptions } from '../config.js';
 import type { MediaDownload } from './index.js';
-
-const youtubedl: any = (yt as any).default || yt;
 
 /** Downloads a URL to a local file, following HTTP/HTTPS redirects. Resolves the content-type. */
 function downloadFile(url: string, destPath: string, headers?: Record<string, string>): Promise<string> {
@@ -116,61 +112,31 @@ export async function downloadMedia(media: MediaDownload, runDir: string): Promi
     return { audioFilePath: '', videoFilePath: '', imageFilePaths, mediaBytes };
   }
 
-  const audioExt = media.kind === 'ytdlp' ? '.mp3' : media.audioUrl?.includes('.mp3') ? '.mp3' : '.mp4';
+  const audioExt = media.audioUrl?.includes('.mp3') ? '.mp3' : '.mp4';
   let audioFilePath = path.join(runDir, `audio${audioExt}`);
   let videoFilePath = path.join(runDir, 'video.mp4');
   const downloads: Promise<unknown>[] = [];
 
-  if (media.kind === 'ytdlp') {
-    const cookieOpts = getYtdlpCookieOptions();
+  // direct
+  if (media.audioUrl) {
     downloads.push(
-      youtubedl(media.sourceUrl, {
-        output: audioFilePath,
-        format: 'bestaudio/best',
-        extractAudio: true,
-        audioFormat: 'mp3',
-        noWarnings: true,
-        noPlaylist: true,
-        ...cookieOpts,
-      }).catch((err: any) => {
-        console.warn(`[download] yt-dlp audio download failed: ${err.message}`);
+      downloadFile(media.audioUrl, audioFilePath, media.headers).catch((err) => {
+        console.warn(`[download] audio download failed: ${err.message}`);
         audioFilePath = '';
       }),
     );
+  } else {
+    audioFilePath = '';
+  }
+  if (media.videoUrl) {
     downloads.push(
-      youtubedl(media.sourceUrl, {
-        output: videoFilePath,
-        format: 'bestvideo/best',
-        noWarnings: true,
-        noPlaylist: true,
-        ...cookieOpts,
-      }).catch((err: any) => {
-        console.warn(`[download] yt-dlp video download failed (will skip frame extraction): ${err.message}`);
+      downloadFile(media.videoUrl, videoFilePath, media.headers).catch((err) => {
+        console.warn(`[download] video download failed (will skip frame extraction): ${err.message}`);
         videoFilePath = '';
       }),
     );
   } else {
-    // direct
-    if (media.audioUrl) {
-      downloads.push(
-        downloadFile(media.audioUrl, audioFilePath, media.headers).catch((err) => {
-          console.warn(`[download] audio download failed: ${err.message}`);
-          audioFilePath = '';
-        }),
-      );
-    } else {
-      audioFilePath = '';
-    }
-    if (media.videoUrl) {
-      downloads.push(
-        downloadFile(media.videoUrl, videoFilePath, media.headers).catch((err) => {
-          console.warn(`[download] video download failed (will skip frame extraction): ${err.message}`);
-          videoFilePath = '';
-        }),
-      );
-    } else {
-      videoFilePath = '';
-    }
+    videoFilePath = '';
   }
 
   await Promise.allSettled(downloads);
