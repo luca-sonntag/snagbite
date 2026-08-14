@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, Zap, History, Sparkles, Plus, Tag, ChevronRight, Settings2 } from 'lucide-react';
+import { Plus, Tag, ChevronRight, Settings2 } from 'lucide-react';
 import type { Collection, Job } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import CollectionTile from './CollectionTile';
@@ -124,7 +124,6 @@ export default function CookbookHome({
       {/* Zuletzt gespeichert / Neueste Rezepte (2 Zeilen, horizontal scrollbar) */}
       <TwoRowRecipeShelf
         title={t('catalog.shelfNewest')}
-        icon={<Sparkles className="w-4 h-4 text-emerald-500" />}
         jobs={shelves.newest.items}
         totalCount={shelves.newest.total}
         formatTotalTime={formatTotalTime}
@@ -139,7 +138,6 @@ export default function CookbookHome({
       {shelves.recent.total > 5 && (
         <RecipeShelf
           title={t('catalog.shelfRecent')}
-          icon={<History className="w-4 h-4 text-emerald-500" />}
           jobs={shelves.recent.items}
           totalCount={shelves.recent.total}
           formatTotalTime={formatTotalTime}
@@ -154,7 +152,6 @@ export default function CookbookHome({
       {shelves.favorites.total > 5 && (
         <RecipeShelf
           title={t('catalog.favoritesFilter')}
-          icon={<Star className="w-4 h-4 text-amber-500 fill-amber-500" />}
           jobs={shelves.favorites.items}
           totalCount={shelves.favorites.total}
           formatTotalTime={formatTotalTime}
@@ -169,7 +166,6 @@ export default function CookbookHome({
       {shelves.quick.total > 5 && (
         <RecipeShelf
           title={t('catalog.shelfQuick')}
-          icon={<Zap className="w-4 h-4 text-emerald-500" />}
           jobs={shelves.quick.items}
           totalCount={shelves.quick.total}
           formatTotalTime={formatTotalTime}

@@ -6,7 +6,7 @@ import { useI18n } from '../../context/I18nContext';
 
 interface RecipeShelfProps {
   title: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   jobs: Job[];
   /** Total number of matches — drives whether "show all" is worth offering. */
   totalCount: number;
@@ -46,8 +46,8 @@ export default function RecipeShelf({
         onClick={onOpenAll}
         className="flex items-center justify-between gap-2 w-full text-left cursor-pointer group active:scale-[0.99] transition-transform"
       >
-        <h3 className="flex items-center gap-2 text-base font-bold text-gray-900 dark:text-white">
-          <span className="shrink-0">{icon}</span>
+        <h3 className="text-base font-bold text-gray-900 dark:text-white">
+          {icon && <span className="shrink-0 mr-2">{icon}</span>}
           {title}
         </h3>
         <span className="flex items-center gap-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
