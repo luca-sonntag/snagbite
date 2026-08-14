@@ -528,7 +528,7 @@ export default function SavedCatalog({
           )}
         </div>
       ) : viewMode === 'card' ? (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 py-1">
           {filteredJobs.map(job => (
             <RecipePosterCard
               key={job.id}

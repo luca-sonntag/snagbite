@@ -57,7 +57,7 @@ export default function TwoRowRecipeShelf({
         </span>
       </button>
 
-      <div className="grid grid-rows-2 grid-flow-col auto-cols-max gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 pb-1 scroll-smooth">
+      <div className="grid grid-rows-2 grid-flow-col auto-cols-max gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
         {jobs.map(job => (
           <RecipePosterCard
             key={job.id}

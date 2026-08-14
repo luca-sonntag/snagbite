@@ -95,7 +95,7 @@ export default function CookbookHome({
             </span>
           </button>
         ) : (
-          <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 pb-1 scroll-smooth">
+          <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
             {collections.map(col => (
               <CollectionTile
                 key={col.id}
