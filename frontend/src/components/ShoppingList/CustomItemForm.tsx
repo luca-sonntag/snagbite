@@ -122,9 +122,11 @@ export default function CustomItemForm({ isOpen, addCustomItem, onClose }: Custo
                   </div>
                 </div>
 
-                {/* Quick unit suggestion chips */}
-                <div className="flex flex-wrap gap-1.5 items-center mt-1">
-                  <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mr-1">{t('shopping.suggestions')}</span>
+                {/* Quick unit suggestion chips (horizontal scrollable) */}
+                <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1 mt-0.5 scroll-smooth">
+                  <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 shrink-0 mr-1">
+                    {t('shopping.suggestions')}
+                  </span>
                   {suggestions.map((sug) => {
                     const isActive = unit.trim().toLowerCase() === sug.trim().toLowerCase();
                     return (
@@ -132,7 +134,7 @@ export default function CustomItemForm({ isOpen, addCustomItem, onClose }: Custo
                         key={sug}
                         type="button"
                         onClick={() => setUnit(isActive ? '' : sug)}
-                        className={`text-xs px-2.5 py-1 rounded-lg border transition-all cursor-pointer select-none active:scale-95 ${
+                        className={`text-xs px-2.5 py-1 rounded-lg border transition-all cursor-pointer select-none active:scale-95 shrink-0 whitespace-nowrap ${
                           isActive
                             ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-bold shadow-xs'
                             : 'border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-300 hover:border-emerald-500/50 hover:bg-emerald-500/5'
