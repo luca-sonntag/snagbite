@@ -60,5 +60,6 @@ export interface RecommendationResult<T = SharedJob> {
   defaultTitle: string;
   badgeEmoji?: string;
   jobs: T[];
+  allJobs: T[];
   totalCount: number;
 }

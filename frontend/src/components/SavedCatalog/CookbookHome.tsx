@@ -135,7 +135,7 @@ export default function CookbookHome({
           jobs={shelves.recommended.items}
           totalCount={shelves.recommended.total}
           formatTotalTime={formatTotalTime}
-          onOpenAll={() => onOpenList({ kind: 'all' })}
+          onOpenAll={() => onOpenList({ kind: 'recommended' })}
           onOpenRecipe={onOpenRecipe}
           isSelectMode={isSelectMode}
           selectedIds={selectedIds}

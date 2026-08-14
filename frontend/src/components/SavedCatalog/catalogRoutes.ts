@@ -28,6 +28,7 @@ export type CatalogPreset =
   | { kind: 'favorites' }
   | { kind: 'quick' }
   | { kind: 'recent' }
+  | { kind: 'recommended' }
   | { kind: 'collection'; id: string }
   | { kind: 'flag'; name: string };
 
@@ -48,6 +49,8 @@ export function buildListRoute(preset: CatalogPreset): string {
       return `${LIST_SEGMENT}/quick`;
     case 'recent':
       return `${LIST_SEGMENT}/recent`;
+    case 'recommended':
+      return `${LIST_SEGMENT}/recommended`;
     case 'collection':
       return `${LIST_SEGMENT}/collection/${encodeURIComponent(preset.id)}`;
     case 'flag':
@@ -75,6 +78,8 @@ export function parseListRoute(subPath: string | null | undefined): CatalogPrese
       return { kind: 'quick' };
     case 'recent':
       return { kind: 'recent' };
+    case 'recommended':
+      return { kind: 'recommended' };
     case 'collection':
       return value ? { kind: 'collection', id: safeDecode(value) } : { kind: 'all' };
     case 'flag':
@@ -99,6 +104,8 @@ export function getBaseFiltersForPreset(preset: CatalogPreset): CatalogFilterSta
       return { ...EMPTY_FILTERS, favoritesOnly: true };
     case 'quick':
       return { ...EMPTY_FILTERS, maxTime: 30 };
+    case 'recommended':
+      return { ...EMPTY_FILTERS, recommendedOnly: true };
     case 'collection':
       return { ...EMPTY_FILTERS, collectionIds: [preset.id] };
     case 'flag':

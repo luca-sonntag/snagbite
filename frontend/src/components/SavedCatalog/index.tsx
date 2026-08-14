@@ -199,6 +199,8 @@ export default function SavedCatalog({
         return t('catalog.shelfQuick');
       case 'recent':
         return t('catalog.shelfRecent');
+      case 'recommended':
+        return shelves.recommended?.title ?? t('catalog.shelfRecommended');
       case 'collection': {
         const col = collections.find(c => c.id === preset.id);
         return col ? `${col.emoji ? col.emoji + ' ' : ''}${col.name}` : t('catalog.allRecipesTitle');

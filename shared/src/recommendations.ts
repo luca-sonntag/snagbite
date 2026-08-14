@@ -248,6 +248,7 @@ export function getRecommendedShelf<T extends SharedJob = SharedJob>(
     defaultTitle: bestTheme.defaultTitle,
     badgeEmoji: bestTheme.badgeEmoji,
     jobs: bestTheme.matchedJobs.slice(0, limit),
+    allJobs: bestTheme.matchedJobs,
     totalCount: bestTheme.matchedJobs.length,
   };
 }

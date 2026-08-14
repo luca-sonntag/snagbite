@@ -14,6 +14,7 @@ import { apiUrl } from '../api';
  */
 export interface CatalogFilterState {
   favoritesOnly: boolean;
+  recommendedOnly: boolean;
   /** Max total time (prep + cook) in minutes; 0 = no time constraint. */
   maxTime: number;
   collectionIds: string[];
@@ -22,6 +23,7 @@ export interface CatalogFilterState {
 
 export const EMPTY_FILTERS: CatalogFilterState = {
   favoritesOnly: false,
+  recommendedOnly: false,
   maxTime: 0,
   collectionIds: [],
   flags: []
@@ -48,6 +50,7 @@ export function getTotalTime(recipe: Pick<Recipe, 'prepTime' | 'cookTime'> | und
 export function countActiveFilters(filters: CatalogFilterState): number {
   return (
     (filters.favoritesOnly ? 1 : 0) +
+    (filters.recommendedOnly ? 1 : 0) +
     (filters.maxTime > 0 ? 1 : 0) +
     filters.collectionIds.length +
     filters.flags.length
@@ -263,12 +266,26 @@ export function useSavedCatalog({
     ) || false;
   }, []);
 
+  const recResult = useMemo(() => {
+    return getRecommendedShelf<Job>(completedJobs, {
+      now: new Date(2026, 1, 10),
+      recentMap,
+      limit: SHELF_SIZE,
+    });
+  }, [completedJobs, recentMap]);
+
+  const recommendedJobIds = useMemo(() => {
+    return new Set((recResult?.allJobs ?? []).map(j => j.id));
+  }, [recResult]);
+
   /** Applies the search query plus an arbitrary facet set (unsorted). */
   const applyFilters = useCallback((facets: CatalogFilterState, query: string): Job[] => {
     return completedJobs.filter(job => {
       if (!matchesSearch(job, query)) return false;
 
       if (facets.favoritesOnly && job.isFavorite !== true) return false;
+
+      if (facets.recommendedOnly && !recommendedJobIds.has(job.id)) return false;
 
       if (facets.maxTime > 0) {
         const total = getTotalTime(job.recipe);
@@ -287,7 +304,7 @@ export function useSavedCatalog({
 
       return true;
     });
-  }, [completedJobs, matchesSearch]);
+  }, [completedJobs, matchesSearch, recommendedJobIds]);
 
   // Filter jobs: search AND every active facet, then sort
   const filteredJobs = useMemo(
@@ -314,20 +331,16 @@ export function useSavedCatalog({
     });
     const opened = completedJobs.filter(j => recentMap[j.id]);
 
-    const recResult = getRecommendedShelf<Job>(completedJobs, {
-      now: new Date(),
-      recentMap,
-      limit: SHELF_SIZE,
-    });
-
     const recommended = recResult && recResult.jobs.length >= 2
       ? {
-          items: recResult.jobs,
-          total: recResult.totalCount,
-          themeId: recResult.themeId,
-          title: t(recResult.titleKey as any) || recResult.defaultTitle,
-          badgeEmoji: recResult.badgeEmoji,
-        }
+        items: recResult.jobs,
+        allJobs: recResult.allJobs,
+        allJobIds: recResult.allJobs.map(j => j.id),
+        total: recResult.totalCount,
+        themeId: recResult.themeId,
+        title: t(recResult.titleKey as any) || recResult.defaultTitle,
+        badgeEmoji: recResult.badgeEmoji,
+      }
       : null;
 
     return {
@@ -337,7 +350,7 @@ export function useSavedCatalog({
       quick: { items: sortJobs(quick, 'time').slice(0, SHELF_SIZE), total: quick.length },
       newest: { items: sortJobs(completedJobs, 'newest').slice(0, SHELF_VERTICAL_SIZE), total: completedJobs.length }
     };
-  }, [completedJobs, recentMap, sortJobs, t]);
+  }, [completedJobs, recentMap, recResult, sortJobs, t]);
 
   /** jobId list per collection, used for the collection tiles' cover mosaic. */
   const jobsByCollection = useMemo(() => {
