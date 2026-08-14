@@ -876,6 +876,7 @@ export const uiTranslations = {
       shelfRecommended: 'Für dich empfohlen',
       recommendations: {
         shelfTitle: 'Für dich empfohlen',
+        subtitle: 'Empfohlene Rezepte aus deiner Sammlung',
         spring: 'Frische Frühlings-Küche',
         summer: 'Sommer-Rezepte & Frische Küche',
         autumn: 'Herbst-Genuss & Saisonales',
@@ -1825,6 +1826,7 @@ export const uiTranslations = {
       shelfRecommended: 'Recommended for you',
       recommendations: {
         shelfTitle: 'Recommended for you',
+        subtitle: 'Recommended recipes from your collection',
         spring: 'Fresh Spring Kitchen',
         summer: 'Summer Recipes & Fresh Dishes',
         autumn: 'Autumn Flavors & Seasonal Produce',

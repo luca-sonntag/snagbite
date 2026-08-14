@@ -188,6 +188,7 @@ export default function CookbookHome({
       {shelves.recommended && shelves.recommended.items.length >= 2 && (
         <RecipeShelf
           title={shelves.recommended.title}
+          subtitle={t('catalog.recommendations.subtitle')}
           jobs={shelves.recommended.items}
           totalCount={shelves.recommended.total}
           formatTotalTime={formatTotalTime}

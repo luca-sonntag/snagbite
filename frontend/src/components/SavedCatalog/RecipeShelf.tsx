@@ -6,6 +6,7 @@ import { useI18n } from '../../context/I18nContext';
 
 interface RecipeShelfProps {
   title: string;
+  subtitle?: string;
   icon?: React.ReactNode;
   jobs: Job[];
   /** Total number of matches — drives whether "show all" is worth offering. */
@@ -25,6 +26,7 @@ interface RecipeShelfProps {
  */
 export default function RecipeShelf({
   title,
+  subtitle,
   icon,
   jobs,
   totalCount,
@@ -46,10 +48,17 @@ export default function RecipeShelf({
         onClick={onOpenAll}
         className="flex items-center justify-between gap-2 w-full text-left cursor-pointer group active:scale-[0.99] transition-transform"
       >
-        <h3 className="text-base font-bold text-gray-900 dark:text-white">
-          {icon && <span className="shrink-0 mr-2">{icon}</span>}
-          {title}
-        </h3>
+        <div className="flex flex-col min-w-0">
+          <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
+            {icon && <span className="shrink-0 mr-2">{icon}</span>}
+            <span className="truncate">{title}</span>
+          </h3>
+          {subtitle && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-normal mt-0.5">
+              {subtitle}
+            </p>
+          )}
+        </div>
         <span className="flex items-center gap-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
           {t('catalog.showAll', { count: totalCount })}
           <ChevronRight className="w-3.5 h-3.5" />
