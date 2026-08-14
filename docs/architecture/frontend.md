@@ -3,6 +3,7 @@
 ## 1. Stack & Modul-Struktur
 
 * **Technologie:** React 19, Vite, TypeScript, HeroUI v3 (React Aria-basiert), Tailwind CSS v4. Als native Android-App über **Capacitor** gebaut und im **Google Play Store** ausgeliefert.
+* **Shared Workspace (`@cookbook/shared`):** Plattformunabhängige Logik (Saisons, Feiertags-Kalender, Daypart-Heuristiken, Contextual Recommendation Engine) wird als npm-Workspace zwischen Frontend und weiteren Modulen geteilt.
 * **App-Shell (`App.tsx`):**
   * Modular gestaltet, delegiert komplexe Zustände an Custom Hooks.
   * Zeigt ein Auth-Gate (`AuthForm`) bei fehlender Session.
@@ -16,7 +17,7 @@
 * **`OverlayStackContext.tsx`:** Globaler Ref-Counted Overlay-Stack (`pushOverlay`, `popOverlay`, `isAnyOverlayOpen`) und Convenience-Hook `useAdOverlay(isOpen)`. Blendet das native AdMob-Banner synchron aus, sobald ein beliebiges Modal, Sheet oder Drawer geöffnet wird, und stellt es nach dem Schließen wieder her.
 
 ### Lokalisierung & Error-Code System
-* **Lokalisierung (`frontend/src/i18n.ts`):** Übersetzungen für Supermarktabteilungen, Emojis, Sortierung, UI-Texte und Auth.
+* **Lokalisierung (`frontend/src/i18n.ts`):** Übersetzungen für Supermarktabteilungen, Emojis, Sortierung, UI-Texte, Auth und dynamische Recommendation-Themen.
 * **Error-Code-System (`frontend/src/errorCodes.ts` ↔ `backend/src/errors.ts`):**
   * Das Backend liefert maschinenlesbare Codes (`AppErrorCode` + `AppError`-Klasse mit `code`, `params`, `httpStatus`).
   * Asynchrone Fehler werden als JSON-Envelope `{"code","params"}` in `jobs.error` persistiert.
@@ -29,7 +30,7 @@
 ## 2. 📚 3-Ebenen-Katalog (SavedCatalog)
 
 Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
-1. **Kochbuch-Home (`#/history`, `CookbookHome.tsx`):** Browsebare Startseite. Sucheinstieg, Sammlungs-Karussell (`CollectionTile`), oberstes 2-reihiges horizontales Karussell (`TwoRowRecipeShelf.tsx` für "Zuletzt gespeichert"), weitere thematische Regale (`RecipeShelf.tsx`, `RecipePosterCard` für "Zuletzt geöffnet", "Favoriten", "Schnell gekocht"), Label-Chips und "Alle N Rezepte ansehen".
+1. **Kochbuch-Home (`#/history`, `CookbookHome.tsx`):** Browsebare Startseite. Sucheinstieg, Sammlungs-Karussell (`CollectionTile`), dynamisches kontextbasiertes Empfehlungs-Regal (`RecipeShelf.tsx` ganz oben, gespeist aus `@cookbook/shared`), oberstes 2-reihiges horizontales Karussell (`TwoRowRecipeShelf.tsx` für "Zuletzt gespeichert"), weitere thematische Regale (`RecipeShelf.tsx`, `RecipePosterCard` für "Zuletzt geöffnet", "Favoriten", "Schnell gekocht"), Label-Chips und "Alle N Rezepte ansehen".
 2. **Listen-Ebene (`#/history/list...`, `SavedCatalog/index.tsx`):** Vollständige, filter-/sortierbare Liste mit `CatalogFilters.tsx` als Sticky-Header, `FilterSheet` und wahlweise 2-Spalten-Poster-Grid (`viewMode: 'card'`) oder dichten Zeilen (`viewMode: 'compact'`). Nur hier existieren Multi-Select und `BulkActionBar`.
 3. **Detailansicht (`#/history/<jobId>`):** `RecipeDetails`.
 
