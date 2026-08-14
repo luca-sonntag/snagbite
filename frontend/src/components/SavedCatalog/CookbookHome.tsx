@@ -1,10 +1,10 @@
-import React from 'react';
-import { Plus, Tag, ChevronRight, Settings2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, Tag, ChevronRight, ChevronDown, Settings2 } from 'lucide-react';
 import type { Collection, Job } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import CollectionTile from './CollectionTile';
 import RecipeShelf from './RecipeShelf';
-import TwoRowRecipeShelf from './TwoRowRecipeShelf';
+import RecipePosterCard from './RecipePosterCard';
 import type { CatalogPreset } from './catalogRoutes';
 
 interface Shelf {
@@ -65,6 +65,41 @@ export default function CookbookHome({
   bindLongPress,
 }: CookbookHomeProps) {
   const { t } = useI18n();
+
+  // Accordion state for discovery shelves (single-open accordion: newest, recent, quick)
+  const [openShelfKey, setOpenShelfKey] = useState<'newest' | 'recent' | 'quick' | null>('newest');
+
+  const discoveryShelves = [
+    {
+      key: 'newest' as const,
+      title: t('catalog.shelfNewest'),
+      items: shelves.newest.items,
+      total: shelves.newest.total,
+      preset: { kind: 'all' } as CatalogPreset,
+      isTwoRow: true,
+    },
+    {
+      key: 'recent' as const,
+      title: t('catalog.shelfRecent'),
+      items: shelves.recent.items,
+      total: shelves.recent.total,
+      preset: { kind: 'recent' } as CatalogPreset,
+      isTwoRow: false,
+    },
+    {
+      key: 'quick' as const,
+      title: t('catalog.shelfQuick'),
+      items: shelves.quick.items,
+      total: shelves.quick.total,
+      preset: { kind: 'quick' } as CatalogPreset,
+      isTwoRow: false,
+    },
+  ].filter((s) => s.items.length > 0);
+
+  const activeShelfKey =
+    openShelfKey && discoveryShelves.some((s) => s.key === openShelfKey)
+      ? openShelfKey
+      : discoveryShelves[0]?.key || null;
 
   return (
     <div className="flex flex-col gap-7 pb-4 pt-1">
@@ -164,46 +199,91 @@ export default function CookbookHome({
         />
       )}
 
-      {/* Zuletzt gespeichert / Neueste Rezepte (2 Zeilen, horizontal scrollbar) */}
-      <TwoRowRecipeShelf
-        title={t('catalog.shelfNewest')}
-        jobs={shelves.newest.items}
-        totalCount={shelves.newest.total}
-        formatTotalTime={formatTotalTime}
-        onOpenAll={() => onOpenList({ kind: 'all' })}
-        onOpenRecipe={onOpenRecipe}
-        isSelectMode={isSelectMode}
-        selectedIds={selectedIds}
-        bindLongPress={bindLongPress}
-      />
+      {/* Dynamic Discovery Shelves (Single Open Accordion: Neueste, Zuletzt geöffnet, Schnell gekocht) */}
+      {discoveryShelves.length > 0 && (
+        <div className="flex flex-col gap-4">
+          {discoveryShelves.map((shelf) => {
+            const isOpen = activeShelfKey === shelf.key;
 
-      {/* Weitere Shelves (horizontal) — nur angezeigt, wenn mehr als 5 Rezepte vorhanden sind */}
-      {shelves.recent.total > 5 && (
-        <RecipeShelf
-          title={t('catalog.shelfRecent')}
-          jobs={shelves.recent.items}
-          totalCount={shelves.recent.total}
-          formatTotalTime={formatTotalTime}
-          onOpenAll={() => onOpenList({ kind: 'recent' })}
-          onOpenRecipe={onOpenRecipe}
-          isSelectMode={isSelectMode}
-          selectedIds={selectedIds}
-          bindLongPress={bindLongPress}
-        />
-      )}
+            return (
+              <section key={shelf.key} className="flex flex-col transition-all">
+                {/* Header Row: Title & Chevron on Left, Show All Link on Right */}
+                <div className="flex items-center justify-between gap-2 w-full select-none">
+                  <button
+                    type="button"
+                    onClick={() => setOpenShelfKey(isOpen ? null : shelf.key)}
+                    className="flex items-center gap-2 text-left cursor-pointer flex-1 min-w-0 group py-1 active:scale-[0.99] transition-transform outline-none"
+                    aria-expanded={isOpen}
+                  >
+                    <h3
+                      className={`text-base font-bold transition-colors ${
+                        isOpen
+                          ? 'text-gray-900 dark:text-white'
+                          : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200'
+                      }`}
+                    >
+                      {shelf.title}
+                    </h3>
+                    <ChevronDown
+                      className={`w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform duration-200 ${
+                        isOpen ? 'rotate-180 text-emerald-600 dark:text-emerald-400' : ''
+                      }`}
+                    />
+                  </button>
 
-      {shelves.quick.total > 5 && (
-        <RecipeShelf
-          title={t('catalog.shelfQuick')}
-          jobs={shelves.quick.items}
-          totalCount={shelves.quick.total}
-          formatTotalTime={formatTotalTime}
-          onOpenAll={() => onOpenList({ kind: 'quick' })}
-          onOpenRecipe={onOpenRecipe}
-          isSelectMode={isSelectMode}
-          selectedIds={selectedIds}
-          bindLongPress={bindLongPress}
-        />
+                  {/* Show all link button on the right */}
+                  {isOpen && shelf.total > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenList(shelf.preset)}
+                      className="flex items-center gap-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0 cursor-pointer active:scale-95 transition-transform"
+                    >
+                      {t('catalog.showAll', { count: shelf.total })}
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Expanded Shelf Content */}
+                {isOpen && (
+                  <div className="pt-2.5 pb-1 animate-fade-in">
+                    {shelf.isTwoRow ? (
+                      <div className="grid grid-rows-2 grid-flow-col auto-cols-max gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
+                        {shelf.items.map((job) => (
+                          <RecipePosterCard
+                            key={job.id}
+                            job={job}
+                            variant="shelf"
+                            totalTime={formatTotalTime(job.recipe)}
+                            isSelected={selectedIds.has(job.id)}
+                            isSelectMode={isSelectMode}
+                            bindLongPress={bindLongPress ? bindLongPress(job.id, job) : undefined}
+                            onClick={(e) => onOpenRecipe(e, job)}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
+                        {shelf.items.map((job) => (
+                          <RecipePosterCard
+                            key={job.id}
+                            job={job}
+                            variant="shelf"
+                            totalTime={formatTotalTime(job.recipe)}
+                            isSelected={selectedIds.has(job.id)}
+                            isSelectMode={isSelectMode}
+                            bindLongPress={bindLongPress ? bindLongPress(job.id, job) : undefined}
+                            onClick={(e) => onOpenRecipe(e, job)}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </section>
+            );
+          })}
+        </div>
       )}
 
       {/* Escape hatch into the unfiltered list */}
