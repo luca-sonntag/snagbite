@@ -583,18 +583,22 @@ export default function SavedCatalog({
         filters={filters}
         sortBy={sortBy}
         onApply={(next, nextSort) => {
+          setFilters(next);
+          setSortBy(nextSort);
+
+          // If we were on Cookbook Home (Level 1), navigate to the list level so the user sees the filtered/sorted results
+          if (!isListLevel) {
+            navigateCatalogSkipSync(buildListRoute({ kind: 'all' }));
+            return;
+          }
+
           // If we're in a specific context (collection, favorites, quick, flag)
           // and the user changes filters, navigate to general list view so the
           // new filters apply to all recipes, not just the current context.
-          if (isListLevel && preset.kind !== 'all' && preset.kind !== 'search') {
-            setFilters(next);
-            setSortBy(nextSort);
-            skipNextRouteSyncRef.current = true;
-            navigateCatalog(buildListRoute({ kind: 'all' }));
+          if (preset.kind !== 'all' && preset.kind !== 'search') {
+            navigateCatalogSkipSync(buildListRoute({ kind: 'all' }));
             return;
           }
-          setFilters(next);
-          setSortBy(nextSort);
         }}
         collections={collections}
         allFlags={allFlags}
