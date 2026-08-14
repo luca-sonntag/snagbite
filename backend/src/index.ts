@@ -38,7 +38,7 @@ async function bootstrap() {
     app.set('trust proxy', 1);
 
     app.use(helmet({
-      crossOriginResourcePolicy: { policy: 'cross-origin' }, // für /api/image proxy
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
       contentSecurityPolicy: isProduction ? {
         directives: {
           ...helmet.contentSecurityPolicy.getDefaultDirectives(),
@@ -110,36 +110,7 @@ async function bootstrap() {
     app.use('/api/extract-recipe/photos', express.json({ limit: '12mb' }));
     app.use(express.json({ limit: '1mb' }));
 
-    // Image proxy to bypass Instagram CORP blocks (before apiRouter to skip API key check)
-    app.get('/api/image', async (req, res) => {
-      const imageUrl = req.query.url as string;
-      if (!imageUrl) {
-        res.status(400).send('Missing url parameter');
-        return;
-      }
-      try {
-        const response = await fetch(imageUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8'
-          }
-        });
-        if (!response.ok) throw new Error('Failed to fetch image');
-        const contentType = response.headers.get('content-type') || '';
-        if (!contentType.startsWith('image/')) {
-          res.status(415).send('URL did not return an image');
-          return;
-        }
-        res.set('Content-Type', contentType);
-        res.set('Cache-Control', 'public, max-age=31536000');
-        res.set('Access-Control-Allow-Origin', '*');
-        res.set('Cross-Origin-Resource-Policy', 'cross-origin');
-        const buffer = await response.arrayBuffer();
-        res.send(Buffer.from(buffer));
-      } catch {
-        res.status(500).send('Error proxying image');
-      }
-    });
+
 
     // Dynamic PNG icon generator for FCM push notifications (square gradient + emoji)
     app.get('/api/push-icon', async (req, res) => {

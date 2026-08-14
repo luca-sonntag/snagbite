@@ -5,7 +5,7 @@ import { useI18n } from '../context/I18nContext';
 import { apiUrl } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { compressRecipePhotos } from '../utils/imageCompression';
-import { pullAndCacheFrames } from '../utils/recipeFrames';
+
 import { useExtractionJobs, type ExtractionMode } from '../context/ExtractionJobsContext';
 import { sendNativeNotification, requestNativeNotificationPermission, isNative, registerAppStateListener } from '../native';
 
@@ -168,7 +168,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     }
   }, [getAccessToken, stopActivePolling, t]);
 
-  const runSimulatedProgress = useCallback(async (jobId: string, token: string, targetDurationMs: number = 10000) => {
+  const runSimulatedProgress = useCallback(async (jobId: string, targetDurationMs: number = 10000) => {
     setIsPending(true);
     setJobStatus('processing');
 
@@ -187,7 +187,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
 
     if (activePollingJobIdRef.current !== jobId) return;
 
-    await pullAndCacheFrames(jobId, token);
+
     setProgress(null);
     setIsPending(false);
     setUrl('');
@@ -249,12 +249,12 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           if (!isPremium && remainingMs > 2000) {
             stopActivePolling();
             activePollingJobIdRef.current = job.id;
-            await runSimulatedProgress(job.id, token, remainingMs);
+            await runSimulatedProgress(job.id, remainingMs);
             return;
           }
 
           stopActivePolling();
-          await pullAndCacheFrames(job.id, token);
+
           setProgress(null);
           setIsPending(false);
           setUrl('');
@@ -378,7 +378,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
         if (data.status === 'completed') {
           stopActivePolling();
           activePollingJobIdRef.current = data.jobId;
-          runSimulatedProgress(data.jobId, token, 10000);
+          runSimulatedProgress(data.jobId, 10000);
         } else {
           setJobStatus(data.status);
           localStorage.setItem(PENDING_JOB_STORAGE_KEY, data.jobId);

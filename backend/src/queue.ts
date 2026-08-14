@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { claimNextJob, updateJob, getJob, getClient, reclaimExpiredJobs, heartbeatJob, uploadRecipeFrame, sweepOldRecipeFrames, getMaxVideoDurationSeconds, isJobDeleted } from './db.js';
+import { claimNextJob, updateJob, getJob, getClient, reclaimExpiredJobs, heartbeatJob, getMaxVideoDurationSeconds, isJobDeleted } from './db.js';
 import { randomUUID } from 'node:crypto';
 import { getScraperForUrl } from './scrapers/index.js';
 import { downloadMedia } from './scrapers/download.js';
@@ -244,19 +244,6 @@ async function processJob(job: Job): Promise<void> {
 
     console.log(`[Job ${jobId}] Running recipe extraction and frame selection in parallel...`);
 
-    // Carousel fallback when Gemini selection is unavailable/fails: the first slide is
-    // typically the hero shot, so hand it off as the cover via the same transient upload.
-    const uploadFirstCarouselImage = async (): Promise<string[] | null> => {
-      try {
-        const buffer = await fs.readFile(framePaths[0]);
-        await uploadRecipeFrame(jobId, 0, buffer);
-        return [`local:${jobId}:0`];
-      } catch (err: any) {
-        console.warn(`[Job ${jobId}] Carousel cover upload failed: ${err.message}`);
-        return null;
-      }
-    };
-
     const frameSelectionPromise: Promise<string[] | null> = (gridImagePath && framePaths.length > 0)
       ? (async () => {
         try {
@@ -265,26 +252,20 @@ async function processJob(job: Job): Promise<void> {
           const bestIndices = await selectBestFoodFrame(framePaths, gridImagePath, runDir);
           console.log(`[Job ${jobId}] Best frames selected: indices ${bestIndices.join(', ')}`);
 
-          // Upload best frames to Supabase Storage as a transient hand-off: the
-          // extracting device pulls them once (GET /api/jobs/:id/frames) and they
-          // are deleted right after. The recipe stores only local references, so
-          // we never persist/rehost third-party video frames server-side.
-          const localRefs: string[] = [];
-          for (let i = 0; i < bestIndices.length; i++) {
-            const idx = bestIndices[i];
-            const buffer = await fs.readFile(framePaths[idx]);
-            await uploadRecipeFrame(jobId, i, buffer);
-            localRefs.push(`local:${jobId}:${i}`);
+          if (isCarousel && scrapeResult.media.kind === 'images') {
+             const originalUrls = scrapeResult.media.imageUrls;
+             return bestIndices.map(idx => originalUrls[idx]).filter(Boolean);
           }
-
-          return localRefs;
+          return null;
         } catch (err: any) {
-          console.warn(`[Job ${jobId}] Frame selection failed (falling back to cover): ${err.message}`);
-          return isCarousel ? uploadFirstCarouselImage() : null;
+          console.warn(`[Job ${jobId}] Frame selection failed: ${err.message}`);
+          return (isCarousel && scrapeResult.media.kind === 'images' && scrapeResult.media.imageUrls.length > 0)
+            ? [scrapeResult.media.imageUrls[0]]
+            : null;
         }
       })()
-      : (isCarousel && framePaths.length > 0)
-        ? uploadFirstCarouselImage()
+      : (isCarousel && scrapeResult.media.kind === 'images' && scrapeResult.media.imageUrls.length > 0)
+        ? Promise.resolve([scrapeResult.media.imageUrls[0]])
         : Promise.resolve(null);
 
     await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 75, stage: 'extracting_recipe' } as any });
@@ -435,10 +416,7 @@ export function startQueue(pollIntervalMs = 2000): void {
   const runCleanup = () => {
     cleanupOldRunDirs(30);
     void pruneOldGeminiLogs(90);
-    // Backstop for transient recipe frames the device never pulled (see db.ts).
-    sweepOldRecipeFrames(24)
-      .then(n => { if (n > 0) console.log(`[cleanup] Swept ${n} orphaned recipe frame(s).`); })
-      .catch(err => console.error('[cleanup] Frame sweep failed:', err));
+
     // Backstop for photo imports whose job never ran (see photoImport.ts).
     sweepOldPhotoImports(24)
       .then(n => { if (n > 0) console.log(`[cleanup] Swept ${n} orphaned import photo(s).`); })

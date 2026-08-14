@@ -1,27 +1,47 @@
 import { useState, useEffect } from 'react';
 import { getCachedImage, setCachedImage, getMemoryCachedImage } from '../utils/imageStore';
 import { compressImage, PREVIEW_PROFILE } from '../utils/imageCompression';
-import { apiUrl } from '../api';
+import { CapacitorHttp } from '@capacitor/core';
+import { isNative } from '../native';
 
 /**
  * Helper to fetch an image via the backend proxy, draw it onto a canvas,
  * resize it to max 800px (preserving aspect ratio), and compress it to a JPEG Base64 string.
  */
 async function compressAndConvertToBase64(url: string): Promise<string> {
-  // Use the existing backend image proxy to bypass CORS/CORP blocks
-  const proxyUrl = apiUrl(url.startsWith('/') ? url : `/api/image?url=${encodeURIComponent(url)}`);
-  
-  const response = await fetch(proxyUrl);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch image via proxy: ${response.statusText}`);
-  }
+  let blob: Blob;
 
-  const contentType = response.headers.get('content-type') ?? '';
-  if (!contentType.startsWith('image/')) {
-    throw new Error(`URL did not return an image (got ${contentType})`);
-  }
+  if (isNative()) {
+    // On native apps, use CapacitorHttp to bypass CORS when downloading third-party CDN images directly.
+    const response = await CapacitorHttp.get({
+      url,
+      responseType: 'blob',
+    });
+    
+    if (response.status < 200 || response.status >= 300) {
+      throw new Error(`Failed to fetch image via CapacitorHttp: ${response.status}`);
+    }
 
-  const blob = await response.blob();
+    // CapacitorHttp returns response.data as a Base64 string when responseType is 'blob'
+    const base64Data = response.data;
+    
+    // Convert base64 back to a Blob for compression
+    const fetchResponse = await fetch(`data:image/jpeg;base64,${base64Data}`);
+    blob = await fetchResponse.blob();
+  } else {
+    // On Web, use standard fetch (will fail if the image server strictly enforces CORS)
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image via web fetch: ${response.statusText}`);
+    }
+
+    const contentType = response.headers.get('content-type') ?? '';
+    if (!contentType.startsWith('image/')) {
+      throw new Error(`URL did not return an image (got ${contentType})`);
+    }
+
+    blob = await response.blob();
+  }
 
   return compressImage(blob, PREVIEW_PROFILE);
 }

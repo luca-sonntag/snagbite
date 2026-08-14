@@ -8,8 +8,6 @@ import {
   findActiveJobByUrl,
   getAllJobs,
   deleteJob,
-  deleteRecipeFrames,
-  getRecipeFrames,
   countActiveJobsForUser,
   getClient,
   getExtractionsForUserInTimeframe,
@@ -570,44 +568,7 @@ apiRouter.get('/jobs/:id/cook-history', async (req: Request, res: Response): Pro
   }
 });
 
-/**
- * One-time transient hand-off of a recipe's video frames to the extracting device.
- * GET /api/jobs/:id/frames
- *
- * Returns the frames as base64 data URLs, then deletes them from Storage once the
- * response is delivered. This keeps frames off our servers long-term (they live
- * only in the device's local IndexedDB cache afterwards), so we don't rehost
- * third-party video content. If the device never calls this, sweepOldRecipeFrames
- * removes the orphans as a backstop.
- */
-apiRouter.get('/jobs/:id/frames', async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
 
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-
-    // Ownership check: getJob is scoped to the requesting user.
-    const job = await getJob(id, req.userId!);
-    if (!job) {
-      throw new AppError('JOB_NOT_FOUND');
-    }
-
-    const frames = await getRecipeFrames(id);
-
-    // Delete the transient copies once the bytes have been delivered.
-    res.on('finish', () => {
-      if (frames.length === 0) return;
-      deleteRecipeFrames(id).catch(err =>
-        console.warn(`Failed to delete transient frames for job ${id}:`, err.message)
-      );
-    });
-
-    res.status(200).json({ success: true, frames });
-  } catch (error: any) {
-    if (!(error instanceof AppError)) console.error('Error delivering recipe frames:', error);
-    sendAppError(res, error);
-  }
-});
 
 /**
  * Endpoint to retrieve all recipe extraction jobs.
@@ -638,9 +599,7 @@ apiRouter.delete('/jobs/:id', async (req: Request, res: Response): Promise<void>
     const { id } = req.params;
     const deleted = await deleteJob(id, req.userId!);
     if (deleted) {
-      deleteRecipeFrames(id).catch(err =>
-        console.warn(`Failed to delete storage frames for job ${id}:`, err.message)
-      );
+      // transient frames are no longer uploaded
     }
     if (!deleted) {
       throw new AppError('JOB_NOT_FOUND');

@@ -4,7 +4,7 @@ import { type ErrorParams, parseSerializedError } from '../errorCodes';
 import { apiUrl } from '../api';
 import { useAuth } from './AuthContext';
 import { useI18n } from '../context/I18nContext';
-import { pullAndCacheFrames } from '../utils/recipeFrames';
+
 import { sendNativeNotification } from '../native';
 
 export type ExtractionMode = 'link' | 'photo';
@@ -112,7 +112,7 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
   const jobsRef = useRef<ExtractionJobEntry[]>(jobs);
   jobsRef.current = jobs;
 
-  // Guards so a job is only finalized (frames pulled, notification fired,
+  // Guards so a job is only finalized (notification fired,
   // completion event dispatched) exactly once — even across re-render/StrictMode.
   const finalizedRef = useRef<Set<string>>(new Set(jobs.filter(j => isTerminal(j.status)).map(j => j.id)));
   // Prevents overlapping polls of the same job within a slow tick.
@@ -154,11 +154,7 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
     setJobsPersist(prev => prev.filter(j => j.id !== id));
   }, [setJobsPersist]);
 
-  const finalizeCompletion = useCallback(async (job: Job, token: string) => {
-    // Pull the transient frames into the local cache before the recipe is shown —
-    // they are deleted server-side once fetched.
-    await pullAndCacheFrames(job.id, token);
-
+  const finalizeCompletion = useCallback(async (job: Job) => {
     const recipeTitle = job.recipe?.title || t('recipe.recipe') || 'Recipe';
     const notifTitle = t('notification.recipeReady.title');
     const notifBody = t('notification.recipeReady.body', { title: recipeTitle });
@@ -208,7 +204,7 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
       if (job.status === 'completed') {
         if (finalizedRef.current.has(id)) return;
         finalizedRef.current.add(id);
-        await finalizeCompletion(job, token);
+        await finalizeCompletion(job);
       } else if (job.status === 'failed') {
         if (finalizedRef.current.has(id)) return;
         finalizedRef.current.add(id);
