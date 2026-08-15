@@ -56,13 +56,13 @@
             "baseName": "almond milk",
             "amount": 160,
             "unit": "ml",
-            "calories": 598,
-            "protein": 41,
-            "carbs": 0,
-            "fat": 48.3,
+            "calories": 53,
+            "protein": 1.8,
+            "carbs": 2.1,
+            "fat": 4.2,
             "isStaple": false,
-            "canonicalId": "tilsiter_raw_milk_at_least_45_fidm",
-            "matchedName": "Tilsiter, Rohmilch, vollfett",
+            "canonicalId": "almond_drink_plain",
+            "matchedName": "Mandelgetränk, nature",
             "isVerified": true,
             "category": "DAIRY_EGGS"
           }
@@ -91,15 +91,12 @@
             "baseName": "chocolate chips",
             "amount": 10,
             "unit": "g",
-            "calories": 54,
-            "protein": 0.5,
-            "carbs": 4.9,
-            "fat": 3.5,
+            "calories": 50,
+            "protein": 1,
+            "carbs": 6,
+            "fat": 3,
             "isStaple": false,
-            "canonicalId": "pommes_chips",
-            "matchedName": "Pommes Chips",
-            "isVerified": true,
-            "category": "SWEETS_SNACKS"
+            "isVerified": false
           }
         ]
       },
@@ -111,10 +108,10 @@
             "baseName": "protein powder",
             "amount": 40,
             "unit": "g",
-            "calories": 192,
-            "protein": 9.9,
-            "carbs": 14,
-            "fat": 10.5,
+            "calories": 140,
+            "protein": 30,
+            "carbs": 3,
+            "fat": 1,
             "modifier": "Chocolate",
             "notes": "Evo Whey",
             "parentIngredient": {
@@ -122,10 +119,7 @@
               "baseName": "protein powder",
               "unit": "g"
             },
-            "canonicalId": "whole_milk_powder",
-            "matchedName": "Vollmilchpulver",
-            "isVerified": true,
-            "category": "DAIRY_EGGS"
+            "isVerified": false
           },
           {
             "name": "Süßungsmittel",
@@ -138,10 +132,7 @@
             "fat": 0,
             "isStaple": true,
             "notes": "z.B. FlavUp",
-            "canonicalId": "cola_beverage_with_sweetener",
-            "matchedName": "Colagetränk, mit Süssstoffen",
-            "isVerified": true,
-            "category": "BEVERAGES"
+            "isVerified": false
           },
           {
             "name": "Salz",
@@ -163,15 +154,12 @@
             "baseName": "baking powder",
             "amount": 0.5,
             "unit": "TL",
-            "calories": 12,
-            "protein": 0.6,
-            "carbs": 0.9,
-            "fat": 0.7,
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
             "isStaple": true,
-            "canonicalId": "whole_milk_powder",
-            "matchedName": "Vollmilchpulver",
-            "isVerified": true,
-            "category": "DAIRY_EGGS"
+            "isVerified": false
           }
         ]
       }
@@ -223,8 +211,8 @@
       "protein": 40
     },
     "totalIngredients": 9,
-    "verifiedCount": 9,
-    "matchRatePercent": 100,
+    "verifiedCount": 5,
+    "matchRatePercent": 56,
     "ingredients": [
       {
         "rawName": "Banane",
@@ -257,13 +245,13 @@
         "baseName": "almond milk",
         "amount": 160,
         "unit": "ml",
-        "canonicalId": "tilsiter_raw_milk_at_least_45_fidm",
-        "matchedName": "Tilsiter, Rohmilch, vollfett",
+        "canonicalId": "almond_drink_plain",
+        "matchedName": "Mandelgetränk, nature",
         "isVerified": true,
-        "calories": 598,
-        "protein": 41,
-        "carbs": 0,
-        "fat": 48.3
+        "calories": 53,
+        "protein": 1.8,
+        "carbs": 2.1,
+        "fat": 4.2
       },
       {
         "rawName": "Kakaopulver",
@@ -283,35 +271,29 @@
         "baseName": "chocolate chips",
         "amount": 10,
         "unit": "g",
-        "canonicalId": "pommes_chips",
-        "matchedName": "Pommes Chips",
-        "isVerified": true,
-        "calories": 54,
-        "protein": 0.5,
-        "carbs": 4.9,
-        "fat": 3.5
+        "isVerified": false,
+        "calories": 50,
+        "protein": 1,
+        "carbs": 6,
+        "fat": 3
       },
       {
         "rawName": "Proteinpulver",
         "baseName": "protein powder",
         "amount": 40,
         "unit": "g",
-        "canonicalId": "whole_milk_powder",
-        "matchedName": "Vollmilchpulver",
-        "isVerified": true,
-        "calories": 192,
-        "protein": 9.9,
-        "carbs": 14,
-        "fat": 10.5
+        "isVerified": false,
+        "calories": 140,
+        "protein": 30,
+        "carbs": 3,
+        "fat": 1
       },
       {
         "rawName": "Süßungsmittel",
         "baseName": "sweetener",
         "amount": 1,
         "unit": "nach Bedarf",
-        "canonicalId": "cola_beverage_with_sweetener",
-        "matchedName": "Colagetränk, mit Süssstoffen",
-        "isVerified": true,
+        "isVerified": false,
         "calories": 0,
         "protein": 0,
         "carbs": 0,
@@ -335,13 +317,11 @@
         "baseName": "baking powder",
         "amount": 0.5,
         "unit": "TL",
-        "canonicalId": "whole_milk_powder",
-        "matchedName": "Vollmilchpulver",
-        "isVerified": true,
-        "calories": 12,
-        "protein": 0.6,
-        "carbs": 0.9,
-        "fat": 0.7
+        "isVerified": false,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
       }
     ]
   }

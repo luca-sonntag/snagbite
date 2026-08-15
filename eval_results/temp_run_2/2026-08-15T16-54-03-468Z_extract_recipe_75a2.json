@@ -1,0 +1,138 @@
+{
+  "timestamp": "2026-08-15T16:54:03.468Z",
+  "requestType": "extract_recipe",
+  "model": "gemini-3.1-flash-lite",
+  "durationMs": 2293,
+  "success": true,
+  "input": {
+    "captionLength": 452,
+    "captionPreview": "Einfaches High-Protein-Dessert 🤎💪\n\nWenn ihr möchtet, könnt ihr statt normaler Butterkekse auch die Variante mit 30 % weniger Zucker verwenden. 🤭\n\nZutaten:\n• 1 Packung Vanille-Skyr\n• 1 Schoko-Protein-Pudding\n• Butterkekse\n• Etwas Backkakao zum Bestäuben\n\nAlles schichten, mit Kakao toppen und fu",
+    "carouselImageCount": 0,
+    "imageSourceKind": "carousel",
+    "prompt": "You are an expert recipe extractor. Analyze the provided content (which may include audio, website text, or video caption).\n    \nReconstruct the complete recipe, resolving any contradictions culinary-wise. Ensure to follow the field-level guidelines specified in the descriptions of the output schema.\n\nKey Constraints:\n1. Recipe Existence & Anti-Hallucination: The source content MUST contain the actual recipe details (specific ingredients with quantities and/or step-by-step cooking instructions). You MUST set \"isRecipe\" to false if:\n   a) The content is unrelated (comedy, vlogs, fitness motivation, general chat, etc.).\n   b) The content is merely a teaser, promo, or engagement bait without the full recipe (e.g. \"Comment BUCKEYE and I'll send you the recipe\", \"Recipe in my ebook\", \"Link in bio\", \"DM for full recipe\", or appetizing marketing descriptions/macros without the actual list of ingredients and preparation steps).\n   c) The source mentions only the dish name/concept but completely omits the concrete ingredients and instructions.\n   NEVER under any circumstances invent, fabricate, or hallucinate ingredients, amounts, or cooking steps when they are not present in the provided source text, audio, or images.\n2. Multi-Recipe Ambiguity: Before attempting to extract a recipe, evaluate if the content represents a multi-recipe collection, roundup, or compilation. You MUST set \"containsMultipleRecipes\" to true if ANY of the following apply:\n   a) The title, caption, or cover image text indicates multiple dishes/recipes (e.g. \"High protein dinners...\", \"5 meals to get lean\", \"3 lunch ideas\", \"What I eat in a day\", \"4 low-calorie recipes\").\n   b) The carousel images or video scenes present multiple distinct standalone main dishes across different slides/segments (e.g. Slide 2 is \"Smash Burger & Sweet Potato Fries\", Slide 4 is \"Bang Bang Chicken\", Slide 6 is \"Beef Burrito Bowl\").\n   c) Multiple distinct nutrition/macro cards exist for different dishes throughout the slides/segments.\n   If \"containsMultipleRecipes\" is true, do NOT attempt to merge the dishes into one recipe.\n   Set \"containsMultipleRecipes\" to false ONLY if the entire post is dedicated to ONE single recipe (including its sub-components like sauce, marinade, side dish, or garnishes cooked together as one meal).\n3. Category Ordering: Always place \"PRODUCE\" first in the ingredients array, followed by dry goods/pantry items, then refrigerated products/meats, and finally other/extras at the very end.\n4. Translation: Write and translate all text values (including title, description, ingredient names/notes, instruction steps, equipment list, tips, alternative ingredient details, and tags) into: German. Keep the category keys as the uppercase English enum values. Follow the schema strictly.\n5. Preferred Units:\n   - Temperature Units: Format all temperature values mentioned in the instructions, description, tips, or title using the preferred unit: Celsius (e.g., convert and format as \"200°C\" or \"400°F\" depending on preference).\n   - Weight & Volume Units: Format all ingredient weights, volumes, and measurements using the preferred unit system: metric (e.g., metric units like grams, milliliters, kilograms, or imperial units like ounces, cups, pounds, fluid ounces) and perform conversions where appropriate.\n6. Missing Data & Nutrition: If any information for a specific field is missing, leave it empty (empty string \"\", null, or empty array []). You MUST set \"hasExplicitNutritionalValues\" to true ONLY IF the recipe nutritional values are explicitly stated in the source text or audio. If they are not, set it to false and set \"nutritionalValues\" to null (do NOT estimate or calculate overall nutritional values at the recipe level). Note that \"nutritionalValues\" MUST represent values per single serving/portion. If the source lists total values for the entire recipe, divide them by the number of servings/portions first.\n7. Clean Ingredient Names: Ensure the \"name\" field contains only the clean ingredient name (e.g., \"Frischkäse\", \"evaporated milk\", \"cream cheese\", \"butter\"). Move all adjectives, processing states, or descriptions (such as \"light\", \"mager\", \"low fat\", \"leichte\", \"gerieben\", \"grated\") into the \"modifier\" field. Do NOT leave these descriptors inside the \"name\" field.\n8. Ingredient Decomposition: If a composite element or homemade component (like a custom sauce or pesto) is prepared during the recipe, you MUST list its raw ingredients individually instead of the finished compound product.\n9. Ingredient-level Nutritional Values: For each ingredient, you MUST estimate its nutritional values (calories, protein, carbs, fat) based on the ENTIRE specified quantity (amount * unit). Do NOT output per-100g, per-100ml, or single-unit values unless the quantity is exactly 100g, 100ml, or 1 unit. E.g., if chicken breast has 165 kcal per 100g and the recipe specifies 500g, the calories field MUST be 825, NOT 165. If a potato has 150 kcal and the amount is 6, the calories field MUST be 900, NOT 150. If olive oil has 14g fat/EL and the amount is 3 EL, the fat field MUST be 42, NOT 14.\n10. Infer Minor Missing Components (Only for Existing Recipes): If the source already contains a full recipe with ingredients and instructions, but the title or visual images explicitly show an obvious missing minor garnish or component (e.g., 'Air-Fried Broccolini' in the title and green broccolini on the plate) that was accidentally omitted from the written list, you may infer that specific item. NEVER use this rule to fabricate an entire recipe from a title or teaser when no base recipe is provided.\n11. Serving Size Estimation: Identify the number of servings or portions the recipe makes. Look for clues like 'serves 4' or estimate based on the ingredient amounts (e.g., 500g chicken and 6 potatoes typically serves 3-4 people). Avoid defaulting to 1 serving if the ingredient amounts are clearly meant for a family-sized meal.\n12. Zero-Calorie & Low-Calorie Ingredients: Ingredients like water, ice, salt, or baking soda MUST have 0 calories, protein, carbs, and fat. For spices, seasonings, or herbs in small quantities (like teaspoons), focus your calculation energy on the high-calorie/high-macro ingredients (meats, oils, dairy, grains, starches) and estimate very small values (e.g., 5 kcal) or 0.\n13. Cooked vs. Raw/Dry States of Expandable Ingredients: For ingredients that expand significantly during cooking (e.g., rice, pasta, lentils, beans, chickpeas, couscous, quinoa, bulgur), you MUST determine whether the specified quantity refers to the dry/uncooked state or the cooked/prepared state. Dry/uncooked state (e.g., \"100g uncooked rice\" or \"100g rice\" which is boiled in the instructions) has high caloric density (e.g., dry rice: ~350 kcal/100g, dry pasta: ~350 kcal/100g, dry lentils: ~350 kcal/100g). Cooked/prepared state (e.g., \"100g cooked rice\", \"100g boiled pasta\", canned/pre-cooked beans, or when already-cooked ingredients are added directly to a stir-fry/bowl) has much lower caloric density (e.g., cooked rice: ~130 kcal/100g, cooked pasta: ~130-150 kcal/100g, cooked lentils: ~110-120 kcal/100g). Ambiguity resolution: Analyze the cooking instructions. If the instructions include boiling/cooking the dry ingredient, calculate using dry/raw values. If the ingredient is added pre-cooked, or if treating it as raw results in absurdly high calories (e.g., 250g dry rice is ~850 kcal and cooks to 750g cooked rice, which is way too much for a single serving of fried rice), assume the quantity represents the cooked state and calculate using cooked values.\n14. Common Pantry Staples: For each ingredient, set the \"isStaple\" boolean to true ONLY if it is a very common basic staple that people almost always already have at home and rarely need to buy specifically for a recipe (e.g. salt, pepper, water, cooking oil, sugar, common dried spices). Set it to false for anything a user would typically need to shop for (e.g. meat, cheese, vegetables, fresh herbs, specialty items). When in doubt, set it to false.\n15. Inline Ingredient Tagging: In every step description, whenever an ingredient from the ingredients list is used or referenced, you MUST format its mention using the inline syntax '[exact word used in text](ing:baseName)'. 'baseName' MUST match the English 'baseName' (or 'name' if 'baseName' is not set) of the corresponding ingredient in the ingredients list. Examples:\n   - Ingredients: Eigelb (baseName: egg yolk), Ei (baseName: egg), Parmesan (baseName: parmesan)\n   - Step description: \"Die [Eigelbe](ing:egg yolk) und das [Ei](ing:egg) zusammen mit dem [Parmesan](ing:parmesan) verrühren.\"\n   - Do NOT tag equipment or non-ingredient words. Make sure the brackets wrap the natural word as it appears in the sentence.\n16. Concise, Direct Instruction Steps: Write instruction step descriptions as short, clear, action-oriented sentences. Eliminate conversational filler words, narrative transitions, and redundancies. Split long multi-action steps into distinct, bite-sized steps so each step is easy to follow while cooking.\n17. Inline Timer Tagging: In every step description, whenever a cooking duration or time span is mentioned (e.g. \"15 Minuten\", \"1,5 Stunden\", \"30 Sekunden\"), you MUST format it using the inline syntax '[exact time text](timer:duration_in_seconds)'. Calculate the total duration in seconds and put it in the timer parameter. Examples:\n   - \"Ca. [15 Minuten](timer:900) garen.\"\n   - \"Für [1,5 Stunden](timer:5400) köcheln lassen.\"\n   - \"Etwa [45 Sekunden](timer:45) anbraten.\"\n\nDescription/Caption:\n\"\"\"\nEinfaches High-Protein-Dessert 🤎💪\n\nWenn ihr möchtet, könnt ihr statt normaler Butterkekse auch die Variante mit 30 % weniger Zucker verwenden. 🤭\n\nZutaten:\n• 1 Packung Vanille-Skyr\n• 1 Schoko-Protein-Pudding\n• Butterkekse\n• Etwas Backkakao zum Bestäuben\n\nAlles schichten, mit Kakao toppen und für 3–4 Stunden in den Kühlschrank stellen – fertig! 😍\n\nGesamtes Dessert:\n🔥 ca. 750 kcal\n💪 ca. 72 g Protein\n\n#proteindessert #skyr #desserts #dessert\n\"\"\""
+  },
+  "rawOutput": "{\n  \"isRecipe\": true,\n  \"containsMultipleRecipes\": false,\n  \"title\": \"Einfaches High-Protein-Dessert\",\n  \"description\": \"Ein schnelles und proteinreiches Schichtdessert mit Skyr, Protein-Pudding und Butterkeksen.\",\n  \"prepTime\": 10,\n  \"cookTime\": 0,\n  \"servings\": 1,\n  \"ingredients\": [\n    {\n      \"name\": \"DAIRY_EGGS\",\n      \"items\": [\n        {\n          \"name\": \"Vanille-Skyr\",\n          \"baseName\": \"skyr\",\n          \"amount\": 250,\n          \"unit\": \"g\",\n          \"calories\": 160,\n          \"protein\": 25,\n          \"carbs\": 15,\n          \"fat\": 0,\n          \"isStaple\": false\n        },\n        {\n          \"name\": \"Schoko-Protein-Pudding\",\n          \"baseName\": \"protein pudding\",\n          \"amount\": 200,\n          \"unit\": \"g\",\n          \"calories\": 160,\n          \"protein\": 20,\n          \"carbs\": 15,\n          \"fat\": 3,\n          \"isStaple\": false\n        }\n      ]\n    },\n    {\n      \"name\": \"GRAINS_PASTA\",\n      \"items\": [\n        {\n          \"name\": \"Butterkekse\",\n          \"baseName\": \"butter cookies\",\n          \"amount\": 60,\n          \"unit\": \"g\",\n          \"calories\": 270,\n          \"protein\": 4,\n          \"carbs\": 40,\n          \"fat\": 10,\n          \"isStaple\": false\n        }\n      ]\n    },\n    {\n      \"name\": \"SWEETS_SNACKS\",\n      \"items\": [\n        {\n          \"name\": \"Backkakao\",\n          \"baseName\": \"cocoa powder\",\n          \"amount\": 5,\n          \"unit\": \"g\",\n          \"calories\": 15,\n          \"protein\": 1,\n          \"carbs\": 1,\n          \"fat\": 1,\n          \"isStaple\": true\n        }\n      ]\n    }\n  ],\n  \"instructions\": [\n    {\n      \"step\": 1,\n      \"description\": \"Den [Vanille-Skyr](ing:skyr) und den [Schoko-Protein-Pudding](ing:protein pudding) abwechselnd mit den [Butterkeksen](ing:butter cookies) in ein Glas oder eine Schale schichten.\"\n    },\n    {\n      \"step\": 2,\n      \"description\": \"Das Dessert mit etwas [Backkakao](ing:cocoa powder) bestäuben.\"\n    },\n    {\n      \"step\": 3,\n      \"description\": \"Für ca. [3 bis 4 Stunden](timer:12600) in den Kühlschrank stellen, damit die Kekse weich werden und das Dessert durchzieht.\"\n    }\n  ],\n  \"equipment\": [\n    \"Glas oder Schale\",\n    \"Löffel\"\n  ],\n  \"hasExplicitNutritionalValues\": true,\n  \"transcript\": \"NO_SPOKEN_WORDS\",\n  \"tags\": [\n    \"High-Protein\",\n    \"Dessert\"\n  ],\n  \"emoji\": \"🍮\",\n  \"nutritionalValues\": {\n    \"calories\": 750,\n    \"carbs\": 71,\n    \"fat\": 14,\n    \"protein\": 72\n  }\n}",
+  "parsedOutput": {
+    "isRecipe": true,
+    "title": "Einfaches High-Protein-Dessert",
+    "description": "Ein schnelles und proteinreiches Schichtdessert mit Skyr, Protein-Pudding und Butterkeksen.",
+    "prepTime": 10,
+    "cookTime": 0,
+    "servings": 1,
+    "ingredients": [
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Vanille-Skyr",
+            "baseName": "skyr",
+            "amount": 250,
+            "unit": "g",
+            "calories": 160,
+            "protein": 25,
+            "carbs": 15,
+            "fat": 0,
+            "isStaple": false,
+            "isVerified": false
+          },
+          {
+            "name": "Schoko-Protein-Pudding",
+            "baseName": "protein pudding",
+            "amount": 200,
+            "unit": "g",
+            "calories": 250,
+            "protein": 6.8,
+            "carbs": 46,
+            "fat": 4.2,
+            "isStaple": false,
+            "canonicalId": "pudding_caramel",
+            "matchedName": "Pudding, Caramel",
+            "isVerified": true,
+            "category": "SWEETS_SNACKS"
+          }
+        ]
+      },
+      {
+        "name": "GRAINS_PASTA",
+        "items": [
+          {
+            "name": "Butterkekse",
+            "baseName": "butter cookies",
+            "amount": 60,
+            "unit": "g",
+            "calories": 270,
+            "protein": 4,
+            "carbs": 40,
+            "fat": 10,
+            "isStaple": false,
+            "isVerified": false
+          }
+        ]
+      },
+      {
+        "name": "SWEETS_SNACKS",
+        "items": [
+          {
+            "name": "Backkakao",
+            "baseName": "cocoa powder",
+            "amount": 5,
+            "unit": "g",
+            "calories": 19,
+            "protein": 1.1,
+            "carbs": 0.6,
+            "fat": 1,
+            "isStaple": true,
+            "canonicalId": "cocoa_powder_without_sugar",
+            "matchedName": "Kakaopulver, ohne Zucker",
+            "isVerified": true,
+            "category": "SWEETS_SNACKS"
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "Den [Vanille-Skyr](ing:skyr) und den [Schoko-Protein-Pudding](ing:protein pudding) abwechselnd mit den [Butterkeksen](ing:butter cookies) in ein Glas oder eine Schale schichten."
+      },
+      {
+        "step": 2,
+        "description": "Das Dessert mit etwas [Backkakao](ing:cocoa powder) bestäuben."
+      },
+      {
+        "step": 3,
+        "description": "Für ca. [3 bis 4 Stunden](timer:12600) in den Kühlschrank stellen, damit die Kekse weich werden und das Dessert durchzieht."
+      }
+    ],
+    "equipment": [
+      "Glas oder Schale",
+      "Löffel"
+    ],
+    "transcript": null,
+    "tags": [
+      "High-Protein",
+      "Dessert"
+    ],
+    "emoji": "🍮",
+    "nutritionalValues": {
+      "calories": 750,
+      "carbs": 71,
+      "fat": 14,
+      "protein": 72
+    }
+  },
+  "tokenUsage": {
+    "promptTokens": 2512,
+    "candidateTokens": 856,
+    "totalTokens": 3368
+  },
+  "costEstimate": {
+    "inputCostUsd": 0.000628,
+    "outputCostUsd": 0.001284,
+    "totalCostUsd": 0.001912,
+    "totalCostFormatted": "$0.0019",
+    "pricingTier": "short",
+    "pricingKnown": true
+  },
+  "logDir": "C:\\Users\\lucas\\source\\repos\\cookbook\\eval_results\\temp_run_2"
+}

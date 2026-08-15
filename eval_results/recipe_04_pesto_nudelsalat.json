@@ -74,14 +74,14 @@
             "baseName": "pasta",
             "amount": 250,
             "unit": "g",
-            "calories": 530,
-            "protein": 21.8,
-            "carbs": 75,
-            "fat": 14.3,
+            "calories": 913,
+            "protein": 33.3,
+            "carbs": 174.8,
+            "fat": 7,
             "isStaple": false,
             "modifier": "klein",
-            "canonicalId": "pasta_fresh_filled_with_spinach_and_ricotta_raw",
-            "matchedName": "Teigwaren, frisch, gefüllt mit Spinat und Ricotta, roh",
+            "canonicalId": "pasta_with_egg_dry",
+            "matchedName": "Teigwaren mit Ei, trocken",
             "isVerified": true,
             "category": "GRAINS_PASTA"
           }
@@ -110,15 +110,12 @@
             "baseName": "water",
             "amount": 1,
             "unit": "EL",
-            "calories": 13,
+            "calories": 0,
             "protein": 0,
-            "carbs": 3.3,
+            "carbs": 0,
             "fat": 0,
             "isStaple": true,
-            "canonicalId": "water_ice",
-            "matchedName": "Wassereis",
-            "isVerified": true,
-            "category": "SWEETS_SNACKS"
+            "isVerified": false
           },
           {
             "name": "Zitronensaft",
@@ -150,11 +147,11 @@
       },
       {
         "step": 2,
-        "description": "Anschließend die [Pasta](ing:pasta) mit den [Cocktailtomaten](ing:cherry tomato), den [Mozzarellakugeln](ing:mozzarella) und dem [Parmesan](ing:parmesan) in einer großen Schüssel vermengen."
+        "description": "Die abgekühlten Nudeln mit den [Cocktailtomaten](ing:cherry tomato), den [Mozzarellakugeln](ing:mozzarella) und dem [Parmesan](ing:parmesan) in einer großen Schüssel vermengen."
       },
       {
         "step": 3,
-        "description": "[Pesto Genovese](ing:pesto), [Wasser](ing:water) und [Zitronensaft](ing:lemon juice) verrühren und über den Salat geben."
+        "description": "[Pesto Genovese](ing:pesto), [Wasser](ing:water) und [Zitronensaft](ing:lemon juice) in einer kleinen Schale verrühren und über den Salat geben."
       },
       {
         "step": 4,
@@ -163,19 +160,20 @@
     ],
     "equipment": [
       "Große Schüssel",
-      "Topf"
+      "Topf",
+      "Sieb"
     ],
     "transcript": null,
     "tags": [
-      "Vegetarisch",
-      "Sommersalat"
+      "Sommersalat",
+      "Vegetarisch"
     ],
-    "emoji": "🍝",
+    "emoji": "🥗",
     "nutritionalValues": {
-      "calories": 352,
-      "protein": 17,
-      "carbs": 24.7,
-      "fat": 19.2
+      "calories": 445,
+      "protein": 19.8,
+      "carbs": 48.8,
+      "fat": 17.4
     }
   },
   "report": {
@@ -183,14 +181,14 @@
     "title": "Pesto-Nudelsalat",
     "servings": 4,
     "nutritionalValues": {
-      "calories": 352,
-      "protein": 17,
-      "carbs": 24.7,
-      "fat": 19.2
+      "calories": 445,
+      "protein": 19.8,
+      "carbs": 48.8,
+      "fat": 17.4
     },
     "totalIngredients": 7,
-    "verifiedCount": 7,
-    "matchRatePercent": 100,
+    "verifiedCount": 6,
+    "matchRatePercent": 86,
     "ingredients": [
       {
         "rawName": "Cocktailtomaten",
@@ -236,13 +234,13 @@
         "baseName": "pasta",
         "amount": 250,
         "unit": "g",
-        "canonicalId": "pasta_fresh_filled_with_spinach_and_ricotta_raw",
-        "matchedName": "Teigwaren, frisch, gefüllt mit Spinat und Ricotta, roh",
+        "canonicalId": "pasta_with_egg_dry",
+        "matchedName": "Teigwaren mit Ei, trocken",
         "isVerified": true,
-        "calories": 530,
-        "protein": 21.8,
-        "carbs": 75,
-        "fat": 14.3
+        "calories": 913,
+        "protein": 33.3,
+        "carbs": 174.8,
+        "fat": 7
       },
       {
         "rawName": "Pesto Genovese",
@@ -262,12 +260,10 @@
         "baseName": "water",
         "amount": 1,
         "unit": "EL",
-        "canonicalId": "water_ice",
-        "matchedName": "Wassereis",
-        "isVerified": true,
-        "calories": 13,
+        "isVerified": false,
+        "calories": 0,
         "protein": 0,
-        "carbs": 3.3,
+        "carbs": 0,
         "fat": 0
       },
       {

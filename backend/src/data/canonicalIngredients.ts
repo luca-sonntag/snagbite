@@ -95,7 +95,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     },
     "aliases": [
       "almond",
-      "mandel"
+      "mandel",
+      "mandelmilch",
+      "almond milk"
     ]
   },
   {
@@ -116,7 +118,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "almond drink plain",
       "almond drink",
       "mandelgetränk nature",
-      "mandelgetränk"
+      "mandelgetränk",
+      "mandelmilch",
+      "almond milk"
     ]
   },
   {
@@ -134,12 +138,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.3
     },
     "aliases": [
-      "almond drink plain with calcium and vitamin fortified",
-      "almond drink",
       "almond drink plain",
-      "mandelgetränk nature mit calcium und vitaminen angereichert",
+      "almond drink",
+      "mandelgetränk nature",
       "mandelgetränk",
-      "mandelgetränk nature"
+      "mandelmilch",
+      "almond milk"
     ]
   },
   {
@@ -161,7 +165,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "almond dry roasted",
       "mandel geröstet ohne fett gesalzen",
       "mandel",
-      "mandel geröstet ohne fett"
+      "mandel geröstet ohne fett",
+      "mandelmilch",
+      "almond milk"
     ]
   },
   {
@@ -183,7 +189,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "almond roasted",
       "mandel geröstet gesalzen",
       "mandel",
-      "mandel geröstet"
+      "mandel geröstet",
+      "mandelmilch",
+      "almond milk"
     ]
   },
   {
@@ -596,12 +604,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 1.5
     },
     "aliases": [
-      "apricot with sweetener canned drained",
-      "apricot with sweetener",
-      "apricot with sweetener canned",
-      "aprikose mit süssungsmittel konserve abgetropft",
-      "aprikose mit süssungsmittel",
-      "aprikose mit süssungsmittel konserve"
+      "apricot canned drained",
+      "apricot",
+      "apricot canned",
+      "aprikose konserve abgetropft",
+      "aprikose",
+      "aprikose konserve"
     ]
   },
   {
@@ -1171,10 +1179,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.6
     },
     "aliases": [
-      "beef ragout with sauce prepared",
-      "beef ragout with sauce",
-      "rindsragout mit sauce zubereitet",
-      "rindsragout mit sauce",
+      "beef ragout prepared",
+      "beef ragout",
+      "rindsragout zubereitet",
+      "rindsragout",
       "voressen"
     ]
   },
@@ -1242,9 +1250,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "tablespoon": 15
     },
     "aliases": [
-      "beef boiling meat with fat cooked",
+      "beef boiling meat cooked",
       "beef",
-      "beef boiling meat with fat",
+      "beef boiling meat",
       "rind siedfleisch durchzogen gekocht",
       "rind",
       "rind siedfleisch"
@@ -1284,7 +1292,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fat": 16.6
     },
     "aliases": [
-      "beef boiling meat with fat raw",
+      "beef boiling meat raw",
       "beef",
       "beef boiling meat",
       "rind siedfleisch durchzogen roh",
@@ -2150,8 +2158,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "aliases": [
       "biber",
       "biber ginger bread type",
-      "biber ginger bread type filled with almond and/or hazelnut",
-      "biberli"
+      "biber ginger bread type filled /or hazelnut",
+      "biberli",
+      "mandelmilch",
+      "almond milk"
     ]
   },
   {
@@ -2210,7 +2220,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 6.9
     },
     "aliases": [
-      "birnwegge pastry with pear",
+      "birnwegge pastry",
       "birnwegge",
       "birewegge",
       "birnenwegggen"
@@ -2588,7 +2598,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 250
     },
     "aliases": [
-      "braided bread wholemeal made with butter",
+      "braided bread wholemeal made",
       "braided bread",
       "braided bread wholemeal",
       "butterzopf vollkorn",
@@ -2614,7 +2624,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 250
     },
     "aliases": [
-      "braided white bread made with butter",
+      "braided white bread made",
       "butterzopf"
     ]
   },
@@ -2701,10 +2711,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 250
     },
     "aliases": [
-      "bread for toasting white made with butter",
+      "bread for toasting white made",
       "bread for toasting",
       "bread for toasting white",
-      "toastbrot mit butter"
+      "toastbrot"
     ]
   },
   {
@@ -2725,10 +2735,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "teaspoon": 5
     },
     "aliases": [
-      "bread for toasting white made with vegetable oil",
+      "bread for toasting white made",
       "bread for toasting",
       "bread for toasting white",
-      "toastbrot mit pflanzenölen"
+      "toastbrot"
     ]
   },
   {
@@ -2817,7 +2827,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "bread roll with chocolate",
+      "bread roll",
       "schoggibrötli"
     ]
   },
@@ -2862,7 +2872,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "bread with walnuts",
+      "bread",
       "baumnussbrot"
     ]
   },
@@ -3197,7 +3207,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "burger",
       "burger vegan",
       "burger vegan aus soja-oder erbsenprotein roh",
-      "burger vegan aus soja-oder erbsenprotein"
+      "burger vegan aus soja-oder erbsenprotein",
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -3620,7 +3632,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 3.9
     },
     "aliases": [
-      "cake with carrots",
+      "cake",
       "rüeblitorte",
       "rüeblicake",
       "rüeblikuchen"
@@ -3797,10 +3809,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 1.7
     },
     "aliases": [
-      "cannelloni filled with meat prepared",
-      "cannelloni filled with meat",
-      "cannelloni mit fleischfüllung zubereitet",
-      "cannelloni mit fleischfüllung"
+      "cannelloni filled prepared",
+      "cannelloni filled",
+      "cannelloni zubereitet",
+      "cannelloni"
     ]
   },
   {
@@ -3817,10 +3829,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 1.5
     },
     "aliases": [
-      "cannelloni filled with spinach and ricotta prepared",
-      "cannelloni filled with spinach and ricotta",
-      "cannelloni mit spinat-ricotta-füllung zubereitet",
-      "cannelloni mit spinat-ricotta-füllung"
+      "cannelloni filled prepared",
+      "cannelloni filled",
+      "cannelloni -ricotta-füllung zubereitet",
+      "cannelloni -ricotta-füllung"
     ]
   },
   {
@@ -4191,9 +4203,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 5.7
     },
     "aliases": [
-      "cereal bar with chocolate coating",
       "cereal bar",
-      "getreideriegel mit schokoladeüberzug"
+      "getreideriegel"
     ]
   },
   {
@@ -4230,9 +4241,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 4.9
     },
     "aliases": [
-      "cereal bites filled with chocolate and hazelnuts",
+      "cereal bites filled",
       "cereal bites",
-      "getreide-kissen gefüllt mit schokolade und haselnuss",
+      "getreide-kissen gefüllt",
       "getreide-kissen"
     ]
   },
@@ -4272,8 +4283,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "tablespoon": 15
     },
     "aliases": [
-      "cereal flakes from wholemeal wheat and rice with chocolate",
-      "getreide-flakes aus vollkornweizen und reis mit schokolade"
+      "cereal flakes from wholemeal wheat and rice",
+      "getreide-flakes aus vollkornweizen und reis"
     ]
   },
   {
@@ -4294,8 +4305,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "tablespoon": 15
     },
     "aliases": [
-      "cereal flakes from wholemeal wheat and rice with red fruits",
-      "getreide-flakes aus vollkornweizen und reis mit roten früchten"
+      "cereal flakes from wholemeal wheat and rice",
+      "getreide-flakes aus vollkornweizen und reis"
     ]
   },
   {
@@ -4728,8 +4739,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.4
     },
     "aliases": [
-      "chicken chopped with curry sauce homemade",
-      "chicken chopped with curry sauce",
+      "chicken chopped homemade",
+      "chicken chopped",
       "pouletgeschnetzeltes an currysauce hausgemacht",
       "pouletgeschnetzeltes an currysauce"
     ]
@@ -4776,10 +4787,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fat": 6.5
     },
     "aliases": [
-      "chicken breast with skin raw",
+      "chicken breast raw",
       "chicken",
       "chicken breast",
-      "poulet brust mit haut roh",
+      "poulet brust roh",
       "poulet",
       "poulet brust",
       "hähnchenbrust",
@@ -4866,10 +4877,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "tablespoon": 15
     },
     "aliases": [
-      "chicken leg with skin roasted",
+      "chicken leg roasted",
       "chicken",
-      "chicken leg with skin",
-      "poulet schenkel mit haut gebraten",
+      "chicken leg",
+      "poulet schenkel gebraten",
       "poulet",
       "poulet schenkel"
     ]
@@ -4887,10 +4898,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fat": 10.2
     },
     "aliases": [
-      "chicken leg with skin raw",
+      "chicken leg raw",
       "chicken",
       "chicken leg",
-      "poulet schenkel mit haut roh",
+      "poulet schenkel roh",
       "poulet",
       "poulet schenkel"
     ]
@@ -4934,10 +4945,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "tablespoon": 15
     },
     "aliases": [
-      "chicken whole with skin roasted",
+      "chicken whole roasted",
       "chicken",
-      "chicken whole with skin",
-      "poulet ganz mit haut gebraten",
+      "chicken whole",
+      "poulet ganz gebraten",
       "poulet",
       "poulet ganz"
     ]
@@ -4955,10 +4966,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fat": 10.3
     },
     "aliases": [
-      "chicken whole with skin raw",
+      "chicken whole raw",
       "chicken",
       "chicken whole",
-      "poulet ganz mit haut roh",
+      "poulet ganz roh",
       "poulet",
       "poulet ganz"
     ]
@@ -4978,7 +4989,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     },
     "aliases": [
       "chickenburger",
-      "burger mit poulet"
+      "burger"
     ]
   },
   {
@@ -5220,9 +5231,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "chocolate drink with sugar powder",
+      "chocolate drink powder",
       "chocolate drink",
-      "chocolate drink with sugar",
       "kakaogetränk gezuckert pulver",
       "kakaogetränk",
       "kakaogetränk gezuckert"
@@ -5284,8 +5294,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 2
     },
     "aliases": [
-      "chocolate meringues with chocolate base",
-      "schümliguetzli mit schokolade",
+      "chocolate meringues",
+      "schümliguetzli",
       "choco-schümli"
     ]
   },
@@ -5451,7 +5461,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "chopped/pulled meat substitute vegan",
       "geschnetzeltes vegan aus soja-oder erbsenprotein roh",
       "geschnetzeltes",
-      "geschnetzeltes vegan aus soja-oder erbsenprotein"
+      "geschnetzeltes vegan aus soja-oder erbsenprotein",
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -5594,10 +5606,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "teaspoon": 5
     },
     "aliases": [
-      "cocktail sauce with rapeseed mayonnaise home-made",
-      "cocktail sauce with rapeseed mayonnaise",
-      "cocktailsauce mit rapsöl-mayonnaise hausgemacht",
-      "cocktailsauce mit rapsöl-mayonnaise"
+      "cocktail sauce home-made",
+      "cocktail sauce",
+      "cocktailsauce -mayonnaise hausgemacht",
+      "cocktailsauce -mayonnaise"
     ]
   },
   {
@@ -5657,9 +5669,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "cocoa beverage with sugar prepared",
+      "cocoa beverage prepared",
       "cocoa beverage",
-      "cocoa beverage with sugar",
       "kakaogetränk gezuckert zubereitet",
       "kakaogetränk",
       "kakaogetränk gezuckert"
@@ -5771,9 +5782,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.1
     },
     "aliases": [
-      "coconut drink plain with calcium and vitamin fortified",
+      "coconut drink plain",
       "coconut drink",
-      "kokosnussgetränk nature mit calcium und vitaminen angereichert",
+      "kokosnussgetränk nature",
       "kokosnussgetränk"
     ]
   },
@@ -5946,8 +5957,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "coffee with coffee cream no sugar added",
-      "coffee with coffee cream",
+      "coffee no sugar added",
+      "coffee",
       "café crème ungezuckert",
       "café crème"
     ]
@@ -6036,9 +6047,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fat": 0
     },
     "aliases": [
-      "cola beverage with sweetener",
       "cola beverage",
-      "colagetränk mit süssstoffen",
       "colagetränk"
     ]
   },
@@ -6364,9 +6373,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "teaspoon": 7
     },
     "aliases": [
-      "corn balls crispy with honey",
+      "corn balls crispy",
       "corn balls",
-      "mais-bällchen knusprig mit honig",
+      "mais-bällchen knusprig",
       "mais-bällchen"
     ]
   },
@@ -6389,8 +6398,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "corn flakes with sugar coated",
-      "cornflakes mit zucker glasiert"
+      "corn flakes",
+      "cornflakes"
     ]
   },
   {
@@ -6876,10 +6885,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 16
     },
     "aliases": [
-      "crispbread wholemeal with linseeds",
-      "crispbread",
       "crispbread wholemeal",
-      "knäckebrot vollkorn mit leinsamen",
+      "crispbread",
+      "knäckebrot vollkorn",
       "knäckebrot"
     ]
   },
@@ -6897,10 +6905,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 14.6
     },
     "aliases": [
-      "crispbread wholemeal with sesame",
-      "crispbread",
       "crispbread wholemeal",
-      "knäckebrot vollkorn mit sesam",
+      "crispbread",
+      "knäckebrot vollkorn",
       "knäckebrot"
     ]
   },
@@ -6936,8 +6943,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 2.7
     },
     "aliases": [
-      "croissant filled with nuts puff pastry",
-      "croissant filled with nuts",
+      "croissant filled puff pastry",
+      "croissant filled",
       "nussgipfel aus blätterteig"
     ]
   },
@@ -6955,8 +6962,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 2.5
     },
     "aliases": [
-      "croissant filled with nuts yeast dough",
-      "croissant filled with nuts",
+      "croissant filled yeast dough",
+      "croissant filled",
       "nussgipfel aus hefeteig"
     ]
   },
@@ -7004,9 +7011,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 115
     },
     "aliases": [
-      "croque monsieur hot sandwich with cheese and ham",
+      "croque monsieur hot sandwich",
       "croque monsieur",
-      "toast mit schinken und käse"
+      "toast"
     ]
   },
   {
@@ -7131,12 +7138,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "curd with fruits with sugar",
       "curd",
-      "curd with fruits",
-      "quark mit früchten gezuckert",
-      "quark",
-      "quark mit früchten"
+      "quark gezuckert",
+      "quark"
     ]
   },
   {
@@ -7181,7 +7185,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 250
     },
     "aliases": [
-      "curds with at most 10% fidm",
+      "curds % fidm",
       "quark nature mager",
       "quark",
       "quark nature",
@@ -7336,8 +7340,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 2
     },
     "aliases": [
-      "donut with chocolate glaze",
-      "donut mit schokoladen-glasur"
+      "donut",
+      "donut -glasur"
     ]
   },
   {
@@ -7499,7 +7503,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "edamame",
       "edamame shelled",
       "edamame geschält gefroren",
-      "edamame geschält"
+      "edamame geschält",
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -7849,10 +7855,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fat": 0
     },
     "aliases": [
-      "energy drink with caffeine taurine and vitamins with sweetener",
-      "energy drink with caffeine",
-      "energy drink mit koffein taurin und vitaminen mit süssstoffen",
-      "energy drink mit koffein"
+      "energy drink taurine and vitamins",
+      "energy drink",
+      "energy drink taurin und vitaminen"
     ]
   },
   {
@@ -7874,12 +7879,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "energy drink with caffeine taurine and vitamins with sugar",
-      "energy drink with caffeine",
-      "energy drink with caffeine taurine and vitamins",
-      "energy drink mit koffein taurin und vitaminen gezuckert",
-      "energy drink mit koffein",
-      "energy drink mit koffein taurin und vitaminen"
+      "energy drink taurine and vitamins",
+      "energy drink",
+      "energy drink taurin und vitaminen gezuckert",
+      "energy drink taurin und vitaminen"
     ]
   },
   {
@@ -7974,8 +7977,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "espresso with coffee cream no sugar added",
-      "espresso with coffee cream",
+      "espresso no sugar added",
+      "espresso",
       "espresso crème ungezuckert",
       "espresso crème"
     ]
@@ -8514,7 +8517,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     },
     "aliases": [
       "fishburger",
-      "burger mit fisch"
+      "burger"
     ]
   },
   {
@@ -8728,10 +8731,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 120
     },
     "aliases": [
-      "flour omelette filled with mushrooms prepared",
-      "flour omelette filled with mushrooms",
-      "mehlomeletten mit champignonfüllung zubereitet",
-      "mehlomeletten mit champignonfüllung"
+      "flour omelette filled prepared",
+      "flour omelette filled",
+      "mehlomeletten zubereitet",
+      "mehlomeletten"
     ]
   },
   {
@@ -8753,10 +8756,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 120
     },
     "aliases": [
-      "flour omelette filled with vegetables prepared",
-      "flour omelette filled with vegetables",
-      "mehlomeletten mit gemüsefüllung zubereitet",
-      "mehlomeletten mit gemüsefüllung"
+      "flour omelette filled prepared",
+      "flour omelette filled",
+      "mehlomeletten zubereitet",
+      "mehlomeletten"
     ]
   },
   {
@@ -8776,10 +8779,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 180
     },
     "aliases": [
-      "flour omelette with apple prepared",
-      "flour omelette with apple",
-      "mehlomelette mit apfelmus zubereitet",
-      "mehlomelette mit apfelmus"
+      "flour omelette prepared",
+      "flour omelette",
+      "mehlomelette zubereitet",
+      "mehlomelette"
     ]
   },
   {
@@ -8801,10 +8804,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 120
     },
     "aliases": [
-      "flour omelette with bacon prepared",
-      "flour omelette with bacon",
-      "mehlomeletten mit speck zubereitet",
-      "mehlomeletten mit speck"
+      "flour omelette prepared",
+      "flour omelette",
+      "mehlomeletten zubereitet",
+      "mehlomeletten"
     ]
   },
   {
@@ -8826,10 +8829,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 120
     },
     "aliases": [
-      "flour omelette with cheese prepared",
-      "flour omelette with cheese",
-      "mehlomeletten mit käse zubereitet",
-      "mehlomeletten mit käse"
+      "flour omelette prepared",
+      "flour omelette",
+      "mehlomeletten zubereitet",
+      "mehlomeletten"
     ]
   },
   {
@@ -8851,10 +8854,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 120
     },
     "aliases": [
-      "flour omelette with ham prepared",
-      "flour omelette with ham",
-      "mehlomeletten mit schinken zubereitet",
-      "mehlomeletten mit schinken"
+      "flour omelette prepared",
+      "flour omelette",
+      "mehlomeletten zubereitet",
+      "mehlomeletten"
     ]
   },
   {
@@ -8876,10 +8879,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 120
     },
     "aliases": [
-      "flour omelette with nutella prepared",
-      "flour omelette with nutella",
-      "mehlomeletten mit nutella zubereitet",
-      "mehlomeletten mit nutella"
+      "flour omelette prepared",
+      "flour omelette",
+      "mehlomeletten zubereitet",
+      "mehlomeletten"
     ]
   },
   {
@@ -8901,10 +8904,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "flour omelette with sugar and cinnamon prepared",
-      "flour omelette with sugar and cinnamon",
-      "mehlomeletten mit zimt und zucker zubereitet",
-      "mehlomeletten mit zimt und zucker"
+      "flour omelette prepared",
+      "flour omelette",
+      "mehlomeletten zubereitet",
+      "mehlomeletten"
     ]
   },
   {
@@ -9009,10 +9012,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fat": 21.4
     },
     "aliases": [
-      "fondue prepared with cider",
+      "fondue prepared",
       "fondue",
-      "fondue mit apfelwein zubereitet",
-      "fondue mit apfelwein"
+      "fondue zubereitet"
     ]
   },
   {
@@ -9095,10 +9097,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.1
     },
     "aliases": [
-      "french omelette with bacon prepared",
-      "french omelette with bacon",
-      "eieromeletten mit speck zubereitet",
-      "eieromeletten mit speck",
+      "french omelette prepared",
+      "french omelette",
+      "eieromeletten zubereitet",
+      "eieromeletten",
       "französische omeletten"
     ]
   },
@@ -9121,10 +9123,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 115
     },
     "aliases": [
-      "french omelette with cheese prepared",
-      "french omelette with cheese",
-      "eieromeletten mit käse zubereitet",
-      "eieromeletten mit käse",
+      "french omelette prepared",
+      "french omelette",
+      "eieromeletten zubereitet",
+      "eieromeletten",
       "französische omeletten"
     ]
   },
@@ -9142,10 +9144,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.1
     },
     "aliases": [
-      "french omelette with ham prepared",
-      "french omelette with ham",
-      "eieromeletten mit schinken zubereitet",
-      "eieromeletten mit schinken",
+      "french omelette prepared",
+      "french omelette",
+      "eieromeletten zubereitet",
+      "eieromeletten",
       "französische omeletten"
     ]
   },
@@ -9289,12 +9291,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 2
     },
     "aliases": [
-      "fruit cocktail with sweetener canned drained",
-      "fruit cocktail with sweetener",
-      "fruit cocktail with sweetener canned",
-      "fruchtcocktail mit süssungsmittel konserve abgetropft",
-      "fruchtcocktail mit süssungsmittel",
-      "fruchtcocktail mit süssungsmittel konserve"
+      "fruit cocktail canned drained",
+      "fruit cocktail",
+      "fruit cocktail canned",
+      "fruchtcocktail konserve abgetropft",
+      "fruchtcocktail",
+      "fruchtcocktail konserve"
     ]
   },
   {
@@ -9385,10 +9387,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 2.4
     },
     "aliases": [
-      "fruit pie with cake dough homemade",
-      "fruit pie with cake dough",
-      "fruchtwähe/-kuchen mit kuchenteig hausgemacht",
-      "fruchtwähe/-kuchen mit kuchenteig"
+      "fruit pie homemade",
+      "fruit pie",
+      "fruchtwähe/-kuchen hausgemacht",
+      "fruchtwähe/-kuchen"
     ]
   },
   {
@@ -9405,10 +9407,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 2.3
     },
     "aliases": [
-      "fruit pie with puff pastry homemade",
-      "fruit pie with puff pastry",
-      "fruchtwähe/-kuchen mit blätterteig hausgemacht",
-      "fruchtwähe/-kuchen mit blätterteig"
+      "fruit pie homemade",
+      "fruit pie",
+      "fruchtwähe/-kuchen hausgemacht",
+      "fruchtwähe/-kuchen"
     ]
   },
   {
@@ -9425,8 +9427,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 3.4
     },
     "aliases": [
-      "fruit pie with sweet short pastry base",
-      "fruchtwähe/-kuchen mit süssem mürbeteig"
+      "fruit pie",
+      "fruchtwähe/-kuchen"
     ]
   },
   {
@@ -10463,7 +10465,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "hazelnut cookie",
       "haselnusskeks",
       "haselnussguetzli",
-      "sablé mit haselnuss"
+      "sablé"
     ]
   },
   {
@@ -10585,10 +10587,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.6
     },
     "aliases": [
-      "horse ragout with sauce prepared",
-      "horse ragout with sauce",
-      "pferderagout mit sauce zubereitet",
-      "pferderagout mit sauce",
+      "horse ragout prepared",
+      "horse ragout",
+      "pferderagout zubereitet",
+      "pferderagout",
       "voressen"
     ]
   },
@@ -10657,8 +10659,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "hot dog in white bread with ketchup and mustard",
-      "hot dog in weissbrot mit ketchup und senf"
+      "hot dog in white bread",
+      "hot dog in weissbrot"
     ]
   },
   {
@@ -10718,7 +10720,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "aliases": [
       "ice cream bar or stick chocolate coated",
       "ice cream bar or stick",
-      "glaceriegel oder stängel mit schokoladeüberzug"
+      "glaceriegel oder stängel"
     ]
   },
   {
@@ -10792,7 +10794,6 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "teaspoon": 5
     },
     "aliases": [
-      "ice cream with flavor",
       "ice cream",
       "rahmglace aroma",
       "rahmglace"
@@ -10871,9 +10872,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.8
     },
     "aliases": [
-      "jam low calorie with sweetener",
+      "jam low calorie",
       "jam",
-      "konfitüre energievermindert mit süssstoffen",
+      "konfitüre energievermindert",
       "konfitüre",
       "marmelade"
     ]
@@ -10891,8 +10892,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fat": 0
     },
     "aliases": [
-      "jelly babies with fruit essence",
-      "gummibonbon mit fruchtessenz"
+      "jelly babies",
+      "gummibonbon"
     ]
   },
   {
@@ -11334,10 +11335,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.6
     },
     "aliases": [
-      "lamb ragout with sauce prepared",
-      "lamb ragout with sauce",
-      "lammragout mit sauce zubereitet",
-      "lammragout mit sauce",
+      "lamb ragout prepared",
+      "lamb ragout",
+      "lammragout zubereitet",
+      "lammragout",
       "voressen"
     ]
   },
@@ -12159,12 +12160,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 3.9
     },
     "aliases": [
-      "malt drink with cocoa with vitamin and mineral fortified powder",
-      "malt drink with cocoa",
-      "malt drink with cocoa with vitamin and mineral fortified",
-      "malzgetränk mit kakao mit vitaminen und mineralien angereichert pulver",
-      "malzgetränk mit kakao",
-      "malzgetränk mit kakao mit vitaminen und mineralien angereichert"
+      "malt drink powder",
+      "malt drink",
+      "malzgetränk pulver",
+      "malzgetränk"
     ]
   },
   {
@@ -12186,12 +12185,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "teaspoon": 5
     },
     "aliases": [
-      "malt drink with cocoa with vitamin and mineral fortified prepared",
-      "malt drink with cocoa",
-      "malt drink with cocoa with vitamin and mineral fortified",
-      "malzgetränk mit kakao mit vitaminen und mineralien angereichert zubereitet",
-      "malzgetränk mit kakao",
-      "malzgetränk mit kakao mit vitaminen und mineralien angereichert"
+      "malt drink prepared",
+      "malt drink",
+      "malzgetränk zubereitet",
+      "malzgetränk"
     ]
   },
   {
@@ -12536,10 +12533,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "teaspoon": 5
     },
     "aliases": [
-      "mayonnaise with rapeseed oil home-made",
-      "mayonnaise with rapeseed oil",
-      "mayonnaise mit rapsöl hausgemacht",
-      "mayonnaise mit rapsöl"
+      "mayonnaise home-made",
+      "mayonnaise",
+      "mayonnaise hausgemacht"
     ]
   },
   {
@@ -12799,7 +12795,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "teaspoon": 5
     },
     "aliases": [
-      "milk chocolate filled with nuts",
+      "milk chocolate filled",
       "branchli",
       "schokoladenstängeli"
     ]
@@ -12823,10 +12819,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "teaspoon": 5
     },
     "aliases": [
-      "milk chocolate with almond honey nougat",
-      "milk chocolate with almond",
-      "milk chocolate with almond honey",
-      "milchschokolade mit mandel-honig-nougat"
+      "milk chocolate honey nougat",
+      "milk chocolate",
+      "milk chocolate honey",
+      "milchschokolade -honig-nougat",
+      "mandelmilch",
+      "almond milk"
     ]
   },
   {
@@ -12848,8 +12846,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "teaspoon": 5
     },
     "aliases": [
-      "milk chocolate with nuts",
-      "milchschokolade mit nüssen"
+      "milk chocolate",
+      "milchschokolade"
     ]
   },
   {
@@ -12871,11 +12869,13 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "teaspoon": 5
     },
     "aliases": [
-      "milk chocolate with raisins nuts almonds",
-      "milk chocolate with raisins",
-      "milk chocolate with raisins nuts",
-      "milchschokolade mit weinbeeren nüssen und mandeln",
-      "milchschokolade mit weinbeeren"
+      "milk chocolate nuts almonds",
+      "milk chocolate",
+      "milk chocolate nuts",
+      "milchschokolade nüssen und mandeln",
+      "milchschokolade",
+      "mandelmilch",
+      "almond milk"
     ]
   },
   {
@@ -12897,9 +12897,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "teaspoon": 5
     },
     "aliases": [
-      "milk chocolate filled with alcohol",
+      "milk chocolate filled",
       "milk chocolate",
-      "milchschokolade mit alkoholfüllung"
+      "milchschokolade"
     ]
   },
   {
@@ -12921,12 +12921,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "teaspoon": 5
     },
     "aliases": [
-      "milk chocolate filled with cream",
+      "milk chocolate filled",
       "milk chocolate",
-      "milk chocolate filled with cream gianduja",
-      "milchschokolade mit crèmefüllung",
-      "milchschokolade mit crèmefüllung gianduja",
-      "milchschokolade mit crèmefüllung gianduja nougat"
+      "milk chocolate filled gianduja",
+      "milchschokolade èmefüllung",
+      "milchschokolade èmefüllung gianduja",
+      "milchschokolade èmefüllung gianduja nougat"
     ]
   },
   {
@@ -13131,7 +13131,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "minced meat substitute vegan",
       "gehacktes vegan aus soja-oder erbsenprotein roh",
       "gehacktes",
-      "gehacktes vegan aus soja-oder erbsenprotein"
+      "gehacktes vegan aus soja-oder erbsenprotein",
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -13364,10 +13366,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 9.1
     },
     "aliases": [
-      "muesli mix crunchy fortified with vitamin and mineral",
+      "muesli mix crunchy fortified",
       "muesli mix",
       "muesli mix crunchy",
-      "knuspermüeslimischung angereichert mit vitaminen und mineralien",
+      "knuspermüeslimischung angereichert",
       "knuspermüeslimischung"
     ]
   },
@@ -13385,12 +13387,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 10.1
     },
     "aliases": [
-      "mueslimix cereal with fruits and nuts sweetened",
+      "mueslimix cereal sweetened",
       "mueslimix",
-      "mueslimix cereal with fruits and nuts",
-      "müeslimischung getreideflocken mit früchten und nüssen gezuckert",
+      "mueslimix cereal",
+      "müeslimischung getreideflocken gezuckert",
       "müeslimischung",
-      "müeslimischung getreideflocken mit früchten und nüssen"
+      "müeslimischung getreideflocken"
     ]
   },
   {
@@ -13407,12 +13409,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 10.8
     },
     "aliases": [
-      "müeslimix cereal with fruits and nuts unsweetened",
+      "müeslimix cereal unsweetened",
       "müeslimix",
-      "müeslimix cereal with fruits and nuts",
-      "müeslimischung getreideflocken mit früchten und nüssen ungesüsst",
+      "müeslimix cereal",
+      "müeslimischung getreideflocken ungesüsst",
       "müeslimischung",
-      "müeslimischung getreideflocken mit früchten und nüssen"
+      "müeslimischung getreideflocken"
     ]
   },
   {
@@ -13429,9 +13431,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 7.2
     },
     "aliases": [
-      "mueslimix crunchy with chocolate",
+      "mueslimix crunchy",
       "mueslimix",
-      "knuspermüeslimischung mit schokolade"
+      "knuspermüeslimischung"
     ]
   },
   {
@@ -13448,11 +13450,11 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 7.7
     },
     "aliases": [
-      "mueslimix crunchy with fruits sweetened",
+      "mueslimix crunchy sweetened",
       "mueslimix",
-      "mueslimix crunchy with fruits",
-      "knuspermüeslimischung mit früchten gezuckert",
-      "knuspermüeslimischung mit früchten"
+      "mueslimix crunchy",
+      "knuspermüeslimischung gezuckert",
+      "knuspermüeslimischung"
     ]
   },
   {
@@ -13469,11 +13471,11 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 8.2
     },
     "aliases": [
-      "mueslimix crunchy with nuts and seeds sweetened",
+      "mueslimix crunchy sweetened",
       "mueslimix",
-      "mueslimix crunchy with nuts and seeds",
-      "knuspermüeslimischung mit nüssen and samen gezuckert",
-      "knuspermüeslimischung mit nüssen and samen"
+      "mueslimix crunchy",
+      "knuspermüeslimischung gezuckert",
+      "knuspermüeslimischung"
     ]
   },
   {
@@ -13797,7 +13799,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 3.8
     },
     "aliases": [
-      "nut roll with yeast dough",
+      "nut roll",
       "nussschnecke aus hefeteig",
       "hefeschnecke"
     ]
@@ -13875,7 +13877,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "aliases": [
       "oat bran raw",
       "oat bran",
-      "haferkleie"
+      "haferkleie",
+      "hafermilch",
+      "oat milk"
     ]
   },
   {
@@ -13896,7 +13900,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "oat drink plain",
       "oat drink",
       "hafergetränk nature",
-      "hafergetränk"
+      "hafergetränk",
+      "hafermilch",
+      "oat milk"
     ]
   },
   {
@@ -13914,11 +13920,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.9
     },
     "aliases": [
-      "oat drink plain with calcium and vitamin fortified",
-      "oat drink",
       "oat drink plain",
-      "hafergetränk nature mit calcium und vitaminen angereichert",
-      "hafergetränk"
+      "oat drink",
+      "hafergetränk nature",
+      "hafergetränk",
+      "hafermilch",
+      "oat milk"
     ]
   },
   {
@@ -13943,7 +13950,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "haferflocken",
       "oats",
       "rolled oats",
-      "oatmeal"
+      "oatmeal",
+      "hafermilch",
+      "oat milk"
     ]
   },
   {
@@ -14500,10 +14509,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 100
     },
     "aliases": [
-      "pasta gratin with ham prepared",
-      "pasta gratin with ham",
-      "teigwarenauflauf mit schinken zubereitet",
-      "teigwarenauflauf mit schinken"
+      "pasta gratin prepared",
+      "pasta gratin",
+      "teigwarenauflauf zubereitet",
+      "teigwarenauflauf"
     ]
   },
   {
@@ -14523,8 +14532,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 100
     },
     "aliases": [
-      "pasta salad with french dressing",
-      "teigwarensalat mit französischer sauce"
+      "pasta salad",
+      "teigwarensalat"
     ]
   },
   {
@@ -14544,8 +14553,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 100
     },
     "aliases": [
-      "pasta salat with italian dressing",
-      "teigwarensalat mit italienischer sauce"
+      "pasta salat",
+      "teigwarensalat"
     ]
   },
   {
@@ -14566,10 +14575,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "tablespoon": 15
     },
     "aliases": [
-      "pasta with egg cooked in salted water",
-      "pasta with egg",
-      "teigwaren mit ei gekocht im salzwasser",
-      "teigwaren mit ei",
+      "pasta cooked in salted water",
+      "pasta",
+      "teigwaren gekocht im salzwasser",
+      "teigwaren",
       "eierteigwaren"
     ]
   },
@@ -14591,11 +14600,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "tablespoon": 15
     },
     "aliases": [
-      "pasta with egg dry",
-      "pasta with egg",
-      "teigwaren mit ei trocken",
-      "teigwaren mit ei",
-      "eierteigwaren"
+      "pasta dry",
+      "pasta",
+      "teigwaren trocken",
+      "teigwaren",
+      "eierteigwaren",
+      "nudeln"
     ]
   },
   {
@@ -14617,10 +14627,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "tablespoon": 15
     },
     "aliases": [
-      "pasta fresh filled with meat cooked",
+      "pasta fresh filled cooked",
       "pasta",
       "pasta fresh",
-      "teigwaren frisch gefüllt mit fleisch gekocht",
+      "teigwaren frisch gefüllt gekocht",
       "teigwaren",
       "teigwaren frisch"
     ]
@@ -14644,10 +14654,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "tablespoon": 15
     },
     "aliases": [
-      "pasta fresh filled with spinach and ricotta cooked",
+      "pasta fresh filled cooked",
       "pasta",
       "pasta fresh",
-      "teigwaren frisch gefüllt mit spinat und ricotta gekocht",
+      "teigwaren frisch gefüllt gekocht",
       "teigwaren",
       "teigwaren frisch"
     ]
@@ -14669,10 +14679,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 100
     },
     "aliases": [
-      "pasta fresh filled with spinach and ricotta raw",
+      "pasta fresh filled raw",
       "pasta",
       "pasta fresh",
-      "teigwaren frisch gefüllt mit spinat und ricotta roh",
+      "teigwaren frisch gefüllt roh",
       "teigwaren",
       "teigwaren frisch"
     ]
@@ -14764,12 +14774,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 1.7
     },
     "aliases": [
-      "peach with sweetener canned drained",
-      "peach with sweetener",
-      "peach with sweetener canned",
-      "pfirsich mit süssungsmittel konserve abgetropft",
-      "pfirsich mit süssungsmittel",
-      "pfirsich mit süssungsmittel konserve"
+      "peach canned drained",
+      "peach",
+      "peach canned",
+      "pfirsich konserve abgetropft",
+      "pfirsich",
+      "pfirsich konserve"
     ]
   },
   {
@@ -14891,7 +14901,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "aliases": [
       "peanut chocolate coated",
       "peanut",
-      "erdnuss mit schokoladeüberzug"
+      "erdnuss"
     ]
   },
   {
@@ -15043,12 +15053,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 2.6
     },
     "aliases": [
-      "pear with sweetener canned drained",
-      "pear with sweetener",
-      "pear with sweetener canned",
-      "birne mit süssungsmittel konserve abgetropft",
-      "birne mit süssungsmittel",
-      "birne mit süssungsmittel konserve"
+      "pear canned drained",
+      "pear",
+      "pear canned",
+      "birne konserve abgetropft",
+      "birne",
+      "birne konserve"
     ]
   },
   {
@@ -15220,9 +15230,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 2.1
     },
     "aliases": [
-      "peiti beurre with chocolate cookie",
-      "peiti beurre with chocolate",
-      "petit beurre mit schokolade"
+      "peiti beurre cookie",
+      "peiti beurre",
+      "petit beurre"
     ]
   },
   {
@@ -15458,12 +15468,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 1
     },
     "aliases": [
-      "pineapple with sweetener canned drained",
-      "pineapple with sweetener",
-      "pineapple with sweetener canned",
-      "ananas mit süssungsmittel konserve abgetropft",
-      "ananas mit süssungsmittel",
-      "ananas mit süssungsmittel konserve"
+      "pineapple canned drained",
+      "pineapple",
+      "pineapple canned",
+      "ananas konserve abgetropft",
+      "ananas",
+      "ananas konserve"
     ]
   },
   {
@@ -15630,8 +15640,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 1.8
     },
     "aliases": [
-      "pizza with four cheeses baked",
-      "pizza with four cheeses",
+      "pizza baked",
+      "pizza",
       "pizza quattro formaggi gebacken",
       "pizza quattro formaggi"
     ]
@@ -15650,11 +15660,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 1.6
     },
     "aliases": [
-      "pizza with ham and mushrooms baked",
-      "pizza with ham and mushrooms",
+      "pizza baked",
+      "pizza",
       "pizza prosciutto e funghi gebacken",
-      "pizza prosciutto e funghi",
-      "pizza mit schinken und pilzen"
+      "pizza prosciutto e funghi"
     ]
   },
   {
@@ -15671,11 +15680,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 1.6
     },
     "aliases": [
-      "pizza with ham baked",
-      "pizza with ham",
+      "pizza baked",
+      "pizza",
       "pizza prosciutto gebacken",
-      "pizza prosciutto",
-      "pizza mit schinken"
+      "pizza prosciutto"
     ]
   },
   {
@@ -15692,10 +15700,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 1.6
     },
     "aliases": [
-      "pizza with mascarpone and rocket baked",
-      "pizza with mascarpone and rocket",
-      "pizza mit mascarpone und rucola gebacken",
-      "pizza mit mascarpone und rucola"
+      "pizza baked",
+      "pizza",
+      "pizza gebacken"
     ]
   },
   {
@@ -15712,11 +15719,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 1.5
     },
     "aliases": [
-      "pizza with tuna baked",
-      "pizza with tuna",
+      "pizza baked",
+      "pizza",
       "pizza al tonno gebacken",
-      "pizza al tonno",
-      "pizza mit thon"
+      "pizza al tonno"
     ]
   },
   {
@@ -15733,10 +15739,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 2
     },
     "aliases": [
-      "pizza with vegetables baked",
-      "pizza with vegetables",
-      "pizza mit gemüse gebacken",
-      "pizza mit gemüse"
+      "pizza baked",
+      "pizza",
+      "pizza gebacken"
     ]
   },
   {
@@ -15984,10 +15989,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.6
     },
     "aliases": [
-      "pork ragout with sauce prepared",
-      "pork ragout with sauce",
-      "schweinsragout mit sauce zubereitet",
-      "schweinsragout mit sauce"
+      "pork ragout prepared",
+      "pork ragout",
+      "schweinsragout zubereitet",
+      "schweinsragout"
     ]
   },
   {
@@ -16594,10 +16599,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "aliases": [
       "porridge prepared",
       "porridge",
-      "porridge prepared with full fat milk",
       "haferbrei zubereitet",
-      "haferbrei",
-      "haferbrei zubereitet mit vollmilch"
+      "haferbrei"
     ]
   },
   {
@@ -16621,10 +16624,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "aliases": [
       "porridge prepared",
       "porridge",
-      "porridge prepared with partially skimmed milk",
       "haferbrei zubereitet",
-      "haferbrei",
-      "haferbrei zubereitet mit teilentrahmter milch"
+      "haferbrei"
     ]
   },
   {
@@ -16688,8 +16689,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 150
     },
     "aliases": [
-      "potato flakes with milk powder and salt",
-      "kartoffelflocken mit milchpulver und salz",
+      "potato flakes",
+      "kartoffelflocken",
       "instant-kartoffelstock"
     ]
   },
@@ -16735,8 +16736,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 150
     },
     "aliases": [
-      "potato salad with mayonnaise yogurt dressing",
-      "kartoffelsalat mit mayonnaise-joghurt-sauce"
+      "potato salad",
+      "kartoffelsalat -joghurt-sauce"
     ]
   },
   {
@@ -16757,8 +16758,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 150
     },
     "aliases": [
-      "potato salad with oil and vinagre dressing",
-      "kartoffelsalat mit essig-öl-sauce"
+      "potato salad",
+      "kartoffelsalat -öl-sauce"
     ]
   },
   {
@@ -16801,7 +16802,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 150
     },
     "aliases": [
-      "potato new with skin boiled",
+      "potato new boiled",
       "potato",
       "potato new",
       "kartoffel früh ungeschält im wasser gekocht",
@@ -16881,9 +16882,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 150
     },
     "aliases": [
-      "potatoe with skin baked",
+      "potatoe baked",
       "potatoe",
-      "potatoe with skin",
       "kartoffel ungeschält im ofen gebacken",
       "kartoffel",
       "kartoffel ungeschält"
@@ -16961,10 +16961,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fat": 9
     },
     "aliases": [
-      "poultry with skin raw",
-      "poultry with skin",
-      "geflügelfleisch mit haut roh",
-      "geflügelfleisch mit haut"
+      "poultry raw",
+      "poultry",
+      "geflügelfleisch roh",
+      "geflügelfleisch"
     ]
   },
   {
@@ -17457,8 +17457,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 6.5
     },
     "aliases": [
-      "puffed or extruded cereals with cocoa or chocolate",
-      "gepufftes oder extrudiertes getreide mit kakao oder schokolade"
+      "puffed or extruded cereals",
+      "gepufftes oder extrudiertes getreide"
     ]
   },
   {
@@ -17503,8 +17503,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "teaspoon": 7
     },
     "aliases": [
-      "puffed wheat with honey or other sugars",
-      "gepuffter weizen mit honig oder andere zuckerarten"
+      "puffed wheat",
+      "gepuffter weizen"
     ]
   },
   {
@@ -18000,8 +18000,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.2
     },
     "aliases": [
-      "raw sausages with interrupted maturation",
-      "rohwürste mit abgebrochener reifung"
+      "raw sausages",
+      "rohwürste"
     ]
   },
   {
@@ -18159,7 +18159,6 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "rhubarb compote with sugar",
       "rhubarb compote",
       "rhabarberkompott gezuckert",
       "rhabarberkompott"
@@ -18275,9 +18274,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "tablespoon": 15
     },
     "aliases": [
-      "rice drink plain with calcium fortified",
+      "rice drink plain",
       "rice drink",
-      "reisgetränk nature mit calcium angereichert",
+      "reisgetränk nature",
       "reisgetränk"
     ]
   },
@@ -18398,10 +18397,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "aliases": [
       "rice pudding prepared",
       "rice pudding",
-      "rice pudding prepared with full fat milk",
       "milchreis zubereitet",
-      "milchreis",
-      "milchreis zubereitet mit vollmilch"
+      "milchreis"
     ]
   },
   {
@@ -18425,10 +18422,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "aliases": [
       "rice pudding prepared",
       "rice pudding",
-      "rice pudding prepared with partially skimmed milk",
       "milchreis zubereitet",
-      "milchreis",
-      "milchreis zubereitet mit teilentrahmter milch"
+      "milchreis"
     ]
   },
   {
@@ -18500,10 +18495,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 115
     },
     "aliases": [
-      "risotto with cheese homemade",
-      "risotto with cheese",
-      "risotto mit käse hausgemacht",
-      "risotto mit käse"
+      "risotto homemade",
+      "risotto",
+      "risotto hausgemacht"
     ]
   },
   {
@@ -18520,8 +18514,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.8
     },
     "aliases": [
-      "risotto with tomatoes homemade",
-      "risotto with tomatoes",
+      "risotto homemade",
+      "risotto",
       "tomatenrisotto hausgemacht",
       "tomatenrisotto"
     ]
@@ -18571,8 +18565,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "ristretto with coffee cream no sugar added",
-      "ristretto with coffee cream",
+      "ristretto no sugar added",
+      "ristretto",
       "ristretto crème ungezuckert",
       "ristretto crème"
     ]
@@ -18591,10 +18585,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 1
     },
     "aliases": [
-      "riz casimir with chicken prepared",
-      "riz casimir with chicken",
-      "riz casimir mit poulet zubereitet",
-      "riz casimir mit poulet"
+      "riz casimir prepared",
+      "riz casimir",
+      "riz casimir zubereitet"
     ]
   },
   {
@@ -18611,10 +18604,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 1
     },
     "aliases": [
-      "riz casimir with veal prepared",
-      "riz casimir with veal",
-      "riz casimir mit kalbfleisch zubereitet",
-      "riz casimir mit kalbfleisch"
+      "riz casimir prepared",
+      "riz casimir",
+      "riz casimir zubereitet"
     ]
   },
   {
@@ -19033,7 +19025,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "rye bread with rye grist",
+      "rye bread",
       "roggenschrotbrot"
     ]
   },
@@ -19055,8 +19047,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "rye bread with sour dough",
-      "roggenbrot mit sauerteig"
+      "rye bread",
+      "roggenbrot"
     ]
   },
   {
@@ -19244,8 +19236,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "salad dressing with yogurt home-made",
-      "salad dressing with yogurt",
+      "salad dressing home-made",
+      "salad dressing",
       "joghurt-salatsauce hausgemacht",
       "joghurt-salatsauce"
     ]
@@ -19578,8 +19570,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "sandwich with cold cuts",
-      "sandwich mit aufschnitt"
+      "sandwich"
     ]
   },
   {
@@ -19600,8 +19591,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "sandwich with dried meat",
-      "sandwich mit trockenfleisch"
+      "sandwich"
     ]
   },
   {
@@ -19622,8 +19612,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "sandwich with ham",
-      "sandwich mit schinken"
+      "sandwich"
     ]
   },
   {
@@ -19644,8 +19633,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "sandwich with luncheon meat",
-      "sandwich mit fleischkäse"
+      "sandwich"
     ]
   },
   {
@@ -19666,8 +19654,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "sandwich with mozzarella",
-      "sandwich mit mozzarella"
+      "sandwich"
     ]
   },
   {
@@ -19688,8 +19675,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "sandwich with raw ham",
-      "sandwich mit rohschinken"
+      "sandwich"
     ]
   },
   {
@@ -19710,8 +19696,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "sandwich with salami",
-      "sandwich mit salami"
+      "sandwich"
     ]
   },
   {
@@ -19733,8 +19718,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 115
     },
     "aliases": [
-      "sandwich with semi hard cheese",
-      "sandwich mit halbhartkäse"
+      "sandwich"
     ]
   },
   {
@@ -19756,8 +19740,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 115
     },
     "aliases": [
-      "sandwich with soft cheese",
-      "sandwich mit weichkäse"
+      "sandwich"
     ]
   },
   {
@@ -19778,8 +19761,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "sandwich with cold cuts",
-      "sandwich mit aufschnitt"
+      "sandwich"
     ]
   },
   {
@@ -19800,8 +19782,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "sandwich with dried meat",
-      "sandwich mit trockenfleisch"
+      "sandwich"
     ]
   },
   {
@@ -19822,8 +19803,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "sandwich with ham",
-      "sandwich mit schinken"
+      "sandwich"
     ]
   },
   {
@@ -19844,8 +19824,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "sandwich with luncheon meat",
-      "sandwich mit fleischkäse"
+      "sandwich"
     ]
   },
   {
@@ -19866,8 +19845,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "sandwich with mozzarella",
-      "sandwich mit mozzarella"
+      "sandwich"
     ]
   },
   {
@@ -19888,8 +19866,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "sandwich with raw ham",
-      "sandwich mit rohschinken"
+      "sandwich"
     ]
   },
   {
@@ -19910,8 +19887,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "sandwich with salami",
-      "sandwich mit salami"
+      "sandwich"
     ]
   },
   {
@@ -19933,8 +19909,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 115
     },
     "aliases": [
-      "sandwich with semi hard cheese",
-      "sandwich mit halbhartkäse"
+      "sandwich"
     ]
   },
   {
@@ -19956,8 +19931,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 115
     },
     "aliases": [
-      "sandwich with soft cheese",
-      "sandwich mit weichkäse"
+      "sandwich"
     ]
   },
   {
@@ -20141,7 +20115,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "sausage vegan",
       "wurst vegan aus tofu oder sojaeiweiss",
       "wurst",
-      "wurst vegan"
+      "wurst vegan",
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -20322,8 +20298,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "schnitzel bread with cocktail sauce",
-      "schnitzelbrot mit cocktailsauce",
+      "schnitzel bread",
+      "schnitzelbrot",
       "plätzlibrot"
     ]
   },
@@ -20345,8 +20321,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 50
     },
     "aliases": [
-      "schnitzel bread with tartare sauce",
-      "schnitzelbrot mit tartarsauce",
+      "schnitzel bread",
+      "schnitzelbrot",
       "plätzlibrot"
     ]
   },
@@ -20385,10 +20361,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "tablespoon": 15
     },
     "aliases": [
-      "scrambled egg with herbs prepared",
-      "scrambled egg with herbs",
-      "rührei mit kräutern zubereitet",
-      "rührei mit kräutern"
+      "scrambled egg prepared",
+      "scrambled egg",
+      "rührei zubereitet",
+      "rührei"
     ]
   },
   {
@@ -20409,10 +20385,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 115
     },
     "aliases": [
-      "scrambled eggs with cheese prepared",
-      "scrambled eggs with cheese",
-      "rührei mit käse zubereitet",
-      "rührei mit käse"
+      "scrambled eggs prepared",
+      "scrambled eggs",
+      "rührei zubereitet",
+      "rührei"
     ]
   },
   {
@@ -20428,10 +20404,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fat": 9.6
     },
     "aliases": [
-      "scrambled eggs with ham prepared",
-      "scrambled eggs with ham",
-      "rührei mit schinken zubereitet",
-      "rührei mit schinken"
+      "scrambled eggs prepared",
+      "scrambled eggs",
+      "rührei zubereitet",
+      "rührei"
     ]
   },
   {
@@ -20448,10 +20424,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.4
     },
     "aliases": [
-      "scrambled eggs with mushrooms prepared",
-      "scrambled eggs with mushrooms",
-      "rührei mit champignons zubereitet",
-      "rührei mit champignons"
+      "scrambled eggs prepared",
+      "scrambled eggs",
+      "rührei zubereitet",
+      "rührei"
     ]
   },
   {
@@ -20622,8 +20598,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "semolina pudding with sugar",
-      "griessköpfli mit zucker"
+      "semolina pudding",
+      "griessköpfli"
     ]
   },
   {
@@ -20647,10 +20623,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "aliases": [
       "semolina pudding prepared",
       "semolina pudding",
-      "semolina pudding prepared with full fat milk",
       "griessbrei zubereitet",
-      "griessbrei",
-      "griessbrei zubereitet mit vollmilch"
+      "griessbrei"
     ]
   },
   {
@@ -20674,10 +20648,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "aliases": [
       "semolina pudding prepared",
       "semolina pudding",
-      "semolina pudding prepared with partially skimmed milk",
       "griessbrei zubereitet",
-      "griessbrei",
-      "griessbrei zubereitet mit teilentrahmter milch"
+      "griessbrei"
     ]
   },
   {
@@ -21207,12 +21179,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fat": 0
     },
     "aliases": [
-      "soft drink with flavor sweetened",
+      "soft drink sweetened",
       "soft drink",
-      "soft drink with flavor",
-      "limonade mit aroma gezuckert",
-      "limonade",
-      "limonade mit aroma"
+      "limonade gezuckert",
+      "limonade"
     ]
   },
   {
@@ -21341,7 +21311,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "soy drink chocolate",
       "soy drink",
       "sojagetränk schokolade",
-      "sojagetränk"
+      "sojagetränk",
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -21360,7 +21332,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     },
     "aliases": [
       "soy sauce",
-      "sojasauce"
+      "sojasauce",
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -21381,7 +21355,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "soya drink plain",
       "soya drink",
       "sojagetränk nature",
-      "sojagetränk"
+      "sojagetränk",
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -21399,12 +21375,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.6
     },
     "aliases": [
-      "soya drink plain with calcium and vitamin fortified",
-      "soya drink",
       "soya drink plain",
-      "sojagetränk nature mit calcium and vitaminen angereichert",
+      "soya drink",
+      "sojagetränk nature",
       "sojagetränk",
-      "sojagetränk nature"
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -21429,7 +21405,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "soya flour defatted",
       "soya flour",
       "sojamehl entfettet",
-      "sojamehl"
+      "sojamehl",
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -21454,7 +21432,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "soya flour full fat",
       "soya flour",
       "sojamehl vollfett",
-      "sojamehl"
+      "sojamehl",
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -21476,7 +21456,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "soya textured pieces",
       "soja texturiert trocken",
       "soja",
-      "soja texturiert granulat"
+      "soja texturiert granulat",
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -21498,7 +21480,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     },
     "aliases": [
       "soybean oil",
-      "sojaöl"
+      "sojaöl",
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -21518,7 +21502,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "soybean sprouts",
       "sojasprossen roh",
       "sojasprossen",
-      "sojakeime"
+      "sojakeime",
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -21543,7 +21529,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "soybean cooked",
       "soybean",
       "sojabohne gekocht",
-      "sojabohne"
+      "sojabohne",
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -21563,7 +21551,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "soybean dried",
       "soybean",
       "sojabohne getrocknet",
-      "sojabohne"
+      "sojabohne",
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -21676,9 +21666,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 250
     },
     "aliases": [
-      "spätzli fried with butter",
+      "spätzli fried",
       "spätzli",
-      "spätzli gebraten mit butter"
+      "spätzli gebraten"
     ]
   },
   {
@@ -22675,7 +22665,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     },
     "aliases": [
       "table salt iodized",
-      "kochsalz mit jod"
+      "kochsalz"
     ]
   },
   {
@@ -22697,7 +22687,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     },
     "aliases": [
       "table salt iodized and fluoridized",
-      "kochsalz mit jod und fluor",
+      "kochsalz",
       "speisesalz"
     ]
   },
@@ -22780,10 +22770,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "teaspoon": 5
     },
     "aliases": [
-      "tartare sauce with rapeseed mayonnaise home-made",
-      "tartare sauce with rapeseed mayonnaise",
-      "tartarsauce mit rapsöl-mayonnaise hausgemacht",
-      "tartarsauce mit rapsöl-mayonnaise"
+      "tartare sauce home-made",
+      "tartare sauce",
+      "tartarsauce -mayonnaise hausgemacht",
+      "tartarsauce -mayonnaise"
     ]
   },
   {
@@ -22931,10 +22921,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.6
     },
     "aliases": [
-      "thin pancakes with bacon prepared",
-      "thin pancakes with bacon",
-      "crêpes mit speck zubereitet",
-      "crêpes mit speck"
+      "thin pancakes prepared",
+      "thin pancakes",
+      "crêpes zubereitet",
+      "crêpes"
     ]
   },
   {
@@ -22956,10 +22946,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 115
     },
     "aliases": [
-      "thin pancakes with camembert cheese prepared",
-      "thin pancakes with camembert cheese",
-      "crêpes mit camembert zubereitet",
-      "crêpes mit camembert"
+      "thin pancakes prepared",
+      "thin pancakes",
+      "crêpes zubereitet",
+      "crêpes"
     ]
   },
   {
@@ -22976,10 +22966,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.5
     },
     "aliases": [
-      "thin pancakes with ham prepared",
-      "thin pancakes with ham",
-      "crêpes mit schinken zubereitet",
-      "crêpes mit schinken"
+      "thin pancakes prepared",
+      "thin pancakes",
+      "crêpes zubereitet",
+      "crêpes"
     ]
   },
   {
@@ -22996,10 +22986,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 1.6
     },
     "aliases": [
-      "thin pancakes with mushrooms prepared",
-      "thin pancakes with mushrooms",
-      "crêpes mit champignonfüllung zubereitet",
-      "crêpes mit champignonfüllung"
+      "thin pancakes prepared",
+      "thin pancakes",
+      "crêpes zubereitet",
+      "crêpes"
     ]
   },
   {
@@ -23016,10 +23006,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 1.6
     },
     "aliases": [
-      "thin pancakes with nutella prepared",
-      "thin pancakes with nutella",
-      "crêpes mit nutella zubereitet",
-      "crêpes mit nutella"
+      "thin pancakes prepared",
+      "thin pancakes",
+      "crêpes zubereitet",
+      "crêpes"
     ]
   },
   {
@@ -23041,10 +23031,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "thin pancakes with sugar and cinnamon prepared",
-      "thin pancakes with sugar and cinnamon",
-      "crêpes mit zimt und zucker zubereitet",
-      "crêpes mit zimt und zucker"
+      "thin pancakes prepared",
+      "thin pancakes",
+      "crêpes zubereitet",
+      "crêpes"
     ]
   },
   {
@@ -23061,10 +23051,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 1.6
     },
     "aliases": [
-      "thin pancakes with vegetable filling prepared",
-      "thin pancakes with vegetable filling",
-      "crêpes mit gemüsefüllung zubereitet",
-      "crêpes mit gemüsefüllung"
+      "thin pancakes prepared",
+      "thin pancakes",
+      "crêpes zubereitet",
+      "crêpes"
     ]
   },
   {
@@ -24040,8 +24030,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.4
     },
     "aliases": [
-      "veal chopped with curry sauce homemade",
-      "veal chopped with curry sauce",
+      "veal chopped homemade",
+      "veal chopped",
       "kalbsgeschnetzeltes an currysauce hausgemacht",
       "kalbsgeschnetzeltes an currysauce"
     ]
@@ -24080,10 +24070,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.6
     },
     "aliases": [
-      "veal ragout with gravy prepared",
-      "veal ragout with gravy",
-      "kalbsragout mit sauce zubereitet",
-      "kalbsragout mit sauce",
+      "veal ragout prepared",
+      "veal ragout",
+      "kalbsragout zubereitet",
+      "kalbsragout",
       "voressen"
     ]
   },
@@ -24769,8 +24759,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 0.2
     },
     "aliases": [
-      "vitello tonnato with garnish",
-      "vitello tonnato mit garnitur"
+      "vitello tonnato"
     ]
   },
   {
@@ -24805,11 +24794,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "fiber": 3.5
     },
     "aliases": [
-      "wafer filled and coated with chocolate",
+      "wafer filled and coated",
       "wafer",
-      "waffelguetzli gefüllt mit schokoladenüberzug",
-      "waffelguetzli",
-      "waffelguetzli gefüllt"
+      "waffelguetzli gefüllt",
+      "waffelguetzli"
     ]
   },
   {
@@ -24968,7 +24956,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "piece": 250
     },
     "aliases": [
-      "weggli bread roll made with butter",
+      "weggli bread roll made",
       "weggli",
       "butterweggli"
     ]
@@ -25594,8 +25582,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "teaspoon": 7
     },
     "aliases": [
-      "wholemeal rice waffles with honey or fruit",
-      "vollkornreiswaffel mit honig oder früchten"
+      "wholemeal rice waffles",
+      "vollkornreiswaffel"
     ]
   },
   {
@@ -25616,8 +25604,8 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "tablespoon": 15
     },
     "aliases": [
-      "wholemeal rice waffles with sweet coating",
-      "vollkornreiswaffel mit süssem überzug"
+      "wholemeal rice waffles",
+      "vollkornreiswaffel"
     ]
   },
   {
@@ -26013,7 +26001,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "yoghurt with added sugar",
+      "yoghurt",
       "joghurt gezuckert",
       "joghurt"
     ]
@@ -26102,12 +26090,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "yogurt flavored low fat with sweetener",
-      "yogurt flavored",
       "yogurt flavored low fat",
-      "joghurt mit aroma mager mit süssstoffen",
-      "joghurt mit aroma",
-      "joghurt mit aroma mager"
+      "yogurt flavored",
+      "joghurt mager",
+      "joghurt"
     ]
   },
   {
@@ -26151,12 +26137,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "yogurt substitute almond based with fruits or flavour with sugar",
-      "yogurt substitute",
       "yogurt substitute almond based",
-      "joghurtalternative aus mandel mit früchten oder aroma gezuckert",
+      "yogurt substitute",
+      "joghurtalternative aus mandel gezuckert",
       "joghurtalternative aus mandel",
-      "joghurtalternative aus mandel mit früchten oder aroma"
+      "mandelmilch",
+      "almond milk"
     ]
   },
   {
@@ -26180,7 +26166,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "yogurt substitute",
       "yogurt substitute based on almond",
       "joghurtalternative aus mandel nature",
-      "joghurtalternative aus mandel"
+      "joghurtalternative aus mandel",
+      "mandelmilch",
+      "almond milk"
     ]
   },
   {
@@ -26227,12 +26215,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "yogurt substitute based on coconut with fruits or flavour with sugar",
-      "yogurt substitute",
       "yogurt substitute based on coconut",
-      "joghurtalternative aus kokosnuss mit früchten oder aroma gezuckert",
-      "joghurtalternative aus kokosnuss",
-      "joghurtalternative aus kokosnuss mit früchten oder aroma"
+      "yogurt substitute",
+      "joghurtalternative aus kokosnuss gezuckert",
+      "joghurtalternative aus kokosnuss"
     ]
   },
   {
@@ -26257,7 +26243,9 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "yogurt substitute",
       "yogurt substitute soy-based",
       "joghurtalternative aus soja nature",
-      "joghurtalternative aus soja"
+      "joghurtalternative aus soja",
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -26278,12 +26266,13 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "yogurt substitute soy-based plain with calcium and vitamin fortified",
+      "yogurt substitute soy-based plain",
       "yogurt substitute",
       "yogurt substitute soy-based",
-      "joghurtalternative aus soja nature mit calcium und vitaminen angereichert",
+      "joghurtalternative aus soja nature",
       "joghurtalternative aus soja",
-      "joghurtalternative aus soja nature"
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -26305,12 +26294,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "yogurt substitute soy-based with fruits or flavour with sugar",
-      "yogurt substitute",
       "yogurt substitute soy-based",
-      "joghurtalternative aus soja mit früchten oder aroma gezuckert",
+      "yogurt substitute",
+      "joghurtalternative aus soja gezuckert",
       "joghurtalternative aus soja",
-      "joghurtalternative aus soja mit früchten oder aroma"
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -26332,12 +26321,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "yogurt substitute soy-based. with fruit or flavour with sugar with calcium and vitamins fortified",
+      "yogurt substitute soy-based.",
       "yogurt substitute",
-      "yogurt substitute soy-based. with fruit or flavour",
-      "joghurtalternative aus soja mit früchten oder aroma gezuckert mit calcium und vitaminen angereichert",
+      "joghurtalternative aus soja gezuckert",
       "joghurtalternative aus soja",
-      "joghurtalternative aus soja mit früchten oder aroma"
+      "sojamilch",
+      "soy milk"
     ]
   },
   {
@@ -26358,10 +26347,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "teaspoon": 5
     },
     "aliases": [
-      "yogurt with cream plain",
-      "yogurt with cream",
-      "joghurt mit rahm nature",
-      "joghurt mit rahm"
+      "yogurt plain",
+      "yogurt",
+      "joghurt nature",
+      "joghurt"
     ]
   },
   {
@@ -26383,12 +26372,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "teaspoon": 5
     },
     "aliases": [
-      "yogurt with cream with fruits or flavour sweetened",
-      "yogurt with cream",
-      "yogurt with cream with fruits or flavour",
-      "joghurt mit rahm mit früchten oder aroma gezuckert",
-      "joghurt mit rahm",
-      "joghurt mit rahm mit früchten oder aroma"
+      "yogurt sweetened",
+      "yogurt",
+      "joghurt gezuckert",
+      "joghurt"
     ]
   },
   {
@@ -26409,12 +26396,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "cup": 200
     },
     "aliases": [
-      "yogurt with fruit low fat with sweetener",
-      "yogurt with fruit",
-      "yogurt with fruit low fat",
-      "joghurt mit früchten mager mit süssstoffen",
-      "joghurt mit früchten",
-      "joghurt mit früchten mager"
+      "yogurt low fat",
+      "yogurt",
+      "joghurt mager",
+      "joghurt"
     ]
   },
   {

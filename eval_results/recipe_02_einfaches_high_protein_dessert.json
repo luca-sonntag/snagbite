@@ -3,7 +3,7 @@
   "recipe": {
     "isRecipe": true,
     "title": "Einfaches High-Protein-Dessert",
-    "description": "Ein schnelles und proteinreiches Schichtdessert mit Skyr, Schokopudding und Butterkeksen.",
+    "description": "Ein schnelles und proteinreiches Schichtdessert mit Skyr, Protein-Pudding und Butterkeksen.",
     "prepTime": 10,
     "cookTime": 0,
     "servings": 1,
@@ -18,7 +18,7 @@
             "unit": "g",
             "calories": 160,
             "protein": 25,
-            "carbs": 10,
+            "carbs": 15,
             "fat": 0,
             "isStaple": false,
             "isVerified": false
@@ -28,15 +28,15 @@
             "baseName": "protein pudding",
             "amount": 200,
             "unit": "g",
-            "calories": 298,
-            "protein": 20.4,
-            "carbs": 5,
-            "fat": 21.8,
+            "calories": 250,
+            "protein": 6.8,
+            "carbs": 46,
+            "fat": 4.2,
             "isStaple": false,
-            "canonicalId": "black_pudding",
-            "matchedName": "Blutwurst",
+            "canonicalId": "pudding_caramel",
+            "matchedName": "Pudding, Caramel",
             "isVerified": true,
-            "category": "MEAT_POULTRY"
+            "category": "SWEETS_SNACKS"
           }
         ]
       },
@@ -45,18 +45,15 @@
         "items": [
           {
             "name": "Butterkekse",
-            "baseName": "butter cookie",
+            "baseName": "butter cookies",
             "amount": 60,
             "unit": "g",
-            "calories": 263,
-            "protein": 2.8,
-            "carbs": 32.3,
-            "fat": 13.4,
+            "calories": 270,
+            "protein": 4,
+            "carbs": 40,
+            "fat": 10,
             "isStaple": false,
-            "canonicalId": "prussian_cookie",
-            "matchedName": "Prussien",
-            "isVerified": true,
-            "category": "SWEETS_SNACKS"
+            "isVerified": false
           }
         ]
       },
@@ -84,7 +81,7 @@
     "instructions": [
       {
         "step": 1,
-        "description": "Den [Vanille-Skyr](ing:skyr), den [Schoko-Protein-Pudding](ing:protein pudding) und die [Butterkekse](ing:butter cookie) abwechselnd in eine Form schichten."
+        "description": "Den [Vanille-Skyr](ing:skyr) und den [Schoko-Protein-Pudding](ing:protein pudding) abwechselnd mit den [Butterkeksen](ing:butter cookies) in ein Glas oder eine Schale schichten."
       },
       {
         "step": 2,
@@ -92,12 +89,12 @@
       },
       {
         "step": 3,
-        "description": "Das Dessert für [3 bis 4 Stunden](timer:12600) in den Kühlschrank stellen."
+        "description": "Für ca. [3 bis 4 Stunden](timer:12600) in den Kühlschrank stellen, damit die Kekse weich werden und das Dessert durchzieht."
       }
     ],
     "equipment": [
-      "Schüssel",
-      "Auflaufform"
+      "Glas oder Schale",
+      "Löffel"
     ],
     "transcript": null,
     "tags": [
@@ -105,17 +102,10 @@
       "Dessert"
     ],
     "emoji": "🍮",
-    "alternativeIngredients": [
-      {
-        "original": "Butterkekse",
-        "substitute": "Butterkekse mit 30 % weniger Zucker",
-        "notes": "Für eine zuckerreduzierte Variante."
-      }
-    ],
     "nutritionalValues": {
       "calories": 750,
-      "carbs": 66,
-      "fat": 15,
+      "carbs": 71,
+      "fat": 14,
       "protein": 72
     }
   },
@@ -125,13 +115,13 @@
     "servings": 1,
     "nutritionalValues": {
       "calories": 750,
-      "carbs": 66,
-      "fat": 15,
+      "carbs": 71,
+      "fat": 14,
       "protein": 72
     },
     "totalIngredients": 4,
-    "verifiedCount": 3,
-    "matchRatePercent": 75,
+    "verifiedCount": 2,
+    "matchRatePercent": 50,
     "ingredients": [
       {
         "rawName": "Vanille-Skyr",
@@ -141,7 +131,7 @@
         "isVerified": false,
         "calories": 160,
         "protein": 25,
-        "carbs": 10,
+        "carbs": 15,
         "fat": 0
       },
       {
@@ -149,26 +139,24 @@
         "baseName": "protein pudding",
         "amount": 200,
         "unit": "g",
-        "canonicalId": "black_pudding",
-        "matchedName": "Blutwurst",
+        "canonicalId": "pudding_caramel",
+        "matchedName": "Pudding, Caramel",
         "isVerified": true,
-        "calories": 298,
-        "protein": 20.4,
-        "carbs": 5,
-        "fat": 21.8
+        "calories": 250,
+        "protein": 6.8,
+        "carbs": 46,
+        "fat": 4.2
       },
       {
         "rawName": "Butterkekse",
-        "baseName": "butter cookie",
+        "baseName": "butter cookies",
         "amount": 60,
         "unit": "g",
-        "canonicalId": "prussian_cookie",
-        "matchedName": "Prussien",
-        "isVerified": true,
-        "calories": 263,
-        "protein": 2.8,
-        "carbs": 32.3,
-        "fat": 13.4
+        "isVerified": false,
+        "calories": 270,
+        "protein": 4,
+        "carbs": 40,
+        "fat": 10
       },
       {
         "rawName": "Backkakao",

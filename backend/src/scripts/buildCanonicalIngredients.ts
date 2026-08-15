@@ -226,6 +226,7 @@ function cleanAlias(text: string): string {
   return text
     .toLowerCase()
     .replace(/\([^)]*\)/g, ' ')
+    .replace(/\b(mit|with)\s+[a-zäöüß0-9\s]+/gi, ' ')
     .replace(/[()[\]{},;:"'!?]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -388,6 +389,23 @@ function generateAliases(nameEn: string, nameDe: string, synEn?: string, synDe?:
   }
   if (nameDe.startsWith('Butter,') || nameEn.startsWith('Butter,')) {
     add('butter');
+  }
+  if (combined.includes('mandel') && (combined.includes('drink') || combined.includes('getränk') || combined.includes('almond'))) {
+    add('mandelmilch');
+    add('almond milk');
+  }
+  if (combined.includes('hafer') && (combined.includes('drink') || combined.includes('getränk') || combined.includes('oat'))) {
+    add('hafermilch');
+    add('oat milk');
+  }
+  if (combined.includes('soja') && (combined.includes('drink') || combined.includes('getränk') || combined.includes('soy'))) {
+    add('sojamilch');
+    add('soy milk');
+  }
+  if (combined.includes('teigwaren mit ei, trocken') || combined.includes('pasta with egg, dry')) {
+    add('pasta');
+    add('nudeln');
+    add('teigwaren');
   }
 
   return Array.from(aliases);

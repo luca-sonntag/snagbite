@@ -1,10 +1,10 @@
 {
-  "evaluatedAt": "2026-08-15T16:34:00.380Z",
+  "evaluatedAt": "2026-08-15T16:54:21.552Z",
   "totalUrls": 64,
   "processedRecipes": 5,
   "globalTotalIngredients": 46,
-  "globalVerifiedIngredients": 43,
-  "globalMatchRatePercent": 93,
+  "globalVerifiedIngredients": 33,
+  "globalMatchRatePercent": 72,
   "unverifiedIngredients": [
     {
       "recipeTitle": "Flammkuchen-Style Pasta",
@@ -13,9 +13,27 @@
       "unit": "EL"
     },
     {
+      "recipeTitle": "Flammkuchen-Style Pasta",
+      "rawName": "Pfeffer",
+      "baseName": "pepper",
+      "unit": "Prise"
+    },
+    {
+      "recipeTitle": "Flammkuchen-Style Pasta",
+      "rawName": "Cayennepfeffer",
+      "baseName": "cayenne pepper",
+      "unit": "Prise"
+    },
+    {
       "recipeTitle": "Einfaches High-Protein-Dessert",
       "rawName": "Vanille-Skyr",
       "baseName": "skyr",
+      "unit": "g"
+    },
+    {
+      "recipeTitle": "Einfaches High-Protein-Dessert",
+      "rawName": "Butterkekse",
+      "baseName": "butter cookies",
       "unit": "g"
     },
     {
@@ -23,6 +41,48 @@
       "rawName": "Creme fraiche",
       "baseName": "creme fraiche",
       "unit": "EL"
+    },
+    {
+      "recipeTitle": "Flammkuchen-Style Pasta",
+      "rawName": "Pfeffer",
+      "baseName": "pepper",
+      "unit": "Prise"
+    },
+    {
+      "recipeTitle": "Flammkuchen-Style Pasta",
+      "rawName": "Cayennepfeffer",
+      "baseName": "cayenne pepper",
+      "unit": "Prise"
+    },
+    {
+      "recipeTitle": "Pesto-Nudelsalat",
+      "rawName": "Wasser",
+      "baseName": "water",
+      "unit": "EL"
+    },
+    {
+      "recipeTitle": "Brownie Baked Oats",
+      "rawName": "Schokoladen-Chunks",
+      "baseName": "chocolate chips",
+      "unit": "g"
+    },
+    {
+      "recipeTitle": "Brownie Baked Oats",
+      "rawName": "Proteinpulver",
+      "baseName": "protein powder",
+      "unit": "g"
+    },
+    {
+      "recipeTitle": "Brownie Baked Oats",
+      "rawName": "Süßungsmittel",
+      "baseName": "sweetener",
+      "unit": "nach Bedarf"
+    },
+    {
+      "recipeTitle": "Brownie Baked Oats",
+      "rawName": "Backpulver",
+      "baseName": "baking powder",
+      "unit": "TL"
     }
   ],
   "verifiedIngredients": [
@@ -79,8 +139,8 @@
       "recipeTitle": "Flammkuchen-Style Pasta",
       "rawName": "Pasta Rustica Flammkuchen Style",
       "baseName": "pasta",
-      "matchedName": "Teigwaren, frisch, gefüllt mit Spinat und Ricotta, roh",
-      "canonicalId": "pasta_fresh_filled_with_spinach_and_ricotta_raw"
+      "matchedName": "Teigwaren mit Ei, trocken",
+      "canonicalId": "pasta_with_egg_dry"
     },
     {
       "recipeTitle": "Flammkuchen-Style Pasta",
@@ -91,38 +151,17 @@
     },
     {
       "recipeTitle": "Flammkuchen-Style Pasta",
-      "rawName": "Pfeffer",
-      "baseName": "pepper",
-      "matchedName": "Peperoni, rot, roh",
-      "canonicalId": "bell_pepper_red_raw"
-    },
-    {
-      "recipeTitle": "Flammkuchen-Style Pasta",
       "rawName": "Paprikapulver",
       "baseName": "paprika",
       "matchedName": "Paprika (Gewürz)",
       "canonicalId": "paprika"
     },
     {
-      "recipeTitle": "Flammkuchen-Style Pasta",
-      "rawName": "Cayennepfeffer",
-      "baseName": "cayenne pepper",
-      "matchedName": "Peperoni, rot, roh",
-      "canonicalId": "bell_pepper_red_raw"
-    },
-    {
       "recipeTitle": "Einfaches High-Protein-Dessert",
       "rawName": "Schoko-Protein-Pudding",
       "baseName": "protein pudding",
-      "matchedName": "Blutwurst",
-      "canonicalId": "black_pudding"
-    },
-    {
-      "recipeTitle": "Einfaches High-Protein-Dessert",
-      "rawName": "Butterkekse",
-      "baseName": "butter cookie",
-      "matchedName": "Prussien",
-      "canonicalId": "prussian_cookie"
+      "matchedName": "Pudding, Caramel",
+      "canonicalId": "pudding_caramel"
     },
     {
       "recipeTitle": "Einfaches High-Protein-Dessert",
@@ -184,8 +223,8 @@
       "recipeTitle": "Flammkuchen-Style Pasta",
       "rawName": "Pasta Rustica Flammkuchen Style",
       "baseName": "pasta",
-      "matchedName": "Teigwaren, frisch, gefüllt mit Spinat und Ricotta, roh",
-      "canonicalId": "pasta_fresh_filled_with_spinach_and_ricotta_raw"
+      "matchedName": "Teigwaren mit Ei, trocken",
+      "canonicalId": "pasta_with_egg_dry"
     },
     {
       "recipeTitle": "Flammkuchen-Style Pasta",
@@ -196,24 +235,10 @@
     },
     {
       "recipeTitle": "Flammkuchen-Style Pasta",
-      "rawName": "Pfeffer",
-      "baseName": "pepper",
-      "matchedName": "Peperoni, rot, roh",
-      "canonicalId": "bell_pepper_red_raw"
-    },
-    {
-      "recipeTitle": "Flammkuchen-Style Pasta",
       "rawName": "Paprikapulver",
       "baseName": "paprika",
       "matchedName": "Paprika (Gewürz)",
       "canonicalId": "paprika"
-    },
-    {
-      "recipeTitle": "Flammkuchen-Style Pasta",
-      "rawName": "Cayennepfeffer",
-      "baseName": "cayenne pepper",
-      "matchedName": "Peperoni, rot, roh",
-      "canonicalId": "bell_pepper_red_raw"
     },
     {
       "recipeTitle": "Pesto-Nudelsalat",
@@ -240,8 +265,8 @@
       "recipeTitle": "Pesto-Nudelsalat",
       "rawName": "Pasta",
       "baseName": "pasta",
-      "matchedName": "Teigwaren, frisch, gefüllt mit Spinat und Ricotta, roh",
-      "canonicalId": "pasta_fresh_filled_with_spinach_and_ricotta_raw"
+      "matchedName": "Teigwaren mit Ei, trocken",
+      "canonicalId": "pasta_with_egg_dry"
     },
     {
       "recipeTitle": "Pesto-Nudelsalat",
@@ -249,13 +274,6 @@
       "baseName": "pesto",
       "matchedName": "Pestosauce, rot",
       "canonicalId": "pesto_sauce_red"
-    },
-    {
-      "recipeTitle": "Pesto-Nudelsalat",
-      "rawName": "Wasser",
-      "baseName": "water",
-      "matchedName": "Wassereis",
-      "canonicalId": "water_ice"
     },
     {
       "recipeTitle": "Pesto-Nudelsalat",
@@ -282,8 +300,8 @@
       "recipeTitle": "Brownie Baked Oats",
       "rawName": "Mandelmilch",
       "baseName": "almond milk",
-      "matchedName": "Tilsiter, Rohmilch, vollfett",
-      "canonicalId": "tilsiter_raw_milk_at_least_45_fidm"
+      "matchedName": "Mandelgetränk, nature",
+      "canonicalId": "almond_drink_plain"
     },
     {
       "recipeTitle": "Brownie Baked Oats",
@@ -294,38 +312,10 @@
     },
     {
       "recipeTitle": "Brownie Baked Oats",
-      "rawName": "Schokoladen-Chunks",
-      "baseName": "chocolate chips",
-      "matchedName": "Pommes Chips",
-      "canonicalId": "pommes_chips"
-    },
-    {
-      "recipeTitle": "Brownie Baked Oats",
-      "rawName": "Proteinpulver",
-      "baseName": "protein powder",
-      "matchedName": "Vollmilchpulver",
-      "canonicalId": "whole_milk_powder"
-    },
-    {
-      "recipeTitle": "Brownie Baked Oats",
-      "rawName": "Süßungsmittel",
-      "baseName": "sweetener",
-      "matchedName": "Colagetränk, mit Süssstoffen",
-      "canonicalId": "cola_beverage_with_sweetener"
-    },
-    {
-      "recipeTitle": "Brownie Baked Oats",
       "rawName": "Salz",
       "baseName": "salt",
       "matchedName": "Salz, Himalayasalz",
       "canonicalId": "salt_himalaya_salt"
-    },
-    {
-      "recipeTitle": "Brownie Baked Oats",
-      "rawName": "Backpulver",
-      "baseName": "baking powder",
-      "matchedName": "Vollmilchpulver",
-      "canonicalId": "whole_milk_powder"
     }
   ],
   "recipes": [
@@ -334,14 +324,14 @@
       "title": "Flammkuchen-Style Pasta",
       "servings": 4,
       "nutritionalValues": {
-        "calories": 563,
-        "protein": 25.4,
-        "carbs": 18.1,
-        "fat": 42.3
+        "calories": 640,
+        "protein": 27.7,
+        "carbs": 38,
+        "fat": 40.8
       },
       "totalIngredients": 13,
-      "verifiedCount": 12,
-      "matchRatePercent": 92,
+      "verifiedCount": 10,
+      "matchRatePercent": 77,
       "ingredients": [
         {
           "rawName": "Zwiebel",
@@ -450,13 +440,13 @@
           "baseName": "pasta",
           "amount": 2,
           "unit": "Packung",
-          "canonicalId": "pasta_fresh_filled_with_spinach_and_ricotta_raw",
-          "matchedName": "Teigwaren, frisch, gefüllt mit Spinat und Ricotta, roh",
+          "canonicalId": "pasta_with_egg_dry",
+          "matchedName": "Teigwaren mit Ei, trocken",
           "isVerified": true,
-          "calories": 424,
-          "protein": 17.4,
-          "carbs": 60,
-          "fat": 11.4
+          "calories": 730,
+          "protein": 26.6,
+          "carbs": 139.8,
+          "fat": 5.6
         },
         {
           "rawName": "Salz",
@@ -476,9 +466,7 @@
           "baseName": "pepper",
           "amount": 1,
           "unit": "Prise",
-          "canonicalId": "bell_pepper_red_raw",
-          "matchedName": "Peperoni, rot, roh",
-          "isVerified": true,
+          "isVerified": false,
           "calories": 0,
           "protein": 0,
           "carbs": 0,
@@ -502,9 +490,7 @@
           "baseName": "cayenne pepper",
           "amount": 1,
           "unit": "Prise",
-          "canonicalId": "bell_pepper_red_raw",
-          "matchedName": "Peperoni, rot, roh",
-          "isVerified": true,
+          "isVerified": false,
           "calories": 0,
           "protein": 0,
           "carbs": 0,
@@ -518,13 +504,13 @@
       "servings": 1,
       "nutritionalValues": {
         "calories": 750,
-        "carbs": 66,
-        "fat": 15,
+        "carbs": 71,
+        "fat": 14,
         "protein": 72
       },
       "totalIngredients": 4,
-      "verifiedCount": 3,
-      "matchRatePercent": 75,
+      "verifiedCount": 2,
+      "matchRatePercent": 50,
       "ingredients": [
         {
           "rawName": "Vanille-Skyr",
@@ -534,7 +520,7 @@
           "isVerified": false,
           "calories": 160,
           "protein": 25,
-          "carbs": 10,
+          "carbs": 15,
           "fat": 0
         },
         {
@@ -542,26 +528,24 @@
           "baseName": "protein pudding",
           "amount": 200,
           "unit": "g",
-          "canonicalId": "black_pudding",
-          "matchedName": "Blutwurst",
+          "canonicalId": "pudding_caramel",
+          "matchedName": "Pudding, Caramel",
           "isVerified": true,
-          "calories": 298,
-          "protein": 20.4,
-          "carbs": 5,
-          "fat": 21.8
+          "calories": 250,
+          "protein": 6.8,
+          "carbs": 46,
+          "fat": 4.2
         },
         {
           "rawName": "Butterkekse",
-          "baseName": "butter cookie",
+          "baseName": "butter cookies",
           "amount": 60,
           "unit": "g",
-          "canonicalId": "prussian_cookie",
-          "matchedName": "Prussien",
-          "isVerified": true,
-          "calories": 263,
-          "protein": 2.8,
-          "carbs": 32.3,
-          "fat": 13.4
+          "isVerified": false,
+          "calories": 270,
+          "protein": 4,
+          "carbs": 40,
+          "fat": 10
         },
         {
           "rawName": "Backkakao",
@@ -583,14 +567,14 @@
       "title": "Flammkuchen-Style Pasta",
       "servings": 4,
       "nutritionalValues": {
-        "calories": 563,
-        "protein": 25.4,
-        "carbs": 18.1,
-        "fat": 42.3
+        "calories": 640,
+        "protein": 27.7,
+        "carbs": 38,
+        "fat": 40.8
       },
       "totalIngredients": 13,
-      "verifiedCount": 12,
-      "matchRatePercent": 92,
+      "verifiedCount": 10,
+      "matchRatePercent": 77,
       "ingredients": [
         {
           "rawName": "Zwiebel",
@@ -699,13 +683,13 @@
           "baseName": "pasta",
           "amount": 2,
           "unit": "Packung",
-          "canonicalId": "pasta_fresh_filled_with_spinach_and_ricotta_raw",
-          "matchedName": "Teigwaren, frisch, gefüllt mit Spinat und Ricotta, roh",
+          "canonicalId": "pasta_with_egg_dry",
+          "matchedName": "Teigwaren mit Ei, trocken",
           "isVerified": true,
-          "calories": 424,
-          "protein": 17.4,
-          "carbs": 60,
-          "fat": 11.4
+          "calories": 730,
+          "protein": 26.6,
+          "carbs": 139.8,
+          "fat": 5.6
         },
         {
           "rawName": "Salz",
@@ -725,9 +709,7 @@
           "baseName": "pepper",
           "amount": 1,
           "unit": "Prise",
-          "canonicalId": "bell_pepper_red_raw",
-          "matchedName": "Peperoni, rot, roh",
-          "isVerified": true,
+          "isVerified": false,
           "calories": 0,
           "protein": 0,
           "carbs": 0,
@@ -751,9 +733,7 @@
           "baseName": "cayenne pepper",
           "amount": 1,
           "unit": "Prise",
-          "canonicalId": "bell_pepper_red_raw",
-          "matchedName": "Peperoni, rot, roh",
-          "isVerified": true,
+          "isVerified": false,
           "calories": 0,
           "protein": 0,
           "carbs": 0,
@@ -766,14 +746,14 @@
       "title": "Pesto-Nudelsalat",
       "servings": 4,
       "nutritionalValues": {
-        "calories": 352,
-        "protein": 17,
-        "carbs": 24.7,
-        "fat": 19.2
+        "calories": 445,
+        "protein": 19.8,
+        "carbs": 48.8,
+        "fat": 17.4
       },
       "totalIngredients": 7,
-      "verifiedCount": 7,
-      "matchRatePercent": 100,
+      "verifiedCount": 6,
+      "matchRatePercent": 86,
       "ingredients": [
         {
           "rawName": "Cocktailtomaten",
@@ -819,13 +799,13 @@
           "baseName": "pasta",
           "amount": 250,
           "unit": "g",
-          "canonicalId": "pasta_fresh_filled_with_spinach_and_ricotta_raw",
-          "matchedName": "Teigwaren, frisch, gefüllt mit Spinat und Ricotta, roh",
+          "canonicalId": "pasta_with_egg_dry",
+          "matchedName": "Teigwaren mit Ei, trocken",
           "isVerified": true,
-          "calories": 530,
-          "protein": 21.8,
-          "carbs": 75,
-          "fat": 14.3
+          "calories": 913,
+          "protein": 33.3,
+          "carbs": 174.8,
+          "fat": 7
         },
         {
           "rawName": "Pesto Genovese",
@@ -845,12 +825,10 @@
           "baseName": "water",
           "amount": 1,
           "unit": "EL",
-          "canonicalId": "water_ice",
-          "matchedName": "Wassereis",
-          "isVerified": true,
-          "calories": 13,
+          "isVerified": false,
+          "calories": 0,
           "protein": 0,
-          "carbs": 3.3,
+          "carbs": 0,
           "fat": 0
         },
         {
@@ -879,8 +857,8 @@
         "protein": 40
       },
       "totalIngredients": 9,
-      "verifiedCount": 9,
-      "matchRatePercent": 100,
+      "verifiedCount": 5,
+      "matchRatePercent": 56,
       "ingredients": [
         {
           "rawName": "Banane",
@@ -913,13 +891,13 @@
           "baseName": "almond milk",
           "amount": 160,
           "unit": "ml",
-          "canonicalId": "tilsiter_raw_milk_at_least_45_fidm",
-          "matchedName": "Tilsiter, Rohmilch, vollfett",
+          "canonicalId": "almond_drink_plain",
+          "matchedName": "Mandelgetränk, nature",
           "isVerified": true,
-          "calories": 598,
-          "protein": 41,
-          "carbs": 0,
-          "fat": 48.3
+          "calories": 53,
+          "protein": 1.8,
+          "carbs": 2.1,
+          "fat": 4.2
         },
         {
           "rawName": "Kakaopulver",
@@ -939,35 +917,29 @@
           "baseName": "chocolate chips",
           "amount": 10,
           "unit": "g",
-          "canonicalId": "pommes_chips",
-          "matchedName": "Pommes Chips",
-          "isVerified": true,
-          "calories": 54,
-          "protein": 0.5,
-          "carbs": 4.9,
-          "fat": 3.5
+          "isVerified": false,
+          "calories": 50,
+          "protein": 1,
+          "carbs": 6,
+          "fat": 3
         },
         {
           "rawName": "Proteinpulver",
           "baseName": "protein powder",
           "amount": 40,
           "unit": "g",
-          "canonicalId": "whole_milk_powder",
-          "matchedName": "Vollmilchpulver",
-          "isVerified": true,
-          "calories": 192,
-          "protein": 9.9,
-          "carbs": 14,
-          "fat": 10.5
+          "isVerified": false,
+          "calories": 140,
+          "protein": 30,
+          "carbs": 3,
+          "fat": 1
         },
         {
           "rawName": "Süßungsmittel",
           "baseName": "sweetener",
           "amount": 1,
           "unit": "nach Bedarf",
-          "canonicalId": "cola_beverage_with_sweetener",
-          "matchedName": "Colagetränk, mit Süssstoffen",
-          "isVerified": true,
+          "isVerified": false,
           "calories": 0,
           "protein": 0,
           "carbs": 0,
@@ -991,13 +963,11 @@
           "baseName": "baking powder",
           "amount": 0.5,
           "unit": "TL",
-          "canonicalId": "whole_milk_powder",
-          "matchedName": "Vollmilchpulver",
-          "isVerified": true,
-          "calories": 12,
-          "protein": 0.6,
-          "carbs": 0.9,
-          "fat": 0.7
+          "isVerified": false,
+          "calories": 0,
+          "protein": 0,
+          "carbs": 0,
+          "fat": 0
         }
       ]
     }

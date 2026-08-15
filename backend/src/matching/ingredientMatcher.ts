@@ -12,9 +12,11 @@ function getSimplicityScore(item: CanonicalIngredient): number {
   const en = (item.name_en || '').toLowerCase();
   let score = 100 - de.length; // shorter name = simpler base food
   if (de.includes('roh') || en.includes('raw')) score += 30;
-  if (de.includes('nature') || en.includes('plain') || en.includes('unsalted')) score += 20;
+  if (de.includes('nature') || en.includes('plain') || en.includes('unsalted') || de.includes('trocken') || en.includes('dry')) score += 20;
   if (
     de.includes('mit ') ||
+    de.includes('gefüllt') ||
+    en.includes('filled') ||
     de.includes('zubereitet') ||
     de.includes('gericht') ||
     de.includes('salat') ||
@@ -22,10 +24,22 @@ function getSimplicityScore(item: CanonicalIngredient): number {
     de.includes('sauce') ||
     de.includes('burger')
   ) {
-    score -= 50;
+    score -= 60;
   }
   return score;
 }
+
+// Allowed / natural adjacent category pairs (distance = 0)
+const COMPATIBLE_CATEGORY_PAIRS = new Set([
+  'GRAINS_PASTA:PANTRY_BAKING',
+  'PANTRY_BAKING:GRAINS_PASTA',
+  'DAIRY_EGGS:OILS_CONDIMENTS',
+  'OILS_CONDIMENTS:DAIRY_EGGS',
+  'SWEETS_SNACKS:PANTRY_BAKING',
+  'PANTRY_BAKING:SWEETS_SNACKS',
+  'SWEETS_SNACKS:DAIRY_EGGS',
+  'DAIRY_EGGS:SWEETS_SNACKS',
+]);
 
 for (const item of CANONICAL_INGREDIENTS) {
   byId.set(item.id.toLowerCase().trim(), item);
@@ -109,12 +123,42 @@ const GENERIC_STOP_WORDS = new Set([
   'unbekannt',
 ]);
 
+const GENERIC_FOOD_FORMS = new Set([
+  'pulver',
+  'powder',
+  'paste',
+  'sauce',
+  'soße',
+  'sosse',
+  'salat',
+  'salad',
+  'suppe',
+  'soup',
+  'drink',
+  'sirup',
+  'syrup',
+  'extrakt',
+  'extract',
+  'gericht',
+  'dish',
+  'burger',
+  'mix',
+  'gewürz',
+  'seasoning',
+  'zubereitung',
+  'chips',
+  'chunks',
+  'flocken',
+  'flakes',
+  'stuecke',
+  'stücke',
+]);
+
 /**
  * Checks whether candidate tokens match the query tokens with head-noun validation.
- * In culinary names (DE & EN), the last token of a compound noun or phrase is typically
- * the head noun (e.g., "cherry tomato" -> "tomato", "frühlingszwiebel" -> "zwiebel").
- * Matching only a modifier (e.g. "cherry" to "kirsch" or "spring" to "frühlingsrolle")
- * without the head noun is rejected.
+ * In culinary names (DE & EN), matching ONLY a generic food form (e.g. "powder", "paste", "sauce")
+ * without the qualifying ingredient noun (e.g. "baking" vs "chocolate", "tomato" vs "wasabi")
+ * is strictly rejected.
  */
 function isGenericTokenMatch(queryTokens: string[], candidateTokens: string[]): { matched: boolean; score: number } {
   if (queryTokens.length === 0 || candidateTokens.length === 0) return { matched: false, score: 0 };
@@ -125,27 +169,45 @@ function isGenericTokenMatch(queryTokens: string[], candidateTokens: string[]): 
   // Exact match
   if (queryStr === candStr) return { matched: true, score: 500 };
 
-  // Token-by-token comparison with word-boundary awareness
+  // Token-by-token comparison with word-boundary and substantive noun awareness
   let matchedTokens = 0;
+  let nonGenericMatchedTokens = 0;
+
   for (const qt of queryTokens) {
     if (qt.length < 2) continue;
     for (const ct of candidateTokens) {
       if (ct.length < 2) continue;
+
+      let isMatch = false;
+      let matchedWord = '';
+
       if (qt === ct) {
-        matchedTokens++;
-        break;
+        isMatch = true;
+        matchedWord = qt;
+      } else if (qt.length >= 4 && ct.length >= 4 && (qt.startsWith(ct) || ct.startsWith(qt)) && Math.abs(qt.length - ct.length) <= 3) {
+        // Stem / Plural / Prefix match
+        isMatch = true;
+        matchedWord = qt;
+      } else if (qt.length >= 6 && ct.length >= 4 && qt.endsWith(ct) && !GENERIC_FOOD_FORMS.has(ct)) {
+        // Compound word head match (e.g. "kirschtomaten" -> ends with "tomaten")
+        // Exclude generic suffixes like "backpulver" ending with "pulver"
+        isMatch = true;
+        matchedWord = ct;
       }
-      // Stem / Plural / Prefix match (both must be >= 4 chars)
-      if (qt.length >= 4 && ct.length >= 4 && (qt.startsWith(ct) || ct.startsWith(qt)) && Math.abs(qt.length - ct.length) <= 3) {
+
+      if (isMatch) {
         matchedTokens++;
-        break;
-      }
-      // Compound word head match: e.g. "kirschtomaten" -> ends with "tomaten" (min 5 chars)
-      if (qt.length >= 6 && ct.length >= 4 && qt.endsWith(ct)) {
-        matchedTokens++;
+        if (!GENERIC_FOOD_FORMS.has(matchedWord.toLowerCase()) && !GENERIC_STOP_WORDS.has(matchedWord.toLowerCase())) {
+          nonGenericMatchedTokens++;
+        }
         break;
       }
     }
+  }
+
+  // Reject if the only matched token is a generic container/form (e.g. only 'powder' or only 'paste')
+  if (nonGenericMatchedTokens === 0) {
+    return { matched: false, score: 0 };
   }
 
   const queryHead = queryTokens[queryTokens.length - 1];
@@ -260,19 +322,16 @@ export function findCanonicalIngredient(rawName: string, baseName?: string, expe
           if (item.category === cleanCategory) {
             matchScore += 150; // High confidence boost for matching department
           } else if (item.category === 'PREPARED_DISHES') {
-            matchScore -= 200; // Strong penalty: Never match raw ingredient to a prepared meal
-          } else if (
-            (cleanCategory === 'VEGETABLES' || cleanCategory === 'FRUITS') &&
-            (item.category === 'BEVERAGES' || item.category === 'SWEETS_SNACKS')
-          ) {
-            matchScore -= 180; // E.g. cherry tomato vs Cherry Liqueur / Energy drink
+            matchScore -= 250; // Strong penalty: Never match raw ingredient to a prepared meal
+          } else if (COMPATIBLE_CATEGORY_PAIRS.has(`${cleanCategory}:${item.category}`)) {
+            matchScore -= 20; // Mild adjustment for naturally adjacent categories
           } else {
-            matchScore -= 60; // Mild cross-category penalty
+            matchScore -= 350; // Strict penalty for disjoint category mismatches
           }
         } else {
           // If no recipe category given, still heavily penalize prepared dishes
           if (item.category === 'PREPARED_DISHES') {
-            matchScore -= 180;
+            matchScore -= 200;
           }
         }
 
