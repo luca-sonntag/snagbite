@@ -121,6 +121,16 @@ describe('Ingredient Matcher & Normalizer', () => {
       const oil = findCanonicalIngredient('Öl', 'cooking oil', 'OILS_CONDIMENTS');
       assert.ok(oil);
       assert.ok(oil.name_de.toLowerCase().includes('pflanzenöl') || oil.name_en.toLowerCase().includes('vegetable'));
+
+      // 11. Regional / dialect matching via synonyms (Topfen -> Quark / Speisequark)
+      const topfen = findCanonicalIngredient('Topfen', 'curd', 'DAIRY_EGGS', ['Magerquark', 'Speisequark', 'Quark']);
+      assert.ok(topfen);
+      assert.ok(topfen.name_de.toLowerCase().includes('quark') || topfen.name_en.toLowerCase().includes('curd'));
+
+      // 12. Regional meat term via synonyms (Hendl -> Poulet)
+      const hendl = findCanonicalIngredient('Hendlbrust', 'chicken breast', 'MEAT_POULTRY', ['Pouletbrust', 'Hähnchenbrust']);
+      assert.ok(hendl);
+      assert.ok(hendl.name_de.toLowerCase().includes('poulet'));
     });
   });
 

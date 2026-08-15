@@ -83,6 +83,13 @@ const recipeSchema = {
                   type: FunctionDeclarationSchemaType.STRING,
                   description: 'The core standard noun in singular form strictly in ENGLISH used as a universal database key to group similar ingredients across recipes in any language. Be specific with culinary qualifiers: e.g., use "ground beef" for Rinderhack, "cooked ham" for Kochschinken vs "cured ham"/"bacon" for Rohschinken/Speck, "cottage cheese" for Hüttenkäse vs "shredded cheese"/"gouda" for Reibekäse, "chicken breast" for Hähnchenbrust, "oat milk"/"almond milk"/"soy cream" for plant-based dairy, "almond flour" for Mandelmehl, "egg yolk" for Eigelb, "onion" for Zwiebel, "spring onion" for Frühlingszwiebel, "garlic" for Knoblauch.',
                 },
+                synonyms: {
+                  type: FunctionDeclarationSchemaType.ARRAY,
+                  description: '2-4 alternative culinary names, regional German/Austrian/Swiss terms or common synonyms in singular or plural form (e.g. for "Frühlingszwiebel": ["Bundzwiebel", "Lauchzwiebel", "Jungzwiebel", "scallion", "green onion"]; for "Sahne": ["Rahm", "Vollrahm", "Schlagobers", "Schlagsahne", "heavy cream"]; for "Quark": ["Topfen", "Speisequark", "curd"]; for "Hackfleisch": ["Gehacktes", "Faschiertes", "minced meat"]; for "Hähnchenbrust": ["Pouletbrust", "Hühnerbrust"]; for "Paniermehl": ["Semmelbrösel", "Panierbrot", "breadcrumbs"]).',
+                  items: {
+                    type: FunctionDeclarationSchemaType.STRING,
+                  },
+                },
                 parentIngredient: {
                   type: FunctionDeclarationSchemaType.OBJECT,
                   description: 'Set ONLY if this ingredient is a derived component/part that is NOT bought separately as its own package in stores (e.g. for "Eigelb" or "Eiweiß", parentIngredient MUST be { "name": "Ei", "baseName": "egg", "unit": "Stück" }; for "Zitronenabrieb" or "Zitronensaft", parentIngredient MUST be { "name": "Zitrone", "baseName": "lemon", "unit": "Stück" }; for "Knoblauchzehe", parentIngredient MUST be { "name": "Knoblauch", "baseName": "garlic", "unit": "Zehe" }). Leave empty or null if the ingredient is already a standalone primary grocery item sold separately in stores (e.g. "Hähnchenbrust", "Hähnchenkeule", "Rinderhackfleisch", "Butter", "Parmesan" MUST leave parentIngredient empty/null).',

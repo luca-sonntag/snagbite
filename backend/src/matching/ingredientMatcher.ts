@@ -261,17 +261,30 @@ function isGenericTokenMatch(queryTokens: string[], candidateTokens: string[]): 
 
 /**
  * Finds a matching canonical ingredient using a high-precision multi-stage lookup:
- * 1. Exact baseName / rawName O(1) index check
- * 2. Category-scoped and precision-scored token matching preferring raw/base foods over composite dishes
+ * 1. Exact baseName / rawName / synonym O(1) index check
+ * 2. Common Candidate Scoring Pool across rawName, baseName and all synonyms:
+ *    - Exact matches on synonyms (e.g. "Bundzwiebel" -> "Bundzwiebel, roh") outscore
+ *      partial substring token matches on rawName (e.g. "Frühlingszwiebel" -> "Speisezwiebel" via "-zwiebel").
+ *    - Category-scoped and precision-scored token matching preferring raw/base foods over composite dishes.
  */
-export function findCanonicalIngredient(rawName: string, baseName?: string, expectedCategory?: string): CanonicalIngredient | null {
+export function findCanonicalIngredient(
+  rawName: string,
+  baseName?: string,
+  expectedCategory?: string,
+  synonyms?: string[]
+): CanonicalIngredient | null {
   const normBase = baseName ? normalizeSearchTerm(baseName) : '';
   const normRaw = normalizeSearchTerm(rawName);
-  const queryCombined = `${normRaw} ${normBase}`.toLowerCase();
+  const normSynonyms = (synonyms || [])
+    .map(s => normalizeSearchTerm(s))
+    .filter(s => s && s.length >= 2 && !GENERIC_STOP_WORDS.has(s));
+
+  const queryCombined = [normRaw, normBase, ...normSynonyms].join(' ').toLowerCase();
   const wantsMager = queryCombined.includes('mager') || queryCombined.includes('lean') || queryCombined.includes('light') || queryCombined.includes('low fat');
 
   const rawTokens = normRaw.split(/\s+/).filter(t => t.length > 0 && !GENERIC_STOP_WORDS.has(t));
   const baseTokens = normBase.split(/\s+/).filter(t => t.length > 0 && !GENERIC_STOP_WORDS.has(t));
+  const synonymTokensList = normSynonyms.map(syn => syn.split(/\s+/).filter(t => t.length > 0 && !GENERIC_STOP_WORDS.has(t)));
 
   const cleanCategory = expectedCategory ? expectedCategory.trim().toUpperCase() : undefined;
 
@@ -296,7 +309,17 @@ export function findCanonicalIngredient(rawName: string, baseName?: string, expe
     }
   }
 
-  // Stage 2: Precision scoring across all canonical items
+  // Stage 1c: Exact synonym check
+  for (const synNorm of normSynonyms) {
+    const directSyn = byAlias.get(synNorm) || byId.get(synNorm) || byNameDe.get(synNorm) || byNameEn.get(synNorm);
+    if (directSyn) {
+      if (!cleanCategory || directSyn.category === cleanCategory || cleanCategory === 'OTHER') {
+        return directSyn;
+      }
+    }
+  }
+
+  // Stage 2: Precision scoring across all canonical items (Common Candidate Pool)
   const candidates: { item: CanonicalIngredient; score: number }[] = [];
 
   for (const item of CANONICAL_INGREDIENTS) {
@@ -313,11 +336,21 @@ export function findCanonicalIngredient(rawName: string, baseName?: string, expe
 
       let matchScore = 0;
 
+      // 1. Direct equality checks (Exact match)
       if (normBase && aliasNorm === normBase) {
-        matchScore = 500 + aliasNorm.length * 10;
-      } else if (normRaw && aliasNorm === normRaw) {
-        matchScore = 500 + aliasNorm.length * 10;
-      } else {
+        matchScore = Math.max(matchScore, 500 + aliasNorm.length * 10);
+      }
+      if (normRaw && aliasNorm === normRaw) {
+        matchScore = Math.max(matchScore, 500 + aliasNorm.length * 10);
+      }
+      for (const synNorm of normSynonyms) {
+        if (synNorm === aliasNorm) {
+          matchScore = Math.max(matchScore, 480 + aliasNorm.length * 8);
+        }
+      }
+
+      // 2. Token overlap & Substring checks
+      if (matchScore < 480) {
         const rawRes = isGenericTokenMatch(rawTokens, aliasTokens);
         const baseRes = isGenericTokenMatch(baseTokens, aliasTokens);
 
@@ -326,6 +359,13 @@ export function findCanonicalIngredient(rawName: string, baseName?: string, expe
         }
         if (baseRes.matched && baseRes.score > matchScore) {
           matchScore = baseRes.score;
+        }
+
+        for (const synTokens of synonymTokensList) {
+          const synRes = isGenericTokenMatch(synTokens, aliasTokens);
+          if (synRes.matched && synRes.score - 15 > matchScore) {
+            matchScore = synRes.score - 15;
+          }
         }
       }
 
@@ -448,7 +488,12 @@ export function matchAndEnrichIngredient(ingredient: Ingredient, groupCategory?:
   fat: number;
 } {
   const effectiveCategory = ingredient.category || groupCategory;
-  const match = findCanonicalIngredient(ingredient.name, ingredient.baseName, effectiveCategory);
+  const match = findCanonicalIngredient(
+    ingredient.name,
+    ingredient.baseName,
+    effectiveCategory,
+    ingredient.synonyms
+  );
 
   if (!match) {
     ingredient.isVerified = false;
