@@ -16,14 +16,16 @@ function getSimplicityScore(item: CanonicalIngredient): number {
   const de = (item.name_de || '').toLowerCase();
   const en = (item.name_en || '').toLowerCase();
   let score = 100 - de.length; // shorter name = simpler base food
-  if (de.includes('roh') || en.includes('raw')) score += 30;
+  if (de.includes('roh') || en.includes('raw') || de.includes('pulver')) score += 30;
   if (de.includes('nature') || de.includes('mager') || en.includes('plain') || en.includes('unsalted') || de.includes('trocken')) score += 20;
   if (
-    de.includes('zubereitet') ||
+    de.includes('zubereitung') ||
+    de.includes('gebäck') ||
     de.includes('gericht') ||
     de.includes('salat') ||
     de.includes('burger') ||
-    de.includes('konserve')
+    de.includes('konserve') ||
+    de.includes('für torten')
   ) {
     score -= 40;
   }
@@ -51,14 +53,14 @@ for (const item of CANONICAL_INGREDIENTS) {
   itemsByCategory.get(cat)!.push(item);
 }
 
-// Fuse options for category-scoped and global fuzzy search
-const FUSE_OPTIONS: IFuseOptions<CanonicalIngredient> = {
+// Fuse options for Stage 1 Candidate Retrieval (broad recall, threshold 0.45)
+const FUSE_RETRIEVAL_OPTIONS: IFuseOptions<CanonicalIngredient> = {
   keys: [
     { name: 'name_de', weight: 0.60 },
     { name: 'aliases', weight: 0.35 },
     { name: 'name_en', weight: 0.05 },
   ],
-  threshold: 0.20, // Strict precision to eliminate false positives
+  threshold: 0.45, // Generous candidate retrieval for Stage 2 re-ranking
   distance: 100,
   ignoreLocation: true,
   minMatchCharLength: 2,
@@ -68,12 +70,12 @@ const FUSE_OPTIONS: IFuseOptions<CanonicalIngredient> = {
 
 const categoryFuseMap = new Map<string, Fuse<CanonicalIngredient>>();
 for (const [cat, items] of itemsByCategory.entries()) {
-  categoryFuseMap.set(cat, new Fuse(items, FUSE_OPTIONS));
+  categoryFuseMap.set(cat, new Fuse(items, FUSE_RETRIEVAL_OPTIONS));
 }
 
 const globalFuse = new Fuse(CANONICAL_INGREDIENTS, {
-  ...FUSE_OPTIONS,
-  threshold: 0.18, // Even stricter for cross-category global fallback
+  ...FUSE_RETRIEVAL_OPTIONS,
+  threshold: 0.35,
 });
 
 /**
@@ -182,7 +184,138 @@ export function normalizeCategory(category?: string): string {
 }
 
 /**
- * Finds a matching canonical ingredient using exact map lookups and Fuse.js fuzzy matching.
+ * Computes Sørensen-Dice similarity coefficient on word tokens (0.0 to 1.0).
+ */
+export function calculateTokenDice(query: string, candidate: CanonicalIngredient): number {
+  const qTokens = query.toLowerCase().split(/\s+/).filter(t => t.length >= 2);
+  if (qTokens.length === 0) return 0;
+
+  const targetTexts = [candidate.name_de, ...(candidate.aliases || []), candidate.name_en].filter(Boolean);
+  let bestScore = 0;
+
+  for (const text of targetTexts) {
+    const tTokens = text.toLowerCase().replace(/[,()[\]/]/g, ' ').split(/\s+/).filter(t => t.length >= 2);
+    if (tTokens.length === 0) continue;
+
+    let matches = 0;
+    for (const q of qTokens) {
+      if (tTokens.some(t => t === q || (t.length >= 4 && (t.startsWith(q) || q.startsWith(t))))) {
+        matches++;
+      }
+    }
+
+    const dice = (2 * matches) / (qTokens.length + tTokens.length);
+    const recall = matches / qTokens.length;
+    const combined = 0.65 * recall + 0.35 * dice;
+    if (combined > bestScore) bestScore = combined;
+  }
+
+  return bestScore;
+}
+
+/**
+ * Standard Jaro-Winkler string similarity (0.0 to 1.0).
+ */
+export function calculateJaroWinkler(s1: string, s2: string): number {
+  const a = s1.toLowerCase().trim();
+  const b = s2.toLowerCase().trim();
+  if (a === b) return 1.0;
+  if (!a || !b) return 0.0;
+
+  const maxDist = Math.floor(Math.max(a.length, b.length) / 2) - 1;
+  const aMatches = new Array(a.length).fill(false);
+  const bMatches = new Array(b.length).fill(false);
+
+  let matches = 0;
+  for (let i = 0; i < a.length; i++) {
+    const start = Math.max(0, i - maxDist);
+    const end = Math.min(i + maxDist + 1, b.length);
+    for (let j = start; j < end; j++) {
+      if (bMatches[j]) continue;
+      if (a[i] !== b[j]) continue;
+      aMatches[i] = true;
+      bMatches[j] = true;
+      matches++;
+      break;
+    }
+  }
+
+  if (matches === 0) return 0.0;
+
+  let transpositions = 0;
+  let k = 0;
+  for (let i = 0; i < a.length; i++) {
+    if (!aMatches[i]) continue;
+    while (!bMatches[k]) k++;
+    if (a[i] !== b[k]) transpositions++;
+    k++;
+  }
+
+  const jaro = (matches / a.length + matches / b.length + (matches - transpositions / 2) / matches) / 3;
+
+  let prefix = 0;
+  for (let i = 0; i < Math.min(4, Math.min(a.length, b.length)); i++) {
+    if (a[i] === b[i]) prefix++;
+    else break;
+  }
+
+  return jaro + prefix * 0.1 * (1 - jaro);
+}
+
+/**
+ * Simplicity / Raw-food score (-0.30 to +0.20).
+ */
+export function calculateSimplicityFactor(item: CanonicalIngredient): number {
+  const de = (item.name_de || '').toLowerCase();
+  let score = 0;
+
+  if (de.length <= 15) score += 0.10;
+  else if (de.length >= 35) score -= 0.10;
+
+  if (de.includes('roh') || de.includes('pulver') || de.includes('getrocknet') || de.includes('mager') || de.includes('natur')) {
+    score += 0.10;
+  }
+
+  if (
+    de.includes('gebäck') ||
+    de.includes('kuchen') ||
+    de.includes('torte') ||
+    de.includes('gericht') ||
+    de.includes('zubereitung') ||
+    de.includes('mariniert') ||
+    de.includes('für torten') ||
+    de.includes('sauce') ||
+    de.includes('salat')
+  ) {
+    score -= 0.25;
+  }
+
+  return score;
+}
+
+/**
+ * Computes a weighted 2-Stage Re-Ranking composite score (0.0 to 1.0).
+ */
+export function calculateCompositeMatchScore(
+  query: string,
+  candidate: CanonicalIngredient,
+  fuseScore: number
+): number {
+  const fuseSim = Math.max(0, 1.0 - fuseScore);
+  const tokenDice = calculateTokenDice(query, candidate);
+  const jaroWinkler = calculateJaroWinkler(query, candidate.name_de);
+  const simplicity = calculateSimplicityFactor(candidate);
+
+  // Weighted composite formula:
+  // 45% Token-Dice + 25% Fuse-Similarity + 15% Jaro-Winkler + 15% Simplicity
+  const normalizedSimplicity = Math.max(0, Math.min(1, simplicity + 0.3));
+  const composite = (0.45 * tokenDice) + (0.25 * fuseSim) + (0.15 * jaroWinkler) + (0.15 * normalizedSimplicity);
+
+  return composite;
+}
+
+/**
+ * Finds a matching canonical ingredient using exact map lookups and 2-stage Fuse.js + Token Re-Ranking.
  */
 export function findCanonicalIngredient(
   name: string,
@@ -239,7 +372,7 @@ export function findCanonicalIngredient(
     }
   }
 
-  // 3. Stage 1: Exact Map Check across all queries
+  // 3. Stage 1: Exact O(1) Fast-Path
   for (const q of queriesToTest) {
     const direct = byAlias.get(q) || byNameDe.get(q) || byId.get(q) || byNameEn.get(q);
     if (direct) {
@@ -249,16 +382,22 @@ export function findCanonicalIngredient(
     }
   }
 
-  // 4. Stage 2: Category-Scoped Fuse.js Search
+  // 4. Stage 2: Category-Scoped 2-Stage Retrieval & Re-Ranking
   if (targetFuse) {
     for (const q of queriesToTest) {
       if (q.length < 2) continue;
       const fuseQuery = q.length > 32 ? q.slice(0, 32) : q;
-      const results = targetFuse.search(fuseQuery, { limit: 1 });
-      if (results.length > 0) {
-        const best = results[0];
-        if (best.score !== undefined && best.score <= 0.22) {
-          return best.item;
+      const candidates = targetFuse.search(fuseQuery, { limit: 5 });
+      if (candidates.length > 0) {
+        const scored = candidates.map(c => ({
+          item: c.item,
+          score: calculateCompositeMatchScore(q, c.item, c.score ?? 0.5),
+        }));
+
+        scored.sort((a, b) => b.score - a.score);
+        // Acceptance threshold: 0.55 ensures strong semantic & token match
+        if (scored[0].score >= 0.55) {
+          return scored[0].item;
         }
       }
     }
@@ -266,16 +405,21 @@ export function findCanonicalIngredient(
     return null;
   }
 
-  // 5. Stage 3: Global Fallback Fuse.js Search (ONLY if category was unspecified or OTHER)
+  // 5. Global Fallback Search (ONLY if category was unspecified or OTHER)
   if (!cleanCategory || cleanCategory === 'OTHER') {
     for (const q of queriesToTest) {
       if (q.length < 3) continue;
       const fuseQuery = q.length > 32 ? q.slice(0, 32) : q;
-      const results = globalFuse.search(fuseQuery, { limit: 1 });
-      if (results.length > 0) {
-        const best = results[0];
-        if (best.score !== undefined && best.score <= 0.18) {
-          return best.item;
+      const candidates = globalFuse.search(fuseQuery, { limit: 5 });
+      if (candidates.length > 0) {
+        const scored = candidates.map(c => ({
+          item: c.item,
+          score: calculateCompositeMatchScore(q, c.item, c.score ?? 0.5),
+        }));
+
+        scored.sort((a, b) => b.score - a.score);
+        if (scored[0].score >= 0.65) {
+          return scored[0].item;
         }
       }
     }

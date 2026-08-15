@@ -88,6 +88,8 @@ function mapBLSToCategory(code: string, nameDe: string): string {
       if (lower.includes('butter') || lower.includes('schmalz')) return 'DAIRY';
       return 'SPICES_OILS';
     case 'R':
+      if (lower.includes('torte') || lower.includes('creme') || lower.includes('guss') || lower.includes('pudding')) return 'SWEETS_SNACKS';
+      if (lower.includes('soße') || lower.includes('sauce')) return 'READY_MEALS';
       if (lower.includes('backhefe') || lower.includes('backpulver') || lower.includes('vanille') || lower.includes('puddingpulver')) return 'BAKING_COOKING';
       return 'SPICES_OILS';
     case 'S':
@@ -153,6 +155,17 @@ function generateAliases(nameDe: string, nameEn: string, code: string): string[]
 
   // Common food synonym mappings
   const lowerDe = nameDe.toLowerCase();
+  if (lowerDe.includes('trinkwasser') || lowerDe.includes('mineralwasser') || code === 'N111000') {
+    aliases.add('wasser');
+    aliases.add('trinkwasser');
+    aliases.add('leitungswasser');
+    aliases.add('water');
+  }
+  if (lowerDe.includes('zitronensaft') || (lowerDe.includes('zitrone') && lowerDe.includes('saft'))) {
+    aliases.add('zitronensaft');
+    aliases.add('lemon juice');
+    aliases.add('zitrone saft');
+  }
   if (lowerDe.includes('speisesalz') || lowerDe.includes('siedesalz')) {
     aliases.add('salz');
     aliases.add('speisesalz');
