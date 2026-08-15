@@ -1,0 +1,288 @@
+{
+  "url": "https://www.instagram.com/reel/DblZ3DgxByf/?igsh=MWxqa2Rrdjd1NW9nbg==",
+  "recipe": {
+    "isRecipe": true,
+    "title": "Pesto-Nudelsalat",
+    "description": "Ein frischer und cremiger Nudelsalat mit Cocktailtomaten, Mozzarella, Parmesan und aromatischem Pesto. Perfekt für Grillabende oder als leichtes Mittagessen.",
+    "prepTime": 15,
+    "cookTime": 10,
+    "servings": 4,
+    "ingredients": [
+      {
+        "name": "VEGETABLES",
+        "items": [
+          {
+            "name": "Cocktailtomaten",
+            "baseName": "cherry tomato",
+            "amount": 200,
+            "unit": "g",
+            "calories": 42,
+            "protein": 1.8,
+            "carbs": 6.6,
+            "fat": 0.6,
+            "isStaple": false,
+            "modifier": "halbiert",
+            "canonicalId": "tomato_raw",
+            "matchedName": "Tomate, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          }
+        ]
+      },
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Mozzarellakugeln",
+            "baseName": "mozzarella",
+            "amount": 125,
+            "unit": "g",
+            "calories": 320,
+            "protein": 24.4,
+            "carbs": 0.9,
+            "fat": 24.4,
+            "isStaple": false,
+            "modifier": "halbiert",
+            "canonicalId": "mozzarella",
+            "matchedName": "Mozzarella",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Parmesan",
+            "baseName": "parmesan",
+            "amount": 50,
+            "unit": "g",
+            "calories": 201,
+            "protein": 15.3,
+            "carbs": 0,
+            "fat": 15.5,
+            "isStaple": false,
+            "modifier": "gerieben",
+            "canonicalId": "parmesan_cheese",
+            "matchedName": "Parmesan",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          }
+        ]
+      },
+      {
+        "name": "GRAINS_PASTA",
+        "items": [
+          {
+            "name": "Pasta",
+            "baseName": "pasta",
+            "amount": 250,
+            "unit": "g",
+            "calories": 530,
+            "protein": 21.8,
+            "carbs": 75,
+            "fat": 14.3,
+            "isStaple": false,
+            "modifier": "klein",
+            "canonicalId": "pasta_fresh_filled_with_spinach_and_ricotta_raw",
+            "matchedName": "Teigwaren, frisch, gefüllt mit Spinat und Ricotta, roh",
+            "isVerified": true,
+            "category": "GRAINS_PASTA"
+          }
+        ]
+      },
+      {
+        "name": "OILS_CONDIMENTS",
+        "items": [
+          {
+            "name": "Pesto Genovese",
+            "baseName": "pesto",
+            "amount": 4,
+            "unit": "EL",
+            "calories": 246,
+            "protein": 3.7,
+            "carbs": 7.9,
+            "fat": 21.7,
+            "isStaple": false,
+            "canonicalId": "pesto_sauce_red",
+            "matchedName": "Pestosauce, rot",
+            "isVerified": true,
+            "category": "OILS_CONDIMENTS"
+          },
+          {
+            "name": "Wasser",
+            "baseName": "water",
+            "amount": 1,
+            "unit": "EL",
+            "calories": 13,
+            "protein": 0,
+            "carbs": 3.3,
+            "fat": 0,
+            "isStaple": true,
+            "canonicalId": "water_ice",
+            "matchedName": "Wassereis",
+            "isVerified": true,
+            "category": "SWEETS_SNACKS"
+          },
+          {
+            "name": "Zitronensaft",
+            "baseName": "lemon juice",
+            "amount": 2,
+            "unit": "Spritzer",
+            "calories": 56,
+            "protein": 0.8,
+            "carbs": 5,
+            "fat": 0.4,
+            "isStaple": true,
+            "parentIngredient": {
+              "name": "Zitrone",
+              "baseName": "lemon",
+              "unit": "Stück"
+            },
+            "canonicalId": "lemon_juice",
+            "matchedName": "Zitronensaft",
+            "isVerified": true,
+            "category": "BEVERAGES"
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "Die [Pasta](ing:pasta) nach Packungsanweisung garen, abgießen und vollständig abkühlen lassen."
+      },
+      {
+        "step": 2,
+        "description": "Anschließend die [Pasta](ing:pasta) mit den [Cocktailtomaten](ing:cherry tomato), den [Mozzarellakugeln](ing:mozzarella) und dem [Parmesan](ing:parmesan) in einer großen Schüssel vermengen."
+      },
+      {
+        "step": 3,
+        "description": "[Pesto Genovese](ing:pesto), [Wasser](ing:water) und [Zitronensaft](ing:lemon juice) verrühren und über den Salat geben."
+      },
+      {
+        "step": 4,
+        "description": "Alles gut vermischen und vor dem Servieren mindestens [30 Minuten](timer:1800) im Kühlschrank durchziehen lassen."
+      }
+    ],
+    "equipment": [
+      "Große Schüssel",
+      "Topf"
+    ],
+    "transcript": null,
+    "tags": [
+      "Vegetarisch",
+      "Sommersalat"
+    ],
+    "emoji": "🍝",
+    "nutritionalValues": {
+      "calories": 352,
+      "protein": 17,
+      "carbs": 24.7,
+      "fat": 19.2
+    }
+  },
+  "report": {
+    "url": "https://www.instagram.com/reel/DblZ3DgxByf/?igsh=MWxqa2Rrdjd1NW9nbg==",
+    "title": "Pesto-Nudelsalat",
+    "servings": 4,
+    "nutritionalValues": {
+      "calories": 352,
+      "protein": 17,
+      "carbs": 24.7,
+      "fat": 19.2
+    },
+    "totalIngredients": 7,
+    "verifiedCount": 7,
+    "matchRatePercent": 100,
+    "ingredients": [
+      {
+        "rawName": "Cocktailtomaten",
+        "baseName": "cherry tomato",
+        "amount": 200,
+        "unit": "g",
+        "canonicalId": "tomato_raw",
+        "matchedName": "Tomate, roh",
+        "isVerified": true,
+        "calories": 42,
+        "protein": 1.8,
+        "carbs": 6.6,
+        "fat": 0.6
+      },
+      {
+        "rawName": "Mozzarellakugeln",
+        "baseName": "mozzarella",
+        "amount": 125,
+        "unit": "g",
+        "canonicalId": "mozzarella",
+        "matchedName": "Mozzarella",
+        "isVerified": true,
+        "calories": 320,
+        "protein": 24.4,
+        "carbs": 0.9,
+        "fat": 24.4
+      },
+      {
+        "rawName": "Parmesan",
+        "baseName": "parmesan",
+        "amount": 50,
+        "unit": "g",
+        "canonicalId": "parmesan_cheese",
+        "matchedName": "Parmesan",
+        "isVerified": true,
+        "calories": 201,
+        "protein": 15.3,
+        "carbs": 0,
+        "fat": 15.5
+      },
+      {
+        "rawName": "Pasta",
+        "baseName": "pasta",
+        "amount": 250,
+        "unit": "g",
+        "canonicalId": "pasta_fresh_filled_with_spinach_and_ricotta_raw",
+        "matchedName": "Teigwaren, frisch, gefüllt mit Spinat und Ricotta, roh",
+        "isVerified": true,
+        "calories": 530,
+        "protein": 21.8,
+        "carbs": 75,
+        "fat": 14.3
+      },
+      {
+        "rawName": "Pesto Genovese",
+        "baseName": "pesto",
+        "amount": 4,
+        "unit": "EL",
+        "canonicalId": "pesto_sauce_red",
+        "matchedName": "Pestosauce, rot",
+        "isVerified": true,
+        "calories": 246,
+        "protein": 3.7,
+        "carbs": 7.9,
+        "fat": 21.7
+      },
+      {
+        "rawName": "Wasser",
+        "baseName": "water",
+        "amount": 1,
+        "unit": "EL",
+        "canonicalId": "water_ice",
+        "matchedName": "Wassereis",
+        "isVerified": true,
+        "calories": 13,
+        "protein": 0,
+        "carbs": 3.3,
+        "fat": 0
+      },
+      {
+        "rawName": "Zitronensaft",
+        "baseName": "lemon juice",
+        "amount": 2,
+        "unit": "Spritzer",
+        "canonicalId": "lemon_juice",
+        "matchedName": "Zitronensaft",
+        "isVerified": true,
+        "calories": 56,
+        "protein": 0.8,
+        "carbs": 5,
+        "fat": 0.4
+      }
+    ]
+  }
+}

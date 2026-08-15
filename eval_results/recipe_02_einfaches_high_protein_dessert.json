@@ -1,0 +1,188 @@
+{
+  "url": "https://www.instagram.com/reel/DbT-jASBqjy/?igsh=ZnBicXQydjNxb3Vq",
+  "recipe": {
+    "isRecipe": true,
+    "title": "Einfaches High-Protein-Dessert",
+    "description": "Ein schnelles und proteinreiches Schichtdessert mit Skyr, Schokopudding und Butterkeksen.",
+    "prepTime": 10,
+    "cookTime": 0,
+    "servings": 1,
+    "ingredients": [
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Vanille-Skyr",
+            "baseName": "skyr",
+            "amount": 250,
+            "unit": "g",
+            "calories": 160,
+            "protein": 25,
+            "carbs": 10,
+            "fat": 0,
+            "isStaple": false,
+            "isVerified": false
+          },
+          {
+            "name": "Schoko-Protein-Pudding",
+            "baseName": "protein pudding",
+            "amount": 200,
+            "unit": "g",
+            "calories": 298,
+            "protein": 20.4,
+            "carbs": 5,
+            "fat": 21.8,
+            "isStaple": false,
+            "canonicalId": "black_pudding",
+            "matchedName": "Blutwurst",
+            "isVerified": true,
+            "category": "MEAT_POULTRY"
+          }
+        ]
+      },
+      {
+        "name": "GRAINS_PASTA",
+        "items": [
+          {
+            "name": "Butterkekse",
+            "baseName": "butter cookie",
+            "amount": 60,
+            "unit": "g",
+            "calories": 263,
+            "protein": 2.8,
+            "carbs": 32.3,
+            "fat": 13.4,
+            "isStaple": false,
+            "canonicalId": "prussian_cookie",
+            "matchedName": "Prussien",
+            "isVerified": true,
+            "category": "SWEETS_SNACKS"
+          }
+        ]
+      },
+      {
+        "name": "SWEETS_SNACKS",
+        "items": [
+          {
+            "name": "Backkakao",
+            "baseName": "cocoa powder",
+            "amount": 5,
+            "unit": "g",
+            "calories": 19,
+            "protein": 1.1,
+            "carbs": 0.6,
+            "fat": 1,
+            "isStaple": true,
+            "canonicalId": "cocoa_powder_without_sugar",
+            "matchedName": "Kakaopulver, ohne Zucker",
+            "isVerified": true,
+            "category": "SWEETS_SNACKS"
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "Den [Vanille-Skyr](ing:skyr), den [Schoko-Protein-Pudding](ing:protein pudding) und die [Butterkekse](ing:butter cookie) abwechselnd in eine Form schichten."
+      },
+      {
+        "step": 2,
+        "description": "Das Dessert mit etwas [Backkakao](ing:cocoa powder) bestäuben."
+      },
+      {
+        "step": 3,
+        "description": "Das Dessert für [3 bis 4 Stunden](timer:12600) in den Kühlschrank stellen."
+      }
+    ],
+    "equipment": [
+      "Schüssel",
+      "Auflaufform"
+    ],
+    "transcript": null,
+    "tags": [
+      "High-Protein",
+      "Dessert"
+    ],
+    "emoji": "🍮",
+    "alternativeIngredients": [
+      {
+        "original": "Butterkekse",
+        "substitute": "Butterkekse mit 30 % weniger Zucker",
+        "notes": "Für eine zuckerreduzierte Variante."
+      }
+    ],
+    "nutritionalValues": {
+      "calories": 750,
+      "carbs": 66,
+      "fat": 15,
+      "protein": 72
+    }
+  },
+  "report": {
+    "url": "https://www.instagram.com/reel/DbT-jASBqjy/?igsh=ZnBicXQydjNxb3Vq",
+    "title": "Einfaches High-Protein-Dessert",
+    "servings": 1,
+    "nutritionalValues": {
+      "calories": 750,
+      "carbs": 66,
+      "fat": 15,
+      "protein": 72
+    },
+    "totalIngredients": 4,
+    "verifiedCount": 3,
+    "matchRatePercent": 75,
+    "ingredients": [
+      {
+        "rawName": "Vanille-Skyr",
+        "baseName": "skyr",
+        "amount": 250,
+        "unit": "g",
+        "isVerified": false,
+        "calories": 160,
+        "protein": 25,
+        "carbs": 10,
+        "fat": 0
+      },
+      {
+        "rawName": "Schoko-Protein-Pudding",
+        "baseName": "protein pudding",
+        "amount": 200,
+        "unit": "g",
+        "canonicalId": "black_pudding",
+        "matchedName": "Blutwurst",
+        "isVerified": true,
+        "calories": 298,
+        "protein": 20.4,
+        "carbs": 5,
+        "fat": 21.8
+      },
+      {
+        "rawName": "Butterkekse",
+        "baseName": "butter cookie",
+        "amount": 60,
+        "unit": "g",
+        "canonicalId": "prussian_cookie",
+        "matchedName": "Prussien",
+        "isVerified": true,
+        "calories": 263,
+        "protein": 2.8,
+        "carbs": 32.3,
+        "fat": 13.4
+      },
+      {
+        "rawName": "Backkakao",
+        "baseName": "cocoa powder",
+        "amount": 5,
+        "unit": "g",
+        "canonicalId": "cocoa_powder_without_sugar",
+        "matchedName": "Kakaopulver, ohne Zucker",
+        "isVerified": true,
+        "calories": 19,
+        "protein": 1.1,
+        "carbs": 0.6,
+        "fat": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,466 @@
+{
+  "url": "https://www.instagram.com/reels/Db8bbHDC1t4/",
+  "recipe": {
+    "isRecipe": true,
+    "title": "Flammkuchen-Style Pasta",
+    "description": "Eine herzhafte Pasta-Variante, die den klassischen Geschmack von Flammkuchen mit Speck, Pfifferlingen und einer cremigen Eigelb-Käse-Sauce kombiniert.",
+    "prepTime": 10,
+    "cookTime": 15,
+    "servings": 4,
+    "ingredients": [
+      {
+        "name": "VEGETABLES",
+        "items": [
+          {
+            "name": "Zwiebel",
+            "baseName": "onion",
+            "amount": 1,
+            "unit": "Stück",
+            "calories": 43,
+            "protein": 1.2,
+            "carbs": 6.9,
+            "fat": 0.7,
+            "isStaple": false,
+            "canonicalId": "onion_raw",
+            "matchedName": "Zwiebel, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          },
+          {
+            "name": "Pfifferlinge",
+            "baseName": "chanterelle",
+            "amount": 150,
+            "unit": "g",
+            "calories": 36,
+            "protein": 3.5,
+            "carbs": 0.3,
+            "fat": 0.8,
+            "isStaple": false,
+            "canonicalId": "chanterelle_raw",
+            "matchedName": "Eierschwamm, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          },
+          {
+            "name": "Frühlingslauch",
+            "baseName": "spring onion",
+            "amount": 1,
+            "unit": "Bund",
+            "calories": 10,
+            "protein": 0.3,
+            "carbs": 1.6,
+            "fat": 0.2,
+            "isStaple": false,
+            "canonicalId": "onion_raw",
+            "matchedName": "Zwiebel, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          }
+        ]
+      },
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Butter",
+            "baseName": "butter",
+            "amount": 1,
+            "unit": "EL",
+            "calories": 124,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 13.8,
+            "isStaple": true,
+            "canonicalId": "butter_clarified",
+            "matchedName": "Bratbutter",
+            "isVerified": true,
+            "category": "OILS_CONDIMENTS"
+          },
+          {
+            "name": "Gruyère",
+            "baseName": "gruyere",
+            "amount": 75,
+            "unit": "g",
+            "calories": 296,
+            "protein": 19.8,
+            "carbs": 0,
+            "fat": 24,
+            "modifier": "gerieben",
+            "notes": "Alternativ Parmesan",
+            "parentIngredient": {
+              "name": "Gruyère",
+              "baseName": "gruyere",
+              "unit": "g"
+            },
+            "canonicalId": "greyerzer_at_least_45_fidm",
+            "matchedName": "Greyerzer, vollfett",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Eigelb",
+            "baseName": "egg yolk",
+            "amount": 4,
+            "unit": "Stück",
+            "calories": 768,
+            "protein": 36.1,
+            "carbs": 0.7,
+            "fat": 68.9,
+            "parentIngredient": {
+              "name": "Ei",
+              "baseName": "egg",
+              "unit": "Stück"
+            },
+            "canonicalId": "egg_yolk_raw",
+            "matchedName": "Hühnereigelb, roh (Eidotter)",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Creme fraiche",
+            "baseName": "creme fraiche",
+            "amount": 3,
+            "unit": "EL",
+            "calories": 150,
+            "protein": 1,
+            "carbs": 2,
+            "fat": 15,
+            "isStaple": false,
+            "isVerified": false
+          }
+        ]
+      },
+      {
+        "name": "MEAT_POULTRY",
+        "items": [
+          {
+            "name": "Speckwürfel",
+            "baseName": "bacon",
+            "amount": 100,
+            "unit": "g",
+            "calories": 400,
+            "protein": 22.1,
+            "carbs": 0.6,
+            "fat": 34.3,
+            "isStaple": false,
+            "canonicalId": "bacon_raw",
+            "matchedName": "Rohessspeck",
+            "isVerified": true,
+            "category": "MEAT_POULTRY"
+          }
+        ]
+      },
+      {
+        "name": "GRAINS_PASTA",
+        "items": [
+          {
+            "name": "Pasta Rustica Flammkuchen Style",
+            "baseName": "pasta",
+            "amount": 2,
+            "unit": "Packung",
+            "calories": 424,
+            "protein": 17.4,
+            "carbs": 60,
+            "fat": 11.4,
+            "isStaple": false,
+            "canonicalId": "pasta_fresh_filled_with_spinach_and_ricotta_raw",
+            "matchedName": "Teigwaren, frisch, gefüllt mit Spinat und Ricotta, roh",
+            "isVerified": true,
+            "category": "GRAINS_PASTA"
+          }
+        ]
+      },
+      {
+        "name": "SPICES_HERBS",
+        "items": [
+          {
+            "name": "Salz",
+            "baseName": "salt",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "canonicalId": "salt_himalaya_salt",
+            "matchedName": "Salz, Himalayasalz",
+            "isVerified": true,
+            "category": "SPICES_HERBS"
+          },
+          {
+            "name": "Pfeffer",
+            "baseName": "pepper",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "canonicalId": "bell_pepper_red_raw",
+            "matchedName": "Peperoni, rot, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          },
+          {
+            "name": "Paprikapulver",
+            "baseName": "paprika",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 2,
+            "protein": 0.1,
+            "carbs": 0.2,
+            "fat": 0.1,
+            "isStaple": true,
+            "canonicalId": "paprika",
+            "matchedName": "Paprika (Gewürz)",
+            "isVerified": true,
+            "category": "SPICES_HERBS"
+          },
+          {
+            "name": "Cayennepfeffer",
+            "baseName": "cayenne pepper",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "canonicalId": "bell_pepper_red_raw",
+            "matchedName": "Peperoni, rot, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "Die [Zwiebel](ing:onion) fein würfeln und zusammen mit den [Speckwürfeln](ing:bacon) in etwas [Butter](ing:butter) anbraten."
+      },
+      {
+        "step": 2,
+        "description": "Die [Pfifferlinge](ing:chanterelle) hinzufügen und für ca. [5 Minuten](timer:300) mitbraten."
+      },
+      {
+        "step": 3,
+        "description": "Die [Pasta Rustica Flammkuchen Style](ing:pasta) nach Packungsanweisung kochen."
+      },
+      {
+        "step": 4,
+        "description": "In einer Schüssel [Eigelb](ing:egg yolk), [Gruyère](ing:gruyere) und [Creme fraiche](ing:creme fraiche) vermengen."
+      },
+      {
+        "step": 5,
+        "description": "Die gekochte [Pasta](ing:pasta) mit der Speck-Pilz-Mischung und der Eier-Käse-Mischung vermengen."
+      },
+      {
+        "step": 6,
+        "description": "Mit [Salz](ing:salt), [Pfeffer](ing:pepper), [Paprikapulver](ing:paprika) und [Cayennepfeffer](ing:cayenne pepper) abschmecken und mit [Frühlingslauch](ing:spring onion) garnieren."
+      }
+    ],
+    "equipment": [
+      "Pfanne",
+      "Topf",
+      "Schüssel"
+    ],
+    "transcript": null,
+    "tags": [
+      "Pasta",
+      "Flammkuchen"
+    ],
+    "emoji": "🍝",
+    "nutritionalValues": {
+      "calories": 563,
+      "protein": 25.4,
+      "carbs": 18.1,
+      "fat": 42.3
+    }
+  },
+  "report": {
+    "url": "https://www.instagram.com/reels/Db8bbHDC1t4/",
+    "title": "Flammkuchen-Style Pasta",
+    "servings": 4,
+    "nutritionalValues": {
+      "calories": 563,
+      "protein": 25.4,
+      "carbs": 18.1,
+      "fat": 42.3
+    },
+    "totalIngredients": 13,
+    "verifiedCount": 12,
+    "matchRatePercent": 92,
+    "ingredients": [
+      {
+        "rawName": "Zwiebel",
+        "baseName": "onion",
+        "amount": 1,
+        "unit": "Stück",
+        "canonicalId": "onion_raw",
+        "matchedName": "Zwiebel, roh",
+        "isVerified": true,
+        "calories": 43,
+        "protein": 1.2,
+        "carbs": 6.9,
+        "fat": 0.7
+      },
+      {
+        "rawName": "Pfifferlinge",
+        "baseName": "chanterelle",
+        "amount": 150,
+        "unit": "g",
+        "canonicalId": "chanterelle_raw",
+        "matchedName": "Eierschwamm, roh",
+        "isVerified": true,
+        "calories": 36,
+        "protein": 3.5,
+        "carbs": 0.3,
+        "fat": 0.8
+      },
+      {
+        "rawName": "Frühlingslauch",
+        "baseName": "spring onion",
+        "amount": 1,
+        "unit": "Bund",
+        "canonicalId": "onion_raw",
+        "matchedName": "Zwiebel, roh",
+        "isVerified": true,
+        "calories": 10,
+        "protein": 0.3,
+        "carbs": 1.6,
+        "fat": 0.2
+      },
+      {
+        "rawName": "Butter",
+        "baseName": "butter",
+        "amount": 1,
+        "unit": "EL",
+        "canonicalId": "butter_clarified",
+        "matchedName": "Bratbutter",
+        "isVerified": true,
+        "calories": 124,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 13.8
+      },
+      {
+        "rawName": "Gruyère",
+        "baseName": "gruyere",
+        "amount": 75,
+        "unit": "g",
+        "canonicalId": "greyerzer_at_least_45_fidm",
+        "matchedName": "Greyerzer, vollfett",
+        "isVerified": true,
+        "calories": 296,
+        "protein": 19.8,
+        "carbs": 0,
+        "fat": 24
+      },
+      {
+        "rawName": "Eigelb",
+        "baseName": "egg yolk",
+        "amount": 4,
+        "unit": "Stück",
+        "canonicalId": "egg_yolk_raw",
+        "matchedName": "Hühnereigelb, roh (Eidotter)",
+        "isVerified": true,
+        "calories": 768,
+        "protein": 36.1,
+        "carbs": 0.7,
+        "fat": 68.9
+      },
+      {
+        "rawName": "Creme fraiche",
+        "baseName": "creme fraiche",
+        "amount": 3,
+        "unit": "EL",
+        "isVerified": false,
+        "calories": 150,
+        "protein": 1,
+        "carbs": 2,
+        "fat": 15
+      },
+      {
+        "rawName": "Speckwürfel",
+        "baseName": "bacon",
+        "amount": 100,
+        "unit": "g",
+        "canonicalId": "bacon_raw",
+        "matchedName": "Rohessspeck",
+        "isVerified": true,
+        "calories": 400,
+        "protein": 22.1,
+        "carbs": 0.6,
+        "fat": 34.3
+      },
+      {
+        "rawName": "Pasta Rustica Flammkuchen Style",
+        "baseName": "pasta",
+        "amount": 2,
+        "unit": "Packung",
+        "canonicalId": "pasta_fresh_filled_with_spinach_and_ricotta_raw",
+        "matchedName": "Teigwaren, frisch, gefüllt mit Spinat und Ricotta, roh",
+        "isVerified": true,
+        "calories": 424,
+        "protein": 17.4,
+        "carbs": 60,
+        "fat": 11.4
+      },
+      {
+        "rawName": "Salz",
+        "baseName": "salt",
+        "amount": 1,
+        "unit": "Prise",
+        "canonicalId": "salt_himalaya_salt",
+        "matchedName": "Salz, Himalayasalz",
+        "isVerified": true,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      {
+        "rawName": "Pfeffer",
+        "baseName": "pepper",
+        "amount": 1,
+        "unit": "Prise",
+        "canonicalId": "bell_pepper_red_raw",
+        "matchedName": "Peperoni, rot, roh",
+        "isVerified": true,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      {
+        "rawName": "Paprikapulver",
+        "baseName": "paprika",
+        "amount": 1,
+        "unit": "Prise",
+        "canonicalId": "paprika",
+        "matchedName": "Paprika (Gewürz)",
+        "isVerified": true,
+        "calories": 2,
+        "protein": 0.1,
+        "carbs": 0.2,
+        "fat": 0.1
+      },
+      {
+        "rawName": "Cayennepfeffer",
+        "baseName": "cayenne pepper",
+        "amount": 1,
+        "unit": "Prise",
+        "canonicalId": "bell_pepper_red_raw",
+        "matchedName": "Peperoni, rot, roh",
+        "isVerified": true,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      }
+    ]
+  }
+}

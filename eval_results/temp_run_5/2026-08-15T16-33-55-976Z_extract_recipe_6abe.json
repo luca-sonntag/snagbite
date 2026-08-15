@@ -1,0 +1,241 @@
+{
+  "timestamp": "2026-08-15T16:33:55.976Z",
+  "requestType": "extract_recipe",
+  "model": "gemini-3.1-flash-lite",
+  "durationMs": 4197,
+  "success": true,
+  "input": {
+    "captionLength": 1084,
+    "captionPreview": "REZEPT⬇️ Brownie Baked Oats\nFolg @fit.by.leni für mehr Meal Prep Rezepte🤍 /Anzeige\n\nNährwerte pro Meal:\n476kcal / 40g P / 47g KH / 11gF\n\nDas brauchst du für 1 Portion:\n(Für 4 Portionen einfach x4 nehmen)\n- 1 Banane\n- 35g Haferflocken\n- 2 TL Kakaopulver\n- 40g Evo Whey Chocolate*\n- Süße nach Bedarf (",
+    "carouselImageCount": 0,
+    "imageSourceKind": "carousel",
+    "prompt": "You are an expert recipe extractor. Analyze the provided content (which may include audio, website text, or video caption).\n    \nReconstruct the complete recipe, resolving any contradictions culinary-wise. Ensure to follow the field-level guidelines specified in the descriptions of the output schema.\n\nKey Constraints:\n1. Recipe Existence & Anti-Hallucination: The source content MUST contain the actual recipe details (specific ingredients with quantities and/or step-by-step cooking instructions). You MUST set \"isRecipe\" to false if:\n   a) The content is unrelated (comedy, vlogs, fitness motivation, general chat, etc.).\n   b) The content is merely a teaser, promo, or engagement bait without the full recipe (e.g. \"Comment BUCKEYE and I'll send you the recipe\", \"Recipe in my ebook\", \"Link in bio\", \"DM for full recipe\", or appetizing marketing descriptions/macros without the actual list of ingredients and preparation steps).\n   c) The source mentions only the dish name/concept but completely omits the concrete ingredients and instructions.\n   NEVER under any circumstances invent, fabricate, or hallucinate ingredients, amounts, or cooking steps when they are not present in the provided source text, audio, or images.\n2. Multi-Recipe Ambiguity: Before attempting to extract a recipe, evaluate if the content represents a multi-recipe collection, roundup, or compilation. You MUST set \"containsMultipleRecipes\" to true if ANY of the following apply:\n   a) The title, caption, or cover image text indicates multiple dishes/recipes (e.g. \"High protein dinners...\", \"5 meals to get lean\", \"3 lunch ideas\", \"What I eat in a day\", \"4 low-calorie recipes\").\n   b) The carousel images or video scenes present multiple distinct standalone main dishes across different slides/segments (e.g. Slide 2 is \"Smash Burger & Sweet Potato Fries\", Slide 4 is \"Bang Bang Chicken\", Slide 6 is \"Beef Burrito Bowl\").\n   c) Multiple distinct nutrition/macro cards exist for different dishes throughout the slides/segments.\n   If \"containsMultipleRecipes\" is true, do NOT attempt to merge the dishes into one recipe.\n   Set \"containsMultipleRecipes\" to false ONLY if the entire post is dedicated to ONE single recipe (including its sub-components like sauce, marinade, side dish, or garnishes cooked together as one meal).\n3. Category Ordering: Always place \"PRODUCE\" first in the ingredients array, followed by dry goods/pantry items, then refrigerated products/meats, and finally other/extras at the very end.\n4. Translation: Write and translate all text values (including title, description, ingredient names/notes, instruction steps, equipment list, tips, alternative ingredient details, and tags) into: German. Keep the category keys as the uppercase English enum values. Follow the schema strictly.\n5. Preferred Units:\n   - Temperature Units: Format all temperature values mentioned in the instructions, description, tips, or title using the preferred unit: Celsius (e.g., convert and format as \"200°C\" or \"400°F\" depending on preference).\n   - Weight & Volume Units: Format all ingredient weights, volumes, and measurements using the preferred unit system: metric (e.g., metric units like grams, milliliters, kilograms, or imperial units like ounces, cups, pounds, fluid ounces) and perform conversions where appropriate.\n6. Missing Data & Nutrition: If any information for a specific field is missing, leave it empty (empty string \"\", null, or empty array []). You MUST set \"hasExplicitNutritionalValues\" to true ONLY IF the recipe nutritional values are explicitly stated in the source text or audio. If they are not, set it to false and set \"nutritionalValues\" to null (do NOT estimate or calculate overall nutritional values at the recipe level). Note that \"nutritionalValues\" MUST represent values per single serving/portion. If the source lists total values for the entire recipe, divide them by the number of servings/portions first.\n7. Clean Ingredient Names: Ensure the \"name\" field contains only the clean ingredient name (e.g., \"Frischkäse\", \"evaporated milk\", \"cream cheese\", \"butter\"). Move all adjectives, processing states, or descriptions (such as \"light\", \"mager\", \"low fat\", \"leichte\", \"gerieben\", \"grated\") into the \"modifier\" field. Do NOT leave these descriptors inside the \"name\" field.\n8. Ingredient Decomposition: If a composite element or homemade component (like a custom sauce or pesto) is prepared during the recipe, you MUST list its raw ingredients individually instead of the finished compound product.\n9. Ingredient-level Nutritional Values: For each ingredient, you MUST estimate its nutritional values (calories, protein, carbs, fat) based on the ENTIRE specified quantity (amount * unit). Do NOT output per-100g, per-100ml, or single-unit values unless the quantity is exactly 100g, 100ml, or 1 unit. E.g., if chicken breast has 165 kcal per 100g and the recipe specifies 500g, the calories field MUST be 825, NOT 165. If a potato has 150 kcal and the amount is 6, the calories field MUST be 900, NOT 150. If olive oil has 14g fat/EL and the amount is 3 EL, the fat field MUST be 42, NOT 14.\n10. Infer Minor Missing Components (Only for Existing Recipes): If the source already contains a full recipe with ingredients and instructions, but the title or visual images explicitly show an obvious missing minor garnish or component (e.g., 'Air-Fried Broccolini' in the title and green broccolini on the plate) that was accidentally omitted from the written list, you may infer that specific item. NEVER use this rule to fabricate an entire recipe from a title or teaser when no base recipe is provided.\n11. Serving Size Estimation: Identify the number of servings or portions the recipe makes. Look for clues like 'serves 4' or estimate based on the ingredient amounts (e.g., 500g chicken and 6 potatoes typically serves 3-4 people). Avoid defaulting to 1 serving if the ingredient amounts are clearly meant for a family-sized meal.\n12. Zero-Calorie & Low-Calorie Ingredients: Ingredients like water, ice, salt, or baking soda MUST have 0 calories, protein, carbs, and fat. For spices, seasonings, or herbs in small quantities (like teaspoons), focus your calculation energy on the high-calorie/high-macro ingredients (meats, oils, dairy, grains, starches) and estimate very small values (e.g., 5 kcal) or 0.\n13. Cooked vs. Raw/Dry States of Expandable Ingredients: For ingredients that expand significantly during cooking (e.g., rice, pasta, lentils, beans, chickpeas, couscous, quinoa, bulgur), you MUST determine whether the specified quantity refers to the dry/uncooked state or the cooked/prepared state. Dry/uncooked state (e.g., \"100g uncooked rice\" or \"100g rice\" which is boiled in the instructions) has high caloric density (e.g., dry rice: ~350 kcal/100g, dry pasta: ~350 kcal/100g, dry lentils: ~350 kcal/100g). Cooked/prepared state (e.g., \"100g cooked rice\", \"100g boiled pasta\", canned/pre-cooked beans, or when already-cooked ingredients are added directly to a stir-fry/bowl) has much lower caloric density (e.g., cooked rice: ~130 kcal/100g, cooked pasta: ~130-150 kcal/100g, cooked lentils: ~110-120 kcal/100g). Ambiguity resolution: Analyze the cooking instructions. If the instructions include boiling/cooking the dry ingredient, calculate using dry/raw values. If the ingredient is added pre-cooked, or if treating it as raw results in absurdly high calories (e.g., 250g dry rice is ~850 kcal and cooks to 750g cooked rice, which is way too much for a single serving of fried rice), assume the quantity represents the cooked state and calculate using cooked values.\n14. Common Pantry Staples: For each ingredient, set the \"isStaple\" boolean to true ONLY if it is a very common basic staple that people almost always already have at home and rarely need to buy specifically for a recipe (e.g. salt, pepper, water, cooking oil, sugar, common dried spices). Set it to false for anything a user would typically need to shop for (e.g. meat, cheese, vegetables, fresh herbs, specialty items). When in doubt, set it to false.\n15. Inline Ingredient Tagging: In every step description, whenever an ingredient from the ingredients list is used or referenced, you MUST format its mention using the inline syntax '[exact word used in text](ing:baseName)'. 'baseName' MUST match the English 'baseName' (or 'name' if 'baseName' is not set) of the corresponding ingredient in the ingredients list. Examples:\n   - Ingredients: Eigelb (baseName: egg yolk), Ei (baseName: egg), Parmesan (baseName: parmesan)\n   - Step description: \"Die [Eigelbe](ing:egg yolk) und das [Ei](ing:egg) zusammen mit dem [Parmesan](ing:parmesan) verrühren.\"\n   - Do NOT tag equipment or non-ingredient words. Make sure the brackets wrap the natural word as it appears in the sentence.\n16. Concise, Direct Instruction Steps: Write instruction step descriptions as short, clear, action-oriented sentences. Eliminate conversational filler words, narrative transitions, and redundancies. Split long multi-action steps into distinct, bite-sized steps so each step is easy to follow while cooking.\n17. Inline Timer Tagging: In every step description, whenever a cooking duration or time span is mentioned (e.g. \"15 Minuten\", \"1,5 Stunden\", \"30 Sekunden\"), you MUST format it using the inline syntax '[exact time text](timer:duration_in_seconds)'. Calculate the total duration in seconds and put it in the timer parameter. Examples:\n   - \"Ca. [15 Minuten](timer:900) garen.\"\n   - \"Für [1,5 Stunden](timer:5400) köcheln lassen.\"\n   - \"Etwa [45 Sekunden](timer:45) anbraten.\"\n\nDescription/Caption:\n\"\"\"\nREZEPT⬇️ Brownie Baked Oats\nFolg @fit.by.leni für mehr Meal Prep Rezepte🤍 /Anzeige\n\nNährwerte pro Meal:\n476kcal / 40g P / 47g KH / 11gF\n\nDas brauchst du für 1 Portion:\n(Für 4 Portionen einfach x4 nehmen)\n- 1 Banane\n- 35g Haferflocken\n- 2 TL Kakaopulver\n- 40g Evo Whey Chocolate*\n- Süße nach Bedarf (z.B. FlavUp Schoko*)\n- 160ml Mandelmilch\n- 10g Schoki Chunks\n- 1 Prise Salz\n- 1/2 TL Backpulver\n\n*Mit meinem Code „Leni“ bekommst du immer den maximalen Rabatt bei @evosportsfuel.de 🩷(Anzeige)\nDas EvoWhey ist das verträgliche Proteinpulver, was ich bisher hatte, musst du unbedingt mal ausprobieren😍\nUnd mit dem FlavUp kannst du ohne Nachteil Zucker sparen! 1 Scoop spart 50g Zucker also 200 Kalorien✨\n\nUnd so geht’s👇🏼\nDie Banane zermatschen, dann Haferflocken, Kakaopulver, Proteinpulver, Süße, Haferdrink, 1 Prise Salz und 1/2 TL Backpulver zu einer Masse verarbeiten. In ein mikrowellengeeignetes Gefäß geben und die Chunks darauf verteilen. Für 20-25 Minuten bei 200 Grad Ober-/ Unterhitze in den Ofen geben und am besten warm genießen!\n\nLasst es euch schmecken! Eure Leni🫶🏼\n\"\"\""
+  },
+  "rawOutput": "{\n  \"isRecipe\": true,\n  \"containsMultipleRecipes\": false,\n  \"title\": \"Brownie Baked Oats\",\n  \"description\": \"Ein proteinreiches und schokoladiges Frühstück, das perfekt für Meal Prep geeignet ist.\",\n  \"prepTime\": 5,\n  \"cookTime\": 25,\n  \"servings\": 1,\n  \"ingredients\": [\n    {\n      \"name\": \"VEGETABLES\",\n      \"items\": [\n        {\n          \"name\": \"Banane\",\n          \"baseName\": \"banana\",\n          \"amount\": 1,\n          \"unit\": \"Stück\",\n          \"calories\": 105,\n          \"protein\": 1,\n          \"carbs\": 27,\n          \"fat\": 0,\n          \"isStaple\": false\n        }\n      ]\n    },\n    {\n      \"name\": \"GRAINS_PASTA\",\n      \"items\": [\n        {\n          \"name\": \"Haferflocken\",\n          \"baseName\": \"oats\",\n          \"amount\": 35,\n          \"unit\": \"g\",\n          \"calories\": 130,\n          \"protein\": 5,\n          \"carbs\": 23,\n          \"fat\": 2,\n          \"isStaple\": true\n        }\n      ]\n    },\n    {\n      \"name\": \"DAIRY_EGGS\",\n      \"items\": [\n        {\n          \"name\": \"Mandelmilch\",\n          \"baseName\": \"almond milk\",\n          \"amount\": 160,\n          \"unit\": \"ml\",\n          \"calories\": 25,\n          \"protein\": 1,\n          \"carbs\": 1,\n          \"fat\": 2,\n          \"isStaple\": false\n        }\n      ]\n    },\n    {\n      \"name\": \"SWEETS_SNACKS\",\n      \"items\": [\n        {\n          \"name\": \"Kakaopulver\",\n          \"baseName\": \"cocoa powder\",\n          \"amount\": 2,\n          \"unit\": \"TL\",\n          \"calories\": 20,\n          \"protein\": 1,\n          \"carbs\": 2,\n          \"fat\": 1,\n          \"isStaple\": true\n        },\n        {\n          \"name\": \"Schokoladen-Chunks\",\n          \"baseName\": \"chocolate chips\",\n          \"amount\": 10,\n          \"unit\": \"g\",\n          \"calories\": 50,\n          \"protein\": 1,\n          \"carbs\": 6,\n          \"fat\": 3,\n          \"isStaple\": false\n        }\n      ]\n    },\n    {\n      \"name\": \"PANTRY_BAKING\",\n      \"items\": [\n        {\n          \"name\": \"Proteinpulver\",\n          \"baseName\": \"protein powder\",\n          \"amount\": 40,\n          \"unit\": \"g\",\n          \"calories\": 140,\n          \"protein\": 30,\n          \"carbs\": 3,\n          \"fat\": 1,\n          \"modifier\": \"Chocolate\",\n          \"notes\": \"Evo Whey\",\n          \"parentIngredient\": {\n            \"name\": \"Proteinpulver\",\n            \"baseName\": \"protein powder\",\n            \"unit\": \"g\"\n          }\n        },\n        {\n          \"name\": \"Süßungsmittel\",\n          \"baseName\": \"sweetener\",\n          \"amount\": 1,\n          \"unit\": \"nach Bedarf\",\n          \"calories\": 0,\n          \"protein\": 0,\n          \"carbs\": 0,\n          \"fat\": 0,\n          \"isStaple\": true,\n          \"notes\": \"z.B. FlavUp\"\n        },\n        {\n          \"name\": \"Salz\",\n          \"baseName\": \"salt\",\n          \"amount\": 1,\n          \"unit\": \"Prise\",\n          \"calories\": 0,\n          \"protein\": 0,\n          \"carbs\": 0,\n          \"fat\": 0,\n          \"isStaple\": true\n        },\n        {\n          \"name\": \"Backpulver\",\n          \"baseName\": \"baking powder\",\n          \"amount\": 0.5,\n          \"unit\": \"TL\",\n          \"calories\": 0,\n          \"protein\": 0,\n          \"carbs\": 0,\n          \"fat\": 0,\n          \"isStaple\": true\n        }\n      ]\n    }\n  ],\n  \"instructions\": [\n    {\n      \"step\": 1,\n      \"description\": \"Die [Banane](ing:banana) in einer Schüssel zermatschen.\"\n    },\n    {\n      \"step\": 2,\n      \"description\": \"[Haferflocken](ing:oats), [Kakaopulver](ing:cocoa powder), [Proteinpulver](ing:protein powder), [Süßungsmittel](ing:sweetener), [Mandelmilch](ing:almond milk), [Salz](ing:salt) und [Backpulver](ing:baking powder) hinzufügen und zu einer gleichmäßigen Masse verrühren.\"\n    },\n    {\n      \"step\": 3,\n      \"description\": \"Die Masse in ein mikrowellengeeignetes Gefäß füllen und die [Schokoladen-Chunks](ing:chocolate chips) darauf verteilen.\"\n    },\n    {\n      \"step\": 4,\n      \"description\": \"Im vorgeheizten Backofen bei 200°C für ca. [20-25 Minuten](timer:1500) backen.\"\n    }\n  ],\n  \"equipment\": [\n    \"Schüssel\",\n    \"Backform oder mikrowellengeeignetes Gefäß\",\n    \"Backofen\"\n  ],\n  \"hasExplicitNutritionalValues\": true,\n  \"transcript\": \"NO_SPOKEN_WORDS\",\n  \"tags\": [\n    \"Frühstück\",\n    \"High-Protein\"\n  ],\n  \"emoji\": \"🍫\",\n  \"nutritionalValues\": {\n    \"calories\": 476,\n    \"carbs\": 47,\n    \"fat\": 11,\n    \"protein\": 40\n  }\n}",
+  "parsedOutput": {
+    "isRecipe": true,
+    "title": "Brownie Baked Oats",
+    "description": "Ein proteinreiches und schokoladiges Frühstück, das perfekt für Meal Prep geeignet ist.",
+    "prepTime": 5,
+    "cookTime": 25,
+    "servings": 1,
+    "ingredients": [
+      {
+        "name": "VEGETABLES",
+        "items": [
+          {
+            "name": "Banane",
+            "baseName": "banana",
+            "amount": 1,
+            "unit": "Stück",
+            "calories": 108,
+            "protein": 1.3,
+            "carbs": 23.6,
+            "fat": 0.2,
+            "isStaple": false,
+            "canonicalId": "banana_raw",
+            "matchedName": "Banane, roh",
+            "isVerified": true,
+            "category": "FRUITS"
+          }
+        ]
+      },
+      {
+        "name": "GRAINS_PASTA",
+        "items": [
+          {
+            "name": "Haferflocken",
+            "baseName": "oats",
+            "amount": 35,
+            "unit": "g",
+            "calories": 133,
+            "protein": 4.7,
+            "carbs": 20.8,
+            "fat": 2.6,
+            "isStaple": true,
+            "canonicalId": "oat_flakes",
+            "matchedName": "Haferflocken",
+            "isVerified": true,
+            "category": "GRAINS_PASTA"
+          }
+        ]
+      },
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Mandelmilch",
+            "baseName": "almond milk",
+            "amount": 160,
+            "unit": "ml",
+            "calories": 598,
+            "protein": 41,
+            "carbs": 0,
+            "fat": 48.3,
+            "isStaple": false,
+            "canonicalId": "tilsiter_raw_milk_at_least_45_fidm",
+            "matchedName": "Tilsiter, Rohmilch, vollfett",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          }
+        ]
+      },
+      {
+        "name": "SWEETS_SNACKS",
+        "items": [
+          {
+            "name": "Kakaopulver",
+            "baseName": "cocoa powder",
+            "amount": 2,
+            "unit": "TL",
+            "calories": 38,
+            "protein": 2.2,
+            "carbs": 1.2,
+            "fat": 2.1,
+            "isStaple": true,
+            "canonicalId": "cocoa_powder_without_sugar",
+            "matchedName": "Kakaopulver, ohne Zucker",
+            "isVerified": true,
+            "category": "SWEETS_SNACKS"
+          },
+          {
+            "name": "Schokoladen-Chunks",
+            "baseName": "chocolate chips",
+            "amount": 10,
+            "unit": "g",
+            "calories": 54,
+            "protein": 0.5,
+            "carbs": 4.9,
+            "fat": 3.5,
+            "isStaple": false,
+            "canonicalId": "pommes_chips",
+            "matchedName": "Pommes Chips",
+            "isVerified": true,
+            "category": "SWEETS_SNACKS"
+          }
+        ]
+      },
+      {
+        "name": "PANTRY_BAKING",
+        "items": [
+          {
+            "name": "Proteinpulver",
+            "baseName": "protein powder",
+            "amount": 40,
+            "unit": "g",
+            "calories": 192,
+            "protein": 9.9,
+            "carbs": 14,
+            "fat": 10.5,
+            "modifier": "Chocolate",
+            "notes": "Evo Whey",
+            "parentIngredient": {
+              "name": "Proteinpulver",
+              "baseName": "protein powder",
+              "unit": "g"
+            },
+            "canonicalId": "whole_milk_powder",
+            "matchedName": "Vollmilchpulver",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Süßungsmittel",
+            "baseName": "sweetener",
+            "amount": 1,
+            "unit": "nach Bedarf",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "notes": "z.B. FlavUp",
+            "canonicalId": "cola_beverage_with_sweetener",
+            "matchedName": "Colagetränk, mit Süssstoffen",
+            "isVerified": true,
+            "category": "BEVERAGES"
+          },
+          {
+            "name": "Salz",
+            "baseName": "salt",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "canonicalId": "salt_himalaya_salt",
+            "matchedName": "Salz, Himalayasalz",
+            "isVerified": true,
+            "category": "SPICES_HERBS"
+          },
+          {
+            "name": "Backpulver",
+            "baseName": "baking powder",
+            "amount": 0.5,
+            "unit": "TL",
+            "calories": 12,
+            "protein": 0.6,
+            "carbs": 0.9,
+            "fat": 0.7,
+            "isStaple": true,
+            "canonicalId": "whole_milk_powder",
+            "matchedName": "Vollmilchpulver",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "Die [Banane](ing:banana) in einer Schüssel zermatschen."
+      },
+      {
+        "step": 2,
+        "description": "[Haferflocken](ing:oats), [Kakaopulver](ing:cocoa powder), [Proteinpulver](ing:protein powder), [Süßungsmittel](ing:sweetener), [Mandelmilch](ing:almond milk), [Salz](ing:salt) und [Backpulver](ing:baking powder) hinzufügen und zu einer gleichmäßigen Masse verrühren."
+      },
+      {
+        "step": 3,
+        "description": "Die Masse in ein mikrowellengeeignetes Gefäß füllen und die [Schokoladen-Chunks](ing:chocolate chips) darauf verteilen."
+      },
+      {
+        "step": 4,
+        "description": "Im vorgeheizten Backofen bei 200°C für ca. [20-25 Minuten](timer:1500) backen."
+      }
+    ],
+    "equipment": [
+      "Schüssel",
+      "Backform oder mikrowellengeeignetes Gefäß",
+      "Backofen"
+    ],
+    "transcript": null,
+    "tags": [
+      "Frühstück",
+      "High-Protein"
+    ],
+    "emoji": "🍫",
+    "nutritionalValues": {
+      "calories": 476,
+      "carbs": 47,
+      "fat": 11,
+      "protein": 40
+    }
+  },
+  "tokenUsage": {
+    "promptTokens": 2737,
+    "candidateTokens": 1477,
+    "totalTokens": 4214
+  },
+  "costEstimate": {
+    "inputCostUsd": 0.000684,
+    "outputCostUsd": 0.002216,
+    "totalCostUsd": 0.0029,
+    "totalCostFormatted": "$0.0029",
+    "pricingTier": "short",
+    "pricingKnown": true
+  },
+  "logDir": "C:\\Users\\lucas\\source\\repos\\cookbook\\eval_results\\temp_run_5"
+}
