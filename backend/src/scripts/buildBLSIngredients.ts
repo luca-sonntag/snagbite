@@ -71,7 +71,9 @@ function mapBLSToCategory(code: string, nameDe: string): string {
       if (lower.includes('mehl') || lower.includes('stärke') || lower.includes('grieß')) return 'BAKING_COOKING';
       return 'GRAINS_PASTA';
     case 'D': return 'SWEETS_SNACKS';
-    case 'E': return 'GRAINS_PASTA';
+    case 'E':
+      if (code.startsWith('E1')) return 'DAIRY'; // Eier, Eigelb, Eiklar
+      return 'GRAINS_PASTA'; // Teigwaren / Nudeln
     case 'F': return 'FRUITS_VEGETABLES';
     case 'G': return 'FRUITS_VEGETABLES';
     case 'H':

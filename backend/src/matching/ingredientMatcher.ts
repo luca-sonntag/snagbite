@@ -1,6 +1,10 @@
-import Fuse, { type IFuseOptions } from 'fuse.js';
+import MiniSearch from 'minisearch';
 import { CANONICAL_INGREDIENTS, type CanonicalIngredient } from '../data/canonicalIngredients.js';
 import type { Recipe, Ingredient, ParentIngredientInfo } from '../types.js';
+
+interface IndexedIngredient extends CanonicalIngredient {
+  search_aliases: string;
+}
 
 // Pre-indexed lookup maps for O(1) exact matching
 const byId = new Map<string, CanonicalIngredient>();
@@ -8,8 +12,9 @@ const byAlias = new Map<string, CanonicalIngredient>();
 const byNameEn = new Map<string, CanonicalIngredient>();
 const byNameDe = new Map<string, CanonicalIngredient>();
 
-// Category-scoped item lists for dedicated Fuse instances
-const itemsByCategory = new Map<string, CanonicalIngredient[]>();
+// Category-scoped item lists for dedicated MiniSearch instances
+const itemsByCategory = new Map<string, IndexedIngredient[]>();
+const allIndexedItems: IndexedIngredient[] = [];
 
 // Simplicity score for choosing between multiple alias matches
 function getSimplicityScore(item: CanonicalIngredient): number {
@@ -46,37 +51,51 @@ for (const item of CANONICAL_INGREDIENTS) {
     }
   }
 
+  const indexedItem: IndexedIngredient = {
+    ...item,
+    search_aliases: (item.aliases || []).join(' '),
+  };
+
+  allIndexedItems.push(indexedItem);
+
   const cat = item.category || 'OTHER';
   if (!itemsByCategory.has(cat)) {
     itemsByCategory.set(cat, []);
   }
-  itemsByCategory.get(cat)!.push(item);
+  itemsByCategory.get(cat)!.push(indexedItem);
 }
 
-// Fuse options for Stage 1 Candidate Retrieval (broad recall, threshold 0.45)
-const FUSE_RETRIEVAL_OPTIONS: IFuseOptions<CanonicalIngredient> = {
-  keys: [
-    { name: 'name_de', weight: 0.60 },
-    { name: 'aliases', weight: 0.35 },
-    { name: 'name_en', weight: 0.05 },
-  ],
-  threshold: 0.45, // Generous candidate retrieval for Stage 2 re-ranking
-  distance: 100,
-  ignoreLocation: true,
-  minMatchCharLength: 2,
-  includeScore: true,
-  shouldSort: true,
-};
+// MiniSearch configuration with German tokenization & BM25 weighting
+function createMiniSearchIndex(items: IndexedIngredient[]): MiniSearch<IndexedIngredient> {
+  const ms = new MiniSearch<IndexedIngredient>({
+    idField: 'id',
+    fields: ['name_de', 'search_aliases', 'name_en'],
+    storeFields: ['id', 'bls_code', 'name_de', 'name_en', 'category', 'nutrients_per_100g', 'standard_units', 'aliases'],
+    tokenize: (text: string) =>
+      text
+        .toLowerCase()
+        .replace(/[,()[\]/._-]/g, ' ')
+        .split(/\s+/)
+        .filter((t) => t.length >= 2),
+    processTerm: (term: string) => term.toLowerCase().trim(),
+    searchOptions: {
+      boost: { name_de: 2.5, search_aliases: 2.0, name_en: 0.8 },
+      fuzzy: (term: string) => (term.length >= 4 ? 0.2 : false),
+      prefix: true,
+      combineWith: 'OR',
+    },
+  });
 
-const categoryFuseMap = new Map<string, Fuse<CanonicalIngredient>>();
+  ms.addAll(items);
+  return ms;
+}
+
+const categoryMiniSearchMap = new Map<string, MiniSearch<IndexedIngredient>>();
 for (const [cat, items] of itemsByCategory.entries()) {
-  categoryFuseMap.set(cat, new Fuse(items, FUSE_RETRIEVAL_OPTIONS));
+  categoryMiniSearchMap.set(cat, createMiniSearchIndex(items));
 }
 
-const globalFuse = new Fuse(CANONICAL_INGREDIENTS, {
-  ...FUSE_RETRIEVAL_OPTIONS,
-  threshold: 0.35,
-});
+const globalMiniSearch = createMiniSearchIndex(allIndexedItems);
 
 /**
  * Normalizes a search term or ingredient name by removing modifiers,
@@ -194,72 +213,23 @@ export function calculateTokenDice(query: string, candidate: CanonicalIngredient
   let bestScore = 0;
 
   for (const text of targetTexts) {
-    const tTokens = text.toLowerCase().replace(/[,()[\]/]/g, ' ').split(/\s+/).filter(t => t.length >= 2);
+    const tTokens = text.toLowerCase().replace(/[,()[\]/._-]/g, ' ').split(/\s+/).filter(t => t.length >= 2);
     if (tTokens.length === 0) continue;
 
     let matches = 0;
     for (const q of qTokens) {
-      if (tTokens.some(t => t === q || (t.length >= 4 && (t.startsWith(q) || q.startsWith(t))))) {
+      if (tTokens.some(t => t === q || (t.length >= 5 && q.length >= 5 && (t.startsWith(q) || q.startsWith(t))))) {
         matches++;
       }
     }
 
     const dice = (2 * matches) / (qTokens.length + tTokens.length);
     const recall = matches / qTokens.length;
-    const combined = 0.65 * recall + 0.35 * dice;
+    const combined = 0.7 * recall + 0.3 * dice;
     if (combined > bestScore) bestScore = combined;
   }
 
   return bestScore;
-}
-
-/**
- * Standard Jaro-Winkler string similarity (0.0 to 1.0).
- */
-export function calculateJaroWinkler(s1: string, s2: string): number {
-  const a = s1.toLowerCase().trim();
-  const b = s2.toLowerCase().trim();
-  if (a === b) return 1.0;
-  if (!a || !b) return 0.0;
-
-  const maxDist = Math.floor(Math.max(a.length, b.length) / 2) - 1;
-  const aMatches = new Array(a.length).fill(false);
-  const bMatches = new Array(b.length).fill(false);
-
-  let matches = 0;
-  for (let i = 0; i < a.length; i++) {
-    const start = Math.max(0, i - maxDist);
-    const end = Math.min(i + maxDist + 1, b.length);
-    for (let j = start; j < end; j++) {
-      if (bMatches[j]) continue;
-      if (a[i] !== b[j]) continue;
-      aMatches[i] = true;
-      bMatches[j] = true;
-      matches++;
-      break;
-    }
-  }
-
-  if (matches === 0) return 0.0;
-
-  let transpositions = 0;
-  let k = 0;
-  for (let i = 0; i < a.length; i++) {
-    if (!aMatches[i]) continue;
-    while (!bMatches[k]) k++;
-    if (a[i] !== b[k]) transpositions++;
-    k++;
-  }
-
-  const jaro = (matches / a.length + matches / b.length + (matches - transpositions / 2) / matches) / 3;
-
-  let prefix = 0;
-  for (let i = 0; i < Math.min(4, Math.min(a.length, b.length)); i++) {
-    if (a[i] === b[i]) prefix++;
-    else break;
-  }
-
-  return jaro + prefix * 0.1 * (1 - jaro);
 }
 
 /**
@@ -294,28 +264,7 @@ export function calculateSimplicityFactor(item: CanonicalIngredient): number {
 }
 
 /**
- * Computes a weighted 2-Stage Re-Ranking composite score (0.0 to 1.0).
- */
-export function calculateCompositeMatchScore(
-  query: string,
-  candidate: CanonicalIngredient,
-  fuseScore: number
-): number {
-  const fuseSim = Math.max(0, 1.0 - fuseScore);
-  const tokenDice = calculateTokenDice(query, candidate);
-  const jaroWinkler = calculateJaroWinkler(query, candidate.name_de);
-  const simplicity = calculateSimplicityFactor(candidate);
-
-  // Weighted composite formula:
-  // 45% Token-Dice + 25% Fuse-Similarity + 15% Jaro-Winkler + 15% Simplicity
-  const normalizedSimplicity = Math.max(0, Math.min(1, simplicity + 0.3));
-  const composite = (0.45 * tokenDice) + (0.25 * fuseSim) + (0.15 * jaroWinkler) + (0.15 * normalizedSimplicity);
-
-  return composite;
-}
-
-/**
- * Finds a matching canonical ingredient using exact map lookups and 2-stage Fuse.js + Token Re-Ranking.
+ * Finds a matching canonical ingredient using exact map lookups and MiniSearch BM25 + Token Guard.
  */
 export function findCanonicalIngredient(
   name: string,
@@ -326,7 +275,7 @@ export function findCanonicalIngredient(
   parentIngredient?: ParentIngredientInfo
 ): CanonicalIngredient | null {
   const cleanCategory = normalizeCategory(category);
-  const targetFuse = cleanCategory && categoryFuseMap.has(cleanCategory) ? categoryFuseMap.get(cleanCategory)! : null;
+  const targetMiniSearch = cleanCategory && categoryMiniSearchMap.has(cleanCategory) ? categoryMiniSearchMap.get(cleanCategory)! : null;
 
   // 1. Parent ingredient priority (e.g. "Ei" for "Eigelb", "Zitrone" for "Zitronenabrieb")
   if (parentIngredient?.name) {
@@ -382,44 +331,63 @@ export function findCanonicalIngredient(
     }
   }
 
-  // 4. Stage 2: Category-Scoped 2-Stage Retrieval & Re-Ranking
-  if (targetFuse) {
+  // 4. Stage 2: Category-Scoped MiniSearch (BM25 + Token Guard)
+  if (targetMiniSearch) {
     for (const q of queriesToTest) {
       if (q.length < 2) continue;
-      const fuseQuery = q.length > 32 ? q.slice(0, 32) : q;
-      const candidates = targetFuse.search(fuseQuery, { limit: 5 });
-      if (candidates.length > 0) {
-        const scored = candidates.map(c => ({
-          item: c.item,
-          score: calculateCompositeMatchScore(q, c.item, c.score ?? 0.5),
-        }));
+      const results = targetMiniSearch.search(q, {
+        boost: { name_de: 3.0, search_aliases: 2.5, name_en: 1.0 },
+        fuzzy: q.length >= 5 ? 0.2 : false,
+        prefix: false, // Strict word matching to prevent prefix bleed (e.g. speck -> speckwurst)
+        combineWith: 'OR',
+      });
 
-        scored.sort((a, b) => b.score - a.score);
-        // Acceptance threshold: 0.55 ensures strong semantic & token match
-        if (scored[0].score >= 0.55) {
-          return scored[0].item;
+      if (results.length > 0) {
+        const evaluated = results.slice(0, 5).map((r) => {
+          const item = byId.get(r.id)!;
+          const tokenDice = calculateTokenDice(q, item);
+          const simplicity = calculateSimplicityFactor(item);
+          // Combined score: BM25 relevance weighted with TokenDice and Simplicity
+          const finalScore = r.score * (0.4 + 0.6 * tokenDice) + simplicity * 2.0;
+          return { item, finalScore, tokenDice, bm25Score: r.score };
+        });
+
+        evaluated.sort((a, b) => b.finalScore - a.finalScore);
+        const best = evaluated[0];
+
+        // Strict Guard: At least 40% of query words must match the candidate food
+        if (best.tokenDice >= 0.40) {
+          return best.item;
         }
       }
     }
-    // Category was specified and no high-confidence match found -> clean null fallback
+    // Category was specified and no high-confidence match found -> clean null
     return null;
   }
 
-  // 5. Global Fallback Search (ONLY if category was unspecified or OTHER)
+  // 5. Stage 3: Global Fallback Search (ONLY if category was unspecified or OTHER)
   if (!cleanCategory || cleanCategory === 'OTHER') {
     for (const q of queriesToTest) {
       if (q.length < 3) continue;
-      const fuseQuery = q.length > 32 ? q.slice(0, 32) : q;
-      const candidates = globalFuse.search(fuseQuery, { limit: 5 });
-      if (candidates.length > 0) {
-        const scored = candidates.map(c => ({
-          item: c.item,
-          score: calculateCompositeMatchScore(q, c.item, c.score ?? 0.5),
-        }));
+      const results = globalMiniSearch.search(q, {
+        boost: { name_de: 3.0, search_aliases: 2.5, name_en: 1.0 },
+        fuzzy: q.length >= 4 ? 0.2 : false,
+        prefix: true,
+      });
 
-        scored.sort((a, b) => b.score - a.score);
-        if (scored[0].score >= 0.65) {
-          return scored[0].item;
+      if (results.length > 0) {
+        const evaluated = results.slice(0, 5).map((r) => {
+          const item = byId.get(r.id)!;
+          const tokenDice = calculateTokenDice(q, item);
+          const simplicity = calculateSimplicityFactor(item);
+          const finalScore = r.score * (0.5 + 0.5 * tokenDice) + simplicity * 2.0;
+          return { item, finalScore, tokenDice, bm25Score: r.score };
+        });
+
+        evaluated.sort((a, b) => b.finalScore - a.finalScore);
+        const best = evaluated[0];
+        if (best.tokenDice >= 0.50 && best.bm25Score >= 8.0) {
+          return best.item;
         }
       }
     }
