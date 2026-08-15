@@ -1,0 +1,233 @@
+{
+  "timestamp": "2026-08-15T17:00:17.079Z",
+  "requestType": "extract_recipe",
+  "model": "gemini-3.1-flash-lite",
+  "durationMs": 3962,
+  "success": true,
+  "input": {
+    "captionLength": 1585,
+    "captionPreview": "⬇️ zum Rezept 🍌🍫⬇️ \nTop Werte: Diese große 500gr Bananen Maulwurf Kuchenbowl hat nur 478 Kalorien und 46gr Protein!! Super einfach, ohne Backofen in 10 Minuten zubereitet! 💪😍\n\n🔥Nährwerte ganze Bowl (500ml):\n478 Kalorien▪️46g EW▪️40g KH▪️12g F\n \n✅ ohne Industriezucker\n✅ ohne Backofen\n✅ schnell &",
+    "carouselImageCount": 0,
+    "imageSourceKind": "carousel",
+    "prompt": "You are an expert recipe extractor. Analyze the provided content (which may include audio, website text, or video caption).\n    \nReconstruct the complete recipe, resolving any contradictions culinary-wise. Ensure to follow the field-level guidelines specified in the descriptions of the output schema.\n\nKey Constraints:\n1. Recipe Existence & Anti-Hallucination: The source content MUST contain the actual recipe details (specific ingredients with quantities and/or step-by-step cooking instructions). You MUST set \"isRecipe\" to false if:\n   a) The content is unrelated (comedy, vlogs, fitness motivation, general chat, etc.).\n   b) The content is merely a teaser, promo, or engagement bait without the full recipe (e.g. \"Comment BUCKEYE and I'll send you the recipe\", \"Recipe in my ebook\", \"Link in bio\", \"DM for full recipe\", or appetizing marketing descriptions/macros without the actual list of ingredients and preparation steps).\n   c) The source mentions only the dish name/concept but completely omits the concrete ingredients and instructions.\n   NEVER under any circumstances invent, fabricate, or hallucinate ingredients, amounts, or cooking steps when they are not present in the provided source text, audio, or images.\n2. Multi-Recipe Ambiguity: Before attempting to extract a recipe, evaluate if the content represents a multi-recipe collection, roundup, or compilation. You MUST set \"containsMultipleRecipes\" to true if ANY of the following apply:\n   a) The title, caption, or cover image text indicates multiple dishes/recipes (e.g. \"High protein dinners...\", \"5 meals to get lean\", \"3 lunch ideas\", \"What I eat in a day\", \"4 low-calorie recipes\").\n   b) The carousel images or video scenes present multiple distinct standalone main dishes across different slides/segments (e.g. Slide 2 is \"Smash Burger & Sweet Potato Fries\", Slide 4 is \"Bang Bang Chicken\", Slide 6 is \"Beef Burrito Bowl\").\n   c) Multiple distinct nutrition/macro cards exist for different dishes throughout the slides/segments.\n   If \"containsMultipleRecipes\" is true, do NOT attempt to merge the dishes into one recipe.\n   Set \"containsMultipleRecipes\" to false ONLY if the entire post is dedicated to ONE single recipe (including its sub-components like sauce, marinade, side dish, or garnishes cooked together as one meal).\n3. Category Ordering: Always place \"PRODUCE\" first in the ingredients array, followed by dry goods/pantry items, then refrigerated products/meats, and finally other/extras at the very end.\n4. Translation: Write and translate all text values (including title, description, ingredient names/notes, instruction steps, equipment list, tips, alternative ingredient details, and tags) into: German. Keep the category keys as the uppercase English enum values. Follow the schema strictly.\n5. Preferred Units:\n   - Temperature Units: Format all temperature values mentioned in the instructions, description, tips, or title using the preferred unit: Celsius (e.g., convert and format as \"200°C\" or \"400°F\" depending on preference).\n   - Weight & Volume Units: Format all ingredient weights, volumes, and measurements using the preferred unit system: metric (e.g., metric units like grams, milliliters, kilograms, or imperial units like ounces, cups, pounds, fluid ounces) and perform conversions where appropriate.\n6. Missing Data & Nutrition: If any information for a specific field is missing, leave it empty (empty string \"\", null, or empty array []). You MUST set \"hasExplicitNutritionalValues\" to true ONLY IF the recipe nutritional values are explicitly stated in the source text or audio. If they are not, set it to false and set \"nutritionalValues\" to null (do NOT estimate or calculate overall nutritional values at the recipe level). Note that \"nutritionalValues\" MUST represent values per single serving/portion. If the source lists total values for the entire recipe, divide them by the number of servings/portions first.\n7. Clean Ingredient Names: Ensure the \"name\" field contains only the clean ingredient name (e.g., \"Frischkäse\", \"evaporated milk\", \"cream cheese\", \"butter\"). Move all adjectives, processing states, or descriptions (such as \"light\", \"mager\", \"low fat\", \"leichte\", \"gerieben\", \"grated\") into the \"modifier\" field. Do NOT leave these descriptors inside the \"name\" field.\n8. Ingredient Decomposition: If a composite element or homemade component (like a custom sauce or pesto) is prepared during the recipe, you MUST list its raw ingredients individually instead of the finished compound product.\n9. Ingredient-level Nutritional Values: For each ingredient, you MUST estimate its nutritional values (calories, protein, carbs, fat) based on the ENTIRE specified quantity (amount * unit). Do NOT output per-100g, per-100ml, or single-unit values unless the quantity is exactly 100g, 100ml, or 1 unit. E.g., if chicken breast has 165 kcal per 100g and the recipe specifies 500g, the calories field MUST be 825, NOT 165. If a potato has 150 kcal and the amount is 6, the calories field MUST be 900, NOT 150. If olive oil has 14g fat/EL and the amount is 3 EL, the fat field MUST be 42, NOT 14.\n10. Infer Minor Missing Components (Only for Existing Recipes): If the source already contains a full recipe with ingredients and instructions, but the title or visual images explicitly show an obvious missing minor garnish or component (e.g., 'Air-Fried Broccolini' in the title and green broccolini on the plate) that was accidentally omitted from the written list, you may infer that specific item. NEVER use this rule to fabricate an entire recipe from a title or teaser when no base recipe is provided.\n11. Serving Size Estimation: Identify the number of servings or portions the recipe makes. Look for clues like 'serves 4' or estimate based on the ingredient amounts (e.g., 500g chicken and 6 potatoes typically serves 3-4 people). Avoid defaulting to 1 serving if the ingredient amounts are clearly meant for a family-sized meal.\n12. Zero-Calorie & Low-Calorie Ingredients: Ingredients like water, ice, salt, or baking soda MUST have 0 calories, protein, carbs, and fat. For spices, seasonings, or herbs in small quantities (like teaspoons), focus your calculation energy on the high-calorie/high-macro ingredients (meats, oils, dairy, grains, starches) and estimate very small values (e.g., 5 kcal) or 0.\n13. Cooked vs. Raw/Dry States of Expandable Ingredients: For ingredients that expand significantly during cooking (e.g., rice, pasta, lentils, beans, chickpeas, couscous, quinoa, bulgur), you MUST determine whether the specified quantity refers to the dry/uncooked state or the cooked/prepared state. Dry/uncooked state (e.g., \"100g uncooked rice\" or \"100g rice\" which is boiled in the instructions) has high caloric density (e.g., dry rice: ~350 kcal/100g, dry pasta: ~350 kcal/100g, dry lentils: ~350 kcal/100g). Cooked/prepared state (e.g., \"100g cooked rice\", \"100g boiled pasta\", canned/pre-cooked beans, or when already-cooked ingredients are added directly to a stir-fry/bowl) has much lower caloric density (e.g., cooked rice: ~130 kcal/100g, cooked pasta: ~130-150 kcal/100g, cooked lentils: ~110-120 kcal/100g). Ambiguity resolution: Analyze the cooking instructions. If the instructions include boiling/cooking the dry ingredient, calculate using dry/raw values. If the ingredient is added pre-cooked, or if treating it as raw results in absurdly high calories (e.g., 250g dry rice is ~850 kcal and cooks to 750g cooked rice, which is way too much for a single serving of fried rice), assume the quantity represents the cooked state and calculate using cooked values.\n14. Common Pantry Staples: For each ingredient, set the \"isStaple\" boolean to true ONLY if it is a very common basic staple that people almost always already have at home and rarely need to buy specifically for a recipe (e.g. salt, pepper, water, cooking oil, sugar, common dried spices). Set it to false for anything a user would typically need to shop for (e.g. meat, cheese, vegetables, fresh herbs, specialty items). When in doubt, set it to false.\n15. Inline Ingredient Tagging: In every step description, whenever an ingredient from the ingredients list is used or referenced, you MUST format its mention using the inline syntax '[exact word used in text](ing:baseName)'. 'baseName' MUST match the English 'baseName' (or 'name' if 'baseName' is not set) of the corresponding ingredient in the ingredients list. Examples:\n   - Ingredients: Eigelb (baseName: egg yolk), Ei (baseName: egg), Parmesan (baseName: parmesan)\n   - Step description: \"Die [Eigelbe](ing:egg yolk) und das [Ei](ing:egg) zusammen mit dem [Parmesan](ing:parmesan) verrühren.\"\n   - Do NOT tag equipment or non-ingredient words. Make sure the brackets wrap the natural word as it appears in the sentence.\n16. Concise, Direct Instruction Steps: Write instruction step descriptions as short, clear, action-oriented sentences. Eliminate conversational filler words, narrative transitions, and redundancies. Split long multi-action steps into distinct, bite-sized steps so each step is easy to follow while cooking.\n17. Inline Timer Tagging: In every step description, whenever a cooking duration or time span is mentioned (e.g. \"15 Minuten\", \"1,5 Stunden\", \"30 Sekunden\"), you MUST format it using the inline syntax '[exact time text](timer:duration_in_seconds)'. Calculate the total duration in seconds and put it in the timer parameter. Examples:\n   - \"Ca. [15 Minuten](timer:900) garen.\"\n   - \"Für [1,5 Stunden](timer:5400) köcheln lassen.\"\n   - \"Etwa [45 Sekunden](timer:45) anbraten.\"\n\nDescription/Caption:\n\"\"\"\n⬇️ zum Rezept 🍌🍫⬇️ \nTop Werte: Diese große 500gr Bananen Maulwurf Kuchenbowl hat nur 478 Kalorien und 46gr Protein!! Super einfach, ohne Backofen in 10 Minuten zubereitet! 💪😍\n\n🔥Nährwerte ganze Bowl (500ml):\n478 Kalorien▪️46g EW▪️40g KH▪️12g F\n \n✅ ohne Industriezucker\n✅ ohne Backofen\n✅ schnell & einfach zubereitet \n✅ Mealprep geeignet \n\n💾 Speicher das Rezept gerne ab🥰\n❤️ Folge mir für mehr proteinreiche Rezeptideen \n\nZutaten Kuchenboden:\n• 1 Ei \n• 40ml Mandelmilch (Milch nach Wahl) \n• 15gr Mandelmehl entölt\n• 1TL Backpulver \n• 15gr AllWhey Protein Chocolate Milkshake*\n• 15gr Backkakao\n• 1 scoop AllFlavour Pure Chocolate* (optional: 15gr Erythrit)\n\nZutaten Bananenschicht: \n• 150g Skyr/Magerquark\n• 1 mittelgroße Banane\n• 3gr Flohsamen (optional für mehr Ballaststoffe)\n• 1 scoop AllFlavour Vanilla Dream* (optional: Vanillepaste)\n\n* vom 15.-22. Juli große 20% Zucker Spar Aktion bei @fayncom — mit Code „JACKY“ den maximalen Rabatt 💪😘 | Werbung\n\nZubereitung:\n1. Für den Teig alle Zutaten, in einer Mikrowellengeeignete Schale, verrühren und für 3 Minuten (bei voller Wattzahl) in die Mirkowelle.\n2. Topfen/Skyr mit Vanillepaste/AllFlavour und Flohsamen verrühren. Banane klein schneiden. \n3. Kuchenboden vorsichtig in 2 Teile schneiden. Die eine Hälfte des Kuchen als Boden in die Form legen, zuerst Topfencreme und anschließend Banane darauf verteilen und die zweite Hälfte des Kuchen darüber zerzupfen. \n4. Ihr könnt die Bowl im Kühlschrank kalt stellen oder sofort genießen! 🤤❤️\n\n#abnehmen2026 #abnehmrezepte #kalorienarmerezepte #abnehmenohnezuhungern #rezeptideen\n\"\"\""
+  },
+  "rawOutput": "{\n  \"isRecipe\": true,\n  \"containsMultipleRecipes\": false,\n  \"title\": \"Bananen-Maulwurf-Kuchenbowl\",\n  \"description\": \"Eine proteinreiche, kalorienarme Maulwurf-Kuchenbowl, die ohne Backofen in nur 10 Minuten zubereitet ist.\",\n  \"prepTime\": 5,\n  \"cookTime\": 5,\n  \"servings\": 1,\n  \"ingredients\": [\n    {\n      \"name\": \"VEGETABLES\",\n      \"items\": [\n        {\n          \"name\": \"Banane\",\n          \"baseName\": \"banana\",\n          \"amount\": 1,\n          \"unit\": \"Stück\",\n          \"calories\": 105,\n          \"protein\": 1,\n          \"carbs\": 27,\n          \"fat\": 0,\n          \"isStaple\": false\n        }\n      ]\n    },\n    {\n      \"name\": \"DAIRY_EGGS\",\n      \"items\": [\n        {\n          \"name\": \"Ei\",\n          \"baseName\": \"egg\",\n          \"amount\": 1,\n          \"unit\": \"Stück\",\n          \"calories\": 75,\n          \"protein\": 7,\n          \"carbs\": 1,\n          \"fat\": 5,\n          \"isStaple\": false\n        },\n        {\n          \"name\": \"Mandelmilch\",\n          \"baseName\": \"almond milk\",\n          \"amount\": 40,\n          \"unit\": \"ml\",\n          \"calories\": 6,\n          \"protein\": 0,\n          \"carbs\": 0,\n          \"fat\": 0,\n          \"isStaple\": false\n        },\n        {\n          \"name\": \"Skyr\",\n          \"baseName\": \"skyr\",\n          \"amount\": 150,\n          \"unit\": \"g\",\n          \"calories\": 95,\n          \"protein\": 16,\n          \"carbs\": 6,\n          \"fat\": 0,\n          \"isStaple\": false\n        }\n      ]\n    },\n    {\n      \"name\": \"PANTRY_BAKING\",\n      \"items\": [\n        {\n          \"name\": \"Mandelmehl\",\n          \"baseName\": \"almond flour\",\n          \"amount\": 15,\n          \"unit\": \"g\",\n          \"calories\": 50,\n          \"protein\": 6,\n          \"carbs\": 1,\n          \"fat\": 3,\n          \"modifier\": \"entölt\",\n          \"notes\": \"entölt\",\n          \"parentIngredient\": {\n            \"name\": \"Mandelmehl\",\n            \"baseName\": \"almond flour\",\n            \"unit\": \"g\"\n          }\n        },\n        {\n          \"name\": \"Backpulver\",\n          \"baseName\": \"baking powder\",\n          \"amount\": 1,\n          \"unit\": \"TL\",\n          \"calories\": 0,\n          \"protein\": 0,\n          \"carbs\": 0,\n          \"fat\": 0,\n          \"isStaple\": true\n        },\n        {\n          \"name\": \"Whey Protein\",\n          \"baseName\": \"whey protein\",\n          \"amount\": 15,\n          \"unit\": \"g\",\n          \"calories\": 55,\n          \"protein\": 12,\n          \"carbs\": 1,\n          \"fat\": 0,\n          \"modifier\": \"Chocolate Milkshake\"\n        },\n        {\n          \"name\": \"Backkakao\",\n          \"baseName\": \"cocoa powder\",\n          \"amount\": 15,\n          \"unit\": \"g\",\n          \"calories\": 45,\n          \"protein\": 3,\n          \"carbs\": 3,\n          \"fat\": 2,\n          \"isStaple\": false\n        },\n        {\n          \"name\": \"Flohsamen\",\n          \"baseName\": \"psyllium husk\",\n          \"amount\": 3,\n          \"unit\": \"g\",\n          \"calories\": 5,\n          \"protein\": 0,\n          \"carbs\": 0,\n          \"fat\": 0,\n          \"isStaple\": false\n        },\n        {\n          \"name\": \"AllFlavour\",\n          \"baseName\": \"flavor drops\",\n          \"amount\": 2,\n          \"unit\": \"scoop\",\n          \"calories\": 0,\n          \"protein\": 0,\n          \"carbs\": 0,\n          \"fat\": 0,\n          \"modifier\": \"Chocolate/Vanilla\"\n        }\n      ]\n    }\n  ],\n  \"instructions\": [\n    {\n      \"step\": 1,\n      \"description\": \"Für den Teig das [Ei](ing:egg), die [Mandelmilch](ing:almond milk), das [Mandelmehl](ing:almond flour), [Backpulver](ing:baking powder), [Whey Protein](ing:whey protein) und [Backkakao](ing:cocoa powder) in einer mikrowellengeeigneten Schale verrühren und für [3 Minuten](timer:180) in der Mikrowelle garen.\"\n    },\n    {\n      \"step\": 2,\n      \"description\": \"Den [Skyr](ing:skyr) mit [AllFlavour](ing:flavor drops) und [Flohsamen](ing:psyllium husk) verrühren. Die [Banane](ing:banana) klein schneiden.\"\n    },\n    {\n      \"step\": 3,\n      \"description\": \"Den Kuchenboden vorsichtig in zwei Teile schneiden. Eine Hälfte als Boden in die Form legen, die Creme und die [Banane](ing:banana) darauf verteilen und die zweite Hälfte des Kuchens darüber zerzupfen.\"\n    },\n    {\n      \"step\": 4,\n      \"description\": \"Die Bowl nach Belieben im Kühlschrank kalt stellen oder sofort genießen.\"\n    }\n  ],\n  \"equipment\": [\n    \"Mikrowellengeeignete Schale\",\n    \"Mikrowelle\",\n    \"Messer\"\n  ],\n  \"hasExplicitNutritionalValues\": true,\n  \"transcript\": \"NO_SPOKEN_WORDS\",\n  \"tags\": [\n    \"High-Protein\",\n    \"Dessert\"\n  ],\n  \"emoji\": \"🍌\",\n  \"nutritionalValues\": {\n    \"calories\": 478,\n    \"carbs\": 40,\n    \"fat\": 12,\n    \"protein\": 46\n  }\n}",
+  "parsedOutput": {
+    "isRecipe": true,
+    "title": "Bananen-Maulwurf-Kuchenbowl",
+    "description": "Eine proteinreiche, kalorienarme Maulwurf-Kuchenbowl, die ohne Backofen in nur 10 Minuten zubereitet ist.",
+    "prepTime": 5,
+    "cookTime": 5,
+    "servings": 1,
+    "ingredients": [
+      {
+        "name": "VEGETABLES",
+        "items": [
+          {
+            "name": "Banane",
+            "baseName": "banana",
+            "amount": 1,
+            "unit": "Stück",
+            "calories": 108,
+            "protein": 1.3,
+            "carbs": 23.6,
+            "fat": 0.2,
+            "isStaple": false,
+            "canonicalId": "banana_raw",
+            "matchedName": "Banane, roh",
+            "isVerified": true,
+            "category": "FRUITS"
+          }
+        ]
+      },
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Ei",
+            "baseName": "egg",
+            "amount": 1,
+            "unit": "Stück",
+            "calories": 77,
+            "protein": 6.9,
+            "carbs": 0.2,
+            "fat": 5.4,
+            "isStaple": false,
+            "canonicalId": "egg_raw",
+            "matchedName": "Hühnerei, ganz, roh",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Mandelmilch",
+            "baseName": "almond milk",
+            "amount": 40,
+            "unit": "ml",
+            "calories": 13,
+            "protein": 0.4,
+            "carbs": 0.5,
+            "fat": 1,
+            "isStaple": false,
+            "canonicalId": "almond_drink_plain",
+            "matchedName": "Mandelgetränk, nature",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Skyr",
+            "baseName": "skyr",
+            "amount": 150,
+            "unit": "g",
+            "calories": 95,
+            "protein": 16,
+            "carbs": 6,
+            "fat": 0,
+            "isStaple": false,
+            "isVerified": false
+          }
+        ]
+      },
+      {
+        "name": "PANTRY_BAKING",
+        "items": [
+          {
+            "name": "Mandelmehl",
+            "baseName": "almond flour",
+            "amount": 15,
+            "unit": "g",
+            "calories": 52,
+            "protein": 1.9,
+            "carbs": 10.1,
+            "fat": 0.2,
+            "modifier": "entölt",
+            "notes": "entölt",
+            "parentIngredient": {
+              "name": "Mandelmehl",
+              "baseName": "almond flour",
+              "unit": "g"
+            },
+            "canonicalId": "sp_tzle_flour",
+            "matchedName": "Knöpflimehl",
+            "isVerified": true,
+            "category": "GRAINS_PASTA"
+          },
+          {
+            "name": "Backpulver",
+            "baseName": "baking powder",
+            "amount": 1,
+            "unit": "TL",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Whey Protein",
+            "baseName": "whey protein",
+            "amount": 15,
+            "unit": "g",
+            "calories": 55,
+            "protein": 12,
+            "carbs": 1,
+            "fat": 0,
+            "modifier": "Chocolate Milkshake",
+            "isVerified": false
+          },
+          {
+            "name": "Backkakao",
+            "baseName": "cocoa powder",
+            "amount": 15,
+            "unit": "g",
+            "calories": 57,
+            "protein": 3.4,
+            "carbs": 1.7,
+            "fat": 3.1,
+            "isStaple": false,
+            "canonicalId": "cocoa_powder_without_sugar",
+            "matchedName": "Kakaopulver, ohne Zucker",
+            "isVerified": true,
+            "category": "SWEETS_SNACKS"
+          },
+          {
+            "name": "Flohsamen",
+            "baseName": "psyllium husk",
+            "amount": 3,
+            "unit": "g",
+            "calories": 11,
+            "protein": 0.5,
+            "carbs": 1.7,
+            "fat": 0.2,
+            "isStaple": false,
+            "canonicalId": "amaranth_seed_raw",
+            "matchedName": "Amaranth, Samen, roh",
+            "isVerified": true,
+            "category": "GRAINS_PASTA"
+          },
+          {
+            "name": "AllFlavour",
+            "baseName": "flavor drops",
+            "amount": 2,
+            "unit": "scoop",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "modifier": "Chocolate/Vanilla",
+            "isVerified": false
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "Für den Teig das [Ei](ing:egg), die [Mandelmilch](ing:almond milk), das [Mandelmehl](ing:almond flour), [Backpulver](ing:baking powder), [Whey Protein](ing:whey protein) und [Backkakao](ing:cocoa powder) in einer mikrowellengeeigneten Schale verrühren und für [3 Minuten](timer:180) in der Mikrowelle garen."
+      },
+      {
+        "step": 2,
+        "description": "Den [Skyr](ing:skyr) mit [AllFlavour](ing:flavor drops) und [Flohsamen](ing:psyllium husk) verrühren. Die [Banane](ing:banana) klein schneiden."
+      },
+      {
+        "step": 3,
+        "description": "Den Kuchenboden vorsichtig in zwei Teile schneiden. Eine Hälfte als Boden in die Form legen, die Creme und die [Banane](ing:banana) darauf verteilen und die zweite Hälfte des Kuchens darüber zerzupfen."
+      },
+      {
+        "step": 4,
+        "description": "Die Bowl nach Belieben im Kühlschrank kalt stellen oder sofort genießen."
+      }
+    ],
+    "equipment": [
+      "Mikrowellengeeignete Schale",
+      "Mikrowelle",
+      "Messer"
+    ],
+    "transcript": null,
+    "tags": [
+      "High-Protein",
+      "Dessert"
+    ],
+    "emoji": "🍌",
+    "nutritionalValues": {
+      "calories": 478,
+      "carbs": 40,
+      "fat": 12,
+      "protein": 46
+    }
+  },
+  "tokenUsage": {
+    "promptTokens": 2882,
+    "candidateTokens": 1548,
+    "totalTokens": 4430
+  },
+  "costEstimate": {
+    "inputCostUsd": 0.000721,
+    "outputCostUsd": 0.002322,
+    "totalCostUsd": 0.003043,
+    "totalCostFormatted": "$0.0030",
+    "pricingTier": "short",
+    "pricingKnown": true
+  },
+  "logDir": "C:\\Users\\lucas\\source\\repos\\cookbook\\eval_results\\temp_run_w2_14"
+}

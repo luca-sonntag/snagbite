@@ -1,0 +1,260 @@
+{
+  "url": "https://www.instagram.com/reel/Db_I6kWIjbR/?igsh=dzAwNzY2Y3JlNXds",
+  "recipe": {
+    "isRecipe": true,
+    "title": "Schinken-Brokkoli-Auflauf",
+    "description": "Ein herzhafter und einfacher Auflauf mit Nudeln, Brokkoli und Schinken, perfekt für das Mealprep.",
+    "prepTime": 10,
+    "cookTime": 20,
+    "servings": 3,
+    "ingredients": [
+      {
+        "name": "VEGETABLES",
+        "items": [
+          {
+            "name": "Brokkoli",
+            "baseName": "broccoli",
+            "amount": 300,
+            "unit": "g",
+            "calories": 117,
+            "protein": 10.8,
+            "carbs": 9.6,
+            "fat": 1.8,
+            "isStaple": false,
+            "canonicalId": "broccoli_raw",
+            "matchedName": "Broccoli, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          }
+        ]
+      },
+      {
+        "name": "GRAINS_PASTA",
+        "items": [
+          {
+            "name": "Nudeln",
+            "baseName": "pasta",
+            "amount": 250,
+            "unit": "g",
+            "calories": 913,
+            "protein": 33.3,
+            "carbs": 174.8,
+            "fat": 7,
+            "isStaple": false,
+            "modifier": "ungekocht",
+            "canonicalId": "pasta_with_egg_dry",
+            "matchedName": "Teigwaren mit Ei, trocken",
+            "isVerified": true,
+            "category": "GRAINS_PASTA"
+          }
+        ]
+      },
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Soja Sahne",
+            "baseName": "soy cream",
+            "amount": 250,
+            "unit": "ml",
+            "calories": 838,
+            "protein": 5,
+            "carbs": 7.8,
+            "fat": 87.3,
+            "isStaple": false,
+            "canonicalId": "cream_35_fat_uht",
+            "matchedName": "Vollrahm, UHT",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Käse",
+            "baseName": "cheese",
+            "amount": 80,
+            "unit": "g",
+            "calories": 80,
+            "protein": 9.9,
+            "carbs": 1.9,
+            "fat": 3.6,
+            "isStaple": false,
+            "modifier": "vegan",
+            "canonicalId": "cottage_cheese",
+            "matchedName": "Hüttenkäse, nature",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          }
+        ]
+      },
+      {
+        "name": "MEAT_POULTRY",
+        "items": [
+          {
+            "name": "Kochschinken",
+            "baseName": "ham",
+            "amount": 70,
+            "unit": "g",
+            "calories": 160,
+            "protein": 21.7,
+            "carbs": 0.2,
+            "fat": 8,
+            "isStaple": false,
+            "modifier": "vegan",
+            "canonicalId": "ham_raw",
+            "matchedName": "Rohschinken",
+            "isVerified": true,
+            "category": "MEAT_POULTRY"
+          }
+        ]
+      },
+      {
+        "name": "SPICES_HERBS",
+        "items": [
+          {
+            "name": "Gewürze",
+            "baseName": "spices",
+            "amount": 1,
+            "unit": "TL",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "modifier": "nach Wahl",
+            "isVerified": false
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "Die [Nudeln](ing:pasta) al dente kochen."
+      },
+      {
+        "step": 2,
+        "description": "Den [Brokkoli](ing:broccoli) kurz kochen, bis er bissfest ist."
+      },
+      {
+        "step": 3,
+        "description": "Den [Kochschinken](ing:ham) klein schneiden."
+      },
+      {
+        "step": 4,
+        "description": "Die [Nudeln](ing:pasta), den [Brokkoli](ing:broccoli) und den [Kochschinken](ing:ham) in Auflaufformen verteilen, mit [Soja Sahne](ing:soy cream) und [Gewürze](ing:spices) vermengen."
+      },
+      {
+        "step": 5,
+        "description": "Den [Käse](ing:cheese) darüber geben und im Ofen backen, bis er leicht golden ist."
+      }
+    ],
+    "equipment": [
+      "Topf",
+      "Auflaufform",
+      "Messer"
+    ],
+    "transcript": null,
+    "tags": [
+      "Mealprep",
+      "Vegetarisch"
+    ],
+    "emoji": "🥦",
+    "nutritionalValues": {
+      "calories": 703,
+      "protein": 26.9,
+      "carbs": 64.8,
+      "fat": 35.9
+    }
+  },
+  "report": {
+    "url": "https://www.instagram.com/reel/Db_I6kWIjbR/?igsh=dzAwNzY2Y3JlNXds",
+    "title": "Schinken-Brokkoli-Auflauf",
+    "servings": 3,
+    "nutritionalValues": {
+      "calories": 703,
+      "protein": 26.9,
+      "carbs": 64.8,
+      "fat": 35.9
+    },
+    "totalIngredients": 6,
+    "verifiedCount": 5,
+    "matchRatePercent": 83,
+    "ingredients": [
+      {
+        "rawName": "Brokkoli",
+        "baseName": "broccoli",
+        "amount": 300,
+        "unit": "g",
+        "canonicalId": "broccoli_raw",
+        "matchedName": "Broccoli, roh",
+        "isVerified": true,
+        "calories": 117,
+        "protein": 10.8,
+        "carbs": 9.6,
+        "fat": 1.8
+      },
+      {
+        "rawName": "Nudeln",
+        "baseName": "pasta",
+        "amount": 250,
+        "unit": "g",
+        "canonicalId": "pasta_with_egg_dry",
+        "matchedName": "Teigwaren mit Ei, trocken",
+        "isVerified": true,
+        "calories": 913,
+        "protein": 33.3,
+        "carbs": 174.8,
+        "fat": 7
+      },
+      {
+        "rawName": "Soja Sahne",
+        "baseName": "soy cream",
+        "amount": 250,
+        "unit": "ml",
+        "canonicalId": "cream_35_fat_uht",
+        "matchedName": "Vollrahm, UHT",
+        "isVerified": true,
+        "calories": 838,
+        "protein": 5,
+        "carbs": 7.8,
+        "fat": 87.3
+      },
+      {
+        "rawName": "Käse",
+        "baseName": "cheese",
+        "amount": 80,
+        "unit": "g",
+        "canonicalId": "cottage_cheese",
+        "matchedName": "Hüttenkäse, nature",
+        "isVerified": true,
+        "calories": 80,
+        "protein": 9.9,
+        "carbs": 1.9,
+        "fat": 3.6
+      },
+      {
+        "rawName": "Kochschinken",
+        "baseName": "ham",
+        "amount": 70,
+        "unit": "g",
+        "canonicalId": "ham_raw",
+        "matchedName": "Rohschinken",
+        "isVerified": true,
+        "calories": 160,
+        "protein": 21.7,
+        "carbs": 0.2,
+        "fat": 8
+      },
+      {
+        "rawName": "Gewürze",
+        "baseName": "spices",
+        "amount": 1,
+        "unit": "TL",
+        "isVerified": false,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      }
+    ]
+  }
+}

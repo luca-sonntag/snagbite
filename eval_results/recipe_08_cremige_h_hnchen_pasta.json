@@ -1,0 +1,453 @@
+{
+  "url": "https://www.instagram.com/reel/DblkojcM6eF/?igsh=MXBja294NmhvNW4xdA==",
+  "recipe": {
+    "isRecipe": true,
+    "title": "Cremige Hähnchen-Pasta",
+    "description": "Eine schnelle und cremige Pasta mit zartem Hähnchen und einer würzigen Tomaten-Sahne-Sauce.",
+    "prepTime": 10,
+    "cookTime": 15,
+    "servings": 3,
+    "ingredients": [
+      {
+        "name": "VEGETABLES",
+        "items": [
+          {
+            "name": "Petersilie",
+            "baseName": "parsley",
+            "amount": 1,
+            "unit": "TL",
+            "calories": 3,
+            "protein": 0.2,
+            "carbs": 0.4,
+            "fat": 0,
+            "isStaple": true,
+            "modifier": "getrocknet",
+            "canonicalId": "parsley_fresh",
+            "matchedName": "Petersilie, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          }
+        ]
+      },
+      {
+        "name": "GRAINS_PASTA",
+        "items": [
+          {
+            "name": "Nudeln",
+            "baseName": "pasta",
+            "amount": 350,
+            "unit": "g",
+            "calories": 1278,
+            "protein": 46.6,
+            "carbs": 244.7,
+            "fat": 9.8,
+            "isStaple": false,
+            "canonicalId": "pasta_with_egg_dry",
+            "matchedName": "Teigwaren mit Ei, trocken",
+            "isVerified": true,
+            "category": "GRAINS_PASTA"
+          }
+        ]
+      },
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Schlagsahne",
+            "baseName": "heavy cream",
+            "amount": 400,
+            "unit": "ml",
+            "calories": 1340,
+            "protein": 8,
+            "carbs": 12.4,
+            "fat": 139.6,
+            "isStaple": false,
+            "canonicalId": "cream_35_fat_uht",
+            "matchedName": "Vollrahm, UHT",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Mozzarella",
+            "baseName": "mozzarella",
+            "amount": 50,
+            "unit": "g",
+            "calories": 128,
+            "protein": 9.8,
+            "carbs": 0.4,
+            "fat": 9.8,
+            "isStaple": false,
+            "modifier": "gerieben",
+            "canonicalId": "mozzarella",
+            "matchedName": "Mozzarella",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          }
+        ]
+      },
+      {
+        "name": "MEAT_POULTRY",
+        "items": [
+          {
+            "name": "Hähnchenbrust",
+            "baseName": "chicken breast",
+            "amount": 250,
+            "unit": "g",
+            "calories": 268,
+            "protein": 61.5,
+            "carbs": 0,
+            "fat": 2.5,
+            "isStaple": false,
+            "canonicalId": "chicken_breast_without_skin_raw",
+            "matchedName": "Poulet, Brust, ohne Haut, roh",
+            "isVerified": true,
+            "category": "MEAT_POULTRY"
+          }
+        ]
+      },
+      {
+        "name": "OILS_CONDIMENTS",
+        "items": [
+          {
+            "name": "Öl",
+            "baseName": "oil",
+            "amount": 1,
+            "unit": "EL",
+            "calories": 126,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 14,
+            "isStaple": true,
+            "canonicalId": "hempseed_oil",
+            "matchedName": "Hanföl",
+            "isVerified": true,
+            "category": "OILS_CONDIMENTS"
+          },
+          {
+            "name": "Tomatenmark",
+            "baseName": "tomato paste",
+            "amount": 2,
+            "unit": "EL",
+            "calories": 23,
+            "protein": 1.3,
+            "carbs": 3.9,
+            "fat": 0.1,
+            "isStaple": true,
+            "canonicalId": "tomato_paste",
+            "matchedName": "Tomatenpüree",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          }
+        ]
+      },
+      {
+        "name": "SPICES_HERBS",
+        "items": [
+          {
+            "name": "Salz",
+            "baseName": "salt",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "canonicalId": "salt_himalaya_salt",
+            "matchedName": "Salz, Himalayasalz",
+            "isVerified": true,
+            "category": "SPICES_HERBS"
+          },
+          {
+            "name": "Pfeffer",
+            "baseName": "pepper",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Paprikapulver",
+            "baseName": "paprika",
+            "amount": 1,
+            "unit": "TL",
+            "calories": 18,
+            "protein": 0.7,
+            "carbs": 1.7,
+            "fat": 0.7,
+            "isStaple": true,
+            "canonicalId": "paprika",
+            "matchedName": "Paprika (Gewürz)",
+            "isVerified": true,
+            "category": "SPICES_HERBS"
+          },
+          {
+            "name": "Knoblauchpulver",
+            "baseName": "garlic powder",
+            "amount": 1,
+            "unit": "TL",
+            "calories": 5,
+            "protein": 0,
+            "carbs": 1,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Zwiebelpulver",
+            "baseName": "onion powder",
+            "amount": 1,
+            "unit": "TL",
+            "calories": 5,
+            "protein": 0,
+            "carbs": 1,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Gemüsebrühepulver",
+            "baseName": "vegetable bouillon",
+            "amount": 1,
+            "unit": "TL",
+            "calories": 5,
+            "protein": 0,
+            "carbs": 1,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "[Nudeln](ing:pasta) nach Packungsanweisung kochen."
+      },
+      {
+        "step": 2,
+        "description": "[Hähnchenbrust](ing:chicken breast) in mundgerechte Stücke schneiden und in etwas [Öl](ing:oil) anbraten."
+      },
+      {
+        "step": 3,
+        "description": "[Schlagsahne](ing:heavy cream) und [Tomatenmark](ing:tomato paste) dazugeben und verrühren."
+      },
+      {
+        "step": 4,
+        "description": "Mit [Salz](ing:salt), [Pfeffer](ing:pepper), [Paprikapulver](ing:paprika), [Knoblauchpulver](ing:garlic powder), [Zwiebelpulver](ing:onion powder), [Petersilie](ing:parsley) und [Gemüsebrühepulver](ing:vegetable bouillon) würzen und kurz köcheln lassen."
+      },
+      {
+        "step": 5,
+        "description": "[Mozzarella](ing:mozzarella) einrühren und weiterrühren, bis der Käse vollständig geschmolzen ist."
+      },
+      {
+        "step": 6,
+        "description": "Die gekochten [Nudeln](ing:pasta) dazugeben und alles gut vermengen."
+      },
+      {
+        "step": 7,
+        "description": "Servieren und genießen."
+      }
+    ],
+    "equipment": [
+      "Topf",
+      "Pfanne",
+      "Messer",
+      "Schneidebrett"
+    ],
+    "transcript": null,
+    "tags": [
+      "Pasta",
+      "Hähnchen"
+    ],
+    "emoji": "🍝",
+    "nutritionalValues": {
+      "calories": 1066,
+      "protein": 42.7,
+      "carbs": 88.8,
+      "fat": 58.8
+    }
+  },
+  "report": {
+    "url": "https://www.instagram.com/reel/DblkojcM6eF/?igsh=MXBja294NmhvNW4xdA==",
+    "title": "Cremige Hähnchen-Pasta",
+    "servings": 3,
+    "nutritionalValues": {
+      "calories": 1066,
+      "protein": 42.7,
+      "carbs": 88.8,
+      "fat": 58.8
+    },
+    "totalIngredients": 13,
+    "verifiedCount": 9,
+    "matchRatePercent": 69,
+    "ingredients": [
+      {
+        "rawName": "Petersilie",
+        "baseName": "parsley",
+        "amount": 1,
+        "unit": "TL",
+        "canonicalId": "parsley_fresh",
+        "matchedName": "Petersilie, roh",
+        "isVerified": true,
+        "calories": 3,
+        "protein": 0.2,
+        "carbs": 0.4,
+        "fat": 0
+      },
+      {
+        "rawName": "Nudeln",
+        "baseName": "pasta",
+        "amount": 350,
+        "unit": "g",
+        "canonicalId": "pasta_with_egg_dry",
+        "matchedName": "Teigwaren mit Ei, trocken",
+        "isVerified": true,
+        "calories": 1278,
+        "protein": 46.6,
+        "carbs": 244.7,
+        "fat": 9.8
+      },
+      {
+        "rawName": "Schlagsahne",
+        "baseName": "heavy cream",
+        "amount": 400,
+        "unit": "ml",
+        "canonicalId": "cream_35_fat_uht",
+        "matchedName": "Vollrahm, UHT",
+        "isVerified": true,
+        "calories": 1340,
+        "protein": 8,
+        "carbs": 12.4,
+        "fat": 139.6
+      },
+      {
+        "rawName": "Mozzarella",
+        "baseName": "mozzarella",
+        "amount": 50,
+        "unit": "g",
+        "canonicalId": "mozzarella",
+        "matchedName": "Mozzarella",
+        "isVerified": true,
+        "calories": 128,
+        "protein": 9.8,
+        "carbs": 0.4,
+        "fat": 9.8
+      },
+      {
+        "rawName": "Hähnchenbrust",
+        "baseName": "chicken breast",
+        "amount": 250,
+        "unit": "g",
+        "canonicalId": "chicken_breast_without_skin_raw",
+        "matchedName": "Poulet, Brust, ohne Haut, roh",
+        "isVerified": true,
+        "calories": 268,
+        "protein": 61.5,
+        "carbs": 0,
+        "fat": 2.5
+      },
+      {
+        "rawName": "Öl",
+        "baseName": "oil",
+        "amount": 1,
+        "unit": "EL",
+        "canonicalId": "hempseed_oil",
+        "matchedName": "Hanföl",
+        "isVerified": true,
+        "calories": 126,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 14
+      },
+      {
+        "rawName": "Tomatenmark",
+        "baseName": "tomato paste",
+        "amount": 2,
+        "unit": "EL",
+        "canonicalId": "tomato_paste",
+        "matchedName": "Tomatenpüree",
+        "isVerified": true,
+        "calories": 23,
+        "protein": 1.3,
+        "carbs": 3.9,
+        "fat": 0.1
+      },
+      {
+        "rawName": "Salz",
+        "baseName": "salt",
+        "amount": 1,
+        "unit": "Prise",
+        "canonicalId": "salt_himalaya_salt",
+        "matchedName": "Salz, Himalayasalz",
+        "isVerified": true,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      {
+        "rawName": "Pfeffer",
+        "baseName": "pepper",
+        "amount": 1,
+        "unit": "Prise",
+        "isVerified": false,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      {
+        "rawName": "Paprikapulver",
+        "baseName": "paprika",
+        "amount": 1,
+        "unit": "TL",
+        "canonicalId": "paprika",
+        "matchedName": "Paprika (Gewürz)",
+        "isVerified": true,
+        "calories": 18,
+        "protein": 0.7,
+        "carbs": 1.7,
+        "fat": 0.7
+      },
+      {
+        "rawName": "Knoblauchpulver",
+        "baseName": "garlic powder",
+        "amount": 1,
+        "unit": "TL",
+        "isVerified": false,
+        "calories": 5,
+        "protein": 0,
+        "carbs": 1,
+        "fat": 0
+      },
+      {
+        "rawName": "Zwiebelpulver",
+        "baseName": "onion powder",
+        "amount": 1,
+        "unit": "TL",
+        "isVerified": false,
+        "calories": 5,
+        "protein": 0,
+        "carbs": 1,
+        "fat": 0
+      },
+      {
+        "rawName": "Gemüsebrühepulver",
+        "baseName": "vegetable bouillon",
+        "amount": 1,
+        "unit": "TL",
+        "isVerified": false,
+        "calories": 5,
+        "protein": 0,
+        "carbs": 1,
+        "fat": 0
+      }
+    ]
+  }
+}

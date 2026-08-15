@@ -1,0 +1,227 @@
+{
+  "url": "https://www.instagram.com/p/DYixugyxvSe/",
+  "recipe": {
+    "isRecipe": true,
+    "title": "Pesto-Käse-Twists",
+    "description": "Einfache und köstliche Blätterteig-Twists gefüllt mit einer cremigen Pesto-Käse-Mischung.",
+    "prepTime": 15,
+    "cookTime": 20,
+    "servings": 8,
+    "ingredients": [
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Frischkäse",
+            "baseName": "cream cheese",
+            "amount": 225,
+            "unit": "g",
+            "calories": 790,
+            "protein": 25,
+            "carbs": 10.1,
+            "fat": 72.2,
+            "isStaple": false,
+            "modifier": "weich",
+            "canonicalId": "cream_cheese_min_60_fidm",
+            "matchedName": "Frischkäse, Doppelrahm",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Mozzarella",
+            "baseName": "mozzarella",
+            "amount": 225,
+            "unit": "g",
+            "calories": 576,
+            "protein": 43.9,
+            "carbs": 1.6,
+            "fat": 43.9,
+            "isStaple": false,
+            "modifier": "gerieben",
+            "canonicalId": "mozzarella",
+            "matchedName": "Mozzarella",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Ei",
+            "baseName": "egg",
+            "amount": 1,
+            "unit": "Stück",
+            "calories": 77,
+            "protein": 6.9,
+            "carbs": 0.2,
+            "fat": 5.4,
+            "isStaple": true,
+            "modifier": "verquirlt",
+            "canonicalId": "egg_raw",
+            "matchedName": "Hühnerei, ganz, roh",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          }
+        ]
+      },
+      {
+        "name": "GRAINS_PASTA",
+        "items": [
+          {
+            "name": "Blätterteig",
+            "baseName": "puff pastry",
+            "amount": 1,
+            "unit": "Platte",
+            "calories": 364,
+            "protein": 5.2,
+            "carbs": 29.4,
+            "fat": 24.7,
+            "isStaple": false,
+            "canonicalId": "puff_pastry_home_made_raw",
+            "matchedName": "Blätterteig, hausgemacht (Butter), ungebacken",
+            "isVerified": true,
+            "category": "GRAINS_PASTA"
+          }
+        ]
+      },
+      {
+        "name": "OILS_CONDIMENTS",
+        "items": [
+          {
+            "name": "Basilikum-Pesto",
+            "baseName": "pesto",
+            "amount": 190,
+            "unit": "g",
+            "calories": 779,
+            "protein": 11.6,
+            "carbs": 24.9,
+            "fat": 68.8,
+            "isStaple": false,
+            "canonicalId": "pesto_sauce_red",
+            "matchedName": "Pestosauce, rot",
+            "isVerified": true,
+            "category": "OILS_CONDIMENTS"
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "Den [Frischkäse](ing:cream cheese), den Großteil des [Mozzarella](ing:mozzarella) (etwa 1/2 Tasse für das Topping beiseitelegen) und das [Basilikum-Pesto](ing:pesto) in einer Schüssel glatt rühren."
+      },
+      {
+        "step": 2,
+        "description": "Die Mischung auf einer Hälfte des [Blätterteig](ing:puff pastry) verteilen und die andere Hälfte darüberklappen."
+      },
+      {
+        "step": 3,
+        "description": "Den Teig in Streifen schneiden, diese eindrehen und auf ein mit Backpapier belegtes Blech legen."
+      },
+      {
+        "step": 4,
+        "description": "Die Twists mit dem verquirlten [Ei](ing:egg) bestreichen und mit dem restlichen [Mozzarella](ing:mozzarella) bestreuen."
+      },
+      {
+        "step": 5,
+        "description": "Bei 200°C für ca. [15-20 Minuten](timer:1200) goldbraun und knusprig backen."
+      }
+    ],
+    "equipment": [
+      "Rührschüssel",
+      "Backblech",
+      "Backpapier",
+      "Backpinsel"
+    ],
+    "transcript": null,
+    "tags": [
+      "Vegetarisch",
+      "Snack"
+    ],
+    "emoji": "🧀",
+    "nutritionalValues": {
+      "calories": 323,
+      "protein": 11.6,
+      "carbs": 8.3,
+      "fat": 26.9
+    }
+  },
+  "report": {
+    "url": "https://www.instagram.com/p/DYixugyxvSe/",
+    "title": "Pesto-Käse-Twists",
+    "servings": 8,
+    "nutritionalValues": {
+      "calories": 323,
+      "protein": 11.6,
+      "carbs": 8.3,
+      "fat": 26.9
+    },
+    "totalIngredients": 5,
+    "verifiedCount": 5,
+    "matchRatePercent": 100,
+    "ingredients": [
+      {
+        "rawName": "Frischkäse",
+        "baseName": "cream cheese",
+        "amount": 225,
+        "unit": "g",
+        "canonicalId": "cream_cheese_min_60_fidm",
+        "matchedName": "Frischkäse, Doppelrahm",
+        "isVerified": true,
+        "calories": 790,
+        "protein": 25,
+        "carbs": 10.1,
+        "fat": 72.2
+      },
+      {
+        "rawName": "Mozzarella",
+        "baseName": "mozzarella",
+        "amount": 225,
+        "unit": "g",
+        "canonicalId": "mozzarella",
+        "matchedName": "Mozzarella",
+        "isVerified": true,
+        "calories": 576,
+        "protein": 43.9,
+        "carbs": 1.6,
+        "fat": 43.9
+      },
+      {
+        "rawName": "Ei",
+        "baseName": "egg",
+        "amount": 1,
+        "unit": "Stück",
+        "canonicalId": "egg_raw",
+        "matchedName": "Hühnerei, ganz, roh",
+        "isVerified": true,
+        "calories": 77,
+        "protein": 6.9,
+        "carbs": 0.2,
+        "fat": 5.4
+      },
+      {
+        "rawName": "Blätterteig",
+        "baseName": "puff pastry",
+        "amount": 1,
+        "unit": "Platte",
+        "canonicalId": "puff_pastry_home_made_raw",
+        "matchedName": "Blätterteig, hausgemacht (Butter), ungebacken",
+        "isVerified": true,
+        "calories": 364,
+        "protein": 5.2,
+        "carbs": 29.4,
+        "fat": 24.7
+      },
+      {
+        "rawName": "Basilikum-Pesto",
+        "baseName": "pesto",
+        "amount": 190,
+        "unit": "g",
+        "canonicalId": "pesto_sauce_red",
+        "matchedName": "Pestosauce, rot",
+        "isVerified": true,
+        "calories": 779,
+        "protein": 11.6,
+        "carbs": 24.9,
+        "fat": 68.8
+      }
+    ]
+  }
+}

@@ -68,120 +68,123 @@ async function run() {
   const unverifiedList: { recipeTitle: string; rawName: string; baseName?: string; unit: string }[] = [];
   const verifiedList: { recipeTitle: string; rawName: string; baseName?: string; matchedName?: string | null; canonicalId?: string | null }[] = [];
 
+  const CONCURRENCY = 3;
   const TARGET_RECIPES = 5;
+  let nextUrlIndex = 0;
 
-  for (let i = 0; i < uniqueUrls.length && allReports.length < TARGET_RECIPES; i++) {
-    const url = uniqueUrls[i];
-    const recipeNum = allReports.length + 1;
-    console.log(`[Recipe #${recipeNum}] Processing URL (${i + 1}/${uniqueUrls.length}): ${url}`);
+  async function worker(workerId: number) {
+    while (nextUrlIndex < uniqueUrls.length && allReports.length < TARGET_RECIPES) {
+      const idx = nextUrlIndex++;
+      const url = uniqueUrls[idx];
+      const runDir = path.join(outputDir, `temp_run_w${workerId}_${idx + 1}`);
+      await fs.mkdir(runDir, { recursive: true });
 
-    const runDir = path.join(outputDir, `temp_run_${i + 1}`);
-    await fs.mkdir(runDir, { recursive: true });
+      try {
+        console.log(`[Worker ${workerId}] Processing URL (${idx + 1}/${uniqueUrls.length}): ${url}`);
+        const scraper = getScraperForUrl(url);
+        const scrapeResult: ScrapeResult = await scraper.scrape(url, runDir);
+        console.log(`  [Worker ${workerId}] Scraped: "${scrapeResult.title || 'Untitled'}" (Platform: ${scrapeResult.platform}, Caption: ${(scrapeResult.caption || '').length} chars)`);
 
-    try {
-      // 1. Scrape metadata
-      const scraper = getScraperForUrl(url);
-      const scrapeResult: ScrapeResult = await scraper.scrape(url, runDir);
-      console.log(`  Scraped: "${scrapeResult.title || 'Untitled'}" (Platform: ${scrapeResult.platform}, Caption: ${(scrapeResult.caption || '').length} chars)`);
+        const recipe: Recipe = await extractRecipe(
+          undefined,
+          undefined,
+          scrapeResult.caption || '',
+          undefined,
+          runDir,
+          undefined,
+          scrapeResult.html || undefined,
+          undefined
+        );
 
-      // 2. Extract recipe via Gemini
-      const recipe: Recipe = await extractRecipe(
-        undefined, // audioFilePath
-        undefined, // mimeType
-        scrapeResult.caption || '',
-        undefined, // gridImagePath
-        runDir,
-        undefined, // userPrefs
-        scrapeResult.html || undefined,
-        undefined // carouselImagePaths
-      );
+        if (recipe.isRecipe === false) {
+          console.warn(`  [Worker ${workerId}] -> Gemini flagged URL as NOT a recipe.`);
+          continue;
+        }
 
-      if (recipe.isRecipe === false) {
-        console.warn(`  -> Gemini flagged this URL as NOT a recipe.`);
-        continue;
-      }
+        enrichRecipeWithCanonicalIngredients(recipe);
 
-      // 3. Canonical Ingredient Normalization & Nutrition Enrichment
-      enrichRecipeWithCanonicalIngredients(recipe);
+        const flatIngredients: EvalIngredientReport[] = [];
+        let verifiedCount = 0;
 
-      // 4. Collect report data
-      const flatIngredients: EvalIngredientReport[] = [];
-      let verifiedCount = 0;
+        for (const group of recipe.ingredients || []) {
+          for (const ing of group.items || []) {
+            const isVer = !!ing.isVerified;
+            if (isVer) {
+              verifiedCount++;
+              verifiedList.push({
+                recipeTitle: recipe.title,
+                rawName: ing.name,
+                baseName: ing.baseName,
+                matchedName: ing.matchedName,
+                canonicalId: ing.canonicalId,
+              });
+            } else {
+              unverifiedList.push({
+                recipeTitle: recipe.title,
+                rawName: ing.name,
+                baseName: ing.baseName,
+                unit: ing.unit,
+              });
+            }
 
-      for (const group of recipe.ingredients || []) {
-        for (const ing of group.items || []) {
-          const isVer = !!ing.isVerified;
-          if (isVer) {
-            verifiedCount++;
-            verifiedList.push({
-              recipeTitle: recipe.title,
+            flatIngredients.push({
               rawName: ing.name,
               baseName: ing.baseName,
-              matchedName: ing.matchedName,
-              canonicalId: ing.canonicalId,
-            });
-          } else {
-            unverifiedList.push({
-              recipeTitle: recipe.title,
-              rawName: ing.name,
-              baseName: ing.baseName,
+              amount: ing.amount,
               unit: ing.unit,
+              canonicalId: ing.canonicalId,
+              matchedName: ing.matchedName,
+              isVerified: isVer,
+              calories: ing.calories,
+              protein: ing.protein,
+              carbs: ing.carbs,
+              fat: ing.fat,
             });
           }
-
-          flatIngredients.push({
-            rawName: ing.name,
-            baseName: ing.baseName,
-            amount: ing.amount,
-            unit: ing.unit,
-            canonicalId: ing.canonicalId,
-            matchedName: ing.matchedName,
-            isVerified: isVer,
-            calories: ing.calories,
-            protein: ing.protein,
-            carbs: ing.carbs,
-            fat: ing.fat,
-          });
         }
+
+        const totalIngs = flatIngredients.length;
+        const matchRate = totalIngs > 0 ? Math.round((verifiedCount / totalIngs) * 100) : 0;
+        globalTotalIngredients += totalIngs;
+        globalVerifiedIngredients += verifiedCount;
+
+        const report: EvalRecipeReport = {
+          url,
+          title: recipe.title,
+          servings: recipe.servings,
+          nutritionalValues: recipe.nutritionalValues,
+          totalIngredients: totalIngs,
+          verifiedCount,
+          matchRatePercent: matchRate,
+          ingredients: flatIngredients,
+        };
+
+        allReports.push(report);
+        const reportIndex = allReports.length;
+
+        const safeTitle = (recipe.title || `recipe_${idx + 1}`)
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '_')
+          .slice(0, 40);
+        const jsonFileName = `recipe_${String(reportIndex).padStart(2, '0')}_${safeTitle}.json`;
+        const jsonPath = path.join(outputDir, jsonFileName);
+        await fs.writeFile(jsonPath, JSON.stringify({ url, recipe, report }, null, 2), 'utf-8');
+
+        console.log(`  [Worker ${workerId}] -> Matched: ${verifiedCount}/${totalIngs} ingredients (${matchRate}%) for "${recipe.title}"`);
+        console.log(`  [Worker ${workerId}] -> Nutrition: ${recipe.nutritionalValues?.calories || 0} kcal | P: ${recipe.nutritionalValues?.protein || 0}g | C: ${recipe.nutritionalValues?.carbs || 0}g | F: ${recipe.nutritionalValues?.fat || 0}g`);
+        console.log(`  [Worker ${workerId}] -> Saved JSON: ${jsonFileName}\n`);
+      } catch (err: any) {
+        console.error(`  [Worker ${workerId}] -> Failed for ${url}:`, err.message);
+      } finally {
+        await fs.rm(runDir, { recursive: true, force: true }).catch(() => { });
       }
-
-      const totalIngs = flatIngredients.length;
-      const matchRate = totalIngs > 0 ? Math.round((verifiedCount / totalIngs) * 100) : 0;
-      globalTotalIngredients += totalIngs;
-      globalVerifiedIngredients += verifiedCount;
-
-      const report: EvalRecipeReport = {
-        url,
-        title: recipe.title,
-        servings: recipe.servings,
-        nutritionalValues: recipe.nutritionalValues,
-        totalIngredients: totalIngs,
-        verifiedCount,
-        matchRatePercent: matchRate,
-        ingredients: flatIngredients,
-      };
-
-      allReports.push(report);
-
-      // Save individual JSON file
-      const safeTitle = (recipe.title || `recipe_${i + 1}`)
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '_')
-        .slice(0, 40);
-      const jsonFileName = `recipe_${String(i + 1).padStart(2, '0')}_${safeTitle}.json`;
-      const jsonPath = path.join(outputDir, jsonFileName);
-      await fs.writeFile(jsonPath, JSON.stringify({ url, recipe, report }, null, 2), 'utf-8');
-
-      console.log(`  -> Matched: ${verifiedCount}/${totalIngs} ingredients (${matchRate}%)`);
-      console.log(`  -> Nutrition: ${recipe.nutritionalValues?.calories || 0} kcal | P: ${recipe.nutritionalValues?.protein || 0}g | C: ${recipe.nutritionalValues?.carbs || 0}g | F: ${recipe.nutritionalValues?.fat || 0}g`);
-      console.log(`  -> Saved JSON: ${jsonFileName}\n`);
-    } catch (err: any) {
-      console.error(`  -> Failed for ${url}:`, err.message);
-    } finally {
-      // Clean up temporary run directory
-      await fs.rm(runDir, { recursive: true, force: true }).catch(() => {});
     }
   }
+
+  // Run 3 workers in parallel
+  console.log(`Launching ${CONCURRENCY} parallel workers...\n`);
+  const workerPromises = Array.from({ length: CONCURRENCY }, (_, i) => worker(i + 1));
+  await Promise.all(workerPromises);
 
   // Write summary report JSON
   const summary = {

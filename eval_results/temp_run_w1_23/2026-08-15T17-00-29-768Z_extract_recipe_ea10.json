@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-08-15T17:00:29.768Z",
+  "requestType": "extract_recipe",
+  "model": "gemini-3.1-flash-lite",
+  "durationMs": 923,
+  "success": false,
+  "error": "The provided content does not appear to contain a complete food recipe.",
+  "input": {
+    "captionLength": 70,
+    "captionPreview": "Airfryer Pesto Chicken 🤟🏼🤌🏼✨\n\n#gym #food #mealprep #hyrox #rezepte",
+    "carouselImageCount": 0,
+    "imageSourceKind": "carousel"
+  },
+  "rawOutput": "{\n  \"isRecipe\": false,\n  \"containsMultipleRecipes\": false,\n  \"title\": \"Airfryer Pesto Chicken\",\n  \"description\": \"Ein einfaches Rezept für Pesto-Hähnchen aus der Heißluftfritteuse.\",\n  \"prepTime\": 0,\n  \"cookTime\": 0,\n  \"servings\": 0,\n  \"ingredients\": [],\n  \"instructions\": [],\n  \"equipment\": [],\n  \"hasExplicitNutritionalValues\": false,\n  \"transcript\": \"NO_SPOKEN_WORDS\",\n  \"tags\": [\n    \"Hähnchen\",\n    \"Airfryer\"\n  ],\n  \"emoji\": \"🍗\"\n}",
+  "logDir": "C:\\Users\\lucas\\source\\repos\\cookbook\\eval_results\\temp_run_w1_23"
+}

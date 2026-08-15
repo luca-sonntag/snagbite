@@ -1,0 +1,172 @@
+{
+  "timestamp": "2026-08-15T17:00:54.080Z",
+  "requestType": "extract_recipe",
+  "model": "gemini-3.1-flash-lite",
+  "durationMs": 3031,
+  "success": true,
+  "input": {
+    "captionLength": 600,
+    "captionPreview": "these pesto cheese twists are so easy and so yummy 🧀🌱😋\n\nIngredients:\n8oz cream cheese (softened)\n8oz shredded mozzarella cheese\n1 jar @barillaus rustic basil pesto sauce \n1 sheet @bakejusrol puff pastry\n1 egg (beaten)\n\nInstructions:\nIn a large bowl, mix cream cheese, mozzarella (saving a 1/2 cup ",
+    "carouselImageCount": 0,
+    "imageSourceKind": "carousel",
+    "prompt": "You are an expert recipe extractor. Analyze the provided content (which may include audio, website text, or video caption).\n    \nReconstruct the complete recipe, resolving any contradictions culinary-wise. Ensure to follow the field-level guidelines specified in the descriptions of the output schema.\n\nKey Constraints:\n1. Recipe Existence & Anti-Hallucination: The source content MUST contain the actual recipe details (specific ingredients with quantities and/or step-by-step cooking instructions). You MUST set \"isRecipe\" to false if:\n   a) The content is unrelated (comedy, vlogs, fitness motivation, general chat, etc.).\n   b) The content is merely a teaser, promo, or engagement bait without the full recipe (e.g. \"Comment BUCKEYE and I'll send you the recipe\", \"Recipe in my ebook\", \"Link in bio\", \"DM for full recipe\", or appetizing marketing descriptions/macros without the actual list of ingredients and preparation steps).\n   c) The source mentions only the dish name/concept but completely omits the concrete ingredients and instructions.\n   NEVER under any circumstances invent, fabricate, or hallucinate ingredients, amounts, or cooking steps when they are not present in the provided source text, audio, or images.\n2. Multi-Recipe Ambiguity: Before attempting to extract a recipe, evaluate if the content represents a multi-recipe collection, roundup, or compilation. You MUST set \"containsMultipleRecipes\" to true if ANY of the following apply:\n   a) The title, caption, or cover image text indicates multiple dishes/recipes (e.g. \"High protein dinners...\", \"5 meals to get lean\", \"3 lunch ideas\", \"What I eat in a day\", \"4 low-calorie recipes\").\n   b) The carousel images or video scenes present multiple distinct standalone main dishes across different slides/segments (e.g. Slide 2 is \"Smash Burger & Sweet Potato Fries\", Slide 4 is \"Bang Bang Chicken\", Slide 6 is \"Beef Burrito Bowl\").\n   c) Multiple distinct nutrition/macro cards exist for different dishes throughout the slides/segments.\n   If \"containsMultipleRecipes\" is true, do NOT attempt to merge the dishes into one recipe.\n   Set \"containsMultipleRecipes\" to false ONLY if the entire post is dedicated to ONE single recipe (including its sub-components like sauce, marinade, side dish, or garnishes cooked together as one meal).\n3. Category Ordering: Always place \"PRODUCE\" first in the ingredients array, followed by dry goods/pantry items, then refrigerated products/meats, and finally other/extras at the very end.\n4. Translation: Write and translate all text values (including title, description, ingredient names/notes, instruction steps, equipment list, tips, alternative ingredient details, and tags) into: German. Keep the category keys as the uppercase English enum values. Follow the schema strictly.\n5. Preferred Units:\n   - Temperature Units: Format all temperature values mentioned in the instructions, description, tips, or title using the preferred unit: Celsius (e.g., convert and format as \"200°C\" or \"400°F\" depending on preference).\n   - Weight & Volume Units: Format all ingredient weights, volumes, and measurements using the preferred unit system: metric (e.g., metric units like grams, milliliters, kilograms, or imperial units like ounces, cups, pounds, fluid ounces) and perform conversions where appropriate.\n6. Missing Data & Nutrition: If any information for a specific field is missing, leave it empty (empty string \"\", null, or empty array []). You MUST set \"hasExplicitNutritionalValues\" to true ONLY IF the recipe nutritional values are explicitly stated in the source text or audio. If they are not, set it to false and set \"nutritionalValues\" to null (do NOT estimate or calculate overall nutritional values at the recipe level). Note that \"nutritionalValues\" MUST represent values per single serving/portion. If the source lists total values for the entire recipe, divide them by the number of servings/portions first.\n7. Clean Ingredient Names: Ensure the \"name\" field contains only the clean ingredient name (e.g., \"Frischkäse\", \"evaporated milk\", \"cream cheese\", \"butter\"). Move all adjectives, processing states, or descriptions (such as \"light\", \"mager\", \"low fat\", \"leichte\", \"gerieben\", \"grated\") into the \"modifier\" field. Do NOT leave these descriptors inside the \"name\" field.\n8. Ingredient Decomposition: If a composite element or homemade component (like a custom sauce or pesto) is prepared during the recipe, you MUST list its raw ingredients individually instead of the finished compound product.\n9. Ingredient-level Nutritional Values: For each ingredient, you MUST estimate its nutritional values (calories, protein, carbs, fat) based on the ENTIRE specified quantity (amount * unit). Do NOT output per-100g, per-100ml, or single-unit values unless the quantity is exactly 100g, 100ml, or 1 unit. E.g., if chicken breast has 165 kcal per 100g and the recipe specifies 500g, the calories field MUST be 825, NOT 165. If a potato has 150 kcal and the amount is 6, the calories field MUST be 900, NOT 150. If olive oil has 14g fat/EL and the amount is 3 EL, the fat field MUST be 42, NOT 14.\n10. Infer Minor Missing Components (Only for Existing Recipes): If the source already contains a full recipe with ingredients and instructions, but the title or visual images explicitly show an obvious missing minor garnish or component (e.g., 'Air-Fried Broccolini' in the title and green broccolini on the plate) that was accidentally omitted from the written list, you may infer that specific item. NEVER use this rule to fabricate an entire recipe from a title or teaser when no base recipe is provided.\n11. Serving Size Estimation: Identify the number of servings or portions the recipe makes. Look for clues like 'serves 4' or estimate based on the ingredient amounts (e.g., 500g chicken and 6 potatoes typically serves 3-4 people). Avoid defaulting to 1 serving if the ingredient amounts are clearly meant for a family-sized meal.\n12. Zero-Calorie & Low-Calorie Ingredients: Ingredients like water, ice, salt, or baking soda MUST have 0 calories, protein, carbs, and fat. For spices, seasonings, or herbs in small quantities (like teaspoons), focus your calculation energy on the high-calorie/high-macro ingredients (meats, oils, dairy, grains, starches) and estimate very small values (e.g., 5 kcal) or 0.\n13. Cooked vs. Raw/Dry States of Expandable Ingredients: For ingredients that expand significantly during cooking (e.g., rice, pasta, lentils, beans, chickpeas, couscous, quinoa, bulgur), you MUST determine whether the specified quantity refers to the dry/uncooked state or the cooked/prepared state. Dry/uncooked state (e.g., \"100g uncooked rice\" or \"100g rice\" which is boiled in the instructions) has high caloric density (e.g., dry rice: ~350 kcal/100g, dry pasta: ~350 kcal/100g, dry lentils: ~350 kcal/100g). Cooked/prepared state (e.g., \"100g cooked rice\", \"100g boiled pasta\", canned/pre-cooked beans, or when already-cooked ingredients are added directly to a stir-fry/bowl) has much lower caloric density (e.g., cooked rice: ~130 kcal/100g, cooked pasta: ~130-150 kcal/100g, cooked lentils: ~110-120 kcal/100g). Ambiguity resolution: Analyze the cooking instructions. If the instructions include boiling/cooking the dry ingredient, calculate using dry/raw values. If the ingredient is added pre-cooked, or if treating it as raw results in absurdly high calories (e.g., 250g dry rice is ~850 kcal and cooks to 750g cooked rice, which is way too much for a single serving of fried rice), assume the quantity represents the cooked state and calculate using cooked values.\n14. Common Pantry Staples: For each ingredient, set the \"isStaple\" boolean to true ONLY if it is a very common basic staple that people almost always already have at home and rarely need to buy specifically for a recipe (e.g. salt, pepper, water, cooking oil, sugar, common dried spices). Set it to false for anything a user would typically need to shop for (e.g. meat, cheese, vegetables, fresh herbs, specialty items). When in doubt, set it to false.\n15. Inline Ingredient Tagging: In every step description, whenever an ingredient from the ingredients list is used or referenced, you MUST format its mention using the inline syntax '[exact word used in text](ing:baseName)'. 'baseName' MUST match the English 'baseName' (or 'name' if 'baseName' is not set) of the corresponding ingredient in the ingredients list. Examples:\n   - Ingredients: Eigelb (baseName: egg yolk), Ei (baseName: egg), Parmesan (baseName: parmesan)\n   - Step description: \"Die [Eigelbe](ing:egg yolk) und das [Ei](ing:egg) zusammen mit dem [Parmesan](ing:parmesan) verrühren.\"\n   - Do NOT tag equipment or non-ingredient words. Make sure the brackets wrap the natural word as it appears in the sentence.\n16. Concise, Direct Instruction Steps: Write instruction step descriptions as short, clear, action-oriented sentences. Eliminate conversational filler words, narrative transitions, and redundancies. Split long multi-action steps into distinct, bite-sized steps so each step is easy to follow while cooking.\n17. Inline Timer Tagging: In every step description, whenever a cooking duration or time span is mentioned (e.g. \"15 Minuten\", \"1,5 Stunden\", \"30 Sekunden\"), you MUST format it using the inline syntax '[exact time text](timer:duration_in_seconds)'. Calculate the total duration in seconds and put it in the timer parameter. Examples:\n   - \"Ca. [15 Minuten](timer:900) garen.\"\n   - \"Für [1,5 Stunden](timer:5400) köcheln lassen.\"\n   - \"Etwa [45 Sekunden](timer:45) anbraten.\"\n\nDescription/Caption:\n\"\"\"\nthese pesto cheese twists are so easy and so yummy 🧀🌱😋\n\nIngredients:\n8oz cream cheese (softened)\n8oz shredded mozzarella cheese\n1 jar @barillaus rustic basil pesto sauce \n1 sheet @bakejusrol puff pastry\n1 egg (beaten)\n\nInstructions:\nIn a large bowl, mix cream cheese, mozzarella (saving a 1/2 cup for topping), and pesto sauce until smooth. Spread over half of the puff pastry and fold the other half over. Slice into strips, twist each one, place on a lined baking sheet, brush with egg wash, and sprinkle remaining cheese on top. Bake at 400° for 15–20 minutes until golden and crispy. Enjoy! 😋\n\"\"\""
+  },
+  "rawOutput": "{\n  \"isRecipe\": true,\n  \"containsMultipleRecipes\": false,\n  \"title\": \"Pesto-Käse-Twists\",\n  \"description\": \"Einfache und köstliche Blätterteig-Twists gefüllt mit einer cremigen Pesto-Käse-Mischung.\",\n  \"prepTime\": 15,\n  \"cookTime\": 20,\n  \"servings\": 8,\n  \"ingredients\": [\n    {\n      \"name\": \"DAIRY_EGGS\",\n      \"items\": [\n        {\n          \"name\": \"Frischkäse\",\n          \"baseName\": \"cream cheese\",\n          \"amount\": 225,\n          \"unit\": \"g\",\n          \"calories\": 760,\n          \"protein\": 14,\n          \"carbs\": 10,\n          \"fat\": 75,\n          \"isStaple\": false,\n          \"modifier\": \"weich\"\n        },\n        {\n          \"name\": \"Mozzarella\",\n          \"baseName\": \"mozzarella\",\n          \"amount\": 225,\n          \"unit\": \"g\",\n          \"calories\": 675,\n          \"protein\": 50,\n          \"carbs\": 5,\n          \"fat\": 50,\n          \"isStaple\": false,\n          \"modifier\": \"gerieben\"\n        },\n        {\n          \"name\": \"Ei\",\n          \"baseName\": \"egg\",\n          \"amount\": 1,\n          \"unit\": \"Stück\",\n          \"calories\": 70,\n          \"protein\": 6,\n          \"carbs\": 1,\n          \"fat\": 5,\n          \"isStaple\": true,\n          \"modifier\": \"verquirlt\"\n        }\n      ]\n    },\n    {\n      \"name\": \"GRAINS_PASTA\",\n      \"items\": [\n        {\n          \"name\": \"Blätterteig\",\n          \"baseName\": \"puff pastry\",\n          \"amount\": 1,\n          \"unit\": \"Platte\",\n          \"calories\": 800,\n          \"protein\": 12,\n          \"carbs\": 60,\n          \"fat\": 55,\n          \"isStaple\": false\n        }\n      ]\n    },\n    {\n      \"name\": \"OILS_CONDIMENTS\",\n      \"items\": [\n        {\n          \"name\": \"Basilikum-Pesto\",\n          \"baseName\": \"pesto\",\n          \"amount\": 190,\n          \"unit\": \"g\",\n          \"calories\": 850,\n          \"protein\": 10,\n          \"carbs\": 8,\n          \"fat\": 85,\n          \"isStaple\": false\n        }\n      ]\n    }\n  ],\n  \"instructions\": [\n    {\n      \"step\": 1,\n      \"description\": \"Den [Frischkäse](ing:cream cheese), den Großteil des [Mozzarella](ing:mozzarella) (etwa 1/2 Tasse für das Topping beiseitelegen) und das [Basilikum-Pesto](ing:pesto) in einer Schüssel glatt rühren.\"\n    },\n    {\n      \"step\": 2,\n      \"description\": \"Die Mischung auf einer Hälfte des [Blätterteig](ing:puff pastry) verteilen und die andere Hälfte darüberklappen.\"\n    },\n    {\n      \"step\": 3,\n      \"description\": \"Den Teig in Streifen schneiden, diese eindrehen und auf ein mit Backpapier belegtes Blech legen.\"\n    },\n    {\n      \"step\": 4,\n      \"description\": \"Die Twists mit dem verquirlten [Ei](ing:egg) bestreichen und mit dem restlichen [Mozzarella](ing:mozzarella) bestreuen.\"\n    },\n    {\n      \"step\": 5,\n      \"description\": \"Bei 200°C für ca. [15-20 Minuten](timer:1200) goldbraun und knusprig backen.\"\n    }\n  ],\n  \"equipment\": [\n    \"Rührschüssel\",\n    \"Backblech\",\n    \"Backpapier\",\n    \"Backpinsel\"\n  ],\n  \"hasExplicitNutritionalValues\": false,\n  \"transcript\": \"NO_SPOKEN_WORDS\",\n  \"tags\": [\n    \"Vegetarisch\",\n    \"Snack\"\n  ],\n  \"emoji\": \"🧀\"\n}",
+  "parsedOutput": {
+    "isRecipe": true,
+    "title": "Pesto-Käse-Twists",
+    "description": "Einfache und köstliche Blätterteig-Twists gefüllt mit einer cremigen Pesto-Käse-Mischung.",
+    "prepTime": 15,
+    "cookTime": 20,
+    "servings": 8,
+    "ingredients": [
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Frischkäse",
+            "baseName": "cream cheese",
+            "amount": 225,
+            "unit": "g",
+            "calories": 790,
+            "protein": 25,
+            "carbs": 10.1,
+            "fat": 72.2,
+            "isStaple": false,
+            "modifier": "weich",
+            "canonicalId": "cream_cheese_min_60_fidm",
+            "matchedName": "Frischkäse, Doppelrahm",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Mozzarella",
+            "baseName": "mozzarella",
+            "amount": 225,
+            "unit": "g",
+            "calories": 576,
+            "protein": 43.9,
+            "carbs": 1.6,
+            "fat": 43.9,
+            "isStaple": false,
+            "modifier": "gerieben",
+            "canonicalId": "mozzarella",
+            "matchedName": "Mozzarella",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Ei",
+            "baseName": "egg",
+            "amount": 1,
+            "unit": "Stück",
+            "calories": 77,
+            "protein": 6.9,
+            "carbs": 0.2,
+            "fat": 5.4,
+            "isStaple": true,
+            "modifier": "verquirlt",
+            "canonicalId": "egg_raw",
+            "matchedName": "Hühnerei, ganz, roh",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          }
+        ]
+      },
+      {
+        "name": "GRAINS_PASTA",
+        "items": [
+          {
+            "name": "Blätterteig",
+            "baseName": "puff pastry",
+            "amount": 1,
+            "unit": "Platte",
+            "calories": 364,
+            "protein": 5.2,
+            "carbs": 29.4,
+            "fat": 24.7,
+            "isStaple": false,
+            "canonicalId": "puff_pastry_home_made_raw",
+            "matchedName": "Blätterteig, hausgemacht (Butter), ungebacken",
+            "isVerified": true,
+            "category": "GRAINS_PASTA"
+          }
+        ]
+      },
+      {
+        "name": "OILS_CONDIMENTS",
+        "items": [
+          {
+            "name": "Basilikum-Pesto",
+            "baseName": "pesto",
+            "amount": 190,
+            "unit": "g",
+            "calories": 779,
+            "protein": 11.6,
+            "carbs": 24.9,
+            "fat": 68.8,
+            "isStaple": false,
+            "canonicalId": "pesto_sauce_red",
+            "matchedName": "Pestosauce, rot",
+            "isVerified": true,
+            "category": "OILS_CONDIMENTS"
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "Den [Frischkäse](ing:cream cheese), den Großteil des [Mozzarella](ing:mozzarella) (etwa 1/2 Tasse für das Topping beiseitelegen) und das [Basilikum-Pesto](ing:pesto) in einer Schüssel glatt rühren."
+      },
+      {
+        "step": 2,
+        "description": "Die Mischung auf einer Hälfte des [Blätterteig](ing:puff pastry) verteilen und die andere Hälfte darüberklappen."
+      },
+      {
+        "step": 3,
+        "description": "Den Teig in Streifen schneiden, diese eindrehen und auf ein mit Backpapier belegtes Blech legen."
+      },
+      {
+        "step": 4,
+        "description": "Die Twists mit dem verquirlten [Ei](ing:egg) bestreichen und mit dem restlichen [Mozzarella](ing:mozzarella) bestreuen."
+      },
+      {
+        "step": 5,
+        "description": "Bei 200°C für ca. [15-20 Minuten](timer:1200) goldbraun und knusprig backen."
+      }
+    ],
+    "equipment": [
+      "Rührschüssel",
+      "Backblech",
+      "Backpapier",
+      "Backpinsel"
+    ],
+    "transcript": null,
+    "tags": [
+      "Vegetarisch",
+      "Snack"
+    ],
+    "emoji": "🧀",
+    "nutritionalValues": {
+      "calories": 323,
+      "protein": 11.6,
+      "carbs": 8.3,
+      "fat": 26.9
+    }
+  },
+  "tokenUsage": {
+    "promptTokens": 2508,
+    "candidateTokens": 1070,
+    "totalTokens": 3578
+  },
+  "costEstimate": {
+    "inputCostUsd": 0.000627,
+    "outputCostUsd": 0.001605,
+    "totalCostUsd": 0.002232,
+    "totalCostFormatted": "$0.0022",
+    "pricingTier": "short",
+    "pricingKnown": true
+  },
+  "logDir": "C:\\Users\\lucas\\source\\repos\\cookbook\\eval_results\\temp_run_w2_38"
+}

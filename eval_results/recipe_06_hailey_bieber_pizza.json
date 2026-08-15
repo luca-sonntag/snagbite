@@ -1,0 +1,411 @@
+{
+  "url": "https://www.instagram.com/reel/Da2UEDQtcrm/?igsh=ZTI1ODExeXVuMGZu",
+  "recipe": {
+    "isRecipe": true,
+    "title": "Hailey Bieber Pizza",
+    "description": "Eine kalorienarme und proteinreiche Pizza-Variante, inspiriert von Hailey Bieber.",
+    "prepTime": 10,
+    "cookTime": 20,
+    "servings": 1,
+    "ingredients": [
+      {
+        "name": "VEGETABLES",
+        "items": [
+          {
+            "name": "Knobilicious",
+            "baseName": "garlic seasoning",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          }
+        ]
+      },
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Hüttenkäse",
+            "baseName": "cottage cheese",
+            "amount": 60,
+            "unit": "g",
+            "calories": 60,
+            "protein": 7.4,
+            "carbs": 1.4,
+            "fat": 2.7,
+            "isStaple": false,
+            "modifier": "Light",
+            "canonicalId": "cottage_cheese",
+            "matchedName": "Hüttenkäse, nature",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Eiklar",
+            "baseName": "egg white",
+            "amount": 80,
+            "unit": "g",
+            "calories": 36,
+            "protein": 8.6,
+            "carbs": 0.3,
+            "fat": 0,
+            "isStaple": false,
+            "parentIngredient": {
+              "name": "Ei",
+              "baseName": "egg",
+              "unit": "Stück"
+            },
+            "canonicalId": "egg_white_raw",
+            "matchedName": "Hühnereiweiss, roh (Eiklar)",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Mozzarella",
+            "baseName": "mozzarella",
+            "amount": 30,
+            "unit": "g",
+            "calories": 77,
+            "protein": 5.9,
+            "carbs": 0.2,
+            "fat": 5.9,
+            "isStaple": false,
+            "modifier": "geriebener",
+            "canonicalId": "mozzarella",
+            "matchedName": "Mozzarella",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          }
+        ]
+      },
+      {
+        "name": "GRAINS_PASTA",
+        "items": [
+          {
+            "name": "Dinkelmehl",
+            "baseName": "spelt flour",
+            "amount": 40,
+            "unit": "g",
+            "calories": 139,
+            "protein": 5.3,
+            "carbs": 27.3,
+            "fat": 0.6,
+            "isStaple": false,
+            "canonicalId": "spelt_fine_flour",
+            "matchedName": "Dinkelmehl, weiss, Typ 550",
+            "isVerified": true,
+            "category": "GRAINS_PASTA"
+          }
+        ]
+      },
+      {
+        "name": "OILS_CONDIMENTS",
+        "items": [
+          {
+            "name": "Tomatenmark",
+            "baseName": "tomato paste",
+            "amount": 10,
+            "unit": "g",
+            "calories": 8,
+            "protein": 0.5,
+            "carbs": 1.3,
+            "fat": 0,
+            "isStaple": false,
+            "canonicalId": "tomato_paste",
+            "matchedName": "Tomatenpüree",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          },
+          {
+            "name": "passierte Tomaten",
+            "baseName": "strained tomatoes",
+            "amount": 60,
+            "unit": "g",
+            "calories": 41,
+            "protein": 1.1,
+            "carbs": 5.8,
+            "fat": 1.3,
+            "isStaple": false,
+            "canonicalId": "tomato_sauce",
+            "matchedName": "Tomatensauce",
+            "isVerified": true,
+            "category": "OILS_CONDIMENTS"
+          }
+        ]
+      },
+      {
+        "name": "SPICES_HERBS",
+        "items": [
+          {
+            "name": "Backpulver",
+            "baseName": "baking powder",
+            "amount": 3,
+            "unit": "g",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Salz",
+            "baseName": "salt",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "canonicalId": "salt_himalaya_salt",
+            "matchedName": "Salz, Himalayasalz",
+            "isVerified": true,
+            "category": "SPICES_HERBS"
+          },
+          {
+            "name": "Pfeffer",
+            "baseName": "pepper",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Oregano",
+            "baseName": "oregano",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Chiliflocken",
+            "baseName": "chili flakes",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "[Hüttenkäse](ing:cottage cheese), [Salz](ing:salt), [Pfeffer](ing:pepper), [Oregano](ing:oregano), [Chiliflocken](ing:chili flakes), [Knobilicious](ing:garlic seasoning), [Dinkelmehl](ing:spelt flour), [Eiklar](ing:egg white) und [Backpulver](ing:baking powder) in einer Schüssel zu einer glatten Masse verrühren."
+      },
+      {
+        "step": 2,
+        "description": "Die Masse auf ein mit Backpapier belegtes Backblech geben, rund formen und für [10 Minuten](timer:600) bei 180°C backen."
+      },
+      {
+        "step": 3,
+        "description": "Den Boden vorsichtig vom Backpapier lösen."
+      },
+      {
+        "step": 4,
+        "description": "[Passierte Tomaten](ing:strained tomatoes) mit [Tomatenmark](ing:tomato paste) und den Gewürzen verrühren und den Boden damit bestreichen."
+      },
+      {
+        "step": 5,
+        "description": "Mit [Mozzarella](ing:mozzarella) belegen und für weitere [10 Minuten](timer:600) backen."
+      }
+    ],
+    "equipment": [
+      "Schüssel",
+      "Backblech",
+      "Backpapier"
+    ],
+    "transcript": null,
+    "tags": [
+      "Proteinreich",
+      "Kalorienarm"
+    ],
+    "emoji": "🍕",
+    "nutritionalValues": {
+      "calories": 338,
+      "carbs": 37,
+      "fat": 9,
+      "protein": 29
+    }
+  },
+  "report": {
+    "url": "https://www.instagram.com/reel/Da2UEDQtcrm/?igsh=ZTI1ODExeXVuMGZu",
+    "title": "Hailey Bieber Pizza",
+    "servings": 1,
+    "nutritionalValues": {
+      "calories": 338,
+      "carbs": 37,
+      "fat": 9,
+      "protein": 29
+    },
+    "totalIngredients": 12,
+    "verifiedCount": 7,
+    "matchRatePercent": 58,
+    "ingredients": [
+      {
+        "rawName": "Knobilicious",
+        "baseName": "garlic seasoning",
+        "amount": 1,
+        "unit": "Prise",
+        "isVerified": false,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      {
+        "rawName": "Hüttenkäse",
+        "baseName": "cottage cheese",
+        "amount": 60,
+        "unit": "g",
+        "canonicalId": "cottage_cheese",
+        "matchedName": "Hüttenkäse, nature",
+        "isVerified": true,
+        "calories": 60,
+        "protein": 7.4,
+        "carbs": 1.4,
+        "fat": 2.7
+      },
+      {
+        "rawName": "Eiklar",
+        "baseName": "egg white",
+        "amount": 80,
+        "unit": "g",
+        "canonicalId": "egg_white_raw",
+        "matchedName": "Hühnereiweiss, roh (Eiklar)",
+        "isVerified": true,
+        "calories": 36,
+        "protein": 8.6,
+        "carbs": 0.3,
+        "fat": 0
+      },
+      {
+        "rawName": "Mozzarella",
+        "baseName": "mozzarella",
+        "amount": 30,
+        "unit": "g",
+        "canonicalId": "mozzarella",
+        "matchedName": "Mozzarella",
+        "isVerified": true,
+        "calories": 77,
+        "protein": 5.9,
+        "carbs": 0.2,
+        "fat": 5.9
+      },
+      {
+        "rawName": "Dinkelmehl",
+        "baseName": "spelt flour",
+        "amount": 40,
+        "unit": "g",
+        "canonicalId": "spelt_fine_flour",
+        "matchedName": "Dinkelmehl, weiss, Typ 550",
+        "isVerified": true,
+        "calories": 139,
+        "protein": 5.3,
+        "carbs": 27.3,
+        "fat": 0.6
+      },
+      {
+        "rawName": "Tomatenmark",
+        "baseName": "tomato paste",
+        "amount": 10,
+        "unit": "g",
+        "canonicalId": "tomato_paste",
+        "matchedName": "Tomatenpüree",
+        "isVerified": true,
+        "calories": 8,
+        "protein": 0.5,
+        "carbs": 1.3,
+        "fat": 0
+      },
+      {
+        "rawName": "passierte Tomaten",
+        "baseName": "strained tomatoes",
+        "amount": 60,
+        "unit": "g",
+        "canonicalId": "tomato_sauce",
+        "matchedName": "Tomatensauce",
+        "isVerified": true,
+        "calories": 41,
+        "protein": 1.1,
+        "carbs": 5.8,
+        "fat": 1.3
+      },
+      {
+        "rawName": "Backpulver",
+        "baseName": "baking powder",
+        "amount": 3,
+        "unit": "g",
+        "isVerified": false,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      {
+        "rawName": "Salz",
+        "baseName": "salt",
+        "amount": 1,
+        "unit": "Prise",
+        "canonicalId": "salt_himalaya_salt",
+        "matchedName": "Salz, Himalayasalz",
+        "isVerified": true,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      {
+        "rawName": "Pfeffer",
+        "baseName": "pepper",
+        "amount": 1,
+        "unit": "Prise",
+        "isVerified": false,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      {
+        "rawName": "Oregano",
+        "baseName": "oregano",
+        "amount": 1,
+        "unit": "Prise",
+        "isVerified": false,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      {
+        "rawName": "Chiliflocken",
+        "baseName": "chili flakes",
+        "amount": 1,
+        "unit": "Prise",
+        "isVerified": false,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      }
+    ]
+  }
+}

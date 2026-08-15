@@ -1,0 +1,299 @@
+{
+  "timestamp": "2026-08-15T17:17:58.489Z",
+  "requestType": "extract_recipe",
+  "model": "gemini-3.1-flash-lite",
+  "durationMs": 5103,
+  "success": true,
+  "input": {
+    "captionLength": 560,
+    "captionPreview": "Müsst ihr probieren!😬 Anzeige \n\nIch liebe Flammkuchen und das ganze als Pasta? Hallooo, wie geil!!😍😍\n\nHolt euch die Pasta Rustica „Flammkuchen Style“ von @steinhaus1841 und probierts mal aus.👨🏻‍🍳\n\n📝Zutaten:\n(3-4 Portionen) \n▫️1 größere Zwiebel\n▫️Etwas Butter \n▫️Salz & Pfeffer\n▫️1 Prise Papr",
+    "carouselImageCount": 0,
+    "imageSourceKind": "carousel",
+    "prompt": "You are an expert recipe extractor. Analyze the provided content (which may include audio, website text, or video caption).\n    \nReconstruct the complete recipe, resolving any contradictions culinary-wise. Ensure to follow the field-level guidelines specified in the descriptions of the output schema.\n\nKey Constraints:\n1. Recipe Existence & Anti-Hallucination: The source content MUST contain the actual recipe details (specific ingredients with quantities and/or step-by-step cooking instructions). You MUST set \"isRecipe\" to false if:\n   a) The content is unrelated (comedy, vlogs, fitness motivation, general chat, etc.).\n   b) The content is merely a teaser, promo, or engagement bait without the full recipe (e.g. \"Comment BUCKEYE and I'll send you the recipe\", \"Recipe in my ebook\", \"Link in bio\", \"DM for full recipe\", or appetizing marketing descriptions/macros without the actual list of ingredients and preparation steps).\n   c) The source mentions only the dish name/concept but completely omits the concrete ingredients and instructions.\n   NEVER under any circumstances invent, fabricate, or hallucinate ingredients, amounts, or cooking steps when they are not present in the provided source text, audio, or images.\n2. Multi-Recipe Ambiguity: Before attempting to extract a recipe, evaluate if the content represents a multi-recipe collection, roundup, or compilation. You MUST set \"containsMultipleRecipes\" to true if ANY of the following apply:\n   a) The title, caption, or cover image text indicates multiple dishes/recipes (e.g. \"High protein dinners...\", \"5 meals to get lean\", \"3 lunch ideas\", \"What I eat in a day\", \"4 low-calorie recipes\").\n   b) The carousel images or video scenes present multiple distinct standalone main dishes across different slides/segments (e.g. Slide 2 is \"Smash Burger & Sweet Potato Fries\", Slide 4 is \"Bang Bang Chicken\", Slide 6 is \"Beef Burrito Bowl\").\n   c) Multiple distinct nutrition/macro cards exist for different dishes throughout the slides/segments.\n   If \"containsMultipleRecipes\" is true, do NOT attempt to merge the dishes into one recipe.\n   Set \"containsMultipleRecipes\" to false ONLY if the entire post is dedicated to ONE single recipe (including its sub-components like sauce, marinade, side dish, or garnishes cooked together as one meal).\n3. Category Ordering: Group ingredients using the 13 standardized supermarket category keys: VEGETABLES (fresh vegetables/herbs/mushrooms), FRUITS (fresh/dried fruits/berries), DAIRY_EGGS (milk/cheese/yogurt/cream/butter/eggs/tofu/plant milk), MEAT_POULTRY (meat/chicken/sausages/vegan meat), SEAFOOD (fish/seafood), GRAINS_PASTA (pasta/rice/flour/dough/bread/oats/potatoes), OILS_CONDIMENTS (cooking oils/vinegar/dressings/sauces), SPICES_HERBS (salt/pepper/dried spices), NUTS_SEEDS (nuts/seeds/avocado), SWEETS_SNACKS (sugar/honey/chocolate/cookies/ice cream/chips), BEVERAGES (drinks/juices/coffee/tea/alcohol), PANTRY_BAKING (yeast/baking powder/gelatine/protein powder), PREPARED_DISHES (ready meals).\n4. Translation: Write and translate all text values (including title, description, ingredient names/notes, instruction steps, equipment list, tips, alternative ingredient details, and tags) into: German. Keep the category keys as the uppercase English enum values. Follow the schema strictly.\n5. Preferred Units:\n   - Temperature Units: Format all temperature values mentioned in the instructions, description, tips, or title using the preferred unit: Celsius (e.g., convert and format as \"200°C\" or \"400°F\" depending on preference).\n   - Weight & Volume Units: Format all ingredient weights, volumes, and measurements using the preferred unit system: metric (e.g., metric units like grams, milliliters, kilograms, or imperial units like ounces, cups, pounds, fluid ounces) and perform conversions where appropriate.\n6. Missing Data & Nutrition: If any information for a specific field is missing, leave it empty (empty string \"\", null, or empty array []). You MUST set \"hasExplicitNutritionalValues\" to true ONLY IF the recipe nutritional values are explicitly stated in the source text or audio. If they are not, set it to false and set \"nutritionalValues\" to null (do NOT estimate or calculate overall nutritional values at the recipe level). Note that \"nutritionalValues\" MUST represent values per single serving/portion. If the source lists total values for the entire recipe, divide them by the number of servings/portions first.\n7. Clean Ingredient Names: Ensure the \"name\" field contains only the clean ingredient name (e.g., \"Frischkäse\", \"evaporated milk\", \"cream cheese\", \"butter\"). Move all adjectives, processing states, or descriptions (such as \"light\", \"mager\", \"low fat\", \"leichte\", \"gerieben\", \"grated\") into the \"modifier\" field. Do NOT leave these descriptors inside the \"name\" field.\n8. Ingredient Decomposition: If a composite element or homemade component (like a custom sauce or pesto) is prepared during the recipe, you MUST list its raw ingredients individually instead of the finished compound product.\n9. Ingredient-level Nutritional Values: For each ingredient, you MUST estimate its nutritional values (calories, protein, carbs, fat) based on the ENTIRE specified quantity (amount * unit). Do NOT output per-100g, per-100ml, or single-unit values unless the quantity is exactly 100g, 100ml, or 1 unit. E.g., if chicken breast has 165 kcal per 100g and the recipe specifies 500g, the calories field MUST be 825, NOT 165. If a potato has 150 kcal and the amount is 6, the calories field MUST be 900, NOT 150. If olive oil has 14g fat/EL and the amount is 3 EL, the fat field MUST be 42, NOT 14.\n10. Infer Minor Missing Components (Only for Existing Recipes): If the source already contains a full recipe with ingredients and instructions, but the title or visual images explicitly show an obvious missing minor garnish or component (e.g., 'Air-Fried Broccolini' in the title and green broccolini on the plate) that was accidentally omitted from the written list, you may infer that specific item. NEVER use this rule to fabricate an entire recipe from a title or teaser when no base recipe is provided.\n11. Serving Size Estimation: Identify the number of servings or portions the recipe makes. Look for clues like 'serves 4' or estimate based on the ingredient amounts (e.g., 500g chicken and 6 potatoes typically serves 3-4 people). Avoid defaulting to 1 serving if the ingredient amounts are clearly meant for a family-sized meal.\n12. Zero-Calorie & Low-Calorie Ingredients: Ingredients like water, ice, salt, or baking soda MUST have 0 calories, protein, carbs, and fat. For spices, seasonings, or herbs in small quantities (like teaspoons), focus your calculation energy on the high-calorie/high-macro ingredients (meats, oils, dairy, grains, starches) and estimate very small values (e.g., 5 kcal) or 0.\n13. Cooked vs. Raw/Dry States of Expandable Ingredients: For ingredients that expand significantly during cooking (e.g., rice, pasta, lentils, beans, chickpeas, couscous, quinoa, bulgur), you MUST determine whether the specified quantity refers to the dry/uncooked state or the cooked/prepared state. Dry/uncooked state (e.g., \"100g uncooked rice\" or \"100g rice\" which is boiled in the instructions) has high caloric density (e.g., dry rice: ~350 kcal/100g, dry pasta: ~350 kcal/100g, dry lentils: ~350 kcal/100g). Cooked/prepared state (e.g., \"100g cooked rice\", \"100g boiled pasta\", canned/pre-cooked beans, or when already-cooked ingredients are added directly to a stir-fry/bowl) has much lower caloric density (e.g., cooked rice: ~130 kcal/100g, cooked pasta: ~130-150 kcal/100g, cooked lentils: ~110-120 kcal/100g). Ambiguity resolution: Analyze the cooking instructions. If the instructions include boiling/cooking the dry ingredient, calculate using dry/raw values. If the ingredient is added pre-cooked, or if treating it as raw results in absurdly high calories (e.g., 250g dry rice is ~850 kcal and cooks to 750g cooked rice, which is way too much for a single serving of fried rice), assume the quantity represents the cooked state and calculate using cooked values.\n14. Common Pantry Staples: For each ingredient, set the \"isStaple\" boolean to true ONLY if it is a very common basic staple that people almost always already have at home and rarely need to buy specifically for a recipe (e.g. salt, pepper, water, cooking oil, sugar, common dried spices). Set it to false for anything a user would typically need to shop for (e.g. meat, cheese, vegetables, fresh herbs, specialty items). When in doubt, set it to false.\n15. Inline Ingredient Tagging: In every step description, whenever an ingredient from the ingredients list is used or referenced, you MUST format its mention using the inline syntax '[exact word used in text](ing:baseName)'. 'baseName' MUST match the English 'baseName' (or 'name' if 'baseName' is not set) of the corresponding ingredient in the ingredients list. Examples:\n   - Ingredients: Eigelb (baseName: egg yolk), Ei (baseName: egg), Parmesan (baseName: parmesan)\n   - Step description: \"Die [Eigelbe](ing:egg yolk) und das [Ei](ing:egg) zusammen mit dem [Parmesan](ing:parmesan) verrühren.\"\n   - Do NOT tag equipment or non-ingredient words. Make sure the brackets wrap the natural word as it appears in the sentence.\n16. Concise, Direct Instruction Steps: Write instruction step descriptions as short, clear, action-oriented sentences. Eliminate conversational filler words, narrative transitions, and redundancies. Split long multi-action steps into distinct, bite-sized steps so each step is easy to follow while cooking.\n17. Inline Timer Tagging: In every step description, whenever a cooking duration or time span is mentioned (e.g. \"15 Minuten\", \"1,5 Stunden\", \"30 Sekunden\"), you MUST format it using the inline syntax '[exact time text](timer:duration_in_seconds)'. Calculate the total duration in seconds and put it in the timer parameter. Examples:\n   - \"Ca. [15 Minuten](timer:900) garen.\"\n   - \"Für [1,5 Stunden](timer:5400) köcheln lassen.\"\n   - \"Etwa [45 Sekunden](timer:45) anbraten.\"\n\nDescription/Caption:\n\"\"\"\nMüsst ihr probieren!😬 Anzeige \n\nIch liebe Flammkuchen und das ganze als Pasta? Hallooo, wie geil!!😍😍\n\nHolt euch die Pasta Rustica „Flammkuchen Style“ von @steinhaus1841 und probierts mal aus.👨🏻‍🍳\n\n📝Zutaten:\n(3-4 Portionen) \n▫️1 größere Zwiebel\n▫️Etwas Butter \n▫️Salz & Pfeffer\n▫️1 Prise Paprikapulver \n▫️100g Speckwürfel\n▫️150g Pfifferlinge \n▫️1 Prise Cayennepfeffer \n▫️2x Pasta Rustica „Flammkuchen Style“\n▫️75g geriebenen Gruyère oder Parmesan \n▫️4 Eigelb \n▫️2-3 EL Creme fraiche \n▫️Frühlingslauch \n\nGuten Appetit ♥️\n\n#steinhaus1841 #pastarustica\n\"\"\""
+  },
+  "rawOutput": "{\n  \"isRecipe\": true,\n  \"containsMultipleRecipes\": false,\n  \"title\": \"Pasta Rustica „Flammkuchen Style“\",\n  \"description\": \"Eine herzhafte Pasta-Variante, die den klassischen Geschmack von Flammkuchen mit Speck, Pfifferlingen und Gruyère vereint.\",\n  \"prepTime\": 15,\n  \"cookTime\": 15,\n  \"servings\": 4,\n  \"ingredients\": [\n    {\n      \"name\": \"VEGETABLES\",\n      \"items\": [\n        {\n          \"name\": \"Zwiebel\",\n          \"baseName\": \"onion\",\n          \"amount\": 1,\n          \"unit\": \"Stück\",\n          \"calories\": 45,\n          \"protein\": 1,\n          \"carbs\": 10,\n          \"fat\": 0,\n          \"isStaple\": false\n        },\n        {\n          \"name\": \"Pfifferlinge\",\n          \"baseName\": \"chanterelles\",\n          \"amount\": 150,\n          \"unit\": \"g\",\n          \"calories\": 50,\n          \"protein\": 2,\n          \"carbs\": 10,\n          \"fat\": 1,\n          \"isStaple\": false\n        },\n        {\n          \"name\": \"Frühlingslauch\",\n          \"baseName\": \"spring onion\",\n          \"amount\": 1,\n          \"unit\": \"Bund\",\n          \"calories\": 30,\n          \"protein\": 2,\n          \"carbs\": 5,\n          \"fat\": 0,\n          \"isStaple\": false\n        }\n      ]\n    },\n    {\n      \"name\": \"DAIRY_EGGS\",\n      \"items\": [\n        {\n          \"name\": \"Butter\",\n          \"baseName\": \"butter\",\n          \"amount\": 1,\n          \"unit\": \"EL\",\n          \"calories\": 100,\n          \"protein\": 0,\n          \"carbs\": 0,\n          \"fat\": 11,\n          \"isStaple\": true\n        },\n        {\n          \"name\": \"Gruyère\",\n          \"baseName\": \"gruyere cheese\",\n          \"amount\": 75,\n          \"unit\": \"g\",\n          \"calories\": 300,\n          \"protein\": 22,\n          \"carbs\": 0,\n          \"fat\": 24,\n          \"modifier\": \"gerieben\",\n          \"notes\": \"Alternativ Parmesan\",\n          \"replacedOriginal\": \"Gruyère oder Parmesan\"\n        },\n        {\n          \"name\": \"Eigelb\",\n          \"baseName\": \"egg yolk\",\n          \"amount\": 4,\n          \"unit\": \"Stück\",\n          \"calories\": 220,\n          \"protein\": 11,\n          \"carbs\": 1,\n          \"fat\": 18,\n          \"parentIngredient\": {\n            \"name\": \"Ei\",\n            \"baseName\": \"egg\",\n            \"unit\": \"Stück\"\n          }\n        },\n        {\n          \"name\": \"Creme fraiche\",\n          \"baseName\": \"creme fraiche\",\n          \"amount\": 3,\n          \"unit\": \"EL\",\n          \"calories\": 150,\n          \"protein\": 1,\n          \"carbs\": 2,\n          \"fat\": 15,\n          \"isStaple\": false\n        }\n      ]\n    },\n    {\n      \"name\": \"MEAT_POULTRY\",\n      \"items\": [\n        {\n          \"name\": \"Speckwürfel\",\n          \"baseName\": \"bacon\",\n          \"amount\": 100,\n          \"unit\": \"g\",\n          \"calories\": 400,\n          \"protein\": 15,\n          \"carbs\": 1,\n          \"fat\": 38,\n          \"modifier\": \"gewürfelt\",\n          \"notes\": \"Speckwürfel\",\n          \"replacedOriginal\": \"Speckwürfel\"\n        }\n      ]\n    },\n    {\n      \"name\": \"GRAINS_PASTA\",\n      \"items\": [\n        {\n          \"name\": \"Pasta Rustica\",\n          \"baseName\": \"pasta\",\n          \"amount\": 2,\n          \"unit\": \"Packung\",\n          \"calories\": 1400,\n          \"protein\": 50,\n          \"carbs\": 280,\n          \"fat\": 5,\n          \"modifier\": \"Flammkuchen Style\"\n        }\n      ]\n    },\n    {\n      \"name\": \"SPICES_HERBS\",\n      \"items\": [\n        {\n          \"name\": \"Salz\",\n          \"baseName\": \"salt\",\n          \"amount\": 1,\n          \"unit\": \"Prise\",\n          \"calories\": 0,\n          \"protein\": 0,\n          \"carbs\": 0,\n          \"fat\": 0,\n          \"isStaple\": true\n        },\n        {\n          \"name\": \"Pfeffer\",\n          \"baseName\": \"pepper\",\n          \"amount\": 1,\n          \"unit\": \"Prise\",\n          \"calories\": 0,\n          \"protein\": 0,\n          \"carbs\": 0,\n          \"fat\": 0,\n          \"isStaple\": true\n        },\n        {\n          \"name\": \"Paprikapulver\",\n          \"baseName\": \"paprika\",\n          \"amount\": 1,\n          \"unit\": \"Prise\",\n          \"calories\": 0,\n          \"protein\": 0,\n          \"carbs\": 0,\n          \"fat\": 0,\n          \"isStaple\": true\n        },\n        {\n          \"name\": \"Cayennepfeffer\",\n          \"baseName\": \"cayenne pepper\",\n          \"amount\": 1,\n          \"unit\": \"Prise\",\n          \"calories\": 0,\n          \"protein\": 0,\n          \"carbs\": 0,\n          \"fat\": 0,\n          \"isStaple\": true\n        }\n      ]\n    }\n  ],\n  \"instructions\": [\n    {\n      \"step\": 1,\n      \"description\": \"Die [Zwiebel](ing:onion) fein würfeln und in etwas [Butter](ing:butter) glasig dünsten.\"\n    },\n    {\n      \"step\": 2,\n      \"description\": \"Die [Speckwürfel](ing:bacon) und [Pfifferlinge](ing:chanterelles) hinzufügen und für ca. [5 Minuten](timer:300) scharf anbraten.\"\n    },\n    {\n      \"step\": 3,\n      \"description\": \"Mit [Salz](ing:salt), [Pfeffer](ing:pepper), [Paprikapulver](ing:paprika) und [Cayennepfeffer](ing:cayenne pepper) würzen.\"\n    },\n    {\n      \"step\": 4,\n      \"description\": \"Die [Pasta Rustica](ing:pasta) nach Packungsanweisung kochen.\"\n    },\n    {\n      \"step\": 5,\n      \"description\": \"In einer Schüssel [Eigelb](ing:egg yolk), [Creme fraiche](ing:creme fraiche) und den geriebenen [Gruyère](ing:gruyere cheese) vermengen.\"\n    },\n    {\n      \"step\": 6,\n      \"description\": \"Die gekochte Pasta mit der Speck-Pilz-Mischung und der Eier-Käse-Creme vermischen, kurz durchschwenken und mit [Frühlingslauch](ing:spring onion) garnieren.\"\n    }\n  ],\n  \"equipment\": [\n    \"Pfanne\",\n    \"Topf\",\n    \"Schüssel\"\n  ],\n  \"hasExplicitNutritionalValues\": false,\n  \"transcript\": \"NO_SPOKEN_WORDS\",\n  \"tags\": [\n    \"Pasta\",\n    \"Flammkuchen\"\n  ],\n  \"emoji\": \"🍝\"\n}",
+  "parsedOutput": {
+    "isRecipe": true,
+    "title": "Pasta Rustica „Flammkuchen Style“",
+    "description": "Eine herzhafte Pasta-Variante, die den klassischen Geschmack von Flammkuchen mit Speck, Pfifferlingen und Gruyère vereint.",
+    "prepTime": 15,
+    "cookTime": 15,
+    "servings": 4,
+    "ingredients": [
+      {
+        "name": "VEGETABLES",
+        "items": [
+          {
+            "name": "Zwiebel",
+            "baseName": "onion",
+            "amount": 1,
+            "unit": "Stück",
+            "calories": 43,
+            "protein": 1.2,
+            "carbs": 6.9,
+            "fat": 0.7,
+            "isStaple": false,
+            "canonicalId": "onion_raw",
+            "matchedName": "Zwiebel, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          },
+          {
+            "name": "Pfifferlinge",
+            "baseName": "chanterelles",
+            "amount": 150,
+            "unit": "g",
+            "calories": 36,
+            "protein": 3.5,
+            "carbs": 0.3,
+            "fat": 0.8,
+            "isStaple": false,
+            "canonicalId": "chanterelle_raw",
+            "matchedName": "Eierschwamm, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          },
+          {
+            "name": "Frühlingslauch",
+            "baseName": "spring onion",
+            "amount": 1,
+            "unit": "Bund",
+            "calories": 10,
+            "protein": 0.3,
+            "carbs": 1.6,
+            "fat": 0.2,
+            "isStaple": false,
+            "canonicalId": "onion_raw",
+            "matchedName": "Zwiebel, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          }
+        ]
+      },
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Butter",
+            "baseName": "butter",
+            "amount": 1,
+            "unit": "EL",
+            "calories": 124,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 13.8,
+            "isStaple": true,
+            "canonicalId": "butter_clarified",
+            "matchedName": "Bratbutter",
+            "isVerified": true,
+            "category": "OILS_CONDIMENTS"
+          },
+          {
+            "name": "Gruyère",
+            "baseName": "gruyere cheese",
+            "amount": 75,
+            "unit": "g",
+            "calories": 296,
+            "protein": 19.8,
+            "carbs": 0,
+            "fat": 24,
+            "modifier": "gerieben",
+            "notes": "Alternativ Parmesan",
+            "canonicalId": "greyerzer_at_least_45_fidm",
+            "matchedName": "Greyerzer, vollfett",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Eigelb",
+            "baseName": "egg yolk",
+            "amount": 4,
+            "unit": "Stück",
+            "calories": 768,
+            "protein": 36.1,
+            "carbs": 0.7,
+            "fat": 68.9,
+            "parentIngredient": {
+              "name": "Ei",
+              "baseName": "egg",
+              "unit": "Stück"
+            },
+            "canonicalId": "egg_yolk_raw",
+            "matchedName": "Hühnereigelb, roh (Eidotter)",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Creme fraiche",
+            "baseName": "creme fraiche",
+            "amount": 3,
+            "unit": "EL",
+            "calories": 150,
+            "protein": 1,
+            "carbs": 2,
+            "fat": 15,
+            "isStaple": false,
+            "isVerified": false
+          }
+        ]
+      },
+      {
+        "name": "MEAT_POULTRY",
+        "items": [
+          {
+            "name": "Speckwürfel",
+            "baseName": "bacon",
+            "amount": 100,
+            "unit": "g",
+            "calories": 400,
+            "protein": 22.1,
+            "carbs": 0.6,
+            "fat": 34.3,
+            "modifier": "gewürfelt",
+            "notes": "Speckwürfel",
+            "canonicalId": "bacon_raw",
+            "matchedName": "Rohessspeck",
+            "isVerified": true,
+            "category": "MEAT_POULTRY"
+          }
+        ]
+      },
+      {
+        "name": "GRAINS_PASTA",
+        "items": [
+          {
+            "name": "Pasta Rustica",
+            "baseName": "pasta",
+            "amount": 2,
+            "unit": "Packung",
+            "calories": 730,
+            "protein": 26.6,
+            "carbs": 139.8,
+            "fat": 5.6,
+            "modifier": "Flammkuchen Style",
+            "canonicalId": "pasta_with_egg_dry",
+            "matchedName": "Teigwaren mit Ei, trocken",
+            "isVerified": true,
+            "category": "GRAINS_PASTA"
+          }
+        ]
+      },
+      {
+        "name": "SPICES_HERBS",
+        "items": [
+          {
+            "name": "Salz",
+            "baseName": "salt",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "canonicalId": "salt_himalaya_salt",
+            "matchedName": "Salz, Himalayasalz",
+            "isVerified": true,
+            "category": "SPICES_HERBS"
+          },
+          {
+            "name": "Pfeffer",
+            "baseName": "pepper",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Paprikapulver",
+            "baseName": "paprika",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 2,
+            "protein": 0.1,
+            "carbs": 0.2,
+            "fat": 0.1,
+            "isStaple": true,
+            "canonicalId": "paprika",
+            "matchedName": "Paprika (Gewürz)",
+            "isVerified": true,
+            "category": "SPICES_HERBS"
+          },
+          {
+            "name": "Cayennepfeffer",
+            "baseName": "cayenne pepper",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "Die [Zwiebel](ing:onion) fein würfeln und in etwas [Butter](ing:butter) glasig dünsten."
+      },
+      {
+        "step": 2,
+        "description": "Die [Speckwürfel](ing:bacon) und [Pfifferlinge](ing:chanterelles) hinzufügen und für ca. [5 Minuten](timer:300) scharf anbraten."
+      },
+      {
+        "step": 3,
+        "description": "Mit [Salz](ing:salt), [Pfeffer](ing:pepper), [Paprikapulver](ing:paprika) und [Cayennepfeffer](ing:cayenne pepper) würzen."
+      },
+      {
+        "step": 4,
+        "description": "Die [Pasta Rustica](ing:pasta) nach Packungsanweisung kochen."
+      },
+      {
+        "step": 5,
+        "description": "In einer Schüssel [Eigelb](ing:egg yolk), [Creme fraiche](ing:creme fraiche) und den geriebenen [Gruyère](ing:gruyere cheese) vermengen."
+      },
+      {
+        "step": 6,
+        "description": "Die gekochte Pasta mit der Speck-Pilz-Mischung und der Eier-Käse-Creme vermischen, kurz durchschwenken und mit [Frühlingslauch](ing:spring onion) garnieren."
+      }
+    ],
+    "equipment": [
+      "Pfanne",
+      "Topf",
+      "Schüssel"
+    ],
+    "transcript": null,
+    "tags": [
+      "Pasta",
+      "Flammkuchen"
+    ],
+    "emoji": "🍝",
+    "nutritionalValues": {
+      "calories": 640,
+      "protein": 27.7,
+      "carbs": 38,
+      "fat": 40.8
+    }
+  },
+  "tokenUsage": {
+    "promptTokens": 2764,
+    "candidateTokens": 1905,
+    "totalTokens": 4669
+  },
+  "costEstimate": {
+    "inputCostUsd": 0.000691,
+    "outputCostUsd": 0.002857,
+    "totalCostUsd": 0.003548,
+    "totalCostFormatted": "$0.0035",
+    "pricingTier": "short",
+    "pricingKnown": true
+  },
+  "logDir": "C:\\Users\\lucas\\source\\repos\\cookbook\\eval_results\\temp_run_w3_3"
+}

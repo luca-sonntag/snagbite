@@ -1,0 +1,345 @@
+{
+  "url": "https://www.instagram.com/reel/DavSSgEq6Xz/?igsh=MWMwYzAzbm5sZm1raw==",
+  "recipe": {
+    "isRecipe": true,
+    "title": "Bananen-Maulwurf-Kuchenbowl",
+    "description": "Eine proteinreiche, kalorienarme Maulwurf-Kuchenbowl, die ohne Backofen in nur 10 Minuten zubereitet ist.",
+    "prepTime": 5,
+    "cookTime": 5,
+    "servings": 1,
+    "ingredients": [
+      {
+        "name": "VEGETABLES",
+        "items": [
+          {
+            "name": "Banane",
+            "baseName": "banana",
+            "amount": 1,
+            "unit": "Stück",
+            "calories": 108,
+            "protein": 1.3,
+            "carbs": 23.6,
+            "fat": 0.2,
+            "isStaple": false,
+            "canonicalId": "banana_raw",
+            "matchedName": "Banane, roh",
+            "isVerified": true,
+            "category": "FRUITS"
+          }
+        ]
+      },
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Ei",
+            "baseName": "egg",
+            "amount": 1,
+            "unit": "Stück",
+            "calories": 77,
+            "protein": 6.9,
+            "carbs": 0.2,
+            "fat": 5.4,
+            "isStaple": false,
+            "canonicalId": "egg_raw",
+            "matchedName": "Hühnerei, ganz, roh",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Mandelmilch",
+            "baseName": "almond milk",
+            "amount": 40,
+            "unit": "ml",
+            "calories": 13,
+            "protein": 0.4,
+            "carbs": 0.5,
+            "fat": 1,
+            "isStaple": false,
+            "canonicalId": "almond_drink_plain",
+            "matchedName": "Mandelgetränk, nature",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Skyr",
+            "baseName": "skyr",
+            "amount": 150,
+            "unit": "g",
+            "calories": 95,
+            "protein": 16,
+            "carbs": 6,
+            "fat": 0,
+            "isStaple": false,
+            "isVerified": false
+          }
+        ]
+      },
+      {
+        "name": "PANTRY_BAKING",
+        "items": [
+          {
+            "name": "Mandelmehl",
+            "baseName": "almond flour",
+            "amount": 15,
+            "unit": "g",
+            "calories": 52,
+            "protein": 1.9,
+            "carbs": 10.1,
+            "fat": 0.2,
+            "modifier": "entölt",
+            "notes": "entölt",
+            "parentIngredient": {
+              "name": "Mandelmehl",
+              "baseName": "almond flour",
+              "unit": "g"
+            },
+            "canonicalId": "sp_tzle_flour",
+            "matchedName": "Knöpflimehl",
+            "isVerified": true,
+            "category": "GRAINS_PASTA"
+          },
+          {
+            "name": "Backpulver",
+            "baseName": "baking powder",
+            "amount": 1,
+            "unit": "TL",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Whey Protein",
+            "baseName": "whey protein",
+            "amount": 15,
+            "unit": "g",
+            "calories": 55,
+            "protein": 12,
+            "carbs": 1,
+            "fat": 0,
+            "modifier": "Chocolate Milkshake",
+            "isVerified": false
+          },
+          {
+            "name": "Backkakao",
+            "baseName": "cocoa powder",
+            "amount": 15,
+            "unit": "g",
+            "calories": 57,
+            "protein": 3.4,
+            "carbs": 1.7,
+            "fat": 3.1,
+            "isStaple": false,
+            "canonicalId": "cocoa_powder_without_sugar",
+            "matchedName": "Kakaopulver, ohne Zucker",
+            "isVerified": true,
+            "category": "SWEETS_SNACKS"
+          },
+          {
+            "name": "Flohsamen",
+            "baseName": "psyllium husk",
+            "amount": 3,
+            "unit": "g",
+            "calories": 11,
+            "protein": 0.5,
+            "carbs": 1.7,
+            "fat": 0.2,
+            "isStaple": false,
+            "canonicalId": "amaranth_seed_raw",
+            "matchedName": "Amaranth, Samen, roh",
+            "isVerified": true,
+            "category": "GRAINS_PASTA"
+          },
+          {
+            "name": "AllFlavour",
+            "baseName": "flavor drops",
+            "amount": 2,
+            "unit": "scoop",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "modifier": "Chocolate/Vanilla",
+            "isVerified": false
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "Für den Teig das [Ei](ing:egg), die [Mandelmilch](ing:almond milk), das [Mandelmehl](ing:almond flour), [Backpulver](ing:baking powder), [Whey Protein](ing:whey protein) und [Backkakao](ing:cocoa powder) in einer mikrowellengeeigneten Schale verrühren und für [3 Minuten](timer:180) in der Mikrowelle garen."
+      },
+      {
+        "step": 2,
+        "description": "Den [Skyr](ing:skyr) mit [AllFlavour](ing:flavor drops) und [Flohsamen](ing:psyllium husk) verrühren. Die [Banane](ing:banana) klein schneiden."
+      },
+      {
+        "step": 3,
+        "description": "Den Kuchenboden vorsichtig in zwei Teile schneiden. Eine Hälfte als Boden in die Form legen, die Creme und die [Banane](ing:banana) darauf verteilen und die zweite Hälfte des Kuchens darüber zerzupfen."
+      },
+      {
+        "step": 4,
+        "description": "Die Bowl nach Belieben im Kühlschrank kalt stellen oder sofort genießen."
+      }
+    ],
+    "equipment": [
+      "Mikrowellengeeignete Schale",
+      "Mikrowelle",
+      "Messer"
+    ],
+    "transcript": null,
+    "tags": [
+      "High-Protein",
+      "Dessert"
+    ],
+    "emoji": "🍌",
+    "nutritionalValues": {
+      "calories": 478,
+      "carbs": 40,
+      "fat": 12,
+      "protein": 46
+    }
+  },
+  "report": {
+    "url": "https://www.instagram.com/reel/DavSSgEq6Xz/?igsh=MWMwYzAzbm5sZm1raw==",
+    "title": "Bananen-Maulwurf-Kuchenbowl",
+    "servings": 1,
+    "nutritionalValues": {
+      "calories": 478,
+      "carbs": 40,
+      "fat": 12,
+      "protein": 46
+    },
+    "totalIngredients": 10,
+    "verifiedCount": 6,
+    "matchRatePercent": 60,
+    "ingredients": [
+      {
+        "rawName": "Banane",
+        "baseName": "banana",
+        "amount": 1,
+        "unit": "Stück",
+        "canonicalId": "banana_raw",
+        "matchedName": "Banane, roh",
+        "isVerified": true,
+        "calories": 108,
+        "protein": 1.3,
+        "carbs": 23.6,
+        "fat": 0.2
+      },
+      {
+        "rawName": "Ei",
+        "baseName": "egg",
+        "amount": 1,
+        "unit": "Stück",
+        "canonicalId": "egg_raw",
+        "matchedName": "Hühnerei, ganz, roh",
+        "isVerified": true,
+        "calories": 77,
+        "protein": 6.9,
+        "carbs": 0.2,
+        "fat": 5.4
+      },
+      {
+        "rawName": "Mandelmilch",
+        "baseName": "almond milk",
+        "amount": 40,
+        "unit": "ml",
+        "canonicalId": "almond_drink_plain",
+        "matchedName": "Mandelgetränk, nature",
+        "isVerified": true,
+        "calories": 13,
+        "protein": 0.4,
+        "carbs": 0.5,
+        "fat": 1
+      },
+      {
+        "rawName": "Skyr",
+        "baseName": "skyr",
+        "amount": 150,
+        "unit": "g",
+        "isVerified": false,
+        "calories": 95,
+        "protein": 16,
+        "carbs": 6,
+        "fat": 0
+      },
+      {
+        "rawName": "Mandelmehl",
+        "baseName": "almond flour",
+        "amount": 15,
+        "unit": "g",
+        "canonicalId": "sp_tzle_flour",
+        "matchedName": "Knöpflimehl",
+        "isVerified": true,
+        "calories": 52,
+        "protein": 1.9,
+        "carbs": 10.1,
+        "fat": 0.2
+      },
+      {
+        "rawName": "Backpulver",
+        "baseName": "baking powder",
+        "amount": 1,
+        "unit": "TL",
+        "isVerified": false,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      {
+        "rawName": "Whey Protein",
+        "baseName": "whey protein",
+        "amount": 15,
+        "unit": "g",
+        "isVerified": false,
+        "calories": 55,
+        "protein": 12,
+        "carbs": 1,
+        "fat": 0
+      },
+      {
+        "rawName": "Backkakao",
+        "baseName": "cocoa powder",
+        "amount": 15,
+        "unit": "g",
+        "canonicalId": "cocoa_powder_without_sugar",
+        "matchedName": "Kakaopulver, ohne Zucker",
+        "isVerified": true,
+        "calories": 57,
+        "protein": 3.4,
+        "carbs": 1.7,
+        "fat": 3.1
+      },
+      {
+        "rawName": "Flohsamen",
+        "baseName": "psyllium husk",
+        "amount": 3,
+        "unit": "g",
+        "canonicalId": "amaranth_seed_raw",
+        "matchedName": "Amaranth, Samen, roh",
+        "isVerified": true,
+        "calories": 11,
+        "protein": 0.5,
+        "carbs": 1.7,
+        "fat": 0.2
+      },
+      {
+        "rawName": "AllFlavour",
+        "baseName": "flavor drops",
+        "amount": 2,
+        "unit": "scoop",
+        "isVerified": false,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      }
+    ]
+  }
+}

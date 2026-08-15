@@ -1,0 +1,330 @@
+{
+  "url": "https://www.instagram.com/reel/Dbp9IEtI2MI/?igsh=MWFmZWNneXlmZXpsZA==",
+  "recipe": {
+    "isRecipe": true,
+    "title": "Sandwichmaker-Burger-Toast",
+    "description": "Ein herzhafter, proteinreicher Burger-Toast, der direkt im Sandwichmaker zubereitet wird.",
+    "prepTime": 5,
+    "cookTime": 10,
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "VEGETABLES",
+        "items": [
+          {
+            "name": "Jalapenos",
+            "baseName": "jalapeno",
+            "amount": 10,
+            "unit": "g",
+            "calories": 3,
+            "protein": 0.1,
+            "carbs": 0.6,
+            "fat": 0,
+            "isStaple": false,
+            "isVerified": false
+          }
+        ]
+      },
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Cheddar",
+            "baseName": "cheddar",
+            "amount": 2,
+            "unit": "Scheiben",
+            "calories": 220,
+            "protein": 14,
+            "carbs": 1,
+            "fat": 18,
+            "isStaple": false,
+            "isVerified": false
+          }
+        ]
+      },
+      {
+        "name": "MEAT_POULTRY",
+        "items": [
+          {
+            "name": "Rinderhack",
+            "baseName": "ground beef",
+            "amount": 150,
+            "unit": "g",
+            "calories": 225,
+            "protein": 29,
+            "carbs": 0,
+            "fat": 12.1,
+            "isStaple": false,
+            "modifier": "mager, 5% Fett",
+            "canonicalId": "beef_ragout_raw",
+            "matchedName": "Rind, Hals, roh",
+            "isVerified": true,
+            "category": "MEAT_POULTRY"
+          }
+        ]
+      },
+      {
+        "name": "GRAINS_PASTA",
+        "items": [
+          {
+            "name": "Protein Toast",
+            "baseName": "toast",
+            "amount": 4,
+            "unit": "Scheiben",
+            "calories": 434,
+            "protein": 14.9,
+            "carbs": 69.9,
+            "fat": 7.8,
+            "isStaple": false,
+            "canonicalId": "bread_for_toasting_wholemeal",
+            "matchedName": "Toastbrot, Vollkorn",
+            "isVerified": true,
+            "category": "GRAINS_PASTA"
+          }
+        ]
+      },
+      {
+        "name": "OILS_CONDIMENTS",
+        "items": [
+          {
+            "name": "Senf",
+            "baseName": "mustard",
+            "amount": 1,
+            "unit": "EL",
+            "calories": 19,
+            "protein": 1.1,
+            "carbs": 0.6,
+            "fat": 1.2,
+            "isStaple": true,
+            "canonicalId": "mustard",
+            "matchedName": "Senf",
+            "isVerified": true,
+            "category": "OILS_CONDIMENTS"
+          },
+          {
+            "name": "Ketchup",
+            "baseName": "ketchup",
+            "amount": 1,
+            "unit": "EL",
+            "calories": 18,
+            "protein": 0.3,
+            "carbs": 3.9,
+            "fat": 0.1,
+            "isStaple": true,
+            "canonicalId": "ketchup",
+            "matchedName": "Ketchup",
+            "isVerified": true,
+            "category": "OILS_CONDIMENTS"
+          }
+        ]
+      },
+      {
+        "name": "SPICES_HERBS",
+        "items": [
+          {
+            "name": "Salz",
+            "baseName": "salt",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "canonicalId": "salt_himalaya_salt",
+            "matchedName": "Salz, Himalayasalz",
+            "isVerified": true,
+            "category": "SPICES_HERBS"
+          },
+          {
+            "name": "Pfeffer",
+            "baseName": "pepper",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Paprikapulver",
+            "baseName": "paprika",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 2,
+            "protein": 0.1,
+            "carbs": 0.2,
+            "fat": 0.1,
+            "isStaple": true,
+            "canonicalId": "paprika",
+            "matchedName": "Paprika (Gewürz)",
+            "isVerified": true,
+            "category": "SPICES_HERBS"
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "Das [Rinderhack](ing:ground beef) mit [Salz](ing:salt), [Pfeffer](ing:pepper) und [Paprikapulver](ing:paprika) würzen."
+      },
+      {
+        "step": 2,
+        "description": "Die [Protein Toast](ing:toast) Scheiben mit [Senf](ing:mustard) und [Ketchup](ing:ketchup) bestreichen."
+      },
+      {
+        "step": 3,
+        "description": "Das Fleisch, den [Cheddar](ing:cheddar) und die [Jalapenos](ing:jalapeno) auf den Toastscheiben verteilen und zusammenklappen."
+      },
+      {
+        "step": 4,
+        "description": "Die belegten Toasts für ca. [10 Minuten](timer:600) im Sandwichmaker goldbraun backen."
+      }
+    ],
+    "equipment": [
+      "Sandwichmaker"
+    ],
+    "transcript": null,
+    "tags": [
+      "High-Protein",
+      "Fitness"
+    ],
+    "emoji": "🥪",
+    "nutritionalValues": {
+      "calories": 359,
+      "carbs": 33,
+      "fat": 10.5,
+      "protein": 31
+    }
+  },
+  "report": {
+    "url": "https://www.instagram.com/reel/Dbp9IEtI2MI/?igsh=MWFmZWNneXlmZXpsZA==",
+    "title": "Sandwichmaker-Burger-Toast",
+    "servings": 2,
+    "nutritionalValues": {
+      "calories": 359,
+      "carbs": 33,
+      "fat": 10.5,
+      "protein": 31
+    },
+    "totalIngredients": 9,
+    "verifiedCount": 6,
+    "matchRatePercent": 67,
+    "ingredients": [
+      {
+        "rawName": "Jalapenos",
+        "baseName": "jalapeno",
+        "amount": 10,
+        "unit": "g",
+        "isVerified": false,
+        "calories": 3,
+        "protein": 0.1,
+        "carbs": 0.6,
+        "fat": 0
+      },
+      {
+        "rawName": "Cheddar",
+        "baseName": "cheddar",
+        "amount": 2,
+        "unit": "Scheiben",
+        "isVerified": false,
+        "calories": 220,
+        "protein": 14,
+        "carbs": 1,
+        "fat": 18
+      },
+      {
+        "rawName": "Rinderhack",
+        "baseName": "ground beef",
+        "amount": 150,
+        "unit": "g",
+        "canonicalId": "beef_ragout_raw",
+        "matchedName": "Rind, Hals, roh",
+        "isVerified": true,
+        "calories": 225,
+        "protein": 29,
+        "carbs": 0,
+        "fat": 12.1
+      },
+      {
+        "rawName": "Protein Toast",
+        "baseName": "toast",
+        "amount": 4,
+        "unit": "Scheiben",
+        "canonicalId": "bread_for_toasting_wholemeal",
+        "matchedName": "Toastbrot, Vollkorn",
+        "isVerified": true,
+        "calories": 434,
+        "protein": 14.9,
+        "carbs": 69.9,
+        "fat": 7.8
+      },
+      {
+        "rawName": "Senf",
+        "baseName": "mustard",
+        "amount": 1,
+        "unit": "EL",
+        "canonicalId": "mustard",
+        "matchedName": "Senf",
+        "isVerified": true,
+        "calories": 19,
+        "protein": 1.1,
+        "carbs": 0.6,
+        "fat": 1.2
+      },
+      {
+        "rawName": "Ketchup",
+        "baseName": "ketchup",
+        "amount": 1,
+        "unit": "EL",
+        "canonicalId": "ketchup",
+        "matchedName": "Ketchup",
+        "isVerified": true,
+        "calories": 18,
+        "protein": 0.3,
+        "carbs": 3.9,
+        "fat": 0.1
+      },
+      {
+        "rawName": "Salz",
+        "baseName": "salt",
+        "amount": 1,
+        "unit": "Prise",
+        "canonicalId": "salt_himalaya_salt",
+        "matchedName": "Salz, Himalayasalz",
+        "isVerified": true,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      {
+        "rawName": "Pfeffer",
+        "baseName": "pepper",
+        "amount": 1,
+        "unit": "Prise",
+        "isVerified": false,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      {
+        "rawName": "Paprikapulver",
+        "baseName": "paprika",
+        "amount": 1,
+        "unit": "Prise",
+        "canonicalId": "paprika",
+        "matchedName": "Paprika (Gewürz)",
+        "isVerified": true,
+        "calories": 2,
+        "protein": 0.1,
+        "carbs": 0.2,
+        "fat": 0.1
+      }
+    ]
+  }
+}

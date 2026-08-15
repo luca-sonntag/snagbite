@@ -1,0 +1,433 @@
+{
+  "url": "https://www.instagram.com/reel/DbGd3XtopUp/?igsh=MTZoYzh0aWcyYjhtNg==",
+  "recipe": {
+    "isRecipe": true,
+    "title": "High-Protein Flammkuchen",
+    "description": "Ein einfacher und proteinreicher Flammkuchen aus nur 5 Hauptzutaten, perfekt für eine bewusste Ernährung.",
+    "prepTime": 10,
+    "cookTime": 20,
+    "servings": 12,
+    "ingredients": [
+      {
+        "name": "VEGETABLES",
+        "items": [
+          {
+            "name": "rote Zwiebel",
+            "baseName": "onion",
+            "amount": 1,
+            "unit": "Stück",
+            "calories": 43,
+            "protein": 1.2,
+            "carbs": 6.9,
+            "fat": 0.7,
+            "isStaple": false,
+            "modifier": "klein",
+            "canonicalId": "onion_raw",
+            "matchedName": "Zwiebel, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          }
+        ]
+      },
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Magerquark",
+            "baseName": "quark",
+            "amount": 400,
+            "unit": "g",
+            "calories": 244,
+            "protein": 42.4,
+            "carbs": 16.8,
+            "fat": 0.8,
+            "isStaple": false,
+            "modifier": "mager",
+            "canonicalId": "curds_with_at_most_10_fidm",
+            "matchedName": "Quark, nature, mager",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Streukäse",
+            "baseName": "cheese",
+            "amount": 250,
+            "unit": "g",
+            "calories": 250,
+            "protein": 31,
+            "carbs": 6,
+            "fat": 11.3,
+            "isStaple": false,
+            "modifier": "proteinreich",
+            "canonicalId": "cottage_cheese",
+            "matchedName": "Hüttenkäse, nature",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Eier",
+            "baseName": "egg",
+            "amount": 3,
+            "unit": "Stück",
+            "calories": 231,
+            "protein": 20.8,
+            "carbs": 0.5,
+            "fat": 16.2,
+            "isStaple": true,
+            "canonicalId": "egg_raw",
+            "matchedName": "Hühnerei, ganz, roh",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          }
+        ]
+      },
+      {
+        "name": "MEAT_POULTRY",
+        "items": [
+          {
+            "name": "Schinkenwürfel",
+            "baseName": "ham",
+            "amount": 50,
+            "unit": "g",
+            "calories": 115,
+            "protein": 15.5,
+            "carbs": 0.2,
+            "fat": 5.8,
+            "isStaple": false,
+            "modifier": "light",
+            "canonicalId": "ham_raw",
+            "matchedName": "Rohschinken",
+            "isVerified": true,
+            "category": "MEAT_POULTRY"
+          }
+        ]
+      },
+      {
+        "name": "SPICES_HERBS",
+        "items": [
+          {
+            "name": "Salz",
+            "baseName": "salt",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "canonicalId": "salt_himalaya_salt",
+            "matchedName": "Salz, Himalayasalz",
+            "isVerified": true,
+            "category": "SPICES_HERBS"
+          },
+          {
+            "name": "Zwiebelpulver",
+            "baseName": "onion powder",
+            "amount": 1,
+            "unit": "TL",
+            "calories": 5,
+            "protein": 0,
+            "carbs": 1,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Paprikapulver",
+            "baseName": "paprika",
+            "amount": 1,
+            "unit": "TL",
+            "calories": 18,
+            "protein": 0.7,
+            "carbs": 1.7,
+            "fat": 0.7,
+            "isStaple": true,
+            "canonicalId": "paprika",
+            "matchedName": "Paprika (Gewürz)",
+            "isVerified": true,
+            "category": "SPICES_HERBS"
+          },
+          {
+            "name": "Kümmel",
+            "baseName": "caraway",
+            "amount": 1,
+            "unit": "TL",
+            "calories": 5,
+            "protein": 0,
+            "carbs": 1,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Pfeffer",
+            "baseName": "pepper",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Petersilie",
+            "baseName": "parsley",
+            "amount": 1,
+            "unit": "TL",
+            "calories": 3,
+            "protein": 0.2,
+            "carbs": 0.4,
+            "fat": 0,
+            "isStaple": true,
+            "canonicalId": "parsley_fresh",
+            "matchedName": "Petersilie, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          },
+          {
+            "name": "Muskat",
+            "baseName": "nutmeg",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Knoblauch",
+            "baseName": "garlic",
+            "amount": 1,
+            "unit": "Prise",
+            "calories": 1,
+            "protein": 0,
+            "carbs": 0.1,
+            "fat": 0,
+            "isStaple": true,
+            "canonicalId": "garlic_raw",
+            "matchedName": "Knoblauch, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "Den [Magerquark](ing:quark) mit den [Eiern](ing:egg) und den Gewürzen ([Salz](ing:salt), [Zwiebelpulver](ing:onion powder), [Paprikapulver](ing:paprika), [Kümmel](ing:caraway), [Pfeffer](ing:pepper), [Petersilie](ing:parsley), [Muskat](ing:nutmeg), [Knoblauch](ing:garlic)) zu einem glatten Teig verrühren."
+      },
+      {
+        "step": 2,
+        "description": "Den Teig auf einem mit Backpapier belegten Blech gleichmäßig verstreichen."
+      },
+      {
+        "step": 3,
+        "description": "Mit dem [Streukäse](ing:cheese), den [Schinkenwürfeln](ing:ham) und der in Ringe geschnittenen [roten Zwiebel](ing:onion) belegen."
+      },
+      {
+        "step": 4,
+        "description": "Im vorgeheizten Ofen bei ca. 200°C für [20 Minuten](timer:1200) backen, bis der Käse goldbraun ist."
+      }
+    ],
+    "equipment": [
+      "Backblech",
+      "Backpapier",
+      "Rührschüssel",
+      "Ofen"
+    ],
+    "transcript": null,
+    "tags": [
+      "High-Protein",
+      "Low-Carb"
+    ],
+    "emoji": "🍕",
+    "nutritionalValues": {
+      "calories": 84,
+      "carbs": 2,
+      "fat": 3,
+      "protein": 11
+    }
+  },
+  "report": {
+    "url": "https://www.instagram.com/reel/DbGd3XtopUp/?igsh=MTZoYzh0aWcyYjhtNg==",
+    "title": "High-Protein Flammkuchen",
+    "servings": 12,
+    "nutritionalValues": {
+      "calories": 84,
+      "carbs": 2,
+      "fat": 3,
+      "protein": 11
+    },
+    "totalIngredients": 13,
+    "verifiedCount": 9,
+    "matchRatePercent": 69,
+    "ingredients": [
+      {
+        "rawName": "rote Zwiebel",
+        "baseName": "onion",
+        "amount": 1,
+        "unit": "Stück",
+        "canonicalId": "onion_raw",
+        "matchedName": "Zwiebel, roh",
+        "isVerified": true,
+        "calories": 43,
+        "protein": 1.2,
+        "carbs": 6.9,
+        "fat": 0.7
+      },
+      {
+        "rawName": "Magerquark",
+        "baseName": "quark",
+        "amount": 400,
+        "unit": "g",
+        "canonicalId": "curds_with_at_most_10_fidm",
+        "matchedName": "Quark, nature, mager",
+        "isVerified": true,
+        "calories": 244,
+        "protein": 42.4,
+        "carbs": 16.8,
+        "fat": 0.8
+      },
+      {
+        "rawName": "Streukäse",
+        "baseName": "cheese",
+        "amount": 250,
+        "unit": "g",
+        "canonicalId": "cottage_cheese",
+        "matchedName": "Hüttenkäse, nature",
+        "isVerified": true,
+        "calories": 250,
+        "protein": 31,
+        "carbs": 6,
+        "fat": 11.3
+      },
+      {
+        "rawName": "Eier",
+        "baseName": "egg",
+        "amount": 3,
+        "unit": "Stück",
+        "canonicalId": "egg_raw",
+        "matchedName": "Hühnerei, ganz, roh",
+        "isVerified": true,
+        "calories": 231,
+        "protein": 20.8,
+        "carbs": 0.5,
+        "fat": 16.2
+      },
+      {
+        "rawName": "Schinkenwürfel",
+        "baseName": "ham",
+        "amount": 50,
+        "unit": "g",
+        "canonicalId": "ham_raw",
+        "matchedName": "Rohschinken",
+        "isVerified": true,
+        "calories": 115,
+        "protein": 15.5,
+        "carbs": 0.2,
+        "fat": 5.8
+      },
+      {
+        "rawName": "Salz",
+        "baseName": "salt",
+        "amount": 1,
+        "unit": "Prise",
+        "canonicalId": "salt_himalaya_salt",
+        "matchedName": "Salz, Himalayasalz",
+        "isVerified": true,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      {
+        "rawName": "Zwiebelpulver",
+        "baseName": "onion powder",
+        "amount": 1,
+        "unit": "TL",
+        "isVerified": false,
+        "calories": 5,
+        "protein": 0,
+        "carbs": 1,
+        "fat": 0
+      },
+      {
+        "rawName": "Paprikapulver",
+        "baseName": "paprika",
+        "amount": 1,
+        "unit": "TL",
+        "canonicalId": "paprika",
+        "matchedName": "Paprika (Gewürz)",
+        "isVerified": true,
+        "calories": 18,
+        "protein": 0.7,
+        "carbs": 1.7,
+        "fat": 0.7
+      },
+      {
+        "rawName": "Kümmel",
+        "baseName": "caraway",
+        "amount": 1,
+        "unit": "TL",
+        "isVerified": false,
+        "calories": 5,
+        "protein": 0,
+        "carbs": 1,
+        "fat": 0
+      },
+      {
+        "rawName": "Pfeffer",
+        "baseName": "pepper",
+        "amount": 1,
+        "unit": "Prise",
+        "isVerified": false,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      {
+        "rawName": "Petersilie",
+        "baseName": "parsley",
+        "amount": 1,
+        "unit": "TL",
+        "canonicalId": "parsley_fresh",
+        "matchedName": "Petersilie, roh",
+        "isVerified": true,
+        "calories": 3,
+        "protein": 0.2,
+        "carbs": 0.4,
+        "fat": 0
+      },
+      {
+        "rawName": "Muskat",
+        "baseName": "nutmeg",
+        "amount": 1,
+        "unit": "Prise",
+        "isVerified": false,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      {
+        "rawName": "Knoblauch",
+        "baseName": "garlic",
+        "amount": 1,
+        "unit": "Prise",
+        "canonicalId": "garlic_raw",
+        "matchedName": "Knoblauch, roh",
+        "isVerified": true,
+        "calories": 1,
+        "protein": 0,
+        "carbs": 0.1,
+        "fat": 0
+      }
+    ]
+  }
+}

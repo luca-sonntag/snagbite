@@ -1,0 +1,283 @@
+{
+  "url": "https://www.instagram.com/reel/DbfWp9boAc5/?igsh=MWl6M3dncmlzNmxndw==",
+  "recipe": {
+    "isRecipe": true,
+    "title": "High Protein Oreo Cheesecake",
+    "description": "Ein ultra cremiger und proteinreicher Käsekuchen, perfekt für alle Oreo-Fans.",
+    "prepTime": 15,
+    "cookTime": 40,
+    "servings": 8,
+    "ingredients": [
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Skyr",
+            "baseName": "skyr",
+            "amount": 1000,
+            "unit": "g",
+            "calories": 650,
+            "protein": 110,
+            "carbs": 40,
+            "fat": 2,
+            "isStaple": false,
+            "isVerified": false
+          },
+          {
+            "name": "Frischkäse",
+            "baseName": "cream cheese",
+            "amount": 400,
+            "unit": "g",
+            "calories": 1404,
+            "protein": 44.4,
+            "carbs": 18,
+            "fat": 128.4,
+            "isStaple": false,
+            "modifier": "fettreduziert",
+            "canonicalId": "cream_cheese_min_60_fidm",
+            "matchedName": "Frischkäse, Doppelrahm",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Eier",
+            "baseName": "egg",
+            "amount": 4,
+            "unit": "Stück",
+            "calories": 308,
+            "protein": 27.7,
+            "carbs": 0.7,
+            "fat": 21.6,
+            "isStaple": false,
+            "canonicalId": "egg_raw",
+            "matchedName": "Hühnerei, ganz, roh",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Vanille Protein Pudding",
+            "baseName": "protein pudding",
+            "amount": 200,
+            "unit": "g",
+            "calories": 250,
+            "protein": 6.8,
+            "carbs": 46,
+            "fat": 4.2,
+            "isStaple": false,
+            "canonicalId": "pudding_caramel",
+            "matchedName": "Pudding, Caramel",
+            "isVerified": true,
+            "category": "SWEETS_SNACKS"
+          }
+        ]
+      },
+      {
+        "name": "GRAINS_PASTA",
+        "items": [
+          {
+            "name": "Vanillepuddingpulver",
+            "baseName": "pudding powder",
+            "amount": 2,
+            "unit": "Päckchen",
+            "calories": 200,
+            "protein": 1,
+            "carbs": 45,
+            "fat": 0,
+            "isStaple": false,
+            "isVerified": false
+          },
+          {
+            "name": "Oreo Kekse",
+            "baseName": "oreo cookies",
+            "amount": 50,
+            "unit": "g",
+            "calories": 240,
+            "protein": 3,
+            "carbs": 35,
+            "fat": 10,
+            "isStaple": false,
+            "modifier": "zerbröselt",
+            "isVerified": false
+          }
+        ]
+      },
+      {
+        "name": "OILS_CONDIMENTS",
+        "items": [
+          {
+            "name": "Erythrit",
+            "baseName": "erythritol",
+            "amount": 60,
+            "unit": "g",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": false,
+            "isVerified": false
+          },
+          {
+            "name": "Vanille Flavour Drops",
+            "baseName": "flavour drops",
+            "amount": 5,
+            "unit": "ml",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": false,
+            "isVerified": false
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "Alle Zutaten, außer dem Pudding und den Keksen, in einer großen Schüssel zu einer glatten Masse verrühren."
+      },
+      {
+        "step": 2,
+        "description": "Die [Cheesecake-Masse](ing:skyr) in eine Backform geben und glattstreichen."
+      },
+      {
+        "step": 3,
+        "description": "Bei 180 °C Ober-/Unterhitze ca. [35–40 Minuten](timer:2400) backen."
+      },
+      {
+        "step": 4,
+        "description": "Anschließend vollständig auskühlen lassen."
+      },
+      {
+        "step": 5,
+        "description": "Mit dem [Vanille Protein Pudding](ing:protein pudding) bestreichen und zum Schluss die zerbröselten [Oreo Kekse](ing:oreo cookies) darüber verteilen."
+      }
+    ],
+    "equipment": [
+      "Backform",
+      "Rührschüssel"
+    ],
+    "transcript": null,
+    "tags": [
+      "High-Protein",
+      "Dessert"
+    ],
+    "emoji": "🍰",
+    "nutritionalValues": {
+      "calories": 192,
+      "carbs": 12.1,
+      "fat": 4.1,
+      "protein": 25.1
+    }
+  },
+  "report": {
+    "url": "https://www.instagram.com/reel/DbfWp9boAc5/?igsh=MWl6M3dncmlzNmxndw==",
+    "title": "High Protein Oreo Cheesecake",
+    "servings": 8,
+    "nutritionalValues": {
+      "calories": 192,
+      "carbs": 12.1,
+      "fat": 4.1,
+      "protein": 25.1
+    },
+    "totalIngredients": 8,
+    "verifiedCount": 3,
+    "matchRatePercent": 38,
+    "ingredients": [
+      {
+        "rawName": "Skyr",
+        "baseName": "skyr",
+        "amount": 1000,
+        "unit": "g",
+        "isVerified": false,
+        "calories": 650,
+        "protein": 110,
+        "carbs": 40,
+        "fat": 2
+      },
+      {
+        "rawName": "Frischkäse",
+        "baseName": "cream cheese",
+        "amount": 400,
+        "unit": "g",
+        "canonicalId": "cream_cheese_min_60_fidm",
+        "matchedName": "Frischkäse, Doppelrahm",
+        "isVerified": true,
+        "calories": 1404,
+        "protein": 44.4,
+        "carbs": 18,
+        "fat": 128.4
+      },
+      {
+        "rawName": "Eier",
+        "baseName": "egg",
+        "amount": 4,
+        "unit": "Stück",
+        "canonicalId": "egg_raw",
+        "matchedName": "Hühnerei, ganz, roh",
+        "isVerified": true,
+        "calories": 308,
+        "protein": 27.7,
+        "carbs": 0.7,
+        "fat": 21.6
+      },
+      {
+        "rawName": "Vanille Protein Pudding",
+        "baseName": "protein pudding",
+        "amount": 200,
+        "unit": "g",
+        "canonicalId": "pudding_caramel",
+        "matchedName": "Pudding, Caramel",
+        "isVerified": true,
+        "calories": 250,
+        "protein": 6.8,
+        "carbs": 46,
+        "fat": 4.2
+      },
+      {
+        "rawName": "Vanillepuddingpulver",
+        "baseName": "pudding powder",
+        "amount": 2,
+        "unit": "Päckchen",
+        "isVerified": false,
+        "calories": 200,
+        "protein": 1,
+        "carbs": 45,
+        "fat": 0
+      },
+      {
+        "rawName": "Oreo Kekse",
+        "baseName": "oreo cookies",
+        "amount": 50,
+        "unit": "g",
+        "isVerified": false,
+        "calories": 240,
+        "protein": 3,
+        "carbs": 35,
+        "fat": 10
+      },
+      {
+        "rawName": "Erythrit",
+        "baseName": "erythritol",
+        "amount": 60,
+        "unit": "g",
+        "isVerified": false,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      {
+        "rawName": "Vanille Flavour Drops",
+        "baseName": "flavour drops",
+        "amount": 5,
+        "unit": "ml",
+        "isVerified": false,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      }
+    ]
+  }
+}

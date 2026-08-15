@@ -1,0 +1,406 @@
+{
+  "url": "https://www.instagram.com/reel/DbWCITDqBf9/?igsh=ZGR1c3gyZ3VwcHBx",
+  "recipe": {
+    "isRecipe": true,
+    "title": "High Protein Spaghetti mit Hackbällchen",
+    "description": "Klassisches Comfort Food, super einfach & mit ordentlich Protein.",
+    "prepTime": 15,
+    "cookTime": 20,
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "VEGETABLES",
+        "items": [
+          {
+            "name": "Zwiebel",
+            "baseName": "onion",
+            "amount": 1,
+            "unit": "Stück",
+            "calories": 43,
+            "protein": 1.2,
+            "carbs": 6.9,
+            "fat": 0.7,
+            "isStaple": false,
+            "canonicalId": "onion_raw",
+            "matchedName": "Zwiebel, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          },
+          {
+            "name": "Knoblauch",
+            "baseName": "garlic",
+            "amount": 2,
+            "unit": "Zehe",
+            "calories": 9,
+            "protein": 0.5,
+            "carbs": 1.3,
+            "fat": 0,
+            "isStaple": true,
+            "canonicalId": "garlic_raw",
+            "matchedName": "Knoblauch, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          }
+        ]
+      },
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Ei",
+            "baseName": "egg",
+            "amount": 1,
+            "unit": "Stück",
+            "calories": 77,
+            "protein": 6.9,
+            "carbs": 0.2,
+            "fat": 5.4,
+            "isStaple": true,
+            "canonicalId": "egg_raw",
+            "matchedName": "Hühnerei, ganz, roh",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Skyr",
+            "baseName": "skyr",
+            "amount": 100,
+            "unit": "g",
+            "calories": 65,
+            "protein": 11,
+            "carbs": 4,
+            "fat": 0,
+            "isStaple": false,
+            "isVerified": false
+          },
+          {
+            "name": "Cremefine",
+            "baseName": "cream",
+            "amount": 150,
+            "unit": "ml",
+            "calories": 503,
+            "protein": 3,
+            "carbs": 4.7,
+            "fat": 52.4,
+            "isStaple": false,
+            "modifier": "leicht",
+            "canonicalId": "cream_35_fat_uht",
+            "matchedName": "Vollrahm, UHT",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Käse",
+            "baseName": "cheese",
+            "amount": 30,
+            "unit": "g",
+            "calories": 30,
+            "protein": 3.7,
+            "carbs": 0.7,
+            "fat": 1.3,
+            "isStaple": false,
+            "modifier": "light",
+            "canonicalId": "cottage_cheese",
+            "matchedName": "Hüttenkäse, nature",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          }
+        ]
+      },
+      {
+        "name": "MEAT_POULTRY",
+        "items": [
+          {
+            "name": "Hackfleisch",
+            "baseName": "minced meat",
+            "amount": 380,
+            "unit": "g",
+            "calories": 790,
+            "protein": 73,
+            "carbs": 0,
+            "fat": 55.5,
+            "isStaple": false,
+            "modifier": "mager",
+            "canonicalId": "beef_minced_raw",
+            "matchedName": "Rind, Gehacktes, roh",
+            "isVerified": true,
+            "category": "MEAT_POULTRY"
+          }
+        ]
+      },
+      {
+        "name": "GRAINS_PASTA",
+        "items": [
+          {
+            "name": "Spaghetti",
+            "baseName": "spaghetti",
+            "amount": 150,
+            "unit": "g",
+            "calories": 525,
+            "protein": 18,
+            "carbs": 110,
+            "fat": 2,
+            "isStaple": false,
+            "isVerified": false
+          },
+          {
+            "name": "Semmelbrösel",
+            "baseName": "breadcrumbs",
+            "amount": 30,
+            "unit": "g",
+            "calories": 112,
+            "protein": 3.8,
+            "carbs": 22.1,
+            "fat": 0.6,
+            "isStaple": true,
+            "canonicalId": "breadcrumbs",
+            "matchedName": "Paniermehl",
+            "isVerified": true,
+            "category": "GRAINS_PASTA"
+          }
+        ]
+      },
+      {
+        "name": "OILS_CONDIMENTS",
+        "items": [
+          {
+            "name": "Tomatensauce",
+            "baseName": "tomato sauce",
+            "amount": 400,
+            "unit": "ml",
+            "calories": 276,
+            "protein": 7.2,
+            "carbs": 38.8,
+            "fat": 8.4,
+            "isStaple": false,
+            "canonicalId": "tomato_sauce",
+            "matchedName": "Tomatensauce",
+            "isVerified": true,
+            "category": "OILS_CONDIMENTS"
+          }
+        ]
+      },
+      {
+        "name": "SPICES_HERBS",
+        "items": [
+          {
+            "name": "Gewürze",
+            "baseName": "spices",
+            "amount": 1,
+            "unit": "TL",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "Die [Spaghetti](ing:spaghetti) nach Packungsanleitung al dente kochen und zur Seite stellen."
+      },
+      {
+        "step": 2,
+        "description": "Das [Hackfleisch](ing:minced meat) mit dem [Ei](ing:egg) und den [Semmelbröseln](ing:breadcrumbs) vermengen, nach Belieben mit [Gewürzen](ing:spices) würzen und kleine Hackbällchen formen."
+      },
+      {
+        "step": 3,
+        "description": "Die Hackbällchen in einer Pfanne rundherum anbraten oder im Airfryer goldbraun ausbacken."
+      },
+      {
+        "step": 4,
+        "description": "Die [Zwiebel](ing:onion) und den [Knoblauch](ing:garlic) klein schneiden und in einer großen Pfanne anbraten."
+      },
+      {
+        "step": 5,
+        "description": "Mit der [Tomatensauce](ing:tomato sauce) ablöschen, würzen und kurz köcheln lassen."
+      },
+      {
+        "step": 6,
+        "description": "Die Hackbällchen in die [Tomatensauce](ing:tomato sauce) geben und mit [Cremefine](ing:cream) ablöschen."
+      },
+      {
+        "step": 7,
+        "description": "Die gekochten [Spaghetti](ing:spaghetti) und den [Skyr](ing:skyr) unterheben und alles kurz zusammen erwärmen."
+      },
+      {
+        "step": 8,
+        "description": "Auf zwei Portionen verteilen und nach Belieben mit etwas [Käse](ing:cheese) toppen."
+      }
+    ],
+    "equipment": [
+      "Pfanne",
+      "Topf",
+      "Airfryer (optional)"
+    ],
+    "transcript": null,
+    "tags": [
+      "High-Protein",
+      "Pasta"
+    ],
+    "emoji": "🍝",
+    "nutritionalValues": {
+      "calories": 680,
+      "carbs": 68,
+      "fat": 18,
+      "protein": 60
+    }
+  },
+  "report": {
+    "url": "https://www.instagram.com/reel/DbWCITDqBf9/?igsh=ZGR1c3gyZ3VwcHBx",
+    "title": "High Protein Spaghetti mit Hackbällchen",
+    "servings": 2,
+    "nutritionalValues": {
+      "calories": 680,
+      "carbs": 68,
+      "fat": 18,
+      "protein": 60
+    },
+    "totalIngredients": 11,
+    "verifiedCount": 8,
+    "matchRatePercent": 73,
+    "ingredients": [
+      {
+        "rawName": "Zwiebel",
+        "baseName": "onion",
+        "amount": 1,
+        "unit": "Stück",
+        "canonicalId": "onion_raw",
+        "matchedName": "Zwiebel, roh",
+        "isVerified": true,
+        "calories": 43,
+        "protein": 1.2,
+        "carbs": 6.9,
+        "fat": 0.7
+      },
+      {
+        "rawName": "Knoblauch",
+        "baseName": "garlic",
+        "amount": 2,
+        "unit": "Zehe",
+        "canonicalId": "garlic_raw",
+        "matchedName": "Knoblauch, roh",
+        "isVerified": true,
+        "calories": 9,
+        "protein": 0.5,
+        "carbs": 1.3,
+        "fat": 0
+      },
+      {
+        "rawName": "Ei",
+        "baseName": "egg",
+        "amount": 1,
+        "unit": "Stück",
+        "canonicalId": "egg_raw",
+        "matchedName": "Hühnerei, ganz, roh",
+        "isVerified": true,
+        "calories": 77,
+        "protein": 6.9,
+        "carbs": 0.2,
+        "fat": 5.4
+      },
+      {
+        "rawName": "Skyr",
+        "baseName": "skyr",
+        "amount": 100,
+        "unit": "g",
+        "isVerified": false,
+        "calories": 65,
+        "protein": 11,
+        "carbs": 4,
+        "fat": 0
+      },
+      {
+        "rawName": "Cremefine",
+        "baseName": "cream",
+        "amount": 150,
+        "unit": "ml",
+        "canonicalId": "cream_35_fat_uht",
+        "matchedName": "Vollrahm, UHT",
+        "isVerified": true,
+        "calories": 503,
+        "protein": 3,
+        "carbs": 4.7,
+        "fat": 52.4
+      },
+      {
+        "rawName": "Käse",
+        "baseName": "cheese",
+        "amount": 30,
+        "unit": "g",
+        "canonicalId": "cottage_cheese",
+        "matchedName": "Hüttenkäse, nature",
+        "isVerified": true,
+        "calories": 30,
+        "protein": 3.7,
+        "carbs": 0.7,
+        "fat": 1.3
+      },
+      {
+        "rawName": "Hackfleisch",
+        "baseName": "minced meat",
+        "amount": 380,
+        "unit": "g",
+        "canonicalId": "beef_minced_raw",
+        "matchedName": "Rind, Gehacktes, roh",
+        "isVerified": true,
+        "calories": 790,
+        "protein": 73,
+        "carbs": 0,
+        "fat": 55.5
+      },
+      {
+        "rawName": "Spaghetti",
+        "baseName": "spaghetti",
+        "amount": 150,
+        "unit": "g",
+        "isVerified": false,
+        "calories": 525,
+        "protein": 18,
+        "carbs": 110,
+        "fat": 2
+      },
+      {
+        "rawName": "Semmelbrösel",
+        "baseName": "breadcrumbs",
+        "amount": 30,
+        "unit": "g",
+        "canonicalId": "breadcrumbs",
+        "matchedName": "Paniermehl",
+        "isVerified": true,
+        "calories": 112,
+        "protein": 3.8,
+        "carbs": 22.1,
+        "fat": 0.6
+      },
+      {
+        "rawName": "Tomatensauce",
+        "baseName": "tomato sauce",
+        "amount": 400,
+        "unit": "ml",
+        "canonicalId": "tomato_sauce",
+        "matchedName": "Tomatensauce",
+        "isVerified": true,
+        "calories": 276,
+        "protein": 7.2,
+        "carbs": 38.8,
+        "fat": 8.4
+      },
+      {
+        "rawName": "Gewürze",
+        "baseName": "spices",
+        "amount": 1,
+        "unit": "TL",
+        "isVerified": false,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      }
+    ]
+  }
+}

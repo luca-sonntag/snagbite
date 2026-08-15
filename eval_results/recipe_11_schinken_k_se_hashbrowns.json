@@ -1,0 +1,209 @@
+{
+  "url": "https://www.instagram.com/reel/DbhLqAXxbuc/?igsh=cjVwOGFiNGsyNXpo",
+  "recipe": {
+    "isRecipe": true,
+    "title": "Schinken-Käse-Hashbrowns",
+    "description": "Knusprige, mit Schinken und Käse überbackene Hashbrown-Patties, perfekt als kleiner Snack.",
+    "prepTime": 5,
+    "cookTime": 24,
+    "servings": 1,
+    "ingredients": [
+      {
+        "name": "VEGETABLES",
+        "items": [
+          {
+            "name": "Schnittlauch",
+            "baseName": "chives",
+            "amount": 1,
+            "unit": "EL",
+            "calories": 5,
+            "protein": 0.5,
+            "carbs": 0.3,
+            "fat": 0.1,
+            "isStaple": false,
+            "modifier": "gehackt",
+            "canonicalId": "chives_fresh",
+            "matchedName": "Schnittlauch, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          }
+        ]
+      },
+      {
+        "name": "GRAINS_PASTA",
+        "items": [
+          {
+            "name": "Hashbrown-Patties",
+            "baseName": "hashbrown",
+            "amount": 3,
+            "unit": "Stück",
+            "calories": 450,
+            "protein": 6,
+            "carbs": 45,
+            "fat": 27,
+            "isStaple": false,
+            "modifier": "tiefgekühlt",
+            "isVerified": false
+          }
+        ]
+      },
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Mozzarella",
+            "baseName": "mozzarella",
+            "amount": 60,
+            "unit": "g",
+            "calories": 154,
+            "protein": 11.7,
+            "carbs": 0.4,
+            "fat": 11.7,
+            "isStaple": false,
+            "modifier": "gerieben",
+            "canonicalId": "mozzarella",
+            "matchedName": "Mozzarella",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          }
+        ]
+      },
+      {
+        "name": "MEAT_POULTRY",
+        "items": [
+          {
+            "name": "Schinken",
+            "baseName": "ham",
+            "amount": 50,
+            "unit": "g",
+            "calories": 115,
+            "protein": 15.5,
+            "carbs": 0.2,
+            "fat": 5.8,
+            "isStaple": false,
+            "modifier": "gewürfelt",
+            "canonicalId": "ham_raw",
+            "matchedName": "Rohschinken",
+            "isVerified": true,
+            "category": "MEAT_POULTRY"
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "Den Backofen auf 200°C vorheizen und ein Backblech mit Backpapier auslegen."
+      },
+      {
+        "step": 2,
+        "description": "Die [Hashbrown-Patties](ing:hashbrown) für [14 Minuten](timer:840) backen, dabei nach der Hälfte der Zeit wenden."
+      },
+      {
+        "step": 3,
+        "description": "Die Patties mit [Mozzarella](ing:mozzarella) und [Schinken](ing:ham) belegen."
+      },
+      {
+        "step": 4,
+        "description": "Weitere [5-10 Minuten](timer:600) backen, bis der Käse geschmolzen und sprudelnd ist."
+      },
+      {
+        "step": 5,
+        "description": "Mit [Schnittlauch](ing:chives) bestreuen und servieren."
+      }
+    ],
+    "equipment": [
+      "Backblech",
+      "Backpapier",
+      "Backofen"
+    ],
+    "transcript": null,
+    "tags": [
+      "Snack",
+      "Schnell"
+    ],
+    "emoji": "🥔",
+    "alternativeIngredients": [
+      {
+        "original": "Mozzarella",
+        "substitute": "Cheddar",
+        "notes": "Für einen kräftigeren Geschmack."
+      }
+    ],
+    "tips": [
+      "Achten Sie darauf, die Hashbrowns nicht zu überladen, damit sie knusprig bleiben."
+    ],
+    "nutritionalValues": {
+      "calories": 724,
+      "protein": 33.7,
+      "carbs": 45.9,
+      "fat": 44.6
+    }
+  },
+  "report": {
+    "url": "https://www.instagram.com/reel/DbhLqAXxbuc/?igsh=cjVwOGFiNGsyNXpo",
+    "title": "Schinken-Käse-Hashbrowns",
+    "servings": 1,
+    "nutritionalValues": {
+      "calories": 724,
+      "protein": 33.7,
+      "carbs": 45.9,
+      "fat": 44.6
+    },
+    "totalIngredients": 4,
+    "verifiedCount": 3,
+    "matchRatePercent": 75,
+    "ingredients": [
+      {
+        "rawName": "Schnittlauch",
+        "baseName": "chives",
+        "amount": 1,
+        "unit": "EL",
+        "canonicalId": "chives_fresh",
+        "matchedName": "Schnittlauch, roh",
+        "isVerified": true,
+        "calories": 5,
+        "protein": 0.5,
+        "carbs": 0.3,
+        "fat": 0.1
+      },
+      {
+        "rawName": "Hashbrown-Patties",
+        "baseName": "hashbrown",
+        "amount": 3,
+        "unit": "Stück",
+        "isVerified": false,
+        "calories": 450,
+        "protein": 6,
+        "carbs": 45,
+        "fat": 27
+      },
+      {
+        "rawName": "Mozzarella",
+        "baseName": "mozzarella",
+        "amount": 60,
+        "unit": "g",
+        "canonicalId": "mozzarella",
+        "matchedName": "Mozzarella",
+        "isVerified": true,
+        "calories": 154,
+        "protein": 11.7,
+        "carbs": 0.4,
+        "fat": 11.7
+      },
+      {
+        "rawName": "Schinken",
+        "baseName": "ham",
+        "amount": 50,
+        "unit": "g",
+        "canonicalId": "ham_raw",
+        "matchedName": "Rohschinken",
+        "isVerified": true,
+        "calories": 115,
+        "protein": 15.5,
+        "carbs": 0.2,
+        "fat": 5.8
+      }
+    ]
+  }
+}

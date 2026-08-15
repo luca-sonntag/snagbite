@@ -2,8 +2,8 @@
   "url": "https://www.instagram.com/reel/DblZ3DgxByf/?igsh=MWxqa2Rrdjd1NW9nbg==",
   "recipe": {
     "isRecipe": true,
-    "title": "Pesto Nudelsalat",
-    "description": "Ein frischer und aromatischer Nudelsalat mit Cocktailtomaten, Mozzarella, Parmesan und Pesto Genovese. Perfekt für Grillabende oder als leichtes Mittagessen.",
+    "title": "Pesto-Nudelsalat",
+    "description": "Ein frischer und cremiger Nudelsalat mit Cocktailtomaten, Mozzarella, Parmesan und aromatischem Pesto. Perfekt für Grillabende oder als leichtes Mittagessen.",
     "prepTime": 15,
     "cookTime": 10,
     "servings": 4,
@@ -147,11 +147,11 @@
       },
       {
         "step": 2,
-        "description": "Anschließend mit den [Cocktailtomaten](ing:cherry tomato), den [Mozzarellakugeln](ing:mozzarella) und dem [Parmesan](ing:parmesan) in einer großen Schüssel vermengen."
+        "description": "Die abgekühlten Nudeln mit den [Cocktailtomaten](ing:cherry tomato), den [Mozzarellakugeln](ing:mozzarella) und dem [Parmesan](ing:parmesan) in einer großen Schüssel vermengen."
       },
       {
         "step": 3,
-        "description": "[Pesto Genovese](ing:pesto), [Wasser](ing:water) und [Zitronensaft](ing:lemon juice) verrühren und über den Salat geben."
+        "description": "[Pesto Genovese](ing:pesto), [Wasser](ing:water) und [Zitronensaft](ing:lemon juice) in einer kleinen Schale verrühren und über den Salat geben."
       },
       {
         "step": 4,
@@ -160,14 +160,15 @@
     ],
     "equipment": [
       "Große Schüssel",
-      "Topf"
+      "Topf",
+      "Sieb"
     ],
     "transcript": null,
     "tags": [
-      "Vegetarisch",
-      "Sommersalat"
+      "Sommersalat",
+      "Vegetarisch"
     ],
-    "emoji": "🍝",
+    "emoji": "🥗",
     "nutritionalValues": {
       "calories": 445,
       "protein": 19.8,
@@ -177,7 +178,7 @@
   },
   "report": {
     "url": "https://www.instagram.com/reel/DblZ3DgxByf/?igsh=MWxqa2Rrdjd1NW9nbg==",
-    "title": "Pesto Nudelsalat",
+    "title": "Pesto-Nudelsalat",
     "servings": 4,
     "nutritionalValues": {
       "calories": 445,

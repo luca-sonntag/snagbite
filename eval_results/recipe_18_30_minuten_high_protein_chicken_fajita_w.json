@@ -1,0 +1,554 @@
+{
+  "url": "https://www.instagram.com/reel/Dav8iHVSl_G/?igsh=YzluOGN1cnl3ZTJv",
+  "recipe": {
+    "isRecipe": true,
+    "title": "30-Minuten High-Protein Chicken Fajita Wraps",
+    "description": "Saftige Hähnchen-Fajitas mit einer cremigen Knoblauchsoße, geschmolzenem Käse und knusprig getoasteten Wraps.",
+    "prepTime": 10,
+    "cookTime": 20,
+    "servings": 4,
+    "ingredients": [
+      {
+        "name": "VEGETABLES",
+        "items": [
+          {
+            "name": "Paprika",
+            "baseName": "bell pepper",
+            "amount": 3,
+            "unit": "Stück",
+            "calories": 154,
+            "protein": 4.3,
+            "carbs": 28.3,
+            "fat": 0.5,
+            "isStaple": false,
+            "modifier": "bunt",
+            "canonicalId": "bell_pepper_red_raw",
+            "matchedName": "Peperoni, rot, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          }
+        ]
+      },
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Griechischer Joghurt",
+            "baseName": "greek yogurt",
+            "amount": 60,
+            "unit": "ml",
+            "calories": 61,
+            "protein": 2,
+            "carbs": 9.1,
+            "fat": 1.6,
+            "isStaple": false,
+            "canonicalId": "yogurt_strawberry",
+            "matchedName": "Joghurt, Erdbeer",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Cheddar",
+            "baseName": "cheddar cheese",
+            "amount": 150,
+            "unit": "g",
+            "calories": 150,
+            "protein": 18.6,
+            "carbs": 3.6,
+            "fat": 6.8,
+            "isStaple": false,
+            "modifier": "gerieben",
+            "canonicalId": "cottage_cheese",
+            "matchedName": "Hüttenkäse, nature",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          }
+        ]
+      },
+      {
+        "name": "MEAT_POULTRY",
+        "items": [
+          {
+            "name": "Hähnchenbrust",
+            "baseName": "chicken breast",
+            "amount": 750,
+            "unit": "g",
+            "calories": 803,
+            "protein": 184.5,
+            "carbs": 0,
+            "fat": 7.5,
+            "isStaple": false,
+            "modifier": "in Streifen geschnitten",
+            "canonicalId": "chicken_breast_without_skin_raw",
+            "matchedName": "Poulet, Brust, ohne Haut, roh",
+            "isVerified": true,
+            "category": "MEAT_POULTRY"
+          }
+        ]
+      },
+      {
+        "name": "GRAINS_PASTA",
+        "items": [
+          {
+            "name": "Tortilla Wraps",
+            "baseName": "tortilla",
+            "amount": 4,
+            "unit": "Stück",
+            "calories": 800,
+            "protein": 20,
+            "carbs": 120,
+            "fat": 20,
+            "isStaple": false,
+            "modifier": "groß",
+            "isVerified": false
+          }
+        ]
+      },
+      {
+        "name": "OILS_CONDIMENTS",
+        "items": [
+          {
+            "name": "Olivenöl",
+            "baseName": "olive oil",
+            "amount": 40,
+            "unit": "ml",
+            "calories": 360,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 40,
+            "isStaple": true,
+            "canonicalId": "olive_oil",
+            "matchedName": "Olivenöl",
+            "isVerified": true,
+            "category": "OILS_CONDIMENTS"
+          },
+          {
+            "name": "Mayonnaise",
+            "baseName": "mayonnaise",
+            "amount": 120,
+            "unit": "ml",
+            "calories": 832,
+            "protein": 1.7,
+            "carbs": 3.1,
+            "fat": 90.2,
+            "isStaple": false,
+            "canonicalId": "mayonnaise",
+            "matchedName": "Mayonnaise",
+            "isVerified": true,
+            "category": "OILS_CONDIMENTS"
+          },
+          {
+            "name": "Zitronensaft",
+            "baseName": "lemon juice",
+            "amount": 15,
+            "unit": "ml",
+            "calories": 4,
+            "protein": 0.1,
+            "carbs": 0.4,
+            "fat": 0,
+            "isStaple": false,
+            "parentIngredient": {
+              "name": "Zitrone",
+              "baseName": "lemon",
+              "unit": "Stück"
+            },
+            "canonicalId": "lemon_juice",
+            "matchedName": "Zitronensaft",
+            "isVerified": true,
+            "category": "BEVERAGES"
+          },
+          {
+            "name": "Knoblauchpaste",
+            "baseName": "garlic paste",
+            "amount": 1,
+            "unit": "TL",
+            "calories": 10,
+            "protein": 0,
+            "carbs": 2,
+            "fat": 0,
+            "isStaple": false,
+            "isVerified": false
+          }
+        ]
+      },
+      {
+        "name": "SPICES_HERBS",
+        "items": [
+          {
+            "name": "Salz",
+            "baseName": "salt",
+            "amount": 2.5,
+            "unit": "TL",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "canonicalId": "salt_himalaya_salt",
+            "matchedName": "Salz, Himalayasalz",
+            "isVerified": true,
+            "category": "SPICES_HERBS"
+          },
+          {
+            "name": "Chilipulver",
+            "baseName": "chili powder",
+            "amount": 2,
+            "unit": "TL",
+            "calories": 10,
+            "protein": 0,
+            "carbs": 2,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Schwarzer Pfeffer",
+            "baseName": "black pepper",
+            "amount": 1.25,
+            "unit": "TL",
+            "calories": 5,
+            "protein": 0,
+            "carbs": 1,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Kreuzkümmel",
+            "baseName": "cumin",
+            "amount": 1.5,
+            "unit": "TL",
+            "calories": 10,
+            "protein": 0,
+            "carbs": 1,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Oregano",
+            "baseName": "oregano",
+            "amount": 1,
+            "unit": "TL",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Paprikapulver",
+            "baseName": "paprika",
+            "amount": 1.5,
+            "unit": "TL",
+            "calories": 27,
+            "protein": 1.1,
+            "carbs": 2.6,
+            "fat": 1,
+            "isStaple": true,
+            "canonicalId": "paprika",
+            "matchedName": "Paprika (Gewürz)",
+            "isVerified": true,
+            "category": "SPICES_HERBS"
+          },
+          {
+            "name": "Knoblauchpulver",
+            "baseName": "garlic powder",
+            "amount": 1,
+            "unit": "TL",
+            "calories": 10,
+            "protein": 0,
+            "carbs": 2,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Zwiebelpulver",
+            "baseName": "onion powder",
+            "amount": 1,
+            "unit": "TL",
+            "calories": 10,
+            "protein": 0,
+            "carbs": 2,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "Den Ofen auf 230°C (Grillfunktion) vorheizen."
+      },
+      {
+        "step": 2,
+        "description": "[Hähnchenbrust](ing:chicken breast), [Paprika](ing:bell pepper), [Olivenöl](ing:olive oil), [Salz](ing:salt), [Chilipulver](ing:chili powder), [Schwarzer Pfeffer](ing:black pepper), [Kreuzkümmel](ing:cumin), [Oregano](ing:oregano), [Paprikapulver](ing:paprika), [Knoblauchpulver](ing:garlic powder) und [Zwiebelpulver](ing:onion powder) auf einem Backblech vermengen."
+      },
+      {
+        "step": 3,
+        "description": "Die Mischung flach verteilen und für [15 Minuten](timer:900) grillen, dabei nach der Hälfte der Zeit umrühren."
+      },
+      {
+        "step": 4,
+        "description": "Den [Cheddar](ing:cheddar cheese) darüber streuen und für weitere [1-2 Minuten](timer:120) in den Ofen geben, bis der Käse geschmolzen ist."
+      },
+      {
+        "step": 5,
+        "description": "In der Zwischenzeit [Mayonnaise](ing:mayonnaise), [Griechischer Joghurt](ing:greek yogurt), [Zitronensaft](ing:lemon juice), [Knoblauchpaste](ing:garlic paste), [Paprikapulver](ing:paprika), [Kreuzkümmel](ing:cumin), [Schwarzer Pfeffer](ing:black pepper) und [Salz](ing:salt) zu einer glatten Soße verrühren."
+      },
+      {
+        "step": 6,
+        "description": "Die Soße auf die [Tortilla Wraps](ing:tortilla) streichen, mit der Hähnchen-Käse-Mischung belegen und fest einrollen."
+      },
+      {
+        "step": 7,
+        "description": "Die Wraps in einer trockenen Pfanne für [1-2 Minuten](timer:120) pro Seite goldbraun und knusprig anrösten."
+      },
+      {
+        "step": 8,
+        "description": "Halbieren und servieren."
+      }
+    ],
+    "equipment": [
+      "Backblech",
+      "Pfanne"
+    ],
+    "transcript": null,
+    "tags": [
+      "High-Protein",
+      "30-Minuten-Gericht"
+    ],
+    "emoji": "🌯",
+    "nutritionalValues": {
+      "calories": 812,
+      "protein": 58.1,
+      "carbs": 44.3,
+      "fat": 41.9
+    }
+  },
+  "report": {
+    "url": "https://www.instagram.com/reel/Dav8iHVSl_G/?igsh=YzluOGN1cnl3ZTJv",
+    "title": "30-Minuten High-Protein Chicken Fajita Wraps",
+    "servings": 4,
+    "nutritionalValues": {
+      "calories": 812,
+      "protein": 58.1,
+      "carbs": 44.3,
+      "fat": 41.9
+    },
+    "totalIngredients": 17,
+    "verifiedCount": 9,
+    "matchRatePercent": 53,
+    "ingredients": [
+      {
+        "rawName": "Paprika",
+        "baseName": "bell pepper",
+        "amount": 3,
+        "unit": "Stück",
+        "canonicalId": "bell_pepper_red_raw",
+        "matchedName": "Peperoni, rot, roh",
+        "isVerified": true,
+        "calories": 154,
+        "protein": 4.3,
+        "carbs": 28.3,
+        "fat": 0.5
+      },
+      {
+        "rawName": "Griechischer Joghurt",
+        "baseName": "greek yogurt",
+        "amount": 60,
+        "unit": "ml",
+        "canonicalId": "yogurt_strawberry",
+        "matchedName": "Joghurt, Erdbeer",
+        "isVerified": true,
+        "calories": 61,
+        "protein": 2,
+        "carbs": 9.1,
+        "fat": 1.6
+      },
+      {
+        "rawName": "Cheddar",
+        "baseName": "cheddar cheese",
+        "amount": 150,
+        "unit": "g",
+        "canonicalId": "cottage_cheese",
+        "matchedName": "Hüttenkäse, nature",
+        "isVerified": true,
+        "calories": 150,
+        "protein": 18.6,
+        "carbs": 3.6,
+        "fat": 6.8
+      },
+      {
+        "rawName": "Hähnchenbrust",
+        "baseName": "chicken breast",
+        "amount": 750,
+        "unit": "g",
+        "canonicalId": "chicken_breast_without_skin_raw",
+        "matchedName": "Poulet, Brust, ohne Haut, roh",
+        "isVerified": true,
+        "calories": 803,
+        "protein": 184.5,
+        "carbs": 0,
+        "fat": 7.5
+      },
+      {
+        "rawName": "Tortilla Wraps",
+        "baseName": "tortilla",
+        "amount": 4,
+        "unit": "Stück",
+        "isVerified": false,
+        "calories": 800,
+        "protein": 20,
+        "carbs": 120,
+        "fat": 20
+      },
+      {
+        "rawName": "Olivenöl",
+        "baseName": "olive oil",
+        "amount": 40,
+        "unit": "ml",
+        "canonicalId": "olive_oil",
+        "matchedName": "Olivenöl",
+        "isVerified": true,
+        "calories": 360,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 40
+      },
+      {
+        "rawName": "Mayonnaise",
+        "baseName": "mayonnaise",
+        "amount": 120,
+        "unit": "ml",
+        "canonicalId": "mayonnaise",
+        "matchedName": "Mayonnaise",
+        "isVerified": true,
+        "calories": 832,
+        "protein": 1.7,
+        "carbs": 3.1,
+        "fat": 90.2
+      },
+      {
+        "rawName": "Zitronensaft",
+        "baseName": "lemon juice",
+        "amount": 15,
+        "unit": "ml",
+        "canonicalId": "lemon_juice",
+        "matchedName": "Zitronensaft",
+        "isVerified": true,
+        "calories": 4,
+        "protein": 0.1,
+        "carbs": 0.4,
+        "fat": 0
+      },
+      {
+        "rawName": "Knoblauchpaste",
+        "baseName": "garlic paste",
+        "amount": 1,
+        "unit": "TL",
+        "isVerified": false,
+        "calories": 10,
+        "protein": 0,
+        "carbs": 2,
+        "fat": 0
+      },
+      {
+        "rawName": "Salz",
+        "baseName": "salt",
+        "amount": 2.5,
+        "unit": "TL",
+        "canonicalId": "salt_himalaya_salt",
+        "matchedName": "Salz, Himalayasalz",
+        "isVerified": true,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      {
+        "rawName": "Chilipulver",
+        "baseName": "chili powder",
+        "amount": 2,
+        "unit": "TL",
+        "isVerified": false,
+        "calories": 10,
+        "protein": 0,
+        "carbs": 2,
+        "fat": 0
+      },
+      {
+        "rawName": "Schwarzer Pfeffer",
+        "baseName": "black pepper",
+        "amount": 1.25,
+        "unit": "TL",
+        "isVerified": false,
+        "calories": 5,
+        "protein": 0,
+        "carbs": 1,
+        "fat": 0
+      },
+      {
+        "rawName": "Kreuzkümmel",
+        "baseName": "cumin",
+        "amount": 1.5,
+        "unit": "TL",
+        "isVerified": false,
+        "calories": 10,
+        "protein": 0,
+        "carbs": 1,
+        "fat": 0
+      },
+      {
+        "rawName": "Oregano",
+        "baseName": "oregano",
+        "amount": 1,
+        "unit": "TL",
+        "isVerified": false,
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      {
+        "rawName": "Paprikapulver",
+        "baseName": "paprika",
+        "amount": 1.5,
+        "unit": "TL",
+        "canonicalId": "paprika",
+        "matchedName": "Paprika (Gewürz)",
+        "isVerified": true,
+        "calories": 27,
+        "protein": 1.1,
+        "carbs": 2.6,
+        "fat": 1
+      },
+      {
+        "rawName": "Knoblauchpulver",
+        "baseName": "garlic powder",
+        "amount": 1,
+        "unit": "TL",
+        "isVerified": false,
+        "calories": 10,
+        "protein": 0,
+        "carbs": 2,
+        "fat": 0
+      },
+      {
+        "rawName": "Zwiebelpulver",
+        "baseName": "onion powder",
+        "amount": 1,
+        "unit": "TL",
+        "isVerified": false,
+        "calories": 10,
+        "protein": 0,
+        "carbs": 2,
+        "fat": 0
+      }
+    ]
+  }
+}

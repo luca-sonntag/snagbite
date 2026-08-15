@@ -1,0 +1,340 @@
+{
+  "timestamp": "2026-08-15T17:00:59.459Z",
+  "requestType": "extract_recipe",
+  "model": "gemini-3.1-flash-lite",
+  "durationMs": 5436,
+  "success": true,
+  "input": {
+    "captionLength": 610,
+    "captionPreview": "post workout mealll 🤭💪🏼 recipe: * 2 tbsp oil\n* 2 lbs ground beef \n* 2 tbsp chipotle pepper paste\n* 1 tbsp minced garlic \n* 1 tsp salt\n* 1 tsp chili powder \n* 2 tsp cumin\n* 2 tsp paprika\n* 2 tsp black pepper\n\nPico de gallo:\n- 1 onion\n- 1 tomato \n- 2 tbsp chopped cilantro \n- Juice from 1/2 lemon\n- ",
+    "carouselImageCount": 0,
+    "imageSourceKind": "carousel",
+    "prompt": "You are an expert recipe extractor. Analyze the provided content (which may include audio, website text, or video caption).\n    \nReconstruct the complete recipe, resolving any contradictions culinary-wise. Ensure to follow the field-level guidelines specified in the descriptions of the output schema.\n\nKey Constraints:\n1. Recipe Existence & Anti-Hallucination: The source content MUST contain the actual recipe details (specific ingredients with quantities and/or step-by-step cooking instructions). You MUST set \"isRecipe\" to false if:\n   a) The content is unrelated (comedy, vlogs, fitness motivation, general chat, etc.).\n   b) The content is merely a teaser, promo, or engagement bait without the full recipe (e.g. \"Comment BUCKEYE and I'll send you the recipe\", \"Recipe in my ebook\", \"Link in bio\", \"DM for full recipe\", or appetizing marketing descriptions/macros without the actual list of ingredients and preparation steps).\n   c) The source mentions only the dish name/concept but completely omits the concrete ingredients and instructions.\n   NEVER under any circumstances invent, fabricate, or hallucinate ingredients, amounts, or cooking steps when they are not present in the provided source text, audio, or images.\n2. Multi-Recipe Ambiguity: Before attempting to extract a recipe, evaluate if the content represents a multi-recipe collection, roundup, or compilation. You MUST set \"containsMultipleRecipes\" to true if ANY of the following apply:\n   a) The title, caption, or cover image text indicates multiple dishes/recipes (e.g. \"High protein dinners...\", \"5 meals to get lean\", \"3 lunch ideas\", \"What I eat in a day\", \"4 low-calorie recipes\").\n   b) The carousel images or video scenes present multiple distinct standalone main dishes across different slides/segments (e.g. Slide 2 is \"Smash Burger & Sweet Potato Fries\", Slide 4 is \"Bang Bang Chicken\", Slide 6 is \"Beef Burrito Bowl\").\n   c) Multiple distinct nutrition/macro cards exist for different dishes throughout the slides/segments.\n   If \"containsMultipleRecipes\" is true, do NOT attempt to merge the dishes into one recipe.\n   Set \"containsMultipleRecipes\" to false ONLY if the entire post is dedicated to ONE single recipe (including its sub-components like sauce, marinade, side dish, or garnishes cooked together as one meal).\n3. Category Ordering: Always place \"PRODUCE\" first in the ingredients array, followed by dry goods/pantry items, then refrigerated products/meats, and finally other/extras at the very end.\n4. Translation: Write and translate all text values (including title, description, ingredient names/notes, instruction steps, equipment list, tips, alternative ingredient details, and tags) into: German. Keep the category keys as the uppercase English enum values. Follow the schema strictly.\n5. Preferred Units:\n   - Temperature Units: Format all temperature values mentioned in the instructions, description, tips, or title using the preferred unit: Celsius (e.g., convert and format as \"200°C\" or \"400°F\" depending on preference).\n   - Weight & Volume Units: Format all ingredient weights, volumes, and measurements using the preferred unit system: metric (e.g., metric units like grams, milliliters, kilograms, or imperial units like ounces, cups, pounds, fluid ounces) and perform conversions where appropriate.\n6. Missing Data & Nutrition: If any information for a specific field is missing, leave it empty (empty string \"\", null, or empty array []). You MUST set \"hasExplicitNutritionalValues\" to true ONLY IF the recipe nutritional values are explicitly stated in the source text or audio. If they are not, set it to false and set \"nutritionalValues\" to null (do NOT estimate or calculate overall nutritional values at the recipe level). Note that \"nutritionalValues\" MUST represent values per single serving/portion. If the source lists total values for the entire recipe, divide them by the number of servings/portions first.\n7. Clean Ingredient Names: Ensure the \"name\" field contains only the clean ingredient name (e.g., \"Frischkäse\", \"evaporated milk\", \"cream cheese\", \"butter\"). Move all adjectives, processing states, or descriptions (such as \"light\", \"mager\", \"low fat\", \"leichte\", \"gerieben\", \"grated\") into the \"modifier\" field. Do NOT leave these descriptors inside the \"name\" field.\n8. Ingredient Decomposition: If a composite element or homemade component (like a custom sauce or pesto) is prepared during the recipe, you MUST list its raw ingredients individually instead of the finished compound product.\n9. Ingredient-level Nutritional Values: For each ingredient, you MUST estimate its nutritional values (calories, protein, carbs, fat) based on the ENTIRE specified quantity (amount * unit). Do NOT output per-100g, per-100ml, or single-unit values unless the quantity is exactly 100g, 100ml, or 1 unit. E.g., if chicken breast has 165 kcal per 100g and the recipe specifies 500g, the calories field MUST be 825, NOT 165. If a potato has 150 kcal and the amount is 6, the calories field MUST be 900, NOT 150. If olive oil has 14g fat/EL and the amount is 3 EL, the fat field MUST be 42, NOT 14.\n10. Infer Minor Missing Components (Only for Existing Recipes): If the source already contains a full recipe with ingredients and instructions, but the title or visual images explicitly show an obvious missing minor garnish or component (e.g., 'Air-Fried Broccolini' in the title and green broccolini on the plate) that was accidentally omitted from the written list, you may infer that specific item. NEVER use this rule to fabricate an entire recipe from a title or teaser when no base recipe is provided.\n11. Serving Size Estimation: Identify the number of servings or portions the recipe makes. Look for clues like 'serves 4' or estimate based on the ingredient amounts (e.g., 500g chicken and 6 potatoes typically serves 3-4 people). Avoid defaulting to 1 serving if the ingredient amounts are clearly meant for a family-sized meal.\n12. Zero-Calorie & Low-Calorie Ingredients: Ingredients like water, ice, salt, or baking soda MUST have 0 calories, protein, carbs, and fat. For spices, seasonings, or herbs in small quantities (like teaspoons), focus your calculation energy on the high-calorie/high-macro ingredients (meats, oils, dairy, grains, starches) and estimate very small values (e.g., 5 kcal) or 0.\n13. Cooked vs. Raw/Dry States of Expandable Ingredients: For ingredients that expand significantly during cooking (e.g., rice, pasta, lentils, beans, chickpeas, couscous, quinoa, bulgur), you MUST determine whether the specified quantity refers to the dry/uncooked state or the cooked/prepared state. Dry/uncooked state (e.g., \"100g uncooked rice\" or \"100g rice\" which is boiled in the instructions) has high caloric density (e.g., dry rice: ~350 kcal/100g, dry pasta: ~350 kcal/100g, dry lentils: ~350 kcal/100g). Cooked/prepared state (e.g., \"100g cooked rice\", \"100g boiled pasta\", canned/pre-cooked beans, or when already-cooked ingredients are added directly to a stir-fry/bowl) has much lower caloric density (e.g., cooked rice: ~130 kcal/100g, cooked pasta: ~130-150 kcal/100g, cooked lentils: ~110-120 kcal/100g). Ambiguity resolution: Analyze the cooking instructions. If the instructions include boiling/cooking the dry ingredient, calculate using dry/raw values. If the ingredient is added pre-cooked, or if treating it as raw results in absurdly high calories (e.g., 250g dry rice is ~850 kcal and cooks to 750g cooked rice, which is way too much for a single serving of fried rice), assume the quantity represents the cooked state and calculate using cooked values.\n14. Common Pantry Staples: For each ingredient, set the \"isStaple\" boolean to true ONLY if it is a very common basic staple that people almost always already have at home and rarely need to buy specifically for a recipe (e.g. salt, pepper, water, cooking oil, sugar, common dried spices). Set it to false for anything a user would typically need to shop for (e.g. meat, cheese, vegetables, fresh herbs, specialty items). When in doubt, set it to false.\n15. Inline Ingredient Tagging: In every step description, whenever an ingredient from the ingredients list is used or referenced, you MUST format its mention using the inline syntax '[exact word used in text](ing:baseName)'. 'baseName' MUST match the English 'baseName' (or 'name' if 'baseName' is not set) of the corresponding ingredient in the ingredients list. Examples:\n   - Ingredients: Eigelb (baseName: egg yolk), Ei (baseName: egg), Parmesan (baseName: parmesan)\n   - Step description: \"Die [Eigelbe](ing:egg yolk) und das [Ei](ing:egg) zusammen mit dem [Parmesan](ing:parmesan) verrühren.\"\n   - Do NOT tag equipment or non-ingredient words. Make sure the brackets wrap the natural word as it appears in the sentence.\n16. Concise, Direct Instruction Steps: Write instruction step descriptions as short, clear, action-oriented sentences. Eliminate conversational filler words, narrative transitions, and redundancies. Split long multi-action steps into distinct, bite-sized steps so each step is easy to follow while cooking.\n17. Inline Timer Tagging: In every step description, whenever a cooking duration or time span is mentioned (e.g. \"15 Minuten\", \"1,5 Stunden\", \"30 Sekunden\"), you MUST format it using the inline syntax '[exact time text](timer:duration_in_seconds)'. Calculate the total duration in seconds and put it in the timer parameter. Examples:\n   - \"Ca. [15 Minuten](timer:900) garen.\"\n   - \"Für [1,5 Stunden](timer:5400) köcheln lassen.\"\n   - \"Etwa [45 Sekunden](timer:45) anbraten.\"\n\nDescription/Caption:\n\"\"\"\npost workout mealll 🤭💪🏼 recipe: * 2 tbsp oil\n* 2 lbs ground beef \n* 2 tbsp chipotle pepper paste\n* 1 tbsp minced garlic \n* 1 tsp salt\n* 1 tsp chili powder \n* 2 tsp cumin\n* 2 tsp paprika\n* 2 tsp black pepper\n\nPico de gallo:\n- 1 onion\n- 1 tomato \n- 2 tbsp chopped cilantro \n- Juice from 1/2 lemon\n- salt to taste \n\nCilantro yogurt sauce:\n- 1/2 cup plain greek yogurt, whole milk\n- 1/2 cup sour cream \n- Handful cilantro \n- 2 garlic cloves \n- 1 tbsp lemon juice \n- 1/4 tsp black pepper \n- 1/4 tsp cumin \n- salt to taste \n- 1 tbsp water, optional \n#crispytacos #beeftacos🌮 #tacosrecipe #cookwithme #easyrecipes\n\"\"\""
+  },
+  "rawOutput": "{\n  \"isRecipe\": true,\n  \"containsMultipleRecipes\": false,\n  \"title\": \"Post-Workout Rinder-Tacos mit Pico de Gallo und Koriander-Joghurt-Sauce\",\n  \"description\": \"Ein proteinreiches Post-Workout-Gericht mit würzigem Rinderhackfleisch, frischem Pico de Gallo und einer cremigen Koriander-Joghurt-Sauce.\",\n  \"prepTime\": 20,\n  \"cookTime\": 15,\n  \"servings\": 4,\n  \"ingredients\": [\n    {\n      \"name\": \"VEGETABLES\",\n      \"items\": [\n        {\n          \"name\": \"Zwiebel\",\n          \"baseName\": \"onion\",\n          \"amount\": 1,\n          \"unit\": \"Stück\",\n          \"calories\": 40,\n          \"protein\": 1,\n          \"carbs\": 9,\n          \"fat\": 0,\n          \"isStaple\": false\n        },\n        {\n          \"name\": \"Tomate\",\n          \"baseName\": \"tomato\",\n          \"amount\": 1,\n          \"unit\": \"Stück\",\n          \"calories\": 20,\n          \"protein\": 1,\n          \"carbs\": 4,\n          \"fat\": 0,\n          \"isStaple\": false\n        },\n        {\n          \"name\": \"Koriander\",\n          \"baseName\": \"cilantro\",\n          \"amount\": 2,\n          \"unit\": \"EL\",\n          \"calories\": 0,\n          \"protein\": 0,\n          \"carbs\": 0,\n          \"fat\": 0,\n          \"isStaple\": false\n        },\n        {\n          \"name\": \"Koriander\",\n          \"baseName\": \"cilantro\",\n          \"amount\": 1,\n          \"unit\": \"Handvoll\",\n          \"calories\": 5,\n          \"protein\": 0,\n          \"carbs\": 1,\n          \"fat\": 0,\n          \"isStaple\": false\n        },\n        {\n          \"name\": \"Knoblauch\",\n          \"baseName\": \"garlic\",\n          \"amount\": 3,\n          \"unit\": \"Zehen\",\n          \"calories\": 15,\n          \"protein\": 1,\n          \"carbs\": 3,\n          \"fat\": 0,\n          \"isStaple\": false,\n          \"modifier\": \"gehackt\"\n        }\n      ]\n    },\n    {\n      \"name\": \"DAIRY_EGGS\",\n      \"items\": [\n        {\n          \"name\": \"Griechischer Joghurt\",\n          \"baseName\": \"greek yogurt\",\n          \"amount\": 0.5,\n          \"unit\": \"Tasse\",\n          \"calories\": 150,\n          \"protein\": 12,\n          \"carbs\": 6,\n          \"fat\": 8,\n          \"isStaple\": false,\n          \"modifier\": \"Vollmilch\"\n        },\n        {\n          \"name\": \"Saure Sahne\",\n          \"baseName\": \"sour cream\",\n          \"amount\": 0.5,\n          \"unit\": \"Tasse\",\n          \"calories\": 220,\n          \"protein\": 4,\n          \"carbs\": 5,\n          \"fat\": 20,\n          \"isStaple\": false\n        }\n      ]\n    },\n    {\n      \"name\": \"MEAT_POULTRY\",\n      \"items\": [\n        {\n          \"name\": \"Rinderhackfleisch\",\n          \"baseName\": \"ground beef\",\n          \"amount\": 900,\n          \"unit\": \"g\",\n          \"calories\": 2250,\n          \"protein\": 150,\n          \"carbs\": 0,\n          \"fat\": 180,\n          \"isStaple\": false\n        }\n      ]\n    },\n    {\n      \"name\": \"OILS_CONDIMENTS\",\n      \"items\": [\n        {\n          \"name\": \"Öl\",\n          \"baseName\": \"oil\",\n          \"amount\": 2,\n          \"unit\": \"EL\",\n          \"calories\": 240,\n          \"protein\": 0,\n          \"carbs\": 0,\n          \"fat\": 28,\n          \"isStaple\": true\n        },\n        {\n          \"name\": \"Chipotle-Paste\",\n          \"baseName\": \"chipotle pepper paste\",\n          \"amount\": 2,\n          \"unit\": \"EL\",\n          \"calories\": 30,\n          \"protein\": 1,\n          \"carbs\": 4,\n          \"fat\": 1,\n          \"isStaple\": false\n        },\n        {\n          \"name\": \"Zitronensaft\",\n          \"baseName\": \"lemon juice\",\n          \"amount\": 1.5,\n          \"unit\": \"EL\",\n          \"calories\": 5,\n          \"protein\": 0,\n          \"carbs\": 1,\n          \"fat\": 0,\n          \"isStaple\": false,\n          \"parentIngredient\": {\n            \"name\": \"Zitrone\",\n            \"baseName\": \"lemon\",\n            \"unit\": \"Stück\"\n          }\n        },\n        {\n          \"name\": \"Wasser\",\n          \"baseName\": \"water\",\n          \"amount\": 1,\n          \"unit\": \"EL\",\n          \"calories\": 0,\n          \"protein\": 0,\n          \"carbs\": 0,\n          \"fat\": 0,\n          \"isStaple\": true\n        }\n      ]\n    },\n    {\n      \"name\": \"SPICES_HERBS\",\n      \"items\": [\n        {\n          \"name\": \"Salz\",\n          \"baseName\": \"salt\",\n          \"amount\": 2,\n          \"unit\": \"TL\",\n          \"calories\": 0,\n          \"protein\": 0,\n          \"carbs\": 0,\n          \"fat\": 0,\n          \"isStaple\": true\n        },\n        {\n          \"name\": \"Chilipulver\",\n          \"baseName\": \"chili powder\",\n          \"amount\": 1,\n          \"unit\": \"TL\",\n          \"calories\": 5,\n          \"protein\": 0,\n          \"carbs\": 1,\n          \"fat\": 0,\n          \"isStaple\": true\n        },\n        {\n          \"name\": \"Kreuzkümmel\",\n          \"baseName\": \"cumin\",\n          \"amount\": 2.25,\n          \"unit\": \"TL\",\n          \"calories\": 10,\n          \"protein\": 0,\n          \"carbs\": 1,\n          \"fat\": 0,\n          \"isStaple\": true\n        },\n        {\n          \"name\": \"Paprikapulver\",\n          \"baseName\": \"paprika\",\n          \"amount\": 2,\n          \"unit\": \"TL\",\n          \"calories\": 10,\n          \"protein\": 0,\n          \"carbs\": 1,\n          \"fat\": 0,\n          \"isStaple\": true\n        },\n        {\n          \"name\": \"Schwarzer Pfeffer\",\n          \"baseName\": \"black pepper\",\n          \"amount\": 2.25,\n          \"unit\": \"TL\",\n          \"calories\": 5,\n          \"protein\": 0,\n          \"carbs\": 1,\n          \"fat\": 0,\n          \"isStaple\": true\n        }\n      ]\n    }\n  ],\n  \"instructions\": [\n    {\n      \"step\": 1,\n      \"description\": \"Das [Öl](ing:oil) in einer Pfanne erhitzen und das [Rinderhackfleisch](ing:ground beef) darin anbraten.\"\n    },\n    {\n      \"step\": 2,\n      \"description\": \"Die [Chipotle-Paste](ing:chipotle pepper paste), [Knoblauch](ing:garlic), [Salz](ing:salt), [Chilipulver](ing:chili powder), [Kreuzkümmel](ing:cumin), [Paprikapulver](ing:paprika) und [schwarzen Pfeffer](ing:black pepper) hinzufügen und gut vermengen.\"\n    },\n    {\n      \"step\": 3,\n      \"description\": \"Für das Pico de Gallo die [Zwiebel](ing:onion) und [Tomate](ing:tomato) fein würfeln, mit [Koriander](ing:cilantro), [Zitronensaft](ing:lemon juice) und [Salz](ing:salt) vermischen.\"\n    },\n    {\n      \"step\": 4,\n      \"description\": \"Für die Sauce den [griechischen Joghurt](ing:greek yogurt), [saure Sahne](ing:sour cream), [Koriander](ing:cilantro), [Knoblauch](ing:garlic), [Zitronensaft](ing:lemon juice), [schwarzen Pfeffer](ing:black pepper), [Kreuzkümmel](ing:cumin), [Salz](ing:salt) und optional [Wasser](ing:water) glatt rühren.\"\n    }\n  ],\n  \"equipment\": [\n    \"Pfanne\",\n    \"Schüsseln\",\n    \"Messer\"\n  ],\n  \"hasExplicitNutritionalValues\": false,\n  \"transcript\": \"NO_SPOKEN_WORDS\",\n  \"tags\": [\n    \"High-Protein\",\n    \"Tacos\"\n  ],\n  \"emoji\": \"🌮\"\n}",
+  "parsedOutput": {
+    "isRecipe": true,
+    "title": "Post-Workout Rinder-Tacos mit Pico de Gallo und Koriander-Joghurt-Sauce",
+    "description": "Ein proteinreiches Post-Workout-Gericht mit würzigem Rinderhackfleisch, frischem Pico de Gallo und einer cremigen Koriander-Joghurt-Sauce.",
+    "prepTime": 20,
+    "cookTime": 15,
+    "servings": 4,
+    "ingredients": [
+      {
+        "name": "VEGETABLES",
+        "items": [
+          {
+            "name": "Zwiebel",
+            "baseName": "onion",
+            "amount": 1,
+            "unit": "Stück",
+            "calories": 43,
+            "protein": 1.2,
+            "carbs": 6.9,
+            "fat": 0.7,
+            "isStaple": false,
+            "canonicalId": "onion_raw",
+            "matchedName": "Zwiebel, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          },
+          {
+            "name": "Tomate",
+            "baseName": "tomato",
+            "amount": 1,
+            "unit": "Stück",
+            "calories": 25,
+            "protein": 1.1,
+            "carbs": 4,
+            "fat": 0.4,
+            "isStaple": false,
+            "canonicalId": "tomato_raw",
+            "matchedName": "Tomate, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          },
+          {
+            "name": "Koriander",
+            "baseName": "cilantro",
+            "amount": 2,
+            "unit": "EL",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": false,
+            "isVerified": false
+          },
+          {
+            "name": "Koriander",
+            "baseName": "cilantro",
+            "amount": 1,
+            "unit": "Handvoll",
+            "calories": 5,
+            "protein": 0,
+            "carbs": 1,
+            "fat": 0,
+            "isStaple": false,
+            "isVerified": false
+          },
+          {
+            "name": "Knoblauch",
+            "baseName": "garlic",
+            "amount": 3,
+            "unit": "Zehen",
+            "calories": 13,
+            "protein": 0.8,
+            "carbs": 2,
+            "fat": 0.1,
+            "isStaple": false,
+            "modifier": "gehackt",
+            "canonicalId": "garlic_raw",
+            "matchedName": "Knoblauch, roh",
+            "isVerified": true,
+            "category": "VEGETABLES"
+          }
+        ]
+      },
+      {
+        "name": "DAIRY_EGGS",
+        "items": [
+          {
+            "name": "Griechischer Joghurt",
+            "baseName": "greek yogurt",
+            "amount": 0.5,
+            "unit": "Tasse",
+            "calories": 101,
+            "protein": 3.4,
+            "carbs": 15.2,
+            "fat": 2.7,
+            "isStaple": false,
+            "modifier": "Vollmilch",
+            "canonicalId": "yogurt_strawberry",
+            "matchedName": "Joghurt, Erdbeer",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          },
+          {
+            "name": "Saure Sahne",
+            "baseName": "sour cream",
+            "amount": 0.5,
+            "unit": "Tasse",
+            "calories": 403,
+            "protein": 2.9,
+            "carbs": 3.4,
+            "fat": 42,
+            "isStaple": false,
+            "canonicalId": "sour_cream_35_fat",
+            "matchedName": "Sauerrahm",
+            "isVerified": true,
+            "category": "DAIRY_EGGS"
+          }
+        ]
+      },
+      {
+        "name": "MEAT_POULTRY",
+        "items": [
+          {
+            "name": "Rinderhackfleisch",
+            "baseName": "ground beef",
+            "amount": 900,
+            "unit": "g",
+            "calories": 1350,
+            "protein": 173.7,
+            "carbs": 0,
+            "fat": 72.9,
+            "isStaple": false,
+            "canonicalId": "beef_ragout_raw",
+            "matchedName": "Rind, Hals, roh",
+            "isVerified": true,
+            "category": "MEAT_POULTRY"
+          }
+        ]
+      },
+      {
+        "name": "OILS_CONDIMENTS",
+        "items": [
+          {
+            "name": "Öl",
+            "baseName": "oil",
+            "amount": 2,
+            "unit": "EL",
+            "calories": 252,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 28,
+            "isStaple": true,
+            "canonicalId": "hempseed_oil",
+            "matchedName": "Hanföl",
+            "isVerified": true,
+            "category": "OILS_CONDIMENTS"
+          },
+          {
+            "name": "Chipotle-Paste",
+            "baseName": "chipotle pepper paste",
+            "amount": 2,
+            "unit": "EL",
+            "calories": 30,
+            "protein": 1,
+            "carbs": 4,
+            "fat": 1,
+            "isStaple": false,
+            "isVerified": false
+          },
+          {
+            "name": "Zitronensaft",
+            "baseName": "lemon juice",
+            "amount": 1.5,
+            "unit": "EL",
+            "calories": 6,
+            "protein": 0.1,
+            "carbs": 0.6,
+            "fat": 0,
+            "isStaple": false,
+            "parentIngredient": {
+              "name": "Zitrone",
+              "baseName": "lemon",
+              "unit": "Stück"
+            },
+            "canonicalId": "lemon_juice",
+            "matchedName": "Zitronensaft",
+            "isVerified": true,
+            "category": "BEVERAGES"
+          },
+          {
+            "name": "Wasser",
+            "baseName": "water",
+            "amount": 1,
+            "unit": "EL",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          }
+        ]
+      },
+      {
+        "name": "SPICES_HERBS",
+        "items": [
+          {
+            "name": "Salz",
+            "baseName": "salt",
+            "amount": 2,
+            "unit": "TL",
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "isStaple": true,
+            "canonicalId": "salt_himalaya_salt",
+            "matchedName": "Salz, Himalayasalz",
+            "isVerified": true,
+            "category": "SPICES_HERBS"
+          },
+          {
+            "name": "Chilipulver",
+            "baseName": "chili powder",
+            "amount": 1,
+            "unit": "TL",
+            "calories": 5,
+            "protein": 0,
+            "carbs": 1,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Kreuzkümmel",
+            "baseName": "cumin",
+            "amount": 2.25,
+            "unit": "TL",
+            "calories": 10,
+            "protein": 0,
+            "carbs": 1,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          },
+          {
+            "name": "Paprikapulver",
+            "baseName": "paprika",
+            "amount": 2,
+            "unit": "TL",
+            "calories": 36,
+            "protein": 1.5,
+            "carbs": 3.5,
+            "fat": 1.3,
+            "isStaple": true,
+            "canonicalId": "paprika",
+            "matchedName": "Paprika (Gewürz)",
+            "isVerified": true,
+            "category": "SPICES_HERBS"
+          },
+          {
+            "name": "Schwarzer Pfeffer",
+            "baseName": "black pepper",
+            "amount": 2.25,
+            "unit": "TL",
+            "calories": 5,
+            "protein": 0,
+            "carbs": 1,
+            "fat": 0,
+            "isStaple": true,
+            "isVerified": false
+          }
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "step": 1,
+        "description": "Das [Öl](ing:oil) in einer Pfanne erhitzen und das [Rinderhackfleisch](ing:ground beef) darin anbraten."
+      },
+      {
+        "step": 2,
+        "description": "Die [Chipotle-Paste](ing:chipotle pepper paste), [Knoblauch](ing:garlic), [Salz](ing:salt), [Chilipulver](ing:chili powder), [Kreuzkümmel](ing:cumin), [Paprikapulver](ing:paprika) und [schwarzen Pfeffer](ing:black pepper) hinzufügen und gut vermengen."
+      },
+      {
+        "step": 3,
+        "description": "Für das Pico de Gallo die [Zwiebel](ing:onion) und [Tomate](ing:tomato) fein würfeln, mit [Koriander](ing:cilantro), [Zitronensaft](ing:lemon juice) und [Salz](ing:salt) vermischen."
+      },
+      {
+        "step": 4,
+        "description": "Für die Sauce den [griechischen Joghurt](ing:greek yogurt), [saure Sahne](ing:sour cream), [Koriander](ing:cilantro), [Knoblauch](ing:garlic), [Zitronensaft](ing:lemon juice), [schwarzen Pfeffer](ing:black pepper), [Kreuzkümmel](ing:cumin), [Salz](ing:salt) und optional [Wasser](ing:water) glatt rühren."
+      }
+    ],
+    "equipment": [
+      "Pfanne",
+      "Schüsseln",
+      "Messer"
+    ],
+    "transcript": null,
+    "tags": [
+      "High-Protein",
+      "Tacos"
+    ],
+    "emoji": "🌮",
+    "nutritionalValues": {
+      "calories": 571,
+      "protein": 46.4,
+      "carbs": 10.9,
+      "fat": 37.3
+    }
+  },
+  "tokenUsage": {
+    "promptTokens": 2574,
+    "candidateTokens": 2275,
+    "totalTokens": 4849
+  },
+  "costEstimate": {
+    "inputCostUsd": 0.000643,
+    "outputCostUsd": 0.003413,
+    "totalCostUsd": 0.004056,
+    "totalCostFormatted": "$0.0041",
+    "pricingTier": "short",
+    "pricingKnown": true
+  },
+  "logDir": "C:\\Users\\lucas\\source\\repos\\cookbook\\eval_results\\temp_run_w1_41"
+}
