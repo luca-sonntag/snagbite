@@ -153,6 +153,48 @@ function generateAliases(nameDe: string, nameEn: string, code: string): string[]
 
   // Common food synonym mappings
   const lowerDe = nameDe.toLowerCase();
+  if (lowerDe.includes('speisesalz') || lowerDe.includes('siedesalz')) {
+    aliases.add('salz');
+    aliases.add('speisesalz');
+    aliases.add('meersalz');
+    aliases.add('jodsalz');
+    aliases.add('salt');
+  }
+  if (lowerDe.includes('schwarzer pfeffer') || code === 'R131000') {
+    aliases.add('pfeffer');
+    aliases.add('schwarzer pfeffer');
+    aliases.add('pfeffer schwarz');
+    aliases.add('pepper');
+  }
+  if (lowerDe.includes('hühnervollei') || (lowerDe.includes('hühnerei') && !lowerDe.includes('eigelb') && !lowerDe.includes('eiweiß'))) {
+    aliases.add('ei');
+    aliases.add('eier');
+    aliases.add('hühnerei');
+    aliases.add('egg');
+    aliases.add('eggs');
+  }
+  if (lowerDe.includes('hühnereigelb') || lowerDe.includes('eigelb')) {
+    aliases.add('eigelb');
+    aliases.add('egg yolk');
+  }
+  if (lowerDe.includes('hühnereiweiß') || lowerDe.includes('eiklar') || lowerDe.includes('eiweiß')) {
+    aliases.add('eiweiß');
+    aliases.add('eiklar');
+    aliases.add('egg white');
+  }
+  if (lowerDe.includes('kakaopulver') || (lowerDe.includes('kakao') && code.startsWith('S211'))) {
+    aliases.add('backkakao');
+    aliases.add('kakaopulver');
+    aliases.add('kakao');
+    aliases.add('cocoa powder');
+  }
+  if (lowerDe.includes('tomate') && code.startsWith('G501')) {
+    aliases.add('tomate');
+    aliases.add('tomaten');
+    aliases.add('kirschtomaten');
+    aliases.add('cocktailtomaten');
+    aliases.add('cherrytomaten');
+  }
   if (lowerDe.includes('speisequark') && lowerDe.includes('mager')) {
     aliases.add('magerquark');
     aliases.add('quark mager');
@@ -194,6 +236,10 @@ function generateAliases(nameDe: string, nameEn: string, code: string): string[]
     aliases.add('olivenöl');
     aliases.add('olivenoel');
     aliases.add('natives olivenöl');
+  }
+  if (lowerDe.includes('butter') && code.startsWith('Q651')) {
+    aliases.add('butter');
+    aliases.add('deutsche markenbutter');
   }
   if (lowerDe.includes('gouda')) {
     aliases.add('gouda');

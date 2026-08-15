@@ -92,7 +92,7 @@ const recipeSchema = {
                 },
                 searchQueries: {
                   type: FunctionDeclarationSchemaType.ARRAY,
-                  description: '2-3 prioritized German search phrases from specific product name to generic base food for matching with the German food database (BLS). E.g. for "Magerquark": ["Magerquark", "Speisequark mager", "Quark"]; for "geriebener Gouda": ["Gouda gerieben", "Gouda"]; for "Hähnchenbrustfilet": ["Hähnchenbrustfilet", "Hähnchen Brustfilet", "Hühnerbrust"]; for "Haferflocken": ["Haferflocken", "Hafer Flocken"].',
+                  description: '2-3 prioritized German search phrases from specific product name to generic base food for matching with the German food database (BLS). E.g. for "Magerquark": ["Magerquark", "Speisequark mager", "Quark"]; for "Salz": ["Speisesalz", "Salz"]; for "Pfeffer": ["Schwarzer Pfeffer", "Pfeffer"]; for "Paprikapulver": ["Paprikapulver edelsüß", "Paprikapulver"]; for "Backkakao": ["Kakaopulver", "Backkakao"]; for "Dinkelmehl": ["Dinkelmehl", "Mehl"]; for "geriebener Gouda": ["Gouda gerieben", "Gouda"]; for "Hähnchenbrustfilet": ["Hähnchenbrustfilet", "Hähnchen Brustfilet", "Hühnerbrust"]; for "Haferflocken": ["Haferflocken", "Hafer Flocken"].',
                   items: {
                     type: FunctionDeclarationSchemaType.STRING,
                   },

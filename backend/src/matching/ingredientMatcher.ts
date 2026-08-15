@@ -58,7 +58,7 @@ const FUSE_OPTIONS: IFuseOptions<CanonicalIngredient> = {
     { name: 'aliases', weight: 0.35 },
     { name: 'name_en', weight: 0.05 },
   ],
-  threshold: 0.35, // 0.0 = perfect match, 1.0 = match anything
+  threshold: 0.20, // Strict precision to eliminate false positives
   distance: 100,
   ignoreLocation: true,
   minMatchCharLength: 2,
@@ -73,7 +73,7 @@ for (const [cat, items] of itemsByCategory.entries()) {
 
 const globalFuse = new Fuse(CANONICAL_INGREDIENTS, {
   ...FUSE_OPTIONS,
-  threshold: 0.25, // Stricter threshold for cross-category global fallback
+  threshold: 0.18, // Even stricter for cross-category global fallback
 });
 
 /**
@@ -254,25 +254,29 @@ export function findCanonicalIngredient(
     for (const q of queriesToTest) {
       if (q.length < 2) continue;
       const fuseQuery = q.length > 32 ? q.slice(0, 32) : q;
-      const results = targetFuse.search(fuseQuery, { limit: 3 });
+      const results = targetFuse.search(fuseQuery, { limit: 1 });
       if (results.length > 0) {
         const best = results[0];
-        if (best.score !== undefined && best.score <= 0.40) {
+        if (best.score !== undefined && best.score <= 0.22) {
           return best.item;
         }
       }
     }
+    // Category was specified and no high-confidence match found -> clean null fallback
+    return null;
   }
 
-  // 5. Stage 3: Global Fallback Fuse.js Search (Strict Threshold <= 0.22)
-  for (const q of queriesToTest) {
-    if (q.length < 3) continue;
-    const fuseQuery = q.length > 32 ? q.slice(0, 32) : q;
-    const results = globalFuse.search(fuseQuery, { limit: 1 });
-    if (results.length > 0) {
-      const best = results[0];
-      if (best.score !== undefined && best.score <= 0.22) {
-        return best.item;
+  // 5. Stage 3: Global Fallback Fuse.js Search (ONLY if category was unspecified or OTHER)
+  if (!cleanCategory || cleanCategory === 'OTHER') {
+    for (const q of queriesToTest) {
+      if (q.length < 3) continue;
+      const fuseQuery = q.length > 32 ? q.slice(0, 32) : q;
+      const results = globalFuse.search(fuseQuery, { limit: 1 });
+      if (results.length > 0) {
+        const best = results[0];
+        if (best.score !== undefined && best.score <= 0.18) {
+          return best.item;
+        }
       }
     }
   }
