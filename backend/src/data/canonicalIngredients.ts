@@ -7,18 +7,19 @@ export interface CanonicalIngredient {
   name_en: string;
   name_de: string;
   category:
-    | 'PRODUCE'
+    | 'VEGETABLES'
+    | 'FRUITS'
+    | 'DAIRY_EGGS'
     | 'MEAT_POULTRY'
     | 'SEAFOOD'
-    | 'DAIRY_EGGS'
-    | 'PANTRY'
     | 'GRAINS_PASTA'
+    | 'OILS_CONDIMENTS'
     | 'SPICES_HERBS'
-    | 'BAKING'
-    | 'CONDIMENTS_OILS'
-    | 'FROZEN'
+    | 'NUTS_SEEDS'
+    | 'SWEETS_SNACKS'
     | 'BEVERAGES'
-    | 'BAKERY'
+    | 'PANTRY_BAKING'
+    | 'PREPARED_DISHES'
     | 'OTHER';
   density?: number;
   nutrients_per_100g: {
