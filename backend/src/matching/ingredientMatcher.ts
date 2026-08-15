@@ -1,43 +1,34 @@
+import Fuse, { type IFuseOptions } from 'fuse.js';
 import { CANONICAL_INGREDIENTS, type CanonicalIngredient } from '../data/canonicalIngredients.js';
-import type { Recipe, Ingredient } from '../types.js';
+import type { Recipe, Ingredient, ParentIngredientInfo } from '../types.js';
 
-// Pre-indexed lookup maps for O(1) matching
+// Pre-indexed lookup maps for O(1) exact matching
 const byId = new Map<string, CanonicalIngredient>();
 const byAlias = new Map<string, CanonicalIngredient>();
 const byNameEn = new Map<string, CanonicalIngredient>();
 const byNameDe = new Map<string, CanonicalIngredient>();
 
+// Category-scoped item lists for dedicated Fuse instances
+const itemsByCategory = new Map<string, CanonicalIngredient[]>();
+
+// Simplicity score for choosing between multiple alias matches
 function getSimplicityScore(item: CanonicalIngredient): number {
   const de = (item.name_de || '').toLowerCase();
   const en = (item.name_en || '').toLowerCase();
   let score = 100 - de.length; // shorter name = simpler base food
   if (de.includes('roh') || en.includes('raw')) score += 30;
-  if (de.includes('nature') || en.includes('plain') || en.includes('unsalted') || de.includes('trocken') || en.includes('dry')) score += 20;
+  if (de.includes('nature') || de.includes('mager') || en.includes('plain') || en.includes('unsalted') || de.includes('trocken')) score += 20;
   if (
-    de.includes('mit ') ||
-    de.includes('gefüllt') ||
-    en.includes('filled') ||
     de.includes('zubereitet') ||
     de.includes('gericht') ||
     de.includes('salat') ||
-    de.includes('teig') ||
-    de.includes('sauce') ||
-    de.includes('burger')
+    de.includes('burger') ||
+    de.includes('konserve')
   ) {
-    score -= 60;
+    score -= 40;
   }
   return score;
 }
-
-// Allowed / natural adjacent category pairs (distance = 0)
-const COMPATIBLE_CATEGORY_PAIRS = new Set([
-  'GRAINS_PASTA:PANTRY_BAKING',
-  'PANTRY_BAKING:GRAINS_PASTA',
-  'DAIRY_EGGS:OILS_CONDIMENTS',
-  'OILS_CONDIMENTS:DAIRY_EGGS',
-  'SWEETS_SNACKS:PANTRY_BAKING',
-  'PANTRY_BAKING:SWEETS_SNACKS',
-]);
 
 for (const item of CANONICAL_INGREDIENTS) {
   byId.set(item.id.toLowerCase().trim(), item);
@@ -52,11 +43,42 @@ for (const item of CANONICAL_INGREDIENTS) {
       byAlias.set(key, item);
     }
   }
+
+  const cat = item.category || 'OTHER';
+  if (!itemsByCategory.has(cat)) {
+    itemsByCategory.set(cat, []);
+  }
+  itemsByCategory.get(cat)!.push(item);
 }
 
+// Fuse options for category-scoped and global fuzzy search
+const FUSE_OPTIONS: IFuseOptions<CanonicalIngredient> = {
+  keys: [
+    { name: 'name_de', weight: 0.60 },
+    { name: 'aliases', weight: 0.35 },
+    { name: 'name_en', weight: 0.05 },
+  ],
+  threshold: 0.35, // 0.0 = perfect match, 1.0 = match anything
+  distance: 100,
+  ignoreLocation: true,
+  minMatchCharLength: 2,
+  includeScore: true,
+  shouldSort: true,
+};
+
+const categoryFuseMap = new Map<string, Fuse<CanonicalIngredient>>();
+for (const [cat, items] of itemsByCategory.entries()) {
+  categoryFuseMap.set(cat, new Fuse(items, FUSE_OPTIONS));
+}
+
+const globalFuse = new Fuse(CANONICAL_INGREDIENTS, {
+  ...FUSE_OPTIONS,
+  threshold: 0.25, // Stricter threshold for cross-category global fallback
+});
+
 /**
- * Normalizes a raw ingredient name or baseName by stripping modifiers in parentheses,
- * comma suffixes, extra whitespace, and converting to lowercase.
+ * Normalizes a search term or ingredient name by removing modifiers,
+ * parenthetical text, and special characters.
  */
 export function normalizeSearchTerm(term: string): string {
   if (!term) return '';
@@ -99,333 +121,159 @@ export function normalizeUnit(rawUnit?: string): string {
   if (['bund', 'bunch', 'bunches', 'strauss', 'strauß'].includes(u)) return 'bunch';
   if (['handvoll', 'handful'].includes(u)) return 'handful';
 
-  return u;
+  return 'piece';
 }
 
-const GENERIC_STOP_WORDS = new Set([
-  'sauce',
-  'soße',
-  'sosse',
-  'gericht',
-  'salat',
-  'drink',
-  'suppe',
-  'pulver',
-  'nature',
-  'plain',
-  'extrakt',
-  'zubereitet',
-  'geheim',
-  'secret',
-  'exotic',
-  'unbekannt',
-]);
-
-const GENERIC_FOOD_FORMS = new Set([
-  'pulver',
-  'powder',
-  'paste',
-  'sauce',
-  'soße',
-  'sosse',
-  'salat',
-  'salad',
-  'suppe',
-  'soup',
-  'drink',
-  'sirup',
-  'syrup',
-  'extrakt',
-  'extract',
-  'gericht',
-  'dish',
-  'burger',
-  'mix',
-  'gewürz',
-  'seasoning',
-  'zubereitung',
-  'chips',
-  'chunks',
-  'flocken',
-  'flakes',
-  'stuecke',
-  'stücke',
-  'mehl',
-  'flour',
-  'samen',
-  'seed',
-  'seeds',
-  'öl',
-  'oil',
-  'oel',
-  'joghurt',
-  'yogurt',
-  'käse',
-  'cheese',
-  'cream',
-  'sahne',
-  'rahm',
-  'eis',
-  'glace',
-]);
-
 /**
- * Checks whether candidate tokens match the query tokens with head-noun validation.
- * In culinary names (DE & EN), matching ONLY a generic food form (e.g. "powder", "paste", "sauce")
- * without the qualifying ingredient noun (e.g. "baking" vs "chocolate", "tomato" vs "wasabi")
- * is strictly rejected.
+ * Standardize category strings to canonical enum format.
  */
-function isGenericTokenMatch(queryTokens: string[], candidateTokens: string[]): { matched: boolean; score: number } {
-  if (queryTokens.length === 0 || candidateTokens.length === 0) return { matched: false, score: 0 };
-
-  const queryStr = queryTokens.join(' ');
-  const candStr = candidateTokens.join(' ');
-
-  // Exact match
-  if (queryStr === candStr) return { matched: true, score: 500 };
-
-  // Token-by-token comparison with word-boundary and substantive noun awareness
-  let matchedTokens = 0;
-  let nonGenericMatchedTokens = 0;
-
-  for (const qt of queryTokens) {
-    if (qt.length < 2) continue;
-    for (const ct of candidateTokens) {
-      if (ct.length < 2) continue;
-
-      let isMatch = false;
-      let matchedWord = '';
-
-      if (qt === ct) {
-        isMatch = true;
-        matchedWord = qt;
-      } else if (qt.length >= 4 && ct.length >= 4 && (qt.startsWith(ct) || ct.startsWith(qt)) && Math.abs(qt.length - ct.length) <= 3) {
-        // Stem / Plural / Prefix match
-        isMatch = true;
-        matchedWord = qt;
-      } else if (qt.length >= 6 && ct.length >= 4 && qt.endsWith(ct) && !GENERIC_FOOD_FORMS.has(ct)) {
-        // Compound word head match (e.g. "kirschtomaten" -> ends with "tomaten")
-        // Exclude generic suffixes like "backpulver" ending with "pulver"
-        isMatch = true;
-        matchedWord = ct;
-      }
-
-      if (isMatch) {
-        matchedTokens++;
-        if (!GENERIC_FOOD_FORMS.has(matchedWord.toLowerCase()) && !GENERIC_STOP_WORDS.has(matchedWord.toLowerCase())) {
-          nonGenericMatchedTokens++;
-        }
-        break;
-      }
-    }
-  }
-
-  // Reject if the only matched token is a generic container/form (e.g. only 'powder' or only 'paste')
-  if (nonGenericMatchedTokens === 0) {
-    return { matched: false, score: 0 };
-  }
-
-  const queryHead = queryTokens[queryTokens.length - 1];
-  const candHead = candidateTokens[candidateTokens.length - 1];
-  const headMatches = queryHead === candHead ||
-    (queryHead.length >= 4 && candHead.length >= 4 && (queryHead.startsWith(candHead) || candHead.startsWith(queryHead) || queryHead.endsWith(candHead)));
-
-  // If multi-word query: require head noun match AND high token overlap (>= 50%)
-  const overlapRatio = matchedTokens / queryTokens.length;
-
-  if (queryTokens.length > 1) {
-    if (headMatches && overlapRatio >= 0.5) {
-      return { matched: true, score: 250 + matchedTokens * 50 };
-    }
-    if (overlapRatio >= 0.8) {
-      return { matched: true, score: 220 + matchedTokens * 40 };
-    }
-    return { matched: false, score: 0 };
-  }
-
-  // Single word query:
-  if (matchedTokens === 1) {
-    if (queryStr === candStr) {
-      return { matched: true, score: 300 + queryTokens[0].length * 10 };
-    }
-    if (candidateTokens.length === 1 && (queryTokens[0].startsWith(candidateTokens[0]) || candidateTokens[0].startsWith(queryTokens[0]))) {
-      return { matched: true, score: 250 + queryTokens[0].length * 10 };
-    }
-    if (headMatches) {
-      return { matched: true, score: 200 + queryTokens[0].length * 5 };
-    }
-  }
-
-  return { matched: false, score: 0 };
+export function normalizeCategory(category?: string): string {
+  if (!category) return '';
+  const c = category.toUpperCase().trim();
+  const map: Record<string, string> = {
+    PRODUCE: 'FRUITS_VEGETABLES',
+    VEGETABLES: 'FRUITS_VEGETABLES',
+    FRUITS: 'FRUITS_VEGETABLES',
+    FRUITS_VEGETABLES: 'FRUITS_VEGETABLES',
+    DAIRY: 'DAIRY',
+    DAIRY_EGGS: 'DAIRY',
+    EGGS: 'DAIRY',
+    MEAT: 'MEAT_FISH',
+    POULTRY: 'MEAT_FISH',
+    MEAT_POULTRY: 'MEAT_FISH',
+    FISH: 'MEAT_FISH',
+    SEAFOOD: 'MEAT_FISH',
+    FISH_SEAFOOD: 'MEAT_FISH',
+    MEAT_FISH: 'MEAT_FISH',
+    GRAINS: 'GRAINS_PASTA',
+    PASTA: 'GRAINS_PASTA',
+    GRAINS_PASTA: 'GRAINS_PASTA',
+    BAKING: 'BAKING_COOKING',
+    PANTRY: 'BAKING_COOKING',
+    PANTRY_BAKING: 'BAKING_COOKING',
+    BAKING_COOKING: 'BAKING_COOKING',
+    SPICES: 'SPICES_OILS',
+    OILS: 'SPICES_OILS',
+    SPICES_OILS: 'SPICES_OILS',
+    OILS_CONDIMENTS: 'SPICES_OILS',
+    CONDIMENTS: 'SPICES_OILS',
+    HERBS_SPICES: 'SPICES_OILS',
+    CANNED: 'CANNED_PRESERVED',
+    CANNED_GOODS: 'CANNED_PRESERVED',
+    CANNED_PRESERVED: 'CANNED_PRESERVED',
+    FROZEN: 'FROZEN',
+    FROZEN_FOODS: 'FROZEN',
+    BREAD: 'BREAD_BAKERY',
+    BAKERY: 'BREAD_BAKERY',
+    BREAD_BAKERY: 'BREAD_BAKERY',
+    BEVERAGES: 'BEVERAGES',
+    DRINKS: 'BEVERAGES',
+    SWEETS: 'SWEETS_SNACKS',
+    SNACKS: 'SWEETS_SNACKS',
+    SWEETS_SNACKS: 'SWEETS_SNACKS',
+    SNACKS_SWEETS: 'SWEETS_SNACKS',
+    READY_MEALS: 'READY_MEALS',
+    CONVENIENCE: 'READY_MEALS',
+    PREPARED_DISHES: 'READY_MEALS',
+    REFRIGERATED_CONVENIENCE: 'REFRIGERATED_CONVENIENCE',
+    OTHER: 'OTHER',
+  };
+  return map[c] || c;
 }
 
 /**
- * Finds a matching canonical ingredient using a high-precision multi-stage lookup:
- * 1. Exact baseName / rawName / synonym O(1) index check
- * 2. Common Candidate Scoring Pool across rawName, baseName and all synonyms:
- *    - Exact matches on synonyms (e.g. "Bundzwiebel" -> "Bundzwiebel, roh") outscore
- *      partial substring token matches on rawName (e.g. "Frühlingszwiebel" -> "Speisezwiebel" via "-zwiebel").
- *    - Category-scoped and precision-scored token matching preferring raw/base foods over composite dishes.
+ * Finds a matching canonical ingredient using exact map lookups and Fuse.js fuzzy matching.
  */
 export function findCanonicalIngredient(
-  rawName: string,
+  name: string,
   baseName?: string,
-  expectedCategory?: string,
-  synonyms?: string[]
+  category?: string,
+  synonyms?: string[],
+  searchQueries?: string[],
+  parentIngredient?: ParentIngredientInfo
 ): CanonicalIngredient | null {
-  const normBase = baseName ? normalizeSearchTerm(baseName) : '';
-  const normRaw = normalizeSearchTerm(rawName);
-  const normSynonyms = (synonyms || [])
-    .map(s => normalizeSearchTerm(s))
-    .filter(s => s && s.length >= 2 && !GENERIC_STOP_WORDS.has(s));
+  const cleanCategory = normalizeCategory(category);
+  const targetFuse = cleanCategory && categoryFuseMap.has(cleanCategory) ? categoryFuseMap.get(cleanCategory)! : null;
 
-  const queryCombined = [normRaw, normBase, ...normSynonyms].join(' ').toLowerCase();
-  const wantsMager = queryCombined.includes('mager') || queryCombined.includes('lean') || queryCombined.includes('light') || queryCombined.includes('low fat');
-
-  const rawTokens = normRaw.split(/\s+/).filter(t => t.length > 0 && !GENERIC_STOP_WORDS.has(t));
-  const baseTokens = normBase.split(/\s+/).filter(t => t.length > 0 && !GENERIC_STOP_WORDS.has(t));
-  const synonymTokensList = normSynonyms.map(syn => syn.split(/\s+/).filter(t => t.length > 0 && !GENERIC_STOP_WORDS.has(t)));
-
-  const cleanCategory = expectedCategory ? expectedCategory.trim().toUpperCase() : undefined;
-
-  // Stage 1: Exact specific rawName check
-  if (normRaw && !GENERIC_STOP_WORDS.has(normRaw)) {
-    const directRaw = byAlias.get(normRaw) || byId.get(normRaw) || byNameDe.get(normRaw) || byNameEn.get(normRaw);
-    if (directRaw) {
-      // If category is given and differs drastically, don't blindly accept
-      if (!cleanCategory || directRaw.category === cleanCategory || cleanCategory === 'OTHER') {
-        return directRaw;
+  // 1. Parent ingredient priority (e.g. "Ei" for "Eigelb", "Zitrone" for "Zitronenabrieb")
+  if (parentIngredient?.name) {
+    const normParent = normalizeSearchTerm(parentIngredient.name);
+    const directParent = byAlias.get(normParent) || byNameDe.get(normParent) || byId.get(normParent);
+    if (directParent) {
+      if (!cleanCategory || directParent.category === cleanCategory || cleanCategory === 'OTHER') {
+        return directParent;
       }
     }
   }
 
-  // Stage 1b: Exact baseName check
-  if (normBase && !GENERIC_STOP_WORDS.has(normBase) && !wantsMager) {
-    const directBase = byAlias.get(normBase) || byId.get(normBase) || byNameEn.get(normBase) || byNameDe.get(normBase);
-    if (directBase) {
-      if (!cleanCategory || directBase.category === cleanCategory || cleanCategory === 'OTHER') {
-        return directBase;
+  // 2. Build prioritized search query list
+  const queriesToTest: string[] = [];
+
+  // A. Add explicit searchQueries from Gemini
+  if (searchQueries && Array.isArray(searchQueries)) {
+    for (const q of searchQueries) {
+      if (q && typeof q === 'string') {
+        const norm = normalizeSearchTerm(q);
+        if (norm && !queriesToTest.includes(norm)) queriesToTest.push(norm);
       }
     }
   }
 
-  // Stage 1c: Exact synonym check
-  for (const synNorm of normSynonyms) {
-    const directSyn = byAlias.get(synNorm) || byId.get(synNorm) || byNameDe.get(synNorm) || byNameEn.get(synNorm);
-    if (directSyn) {
-      if (!cleanCategory || directSyn.category === cleanCategory || cleanCategory === 'OTHER') {
-        return directSyn;
+  // B. Add baseName & name
+  if (baseName) {
+    const norm = normalizeSearchTerm(baseName);
+    if (norm && !queriesToTest.includes(norm)) queriesToTest.push(norm);
+  }
+  if (name) {
+    const norm = normalizeSearchTerm(name);
+    if (norm && !queriesToTest.includes(norm)) queriesToTest.push(norm);
+  }
+
+  // C. Add synonyms
+  if (synonyms && Array.isArray(synonyms)) {
+    for (const s of synonyms) {
+      if (s && typeof s === 'string') {
+        const norm = normalizeSearchTerm(s);
+        if (norm && !queriesToTest.includes(norm)) queriesToTest.push(norm);
       }
     }
   }
 
-  // Stage 2: Precision scoring across all canonical items (Common Candidate Pool)
-  const candidates: { item: CanonicalIngredient; score: number }[] = [];
-
-  for (const item of CANONICAL_INGREDIENTS) {
-    const itemNameDe = (item.name_de || '').toLowerCase();
-    const itemNameEn = (item.name_en || '').toLowerCase();
-
-    for (const alias of item.aliases) {
-      const aliasNorm = normalizeSearchTerm(alias);
-      if (!aliasNorm || aliasNorm.length < 2) continue;
-      if (GENERIC_STOP_WORDS.has(aliasNorm)) continue;
-
-      const aliasTokens = aliasNorm.split(/\s+/).filter(t => t.length > 0 && !GENERIC_STOP_WORDS.has(t));
-      if (aliasTokens.length === 0) continue;
-
-      let matchScore = 0;
-
-      // 1. Direct equality checks (Exact match)
-      if (normBase && aliasNorm === normBase) {
-        matchScore = Math.max(matchScore, 500 + aliasNorm.length * 10);
-      }
-      if (normRaw && aliasNorm === normRaw) {
-        matchScore = Math.max(matchScore, 500 + aliasNorm.length * 10);
-      }
-      for (const synNorm of normSynonyms) {
-        if (synNorm === aliasNorm) {
-          matchScore = Math.max(matchScore, 480 + aliasNorm.length * 8);
-        }
-      }
-
-      // 2. Token overlap & Substring checks
-      if (matchScore < 480) {
-        const rawRes = isGenericTokenMatch(rawTokens, aliasTokens);
-        const baseRes = isGenericTokenMatch(baseTokens, aliasTokens);
-
-        if (rawRes.matched && rawRes.score > matchScore) {
-          matchScore = rawRes.score;
-        }
-        if (baseRes.matched && baseRes.score > matchScore) {
-          matchScore = baseRes.score;
-        }
-
-        for (const synTokens of synonymTokensList) {
-          const synRes = isGenericTokenMatch(synTokens, aliasTokens);
-          if (synRes.matched && synRes.score - 15 > matchScore) {
-            matchScore = synRes.score - 15;
-          }
-        }
-      }
-
-      if (matchScore > 0) {
-        matchScore += getSimplicityScore(item);
-
-        // 1. Category-aware weighting
-        if (cleanCategory && cleanCategory !== 'OTHER') {
-          if (item.category === cleanCategory) {
-            matchScore += 150; // High confidence boost for matching department
-          } else if (item.category === 'PREPARED_DISHES') {
-            matchScore -= 250; // Strong penalty: Never match raw ingredient to a prepared meal
-          } else if (COMPATIBLE_CATEGORY_PAIRS.has(`${cleanCategory}:${item.category}`)) {
-            matchScore -= 20; // Mild adjustment for naturally adjacent categories
-          } else {
-            matchScore -= 350; // Strict penalty for disjoint category mismatches
-          }
-        } else {
-          // If no recipe category given, still heavily penalize prepared dishes
-          if (item.category === 'PREPARED_DISHES') {
-            matchScore -= 200;
-          }
-        }
-
-        // 2. Flavored vs Plain Dairy Guard
-        const itemCombined = (itemNameDe + ' ' + itemNameEn).toLowerCase();
-        const DAIRY_FLAVORS = ['erdbeer', 'strawberry', 'mokka', 'mocha', 'schoko', 'chocolate', 'früchte', 'fruit', 'aprikose', 'apricot', 'birne', 'pear', 'waldbeeren', 'berries', 'himbeer', 'raspberry'];
-        const isItemFlavored = DAIRY_FLAVORS.some(f => itemCombined.includes(f));
-        const isQueryFlavored = DAIRY_FLAVORS.some(f => queryCombined.includes(f));
-        if (isItemFlavored && !isQueryFlavored && (item.category === 'DAIRY_EGGS' || item.category === 'SWEETS_SNACKS')) {
-          matchScore -= 300; // Penalize fruit/flavored varieties when plain is requested
-        }
-
-        // 3. Plant vs Animal Dairy Guard
-        const PLANT_QUALIFIERS = ['soja', 'soy', 'mandel', 'almond', 'hafer', 'oat', 'vegan', 'pflanzlich', 'plant', 'kokos', 'coconut', 'reis', 'rice milk', 'cashew'];
-        const isQueryPlant = PLANT_QUALIFIERS.some(p => queryCombined.includes(p));
-        const isItemPlant = PLANT_QUALIFIERS.some(p => itemCombined.includes(p)) || itemCombined.includes('tofu') || itemCombined.includes('pflanz');
-        if (isQueryPlant && !isItemPlant && item.category === 'DAIRY_EGGS') {
-          matchScore -= 400; // Block cow's milk/cream/butter for plant queries
-        }
-
-        // 4. Specificity (mager / low fat)
-        if (wantsMager) {
-          if (itemNameDe.includes('mager') || itemNameEn.includes('lean') || itemNameEn.includes('low fat') || itemNameDe.includes('0.2%')) {
-            matchScore += 80;
-          } else if (itemNameDe.includes('rahm') || itemNameDe.includes('40%') || itemNameDe.includes('doppelrahm')) {
-            matchScore -= 80;
-          }
-        }
-
-        candidates.push({ item, score: matchScore });
+  // 3. Stage 1: Exact Map Check across all queries
+  for (const q of queriesToTest) {
+    const direct = byAlias.get(q) || byNameDe.get(q) || byId.get(q) || byNameEn.get(q);
+    if (direct) {
+      if (!cleanCategory || direct.category === cleanCategory || cleanCategory === 'OTHER') {
+        return direct;
       }
     }
   }
 
-  if (candidates.length > 0) {
-    candidates.sort((a, b) => b.score - a.score);
-    // Threshold for accepting match: >= 200 ensures strong verified match
-    if (candidates[0].score >= 200) {
-      return candidates[0].item;
+  // 4. Stage 2: Category-Scoped Fuse.js Search
+  if (targetFuse) {
+    for (const q of queriesToTest) {
+      if (q.length < 2) continue;
+      const fuseQuery = q.length > 32 ? q.slice(0, 32) : q;
+      const results = targetFuse.search(fuseQuery, { limit: 3 });
+      if (results.length > 0) {
+        const best = results[0];
+        if (best.score !== undefined && best.score <= 0.40) {
+          return best.item;
+        }
+      }
+    }
+  }
+
+  // 5. Stage 3: Global Fallback Fuse.js Search (Strict Threshold <= 0.22)
+  for (const q of queriesToTest) {
+    if (q.length < 3) continue;
+    const fuseQuery = q.length > 32 ? q.slice(0, 32) : q;
+    const results = globalFuse.search(fuseQuery, { limit: 1 });
+    if (results.length > 0) {
+      const best = results[0];
+      if (best.score !== undefined && best.score <= 0.22) {
+        return best.item;
+      }
     }
   }
 
@@ -458,7 +306,7 @@ export function calculateWeightGrams(amount: number, unit: string, item: Canonic
     tablespoon: 15,
     teaspoon: 5,
     cup: 200,
-    clove: 4,
+    clove: 3,
     piece: 100,
     pinch: 0.5,
     slice: 30,
@@ -471,7 +319,6 @@ export function calculateWeightGrams(amount: number, unit: string, item: Canonic
     return amount * globalDefaults[normUnit];
   }
 
-  // 4. Default: assume 100g per piece/unit if completely unknown
   return amount * 100;
 }
 
@@ -492,7 +339,9 @@ export function matchAndEnrichIngredient(ingredient: Ingredient, groupCategory?:
     ingredient.name,
     ingredient.baseName,
     effectiveCategory,
-    ingredient.synonyms
+    ingredient.synonyms,
+    ingredient.searchQueries,
+    ingredient.parentIngredient
   );
 
   if (!match) {
