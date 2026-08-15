@@ -90,6 +90,13 @@ const recipeSchema = {
                     type: FunctionDeclarationSchemaType.STRING,
                   },
                 },
+                searchQueries: {
+                  type: FunctionDeclarationSchemaType.ARRAY,
+                  description: '2-3 prioritized German search phrases from specific product name to generic base food for matching with the German food database (BLS). E.g. for "Magerquark": ["Magerquark", "Speisequark mager", "Quark"]; for "geriebener Gouda": ["Gouda gerieben", "Gouda"]; for "Hähnchenbrustfilet": ["Hähnchenbrustfilet", "Hähnchen Brustfilet", "Hühnerbrust"]; for "Haferflocken": ["Haferflocken", "Hafer Flocken"].',
+                  items: {
+                    type: FunctionDeclarationSchemaType.STRING,
+                  },
+                },
                 parentIngredient: {
                   type: FunctionDeclarationSchemaType.OBJECT,
                   description: 'Set ONLY if this ingredient is a derived component/part that is NOT bought separately as its own package in stores (e.g. for "Eigelb" or "Eiweiß", parentIngredient MUST be { "name": "Ei", "baseName": "egg", "unit": "Stück" }; for "Zitronenabrieb" or "Zitronensaft", parentIngredient MUST be { "name": "Zitrone", "baseName": "lemon", "unit": "Stück" }; for "Knoblauchzehe", parentIngredient MUST be { "name": "Knoblauch", "baseName": "garlic", "unit": "Zehe" }). Leave empty or null if the ingredient is already a standalone primary grocery item sold separately in stores (e.g. "Hähnchenbrust", "Hähnchenkeule", "Rinderhackfleisch", "Butter", "Parmesan" MUST leave parentIngredient empty/null).',

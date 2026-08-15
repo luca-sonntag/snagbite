@@ -9,6 +9,7 @@ export interface Ingredient {
   name: string;
   baseName?: string;
   synonyms?: string[];
+  searchQueries?: string[];
   parentIngredient?: ParentIngredientInfo;
   replacedOriginal?: string;
   amount: number;
