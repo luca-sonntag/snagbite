@@ -6,18 +6,28 @@ import {
 } from './errorCodes';
 
 export const IngredientCategory = {
-  PRODUCE: 'PRODUCE',
-  BAKERY: 'BAKERY',
+  // New standardized Swiss DB main categories
+  VEGETABLES: 'VEGETABLES',
+  FRUITS: 'FRUITS',
+  DAIRY_EGGS: 'DAIRY_EGGS',
   MEAT_POULTRY: 'MEAT_POULTRY',
   SEAFOOD: 'SEAFOOD',
-  DAIRY_EGGS: 'DAIRY_EGGS',
-  PANTRY: 'PANTRY',
   GRAINS_PASTA: 'GRAINS_PASTA',
+  OILS_CONDIMENTS: 'OILS_CONDIMENTS',
   SPICES_HERBS: 'SPICES_HERBS',
+  NUTS_SEEDS: 'NUTS_SEEDS',
+  SWEETS_SNACKS: 'SWEETS_SNACKS',
+  BEVERAGES: 'BEVERAGES',
+  PANTRY_BAKING: 'PANTRY_BAKING',
+  PREPARED_DISHES: 'PREPARED_DISHES',
+
+  // Legacy categories for backward compatibility
+  PRODUCE: 'PRODUCE',
+  BAKERY: 'BAKERY',
+  PANTRY: 'PANTRY',
   BAKING: 'BAKING',
   CONDIMENTS_OILS: 'CONDIMENTS_OILS',
   FROZEN: 'FROZEN',
-  BEVERAGES: 'BEVERAGES',
   OTHER: 'OTHER'
 } as const;
 
@@ -27,45 +37,77 @@ export type SupportedLanguage = 'de' | 'en';
 
 export const categoryTranslations: Record<SupportedLanguage, Record<IngredientCategory, string>> = {
   de: {
-    [IngredientCategory.PRODUCE]: 'Obst & Gemüse',
-    [IngredientCategory.BAKERY]: 'Brot & Backwaren',
+    [IngredientCategory.VEGETABLES]: 'Gemüse, Pilze & Salate',
+    [IngredientCategory.FRUITS]: 'Obst, Früchte & Beeren',
+    [IngredientCategory.DAIRY_EGGS]: 'Milchprodukte & Eier',
     [IngredientCategory.MEAT_POULTRY]: 'Fleisch & Geflügel',
     [IngredientCategory.SEAFOOD]: 'Fisch & Meeresfrüchte',
-    [IngredientCategory.DAIRY_EGGS]: 'Molkereiprodukte & Eier',
-    [IngredientCategory.PANTRY]: 'Konserven & Vorrat',
-    [IngredientCategory.GRAINS_PASTA]: 'Getreide & Nudeln',
+    [IngredientCategory.GRAINS_PASTA]: 'Getreide, Nudeln & Brot',
+    [IngredientCategory.OILS_CONDIMENTS]: 'Öle, Saucen & Essig',
     [IngredientCategory.SPICES_HERBS]: 'Gewürze & Kräuter',
+    [IngredientCategory.NUTS_SEEDS]: 'Nüsse & Samen',
+    [IngredientCategory.SWEETS_SNACKS]: 'Süßwaren & Snacks',
+    [IngredientCategory.BEVERAGES]: 'Getränke',
+    [IngredientCategory.PANTRY_BAKING]: 'Backzutaten & Vorrat',
+    [IngredientCategory.PREPARED_DISHES]: 'Fertiggerichte',
+
+    // Legacy
+    [IngredientCategory.PRODUCE]: 'Obst & Gemüse',
+    [IngredientCategory.BAKERY]: 'Brot & Backwaren',
+    [IngredientCategory.PANTRY]: 'Konserven & Vorrat',
     [IngredientCategory.BAKING]: 'Backzutaten',
     [IngredientCategory.CONDIMENTS_OILS]: 'Saucen & Öle',
     [IngredientCategory.FROZEN]: 'Tiefkühlkost',
-    [IngredientCategory.BEVERAGES]: 'Getränke',
     [IngredientCategory.OTHER]: 'Sonstiges',
   },
   en: {
+    [IngredientCategory.VEGETABLES]: 'Vegetables & Mushrooms',
+    [IngredientCategory.FRUITS]: 'Fruits & Berries',
+    [IngredientCategory.DAIRY_EGGS]: 'Dairy & Eggs',
+    [IngredientCategory.MEAT_POULTRY]: 'Meat & Poultry',
+    [IngredientCategory.SEAFOOD]: 'Fish & Seafood',
+    [IngredientCategory.GRAINS_PASTA]: 'Grains, Pasta & Bread',
+    [IngredientCategory.OILS_CONDIMENTS]: 'Oils, Sauces & Vinegar',
+    [IngredientCategory.SPICES_HERBS]: 'Spices & Herbs',
+    [IngredientCategory.NUTS_SEEDS]: 'Nuts & Seeds',
+    [IngredientCategory.SWEETS_SNACKS]: 'Sweets & Snacks',
+    [IngredientCategory.BEVERAGES]: 'Beverages',
+    [IngredientCategory.PANTRY_BAKING]: 'Baking & Pantry',
+    [IngredientCategory.PREPARED_DISHES]: 'Prepared Dishes',
+
+    // Legacy
     [IngredientCategory.PRODUCE]: 'Produce',
     [IngredientCategory.BAKERY]: 'Bakery',
-    [IngredientCategory.MEAT_POULTRY]: 'Meat & Poultry',
-    [IngredientCategory.SEAFOOD]: 'Seafood',
-    [IngredientCategory.DAIRY_EGGS]: 'Dairy & Eggs',
     [IngredientCategory.PANTRY]: 'Pantry & Canned Goods',
-    [IngredientCategory.GRAINS_PASTA]: 'Grains & Pasta',
-    [IngredientCategory.SPICES_HERBS]: 'Spices & Herbs',
     [IngredientCategory.BAKING]: 'Baking',
     [IngredientCategory.CONDIMENTS_OILS]: 'Condiments & Oils',
     [IngredientCategory.FROZEN]: 'Frozen Foods',
-    [IngredientCategory.BEVERAGES]: 'Beverages',
     [IngredientCategory.OTHER]: 'Other',
   }
 };
 
 // Map legacy category names (German or generic English) to English enum keys for backward compatibility
 export const legacyCategoryMap: Record<string, IngredientCategory> = {
+  'gemüse': IngredientCategory.VEGETABLES,
+  'gemüse, pilze & salate': IngredientCategory.VEGETABLES,
+  'vegetables': IngredientCategory.VEGETABLES,
+  'obst': IngredientCategory.FRUITS,
+  'früchte': IngredientCategory.FRUITS,
+  'obst & früchte': IngredientCategory.FRUITS,
+  'fruits': IngredientCategory.FRUITS,
+  'nüsse': IngredientCategory.NUTS_SEEDS,
+  'nüsse & samen': IngredientCategory.NUTS_SEEDS,
+  'nuts & seeds': IngredientCategory.NUTS_SEEDS,
+  'süßigkeiten': IngredientCategory.SWEETS_SNACKS,
+  'süßwaren & snacks': IngredientCategory.SWEETS_SNACKS,
+  'sweets & snacks': IngredientCategory.SWEETS_SNACKS,
+  'fertiggerichte': IngredientCategory.PREPARED_DISHES,
+  'prepared dishes': IngredientCategory.PREPARED_DISHES,
   'obst & gemüse': IngredientCategory.PRODUCE,
   'obst und gemüse': IngredientCategory.PRODUCE,
-  'gemüse': IngredientCategory.PRODUCE,
-  'frische kräuter': IngredientCategory.PRODUCE,
-  'brot & backwaren': IngredientCategory.BAKERY,
-  'backwaren': IngredientCategory.BAKERY,
+  'frische kräuter': IngredientCategory.VEGETABLES,
+  'brot & backwaren': IngredientCategory.GRAINS_PASTA,
+  'backwaren': IngredientCategory.GRAINS_PASTA,
   'fleisch & geflügel': IngredientCategory.MEAT_POULTRY,
   'fleisch': IngredientCategory.MEAT_POULTRY,
   'geflügel': IngredientCategory.MEAT_POULTRY,
@@ -76,20 +118,20 @@ export const legacyCategoryMap: Record<string, IngredientCategory> = {
   'käse & molkereiprodukte': IngredientCategory.DAIRY_EGGS,
   'milchprodukte': IngredientCategory.DAIRY_EGGS,
   'eier': IngredientCategory.DAIRY_EGGS,
-  'konserven & vorrat': IngredientCategory.PANTRY,
-  'konserven': IngredientCategory.PANTRY,
-  'vorrat': IngredientCategory.PANTRY,
-  'vorratskammer': IngredientCategory.PANTRY,
+  'konserven & vorrat': IngredientCategory.PANTRY_BAKING,
+  'konserven': IngredientCategory.PANTRY_BAKING,
+  'vorrat': IngredientCategory.PANTRY_BAKING,
+  'vorratskammer': IngredientCategory.PANTRY_BAKING,
   'getreide & nudeln': IngredientCategory.GRAINS_PASTA,
   'getreide': IngredientCategory.GRAINS_PASTA,
   'nudeln': IngredientCategory.GRAINS_PASTA,
   'gewürze & kräuter': IngredientCategory.SPICES_HERBS,
   'gewürze': IngredientCategory.SPICES_HERBS,
-  'backzutaten': IngredientCategory.BAKING,
-  'saucen & öle': IngredientCategory.CONDIMENTS_OILS,
-  'öle & saucen': IngredientCategory.CONDIMENTS_OILS,
-  'öle': IngredientCategory.CONDIMENTS_OILS,
-  'saucen': IngredientCategory.CONDIMENTS_OILS,
+  'backzutaten': IngredientCategory.PANTRY_BAKING,
+  'saucen & öle': IngredientCategory.OILS_CONDIMENTS,
+  'öle & saucen': IngredientCategory.OILS_CONDIMENTS,
+  'öle': IngredientCategory.OILS_CONDIMENTS,
+  'saucen': IngredientCategory.OILS_CONDIMENTS,
   'tiefkühlkost': IngredientCategory.FROZEN,
   'getränke': IngredientCategory.BEVERAGES,
   'sonstiges': IngredientCategory.OTHER,
@@ -120,35 +162,51 @@ export function translateCategory(category: string, lang: SupportedLanguage = 'd
 
 // Fixed sorting order for supermarket layout
 export const categoryOrder: IngredientCategory[] = [
+  IngredientCategory.VEGETABLES,
+  IngredientCategory.FRUITS,
   IngredientCategory.PRODUCE,
-  IngredientCategory.BAKERY,
-  IngredientCategory.PANTRY,
-  IngredientCategory.GRAINS_PASTA,
-  IngredientCategory.SPICES_HERBS,
   IngredientCategory.DAIRY_EGGS,
   IngredientCategory.MEAT_POULTRY,
   IngredientCategory.SEAFOOD,
-  IngredientCategory.BAKING,
+  IngredientCategory.GRAINS_PASTA,
+  IngredientCategory.BAKERY,
+  IngredientCategory.OILS_CONDIMENTS,
   IngredientCategory.CONDIMENTS_OILS,
+  IngredientCategory.SPICES_HERBS,
+  IngredientCategory.NUTS_SEEDS,
+  IngredientCategory.SWEETS_SNACKS,
+  IngredientCategory.PANTRY_BAKING,
+  IngredientCategory.BAKING,
+  IngredientCategory.PANTRY,
+  IngredientCategory.PREPARED_DISHES,
   IngredientCategory.FROZEN,
   IngredientCategory.BEVERAGES,
   IngredientCategory.OTHER
 ];
 
-// Icons for each category (legacy)
+// Icons for each category
 export const categoryIcons: Record<IngredientCategory, string> = {
-  [IngredientCategory.PRODUCE]: '🥦',
-  [IngredientCategory.BAKERY]: '🍞',
+  [IngredientCategory.VEGETABLES]: '🥦',
+  [IngredientCategory.FRUITS]: '🍎',
+  [IngredientCategory.DAIRY_EGGS]: '🥛',
   [IngredientCategory.MEAT_POULTRY]: '🥩',
   [IngredientCategory.SEAFOOD]: '🐟',
-  [IngredientCategory.DAIRY_EGGS]: '🥛',
-  [IngredientCategory.PANTRY]: '🥫',
   [IngredientCategory.GRAINS_PASTA]: '🍝',
+  [IngredientCategory.OILS_CONDIMENTS]: '🍶',
   [IngredientCategory.SPICES_HERBS]: '🧂',
+  [IngredientCategory.NUTS_SEEDS]: '🥜',
+  [IngredientCategory.SWEETS_SNACKS]: '🍫',
+  [IngredientCategory.BEVERAGES]: '🥤',
+  [IngredientCategory.PANTRY_BAKING]: '🥣',
+  [IngredientCategory.PREPARED_DISHES]: '🍱',
+
+  // Legacy
+  [IngredientCategory.PRODUCE]: '🥦',
+  [IngredientCategory.BAKERY]: '🍞',
+  [IngredientCategory.PANTRY]: '🥫',
   [IngredientCategory.BAKING]: '🥣',
   [IngredientCategory.CONDIMENTS_OILS]: '🍶',
   [IngredientCategory.FROZEN]: '❄️',
-  [IngredientCategory.BEVERAGES]: '🥤',
   [IngredientCategory.OTHER]: '🛍️',
 };
 
@@ -173,6 +231,60 @@ export interface CategoryTheme {
 
 // Dedicated accent colors for each supermarket aisle/category
 export const categoryColors: Record<IngredientCategory, CategoryTheme> = {
+  [IngredientCategory.VEGETABLES]: {
+    barClass: 'bg-emerald-500',
+    hex: '#10b981',
+  },
+  [IngredientCategory.FRUITS]: {
+    barClass: 'bg-rose-400',
+    hex: '#fb7185',
+  },
+  [IngredientCategory.DAIRY_EGGS]: {
+    barClass: 'bg-blue-500',
+    hex: '#3b82f6',
+  },
+  [IngredientCategory.MEAT_POULTRY]: {
+    barClass: 'bg-rose-600',
+    hex: '#e11d48',
+  },
+  [IngredientCategory.SEAFOOD]: {
+    barClass: 'bg-cyan-500',
+    hex: '#06b6d4',
+  },
+  [IngredientCategory.GRAINS_PASTA]: {
+    barClass: 'bg-amber-500',
+    hex: '#f59e0b',
+  },
+  [IngredientCategory.OILS_CONDIMENTS]: {
+    barClass: 'bg-violet-500',
+    hex: '#8b5cf6',
+  },
+  [IngredientCategory.SPICES_HERBS]: {
+    barClass: 'bg-teal-500',
+    hex: '#14b8a6',
+  },
+  [IngredientCategory.NUTS_SEEDS]: {
+    barClass: 'bg-orange-400',
+    hex: '#fb923c',
+  },
+  [IngredientCategory.SWEETS_SNACKS]: {
+    barClass: 'bg-pink-500',
+    hex: '#ec4899',
+  },
+  [IngredientCategory.BEVERAGES]: {
+    barClass: 'bg-lime-500',
+    hex: '#84cc16',
+  },
+  [IngredientCategory.PANTRY_BAKING]: {
+    barClass: 'bg-amber-700',
+    hex: '#b45309',
+  },
+  [IngredientCategory.PREPARED_DISHES]: {
+    barClass: 'bg-indigo-500',
+    hex: '#6366f1',
+  },
+
+  // Legacy
   [IngredientCategory.PRODUCE]: {
     barClass: 'bg-emerald-500',
     hex: '#10b981',
@@ -181,29 +293,9 @@ export const categoryColors: Record<IngredientCategory, CategoryTheme> = {
     barClass: 'bg-amber-500',
     hex: '#f59e0b',
   },
-  [IngredientCategory.MEAT_POULTRY]: {
-    barClass: 'bg-rose-500',
-    hex: '#f43f5e',
-  },
-  [IngredientCategory.SEAFOOD]: {
-    barClass: 'bg-cyan-500',
-    hex: '#06b6d4',
-  },
-  [IngredientCategory.DAIRY_EGGS]: {
-    barClass: 'bg-blue-500',
-    hex: '#3b82f6',
-  },
   [IngredientCategory.PANTRY]: {
     barClass: 'bg-orange-500',
     hex: '#f97316',
-  },
-  [IngredientCategory.GRAINS_PASTA]: {
-    barClass: 'bg-yellow-500',
-    hex: '#eab308',
-  },
-  [IngredientCategory.SPICES_HERBS]: {
-    barClass: 'bg-teal-500',
-    hex: '#14b8a6',
   },
   [IngredientCategory.BAKING]: {
     barClass: 'bg-pink-500',
@@ -216,10 +308,6 @@ export const categoryColors: Record<IngredientCategory, CategoryTheme> = {
   [IngredientCategory.FROZEN]: {
     barClass: 'bg-sky-400',
     hex: '#38bdf8',
-  },
-  [IngredientCategory.BEVERAGES]: {
-    barClass: 'bg-lime-500',
-    hex: '#84cc16',
   },
   [IngredientCategory.OTHER]: {
     barClass: 'bg-slate-400',

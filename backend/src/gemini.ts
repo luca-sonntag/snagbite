@@ -51,20 +51,21 @@ const recipeSchema = {
         properties: {
           name: {
             type: FunctionDeclarationSchemaType.STRING,
-            description: 'The uppercase category key for the supermarket department.',
+            description: 'The uppercase category key for the supermarket department (e.g. VEGETABLES for fresh vegetables/salads/mushrooms/fresh herbs, FRUITS for fresh/dried fruit/berries, DAIRY_EGGS for milk/cheese/yogurt/cream/butter/eggs/tofu/plant milk, MEAT_POULTRY for meat/chicken/sausage/vegan meat, SEAFOOD for fish/shrimp, GRAINS_PASTA for pasta/rice/flour/dough/bread/oats/potatoes/legumes, OILS_CONDIMENTS for cooking oils/vinegar/dressings/sauces, SPICES_HERBS for salt/pepper/dried spices, NUTS_SEEDS for nuts/seeds/avocado, SWEETS_SNACKS for sugar/honey/chocolate/cookies/ice cream/chips, BEVERAGES for drinks/juices/coffee/tea/alcohol, PANTRY_BAKING for yeast/baking powder/gelatine/protein powder, PREPARED_DISHES for ready-made meals, or OTHER).',
             enum: [
-              'PRODUCE',
-              'BAKERY',
+              'VEGETABLES',
+              'FRUITS',
+              'DAIRY_EGGS',
               'MEAT_POULTRY',
               'SEAFOOD',
-              'DAIRY_EGGS',
-              'PANTRY',
               'GRAINS_PASTA',
+              'OILS_CONDIMENTS',
               'SPICES_HERBS',
-              'BAKING',
-              'CONDIMENTS_OILS',
-              'FROZEN',
+              'NUTS_SEEDS',
+              'SWEETS_SNACKS',
               'BEVERAGES',
+              'PANTRY_BAKING',
+              'PREPARED_DISHES',
               'OTHER'
             ]
           },
