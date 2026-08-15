@@ -11,6 +11,7 @@ import type { Job } from './types.js';
 import { config } from './config.js';
 import { AppError, serializeJobError } from './errors.js';
 import { notificationTick } from './notifications/worker.js';
+import { enrichRecipeWithCanonicalIngredients } from './matching/ingredientMatcher.js';
 
 const workerId = randomUUID();
 let activeJobs = 0;
@@ -103,6 +104,9 @@ async function processJob(job: Job): Promise<void> {
       recipe.parentJobId = parentJob.id;
       recipe.parentRecipeTitle = parentJob.recipe.title;
       recipe.remixPrompt = job.prompt || null;
+
+      // Canonical ingredient normalization & nutritional calculation
+      enrichRecipeWithCanonicalIngredients(recipe);
 
       await updateJob(jobId, { status: 'completed', recipe, error: null });
       return;
@@ -304,6 +308,9 @@ async function processJob(job: Job): Promise<void> {
 
     // Assign unique recipe ID equal to jobId
     recipe.id = jobId;
+
+    // Canonical ingredient normalization & nutritional calculation
+    enrichRecipeWithCanonicalIngredients(recipe);
 
     // 7. Update job as completed
     await updateJob(jobId, {
