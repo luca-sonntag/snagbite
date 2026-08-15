@@ -72,6 +72,29 @@ export interface Recipe {
   parentJobId?: string | null;
   parentRecipeTitle?: string | null;
   remixPrompt?: string | null;
+  geminiUsage?: GeminiUsageInfo;
+}
+
+export interface GeminiTokenUsage {
+  promptTokens: number;
+  candidateTokens: number;
+  totalTokens: number;
+}
+
+export interface GeminiCostEstimate {
+  inputCostUsd: number;
+  outputCostUsd: number;
+  totalCostUsd: number;
+  totalCostFormatted: string;
+  pricingTier?: string;
+  pricingKnown?: boolean;
+}
+
+export interface GeminiUsageInfo {
+  tokenUsage?: GeminiTokenUsage;
+  costEstimate?: GeminiCostEstimate;
+  durationMs?: number;
+  model?: string;
 }
 
 export type JobStatus = 'pending' | 'scraping' | 'processing' | 'completed' | 'failed';

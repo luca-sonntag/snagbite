@@ -564,12 +564,20 @@ ${caption.trim() ? `\nDescription/Caption:\n"""\n${caption}\n"""` : ''}${htmlCon
       }
       : undefined;
     const costEstimate = tokenUsage ? estimateCost(config.GEMINI_MODEL, tokenUsage) : undefined;
+    const durationMs = Date.now() - startTime;
+
+    recipe.geminiUsage = {
+      tokenUsage,
+      costEstimate,
+      durationMs,
+      model: config.GEMINI_MODEL,
+    };
 
     void writeGeminiLog({
       timestamp,
       requestType: 'extract_recipe',
       model: config.GEMINI_MODEL,
-      durationMs: Date.now() - startTime,
+      durationMs,
       success: true,
       input: {
         audioFilePath,
