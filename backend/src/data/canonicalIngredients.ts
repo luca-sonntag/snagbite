@@ -1524,7 +1524,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "rind gehacktes mager roh",
       "rind",
       "rind gehacktes",
-      "hackfleisch"
+      "hackfleisch",
+      "ground beef",
+      "minced beef",
+      "rinderhack",
+      "rinderhackfleisch",
+      "minced meat"
     ]
   },
   {
@@ -1551,7 +1556,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "rind gehacktes gebraten",
       "rind",
       "rind gehacktes",
-      "hackfleisch"
+      "hackfleisch",
+      "ground beef",
+      "minced beef",
+      "rinderhack",
+      "rinderhackfleisch",
+      "minced meat"
     ]
   },
   {
@@ -1573,7 +1583,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "rind gehacktes roh",
       "rind",
       "rind gehacktes",
-      "hackfleisch"
+      "hackfleisch",
+      "ground beef",
+      "minced beef",
+      "rinderhack",
+      "rinderhackfleisch",
+      "minced meat"
     ]
   },
   {
@@ -2738,7 +2753,13 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "bread for toasting white made",
       "bread for toasting",
       "bread for toasting white",
-      "toastbrot"
+      "toastbrot",
+      "cooking oil",
+      "speiseöl",
+      "speiseoel",
+      "pflanzenöl",
+      "öl",
+      "oil"
     ]
   },
   {
@@ -10093,7 +10114,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "greyerzer at least 45% fidm",
       "greyerzer",
       "greyerzer vollfett",
-      "gruyère"
+      "gruyère",
+      "geriebener käse",
+      "streukäse",
+      "reibekäse",
+      "shredded cheese",
+      "grated cheese"
     ]
   },
   {
@@ -10246,7 +10272,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "aliases": [
       "ham cooked",
       "ham",
-      "hinterschinken"
+      "hinterschinken",
+      "kochschinken",
+      "cooked ham",
+      "vorderschinken"
     ]
   },
   {
@@ -12125,7 +12154,13 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     },
     "aliases": [
       "madeleine biscuit",
-      "madeleine"
+      "madeleine",
+      "cooking oil",
+      "speiseöl",
+      "speiseoel",
+      "pflanzenöl",
+      "öl",
+      "oil"
     ]
   },
   {
@@ -12471,7 +12506,13 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "mashed potatoes prepared",
       "mashed potatoes",
       "kartoffelstock zubereitet",
-      "kartoffelstock"
+      "kartoffelstock",
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -13088,7 +13129,13 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "minced meat average of beef veal",
       "gehacktes gebraten",
       "gehacktes durchschnitt aus rind",
-      "gehacktes durchschnitt aus rind kalb"
+      "gehacktes durchschnitt aus rind kalb",
+      "ground beef",
+      "minced beef",
+      "rinderhack",
+      "rinderhackfleisch",
+      "hackfleisch",
+      "minced meat"
     ]
   },
   {
@@ -13109,7 +13156,13 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "minced meat average of beef veal",
       "gehacktes roh",
       "gehacktes durchschnitt aus rind",
-      "gehacktes durchschnitt aus rind kalb"
+      "gehacktes durchschnitt aus rind kalb",
+      "ground beef",
+      "minced beef",
+      "rinderhack",
+      "rinderhackfleisch",
+      "hackfleisch",
+      "minced meat"
     ]
   },
   {
@@ -16306,7 +16359,10 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "pork ham from shoulder cooked",
       "pork",
       "pork ham from shoulder",
-      "vorderschinken"
+      "vorderschinken",
+      "kochschinken",
+      "cooked ham",
+      "hinterschinken"
     ]
   },
   {
@@ -16600,7 +16656,13 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "porridge prepared",
       "porridge",
       "haferbrei zubereitet",
-      "haferbrei"
+      "haferbrei",
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -18398,7 +18460,13 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "rice pudding prepared",
       "rice pudding",
       "milchreis zubereitet",
-      "milchreis"
+      "milchreis",
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -18694,7 +18762,11 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "rolled smoked ham cooked",
       "rolled smoked ham",
       "rollschinken gekocht",
-      "rollschinken"
+      "rollschinken",
+      "kochschinken",
+      "cooked ham",
+      "hinterschinken",
+      "vorderschinken"
     ]
   },
   {
@@ -20624,7 +20696,13 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "semolina pudding prepared",
       "semolina pudding",
       "griessbrei zubereitet",
-      "griessbrei"
+      "griessbrei",
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -20674,7 +20752,13 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "semolina slice prepared",
       "semolina slice",
       "griessschnitte zubereitet",
-      "griessschnitte"
+      "griessschnitte",
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -25402,7 +25486,13 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     },
     "aliases": [
       "whole milk powder",
-      "vollmilchpulver"
+      "vollmilchpulver",
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -25429,7 +25519,13 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "whole milk 3.5 % fat",
       "vollmilch standardisiert 3.5% fett uht",
       "vollmilch",
-      "vollmilch standardisiert"
+      "vollmilch standardisiert",
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -25454,7 +25550,13 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "whole milk pasteurized",
       "whole milk",
       "vollmilch pasteurisiert",
-      "vollmilch"
+      "vollmilch",
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -25479,7 +25581,13 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "whole milk uht",
       "whole milk",
       "vollmilch uht",
-      "vollmilch"
+      "vollmilch",
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -26115,7 +26223,12 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "aliases": [
       "yogurt natural",
       "joghurt nature",
-      "joghurt"
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -26471,7 +26584,11 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
       "yogurt",
       "joghurt nature mager",
       "joghurt",
-      "joghurt nature"
+      "joghurt nature",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {

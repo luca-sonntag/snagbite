@@ -92,6 +92,35 @@ describe('Ingredient Matcher & Normalizer', () => {
       if (sweetener) {
         assert.notEqual(sweetener.category, 'BEVERAGES');
       }
+
+      // 5. Greek yogurt should match plain nature yogurt, NEVER strawberry / fruit yogurt
+      const greekYogurt = findCanonicalIngredient('Griechischer Joghurt', 'greek yogurt', 'DAIRY_EGGS');
+      assert.ok(greekYogurt);
+      assert.ok(!greekYogurt.name_de.toLowerCase().includes('erdbeer'));
+      assert.ok(greekYogurt.name_de.toLowerCase().includes('nature') || greekYogurt.name_de.toLowerCase().includes('joghurt'));
+
+      // 6. Soy cream (plant-based) should NEVER match animal heavy cow cream (Vollrahm)
+      const soyCream = findCanonicalIngredient('Soja Sahne', 'soy cream', 'DAIRY_EGGS');
+      assert.equal(soyCream, null);
+
+      // 7. Almond flour (nut flour) should NEVER match wheat Knöpflimehl
+      const almondFlour = findCanonicalIngredient('Mandelmehl', 'almond flour', 'PANTRY_BAKING');
+      assert.equal(almondFlour, null);
+
+      // 8. Ground beef / Rinderhack should match minced beef
+      const groundBeef = findCanonicalIngredient('Rinderhack', 'ground beef', 'MEAT_POULTRY');
+      assert.ok(groundBeef);
+      assert.ok(groundBeef.name_de.toLowerCase().includes('gehacktes') || groundBeef.name_en.toLowerCase().includes('minced'));
+
+      // 9. Cooked ham / Kochschinken should match Hinterschinken gekocht
+      const cookedHam = findCanonicalIngredient('Kochschinken', 'cooked ham', 'MEAT_POULTRY');
+      assert.ok(cookedHam);
+      assert.ok(cookedHam.name_de.toLowerCase().includes('gekocht') || cookedHam.name_en.toLowerCase().includes('cooked'));
+
+      // 10. Cooking oil / Speiseöl should match Pflanzenöl, not Hanföl
+      const oil = findCanonicalIngredient('Öl', 'cooking oil', 'OILS_CONDIMENTS');
+      assert.ok(oil);
+      assert.ok(oil.name_de.toLowerCase().includes('pflanzenöl') || oil.name_en.toLowerCase().includes('vegetable'));
     });
   });
 

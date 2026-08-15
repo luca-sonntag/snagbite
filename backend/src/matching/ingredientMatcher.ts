@@ -37,8 +37,6 @@ const COMPATIBLE_CATEGORY_PAIRS = new Set([
   'OILS_CONDIMENTS:DAIRY_EGGS',
   'SWEETS_SNACKS:PANTRY_BAKING',
   'PANTRY_BAKING:SWEETS_SNACKS',
-  'SWEETS_SNACKS:DAIRY_EGGS',
-  'DAIRY_EGGS:SWEETS_SNACKS',
 ]);
 
 for (const item of CANONICAL_INGREDIENTS) {
@@ -152,6 +150,23 @@ const GENERIC_FOOD_FORMS = new Set([
   'flakes',
   'stuecke',
   'stücke',
+  'mehl',
+  'flour',
+  'samen',
+  'seed',
+  'seeds',
+  'öl',
+  'oil',
+  'oel',
+  'joghurt',
+  'yogurt',
+  'käse',
+  'cheese',
+  'cream',
+  'sahne',
+  'rahm',
+  'eis',
+  'glace',
 ]);
 
 /**
@@ -335,7 +350,24 @@ export function findCanonicalIngredient(rawName: string, baseName?: string, expe
           }
         }
 
-        // 2. Specificity (mager / low fat)
+        // 2. Flavored vs Plain Dairy Guard
+        const itemCombined = (itemNameDe + ' ' + itemNameEn).toLowerCase();
+        const DAIRY_FLAVORS = ['erdbeer', 'strawberry', 'mokka', 'mocha', 'schoko', 'chocolate', 'früchte', 'fruit', 'aprikose', 'apricot', 'birne', 'pear', 'waldbeeren', 'berries', 'himbeer', 'raspberry'];
+        const isItemFlavored = DAIRY_FLAVORS.some(f => itemCombined.includes(f));
+        const isQueryFlavored = DAIRY_FLAVORS.some(f => queryCombined.includes(f));
+        if (isItemFlavored && !isQueryFlavored && (item.category === 'DAIRY_EGGS' || item.category === 'SWEETS_SNACKS')) {
+          matchScore -= 300; // Penalize fruit/flavored varieties when plain is requested
+        }
+
+        // 3. Plant vs Animal Dairy Guard
+        const PLANT_QUALIFIERS = ['soja', 'soy', 'mandel', 'almond', 'hafer', 'oat', 'vegan', 'pflanzlich', 'plant', 'kokos', 'coconut', 'reis', 'rice milk', 'cashew'];
+        const isQueryPlant = PLANT_QUALIFIERS.some(p => queryCombined.includes(p));
+        const isItemPlant = PLANT_QUALIFIERS.some(p => itemCombined.includes(p)) || itemCombined.includes('tofu') || itemCombined.includes('pflanz');
+        if (isQueryPlant && !isItemPlant && item.category === 'DAIRY_EGGS') {
+          matchScore -= 400; // Block cow's milk/cream/butter for plant queries
+        }
+
+        // 4. Specificity (mager / low fat)
         if (wantsMager) {
           if (itemNameDe.includes('mager') || itemNameEn.includes('lean') || itemNameEn.includes('low fat') || itemNameDe.includes('0.2%')) {
             matchScore += 80;

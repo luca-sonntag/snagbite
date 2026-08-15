@@ -407,6 +407,50 @@ function generateAliases(nameEn: string, nameDe: string, synEn?: string, synDe?:
     add('nudeln');
     add('teigwaren');
   }
+  if (combined.includes('rind') && (combined.includes('gehacktes') || combined.includes('minced'))) {
+    add('ground beef');
+    add('minced beef');
+    add('rinderhack');
+    add('rinderhackfleisch');
+    add('hackfleisch');
+    add('minced meat');
+  }
+  if (combined.includes('schinken') && (combined.includes('gekocht') || combined.includes('cooked'))) {
+    add('kochschinken');
+    add('cooked ham');
+    add('hinterschinken');
+    add('vorderschinken');
+  }
+  if (combined.includes('pflanzenöl') || combined.includes('vegetable oil')) {
+    add('cooking oil');
+    add('speiseöl');
+    add('speiseoel');
+    add('pflanzenöl');
+    add('öl');
+    add('oil');
+  }
+  if (combined.includes('joghurt, nature') || combined.includes('yogurt, plain') || combined.includes('vollmilch')) {
+    add('joghurt');
+    add('yogurt');
+    add('plain yogurt');
+    add('naturjoghurt');
+    add('greek yogurt');
+    add('griechischer joghurt');
+  }
+  if (combined.includes('gouda') || combined.includes('greyerzer') || combined.includes('gruyere')) {
+    add('geriebener käse');
+    add('streukäse');
+    add('reibekäse');
+    add('shredded cheese');
+    add('grated cheese');
+  }
+  if (combined.includes('wienerli') && (combined.includes('geflügel') || combined.includes('poulet') || combined.includes('pouletfleisch'))) {
+    add('geflügelwürstchen');
+    add('poulet wienerli');
+    add('wienerli poulet');
+    add('chicken sausage');
+    add('poulet sausage');
+  }
 
   return Array.from(aliases);
 }

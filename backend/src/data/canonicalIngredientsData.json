@@ -1480,7 +1480,12 @@
       "rind gehacktes mager roh",
       "rind",
       "rind gehacktes",
-      "hackfleisch"
+      "hackfleisch",
+      "ground beef",
+      "minced beef",
+      "rinderhack",
+      "rinderhackfleisch",
+      "minced meat"
     ]
   },
   {
@@ -1507,7 +1512,12 @@
       "rind gehacktes gebraten",
       "rind",
       "rind gehacktes",
-      "hackfleisch"
+      "hackfleisch",
+      "ground beef",
+      "minced beef",
+      "rinderhack",
+      "rinderhackfleisch",
+      "minced meat"
     ]
   },
   {
@@ -1529,7 +1539,12 @@
       "rind gehacktes roh",
       "rind",
       "rind gehacktes",
-      "hackfleisch"
+      "hackfleisch",
+      "ground beef",
+      "minced beef",
+      "rinderhack",
+      "rinderhackfleisch",
+      "minced meat"
     ]
   },
   {
@@ -2694,7 +2709,13 @@
       "bread for toasting white made",
       "bread for toasting",
       "bread for toasting white",
-      "toastbrot"
+      "toastbrot",
+      "cooking oil",
+      "speiseöl",
+      "speiseoel",
+      "pflanzenöl",
+      "öl",
+      "oil"
     ]
   },
   {
@@ -10049,7 +10070,12 @@
       "greyerzer at least 45% fidm",
       "greyerzer",
       "greyerzer vollfett",
-      "gruyère"
+      "gruyère",
+      "geriebener käse",
+      "streukäse",
+      "reibekäse",
+      "shredded cheese",
+      "grated cheese"
     ]
   },
   {
@@ -10202,7 +10228,10 @@
     "aliases": [
       "ham cooked",
       "ham",
-      "hinterschinken"
+      "hinterschinken",
+      "kochschinken",
+      "cooked ham",
+      "vorderschinken"
     ]
   },
   {
@@ -12081,7 +12110,13 @@
     },
     "aliases": [
       "madeleine biscuit",
-      "madeleine"
+      "madeleine",
+      "cooking oil",
+      "speiseöl",
+      "speiseoel",
+      "pflanzenöl",
+      "öl",
+      "oil"
     ]
   },
   {
@@ -12427,7 +12462,13 @@
       "mashed potatoes prepared",
       "mashed potatoes",
       "kartoffelstock zubereitet",
-      "kartoffelstock"
+      "kartoffelstock",
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -13044,7 +13085,13 @@
       "minced meat average of beef veal",
       "gehacktes gebraten",
       "gehacktes durchschnitt aus rind",
-      "gehacktes durchschnitt aus rind kalb"
+      "gehacktes durchschnitt aus rind kalb",
+      "ground beef",
+      "minced beef",
+      "rinderhack",
+      "rinderhackfleisch",
+      "hackfleisch",
+      "minced meat"
     ]
   },
   {
@@ -13065,7 +13112,13 @@
       "minced meat average of beef veal",
       "gehacktes roh",
       "gehacktes durchschnitt aus rind",
-      "gehacktes durchschnitt aus rind kalb"
+      "gehacktes durchschnitt aus rind kalb",
+      "ground beef",
+      "minced beef",
+      "rinderhack",
+      "rinderhackfleisch",
+      "hackfleisch",
+      "minced meat"
     ]
   },
   {
@@ -16262,7 +16315,10 @@
       "pork ham from shoulder cooked",
       "pork",
       "pork ham from shoulder",
-      "vorderschinken"
+      "vorderschinken",
+      "kochschinken",
+      "cooked ham",
+      "hinterschinken"
     ]
   },
   {
@@ -16556,7 +16612,13 @@
       "porridge prepared",
       "porridge",
       "haferbrei zubereitet",
-      "haferbrei"
+      "haferbrei",
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -18354,7 +18416,13 @@
       "rice pudding prepared",
       "rice pudding",
       "milchreis zubereitet",
-      "milchreis"
+      "milchreis",
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -18650,7 +18718,11 @@
       "rolled smoked ham cooked",
       "rolled smoked ham",
       "rollschinken gekocht",
-      "rollschinken"
+      "rollschinken",
+      "kochschinken",
+      "cooked ham",
+      "hinterschinken",
+      "vorderschinken"
     ]
   },
   {
@@ -20580,7 +20652,13 @@
       "semolina pudding prepared",
       "semolina pudding",
       "griessbrei zubereitet",
-      "griessbrei"
+      "griessbrei",
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -20630,7 +20708,13 @@
       "semolina slice prepared",
       "semolina slice",
       "griessschnitte zubereitet",
-      "griessschnitte"
+      "griessschnitte",
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -25358,7 +25442,13 @@
     },
     "aliases": [
       "whole milk powder",
-      "vollmilchpulver"
+      "vollmilchpulver",
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -25385,7 +25475,13 @@
       "whole milk 3.5 % fat",
       "vollmilch standardisiert 3.5% fett uht",
       "vollmilch",
-      "vollmilch standardisiert"
+      "vollmilch standardisiert",
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -25410,7 +25506,13 @@
       "whole milk pasteurized",
       "whole milk",
       "vollmilch pasteurisiert",
-      "vollmilch"
+      "vollmilch",
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -25435,7 +25537,13 @@
       "whole milk uht",
       "whole milk",
       "vollmilch uht",
-      "vollmilch"
+      "vollmilch",
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -26071,7 +26179,12 @@
     "aliases": [
       "yogurt natural",
       "joghurt nature",
-      "joghurt"
+      "joghurt",
+      "yogurt",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
@@ -26427,7 +26540,11 @@
       "yogurt",
       "joghurt nature mager",
       "joghurt",
-      "joghurt nature"
+      "joghurt nature",
+      "plain yogurt",
+      "naturjoghurt",
+      "greek yogurt",
+      "griechischer joghurt"
     ]
   },
   {
