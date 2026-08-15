@@ -13,10 +13,16 @@ export function useRecipeNutrition(recipe: Recipe) {
         (original.fat !== undefined && original.fat !== null && original.fat !== 0))
     );
 
+    const hasVerifiedIngredients = !!(
+      recipe.ingredients &&
+      recipe.ingredients.some((g) => g.items?.some((i) => i.isVerified))
+    );
+
     if (hasOriginal) {
       return {
         nutritionalValues: original,
         isAiEstimated: false,
+        isVerified: hasVerifiedIngredients,
         hasNutritionInfo: true,
       };
     }
@@ -66,6 +72,7 @@ export function useRecipeNutrition(recipe: Recipe) {
       return {
         nutritionalValues: calculated,
         isAiEstimated: true,
+        isVerified: hasVerifiedIngredients,
         hasNutritionInfo,
       };
     }
@@ -74,6 +81,7 @@ export function useRecipeNutrition(recipe: Recipe) {
     return {
       nutritionalValues: null,
       isAiEstimated: false,
+      isVerified: false,
       hasNutritionInfo: false,
     };
   }, [recipe]);

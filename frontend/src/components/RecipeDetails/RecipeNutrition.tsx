@@ -8,6 +8,7 @@ import { Lock, Flame } from 'lucide-react';
 interface RecipeNutritionProps {
   nutritionalValues: any;
   isAiEstimated: boolean;
+  isVerified?: boolean;
   showTotalNutrition?: boolean;
   onToggleTotalNutrition?: (isTotal: boolean) => void;
   getNutritionDisplayValue: (val: any, unit?: string, isTotal?: boolean, includeUnit?: boolean) => string;
@@ -16,6 +17,7 @@ interface RecipeNutritionProps {
 export default function RecipeNutrition({
   nutritionalValues,
   isAiEstimated,
+  isVerified,
   getNutritionDisplayValue
 }: RecipeNutritionProps) {
   const { t } = useI18n();
@@ -47,7 +49,12 @@ export default function RecipeNutrition({
               <span className={statLabel}>
                 {t('recipe.nutritionTitle')} ({t('recipe.nutritionPerServing')})
               </span>
-              {isAiEstimated && isPremium && <AiNotice type="badge" />}
+              {isAiEstimated && isPremium && (
+                <AiNotice
+                  type="badge"
+                  tooltipText={isVerified ? t('recipe.verifiedDatabaseTooltip') : undefined}
+                />
+              )}
             </div>
 
             {/* 4-column grid — calories prominent, macros secondary */}

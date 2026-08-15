@@ -66,7 +66,16 @@ export default function RecipeIngredients({
                 <span>{t('recipe.showNutritionPerIngredient')}</span>
                 {!isPremium && <Crown className="w-3 h-3 text-amber-500 fill-amber-500 ml-0.5" />}
               </button>
-              {isPremium && <AiNotice type="badge" tooltipText={t('recipe.aiIngredientsEstimateTooltip')} />}
+              {isPremium && (
+                <AiNotice
+                  type="badge"
+                  tooltipText={
+                    sortedIngredients.some(({ group }) => group.items.some((ing) => ing.isVerified))
+                      ? t('recipe.verifiedDatabaseTooltip')
+                      : t('recipe.aiIngredientsEstimateTooltip')
+                  }
+                />
+              )}
             </div>
           )}
         </div>

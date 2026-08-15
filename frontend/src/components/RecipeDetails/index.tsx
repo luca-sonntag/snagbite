@@ -332,7 +332,7 @@ export default function RecipeDetails({
   const progressPercent = totalStepsCount > 0 ? (completedStepsCount / totalStepsCount) * 100 : 0;
 
   // Get nutritional info (either reel-level or aggregated per-ingredient AI estimates)
-  const { nutritionalValues, isAiEstimated, hasNutritionInfo } = useRecipeNutrition(recipe);
+  const { nutritionalValues, isAiEstimated, isVerified, hasNutritionInfo } = useRecipeNutrition(recipe);
 
   // Prep + cook collapsed into the single figure shown in the meta strip. Both
   // fields may be legacy strings ("20 Min."), so pull the leading number out.
@@ -591,6 +591,7 @@ export default function RecipeDetails({
             onIncreaseServings={() => setServings(s => s + 1)}
             nutritionalValues={hasNutritionInfo ? nutritionalValues : null}
             isAiEstimated={isAiEstimated}
+            isVerified={isVerified}
             showTotalNutrition={showTotalNutrition}
             onToggleTotalNutrition={handleToggleTotalNutrition}
             getNutritionDisplayValue={getNutritionDisplayValue}

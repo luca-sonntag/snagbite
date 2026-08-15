@@ -13,6 +13,7 @@ interface RecipeInfoSectionProps {
   /** Nutrition block is omitted entirely when the recipe carries no values. */
   nutritionalValues: any | null;
   isAiEstimated: boolean;
+  isVerified?: boolean;
   showTotalNutrition: boolean;
   onToggleTotalNutrition: (isTotal: boolean) => void;
   getNutritionDisplayValue: (val: any, unit?: string, isTotal?: boolean, includeUnit?: boolean) => string;
@@ -31,6 +32,7 @@ export default function RecipeInfoSection({
   onIncreaseServings,
   nutritionalValues,
   isAiEstimated,
+  isVerified,
   showTotalNutrition,
   onToggleTotalNutrition,
   getNutritionDisplayValue,
@@ -78,6 +80,7 @@ export default function RecipeInfoSection({
             <RecipeNutrition
               nutritionalValues={nutritionalValues}
               isAiEstimated={isAiEstimated}
+              isVerified={isVerified}
               showTotalNutrition={showTotalNutrition}
               onToggleTotalNutrition={onToggleTotalNutrition}
               getNutritionDisplayValue={getNutritionDisplayValue}
