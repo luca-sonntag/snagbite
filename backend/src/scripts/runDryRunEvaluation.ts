@@ -5,7 +5,7 @@ import { getScraperForUrl } from '../scrapers/index.js';
 import { extractRecipe } from '../gemini.js';
 import { enrichRecipeWithCanonicalIngredients } from '../matching/ingredientMatcher.js';
 import { config } from '../config.js';
-import type { Recipe, ScrapeResult } from '../types.js';
+import type { Recipe } from '../types.js';
 
 interface EvalIngredientReport {
   rawName: string;
@@ -71,8 +71,8 @@ async function run() {
     }
   }
 
-  const TARGET_RECIPES = 20;
-  const CONCURRENCY = 3;
+  const TARGET_RECIPES = 5;
+  const CONCURRENCY = 2;
 
   // Create unique timestamped run directory inside eval_results
   const now = new Date();
@@ -115,8 +115,8 @@ async function run() {
       try {
         console.log(`[Worker ${workerId}] Processing URL (${idx + 1}/${uniqueUrls.length}): ${url}`);
         const scraper = getScraperForUrl(url);
-        const scrapeResult: ScrapeResult = await scraper.scrape(url, runDir);
-        console.log(`  [Worker ${workerId}] Scraped: "${scrapeResult.title || 'Untitled'}" (Platform: ${scrapeResult.platform}, Caption: ${(scrapeResult.caption || '').length} chars)`);
+        const scrapeResult = await scraper.scrape(url, runDir);
+        console.log(`  [Worker ${workerId}] Scraped: Caption ${(scrapeResult.caption || '').length} chars`);
 
         const recipe: Recipe = await extractRecipe(
           undefined,
@@ -125,7 +125,7 @@ async function run() {
           undefined,
           runDir,
           undefined,
-          scrapeResult.html || undefined,
+          scrapeResult.htmlContent || undefined,
           undefined
         );
 
@@ -253,7 +253,7 @@ async function run() {
   await Promise.all(workerPromises);
 
   // Cleanup temporary base scraping directory
-  await fs.rm(tempBaseDir, { recursive: true, force: true }).catch(() => {});
+  await fs.rm(tempBaseDir, { recursive: true, force: true }).catch(() => { });
 
   // Gemini cost analytics summary
   const avgCostPerRecipe = allReports.length > 0 ? totalGeminiCostUsd / allReports.length : 0;

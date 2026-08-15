@@ -80,13 +80,15 @@ Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()` (
 
 ---
 
-## 6. Kanonische Zutatennormalisierung & Nährwertberechnung (Schweizer Nährwertdatenbank)
+## 6. Kanonische Zutatennormalisierung & Nährwertberechnung (BLS 4.0 & Fuse.js)
 
-* **Referenz-Datenbank:** Basierend auf der offiziellen **Schweizer Nährwertdatenbank (V 7.1 Generic Foods)** des Bundesamts für Lebensmittelsicherheit und Veterinärwesen (BLV).
-* **Bilingualer Datensatz (`backend/src/data/canonicalIngredientsData.json` & `canonicalIngredients.ts`):** 1.216 laboranalytisch geprüfte generische Grundnahrungsmittel mit englischen (`name_en`) und deutschen (`name_de`) Bezeichnungen, Makronährwerten (`calories`, `protein`, `carbs`, `fat`, `fiber` pro 100g) und Dichten (`density`).
-* **Kulinarisches Einheitenwörterbuch (`standard_units`):** Standard-Stückgewichte in Gramm für stückweise Zutaten (z. B. 1 Zehe Knoblauch = 4g, 1 Ei = 55g, 1 Zwiebel = 110g, 1 EL Öl = 14g, 1 TL = 5g).
-* **Multi-Stage High-Precision Matching (`backend/src/matching/ingredientMatcher.ts`):**
-  1. **Stage 1 (O(1) Exact Index Lookup):** Priorisiert spezifische deutsche Namen (`rawName` wie `Magerquark`) vor übergeordneten englischen Bezeichnungen (`baseName` wie `quark`).
-  2. **Stage 2 (Precision Scored Word & Token Matching):** Token-basiertes Wortgrenzen-Matching mit Simplicity-Scoring (bevorzugt rohe/reine Grundzutaten gegenüber verarbeiteten Mischgerichten wie "Teigwarensalat mit..." oder "Pizzateig mit..."), Modifikator-Erkennung (`mager` / `lean` vs. `rahm` / `doppelrahm`) und Ausschluss generischer Stop-Words (`sauce`, `gericht`, `salat`).
-  3. **Fallback:** Bei ungelisteten exotischen Zutaten werden die Gemini-KI-Schätzwerte beibehalten und mit `isVerified: false` markiert.
+* **Referenz-Datenbank:** Basierend auf dem offiziellen **Bundeslebensmittelschlüssel (BLS 4.0)** des Bundesministeriums für Ernährung und Landwirtschaft (BMEL).
+* **Datensatz (`backend/src/data/canonicalIngredientsData.json` & `canonicalIngredients.ts`):** 7.140 laboranalytisch erfasste deutsche Grundnahrungsmittel mit vollständigen Makronährwerten (`calories`, `protein`, `carbs`, `fat`, `fiber` pro 100g) und 13 standardisierten Supermarkt-Kategorien.
+* **Kulinarisches Einheitenwörterbuch (`standard_units`):** Standard-Stückgewichte in Gramm für stückweise Zutaten (z. B. 1 Zehe Knoblauch = 3g, 1 Ei = 55g, 1 Zwiebel = 80g, 1 EL Öl = 12g, 1 TL = 4g).
+* **Kategorie-basierte Fuse.js Matching-Engine (`backend/src/matching/ingredientMatcher.ts`):**
+  1. **Stufe 1 (Parent Ingredient Priority):** Bei abgeleiteten Zutaten (z. B. Knoblauchzehe $\rightarrow$ Knoblauch, Zitronenabrieb $\rightarrow$ Zitrone) wird primär das Ausgangsprodukt gematcht.
+  2. **Stufe 2 (Gemini Search-Queries & Exact O(1) Lookup):** Schneller Map-Check über die von Gemini gelieferte Kaskade aus 2–3 priorisierten deutschen Suchbegriffen (`searchQueries: string[]`).
+  3. **Stufe 3 (Kategorie-Scoped Fuse.js Fuzzy Search):** Fehlertolerante Ähnlichkeitssuche innerhalb der jeweiligen Supermarkt-Kategorie (`threshold <= 0.40`).
+  4. **Stufe 4 (Global Fallback Search):** Strenge globale Suche (`threshold <= 0.22`) für ungekannte Kategorien.
+  5. **Fallback:** Bei ungelisteten exotischen Zutaten werden die Gemini-KI-Schätzwerte beibehalten und mit `isVerified: false` markiert.
 * **Rezept-Aggregation (`enrichRecipeWithCanonicalIngredients`):** Wird im Hintergrund-Worker (`backend/src/queue.ts`) für alle neuen Extraktionen und Remix-Jobs automatisch ausgeführt. Berechnet Nährwerte pro Zutat (`calories`, `protein`, `carbs`, `fat`, `isVerified`, `canonicalId`, `matchedName`) und aggregiert `recipe.nutritionalValues` pro Portion.

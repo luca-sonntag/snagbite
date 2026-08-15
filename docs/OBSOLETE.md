@@ -6,7 +6,20 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
-### 2026-08-15: pgvector & Cosine Similarity Embeddings durch deterministische Schweizer Nährwertdatenbank ersetzt
+### 2026-08-15: Schweizer Nährwertdatenbank & komplexe manuelle TS-Regex-Heuristiken durch BLS 4.0 & Fuse.js ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Schweizer Nährwertdatenbank V7.1 (~1.200 Einträge): Zu geringe Marktabdeckung für moderne deutsche Social-Media-Zutaten, viele falsche Treffer durch Dialektunterschiede (*Poulet, Rahm*).
+  - Komplexe handgeschriebene TypeScript-Heuristiken (Hunderte Zeilen Komposita-Guards, manuelle Head-Noun-Extraktion, Dairy-Flavor-Guards) in `backend/src/matching/ingredientMatcher.ts`.
+* **Ersetzt durch:**
+  - **Bundeslebensmittelschlüssel (BLS 4.0 mit 7.140 Einträgen):** Umfassender deutscher Standard-Datensatz mit genauen Nährwerten.
+  - **Gemini Search-Queries Kaskade (`searchQueries: string[]`):** Gemini generiert 2–3 priorisierte deutsche Suchbegriffe pro Zutat (vom spezifischen Produkt zum Grundlebensmittel).
+  - **Kategorie-basierte Fuse.js Matching-Engine:** Schnelle, mathematische Ähnlichkeitssuche mit Konfidenz-Scoring und 96%+ Trefferquote.
+* **Betroffene Dateien:** `backend/src/matching/ingredientMatcher.ts`, `backend/src/data/canonicalIngredientsData.json`, `backend/src/gemini.ts`, `backend/src/scripts/buildBLSIngredients.ts`.
+
+---
+
+### 2026-08-15: pgvector & Cosine Similarity Embeddings durch deterministische Nährwertdatenbank ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
   - Experimentelle pgvector-Vektorsuche und `text-embedding-004` Embeddings pro Einzelzutat (Branch `feature/food-data-nutritions`).
