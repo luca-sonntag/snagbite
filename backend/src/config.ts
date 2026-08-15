@@ -2,8 +2,9 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { existsSync } from 'fs';
 
-// Load .env file
+// Load .env file from project root or backend folder
 dotenv.config();
+dotenv.config({ path: path.resolve('backend', '.env') });
 
 export interface Config {
   PORT: number;

@@ -65,6 +65,34 @@ describe('Ingredient Matcher & Normalizer', () => {
       const exotic = findCanonicalIngredient('Unbekannte Geheimsauce', 'secret exotic sauce');
       assert.equal(exotic, null);
     });
+
+    test('prevents false positives using head noun and category scoping', () => {
+      // 1. Cherry tomato in VEGETABLES should never match Cherry liqueur (Kirsch) in BEVERAGES
+      const cherryTomato = findCanonicalIngredient('Kirschtomaten', 'cherry tomato', 'VEGETABLES');
+      if (cherryTomato) {
+        assert.notEqual(cherryTomato.category, 'BEVERAGES');
+        assert.ok(!cherryTomato.name_de.toLowerCase().includes('kirsch '));
+      }
+
+      // 2. Spring onion in VEGETABLES should never match Spring roll (Frühlingsrolle) in PREPARED_DISHES
+      const springOnion = findCanonicalIngredient('Frühlingszwiebeln', 'spring onion', 'VEGETABLES');
+      if (springOnion) {
+        assert.notEqual(springOnion.category, 'PREPARED_DISHES');
+        assert.ok(!springOnion.name_de.toLowerCase().includes('rolle'));
+      }
+
+      // 3. Protein powder in PANTRY_BAKING should never match a prepared burger/dish
+      const proteinPowder = findCanonicalIngredient('Proteinpulver', 'protein powder', 'PANTRY_BAKING');
+      if (proteinPowder) {
+        assert.notEqual(proteinPowder.category, 'PREPARED_DISHES');
+      }
+
+      // 4. Sweetener in SWEETS_SNACKS should never match Energy Drink in BEVERAGES
+      const sweetener = findCanonicalIngredient('Flüssigsüßstoff', 'liquid sweetener', 'SWEETS_SNACKS');
+      if (sweetener) {
+        assert.notEqual(sweetener.category, 'BEVERAGES');
+      }
+    });
   });
 
   describe('calculateWeightGrams', () => {
