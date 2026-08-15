@@ -6,6 +6,17 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-15: pgvector & Cosine Similarity Embeddings durch deterministische Schweizer Nährwertdatenbank ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Experimentelle pgvector-Vektorsuche und `text-embedding-004` Embeddings pro Einzelzutat (Branch `feature/food-data-nutritions`).
+  - Führte zu 8–15 sequenziellen LLM- & Embedding-API-Aufrufen pro Rezept, unvorhersehbarer Latenz (+8 bis +20 Sekunden) und Supabase Statement-Timeouts.
+* **Ersetzt durch:**
+  - **Deterministische Schweizer Nährwertdatenbank V7.1 (`backend/src/matching/ingredientMatcher.ts`):** 1.216 laborgeprüfte generische Lebensmittel mit bilingualem Mapping (DE/EN), kulinarischen Stückgewichten (`standard_units`) und O(1) Memory-Indexierung (< 1ms Matching-Latenz).
+* **Betroffene Dateien:** `backend/src/matching/ingredientMatcher.ts`, `backend/src/data/canonicalIngredients.ts`, `backend/src/queue.ts`.
+
+---
+
 ### 2026-08-15: Video-Download-Pipeline & fehlerhafte Textlängen-Heuristik (`caption.length < 40`) entfernt
 
 * **Ersetzter Code / Anti-Pattern:**

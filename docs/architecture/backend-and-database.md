@@ -77,3 +77,16 @@ Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()` (
 * **Hybrid Selection & Copy Generation:** Abendliches Worker-Intervall (`backend/src/notifications/worker.ts`) wählt deterministisch den besten Kandidaten (`pickBestCandidate`) basierend auf Inaktivität, Lieblings-Kategorien oder Rezept-Sammlungen aus. Gemini formuliert anschließend kurze, persönliche Push-Texte (`generateNotificationCopy`) mit Emoji & Gradient-Theme.
 * **FCM High-Priority Data-Only Payloads & Icon Generator:** `sendToToken` in `backend/src/push/fcm.ts` versendet reine Data-Payloads mit `title`, `body`, `iconUrl` (`GET /api/push-icon`) und `jobId`. Der PNG-Generator (`bannerGenerator.ts`) isoliert das erste valide Emoji, unterstützt Noto/Twemoji-Hex-Varianten (inkl. `\uFE0F` & ZWJ-Sequenzen) und fällt bei fehlendem Emoji auf themenspezifische Standard-Food-Emojis zurück.
 * **Nativer Android FCM Empfänger:** `MyFirebaseMessagingService.java` übernimmt den Empfang auf Android (sowohl im Vordergrund, Hintergrund als auch bei beendeter App via `tools:node="replace"`). Er erzeugt eine native Android-Notifikation mit `setLargeIcon()` (256x256 quadratisches Farbverlauf-PNG), `BigTextStyle`, folgt HTTP➔HTTPS-Redirects manuell und verwendet ein 10s-Timeout. Klick-Payloads werden an Capacitor für direkte Rezept-Navigation weitergereicht.
+
+---
+
+## 6. Kanonische Zutatennormalisierung & Nährwertberechnung (Schweizer Nährwertdatenbank)
+
+* **Referenz-Datenbank:** Basierend auf der offiziellen **Schweizer Nährwertdatenbank (V 7.1 Generic Foods)** des Bundesamts für Lebensmittelsicherheit und Veterinärwesen (BLV).
+* **Bilingualer Datensatz (`backend/src/data/canonicalIngredientsData.json` & `canonicalIngredients.ts`):** 1.216 laboranalytisch geprüfte generische Grundnahrungsmittel mit englischen (`name_en`) und deutschen (`name_de`) Bezeichnungen, Makronährwerten (`calories`, `protein`, `carbs`, `fat`, `fiber` pro 100g) und Dichten (`density`).
+* **Kulinarisches Einheitenwörterbuch (`standard_units`):** Standard-Stückgewichte in Gramm für stückweise Zutaten (z. B. 1 Zehe Knoblauch = 4g, 1 Ei = 55g, 1 Zwiebel = 110g, 1 EL Öl = 14g, 1 TL = 5g).
+* **Multi-Stage High-Precision Matching (`backend/src/matching/ingredientMatcher.ts`):**
+  1. **Stage 1 (O(1) Exact Index Lookup):** Priorisiert spezifische deutsche Namen (`rawName` wie `Magerquark`) vor übergeordneten englischen Bezeichnungen (`baseName` wie `quark`).
+  2. **Stage 2 (Precision Scored Word & Token Matching):** Token-basiertes Wortgrenzen-Matching mit Simplicity-Scoring (bevorzugt rohe/reine Grundzutaten gegenüber verarbeiteten Mischgerichten wie "Teigwarensalat mit..." oder "Pizzateig mit..."), Modifikator-Erkennung (`mager` / `lean` vs. `rahm` / `doppelrahm`) und Ausschluss generischer Stop-Words (`sauce`, `gericht`, `salat`).
+  3. **Fallback:** Bei ungelisteten exotischen Zutaten werden die Gemini-KI-Schätzwerte beibehalten und mit `isVerified: false` markiert.
+* **Rezept-Aggregation (`enrichRecipeWithCanonicalIngredients`):** Wird im Hintergrund-Worker (`backend/src/queue.ts`) für alle neuen Extraktionen und Remix-Jobs automatisch ausgeführt. Berechnet Nährwerte pro Zutat (`calories`, `protein`, `carbs`, `fat`, `isVerified`, `canonicalId`, `matchedName`) und aggregiert `recipe.nutritionalValues` pro Portion.
