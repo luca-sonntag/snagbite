@@ -48,7 +48,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "10533",
     "name_en": "Agar Agar",
     "name_de": "Agar Agar",
-    "category": "PANTRY",
+    "category": "PANTRY_BAKING",
     "nutrients_per_100g": {
       "calories": 160,
       "protein": 2.4,
@@ -65,7 +65,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "10536",
     "name_en": "Agave syrup",
     "name_de": "Agavensirup",
-    "category": "BAKING",
+    "category": "SWEETS_SNACKS",
     "density": 1.4,
     "nutrients_per_100g": {
       "calories": 310,
@@ -85,7 +85,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "273",
     "name_en": "Almond",
     "name_de": "Mandel",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 624,
       "protein": 25.6,
@@ -103,7 +103,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14113",
     "name_en": "Almond drink, plain",
     "name_de": "Mandelgetränk, nature",
-    "category": "BEVERAGES",
+    "category": "DAIRY_EGGS",
     "density": 1.1,
     "nutrients_per_100g": {
       "calories": 33,
@@ -124,7 +124,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14131",
     "name_en": "Almond drink, plain, with calcium and vitamin fortified",
     "name_de": "Mandelgetränk, nature, mit Calcium und Vitaminen angereichert",
-    "category": "BEVERAGES",
+    "category": "DAIRY_EGGS",
     "density": 1.1,
     "nutrients_per_100g": {
       "calories": 33,
@@ -147,7 +147,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "278",
     "name_en": "Almond, dry roasted, salted",
     "name_de": "Mandel, geröstet ohne Fett, gesalzen",
-    "category": "SPICES_HERBS",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 637,
       "protein": 25.4,
@@ -169,7 +169,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "269",
     "name_en": "Almond, roasted, salted",
     "name_de": "Mandel, geröstet, gesalzen",
-    "category": "SPICES_HERBS",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 649,
       "protein": 25.6,
@@ -191,7 +191,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13398",
     "name_en": "Amaranth, seed, cooked (without addition of fat and salt)",
     "name_de": "Amaranth, Samen, gekocht (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 119,
       "protein": 5,
@@ -217,7 +217,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13397",
     "name_en": "Amaranth, seed, raw",
     "name_de": "Amaranth, Samen, roh",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 376,
       "protein": 15.8,
@@ -238,7 +238,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "868",
     "name_en": "Amaretti (hard)",
     "name_de": "Amaretti (hart)",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 464,
       "protein": 8.8,
@@ -255,7 +255,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14295",
     "name_en": "Amaretti (soft)",
     "name_de": "Amaretti (weich)",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 464,
       "protein": 12.4,
@@ -272,7 +272,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "10532",
     "name_en": "Anchovis paste",
     "name_de": "Sardellenpaste",
-    "category": "PANTRY",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 272,
       "protein": 19.8,
@@ -325,7 +325,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "568",
     "name_en": "Apple juice",
     "name_de": "Apfelsaft",
-    "category": "PRODUCE",
+    "category": "BEVERAGES",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 48,
@@ -348,7 +348,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1480",
     "name_en": "Apple pie, homemade, baked (with cake dough)",
     "name_de": "Apfelwähe/-kuchen, hausgemacht, gebacken (mit Kuchenteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 162,
       "protein": 2.9,
@@ -374,7 +374,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1479",
     "name_en": "Apple pie, homemade, baked (with puff pastry)",
     "name_de": "Apfelwähe/-kuchen, hausgemacht, gebacken (mit Blätterteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 160,
       "protein": 2.7,
@@ -400,7 +400,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "378",
     "name_en": "Apple, fresh",
     "name_de": "Apfel, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 52,
       "protein": 0.3,
@@ -423,7 +423,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "435",
     "name_en": "Apple, peeled, dried",
     "name_de": "Apfel, geschält, getrocknet",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 264,
       "protein": 1.4,
@@ -449,7 +449,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1049",
     "name_en": "Apple, stewed, drained (without addition of sugar)",
     "name_de": "Apfel, gedünstet, abgetropft (ohne Zugabe von Zucker)",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 56,
       "protein": 0.3,
@@ -474,7 +474,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "627",
     "name_en": "Applesauce, sweetened, canned",
     "name_de": "Apfelmus, gezuckert (Konserve)",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 89,
       "protein": 0.3,
@@ -495,7 +495,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "628",
     "name_en": "Applesauce, unsweetened, canned",
     "name_de": "Apfelmus, ungezuckert (Konserve)",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 55,
       "protein": 0.3,
@@ -516,7 +516,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "621",
     "name_en": "Apricot in syrup, canned, drained",
     "name_de": "Aprikose in Sirup, Konserve, abgetropft",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 62,
       "protein": 0.9,
@@ -539,7 +539,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1482",
     "name_en": "Apricot pie, homemade, baked (with cake dough)",
     "name_de": "Aprikosenwähe/-kuchen, hausgemacht, gebacken (mit Kuchenteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 156,
       "protein": 3.3,
@@ -563,7 +563,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1481",
     "name_en": "Apricot pie, homemade, baked (with puff pastry)",
     "name_de": "Aprikosenwähe/-kuchen, hausgemacht, gebacken (mit Blätterteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 154,
       "protein": 3.1,
@@ -587,7 +587,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14097",
     "name_en": "Apricot with sweetener, canned, drained",
     "name_de": "Aprikose mit Süssungsmittel, Konserve, abgetropft",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 41,
       "protein": 0.9,
@@ -609,7 +609,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "469",
     "name_en": "Apricot, dried",
     "name_de": "Aprikose, getrocknet",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 239,
       "protein": 2.9,
@@ -631,7 +631,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "379",
     "name_en": "Apricot, raw",
     "name_de": "Aprikose, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 44,
       "protein": 0.8,
@@ -652,7 +652,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1051",
     "name_en": "Apricot, stewed, drained (without addition of sugar)",
     "name_de": "Aprikose, gedünstet, abgetropft (ohne Zugabe von Zucker)",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 45,
       "protein": 1,
@@ -680,7 +680,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13449",
     "name_en": "Artichoke, heart, canned, drained",
     "name_de": "Artischocken, Herz, abgetropft (Konserve)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 27,
       "protein": 1.8,
@@ -702,7 +702,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "443",
     "name_en": "Asparagus (white or green), raw",
     "name_de": "Spargel (weiss und grün), roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 26,
       "protein": 2.2,
@@ -722,7 +722,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1024",
     "name_en": "Asparagus (white or green), steamed (without addition of salt)",
     "name_de": "Spargel (weiss und grün), gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 25,
       "protein": 2,
@@ -747,7 +747,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14162",
     "name_en": "Asparagus, green, raw",
     "name_de": "Spargel, grün, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 26,
       "protein": 1.9,
@@ -769,7 +769,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14161",
     "name_en": "Asparagus, with, raw",
     "name_de": "Spargel, weiss, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 26,
       "protein": 2.4,
@@ -791,7 +791,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "380",
     "name_en": "Avocado, fresh",
     "name_de": "Avocado, roh",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 158,
       "protein": 1.6,
@@ -892,7 +892,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1577",
     "name_en": "Bami Goreng, prepared",
     "name_de": "Bami Goreng, zubereitet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 130,
       "protein": 13.5,
@@ -911,7 +911,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "741",
     "name_en": "Banana, dried",
     "name_de": "Banane, getrocknet",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 273,
       "protein": 3,
@@ -934,7 +934,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "740",
     "name_en": "Banana, dried (banana chips)",
     "name_de": "Banane, gedörrt",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 370,
       "protein": 3.9,
@@ -958,7 +958,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "381",
     "name_en": "Banana, raw",
     "name_de": "Banane, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 90,
       "protein": 1.1,
@@ -981,7 +981,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13937",
     "name_en": "Barbecue sauce",
     "name_de": "Barbecue Grillsauce",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 1.1,
     "nutrients_per_100g": {
       "calories": 131,
@@ -1018,7 +1018,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1587",
     "name_en": "Barley risotto, cooked",
     "name_de": "Gerstotto, gekocht",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 134,
       "protein": 3.2,
@@ -1038,7 +1038,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "464",
     "name_en": "Basil, raw",
     "name_de": "Basilikum, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 46,
       "protein": 3.1,
@@ -1058,7 +1058,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1248",
     "name_en": "Basler Leckerli (Swiss biscuit from Basel)",
     "name_de": "Basler Leckerli",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 412,
       "protein": 7.5,
@@ -1075,7 +1075,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "473",
     "name_en": "Bean, green, dried",
     "name_de": "Bohne, grün, getrocknet",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 318,
       "protein": 20.2,
@@ -1098,7 +1098,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "353",
     "name_en": "Bean, green, raw",
     "name_de": "Bohne, grün, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 32,
       "protein": 1.9,
@@ -1121,7 +1121,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "12981",
     "name_en": "Béchamel sauce, home-made",
     "name_de": "Béchamelsauce, hausgemacht",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 146,
       "protein": 4.2,
@@ -1162,7 +1162,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1672",
     "name_en": "Beef ragout with sauce, prepared",
     "name_de": "Rindsragout mit Sauce, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 90,
       "protein": 12.3,
@@ -1859,7 +1859,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "451",
     "name_en": "Beetroot, raw",
     "name_de": "Rande, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 48,
       "protein": 1.7,
@@ -1880,7 +1880,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1019",
     "name_en": "Beetroot, steamed (without addition of salt)",
     "name_de": "Rande, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 56,
       "protein": 2,
@@ -1906,7 +1906,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "359",
     "name_en": "Bell pepper, green, raw",
     "name_de": "Peperoni, grün, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 22,
       "protein": 0.9,
@@ -1932,7 +1932,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1017",
     "name_en": "Bell pepper, green, stewed (without addition of fat and salt)",
     "name_de": "Peperoni, grün, gedünstet (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 27,
       "protein": 1.1,
@@ -1958,7 +1958,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "360",
     "name_en": "Bell pepper, red, raw",
     "name_de": "Peperoni, rot, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 32,
       "protein": 0.9,
@@ -1984,7 +1984,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1018",
     "name_en": "Bell pepper, red, stewed (without addition of fat and salt)",
     "name_de": "Peperoni, rot, gedünstet (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 39,
       "protein": 1.1,
@@ -2010,7 +2010,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "851",
     "name_en": "Berliner pastry",
     "name_de": "Berliner",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 329,
       "protein": 6.2,
@@ -2090,7 +2090,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1122",
     "name_en": "Berries (average), cooked (without addition of sugar)",
     "name_de": "Beeren (Durchschnitt), gekocht (ohne Zugabe von Zucker)",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 38,
       "protein": 0.9,
@@ -2115,7 +2115,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1119",
     "name_en": "Berries (average), raw",
     "name_de": "Beeren (Durchschnitt), roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 43,
       "protein": 0.9,
@@ -2135,7 +2135,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "859",
     "name_en": "Biber (Ginger bread type, filled with almond and/or hazelnut)",
     "name_de": "Biber (Mandel- und/oder Haselnussfüllung)",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 392,
       "protein": 8.5,
@@ -2177,7 +2177,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1198",
     "name_en": "Birchermüesli, prepared (no sugar added)",
     "name_de": "Birchermüesli, zubereitet (ungezuckert)",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 86,
       "protein": 2.6,
@@ -2201,7 +2201,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "862",
     "name_en": "Birnwegge, pastry with pear",
     "name_de": "Birnwegge",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 363,
       "protein": 4.9,
@@ -2221,7 +2221,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "881",
     "name_en": "Biscuit Willisau",
     "name_de": "Willisauer Ringli",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 380,
       "protein": 5.5,
@@ -2239,7 +2239,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "883",
     "name_en": "Black forest cake",
     "name_de": "Schwarzwälder Kirschtorte",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 258,
       "protein": 4.5,
@@ -2275,7 +2275,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "452",
     "name_en": "Black salsify, raw",
     "name_de": "Schwarzwurzel, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 54,
       "protein": 1.4,
@@ -2295,7 +2295,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1023",
     "name_en": "Black salsify, steamed (without addition of salt)",
     "name_de": "Schwarzwurzel, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 56,
       "protein": 1.5,
@@ -2320,7 +2320,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1485",
     "name_en": "Blackberry pie, homemade (with sweet short pastry base)",
     "name_de": "Brombeerwähe/-kuchen, hausgemacht (mit süssem Mürbeteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 215,
       "protein": 3.2,
@@ -2340,7 +2340,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1596",
     "name_en": "Blackberry pie, homemade, baked (with cake dough)",
     "name_de": "Brombeerwähe/-kuchen, hausgemacht, gebacken (mit Kuchenteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 158,
       "protein": 3.5,
@@ -2363,7 +2363,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1594",
     "name_en": "Blackberry pie, homemade, baked (with puff pastry)",
     "name_de": "Brombeerwähe/-kuchen, hausgemacht, gebacken (mit Blätterteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 156,
       "protein": 3.3,
@@ -2386,7 +2386,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "383",
     "name_en": "Blackberry, fresh",
     "name_de": "Brombeere, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 47,
       "protein": 1.1,
@@ -2448,7 +2448,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14101",
     "name_en": "Blueberry, freeze-dried",
     "name_de": "Heidelbeere, gefriergetrocknet",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 338,
       "protein": 6.1,
@@ -2468,7 +2468,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "389",
     "name_en": "Blueberry, raw",
     "name_de": "Heidelbeere, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 51,
       "protein": 0.9,
@@ -2488,7 +2488,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1697",
     "name_en": "Boiling meat salad, prepared",
     "name_de": "Siedfleischsalat, zubereitet",
-    "category": "PRODUCE",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 203,
       "protein": 15,
@@ -2508,7 +2508,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "668",
     "name_en": "Bouillon, meat, prepared",
     "name_de": "Bouillon, Fleisch, zubereitet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 5,
@@ -2530,7 +2530,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "665",
     "name_en": "Bouillon, poultry, prepared",
     "name_de": "Bouillon, Geflügel, zubereitet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 5,
@@ -2552,7 +2552,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "664",
     "name_en": "Bouillon, vegetable, prepared",
     "name_de": "Bouillon, Gemüse, zubereitet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 6,
@@ -2623,7 +2623,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "279",
     "name_en": "Brazil nut",
     "name_de": "Paranuss",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 698,
       "protein": 17,
@@ -2804,7 +2804,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14038",
     "name_en": "Bread roll with chocolate",
     "name_de": "Schoggibrötli",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 366,
       "protein": 8.6,
@@ -2871,7 +2871,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "750",
     "name_en": "Breadcrumbs",
     "name_de": "Paniermehl",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 373,
       "protein": 12.7,
@@ -2942,7 +2942,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "351",
     "name_en": "Broccoli, raw",
     "name_de": "Broccoli, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 39,
       "protein": 3.6,
@@ -2961,7 +2961,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1005",
     "name_en": "Broccoli, steamed (without addition of salt)",
     "name_de": "Broccoli, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 35,
       "protein": 3.3,
@@ -3029,7 +3029,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "864",
     "name_en": "Brunsli (chocolate cookie), homemade",
     "name_de": "Brunsli, hausgemacht",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 515,
       "protein": 14.9,
@@ -3048,7 +3048,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1021",
     "name_en": "Brussel sprouts, steamed (without addition of salt)",
     "name_de": "Rosenkohl, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 37,
       "protein": 3.6,
@@ -3073,7 +3073,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "363",
     "name_en": "Brussels sprouts, raw",
     "name_de": "Rosenkohl, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 41,
       "protein": 4,
@@ -3093,7 +3093,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "420",
     "name_en": "Buckwheat flour",
     "name_de": "Buchweizenmehl",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 343,
       "protein": 12,
@@ -3116,7 +3116,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "421",
     "name_en": "Buckwheat, grain peeled",
     "name_de": "Buchweizen, Korn geschält",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 341,
       "protein": 13.1,
@@ -3205,7 +3205,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "901",
     "name_en": "Butter cake",
     "name_de": "Cake, nature Gleichschwer, hausgemacht",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 430,
       "protein": 6.9,
@@ -3281,7 +3281,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "49",
     "name_en": "Butter of choice",
     "name_de": "Vorzugsbutter",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 746,
       "protein": 0.7,
@@ -3304,7 +3304,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "191",
     "name_en": "Butter, 40% fat",
     "name_de": "Halbfettbutter",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 391,
       "protein": 4.8,
@@ -3327,7 +3327,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "60",
     "name_en": "Butter, cheese dairy",
     "name_de": "Käsereibutter",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 747,
       "protein": 0.4,
@@ -3350,7 +3350,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "50",
     "name_en": "Butter, clarified",
     "name_de": "Bratbutter",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 885,
       "protein": 0.1,
@@ -3373,7 +3373,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14297",
     "name_en": "Butter, salted",
     "name_de": "Butter, gesalzen",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 732,
       "protein": 0.7,
@@ -3396,7 +3396,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "448",
     "name_en": "Butterhead lettuce, raw",
     "name_de": "Kopfsalat, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 16,
       "protein": 1.3,
@@ -3452,7 +3452,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "10582",
     "name_en": "Cabbage vegetables (average), boiled (without addition of salt and fat)",
     "name_de": "Kohlgemüse (Durchschnitt), gekocht (ohne Zugabe von Salz und Fett)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 31,
       "protein": 2.1,
@@ -3477,7 +3477,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1167",
     "name_en": "Cabbage vegetables (average), raw",
     "name_de": "Kohlgemüse (Durchschnitt), roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 32,
       "protein": 2.2,
@@ -3497,7 +3497,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1176",
     "name_en": "Cake dough (with butter), raw",
     "name_de": "Kuchenteig (mit Butter), ungebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 375,
       "protein": 6.7,
@@ -3523,7 +3523,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "906",
     "name_en": "Cake dough (with vegetable fat), raw",
     "name_de": "Kuchenteig (mit pflanzlichem Fett), ungebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 394,
       "protein": 6.6,
@@ -3544,7 +3544,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13417",
     "name_en": "Cake dough, whole (with butter), raw",
     "name_de": "Kuchenteig, Vollkorn (mit Butter), ungebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 372,
       "protein": 7.6,
@@ -3571,7 +3571,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13416",
     "name_en": "Cake dough, whole (with vegetable fat), raw",
     "name_de": "Kuchenteig, Vollkorn (mit pflanzichem Fett), ungebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 359,
       "protein": 7.6,
@@ -3593,7 +3593,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "877",
     "name_en": "Cake financier",
     "name_de": "Cake Financier",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 440,
       "protein": 11.1,
@@ -3611,7 +3611,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "916",
     "name_en": "Cake with carrots",
     "name_de": "Rüeblitorte",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 303,
       "protein": 11.1,
@@ -3706,7 +3706,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13486",
     "name_en": "Candied chestnut",
     "name_de": "Kandierte Kastanien",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 316,
       "protein": 0.9,
@@ -3724,7 +3724,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "856",
     "name_en": "Candied lemon peel",
     "name_de": "Zitronat",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 289,
       "protein": 0.4,
@@ -3747,7 +3747,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "855",
     "name_en": "Candied orange peel",
     "name_de": "Orangeat",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 306,
       "protein": 0.4,
@@ -3769,7 +3769,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "953",
     "name_en": "Candy, toffee",
     "name_de": "Rahmkaramellen",
-    "category": "PRODUCE",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 351,
       "protein": 0.4,
@@ -3788,7 +3788,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1644",
     "name_en": "Cannelloni filled with meat, prepared",
     "name_de": "Cannelloni mit Fleischfüllung, zubereitet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 191,
       "protein": 9.8,
@@ -3808,7 +3808,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1646",
     "name_en": "Cannelloni filled with spinach and ricotta, prepared",
     "name_de": "Cannelloni mit Spinat-Ricotta-Füllung, zubereitet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 221,
       "protein": 7.8,
@@ -3828,7 +3828,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14282",
     "name_en": "Capers, pickled in vinegar",
     "name_de": "Kapern, in Essig eingelegt",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 38,
       "protein": 2.2,
@@ -3873,7 +3873,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1692",
     "name_en": "Capuns, prepared",
     "name_de": "Capuns, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 166,
       "protein": 8.1,
@@ -3893,7 +3893,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14060",
     "name_en": "Carnival pastry",
     "name_de": "Fasnachtschüechli",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 553,
       "protein": 11.5,
@@ -3911,7 +3911,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "566",
     "name_en": "Carrot juice",
     "name_de": "Karottensaft",
-    "category": "PRODUCE",
+    "category": "BEVERAGES",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 32,
@@ -3935,7 +3935,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "355",
     "name_en": "Carrot, raw",
     "name_de": "Karotte, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 42,
       "protein": 0.6,
@@ -3961,7 +3961,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1002",
     "name_en": "Carrot, steamed (without addition of salt)",
     "name_de": "Karotte, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 44,
       "protein": 0.7,
@@ -3986,7 +3986,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "275",
     "name_en": "Cashew nut",
     "name_de": "Cashewnuss",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 619,
       "protein": 21.5,
@@ -4005,7 +4005,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "350",
     "name_en": "Cauliflower, raw",
     "name_de": "Blumenkohl, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 26,
       "protein": 1.8,
@@ -4025,7 +4025,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1004",
     "name_en": "Cauliflower, steamed (without addition of salt)",
     "name_de": "Blumenkohl, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 26,
       "protein": 1.8,
@@ -4050,7 +4050,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1660",
     "name_en": "Celeriac piccata, prepared",
     "name_de": "Sellerie-Piccata, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 136,
       "protein": 5.4,
@@ -4070,7 +4070,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1655",
     "name_en": "Celeriac slices, breaded, prepared",
     "name_de": "Selleriescheiben, paniert, zubereitet",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 139,
       "protein": 4.7,
@@ -4092,7 +4092,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "357",
     "name_en": "Celeriac, raw",
     "name_de": "Knollensellerie, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 32,
       "protein": 1.4,
@@ -4112,7 +4112,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1013",
     "name_en": "Celeriac, steamed",
     "name_de": "Knollensellerie, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 32,
       "protein": 1.4,
@@ -4137,7 +4137,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "366",
     "name_en": "Celery, raw",
     "name_de": "Stangensellerie, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 18,
       "protein": 0.6,
@@ -4157,7 +4157,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1026",
     "name_en": "Celery, steamed (without addition of salt)",
     "name_de": "Stangensellerie, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 19,
       "protein": 0.6,
@@ -4182,7 +4182,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13448",
     "name_en": "Cereal bar, with chocolate coating",
     "name_de": "Getreideriegel mit Schokoladeüberzug",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 460,
       "protein": 8.7,
@@ -4201,7 +4201,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13488",
     "name_en": "Cereal bar, without cover and filling",
     "name_de": "Getreideriegel, ohne Ueberzug und Füllung",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 418,
       "protein": 8.2,
@@ -4346,7 +4346,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "376",
     "name_en": "Chanterelle, raw",
     "name_de": "Eierschwamm, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 24,
       "protein": 2.3,
@@ -4367,7 +4367,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1038",
     "name_en": "Chanterelle, stewed (without addition of fat and salt)",
     "name_de": "Eierschwamm, gedünstet (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 28,
       "protein": 2.6,
@@ -4393,7 +4393,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1569",
     "name_en": "Cheese and sausage salad, prepared",
     "name_de": "Wurst-Käse-Salat, zubereitet",
-    "category": "PRODUCE",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 262,
       "protein": 13.8,
@@ -4418,7 +4418,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1601",
     "name_en": "Cheese bread slices, prepared",
     "name_de": "Käseschnitte, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 270,
       "protein": 13.6,
@@ -4514,7 +4514,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14024",
     "name_en": "Cheeseburger",
     "name_de": "Cheeseburger",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 281,
       "protein": 13.2,
@@ -4531,7 +4531,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "882",
     "name_en": "Cherry pie from Zug",
     "name_de": "Zuger Kirschtorte",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 307,
       "protein": 5.8,
@@ -4549,7 +4549,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1546",
     "name_en": "Cherry pie, homemade, baked (with cake dough)",
     "name_de": "Kirschenwähe/-kuchen, hausgemacht, gebacken (mit Kuchenteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 169,
       "protein": 3.3,
@@ -4572,7 +4572,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1545",
     "name_en": "Cherry pie, homemade, baked (with puff pastry)",
     "name_de": "Kirschenwähe/-kuchen, hausgemacht, gebacken (mit Blätterteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 167,
       "protein": 3.1,
@@ -4595,7 +4595,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "394",
     "name_en": "Cherry, raw",
     "name_de": "Kirsche, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 62,
       "protein": 0.8,
@@ -4615,7 +4615,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1052",
     "name_en": "Cherry, stewed, drained (without addition of sugar)",
     "name_de": "Kirsche, gedünstet, abgetropft (ohne Zugabe von Zucker)",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 58,
       "protein": 0.9,
@@ -4642,7 +4642,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14300",
     "name_en": "Chestnut puree (for vermicelli)",
     "name_de": "Marroni-Püree (für Vermicelles)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 219,
       "protein": 2.1,
@@ -4660,7 +4660,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "272",
     "name_en": "Chestnut, raw",
     "name_de": "Edelkastanie, roh",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 190,
       "protein": 2.9,
@@ -4681,7 +4681,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14301",
     "name_en": "Chestnut, roasted",
     "name_de": "Edelkastanie, geröstet",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 210,
       "protein": 3.9,
@@ -4701,7 +4701,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13457",
     "name_en": "Chia seed",
     "name_de": "Chia-Samen",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 482,
       "protein": 21.4,
@@ -4968,7 +4968,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13460",
     "name_en": "Chickenburger",
     "name_de": "Burger mit Poulet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 247,
       "protein": 12.7,
@@ -4986,7 +4986,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1059",
     "name_en": "Chickpea, cooked (without addition of fat and salt)",
     "name_de": "Kichererbse, gekocht (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 131,
       "protein": 7.3,
@@ -5011,7 +5011,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "439",
     "name_en": "Chickpea, dried",
     "name_de": "Kichererbse, getrocknet",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 338,
       "protein": 18.6,
@@ -5031,7 +5031,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "447",
     "name_en": "Chicory, raw",
     "name_de": "Chicorée, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 20,
       "protein": 1.1,
@@ -5052,7 +5052,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1006",
     "name_en": "Chicory, steamed (without addition of salt)",
     "name_de": "Chicorée, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 20,
       "protein": 1.1,
@@ -5078,7 +5078,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1648",
     "name_en": "Chili con carne, prepared",
     "name_de": "Chili con carne, zubereitet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 118,
       "protein": 10.2,
@@ -5097,7 +5097,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "437",
     "name_en": "Chinese cabbage, raw",
     "name_de": "Chinakohl, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 14,
       "protein": 1.4,
@@ -5120,7 +5120,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1007",
     "name_en": "Chinese cabbage, stewed (without addition of fat and salt)",
     "name_de": "Chinakohl, gedünstet (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 14,
       "protein": 1.3,
@@ -5148,7 +5148,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "374",
     "name_en": "Chives, fresh",
     "name_de": "Schnittlauch, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 30,
       "protein": 3,
@@ -5168,7 +5168,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "889",
     "name_en": "Chocolate cake/ ring cake/ -muffin",
     "name_de": "Schokoladencake/ -gugelhopf/ -muffin, hausgemacht",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 424,
       "protein": 8.1,
@@ -5187,7 +5187,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14008",
     "name_en": "Chocolate cookie",
     "name_de": "Cookie, Schokolade",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 502,
       "protein": 6.5,
@@ -5206,7 +5206,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14214",
     "name_en": "Chocolate drink, with sugar, powder",
     "name_de": "Kakaogetränk, gezuckert, Pulver",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 386,
       "protein": 6.5,
@@ -5233,7 +5233,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14230",
     "name_en": "Chocolate fondant",
     "name_de": "Schokoladenkuchen, feucht, hausgemacht",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 503,
       "protein": 6.3,
@@ -5254,7 +5254,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14035",
     "name_en": "Chocolate meringues",
     "name_de": "Schümliguetzli",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 444,
       "protein": 4.2,
@@ -5275,7 +5275,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14039",
     "name_en": "Chocolate meringues with chocolate base",
     "name_de": "Schümliguetzli mit Schokolade",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 486,
       "protein": 5.2,
@@ -5294,7 +5294,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14302",
     "name_en": "Chocolate mousse, home made",
     "name_de": "Schokoladenmousse, hausgemacht",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 338,
       "protein": 5.2,
@@ -5314,7 +5314,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "960",
     "name_en": "Chocolate powder",
     "name_de": "Schokoladenpulver",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 398,
       "protein": 5.3,
@@ -5332,7 +5332,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "807",
     "name_en": "Chocolate sauce",
     "name_de": "Schokoladencrème",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 122,
       "protein": 3.6,
@@ -5350,7 +5350,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "196",
     "name_en": "Chocolate, dark",
     "name_de": "Schokolade, dunkel (bitter)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 537,
       "protein": 5.7,
@@ -5370,7 +5370,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "197",
     "name_en": "Chocolate, white",
     "name_de": "Schokolade, weiss",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 567,
       "protein": 6.7,
@@ -5459,7 +5459,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "867",
     "name_en": "Chräbeli (aniseed cookie), homemade",
     "name_de": "Chräbeli (Anisgebäck), hausgemacht",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 366,
       "protein": 8.6,
@@ -5540,7 +5540,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "876",
     "name_en": "Cinnamon cookie, star-shaped, homemade",
     "name_de": "Zimtstern, hausgemacht",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 505,
       "protein": 14.2,
@@ -5561,7 +5561,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1126",
     "name_en": "Citrus fruits (average), raw",
     "name_de": "Zitrusfrüchte (Durchschnitt), roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 40,
       "protein": 0.8,
@@ -5581,7 +5581,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1683",
     "name_en": "Cocktail sauce with rapeseed mayonnaise, home-made",
     "name_de": "Cocktailsauce mit Rapsöl-Mayonnaise, hausgemacht",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 697,
       "protein": 2.3,
@@ -5605,7 +5605,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14303",
     "name_en": "Coco macaroon",
     "name_de": "Kokosmakrone",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 474,
       "protein": 5.8,
@@ -5623,7 +5623,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "888",
     "name_en": "Coco macaroon, homemade",
     "name_de": "Kokosmakrone, hausgemacht",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 549,
       "protein": 6.9,
@@ -5643,7 +5643,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14220",
     "name_en": "Cocoa beverage, with sugar, prepared (with milk)",
     "name_de": "Kakaogetränk, gezuckert, zubereitet (mit Milch)",
-    "category": "DAIRY_EGGS",
+    "category": "BEVERAGES",
     "nutrients_per_100g": {
       "calories": 81,
       "protein": 3.4,
@@ -5670,7 +5670,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "978",
     "name_en": "Cocoa powder, deoiled, without sugar",
     "name_de": "Kakaopulver, entölt, ohne Zucker",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 343,
       "protein": 24.8,
@@ -5697,7 +5697,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "581",
     "name_en": "Cocoa powder, without sugar",
     "name_de": "Kakaopulver, ohne Zucker",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 380,
       "protein": 22.4,
@@ -5722,7 +5722,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "284",
     "name_en": "Coconut",
     "name_de": "Kokosnuss",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 384,
       "protein": 4.6,
@@ -5740,7 +5740,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14124",
     "name_en": "Coconut drink, plain",
     "name_de": "Kokosnussgetränk, nature",
-    "category": "BEVERAGES",
+    "category": "DAIRY_EGGS",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 22,
@@ -5761,7 +5761,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14132",
     "name_en": "Coconut drink, plain with calcium and vitamin fortified",
     "name_de": "Kokosnussgetränk, nature mit Calcium und Vitaminen angereichert",
-    "category": "BEVERAGES",
+    "category": "DAIRY_EGGS",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 22,
@@ -5782,7 +5782,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "601",
     "name_en": "Coconut fat",
     "name_de": "Kokosfett",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 894,
       "protein": 0.8,
@@ -5799,7 +5799,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13458",
     "name_en": "Coconut milk",
     "name_de": "Kokosnussmilch",
-    "category": "CONDIMENTS_OILS",
+    "category": "DAIRY_EGGS",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 214,
@@ -5841,7 +5841,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "742",
     "name_en": "Coconut, dried (coco flakes)",
     "name_de": "Kokosnuss, getrocknet (Kokosrapseln, Kokosflocken)",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 653,
       "protein": 7.6,
@@ -5908,7 +5908,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "69",
     "name_en": "Coffee cream UHT",
     "name_de": "Kaffeerahm",
-    "category": "CONDIMENTS_OILS",
+    "category": "DAIRY_EGGS",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 161,
@@ -6064,7 +6064,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1573",
     "name_en": "Coleslaw salad, prepared",
     "name_de": "Coleslaw Salat, zubereitet",
-    "category": "PRODUCE",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 119,
       "protein": 1.6,
@@ -6084,7 +6084,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13388",
     "name_en": "Common bean (all types), mature seed, cooked (without addition of fat and salt)",
     "name_de": "Bohne (alle Arten), gekocht (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 111,
       "protein": 7.7,
@@ -6110,7 +6110,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13387",
     "name_en": "Common bean (all types), mature seed, dried",
     "name_de": "Bohne (alle Arten), getrocknet",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 305,
       "protein": 20.9,
@@ -6253,7 +6253,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "51",
     "name_en": "Cooking butter",
     "name_de": "Kochbutter",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 745,
       "protein": 0.5,
@@ -6398,7 +6398,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "412",
     "name_en": "Corn germ oil",
     "name_de": "Maiskeimöl",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 900,
@@ -6420,7 +6420,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1619",
     "name_en": "Corn semolina, cooked",
     "name_de": "Maisgriess, gekocht",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 79,
       "protein": 2,
@@ -6441,7 +6441,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "425",
     "name_en": "Corn semolina, dried",
     "name_de": "Maisgriess, trocken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 350,
       "protein": 8.8,
@@ -6554,7 +6554,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14191",
     "name_en": "Couscous (precooked durum wheat semolina), cooked (without addition of fat and salt)",
     "name_de": "Couscous-Körner (vorgekochtes Hartweizengriess), gekocht (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 158,
       "protein": 5,
@@ -6605,7 +6605,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "950",
     "name_en": "Cracker, salty snacks",
     "name_de": "Cracker, Salzgebäck, Apérogebäck",
-    "category": "SPICES_HERBS",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 449,
       "protein": 9.2,
@@ -6625,7 +6625,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "987",
     "name_en": "Cranberry, fresh",
     "name_de": "Preiselbeere, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 36,
       "protein": 0.3,
@@ -6646,7 +6646,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1195",
     "name_en": "Cream (average)",
     "name_de": "Rahm (Durchschnitt)",
-    "category": "CONDIMENTS_OILS",
+    "category": "DAIRY_EGGS",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 279,
@@ -6693,7 +6693,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "924",
     "name_en": "Cream slice",
     "name_de": "Crèmeschnitte",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 301,
       "protein": 4.1,
@@ -6716,7 +6716,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "65",
     "name_en": "Cream, 35% fat, pasteurized",
     "name_de": "Vollrahm, pasteurisiert",
-    "category": "CONDIMENTS_OILS",
+    "category": "DAIRY_EGGS",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 334,
@@ -6743,7 +6743,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "66",
     "name_en": "Cream, 35% fat, UHT",
     "name_de": "Vollrahm, UHT",
-    "category": "CONDIMENTS_OILS",
+    "category": "DAIRY_EGGS",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 335,
@@ -6770,7 +6770,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "798",
     "name_en": "Cream, at least 45 % milk fat, pasteurized",
     "name_de": "Doppelrahm, pasteurisiert",
-    "category": "CONDIMENTS_OILS",
+    "category": "DAIRY_EGGS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 468,
@@ -6796,7 +6796,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "67",
     "name_en": "Cream, pasteurized, 25% fat",
     "name_de": "Halbrahm, pasteurisiert",
-    "category": "CONDIMENTS_OILS",
+    "category": "DAIRY_EGGS",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 274,
@@ -6822,7 +6822,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "68",
     "name_en": "Cream, UHT",
     "name_de": "Halbrahm, UHT",
-    "category": "CONDIMENTS_OILS",
+    "category": "DAIRY_EGGS",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 251,
@@ -6927,7 +6927,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "913",
     "name_en": "Croissant filled with nuts, puff pastry",
     "name_de": "Nussgipfel aus Blätterteig",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 419,
       "protein": 6.8,
@@ -6946,7 +6946,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "914",
     "name_en": "Croissant filled with nuts, yeast dough",
     "name_de": "Nussgipfel aus Hefeteig",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 318,
       "protein": 7.7,
@@ -6990,7 +6990,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14056",
     "name_en": "Croque Monsieur, Hot Sandwich with cheese and ham",
     "name_de": "Croque Monsieur",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 260,
       "protein": 16.4,
@@ -7014,7 +7014,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "491",
     "name_en": "Cucumber, pickled",
     "name_de": "Gurke, in Essig eingelegt",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 14,
       "protein": 0.7,
@@ -7041,7 +7041,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "354",
     "name_en": "Cucumber, raw",
     "name_de": "Gurke, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 12,
       "protein": 0.7,
@@ -7067,7 +7067,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1182",
     "name_en": "Curd cheese puff pastry (with butter), raw",
     "name_de": "Quarkblätterteig (mit Butter), ungebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 401,
       "protein": 7.1,
@@ -7092,7 +7092,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1181",
     "name_en": "Curd cheese puff pastry (with vegetable fat), raw",
     "name_de": "Quarkblätterteig (mit pflanzlichem Fett), ungebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 388,
       "protein": 7.1,
@@ -7223,7 +7223,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "392",
     "name_en": "Currant, black, raw",
     "name_de": "Johannisbeere, schwarz, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 71,
       "protein": 1.3,
@@ -7245,7 +7245,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "391",
     "name_en": "Currant, red, raw",
     "name_de": "Johannisbeere, rot, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 50,
       "protein": 1.6,
@@ -7267,7 +7267,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "384",
     "name_en": "Date, dried",
     "name_de": "Dattel, getrocknet",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 287,
       "protein": 2.4,
@@ -7327,7 +7327,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14233",
     "name_en": "Donut with chocolate glaze",
     "name_de": "Donut mit Schokoladen-Glasur",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 364,
       "protein": 6.4,
@@ -7345,7 +7345,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13419",
     "name_en": "Dough for french pizza from Alsace",
     "name_de": "Flammkuchenteig, ungebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 221,
       "protein": 7.5,
@@ -7364,7 +7364,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14208",
     "name_en": "Dough for french pizza from Alsace, baked",
     "name_de": "Flammkuchenteig, gebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 257,
       "protein": 8.7,
@@ -7423,7 +7423,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "10535",
     "name_en": "Dulce de Leche",
     "name_de": "Dulce de Leche",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 295,
       "protein": 5.7,
@@ -7440,7 +7440,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "423",
     "name_en": "Durum wheat semolina",
     "name_de": "Hartweizengriess, trocken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 347,
       "protein": 13.3,
@@ -7459,7 +7459,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14192",
     "name_en": "Durum wheat, precooked hulled grain, cooked (without addition of fat and salt)",
     "name_de": "Hartweizen, vorgekochtes geschältest Korn, gekocht (ohne Zugabe von Salz und Fett)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 149,
       "protein": 5.9,
@@ -7486,7 +7486,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14160",
     "name_en": "Edamame (immature soy bean), shelled, frozen",
     "name_de": "Edamame (unreife Sojabohne), geschält, gefroren",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 143,
       "protein": 11.5,
@@ -7507,7 +7507,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "455",
     "name_en": "Edible boletus, fresh",
     "name_de": "Steinpilz, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 39,
       "protein": 5.4,
@@ -7527,7 +7527,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1040",
     "name_en": "Edible boletus, stewed (without addition of fat and salt)",
     "name_de": "Steinpilz, gedünstet (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 46,
       "protein": 6.1,
@@ -7660,7 +7660,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1659",
     "name_en": "Eggplant piccata, prepared",
     "name_de": "Auberginen-Piccata, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 138,
       "protein": 5.6,
@@ -7680,7 +7680,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1658",
     "name_en": "Eggplant slices, breaded, prepared",
     "name_de": "Auberginenscheiben, paniert, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 136,
       "protein": 4.7,
@@ -7702,7 +7702,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "349",
     "name_en": "Eggplant, raw",
     "name_de": "Aubergine, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 21,
       "protein": 1.1,
@@ -7723,7 +7723,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1653",
     "name_en": "Eggplant, steamed (without addition of salt)",
     "name_de": "Aubergine, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 21,
       "protein": 1.1,
@@ -7748,7 +7748,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1003",
     "name_en": "Eggplant, stewed (without addition of fat and salt)",
     "name_de": "Aubergine, gedünstet (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 24,
       "protein": 1.3,
@@ -7774,7 +7774,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "436",
     "name_en": "Elderberry, raw",
     "name_de": "Holunderbeere, schwarz, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 63,
       "protein": 2.5,
@@ -7819,7 +7819,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "467",
     "name_en": "Endive, raw",
     "name_de": "Endivie, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 16,
       "protein": 1.8,
@@ -8028,7 +8028,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14066",
     "name_en": "Falafel (deep fried in HOLL rapeseed oil)",
     "name_de": "Falafel, frittiert (in HOLL Rapsöl frittiert)",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 229,
       "protein": 8.4,
@@ -8073,7 +8073,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "352",
     "name_en": "Fennel, raw",
     "name_de": "Fenchel, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 23,
       "protein": 1,
@@ -8093,7 +8093,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1008",
     "name_en": "Fennel, steamed (without addition of salt)",
     "name_de": "Fenchel, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 22,
       "protein": 1,
@@ -8118,7 +8118,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1269",
     "name_en": "Fermented dough",
     "name_de": "Fermentierter Teig",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 199,
       "protein": 7.8,
@@ -8182,7 +8182,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "387",
     "name_en": "Fig, dried",
     "name_de": "Feige, getrocknet",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 267,
       "protein": 3.1,
@@ -8203,7 +8203,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "386",
     "name_en": "Fig, fresh",
     "name_de": "Feige, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 71,
       "protein": 1.2,
@@ -8504,7 +8504,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13461",
     "name_en": "Fishburger",
     "name_de": "Burger mit Fisch",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 262,
       "protein": 12.2,
@@ -8603,7 +8603,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13405",
     "name_en": "Flaxseed oil, cold pressed",
     "name_de": "Leinöl, kaltgepresst",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 900,
@@ -8628,7 +8628,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14007",
     "name_en": "Florentine",
     "name_de": "Florentiner",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 514,
       "protein": 9.3,
@@ -8691,7 +8691,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1135",
     "name_en": "Flour (average)",
     "name_de": "Mehl (Durchschnitt)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 344,
       "protein": 12,
@@ -8714,7 +8714,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1524",
     "name_en": "Flour omelette filled with mushrooms, prepared",
     "name_de": "Mehlomeletten mit Champignonfüllung, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 129,
       "protein": 5.4,
@@ -8739,7 +8739,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1525",
     "name_en": "Flour omelette filled with vegetables, prepared",
     "name_de": "Mehlomeletten mit Gemüsefüllung, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 144,
       "protein": 5.3,
@@ -8764,7 +8764,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14266",
     "name_en": "Flour omelette with apple, prepared",
     "name_de": "Mehlomelette mit Apfelmus, zubereitet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 112,
       "protein": 3.5,
@@ -8787,7 +8787,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1527",
     "name_en": "Flour omelette with bacon, prepared",
     "name_de": "Mehlomeletten mit Speck, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 187,
       "protein": 9.3,
@@ -8812,7 +8812,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1523",
     "name_en": "Flour omelette with cheese, prepared",
     "name_de": "Mehlomeletten mit Käse, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 194,
       "protein": 9.9,
@@ -8837,7 +8837,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1526",
     "name_en": "Flour omelette with ham, prepared",
     "name_de": "Mehlomeletten mit Schinken, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 155,
       "protein": 9.7,
@@ -8862,7 +8862,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1695",
     "name_en": "Flour omelette with Nutella, prepared",
     "name_de": "Mehlomeletten mit Nutella, zubereitet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 265,
       "protein": 6.7,
@@ -8887,7 +8887,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1694",
     "name_en": "Flour omelette with sugar and cinnamon, prepared",
     "name_de": "Mehlomeletten mit Zimt und Zucker, zubereitet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 186,
       "protein": 6.6,
@@ -8912,7 +8912,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1522",
     "name_en": "Flour omelette, homemade, prepared",
     "name_de": "Mehlomeletten, hausgemacht, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 174,
       "protein": 6.9,
@@ -8939,7 +8939,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1136",
     "name_en": "Flour, white and semi-white (average)",
     "name_de": "Mehl, hell (Durchschnitt)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 345,
       "protein": 12,
@@ -8964,7 +8964,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1475",
     "name_en": "Fondue moitié-moitié, prepared",
     "name_de": "Fondue moitié-moitié, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 292,
       "protein": 16.8,
@@ -8982,7 +8982,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "797",
     "name_en": "Fondue, prepared",
     "name_de": "Fondue klassisch, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 306,
       "protein": 18.3,
@@ -9001,7 +9001,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1476",
     "name_en": "Fondue, prepared with cider",
     "name_de": "Fondue mit Apfelwein, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 282,
       "protein": 18.7,
@@ -9020,7 +9020,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "10450",
     "name_en": "French fries (baked in the oven), unsalted",
     "name_de": "Pommes Frites (im Ofen gebacken), ungesalzen",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 213,
       "protein": 3.8,
@@ -9041,7 +9041,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "10449",
     "name_en": "French fries (deep fried in HO sunflower oil), unsalted",
     "name_de": "Pommes Frites (in HO Sonnenblumenöl frittiert), ungesalzen",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 286,
       "protein": 3.2,
@@ -9065,7 +9065,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "818",
     "name_en": "French fries for oven, deep-frozen",
     "name_de": "Ofen-Frites, tiefgekühlt",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 154,
       "protein": 2.4,
@@ -9086,7 +9086,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1503",
     "name_en": "French omelette with bacon, prepared",
     "name_de": "Eieromeletten mit Speck, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 175,
       "protein": 12.5,
@@ -9107,7 +9107,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1502",
     "name_en": "French omelette with cheese, prepared",
     "name_de": "Eieromeletten mit Käse, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 192,
       "protein": 14,
@@ -9133,7 +9133,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1501",
     "name_en": "French omelette with ham, prepared",
     "name_de": "Eieromeletten mit Schinken, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 143,
       "protein": 12.8,
@@ -9154,7 +9154,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1500",
     "name_en": "French omelette, prepared",
     "name_de": "Eieromeletten, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 151,
       "protein": 11.4,
@@ -9174,7 +9174,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1504",
     "name_en": "French pizza from Alsace, baked",
     "name_de": "Flammkuchen, gebacken",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 263,
       "protein": 7.8,
@@ -9194,7 +9194,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1515",
     "name_en": "French toast unsweetened",
     "name_de": "Fotzelschnitte ungezuckert",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 221,
       "protein": 8,
@@ -9236,7 +9236,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1120",
     "name_en": "Fruit (average), dried",
     "name_de": "Früchte (Durchschnitt), getrocknet",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 278,
       "protein": 2.5,
@@ -9258,7 +9258,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "775",
     "name_en": "Fruit cocktail in syrup, canned, drained",
     "name_de": "Fruchtcocktail in Sirup, Konserve, abgetropft",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 77,
       "protein": 0.6,
@@ -9280,7 +9280,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "777",
     "name_en": "Fruit cocktail with sweetener, canned, drained",
     "name_de": "Fruchtcocktail mit Süssungsmittel, Konserve, abgetropft",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 47,
       "protein": 0.7,
@@ -9302,7 +9302,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1130",
     "name_en": "Fruit juice (average), no sugar added",
     "name_de": "Fruchtsaft (Durchschnitt), ungezuckert",
-    "category": "PRODUCE",
+    "category": "BEVERAGES",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 47,
@@ -9328,7 +9328,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1131",
     "name_en": "Fruit juice diluted (average, 60% juice - 40% water), no sugar added",
     "name_de": "Fruchtsaft-Schorle (Durchschnitt, 60% Saft - 40% Wasser), ungezuckert",
-    "category": "PRODUCE",
+    "category": "BEVERAGES",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 28,
@@ -9356,7 +9356,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "10456",
     "name_en": "Fruit pie (average), homemade",
     "name_de": "Fruchtwähe/-kuchen (Durchschnitt), hausgemacht",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 176,
       "protein": 3.2,
@@ -9376,7 +9376,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "10454",
     "name_en": "Fruit pie with cake dough (average), homemade",
     "name_de": "Fruchtwähe/-kuchen mit Kuchenteig (Durchschnitt), hausgemacht",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 158,
       "protein": 3.3,
@@ -9396,7 +9396,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "10453",
     "name_en": "Fruit pie with puff pastry (average), homemade",
     "name_de": "Fruchtwähe/-kuchen mit Blätterteig (Durchschnitt), hausgemacht",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 155,
       "protein": 3.1,
@@ -9416,7 +9416,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "10455",
     "name_en": "Fruit pie with sweet short pastry base (average)",
     "name_de": "Fruchtwähe/-kuchen mit süssem Mürbeteig (Durchschnitt)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 215,
       "protein": 3.3,
@@ -9434,7 +9434,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14270",
     "name_en": "Fruit tart",
     "name_de": "Fruchtwähe/-kuchen",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 203,
       "protein": 3.6,
@@ -9453,7 +9453,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1124",
     "name_en": "Fruits (average), cooked (without addition of sugar)",
     "name_de": "Früchte (Durchschnitt), gekocht (ohne Zugabe von Zucker)",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 50,
       "protein": 0.6,
@@ -9478,7 +9478,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1123",
     "name_en": "Fruits, raw (average)",
     "name_de": "Früchte (Durchschnitt), roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 56,
       "protein": 0.7,
@@ -9541,7 +9541,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "356",
     "name_en": "Garlic, raw",
     "name_de": "Knoblauch, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 107,
       "protein": 6.4,
@@ -9570,7 +9570,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14002",
     "name_en": "Gazpacho",
     "name_de": "Gazpacho",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 33,
       "protein": 0.7,
@@ -9608,7 +9608,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "768",
     "name_en": "Glucose",
     "name_de": "Traubenzucker",
-    "category": "BAKING",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 399,
       "protein": 0,
@@ -9669,7 +9669,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "400",
     "name_en": "Gooseberry, raw",
     "name_de": "Stachelbeere, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 39,
       "protein": 0.8,
@@ -9705,7 +9705,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "684",
     "name_en": "Goulash soup",
     "name_de": "Gulaschsuppe",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 67,
       "protein": 4.8,
@@ -9723,7 +9723,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "573",
     "name_en": "Grape juice",
     "name_de": "Traubensaft",
-    "category": "PRODUCE",
+    "category": "BEVERAGES",
     "density": 1.1,
     "nutrients_per_100g": {
       "calories": 67,
@@ -9742,7 +9742,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "592",
     "name_en": "Grape seed oil",
     "name_de": "Traubenkernöl",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 900,
@@ -9764,7 +9764,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "478",
     "name_en": "Grape, green, fresh",
     "name_de": "Traube, weiss, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 69,
       "protein": 0.7,
@@ -9787,7 +9787,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "388",
     "name_en": "Grapefruit (white or red), raw",
     "name_de": "Grapefruit (weiss oder rot), roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 39,
       "protein": 0.9,
@@ -9807,7 +9807,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "669",
     "name_en": "Graubünden barley soup",
     "name_de": "Bündner Gerstensuppe",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 42,
       "protein": 1.4,
@@ -9825,7 +9825,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "651",
     "name_en": "Gravy, brown",
     "name_de": "Bratensauce, klar",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 44,
       "protein": 1.5,
@@ -9845,7 +9845,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "650",
     "name_en": "Gravy, thickened",
     "name_de": "Bratensauce, gebunden",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 53,
       "protein": 1.6,
@@ -9865,7 +9865,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14068",
     "name_en": "Green bean, dried, soaked, steamed (without addition of salt)",
     "name_de": "Dörrbohne, eingeweicht, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 76,
       "protein": 4.8,
@@ -9892,7 +9892,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1009",
     "name_en": "Green bean, steamed (without addition of salt)",
     "name_de": "Bohne, grün, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 33,
       "protein": 2,
@@ -9919,7 +9919,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14219",
     "name_en": "Green pea, frozen",
     "name_de": "Erbse, grün, tiefgekühlt",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 81,
       "protein": 5.3,
@@ -9942,7 +9942,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "369",
     "name_en": "Green pea, raw",
     "name_de": "Erbse, grün, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 90,
       "protein": 6.9,
@@ -9964,7 +9964,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1010",
     "name_en": "Green pea, steamed (without addition of salt)",
     "name_de": "Erbse, grün, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 99,
       "protein": 7.6,
@@ -9990,7 +9990,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1011",
     "name_en": "Green peas (canned), heated (without addition of salt)",
     "name_de": "Erbse (Konserve), aufgewärmt (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 89,
       "protein": 4.9,
@@ -10015,7 +10015,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1034",
     "name_en": "Green peas and carrots (canned), heated (without addition of salt)",
     "name_de": "Erbsen und Karotten (Konserve), aufgewärmt (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 70,
       "protein": 4.3,
@@ -10041,7 +10041,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "815",
     "name_en": "Green peas and carrots, canned",
     "name_de": "Erbsen und Karotten (Konserve)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 68,
       "protein": 4.2,
@@ -10061,7 +10061,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "630",
     "name_en": "Green peas, canned",
     "name_de": "Erbse (Konserve)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 87,
       "protein": 4.8,
@@ -10099,7 +10099,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14213",
     "name_en": "Grissini",
     "name_de": "Grissini",
-    "category": "SPICES_HERBS",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 424,
       "protein": 11.8,
@@ -10116,7 +10116,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1272",
     "name_en": "Grittibänz (Swiss bread man)",
     "name_de": "Grittibänz",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 329,
       "protein": 9.2,
@@ -10137,7 +10137,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "653",
     "name_en": "Ground meat sauce",
     "name_de": "Bolognaisesauce",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 96,
       "protein": 6.3,
@@ -10156,7 +10156,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14292",
     "name_en": "Guacamole, homemade",
     "name_de": "Guacamole, hausgemacht",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 139,
       "protein": 1.6,
@@ -10175,7 +10175,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13997",
     "name_en": "Guacamole, pre-packaged",
     "name_de": "Guacamole, abgepackt",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 192,
       "protein": 2.2,
@@ -10216,7 +10216,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13446",
     "name_en": "Ham croissant",
     "name_de": "Schinkengipfeli",
-    "category": "SPICES_HERBS",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 340,
       "protein": 11.1,
@@ -10270,7 +10270,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14025",
     "name_en": "Hamburger, double",
     "name_de": "Hamburger, doppelt",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 258,
       "protein": 11.9,
@@ -10313,7 +10313,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "952",
     "name_en": "Hard caramels",
     "name_de": "Hartkaramellen, Hartbonbons",
-    "category": "PRODUCE",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 385,
       "protein": 0.5,
@@ -10415,7 +10415,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "270",
     "name_en": "Hazelnut",
     "name_de": "Haselnuss",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 661,
       "protein": 16.4,
@@ -10433,7 +10433,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "703",
     "name_en": "Hazelnut-chocolate spread",
     "name_de": "Haselnuss-Schokolade-Brotaufstrich",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 549,
       "protein": 6,
@@ -10451,7 +10451,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "903",
     "name_en": "Hazelnut cookie",
     "name_de": "Haselnusskeks",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 473,
       "protein": 6.7,
@@ -10471,7 +10471,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "869",
     "name_en": "Hazelnut macaroon, homemade",
     "name_de": "Haselnussmakrone, hausgemacht",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 544,
       "protein": 12.2,
@@ -10491,7 +10491,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14108",
     "name_en": "Hazelnut oil",
     "name_de": "Haselnussöl",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 900,
@@ -10513,7 +10513,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14091",
     "name_en": "Hempseed oil",
     "name_de": "Hanföl",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 900,
@@ -10535,7 +10535,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "666",
     "name_en": "Hollandaise sauce",
     "name_de": "Hollandaisesauce",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 212,
       "protein": 3,
@@ -10553,7 +10553,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "472",
     "name_en": "Honey, from flowers",
     "name_de": "Honig (Blütenhonig)",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "density": 1.4,
     "nutrients_per_100g": {
       "calories": 306,
@@ -10576,7 +10576,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1670",
     "name_en": "Horse ragout with sauce, prepared",
     "name_de": "Pferderagout mit Sauce, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 99,
       "protein": 12.4,
@@ -10644,7 +10644,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1590",
     "name_en": "Hot Dog in white bread with ketchup and mustard",
     "name_de": "Hot Dog in Weissbrot mit Ketchup und Senf",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 216,
       "protein": 9.1,
@@ -10666,7 +10666,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14055",
     "name_en": "Hummus",
     "name_de": "Hummus",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 204,
       "protein": 7.3,
@@ -10683,7 +10683,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "652",
     "name_en": "Huntsman sauce",
     "name_de": "Jägersauce",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 58,
       "protein": 2.2,
@@ -10701,7 +10701,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13960",
     "name_en": "Ice cream bar or stick, chocolate coated",
     "name_de": "Glaceriegel oder Stängel (Rahmglace) mit Schokoladeüberzug",
-    "category": "DAIRY_EGGS",
+    "category": "SWEETS_SNACKS",
     "density": 0.7,
     "nutrients_per_100g": {
       "calories": 359,
@@ -10726,7 +10726,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13959",
     "name_en": "Ice cream cone",
     "name_de": "Cornet Glace",
-    "category": "DAIRY_EGGS",
+    "category": "SWEETS_SNACKS",
     "density": 0.6,
     "nutrients_per_100g": {
       "calories": 292,
@@ -10750,7 +10750,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "694",
     "name_en": "Ice cream, dairy, fruit",
     "name_de": "Rahmglace, Frucht",
-    "category": "DAIRY_EGGS",
+    "category": "SWEETS_SNACKS",
     "density": 0.6,
     "nutrients_per_100g": {
       "calories": 185,
@@ -10777,7 +10777,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14206",
     "name_en": "Ice cream, with flavor",
     "name_de": "Rahmglace, Aroma",
-    "category": "DAIRY_EGGS",
+    "category": "SWEETS_SNACKS",
     "density": 0.5,
     "nutrients_per_100g": {
       "calories": 278,
@@ -10823,7 +10823,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "459",
     "name_en": "Iceberg lettuce, raw",
     "name_de": "Eisbergsalat, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 15,
       "protein": 0.8,
@@ -10843,7 +10843,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "696",
     "name_en": "Jam",
     "name_de": "Konfitüre",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 246,
       "protein": 0.5,
@@ -10862,7 +10862,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "697",
     "name_en": "Jam, low calorie with sweetener",
     "name_de": "Konfitüre, energievermindert mit Süssstoffen",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 136,
       "protein": 0.5,
@@ -10883,7 +10883,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "951",
     "name_en": "Jelly babies with fruit essence",
     "name_de": "Gummibonbon mit Fruchtessenz",
-    "category": "PRODUCE",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 341,
       "protein": 6.6,
@@ -10900,7 +10900,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13442",
     "name_en": "Jerusalem artichoke, cooked (without addition of salt)",
     "name_de": "Topinambur, gekocht (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 52,
       "protein": 2.3,
@@ -10925,7 +10925,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13441",
     "name_en": "Jerusalem artichoke, raw",
     "name_de": "Topinambur, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 54,
       "protein": 2.4,
@@ -10945,7 +10945,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "583",
     "name_en": "Kakaobutter",
     "name_de": "Kakaobutter",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 900,
       "protein": 0,
@@ -10961,7 +10961,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "393",
     "name_en": "Kaki, raw",
     "name_de": "Kaki, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 77,
       "protein": 0.9,
@@ -10980,7 +10980,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13400",
     "name_en": "Kale, raw",
     "name_de": "Federkohl, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 44,
       "protein": 4.3,
@@ -11001,7 +11001,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13401",
     "name_en": "Kale, stewed (without addition of salt and fat)",
     "name_de": "Federkohl, gedünstet (ohne Zugabe von Salz und Fett)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 44,
       "protein": 4.3,
@@ -11027,7 +11027,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1572",
     "name_en": "Kebab in pita bread",
     "name_de": "Kebab im Fladenbrot",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 121,
       "protein": 7.6,
@@ -11049,7 +11049,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "635",
     "name_en": "Ketchup",
     "name_de": "Ketchup",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 1.1,
     "nutrients_per_100g": {
       "calories": 117,
@@ -11067,7 +11067,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "395",
     "name_en": "Kiwi fruit, raw",
     "name_de": "Kiwi, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 58,
       "protein": 0.9,
@@ -11087,7 +11087,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "449",
     "name_en": "Kohlrabi, raw",
     "name_de": "Kohlrabi, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 27,
       "protein": 1.9,
@@ -11107,7 +11107,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1014",
     "name_en": "Kohlrabi, steamed (without addition of salt)",
     "name_de": "Kohlrabi, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 28,
       "protein": 2,
@@ -11132,7 +11132,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "852",
     "name_en": "Ladyfinger cookie",
     "name_de": "Löffelbiscuit",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 413,
       "protein": 12.2,
@@ -11150,7 +11150,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "372",
     "name_en": "Lamb's lettuce, raw",
     "name_de": "Nüsslisalat, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 18,
       "protein": 2,
@@ -11325,7 +11325,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1673",
     "name_en": "Lamb ragout with sauce, prepared",
     "name_de": "Lammragout mit Sauce, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 122,
       "protein": 11.4,
@@ -11435,7 +11435,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1127",
     "name_en": "Leafy salad (average), raw",
     "name_de": "Blattsalat (Durchschnitt), roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 17,
       "protein": 1.3,
@@ -11455,7 +11455,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1164",
     "name_en": "Leafy vegetables (average excluding salads), boiled (without addition of salt and fat)",
     "name_de": "Blattgemüse (Durchschnitt exkl. Salate), gekocht (ohne Zugabe von Salz und Fett)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 22,
       "protein": 1.3,
@@ -11480,7 +11480,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1165",
     "name_en": "Leafy vegetables (average excluding salads), steamed (without addition of salt)",
     "name_de": "Blattgemüse (Durchschnitt exkl. Salate), gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 23,
       "protein": 1.4,
@@ -11505,7 +11505,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1166",
     "name_en": "Leafy vegetables (average excluding salads), stewed (without addition of salt and fat)",
     "name_de": "Blattgemüse (Durchschnitt exkl. Salate), gedünstet (ohne Zugabe von Salz und Fett)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 24,
       "protein": 1.4,
@@ -11530,7 +11530,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14287",
     "name_en": "Lebkuchen",
     "name_de": "Lebkuchen",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 326,
       "protein": 7,
@@ -11548,7 +11548,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "358",
     "name_en": "Leek, raw",
     "name_de": "Lauch, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 32,
       "protein": 2,
@@ -11568,7 +11568,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1015",
     "name_en": "Leek, stewed (without addition of fat and salt)",
     "name_de": "Lauch, gedünstet (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 34,
       "protein": 2.1,
@@ -11593,7 +11593,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1134",
     "name_en": "Legumes/Pulses (average), cooked (without addition of fat and salt)",
     "name_de": "Hülsenfrüchte (Durchschnitt), gekocht (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 127,
       "protein": 9.6,
@@ -11618,7 +11618,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1133",
     "name_en": "Legumes/Pulses, (average) dried",
     "name_de": "Hülsenfrüchte (Durchschnitt), getrocknet",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 335,
       "protein": 25.1,
@@ -11638,7 +11638,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "10534",
     "name_en": "Lemon Curd",
     "name_de": "Lemon Curd",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 317,
       "protein": 6.4,
@@ -11661,7 +11661,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "605",
     "name_en": "Lemon juice",
     "name_de": "Zitronensaft",
-    "category": "PRODUCE",
+    "category": "BEVERAGES",
     "density": 1.1,
     "nutrients_per_100g": {
       "calories": 28,
@@ -11685,7 +11685,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13951",
     "name_en": "Lemon peel",
     "name_de": "Zitronenschale",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 52,
       "protein": 1.5,
@@ -11708,7 +11708,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "398",
     "name_en": "Lemon, fresh",
     "name_de": "Zitrone, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 24,
       "protein": 0.8,
@@ -11733,7 +11733,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13386",
     "name_en": "Lentil, split, cooked (without addition of fat and salt)",
     "name_de": "Linse, geschält, gekocht (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 131,
       "protein": 11,
@@ -11760,7 +11760,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13385",
     "name_en": "Lentil, split, dried",
     "name_de": "Linse, geschält, getrocknet",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 325,
       "protein": 27,
@@ -11782,7 +11782,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1060",
     "name_en": "Lentil, whole, cooked (without addition of fat and salt)",
     "name_de": "Linse, ganz, gekocht (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 111,
       "protein": 8.8,
@@ -11809,7 +11809,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "370",
     "name_en": "Lentil, whole, dried",
     "name_de": "Linse, ganz, getrocknet",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 313,
       "protein": 24.4,
@@ -11854,7 +11854,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "277",
     "name_en": "Linseed",
     "name_de": "Leinsamen",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 533,
       "protein": 21.3,
@@ -11872,7 +11872,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14286",
     "name_en": "Linzertorte (Pastry base covered with raspberry sweetmeat)",
     "name_de": "Linzertorte",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 442,
       "protein": 7.1,
@@ -11889,7 +11889,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13883",
     "name_en": "Litchi, raw",
     "name_de": "Litschi, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 77,
       "protein": 1.1,
@@ -12067,7 +12067,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1478",
     "name_en": "Macaroni from the alps, prepared",
     "name_de": "Älplermagronen, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 180,
       "protein": 6,
@@ -12087,7 +12087,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "878",
     "name_en": "Madeleine biscuit (with butter)",
     "name_de": "Madeleine (mit Butter)",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 460,
       "protein": 7.3,
@@ -12110,7 +12110,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14117",
     "name_en": "Madeleine biscuit (with vegetable oil)",
     "name_de": "Madeleine (mit Pflanzenöl)",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 434,
       "protein": 7.9,
@@ -12132,7 +12132,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "426",
     "name_en": "Maize starch",
     "name_de": "Maisstärke",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 354,
       "protein": 0.3,
@@ -12150,7 +12150,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13434",
     "name_en": "Malt drink with cocoa, with vitamin and mineral fortified, powder",
     "name_de": "Malzgetränk mit Kakao, mit Vitaminen und Mineralien angereichert, Pulver",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 372,
       "protein": 10.7,
@@ -12172,7 +12172,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14050",
     "name_en": "Malt drink with cocoa, with vitamin and mineral fortified, prepared (with milk)",
     "name_de": "Malzgetränk mit Kakao, mit Vitaminen und Mineralien angereichert, zubereitet (mit Milch)",
-    "category": "DAIRY_EGGS",
+    "category": "BEVERAGES",
     "nutrients_per_100g": {
       "calories": 80,
       "protein": 3.7,
@@ -12199,7 +12199,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "397",
     "name_en": "Mandarin, fresh",
     "name_de": "Mandarine, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 45,
       "protein": 0.8,
@@ -12219,7 +12219,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13884",
     "name_en": "Mango, dried",
     "name_de": "Mango, getrocknet",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 293,
       "protein": 2.9,
@@ -12238,7 +12238,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "396",
     "name_en": "Mango, fresh",
     "name_de": "Mango, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 68,
       "protein": 0.6,
@@ -12257,7 +12257,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14054",
     "name_en": "Manioc, tuber, cooked (without addition of salt)",
     "name_de": "Maniok, Wurzelknolle, gekocht (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 147,
       "protein": 1.4,
@@ -12284,7 +12284,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13918",
     "name_en": "Manioc, tuber, raw",
     "name_de": "Maniok, Wurzelknolle, roh",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 157,
       "protein": 1.4,
@@ -12309,7 +12309,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14093",
     "name_en": "Maple syrup",
     "name_de": "Ahornsirup",
-    "category": "BAKING",
+    "category": "SWEETS_SNACKS",
     "density": 1.3,
     "nutrients_per_100g": {
       "calories": 271,
@@ -12327,7 +12327,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "898",
     "name_en": "Marble cake",
     "name_de": "Marmorkuchen",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 356,
       "protein": 7.4,
@@ -12346,7 +12346,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "209",
     "name_en": "Margarine, 35 - 40 % fat",
     "name_de": "Margarine, 35 - 40 % Fett",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 357,
       "protein": 0.3,
@@ -12364,7 +12364,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "208",
     "name_en": "Margarine, without butter, 70 - 80 % Fett",
     "name_de": "Margarine, ohne Butter, 70 - 80 % Fett",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 696,
       "protein": 0.5,
@@ -12389,7 +12389,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14288",
     "name_en": "Marzipan",
     "name_de": "Marzipan",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 472,
       "protein": 9.1,
@@ -12406,7 +12406,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "866",
     "name_en": "Mashed potatoes, instant, prepared (with water and butter)",
     "name_de": "Instant-Kartoffelstock, zubereitet (mit Wasser und Butter)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 80,
       "protein": 2,
@@ -12432,7 +12432,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1519",
     "name_en": "Mashed potatoes, prepared (with cream and butter)",
     "name_de": "Kartoffelstock, zubereitet (mit Rahm und Butter)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 138,
       "protein": 2,
@@ -12457,7 +12457,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "863",
     "name_en": "Mashed potatoes, prepared (with full fat milk and butter)",
     "name_de": "Kartoffelstock, zubereitet (mit Vollmilch und Butter)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 95,
       "protein": 2.2,
@@ -12482,7 +12482,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1518",
     "name_en": "Mashed potatoes, prepared (with half skimmed milk and butter)",
     "name_de": "Kartoffelstock, zubereitet (mit halbentrahmter Milch und Butter)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 91,
       "protein": 2.2,
@@ -12507,7 +12507,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "771",
     "name_en": "Mayonnaise",
     "name_de": "Mayonnaise",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 693,
       "protein": 1.4,
@@ -12524,7 +12524,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1682",
     "name_en": "Mayonnaise with rapeseed oil, home-made",
     "name_de": "Mayonnaise mit Rapsöl, hausgemacht",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 794,
       "protein": 2.4,
@@ -12547,7 +12547,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "772",
     "name_en": "Mayonnaise, low calorie",
     "name_de": "Mayonnaise, kalorienvermindert",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 327,
       "protein": 0.9,
@@ -12584,7 +12584,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1664",
     "name_en": "Meat lasagne, prepared",
     "name_de": "Fleischlasagne, zubereitet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 154,
       "protein": 9.2,
@@ -12604,7 +12604,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1582",
     "name_en": "Meat loaf, homemade, baked in the oven",
     "name_de": "Hackbraten, hausgemacht, im Ofen gebacken",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 175,
       "protein": 15,
@@ -12673,7 +12673,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "399",
     "name_en": "Melon, cantaloupe (sweet melon), raw",
     "name_de": "Zuckermelone (Honigmelone), roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 62,
       "protein": 1.1,
@@ -12695,7 +12695,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14289",
     "name_en": "Meringue, shell",
     "name_de": "Meringue-Schale",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 391,
       "protein": 5.5,
@@ -12713,7 +12713,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "879",
     "name_en": "Milanese cookie, butter, sweet, homemade",
     "name_de": "Mailänderli, hausgemacht",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 431,
       "protein": 7.1,
@@ -12762,7 +12762,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "195",
     "name_en": "Milk chocolate",
     "name_de": "Milchschokolade",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 537,
       "protein": 6.5,
@@ -12785,7 +12785,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "642",
     "name_en": "Milk chocolate filled with nuts (chocolate bar)",
     "name_de": "Branchli (Milchschokolade mit Haselnusscrèmefüllung)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 556,
       "protein": 8.3,
@@ -12809,7 +12809,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "643",
     "name_en": "Milk chocolate with almond, honey, nougat",
     "name_de": "Milchschokolade mit Mandel-Honig-Nougat",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 534,
       "protein": 7.3,
@@ -12834,7 +12834,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "612",
     "name_en": "Milk chocolate with nuts",
     "name_de": "Milchschokolade mit Nüssen",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 568,
       "protein": 8.7,
@@ -12857,7 +12857,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "641",
     "name_en": "Milk chocolate with raisins, nuts, almonds",
     "name_de": "Milchschokolade mit Weinbeeren, Nüssen und Mandeln",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 509,
       "protein": 8.4,
@@ -12883,7 +12883,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "654",
     "name_en": "Milk chocolate, filled with alcohol",
     "name_de": "Milchschokolade mit Alkoholfüllung",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 484,
       "protein": 5.6,
@@ -12907,7 +12907,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "655",
     "name_en": "Milk chocolate, filled with cream (gianduja, nougat)",
     "name_de": "Milchschokolade mit Crèmefüllung (Gianduja, Nougat)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 571,
       "protein": 7.9,
@@ -13010,7 +13010,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1586",
     "name_en": "Millet risotto, cooked",
     "name_de": "Hirsotto, gekocht",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 146,
       "protein": 3.8,
@@ -13030,7 +13030,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "422",
     "name_en": "Millet, grain peeled",
     "name_de": "Hirse, Korn geschält",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 360,
       "protein": 10.6,
@@ -13161,7 +13161,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "671",
     "name_en": "Minestrone",
     "name_de": "Minestrone",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 53,
       "protein": 2,
@@ -13195,7 +13195,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1053",
     "name_en": "Mirabelle plum, stewed, drained (without addition of sugar)",
     "name_de": "Mirabelle, gedünstet, abgetropft (ohne Zugabe von Zucker)",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 70,
       "protein": 0.7,
@@ -13222,7 +13222,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "732",
     "name_en": "Molasses",
     "name_de": "Melasse, Melassesirup",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "density": 1.4,
     "nutrients_per_100g": {
       "calories": 274,
@@ -13241,7 +13241,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "761",
     "name_en": "Molluscs, blue mussel, raw",
     "name_de": "Miesmuschel, roh",
-    "category": "PRODUCE",
+    "category": "SEAFOOD",
     "nutrients_per_100g": {
       "calories": 85,
       "protein": 11.7,
@@ -13261,7 +13261,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "457",
     "name_en": "Morel, fresh",
     "name_de": "Morchel, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 29,
       "protein": 2.5,
@@ -13281,7 +13281,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1039",
     "name_en": "Morel, stewed (without addition of fat and salt)",
     "name_de": "Morchel, gedünstet (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 34,
       "protein": 2.8,
@@ -13502,7 +13502,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1128",
     "name_en": "Mushroom (average), raw",
     "name_de": "Pilz (Durchschnitt), roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 26,
       "protein": 3.6,
@@ -13522,7 +13522,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1129",
     "name_en": "Mushroom (average), stewed (without addition of fat and salt)",
     "name_de": "Pilz (Durchschnitt), gedünstet (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 30,
       "protein": 4.1,
@@ -13547,7 +13547,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1585",
     "name_en": "Mushroom risotto, prepared",
     "name_de": "Pilzrisotto, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 129,
       "protein": 4.2,
@@ -13567,7 +13567,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "683",
     "name_en": "Mushroom sauce, thickened",
     "name_de": "Pilzsauce, gebunden",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 132,
       "protein": 4.1,
@@ -13587,7 +13587,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "688",
     "name_en": "Mushroom soup",
     "name_de": "Pilzsuppe",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 38,
       "protein": 1.1,
@@ -13605,7 +13605,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "629",
     "name_en": "Mushroom, canned",
     "name_de": "Champignon (Konserve)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 19,
       "protein": 2.2,
@@ -13624,7 +13624,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "375",
     "name_en": "Mushroom, raw",
     "name_de": "Champignon, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 25,
       "protein": 3.7,
@@ -13644,7 +13644,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1037",
     "name_en": "Mushroom, stewed (without addition of fat and salt)",
     "name_de": "Champignon, gedünstet (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 29,
       "protein": 4.2,
@@ -13669,7 +13669,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13977",
     "name_en": "Mussel, cooked",
     "name_de": "Miesmuschel, gekocht",
-    "category": "PRODUCE",
+    "category": "SEAFOOD",
     "nutrients_per_100g": {
       "calories": 108,
       "protein": 17.2,
@@ -13688,7 +13688,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13464",
     "name_en": "Mustard",
     "name_de": "Senf",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 124,
       "protein": 7.1,
@@ -13710,7 +13710,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1579",
     "name_en": "Nasi Goreng, prepared",
     "name_de": "Nasi Goreng, zubereitet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 125,
       "protein": 10.8,
@@ -13729,7 +13729,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "404",
     "name_en": "Nectarine, fresh",
     "name_de": "Nektarine, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 55,
       "protein": 1,
@@ -13749,7 +13749,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "767",
     "name_en": "Norway lobster, raw",
     "name_de": "Scampi (Kaisergranat), roh",
-    "category": "PRODUCE",
+    "category": "SEAFOOD",
     "nutrients_per_100g": {
       "calories": 93,
       "protein": 19.6,
@@ -13788,7 +13788,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "915",
     "name_en": "Nut roll with yeast dough",
     "name_de": "Nussschnecke aus Hefeteig",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 445,
       "protein": 12.2,
@@ -13807,7 +13807,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14294",
     "name_en": "Nut sticks",
     "name_de": "Nuss-Stängeli",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 454,
@@ -13826,7 +13826,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "871",
     "name_en": "Nut sticks, homemade",
     "name_de": "Haselnussstängeli, hausgemacht",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 567,
       "protein": 10.5,
@@ -13846,7 +13846,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "902",
     "name_en": "Nut tart from Engadin",
     "name_de": "Engadiner Nusstorte",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 481,
       "protein": 7,
@@ -13883,7 +13883,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14114",
     "name_en": "Oat drink, plain",
     "name_de": "Hafergetränk, nature",
-    "category": "BEVERAGES",
+    "category": "DAIRY_EGGS",
     "density": 1.1,
     "nutrients_per_100g": {
       "calories": 47,
@@ -13904,7 +13904,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14130",
     "name_en": "Oat drink, plain, with calcium and vitamin fortified",
     "name_de": "Hafergetränk, nature mit Calcium und Vitaminen angereichert",
-    "category": "BEVERAGES",
+    "category": "DAIRY_EGGS",
     "density": 1.1,
     "nutrients_per_100g": {
       "calories": 48,
@@ -13951,7 +13951,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "591",
     "name_en": "Olive oil",
     "name_de": "Olivenöl",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 900,
@@ -13974,7 +13974,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "493",
     "name_en": "Olive, black",
     "name_de": "Olive, schwarz",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 176,
       "protein": 1.4,
@@ -13993,7 +13993,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "492",
     "name_en": "Olive, green, in brine, drained",
     "name_de": "Olive, grün, in Salzlake, abgetropft",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 154,
       "protein": 1.3,
@@ -14014,7 +14014,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1616",
     "name_en": "Onion quiche, baked (with cake dough)",
     "name_de": "Zwiebelkuchen, gebacken (mit Kuchenteig)",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 189,
       "protein": 5.2,
@@ -14045,7 +14045,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1615",
     "name_en": "Onion quiche, baked (with puff pastry)",
     "name_de": "Zwiebelkuchen, gebacken (mit Blätterteig)",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 186,
       "protein": 4.8,
@@ -14076,7 +14076,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "368",
     "name_en": "Onion, raw",
     "name_de": "Zwiebel, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 39,
       "protein": 1.1,
@@ -14104,7 +14104,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1036",
     "name_en": "Onion, roasted, brown (without addition of fat and salt)",
     "name_de": "Zwiebel, geröstet (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 92,
       "protein": 2.6,
@@ -14133,7 +14133,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1035",
     "name_en": "Onion, stewed (without addition of fat and salt)",
     "name_de": "Zwiebel, gedünstet (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 43,
       "protein": 1.2,
@@ -14161,7 +14161,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "576",
     "name_en": "Orange juice",
     "name_de": "Orangensaft",
-    "category": "PRODUCE",
+    "category": "BEVERAGES",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 42,
@@ -14184,7 +14184,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "572",
     "name_en": "Orange nectar",
     "name_de": "Orangennektar",
-    "category": "PRODUCE",
+    "category": "BEVERAGES",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 42,
@@ -14207,7 +14207,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "405",
     "name_en": "Orange, fresh",
     "name_de": "Orange, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 45,
       "protein": 0.8,
@@ -14231,7 +14231,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "708",
     "name_en": "Palm oil, palm fat",
     "name_de": "Palmöl - Palmfett",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 899,
@@ -14254,7 +14254,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "202",
     "name_en": "Panettone",
     "name_de": "Panettone",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 354,
       "protein": 6.4,
@@ -14288,7 +14288,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13440",
     "name_en": "Papaya, ripe, raw",
     "name_de": "Papaya, reif, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 44,
       "protein": 0.5,
@@ -14353,7 +14353,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "373",
     "name_en": "Parsley, fresh",
     "name_de": "Petersilie, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 58,
       "protein": 3.9,
@@ -14374,7 +14374,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13443",
     "name_en": "Parsnip, cooked (without addition of salt)",
     "name_de": "Pastinake, gekocht (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 58,
       "protein": 1.2,
@@ -14399,7 +14399,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13439",
     "name_en": "Parsnip, raw",
     "name_de": "Pastinake, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 62,
       "protein": 1.3,
@@ -14419,7 +14419,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "986",
     "name_en": "Passion fruit, fresh",
     "name_de": "Passionsfrucht, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 102,
       "protein": 2.1,
@@ -14440,7 +14440,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1063",
     "name_en": "Pasta egg-free, cooked in salted water (uniodised)",
     "name_de": "Teigwaren ohne Ei, gekocht im Salzwasser (unjodiert)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 158,
       "protein": 5.9,
@@ -14464,7 +14464,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "800",
     "name_en": "Pasta egg-free, dry",
     "name_de": "Teigwaren ohne Ei, trocken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 353,
       "protein": 12.6,
@@ -14488,7 +14488,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1611",
     "name_en": "Pasta gratin with ham, prepared",
     "name_de": "Teigwarenauflauf mit Schinken, zubereitet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 163,
       "protein": 10.2,
@@ -14511,7 +14511,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1598",
     "name_en": "Pasta salad with French dressing",
     "name_de": "Teigwarensalat mit französischer Sauce",
-    "category": "PRODUCE",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 126,
       "protein": 5.6,
@@ -14532,7 +14532,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1597",
     "name_en": "Pasta salat with Italian dressing",
     "name_de": "Teigwarensalat mit italienischer Sauce",
-    "category": "PRODUCE",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 130,
       "protein": 5.5,
@@ -14553,7 +14553,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1062",
     "name_en": "Pasta with egg, cooked in salted water (uniodised)",
     "name_de": "Teigwaren mit Ei, gekocht im Salzwasser (unjodiert)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 132,
       "protein": 5,
@@ -14578,7 +14578,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "799",
     "name_en": "Pasta with egg, dry",
     "name_de": "Teigwaren mit Ei, trocken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 365,
       "protein": 13.3,
@@ -14603,7 +14603,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13462",
     "name_en": "Pasta, fresh, filled with meat, cooked",
     "name_de": "Teigwaren, frisch, gefüllt mit Fleisch, gekocht (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 174,
       "protein": 6.9,
@@ -14630,7 +14630,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13498",
     "name_en": "Pasta, fresh, filled with spinach and ricotta, cooked (without addition of fat and salt)",
     "name_de": "Teigwaren, frisch, gefüllt mit Spinat und Ricotta, gekocht (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 175,
       "protein": 7.4,
@@ -14657,7 +14657,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13489",
     "name_en": "Pasta, fresh, filled with spinach and ricotta, raw",
     "name_de": "Teigwaren, frisch, gefüllt mit Spinat und Ricotta, roh",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 212,
       "protein": 8.7,
@@ -14682,7 +14682,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13390",
     "name_en": "Pea, mature seed, split, cooked (wothout addition of fat and salt)",
     "name_de": "Erbse, reif, getrocknet, gekocht (ohne Zusatz von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 137,
       "protein": 9,
@@ -14709,7 +14709,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13389",
     "name_en": "Pea, mature seed, split, dried",
     "name_de": "Erbse, reif, getrocknet",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 331,
       "protein": 21.3,
@@ -14733,7 +14733,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "624",
     "name_en": "Peach in syrup, canned, drained",
     "name_de": "Pfirsich in Sirup, Konserve, abgetropft",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 82,
       "protein": 0.7,
@@ -14755,7 +14755,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "625",
     "name_en": "Peach with sweetener, canned, drained",
     "name_de": "Pfirsich mit Süssungsmittel, Konserve, abgetropft",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 40,
       "protein": 0.8,
@@ -14777,7 +14777,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "401",
     "name_en": "Peach, yellow, fresh",
     "name_de": "Pfirsich, gelb, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 43,
       "protein": 0.8,
@@ -14799,7 +14799,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "282",
     "name_en": "Peanut",
     "name_de": "Erdnuss",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 623,
       "protein": 26.1,
@@ -14817,7 +14817,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "751",
     "name_en": "Peanut butter",
     "name_de": "Erdnussbutter",
-    "category": "PANTRY",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 636,
       "protein": 26.1,
@@ -14840,7 +14840,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "681",
     "name_en": "Peanut curls",
     "name_de": "Erdnuss-Flips",
-    "category": "SPICES_HERBS",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 507,
       "protein": 13.2,
@@ -14858,7 +14858,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "596",
     "name_en": "Peanut oil",
     "name_de": "Erdnussöl",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 900,
@@ -14880,7 +14880,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14267",
     "name_en": "Peanut, chocolate coated",
     "name_de": "Erdnuss mit Schokoladeüberzug",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 498,
       "protein": 9.5,
@@ -14899,7 +14899,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14092",
     "name_en": "Peanut, roasted, salted",
     "name_de": "Erdnuss, geröstet, gesalzen",
-    "category": "SPICES_HERBS",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 631,
       "protein": 26.2,
@@ -14921,7 +14921,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14238",
     "name_en": "Peanut,grilled, without salt",
     "name_de": "Erdnuss, geröstet, ohne Salz",
-    "category": "SPICES_HERBS",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 637,
       "protein": 26.8,
@@ -14948,7 +14948,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "620",
     "name_en": "Pear in syrup, canned, drained",
     "name_de": "Birne in Sirup, Konserve, abgetropft",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 71,
       "protein": 0.4,
@@ -14970,7 +14970,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "562",
     "name_en": "Pear juice",
     "name_de": "Birnensaft",
-    "category": "PRODUCE",
+    "category": "BEVERAGES",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 50,
@@ -14988,7 +14988,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1484",
     "name_en": "Pear pie, homemade, baked (with cake dough)",
     "name_de": "Birnenwähe/-kuchen, hausgemacht, gebacken (mit Kuchenteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 163,
       "protein": 3.1,
@@ -15011,7 +15011,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1483",
     "name_en": "Pear pie, homemade, baked (with puff pastry)",
     "name_de": "Birnenwähe/-kuchen, hausgemacht, gebacken (mit Blätterteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 161,
       "protein": 2.8,
@@ -15034,7 +15034,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14098",
     "name_en": "Pear with sweetener, canned, drained",
     "name_de": "Birne mit Süssungsmittel, Konserve, abgetropft",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 50,
       "protein": 0.5,
@@ -15056,7 +15056,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "433",
     "name_en": "Pear, dried",
     "name_de": "Birne, getrocknet",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 288,
       "protein": 2.3,
@@ -15078,7 +15078,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "382",
     "name_en": "Pear, raw",
     "name_de": "Birne, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 54,
       "protein": 0.5,
@@ -15098,7 +15098,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1050",
     "name_en": "Pear, stewed, drained (without addition of sugar)",
     "name_de": "Birne, gedünstet, abgetropft (ohne Zugabe von Zucker)",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 57,
       "protein": 0.6,
@@ -15125,7 +15125,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "429",
     "name_en": "Pearl barley",
     "name_de": "Rollgerste",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 337,
       "protein": 9.1,
@@ -15144,7 +15144,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14200",
     "name_en": "Pearl barley, cooked in salted water (uniodised)",
     "name_de": "Rollgerste, gekocht in Salzwasser (unjodiert)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 134,
       "protein": 3.6,
@@ -15164,7 +15164,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "494",
     "name_en": "Pearl onion, pickled",
     "name_de": "Silberzwiebel, in Essig eingelegt",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 28,
       "protein": 0.9,
@@ -15211,7 +15211,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "884",
     "name_en": "Peiti Beurre with chocolate, cookie",
     "name_de": "Petit Beurre mit Schokolade",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 482,
       "protein": 7.7,
@@ -15230,7 +15230,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "463",
     "name_en": "Peppermint, fresh",
     "name_de": "Pfefferminze, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 49,
       "protein": 3.8,
@@ -15250,7 +15250,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13459",
     "name_en": "Pesto sauce, green",
     "name_de": "Pestosauce, grün",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 436,
       "protein": 5.6,
@@ -15270,7 +15270,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13447",
     "name_en": "Pesto sauce, red",
     "name_de": "Pestosauce, rot",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 410,
       "protein": 6.1,
@@ -15290,7 +15290,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14074",
     "name_en": "Petit Beurre, cookie",
     "name_de": "Petit Beurre",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 431,
       "protein": 8.7,
@@ -15308,7 +15308,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14067",
     "name_en": "Petit beurre, wholemeal cookie",
     "name_de": "Petit Beurre, Vollkorn",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 426,
       "protein": 9.6,
@@ -15346,7 +15346,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "283",
     "name_en": "Pine nuts",
     "name_de": "Pinienkerne",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 688,
       "protein": 16.5,
@@ -15364,7 +15364,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14094",
     "name_en": "Pineapple in pineapple juice, canned, drained",
     "name_de": "Ananas in Ananassaft, Konserve, abgetropft",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 60,
       "protein": 0.5,
@@ -15386,7 +15386,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14095",
     "name_en": "Pineapple in pineapple juice, canned, not drained",
     "name_de": "Ananas in Ananassaft, Konserve, nicht abgetropft",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 59,
       "protein": 0.4,
@@ -15408,7 +15408,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "617",
     "name_en": "Pineapple in syrup, canned, drained",
     "name_de": "Ananas in Sirup, Konserve, abgetropft",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 70,
       "protein": 0.5,
@@ -15430,7 +15430,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13880",
     "name_en": "Pineapple juice",
     "name_de": "Ananassaft",
-    "category": "PRODUCE",
+    "category": "BEVERAGES",
     "density": 1.1,
     "nutrients_per_100g": {
       "calories": 51,
@@ -15449,7 +15449,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14096",
     "name_en": "Pineapple with sweetener, canned, drained",
     "name_de": "Ananas mit Süssungsmittel, Konserve, abgetropft",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 42,
       "protein": 0.5,
@@ -15471,7 +15471,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "377",
     "name_en": "Pineapple, fresh",
     "name_de": "Ananas, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 52,
       "protein": 0.5,
@@ -15491,7 +15491,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "274",
     "name_en": "Pistachio, dried",
     "name_de": "Pistazie",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 621,
       "protein": 25.5,
@@ -15510,7 +15510,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1533",
     "name_en": "Pizza Calzone, baked",
     "name_de": "Pizza Calzone, gebacken",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 225,
       "protein": 11.5,
@@ -15529,7 +15529,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "907",
     "name_en": "Pizza doug ( with olive oil), raw",
     "name_de": "Pizzateig (mit Olivenöl), ungebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 229,
       "protein": 7,
@@ -15556,7 +15556,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14158",
     "name_en": "Pizza dough (with olive oil), baked",
     "name_de": "Pizzateig (mit Olivenöl), gebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 266,
       "protein": 8.2,
@@ -15583,7 +15583,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1534",
     "name_en": "Pizza Hawaii, baked",
     "name_de": "Pizza Hawaii, gebacken",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 196,
       "protein": 9.5,
@@ -15602,7 +15602,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1535",
     "name_en": "Pizza Margherita, baked",
     "name_de": "Pizza Margherita, gebacken",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 238,
       "protein": 9.9,
@@ -15621,7 +15621,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1539",
     "name_en": "Pizza with four cheeses, baked",
     "name_de": "Pizza Quattro Formaggi, gebacken",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 297,
       "protein": 12.3,
@@ -15641,7 +15641,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1537",
     "name_en": "Pizza with ham and mushrooms, baked",
     "name_de": "Pizza Prosciutto e Funghi, gebacken",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 205,
       "protein": 10.8,
@@ -15662,7 +15662,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1538",
     "name_en": "Pizza with ham, baked",
     "name_de": "Pizza Prosciutto, gebacken",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 219,
       "protein": 10.7,
@@ -15683,7 +15683,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1536",
     "name_en": "Pizza with mascarpone and rocket, baked",
     "name_de": "Pizza mit Mascarpone und Rucola, gebacken",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 239,
       "protein": 9.5,
@@ -15703,7 +15703,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1532",
     "name_en": "Pizza with tuna, baked",
     "name_de": "Pizza al tonno, gebacken",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 225,
       "protein": 11.9,
@@ -15724,7 +15724,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1540",
     "name_en": "Pizza with vegetables, baked",
     "name_de": "Pizza mit Gemüse, gebacken",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 125,
       "protein": 5.7,
@@ -15744,7 +15744,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1530",
     "name_en": "Plum pie, homemade, baked (with cake dough)",
     "name_de": "Pflaumenwähe/-kuchen, hausgemacht, gebacken (mit Kuchenteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 159,
       "protein": 3.2,
@@ -15766,7 +15766,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1528",
     "name_en": "Plum pie, homemade, baked (with puff pastry)",
     "name_de": "Pflaumenwähe/-kuchen, hausgemacht, gebacken (mit Blätterteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 156,
       "protein": 2.9,
@@ -15789,7 +15789,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "474",
     "name_en": "Plum, fresh",
     "name_de": "Pflaume, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 48,
       "protein": 0.6,
@@ -15809,7 +15809,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1054",
     "name_en": "Plum, stewed, drained (without addition of sugar)",
     "name_de": "Pflaume, gedünstet, abgetropft (ohne Zugabe von Zucker)",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 48,
       "protein": 0.7,
@@ -15836,7 +15836,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "10546",
     "name_en": "Polenta nera (made from corn semolina and buckwheat flour,) cooked",
     "name_de": "Polenta nera (aus Maisgriess und Buchweizenmehl), gekocht",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 113,
       "protein": 4.2,
@@ -15862,7 +15862,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13882",
     "name_en": "Pomegranate, raw",
     "name_de": "Granatapfel, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 81,
       "protein": 1.4,
@@ -15882,7 +15882,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "12982",
     "name_en": "Pommes Chips",
     "name_de": "Pommes Chips",
-    "category": "SPICES_HERBS",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 538,
       "protein": 4.9,
@@ -15899,7 +15899,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "424",
     "name_en": "Popcorn",
     "name_de": "Popcorn",
-    "category": "SPICES_HERBS",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 367,
       "protein": 12,
@@ -15917,7 +15917,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1668",
     "name_en": "Porc piccata, prepared",
     "name_de": "Schweinspiccata, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 226,
       "protein": 22.9,
@@ -15958,7 +15958,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "594",
     "name_en": "Pork lard",
     "name_de": "Schweineschmalz",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 900,
       "protein": 0,
@@ -15975,7 +15975,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1671",
     "name_en": "Pork ragout with sauce, prepared",
     "name_de": "Schweinsragout mit Sauce, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 112,
       "protein": 12.1,
@@ -16578,7 +16578,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1511",
     "name_en": "Porridge, prepared (with full fat milk, without addition of sugar)",
     "name_de": "Haferbrei, zubereitet (mit Vollmilch, ohne Zugabe von Zucker)",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 150,
       "protein": 6.3,
@@ -16605,7 +16605,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1512",
     "name_en": "Porridge, prepared (with partially skimmed milk, without addition of sugar)",
     "name_de": "Haferbrei, zubereitet (mit teilentrahmter Milch, ohne Zugabe von Zucker)",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 136,
       "protein": 6.4,
@@ -16653,7 +16653,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "12983",
     "name_en": "Potato chips fat reduced",
     "name_de": "Pommes Chips fettreduziert",
-    "category": "SPICES_HERBS",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 468,
       "protein": 5.9,
@@ -16675,7 +16675,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "860",
     "name_en": "Potato flakes with milk powder and salt (instant mashed potatoes)",
     "name_de": "Kartoffelflocken mit Milchpulver und Salz (Instant-Kartoffelstock)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 365,
       "protein": 11.3,
@@ -16698,7 +16698,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14197",
     "name_en": "Potato gnocchi, cooked",
     "name_de": "Kartoffelgnocchi, gekocht",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 177,
       "protein": 5,
@@ -16722,7 +16722,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1516",
     "name_en": "Potato salad with mayonnaise yogurt dressing",
     "name_de": "Kartoffelsalat mit Mayonnaise-Joghurt-Sauce",
-    "category": "PRODUCE",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 78,
       "protein": 1.8,
@@ -16744,7 +16744,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1517",
     "name_en": "Potato salad with oil and vinagre dressing",
     "name_de": "Kartoffelsalat mit Essig-Öl-Sauce",
-    "category": "PRODUCE",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 95,
       "protein": 1.7,
@@ -16766,7 +16766,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "497",
     "name_en": "Potato starch",
     "name_de": "Kartoffelstärke",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 336,
       "protein": 0.6,
@@ -16788,7 +16788,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14259",
     "name_en": "Potato, new, with skin, boiled (without salt)",
     "name_de": "Kartoffel, früh, ungeschält, im Wasser gekocht (ohne Salz)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 66,
       "protein": 1.8,
@@ -16814,7 +16814,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "813",
     "name_en": "Potato, peeled, raw",
     "name_de": "Kartoffel, geschält, roh",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 76,
       "protein": 2,
@@ -16841,7 +16841,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1057",
     "name_en": "Potatoe, peeled, steamed (without addition of salt)",
     "name_de": "Kartoffel, geschält, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 75,
       "protein": 2,
@@ -16868,7 +16868,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14258",
     "name_en": "Potatoe, with skin, baked (without addition of fat and salt)",
     "name_de": "Kartoffel, ungeschält, im Ofen gebacken (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 100,
       "protein": 2.5,
@@ -16894,7 +16894,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1599",
     "name_en": "Potatoes au gratin dauphinois, prepared",
     "name_de": "Kartoffelgratin dauphinois, zubereitet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 127,
       "protein": 2.5,
@@ -16914,7 +16914,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1600",
     "name_en": "Potatoes au gratin savoyard, prepared",
     "name_de": "Kartoffelgratin Savoyer Art, zubereitet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 78,
       "protein": 2.3,
@@ -16991,7 +16991,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14296",
     "name_en": "Pretzel sticks (dry lye pretzel)",
     "name_de": "Laugengebäck trocken (Bretzel, Sticks)",
-    "category": "SPICES_HERBS",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 388,
       "protein": 11.5,
@@ -17167,7 +17167,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1531",
     "name_en": "Prune plum pie, homemade, baked (with cake dough)",
     "name_de": "Zwetschgenwähe/-kuchen, hausgemacht, gebacken (mit Kuchenteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 155,
       "protein": 3.2,
@@ -17190,7 +17190,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1529",
     "name_en": "Prune plum pie, homemade, baked (with puff pastry)",
     "name_de": "Zwetschgenwähe/-kuchen, hausgemacht, gebacken (mit Blätterteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 153,
       "protein": 2.9,
@@ -17213,7 +17213,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "479",
     "name_en": "Prune plum, fresh",
     "name_de": "Zwetschge, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 43,
       "protein": 0.6,
@@ -17233,7 +17233,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1056",
     "name_en": "Prune plum, stewed, drained (without addition of sugar)",
     "name_de": "Zwetschge, gedünstet, abgetropft (ohne Zugabe von Zucker)",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 43,
       "protein": 0.7,
@@ -17260,7 +17260,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "475",
     "name_en": "Prune, dried",
     "name_de": "Pflaume, getrocknet",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 227,
       "protein": 1.6,
@@ -17282,7 +17282,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "874",
     "name_en": "Prussian cookie",
     "name_de": "Prussien",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 438,
       "protein": 4.7,
@@ -17301,7 +17301,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "806",
     "name_en": "Pudding, caramel",
     "name_de": "Pudding, Caramel",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 125,
       "protein": 3.4,
@@ -17320,7 +17320,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "810",
     "name_en": "Pudding, chocolate",
     "name_de": "Pudding, Schokolade",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 121,
       "protein": 3,
@@ -17340,7 +17340,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "809",
     "name_en": "Pudding, vanilla",
     "name_de": "Pudding, Vanille",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 102,
       "protein": 2.8,
@@ -17360,7 +17360,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13445",
     "name_en": "Puff pastry (with vegetable fat), raw",
     "name_de": "Blätterteig (mit pflanzichem Fett), ungebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 385,
       "protein": 5.7,
@@ -17380,7 +17380,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "928",
     "name_en": "Puff pastry sticks",
     "name_de": "Blätterteigstängel",
-    "category": "SPICES_HERBS",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 490,
       "protein": 7.1,
@@ -17399,7 +17399,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "904",
     "name_en": "Puff pastry, home-made (with butter), raw",
     "name_de": "Blätterteig, hausgemacht (Butter), ungebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 364,
       "protein": 5.2,
@@ -17426,7 +17426,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "905",
     "name_en": "Puff pastry, home-made (with vegetable fat), raw",
     "name_de": "Blätterteig, hausgemacht (mit pflanzlichem Fett), ungebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 349,
       "protein": 5.2,
@@ -17512,7 +17512,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1662",
     "name_en": "Pumpkin piccata, prepared",
     "name_de": "Kürbis-Piccata, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 140,
       "protein": 5.5,
@@ -17532,7 +17532,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13404",
     "name_en": "Pumpkin seed oil",
     "name_de": "Kürbiskernöl",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 900,
@@ -17554,7 +17554,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "276",
     "name_en": "Pumpkin seeds",
     "name_de": "Kürbiskerne",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 615,
       "protein": 35.6,
@@ -17572,7 +17572,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "480",
     "name_en": "Pumpkin, raw",
     "name_de": "Kürbis, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 28,
       "protein": 1.1,
@@ -17593,7 +17593,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1020",
     "name_en": "Pumpkin, steamed (without addition of salt)",
     "name_de": "Kürbis, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 29,
       "protein": 1.1,
@@ -17618,7 +17618,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1541",
     "name_en": "Quiche Lorraine, baked (with cake dough)",
     "name_de": "Quiche Lorraine, gebacken (mit Kuchenteig)",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 307,
       "protein": 9.1,
@@ -17637,7 +17637,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1542",
     "name_en": "Quiche Lorraine, baked (with puff pastry)",
     "name_de": "Quiche Lorraine, gebacken (mit Blätterteig)",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 304,
       "protein": 8.5,
@@ -17656,7 +17656,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1055",
     "name_en": "Quince, cooked, drained (without addition of sugar)",
     "name_de": "Quitte, gekocht, abgetropft (ohne Zugabe von Zucker)",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 49,
       "protein": 0.5,
@@ -17683,7 +17683,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "476",
     "name_en": "Quince, fresh",
     "name_de": "Quitte, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 47,
       "protein": 0.4,
@@ -17703,7 +17703,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13396",
     "name_en": "Quinoa, cooked (without addition of salt and fat)",
     "name_de": "Quinoa, gekocht (ohne Zugabe von Salz und Fett)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 117,
       "protein": 4.4,
@@ -17727,7 +17727,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13394",
     "name_en": "Quinoa, raw",
     "name_de": "Quinoa, roh",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 362,
       "protein": 13.3,
@@ -17768,7 +17768,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "458",
     "name_en": "Radicchio red, raw",
     "name_de": "Cicorino rot, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 19,
       "protein": 1.4,
@@ -17788,7 +17788,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "361",
     "name_en": "Radish, raw",
     "name_de": "Rettich, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 24,
       "protein": 1,
@@ -17808,7 +17808,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "456",
     "name_en": "Radish, red, raw",
     "name_de": "Radieschen, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 14,
       "protein": 0.9,
@@ -17830,7 +17830,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "477",
     "name_en": "Raisins, dried (grape)/ sultanas",
     "name_de": "Rosine, getrocknet",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 321,
       "protein": 3,
@@ -17852,7 +17852,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "600",
     "name_en": "Rapeseed oil",
     "name_de": "Rapsöl",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 900,
@@ -17874,7 +17874,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1069",
     "name_en": "Rapeseed oil HOLL (high oleic, low linolenic)",
     "name_de": "Rapsöl HOLL (high oleic, low linolenic)",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 900,
@@ -17900,7 +17900,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "917",
     "name_en": "Rascal (Shortbread cookie with jam)",
     "name_de": "Spitzbube (Mürbeteiggebäck mit Konfitüre)",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 499,
       "protein": 5.8,
@@ -17918,7 +17918,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "390",
     "name_en": "Raspberry, raw",
     "name_de": "Himbeere, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 44,
       "protein": 1.2,
@@ -17938,7 +17938,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1665",
     "name_en": "Ratatouille, prepared",
     "name_de": "Ratatouille, zubereitet",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 47,
       "protein": 1.4,
@@ -18031,7 +18031,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "364",
     "name_en": "Red cabbage, raw",
     "name_de": "Rotkohl, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 29,
       "protein": 1.1,
@@ -18053,7 +18053,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1022",
     "name_en": "Red cabbage, stewed (without addition of fat and salt)",
     "name_de": "Rotkohl, gedünstet (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 25,
       "protein": 1,
@@ -18080,7 +18080,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1592",
     "name_en": "Red currant pie, homemade (with sweet short pastry base)",
     "name_de": "Johannisbeerwähe/-kuchen, hausgemacht (mit süssem Mürbeteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 216,
       "protein": 3.5,
@@ -18100,7 +18100,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1595",
     "name_en": "Red currant pie, homemade, baked (with cake dough)",
     "name_de": "Johannisbeerwähe/-kuchen, hausgemacht, gebacken (mit Kuchenteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 160,
       "protein": 3.9,
@@ -18122,7 +18122,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1593",
     "name_en": "Red currant pie, homemade, baked (with puff pastry)",
     "name_de": "Johannisbeerwähe/-kuchen, hausgmacht, gebacken (mit Blätterteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 158,
       "protein": 3.6,
@@ -18145,7 +18145,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13477",
     "name_en": "Rhubarb compote, with sugar",
     "name_de": "Rhabarberkompott, gezuckert",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 84,
       "protein": 0.7,
@@ -18170,7 +18170,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1548",
     "name_en": "Rhubarb pie, homemade, baked (with cake dough)",
     "name_de": "Rhabarberwähe/-kuchen, hausgemacht, gebacken (mit Kuchenteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 136,
       "protein": 3.3,
@@ -18193,7 +18193,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1547",
     "name_en": "Rhubarb pie, homemade, baked (with puff pastry)",
     "name_de": "Rhabarberwähe/-kuchen, hausgemacht, gebacken (mit Blätterteig)",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 133,
       "protein": 3,
@@ -18216,7 +18216,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "362",
     "name_en": "Rhubarb, raw",
     "name_de": "Rhabarber, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 22,
       "protein": 0.8,
@@ -18236,7 +18236,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13450",
     "name_en": "Rice drink, plain",
     "name_de": "Reisgetränk, nature",
-    "category": "BEVERAGES",
+    "category": "DAIRY_EGGS",
     "density": 1.1,
     "nutrients_per_100g": {
       "calories": 54,
@@ -18261,7 +18261,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14133",
     "name_en": "Rice drink, plain with calcium fortified",
     "name_de": "Reisgetränk, nature mit Calcium angereichert",
-    "category": "BEVERAGES",
+    "category": "DAIRY_EGGS",
     "density": 1.1,
     "nutrients_per_100g": {
       "calories": 54,
@@ -18286,7 +18286,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1065",
     "name_en": "Rice parboiled, cooked in salted water (uniodised)",
     "name_de": "Reis parboiled, gekocht in Salzwasser (unjodiert)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 121,
       "protein": 2.5,
@@ -18310,7 +18310,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "419",
     "name_en": "Rice parboiled, raw",
     "name_de": "Reis parboiled, trocken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 356,
       "protein": 7.5,
@@ -18334,7 +18334,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1066",
     "name_en": "Rice polished, cooked in salted water (uniodised)",
     "name_de": "Reis poliert, gekocht in Salzwasser (unjodiert)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 117,
       "protein": 2.5,
@@ -18358,7 +18358,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "427",
     "name_en": "Rice polished, raw",
     "name_de": "Reis poliert, trocken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 352,
       "protein": 7.4,
@@ -18382,7 +18382,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1514",
     "name_en": "Rice pudding, prepared (with full fat milk, without addition of sugar)",
     "name_de": "Milchreis, zubereitet (mit Vollmilch, ohne Zugabe von Zucker)",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 145,
       "protein": 5.2,
@@ -18409,7 +18409,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1513",
     "name_en": "Rice pudding, prepared (with partially skimmed milk, without addition of sugar)",
     "name_de": "Milchreis, zubereitet (mit teilentrahmter Milch, ohne Zugabe von Zucker)",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 124,
       "protein": 5.3,
@@ -18436,7 +18436,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "428",
     "name_en": "Rice unpolished (wholemeal), raw",
     "name_de": "Reis unpoliert, trocken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 350,
       "protein": 7.4,
@@ -18461,7 +18461,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1067",
     "name_en": "Rice unpolished, cooked in salted water (uniodised)",
     "name_de": "Reis unpoliert, gekocht in Salzwasser (unjodiert)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 133,
       "protein": 2.8,
@@ -18486,7 +18486,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14255",
     "name_en": "Risotto with cheese, homemade",
     "name_de": "Risotto mit Käse, hausgemacht",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 144,
       "protein": 4.2,
@@ -18511,7 +18511,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "10567",
     "name_en": "Risotto with tomatoes, homemade",
     "name_de": "Tomatenrisotto, hausgemacht",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 125,
       "protein": 3.9,
@@ -18531,7 +18531,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1584",
     "name_en": "Risotto without cheese, prepared",
     "name_de": "Risotto ohne Käse, zubereitet",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 125,
       "protein": 2.4,
@@ -18582,7 +18582,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1675",
     "name_en": "Riz Casimir with chicken, prepared",
     "name_de": "Riz Casimir mit Poulet, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 126,
       "protein": 7.4,
@@ -18602,7 +18602,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1677",
     "name_en": "Riz Casimir with veal, prepared",
     "name_de": "Riz Casimir mit Kalbfleisch, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 124,
       "protein": 6.7,
@@ -18622,7 +18622,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "468",
     "name_en": "Rocket, raw",
     "name_de": "Rucola, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 22,
       "protein": 3.6,
@@ -18745,7 +18745,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "441",
     "name_en": "Romaine lettuce (cos lettuce)",
     "name_de": "Lattich, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 17,
       "protein": 1.2,
@@ -18764,7 +18764,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1161",
     "name_en": "Root and tuber vegetables (average), boiled (without addition of fat and salt)",
     "name_de": "Wurzel- und Knollengemüse (Durchschnitt), gekocht (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 38,
       "protein": 0.8,
@@ -18789,7 +18789,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1267",
     "name_en": "Root and tuber vegetables (average), raw",
     "name_de": "Wurzel- und Knollengemüse (Durchschnitt), roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 42,
       "protein": 0.9,
@@ -18809,7 +18809,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1162",
     "name_en": "Root and tuber vegetables (average), steamed (without addition of salt)",
     "name_de": "Wurzel- und Knollengemüse (Durchschnitt), gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 42,
       "protein": 0.9,
@@ -18834,7 +18834,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1163",
     "name_en": "Root and tuber vegetables (average), stewed (without addition of fat and salt)",
     "name_de": "Wurzel- und Knollengemüse (Durchschnitt), gedünstet (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 36,
       "protein": 0.8,
@@ -18881,7 +18881,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14269",
     "name_en": "Rosemary, dried",
     "name_de": "Rosmarin, getrocknet",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 328,
       "protein": 4.9,
@@ -18901,7 +18901,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "462",
     "name_en": "Rosemary, fresh",
     "name_de": "Rosmarin, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 62,
       "protein": 0.8,
@@ -18921,7 +18921,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "858",
     "name_en": "Rosti (shredded potatoes), unprepared",
     "name_de": "Rösti (Fertig-Rösti), ungebraten",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 108,
       "protein": 1.9,
@@ -18978,7 +18978,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1607",
     "name_en": "Russian salad, prepared",
     "name_de": "Russischer Salat, zubereitet",
-    "category": "PRODUCE",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 199,
       "protein": 2.5,
@@ -19064,7 +19064,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "749",
     "name_en": "Rye flour (wholemeal) Type 1800",
     "name_de": "Roggenmehl, Vollkorn, Schrot, Typ 1800",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 321,
       "protein": 10.8,
@@ -19089,7 +19089,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "752",
     "name_en": "Rye flour Type 1050",
     "name_de": "Roggenmehl, Ruch, Typ 1050",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 340,
       "protein": 9,
@@ -19114,7 +19114,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "748",
     "name_en": "Rye flour Type 815",
     "name_de": "Roggenmehl, halbweiss, Typ 815",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 334,
       "protein": 6.9,
@@ -19139,7 +19139,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "589",
     "name_en": "Safflower oil",
     "name_de": "Distelöl",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 900,
@@ -19161,7 +19161,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "461",
     "name_en": "Sage, raw",
     "name_de": "Salbei, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 59,
       "protein": 1.7,
@@ -19181,7 +19181,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1201",
     "name_en": "Salad dressing french style, home-made (with rapeseed oil)",
     "name_de": "Salatsauce französisch, hausgemacht (mit Rapsöl)",
-    "category": "PRODUCE",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 377,
       "protein": 0.9,
@@ -19205,7 +19205,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1200",
     "name_en": "Salad dressing italian style, home-made (with olive oil)",
     "name_de": "Salatsauce italienisch, hausgemacht (mit Olivenöl)",
-    "category": "PRODUCE",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 421,
       "protein": 0.3,
@@ -19232,7 +19232,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14273",
     "name_en": "Salad dressing with yogurt, home-made",
     "name_de": "Joghurt-Salatsauce, hausgemacht",
-    "category": "PRODUCE",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 283,
       "protein": 2.2,
@@ -19255,7 +19255,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13503",
     "name_en": "Salad dressing, french style",
     "name_de": "Salatsauce, französisch",
-    "category": "PRODUCE",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 360,
       "protein": 1.4,
@@ -19275,7 +19275,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13502",
     "name_en": "Salad dressing, italienisch style",
     "name_de": "Salatsauce, italienisch",
-    "category": "PRODUCE",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 309,
       "protein": 0.1,
@@ -19546,7 +19546,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "10562",
     "name_en": "Samosa, deep-fried",
     "name_de": "Samosa, frittiert",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 382,
       "protein": 6.4,
@@ -19565,7 +19565,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1551",
     "name_en": "Sandwich (baguette bread) with cold cuts",
     "name_de": "Sandwich (Baguette) mit Aufschnitt",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 154,
       "protein": 5.3,
@@ -19587,7 +19587,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1553",
     "name_en": "Sandwich (baguette bread) with dried meat",
     "name_de": "Sandwich (Baguette) mit Trockenfleisch",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 139,
       "protein": 7.2,
@@ -19609,7 +19609,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1557",
     "name_en": "Sandwich (baguette bread) with ham",
     "name_de": "Sandwich (Baguette) mit Schinken",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 129,
       "protein": 6.3,
@@ -19631,7 +19631,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1505",
     "name_en": "Sandwich (baguette bread) with luncheon meat",
     "name_de": "Sandwich (Baguette) mit Fleischkäse",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 217,
       "protein": 8,
@@ -19653,7 +19653,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1561",
     "name_en": "Sandwich (baguette bread) with mozzarella",
     "name_de": "Sandwich (Baguette) mit Mozzarella",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 161,
       "protein": 5.9,
@@ -19675,7 +19675,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1549",
     "name_en": "Sandwich (baguette bread) with raw ham",
     "name_de": "Sandwich (Baguette) mit Rohschinken",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 162,
       "protein": 8.8,
@@ -19697,7 +19697,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1555",
     "name_en": "Sandwich (baguette bread) with salami",
     "name_de": "Sandwich (Baguette) mit Salami",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 156,
       "protein": 5.8,
@@ -19719,7 +19719,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1559",
     "name_en": "Sandwich (baguette bread) with semi hard cheese",
     "name_de": "Sandwich (Baguette) mit Halbhartkäse",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 176,
       "protein": 6.7,
@@ -19742,7 +19742,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1521",
     "name_en": "Sandwich (baguette bread) with soft cheese",
     "name_de": "Sandwich (Baguette) mit Weichkäse",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 181,
       "protein": 6.3,
@@ -19765,7 +19765,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1552",
     "name_en": "Sandwich (brown bread) with cold cuts",
     "name_de": "Sandwich (Ruchbrot) mit Aufschnitt",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 148,
       "protein": 5.5,
@@ -19787,7 +19787,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1554",
     "name_en": "Sandwich (brown bread) with dried meat",
     "name_de": "Sandwich (Ruchbrot) mit Trockenfleisch",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 132,
       "protein": 7.4,
@@ -19809,7 +19809,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1558",
     "name_en": "Sandwich (brown bread) with ham",
     "name_de": "Sandwich (Ruchbrot) mit Schinken",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 123,
       "protein": 6.4,
@@ -19831,7 +19831,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1506",
     "name_en": "Sandwich (brown bread) with luncheon meat",
     "name_de": "Sandwich (Ruchbrot) mit Fleischkäse",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 207,
       "protein": 8.2,
@@ -19853,7 +19853,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1562",
     "name_en": "Sandwich (brown bread) with mozzarella",
     "name_de": "Sandwich (Ruchbrot) mit Mozzarella",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 153,
       "protein": 6.1,
@@ -19875,7 +19875,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1550",
     "name_en": "Sandwich (brown bread) with raw ham",
     "name_de": "Sandwich (Ruchbrot) mit Rohschinken",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 155,
       "protein": 9,
@@ -19897,7 +19897,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1556",
     "name_en": "Sandwich (brown bread) with salami",
     "name_de": "Sandwich (Ruchbrot) mit Salami",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 149,
       "protein": 5.9,
@@ -19919,7 +19919,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1560",
     "name_en": "Sandwich (brown bread) with semi hard cheese",
     "name_de": "Sandwich (Ruchbrot) mit Halbhartkäse",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 169,
       "protein": 6.9,
@@ -19942,7 +19942,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1520",
     "name_en": "Sandwich (brown bread) with soft cheese",
     "name_de": "Sandwich (Ruchbrot) mit Weichkäse",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 172,
       "protein": 6.5,
@@ -20027,7 +20027,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "647",
     "name_en": "Sauerkraut, pickled",
     "name_de": "Sauerkraut, in Essig eingelegt",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 19,
       "protein": 1.3,
@@ -20047,7 +20047,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1568",
     "name_en": "Sausage salad, prepared",
     "name_de": "Wurstsalat, zubereitet",
-    "category": "PRODUCE",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 224,
       "protein": 7.1,
@@ -20171,7 +20171,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1543",
     "name_en": "Savoury cheese quiche, baked (with cake dough)",
     "name_de": "Käsekuchen, gebacken (mit Kuchenteig)",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 302,
       "protein": 14.2,
@@ -20197,7 +20197,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1544",
     "name_en": "Savoury cheese quiche, baked (with puff pastry)",
     "name_de": "Käsekuchen, gebacken (mit Blätterteig)",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 298,
       "protein": 13.7,
@@ -20223,7 +20223,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "454",
     "name_en": "Savoy cabbage, raw",
     "name_de": "Wirz, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 27,
       "protein": 2,
@@ -20244,7 +20244,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1030",
     "name_en": "Savoy cabbage, steamed (without addition of salt)",
     "name_de": "Wirz, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 26,
       "protein": 1.9,
@@ -20309,7 +20309,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1685",
     "name_en": "Schnitzel bread with cocktail sauce",
     "name_de": "Schnitzelbrot mit Cocktailsauce",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 262,
       "protein": 14.5,
@@ -20332,7 +20332,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1686",
     "name_en": "Schnitzel bread with tartare sauce",
     "name_de": "Schnitzelbrot mit Tartarsauce",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 242,
       "protein": 13.9,
@@ -20372,7 +20372,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1603",
     "name_en": "Scrambled egg with herbs, prepared",
     "name_de": "Rührei mit Kräutern, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 140,
       "protein": 10.6,
@@ -20396,7 +20396,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1605",
     "name_en": "Scrambled eggs with cheese, prepared",
     "name_de": "Rührei mit Käse, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 156,
       "protein": 11.7,
@@ -20420,7 +20420,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1606",
     "name_en": "Scrambled eggs with ham, prepared",
     "name_de": "Rührei mit Schinken, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 143,
       "protein": 12.8,
@@ -20439,7 +20439,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1604",
     "name_en": "Scrambled eggs with mushrooms, prepared",
     "name_de": "Rührei mit Champignons, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 127,
       "protein": 9.8,
@@ -20459,7 +20459,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1602",
     "name_en": "Scrambled eggs, prepared",
     "name_de": "Rührei, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 147,
       "protein": 11.1,
@@ -20478,7 +20478,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13466",
     "name_en": "Seaweed, Nori, dried",
     "name_de": "Alge, Nori, getrocknet",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 255,
       "protein": 31.5,
@@ -20502,7 +20502,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1170",
     "name_en": "Seeds, kernels, nuts (average), unsalted",
     "name_de": "Samen, Kerne, Nüsse (Durchschnitt), ungesalzen",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 618,
       "protein": 20.8,
@@ -20524,7 +20524,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14118",
     "name_en": "Seitan",
     "name_de": "Seitan",
-    "category": "PANTRY",
+    "category": "MEAT_POULTRY",
     "nutrients_per_100g": {
       "calories": 193,
       "protein": 28,
@@ -20608,7 +20608,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14248",
     "name_en": "Semolina pudding with sugar",
     "name_de": "Griessköpfli mit Zucker",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 118,
       "protein": 4.4,
@@ -20631,7 +20631,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1510",
     "name_en": "Semolina pudding, prepared (with full fat milk, without addition of sugar)",
     "name_de": "Griessbrei, zubereitet (mit Vollmilch, ohne Zugabe von Zucker)",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 94,
       "protein": 4.8,
@@ -20658,7 +20658,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1509",
     "name_en": "Semolina pudding, prepared (with partially skimmed milk, without addition of sugar)",
     "name_de": "Griessbrei, zubereitet (mit teilentrahmter Milch, ohne Zugabe von Zucker)",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 88,
       "protein": 4.7,
@@ -20685,7 +20685,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1508",
     "name_en": "Semolina slice, prepared (with full fat milk)",
     "name_de": "Griessschnitte, zubereitet (mit Vollmilch)",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 154,
       "protein": 6.3,
@@ -20710,7 +20710,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1507",
     "name_en": "Semolina slice, prepared (with partially skimmed milk)",
     "name_de": "Griessschnitte, zubereitet (mit teilentrahmter Milch)",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 139,
       "protein": 6.3,
@@ -20735,7 +20735,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14107",
     "name_en": "Sesame oil",
     "name_de": "Sesamöl",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 900,
@@ -20757,7 +20757,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "280",
     "name_en": "Sesame seeds whole",
     "name_de": "Sesamsamen ungeschält",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 619,
       "protein": 23.1,
@@ -20775,7 +20775,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "408",
     "name_en": "Sesame seeds, peeled",
     "name_de": "Sesamsamen, geschält",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 660,
       "protein": 26.8,
@@ -20795,7 +20795,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14281",
     "name_en": "Shallot, raw",
     "name_de": "Schalotte, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 66,
       "protein": 1.8,
@@ -20815,7 +20815,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1099",
     "name_en": "Shellfish (average), raw",
     "name_de": "Krustentiere (Durchschnitt), roh",
-    "category": "PRODUCE",
+    "category": "SEAFOOD",
     "nutrients_per_100g": {
       "calories": 84,
       "protein": 18.1,
@@ -20853,7 +20853,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "875",
     "name_en": "Short bread cookie (Sablé), homemade",
     "name_de": "Sablé, Butter, hausgemacht",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 474,
       "protein": 5.9,
@@ -20879,7 +20879,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14044",
     "name_en": "Short pastry base (with butter), sweet, baked",
     "name_de": "Mürbeteig (mit Butter), süss, gebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 530,
       "protein": 9.8,
@@ -20906,7 +20906,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14043",
     "name_en": "Short pastry base (with butter), sweet, raw",
     "name_de": "Mürbeteig (mit Butter), süss, ungebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 424,
       "protein": 7.8,
@@ -20933,7 +20933,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14045",
     "name_en": "Short pastry base (with vegetable fat), sweet, baked",
     "name_de": "Mürbeteig (mit pflanzlichem Fett), süss, gebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 494,
       "protein": 8,
@@ -20955,7 +20955,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "909",
     "name_en": "Short pastry base (with vegetable fat), sweet, raw",
     "name_de": "Mürbeteig (mit pflanzlichem Fett), süss, ungebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 395,
       "protein": 6.4,
@@ -20977,7 +20977,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1498",
     "name_en": "Shrimp cocktail, prepared",
     "name_de": "Crevettencocktail, zubereitet",
-    "category": "PRODUCE",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 168,
       "protein": 4.4,
@@ -20997,7 +20997,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14293",
     "name_en": "Shrimp, peeled, cooked",
     "name_de": "Garnele, geschält, gekocht",
-    "category": "PRODUCE",
+    "category": "SEAFOOD",
     "nutrients_per_100g": {
       "calories": 86,
       "protein": 19,
@@ -21018,7 +21018,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "766",
     "name_en": "Shrimp, peeled, raw (fresh or frozen)",
     "name_de": "Garnele, geschält, roh (frisch oder tiefgekuhlt)",
-    "category": "PRODUCE",
+    "category": "SEAFOOD",
     "nutrients_per_100g": {
       "calories": 74,
       "protein": 16.6,
@@ -21063,7 +21063,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "954",
     "name_en": "Soft caramel candies",
     "name_de": "Weichkaramellen, Bonbons",
-    "category": "PRODUCE",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 448,
       "protein": 2.1,
@@ -21242,7 +21242,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "10561",
     "name_en": "Somosa, baked",
     "name_de": "Samosa, gebacken",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 353,
       "protein": 6.8,
@@ -21262,7 +21262,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "892",
     "name_en": "Sorbet, fruit",
     "name_de": "Sorbet, Frucht",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "density": 0.7,
     "nutrients_per_100g": {
       "calories": 137,
@@ -21282,7 +21282,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "574",
     "name_en": "Sour cream (crème fraîche) 35% fat",
     "name_de": "Sauerrahm",
-    "category": "CONDIMENTS_OILS",
+    "category": "DAIRY_EGGS",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 336,
@@ -21306,7 +21306,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "575",
     "name_en": "Sour cream 15% fat",
     "name_de": "Saurer Halbrahm",
-    "category": "CONDIMENTS_OILS",
+    "category": "DAIRY_EGGS",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 173,
@@ -21329,7 +21329,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14223",
     "name_en": "Soy drink, chocolate",
     "name_de": "Sojagetränk, Schokolade",
-    "category": "BEVERAGES",
+    "category": "DAIRY_EGGS",
     "nutrients_per_100g": {
       "calories": 76,
       "protein": 3.8,
@@ -21349,7 +21349,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13456",
     "name_en": "Soy sauce",
     "name_de": "Sojasauce",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 1.1,
     "nutrients_per_100g": {
       "calories": 56,
@@ -21368,7 +21368,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "72",
     "name_en": "Soya drink, plain",
     "name_de": "Sojagetränk, nature",
-    "category": "BEVERAGES",
+    "category": "DAIRY_EGGS",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 40,
@@ -21389,7 +21389,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14129",
     "name_en": "Soya drink, plain, with calcium and vitamin fortified",
     "name_de": "Sojagetränk, nature, mit Calcium and Vitaminen angereichert",
-    "category": "BEVERAGES",
+    "category": "DAIRY_EGGS",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 40,
@@ -21412,7 +21412,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "996",
     "name_en": "Soya flour, defatted",
     "name_de": "Sojamehl, entfettet",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 296,
       "protein": 51.5,
@@ -21437,7 +21437,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "995",
     "name_en": "Soya flour, full fat",
     "name_de": "Sojamehl, vollfett",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 470,
       "protein": 40.8,
@@ -21462,7 +21462,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14147",
     "name_en": "Soya, textured (pieces, minced), dried",
     "name_de": "Soja, texturiert (Granulat, Schnetzel), trocken",
-    "category": "PANTRY",
+    "category": "MEAT_POULTRY",
     "nutrients_per_100g": {
       "calories": 322,
       "protein": 49.9,
@@ -21484,7 +21484,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "603",
     "name_en": "Soybean oil",
     "name_de": "Sojaöl",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 900,
@@ -21506,7 +21506,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "466",
     "name_en": "Soybean sprouts",
     "name_de": "Sojasprossen, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 55,
       "protein": 5.5,
@@ -21526,7 +21526,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1061",
     "name_en": "Soybean, cooked (without addition of fat and salt)",
     "name_de": "Sojabohne, gekocht (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 157,
       "protein": 15,
@@ -21551,7 +21551,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "442",
     "name_en": "Soybean, dried",
     "name_de": "Sojabohne, getrocknet",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 396,
       "protein": 38.2,
@@ -21593,7 +21593,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1399",
     "name_en": "Spätzle flour",
     "name_de": "Knöpflimehl",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 347,
       "protein": 12.9,
@@ -21617,7 +21617,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14180",
     "name_en": "Spätzli, cooked, drained, homemade",
     "name_de": "Spätzli, gekocht, abgetropft, hausgemacht",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 146,
       "protein": 6.7,
@@ -21638,7 +21638,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14198",
     "name_en": "Spätzli, fried (without added fat and salt)",
     "name_de": "Spätzli gebraten (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 168,
       "protein": 7.7,
@@ -21662,7 +21662,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14184",
     "name_en": "Spätzli, fried with butter",
     "name_de": "Spätzli gebraten mit Butter",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 199,
       "protein": 7.3,
@@ -21686,7 +21686,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1043",
     "name_en": "Spelt, fine flour (type 550)",
     "name_de": "Dinkelmehl, weiss, Typ 550",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 348,
       "protein": 13.3,
@@ -21712,7 +21712,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1041",
     "name_en": "Spelt, flour Ruch (type 1100)",
     "name_de": "Dinkelmehl, Ruch, Typ 1100",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 348,
       "protein": 14.3,
@@ -21738,7 +21738,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1042",
     "name_en": "Spelt, wholemeal flour (type 1900)",
     "name_de": "Dinkelmehl, Vollkorn, Typ 1900",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 345,
       "protein": 15,
@@ -21764,7 +21764,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14240",
     "name_en": "Spinach in cream sauce, cooked",
     "name_de": "Rahmspinat, gekocht",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 65,
       "protein": 2.9,
@@ -21789,7 +21789,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1566",
     "name_en": "Spinach quiche, baked (with cake dough)",
     "name_de": "Spinatkuchen, gebacken (mit Kuchenteig)",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 192,
       "protein": 6.4,
@@ -21810,7 +21810,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1567",
     "name_en": "Spinach quiche, baked (with puff pastry)",
     "name_de": "Spinatkuchen, gebacken (mit Blätterteig)",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 189,
       "protein": 6,
@@ -21831,7 +21831,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "365",
     "name_en": "Spinach, raw",
     "name_de": "Spinat, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 25,
       "protein": 2.6,
@@ -21851,7 +21851,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1025",
     "name_en": "Spinach, steamed (without addition of salt)",
     "name_de": "Spinat, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 31,
       "protein": 3.3,
@@ -22015,7 +22015,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14061",
     "name_en": "Spring roll, deep fried",
     "name_de": "Frühlingsrolle, frittiert",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 224,
       "protein": 6.5,
@@ -22035,7 +22035,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1656",
     "name_en": "Squash slices, breaded, prepared",
     "name_de": "Kürbisscheiben, paniert, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 144,
       "protein": 4.7,
@@ -22057,7 +22057,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "764",
     "name_en": "Squid, raw",
     "name_de": "Kalmar, roh",
-    "category": "PRODUCE",
+    "category": "SEAFOOD",
     "nutrients_per_100g": {
       "calories": 77,
       "protein": 14.4,
@@ -22119,7 +22119,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "385",
     "name_en": "Strawberry, fresh",
     "name_de": "Erdbeere, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 38,
       "protein": 0.6,
@@ -22139,7 +22139,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13418",
     "name_en": "Strudel dough, raw",
     "name_de": "Strudelteig, ungebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 234,
       "protein": 7.6,
@@ -22159,7 +22159,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "465",
     "name_en": "Sugar loaf chicory, raw",
     "name_de": "Zuckerhutsalat, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 16,
       "protein": 1.2,
@@ -22184,7 +22184,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "438",
     "name_en": "Sugar pea, raw",
     "name_de": "Kefe, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 48,
       "protein": 3.8,
@@ -22211,7 +22211,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1012",
     "name_en": "Sugar pea, steamed (without addition of salt)",
     "name_de": "Kefe, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 52,
       "protein": 4.1,
@@ -22238,7 +22238,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "471",
     "name_en": "Sugar, brown",
     "name_de": "Zucker, braun",
-    "category": "BAKING",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 390,
       "protein": 0,
@@ -22262,7 +22262,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "470",
     "name_en": "Sugar, white",
     "name_de": "Zucker, weiss",
-    "category": "BAKING",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 400,
       "protein": 0,
@@ -22288,7 +22288,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "598",
     "name_en": "Sunflower oil",
     "name_de": "Sonnenblumenöl",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 900,
@@ -22310,7 +22310,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1068",
     "name_en": "Sunflower oil HO (high oleic), refined",
     "name_de": "Sonnenblumenöl HO (high oleic), raffiniert",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 900,
@@ -22334,7 +22334,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "281",
     "name_en": "Sunflower seeds",
     "name_de": "Sonnenblumenkerne",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 621,
       "protein": 25.1,
@@ -22369,7 +22369,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1033",
     "name_en": "Sweet corn (canned), heated (without addition of salt)",
     "name_de": "Zuckermais (Konserve), aufgewärmt (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 107,
       "protein": 3.1,
@@ -22394,7 +22394,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "632",
     "name_en": "Sweet corn canned",
     "name_de": "Zuckermais (Konserve)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 105,
       "protein": 3,
@@ -22412,7 +22412,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "633",
     "name_en": "Sweet corn cob, pickled",
     "name_de": "Maiskölbchen, in Essig eingelegt",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 119,
       "protein": 3.4,
@@ -22432,7 +22432,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "432",
     "name_en": "Sweet corn, raw",
     "name_de": "Mais, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 85,
       "protein": 3.2,
@@ -22456,7 +22456,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1032",
     "name_en": "Sweet corn, steamed",
     "name_de": "Mais, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 92,
       "protein": 3.5,
@@ -22483,7 +22483,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14262",
     "name_en": "Sweet potato, baked (without addition of fat and salt)",
     "name_de": "Süsskartoffel, im Ofen gebacken (ohne Zubage von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 100,
       "protein": 1.9,
@@ -22507,7 +22507,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13406",
     "name_en": "Sweet potato, raw",
     "name_de": "Süsskartoffel, roh",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 81,
       "protein": 1.6,
@@ -22531,7 +22531,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13407",
     "name_en": "Sweet potato, steamed (without addition of salt)",
     "name_de": "Süsskartoffel, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 81,
       "protein": 1.6,
@@ -22575,7 +22575,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "450",
     "name_en": "Swiss chard, raw",
     "name_de": "Mangold, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 16,
       "protein": 1,
@@ -22596,7 +22596,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1016",
     "name_en": "Swiss chard, steamed (without addition of salt)",
     "name_de": "Mangold, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 20,
       "protein": 1.3,
@@ -22729,7 +22729,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1609",
     "name_en": "Taboulé, prepared (with Bulgur)",
     "name_de": "Taboulé, zubereitet (mit Bulgur)",
-    "category": "PRODUCE",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 110,
       "protein": 2.3,
@@ -22748,7 +22748,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1610",
     "name_en": "Taboulé, prepared (with Couscous)",
     "name_de": "Taboulé, zubereitet (mit Couscous)",
-    "category": "PRODUCE",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 132,
       "protein": 3.1,
@@ -22767,7 +22767,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1684",
     "name_en": "Tartare sauce with rapeseed mayonnaise, home-made",
     "name_de": "Tartarsauce mit Rapsöl-Mayonnaise, hausgemacht",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 385,
       "protein": 3.7,
@@ -22791,7 +22791,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14231",
     "name_en": "Tarte au citron",
     "name_de": "Tarte au citron",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 257,
       "protein": 6.3,
@@ -22833,7 +22833,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14251",
     "name_en": "Tempeh, plain",
     "name_de": "Tempeh, nature",
-    "category": "PANTRY",
+    "category": "MEAT_POULTRY",
     "nutrients_per_100g": {
       "calories": 157,
       "protein": 17.6,
@@ -22905,7 +22905,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13956",
     "name_en": "Thickened pear juice",
     "name_de": "Birnendicksaft",
-    "category": "BAKING",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 351,
       "protein": 3.1,
@@ -22922,7 +22922,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1496",
     "name_en": "Thin pancakes with bacon, prepared",
     "name_de": "Crêpes mit Speck, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 251,
       "protein": 11.2,
@@ -22942,7 +22942,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1489",
     "name_en": "Thin pancakes with camembert cheese, prepared",
     "name_de": "Crêpes mit Camembert, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 246,
       "protein": 11.9,
@@ -22967,7 +22967,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1495",
     "name_en": "Thin pancakes with ham, prepared",
     "name_de": "Crêpes mit Schinken, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 191,
       "protein": 12.8,
@@ -22987,7 +22987,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1491",
     "name_en": "Thin pancakes with mushrooms, prepared",
     "name_de": "Crêpes mit Champignonfüllung, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 138,
       "protein": 5.8,
@@ -23007,7 +23007,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1494",
     "name_en": "Thin pancakes with Nutella, prepared",
     "name_de": "Crêpes mit Nutella, zubereitet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 376,
       "protein": 7.8,
@@ -23027,7 +23027,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1488",
     "name_en": "Thin pancakes with sugar and cinnamon, prepared",
     "name_de": "Crêpes mit Zimt und Zucker, zubereitet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 253,
       "protein": 8.2,
@@ -23052,7 +23052,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1493",
     "name_en": "Thin pancakes with vegetable filling, prepared",
     "name_de": "Crêpes mit Gemüsefüllung, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 165,
       "protein": 6,
@@ -23072,7 +23072,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1487",
     "name_en": "Thin pancakes, prepared",
     "name_de": "Crêpes nature, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 232,
       "protein": 9.4,
@@ -23092,7 +23092,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "460",
     "name_en": "Thyme, fresh",
     "name_de": "Thymian, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 52,
       "protein": 1.5,
@@ -23162,7 +23162,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14023",
     "name_en": "Tiramisu",
     "name_de": "Tiramisu",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 240,
       "protein": 4.3,
@@ -23179,7 +23179,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14120",
     "name_en": "Tofu ferm, plain (produced with calcium salt)",
     "name_de": "Tofu, fest, nature (hergestellt mit Calciumsalz)",
-    "category": "PANTRY",
+    "category": "MEAT_POULTRY",
     "nutrients_per_100g": {
       "calories": 148,
       "protein": 14.7,
@@ -23205,7 +23205,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14119",
     "name_en": "Tofu, ferm, plain (produced with nigari)",
     "name_de": "Tofu, fest, nature (hergestellt mit Nigari)",
-    "category": "PANTRY",
+    "category": "MEAT_POULTRY",
     "nutrients_per_100g": {
       "calories": 148,
       "protein": 14.7,
@@ -23226,7 +23226,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13437",
     "name_en": "Tofu, firm, plain (average)",
     "name_de": "Tofu, fest, nature (Durchschnitt)",
-    "category": "PANTRY",
+    "category": "MEAT_POULTRY",
     "nutrients_per_100g": {
       "calories": 148,
       "protein": 14.7,
@@ -23247,7 +23247,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14167",
     "name_en": "Tofu, firm, plain (average), roasted (without addition of fat and salt)",
     "name_de": "Tofu, fest, nature (Durchschnitt), gebraten (ohne Zugabe von Fett und Salz)",
-    "category": "PANTRY",
+    "category": "MEAT_POULTRY",
     "nutrients_per_100g": {
       "calories": 168,
       "protein": 18,
@@ -23273,7 +23273,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13438",
     "name_en": "Tofu, silken (soft), plain",
     "name_de": "Tofu, seidig (weich), nature",
-    "category": "PANTRY",
+    "category": "MEAT_POULTRY",
     "nutrients_per_100g": {
       "calories": 53,
       "protein": 5,
@@ -23296,7 +23296,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14090",
     "name_en": "Tofu, smoked (average)",
     "name_de": "Tofu, geräuchert (Durchschnitt)",
-    "category": "PANTRY",
+    "category": "MEAT_POULTRY",
     "nutrients_per_100g": {
       "calories": 164,
       "protein": 16.4,
@@ -23315,7 +23315,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14168",
     "name_en": "Tofu, smoked (average), roasted (without addition of fat and salt)",
     "name_de": "Tofu, geräuchert (Durchschnitt), gebraten (ohne Zugabe von Fett und Salz)",
-    "category": "PANTRY",
+    "category": "MEAT_POULTRY",
     "nutrients_per_100g": {
       "calories": 163,
       "protein": 17.5,
@@ -23341,7 +23341,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14122",
     "name_en": "Tofu, smoked (produced with calcium salt)",
     "name_de": "Tofu, geräuchert (hergestellt mit Calciumsalz)",
-    "category": "PANTRY",
+    "category": "MEAT_POULTRY",
     "nutrients_per_100g": {
       "calories": 164,
       "protein": 16.4,
@@ -23365,7 +23365,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14121",
     "name_en": "Tofu, smoked (produced with nigari)",
     "name_de": "Tofu, geräuchert (hergestellt mit Nigari)",
-    "category": "PANTRY",
+    "category": "MEAT_POULTRY",
     "nutrients_per_100g": {
       "calories": 164,
       "protein": 16.4,
@@ -23384,7 +23384,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "564",
     "name_en": "Tomato juice",
     "name_de": "Tomatensaft",
-    "category": "PRODUCE",
+    "category": "BEVERAGES",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 16,
@@ -23408,7 +23408,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "636",
     "name_en": "Tomato paste",
     "name_de": "Tomatenpüree",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 77,
       "protein": 4.5,
@@ -23432,7 +23432,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1618",
     "name_en": "Tomato quiche, baked (with cake dough)",
     "name_de": "Tomatenkuchen, gebacken (mit Kuchenteig)",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 174,
       "protein": 4.3,
@@ -23458,7 +23458,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1617",
     "name_en": "Tomato quiche, baked (with puff pastry)",
     "name_de": "Tomatenkuchen, gebacken (mit Blätterteig)",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 171,
       "protein": 3.9,
@@ -23484,7 +23484,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "667",
     "name_en": "Tomato sauce",
     "name_de": "Tomatensauce",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 69,
       "protein": 1.8,
@@ -23507,7 +23507,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "670",
     "name_en": "Tomato soup",
     "name_de": "Tomatensuppe",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 39,
       "protein": 0.7,
@@ -23530,7 +23530,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13463",
     "name_en": "Tomato, dried",
     "name_de": "Tomate, getrocknet",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 282,
       "protein": 14.1,
@@ -23555,7 +23555,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13490",
     "name_en": "Tomato, dried, in oil, drained",
     "name_de": "Tomate, getrocknet, in Öl eingelegt, abgetropft",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 187,
       "protein": 4.3,
@@ -23582,7 +23582,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "637",
     "name_en": "Tomato, peeled (pelati), canned",
     "name_de": "Tomate, geschält (Konserve)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 22,
       "protein": 1.1,
@@ -23609,7 +23609,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "348",
     "name_en": "Tomato, raw",
     "name_de": "Tomate, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 21,
       "protein": 0.9,
@@ -23634,7 +23634,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1027",
     "name_en": "Tomato, stewed (without addition of fat and salt)",
     "name_de": "Tomate, gedünstet (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 26,
       "protein": 1.1,
@@ -23700,7 +23700,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "932",
     "name_en": "Tortilla chips, corn-based",
     "name_de": "Mais-Chips (Apérogebäck)",
-    "category": "SPICES_HERBS",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 509,
       "protein": 7.8,
@@ -23826,7 +23826,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1613",
     "name_en": "Tuna salad on oil-vinagre-dressing (made from tuna in water)",
     "name_de": "Thonsalat an Essig-Öl-Sauce (aus Thon im Wasser)",
-    "category": "PRODUCE",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 108,
       "protein": 8.8,
@@ -23917,7 +23917,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "887",
     "name_en": "Tyrolese cake",
     "name_de": "Tirolercake",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 514,
       "protein": 8.9,
@@ -23935,7 +23935,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14003",
     "name_en": "Tzatziki",
     "name_de": "Tzatziki",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 138,
       "protein": 6.1,
@@ -23984,7 +23984,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13413",
     "name_en": "Vanille cream, home-made, cooked",
     "name_de": "Vanillecrème, hausgemacht, gekocht",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 109,
       "protein": 4.3,
@@ -24051,7 +24051,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1667",
     "name_en": "Veal piccata, prepared",
     "name_de": "Kalbspiccata, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 217,
       "protein": 22.5,
@@ -24071,7 +24071,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1669",
     "name_en": "Veal ragout with gravy, prepared",
     "name_de": "Kalbsragout mit Sauce, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 91,
       "protein": 11.3,
@@ -24589,7 +24589,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1580",
     "name_en": "Vegetable au gratin, baked",
     "name_de": "Gemüsegratin, gebacken",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 58,
       "protein": 2.6,
@@ -24609,7 +24609,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1666",
     "name_en": "Vegetable lasagne, prepared",
     "name_de": "Gemüselasagne, zubereitet",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 133,
       "protein": 4.4,
@@ -24629,7 +24629,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14193",
     "name_en": "Vegetables (average), boiled (without addition of salt and fat)",
     "name_de": "Gemüse (Durchschnitt), gekocht (ohne Zugabe von Salz und Fett)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 28,
       "protein": 1.2,
@@ -24654,7 +24654,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1152",
     "name_en": "Vegetables (average), raw",
     "name_de": "Gemüse (Durchschnitt), roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 29,
       "protein": 1.3,
@@ -24696,7 +24696,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1202",
     "name_en": "Vinaigrette dressing (with rapeseed oil)",
     "name_de": "Vinaigrette (mit Rapsöl)",
-    "category": "PRODUCE",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 232,
       "protein": 4.2,
@@ -24736,7 +24736,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1199",
     "name_en": "Vinegar-oil-salad dressing, home-made (with rapeseed oil)",
     "name_de": "Essig-Öl-Salatsauce, hausgemacht (mit Rapsöl)",
-    "category": "PRODUCE",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 287,
       "protein": 0.7,
@@ -24796,7 +24796,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14304",
     "name_en": "Wafer, filled and coated with chocolate",
     "name_de": "Waffelguetzli, gefüllt, mit Schokoladenüberzug",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 534,
       "protein": 6.6,
@@ -24817,7 +24817,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14016",
     "name_en": "Waffle, fresh",
     "name_de": "Waffel, frisch",
-    "category": "BAKERY",
+    "category": "SWEETS_SNACKS",
     "nutrients_per_100g": {
       "calories": 301,
       "protein": 8,
@@ -24837,7 +24837,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "271",
     "name_en": "Walnut",
     "name_de": "Baumnuss",
-    "category": "PRODUCE",
+    "category": "NUTS_SEEDS",
     "nutrients_per_100g": {
       "calories": 709,
       "protein": 15.7,
@@ -24856,7 +24856,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13402",
     "name_en": "Walnut oil",
     "name_de": "Baumnussöl",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 900,
@@ -24878,7 +24878,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "10542",
     "name_en": "Wasabi Paste",
     "name_de": "Wasabi Paste",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 308,
       "protein": 2.9,
@@ -24895,7 +24895,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "371",
     "name_en": "Water cress, raw",
     "name_de": "Brunnenkresse, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 19,
       "protein": 1.7,
@@ -24915,7 +24915,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "893",
     "name_en": "Water ice",
     "name_de": "Wassereis",
-    "category": "PANTRY",
+    "category": "SWEETS_SNACKS",
     "density": 1,
     "nutrients_per_100g": {
       "calories": 88,
@@ -24934,7 +24934,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "402",
     "name_en": "Watermelon, fresh",
     "name_de": "Wassermelone, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 39,
       "protein": 0.7,
@@ -25014,7 +25014,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "204",
     "name_en": "Wheat flour, bakery, type 550",
     "name_de": "Weizenmehl (Backmehl), Typ 550",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 344,
       "protein": 12,
@@ -25040,7 +25040,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "203",
     "name_en": "Wheat flour, high ash, type 1100",
     "name_de": "Weizenmehl, Ruch, Typ 1100",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 339,
       "protein": 13.5,
@@ -25067,7 +25067,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "207",
     "name_en": "Wheat flour, semi white, type 720",
     "name_de": "Weizenmehl, halbweiss, Typ 720",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 340,
       "protein": 13,
@@ -25094,7 +25094,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "205",
     "name_en": "Wheat flour, white, type 400",
     "name_de": "Weizenmehl, weiss, Typ 400",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 346,
       "protein": 11.5,
@@ -25121,7 +25121,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "206",
     "name_en": "Wheat flour, wholemeal, type 1700",
     "name_de": "Weizenmehl, Vollkorn, Typ 1700",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 338,
       "protein": 13.5,
@@ -25166,7 +25166,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "593",
     "name_en": "Wheat germ oil",
     "name_de": "Weizenkeimöl",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 0.9,
     "nutrients_per_100g": {
       "calories": 900,
@@ -25188,7 +25188,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1588",
     "name_en": "Wheat risotto, cooked",
     "name_de": "Weizenotto, gekocht",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 172,
       "protein": 5.3,
@@ -25208,7 +25208,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "897",
     "name_en": "Wheat starch",
     "name_de": "Weizenstärke",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 348,
       "protein": 0.4,
@@ -25245,7 +25245,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "734",
     "name_en": "Wheat, soft, whole grain",
     "name_de": "Weizen (Weichweizen), ganzes Korn",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 327,
       "protein": 11.4,
@@ -25310,7 +25310,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "453",
     "name_en": "White cabbage, raw",
     "name_de": "Weisskohl, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 36,
       "protein": 1.4,
@@ -25331,7 +25331,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1028",
     "name_en": "White cabbage, steamed (without addition of salt)",
     "name_de": "Weisskohl, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 35,
       "protein": 1.3,
@@ -25356,7 +25356,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1029",
     "name_en": "White cabbage, stewed (without addition of fat and salt)",
     "name_de": "Weisskohl, gedünstet (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 37,
       "protein": 1.4,
@@ -25499,7 +25499,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1064",
     "name_en": "Wholemeal pasta egg-free, cooked in salted water (uniodised)",
     "name_de": "Teigwaren ohne Ei, Vollkorn, gekocht im Salzwasser (unjodiert)",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 152,
       "protein": 5.9,
@@ -25529,7 +25529,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "801",
     "name_en": "Wholemeal pasta egg-free, dry",
     "name_de": "Teigwaren ohne Ei, Vollkorn, trocken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 338,
       "protein": 12.6,
@@ -25664,7 +25664,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14221",
     "name_en": "Wienerli (Swiss sausage) in pastry",
     "name_de": "Wienerli im Teig",
-    "category": "PANTRY",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 279,
       "protein": 10.7,
@@ -25868,7 +25868,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "13939",
     "name_en": "Worcestershire sauce",
     "name_de": "Worcester Sauce",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "density": 1.2,
     "nutrients_per_100g": {
       "calories": 124,
@@ -25886,7 +25886,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "763",
     "name_en": "Yeast (baking), pressed",
     "name_de": "Bäckerhefe, gepresst",
-    "category": "BAKING",
+    "category": "PANTRY_BAKING",
     "nutrients_per_100g": {
       "calories": 96,
       "protein": 16.7,
@@ -25907,7 +25907,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "910",
     "name_en": "Yeast dough (with butter), sweet, raw",
     "name_de": "Hefeteig (mit Butter), süss, ungebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 311,
       "protein": 8.7,
@@ -25934,7 +25934,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1177",
     "name_en": "Yeast dough (with vegetable fat), sweet, raw",
     "name_de": "Hefeteig (mit pflanzlichem Fett), süss, ungebacken",
-    "category": "PRODUCE",
+    "category": "GRAINS_PASTA",
     "nutrients_per_100g": {
       "calories": 300,
       "protein": 9.2,
@@ -25956,7 +25956,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "839",
     "name_en": "Yeast, dried",
     "name_de": "Bierhefe, getrocknet",
-    "category": "BAKING",
+    "category": "PANTRY_BAKING",
     "nutrients_per_100g": {
       "calories": 354,
       "protein": 47.9,
@@ -25979,7 +25979,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "403",
     "name_en": "Yellow plum, fresh",
     "name_de": "Mirabelle, roh",
-    "category": "PRODUCE",
+    "category": "FRUITS",
     "nutrients_per_100g": {
       "calories": 76,
       "protein": 0.6,
@@ -26046,7 +26046,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "14135",
     "name_en": "Yogurt butter",
     "name_de": "Joghurt-Butter",
-    "category": "CONDIMENTS_OILS",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 602,
       "protein": 1.2,
@@ -26068,7 +26068,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1612",
     "name_en": "Yogurt dressing (without oil)",
     "name_de": "Joghurt-Salatsauce (ohne Öl)",
-    "category": "PRODUCE",
+    "category": "OILS_CONDIMENTS",
     "nutrients_per_100g": {
       "calories": 58,
       "protein": 3.2,
@@ -26624,7 +26624,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1661",
     "name_en": "Zucchini piccata, prepared",
     "name_de": "Zucchetti-Piccata, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 122,
       "protein": 5.2,
@@ -26648,7 +26648,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1657",
     "name_en": "Zucchini slices, breaded, prepared",
     "name_de": "Zucchettischeiben, paniert, zubereitet",
-    "category": "SPICES_HERBS",
+    "category": "PREPARED_DISHES",
     "nutrients_per_100g": {
       "calories": 125,
       "protein": 4.5,
@@ -26674,7 +26674,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "367",
     "name_en": "Zucchini, raw",
     "name_de": "Zucchetti, roh",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 17,
       "protein": 1.2,
@@ -26698,7 +26698,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1654",
     "name_en": "Zucchini, steamed (without addition of salt)",
     "name_de": "Zucchetti, gedämpft (ohne Zugabe von Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 18,
       "protein": 1.3,
@@ -26722,7 +26722,7 @@ export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = [
     "swiss_id": "1031",
     "name_en": "Zucchini, stewed (without addition of fat and salt)",
     "name_de": "Zucchetti, gedünstet (ohne Zugabe von Fett und Salz)",
-    "category": "PRODUCE",
+    "category": "VEGETABLES",
     "nutrients_per_100g": {
       "calories": 20,
       "protein": 1.5,

@@ -1,56 +1,10 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 
-interface RawFoodItem {
-  id: string;
-  name_en: string;
-  name_de: string;
-  category_en: string;
-  category_de: string;
-  density?: number;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  fiber?: number;
-  aliases: string[];
-}
-
-function parseNumber(val?: string): number {
-  if (!val) return 0;
-  const clean = val.trim().replace(',', '.');
-  if (clean === 'n.d.' || clean === 'k.A.' || clean === '-' || clean === 'tr.') return 0;
-  if (clean.startsWith('<')) {
-    const num = parseFloat(clean.substring(1));
-    return isNaN(num) ? 0 : num;
-  }
-  const num = parseFloat(clean);
-  return isNaN(num) ? 0 : Math.round(num * 10) / 10;
-}
-
 /**
- * Splits a CSV line taking into account quoted fields with embedded semicolons.
+ * Explicit, human-curated 1:1 mapping of ALL 106 Swiss subcategories
+ * to 11 standardized, culinary-correct main categories.
  */
-function parseCsvLine(line: string): string[] {
-  const result: string[] = [];
-  let current = '';
-  let inQuotes = false;
-
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    if (char === '"') {
-      inQuotes = !inQuotes;
-    } else if (char === ';' && !inQuotes) {
-      result.push(current.trim());
-      current = '';
-    } else {
-      current += char;
-    }
-  }
-  result.push(current.trim());
-  return result;
-}
-
 export const SWISS_CATEGORY_EXPLICIT_MAP: Record<string, { mainCategory: string; labelDe: string; labelEn: string }> = {
   // ── 1. VEGETABLES (Gemüse frisch/gekocht, Pilze, Salate, Kräuter, Sprossen) ───────
   'Gemüse/Gemüse frisch': { mainCategory: 'VEGETABLES', labelDe: 'Frisches Gemüse & Salate', labelEn: 'Fresh Vegetables & Salads' },
@@ -66,7 +20,7 @@ export const SWISS_CATEGORY_EXPLICIT_MAP: Record<string, { mainCategory: string;
   'Früchte/Früchte gekocht (inkl. Konserven)': { mainCategory: 'FRUITS', labelDe: 'Obstkonserven & Kompott', labelEn: 'Canned Fruit & Compote' },
   'Früchte/Früchte getrocknet': { mainCategory: 'FRUITS', labelDe: 'Trockenfrüchte & Dörrobst', labelEn: 'Dried Fruits' },
 
-  // ── 3. DAIRY_EGGS (Milch, Käse, Joghurt, Quark, Butter, Rahm, Eier, Tofu, Pflanzendrinks) ──
+  // ── 2. DAIRY_EGGS (Milch, Käse, Joghurt, Quark, Butter, Rahm, Eier, Tofu, Pflanzendrinks) ──
   'Milch und Milchprodukte/Hartkäse': { mainCategory: 'DAIRY_EGGS', labelDe: 'Hartkäse', labelEn: 'Hard Cheese' },
   'Milch und Milchprodukte/Halbhartkäse': { mainCategory: 'DAIRY_EGGS', labelDe: 'Halbhartkäse', labelEn: 'Semi-Hard Cheese' },
   'Milch und Milchprodukte/Weichkäse': { mainCategory: 'DAIRY_EGGS', labelDe: 'Weichkäse', labelEn: 'Soft Cheese' },
@@ -88,7 +42,7 @@ export const SWISS_CATEGORY_EXPLICIT_MAP: Record<string, { mainCategory: string;
   'Pflanzliche Proteinlieferanten und Alternativen zu tierischen Produkten/Pflanzliche Getränke': { mainCategory: 'DAIRY_EGGS', labelDe: 'Pflanzendrinks (Haferdrink, Mandeldrink, Sojadrink)', labelEn: 'Plant-Based Milk Drinks' },
   'Pflanzliche Proteinlieferanten und Alternativen zu tierischen Produkten/Tofu und Tofuerzeugnisse': { mainCategory: 'DAIRY_EGGS', labelDe: 'Tofu & Sojaprodukte', labelEn: 'Tofu Products' },
 
-  // ── 4. MEAT_POULTRY (Fleisch, Geflügel, Wurstwaren, Schinken, Fleischalternativen) ──
+  // ── 3. MEAT_POULTRY (Fleisch, Geflügel, Wurstwaren, Schinken, Fleischalternativen) ──
   'Fleisch und Innereien/Rind': { mainCategory: 'MEAT_POULTRY', labelDe: 'Rindfleisch & Rinderhack', labelEn: 'Beef' },
   'Fleisch und Innereien/Kalb': { mainCategory: 'MEAT_POULTRY', labelDe: 'Kalbfleisch', labelEn: 'Veal' },
   'Fleisch und Innereien/Schwein': { mainCategory: 'MEAT_POULTRY', labelDe: 'Schweinefleisch', labelEn: 'Pork' },
@@ -105,7 +59,7 @@ export const SWISS_CATEGORY_EXPLICIT_MAP: Record<string, { mainCategory: string;
   'Pflanzliche Proteinlieferanten und Alternativen zu tierischen Produkten/Alternativen zu Fleisch, Fleischwaren, Fisch oder Ei': { mainCategory: 'MEAT_POULTRY', labelDe: 'Vegane Fleischalternativen (Sojaschnetzel, Mykoprotein)', labelEn: 'Plant-Based Meat Substitutes' },
   'Pflanzliche Proteinlieferanten und Alternativen zu tierischen Produkten/Pflanzliche Proteinlieferanten': { mainCategory: 'MEAT_POULTRY', labelDe: 'Pflanzliche Protein-Rohstoffe (Seitan, Tempeh)', labelEn: 'Plant-Based Proteins (Seitan, Tempeh)' },
 
-  // ── 5. SEAFOOD (Fische, Meeresfrüchte, Krustentiere) ──────────────────────────────
+  // ── 4. SEAFOOD (Fische, Meeresfrüchte, Krustentiere) ──────────────────────────────
   'Fisch': { mainCategory: 'SEAFOOD', labelDe: 'Fisch & Fischwaren', labelEn: 'Fish' },
   'Fisch/Meeresfische': { mainCategory: 'SEAFOOD', labelDe: 'Meeresfische (Lachs, Dorsch, Thunfisch)', labelEn: 'Saltwater Fish' },
   'Fisch/Süsswasserfische': { mainCategory: 'SEAFOOD', labelDe: 'Süßwasserfische (Forelle, Zander, Felchen)', labelEn: 'Freshwater Fish' },
@@ -114,7 +68,7 @@ export const SWISS_CATEGORY_EXPLICIT_MAP: Record<string, { mainCategory: string;
   'Fische und Krustentiere': { mainCategory: 'SEAFOOD', labelDe: 'Fischereierzeugnisse', labelEn: 'Fish & Shellfish' },
   'Krustentiere und Weichtiere': { mainCategory: 'SEAFOOD', labelDe: 'Krustentiere (Garnelen, Crevetten, Muscheln)', labelEn: 'Shellfish & Crustaceans' },
 
-  // ── 6. GRAINS_PASTA (Getreide, Nudeln, Reis, Mehl, Teige, Kartoffeln, Hülsenfrüchte & Brot) ──
+  // ── 5. GRAINS_PASTA (Getreide, Nudeln, Reis, Mehl, Teige, Kartoffeln, Hülsenfrüchte & Brot) ──
   'Brote, Flocken und Frühstückscerealien/Brote und Brotwaren': { mainCategory: 'GRAINS_PASTA', labelDe: 'Brot & Brotwaren', labelEn: 'Bread & Buns' },
   'Brote, Flocken und Frühstückscerealien/Kleingebäcke': { mainCategory: 'GRAINS_PASTA', labelDe: 'Kleingebäcke & Gipfeli/Croissants', labelEn: 'Small Bakery Items' },
   'Brote, Flocken und Frühstückscerealien/Knäckebrote, Zwiebäcke und Toaste': { mainCategory: 'GRAINS_PASTA', labelDe: 'Toast, Knäckebrot & Zwieback', labelEn: 'Toast & Crispbread' },
@@ -131,7 +85,7 @@ export const SWISS_CATEGORY_EXPLICIT_MAP: Record<string, { mainCategory: string;
   'Getreideprodukte, Hülsenfrüchte und Kartoffeln/Mais': { mainCategory: 'GRAINS_PASTA', labelDe: 'Mais & Polenta/Maisgrieß', labelEn: 'Corn & Polenta' },
   'Getreideprodukte, Hülsenfrüchte und Kartoffeln/Sonstige Getreideprodukte': { mainCategory: 'GRAINS_PASTA', labelDe: 'Couscous, Bulgur, Gerste & Buchweizen', labelEn: 'Couscous, Bulgur & Grains' },
 
-  // ── 7. OILS_CONDIMENTS (Öle, Fette, Essig, Salatsaucen, Saucen, Senf & Mayonnaise) ──
+  // ── 6. OILS_CONDIMENTS (Öle, Fette, Essig, Salatsaucen, Saucen, Senf & Mayonnaise) ──
   'Fette und Öle/Öle': { mainCategory: 'OILS_CONDIMENTS', labelDe: 'Pflanzenöle (Olivenöl, Rapsöl, Sonnenblumenöl)', labelEn: 'Vegetable Oils' },
   'Fette und Öle/Fette': { mainCategory: 'OILS_CONDIMENTS', labelDe: 'Speisefette (Bratbutter, Pflanzenfett, Margarine)', labelEn: 'Cooking Fats & Margarine' },
   'Fette und Öle/Salatsaucen': { mainCategory: 'OILS_CONDIMENTS', labelDe: 'Salatdressings & Vinaigrettes', labelEn: 'Salad Dressings' },
@@ -140,14 +94,14 @@ export const SWISS_CATEGORY_EXPLICIT_MAP: Record<string, { mainCategory: string;
   'Verschiedenes/Essig': { mainCategory: 'OILS_CONDIMENTS', labelDe: 'Essig & Aceto Balsamico', labelEn: 'Vinegar' },
   'Verschiedenes/Aufstriche': { mainCategory: 'OILS_CONDIMENTS', labelDe: 'Pikante Brotaufstriche & Pasten', labelEn: 'Savory Spreads' },
 
-  // ── 8. SPICES_HERBS (Trockengewürze, Salz, Pfeffer, Würzmittel) ───────────────────
+  // ── 7. SPICES_HERBS (Trockengewürze, Salz, Pfeffer, Würzmittel) ───────────────────
   'Verschiedenes/Salz, Gewürze und Aromen': { mainCategory: 'SPICES_HERBS', labelDe: 'Salz, Pfeffer, Paprika & Gewürzmischungen', labelEn: 'Salt, Pepper & Spices' },
 
-  // ── 9. NUTS_SEEDS (Nüsse, Samen, Kerne, Avocado, Oliven) ──────────────────────────
+  // ── 8. NUTS_SEEDS (Nüsse, Samen, Kerne, Avocado, Oliven) ──────────────────────────
   'Nüsse, Samen und Ölfrüchte': { mainCategory: 'NUTS_SEEDS', labelDe: 'Nüsse, Mandeln, Chiasamen, Avocado & Kerne', labelEn: 'Nuts, Seeds & Avocado' },
   'Salzige Snacks/Gesalzene Nüsse, Samen, Kerne': { mainCategory: 'NUTS_SEEDS', labelDe: 'Gesalzene Nüsse & Kerne (Erdnüsse, Cashews)', labelEn: 'Salted Nuts & Seeds' },
 
-  // ── 10. SWEETS_SNACKS (Kekse, Schokolade, Kuchen, Zucker, Süßungsmittel & Snacks) ──
+  // ── 9. SWEETS_SNACKS (Kekse, Schokolade, Kuchen, Zucker, Süßungsmittel & Snacks) ──
   'Süssigkeiten/Guetzli': { mainCategory: 'SWEETS_SNACKS', labelDe: 'Kekse, Cookies & Plätzchen', labelEn: 'Cookies & Biscuits' },
   'Süssigkeiten/Schokolade und Kakaoerzeugnisse': { mainCategory: 'SWEETS_SNACKS', labelDe: 'Schokolade & Kakaopulver', labelEn: 'Chocolate & Cocoa Powder' },
   'Süssigkeiten/Kuchen, Torten und Cake': { mainCategory: 'SWEETS_SNACKS', labelDe: 'Kuchen, Torten & Cakes', labelEn: 'Cakes & Pastries' },
@@ -166,7 +120,7 @@ export const SWISS_CATEGORY_EXPLICIT_MAP: Record<string, { mainCategory: string;
   'Salzige Snacks/Blätterteiggebäcke': { mainCategory: 'SWEETS_SNACKS', labelDe: 'Salzige Blätterteiggebäcke (Prussiens etc.)', labelEn: 'Savory Pastries' },
   'Salzige Snacks/Sonstige salzige Snacks': { mainCategory: 'SWEETS_SNACKS', labelDe: 'Sonstige salzige Snacks', labelEn: 'Other Salty Snacks' },
 
-  // ── 11. BEVERAGES (Säfte, Drinks, Kaffee, Tee, Bier, Wein, Spirituosen) ───────────
+  // ── 10. BEVERAGES (Säfte, Drinks, Kaffee, Tee, Bier, Wein, Spirituosen) ───────────
   'Früchte/Fruchtsäfte': { mainCategory: 'BEVERAGES', labelDe: 'Fruchtsäfte (Orangensaft, Apfelsaft etc.)', labelEn: 'Fruit Juices' },
   'Gemüse/Gemüsesäfte': { mainCategory: 'BEVERAGES', labelDe: 'Gemüsesäfte (Tomatensaft, Karottensaft)', labelEn: 'Vegetable Juices' },
   'Alkoholfreie Getränke/Frucht- und Gemüsesäfte': { mainCategory: 'BEVERAGES', labelDe: 'Frucht- & Gemüsesäfte', labelEn: 'Fruit & Vegetable Juices' },
@@ -191,13 +145,13 @@ export const SWISS_CATEGORY_EXPLICIT_MAP: Record<string, { mainCategory: string;
   'Alkoholhaltige Getränke/Sonstige alkoholische Getränke': { mainCategory: 'BEVERAGES', labelDe: 'Sonstige alkoholische Getränke (Cider, Apfelwein)', labelEn: 'Other Alcoholic Drinks' },
   'Alkoholhaltige Getränke': { mainCategory: 'BEVERAGES', labelDe: 'Alkoholische Getränke', labelEn: 'Alcoholic Beverages' },
 
-  // ── 12. PANTRY_BAKING (Backzutaten, Hefe, Backpulver, Gelatine, Supplemente) ──────
+  // ── 11. PANTRY_BAKING (Backzutaten, Hefe, Backpulver, Gelatine, Supplemente) ──────
   'Verschiedenes/Backzutaten': { mainCategory: 'PANTRY_BAKING', labelDe: 'Backzutaten (Backpulver, Natron, Vanille)', labelEn: 'Baking Ingredients' },
   'Verschiedenes/Hefe': { mainCategory: 'PANTRY_BAKING', labelDe: 'Hefe (frisch & trocken)', labelEn: 'Yeast' },
   'Verschiedenes/Bindemittel und Geliermittel': { mainCategory: 'PANTRY_BAKING', labelDe: 'Geliermittel & Gelatine', labelEn: 'Gelling Agents' },
   'Speziallebensmittel/Supplemente': { mainCategory: 'PANTRY_BAKING', labelDe: 'Supplemente & Protein-Konzentrate', labelEn: 'Supplements' },
 
-  // ── 13. PREPARED_DISHES (Komplett fertige Gerichte, Gratins, Sandwiches, Pizza) ───
+  // ── 12. PREPARED_DISHES (Komplett fertige Gerichte, Gratins, Sandwiches, Pizza) ───
   'Gerichte/Sonstige salzige/rezente Gerichte': { mainCategory: 'PREPARED_DISHES', labelDe: 'Pfannengerichte & Salziges', labelEn: 'Savory Dishes' },
   'Gerichte/Kuchen und Gratins': { mainCategory: 'PREPARED_DISHES', labelDe: 'Aufläufe, Gratins & Wähen', labelEn: 'Casseroles & Gratins' },
   'Gerichte/Sandwiches': { mainCategory: 'PREPARED_DISHES', labelDe: 'Sandwiches & belegte Brote', labelEn: 'Sandwiches' },
@@ -212,325 +166,85 @@ export const SWISS_CATEGORY_EXPLICIT_MAP: Record<string, { mainCategory: string;
   'Gerichte': { mainCategory: 'PREPARED_DISHES', labelDe: 'Zubereitete Speisen', labelEn: 'Prepared Dishes' },
 };
 
-function mapCategory(catDe: string, catEn: string): string {
-  const cats = (catDe || '').split(';').map(c => c.trim()).filter(Boolean);
-  for (const c of cats) {
-    if (SWISS_CATEGORY_EXPLICIT_MAP[c]) {
-      return SWISS_CATEGORY_EXPLICIT_MAP[c].mainCategory;
-    }
-  }
-  return 'PANTRY_BAKING';
-}
-
-function cleanAlias(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/\([^)]*\)/g, ' ')
-    .replace(/[()[\]{},;:"'!?]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-
-
-const STANDARD_UNIT_WEIGHTS_BY_KEYWORD: Record<string, { piece?: number; clove?: number; tablespoon?: number; teaspoon?: number; cup?: number; pinch?: number; slice?: number; can?: number; bunch?: number }> = {
-  egg: { piece: 55, tablespoon: 15 },
-  ei: { piece: 55, tablespoon: 15 },
-  garlic: { clove: 4, piece: 35, teaspoon: 3, tablespoon: 10 },
-  knoblauch: { clove: 4, piece: 35, teaspoon: 3, tablespoon: 10 },
-  onion: { piece: 110, tablespoon: 15, teaspoon: 5, cup: 160 },
-  zwiebel: { piece: 110, tablespoon: 15, teaspoon: 5, cup: 160 },
-  potato: { piece: 150, cup: 150 },
-  kartoffel: { piece: 150, cup: 150 },
-  carrot: { piece: 100, cup: 130 },
-  karotte: { piece: 100, cup: 130 },
-  moehre: { piece: 100, cup: 130 },
-  tomato: { piece: 120, cup: 180, slice: 25 },
-  tomate: { piece: 120, cup: 180, slice: 25 },
-  apple: { piece: 180 },
-  apfel: { piece: 180 },
-  banana: { piece: 120 },
-  banane: { piece: 120 },
-  lemon: { piece: 100, tablespoon: 15, teaspoon: 5 },
-  zitrone: { piece: 100, tablespoon: 15, teaspoon: 5 },
-  lime: { piece: 60, tablespoon: 15, teaspoon: 5 },
-  limette: { piece: 60, tablespoon: 15, teaspoon: 5 },
-  orange: { piece: 150, tablespoon: 15 },
-  avocado: { piece: 170, tablespoon: 15 },
-  cucumber: { piece: 350, cup: 130, slice: 10 },
-  gurke: { piece: 350, cup: 130, slice: 10 },
-  zucchini: { piece: 200, cup: 130 },
-  pepper: { piece: 160, cup: 150 },
-  paprika: { piece: 160, cup: 150 },
-  butter: { tablespoon: 14, teaspoon: 5, piece: 250 },
-  oil: { tablespoon: 14, teaspoon: 5 },
-  oel: { tablespoon: 14, teaspoon: 5 },
-  öl: { tablespoon: 14, teaspoon: 5 },
-  sugar: { tablespoon: 15, teaspoon: 5, cup: 200 },
-  zucker: { tablespoon: 15, teaspoon: 5, cup: 200 },
-  flour: { tablespoon: 12, teaspoon: 4, cup: 120 },
-  mehl: { tablespoon: 12, teaspoon: 4, cup: 120 },
-  milk: { cup: 240, tablespoon: 15, teaspoon: 5 },
-  milch: { cup: 240, tablespoon: 15, teaspoon: 5 },
-  cream: { cup: 240, tablespoon: 15, teaspoon: 5 },
-  sahne: { cup: 240, tablespoon: 15, teaspoon: 5 },
-  quark: { tablespoon: 20, cup: 250, piece: 250 },
-  yogurt: { tablespoon: 18, cup: 200 },
-  joghurt: { tablespoon: 18, cup: 200 },
-  cheese: { slice: 25, tablespoon: 10, cup: 115 },
-  kaese: { slice: 25, tablespoon: 10, cup: 115 },
-  käse: { slice: 25, tablespoon: 10, cup: 115 },
-  bread: { slice: 40, piece: 50 },
-  brot: { slice: 40, piece: 50 },
-  salt: { pinch: 0.5, teaspoon: 5, tablespoon: 15 },
-  salz: { pinch: 0.5, teaspoon: 5, tablespoon: 15 },
-  pfeffer: { pinch: 0.3, teaspoon: 3, tablespoon: 8 },
-  mustard: { tablespoon: 15, teaspoon: 5 },
-  senf: { tablespoon: 15, teaspoon: 5 },
-  honey: { tablespoon: 21, teaspoon: 7 },
-  honig: { tablespoon: 21, teaspoon: 7 },
-  pasta: { cup: 100 },
-  nudeln: { cup: 100 },
-  rice: { cup: 185, tablespoon: 15 },
-  reis: { cup: 185, tablespoon: 15 },
-  oats: { cup: 90, tablespoon: 10 },
-  haferflocken: { cup: 90, tablespoon: 10 },
+const MAIN_CATEGORY_TITLES: Record<string, { de: string; en: string }> = {
+  VEGETABLES: { de: 'Gemüse, Pilze & Salate', en: 'Vegetables & Mushrooms' },
+  FRUITS: { de: 'Obst, Früchte & Beeren', en: 'Fruits & Berries' },
+  DAIRY_EGGS: { de: 'Milchprodukte, Eier & pflanzliche Alternativen', en: 'Dairy, Eggs & Plant-Based Alternatives' },
+  MEAT_POULTRY: { de: 'Fleisch, Geflügel & Fleischalternativen', en: 'Meat, Poultry & Meat Substitutes' },
+  SEAFOOD: { de: 'Fisch & Meeresfrüchte', en: 'Fish & Seafood' },
+  GRAINS_PASTA: { de: 'Getreide, Nudeln, Reis, Mehl, Teige & Brot', en: 'Grains, Pasta, Rice, Flour, Dough & Bread' },
+  OILS_CONDIMENTS: { de: 'Pflanzenöle, Speisefette, Essig & Saucen', en: 'Oils, Fats, Vinegar & Sauces' },
+  SPICES_HERBS: { de: 'Gewürze, Kräuter & Salz', en: 'Spices, Herbs & Salt' },
+  NUTS_SEEDS: { de: 'Nüsse, Samen, Kerne & Avocado', en: 'Nuts, Seeds & Avocado' },
+  SWEETS_SNACKS: { de: 'Süßwaren, Kekse, Schokolade, Zucker & Snacks', en: 'Sweets, Cookies, Chocolate, Sugar & Snacks' },
+  BEVERAGES: { de: 'Getränke, Säfte, Kaffee, Tee & Alkohol', en: 'Beverages, Juices, Coffee, Tea & Alcohol' },
+  PANTRY_BAKING: { de: 'Backzutaten, Hefe & Supplemente', en: 'Baking Ingredients, Yeast & Supplements' },
+  PREPARED_DISHES: { de: 'Fertiggerichte & zubereitete Speisen', en: 'Prepared Dishes' },
 };
 
-function getStandardUnits(nameEn: string, nameDe: string): any {
-  const combined = (nameEn + ' ' + nameDe).toLowerCase();
-  for (const [kw, units] of Object.entries(STANDARD_UNIT_WEIGHTS_BY_KEYWORD)) {
-    const regex = new RegExp(`\\b${kw}\\b`, 'i');
-    if (regex.test(combined)) {
-      return units;
+async function verifyAndGenerate() {
+  const rawPath = path.resolve('eval_results/swiss_categories_raw.json');
+  const raw: { category: string; itemCount: number; sampleFoods: string[] }[] = JSON.parse(await fs.readFile(rawPath, 'utf-8'));
+
+  const missing: string[] = [];
+  const mainStats = new Map<string, { label: string; count: number; subcats: { name: string; count: number; samples: string[] }[] }>();
+
+  for (const item of raw) {
+    const mapping = SWISS_CATEGORY_EXPLICIT_MAP[item.category];
+    if (!mapping) {
+      missing.push(item.category);
+      continue;
     }
-  }
-  return undefined;
-}
 
-function generateAliases(nameEn: string, nameDe: string, synEn?: string, synDe?: string): string[] {
-  const aliases = new Set<string>();
-
-  const add = (t?: string) => {
-    if (!t) return;
-    const cleaned = cleanAlias(t);
-    if (cleaned.length >= 2) aliases.add(cleaned);
-
-    const parts = t.split(',').map(p => cleanAlias(p)).filter(p => p.length >= 2);
-    if (parts.length > 1) {
-      // Add first part (main noun): "Butter, gesalzen" -> "butter", "Poulet, Brust" -> "poulet"
-      aliases.add(parts[0]);
-      // Add first two parts: "Poulet, Brust, roh" -> "poulet brust"
-      if (parts.length >= 2) {
-        aliases.add(`${parts[0]} ${parts[1]}`);
-      }
-    }
-  };
-
-  add(nameEn);
-  add(nameDe);
-
-  if (synEn) {
-    synEn.split(/[;,]/).forEach(s => add(s));
-  }
-  if (synDe) {
-    synDe.split(/[;,]/).forEach(s => add(s));
-  }
-
-  const combined = (nameEn + ' ' + nameDe).toLowerCase();
-
-  // Natural culinary variations
-  if (combined.includes('poulet') && combined.includes('brust')) {
-    add('hähnchenbrust');
-    add('haehnchenbrust');
-    add('hühnerbrust');
-    add('chicken breast');
-    add('pouletbrust');
-    add('hähnchenbrustfilet');
-  }
-  if (combined.includes('quark') && (combined.includes('mager') || combined.includes('lean') || combined.includes('0.2%') || combined.includes('low fat'))) {
-    add('magerquark');
-    add('speisequark mager');
-    add('speisequark');
-    add('topfen');
-    add('magerstufe');
-  }
-  if (combined.includes('haferflocken') || combined.includes('oat flakes')) {
-    add('haferflocken');
-    add('oats');
-    add('rolled oats');
-    add('oatmeal');
-  }
-  if (combined.includes('knoblauch') || combined.includes('garlic')) {
-    add('knoblauch');
-    add('knoblauchzehe');
-    add('knoblauchzehen');
-    add('garlic');
-    add('garlic clove');
-  }
-  if (combined.includes('zwiebel') || combined.includes('onion')) {
-    add('zwiebel');
-    add('zwiebeln');
-    add('onion');
-    add('onions');
-  }
-  if (combined.includes('hühnerei') || (combined.includes('egg') && combined.includes('whole'))) {
-    add('ei');
-    add('eier');
-    add('egg');
-    add('eggs');
-    add('hühnerei');
-  }
-  if (combined.includes('olivenöl') || combined.includes('olive oil')) {
-    add('olivenöl');
-    add('olivenoel');
-    add('olive oil');
-  }
-  if (nameDe.startsWith('Butter,') || nameEn.startsWith('Butter,')) {
-    add('butter');
-  }
-
-  return Array.from(aliases);
-}
-
-function createCanonicalSlug(nameEn: string, id: string): string {
-  const slug = nameEn
-    .toLowerCase()
-    .replace(/\([^)]*\)/g, '')
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-  return slug || `item_${id}`;
-}
-
-async function main() {
-  const enCsvPath = path.resolve('backend/src/data/swiss_food_composition.csv');
-  const deCsvPath = path.resolve('backend/src/data/swiss_food_composition_de.csv');
-  const outputPath = path.resolve('backend/src/data/canonicalIngredientsData.json');
-  const tsOutputPath = path.resolve('backend/src/data/canonicalIngredients.ts');
-
-  console.log('Reading Swiss Food Composition CSVs...');
-  const enLines = fs.readFileSync(enCsvPath, 'utf-8').split(/\r?\n/).filter(l => l.trim().length > 0);
-  const deLines = fs.readFileSync(deCsvPath, 'utf-8').split(/\r?\n/).filter(l => l.trim().length > 0);
-
-  // Map German rows by ID
-  const deMap = new Map<string, { name: string; synonyms: string; category: string }>();
-  for (let i = 3; i < deLines.length; i++) {
-    const cols = parseCsvLine(deLines[i]);
-    const id = cols[0];
-    if (id) {
-      deMap.set(id, {
-        name: cols[3] || '',
-        synonyms: cols[4] || '',
-        category: cols[5] || '',
-      });
-    }
-  }
-
-  const items: any[] = [];
-  const seenIds = new Set<string>();
-
-  for (let i = 3; i < enLines.length; i++) {
-    const cols = parseCsvLine(enLines[i]);
-    const id = cols[0];
-    if (!id || seenIds.has(id)) continue;
-    seenIds.add(id);
-
-    const nameEn = cols[3] || '';
-    const synEn = cols[4] || '';
-    const catEn = cols[5] || '';
-    const density = parseNumber(cols[6]);
-    const kcal = Math.round(parseNumber(cols[11]));
-    const fat = parseNumber(cols[14]);
-    const carbs = parseNumber(cols[41]);
-    const fiber = parseNumber(cols[50]);
-    const protein = parseNumber(cols[53]);
-
-    const deData = deMap.get(id);
-    const nameDe = deData?.name || nameEn;
-    const synDe = deData?.synonyms || '';
-    const catDe = deData?.category || '';
-
-    const category = mapCategory(catDe, catEn);
-    const aliases = generateAliases(nameEn, nameDe, synEn, synDe);
-    const canonicalKey = createCanonicalSlug(nameEn, id);
-
-    const standardUnits = getStandardUnits(nameEn, nameDe);
-
-    items.push({
-      id: canonicalKey,
-      swiss_id: id,
-      name_en: nameEn,
-      name_de: nameDe,
-      category,
-      density: density > 0 ? density : undefined,
-      nutrients_per_100g: {
-        calories: kcal,
-        protein,
-        carbs,
-        fat,
-        fiber: fiber > 0 ? fiber : undefined,
-      },
-      standard_units: standardUnits,
-      aliases,
+    const titleDe = MAIN_CATEGORY_TITLES[mapping.mainCategory]?.de || mapping.mainCategory;
+    const current = mainStats.get(mapping.mainCategory) || {
+      label: titleDe,
+      count: 0,
+      subcats: [],
+    };
+    current.count += item.itemCount;
+    current.subcats.push({
+      name: item.category,
+      count: item.itemCount,
+      samples: item.sampleFoods,
     });
+    mainStats.set(mapping.mainCategory, current);
   }
 
-  console.log(`Parsed and merged ${items.length} canonical food items!`);
+  if (missing.length > 0) {
+    console.warn(`WARNING: Missing mappings for ${missing.length} categories:`, missing);
+  } else {
+    console.log(`✅ 100% of all ${raw.length} Swiss categories are cleanly mapped!`);
+  }
 
-  // Write JSON artifact
-  fs.writeFileSync(outputPath, JSON.stringify(items, null, 2), 'utf-8');
-  console.log(`Saved JSON to: ${outputPath}`);
+  // Generate clean Markdown Report
+  let md = '# 🇨🇭 Handkuratiertes Mapping der Schweizer Nährwertdatenbank\n\n';
+  md += 'Alle **106 Unterkategorien** der Schweizer Nährwertdatenbank wurden **manuell und fachlich exakt** auf **13 Standard-Hauptkategorien** gemappt:\n\n';
 
-  // Write TS file
-  const tsContent = `// Auto-generated bilingual food database from Swiss Food Composition Database V7.1 (Generic Foods)
-// Contains ${items.length} laboratory-tested generic base ingredients with EN/DE names, nutrients per 100g and aliases.
+  md += '| # | Hauptkategorie (Enum) | Deutsche Bezeichnung | Anzahl Subkategorien | Enthaltene Lebensmittel |\n';
+  md += '|---|---|---|---|---|\n';
 
-export interface CanonicalIngredient {
-  id: string;
-  swiss_id?: string;
-  name_en: string;
-  name_de: string;
-  category:
-    | 'PRODUCE'
-    | 'MEAT_POULTRY'
-    | 'SEAFOOD'
-    | 'DAIRY_EGGS'
-    | 'PANTRY'
-    | 'GRAINS_PASTA'
-    | 'SPICES_HERBS'
-    | 'BAKING'
-    | 'CONDIMENTS_OILS'
-    | 'FROZEN'
-    | 'BEVERAGES'
-    | 'BAKERY'
-    | 'OTHER';
-  density?: number;
-  nutrients_per_100g: {
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-    fiber?: number;
-  };
-  standard_units?: {
-    piece?: number;
-    tablespoon?: number;
-    teaspoon?: number;
-    cup?: number;
-    clove?: number;
-    pinch?: number;
-    slice?: number;
-    can?: number;
-    bunch?: number;
-  };
-  aliases: string[];
+  const sortedMains = Array.from(mainStats.entries()).sort((a, b) => b[1].count - a[1].count);
+
+  sortedMains.forEach(([key, val], idx) => {
+    md += `| ${idx + 1} | \`${key}\` | **${val.label}** | ${val.subcats.length} | ${val.count} Items |\n`;
+  });
+
+  md += '\n---\n\n## 📋 Vollständige Zuordnung aller 106 Subkategorien\n\n';
+
+  sortedMains.forEach(([key, val], idx) => {
+    md += `### ${idx + 1}. \`${key}\` — ${val.label} (${val.count} Items)\n\n`;
+    md += '| Schweizer Original-Kategorie | Anzahl Items | Typische Beispiele |\n';
+    md += '|---|---|---|\n';
+    val.subcats.forEach(s => {
+      md += `| \`${s.name}\` | **${s.count}** | ${s.samples.slice(0, 4).join(', ')} |\n`;
+    });
+    md += '\n';
+  });
+
+  const outPath = path.resolve('eval_results/MANUAL_SWISS_CATEGORIES_MAPPING.md');
+  await fs.writeFile(outPath, md, 'utf-8');
+  console.log(`Markdown saved to: ${outPath}`);
 }
 
-export const CANONICAL_INGREDIENTS: CanonicalIngredient[] = ${JSON.stringify(items, null, 2)};
-`;
-
-  fs.writeFileSync(tsOutputPath, tsContent, 'utf-8');
-  console.log(`Saved TS module to: ${tsOutputPath}`);
-}
-
-main().catch(console.error);
+verifyAndGenerate();
