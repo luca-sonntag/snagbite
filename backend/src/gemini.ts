@@ -81,7 +81,7 @@ const recipeSchema = {
                 },
                 baseName: {
                   type: FunctionDeclarationSchemaType.STRING,
-                  description: 'The core standard noun in singular form strictly in ENGLISH used as a universal database key to group similar ingredients across recipes in any language (e.g., if name is "rote Zwiebeln" or "oignons rouges", baseName MUST be "onion"; if name is "Eigelb", baseName MUST be "egg yolk"; if name is "Parmesan", baseName MUST be "parmesan").',
+                  description: 'The core standard noun in singular form strictly in ENGLISH used as a universal database key to group similar ingredients across recipes in any language. Be specific with culinary qualifiers: e.g., use "ground beef" for Rinderhack, "cooked ham" for Kochschinken vs "cured ham"/"bacon" for Rohschinken/Speck, "cottage cheese" for Hüttenkäse vs "shredded cheese"/"gouda" for Reibekäse, "chicken breast" for Hähnchenbrust, "oat milk"/"almond milk"/"soy cream" for plant-based dairy, "almond flour" for Mandelmehl, "egg yolk" for Eigelb, "onion" for Zwiebel, "spring onion" for Frühlingszwiebel, "garlic" for Knoblauch.',
                 },
                 parentIngredient: {
                   type: FunctionDeclarationSchemaType.OBJECT,
@@ -266,7 +266,7 @@ interface UserPreferences {
 
 const CLEAN_INGREDIENT_NAMES_INSTRUCTION = 'Ensure the "name" field contains only the clean ingredient name (e.g., "Frischkäse", "evaporated milk", "cream cheese", "butter"). Move all adjectives, processing states, or descriptions (such as "light", "mager", "low fat", "leichte", "gerieben", "grated") into the "modifier" field. Do NOT leave these descriptors inside the "name" field.';
 
-const CATEGORY_ORDERING_INSTRUCTION = 'Always place "PRODUCE" first in the ingredients array, followed by dry goods/pantry items, then refrigerated products/meats, and finally other/extras at the very end.';
+const CATEGORY_ORDERING_INSTRUCTION = 'Group ingredients using the 13 standardized supermarket category keys: VEGETABLES (fresh vegetables/herbs/mushrooms), FRUITS (fresh/dried fruits/berries), DAIRY_EGGS (milk/cheese/yogurt/cream/butter/eggs/tofu/plant milk), MEAT_POULTRY (meat/chicken/sausages/vegan meat), SEAFOOD (fish/seafood), GRAINS_PASTA (pasta/rice/flour/dough/bread/oats/potatoes), OILS_CONDIMENTS (cooking oils/vinegar/dressings/sauces), SPICES_HERBS (salt/pepper/dried spices), NUTS_SEEDS (nuts/seeds/avocado), SWEETS_SNACKS (sugar/honey/chocolate/cookies/ice cream/chips), BEVERAGES (drinks/juices/coffee/tea/alcohol), PANTRY_BAKING (yeast/baking powder/gelatine/protein powder), PREPARED_DISHES (ready meals).';
 
 const INGREDIENT_DECOMPOSITION_INSTRUCTION = 'If a composite element or homemade component (like a custom sauce or pesto) is prepared during the recipe, you MUST list its raw ingredients individually instead of the finished compound product.';
 
