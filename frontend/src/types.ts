@@ -20,6 +20,9 @@ export interface Ingredient {
   carbs?: number | null;
   fat?: number | null;
   isStaple?: boolean;
+  canonicalId?: string | null;
+  matchedName?: string | null;
+  isVerified?: boolean | null;
 }
 
 export interface IngredientGroup {
