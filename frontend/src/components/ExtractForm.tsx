@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Card, TextField, Label, Input, Button, FieldError, Spinner, Accordion } from '@heroui/react';
-import { BookOpen, Camera, Clipboard, Globe, HelpCircle, ImagePlus, Link2, Play, Sparkles, X } from 'lucide-react';
+import { BookOpen, Camera, Clipboard, Clock, Globe, HelpCircle, ImagePlus, Link2, Play, X } from 'lucide-react';
 import { MAX_IMPORT_PHOTOS } from '../hooks/useRecipeExtraction';
 import { Clipboard as CapClipboard } from '@capacitor/clipboard';
 import { Capacitor } from '@capacitor/core';
@@ -211,18 +211,20 @@ export default function ExtractForm({
 
   const DEMO_RECIPES = [
     {
-      name: 'Chicken Alfredo',
-      tag: '🍝 Pasta',
+      name: '20-Minuten Chicken Alfredo',
+      time: '20 Min.',
+      imageUrl: '/demo/alfredo.jpg',
       platform: 'Instagram Reel',
       url: 'https://www.instagram.com/p/DYixugyxvSe/',
-      icon: <InstagramIcon className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
+      icon: <InstagramIcon className="w-3.5 h-3.5" />
     },
     {
       name: 'Viral Brioche Rolls',
-      tag: '🥐 Baking',
+      time: '35 Min.',
+      imageUrl: '/demo/rolls.jpg',
       platform: 'TikTok Video',
       url: 'https://www.tiktok.com/@on_todays_bake/video/7618942237535194390',
-      icon: <TikTokIcon className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
+      icon: <TikTokIcon className="w-3.5 h-3.5" />
     }
   ];
 
@@ -508,8 +510,8 @@ export default function ExtractForm({
                 />
               </div>
             ) : limitStatus && limitStatus.limit >= 0 ? (
-              <div className="flex flex-col items-center gap-1.5 -mt-1">
-                <p className="text-center text-xs text-gray-500 dark:text-gray-400 font-medium transition-colors">
+              <div className="flex items-center justify-between px-3 py-2 rounded-2xl bg-gray-50 dark:bg-gray-800/50 text-xs">
+                <span className="font-medium text-gray-600 dark:text-gray-300">
                   {t('form.remainingExtractions', {
                     remaining: limitStatus.remaining,
                     limit: limitStatus.limit,
@@ -517,13 +519,15 @@ export default function ExtractForm({
                       ? t('form.remainingExtractionsToday')
                       : t('form.remainingExtractionsDays', { days: limitStatus.windowDays })
                   })}
-                </p>
+                </span>
                 {!isRealPremium && (
-                  <PremiumHint
-                    variant="inline"
+                  <button
+                    type="button"
                     onClick={() => setIsPremiumModalOpen(true)}
-                    label={t('premium.hint.extractUnlimited')}
-                  />
+                    className="text-amber-600 dark:text-amber-400 font-bold hover:underline cursor-pointer border-none bg-transparent"
+                  >
+                    👑 {t('premium.hint.upgrade') || 'Unbegrenzt'}
+                  </button>
                 )}
               </div>
             ) : null}
@@ -559,48 +563,51 @@ export default function ExtractForm({
         <>
           {/* Link-only guidance & demo cards */}
           {mode === 'link' && (<>
-            {/* Demo Recipes Card */}
-            <div className="bg-white dark:bg-gray-900 p-5 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                    {t('form.demoTitle')}
-                  </h3>
-                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
-                    {t('form.demoSubtitle')}
-                  </p>
-                </div>
+            {/* Demo Recipes Section */}
+            <div className="flex flex-col gap-2.5">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-xs font-bold text-gray-900 dark:text-white">
+                  {t('form.demoTitle')}
+                </span>
+                <span className="text-[11px] text-gray-400 dark:text-gray-500">
+                  {t('form.demoSubtitle')}
+                </span>
               </div>
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-3">
                 {DEMO_RECIPES.map((demo, idx) => (
-                  <button
+                  <div
                     key={idx}
-                    type="button"
                     onClick={() => handleDemoClick(demo.url)}
-                    disabled={isPending}
-                    className="flex flex-col justify-between p-3.5 rounded-2xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/60 dark:hover:bg-gray-800 border-none text-left gap-3 active:scale-95 transition-all cursor-pointer group shadow-none"
+                    className="rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none group"
                   >
-                    <div className="flex items-center justify-between w-full">
-                      <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-300">
-                        {demo.tag}
-                      </span>
-                      <div className="p-1 rounded-lg bg-gray-200/60 dark:bg-gray-700/60">
+                    {/* Cover photo */}
+                    <div className="relative w-full aspect-[4/3] bg-gray-100 dark:bg-gray-800 overflow-hidden">
+                      <img
+                        src={demo.imageUrl}
+                        alt={demo.name}
+                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
+                      />
+                      <div className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/45 backdrop-blur-md text-white">
                         {demo.icon}
                       </div>
                     </div>
-                    <div>
-                      <h4 className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">
+
+                    {/* Meta */}
+                    <div className="flex flex-col gap-1 p-3 flex-1">
+                      <h4 className="text-xs font-bold text-gray-900 dark:text-white leading-snug line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                         {demo.name}
                       </h4>
-                      <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
-                        {demo.platform}
-                      </p>
+                      <div className="mt-auto pt-1 flex items-center justify-between">
+                        <span className="flex items-center gap-1 text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                          <Clock className="w-3 h-3 text-emerald-500 shrink-0" />
+                          {demo.time}
+                        </span>
+                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                          {language === 'de' ? 'Importieren →' : 'Import →'}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
-                      {language === 'de' ? 'Ausprobieren →' : 'Try it →'}
-                    </span>
-                  </button>
+                  </div>
                 ))}
               </div>
             </div>
