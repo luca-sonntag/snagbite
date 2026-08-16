@@ -758,36 +758,63 @@ function generateStandardUnits(nameDe: string, category: string): Record<string,
   if (category === 'SPICES_OILS') {
     units.tablespoon = 12;
     units.teaspoon = 4;
-  } else if (category === 'FRUITS_VEGETABLES') {
-    if (lower.includes('apfel') || lower.includes('birne') || lower.includes('orange')) units.piece = 150;
-    else if (lower.includes('banane')) units.piece = 120;
-    else if (lower.includes('zwiebel')) units.piece = 80;
-    else if (lower.includes('knoblauch')) { units.clove = 3; units.piece = 3; }
-    else if (lower.includes('tomate') && !lower.includes('cherry')) units.piece = 100;
-    else if (lower.includes('cherry') || lower.includes('kirschtomate')) units.piece = 20;
-    else if (lower.includes('zitrone') || lower.includes('limette')) units.piece = 60;
-    else if (lower.includes('avocado')) units.piece = 180;
-    else if (lower.includes('paprika')) units.piece = 150;
-    else if (lower.includes('gurke')) units.piece = 300;
-    else units.piece = 100;
-  } else if (category === 'DAIRY') {
-    if (lower.includes('eigelb') || lower.includes('dotter')) units.piece = 20;
-    else if (lower.includes('eiweiß') || lower.includes('eiklar')) units.piece = 35;
-    else if (lower.includes('wachtelei')) units.piece = 12;
-    else if (lower.includes('ei') && (lower.includes('hühnerei') || lower.includes('vollei'))) units.piece = 55;
-    else if (lower.includes('becher')) units.cup = 200;
-    else if (lower.includes('scheibe')) units.slice = 25;
-  } else if (category === 'BREAD_BAKERY') {
-    if (lower.includes('toast')) { units.slice = 25; units.piece = 25; }
-    else if (lower.includes('brot')) { units.slice = 40; units.piece = 40; }
-    else if (lower.includes('keks') || lower.includes('cookie') || lower.includes('waffel')) units.piece = 15;
-    else if (lower.includes('brötchen') || lower.includes('semmel')) units.piece = 60;
-    else if (lower.includes('wrap') || lower.includes('tortilla')) units.piece = 50;
-  } else if (category === 'MEAT_FISH') {
-    if (lower.includes('fischstäbchen') || lower.includes('stäbchen') || lower.includes('nugget')) units.piece = 30;
-    else if (lower.includes('würstchen') || lower.includes('wiener')) units.piece = 50;
-    else if (lower.includes('frikadelle') || lower.includes('bulette') || lower.includes('patty')) units.piece = 75;
-    else if (lower.includes('scheibe') || lower.includes('speck') || lower.includes('schinken')) { units.slice = 20; units.piece = 20; }
+  }
+
+  // Food-specific standard piece & slice weights
+  if (lower.includes('fischstäbchen') || lower.includes('stäbchen') || lower.includes('nugget')) {
+    units.piece = 30;
+  } else if (lower.includes('toast')) {
+    units.slice = 25;
+    units.piece = 25;
+  } else if (lower.includes('brot') && !lower.includes('brötchen')) {
+    units.slice = 40;
+    units.piece = 40;
+  } else if (lower.includes('keks') || lower.includes('cookie') || lower.includes('waffel') || lower.includes('plätzchen')) {
+    units.piece = 15;
+  } else if (lower.includes('brötchen') || lower.includes('semmel') || lower.includes('croissant') || lower.includes('bun')) {
+    units.piece = 60;
+  } else if (lower.includes('wrap') || lower.includes('tortilla') || lower.includes('fladenbrot')) {
+    units.piece = 50;
+  } else if (lower.includes('eigelb') || lower.includes('dotter')) {
+    units.piece = 20;
+  } else if (lower.includes('eiweiß') || lower.includes('eiklar')) {
+    units.piece = 35;
+  } else if (lower.includes('wachtelei')) {
+    units.piece = 12;
+  } else if (lower.includes('ei') && (lower.includes('hühnerei') || lower.includes('vollei'))) {
+    units.piece = 55;
+  } else if (lower.includes('würstchen') || lower.includes('wiener') || lower.includes('hotdog') || lower.includes('bratwurst')) {
+    units.piece = 50;
+  } else if (lower.includes('frikadelle') || lower.includes('bulette') || lower.includes('patty')) {
+    units.piece = 75;
+  } else if (lower.includes('knoblauch')) {
+    units.clove = 3;
+    units.piece = 3;
+  } else if (lower.includes('frühlingszwiebel') || lower.includes('lauchzwiebel') || lower.includes('frühlingslauch')) {
+    units.piece = 15;
+  } else if (lower.includes('cherry') || lower.includes('kirschtomate') || lower.includes('cocktailtomate')) {
+    units.piece = 15;
+  } else if (lower.includes('tomate')) {
+    units.piece = 100;
+  } else if (lower.includes('zwiebel') || lower.includes('schalotte')) {
+    units.piece = 80;
+  } else if (lower.includes('apfel') || lower.includes('birne') || lower.includes('orange')) {
+    units.piece = 150;
+  } else if (lower.includes('banane')) {
+    units.piece = 110;
+  } else if (lower.includes('zitrone') || lower.includes('limette')) {
+    units.piece = 60;
+  } else if (lower.includes('avocado')) {
+    units.piece = 150;
+  } else if (lower.includes('paprika')) {
+    units.piece = 150;
+  } else if (lower.includes('gurke')) {
+    units.piece = 300;
+  } else if (lower.includes('becher')) {
+    units.cup = 200;
+  } else if (lower.includes('scheibe') || lower.includes('speck') || lower.includes('schinken') || lower.includes('käse')) {
+    units.slice = 25;
+    units.piece = 25;
   }
 
   return units;
