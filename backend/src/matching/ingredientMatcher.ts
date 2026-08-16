@@ -420,7 +420,8 @@ export async function findCanonicalIngredient(
 
     // Never match fitness protein powder to baking leavening agents (Backpulver/Natron)
     const isBakingLeavening = item.bls_code?.startsWith('R42') || candDe.includes('backpulver') || candDe.includes('natron');
-    if (isFitnessQuery && isBakingLeavening) {
+    const isLeaveningQuery = /\b(backpulver|natron|baking powder|baking soda|leavening)\b/i.test(lowerQuery);
+    if (!isLeaveningQuery && isBakingLeavening) {
       continue;
     }
 
@@ -432,6 +433,12 @@ export async function findCanonicalIngredient(
     // Spice vs Sauce guard: if asking for pure spice (e.g. Curry, Paprikapulver), never match ketchup or sauce unless query asks for sauce
     const isSpiceQuery = (cleanCategory === 'SPICES_OILS' || /\b(pulver|powder|gewürz|spice)\b/i.test(lowerQuery)) && !/\b(ketchup|sauce|soße|dressing|dip)\b/i.test(lowerQuery);
     if (isSpiceQuery && (candDe.includes('ketchup') || candDe.includes('sauce') || candDe.includes('soße') || candDe.includes('dressing'))) {
+      continue;
+    }
+
+    // Pesto vs Dried herbs guard: Pesto (rich sauce with oil & nuts) must never match dry single herb leaves
+    const isPestoQuery = /\bpesto\b/i.test(lowerQuery);
+    if (isPestoQuery && (candDe.includes('getrocknet') || candDe.includes('blatt') || item.category === 'FRUITS_VEGETABLES')) {
       continue;
     }
 

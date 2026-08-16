@@ -77,11 +77,11 @@ const recipeSchema = {
               properties: {
                 name: {
                   type: FunctionDeclarationSchemaType.STRING,
-                  description: 'The clean name of the ingredient, completely stripped of quantities, numbers, units, and modifiers/specifications/processing states (e.g. use "Frischkäse" instead of "Leichter Frischkäse", "Butter" instead of "Leichte Butter", "Parmesan" instead of "Parmesan, gerieben", "Hähnchenschenkel" instead of "Hähnchenschenkel, gewürfelt"). Adjectives/specifications/states like "leicht", "mager", "gerieben", "gewürfelt", "ohne Knochen" MUST be moved to the "modifier" field. If a composite element is prepared during the recipe, list its raw ingredients individually.',
+                  description: 'The clean name of the ingredient in the recipe language, stripped of quantities, numbers, units, and superficial adjectives/processing states (e.g. use "Frischkäse" instead of "Leichter Frischkäse", "Butter" instead of "Leichte Butter", "Parmesan" instead of "Parmesan, gerieben", "Hähnchenschenkel" instead of "Hähnchenschenkel, gewürfelt"). IMPORTANT: Compound nouns where the suffix or word defines the core food identity itself (e.g. "Paprikapulver", "Knoblauchpulver", "Backpulver", "Mandelmehl", "Olivenöl", "Tomatenmark", "Kochschinken", "Schlagsahne", "Frischkäse") MUST remain fully intact as compound words in "name". Only real culinary states or adjectives (e.g. "leicht", "mager", "gerieben", "gewürfelt", "ohne Knochen") belong in the "modifier" field.',
                 },
                 baseName: {
                   type: FunctionDeclarationSchemaType.STRING,
-                  description: 'The core standard noun in singular form strictly in ENGLISH used as a universal database key to group similar ingredients across recipes in any language. Be specific with culinary qualifiers: e.g., use "ground beef" for Rinderhack, "cooked ham" for Kochschinken vs "cured ham"/"bacon" for Rohschinken/Speck, "cottage cheese" for Hüttenkäse vs "shredded cheese"/"gouda" for Reibekäse, "chicken breast" for Hähnchenbrust, "oat milk"/"almond milk"/"soy cream" for plant-based dairy, "almond flour" for Mandelmehl, "egg yolk" for Eigelb, "onion" for Zwiebel, "spring onion" for Frühlingszwiebel, "garlic" for Knoblauch.',
+                  description: 'The core standard noun in singular form strictly in ENGLISH used as a universal database key to group similar ingredients across recipes in any language. Be precise and specific: \n- For dried ground spices and powders, ALWAYS include "powder" (e.g., "paprika powder" for Paprikapulver, "garlic powder" for Knoblauchpulver, "onion powder" for Zwiebelpulver, "chili powder" for Chilipulver, "baking powder" for Backpulver; NEVER use "paprika" for powder as "paprika" refers to fresh bell pepper).\n- For fresh vegetables, use specific produce terms: "bell pepper" or "red bell pepper" for Gemüsepaprika, "garlic" for Knoblauch, "onion" for Zwiebel, "spring onion" for Frühlingszwiebel.\n- For meats, specify the cut/type: "chicken breast" for Hähnchenbrust, "ground chicken" for Hähnchenhackfleisch, "ground beef" for Rinderhack, "cooked ham" for Kochschinken vs "cured ham"/"bacon" for Rohschinken/Speck.\n- For dairy/grains: "cottage cheese" for Hüttenkäse, "gouda" or "shredded cheese" for generic geriebener Käse, "tortilla wrap" for Wraps/Fladenbrot vs "tortilla chips" for Nachos, "almond flour" for Mandelmehl.',
                 },
                 synonyms: {
                   type: FunctionDeclarationSchemaType.ARRAY,
@@ -92,26 +92,26 @@ const recipeSchema = {
                 },
                 searchQueries: {
                   type: FunctionDeclarationSchemaType.ARRAY,
-                  description: '2-3 prioritized German search phrases from specific product name to generic base food for matching with the German food database (BLS). E.g. for "Magerquark": ["Magerquark", "Speisequark mager", "Quark"]; for "Salz": ["Speisesalz", "Salz"]; for "Pfeffer": ["Schwarzer Pfeffer", "Pfeffer"]; for "Paprikapulver": ["Paprikapulver edelsüß", "Paprikapulver"]; for "Backkakao": ["Kakaopulver", "Backkakao"]; for "Dinkelmehl": ["Dinkelmehl", "Mehl"]; for "geriebener Gouda": ["Gouda gerieben", "Gouda"]; for "Hähnchenbrustfilet": ["Hähnchenbrustfilet", "Hähnchen Brustfilet", "Hühnerbrust"]; for "Haferflocken": ["Haferflocken", "Hafer Flocken"].',
+                  description: '2-3 prioritized German search phrases from specific product name to generic base food for matching with the German food database (BLS). IMPORTANT: Never strip distinguishing food suffixes (e.g. for "Paprikapulver": ["Paprikapulver edelsüß", "Paprikapulver"], NEVER ["Paprika"]; for "Chilipulver": ["Chilipulver", "Cayennepfeffer"]; for "Magerquark": ["Magerquark", "Speisequark mager", "Quark"]; for "Salz": ["Speisesalz", "Salz"]; for "Pfeffer": ["Schwarzer Pfeffer", "Pfeffer"]; for "Backkakao": ["Kakaopulver", "Backkakao"]; for "Dinkelmehl": ["Dinkelmehl", "Mehl"]; for "geriebener Gouda": ["Gouda gerieben", "Gouda"]; for "Hähnchenbrustfilet": ["Hähnchenbrustfilet", "Hähnchen Brustfilet", "Hühnerbrust"]; for "Haferflocken": ["Haferflocken", "Hafer Flocken"]).',
                   items: {
                     type: FunctionDeclarationSchemaType.STRING,
                   },
                 },
                 parentIngredient: {
                   type: FunctionDeclarationSchemaType.OBJECT,
-                  description: 'Set ONLY if this ingredient is a derived component/part that is NOT bought separately as its own package in stores (e.g. for "Eigelb" or "Eiweiß", parentIngredient MUST be { "name": "Ei", "baseName": "egg", "unit": "Stück" }; for "Zitronenabrieb" or "Zitronensaft", parentIngredient MUST be { "name": "Zitrone", "baseName": "lemon", "unit": "Stück" }; for "Knoblauchzehe", parentIngredient MUST be { "name": "Knoblauch", "baseName": "garlic", "unit": "Zehe" }). Leave empty or null if the ingredient is already a standalone primary grocery item sold separately in stores (e.g. "Hähnchenbrust", "Hähnchenkeule", "Rinderhackfleisch", "Butter", "Parmesan" MUST leave parentIngredient empty/null).',
+                  description: 'Set ONLY if this ingredient is a derived component/part that is NOT bought separately as its own package in stores (e.g. for "Eigelb" or "Eiweiß", parentIngredient MUST be { "name": "Ei", "baseName": "egg", "unit": "Stück" }; for "Zitronenabrieb" or "Zitronensaft", parentIngredient MUST be { "name": "Zitrone", "baseName": "lemon", "unit": "Stück" }; for "Knoblauchzehe", parentIngredient MUST be { "name": "Knoblauch", "baseName": "garlic", "unit": "Zehe" }; for flavored honey like "Scharfer Honig", parentIngredient MUST be { "name": "Honig", "baseName": "honey", "unit": "g" }). Leave empty or null if the ingredient is already a standalone primary grocery item sold separately in stores (e.g. "Hähnchenbrust", "Hähnchenkeule", "Rinderhackfleisch", "Butter", "Parmesan" MUST leave parentIngredient empty/null).',
                   properties: {
                     name: {
                       type: FunctionDeclarationSchemaType.STRING,
-                      description: 'The clean raw grocery product name in recipe language (e.g. "Ei", "Zitrone", "Knoblauch").',
+                      description: 'The clean raw grocery product name in recipe language (e.g. "Ei", "Zitrone", "Knoblauch", "Honig").',
                     },
                     baseName: {
                       type: FunctionDeclarationSchemaType.STRING,
-                      description: 'The English baseName for the raw parent grocery product (e.g. "egg", "lemon", "garlic").',
+                      description: 'The English baseName for the raw parent grocery product (e.g. "egg", "lemon", "garlic", "honey").',
                     },
                     unit: {
                       type: FunctionDeclarationSchemaType.STRING,
-                      description: 'The default grocery unit (e.g. "Stück", "Knolle", "Zehe").',
+                      description: 'The default grocery unit (e.g. "Stück", "Knolle", "Zehe", "g").',
                     },
                   },
                   required: ['name', 'baseName'],
@@ -278,11 +278,11 @@ interface UserPreferences {
   preferredUnitSystem?: string;
 }
 
-const CLEAN_INGREDIENT_NAMES_INSTRUCTION = 'Ensure the "name" field contains only the clean ingredient name (e.g., "Frischkäse", "evaporated milk", "cream cheese", "butter"). Move all adjectives, processing states, or descriptions (such as "light", "mager", "low fat", "leichte", "gerieben", "grated") into the "modifier" field. Do NOT leave these descriptors inside the "name" field.';
+const CLEAN_INGREDIENT_NAMES_INSTRUCTION = 'Ensure the "name" field contains only the clean ingredient name (e.g., "Frischkäse", "Paprikapulver", "Olivenöl", "Mandelmehl", "Butter", "Kochschinken"). Retain compound nouns where the suffix or word defines the core food identity (e.g. "Paprikapulver", "Knoblauchpulver", "Backpulver", "Mandelmehl", "Olivenöl", "Tomatenmark"). Move only true descriptive adjectives and processing states (such as "light", "mager", "low fat", "leichte", "gerieben", "grated", "gewürfelt") into the "modifier" field. Do NOT strip essential compound words from "name".';
 
-const CATEGORY_ORDERING_INSTRUCTION = 'Group ingredients using the 13 standardized supermarket category keys: VEGETABLES (fresh vegetables/herbs/mushrooms), FRUITS (fresh/dried fruits/berries), DAIRY_EGGS (milk/cheese/yogurt/cream/butter/eggs/tofu/plant milk), MEAT_POULTRY (meat/chicken/sausages/vegan meat), SEAFOOD (fish/seafood), GRAINS_PASTA (pasta/rice/flour/dough/bread/oats/potatoes), OILS_CONDIMENTS (cooking oils/vinegar/dressings/sauces), SPICES_HERBS (salt/pepper/dried spices), NUTS_SEEDS (nuts/seeds/avocado), SWEETS_SNACKS (sugar/honey/chocolate/cookies/ice cream/chips), BEVERAGES (drinks/juices/coffee/tea/alcohol), PANTRY_BAKING (yeast/baking powder/gelatine/protein powder), PREPARED_DISHES (ready meals).';
+const CATEGORY_ORDERING_INSTRUCTION = 'Group ingredients using the standardized supermarket category keys: VEGETABLES (fresh vegetables/salads/mushrooms/fresh herbs), FRUITS (fresh/dried fruits/berries), DAIRY_EGGS (milk/cheese/yogurt/cream/butter/eggs/tofu/plant milk), MEAT_POULTRY (meat/chicken/sausages/vegan meat), SEAFOOD (fish/seafood), GRAINS_PASTA (pasta/rice/flour/dough/bread/oats/potatoes), OILS_CONDIMENTS (cooking oils/vinegar/dressings/store-bought sauces/pesto), SPICES_HERBS (salt/pepper/dried spices/ground spice powders), NUTS_SEEDS (nuts/seeds/avocado), SWEETS_SNACKS (sugar/honey/chocolate/cookies/ice cream/chips), BEVERAGES (drinks/juices/coffee/tea/alcohol), PANTRY_BAKING (yeast/baking powder/gelatine/protein powder), PREPARED_DISHES (ready meals).';
 
-const INGREDIENT_DECOMPOSITION_INSTRUCTION = 'If a composite element or homemade component (like a custom sauce or pesto) is prepared during the recipe, you MUST list its raw ingredients individually instead of the finished compound product.';
+const INGREDIENT_DECOMPOSITION_INSTRUCTION = 'Decompose homemade elements (like a custom marinade, dressing, or sauce prepared from raw ingredients in the video) into their individual raw ingredients. However, if the recipe uses a pre-made or store-bought condiment/sauce directly (e.g., "1 EL Pesto", "2 EL Hummus", "100g Pizzasauce", "Ketchup", "Sojasauce"), you MUST keep it as ONE single ingredient in the list.';
 
 const STAPLE_INGREDIENT_INSTRUCTION = 'For each ingredient, set the "isStaple" boolean to true ONLY if it is a very common basic staple that people almost always already have at home and rarely need to buy specifically for a recipe (e.g. salt, pepper, water, cooking oil, sugar, common dried spices). Set it to false for anything a user would typically need to shop for (e.g. meat, cheese, vegetables, fresh herbs, specialty items). When in doubt, set it to false.';
 

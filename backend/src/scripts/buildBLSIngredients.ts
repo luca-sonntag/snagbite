@@ -360,11 +360,22 @@ function generateAliases(nameDe: string, nameEn: string, code: string, category?
     if (lowerDe.includes('butter') && (code.startsWith('Q651') || lowerDe.includes('markenbutter') || lowerDe === 'butter')) {
       aliases.add('butter');
     }
-    if (lowerDe.includes('gouda') && code.startsWith('M402')) {
+    if (code === 'M402600' || (lowerDe.includes('gouda') && code.startsWith('M402'))) {
       aliases.add('gouda');
       aliases.add('gouda gerieben');
       aliases.add('streukäse');
       aliases.add('geriebener käse');
+      aliases.add('käse');
+      aliases.add('cheese');
+      aliases.add('shredded cheese');
+    }
+    if (code === 'B783012' || lowerDe.includes('weizentortilla')) {
+      aliases.add('weizentortilla');
+      aliases.add('tortilla');
+      aliases.add('tortilla wrap');
+      aliases.add('tortilla wraps');
+      aliases.add('wrap');
+      aliases.add('wraps');
     }
     if (lowerDe.includes('mozzarella') && code.startsWith('M032')) {
       aliases.add('mozzarella');
