@@ -64,6 +64,7 @@ function mapBLSToCategory(code: string, nameDe: string): string {
   // Specific overrides based on keywords
   if (lower.includes('konserve') || lower.includes('dose')) return 'CANNED_PRESERVED';
   if (lower.includes('tiefkühl') || lower.includes('tiefgefroren') || lower.includes(' gefrostet')) return 'FROZEN';
+  if (lower.includes('mehl') || lower.includes('stärke') || lower.includes('backpulver') || lower.includes('hefe')) return 'BAKING_COOKING';
 
   switch (p1) {
     case 'B': return 'BREAD_BAKERY';
@@ -227,6 +228,21 @@ function generateAliases(nameDe: string, nameEn: string, code: string): string[]
     aliases.add('rinderhackfleisch');
     aliases.add('rinderhack');
     aliases.add('hackfleisch rind');
+  }
+  if (lowerDe.includes('speisezwiebel') || (lowerDe.includes('zwiebel') && code.startsWith('G480'))) {
+    aliases.add('zwiebel');
+    aliases.add('zwiebeln');
+    aliases.add('rote zwiebel');
+    aliases.add('rote zwiebeln');
+    aliases.add('onion');
+    aliases.add('onions');
+  }
+  if (lowerDe.includes('knoblauch') && code.startsWith('K111')) {
+    aliases.add('knoblauch');
+    aliases.add('knoblauchzehe');
+    aliases.add('knoblauchzehen');
+    aliases.add('garlic');
+    aliases.add('garlic clove');
   }
   if (lowerDe.includes('gemischtes hackfleisch') || (lowerDe.includes('hackfleisch') && lowerDe.includes('gemischt'))) {
     aliases.add('hackfleisch gemischt');

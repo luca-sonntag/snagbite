@@ -106,7 +106,7 @@ async function processJob(job: Job): Promise<void> {
       recipe.remixPrompt = job.prompt || null;
 
       // Canonical ingredient normalization & nutritional calculation
-      enrichRecipeWithCanonicalIngredients(recipe);
+      await enrichRecipeWithCanonicalIngredients(recipe);
 
       await updateJob(jobId, { status: 'completed', recipe, error: null });
       return;
@@ -310,7 +310,7 @@ async function processJob(job: Job): Promise<void> {
     recipe.id = jobId;
 
     // Canonical ingredient normalization & nutritional calculation
-    enrichRecipeWithCanonicalIngredients(recipe);
+    await enrichRecipeWithCanonicalIngredients(recipe);
 
     // 7. Update job as completed
     await updateJob(jobId, {

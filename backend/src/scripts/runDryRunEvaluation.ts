@@ -134,7 +134,7 @@ async function run() {
           continue;
         }
 
-        enrichRecipeWithCanonicalIngredients(recipe);
+        await enrichRecipeWithCanonicalIngredients(recipe);
 
         const flatIngredients: EvalIngredientReport[] = [];
         let verifiedCount = 0;

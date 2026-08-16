@@ -1,26 +1,58 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import MiniSearch from 'minisearch';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { config } from '../config.js';
 import { CANONICAL_INGREDIENTS, type CanonicalIngredient } from '../data/canonicalIngredients.js';
 import type { Recipe, Ingredient, ParentIngredientInfo } from '../types.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const EMBEDDINGS_BIN_PATH = path.resolve(__dirname, '../data/canonicalEmbeddings.bin');
+const EMBEDDINGS_META_PATH = path.resolve(__dirname, '../data/canonicalEmbeddingsMeta.json');
+const EMBEDDING_DIM = 3072;
+const MODEL_NAME = 'gemini-embedding-001';
 
 interface IndexedIngredient extends CanonicalIngredient {
   search_aliases: string;
 }
 
-// Pre-indexed lookup maps for O(1) exact matching
+// 1. Exact lookup maps for O(1) matching
 const byId = new Map<string, CanonicalIngredient>();
 const byAlias = new Map<string, CanonicalIngredient>();
 const byNameEn = new Map<string, CanonicalIngredient>();
 const byNameDe = new Map<string, CanonicalIngredient>();
 
-// Category-scoped item lists for dedicated MiniSearch instances
+// 2. Category-scoped item lists for MiniSearch instances
 const itemsByCategory = new Map<string, IndexedIngredient[]>();
 const allIndexedItems: IndexedIngredient[] = [];
 
-// Simplicity score for choosing between multiple alias matches
+// 3. Precomputed Embeddings index & buffer
+let embeddingsBuffer: Float32Array | null = null;
+const idToVectorIndex = new Map<string, number>();
+
+try {
+  if (fs.existsSync(EMBEDDINGS_BIN_PATH) && fs.existsSync(EMBEDDINGS_META_PATH)) {
+    const rawMeta = fs.readFileSync(EMBEDDINGS_META_PATH, 'utf-8');
+    const meta = JSON.parse(rawMeta);
+    for (let i = 0; i < meta.idMap.length; i++) {
+      idToVectorIndex.set(meta.idMap[i].toLowerCase().trim(), i);
+    }
+
+    const rawBin = fs.readFileSync(EMBEDDINGS_BIN_PATH);
+    embeddingsBuffer = new Float32Array(rawBin.buffer, rawBin.byteOffset, rawBin.byteLength / 4);
+  }
+} catch (err) {
+  console.warn('[ingredientMatcher] Could not load canonical embeddings buffer:', err);
+}
+
+// Simplicity score for choosing between multiple exact alias matches
 function getSimplicityScore(item: CanonicalIngredient): number {
   const de = (item.name_de || '').toLowerCase();
   const en = (item.name_en || '').toLowerCase();
-  let score = 100 - de.length; // shorter name = simpler base food
+  let score = 100 - de.length;
   if (de.includes('roh') || en.includes('raw') || de.includes('pulver')) score += 30;
   if (de.includes('nature') || de.includes('mager') || en.includes('plain') || en.includes('unsalted') || de.includes('trocken')) score += 20;
   if (
@@ -65,7 +97,7 @@ for (const item of CANONICAL_INGREDIENTS) {
   itemsByCategory.get(cat)!.push(indexedItem);
 }
 
-// MiniSearch configuration with German tokenization & BM25 weighting
+// 4. MiniSearch Indexes (BM25 sparse search)
 function createMiniSearchIndex(items: IndexedIngredient[]): MiniSearch<IndexedIngredient> {
   const ms = new MiniSearch<IndexedIngredient>({
     idField: 'id',
@@ -79,9 +111,9 @@ function createMiniSearchIndex(items: IndexedIngredient[]): MiniSearch<IndexedIn
         .filter((t) => t.length >= 2),
     processTerm: (term: string) => term.toLowerCase().trim(),
     searchOptions: {
-      boost: { name_de: 2.5, search_aliases: 2.0, name_en: 0.8 },
-      fuzzy: (term: string) => (term.length >= 4 ? 0.2 : false),
-      prefix: true,
+      boost: { name_de: 3.0, search_aliases: 2.5, name_en: 1.0 },
+      fuzzy: (term: string) => (term.length >= 5 ? 0.2 : false),
+      prefix: false,
       combineWith: 'OR',
     },
   });
@@ -94,8 +126,29 @@ const categoryMiniSearchMap = new Map<string, MiniSearch<IndexedIngredient>>();
 for (const [cat, items] of itemsByCategory.entries()) {
   categoryMiniSearchMap.set(cat, createMiniSearchIndex(items));
 }
-
 const globalMiniSearch = createMiniSearchIndex(allIndexedItems);
+
+// 5. Google Generative AI Embedding Client
+let embeddingModel: any = null;
+function getEmbeddingModel(): any {
+  if (!embeddingModel && config.GEMINI_API_KEY && config.GEMINI_API_KEY !== 'your_gemini_api_key_here') {
+    const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
+    embeddingModel = genAI.getGenerativeModel({ model: MODEL_NAME });
+  }
+  return embeddingModel;
+}
+
+/**
+ * Calculates dot product (cosine similarity) between normalized vectors.
+ */
+function calculateCosineSimilarity(vecA: Float32Array | number[], vecBOffset: number): number {
+  if (!embeddingsBuffer) return 0;
+  let dot = 0;
+  for (let i = 0; i < EMBEDDING_DIM; i++) {
+    dot += vecA[i] * embeddingsBuffer[vecBOffset + i];
+  }
+  return dot;
+}
 
 /**
  * Normalizes a search term or ingredient name by removing modifiers,
@@ -105,16 +158,16 @@ export function normalizeSearchTerm(term: string): string {
   if (!term) return '';
   let cleaned = term.toLowerCase().trim();
 
-  // 1. Remove parenthetical descriptions: "Zwiebel (gewürfelt)" -> "Zwiebel"
+  // Remove parenthetical descriptions: "Zwiebel (gewürfelt)" -> "Zwiebel"
   cleaned = cleaned.replace(/\s*\([^)]*\)/g, ' ').trim();
 
-  // 2. Remove trailing comma modifiers: "Zwiebel, fein gewürfelt" -> "Zwiebel"
+  // Remove trailing comma modifiers: "Zwiebel, fein gewürfelt" -> "Zwiebel"
   const commaIndex = cleaned.indexOf(',');
   if (commaIndex !== -1) {
     cleaned = cleaned.slice(0, commaIndex).trim();
   }
 
-  // 3. Remove punctuation / multiple spaces
+  // Remove punctuation / multiple spaces
   cleaned = cleaned.replace(/[-_.]/g, ' ').replace(/[()[\]{},;:"'!?]/g, ' ').replace(/\s+/g, ' ').trim();
 
   return cleaned;
@@ -203,81 +256,81 @@ export function normalizeCategory(category?: string): string {
 }
 
 /**
- * Computes Sørensen-Dice similarity coefficient on word tokens (0.0 to 1.0).
+ * Builds the prioritized search queries for an ingredient.
  */
-export function calculateTokenDice(query: string, candidate: CanonicalIngredient): number {
-  const qTokens = query.toLowerCase().split(/\s+/).filter(t => t.length >= 2);
-  if (qTokens.length === 0) return 0;
+function buildSearchQueries(
+  name: string,
+  baseName?: string,
+  synonyms?: string[],
+  searchQueries?: string[]
+): string[] {
+  const queries: string[] = [];
 
-  const targetTexts = [candidate.name_de, ...(candidate.aliases || []), candidate.name_en].filter(Boolean);
-  let bestScore = 0;
-
-  for (const text of targetTexts) {
-    const tTokens = text.toLowerCase().replace(/[,()[\]/._-]/g, ' ').split(/\s+/).filter(t => t.length >= 2);
-    if (tTokens.length === 0) continue;
-
-    let matches = 0;
-    for (const q of qTokens) {
-      if (tTokens.some(t => t === q || (t.length >= 5 && q.length >= 5 && (t.startsWith(q) || q.startsWith(t))))) {
-        matches++;
+  // A. Explicit search queries from Gemini
+  if (searchQueries && Array.isArray(searchQueries)) {
+    for (const q of searchQueries) {
+      if (q && typeof q === 'string') {
+        const norm = normalizeSearchTerm(q);
+        if (norm && !queries.includes(norm)) queries.push(norm);
       }
     }
-
-    const dice = (2 * matches) / (qTokens.length + tTokens.length);
-    const recall = matches / qTokens.length;
-    const combined = 0.7 * recall + 0.3 * dice;
-    if (combined > bestScore) bestScore = combined;
   }
 
-  return bestScore;
+  // B. Name & baseName
+  if (name) {
+    const norm = normalizeSearchTerm(name);
+    if (norm && !queries.includes(norm)) queries.push(norm);
+  }
+  if (baseName) {
+    const norm = normalizeSearchTerm(baseName);
+    if (norm && !queries.includes(norm)) queries.push(norm);
+  }
+
+  // C. Synonyms
+  if (synonyms && Array.isArray(synonyms)) {
+    for (const s of synonyms) {
+      if (s && typeof s === 'string') {
+        const norm = normalizeSearchTerm(s);
+        if (norm && !queries.includes(norm)) queries.push(norm);
+      }
+    }
+  }
+
+  return queries;
 }
 
 /**
- * Simplicity / Raw-food score (-0.30 to +0.20).
+ * Computes query embedding via Google Gemini Embedding API.
  */
-export function calculateSimplicityFactor(item: CanonicalIngredient): number {
-  const de = (item.name_de || '').toLowerCase();
-  let score = 0;
-
-  if (de.length <= 15) score += 0.10;
-  else if (de.length >= 35) score -= 0.10;
-
-  if (de.includes('roh') || de.includes('pulver') || de.includes('getrocknet') || de.includes('mager') || de.includes('natur')) {
-    score += 0.10;
+async function fetchQueryEmbedding(text: string): Promise<number[] | null> {
+  const model = getEmbeddingModel();
+  if (!model) return null;
+  try {
+    const res = await model.embedContent({
+      content: { role: 'user', parts: [{ text }] },
+    });
+    return res.embedding?.values || null;
+  } catch (err: any) {
+    console.warn(`[ingredientMatcher] Embedding call failed for "${text}":`, err.message);
+    return null;
   }
-
-  if (
-    de.includes('gebäck') ||
-    de.includes('kuchen') ||
-    de.includes('torte') ||
-    de.includes('gericht') ||
-    de.includes('zubereitung') ||
-    de.includes('mariniert') ||
-    de.includes('für torten') ||
-    de.includes('sauce') ||
-    de.includes('salat')
-  ) {
-    score -= 0.25;
-  }
-
-  return score;
 }
 
 /**
- * Finds a matching canonical ingredient using exact map lookups and MiniSearch BM25 + Token Guard.
+ * Finds a matching canonical ingredient using Hybrid Search (Exact -> BM25 Sparse -> Gemini Vector Dense).
  */
-export function findCanonicalIngredient(
+export async function findCanonicalIngredient(
   name: string,
   baseName?: string,
   category?: string,
   synonyms?: string[],
   searchQueries?: string[],
   parentIngredient?: ParentIngredientInfo
-): CanonicalIngredient | null {
+): Promise<CanonicalIngredient | null> {
   const cleanCategory = normalizeCategory(category);
   const targetMiniSearch = cleanCategory && categoryMiniSearchMap.has(cleanCategory) ? categoryMiniSearchMap.get(cleanCategory)! : null;
 
-  // 1. Parent ingredient priority (e.g. "Ei" for "Eigelb", "Zitrone" for "Zitronenabrieb")
+  // 1. Parent ingredient priority (e.g. "Ei" for "Eigelb", "Zitrone" for "Zitronensaft")
   if (parentIngredient?.name) {
     const normParent = normalizeSearchTerm(parentIngredient.name);
     const directParent = byAlias.get(normParent) || byNameDe.get(normParent) || byId.get(normParent);
@@ -288,38 +341,8 @@ export function findCanonicalIngredient(
     }
   }
 
-  // 2. Build prioritized search query list
-  const queriesToTest: string[] = [];
-
-  // A. Add explicit searchQueries from Gemini
-  if (searchQueries && Array.isArray(searchQueries)) {
-    for (const q of searchQueries) {
-      if (q && typeof q === 'string') {
-        const norm = normalizeSearchTerm(q);
-        if (norm && !queriesToTest.includes(norm)) queriesToTest.push(norm);
-      }
-    }
-  }
-
-  // B. Add baseName & name
-  if (baseName) {
-    const norm = normalizeSearchTerm(baseName);
-    if (norm && !queriesToTest.includes(norm)) queriesToTest.push(norm);
-  }
-  if (name) {
-    const norm = normalizeSearchTerm(name);
-    if (norm && !queriesToTest.includes(norm)) queriesToTest.push(norm);
-  }
-
-  // C. Add synonyms
-  if (synonyms && Array.isArray(synonyms)) {
-    for (const s of synonyms) {
-      if (s && typeof s === 'string') {
-        const norm = normalizeSearchTerm(s);
-        if (norm && !queriesToTest.includes(norm)) queriesToTest.push(norm);
-      }
-    }
-  }
+  // 2. Build search query list
+  const queriesToTest = buildSearchQueries(name, baseName, synonyms, searchQueries);
 
   // 3. Stage 1: Exact O(1) Fast-Path
   for (const q of queriesToTest) {
@@ -331,66 +354,73 @@ export function findCanonicalIngredient(
     }
   }
 
-  // 4. Stage 2: Category-Scoped MiniSearch (BM25 + Token Guard)
-  if (targetMiniSearch) {
-    for (const q of queriesToTest) {
-      if (q.length < 2) continue;
-      const results = targetMiniSearch.search(q, {
-        boost: { name_de: 3.0, search_aliases: 2.5, name_en: 1.0 },
-        fuzzy: q.length >= 5 ? 0.2 : false,
-        prefix: false, // Strict word matching to prevent prefix bleed (e.g. speck -> speckwurst)
-        combineWith: 'OR',
-      });
+  // 4. Stage 2: Category-Scoped Sparse Retrieval (MiniSearch BM25)
+  const candidateMap = new Map<string, { item: CanonicalIngredient; bm25Score: number }>();
+  const searchEngine = targetMiniSearch || globalMiniSearch;
 
-      if (results.length > 0) {
-        const evaluated = results.slice(0, 5).map((r) => {
-          const item = byId.get(r.id)!;
-          const tokenDice = calculateTokenDice(q, item);
-          const simplicity = calculateSimplicityFactor(item);
-          // Combined score: BM25 relevance weighted with TokenDice and Simplicity
-          const finalScore = r.score * (0.4 + 0.6 * tokenDice) + simplicity * 2.0;
-          return { item, finalScore, tokenDice, bm25Score: r.score };
-        });
+  for (const q of queriesToTest) {
+    if (q.length < 2) continue;
+    const results = searchEngine.search(q, {
+      boost: { name_de: 3.0, search_aliases: 2.5, name_en: 1.0 },
+      fuzzy: q.length >= 5 ? 0.2 : false,
+      prefix: false,
+      combineWith: 'OR',
+    });
 
-        evaluated.sort((a, b) => b.finalScore - a.finalScore);
-        const best = evaluated[0];
-
-        // Strict Guard: At least 40% of query words must match the candidate food
-        if (best.tokenDice >= 0.40) {
-          return best.item;
+    for (const r of results.slice(0, 8)) {
+      if (!candidateMap.has(r.id)) {
+        const item = byId.get(r.id);
+        if (item) {
+          candidateMap.set(r.id, { item, bm25Score: r.score });
         }
       }
     }
-    // Category was specified and no high-confidence match found -> clean null
+  }
+
+  const candidates = Array.from(candidateMap.values());
+  if (candidates.length === 0) {
     return null;
   }
 
-  // 5. Stage 3: Global Fallback Search (ONLY if category was unspecified or OTHER)
-  if (!cleanCategory || cleanCategory === 'OTHER') {
-    for (const q of queriesToTest) {
-      if (q.length < 3) continue;
-      const results = globalMiniSearch.search(q, {
-        boost: { name_de: 3.0, search_aliases: 2.5, name_en: 1.0 },
-        fuzzy: q.length >= 4 ? 0.2 : false,
-        prefix: true,
-      });
+  // 5. Stage 3: Dense Semantic Re-Ranking (Gemini Vector Embeddings)
+  let bestCandidate: CanonicalIngredient | null = null;
+  let bestScore = 0;
 
-      if (results.length > 0) {
-        const evaluated = results.slice(0, 5).map((r) => {
-          const item = byId.get(r.id)!;
-          const tokenDice = calculateTokenDice(q, item);
-          const simplicity = calculateSimplicityFactor(item);
-          const finalScore = r.score * (0.5 + 0.5 * tokenDice) + simplicity * 2.0;
-          return { item, finalScore, tokenDice, bm25Score: r.score };
-        });
+  let queryVector: number[] | null = null;
+  if (embeddingsBuffer) {
+    const primaryQuery = queriesToTest[0] || name;
+    queryVector = await fetchQueryEmbedding(primaryQuery);
+  }
 
-        evaluated.sort((a, b) => b.finalScore - a.finalScore);
-        const best = evaluated[0];
-        if (best.tokenDice >= 0.50 && best.bm25Score >= 8.0) {
-          return best.item;
-        }
-      }
+  for (const { item, bm25Score } of candidates) {
+    let semanticScore = 0;
+    const vecIdx = idToVectorIndex.get(item.id.toLowerCase().trim());
+
+    if (queryVector && vecIdx !== undefined && embeddingsBuffer) {
+      const offset = vecIdx * EMBEDDING_DIM;
+      semanticScore = calculateCosineSimilarity(queryVector, offset);
     }
+
+    // Normalized BM25: saturates around score 10
+    const normalizedBM25 = Math.min(1.0, bm25Score / 10.0);
+
+    // Hybrid composite score: 45% BM25 + 55% Semantic Vector Similarity
+    const hybridScore = queryVector ? (0.45 * normalizedBM25 + 0.55 * semanticScore) : normalizedBM25;
+
+    // Strict semantic filter: if vector model is active, cosine similarity must be >= 0.70
+    if (queryVector && semanticScore < 0.70) {
+      continue;
+    }
+
+    if (hybridScore > bestScore) {
+      bestScore = hybridScore;
+      bestCandidate = item;
+    }
+  }
+
+  // Final acceptance threshold (ensures high-confidence matches only)
+  if (bestCandidate && bestScore >= 0.68) {
+    return bestCandidate;
   }
 
   return null;
@@ -443,15 +473,15 @@ export function calculateWeightGrams(amount: number, unit: string, item: Canonic
  * If a canonical match is found, updates the nutrients based on the 100g reference values.
  * If unmatched, keeps the AI estimated values as a safe fallback.
  */
-export function matchAndEnrichIngredient(ingredient: Ingredient, groupCategory?: string): {
+export async function matchAndEnrichIngredient(ingredient: Ingredient, groupCategory?: string): Promise<{
   matched: boolean;
   calories: number;
   protein: number;
   carbs: number;
   fat: number;
-} {
+}> {
   const effectiveCategory = ingredient.category || groupCategory;
-  const match = findCanonicalIngredient(
+  const match = await findCanonicalIngredient(
     ingredient.name,
     ingredient.baseName,
     effectiveCategory,
@@ -498,7 +528,7 @@ export function matchAndEnrichIngredient(ingredient: Ingredient, groupCategory?:
  * Enriches all ingredients in a recipe with canonical nutritional data and
  * computes the recipe-level nutritional values per serving (if not explicitly given).
  */
-export function enrichRecipeWithCanonicalIngredients(recipe: Recipe): void {
+export async function enrichRecipeWithCanonicalIngredients(recipe: Recipe): Promise<void> {
   if (!recipe || !recipe.ingredients) return;
 
   let totalCalories = 0;
@@ -512,7 +542,7 @@ export function enrichRecipeWithCanonicalIngredients(recipe: Recipe): void {
     if (!group.items) continue;
     for (const ing of group.items) {
       totalIngredients++;
-      const result = matchAndEnrichIngredient(ing, group.name);
+      const result = await matchAndEnrichIngredient(ing, group.name);
       if (result.matched) {
         matchedCount++;
       }
