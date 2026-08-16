@@ -133,15 +133,15 @@ export default function RecipeIngredients({
                             return (
                               <span className="block mt-1 text-[11px] text-gray-400 dark:text-gray-500 font-medium select-none text-left">
                                 <span
-                                  className={`px-2 py-0.5 rounded-md inline-flex items-center gap-1.5 transition-colors ${
+                                  className={`px-1.5 py-0.5 rounded-md inline-flex items-center gap-1.5 transition-colors text-[10.5px] ${
                                     ing.isVerified
-                                      ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold'
-                                      : 'bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-400'
+                                      ? 'bg-emerald-500/[0.05] dark:bg-emerald-400/[0.07] text-emerald-800/75 dark:text-emerald-300/75 border border-emerald-500/10 font-medium'
+                                      : 'bg-black/[0.03] dark:bg-white/[0.04] text-gray-500 dark:text-gray-400 font-normal'
                                   }`}
                                   title={ing.matchedName ? t('recipe.verifiedIngredientTooltip', { name: ing.matchedName }) : undefined}
                                 >
                                   {ing.isVerified && (
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block shrink-0 shadow-[0_0_4px_rgba(16,185,129,0.5)]" />
+                                    <span className="w-1 h-1 rounded-full bg-emerald-500/70 inline-block shrink-0" />
                                   )}
                                   <span>{parts.join(' · ')}</span>
                                 </span>

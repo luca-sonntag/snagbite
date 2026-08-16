@@ -268,7 +268,7 @@ export function useSavedCatalog({
 
   const recResult = useMemo(() => {
     return getRecommendedShelf<Job>(completedJobs, {
-      now: new Date(2026, 1, 10),
+      now: new Date(),
       recentMap,
       limit: SHELF_SIZE,
     });
