@@ -374,7 +374,7 @@ export function getMiniSearchCandidates(
   category?: string,
   synonyms?: string[],
   searchQueries?: string[],
-  limit = 8
+  limit = 10
 ): CanonicalIngredient[] {
   const cleanCategory = normalizeCategory(category);
   const targetMiniSearch = cleanCategory && categoryMiniSearchMap.has(cleanCategory) ? categoryMiniSearchMap.get(cleanCategory)! : null;
@@ -511,7 +511,7 @@ export async function rerankIngredientsBatchWithGemini(
     return resultMap;
   }
 
-  const modelName = config.GEMINI_RERANKER_MODEL || 'gemini-3.1-flash-lite';
+  const modelName = config.GEMINI_RERANKER_MODEL;
   const model = genAI.getGenerativeModel({
     model: modelName,
     generationConfig: {
@@ -776,7 +776,7 @@ export async function enrichRecipeWithCanonicalIngredients(recipe: Recipe): Prom
         effectiveCategory,
         ing.synonyms,
         ing.searchQueries,
-        6
+        /* limit: */ 10
       );
       if (candidates.length > 0) {
         unmatchedForBatch.push({
