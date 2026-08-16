@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Drawer, Button } from '@heroui/react';
-import { Users, Minus, Plus, Flame, ArrowRight } from 'lucide-react';
+import { Users, Minus, Plus, Flame } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useAdOverlay } from '../../context/OverlayStackContext';
 
@@ -117,7 +117,7 @@ export default function AdjustServingsSheet({
                 </div>
 
                 {/* Stepper Box */}
-                <div className="flex flex-col items-center justify-center py-4 px-6 bg-gray-100/70 dark:bg-gray-800/60 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
+                <div className="flex flex-col items-center justify-center py-4 px-6 bg-gray-100/70 dark:bg-gray-800/60 rounded-2xl border-none">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
                     {t('recipe.adjustServingsTargetLabel')}
                   </span>
@@ -126,7 +126,7 @@ export default function AdjustServingsSheet({
                       isIconOnly
                       size="md"
                       variant="tertiary"
-                      className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-500/10 active:scale-90 disabled:opacity-30 disabled:pointer-events-none transition-all"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border-none hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-500/10 active:scale-90 disabled:opacity-30 disabled:pointer-events-none transition-all"
                       onPress={handleDecrease}
                       isDisabled={targetServings <= 1 || isSaving}
                       aria-label={t('recipe.decreaseServings')}
@@ -144,7 +144,7 @@ export default function AdjustServingsSheet({
                       isIconOnly
                       size="md"
                       variant="tertiary"
-                      className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-500/10 active:scale-90 disabled:opacity-30 disabled:pointer-events-none transition-all"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border-none hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-500/10 active:scale-90 disabled:opacity-30 disabled:pointer-events-none transition-all"
                       onPress={handleIncrease}
                       isDisabled={targetServings >= 24 || isSaving}
                       aria-label={t('recipe.increaseServings')}
@@ -154,88 +154,84 @@ export default function AdjustServingsSheet({
                   </div>
                 </div>
 
-                {/* Nutritional Preview Card */}
+                {/* Nutritional Preview Card (Flat & Clean) */}
                 {hasNutrition && (
-                  <div className="bg-emerald-500/10 dark:bg-emerald-500/15 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] rounded-2xl p-4 flex flex-col gap-2.5">
-                    <div className="flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300">
-                      <Flame className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-                      <span className="text-[10px] font-bold uppercase tracking-wider">
-                        {t('recipe.adjustServingsPreviewTitle')}
+                  <div className="bg-gray-100/70 dark:bg-gray-800/60 rounded-2xl p-4 border-none flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0 text-emerald-600 dark:text-emerald-400">
+                        <Flame className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                        {t('recipe.nutritionTitle')} ({t('recipe.nutritionPerServing')})
                       </span>
                     </div>
 
-                    {oldCalories > 0 && (
-                      <p className="text-xs text-gray-700 dark:text-gray-200 font-semibold leading-relaxed">
-                        {targetServings === initialServings
-                          ? t('recipe.adjustServingsPreviewUnchanged', { kcal: oldCalories })
-                          : t('recipe.adjustServingsPreviewKcal', {
-                              oldKcal: oldCalories.toLocaleString('de-DE'),
-                              newKcal: newCalories.toLocaleString('de-DE'),
-                            })}
-                      </p>
-                    )}
-
-                    {/* Macros grid */}
-                    {(oldProtein > 0 || oldCarbs > 0 || oldFat > 0) && (
-                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-emerald-500/10 dark:border-emerald-500/20">
-                        {/* Protein */}
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                            {t('recipe.nutritionProtein')}
-                          </span>
-                          <div className="text-xs font-semibold text-gray-900 dark:text-white tabular-nums flex items-center gap-1">
-                            <span>{formatMacro(oldProtein)}g</span>
-                            {targetServings !== initialServings && (
-                              <>
-                                <ArrowRight className="w-2.5 h-2.5 opacity-40" />
-                                <span className="text-emerald-700 dark:text-emerald-300 font-bold">
-                                  {formatMacro(newProtein)}g
-                                </span>
-                              </>
-                            )}
-                          </div>
+                    <div className="grid grid-cols-4 gap-2 text-left items-start">
+                      {/* Calories */}
+                      <div>
+                        <div className="text-gray-900 dark:text-white text-sm sm:text-base font-bold tabular-nums leading-tight">
+                          {targetServings === initialServings ? (
+                            <span>{oldCalories}</span>
+                          ) : (
+                            <span className="text-emerald-600 dark:text-emerald-400 font-bold">{newCalories}</span>
+                          )}
                         </div>
-
-                        {/* Carbs */}
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                            {t('recipe.nutritionCarbs')}
-                          </span>
-                          <div className="text-xs font-semibold text-gray-900 dark:text-white tabular-nums flex items-center gap-1">
-                            <span>{formatMacro(oldCarbs)}g</span>
-                            {targetServings !== initialServings && (
-                              <>
-                                <ArrowRight className="w-2.5 h-2.5 opacity-40" />
-                                <span className="text-emerald-700 dark:text-emerald-300 font-bold">
-                                  {formatMacro(newCarbs)}g
-                                </span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Fat */}
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                            {t('recipe.nutritionFat')}
-                          </span>
-                          <div className="text-xs font-semibold text-gray-900 dark:text-white tabular-nums flex items-center gap-1">
-                            <span>{formatMacro(oldFat)}g</span>
-                            {targetServings !== initialServings && (
-                              <>
-                                <ArrowRight className="w-2.5 h-2.5 opacity-40" />
-                                <span className="text-emerald-700 dark:text-emerald-300 font-bold">
-                                  {formatMacro(newFat)}g
-                                </span>
-                              </>
-                            )}
-                          </div>
+                        <div className="text-[10px] font-medium text-gray-400 dark:text-gray-500 mt-0.5">
+                          {t('recipe.nutritionCalories')}
                         </div>
                       </div>
-                    )}
+
+                      {/* Protein */}
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-[2px] bg-blue-500 shrink-0" />
+                          <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
+                            {targetServings === initialServings ? (
+                              `${formatMacro(oldProtein)}g`
+                            ) : (
+                              <span className="text-emerald-600 dark:text-emerald-400 font-bold">{formatMacro(newProtein)}g</span>
+                            )}
+                          </span>
+                        </div>
+                        <div className="text-[10px] font-medium text-gray-400 dark:text-gray-500 mt-0.5 truncate">
+                          {t('recipe.nutritionProtein')}
+                        </div>
+                      </div>
+
+                      {/* Carbs */}
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-[2px] bg-amber-500 shrink-0" />
+                          <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
+                            {targetServings === initialServings ? (
+                              `${formatMacro(oldCarbs)}g`
+                            ) : (
+                              <span className="text-emerald-600 dark:text-emerald-400 font-bold">{formatMacro(newCarbs)}g</span>
+                            )}
+                          </span>
+                        </div>
+                        <div className="text-[10px] font-medium text-gray-400 dark:text-gray-500 mt-0.5 truncate">
+                          {t('recipe.nutritionCarbs')}
+                        </div>
+                      </div>
+
+                      {/* Fat */}
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-[2px] bg-rose-500 shrink-0" />
+                          <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
+                            {targetServings === initialServings ? (
+                              `${formatMacro(oldFat)}g`
+                            ) : (
+                              <span className="text-emerald-600 dark:text-emerald-400 font-bold">{formatMacro(newFat)}g</span>
+                            )}
+                          </span>
+                        </div>
+                        <div className="text-[10px] font-medium text-gray-400 dark:text-gray-500 mt-0.5 truncate">
+                          {t('recipe.nutritionFat')}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
 
