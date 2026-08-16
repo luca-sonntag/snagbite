@@ -192,8 +192,8 @@ export default function IngredientNutritionSheet({
                       <span className="text-xl font-black text-gray-900 dark:text-white tracking-tight block">
                         {scaledProtein} <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">g</span>
                       </span>
-                      <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
-                        {Math.round(proteinKcal)} kcal
+                      <span className="text-[10px] text-gray-500 dark:text-gray-400 font-semibold">
+                        {proteinPct}%
                       </span>
                     </div>
                   </div>
@@ -210,8 +210,8 @@ export default function IngredientNutritionSheet({
                       <span className="text-xl font-black text-gray-900 dark:text-white tracking-tight block">
                         {scaledCarbs} <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">g</span>
                       </span>
-                      <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
-                        {Math.round(carbsKcal)} kcal
+                      <span className="text-[10px] text-gray-500 dark:text-gray-400 font-semibold">
+                        {carbsPct}%
                       </span>
                     </div>
                   </div>
@@ -228,8 +228,8 @@ export default function IngredientNutritionSheet({
                       <span className="text-xl font-black text-gray-900 dark:text-white tracking-tight block">
                         {scaledFat} <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">g</span>
                       </span>
-                      <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
-                        {Math.round(fatKcal)} kcal
+                      <span className="text-[10px] text-gray-500 dark:text-gray-400 font-semibold">
+                        {fatPct}%
                       </span>
                     </div>
                   </div>
