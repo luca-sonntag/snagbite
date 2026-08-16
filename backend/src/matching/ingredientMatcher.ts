@@ -77,6 +77,9 @@ function getSimplicityScore(item: CanonicalIngredient): number {
 
 for (const item of CANONICAL_INGREDIENTS) {
   byId.set(item.id.toLowerCase().trim(), item);
+  if (item.bls_code) {
+    byId.set(item.bls_code.toLowerCase().trim(), item);
+  }
   byNameEn.set(item.name_en.toLowerCase().trim(), item);
   byNameDe.set(item.name_de.toLowerCase().trim(), item);
 
@@ -394,7 +397,7 @@ export async function findCanonicalIngredient(
     const singular = toEnglishSingular(normBase);
     const mappedId = BASE_NAME_TO_CANONICAL_ID[normBase] || BASE_NAME_TO_CANONICAL_ID[singular];
     if (mappedId) {
-      const item = byId.get(mappedId);
+      const item = byId.get(mappedId.toLowerCase().trim()) || byId.get('bls_' + mappedId.toLowerCase().trim());
       if (item) {
         return item;
       }
@@ -408,7 +411,7 @@ export async function findCanonicalIngredient(
       const singularParent = toEnglishSingular(normParentBase);
       const mappedParentId = BASE_NAME_TO_CANONICAL_ID[normParentBase] || BASE_NAME_TO_CANONICAL_ID[singularParent];
       if (mappedParentId) {
-        const item = byId.get(mappedParentId);
+        const item = byId.get(mappedParentId.toLowerCase().trim()) || byId.get('bls_' + mappedParentId.toLowerCase().trim());
         if (item) return item;
       }
     }
