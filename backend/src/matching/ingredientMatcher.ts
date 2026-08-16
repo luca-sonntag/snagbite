@@ -272,17 +272,9 @@ function buildSearchQueries(
   const queries: string[] = [];
   const genericFragments = new Set(['powder', 'pulver', 'milk', 'milch', 'cheese', 'käse', 'oil', 'öl', 'sauce', 'soße', 'cookies', 'kekse', 'pudding']);
 
-  // A. Explicit search queries from Gemini
-  if (searchQueries && Array.isArray(searchQueries)) {
-    for (const q of searchQueries) {
-      if (q && typeof q === 'string') {
-        const norm = normalizeSearchTerm(q);
-        if (norm && !queries.includes(norm)) queries.push(norm);
-      }
-    }
-  }
+  const isPowderName = /\b(pulver|powder)\b/i.test(name) || /\b(pulver|powder)\b/i.test(baseName || '');
 
-  // B. Name & baseName
+  // 1. Primary Name & baseName (highest priority)
   if (name) {
     const norm = normalizeSearchTerm(name);
     if (norm && !queries.includes(norm)) queries.push(norm);
@@ -292,7 +284,22 @@ function buildSearchQueries(
     if (norm && !queries.includes(norm)) queries.push(norm);
   }
 
-  // C. Synonyms
+  // 2. Explicit search queries from Gemini
+  if (searchQueries && Array.isArray(searchQueries)) {
+    for (const q of searchQueries) {
+      if (q && typeof q === 'string') {
+        const norm = normalizeSearchTerm(q);
+        if (!norm || queries.includes(norm)) continue;
+        // If the ingredient is a powder, do not search for the raw root (e.g. "paprika" for "paprikapulver")
+        if (isPowderName && !norm.includes('pulver') && !norm.includes('powder') && !norm.includes('gewürz')) {
+          continue;
+        }
+        queries.push(norm);
+      }
+    }
+  }
+
+  // 3. Synonyms
   if (synonyms && Array.isArray(synonyms)) {
     for (const s of synonyms) {
       if (s && typeof s === 'string') {
@@ -300,6 +307,9 @@ function buildSearchQueries(
         if (!norm || queries.includes(norm)) continue;
         if (genericFragments.has(norm) && name && name.split(/\s+/).length >= 2) {
           continue; // Skip isolated generic fragment for compound products
+        }
+        if (isPowderName && !norm.includes('pulver') && !norm.includes('powder') && !norm.includes('gewürz')) {
+          continue;
         }
         queries.push(norm);
       }
@@ -339,6 +349,7 @@ export async function findCanonicalIngredient(
 ): Promise<CanonicalIngredient | null> {
   const cleanCategory = normalizeCategory(category);
   const targetMiniSearch = cleanCategory && categoryMiniSearchMap.has(cleanCategory) ? categoryMiniSearchMap.get(cleanCategory)! : null;
+  const isPowderQuery = /\b(pulver|powder)\b/i.test(name) || /\b(pulver|powder)\b/i.test(baseName || '');
 
   // 1. Parent ingredient priority (e.g. "Ei" for "Eigelb", "Zitrone" for "Zitronensaft")
   if (parentIngredient?.name) {
@@ -356,6 +367,9 @@ export async function findCanonicalIngredient(
   for (const q of queriesToTest) {
     const direct = byAlias.get(q) || byNameDe.get(q) || byId.get(q) || byNameEn.get(q);
     if (direct) {
+      if (isPowderQuery && direct.category === 'FRUITS_VEGETABLES' && !direct.name_de.toLowerCase().includes('pulver')) {
+        continue;
+      }
       return direct;
     }
   }
@@ -401,9 +415,40 @@ export async function findCanonicalIngredient(
   const isFitnessQuery = /\b(protein|whey|isoclear|casein)\b/i.test(name) || /\b(protein|whey|isoclear|casein)\b/i.test(baseName || '');
 
   for (const { item, bm25Score } of candidates) {
+    const candDe = (item.name_de || '').toLowerCase();
+    const lowerQuery = (name + ' ' + (baseName || '')).toLowerCase();
+
     // Never match fitness protein powder to baking leavening agents (Backpulver/Natron)
-    const isBakingLeavening = item.bls_code?.startsWith('R42') || (item.name_de || '').toLowerCase().includes('backpulver') || (item.name_de || '').toLowerCase().includes('natron');
+    const isBakingLeavening = item.bls_code?.startsWith('R42') || candDe.includes('backpulver') || candDe.includes('natron');
     if (isFitnessQuery && isBakingLeavening) {
+      continue;
+    }
+
+    // Flour vs Pastry guard: if asking for flour (e.g. Mandelmehl, Kokosmehl), never match cake/pastry (e.g. Mandelkuchen)
+    if (/\b(mehl|flour)\b/i.test(lowerQuery) && (candDe.includes('kuchen') || candDe.includes('torte') || candDe.includes('gebäck') || item.bls_code?.startsWith('D4'))) {
+      continue;
+    }
+
+    // Spice vs Sauce guard: if asking for pure spice (e.g. Curry, Paprikapulver), never match ketchup or sauce unless query asks for sauce
+    const isSpiceQuery = (cleanCategory === 'SPICES_OILS' || /\b(pulver|powder|gewürz|spice)\b/i.test(lowerQuery)) && !/\b(ketchup|sauce|soße|dressing|dip)\b/i.test(lowerQuery);
+    if (isSpiceQuery && (candDe.includes('ketchup') || candDe.includes('sauce') || candDe.includes('soße') || candDe.includes('dressing'))) {
+      continue;
+    }
+
+    // Pulver/Powder guard: if query is a powder (e.g. Paprikapulver, Mangopulver), do not match fresh raw fruit/vegetable
+    if (/\b(pulver|powder)\b/i.test(lowerQuery) && item.category === 'FRUITS_VEGETABLES' && !candDe.includes('pulver') && !candDe.includes('powder') && !candDe.includes('getrocknet')) {
+      continue;
+    }
+
+    // Poultry vs Beef/Offal guard: if query is poultry (e.g. Hähnchenhackfleisch), do not match beef/offal (e.g. Leberhack)
+    const isPoultryQuery = /\b(hähnchen|huhn|hühner|geflügel|pute|truthahn|chicken|turkey)\b/i.test(lowerQuery);
+    if (isPoultryQuery && (item.bls_code?.startsWith('U') || candDe.includes('leber') || candDe.includes('niere') || candDe.includes('schwein') || candDe.includes('rind'))) {
+      continue;
+    }
+
+    // Seasoning vs Animal Fat guard: if query is seasoning (e.g. Hähnchengewürz), do not match animal fat/oil
+    const isSeasoningQuery = /\b(gewürz|seasoning|rub)\b/i.test(lowerQuery);
+    if (isSeasoningQuery && (item.category === 'SPICES_OILS' || item.bls_code?.startsWith('Q')) && (candDe.includes('fett') || candDe.includes('schmalz') || candDe.includes('talg'))) {
       continue;
     }
 
