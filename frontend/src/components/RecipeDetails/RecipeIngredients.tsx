@@ -112,6 +112,12 @@ export default function RecipeIngredients({
                             <span className="text-xs text-red-500/70 line-through mr-1.5">{ing.replacedOriginal}</span>
                           )}
                           <span>{name}</span>
+                          {ing.isVerified && (
+                            <span
+                              className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1.5 mb-0.5 align-middle shadow-[0_0_5px_rgba(16,185,129,0.4)] cursor-help"
+                              title={ing.matchedName ? t('recipe.verifiedIngredientTooltip', { name: ing.matchedName }) : t('recipe.verifiedIngredient')}
+                            />
+                          )}
                           {showParentBadge && (
                             <span className="text-xs text-gray-400 dark:text-gray-400 ml-1 font-normal">
                               {t('recipe.parentDerivedLabel', { parent: parent.name })}
@@ -132,8 +138,18 @@ export default function RecipeIngredients({
                             if (parts.length === 0) return null;
                             return (
                               <span className="block mt-1 text-[11px] text-gray-400 dark:text-gray-500 font-medium select-none text-left">
-                                <span className="bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded-md inline-block">
-                                  {parts.join(' | ')}
+                                <span
+                                  className={`px-2 py-0.5 rounded-md inline-flex items-center gap-1.5 transition-colors ${
+                                    ing.isVerified
+                                      ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold'
+                                      : 'bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-400'
+                                  }`}
+                                  title={ing.matchedName ? t('recipe.verifiedIngredientTooltip', { name: ing.matchedName }) : undefined}
+                                >
+                                  {ing.isVerified && (
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block shrink-0 shadow-[0_0_4px_rgba(16,185,129,0.5)]" />
+                                  )}
+                                  <span>{parts.join(' | ')}</span>
                                 </span>
                               </span>
                             );
