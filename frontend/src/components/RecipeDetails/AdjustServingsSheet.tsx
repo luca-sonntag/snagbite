@@ -117,8 +117,8 @@ export default function AdjustServingsSheet({
                 </div>
 
                 {/* Stepper Box */}
-                <div className="flex flex-col items-center justify-center py-4 px-6 bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 rounded-2xl">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
+                <div className="flex flex-col items-center justify-center py-4 px-6 bg-gray-100/70 dark:bg-gray-800/60 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
                     {t('recipe.adjustServingsTargetLabel')}
                   </span>
                   <div className="flex items-center gap-4">
@@ -126,7 +126,7 @@ export default function AdjustServingsSheet({
                       isIconOnly
                       size="md"
                       variant="tertiary"
-                      className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-full text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 shadow-sm border border-black/5 dark:border-white/5 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-500/10 active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-500/10 active:scale-90 disabled:opacity-30 disabled:pointer-events-none transition-all"
                       onPress={handleDecrease}
                       isDisabled={targetServings <= 1 || isSaving}
                       aria-label={t('recipe.decreaseServings')}
@@ -144,7 +144,7 @@ export default function AdjustServingsSheet({
                       isIconOnly
                       size="md"
                       variant="tertiary"
-                      className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-full text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 shadow-sm border border-black/5 dark:border-white/5 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-500/10 active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-500/10 active:scale-90 disabled:opacity-30 disabled:pointer-events-none transition-all"
                       onPress={handleIncrease}
                       isDisabled={targetServings >= 24 || isSaving}
                       aria-label={t('recipe.increaseServings')}
@@ -156,16 +156,16 @@ export default function AdjustServingsSheet({
 
                 {/* Nutritional Preview Card */}
                 {hasNutrition && (
-                  <div className="bg-emerald-500/[0.06] dark:bg-emerald-500/[0.1] border border-emerald-500/20 dark:border-emerald-500/25 rounded-2xl p-4 flex flex-col gap-3">
-                    <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
+                  <div className="bg-emerald-500/10 dark:bg-emerald-500/15 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] rounded-2xl p-4 flex flex-col gap-2.5">
+                    <div className="flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300">
                       <Flame className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-                      <span className="text-xs font-bold uppercase tracking-wider">
+                      <span className="text-[10px] font-bold uppercase tracking-wider">
                         {t('recipe.adjustServingsPreviewTitle')}
                       </span>
                     </div>
 
                     {oldCalories > 0 && (
-                      <p className="text-xs text-gray-700 dark:text-gray-200 font-medium leading-relaxed">
+                      <p className="text-xs text-gray-700 dark:text-gray-200 font-semibold leading-relaxed">
                         {targetServings === initialServings
                           ? t('recipe.adjustServingsPreviewUnchanged', { kcal: oldCalories })
                           : t('recipe.adjustServingsPreviewKcal', {
@@ -177,7 +177,7 @@ export default function AdjustServingsSheet({
 
                     {/* Macros grid */}
                     {(oldProtein > 0 || oldCarbs > 0 || oldFat > 0) && (
-                      <div className="grid grid-cols-3 gap-2 pt-1 border-t border-emerald-500/15">
+                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-emerald-500/10 dark:border-emerald-500/20">
                         {/* Protein */}
                         <div className="flex flex-col gap-0.5">
                           <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1">
@@ -245,14 +245,14 @@ export default function AdjustServingsSheet({
                     variant="tertiary"
                     onPress={onClose}
                     isDisabled={isSaving}
-                    className="flex-1 h-12 rounded-xl text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white font-semibold transition-all"
+                    className="flex-1 h-12 rounded-2xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold border-none active:scale-95 transition-all"
                   >
                     {t('recipe.adjustServingsCancel')}
                   </Button>
                   <Button
                     onPress={handleConfirmSave}
                     isDisabled={isSaving}
-                    className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md active:scale-[0.98] transition-all"
+                    className="flex-1 h-12 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] active:scale-95 transition-all"
                   >
                     {isSaving ? t('recipe.adjustServingsSaving') : t('recipe.adjustServingsSave')}
                   </Button>
