@@ -9,6 +9,7 @@
   * Zeigt ein Auth-Gate (`AuthForm`) bei fehlender Session.
   * **`--app-sticky-top` (Sticky-Offset):** Die Sticky-Kopfregion (Safe-Area-Filler + `TimerBanner`) misst ihre Höhe per `ResizeObserver` und schreibt die Höhe als globale CSS-Variable `--app-sticky-top` auf `document.documentElement`. Views nutzen `sticky top-[var(--app-sticky-top)]`.
   * **`RecipeDetails` Single-Page Scroll-Layout & `RecipeStickyBar`**: Rezept-Detailansicht als einzelne, fließende Scroll-Seite ohne Tabs (Details `RecipeInfoSection`, Zutaten `RecipeIngredients`, Zubereitung `RecipeInstructions`). `RecipeStickyBar` heftet sich an `top-[var(--app-sticky-top)]` und markiert dynamisch per Scroll-Spy die gerade sichtbare Sektion. Kategorie-Überschriften in den Zutaten verwenden harmonische vertikale Farb-Pills (`w-1 h-3.5 rounded-full`, passend zur Taxonomie aus `i18n.ts`).
+  * **Basis-Portionen anpassen (`AdjustServingsSheet.tsx`)**: Klick auf die Portionen-Zeile in `RecipeInfoSection` (gekennzeichnet durch Chevron-Right Icon) öffnet das `AdjustServingsSheet`. Erlaubt das Umverteilen der Basis-Portionen mit mathematisch exakter Live-Neuberechnung aller Nährwerte pro Portion (Kalorien & Makros) und persistiert die Änderungen atomar in Supabase (`PATCH /api/jobs/:id`).
 
 ### Zentralisierte Kontexte (`frontend/src/context/`)
 * **`AuthContext.tsx`:** Verwaltet Supabase Auth Session (`signIn`, `signUp`, `signInWithGoogle`, `signOut`, `getAccessToken`, `isPremium`).

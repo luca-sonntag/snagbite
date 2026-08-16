@@ -10,7 +10,7 @@
 
 ### History, ID-Vergabe & Verwaltung
 * Bietet Helper-Funktionen (`getAllJobs(userId)` und `deleteJob(id, userId)`) zur persistenten Abfrage und Bereinigung von Extraktionen – stets benutzerbezogen.
-* Stellt REST-Endpunkte bereit: `GET /api/jobs` (liefert den Extraktionsverlauf des authentifizierten Users), `DELETE /api/jobs/:id` (löscht ein bestimmtes Rezept des Users) und `DELETE /api/users/me` (löscht das Benutzerkonto über die Supabase Admin API).
+* Stellt REST-Endpunkte bereit: `GET /api/jobs` (liefert den Extraktionsverlauf des authentifizierten Users), `PATCH /api/jobs/:id` (aktualisiert ein gespeichertes Rezept, z. B. bei Basis-Portionsänderungen), `DELETE /api/jobs/:id` (löscht ein bestimmtes Rezept des Users) und `DELETE /api/users/me` (löscht das Benutzerkonto über die Supabase Admin API).
 * **Eindeutige Identifikation:** Normalisiert Rezepte bei Abfragen und versieht sie mit einer eindeutigen `id` (entspricht der `jobId`), um Kollisionen zwischen Rezepten mit gleichem Titel zu unterbinden.
 * **Caching-Deaktivierung:** Setzt explizit `Cache-Control` Header (`no-store, no-cache, must-revalidate, proxy-revalidate`) für dynamic endpoints (`/api/jobs` und `/api/jobs/:id`), um zu verhindern, dass Browser veraltete/gecachte Job-Zustände ausliefern.
 
