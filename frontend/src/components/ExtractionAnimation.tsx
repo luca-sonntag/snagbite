@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Camera, ChefHat, Sparkles, UtensilsCrossed, CheckCircle2 } from 'lucide-react';
+import { ChefHat } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
 import type { SupportedLanguage } from '../i18n';
@@ -184,110 +184,43 @@ export default function ExtractionAnimation({ url: _url, jobStatus, progress, va
   const targetPercent = SCENE_TARGET_PERCENT[displayedStage];
   const percent = progress?.percent !== undefined ? Math.min(progress.percent, targetPercent) : targetPercent;
 
-  const renderVisual = (stage: ProgressStage) => {
-    return (
-      <div className="relative w-28 h-28 flex items-center justify-center">
-        {/* Ambient Blur Glow */}
-        <div className="absolute inset-0 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-full blur-2xl animate-pulse" />
-
-        {/* High-End Orbital SVG Ring */}
-        <svg className="absolute inset-0 w-full h-full animate-[spin_6s_linear_infinite]" viewBox="0 0 100 100">
-          <circle
-            cx="50"
-            cy="50"
-            r="44"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            className="text-emerald-500/15 dark:text-emerald-400/15"
-          />
-          <circle
-            cx="50"
-            cy="50"
-            r="44"
-            fill="none"
-            stroke="url(#gradient-ring)"
-            strokeWidth="2.5"
-            strokeDasharray="70 200"
-            strokeLinecap="round"
-          />
-          <defs>
-            <linearGradient id="gradient-ring" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#10b981" />
-              <stop offset="100%" stopColor="#14b8a6" stopOpacity="0.1" />
-            </linearGradient>
-          </defs>
-        </svg>
-
-        {/* Inner Glass Squircle Container */}
-        <div className="relative w-18 h-18 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 backdrop-blur-sm flex items-center justify-center border border-emerald-500/20 dark:border-emerald-500/30 shadow-inner">
-          {stage === 'queued' ? (
-            <ChefHat className="w-9 h-9 text-emerald-600 dark:text-emerald-400 animate-bounce" />
-          ) : stage === 'reading_photos' ? (
-            <Camera className="w-9 h-9 text-emerald-600 dark:text-emerald-400 animate-pulse" />
-          ) : stage === 'scraping' ? (
-            <UtensilsCrossed className="w-9 h-9 text-emerald-600 dark:text-emerald-400 animate-pulse" />
-          ) : stage === 'finalizing' ? (
-            <CheckCircle2 className="w-9 h-9 text-emerald-600 dark:text-emerald-400 animate-pulse" />
-          ) : (
-            <div className="relative flex items-center justify-center">
-              <ChefHat className="w-9 h-9 text-emerald-600 dark:text-emerald-400 animate-pulse" />
-              <Sparkles className="w-3.5 h-3.5 text-amber-400 dark:text-amber-300 absolute -top-1.5 -right-1.5 animate-bounce [animation-duration:2s]" />
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] p-6 sm:p-8 flex flex-col items-center gap-6 w-full text-center">
-      {/* Animated Hero Graphic */}
-      <div className="my-1">
-        <div key={displayedIndex} className="animate-fade-in">
-          {renderVisual(displayedStage)}
-        </div>
+    <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] p-6 sm:p-8 flex flex-col items-center justify-center text-center w-full">
+      {/* Clean Minimal Icon */}
+      <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
+        <ChefHat className="w-8 h-8 animate-pulse" />
       </div>
 
-      {/* Progress & Stage Details */}
-      <div className="flex flex-col gap-3.5 w-full max-w-sm">
-        <div className="flex justify-between items-center px-0.5">
-          <span className="text-[11px] font-bold text-gray-900 dark:text-white uppercase tracking-wider">
-            {t(`job.progress.stages.${displayedStage}`)}
-          </span>
-          <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 tabular-nums">
-            {percent}%
-          </span>
-        </div>
+      {/* Clean Title & Subtle Subtitle */}
+      <h3 className="text-base font-bold text-gray-900 dark:text-white leading-snug">
+        {t(`job.progress.stages.${displayedStage}`)}
+      </h3>
+      <p
+        key={funnyText}
+        className="text-xs text-gray-500 dark:text-gray-400 mt-1 min-h-[1.25rem] italic animate-fade-in"
+      >
+        {funnyText}
+      </p>
 
-        {/* Progress Bar - Clean Flat Style */}
-        <div className="w-full bg-gray-100 dark:bg-gray-800 h-2 rounded-full overflow-hidden relative">
+      {/* Minimal Clean Progress Bar */}
+      <div className="w-full max-w-xs mt-5 flex flex-col gap-1.5">
+        <div className="w-full bg-gray-100 dark:bg-gray-800 h-1.5 rounded-full overflow-hidden">
           <div
-            className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full rounded-full transition-all duration-700 ease-out relative"
+            className="bg-emerald-500 h-full rounded-full transition-all duration-500 ease-out"
             style={{ width: `${percent}%` }}
-          >
-            <div className="absolute inset-0 bg-white/20 animate-pulse" />
-          </div>
+          />
         </div>
-
-        {/* Charming Food Quote (Strictly no emojis) */}
-        <div className="pt-1.5 min-h-[1.75rem] flex items-center justify-center">
-          <p
-            key={funnyText}
-            className="text-xs text-gray-500 dark:text-gray-400 font-medium italic opacity-95 animate-fade-in leading-relaxed"
-          >
-            {funnyText}
-          </p>
+        <div className="flex justify-between items-center text-[11px] font-medium text-gray-400 dark:text-gray-500 px-0.5">
+          <span>{language === 'de' ? 'Rezept-Erstellung' : 'Recipe Creation'}</span>
+          <span className="font-semibold tabular-nums text-gray-700 dark:text-gray-300">{percent}%</span>
         </div>
       </div>
 
-      {/* Background Notification Notice — for Premium users */}
+      {/* Background Notification Notice for Premium */}
       {isPremium && (
-        <div className="w-full max-w-sm bg-gray-50 dark:bg-gray-800/60 rounded-2xl p-3 text-center border-none">
-          <p className="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
-            {t('job.backgroundNotice')}
-          </p>
-        </div>
+        <p className="text-[11px] leading-relaxed text-gray-400 dark:text-gray-500 mt-5 max-w-xs border-t border-gray-100 dark:border-gray-800/60 pt-3.5">
+          {t('job.backgroundNotice')}
+        </p>
       )}
     </div>
   );
