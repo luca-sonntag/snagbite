@@ -112,12 +112,6 @@ export default function RecipeIngredients({
                             <span className="text-xs text-red-500/70 line-through mr-1.5">{ing.replacedOriginal}</span>
                           )}
                           <span>{name}</span>
-                          {ing.isVerified && (
-                            <span
-                              className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1.5 mb-0.5 align-middle shadow-[0_0_5px_rgba(16,185,129,0.4)] cursor-help"
-                              title={ing.matchedName ? t('recipe.verifiedIngredientTooltip', { name: ing.matchedName }) : t('recipe.verifiedIngredient')}
-                            />
-                          )}
                           {showParentBadge && (
                             <span className="text-xs text-gray-400 dark:text-gray-400 ml-1 font-normal">
                               {t('recipe.parentDerivedLabel', { parent: parent.name })}
@@ -149,7 +143,7 @@ export default function RecipeIngredients({
                                   {ing.isVerified && (
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block shrink-0 shadow-[0_0_4px_rgba(16,185,129,0.5)]" />
                                   )}
-                                  <span>{parts.join(' | ')}</span>
+                                  <span>{parts.join(' · ')}</span>
                                 </span>
                               </span>
                             );
