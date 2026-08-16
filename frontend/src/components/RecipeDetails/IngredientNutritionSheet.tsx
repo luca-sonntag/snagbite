@@ -159,7 +159,7 @@ export default function IngredientNutritionSheet({
                   {/* Protein */}
                   <div className="bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent dark:from-blue-500/15 dark:to-transparent rounded-2xl p-3 flex flex-col justify-between text-left">
                     <div className="flex items-center gap-1.5 mb-1.5">
-                      <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                      <span className="w-2 h-2 rounded-[3px] bg-blue-500 shrink-0" />
                       <span className="text-[10.5px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300 truncate">
                         {t('recipe.ingredientNutritionProtein')}
                       </span>
@@ -177,7 +177,7 @@ export default function IngredientNutritionSheet({
                   {/* Carbs */}
                   <div className="bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent dark:from-amber-500/15 dark:to-transparent rounded-2xl p-3 flex flex-col justify-between text-left">
                     <div className="flex items-center gap-1.5 mb-1.5">
-                      <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+                      <span className="w-2 h-2 rounded-[3px] bg-amber-500 shrink-0" />
                       <span className="text-[10.5px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300 truncate">
                         {t('recipe.ingredientNutritionCarbs')}
                       </span>
@@ -195,7 +195,7 @@ export default function IngredientNutritionSheet({
                   {/* Fat */}
                   <div className="bg-gradient-to-br from-rose-500/10 via-rose-500/5 to-transparent dark:from-rose-500/15 dark:to-transparent rounded-2xl p-3 flex flex-col justify-between text-left">
                     <div className="flex items-center gap-1.5 mb-1.5">
-                      <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
+                      <span className="w-2 h-2 rounded-[3px] bg-rose-500 shrink-0" />
                       <span className="text-[10.5px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300 truncate">
                         {t('recipe.ingredientNutritionFat')}
                       </span>

@@ -102,8 +102,8 @@ export default function RecipeNutrition({
 
                 {/* Protein */}
                 <div>
-                  <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-[3px] bg-blue-500 shrink-0" />
                     <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
                       {proteinDisplay}g
                     </span>
@@ -115,8 +115,8 @@ export default function RecipeNutrition({
 
                 {/* Carbs */}
                 <div>
-                  <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-[3px] bg-amber-500 shrink-0" />
                     <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
                       {carbsDisplay}g
                     </span>
@@ -128,8 +128,8 @@ export default function RecipeNutrition({
 
                 {/* Fat */}
                 <div>
-                  <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-[3px] bg-rose-500 shrink-0" />
                     <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
                       {fatDisplay}g
                     </span>
