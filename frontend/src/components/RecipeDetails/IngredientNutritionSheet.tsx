@@ -88,30 +88,6 @@ export default function IngredientNutritionSheet({
                   </button>
                 </div>
 
-                {/* Verification Status Pill */}
-                {ingredient.isVerified ? (
-                  <div className="bg-emerald-500/[0.07] dark:bg-emerald-400/[0.08] text-emerald-800 dark:text-emerald-300 rounded-2xl p-3 flex items-center gap-2.5 text-xs font-medium border border-emerald-500/10">
-                    <ShieldCheck className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <span className="font-bold block text-emerald-900 dark:text-emerald-200">
-                        {t('recipe.ingredientNutritionVerifiedBadge')}
-                      </span>
-                      {ingredient.matchedName && (
-                        <span className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80 truncate block">
-                          BLS: {ingredient.matchedName}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-2xl p-3 flex items-center gap-2.5 text-xs font-medium">
-                    <Sparkles className="w-4 h-4 text-gray-400 shrink-0" />
-                    <span className="text-[11.5px] leading-tight">
-                      {t('recipe.ingredientNutritionEstimatedBadge')}
-                    </span>
-                  </div>
-                )}
-
                 {/* Calories Hero Banner */}
                 <div className="bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent dark:from-emerald-500/15 dark:to-transparent rounded-3xl p-4 sm:p-5 flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -234,6 +210,30 @@ export default function IngredientNutritionSheet({
                     </div>
                   </div>
                 </div>
+
+                {/* Verification Status Pill */}
+                {ingredient.isVerified ? (
+                  <div className="bg-emerald-500/[0.07] dark:bg-emerald-400/[0.08] text-emerald-800 dark:text-emerald-300 rounded-2xl p-3 flex items-center gap-2.5 text-xs font-medium border border-emerald-500/10">
+                    <ShieldCheck className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <span className="font-bold block text-emerald-900 dark:text-emerald-200">
+                        {t('recipe.ingredientNutritionVerifiedBadge')}
+                      </span>
+                      {ingredient.matchedName && (
+                        <span className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80 truncate block">
+                          BLS: {ingredient.matchedName}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-2xl p-3 flex items-center gap-2.5 text-xs font-medium">
+                    <Sparkles className="w-4 h-4 text-gray-400 shrink-0" />
+                    <span className="text-[11.5px] leading-tight">
+                      {t('recipe.ingredientNutritionEstimatedBadge')}
+                    </span>
+                  </div>
+                )}
 
                 {/* Close CTA Button */}
                 <Button
