@@ -140,14 +140,12 @@ export default function ShoppingConfirmSheet({
                                 onClick={() => toggleItem(uniqueId)}
                                 className="flex items-center gap-3.5 py-2 px-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
                               >
-                                <div className={`w-5.5 h-5.5 rounded-md border flex items-center justify-center flex-shrink-0 transition-all ${
-                                  isChecked ? 'bg-emerald-500 border-emerald-500' : 'border-black/20 dark:border-white/20'
-                                }`}>
+                                <div className={`w-5.5 h-5.5 rounded-md border flex items-center justify-center flex-shrink-0 transition-all ${isChecked ? 'bg-emerald-500 border-emerald-500' : 'border-black/20 dark:border-white/20'
+                                  }`}>
                                   {isChecked && <Check className="w-3.5 h-3.5 text-white" />}
                                 </div>
-                                <div className={`flex-1 text-sm select-none transition-all flex flex-wrap items-center gap-1.5 ${
-                                  isChecked ? 'text-gray-800 dark:text-gray-200' : 'text-gray-400 dark:text-gray-500'
-                                }`}>
+                                <div className={`flex-1 text-sm select-none transition-all flex flex-wrap items-center gap-1.5 ${isChecked ? 'text-gray-800 dark:text-gray-200' : 'text-gray-400 dark:text-gray-500'
+                                  }`}>
                                   <span className="font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
                                     {amountStr}{unitStr}
                                   </span>
@@ -173,12 +171,12 @@ export default function ShoppingConfirmSheet({
                 <Button
                   variant="tertiary"
                   onPress={onClose}
-                  className="w-full h-12 rounded-full text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                  className="w-full h-12 rounded-xl text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                 >
                   {t('recipe.shoppingConfirmCancel')}
                 </Button>
                 <Button
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md transition-all h-12 rounded-full"
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md transition-all h-12 rounded-xl"
                   onPress={handleConfirm}
                   isDisabled={selectedCount === 0}
                 >
