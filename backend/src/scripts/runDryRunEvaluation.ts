@@ -49,6 +49,7 @@ interface CliOptions {
   skip: number;
   targetRecipes: number;
   concurrency: number;
+  file?: string;
 }
 
 function parseCliArgs(): CliOptions {
@@ -58,6 +59,7 @@ function parseCliArgs(): CliOptions {
     ? parseInt(process.env.LIMIT || process.env.TARGET_RECIPES!, 10)
     : 5;
   let concurrency = process.env.CONCURRENCY ? parseInt(process.env.CONCURRENCY, 10) : 2;
+  let file = process.env.FILE || process.env.URL_FILE || process.env.URLS_FILE || undefined;
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -66,18 +68,28 @@ function parseCliArgs(): CliOptions {
 Usage: npx tsx src/scripts/runDryRunEvaluation.ts [options]
 
 Options:
-  --skip, -s <n>         Number of recipe URLs to skip (default: 0)
-  --limit, -l, -n <n>    Number of recipes to successfully evaluate (default: 5)
-  --concurrency, -c <n>  Number of parallel workers (default: 2)
-  --help, -h             Show this help message
+  --file, -f, --urls <path> Number/list of URLs from a .txt or .json file (overrides Supabase fetch)
+  --skip, -s <n>            Number of recipe URLs to skip (default: 0)
+  --limit, -l, -n <n>       Number of recipes to successfully evaluate (default: 5)
+  --concurrency, -c <n>     Number of parallel workers (default: 2)
+  --help, -h                Show this help message
 
 Environment variables:
-  SKIP=5 LIMIT=10 CONCURRENCY=2 npx tsx src/scripts/runDryRunEvaluation.ts
+  FILE=my_urls.txt SKIP=5 LIMIT=10 CONCURRENCY=2 npx tsx src/scripts/runDryRunEvaluation.ts
       `);
       process.exit(0);
     }
 
-    if (arg === '--skip' || arg === '-s') {
+    if (arg === '--file' || arg === '-f' || arg === '--urls' || arg === '-u') {
+      const val = args[++i];
+      if (val) file = val.trim();
+    } else if (arg.startsWith('--file=') || arg.startsWith('--urls=')) {
+      const val = arg.split('=')[1];
+      if (val) file = val.trim();
+    } else if (arg.startsWith('-f=') || arg.startsWith('-u=')) {
+      const val = arg.split('=')[1];
+      if (val) file = val.trim();
+    } else if (arg === '--skip' || arg === '-s') {
       const val = parseInt(args[++i], 10);
       if (!isNaN(val)) skip = Math.max(0, val);
     } else if (arg.startsWith('--skip=')) {
@@ -105,35 +117,96 @@ Environment variables:
   if (isNaN(targetRecipes) || targetRecipes < 1) targetRecipes = 5;
   if (isNaN(concurrency) || concurrency < 1) concurrency = 2;
 
-  return { skip, targetRecipes, concurrency };
+  return { skip, targetRecipes, concurrency, file };
+}
+
+async function loadUrlsFromFile(filePath: string): Promise<string[]> {
+  const resolvedPath = path.resolve(process.cwd(), filePath);
+  console.log(`Loading recipe URLs from file: ${resolvedPath}`);
+  
+  const content = await fs.readFile(resolvedPath, 'utf-8');
+  const urls: string[] = [];
+  const seen = new Set<string>();
+
+  const trimmed = content.trim();
+  if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      const rawList: any[] = Array.isArray(parsed)
+        ? parsed
+        : Array.isArray(parsed.urls)
+        ? parsed.urls
+        : Array.isArray(parsed.jobs)
+        ? parsed.jobs
+        : [];
+
+      for (const item of rawList) {
+        const u = typeof item === 'string' ? item.trim() : item?.url?.trim();
+        if (u && (u.startsWith('http://') || u.startsWith('https://')) && !seen.has(u)) {
+          seen.add(u);
+          urls.push(u);
+        }
+      }
+      return urls;
+    } catch {
+      // If JSON parsing fails, fall back to line-by-line parsing
+    }
+  }
+
+  // Line-by-line parsing for .txt or plaintext lists
+  const lines = content.split(/\r?\n/);
+  for (let line of lines) {
+    line = line.trim();
+    if (!line || line.startsWith('#') || line.startsWith('//')) {
+      continue;
+    }
+    if ((line.startsWith('http://') || line.startsWith('https://')) && !seen.has(line)) {
+      seen.add(line);
+      urls.push(line);
+    }
+  }
+
+  return urls;
 }
 
 async function run() {
-  const { skip, targetRecipes, concurrency } = parseCliArgs();
+  const { skip, targetRecipes, concurrency, file } = parseCliArgs();
 
   console.log('=== Starting Dry-Run Recipe & Ingredient Matching Evaluation ===\n');
 
-  const supabase = getClient();
-  const { data: jobs, error } = await supabase
-    .from('jobs')
-    .select('id, url, status, error, recipe')
-    .eq('status', 'completed')
-    .is('error', null)
-    .not('url', 'like', 'photo://%')
-    .order('created_at', { ascending: false });
+  let uniqueUrls: string[] = [];
 
-  if (error || !jobs) {
-    console.error('Failed to fetch completed jobs from Supabase:', error);
-    process.exit(1);
-  }
-
-  const uniqueUrls: string[] = [];
-  const seen = new Set<string>();
-  for (const j of jobs) {
-    if (j.url && !seen.has(j.url) && !j.url.includes('seed-')) {
-      seen.add(j.url);
-      uniqueUrls.push(j.url);
+  if (file) {
+    try {
+      uniqueUrls = await loadUrlsFromFile(file);
+      console.log(`Loaded ${uniqueUrls.length} unique URLs from ${file}.`);
+    } catch (err: any) {
+      console.error(`Failed to read URLs from file "${file}":`, err.message);
+      process.exit(1);
     }
+  } else {
+    const supabase = getClient();
+    const { data: jobs, error } = await supabase
+      .from('jobs')
+      .select('id, url, status, error, recipe')
+      .eq('status', 'completed')
+      .is('error', null)
+      .not('url', 'like', 'photo://%')
+      .order('created_at', { ascending: false });
+
+    if (error || !jobs) {
+      console.error('Failed to fetch completed jobs from Supabase:', error);
+      process.exit(1);
+    }
+
+    const seen = new Set<string>();
+    for (const j of jobs) {
+      if (j.url && !seen.has(j.url) && !j.url.includes('seed-')) {
+        seen.add(j.url);
+        uniqueUrls.push(j.url);
+      }
+    }
+    console.log(`Found ${uniqueUrls.length} real unique recipe URLs in Supabase Dev.`);
   }
 
   // Create unique timestamped run directory inside eval_results

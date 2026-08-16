@@ -502,11 +502,68 @@ function generateAliases(nameDe: string, nameEn: string, code: string, category?
       aliases.add('vollkornspaghetti');
       aliases.add('whole wheat pasta');
     }
-    if (lowerDe.includes('reis') && code.startsWith('C311')) {
+    if (lowerDe.includes('aprikose') && code.startsWith('F201')) {
+      aliases.add('aprikose');
+      aliases.add('aprikosen');
+      aliases.add('marille');
+      aliases.add('marillen');
+      aliases.add('apricot');
+      aliases.add('apricots');
+    }
+    if (lowerDe.includes('erbse') && code.startsWith('G760')) {
+      aliases.add('erbse');
+      aliases.add('erbsen');
+      aliases.add('grüne erbsen');
+      aliases.add('tiefkühlerbsen');
+      aliases.add('tk erbsen');
+      aliases.add('peas');
+      aliases.add('green peas');
+    }
+    if (lowerDe.includes('toastbrot') && code.startsWith('B314')) {
+      aliases.add('toast');
+      aliases.add('toastbrot');
+      aliases.add('buttertoast');
+      aliases.add('weizentoast');
+      aliases.add('toast bread');
+      aliases.add('white toast');
+    }
+    if ((lowerDe.includes('weizenbrötchen') || lowerDe.includes('brötchen') || lowerDe.includes('semmel')) && code.startsWith('B321')) {
+      aliases.add('brötchen');
+      aliases.add('semmel');
+      aliases.add('schrippe');
+      aliases.add('weizenbrötchen');
+      aliases.add('burgerbrötchen');
+      aliases.add('burger bun');
+      aliases.add('hamburgerbrötchen');
+    }
+    if (code === 'P741000' || (lowerDe.includes('rum') && code.startsWith('P741'))) {
+      aliases.add('rum');
+      aliases.add('brauner rum');
+      aliases.add('weißer rum');
+    }
+    if (code.startsWith('C311') || lowerDe.includes('reis')) {
       aliases.add('reis');
       aliases.add('basmatireis');
       aliases.add('jasminreis');
+      aliases.add('langkornreis');
+      aliases.add('parboiled reis');
       aliases.add('rice');
+      aliases.add('white rice');
+    }
+    if (code === 'S111000' || (lowerDe.includes('zucker') && code.startsWith('S1110'))) {
+      aliases.add('zucker');
+      aliases.add('haushaltszucker');
+      aliases.add('kristallzucker');
+      aliases.add('feinzucker');
+      aliases.add('sugar');
+      aliases.add('white sugar');
+      aliases.add('würfelzucker');
+    }
+    if (code === 'S112000' || lowerDe.includes('kandisfarin')) {
+      aliases.add('brauner zucker');
+      aliases.add('rohzucker');
+      aliases.add('rohrzucker');
+      aliases.add('brown sugar');
     }
     if (lowerDe.includes('backpulver') && code.startsWith('R4211')) {
       aliases.add('backpulver');
@@ -515,6 +572,7 @@ function generateAliases(nameDe: string, nameEn: string, code: string, category?
     if (lowerDe.includes('natron') && code.startsWith('R4212')) {
       aliases.add('natron');
       aliases.add('speisenatron');
+      aliases.add('speisesoda');
       aliases.add('baking soda');
     }
     if (lowerDe.includes('backhefe') || lowerDe.includes('trockenhefe')) {
@@ -528,14 +586,16 @@ function generateAliases(nameDe: string, nameEn: string, code: string, category?
       aliases.add('kakao');
       aliases.add('cocoa powder');
     }
-    if (lowerDe.includes('kristallzucker') || lowerDe.includes('haushaltszucker') || (lowerDe === 'zucker' && code.startsWith('S111'))) {
-      aliases.add('zucker');
-      aliases.add('haushaltszucker');
-      aliases.add('sugar');
-    }
-    if (lowerDe.includes('puderzucker') && code.startsWith('S112')) {
+    if (code === 'S111100' || (lowerDe.includes('puderzucker') && code.startsWith('S1111'))) {
       aliases.add('puderzucker');
       aliases.add('powdered sugar');
+      aliases.add('icing sugar');
+      aliases.add('staubzucker');
+    }
+    if (code === 'S114000' || lowerDe.includes('vanillezucker')) {
+      aliases.add('vanillezucker');
+      aliases.add('vanille zucker');
+      aliases.add('vanilla sugar');
     }
     if (lowerDe.includes('bienenhonig') || (lowerDe.includes('honig') && code.startsWith('S12'))) {
       aliases.add('honig');
@@ -580,18 +640,6 @@ function generateAliases(nameDe: string, nameEn: string, code: string, category?
       aliases.add('pepper');
       aliases.add('black pepper');
     }
-    if (lowerDe.includes('paprikapulver') || (lowerDe.includes('paprika') && code.startsWith('R211'))) {
-      aliases.add('paprikapulver');
-      aliases.add('paprikapulver edelsüß');
-      aliases.add('paprika edelsüß');
-      aliases.add('paprika powder');
-    }
-    if (lowerDe.includes('cayennepfeffer') || code === 'R213100' || (lowerDe.includes('chili') && lowerDe.includes('pulver'))) {
-      aliases.add('cayennepfeffer');
-      aliases.add('chilipulver');
-      aliases.add('cayenne pepper');
-      aliases.add('chili powder');
-    }
     if (lowerDe.includes('knoblauch') && lowerDe.includes('pulver')) {
       aliases.add('knoblauchpulver');
       aliases.add('knoblauch pulver');
@@ -602,30 +650,9 @@ function generateAliases(nameDe: string, nameEn: string, code: string, category?
       aliases.add('zwiebel pulver');
       aliases.add('onion powder');
     }
-    if (lowerDe.includes('zimt') && code.startsWith('R261')) {
-      aliases.add('zimt');
-      aliases.add('zimtpulver');
-      aliases.add('cinnamon');
-    }
-    if (lowerDe.includes('muskat') && code.startsWith('R255')) {
-      aliases.add('muskat');
-      aliases.add('muskatnuss');
-      aliases.add('nutmeg');
-    }
-    if (lowerDe.includes('oregano') && code.startsWith('R241')) {
-      aliases.add('oregano');
-    }
     if (lowerDe.includes('basilikum') && (code.startsWith('G061') || code.startsWith('R231'))) {
       aliases.add('basilikum');
       aliases.add('basil');
-    }
-    if (lowerDe.includes('rosmarin') && code.startsWith('R245')) {
-      aliases.add('rosmarin');
-      aliases.add('rosemary');
-    }
-    if (lowerDe.includes('thymian') && code.startsWith('R248')) {
-      aliases.add('thymian');
-      aliases.add('thyme');
     }
     if (lowerDe.includes('petersilie') && code.startsWith('G250')) {
       aliases.add('petersilie');
@@ -642,7 +669,7 @@ function generateAliases(nameDe: string, nameEn: string, code: string, category?
       aliases.add('natives olivenöl');
       aliases.add('olive oil');
     }
-    if (lowerDe.includes('rapsöl') && code.startsWith('Q230')) {
+    if (code === 'Q230000' || (lowerDe.includes('rapsöl') && code.startsWith('Q230'))) {
       aliases.add('rapsöl');
       aliases.add('pflanzenöl');
       aliases.add('speiseöl');
@@ -650,6 +677,7 @@ function generateAliases(nameDe: string, nameEn: string, code: string, category?
       aliases.add('canola oil');
       aliases.add('cooking oil');
       aliases.add('vegetable oil');
+      aliases.add('bratöl');
     }
     if (lowerDe.includes('sonnenblumenöl') && code.startsWith('Q280')) {
       aliases.add('sonnenblumenöl');
