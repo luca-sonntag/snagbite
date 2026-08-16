@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-16: Hardcodierte Stück-Gewichts-Heuristiken durch schema-autoritatives `gramsPerUnit` & BLS `standard_units` ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Hardcodierte TypeScript-Heuristik-Funktionen `getPieceWeightGrams`, `getSliceWeightGrams` und `getPackWeightGrams` mit über 150 Zeilen String-Checks in `backend/src/matching/ingredientMatcher.ts`.
+  - Pauschale 100g-Fallbacks für Einheiten wie `Stück` oder `Scheiben`, die bei Lebensmitteln wie Fischstäbchen (30g), Toastbrotscheiben (25g) oder Eigelb (20g) zu drastisch überhöhten Kalorien führten.
+* **Ersetzt durch:**
+  - **Schema-autoritatives `gramsPerUnit` im Gemini-Extraktionsschema (`backend/src/gemini.ts`):** Gemini liefert für jede Zutat das exakte, kontextbezogene Einzelgewicht der Einheit ($1\text{ Fischstäbchen} = 30\text{g}$, $1\text{ Scheibe Toast} = 25\text{g}$, $1\text{ Eigelb} = 20\text{g}$, $1\text{ Ei} = 55\text{g}$, $1\text{ Zwiebel} = 80\text{g}$, $1\text{ Dose} = 400\text{g}$).
+  - **Kuratierte BLS `standard_units` im Offline-Datensatz (`buildBLSIngredients.ts` & `canonicalIngredientsData.json`):** Schlagwort-unabhängige Stück- und Scheibengewichte direkt im kanonischen Datensatz als robuster Fallback.
+  - **Deterministische Multiplikation im Matcher:** `weightGrams = amount * gramsPerUnit`.
+* **Betroffene Dateien:** `backend/src/matching/ingredientMatcher.ts`, `backend/src/gemini.ts`, `backend/src/types.ts`, `frontend/src/types.ts`, `backend/src/scripts/buildBLSIngredients.ts`, `backend/src/data/canonicalIngredientsData.json`.
+
+---
+
 ### 2026-08-16: 87 MB Vektor-Embeddings (`canonicalEmbeddings.bin`) durch Universal BaseNameMap + MiniSearch BM25 + Gemini Batch-Reranker ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
