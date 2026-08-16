@@ -17,6 +17,7 @@ export interface Config {
   SUPABASE_PUBLISHABLE_KEY: string;
   SUPABASE_SECRET_KEY: string;
   GEMINI_MODEL: string;
+  GEMINI_RERANKER_MODEL: string;
   GEMINI_TEMPERATURE: number;
   RECIPE_LANGUAGE: string;
   PREFERRED_TEMPERATURE_UNIT: string;
@@ -87,7 +88,8 @@ export const config: Config = {
   SUPABASE_URL: getEnv('SUPABASE_URL'),
   SUPABASE_PUBLISHABLE_KEY: getEnv('SUPABASE_PUBLISHABLE_KEY'),
   SUPABASE_SECRET_KEY: getEnv('SUPABASE_SECRET_KEY'),
-  GEMINI_MODEL: getEnv('GEMINI_MODEL', 'gemini-1.5-flash'),
+  GEMINI_MODEL: getEnv('GEMINI_MODEL', 'gemini-3.1-flash-lite'),
+  GEMINI_RERANKER_MODEL: getEnv('GEMINI_RERANKER_MODEL', 'gemini-2.0-flash-lite'),
   GEMINI_TEMPERATURE: parseFloat(getEnv('GEMINI_TEMPERATURE', '0')),
   RECIPE_LANGUAGE: getEnv('RECIPE_LANGUAGE', 'German'),
   PREFERRED_TEMPERATURE_UNIT: getEnv('PREFERRED_TEMPERATURE_UNIT', 'Celsius'),

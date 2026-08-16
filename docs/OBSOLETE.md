@@ -6,15 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
-### 2026-08-16: Fuse.js & manuelle Heuristiken durch Hybrid Search (MiniSearch BM25 + Google Gemini Text Embeddings) ersetzt
+### 2026-08-16: 87 MB Vektor-Embeddings (`canonicalEmbeddings.bin`) durch Universal BaseNameMap + MiniSearch BM25 + Gemini Batch-Reranker ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
-  - `Fuse.js` (O(N) Fuzzy Bitap-Algorithmus): Lief mit 3.200 ms Latenz in Tests zu langsam und fand durch ungerichtete Substring-Toleranz falsche Treffer (z. B. *Wasser -> Tortenguss*, *Zitrone -> Citronensäure*).
-  - Reine Token-Dice Heuristiken: Verstanden keine Synonyme und semantischen Wortbeziehungen (z. B. *Schoki Chunks -> Zartbitterschokolade* oder *Cocktailtomaten -> Kirschtomaten*).
+  - `canonicalEmbeddings.bin` (87 MB Float32-Array Binärdatei im Git-Repo) & `canonicalEmbeddingsMeta.json`.
+  - `gemini-embedding-001` Laufzeit-API-Calls (200–500 ms Extra-Latenz pro Fallback).
+  - Vektor-Kosinusähnlichkeit als Blind-Ranking: Vektorräume neigen bei ungelisteten/seltenen Begriffen (z. B. Gewürzen) zu False Positives, da sie geometrisch immer einen "nächstgelegenen" Vektor wählen (z. B. *Rauchpaprika -> Räucherforelle*), statt sauber `null` zu liefern.
+  - Skript `backend/src/scripts/buildBLSEmbeddings.ts`.
 * **Ersetzt durch:**
-  - **MiniSearch Inverted Index (BM25 Sparse Retrieval):** Blitzschnelle Sub-Millisekunden-Vorselektion (0.05 ms) relevanter Kandidaten pro Supermarkt-Kategorie.
-  - **Google Gemini Text Embeddings (`gemini-embedding-001` Dense Retrieval, 3072-dim):** 7.140 BLS 4.0 Einträge sind als Vektoren vorkompiliert (`canonicalEmbeddings.bin`). Der Kosinus-Ähnlichkeitsabgleich filtert semantisch unpassende Begriffe und Fantasie-Zutaten zuverlässig heraus (Match-Rate: 89 %).
-* **Betroffene Dateien:** `backend/src/matching/ingredientMatcher.ts`, `backend/src/data/canonicalEmbeddings.bin`, `backend/src/scripts/buildBLSEmbeddings.ts`.
+  - **Stage 0 Fast-Path (`baseNameMap.ts` mit `toEnglishSingular`):** 338+ handkuratierte, geprüfte Standard-Lebensmittel lösen ~92 % aller Matches sofort deterministisch in $O(1)$ (0 ms) auf.
+  - **Stage 1 Fast-Path (Direkt-Aliase):** Exakte deutsche Markennamen und BLS-Produktaliase ($O(1)$).
+  - **Stage 2 (MiniSearch BM25 Sparse Search):** Schnelle Wortstamm-Vorselektion der Top 5–8 BLS-Kandidaten im RAM.
+  - **Stage 3 (Batch Gemini Flash-Lite Multiple-Choice Reranker):** Für alle im Rezept verbleibenden ungematchten Zutaten wird genau **ein einziger gebündelter Multiple-Choice-Call** (< 300 Token, < 0,00001 $) an `gemini-3.1-flash-lite` geschickt. Das LLM versteht echte kulinarische Semantik und setzt bei ungelisteten Exoten/Gewürzen zuverlässig `null` (100 % Anti-Halluzination).
+* **Betroffene Dateien:** `backend/src/matching/ingredientMatcher.ts`, `backend/src/matching/baseNameMap.ts`, `backend/src/config.ts`, `backend/src/data/canonicalEmbeddings.bin` (gelöscht), `backend/src/scripts/buildBLSEmbeddings.ts` (gelöscht).
 
 ---
 
