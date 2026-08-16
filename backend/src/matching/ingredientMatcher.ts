@@ -58,8 +58,6 @@ for (const item of CANONICAL_INGREDIENTS) {
     item.name_de,
     item.name_en,
     ...(item.aliases || []),
-    ...(item.search_terms_de || []),
-    ...(item.search_terms_en || []),
   ].filter(Boolean);
 
   const cleanAliases: string[] = [];
@@ -537,7 +535,7 @@ export async function rerankIngredientsBatchWithGemini(
         required: ['matches'],
       },
       temperature: 0,
-    },
+    } as any,
     systemInstruction: `You are an expert culinary nutrition scientist.
 Your task is to match recipe ingredients to their authoritative food database entries (BLS).
 For each ingredient in the input list:

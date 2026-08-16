@@ -155,8 +155,8 @@ describe('Ingredient Matcher & Normalizer (BLS 4.0 + Hybrid Search)', () => {
       assert.equal(items[2].canonicalId, undefined);
 
       assert.ok(recipe.nutritionalValues);
-      assert.ok(recipe.nutritionalValues.calories > 200);
-      assert.ok(recipe.nutritionalValues.protein > 15);
+      assert.ok((recipe.nutritionalValues.calories ?? 0) > 200);
+      assert.ok((recipe.nutritionalValues.protein ?? 0) > 15);
     });
   });
 });
