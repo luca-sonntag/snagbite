@@ -6,6 +6,7 @@ import { useI18n } from '../../context/I18nContext';
 import { getCategoryTheme } from '../../i18n';
 import { getParentIngredient } from '../../utils/ingredientTaxonomy';
 import IngredientNutritionSheet from './IngredientNutritionSheet';
+import PremiumCrownBadge from '../PremiumCrownBadge';
 
 interface RecipeIngredientsProps {
   recipe: Recipe;
@@ -59,7 +60,7 @@ export default function RecipeIngredients({
             <button
               type="button"
               onClick={onToggleIngredientNutrition}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all select-none border-none active:scale-95 ${
+              className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all select-none border-none active:scale-95 ${
                 showIngredientNutrition
                   ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
                   : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
@@ -72,6 +73,7 @@ export default function RecipeIngredients({
             >
               <Flame className="w-3.5 h-3.5" />
               <span>{t('recipe.showNutritionPerIngredient')}</span>
+              {!isPremium && <PremiumCrownBadge />}
             </button>
           )}
         </div>
