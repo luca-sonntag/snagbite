@@ -154,10 +154,10 @@ export default function IngredientNutritionSheet({
                   </div>
                 )}
 
-                {/* 3 Macro Cards (Clean Flat Style) */}
+                {/* 3 Macro Cards (Gradient Style matching Calories Banner) */}
                 <div className="grid grid-cols-3 gap-2.5">
                   {/* Protein */}
-                  <div className="bg-blue-500/[0.06] dark:bg-blue-400/[0.08] rounded-2xl p-3 flex flex-col justify-between border border-blue-500/10 text-left">
+                  <div className="bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent dark:from-blue-500/15 dark:to-transparent rounded-2xl p-3 flex flex-col justify-between text-left">
                     <div className="flex items-center gap-1.5 mb-1.5">
                       <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
                       <span className="text-[10.5px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300 truncate">
@@ -175,7 +175,7 @@ export default function IngredientNutritionSheet({
                   </div>
 
                   {/* Carbs */}
-                  <div className="bg-amber-500/[0.06] dark:bg-amber-400/[0.08] rounded-2xl p-3 flex flex-col justify-between border border-amber-500/10 text-left">
+                  <div className="bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent dark:from-amber-500/15 dark:to-transparent rounded-2xl p-3 flex flex-col justify-between text-left">
                     <div className="flex items-center gap-1.5 mb-1.5">
                       <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
                       <span className="text-[10.5px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300 truncate">
@@ -193,7 +193,7 @@ export default function IngredientNutritionSheet({
                   </div>
 
                   {/* Fat */}
-                  <div className="bg-rose-500/[0.06] dark:bg-rose-400/[0.08] rounded-2xl p-3 flex flex-col justify-between border border-rose-500/10 text-left">
+                  <div className="bg-gradient-to-br from-rose-500/10 via-rose-500/5 to-transparent dark:from-rose-500/15 dark:to-transparent rounded-2xl p-3 flex flex-col justify-between text-left">
                     <div className="flex items-center gap-1.5 mb-1.5">
                       <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
                       <span className="text-[10.5px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300 truncate">
