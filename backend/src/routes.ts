@@ -615,6 +615,41 @@ apiRouter.delete('/jobs/:id', async (req: Request, res: Response): Promise<void>
 });
 
 /**
+ * Endpoint to update a specific recipe in an existing job (e.g. adjust base servings and nutrition).
+ * PATCH /api/jobs/:id
+ * Body: { recipe: Recipe }
+ */
+apiRouter.patch('/jobs/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { recipe } = req.body;
+
+    if (!id) {
+      throw new AppError('MISSING_FIELD', { params: { field: 'id' } });
+    }
+    if (!recipe || typeof recipe !== 'object') {
+      throw new AppError('MISSING_FIELD', { params: { field: 'recipe' } });
+    }
+
+    const job = await getJob(id, req.userId!);
+    if (!job) {
+      throw new AppError('JOB_NOT_FOUND');
+    }
+
+    await updateJob(id, { recipe });
+
+    res.status(200).json({
+      success: true,
+      message: 'Recipe updated successfully.',
+      recipe,
+    });
+  } catch (error: any) {
+    if (!(error instanceof AppError)) console.error('Error updating recipe in job:', error);
+    sendAppError(res, error);
+  }
+});
+
+/**
  * Endpoint to retrieve the current user's recipe extraction rate limit status.
  * GET /api/extractions/limit
  */
