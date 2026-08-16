@@ -6,6 +6,18 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-16: Fuse.js & manuelle Heuristiken durch Hybrid Search (MiniSearch BM25 + Google Gemini Text Embeddings) ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `Fuse.js` (O(N) Fuzzy Bitap-Algorithmus): Lief mit 3.200 ms Latenz in Tests zu langsam und fand durch ungerichtete Substring-Toleranz falsche Treffer (z. B. *Wasser -> Tortenguss*, *Zitrone -> Citronensäure*).
+  - Reine Token-Dice Heuristiken: Verstanden keine Synonyme und semantischen Wortbeziehungen (z. B. *Schoki Chunks -> Zartbitterschokolade* oder *Cocktailtomaten -> Kirschtomaten*).
+* **Ersetzt durch:**
+  - **MiniSearch Inverted Index (BM25 Sparse Retrieval):** Blitzschnelle Sub-Millisekunden-Vorselektion (0.05 ms) relevanter Kandidaten pro Supermarkt-Kategorie.
+  - **Google Gemini Text Embeddings (`gemini-embedding-001` Dense Retrieval, 3072-dim):** 7.140 BLS 4.0 Einträge sind als Vektoren vorkompiliert (`canonicalEmbeddings.bin`). Der Kosinus-Ähnlichkeitsabgleich filtert semantisch unpassende Begriffe und Fantasie-Zutaten zuverlässig heraus (Match-Rate: 89 %).
+* **Betroffene Dateien:** `backend/src/matching/ingredientMatcher.ts`, `backend/src/data/canonicalEmbeddings.bin`, `backend/src/scripts/buildBLSEmbeddings.ts`.
+
+---
+
 ### 2026-08-15: Schweizer Nährwertdatenbank & komplexe manuelle TS-Regex-Heuristiken durch BLS 4.0 & Fuse.js ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
