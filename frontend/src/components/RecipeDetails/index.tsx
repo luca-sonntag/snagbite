@@ -23,6 +23,8 @@ import RecipeCopilot from './RecipeCopilot';
 import { useAuth } from '../../context/AuthContext';
 import PremiumModal from '../PremiumModal';
 import ShoppingConfirmSheet from './ShoppingConfirmSheet';
+import AdjustServingsSheet from './AdjustServingsSheet';
+import { apiUrl } from '../../api';
 import { stripInlineIngredientTags } from '../../utils/ingredientMatch';
 
 interface RecipeDetailsProps {
@@ -83,8 +85,9 @@ export default function RecipeDetails({
 
   // Local UI states
   const [isCopied, setIsCopied] = useState(false);
-  const { isPremium } = useAuth();
+  const { isPremium, getAccessToken } = useAuth();
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  const [isAdjustServingsOpen, setIsAdjustServingsOpen] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [isCookingMode, setIsCookingMode] = useState(false);
@@ -274,6 +277,99 @@ export default function RecipeDetails({
       localStorage.setItem('recipe_show_total_nutrition', JSON.stringify(isTotal));
     } catch (e) {
       console.error('Error saving showTotalNutrition to localStorage', e);
+    }
+  };
+
+  const handleSaveAdjustedServings = async (targetServings: number) => {
+    const originalBaseServings = Math.max(1, recipe.servings || 1);
+    if (targetServings === originalBaseServings) {
+      return;
+    }
+
+    const ratio = originalBaseServings / targetServings;
+
+    const scaleNutritionalValue = (val: any) => {
+      if (val === undefined || val === null || val === '') return val;
+      if (typeof val === 'number') {
+        return Math.round(val * ratio);
+      }
+      const match = String(val).trim().match(/^([\d.,]+)\s*([a-zA-Z%]*)$/);
+      if (!match) return val;
+      const num = parseFloat(match[1].replace(',', '.'));
+      if (isNaN(num)) return val;
+      const scaled = Math.round(num * ratio * 10) / 10;
+      const unit = match[2] || '';
+      return `${scaled}${unit}`;
+    };
+
+    const updatedNutritionalValues = recipe.nutritionalValues
+      ? {
+          ...recipe.nutritionalValues,
+          calories: scaleNutritionalValue(recipe.nutritionalValues.calories),
+          protein: scaleNutritionalValue(recipe.nutritionalValues.protein),
+          carbs: scaleNutritionalValue(recipe.nutritionalValues.carbs),
+          fat: scaleNutritionalValue(recipe.nutritionalValues.fat),
+        }
+      : recipe.nutritionalValues;
+
+    const updatedIngredients = Array.isArray(recipe.ingredients)
+      ? recipe.ingredients.map((group) => ({
+          ...group,
+          items: Array.isArray(group.items)
+            ? group.items.map((ing) => ({
+                ...ing,
+                calories:
+                  typeof ing.calories === 'number'
+                    ? Math.round(ing.calories * ratio)
+                    : ing.calories,
+                protein:
+                  typeof ing.protein === 'number'
+                    ? Math.round(ing.protein * ratio * 10) / 10
+                    : ing.protein,
+                carbs:
+                  typeof ing.carbs === 'number'
+                    ? Math.round(ing.carbs * ratio * 10) / 10
+                    : ing.carbs,
+                fat:
+                  typeof ing.fat === 'number'
+                    ? Math.round(ing.fat * ratio * 10) / 10
+                    : ing.fat,
+              }))
+            : group.items,
+        }))
+      : recipe.ingredients;
+
+    const updatedRecipe: Recipe = {
+      ...recipe,
+      servings: targetServings,
+      nutritionalValues: updatedNutritionalValues,
+      ingredients: updatedIngredients,
+    };
+
+    if (recipe.id) {
+      try {
+        const token = await getAccessToken();
+        const res = await fetch(apiUrl(`/api/jobs/${recipe.id}`), {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ recipe: updatedRecipe }),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          console.error('Failed to patch recipe servings on backend:', errData);
+        }
+      } catch (err) {
+        console.error('Error updating recipe servings on backend:', err);
+      }
+    }
+
+    setServings(targetServings);
+    if (onReplaceCurrent) {
+      onReplaceCurrent(updatedRecipe);
     }
   };
 
@@ -590,6 +686,7 @@ export default function RecipeDetails({
             servings={servings}
             onDecreaseServings={() => setServings(s => Math.max(1, s - 1))}
             onIncreaseServings={() => setServings(s => s + 1)}
+            onOpenAdjustServings={() => setIsAdjustServingsOpen(true)}
             nutritionalValues={hasNutritionInfo ? nutritionalValues : null}
             isAiEstimated={isAiEstimated}
             isVerified={isVerified}
@@ -721,6 +818,15 @@ export default function RecipeDetails({
         scaleFactor={scaleFactor}
         formatAmount={formatAmount}
         onConfirm={handleConfirmShoppingListSelection}
+      />
+
+      {/* Adjust Base Servings Drawer */}
+      <AdjustServingsSheet
+        isOpen={isAdjustServingsOpen}
+        onClose={() => setIsAdjustServingsOpen(false)}
+        baseServings={recipe.servings || 1}
+        nutritionalValues={recipe.nutritionalValues}
+        onSave={handleSaveAdjustedServings}
       />
     </article>
   );

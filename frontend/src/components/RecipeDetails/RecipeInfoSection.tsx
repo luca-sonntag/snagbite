@@ -1,4 +1,4 @@
-import { Clock, Utensils, Users } from 'lucide-react';
+import { Clock, Utensils, Users, ChevronRight } from 'lucide-react';
 import RecipeNutrition from './RecipeNutrition';
 import RecipeServingsStepper from './RecipeServingsStepper';
 import { useI18n } from '../../context/I18nContext';
@@ -10,6 +10,7 @@ interface RecipeInfoSectionProps {
   servings: number;
   onDecreaseServings: () => void;
   onIncreaseServings: () => void;
+  onOpenAdjustServings?: () => void;
   /** Nutrition block is omitted entirely when the recipe carries no values. */
   nutritionalValues: any | null;
   isAiEstimated: boolean;
@@ -30,6 +31,7 @@ export default function RecipeInfoSection({
   servings,
   onDecreaseServings,
   onIncreaseServings,
+  onOpenAdjustServings,
   nutritionalValues,
   isAiEstimated,
   isVerified,
@@ -89,7 +91,12 @@ export default function RecipeInfoSection({
         )}
 
         {/* Servings row */}
-        <div className="flex items-center justify-between gap-3 px-4.5 sm:px-5 py-3.5 border-t border-black/5 dark:border-white/5">
+        <div
+          onClick={onOpenAdjustServings}
+          className={`flex items-center justify-between gap-3 px-4.5 sm:px-5 py-3.5 border-t border-black/5 dark:border-white/5 transition-colors ${
+            onOpenAdjustServings ? 'cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02]' : ''
+          }`}
+        >
           <div className="flex items-center gap-3 min-w-0">
             <div className={iconBadge}>
               <Users className={iconClass} />
@@ -98,11 +105,16 @@ export default function RecipeInfoSection({
               {t('recipe.serves')}
             </span>
           </div>
-          <RecipeServingsStepper
-            servings={servings}
-            onDecreaseServings={onDecreaseServings}
-            onIncreaseServings={onIncreaseServings}
-          />
+          <div className="flex items-center gap-2">
+            <RecipeServingsStepper
+              servings={servings}
+              onDecreaseServings={onDecreaseServings}
+              onIncreaseServings={onIncreaseServings}
+            />
+            {onOpenAdjustServings && (
+              <ChevronRight className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 opacity-60 flex-shrink-0" />
+            )}
+          </div>
         </div>
       </div>
     </div>

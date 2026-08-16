@@ -26,7 +26,7 @@ export default function RecipeServingsStepper({
     'w-11 h-11 min-w-[44px] min-h-[44px] p-0 rounded-full text-gray-500 dark:text-gray-400 bg-black/[0.03] dark:bg-white/[0.05] hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-500/10 active:scale-90 transition-all';
 
   return (
-    <div className="flex items-center gap-1.5 flex-shrink-0">
+    <div className="flex items-center gap-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
       <Button
         isIconOnly
         size="sm"
