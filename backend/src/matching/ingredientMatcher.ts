@@ -366,7 +366,7 @@ export function findFastPathMatch(
 }
 
 /**
- * Stage 2: MiniSearch BM25 candidate retrieval with domain guards.
+ * Stage 2: MiniSearch BM25 candidate retrieval with lightweight domain pre-filters.
  */
 export function getMiniSearchCandidates(
   name: string,
@@ -618,7 +618,7 @@ export async function findCanonicalIngredient(
   if (fast) return fast;
 
   // 2. MiniSearch BM25 candidates
-  const candidates = getMiniSearchCandidates(name, baseName, category, synonyms, searchQueries, 6);
+  const candidates = getMiniSearchCandidates(name, baseName, category, synonyms, searchQueries, 10);
   if (candidates.length === 0) return null;
 
   // 3. Batch rerank for single item
@@ -677,25 +677,18 @@ export function calculateWeightGrams(amount: number, unit: string, item: Canonic
 }
 
 /**
- * Matches and enriches a single ingredient.
+ * Helper to apply matched canonical nutritional data to an ingredient and compute its macro values.
  */
-export async function matchAndEnrichIngredient(ingredient: Ingredient, groupCategory?: string): Promise<{
+export function applyCanonicalMatchToIngredient(
+  ingredient: Ingredient,
+  match: CanonicalIngredient | null
+): {
   matched: boolean;
   calories: number;
   protein: number;
   carbs: number;
   fat: number;
-}> {
-  const effectiveCategory = ingredient.category || groupCategory;
-  const match = await findCanonicalIngredient(
-    ingredient.name,
-    ingredient.baseName,
-    effectiveCategory,
-    ingredient.synonyms,
-    ingredient.searchQueries,
-    ingredient.parentIngredient
-  );
-
+} {
   if (!match) {
     ingredient.isVerified = false;
     return {
@@ -728,6 +721,29 @@ export async function matchAndEnrichIngredient(ingredient: Ingredient, groupCate
   }
 
   return { matched: true, calories: cal, protein: prot, carbs: carb, fat };
+}
+
+/**
+ * Matches and enriches a single ingredient.
+ */
+export async function matchAndEnrichIngredient(ingredient: Ingredient, groupCategory?: string): Promise<{
+  matched: boolean;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}> {
+  const effectiveCategory = ingredient.category || groupCategory;
+  const match = await findCanonicalIngredient(
+    ingredient.name,
+    ingredient.baseName,
+    effectiveCategory,
+    ingredient.synonyms,
+    ingredient.searchQueries,
+    ingredient.parentIngredient
+  );
+
+  return applyCanonicalMatchToIngredient(ingredient, match);
 }
 
 /**
@@ -776,7 +792,7 @@ export async function enrichRecipeWithCanonicalIngredients(recipe: Recipe): Prom
         effectiveCategory,
         ing.synonyms,
         ing.searchQueries,
-        /* limit: */ 10
+        10
       );
       if (candidates.length > 0) {
         unmatchedForBatch.push({
@@ -807,40 +823,12 @@ export async function enrichRecipeWithCanonicalIngredients(recipe: Recipe): Prom
   let totalFat = 0;
 
   for (const { ing, id } of flatItems) {
-    const match = matchedCanonicalMap.get(id);
-    if (!match) {
-      ing.isVerified = false;
-      totalCalories += ing.calories ?? 0;
-      totalProtein += ing.protein ?? 0;
-      totalCarbs += ing.carbs ?? 0;
-      totalFat += ing.fat ?? 0;
-      continue;
-    }
-
-    const weightGrams = calculateWeightGrams(ing.amount, ing.unit, match);
-    const factor = weightGrams / 100;
-
-    const cal = Math.round(match.nutrients_per_100g.calories * factor);
-    const prot = Math.round(match.nutrients_per_100g.protein * factor * 10) / 10;
-    const carb = Math.round(match.nutrients_per_100g.carbs * factor * 10) / 10;
-    const fat = Math.round(match.nutrients_per_100g.fat * factor * 10) / 10;
-
-    ing.canonicalId = match.id;
-    ing.matchedName = match.name_de;
-    ing.isVerified = true;
-    ing.calories = cal;
-    ing.protein = prot;
-    ing.carbs = carb;
-    ing.fat = fat;
-
-    if (!ing.category || ing.category === 'OTHER') {
-      ing.category = match.category;
-    }
-
-    totalCalories += cal;
-    totalProtein += prot;
-    totalCarbs += carb;
-    totalFat += fat;
+    const match = matchedCanonicalMap.get(id) || null;
+    const res = applyCanonicalMatchToIngredient(ing, match);
+    totalCalories += res.calories;
+    totalProtein += res.protein;
+    totalCarbs += res.carbs;
+    totalFat += res.fat;
   }
 
   const servings = recipe.servings > 0 ? recipe.servings : 1;
