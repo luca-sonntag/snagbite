@@ -45,11 +45,17 @@ export default function ActiveExtractions() {
   if (jobs.length === 0) return null;
 
   const anyRunning = jobs.some(j => j.status !== 'completed' && j.status !== 'failed');
+  const onlyFailed = jobs.every(j => j.status === 'failed');
+  const sectionTitle = anyRunning
+    ? t('activeExtractions.title')
+    : onlyFailed
+      ? t('activeExtractions.titleFailed')
+      : t('activeExtractions.titleDone');
 
   return (
     <div className="flex flex-col gap-2.5">
       <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-1">
-        {anyRunning ? t('activeExtractions.title') : t('activeExtractions.titleDone')}
+        {sectionTitle}
       </span>
 
       {jobs.map(job => {
@@ -71,11 +77,11 @@ export default function ActiveExtractions() {
           <div
             key={job.id}
             onClick={isDone ? open : undefined}
-            className={`relative flex items-center gap-3 px-4 py-3 rounded-2xl overflow-hidden transition-all border-none ${
+            className={`relative flex items-center gap-3.5 px-4 py-3.5 rounded-3xl overflow-hidden transition-all border-none ${
               isDone
                 ? 'cursor-pointer active:scale-[0.99] bg-emerald-500/10 dark:bg-emerald-500/15'
                 : isFailed
-                  ? 'bg-rose-500/10 dark:bg-rose-500/15'
+                  ? 'bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)]'
                   : 'bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)]'
             }`}
           >
@@ -87,11 +93,11 @@ export default function ActiveExtractions() {
               />
             )}
 
-            <div className={`relative shrink-0 w-9 h-9 rounded-xl flex items-center justify-center ${
+            <div className={`relative shrink-0 w-9 h-9 rounded-2xl flex items-center justify-center ${
               isDone
                 ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
                 : isFailed
-                  ? 'bg-rose-500/15 text-rose-500 dark:text-rose-400'
+                  ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
                   : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
             }`}>
               {isDone ? (
@@ -104,13 +110,13 @@ export default function ActiveExtractions() {
             </div>
 
             <div className="relative min-w-0 flex-1">
-              <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+              <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
                 {isDone
                   ? (job.title || t('activeExtractions.ready'))
                   : displayLabel}
               </p>
-              <p className={`text-[11px] leading-snug ${
-                isFailed ? 'text-rose-600 dark:text-rose-400 whitespace-normal break-words font-medium' : 'text-gray-500 dark:text-gray-400 truncate'
+              <p className={`text-xs leading-relaxed ${
+                isFailed ? 'text-gray-500 dark:text-gray-400 whitespace-normal break-words font-normal mt-0.5' : 'text-gray-500 dark:text-gray-400 truncate font-medium'
               }`}>
                 {isDone
                   ? t('activeExtractions.tapToOpen')
@@ -126,10 +132,10 @@ export default function ActiveExtractions() {
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); dismissJob(job.id); }}
-                className="relative shrink-0 w-8 h-8 rounded-full bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-300 flex items-center justify-center transition-colors cursor-pointer outline-none border-none"
+                className="relative shrink-0 w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex items-center justify-center transition-colors cursor-pointer outline-none border-none self-start mt-0.5"
                 aria-label={t('activeExtractions.dismiss')}
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
             ) : (
               <ChefHat className="relative shrink-0 w-4 h-4 text-emerald-500/50" />
