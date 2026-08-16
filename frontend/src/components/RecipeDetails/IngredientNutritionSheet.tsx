@@ -91,28 +91,28 @@ export default function IngredientNutritionSheet({
                 {/* Calories Hero Banner */}
                 <div className="bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent dark:from-emerald-500/15 dark:to-transparent rounded-3xl p-4 sm:p-5 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 shrink-0">
-                      <Flame className="w-6 h-6" />
+                    <div className="w-11 h-11 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 shrink-0">
+                      <Flame className="w-5.5 h-5.5" />
                     </div>
                     <div>
-                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
                         {t('recipe.calories')}
                       </span>
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2.5xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight tabular-nums">
                           {scaledCalories}
                         </span>
-                        <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">kcal</span>
+                        <span className="text-xs font-normal text-gray-500 dark:text-gray-400">kcal</span>
                       </div>
                     </div>
                   </div>
 
                   {per100gKcal !== null && (
                     <div className="text-right">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 block">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 block">
                         {t('recipe.per100g')}
                       </span>
-                      <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
+                      <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 tabular-nums">
                         ≈ {per100gKcal} kcal
                       </span>
                     </div>
@@ -121,14 +121,14 @@ export default function IngredientNutritionSheet({
 
                 {/* 3-Color Macro Progress Bar */}
                 {totalMacroKcal > 0 && (
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between text-xs font-bold text-gray-600 dark:text-gray-400">
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center justify-between text-xs font-medium text-gray-500 dark:text-gray-400">
                       <span>{t('recipe.ingredientNutritionDistribution')}</span>
-                      <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                      <span className="text-[11px] font-normal text-gray-400 dark:text-gray-500 tabular-nums">
                         {proteinPct}% E · {carbsPct}% K · {fatPct}% F
                       </span>
                     </div>
-                    <div className="h-3 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden flex shadow-inner">
+                    <div className="h-2.5 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden flex shadow-inner">
                       {proteinPct > 0 && (
                         <div
                           style={{ width: `${proteinPct}%` }}
@@ -158,17 +158,17 @@ export default function IngredientNutritionSheet({
                 <div className="grid grid-cols-3 gap-2.5">
                   {/* Protein */}
                   <div className="bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent dark:from-blue-500/15 dark:to-transparent rounded-2xl p-3 flex flex-col justify-between text-left">
-                    <div className="flex items-center gap-1.5 mb-1.5">
-                      <span className="w-2 h-2 rounded-[3px] bg-blue-500 shrink-0" />
-                      <span className="text-[10.5px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300 truncate">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="w-1.5 h-1.5 rounded-[2.5px] bg-blue-500 shrink-0" />
+                      <span className="text-[10.5px] font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-300 truncate">
                         {t('recipe.ingredientNutritionProtein')}
                       </span>
                     </div>
                     <div>
-                      <span className="text-xl font-black text-gray-900 dark:text-white tracking-tight block">
-                        {scaledProtein} <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">g</span>
+                      <span className="text-lg font-bold text-gray-900 dark:text-white tracking-tight block tabular-nums">
+                        {scaledProtein} <span className="text-xs font-normal text-gray-500 dark:text-gray-400">g</span>
                       </span>
-                      <span className="text-[10px] text-gray-500 dark:text-gray-400 font-semibold">
+                      <span className="text-[10.5px] text-gray-400 dark:text-gray-500 font-normal">
                         {proteinPct}%
                       </span>
                     </div>
@@ -176,17 +176,17 @@ export default function IngredientNutritionSheet({
 
                   {/* Carbs */}
                   <div className="bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent dark:from-amber-500/15 dark:to-transparent rounded-2xl p-3 flex flex-col justify-between text-left">
-                    <div className="flex items-center gap-1.5 mb-1.5">
-                      <span className="w-2 h-2 rounded-[3px] bg-amber-500 shrink-0" />
-                      <span className="text-[10.5px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300 truncate">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="w-1.5 h-1.5 rounded-[2.5px] bg-amber-500 shrink-0" />
+                      <span className="text-[10.5px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300 truncate">
                         {t('recipe.ingredientNutritionCarbs')}
                       </span>
                     </div>
                     <div>
-                      <span className="text-xl font-black text-gray-900 dark:text-white tracking-tight block">
-                        {scaledCarbs} <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">g</span>
+                      <span className="text-lg font-bold text-gray-900 dark:text-white tracking-tight block tabular-nums">
+                        {scaledCarbs} <span className="text-xs font-normal text-gray-500 dark:text-gray-400">g</span>
                       </span>
-                      <span className="text-[10px] text-gray-500 dark:text-gray-400 font-semibold">
+                      <span className="text-[10.5px] text-gray-400 dark:text-gray-500 font-normal">
                         {carbsPct}%
                       </span>
                     </div>
@@ -194,17 +194,17 @@ export default function IngredientNutritionSheet({
 
                   {/* Fat */}
                   <div className="bg-gradient-to-br from-rose-500/10 via-rose-500/5 to-transparent dark:from-rose-500/15 dark:to-transparent rounded-2xl p-3 flex flex-col justify-between text-left">
-                    <div className="flex items-center gap-1.5 mb-1.5">
-                      <span className="w-2 h-2 rounded-[3px] bg-rose-500 shrink-0" />
-                      <span className="text-[10.5px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300 truncate">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="w-1.5 h-1.5 rounded-[2.5px] bg-rose-500 shrink-0" />
+                      <span className="text-[10.5px] font-semibold uppercase tracking-wider text-rose-700 dark:text-rose-300 truncate">
                         {t('recipe.ingredientNutritionFat')}
                       </span>
                     </div>
                     <div>
-                      <span className="text-xl font-black text-gray-900 dark:text-white tracking-tight block">
-                        {scaledFat} <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">g</span>
+                      <span className="text-lg font-bold text-gray-900 dark:text-white tracking-tight block tabular-nums">
+                        {scaledFat} <span className="text-xs font-normal text-gray-500 dark:text-gray-400">g</span>
                       </span>
-                      <span className="text-[10px] text-gray-500 dark:text-gray-400 font-semibold">
+                      <span className="text-[10.5px] text-gray-400 dark:text-gray-500 font-normal">
                         {fatPct}%
                       </span>
                     </div>
@@ -216,11 +216,11 @@ export default function IngredientNutritionSheet({
                   <div className="bg-emerald-500/[0.07] dark:bg-emerald-400/[0.08] text-emerald-800 dark:text-emerald-300 rounded-2xl p-3 flex items-center gap-2.5 text-xs font-medium border border-emerald-500/10">
                     <ShieldCheck className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <span className="font-bold block text-emerald-900 dark:text-emerald-200">
+                      <span className="font-semibold block text-emerald-900 dark:text-emerald-200">
                         {t('recipe.ingredientNutritionVerifiedBadge')}
                       </span>
                       {ingredient.matchedName && (
-                        <span className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80 truncate block">
+                        <span className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80 truncate block font-normal">
                           BLS: {ingredient.matchedName}
                         </span>
                       )}
@@ -238,7 +238,7 @@ export default function IngredientNutritionSheet({
                 {/* Close CTA Button */}
                 <Button
                   onPress={onClose}
-                  className="w-full py-3.5 mt-1 rounded-2xl font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border-none active:scale-[0.98] transition-all h-12 text-sm"
+                  className="w-full py-3.5 mt-1 rounded-2xl font-semibold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border-none active:scale-[0.98] transition-all h-12 text-sm"
                 >
                   {t('recipe.ingredientNutritionClose')}
                 </Button>
