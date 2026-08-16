@@ -18,8 +18,6 @@
 
 @import "tailwindcss";
 
-@variant dark (&:where(.dark, .dark *));
-
 @theme {
   /* Warm neutral grays matching the Claude app dark palette */
   --color-gray-950: #1a1917;
@@ -32,6 +30,8 @@
 }
 
 @import "@heroui/styles";
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   font-family: 'Outfit', system-ui, -apple-system, sans-serif;
