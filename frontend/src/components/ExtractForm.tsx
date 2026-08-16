@@ -211,19 +211,19 @@ export default function ExtractForm({
 
   const DEMO_RECIPES = [
     {
-      name: '20-Minuten Chicken Alfredo',
+      name: 'Pesto-Käse-Twists',
       time: '20 Min.',
-      imageUrl: '/demo/alfredo.jpg',
+      imageUrl: '/demo/pesto-twists.jpg',
       platform: 'Instagram Reel',
       url: 'https://www.instagram.com/p/DYixugyxvSe/',
       icon: <InstagramIcon className="w-3.5 h-3.5" />
     },
     {
-      name: 'Viral Brioche Rolls',
-      time: '35 Min.',
-      imageUrl: '/demo/rolls.jpg',
+      name: 'Flammkuchen aus dem Mixer',
+      time: '25 Min.',
+      imageUrl: '/demo/flammkuchen.jpg',
       platform: 'TikTok Video',
-      url: 'https://www.tiktok.com/@on_todays_bake/video/7618942237535194390',
+      url: 'https://vm.tiktok.com/ZN8JffHcL/',
       icon: <TikTokIcon className="w-3.5 h-3.5" />
     }
   ];
@@ -510,26 +510,15 @@ export default function ExtractForm({
                 />
               </div>
             ) : limitStatus && limitStatus.limit >= 0 ? (
-              <div className="flex items-center justify-between px-3 py-2 rounded-2xl bg-gray-50 dark:bg-gray-800/50 text-xs">
-                <span className="font-medium text-gray-600 dark:text-gray-300">
-                  {t('form.remainingExtractions', {
-                    remaining: limitStatus.remaining,
-                    limit: limitStatus.limit,
-                    days: limitStatus.windowDays === 1
-                      ? t('form.remainingExtractionsToday')
-                      : t('form.remainingExtractionsDays', { days: limitStatus.windowDays })
-                  })}
-                </span>
-                {!isRealPremium && (
-                  <button
-                    type="button"
-                    onClick={() => setIsPremiumModalOpen(true)}
-                    className="text-amber-600 dark:text-amber-400 font-bold hover:underline cursor-pointer border-none bg-transparent"
-                  >
-                    👑 {t('premium.hint.upgrade') || 'Unbegrenzt'}
-                  </button>
-                )}
-              </div>
+              <p className="text-center text-xs text-gray-500 dark:text-gray-400 font-medium -mt-1">
+                {t('form.remainingExtractions', {
+                  remaining: limitStatus.remaining,
+                  limit: limitStatus.limit,
+                  days: limitStatus.windowDays === 1
+                    ? t('form.remainingExtractionsToday')
+                    : t('form.remainingExtractionsDays', { days: limitStatus.windowDays })
+                })}
+              </p>
             ) : null}
 
             {/* Premium Modal */}
@@ -537,7 +526,7 @@ export default function ExtractForm({
 
             {/* Supported Platforms (Subtle Monochrome) */}
             {mode === 'link' ? (
-              <div className="flex items-center justify-center gap-2 pt-1">
+              <div className="flex items-center justify-center gap-2 pt-0.5">
                 <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                   {t('form.platformsTitle')}
                 </span>
@@ -565,14 +554,9 @@ export default function ExtractForm({
           {mode === 'link' && (<>
             {/* Demo Recipes Section */}
             <div className="flex flex-col gap-2.5">
-              <div className="flex items-center justify-between px-1">
-                <span className="text-xs font-bold text-gray-900 dark:text-white">
-                  {t('form.demoTitle')}
-                </span>
-                <span className="text-[11px] text-gray-400 dark:text-gray-500">
-                  {t('form.demoSubtitle')}
-                </span>
-              </div>
+              <h3 className="text-xs font-bold text-gray-900 dark:text-white px-1">
+                {t('form.demoTitle')}
+              </h3>
               <div className="grid grid-cols-2 gap-3">
                 {DEMO_RECIPES.map((demo, idx) => (
                   <div
