@@ -3,7 +3,8 @@ import path from 'path';
 import { getClient } from '../db.js';
 import { getScraperForUrl } from '../scrapers/index.js';
 import { extractRecipe } from '../gemini.js';
-import { enrichRecipeWithCanonicalIngredients } from '../matching/ingredientMatcher.js';
+import { enrichRecipeWithCanonicalIngredients, toEnglishSingular } from '../matching/ingredientMatcher.js';
+import { BASE_NAME_TO_CANONICAL_ID } from '../matching/baseNameMap.js';
 import { config } from '../config.js';
 import type { Recipe } from '../types.js';
 
@@ -15,6 +16,7 @@ interface EvalIngredientReport {
   canonicalId?: string | null;
   matchedName?: string | null;
   isVerified: boolean;
+  isBaseNameMapMatch?: boolean;
   calories?: number | null;
   protein?: number | null;
   carbs?: number | null;
@@ -41,6 +43,8 @@ interface EvalRecipeReport {
   totalIngredients: number;
   verifiedCount: number;
   matchRatePercent: number;
+  baseNameMapMatchCount: number;
+  baseNameMapMatchRatePercent: number;
   geminiUsage?: EvalGeminiUsageReport;
   ingredients: EvalIngredientReport[];
 }
@@ -234,6 +238,7 @@ async function run() {
   const allReports: EvalRecipeReport[] = [];
   let globalTotalIngredients = 0;
   let globalVerifiedIngredients = 0;
+  let globalBaseNameMapMatches = 0;
   let totalPromptTokens = 0;
   let totalCandidateTokens = 0;
   let totalGeminiTokens = 0;
@@ -243,7 +248,7 @@ async function run() {
   let totalGeminiDurationMs = 0;
 
   const unverifiedList: { recipeTitle: string; rawName: string; baseName?: string; unit: string }[] = [];
-  const verifiedList: { recipeTitle: string; rawName: string; baseName?: string; matchedName?: string | null; canonicalId?: string | null }[] = [];
+  const verifiedList: { recipeTitle: string; rawName: string; baseName?: string; matchedName?: string | null; canonicalId?: string | null; isBaseNameMapMatch?: boolean }[] = [];
 
   const tempBaseDir = path.join(baseOutputDir, '.eval_temp');
   await fs.mkdir(tempBaseDir, { recursive: true });
@@ -284,18 +289,36 @@ async function run() {
 
         const flatIngredients: EvalIngredientReport[] = [];
         let verifiedCount = 0;
+        let baseNameMapMatchCount = 0;
 
         for (const group of recipe.ingredients || []) {
           for (const ing of group.items || []) {
             const isVer = !!ing.isVerified;
+            let isBaseNameMapMatch = false;
+
+            if (isVer && ing.canonicalId && ing.baseName) {
+              const normBase = ing.baseName.toLowerCase().trim();
+              const singular = toEnglishSingular(normBase);
+              const mappedCode = BASE_NAME_TO_CANONICAL_ID[normBase] || BASE_NAME_TO_CANONICAL_ID[singular];
+              const cleanCanonicalId = ing.canonicalId.replace(/^bls_/i, '').toUpperCase();
+              if (mappedCode && cleanCanonicalId === mappedCode.toUpperCase()) {
+                isBaseNameMapMatch = true;
+              }
+            }
+
             if (isVer) {
               verifiedCount++;
+              if (isBaseNameMapMatch) {
+                baseNameMapMatchCount++;
+                globalBaseNameMapMatches++;
+              }
               verifiedList.push({
                 recipeTitle: recipe.title,
                 rawName: ing.name,
                 baseName: ing.baseName,
                 matchedName: ing.matchedName,
                 canonicalId: ing.canonicalId,
+                isBaseNameMapMatch,
               });
             } else {
               unverifiedList.push({
@@ -314,6 +337,7 @@ async function run() {
               canonicalId: ing.canonicalId,
               matchedName: ing.matchedName,
               isVerified: isVer,
+              isBaseNameMapMatch,
               calories: ing.calories,
               protein: ing.protein,
               carbs: ing.carbs,
@@ -324,6 +348,7 @@ async function run() {
 
         const totalIngs = flatIngredients.length;
         const matchRate = totalIngs > 0 ? Math.round((verifiedCount / totalIngs) * 100) : 0;
+        const baseNameMapRate = totalIngs > 0 ? Math.round((baseNameMapMatchCount / totalIngs) * 100) : 0;
         globalTotalIngredients += totalIngs;
         globalVerifiedIngredients += verifiedCount;
 
@@ -366,6 +391,8 @@ async function run() {
           totalIngredients: totalIngs,
           verifiedCount,
           matchRatePercent: matchRate,
+          baseNameMapMatchCount,
+          baseNameMapMatchRatePercent: baseNameMapRate,
           geminiUsage: geminiUsageReport,
           ingredients: flatIngredients,
         };
@@ -381,7 +408,7 @@ async function run() {
         const jsonPath = path.join(runOutputDir, jsonFileName);
         await fs.writeFile(jsonPath, JSON.stringify({ url, recipe, report }, null, 2), 'utf-8');
 
-        console.log(`  [Worker ${workerId}] -> Matched: ${verifiedCount}/${totalIngs} ingredients (${matchRate}%) for "${recipe.title}"`);
+        console.log(`  [Worker ${workerId}] -> Matched: ${verifiedCount}/${totalIngs} ingredients (${matchRate}%) [BaseNameMap: ${baseNameMapMatchCount}/${totalIngs} (${baseNameMapRate}%)] for "${recipe.title}"`);
         console.log(`  [Worker ${workerId}] -> Nutrition: ${recipe.nutritionalValues?.calories || 0} kcal | P: ${recipe.nutritionalValues?.protein || 0}g | C: ${recipe.nutritionalValues?.carbs || 0}g | F: ${recipe.nutritionalValues?.fat || 0}g`);
         console.log(`  [Worker ${workerId}] -> Gemini: ${tokens.toLocaleString()} tokens (in ${promptTokens.toLocaleString()} / out ${candidateTokens.toLocaleString()}) | Cost: ${costFormatted} | ${(duration / 1000).toFixed(1)}s`);
         console.log(`  [Worker ${workerId}] -> Saved JSON: ${jsonFileName}\n`);
@@ -433,6 +460,9 @@ async function run() {
     globalTotalIngredients,
     globalVerifiedIngredients,
     globalMatchRatePercent: globalTotalIngredients > 0 ? Math.round((globalVerifiedIngredients / globalTotalIngredients) * 100) : 0,
+    globalBaseNameMapMatches,
+    globalBaseNameMapMatchRatePercent: globalTotalIngredients > 0 ? Math.round((globalBaseNameMapMatches / globalTotalIngredients) * 100) : 0,
+    baseNameMapCoveragePercent: globalVerifiedIngredients > 0 ? Math.round((globalBaseNameMapMatches / globalVerifiedIngredients) * 100) : 0,
     geminiCosts,
     unverifiedIngredients: unverifiedList,
     verifiedIngredients: verifiedList,
@@ -452,6 +482,8 @@ async function run() {
   console.log(`Total Recipes Processed: ${allReports.length}`);
   console.log(`Total Ingredients: ${globalTotalIngredients}`);
   console.log(`Verified Ingredients: ${globalVerifiedIngredients} (${summary.globalMatchRatePercent}%)`);
+  console.log(`└─ Matched via BaseNameMap: ${globalBaseNameMapMatches} (${summary.globalBaseNameMapMatchRatePercent}% of total, ${summary.baseNameMapCoveragePercent}% of all matched)`);
+  console.log(`└─ Matched via Aliases/Hybrid: ${globalVerifiedIngredients - globalBaseNameMapMatches} (${globalTotalIngredients > 0 ? Math.round(((globalVerifiedIngredients - globalBaseNameMapMatches) / globalTotalIngredients) * 100) : 0}%)`);
   console.log(`Unverified Ingredients: ${unverifiedList.length}`);
   console.log('\n=== GEMINI COST & TOKEN SUMMARY ===');
   console.log(`Model: ${geminiCosts.model}`);
