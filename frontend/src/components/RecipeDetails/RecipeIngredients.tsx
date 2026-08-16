@@ -141,18 +141,13 @@ export default function RecipeIngredients({
                             e.stopPropagation();
                             setSelectedNutritionIngredient(ing);
                           }}
-                          className={`px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5 text-xs font-semibold shrink-0 border-none transition-all active:scale-95 ${
+                          className={`px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 text-xs font-semibold shrink-0 border-none transition-all active:scale-95 ${
                             ing.isVerified
                               ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
                               : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
                           }`}
                           title={ing.matchedName ? t('recipe.verifiedIngredientTooltip', { name: ing.matchedName }) : undefined}
                         >
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                              ing.isVerified ? 'bg-emerald-500' : 'bg-gray-400 dark:bg-gray-500'
-                            }`}
-                          />
                           <span className="tabular-nums">{Math.round(ing.calories * scaleFactor)} kcal</span>
                           <ChevronRight className="w-3 h-3 opacity-40 -ml-0.5" />
                         </button>
