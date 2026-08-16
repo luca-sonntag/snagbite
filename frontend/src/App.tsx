@@ -738,13 +738,18 @@ export default function App() {
 
         {activeView === 'extract' && !isPending && !recipe && (
           <header className="w-full bg-gray-50/85 dark:bg-gray-950/85 backdrop-blur-md transition-colors duration-300">
-            <div className="relative w-full max-w-md mx-auto px-4 py-3 flex justify-center items-center">
-              <div className="flex items-center gap-2">
+            <div className="relative w-full max-w-md mx-auto px-4 py-3 flex justify-between items-center">
+              <div className="flex items-center gap-2.5">
                 <div className="flex-shrink-0">
                   <img src="/logo-login.png" alt="App Logo" className="w-7 h-7 object-contain" />
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white m-0 leading-none">{t('app.title')}</h1>
+                  <h1 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white m-0 leading-none">
+                    {t('form.headerTitle') || t('app.title')}
+                  </h1>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 leading-none">
+                    {t('form.headerSubtitle')}
+                  </p>
                 </div>
               </div>
             </div>
