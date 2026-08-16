@@ -58,7 +58,7 @@ export default function RecipeNutrition({
     <>
       <div
         onClick={() => !isPremium && setIsPremiumModalOpen(true)}
-        className={`relative p-3.5 sm:p-4 flex flex-col gap-2.5 transition-all duration-300 ${!isPremium ? 'cursor-pointer hover:bg-black/5 dark:hover:bg-white/5' : ''
+        className={`relative p-4 sm:p-5 flex flex-col gap-3.5 transition-all duration-300 ${!isPremium ? 'cursor-pointer hover:bg-black/5 dark:hover:bg-white/5' : ''
           }`}
       >
         {/* Top Header Row: NÄHRWERTE (PRO PORTION) label + AI badge */}

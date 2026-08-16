@@ -49,7 +49,7 @@ export default function RecipeInfoSection({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Prep / cook times + nutrition + servings grouped into one cohesive overview card. */}
+      {/* Card 1: Prep / cook times + servings grouped into timing overview card */}
       <div className="glass-panel rounded-2xl overflow-hidden">
         <div className="grid grid-cols-2">
           {/* Prep time */}
@@ -74,20 +74,6 @@ export default function RecipeInfoSection({
           </div>
         </div>
 
-        {/* Nutrition section (between prep/cook time and servings) */}
-        {nutritionalValues && (
-          <div className="border-t border-black/5 dark:border-white/5">
-            <RecipeNutrition
-              nutritionalValues={nutritionalValues}
-              isAiEstimated={isAiEstimated}
-              isVerified={isVerified}
-              showTotalNutrition={showTotalNutrition}
-              onToggleTotalNutrition={onToggleTotalNutrition}
-              getNutritionDisplayValue={getNutritionDisplayValue}
-            />
-          </div>
-        )}
-
         {/* Servings row */}
         <div className="flex items-center justify-between gap-3 px-4.5 sm:px-5 py-3.5 border-t border-black/5 dark:border-white/5">
           <div className="flex items-center gap-3 min-w-0">
@@ -105,6 +91,20 @@ export default function RecipeInfoSection({
           />
         </div>
       </div>
+
+      {/* Card 2: Dedicated Nutrition & Macro Dashboard Card */}
+      {nutritionalValues && (
+        <div className="glass-panel rounded-2xl overflow-hidden">
+          <RecipeNutrition
+            nutritionalValues={nutritionalValues}
+            isAiEstimated={isAiEstimated}
+            isVerified={isVerified}
+            showTotalNutrition={showTotalNutrition}
+            onToggleTotalNutrition={onToggleTotalNutrition}
+            getNutritionDisplayValue={getNutritionDisplayValue}
+          />
+        </div>
+      )}
     </div>
   );
 }
