@@ -459,6 +459,41 @@ export async function findCanonicalIngredient(
       continue;
     }
 
+    // Nutmeg vs Tree Nuts guard: nutmeg is a spice, never a whole nut like walnut/hazelnut
+    if (/\b(muskat|muskatnuss|nutmeg)\b/i.test(lowerQuery) && (item.category === 'NUTS_SEEDS' || item.bls_code?.startsWith('H1') || item.bls_code?.startsWith('H2') || candDe.includes('walnuss') || candDe.includes('haselnuss'))) {
+      continue;
+    }
+
+    // Pure spice/seasoning vs Meat/Fish/Prepared Dishes guard: spices (e.g. Rauchpaprika, Kebab-Gewürz, Pommesgewürz) must never match fish/meat/dishes
+    const isPureSpiceQuery = /\b(pulver|powder|gewürz|seasoning|rub|salz|salt|flocken|flakes)\b/i.test(lowerQuery) && !/\b(fleisch|meat|fish|fisch|lachs|salmon|currywurst|suppe|soup)\b/i.test(lowerQuery);
+    if (isPureSpiceQuery && (item.category === 'MEAT_FISH' || item.category === 'PREPARED_DISHES' || item.bls_code?.startsWith('T') || item.bls_code?.startsWith('U') || item.bls_code?.startsWith('V') || item.bls_code?.startsWith('W') || item.bls_code?.startsWith('Y') || candDe.includes('geräuchert') || candDe.includes('gebraten') || candDe.includes('gegrillt') || candDe.includes('pommes'))) {
+      continue;
+    }
+
+    // Broth vs Animal Fat guard: broth/stock must never match pure animal fat/tallow
+    const isBrothQuery = /\b(brühe|bouillon|broth|stock|fond)\b/i.test(lowerQuery);
+    if (isBrothQuery && (item.category === 'SPICES_OILS' || item.bls_code?.startsWith('Q') || candDe.includes('fett') || candDe.includes('talg') || candDe.includes('schmalz'))) {
+      continue;
+    }
+
+    // Pastry/Cookies vs Meat Substitute guard: sweet baked goods must never match savory soy meat substitutes
+    const isPastryQuery = /\b(keks|kuchen|torte|gebäck|cookie|biscuit|pastry)\b/i.test(lowerQuery);
+    if (isPastryQuery && (item.bls_code?.startsWith('H91') || candDe.includes('schnitzel') || candDe.includes('bratwurst') || candDe.includes('frikadelle'))) {
+      continue;
+    }
+
+    // Chili flakes vs Grain Flakes guard: chili flakes must never match oat/wheat flakes
+    const isChiliFlakesQuery = /\b(chili|chilikörner|chiliflocken|pepper flakes)\b/i.test(lowerQuery);
+    if (isChiliFlakesQuery && (item.category === 'GRAINS_PASTA' || item.bls_code?.startsWith('C1') || candDe.includes('hafer') || candDe.includes('weizen') || candDe.includes('dinkel'))) {
+      continue;
+    }
+
+    // Pure Butter guard: standard butter queries must never match cosmetic/plant fats like Sheabutter or Kakaobutter
+    const isPureButterQuery = /\bbutter\b/i.test(lowerQuery) && !/\b(shea|kakao|erdnuss|mandel|apfel|cookie)\b/i.test(lowerQuery);
+    if (isPureButterQuery && (candDe.includes('shea') || candDe.includes('kakao') || candDe.includes('joghurtbutter'))) {
+      continue;
+    }
+
     let semanticScore = 0;
     const vecIdx = idToVectorIndex.get(item.id.toLowerCase().trim());
 

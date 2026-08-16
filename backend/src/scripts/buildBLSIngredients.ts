@@ -229,15 +229,25 @@ function generateAliases(nameDe: string, nameEn: string, code: string, category?
       aliases.add('paprika gelb');
       aliases.add('yellow bell pepper');
     }
-    if (lowerDe.includes('tomate') && code.startsWith('G501')) {
+    if (code === 'G561100' || (lowerDe.includes('tomate') && code.startsWith('G561'))) {
       aliases.add('tomate');
       aliases.add('tomaten');
       aliases.add('cherrytomate');
       aliases.add('cherrytomaten');
+      aliases.add('cherry-tomaten');
+      aliases.add('cherry tomaten');
       aliases.add('kirschtomaten');
       aliases.add('cocktailtomaten');
       aliases.add('tomato');
       aliases.add('tomatoes');
+      aliases.add('cherry tomatoes');
+      aliases.add('cherry tomato');
+    }
+    if (code === 'G770400' || (lowerDe.includes('kichererbse') && code.startsWith('G770'))) {
+      aliases.add('kichererbse');
+      aliases.add('kichererbsen');
+      aliases.add('chickpea');
+      aliases.add('chickpeas');
     }
     if (lowerDe.includes('brokkoli') || lowerDe.includes('broccoli')) {
       aliases.add('brokkoli');
@@ -352,13 +362,18 @@ function generateAliases(nameDe: string, nameEn: string, code: string, category?
       aliases.add('körniger frischkäse');
       aliases.add('cottage cheese');
     }
-    if (lowerDe.includes('joghurt') && code.startsWith('M210')) {
+    if (code === 'M141000' || (lowerDe.includes('joghurt') && code.startsWith('M141'))) {
       aliases.add('joghurt');
       aliases.add('naturjoghurt');
+      aliases.add('vollmilchjoghurt');
       aliases.add('yogurt');
+      aliases.add('plain yogurt');
     }
-    if (lowerDe.includes('butter') && (code.startsWith('Q651') || lowerDe.includes('markenbutter') || lowerDe === 'butter')) {
+    if (code === 'Q630000' || code === 'Q651000' || (lowerDe.includes('butter') && (code.startsWith('Q630') || code.startsWith('Q651')))) {
       aliases.add('butter');
+      aliases.add('süßrahmbutter');
+      aliases.add('markenbutter');
+      aliases.add('speisebutter');
     }
     if (code === 'M402600' || (lowerDe.includes('gouda') && code.startsWith('M402'))) {
       aliases.add('gouda');
@@ -368,6 +383,16 @@ function generateAliases(nameDe: string, nameEn: string, code: string, category?
       aliases.add('käse');
       aliases.add('cheese');
       aliases.add('shredded cheese');
+      aliases.add('scheibenkäse');
+      aliases.add('schnittkäse');
+      aliases.add('sliced cheese');
+    }
+    if (code === 'Q520000' || code === 'Q510000') {
+      aliases.delete('butter');
+    }
+    if (code === 'Q6A6000') {
+      aliases.delete('joghurt');
+      aliases.delete('yogurt');
     }
     if (code === 'B783012' || lowerDe.includes('weizentortilla')) {
       aliases.add('weizentortilla');
