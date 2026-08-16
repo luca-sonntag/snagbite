@@ -46,6 +46,7 @@ Karten werden **ohne Rand** (`border-none`) und mit einem **minimalen, weichen S
 * **Betroffene Komponenten:**
   * Rezept-Poster & Listenkarten (`RecipePosterCard`, `RecipeListItem`)
   * Sammlungs-Kacheln (`CollectionTile`)
+  * Rezept-Import & Formular-Karten (`ExtractForm`)
   * Einkaufslisten-Regal-Karten (`ShoppingListGroup`, `ShoppingCheckedDrawer`)
   * Einstellungen & Profil-Karten (`SettingsView`, `NotificationSettings`)
   * Kontextuelle Zutatenkarte im Kochmodus (`CookingMode`)
@@ -87,6 +88,13 @@ Karten werden **ohne Rand** (`border-none`) und mit einem **minimalen, weichen S
   * **User:** Flache Smaragdgrüne Bubbles (`bg-emerald-600 text-white rounded-2xl rounded-tr-xs shadow-none`).
 * **Remix- & Transaktionskarten:** Soft Emerald Cards (`bg-emerald-500/10 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] rounded-2xl`).
 * **Eingabeleiste & Quick Chips:** Flaches Pill-Input `bg-gray-100 dark:bg-gray-800 border-none rounded-2xl focus-within:ring-2 focus-within:ring-emerald-500/30`. Chips als flache Abrundungen `bg-gray-100 dark:bg-gray-800 border-none`.
+
+### 4.3 Rezept-Import / Neu-Tab (`ExtractForm`)
+* **Header:** Konsistenter Seiten-Header mit Titel (*Neues Rezept*) und Subtitel (*Aus Video, Link oder Foto erstellen*).
+* **Segmented Mode Switcher:** Flache Pill-Leiste (`bg-gray-100 dark:bg-gray-800 rounded-2xl p-1 border-none`).
+* **Social Media & Plattform-Icons:** Subtil und monochrom gehalten (`text-gray-400 dark:text-gray-500`), keine bunten Marken-Hintergründe.
+* **Beispiel-Karten:** Clean Flat Style 2-Spalten-Kacheln mit haptischem Feedback (`active:scale-95`).
+* **Akkordeons & Tipps:** Flache, rahmenlose Boxen (`bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]`) mit `rounded-2xl` Step-Karten.
 
 ---
 
