@@ -62,8 +62,8 @@ export default function IngredientNutritionSheet({
           className="!z-[100]"
         >
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative bg-white dark:bg-gray-900 text-gray-900 dark:text-white pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
-              <Drawer.Handle className="bg-gray-300 dark:bg-gray-700" />
+            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 !p-0 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
+              <Drawer.Handle />
 
               <div className="p-5 sm:p-6 flex flex-col gap-4 text-gray-900 dark:text-white max-w-lg mx-auto w-full">
                 {/* Header */}
@@ -81,7 +81,7 @@ export default function IngredientNutritionSheet({
                   <button
                     type="button"
                     onClick={onClose}
-                    className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:text-gray-900 dark:hover:text-white shrink-0 active:scale-95 transition-all"
+                    className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:text-gray-900 dark:hover:text-white shrink-0 active:scale-95 transition-all cursor-pointer"
                     aria-label="Close"
                   >
                     <X className="w-4 h-4" />
@@ -90,7 +90,7 @@ export default function IngredientNutritionSheet({
 
                 {/* Verification Status Pill */}
                 {ingredient.isVerified ? (
-                  <div className="bg-emerald-500/[0.08] dark:bg-emerald-400/[0.12] text-emerald-800 dark:text-emerald-300 rounded-2xl p-3 flex items-center gap-2.5 text-xs font-medium border border-emerald-500/15">
+                  <div className="bg-emerald-500/[0.07] dark:bg-emerald-400/[0.08] text-emerald-800 dark:text-emerald-300 rounded-2xl p-3 flex items-center gap-2.5 text-xs font-medium border border-emerald-500/10">
                     <ShieldCheck className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <div className="min-w-0 flex-1">
                       <span className="font-bold block text-emerald-900 dark:text-emerald-200">
@@ -113,13 +113,13 @@ export default function IngredientNutritionSheet({
                 )}
 
                 {/* Calories Hero Banner */}
-                <div className="bg-emerald-500/10 dark:bg-emerald-500/15 rounded-3xl p-4 sm:p-5 flex items-center justify-between border border-emerald-500/15">
+                <div className="bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent dark:from-emerald-500/15 dark:to-transparent rounded-3xl p-4 sm:p-5 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 shrink-0">
                       <Flame className="w-6 h-6" />
                     </div>
                     <div>
-                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400">
+                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
                         {t('recipe.calories')}
                       </span>
                       <div className="flex items-baseline gap-1.5">
@@ -133,10 +133,10 @@ export default function IngredientNutritionSheet({
 
                   {per100gKcal !== null && (
                     <div className="text-right">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-400 block">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 block">
                         {t('recipe.per100g')}
                       </span>
-                      <span className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                      <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
                         ≈ {per100gKcal} kcal
                       </span>
                     </div>
@@ -146,9 +146,9 @@ export default function IngredientNutritionSheet({
                 {/* 3-Color Macro Progress Bar */}
                 {totalMacroKcal > 0 && (
                   <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between text-xs font-bold text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center justify-between text-xs font-bold text-gray-600 dark:text-gray-400">
                       <span>{t('recipe.ingredientNutritionDistribution')}</span>
-                      <span className="text-[11px] font-medium text-gray-400">
+                      <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
                         {proteinPct}% E · {carbsPct}% K · {fatPct}% F
                       </span>
                     </div>
@@ -181,7 +181,7 @@ export default function IngredientNutritionSheet({
                 {/* 3 Macro Cards (Clean Flat Style) */}
                 <div className="grid grid-cols-3 gap-2.5">
                   {/* Protein */}
-                  <div className="bg-blue-500/10 dark:bg-blue-500/15 rounded-2xl p-3 flex flex-col justify-between border border-blue-500/15 text-left">
+                  <div className="bg-blue-500/[0.06] dark:bg-blue-400/[0.08] rounded-2xl p-3 flex flex-col justify-between border border-blue-500/10 text-left">
                     <div className="flex items-center gap-1.5 mb-1.5">
                       <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
                       <span className="text-[10.5px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300 truncate">
@@ -199,7 +199,7 @@ export default function IngredientNutritionSheet({
                   </div>
 
                   {/* Carbs */}
-                  <div className="bg-amber-500/10 dark:bg-amber-500/15 rounded-2xl p-3 flex flex-col justify-between border border-amber-500/15 text-left">
+                  <div className="bg-amber-500/[0.06] dark:bg-amber-400/[0.08] rounded-2xl p-3 flex flex-col justify-between border border-amber-500/10 text-left">
                     <div className="flex items-center gap-1.5 mb-1.5">
                       <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
                       <span className="text-[10.5px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300 truncate">
@@ -217,7 +217,7 @@ export default function IngredientNutritionSheet({
                   </div>
 
                   {/* Fat */}
-                  <div className="bg-rose-500/10 dark:bg-rose-500/15 rounded-2xl p-3 flex flex-col justify-between border border-rose-500/15 text-left">
+                  <div className="bg-rose-500/[0.06] dark:bg-rose-400/[0.08] rounded-2xl p-3 flex flex-col justify-between border border-rose-500/10 text-left">
                     <div className="flex items-center gap-1.5 mb-1.5">
                       <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
                       <span className="text-[10.5px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300 truncate">
@@ -238,7 +238,7 @@ export default function IngredientNutritionSheet({
                 {/* Close CTA Button */}
                 <Button
                   onPress={onClose}
-                  className="w-full py-3.5 mt-1 rounded-2xl font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white border-none active:scale-[0.98] transition-all h-12 text-sm"
+                  className="w-full py-3.5 mt-1 rounded-2xl font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border-none active:scale-[0.98] transition-all h-12 text-sm"
                 >
                   {t('recipe.ingredientNutritionClose')}
                 </Button>
