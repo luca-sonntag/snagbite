@@ -59,10 +59,10 @@ export default function RecipeIngredients({
             <button
               type="button"
               onClick={onToggleIngredientNutrition}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all select-none border-none ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all select-none border-none active:scale-95 ${
                 showIngredientNutrition
-                  ? 'bg-emerald-500 text-white shadow-sm'
-                  : 'bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-300 hover:bg-black/10 dark:hover:bg-white/10'
+                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
+                  : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
               }`}
               title={
                 !isPremium
@@ -141,17 +141,19 @@ export default function RecipeIngredients({
                             e.stopPropagation();
                             setSelectedNutritionIngredient(ing);
                           }}
-                          className={`px-2 py-0.5 rounded-lg inline-flex items-center gap-1.5 text-xs font-semibold shrink-0 transition-all active:scale-95 ${
+                          className={`px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5 text-xs font-semibold shrink-0 border-none transition-all active:scale-95 ${
                             ing.isVerified
-                              ? 'bg-emerald-500/[0.06] dark:bg-emerald-400/[0.08] text-emerald-800/80 dark:text-emerald-300/80 border border-emerald-500/10 hover:bg-emerald-500/15'
-                              : 'bg-black/[0.03] dark:bg-white/[0.05] text-gray-600 dark:text-gray-400 hover:bg-black/[0.06]'
+                              ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
+                              : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
                           }`}
                           title={ing.matchedName ? t('recipe.verifiedIngredientTooltip', { name: ing.matchedName }) : undefined}
                         >
-                          {ing.isVerified && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                          )}
-                          <span>{Math.round(ing.calories * scaleFactor)} kcal</span>
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                              ing.isVerified ? 'bg-emerald-500' : 'bg-gray-400 dark:bg-gray-500'
+                            }`}
+                          />
+                          <span className="tabular-nums">{Math.round(ing.calories * scaleFactor)} kcal</span>
                           <ChevronRight className="w-3 h-3 opacity-40 -ml-0.5" />
                         </button>
                       )}
