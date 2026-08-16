@@ -466,7 +466,7 @@ export async function findCanonicalIngredient(
 
     // Pure spice/seasoning vs Meat/Fish/Prepared Dishes guard: spices (e.g. Rauchpaprika, Kebab-Gewürz, Pommesgewürz) must never match fish/meat/dishes
     const isPureSpiceQuery = /\b(pulver|powder|gewürz|seasoning|rub|salz|salt|flocken|flakes)\b/i.test(lowerQuery) && !/\b(fleisch|meat|fish|fisch|lachs|salmon|currywurst|suppe|soup)\b/i.test(lowerQuery);
-    if (isPureSpiceQuery && (item.category === 'MEAT_FISH' || item.category === 'PREPARED_DISHES' || item.bls_code?.startsWith('T') || item.bls_code?.startsWith('U') || item.bls_code?.startsWith('V') || item.bls_code?.startsWith('W') || item.bls_code?.startsWith('Y') || candDe.includes('geräuchert') || candDe.includes('gebraten') || candDe.includes('gegrillt') || candDe.includes('pommes'))) {
+    if (isPureSpiceQuery && (item.category === 'MEAT_FISH' || item.category === 'PREPARED_DISHES' || item.bls_code?.startsWith('T') || item.bls_code?.startsWith('U') || item.bls_code?.startsWith('V') || item.bls_code?.startsWith('W') || item.bls_code?.startsWith('X') || item.bls_code?.startsWith('Y') || candDe.includes('geräuchert') || candDe.includes('gebraten') || candDe.includes('gegrillt') || candDe.includes('pommes'))) {
       continue;
     }
 
@@ -491,6 +491,12 @@ export async function findCanonicalIngredient(
     // Pure Butter guard: standard butter queries must never match cosmetic/plant fats like Sheabutter or Kakaobutter
     const isPureButterQuery = /\bbutter\b/i.test(lowerQuery) && !/\b(shea|kakao|erdnuss|mandel|apfel|cookie)\b/i.test(lowerQuery);
     if (isPureButterQuery && (candDe.includes('shea') || candDe.includes('kakao') || candDe.includes('joghurtbutter'))) {
+      continue;
+    }
+
+    // Plain Dairy vs Fruit Dessert guard: plain yogurt/milk/quark must not match sweet fruit-flavored yogurts/desserts
+    const isPlainDairyQuery = /\b(joghurt|quark|milch|yogurt)\b/i.test(lowerQuery) && !/\b(erdbeer|kirsch|frucht|vanille|schoko|stracciatella|blaubeer|beere|fruit)\b/i.test(lowerQuery);
+    if (isPlainDairyQuery && (item.bls_code?.startsWith('Y8') || candDe.includes('erdbeer') || candDe.includes('kirsch') || candDe.includes('frucht') || candDe.includes('pfirsich') || candDe.includes('banane'))) {
       continue;
     }
 

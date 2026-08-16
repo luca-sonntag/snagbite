@@ -362,7 +362,7 @@ function generateAliases(nameDe: string, nameEn: string, code: string, category?
       aliases.add('körniger frischkäse');
       aliases.add('cottage cheese');
     }
-    if (code === 'M141000' || (lowerDe.includes('joghurt') && code.startsWith('M141'))) {
+    if (code === 'M141300' || (lowerDe.includes('joghurt mild') && code.startsWith('M1413'))) {
       aliases.add('joghurt');
       aliases.add('naturjoghurt');
       aliases.add('vollmilchjoghurt');
