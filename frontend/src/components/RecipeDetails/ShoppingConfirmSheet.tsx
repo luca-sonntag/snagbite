@@ -89,7 +89,7 @@ export default function ShoppingConfirmSheet({
               {/* Header */}
               <Drawer.Header className="border-b border-black/5 dark:border-white/5 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-full bg-emerald-500/5 flex items-center justify-center">
                     <Salad className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>

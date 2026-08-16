@@ -47,7 +47,7 @@ export default function RecipeNutrition({
   const fatPct = totalMacroKcal > 0 ? Math.max(0, 100 - proteinPct - carbsPct) : 0;
 
   const iconBadge =
-    'w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0';
+    'w-9 h-9 rounded-full bg-emerald-500/5 flex items-center justify-center flex-shrink-0';
   const iconClass = 'w-[18px] h-[18px] text-emerald-600 dark:text-emerald-400';
   const statLabel =
     'text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500';

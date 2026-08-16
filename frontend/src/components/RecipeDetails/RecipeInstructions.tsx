@@ -36,7 +36,7 @@ export default function RecipeInstructions({
     <div className="flex flex-col gap-4 pb-4">
       {/* Section Header (OUTSIDE card) */}
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+        <div className="w-9 h-9 rounded-full bg-emerald-500/5 flex items-center justify-center flex-shrink-0">
           <ChefHat className="w-[18px] h-[18px] text-emerald-600 dark:text-emerald-400" />
         </div>
         <h3 className="text-base font-bold text-gray-900 dark:text-white">{t('recipe.stepByStep')}</h3>
@@ -52,7 +52,7 @@ export default function RecipeInstructions({
         {/* 1. Cooking Progress Bar & Start Button */}
         <div className="px-5 py-5 sm:px-6 sm:py-6">
           <div className="flex items-center gap-3.5 sm:gap-4">
-            <div className="w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-full bg-emerald-500/5 flex items-center justify-center flex-shrink-0">
               <ListChecks className="w-[18px] h-[18px] text-emerald-600 dark:text-emerald-400" />
             </div>
 
@@ -90,7 +90,7 @@ export default function RecipeInstructions({
         {recipe.equipment && recipe.equipment.length > 0 && (
           <div className="px-5 py-4.5 sm:px-6 sm:py-5.5 border-t border-black/5 dark:border-white/5">
             <div className="flex items-center gap-3.5 sm:gap-4">
-              <div className="w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+              <div className="w-9 h-9 rounded-full bg-emerald-500/5 flex items-center justify-center flex-shrink-0">
                 <Utensils className="w-[18px] h-[18px] text-emerald-600 dark:text-emerald-400" />
               </div>
               <div className="flex-1 min-w-0">

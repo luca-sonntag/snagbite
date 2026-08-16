@@ -46,7 +46,7 @@ export default function RecipeIngredients({
       <div>
         <div className="flex items-center justify-between gap-2 mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-full bg-emerald-500/5 flex items-center justify-center flex-shrink-0">
               <Salad className="w-[18px] h-[18px] text-emerald-600 dark:text-emerald-400" />
             </div>
             <h3 className="text-base font-bold text-gray-900 dark:text-white">{t('recipe.tabIngredients')}</h3>
