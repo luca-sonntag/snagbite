@@ -61,49 +61,89 @@ export default function RecipeNutrition({
     <>
       <div
         onClick={() => !isPremium && setIsPremiumModalOpen(true)}
-        className={`relative py-3.5 px-4.5 sm:px-5 flex flex-col gap-2.5 transition-all duration-300 ${!isPremium ? 'cursor-pointer hover:bg-black/5 dark:hover:bg-white/5' : ''
+        className={`relative py-3.5 px-4.5 sm:px-5 transition-all duration-300 ${!isPremium ? 'cursor-pointer hover:bg-black/5 dark:hover:bg-white/5' : ''
           }`}
       >
         <div
           className={`flex flex-col gap-2.5 transition-all duration-300 ${!isPremium ? 'filter blur-sm select-none pointer-events-none opacity-30' : ''
             }`}
         >
-          {/* Main Row: Flame Medallion on left + Label + Prominent Calories & % */}
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className={iconBadge}>
-                <Flame className={iconClass} />
+          <div className="flex items-center gap-3">
+            {/* Green Circle Badge matching Clock / Utensils / Users */}
+            <div className={iconBadge}>
+              <Flame className={iconClass} />
+            </div>
+
+            <div className="flex-1 min-w-0">
+              {/* Top Header Row: NÄHRWERTE (PRO PORTION) label */}
+              <div className="flex items-center gap-1.5 min-w-0 mb-1">
+                <span className={statLabel}>
+                  {t('recipe.nutritionTitle')} ({t('recipe.nutritionPerServing')})
+                </span>
+                {isAiEstimated && isPremium && (
+                  <AiNotice
+                    type="badge"
+                    tooltipText={isVerified ? t('recipe.verifiedDatabaseTooltip') : undefined}
+                  />
+                )}
               </div>
-              <div className="flex flex-col leading-tight min-w-0">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className={statLabel}>
-                    {t('recipe.nutritionTitle')} ({t('recipe.nutritionPerServing')})
-                  </span>
-                  {isAiEstimated && isPremium && (
-                    <AiNotice
-                      type="badge"
-                      tooltipText={isVerified ? t('recipe.verifiedDatabaseTooltip') : undefined}
-                    />
-                  )}
-                </div>
-                <div className="flex items-baseline gap-1 mt-0.5">
-                  <span className="text-base font-bold text-gray-900 dark:text-white tabular-nums">
+
+              {/* 4-column grid: Calories + 3 Macros with colored dots */}
+              <div className="grid grid-cols-4 gap-1.5 text-left items-start">
+                {/* Calories */}
+                <div>
+                  <div className="text-gray-900 dark:text-white text-base font-bold tabular-nums leading-tight">
                     {caloriesDisplay}
-                  </span>
-                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400">kcal</span>
+                  </div>
+                  <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                    {t('recipe.nutritionCalories')}
+                  </div>
+                </div>
+
+                {/* Protein */}
+                <div>
+                  <div className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                    <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
+                      {proteinDisplay}g
+                    </span>
+                  </div>
+                  <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                    {t('recipe.ingredientNutritionProtein')}
+                  </div>
+                </div>
+
+                {/* Carbs */}
+                <div>
+                  <div className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                    <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
+                      {carbsDisplay}g
+                    </span>
+                  </div>
+                  <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                    {t('recipe.nutritionCarbs')}
+                  </div>
+                </div>
+
+                {/* Fat */}
+                <div>
+                  <div className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+                    <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
+                      {fatDisplay}g
+                    </span>
+                  </div>
+                  <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                    {t('recipe.ingredientNutritionFat')}
+                  </div>
                 </div>
               </div>
             </div>
-
-            {totalMacroKcal > 0 && isPremium && (
-              <span className="text-[10.5px] font-medium text-gray-400 dark:text-gray-500 tabular-nums shrink-0">
-                {proteinPct}% E · {carbsPct}% K · {fatPct}% F
-              </span>
-            )}
           </div>
 
-          {/* 3-Color Macro Progress Bar */}
-          {totalMacroKcal > 0 && (
+          {/* 3-Color Macro Progress Bar as a subtle visual indicator */}
+          {totalMacroKcal > 0 && isPremium && (
             <div className="h-1.5 w-full rounded-full bg-black/5 dark:bg-white/10 overflow-hidden flex shadow-inner">
               {proteinPct > 0 && (
                 <div
@@ -128,57 +168,6 @@ export default function RecipeNutrition({
               )}
             </div>
           )}
-
-          {/* 3 Clean Macro Columns (Flat style with dots, values & percentages) */}
-          <div className="grid grid-cols-3 gap-2 pt-0.5">
-            {/* Protein */}
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
-              <div className="min-w-0">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300 block truncate">
-                  {t('recipe.ingredientNutritionProtein')}
-                </span>
-                <span className="text-xs font-bold text-gray-900 dark:text-white tabular-nums">
-                  {proteinDisplay} g{' '}
-                  <span className="text-[10px] font-medium text-gray-400 dark:text-gray-500">
-                    ({proteinPct}%)
-                  </span>
-                </span>
-              </div>
-            </div>
-
-            {/* Carbs */}
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
-              <div className="min-w-0">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300 block truncate">
-                  {t('recipe.ingredientNutritionCarbs')}
-                </span>
-                <span className="text-xs font-bold text-gray-900 dark:text-white tabular-nums">
-                  {carbsDisplay} g{' '}
-                  <span className="text-[10px] font-medium text-gray-400 dark:text-gray-500">
-                    ({carbsPct}%)
-                  </span>
-                </span>
-              </div>
-            </div>
-
-            {/* Fat */}
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
-              <div className="min-w-0">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300 block truncate">
-                  {t('recipe.ingredientNutritionFat')}
-                </span>
-                <span className="text-xs font-bold text-gray-900 dark:text-white tabular-nums">
-                  {fatDisplay} g{' '}
-                  <span className="text-[10px] font-medium text-gray-400 dark:text-gray-500">
-                    ({fatPct}%)
-                  </span>
-                </span>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Locked Overlay */}
