@@ -23,10 +23,22 @@ interface DialogContextProps {
 
 const DialogContext = createContext<DialogContextProps | undefined>(undefined);
 
+const defaultDialogContext: DialogContextProps = {
+  alert: async (opts) => {
+    const text = typeof opts.message === 'string' ? opts.message : opts.title;
+    window.alert(text);
+  },
+  confirm: async (opts) => {
+    const text = typeof opts.message === 'string' ? opts.message : opts.title;
+    return window.confirm(text);
+  },
+};
+
 export function useDialog() {
   const context = useContext(DialogContext);
   if (!context) {
-    throw new Error('useDialog must be used within a DialogProvider');
+    console.warn('[DialogContext] useDialog called outside DialogProvider, using fallback.');
+    return defaultDialogContext;
   }
   return context;
 }
