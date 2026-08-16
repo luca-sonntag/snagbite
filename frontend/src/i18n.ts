@@ -632,16 +632,16 @@ export const uiTranslations = {
       },
       progress: {
         stages: {
-          queued: 'Warteschlange',
-          scraping: 'Video-Daten laden',
-          downloading_media: 'Audio & Video herunterladen',
-          extracting_frames: 'Videobilder analysieren',
-          reading_photos: 'Fotos auslesen',
-          extracting_recipe: 'Rezept strukturieren',
-          finalizing: 'Zusammenfassen'
+          queued: 'Vorbereiten...',
+          scraping: 'Inhalte analysieren...',
+          downloading_media: 'Zutaten erfassen...',
+          extracting_frames: 'Zubereitungsschritte prüfen...',
+          reading_photos: 'Rezeptkarten auslesen...',
+          extracting_recipe: 'Rezept strukturieren...',
+          finalizing: 'Fast fertig, wird serviert...'
         }
       },
-      backgroundNotice: 'Dein Rezept wird im Hintergrund vorbereitet. Du kannst die App verlassen oder schließen – du wirst benachrichtigt, sobald das Rezept fertig ist.'
+      backgroundNotice: 'Dein Rezept wird im Hintergrund vorbereitet. Du kannst die App verlassen – du wirst benachrichtigt, sobald es fertig ist.'
     },
     theme: {
       toggle: 'Theme umschalten',
@@ -774,13 +774,13 @@ export const uiTranslations = {
       dismiss: 'Ausblenden',
       photoSource: 'Fotos',
       stages: {
-        queued: 'In Warteschlange…',
-        scraping: 'Video wird geladen…',
-        downloading_media: 'Medien werden geladen…',
-        extracting_frames: 'Bilder werden analysiert…',
-        reading_photos: 'Fotos werden gelesen…',
-        extracting_recipe: 'Rezept wird erstellt…',
-        finalizing: 'Wird abgeschlossen…',
+        queued: 'Wird vorbereitet…',
+        scraping: 'Inhalte analysieren…',
+        downloading_media: 'Zutaten erfassen…',
+        extracting_frames: 'Schritte prüfen…',
+        reading_photos: 'Rezeptkarten erfassen…',
+        extracting_recipe: 'Rezept strukturieren…',
+        finalizing: 'Wird serviert…',
       },
     },
     form: {
@@ -1614,16 +1614,16 @@ export const uiTranslations = {
       },
       progress: {
         stages: {
-          queued: 'Queue',
-          scraping: 'Fetching video data',
-          downloading_media: 'Downloading audio & video',
-          extracting_frames: 'Extracting video frames',
-          reading_photos: 'Reading your photos',
-          extracting_recipe: 'Preparing recipe',
-          finalizing: 'Saving & Finalizing'
+          queued: 'Preparing...',
+          scraping: 'Analyzing content...',
+          downloading_media: 'Gathering ingredients...',
+          extracting_frames: 'Checking recipe steps...',
+          reading_photos: 'Reading recipe cards...',
+          extracting_recipe: 'Structuring & perfecting recipe...',
+          finalizing: 'Almost ready, serving now...'
         }
       },
-      backgroundNotice: 'Your recipe is being prepared in the background. You can navigate away or close the app — you will be notified once the recipe is ready.'
+      backgroundNotice: 'Your recipe is being prepared in the background. You can leave the app — we will notify you once it is ready.'
     },
     theme: {
       toggle: 'Toggle Theme',
@@ -1756,13 +1756,13 @@ export const uiTranslations = {
       dismiss: 'Dismiss',
       photoSource: 'Photos',
       stages: {
-        queued: 'Queued…',
-        scraping: 'Fetching video…',
-        downloading_media: 'Downloading media…',
-        extracting_frames: 'Analyzing frames…',
-        reading_photos: 'Reading photos…',
-        extracting_recipe: 'Building recipe…',
-        finalizing: 'Finishing up…',
+        queued: 'Preparing…',
+        scraping: 'Analyzing content…',
+        downloading_media: 'Gathering ingredients…',
+        extracting_frames: 'Checking steps…',
+        reading_photos: 'Reading recipe cards…',
+        extracting_recipe: 'Structuring recipe…',
+        finalizing: 'Serving now…',
       },
     },
     form: {
