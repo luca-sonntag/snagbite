@@ -771,13 +771,23 @@ function generateStandardUnits(nameDe: string, category: string): Record<string,
     else if (lower.includes('gurke')) units.piece = 300;
     else units.piece = 100;
   } else if (category === 'DAIRY') {
-    if (lower.includes('ei') && (lower.includes('hühnerei') || lower.includes('vollei'))) units.piece = 55;
+    if (lower.includes('eigelb') || lower.includes('dotter')) units.piece = 20;
+    else if (lower.includes('eiweiß') || lower.includes('eiklar')) units.piece = 35;
+    else if (lower.includes('wachtelei')) units.piece = 12;
+    else if (lower.includes('ei') && (lower.includes('hühnerei') || lower.includes('vollei'))) units.piece = 55;
     else if (lower.includes('becher')) units.cup = 200;
-    else if (lower.includes('scheibe')) units.slice = 30;
+    else if (lower.includes('scheibe')) units.slice = 25;
   } else if (category === 'BREAD_BAKERY') {
-    if (lower.includes('toast') || lower.includes('brot')) units.slice = 40;
-    else if (lower.includes('brötchen')) units.piece = 60;
-    else if (lower.includes('wrap') || lower.includes('tortilla')) units.piece = 65;
+    if (lower.includes('toast')) { units.slice = 25; units.piece = 25; }
+    else if (lower.includes('brot')) { units.slice = 40; units.piece = 40; }
+    else if (lower.includes('keks') || lower.includes('cookie') || lower.includes('waffel')) units.piece = 15;
+    else if (lower.includes('brötchen') || lower.includes('semmel')) units.piece = 60;
+    else if (lower.includes('wrap') || lower.includes('tortilla')) units.piece = 50;
+  } else if (category === 'MEAT_FISH') {
+    if (lower.includes('fischstäbchen') || lower.includes('stäbchen') || lower.includes('nugget')) units.piece = 30;
+    else if (lower.includes('würstchen') || lower.includes('wiener')) units.piece = 50;
+    else if (lower.includes('frikadelle') || lower.includes('bulette') || lower.includes('patty')) units.piece = 75;
+    else if (lower.includes('scheibe') || lower.includes('speck') || lower.includes('schinken')) { units.slice = 20; units.piece = 20; }
   }
 
   return units;

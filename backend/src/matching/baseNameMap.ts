@@ -221,6 +221,8 @@ export const BASE_NAME_TO_CANONICAL_ID: Record<string, string> = {
   'prawn': 'T753100',
   'squid': 'T020100',
   'mussel': 'T792100',
+  'fish stick': 'T930100',
+  'fish finger': 'T930100',
 
   // === GRAINS, BAKERY, FLOURS & PASTA ===
   'flour': 'C211000',

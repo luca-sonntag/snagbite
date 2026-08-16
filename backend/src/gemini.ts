@@ -128,6 +128,10 @@ const recipeSchema = {
                   type: FunctionDeclarationSchemaType.STRING,
                   description: 'The unit of measurement (e.g., g, ml, EL, TL, Stück).',
                 },
+                gramsPerUnit: {
+                  type: FunctionDeclarationSchemaType.NUMBER,
+                  description: 'The estimated realistic net weight in grams for EXACTLY ONE unit of this ingredient. For example: 1 Stück Fischstäbchen = 30, 1 Stück Toastbrot = 25, 1 Stück Eigelb = 20, 1 Stück Ei = 55, 1 Stück Zwiebel = 80, 1 Stück Knoblauchzehe = 3, 1 Dose = 400, 1 EL = 15, 1 TL = 5, 1 Prise = 0.5. If unit is already g or ml, set to 1. If unit is kg or l, set to 1000.',
+                },
                 notes: {
                   type: FunctionDeclarationSchemaType.STRING,
                   description: 'Optional preparation notes specific to this ingredient.',
@@ -157,7 +161,7 @@ const recipeSchema = {
                   description: 'True ONLY if this is a very common basic staple that people almost always already have at home and rarely need to buy specifically for a recipe (e.g. salt, pepper, water, cooking oil, sugar, common dried spices). Set to false for anything a user would typically need to shop for (e.g. meat, cheese, vegetables, fresh herbs, specialty items).',
                 },
               },
-              required: ['name', 'baseName', 'amount', 'unit', 'calories', 'protein', 'carbs', 'fat'],
+              required: ['name', 'baseName', 'amount', 'unit', 'gramsPerUnit', 'calories', 'protein', 'carbs', 'fat'],
             },
           },
         },

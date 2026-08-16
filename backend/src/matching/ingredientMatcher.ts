@@ -161,13 +161,16 @@ export function normalizeUnit(unit: string): string {
   if (['el', 'esslöffel', 'tbsp', 'tablespoon', 'tablespoons'].includes(u)) return 'tablespoon';
   if (['tl', 'teelöffel', 'tsp', 'teaspoon', 'teaspoons'].includes(u)) return 'teaspoon';
   if (['stk', 'stück', 'stueck', 'piece', 'pieces', 'pc', 'pcs', 'x'].includes(u)) return 'piece';
+  if (['scheibe', 'scheiben', 'slice', 'slices'].includes(u)) return 'slice';
+  if (['packung', 'packungen', 'pkg', 'pack', 'packs', 'package', 'packages', 'pck', 'pckg', 'päckchen', 'paeckchen', 'beutel'].includes(u)) return 'pack';
+  if (['dose', 'dosen', 'can', 'cans', 'tin'].includes(u)) return 'can';
+  if (['glas', 'gläser', 'glaeser', 'jar', 'jars'].includes(u)) return 'jar';
+  if (['becher', 'tub', 'tubs'].includes(u)) return 'cup';
+  if (['tasse', 'tassen', 'cup', 'cups'].includes(u)) return 'cup';
+  if (['bund', 'bunch', 'bunches'].includes(u)) return 'bunch';
   if (['prise', 'prisen', 'pinch', 'pinches'].includes(u)) return 'pinch';
   if (['zehe', 'zehen', 'clove', 'cloves'].includes(u)) return 'clove';
-  if (['scheibe', 'scheiben', 'slice', 'slices'].includes(u)) return 'slice';
-  if (['dose', 'dosen', 'can', 'cans', 'tin'].includes(u)) return 'can';
-  if (['bund', 'bunch', 'bunches'].includes(u)) return 'bunch';
   if (['handvoll', 'handful'].includes(u)) return 'handful';
-  if (['tasse', 'tassen', 'cup', 'cups'].includes(u)) return 'cup';
   return 'piece';
 }
 
@@ -633,19 +636,181 @@ export async function findCanonicalIngredient(
 }
 
 /**
- * Calculates the total weight in grams for a given amount, unit, and matched ingredient.
+ * Resolves context-aware gram weights for individual food items (per piece / Stück).
  */
-export function calculateWeightGrams(amount: number, unit: string, item: CanonicalIngredient | null): number {
+export function getPieceWeightGrams(item: CanonicalIngredient | null): number {
+  if (!item) return 100;
+
+  if (item.standard_units?.piece && item.standard_units.piece > 0) {
+    return item.standard_units.piece;
+  }
+
+  const de = (item.name_de || '').toLowerCase();
+  const en = (item.name_en || '').toLowerCase();
+
+  // 1. Fischstäbchen, Nuggets & Sticks (30g)
+  if (
+    de.includes('fischstäbchen') ||
+    en.includes('fish finger') ||
+    en.includes('fish stick') ||
+    de.includes('nugget') ||
+    de.includes('stäbchen')
+  ) {
+    return 30;
+  }
+
+  // 2. Brot & Backwaren
+  if (de.includes('toast') || en.includes('toast')) return 25; // 1 Scheibe Toast = ~25g
+  if (
+    de.includes('keks') ||
+    de.includes('cookie') ||
+    de.includes('biscuit') ||
+    de.includes('plätzchen') ||
+    de.includes('waffel') ||
+    de.includes('waffle')
+  ) {
+    return 15;
+  }
+  if (
+    de.includes('brötchen') ||
+    de.includes('semmel') ||
+    de.includes('schrippe') ||
+    de.includes('croissant') ||
+    en.includes('bun')
+  ) {
+    return 60;
+  }
+  if (de.includes('tortilla') || de.includes('wrap') || de.includes('fladenbrot') || de.includes('taco')) {
+    return 50;
+  }
+  if (de.includes('brot') || en.includes('bread')) return 40; // 1 Scheibe Brot = ~40g
+  if (de.includes('muffin') || de.includes('cupcake')) return 75;
+
+  // 3. Eier
+  if (de.includes('eigelb') || de.includes('dotter') || en.includes('egg yolk')) return 20; // 1 Eigelb = ~20g
+  if (de.includes('eiweiß') || de.includes('eiklar') || en.includes('egg white')) return 35; // 1 Eiweiß = ~35g
+  if (de.includes('wachtelei')) return 12;
+  if (de.includes('hühnerei') || de.includes('ei ') || de === 'ei' || en.includes('egg')) return 55; // 1 Hühnerei = ~55g
+
+  // 4. Fleisch, Geflügel & Wurst in Stück/Scheiben
+  if (de.includes('wiener') || de.includes('würstchen') || de.includes('hotdog') || de.includes('bratwurst')) {
+    return 50;
+  }
+  if (de.includes('frikadelle') || de.includes('bulette') || de.includes('patty') || de.includes('meatball')) {
+    return 75;
+  }
+  if (de.includes('falafel')) return 20;
+  if (de.includes('schinken') || de.includes('speck') || de.includes('bacon') || de.includes('salami')) {
+    return 20; // 1 Scheibe/Stück Speck/Schinken
+  }
+
+  // 5. Gemüse
+  if (de.includes('knoblauchzehe') || en.includes('clove')) return 3;
+  if (de.includes('knoblauch') && !de.includes('pulver')) return 30; // 1 Knolle Knoblauch
+  if (
+    de.includes('frühlingszwiebel') ||
+    de.includes('lauchzwiebel') ||
+    de.includes('frühlingslauch') ||
+    en.includes('scallion') ||
+    en.includes('spring onion')
+  ) {
+    return 15;
+  }
+  if (de.includes('cherrytomate') || de.includes('cocktailtomate') || en.includes('cherry tomato')) {
+    return 15;
+  }
+  if (de.includes('chili') || de.includes('jalapeno') || de.includes('peperoni')) return 10;
+  if (de.includes('lorbeerblatt') || en.includes('bay leaf')) return 0.5;
+  if (de.includes('champignon') || de.includes('pilz') || en.includes('mushroom')) return 20;
+  if (de.includes('zwiebel') || de.includes('schalotte') || en.includes('onion')) return 80;
+  if (de.includes('karotte') || de.includes('möhre') || en.includes('carrot')) return 80;
+  if (de.includes('tomate') || en.includes('tomato')) return 110;
+  if (de.includes('kartoffel') || en.includes('potato')) return 120;
+  if (de.includes('paprika') || en.includes('bell pepper')) return 150;
+  if (de.includes('avocado')) return 150;
+  if (de.includes('zucchini')) return 200;
+  if (de.includes('aubergine') || en.includes('eggplant')) return 250;
+  if (de.includes('gurke') || en.includes('cucumber')) return 300;
+
+  // 6. Früchte & Obst
+  if (de.includes('erdbeere') || de.includes('himbeere') || de.includes('blaubeere') || en.includes('berry')) {
+    return 15;
+  }
+  if (de.includes('dattel') || de.includes('feige') || en.includes('date')) return 10;
+  if (de.includes('limette') || en.includes('lime')) return 40;
+  if (de.includes('zitrone') || en.includes('lemon')) return 70;
+  if (de.includes('banane') || en.includes('banana')) return 110;
+  if (de.includes('apfel') || de.includes('birne') || en.includes('apple') || en.includes('pear')) return 150;
+  if (de.includes('orange') || de.includes('mandarine')) return 150;
+
+  // 7. Käse in Scheiben/Stück
+  if (de.includes('käse') || de.includes('gouda') || de.includes('cheddar') || de.includes('scheiblette')) {
+    return 25;
+  }
+
+  return 100;
+}
+
+/**
+ * Resolves context-aware gram weights for food slices (Scheiben).
+ */
+export function getSliceWeightGrams(item: CanonicalIngredient | null): number {
+  if (!item) return 30;
+  const de = (item.name_de || '').toLowerCase();
+
+  if (de.includes('toast')) return 25;
+  if (de.includes('brot')) return 40;
+  if (de.includes('käse') || de.includes('gouda') || de.includes('cheddar')) return 25;
+  if (de.includes('schinken') || de.includes('speck') || de.includes('bacon') || de.includes('salami')) return 20;
+  if (de.includes('tomate') || de.includes('gurke') || de.includes('zitrone')) return 15;
+
+  return 30;
+}
+
+/**
+ * Resolves context-aware gram weights for packages (Packungen / Päckchen).
+ */
+export function getPackWeightGrams(item: CanonicalIngredient | null): number {
+  if (!item) return 250;
+  const de = (item.name_de || '').toLowerCase();
+  const cat = item.category || '';
+
+  if (de.includes('pasta') || de.includes('nudel') || de.includes('spaghetti') || cat === 'GRAINS_PASTA') {
+    return 250;
+  }
+  if (de.includes('fischstäbchen')) return 450;
+  if (de.includes('speck') || de.includes('bacon') || de.includes('schinken')) return 100;
+  if (de.includes('käse') || de.includes('feta') || de.includes('mozzarella') || de.includes('gerieben')) return 150;
+  if (de.includes('butter')) return 250;
+  if (de.includes('hackfleisch') || de.includes('hähnchen')) return 400;
+  if (de.includes('backpulver') || de.includes('natron') || de.includes('hefe') || de.includes('vanillezucker')) return 15;
+
+  return 250;
+}
+
+/**
+ * Calculates the total weight in grams for a given amount, unit, and matched ingredient.
+ * Prioritizes Gemini's estimated gramsPerUnit when available, with fallback to item standard units.
+ */
+export function calculateWeightGrams(
+  amount: number,
+  unit: string,
+  item: CanonicalIngredient | null,
+  gramsPerUnit?: number | null
+): number {
   if (amount <= 0) return 0;
   const normUnit = normalizeUnit(unit);
 
-  // 1. Direct weight / volume
-  if (normUnit === 'g') return amount;
-  if (normUnit === 'kg') return amount * 1000;
-  if (normUnit === 'ml') return amount;
-  if (normUnit === 'l') return amount * 1000;
+  // 1. Direct grams / milliliters
+  if (normUnit === 'g' || normUnit === 'ml') return amount;
+  if (normUnit === 'kg' || normUnit === 'l') return amount * 1000;
 
-  // 2. Specific standard unit weights for this ingredient
+  // 2. High-precision Gemini gramsPerUnit (when available > 0)
+  if (gramsPerUnit !== undefined && gramsPerUnit !== null && gramsPerUnit > 0) {
+    return amount * gramsPerUnit;
+  }
+
+  // 3. Specific standard unit weights for this ingredient
   if (item?.standard_units) {
     const std = item.standard_units as Record<string, number | undefined>;
     if (std[normUnit] !== undefined && std[normUnit]! > 0) {
@@ -653,17 +818,27 @@ export function calculateWeightGrams(amount: number, unit: string, item: Canonic
     }
   }
 
-  // 3. Global default fallbacks by unit
+  // 4. Dynamic context-aware item units
+  if (normUnit === 'piece') {
+    return amount * getPieceWeightGrams(item);
+  }
+  if (normUnit === 'slice') {
+    return amount * getSliceWeightGrams(item);
+  }
+  if (normUnit === 'pack') {
+    return amount * getPackWeightGrams(item);
+  }
+
+  // 5. Global default fallbacks by unit
   const globalDefaults: Record<string, number> = {
     tablespoon: 15,
     teaspoon: 5,
     cup: 200,
     clove: 3,
-    piece: 100,
     pinch: 0.5,
-    slice: 30,
     can: 400,
-    bunch: 25,
+    jar: 350,
+    bunch: 80,
     handful: 30,
   };
 
@@ -698,8 +873,13 @@ export function applyCanonicalMatchToIngredient(
     };
   }
 
-  const weightGrams = calculateWeightGrams(ingredient.amount, ingredient.unit, match);
+  const weightGrams = calculateWeightGrams(ingredient.amount, ingredient.unit, match, ingredient.gramsPerUnit);
   const factor = weightGrams / 100;
+
+  // Populate gramsPerUnit on ingredient if missing
+  if ((!ingredient.gramsPerUnit || ingredient.gramsPerUnit <= 0) && ingredient.amount > 0) {
+    ingredient.gramsPerUnit = Math.round((weightGrams / ingredient.amount) * 10) / 10;
+  }
 
   const cal = Math.round(match.nutrients_per_100g.calories * factor);
   const prot = Math.round(match.nutrients_per_100g.protein * factor * 10) / 10;

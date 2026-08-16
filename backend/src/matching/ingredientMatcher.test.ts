@@ -110,6 +110,20 @@ describe('Ingredient Matcher & Normalizer (BLS 4.0 + Hybrid Search)', () => {
       assert.equal(weight, 6); // 2 cloves * 3g = 6g
     });
 
+    test('calculates realistic piece weights for fish fingers, toast slices and egg yolk', async () => {
+      const fishSticks = await findCanonicalIngredient('Fischstäbchen', 'fish stick', 'MEAT_FISH');
+      assert.ok(fishSticks);
+      assert.equal(calculateWeightGrams(16, 'Stück', fishSticks), 480); // 16 * 30g = 480g
+
+      const toast = await findCanonicalIngredient('Toastbrotscheiben', 'toast bread', 'GRAINS_PASTA');
+      assert.ok(toast);
+      assert.equal(calculateWeightGrams(8, 'Stück', toast), 200); // 8 * 25g = 200g
+
+      const yolk = await findCanonicalIngredient('Eigelb', 'egg yolk', 'DAIRY');
+      assert.ok(yolk);
+      assert.equal(calculateWeightGrams(4, 'Stück', yolk), 80); // 4 * 20g = 80g
+    });
+
     test('calculates grams from volume with density', async () => {
       const oil = await findCanonicalIngredient('Olivenöl', 'olive oil', 'SPICES_OILS', [], ['Olivenöl']);
       assert.ok(oil);

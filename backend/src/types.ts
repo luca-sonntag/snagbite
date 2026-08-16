@@ -14,6 +14,7 @@ export interface Ingredient {
   replacedOriginal?: string;
   amount: number;
   unit: string;
+  gramsPerUnit?: number | null;
   notes?: string;
   modifier?: string;
   category?: string;
