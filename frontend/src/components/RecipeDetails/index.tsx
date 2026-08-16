@@ -23,6 +23,7 @@ import RecipeCopilot from './RecipeCopilot';
 import { useAuth } from '../../context/AuthContext';
 import PremiumModal from '../PremiumModal';
 import ShoppingConfirmSheet from './ShoppingConfirmSheet';
+import { stripInlineIngredientTags } from '../../utils/ingredientMatch';
 
 interface RecipeDetailsProps {
   recipe: Recipe;
@@ -434,7 +435,7 @@ export default function RecipeDetails({
 
     // --- Plain text ---
     let text = `${recipe.title}\n\n`;
-    if (recipe.description) text += `${recipe.description}\n\n`;
+    if (recipe.description) text += `${stripInlineIngredientTags(recipe.description)}\n\n`;
     text += `${metaLine}\n\n`;
 
     text += `${t('recipe.tabIngredients')}\n`;
@@ -449,14 +450,14 @@ export default function RecipeDetails({
 
     text += `${t('recipe.tabInstructions')}\n`;
     recipe.instructions.forEach((step) => {
-      text += `${step.step}. ${step.description}\n`;
+      text += `${step.step}. ${stripInlineIngredientTags(step.description)}\n`;
     });
     text += `\n`;
 
     if (recipe.equipment && recipe.equipment.length > 0) {
       text += `${t('recipe.requiredEquipment')}\n`;
       recipe.equipment.forEach((item) => {
-        text += `• ${item}\n`;
+        text += `• ${stripInlineIngredientTags(item)}\n`;
       });
       text += `\n`;
     }
@@ -464,14 +465,14 @@ export default function RecipeDetails({
     if (recipe.tips && recipe.tips.length > 0) {
       text += `${t('recipe.tipsTitle')}\n`;
       recipe.tips.forEach((tip) => {
-        text += `• ${tip}\n`;
+        text += `• ${stripInlineIngredientTags(tip)}\n`;
       });
       text += `\n`;
     }
 
     // --- Rich text (HTML) ---
     let html = `<h1>${escapeHtml(recipe.title)}</h1>`;
-    if (recipe.description) html += `<p>${escapeHtml(recipe.description)}</p>`;
+    if (recipe.description) html += `<p>${escapeHtml(stripInlineIngredientTags(recipe.description))}</p>`;
     html += `<p><strong>${escapeHtml(t('recipe.prep'))}:</strong> ${escapeHtml(formatTimeValue(recipe.prepTime))} · <strong>${escapeHtml(t('recipe.cook'))}:</strong> ${escapeHtml(formatTimeValue(recipe.cookTime))} · <strong>${escapeHtml(t('recipe.serves'))}:</strong> ${servings}</p>`;
 
     html += `<h2>${escapeHtml(t('recipe.tabIngredients'))}</h2>`;
@@ -486,14 +487,14 @@ export default function RecipeDetails({
 
     html += `<h2>${escapeHtml(t('recipe.tabInstructions'))}</h2><ol>`;
     recipe.instructions.forEach((step) => {
-      html += `<li>${escapeHtml(step.description)}</li>`;
+      html += `<li>${escapeHtml(stripInlineIngredientTags(step.description))}</li>`;
     });
     html += `</ol>`;
 
     if (recipe.equipment && recipe.equipment.length > 0) {
       html += `<h2>${escapeHtml(t('recipe.requiredEquipment'))}</h2><ul>`;
       recipe.equipment.forEach((item) => {
-        html += `<li>${escapeHtml(item)}</li>`;
+        html += `<li>${escapeHtml(stripInlineIngredientTags(item))}</li>`;
       });
       html += `</ul>`;
     }
@@ -501,7 +502,7 @@ export default function RecipeDetails({
     if (recipe.tips && recipe.tips.length > 0) {
       html += `<h2>${escapeHtml(t('recipe.tipsTitle'))}</h2><ul>`;
       recipe.tips.forEach((tip) => {
-        html += `<li>${escapeHtml(tip)}</li>`;
+        html += `<li>${escapeHtml(stripInlineIngredientTags(tip))}</li>`;
       });
       html += `</ul>`;
     }
