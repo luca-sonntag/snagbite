@@ -338,6 +338,42 @@ async function fetchQueryEmbedding(text: string): Promise<number[] | null> {
 }
 
 /**
+ * Safely converts an English plural food noun to its singular form.
+ * Preserves nouns ending in -ss, -us, -is, -se, -cous (e.g. cheese, hummus, asparagus, couscous).
+ */
+export function toEnglishSingular(word: string): string {
+  if (!word || word.length <= 2) return word;
+  const lower = word.toLowerCase().trim();
+
+  // 1. Never strip singular words ending in -ss, -us, -is, -se, -cous
+  if (/(?:ss|us|is|cous|se)$/.test(lower)) {
+    return lower;
+  }
+
+  // 2. Berries & -ies (strawberries -> strawberry, raspberries -> raspberry)
+  if (lower.endsWith('ies')) {
+    return lower.slice(0, -3) + 'y';
+  }
+
+  // 3. -oes (potatoes -> potato, tomatoes -> tomato)
+  if (lower.endsWith('oes')) {
+    return lower.slice(0, -2);
+  }
+
+  // 4. -leaves (leaves -> leaf)
+  if (lower.endsWith('leaves')) {
+    return lower.slice(0, -3) + 'f';
+  }
+
+  // 5. Standard Plural -s (eggs -> egg, onions -> onion, carrots -> carrot, shrimps -> shrimp)
+  if (lower.endsWith('s') && !lower.endsWith('ss')) {
+    return lower.slice(0, -1);
+  }
+
+  return lower;
+}
+
+/**
  * Finds a matching canonical ingredient using Hybrid Search (Exact -> BM25 Sparse -> Gemini Vector Dense).
  */
 export async function findCanonicalIngredient(
@@ -352,10 +388,11 @@ export async function findCanonicalIngredient(
   const targetMiniSearch = cleanCategory && categoryMiniSearchMap.has(cleanCategory) ? categoryMiniSearchMap.get(cleanCategory)! : null;
   const isPowderQuery = /\b(pulver|powder)\b/i.test(name) || /\b(pulver|powder)\b/i.test(baseName || '');
 
-  // 0. Stage 0: Universal BaseName Fast-Path (authoritative direct English key match)
+  // 0. Stage 0: Universal BaseName Fast-Path (authoritative direct English key match + safe singularizer)
   if (baseName) {
     const normBase = baseName.toLowerCase().trim();
-    const mappedId = BASE_NAME_TO_CANONICAL_ID[normBase];
+    const singular = toEnglishSingular(normBase);
+    const mappedId = BASE_NAME_TO_CANONICAL_ID[normBase] || BASE_NAME_TO_CANONICAL_ID[singular];
     if (mappedId) {
       const item = byId.get(mappedId);
       if (item) {
@@ -367,7 +404,9 @@ export async function findCanonicalIngredient(
   // 1. Parent ingredient priority (e.g. "Ei" for "Eigelb", "Zitrone" for "Zitronensaft")
   if (parentIngredient?.name || parentIngredient?.baseName) {
     if (parentIngredient.baseName) {
-      const mappedParentId = BASE_NAME_TO_CANONICAL_ID[parentIngredient.baseName.toLowerCase().trim()];
+      const normParentBase = parentIngredient.baseName.toLowerCase().trim();
+      const singularParent = toEnglishSingular(normParentBase);
+      const mappedParentId = BASE_NAME_TO_CANONICAL_ID[normParentBase] || BASE_NAME_TO_CANONICAL_ID[singularParent];
       if (mappedParentId) {
         const item = byId.get(mappedParentId);
         if (item) return item;

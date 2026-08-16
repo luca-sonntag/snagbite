@@ -6,10 +6,33 @@ import {
   normalizeUnit,
   calculateWeightGrams,
   enrichRecipeWithCanonicalIngredients,
+  toEnglishSingular,
 } from './ingredientMatcher.js';
 import type { Recipe } from '../types.js';
 
 describe('Ingredient Matcher & Normalizer (BLS 4.0 + Hybrid Search)', () => {
+  describe('toEnglishSingular', () => {
+    test('safely converts regular and irregular plurals without breaking words ending in s/ss/us/se', () => {
+      // Plural to singular conversions
+      assert.equal(toEnglishSingular('eggs'), 'egg');
+      assert.equal(toEnglishSingular('onions'), 'onion');
+      assert.equal(toEnglishSingular('carrots'), 'carrot');
+      assert.equal(toEnglishSingular('potatoes'), 'potato');
+      assert.equal(toEnglishSingular('tomatoes'), 'tomato');
+      assert.equal(toEnglishSingular('strawberries'), 'strawberry');
+      assert.equal(toEnglishSingular('raspberries'), 'raspberry');
+      assert.equal(toEnglishSingular('leaves'), 'leaf');
+      assert.equal(toEnglishSingular('shrimps'), 'shrimp');
+
+      // Words ending in s/ss/us/is/se that MUST NOT be truncated
+      assert.equal(toEnglishSingular('cheese'), 'cheese');
+      assert.equal(toEnglishSingular('hummus'), 'hummus');
+      assert.equal(toEnglishSingular('asparagus'), 'asparagus');
+      assert.equal(toEnglishSingular('couscous'), 'couscous');
+      assert.equal(toEnglishSingular('watercress'), 'watercress');
+    });
+  });
+
   describe('normalizeSearchTerm', () => {
     test('cleans parentheses, comma suffixes and extra modifiers', () => {
       assert.equal(normalizeSearchTerm('Zwiebel (fein gewürfelt)'), 'zwiebel');
