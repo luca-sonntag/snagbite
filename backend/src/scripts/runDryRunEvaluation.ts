@@ -45,7 +45,72 @@ interface EvalRecipeReport {
   ingredients: EvalIngredientReport[];
 }
 
+interface CliOptions {
+  skip: number;
+  targetRecipes: number;
+  concurrency: number;
+}
+
+function parseCliArgs(): CliOptions {
+  const args = process.argv.slice(2);
+  let skip = process.env.SKIP ? parseInt(process.env.SKIP, 10) : 0;
+  let targetRecipes = process.env.LIMIT || process.env.TARGET_RECIPES
+    ? parseInt(process.env.LIMIT || process.env.TARGET_RECIPES!, 10)
+    : 5;
+  let concurrency = process.env.CONCURRENCY ? parseInt(process.env.CONCURRENCY, 10) : 2;
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === '--help' || arg === '-h') {
+      console.log(`
+Usage: npx tsx src/scripts/runDryRunEvaluation.ts [options]
+
+Options:
+  --skip, -s <n>         Number of recipe URLs to skip (default: 0)
+  --limit, -l, -n <n>    Number of recipes to successfully evaluate (default: 5)
+  --concurrency, -c <n>  Number of parallel workers (default: 2)
+  --help, -h             Show this help message
+
+Environment variables:
+  SKIP=5 LIMIT=10 CONCURRENCY=2 npx tsx src/scripts/runDryRunEvaluation.ts
+      `);
+      process.exit(0);
+    }
+
+    if (arg === '--skip' || arg === '-s') {
+      const val = parseInt(args[++i], 10);
+      if (!isNaN(val)) skip = Math.max(0, val);
+    } else if (arg.startsWith('--skip=')) {
+      const val = parseInt(arg.slice(7), 10);
+      if (!isNaN(val)) skip = Math.max(0, val);
+    } else if (arg.startsWith('-s=')) {
+      const val = parseInt(arg.slice(3), 10);
+      if (!isNaN(val)) skip = Math.max(0, val);
+    } else if (arg === '--limit' || arg === '-l' || arg === '-n' || arg === '--target') {
+      const val = parseInt(args[++i], 10);
+      if (!isNaN(val)) targetRecipes = Math.max(1, val);
+    } else if (arg.startsWith('--limit=') || arg.startsWith('--target=')) {
+      const val = parseInt(arg.split('=')[1], 10);
+      if (!isNaN(val)) targetRecipes = Math.max(1, val);
+    } else if (arg === '--concurrency' || arg === '-c') {
+      const val = parseInt(args[++i], 10);
+      if (!isNaN(val)) concurrency = Math.max(1, val);
+    } else if (arg.startsWith('--concurrency=') || arg.startsWith('-c=')) {
+      const val = parseInt(arg.split('=')[1], 10);
+      if (!isNaN(val)) concurrency = Math.max(1, val);
+    }
+  }
+
+  if (isNaN(skip) || skip < 0) skip = 0;
+  if (isNaN(targetRecipes) || targetRecipes < 1) targetRecipes = 5;
+  if (isNaN(concurrency) || concurrency < 1) concurrency = 2;
+
+  return { skip, targetRecipes, concurrency };
+}
+
 async function run() {
+  const { skip, targetRecipes, concurrency } = parseCliArgs();
+
   console.log('=== Starting Dry-Run Recipe & Ingredient Matching Evaluation ===\n');
 
   const supabase = getClient();
@@ -71,9 +136,6 @@ async function run() {
     }
   }
 
-  const TARGET_RECIPES = 5;
-  const CONCURRENCY = 2;
-
   // Create unique timestamped run directory inside eval_results
   const now = new Date();
   const pad = (n: number) => String(n).padStart(2, '0');
@@ -83,8 +145,18 @@ async function run() {
   await fs.mkdir(runOutputDir, { recursive: true });
 
   console.log(`Found ${uniqueUrls.length} real unique recipe URLs in Supabase Dev.`);
-  console.log(`Target: ${TARGET_RECIPES} recipes | Concurrency: ${CONCURRENCY}`);
+  if (skip > 0) {
+    console.log(`Skipping first ${skip} recipes (starting at index ${skip + 1}).`);
+  }
+  console.log(`Target: ${targetRecipes} recipes | Concurrency: ${concurrency}`);
   console.log(`Run Output Directory: ${runOutputDir}\n`);
+
+  if (skip >= uniqueUrls.length) {
+    console.warn(`[Warning] Skip offset (${skip}) is >= total available URLs (${uniqueUrls.length}). Nothing to process.`);
+    return;
+  }
+
+  const candidateUrls = uniqueUrls.slice(skip);
 
   const allReports: EvalRecipeReport[] = [];
   let globalTotalIngredients = 0;
@@ -103,17 +175,18 @@ async function run() {
   const tempBaseDir = path.join(baseOutputDir, '.eval_temp');
   await fs.mkdir(tempBaseDir, { recursive: true });
 
-  let nextUrlIndex = 0;
+  let nextCandidateIndex = 0;
 
   async function worker(workerId: number) {
-    while (nextUrlIndex < uniqueUrls.length && allReports.length < TARGET_RECIPES) {
-      const idx = nextUrlIndex++;
-      const url = uniqueUrls[idx];
-      const runDir = path.join(tempBaseDir, `w${workerId}_${idx + 1}`);
+    while (nextCandidateIndex < candidateUrls.length && allReports.length < targetRecipes) {
+      const candidateIdx = nextCandidateIndex++;
+      const globalIdx = skip + candidateIdx;
+      const url = candidateUrls[candidateIdx];
+      const runDir = path.join(tempBaseDir, `w${workerId}_${globalIdx + 1}`);
       await fs.mkdir(runDir, { recursive: true });
 
       try {
-        console.log(`[Worker ${workerId}] Processing URL (${idx + 1}/${uniqueUrls.length}): ${url}`);
+        console.log(`[Worker ${workerId}] Processing URL (${globalIdx + 1}/${uniqueUrls.length}): ${url}`);
         const scraper = getScraperForUrl(url);
         const scrapeResult = await scraper.scrape(url, runDir);
         console.log(`  [Worker ${workerId}] Scraped: Caption ${(scrapeResult.caption || '').length} chars`);
@@ -227,7 +300,7 @@ async function run() {
         allReports.push(report);
         const reportIndex = allReports.length;
 
-        const safeTitle = (recipe.title || `recipe_${idx + 1}`)
+        const safeTitle = (recipe.title || `recipe_${globalIdx + 1}`)
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, '_')
           .slice(0, 40);
@@ -248,8 +321,8 @@ async function run() {
   }
 
   // Run workers in parallel
-  console.log(`Launching ${CONCURRENCY} parallel workers...\n`);
-  const workerPromises = Array.from({ length: CONCURRENCY }, (_, i) => worker(i + 1));
+  console.log(`Launching ${concurrency} parallel workers...\n`);
+  const workerPromises = Array.from({ length: concurrency }, (_, i) => worker(i + 1));
   await Promise.all(workerPromises);
 
   // Cleanup temporary base scraping directory
@@ -280,6 +353,9 @@ async function run() {
     runFolder: runFolderName,
     evaluatedAt: new Date().toISOString(),
     totalUrlsAvailable: uniqueUrls.length,
+    skip,
+    targetRecipes,
+    concurrency,
     processedRecipes: allReports.length,
     globalTotalIngredients,
     globalVerifiedIngredients,
