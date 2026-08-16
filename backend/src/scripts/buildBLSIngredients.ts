@@ -119,7 +119,7 @@ function cleanText(text: string): string {
     .trim();
 }
 
-function generateAliases(nameDe: string, nameEn: string, code: string): string[] {
+function generateAliases(nameDe: string, nameEn: string, code: string, category?: string): string[] {
   const aliases = new Set<string>();
 
   const addAlias = (str: string) => {
@@ -144,153 +144,193 @@ function generateAliases(nameDe: string, nameEn: string, code: string): string[]
     addAlias(part);
   }
 
-  // Remove common administrative BLS suffixes and qualifiers
-  const strippedDe = nameDe
-    .replace(/mind\.\s*\d+\s*%\s*Fett\s*i\.\s*Tr\./gi, '')
-    .replace(/max\.\s*\d+\s*%\s*Fett\s*i\.\s*Tr\./gi, '')
-    .replace(/\d+\s*%\s*Fett\s*i\.\s*Tr\./gi, '')
-    .replace(/\b(ohne Schwartenzug|ohne Haut|mit Haut|ohne Knochen|mit Knochen)\b/gi, '')
-    .replace(/\b(roh|gekocht|gebraten|gedünstet|gebacken|frittiert|getrocknet|konserve|tiefgekühlt)\b/gi, '')
-    .replace(/\([^\)]*\)/g, '')
-    .trim();
-
-  addAlias(strippedDe);
-
-  // Common food synonym mappings
+  // Remove common administrative BLS suffixes and qualifiers (only for base foods)
   const lowerDe = nameDe.toLowerCase();
-  if (lowerDe.includes('trinkwasser') || lowerDe.includes('mineralwasser') || code === 'N111000') {
-    aliases.add('wasser');
-    aliases.add('trinkwasser');
-    aliases.add('leitungswasser');
-    aliases.add('water');
-  }
-  if (lowerDe.includes('zitronensaft') || (lowerDe.includes('zitrone') && lowerDe.includes('saft'))) {
-    aliases.add('zitronensaft');
-    aliases.add('lemon juice');
-    aliases.add('zitrone saft');
-  }
-  if (lowerDe.includes('speisesalz') || lowerDe.includes('siedesalz')) {
-    aliases.add('salz');
-    aliases.add('speisesalz');
-    aliases.add('meersalz');
-    aliases.add('jodsalz');
-    aliases.add('salt');
-  }
-  if (lowerDe.includes('schwarzer pfeffer') || code === 'R131000') {
-    aliases.add('pfeffer');
-    aliases.add('schwarzer pfeffer');
-    aliases.add('pfeffer schwarz');
-    aliases.add('pepper');
-  }
-  if (lowerDe.includes('hühnervollei') || (lowerDe.includes('hühnerei') && !lowerDe.includes('eigelb') && !lowerDe.includes('eiweiß'))) {
-    aliases.add('ei');
-    aliases.add('eier');
-    aliases.add('hühnerei');
-    aliases.add('egg');
-    aliases.add('eggs');
-  }
-  if (lowerDe.includes('hühnereigelb') || lowerDe.includes('eigelb')) {
-    aliases.add('eigelb');
-    aliases.add('egg yolk');
-  }
-  if (lowerDe.includes('hühnereiweiß') || lowerDe.includes('eiklar') || lowerDe.includes('eiweiß')) {
-    aliases.add('eiweiß');
-    aliases.add('eiklar');
-    aliases.add('egg white');
-  }
-  if (lowerDe.includes('kakaopulver') || (lowerDe.includes('kakao') && code.startsWith('S211'))) {
-    aliases.add('backkakao');
-    aliases.add('kakaopulver');
-    aliases.add('kakao');
-    aliases.add('cocoa powder');
-  }
-  if (lowerDe.includes('tomate') && code.startsWith('G501')) {
-    aliases.add('tomate');
-    aliases.add('tomaten');
-    aliases.add('kirschtomaten');
-    aliases.add('cocktailtomaten');
-    aliases.add('cherrytomaten');
-  }
-  if (lowerDe.includes('speisequark') && lowerDe.includes('mager')) {
-    aliases.add('magerquark');
-    aliases.add('quark mager');
-    aliases.add('quark magerstufe');
-    aliases.add('speisequark mager');
-  }
-  if (lowerDe.includes('hähnchen') && (lowerDe.includes('brust') || lowerDe.includes('filet'))) {
-    aliases.add('hähnchenbrustfilet');
-    aliases.add('hähnchenbrust');
-    aliases.add('hühnerbrust');
-    aliases.add('hühnerbrustfilet');
-    aliases.add('hähnchengeschnetzeltes');
-  }
-  if (lowerDe.includes('rind') && lowerDe.includes('hackfleisch')) {
-    aliases.add('rinderhackfleisch');
-    aliases.add('rinderhack');
-    aliases.add('hackfleisch rind');
-  }
-  if (lowerDe.includes('speisezwiebel') || (lowerDe.includes('zwiebel') && code.startsWith('G480'))) {
-    aliases.add('zwiebel');
-    aliases.add('zwiebeln');
-    aliases.add('rote zwiebel');
-    aliases.add('rote zwiebeln');
-    aliases.add('onion');
-    aliases.add('onions');
-  }
-  if (lowerDe.includes('knoblauch') && code.startsWith('K111')) {
-    aliases.add('knoblauch');
-    aliases.add('knoblauchzehe');
-    aliases.add('knoblauchzehen');
-    aliases.add('garlic');
-    aliases.add('garlic clove');
-  }
-  if (lowerDe.includes('gemischtes hackfleisch') || (lowerDe.includes('hackfleisch') && lowerDe.includes('gemischt'))) {
-    aliases.add('hackfleisch gemischt');
-    aliases.add('hackfleisch');
-  }
-  if (lowerDe.includes('hafer') && lowerDe.includes('flocken')) {
-    aliases.add('haferflocken');
-    aliases.add('zarte haferflocken');
-    aliases.add('kernige haferflocken');
-  }
-  if (lowerDe.includes('eierteigwaren') || (lowerDe.includes('teigwaren') && !lowerDe.includes('vollkorn'))) {
-    aliases.add('nudeln');
-    aliases.add('pasta');
-    aliases.add('spaghetti');
-  }
-  if (lowerDe.includes('vollkornteigwaren')) {
-    aliases.add('vollkornnudeln');
-    aliases.add('vollkornpasta');
-    aliases.add('vollkornspaghetti');
-  }
-  if (lowerDe.includes('olivenöl')) {
-    aliases.add('olivenöl');
-    aliases.add('olivenoel');
-    aliases.add('natives olivenöl');
-  }
-  if (lowerDe.includes('butter') && code.startsWith('Q651')) {
-    aliases.add('butter');
-    aliases.add('deutsche markenbutter');
-  }
-  if (lowerDe.includes('gouda')) {
-    aliases.add('gouda');
-    aliases.add('gouda gerieben');
-    aliases.add('geriebener gouda');
-  }
-  if (lowerDe.includes('mozzarella')) {
-    aliases.add('mozzarella');
-    aliases.add('mozzarella gerieben');
-    aliases.add('mozzarella light');
-  }
-  if (lowerDe.includes('parmesan') || lowerDe.includes('parmigiano')) {
-    aliases.add('parmesan');
-    aliases.add('parmigiano reggiano');
-    aliases.add('grana padano');
-  }
-  if (lowerDe.includes('schafskäse') || lowerDe.includes('feta')) {
-    aliases.add('feta');
-    aliases.add('schafskäse');
-    aliases.add('hirtenkäse');
+  const isCompositeMeal = code.startsWith('X') || code.startsWith('Y') || category === 'READY_MEALS';
+
+  if (!isCompositeMeal) {
+    const strippedDe = nameDe
+      .replace(/mind\.\s*\d+\s*%\s*Fett\s*i\.\s*Tr\./gi, '')
+      .replace(/max\.\s*\d+\s*%\s*Fett\s*i\.\s*Tr\./gi, '')
+      .replace(/\d+\s*%\s*Fett\s*i\.\s*Tr\./gi, '')
+      .replace(/\b(ohne Schwartenzug|ohne Haut|mit Haut|ohne Knochen|mit Knochen)\b/gi, '')
+      .replace(/\b(roh|gekocht|gebraten|gedünstet|gebacken|frittiert|getrocknet|konserve|tiefgekühlt)\b/gi, '')
+      .replace(/\([^\)]*\)/g, '')
+      .trim();
+
+    addAlias(strippedDe);
+
+    if (lowerDe.includes('trinkwasser') || lowerDe.includes('mineralwasser') || code === 'N111000') {
+      aliases.add('wasser');
+      aliases.add('trinkwasser');
+      aliases.add('water');
+    }
+    if (lowerDe.includes('zitronensaft') || (lowerDe.includes('zitrone') && lowerDe.includes('saft'))) {
+      aliases.add('zitronensaft');
+      aliases.add('lemon juice');
+    }
+    if (lowerDe.includes('speisesalz') || lowerDe.includes('siedesalz')) {
+      aliases.add('salz');
+      aliases.add('speisesalz');
+      aliases.add('meersalz');
+      aliases.add('jodsalz');
+      aliases.add('salt');
+    }
+    if (lowerDe.includes('schwarzer pfeffer') || code === 'R131000') {
+      aliases.add('pfeffer');
+      aliases.add('schwarzer pfeffer');
+      aliases.add('pfeffer schwarz');
+      aliases.add('pepper');
+    }
+    if (lowerDe.includes('hühnervollei') || (lowerDe.includes('hühnerei') && !lowerDe.includes('eigelb') && !lowerDe.includes('eiweiß'))) {
+      aliases.add('ei');
+      aliases.add('eier');
+      aliases.add('hühnerei');
+      aliases.add('egg');
+      aliases.add('eggs');
+    }
+    if (lowerDe.includes('hühnereigelb') || lowerDe.includes('eigelb')) {
+      aliases.add('eigelb');
+      aliases.add('egg yolk');
+    }
+    if (lowerDe.includes('hühnereiweiß') || lowerDe.includes('eiklar') || lowerDe.includes('eiweiß')) {
+      aliases.add('eiweiß');
+      aliases.add('eiklar');
+      aliases.add('egg white');
+    }
+    if (lowerDe.includes('kakaopulver') || (lowerDe.includes('kakao') && code.startsWith('S211'))) {
+      aliases.add('backkakao');
+      aliases.add('kakaopulver');
+      aliases.add('kakao');
+      aliases.add('cocoa powder');
+    }
+    if (lowerDe.includes('tomate') && code.startsWith('G501')) {
+      aliases.add('tomate');
+      aliases.add('tomaten');
+      aliases.add('kirschtomaten');
+      aliases.add('cocktailtomaten');
+      aliases.add('cherrytomaten');
+    }
+    if (lowerDe.includes('speisequark') && lowerDe.includes('mager')) {
+      aliases.add('magerquark');
+      aliases.add('quark mager');
+      aliases.add('speisequark mager');
+    }
+    if (lowerDe.includes('hähnchen') && (lowerDe.includes('brust') || lowerDe.includes('filet'))) {
+      aliases.add('hähnchenbrustfilet');
+      aliases.add('hähnchenbrust');
+      aliases.add('hühnerbrust');
+      aliases.add('hühnerbrustfilet');
+    }
+    if (lowerDe.includes('rind') && lowerDe.includes('hackfleisch')) {
+      aliases.add('rinderhackfleisch');
+      aliases.add('rinderhack');
+    }
+    if (lowerDe.includes('speisezwiebel') || (lowerDe.includes('zwiebel') && code.startsWith('G480'))) {
+      aliases.add('zwiebel');
+      aliases.add('zwiebeln');
+      aliases.add('rote zwiebel');
+      aliases.add('onion');
+      aliases.add('onions');
+    }
+    if (lowerDe.includes('knoblauch') && code.startsWith('K111')) {
+      aliases.add('knoblauch');
+      aliases.add('knoblauchzehe');
+      aliases.add('knoblauchzehen');
+      aliases.add('garlic');
+    }
+    if (lowerDe.includes('butter') && (code.startsWith('Q651') || lowerDe.includes('markenbutter') || lowerDe === 'butter')) {
+      aliases.add('butter');
+    }
+    if (lowerDe.includes('dinkel') && lowerDe.includes('mehl')) {
+      aliases.add('dinkelmehl');
+      aliases.add('dinkel mehl');
+      aliases.add('spelt flour');
+    }
+    if (lowerDe.includes('weizen') && lowerDe.includes('mehl') && code.startsWith('C211')) {
+      aliases.add('mehl');
+      aliases.add('weizenmehl');
+      aliases.add('wheat flour');
+      aliases.add('flour');
+    }
+    if (lowerDe.includes('paprikapulver') || (lowerDe.includes('paprika') && code.startsWith('R211'))) {
+      aliases.add('paprikapulver');
+      aliases.add('paprikapulver edelsüß');
+      aliases.add('paprika edelsüß');
+      aliases.add('paprika powder');
+    }
+    if (lowerDe.includes('cayennepfeffer') || code === 'R213100' || (lowerDe.includes('chili') && lowerDe.includes('pulver'))) {
+      aliases.add('cayennepfeffer');
+      aliases.add('chilipulver');
+      aliases.add('cayenne pepper');
+    }
+    if ((lowerDe.includes('schlagsahne') || lowerDe.includes('sahne')) && code.startsWith('M173')) {
+      aliases.add('sahne');
+      aliases.add('schlagsahne');
+      aliases.add('heavy cream');
+      aliases.add('cream');
+    }
+    if (lowerDe.includes('mozzarella') && code.startsWith('M032')) {
+      aliases.add('mozzarella');
+      aliases.add('mozzarellakugeln');
+    }
+    if (lowerDe.includes('parmesan') && code.startsWith('M306')) {
+      aliases.add('parmesan');
+      aliases.add('parmesankäse');
+    }
+    if (lowerDe.includes('joghurt') && code.startsWith('M210')) {
+      aliases.add('joghurt');
+      aliases.add('naturjoghurt');
+      aliases.add('yogurt');
+    }
+    if (lowerDe.includes('hafer') && lowerDe.includes('flocken')) {
+      aliases.add('haferflocken');
+      aliases.add('zarte haferflocken');
+      aliases.add('rolled oats');
+      aliases.add('oats');
+    }
+    if ((lowerDe.includes('teigwaren') || lowerDe.includes('pasta') || lowerDe.includes('nudeln')) && code.startsWith('E432')) {
+      aliases.add('nudeln');
+      aliases.add('pasta');
+      aliases.add('bandnudeln');
+    }
+    if (lowerDe.includes('vollkornteigwaren')) {
+      aliases.add('vollkornnudeln');
+      aliases.add('vollkornpasta');
+      aliases.add('vollkornspaghetti');
+    }
+    if (lowerDe.includes('olivenöl')) {
+      aliases.add('olivenöl');
+      aliases.add('natives olivenöl');
+      aliases.add('olive oil');
+    }
+    if (lowerDe.includes('gouda')) {
+      aliases.add('gouda');
+      aliases.add('gouda gerieben');
+    }
+    if (lowerDe.includes('kochschinken') && code.startsWith('W424')) {
+      aliases.add('kochschinken');
+      aliases.add('schinken');
+      aliases.add('cooked ham');
+      aliases.add('ham');
+    }
+    if (code === 'G543100' || (code.startsWith('G543') && lowerDe.includes('rot') && lowerDe.includes('roh'))) {
+      aliases.add('paprika');
+      aliases.add('rote paprika');
+      aliases.add('paprikaschote');
+      aliases.add('bell pepper');
+      aliases.add('red bell pepper');
+    }
+    if (code === 'G541100' || (code.startsWith('G541') && lowerDe.includes('grün') && lowerDe.includes('roh'))) {
+      aliases.add('grüne paprika');
+      aliases.add('paprika grün');
+      aliases.add('green bell pepper');
+    }
+    if (code === 'G542100' || (code.startsWith('G542') && lowerDe.includes('gelb') && lowerDe.includes('roh'))) {
+      aliases.add('gelbe paprika');
+      aliases.add('paprika gelb');
+      aliases.add('yellow bell pepper');
+    }
   }
 
   return Array.from(aliases).filter(a => a.length >= 2);
@@ -370,7 +410,7 @@ async function build() {
     const fiber = parseGermanNumber(cols[21]);
 
     const category = mapBLSToCategory(code, nameDe);
-    const aliases = generateAliases(nameDe, nameEn, code);
+    const aliases = generateAliases(nameDe, nameEn, code, category);
     const standardUnits = generateStandardUnits(nameDe, category);
 
     const id = `bls_${code.toLowerCase()}`;

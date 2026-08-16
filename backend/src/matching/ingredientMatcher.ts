@@ -48,12 +48,13 @@ try {
   console.warn('[ingredientMatcher] Could not load canonical embeddings buffer:', err);
 }
 
-// Simplicity score for choosing between multiple exact alias matches
+// Simplicity score for choosing between multiple exact alias matches and ranking raw staples
 function getSimplicityScore(item: CanonicalIngredient): number {
   const de = (item.name_de || '').toLowerCase();
   const en = (item.name_en || '').toLowerCase();
   let score = 100 - de.length;
-  if (de.includes('roh') || en.includes('raw') || de.includes('pulver')) score += 30;
+  if (de.includes('roh') || en.includes('raw')) score += 40;
+  if (de.includes('pulver') && !de.includes('backpulver')) score += 25;
   if (de.includes('nature') || de.includes('mager') || en.includes('plain') || en.includes('unsalted') || de.includes('trocken')) score += 20;
   if (
     de.includes('zubereitung') ||
@@ -62,6 +63,10 @@ function getSimplicityScore(item: CanonicalIngredient): number {
     de.includes('salat') ||
     de.includes('burger') ||
     de.includes('konserve') ||
+    de.includes('gegrillt') ||
+    de.includes('gebacken') ||
+    de.includes('gedünstet') ||
+    de.includes('mit fett und salz') ||
     de.includes('für torten')
   ) {
     score -= 40;
@@ -265,6 +270,7 @@ function buildSearchQueries(
   searchQueries?: string[]
 ): string[] {
   const queries: string[] = [];
+  const genericFragments = new Set(['powder', 'pulver', 'milk', 'milch', 'cheese', 'käse', 'oil', 'öl', 'sauce', 'soße', 'cookies', 'kekse', 'pudding']);
 
   // A. Explicit search queries from Gemini
   if (searchQueries && Array.isArray(searchQueries)) {
@@ -291,7 +297,11 @@ function buildSearchQueries(
     for (const s of synonyms) {
       if (s && typeof s === 'string') {
         const norm = normalizeSearchTerm(s);
-        if (norm && !queries.includes(norm)) queries.push(norm);
+        if (!norm || queries.includes(norm)) continue;
+        if (genericFragments.has(norm) && name && name.split(/\s+/).length >= 2) {
+          continue; // Skip isolated generic fragment for compound products
+        }
+        queries.push(norm);
       }
     }
   }
@@ -335,22 +345,18 @@ export async function findCanonicalIngredient(
     const normParent = normalizeSearchTerm(parentIngredient.name);
     const directParent = byAlias.get(normParent) || byNameDe.get(normParent) || byId.get(normParent);
     if (directParent) {
-      if (!cleanCategory || directParent.category === cleanCategory || cleanCategory === 'OTHER') {
-        return directParent;
-      }
+      return directParent;
     }
   }
 
   // 2. Build search query list
   const queriesToTest = buildSearchQueries(name, baseName, synonyms, searchQueries);
 
-  // 3. Stage 1: Exact O(1) Fast-Path
+  // 3. Stage 1: Exact O(1) Fast-Path (authoritative direct alias match)
   for (const q of queriesToTest) {
     const direct = byAlias.get(q) || byNameDe.get(q) || byId.get(q) || byNameEn.get(q);
     if (direct) {
-      if (!cleanCategory || direct.category === cleanCategory || cleanCategory === 'OTHER') {
-        return direct;
-      }
+      return direct;
     }
   }
 
@@ -392,7 +398,15 @@ export async function findCanonicalIngredient(
     queryVector = await fetchQueryEmbedding(primaryQuery);
   }
 
+  const isFitnessQuery = /\b(protein|whey|isoclear|casein)\b/i.test(name) || /\b(protein|whey|isoclear|casein)\b/i.test(baseName || '');
+
   for (const { item, bm25Score } of candidates) {
+    // Never match fitness protein powder to baking leavening agents (Backpulver/Natron)
+    const isBakingLeavening = item.bls_code?.startsWith('R42') || (item.name_de || '').toLowerCase().includes('backpulver') || (item.name_de || '').toLowerCase().includes('natron');
+    if (isFitnessQuery && isBakingLeavening) {
+      continue;
+    }
+
     let semanticScore = 0;
     const vecIdx = idToVectorIndex.get(item.id.toLowerCase().trim());
 
@@ -401,11 +415,26 @@ export async function findCanonicalIngredient(
       semanticScore = calculateCosineSimilarity(queryVector, offset);
     }
 
+    // Category alignment bonus / penalty
+    let categoryWeight = 1.0;
+    if (cleanCategory && cleanCategory !== 'READY_MEALS' && cleanCategory !== 'OTHER') {
+      if (item.category === 'READY_MEALS' || item.bls_code?.startsWith('X') || item.bls_code?.startsWith('Y')) {
+        categoryWeight = 0.65; // Strong penalty for ready meals when looking for raw produce/dairy/meat/grains
+      } else if (item.category === cleanCategory) {
+        categoryWeight = 1.15; // Category match bonus
+      }
+    }
+
     // Normalized BM25: saturates around score 10
     const normalizedBM25 = Math.min(1.0, bm25Score / 10.0);
+    const simplicityBonus = (getSimplicityScore(item) - 50) / 400;
 
-    // Hybrid composite score: 45% BM25 + 55% Semantic Vector Similarity
-    const hybridScore = queryVector ? (0.45 * normalizedBM25 + 0.55 * semanticScore) : normalizedBM25;
+    // Hybrid composite score: (40% BM25 + 60% Semantic Vector Similarity + simplicity bonus) * categoryWeight
+    const baseScore = queryVector
+      ? (0.40 * normalizedBM25 + 0.60 * semanticScore + simplicityBonus)
+      : (normalizedBM25 + simplicityBonus);
+
+    const hybridScore = baseScore * categoryWeight;
 
     // Strict semantic filter: if vector model is active, cosine similarity must be >= 0.70
     if (queryVector && semanticScore < 0.70) {
