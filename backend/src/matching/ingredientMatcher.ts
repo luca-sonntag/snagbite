@@ -5,6 +5,7 @@ import MiniSearch from 'minisearch';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { config } from '../config.js';
 import { CANONICAL_INGREDIENTS, type CanonicalIngredient } from '../data/canonicalIngredients.js';
+import { BASE_NAME_TO_CANONICAL_ID } from './baseNameMap.js';
 import type { Recipe, Ingredient, ParentIngredientInfo } from '../types.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -351,12 +352,33 @@ export async function findCanonicalIngredient(
   const targetMiniSearch = cleanCategory && categoryMiniSearchMap.has(cleanCategory) ? categoryMiniSearchMap.get(cleanCategory)! : null;
   const isPowderQuery = /\b(pulver|powder)\b/i.test(name) || /\b(pulver|powder)\b/i.test(baseName || '');
 
+  // 0. Stage 0: Universal BaseName Fast-Path (authoritative direct English key match)
+  if (baseName) {
+    const normBase = baseName.toLowerCase().trim();
+    const mappedId = BASE_NAME_TO_CANONICAL_ID[normBase];
+    if (mappedId) {
+      const item = byId.get(mappedId);
+      if (item) {
+        return item;
+      }
+    }
+  }
+
   // 1. Parent ingredient priority (e.g. "Ei" for "Eigelb", "Zitrone" for "Zitronensaft")
-  if (parentIngredient?.name) {
-    const normParent = normalizeSearchTerm(parentIngredient.name);
-    const directParent = byAlias.get(normParent) || byNameDe.get(normParent) || byId.get(normParent);
-    if (directParent) {
-      return directParent;
+  if (parentIngredient?.name || parentIngredient?.baseName) {
+    if (parentIngredient.baseName) {
+      const mappedParentId = BASE_NAME_TO_CANONICAL_ID[parentIngredient.baseName.toLowerCase().trim()];
+      if (mappedParentId) {
+        const item = byId.get(mappedParentId);
+        if (item) return item;
+      }
+    }
+    if (parentIngredient.name) {
+      const normParent = normalizeSearchTerm(parentIngredient.name);
+      const directParent = byAlias.get(normParent) || byNameDe.get(normParent) || byId.get(normParent);
+      if (directParent) {
+        return directParent;
+      }
     }
   }
 
