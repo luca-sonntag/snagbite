@@ -41,16 +41,16 @@ export default function PremiumHint({
     <button
       type="button"
       onClick={onClick}
-      className={`w-full cursor-pointer flex items-center gap-3 px-4 py-3 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] active:scale-[0.98] transition-all text-left ${className}`}
+      className={`w-full cursor-pointer flex items-center gap-3 p-4 rounded-3xl bg-white dark:bg-gray-900 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:bg-gray-50 dark:hover:bg-gray-800/70 active:scale-[0.99] transition-all text-left ${className}`}
     >
-      <span className="w-9 h-9 rounded-2xl bg-amber-500/10 flex items-center justify-center shrink-0">
-        <Crown className="w-5 h-5 text-amber-500 fill-amber-500" />
+      <span className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+        <Crown className="w-5 h-5" />
       </span>
       <span className="flex-1 min-w-0 text-xs font-semibold text-gray-900 dark:text-white leading-snug">
         {label}
       </span>
       {cta && (
-        <span className="text-[11px] font-extrabold text-white bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded-xl shrink-0 transition-colors">
+        <span className="text-xs font-bold text-white bg-amber-500 hover:bg-amber-400 h-9 px-3.5 rounded-xl shrink-0 flex items-center transition-colors">
           {cta}
         </span>
       )}
