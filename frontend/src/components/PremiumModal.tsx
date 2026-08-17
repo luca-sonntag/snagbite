@@ -182,13 +182,12 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
         {/* Main sheet — ONE gradient for the whole sheet, hero + features share it seamlessly */}
         <div
           className="relative flex-1 flex flex-col w-full max-w-md mx-auto rounded-t-[28px] overflow-hidden shadow-[0_-8px_40px_rgba(0,0,0,0.18)]"
-          style={{ background: 'linear-gradient(180deg, #e6fcef 0%, #edfbf3 90px, #f1fbf5 190px, #f5fcf8 300px, #f8fbf9 420px, #f9fafb 560px, #f9fafb 100%)' }}
+          style={{ background: 'linear-gradient(180deg, #f2fbf6 0%, #f6fcf9 150px, #f9fafb 340px, #f9fafb 100%)' }}
         >
 
-          {/* Radial ambient glow — lives on the sheet (not the hero) so it radiates
-              seamlessly down into the feature area instead of being clipped */}
-          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-[28rem] h-80 bg-emerald-400/25 rounded-[50%] blur-3xl pointer-events-none z-0" />
-          <div className="absolute top-0 right-[-20%] w-56 h-40 bg-amber-300/10 rounded-full blur-3xl pointer-events-none z-0" />
+          {/* Soft indirect glow radiating from the top-left corner — lives on the
+              sheet (not the hero) so it bleeds gently down into the feature area */}
+          <div className="absolute -top-16 -left-16 w-80 h-80 bg-emerald-400/15 rounded-[50%] blur-[80px] pointer-events-none z-0" />
 
           {/* ─── Hero: transparent — sheet gradient + glow show through ─── */}
           <div className="relative z-10 shrink-0">
