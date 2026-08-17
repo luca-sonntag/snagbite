@@ -198,7 +198,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                 <h2
                   className="text-[28px] font-black tracking-tight leading-[1.1]"
                   style={{
-                    background: 'linear-gradient(135deg, #334155 0%, #92400e 60%, #f59e0b 100%)',
+                    background: 'linear-gradient(135deg, #7c2d12 0%, #b45309 55%, #f59e0b 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                   }}
