@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {
-  Crown, Check, X, Loader2, AlertCircle,
+  Check, X, Loader2, AlertCircle,
   Video, MessageSquare, Flame, ListTodo, Coffee, Layers, ChefHat
 } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
@@ -167,53 +167,60 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
       {/* Sheet container */}
       <div className="absolute inset-0 flex flex-col">
 
-        {/* Tapable top spacer */}
+        {/* Tapable top spacer to dismiss */}
         <div
           className="shrink-0"
-          style={{ height: 'max(var(--safe-area-inset-top, 0px), 24px)' }}
+          style={{ height: 'max(var(--safe-area-inset-top, 0px), 32px)' }}
           onClick={() => !loading && onOpenChange(false)}
         />
 
         {/* Main sheet */}
-        <div className="relative flex-1 flex flex-col w-full max-w-md mx-auto bg-gray-50 rounded-t-[28px] overflow-hidden shadow-[0_-8px_40px_rgba(0,0,0,0.2)]">
+        <div className="relative flex-1 flex flex-col w-full max-w-md mx-auto bg-gray-50 rounded-t-[28px] overflow-hidden shadow-[0_-8px_40px_rgba(0,0,0,0.18)]">
 
-          {/* ─── Hero Section ─── */}
-          <div className="relative shrink-0 rounded-t-[28px] overflow-hidden" style={{ background: 'linear-gradient(160deg, #f0fdf4 0%, #ffffff 55%, #fffbeb 100%)' }}>
-            {/* Soft radial behind crown */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-40 bg-emerald-400/15 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 w-40 h-24 bg-amber-300/12 rounded-full blur-2xl pointer-events-none" />
+          {/* â”€â”€â”€ Hero: pure typography, no icon â”€â”€â”€ */}
+          <div className="relative shrink-0 rounded-t-[28px] overflow-hidden" style={{ background: 'linear-gradient(170deg, #ecfdf5 0%, #ffffff 50%, #fafafa 100%)' }}>
+            {/* Radial ambient glow */}
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-96 h-48 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-0 right-[-20%] w-48 h-32 bg-amber-300/10 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="relative px-6 pt-7 pb-6">
-              {/* Close button */}
+            <div className="relative px-6 pt-6 pb-5">
+              {/* Close */}
               {!loading && (
                 <button
                   onClick={() => onOpenChange(false)}
-                  className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-black/5 hover:bg-black/10 border-none text-gray-500 hover:text-gray-800 transition-all active:scale-95 cursor-pointer z-10"
-                  aria-label={t('premium.modal.close') || 'Schließen'}
+                  className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-black/6 hover:bg-black/10 border-none text-gray-500 hover:text-gray-800 transition-all active:scale-95 cursor-pointer z-10"
+                  aria-label={t('premium.modal.close') || 'SchlieÃŸen'}
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
               )}
 
-              <div className="flex flex-col items-center text-center gap-3 relative">
-                {/* Crown badge — larger, more dramatic */}
-                <div className="w-[60px] h-[60px] rounded-[18px] bg-gradient-to-br from-amber-100 to-amber-50 flex items-center justify-center shadow-[0_6px_24px_rgba(251,191,36,0.28)]">
-                  <Crown className="w-8 h-8 text-amber-500 fill-amber-400" />
-                </div>
+              <div className="flex flex-col items-center text-center gap-2 relative">
+                {/* PREMIUM label â€” elegant, no icon */}
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600/70 mt-1">
+                  Premium
+                </span>
 
-                <div>
-                  <h2 className="text-[24px] font-black tracking-tight leading-tight" style={{ background: 'linear-gradient(135deg, #111827 30%, #059669 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                    {t('premium.modal.title')}
-                  </h2>
-                  <p className="text-sm text-gray-500 leading-relaxed mt-1.5 max-w-[220px] mx-auto">
-                    {t('premium.modal.subtitle')}
-                  </p>
-                </div>
+                {/* Gradient title â€” the hero IS the title */}
+                <h2
+                  className="text-[28px] font-black tracking-tight leading-[1.1]"
+                  style={{
+                    background: 'linear-gradient(135deg, #0f172a 0%, #064e3b 60%, #059669 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                >
+                  {t('premium.modal.title')}
+                </h2>
 
-                {/* Coffee anchor pill */}
-                <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10">
-                  <Coffee className="w-3.5 h-3.5 text-emerald-600" />
-                  <span className="text-[11px] font-bold text-emerald-700 tracking-wide">
+                <p className="text-[13px] text-gray-500 leading-relaxed max-w-[210px] mx-auto">
+                  {t('premium.modal.subtitle')}
+                </p>
+
+                {/* Coffee anchor */}
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 mt-0.5">
+                  <Coffee className="w-3 h-3 text-emerald-600" />
+                  <span className="text-[10px] font-bold text-emerald-700 tracking-wide">
                     {t('premium.modal.coffeeAnchor') || 'Weniger als ein Kaffee im Monat'}
                   </span>
                 </div>
@@ -221,31 +228,28 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
             </div>
           </div>
 
-          {/* Hero → body separator: thin shadow line instead of hard border */}
-          <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent shrink-0 mx-4" />
+          {/* Separator */}
+          <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent shrink-0" />
 
-          {/* ——— Scrollable body ——— */}
-          <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-2">
-
-            {/* Feature list */}
-            <div className="px-5 pt-4">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2.5">
+          {/* â”€â”€â”€ Scrollable feature list â”€â”€â”€ */}
+          <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="px-5 pt-4 pb-3">
+              <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-2.5">
                 Alles in Premium
               </p>
-              <div className="bg-white rounded-2xl shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden border-none">
+              <div className="bg-white rounded-2xl shadow-[0_1px_4px_rgba(0,0,0,0.05)] overflow-hidden">
                 {featureItems.map((item, idx) => (
                   <div
                     key={idx}
-                    className={`flex items-center gap-3.5 px-4 py-3.5 ${idx < featureItems.length - 1 ? 'border-b border-gray-100' : ''}`}
+                    className={`flex items-center gap-3 px-4 py-3 ${idx < featureItems.length - 1 ? 'border-b border-gray-100' : ''}`}
                   >
-                    <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
                       {item.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-gray-900 leading-tight">{item.title}</p>
-                      <p className="text-xs text-gray-500 leading-snug mt-0.5">{item.desc}</p>
+                      <p className="text-[13px] font-bold text-gray-900 leading-tight">{item.title}</p>
+                      <p className="text-[11px] text-gray-500 leading-snug mt-0.5">{item.desc}</p>
                     </div>
-                    {/* Solid check — more visible than the pale circle */}
                     <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
                       <Check className="w-3 h-3 text-white" strokeWidth={3} />
                     </div>
@@ -253,136 +257,131 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                 ))}
               </div>
             </div>
+          </div>
 
-            {/* Pricing section */}
-            <div className="px-5 pt-5">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2.5">
-                Dein Plan
-              </p>
+          {/* â”€â”€â”€ Plans â€” always visible, never scrolls â”€â”€â”€ */}
+          <div className="shrink-0 px-5 pt-3 pb-2 bg-gray-50 border-t border-gray-100">
+            <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-2.5">
+              {t('premium.modal.comparison.tableTitle') ? 'Dein Plan' : 'Dein Plan'}
+            </p>
 
-              {isLoadingPackages ? (
-                <div className="flex items-center justify-center py-6 gap-2">
-                  <Loader2 className="w-5 h-5 animate-spin text-emerald-500" />
-                  <span className="text-sm text-gray-400">{t('premium.modal.verifying') || 'Lade Optionen...'}</span>
-                </div>
-              ) : packages.length > 0 ? (
-                <div className={`grid ${packages.length === 1 ? 'grid-cols-1' : 'grid-cols-2'} gap-2.5`}>
-                  {packages.map((pkg) => {
-                    const isSelected = selectedPackageId === pkg.identifier;
-                    const isYearly = pkg.packageType === 'ANNUAL';
+            {isLoadingPackages ? (
+              <div className="flex items-center justify-center py-3 gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-emerald-500" />
+                <span className="text-xs text-gray-400">{t('premium.modal.verifying') || 'Lade Optionen...'}</span>
+              </div>
+            ) : packages.length > 0 ? (
+              <div className={`grid ${packages.length === 1 ? 'grid-cols-1' : 'grid-cols-2'} gap-2`}>
+                {packages.map((pkg) => {
+                  const isSelected = selectedPackageId === pkg.identifier;
+                  const isYearly = pkg.packageType === 'ANNUAL';
 
-                    let monthlyPriceStr = pkg.product.priceString;
-                    if (isYearly) {
-                      const monthlyEquiv = pkg.product.pricePerMonthString ||
-                        (pkg.product.price ? `${(pkg.product.price / 12).toFixed(2).replace('.', ',')} â‚¬` : '');
-                      monthlyPriceStr = t('premium.modal.priceMonthlyEquivalent').replace('{price}', monthlyEquiv);
-                    }
+                  let monthlyPriceStr = pkg.product.priceString;
+                  if (isYearly) {
+                    const monthlyEquiv = pkg.product.pricePerMonthString ||
+                      (pkg.product.price ? `${(pkg.product.price / 12).toFixed(2).replace('.', ',')} â‚¬` : '');
+                    monthlyPriceStr = t('premium.modal.priceMonthlyEquivalent').replace('{price}', monthlyEquiv);
+                  }
 
-                    const pkgTrialDays = (pkg.product?.introPrice && pkg.product.introPrice.price === 0)
-                      ? (pkg.product.introPrice.periodNumberOfUnits || trialDays)
-                      : 0;
+                  const pkgTrialDays = (pkg.product?.introPrice && pkg.product.introPrice.price === 0)
+                    ? (pkg.product.introPrice.periodNumberOfUnits || trialDays)
+                    : 0;
 
-                    const hasSavings = isYearly && packages.some(p => p.packageType === 'MONTHLY');
-                    let savingsPercent = 37;
-                    if (hasSavings) {
-                      const monthlyPkg = packages.find(p => p.packageType === 'MONTHLY');
-                      if (monthlyPkg?.product?.price && pkg.product.price) {
-                        const monthlyCost = monthlyPkg.product.price * 12;
-                        const yearlyCost = pkg.product.price;
-                        if (monthlyCost > yearlyCost) {
-                          savingsPercent = Math.round(((monthlyCost - yearlyCost) / monthlyCost) * 100);
-                        }
+                  const hasSavings = isYearly && packages.some(p => p.packageType === 'MONTHLY');
+                  let savingsPercent = 37;
+                  if (hasSavings) {
+                    const monthlyPkg = packages.find(p => p.packageType === 'MONTHLY');
+                    if (monthlyPkg?.product?.price && pkg.product.price) {
+                      const monthlyCost = monthlyPkg.product.price * 12;
+                      const yearlyCost = pkg.product.price;
+                      if (monthlyCost > yearlyCost) {
+                        savingsPercent = Math.round(((monthlyCost - yearlyCost) / monthlyCost) * 100);
                       }
                     }
+                  }
 
-                    return (
-                      <button
-                        key={pkg.identifier}
-                        type="button"
-                        onClick={() => setSelectedPackageId(pkg.identifier)}
-                        className={`relative pt-5 pb-3.5 px-4 rounded-2xl flex flex-col gap-0.5 border-2 transition-all active:scale-[0.97] cursor-pointer text-left w-full ${
-                          isSelected
-                            ? 'bg-white border-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.08)]'
-                            : 'bg-white border-transparent shadow-[0_2px_6px_rgba(0,0,0,0.04)] hover:border-gray-200'
-                        }`}
-                      >
-                        {/* Bestseller chip */}
-                        {isYearly && (
-                          <span className="absolute -top-[11px] left-1/2 -translate-x-1/2 bg-emerald-500 text-white font-extrabold text-[9px] px-2.5 py-[3px] rounded-full uppercase tracking-wider whitespace-nowrap">
-                            {t('premium.modal.bestseller') || 'Bestseller'}
+                  return (
+                    <button
+                      key={pkg.identifier}
+                      type="button"
+                      onClick={() => setSelectedPackageId(pkg.identifier)}
+                      className={`relative pt-4 pb-3 px-3.5 rounded-2xl flex flex-col gap-0.5 border-2 transition-all active:scale-[0.97] cursor-pointer text-left w-full ${
+                        isSelected
+                          ? 'bg-white border-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.10)]'
+                          : 'bg-white border-transparent shadow-[0_1px_4px_rgba(0,0,0,0.06)] hover:border-gray-200'
+                      }`}
+                    >
+                      {/* Bestseller chip */}
+                      {isYearly && (
+                        <span className="absolute -top-[10px] left-1/2 -translate-x-1/2 bg-emerald-500 text-white font-extrabold text-[8px] px-2.5 py-[3px] rounded-full uppercase tracking-wider whitespace-nowrap">
+                          {t('premium.modal.bestseller') || 'Bestseller'}
+                        </span>
+                      )}
+
+                      {/* Labels row */}
+                      <div className="flex items-center gap-1 flex-wrap mb-0.5">
+                        <span className={`text-[10px] font-bold ${isSelected ? 'text-emerald-700' : 'text-gray-500'}`}>
+                          {isYearly ? t('premium.modal.yearly') : t('premium.modal.monthly')}
+                        </span>
+                        {hasSavings && (
+                          <span className="bg-emerald-500/10 text-emerald-600 font-black text-[8px] px-1.5 py-0.5 rounded-full">
+                            -{savingsPercent}%
                           </span>
                         )}
-
-                        {/* Labels */}
-                        <div className="flex items-center gap-1.5 flex-wrap mb-1">
-                          <span className={`text-[11px] font-bold ${isSelected ? 'text-emerald-700' : 'text-gray-500'}`}>
-                            {isYearly ? t('premium.modal.yearly') : t('premium.modal.monthly')}
+                        {pkgTrialDays > 0 && (
+                          <span className="bg-emerald-500/10 text-emerald-600 font-black text-[8px] px-1.5 py-0.5 rounded-full">
+                            {t('premium.modal.trialBadge').replace('{days}', String(pkgTrialDays))}
                           </span>
-                          {hasSavings && (
-                            <span className="bg-emerald-500/10 text-emerald-600 font-black text-[9px] px-1.5 py-0.5 rounded-full">
-                              -{savingsPercent}%
-                            </span>
-                          )}
-                          {pkgTrialDays > 0 && (
-                            <span className="bg-emerald-500/10 text-emerald-600 font-black text-[9px] px-1.5 py-0.5 rounded-full">
-                              {t('premium.modal.trialBadge').replace('{days}', String(pkgTrialDays))}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Price */}
-                        <div className="text-xl font-black text-gray-900 leading-none">
-                          {monthlyPriceStr}
-                        </div>
-
-                        {/* Period */}
-                        <div className="text-[10px] text-gray-400 mt-1 leading-tight">
-                          {isYearly
-                            ? t('premium.modal.priceYearlyPeriod').replace('{price}', pkg.product.priceString)
-                            : t('premium.modal.pricePeriod').replace('{price}', pkg.product.priceString)
-                          }
-                        </div>
-
-                        {/* Selected check */}
-                        {isSelected && (
-                          <div className="absolute top-3 right-3 w-[18px] h-[18px] rounded-full bg-emerald-500 flex items-center justify-center shadow-sm">
-                            <Check className="w-2.5 h-2.5 text-white" strokeWidth={3.5} />
-                          </div>
                         )}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="flex items-center gap-2.5 p-3.5 bg-white rounded-2xl shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
-                  <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
-                  <span className="text-sm text-gray-500">Keine Angebote verfÃ¼gbar.</span>
-                </div>
-              )}
-            </div>
+                      </div>
 
-            {/* Bottom breathing room */}
-            <div className="h-5" />
+                      {/* Price */}
+                      <div className="text-lg font-black text-gray-900 leading-none">
+                        {monthlyPriceStr}
+                      </div>
+
+                      {/* Period */}
+                      <div className="text-[9px] text-gray-400 mt-0.5 leading-tight">
+                        {isYearly
+                          ? t('premium.modal.priceYearlyPeriod').replace('{price}', pkg.product.priceString)
+                          : t('premium.modal.pricePeriod').replace('{price}', pkg.product.priceString)
+                        }
+                      </div>
+
+                      {/* Selection check */}
+                      {isSelected && (
+                        <div className="absolute top-2.5 right-2.5 w-[18px] h-[18px] rounded-full bg-emerald-500 flex items-center justify-center shadow-sm">
+                          <Check className="w-2.5 h-2.5 text-white" strokeWidth={3.5} />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 p-3 bg-white rounded-2xl">
+                <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
+                <span className="text-xs text-gray-500">Keine Angebote verfÃ¼gbar.</span>
+              </div>
+            )}
           </div>
 
           {/* â”€â”€â”€ Sticky CTA block â”€â”€â”€ */}
           <div
-            className="shrink-0 bg-gray-50 border-t border-gray-100 px-5 pt-4"
+            className="shrink-0 bg-gray-50 px-5 pt-3"
             style={{ paddingBottom: 'max(var(--safe-area-inset-bottom, 0px), 20px)' }}
           >
-            {/* Status messages */}
             {errorMsg && (
-              <div className="mb-3 text-xs font-semibold text-red-600 bg-red-50 py-2.5 px-3 rounded-2xl text-center">
+              <div className="mb-2.5 text-xs font-semibold text-red-600 bg-red-50 py-2 px-3 rounded-2xl text-center">
                 {errorMsg}
               </div>
             )}
             {success && (
-              <div className="mb-3 text-xs font-semibold text-emerald-700 bg-emerald-50 py-2.5 px-3 rounded-2xl text-center flex items-center justify-center gap-1.5">
+              <div className="mb-2.5 text-xs font-semibold text-emerald-700 bg-emerald-50 py-2 px-3 rounded-2xl text-center flex items-center justify-center gap-1.5">
                 <Check className="w-4 h-4" /> {t('premium.modal.success')}
               </div>
             )}
 
-            {/* Main CTA */}
             {user?.app_metadata?.tier === 'alpha' ? (
               <button className="w-full h-[52px] rounded-2xl bg-gray-100 border-none text-gray-500 text-sm font-bold flex items-center justify-center gap-2 cursor-default">
                 <Check className="w-5 h-5 text-emerald-500" />
@@ -402,22 +401,18 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
               <button
                 onClick={handleUpgrade}
                 disabled={loading || !selectedPackageId}
-                className="w-full h-[52px] rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-base font-extrabold flex items-center justify-center gap-2 border-none active:scale-[0.98] transition-all duration-150 disabled:opacity-60 cursor-pointer shadow-[0_4px_20px_rgba(16,185,129,0.28)]"
+                className="w-full h-[52px] rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-[15px] font-extrabold flex items-center justify-center gap-2 border-none active:scale-[0.98] transition-all duration-150 disabled:opacity-60 cursor-pointer shadow-[0_4px_20px_rgba(16,185,129,0.30)]"
               >
                 {loading ? (
                   <><Loader2 className="w-5 h-5 animate-spin" /> {t('premium.modal.loading')}</>
                 ) : (
-                  <>
-                    <Crown className="w-[18px] h-[18px] fill-white/80" />
-                    <span>{hasSelectedTrial ? t('premium.modal.ctaWithTrial') : t('premium.modal.ctaWithoutTrial')}</span>
-                  </>
+                  <span>{hasSelectedTrial ? t('premium.modal.ctaWithTrial') : t('premium.modal.ctaWithoutTrial')}</span>
                 )}
               </button>
             )}
 
-            {/* Legal footnotes */}
             {!isPremium && !loading && !isValidating && !isLoadingPackages && (
-              <div className="mt-2.5 text-center space-y-1">
+              <div className="mt-2 text-center space-y-0.5">
                 <p className="text-[11px] text-gray-400 font-semibold">
                   {t('premium.modal.cancelSubtitle') || 'Kein Risiko. Jederzeit kÃ¼ndbar.'}
                 </p>
