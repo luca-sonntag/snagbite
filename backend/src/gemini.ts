@@ -282,6 +282,23 @@ interface UserPreferences {
   preferredUnitSystem?: string;
 }
 
+/**
+ * Moves model-reported recipe-level nutrition into `sourceNutritionalValues` and
+ * clears `nutritionalValues`.
+ *
+ * The displayed per-serving figure is always derived from the ingredient list
+ * (see `enrichRecipeWithCanonicalIngredients`), so the model's value must not
+ * occupy the same field — otherwise a stated value and a computed one become
+ * indistinguishable after the fact, which is exactly what made the provenance of
+ * older recipes unrecoverable.
+ */
+function applySourceNutritionalValues(recipe: Recipe, rawRecipe: any): void {
+  const stated = rawRecipe.hasExplicitNutritionalValues === true && rawRecipe.nutritionalValues;
+  recipe.hasExplicitNutritionalValues = !!stated;
+  recipe.sourceNutritionalValues = stated ? rawRecipe.nutritionalValues : null;
+  delete recipe.nutritionalValues;
+}
+
 const CLEAN_INGREDIENT_NAMES_INSTRUCTION = 'Ensure the "name" field contains only the clean ingredient name (e.g., "Frischkäse", "Paprikapulver", "Olivenöl", "Mandelmehl", "Butter", "Kochschinken"). Retain compound nouns where the suffix or word defines the core food identity (e.g. "Paprikapulver", "Knoblauchpulver", "Backpulver", "Mandelmehl", "Olivenöl", "Tomatenmark"). Move only true descriptive adjectives and processing states (such as "light", "mager", "low fat", "leichte", "gerieben", "grated", "gewürfelt") into the "modifier" field. Do NOT strip essential compound words from "name".';
 
 const CATEGORY_ORDERING_INSTRUCTION = 'Group ingredients using the standardized supermarket category keys: VEGETABLES (fresh vegetables/salads/mushrooms/fresh herbs), FRUITS (fresh/dried fruits/berries), DAIRY_EGGS (milk/cheese/yogurt/cream/butter/eggs/tofu/plant milk), MEAT_POULTRY (meat/chicken/sausages/vegan meat), SEAFOOD (fish/seafood), GRAINS_PASTA (pasta/rice/flour/dough/bread/oats/potatoes), OILS_CONDIMENTS (cooking oils/vinegar/dressings/store-bought sauces/pesto), SPICES_HERBS (salt/pepper/dried spices/ground spice powders), NUTS_SEEDS (nuts/seeds/avocado), SWEETS_SNACKS (sugar/honey/chocolate/cookies/ice cream/chips), BEVERAGES (drinks/juices/coffee/tea/alcohol), PANTRY_BAKING (yeast/baking powder/gelatine/protein powder), PREPARED_DISHES (ready meals).';
@@ -544,11 +561,10 @@ ${caption.trim() ? `\nDescription/Caption:\n"""\n${caption}\n"""` : ''}${htmlCon
 
     const recipe: Recipe = rawRecipe;
 
-    // Conditionally clear nutritionalValues if the model indicated they weren't explicitly provided
-    if (rawRecipe.hasExplicitNutritionalValues === false) {
-      delete recipe.nutritionalValues;
-    }
-    delete (recipe as any).hasExplicitNutritionalValues;
+    // Recipe-level nutrition the source stated itself is kept, but parked in its own
+    // field: `nutritionalValues` is derived from the ingredient list downstream, so
+    // the two never end up indistinguishable in one slot.
+    applySourceNutritionalValues(recipe, rawRecipe);
     delete (recipe as any).containsMultipleRecipes;
 
     // Remove any hallucinated replacedOriginal fields during initial extractions
@@ -843,10 +859,7 @@ ${JSON.stringify(parentRecipe, null, 2)}`;
     const rawRecipe = JSON.parse(rawOutput);
     const recipe: Recipe = rawRecipe;
 
-    if (rawRecipe.hasExplicitNutritionalValues === false) {
-      delete recipe.nutritionalValues;
-    }
-    delete (recipe as any).hasExplicitNutritionalValues;
+    applySourceNutritionalValues(recipe, rawRecipe);
     // Remixes start from one recipe, so the ambiguity flag is meaningless here — drop it.
     delete (recipe as any).containsMultipleRecipes;
 

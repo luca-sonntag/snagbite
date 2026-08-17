@@ -60,7 +60,13 @@ export interface Recipe {
   ingredients: IngredientGroup[];
   instructions: InstructionStep[];
   equipment: string[];
+  /** Derived per-serving nutrition (Σ ingredients / servings). Never client-authored. */
   nutritionalValues?: NutritionalValues;
+  /** Per-serving nutrition as stated by the recipe source, when it stated any. */
+  sourceNutritionalValues?: NutritionalValues | null;
+  hasExplicitNutritionalValues?: boolean;
+  /** Share (0..1) of the calories backed by a BLS match rather than a Gemini estimate. */
+  nutritionCoverage?: number;
   tips?: string[];
   alternativeIngredients?: AlternativeIngredient[];
   transcript?: string | null;

@@ -843,6 +843,7 @@ export async function enrichRecipeWithCanonicalIngredients(recipe: Recipe): Prom
   let totalProtein = 0;
   let totalCarbs = 0;
   let totalFat = 0;
+  let matchedCalories = 0;
 
   for (const { ing, id } of flatItems) {
     const match = matchedCanonicalMap.get(id) || null;
@@ -851,22 +852,26 @@ export async function enrichRecipeWithCanonicalIngredients(recipe: Recipe): Prom
     totalProtein += res.protein;
     totalCarbs += res.carbs;
     totalFat += res.fat;
+    if (res.matched) matchedCalories += res.calories;
   }
 
   const servings = recipe.servings > 0 ? recipe.servings : 1;
 
-  if (
-    !recipe.nutritionalValues ||
-    (recipe.nutritionalValues.calories === 0 &&
-      recipe.nutritionalValues.protein === 0 &&
-      recipe.nutritionalValues.carbs === 0 &&
-      recipe.nutritionalValues.fat === 0)
-  ) {
-    recipe.nutritionalValues = {
-      calories: Math.round(totalCalories / servings),
-      protein: Math.round((totalProtein / servings) * 10) / 10,
-      carbs: Math.round((totalCarbs / servings) * 10) / 10,
-      fat: Math.round((totalFat / servings) * 10) / 10,
-    };
-  }
+  // The per-serving figure is derived, unconditionally. A recipe-level value the
+  // source stated lives in `sourceNutritionalValues` and is shown alongside rather
+  // than instead of this one — mixing both into this field is what previously made
+  // it impossible to tell a BLS sum from a model guess.
+  recipe.nutritionalValues = {
+    calories: Math.round(totalCalories / servings),
+    protein: Math.round((totalProtein / servings) * 10) / 10,
+    carbs: Math.round((totalCarbs / servings) * 10) / 10,
+    fat: Math.round((totalFat / servings) * 10) / 10,
+  };
+
+  // Share of the calories backed by BLS rather than by a Gemini estimate. A recipe
+  // whose calories are dominated by unmatched ingredients must not claim to be
+  // database-verified.
+  recipe.nutritionCoverage = totalCalories > 0
+    ? Math.round((matchedCalories / totalCalories) * 100) / 100
+    : 0;
 }

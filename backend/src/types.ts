@@ -64,7 +64,22 @@ export interface Recipe {
   ingredients: IngredientGroup[];
   instructions: InstructionStep[];
   equipment: string[];
+  /**
+   * Per-serving nutrition. Always derived from the ingredient list by
+   * `enrichRecipeWithCanonicalIngredients` — never taken from the model and never
+   * written by a client. Treat it as a cache of `Σ ingredients / servings`.
+   */
   nutritionalValues?: NutritionalValues;
+  /** Per-serving nutrition as literally stated by the source, when it stated any. */
+  sourceNutritionalValues?: NutritionalValues | null;
+  /** Whether the source itself stated recipe-level nutrition. */
+  hasExplicitNutritionalValues?: boolean;
+  /**
+   * Share (0..1) of `nutritionalValues.calories` contributed by ingredients matched
+   * against the BLS database. The remainder comes from Gemini estimates for
+   * ingredients the matcher could not resolve.
+   */
+  nutritionCoverage?: number;
   tips?: string[];
   alternativeIngredients?: AlternativeIngredient[];
   transcript?: string | null;

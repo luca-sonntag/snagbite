@@ -7,6 +7,7 @@ import { Lock, Flame } from 'lucide-react';
 
 interface RecipeNutritionProps {
   nutritionalValues: any;
+  sourceNutritionalValues?: any;
   isAiEstimated: boolean;
   isVerified?: boolean;
   showTotalNutrition?: boolean;
@@ -16,6 +17,7 @@ interface RecipeNutritionProps {
 
 export default function RecipeNutrition({
   nutritionalValues,
+  sourceNutritionalValues,
   isAiEstimated,
   isVerified,
   getNutritionDisplayValue
@@ -51,6 +53,16 @@ export default function RecipeNutrition({
   const iconClass = 'w-[18px] h-[18px] text-emerald-600 dark:text-emerald-400';
   const statLabel =
     'text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500';
+
+  // Only worth showing when it actually disagrees with the computed figure — an
+  // identical number twice is noise, a diverging one is information (the source
+  // knows the finished dish, the sum only knows the shopping list).
+  const sourceCalories = parseNum(sourceNutritionalValues?.calories);
+  const computedCalories = parseNum(nutritionalValues?.calories);
+  const showSourceCalories =
+    sourceCalories > 0 &&
+    computedCalories > 0 &&
+    Math.abs(sourceCalories - computedCalories) / computedCalories >= 0.1;
 
   const caloriesDisplay = getNutritionDisplayValue(nutritionalValues?.calories, 'kcal', false, false);
   const proteinDisplay = getNutritionDisplayValue(nutritionalValues?.protein, 'g', false, false);
@@ -141,6 +153,13 @@ export default function RecipeNutrition({
               </div>
             </div>
           </div>
+
+          {/* What the recipe source itself claimed, when it disagrees with the sum */}
+          {showSourceCalories && isPremium && (
+            <div className="text-[10px] font-medium text-gray-400 dark:text-gray-500 pl-12">
+              {t('recipe.nutritionSourceClaim', { value: String(Math.round(sourceCalories)) })}
+            </div>
+          )}
 
           {/* 3-Color Macro Progress Bar as a subtle visual indicator */}
           {totalMacroKcal > 0 && isPremium && (

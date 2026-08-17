@@ -13,6 +13,8 @@ interface RecipeInfoSectionProps {
   onOpenAdjustServings?: () => void;
   /** Nutrition block is omitted entirely when the recipe carries no values. */
   nutritionalValues: any | null;
+  /** What the recipe source claimed, shown only when it diverges from the computed figure. */
+  sourceNutritionalValues?: any | null;
   isAiEstimated: boolean;
   isVerified?: boolean;
   showTotalNutrition: boolean;
@@ -33,6 +35,7 @@ export default function RecipeInfoSection({
   onIncreaseServings,
   onOpenAdjustServings,
   nutritionalValues,
+  sourceNutritionalValues,
   isAiEstimated,
   isVerified,
   showTotalNutrition,
@@ -81,6 +84,7 @@ export default function RecipeInfoSection({
           <div className="border-t border-black/5 dark:border-white/5">
             <RecipeNutrition
               nutritionalValues={nutritionalValues}
+              sourceNutritionalValues={sourceNutritionalValues}
               isAiEstimated={isAiEstimated}
               isVerified={isVerified}
               showTotalNutrition={showTotalNutrition}

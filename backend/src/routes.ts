@@ -637,6 +637,14 @@ apiRouter.patch('/jobs/:id', async (req: Request, res: Response): Promise<void> 
       throw new AppError('JOB_NOT_FOUND');
     }
 
+    // Nutrition is server-owned: the client may move amounts or the serving count,
+    // but the macros that follow from them are recomputed here rather than trusted.
+    // Without this, a client could persist any figure it liked — which is how
+    // inflated per-ingredient macros reached the database in the first place.
+    recipe.sourceNutritionalValues = job.recipe?.sourceNutritionalValues ?? null;
+    recipe.hasExplicitNutritionalValues = job.recipe?.hasExplicitNutritionalValues ?? false;
+    await enrichRecipeWithCanonicalIngredients(recipe);
+
     await updateJob(id, { recipe });
 
     res.status(200).json({

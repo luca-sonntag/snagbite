@@ -171,6 +171,38 @@ describe('Ingredient Matcher & Normalizer (BLS 4.0 + Hybrid Search)', () => {
       assert.ok(recipe.nutritionalValues);
       assert.ok((recipe.nutritionalValues.calories ?? 0) > 200);
       assert.ok((recipe.nutritionalValues.protein ?? 0) > 15);
+
+      // Only the unmatched "Geheimpulver" contributes non-BLS calories.
+      assert.ok((recipe.nutritionCoverage ?? 0) > 0.8);
+      assert.ok((recipe.nutritionCoverage ?? 0) < 1);
+    });
+
+    test('recomputes recipe totals even when a stale value is already present', async () => {
+      const recipe: Recipe = {
+        title: 'Kartoffeln',
+        description: 'Test Recipe',
+        prepTime: 5,
+        cookTime: 10,
+        servings: 2,
+        ingredients: [
+          {
+            name: 'Zutaten',
+            items: [
+              { name: 'Kartoffeln', baseName: 'potatoes', amount: 400, unit: 'g', category: 'FRUITS_VEGETABLES' },
+            ],
+          },
+        ],
+        instructions: [{ step: 1, description: 'Kochen' }],
+        equipment: ['Topf'],
+        // A bogus figure of the kind a client PATCH or an echoing remix used to leave behind.
+        nutritionalValues: { calories: 9999, protein: 999, carbs: 999, fat: 999 },
+      };
+
+      await enrichRecipeWithCanonicalIngredients(recipe);
+
+      // 400 g potatoes at 83 kcal/100 g = 332 kcal total, over 2 servings.
+      assert.equal(recipe.nutritionalValues?.calories, 166);
+      assert.equal(recipe.nutritionCoverage, 1);
     });
   });
 });

@@ -286,42 +286,15 @@ export default function RecipeDetails({
       return;
     }
 
-    const ratio = originalBaseServings / targetServings;
-
-    const scaleNutritionalValue = (val: any) => {
-      if (val === undefined || val === null || val === '') return val;
-      if (typeof val === 'number') {
-        return Math.round(val * ratio);
-      }
-      const match = String(val).trim().match(/^([\d.,]+)\s*([a-zA-Z%]*)$/);
-      if (!match) return val;
-      const num = parseFloat(match[1].replace(',', '.'));
-      if (isNaN(num)) return val;
-      const scaled = Math.round(num * ratio * 10) / 10;
-      const unit = match[2] || '';
-      return `${scaled}${unit}`;
-    };
-
-    const updatedNutritionalValues = recipe.nutritionalValues
-      ? {
-          ...recipe.nutritionalValues,
-          calories: scaleNutritionalValue(recipe.nutritionalValues.calories),
-          protein: scaleNutritionalValue(recipe.nutritionalValues.protein),
-          carbs: scaleNutritionalValue(recipe.nutritionalValues.carbs),
-          fat: scaleNutritionalValue(recipe.nutritionalValues.fat),
-        }
-      : recipe.nutritionalValues;
-
-    // Ingredients are deliberately left untouched: this sheet corrects how many
-    // servings the *existing* amounts yield, so the food in the pot does not
-    // change. Per-ingredient macros are absolute values for `amount`, so scaling
-    // them here would decouple them from the amount they describe (e.g. 200 g
-    // Wiener Würstchen claiming 2312 kcal instead of 578). Only the per-serving
-    // recipe totals above depend on the serving count.
+    // Only the serving count changes. This sheet corrects how many servings the
+    // *existing* amounts yield, so neither the ingredients nor their macros move —
+    // they are absolute values for `amount`, and scaling them would decouple them
+    // from the amount they describe. The per-serving figure is derived from those
+    // macros divided by `servings` (see useRecipeNutrition), so it follows from
+    // this change on its own and must not be written here.
     const updatedRecipe: Recipe = {
       ...recipe,
       servings: targetServings,
-      nutritionalValues: updatedNutritionalValues,
     };
 
     if (recipe.id) {
@@ -407,7 +380,8 @@ export default function RecipeDetails({
   const progressPercent = totalStepsCount > 0 ? (completedStepsCount / totalStepsCount) * 100 : 0;
 
   // Get nutritional info (either reel-level or aggregated per-ingredient AI estimates)
-  const { nutritionalValues, isAiEstimated, isVerified, hasNutritionInfo } = useRecipeNutrition(recipe);
+  const { nutritionalValues, sourceNutritionalValues, isAiEstimated, isVerified, hasNutritionInfo } =
+    useRecipeNutrition(recipe);
 
   // Prep + cook collapsed into the single figure shown in the meta strip. Both
   // fields may be legacy strings ("20 Min."), so pull the leading number out.
@@ -666,6 +640,7 @@ export default function RecipeDetails({
             onIncreaseServings={() => setServings(s => s + 1)}
             onOpenAdjustServings={() => setIsAdjustServingsOpen(true)}
             nutritionalValues={hasNutritionInfo ? nutritionalValues : null}
+            sourceNutritionalValues={sourceNutritionalValues}
             isAiEstimated={isAiEstimated}
             isVerified={isVerified}
             showTotalNutrition={showTotalNutrition}
@@ -803,7 +778,9 @@ export default function RecipeDetails({
         isOpen={isAdjustServingsOpen}
         onClose={() => setIsAdjustServingsOpen(false)}
         baseServings={recipe.servings || 1}
-        nutritionalValues={recipe.nutritionalValues}
+        // The derived figure, not the stored one — the preview must match what the
+        // nutrition card will show once the new serving count is applied.
+        nutritionalValues={nutritionalValues}
         onSave={handleSaveAdjustedServings}
       />
     </article>
