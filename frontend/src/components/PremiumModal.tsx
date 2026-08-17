@@ -182,15 +182,16 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
         {/* Main sheet — ONE gradient for the whole sheet, hero + features share it seamlessly */}
         <div
           className="relative flex-1 flex flex-col w-full max-w-md mx-auto rounded-t-[28px] overflow-hidden shadow-[0_-8px_40px_rgba(0,0,0,0.18)]"
-          style={{ background: 'linear-gradient(180deg, #e8fdf2 0%, #f4fdf8 120px, #f9fafb 260px, #f9fafb 100%)' }}
+          style={{ background: 'linear-gradient(180deg, #e6fcef 0%, #edfbf3 90px, #f1fbf5 190px, #f5fcf8 300px, #f8fbf9 420px, #f9fafb 560px, #f9fafb 100%)' }}
         >
 
-          {/* ─── Hero: transparent — sheet gradient shows through ─── */}
-          <div className="relative shrink-0 rounded-t-[28px] overflow-hidden">
-            {/* Radial ambient glow */}
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-96 h-48 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute top-0 right-[-20%] w-48 h-32 bg-amber-300/10 rounded-full blur-3xl pointer-events-none" />
+          {/* Radial ambient glow — lives on the sheet (not the hero) so it radiates
+              seamlessly down into the feature area instead of being clipped */}
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-[28rem] h-80 bg-emerald-400/25 rounded-[50%] blur-3xl pointer-events-none z-0" />
+          <div className="absolute top-0 right-[-20%] w-56 h-40 bg-amber-300/10 rounded-full blur-3xl pointer-events-none z-0" />
 
+          {/* ─── Hero: transparent — sheet gradient + glow show through ─── */}
+          <div className="relative z-10 shrink-0">
             <div className="relative px-6 pt-6 pb-5">
               {/* Close */}
               {!loading && (
@@ -237,7 +238,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
           </div>
 
           {/* ─── Scrollable feature list ─── transparent, inherits sheet gradient */}
-          <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="relative z-10 flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <div className="px-5 pt-4 pb-3">
               <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-2.5">
                 Alles in Premium
