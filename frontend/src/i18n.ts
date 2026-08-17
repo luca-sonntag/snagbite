@@ -1226,8 +1226,8 @@ export const uiTranslations = {
         termsNoticeSuffix: ' zu.',
         trialBanner: {
           title: 'Premium kostenlos testen',
-          body: 'Alle Premium-Features freischalten — danach automatisch Free.',
-          cta: 'Jetzt starten',
+          body: 'Schalte alles frei. Endet von selbst – keine Kündigung nötig.',
+          cta: 'Kostenlos starten',
           dismiss: 'Später',
           days: 'Tage',
         },
@@ -1291,7 +1291,7 @@ export const uiTranslations = {
       },
       hint: {
         extractUnlimited: 'Premium: Unbegrenzt freischalten',
-        catalogFull: 'Kochbuch voll ({count}/{limit}) – Lösche ein Rezept oder upgrade.',
+        catalogFull: 'Kochbuch voll ({count}/{limit}). Mit Premium speicherst du unbegrenzt.',
         catalogAlmostFull: 'Kochbuch fast voll ({count}/{limit})',
         extractionLimitReached: 'Tageslimit ({used}/{limit}) erreicht – Schau ein kurzes Video zum Erstellen oder upgrade auf Premium.',
         unlockNutrition: 'Nährwerte freischalten',
@@ -2221,8 +2221,8 @@ export const uiTranslations = {
         termsNoticeSuffix: '.',
         trialBanner: {
           title: 'Try Premium free',
-          body: 'Unlock all premium features — auto-reverts to Free afterwards.',
-          cta: 'Start now',
+          body: 'Unlock everything. Ends on its own – no cancelling needed.',
+          cta: 'Start free',
           dismiss: 'Later',
           days: 'days',
         },
@@ -2286,7 +2286,7 @@ export const uiTranslations = {
       },
       hint: {
         extractUnlimited: 'Premium: Unlock unlimited',
-        catalogFull: 'Cookbook full ({count}/{limit}) – Delete a recipe or upgrade.',
+        catalogFull: 'Cookbook full ({count}/{limit}). Go Premium to save unlimited recipes.',
         catalogAlmostFull: 'Cookbook almost full ({count}/{limit})',
         extractionLimitReached: 'Daily limit reached ({used}/{limit}) – Watch a short video to create or upgrade to Premium.',
         unlockNutrition: 'Unlock nutrition',
