@@ -1257,7 +1257,7 @@ export const uiTranslations = {
         features: {
           extractions: {
             title: 'Mehr Rezept-Importe',
-            desc: 'Bis zu 30 Importe täglich — Reels, Web, Fotos & Hintergrund.'
+            desc: 'Bis zu 30 täglich aus Videos, Web & Fotos — im Hintergrund & mehrere gleichzeitig.'
           },
           nutrition: {
             title: 'Nährwerte & Makros',
@@ -2252,7 +2252,7 @@ export const uiTranslations = {
         features: {
           extractions: {
             title: 'More Recipe Imports',
-            desc: 'Up to 30 imports daily — reels, web, photos & background.'
+            desc: 'Up to 30 a day from videos, web & photos — in the background & several at once.'
           },
           nutrition: {
             title: 'Nutrition & Macros',
