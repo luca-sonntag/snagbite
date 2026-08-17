@@ -240,7 +240,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                       <p className="text-[13px] font-bold text-gray-900 leading-tight">{item.title}</p>
                       <p className="text-[11px] text-gray-500 leading-snug mt-0.5">{item.desc}</p>
                     </div>
-                    <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center shrink-0">
+                    <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
                       <Check className="w-3 h-3 text-white" strokeWidth={3} />
                     </div>
                   </div>
@@ -257,7 +257,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
 
             {isLoadingPackages ? (
               <div className="flex items-center justify-center py-3 gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-amber-500" />
+                <Loader2 className="w-4 h-4 animate-spin text-emerald-500" />
                 <span className="text-xs text-gray-400">{t('premium.modal.verifying') || 'Lade Optionen...'}</span>
               </div>
             ) : packages.length > 0 ? (
@@ -297,7 +297,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                       onClick={() => setSelectedPackageId(pkg.identifier)}
                       className={`relative pt-4 pb-3 px-3.5 rounded-2xl flex flex-col gap-0.5 border-2 transition-all active:scale-[0.97] cursor-pointer text-left w-full ${
                         isSelected
-                          ? 'bg-white border-amber-500 shadow-[0_0_0_3px_rgba(245,158,11,0.10)]'
+                          ? 'bg-white border-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.10)]'
                           : 'bg-white border-transparent shadow-[0_1px_4px_rgba(0,0,0,0.06)] hover:border-gray-200'
                       }`}
                     >
@@ -310,7 +310,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
 
                       {/* Labels row — pr-6 leaves room for the selection check */}
                       <div className="flex items-center gap-1 flex-wrap mb-0.5 pr-6">
-                        <span className={`text-[10px] font-bold ${isSelected ? 'text-amber-700' : 'text-gray-500'}`}>
+                        <span className={`text-[10px] font-bold ${isSelected ? 'text-emerald-700' : 'text-gray-500'}`}>
                           {isYearly ? t('premium.modal.yearly') : t('premium.modal.monthly')}
                         </span>
                         {/* Flexibel badge for monthly — makes card feel less empty */}
@@ -346,7 +346,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
 
                       {/* Selection check — bottom-right to avoid overlapping labels */}
                       {isSelected && (
-                        <div className="absolute bottom-2.5 right-2.5 w-[18px] h-[18px] rounded-full bg-amber-500 flex items-center justify-center shadow-sm">
+                        <div className="absolute bottom-2.5 right-2.5 w-[18px] h-[18px] rounded-full bg-emerald-500 flex items-center justify-center shadow-sm">
                           <Check className="w-2.5 h-2.5 text-white" strokeWidth={3.5} />
                         </div>
                       )}
@@ -373,31 +373,31 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
               </div>
             )}
             {success && (
-              <div className="mb-2.5 text-xs font-semibold text-amber-700 bg-amber-50 py-2 px-3 rounded-2xl text-center flex items-center justify-center gap-1.5">
+              <div className="mb-2.5 text-xs font-semibold text-emerald-700 bg-emerald-50 py-2 px-3 rounded-2xl text-center flex items-center justify-center gap-1.5">
                 <Check className="w-4 h-4" /> {t('premium.modal.success')}
               </div>
             )}
 
             {user?.app_metadata?.tier === 'alpha' ? (
               <button className="w-full h-[52px] rounded-2xl bg-gray-100 border-none text-gray-500 text-sm font-bold flex items-center justify-center gap-2 cursor-default">
-                <Check className="w-5 h-5 text-amber-500" />
+                <Check className="w-5 h-5 text-emerald-500" />
                 {t('premium.modal.alphaOwned') || 'KÃ¤ufe wÃ¤hrend der Alpha deaktiviert'}
               </button>
             ) : isPremium ? (
               <button className="w-full h-[52px] rounded-2xl bg-gray-100 border-none text-gray-500 text-sm font-bold flex items-center justify-center gap-2 cursor-default">
-                <Check className="w-5 h-5 text-amber-500" />
+                <Check className="w-5 h-5 text-emerald-500" />
                 {t('premium.modal.owned') || 'Du hast Premium'}
               </button>
             ) : isLoadingPackages ? (
               <button disabled className="w-full h-[52px] rounded-2xl bg-gray-100 border-none text-gray-400 text-sm font-bold flex items-center justify-center gap-2 cursor-default">
-                <Loader2 className="w-5 h-5 animate-spin text-amber-500" />
+                <Loader2 className="w-5 h-5 animate-spin text-emerald-500" />
                 {t('premium.modal.verifying') || 'Verifiziere Status...'}
               </button>
             ) : (
               <button
                 onClick={handleUpgrade}
                 disabled={loading || !selectedPackageId}
-                className="w-full h-[52px] rounded-2xl bg-amber-500 hover:bg-amber-400 text-white text-[15px] font-extrabold flex items-center justify-center gap-2 border-none active:scale-[0.98] transition-all duration-150 disabled:opacity-60 cursor-pointer shadow-[0_4px_20px_rgba(245,158,11,0.30)]"
+                className="w-full h-[52px] rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-[15px] font-extrabold flex items-center justify-center gap-2 border-none active:scale-[0.98] transition-all duration-150 disabled:opacity-60 cursor-pointer shadow-[0_4px_20px_rgba(16,185,129,0.30)]"
               >
                 {loading ? (
                   <><Loader2 className="w-5 h-5 animate-spin" /> {t('premium.modal.loading')}</>
@@ -418,7 +418,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                     href={LEGAL_URLS.terms}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline underline-offset-2 hover:text-amber-600 transition-colors"
+                    className="underline underline-offset-2 hover:text-emerald-600 transition-colors"
                   >
                     {t('premium.modal.termsLink') || 'AGB'}
                   </a>
