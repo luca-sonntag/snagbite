@@ -286,6 +286,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAdminStatus(session.access_token);
   }, [session, checkAdminStatus]);
 
+  /**
+   * Reconcile the locally cached tier with the authoritative server tier in the
+   * background. Runs on session load so the paywall (and the rest of the app)
+   * already reflects the correct tier by the time it's opened, instead of the
+   * modal having to verify on open. Only acts on a genuine mismatch to avoid
+   * needless session refreshes.
+   */
+  const reconcileServerTier = useCallback(async (token: string, localTier: string | undefined) => {
+    try {
+      const res = await fetch(apiUrl('/api/extractions/limit'), {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.success && data.tier && data.tier !== localTier) {
+        console.log(`[Auth] Tier mismatch (local: ${localTier}, server: ${data.tier}). Refreshing session...`);
+        await refreshSession();
+      }
+    } catch (err) {
+      console.warn('[Auth] Background tier reconciliation failed:', err);
+    }
+  }, [refreshSession]);
+
+  useEffect(() => {
+    if (!session) return;
+    const localTier = session.user?.app_metadata?.tier;
+    // Premium/alpha are already authoritative locally — nothing to reconcile.
+    if (localTier === 'premium' || localTier === 'alpha') return;
+    reconcileServerTier(session.access_token, localTier);
+  }, [session, reconcileServerTier]);
+
   const signIn = useCallback(async (email: string, password: string) => {
     setAuthError(null);
     const { error } = await supabase.auth.signInWithPassword({ email, password });

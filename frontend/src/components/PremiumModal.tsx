@@ -7,7 +7,6 @@ import {
 import { useI18n } from '../context/I18nContext';
 import { buyPremium, getSubscriptionOfferings, getCachedOfferings } from '../utils/purchase';
 import { useAuth } from '../context/AuthContext';
-import { apiUrl } from '../api';
 import { LEGAL_URLS } from '../legal';
 import { useAdOverlay } from '../context/OverlayStackContext';
 
@@ -18,11 +17,10 @@ interface PremiumModalProps {
 
 export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps) {
   const { t } = useI18n();
-  const { isPremium, user, getAccessToken, refreshSession } = useAuth();
+  const { isPremium, user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [isValidating, setIsValidating] = useState(false);
 
   // Optimizations States — warm-start from the prefetched cache so the paywall
   // opens instantly instead of showing a spinner while offerings load.
@@ -41,32 +39,8 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
       setLoading(false);
       document.body.style.overflow = 'hidden';
 
-      // Verify status with server if currently seen as free user
-      const currentTier = user?.app_metadata?.tier;
-      if (currentTier !== 'premium' && currentTier !== 'alpha') {
-        const verifyServerTier = async () => {
-          setIsValidating(true);
-          try {
-            const token = await getAccessToken();
-            if (!token) return;
-            const res = await fetch(apiUrl('/api/extractions/limit'), {
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-              const data = await res.json();
-              if (data.success && data.tier && data.tier !== currentTier) {
-                console.log(`PremiumModal: Tier mismatch detected (local: ${currentTier}, server: ${data.tier}). Refreshing session...`);
-                await refreshSession();
-              }
-            }
-          } catch (err) {
-            console.warn('PremiumModal: Failed to verify server tier:', err);
-          } finally {
-            setIsValidating(false);
-          }
-        };
-        verifyServerTier();
-      }
+      // Note: server-tier reconciliation now runs in the background on session
+      // load (see AuthContext), so the modal no longer needs to verify on open.
 
       // Auto-select the best default plan from a package list:
       // free-trial plan first, then Yearly, then the first available.
@@ -99,10 +73,9 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
       loadOfferings();
     } else {
       document.body.style.overflow = '';
-      setIsValidating(false);
     }
     return () => { document.body.style.overflow = ''; };
-  }, [isOpen, user, getAccessToken, refreshSession]);
+  }, [isOpen]);
 
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
@@ -415,7 +388,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                 <Check className="w-5 h-5 text-emerald-500" />
                 {t('premium.modal.owned') || 'Du hast Premium'}
               </button>
-            ) : isValidating || isLoadingPackages ? (
+            ) : isLoadingPackages ? (
               <button disabled className="w-full h-[52px] rounded-2xl bg-gray-100 border-none text-gray-400 text-sm font-bold flex items-center justify-center gap-2 cursor-default">
                 <Loader2 className="w-5 h-5 animate-spin text-emerald-500" />
                 {t('premium.modal.verifying') || 'Verifiziere Status...'}
@@ -434,7 +407,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
               </button>
             )}
 
-            {!isPremium && !loading && !isValidating && !isLoadingPackages && (
+            {!isPremium && !loading && !isLoadingPackages && (
               <div className="mt-2 text-center space-y-0.5">
                 <p className="text-[11px] text-gray-400 font-semibold">
                   {t('premium.modal.cancelSubtitle') || 'Kein Risiko. Jederzeit kÃ¼ndbar.'}
