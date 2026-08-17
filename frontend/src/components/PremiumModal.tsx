@@ -242,7 +242,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
               <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-2.5">
                 Alles in Premium
               </p>
-              <div className="bg-white/55 backdrop-blur-md rounded-2xl shadow-[0_1px_4px_rgba(0,0,0,0.05)] overflow-hidden">
+              <div className="bg-white/35 backdrop-blur-md rounded-2xl shadow-[0_1px_4px_rgba(0,0,0,0.05)] overflow-hidden">
                 {featureItems.map((item, idx) => (
                   <div
                     key={idx}
