@@ -312,38 +312,16 @@ export default function RecipeDetails({
         }
       : recipe.nutritionalValues;
 
-    const updatedIngredients = Array.isArray(recipe.ingredients)
-      ? recipe.ingredients.map((group) => ({
-          ...group,
-          items: Array.isArray(group.items)
-            ? group.items.map((ing) => ({
-                ...ing,
-                calories:
-                  typeof ing.calories === 'number'
-                    ? Math.round(ing.calories * ratio)
-                    : ing.calories,
-                protein:
-                  typeof ing.protein === 'number'
-                    ? Math.round(ing.protein * ratio * 10) / 10
-                    : ing.protein,
-                carbs:
-                  typeof ing.carbs === 'number'
-                    ? Math.round(ing.carbs * ratio * 10) / 10
-                    : ing.carbs,
-                fat:
-                  typeof ing.fat === 'number'
-                    ? Math.round(ing.fat * ratio * 10) / 10
-                    : ing.fat,
-              }))
-            : group.items,
-        }))
-      : recipe.ingredients;
-
+    // Ingredients are deliberately left untouched: this sheet corrects how many
+    // servings the *existing* amounts yield, so the food in the pot does not
+    // change. Per-ingredient macros are absolute values for `amount`, so scaling
+    // them here would decouple them from the amount they describe (e.g. 200 g
+    // Wiener Würstchen claiming 2312 kcal instead of 578). Only the per-serving
+    // recipe totals above depend on the serving count.
     const updatedRecipe: Recipe = {
       ...recipe,
       servings: targetServings,
       nutritionalValues: updatedNutritionalValues,
-      ingredients: updatedIngredients,
     };
 
     if (recipe.id) {
