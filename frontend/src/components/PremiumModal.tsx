@@ -1,8 +1,8 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {
-  Crown, Check, X, Loader2, Sparkles, AlertCircle,
-  Video, MessageSquare, Flame, ListTodo, ChevronRight
+  Crown, Check, X, Loader2, AlertCircle,
+  Video, MessageSquare, Flame, ListTodo, Coffee
 } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { buyPremium, getSubscriptionOfferings } from '../utils/purchase';
@@ -178,7 +178,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
               <button
                 onClick={() => onOpenChange(false)}
                 className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 border-none text-gray-400 hover:text-gray-700 transition-all active:scale-95 cursor-pointer z-10"
-                aria-label={t('premium.modal.close') || 'SchlieÃŸen'}
+                aria-label={t('premium.modal.close') || 'Schließen'}
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -199,17 +199,20 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                 </p>
               </div>
 
-              {/* Price anchor pill â€” emerald to match app accent */}
+              {/* Price anchor pill — Coffee icon, no emoji */}
               <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 mt-0.5">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                <Coffee className="w-3.5 h-3.5 text-emerald-600" />
                 <span className="text-[11px] font-bold text-emerald-700 tracking-wide">
-                  {t('premium.modal.coffeeAnchor') || 'Weniger als ein Kaffee im Monat â˜•'}
+                  {t('premium.modal.coffeeAnchor') || 'Weniger als ein Kaffee im Monat'}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* â”€â”€â”€ Scrollable body â”€â”€â”€ */}
+          {/* Hero → body separator: thin shadow line instead of hard border */}
+          <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent shrink-0 mx-4" />
+
+          {/* ——— Scrollable body ——— */}
           <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-2">
 
             {/* Feature list */}
@@ -230,8 +233,9 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                       <p className="text-sm font-bold text-gray-900 leading-tight">{item.title}</p>
                       <p className="text-xs text-gray-500 leading-snug mt-0.5">{item.desc}</p>
                     </div>
-                    <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-                      <Check className="w-3 h-3 text-emerald-600" strokeWidth={3} />
+                    {/* Solid check — more visible than the pale circle */}
+                    <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+                      <Check className="w-3 h-3 text-white" strokeWidth={3} />
                     </div>
                   </div>
                 ))}
@@ -308,7 +312,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                             </span>
                           )}
                           {pkgTrialDays > 0 && (
-                            <span className="bg-amber-400/15 text-amber-600 font-black text-[9px] px-1.5 py-0.5 rounded-full">
+                            <span className="bg-emerald-500/10 text-emerald-600 font-black text-[9px] px-1.5 py-0.5 rounded-full">
                               {t('premium.modal.trialBadge').replace('{days}', String(pkgTrialDays))}
                             </span>
                           )}
@@ -329,7 +333,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
 
                         {/* Selected check */}
                         {isSelected && (
-                          <div className="absolute top-3 right-3 w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
+                          <div className="absolute top-3 right-3 w-[18px] h-[18px] rounded-full bg-emerald-500 flex items-center justify-center shadow-sm">
                             <Check className="w-2.5 h-2.5 text-white" strokeWidth={3.5} />
                           </div>
                         )}
@@ -392,9 +396,8 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                   <><Loader2 className="w-5 h-5 animate-spin" /> {t('premium.modal.loading')}</>
                 ) : (
                   <>
-                    <Crown className="w-[18px] h-[18px]" />
+                    <Crown className="w-[18px] h-[18px] fill-white/80" />
                     <span>{hasSelectedTrial ? t('premium.modal.ctaWithTrial') : t('premium.modal.ctaWithoutTrial')}</span>
-                    <ChevronRight className="w-4 h-4 opacity-70" />
                   </>
                 )}
               </button>
