@@ -303,7 +303,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                     >
                       {/* Bestseller chip */}
                       {isYearly && (
-                        <span className="absolute -top-[10px] left-1/2 -translate-x-1/2 bg-amber-500 text-white font-extrabold text-[8px] px-2.5 py-[3px] rounded-full uppercase tracking-wider whitespace-nowrap">
+                        <span className="absolute -top-[10px] left-1/2 -translate-x-1/2 bg-emerald-500 text-white font-extrabold text-[8px] px-2.5 py-[3px] rounded-full uppercase tracking-wider whitespace-nowrap">
                           {t('premium.modal.bestseller') || 'Bestseller'}
                         </span>
                       )}
@@ -320,12 +320,12 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                           </span>
                         )}
                         {hasSavings && (
-                          <span className="bg-amber-500/10 text-amber-600 font-black text-[8px] px-1.5 py-0.5 rounded-full">
+                          <span className="bg-emerald-500/10 text-emerald-600 font-black text-[8px] px-1.5 py-0.5 rounded-full">
                             -{savingsPercent}%
                           </span>
                         )}
                         {pkgTrialDays > 0 && (
-                          <span className="bg-amber-500/10 text-amber-600 font-black text-[8px] px-1.5 py-0.5 rounded-full">
+                          <span className="bg-emerald-500/10 text-emerald-600 font-black text-[8px] px-1.5 py-0.5 rounded-full">
                             {t('premium.modal.trialBadge').replace('{days}', String(pkgTrialDays))}
                           </span>
                         )}
