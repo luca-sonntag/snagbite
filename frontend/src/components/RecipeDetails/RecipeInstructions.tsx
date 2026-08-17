@@ -57,7 +57,7 @@ export default function RecipeInstructions({
             </div>
 
             <div className="flex-1 min-w-0">
-              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 sm:gap-5">
+              <div className="flex flex-col justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex justify-between items-center mb-2.5">
                     <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500">{t('recipe.cookingProgress')}</span>
@@ -74,7 +74,7 @@ export default function RecipeInstructions({
                 </div>
 
                 <Button
-                  className="relative bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4.5 py-2.5 rounded-xl shadow-md flex items-center justify-center gap-2 active:scale-[0.98] transition-all flex-shrink-0 self-start sm:self-center mt-1 sm:mt-0"
+                  className="relative bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4.5 py-2.5 rounded-xl shadow-md flex items-center justify-center gap-2 active:scale-[0.98] transition-all flex-shrink-0 self-start"
                   onPress={onStartCooking}
                 >
                   <Play className="w-4 h-4 fill-white" />
