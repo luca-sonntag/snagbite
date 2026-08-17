@@ -182,7 +182,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
         {/* Main sheet — ONE gradient for the whole sheet, hero + features share it seamlessly */}
         <div
           className="relative flex-1 flex flex-col w-full max-w-md mx-auto rounded-t-[28px] overflow-hidden shadow-[0_-8px_40px_rgba(0,0,0,0.18)]"
-          style={{ background: 'linear-gradient(180deg, #f2fbf6 0%, #f6fcf9 150px, #f9fafb 340px, #f9fafb 100%)' }}
+          style={{ background: 'linear-gradient(180deg, #eafaf1 0%, #f0fbf5 150px, #f4fbf7 300px, #f7fbf9 450px, #f9fafb 620px, #f9fafb 100%)' }}
         >
 
           {/* Soft indirect glow radiating from the top-left corner — lives on the
@@ -242,7 +242,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
               <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-2.5">
                 Alles in Premium
               </p>
-              <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-[0_1px_4px_rgba(0,0,0,0.05)] overflow-hidden">
+              <div className="bg-white/55 backdrop-blur-md rounded-2xl shadow-[0_1px_4px_rgba(0,0,0,0.05)] overflow-hidden">
                 {featureItems.map((item, idx) => (
                   <div
                     key={idx}
