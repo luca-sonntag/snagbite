@@ -28,7 +28,7 @@ export default function PremiumUpgradeCard({ onUpgradeClick, className = '' }: P
             Snagbite Premium
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
-            {language === 'de' ? 'Unbegrenzte Rezepte, KI-Remix & mehr' : 'Unlimited recipes, AI remix & more'}
+            {language === 'de' ? 'Mehr Rezept-Importe, Nährwerte & KI-Chat' : 'More recipe imports, nutrition info & AI chat'}
           </p>
         </div>
       </div>
