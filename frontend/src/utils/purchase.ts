@@ -172,8 +172,8 @@ export async function getSubscriptionOfferings(): Promise<any[]> {
   // Browser / dev mock — RevenueCat only runs on native
   if (!Capacitor.isNativePlatform()) {
     return [
-      { identifier: '$rc_monthly', packageType: 'MONTHLY', product: { identifier: 'snagbite_premium_monthly', priceString: '2,99 €', price: 2.99, introPrice: null } },
-      { identifier: '$rc_annual',  packageType: 'ANNUAL',  product: { identifier: 'snagbite_premium_annual',  priceString: '17,99 €', price: 17.99, pricePerMonthString: '1,50 €', introPrice: { price: 0, periodNumberOfUnits: 3 } } },
+      { identifier: '$rc_monthly', packageType: 'MONTHLY', product: { identifier: 'snagbite_premium_monthly', priceString: '3,99 €', price: 3.99, introPrice: null } },
+      { identifier: '$rc_annual',  packageType: 'ANNUAL',  product: { identifier: 'snagbite_premium_annual',  priceString: '29,99 €', price: 29.99, pricePerMonthString: '2,50 €', introPrice: { price: 0, periodNumberOfUnits: 3 } } },
     ];
   }
 

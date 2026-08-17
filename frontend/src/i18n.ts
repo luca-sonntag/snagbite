@@ -1199,7 +1199,7 @@ export const uiTranslations = {
     premium: {
       modal: {
         title: 'Snagbite Premium',
-        subtitle: 'Koche wie ein Profi, ohne Limits!',
+        subtitle: 'Mehr kochen, weniger tippen.',
         cta: 'Jetzt Premium freischalten',
         loading: 'Zahlung wird verarbeitet...',
         success: 'Erfolgreich freigeschaltet!',
@@ -1256,20 +1256,28 @@ export const uiTranslations = {
         },
         features: {
           extractions: {
-            title: 'Unbegrenzt & Multi-Import',
-            desc: 'Rezepte aus Reels, Web & Fotos importieren — auch im Hintergrund.'
+            title: 'Mehr Rezept-Importe',
+            desc: 'Bis zu 10 Importe täglich — Reels, Web, Fotos & Hintergrund.'
+          },
+          nutrition: {
+            title: 'Nährwerte & Makros',
+            desc: 'Kalorien, Makros & Portionen pro Portion auf einen Blick.'
           },
           remix: {
             title: 'Rezept-KI-Chat',
             desc: 'Rezepte per Chat anpassen, Zutaten ersetzen & Kochtipps holen.'
           },
-          nutrition: {
-            title: 'Nährwerte & Makros',
-            desc: 'Kalorien, Makros & Portionen auf einen Blick.'
-          },
           shoppingList: {
             title: 'Smarte Einkaufsliste',
-            desc: 'Zutaten aus allen Rezepten automatisch kombinieren.'
+            desc: 'Zutaten aus beliebig vielen Rezepten kombinieren.'
+          },
+          collections: {
+            title: 'Sammlungen & Labels',
+            desc: 'Rezepte in eigene Sammlungen organisieren.'
+          },
+          cookingMode: {
+            title: 'Kochmodus',
+            desc: 'Schritt-für-Schritt kochen mit Timer & Fokusansicht.'
           }
         }
       },
@@ -2182,7 +2190,7 @@ export const uiTranslations = {
     premium: {
       modal: {
         title: 'Snagbite Premium',
-        subtitle: 'Cook like a pro, without limits!',
+        subtitle: 'Cook more. Type less.',
         cta: 'Unlock Premium Now',
         loading: 'Processing payment...',
         success: 'Successfully unlocked!',
@@ -2239,20 +2247,28 @@ export const uiTranslations = {
         },
         features: {
           extractions: {
-            title: 'Unlimited & Multi-Import',
-            desc: 'Import recipes from reels, web & photos — even in background.'
+            title: 'More Recipe Imports',
+            desc: 'Up to 10 imports daily — reels, web, photos & background.'
+          },
+          nutrition: {
+            title: 'Nutrition & Macros',
+            desc: 'Calories, macros & portions per serving at a glance.'
           },
           remix: {
             title: 'Recipe AI Chat',
             desc: 'Adapt recipes via chat, replace ingredients & get cooking tips.'
           },
-          nutrition: {
-            title: 'Nutrition & Macros',
-            desc: 'Calories, macros & portion breakdowns at a glance.'
-          },
           shoppingList: {
             title: 'Smart Shopping List',
-            desc: 'Combine ingredients from all recipes automatically.'
+            desc: 'Combine ingredients from as many recipes as you like.'
+          },
+          collections: {
+            title: 'Collections & Labels',
+            desc: 'Organise recipes into your own collections.'
+          },
+          cookingMode: {
+            title: 'Cooking Mode',
+            desc: 'Step-by-step cooking with timer & focus view.'
           }
         }
       },

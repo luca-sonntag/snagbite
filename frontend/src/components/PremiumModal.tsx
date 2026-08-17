@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Crown, Check, X, Loader2, AlertCircle,
-  Video, MessageSquare, Flame, ListTodo, Coffee
+  Video, MessageSquare, Flame, ListTodo, Coffee, Layers, ChefHat
 } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { buyPremium, getSubscriptionOfferings } from '../utils/purchase';
@@ -127,19 +127,29 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
       icon: <Video className="w-5 h-5 text-emerald-600" />,
     },
     {
-      title: t('premium.modal.features.remix.title'),
-      desc: t('premium.modal.features.remix.desc'),
-      icon: <MessageSquare className="w-5 h-5 text-emerald-600" />,
-    },
-    {
       title: t('premium.modal.features.nutrition.title'),
       desc: t('premium.modal.features.nutrition.desc'),
       icon: <Flame className="w-5 h-5 text-emerald-600" />,
     },
     {
+      title: t('premium.modal.features.remix.title'),
+      desc: t('premium.modal.features.remix.desc'),
+      icon: <MessageSquare className="w-5 h-5 text-emerald-600" />,
+    },
+    {
       title: t('premium.modal.features.shoppingList.title'),
       desc: t('premium.modal.features.shoppingList.desc'),
       icon: <ListTodo className="w-5 h-5 text-emerald-600" />,
+    },
+    {
+      title: t('premium.modal.features.collections.title'),
+      desc: t('premium.modal.features.collections.desc'),
+      icon: <Layers className="w-5 h-5 text-emerald-600" />,
+    },
+    {
+      title: t('premium.modal.features.cookingMode.title'),
+      desc: t('premium.modal.features.cookingMode.desc'),
+      icon: <ChefHat className="w-5 h-5 text-emerald-600" />,
     },
   ];
 
@@ -167,44 +177,46 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
         {/* Main sheet */}
         <div className="relative flex-1 flex flex-col w-full max-w-md mx-auto bg-gray-50 rounded-t-[28px] overflow-hidden shadow-[0_-8px_40px_rgba(0,0,0,0.2)]">
 
-          {/* â”€â”€â”€ Hero Section â”€â”€â”€ */}
-          <div className="relative shrink-0 bg-white rounded-t-[28px] px-6 pt-7 pb-6 overflow-hidden">
-            {/* Ambient glow â€” very subtle, feels premium */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-72 h-28 bg-emerald-400/12 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-40 h-20 bg-amber-300/10 rounded-full blur-2xl pointer-events-none" />
+          {/* ─── Hero Section ─── */}
+          <div className="relative shrink-0 rounded-t-[28px] overflow-hidden" style={{ background: 'linear-gradient(160deg, #f0fdf4 0%, #ffffff 55%, #fffbeb 100%)' }}>
+            {/* Soft radial behind crown */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-40 bg-emerald-400/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 w-40 h-24 bg-amber-300/12 rounded-full blur-2xl pointer-events-none" />
 
-            {/* Close button */}
-            {!loading && (
-              <button
-                onClick={() => onOpenChange(false)}
-                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 border-none text-gray-400 hover:text-gray-700 transition-all active:scale-95 cursor-pointer z-10"
-                aria-label={t('premium.modal.close') || 'Schließen'}
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
+            <div className="relative px-6 pt-7 pb-6">
+              {/* Close button */}
+              {!loading && (
+                <button
+                  onClick={() => onOpenChange(false)}
+                  className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-black/5 hover:bg-black/10 border-none text-gray-500 hover:text-gray-800 transition-all active:scale-95 cursor-pointer z-10"
+                  aria-label={t('premium.modal.close') || 'Schließen'}
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
 
-            <div className="flex flex-col items-center text-center gap-2.5 relative">
-              {/* Crown icon badge */}
-              <div className="w-[52px] h-[52px] rounded-2xl bg-amber-50 flex items-center justify-center shadow-[0_4px_16px_rgba(251,191,36,0.20)]">
-                <Crown className="w-7 h-7 text-amber-500 fill-amber-400" />
-              </div>
+              <div className="flex flex-col items-center text-center gap-3 relative">
+                {/* Crown badge — larger, more dramatic */}
+                <div className="w-[60px] h-[60px] rounded-[18px] bg-gradient-to-br from-amber-100 to-amber-50 flex items-center justify-center shadow-[0_6px_24px_rgba(251,191,36,0.28)]">
+                  <Crown className="w-8 h-8 text-amber-500 fill-amber-400" />
+                </div>
 
-              <div>
-                <h2 className="text-[22px] font-black text-gray-900 tracking-tight leading-tight">
-                  {t('premium.modal.title')}
-                </h2>
-                <p className="text-sm text-gray-500 leading-relaxed mt-1 max-w-[230px] mx-auto">
-                  {t('premium.modal.subtitle')}
-                </p>
-              </div>
+                <div>
+                  <h2 className="text-[24px] font-black tracking-tight leading-tight" style={{ background: 'linear-gradient(135deg, #111827 30%, #059669 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                    {t('premium.modal.title')}
+                  </h2>
+                  <p className="text-sm text-gray-500 leading-relaxed mt-1.5 max-w-[220px] mx-auto">
+                    {t('premium.modal.subtitle')}
+                  </p>
+                </div>
 
-              {/* Price anchor pill — Coffee icon, no emoji */}
-              <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 mt-0.5">
-                <Coffee className="w-3.5 h-3.5 text-emerald-600" />
-                <span className="text-[11px] font-bold text-emerald-700 tracking-wide">
-                  {t('premium.modal.coffeeAnchor') || 'Weniger als ein Kaffee im Monat'}
-                </span>
+                {/* Coffee anchor pill */}
+                <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10">
+                  <Coffee className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="text-[11px] font-bold text-emerald-700 tracking-wide">
+                    {t('premium.modal.coffeeAnchor') || 'Weniger als ein Kaffee im Monat'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
