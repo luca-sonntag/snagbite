@@ -68,6 +68,7 @@ import {
 import { config } from './config.js';
 import { requireAuth, requireAdmin } from './auth.js';
 import { chatAboutRecipe, generateChatChips, remixRecipe, verifyCookedDishPhoto } from './gemini.js';
+import { enrichRecipeWithCanonicalIngredients } from './matching/ingredientMatcher.js';
 import { getLlmMetrics } from './adminMetrics.js';
 import { AppError, sendAppError } from './errors.js';
 import { randomUUID } from 'node:crypto';
@@ -953,6 +954,12 @@ apiRouter.post('/jobs/:id/chat/confirm', async (req: Request, res: Response): Pr
     } catch { }
 
     const remixedRecipe = await remixRecipe(job.recipe, modificationRequest, undefined, userPrefs);
+
+    // The remix prompt hands Gemini the parent recipe JSON, so it echoes back the
+    // parent's canonicalId/matchedName/isVerified while re-estimating the macros
+    // itself. Re-run the canonical matcher so persisted macros come from BLS and
+    // not from the model's guess.
+    await enrichRecipeWithCanonicalIngredients(remixedRecipe);
 
     if (replaceCurrent) {
       // Preserve images from the original recipe (Gemini doesn't know about them)

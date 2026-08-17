@@ -153,6 +153,9 @@ async function processJob(job: Job): Promise<void> {
       recipe.imageUrl = null;
       recipe.instagramHandle = null;
 
+      // Canonical ingredient normalization & nutritional calculation
+      await enrichRecipeWithCanonicalIngredients(recipe);
+
       await updateJob(jobId, { status: 'completed', recipe, error: null });
       return;
     }

@@ -702,7 +702,12 @@ export function applyCanonicalMatchToIngredient(
   fat: number;
 } {
   if (!match) {
+    // Remixes echo the parent's match fields back from the model — drop them so an
+    // unmatched ingredient never carries a stale canonical reference next to
+    // LLM-estimated macros.
     ingredient.isVerified = false;
+    ingredient.canonicalId = undefined;
+    ingredient.matchedName = undefined;
     return {
       matched: false,
       calories: ingredient.calories ?? 0,
