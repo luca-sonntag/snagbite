@@ -8,6 +8,8 @@ COPY package*.json ./
 COPY backend/package*.json backend/
 COPY frontend/package*.json frontend/
 COPY healthcheck/package*.json healthcheck/
+COPY website/package*.json website/
+COPY shared/package*.json shared/
 
 # Install dependencies for the workspaces
 RUN YOUTUBE_DL_SKIP_PYTHON_CHECK=1 npm install
