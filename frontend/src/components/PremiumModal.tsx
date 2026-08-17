@@ -225,17 +225,15 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
   const modal = (
     <div className="fixed inset-0 z-[200] flex flex-col overflow-hidden" role="dialog" aria-modal="true">
 
-      {/* Fullscreen premium dark gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-emerald-950 to-slate-950" />
+      {/* Warm charcoal base — matches app dark mode bg-gray-950 */}
+      <div className="absolute inset-0" style={{ background: '#141412' }} />
 
-      {/* Ambient Glow spots behind cards */}
-      <div className="absolute top-[20%] left-[-15%] w-80 h-80 bg-emerald-500/10 rounded-full filter blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-[25%] right-[-15%] w-80 h-80 bg-amber-500/10 rounded-full filter blur-[100px] pointer-events-none" />
+      {/* Subtle ambient glow — crown warmth top, amber warmth bottom */}
+      <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[480px] h-72 bg-amber-500/8 rounded-full filter blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[10%] right-[-20%] w-72 h-72 bg-emerald-500/6 rounded-full filter blur-[100px] pointer-events-none" />
 
-      {/* Radial highlight at top */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-60 bg-emerald-400/10 rounded-full filter blur-3xl pointer-events-none" />
-      {/* Depth shadow at bottom */}
-      <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+      {/* Subtle vignette at bottom */}
+      <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
 
       {/* Content Container */}
       <div
@@ -251,7 +249,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
           <div className="flex justify-end pt-4 pb-1 shrink-0">
             <button
               onClick={() => onOpenChange(false)}
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border-none text-white/80 hover:text-white transition-colors cursor-pointer"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 border-none text-gray-400 hover:text-white transition-all active:scale-95 cursor-pointer"
               aria-label={t('premium.modal.close') || 'Schließen'}
             >
               <X className="w-4 h-4" />
@@ -268,7 +266,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
               {t('premium.modal.title')}
             </h2>
           </div>
-          <p className="text-sm text-emerald-100/70 max-w-xs leading-relaxed font-medium">
+          <p className="text-sm text-gray-400 max-w-xs leading-relaxed font-medium">
             {t('premium.modal.subtitle')}
           </p>
           {renderCoffeeAnchor()}
@@ -282,16 +280,16 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
             {featureItems.map((item, idx) => (
               <div
                 key={idx}
-                className="bg-white/5 border-none rounded-2xl p-3 flex flex-col gap-2 relative overflow-hidden backdrop-blur-md hover:bg-white/10 transition-all"
+                className="bg-gray-900 border-none rounded-2xl p-3 flex flex-col gap-2 relative overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.15)] hover:bg-gray-800 transition-all active:scale-[0.98]"
               >
-                <div className="w-8 h-8 rounded-xl bg-amber-400/10 border-none flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 border-none flex items-center justify-center shrink-0">
                   {item.icon}
                 </div>
                 <div className="flex flex-col gap-0.5">
                   <span className="text-xs font-bold text-white leading-tight">
                     {item.title}
                   </span>
-                  <span className="text-[10px] text-emerald-100/60 leading-normal">
+                  <span className="text-[10px] text-gray-500 leading-normal">
                     {item.desc}
                   </span>
                 </div>
@@ -301,30 +299,30 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
 
           {/* Divider between Cards and Table */}
           <div className="flex items-center gap-3 py-1 shrink-0">
-            <div className="flex-1 h-[1px] bg-white/5" />
-            <span className="text-[9px] font-bold text-emerald-200/40 uppercase tracking-widest">
+            <div className="flex-1 h-[1px] bg-gray-800" />
+            <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">
               {t('premium.modal.comparison.tableTitle') || 'Free vs. Premium im Vergleich'}
             </span>
-            <div className="flex-1 h-[1px] bg-white/5" />
+            <div className="flex-1 h-[1px] bg-gray-800" />
           </div>
 
           {/* Comparison Table */}
-          <div className="flex flex-col rounded-3xl overflow-hidden bg-white/5 border-none backdrop-blur-md shrink-0">
+          <div className="flex flex-col rounded-3xl overflow-hidden bg-gray-900 border-none shadow-[0_2px_8px_rgba(0,0,0,0.15)] shrink-0">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-white/5 text-[9px] uppercase tracking-wider text-emerald-200/50">
+                <tr className="border-b border-gray-800 text-[9px] uppercase tracking-wider text-gray-500">
                   <th className="px-4 py-3 font-bold">{t('premium.modal.comparison.headerFeature')}</th>
                   <th className="px-3 py-3 font-bold text-center">{t('premium.modal.comparison.headerFree')}</th>
-                  <th className="px-3 py-3 font-bold text-center text-amber-300">{t('premium.modal.comparison.headerPremium')}</th>
+                  <th className="px-3 py-3 font-bold text-center text-amber-400">{t('premium.modal.comparison.headerPremium')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-gray-800">
                 {comparisonRows.map((row, index) => (
                   <tr
                     key={index}
-                    className={`hover:bg-white/5 transition-colors ${index % 2 === 0 ? 'bg-white/[0.01]' : 'bg-transparent'}`}
+                    className={`transition-colors ${index % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800/40'}`}
                   >
-                    <td className="px-4 py-3.5 font-bold text-white text-[11px] leading-tight">{row.feature}</td>
+                    <td className="px-4 py-3.5 font-bold text-gray-200 text-[11px] leading-tight">{row.feature}</td>
                     <td className="px-3 py-3.5 text-center leading-none">
                       {renderCellContent(row.free, false)}
                     </td>
@@ -352,7 +350,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
         )}
 
         {/* Sticky Pricing & CTA Block */}
-        <div className="shrink-0 mt-3 pt-3 border-t border-white/5 flex flex-col gap-3.5">
+        <div className="shrink-0 mt-3 pt-3 border-t border-gray-800 flex flex-col gap-3.5">
 
           {/* Pricing Options Cards */}
           {isLoadingPackages ? (
@@ -398,28 +396,28 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                     key={pkg.identifier}
                     onClick={() => setSelectedPackageId(pkg.identifier)}
                     className={`relative p-3.5 rounded-2xl flex flex-col gap-0.5 border-none transition-all active:scale-[0.98] cursor-pointer ${isSelected
-                        ? 'bg-gradient-to-b from-amber-400/25 to-amber-400/10 ring-2 ring-amber-400'
-                        : 'bg-white/5 hover:bg-white/10'
+                        ? 'bg-amber-500/10 ring-2 ring-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.12)]'
+                        : 'bg-gray-900 hover:bg-gray-800 shadow-[0_2px_8px_rgba(0,0,0,0.15)]'
                       }`}
                   >
                     {/* Bestseller Badge */}
                     {isYearly && (
-                      <span className="absolute top-2 right-2 bg-amber-400 text-emerald-950 font-extrabold text-[8px] px-1.5 py-0.5 rounded uppercase tracking-wider">
+                      <span className="absolute top-2 right-2 bg-amber-400 text-gray-950 font-extrabold text-[8px] px-1.5 py-0.5 rounded-md uppercase tracking-wider">
                         {t('premium.modal.bestseller') || 'Bestseller'}
                       </span>
                     )}
 
                     <div className="flex items-center gap-1.5 pt-1">
-                      <span className="text-[10px] font-bold text-white/80">
+                      <span className="text-[10px] font-bold text-gray-300">
                         {isYearly ? t('premium.modal.yearly') : t('premium.modal.monthly')}
                       </span>
                       {hasSavings && (
-                        <span className="bg-emerald-400/20 text-emerald-400 font-extrabold text-[7.5px] px-1 py-0.5 rounded border-none">
+                        <span className="bg-emerald-500/10 text-emerald-400 font-extrabold text-[7.5px] px-1 py-0.5 rounded border-none">
                           {t('premium.modal.savePercent').replace('{percent}', String(savingsPercent)) || `-${savingsPercent}%`}
                         </span>
                       )}
                       {pkgTrialDays > 0 && (
-                        <span className="bg-amber-400/20 text-amber-300 font-extrabold text-[7.5px] px-1 py-0.5 rounded border-none">
+                        <span className="bg-amber-500/10 text-amber-400 font-extrabold text-[7.5px] px-1 py-0.5 rounded border-none">
                           {t('premium.modal.trialBadge').replace('{days}', String(pkgTrialDays))}
                         </span>
                       )}
@@ -429,7 +427,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                       {monthlyPriceStr}
                     </div>
 
-                    <div className="text-[9px] text-emerald-100/60 mt-auto">
+                    <div className="text-[9px] text-gray-500 mt-auto">
                       {isYearly
                         ? t('premium.modal.priceYearlyPeriod').replace('{price}', pkg.product.priceString)
                         : t('premium.modal.pricePeriod').replace('{price}', pkg.product.priceString)
@@ -440,9 +438,9 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
               })}
             </div>
           ) : (
-            <div className="flex items-center gap-2 p-3 bg-yellow-500/10 border-none rounded-xl shrink-0">
-              <AlertCircle className="w-4 h-4 text-amber-300 shrink-0" />
-              <span className="text-[10px] text-amber-200/80 leading-relaxed">
+            <div className="flex items-center gap-2 p-3 bg-amber-500/10 border-none rounded-2xl shrink-0">
+              <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+              <span className="text-[10px] text-gray-400 leading-relaxed">
                 Keine Angebote verfügbar.
               </span>
             </div>
@@ -451,16 +449,16 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
           {/* CTA Button Block */}
           <div>
             {user?.app_metadata?.tier === 'alpha' ? (
-              <button className="w-full h-14 rounded-2xl bg-white/10 border-none text-white text-sm font-bold flex items-center justify-center gap-2 cursor-default">
-                <Check className="w-5 h-5 text-amber-300" /> {t('premium.modal.alphaOwned') || 'Käufe während der Alpha deaktiviert'}
+              <button className="w-full h-14 rounded-2xl bg-gray-800 border-none text-gray-300 text-sm font-bold flex items-center justify-center gap-2 cursor-default">
+                <Check className="w-5 h-5 text-amber-400" /> {t('premium.modal.alphaOwned') || 'Käufe während der Alpha deaktiviert'}
               </button>
             ) : isPremium ? (
-              <button className="w-full h-14 rounded-2xl bg-white/10 border-none text-white text-sm font-bold flex items-center justify-center gap-2 cursor-default">
-                <Check className="w-5 h-5 text-amber-300" /> {t('premium.modal.owned') || 'Du hast Premium'}
+              <button className="w-full h-14 rounded-2xl bg-gray-800 border-none text-gray-300 text-sm font-bold flex items-center justify-center gap-2 cursor-default">
+                <Check className="w-5 h-5 text-amber-400" /> {t('premium.modal.owned') || 'Du hast Premium'}
               </button>
             ) : isValidating || isLoadingPackages ? (
-              <button disabled className="w-full h-14 rounded-2xl bg-white/10 border-none text-white text-sm font-bold flex items-center justify-center gap-2 cursor-default">
-                <Loader2 className="w-5 h-5 animate-spin text-amber-300" /> {t('premium.modal.verifying') || 'Verifiziere Status...'}
+              <button disabled className="w-full h-14 rounded-2xl bg-gray-800 border-none text-gray-400 text-sm font-bold flex items-center justify-center gap-2 cursor-default">
+                <Loader2 className="w-5 h-5 animate-spin text-amber-400" /> {t('premium.modal.verifying') || 'Verifiziere Status...'}
               </button>
             ) : (
               <button
@@ -482,17 +480,17 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
             )}
             {!isPremium && !loading && !isValidating && !isLoadingPackages && (
               <>
-                <p className="text-center text-[11px] text-emerald-100/50 mt-2 font-semibold">
+                <p className="text-center text-[11px] text-gray-500 mt-2 font-semibold">
                   {t('premium.modal.cancelSubtitle') || 'Kein Risiko. Jederzeit kündbar.'}
                 </p>
                 {/* Reference to the AGB (terms) shown before the in-app purchase. */}
-                <p className="text-center text-[10px] text-emerald-100/40 mt-1">
+                <p className="text-center text-[10px] text-gray-600 mt-1">
                   {t('premium.modal.termsNoticePrefix') || 'Mit dem Kauf stimmst du den '}
                   <a
                     href={LEGAL_URLS.terms}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline underline-offset-2 hover:text-amber-300 transition-colors"
+                    className="underline underline-offset-2 hover:text-amber-400 transition-colors"
                   >
                     {t('premium.modal.termsLink') || 'AGB'}
                   </a>
