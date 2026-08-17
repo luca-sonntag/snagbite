@@ -1226,7 +1226,7 @@ export const uiTranslations = {
         termsNoticeSuffix: ' zu.',
         trialBanner: {
           title: 'Premium kostenlos testen',
-          body: 'Schalte alles frei. Endet von selbst – keine Kündigung nötig.',
+          body: 'Schalte alles frei. Jederzeit kündbar.',
           cta: 'Kostenlos starten',
           dismiss: 'Später',
           days: 'Tage',
@@ -2221,7 +2221,7 @@ export const uiTranslations = {
         termsNoticeSuffix: '.',
         trialBanner: {
           title: 'Try Premium free',
-          body: 'Unlock everything. Ends on its own – no cancelling needed.',
+          body: 'Unlock everything. Cancel anytime.',
           cta: 'Start free',
           dismiss: 'Later',
           days: 'days',
