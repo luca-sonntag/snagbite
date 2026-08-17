@@ -86,12 +86,12 @@ export default function NotificationSettings() {
             </div>
             <div className="min-w-0">
               <p className="font-semibold text-gray-900 dark:text-white text-sm">
-                {isDe ? 'Smarte Rezept-Tipps' : 'Smart recipe tips'}
+                {isDe ? 'Push-Benachrichtigungen' : 'Push notifications'}
               </p>
               <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-medium">
                 {isDe
-                  ? 'Persönliche Ideen aus deinem Kochbuch – nie spammy'
-                  : 'Personal ideas from your cookbook – never spammy'}
+                  ? 'Rezeptideen, Erinnerungen & Tipps rund ums Kochen – abgestimmt auf dein Kochbuch. Jederzeit deaktivierbar.'
+                  : 'Recipe ideas, reminders & cooking tips based on your cookbook. Turn off anytime.'}
               </p>
             </div>
           </div>
