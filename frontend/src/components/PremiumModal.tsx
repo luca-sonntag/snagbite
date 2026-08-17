@@ -1,6 +1,9 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Crown, Check, X, Loader2, Sparkles, AlertCircle, Video, MessageSquare, Flame, ListTodo } from 'lucide-react';
+import {
+  Crown, Check, X, Loader2, Sparkles, AlertCircle,
+  Video, MessageSquare, Flame, ListTodo, ChevronRight
+} from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { buyPremium, getSubscriptionOfferings } from '../utils/purchase';
 import { useAuth } from '../context/AuthContext';
@@ -121,387 +124,305 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
     {
       title: t('premium.modal.features.extractions.title'),
       desc: t('premium.modal.features.extractions.desc'),
-      icon: <Video className="w-4 h-4 text-amber-400" />
+      icon: <Video className="w-5 h-5 text-emerald-600" />,
     },
     {
       title: t('premium.modal.features.remix.title'),
       desc: t('premium.modal.features.remix.desc'),
-      icon: <MessageSquare className="w-4 h-4 text-amber-400" />
+      icon: <MessageSquare className="w-5 h-5 text-emerald-600" />,
     },
     {
       title: t('premium.modal.features.nutrition.title'),
       desc: t('premium.modal.features.nutrition.desc'),
-      icon: <Flame className="w-4 h-4 text-amber-400" />
+      icon: <Flame className="w-5 h-5 text-emerald-600" />,
     },
     {
       title: t('premium.modal.features.shoppingList.title'),
       desc: t('premium.modal.features.shoppingList.desc'),
-      icon: <ListTodo className="w-4 h-4 text-amber-400" />
+      icon: <ListTodo className="w-5 h-5 text-emerald-600" />,
     },
   ];
-
-  const comparisonRows = [
-    {
-      feature: t('premium.modal.comparison.rowExtractions'),
-      free: t('premium.modal.comparison.rowExtractionsFree'),
-      premium: t('premium.modal.comparison.rowExtractionsPremium'),
-    },
-    {
-      feature: t('premium.modal.comparison.rowCookbook'),
-      free: t('premium.modal.comparison.rowCookbookFree'),
-      premium: t('premium.modal.comparison.rowCookbookPremium'),
-    },
-    {
-      feature: t('premium.modal.comparison.rowShoppingList'),
-      free: t('premium.modal.comparison.rowShoppingListFree'),
-      premium: t('premium.modal.comparison.rowShoppingListPremium'),
-    },
-    {
-      feature: t('premium.modal.comparison.rowAiChat'),
-      free: false,
-      premium: true,
-    },
-    {
-      feature: t('premium.modal.comparison.rowNutrition'),
-      free: false,
-      premium: true,
-    },
-    {
-      feature: t('premium.modal.comparison.rowCollections'),
-      free: false,
-      premium: true,
-    },
-    {
-      feature: t('premium.modal.comparison.rowCookingMode'),
-      free: false,
-      premium: true,
-    },
-  ];
-
-  // Helper to render comparison cells cleanly using modern check/cross components
-  const renderCellContent = (val: string | boolean, isPremiumCol: boolean) => {
-    if (typeof val === 'boolean') {
-      if (val) {
-        return (
-          <div className="flex items-center justify-center">
-            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-amber-400/30 to-yellow-500/20 border border-amber-400/40 flex items-center justify-center shadow-sm shadow-amber-400/10 shrink-0">
-              <Check className="w-2.5 h-2.5 text-amber-300" strokeWidth={4} />
-            </div>
-          </div>
-        );
-      } else {
-        return (
-          <div className="flex items-center justify-center">
-            <div className="w-5 h-5 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-              <X className="w-2.5 h-2.5 text-white/30" strokeWidth={3} />
-            </div>
-          </div>
-        );
-      }
-    }
-
-    return (
-      <span className={isPremiumCol ? 'text-amber-300 font-extrabold text-[11px]' : 'text-emerald-100/65 font-medium text-[11px]'}>
-        {val}
-      </span>
-    );
-  };
 
   // Helper to determine trial info
   const selectedPackage = packages.find(p => p.identifier === selectedPackageId);
   const hasSelectedTrial = !!(selectedPackage?.product?.introPrice && selectedPackage?.product?.introPrice?.price === 0);
   const trialDays = selectedPackage?.product?.introPrice?.periodNumberOfUnits || 3;
 
-  // Render the Coffee Anchor Badge
-  const renderCoffeeAnchor = () => {
-    return (
-      <div className="flex items-center justify-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/10 border-none text-amber-300 text-[10px] font-bold tracking-wide shrink-0">
-        <Sparkles className="w-3.5 h-3.5 fill-amber-300 animate-pulse" />
-        {t('premium.modal.coffeeAnchor') || 'Weniger als ein Kaffee im Monat ☕'}
-      </div>
-    );
-  };
-
   const modal = (
     <div className="fixed inset-0 z-[200] flex flex-col overflow-hidden" role="dialog" aria-modal="true">
 
-      {/* Warm charcoal base — matches app dark mode bg-gray-950 */}
-      <div className="absolute inset-0" style={{ background: '#141412' }} />
+      {/* Blurred backdrop */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
 
-      {/* Subtle ambient glow — crown warmth top, amber warmth bottom */}
-      <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[480px] h-72 bg-amber-500/8 rounded-full filter blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[10%] right-[-20%] w-72 h-72 bg-emerald-500/6 rounded-full filter blur-[100px] pointer-events-none" />
+      {/* Sheet container */}
+      <div className="absolute inset-0 flex flex-col">
 
-      {/* Subtle vignette at bottom */}
-      <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
+        {/* Tapable top spacer */}
+        <div
+          className="shrink-0"
+          style={{ height: 'max(var(--safe-area-inset-top, 0px), 24px)' }}
+          onClick={() => !loading && onOpenChange(false)}
+        />
 
-      {/* Content Container */}
-      <div
-        className="relative flex flex-col h-full w-full max-w-md mx-auto px-5 select-none"
-        style={{
-          paddingTop: 'max(var(--safe-area-inset-top, 0px), 52px)',
-          paddingBottom: 'max(var(--safe-area-inset-bottom, 0px), 28px)'
-        }}
-      >
+        {/* Main sheet */}
+        <div className="relative flex-1 flex flex-col w-full max-w-md mx-auto bg-gray-50 rounded-t-[28px] overflow-hidden shadow-[0_-8px_40px_rgba(0,0,0,0.2)]">
 
-        {/* Close Button */}
-        {!loading && (
-          <div className="flex justify-end pt-4 pb-1 shrink-0">
-            <button
-              onClick={() => onOpenChange(false)}
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 border-none text-gray-400 hover:text-white transition-all active:scale-95 cursor-pointer"
-              aria-label={t('premium.modal.close') || 'Schließen'}
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-        {loading && <div className="h-10 shrink-0" />}
+          {/* â”€â”€â”€ Hero Section â”€â”€â”€ */}
+          <div className="relative shrink-0 bg-white rounded-t-[28px] px-6 pt-7 pb-6 overflow-hidden">
+            {/* Ambient glow â€” very subtle, feels premium */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-72 h-28 bg-emerald-400/12 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-40 h-20 bg-amber-300/10 rounded-full blur-2xl pointer-events-none" />
 
-        {/* Header */}
-        <div className="flex flex-col items-center text-center gap-2 pb-2 shrink-0">
-          <div className="flex items-center justify-center gap-2">
-            <Crown className="w-6 h-6 text-amber-400 fill-amber-400 drop-shadow-[0_2px_8px_rgba(251,191,36,0.4)]" />
-            <h2 className="text-3xl font-black bg-gradient-to-r from-white via-amber-200 to-white bg-clip-text text-transparent tracking-tight drop-shadow-sm">
-              {t('premium.modal.title')}
-            </h2>
-          </div>
-          <p className="text-sm text-gray-400 max-w-xs leading-relaxed font-medium">
-            {t('premium.modal.subtitle')}
-          </p>
-          {renderCoffeeAnchor()}
-        </div>
-
-        {/* Scrollable middle container - Scrollbar completely hidden. Displays both Cards and Table sequentially. */}
-        <div className="flex-1 overflow-y-auto pr-1 -mr-1 flex flex-col gap-4 py-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-
-          {/* 2x2 Outcome Benefit Tiles */}
-          <div className="grid grid-cols-2 gap-3 shrink-0">
-            {featureItems.map((item, idx) => (
-              <div
-                key={idx}
-                className="bg-gray-900 border-none rounded-2xl p-3 flex flex-col gap-2 relative overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.15)] hover:bg-gray-800 transition-all active:scale-[0.98]"
+            {/* Close button */}
+            {!loading && (
+              <button
+                onClick={() => onOpenChange(false)}
+                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 border-none text-gray-400 hover:text-gray-700 transition-all active:scale-95 cursor-pointer z-10"
+                aria-label={t('premium.modal.close') || 'SchlieÃŸen'}
               >
-                <div className="w-8 h-8 rounded-xl bg-amber-500/10 border-none flex items-center justify-center shrink-0">
-                  {item.icon}
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-xs font-bold text-white leading-tight">
-                    {item.title}
-                  </span>
-                  <span className="text-[10px] text-gray-500 leading-normal">
-                    {item.desc}
-                  </span>
-                </div>
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+
+            <div className="flex flex-col items-center text-center gap-2.5 relative">
+              {/* Crown icon badge */}
+              <div className="w-[52px] h-[52px] rounded-2xl bg-amber-50 flex items-center justify-center shadow-[0_4px_16px_rgba(251,191,36,0.20)]">
+                <Crown className="w-7 h-7 text-amber-500 fill-amber-400" />
               </div>
-            ))}
-          </div>
 
-          {/* Divider between Cards and Table */}
-          <div className="flex items-center gap-3 py-1 shrink-0">
-            <div className="flex-1 h-[1px] bg-gray-800" />
-            <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">
-              {t('premium.modal.comparison.tableTitle') || 'Free vs. Premium im Vergleich'}
-            </span>
-            <div className="flex-1 h-[1px] bg-gray-800" />
-          </div>
+              <div>
+                <h2 className="text-[22px] font-black text-gray-900 tracking-tight leading-tight">
+                  {t('premium.modal.title')}
+                </h2>
+                <p className="text-sm text-gray-500 leading-relaxed mt-1 max-w-[230px] mx-auto">
+                  {t('premium.modal.subtitle')}
+                </p>
+              </div>
 
-          {/* Comparison Table */}
-          <div className="flex flex-col rounded-3xl overflow-hidden bg-gray-900 border-none shadow-[0_2px_8px_rgba(0,0,0,0.15)] shrink-0">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-gray-800 text-[9px] uppercase tracking-wider text-gray-500">
-                  <th className="px-4 py-3 font-bold">{t('premium.modal.comparison.headerFeature')}</th>
-                  <th className="px-3 py-3 font-bold text-center">{t('premium.modal.comparison.headerFree')}</th>
-                  <th className="px-3 py-3 font-bold text-center text-amber-400">{t('premium.modal.comparison.headerPremium')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-800">
-                {comparisonRows.map((row, index) => (
-                  <tr
-                    key={index}
-                    className={`transition-colors ${index % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800/40'}`}
-                  >
-                    <td className="px-4 py-3.5 font-bold text-gray-200 text-[11px] leading-tight">{row.feature}</td>
-                    <td className="px-3 py-3.5 text-center leading-none">
-                      {renderCellContent(row.free, false)}
-                    </td>
-                    <td className="px-3 py-3.5 text-center leading-none">
-                      {renderCellContent(row.premium, true)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-        </div>
-
-        {/* Status messages */}
-        {errorMsg && (
-          <div className="mt-3 text-xs font-semibold text-white bg-red-500/30 py-2 px-3 rounded-xl border-none text-center shrink-0">
-            {errorMsg}
-          </div>
-        )}
-        {success && (
-          <div className="mt-3 text-xs font-semibold text-white bg-emerald-400/20 py-2 px-3 rounded-xl border-none text-center flex items-center justify-center gap-1.5 shrink-0">
-            <Check className="w-4 h-4" /> {t('premium.modal.success')}
-          </div>
-        )}
-
-        {/* Sticky Pricing & CTA Block */}
-        <div className="shrink-0 mt-3 pt-3 border-t border-gray-800 flex flex-col gap-3.5">
-
-          {/* Pricing Options Cards */}
-          {isLoadingPackages ? (
-            <div className="flex flex-col items-center justify-center py-4 gap-2 shrink-0">
-              <Loader2 className="w-5 h-5 animate-spin text-amber-300" />
-              <span className="text-[10px] text-emerald-100/60">{t('premium.modal.verifying') || 'Lade Optionen...'}</span>
+              {/* Price anchor pill â€” emerald to match app accent */}
+              <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 mt-0.5">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="text-[11px] font-bold text-emerald-700 tracking-wide">
+                  {t('premium.modal.coffeeAnchor') || 'Weniger als ein Kaffee im Monat â˜•'}
+                </span>
+              </div>
             </div>
-          ) : packages.length > 0 ? (
-            <div className={`grid ${packages.length === 1 ? 'grid-cols-1 w-52 mx-auto' : 'grid-cols-2'} gap-3 shrink-0`}>
-              {packages.map((pkg) => {
-                const isSelected = selectedPackageId === pkg.identifier;
-                const isYearly = pkg.packageType === 'ANNUAL';
+          </div>
 
-                // Format monthly equivalent for yearly (standard yearly price / 12)
-                let monthlyPriceStr = pkg.product.priceString;
-                if (isYearly) {
-                  const monthlyEquiv = pkg.product.pricePerMonthString ||
-                    (pkg.product.price ? `${(pkg.product.price / 12).toFixed(2).replace('.', ',')} €` : '');
-                  monthlyPriceStr = t('premium.modal.priceMonthlyEquivalent').replace('{price}', monthlyEquiv);
-                }
+          {/* â”€â”€â”€ Scrollable body â”€â”€â”€ */}
+          <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-2">
 
-                // Free-trial length for this package (intro offer with price 0), if any
-                const pkgTrialDays = (pkg.product?.introPrice && pkg.product.introPrice.price === 0)
-                  ? (pkg.product.introPrice.periodNumberOfUnits || trialDays)
-                  : 0;
-
-                // If monthly package exists, we can show savings percentage on yearly
-                const hasSavings = isYearly && packages.some(p => p.packageType === 'MONTHLY');
-                let savingsPercent = 37;
-                if (hasSavings) {
-                  const monthlyPkg = packages.find(p => p.packageType === 'MONTHLY');
-                  if (monthlyPkg?.product?.price && pkg.product.price) {
-                    const monthlyCost = monthlyPkg.product.price * 12;
-                    const yearlyCost = pkg.product.price;
-                    if (monthlyCost > yearlyCost) {
-                      savingsPercent = Math.round(((monthlyCost - yearlyCost) / monthlyCost) * 100);
-                    }
-                  }
-                }
-
-                return (
+            {/* Feature list */}
+            <div className="px-5 pt-4">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2.5">
+                Alles in Premium
+              </p>
+              <div className="bg-white rounded-2xl shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden border-none">
+                {featureItems.map((item, idx) => (
                   <div
-                    key={pkg.identifier}
-                    onClick={() => setSelectedPackageId(pkg.identifier)}
-                    className={`relative p-3.5 rounded-2xl flex flex-col gap-0.5 border-none transition-all active:scale-[0.98] cursor-pointer ${isSelected
-                        ? 'bg-amber-500/10 ring-2 ring-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.12)]'
-                        : 'bg-gray-900 hover:bg-gray-800 shadow-[0_2px_8px_rgba(0,0,0,0.15)]'
-                      }`}
+                    key={idx}
+                    className={`flex items-center gap-3.5 px-4 py-3.5 ${idx < featureItems.length - 1 ? 'border-b border-gray-100' : ''}`}
                   >
-                    {/* Bestseller Badge */}
-                    {isYearly && (
-                      <span className="absolute top-2 right-2 bg-amber-400 text-gray-950 font-extrabold text-[8px] px-1.5 py-0.5 rounded-md uppercase tracking-wider">
-                        {t('premium.modal.bestseller') || 'Bestseller'}
-                      </span>
-                    )}
-
-                    <div className="flex items-center gap-1.5 pt-1">
-                      <span className="text-[10px] font-bold text-gray-300">
-                        {isYearly ? t('premium.modal.yearly') : t('premium.modal.monthly')}
-                      </span>
-                      {hasSavings && (
-                        <span className="bg-emerald-500/10 text-emerald-400 font-extrabold text-[7.5px] px-1 py-0.5 rounded border-none">
-                          {t('premium.modal.savePercent').replace('{percent}', String(savingsPercent)) || `-${savingsPercent}%`}
-                        </span>
-                      )}
-                      {pkgTrialDays > 0 && (
-                        <span className="bg-amber-500/10 text-amber-400 font-extrabold text-[7.5px] px-1 py-0.5 rounded border-none">
-                          {t('premium.modal.trialBadge').replace('{days}', String(pkgTrialDays))}
-                        </span>
-                      )}
+                    <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                      {item.icon}
                     </div>
-
-                    <div className="text-base font-extrabold text-white leading-tight">
-                      {monthlyPriceStr}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-gray-900 leading-tight">{item.title}</p>
+                      <p className="text-xs text-gray-500 leading-snug mt-0.5">{item.desc}</p>
                     </div>
-
-                    <div className="text-[9px] text-gray-500 mt-auto">
-                      {isYearly
-                        ? t('premium.modal.priceYearlyPeriod').replace('{price}', pkg.product.priceString)
-                        : t('premium.modal.pricePeriod').replace('{price}', pkg.product.priceString)
-                      }
+                    <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                      <Check className="w-3 h-3 text-emerald-600" strokeWidth={3} />
                     </div>
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
-          ) : (
-            <div className="flex items-center gap-2 p-3 bg-amber-500/10 border-none rounded-2xl shrink-0">
-              <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-              <span className="text-[10px] text-gray-400 leading-relaxed">
-                Keine Angebote verfügbar.
-              </span>
-            </div>
-          )}
 
-          {/* CTA Button Block */}
-          <div>
+            {/* Pricing section */}
+            <div className="px-5 pt-5">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2.5">
+                Dein Plan
+              </p>
+
+              {isLoadingPackages ? (
+                <div className="flex items-center justify-center py-6 gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin text-emerald-500" />
+                  <span className="text-sm text-gray-400">{t('premium.modal.verifying') || 'Lade Optionen...'}</span>
+                </div>
+              ) : packages.length > 0 ? (
+                <div className={`grid ${packages.length === 1 ? 'grid-cols-1' : 'grid-cols-2'} gap-2.5`}>
+                  {packages.map((pkg) => {
+                    const isSelected = selectedPackageId === pkg.identifier;
+                    const isYearly = pkg.packageType === 'ANNUAL';
+
+                    let monthlyPriceStr = pkg.product.priceString;
+                    if (isYearly) {
+                      const monthlyEquiv = pkg.product.pricePerMonthString ||
+                        (pkg.product.price ? `${(pkg.product.price / 12).toFixed(2).replace('.', ',')} â‚¬` : '');
+                      monthlyPriceStr = t('premium.modal.priceMonthlyEquivalent').replace('{price}', monthlyEquiv);
+                    }
+
+                    const pkgTrialDays = (pkg.product?.introPrice && pkg.product.introPrice.price === 0)
+                      ? (pkg.product.introPrice.periodNumberOfUnits || trialDays)
+                      : 0;
+
+                    const hasSavings = isYearly && packages.some(p => p.packageType === 'MONTHLY');
+                    let savingsPercent = 37;
+                    if (hasSavings) {
+                      const monthlyPkg = packages.find(p => p.packageType === 'MONTHLY');
+                      if (monthlyPkg?.product?.price && pkg.product.price) {
+                        const monthlyCost = monthlyPkg.product.price * 12;
+                        const yearlyCost = pkg.product.price;
+                        if (monthlyCost > yearlyCost) {
+                          savingsPercent = Math.round(((monthlyCost - yearlyCost) / monthlyCost) * 100);
+                        }
+                      }
+                    }
+
+                    return (
+                      <button
+                        key={pkg.identifier}
+                        type="button"
+                        onClick={() => setSelectedPackageId(pkg.identifier)}
+                        className={`relative pt-5 pb-3.5 px-4 rounded-2xl flex flex-col gap-0.5 border-2 transition-all active:scale-[0.97] cursor-pointer text-left w-full ${
+                          isSelected
+                            ? 'bg-white border-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.08)]'
+                            : 'bg-white border-transparent shadow-[0_2px_6px_rgba(0,0,0,0.04)] hover:border-gray-200'
+                        }`}
+                      >
+                        {/* Bestseller chip */}
+                        {isYearly && (
+                          <span className="absolute -top-[11px] left-1/2 -translate-x-1/2 bg-emerald-500 text-white font-extrabold text-[9px] px-2.5 py-[3px] rounded-full uppercase tracking-wider whitespace-nowrap">
+                            {t('premium.modal.bestseller') || 'Bestseller'}
+                          </span>
+                        )}
+
+                        {/* Labels */}
+                        <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                          <span className={`text-[11px] font-bold ${isSelected ? 'text-emerald-700' : 'text-gray-500'}`}>
+                            {isYearly ? t('premium.modal.yearly') : t('premium.modal.monthly')}
+                          </span>
+                          {hasSavings && (
+                            <span className="bg-emerald-500/10 text-emerald-600 font-black text-[9px] px-1.5 py-0.5 rounded-full">
+                              -{savingsPercent}%
+                            </span>
+                          )}
+                          {pkgTrialDays > 0 && (
+                            <span className="bg-amber-400/15 text-amber-600 font-black text-[9px] px-1.5 py-0.5 rounded-full">
+                              {t('premium.modal.trialBadge').replace('{days}', String(pkgTrialDays))}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Price */}
+                        <div className="text-xl font-black text-gray-900 leading-none">
+                          {monthlyPriceStr}
+                        </div>
+
+                        {/* Period */}
+                        <div className="text-[10px] text-gray-400 mt-1 leading-tight">
+                          {isYearly
+                            ? t('premium.modal.priceYearlyPeriod').replace('{price}', pkg.product.priceString)
+                            : t('premium.modal.pricePeriod').replace('{price}', pkg.product.priceString)
+                          }
+                        </div>
+
+                        {/* Selected check */}
+                        {isSelected && (
+                          <div className="absolute top-3 right-3 w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
+                            <Check className="w-2.5 h-2.5 text-white" strokeWidth={3.5} />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2.5 p-3.5 bg-white rounded-2xl shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
+                  <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
+                  <span className="text-sm text-gray-500">Keine Angebote verfÃ¼gbar.</span>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom breathing room */}
+            <div className="h-5" />
+          </div>
+
+          {/* â”€â”€â”€ Sticky CTA block â”€â”€â”€ */}
+          <div
+            className="shrink-0 bg-gray-50 border-t border-gray-100 px-5 pt-4"
+            style={{ paddingBottom: 'max(var(--safe-area-inset-bottom, 0px), 20px)' }}
+          >
+            {/* Status messages */}
+            {errorMsg && (
+              <div className="mb-3 text-xs font-semibold text-red-600 bg-red-50 py-2.5 px-3 rounded-2xl text-center">
+                {errorMsg}
+              </div>
+            )}
+            {success && (
+              <div className="mb-3 text-xs font-semibold text-emerald-700 bg-emerald-50 py-2.5 px-3 rounded-2xl text-center flex items-center justify-center gap-1.5">
+                <Check className="w-4 h-4" /> {t('premium.modal.success')}
+              </div>
+            )}
+
+            {/* Main CTA */}
             {user?.app_metadata?.tier === 'alpha' ? (
-              <button className="w-full h-14 rounded-2xl bg-gray-800 border-none text-gray-300 text-sm font-bold flex items-center justify-center gap-2 cursor-default">
-                <Check className="w-5 h-5 text-amber-400" /> {t('premium.modal.alphaOwned') || 'Käufe während der Alpha deaktiviert'}
+              <button className="w-full h-[52px] rounded-2xl bg-gray-100 border-none text-gray-500 text-sm font-bold flex items-center justify-center gap-2 cursor-default">
+                <Check className="w-5 h-5 text-emerald-500" />
+                {t('premium.modal.alphaOwned') || 'KÃ¤ufe wÃ¤hrend der Alpha deaktiviert'}
               </button>
             ) : isPremium ? (
-              <button className="w-full h-14 rounded-2xl bg-gray-800 border-none text-gray-300 text-sm font-bold flex items-center justify-center gap-2 cursor-default">
-                <Check className="w-5 h-5 text-amber-400" /> {t('premium.modal.owned') || 'Du hast Premium'}
+              <button className="w-full h-[52px] rounded-2xl bg-gray-100 border-none text-gray-500 text-sm font-bold flex items-center justify-center gap-2 cursor-default">
+                <Check className="w-5 h-5 text-emerald-500" />
+                {t('premium.modal.owned') || 'Du hast Premium'}
               </button>
             ) : isValidating || isLoadingPackages ? (
-              <button disabled className="w-full h-14 rounded-2xl bg-gray-800 border-none text-gray-400 text-sm font-bold flex items-center justify-center gap-2 cursor-default">
-                <Loader2 className="w-5 h-5 animate-spin text-amber-400" /> {t('premium.modal.verifying') || 'Verifiziere Status...'}
+              <button disabled className="w-full h-[52px] rounded-2xl bg-gray-100 border-none text-gray-400 text-sm font-bold flex items-center justify-center gap-2 cursor-default">
+                <Loader2 className="w-5 h-5 animate-spin text-emerald-500" />
+                {t('premium.modal.verifying') || 'Verifiziere Status...'}
               </button>
             ) : (
               <button
                 onClick={handleUpgrade}
                 disabled={loading || !selectedPackageId}
-                className="w-full h-14 rounded-2xl bg-amber-400 hover:bg-amber-300 text-emerald-950 text-base font-extrabold flex items-center justify-center gap-2 border-none active:scale-[0.98] transition-all duration-150 disabled:opacity-60 cursor-pointer"
+                className="w-full h-[52px] rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-base font-extrabold flex items-center justify-center gap-2 border-none active:scale-[0.98] transition-all duration-150 disabled:opacity-60 cursor-pointer shadow-[0_4px_20px_rgba(16,185,129,0.28)]"
               >
                 {loading ? (
                   <><Loader2 className="w-5 h-5 animate-spin" /> {t('premium.modal.loading')}</>
                 ) : (
                   <>
-                    <Crown className="w-5 h-5" />
-                    <span>
-                      {hasSelectedTrial ? t('premium.modal.ctaWithTrial') : t('premium.modal.ctaWithoutTrial')}
-                    </span>
+                    <Crown className="w-[18px] h-[18px]" />
+                    <span>{hasSelectedTrial ? t('premium.modal.ctaWithTrial') : t('premium.modal.ctaWithoutTrial')}</span>
+                    <ChevronRight className="w-4 h-4 opacity-70" />
                   </>
                 )}
               </button>
             )}
+
+            {/* Legal footnotes */}
             {!isPremium && !loading && !isValidating && !isLoadingPackages && (
-              <>
-                <p className="text-center text-[11px] text-gray-500 mt-2 font-semibold">
-                  {t('premium.modal.cancelSubtitle') || 'Kein Risiko. Jederzeit kündbar.'}
+              <div className="mt-2.5 text-center space-y-1">
+                <p className="text-[11px] text-gray-400 font-semibold">
+                  {t('premium.modal.cancelSubtitle') || 'Kein Risiko. Jederzeit kÃ¼ndbar.'}
                 </p>
-                {/* Reference to the AGB (terms) shown before the in-app purchase. */}
-                <p className="text-center text-[10px] text-gray-600 mt-1">
+                <p className="text-[10px] text-gray-400">
                   {t('premium.modal.termsNoticePrefix') || 'Mit dem Kauf stimmst du den '}
                   <a
                     href={LEGAL_URLS.terms}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline underline-offset-2 hover:text-amber-400 transition-colors"
+                    className="underline underline-offset-2 hover:text-emerald-600 transition-colors"
                   >
                     {t('premium.modal.termsLink') || 'AGB'}
                   </a>
                   {t('premium.modal.termsNoticeSuffix') || ' zu.'}
                 </p>
-              </>
+              </div>
             )}
           </div>
 
         </div>
-
       </div>
     </div>
   );
