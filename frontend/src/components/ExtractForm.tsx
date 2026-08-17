@@ -235,19 +235,6 @@ export default function ExtractForm({
         <PremiumUpgradeCard onUpgradeClick={() => setIsPremiumModalOpen(true)} />
       )}
       {errorBanner}
-      {/* Cookbook-full upsell — pinned to the top (directly under the trial
-          banner) rather than below the form, so the limit is seen first. */}
-      {!isPending && cookbookFull && (
-        <PremiumHint
-          variant="banner"
-          onClick={() => setIsPremiumModalOpen(true)}
-          label={t('premium.hint.catalogFull', {
-            count: limitStatus?.savedRecipes ?? 0,
-            limit: limitStatus?.maxSavedRecipes ?? 5
-          })}
-          cta={t('premium.hint.upgrade')}
-        />
-      )}
       {/* Input Card or Extraction Animation Card */}
       {isPending ? (
         <div className="flex flex-col w-full gap-4 my-auto justify-center">
@@ -498,7 +485,18 @@ export default function ExtractForm({
               </p>
             )}
 
-            {extractionLimitReached ? (
+            {cookbookFull ? (
+              <div className="flex justify-center -mt-1">
+                <PremiumHint
+                  variant="inline"
+                  onClick={() => setIsPremiumModalOpen(true)}
+                  label={t('premium.hint.catalogFull', {
+                    count: limitStatus?.savedRecipes ?? 0,
+                    limit: limitStatus?.maxSavedRecipes ?? 5
+                  })}
+                />
+              </div>
+            ) : extractionLimitReached ? (
               <div className="flex flex-col gap-2.5 -mt-1">
                 <PremiumHint
                   variant="banner"
@@ -510,7 +508,7 @@ export default function ExtractForm({
                   cta={t('premium.hint.upgrade')}
                 />
               </div>
-            ) : !cookbookFull && limitStatus && limitStatus.limit >= 0 ? (
+            ) : limitStatus && limitStatus.limit >= 0 ? (
               <p className="text-center text-xs text-gray-500 dark:text-gray-400 font-medium -mt-1">
                 {t('form.remainingExtractions', {
                   remaining: limitStatus.remaining,
