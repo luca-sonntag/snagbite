@@ -1240,7 +1240,7 @@ export const uiTranslations = {
           rowExtractionsFree: '1 / Tag',
           rowExtractionsPremium: 'Unbegrenzt',
           rowCookbook: 'Kochbuch (Speichern)',
-          rowCookbookFree: 'Max. 5 Rezepte',
+          rowCookbookFree: 'Max. 10 Rezepte',
           rowCookbookPremium: 'Unbegrenzt',
           rowShoppingList: 'Einkaufsliste',
           rowShoppingListFree: '1 Rezept',
@@ -1257,7 +1257,7 @@ export const uiTranslations = {
         features: {
           extractions: {
             title: 'Mehr Rezept-Importe',
-            desc: 'Bis zu 10 Importe täglich — Reels, Web, Fotos & Hintergrund.'
+            desc: 'Bis zu 30 Importe täglich — Reels, Web, Fotos & Hintergrund.'
           },
           nutrition: {
             title: 'Nährwerte & Makros',
@@ -2235,7 +2235,7 @@ export const uiTranslations = {
           rowExtractionsFree: '1 / day',
           rowExtractionsPremium: 'Unlimited',
           rowCookbook: 'Cookbook (Save)',
-          rowCookbookFree: 'Max 5 recipes',
+          rowCookbookFree: 'Max 10 recipes',
           rowCookbookPremium: 'Unlimited',
           rowShoppingList: 'Shopping List',
           rowShoppingListFree: '1 recipe',
@@ -2252,7 +2252,7 @@ export const uiTranslations = {
         features: {
           extractions: {
             title: 'More Recipe Imports',
-            desc: 'Up to 10 imports daily — reels, web, photos & background.'
+            desc: 'Up to 30 imports daily — reels, web, photos & background.'
           },
           nutrition: {
             title: 'Nutrition & Macros',
