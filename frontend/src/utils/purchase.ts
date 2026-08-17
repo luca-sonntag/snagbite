@@ -168,7 +168,18 @@ async function syncBillingStatus(isPremium: boolean): Promise<void> {
   }
 }
 
-export async function getSubscriptionOfferings(): Promise<any[]> {
+/** Cached offerings so the paywall can open instantly once they've been
+ *  prefetched in the background (e.g. by AuthContext on session load). */
+let cachedOfferings: any[] | null = null;
+/** In-flight fetch, so concurrent callers share a single request. */
+let offeringsPromise: Promise<any[]> | null = null;
+
+/** Synchronous access to the last fetched offerings (null if never loaded). */
+export function getCachedOfferings(): any[] | null {
+  return cachedOfferings;
+}
+
+async function fetchSubscriptionOfferings(): Promise<any[]> {
   // Browser / dev mock — RevenueCat only runs on native
   if (!Capacitor.isNativePlatform()) {
     return [
@@ -191,6 +202,34 @@ export async function getSubscriptionOfferings(): Promise<any[]> {
     console.error('[RevenueCat] Failed to get offerings:', err);
     return [];
   }
+}
+
+/**
+ * Get subscription offerings, served from an in-memory cache when available.
+ * The first call (typically a background prefetch on app/session start) warms
+ * the cache so later callers — like the paywall modal — resolve instantly.
+ * Pass `forceRefresh` to bypass the cache and refetch.
+ */
+export async function getSubscriptionOfferings(forceRefresh = false): Promise<any[]> {
+  if (!forceRefresh && cachedOfferings && cachedOfferings.length > 0) {
+    return cachedOfferings;
+  }
+  // Dedupe concurrent fetches
+  if (offeringsPromise) return offeringsPromise;
+
+  offeringsPromise = (async () => {
+    try {
+      const result = await fetchSubscriptionOfferings();
+      if (result.length > 0) {
+        cachedOfferings = result;
+      }
+      return result;
+    } finally {
+      offeringsPromise = null;
+    }
+  })();
+
+  return offeringsPromise;
 }
 
 export async function buyPremium(packageId?: string): Promise<boolean> {

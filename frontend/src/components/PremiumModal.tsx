@@ -5,7 +5,7 @@ import {
   Video, MessageSquare, Flame, ListTodo, Coffee, Layers, ChefHat, EyeOff
 } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
-import { buyPremium, getSubscriptionOfferings } from '../utils/purchase';
+import { buyPremium, getSubscriptionOfferings, getCachedOfferings } from '../utils/purchase';
 import { useAuth } from '../context/AuthContext';
 import { apiUrl } from '../api';
 import { LEGAL_URLS } from '../legal';
@@ -24,8 +24,10 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isValidating, setIsValidating] = useState(false);
 
-  // Optimizations States
-  const [packages, setPackages] = useState<any[]>([]);
+  // Optimizations States — warm-start from the prefetched cache so the paywall
+  // opens instantly instead of showing a spinner while offerings load.
+  const cachedPackages = getCachedOfferings();
+  const [packages, setPackages] = useState<any[]>(cachedPackages ?? []);
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
   const [isLoadingPackages, setIsLoadingPackages] = useState(false);
 
@@ -66,18 +68,28 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
         verifyServerTier();
       }
 
-      // Load Packages from RevenueCat
+      // Auto-select the best default plan from a package list:
+      // free-trial plan first, then Yearly, then the first available.
+      const autoSelect = (offs: any[]) => {
+        if (offs.length === 0) return;
+        const trialPkg = offs.find(p => p.product?.introPrice && p.product.introPrice.price === 0);
+        const yearly = offs.find(p => p.packageType === 'ANNUAL');
+        setSelectedPackageId(prev => prev ?? (trialPkg?.identifier || yearly?.identifier || offs[0].identifier));
+      };
+
+      // If offerings were prefetched, select immediately — no spinner.
+      if (cachedPackages && cachedPackages.length > 0) {
+        autoSelect(cachedPackages);
+      }
+
+      // Load Packages from RevenueCat (served from cache when warm).
       const loadOfferings = async () => {
-        setIsLoadingPackages(true);
+        // Only show the loading state when we have nothing to display yet.
+        if (!cachedPackages || cachedPackages.length === 0) setIsLoadingPackages(true);
         try {
           const offs = await getSubscriptionOfferings();
           setPackages(offs);
-          if (offs.length > 0) {
-            // Auto-select the plan that offers a free trial, then Yearly, then first available
-            const trialPkg = offs.find(p => p.product?.introPrice && p.product.introPrice.price === 0);
-            const yearly = offs.find(p => p.packageType === 'ANNUAL');
-            setSelectedPackageId(trialPkg?.identifier || yearly?.identifier || offs[0].identifier);
-          }
+          autoSelect(offs);
         } catch (err) {
           console.error('PremiumModal: Failed to load subscription offerings:', err);
         } finally {
