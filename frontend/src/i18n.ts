@@ -1278,6 +1278,10 @@ export const uiTranslations = {
           cookingMode: {
             title: 'Kochmodus',
             desc: 'Schritt-für-Schritt kochen mit Timer & Fokusansicht.'
+          },
+          noAds: {
+            title: 'Keine Werbung',
+            desc: 'Genieße die App ohne Banner-Werbung.'
           }
         }
       },
@@ -2269,6 +2273,10 @@ export const uiTranslations = {
           cookingMode: {
             title: 'Cooking Mode',
             desc: 'Step-by-step cooking with timer & focus view.'
+          },
+          noAds: {
+            title: 'No Ads',
+            desc: 'Enjoy the app without banner ads.'
           }
         }
       },

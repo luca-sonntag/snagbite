@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Check, X, Loader2, AlertCircle,
-  Video, MessageSquare, Flame, ListTodo, Coffee, Layers, ChefHat
+  Video, MessageSquare, Flame, ListTodo, Coffee, Layers, ChefHat, EyeOff
 } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { buyPremium, getSubscriptionOfferings } from '../utils/purchase';
@@ -151,6 +151,11 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
       desc: t('premium.modal.features.cookingMode.desc'),
       icon: <ChefHat className="w-5 h-5 text-emerald-600" />,
     },
+    {
+      title: t('premium.modal.features.noAds.title'),
+      desc: t('premium.modal.features.noAds.desc'),
+      icon: <EyeOff className="w-5 h-5 text-emerald-600" />,
+    },
   ];
 
   // Helper to determine trial info
@@ -174,11 +179,14 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
           onClick={() => !loading && onOpenChange(false)}
         />
 
-        {/* Main sheet */}
-        <div className="relative flex-1 flex flex-col w-full max-w-md mx-auto bg-gray-50 rounded-t-[28px] overflow-hidden shadow-[0_-8px_40px_rgba(0,0,0,0.18)]">
+        {/* Main sheet — ONE gradient for the whole sheet, hero + features share it seamlessly */}
+        <div
+          className="relative flex-1 flex flex-col w-full max-w-md mx-auto rounded-t-[28px] overflow-hidden shadow-[0_-8px_40px_rgba(0,0,0,0.18)]"
+          style={{ background: 'linear-gradient(180deg, #e8fdf2 0%, #f4fdf8 120px, #f9fafb 260px, #f9fafb 100%)' }}
+        >
 
-          {/* â”€â”€â”€ Hero: pure typography, no icon â”€â”€â”€ */}
-          <div className="relative shrink-0 rounded-t-[28px] overflow-hidden" style={{ background: 'linear-gradient(170deg, #ecfdf5 0%, #ffffff 50%, #fafafa 100%)' }}>
+          {/* ─── Hero: transparent — sheet gradient shows through ─── */}
+          <div className="relative shrink-0 rounded-t-[28px] overflow-hidden">
             {/* Radial ambient glow */}
             <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-96 h-48 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute top-0 right-[-20%] w-48 h-32 bg-amber-300/10 rounded-full blur-3xl pointer-events-none" />
@@ -228,8 +236,8 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
             </div>
           </div>
 
-          {/* ——— Scrollable feature list ——— seamlessly continues hero gradient */}
-          <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" style={{ background: 'linear-gradient(180deg, #f0fdf4 0%, #f9fafb 60px)' }}>
+          {/* ─── Scrollable feature list ─── transparent, inherits sheet gradient */}
+          <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <div className="px-5 pt-4 pb-3">
               <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-2.5">
                 Alles in Premium
@@ -320,6 +328,12 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                         <span className={`text-[10px] font-bold ${isSelected ? 'text-emerald-700' : 'text-gray-500'}`}>
                           {isYearly ? t('premium.modal.yearly') : t('premium.modal.monthly')}
                         </span>
+                        {/* Flexibel badge for monthly — makes card feel less empty */}
+                        {!isYearly && (
+                          <span className="bg-gray-100 text-gray-500 font-black text-[8px] px-1.5 py-0.5 rounded-full">
+                            Flexibel
+                          </span>
+                        )}
                         {hasSavings && (
                           <span className="bg-emerald-500/10 text-emerald-600 font-black text-[8px] px-1.5 py-0.5 rounded-full">
                             -{savingsPercent}%
