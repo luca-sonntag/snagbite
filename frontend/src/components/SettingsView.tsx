@@ -13,6 +13,9 @@ import { LEGAL_URLS } from '../legal';
 import PremiumUpgradeCard from './PremiumUpgradeCard';
 import NotificationSettings from './NotificationSettings';
 
+// Unit system is not yet ready to be user-configurable; keep the setting UI in place but hidden for now.
+const SHOW_UNIT_SYSTEM_SETTING = false;
+
 function SettingInfo({ text }: { text: string }) {
   return (
     <Popover>
@@ -267,45 +270,47 @@ export default function SettingsView() {
             </Select>
           </div>
 
-          {/* Unit System Option */}
-          <div className="p-4 flex items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-2.5 border-b border-black/5 dark:border-white/5">
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-xl shrink-0">
-                <Scale className="w-5 h-5" />
-              </div>
-              <div className="min-w-0">
-                <div className="font-semibold text-gray-900 dark:text-white text-sm flex items-center min-w-0">
-                  <span className="truncate">{t('app.settings.unitSystem') || 'Unit System'}</span>
-                  <SettingInfo text={t('app.settings.settingInfoTooltip') || 'This setting only affects newly extracted recipes.'} />
+          {/* Unit System Option — hidden for now (not deleted): not yet ready to be user-configurable */}
+          {SHOW_UNIT_SYSTEM_SETTING && (
+            <div className="p-4 flex items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-2.5 border-b border-black/5 dark:border-white/5">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-xl shrink-0">
+                  <Scale className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-semibold text-gray-900 dark:text-white text-sm flex items-center min-w-0">
+                    <span className="truncate">{t('app.settings.unitSystem') || 'Unit System'}</span>
+                    <SettingInfo text={t('app.settings.settingInfoTooltip') || 'This setting only affects newly extracted recipes.'} />
+                  </div>
                 </div>
               </div>
+              <Select
+                variant="secondary"
+                selectedKey={preferredUnitSystem}
+                onSelectionChange={(key) => handleUpdateSetting('preferred_unit_system', key as string)}
+                isDisabled={isSaving}
+                className="w-40 shrink-0 max-[400px]:w-full"
+                aria-label="Unit System"
+              >
+                <Select.Trigger className="h-9 py-1.5 px-3 flex items-center leading-none rounded-xl bg-black/5 dark:bg-white/5 border-none shadow-none hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
+                  <Select.Value className="text-xs font-semibold" />
+                  <Select.Indicator className="size-3.5" />
+                </Select.Trigger>
+                <Select.Popover className="p-1 min-w-[170px] bg-white dark:bg-gray-950 border border-black/10 dark:border-white/10 rounded-xl shadow-lg">
+                  <ListBox>
+                    <ListBox.Item id="metric" textValue={t('app.settings.unitSystemMetric') || 'Metric (g, ml, kg)'} className="px-3.5 py-2.5 text-xs font-semibold rounded-lg">
+                      {t('app.settings.unitSystemMetric') || 'Metric (g, ml, kg)'}
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                    <ListBox.Item id="imperial" textValue={t('app.settings.unitSystemImperial') || 'Imperial (oz, cups, lbs)'} className="px-3.5 py-2.5 text-xs font-semibold rounded-lg">
+                      {t('app.settings.unitSystemImperial') || 'Imperial (oz, cups, lbs)'}
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                  </ListBox>
+                </Select.Popover>
+              </Select>
             </div>
-            <Select
-              variant="secondary"
-              selectedKey={preferredUnitSystem}
-              onSelectionChange={(key) => handleUpdateSetting('preferred_unit_system', key as string)}
-              isDisabled={isSaving}
-              className="w-40 shrink-0 max-[400px]:w-full"
-              aria-label="Unit System"
-            >
-              <Select.Trigger className="h-9 py-1.5 px-3 flex items-center leading-none rounded-xl bg-black/5 dark:bg-white/5 border-none shadow-none hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
-                <Select.Value className="text-xs font-semibold" />
-                <Select.Indicator className="size-3.5" />
-              </Select.Trigger>
-              <Select.Popover className="p-1 min-w-[170px] bg-white dark:bg-gray-950 border border-black/10 dark:border-white/10 rounded-xl shadow-lg">
-                <ListBox>
-                  <ListBox.Item id="metric" textValue={t('app.settings.unitSystemMetric') || 'Metric (g, ml, kg)'} className="px-3.5 py-2.5 text-xs font-semibold rounded-lg">
-                    {t('app.settings.unitSystemMetric') || 'Metric (g, ml, kg)'}
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                  <ListBox.Item id="imperial" textValue={t('app.settings.unitSystemImperial') || 'Imperial (oz, cups, lbs)'} className="px-3.5 py-2.5 text-xs font-semibold rounded-lg">
-                    {t('app.settings.unitSystemImperial') || 'Imperial (oz, cups, lbs)'}
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                </ListBox>
-              </Select.Popover>
-            </Select>
-          </div>
+          )}
 
           {/* Theme Option */}
           <div className="p-4 flex items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-2.5 border-b border-black/5 dark:border-white/5 last:border-b-0">
