@@ -109,37 +109,37 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
     {
       title: t('premium.modal.features.extractions.title'),
       desc: t('premium.modal.features.extractions.desc'),
-      icon: <Video className="w-5 h-5 text-emerald-600" />,
+      icon: <Video className="w-5 h-5 text-amber-600" />,
     },
     {
       title: t('premium.modal.features.nutrition.title'),
       desc: t('premium.modal.features.nutrition.desc'),
-      icon: <Flame className="w-5 h-5 text-emerald-600" />,
+      icon: <Flame className="w-5 h-5 text-amber-600" />,
     },
     {
       title: t('premium.modal.features.remix.title'),
       desc: t('premium.modal.features.remix.desc'),
-      icon: <MessageSquare className="w-5 h-5 text-emerald-600" />,
+      icon: <MessageSquare className="w-5 h-5 text-amber-600" />,
     },
     {
       title: t('premium.modal.features.shoppingList.title'),
       desc: t('premium.modal.features.shoppingList.desc'),
-      icon: <ListTodo className="w-5 h-5 text-emerald-600" />,
+      icon: <ListTodo className="w-5 h-5 text-amber-600" />,
     },
     {
       title: t('premium.modal.features.collections.title'),
       desc: t('premium.modal.features.collections.desc'),
-      icon: <Layers className="w-5 h-5 text-emerald-600" />,
+      icon: <Layers className="w-5 h-5 text-amber-600" />,
     },
     {
       title: t('premium.modal.features.cookingMode.title'),
       desc: t('premium.modal.features.cookingMode.desc'),
-      icon: <ChefHat className="w-5 h-5 text-emerald-600" />,
+      icon: <ChefHat className="w-5 h-5 text-amber-600" />,
     },
     {
       title: t('premium.modal.features.noAds.title'),
       desc: t('premium.modal.features.noAds.desc'),
-      icon: <EyeOff className="w-5 h-5 text-emerald-600" />,
+      icon: <EyeOff className="w-5 h-5 text-amber-600" />,
     },
   ];
 
@@ -167,12 +167,12 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
         {/* Main sheet — ONE gradient for the whole sheet, hero + features share it seamlessly */}
         <div
           className="relative flex-1 flex flex-col w-full max-w-md mx-auto rounded-t-[28px] overflow-hidden shadow-[0_-8px_40px_rgba(0,0,0,0.18)]"
-          style={{ background: 'linear-gradient(180deg, #ddf6e8 0%, #e8f9f0 150px, #f0faf5 300px, #f5fbf8 450px, #f9fafb 620px, #f9fafb 100%)' }}
+          style={{ background: 'linear-gradient(180deg, #fdeecf 0%, #fdf4e2 150px, #fbf7ee 300px, #f9f8f4 450px, #f9fafb 620px, #f9fafb 100%)' }}
         >
 
           {/* Soft indirect glow radiating from the top-left corner — lives on the
               sheet (not the hero) so it bleeds gently down into the feature area */}
-          <div className="absolute -top-16 -left-16 w-80 h-80 bg-emerald-400/15 rounded-[50%] blur-[80px] pointer-events-none z-0" />
+          <div className="absolute -top-16 -left-16 w-80 h-80 bg-amber-400/15 rounded-[50%] blur-[80px] pointer-events-none z-0" />
 
           {/* ─── Hero: transparent — sheet gradient + glow show through ─── */}
           <div className="relative z-10 shrink-0">
@@ -190,7 +190,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
 
               <div className="flex flex-col items-center text-center gap-2 relative">
                 {/* PREMIUM label â€” elegant, no icon */}
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600/70 mt-1">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600/70 mt-1">
                   Premium
                 </span>
 
@@ -198,7 +198,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                 <h2
                   className="text-[28px] font-black tracking-tight leading-[1.1]"
                   style={{
-                    background: 'linear-gradient(135deg, #0f172a 0%, #064e3b 60%, #059669 100%)',
+                    background: 'linear-gradient(135deg, #0f172a 0%, #92400e 60%, #f59e0b 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                   }}
@@ -211,9 +211,9 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                 </p>
 
                 {/* Coffee anchor */}
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 mt-0.5">
-                  <Coffee className="w-3 h-3 text-emerald-600" />
-                  <span className="text-[10px] font-bold text-emerald-700 tracking-wide">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 mt-0.5">
+                  <Coffee className="w-3 h-3 text-amber-600" />
+                  <span className="text-[10px] font-bold text-amber-700 tracking-wide">
                     {t('premium.modal.coffeeAnchor') || 'Weniger als ein Kaffee im Monat'}
                   </span>
                 </div>
@@ -233,14 +233,14 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                     key={idx}
                     className={`flex items-center gap-3 px-4 py-3 ${idx < featureItems.length - 1 ? 'border-b border-gray-100' : ''}`}
                   >
-                    <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
                       {item.icon}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-bold text-gray-900 leading-tight">{item.title}</p>
                       <p className="text-[11px] text-gray-500 leading-snug mt-0.5">{item.desc}</p>
                     </div>
-                    <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+                    <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center shrink-0">
                       <Check className="w-3 h-3 text-white" strokeWidth={3} />
                     </div>
                   </div>
@@ -257,7 +257,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
 
             {isLoadingPackages ? (
               <div className="flex items-center justify-center py-3 gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-emerald-500" />
+                <Loader2 className="w-4 h-4 animate-spin text-amber-500" />
                 <span className="text-xs text-gray-400">{t('premium.modal.verifying') || 'Lade Optionen...'}</span>
               </div>
             ) : packages.length > 0 ? (
@@ -297,20 +297,20 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                       onClick={() => setSelectedPackageId(pkg.identifier)}
                       className={`relative pt-4 pb-3 px-3.5 rounded-2xl flex flex-col gap-0.5 border-2 transition-all active:scale-[0.97] cursor-pointer text-left w-full ${
                         isSelected
-                          ? 'bg-white border-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.10)]'
+                          ? 'bg-white border-amber-500 shadow-[0_0_0_3px_rgba(245,158,11,0.10)]'
                           : 'bg-white border-transparent shadow-[0_1px_4px_rgba(0,0,0,0.06)] hover:border-gray-200'
                       }`}
                     >
                       {/* Bestseller chip */}
                       {isYearly && (
-                        <span className="absolute -top-[10px] left-1/2 -translate-x-1/2 bg-emerald-500 text-white font-extrabold text-[8px] px-2.5 py-[3px] rounded-full uppercase tracking-wider whitespace-nowrap">
+                        <span className="absolute -top-[10px] left-1/2 -translate-x-1/2 bg-amber-500 text-white font-extrabold text-[8px] px-2.5 py-[3px] rounded-full uppercase tracking-wider whitespace-nowrap">
                           {t('premium.modal.bestseller') || 'Bestseller'}
                         </span>
                       )}
 
                       {/* Labels row — pr-6 leaves room for the selection check */}
                       <div className="flex items-center gap-1 flex-wrap mb-0.5 pr-6">
-                        <span className={`text-[10px] font-bold ${isSelected ? 'text-emerald-700' : 'text-gray-500'}`}>
+                        <span className={`text-[10px] font-bold ${isSelected ? 'text-amber-700' : 'text-gray-500'}`}>
                           {isYearly ? t('premium.modal.yearly') : t('premium.modal.monthly')}
                         </span>
                         {/* Flexibel badge for monthly — makes card feel less empty */}
@@ -320,12 +320,12 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                           </span>
                         )}
                         {hasSavings && (
-                          <span className="bg-emerald-500/10 text-emerald-600 font-black text-[8px] px-1.5 py-0.5 rounded-full">
+                          <span className="bg-amber-500/10 text-amber-600 font-black text-[8px] px-1.5 py-0.5 rounded-full">
                             -{savingsPercent}%
                           </span>
                         )}
                         {pkgTrialDays > 0 && (
-                          <span className="bg-emerald-500/10 text-emerald-600 font-black text-[8px] px-1.5 py-0.5 rounded-full">
+                          <span className="bg-amber-500/10 text-amber-600 font-black text-[8px] px-1.5 py-0.5 rounded-full">
                             {t('premium.modal.trialBadge').replace('{days}', String(pkgTrialDays))}
                           </span>
                         )}
@@ -346,7 +346,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
 
                       {/* Selection check — bottom-right to avoid overlapping labels */}
                       {isSelected && (
-                        <div className="absolute bottom-2.5 right-2.5 w-[18px] h-[18px] rounded-full bg-emerald-500 flex items-center justify-center shadow-sm">
+                        <div className="absolute bottom-2.5 right-2.5 w-[18px] h-[18px] rounded-full bg-amber-500 flex items-center justify-center shadow-sm">
                           <Check className="w-2.5 h-2.5 text-white" strokeWidth={3.5} />
                         </div>
                       )}
@@ -373,31 +373,31 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
               </div>
             )}
             {success && (
-              <div className="mb-2.5 text-xs font-semibold text-emerald-700 bg-emerald-50 py-2 px-3 rounded-2xl text-center flex items-center justify-center gap-1.5">
+              <div className="mb-2.5 text-xs font-semibold text-amber-700 bg-amber-50 py-2 px-3 rounded-2xl text-center flex items-center justify-center gap-1.5">
                 <Check className="w-4 h-4" /> {t('premium.modal.success')}
               </div>
             )}
 
             {user?.app_metadata?.tier === 'alpha' ? (
               <button className="w-full h-[52px] rounded-2xl bg-gray-100 border-none text-gray-500 text-sm font-bold flex items-center justify-center gap-2 cursor-default">
-                <Check className="w-5 h-5 text-emerald-500" />
+                <Check className="w-5 h-5 text-amber-500" />
                 {t('premium.modal.alphaOwned') || 'KÃ¤ufe wÃ¤hrend der Alpha deaktiviert'}
               </button>
             ) : isPremium ? (
               <button className="w-full h-[52px] rounded-2xl bg-gray-100 border-none text-gray-500 text-sm font-bold flex items-center justify-center gap-2 cursor-default">
-                <Check className="w-5 h-5 text-emerald-500" />
+                <Check className="w-5 h-5 text-amber-500" />
                 {t('premium.modal.owned') || 'Du hast Premium'}
               </button>
             ) : isLoadingPackages ? (
               <button disabled className="w-full h-[52px] rounded-2xl bg-gray-100 border-none text-gray-400 text-sm font-bold flex items-center justify-center gap-2 cursor-default">
-                <Loader2 className="w-5 h-5 animate-spin text-emerald-500" />
+                <Loader2 className="w-5 h-5 animate-spin text-amber-500" />
                 {t('premium.modal.verifying') || 'Verifiziere Status...'}
               </button>
             ) : (
               <button
                 onClick={handleUpgrade}
                 disabled={loading || !selectedPackageId}
-                className="w-full h-[52px] rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-[15px] font-extrabold flex items-center justify-center gap-2 border-none active:scale-[0.98] transition-all duration-150 disabled:opacity-60 cursor-pointer shadow-[0_4px_20px_rgba(16,185,129,0.30)]"
+                className="w-full h-[52px] rounded-2xl bg-amber-500 hover:bg-amber-400 text-white text-[15px] font-extrabold flex items-center justify-center gap-2 border-none active:scale-[0.98] transition-all duration-150 disabled:opacity-60 cursor-pointer shadow-[0_4px_20px_rgba(245,158,11,0.30)]"
               >
                 {loading ? (
                   <><Loader2 className="w-5 h-5 animate-spin" /> {t('premium.modal.loading')}</>
@@ -418,7 +418,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                     href={LEGAL_URLS.terms}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline underline-offset-2 hover:text-emerald-600 transition-colors"
+                    className="underline underline-offset-2 hover:text-amber-600 transition-colors"
                   >
                     {t('premium.modal.termsLink') || 'AGB'}
                   </a>
