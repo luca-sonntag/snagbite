@@ -182,7 +182,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
         {/* Main sheet — ONE gradient for the whole sheet, hero + features share it seamlessly */}
         <div
           className="relative flex-1 flex flex-col w-full max-w-md mx-auto rounded-t-[28px] overflow-hidden shadow-[0_-8px_40px_rgba(0,0,0,0.18)]"
-          style={{ background: 'linear-gradient(180deg, #eafaf1 0%, #f0fbf5 150px, #f4fbf7 300px, #f7fbf9 450px, #f9fafb 620px, #f9fafb 100%)' }}
+          style={{ background: 'linear-gradient(180deg, #ddf6e8 0%, #e8f9f0 150px, #f0faf5 300px, #f5fbf8 450px, #f9fafb 620px, #f9fafb 100%)' }}
         >
 
           {/* Soft indirect glow radiating from the top-left corner — lives on the
