@@ -228,11 +228,8 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
             </div>
           </div>
 
-          {/* Separator */}
-          <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent shrink-0" />
-
-          {/* â”€â”€â”€ Scrollable feature list â”€â”€â”€ */}
-          <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {/* ——— Scrollable feature list ——— seamlessly continues hero gradient */}
+          <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" style={{ background: 'linear-gradient(180deg, #f0fdf4 0%, #f9fafb 60px)' }}>
             <div className="px-5 pt-4 pb-3">
               <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-2.5">
                 Alles in Premium
@@ -318,8 +315,8 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                         </span>
                       )}
 
-                      {/* Labels row */}
-                      <div className="flex items-center gap-1 flex-wrap mb-0.5">
+                      {/* Labels row — pr-6 leaves room for the selection check */}
+                      <div className="flex items-center gap-1 flex-wrap mb-0.5 pr-6">
                         <span className={`text-[10px] font-bold ${isSelected ? 'text-emerald-700' : 'text-gray-500'}`}>
                           {isYearly ? t('premium.modal.yearly') : t('premium.modal.monthly')}
                         </span>
@@ -348,9 +345,9 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                         }
                       </div>
 
-                      {/* Selection check */}
+                      {/* Selection check — bottom-right to avoid overlapping labels */}
                       {isSelected && (
-                        <div className="absolute top-2.5 right-2.5 w-[18px] h-[18px] rounded-full bg-emerald-500 flex items-center justify-center shadow-sm">
+                        <div className="absolute bottom-2.5 right-2.5 w-[18px] h-[18px] rounded-full bg-emerald-500 flex items-center justify-center shadow-sm">
                           <Check className="w-2.5 h-2.5 text-white" strokeWidth={3.5} />
                         </div>
                       )}
