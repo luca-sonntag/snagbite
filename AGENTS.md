@@ -42,7 +42,7 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
    * Client-seitiges Image Caching (IndexedDB `recipe-image-cache` + `/api/image` Proxy)
    * In-App Koch-Timer (`TimerContext`, `TimerBanner`, `TimerConfirmSheet`) & Share Target Integration
    * In-App Bug-Reports & Feedback (`FeedbackDrawer.tsx` & Console Ring Buffer)
-   * AdMob Monetarisierung (Bottom-Dock `BANNER`, MREC `ExtractionAdCard`, Rewarded Video Ads, UMP Consent, Patched Plugin)
+   * AdMob Monetarisierung (MREC `ExtractionAdCard`, App-Open Interstitial beim Start, Rewarded Video Ads, UMP Consent, Patched Plugin)
 
 5. 🚀 [**Deployment, Play Store & OTA Updates**](file:///c:/Users/lucas/source/repos/cookbook/docs/architecture/deployment-and-ota.md)
    * Play Store Build Pipeline (Fastlane in Docker, `version.properties`, `release.ps1`, `deploy-playstore.ps1`)
@@ -65,4 +65,4 @@ Dieses Projekt analysiert Rezept-Reels (Instagram, TikTok, YouTube Shorts, Websi
 3. **Queue & Processing:** Worker claimt Job atomar (`claim_next_job`), führt Scraping/Downloader oder Photo-Fetch durch, baut Video-Grid und ruft Gemini Multimodal API auf.
 4. **Structured Recipe Output:** Gemini liefert standardisierte Zutaten, Supermarktkategorien, Nährwerte per Portion und Schritte.
 5. **Dashboard & PWA:** Interaktive Checklisten, Portionsrechner, In-App Timers, 3-Ebenen-Katalog mit Sammlungen/Labels, Einkaufsliste, Offline-Bildercache & Recipe Copilot Chat.
-6. **Monetarisierung & Freemium:** AdMob Banner-Integration (Bottom Dock & MREC), Rewarded Video Ads für Extraktions-Aufstockung (+1 Credit) und RevenueCat In-App Purchases für das werbefreie Premium-Abonnement.
+6. **Monetarisierung & Freemium:** AdMob-Integration (Extraktions-MREC & App-Open Interstitial beim Start), Rewarded Video Ads für Extraktions-Aufstockung (+1 Credit) und RevenueCat In-App Purchases für das werbefreie Premium-Abonnement.

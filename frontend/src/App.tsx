@@ -1,29 +1,34 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { Sparkles, BookOpen, ShoppingCart, User, Trophy } from 'lucide-react';
 
 import type { Job } from './types';
 import { apiUrl } from './api';
-import { registerShareIntent, registerNotificationTap, hideSplashScreen, registerBackButtonHandler, registerAppUrlOpen } from './native';
+import { registerShareIntent, registerNotificationTap, hideSplashScreen, registerBackButtonHandler, registerAppUrlOpen, registerAppStateListener } from './native';
+import { APP_OPEN_RESUME_MIN_BG_MS } from './env';
 import { registerPushTapHandler, enablePushNotifications } from './push';
 import { parseSharedUrl } from './utils/shareUrl';
 import ExtractForm, { type ExtractMode } from './components/ExtractForm';
 import ActiveExtractions from './components/ActiveExtractions';
 import ExtractionAnimation from './components/ExtractionAnimation';
 import ErrorBanner from './components/ErrorBanner';
-import RecipeDetails from './components/RecipeDetails';
-import SavedCatalog from './components/SavedCatalog/index';
 import { isCatalogListRoute } from './components/SavedCatalog/catalogRoutes';
-import ShoppingList from './components/ShoppingList';
 import AuthForm from './components/AuthForm';
-import SettingsView from './components/SettingsView';
-import ProgressView from './components/ProgressView';
 import TimerBanner from './components/TimerBanner';
 import OtaUpdateBanner from './components/OtaUpdateBanner';
-import WelcomeGuide from './components/WelcomeGuide';
-import AlphaWelcome from './components/AlphaWelcome';
 import TrialBanner from './components/TrialBanner';
 import NotificationPrompt from './components/NotificationPrompt';
-import PremiumModal from './components/PremiumModal';
+
+// Heavy views are code-split so they aren't parsed on cold start — the initial
+// bundle only needs the default extract tab. Each mounts on first visit (then
+// stays mounted to preserve its state) via the `visitedViews` gate below.
+const RecipeDetails = lazy(() => import('./components/RecipeDetails'));
+const SavedCatalog = lazy(() => import('./components/SavedCatalog/index'));
+const ShoppingList = lazy(() => import('./components/ShoppingList'));
+const SettingsView = lazy(() => import('./components/SettingsView'));
+const ProgressView = lazy(() => import('./components/ProgressView'));
+const PremiumModal = lazy(() => import('./components/PremiumModal'));
+const WelcomeGuide = lazy(() => import('./components/WelcomeGuide'));
+const AlphaWelcome = lazy(() => import('./components/AlphaWelcome'));
 
 import { useRecipeExtraction } from './hooks/useRecipeExtraction';
 import { useShoppingList } from './hooks/useShoppingList';
@@ -39,11 +44,19 @@ import { deleteCachedImage } from './utils/imageStore';
 import { useTimerManager } from './hooks/useTimerManager';
 import { useOnboarding } from './hooks/useOnboarding';
 import { useAlphaWelcome } from './hooks/useAlphaWelcome';
-import ExtractionAdCard from './components/ExtractionAdCard';
 
 // Module-level flag to ensure the Web Share Target is only processed once per page load.
 // This prevents re-triggering the interceptor when the user's auth state or metadata updates.
 let isWebShareProcessed = false;
+
+/** Lightweight fallback while a lazily-loaded view chunk resolves (first visit only). */
+function ViewFallback() {
+  return (
+    <div className="w-full flex items-center justify-center py-16">
+      <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent" />
+    </div>
+  );
+}
 
 export default function App() {
   const dialog = useDialog();
@@ -74,6 +87,21 @@ export default function App() {
   const [isCatalogSelectMode, setIsCatalogSelectMode] = useState(false);
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const { pendingNavigation, dismissAllFinished } = useTimerManager();
+
+  // Track which tabs have been opened at least once. The heavy tab views are
+  // code-split and only mounted after their first visit (then kept mounted to
+  // preserve state), so their chunks stay out of the cold-start path.
+  const [visitedViews, setVisitedViews] = useState<Set<string>>(() => new Set([activeView]));
+  useEffect(() => {
+    setVisitedViews(prev => (prev.has(activeView) ? prev : new Set(prev).add(activeView)));
+  }, [activeView]);
+
+  // Mount the (lazy) premium modal only once it's first opened, then keep it
+  // mounted so its close transition still runs.
+  const [premiumModalLoaded, setPremiumModalLoaded] = useState(false);
+  useEffect(() => {
+    if (isPremiumModalOpen) setPremiumModalLoaded(true);
+  }, [isPremiumModalOpen]);
 
   // First-launch onboarding gate (also re-openable from Settings)
   const {
@@ -140,7 +168,6 @@ export default function App() {
   // effect doesn't clear its subPath before the history state catches up.
   const newlyExtractedJobIdRef = useRef<string | null>(null);
   const [isCatalogSheetOpen, setIsCatalogSheetOpen] = useState(false);
-  const [adStatus, setAdStatus] = useState<'pending' | 'loaded' | 'failed'>('pending');
 
   // Remembers the last open state of the history tab (recipe detail or list),
   // so the bottom-nav "Recipes" button returns to the recipe that was open
@@ -328,6 +355,93 @@ export default function App() {
     }).catch(err => console.error('Failed to load ads module:', err));
   }, [authLoading, user, fetchHistory]);
 
+  // App-Open ad: a full-screen interstitial shown ONCE on a neutral cold start
+  // for free users, a short beat after the app is ready so it never covers the
+  // splash/first paint. `maybeShowAppOpenAd` enforces the first-launch exclusion
+  // + frequency cap and additionally bails if any banner is live (no-op on web).
+  //
+  // The one-shot is *consumed* the first time the app is ready (past onboarding),
+  // regardless of what's on screen. This is deliberate: the primary flow is
+  // sharing a reel, which cold-starts the app straight into an extraction. We
+  // must never let the interstitial fire when that extraction finishes — showing
+  // it into the MREC banner teardown + recipe-view transition crashes the app.
+  // So if we didn't land on a neutral screen, we skip the ad for this session
+  // entirely instead of deferring it.
+  const appOpenAttemptedRef = useRef(false);
+  // Timestamp (ms) of the last time the app went to the background; used to tell
+  // a real "new session" resume from a brief app-switch (see resume effect).
+  const appBackgroundedAtRef = useRef<number | null>(null);
+  // Always-fresh snapshot of the gates, re-checked when the deferred timer fires
+  // (an extraction/recipe may have started during the 1.2s delay).
+  const appOpenBlockedRef = useRef(true);
+  appOpenBlockedRef.current = isPremium || isPending || !!recipe || showOnboarding;
+  useEffect(() => {
+    if (authLoading || !user) return;
+    if (showOnboarding) return; // first-launch guide up (ad is excluded on 1st launch anyway)
+    if (appOpenAttemptedRef.current) return;
+    appOpenAttemptedRef.current = true; // consume the single per-session chance now
+    if (appOpenBlockedRef.current) return; // didn't cold-start on a neutral screen → skip
+
+    // Warm up the interstitial now (only if this open will actually show one),
+    // so the 1.2s beat below overlaps the fill request and the ad shows instantly.
+    import('./utils/ads')
+      .then(({ appOpenAdWouldShow, preloadAppOpenAd }) => {
+        if (appOpenAdWouldShow()) preloadAppOpenAd();
+      })
+      .catch(() => {});
+
+    const id = setTimeout(() => {
+      if (appOpenBlockedRef.current) return; // state changed during the delay
+      import('./utils/ads')
+        .then(({ maybeShowAppOpenAd }) => maybeShowAppOpenAd())
+        .catch(err => console.error('Failed to load ads module:', err));
+    }, 1200);
+    return () => clearTimeout(id);
+  }, [authLoading, user, showOnboarding]);
+
+  // App-Open ad on RESUME. The cold-start effect above only fires on a true
+  // process start, so a device that keeps the app in the background for days
+  // would never see an app-open ad. We also treat a resume after a long
+  // background (>= APP_OPEN_RESUME_MIN_BG_MS) as an eligible "open" and run the
+  // same policy — maybeShowAppOpenAd shares ONE counter + time floor across cold
+  // starts and resumes, so this never doubles up. Brief app-switches never
+  // qualify. The crash guards still apply: maybeShowAppOpenAd bails while a
+  // banner is live, and appOpenBlockedRef skips any non-neutral screen (recipe
+  // open, extraction running, premium) — re-checked when the deferred timer fires.
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const cleanup = registerAppStateListener((isActive) => {
+      if (!isActive) {
+        appBackgroundedAtRef.current = Date.now();
+        return;
+      }
+      // Foregrounded. Only a resume after a long background counts as an "open".
+      const bgAt = appBackgroundedAtRef.current;
+      appBackgroundedAtRef.current = null;
+      if (bgAt == null || Date.now() - bgAt < APP_OPEN_RESUME_MIN_BG_MS) return;
+      if (appOpenBlockedRef.current) return; // resumed onto a non-neutral screen
+
+      // Warm the interstitial during the 1.2s beat so the resume ad is instant.
+      import('./utils/ads')
+        .then(({ appOpenAdWouldShow, preloadAppOpenAd }) => {
+          if (appOpenAdWouldShow()) preloadAppOpenAd();
+        })
+        .catch(() => {});
+
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (appOpenBlockedRef.current) return; // state changed during the delay
+        import('./utils/ads')
+          .then(({ maybeShowAppOpenAd }) => maybeShowAppOpenAd())
+          .catch(err => console.error('Failed to load ads module:', err));
+      }, 1200);
+    });
+    return () => {
+      if (timer) clearTimeout(timer);
+      cleanup();
+    };
+  }, []);
+
   // Initial sync on startup/login
   useEffect(() => {
     if (authLoading) return;
@@ -388,15 +502,14 @@ export default function App() {
     }
   }, [activeView, user, fetchLimitStatus, initialSyncDone]);
 
-  // Hide native splash screen as soon as auth has settled.
-  // We don't wait for initialSyncDone (fetchLimitStatus) because that API call
-  // would add unnecessary delay — the limit status can be loaded silently in
-  // the background while the app is already visible to the user.
+  // Hide the native splash as soon as the web layer has mounted — NOT when auth
+  // settles. Waiting for auth kept the native splash up for the whole
+  // getSession() (+ token refresh) round-trip. During authLoading the app now
+  // shows its own brand-matched loader (see the auth gate), so the handoff is
+  // seamless and the auth round-trip no longer counts toward splash time.
   useEffect(() => {
-    if (!authLoading) {
-      hideSplashScreen();
-    }
-  }, [authLoading]);
+    hideSplashScreen();
+  }, []);
 
   // After history loads, check if current URL references a valid jobId and keep it,
   // or clear the subPath if the jobId no longer exists.
@@ -708,10 +821,17 @@ export default function App() {
 
 
   // ── Auth gate ────────────────────────────────────────────────────────────
-  if (authLoading || !initialSyncDone) {
+  // Only block on auth settling — NOT on the initial limit-status sync. That
+  // sync is a network call; gating the whole app on it just swaps the splash
+  // for a full-screen spinner for a second or two. `limitStatus` is nullable
+  // everywhere (the quota line simply doesn't render until it arrives), so we
+  // show the app immediately and let the sync populate in the background.
+  if (authLoading) {
+    // Brand-matched loader (same #064e3b background + spinner as the native
+    // splash) so hiding the splash on mount hands off without a visible flash.
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent" />
+      <div className="min-h-screen flex items-center justify-center bg-[#064e3b]">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-white/70 border-t-transparent" />
       </div>
     );
   }
@@ -720,7 +840,11 @@ export default function App() {
   // self-contained full-screen portal overlay, and useOnboarding's gate works
   // without a logged-in user (localStorage is the authoritative flag).
   if (!user && showOnboarding) {
-    return <WelcomeGuide onClose={completeOnboarding} />;
+    return (
+      <Suspense fallback={null}>
+        <WelcomeGuide onClose={completeOnboarding} />
+      </Suspense>
+    );
   }
 
   if (!user) {
@@ -792,6 +916,7 @@ export default function App() {
         >
           {recipe ? (
             /* Recipe Detail View — hides extract inputs once extraction is done */
+            <Suspense fallback={<ViewFallback />}>
             <RecipeDetails
               key={recipe.id || recipe.title}
               recipe={recipe}
@@ -820,6 +945,7 @@ export default function App() {
                 }
               }}
             />
+            </Suspense>
           ) : latestRunning ? (
             /* Premium background extraction running: keep the animation (newest
                job) on top, the per-job boxes below, and hide the form. Further
@@ -884,6 +1010,8 @@ export default function App() {
 
         {/* HISTORY / SAVED RECIPES TAB */}
         <div hidden={activeView !== 'history'} aria-hidden={activeView !== 'history' || undefined}>
+          {visitedViews.has('history') && (
+          <Suspense fallback={<ViewFallback />}>
           <SavedCatalog
             history={history}
             historyLoaded={historyLoaded}
@@ -917,10 +1045,14 @@ export default function App() {
             onNavigateCatalog={navigateCatalog}
             limitStatus={limitStatus}
           />
+          </Suspense>
+          )}
         </div>
 
         {/* SHOPPING LIST TAB */}
         <div hidden={activeView !== 'shopping-list'} aria-hidden={activeView !== 'shopping-list' || undefined}>
+          {visitedViews.has('shopping-list') && (
+          <Suspense fallback={<ViewFallback />}>
           <ShoppingList
             aggregatedList={aggregatedList}
             activeRecipes={activeRecipes}
@@ -937,10 +1069,14 @@ export default function App() {
             clearAll={clearAll}
             clearChecked={clearChecked}
           />
+          </Suspense>
+          )}
         </div>
 
         {/* PROGRESS TAB */}
         <div hidden={activeView !== 'progress'} aria-hidden={activeView !== 'progress' || undefined}>
+          {visitedViews.has('progress') && (
+          <Suspense fallback={<ViewFallback />}>
           <ProgressView
             pendingInviteCode={pendingInviteCode}
             onInviteConsumed={() => setPendingInviteCode(null)}
@@ -948,16 +1084,26 @@ export default function App() {
               navigate('history', jobId);
             }}
           />
+          </Suspense>
+          )}
         </div>
 
         {/* SETTINGS TAB */}
         <div hidden={activeView !== 'settings'} aria-hidden={activeView !== 'settings' || undefined}>
+          {visitedViews.has('settings') && (
+          <Suspense fallback={<ViewFallback />}>
           <SettingsView />
+          </Suspense>
+          )}
         </div>
       </main>
 
       {/* Global Premium Modal (shared by TrialBanner and other components) */}
-      <PremiumModal isOpen={isPremiumModalOpen} onOpenChange={setIsPremiumModalOpen} />
+      {premiumModalLoaded && (
+        <Suspense fallback={null}>
+          <PremiumModal isOpen={isPremiumModalOpen} onOpenChange={setIsPremiumModalOpen} />
+        </Suspense>
+      )}
 
       {/* Mobile Bottom Navigation Bar */}
       {(() => {
@@ -968,33 +1114,9 @@ export default function App() {
         const bottomBarClasses = `fixed bottom-0 inset-x-0 z-40 transition-all duration-300 ease-in-out pb-safe ${isBottomBarHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
           }`;
 
-        const shouldShowBannerAd =
-          !isPremium &&
-          !isViewingRecipe &&
-          activeView !== 'settings' &&
-          adStatus !== 'failed';
-
-        // The bottom-bar banner is destroyed on real teardown (premium / no fill)
-        // and while an extraction runs: the form then shows its own larger MREC
-        // ad, and the single native banner can't be reused across sizes — so we
-        // release it here, letting the MREC load fresh with its own spinner.
-        // Other temporary contexts (recipe view, settings, admin, overlays,
-        // select mode) hide/resume it instead, preserving the loaded ad.
-        const bannerCanExist = !isPremium && !isPending && adStatus !== 'failed';
-
         return (
           <div className={bottomBarClasses}>
             <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] w-full max-w-md mx-auto flex flex-col rounded-t-3xl overflow-hidden">
-              {/* Banner ad displayed seamlessly attached to top of bottom menu for free users */}
-              <div className={`w-full pt-2 pb-1.5 px-3 border-b border-gray-100/60 dark:border-gray-800/60 flex flex-col items-center justify-center ${shouldShowBannerAd ? '' : 'hidden'}`}>
-                <ExtractionAdCard
-                  isActive={bannerCanExist}
-                  hidden={!shouldShowBannerAd || isBottomBarHidden}
-                  variant="banner"
-                  embedded
-                  onStatusChange={setAdStatus}
-                />
-              </div>
 
               <div className="w-full flex justify-around items-center pt-3 pb-[calc(1.25rem_+_var(--safe-area-inset-bottom))] px-3">
               {/* Extract / New Recipe Tab */}
@@ -1117,17 +1239,21 @@ export default function App() {
 
       {/* First-launch onboarding overlay (rendered via portal) */}
       {showOnboarding && (
-        <WelcomeGuide
-          onClose={() => {
-            completeOnboarding();
-            navigate('extract');
-          }}
-        />
+        <Suspense fallback={null}>
+          <WelcomeGuide
+            onClose={() => {
+              completeOnboarding();
+              navigate('extract');
+            }}
+          />
+        </Suspense>
       )}
 
       {/* Alpha tester welcome overlay — after onboarding so they don't stack */}
       {!showOnboarding && showAlphaWelcome && (
-        <AlphaWelcome onClose={completeAlphaWelcome} />
+        <Suspense fallback={null}>
+          <AlphaWelcome onClose={completeAlphaWelcome} />
+        </Suspense>
       )}
     </div>
   );

@@ -4,9 +4,11 @@ import {
   BannerAdPosition,
   BannerAdPluginEvents,
   RewardAdPluginEvents,
+  InterstitialAdPluginEvents,
   AdmobConsentStatus,
 } from '@capacitor-community/admob';
 import { isNative } from '../native';
+import { APP_OPEN_MIN_INTERVAL_MS } from '../env';
 
 /**
  * Google AdMob integration for the freemium extraction ad.
@@ -26,8 +28,12 @@ const TEST_BANNER_AD_ID = 'ca-app-pub-3940256099942544/6300978111';
 /** Google's public TEST rewarded video ad unit ID. */
 const TEST_REWARDED_AD_ID = 'ca-app-pub-3940256099942544/5224354917';
 
+/** Google's public TEST interstitial ad unit ID (used for the app-open ad). */
+const TEST_INTERSTITIAL_AD_ID = 'ca-app-pub-3940256099942544/1033173712';
+
 const CONFIGURED_BANNER_AD_ID = import.meta.env.VITE_ADMOB_BANNER_ID as string | undefined;
 const CONFIGURED_REWARDED_AD_ID = import.meta.env.VITE_ADMOB_REWARDED_ID as string | undefined;
+const CONFIGURED_INTERSTITIAL_AD_ID = import.meta.env.VITE_ADMOB_INTERSTITIAL_ID as string | undefined;
 
 /**
  * Comma-separated AdMob test-device IDs (from the "Use setTestDeviceIds(...)"
@@ -44,6 +50,7 @@ const CONFIGURED_TEST_DEVICES = (import.meta.env.VITE_ADMOB_TEST_DEVICES as stri
 /** Real ad unit if configured in environment, otherwise Google's test unit. */
 const BANNER_AD_ID = CONFIGURED_BANNER_AD_ID || TEST_BANNER_AD_ID;
 const REWARDED_AD_ID = CONFIGURED_REWARDED_AD_ID || TEST_REWARDED_AD_ID;
+const INTERSTITIAL_AD_ID = CONFIGURED_INTERSTITIAL_AD_ID || TEST_INTERSTITIAL_AD_ID;
 
 /**
  * Serve test ads unless a real ad unit id is configured in environment.
@@ -396,6 +403,227 @@ export async function showRewardedAd(): Promise<boolean> {
       console.error('[AdMob] error during rewarded ad flow:', err);
       cleanup();
       resolve(false);
+    }
+  });
+}
+
+/* -------------------------------------------------------------------------- */
+/* App-Open Ad (full-screen interstitial shown on app launch)                 */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The @capacitor-community/admob v8 plugin has no dedicated App-Open format, so
+ * the "fullscreen banner after launch" is implemented as an INTERSTITIAL shown
+ * once the app is ready. It stays unobtrusive for free users via three guards:
+ *   1. First-launch exclusion — never shown on the very first app session.
+ *   2. Open cadence — shown on every APP_OPEN_SHOW_EVERY_N_OPENS-th eligible
+ *      open. An "open" is a cold start or a resume after a long background; the
+ *      caller decides which resumes qualify (see APP_OPEN_RESUME_MIN_BG in
+ *      App.tsx) before invoking this. Both trigger types share one counter.
+ *   3. Time floor — never two app-open ads within APP_OPEN_MIN_INTERVAL_MS, so
+ *      the cadence can't stack two ads close together.
+ * All three are persisted in localStorage so they survive across cold starts.
+ */
+
+/** Show the app-open ad on every Nth eligible open (cold start or qualifying resume). */
+const APP_OPEN_SHOW_EVERY_N_OPENS = 3;
+// The time floor (min gap between two app-open ads) lives in ../env as
+// APP_OPEN_MIN_INTERVAL_MS so it can be overridden for testing. Default 4h.
+/** Running count of eligible opens since the last shown app-open ad. */
+const APP_OPEN_OPEN_COUNT_KEY = 'snagbite:appOpenAd:openCount';
+/** Timestamp (ms) of the last app-open ad attempt; drives the time floor. */
+const APP_OPEN_LAST_SHOWN_KEY = 'snagbite:appOpenAd:lastShownAt';
+/** Set the first time an app-open ad would be eligible; that first time is skipped. */
+const APP_OPEN_FIRST_LAUNCH_KEY = 'snagbite:appOpenAd:firstLaunchSeen';
+
+/**
+ * Show the app-open ad only when we have a real interstitial unit configured,
+ * or when running test builds (test unit serves safe test ads). In a production
+ * build without VITE_ADMOB_INTERSTITIAL_ID we skip entirely rather than serving
+ * Google's test interstitial to real users.
+ */
+const APP_OPEN_ENABLED = IS_TESTING || !!CONFIGURED_INTERSTITIAL_AD_ID;
+
+/** Guards against overlapping interstitial requests. */
+let appOpenInFlight = false;
+
+/* -------------------------------------------------------------------------- */
+/* Interstitial preloading                                                    */
+/* -------------------------------------------------------------------------- */
+/* The plugin fetches an interstitial only when `prepareInterstitial` is       */
+/* called, and that fill request is a network round-trip (1–3s). Doing it      */
+/* inline at show-time makes the ad appear seconds after the trigger. Instead   */
+/* we let callers preload it ahead of the trigger, so `showInterstitial` fires  */
+/* on an already-loaded ad. Google interstitials expire ~1h after load, so a    */
+/* preloaded ad is treated as stale before that and re-fetched.                 */
+
+let interstitialReady = false;
+let interstitialPreparing: Promise<void> | null = null;
+let interstitialPreparedAt = 0;
+/** Refresh a preloaded interstitial a little before Google's ~1h expiry. */
+const INTERSTITIAL_TTL_MS = 55 * 60 * 1000;
+
+function interstitialFresh(): boolean {
+  return interstitialReady && Date.now() - interstitialPreparedAt < INTERSTITIAL_TTL_MS;
+}
+
+/**
+ * Prepare (fetch) an app-open interstitial ahead of time so a later
+ * `maybeShowAppOpenAd()` can show it instantly instead of waiting on a fill
+ * request. Idempotent and concurrency-safe: a no-op if a fresh ad is already
+ * loaded or a prepare is already in flight. No-op on web / when the app-open ad
+ * is disabled / when consent was declined. Callers should preload only when a
+ * show is actually imminent (see `appOpenAdWouldShow`) to avoid burning fill
+ * requests on opens that won't display an ad.
+ */
+export async function preloadAppOpenAd(): Promise<void> {
+  if (!isNative()) return;
+  if (!APP_OPEN_ENABLED) return;
+  if (interstitialFresh()) return;
+  if (interstitialPreparing) return interstitialPreparing;
+
+  // Assign the promise synchronously so a second caller can't double-prepare.
+  interstitialPreparing = (async () => {
+    try {
+      await initAds();
+      if (!canRequestAds) return;
+      console.log('[AdMob] preloading app-open interstitial...');
+      await AdMob.prepareInterstitial({
+        adId: INTERSTITIAL_AD_ID,
+        isTesting: IS_TESTING,
+        npa: !personalizedAllowed,
+      });
+      interstitialReady = true;
+      interstitialPreparedAt = Date.now();
+    } catch (err) {
+      console.warn('[AdMob] interstitial preload failed:', err);
+      interstitialReady = false;
+    } finally {
+      interstitialPreparing = null;
+    }
+  })();
+  return interstitialPreparing;
+}
+
+/**
+ * Read-only check of whether the NEXT `maybeShowAppOpenAd()` would actually show
+ * an ad: first-launch already passed, the shared open-counter is about to reach
+ * N, and the time floor is clear. Does NOT mutate the counter — it mirrors the
+ * gating in `maybeShowAppOpenAd` so callers can preload only when a show is
+ * imminent. Keep the two in sync.
+ */
+export function appOpenAdWouldShow(): boolean {
+  if (!isNative() || !APP_OPEN_ENABLED) return false;
+  try {
+    if (!localStorage.getItem(APP_OPEN_FIRST_LAUNCH_KEY)) return false;
+    const count = Number(localStorage.getItem(APP_OPEN_OPEN_COUNT_KEY) || 0) + 1;
+    const last = Number(localStorage.getItem(APP_OPEN_LAST_SHOWN_KEY) || 0);
+    const intervalPassed = !last || Date.now() - last >= APP_OPEN_MIN_INTERVAL_MS;
+    return count >= APP_OPEN_SHOW_EVERY_N_OPENS && intervalPassed;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Show a full-screen interstitial "app-open" ad for free users, respecting the
+ * first-launch exclusion and the frequency cap. No-op on web, when consent was
+ * declined, or when an interstitial is already in flight. The caller is
+ * responsible for the user-level gating (free tier, no onboarding, no running
+ * extraction) — this function only enforces the ad-level policy.
+ *
+ * Resolves `true` if an ad was shown and dismissed, `false` otherwise.
+ */
+export async function maybeShowAppOpenAd(): Promise<boolean> {
+  if (!isNative()) return false;
+  if (!APP_OPEN_ENABLED) return false;
+  if (appOpenInFlight) return false;
+
+  // Never show a full-screen interstitial while a banner is live (shown or kept
+  // hidden in memory). During an extraction the MREC banner is on screen and is
+  // torn down the moment it finishes — showing an interstitial into that
+  // banner-teardown + activity transition crashes the app. If any banner is
+  // active, skip the app-open ad entirely.
+  if (bannerShown || isBannerCurrentlyHidden) return false;
+
+  await initAds();
+  if (!canRequestAds) return false;
+
+  // First-launch exclusion: the first time we'd ever be eligible, record it and
+  // skip — so a brand-new user is never greeted by a full-screen ad.
+  try {
+    if (!localStorage.getItem(APP_OPEN_FIRST_LAUNCH_KEY)) {
+      localStorage.setItem(APP_OPEN_FIRST_LAUNCH_KEY, String(Date.now()));
+      return false;
+    }
+    // Unified cadence + time floor. Count every eligible open (cold start or a
+    // qualifying resume the caller let through) and show only once we've reached
+    // the Nth open AND enough time has passed since the last ad. Counting
+    // up-front means no-fills still advance the cadence and a rapid relaunch is
+    // counted rather than firing another ad.
+    const count = Number(localStorage.getItem(APP_OPEN_OPEN_COUNT_KEY) || 0) + 1;
+    const last = Number(localStorage.getItem(APP_OPEN_LAST_SHOWN_KEY) || 0);
+    const intervalPassed = !last || Date.now() - last >= APP_OPEN_MIN_INTERVAL_MS;
+    if (count < APP_OPEN_SHOW_EVERY_N_OPENS || !intervalPassed) {
+      // Not yet — keep the counter armed (it stays >= N while the floor blocks).
+      localStorage.setItem(APP_OPEN_OPEN_COUNT_KEY, String(count));
+      return false;
+    }
+    // Nth open reached and the time floor is clear — reset the counter and stamp
+    // the attempt time up-front (so the floor covers no-fills too), then show.
+    localStorage.setItem(APP_OPEN_OPEN_COUNT_KEY, '0');
+    localStorage.setItem(APP_OPEN_LAST_SHOWN_KEY, String(Date.now()));
+  } catch {
+    // localStorage unavailable — fail closed (don't risk an uncapped ad).
+    return false;
+  }
+
+  appOpenInFlight = true;
+
+  return new Promise<boolean>(async (resolve) => {
+    let settled = false;
+    let dismissedHandle: any = null;
+    let failedHandle: any = null;
+
+    const finish = (result: boolean) => {
+      if (settled) return;
+      settled = true;
+      dismissedHandle?.remove?.().catch(() => {});
+      failedHandle?.remove?.().catch(() => {});
+      appOpenInFlight = false;
+      resolve(result);
+    };
+
+    try {
+      dismissedHandle = await AdMob.addListener(InterstitialAdPluginEvents.Dismissed, () => {
+        console.log('[AdMob] app-open interstitial dismissed');
+        finish(true);
+      });
+      failedHandle = await AdMob.addListener(InterstitialAdPluginEvents.FailedToShow, (err: unknown) => {
+        console.warn('[AdMob] app-open interstitial failed to show:', err);
+        finish(false);
+      });
+
+      // Prefer a preloaded ad (instant show). If a preload is still in flight,
+      // wait for it; if none is loaded/fresh, prepare inline as a fallback.
+      if (interstitialPreparing) await interstitialPreparing;
+      if (!interstitialFresh()) {
+        console.log('[AdMob] preparing app-open interstitial (no warm preload)...');
+        await AdMob.prepareInterstitial({
+          adId: INTERSTITIAL_AD_ID,
+          isTesting: IS_TESTING,
+          npa: !personalizedAllowed,
+        });
+        interstitialPreparedAt = Date.now();
+      }
+      interstitialReady = false; // consume — a shown interstitial can't be reused
+
+      console.log('[AdMob] showing app-open interstitial...');
+      await AdMob.showInterstitial();
+    } catch (err) {
+      // Includes the no-fill / failed-to-load case (prepareInterstitial rejects).
+      console.warn('[AdMob] app-open interstitial flow failed:', err);
+      finish(false);
     }
   });
 }
