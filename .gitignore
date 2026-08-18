@@ -18,3 +18,5 @@ temp-downloads/
 frontend/releases/
 *firebase-adminsdk*.json
 docs/FEATURE_IDEAS.md
+# graphify knowledge graph (locally generated, rebuild with: graphify extract . --code-only)
+graphify-out/
