@@ -6,6 +6,7 @@ import { useI18n } from '../../context/I18nContext';
 import { useGamification } from '../../context/GamificationContext';
 import { progressPct, xpToNextLevel } from '../../utils/levels';
 import { ALL_BADGE_KEYS, badgeEmoji, BADGE_XP } from '../../utils/badges';
+import { tint, TINT } from '../../utils/tint';
 import type { CookPhotoItem } from '../../types';
 
 function getCulinaryRankKey(level: number): string {
@@ -88,7 +89,10 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
   return (
     <div className="flex flex-col gap-6">
       {/* 1. Hero Level & Culinary Rank Card */}
-      <div className="rounded-3xl bg-white dark:bg-gray-900 p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
+      <div
+        style={tint(TINT.emerald)}
+        className="tint-surface-strong rounded-3xl p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]"
+      >
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm shrink-0">
@@ -137,6 +141,7 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
           value={stats?.currentStreak ?? 0}
           label="W-Serie"
           accent="text-orange-500 bg-orange-500/10 dark:bg-orange-500/20"
+          tintColor={TINT.orange}
         />
 
         <div className="relative h-full">
@@ -145,6 +150,7 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
             value={stats?.coins ?? 0}
             label="Punkte"
             accent="text-amber-500 bg-amber-500/10 dark:bg-amber-500/20"
+            tintColor={TINT.amber}
             onPress={() => {
               setShowCoinsNotice(true);
               setTimeout(() => setShowCoinsNotice(false), 3000);
@@ -163,13 +169,17 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
           value={stats?.totalCooks ?? 0}
           label="Gekocht"
           accent="text-emerald-500 bg-emerald-500/10 dark:bg-emerald-500/20"
+          tintColor={TINT.emerald}
         />
       </div>
 
 
 
       {/* 2. "Deine Koch-Galerie" (Food Photo Feed) */}
-      <div className="rounded-3xl bg-white dark:bg-gray-900 p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] space-y-4">
+      <div
+        style={tint(TINT.violet)}
+        className="tint-surface rounded-3xl p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] space-y-4"
+      >
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <Camera className="h-4.5 w-4.5 text-emerald-500" />
@@ -216,7 +226,10 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
       </div>
 
       {/* 3. Badges Grid (Flat & Clean) */}
-      <div className="rounded-3xl bg-white dark:bg-gray-900 p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] space-y-4">
+      <div
+        style={tint(TINT.amber)}
+        className="tint-surface rounded-3xl p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] space-y-4"
+      >
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <Award className="h-4.5 w-4.5 text-emerald-500" />
@@ -285,12 +298,14 @@ function StatTile({
   value,
   label,
   accent,
+  tintColor,
   onPress,
 }: {
   icon: ReactNode;
   value: number;
   label: string;
   accent: string;
+  tintColor: string;
   onPress?: () => void;
 }) {
   const content = (
@@ -307,7 +322,8 @@ function StatTile({
     return (
       <Button
         onPress={onPress}
-        className="flex flex-col items-center justify-between gap-1.5 rounded-3xl bg-white dark:bg-gray-900 p-4 h-full text-center border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] transition-all active:scale-95 cursor-pointer w-full"
+        style={tint(tintColor)}
+        className="tint-surface flex flex-col items-center justify-between gap-1.5 rounded-3xl p-4 h-full text-center border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] transition-all active:scale-95 cursor-pointer w-full"
       >
         {content}
       </Button>
@@ -315,7 +331,10 @@ function StatTile({
   }
 
   return (
-    <div className="flex flex-col items-center justify-between gap-1.5 rounded-3xl bg-white dark:bg-gray-900 p-4 text-center border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] w-full h-full">
+    <div
+      style={tint(tintColor)}
+      className="tint-surface flex flex-col items-center justify-between gap-1.5 rounded-3xl p-4 text-center border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] w-full h-full"
+    >
       {content}
     </div>
   );
