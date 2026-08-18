@@ -898,11 +898,11 @@ export default function App() {
               : 'pb-24'
         } ${(!isViewingRecipe && activeView !== 'extract') ? 'pt-4' : ''}`}>
 
-        {/* One-time trial banner for free users */}
-        {!(isPending && !isPremium) && <TrialBanner onOpenPremium={() => setIsPremiumModalOpen(true)} />}
+        {/* One-time trial banner for free users (only shown on list/home views, not inside a recipe) */}
+        {!(isPending && !isPremium) && !isViewingRecipe && <TrialBanner onOpenPremium={() => setIsPremiumModalOpen(true)} />}
 
         {/* Soft opt-in notification prompt (triggered after N saved recipes) */}
-        {!(isPending && !isPremium) && <NotificationPrompt savedCount={history.length} />}
+        {!(isPending && !isPremium) && !isViewingRecipe && <NotificationPrompt savedCount={history.length} />}
 
         {/* ALWAYS-MOUNTED VIEWS — hidden via HTML `hidden` attribute (display:none)
             instead of conditional rendering. This preserves component state,
