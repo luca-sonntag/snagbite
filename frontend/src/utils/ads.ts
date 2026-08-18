@@ -451,6 +451,13 @@ export async function maybeShowAppOpenAd(): Promise<boolean> {
   if (!APP_OPEN_ENABLED) return false;
   if (appOpenInFlight) return false;
 
+  // Never show a full-screen interstitial while a banner is live (shown or kept
+  // hidden in memory). During an extraction the MREC banner is on screen and is
+  // torn down the moment it finishes — showing an interstitial into that
+  // banner-teardown + activity transition crashes the app. If any banner is
+  // active, skip the app-open ad entirely.
+  if (bannerShown || isBannerCurrentlyHidden) return false;
+
   await initAds();
   if (!canRequestAds) return false;
 

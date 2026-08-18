@@ -326,25 +326,38 @@ export default function App() {
     }).catch(err => console.error('Failed to load ads module:', err));
   }, [authLoading, user, fetchHistory]);
 
-  // App-Open ad: a full-screen interstitial shown once on cold start for free
-  // users. Attempted a single time per app session, a short beat after the app
-  // is ready so it never covers the splash/first paint. It is skipped while
-  // onboarding is showing and during a running extraction, and `maybeShowAppOpenAd`
-  // itself enforces the first-launch exclusion + frequency cap (no-op on web).
+  // App-Open ad: a full-screen interstitial shown ONCE on a neutral cold start
+  // for free users, a short beat after the app is ready so it never covers the
+  // splash/first paint. `maybeShowAppOpenAd` enforces the first-launch exclusion
+  // + frequency cap and additionally bails if any banner is live (no-op on web).
+  //
+  // The one-shot is *consumed* the first time the app is ready (past onboarding),
+  // regardless of what's on screen. This is deliberate: the primary flow is
+  // sharing a reel, which cold-starts the app straight into an extraction. We
+  // must never let the interstitial fire when that extraction finishes — showing
+  // it into the MREC banner teardown + recipe-view transition crashes the app.
+  // So if we didn't land on a neutral screen, we skip the ad for this session
+  // entirely instead of deferring it.
   const appOpenAttemptedRef = useRef(false);
+  // Always-fresh snapshot of the gates, re-checked when the deferred timer fires
+  // (an extraction/recipe may have started during the 1.2s delay).
+  const appOpenBlockedRef = useRef(true);
+  appOpenBlockedRef.current = isPremium || isPending || !!recipe || showOnboarding;
   useEffect(() => {
     if (authLoading || !user) return;
-    if (isPremium || showOnboarding || isPending) return;
+    if (showOnboarding) return; // first-launch guide up (ad is excluded on 1st launch anyway)
     if (appOpenAttemptedRef.current) return;
-    appOpenAttemptedRef.current = true;
+    appOpenAttemptedRef.current = true; // consume the single per-session chance now
+    if (appOpenBlockedRef.current) return; // didn't cold-start on a neutral screen → skip
 
     const id = setTimeout(() => {
+      if (appOpenBlockedRef.current) return; // state changed during the delay
       import('./utils/ads')
         .then(({ maybeShowAppOpenAd }) => maybeShowAppOpenAd())
         .catch(err => console.error('Failed to load ads module:', err));
     }, 1200);
     return () => clearTimeout(id);
-  }, [authLoading, user, isPremium, showOnboarding, isPending]);
+  }, [authLoading, user, showOnboarding]);
 
   // Initial sync on startup/login
   useEffect(() => {
