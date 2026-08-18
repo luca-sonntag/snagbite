@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Card, TextField, Label, Input, Button, FieldError, Spinner, Accordion } from '@heroui/react';
 import { BookOpen, Camera, Clipboard, Clock, Globe, HelpCircle, ImagePlus, Link2, Play, X } from 'lucide-react';
-import { tint, TINT } from '../utils/tint';
 import { MAX_IMPORT_PHOTOS } from '../hooks/useRecipeExtraction';
 import { Clipboard as CapClipboard } from '@capacitor/clipboard';
 import { Capacitor } from '@capacitor/core';
@@ -250,10 +249,7 @@ export default function ExtractForm({
           {!isRealPremium && <ExtractionAdCard isActive={isActive} />}
         </div>
       ) : (
-        <Card
-          style={tint(TINT.emerald)}
-          className="!bg-white dark:!bg-gray-900 tint-wash p-5 sm:p-6 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]"
-        >
+        <Card className="!bg-white dark:!bg-gray-900 p-5 sm:p-6 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
           <form
             onSubmit={(e) => {
               if (atConcurrencyLimit) { e.preventDefault(); return; }
@@ -600,12 +596,7 @@ export default function ExtractForm({
             </div>
 
             {/* Share Directly Accordion */}
-            <Accordion
-              variant="surface"
-              style={tint(TINT.emerald)}
-              className="w-full tint-surface rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden"
-              defaultExpandedKeys={[]}
-            >
+            <Accordion variant="surface" className="w-full bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden" defaultExpandedKeys={[]}>
               <Accordion.Item className="border-none" id="share">
                 <Accordion.Heading>
                   <Accordion.Trigger className="px-5 py-4 flex items-center justify-between text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
@@ -677,16 +668,12 @@ export default function ExtractForm({
             </Accordion>
 
             {/* Help / Instructions Accordion */}
-            <Accordion
-              variant="surface"
-              style={tint(TINT.blue)}
-              className="w-full tint-surface rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden"
-            >
+            <Accordion variant="surface" className="w-full bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden">
               <Accordion.Item className="border-none">
                 <Accordion.Heading>
                   <Accordion.Trigger className="px-5 py-4 flex items-center justify-between text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                     <span className="flex items-center gap-2.5 text-sm font-bold">
-                      <div className="p-1.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                      <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                         <HelpCircle className="w-4 h-4" />
                       </div>
                       {t('form.helpTitle')}

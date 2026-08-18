@@ -1,6 +1,5 @@
 import { Button } from '@heroui/react';
 import { AlertCircle, RefreshCw } from 'lucide-react';
-import { tint, TINT } from '../utils/tint';
 import { useI18n } from '../context/I18nContext';
 import { resolveErrorCode } from '../i18n';
 import { isRetryableError } from '../errorCodes';
@@ -36,7 +35,7 @@ export default function ErrorBanner({
   const canRetry = isRetryableError(jobErrorCode, jobError);
 
   return (
-    <div style={tint(TINT.rose)} className="p-4 sm:p-5 rounded-3xl tint-surface border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col gap-3">
+    <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-gray-900 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col gap-3">
       <div className="flex items-start gap-3.5">
         <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0 flex items-center justify-center">
           <AlertCircle className="w-5 h-5" />

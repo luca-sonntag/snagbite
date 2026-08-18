@@ -1,6 +1,5 @@
 import { Button } from '@heroui/react';
 import { Play, Sparkles, Check, ChefHat, Utensils, ListChecks } from 'lucide-react';
-import { tint, TINT } from '../../utils/tint';
 import type { Recipe } from '../../types';
 import RecipeInstructionText from '../RecipeInstructionText';
 import { useI18n } from '../../context/I18nContext';
@@ -49,10 +48,7 @@ export default function RecipeInstructions({
       </div>
 
       {/* Main Cohesive Card Group (Progress + Equipment + Steps) */}
-      <div
-        style={tint(TINT.emerald)}
-        className="glass-panel tint-surface rounded-2xl overflow-hidden"
-      >
+      <div className="glass-panel rounded-2xl overflow-hidden">
         {/* 1. Cooking Progress Bar & Start Button */}
         <div className="px-5 py-5 sm:px-6 sm:py-6">
           <div className="flex items-center gap-3.5 sm:gap-4">
@@ -164,18 +160,15 @@ export default function RecipeInstructions({
 
       {/* Tips Card */}
       {recipe.tips && recipe.tips.length > 0 && (
-        <div
-          style={tint(TINT.amber)}
-          className="glass-panel tint-surface p-4.5 sm:p-5 rounded-2xl border border-amber-500/15"
-        >
-          <h3 className="text-xs font-bold text-amber-600 dark:text-amber-400 mb-3 uppercase tracking-wider flex items-center gap-1.5">
+        <div className="glass-panel p-4.5 sm:p-5 rounded-2xl border border-emerald-500/10">
+          <h3 className="text-xs font-bold text-emerald-500 mb-3 uppercase tracking-wider flex items-center gap-1.5">
             <ChefHat className="w-4 h-4" />
             <span>{t('recipe.tipsTitle')}</span>
           </h3>
           <ul className="flex flex-col gap-3 text-sm text-gray-700 dark:text-gray-300">
             {recipe.tips.map((tip, idx) => (
               <li key={idx} className="flex items-start gap-2.5 leading-normal">
-                <span className="bg-amber-500/10 text-amber-600 dark:text-amber-400 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold border border-amber-500/20">{idx + 1}</span>
+                <span className="bg-emerald-500/10 text-emerald-500 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold border border-emerald-500/20">{idx + 1}</span>
                 <span>
                   <RecipeInstructionText text={tip} recipe={recipe} formatAmount={formatAmount} />
                 </span>

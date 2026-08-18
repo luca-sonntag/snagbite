@@ -89,10 +89,7 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
   return (
     <div className="flex flex-col gap-6">
       {/* 1. Hero Level & Culinary Rank Card */}
-      <div
-        style={tint(TINT.emerald)}
-        className="tint-surface-strong rounded-3xl p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]"
-      >
+      <div className="rounded-3xl bg-white dark:bg-gray-900 p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm shrink-0">
@@ -176,10 +173,7 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
 
 
       {/* 2. "Deine Koch-Galerie" (Food Photo Feed) */}
-      <div
-        style={tint(TINT.violet)}
-        className="tint-surface rounded-3xl p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] space-y-4"
-      >
+      <div className="rounded-3xl bg-white dark:bg-gray-900 p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <Camera className="h-4.5 w-4.5 text-emerald-500" />
@@ -226,10 +220,7 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
       </div>
 
       {/* 3. Badges Grid (Flat & Clean) */}
-      <div
-        style={tint(TINT.amber)}
-        className="tint-surface rounded-3xl p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] space-y-4"
-      >
+      <div className="rounded-3xl bg-white dark:bg-gray-900 p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <Award className="h-4.5 w-4.5 text-emerald-500" />

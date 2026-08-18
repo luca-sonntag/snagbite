@@ -11,7 +11,6 @@ import { APP_VERSION_LABEL } from '../version';
 import { getActiveOtaVersion } from '../utils/otaUpdater';
 import { LEGAL_URLS } from '../legal';
 import PremiumUpgradeCard from './PremiumUpgradeCard';
-import { tint, TINT } from '../utils/tint';
 import NotificationSettings from './NotificationSettings';
 
 // Unit system is not yet ready to be user-configurable; keep the setting UI in place but hidden for now.
@@ -123,10 +122,7 @@ export default function SettingsView() {
       )}
 
       {/* Profile Card */}
-      <div
-        style={tint(TINT.emerald)}
-        className="mx-2 p-5 tint-surface-strong border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] rounded-3xl flex flex-col gap-4 relative overflow-hidden"
-      >
+      <div className="mx-2 p-5 bg-white dark:bg-gray-900 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] rounded-3xl flex flex-col gap-4 relative overflow-hidden">
         {isPremium && (
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full blur-2xl pointer-events-none -mr-8 -mt-8" />
         )}
@@ -191,7 +187,7 @@ export default function SettingsView() {
           {language === 'de' ? 'Einstellungen' : 'Preferences'}
         </h3>
         
-        <div style={tint(TINT.blue)} className="tint-surface rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
+        <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
           {/* Language Option */}
           <div className="p-4 flex items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-2.5 border-b border-black/5 dark:border-white/5">
             <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -371,7 +367,7 @@ export default function SettingsView() {
               {language === 'de' ? 'Verwaltung' : 'Administration'}
             </h3>
 
-          <div style={tint(TINT.violet)} className="tint-surface rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
             <a
               href={adminPanelUrl}
               target="_blank"
@@ -405,7 +401,7 @@ export default function SettingsView() {
           {language === 'de' ? 'Hilfe' : 'Help'}
         </h3>
 
-        <div style={tint(TINT.cyan)} className="tint-surface rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
+        <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
           <button
             onClick={() => window.dispatchEvent(new Event('app:replay-onboarding'))}
             className="w-full p-4 flex items-center justify-between border-b border-black/5 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 transition-all active:scale-[0.99] text-left cursor-pointer group"
@@ -448,7 +444,7 @@ export default function SettingsView() {
           {t('app.settings.legal.section') || 'Rechtliches'}
         </h3>
 
-        <div style={tint(TINT.slate)} className="tint-surface rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
+        <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
           {[
             { href: LEGAL_URLS.privacy, icon: Shield, label: t('app.settings.legal.privacy') || 'Datenschutzerklärung' },
             { href: LEGAL_URLS.terms, icon: ScrollText, label: t('app.settings.legal.terms') || 'AGB' },
@@ -485,7 +481,7 @@ export default function SettingsView() {
           {language === 'de' ? 'Konto-Aktionen' : 'Account Actions'}
         </h3>
         
-        <div style={tint(TINT.rose)} className="tint-surface rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
+        <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
           {/* Logout Option */}
           {!autoSignedIn && (
             <button

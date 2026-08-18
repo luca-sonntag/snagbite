@@ -374,7 +374,6 @@ html.dark .glass-panel {
   min-height: 0;
 }
 
-
 /* ── Tinted surfaces ──────────────────────────────────────────────────────
    Lifts otherwise flat white cards by washing a soft diagonal accent over
    the surface (same look as the macro cards in the nutrition sheet).
@@ -397,47 +396,6 @@ html.dark .tint-surface {
   background-image: linear-gradient(
     135deg,
     color-mix(in srgb, var(--tint) 20%, transparent) 0%,
-    color-mix(in srgb, var(--tint) 9%, transparent) 45%,
-    transparent 80%
-  );
-}
-
-/* Hero variant: same wash, more presence. For headline surfaces. */
-.tint-surface-strong {
-  background-color: #ffffff;
-  background-image: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--tint) 18%, transparent) 0%,
-    color-mix(in srgb, var(--tint) 8%, transparent) 48%,
-    transparent 85%
-  );
-}
-
-html.dark .tint-surface-strong {
-  background-color: var(--color-gray-900);
-  background-image: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--tint) 28%, transparent) 0%,
-    color-mix(in srgb, var(--tint) 12%, transparent) 48%,
-    transparent 85%
-  );
-}
-
-/* Transparent variant: no own background, for tiles that sit on a tinted
-   parent or already carry their own surface colour. */
-.tint-wash {
-  background-image: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--tint) 12%, transparent) 0%,
-    color-mix(in srgb, var(--tint) 5%, transparent) 45%,
-    transparent 80%
-  );
-}
-
-html.dark .tint-wash {
-  background-image: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--tint) 22%, transparent) 0%,
     color-mix(in srgb, var(--tint) 9%, transparent) 45%,
     transparent 80%
   );

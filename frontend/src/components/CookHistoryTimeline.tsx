@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import { UtensilsCrossed, Camera, Clock } from 'lucide-react';
-import { tint, TINT } from '../utils/tint';
 import type { CookHistory } from '../hooks/useCookHistory';
 import { useI18n } from '../context/I18nContext';
 import { formatRelative } from '../utils/formatRelative';
@@ -57,7 +56,7 @@ export default function CookHistoryTimeline({ history }: CookHistoryTimelineProp
   };
 
   return (
-    <div style={tint(TINT.violet)} className="rounded-3xl tint-surface p-5 border border-black/5 dark:border-white/5 shadow-2xs">
+    <div className="rounded-3xl bg-white dark:bg-gray-900 p-5 border border-black/5 dark:border-white/5 shadow-2xs">
       {/* Clean section header without extra badges */}
       <h4 className="text-base font-extrabold text-gray-900 dark:text-white mb-3">
         {t('app.gamification.cookedTimelineTitle')}
