@@ -3,7 +3,7 @@ import { Sparkles, BookOpen, ShoppingCart, User, Trophy } from 'lucide-react';
 
 import type { Job } from './types';
 import { apiUrl } from './api';
-import { registerShareIntent, registerNotificationTap, hideSplashScreen, registerBackButtonHandler, registerAppUrlOpen } from './native';
+import { registerShareIntent, registerNotificationTap, hideSplashScreen, registerBackButtonHandler, registerAppUrlOpen, registerAppStateListener } from './native';
 import { registerPushTapHandler, enablePushNotifications } from './push';
 import { parseSharedUrl } from './utils/shareUrl';
 import ExtractForm, { type ExtractMode } from './components/ExtractForm';
@@ -339,6 +339,9 @@ export default function App() {
   // So if we didn't land on a neutral screen, we skip the ad for this session
   // entirely instead of deferring it.
   const appOpenAttemptedRef = useRef(false);
+  // Timestamp (ms) of the last time the app went to the background; used to tell
+  // a real "new session" resume from a brief app-switch (see resume effect).
+  const appBackgroundedAtRef = useRef<number | null>(null);
   // Always-fresh snapshot of the gates, re-checked when the deferred timer fires
   // (an extraction/recipe may have started during the 1.2s delay).
   const appOpenBlockedRef = useRef(true);
@@ -358,6 +361,42 @@ export default function App() {
     }, 1200);
     return () => clearTimeout(id);
   }, [authLoading, user, showOnboarding]);
+
+  // App-Open ad on RESUME. The cold-start effect above only fires on a true
+  // process start, so a device that keeps the app in the background for days
+  // would never see an app-open ad. We also treat a resume after a long
+  // background (>= APP_OPEN_RESUME_MIN_BG_MS) as an eligible "open" and run the
+  // same policy — maybeShowAppOpenAd shares ONE counter + time floor across cold
+  // starts and resumes, so this never doubles up. Brief app-switches never
+  // qualify. The crash guards still apply: maybeShowAppOpenAd bails while a
+  // banner is live, and appOpenBlockedRef skips any non-neutral screen (recipe
+  // open, extraction running, premium) — re-checked when the deferred timer fires.
+  useEffect(() => {
+    const APP_OPEN_RESUME_MIN_BG_MS = 4 * 60 * 60 * 1000; // 4h
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const cleanup = registerAppStateListener((isActive) => {
+      if (!isActive) {
+        appBackgroundedAtRef.current = Date.now();
+        return;
+      }
+      // Foregrounded. Only a resume after a long background counts as an "open".
+      const bgAt = appBackgroundedAtRef.current;
+      appBackgroundedAtRef.current = null;
+      if (bgAt == null || Date.now() - bgAt < APP_OPEN_RESUME_MIN_BG_MS) return;
+      if (appOpenBlockedRef.current) return; // resumed onto a non-neutral screen
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (appOpenBlockedRef.current) return; // state changed during the delay
+        import('./utils/ads')
+          .then(({ maybeShowAppOpenAd }) => maybeShowAppOpenAd())
+          .catch(err => console.error('Failed to load ads module:', err));
+      }, 1200);
+    });
+    return () => {
+      if (timer) clearTimeout(timer);
+      cleanup();
+    };
+  }, []);
 
   // Initial sync on startup/login
   useEffect(() => {

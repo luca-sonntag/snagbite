@@ -413,17 +413,25 @@ export async function showRewardedAd(): Promise<boolean> {
 /**
  * The @capacitor-community/admob v8 plugin has no dedicated App-Open format, so
  * the "fullscreen banner after launch" is implemented as an INTERSTITIAL shown
- * once the app is ready. It stays unobtrusive for free users via two guards:
+ * once the app is ready. It stays unobtrusive for free users via three guards:
  *   1. First-launch exclusion — never shown on the very first app session.
- *   2. Cold-start cadence — shown on every APP_OPEN_SHOW_EVERY_N_COLD_STARTS-th
- *      eligible cold start rather than on a wall-clock timer.
- * Both are persisted in localStorage so they survive across cold starts.
+ *   2. Open cadence — shown on every APP_OPEN_SHOW_EVERY_N_OPENS-th eligible
+ *      open. An "open" is a cold start or a resume after a long background; the
+ *      caller decides which resumes qualify (see APP_OPEN_RESUME_MIN_BG in
+ *      App.tsx) before invoking this. Both trigger types share one counter.
+ *   3. Time floor — never two app-open ads within APP_OPEN_MIN_INTERVAL_MS, so
+ *      the cadence can't stack two ads close together.
+ * All three are persisted in localStorage so they survive across cold starts.
  */
 
-/** Show the app-open ad on every Nth eligible cold start. */
-const APP_OPEN_SHOW_EVERY_N_COLD_STARTS = 3;
-/** Running count of eligible cold starts since the last shown app-open ad. */
-const APP_OPEN_COLD_START_COUNT_KEY = 'snagbite:appOpenAd:coldStartCount';
+/** Show the app-open ad on every Nth eligible open (cold start or qualifying resume). */
+const APP_OPEN_SHOW_EVERY_N_OPENS = 3;
+/** Never show two app-open ads within this window, regardless of the counter (4h). */
+const APP_OPEN_MIN_INTERVAL_MS = 4 * 60 * 60 * 1000;
+/** Running count of eligible opens since the last shown app-open ad. */
+const APP_OPEN_OPEN_COUNT_KEY = 'snagbite:appOpenAd:openCount';
+/** Timestamp (ms) of the last app-open ad attempt; drives the time floor. */
+const APP_OPEN_LAST_SHOWN_KEY = 'snagbite:appOpenAd:lastShownAt';
 /** Set the first time an app-open ad would be eligible; that first time is skipped. */
 const APP_OPEN_FIRST_LAUNCH_KEY = 'snagbite:appOpenAd:firstLaunchSeen';
 
@@ -469,16 +477,23 @@ export async function maybeShowAppOpenAd(): Promise<boolean> {
       localStorage.setItem(APP_OPEN_FIRST_LAUNCH_KEY, String(Date.now()));
       return false;
     }
-    // Cold-start cadence: only show on every Nth eligible cold start. Counting
-    // up-front (before the ad is shown) also means no-fills still advance the
-    // cadence, and a rapid relaunch is counted rather than firing another ad.
-    const count = Number(localStorage.getItem(APP_OPEN_COLD_START_COUNT_KEY) || 0) + 1;
-    if (count < APP_OPEN_SHOW_EVERY_N_COLD_STARTS) {
-      localStorage.setItem(APP_OPEN_COLD_START_COUNT_KEY, String(count));
+    // Unified cadence + time floor. Count every eligible open (cold start or a
+    // qualifying resume the caller let through) and show only once we've reached
+    // the Nth open AND enough time has passed since the last ad. Counting
+    // up-front means no-fills still advance the cadence and a rapid relaunch is
+    // counted rather than firing another ad.
+    const count = Number(localStorage.getItem(APP_OPEN_OPEN_COUNT_KEY) || 0) + 1;
+    const last = Number(localStorage.getItem(APP_OPEN_LAST_SHOWN_KEY) || 0);
+    const intervalPassed = !last || Date.now() - last >= APP_OPEN_MIN_INTERVAL_MS;
+    if (count < APP_OPEN_SHOW_EVERY_N_OPENS || !intervalPassed) {
+      // Not yet — keep the counter armed (it stays >= N while the floor blocks).
+      localStorage.setItem(APP_OPEN_OPEN_COUNT_KEY, String(count));
       return false;
     }
-    // Nth cold start reached — reset the counter and proceed to show.
-    localStorage.setItem(APP_OPEN_COLD_START_COUNT_KEY, '0');
+    // Nth open reached and the time floor is clear — reset the counter and stamp
+    // the attempt time up-front (so the floor covers no-fills too), then show.
+    localStorage.setItem(APP_OPEN_OPEN_COUNT_KEY, '0');
+    localStorage.setItem(APP_OPEN_LAST_SHOWN_KEY, String(Date.now()));
   } catch {
     // localStorage unavailable — fail closed (don't risk an uncapped ad).
     return false;
