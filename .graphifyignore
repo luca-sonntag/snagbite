@@ -1,0 +1,31 @@
+# Ergänzt .gitignore für den graphify Knowledge Graph.
+# Kann nur zusätzlich ausschließen — nie etwas re-includen.
+# Ziel: nur echte Architektur im Graph, keine Nutzdaten/Assets.
+
+# --- Große Nutzdaten (keine Architektur, ~7.9M Tokens) ---
+backend/src/data/bls_4_0_daten_2025_de.csv
+backend/src/data/canonicalIngredientsData.json
+# canonicalIngredients.ts (der Loader) bleibt bewusst drin.
+
+# --- Lock-Dateien (~277k Tokens, null Aussagekraft) ---
+**/package-lock.json
+
+# --- Bilder & Medien ---
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.ico
+*.svg
+
+# --- Fonts & Design-Quellen ---
+*.woff
+*.woff2
+*.ttf
+*.eot
+*.afdesign
+
+# --- Generierte Reports ---
+eval_results/
+graphify-out/
