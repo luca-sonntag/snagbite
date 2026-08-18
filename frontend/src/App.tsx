@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { Sparkles, BookOpen, ShoppingCart, User, Trophy } from 'lucide-react';
 
 import type { Job } from './types';
@@ -11,20 +11,24 @@ import ExtractForm, { type ExtractMode } from './components/ExtractForm';
 import ActiveExtractions from './components/ActiveExtractions';
 import ExtractionAnimation from './components/ExtractionAnimation';
 import ErrorBanner from './components/ErrorBanner';
-import RecipeDetails from './components/RecipeDetails';
-import SavedCatalog from './components/SavedCatalog/index';
 import { isCatalogListRoute } from './components/SavedCatalog/catalogRoutes';
-import ShoppingList from './components/ShoppingList';
 import AuthForm from './components/AuthForm';
-import SettingsView from './components/SettingsView';
-import ProgressView from './components/ProgressView';
 import TimerBanner from './components/TimerBanner';
 import OtaUpdateBanner from './components/OtaUpdateBanner';
-import WelcomeGuide from './components/WelcomeGuide';
-import AlphaWelcome from './components/AlphaWelcome';
 import TrialBanner from './components/TrialBanner';
 import NotificationPrompt from './components/NotificationPrompt';
-import PremiumModal from './components/PremiumModal';
+
+// Heavy views are code-split so they aren't parsed on cold start — the initial
+// bundle only needs the default extract tab. Each mounts on first visit (then
+// stays mounted to preserve its state) via the `visitedViews` gate below.
+const RecipeDetails = lazy(() => import('./components/RecipeDetails'));
+const SavedCatalog = lazy(() => import('./components/SavedCatalog/index'));
+const ShoppingList = lazy(() => import('./components/ShoppingList'));
+const SettingsView = lazy(() => import('./components/SettingsView'));
+const ProgressView = lazy(() => import('./components/ProgressView'));
+const PremiumModal = lazy(() => import('./components/PremiumModal'));
+const WelcomeGuide = lazy(() => import('./components/WelcomeGuide'));
+const AlphaWelcome = lazy(() => import('./components/AlphaWelcome'));
 
 import { useRecipeExtraction } from './hooks/useRecipeExtraction';
 import { useShoppingList } from './hooks/useShoppingList';
@@ -44,6 +48,15 @@ import { useAlphaWelcome } from './hooks/useAlphaWelcome';
 // Module-level flag to ensure the Web Share Target is only processed once per page load.
 // This prevents re-triggering the interceptor when the user's auth state or metadata updates.
 let isWebShareProcessed = false;
+
+/** Lightweight fallback while a lazily-loaded view chunk resolves (first visit only). */
+function ViewFallback() {
+  return (
+    <div className="w-full flex items-center justify-center py-16">
+      <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent" />
+    </div>
+  );
+}
 
 export default function App() {
   const dialog = useDialog();
@@ -74,6 +87,21 @@ export default function App() {
   const [isCatalogSelectMode, setIsCatalogSelectMode] = useState(false);
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const { pendingNavigation, dismissAllFinished } = useTimerManager();
+
+  // Track which tabs have been opened at least once. The heavy tab views are
+  // code-split and only mounted after their first visit (then kept mounted to
+  // preserve state), so their chunks stay out of the cold-start path.
+  const [visitedViews, setVisitedViews] = useState<Set<string>>(() => new Set([activeView]));
+  useEffect(() => {
+    setVisitedViews(prev => (prev.has(activeView) ? prev : new Set(prev).add(activeView)));
+  }, [activeView]);
+
+  // Mount the (lazy) premium modal only once it's first opened, then keep it
+  // mounted so its close transition still runs.
+  const [premiumModalLoaded, setPremiumModalLoaded] = useState(false);
+  useEffect(() => {
+    if (isPremiumModalOpen) setPremiumModalLoaded(true);
+  }, [isPremiumModalOpen]);
 
   // First-launch onboarding gate (also re-openable from Settings)
   const {
@@ -811,7 +839,11 @@ export default function App() {
   // self-contained full-screen portal overlay, and useOnboarding's gate works
   // without a logged-in user (localStorage is the authoritative flag).
   if (!user && showOnboarding) {
-    return <WelcomeGuide onClose={completeOnboarding} />;
+    return (
+      <Suspense fallback={null}>
+        <WelcomeGuide onClose={completeOnboarding} />
+      </Suspense>
+    );
   }
 
   if (!user) {
@@ -883,6 +915,7 @@ export default function App() {
         >
           {recipe ? (
             /* Recipe Detail View — hides extract inputs once extraction is done */
+            <Suspense fallback={<ViewFallback />}>
             <RecipeDetails
               key={recipe.id || recipe.title}
               recipe={recipe}
@@ -911,6 +944,7 @@ export default function App() {
                 }
               }}
             />
+            </Suspense>
           ) : latestRunning ? (
             /* Premium background extraction running: keep the animation (newest
                job) on top, the per-job boxes below, and hide the form. Further
@@ -975,6 +1009,8 @@ export default function App() {
 
         {/* HISTORY / SAVED RECIPES TAB */}
         <div hidden={activeView !== 'history'} aria-hidden={activeView !== 'history' || undefined}>
+          {visitedViews.has('history') && (
+          <Suspense fallback={<ViewFallback />}>
           <SavedCatalog
             history={history}
             historyLoaded={historyLoaded}
@@ -1008,10 +1044,14 @@ export default function App() {
             onNavigateCatalog={navigateCatalog}
             limitStatus={limitStatus}
           />
+          </Suspense>
+          )}
         </div>
 
         {/* SHOPPING LIST TAB */}
         <div hidden={activeView !== 'shopping-list'} aria-hidden={activeView !== 'shopping-list' || undefined}>
+          {visitedViews.has('shopping-list') && (
+          <Suspense fallback={<ViewFallback />}>
           <ShoppingList
             aggregatedList={aggregatedList}
             activeRecipes={activeRecipes}
@@ -1028,10 +1068,14 @@ export default function App() {
             clearAll={clearAll}
             clearChecked={clearChecked}
           />
+          </Suspense>
+          )}
         </div>
 
         {/* PROGRESS TAB */}
         <div hidden={activeView !== 'progress'} aria-hidden={activeView !== 'progress' || undefined}>
+          {visitedViews.has('progress') && (
+          <Suspense fallback={<ViewFallback />}>
           <ProgressView
             pendingInviteCode={pendingInviteCode}
             onInviteConsumed={() => setPendingInviteCode(null)}
@@ -1039,16 +1083,26 @@ export default function App() {
               navigate('history', jobId);
             }}
           />
+          </Suspense>
+          )}
         </div>
 
         {/* SETTINGS TAB */}
         <div hidden={activeView !== 'settings'} aria-hidden={activeView !== 'settings' || undefined}>
+          {visitedViews.has('settings') && (
+          <Suspense fallback={<ViewFallback />}>
           <SettingsView />
+          </Suspense>
+          )}
         </div>
       </main>
 
       {/* Global Premium Modal (shared by TrialBanner and other components) */}
-      <PremiumModal isOpen={isPremiumModalOpen} onOpenChange={setIsPremiumModalOpen} />
+      {premiumModalLoaded && (
+        <Suspense fallback={null}>
+          <PremiumModal isOpen={isPremiumModalOpen} onOpenChange={setIsPremiumModalOpen} />
+        </Suspense>
+      )}
 
       {/* Mobile Bottom Navigation Bar */}
       {(() => {
@@ -1184,17 +1238,21 @@ export default function App() {
 
       {/* First-launch onboarding overlay (rendered via portal) */}
       {showOnboarding && (
-        <WelcomeGuide
-          onClose={() => {
-            completeOnboarding();
-            navigate('extract');
-          }}
-        />
+        <Suspense fallback={null}>
+          <WelcomeGuide
+            onClose={() => {
+              completeOnboarding();
+              navigate('extract');
+            }}
+          />
+        </Suspense>
       )}
 
       {/* Alpha tester welcome overlay — after onboarding so they don't stack */}
       {!showOnboarding && showAlphaWelcome && (
-        <AlphaWelcome onClose={completeAlphaWelcome} />
+        <Suspense fallback={null}>
+          <AlphaWelcome onClose={completeAlphaWelcome} />
+        </Suspense>
       )}
     </div>
   );
