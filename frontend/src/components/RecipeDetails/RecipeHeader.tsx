@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Popover, Button } from '@heroui/react';
-import { MoreVertical, Check, Copy, ShoppingCart, Trash2, Folder, Tag, Plus, Star } from 'lucide-react';
+import { MoreVertical, Check, Copy, ShoppingCart, Trash2, Folder, Tag, Star } from 'lucide-react';
 import type { Recipe } from '../../types';
 import RecipeImageGallery from '../RecipeImageGallery';
 import { useI18n } from '../../context/I18nContext';
@@ -165,6 +165,14 @@ export default function RecipeHeader({
                     <span>{t('recipe.delete')}</span>
                   </button>
                 )}
+
+                {/* Looked up rarely, so it lives here rather than competing
+                    with the title for space above the fold. */}
+                {createdAt && (
+                  <div className="px-4.5 pt-2.5 pb-1.5 mt-1 border-t border-black/5 dark:border-white/5 text-[11px] font-medium text-gray-400 dark:text-gray-500 select-none">
+                    {t('catalog.savedOn', { date: new Date(createdAt).toLocaleDateString(language) })}
+                  </div>
+                )}
               </div>
             </Popover.Content>
           </Popover>
@@ -223,38 +231,30 @@ export default function RecipeHeader({
             )}
           </div>
         )}
-        {((flags && flags.length > 0) || onManageFlags) && (
+        {/* Only the labels themselves earn a row here. Adding one is already an
+            entry in the overflow menu, so the empty-state chip was a second
+            door to the same place — and it cost a full row above the fold. */}
+        {flags && flags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-1">
-            {flags && flags.map((flag, idx) => (
-              <span
+            {flags.map((flag, idx) => (
+              <button
                 key={`flag-${idx}`}
-                className="bg-amber-500/10 text-amber-600 dark:text-amber-400 text-sm font-bold px-3 py-1 rounded-full select-none whitespace-nowrap border border-amber-500/20 flex items-center gap-1"
+                type="button"
+                onClick={onManageFlags}
+                disabled={!onManageFlags}
+                className={`bg-amber-500/10 text-amber-600 dark:text-amber-400 text-sm font-bold px-3 py-1 rounded-full select-none whitespace-nowrap border border-amber-500/20 flex items-center gap-1 outline-none ${
+                  onManageFlags ? 'cursor-pointer active:scale-95 transition-transform' : ''
+                }`}
               >
                 <Tag className="w-3.5 h-3.5" />
                 {flag}
-              </span>
-            ))}
-            {onManageFlags && (
-              <button
-                type="button"
-                onClick={onManageFlags}
-                className="bg-transparent border border-dashed border-black/20 dark:border-white/20 hover:border-black/40 dark:hover:border-white/40 text-gray-500 hover:text-emerald-500 dark:text-gray-400 text-sm font-bold px-3 py-1 rounded-full select-none whitespace-nowrap flex items-center gap-1 active:scale-95 transition-all cursor-pointer outline-none"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>{language === 'de' ? 'Label' : 'Label'}</span>
               </button>
-            )}
+            ))}
           </div>
         )}
-        {(createdAt || (history && history.count > 0)) && (
+        {history && history.count > 0 && (
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-400 dark:text-gray-500 font-medium mt-1 select-none">
-            {createdAt && (
-              <span>
-                {t('catalog.savedOn', { date: new Date(createdAt).toLocaleDateString(language) })}
-              </span>
-            )}
-            {createdAt && history && history.count > 0 && <span>·</span>}
-            {history && history.count > 0 && (
+            {(
               <button
                 type="button"
                 onClick={() => {
