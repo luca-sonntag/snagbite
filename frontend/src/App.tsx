@@ -1111,14 +1111,14 @@ export default function App() {
           (activeView === 'history' && (isCatalogSelectMode || isCatalogSheetOpen)) ||
           (isPending && !isPremium) ||
           isPremiumModalOpen;
-        const bottomBarClasses = `fixed bottom-0 inset-x-0 z-40 transition-all duration-300 ease-in-out pb-safe ${isBottomBarHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
+        const bottomBarClasses = `fixed bottom-0 inset-x-0 z-40 transition-all duration-300 ease-in-out px-3 pb-[calc(0.75rem_+_var(--safe-area-inset-bottom))] ${isBottomBarHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
           }`;
 
         return (
           <div className={bottomBarClasses}>
-            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] w-full max-w-md mx-auto flex flex-col rounded-t-3xl overflow-hidden">
+            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border border-gray-100 dark:border-gray-800/80 shadow-[0_8px_28px_rgba(0,0,0,0.12)] w-full max-w-md mx-auto flex flex-col rounded-3xl overflow-hidden">
 
-              <div className="w-full flex justify-around items-center pt-3 pb-[calc(1.25rem_+_var(--safe-area-inset-bottom))] px-3">
+              <div className="w-full flex justify-around items-center pt-3 pb-3 px-3">
               {/* Extract / New Recipe Tab */}
               <button
                 onClick={() => navigate('extract')}
