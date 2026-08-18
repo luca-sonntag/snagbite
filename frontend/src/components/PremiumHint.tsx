@@ -41,7 +41,7 @@ export default function PremiumHint({
     <button
       type="button"
       onClick={onClick}
-      className={`w-full cursor-pointer flex items-center gap-3 p-4 rounded-3xl bg-white dark:bg-gray-900 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:bg-gray-50 dark:hover:bg-gray-800/70 active:scale-[0.99] transition-all text-left ${className}`}
+      className={`w-full cursor-pointer flex items-center gap-3 p-4 rounded-3xl tint-premium border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:brightness-[0.98] dark:hover:brightness-110 active:scale-[0.99] transition-all text-left ${className}`}
     >
       <span className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
         <Crown className="w-5 h-5" />
