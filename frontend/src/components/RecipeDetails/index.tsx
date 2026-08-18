@@ -12,6 +12,7 @@ import { useCookHistory } from '../../hooks/useCookHistory';
 // Import subcomponents
 import RecipeHeader from './RecipeHeader';
 import RecipeInfoSection from './RecipeInfoSection';
+import RecipeNutrition from './RecipeNutrition';
 import RecipeStickyBar from './RecipeStickyBar';
 import RecipeIngredients from './RecipeIngredients';
 import RecipeInstructions from './RecipeInstructions';
@@ -636,8 +637,6 @@ export default function RecipeDetails({
             cookTime={recipe.cookTime}
             formatTimeValue={formatTimeValue}
             servings={servings}
-            onDecreaseServings={() => setServings(s => Math.max(1, s - 1))}
-            onIncreaseServings={() => setServings(s => s + 1)}
             onOpenAdjustServings={() => setIsAdjustServingsOpen(true)}
             nutritionalValues={hasNutritionInfo ? nutritionalValues : null}
             sourceNutritionalValues={sourceNutritionalValues}
@@ -649,7 +648,6 @@ export default function RecipeDetails({
           />
         </section>
 
-        <hr className="border-black/5 dark:border-white/5" />
 
         {/* Ingredients section */}
         <section
@@ -667,10 +665,12 @@ export default function RecipeDetails({
             formatAmount={formatAmount}
             onAddIngredients={onAddIngredients ? handleAddToShoppingList : undefined}
             isAdded={isAdded}
+            servings={servings}
+            onDecreaseServings={() => setServings(s => Math.max(1, s - 1))}
+            onIncreaseServings={() => setServings(s => s + 1)}
           />
         </section>
 
-        <hr className="border-black/5 dark:border-white/5" />
 
         {/* Instructions section */}
         <section
@@ -689,6 +689,24 @@ export default function RecipeDetails({
             formatAmount={formatAmount}
           />
         </section>
+
+        {/* Full nutrition breakdown — reference data, so it follows the
+            cooking content instead of preceding it. The calorie headline and
+            macro bar still sit in the metrics row at the top. */}
+        {hasNutritionInfo && nutritionalValues && (
+          <section id="nutrition" className="glass-panel rounded-2xl overflow-hidden">
+            <RecipeNutrition
+              variant="detail"
+              nutritionalValues={nutritionalValues}
+              sourceNutritionalValues={sourceNutritionalValues}
+              isAiEstimated={isAiEstimated}
+              isVerified={isVerified}
+              showTotalNutrition={showTotalNutrition}
+              onToggleTotalNutrition={handleToggleTotalNutrition}
+              getNutritionDisplayValue={getNutritionDisplayValue}
+            />
+          </section>
+        )}
 
         {/* "I cooked this" — gamification CTA card with photo verification */}
         {recipe.id && (

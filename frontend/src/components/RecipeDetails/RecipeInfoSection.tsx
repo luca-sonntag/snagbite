@@ -1,6 +1,5 @@
 import { Clock, Utensils, Users, ChevronRight } from 'lucide-react';
 import RecipeNutrition from './RecipeNutrition';
-import RecipeServingsStepper from './RecipeServingsStepper';
 import { useI18n } from '../../context/I18nContext';
 
 interface RecipeInfoSectionProps {
@@ -8,8 +7,6 @@ interface RecipeInfoSectionProps {
   cookTime: any;
   formatTimeValue: (time: any) => string;
   servings: number;
-  onDecreaseServings: () => void;
-  onIncreaseServings: () => void;
   onOpenAdjustServings?: () => void;
   /** Nutrition block is omitted entirely when the recipe carries no values. */
   nutritionalValues: any | null;
@@ -23,16 +20,19 @@ interface RecipeInfoSectionProps {
 }
 
 /**
- * Embedded section holding prep/cook times, the servings stepper, the full
- * nutrition table and the AI disclaimer directly on the main recipe details page.
+ * The metrics row at the top of the recipe page: prep time, cook time and
+ * servings as three equal figures, followed by the calorie headline and the
+ * macro bar.
+ *
+ * Deliberately short. The full per-macro breakdown lives in its own section
+ * below the instructions, and the servings *stepper* sits in the ingredients
+ * header where its effect is visible — this row only reports the number.
  */
 export default function RecipeInfoSection({
   prepTime,
   cookTime,
   formatTimeValue,
   servings,
-  onDecreaseServings,
-  onIncreaseServings,
   onOpenAdjustServings,
   nutritionalValues,
   sourceNutritionalValues,
@@ -44,83 +44,65 @@ export default function RecipeInfoSection({
 }: RecipeInfoSectionProps) {
   const { t } = useI18n();
 
-  // Shared look for the small emerald icon medallions in front of each figure.
-  const iconBadge =
-    'w-9 h-9 rounded-full bg-emerald-500/5 flex items-center justify-center flex-shrink-0';
-  const iconClass = 'w-[18px] h-[18px] text-emerald-600 dark:text-emerald-400';
+  const iconClass = 'w-[17px] h-[17px] text-emerald-600 dark:text-emerald-400';
   const statLabel =
     'text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500';
   const statValue = 'text-sm font-bold text-gray-900 dark:text-white';
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Prep / cook times + nutrition + servings grouped into one cohesive overview card. */}
-      <div className="glass-panel rounded-2xl overflow-hidden">
-        <div className="grid grid-cols-2">
-          {/* Prep time */}
-          <div className="flex items-center gap-3 py-4 px-4.5 sm:px-5">
-            <div className={iconBadge}>
-              <Clock className={iconClass} />
-            </div>
-            <div className="flex flex-col leading-tight min-w-0">
-              <span className={statLabel}>{t('recipe.prep')}</span>
-              <span className={statValue}>{formatTimeValue(prepTime)}</span>
-            </div>
-          </div>
-          {/* Cook time */}
-          <div className="flex items-center gap-3 py-4 px-4.5 sm:px-5 border-l border-black/5 dark:border-white/5">
-            <div className={iconBadge}>
-              <Utensils className={iconClass} />
-            </div>
-            <div className="flex flex-col leading-tight min-w-0">
-              <span className={statLabel}>{t('recipe.cook')}</span>
-              <span className={statValue}>{formatTimeValue(cookTime)}</span>
-            </div>
-          </div>
+    <div className="glass-panel rounded-2xl overflow-hidden">
+      <div className="grid grid-cols-3">
+        {/* Prep time */}
+        <div className="flex flex-col items-center gap-1 py-3.5 px-2 text-center">
+          <Clock className={iconClass} />
+          <span className={statLabel}>{t('recipe.prep')}</span>
+          <span className={statValue}>{formatTimeValue(prepTime)}</span>
         </div>
 
-        {/* Nutrition section (between prep/cook time and servings) */}
-        {nutritionalValues && (
-          <div className="border-t border-black/5 dark:border-white/5">
-            <RecipeNutrition
-              nutritionalValues={nutritionalValues}
-              sourceNutritionalValues={sourceNutritionalValues}
-              isAiEstimated={isAiEstimated}
-              isVerified={isVerified}
-              showTotalNutrition={showTotalNutrition}
-              onToggleTotalNutrition={onToggleTotalNutrition}
-              getNutritionDisplayValue={getNutritionDisplayValue}
-            />
-          </div>
-        )}
+        {/* Cook time */}
+        <div className="flex flex-col items-center gap-1 py-3.5 px-2 text-center border-l border-black/5 dark:border-white/5">
+          <Utensils className={iconClass} />
+          <span className={statLabel}>{t('recipe.cook')}</span>
+          <span className={statValue}>{formatTimeValue(cookTime)}</span>
+        </div>
 
-        {/* Servings row */}
-        <div
+        {/* Servings — reported here, adjusted in the ingredients section */}
+        <button
+          type="button"
           onClick={onOpenAdjustServings}
-          className={`flex items-center justify-between gap-3 px-4.5 sm:px-5 py-3.5 border-t border-black/5 dark:border-white/5 transition-colors ${
-            onOpenAdjustServings ? 'cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02]' : ''
+          disabled={!onOpenAdjustServings}
+          className={`flex flex-col items-center gap-1 py-3.5 px-2 text-center border-l border-black/5 dark:border-white/5 bg-transparent border-y-0 border-r-0 outline-none transition-colors ${
+            onOpenAdjustServings
+              ? 'cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02]'
+              : ''
           }`}
         >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className={iconBadge}>
-              <Users className={iconClass} />
-            </div>
-            <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-              {t('recipe.serves')}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <RecipeServingsStepper
-              servings={servings}
-              onDecreaseServings={onDecreaseServings}
-              onIncreaseServings={onIncreaseServings}
-            />
+          <Users className={iconClass} />
+          <span className={statLabel}>{t('recipe.serves')}</span>
+          <span className={`${statValue} flex items-center gap-0.5`}>
+            <span className="tabular-nums">{servings}</span>
             {onOpenAdjustServings && (
-              <ChevronRight className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 opacity-60 flex-shrink-0" />
+              <ChevronRight className="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-60" />
             )}
-          </div>
-        </div>
+          </span>
+        </button>
       </div>
+
+      {/* Calorie headline + macro distribution */}
+      {nutritionalValues && (
+        <div className="border-t border-black/5 dark:border-white/5">
+          <RecipeNutrition
+            variant="summary"
+            nutritionalValues={nutritionalValues}
+            sourceNutritionalValues={sourceNutritionalValues}
+            isAiEstimated={isAiEstimated}
+            isVerified={isVerified}
+            showTotalNutrition={showTotalNutrition}
+            onToggleTotalNutrition={onToggleTotalNutrition}
+            getNutritionDisplayValue={getNutritionDisplayValue}
+          />
+        </div>
+      )}
     </div>
   );
 }

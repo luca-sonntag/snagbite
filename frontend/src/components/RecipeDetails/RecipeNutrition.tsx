@@ -13,6 +13,14 @@ interface RecipeNutritionProps {
   showTotalNutrition?: boolean;
   onToggleTotalNutrition?: (isTotal: boolean) => void;
   getNutritionDisplayValue: (val: any, unit?: string, isTotal?: boolean, includeUnit?: boolean) => string;
+  /**
+   * `summary` is the headline figure carried by the metrics row at the top of
+   * the page: calories plus the macro distribution bar. `detail` is the full
+   * per-macro breakdown that sits in its own section further down. Splitting
+   * them keeps the numbers in one component while letting the page show the
+   * short version early and the long version where it belongs.
+   */
+  variant?: 'summary' | 'detail';
 }
 
 export default function RecipeNutrition({
@@ -20,7 +28,8 @@ export default function RecipeNutrition({
   sourceNutritionalValues,
   isAiEstimated,
   isVerified,
-  getNutritionDisplayValue
+  getNutritionDisplayValue,
+  variant = 'detail'
 }: RecipeNutritionProps) {
   const { t } = useI18n();
   const { isPremium } = useAuth();
@@ -34,6 +43,8 @@ export default function RecipeNutrition({
     const n = parseFloat(match[1].replace(',', '.'));
     return isNaN(n) ? 0 : n;
   };
+
+  const isSummary = variant === 'summary';
 
   const proteinNum = parseNum(nutritionalValues?.protein);
   const carbsNum = parseNum(nutritionalValues?.carbs);
@@ -100,91 +111,125 @@ export default function RecipeNutrition({
                 )}
               </div>
 
-              {/* 4-column grid: Calories + 3 Macros with colored dots */}
-              <div className="grid grid-cols-4 gap-1.5 text-left items-start">
-                {/* Calories */}
-                <div>
-                  <div className="text-gray-900 dark:text-white text-base font-bold tabular-nums leading-tight">
+              {isSummary ? (
+                /* Headline figure only — the grams live in the detail section. */
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-gray-900 dark:text-white text-2xl font-bold tabular-nums leading-none">
                     {caloriesDisplay}
-                  </div>
-                  <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                  </span>
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
                     {t('recipe.nutritionCalories')}
-                  </div>
+                  </span>
                 </div>
+              ) : (
+                /* 4-column grid: Calories + 3 Macros with colored dots */
+                <div className="grid grid-cols-4 gap-1.5 text-left items-start">
+                  {/* Calories */}
+                  <div>
+                    <div className="text-gray-900 dark:text-white text-base font-bold tabular-nums leading-tight">
+                      {caloriesDisplay}
+                    </div>
+                    <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                      {t('recipe.nutritionCalories')}
+                    </div>
+                  </div>
 
-                {/* Protein */}
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-[3px] bg-blue-500 shrink-0" />
-                    <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
-                      {proteinDisplay}g
-                    </span>
+                  {/* Protein */}
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-[3px] bg-blue-500 shrink-0" />
+                      <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
+                        {proteinDisplay}g
+                      </span>
+                    </div>
+                    <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                      {t('recipe.ingredientNutritionProtein')}
+                    </div>
                   </div>
-                  <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-                    {t('recipe.ingredientNutritionProtein')}
-                  </div>
-                </div>
 
-                {/* Carbs */}
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-[3px] bg-amber-500 shrink-0" />
-                    <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
-                      {carbsDisplay}g
-                    </span>
+                  {/* Carbs */}
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-[3px] bg-amber-500 shrink-0" />
+                      <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
+                        {carbsDisplay}g
+                      </span>
+                    </div>
+                    <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                      {t('recipe.nutritionCarbs')}
+                    </div>
                   </div>
-                  <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-                    {t('recipe.nutritionCarbs')}
-                  </div>
-                </div>
 
-                {/* Fat */}
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-[3px] bg-rose-500 shrink-0" />
-                    <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
-                      {fatDisplay}g
-                    </span>
-                  </div>
-                  <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-                    {t('recipe.ingredientNutritionFat')}
+                  {/* Fat */}
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-[3px] bg-rose-500 shrink-0" />
+                      <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
+                        {fatDisplay}g
+                      </span>
+                    </div>
+                    <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                      {t('recipe.ingredientNutritionFat')}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
           {/* What the recipe source itself claimed, when it disagrees with the sum */}
-          {showSourceCalories && isPremium && (
+          {!isSummary && showSourceCalories && isPremium && (
             <div className="text-[10px] font-medium text-gray-400 dark:text-gray-500 pl-12">
               {t('recipe.nutritionSourceClaim', { value: String(Math.round(sourceCalories)) })}
             </div>
           )}
 
-          {/* 3-Color Macro Progress Bar as a subtle visual indicator */}
-          {totalMacroKcal > 0 && isPremium && (
-            <div className="h-1.5 w-full rounded-full bg-black/5 dark:bg-white/10 overflow-hidden flex shadow-inner">
-              {proteinPct > 0 && (
-                <div
-                  style={{ width: `${proteinPct}%` }}
-                  className="h-full bg-blue-500 transition-all duration-500"
-                  title={`Protein: ${proteinPct}%`}
-                />
-              )}
-              {carbsPct > 0 && (
-                <div
-                  style={{ width: `${carbsPct}%` }}
-                  className="h-full bg-amber-500 transition-all duration-500"
-                  title={`Kohlenhydrate: ${carbsPct}%`}
-                />
-              )}
-              {fatPct > 0 && (
-                <div
-                  style={{ width: `${fatPct}%` }}
-                  className="h-full bg-rose-500 transition-all duration-500"
-                  title={`Fett: ${fatPct}%`}
-                />
-              )}
+          {/* Macro distribution — the summary carries it, at a weight that
+              matches how much of the story it actually tells. */}
+          {isSummary && totalMacroKcal > 0 && isPremium && (
+            <div className="flex flex-col gap-1.5">
+              <div className="h-2.5 w-full rounded-full bg-black/5 dark:bg-white/10 overflow-hidden flex shadow-inner">
+                {proteinPct > 0 && (
+                  <div
+                    style={{ width: `${proteinPct}%` }}
+                    className="h-full bg-blue-500 transition-all duration-500"
+                    title={`${t('recipe.ingredientNutritionProtein')}: ${proteinPct}%`}
+                  />
+                )}
+                {carbsPct > 0 && (
+                  <div
+                    style={{ width: `${carbsPct}%` }}
+                    className="h-full bg-amber-500 transition-all duration-500"
+                    title={`${t('recipe.nutritionCarbs')}: ${carbsPct}%`}
+                  />
+                )}
+                {fatPct > 0 && (
+                  <div
+                    style={{ width: `${fatPct}%` }}
+                    className="h-full bg-rose-500 transition-all duration-500"
+                    title={`${t('recipe.ingredientNutritionFat')}: ${fatPct}%`}
+                  />
+                )}
+              </div>
+
+              {/* Legend: the bar is only readable once the segments are named. */}
+              <div className="flex items-center gap-3.5 flex-wrap">
+                <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-500 dark:text-gray-400">
+                  <span className="w-2 h-2 rounded-[3px] bg-blue-500 shrink-0" />
+                  {t('recipe.ingredientNutritionProtein')}
+                  <span className="tabular-nums font-semibold text-gray-700 dark:text-gray-300">{proteinDisplay}g</span>
+                </span>
+                <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-500 dark:text-gray-400">
+                  <span className="w-2 h-2 rounded-[3px] bg-amber-500 shrink-0" />
+                  {t('recipe.nutritionCarbs')}
+                  <span className="tabular-nums font-semibold text-gray-700 dark:text-gray-300">{carbsDisplay}g</span>
+                </span>
+                <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-500 dark:text-gray-400">
+                  <span className="w-2 h-2 rounded-[3px] bg-rose-500 shrink-0" />
+                  {t('recipe.ingredientNutritionFat')}
+                  <span className="tabular-nums font-semibold text-gray-700 dark:text-gray-300">{fatDisplay}g</span>
+                </span>
+              </div>
             </div>
           )}
         </div>

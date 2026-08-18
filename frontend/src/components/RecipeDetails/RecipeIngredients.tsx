@@ -7,6 +7,7 @@ import { getCategoryTheme } from '../../i18n';
 import { getParentIngredient } from '../../utils/ingredientTaxonomy';
 import IngredientNutritionSheet from './IngredientNutritionSheet';
 import PremiumCrownBadge from '../PremiumCrownBadge';
+import RecipeServingsStepper from './RecipeServingsStepper';
 
 interface RecipeIngredientsProps {
   recipe: Recipe;
@@ -19,6 +20,11 @@ interface RecipeIngredientsProps {
   formatAmount: (amount: number | undefined, unit: string | undefined) => string;
   onAddIngredients?: () => void;
   isAdded: boolean;
+  /** Scaling lives here rather than in the metrics row, so the amounts it
+   *  rewrites are on screen while the user adjusts it. */
+  servings: number;
+  onDecreaseServings: () => void;
+  onIncreaseServings: () => void;
 }
 
 export default function RecipeIngredients({
@@ -32,6 +38,9 @@ export default function RecipeIngredients({
   formatAmount,
   onAddIngredients,
   isAdded,
+  servings,
+  onDecreaseServings,
+  onIncreaseServings,
 }: RecipeIngredientsProps) {
   const { t, translateCategory } = useI18n();
   const [selectedNutritionIngredient, setSelectedNutritionIngredient] = useState<Ingredient | null>(null);
@@ -77,6 +86,18 @@ export default function RecipeIngredients({
             </button>
           )}
         </div>
+        {/* Portion scaling sits directly above the amounts it rewrites. */}
+        <div className="flex items-center justify-between gap-3 mb-3 px-1">
+          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+            {t('recipe.serves')}
+          </span>
+          <RecipeServingsStepper
+            servings={servings}
+            onDecreaseServings={onDecreaseServings}
+            onIncreaseServings={onIncreaseServings}
+          />
+        </div>
+
         <Card className="glass-panel p-5 rounded-2xl">
         <div className="flex flex-col gap-6">
           {sortedIngredients.map(({ group, originalIdx }) => {
