@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ChefHat } from 'lucide-react';
+import { tint, TINT } from '../utils/tint';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
 import type { SupportedLanguage } from '../i18n';
@@ -185,7 +186,7 @@ export default function ExtractionAnimation({ url: _url, jobStatus, progress, va
   const percent = progress?.percent !== undefined ? Math.min(progress.percent, targetPercent) : targetPercent;
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] p-6 sm:p-8 flex flex-col items-center justify-center text-center w-full">
+    <div style={tint(TINT.emerald)} className="tint-surface rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] p-6 sm:p-8 flex flex-col items-center justify-center text-center w-full">
       {/* Clean Minimal Icon */}
       <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
         <ChefHat className="w-8 h-8 animate-pulse" />
