@@ -21,3 +21,27 @@ export const TEST_USER_PASSWORD = import.meta.env.VITE_TEST_USER_PASSWORD as str
  * rather than crashing.
  */
 export const TEST_LOGIN_ENABLED = TEST_LOGIN_FLAG && !!TEST_USER_EMAIL && !!TEST_USER_PASSWORD;
+
+/**
+ * App-open ad timing knobs (milliseconds). These default to the production
+ * values and can be overridden — for on-device testing without editing code —
+ * via `.env.development.local`, e.g. `VITE_APP_OPEN_MIN_INTERVAL_MS=5000`. That
+ * makes the every-3rd-open cadence and the resume threshold fire in seconds
+ * instead of hours so the flow is verifiable in a single sitting.
+ */
+function envMs(raw: string | undefined, fallback: number): number {
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+
+/** Minimum gap between two app-open ads (the time floor). Default 4h. */
+export const APP_OPEN_MIN_INTERVAL_MS = envMs(
+  import.meta.env.VITE_APP_OPEN_MIN_INTERVAL_MS as string | undefined,
+  4 * 60 * 60 * 1000,
+);
+
+/** How long the app must be backgrounded before a resume counts as an eligible "open". Default 4h. */
+export const APP_OPEN_RESUME_MIN_BG_MS = envMs(
+  import.meta.env.VITE_APP_OPEN_RESUME_MIN_BG_MS as string | undefined,
+  4 * 60 * 60 * 1000,
+);

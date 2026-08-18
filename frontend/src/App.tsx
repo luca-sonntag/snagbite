@@ -4,6 +4,7 @@ import { Sparkles, BookOpen, ShoppingCart, User, Trophy } from 'lucide-react';
 import type { Job } from './types';
 import { apiUrl } from './api';
 import { registerShareIntent, registerNotificationTap, hideSplashScreen, registerBackButtonHandler, registerAppUrlOpen, registerAppStateListener } from './native';
+import { APP_OPEN_RESUME_MIN_BG_MS } from './env';
 import { registerPushTapHandler, enablePushNotifications } from './push';
 import { parseSharedUrl } from './utils/shareUrl';
 import ExtractForm, { type ExtractMode } from './components/ExtractForm';
@@ -353,6 +354,14 @@ export default function App() {
     appOpenAttemptedRef.current = true; // consume the single per-session chance now
     if (appOpenBlockedRef.current) return; // didn't cold-start on a neutral screen → skip
 
+    // Warm up the interstitial now (only if this open will actually show one),
+    // so the 1.2s beat below overlaps the fill request and the ad shows instantly.
+    import('./utils/ads')
+      .then(({ appOpenAdWouldShow, preloadAppOpenAd }) => {
+        if (appOpenAdWouldShow()) preloadAppOpenAd();
+      })
+      .catch(() => {});
+
     const id = setTimeout(() => {
       if (appOpenBlockedRef.current) return; // state changed during the delay
       import('./utils/ads')
@@ -372,7 +381,6 @@ export default function App() {
   // banner is live, and appOpenBlockedRef skips any non-neutral screen (recipe
   // open, extraction running, premium) — re-checked when the deferred timer fires.
   useEffect(() => {
-    const APP_OPEN_RESUME_MIN_BG_MS = 4 * 60 * 60 * 1000; // 4h
     let timer: ReturnType<typeof setTimeout> | null = null;
     const cleanup = registerAppStateListener((isActive) => {
       if (!isActive) {
@@ -384,6 +392,14 @@ export default function App() {
       appBackgroundedAtRef.current = null;
       if (bgAt == null || Date.now() - bgAt < APP_OPEN_RESUME_MIN_BG_MS) return;
       if (appOpenBlockedRef.current) return; // resumed onto a non-neutral screen
+
+      // Warm the interstitial during the 1.2s beat so the resume ad is instant.
+      import('./utils/ads')
+        .then(({ appOpenAdWouldShow, preloadAppOpenAd }) => {
+          if (appOpenAdWouldShow()) preloadAppOpenAd();
+        })
+        .catch(() => {});
+
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
         if (appOpenBlockedRef.current) return; // state changed during the delay
@@ -778,7 +794,12 @@ export default function App() {
 
 
   // ── Auth gate ────────────────────────────────────────────────────────────
-  if (authLoading || !initialSyncDone) {
+  // Only block on auth settling — NOT on the initial limit-status sync. That
+  // sync is a network call; gating the whole app on it just swaps the splash
+  // for a full-screen spinner for a second or two. `limitStatus` is nullable
+  // everywhere (the quota line simply doesn't render until it arrives), so we
+  // show the app immediately and let the sync populate in the background.
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
         <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent" />

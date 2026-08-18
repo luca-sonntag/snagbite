@@ -8,6 +8,7 @@ import {
   AdmobConsentStatus,
 } from '@capacitor-community/admob';
 import { isNative } from '../native';
+import { APP_OPEN_MIN_INTERVAL_MS } from '../env';
 
 /**
  * Google AdMob integration for the freemium extraction ad.
@@ -426,8 +427,8 @@ export async function showRewardedAd(): Promise<boolean> {
 
 /** Show the app-open ad on every Nth eligible open (cold start or qualifying resume). */
 const APP_OPEN_SHOW_EVERY_N_OPENS = 3;
-/** Never show two app-open ads within this window, regardless of the counter (4h). */
-const APP_OPEN_MIN_INTERVAL_MS = 4 * 60 * 60 * 1000;
+// The time floor (min gap between two app-open ads) lives in ../env as
+// APP_OPEN_MIN_INTERVAL_MS so it can be overridden for testing. Default 4h.
 /** Running count of eligible opens since the last shown app-open ad. */
 const APP_OPEN_OPEN_COUNT_KEY = 'snagbite:appOpenAd:openCount';
 /** Timestamp (ms) of the last app-open ad attempt; drives the time floor. */
@@ -445,6 +446,84 @@ const APP_OPEN_ENABLED = IS_TESTING || !!CONFIGURED_INTERSTITIAL_AD_ID;
 
 /** Guards against overlapping interstitial requests. */
 let appOpenInFlight = false;
+
+/* -------------------------------------------------------------------------- */
+/* Interstitial preloading                                                    */
+/* -------------------------------------------------------------------------- */
+/* The plugin fetches an interstitial only when `prepareInterstitial` is       */
+/* called, and that fill request is a network round-trip (1–3s). Doing it      */
+/* inline at show-time makes the ad appear seconds after the trigger. Instead   */
+/* we let callers preload it ahead of the trigger, so `showInterstitial` fires  */
+/* on an already-loaded ad. Google interstitials expire ~1h after load, so a    */
+/* preloaded ad is treated as stale before that and re-fetched.                 */
+
+let interstitialReady = false;
+let interstitialPreparing: Promise<void> | null = null;
+let interstitialPreparedAt = 0;
+/** Refresh a preloaded interstitial a little before Google's ~1h expiry. */
+const INTERSTITIAL_TTL_MS = 55 * 60 * 1000;
+
+function interstitialFresh(): boolean {
+  return interstitialReady && Date.now() - interstitialPreparedAt < INTERSTITIAL_TTL_MS;
+}
+
+/**
+ * Prepare (fetch) an app-open interstitial ahead of time so a later
+ * `maybeShowAppOpenAd()` can show it instantly instead of waiting on a fill
+ * request. Idempotent and concurrency-safe: a no-op if a fresh ad is already
+ * loaded or a prepare is already in flight. No-op on web / when the app-open ad
+ * is disabled / when consent was declined. Callers should preload only when a
+ * show is actually imminent (see `appOpenAdWouldShow`) to avoid burning fill
+ * requests on opens that won't display an ad.
+ */
+export async function preloadAppOpenAd(): Promise<void> {
+  if (!isNative()) return;
+  if (!APP_OPEN_ENABLED) return;
+  if (interstitialFresh()) return;
+  if (interstitialPreparing) return interstitialPreparing;
+
+  // Assign the promise synchronously so a second caller can't double-prepare.
+  interstitialPreparing = (async () => {
+    try {
+      await initAds();
+      if (!canRequestAds) return;
+      console.log('[AdMob] preloading app-open interstitial...');
+      await AdMob.prepareInterstitial({
+        adId: INTERSTITIAL_AD_ID,
+        isTesting: IS_TESTING,
+        npa: !personalizedAllowed,
+      });
+      interstitialReady = true;
+      interstitialPreparedAt = Date.now();
+    } catch (err) {
+      console.warn('[AdMob] interstitial preload failed:', err);
+      interstitialReady = false;
+    } finally {
+      interstitialPreparing = null;
+    }
+  })();
+  return interstitialPreparing;
+}
+
+/**
+ * Read-only check of whether the NEXT `maybeShowAppOpenAd()` would actually show
+ * an ad: first-launch already passed, the shared open-counter is about to reach
+ * N, and the time floor is clear. Does NOT mutate the counter — it mirrors the
+ * gating in `maybeShowAppOpenAd` so callers can preload only when a show is
+ * imminent. Keep the two in sync.
+ */
+export function appOpenAdWouldShow(): boolean {
+  if (!isNative() || !APP_OPEN_ENABLED) return false;
+  try {
+    if (!localStorage.getItem(APP_OPEN_FIRST_LAUNCH_KEY)) return false;
+    const count = Number(localStorage.getItem(APP_OPEN_OPEN_COUNT_KEY) || 0) + 1;
+    const last = Number(localStorage.getItem(APP_OPEN_LAST_SHOWN_KEY) || 0);
+    const intervalPassed = !last || Date.now() - last >= APP_OPEN_MIN_INTERVAL_MS;
+    return count >= APP_OPEN_SHOW_EVERY_N_OPENS && intervalPassed;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Show a full-screen interstitial "app-open" ad for free users, respecting the
@@ -525,12 +604,19 @@ export async function maybeShowAppOpenAd(): Promise<boolean> {
         finish(false);
       });
 
-      console.log('[AdMob] preparing app-open interstitial...');
-      await AdMob.prepareInterstitial({
-        adId: INTERSTITIAL_AD_ID,
-        isTesting: IS_TESTING,
-        npa: !personalizedAllowed,
-      });
+      // Prefer a preloaded ad (instant show). If a preload is still in flight,
+      // wait for it; if none is loaded/fresh, prepare inline as a fallback.
+      if (interstitialPreparing) await interstitialPreparing;
+      if (!interstitialFresh()) {
+        console.log('[AdMob] preparing app-open interstitial (no warm preload)...');
+        await AdMob.prepareInterstitial({
+          adId: INTERSTITIAL_AD_ID,
+          isTesting: IS_TESTING,
+          npa: !personalizedAllowed,
+        });
+        interstitialPreparedAt = Date.now();
+      }
+      interstitialReady = false; // consume — a shown interstitial can't be reused
 
       console.log('[AdMob] showing app-open interstitial...');
       await AdMob.showInterstitial();
