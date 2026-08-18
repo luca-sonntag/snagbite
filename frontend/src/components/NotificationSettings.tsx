@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Bell } from 'lucide-react';
+import { tint, TINT } from '../utils/tint';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
 import { enablePushNotifications, disablePushNotifications } from '../push';
@@ -77,7 +78,10 @@ export default function NotificationSettings() {
         {isDe ? 'Benachrichtigungen' : 'Notifications'}
       </h3>
 
-      <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
+      <div
+        style={tint(TINT.amber)}
+        className="tint-surface rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2"
+      >
         {/* Master toggle */}
         <div className="p-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
