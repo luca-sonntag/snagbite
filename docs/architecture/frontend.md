@@ -114,10 +114,16 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
 Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird für Free-User ausgespielt. Auf Non-Native/Web fungieren alle Aufrufe als sichere No-Ops bzw. simulieren Video-Delays im Dev-Modus.
 
 ### Banner-Formate & Platzierung
-* **Bottom-Dock Banner (`BANNER` 320×50):** Integriert in der Haupt-App-Shell (`App.tsx`) direkt oberhalb der Bottom-Navigation.
-  * **Sichtbarkeit:** Sichtbar auf den Tabs `extract`, `history`, `shopping-list` und `progress` für Free-User.
-  * **Unterdrückung:** Ausgeblendet im `settings`- und `admin`-Tab, während einer geöffneten Rezept-Detailansicht (`isViewingRecipe`) sowie während einer aktiven Extraktion.
 * **Extraktions-Fortschrittsbanner (`MEDIUM_RECTANGLE` / MREC 300×250):** Wird in `ExtractForm.tsx` / `ExtractionAnimation.tsx` unterhalb des Fortschritts-Skeletts eingeblendet, während Gemini das Rezept analysiert.
+
+> **Hinweis:** Das frühere **Bottom-Dock Banner (`BANNER` 320×50)** oberhalb der Bottom-Navigation wurde entfernt (zu aufdringlich, zu viel Platzverlust). Der native Banner-Kanal wird jetzt ausschließlich vom Extraktions-MREC genutzt.
+
+### App-Open Ad (Full-Screen Interstitial beim Start)
+* **Format:** Da `@capacitor-community/admob` v8 kein dediziertes App-Open-Format hat, wird der „Fullscreen-Banner nach dem Starten" als **Interstitial** (`prepareInterstitial` / `showInterstitial`) umgesetzt (`maybeShowAppOpenAd()` in `ads.ts`).
+* **Trigger:** Einmal pro App-Session beim Cold Start (`App.tsx`), ~1,2 s nach App-Bereitschaft, damit der Splash/First-Paint nicht überdeckt wird. Nur für Free-User; unterdrückt während Onboarding (`showOnboarding`) und laufender Extraktion (`isPending`).
+* **First-Launch-Ausschluss:** Beim allerersten Eligibility-Zeitpunkt wird nur ein `localStorage`-Flag (`snagbite:appOpenAd:firstLaunchSeen`) gesetzt und die Ad übersprungen — Neu-User werden nie sofort mit einem Vollbild-Ad begrüßt.
+* **Frequency-Cap:** Höchstens eine App-Open-Ad pro `APP_OPEN_MIN_INTERVAL_MS` (4 h), persistiert über `snagbite:appOpenAd:lastShownAt`. Der Zeitstempel wird bereits beim Versuch gesetzt, sodass der Cap auch No-Fills abdeckt.
+* **Produktions-Guard:** Ohne konfigurierte `VITE_ADMOB_INTERSTITIAL_ID` bleibt die App-Open-Ad im Prod-Build **deaktiviert** (kein Test-Interstitial für echte User). In Test-/Dev-Builds wird automatisch Googles Test-Interstitial genutzt.
 
 ### Dynamische Layout-Messung (`ExtractionAdCard.tsx`)
 * Da AdMob-Banner als native OS-Views über der Capacitor WebView gerendert werden, berechnet `ExtractionAdCard` per `getBoundingClientRect()` dynamisch den exakten Abstand (`bottomMargin`) zum Viewport-Boden.
