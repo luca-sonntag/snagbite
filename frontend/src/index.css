@@ -66,6 +66,48 @@ html.dark body {
   color: #f3f4f6;
 }
 
+/* ============================================================
+   Warme, geschichtete Light-Mode-Palette.
+   Der Default-Light-Mode war reinweiße Cards (#fff) auf kaltem #f9fafb — die
+   beiden lagen nur ~2 % auseinander, dadurch keine tonale Trennung: alles
+   verschmolz zu einer grellen, flachen weißen Fläche. Diese Overrides wärmen
+   die Neutralen und setzen den Canvas sichtbar unter die Cards, analog zum
+   bereits warmen Dark Mode. Nur Light Mode (html:not(.dark)); Dark Mode,
+   text-white und Foto-Overlays (bg-white/5–40) bleiben unangetastet.
+   Alle Werte hier zentral justierbar.
+   ============================================================ */
+html:not(.dark) {
+  --color-gray-50:  #F3EFE8;
+  --color-gray-100: #ECE7DF;
+  --color-gray-200: #E2DDD3;
+}
+
+/* Warmer Greige-Canvas */
+html:not(.dark) body {
+  background-color: #ECE9E2;
+}
+
+/* Solide Card-Flächen: nur der Hintergrund wird aufgewärmt, damit text-white
+   und die bg-white/NN Overlays auf Fotos/Dunkelflächen weiß bleiben. */
+html:not(.dark) .bg-white {
+  background-color: #FBFAF8;
+}
+/* !important, da Tailwinds !-Variante selbst mit !important emittiert. */
+html:not(.dark) .\!bg-white {
+  background-color: #FBFAF8 !important;
+}
+
+/* Gefrostete High-Opacity-Panels (Bottom-Nav, FAB, Sticky-Bar, Auth). */
+html:not(.dark) .bg-white\/90 {
+  background-color: color-mix(in srgb, #FBFAF8 90%, transparent);
+}
+html:not(.dark) .bg-white\/85 {
+  background-color: color-mix(in srgb, #FBFAF8 85%, transparent);
+}
+html:not(.dark) .bg-white\/70 {
+  background-color: color-mix(in srgb, #FBFAF8 70%, transparent);
+}
+
 /* Ensure the HTML `hidden` attribute always wins over Tailwind utility classes
    (e.g. `flex`, `grid`) that could override `display: none`. Used by the
    always-mounted tab panels in App.tsx to hide inactive views. */
@@ -154,7 +196,7 @@ html.dark body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f3f4f6;
+  background: #F3EFE8;
 }
 html.dark ::-webkit-scrollbar-track {
   background: #1a1917;
@@ -169,11 +211,11 @@ html.dark ::-webkit-scrollbar-track {
 
 /* Glassmorphism utility */
 .glass-panel {
-  background: #ffffff;
+  background: #FBFAF8;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: none;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
