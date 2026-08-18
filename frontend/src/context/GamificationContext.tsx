@@ -115,6 +115,17 @@ export function GamificationProvider({ children }: { children: React.ReactNode }
       // Async refresh to fetch latest photos from backend
       refresh();
 
+      // Dispatch event to notify components (e.g. useRecipeProgress) to reset checked steps
+      try {
+        window.dispatchEvent(
+          new CustomEvent('app:recipe-cooked', {
+            detail: { jobId, duplicate: result.duplicate },
+          })
+        );
+      } catch (e) {
+        console.warn('Failed to dispatch app:recipe-cooked event', e);
+      }
+
       // Only celebrate a real reward (a duplicate re-tap awards nothing).
       if (!result.duplicate && (result.earned.xp > 0 || result.newBadges.length > 0)) {
         setReward(result);

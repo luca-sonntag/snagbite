@@ -1299,6 +1299,7 @@ export const uiTranslations = {
         catalogAlmostFull: 'Kochbuch fast voll ({count}/{limit})',
         extractionLimitReached: 'Tageslimit ({used}/{limit}) erreicht – Schau ein kurzes Video zum Erstellen oder upgrade auf Premium.',
         unlockNutrition: 'Nährwerte freischalten',
+        unlockMacros: 'Makros freischalten',
         upgrade: 'Upgrade'
       }
     },
@@ -2298,6 +2299,7 @@ export const uiTranslations = {
         catalogAlmostFull: 'Cookbook almost full ({count}/{limit})',
         extractionLimitReached: 'Daily limit reached ({used}/{limit}) – Watch a short video to create or upgrade to Premium.',
         unlockNutrition: 'Unlock nutrition',
+        unlockMacros: 'Unlock macros',
         upgrade: 'Upgrade'
       }
     },

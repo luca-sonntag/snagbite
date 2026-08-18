@@ -24,16 +24,64 @@ export function useRecipeProgress(recipe: Recipe) {
     }
   }, [recipeId, stepsKey]);
 
+  // Listen for dish cooked event to reset steps
+  useEffect(() => {
+    const handleRecipeCooked = (e: Event) => {
+      const customEvent = e as CustomEvent<{ jobId: string; duplicate?: boolean }>;
+      if (customEvent.detail && (customEvent.detail.jobId === recipe.id || customEvent.detail.jobId === recipe.title)) {
+        setCheckedSteps({});
+        try {
+          localStorage.removeItem(stepsKey);
+        } catch {
+          // ignore storage error
+        }
+      }
+    };
+
+    window.addEventListener('app:recipe-cooked', handleRecipeCooked);
+    return () => {
+      window.removeEventListener('app:recipe-cooked', handleRecipeCooked);
+    };
+  }, [recipe.id, recipe.title, stepsKey]);
+
   const toggleStep = (stepNum: number) => {
     setCheckedSteps((prev) => {
-      const next = { ...prev, [stepNum]: !prev[stepNum] };
+      const instructions = recipe.instructions ?? [];
+      const currentIdx = instructions.findIndex((s) => s.step === stepNum);
+      if (currentIdx === -1) return prev;
+
+      const isCurrentlyChecked = !!prev[stepNum];
+      const next = { ...prev };
+
+      if (isCurrentlyChecked) {
+        // When unchecking a step, also uncheck all subsequent steps to maintain sequential order
+        for (let i = currentIdx; i < instructions.length; i++) {
+          delete next[instructions[i].step];
+        }
+      } else {
+        // When checking a step, ensure all previous steps up to this one are also checked
+        for (let i = 0; i <= currentIdx; i++) {
+          next[instructions[i].step] = true;
+        }
+      }
+
       localStorage.setItem(stepsKey, JSON.stringify(next));
       return next;
     });
   };
 
+  const resetProgress = () => {
+    setCheckedSteps({});
+    try {
+      localStorage.removeItem(stepsKey);
+    } catch {
+      // ignore storage error
+    }
+  };
+
   return {
     checkedSteps,
     toggleStep,
+    resetProgress,
   };
 }

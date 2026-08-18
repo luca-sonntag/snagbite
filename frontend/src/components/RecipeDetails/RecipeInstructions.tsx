@@ -162,16 +162,16 @@ export default function RecipeInstructions({
                     <div className={`${railBase} h-4 ${isFirst ? 'invisible' : railTone(prevChecked)}`} />
 
                     <div
-                      className={`w-7 h-7 rounded-full border flex items-center justify-center shrink-0 transition-all duration-200 ${
+                      className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all duration-200 ${
                         isChecked
-                          ? 'bg-emerald-500 border-emerald-500 text-white'
+                          ? 'bg-emerald-500 text-white shadow-sm'
                           : isActive
-                            ? 'border-2 border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
-                            : 'border-black/15 dark:border-white/15 text-gray-500 dark:text-gray-400'
+                            ? 'bg-emerald-500 text-white font-extrabold shadow-sm ring-4 ring-emerald-500/20 dark:ring-emerald-400/20'
+                            : 'bg-black/[0.05] dark:bg-white/[0.07] text-gray-500 dark:text-gray-400 font-semibold'
                       }`}
                     >
                       {isChecked
-                        ? <Check className="w-3.5 h-3.5" />
+                        ? <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                         : <span className="text-[11px] font-bold tabular-nums">{step.step}</span>
                       }
                     </div>
