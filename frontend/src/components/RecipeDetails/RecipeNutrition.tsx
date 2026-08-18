@@ -132,10 +132,10 @@ export default function RecipeNutrition({
                   {/* Protein */}
                   <div
                     onClick={() => !isPremium && setIsPremiumModalOpen(true)}
-                    className={!isPremium ? 'filter blur-[3px] select-none opacity-40 cursor-pointer' : ''}
+                    className={!isPremium ? 'filter blur-[2.5px] select-none opacity-60 cursor-pointer' : ''}
                   >
                     <div className="flex items-center gap-1.5">
-                      <span className={`w-2 h-2 rounded-[3px] shrink-0 ${isPremium ? 'bg-blue-500' : 'bg-gray-400 dark:bg-gray-500'}`} />
+                      <span className={`w-2 h-2 rounded-[3px] shrink-0 ${isPremium ? 'bg-blue-500' : 'bg-blue-500/70'}`} />
                       <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
                         {isPremium ? `${proteinDisplay}g` : '00g'}
                       </span>
@@ -148,10 +148,10 @@ export default function RecipeNutrition({
                   {/* Carbs */}
                   <div
                     onClick={() => !isPremium && setIsPremiumModalOpen(true)}
-                    className={!isPremium ? 'filter blur-[3px] select-none opacity-40 cursor-pointer' : ''}
+                    className={!isPremium ? 'filter blur-[2.5px] select-none opacity-60 cursor-pointer' : ''}
                   >
                     <div className="flex items-center gap-1.5">
-                      <span className={`w-2 h-2 rounded-[3px] shrink-0 ${isPremium ? 'bg-amber-500' : 'bg-gray-400 dark:bg-gray-500'}`} />
+                      <span className={`w-2 h-2 rounded-[3px] shrink-0 ${isPremium ? 'bg-amber-500' : 'bg-amber-500/70'}`} />
                       <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
                         {isPremium ? `${carbsDisplay}g` : '00g'}
                       </span>
@@ -164,10 +164,10 @@ export default function RecipeNutrition({
                   {/* Fat */}
                   <div
                     onClick={() => !isPremium && setIsPremiumModalOpen(true)}
-                    className={!isPremium ? 'filter blur-[3px] select-none opacity-40 cursor-pointer' : ''}
+                    className={!isPremium ? 'filter blur-[2.5px] select-none opacity-60 cursor-pointer' : ''}
                   >
                     <div className="flex items-center gap-1.5">
-                      <span className={`w-2 h-2 rounded-[3px] shrink-0 ${isPremium ? 'bg-rose-500' : 'bg-gray-400 dark:bg-gray-500'}`} />
+                      <span className={`w-2 h-2 rounded-[3px] shrink-0 ${isPremium ? 'bg-rose-500' : 'bg-rose-500/70'}`} />
                       <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
                         {isPremium ? `${fatDisplay}g` : '00g'}
                       </span>
@@ -223,11 +223,11 @@ export default function RecipeNutrition({
                     </>
                   )
                 ) : (
-                  /* In Free mode: grayed out progress bar segments */
-                  <div className="h-full w-full bg-gray-300 dark:bg-gray-700 opacity-60 flex">
-                    <div className="w-[30%] h-full bg-gray-400/50 border-r border-black/10 dark:border-white/10" />
-                    <div className="w-[40%] h-full bg-gray-400/40 border-r border-black/10 dark:border-white/10" />
-                    <div className="w-[30%] h-full bg-gray-400/30" />
+                  /* In Free mode: equal thirds preview with soft blur so colors shine through nicely */
+                  <div className="h-full w-full flex filter blur-[2px] opacity-75">
+                    <div className="w-1/3 h-full bg-blue-500/80" />
+                    <div className="w-1/3 h-full bg-amber-500/80" />
+                    <div className="w-1/3 h-full bg-rose-500/80" />
                   </div>
                 )}
               </div>
@@ -256,19 +256,19 @@ export default function RecipeNutrition({
               ) : (
                 /* Free mode: blurred legend with unlock prompt */
                 <div className="relative flex items-center justify-between pt-0.5">
-                  <div className="flex items-center gap-3.5 flex-wrap filter blur-[3.5px] select-none opacity-40 pointer-events-none">
-                    <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-400">
-                      <span className="w-2 h-2 rounded-[3px] bg-gray-400 shrink-0" />
+                  <div className="flex items-center gap-3.5 flex-wrap filter blur-[3px] select-none opacity-50 pointer-events-none">
+                    <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
+                      <span className="w-2 h-2 rounded-[3px] bg-blue-500 shrink-0" />
                       {t('recipe.ingredientNutritionProtein')}
                       <span className="tabular-nums font-semibold">00g</span>
                     </span>
-                    <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-400">
-                      <span className="w-2 h-2 rounded-[3px] bg-gray-400 shrink-0" />
+                    <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
+                      <span className="w-2 h-2 rounded-[3px] bg-amber-500 shrink-0" />
                       {t('recipe.nutritionCarbs')}
                       <span className="tabular-nums font-semibold">00g</span>
                     </span>
-                    <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-400">
-                      <span className="w-2 h-2 rounded-[3px] bg-gray-400 shrink-0" />
+                    <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
+                      <span className="w-2 h-2 rounded-[3px] bg-rose-500 shrink-0" />
                       {t('recipe.ingredientNutritionFat')}
                       <span className="tabular-nums font-semibold">00g</span>
                     </span>
