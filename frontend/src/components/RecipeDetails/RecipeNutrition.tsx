@@ -3,7 +3,7 @@ import AiNotice from '../AiNotice';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import PremiumModal from '../PremiumModal';
-import { Lock, Flame } from 'lucide-react';
+import { Lock, Flame, Crown } from 'lucide-react';
 
 interface RecipeNutritionProps {
   nutritionalValues: any;
@@ -246,11 +246,11 @@ export default function RecipeNutrition({
                 /* Free mode: unified blurred wrapper over progress bar + legend with overlay button */
                 <div className="relative">
                   <div className="flex flex-col gap-1.5 filter blur-[4px] select-none opacity-45 pointer-events-none transition-all">
-                    {/* Progress bar preview: 1/3 colors blurred */}
+                    {/* Progress bar preview: artificial uneven distribution with soft blur */}
                     <div className="h-2.5 w-full rounded-full bg-black/5 dark:bg-white/10 overflow-hidden flex shadow-inner">
-                      <div className="w-1/3 h-full bg-blue-500" />
-                      <div className="w-1/3 h-full bg-amber-500" />
-                      <div className="w-1/3 h-full bg-rose-500" />
+                      <div className="w-[28%] h-full bg-blue-500" />
+                      <div className="w-[44%] h-full bg-amber-500" />
+                      <div className="w-[28%] h-full bg-rose-500" />
                     </div>
 
                     {/* Legend preview */}
@@ -258,26 +258,26 @@ export default function RecipeNutrition({
                       <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
                         <span className="w-2 h-2 rounded-[3px] bg-blue-500 shrink-0" />
                         {t('recipe.ingredientNutritionProtein')}
-                        <span className="tabular-nums font-semibold">12g</span>
+                        <span className="tabular-nums font-semibold">24g</span>
                       </span>
                       <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
                         <span className="w-2 h-2 rounded-[3px] bg-amber-500 shrink-0" />
                         {t('recipe.nutritionCarbs')}
-                        <span className="tabular-nums font-semibold">45g</span>
+                        <span className="tabular-nums font-semibold">38g</span>
                       </span>
                       <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
                         <span className="w-2 h-2 rounded-[3px] bg-rose-500 shrink-0" />
                         {t('recipe.ingredientNutritionFat')}
-                        <span className="tabular-nums font-semibold">20g</span>
+                        <span className="tabular-nums font-semibold">18g</span>
                       </span>
                     </div>
                   </div>
 
-                  {/* Centered Unlock CTA badge */}
+                  {/* Centered Unlock CTA badge with amber crown & premium tint styling */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="inline-flex items-center gap-1.5 text-[10.5px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 dark:bg-emerald-500/20 group-hover:bg-emerald-500/25 px-3 py-1 rounded-full shadow-sm border border-emerald-500/20 backdrop-blur-sm transition-all">
-                      <Lock className="w-3 h-3" />
-                      {t('premium.hint.unlockMacros')}
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-900 dark:text-amber-200 bg-amber-500/15 dark:bg-amber-400/20 group-hover:bg-amber-500/25 px-3.5 py-1.5 rounded-full shadow-sm border border-amber-500/30 backdrop-blur-md transition-all">
+                      <Crown className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                      <span>{t('premium.hint.unlockMacros')}</span>
                     </span>
                   </div>
                 </div>
