@@ -4,6 +4,7 @@ import {
   BannerAdPosition,
   BannerAdPluginEvents,
   RewardAdPluginEvents,
+  InterstitialAdPluginEvents,
   AdmobConsentStatus,
 } from '@capacitor-community/admob';
 import { isNative } from '../native';
@@ -26,8 +27,12 @@ const TEST_BANNER_AD_ID = 'ca-app-pub-3940256099942544/6300978111';
 /** Google's public TEST rewarded video ad unit ID. */
 const TEST_REWARDED_AD_ID = 'ca-app-pub-3940256099942544/5224354917';
 
+/** Google's public TEST interstitial ad unit ID (used for the app-open ad). */
+const TEST_INTERSTITIAL_AD_ID = 'ca-app-pub-3940256099942544/1033173712';
+
 const CONFIGURED_BANNER_AD_ID = import.meta.env.VITE_ADMOB_BANNER_ID as string | undefined;
 const CONFIGURED_REWARDED_AD_ID = import.meta.env.VITE_ADMOB_REWARDED_ID as string | undefined;
+const CONFIGURED_INTERSTITIAL_AD_ID = import.meta.env.VITE_ADMOB_INTERSTITIAL_ID as string | undefined;
 
 /**
  * Comma-separated AdMob test-device IDs (from the "Use setTestDeviceIds(...)"
@@ -44,6 +49,7 @@ const CONFIGURED_TEST_DEVICES = (import.meta.env.VITE_ADMOB_TEST_DEVICES as stri
 /** Real ad unit if configured in environment, otherwise Google's test unit. */
 const BANNER_AD_ID = CONFIGURED_BANNER_AD_ID || TEST_BANNER_AD_ID;
 const REWARDED_AD_ID = CONFIGURED_REWARDED_AD_ID || TEST_REWARDED_AD_ID;
+const INTERSTITIAL_AD_ID = CONFIGURED_INTERSTITIAL_AD_ID || TEST_INTERSTITIAL_AD_ID;
 
 /**
  * Serve test ads unless a real ad unit id is configured in environment.
@@ -396,6 +402,119 @@ export async function showRewardedAd(): Promise<boolean> {
       console.error('[AdMob] error during rewarded ad flow:', err);
       cleanup();
       resolve(false);
+    }
+  });
+}
+
+/* -------------------------------------------------------------------------- */
+/* App-Open Ad (full-screen interstitial shown on app launch)                 */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The @capacitor-community/admob v8 plugin has no dedicated App-Open format, so
+ * the "fullscreen banner after launch" is implemented as an INTERSTITIAL shown
+ * once the app is ready. It stays unobtrusive for free users via two guards:
+ *   1. First-launch exclusion — never shown on the very first app session.
+ *   2. Frequency cap — at most one app-open ad per APP_OPEN_MIN_INTERVAL_MS.
+ * Both are persisted in localStorage so they survive across cold starts.
+ */
+
+/** At most one app-open ad within this window (4h). */
+const APP_OPEN_MIN_INTERVAL_MS = 4 * 60 * 60 * 1000;
+/** Timestamp (ms) of the last app-open attempt. */
+const APP_OPEN_LAST_SHOWN_KEY = 'snagbite:appOpenAd:lastShownAt';
+/** Set the first time an app-open ad would be eligible; that first time is skipped. */
+const APP_OPEN_FIRST_LAUNCH_KEY = 'snagbite:appOpenAd:firstLaunchSeen';
+
+/**
+ * Show the app-open ad only when we have a real interstitial unit configured,
+ * or when running test builds (test unit serves safe test ads). In a production
+ * build without VITE_ADMOB_INTERSTITIAL_ID we skip entirely rather than serving
+ * Google's test interstitial to real users.
+ */
+const APP_OPEN_ENABLED = IS_TESTING || !!CONFIGURED_INTERSTITIAL_AD_ID;
+
+/** Guards against overlapping interstitial requests. */
+let appOpenInFlight = false;
+
+/**
+ * Show a full-screen interstitial "app-open" ad for free users, respecting the
+ * first-launch exclusion and the frequency cap. No-op on web, when consent was
+ * declined, or when an interstitial is already in flight. The caller is
+ * responsible for the user-level gating (free tier, no onboarding, no running
+ * extraction) — this function only enforces the ad-level policy.
+ *
+ * Resolves `true` if an ad was shown and dismissed, `false` otherwise.
+ */
+export async function maybeShowAppOpenAd(): Promise<boolean> {
+  if (!isNative()) return false;
+  if (!APP_OPEN_ENABLED) return false;
+  if (appOpenInFlight) return false;
+
+  await initAds();
+  if (!canRequestAds) return false;
+
+  // First-launch exclusion: the first time we'd ever be eligible, record it and
+  // skip — so a brand-new user is never greeted by a full-screen ad.
+  try {
+    if (!localStorage.getItem(APP_OPEN_FIRST_LAUNCH_KEY)) {
+      localStorage.setItem(APP_OPEN_FIRST_LAUNCH_KEY, String(Date.now()));
+      return false;
+    }
+    // Frequency cap.
+    const last = Number(localStorage.getItem(APP_OPEN_LAST_SHOWN_KEY) || 0);
+    if (last && Date.now() - last < APP_OPEN_MIN_INTERVAL_MS) return false;
+  } catch {
+    // localStorage unavailable — fail closed (don't risk an uncapped ad).
+    return false;
+  }
+
+  appOpenInFlight = true;
+  // Record the attempt up-front so the cap covers no-fills too and a rapid
+  // relaunch can't fire a second request before this one settles.
+  try {
+    localStorage.setItem(APP_OPEN_LAST_SHOWN_KEY, String(Date.now()));
+  } catch {
+    /* ignore */
+  }
+
+  return new Promise<boolean>(async (resolve) => {
+    let settled = false;
+    let dismissedHandle: any = null;
+    let failedHandle: any = null;
+
+    const finish = (result: boolean) => {
+      if (settled) return;
+      settled = true;
+      dismissedHandle?.remove?.().catch(() => {});
+      failedHandle?.remove?.().catch(() => {});
+      appOpenInFlight = false;
+      resolve(result);
+    };
+
+    try {
+      dismissedHandle = await AdMob.addListener(InterstitialAdPluginEvents.Dismissed, () => {
+        console.log('[AdMob] app-open interstitial dismissed');
+        finish(true);
+      });
+      failedHandle = await AdMob.addListener(InterstitialAdPluginEvents.FailedToShow, (err: unknown) => {
+        console.warn('[AdMob] app-open interstitial failed to show:', err);
+        finish(false);
+      });
+
+      console.log('[AdMob] preparing app-open interstitial...');
+      await AdMob.prepareInterstitial({
+        adId: INTERSTITIAL_AD_ID,
+        isTesting: IS_TESTING,
+        npa: !personalizedAllowed,
+      });
+
+      console.log('[AdMob] showing app-open interstitial...');
+      await AdMob.showInterstitial();
+    } catch (err) {
+      // Includes the no-fill / failed-to-load case (prepareInterstitial rejects).
+      console.warn('[AdMob] app-open interstitial flow failed:', err);
+      finish(false);
     }
   });
 }
