@@ -8,13 +8,22 @@ import TimerConfirmSheet from './TimerConfirmSheet';
 import PremiumModal from './PremiumModal';
 
 interface RecipeInstructionTextProps {
+  /**
+   * `list` is the step list on the detail page, where a dozen coloured words
+   * across five steps read as noise — there, only tappable things (ingredients,
+   * timers) carry a hue. `focused` is the cooking mode: one step filling the
+   * screen, where temperature and equipment are worth spotting at a glance.
+   */
+  variant?: 'list' | 'focused';
   text: string;
   recipe: Recipe;
   formatAmount: (amount: number, unit?: string) => string;
   stepNum?: number;
 }
 
-export default function RecipeInstructionText({ text, recipe, formatAmount, stepNum }: RecipeInstructionTextProps) {
+export default function RecipeInstructionText({ text, recipe, formatAmount, stepNum,
+  variant = 'list',
+}: RecipeInstructionTextProps) {
   const { t } = useI18n();
   const { isPremium } = useAuth();
 
@@ -179,7 +188,9 @@ export default function RecipeInstructionText({ text, recipe, formatAmount, step
                 }`}
                 title={canTimer ? 'Timer starten / Start timer' : undefined}
               >
-                <Clock className="w-4 h-4 text-blue-500 dark:text-blue-400 shrink-0 inline align-text-bottom" />
+                <Clock className={`w-4 h-4 shrink-0 inline align-text-bottom ${
+                  canTimer ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+                }`} />
                 {timeText}
               </span>
             );
@@ -191,7 +202,11 @@ export default function RecipeInstructionText({ text, recipe, formatAmount, step
             return (
               <span
                 key={index}
-                className="font-semibold text-orange-600 dark:text-orange-500 cursor-default select-none"
+                className={`font-semibold cursor-default select-none ${
+                  variant === 'focused'
+                    ? 'text-orange-600 dark:text-orange-500'
+                    : 'text-gray-900 dark:text-white'
+                }`}
               >
                 {part}
               </span>
@@ -203,7 +218,22 @@ export default function RecipeInstructionText({ text, recipe, formatAmount, step
           if (matched) {
             const isIng = matched.type === 'ingredient';
             if (!isIng) {
-              return <span key={index} className="font-semibold text-amber-600 dark:text-amber-500">{part}</span>;
+              return (
+                <span
+                  key={index}
+                  className={
+                    // In the compact list a soft chip is what makes equipment
+                    // visible without shouting. In cooking mode the step is set
+                    // large and bold, where that same chip reads as a button
+                    // dropped into the sentence — there the word carries itself.
+                    variant === 'focused'
+                      ? undefined
+                      : 'bg-black/[0.06] dark:bg-white/[0.09] rounded px-1.5 py-[1.5px] text-gray-700 dark:text-gray-300'
+                  }
+                >
+                  {part}
+                </span>
+              );
             }
 
             return (

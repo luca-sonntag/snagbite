@@ -309,7 +309,7 @@ export default function CookingMode({
         {/* Step Description */}
         {currentStep && (
           <h1 className="text-2xl sm:text-3xl md:text-3.5xl font-bold text-gray-900 dark:text-white tracking-tight leading-relaxed md:leading-[1.6] mb-6 max-h-[40dvh] overflow-y-auto px-2 flex-shrink-0">
-            <RecipeInstructionText text={currentStep.description} recipe={recipe} formatAmount={formatAmount} stepNum={currentStep.step} />
+            <RecipeInstructionText variant="focused" text={currentStep.description} recipe={recipe} formatAmount={formatAmount} stepNum={currentStep.step} />
           </h1>
         )}
 
