@@ -188,17 +188,17 @@ export default function RecipeNutrition({
             </div>
           )}
 
-          {/* Macro distribution in summary variant: colored in Premium, grayed & blurred in Free with unlock button */}
+          {/* Macro distribution in summary variant: colored in Premium, unified blur across bar & legend in Free */}
           {isSummary && (
             <div
               onClick={() => !isPremium && setIsPremiumModalOpen(true)}
               className={`relative flex flex-col gap-1.5 mt-0.5 ${!isPremium ? 'cursor-pointer group' : ''}`}
             >
-              {/* Progress bar */}
-              <div className="h-2.5 w-full rounded-full bg-black/5 dark:bg-white/10 overflow-hidden flex shadow-inner">
-                {isPremium ? (
-                  totalMacroKcal > 0 && (
-                    <>
+              {isPremium ? (
+                totalMacroKcal > 0 && (
+                  <>
+                    {/* Progress bar */}
+                    <div className="h-2.5 w-full rounded-full bg-black/5 dark:bg-white/10 overflow-hidden flex shadow-inner">
                       {proteinPct > 0 && (
                         <div
                           style={{ width: `${proteinPct}%` }}
@@ -220,68 +220,70 @@ export default function RecipeNutrition({
                           title={`${t('recipe.ingredientNutritionFat')}: ${fatPct}%`}
                         />
                       )}
-                    </>
-                  )
-                ) : (
-                  /* In Free mode: equal thirds preview with soft blur so colors shine through nicely */
-                  <div className="h-full w-full flex filter blur-[2px] opacity-75">
-                    <div className="w-1/3 h-full bg-blue-500/80" />
-                    <div className="w-1/3 h-full bg-amber-500/80" />
-                    <div className="w-1/3 h-full bg-rose-500/80" />
-                  </div>
-                )}
-              </div>
+                    </div>
 
-              {/* Legend */}
-              {isPremium ? (
-                totalMacroKcal > 0 && (
-                  <div className="flex items-center gap-3.5 flex-wrap">
-                    <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-500 dark:text-gray-400">
-                      <span className="w-2 h-2 rounded-[3px] bg-blue-500 shrink-0" />
-                      {t('recipe.ingredientNutritionProtein')}
-                      <span className="tabular-nums font-semibold text-gray-700 dark:text-gray-300">{proteinDisplay}g</span>
-                    </span>
-                    <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-500 dark:text-gray-400">
-                      <span className="w-2 h-2 rounded-[3px] bg-amber-500 shrink-0" />
-                      {t('recipe.nutritionCarbs')}
-                      <span className="tabular-nums font-semibold text-gray-700 dark:text-gray-300">{carbsDisplay}g</span>
-                    </span>
-                    <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-500 dark:text-gray-400">
-                      <span className="w-2 h-2 rounded-[3px] bg-rose-500 shrink-0" />
-                      {t('recipe.ingredientNutritionFat')}
-                      <span className="tabular-nums font-semibold text-gray-700 dark:text-gray-300">{fatDisplay}g</span>
-                    </span>
-                  </div>
+                    {/* Legend */}
+                    <div className="flex items-center gap-3.5 flex-wrap">
+                      <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-500 dark:text-gray-400">
+                        <span className="w-2 h-2 rounded-[3px] bg-blue-500 shrink-0" />
+                        {t('recipe.ingredientNutritionProtein')}
+                        <span className="tabular-nums font-semibold text-gray-700 dark:text-gray-300">{proteinDisplay}g</span>
+                      </span>
+                      <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-500 dark:text-gray-400">
+                        <span className="w-2 h-2 rounded-[3px] bg-amber-500 shrink-0" />
+                        {t('recipe.nutritionCarbs')}
+                        <span className="tabular-nums font-semibold text-gray-700 dark:text-gray-300">{carbsDisplay}g</span>
+                      </span>
+                      <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-500 dark:text-gray-400">
+                        <span className="w-2 h-2 rounded-[3px] bg-rose-500 shrink-0" />
+                        {t('recipe.ingredientNutritionFat')}
+                        <span className="tabular-nums font-semibold text-gray-700 dark:text-gray-300">{fatDisplay}g</span>
+                      </span>
+                    </div>
+                  </>
                 )
               ) : (
-                /* Free mode: blurred legend with unlock prompt */
-                <div className="relative flex items-center justify-between pt-0.5">
-                  <div className="flex items-center gap-3.5 flex-wrap filter blur-[3px] select-none opacity-50 pointer-events-none">
-                    <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
-                      <span className="w-2 h-2 rounded-[3px] bg-blue-500 shrink-0" />
-                      {t('recipe.ingredientNutritionProtein')}
-                      <span className="tabular-nums font-semibold">00g</span>
-                    </span>
-                    <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
-                      <span className="w-2 h-2 rounded-[3px] bg-amber-500 shrink-0" />
-                      {t('recipe.nutritionCarbs')}
-                      <span className="tabular-nums font-semibold">00g</span>
-                    </span>
-                    <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
-                      <span className="w-2 h-2 rounded-[3px] bg-rose-500 shrink-0" />
-                      {t('recipe.ingredientNutritionFat')}
-                      <span className="tabular-nums font-semibold">00g</span>
-                    </span>
+                /* Free mode: unified blurred wrapper over progress bar + legend with overlay button */
+                <div className="relative">
+                  <div className="flex flex-col gap-1.5 filter blur-[4px] select-none opacity-45 pointer-events-none transition-all">
+                    {/* Progress bar preview: 1/3 colors blurred */}
+                    <div className="h-2.5 w-full rounded-full bg-black/5 dark:bg-white/10 overflow-hidden flex shadow-inner">
+                      <div className="w-1/3 h-full bg-blue-500" />
+                      <div className="w-1/3 h-full bg-amber-500" />
+                      <div className="w-1/3 h-full bg-rose-500" />
+                    </div>
+
+                    {/* Legend preview */}
+                    <div className="flex items-center gap-3.5 flex-wrap pt-0.5">
+                      <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
+                        <span className="w-2 h-2 rounded-[3px] bg-blue-500 shrink-0" />
+                        {t('recipe.ingredientNutritionProtein')}
+                        <span className="tabular-nums font-semibold">12g</span>
+                      </span>
+                      <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
+                        <span className="w-2 h-2 rounded-[3px] bg-amber-500 shrink-0" />
+                        {t('recipe.nutritionCarbs')}
+                        <span className="tabular-nums font-semibold">45g</span>
+                      </span>
+                      <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
+                        <span className="w-2 h-2 rounded-[3px] bg-rose-500 shrink-0" />
+                        {t('recipe.ingredientNutritionFat')}
+                        <span className="tabular-nums font-semibold">20g</span>
+                      </span>
+                    </div>
                   </div>
 
+                  {/* Centered / Right-aligned Unlock CTA badge */}
                   <div className="absolute inset-0 flex items-center justify-end">
-                    <span className="inline-flex items-center gap-1 text-[10.5px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-2.5 py-0.5 rounded-full transition-all">
+                    <span className="inline-flex items-center gap-1.5 text-[10.5px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 dark:bg-emerald-500/20 group-hover:bg-emerald-500/25 px-3 py-1 rounded-full shadow-sm border border-emerald-500/20 backdrop-blur-sm transition-all">
                       <Lock className="w-3 h-3" />
                       {t('premium.hint.unlockMacros')}
                     </span>
                   </div>
                 </div>
               )}
+            </div>
+          )}
             </div>
           )}
         </div>
