@@ -44,6 +44,23 @@ export default defineConfig({
       '@cookbook/shared': resolve(configDir, '../shared/src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Split stable dependencies into their own chunks. This doesn't shrink
+        // the first-launch parse (all of these are needed eagerly), but it keeps
+        // vendor code cached across OTA updates — an OTA bundle only changes app
+        // code, so the browser reuses these chunks instead of re-downloading them.
+        manualChunks(id: string) {
+          if (id.includes('/src/i18n')) return 'i18n';
+          if (id.includes('node_modules')) {
+            if (id.includes('@supabase')) return 'supabase';
+            return 'vendor';
+          }
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     tailwindcss()

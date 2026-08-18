@@ -502,15 +502,14 @@ export default function App() {
     }
   }, [activeView, user, fetchLimitStatus, initialSyncDone]);
 
-  // Hide native splash screen as soon as auth has settled.
-  // We don't wait for initialSyncDone (fetchLimitStatus) because that API call
-  // would add unnecessary delay — the limit status can be loaded silently in
-  // the background while the app is already visible to the user.
+  // Hide the native splash as soon as the web layer has mounted — NOT when auth
+  // settles. Waiting for auth kept the native splash up for the whole
+  // getSession() (+ token refresh) round-trip. During authLoading the app now
+  // shows its own brand-matched loader (see the auth gate), so the handoff is
+  // seamless and the auth round-trip no longer counts toward splash time.
   useEffect(() => {
-    if (!authLoading) {
-      hideSplashScreen();
-    }
-  }, [authLoading]);
+    hideSplashScreen();
+  }, []);
 
   // After history loads, check if current URL references a valid jobId and keep it,
   // or clear the subPath if the jobId no longer exists.
@@ -828,9 +827,11 @@ export default function App() {
   // everywhere (the quota line simply doesn't render until it arrives), so we
   // show the app immediately and let the sync populate in the background.
   if (authLoading) {
+    // Brand-matched loader (same #064e3b background + spinner as the native
+    // splash) so hiding the splash on mount hands off without a visible flash.
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent" />
+      <div className="min-h-screen flex items-center justify-center bg-[#064e3b]">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-white/70 border-t-transparent" />
       </div>
     );
   }
