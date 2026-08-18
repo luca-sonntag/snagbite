@@ -246,10 +246,10 @@ export default function RecipeNutrition({
                 /* Free mode: unified blurred wrapper over progress bar + legend with overlay button */
                 <div className="relative">
                   <div className="flex flex-col gap-1.5 filter blur-[4px] select-none opacity-45 pointer-events-none transition-all">
-                    {/* Progress bar preview: artificial uneven distribution with soft blur */}
+                    {/* Progress bar preview: clearly uneven distribution with soft blur */}
                     <div className="h-2.5 w-full rounded-full bg-black/5 dark:bg-white/10 overflow-hidden flex shadow-inner">
-                      <div className="w-[28%] h-full bg-blue-500" />
-                      <div className="w-[44%] h-full bg-amber-500" />
+                      <div className="w-[18%] h-full bg-blue-500" />
+                      <div className="w-[54%] h-full bg-amber-500" />
                       <div className="w-[28%] h-full bg-rose-500" />
                     </div>
 
@@ -258,17 +258,17 @@ export default function RecipeNutrition({
                       <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
                         <span className="w-2 h-2 rounded-[3px] bg-blue-500 shrink-0" />
                         {t('recipe.ingredientNutritionProtein')}
-                        <span className="tabular-nums font-semibold">24g</span>
+                        <span className="tabular-nums font-semibold">16g</span>
                       </span>
                       <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
                         <span className="w-2 h-2 rounded-[3px] bg-amber-500 shrink-0" />
                         {t('recipe.nutritionCarbs')}
-                        <span className="tabular-nums font-semibold">38g</span>
+                        <span className="tabular-nums font-semibold">58g</span>
                       </span>
                       <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
                         <span className="w-2 h-2 rounded-[3px] bg-rose-500 shrink-0" />
                         {t('recipe.ingredientNutritionFat')}
-                        <span className="tabular-nums font-semibold">18g</span>
+                        <span className="tabular-nums font-semibold">14g</span>
                       </span>
                     </div>
                   </div>
