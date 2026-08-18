@@ -39,7 +39,6 @@ import { deleteCachedImage } from './utils/imageStore';
 import { useTimerManager } from './hooks/useTimerManager';
 import { useOnboarding } from './hooks/useOnboarding';
 import { useAlphaWelcome } from './hooks/useAlphaWelcome';
-import ExtractionAdCard from './components/ExtractionAdCard';
 
 // Module-level flag to ensure the Web Share Target is only processed once per page load.
 // This prevents re-triggering the interceptor when the user's auth state or metadata updates.
@@ -140,7 +139,6 @@ export default function App() {
   // effect doesn't clear its subPath before the history state catches up.
   const newlyExtractedJobIdRef = useRef<string | null>(null);
   const [isCatalogSheetOpen, setIsCatalogSheetOpen] = useState(false);
-  const [adStatus, setAdStatus] = useState<'pending' | 'loaded' | 'failed'>('pending');
 
   // Remembers the last open state of the history tab (recipe detail or list),
   // so the bottom-nav "Recipes" button returns to the recipe that was open
@@ -327,6 +325,26 @@ export default function App() {
       initAds();
     }).catch(err => console.error('Failed to load ads module:', err));
   }, [authLoading, user, fetchHistory]);
+
+  // App-Open ad: a full-screen interstitial shown once on cold start for free
+  // users. Attempted a single time per app session, a short beat after the app
+  // is ready so it never covers the splash/first paint. It is skipped while
+  // onboarding is showing and during a running extraction, and `maybeShowAppOpenAd`
+  // itself enforces the first-launch exclusion + frequency cap (no-op on web).
+  const appOpenAttemptedRef = useRef(false);
+  useEffect(() => {
+    if (authLoading || !user) return;
+    if (isPremium || showOnboarding || isPending) return;
+    if (appOpenAttemptedRef.current) return;
+    appOpenAttemptedRef.current = true;
+
+    const id = setTimeout(() => {
+      import('./utils/ads')
+        .then(({ maybeShowAppOpenAd }) => maybeShowAppOpenAd())
+        .catch(err => console.error('Failed to load ads module:', err));
+    }, 1200);
+    return () => clearTimeout(id);
+  }, [authLoading, user, isPremium, showOnboarding, isPending]);
 
   // Initial sync on startup/login
   useEffect(() => {
@@ -968,33 +986,9 @@ export default function App() {
         const bottomBarClasses = `fixed bottom-0 inset-x-0 z-40 transition-all duration-300 ease-in-out pb-safe ${isBottomBarHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
           }`;
 
-        const shouldShowBannerAd =
-          !isPremium &&
-          !isViewingRecipe &&
-          activeView !== 'settings' &&
-          adStatus !== 'failed';
-
-        // The bottom-bar banner is destroyed on real teardown (premium / no fill)
-        // and while an extraction runs: the form then shows its own larger MREC
-        // ad, and the single native banner can't be reused across sizes — so we
-        // release it here, letting the MREC load fresh with its own spinner.
-        // Other temporary contexts (recipe view, settings, admin, overlays,
-        // select mode) hide/resume it instead, preserving the loaded ad.
-        const bannerCanExist = !isPremium && !isPending && adStatus !== 'failed';
-
         return (
           <div className={bottomBarClasses}>
             <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] w-full max-w-md mx-auto flex flex-col rounded-t-3xl overflow-hidden">
-              {/* Banner ad displayed seamlessly attached to top of bottom menu for free users */}
-              <div className={`w-full pt-2 pb-1.5 px-3 border-b border-gray-100/60 dark:border-gray-800/60 flex flex-col items-center justify-center ${shouldShowBannerAd ? '' : 'hidden'}`}>
-                <ExtractionAdCard
-                  isActive={bannerCanExist}
-                  hidden={!shouldShowBannerAd || isBottomBarHidden}
-                  variant="banner"
-                  embedded
-                  onStatusChange={setAdStatus}
-                />
-              </div>
 
               <div className="w-full flex justify-around items-center pt-3 pb-[calc(1.25rem_+_var(--safe-area-inset-bottom))] px-3">
               {/* Extract / New Recipe Tab */}
