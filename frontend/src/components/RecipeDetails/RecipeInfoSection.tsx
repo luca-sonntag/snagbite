@@ -2,6 +2,7 @@ import { Clock, Utensils, Users, ChevronRight } from 'lucide-react';
 import RecipeNutrition from './RecipeNutrition';
 import RecipeServingsStepper from './RecipeServingsStepper';
 import { useI18n } from '../../context/I18nContext';
+import { tint, TINT } from '../../utils/tint';
 
 interface RecipeInfoSectionProps {
   prepTime: any;
@@ -55,7 +56,10 @@ export default function RecipeInfoSection({
   return (
     <div className="flex flex-col gap-4">
       {/* Prep / cook times + nutrition + servings grouped into one cohesive overview card. */}
-      <div className="glass-panel rounded-2xl overflow-hidden">
+      <div
+        style={tint(TINT.emerald)}
+        className="glass-panel tint-surface rounded-2xl overflow-hidden"
+      >
         <div className="grid grid-cols-2">
           {/* Prep time */}
           <div className="flex items-center gap-3 py-4 px-4.5 sm:px-5">
