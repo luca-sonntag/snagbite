@@ -273,8 +273,8 @@ export default function RecipeNutrition({
                     </div>
                   </div>
 
-                  {/* Centered / Right-aligned Unlock CTA badge */}
-                  <div className="absolute inset-0 flex items-center justify-end">
+                  {/* Centered Unlock CTA badge */}
+                  <div className="absolute inset-0 flex items-center justify-center">
                     <span className="inline-flex items-center gap-1.5 text-[10.5px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 dark:bg-emerald-500/20 group-hover:bg-emerald-500/25 px-3 py-1 rounded-full shadow-sm border border-emerald-500/20 backdrop-blur-sm transition-all">
                       <Lock className="w-3 h-3" />
                       {t('premium.hint.unlockMacros')}
@@ -282,8 +282,6 @@ export default function RecipeNutrition({
                   </div>
                 </div>
               )}
-            </div>
-          )}
             </div>
           )}
         </div>
