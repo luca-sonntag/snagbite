@@ -45,11 +45,14 @@ export default function RecipeActionDock({
       {showStart && (
         <button
           onClick={onStartCooking}
-          className="relative p-3 text-white bg-emerald-600 hover:bg-emerald-500 active:scale-90 transition-all cursor-pointer flex items-center justify-center rounded-full shadow-md outline-none border-none group"
+          className="relative px-3.5 py-1.5 text-white bg-emerald-600 hover:bg-emerald-500 active:scale-90 transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5 rounded-lg shadow-md outline-none border-none group"
           title={t('recipe.startCooking')}
           aria-label={t('recipe.startCooking')}
         >
-          <Play className="w-5.5 h-5.5 fill-white" />
+          <Play className="w-5 h-5 fill-white" />
+          <span className="text-[9.5px] font-medium tracking-wide leading-none whitespace-nowrap text-white/80">
+            {t('recipe.dockCook')}
+          </span>
           {!isPremium && <PremiumCrownBadge />}
         </button>
       )}
@@ -60,10 +63,14 @@ export default function RecipeActionDock({
           <FloatingDivider show={showRemixDivider} />
           <button
             onClick={onRemixClick}
-            className="relative p-3 text-gray-700 dark:text-gray-300 hover:text-emerald-500 dark:hover:text-emerald-400 active:scale-90 transition-all cursor-pointer flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 outline-none border-none group"
-            title="Recipe Remix"
+            className="relative px-2.5 py-1.5 text-gray-700 dark:text-gray-300 hover:text-emerald-500 dark:hover:text-emerald-400 active:scale-90 transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 outline-none border-none group"
+            title={t('recipe.dockChat')}
+            aria-label={t('recipe.dockChat')}
           >
-            <MessageCircle className="w-5.5 h-5.5 group-hover:animate-pulse" />
+            <MessageCircle className="w-5 h-5 group-hover:animate-pulse" />
+            <span className="text-[9.5px] font-medium tracking-wide leading-none whitespace-nowrap opacity-70">
+              {t('recipe.dockChat')}
+            </span>
             {!isPremium && <PremiumCrownBadge />}
           </button>
         </>
@@ -75,17 +82,21 @@ export default function RecipeActionDock({
           <FloatingDivider show={showShoppingDivider} />
           <button
             onClick={onAddToCart}
-            className={`relative p-3 active:scale-90 transition-all cursor-pointer flex items-center justify-center rounded-full outline-none border-none ${
+            className={`relative px-2.5 py-1.5 active:scale-90 transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5 rounded-lg outline-none border-none ${
               isAdded
                 ? 'text-emerald-500 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30'
                 : 'text-gray-700 dark:text-gray-300 hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-black/5 dark:hover:bg-white/5'
             }`}
-            aria-label="Add to shopping list"
+            title={t('recipe.dockList')}
+            aria-label={t('recipe.dockList')}
           >
             {isAdded
-              ? <ShoppingBag className="w-5.5 h-5.5" />
-              : <ShoppingCart className="w-5.5 h-5.5" />
+              ? <ShoppingBag className="w-5 h-5" />
+              : <ShoppingCart className="w-5 h-5" />
             }
+            <span className="text-[9.5px] font-medium tracking-wide leading-none whitespace-nowrap opacity-70">
+              {t('recipe.dockList')}
+            </span>
           </button>
         </>
       )}
