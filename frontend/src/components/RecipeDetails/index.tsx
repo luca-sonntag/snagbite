@@ -335,12 +335,6 @@ export default function RecipeDetails({
   };
 
   const handleToggleIngredientNutrition = () => {
-    // Per-ingredient nutrition is a premium feature (advertised alongside the
-    // nutrition card). Free users get the upsell instead of toggling it on.
-    if (!isPremium) {
-      setIsPremiumModalOpen(true);
-      return;
-    }
     setShowIngredientNutrition(prev => {
       const next = !prev;
       try {
@@ -657,7 +651,7 @@ export default function RecipeDetails({
           <RecipeIngredients
             recipe={recipe}
             sortedIngredients={sortedIngredients}
-            showIngredientNutrition={isPremium && showIngredientNutrition}
+            showIngredientNutrition={showIngredientNutrition}
             onToggleIngredientNutrition={handleToggleIngredientNutrition}
             hasIngredientNutrition={hasIngredientNutrition}
             isPremium={isPremium}

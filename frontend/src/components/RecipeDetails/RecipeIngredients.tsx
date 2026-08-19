@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Card, Button } from '@heroui/react';
-import { Check, Plus, Flame, Salad, ChevronRight, Crown } from 'lucide-react';
+import { Check, Plus, Flame, Salad, ChevronRight } from 'lucide-react';
 import type { Ingredient, Recipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { getCategoryTheme } from '../../i18n';
 import { getParentIngredient } from '../../utils/ingredientTaxonomy';
 import IngredientNutritionSheet from './IngredientNutritionSheet';
-import PremiumCrownBadge from '../PremiumCrownBadge';
 import RecipeServingsStepper from './RecipeServingsStepper';
+import PremiumModal from '../PremiumModal';
 
 interface RecipeIngredientsProps {
   recipe: Recipe;
@@ -44,6 +44,7 @@ export default function RecipeIngredients({
 }: RecipeIngredientsProps) {
   const { t, translateCategory } = useI18n();
   const [selectedNutritionIngredient, setSelectedNutritionIngredient] = useState<Ingredient | null>(null);
+  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
 
   const ingredientCount = sortedIngredients.reduce(
     (sum, { group }) => sum + group.items.length,
@@ -66,33 +67,23 @@ export default function RecipeIngredients({
             )}
           </div>
           {hasIngredientNutrition && (
-            isPremium ? (
-              <button
-                type="button"
-                onClick={onToggleIngredientNutrition}
-                className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all select-none border-none active:scale-95 cursor-pointer ${
-                  showIngredientNutrition
-                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
-                    : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                }`}
-                title={t('recipe.verifiedDatabaseTooltip')}
-              >
-                <Flame className="w-3.5 h-3.5" />
-                <span>{t('recipe.showNutritionPerIngredient')}</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={onToggleIngredientNutrition}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-900 dark:text-white tint-premium shadow-[0_2px_8px_rgba(0,0,0,0.06)] ring-1 ring-black/5 dark:ring-white/10 hover:brightness-[0.98] dark:hover:brightness-110 active:scale-95 px-3 py-1 rounded-full border-none transition-all cursor-pointer select-none"
-                title={t('recipe.aiIngredientsEstimateTooltip')}
-              >
-                <div className="w-4 h-4 rounded-md bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0">
-                  <Crown className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
-                </div>
-                <span>{t('recipe.showNutritionPerIngredient')}</span>
-              </button>
-            )
+            <button
+              type="button"
+              onClick={onToggleIngredientNutrition}
+              className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all select-none border-none active:scale-95 cursor-pointer ${
+                showIngredientNutrition
+                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
+                  : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+              }`}
+              title={
+                !isPremium
+                  ? t('recipe.aiIngredientsEstimateTooltip')
+                  : t('recipe.verifiedDatabaseTooltip')
+              }
+            >
+              <Flame className="w-3.5 h-3.5" />
+              <span>{t('recipe.showNutritionPerIngredient')}</span>
+            </button>
           )}
         </div>
         {/* Portion scaling sits directly above the amounts it rewrites. */}
@@ -134,7 +125,11 @@ export default function RecipeIngredients({
                       key={uniqueId}
                       onClick={() => {
                         if (showIngredientNutrition && ing.calories) {
-                          setSelectedNutritionIngredient(ing);
+                          if (!isPremium) {
+                            setIsPremiumModalOpen(true);
+                          } else {
+                            setSelectedNutritionIngredient(ing);
+                          }
                         }
                       }}
                       className={`flex items-center justify-between gap-2 py-1.5 transition-all ${
@@ -171,17 +166,29 @@ export default function RecipeIngredients({
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedNutritionIngredient(ing);
+                            if (!isPremium) {
+                              setIsPremiumModalOpen(true);
+                            } else {
+                              setSelectedNutritionIngredient(ing);
+                            }
                           }}
-                          className={`px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 text-xs font-semibold shrink-0 border-none transition-all active:scale-95 ${
-                            ing.isVerified
-                              ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
-                              : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+                          className={`px-2 py-1 rounded-full inline-flex items-center gap-1 text-xs font-semibold shrink-0 border-none transition-all active:scale-95 cursor-pointer ${
+                            isPremium
+                              ? ing.isVerified
+                                ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
+                                : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+                              : 'bg-black/[0.04] hover:bg-black/[0.08] dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-gray-400 dark:text-gray-500'
                           }`}
-                          title={ing.matchedName ? t('recipe.verifiedIngredientTooltip', { name: ing.matchedName }) : undefined}
+                          title={isPremium && ing.matchedName ? t('recipe.verifiedIngredientTooltip', { name: ing.matchedName }) : undefined}
                         >
-                          <span className="tabular-nums">{Math.round(ing.calories * scaleFactor)} kcal</span>
-                          <ChevronRight className="w-3 h-3 opacity-40 -ml-0.5" />
+                          {isPremium ? (
+                            <>
+                              <span className="tabular-nums">{Math.round(ing.calories * scaleFactor)} kcal</span>
+                              <ChevronRight className="w-3 h-3 opacity-40 -ml-0.5" />
+                            </>
+                          ) : (
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          )}
                         </button>
                       )}
                     </li>
@@ -233,12 +240,17 @@ export default function RecipeIngredients({
         </Card>
       )}
 
-      {/* Ingredient Nutrition Detail Sheet */}
+      {/* Ingredient Nutrition Detail Sheet (Premium only) */}
       <IngredientNutritionSheet
         isOpen={Boolean(selectedNutritionIngredient)}
         onClose={() => setSelectedNutritionIngredient(null)}
         ingredient={selectedNutritionIngredient}
         scaleFactor={scaleFactor}
+      />
+
+      <PremiumModal
+        isOpen={isPremiumModalOpen}
+        onOpenChange={setIsPremiumModalOpen}
       />
     </div>
   );
