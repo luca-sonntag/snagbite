@@ -79,14 +79,7 @@ export default function RecipeStickyBar({
             {calories !== null && (
               <span className="flex items-center gap-1">
                 <Flame className="w-3 h-3 text-emerald-500 flex-shrink-0" />
-                {isPremium ? (
-                  `${calories} kcal`
-                ) : (
-                  <>
-                    <span>kcal</span>
-                    <Crown className="w-2.5 h-2.5 text-amber-500 fill-amber-500" />
-                  </>
-                )}
+                <span>{calories} kcal</span>
               </span>
             )}
           </div>

@@ -58,14 +58,7 @@ export default function RecipeMetaStrip({
         {calories !== null && (
           <span className={chipClasses}>
             <Flame className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-            {isPremium ? (
-              `${calories} kcal`
-            ) : (
-              <>
-                <span className="text-gray-400 dark:text-gray-500">kcal</span>
-                <Crown className="w-3 h-3 text-amber-500 fill-amber-500" />
-              </>
-            )}
+            <span>{calories} kcal</span>
           </span>
         )}
       </div>
