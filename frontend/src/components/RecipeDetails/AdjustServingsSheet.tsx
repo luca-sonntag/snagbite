@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Drawer, Button } from '@heroui/react';
 import { Users, Minus, Plus, Flame } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
+import { useAuth } from '../../context/AuthContext';
 import { useAdOverlay } from '../../context/OverlayStackContext';
 
 interface AdjustServingsSheetProps {
@@ -20,6 +21,7 @@ export default function AdjustServingsSheet({
   onSave,
 }: AdjustServingsSheetProps) {
   const { t } = useI18n();
+  const { isPremium } = useAuth();
   useAdOverlay(isOpen);
 
   const initialServings = Math.max(1, baseServings || 1);
@@ -194,11 +196,11 @@ export default function AdjustServingsSheet({
                           </div>
 
                           {/* Protein */}
-                          <div>
+                          <div className={!isPremium ? 'filter blur-[2.5px] select-none opacity-60' : ''}>
                             <div className="flex items-center gap-1.5">
-                              <span className="w-2 h-2 rounded-[3px] bg-blue-500 shrink-0" />
+                              <span className={`w-2 h-2 rounded-[3px] shrink-0 ${isPremium ? 'bg-blue-500' : 'bg-blue-500/70'}`} />
                               <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
-                                {formatMacro(newProtein)}g
+                                {isPremium ? `${formatMacro(newProtein)}g` : '00g'}
                               </span>
                             </div>
                             <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
@@ -207,11 +209,11 @@ export default function AdjustServingsSheet({
                           </div>
 
                           {/* Carbs */}
-                          <div>
+                          <div className={!isPremium ? 'filter blur-[2.5px] select-none opacity-60' : ''}>
                             <div className="flex items-center gap-1.5">
-                              <span className="w-2 h-2 rounded-[3px] bg-amber-500 shrink-0" />
+                              <span className={`w-2 h-2 rounded-[3px] shrink-0 ${isPremium ? 'bg-amber-500' : 'bg-amber-500/70'}`} />
                               <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
-                                {formatMacro(newCarbs)}g
+                                {isPremium ? `${formatMacro(newCarbs)}g` : '00g'}
                               </span>
                             </div>
                             <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
@@ -220,11 +222,11 @@ export default function AdjustServingsSheet({
                           </div>
 
                           {/* Fat */}
-                          <div>
+                          <div className={!isPremium ? 'filter blur-[2.5px] select-none opacity-60' : ''}>
                             <div className="flex items-center gap-1.5">
-                              <span className="w-2 h-2 rounded-[3px] bg-rose-500 shrink-0" />
+                              <span className={`w-2 h-2 rounded-[3px] shrink-0 ${isPremium ? 'bg-rose-500' : 'bg-rose-500/70'}`} />
                               <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
-                                {formatMacro(newFat)}g
+                                {isPremium ? `${formatMacro(newFat)}g` : '00g'}
                               </span>
                             </div>
                             <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
@@ -235,27 +237,36 @@ export default function AdjustServingsSheet({
                       </div>
                     </div>
 
-                    {/* 3-Color Macro Progress Bar */}
-                    {totalMacroKcal > 0 && (
-                      <div className="h-1.5 w-full rounded-full bg-black/5 dark:bg-white/10 overflow-hidden flex shadow-inner">
-                        {proteinPct > 0 && (
-                          <div
-                            style={{ width: `${proteinPct}%` }}
-                            className="h-full bg-blue-500 transition-all duration-300"
-                          />
-                        )}
-                        {carbsPct > 0 && (
-                          <div
-                            style={{ width: `${carbsPct}%` }}
-                            className="h-full bg-amber-500 transition-all duration-300"
-                          />
-                        )}
-                        {fatPct > 0 && (
-                          <div
-                            style={{ width: `${fatPct}%` }}
-                            className="h-full bg-rose-500 transition-all duration-300"
-                          />
-                        )}
+                    {/* Macro Progress Bar */}
+                    {isPremium ? (
+                      totalMacroKcal > 0 && (
+                        <div className="h-1.5 w-full rounded-full bg-black/5 dark:bg-white/10 overflow-hidden flex shadow-inner">
+                          {proteinPct > 0 && (
+                            <div
+                              style={{ width: `${proteinPct}%` }}
+                              className="h-full bg-blue-500 transition-all duration-300"
+                            />
+                          )}
+                          {carbsPct > 0 && (
+                            <div
+                              style={{ width: `${carbsPct}%` }}
+                              className="h-full bg-amber-500 transition-all duration-300"
+                            />
+                          )}
+                          {fatPct > 0 && (
+                            <div
+                              style={{ width: `${fatPct}%` }}
+                              className="h-full bg-rose-500 transition-all duration-300"
+                            />
+                          )}
+                        </div>
+                      )
+                    ) : (
+                      /* Free mode: blurred uneven preview */
+                      <div className="h-1.5 w-full rounded-full bg-black/5 dark:bg-white/10 overflow-hidden flex shadow-inner filter blur-[1.5px] opacity-60">
+                        <div className="w-[18%] h-full bg-blue-500" />
+                        <div className="w-[54%] h-full bg-amber-500" />
+                        <div className="w-[28%] h-full bg-rose-500" />
                       </div>
                     )}
                   </div>
