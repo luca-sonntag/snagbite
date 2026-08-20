@@ -119,23 +119,33 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
       <Drawer>
         <Drawer.Backdrop isOpen={isOpen} onOpenChange={(open) => { if (!open) onClose(); }} className="!z-[100]">
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))]">
+            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
               <Drawer.Handle />
 
               {/* Header */}
-              <Drawer.Header className="pb-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center">
-                    <MessageSquare className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
+              <Drawer.Header className="pb-3 mb-1">
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center">
+                      <MessageSquare className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white">
+                      {t('feedback.title') || 'Report a bug / Feedback'}
+                    </Drawer.Heading>
                   </div>
-                  <Drawer.Heading className="text-base font-bold">
-                    {t('feedback.title') || 'Report a bug / Feedback'}
-                  </Drawer.Heading>
+                  <button
+                    type="button"
+                    className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer"
+                    onClick={onClose}
+                    aria-label="Close"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
               </Drawer.Header>
 
               {/* Body */}
-              <Drawer.Body className="overflow-y-auto py-4 flex-1 flex flex-col gap-4">
+              <Drawer.Body className="overflow-y-auto py-2 flex-1 flex flex-col gap-4">
                 {/* Type toggle */}
                 <div className="grid grid-cols-2 gap-2">
                   {typeOptions.map((opt) => {
@@ -238,14 +248,14 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
               <Drawer.Footer className="pt-3 flex gap-2">
                 <Button
                   onPress={onClose}
-                  className="flex-1 text-sm h-11 border-none bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl font-semibold active:scale-95 transition-all"
+                  className="flex-1 text-sm h-12 border-none bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-2xl font-bold active:scale-95 transition-all cursor-pointer"
                 >
                   {t('feedback.cancel') || t('dialog.cancelDefault') || 'Cancel'}
                 </Button>
                 <Button
                   onPress={handleSubmit}
                   isDisabled={isSaving || !message.trim()}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-sm h-11 font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-none active:scale-95 transition-all disabled:opacity-50"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-sm h-12 font-bold rounded-2xl flex items-center justify-center gap-1.5 shadow-none border-none active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
                 >
                   {isSaving
                     ? (t('feedback.submitting') || 'Sending...')

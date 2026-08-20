@@ -119,28 +119,28 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
   const getStatusClasses = () => {
     switch (state.status) {
       case 'danger':
-        return 'bg-red-500/10 border-red-500/20';
+        return 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-none';
       case 'warning':
-        return 'bg-amber-500/10 border-amber-500/20';
+        return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-none';
       case 'success':
-        return 'bg-emerald-500/10 border-emerald-500/20';
+        return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none';
       case 'info':
       default:
-        return 'bg-blue-500/10 border-blue-500/20';
+        return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-none';
     }
   };
 
   const getConfirmButtonClasses = () => {
     switch (state.status) {
       case 'danger':
-        return 'bg-red-600 hover:bg-red-500 text-white font-medium shadow-md transition-all';
+        return 'bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-2xl border-none shadow-none active:scale-95 transition-all px-4 py-2.5 h-11 cursor-pointer';
       case 'warning':
-        return 'bg-amber-500 hover:bg-amber-400 text-white font-medium shadow-md transition-all';
+        return 'bg-amber-500 hover:bg-amber-400 text-white font-bold rounded-2xl border-none shadow-none active:scale-95 transition-all px-4 py-2.5 h-11 cursor-pointer';
       case 'success':
-        return 'bg-emerald-600 hover:bg-emerald-500 text-white font-medium shadow-md transition-all';
+        return 'bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl border-none shadow-none active:scale-95 transition-all px-4 py-2.5 h-11 cursor-pointer';
       case 'info':
       default:
-        return 'bg-blue-600 hover:bg-blue-500 text-white font-medium shadow-md transition-all';
+        return 'bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl border-none shadow-none active:scale-95 transition-all px-4 py-2.5 h-11 cursor-pointer';
     }
   };
 
@@ -157,42 +157,42 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
           />
 
           {/* Modal Container */}
-          <div className="relative w-full max-w-sm rounded-2xl border border-black/10 dark:border-white/10 p-6 shadow-2xl bg-white dark:bg-gray-900 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-sm rounded-3xl border-none p-6 shadow-[0_10px_40px_rgba(0,0,0,0.15)] bg-white dark:bg-gray-900 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
             {/* Close Button for Alert, or optional */}
             {state.type === 'alert' && (
               <button 
                 onClick={() => handleClose(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center justify-center transition-all border-none active:scale-95 cursor-pointer"
                 aria-label={t('dialog.closeAria')}
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             )}
 
             {/* Header: Icon + Title */}
-            <div className="flex gap-4 items-start">
-              <div className={`p-2.5 rounded-xl border flex-shrink-0 flex items-center justify-center ${getStatusClasses()}`}>
+            <div className="flex gap-3.5 items-start">
+              <div className={`w-11 h-11 rounded-2xl flex-shrink-0 flex items-center justify-center ${getStatusClasses()}`}>
                 {getIcon()}
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
+              <div className="flex-1 min-w-0 pt-0.5">
+                <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">
                   {state.title}
                 </h3>
               </div>
             </div>
 
             {/* Body Description */}
-            <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed pl-14 whitespace-pre-line">
+            <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed pl-14.5 whitespace-pre-line">
               {renderMessage(state.message)}
             </div>
 
             {/* Footer Buttons */}
-            <div className="flex justify-end gap-2.5 mt-2 pl-14">
+            <div className="flex justify-end gap-2.5 mt-2 pl-14.5">
               {state.type === 'confirm' && (
                 <Button 
-                   variant="tertiary"
+                  variant="tertiary"
                   onPress={() => handleClose(false)}
-                  className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                  className="rounded-2xl font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-none active:scale-95 transition-all px-4 py-2.5 h-11 cursor-pointer"
                 >
                   {state.cancelLabel}
                 </Button>

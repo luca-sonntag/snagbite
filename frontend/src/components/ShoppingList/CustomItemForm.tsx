@@ -54,35 +54,35 @@ export default function CustomItemForm({ isOpen, addCustomItem, onClose }: Custo
       <Drawer>
         <Drawer.Backdrop isOpen={isOpen} onOpenChange={(open) => { if (!open) onClose(); }} className="!z-[100]">
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col p-4 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl">
+            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
               <Drawer.Handle />
 
-              <Drawer.Header className="border-b border-black/5 dark:border-white/5 pb-3 mb-3">
+              <Drawer.Header className="pb-3 mb-1">
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
-                      <Plus className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center flex-shrink-0">
+                      <Plus className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
                     </div>
                     <div className="flex items-center gap-2 min-w-0">
                       <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white truncate">
                         {t('shopping.addTitle')}
                       </Drawer.Heading>
                       {lastAddedName && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 animate-fade-in truncate">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none animate-fade-in truncate">
                           <Check className="w-3 h-3 stroke-[3px]" />
                           <span className="truncate">"{lastAddedName}"</span>
                         </span>
                       )}
                     </div>
                   </div>
-                  <Button
-                    isIconOnly
-                    variant="tertiary"
-                    className="w-8 h-8 rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-gray-500 flex-shrink-0"
-                    onPress={onClose}
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer flex-shrink-0"
+                    aria-label="Close"
                   >
                     <X className="w-4 h-4" />
-                  </Button>
+                  </button>
                 </div>
               </Drawer.Header>
 
@@ -97,7 +97,7 @@ export default function CustomItemForm({ isOpen, addCustomItem, onClose }: Custo
                       placeholder={t('shopping.placeholderName')}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-white dark:bg-gray-800/90 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2.5 text-base text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all shadow-xs"
+                      className="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-xl px-3.5 py-2.5 text-sm sm:text-base text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-emerald-500/30 focus:outline-none transition-all"
                       required
                     />
                   </div>
@@ -108,7 +108,7 @@ export default function CustomItemForm({ isOpen, addCustomItem, onClose }: Custo
                       placeholder={t('shopping.placeholderAmount')}
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
-                      className="w-full bg-white dark:bg-gray-800/90 border border-gray-200 dark:border-white/10 rounded-xl px-2.5 py-2.5 text-base text-center text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all shadow-xs tabular-nums"
+                      className="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-xl px-2.5 py-2.5 text-sm sm:text-base text-center text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-emerald-500/30 focus:outline-none transition-all tabular-nums"
                     />
                   </div>
                   <div className="col-span-4">
@@ -117,14 +117,14 @@ export default function CustomItemForm({ isOpen, addCustomItem, onClose }: Custo
                       placeholder={t('shopping.placeholderUnit')}
                       value={unit}
                       onChange={(e) => setUnit(e.target.value)}
-                      className="w-full bg-white dark:bg-gray-800/90 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2.5 text-base text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all shadow-xs"
+                      className="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-xl px-3.5 py-2.5 text-sm sm:text-base text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-emerald-500/30 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
 
                 {/* Quick unit suggestion chips (horizontal scrollable) */}
                 <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1 mt-0.5 scroll-smooth">
-                  <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 shrink-0 mr-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 shrink-0 mr-1">
                     {t('shopping.suggestions')}
                   </span>
                   {suggestions.map((sug) => {
@@ -134,10 +134,10 @@ export default function CustomItemForm({ isOpen, addCustomItem, onClose }: Custo
                         key={sug}
                         type="button"
                         onClick={() => setUnit(isActive ? '' : sug)}
-                        className={`text-xs px-2.5 py-1 rounded-lg border transition-all cursor-pointer select-none active:scale-95 shrink-0 whitespace-nowrap ${
+                        className={`text-xs px-3 py-1.5 rounded-xl border-none transition-all cursor-pointer select-none active:scale-95 shrink-0 whitespace-nowrap font-medium ${
                           isActive
-                            ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-bold shadow-xs'
-                            : 'border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-300 hover:border-emerald-500/50 hover:bg-emerald-500/5'
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold'
+                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
                         }`}
                       >
                         {sug}
@@ -148,7 +148,7 @@ export default function CustomItemForm({ isOpen, addCustomItem, onClose }: Custo
 
                 <Button
                   type="submit"
-                  className="w-full mt-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2 h-11 text-base cursor-pointer"
+                  className="w-full mt-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-bold border-none shadow-none active:scale-95 transition-all flex items-center justify-center gap-2 h-12 text-base cursor-pointer"
                 >
                   <Plus className="w-5 h-5" />
                   <span>{t('shopping.btnAdd')}</span>

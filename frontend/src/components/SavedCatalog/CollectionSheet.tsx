@@ -254,17 +254,17 @@ export default function CollectionSheet({
       <Drawer>
         <Drawer.Backdrop isOpen={isOpen} onOpenChange={(open) => { if (!open) onClose(); }} className="!z-[100]">
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))]">
+            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
               <Drawer.Handle />
 
               {/* Header */}
-              <Drawer.Header className="pb-3">
+              <Drawer.Header className="pb-3 mb-1">
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+                    <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center">
                       <Folder className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <Drawer.Heading className="text-base font-bold">
+                    <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white">
                     {mode === 'assign'
                       ? (job
                         ? t('catalog.assignCollectionsTitle') || 'Sammlungen zuweisen'
@@ -279,27 +279,27 @@ export default function CollectionSheet({
                   </Drawer.Heading>
                   </div>
                   {(mode === 'create' || mode === 'edit' || mode === 'manage') && (
-                    <Button
-                      isIconOnly
-                      variant="tertiary"
-                      className="w-8 h-8 rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-gray-500"
-                      onPress={onClose}
+                    <button
+                      type="button"
+                      className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer"
+                      onClick={onClose}
+                      aria-label="Close"
                     >
                       <X className="w-4 h-4" />
-                    </Button>
+                    </button>
                   )}
                 </div>
               </Drawer.Header>
 
               {/* Body */}
-              <Drawer.Body className="overflow-y-auto py-4 flex-1">
+              <Drawer.Body className="overflow-y-auto py-2 flex-1">
                 {formError && (
-                  <div className="mb-3 px-3.5 py-2 text-xs font-semibold rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/10">
+                  <div className="mb-3 px-3.5 py-2 text-xs font-semibold rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 border-none">
                     {formError}
                   </div>
                 )}
                 {mode === 'assign' && !job && initialMode !== 'create' && initialMode !== 'manage' && collections.length > 0 && (
-                  <div className="mb-3 px-3.5 py-2.5 text-[11px] leading-snug rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/15">
+                  <div className="mb-3 px-3.5 py-2.5 text-[11px] leading-snug rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-none">
                     {language === 'de'
                       ? '1. Rezept auswählen (lange drücken) · 2. Sammlung wählen · 3. Häkchen setzen oder entfernen.'
                       : '1. Select a recipe (long-press) · 2. Pick a collection · 3. Tick or untick to add or remove.'}
@@ -307,7 +307,7 @@ export default function CollectionSheet({
                 )}
 
                 {mode === 'assign' ? (
-                  <div className="flex flex-col gap-2.5">
+                  <div className="flex flex-col gap-2">
                     {collections.length === 0 ? (
                       <div className="text-center py-8 text-xs text-gray-400 dark:text-gray-500">
                         {t('catalog.noCollections') || 'Keine Sammlungen erstellt'}
@@ -332,10 +332,10 @@ export default function CollectionSheet({
                           <div
                             key={col.id}
                             onClick={() => handleToggleMembership(col.id)}
-                            className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between select-none active:scale-[0.99] ${
+                            className={`p-3.5 rounded-2xl border-none transition-all cursor-pointer flex items-center justify-between select-none active:scale-[0.99] ${
                               isChecked || isPartial
-                                ? 'bg-emerald-500/5 border-emerald-500 dark:bg-emerald-500/10'
-                                : 'bg-black/5 dark:bg-white/5 border-transparent hover:border-black/10 dark:hover:border-white/10'
+                                ? 'bg-emerald-500/10 dark:bg-emerald-500/15'
+                                : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
                             }`}
                           >
                             <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -354,23 +354,22 @@ export default function CollectionSheet({
                               </div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
-                              <Button
-                                isIconOnly
-                                variant="tertiary"
-                                className="w-8 h-8 rounded-xl text-gray-400 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 shrink-0"
+                              <button
+                                type="button"
+                                className="w-8 h-8 rounded-xl text-gray-400 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 shrink-0 flex items-center justify-center border-none transition-all cursor-pointer"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleEditOpen(col);
                                 }}
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
-                              </Button>
-                              <div className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
-                                isChecked ? 'bg-emerald-500 border-emerald-500'
-                                  : isPartial ? 'bg-emerald-500/70 border-emerald-500'
-                                  : 'border-black/20 dark:border-white/20'
+                              </button>
+                              <div className={`w-6 h-6 rounded-xl border-none flex items-center justify-center shrink-0 transition-all ${
+                                isChecked ? 'bg-emerald-500 text-white'
+                                  : isPartial ? 'bg-emerald-500/70 text-white'
+                                  : 'bg-gray-200/80 dark:bg-gray-700/80'
                               }`}>
-                                {isChecked && <Check className="w-3.5 h-3.5 text-white" />}
+                                {isChecked && <Check className="w-3.5 h-3.5 text-white stroke-[3px]" />}
                                 {isPartial && (
                                   <span className="block w-2.5 h-0.5 bg-white rounded-full" />
                                 )}
@@ -383,7 +382,7 @@ export default function CollectionSheet({
 
                     <Button
                       variant="outline"
-                      className="mt-2 py-3.5 rounded-2xl border border-dashed border-emerald-500/40 bg-transparent hover:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-2 font-bold text-xs shrink-0 shadow-none"
+                      className="mt-2 py-3.5 rounded-2xl border-dashed border-emerald-500/40 bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-2 font-bold text-xs shrink-0 shadow-none cursor-pointer"
                       onPress={handleCreateOpen}
                     >
                       <Plus className="w-4 h-4" />
@@ -391,7 +390,7 @@ export default function CollectionSheet({
                     </Button>
                   </div>
                 ) : mode === 'manage' ? (
-                  <div className="flex flex-col gap-2.5">
+                  <div className="flex flex-col gap-2">
                     {collections.length === 0 ? (
                       <div className="text-center py-8 text-xs text-gray-400 dark:text-gray-500">
                         {t('catalog.noCollections') || 'Keine Sammlungen erstellt'}
@@ -400,7 +399,7 @@ export default function CollectionSheet({
                       collections.map(col => (
                         <div
                           key={col.id}
-                          className="p-3.5 rounded-2xl border border-transparent bg-black/5 dark:bg-white/5 hover:border-black/10 dark:hover:border-white/10 transition-all flex items-center justify-between select-none"
+                          className="p-3.5 rounded-2xl border-none bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all flex items-center justify-between select-none"
                         >
                           <div className="flex items-center gap-3 min-w-0 flex-1">
                             {col.emoji && <span className="text-xl">{col.emoji}</span>}
@@ -409,22 +408,20 @@ export default function CollectionSheet({
                             </span>
                           </div>
                           <div className="flex items-center gap-1 shrink-0">
-                            <Button
-                              isIconOnly
-                              variant="tertiary"
-                              className="w-8 h-8 rounded-xl text-gray-400 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 shrink-0"
-                              onPress={() => handleEditOpen(col)}
+                            <button
+                              type="button"
+                              className="w-8 h-8 rounded-xl text-gray-400 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 shrink-0 flex items-center justify-center border-none transition-all cursor-pointer"
+                              onClick={() => handleEditOpen(col)}
                             >
                               <Edit2 className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button
-                              isIconOnly
-                              variant="tertiary"
-                              className="w-8 h-8 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-500/10 shrink-0"
-                              onPress={() => handleDirectDelete(col)}
+                            </button>
+                            <button
+                              type="button"
+                              className="w-8 h-8 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-500/10 shrink-0 flex items-center justify-center border-none transition-all cursor-pointer"
+                              onClick={() => handleDirectDelete(col)}
                             >
                               <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
+                            </button>
                           </div>
                         </div>
                       ))
@@ -432,7 +429,7 @@ export default function CollectionSheet({
 
                     <Button
                       variant="outline"
-                      className="mt-2 py-3.5 rounded-2xl border border-dashed border-emerald-500/40 bg-transparent hover:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-2 font-bold text-xs shrink-0 shadow-none"
+                      className="mt-2 py-3.5 rounded-2xl border-dashed border-emerald-500/40 bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-2 font-bold text-xs shrink-0 shadow-none cursor-pointer"
                       onPress={handleCreateOpen}
                     >
                       <Plus className="w-4 h-4" />
@@ -452,7 +449,7 @@ export default function CollectionSheet({
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder={t('catalog.collectionPlaceholder') || 'z.B. Sonntagsbrunch'}
-                        className="w-full bg-white dark:bg-gray-800/90 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 text-base text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all shadow-xs"
+                        className="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-2xl px-4 py-3 text-base text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-emerald-500/30 focus:outline-none transition-all"
                       />
                     </div>
 
@@ -465,10 +462,10 @@ export default function CollectionSheet({
                         <button
                           type="button"
                           onClick={() => setSelectedEmoji('')}
-                          className={`w-11 h-11 text-lg flex items-center justify-center rounded-2xl transition-all active:scale-90 border border-dashed cursor-pointer ${
+                          className={`w-11 h-11 text-lg flex items-center justify-center rounded-2xl transition-all active:scale-90 border-none cursor-pointer ${
                             !selectedEmoji
-                              ? 'bg-emerald-500/20 border-emerald-500 text-emerald-600 dark:text-emerald-400 font-bold'
-                              : 'bg-black/5 dark:bg-white/5 border-black/20 dark:border-white/20 hover:border-black/35 dark:hover:border-white/35 text-gray-400 dark:text-gray-500'
+                              ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold'
+                              : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-400 dark:text-gray-500'
                           }`}
                           title={t('dialog.cancelDefault') || 'Keins'}
                         >
@@ -479,10 +476,10 @@ export default function CollectionSheet({
                             key={emoji}
                             type="button"
                             onClick={() => setSelectedEmoji(emoji)}
-                            className={`w-11 h-11 text-xl flex items-center justify-center rounded-2xl transition-all active:scale-90 border cursor-pointer ${
+                            className={`w-11 h-11 text-xl flex items-center justify-center rounded-2xl transition-all active:scale-90 border-none cursor-pointer ${
                               selectedEmoji === emoji
-                                ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm'
-                                : 'bg-black/5 dark:bg-white/5 border-transparent hover:border-black/10 dark:hover:border-white/10'
+                                ? 'bg-emerald-500 text-white shadow-sm'
+                                : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
                             }`}
                           >
                             {emoji}
@@ -497,16 +494,16 @@ export default function CollectionSheet({
               {/* Footer */}
               <Drawer.Footer className="pt-3">
                 {mode === 'assign' || mode === 'manage' ? (
-                  <div className="flex gap-3 w-full">
+                  <div className="flex gap-2.5 w-full">
                     <Button
                       variant="tertiary"
-                      className="flex-1 py-3 rounded-xl text-sm font-semibold"
+                      className="flex-1 h-12 rounded-2xl text-sm font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-none active:scale-95 transition-all cursor-pointer"
                       onPress={onClose}
                     >
                       {t('app.dialog.deleteRecipe.cancel') || 'Abbrechen'}
                     </Button>
                     <Button
-                      className="flex-[2] py-3 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white shadow-md shadow-emerald-500/25 active:scale-[0.98] transition-all"
+                      className="flex-[2] h-12 rounded-2xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white border-none shadow-none active:scale-95 transition-all cursor-pointer"
                       onPress={mode === 'manage' ? onClose : handleConfirmAssignment}
                       isDisabled={mode === 'assign' && collections.length === 0}
                     >
@@ -516,25 +513,25 @@ export default function CollectionSheet({
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex gap-3 w-full">
+                  <div className="flex gap-2.5 w-full">
                     {mode === 'edit' && (
-                      <Button
-                        variant="tertiary"
-                        className="py-3 rounded-xl text-sm font-semibold text-rose-500 hover:bg-rose-500/10"
-                        onPress={handleDeleteCollection}
+                      <button
+                        type="button"
+                        className="w-12 h-12 rounded-2xl text-sm font-semibold text-rose-500 hover:bg-rose-500/10 flex items-center justify-center border-none transition-all cursor-pointer active:scale-95 shrink-0"
+                        onClick={handleDeleteCollection}
                       >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                        <Trash2 className="w-5 h-5" />
+                      </button>
                     )}
                     <Button
                       variant="tertiary"
-                      className="flex-1 py-3 rounded-xl text-sm font-semibold"
+                      className="flex-1 h-12 rounded-2xl text-sm font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-none active:scale-95 transition-all cursor-pointer"
                       onPress={onClose}
                     >
                       {t('app.dialog.deleteRecipe.cancel') || 'Abbrechen'}
                     </Button>
                     <Button
-                      className="flex-[2] py-3 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white shadow-md shadow-emerald-500/25 active:scale-[0.98] transition-all"
+                      className="flex-[2] h-12 rounded-2xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white border-none shadow-none active:scale-95 transition-all cursor-pointer"
                       onPress={handleSaveCollection}
                     >
                       {t('recipe.save') || 'Speichern'}
@@ -547,9 +544,9 @@ export default function CollectionSheet({
                   within the drawer's modal interaction scope and is clickable. */}
               {pendingDelete && (
                 <div className="absolute inset-0 z-10 flex items-end justify-center rounded-[inherit] bg-black/40 backdrop-blur-[2px] p-4">
-                  <div className="w-full rounded-2xl border-none bg-white dark:bg-gray-900 shadow-2xl p-5 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="w-full rounded-3xl border-none bg-white dark:bg-gray-900 shadow-[0_10px_40px_rgba(0,0,0,0.15)] p-5 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
                     <div className="flex gap-3.5 items-start">
-                      <div className="p-2.5 rounded-xl border-none flex-shrink-0 flex items-center justify-center bg-rose-500/10">
+                      <div className="w-11 h-11 rounded-2xl border-none flex-shrink-0 flex items-center justify-center bg-rose-500/10">
                         <Trash2 className="w-5 h-5 text-rose-500" />
                       </div>
                       <div className="flex flex-col gap-1 min-w-0">
@@ -563,17 +560,17 @@ export default function CollectionSheet({
                         </p>
                       </div>
                     </div>
-                    <div className="flex gap-3 w-full">
+                    <div className="flex gap-2.5 w-full">
                       <Button
                         variant="tertiary"
-                        className="flex-1 py-3 rounded-xl text-sm font-semibold"
+                        className="flex-1 h-12 rounded-2xl text-sm font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-none active:scale-95 transition-all cursor-pointer"
                         onPress={() => setPendingDelete(null)}
                         isDisabled={isDeleting}
                       >
                         {t('app.dialog.deleteRecipe.cancel') || 'Abbrechen'}
                       </Button>
                       <Button
-                        className="flex-1 py-3 rounded-xl text-sm font-bold bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-500/25 active:scale-[0.98] transition-all"
+                        className="flex-1 h-12 rounded-2xl text-sm font-bold bg-rose-600 hover:bg-rose-500 text-white border-none shadow-none active:scale-95 transition-all cursor-pointer"
                         onPress={handleConfirmDirectDelete}
                         isDisabled={isDeleting}
                       >

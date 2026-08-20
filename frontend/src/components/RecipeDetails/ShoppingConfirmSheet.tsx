@@ -83,17 +83,17 @@ export default function ShoppingConfirmSheet({
       <Drawer>
         <Drawer.Backdrop isOpen={isOpen} onOpenChange={(open) => { if (!open) onClose(); }} className="!z-[100]">
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))]">
+            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
               <Drawer.Handle />
 
               {/* Header */}
-              <Drawer.Header className="border-b border-black/5 dark:border-white/5 pb-3">
+              <Drawer.Header className="pb-3 mb-1">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-emerald-500/5 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center">
                     <Salad className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
-                    <Drawer.Heading className="text-base font-bold">
+                    <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white">
                       {t('recipe.shoppingConfirmTitle')}
                     </Drawer.Heading>
                     {recipeLabel ? (
@@ -110,7 +110,7 @@ export default function ShoppingConfirmSheet({
               </Drawer.Header>
 
               {/* Body */}
-              <Drawer.Body className="overflow-y-auto py-4 flex-1 flex flex-col gap-4">
+              <Drawer.Body className="overflow-y-auto py-2 flex-1 flex flex-col gap-4">
                 <div className="flex flex-col gap-4">
                   {sortedIngredients.map(({ group, originalIdx }, sortedIdx) => {
                     // Check if any items in this group are displayed
@@ -138,11 +138,11 @@ export default function ShoppingConfirmSheet({
                               <div
                                 key={uniqueId}
                                 onClick={() => toggleItem(uniqueId)}
-                                className="flex items-center gap-3.5 py-2 px-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
+                                className="flex items-center gap-3.5 py-2.5 px-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors active:scale-[0.99]"
                               >
-                                <div className={`w-5.5 h-5.5 rounded-md border flex items-center justify-center flex-shrink-0 transition-all ${isChecked ? 'bg-emerald-500 border-emerald-500' : 'border-black/20 dark:border-white/20'
+                                <div className={`w-6 h-6 rounded-xl border-none flex items-center justify-center flex-shrink-0 transition-all ${isChecked ? 'bg-emerald-500 text-white' : 'bg-gray-200/80 dark:bg-gray-700/80'
                                   }`}>
-                                  {isChecked && <Check className="w-3.5 h-3.5 text-white" />}
+                                  {isChecked && <Check className="w-3.5 h-3.5 text-white stroke-[3px]" />}
                                 </div>
                                 <div className={`flex-1 text-sm select-none transition-all flex flex-wrap items-center gap-1.5 ${isChecked ? 'text-gray-800 dark:text-gray-200' : 'text-gray-400 dark:text-gray-500'
                                   }`}>
@@ -151,7 +151,7 @@ export default function ShoppingConfirmSheet({
                                   </span>
                                   <span>{name}</span>
                                   {ing.isStaple && (
-                                    <span className="inline-flex items-center ml-1.5 text-[9px] font-bold text-gray-400 dark:text-gray-500 bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded-full uppercase tracking-wider select-none align-middle whitespace-nowrap no-underline">
+                                    <span className="inline-flex items-center ml-1.5 text-[9px] font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full uppercase tracking-wider select-none align-middle whitespace-nowrap no-underline">
                                       {t('recipe.staplePillLabel')}
                                     </span>
                                   )}
@@ -167,16 +167,16 @@ export default function ShoppingConfirmSheet({
               </Drawer.Body>
 
               {/* Footer */}
-              <Drawer.Footer className="border-t border-black/5 dark:border-white/5 pt-3 flex gap-2">
+              <Drawer.Footer className="pt-3 flex gap-2">
                 <Button
                   variant="tertiary"
                   onPress={onClose}
-                  className="w-full h-12 rounded-xl text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                  className="w-full h-12 rounded-2xl font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-none active:scale-95 transition-all cursor-pointer"
                 >
                   {t('recipe.shoppingConfirmCancel')}
                 </Button>
                 <Button
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md transition-all h-12 rounded-xl"
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-none border-none transition-all h-12 rounded-2xl active:scale-95 cursor-pointer"
                   onPress={handleConfirm}
                   isDisabled={selectedCount === 0}
                 >
