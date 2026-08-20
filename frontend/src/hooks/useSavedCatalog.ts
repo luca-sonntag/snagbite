@@ -474,7 +474,7 @@ export function useSavedCatalog({
         itemsToAdd.push({
           ...ing,
           unit: ing.unit || '',
-          category: ing.category || group.name,
+          category: group.name || ing.category,
         });
       });
     });

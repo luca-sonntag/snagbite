@@ -64,7 +64,7 @@ export default function ShoppingConfirmSheet({
             ...ing,
             amount: scaledAmount,
             unit: ing.unit || '',
-            category: ing.category || group.name,
+            category: group.name || ing.category,
           });
         }
       });
