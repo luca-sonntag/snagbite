@@ -191,15 +191,21 @@ async function fetchFluxImageBuffer(prompt: string): Promise<Buffer> {
     throw new Error('Custom FLUX endpoint returned unexpected JSON response shape');
   }
 
-  // Default / Pollinations fallback (free, instant, 0-config)
+  // Default / Pollinations fallback (free, instant, 0-config or with key)
   const seed = Math.floor(Math.random() * 1000000);
-  const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux&width=1024&height=768&nologo=true&seed=${seed}`;
+  const keyParam = apiKey ? `&key=${encodeURIComponent(apiKey)}` : '';
+  const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux&width=1024&height=768&nologo=true&seed=${seed}${keyParam}`;
+
+  const headers: Record<string, string> = {
+    'User-Agent': 'Cookbook-Recipe-App/1.0',
+  };
+  if (apiKey) {
+    headers['Authorization'] = `Bearer ${apiKey}`;
+  }
 
   const response = await fetch(pollinationsUrl, {
     method: 'GET',
-    headers: {
-      'User-Agent': 'Cookbook-Recipe-App/1.0',
-    },
+    headers,
   });
 
   if (!response.ok) {
