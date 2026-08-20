@@ -7,7 +7,8 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --mode local",
+    "dev:remote": "vite --mode development",
     "build": "tsc -b && vite build",
     "build:dev": "tsc -b && vite build --mode development --sourcemap",
     "lint": "eslint .",
