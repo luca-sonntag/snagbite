@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Card, Button } from '@heroui/react';
-import { Check, Plus, Flame, Salad, ChevronRight } from 'lucide-react';
+import { Check, Plus, Flame, Salad, ChevronRight, Users } from 'lucide-react';
 import type { Ingredient, Recipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { getCategoryTheme } from '../../i18n';
@@ -51,46 +51,63 @@ export default function RecipeIngredients({
     0
   );
 
+  const medallion =
+    'w-9 h-9 rounded-full bg-emerald-500/5 flex items-center justify-center flex-shrink-0';
+  const medallionIcon = 'w-[18px] h-[18px] text-emerald-600 dark:text-emerald-400';
+  const blockLabel =
+    'text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500';
+
   return (
     <div className="flex flex-col gap-4 pb-4">
-      <div>
-        <div className="flex items-center justify-between gap-2 mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-emerald-500/5 flex items-center justify-center flex-shrink-0">
-              <Salad className="w-[18px] h-[18px] text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <h3 className="text-base font-bold text-gray-900 dark:text-white">{t('recipe.tabIngredients')}</h3>
-            {ingredientCount > 0 && (
-              <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">
-                ({ingredientCount})
-              </span>
-            )}
+      {/* Section Header (OUTSIDE card) */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-3">
+          <div className={medallion}>
+            <Salad className={medallionIcon} />
           </div>
-          {hasIngredientNutrition && (
-            <button
-              type="button"
-              onClick={onToggleIngredientNutrition}
-              className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all select-none border-none active:scale-95 cursor-pointer ${
-                showIngredientNutrition
-                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
-                  : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-              }`}
-              title={
-                !isPremium
-                  ? t('recipe.aiIngredientsEstimateTooltip')
-                  : t('recipe.verifiedDatabaseTooltip')
-              }
-            >
-              <Flame className="w-3.5 h-3.5" />
-              <span>{t('recipe.showNutritionPerIngredient')}</span>
-            </button>
+          <h3 className="text-base font-bold text-gray-900 dark:text-white">{t('recipe.tabIngredients')}</h3>
+          {ingredientCount > 0 && (
+            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 rounded-full px-2.5 py-1 tabular-nums select-none">
+              {ingredientCount}
+            </span>
           )}
         </div>
-        {/* Portion scaling sits directly above the amounts it rewrites. */}
-        <div className="flex items-center justify-between gap-3 mb-3 px-1">
-          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-            {t('recipe.serves')}
-          </span>
+        {hasIngredientNutrition && (
+          <button
+            type="button"
+            onClick={onToggleIngredientNutrition}
+            className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all select-none border-none active:scale-95 cursor-pointer ${
+              showIngredientNutrition
+                ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
+                : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+            }`}
+            title={
+              !isPremium
+                ? t('recipe.aiIngredientsEstimateTooltip')
+                : t('recipe.verifiedDatabaseTooltip')
+            }
+          >
+            <Flame className="w-3.5 h-3.5" />
+            <span>{t('recipe.showNutritionPerIngredient')}</span>
+          </button>
+        )}
+      </div>
+
+      {/* Main Cohesive Card Group (Portions + Ingredients List + Shopping Button) */}
+      <div className="glass-panel rounded-2xl overflow-hidden">
+        {/* 1. Servings / Portion scaling header inside card */}
+        <div className="px-5 py-4 sm:px-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className={medallion}>
+              <Users className={medallionIcon} />
+            </div>
+            <div className="flex flex-col">
+              <span className={blockLabel}>{t('recipe.serves')}</span>
+              <span className="text-xs font-bold text-gray-800 dark:text-gray-200 mt-0.5">
+                {t('recipe.servingsCount', { count: servings })}
+              </span>
+            </div>
+          </div>
           <RecipeServingsStepper
             servings={servings}
             onDecreaseServings={onDecreaseServings}
@@ -98,8 +115,8 @@ export default function RecipeIngredients({
           />
         </div>
 
-        <Card className="glass-panel p-5 rounded-2xl">
-        <div className="flex flex-col gap-6">
+        {/* 2. Grouped Ingredients List */}
+        <div className="px-5 py-5 sm:px-6 border-t border-black/5 dark:border-white/5 flex flex-col gap-6">
           {sortedIngredients.map(({ group, originalIdx }) => {
             const theme = getCategoryTheme(group.name);
             return (
@@ -198,28 +215,32 @@ export default function RecipeIngredients({
             </div>
           );
         })}
-      </div>
-      </Card>
+        </div>
 
+        {/* 3. Add to Shopping List Button (Inside Card Footer) */}
         {onAddIngredients && (
-          <Button
-            className={`w-full mt-5 py-3.5 rounded-xl font-semibold shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-white h-12 text-sm ${
-              isAdded ? 'bg-emerald-500' : 'bg-emerald-600 hover:bg-emerald-500'
-            }`}
-            onPress={onAddIngredients}
-          >
-            {isAdded ? (
-              <>
-                <Check className="w-4.5 h-4.5" />
-                <span>{t('recipe.addedToShopping')}</span>
-              </>
-            ) : (
-              <>
-                <Plus className="w-4.5 h-4.5" />
-                <span>{t('recipe.addToShopping')}</span>
-              </>
-            )}
-          </Button>
+          <div className="px-5 py-3.5 sm:px-6 border-t border-black/5 dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.01]">
+            <Button
+              className={`w-full py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 h-11 text-xs sm:text-sm active:scale-[0.98] ${
+                isAdded
+                  ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                  : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 shadow-xs'
+              }`}
+              onPress={onAddIngredients}
+            >
+              {isAdded ? (
+                <>
+                  <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>{t('recipe.addedToShopping')}</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>{t('recipe.addToShopping')}</span>
+                </>
+              )}
+            </Button>
+          </div>
         )}
       </div>
 
