@@ -47,8 +47,10 @@ export default function RecipeStickyBar({
   return (
     <div
       id="recipe-sticky-bar"
-      className={`sticky top-[var(--app-sticky-top)] z-30 -mx-4 px-4 bg-[#f9fafb]/95 dark:bg-gray-950/95 backdrop-blur-md transition-all duration-200 before:content-[''] before:absolute before:bottom-full before:inset-x-0 before:h-12 before:bg-[#f9fafb] dark:before:bg-gray-950 before:pointer-events-none ${
-        isCollapsed ? 'border-b border-black/5 dark:border-white/5 shadow-xs pb-0.5' : ''
+      className={`sticky top-[var(--app-sticky-top)] z-30 -mx-4 px-4 bg-[#f9fafb]/95 dark:bg-gray-950/95 backdrop-blur-md transition-all duration-200 ${
+        isCollapsed
+          ? 'border-b border-black/5 dark:border-white/5 shadow-xs pb-0.5 before:content-[\'\'] before:absolute before:bottom-full before:inset-x-0 before:h-12 before:bg-[#f9fafb] dark:before:bg-gray-950 before:pointer-events-none'
+          : ''
       }`}
     >
       {/* Collapsed title row — only present once the hero has scrolled away. */}
