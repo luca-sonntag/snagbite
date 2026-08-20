@@ -54,12 +54,12 @@ export default function CookedButton({
         <button
           type="button"
           onClick={() => setIsModalOpen(true)}
-          className={`relative px-2.5 py-1.5 text-gray-700 dark:text-gray-300 hover:text-emerald-500 dark:hover:text-emerald-400 active:scale-90 transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 outline-none border-none group ${className}`}
+          className={`relative flex flex-col items-center justify-center gap-1 min-w-[4.25rem] px-2 py-2 rounded-2xl transition-all active:scale-95 cursor-pointer outline-none border-none group text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] ${className}`}
           title={t('app.gamification.cookedCardBtn')}
           aria-label={t('app.gamification.cookedCardBtn')}
         >
-          <CheckCheck className="w-5 h-5 group-hover:scale-110 transition-transform text-emerald-500 dark:text-emerald-400" />
-          <span className="text-[9.5px] font-medium tracking-wide leading-none whitespace-nowrap opacity-70">
+          <CheckCheck className="w-5 h-5" />
+          <span className="text-[10px] font-semibold tracking-wide leading-none whitespace-nowrap">
             {t('recipe.dockCooked')}
           </span>
         </button>
