@@ -21,6 +21,14 @@ interface RecipeInstructionTextProps {
   stepNum?: number;
 }
 
+/**
+ * Equipment and temperature are both context rather than something to act on,
+ * so they share one quiet chip — defined once so the two cannot drift apart.
+ * Colour stays reserved for the tappable things: ingredients and timers.
+ */
+const CONTEXT_CHIP =
+  'bg-black/[0.06] dark:bg-white/[0.09] rounded px-1.5 py-[1.5px] text-gray-700 dark:text-gray-300';
+
 export default function RecipeInstructionText({ text, recipe, formatAmount, stepNum,
   variant = 'list',
 }: RecipeInstructionTextProps) {
@@ -181,14 +189,14 @@ export default function RecipeInstructionText({ text, recipe, formatAmount, step
                   }
                   setTimerSheet({ isOpen: true, seconds, label: text });
                 } : undefined}
-                className={`inline-flex items-center gap-0.5 font-semibold transition-all select-none ${
+                className={`inline-flex items-center gap-0.5 align-middle font-semibold transition-all select-none ${
                   canTimer
                     ? 'text-blue-600 dark:text-blue-500 cursor-pointer hover:underline decoration-blue-500/30 underline-offset-4 active:scale-95'
                     : 'text-gray-500 dark:text-gray-400 cursor-default'
                 }`}
                 title={canTimer ? 'Timer starten / Start timer' : undefined}
               >
-                <Clock className={`w-4 h-4 shrink-0 inline align-text-bottom ${
+                <Clock className={`w-4 h-4 shrink-0 ${
                   canTimer ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
                 }`} />
                 {timeText}
@@ -202,11 +210,11 @@ export default function RecipeInstructionText({ text, recipe, formatAmount, step
             return (
               <span
                 key={index}
-                className={`font-semibold cursor-default select-none ${
+                className={
                   variant === 'focused'
-                    ? 'text-orange-600 dark:text-orange-500'
-                    : 'text-gray-900 dark:text-white'
-                }`}
+                    ? 'font-semibold text-orange-600 dark:text-orange-500 cursor-default select-none'
+                    : `${CONTEXT_CHIP} cursor-default select-none`
+                }
               >
                 {part}
               </span>
@@ -222,13 +230,10 @@ export default function RecipeInstructionText({ text, recipe, formatAmount, step
                 <span
                   key={index}
                   className={
-                    // In the compact list a soft chip is what makes equipment
-                    // visible without shouting. In cooking mode the step is set
-                    // large and bold, where that same chip reads as a button
-                    // dropped into the sentence — there the word carries itself.
-                    variant === 'focused'
-                      ? undefined
-                      : 'bg-black/[0.06] dark:bg-white/[0.09] rounded px-1.5 py-[1.5px] text-gray-700 dark:text-gray-300'
+                    // In cooking mode the step is set large and bold, where the
+                    // chip reads as a button dropped into the sentence — there
+                    // the word carries itself.
+                    variant === 'focused' ? undefined : CONTEXT_CHIP
                   }
                 >
                   {part}
