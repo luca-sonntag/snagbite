@@ -95,253 +95,67 @@ export function normalizeUnit(rawUnit?: string): string {
 }
 
 /**
- * Universal canonical map for staple grocery foods in German and English.
- * Bridges plural/singular and German/English inputs to a universal canonical key.
+ * Resolves the raw parent ingredient if explicitly provided by AI schema.
  */
-const CANONICAL_FOOD_KEYS: Record<string, string> = {
-  // Eggs & Egg parts
-  'ei': 'egg',
-  'eier': 'egg',
-  'hühnerei': 'egg',
-  'hühnereier': 'egg',
-  'eigelb': 'egg',
-  'eiweiß': 'egg',
-  'eigelbe': 'egg',
-  'eiweiße': 'egg',
-  'egg': 'egg',
-  'eggs': 'egg',
-  'egg yolk': 'egg',
-  'egg white': 'egg',
-  'uova': 'egg',
-  'uovo': 'egg',
-  'oeuf': 'egg',
-  'oeufs': 'egg',
-  'huevo': 'egg',
-  'huevos': 'egg',
-
-  // Alliums
-  'zwiebel': 'onion',
-  'zwiebeln': 'onion',
-  'gemüsezwiebel': 'onion',
-  'gemüsezwiebeln': 'onion',
-  'rote zwiebel': 'onion',
-  'rote zwiebeln': 'onion',
-  'weiße zwiebel': 'onion',
-  'weiße zwiebeln': 'onion',
-  'schalotte': 'onion',
-  'schalotten': 'onion',
-  'onion': 'onion',
-  'onions': 'onion',
-  'cipolla': 'onion',
-  'cipolle': 'onion',
-  'oignon': 'onion',
-  'oignons': 'onion',
-  'cebolla': 'onion',
-  'cebollas': 'onion',
-  'knoblauch': 'garlic',
-  'knoblauchzehe': 'garlic',
-  'knoblauchzehen': 'garlic',
-  'garlic': 'garlic',
-  'garlic clove': 'garlic',
-  'garlic cloves': 'garlic',
-  'aglio': 'garlic',
-  'ail': 'garlic',
-  'ajo': 'garlic',
-
-  // Solanaceae & Roots
-  'tomate': 'tomato',
-  'tomaten': 'tomato',
-  'strauchtomate': 'tomato',
-  'strauchtomaten': 'tomato',
-  'romatomate': 'tomato',
-  'romatomaten': 'tomato',
-  'kirschtomate': 'tomato',
-  'kirschtomaten': 'tomato',
-  'cherrytomate': 'tomato',
-  'cherrytomaten': 'tomato',
-  'fleischtomate': 'tomato',
-  'fleischtomaten': 'tomato',
-  'tomato': 'tomato',
-  'tomatoes': 'tomato',
-  'pomodoro': 'tomato',
-  'pomodori': 'tomato',
-  'kartoffel': 'potato',
-  'kartoffeln': 'potato',
-  'speisekartoffel': 'potato',
-  'speisekartoffeln': 'potato',
-  'süßkartoffel': 'potato',
-  'süßkartoffeln': 'potato',
-  'potato': 'potato',
-  'potatoes': 'potato',
-  'patata': 'potato',
-  'patate': 'potato',
-  'karotte': 'carrot',
-  'karotten': 'carrot',
-  'möhre': 'carrot',
-  'möhren': 'carrot',
-  'carrot': 'carrot',
-  'carrots': 'carrot',
-  'gurke': 'cucumber',
-  'gurken': 'cucumber',
-  'salatgurke': 'cucumber',
-  'salatgurken': 'cucumber',
-  'cucumber': 'cucumber',
-  'cucumbers': 'cucumber',
-  'paprika': 'bell pepper',
-  'paprikas': 'bell pepper',
-  'spitzpaprika': 'bell pepper',
-  'gemüsepaprika': 'bell pepper',
-  'bell pepper': 'bell pepper',
-  'bell peppers': 'bell pepper',
-
-  // Citrus & Fruits
-  'zitrone': 'lemon',
-  'zitronen': 'lemon',
-  'zitronensaft': 'lemon',
-  'zitronenabrieb': 'lemon',
-  'zitronenschale': 'lemon',
-  'lemon': 'lemon',
-  'lemons': 'lemon',
-  'lemon juice': 'lemon',
-  'lemon zest': 'lemon',
-  'limette': 'lime',
-  'limetten': 'lime',
-  'limettensaft': 'lime',
-  'limettenabrieb': 'lime',
-  'lime': 'lime',
-  'limes': 'lime',
-  'orange': 'orange',
-  'orangen': 'orange',
-  'orangensaft': 'orange',
-  'orangenabrieb': 'orange',
-  'oranges': 'orange',
-  'apfel': 'apple',
-  'äpfel': 'apple',
-  'apple': 'apple',
-  'apples': 'apple',
-  'avocado': 'avocado',
-  'avocados': 'avocado',
-  'banane': 'banana',
-  'bananen': 'banana',
-  'banana': 'banana',
-  'bananas': 'banana',
-
-  // Fungi & Berries
-  'champignon': 'mushroom',
-  'champignons': 'mushroom',
-  'pilz': 'mushroom',
-  'pilze': 'mushroom',
-  'mushroom': 'mushroom',
-  'mushrooms': 'mushroom',
-  'erdbeere': 'strawberry',
-  'erdbeeren': 'strawberry',
-  'strawberry': 'strawberry',
-  'strawberries': 'strawberry',
-  'himbeere': 'raspberry',
-  'himbeeren': 'raspberry',
-  'raspberry': 'raspberry',
-  'raspberries': 'raspberry',
-  'blaubeere': 'blueberry',
-  'blaubeeren': 'blueberry',
-  'heidelbeere': 'blueberry',
-  'heidelbeeren': 'blueberry',
-  'blueberry': 'blueberry',
-  'blueberries': 'blueberry',
-
-  // Grains & Dairy
-  'nudel': 'pasta',
-  'nudeln': 'pasta',
-  'pasta': 'pasta',
-  'haferflocke': 'oats',
-  'haferflocken': 'oats',
-  'oat': 'oats',
-  'oats': 'oats',
-  'butter': 'butter',
-  'mozzarella': 'mozzarella',
-  'gouda': 'gouda',
-  'parmesan': 'parmesan',
-  'frischkäse': 'cream cheese',
-  'cream cheese': 'cream cheese',
-  'hafermilch': 'oat milk',
-  'oat milk': 'oat milk',
-  'milch': 'milk',
-  'milk': 'milk',
-};
-
-/**
- * Normalizes any food term (German or English, singular or plural) to its canonical base key.
- */
-export function toFoodCanonicalKey(rawText: string): string {
-  if (!rawText) return '';
-  const clean = normalizeIngredientName(rawText).toLowerCase().trim();
-
-  // 1. Exact canonical mapping (bridges German, plural forms and English)
-  if (CANONICAL_FOOD_KEYS[clean]) {
-    return CANONICAL_FOOD_KEYS[clean];
-  }
-
-  // 2. Strip common superficial adjectives (e.g. "Mozzarella light" -> "mozzarella")
-  const stripped = clean
-    .replace(/\b(light|mager|fettarm|gerieben|gehackt|gewürfelt|fein|grob|frisch|bio|mini|groß|klein)\b/gi, '')
-    .trim()
-    .replace(/\s+/g, ' ');
-
-  if (stripped && CANONICAL_FOOD_KEYS[stripped]) {
-    return CANONICAL_FOOD_KEYS[stripped];
-  }
-
-  // 3. English singular conversion
-  const singularEnglish = toEnglishSingular(stripped || clean);
-  if (CANONICAL_FOOD_KEYS[singularEnglish]) {
-    return CANONICAL_FOOD_KEYS[singularEnglish];
-  }
-
-  // 4. Fallback to singular English or clean text
-  return singularEnglish;
-}
-
-/**
- * Resolves the raw parent ingredient for derived components.
- */
-export function getParentIngredient(item: {
-  name?: string;
-  baseName?: string;
-  unit?: string;
-  parentIngredient?: ParentIngredientInfo;
-}): ParentIngredientInfo | null {
-  // 1. Explicit AI parent provided
+export function getParentIngredient(item: { parentIngredient?: ParentIngredientInfo }): ParentIngredientInfo | null {
   if (item.parentIngredient?.name && item.parentIngredient?.baseName) {
-    const parentKey = toFoodCanonicalKey(item.parentIngredient.baseName);
-    const itemKey = toFoodCanonicalKey(item.baseName || item.name || '');
-
-    // Prevent old stale self-parents from corrupting grouping if name matches
-    if (parentKey === itemKey && !['eigelb', 'eiweiß', 'zitronensaft', 'zitronenabrieb', 'limettensaft', 'knoblauchzehe'].includes((item.name || '').toLowerCase())) {
-      return null;
-    }
     return item.parentIngredient;
   }
-
-  // 2. Derived component rules (e.g. Eigelb -> Ei, Zitronenabrieb -> Zitrone)
-  const cleanName = (item.name || '').toLowerCase().trim();
-  if (['eigelb', 'eiweiß', 'eigelbe', 'eiweiße'].includes(cleanName)) {
-    return { name: 'Ei', baseName: 'egg', unit: 'Stück' };
-  }
-  if (['zitronenabrieb', 'zitronenschale', 'zitronensaft'].includes(cleanName)) {
-    return { name: 'Zitrone', baseName: 'lemon', unit: 'Stück' };
-  }
-  if (['limettenabrieb', 'limettenschale', 'limettensaft'].includes(cleanName)) {
-    return { name: 'Limette', baseName: 'lime', unit: 'Stück' };
-  }
-  if (['knoblauchzehe', 'knoblauchzehen'].includes(cleanName)) {
-    return { name: 'Knoblauch', baseName: 'garlic', unit: 'Zehe' };
-  }
-
   return null;
 }
 
 /**
+ * Fallback plural map for legacy localStorage entries or manual items without baseName.
+ */
+const FALLBACK_PLURAL_MAP: Record<string, string> = {
+  'eier': 'egg',
+  'ei': 'egg',
+  'eigelb': 'egg',
+  'eigelbe': 'egg',
+  'eiweiß': 'egg',
+  'eiweiße': 'egg',
+  'zwiebeln': 'onion',
+  'zwiebel': 'onion',
+  'schalotten': 'onion',
+  'schalotte': 'onion',
+  'tomaten': 'tomato',
+  'tomate': 'tomato',
+  'kartoffeln': 'potato',
+  'kartoffel': 'potato',
+  'karotten': 'carrot',
+  'karotte': 'carrot',
+  'möhren': 'carrot',
+  'möhre': 'carrot',
+  'gurken': 'cucumber',
+  'gurke': 'cucumber',
+  'zitronen': 'lemon',
+  'zitrone': 'lemon',
+  'limetten': 'lime',
+  'limette': 'lime',
+  'orangen': 'orange',
+  'orange': 'orange',
+  'äpfel': 'apple',
+  'apfel': 'apple',
+  'bananen': 'banana',
+  'banane': 'banana',
+  'champignons': 'mushroom',
+  'champignon': 'mushroom',
+  'pilze': 'mushroom',
+  'pilz': 'mushroom',
+  'erdbeeren': 'strawberry',
+  'erdbeere': 'strawberry',
+  'himbeeren': 'raspberry',
+  'himbeere': 'raspberry',
+  'blaubeeren': 'blueberry',
+  'blaubeere': 'blueberry',
+  'knoblauchzehen': 'garlic',
+  'knoblauchzehe': 'garlic',
+  'knoblauch': 'garlic',
+};
+
+/**
  * Computes the authoritative universal base key used for grouping items on the shopping list.
- * Unifies English baseNames, German ingredient names, and derived parents into identical keys.
+ * 100% language-agnostic by using the AI's English singular baseName contract, with fallback for manual/legacy items.
  */
 export function normalizeFoodBaseKey(item: {
   name: string;
@@ -349,8 +163,17 @@ export function normalizeFoodBaseKey(item: {
   parentIngredient?: ParentIngredientInfo;
 }): string {
   const parent = getParentIngredient(item);
-  const rawKey = parent?.baseName || item.baseName || item.name;
-  return toFoodCanonicalKey(rawKey);
+  if (parent?.baseName) {
+    return toEnglishSingular(parent.baseName);
+  }
+  if (item.baseName) {
+    return toEnglishSingular(item.baseName);
+  }
+  const clean = normalizeIngredientName(item.name).toLowerCase();
+  if (FALLBACK_PLURAL_MAP[clean]) {
+    return FALLBACK_PLURAL_MAP[clean];
+  }
+  return toEnglishSingular(clean);
 }
 
 /**

@@ -472,11 +472,9 @@ export function useSavedCatalog({
     r.ingredients.forEach((group) => {
       group.items.forEach((ing) => {
         itemsToAdd.push({
-          name: ing.name,
-          amount: ing.amount,
+          ...ing,
           unit: ing.unit || '',
-          notes: ing.notes,
-          category: group.name
+          category: ing.category || group.name,
         });
       });
     });

@@ -61,12 +61,10 @@ export default function ShoppingConfirmSheet({
           const baseAmount = ing.amount || 0;
           const scaledAmount = baseAmount * scaleFactor;
           itemsToAdd.push({
-            name: ing.name,
+            ...ing,
             amount: scaledAmount,
             unit: ing.unit || '',
-            notes: ing.notes,
-            modifier: ing.modifier,
-            category: group.name,
+            category: ing.category || group.name,
           });
         }
       });
