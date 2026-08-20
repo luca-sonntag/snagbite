@@ -89,6 +89,7 @@ const SCENE_ORDER: ProgressStage[] = [
   'downloading_media',
   'extracting_frames',
   'extracting_recipe',
+  'generating_cover',
   'finalizing'
 ];
 
@@ -96,6 +97,7 @@ const PHOTO_SCENE_ORDER: ProgressStage[] = [
   'queued',
   'reading_photos',
   'extracting_recipe',
+  'generating_cover',
   'finalizing'
 ];
 
@@ -105,7 +107,8 @@ const SCENE_TARGET_PERCENT: Record<ProgressStage, number> = {
   downloading_media: 50,
   extracting_frames: 65,
   reading_photos: 30,
-  extracting_recipe: 85,
+  extracting_recipe: 75,
+  generating_cover: 88,
   finalizing: 95,
 };
 
