@@ -1,10 +1,16 @@
 import { config } from './config.js';
 import { getClient } from './db.js';
+import type { FluxUsageInfo } from './types.js';
 
 export interface GenerateCoverOptions {
   prompt: string;
   jobId: string;
   userId?: string | null;
+}
+
+export interface GenerateCoverResult {
+  imageUrl: string | null;
+  usage?: FluxUsageInfo | null;
 }
 
 const STORAGE_BUCKET = 'recipe-covers';
@@ -82,20 +88,20 @@ async function fetchFluxImageBuffer(prompt: string): Promise<Buffer> {
 
 /**
  * Generates an AI food photography cover image with FLUX.1 [schnell] for a recipe,
- * stores it in Supabase Storage, and returns the public image URL.
- * Returns null if generation is disabled, prompt is empty, or generation fails.
+ * stores it in Supabase Storage, and returns the public image URL and usage.
+ * Returns null imageUrl if generation is disabled, prompt is empty, or generation fails.
  */
-export async function generateRecipeCoverImage(opts: GenerateCoverOptions): Promise<string | null> {
+export async function generateRecipeCoverImage(opts: GenerateCoverOptions): Promise<GenerateCoverResult> {
   const { prompt, jobId, userId } = opts;
 
   if (!config.GENERATE_RECIPE_COVERS) {
     console.log(`[imageGenerator] Cover generation disabled via GENERATE_RECIPE_COVERS=false.`);
-    return null;
+    return { imageUrl: null, usage: null };
   }
 
   if (!prompt || typeof prompt !== 'string' || prompt.trim() === '') {
     console.log(`[imageGenerator] No imagePrompt provided for job ${jobId}, skipping cover generation.`);
-    return null;
+    return { imageUrl: null, usage: null };
   }
 
   const startTime = Date.now();
@@ -103,6 +109,7 @@ export async function generateRecipeCoverImage(opts: GenerateCoverOptions): Prom
     await ensureBucketExists();
 
     const imageBuffer = await fetchFluxImageBuffer(prompt.trim());
+    const durationMs = Date.now() - startTime;
 
     const userFolder = userId ? userId : 'anonymous';
     const storagePath = `${userFolder}/${jobId}.jpg`;
@@ -127,10 +134,19 @@ export async function generateRecipeCoverImage(opts: GenerateCoverOptions): Prom
       throw new Error('Supabase Storage did not return a valid public URL for recipe cover.');
     }
 
-    console.log(`[imageGenerator] Successfully generated and hosted AI recipe cover for job ${jobId} in ${Date.now() - startTime}ms: ${publicUrl}`);
-    return publicUrl;
+    const usage: FluxUsageInfo = {
+      model: 'flux-1-schnell',
+      durationMs,
+      costUsd: 0.0035,
+      costFormatted: '$0.0035',
+      inferenceSteps: 4,
+      imageSize: 'landscape_4_3',
+    };
+
+    console.log(`[imageGenerator] Successfully generated and hosted AI recipe cover for job ${jobId} in ${durationMs}ms: ${publicUrl}`);
+    return { imageUrl: publicUrl, usage };
   } catch (error: any) {
     console.warn(`[imageGenerator] Cover image generation failed for job ${jobId} (elapsed: ${Date.now() - startTime}ms): ${error?.message || error}`);
-    return null;
+    return { imageUrl: null, usage: null };
   }
 }

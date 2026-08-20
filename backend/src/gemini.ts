@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI, FunctionDeclarationSchemaType } from '@google/generative-ai';
 import { GoogleAIFileManager } from '@google/generative-ai/files';
 import { config } from './config.js';
-import { Recipe } from './types.js';
+import { Recipe, GeminiUsageInfo } from './types.js';
 import { writeGeminiLog, estimateCost, type TokenUsage } from './logger.js';
 import { AppError } from './errors.js';
 import { withRetry } from './retry.js';
@@ -360,6 +360,11 @@ function imageMimeType(filePath: string): string {
  */
 export type ImageSourceKind = 'carousel' | 'photo';
 
+export interface ExtractRecipeResult {
+  recipe: Recipe;
+  usage?: GeminiUsageInfo;
+}
+
 export async function extractRecipe(
   audioFilePath: string | undefined,
   mimeType: string | undefined,
@@ -370,7 +375,7 @@ export async function extractRecipe(
   htmlContent?: string,
   carouselImagePaths?: string[],
   imageSourceKind: ImageSourceKind = 'carousel'
-): Promise<Recipe> {
+): Promise<ExtractRecipeResult> {
   if (!config.GEMINI_API_KEY || config.GEMINI_API_KEY === 'your_gemini_api_key_here') {
     throw new Error('Gemini API key is not configured in environment variables.');
   }
@@ -610,7 +615,7 @@ ${caption.trim() ? `\nDescription/Caption:\n"""\n${caption}\n"""` : ''}${htmlCon
     const costEstimate = tokenUsage ? estimateCost(config.GEMINI_MODEL, tokenUsage) : undefined;
     const durationMs = Date.now() - startTime;
 
-    recipe.geminiUsage = {
+    const geminiUsage: GeminiUsageInfo = {
       tokenUsage,
       costEstimate,
       durationMs,
@@ -639,7 +644,7 @@ ${caption.trim() ? `\nDescription/Caption:\n"""\n${caption}\n"""` : ''}${htmlCon
       logDir,
     });
 
-    return recipe;
+    return { recipe, usage: geminiUsage };
   } catch (err: any) {
     void writeGeminiLog({
       timestamp,
@@ -810,6 +815,11 @@ export async function selectBestFoodFrame(framePaths: string[], gridImagePath: s
   }
 }
 
+export interface RemixRecipeResult {
+  recipe: Recipe;
+  usage?: GeminiUsageInfo;
+}
+
 /**
  * Takes an existing recipe and a user prompt, and asks Gemini to remix the recipe.
  */
@@ -818,7 +828,7 @@ export async function remixRecipe(
   remixPrompt: string,
   logDir?: string,
   userPrefs?: UserPreferences
-): Promise<Recipe> {
+): Promise<RemixRecipeResult> {
   const startTime = Date.now();
   const timestamp = new Date().toISOString();
   let rawOutput: string | undefined;
@@ -883,12 +893,20 @@ ${JSON.stringify(parentRecipe, null, 2)}`;
       }
       : undefined;
     const costEstimate = tokenUsage ? estimateCost(config.GEMINI_MODEL, tokenUsage) : undefined;
+    const durationMs = Date.now() - startTime;
+
+    const geminiUsage: GeminiUsageInfo = {
+      tokenUsage,
+      costEstimate,
+      durationMs,
+      model: config.GEMINI_MODEL,
+    };
 
     void writeGeminiLog({
       timestamp,
       requestType: 'remix_recipe',
       model: config.GEMINI_MODEL,
-      durationMs: Date.now() - startTime,
+      durationMs,
       success: true,
       input: {
         remixPrompt,
@@ -901,7 +919,7 @@ ${JSON.stringify(parentRecipe, null, 2)}`;
       logDir,
     });
 
-    return recipe;
+    return { recipe, usage: geminiUsage };
   } catch (err: any) {
     void writeGeminiLog({
       timestamp,
