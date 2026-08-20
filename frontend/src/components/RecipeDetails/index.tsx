@@ -381,9 +381,12 @@ export default function RecipeDetails({
   }, [recipe.instructions, checkedSteps]);
   const progressPercent = totalStepsCount > 0 ? (completedStepsCount / totalStepsCount) * 100 : 0;
 
-  // Get nutritional info (either reel-level or aggregated per-ingredient AI estimates)
+  // Get nutritional info (either reel-level or aggregated per-ingredient AI estimates).
+  // NOTE: Do NOT pass `servings` here – the scaling stepper changes ingredient amounts only.
+  // Nutrition per serving is always derived from recipe.servings (the stored base);
+  // only AdjustServingsSheet (with Save) may change that base.
   const { nutritionalValues, sourceNutritionalValues, isAiEstimated, isVerified, hasNutritionInfo } =
-    useRecipeNutrition(recipe, servings);
+    useRecipeNutrition(recipe);
 
   // Prep + cook collapsed into the single figure shown in the meta strip. Both
   // fields may be legacy strings ("20 Min."), so pull the leading number out.
@@ -779,9 +782,7 @@ export default function RecipeDetails({
       <AdjustServingsSheet
         isOpen={isAdjustServingsOpen}
         onClose={() => setIsAdjustServingsOpen(false)}
-        baseServings={servings}
-        // The derived figure, not the stored one — the preview must match what the
-        // nutrition card will show once the new serving count is applied.
+        baseServings={recipe.servings || 1}
         nutritionalValues={nutritionalValues}
         onSave={handleSaveAdjustedServings}
       />
