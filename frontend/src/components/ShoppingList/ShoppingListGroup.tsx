@@ -1,7 +1,6 @@
 import { CheckCheck } from 'lucide-react';
 import type { AggregatedShoppingItem } from '../../types';
 import { translateCategory, getCategoryTheme } from '../../i18n';
-import { tint } from '../../utils/tint';
 import { useI18n } from '../../context/I18nContext';
 import ShoppingListItem from './ShoppingListItem';
 
@@ -45,8 +44,7 @@ export default function ShoppingListGroup({
         return (
           <div
             key={group.category}
-            style={tint(theme.hex)}
-            className={`tint-surface flex flex-col p-2.5 rounded-2xl shadow-[0_2px_6px_rgba(0,0,0,0.03)] transition-all ${
+            className={`flex flex-col p-2.5 rounded-2xl bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] transition-all ${
               isGroupCollapsing ? 'animate-group-collapse' : 'animate-group-expand'
             }`}
           >
