@@ -11,6 +11,7 @@ const STAGE_KEY: Record<ProgressStage, string> = {
   extracting_frames: 'activeExtractions.stages.extracting_frames',
   reading_photos: 'activeExtractions.stages.reading_photos',
   extracting_recipe: 'activeExtractions.stages.extracting_recipe',
+  generating_cover: 'activeExtractions.stages.generating_cover',
   finalizing: 'activeExtractions.stages.finalizing',
 };
 

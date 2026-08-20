@@ -72,6 +72,10 @@ export interface Recipe {
   transcript?: string | null;
   imageUrl?: string | null;
   imageUrls?: string[];
+  /** Detailed food photography prompt used for FLUX.1 [schnell] cover generation. */
+  imagePrompt?: string | null;
+  /** True when imageUrl is an AI-generated cover image rather than a scraped video thumbnail. */
+  isAiCover?: boolean;
   tags?: string[];
   instagramHandle?: string | null;
   parentJobId?: string | null;
@@ -79,7 +83,7 @@ export interface Recipe {
   remixPrompt?: string | null;
 }
 
-export type ProgressStage = 'queued' | 'scraping' | 'downloading_media' | 'extracting_frames' | 'reading_photos' | 'extracting_recipe' | 'finalizing';
+export type ProgressStage = 'queued' | 'scraping' | 'downloading_media' | 'extracting_frames' | 'reading_photos' | 'extracting_recipe' | 'generating_cover' | 'finalizing';
 
 export interface ProgressData {
   isProgress: true;

@@ -638,6 +638,7 @@ export const uiTranslations = {
           extracting_frames: 'Zubereitungsschritte prüfen...',
           reading_photos: 'Rezeptkarten auslesen...',
           extracting_recipe: 'Rezept strukturieren...',
+          generating_cover: 'Cover-Bild generieren...',
           finalizing: 'Fast fertig, wird serviert...'
         }
       },
@@ -781,6 +782,7 @@ export const uiTranslations = {
         extracting_frames: 'Schritte prüfen…',
         reading_photos: 'Rezeptkarten erfassen…',
         extracting_recipe: 'Rezept strukturieren…',
+        generating_cover: 'Cover-Bild generieren…',
         finalizing: 'Wird serviert…',
       },
     },
@@ -1640,6 +1642,7 @@ export const uiTranslations = {
           extracting_frames: 'Checking recipe steps...',
           reading_photos: 'Reading recipe cards...',
           extracting_recipe: 'Structuring & perfecting recipe...',
+          generating_cover: 'Generating cover image...',
           finalizing: 'Almost ready, serving now...'
         }
       },
@@ -1783,6 +1786,7 @@ export const uiTranslations = {
         extracting_frames: 'Checking steps…',
         reading_photos: 'Reading recipe cards…',
         extracting_recipe: 'Structuring recipe…',
+        generating_cover: 'Generating cover image…',
         finalizing: 'Serving now…',
       },
     },
