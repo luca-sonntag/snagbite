@@ -71,6 +71,13 @@ Karten werden **ohne Rand** (`border-none`) und mit einem **minimalen, weichen S
 * `FloatingActionBar` & Bottom Docks: `bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-full border-none shadow-[0_4px_20px_rgba(0,0,0,0.08)]`.
 * Bottom App Bar Navigation (`App.tsx`): `border-none shadow-[0_-2px_10px_rgba(0,0,0,0.03)]`.
 
+### 3.6 Dialoge, Modals & Bottom Sheets (Drawers)
+* **Container & Radien:** `bg-white dark:bg-gray-900 rounded-3xl md:rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)] p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))]`
+* **Header & Footer:** Niemals Trennlinien (`border-b` / `border-t`), stattdessen offene Weißräume (`pb-3 mb-1` / `pt-3`).
+* **Dialog-Felder:** Flache Inset-Flächen `bg-gray-100 dark:bg-gray-800 border-none rounded-xl md:rounded-2xl px-4 py-3 focus:ring-2 focus:ring-emerald-500/30`.
+* **Vorschlags-Chips:** `border-none rounded-xl md:rounded-2xl px-3 py-1.5`, Inaktiv `bg-gray-100 dark:bg-gray-800`, Aktiv `bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold`.
+* **Aktionsbuttons:** Volle `rounded-2xl font-bold h-12 border-none shadow-none active:scale-95 transition-all`.
+
 ---
 
 ## 4. 🍳 Modul-spezifische Guidelines
