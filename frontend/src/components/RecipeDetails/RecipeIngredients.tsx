@@ -204,9 +204,7 @@ export default function RecipeIngredients({
         {onAddIngredients && (
           <Button
             className={`w-full mt-5 py-3.5 rounded-xl font-semibold shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-white h-12 text-sm ${
-              isAdded
-                ? 'bg-gradient-to-b from-emerald-500 to-emerald-600'
-                : 'bg-gradient-to-b from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500'
+              isAdded ? 'bg-emerald-500' : 'bg-emerald-600 hover:bg-emerald-500'
             }`}
             onPress={onAddIngredients}
           >

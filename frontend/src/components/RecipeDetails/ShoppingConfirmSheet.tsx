@@ -176,7 +176,7 @@ export default function ShoppingConfirmSheet({
                   {t('recipe.shoppingConfirmCancel')}
                 </Button>
                 <Button
-                  className="w-full bg-gradient-to-b from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-semibold shadow-md transition-all h-12 rounded-xl"
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md transition-all h-12 rounded-xl"
                   onPress={handleConfirm}
                   isDisabled={selectedCount === 0}
                 >
