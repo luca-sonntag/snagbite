@@ -29,191 +29,54 @@ async function ensureBucketExists(): Promise<void> {
   }
 }
 
+const FAL_FLUX_ENDPOINT = 'https://fal.run/fal-ai/flux-1/schnell';
+
 /**
- * Calls FLUX.1 [schnell] via the configured AI provider to generate a 4:3 food photography
- * cover image for a recipe.
+ * Calls FLUX.1 [schnell] via fal.ai to generate a 4:3 food photography cover image for a recipe.
+ * Docs: https://fal.ai/models/fal-ai/flux-1/schnell/llms.txt
  */
 async function fetchFluxImageBuffer(prompt: string): Promise<Buffer> {
-  const provider = config.FLUX_PROVIDER || 'pollinations';
-  const apiKey = config.FLUX_API_KEY;
-
-  console.log(`[imageGenerator] Requesting FLUX.1 [schnell] cover via provider "${provider}"...`);
-
-  if (provider === 'together') {
-    if (!apiKey) throw new Error('FLUX_API_KEY / TOGETHER_API_KEY is not configured for provider "together"');
-    const endpoint = config.FLUX_API_ENDPOINT || 'https://api.together.xyz/v1/images/generations';
-
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'black-forest-labs/FLUX.1-schnell',
-        prompt,
-        width: 1024,
-        height: 768,
-        steps: 4,
-        n: 1,
-        response_format: 'b64_json',
-      }),
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`Together AI FLUX generation failed (${response.status}): ${errText}`);
-    }
-
-    const data: any = await response.json();
-    const b64 = data.data?.[0]?.b64_json;
-    if (!b64) throw new Error('Together AI response did not contain image b64_json');
-    return Buffer.from(b64, 'base64');
+  const apiKey = config.FAL_KEY;
+  if (!apiKey) {
+    throw new Error('FAL_KEY (or FLUX_API_KEY) is not configured');
   }
 
-  if (provider === 'fal') {
-    if (!apiKey) throw new Error('FLUX_API_KEY / FAL_KEY is not configured for provider "fal"');
-    const endpoint = config.FLUX_API_ENDPOINT || 'https://fal.run/fal-ai/flux/schnell';
+  const authHeader = apiKey.startsWith('Key ') ? apiKey : `Key ${apiKey}`;
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Key ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        prompt,
-        image_size: { width: 1024, height: 768 },
-        num_inference_steps: 4,
-        enable_safety_checker: false,
-      }),
-    });
+  console.log(`[imageGenerator] Requesting FLUX.1 [schnell] 4:3 cover via fal.ai...`);
 
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`Fal.ai FLUX generation failed (${response.status}): ${errText}`);
-    }
-
-    const data: any = await response.json();
-    const imageUrl = data.images?.[0]?.url;
-    if (!imageUrl) throw new Error('Fal.ai response did not contain image url');
-
-    const imgRes = await fetch(imageUrl);
-    const arrayBuffer = await imgRes.arrayBuffer();
-    return Buffer.from(arrayBuffer);
-  }
-
-  if (provider === 'replicate') {
-    if (!apiKey) throw new Error('FLUX_API_KEY / REPLICATE_API_TOKEN is not configured for provider "replicate"');
-    const endpoint = config.FLUX_API_ENDPOINT || 'https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions';
-
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'wait',
-      },
-      body: JSON.stringify({
-        input: {
-          prompt,
-          aspect_ratio: '4:3',
-          num_inference_steps: 4,
-          output_format: 'jpg',
-        },
-      }),
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`Replicate FLUX generation failed (${response.status}): ${errText}`);
-    }
-
-    const data: any = await response.json();
-    const outputUrl = Array.isArray(data.output) ? data.output[0] : data.output;
-    if (!outputUrl) throw new Error('Replicate response did not contain output image URL');
-
-    const imgRes = await fetch(outputUrl);
-    const arrayBuffer = await imgRes.arrayBuffer();
-    return Buffer.from(arrayBuffer);
-  }
-
-  if (provider === 'huggingface') {
-    if (!apiKey) throw new Error('FLUX_API_KEY / HF_TOKEN is not configured for provider "huggingface"');
-    const endpoint = config.FLUX_API_ENDPOINT || 'https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell';
-
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ inputs: prompt }),
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`HuggingFace FLUX generation failed (${response.status}): ${errText}`);
-    }
-
-    const arrayBuffer = await response.arrayBuffer();
-    return Buffer.from(arrayBuffer);
-  }
-
-  if (provider === 'custom') {
-    if (!config.FLUX_API_ENDPOINT) throw new Error('FLUX_API_ENDPOINT must be set when FLUX_PROVIDER is "custom"');
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
-
-    const response = await fetch(config.FLUX_API_ENDPOINT, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ prompt, width: 1024, height: 768, steps: 4 }),
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`Custom FLUX generation failed (${response.status}): ${errText}`);
-    }
-
-    const contentType = response.headers.get('content-type') || '';
-    if (contentType.startsWith('image/')) {
-      const arrayBuffer = await response.arrayBuffer();
-      return Buffer.from(arrayBuffer);
-    }
-    const data: any = await response.json();
-    if (data.b64_json) return Buffer.from(data.b64_json, 'base64');
-    if (data.url) {
-      const imgRes = await fetch(data.url);
-      const arrayBuffer = await imgRes.arrayBuffer();
-      return Buffer.from(arrayBuffer);
-    }
-    throw new Error('Custom FLUX endpoint returned unexpected JSON response shape');
-  }
-
-  // Default / Pollinations fallback (free, instant, 0-config or with key)
-  const seed = Math.floor(Math.random() * 1000000);
-  const keyParam = apiKey ? `&key=${encodeURIComponent(apiKey)}` : '';
-  const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux&width=1024&height=768&nologo=true&seed=${seed}${keyParam}`;
-
-  const headers: Record<string, string> = {
-    'User-Agent': 'Cookbook-Recipe-App/1.0',
-  };
-  if (apiKey) {
-    headers['Authorization'] = `Bearer ${apiKey}`;
-  }
-
-  const response = await fetch(pollinationsUrl, {
-    method: 'GET',
-    headers,
+  const response = await fetch(FAL_FLUX_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Authorization': authHeader,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      prompt,
+      image_size: 'landscape_4_3',
+      num_inference_steps: 4,
+      output_format: 'jpeg',
+      enable_safety_checker: false,
+    }),
   });
 
   if (!response.ok) {
     const errText = await response.text();
-    throw new Error(`Pollinations FLUX generation failed (${response.status}): ${errText}`);
+    throw new Error(`fal.ai FLUX generation failed (${response.status}): ${errText}`);
   }
 
-  const arrayBuffer = await response.arrayBuffer();
+  const data: any = await response.json();
+  const imageUrl = data.images?.[0]?.url;
+  if (!imageUrl) {
+    throw new Error('fal.ai response did not contain an image URL');
+  }
+
+  const imgRes = await fetch(imageUrl);
+  if (!imgRes.ok) {
+    throw new Error(`Failed to download image from fal.ai CDN (${imgRes.status})`);
+  }
+
+  const arrayBuffer = await imgRes.arrayBuffer();
   return Buffer.from(arrayBuffer);
 }
 
