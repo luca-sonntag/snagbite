@@ -6,6 +6,20 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-20: Synthetischer `parentIngredient`-Fallback in `ingredientTaxonomy.ts` & isolierte GroupKeys entfernt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Synthetische `parentIngredient`-Objekterzeugung für *jede* Zutat (`{ name: displayName, baseName: normalized }`), wodurch Primärartikel (z. B. `Ei`, `Eier`, `Zwiebel`, `Butter`) fälschlich als abgeleitete Derivate behandelt wurden.
+  - Dadurch wurde der universelle englische `baseName` (`egg`, `onion`) in `useShoppingList.ts` durch den sprachspezifischen rohen String (`"eier"` vs. `"ei"`) überschrieben, was zur Trennung von Singular- und Pluralformen (z. B. 6 Stück Eier + 1 Stück Ei als 2 separate Zeilen) auf der Einkaufsliste führte.
+* **Ersetzt durch:**
+  - **Echtes 3-Stufen-Parent-Modell (`ingredientTaxonomy.ts`):** `getParentIngredient` liefert `ParentIngredientInfo` **nur** für echte Derivate/Teilprodukte (`Eigelb/Eiweiß ➔ Ei`, `Zitronenabrieb/Zitronensaft ➔ Zitrone`, `Knoblauchzehe ➔ Knoblauch`). Für Primärlebensmittel wird strikt `null` zurückgegeben.
+  - **Deterministischer Universal-BaseKey (`normalizeFoodBaseKey` & `toEnglishSingular`):** Nutzt kanonische englische Singular-Nomen (`egg`, `onion`, `tomato`) für AI-Zutaten und deutsche Food-Mappings für manuelle Eingaben.
+  - **Smarte dynamische Pluralisierung (`getIngredientDisplayName`):** Automatische Anpassung von Zählartikeln (1 Stück `Ei` ➔ 7 Stück `Eier`, 1 Stück `Zwiebel` ➔ 3 Stück `Zwiebeln`) bei unverändert präziser Bezeichnung für Mengenangaben (`Mozzarella`, `Gouda`, `Frischkäse`).
+  - **Einheiten-Normalisierung (`normalizeUnit`):** Standardisierung von Varianten (`Stück`, `stk`, `stk.`, `pcs`, `""` ➔ `Stück`).
+* **Betroffene Dateien:** `frontend/src/utils/ingredientTaxonomy.ts`, `frontend/src/hooks/useShoppingList.ts`, `frontend/src/utils/__tests__/ingredientTaxonomy.test.ts`.
+
+---
+
 ### 2026-08-20: `recipe.geminiUsage` aus Recipe JSON entfernt & durch dedizierte `jobs.llm_usage` JSONB-Spalte ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
