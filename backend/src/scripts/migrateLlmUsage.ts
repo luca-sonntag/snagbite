@@ -49,7 +49,7 @@ async function main(): Promise<void> {
       const hadGeminiUsage = !!recipe.geminiUsage;
       const isAiCover = recipe.isAiCover === true || (typeof recipe.imageUrl === 'string' && recipe.imageUrl.includes('recipe-covers'));
 
-      let existingUsage: LlmUsage = (row.llm_usage && typeof row.llm_usage === 'object') ? { ...row.llm_usage } : {};
+      let existingUsage: LlmUsage = ((row as any).llm_usage && typeof (row as any).llm_usage === 'object') ? { ...(row as any).llm_usage } : {};
       let changed = false;
 
       if (hadGeminiUsage) {
