@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Card, Button } from '@heroui/react';
-import { Check, Plus, Flame, Salad, ChevronRight, Users } from 'lucide-react';
+import { Check, Flame, Salad, ChevronRight, Users, ShoppingCart } from 'lucide-react';
 import type { Ingredient, Recipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { getCategoryTheme } from '../../i18n';
@@ -221,10 +221,10 @@ export default function RecipeIngredients({
         {onAddIngredients && (
           <div className="px-5 py-3.5 sm:px-6 border-t border-black/5 dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.01]">
             <Button
-              className={`w-full py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 h-11 text-xs sm:text-sm active:scale-[0.98] ${
+              className={`w-full py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 h-11 text-xs sm:text-sm active:scale-[0.98] border-none shadow-none ${
                 isAdded
-                  ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
-                  : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 shadow-xs'
+                  ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
+                  : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400'
               }`}
               onPress={onAddIngredients}
             >
@@ -235,7 +235,7 @@ export default function RecipeIngredients({
                 </>
               ) : (
                 <>
-                  <Plus className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <ShoppingCart className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <span>{t('recipe.addToShopping')}</span>
                 </>
               )}
