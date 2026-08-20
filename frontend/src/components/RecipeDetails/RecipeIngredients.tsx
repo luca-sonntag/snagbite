@@ -96,7 +96,7 @@ export default function RecipeIngredients({
       {/* Main Cohesive Card Group (Portions + Ingredients List + Shopping Button) */}
       <div className="glass-panel rounded-2xl overflow-hidden">
         {/* 1. Servings / Portion scaling header inside card */}
-        <div className="px-5 py-4 sm:px-6 flex items-center justify-between gap-4">
+        <div className="px-4.5 py-3.5 sm:px-6 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className={medallion}>
               <Users className={medallionIcon} />
@@ -116,7 +116,7 @@ export default function RecipeIngredients({
         </div>
 
         {/* 2. Grouped Ingredients List */}
-        <div className="px-5 py-5 sm:px-6 border-t border-black/5 dark:border-white/5 flex flex-col gap-6">
+        <div className="px-4.5 py-4.5 sm:px-6 border-t border-black/5 dark:border-white/5 flex flex-col gap-5">
           {sortedIngredients.map(({ group, originalIdx }) => {
             const theme = getCategoryTheme(group.name);
             return (
@@ -156,10 +156,10 @@ export default function RecipeIngredients({
                       }`}
                     >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <span className="w-20 text-right pr-2.5 border-r border-black/5 dark:border-white/10 font-semibold text-emerald-600 dark:text-emerald-400 text-sm whitespace-nowrap flex-shrink-0">
+                        <span className="w-16 text-right pr-2.5 border-r border-black/5 dark:border-white/10 font-semibold text-emerald-600 dark:text-emerald-400 text-sm whitespace-nowrap flex-shrink-0">
                           {amountStr || '\u00A0'}{unitStr || '\u00A0'}
                         </span>
-                        <div className="flex-1 pl-1.5 min-w-0 flex flex-col justify-center py-0.5">
+                        <div className="flex-1 pl-2 min-w-0 flex flex-col justify-center py-0.5">
                           {ing.replacedOriginal && (
                             <span className="text-[11px] leading-tight text-red-500/70 dark:text-red-400/70 line-through font-normal truncate block mb-0.5">
                               {ing.replacedOriginal}
@@ -223,7 +223,7 @@ export default function RecipeIngredients({
 
         {/* 3. Add to Shopping List Button (Inside Card Footer) */}
         {onAddIngredients && (
-          <div className="px-5 py-3.5 sm:px-6 border-t border-black/5 dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.01]">
+          <div className="px-4.5 py-3.5 sm:px-6 border-t border-black/5 dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.01]">
             <Button
               className={`w-full py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 h-11 text-xs sm:text-sm active:scale-[0.98] border-none shadow-none ${
                 isAdded
