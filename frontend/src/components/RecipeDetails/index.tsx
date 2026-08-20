@@ -18,6 +18,7 @@ import RecipeInstructions from './RecipeInstructions';
 import RecipeActionDock from './RecipeActionDock';
 import CookingMode from '../CookingMode';
 import CookedButton from '../CookedButton';
+import CookedModal from '../CookedModal';
 import CookHistoryTimeline from '../CookHistoryTimeline';
 import RecipeCopilot from './RecipeCopilot';
 import { useAuth } from '../../context/AuthContext';
@@ -91,6 +92,7 @@ export default function RecipeDetails({
   const [isAdded, setIsAdded] = useState(false);
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [isCookingMode, setIsCookingMode] = useState(false);
+  const [isCookedModalOpen, setIsCookedModalOpen] = useState(false);
   const [initialStepOverride, setInitialStepOverride] = useState<number | undefined>(undefined);
   const { pendingNavigation, setPendingNavigation } = useTimerManager();
   const { snapshot } = useGamification();
@@ -99,6 +101,19 @@ export default function RecipeDetails({
   const { history: cookHistory } = useCookHistory(recipe.id, cookRefreshKey);
   const [isShoppingConfirmOpen, setIsShoppingConfirmOpen] = useState(false);
   const [shouldNavigateAfterAdd, setShouldNavigateAfterAdd] = useState(false);
+
+  const handleToggleStep = (stepNum: number) => {
+    const instructions = recipe.instructions ?? [];
+    const isCurrentlyChecked = !!checkedSteps[stepNum];
+    const currentIdx = instructions.findIndex((s) => s.step === stepNum);
+
+    toggleStep(stepNum);
+
+    // If checking this step completes all instructions, automatically prompt to log cooked dish & claim XP
+    if (!isCurrentlyChecked && instructions.length > 0 && currentIdx === instructions.length - 1 && recipe.id) {
+      setIsCookedModalOpen(true);
+    }
+  };
 
   const [activeSection, setActiveSection] = useState<'ingredients' | 'instructions' | 'details'>('details');
 
@@ -667,7 +682,7 @@ export default function RecipeDetails({
           <RecipeInstructions
             recipe={recipe}
             checkedSteps={checkedSteps}
-            toggleStep={toggleStep}
+            toggleStep={handleToggleStep}
             activeStepNum={activeStepNum}
             completedStepsCount={completedStepsCount}
             totalStepsCount={totalStepsCount}
@@ -770,6 +785,16 @@ export default function RecipeDetails({
         nutritionalValues={nutritionalValues}
         onSave={handleSaveAdjustedServings}
       />
+
+      {/* Cooked Modal (triggered when completing all steps) */}
+      {recipe.id && (
+        <CookedModal
+          isOpen={isCookedModalOpen}
+          onClose={() => setIsCookedModalOpen(false)}
+          jobId={recipe.id}
+          recipeTitle={recipe.title}
+        />
+      )}
     </article>
   );
 }
