@@ -45,11 +45,16 @@ export default function RecipeStickyBar({
   ];
 
   return (
-    <div id="recipe-sticky-bar" className="sticky top-[var(--app-sticky-top)] z-30 -mx-4 px-4 bg-[#f9fafb]/90 dark:bg-gray-950/90 backdrop-blur-md">
+    <div
+      id="recipe-sticky-bar"
+      className={`sticky top-[var(--app-sticky-top)] z-30 -mx-4 px-4 bg-[#f9fafb]/95 dark:bg-gray-950/95 backdrop-blur-md transition-all duration-200 before:content-[''] before:absolute before:bottom-full before:inset-x-0 before:h-12 before:bg-[#f9fafb] dark:before:bg-gray-950 before:pointer-events-none ${
+        isCollapsed ? 'border-b border-black/5 dark:border-white/5 shadow-xs pb-0.5' : ''
+      }`}
+    >
       {/* Collapsed title row — only present once the hero has scrolled away. */}
       <div
         className={`flex items-center gap-2.5 overflow-hidden motion-safe:transition-all motion-safe:duration-200 ${
-          isCollapsed ? 'max-h-14 opacity-100 pt-2' : 'max-h-0 opacity-0 pointer-events-none'
+          isCollapsed ? 'max-h-14 opacity-100 pt-2 pb-1' : 'max-h-0 opacity-0 pointer-events-none py-0'
         }`}
         aria-hidden={!isCollapsed}
       >

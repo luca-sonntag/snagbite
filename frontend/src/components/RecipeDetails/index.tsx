@@ -103,16 +103,31 @@ export default function RecipeDetails({
   const [activeSection, setActiveSection] = useState<'ingredients' | 'instructions' | 'details'>('details');
 
   // Drives the compact title row inside the sticky tab bar: a zero-height
-  // sentinel sits right below the title block, so as soon as it leaves the
-  // viewport the header has scrolled away and the bar takes over the title.
+  // sentinel sits right before the sticky bar, so as soon as the hero header has
+  // fully scrolled past the sticky top position, the compact title row expands.
   const [collapseSentinel, setCollapseSentinel] = useState<HTMLDivElement | null>(null);
   const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
   useEffect(() => {
     if (!collapseSentinel) return;
+
+    const checkCollapse = () => {
+      const stickyTopHeight = parseInt(
+        getComputedStyle(document.documentElement).getPropertyValue('--app-sticky-top') || '0',
+        10
+      );
+      return `-${stickyTopHeight}px 0px 0px 0px`;
+    };
+
     const observer = new IntersectionObserver(
-      ([entry]) => setIsHeaderCollapsed(!entry.isIntersecting),
-      // Trip once the sentinel passes under the app's sticky top region.
-      { rootMargin: '-64px 0px 0px 0px', threshold: 0 }
+      ([entry]) => {
+        const stickyTopHeight = parseInt(
+          getComputedStyle(document.documentElement).getPropertyValue('--app-sticky-top') || '0',
+          10
+        );
+        const isPastStickyTop = entry.boundingClientRect.top <= stickyTopHeight + 2;
+        setIsHeaderCollapsed(!entry.isIntersecting && isPastStickyTop);
+      },
+      { rootMargin: checkCollapse(), threshold: 0 }
     );
     observer.observe(collapseSentinel);
     return () => observer.disconnect();
