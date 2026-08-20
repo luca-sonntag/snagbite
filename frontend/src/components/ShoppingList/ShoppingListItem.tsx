@@ -68,9 +68,18 @@ export default function ShoppingListItem({
         }
       }
 
-      // Add accumulated modifier notes (amount omitted: modifier applies to the item regardless of subset)
-      modifierAmounts.forEach(({ mod }) => {
-        notes.push(mod);
+      // Add accumulated modifier notes.
+      // If the modifier applies to ALL items, just show the modifier ("verquirlt").
+      // If it applies to a SUBSET, show the modifier with the partial amount in parentheses ("verquirlt (6 Stück)")
+      // so it's clear it's a subset annotation, not a replacement for the total count.
+      modifierAmounts.forEach(({ totalAmount, unit, mod }) => {
+        const isPartial = totalAmount < item.amount;
+        if (isPartial) {
+          const amtStr = formatItemAmount(totalAmount, unit);
+          notes.push(amtStr ? `${mod} (${amtStr})` : mod);
+        } else {
+          notes.push(mod);
+        }
       });
 
       const result = Array.from(new Set(notes.filter(Boolean))).join(', ');
