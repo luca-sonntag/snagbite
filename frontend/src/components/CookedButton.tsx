@@ -54,7 +54,7 @@ export default function CookedButton({
         <button
           type="button"
           onClick={() => setIsModalOpen(true)}
-          className={`relative flex flex-col items-center justify-center gap-1 min-w-[4.25rem] px-2 py-2 rounded-2xl transition-all active:scale-95 cursor-pointer outline-none border-none group text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] ${className}`}
+          className={`relative flex flex-col items-center justify-center gap-1 min-w-[4.25rem] px-2.5 py-2 rounded-2xl transition-all active:scale-95 cursor-pointer outline-none border-none group text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] ${className}`}
           title={t('app.gamification.cookedCardBtn')}
           aria-label={t('app.gamification.cookedCardBtn')}
         >
