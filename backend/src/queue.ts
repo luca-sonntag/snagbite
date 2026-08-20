@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { getScraperForUrl } from './scrapers/index.js';
 import { downloadMedia } from './scrapers/download.js';
 import { extractRecipe, remixRecipe } from './gemini.js';
+import { generateRecipeCoverImage } from './imageGenerator.js';
 import { pruneOldGeminiLogs } from './logger.js';
 import { isPhotoJobUrl, photoUploadIdFromUrl, downloadImportPhotos, deleteImportPhotos, sweepOldPhotoImports } from './photoImport.js';
 import type { Job } from './types.js';
@@ -98,12 +99,33 @@ async function processJob(job: Job): Promise<void> {
       }
 
       recipe.id = jobId;
-      recipe.imageUrl = parentJob.recipe.imageUrl;
-      recipe.imageUrls = parentJob.recipe.imageUrls;
       recipe.instagramHandle = parentJob.recipe.instagramHandle;
       recipe.parentJobId = parentJob.id;
       recipe.parentRecipeTitle = parentJob.recipe.title;
       recipe.remixPrompt = job.prompt || null;
+
+      // Generate AI cover image for the remixed recipe if prompt is present
+      if (recipe.imagePrompt) {
+        await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 85, stage: 'generating_cover' } as any });
+        const aiCoverUrl = await generateRecipeCoverImage({
+          prompt: recipe.imagePrompt,
+          jobId,
+          userId: job.userId,
+        });
+        if (aiCoverUrl) {
+          recipe.imageUrl = aiCoverUrl;
+          recipe.imageUrls = [aiCoverUrl, ...(parentJob.recipe.imageUrls || [])];
+          recipe.isAiCover = true;
+        } else {
+          recipe.imageUrl = parentJob.recipe.imageUrl;
+          recipe.imageUrls = parentJob.recipe.imageUrls;
+        }
+      } else {
+        recipe.imageUrl = parentJob.recipe.imageUrl;
+        recipe.imageUrls = parentJob.recipe.imageUrls;
+      }
+
+      await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 90, stage: 'finalizing' } as any });
 
       // Canonical ingredient normalization & nutritional calculation
       await enrichRecipeWithCanonicalIngredients(recipe);
@@ -147,11 +169,33 @@ async function processJob(job: Job): Promise<void> {
       const recipe = await extractRecipe(undefined, undefined, '', undefined, runDir, userPrefs, undefined, photoPaths, 'photo');
 
       console.log(`[Job ${jobId}] Recipe extracted from photos: "${recipe.title}"`);
-      await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 90, stage: 'finalizing' } as any });
-
       recipe.id = jobId;
-      recipe.imageUrl = null;
       recipe.instagramHandle = null;
+
+      // Generate photorealistic AI cover image of the finished dish for photo imports
+      if (recipe.imagePrompt) {
+        await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 85, stage: 'generating_cover' } as any });
+        const aiCoverUrl = await generateRecipeCoverImage({
+          prompt: recipe.imagePrompt,
+          jobId,
+          userId: photoUserId,
+        });
+        if (aiCoverUrl) {
+          recipe.imageUrl = aiCoverUrl;
+          recipe.imageUrls = [aiCoverUrl];
+          recipe.isAiCover = true;
+        } else {
+          recipe.imageUrl = null;
+          recipe.imageUrls = [];
+          recipe.isAiCover = false;
+        }
+      } else {
+        recipe.imageUrl = null;
+        recipe.imageUrls = [];
+        recipe.isAiCover = false;
+      }
+
+      await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 90, stage: 'finalizing' } as any });
 
       // Canonical ingredient normalization & nutritional calculation
       await enrichRecipeWithCanonicalIngredients(recipe);
@@ -294,18 +338,36 @@ async function processJob(job: Job): Promise<void> {
     ]);
 
     console.log(`[Job ${jobId}] Recipe extracted: "${recipe.title}"`);
-    await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 90, stage: 'finalizing' } as any });
 
-    // Assign image: prefer Gemini-selected frames, fall back to scraper thumbnail
-    if (selectedImageUrls && selectedImageUrls.length > 0) {
-      recipe.imageUrls = selectedImageUrls;
-      recipe.imageUrl = selectedImageUrls[0];
-    } else {
-      recipe.imageUrl = scrapeResult.imageUrl ?? null;
-      if (recipe.imageUrl) {
-        recipe.imageUrls = [recipe.imageUrl];
+    // Collect base scraped frames / thumbnail
+    const baseImageUrls = (selectedImageUrls && selectedImageUrls.length > 0)
+      ? selectedImageUrls
+      : (scrapeResult.imageUrl ? [scrapeResult.imageUrl] : []);
+
+    // Generate AI food photography cover image with FLUX.1 [schnell]
+    if (recipe.imagePrompt) {
+      await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 85, stage: 'generating_cover' } as any });
+      const aiCoverUrl = await generateRecipeCoverImage({
+        prompt: recipe.imagePrompt,
+        jobId,
+        userId: job.userId,
+      });
+      if (aiCoverUrl) {
+        recipe.imageUrl = aiCoverUrl;
+        recipe.imageUrls = [aiCoverUrl, ...baseImageUrls];
+        recipe.isAiCover = true;
+      } else {
+        recipe.imageUrl = baseImageUrls[0] || null;
+        recipe.imageUrls = baseImageUrls;
+        recipe.isAiCover = false;
       }
+    } else {
+      recipe.imageUrl = baseImageUrls[0] || null;
+      recipe.imageUrls = baseImageUrls;
+      recipe.isAiCover = false;
     }
+
+    await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 90, stage: 'finalizing' } as any });
 
     recipe.instagramHandle = scrapeResult.authorHandle || null;
 
