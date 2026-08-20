@@ -102,46 +102,33 @@ export default function RecipeDetails({
 
   const [activeSection, setActiveSection] = useState<'ingredients' | 'instructions' | 'details'>('details');
 
-  // Drives the compact title row inside the sticky tab bar: a zero-height
-  // sentinel sits right before the sticky bar, so as soon as the hero header has
-  // fully scrolled past the sticky top position, the compact title row expands.
   const [collapseSentinel, setCollapseSentinel] = useState<HTMLDivElement | null>(null);
   const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
-  useEffect(() => {
-    if (!collapseSentinel) return;
 
-    const checkCollapse = () => {
-      const stickyTopHeight = parseInt(
-        getComputedStyle(document.documentElement).getPropertyValue('--app-sticky-top') || '0',
-        10
-      );
-      return `-${stickyTopHeight}px 0px 0px 0px`;
-    };
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        const stickyTopHeight = parseInt(
-          getComputedStyle(document.documentElement).getPropertyValue('--app-sticky-top') || '0',
-          10
-        );
-        const isPastStickyTop = entry.boundingClientRect.top <= stickyTopHeight + 2;
-        setIsHeaderCollapsed(!entry.isIntersecting && isPastStickyTop);
-      },
-      { rootMargin: checkCollapse(), threshold: 0 }
-    );
-    observer.observe(collapseSentinel);
-    return () => observer.disconnect();
-  }, [collapseSentinel]);
-
-  // Track scroll position to update the active navigation section (scroll spy)
+  // Track scroll position to update both active navigation section (scroll spy)
+  // and compact title row in sticky sub-navigation.
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['ingredients', 'instructions', 'details'] as const;
-
       const stickyTopHeight = parseInt(
         getComputedStyle(document.documentElement).getPropertyValue('--app-sticky-top') || '0',
         10
       );
+
+      // 1. Collapse state: only show compact title row when the sticky bar is
+      // actually stuck at the top and the hero header has scrolled past.
+      const stickyBar = document.getElementById('recipe-sticky-bar');
+      if (stickyBar) {
+        const barRect = stickyBar.getBoundingClientRect();
+        const isStuck = barRect.top <= stickyTopHeight + 1;
+        const isPastHeader = collapseSentinel
+          ? collapseSentinel.getBoundingClientRect().top <= stickyTopHeight + 2
+          : isStuck;
+
+        setIsHeaderCollapsed(isStuck && isPastHeader);
+      }
+
+      // 2. Section scroll spy
+      const sections = ['ingredients', 'instructions', 'details'] as const;
       // Offset corresponds to status bar/timers + sub-navigation (48px) + offset buffer.
       // The extra buffer (120 px instead of 64 px) makes the tab switch earlier so
       // that it already highlights the incoming section while its heading is still
@@ -165,7 +152,7 @@ export default function RecipeDetails({
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); // Initialize
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [recipe]);
+  }, [recipe, collapseSentinel]);
 
   const scrollToSection = (sectionId: 'ingredients' | 'instructions' | 'details') => {
     const el = document.getElementById(sectionId);
