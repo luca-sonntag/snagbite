@@ -615,7 +615,6 @@ export default function RecipeDetails({
         totalTimeLabel={totalTimeLabel}
         servings={servings}
         calories={hasNutritionInfo ? metaCalories : null}
-        isPremium={isPremium}
       />
 
       {/* Single scrollable layout containing all sections */}

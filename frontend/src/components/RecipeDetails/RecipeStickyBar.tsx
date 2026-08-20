@@ -1,4 +1,4 @@
-import { ArrowLeft, Crown, Clock, Users, Flame } from 'lucide-react';
+import { ArrowLeft, Clock, Users, Flame } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 
 interface RecipeStickyBarProps {
@@ -12,7 +12,6 @@ interface RecipeStickyBarProps {
   totalTimeLabel: string | null;
   servings: number;
   calories: number | null;
-  isPremium: boolean;
 }
 
 /**
@@ -31,7 +30,6 @@ export default function RecipeStickyBar({
   totalTimeLabel,
   servings,
   calories,
-  isPremium,
 }: RecipeStickyBarProps) {
   const { t } = useI18n();
 

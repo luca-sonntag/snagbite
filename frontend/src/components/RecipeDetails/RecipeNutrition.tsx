@@ -3,7 +3,7 @@ import AiNotice from '../AiNotice';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import PremiumModal from '../PremiumModal';
-import { Lock, Flame, Crown } from 'lucide-react';
+import { Flame, Crown } from 'lucide-react';
 
 interface RecipeNutritionProps {
   nutritionalValues: any;

@@ -1,4 +1,4 @@
-import { ChevronRight, Clock, Crown, Flame, Utensils } from 'lucide-react';
+import { ChevronRight, Clock, Flame, Utensils } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 
 interface RecipeMetaStripProps {
@@ -7,8 +7,6 @@ interface RecipeMetaStripProps {
   servings: number;
   /** Per-serving calories, or null when the recipe has no nutrition data. */
   calories: number | null;
-  /** Free users see a crown instead of the calorie value (premium gate). */
-  isPremium: boolean;
   onScrollToDetails: () => void;
   /** If true, renders a flat text flow without background, borders, padding, and chevron. */
   flat?: boolean;
@@ -22,7 +20,6 @@ export default function RecipeMetaStrip({
   totalTimeLabel,
   servings,
   calories,
-  isPremium,
   onScrollToDetails,
   flat = false,
 }: RecipeMetaStripProps) {
