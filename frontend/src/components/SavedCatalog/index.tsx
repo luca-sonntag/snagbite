@@ -373,7 +373,7 @@ export default function SavedCatalog({
         {selectedJobResolved.recipe && (
           <RecipeDetails
             key={selectedJobResolved.id}
-            recipe={selectedJobResolved.recipe}
+            recipe={selectedJobResolved.recipe.id ? selectedJobResolved.recipe : { ...selectedJobResolved.recipe, id: selectedJobResolved.id }}
             onAddIngredients={onAddIngredients}
             onDelete={() => handleDeleteJob({ stopPropagation: () => { } } as any, selectedJobResolved.id)}
             reelUrl={selectedJobResolved.url}

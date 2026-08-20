@@ -283,26 +283,18 @@ export default function RecipeDetails({
   };
 
   const handleSaveAdjustedServings = async (targetServings: number) => {
-    const originalBaseServings = Math.max(1, recipe.servings || 1);
-    if (targetServings === originalBaseServings) {
-      return;
-    }
+    setServings(targetServings);
 
-    // Only the serving count changes. This sheet corrects how many servings the
-    // *existing* amounts yield, so neither the ingredients nor their macros move —
-    // they are absolute values for `amount`, and scaling them would decouple them
-    // from the amount they describe. The per-serving figure is derived from those
-    // macros divided by `servings` (see useRecipeNutrition), so it follows from
-    // this change on its own and must not be written here.
     const updatedRecipe: Recipe = {
       ...recipe,
       servings: targetServings,
     };
 
-    if (recipe.id) {
+    const targetJobId = recipe.id;
+    if (targetJobId) {
       try {
         const token = await getAccessToken();
-        const res = await fetch(apiUrl(`/api/jobs/${recipe.id}`), {
+        const res = await fetch(apiUrl(`/api/jobs/${targetJobId}`), {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -320,7 +312,6 @@ export default function RecipeDetails({
       }
     }
 
-    setServings(targetServings);
     if (onReplaceCurrent) {
       onReplaceCurrent(updatedRecipe);
     }
