@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Popover, Button } from '@heroui/react';
-import { MoreVertical, Check, Copy, ShoppingCart, Trash2, Folder, Tag, Star } from 'lucide-react';
+import { MoreVertical, Check, Copy, ShoppingCart, Trash2, Folder, Tag, Star, ChevronDown, ChevronUp } from 'lucide-react';
 import type { Recipe } from '../../types';
 import RecipeImageGallery from '../RecipeImageGallery';
 import { useI18n } from '../../context/I18nContext';
@@ -55,7 +55,7 @@ export default function RecipeHeader({
   // The description is clamped to two lines so the ingredient list starts
   // higher up. Only offer the toggle for texts that actually get cut off —
   // roughly two lines' worth of characters at the mobile width.
-  const isDescriptionLong = (recipe.description?.length ?? 0) > 90;
+  const isDescriptionLong = (recipe.description?.length ?? 0) > 130;
 
   const resolvedParentTitle = parentRecipeTitle || recipe.parentRecipeTitle;
 
@@ -213,7 +213,7 @@ export default function RecipeHeader({
           </div>
         )}
         {recipe.description && (
-          <div>
+          <div className="flex flex-col">
             <p
               className={`text-sm text-gray-600 dark:text-gray-400 leading-relaxed break-words ${isDescriptionExpanded || !isDescriptionLong ? '' : 'line-clamp-2'
                 }`}
@@ -224,9 +224,14 @@ export default function RecipeHeader({
               <button
                 type="button"
                 onClick={() => setIsDescriptionExpanded(v => !v)}
-                className="mt-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer outline-none border-none bg-transparent p-0"
+                className="mt-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 inline-flex items-center gap-1 cursor-pointer outline-none border-none bg-transparent p-0 w-fit self-start active:scale-95 transition-all select-none"
               >
-                {isDescriptionExpanded ? t('recipe.descriptionLess') : t('recipe.descriptionMore')}
+                <span>{isDescriptionExpanded ? t('recipe.descriptionLess') : t('recipe.descriptionMore')}</span>
+                {isDescriptionExpanded ? (
+                  <ChevronUp className="w-3.5 h-3.5 shrink-0" />
+                ) : (
+                  <ChevronDown className="w-3.5 h-3.5 shrink-0" />
+                )}
               </button>
             )}
           </div>
