@@ -314,11 +314,17 @@ export default function RecipeCopilot({ isOpen, onClose, recipe, onRemixSuccess,
 
       // A modification request is not applied immediately anymore — instead it is staged in the
       // transaction card, where the user collects changes across turns and applies them together.
-      if (data.pendingRemix && data.modificationRequest) {
-        setPendingChanges(prev => [
-          ...prev,
-          { id: crypto.randomUUID(), text: data.modificationRequest },
-        ]);
+      if (data.pendingRemix) {
+        const incomingChanges: string[] = Array.isArray(data.changes) && data.changes.length > 0
+          ? data.changes
+          : (data.modificationRequest ? [data.modificationRequest] : []);
+
+        if (incomingChanges.length > 0) {
+          setPendingChanges(prev => [
+            ...prev,
+            ...incomingChanges.map((text: string) => ({ id: crypto.randomUUID(), text })),
+          ]);
+        }
       }
 
       // Add AI reply to history

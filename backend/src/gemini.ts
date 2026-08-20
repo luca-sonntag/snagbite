@@ -953,6 +953,7 @@ export async function chatAboutRecipe(
   recipeWasModified: boolean;
   pendingRemix?: boolean;
   modificationRequest?: string;
+  changes?: string[];
   newRecipe?: Recipe;
 }> {
   const startTime = Date.now();
@@ -965,16 +966,21 @@ export async function chatAboutRecipe(
         functionDeclarations: [
           {
             name: 'modify_current_recipe',
-            description: 'Passt das aktuelle Rezept basierend auf den Änderungswünschen des Nutzers (z.B. vegan machen, laktosefrei, Portionen skalieren, Zutaten ersetzen) an.',
+            description: 'Passt das aktuelle Rezept basierend auf den Änderungswünschen des Nutzers an (z.B. vegan machen, laktosefrei, Portionen skalieren, Zutaten ersetzen, Schritte anpassen). Gibt alle konkreten einzelnen Änderungen als separate Punkte in einer Liste zurück.',
             parameters: {
               type: FunctionDeclarationSchemaType.OBJECT,
               properties: {
+                changes: {
+                  type: FunctionDeclarationSchemaType.ARRAY,
+                  items: { type: FunctionDeclarationSchemaType.STRING },
+                  description: 'Liste der einzelnen konkreten Änderungen (z.B. ["Rinderhack durch veganes Hackfleisch ersetzen", "Eier durch Tofu-Rührei ersetzen", "Käse durch vegane Käsealternative ersetzen"]). Jeder Eintrag MUSS eine einzelne, präzise Zutat oder Aktion beschreiben.'
+                },
                 modification_request: {
                   type: FunctionDeclarationSchemaType.STRING,
-                  description: 'Der konkrete Wunsch des Nutzers für die Anpassung des Rezepts, z.B. "Mach es vegan" oder "Ersetze Blätterteig durch Pizzateig" oder "Menge verdoppeln".'
+                  description: 'Zusammenfassung der Änderung, z.B. "Rezept veganisieren".'
                 }
               },
-              required: ['modification_request']
+              required: ['changes']
             }
           },
           {
@@ -1035,6 +1041,9 @@ ${recipe.tips?.map(t => `- ${t}`).join('\n') || 'None'}
 
 Tools at your disposal:
 1. modify_current_recipe: Call this when the user wants to adapt, scale, remix, or otherwise modify the recipe details (e.g. make it vegan, gluten-free, low-carb, scale to a different number of servings, swap or add ingredients). Do not try to write modified recipe JSON or instructions in your text reply; always call this tool to perform the modification.
+IMPORTANT FOR RECIPE MODIFICATIONS:
+- When modifying the recipe (e.g. "mach vegan", "mach glutenfrei", or swapping multiple ingredients), ALWAYS split and break down the changes into a granular list of individual, concrete modifications in the "changes" array (e.g. ["Rinderhack durch veganes Hackfleisch ersetzen", "Eier durch Tofu-Rührei ersetzen", "Käse durch vegane Käsealternative ersetzen"]).
+- Do NOT bundle multiple ingredient or instruction swaps into a single long sentence. Each distinct ingredient replacement, addition, removal, or step modification must be its own item in "changes" so the user can review and remove individual items.
 2. add_missing_ingredients_to_shopping_list: Call this when the user asks to add specific items to their shopping list or says they are missing ingredients.
 3. set_cooking_timer: Call this when the user asks to set a timer for a step.
 
@@ -1046,7 +1055,7 @@ ${stagedChanges && stagedChanges.length > 0 ? `
 Pending recipe changes:
 The user has already collected the following modifications, which will be applied together in a later remix (they are NOT applied yet):
 ${stagedChanges.map((c, i) => `${i + 1}. ${c}`).join('\n')}
-When the user requests a further modification, call modify_current_recipe with only the NEW change (do not repeat the already-collected ones). Build on top of the collected changes, avoid duplicates, and briefly point out if a new request conflicts with an already-collected one.
+When the user requests a further modification, call modify_current_recipe with only the NEW change(s) in the "changes" array (do not repeat the already-collected ones). Build on top of the collected changes, avoid duplicates, and briefly point out if a new request conflicts with an already-collected one.
 ` : ''}`;
 
     // Map history & new message to Gemini Content format
@@ -1080,15 +1089,22 @@ When the user requests a further modification, call modify_current_recipe with o
       let recipeWasModified = false;
 
       if (call.name === 'modify_current_recipe') {
+        const rawChanges = (call.args as any).changes;
         const modReq = (call.args as any).modification_request;
-        console.log(`[chatAboutRecipe] Remix requested: "${modReq}". Deferring execution until user confirms.`);
+        const changes: string[] = Array.isArray(rawChanges) && rawChanges.length > 0
+          ? rawChanges.filter((c: unknown): c is string => typeof c === 'string' && c.trim().length > 0)
+          : (modReq ? [modReq] : []);
+        const combinedReq = modReq || changes.join('. ');
+
+        console.log(`[chatAboutRecipe] Remix requested with ${changes.length} change(s):`, changes);
         recipeWasModified = true;
         // Don't execute remixRecipe yet — store the prompt and let user confirm first
         toolResponseData = {
           success: true,
-          message: `Remix prompt stored: "${modReq}". Waiting for user confirmation.`,
+          message: `Staged ${changes.length} recipe modification(s): ${JSON.stringify(changes)}. Waiting for user confirmation.`,
           pendingRemix: true,
-          modificationRequest: modReq,
+          modificationRequest: combinedReq,
+          changes,
         };
       } else if (call.name === 'add_missing_ingredients_to_shopping_list') {
         const ingredients = (call.args as any).ingredients;
@@ -1176,6 +1192,7 @@ When the user requests a further modification, call modify_current_recipe with o
         recipeWasModified,
         pendingRemix: isPendingRemix || undefined,
         modificationRequest: isPendingRemix ? toolResponseData.modificationRequest : undefined,
+        changes: isPendingRemix ? toolResponseData.changes : undefined,
         newRecipe: remixedRecipe
       };
     } else {

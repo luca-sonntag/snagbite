@@ -1109,6 +1109,7 @@ apiRouter.post('/jobs/:id/chat', async (req: Request, res: Response): Promise<vo
       recipeWasModified: result.recipeWasModified,
       pendingRemix: result.pendingRemix,
       modificationRequest: result.modificationRequest,
+      changes: result.changes,
     };
 
     // If recipe was modified AND not pending confirmation, save immediately
