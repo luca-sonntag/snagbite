@@ -1,4 +1,4 @@
-import { Clock, Utensils, Users, ChevronRight } from 'lucide-react';
+import { Clock, Utensils, Users } from 'lucide-react';
 import RecipeNutrition from './RecipeNutrition';
 import { useI18n } from '../../context/I18nContext';
 
@@ -66,26 +66,12 @@ export default function RecipeInfoSection({
           <span className={statValue}>{formatTimeValue(cookTime)}</span>
         </div>
 
-        {/* Servings — reported here, adjusted in the ingredients section */}
-        <button
-          type="button"
-          onClick={onOpenAdjustServings}
-          disabled={!onOpenAdjustServings}
-          className={`flex flex-col items-center gap-1 py-3.5 px-2 text-center border-l border-black/5 dark:border-white/5 bg-transparent border-y-0 border-r-0 outline-none transition-colors ${
-            onOpenAdjustServings
-              ? 'cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02]'
-              : ''
-          }`}
-        >
+        {/* Servings — display only. Nutrition-base adjustment lives on the nutrition card (ℹ️). */}
+        <div className="flex flex-col items-center gap-1 py-3.5 px-2 text-center border-l border-black/5 dark:border-white/5">
           <Users className={iconClass} />
           <span className={statLabel}>{t('recipe.serves')}</span>
-          <span className={`${statValue} flex items-center gap-0.5`}>
-            <span className="tabular-nums">{servings}</span>
-            {onOpenAdjustServings && (
-              <ChevronRight className="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-60" />
-            )}
-          </span>
-        </button>
+          <span className={`${statValue} tabular-nums`}>{servings}</span>
+        </div>
       </div>
 
       {/* Calorie headline + macro distribution */}
@@ -100,6 +86,7 @@ export default function RecipeInfoSection({
             showTotalNutrition={showTotalNutrition}
             onToggleTotalNutrition={onToggleTotalNutrition}
             getNutritionDisplayValue={getNutritionDisplayValue}
+            onOpenAdjustServings={onOpenAdjustServings}
           />
         </div>
       )}
