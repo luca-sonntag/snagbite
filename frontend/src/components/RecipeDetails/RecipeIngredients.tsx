@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Card, Button } from '@heroui/react';
-import { Check, Flame, Salad, ChevronRight, Users, ShoppingCart } from 'lucide-react';
+import { Button } from '@heroui/react';
+import { Check, Flame, Salad, ChevronRight, Users, ShoppingCart, ArrowRight, ArrowLeftRight } from 'lucide-react';
 import type { Ingredient, Recipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { getCategoryTheme } from '../../i18n';
@@ -245,21 +245,45 @@ export default function RecipeIngredients({
       </div>
 
       {recipe.alternativeIngredients && recipe.alternativeIngredients.length > 0 && (
-        <Card className="glass-panel p-5 rounded-2xl">
-          <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3 uppercase tracking-wider">{t('recipe.alternativeIngredients')}</h3>
-          <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4 mt-2">
+          {/* Section Header (OUTSIDE card) */}
+          <div className="flex items-center gap-3">
+            <div className={medallion}>
+              <ArrowLeftRight className={medallionIcon} />
+            </div>
+            <h3 className="text-base font-bold text-gray-900 dark:text-white">
+              {t('recipe.alternativeIngredients')}
+            </h3>
+            <span className="ml-auto text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 rounded-full px-2.5 py-1 tabular-nums select-none">
+              {recipe.alternativeIngredients.length}
+            </span>
+          </div>
+
+          {/* Clean Flat Card Container */}
+          <div className="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-2.5">
             {recipe.alternativeIngredients.map((alt, idx) => (
-              <div key={idx} className="bg-black/5 dark:bg-white/5 p-3 rounded-xl border border-black/5 dark:border-white/5 text-xs">
-                <div className="flex items-center justify-between font-semibold">
-                  <span className="text-red-600 dark:text-red-400 line-through">{alt.original}</span>
-                  <span className="text-gray-500">→</span>
-                  <span className="text-emerald-600 dark:text-emerald-400">{alt.substitute}</span>
+              <div
+                key={idx}
+                className="bg-gray-50/80 dark:bg-gray-800/50 rounded-xl p-3.5 transition-all"
+              >
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400 line-through decoration-gray-400/60 bg-gray-200/60 dark:bg-gray-700/50 px-2.5 py-1 rounded-lg">
+                    {alt.original}
+                  </span>
+                  <ArrowRight className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 dark:bg-emerald-500/20 px-2.5 py-1 rounded-lg">
+                    {alt.substitute}
+                  </span>
                 </div>
-                {alt.notes && <p className="text-gray-500 dark:text-gray-400 mt-1.5 leading-normal">{alt.notes}</p>}
+                {alt.notes && (
+                  <p className="text-xs text-gray-600 dark:text-gray-300 mt-2 leading-relaxed">
+                    {alt.notes}
+                  </p>
+                )}
               </div>
             ))}
           </div>
-        </Card>
+        </div>
       )}
 
       {/* Ingredient Nutrition Detail Sheet (Premium only) */}
