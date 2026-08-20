@@ -1115,8 +1115,17 @@ export default function App() {
           }`;
 
         return (
-          <div className={bottomBarClasses}>
-            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border border-gray-100 dark:border-gray-800/80 shadow-[0_8px_28px_rgba(0,0,0,0.12)] w-full max-w-md mx-auto flex flex-col rounded-3xl overflow-hidden">
+          <>
+            {/* Subtle bottom gradient fade to soften scrolling content behind floating bars */}
+            <div
+              className={`fixed bottom-0 inset-x-0 h-28 pointer-events-none z-30 bg-gradient-to-t from-[#f9fafb] via-[#f9fafb]/80 to-transparent dark:from-[#1a1917] dark:via-[#1a1917]/80 transition-opacity duration-300 ${
+                isBottomBarHidden ? 'opacity-0' : 'opacity-100'
+              }`}
+              aria-hidden="true"
+            />
+
+            <div className={bottomBarClasses}>
+              <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-black/[0.08] dark:border-white/[0.12] shadow-[0_12px_36px_-6px_rgba(0,0,0,0.16),0_4px_16px_rgba(0,0,0,0.08)] w-full max-w-md mx-auto flex flex-col rounded-3xl overflow-hidden">
 
               <div className="w-full flex justify-around items-center pt-3 pb-3 px-3">
               {/* Extract / New Recipe Tab */}
@@ -1234,8 +1243,9 @@ export default function App() {
             </div>
           </div>
         </div>
-      );
-      })()}
+      </>
+    );
+  })()}
 
       {/* First-launch onboarding overlay (rendered via portal) */}
       {showOnboarding && (
