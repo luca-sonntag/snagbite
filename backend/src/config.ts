@@ -69,6 +69,15 @@ export interface Config {
   NOTIFICATION_DEFAULT_TZ: string;
   /** When true, the worker generates + logs but never actually sends to FCM (local testing). */
   NOTIFICATION_DRY_RUN: boolean;
+  // ── FLUX.1 AI Cover Generation ──
+  /** Master toggle to generate AI cover images for recipes during extraction/remix. Default true. */
+  GENERATE_RECIPE_COVERS: boolean;
+  /** Provider for FLUX.1 [schnell] model. Defaults to 'together' if key present, else 'pollinations'. */
+  FLUX_PROVIDER: 'together' | 'fal' | 'replicate' | 'huggingface' | 'pollinations' | 'custom';
+  /** API key for the chosen FLUX provider. */
+  FLUX_API_KEY?: string;
+  /** Optional custom API endpoint URL override for FLUX generation. */
+  FLUX_API_ENDPOINT?: string;
 }
 
 // Validation helper
@@ -127,6 +136,10 @@ export const config: Config = {
   NOTIFICATION_MAX_PER_WEEK: parseInt(getEnv('NOTIFICATION_MAX_PER_WEEK', '3'), 10),
   NOTIFICATION_DEFAULT_TZ: getEnv('NOTIFICATION_DEFAULT_TZ', 'Europe/Vienna'),
   NOTIFICATION_DRY_RUN: getEnv('NOTIFICATION_DRY_RUN', 'false') === 'true',
+  GENERATE_RECIPE_COVERS: getEnv('GENERATE_RECIPE_COVERS', 'true') === 'true',
+  FLUX_PROVIDER: (getEnv('FLUX_PROVIDER', process.env.FLUX_API_KEY || process.env.TOGETHER_API_KEY ? 'together' : 'pollinations')) as any,
+  FLUX_API_KEY: process.env.FLUX_API_KEY || process.env.TOGETHER_API_KEY || process.env.FAL_KEY || process.env.REPLICATE_API_TOKEN || process.env.HF_TOKEN,
+  FLUX_API_ENDPOINT: process.env.FLUX_API_ENDPOINT,
 };
 
 /**
