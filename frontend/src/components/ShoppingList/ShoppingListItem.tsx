@@ -68,11 +68,9 @@ export default function ShoppingListItem({
         }
       }
 
-      // Add accumulated modifier notes
-      modifierAmounts.forEach(({ totalAmount, unit, mod }) => {
-        const amtStr = formatItemAmount(totalAmount, unit);
-        const shouldShowAmount = amtStr && totalAmount !== item.amount;
-        notes.push(`${shouldShowAmount ? `${amtStr} ` : ''}${mod}`);
+      // Add accumulated modifier notes (amount omitted: modifier applies to the item regardless of subset)
+      modifierAmounts.forEach(({ mod }) => {
+        notes.push(mod);
       });
 
       const result = Array.from(new Set(notes.filter(Boolean))).join(', ');
