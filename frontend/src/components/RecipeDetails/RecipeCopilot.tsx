@@ -1,6 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
-import { Button, Drawer, Card } from '@heroui/react';
-import { Send, Sparkles, Bot, User, Loader2, RefreshCw, X, Plus, Trash2, ListChecks } from 'lucide-react';
+import { Button, Drawer } from '@heroui/react';
+import {
+  Send,
+  Sparkles,
+  Bot,
+  User,
+  Loader2,
+  RefreshCw,
+  X,
+  Plus,
+  Trash2,
+  ListChecks,
+  ChefHat,
+  ArrowLeftRight,
+  ShoppingCart,
+  Timer
+} from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import { useTimerManager } from '../../hooks/useTimerManager';
@@ -397,59 +412,84 @@ export default function RecipeCopilot({ isOpen, onClose, recipe, onRemixSuccess,
     }
   };
 
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'remix':
+        return <Sparkles className="w-3.5 h-3.5 text-emerald-500 shrink-0" />;
+      case 'help':
+        return <ChefHat className="w-3.5 h-3.5 text-blue-500 shrink-0" />;
+      case 'substitute':
+        return <ArrowLeftRight className="w-3.5 h-3.5 text-amber-500 shrink-0" />;
+      case 'shopping':
+        return <ShoppingCart className="w-3.5 h-3.5 text-purple-500 shrink-0" />;
+      case 'timer':
+        return <Timer className="w-3.5 h-3.5 text-rose-500 shrink-0" />;
+      default:
+        return <Sparkles className="w-3.5 h-3.5 text-emerald-500 shrink-0" />;
+    }
+  };
+
   return (
     <Drawer isOpen={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
       <Drawer.Backdrop className="!z-[100]">
         <Drawer.Content placement="bottom" className="!z-[100] h-[100dvh] w-full rounded-none md:max-w-2xl md:mx-auto md:h-[85vh] md:rounded-t-3xl">
           <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 flex flex-col h-full overflow-hidden">
 
-            {/* Clear/Reset Session Button (Top-Left) — only when there's a conversation to clear */}
-            {history.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setConfirmingClear(true)}
-                disabled={isPending}
-                className="absolute top-2.5 left-3.5 z-50 p-1.5 rounded-full text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all outline-none border-none cursor-pointer flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
-                aria-label={t('copilot.clearAria')}
-                title={t('copilot.clearAria')}
-              >
-                <Trash2 className="w-4.5 h-4.5" />
-              </button>
-            )}
+            {/* Header: Clean 3-Column Bar */}
+            <div className="h-14 px-4 flex items-center justify-between flex-shrink-0 select-none bg-white dark:bg-gray-900 border-none relative z-10">
+              {/* Left: Clear button or empty placeholder */}
+              <div className="w-9 flex justify-start">
+                {history.length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmingClear(true)}
+                    disabled={isPending}
+                    className="w-9 h-9 rounded-xl bg-gray-100/80 hover:bg-red-500/10 dark:bg-gray-800/80 dark:hover:bg-red-500/20 text-gray-400 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 active:scale-95 transition-all outline-none border-none cursor-pointer flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
+                    aria-label={t('copilot.clearAria')}
+                    title={t('copilot.clearAria')}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                ) : <div className="w-9" />}
+              </div>
 
-            {/* Close Button (Top-Right) */}
-            <button
-              type="button"
-              onClick={onClose}
-              className="absolute top-2.5 right-3.5 z-50 p-1.5 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all outline-none border-none cursor-pointer flex items-center justify-center"
-              aria-label={t('dialog.closeAria')}
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            {/* Compact Header (Plain HTML elements to prevent HeroUI Drawer.Header flex-col / alignment overrides) */}
-            <div className="py-2.5 px-4 flex items-center justify-center flex-shrink-0 select-none bg-white dark:bg-gray-900 h-11 relative">
-              <div className="flex items-center gap-2 max-w-[70%]">
+              {/* Center: Title & Live Indicator */}
+              <div className="flex items-center gap-2 max-w-[65%]">
+                <div className="w-7 h-7 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                  <Bot className="w-4 h-4" />
+                </div>
                 <span className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1.5 leading-none truncate">
                   {t('copilot.title')}
-                  <span className="flex h-1.5 w-1.5 relative">
+                  <span className="flex h-2 w-2 relative shrink-0">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                   </span>
                 </span>
+              </div>
+
+              {/* Right: Close button */}
+              <div className="w-9 flex justify-end">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-9 h-9 rounded-xl bg-gray-100/80 hover:bg-gray-200 dark:bg-gray-800/80 dark:hover:bg-gray-700 text-gray-400 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white active:scale-95 transition-all outline-none border-none cursor-pointer flex items-center justify-center"
+                  aria-label={t('dialog.closeAria')}
+                >
+                  <X className="w-4.5 h-4.5" />
+                </button>
               </div>
             </div>
 
             {/* Body (Messages) */}
-            <Drawer.Body className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4 scrollbar-none bg-gray-50/50 dark:bg-black/10">
+            <Drawer.Body className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 flex flex-col gap-4 scrollbar-none bg-[#f9fafb] dark:bg-[var(--color-gray-950)]">
 
               {/* Welcome message if history is empty */}
               {history.length === 0 && (
                 <div className="my-auto flex flex-col items-center text-center max-w-sm mx-auto gap-3 py-8">
-                  <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                     <Sparkles className="w-6 h-6 animate-pulse" />
                   </div>
-                  <h4 className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white">
                     {t('copilot.title')}
                   </h4>
                   <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
@@ -464,26 +504,28 @@ export default function RecipeCopilot({ isOpen, onClose, recipe, onRemixSuccess,
                 return (
                   <div
                     key={idx}
-                    className={`flex gap-3 max-w-[85%] ${isAI ? 'self-start' : 'self-end flex-row-reverse'}`}
+                    className={`flex gap-2.5 max-w-[88%] ${isAI ? 'self-start items-end' : 'self-end flex-row-reverse items-end'}`}
                   >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-xs ${isAI
-                        ? 'bg-emerald-600'
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-                      }`}>
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-xs mb-1 ${
+                      isAI
+                        ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                        : 'bg-gray-200/80 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
+                    }`}>
                       {isAI ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                      <div className={`p-3.5 rounded-2xl text-sm leading-relaxed ${isAI
-                          ? 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-xs shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none'
-                          : 'bg-emerald-600 text-white rounded-tr-xs'
-                        }`}>
+                    <div className="flex flex-col gap-2 min-w-0">
+                      <div className={`p-3.5 rounded-2xl text-sm leading-relaxed ${
+                        isAI
+                          ? 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-bl-xs shadow-[0_2px_8px_rgba(0,0,0,0.03)] border-none'
+                          : 'bg-emerald-600 text-white rounded-br-xs shadow-none'
+                      }`}>
                         {msg.text}
                       </div>
 
                       {/* Remix system card if recipe was modified */}
                       {isAI && msg.isRemixReady && msg.newRecipe && msg.newJobId && (
-                        <Card className="p-4 border-none bg-emerald-500/10 shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col gap-3 rounded-2xl animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div className="p-4 border-none bg-emerald-500/10 dark:bg-emerald-500/15 shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col gap-3 rounded-2xl animate-in fade-in slide-in-from-bottom-2 duration-300">
                           <div className="flex items-center gap-2">
                             <Sparkles className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400 animate-spin-slow" />
                             <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
@@ -495,15 +537,14 @@ export default function RecipeCopilot({ isOpen, onClose, recipe, onRemixSuccess,
                           </p>
                           <Button
                             size="sm"
-                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl flex items-center gap-1.5 shadow-none active:scale-95 transition-all text-xs"
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl h-10 flex items-center justify-center gap-1.5 border-none shadow-none active:scale-95 transition-all text-xs"
                             onPress={() => handleLoadNewRecipe(msg.newRecipe!, msg.newJobId!)}
                           >
                             <RefreshCw className="w-3.5 h-3.5" />
                             {t('copilot.remixLoadBtn')}
                           </Button>
-                        </Card>
+                        </div>
                       )}
-
                     </div>
                   </div>
                 );
@@ -511,12 +552,12 @@ export default function RecipeCopilot({ isOpen, onClose, recipe, onRemixSuccess,
 
               {/* Loader/Pending reply */}
               {isPending && (
-                <div className="flex gap-3 max-w-[85%] self-start animate-pulse">
-                  <div className="w-8 h-8 rounded-full bg-emerald-600/30 flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-4 h-4 text-emerald-600/50" />
+                <div className="flex gap-2.5 max-w-[88%] self-start items-end animate-pulse">
+                  <div className="w-7 h-7 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 mb-1">
+                    <Bot className="w-4 h-4" />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <div className="bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 text-xs px-3.5 py-3 rounded-2xl rounded-tl-xs border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex items-center gap-2">
+                    <div className="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs px-3.5 py-3 rounded-2xl rounded-bl-xs border-none shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex items-center gap-2">
                       <Loader2 className="w-4.5 h-4.5 animate-spin text-emerald-600 dark:text-emerald-400" />
                       <span>{pendingAction || t('copilot.loading')}</span>
                     </div>
@@ -535,36 +576,38 @@ export default function RecipeCopilot({ isOpen, onClose, recipe, onRemixSuccess,
             </Drawer.Body>
 
             {/* Footer: Transaction Card, Quick Chips & Message Input */}
-            <div className="pt-3 pb-[calc(1rem_+_var(--safe-area-inset-bottom))] px-4 flex flex-col gap-3.5 bg-white dark:bg-gray-900 flex-shrink-0">
+            <div className="pt-2 pb-[calc(1rem_+_var(--safe-area-inset-bottom))] px-4 sm:px-6 flex flex-col gap-2.5 bg-white dark:bg-gray-900 flex-shrink-0">
 
               {/* Transaction Card — collected (staged) changes, applied together */}
               {pendingChanges.length > 0 && (
-                <Card className="p-3.5 border-none bg-emerald-500/10 shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col gap-3 rounded-2xl animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="p-3.5 sm:p-4 border-none bg-emerald-500/10 dark:bg-emerald-500/15 shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col gap-3 rounded-2xl animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <div className="flex items-center gap-2">
-                    <ListChecks className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
-                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                    <div className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                      <ListChecks className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
                       {t('copilot.changesTitle', { count: pendingChanges.length })}
                     </span>
                   </div>
 
                   {/* Collected changes list */}
-                  <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto scrollbar-none">
+                  <div className="flex flex-col gap-1.5 max-h-36 overflow-y-auto scrollbar-none">
                     {pendingChanges.map((change, idx) => (
                       <div
                         key={change.id}
-                        className="flex items-start gap-2 p-2 rounded-xl bg-white dark:bg-gray-800 border-none shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                        className="flex items-start gap-2 p-2.5 rounded-xl bg-white dark:bg-gray-800 border-none shadow-[0_1px_3px_rgba(0,0,0,0.03)]"
                       >
-                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0 w-4 text-center">
+                        <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0 w-4 text-center">
                           {idx + 1}.
                         </span>
-                        <span className="text-xs text-gray-700 dark:text-gray-200 leading-snug flex-1 min-w-0 break-words">
+                        <span className="text-xs text-gray-700 dark:text-gray-200 leading-snug flex-1 min-w-0 break-words font-medium">
                           {change.text}
                         </span>
                         <button
                           type="button"
                           onClick={() => removeChange(change.id)}
                           disabled={isPending}
-                          className="flex-shrink-0 p-1 rounded-full text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all outline-none border-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="flex-shrink-0 p-1 rounded-lg text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all outline-none border-none cursor-pointer disabled:opacity-40"
                           aria-label={t('copilot.changesDeleteAria')}
                           title={t('copilot.changesDeleteAria')}
                         >
@@ -574,16 +617,16 @@ export default function RecipeCopilot({ isOpen, onClose, recipe, onRemixSuccess,
                     ))}
                   </div>
 
-                  {/* Actions: apply (reveals replace/new choice) or discard all */}
+                  {/* Actions */}
                   {choosingApply ? (
-                    <div className="flex flex-col gap-2">
-                      <p className="text-[11px] text-gray-600 dark:text-gray-300 leading-normal">
+                    <div className="flex flex-col gap-2 pt-1">
+                      <p className="text-[11px] text-gray-600 dark:text-gray-300 leading-normal font-medium">
                         {t('copilot.changesApplyPrompt')}
                       </p>
                       <div className="flex gap-2">
                         <Button
                           size="sm"
-                          className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl flex items-center gap-1.5 shadow-none active:scale-95 transition-all text-xs flex-1"
+                          className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl h-10 flex items-center justify-center gap-1.5 border-none shadow-none active:scale-95 transition-all text-xs flex-1"
                           onPress={() => handleApplyChanges(true)}
                           isDisabled={isPending}
                         >
@@ -592,7 +635,7 @@ export default function RecipeCopilot({ isOpen, onClose, recipe, onRemixSuccess,
                         </Button>
                         <Button
                           size="sm"
-                          className="bg-white dark:bg-gray-700 border-none text-emerald-700 dark:text-emerald-400 font-medium rounded-xl flex items-center gap-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] active:scale-95 transition-all text-xs flex-1 hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
+                          className="bg-white dark:bg-gray-800 border-none text-emerald-700 dark:text-emerald-300 font-bold rounded-xl h-10 flex items-center justify-center gap-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] active:scale-95 transition-all text-xs flex-1 hover:bg-gray-50 dark:hover:bg-gray-700"
                           onPress={() => handleApplyChanges(false)}
                           isDisabled={isPending}
                         >
@@ -604,16 +647,16 @@ export default function RecipeCopilot({ isOpen, onClose, recipe, onRemixSuccess,
                         type="button"
                         onClick={() => setChoosingApply(false)}
                         disabled={isPending}
-                        className="text-[11px] text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 font-medium self-center outline-none border-none cursor-pointer bg-transparent disabled:opacity-40"
+                        className="text-[11px] text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 font-medium self-center outline-none border-none cursor-pointer bg-transparent py-1"
                       >
                         {t('dialog.cancelDefault')}
                       </button>
                     </div>
                   ) : (
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 pt-1">
                       <Button
                         size="sm"
-                        className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-none active:scale-95 transition-all text-xs flex-1"
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl h-10 flex items-center justify-center gap-2 border-none shadow-none active:scale-95 transition-all text-xs flex-1"
                         onPress={() => setChoosingApply(true)}
                         isDisabled={isPending}
                       >
@@ -622,7 +665,7 @@ export default function RecipeCopilot({ isOpen, onClose, recipe, onRemixSuccess,
                       </Button>
                       <Button
                         size="sm"
-                        className="bg-white dark:bg-gray-800 border-none text-gray-500 dark:text-gray-400 font-medium rounded-xl flex items-center gap-1.5 active:scale-95 transition-all text-xs hover:text-red-500 dark:hover:text-red-400 shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                        className="bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 font-semibold rounded-xl h-10 px-3.5 flex items-center justify-center gap-1.5 border-none shadow-[0_1px_3px_rgba(0,0,0,0.02)] active:scale-95 transition-all text-xs"
                         onPress={discardAllChanges}
                         isDisabled={isPending}
                       >
@@ -631,55 +674,31 @@ export default function RecipeCopilot({ isOpen, onClose, recipe, onRemixSuccess,
                       </Button>
                     </div>
                   )}
-                </Card>
+                </div>
               )}
 
               {/* Quick Chips Scroll Container */}
               {showChips && (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5">
                   {chipsLoading ? (
                     <div className="flex items-center justify-center py-1">
                       <Loader2 className="w-4 h-4 animate-spin text-emerald-500" />
                     </div>
-                  ) : chips.length === 0 ? null : (
-                    (() => {
-                      const groups: Record<string, { label: string; prompt: string }[]> = {};
-                      for (const c of chips) {
-                        (groups[c.category] ||= []).push({ label: c.label, prompt: c.prompt });
-                      }
-
-                      const categoryLabels: Record<string, string> = {
-                        remix: t('copilot.chipsHeaderRemix'),
-                        help: t('copilot.chipsHeaderHelp'),
-                        substitute: t('copilot.chipsHeaderSubs'),
-                        shopping: t('copilot.chipsHeaderShopping'),
-                        timer: t('copilot.chipsHeaderTimer'),
-                      };
-
-                      const categoryOrder = ['remix', 'help', 'substitute', 'shopping', 'timer'];
-
-                      return categoryOrder.map(cat => {
-                        const group = groups[cat];
-                        if (!group || group.length === 0) return null;
-                        return (
-                          <div key={cat} className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5 touch-pan-x">
-                            <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500 whitespace-nowrap flex-shrink-0 mr-1">
-                              {categoryLabels[cat]}:
-                            </span>
-                            {group.map((chip, idx) => (
-                              <button
-                                key={idx}
-                                onClick={() => handleSend(chip.prompt)}
-                                disabled={isPending}
-                                className="px-3 py-1.5 text-xs font-semibold rounded-full border-none bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 active:scale-95 transition-all whitespace-nowrap flex-shrink-0 cursor-pointer disabled:opacity-50"
-                              >
-                                {chip.label}
-                              </button>
-                            ))}
-                          </div>
-                        );
-                      });
-                    })()
+                  ) : chips.length > 0 && (
+                    <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 px-0.5 touch-pan-x -mx-1">
+                      {chips.map((chip, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleSend(chip.prompt)}
+                          disabled={isPending}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-full border-none bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:bg-emerald-500/20 dark:hover:text-emerald-300 active:scale-95 transition-all whitespace-nowrap flex-shrink-0 cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.02)] disabled:opacity-50"
+                        >
+                          {getCategoryIcon(chip.category)}
+                          <span>{chip.label}</span>
+                        </button>
+                      ))}
+                    </div>
                   )}
                 </div>
               )}
@@ -692,18 +711,17 @@ export default function RecipeCopilot({ isOpen, onClose, recipe, onRemixSuccess,
                 }}
                 className="flex items-center gap-2 w-full"
               >
-                {/* Show chips toggle button */}
                 {!showChips && (
                   <button
                     type="button"
                     onClick={() => setShowChips(true)}
-                    className="flex-shrink-0 h-11 w-10 rounded-2xl bg-gray-100 dark:bg-gray-800 border-none hover:bg-emerald-500/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+                    className="flex-shrink-0 h-12 w-11 rounded-2xl bg-gray-100 dark:bg-gray-800 border-none hover:bg-emerald-500/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
                     aria-label={t('copilot.showSuggestionsAria')}
                   >
                     <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   </button>
                 )}
-                <div className="relative flex-1 flex items-center bg-gray-100 dark:bg-gray-800 border-none rounded-2xl focus-within:ring-2 focus-within:ring-emerald-500/30 pr-1 h-11 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                <div className="relative flex-1 flex items-center bg-gray-100 dark:bg-gray-800 border-none rounded-2xl focus-within:ring-2 focus-within:ring-emerald-500/30 pr-1.5 h-12 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
                   <input
                     ref={textareaRef}
                     value={message}
@@ -711,24 +729,23 @@ export default function RecipeCopilot({ isOpen, onClose, recipe, onRemixSuccess,
                     placeholder={t('copilot.placeholder')}
                     disabled={isPending}
                     aria-label={t('copilot.placeholder')}
-                    className="w-full h-full bg-transparent pl-3 pr-10 text-sm text-gray-900 dark:text-white focus:outline-none border-none"
+                    className="w-full h-full bg-transparent pl-4 pr-11 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none border-none"
                   />
-                  <div className="absolute right-1 top-1/2 -translate-y-1/2">
+                  <div className="absolute right-1.5 top-1/2 -translate-y-1/2">
                     <Button
                       type="submit"
                       isDisabled={isPending || !message.trim()}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl h-8 w-8 min-w-8 shadow-none flex items-center justify-center active:scale-90 transition-all p-0"
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl h-9 w-9 min-w-9 shadow-none flex items-center justify-center active:scale-90 transition-all p-0 border-none disabled:opacity-40"
                       aria-label={t('copilot.sendAria')}
                     >
-                      <Send className="w-4 h-4 fill-white" />
+                      <Send className="w-4 h-4 fill-white ml-0.5" />
                     </Button>
                   </div>
                 </div>
               </form>
             </div>
 
-            {/* Clear/Reset confirmation — rendered inside the drawer so it stays within the
-                drawer's focus trap and remains clickable (a global dialog would sit behind/under it). */}
+            {/* Clear/Reset confirmation */}
             {confirmingClear && (
               <div className="absolute inset-0 z-[60] flex items-center justify-center p-5 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
                 <div className="w-full max-w-xs rounded-2xl border-none p-5 shadow-2xl bg-white dark:bg-gray-900 flex flex-col gap-4 animate-in zoom-in-95 duration-200">
