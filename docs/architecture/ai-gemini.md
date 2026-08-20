@@ -70,9 +70,8 @@ Ein rezept-spezifischer Chatbot (`POST /api/jobs/:id/chat`), der dem Nutzer Frag
     * **Passendes Koch-/Serviergeschirr:** z. B. weiße Keramik-Auflaufform, rustikale gusseiserne Pfanne, Schieferplatte oder Schale.
     * **Kamera & Beleuchtung:** 45-Grad-Winkel oder Nahaufnahme (Makro), warmes natürliches Ambient-Licht, geringe Tiefenschärfe (*shallow depth of field* mit weichem Bokeh).
     * **Negative Constraints:** Kein Text, keine Logos, keine Wasserzeichen, keine Hände, kein Rohzutaten-Müll.
-* **FLUX.1 [schnell] 4-Step Ausführung (`backend/src/imageGenerator.ts`):**
-  * Bildgenerierung im **4:3 Seitenverhältnis** (`1024x768` px) passend zum Poster-Karten-Layout der App.
-  * Multi-Provider-Unterstützung (Together AI, Fal.ai, Replicate, HuggingFace Inference API, Pollinations.ai Fallback oder Custom Endpoint).
+* **FLUX.1 [schnell] 4-Step Ausführung via fal.ai (`backend/src/imageGenerator.ts`):**
+  * Direct Inference über `https://fal.run/fal-ai/flux-1/schnell` mit `image_size: "landscape_4_3"`, 4 Steps und `output_format: "jpeg"`.
   * Speicherung im permanenten öffentlichen Supabase Storage Bucket `recipe-covers` (`${userId}/${jobId}.jpg`).
   * `recipe.imageUrl` wird auf die Public-URL gesetzt; `recipe.isAiCover` wird auf `true` gesetzt.
   * Gescrapte Original-Frames/Slides bleiben in `recipe.imageUrls` für die Galerie erhalten.
