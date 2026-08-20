@@ -138,7 +138,7 @@ const recipeSchema = {
                 },
                 modifier: {
                   type: FunctionDeclarationSchemaType.STRING,
-                  description: 'Optional specification, adjective, attribute, or processing state of the ingredient (e.g. "leicht", "mager", "gerieben", "gewürfelt", "ohne Knochen und Haut"). Keep it clean and short, in the recipe language.',
+                  description: 'Optional product attribute that affects what you need to buy at the store (e.g. "leicht", "mager", "ohne Knochen und Haut", "geräuchert", "TK", "Bio"). IMPORTANT: Do NOT include preparation or cooking states that happen in the kitchen — these are NOT relevant for shopping and must be left out (e.g. do NOT use "verquirlt", "gewürfelt", "gehackt", "fein geschnitten", "aufgetaut", "zerdrückt", "gedünstet", "diced", "chopped", "minced", "whisked", "beaten"). Exception: "gerieben" is allowed only if the product is typically sold pre-grated (e.g. Parmesan, Gouda). Keep the modifier clean and short, in the recipe language.',
                 },
                 calories: {
                   type: FunctionDeclarationSchemaType.INTEGER,
@@ -304,7 +304,7 @@ function applySourceNutritionalValues(recipe: Recipe, rawRecipe: any): void {
   delete recipe.nutritionalValues;
 }
 
-const CLEAN_INGREDIENT_NAMES_INSTRUCTION = 'Ensure the "name" field contains only the clean ingredient name (e.g., "Frischkäse", "Paprikapulver", "Olivenöl", "Mandelmehl", "Butter", "Kochschinken"). Retain compound nouns where the suffix or word defines the core food identity (e.g. "Paprikapulver", "Knoblauchpulver", "Backpulver", "Mandelmehl", "Olivenöl", "Tomatenmark"). Move only true descriptive adjectives and processing states (such as "light", "mager", "low fat", "leichte", "gerieben", "grated", "gewürfelt") into the "modifier" field. Do NOT strip essential compound words from "name".';
+const CLEAN_INGREDIENT_NAMES_INSTRUCTION = 'Ensure the "name" field contains only the clean ingredient name (e.g., "Frischkäse", "Paprikapulver", "Olivenöl", "Mandelmehl", "Butter", "Kochschinken"). Retain compound nouns where the suffix or word defines the core food identity (e.g. "Paprikapulver", "Knoblauchpulver", "Backpulver", "Mandelmehl", "Olivenöl", "Tomatenmark"). Move only shopping-relevant product attributes (e.g. "mager", "leicht", "light", "low fat", "ohne Knochen", "geräuchert") into the "modifier" field. Do NOT put preparation or cooking states into "modifier" (e.g. NOT "gewürfelt", "gerieben" unless sold pre-grated, "gehackt", "verquirlt", "fein geschnitten", "diced", "chopped"). Do NOT strip essential compound words from "name".';
 
 const CATEGORY_ORDERING_INSTRUCTION = 'Group ingredients using the standardized supermarket category keys: VEGETABLES (fresh vegetables/salads/mushrooms/fresh herbs), FRUITS (fresh/dried fruits/berries), DAIRY_EGGS (milk/cheese/yogurt/cream/butter/eggs/tofu/plant milk), MEAT_POULTRY (meat/chicken/sausages/vegan meat), SEAFOOD (fish/seafood), GRAINS_PASTA (pasta/rice/flour/dough/bread/oats/potatoes), OILS_CONDIMENTS (cooking oils/vinegar/dressings/store-bought sauces/pesto), SPICES_HERBS (salt/pepper/dried spices/ground spice powders), NUTS_SEEDS (nuts/seeds/avocado), SWEETS_SNACKS (sugar/honey/chocolate/cookies/ice cream/chips), BEVERAGES (drinks/juices/coffee/tea/alcohol), PANTRY_BAKING (yeast/baking powder/gelatine/protein powder), PREPARED_DISHES (ready meals).';
 
