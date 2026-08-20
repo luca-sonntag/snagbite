@@ -96,6 +96,7 @@ export interface Job {
   url: string;
   status: 'pending' | 'scraping' | 'processing' | 'completed' | 'failed';
   recipe?: Recipe;
+  llmUsage?: Record<string, any> | null;
   progress?: ProgressData;
   error?: string;
   parentJobId?: string | null;

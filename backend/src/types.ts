@@ -94,7 +94,6 @@ export interface Recipe {
   parentJobId?: string | null;
   parentRecipeTitle?: string | null;
   remixPrompt?: string | null;
-  geminiUsage?: GeminiUsageInfo;
 }
 
 export interface GeminiTokenUsage {
@@ -119,6 +118,21 @@ export interface GeminiUsageInfo {
   model?: string;
 }
 
+export interface FluxUsageInfo {
+  model: string;
+  durationMs?: number;
+  costUsd?: number;
+  costFormatted?: string;
+  inferenceSteps?: number;
+  imageSize?: string;
+}
+
+export interface LlmUsage {
+  gemini?: GeminiUsageInfo;
+  flux?: FluxUsageInfo;
+  [key: string]: any;
+}
+
 export type JobStatus = 'pending' | 'scraping' | 'processing' | 'completed' | 'failed';
 
 export type ProgressStage = 'queued' | 'scraping' | 'downloading_media' | 'extracting_frames' | 'reading_photos' | 'extracting_recipe' | 'generating_cover' | 'finalizing';
@@ -135,6 +149,7 @@ export interface Job {
   status: JobStatus;
   error?: string | null;
   recipe?: Recipe | null;
+  llmUsage?: LlmUsage | null;
   progress?: ProgressData | null;
   parentJobId?: string | null;
   prompt?: string | null;
