@@ -69,10 +69,9 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
 
 * **Generische Rohstoff-Konsolidierung & Universelle BaseKeys (`ingredientTaxonomy.ts`):**
   * Rezepte behalten ihre präzisen Zubereitungszutaten (z. B. *2 Eigelb*, *6 Stück Eier verquirlt*, *1 TL Zitronenabrieb*, *3 Knoblauchzehen*).
-  * **Taxonomie-Engine (`ingredientTaxonomy.ts`):** Mapped Teilzutaten und Derivate automatisch auf übergeordnete Rohstoff-Einkaufsartikel (z. B. *Eigelb / Eiweiß ➔ Ei*, *Zitronenabrieb / Zitronensaft ➔ Zitrone*, *Knoblauchzehe ➔ Knoblauch*). Primärartikel (`Ei`, `Eier`, `Zwiebel`) bleiben als Primärartikel erhalten.
-  * **Deterministischer Universal-BaseKey (`normalizeFoodBaseKey`):** Unifiziert singularisierte englische `baseNames` (`egg`, `onion`, `tomato`), abgeleitete Parents und deutsche Freitext-/Manuell-Einträge in einheitliche Gruppierungs-Keys.
-  * **Smarte dynamische Pluralisierung (`getIngredientDisplayName`):** Automatische sprachliche Anpassung von Zählartikeln (1 Stück `Ei` vs. 7 Stück `Eier`, 1 Stück `Zwiebel` vs. 3 Stück `Zwiebeln`) bei unverändert präzisen Mengennamen (`Mozzarella`, `Gouda`, `Frischkäse`).
-  * **Einheiten-Normalisierung (`normalizeUnit`):** Vereinheitlicht Schreibweisen (`Stück`, `stk`, `stk.`, `pcs`, `""` ➔ `Stück`).
+  * **100 % Sprachunabhängige Taxonomie-Engine (`ingredientTaxonomy.ts`):** Kommt vollständig ohne hardcodierte Übersetzungstabellen aus (~30 Zeilen). Nutzt das Gemini-Schema-Vertragsmodell (`baseName` in englischem Singular und `parentIngredient` bei Teilzutaten).
+  * **Deterministischer Universal-BaseKey (`normalizeFoodBaseKey` & `toEnglishSingular`):** Normalisiert den BaseKey (`item.parentIngredient?.baseName || item.baseName || item.name`) sprachunabhängig mit einem schlanken, sicheren englischen Singularizer (`eggs` / `uova` / `œufs` ➔ `egg`, `onions` / `cipolle` ➔ `onion`).
+  * **Einheiten-Normalisierung (`normalizeUnit`):** Standardisiert Schreibweisen (`Stück`, `stk`, `stk.`, `pcs`, `""` ➔ `Stück`).
   * **Aggregations-Logik (`useShoppingList.ts`):** Fasst Zutaten desselben Rohstoffs und kompatibler Einheit auf der Einkaufsliste zusammen (z. B. 6 Stück Eier [verquirlt] + 1 Stück Ei = **7 Stück Eier** [Notiz: 6 Stück verquirlt]).
 * **Sub-Item Breakdown UI & Smart Deduplication (`ShoppingListItem.tsx`):**
   * Blendet unter der aggregierten Hauptzeile die Zusammensetzung transparent ein.
