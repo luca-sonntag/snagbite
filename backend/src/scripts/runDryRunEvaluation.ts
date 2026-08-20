@@ -269,7 +269,7 @@ async function run() {
         const scrapeResult = await scraper.scrape(url, runDir);
         console.log(`  [Worker ${workerId}] Scraped: Caption ${(scrapeResult.caption || '').length} chars`);
 
-        const recipe: Recipe = await extractRecipe(
+        const { recipe, usage } = await extractRecipe(
           undefined,
           undefined,
           scrapeResult.caption || '',
@@ -353,7 +353,6 @@ async function run() {
         globalVerifiedIngredients += verifiedCount;
 
         // Aggregate Gemini token usage & cost
-        const usage = recipe.geminiUsage;
         const promptTokens = usage?.tokenUsage?.promptTokens ?? 0;
         const candidateTokens = usage?.tokenUsage?.candidateTokens ?? 0;
         const tokens = usage?.tokenUsage?.totalTokens ?? 0;

@@ -8,7 +8,7 @@ import { extractRecipe, remixRecipe } from './gemini.js';
 import { generateRecipeCoverImage } from './imageGenerator.js';
 import { pruneOldGeminiLogs } from './logger.js';
 import { isPhotoJobUrl, photoUploadIdFromUrl, downloadImportPhotos, deleteImportPhotos, sweepOldPhotoImports } from './photoImport.js';
-import type { Job } from './types.js';
+import type { Job, LlmUsage } from './types.js';
 import { config } from './config.js';
 import { AppError, serializeJobError } from './errors.js';
 import { notificationTick } from './notifications/worker.js';
@@ -92,7 +92,7 @@ async function processJob(job: Job): Promise<void> {
       }
 
       console.log(`[Job ${jobId}] Requesting remix from Gemini...`);
-      const recipe = await remixRecipe(parentJob.recipe, job.prompt || '', runDir, userPrefs);
+      const { recipe, usage: geminiUsage } = await remixRecipe(parentJob.recipe, job.prompt || '', runDir, userPrefs);
 
       if (recipe.isRecipe === false) {
         throw new AppError('UNRELATED_REMIX_REQUEST', { message: 'The prompt was not recognized as a valid recipe modification.' });
@@ -104,14 +104,17 @@ async function processJob(job: Job): Promise<void> {
       recipe.parentRecipeTitle = parentJob.recipe.title;
       recipe.remixPrompt = job.prompt || null;
 
+      let fluxUsage: any = null;
+
       // Generate AI cover image for the remixed recipe if prompt is present
       if (recipe.imagePrompt) {
         await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 85, stage: 'generating_cover' } as any });
-        const aiCoverUrl = await generateRecipeCoverImage({
+        const { imageUrl: aiCoverUrl, usage } = await generateRecipeCoverImage({
           prompt: recipe.imagePrompt,
           jobId,
           userId: job.userId,
         });
+        fluxUsage = usage;
         if (aiCoverUrl) {
           recipe.imageUrl = aiCoverUrl;
           recipe.imageUrls = [aiCoverUrl, ...(parentJob.recipe.imageUrls || [])];
@@ -130,7 +133,16 @@ async function processJob(job: Job): Promise<void> {
       // Canonical ingredient normalization & nutritional calculation
       await enrichRecipeWithCanonicalIngredients(recipe);
 
-      await updateJob(jobId, { status: 'completed', recipe, error: null });
+      const llmUsage: LlmUsage = {};
+      if (geminiUsage) llmUsage.gemini = geminiUsage;
+      if (fluxUsage) llmUsage.flux = fluxUsage;
+
+      await updateJob(jobId, {
+        status: 'completed',
+        recipe,
+        llmUsage: Object.keys(llmUsage).length > 0 ? llmUsage : null,
+        error: null,
+      });
       return;
     }
 
@@ -166,20 +178,23 @@ async function processJob(job: Job): Promise<void> {
       );
 
       await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 60, stage: 'extracting_recipe' } as any });
-      const recipe = await extractRecipe(undefined, undefined, '', undefined, runDir, userPrefs, undefined, photoPaths, 'photo');
+      const { recipe, usage: geminiUsage } = await extractRecipe(undefined, undefined, '', undefined, runDir, userPrefs, undefined, photoPaths, 'photo');
 
       console.log(`[Job ${jobId}] Recipe extracted from photos: "${recipe.title}"`);
       recipe.id = jobId;
       recipe.instagramHandle = null;
 
+      let fluxUsage: any = null;
+
       // Generate photorealistic AI cover image of the finished dish for photo imports
       if (recipe.imagePrompt) {
         await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 85, stage: 'generating_cover' } as any });
-        const aiCoverUrl = await generateRecipeCoverImage({
+        const { imageUrl: aiCoverUrl, usage } = await generateRecipeCoverImage({
           prompt: recipe.imagePrompt,
           jobId,
           userId: photoUserId,
         });
+        fluxUsage = usage;
         if (aiCoverUrl) {
           recipe.imageUrl = aiCoverUrl;
           recipe.imageUrls = [aiCoverUrl];
@@ -200,7 +215,16 @@ async function processJob(job: Job): Promise<void> {
       // Canonical ingredient normalization & nutritional calculation
       await enrichRecipeWithCanonicalIngredients(recipe);
 
-      await updateJob(jobId, { status: 'completed', recipe, error: null });
+      const llmUsage: LlmUsage = {};
+      if (geminiUsage) llmUsage.gemini = geminiUsage;
+      if (fluxUsage) llmUsage.flux = fluxUsage;
+
+      await updateJob(jobId, {
+        status: 'completed',
+        recipe,
+        llmUsage: Object.keys(llmUsage).length > 0 ? llmUsage : null,
+        error: null,
+      });
       return;
     }
 
@@ -321,7 +345,7 @@ async function processJob(job: Job): Promise<void> {
 
     await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 75, stage: 'extracting_recipe' } as any });
 
-    const [recipe, selectedImageUrls] = await Promise.all([
+    const [{ recipe, usage: geminiUsage }, selectedImageUrls] = await Promise.all([
       extractRecipe(
         audioFilePath || undefined,
         mimeType,
@@ -344,14 +368,17 @@ async function processJob(job: Job): Promise<void> {
       ? selectedImageUrls
       : (scrapeResult.imageUrl ? [scrapeResult.imageUrl] : []);
 
+    let fluxUsage: any = null;
+
     // Generate AI food photography cover image with FLUX.1 [schnell]
     if (recipe.imagePrompt) {
       await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 85, stage: 'generating_cover' } as any });
-      const aiCoverUrl = await generateRecipeCoverImage({
+      const { imageUrl: aiCoverUrl, usage } = await generateRecipeCoverImage({
         prompt: recipe.imagePrompt,
         jobId,
         userId: job.userId,
       });
+      fluxUsage = usage;
       if (aiCoverUrl) {
         recipe.imageUrl = aiCoverUrl;
         recipe.imageUrls = [aiCoverUrl, ...baseImageUrls];
@@ -377,10 +404,15 @@ async function processJob(job: Job): Promise<void> {
     // Canonical ingredient normalization & nutritional calculation
     await enrichRecipeWithCanonicalIngredients(recipe);
 
+    const llmUsage: LlmUsage = {};
+    if (geminiUsage) llmUsage.gemini = geminiUsage;
+    if (fluxUsage) llmUsage.flux = fluxUsage;
+
     // 7. Update job as completed
     await updateJob(jobId, {
       status: 'completed',
       recipe,
+      llmUsage: Object.keys(llmUsage).length > 0 ? llmUsage : null,
       error: null,
     });
   } catch (error: any) {

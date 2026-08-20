@@ -961,13 +961,15 @@ apiRouter.post('/jobs/:id/chat/confirm', async (req: Request, res: Response): Pr
       }
     } catch { }
 
-    const remixedRecipe = await remixRecipe(job.recipe, modificationRequest, undefined, userPrefs);
+    const { recipe: remixedRecipe, usage: remixUsage } = await remixRecipe(job.recipe, modificationRequest, undefined, userPrefs);
 
     // The remix prompt hands Gemini the parent recipe JSON, so it echoes back the
     // parent's canonicalId/matchedName/isVerified while re-estimating the macros
     // itself. Re-run the canonical matcher so persisted macros come from BLS and
     // not from the model's guess.
     await enrichRecipeWithCanonicalIngredients(remixedRecipe);
+
+    const remixLlmUsage = remixUsage ? { gemini: remixUsage } : undefined;
 
     if (replaceCurrent) {
       // Preserve images from the original recipe (Gemini doesn't know about them)
@@ -982,6 +984,7 @@ apiRouter.post('/jobs/:id/chat/confirm', async (req: Request, res: Response): Pr
 
       await updateJob(id, {
         recipe: mergedRecipe as any,
+        llmUsage: remixLlmUsage,
         status: 'completed',
       });
 
@@ -993,7 +996,7 @@ apiRouter.post('/jobs/:id/chat/confirm', async (req: Request, res: Response): Pr
       });
     } else {
       // Save as a new remix job
-      const savedJob = await saveCompletedRemix(id, job.url, remixedRecipe, modificationRequest, req.userId!);
+      const savedJob = await saveCompletedRemix(id, job.url, remixedRecipe, modificationRequest, req.userId!, remixLlmUsage);
       res.status(200).json({
         success: true,
         newJobId: savedJob.id,
