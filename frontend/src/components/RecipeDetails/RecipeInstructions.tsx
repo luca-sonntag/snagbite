@@ -93,10 +93,10 @@ export default function RecipeInstructions({
               </div>
 
               <Button
-                className="relative bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4.5 py-2.5 rounded-xl shadow-md flex items-center justify-center gap-2 active:scale-[0.98] transition-all flex-shrink-0 self-start"
+                className="relative bg-gradient-to-b from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold px-4.5 py-2.5 rounded-xl shadow-md flex items-center justify-center gap-2 active:scale-[0.98] transition-all flex-shrink-0 self-start"
                 onPress={onStartCooking}
               >
-                <Play className="w-4 h-4 fill-white" />
+                <Play className="w-4 h-4 fill-white ml-0.5" />
                 <span>{t('recipe.startCooking')}</span>
                 {!isPremium && <PremiumCrownBadge />}
               </Button>
