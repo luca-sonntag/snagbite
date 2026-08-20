@@ -1,5 +1,5 @@
 import { Button } from '@heroui/react';
-import { Play, Check, ChefHat, Utensils, ListChecks } from 'lucide-react';
+import { Play, Check, ChefHat, Utensils, ListChecks, Lightbulb } from 'lucide-react';
 import type { Recipe } from '../../types';
 import RecipeInstructionText from '../RecipeInstructionText';
 import { useI18n } from '../../context/I18nContext';
@@ -206,23 +206,38 @@ export default function RecipeInstructions({
         )}
       </div>
 
-      {/* Tips Card */}
+      {/* Tips Section */}
       {recipe.tips && recipe.tips.length > 0 && (
-        <div className="glass-panel p-4.5 sm:p-5 rounded-2xl border border-emerald-500/10">
-          <h3 className="text-xs font-bold text-emerald-500 mb-3 uppercase tracking-wider flex items-center gap-1.5">
-            <ChefHat className="w-4 h-4" />
-            <span>{t('recipe.tipsTitle')}</span>
-          </h3>
-          <ul className="flex flex-col gap-3 text-sm text-gray-700 dark:text-gray-300">
+        <div className="flex flex-col gap-4 mt-2">
+          {/* Section Header (OUTSIDE card) */}
+          <div className="flex items-center gap-3">
+            <div className={medallion}>
+              <Lightbulb className={medallionIcon} />
+            </div>
+            <h3 className="text-base font-bold text-gray-900 dark:text-white">
+              {t('recipe.tipsTitle')}
+            </h3>
+            <span className="ml-auto text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 rounded-full px-2.5 py-1 tabular-nums select-none">
+              {recipe.tips.length}
+            </span>
+          </div>
+
+          {/* Clean Flat Card Container */}
+          <div className="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-2.5">
             {recipe.tips.map((tip, idx) => (
-              <li key={idx} className="flex items-start gap-2.5 leading-normal">
-                <span className="bg-emerald-500/10 text-emerald-500 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold border border-emerald-500/20">{idx + 1}</span>
-                <span>
-                  <RecipeInstructionText text={tip} recipe={recipe} formatAmount={formatAmount} />
+              <div
+                key={idx}
+                className="bg-gray-50/80 dark:bg-gray-800/50 rounded-xl p-3 sm:p-3.5 flex items-start gap-3 transition-all"
+              >
+                <span className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 text-xs font-bold tabular-nums mt-0.5">
+                  {idx + 1}
                 </span>
-              </li>
+                <div className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 leading-relaxed min-w-0 flex-1">
+                  <RecipeInstructionText text={tip} recipe={recipe} formatAmount={formatAmount} />
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       )}
     </div>
