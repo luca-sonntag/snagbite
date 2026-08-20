@@ -608,6 +608,8 @@ export default function RecipeDetails({
       {/* Smart Sticky Sub-navigation */}
       <RecipeStickyBar
         recipeTitle={recipe.title}
+        imageUrl={recipe.imageUrl}
+        emoji={recipe.emoji}
         isCollapsed={isHeaderCollapsed}
         onBack={onBack}
         activeSection={activeSection}

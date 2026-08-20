@@ -1,8 +1,11 @@
 import { ArrowLeft, Clock, Users, Flame } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
+import CachedImage from '../CachedImage';
 
 interface RecipeStickyBarProps {
   recipeTitle: string;
+  imageUrl?: string | null;
+  emoji?: string | null;
   isCollapsed: boolean;
   onBack?: () => void;
   activeSection: 'ingredients' | 'instructions' | 'details';
@@ -23,6 +26,8 @@ interface RecipeStickyBarProps {
  */
 export default function RecipeStickyBar({
   recipeTitle,
+  imageUrl,
+  emoji,
   isCollapsed,
   onBack,
   activeSection,
@@ -43,7 +48,7 @@ export default function RecipeStickyBar({
     <div id="recipe-sticky-bar" className="sticky top-[var(--app-sticky-top)] z-30 -mx-4 px-4 bg-[#f9fafb]/90 dark:bg-gray-950/90 backdrop-blur-md">
       {/* Collapsed title row — only present once the hero has scrolled away. */}
       <div
-        className={`flex items-center gap-2 overflow-hidden motion-safe:transition-all motion-safe:duration-200 ${
+        className={`flex items-center gap-2.5 overflow-hidden motion-safe:transition-all motion-safe:duration-200 ${
           isCollapsed ? 'max-h-14 opacity-100 pt-2' : 'max-h-0 opacity-0 pointer-events-none'
         }`}
         aria-hidden={!isCollapsed}
@@ -59,6 +64,14 @@ export default function RecipeStickyBar({
             <ArrowLeft className="w-4 h-4" />
           </button>
         )}
+        <div className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 border border-black/5 dark:border-white/10 shadow-xs flex items-center justify-center">
+          <CachedImage
+            src={imageUrl}
+            emoji={emoji}
+            alt={recipeTitle}
+            className="w-full h-full object-cover"
+          />
+        </div>
         <div className="min-w-0 flex-1 flex flex-col justify-center">
           <span className="text-sm font-bold text-gray-900 dark:text-white truncate leading-tight">
             {recipeTitle}
