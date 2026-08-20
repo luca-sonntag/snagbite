@@ -68,6 +68,7 @@ import {
 import { config } from './config.js';
 import { requireAuth, requireAdmin } from './auth.js';
 import { chatAboutRecipe, generateChatChips, remixRecipe, verifyCookedDishPhoto } from './gemini.js';
+import { generateRecipeCoverImage } from './imageGenerator.js';
 import { enrichRecipeWithCanonicalIngredients } from './matching/ingredientMatcher.js';
 import { getLlmMetrics } from './adminMetrics.js';
 import { AppError, sendAppError } from './errors.js';
@@ -969,14 +970,40 @@ apiRouter.post('/jobs/:id/chat/confirm', async (req: Request, res: Response): Pr
     // not from the model's guess.
     await enrichRecipeWithCanonicalIngredients(remixedRecipe);
 
-    const remixLlmUsage = remixUsage ? { gemini: remixUsage } : undefined;
+    let remixLlmUsage: any = remixUsage ? { gemini: remixUsage } : undefined;
+
+    // Generate AI food photo cover via FLUX.1 [schnell] for the remixed recipe
+    if (remixedRecipe.imagePrompt) {
+      try {
+        const { imageUrl: aiCoverUrl, usage: fluxUsage } = await generateRecipeCoverImage({
+          prompt: remixedRecipe.imagePrompt,
+          jobId: randomUUID(),
+          userId: req.userId,
+        });
+        if (aiCoverUrl) {
+          remixedRecipe.imageUrl = aiCoverUrl;
+          remixedRecipe.imageUrls = [aiCoverUrl];
+          remixedRecipe.isAiCover = true;
+          if (fluxUsage) {
+            remixLlmUsage = { ...(remixLlmUsage || {}), flux: fluxUsage };
+          }
+        }
+      } catch (coverErr) {
+        console.warn(`[chat/confirm] Failed to generate AI cover for remix:`, coverErr);
+      }
+    }
+
+    // Fallback: inherit parent recipe cover if Flux is disabled or failed
+    if (!remixedRecipe.imageUrl && job.recipe?.imageUrl) {
+      remixedRecipe.imageUrl = job.recipe.imageUrl;
+      remixedRecipe.imageUrls = job.recipe.imageUrls ?? [job.recipe.imageUrl];
+    }
 
     if (replaceCurrent) {
-      // Preserve images from the original recipe (Gemini doesn't know about them)
       const mergedRecipe = {
         ...remixedRecipe,
-        imageUrl: job.recipe?.imageUrl ?? null,
-        imageUrls: job.recipe?.imageUrls ?? (job.recipe?.imageUrl ? [job.recipe.imageUrl] : []),
+        imageUrl: remixedRecipe.imageUrl || job.recipe?.imageUrl || null,
+        imageUrls: remixedRecipe.imageUrls || job.recipe?.imageUrls || (job.recipe?.imageUrl ? [job.recipe.imageUrl] : []),
         id,
         parentJobId: job.parentJobId,
         remixPrompt: modificationRequest,
