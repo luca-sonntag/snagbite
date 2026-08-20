@@ -105,57 +105,8 @@ export function getParentIngredient(item: { parentIngredient?: ParentIngredientI
 }
 
 /**
- * Fallback plural map for legacy localStorage entries or manual items without baseName.
- */
-const FALLBACK_PLURAL_MAP: Record<string, string> = {
-  'eier': 'egg',
-  'ei': 'egg',
-  'eigelb': 'egg',
-  'eigelbe': 'egg',
-  'eiweiß': 'egg',
-  'eiweiße': 'egg',
-  'zwiebeln': 'onion',
-  'zwiebel': 'onion',
-  'schalotten': 'onion',
-  'schalotte': 'onion',
-  'tomaten': 'tomato',
-  'tomate': 'tomato',
-  'kartoffeln': 'potato',
-  'kartoffel': 'potato',
-  'karotten': 'carrot',
-  'karotte': 'carrot',
-  'möhren': 'carrot',
-  'möhre': 'carrot',
-  'gurken': 'cucumber',
-  'gurke': 'cucumber',
-  'zitronen': 'lemon',
-  'zitrone': 'lemon',
-  'limetten': 'lime',
-  'limette': 'lime',
-  'orangen': 'orange',
-  'orange': 'orange',
-  'äpfel': 'apple',
-  'apfel': 'apple',
-  'bananen': 'banana',
-  'banane': 'banana',
-  'champignons': 'mushroom',
-  'champignon': 'mushroom',
-  'pilze': 'mushroom',
-  'pilz': 'mushroom',
-  'erdbeeren': 'strawberry',
-  'erdbeere': 'strawberry',
-  'himbeeren': 'raspberry',
-  'himbeere': 'raspberry',
-  'blaubeeren': 'blueberry',
-  'blaubeere': 'blueberry',
-  'knoblauchzehen': 'garlic',
-  'knoblauchzehe': 'garlic',
-  'knoblauch': 'garlic',
-};
-
-/**
  * Computes the authoritative universal base key used for grouping items on the shopping list.
- * 100% language-agnostic by using the AI's English singular baseName contract, with fallback for manual/legacy items.
+ * 100% language-agnostic by using the AI's English singular baseName contract.
  */
 export function normalizeFoodBaseKey(item: {
   name: string;
@@ -163,21 +114,12 @@ export function normalizeFoodBaseKey(item: {
   parentIngredient?: ParentIngredientInfo;
 }): string {
   const parent = getParentIngredient(item);
-  if (parent?.baseName) {
-    return toEnglishSingular(parent.baseName);
-  }
-  if (item.baseName) {
-    return toEnglishSingular(item.baseName);
-  }
-  const clean = normalizeIngredientName(item.name).toLowerCase();
-  if (FALLBACK_PLURAL_MAP[clean]) {
-    return FALLBACK_PLURAL_MAP[clean];
-  }
-  return toEnglishSingular(clean);
+  const rawKey = parent?.baseName || item.baseName || item.name;
+  return toEnglishSingular(normalizeIngredientName(rawKey));
 }
 
 /**
- * Resolves the display name for a shopping list item cleanly.
+ * Resolves the display name for a shopping list item cleanly without language dictionaries.
  */
 export function getIngredientDisplayName(
   item: { name: string; baseName?: string; parentIngredient?: ParentIngredientInfo }
