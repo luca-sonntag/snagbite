@@ -3,7 +3,7 @@ import AiNotice from '../AiNotice';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import PremiumModal from '../PremiumModal';
-import { Flame, Crown, Info } from 'lucide-react';
+import { Flame, Crown } from 'lucide-react';
 
 interface RecipeNutritionProps {
   nutritionalValues: any;
@@ -21,12 +21,6 @@ interface RecipeNutritionProps {
    * short version early and the long version where it belongs.
    */
   variant?: 'summary' | 'detail';
-  /**
-   * When provided, the ℹ️ icon in the summary header becomes a button that
-   * opens the AdjustServingsSheet so the user can correct the portion count
-   * (and therefore nutrition per serving) directly from the nutrition card.
-   */
-  onOpenAdjustServings?: () => void;
 }
 
 export default function RecipeNutrition({
@@ -35,8 +29,7 @@ export default function RecipeNutrition({
   isAiEstimated,
   isVerified,
   getNutritionDisplayValue,
-  variant = 'detail',
-  onOpenAdjustServings,
+  variant = 'detail'
 }: RecipeNutritionProps) {
   const { t } = useI18n();
   const { isPremium } = useAuth();
@@ -100,7 +93,7 @@ export default function RecipeNutrition({
             </div>
 
             <div className="flex-1 min-w-0">
-              {/* Top Header Row: NÄHRWERTE (PRO PORTION) label + optional adjust-servings button */}
+              {/* Top Header Row: NÄHRWERTE (PRO PORTION) label */}
               <div className="flex items-center gap-1.5 min-w-0 mb-1">
                 <span className={statLabel}>
                   {t('recipe.nutritionTitle')} ({t('recipe.nutritionPerServing')})
@@ -110,16 +103,6 @@ export default function RecipeNutrition({
                     type="badge"
                     tooltipText={isVerified ? t('recipe.verifiedDatabaseTooltip') : undefined}
                   />
-                )}
-                {onOpenAdjustServings && (
-                  <button
-                    type="button"
-                    onClick={onOpenAdjustServings}
-                    aria-label={t('recipe.adjustServingsTitle')}
-                    className="ml-auto flex items-center justify-center w-6 h-6 rounded-full text-gray-400 dark:text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-500/10 transition-all active:scale-90 flex-shrink-0"
-                  >
-                    <Info className="w-3.5 h-3.5" />
-                  </button>
                 )}
               </div>
 

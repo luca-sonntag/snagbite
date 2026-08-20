@@ -102,9 +102,9 @@ export default function RecipeIngredients({
               <Users className={medallionIcon} />
             </div>
             <div className="flex flex-col">
-              <span className={blockLabel}>{t('recipe.scalingForToday')}</span>
-              <span className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-0.5">
-                {t('recipe.scalingSubtext')}
+              <span className={blockLabel}>{t('recipe.serves')}</span>
+              <span className="text-xs font-bold text-gray-800 dark:text-gray-200 mt-0.5">
+                {t('recipe.servingsCount', { count: servings })}
               </span>
             </div>
           </div>
