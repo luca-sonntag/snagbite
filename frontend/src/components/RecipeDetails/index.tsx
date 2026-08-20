@@ -24,8 +24,8 @@ import RecipeCopilot from './RecipeCopilot';
 import { useAuth } from '../../context/AuthContext';
 import PremiumModal from '../PremiumModal';
 import ShoppingConfirmSheet from './ShoppingConfirmSheet';
-import AdjustServingsSheet from './AdjustServingsSheet';
-import { apiUrl } from '../../api';
+
+
 import { stripInlineIngredientTags } from '../../utils/ingredientMatch';
 
 interface RecipeDetailsProps {
@@ -86,9 +86,9 @@ export default function RecipeDetails({
 
   // Local UI states
   const [isCopied, setIsCopied] = useState(false);
-  const { isPremium, getAccessToken } = useAuth();
+  const { isPremium } = useAuth();
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
-  const [isAdjustServingsOpen, setIsAdjustServingsOpen] = useState(false);
+
   const [isAdded, setIsAdded] = useState(false);
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [isCookingMode, setIsCookingMode] = useState(false);
@@ -297,40 +297,7 @@ export default function RecipeDetails({
     }
   };
 
-  const handleSaveAdjustedServings = async (targetServings: number) => {
-    setServings(targetServings);
 
-    const updatedRecipe: Recipe = {
-      ...recipe,
-      servings: targetServings,
-    };
-
-    const targetJobId = recipe.id;
-    if (targetJobId) {
-      try {
-        const token = await getAccessToken();
-        const res = await fetch(apiUrl(`/api/jobs/${targetJobId}`), {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({ recipe: updatedRecipe }),
-        });
-
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          console.error('Failed to patch recipe servings on backend:', errData);
-        }
-      } catch (err) {
-        console.error('Error updating recipe servings on backend:', err);
-      }
-    }
-
-    if (onReplaceCurrent) {
-      onReplaceCurrent(updatedRecipe);
-    }
-  };
 
   // Cooking mode is premium-gated: free users are steered to the upsell modal.
   const handleStartCooking = () => {
@@ -381,12 +348,9 @@ export default function RecipeDetails({
   }, [recipe.instructions, checkedSteps]);
   const progressPercent = totalStepsCount > 0 ? (completedStepsCount / totalStepsCount) * 100 : 0;
 
-  // Get nutritional info (either reel-level or aggregated per-ingredient AI estimates).
-  // NOTE: Do NOT pass `servings` here – the scaling stepper changes ingredient amounts only.
-  // Nutrition per serving is always derived from recipe.servings (the stored base);
-  // only AdjustServingsSheet (with Save) may change that base.
+  // Get nutritional info (either reel-level or aggregated per-ingredient AI estimates)
   const { nutritionalValues, sourceNutritionalValues, isAiEstimated, isVerified, hasNutritionInfo } =
-    useRecipeNutrition(recipe);
+    useRecipeNutrition(recipe, servings);
 
   // Prep + cook collapsed into the single figure shown in the meta strip. Both
   // fields may be legacy strings ("20 Min."), so pull the leading number out.
@@ -642,7 +606,7 @@ export default function RecipeDetails({
             cookTime={recipe.cookTime}
             formatTimeValue={formatTimeValue}
             servings={servings}
-            onOpenAdjustServings={() => setIsAdjustServingsOpen(true)}
+
             nutritionalValues={hasNutritionInfo ? nutritionalValues : null}
             sourceNutritionalValues={sourceNutritionalValues}
             isAiEstimated={isAiEstimated}
@@ -778,14 +742,7 @@ export default function RecipeDetails({
         onConfirm={handleConfirmShoppingListSelection}
       />
 
-      {/* Adjust Base Servings Drawer */}
-      <AdjustServingsSheet
-        isOpen={isAdjustServingsOpen}
-        onClose={() => setIsAdjustServingsOpen(false)}
-        baseServings={recipe.servings || 1}
-        nutritionalValues={nutritionalValues}
-        onSave={handleSaveAdjustedServings}
-      />
+
 
       {/* Cooked Modal (triggered when completing all steps) */}
       {recipe.id && (
