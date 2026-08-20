@@ -55,7 +55,9 @@ Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()` (
 
 ## 3. Cloud-Infrastruktur (Supabase & Railway)
 
-* **Tabelle `jobs`:** Speichert Rezept-Extraktionsjobs und fertige Rezepte (`id`, `url`, `url_normalized`, `status`, `error`, `recipe`, `user_id`, `parent_job_id`, `prompt`, `created_at`, `updated_at`, `locked_at`, `locked_by`).
+* **Tabelle `jobs`:** Speichert Rezept-Extraktionsjobs und fertige Rezepte (`id`, `url`, `url_normalized`, `status`, `error`, `recipe`, `llm_usage`, `user_id`, `parent_job_id`, `prompt`, `created_at`, `updated_at`, `locked_at`, `locked_by`).
+  * `recipe` (JSONB): Enthält ausschließlich das bereinigte, saubere Rezept.
+  * `llm_usage` (JSONB): Enthält die Provider-spezifischen LLM- und Inferenzkosten/-tokens (`gemini`, `flux`).
 * **Tabelle `feedback`:** Speichert In-App Bug-Reports & Feedback (`id`, `user_id`, `type`, `message`, `context`, `screenshot_urls`, `created_at`).
 * **Storage Buckets:**
   * `recipe-covers` (öffentlich): Generierte FLUX.1 Food-Fotografie-Coverbilder (`${userId}/${jobId}.jpg`).

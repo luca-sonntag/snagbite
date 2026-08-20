@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-20: `recipe.geminiUsage` aus Recipe JSON entfernt & durch dedizierte `jobs.llm_usage` JSONB-Spalte ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `recipe.geminiUsage = { tokenUsage, costEstimate, durationMs, model }` direkt im `Recipe`-Objekt bzw. in der `jobs.recipe` Datenbankspalte (`backend/src/gemini.ts`, `backend/src/types.ts`).
+  - Vermischung von fachlichen Rezeptdaten (Titel, Zutaten, Schritte) mit rein infrastrukturellen Modell-/Kosten-Metadaten im selben JSONB-Dokument.
+* **Ersetzt durch:**
+  - **Sauberes Rezeptmodell (`Recipe`):** Enthält ausschließlich fachliche Rezept-Attribute.
+  - **Dedizierte `jobs.llm_usage` JSONB-Spalte (`backend/src/db.ts` & `backend/src/types.ts`):** Speichert getrennte Usage-Objekte für `gemini` (Tokens, Input/Output-Kosten, Dauer, Modell) und `flux` (FLUX.1 [schnell] 4-Step Cover Inferenz-Kosten $0.0035, Dauer, Modell).
+  - **Migration (`backend/src/scripts/migrateLlmUsage.ts`):** Extrahiert rückwirkend `geminiUsage` aus bestehenden Jobs nach `llm_usage.gemini`, ergänzt `llm_usage.flux` bei AI-Covers und entfernt `geminiUsage` aus `recipe`.
+* **Betroffene Dateien:** `backend/src/types.ts`, `frontend/src/types.ts`, `backend/src/gemini.ts`, `backend/src/imageGenerator.ts`, `backend/src/queue.ts`, `backend/src/routes.ts`, `backend/src/db.ts`, `backend/db/schema.sql`, `backend/supabase_schema.sql`, `backend/src/scripts/migrateLlmUsage.ts`.
+
+---
+
 ### 2026-08-16: Hardcodierte Stück-Gewichts-Heuristiken durch schema-autoritatives `gramsPerUnit` & BLS `standard_units` ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
