@@ -43,22 +43,12 @@ describe('ingredientTaxonomy (Language-Agnostic Generic Engine)', () => {
   });
 
   describe('normalizeUnit', () => {
-    it('standardizes piece and measurement unit aliases', () => {
-      assert.equal(normalizeUnit(''), 'Stück');
-      assert.equal(normalizeUnit('Stück'), 'Stück');
-      assert.equal(normalizeUnit('stk'), 'Stück');
-      assert.equal(normalizeUnit('stk.'), 'Stück');
-      assert.equal(normalizeUnit('pcs'), 'Stück');
+    it('cleans and trims unit strings', () => {
+      assert.equal(normalizeUnit(''), '');
+      assert.equal(normalizeUnit(' Stück '), 'Stück');
       assert.equal(normalizeUnit('g'), 'g');
-      assert.equal(normalizeUnit('gramm'), 'g');
-      assert.equal(normalizeUnit('kg'), 'kg');
-      assert.equal(normalizeUnit('ml'), 'ml');
-      assert.equal(normalizeUnit('l'), 'l');
-      assert.equal(normalizeUnit('EL'), 'EL');
-      assert.equal(normalizeUnit('TL'), 'TL');
-      assert.equal(normalizeUnit('Zehe'), 'Zehe');
-      assert.equal(normalizeUnit('Zehen'), 'Zehe');
-      assert.equal(normalizeUnit('Dose'), 'Dose');
+      assert.equal(normalizeUnit(' ml '), 'ml');
+      assert.equal(normalizeUnit(undefined), '');
     });
   });
 

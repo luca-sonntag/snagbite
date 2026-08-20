@@ -23,58 +23,11 @@ export function normalizeIngredientName(rawName: string): string {
   return rawName.replace(/\s*\([^)]*\)/g, '').split(',')[0].trim();
 }
 
-const UNIT_MAP: Record<string, string> = {
-  '': 'Stück',
-  'stück': 'Stück',
-  'stueck': 'Stück',
-  'stk': 'Stück',
-  'stk.': 'Stück',
-  'st': 'Stück',
-  'st.': 'Stück',
-  'pcs': 'Stück',
-  'piece': 'Stück',
-  'pieces': 'Stück',
-  'g': 'g',
-  'gramm': 'g',
-  'grams': 'g',
-  'gr': 'g',
-  'kg': 'kg',
-  'kilogramm': 'kg',
-  'ml': 'ml',
-  'milliliter': 'ml',
-  'l': 'l',
-  'liter': 'l',
-  'el': 'EL',
-  'tbsp': 'EL',
-  'tl': 'TL',
-  'tsp': 'TL',
-  'zehe': 'Zehe',
-  'zehen': 'Zehe',
-  'clove': 'Zehe',
-  'cloves': 'Zehe',
-  'dose': 'Dose',
-  'dosen': 'Dose',
-  'can': 'Dose',
-  'cans': 'Dose',
-  'prise': 'Prise',
-  'prisen': 'Prise',
-  'pinch': 'Prise',
-  'scheibe': 'Scheibe',
-  'scheiben': 'Scheibe',
-  'slice': 'Scheibe',
-  'bund': 'Bund',
-  'bunch': 'Bund',
-  'packung': 'Packung',
-  'packungen': 'Packung',
-  'pkg': 'Packung',
-};
-
 /**
- * Normalizes measurement units so equivalent unit variations match cleanly during aggregation.
+ * Normalizes measurement unit strings.
  */
 export function normalizeUnit(rawUnit?: string): string {
-  const clean = (rawUnit || '').toLowerCase().trim();
-  return UNIT_MAP[clean] || rawUnit?.trim() || 'Stück';
+  return (rawUnit || '').trim();
 }
 
 /**
