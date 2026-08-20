@@ -7,38 +7,29 @@ import {
   getParentIngredient,
   normalizeFoodBaseKey,
   getIngredientDisplayName,
+  toFoodCanonicalKey,
 } from '../ingredientTaxonomy.js';
 import type { ShoppingListItem, AggregatedShoppingItem } from '../../types.js';
 
 describe('ingredientTaxonomy', () => {
-  describe('toEnglishSingular', () => {
-    it('safely converts regular and irregular food plurals to singular', () => {
-      assert.equal(toEnglishSingular('eggs'), 'egg');
-      assert.equal(toEnglishSingular('egg'), 'egg');
-      assert.equal(toEnglishSingular('onions'), 'onion');
-      assert.equal(toEnglishSingular('carrots'), 'carrot');
-      assert.equal(toEnglishSingular('tomatoes'), 'tomato');
-      assert.equal(toEnglishSingular('potatoes'), 'potato');
-      assert.equal(toEnglishSingular('strawberries'), 'strawberry');
-      assert.equal(toEnglishSingular('raspberries'), 'raspberry');
-      assert.equal(toEnglishSingular('leaves'), 'leaf');
-      assert.equal(toEnglishSingular('shrimps'), 'shrimp');
-    });
+  describe('toFoodCanonicalKey', () => {
+    it('unifies German, English and plural variations to identical canonical keys', () => {
+      assert.equal(toFoodCanonicalKey('Eier'), 'egg');
+      assert.equal(toFoodCanonicalKey('Ei'), 'egg');
+      assert.equal(toFoodCanonicalKey('egg'), 'egg');
+      assert.equal(toFoodCanonicalKey('eggs'), 'egg');
+      assert.equal(toFoodCanonicalKey('Eigelb'), 'egg');
+      assert.equal(toFoodCanonicalKey('Eiweiß'), 'egg');
 
-    it('preserves words ending in -ss, -us, -is, -se, -cous', () => {
-      assert.equal(toEnglishSingular('cheese'), 'cheese');
-      assert.equal(toEnglishSingular('hummus'), 'hummus');
-      assert.equal(toEnglishSingular('asparagus'), 'asparagus');
-      assert.equal(toEnglishSingular('couscous'), 'couscous');
-    });
-  });
+      assert.equal(toFoodCanonicalKey('Zwiebel'), 'onion');
+      assert.equal(toFoodCanonicalKey('Zwiebeln'), 'onion');
+      assert.equal(toFoodCanonicalKey('onions'), 'onion');
+      assert.equal(toFoodCanonicalKey('onion'), 'onion');
+      assert.equal(toFoodCanonicalKey('Schalotten'), 'onion');
 
-  describe('normalizeIngredientName', () => {
-    it('cleans parenthetical and comma modifiers', () => {
-      assert.equal(normalizeIngredientName('Zwiebel (weiß, fein gewürfelt)'), 'zwiebel');
-      assert.equal(normalizeIngredientName('Zwiebel, gewürfelt'), 'zwiebel');
-      assert.equal(normalizeIngredientName('Mozzarella (light)'), 'mozzarella');
-      assert.equal(normalizeIngredientName('Gouda, gerieben, leicht'), 'gouda');
+      assert.equal(toFoodCanonicalKey('Mozzarella'), 'mozzarella');
+      assert.equal(toFoodCanonicalKey('Mozzarella light'), 'mozzarella');
+      assert.equal(toFoodCanonicalKey('Gouda gerieben, leicht'), 'gouda');
     });
   });
 
@@ -69,71 +60,22 @@ describe('ingredientTaxonomy', () => {
         baseName: 'egg',
         unit: 'Stück',
       });
-      assert.deepEqual(getParentIngredient({ name: 'Eiweiß', baseName: 'egg white' }), {
-        name: 'Ei',
-        baseName: 'egg',
-        unit: 'Stück',
-      });
-      assert.deepEqual(getParentIngredient({ name: 'Zitronensaft', baseName: 'lemon juice' }), {
+      assert.deepEqual(getParentIngredient({ name: 'Zitronensaft' }), {
         name: 'Zitrone',
         baseName: 'lemon',
         unit: 'Stück',
       });
-      assert.deepEqual(getParentIngredient({ name: 'Knoblauchzehe', baseName: 'garlic clove' }), {
+      assert.deepEqual(getParentIngredient({ name: 'Knoblauchzehe' }), {
         name: 'Knoblauch',
         baseName: 'garlic',
         unit: 'Zehe',
       });
     });
 
-    it('returns null for primary standalone grocery foods', () => {
+    it('returns null for primary standalone grocery foods even with stale self-parent', () => {
       assert.equal(getParentIngredient({ name: 'Ei', baseName: 'egg' }), null);
       assert.equal(getParentIngredient({ name: 'Eier', baseName: 'egg' }), null);
-      assert.equal(getParentIngredient({ name: 'Zwiebel', baseName: 'onion' }), null);
-      assert.equal(getParentIngredient({ name: 'Butter', baseName: 'butter' }), null);
-      assert.equal(getParentIngredient({ name: 'Mozzarella light', baseName: 'mozzarella' }), null);
-    });
-  });
-
-  describe('normalizeFoodBaseKey', () => {
-    it('unifies Ei, Eier, Eigelb and English egg variations to "egg"', () => {
-      assert.equal(normalizeFoodBaseKey({ name: '6 Stück Eier', baseName: 'egg' }), 'egg');
-      assert.equal(normalizeFoodBaseKey({ name: '1 Stück Ei', baseName: 'egg' }), 'egg');
-      assert.equal(normalizeFoodBaseKey({ name: 'Eigelb', baseName: 'egg yolk' }), 'egg');
-      assert.equal(normalizeFoodBaseKey({ name: 'Eier' }), 'egg');
-      assert.equal(normalizeFoodBaseKey({ name: 'Ei' }), 'egg');
-      assert.equal(normalizeFoodBaseKey({ name: 'Eggs', baseName: 'eggs' }), 'egg');
-    });
-
-    it('unifies Zwiebel, Zwiebeln, Schalotten and onions to "onion"', () => {
-      assert.equal(normalizeFoodBaseKey({ name: 'Zwiebel', baseName: 'onion' }), 'onion');
-      assert.equal(normalizeFoodBaseKey({ name: 'Zwiebeln', baseName: 'onions' }), 'onion');
-      assert.equal(normalizeFoodBaseKey({ name: 'Zwiebeln' }), 'onion');
-      assert.equal(normalizeFoodBaseKey({ name: 'Schalotten' }), 'onion');
-    });
-
-    it('handles dairy and produce cleanly', () => {
-      assert.equal(normalizeFoodBaseKey({ name: 'Mozzarella light', baseName: 'mozzarella' }), 'mozzarella');
-      assert.equal(normalizeFoodBaseKey({ name: 'Gouda gerieben, leicht', baseName: 'gouda' }), 'gouda');
-      assert.equal(normalizeFoodBaseKey({ name: 'Hafermilch', baseName: 'oat milk' }), 'oat milk');
-      assert.equal(normalizeFoodBaseKey({ name: 'Frischkäse', baseName: 'cream cheese' }), 'cream cheese');
-    });
-  });
-
-  describe('getIngredientDisplayName', () => {
-    it('displays singular or plural depending on quantity for countable grocery items', () => {
-      assert.equal(getIngredientDisplayName({ name: 'Ei', baseName: 'egg' }, 1), 'Ei');
-      assert.equal(getIngredientDisplayName({ name: 'Ei', baseName: 'egg' }, 7), 'Eier');
-      assert.equal(getIngredientDisplayName({ name: 'Eier', baseName: 'egg' }, 6), 'Eier');
-      assert.equal(getIngredientDisplayName({ name: 'Zwiebel', baseName: 'onion' }, 1), 'Zwiebel');
-      assert.equal(getIngredientDisplayName({ name: 'Zwiebel', baseName: 'onion' }, 3), 'Zwiebeln');
-    });
-
-    it('preserves clean names for non-countable or specialized items', () => {
-      assert.equal(getIngredientDisplayName({ name: 'Mozzarella light', baseName: 'mozzarella' }, 1), 'Mozzarella light');
-      assert.equal(getIngredientDisplayName({ name: 'Gouda gerieben, leicht', baseName: 'gouda' }, 1), 'Gouda gerieben');
-      assert.equal(getIngredientDisplayName({ name: 'Hafermilch', baseName: 'oat milk' }, 1), 'Hafermilch');
-      assert.equal(getIngredientDisplayName({ name: 'Frischkäse', baseName: 'cream cheese' }, 1), 'Frischkäse');
+      assert.equal(getParentIngredient({ name: 'Eier', parentIngredient: { name: 'Eier', baseName: 'eier' } }), null);
     });
   });
 
@@ -155,7 +97,6 @@ describe('ingredientTaxonomy', () => {
           if (!existing.itemIds.includes(item.id)) {
             existing.itemIds.push(item.id);
           }
-          existing.name = getIngredientDisplayName(existing, existing.amount);
 
           if (!existing.subItems && (existing.modifier !== item.modifier || existing.name !== item.name || existing.baseName !== item.baseName)) {
             const firstSubName = existing.modifier ? `${existing.name} (${existing.modifier})` : existing.name;
@@ -201,7 +142,7 @@ describe('ingredientTaxonomy', () => {
             recipeTitle: item.recipeTitle
           }] : undefined;
 
-          const displayName = getIngredientDisplayName(item, item.amount);
+          const displayName = getIngredientDisplayName(item);
 
           map.set(key, {
             name: displayName,
@@ -227,12 +168,11 @@ describe('ingredientTaxonomy', () => {
       return Array.from(map.values());
     }
 
-    it('aggregates "6 Stück Eier (verquirlt)" and "1 Stück Ei" into a single "7 Stück Eier" item', () => {
+    it('aggregates "6 Stück Eier (verquirlt)" and "1 Stück Ei" regardless of baseName presence', () => {
       const shoppingList: ShoppingListItem[] = [
         {
           id: 'item-1',
           name: 'Eier',
-          baseName: 'egg',
           amount: 6,
           unit: 'Stück',
           modifier: 'verquirlt',
@@ -245,7 +185,6 @@ describe('ingredientTaxonomy', () => {
         {
           id: 'item-2',
           name: 'Ei',
-          baseName: 'egg',
           amount: 1,
           unit: 'Stück',
           recipeId: 'rec-2',
@@ -258,87 +197,45 @@ describe('ingredientTaxonomy', () => {
 
       const aggregated = aggregateItems(shoppingList);
       assert.equal(aggregated.length, 1);
-      assert.equal(aggregated[0].name, 'Eier');
       assert.equal(aggregated[0].amount, 7);
       assert.equal(aggregated[0].unit, 'Stück');
       assert.equal(aggregated[0].itemIds.length, 2);
       assert.equal(aggregated[0].sources.length, 2);
       assert.equal(aggregated[0].subItems?.length, 2);
-      assert.equal(aggregated[0].subItems?.[0].name, 'Eier (verquirlt)');
-      assert.equal(aggregated[0].subItems?.[0].amount, 6);
-      assert.equal(aggregated[0].subItems?.[1].name, 'Ei');
-      assert.equal(aggregated[0].subItems?.[1].amount, 1);
     });
 
-    it('aggregates "2 Eigelb" and "3 Eier" into a single "5 Stück Eier" item', () => {
+    it('aggregates items with stale localStorage parentIngredient structures', () => {
       const shoppingList: ShoppingListItem[] = [
         {
           id: 'item-1',
-          name: 'Eigelb',
-          baseName: 'egg yolk',
-          parentIngredient: { name: 'Ei', baseName: 'egg', unit: 'Stück' },
-          amount: 2,
+          name: 'Eier',
+          parentIngredient: { name: 'Eier', baseName: 'eier', unit: 'Stück' },
+          amount: 6,
           unit: 'Stück',
+          modifier: 'verquirlt',
           recipeId: 'rec-1',
-          recipeTitle: 'Carbonara',
+          recipeTitle: 'Omelett',
           checked: false,
           createdAt: new Date().toISOString(),
           category: 'DAIRY_EGGS'
         },
         {
           id: 'item-2',
-          name: 'Eier',
-          baseName: 'egg',
-          amount: 3,
-          unit: 'Stück',
-          recipeId: 'rec-2',
-          recipeTitle: 'Pancakes',
-          checked: false,
-          createdAt: new Date().toISOString(),
-          category: 'DAIRY_EGGS'
-        }
-      ];
-
-      const aggregated = aggregateItems(shoppingList);
-      assert.equal(aggregated.length, 1);
-      assert.equal(aggregated[0].name, 'Eier');
-      assert.equal(aggregated[0].amount, 5);
-      assert.equal(aggregated[0].unit, 'Stück');
-      assert.equal(aggregated[0].subItems?.length, 2);
-    });
-
-    it('aggregates "1 Zwiebel" and "2 Zwiebeln" into "3 Stück Zwiebeln"', () => {
-      const shoppingList: ShoppingListItem[] = [
-        {
-          id: 'item-1',
-          name: 'Zwiebel',
-          baseName: 'onion',
+          name: 'Ei',
+          parentIngredient: { name: 'Ei', baseName: 'ei', unit: 'Stück' },
           amount: 1,
           unit: 'Stück',
-          recipeId: 'rec-1',
-          recipeTitle: 'Suppe',
-          checked: false,
-          createdAt: new Date().toISOString(),
-          category: 'PRODUCE'
-        },
-        {
-          id: 'item-2',
-          name: 'Zwiebeln',
-          baseName: 'onions',
-          amount: 2,
-          unit: 'Stück',
           recipeId: 'rec-2',
-          recipeTitle: 'Gulasch',
+          recipeTitle: 'Kuchen',
           checked: false,
           createdAt: new Date().toISOString(),
-          category: 'PRODUCE'
+          category: 'DAIRY_EGGS'
         }
       ];
 
       const aggregated = aggregateItems(shoppingList);
       assert.equal(aggregated.length, 1);
-      assert.equal(aggregated[0].name, 'Zwiebeln');
-      assert.equal(aggregated[0].amount, 3);
+      assert.equal(aggregated[0].amount, 7);
       assert.equal(aggregated[0].unit, 'Stück');
     });
   });

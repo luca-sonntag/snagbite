@@ -195,9 +195,6 @@ export function useShoppingList() {
           existing.category = item.category;
         }
 
-        // Dynamically update display name with new total amount (e.g. 1 Ei -> 7 Eier)
-        existing.name = getIngredientDisplayName(existing, existing.amount);
-
         // Initialize subItems on existing if merging items with different details/modifiers
         if (!existing.subItems && (existing.modifier !== item.modifier || existing.name !== item.name || existing.baseName !== item.baseName)) {
           const firstSubName = existing.modifier ? `${existing.name} (${existing.modifier})` : existing.name;
@@ -258,7 +255,7 @@ export function useShoppingList() {
           recipeTitle: item.recipeTitle
         }] : undefined;
 
-        const displayName = getIngredientDisplayName(item, item.amount);
+        const displayName = getIngredientDisplayName(item);
 
         targetMap.set(key, {
           name: displayName,

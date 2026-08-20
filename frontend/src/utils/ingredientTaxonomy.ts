@@ -37,29 +37,15 @@ export function toEnglishSingular(word: string): string {
 }
 
 /**
- * Dynamically normalizes an ingredient name for grouping without hardcoded dictionaries or language-specific rules.
- * Removes parenthetical descriptions and trailing comma modifiers.
+ * Strips parenthetical descriptions and trailing comma modifiers.
  */
 export function normalizeIngredientName(rawName: string): string {
   if (!rawName) return '';
-
-  let name = rawName.trim();
-
-  // 1. Remove parenthetical descriptions, e.g. "Zwiebel (gewürfelt)" -> "Zwiebel"
-  name = name.replace(/\s*\([^)]*\)/g, '').trim();
-
-  // 2. Remove trailing comma modifiers, e.g. "Zwiebel, fein gewürfelt" -> "Zwiebel"
-  const commaIndex = name.indexOf(',');
-  if (commaIndex !== -1) {
-    name = name.slice(0, commaIndex).trim();
-  }
-
-  // 3. Lowercase & trim
-  return name.toLowerCase().trim();
+  return rawName.replace(/\s*\([^)]*\)/g, '').split(',')[0].trim();
 }
 
 /**
- * Normalizes measurement units so equivalent variations match in aggregation keys.
+ * Normalizes measurement units so equivalent unit variations match cleanly during aggregation.
  */
 export function normalizeUnit(rawUnit?: string): string {
   if (!rawUnit) return 'Stück';
@@ -108,235 +94,246 @@ export function normalizeUnit(rawUnit?: string): string {
   return rawUnit.trim();
 }
 
-interface DerivedTaxonomyRule {
-  targetNames: string[];
-  targetBaseNames: string[];
-  parent: ParentIngredientInfo;
-}
-
 /**
- * Rules for derived component parts that are NOT bought separately in grocery stores.
+ * Universal canonical map for staple grocery foods in German and English.
+ * Bridges plural/singular and German/English inputs to a universal canonical key.
  */
-const KNOWN_DERIVED_RULES: DerivedTaxonomyRule[] = [
-  {
-    targetNames: ['eigelb', 'eiweiß', 'eigelbe', 'eiweiße'],
-    targetBaseNames: ['egg yolk', 'egg white', 'egg-yolk', 'egg-white'],
-    parent: { name: 'Ei', baseName: 'egg', unit: 'Stück' },
-  },
-  {
-    targetNames: ['zitronenabrieb', 'zitronenschale', 'zitronensaft', 'zitronenabrieb (bio)'],
-    targetBaseNames: ['lemon zest', 'lemon juice', 'lemon peel'],
-    parent: { name: 'Zitrone', baseName: 'lemon', unit: 'Stück' },
-  },
-  {
-    targetNames: ['orangenabrieb', 'orangenschale', 'orangensaft'],
-    targetBaseNames: ['orange zest', 'orange juice', 'orange peel'],
-    parent: { name: 'Orange', baseName: 'orange', unit: 'Stück' },
-  },
-  {
-    targetNames: ['limettenabrieb', 'limettenschale', 'limettensaft'],
-    targetBaseNames: ['lime zest', 'lime juice', 'lime peel'],
-    parent: { name: 'Limette', baseName: 'lime', unit: 'Stück' },
-  },
-  {
-    targetNames: ['knoblauchzehe', 'knoblauchzehen'],
-    targetBaseNames: ['garlic clove', 'garlic cloves'],
-    parent: { name: 'Knoblauch', baseName: 'garlic', unit: 'Zehe' },
-  },
-];
+const CANONICAL_FOOD_KEYS: Record<string, string> = {
+  // Eggs & Egg parts
+  'ei': 'egg',
+  'eier': 'egg',
+  'hühnerei': 'egg',
+  'hühnereier': 'egg',
+  'eigelb': 'egg',
+  'eiweiß': 'egg',
+  'eigelbe': 'egg',
+  'eiweiße': 'egg',
+  'egg': 'egg',
+  'eggs': 'egg',
+  'egg yolk': 'egg',
+  'egg white': 'egg',
+  'uova': 'egg',
+  'uovo': 'egg',
+  'oeuf': 'egg',
+  'oeufs': 'egg',
+  'huevo': 'egg',
+  'huevos': 'egg',
 
-interface FoodNameMapping {
-  baseName: string;
-  singularName: string;
-  pluralName: string;
-}
+  // Alliums
+  'zwiebel': 'onion',
+  'zwiebeln': 'onion',
+  'gemüsezwiebel': 'onion',
+  'gemüsezwiebeln': 'onion',
+  'rote zwiebel': 'onion',
+  'rote zwiebeln': 'onion',
+  'weiße zwiebel': 'onion',
+  'weiße zwiebeln': 'onion',
+  'schalotte': 'onion',
+  'schalotten': 'onion',
+  'onion': 'onion',
+  'onions': 'onion',
+  'cipolla': 'onion',
+  'cipolle': 'onion',
+  'oignon': 'onion',
+  'oignons': 'onion',
+  'cebolla': 'onion',
+  'cebollas': 'onion',
+  'knoblauch': 'garlic',
+  'knoblauchzehe': 'garlic',
+  'knoblauchzehen': 'garlic',
+  'garlic': 'garlic',
+  'garlic clove': 'garlic',
+  'garlic cloves': 'garlic',
+  'aglio': 'garlic',
+  'ail': 'garlic',
+  'ajo': 'garlic',
 
-/**
- * Mapping for primary grocery items (singular and plural forms) to universal English baseName and localized display names.
- */
-const KNOWN_FOOD_MAP: Record<string, FoodNameMapping> = {
-  // Eggs
-  'ei': { baseName: 'egg', singularName: 'Ei', pluralName: 'Eier' },
-  'eier': { baseName: 'egg', singularName: 'Ei', pluralName: 'Eier' },
-  'hühnerei': { baseName: 'egg', singularName: 'Ei', pluralName: 'Eier' },
-  'hühnereier': { baseName: 'egg', singularName: 'Ei', pluralName: 'Eier' },
-  'egg': { baseName: 'egg', singularName: 'Ei', pluralName: 'Eier' },
-  'eggs': { baseName: 'egg', singularName: 'Ei', pluralName: 'Eier' },
+  // Solanaceae & Roots
+  'tomate': 'tomato',
+  'tomaten': 'tomato',
+  'strauchtomate': 'tomato',
+  'strauchtomaten': 'tomato',
+  'romatomate': 'tomato',
+  'romatomaten': 'tomato',
+  'kirschtomate': 'tomato',
+  'kirschtomaten': 'tomato',
+  'cherrytomate': 'tomato',
+  'cherrytomaten': 'tomato',
+  'fleischtomate': 'tomato',
+  'fleischtomaten': 'tomato',
+  'tomato': 'tomato',
+  'tomatoes': 'tomato',
+  'pomodoro': 'tomato',
+  'pomodori': 'tomato',
+  'kartoffel': 'potato',
+  'kartoffeln': 'potato',
+  'speisekartoffel': 'potato',
+  'speisekartoffeln': 'potato',
+  'süßkartoffel': 'potato',
+  'süßkartoffeln': 'potato',
+  'potato': 'potato',
+  'potatoes': 'potato',
+  'patata': 'potato',
+  'patate': 'potato',
+  'karotte': 'carrot',
+  'karotten': 'carrot',
+  'möhre': 'carrot',
+  'möhren': 'carrot',
+  'carrot': 'carrot',
+  'carrots': 'carrot',
+  'gurke': 'cucumber',
+  'gurken': 'cucumber',
+  'salatgurke': 'cucumber',
+  'salatgurken': 'cucumber',
+  'cucumber': 'cucumber',
+  'cucumbers': 'cucumber',
+  'paprika': 'bell pepper',
+  'paprikas': 'bell pepper',
+  'spitzpaprika': 'bell pepper',
+  'gemüsepaprika': 'bell pepper',
+  'bell pepper': 'bell pepper',
+  'bell peppers': 'bell pepper',
 
-  // Onions
-  'zwiebel': { baseName: 'onion', singularName: 'Zwiebel', pluralName: 'Zwiebeln' },
-  'zwiebeln': { baseName: 'onion', singularName: 'Zwiebel', pluralName: 'Zwiebeln' },
-  'gemüsezwiebel': { baseName: 'onion', singularName: 'Zwiebel', pluralName: 'Zwiebeln' },
-  'gemüsezwiebeln': { baseName: 'onion', singularName: 'Zwiebel', pluralName: 'Zwiebeln' },
-  'rote zwiebel': { baseName: 'onion', singularName: 'Rote Zwiebel', pluralName: 'Rote Zwiebeln' },
-  'rote zwiebeln': { baseName: 'onion', singularName: 'Rote Zwiebel', pluralName: 'Rote Zwiebeln' },
-  'weiße zwiebel': { baseName: 'onion', singularName: 'Weiße Zwiebel', pluralName: 'Weiße Zwiebeln' },
-  'weiße zwiebeln': { baseName: 'onion', singularName: 'Weiße Zwiebel', pluralName: 'Weiße Zwiebeln' },
-  'schalotte': { baseName: 'onion', singularName: 'Schalotte', pluralName: 'Schalotten' },
-  'schalotten': { baseName: 'onion', singularName: 'Schalotte', pluralName: 'Schalotten' },
-  'onion': { baseName: 'onion', singularName: 'Zwiebel', pluralName: 'Zwiebeln' },
-  'onions': { baseName: 'onion', singularName: 'Zwiebel', pluralName: 'Zwiebeln' },
+  // Citrus & Fruits
+  'zitrone': 'lemon',
+  'zitronen': 'lemon',
+  'zitronensaft': 'lemon',
+  'zitronenabrieb': 'lemon',
+  'zitronenschale': 'lemon',
+  'lemon': 'lemon',
+  'lemons': 'lemon',
+  'lemon juice': 'lemon',
+  'lemon zest': 'lemon',
+  'limette': 'lime',
+  'limetten': 'lime',
+  'limettensaft': 'lime',
+  'limettenabrieb': 'lime',
+  'lime': 'lime',
+  'limes': 'lime',
+  'orange': 'orange',
+  'orangen': 'orange',
+  'orangensaft': 'orange',
+  'orangenabrieb': 'orange',
+  'oranges': 'orange',
+  'apfel': 'apple',
+  'äpfel': 'apple',
+  'apple': 'apple',
+  'apples': 'apple',
+  'avocado': 'avocado',
+  'avocados': 'avocado',
+  'banane': 'banana',
+  'bananen': 'banana',
+  'banana': 'banana',
+  'bananas': 'banana',
 
-  // Tomatoes
-  'tomate': { baseName: 'tomato', singularName: 'Tomate', pluralName: 'Tomaten' },
-  'tomaten': { baseName: 'tomato', singularName: 'Tomate', pluralName: 'Tomaten' },
-  'strauchtomate': { baseName: 'tomato', singularName: 'Strauchtomate', pluralName: 'Strauchtomaten' },
-  'strauchtomaten': { baseName: 'tomato', singularName: 'Strauchtomate', pluralName: 'Strauchtomaten' },
-  'romatomate': { baseName: 'tomato', singularName: 'Romatomate', pluralName: 'Romatomaten' },
-  'romatomaten': { baseName: 'tomato', singularName: 'Romatomate', pluralName: 'Romatomaten' },
-  'kirschtomate': { baseName: 'tomato', singularName: 'Kirschtomate', pluralName: 'Kirschtomaten' },
-  'kirschtomaten': { baseName: 'tomato', singularName: 'Kirschtomate', pluralName: 'Kirschtomaten' },
-  'cherrytomate': { baseName: 'tomato', singularName: 'Cherrytomate', pluralName: 'Cherrytomaten' },
-  'cherrytomaten': { baseName: 'tomato', singularName: 'Cherrytomate', pluralName: 'Cherrytomaten' },
-  'fleischtomate': { baseName: 'tomato', singularName: 'Fleischtomate', pluralName: 'Fleischtomaten' },
-  'fleischtomaten': { baseName: 'tomato', singularName: 'Fleischtomate', pluralName: 'Fleischtomaten' },
-  'tomato': { baseName: 'tomato', singularName: 'Tomate', pluralName: 'Tomaten' },
-  'tomatoes': { baseName: 'tomato', singularName: 'Tomate', pluralName: 'Tomaten' },
+  // Fungi & Berries
+  'champignon': 'mushroom',
+  'champignons': 'mushroom',
+  'pilz': 'mushroom',
+  'pilze': 'mushroom',
+  'mushroom': 'mushroom',
+  'mushrooms': 'mushroom',
+  'erdbeere': 'strawberry',
+  'erdbeeren': 'strawberry',
+  'strawberry': 'strawberry',
+  'strawberries': 'strawberry',
+  'himbeere': 'raspberry',
+  'himbeeren': 'raspberry',
+  'raspberry': 'raspberry',
+  'raspberries': 'raspberry',
+  'blaubeere': 'blueberry',
+  'blaubeeren': 'blueberry',
+  'heidelbeere': 'blueberry',
+  'heidelbeeren': 'blueberry',
+  'blueberry': 'blueberry',
+  'blueberries': 'blueberry',
 
-  // Potatoes
-  'kartoffel': { baseName: 'potato', singularName: 'Kartoffel', pluralName: 'Kartoffeln' },
-  'kartoffeln': { baseName: 'potato', singularName: 'Kartoffel', pluralName: 'Kartoffeln' },
-  'speisekartoffel': { baseName: 'potato', singularName: 'Kartoffel', pluralName: 'Kartoffeln' },
-  'speisekartoffeln': { baseName: 'potato', singularName: 'Kartoffel', pluralName: 'Kartoffeln' },
-  'süßkartoffel': { baseName: 'potato', singularName: 'Süßkartoffel', pluralName: 'Süßkartoffeln' },
-  'süßkartoffeln': { baseName: 'potato', singularName: 'Süßkartoffel', pluralName: 'Süßkartoffeln' },
-  'potato': { baseName: 'potato', singularName: 'Kartoffel', pluralName: 'Kartoffeln' },
-  'potatoes': { baseName: 'potato', singularName: 'Kartoffel', pluralName: 'Kartoffeln' },
-
-  // Carrots
-  'karotte': { baseName: 'carrot', singularName: 'Karotte', pluralName: 'Karotten' },
-  'karotten': { baseName: 'carrot', singularName: 'Karotte', pluralName: 'Karotten' },
-  'möhre': { baseName: 'carrot', singularName: 'Möhre', pluralName: 'Möhren' },
-  'möhren': { baseName: 'carrot', singularName: 'Möhre', pluralName: 'Möhren' },
-  'carrot': { baseName: 'carrot', singularName: 'Karotte', pluralName: 'Karotten' },
-  'carrots': { baseName: 'carrot', singularName: 'Karotte', pluralName: 'Karotten' },
-
-  // Garlic
-  'knoblauch': { baseName: 'garlic', singularName: 'Knoblauch', pluralName: 'Knoblauch' },
-  'garlic': { baseName: 'garlic', singularName: 'Knoblauch', pluralName: 'Knoblauch' },
-
-  // Cucumber
-  'gurke': { baseName: 'cucumber', singularName: 'Gurke', pluralName: 'Gurken' },
-  'gurken': { baseName: 'cucumber', singularName: 'Gurke', pluralName: 'Gurken' },
-  'salatgurke': { baseName: 'cucumber', singularName: 'Salatgurke', pluralName: 'Salatgurken' },
-  'salatgurken': { baseName: 'cucumber', singularName: 'Salatgurke', pluralName: 'Salatgurken' },
-  'cucumber': { baseName: 'cucumber', singularName: 'Gurke', pluralName: 'Gurken' },
-  'cucumbers': { baseName: 'cucumber', singularName: 'Gurke', pluralName: 'Gurken' },
-
-  // Citrus
-  'zitrone': { baseName: 'lemon', singularName: 'Zitrone', pluralName: 'Zitronen' },
-  'zitronen': { baseName: 'lemon', singularName: 'Zitrone', pluralName: 'Zitronen' },
-  'lemon': { baseName: 'lemon', singularName: 'Zitrone', pluralName: 'Zitronen' },
-  'lemons': { baseName: 'lemon', singularName: 'Zitrone', pluralName: 'Zitronen' },
-  'limette': { baseName: 'lime', singularName: 'Limette', pluralName: 'Limetten' },
-  'limetten': { baseName: 'lime', singularName: 'Limette', pluralName: 'Limetten' },
-  'lime': { baseName: 'lime', singularName: 'Limette', pluralName: 'Limetten' },
-  'limes': { baseName: 'lime', singularName: 'Limette', pluralName: 'Limetten' },
-  'orange': { baseName: 'orange', singularName: 'Orange', pluralName: 'Orangen' },
-  'orangen': { baseName: 'orange', singularName: 'Orange', pluralName: 'Orangen' },
-  'oranges': { baseName: 'orange', singularName: 'Orange', pluralName: 'Orangen' },
-
-  // Apples / Fruits
-  'apfel': { baseName: 'apple', singularName: 'Apfel', pluralName: 'Äpfel' },
-  'äpfel': { baseName: 'apple', singularName: 'Apfel', pluralName: 'Äpfel' },
-  'apple': { baseName: 'apple', singularName: 'Apfel', pluralName: 'Äpfel' },
-  'apples': { baseName: 'apple', singularName: 'Apfel', pluralName: 'Äpfel' },
-  'avocado': { baseName: 'avocado', singularName: 'Avocado', pluralName: 'Avocados' },
-  'avocados': { baseName: 'avocado', singularName: 'Avocado', pluralName: 'Avocados' },
-  'banane': { baseName: 'banana', singularName: 'Banane', pluralName: 'Bananen' },
-  'bananen': { baseName: 'banana', singularName: 'Banane', pluralName: 'Bananen' },
-  'banana': { baseName: 'banana', singularName: 'Banane', pluralName: 'Bananen' },
-  'bananas': { baseName: 'banana', singularName: 'Banane', pluralName: 'Bananen' },
-
-  // Mushrooms
-  'champignon': { baseName: 'mushroom', singularName: 'Champignon', pluralName: 'Champignons' },
-  'champignons': { baseName: 'mushroom', singularName: 'Champignon', pluralName: 'Champignons' },
-  'pilz': { baseName: 'mushroom', singularName: 'Pilz', pluralName: 'Pilze' },
-  'pilze': { baseName: 'mushroom', singularName: 'Pilz', pluralName: 'Pilze' },
-  'mushroom': { baseName: 'mushroom', singularName: 'Champignon', pluralName: 'Champignons' },
-  'mushrooms': { baseName: 'mushroom', singularName: 'Champignon', pluralName: 'Champignons' },
-
-  // Berries
-  'erdbeere': { baseName: 'strawberry', singularName: 'Erdbeere', pluralName: 'Erdbeeren' },
-  'erdbeeren': { baseName: 'strawberry', singularName: 'Erdbeere', pluralName: 'Erdbeeren' },
-  'strawberry': { baseName: 'strawberry', singularName: 'Erdbeere', pluralName: 'Erdbeeren' },
-  'strawberries': { baseName: 'strawberry', singularName: 'Erdbeere', pluralName: 'Erdbeeren' },
-  'himbeere': { baseName: 'raspberry', singularName: 'Himbeere', pluralName: 'Himbeeren' },
-  'himbeeren': { baseName: 'raspberry', singularName: 'Himbeere', pluralName: 'Himbeeren' },
-  'raspberry': { baseName: 'raspberry', singularName: 'Himbeere', pluralName: 'Himbeeren' },
-  'raspberries': { baseName: 'raspberry', singularName: 'Himbeere', pluralName: 'Himbeeren' },
-  'blaubeere': { baseName: 'blueberry', singularName: 'Blaubeere', pluralName: 'Blaubeeren' },
-  'blaubeeren': { baseName: 'blueberry', singularName: 'Blaubeere', pluralName: 'Blaubeeren' },
-  'heidelbeere': { baseName: 'blueberry', singularName: 'Heidelbeere', pluralName: 'Heidelbeeren' },
-  'heidelbeeren': { baseName: 'blueberry', singularName: 'Heidelbeere', pluralName: 'Heidelbeeren' },
-  'blueberry': { baseName: 'blueberry', singularName: 'Blaubeere', pluralName: 'Blaubeeren' },
-  'blueberries': { baseName: 'blueberry', singularName: 'Blaubeere', pluralName: 'Blaubeeren' },
-
-  // Staples
-  'nudel': { baseName: 'pasta', singularName: 'Nudeln', pluralName: 'Nudeln' },
-  'nudeln': { baseName: 'pasta', singularName: 'Nudeln', pluralName: 'Nudeln' },
-  'pasta': { baseName: 'pasta', singularName: 'Pasta', pluralName: 'Pasta' },
-  'haferflocke': { baseName: 'oats', singularName: 'Haferflocken', pluralName: 'Haferflocken' },
-  'haferflocken': { baseName: 'oats', singularName: 'Haferflocken', pluralName: 'Haferflocken' },
-  'oat': { baseName: 'oats', singularName: 'Haferflocken', pluralName: 'Haferflocken' },
-  'oats': { baseName: 'oats', singularName: 'Haferflocken', pluralName: 'Haferflocken' },
+  // Grains & Dairy
+  'nudel': 'pasta',
+  'nudeln': 'pasta',
+  'pasta': 'pasta',
+  'haferflocke': 'oats',
+  'haferflocken': 'oats',
+  'oat': 'oats',
+  'oats': 'oats',
+  'butter': 'butter',
+  'mozzarella': 'mozzarella',
+  'gouda': 'gouda',
+  'parmesan': 'parmesan',
+  'frischkäse': 'cream cheese',
+  'cream cheese': 'cream cheese',
+  'hafermilch': 'oat milk',
+  'oat milk': 'oat milk',
+  'milch': 'milk',
+  'milk': 'milk',
 };
 
 /**
- * Resolves the raw parent ingredient for grocery store shopping list aggregation.
- * Checks explicit `ingredient.parentIngredient` first, then taxonomy rules for derived parts, then regex heuristics.
- * Returns null if the ingredient is already a primary grocery product.
+ * Normalizes any food term (German or English, singular or plural) to its canonical base key.
  */
-export function getParentIngredient(ing: {
-  name: string;
+export function toFoodCanonicalKey(rawText: string): string {
+  if (!rawText) return '';
+  const clean = normalizeIngredientName(rawText).toLowerCase().trim();
+
+  // 1. Exact canonical mapping (bridges German, plural forms and English)
+  if (CANONICAL_FOOD_KEYS[clean]) {
+    return CANONICAL_FOOD_KEYS[clean];
+  }
+
+  // 2. Strip common superficial adjectives (e.g. "Mozzarella light" -> "mozzarella")
+  const stripped = clean
+    .replace(/\b(light|mager|fettarm|gerieben|gehackt|gewürfelt|fein|grob|frisch|bio|mini|groß|klein)\b/gi, '')
+    .trim()
+    .replace(/\s+/g, ' ');
+
+  if (stripped && CANONICAL_FOOD_KEYS[stripped]) {
+    return CANONICAL_FOOD_KEYS[stripped];
+  }
+
+  // 3. English singular conversion
+  const singularEnglish = toEnglishSingular(stripped || clean);
+  if (CANONICAL_FOOD_KEYS[singularEnglish]) {
+    return CANONICAL_FOOD_KEYS[singularEnglish];
+  }
+
+  // 4. Fallback to singular English or clean text
+  return singularEnglish;
+}
+
+/**
+ * Resolves the raw parent ingredient for derived components.
+ */
+export function getParentIngredient(item: {
+  name?: string;
   baseName?: string;
   unit?: string;
   parentIngredient?: ParentIngredientInfo;
 }): ParentIngredientInfo | null {
-  // 1. Explicitly provided parent from AI
-  if (ing.parentIngredient?.baseName && ing.parentIngredient?.name) {
-    return ing.parentIngredient;
-  }
+  // 1. Explicit AI parent provided
+  if (item.parentIngredient?.name && item.parentIngredient?.baseName) {
+    const parentKey = toFoodCanonicalKey(item.parentIngredient.baseName);
+    const itemKey = toFoodCanonicalKey(item.baseName || item.name || '');
 
-  const cleanName = normalizeIngredientName(ing.name);
-  const cleanBaseName = toEnglishSingular((ing.baseName || '').toLowerCase().trim());
-
-  // 2. Known explicit derived rule matching (e.g. Eigelb -> Ei, Zitronenabrieb -> Zitrone)
-  for (const rule of KNOWN_DERIVED_RULES) {
-    if (
-      rule.targetNames.includes(cleanName) ||
-      (cleanBaseName && rule.targetBaseNames.includes(cleanBaseName))
-    ) {
-      return {
-        ...rule.parent,
-        unit: rule.parent.unit || ing.unit
-      };
+    // Prevent old stale self-parents from corrupting grouping if name matches
+    if (parentKey === itemKey && !['eigelb', 'eiweiß', 'zitronensaft', 'zitronenabrieb', 'limettensaft', 'knoblauchzehe'].includes((item.name || '').toLowerCase())) {
+      return null;
     }
+    return item.parentIngredient;
   }
 
-  // 3. Regex Heuristics for derived parts
-  // e.g. "Zitronensaft" -> "Zitrone"
-  const suffixMatch = cleanName.match(/^(.+?)(abrieb|schale|saft)$/i);
-  if (suffixMatch && suffixMatch[1].length >= 3) {
-    const rawRoot = suffixMatch[1];
-    const capitalizedName = rawRoot.charAt(0).toUpperCase() + rawRoot.slice(1);
-    return {
-      name: capitalizedName,
-      baseName: rawRoot,
-      unit: 'Stück',
-    };
+  // 2. Derived component rules (e.g. Eigelb -> Ei, Zitronenabrieb -> Zitrone)
+  const cleanName = (item.name || '').toLowerCase().trim();
+  if (['eigelb', 'eiweiß', 'eigelbe', 'eiweiße'].includes(cleanName)) {
+    return { name: 'Ei', baseName: 'egg', unit: 'Stück' };
   }
-
-  // e.g. "Knoblauchzehe" / "Knoblauchzehen"
-  const zeheMatch = cleanName.match(/^(.+?)zehe(n)?$/i);
-  if (zeheMatch && zeheMatch[1].length >= 3) {
-    const rawRoot = zeheMatch[1];
-    const capitalizedName = rawRoot.charAt(0).toUpperCase() + rawRoot.slice(1);
-    return {
-      name: capitalizedName,
-      baseName: rawRoot,
-      unit: 'Zehe',
-    };
+  if (['zitronenabrieb', 'zitronenschale', 'zitronensaft'].includes(cleanName)) {
+    return { name: 'Zitrone', baseName: 'lemon', unit: 'Stück' };
+  }
+  if (['limettenabrieb', 'limettenschale', 'limettensaft'].includes(cleanName)) {
+    return { name: 'Limette', baseName: 'lime', unit: 'Stück' };
+  }
+  if (['knoblauchzehe', 'knoblauchzehen'].includes(cleanName)) {
+    return { name: 'Knoblauch', baseName: 'garlic', unit: 'Zehe' };
   }
 
   return null;
@@ -344,85 +341,34 @@ export function getParentIngredient(ing: {
 
 /**
  * Computes the authoritative universal base key used for grouping items on the shopping list.
- * Unifies AI baseNames, parent ingredients, and German manual inputs into singular English keys.
+ * Unifies English baseNames, German ingredient names, and derived parents into identical keys.
  */
-export function normalizeFoodBaseKey(ing: {
+export function normalizeFoodBaseKey(item: {
   name: string;
   baseName?: string;
   parentIngredient?: ParentIngredientInfo;
 }): string {
-  // 1. Explicit parent baseName
-  if (ing.parentIngredient?.baseName) {
-    return toEnglishSingular(ing.parentIngredient.baseName);
-  }
-
-  // 2. Derived parent
-  const parent = getParentIngredient(ing);
-  if (parent?.baseName) {
-    return toEnglishSingular(parent.baseName);
-  }
-
-  // 3. Explicit ingredient baseName
-  if (ing.baseName) {
-    return toEnglishSingular(ing.baseName);
-  }
-
-  // 4. Known German/English canonical food map lookup
-  const cleanName = normalizeIngredientName(ing.name);
-  if (KNOWN_FOOD_MAP[cleanName]) {
-    return KNOWN_FOOD_MAP[cleanName].baseName;
-  }
-
-  // 5. Fallback: clean normalized name
-  return cleanName;
+  const parent = getParentIngredient(item);
+  const rawKey = parent?.baseName || item.baseName || item.name;
+  return toFoodCanonicalKey(rawKey);
 }
 
 /**
- * Selects the appropriate localized display name for a shopping list item,
- * adapting singular/plural forms based on the total quantity when applicable.
+ * Resolves the display name for a shopping list item cleanly.
  */
 export function getIngredientDisplayName(
-  item: { name: string; baseName?: string; parentIngredient?: ParentIngredientInfo },
-  amount?: number
+  item: { name: string; baseName?: string; parentIngredient?: ParentIngredientInfo }
 ): string {
-  const isPlural = typeof amount === 'number' && amount > 1;
-
-  // 1. Explicit or derived parent
   const parent = getParentIngredient(item);
-  if (parent) {
-    const cleanParentName = normalizeIngredientName(parent.name);
-    if (KNOWN_FOOD_MAP[cleanParentName]) {
-      return isPlural ? KNOWN_FOOD_MAP[cleanParentName].pluralName : KNOWN_FOOD_MAP[cleanParentName].singularName;
-    }
+  if (parent?.name) {
     return parent.name;
   }
-
-  // 2. Lookup in food map by clean German name
-  const cleanName = normalizeIngredientName(item.name);
-  if (KNOWN_FOOD_MAP[cleanName]) {
-    return isPlural ? KNOWN_FOOD_MAP[cleanName].pluralName : KNOWN_FOOD_MAP[cleanName].singularName;
+  const clean = normalizeIngredientName(item.name);
+  if (clean) {
+    return clean.charAt(0).toUpperCase() + clean.slice(1);
   }
-
-  // 3. Lookup in food map by English baseName
-  if (item.baseName) {
-    const cleanBase = toEnglishSingular(item.baseName);
-    if (KNOWN_FOOD_MAP[cleanBase]) {
-      return isPlural ? KNOWN_FOOD_MAP[cleanBase].pluralName : KNOWN_FOOD_MAP[cleanBase].singularName;
-    }
-  }
-
-  // 4. Clean up original name (strip trailing commas/parentheses) and capitalize
-  if (item.name) {
-    const clean = item.name.replace(/\s*\([^)]*\)/g, '').split(',')[0].trim();
-    if (clean) {
-      return clean.charAt(0).toUpperCase() + clean.slice(1);
-    }
-  }
-
-  // 5. Fallback to baseName capitalized
   if (item.baseName) {
     return item.baseName.charAt(0).toUpperCase() + item.baseName.slice(1);
   }
-
   return item.name || '';
 }
