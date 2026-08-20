@@ -377,7 +377,7 @@ export default function RecipeDetails({
 
   // Get nutritional info (either reel-level or aggregated per-ingredient AI estimates)
   const { nutritionalValues, sourceNutritionalValues, isAiEstimated, isVerified, hasNutritionInfo } =
-    useRecipeNutrition(recipe);
+    useRecipeNutrition(recipe, servings);
 
   // Prep + cook collapsed into the single figure shown in the meta strip. Both
   // fields may be legacy strings ("20 Min."), so pull the leading number out.
@@ -773,7 +773,7 @@ export default function RecipeDetails({
       <AdjustServingsSheet
         isOpen={isAdjustServingsOpen}
         onClose={() => setIsAdjustServingsOpen(false)}
-        baseServings={recipe.servings || 1}
+        baseServings={servings}
         // The derived figure, not the stored one — the preview must match what the
         // nutrition card will show once the new serving count is applied.
         nutritionalValues={nutritionalValues}

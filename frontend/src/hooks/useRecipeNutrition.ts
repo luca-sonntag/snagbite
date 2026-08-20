@@ -13,7 +13,7 @@ const VERIFIED_COVERAGE_THRESHOLD = 0.9;
  * recipe source is returned separately as `sourceNutritionalValues` so the UI can
  * show it next to the computed one instead of silently replacing it.
  */
-export function useRecipeNutrition(recipe: Recipe) {
+export function useRecipeNutrition(recipe: Recipe, currentServings?: number) {
   return useMemo(() => {
     const source = recipe.sourceNutritionalValues;
     const hasSource = !!(
@@ -51,13 +51,14 @@ export function useRecipeNutrition(recipe: Recipe) {
       }
     }
 
+    const effectiveServings = Math.max(1, currentServings || recipe.servings || 1);
+
     if (hasIngredientEstimates) {
-      const baseServings = recipe.servings || 1;
       const calculated: NutritionalValues = {
-        calories: totalCalories > 0 ? Math.round(totalCalories / baseServings) : null,
-        protein: totalProtein > 0 ? Math.round((totalProtein / baseServings) * 10) / 10 : null,
-        carbs: totalCarbs > 0 ? Math.round((totalCarbs / baseServings) * 10) / 10 : null,
-        fat: totalFat > 0 ? Math.round((totalFat / baseServings) * 10) / 10 : null,
+        calories: totalCalories > 0 ? Math.round(totalCalories / effectiveServings) : null,
+        protein: totalProtein > 0 ? Math.round((totalProtein / effectiveServings) * 10) / 10 : null,
+        carbs: totalCarbs > 0 ? Math.round((totalCarbs / effectiveServings) * 10) / 10 : null,
+        fat: totalFat > 0 ? Math.round((totalFat / effectiveServings) * 10) / 10 : null,
       };
 
       const coverage = totalCalories > 0 ? matchedCalories / totalCalories : 0;
@@ -80,22 +81,42 @@ export function useRecipeNutrition(recipe: Recipe) {
     // carry their figure in `nutritionalValues`; a stated source figure is the next
     // best thing. Both are shown as estimates, since neither can be traced to BLS.
     const legacy = recipe.nutritionalValues;
-    const fallback = hasSource ? source! : legacy;
+    const baseSource = hasSource ? source! : legacy;
     const hasFallback = !!(
-      fallback &&
-      ((fallback.calories !== undefined && fallback.calories !== null && fallback.calories !== 0) ||
-        (fallback.protein !== undefined && fallback.protein !== null && fallback.protein !== 0) ||
-        (fallback.carbs !== undefined && fallback.carbs !== null && fallback.carbs !== 0) ||
-        (fallback.fat !== undefined && fallback.fat !== null && fallback.fat !== 0))
+      baseSource &&
+      ((baseSource.calories !== undefined && baseSource.calories !== null && baseSource.calories !== 0) ||
+        (baseSource.protein !== undefined && baseSource.protein !== null && baseSource.protein !== 0) ||
+        (baseSource.carbs !== undefined && baseSource.carbs !== null && baseSource.carbs !== 0) ||
+        (baseSource.fat !== undefined && baseSource.fat !== null && baseSource.fat !== 0))
     );
 
+    if (hasFallback && baseSource) {
+      const baseServings = Math.max(1, recipe.servings || 1);
+      const ratio = baseServings / effectiveServings;
+      const scaledFallback: NutritionalValues = {
+        calories: baseSource.calories ? Math.round(baseSource.calories * ratio) : null,
+        protein: baseSource.protein ? Math.round(baseSource.protein * ratio * 10) / 10 : null,
+        carbs: baseSource.carbs ? Math.round(baseSource.carbs * ratio * 10) / 10 : null,
+        fat: baseSource.fat ? Math.round(baseSource.fat * ratio * 10) / 10 : null,
+      };
+
+      return {
+        nutritionalValues: scaledFallback,
+        sourceNutritionalValues: null,
+        coverage: 0,
+        isAiEstimated: true,
+        isVerified: false,
+        hasNutritionInfo: true,
+      };
+    }
+
     return {
-      nutritionalValues: hasFallback ? fallback! : null,
+      nutritionalValues: null,
       sourceNutritionalValues: null,
       coverage: 0,
-      isAiEstimated: hasFallback,
+      isAiEstimated: false,
       isVerified: false,
-      hasNutritionInfo: hasFallback,
+      hasNutritionInfo: false,
     };
-  }, [recipe]);
+  }, [recipe, currentServings]);
 }
