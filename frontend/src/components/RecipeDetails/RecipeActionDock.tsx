@@ -35,11 +35,12 @@ export default function RecipeActionDock({
   const showShopping = !!onAddToCart;
   const showCooked = !!recipeId;
 
-  // Every action shares one geometry so the dock reads as a single row of
-  // equal-weight targets; only the colour treatment marks the primary action.
   const itemBase =
     'relative flex flex-col items-center justify-center gap-1 min-w-[4.25rem] px-2 py-2 rounded-2xl ' +
     'transition-all active:scale-95 cursor-pointer outline-none border-none group';
+  const itemPrimary =
+    `${itemBase} text-white bg-gradient-to-b from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 ` +
+    'shadow-sm shadow-emerald-600/25';
   const itemNeutral =
     `${itemBase} text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 ` +
     'hover:bg-black/[0.04] dark:hover:bg-white/[0.06]';
@@ -51,15 +52,15 @@ export default function RecipeActionDock({
       {showStart && (
         <button
           onClick={onStartCooking}
-          className="relative flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-full text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm shadow-emerald-600/25 transition-all active:scale-95 cursor-pointer outline-none border-none group flex-shrink-0"
+          className={itemPrimary}
           title={t('recipe.startCooking')}
           aria-label={t('recipe.startCooking')}
         >
-          <Play className="w-5 h-5 fill-white" />
+          <Play className="w-5 h-5 fill-white ml-0.5" />
           <span className={itemLabel}>
             {t('recipe.dockCook')}
           </span>
-          {!isPremium && <PremiumCrownBadge className="top-0 right-0" />}
+          {!isPremium && <PremiumCrownBadge />}
         </button>
       )}
 
