@@ -14,6 +14,7 @@ create table if not exists public.jobs (
   status         text not null default 'pending'::text,
   error          text,
   recipe         jsonb,
+  llm_usage      jsonb,
   created_at     timestamptz not null default now(),
   updated_at     timestamptz not null default now(),
   user_id        uuid,

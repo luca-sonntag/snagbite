@@ -44,6 +44,9 @@ ALTER TABLE public.jobs ADD COLUMN IF NOT EXISTS flags text[] NOT NULL DEFAULT '
 -- Total downloaded media size (audio + video, bytes) per job. Powers the admin "Downloaded MB" metric.
 ALTER TABLE public.jobs ADD COLUMN IF NOT EXISTS media_bytes bigint NOT NULL DEFAULT 0;
 
+-- Phase C: Add llm_usage JSONB column for clean separation of AI/LLM metrics (Gemini tokens/costs & FLUX cover generation) from the recipe JSON
+ALTER TABLE public.jobs ADD COLUMN IF NOT EXISTS llm_usage jsonb;
+
 -- Phase B: Collections Table
 CREATE TABLE IF NOT EXISTS public.collections (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

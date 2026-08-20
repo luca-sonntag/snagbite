@@ -1,7 +1,7 @@
 import { createClient, SupabaseClient, PostgrestError } from '@supabase/supabase-js';
 import { randomUUID } from 'node:crypto';
 import { config } from './config.js';
-import type { Job, JobStatus, Recipe, ProgressData, Collection, GamificationConfig, UserStats, Profile } from './types.js';
+import type { Job, JobStatus, Recipe, ProgressData, Collection, GamificationConfig, UserStats, Profile, LlmUsage } from './types.js';
 import { DEFAULT_GAMIFICATION_CONFIG } from './types.js';
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -13,6 +13,7 @@ interface JobRow {
   status: string;
   error: string | null;
   recipe: unknown;
+  llm_usage?: unknown;
   user_id: string;
   parent_job_id: string | null;
   prompt: string | null;
@@ -64,6 +65,7 @@ function rowToJob(row: JobRow): Job {
     status: row.status as JobStatus,
     error: row.error,
     recipe: isProgress ? null : (row.recipe as Recipe),
+    llmUsage: (row.llm_usage as any) ?? null,
     progress: isProgress ? (row.recipe as ProgressData) : null,
     parentJobId: row.parent_job_id,
     prompt: row.prompt,
@@ -93,6 +95,7 @@ function jobToRow(updates: Partial<Job>): Partial<JobRow> {
   if (updates.status !== undefined) row.status = updates.status;
   if (updates.error !== undefined) row.error = updates.error;
   if (updates.recipe !== undefined) row.recipe = updates.recipe;
+  if (updates.llmUsage !== undefined) row.llm_usage = updates.llmUsage;
   if (updates.parentJobId !== undefined) row.parent_job_id = updates.parentJobId;
   if (updates.prompt !== undefined) row.prompt = updates.prompt;
   if (updates.createdAt !== undefined) row.created_at = updates.createdAt;
@@ -111,6 +114,9 @@ function normalizeRecipe(recipe: any, jobId: string): void {
   if (recipe && recipe.isProgress) return;
   if (!recipe.id) {
     recipe.id = jobId;
+  }
+  if (recipe.geminiUsage) {
+    delete recipe.geminiUsage;
   }
   if (recipe.nutritionalEstimates && !recipe.nutritionalValues) {
     recipe.nutritionalValues = recipe.nutritionalEstimates;
@@ -184,7 +190,7 @@ export async function createRemixJob(parentJobId: string, url: string, prompt: s
 }
 
 /** Save a completed recipe remix directly. */
-export async function saveCompletedRemix(parentJobId: string, url: string, recipe: Recipe, prompt: string, userId: string): Promise<Job> {
+export async function saveCompletedRemix(parentJobId: string, url: string, recipe: Recipe, prompt: string, userId: string, llmUsage?: LlmUsage): Promise<Job> {
   const now = new Date().toISOString();
   const id = randomUUID();
 
@@ -204,6 +210,7 @@ export async function saveCompletedRemix(parentJobId: string, url: string, recip
       status: 'completed',
       error: null,
       recipe: finalRecipe as any,
+      llm_usage: (llmUsage as any) ?? null,
       user_id: userId,
       parent_job_id: parentJobId,
       prompt,
