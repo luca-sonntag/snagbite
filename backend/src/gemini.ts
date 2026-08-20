@@ -1048,7 +1048,8 @@ IMPORTANT FOR RECIPE MODIFICATIONS:
 3. set_cooking_timer: Call this when the user asks to set a timer for a step.
 
 Rules:
-- Keep your conversational answers very short and concise (max 2-3 sentences). In the kitchen, speed is key!
+- Keep your conversational answers very short, clean, and concise (max 2-3 sentences). In the kitchen, speed is key!
+- Do NOT use emojis in your responses or generated modification descriptions. Maintain a clean, professional culinary tone.
 - When you call a tool, the system will execute it and return the result to you. You should then write a short, friendly message explaining what was done.
 - Respond in the language requested by the user. If not specified, default to ${targetLanguage}.
 ${stagedChanges && stagedChanges.length > 0 ? `
@@ -1312,6 +1313,7 @@ Each chip must include a "category": one of "remix" (recipe modifications like v
 
 IMPORTANT:
 - Both "label" and "prompt" MUST be in ${langName}.
+- Do NOT include emojis in the chip labels or prompts (clean flat modern tone).
 
 Respond in JSON only: {"chips":[{"category":"remix","label":"…","prompt":"…"}]}`;
 
