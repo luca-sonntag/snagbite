@@ -849,8 +849,12 @@ export async function remixRecipe(
 Your task is to modify the recipe logically and culinarily correctly based on the request.
 
 Important Constraints:
-1. Ingredient Replacement & Stability: If you swap or modify the name of any ingredient (e.g., beef -> tofu, or butter -> light butter), you MUST set the "replacedOriginal" field on the new ingredient to the exact name of the original ingredient that was removed or renamed (e.g., "replacedOriginal": "Rinderhackfleisch" or "Butter"). All other ingredients that are NOT swapped or renamed MUST keep their exact original names from the original recipe JSON; do NOT alter the names of unchanged ingredients without setting "replacedOriginal".
-2. Instruction Update: If you change ingredients, you MUST update the cooking instructions to match the new ingredients (e.g., cooking time for tofu is different from beef).
+1. Strict Scope & Ingredient Stability:
+   - Apply ONLY the specific ingredient modifications, substitutions, scaling, or removals that are EXPLICITLY listed in the "User's Remix Request".
+   - Do NOT assume, extrapolate, or execute any unrequested changes or ingredient removals — even if the general diet or recipe title would normally suggest it (for example, if the request asks to replace beef and cheese with plant-based alternatives, but does NOT mention eggs, you MUST keep the eggs completely unchanged in the recipe!).
+   - If you swap or modify the name of any ingredient (e.g., beef -> plant mince, or butter -> light butter), you MUST set the "replacedOriginal" field on the new ingredient to the exact name of the original ingredient that was removed or renamed (e.g., "replacedOriginal": "Rinderhackfleisch" or "Butter").
+   - ALL ingredients that are NOT explicitly mentioned to be changed or removed in the User's Remix Request MUST keep their exact original names, amounts, units, and structure from the original recipe JSON.
+2. Instruction Update: If you change ingredients, you MUST update the cooking instructions to match the new ingredients (e.g., cooking time for tofu is different from beef). All steps concerning unchanged ingredients must remain consistent.
 3. Title Update: Modify the title of the recipe to reflect the changes (e.g. add "(Vegan Remix)").
 4. Language & Format: ${languageInstruction}
 5. Preferred Units:
