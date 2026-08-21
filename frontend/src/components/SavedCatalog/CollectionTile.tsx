@@ -57,7 +57,7 @@ export default function CollectionTile({ collection, title, emoji, jobs, onClick
 
         {/* Collection badge emoji in bottom-left */}
         {collectionEmoji && (
-          <span className="absolute bottom-1 left-1 w-6 h-6 rounded-lg bg-black/60 dark:bg-black/75 backdrop-blur-md border border-white/20 flex items-center justify-center text-xs select-none shadow-sm z-10">
+          <span className="absolute bottom-1 left-1 w-6 h-6 rounded-lg bg-black/25 dark:bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center text-xs select-none shadow-sm z-10">
             {collectionEmoji}
           </span>
         )}
