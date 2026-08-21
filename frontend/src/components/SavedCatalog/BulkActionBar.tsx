@@ -96,9 +96,9 @@ export default function BulkActionBar({
           <Button
             onPress={onBulkDelete}
             isDisabled={selectedCount === 0}
-            className="flex-1 bg-rose-500 hover:bg-rose-400 text-white text-sm h-11 font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-none active:scale-95 transition-all min-w-0"
+            className="flex-1 bg-rose-500/10 dark:bg-rose-500/15 border-none text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 dark:hover:bg-rose-500/25 text-sm h-11 font-bold rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition-all min-w-0"
           >
-            <Trash2 className="w-4 h-4 shrink-0" />
+            <Trash2 className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
             <span className="truncate">{t('catalog.bulkDelete')}</span>
           </Button>
         </div>
