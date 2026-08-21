@@ -98,10 +98,24 @@ async function extractKeyframesWebCodecs(
       if (isFinished) return;
       isFinished = true;
 
+      const capturedList = Array.from(capturedMap.entries())
+        .sort(([a], [b]) => a - b)
+        .map(([, frame]) => frame);
+
       const results: string[] = [];
-      for (let i = 0; i < targetTimestampsSec.length; i++) {
-        const frame = capturedMap.get(i);
-        if (frame) results.push(frame);
+      if (capturedList.length === 0) {
+        // No frames decoded
+      } else if (capturedList.length >= FRAME_COUNT) {
+        results.push(...capturedList.slice(0, FRAME_COUNT));
+      } else {
+        // Resample/interpolate to guarantee exactly FRAME_COUNT tiles for a complete 4x4 grid
+        for (let i = 0; i < FRAME_COUNT; i++) {
+          const idx = Math.min(
+            capturedList.length - 1,
+            Math.floor((i * capturedList.length) / FRAME_COUNT)
+          );
+          results.push(capturedList[idx]);
+        }
       }
 
       cleanup();
@@ -116,12 +130,19 @@ async function extractKeyframesWebCodecs(
           return;
         }
 
-        const realDuration = (info.duration && info.timescale)
+        // Prioritize actual video track duration over container/movie level metadata
+        const trackDuration = (videoTrack.duration && videoTrack.timescale)
+          ? videoTrack.duration / videoTrack.timescale
+          : 0;
+        const movieDuration = (info.duration && info.timescale)
           ? info.duration / info.timescale
-          : (durationHint || 15);
+          : 0;
+        const realDuration = trackDuration > 0
+          ? trackDuration
+          : (movieDuration > 0 ? movieDuration : (durationHint || 15));
 
         targetTimestampsSec = calculateKeyframeTimestamps(realDuration);
-        console.log(`[videoFrames-WebCodecs] Extracting 16 frames across ${realDuration.toFixed(1)}s: [${targetTimestampsSec.map(t => t.toFixed(1) + 's').join(', ')}]`);
+        console.log(`[videoFrames-WebCodecs] Extracting 16 frames across ${realDuration.toFixed(1)}s (track: ${trackDuration.toFixed(1)}s, movie: ${movieDuration.toFixed(1)}s): [${targetTimestampsSec.map(t => t.toFixed(1) + 's').join(', ')}]`);
 
         const description = getTrackDescription(mp4boxfile, videoTrack);
 
@@ -169,6 +190,7 @@ async function extractKeyframesWebCodecs(
                 if (base64 && base64.length > 200) {
                   capturedMap.set(i, base64);
                 }
+                break; // Only assign the earliest unfilled target slot to this frame
               }
             }
 
