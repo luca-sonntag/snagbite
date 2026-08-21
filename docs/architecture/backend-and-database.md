@@ -10,7 +10,9 @@
 
 ### History, ID-Vergabe & Verwaltung
 * Bietet Helper-Funktionen (`getAllJobs(userId)` und `deleteJob(id, userId)`) zur persistenten Abfrage und Bereinigung von Extraktionen – stets benutzerbezogen.
-* Stellt REST-Endpunkte bereit: `GET /api/jobs` (liefert den Extraktionsverlauf des authentifizierten Users), `PATCH /api/jobs/:id` (aktualisiert ein gespeichertes Rezept, z. B. bei Basis-Portionsänderungen), `DELETE /api/jobs/:id` (löscht ein bestimmtes Rezept des Users) und `DELETE /api/users/me` (löscht das Benutzerkonto über die Supabase Admin API).
+* Stellt REST-Endpunkte bereit: `GET /api/recipes` (das Kochbuch des authentifizierten Users), `GET/PATCH/DELETE /api/recipes/:recipeId` (lesen, Inhalt aktualisieren z. B. bei Basis-Portionsänderungen, aus dem Kochbuch entfernen) und `DELETE /api/users/me` (löscht das Benutzerkonto über die Supabase Admin API).
+* **`recipeId` ist die einzige client-seitige ID** für alles, was ein Rezept betrifft (`/favorite`, `/flags`, `/collections`, `/cooked`, `/cook-history`, `/chat*`, `/remix`); die `user_recipes`-Zeile wird serverseitig über `(user_id, recipe_id)` aufgelöst. `GET /api/jobs/:id` bleibt ausschließlich Polling-Kanal und liefert `recipeId`, sobald der Job fertig ist.
+* **Abbrechen ≠ Löschen:** `POST /api/jobs/:id/cancel` bricht eine laufende Extraktion ab, `DELETE /api/recipes/:id` entfernt ein Rezept aus dem Kochbuch. Beides war früher derselbe Aufruf — genau die Vermischung, die den Soft-Delete erzwungen hat.
 * **Eindeutige Identifikation:** Normalisiert Rezepte bei Abfragen und versieht sie mit einer eindeutigen `id` (entspricht der `jobId`), um Kollisionen zwischen Rezepten mit gleichem Titel zu unterbinden.
 * **Caching-Deaktivierung:** Setzt explizit `Cache-Control` Header (`no-store, no-cache, must-revalidate, proxy-revalidate`) für dynamic endpoints (`/api/jobs` und `/api/jobs/:id`), um zu verhindern, dass Browser veraltete/gecachte Job-Zustände ausliefern.
 
@@ -55,9 +57,16 @@ Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()` (
 
 ## 3. Cloud-Infrastruktur (Supabase & Railway)
 
-* **Tabelle `jobs`:** Speichert Rezept-Extraktionsjobs und fertige Rezepte (`id`, `url`, `url_normalized`, `status`, `error`, `recipe`, `llm_usage`, `user_id`, `parent_job_id`, `prompt`, `created_at`, `updated_at`, `locked_at`, `locked_by`).
-  * `recipe` (JSONB): Enthält ausschließlich das bereinigte, saubere Rezept.
-  * `llm_usage` (JSONB): Enthält die Provider-spezifischen LLM- und Inferenzkosten/-tokens (`gemini`, `flux`).
+* **Tabelle `recipes`:** Der Rezept-**Inhalt**, unabhängig davon, wer ihn extrahiert hat. Skalare sind echte Spalten (`title`, `emoji`, `prep_time`, `cook_time`, `servings`, `image_url`, …), flache Listen `text[]` (`tags`, `equipment`, `tips`, `image_urls`), nur `ingredients`/`instructions`/`alternative_ingredients` bleiben JSONB. Nährwerte liegen als vier Skalare (`calories`, `protein_g`, `carbs_g`, `fat_g`) vor, weil auf ihnen gefiltert und sortiert wird.
+  * `created_by` ist **nullable**: eine Account-Löschung nullt das Feld, statt zu cascaden — sonst würde sie die Kochbücher anderer Nutzer zerstören.
+  * `visibility` (`private` | `unlisted` | `public`) und `origin` (`url` | `photo` | `remix`) sind der Andockpunkt fürs spätere Teilen/Veröffentlichen.
+* **Tabelle `jobs`:** Nur noch der **Extraktions-Task** (`id`, `user_id`, `kind`, `status`, `source_url`, `source_url_normalized`, `progress`, `recipe_id`, `parent_recipe_id`, `remix_prompt`, `error`, `llm_usage`, `media_bytes`, `locked_at`, `locked_by`).
+  * `progress` (JSONB): `{percent, stage}` während des Laufs. Früher wurde der Fortschritt durch die `recipe`-Spalte geschmuggelt (`{isProgress:true, …}`), was fehlgeschlagene Jobs mit toten Platzhaltern zurückließ.
+  * `llm_usage` (JSONB): Kosten/Tokens **dieses Laufs** (`gemini`, `flux`) — bewusst nicht am Rezept, damit ein geteiltes Rezept nicht die Rechnung des Extrahierenden mitträgt.
+  * **Job-Zeilen werden nie gelöscht.** Sie sind der Audit-Trail und tragen das rollierende Rate-Limit; ein Abbruch ist `status='cancelled'`, kein Soft-Delete.
+* **Tabelle `user_recipes`:** Der **Kochbuch-Eintrag** pro User (`user_id`, `recipe_id`, `source_job_id`, `source`, `is_favorite`, `flags`, `added_at`). Wird beim Entfernen eines Rezepts **hart gelöscht** — die Quota hängt an `jobs`, also darf das Kochbuch ehrlich löschen. `source='share'` ist der Andockpunkt fürs Teilen ohne Content-Kopie.
+* **RPC `complete_job(job_id, recipe, llm_usage)`:** Schließt einen Job atomar über alle drei Tabellen ab (Rezept anlegen, Job verknüpfen, ins Kochbuch legen). Ohne die Funktion gäbe es ein Crash-Fenster, in dem ein Nutzer Quota bezahlt hat und kein Rezept bekommt.
+* **Zwei getrennte Quoten:** Der Kochbuch-Cap zählt `user_recipes` (schrumpft beim Löschen), das Rate-Limit zählt `jobs` (schrumpft nie) und schließt Remixes über `kind <> 'remix'` aus — Foto-Importe kosten weiterhin Quota.
 * **Tabelle `feedback`:** Speichert In-App Bug-Reports & Feedback (`id`, `user_id`, `type`, `message`, `context`, `screenshot_urls`, `created_at`).
 * **Storage Buckets:**
   * `recipe-covers` (öffentlich): Generierte FLUX.1 Food-Fotografie-Coverbilder (`${userId}/${jobId}.jpg`).

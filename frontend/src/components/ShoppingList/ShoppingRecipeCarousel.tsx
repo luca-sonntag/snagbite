@@ -1,4 +1,4 @@
-import type { Job } from '../../types';
+import type { SavedRecipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import ShoppingRecipeCard from './ShoppingRecipeCard';
 
@@ -11,7 +11,7 @@ interface ActiveShoppingRecipe {
 
 interface ShoppingRecipeCarouselProps {
   recipes: ActiveShoppingRecipe[];
-  history?: Job[];
+  history?: SavedRecipe[];
   onSelectRecipe: (jobId: string) => void;
   onRemoveRecipe: (recipeId: string, recipeTitle: string) => void;
 }
@@ -27,9 +27,9 @@ export default function ShoppingRecipeCarousel({
   if (!recipes || recipes.length === 0) return null;
 
   // Map history jobs by id for quick lookup of images/metadata
-  const historyMap = new Map<string, Job>();
+  const historyMap = new Map<string, SavedRecipe>();
   history.forEach((job) => {
-    historyMap.set(job.id, job);
+    historyMap.set(job.recipeId, job);
   });
 
   return (

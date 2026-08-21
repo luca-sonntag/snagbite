@@ -4,7 +4,7 @@ import { useI18n } from '../context/I18nContext';
 import CookedModal from './CookedModal';
 
 interface CookedButtonProps {
-  jobId: string;
+  recipeId: string;
   recipeTitle?: string;
   viaCookingMode?: boolean;
   className?: string;
@@ -19,7 +19,7 @@ interface CookedButtonProps {
  * - 'compact': A full-width standalone button.
  */
 export default function CookedButton({
-  jobId,
+  recipeId,
   recipeTitle,
   viaCookingMode,
   className = '',
@@ -77,7 +77,7 @@ export default function CookedButton({
       <CookedModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        jobId={jobId}
+        recipeId={recipeId}
         recipeTitle={recipeTitle}
         viaCookingMode={viaCookingMode}
       />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
-import type { Job } from '../../types';
+import type { SavedRecipe } from '../../types';
 import RecipePosterCard from './RecipePosterCard';
 import { useI18n } from '../../context/I18nContext';
 
@@ -8,15 +8,15 @@ interface RecipeShelfProps {
   title: string;
   subtitle?: string;
   icon?: React.ReactNode;
-  jobs: Job[];
+  jobs: SavedRecipe[];
   /** Total number of matches — drives whether "show all" is worth offering. */
   totalCount: number;
   formatTotalTime: (recipe: any) => string | null;
   onOpenAll: () => void;
-  onOpenRecipe: (e: React.MouseEvent, job: Job) => void;
+  onOpenRecipe: (e: React.MouseEvent, job: SavedRecipe) => void;
   isSelectMode?: boolean;
   selectedIds?: Set<string>;
-  bindLongPress?: (id: string, job: Job) => any;
+  bindLongPress?: (id: string, job: SavedRecipe) => any;
 }
 
 /**
@@ -68,13 +68,13 @@ export default function RecipeShelf({
       <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
         {jobs.map(job => (
           <RecipePosterCard
-            key={job.id}
+            key={job.recipeId}
             job={job}
             variant="shelf"
             totalTime={formatTotalTime(job.recipe)}
-            isSelected={selectedIds.has(job.id)}
+            isSelected={selectedIds.has(job.recipeId)}
             isSelectMode={isSelectMode}
-            bindLongPress={bindLongPress ? bindLongPress(job.id, job) : undefined}
+            bindLongPress={bindLongPress ? bindLongPress(job.recipeId, job) : undefined}
             onClick={(e) => onOpenRecipe(e, job)}
           />
         ))}

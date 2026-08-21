@@ -1,4 +1,4 @@
-import type { Job, Recipe } from '../types.js';
+import type { SavedRecipe, Recipe } from '../types.js';
 import { countKeywordMatches, seasonKeywords } from './season.js';
 import {
   TYPE_CATEGORY,
@@ -11,14 +11,18 @@ import {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-function ageDays(job: Job, now: Date): number {
-  const created = new Date(job.createdAt).getTime();
-  return Math.floor((now.getTime() - created) / DAY_MS);
+function ageDays(entry: SavedRecipe, now: Date): number {
+  const added = new Date(entry.addedAt).getTime();
+  return Math.floor((now.getTime() - added) / DAY_MS);
 }
 
-/** Saved recipes only (completed jobs that actually carry a recipe). */
-function savedRecipes(ctx: NotificationContext): Job[] {
-  return ctx.jobs.filter((j) => j.status === 'completed' && j.recipe && j.recipe.title);
+/**
+ * The user's cookbook. There is nothing left to filter here — a cookbook entry
+ * only exists for a recipe that was successfully extracted, so the old
+ * `status === 'completed' && j.recipe` guard has no work to do.
+ */
+function savedRecipes(ctx: NotificationContext): SavedRecipe[] {
+  return ctx.recipes;
 }
 
 function totalMinutes(recipe: Recipe): number {
@@ -40,10 +44,10 @@ function flatBaseNames(recipe: Recipe): string[] {
 function candidate(
   type: NotificationType,
   score: number,
-  jobId: string | null,
+  recipeId: string | null,
   slots: Record<string, unknown>,
 ): Candidate {
-  return { type, category: TYPE_CATEGORY[type], score, jobId, slots };
+  return { type, category: TYPE_CATEGORY[type], score, recipeId, slots };
 }
 
 /** Deterministic-ish "random" pick seeded by the day, so a tick is stable within a day. */
@@ -65,7 +69,7 @@ function genSeasonal(ctx: NotificationContext): Candidate[] {
   if (matches.length === 0) return [];
   const best = matches[0].j;
   return [
-    candidate('seasonal', 60 + Math.min(matches.length, 5) * 4, best.id, {
+    candidate('seasonal', 60 + Math.min(matches.length, 5) * 4, best.recipeId, {
       season: ctx.season,
       recipeTitle: best.recipe!.title,
       recipeEmoji: best.recipe!.emoji ?? null,
@@ -84,7 +88,7 @@ function genHolidayEvent(ctx: NotificationContext): Candidate[] {
     if (matches.length === 0) continue;
     const best = matches[0].j;
     out.push(
-      candidate('holiday_event', 66 + Math.min(matches.length, 4) * 3, best.id, {
+      candidate('holiday_event', 66 + Math.min(matches.length, 4) * 3, best.recipeId, {
         holiday: holiday.label,
         recipeTitle: best.recipe!.title,
         recipeEmoji: best.recipe!.emoji ?? null,
@@ -108,7 +112,7 @@ function genSavedReminder(ctx: NotificationContext): Candidate[] {
   const top = aged[0];
   const weeks = Math.floor(top.age / 7);
   return [
-    candidate('saved_reminder', 55 + (top.j.isFavorite ? 15 : 0) + Math.min(weeks, 8), top.j.id, {
+    candidate('saved_reminder', 55 + (top.j.isFavorite ? 15 : 0) + Math.min(weeks, 8), top.j.recipeId, {
       recipeTitle: top.j.recipe!.title,
       recipeEmoji: top.j.recipe!.emoji ?? null,
       weeksAgo: weeks,
@@ -124,7 +128,7 @@ function genDormantRediscovery(ctx: NotificationContext): Candidate[] {
   const pick = pickOne(dormant, ctx.localWeekday + ctx.now.getUTCDate());
   if (!pick) return [];
   return [
-    candidate('dormant_rediscovery', 45, pick.id, {
+    candidate('dormant_rediscovery', 45, pick.recipeId, {
       recipeTitle: pick.recipe!.title,
       recipeEmoji: pick.recipe!.emoji ?? null,
       weeksAgo: Math.floor(ageDays(pick, ctx.now) / 7),
@@ -135,14 +139,14 @@ function genDormantRediscovery(ctx: NotificationContext): Candidate[] {
 function genCollectionNudge(ctx: NotificationContext): Candidate[] {
   const out: Candidate[] = [];
   for (const [, col] of ctx.collections) {
-    if (col.jobIds.length < 3) continue;
-    const memberJob = savedRecipes(ctx).find((j) => col.jobIds.includes(j.id));
-    if (!memberJob) continue;
+    if (col.recipeIds.length < 3) continue;
+    const memberEntry = savedRecipes(ctx).find((j) => col.recipeIds.includes(j.recipeId));
+    if (!memberEntry) continue;
     out.push(
-      candidate('collection_nudge', 50 + Math.min(col.jobIds.length, 10), memberJob.id, {
+      candidate('collection_nudge', 50 + Math.min(col.recipeIds.length, 10), memberEntry.recipeId, {
         collectionName: col.name,
-        recipeCount: col.jobIds.length,
-        recipeTitle: memberJob.recipe!.title,
+        recipeCount: col.recipeIds.length,
+        recipeTitle: memberEntry.recipe!.title,
       }),
     );
   }
@@ -155,11 +159,11 @@ function genAnniversary(ctx: NotificationContext): Candidate[] {
     const age = ageDays(j, ctx.now);
     // Fire within a 1-day window around the 6- and 12-month marks.
     if (Math.abs(age - 365) <= 1) {
-      out.push(candidate('anniversary', 72, j.id, {
+      out.push(candidate('anniversary', 72, j.recipeId, {
         recipeTitle: j.recipe!.title, recipeEmoji: j.recipe!.emoji ?? null, period: '1 year',
       }));
     } else if (Math.abs(age - 182) <= 1) {
-      out.push(candidate('anniversary', 68, j.id, {
+      out.push(candidate('anniversary', 68, j.recipeId, {
         recipeTitle: j.recipe!.title, recipeEmoji: j.recipe!.emoji ?? null, period: '6 months',
       }));
     }
@@ -196,7 +200,7 @@ function genWeekdaySuggestion(ctx: NotificationContext): Candidate[] {
     hint = 'weeknight';
   }
 
-  let target: Job | undefined;
+  let target: SavedRecipe | undefined;
   if (hint === 'weekend_project') {
     target = [...recipes].sort((a, b) => totalMinutes(b.recipe!) - totalMinutes(a.recipe!))[0];
   } else {
@@ -209,7 +213,7 @@ function genWeekdaySuggestion(ctx: NotificationContext): Candidate[] {
   if (!target) return [];
 
   return [
-    candidate('weekday_suggestion', 50, target.id, {
+    candidate('weekday_suggestion', 50, target.recipeId, {
       recipeTitle: target.recipe!.title,
       recipeEmoji: target.recipe!.emoji ?? null,
       weekday: ctx.localWeekday,
@@ -229,7 +233,7 @@ function genQuickWin(ctx: NotificationContext): Candidate[] {
   if (quick.length === 0) return [];
   const top = quick[0];
   return [
-    candidate('quick_win', 52 + Math.min(quick.length, 5), top.j.id, {
+    candidate('quick_win', 52 + Math.min(quick.length, 5), top.j.recipeId, {
       recipeTitle: top.j.recipe!.title,
       recipeEmoji: top.j.recipe!.emoji ?? null,
       totalMinutes: top.mins,
@@ -247,7 +251,7 @@ function genOccasionServings(ctx: NotificationContext): Candidate[] {
   if (big.length === 0) return [];
   const top = big[0];
   return [
-    candidate('occasion_servings', 48, top.id, {
+    candidate('occasion_servings', 48, top.recipeId, {
       recipeTitle: top.recipe!.title,
       recipeEmoji: top.recipe!.emoji ?? null,
       servings: top.recipe!.servings,
@@ -279,7 +283,7 @@ function genTasteAffinity(ctx: NotificationContext): Candidate[] {
   );
   if (!target) return [];
   return [
-    candidate('taste_affinity', 50, target.id, {
+    candidate('taste_affinity', 50, target.recipeId, {
       tag: top.value,
       tagCount: top.count,
       recipeTitle: target.recipe!.title,
@@ -296,7 +300,7 @@ function genNutritionGoal(ctx: NotificationContext): Candidate[] {
   if (highProtein.length === 0) return [];
   const top = highProtein[0];
   return [
-    candidate('nutrition_goal', 47, top.j.id, {
+    candidate('nutrition_goal', 47, top.j.recipeId, {
       recipeTitle: top.j.recipe!.title,
       recipeEmoji: top.j.recipe!.emoji ?? null,
       protein: Math.round(top.protein ?? 0),
@@ -311,7 +315,7 @@ function genIngredientSpotlight(ctx: NotificationContext): Candidate[] {
   const target = recipes.find((j) => flatBaseNames(j.recipe as Recipe).includes(top.value));
   if (!target) return [];
   return [
-    candidate('ingredient_spotlight', 46, target.id, {
+    candidate('ingredient_spotlight', 46, target.recipeId, {
       ingredient: top.value,
       recipeCount: top.count,
       recipeTitle: target.recipe!.title,
@@ -321,20 +325,20 @@ function genIngredientSpotlight(ctx: NotificationContext): Candidate[] {
 }
 
 function genCreatorAffinity(ctx: NotificationContext): Candidate[] {
-  const recipes = savedRecipes(ctx).filter((j) => j.recipe!.instagramHandle);
+  const recipes = savedRecipes(ctx).filter((j) => j.recipe!.sourceHandle);
   const top = topFrequency(
-    recipes.map((j) => [j.recipe!.instagramHandle!.toLowerCase()]),
+    recipes.map((j) => [j.recipe!.sourceHandle!.toLowerCase()]),
     2,
   );
   if (!top) return [];
   const fromCreator = recipes.filter(
-    (j) => j.recipe!.instagramHandle!.toLowerCase() === top.value,
+    (j) => j.recipe!.sourceHandle!.toLowerCase() === top.value,
   );
   const target = fromCreator.find((j) => j.isFavorite) ?? fromCreator[0];
   if (!target) return [];
   return [
-    candidate('creator_affinity', 46, target.id, {
-      handle: target.recipe!.instagramHandle,
+    candidate('creator_affinity', 46, target.recipeId, {
+      handle: target.recipe!.sourceHandle,
       recipeCount: top.count,
       recipeTitle: target.recipe!.title,
       recipeEmoji: target.recipe!.emoji ?? null,
@@ -350,7 +354,7 @@ function genRemixNudge(ctx: NotificationContext): Candidate[] {
   if (!pick) return [];
   const idea = REMIX_IDEAS[(ctx.now.getUTCDate() + ctx.localWeekday) % REMIX_IDEAS.length];
   return [
-    candidate('remix_nudge', 44, pick.id, {
+    candidate('remix_nudge', 44, pick.recipeId, {
       recipeTitle: pick.recipe!.title,
       recipeEmoji: pick.recipe!.emoji ?? null,
       remixIdea: idea,
@@ -361,14 +365,14 @@ function genRemixNudge(ctx: NotificationContext): Candidate[] {
 function genMilestone(ctx: NotificationContext): Candidate[] {
   const recipes = savedRecipes(ctx);
   const total = recipes.length;
-  const pickJobId = recipes[0]?.id ?? null;
+  const pickRecipeId = recipes[0]?.recipeId ?? null;
   const milestones = [10, 25, 50, 100, 200];
   if (milestones.includes(total)) {
-    return [candidate('milestone', 60, pickJobId, { kind: 'total', total })];
+    return [candidate('milestone', 60, pickRecipeId, { kind: 'total', total })];
   }
   const savedThisWeek = recipes.filter((j) => ageDays(j, ctx.now) <= 7);
   if (savedThisWeek.length >= 3) {
-    const pickWeeklyId = savedThisWeek[0]?.id ?? pickJobId;
+    const pickWeeklyId = savedThisWeek[0]?.recipeId ?? pickRecipeId;
     return [candidate('milestone', 56, pickWeeklyId, { kind: 'weekly', weeklyCount: savedThisWeek.length })];
   }
   return [];
@@ -427,7 +431,7 @@ export function buildCandidates(ctx: NotificationContext): Candidate[] {
   return raw
     .filter((c) => ctx.categories.has(c.category))
     .filter((c) => !ctx.recentTypes.has(c.type))
-    .filter((c) => !(c.jobId && ctx.recentJobIds.has(c.jobId)))
+    .filter((c) => !(c.recipeId && ctx.recentRecipeIds.has(c.recipeId)))
     .map((c) => ({
       ...c,
       // Nudge variety: a group used recently is slightly penalised.

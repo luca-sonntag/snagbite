@@ -14,7 +14,7 @@ import ShoppingCheckedDrawer from './ShoppingCheckedDrawer';
 import ShoppingEmptyState from './ShoppingEmptyState';
 import ShoppingAllDoneState from './ShoppingAllDoneState';
 import ShoppingRecipeCarousel from './ShoppingRecipeCarousel';
-import type { Job } from '../../types';
+import type { SavedRecipe } from '../../types';
 
 interface ActiveShoppingRecipe {
   recipeId: string;
@@ -29,7 +29,7 @@ interface ShoppingListProps {
     checked: AggregatedShoppingItem[];
   };
   activeRecipes?: ActiveShoppingRecipe[];
-  history?: Job[];
+  history?: SavedRecipe[];
   onSelectRecipe?: (jobId: string) => void;
   onRemoveRecipe?: (recipeId: string) => void;
   addCustomItem: (name: string, amount: number, unit: string) => void;

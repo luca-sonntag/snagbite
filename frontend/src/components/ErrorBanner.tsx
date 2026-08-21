@@ -4,10 +4,11 @@ import { useI18n } from '../context/I18nContext';
 import { resolveErrorCode } from '../i18n';
 import { isRetryableError } from '../errorCodes';
 import type { ErrorParams } from '../errorCodes';
+import type { ExtractionJob } from '../types';
 
 interface ErrorBannerProps {
   isPending: boolean;
-  jobStatus: 'pending' | 'scraping' | 'processing' | 'completed' | 'failed' | null;
+  jobStatus: ExtractionJob['status'] | null;
   jobError: string | null;
   jobErrorCode?: string | null;
   jobErrorParams?: ErrorParams | null;

@@ -662,7 +662,7 @@ export default function RecipeDetails({
         {/* "I cooked this" — gamification CTA card with photo verification */}
         {recipe.id && (
           <div className="mt-4 mb-2">
-            <CookedButton jobId={recipe.id} recipeTitle={recipe.title} variant="card" />
+            <CookedButton recipeId={recipe.id} recipeTitle={recipe.title} variant="card" />
           </div>
         )}
 
@@ -749,7 +749,7 @@ export default function RecipeDetails({
         <CookedModal
           isOpen={isCookedModalOpen}
           onClose={() => setIsCookedModalOpen(false)}
-          jobId={recipe.id}
+          recipeId={recipe.id}
           recipeTitle={recipe.title}
         />
       )}

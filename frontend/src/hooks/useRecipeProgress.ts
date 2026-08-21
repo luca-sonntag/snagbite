@@ -27,8 +27,8 @@ export function useRecipeProgress(recipe: Recipe) {
   // Listen for dish cooked event to reset steps
   useEffect(() => {
     const handleRecipeCooked = (e: Event) => {
-      const customEvent = e as CustomEvent<{ jobId: string; duplicate?: boolean }>;
-      if (customEvent.detail && (customEvent.detail.jobId === recipe.id || customEvent.detail.jobId === recipe.title)) {
+      const customEvent = e as CustomEvent<{ recipeId: string; duplicate?: boolean }>;
+      if (customEvent.detail && (customEvent.detail.recipeId === recipe.id || customEvent.detail.recipeId === recipe.title)) {
         setCheckedSteps({});
         try {
           localStorage.removeItem(stepsKey);

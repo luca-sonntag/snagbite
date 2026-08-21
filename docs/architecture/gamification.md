@@ -18,7 +18,7 @@ für Social/Shop/AI-Verifizierung.
 
 Alles additiv, RLS aktiv (`SELECT`-own als Defense-in-Depth; Writes nur service-role):
 
-* **`cook_events`** — append-only Ereignis (User, Rezept, XP/Coins, `has_photo`,
+* **`cook_events`** — append-only Ereignis (User, `recipe_id`, XP/Coins, `has_photo`,
   `verified`, `leaderboard_eligible`, `trust_score`, `via_cooking_mode`,
   `timer_elapsed`).
 * **`point_ledger`** — append-only, eine Zeile pro Gutschrift (ermöglicht spätere
@@ -45,8 +45,8 @@ inaktiv (kein Cuisine-Signal).
 
 ## 4. Endpoints (`backend/src/routes.ts`)
 
-* `POST /api/jobs/:id/cooked` — verbucht einen Cook (erfordert `photoBase64`; verifiziert per Gemini Vision, lädt Foto in Supabase `cook-photos` hoch). Antwort enthält `stats`, `earned`, `newBadges`, `previousXp/previousLevel/leveledUp` für die Overlay-Animation.
-* `GET /api/jobs/:id/cook-history` — liefert `count`, `firstCookedAt`, `lastCookedAt` sowie `items` (`xpAwarded`, `coinsAwarded`, `hasPhoto`, `photoUrl`, `verified`, `viaCookingMode`, `timerElapsed`) für das Rezept-Detail-Badge & die Koch-Historie.
+* `POST /api/recipes/:id/cooked` — verbucht einen Cook (erfordert `photoBase64`; verifiziert per Gemini Vision, lädt Foto in Supabase `cook-photos` hoch). Antwort enthält `stats`, `earned`, `newBadges`, `previousXp/previousLevel/leveledUp` für die Overlay-Animation.
+* `GET /api/recipes/:id/cook-history` — liefert `count`, `firstCookedAt`, `lastCookedAt` sowie `items` (`xpAwarded`, `coinsAwarded`, `hasPhoto`, `photoUrl`, `verified`, `viaCookingMode`, `timerElapsed`) für das Rezept-Detail-Badge & die Koch-Historie.
 * `GET /api/me/gamification` — `stats` + `badges` + `levelThresholds` für den Tab.
 
 ## 5. Frontend

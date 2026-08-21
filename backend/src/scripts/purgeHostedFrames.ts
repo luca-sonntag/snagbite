@@ -39,7 +39,7 @@ function isHostedFrameUrl(value: unknown): value is string {
 /**
  * Rewrites a recipe's image fields in place. Returns true if anything changed.
  */
-function rewriteRecipe(recipe: any, jobId: string): boolean {
+function rewriteRecipe(recipe: any, recipeId: string): boolean {
   if (!recipe || typeof recipe !== 'object') return false;
   let changed = false;
 
@@ -48,13 +48,13 @@ function rewriteRecipe(recipe: any, jobId: string): boolean {
       if (!isHostedFrameUrl(url)) return url;
       changed = true;
       const idx = frameIndexFromUrl(url) ?? i;
-      return `local:${jobId}:${idx}`;
+      return `local:${recipeId}:${idx}`;
     });
   }
 
   if (isHostedFrameUrl(recipe.imageUrl)) {
     const idx = frameIndexFromUrl(recipe.imageUrl) ?? 0;
-    recipe.imageUrl = `local:${jobId}:${idx}`;
+    recipe.imageUrl = `local:${recipeId}:${idx}`;
     changed = true;
   }
 
@@ -69,32 +69,34 @@ async function rewriteDatabase(): Promise<void> {
 
   for (;;) {
     const { data, error } = await client
-      .from('jobs')
-      .select('id, recipe')
-      .not('recipe', 'is', null)
+      .from('recipes')
+      .select('id, image_url, image_urls')
       .order('created_at', { ascending: true })
       .range(from, from + PAGE_SIZE - 1);
 
-    if (error) throw new Error(`Failed to page jobs: ${error.message}`);
+    if (error) throw new Error(`Failed to page recipes: ${error.message}`);
     if (!data || data.length === 0) break;
 
     for (const row of data) {
       scanned++;
-      const recipe = row.recipe as any;
-      if (!rewriteRecipe(recipe, row.id)) continue;
+      const r = row as any;
+      // Only the image fields matter here, so work on them directly rather than
+      // round-tripping the whole recipe.
+      const recipe = { imageUrl: r.image_url, imageUrls: r.image_urls ?? [] };
+      if (!rewriteRecipe(recipe, r.id)) continue;
 
       updated++;
       if (DRY_RUN) {
-        console.log(`[dry-run] would rewrite job ${row.id} → ${JSON.stringify(recipe.imageUrls)}`);
+        console.log(`[dry-run] would rewrite recipe ${r.id} → ${JSON.stringify(recipe.imageUrls)}`);
         continue;
       }
 
       const { error: updateError } = await client
-        .from('jobs')
-        .update({ recipe })
-        .eq('id', row.id);
+        .from('recipes')
+        .update({ image_url: recipe.imageUrl, image_urls: recipe.imageUrls })
+        .eq('id', r.id);
       if (updateError) {
-        console.error(`Failed to update job ${row.id}: ${updateError.message}`);
+        console.error(`Failed to update recipe ${r.id}: ${updateError.message}`);
       }
     }
 

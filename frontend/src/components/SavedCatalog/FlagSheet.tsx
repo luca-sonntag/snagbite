@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button, Drawer } from '@heroui/react';
 import { Tag, X } from 'lucide-react';
-import type { Job } from '../../types';
+import type { SavedRecipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { useAdOverlay } from '../../context/OverlayStackContext';
 
 interface FlagSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  job: Job | null;
+  job: SavedRecipe | null;
   allExistingFlags: string[];
-  onSave: (job: Job, flags: string[]) => Promise<void>;
+  onSave: (job: SavedRecipe, flags: string[]) => Promise<void>;
 }
 
 export const FlagSheet: React.FC<FlagSheetProps> = ({

@@ -1,41 +1,98 @@
 import { createClient, SupabaseClient, PostgrestError } from '@supabase/supabase-js';
 import { randomUUID } from 'node:crypto';
 import { config } from './config.js';
-import type { Job, JobStatus, Recipe, ProgressData, Collection, GamificationConfig, UserStats, Profile, LlmUsage } from './types.js';
+import type {
+  Job, JobStatus, JobKind, Recipe, ProgressData, SavedRecipe, UserRecipeSource,
+  Collection, GamificationConfig, UserStats, Profile, LlmUsage,
+} from './types.js';
 import { DEFAULT_GAMIFICATION_CONFIG } from './types.js';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-/** Row shape as stored in Supabase (snake_case columns). */
+/**
+ * Row shapes as stored in Supabase (snake_case columns).
+ *
+ * The three tables mirror the three jobs of the former single `jobs` row:
+ * `jobs` is the extraction task, `recipes` is the content, `user_recipes` is
+ * one user's cookbook entry.
+ */
 interface JobRow {
   id: string;
-  url: string;
-  status: string;
-  error: string | null;
-  recipe: unknown;
-  llm_usage?: unknown;
   user_id: string;
-  parent_job_id: string | null;
-  prompt: string | null;
-  created_at: string;
-  updated_at: string;
+  kind: string;
+  status: string;
+  source_url: string;
+  source_url_normalized: string | null;
+  parent_recipe_id: string | null;
+  remix_prompt: string | null;
+  recipe_id: string | null;
+  progress: unknown;
+  error: string | null;
+  llm_usage?: unknown;
+  media_bytes?: number;
   locked_at: string | null;
   locked_by: string | null;
-  url_normalized: string | null;
-  is_favorite?: boolean;
-  flags?: string[];
-  media_bytes?: number;
-  /** NULL = live job; ISO timestamp = soft-deleted */
-  deleted_at?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface RecipeRow {
+  id: string;
+  created_by: string | null;
+  visibility: string;
+  origin: string;
+  source_url: string | null;
+  source_handle: string | null;
+  parent_recipe_id: string | null;
+  remix_prompt: string | null;
+  title: string;
+  description: string | null;
+  emoji: string | null;
+  is_recipe: boolean;
+  prep_time: number | null;
+  cook_time: number | null;
+  servings: number | string | null;
+  tags: string[];
+  equipment: string[];
+  tips: string[];
+  image_url: string | null;
+  image_urls: string[];
+  image_prompt: string | null;
+  is_ai_cover: boolean;
+  transcript: string | null;
+  ingredients: unknown;
+  instructions: unknown;
+  alternative_ingredients: unknown;
+  calories: number | string | null;
+  protein_g: number | string | null;
+  carbs_g: number | string | null;
+  fat_g: number | string | null;
+  source_nutritional_values: unknown;
+  has_explicit_nutritional_values: boolean;
+  nutrition_coverage: number | string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface UserRecipeRow {
+  id: string;
+  user_id: string;
+  recipe_id: string;
+  source_job_id: string | null;
+  source: string;
+  is_favorite: boolean;
+  flags: string[];
+  added_at: string;
+  updated_at: string;
+  recipes?: RecipeRow | null;
 }
 
 // ── Supabase client (lazy singleton) ─────────────────────────────────────────
 
-let _client: SupabaseClient | undefined;
+let _client: SupabaseClient | null = null;
 
 export function getClient(): SupabaseClient {
   // Use service_role key so the queue worker (which has no user JWT) can also operate.
-  // RLS is enforced via explicit .eq('user_id', userId) filters in every query.
   _client ??= createClient(config.SUPABASE_URL, config.SUPABASE_SECRET_KEY);
   return _client;
 }
@@ -53,85 +110,158 @@ function wrapError(context: string, err: PostgrestError): Error {
   return new Error(`${context}: ${err.message}`, { cause: err });
 }
 
+/** Postgres error code for a unique-constraint violation. */
+const PG_UNIQUE_VIOLATION = '23505';
+
+/** Postgres `numeric` arrives as a string over PostgREST. */
+function num(value: number | string | null | undefined): number | null {
+  if (value === null || value === undefined) return null;
+  const n = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
 // ── Row ↔ Domain mapping ─────────────────────────────────────────────────────
 
 function rowToJob(row: JobRow): Job {
-  const recipeData = row.recipe as any;
-  const isProgress = recipeData && recipeData.isProgress;
-
-  const job: Job = {
+  return {
     id: row.id,
-    url: row.url,
-    status: row.status as JobStatus,
-    error: row.error,
-    recipe: isProgress ? null : (row.recipe as Recipe),
-    llmUsage: (row.llm_usage as any) ?? null,
-    progress: isProgress ? (row.recipe as ProgressData) : null,
-    parentJobId: row.parent_job_id,
-    prompt: row.prompt,
     userId: row.user_id,
+    kind: row.kind as JobKind,
+    status: row.status as JobStatus,
+    sourceUrl: row.source_url,
+    sourceUrlNormalized: row.source_url_normalized,
+    error: row.error,
+    progress: (row.progress as ProgressData) ?? null,
+    recipeId: row.recipe_id,
+    parentRecipeId: row.parent_recipe_id,
+    remixPrompt: row.remix_prompt,
+    llmUsage: (row.llm_usage as LlmUsage) ?? null,
+    mediaBytes: row.media_bytes ?? 0,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-    isFavorite: row.is_favorite ?? false,
-    flags: row.flags ?? [],
-    mediaBytes: row.media_bytes ?? 0,
-    deletedAt: row.deleted_at ?? null,
   };
-  if (job.recipe) {
-    normalizeRecipe(job.recipe, job.id);
-    if (job.parentJobId) {
-      job.recipe.parentJobId = job.parentJobId;
-    }
-    if (job.prompt) {
-      job.recipe.remixPrompt = job.prompt;
-    }
-  }
-  return job;
 }
 
 function jobToRow(updates: Partial<Job>): Partial<JobRow> {
   const row: Partial<JobRow> = {};
-  if (updates.url !== undefined) row.url = updates.url;
   if (updates.status !== undefined) row.status = updates.status;
   if (updates.error !== undefined) row.error = updates.error;
-  if (updates.recipe !== undefined) row.recipe = updates.recipe;
+  if (updates.progress !== undefined) row.progress = updates.progress;
+  if (updates.recipeId !== undefined) row.recipe_id = updates.recipeId;
   if (updates.llmUsage !== undefined) row.llm_usage = updates.llmUsage;
-  if (updates.parentJobId !== undefined) row.parent_job_id = updates.parentJobId;
-  if (updates.prompt !== undefined) row.prompt = updates.prompt;
-  if (updates.createdAt !== undefined) row.created_at = updates.createdAt;
-  if (updates.updatedAt !== undefined) row.updated_at = updates.updatedAt;
-  if (updates.isFavorite !== undefined) row.is_favorite = updates.isFavorite;
-  if (updates.flags !== undefined) row.flags = updates.flags;
   if (updates.mediaBytes !== undefined) row.media_bytes = updates.mediaBytes;
-  if (updates.deletedAt !== undefined) row.deleted_at = updates.deletedAt;
+  if (updates.updatedAt !== undefined) row.updated_at = updates.updatedAt;
   return row;
 }
 
-// ── Recipe normalization ─────────────────────────────────────────────────────
+/**
+ * Row -> domain. Exported so maintenance scripts can page over `recipes`
+ * without re-deriving the mapping.
+ */
+export function rowToRecipe(row: RecipeRow): Recipe {
+  const nutritionalValues = {
+    calories: num(row.calories),
+    protein: num(row.protein_g),
+    carbs: num(row.carbs_g),
+    fat: num(row.fat_g),
+  };
+  const hasNutrition = Object.values(nutritionalValues).some((v) => v !== null);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function normalizeRecipe(recipe: any, jobId: string): void {
-  if (recipe && recipe.isProgress) return;
-  if (!recipe.id) {
-    recipe.id = jobId;
-  }
-  if (recipe.geminiUsage) {
-    delete recipe.geminiUsage;
-  }
-  if (recipe.nutritionalEstimates && !recipe.nutritionalValues) {
-    recipe.nutritionalValues = recipe.nutritionalEstimates;
-    delete recipe.nutritionalEstimates;
-  }
-  if (Array.isArray(recipe.ingredients)) {
-    const ingredients = recipe.ingredients as Array<{ items?: unknown[] }>;
-    const needsConversion =
-      ingredients.length === 0 ||
-      (ingredients[0] && !Array.isArray(ingredients[0].items));
-    if (needsConversion) {
-      recipe.ingredients = [{ name: 'Ingredients', items: ingredients }];
-    }
-  }
+  return {
+    id: row.id,
+    createdBy: row.created_by,
+    visibility: row.visibility as Recipe['visibility'],
+    origin: row.origin as Recipe['origin'],
+    sourceUrl: row.source_url,
+    sourceHandle: row.source_handle,
+    parentRecipeId: row.parent_recipe_id,
+    remixPrompt: row.remix_prompt,
+    title: row.title,
+    description: row.description ?? '',
+    emoji: row.emoji,
+    isRecipe: row.is_recipe,
+    prepTime: row.prep_time,
+    cookTime: row.cook_time,
+    servings: num(row.servings) ?? 1,
+    tags: row.tags ?? [],
+    equipment: row.equipment ?? [],
+    tips: row.tips ?? [],
+    imageUrl: row.image_url,
+    imageUrls: row.image_urls ?? [],
+    imagePrompt: row.image_prompt,
+    isAiCover: row.is_ai_cover,
+    transcript: row.transcript,
+    ingredients: (row.ingredients as Recipe['ingredients']) ?? [],
+    instructions: (row.instructions as Recipe['instructions']) ?? [],
+    alternativeIngredients: (row.alternative_ingredients as Recipe['alternativeIngredients']) ?? undefined,
+    ...(hasNutrition ? { nutritionalValues } : {}),
+    sourceNutritionalValues: (row.source_nutritional_values as Recipe['sourceNutritionalValues']) ?? null,
+    hasExplicitNutritionalValues: row.has_explicit_nutritional_values,
+    nutritionCoverage: num(row.nutrition_coverage) ?? undefined,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
 }
+
+/**
+ * Recipe → column-shaped JSON. The single place the domain object is translated
+ * into `recipes` columns; `complete_job()` feeds the result straight into
+ * jsonb_populate_record, so the mapping is not duplicated in SQL.
+ *
+ * Deliberately omits `id`, `created_by` and `origin`: those are owned by the
+ * job, not by the payload.
+ */
+export function recipeToRow(recipe: Recipe): Record<string, unknown> {
+  const n = recipe.nutritionalValues;
+  return {
+    visibility: recipe.visibility ?? 'private',
+    source_url: recipe.sourceUrl ?? null,
+    source_handle: recipe.sourceHandle ?? null,
+    parent_recipe_id: recipe.parentRecipeId ?? null,
+    remix_prompt: recipe.remixPrompt ?? null,
+    title: recipe.title,
+    description: recipe.description ?? null,
+    emoji: recipe.emoji ?? null,
+    is_recipe: recipe.isRecipe ?? true,
+    prep_time: recipe.prepTime ?? null,
+    cook_time: recipe.cookTime ?? null,
+    servings: recipe.servings ?? null,
+    tags: recipe.tags ?? [],
+    equipment: recipe.equipment ?? [],
+    tips: recipe.tips ?? [],
+    image_url: recipe.imageUrl ?? null,
+    image_urls: recipe.imageUrls ?? [],
+    image_prompt: recipe.imagePrompt ?? null,
+    is_ai_cover: recipe.isAiCover ?? false,
+    transcript: recipe.transcript ?? null,
+    ingredients: recipe.ingredients ?? [],
+    instructions: recipe.instructions ?? [],
+    alternative_ingredients: recipe.alternativeIngredients ?? null,
+    calories: n?.calories ?? null,
+    protein_g: n?.protein ?? null,
+    carbs_g: n?.carbs ?? null,
+    fat_g: n?.fat ?? null,
+    source_nutritional_values: recipe.sourceNutritionalValues ?? null,
+    has_explicit_nutritional_values: recipe.hasExplicitNutritionalValues ?? false,
+    nutrition_coverage: recipe.nutritionCoverage ?? null,
+  };
+}
+
+function rowToSavedRecipe(row: UserRecipeRow): SavedRecipe {
+  return {
+    recipeId: row.recipe_id,
+    recipe: rowToRecipe(row.recipes as RecipeRow),
+    source: row.source as UserRecipeSource,
+    isFavorite: row.is_favorite,
+    flags: row.flags ?? [],
+    collectionIds: [],
+    addedAt: row.added_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+/** Columns to select when a cookbook entry is read together with its recipe. */
+const SAVED_RECIPE_SELECT = '*, recipes(*)';
 
 // ── URL normalization ────────────────────────────────────────────────────────
 
@@ -142,19 +272,22 @@ function normalizeUrl(urlStr: string): string {
   return clean.toLowerCase();
 }
 
-// ── Public API ───────────────────────────────────────────────────────────────
+// ── Jobs ─────────────────────────────────────────────────────────────────────
 
-/** Postgres error code for a unique-constraint violation. */
-const PG_UNIQUE_VIOLATION = '23505';
+/** Statuses a job can still be working through. */
+const ACTIVE_STATUSES = ['pending', 'scraping', 'processing'] as const;
 
-/** Create a new pending job. */
-export async function createJob(url: string, userId: string): Promise<Job> {
-  const now = new Date().toISOString();
-  const id = randomUUID();
-
+/** Create a new pending extraction job. */
+export async function createJob(url: string, userId: string, kind: JobKind = 'url'): Promise<Job> {
   const { data, error } = await getClient()
     .from('jobs')
-    .insert({ id, url, url_normalized: normalizeUrl(url), status: 'pending', error: null, recipe: null, user_id: userId, created_at: now, updated_at: now })
+    .insert({
+      user_id: userId,
+      kind,
+      status: 'pending',
+      source_url: url,
+      source_url_normalized: normalizeUrl(url),
+    })
     .select()
     .returns<JobRow>()
     .single();
@@ -162,8 +295,8 @@ export async function createJob(url: string, userId: string): Promise<Job> {
   if (error) {
     // Two near-simultaneous requests for the same URL can both pass the
     // app-level active-job check before either INSERT commits; the partial
-    // unique index on (user_id, url_normalized) for active jobs catches that
-    // race here. Return the job the other request created instead of failing.
+    // unique index on (user_id, source_url_normalized) for active jobs catches
+    // that race here. Return the job the other request created instead.
     if (error.code === PG_UNIQUE_VIOLATION) {
       const existing = await findActiveJobByUrl(url, userId);
       if (existing) return existing;
@@ -173,14 +306,24 @@ export async function createJob(url: string, userId: string): Promise<Job> {
   return rowToJob(data);
 }
 
-/** Create a new pending remix job. */
-export async function createRemixJob(parentJobId: string, url: string, prompt: string, userId: string): Promise<Job> {
-  const now = new Date().toISOString();
-  const id = randomUUID();
-
+/** Create a new pending remix job against an existing recipe. */
+export async function createRemixJob(
+  parentRecipeId: string,
+  url: string,
+  prompt: string,
+  userId: string,
+): Promise<Job> {
   const { data, error } = await getClient()
     .from('jobs')
-    .insert({ id, url, url_normalized: normalizeUrl(url), status: 'pending', error: null, recipe: null, user_id: userId, parent_job_id: parentJobId, prompt, created_at: now, updated_at: now })
+    .insert({
+      user_id: userId,
+      kind: 'remix',
+      status: 'pending',
+      source_url: url,
+      source_url_normalized: normalizeUrl(url),
+      parent_recipe_id: parentRecipeId,
+      remix_prompt: prompt,
+    })
     .select()
     .returns<JobRow>()
     .single();
@@ -189,53 +332,55 @@ export async function createRemixJob(parentJobId: string, url: string, prompt: s
   return rowToJob(data);
 }
 
-/** Save a completed recipe remix directly. */
-export async function saveCompletedRemix(parentJobId: string, url: string, recipe: Recipe, prompt: string, userId: string, llmUsage?: LlmUsage): Promise<Job> {
-  const now = new Date().toISOString();
-  const id = randomUUID();
-
-  const finalRecipe = {
-    ...recipe,
-    id,
-    parentJobId,
-    remixPrompt: prompt
-  };
-
-  const { data, error } = await getClient()
-    .from('jobs')
-    .insert({
-      id,
-      url,
-      url_normalized: normalizeUrl(url),
-      status: 'completed',
-      error: null,
-      recipe: finalRecipe as any,
-      llm_usage: (llmUsage as any) ?? null,
-      user_id: userId,
-      parent_job_id: parentJobId,
-      prompt,
-      created_at: now,
-      updated_at: now
-    })
-    .select()
-    .returns<JobRow>()
-    .single();
-
-  if (error) throw wrapError('Failed to save completed remix job', error);
-  return rowToJob(data);
-}
-
-/** Update an existing job by ID. */
+/**
+ * Update an existing job by ID.
+ *
+ * NOTE: deliberately not user-scoped — every caller is either the worker (which
+ * has no user context) or a route that already checked ownership. Do NOT copy
+ * this pattern for `recipes`: once visibility='public' exists, an unscoped
+ * update there would be a writable-by-anyone table.
+ */
 export async function updateJob(id: string, updates: Partial<Job>): Promise<void> {
   const now = new Date().toISOString();
-  const rowUpdates = { ...jobToRow(updates), updated_at: now };
-
   const { error } = await getClient()
     .from('jobs')
-    .update(rowUpdates)
+    .update({ ...jobToRow(updates), updated_at: now })
     .eq('id', id);
 
   if (error) throw wrapError(`Failed to update job ${id}`, error);
+}
+
+/** Write the worker's progress for a running job. */
+export async function updateJobProgress(
+  id: string,
+  status: JobStatus,
+  progress: ProgressData,
+): Promise<void> {
+  await updateJob(id, { status, progress });
+}
+
+/**
+ * Finish a job: persist the recipe, point the job at it and add it to the
+ * owner's cookbook — atomically, via the complete_job RPC. Returns the new
+ * recipe id.
+ *
+ * Completion spans three tables now; doing it in three round-trips would leave
+ * a crash window where the user has spent quota but has no recipe, or where a
+ * recipe exists in nobody's cookbook.
+ */
+export async function completeJob(
+  jobId: string,
+  recipe: Recipe,
+  llmUsage?: LlmUsage | null,
+): Promise<string> {
+  const { data, error } = await getClient().rpc('complete_job', {
+    p_job_id: jobId,
+    p_recipe: recipeToRow(recipe),
+    p_llm_usage: llmUsage ?? null,
+  });
+
+  if (error) throw wrapError(`Failed to complete job ${jobId}`, error);
+  return data as string;
 }
 
 /** Retrieve a job by ID, or `null` if not found. Scoped to userId when provided. */
@@ -272,41 +417,16 @@ export async function claimNextJob(workerId: string): Promise<Job | null> {
   return rowToJob(rows[0]);
 }
 
-/** Find a completed job by URL (normalized), scoped to userId. Optionally includes soft-deleted jobs. */
-export async function findCompletedJobByUrl(url: string, userId: string, includeDeleted = false): Promise<Job | null> {
-  let query = getClient()
+/** Find a still-running job for this URL, scoped to userId. */
+export async function findActiveJobByUrl(url: string, userId: string): Promise<Job | null> {
+  const { data, error } = await getClient()
     .from('jobs')
     .select()
-    .eq('status', 'completed')
+    // 'cancelled' must never appear here: a cancelled job neither blocks a new
+    // extraction nor counts towards the concurrency limit.
+    .in('status', ACTIVE_STATUSES as unknown as string[])
     .eq('user_id', userId)
-    .eq('url_normalized', normalizeUrl(url));
-
-  if (!includeDeleted) {
-    query = query.is('deleted_at', null);
-  }
-
-  const { data, error } = await query
-    .returns<JobRow[]>()
-    .limit(1);
-
-  if (error) throw wrapError('Failed to search jobs by URL', error);
-  return data.length > 0 ? rowToJob(data[0]) : null;
-}
-
-/** Find a still-running (not yet completed/failed) job by URL (normalized), scoped to userId. Optionally includes soft-deleted jobs. */
-export async function findActiveJobByUrl(url: string, userId: string, includeDeleted = false): Promise<Job | null> {
-  let query = getClient()
-    .from('jobs')
-    .select()
-    .in('status', ['pending', 'scraping', 'processing'])
-    .eq('user_id', userId)
-    .eq('url_normalized', normalizeUrl(url));
-
-  if (!includeDeleted) {
-    query = query.is('deleted_at', null);
-  }
-
-  const { data, error } = await query
+    .eq('source_url_normalized', normalizeUrl(url))
     .returns<JobRow[]>()
     .limit(1);
 
@@ -314,78 +434,244 @@ export async function findActiveJobByUrl(url: string, userId: string, includeDel
   return data.length > 0 ? rowToJob(data[0]) : null;
 }
 
-/** Restores a soft-deleted job by clearing deleted_at, scoped to userId. */
-export async function restoreJob(id: string, userId: string): Promise<boolean> {
+/**
+ * The recipe this user already extracted from this URL, if any — whether or not
+ * it is still in their cookbook. Replaces findCompletedJobByUrl + restoreJob:
+ * re-adding a previously removed recipe is now a user_recipes insert, with no
+ * re-extraction and no quota cost.
+ */
+export async function findExtractedRecipeIdByUrl(url: string, userId: string): Promise<string | null> {
   const { data, error } = await getClient()
     .from('jobs')
-    .update({ deleted_at: null })
+    .select('recipe_id')
+    .eq('status', 'completed')
+    .eq('user_id', userId)
+    .eq('source_url_normalized', normalizeUrl(url))
+    .not('recipe_id', 'is', null)
+    .order('created_at', { ascending: false })
+    .returns<{ recipe_id: string }[]>()
+    .limit(1);
+
+  if (error) throw wrapError('Failed to search completed jobs by URL', error);
+  return data.length > 0 ? data[0].recipe_id : null;
+}
+
+/**
+ * Mark an in-flight job as cancelled. The row survives — it is the audit trail
+ * and it backs the rolling rate limit, so cancelling must not refund quota.
+ * Returns `true` if a running job was actually cancelled.
+ */
+export async function cancelJob(id: string, userId: string): Promise<boolean> {
+  const { data, error } = await getClient()
+    .from('jobs')
+    .update({ status: 'cancelled', progress: null, updated_at: new Date().toISOString() })
     .eq('id', id)
     .eq('user_id', userId)
+    .in('status', ACTIVE_STATUSES as unknown as string[])
     .select('id');
 
-  if (error) throw wrapError(`Failed to restore job ${id}`, error);
+  if (error) throw wrapError(`Failed to cancel job ${id}`, error);
   return (data?.length ?? 0) > 0;
 }
 
-/** Retrieve all non-deleted jobs for a user, newest first. */
-export async function getAllJobs(userId: string): Promise<Job[]> {
+/** Whether the user cancelled this job while the worker was running it. */
+export async function isJobCancelled(id: string): Promise<boolean> {
   const { data, error } = await getClient()
     .from('jobs')
-    .select()
-    .eq('user_id', userId)
-    .is('deleted_at', null)
-    .order('created_at', { ascending: false })
-    .returns<JobRow[]>();
+    .select('status')
+    .eq('id', id)
+    .single();
 
-  if (error) throw wrapError('Failed to get all jobs', error);
-  const jobs = data.map(rowToJob);
+  if (error) {
+    if (isNoRowsError(error)) return true;
+    throw wrapError(`Failed to read job status ${id}`, error);
+  }
+  return (data as { status: string }).status === 'cancelled';
+}
+
+// ── Recipes ──────────────────────────────────────────────────────────────────
+
+/** Read a recipe by id, regardless of who owns it. */
+export async function getRecipe(id: string): Promise<Recipe | null> {
+  const { data, error } = await getClient()
+    .from('recipes')
+    .select()
+    .eq('id', id)
+    .returns<RecipeRow>()
+    .single();
+
+  if (error) {
+    if (isNoRowsError(error)) return null;
+    throw wrapError(`Failed to get recipe ${id}`, error);
+  }
+  return rowToRecipe(data);
+}
+
+/**
+ * Replace a recipe's content.
+ *
+ * Safe while every recipe belongs to exactly one cookbook entry. Once a recipe
+ * can be shared, this needs copy-on-write — otherwise one user's edit rewrites
+ * the recipe under everybody else who saved it.
+ */
+export async function updateRecipe(id: string, recipe: Recipe): Promise<Recipe> {
+  const { data, error } = await getClient()
+    .from('recipes')
+    .update({ ...recipeToRow(recipe), updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .returns<RecipeRow>()
+    .single();
+
+  if (error) throw wrapError(`Failed to update recipe ${id}`, error);
+  return rowToRecipe(data);
+}
+
+/**
+ * Insert a recipe directly into a user's cookbook, without a job.
+ *
+ * Used by the copilot's "save as a new remix", which produces a finished recipe
+ * inline rather than queueing work. Because there is no job row, such a recipe
+ * costs no extraction quota — which is exactly how remixes behaved before.
+ */
+export async function createRecipeForUser(
+  userId: string,
+  recipe: Recipe,
+  origin: Recipe['origin'],
+  source: UserRecipeSource,
+): Promise<Recipe> {
+  const { data, error } = await getClient()
+    .from('recipes')
+    .insert({ ...recipeToRow(recipe), created_by: userId, origin })
+    .select()
+    .returns<RecipeRow>()
+    .single();
+
+  if (error) throw wrapError('Failed to create recipe', error);
+
+  const saved = rowToRecipe(data);
+  await addToLibrary(userId, saved.id!, source);
+  return saved;
+}
+
+/** Title lookup for a set of recipe ids (lineage banners, notifications). */
+export async function getRecipeTitles(ids: string[]): Promise<Map<string, string>> {
+  if (ids.length === 0) return new Map();
+  const { data, error } = await getClient()
+    .from('recipes')
+    .select('id, title')
+    .in('id', ids)
+    .returns<{ id: string; title: string }[]>();
+
+  if (error) throw wrapError('Failed to get recipe titles', error);
+  return new Map(data.map((r) => [r.id, r.title]));
+}
+
+// ── User recipes (the cookbook) ──────────────────────────────────────────────
+
+/** Add a recipe to a user's cookbook. Idempotent. */
+export async function addToLibrary(
+  userId: string,
+  recipeId: string,
+  source: UserRecipeSource = 'extraction',
+  jobId?: string | null,
+): Promise<void> {
+  const { error } = await getClient()
+    .from('user_recipes')
+    .upsert(
+      { user_id: userId, recipe_id: recipeId, source, source_job_id: jobId ?? null },
+      { onConflict: 'user_id,recipe_id', ignoreDuplicates: true },
+    );
+
+  if (error) throw wrapError('Failed to add recipe to library', error);
+}
+
+/**
+ * Remove a recipe from a user's cookbook. A real delete: the job row keeps the
+ * quota honest, so there is nothing left to soft-delete for.
+ */
+export async function removeFromLibrary(userId: string, recipeId: string): Promise<boolean> {
+  const { data, error } = await getClient()
+    .from('user_recipes')
+    .delete()
+    .eq('user_id', userId)
+    .eq('recipe_id', recipeId)
+    .select('id');
+
+  if (error) throw wrapError('Failed to remove recipe from library', error);
+  return (data?.length ?? 0) > 0;
+}
+
+/** Whether this recipe sits in this user's cookbook. */
+export async function isInLibrary(userId: string, recipeId: string): Promise<boolean> {
+  const { count, error } = await getClient()
+    .from('user_recipes')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('recipe_id', recipeId);
+
+  if (error) throw wrapError('Failed to check library membership', error);
+  return (count ?? 0) > 0;
+}
+
+/** One cookbook entry with its recipe, or `null` if the user has not saved it. */
+export async function getSavedRecipe(userId: string, recipeId: string): Promise<SavedRecipe | null> {
+  const { data, error } = await getClient()
+    .from('user_recipes')
+    .select(SAVED_RECIPE_SELECT)
+    .eq('user_id', userId)
+    .eq('recipe_id', recipeId)
+    .single();
+
+  if (error) {
+    if (isNoRowsError(error)) return null;
+    throw wrapError(`Failed to get saved recipe ${recipeId}`, error);
+  }
+  const row = data as unknown as UserRecipeRow;
+  if (!row.recipes) return null;
+
+  const saved = rowToSavedRecipe(row);
+  const memberships = await getCollectionMembership(userId);
+  saved.collectionIds = memberships[recipeId] ?? [];
+  await attachParentTitle(saved.recipe);
+  return saved;
+}
+
+/** The user's whole cookbook, newest first. */
+export async function getLibrary(userId: string): Promise<SavedRecipe[]> {
+  const { data, error } = await getClient()
+    .from('user_recipes')
+    .select(SAVED_RECIPE_SELECT)
+    .eq('user_id', userId)
+    .order('added_at', { ascending: false })
+    .returns<UserRecipeRow[]>();
+
+  if (error) throw wrapError('Failed to get library', error);
+
+  const saved = data.filter((row) => row.recipes).map(rowToSavedRecipe);
 
   try {
     const memberships = await getCollectionMembership(userId);
-    for (const job of jobs) {
-      job.collectionIds = memberships[job.id] ?? [];
+    for (const entry of saved) {
+      entry.collectionIds = memberships[entry.recipeId] ?? [];
     }
   } catch (err) {
-    console.warn('Failed to load collection memberships for jobs:', err);
-    for (const job of jobs) {
-      job.collectionIds = [];
-    }
+    console.warn('Failed to load collection memberships for library:', err);
   }
 
-  return jobs;
+  return saved;
 }
 
-/**
- * Soft-delete a job by setting deleted_at, scoped to userId.
- * Returns `true` if updated, `false` if not found or already deleted.
- *
- * IMPORTANT: this intentionally keeps the row in the database so that
- * getExtractionsForUserInTimeframe() still counts it against the rate limit.
- * Users cannot bypass the extraction quota by deleting their jobs.
- */
-export async function deleteJob(id: string, userId: string): Promise<boolean> {
-  const { data, error } = await getClient()
-    .from('jobs')
-    .update({ deleted_at: new Date().toISOString() })
-    .eq('id', id)
-    .eq('user_id', userId)
-    .is('deleted_at', null)  // only mark once; ignore if already deleted
-    .select('id');
-
-  if (error) throw wrapError(`Failed to soft-delete job ${id}`, error);
-  return (data?.length ?? 0) > 0;
+/** Resolve `parentRecipeTitle` for the remix lineage banner. */
+async function attachParentTitle(recipe: Recipe): Promise<void> {
+  if (!recipe.parentRecipeId) return;
+  try {
+    const titles = await getRecipeTitles([recipe.parentRecipeId]);
+    recipe.parentRecipeTitle = titles.get(recipe.parentRecipeId) ?? null;
+  } catch (err) {
+    console.warn('Failed to resolve parent recipe title:', err);
+  }
 }
-
-/**
- * Checks if a job has been soft-deleted (cancelled).
- */
-export async function isJobDeleted(id: string): Promise<boolean> {
-  const job = await getJob(id);
-  return job ? job.deletedAt !== null : true;
-}
-
-
-
 // ── Feedback / bug reports ────────────────────────────────────────────────────
 
 export interface FeedbackInput {
@@ -481,6 +767,8 @@ export async function reclaimExpiredJobs(timeoutMinutes: number): Promise<void> 
   const { error, count } = await getClient()
     .from('jobs')
     .update({ status: 'pending', locked_at: null, locked_by: null, updated_at: new Date().toISOString() }, { count: 'exact' })
+    // 'cancelled' is deliberately absent: a cancelled job must never be
+    // resurrected by the lease reclaimer.
     .in('status', ['scraping', 'processing'])
     .lt('locked_at', cutoff);
 
@@ -497,30 +785,38 @@ export async function countActiveJobsForUser(userId: string): Promise<number> {
     .from('jobs')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
-    .in('status', ['pending', 'scraping', 'processing']);
+    .in('status', ACTIVE_STATUSES as unknown as string[]);
 
   if (error) throw wrapError('Failed to count active jobs', error);
   return count ?? 0;
 }
 
-/** Count a user's saved (non-deleted) recipes (completed cookbook entries, including remixes). */
-export async function countCompletedRecipesForUser(userId: string): Promise<number> {
+/**
+ * Size of a user's cookbook, for the saved-recipe cap.
+ *
+ * Counts `user_recipes`, NOT `jobs` — this is the one quota that shrinks when
+ * the user removes a recipe. The rate-limit quota below counts jobs instead and
+ * deliberately never shrinks. Do not "unify" the two.
+ */
+export async function countLibraryEntries(userId: string): Promise<number> {
   const { count, error } = await getClient()
-    .from('jobs')
+    .from('user_recipes')
     .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .eq('status', 'completed')
-    .not('recipe', 'is', null)
-    .is('deleted_at', null);
+    .eq('user_id', userId);
 
-  if (error) throw wrapError('Failed to count completed recipes', error);
+  if (error) throw wrapError('Failed to count library entries', error);
   return count ?? 0;
 }
 
 /**
- * Get all extraction jobs created by a user in the last N days (excluding remixes).
- * Failed extractions are excluded so they don't consume the user's rate-limit
- * allowance — only in-flight (pending/scraping/processing) and completed jobs count.
+ * Extraction jobs a user started in the last N days, for the rolling rate limit.
+ *
+ * Remixes are excluded (`kind <> 'remix'`) but photo imports are NOT — they cost
+ * the same pipeline work as a URL extraction and have always consumed quota.
+ * Failed extractions are excluded so a failure does not burn an allowance.
+ *
+ * Cancelled jobs still count: cancelling used to be a soft delete, and the whole
+ * point of keeping the row was that quota cannot be refunded by walking away.
  */
 export async function getExtractionsForUserInTimeframe(userId: string, days: number): Promise<Job[]> {
   const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
@@ -528,7 +824,7 @@ export async function getExtractionsForUserInTimeframe(userId: string, days: num
     .from('jobs')
     .select()
     .eq('user_id', userId)
-    .is('parent_job_id', null)
+    .neq('kind', 'remix')
     .neq('status', 'failed')
     .gte('created_at', cutoff)
     .order('created_at', { ascending: true })
@@ -664,26 +960,26 @@ export async function getAllFeedback(): Promise<any[]> {
   return data || [];
 }
 
-/** Set whether a job is favorited, scoped to userId. */
-export async function setFavorite(jobId: string, userId: string, value: boolean): Promise<void> {
+/** Set whether a cookbook entry is favorited, scoped to userId. */
+export async function setFavorite(recipeId: string, userId: string, value: boolean): Promise<void> {
   const { error } = await getClient()
-    .from('jobs')
+    .from('user_recipes')
     .update({ is_favorite: value, updated_at: new Date().toISOString() })
-    .eq('id', jobId)
+    .eq('recipe_id', recipeId)
     .eq('user_id', userId);
 
-  if (error) throw wrapError(`Failed to set favorite for job ${jobId}`, error);
+  if (error) throw wrapError(`Failed to set favorite for recipe ${recipeId}`, error);
 }
 
-/** Set custom flags for a job, scoped to userId. */
-export async function setFlags(jobId: string, userId: string, flags: string[]): Promise<void> {
+/** Set custom flags on a cookbook entry, scoped to userId. */
+export async function setFlags(recipeId: string, userId: string, flags: string[]): Promise<void> {
   const { error } = await getClient()
-    .from('jobs')
+    .from('user_recipes')
     .update({ flags, updated_at: new Date().toISOString() })
-    .eq('id', jobId)
+    .eq('recipe_id', recipeId)
     .eq('user_id', userId);
 
-  if (error) throw wrapError(`Failed to set flags for job ${jobId}`, error);
+  if (error) throw wrapError(`Failed to set flags for recipe ${recipeId}`, error);
 }
 
 /** List all collections for a user. */
@@ -782,42 +1078,61 @@ export async function deleteCollection(id: string, userId: string): Promise<bool
   return (count ?? 0) > 0;
 }
 
-/** Get collection membership mappings { [jobId]: string[] } for a user. */
+/**
+ * Collection membership as { [recipeId]: collectionId[] } for a user.
+ *
+ * `recipe_collections` points at `user_recipes`, not at `recipes`: a collection
+ * is a per-user construct, so removing a recipe from the cookbook takes its
+ * memberships with it via ON DELETE CASCADE. Callers work in recipe ids, so the
+ * join resolves the library row here.
+ */
 export async function getCollectionMembership(userId: string): Promise<Record<string, string[]>> {
   const { data, error } = await getClient()
     .from('recipe_collections')
-    .select('job_id, collection_id')
+    .select('collection_id, user_recipes!inner(recipe_id)')
     .eq('user_id', userId);
 
   if (error) throw wrapError('Failed to get collection membership', error);
 
   const mapping: Record<string, string[]> = {};
-  if (data) {
-    for (const row of data) {
-      mapping[row.job_id] ??= [];
-      mapping[row.job_id].push(row.collection_id);
-    }
+  for (const row of (data ?? []) as any[]) {
+    const recipeId = row.user_recipes?.recipe_id;
+    if (!recipeId) continue;
+    mapping[recipeId] ??= [];
+    mapping[recipeId].push(row.collection_id);
   }
   return mapping;
 }
 
-/** Set collection memberships for a recipe. */
-export async function setRecipeCollections(jobId: string, userId: string, collectionIds: string[]): Promise<void> {
-  // Delete existing memberships for this recipe
+/** Replace the collection memberships of one cookbook entry. */
+export async function setRecipeCollections(
+  recipeId: string,
+  userId: string,
+  collectionIds: string[],
+): Promise<void> {
+  const { data: entry, error: lookupError } = await getClient()
+    .from('user_recipes')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('recipe_id', recipeId)
+    .single();
+
+  if (lookupError) throw wrapError('Failed to resolve library entry for collections', lookupError);
+  const entryId = (entry as { id: string }).id;
+
   const { error: deleteError } = await getClient()
     .from('recipe_collections')
     .delete()
-    .eq('job_id', jobId)
+    .eq('user_recipe_id', entryId)
     .eq('user_id', userId);
 
   if (deleteError) throw wrapError('Failed to clear old recipe collections', deleteError);
 
-  // Insert new memberships
   if (collectionIds.length > 0) {
     const inserts = collectionIds.map(cid => ({
       collection_id: cid,
-      job_id: jobId,
-      user_id: userId
+      user_recipe_id: entryId,
+      user_id: userId,
     }));
     const { error: insertError } = await getClient()
       .from('recipe_collections')
@@ -1045,7 +1360,7 @@ export async function getFailedJobs(
 ): Promise<FailedJobDetails[]> {
   let query = getClient()
     .from('jobs')
-    .select('id, url, error, user_id, created_at, updated_at')
+    .select('id, source_url, error, user_id, created_at, updated_at')
     .eq('status', 'failed')
     .order('created_at', { ascending: false })
     .limit(limit);
@@ -1060,7 +1375,7 @@ export async function getFailedJobs(
 
   return (data || []).map((row: any) => ({
     id: row.id,
-    url: row.url,
+    url: row.source_url,
     error: row.error,
     userId: row.user_id,
     createdAt: row.created_at,
@@ -1074,7 +1389,7 @@ export interface NotificationLogEntry {
   userId: string;
   category: string;
   type: string;
-  jobId?: string | null;
+  recipeId?: string | null;
   title?: string | null;
 }
 
@@ -1082,7 +1397,7 @@ export interface NotificationLogRow {
   sentAt: string;
   category: string;
   type: string;
-  jobId: string | null;
+  recipeId: string | null;
 }
 
 export interface NotificationUser {
@@ -1153,7 +1468,7 @@ export async function insertNotificationLog(entry: NotificationLogEntry): Promis
       user_id: entry.userId,
       category: entry.category,
       type: entry.type,
-      job_id: entry.jobId ?? null,
+      recipe_id: entry.recipeId ?? null,
       title: entry.title ?? null,
     });
   if (error) throw wrapError('Failed to insert notification log', error);
@@ -1164,7 +1479,7 @@ export async function getRecentNotifications(userId: string, sinceDays: number):
   const cutoff = new Date(Date.now() - sinceDays * 24 * 60 * 60 * 1000).toISOString();
   const { data, error } = await getClient()
     .from('notification_log')
-    .select('sent_at, category, type, job_id')
+    .select('sent_at, category, type, recipe_id')
     .eq('user_id', userId)
     .gte('sent_at', cutoff)
     .order('sent_at', { ascending: false });
@@ -1173,7 +1488,7 @@ export async function getRecentNotifications(userId: string, sinceDays: number):
     sentAt: row.sent_at,
     category: row.category,
     type: row.type,
-    jobId: row.job_id,
+    recipeId: row.recipe_id,
   }));
 }
 
@@ -1282,29 +1597,31 @@ export async function getUserStats(userId: string): Promise<UserStats> {
   return data ? rowToUserStats(data as UserStatsRow) : emptyUserStats(userId);
 }
 
-/** How many times this user has already cooked a given job (repetition factor). */
 /**
- * How many times this user has already cooked a given job (repetition factor).
+ * How many times this user has already cooked a given recipe (repetition factor).
  * When `windowDays` is provided (>0), only cooks within that many days of *now*
  * count — so a weekly favorite resets to full value instead of being punished
  * forever. A value of 0/undefined counts all-time cooks (legacy behavior).
+ *
+ * cook_events reference `recipes`, not `user_recipes`: removing a recipe from
+ * the cookbook must never delete the XP history it earned.
  */
-export async function getCookCountForJob(
+export async function getCookCountForRecipe(
   userId: string,
-  jobId: string,
+  recipeId: string,
   windowDays?: number,
 ): Promise<number> {
   let query = getClient()
     .from('cook_events')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
-    .eq('job_id', jobId);
+    .eq('recipe_id', recipeId);
   if (windowDays && windowDays > 0) {
     const since = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000).toISOString();
     query = query.gte('cooked_at', since);
   }
   const { count, error } = await query;
-  if (error) throw wrapError('Failed to count cook events for job', error);
+  if (error) throw wrapError('Failed to count cook events for recipe', error);
   return count ?? 0;
 }
 
@@ -1322,22 +1639,22 @@ export async function getCookCountSince(userId: string, sinceIso: string): Promi
 /** The most recent cook_event for a user (velocity / duplicate guards). */
 export async function getLastCookEvent(
   userId: string,
-): Promise<{ jobId: string | null; cookedAt: string } | null> {
+): Promise<{ recipeId: string | null; cookedAt: string } | null> {
   const { data, error } = await getClient()
     .from('cook_events')
-    .select('job_id, cooked_at')
+    .select('recipe_id, cooked_at')
     .eq('user_id', userId)
     .order('cooked_at', { ascending: false })
     .limit(1)
     .maybeSingle();
   if (error) throw wrapError('Failed to fetch last cook event', error);
   if (!data) return null;
-  return { jobId: (data as any).job_id, cookedAt: (data as any).cooked_at };
+  return { recipeId: (data as any).recipe_id, cookedAt: (data as any).cooked_at };
 }
 
 export interface InsertCookEventArgs {
   userId: string;
-  jobId: string;
+  recipeId: string;
   xp: number;
   coins: number;
   hasPhoto: boolean;
@@ -1351,11 +1668,9 @@ export interface InsertCookEventArgs {
 
 /** Insert an append-only cook_event row and return its id. */
 export async function insertCookEvent(args: InsertCookEventArgs): Promise<string> {
-  const id = randomUUID();
-  const { error } = await getClient().from('cook_events').insert({
-    id,
+  const { data, error } = await getClient().from('cook_events').insert({
     user_id: args.userId,
-    job_id: args.jobId,
+    recipe_id: args.recipeId,
     xp_awarded: args.xp,
     coins_awarded: args.coins,
     has_photo: args.hasPhoto,
@@ -1365,14 +1680,14 @@ export async function insertCookEvent(args: InsertCookEventArgs): Promise<string
     trust_score: args.trustScore,
     via_cooking_mode: args.viaCookingMode,
     timer_elapsed: args.timerElapsed,
-  });
+  }).select('id').single();
   if (error) throw wrapError('Failed to insert cook event', error);
-  return id;
+  return (data as { id: string }).id;
 }
 
 export interface CookPhotoItem {
   id: string;
-  jobId: string;
+  recipeId: string | null;
   photoUrl: string;
   cookedAt: string;
   recipeTitle?: string;
@@ -1399,23 +1714,23 @@ export interface CookHistory {
 }
 
 /**
- * All cook events for a single job, newest first, with signed photo URLs.
+ * All cook events for a single recipe, newest first, with signed photo URLs.
  * Drives the recipe-detail "already cooked" chip + timeline.
  */
-export async function getCookHistoryForJob(
+export async function getCookHistoryForRecipe(
   userId: string,
-  jobId: string,
+  recipeId: string,
   limit: number = 20,
 ): Promise<CookHistory> {
   const { data, error, count } = await getClient()
     .from('cook_events')
     .select('id, cooked_at, xp_awarded, coins_awarded, has_photo, photo_path, verified, via_cooking_mode, timer_elapsed', { count: 'exact' })
     .eq('user_id', userId)
-    .eq('job_id', jobId)
+    .eq('recipe_id', recipeId)
     .order('cooked_at', { ascending: false })
     .limit(limit);
 
-  if (error) throw wrapError('Failed to fetch cook history for job', error);
+  if (error) throw wrapError('Failed to fetch cook history for recipe', error);
   if (!data || data.length === 0) {
     return { count: 0, firstCookedAt: null, lastCookedAt: null, items: [] };
   }
@@ -1459,11 +1774,17 @@ export async function getCookHistoryForJob(
   };
 }
 
-/** Get recent verified cook photos for a user. */
+/**
+ * Get recent verified cook photos for a user.
+ *
+ * The recipe title comes straight from the joined `recipes` row — it used to
+ * need a second query into jobs.recipe->>'title' because the title lived inside
+ * a JSONB blob.
+ */
 export async function getRecentCookPhotos(userId: string, limit: number = 10): Promise<CookPhotoItem[]> {
   const { data, error } = await getClient()
     .from('cook_events')
-    .select('id, job_id, photo_path, cooked_at')
+    .select('id, recipe_id, photo_path, cooked_at, recipes(title)')
     .eq('user_id', userId)
     .not('photo_path', 'is', null)
     .neq('photo_path', '')
@@ -1475,25 +1796,6 @@ export async function getRecentCookPhotos(userId: string, limit: number = 10): P
     return [];
   }
   if (!data || data.length === 0) return [];
-
-  // Fetch job titles for these job_ids
-  const jobIds = Array.from(new Set(data.map((r: any) => r.job_id).filter(Boolean)));
-  let jobTitleMap: Record<string, string> = {};
-
-  if (jobIds.length > 0) {
-    const { data: jobsData } = await getClient()
-      .from('jobs')
-      .select('id, recipe')
-      .in('id', jobIds);
-
-    if (jobsData) {
-      for (const j of jobsData as any[]) {
-        if (j.id && j.recipe?.title) {
-          jobTitleMap[j.id] = j.recipe.title;
-        }
-      }
-    }
-  }
 
   return Promise.all(
     data.map(async (row: any) => {
@@ -1514,13 +1816,12 @@ export async function getRecentCookPhotos(userId: string, limit: number = 10): P
           photoUrl = getClient().storage.from('cook-photos').getPublicUrl(photoPath).data.publicUrl;
         }
       }
-      const recipeTitle = jobTitleMap[row.job_id] || 'Gekochtes Gericht';
       return {
         id: row.id,
-        jobId: row.job_id,
+        recipeId: row.recipe_id,
         photoUrl,
         cookedAt: row.cooked_at,
-        recipeTitle,
+        recipeTitle: row.recipes?.title || 'Gekochtes Gericht',
       };
     })
   );
@@ -1607,10 +1908,10 @@ export async function awardBadges(userId: string, badgeKeys: string[]): Promise<
 export async function getDistinctCookedRecipeCount(userId: string): Promise<number> {
   const { data, error } = await getClient()
     .from('cook_events')
-    .select('job_id')
+    .select('recipe_id')
     .eq('user_id', userId);
   if (error) throw wrapError('Failed to count distinct cooked recipes', error);
-  const set = new Set((data || []).map((r: any) => r.job_id).filter(Boolean));
+  const set = new Set((data || []).map((r: any) => r.recipe_id).filter(Boolean));
   return set.size;
 }
 
@@ -1642,18 +1943,17 @@ export async function getWeekendCookCount(userId: string): Promise<number> {
 }
 
 /**
- * Maximum cook count for a single recipe (job_id) by this user.
- * Returns 0 if no cooks found.
+ * Maximum cook count for a single recipe by this user. Returns 0 if none found.
  */
 export async function getMaxCooksForSameRecipe(userId: string): Promise<number> {
   const { data, error } = await getClient()
     .from('cook_events')
-    .select('job_id')
+    .select('recipe_id')
     .eq('user_id', userId);
   if (error) throw wrapError('Failed to count same-recipe cooks', error);
   const counts = new Map<string, number>();
   for (const r of (data || []) as any[]) {
-    if (r.job_id) counts.set(r.job_id, (counts.get(r.job_id) ?? 0) + 1);
+    if (r.recipe_id) counts.set(r.recipe_id, (counts.get(r.recipe_id) ?? 0) + 1);
   }
   return counts.size === 0 ? 0 : Math.max(...counts.values());
 }

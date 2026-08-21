@@ -34,13 +34,16 @@ export interface SharedRecipe {
   ingredients?: SharedIngredientGroup[];
 }
 
-export interface SharedJob {
-  id: string;
-  url?: string;
-  createdAt: string;
-  updatedAt?: string;
-  status?: string;
+/**
+ * A cookbook entry: the shared recipe content plus one user's own metadata.
+ * Deliberately looser than the app's SavedRecipe (times accept strings) so the
+ * frontend type satisfies it structurally.
+ */
+export interface SharedSavedRecipe {
+  recipeId: string;
   recipe?: SharedRecipe | null;
+  addedAt: string;
+  updatedAt?: string;
   isFavorite?: boolean;
   flags?: string[];
   collectionIds?: string[];
@@ -54,12 +57,12 @@ export interface RecommendationTheme {
   score: number;
 }
 
-export interface RecommendationResult<T = SharedJob> {
+export interface RecommendationResult<T = SharedSavedRecipe> {
   themeId: string;
   titleKey: string;
   defaultTitle: string;
   badgeEmoji?: string;
-  jobs: T[];
-  allJobs: T[];
+  recipes: T[];
+  allRecipes: T[];
   totalCount: number;
 }

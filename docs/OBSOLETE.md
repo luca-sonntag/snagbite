@@ -6,6 +6,32 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-21: `jobs`-Tabelle als Alleskönner aufgetrennt in `jobs` / `recipes` / `user_recipes`
+
+* **Ersetzter Code / Anti-Pattern:**
+  - **Eine `jobs`-Zeile war drei Dinge gleichzeitig:** Extraktions-Task, Rezept-Inhalt (`recipe jsonb`) und Kochbuch-Eintrag des Users (`is_favorite`, `flags`, `deleted_at`, `recipe_collections.job_id`, `cook_events.job_id`). Ein Rezept konnte damit weder mehreren Usern gehören noch öffentlich werden.
+  - **Polymorphe `jobs.recipe`-Spalte:** hielt entweder das Rezept *oder* einen Fortschritts-Platzhalter `{isProgress:true, percent, stage}`. `queue.ts` schrieb den ~14× pro Job-Lauf, `rowToJob()` unterschied zur Lesezeit per `isProgress`. Fehlgeschlagene Jobs blieben mit totem Platzhalter zurück (10 Zeilen in prod).
+  - **`normalizeRecipe()` in `db.ts`:** drei Alt-Shims, die bei *jedem* Read liefen, ohne je zu persistieren — `recipe.id = jobId` injizieren, `nutritionalEstimates → nutritionalValues` umbenennen, flache Zutaten-Arrays in Gruppen wandeln.
+  - **Ins JSONB gespiegelte Job-Spalten:** `parent_job_id → recipe.parentJobId`, `prompt → recipe.remixPrompt` beim Lesen, beim Schreiben zurückgestempelt.
+  - **`jobs.deleted_at` mit zwei unvereinbaren Bedeutungen:** Quota-Hack (ein gelöschtes Rezept darf das Extraktionslimit nicht zurückerstatten) *und* Abbruch-Signal für den Worker (`isJobDeleted`). Entsprechend meinte `DELETE /api/jobs/:id` zweierlei: Extraktion abbrechen und Rezept aus dem Kochbuch werfen.
+  - **`saveCompletedRemix()`:** erzeugte für einen inline fertiggestellten Copilot-Remix eine vollständige „completed"-Job-Zeile, obwohl nie ein Job lief.
+  - **Zweistufiger Titel-Lookup in `getRecentCookPhotos()`:** eine zweite Query nach `jobs.recipe->>'title'`, weil der Titel in einem JSONB-Blob steckte.
+  - **`isPhotoJobUrl(url)` / `job.parentJobId`-Sniffing** als Branch-Dispatch im Worker.
+  - **Migrations-Skript `backend/src/scripts/migrateLlmUsage.ts`** (npm-Script `migrate:llm-usage`) — durch die Auftrennung gegenstandslos.
+* **Ersetzt durch:**
+  - **`recipes`** — der Inhalt, mit echten Spalten statt Blob (Nährwerte als vier Skalare, flache Listen als `text[]`; nur `ingredients`/`instructions` bleiben JSONB). Trägt `created_by`, `origin`, `parent_recipe_id` und `visibility` (`private`/`unlisted`/`public`) als Andockpunkt fürs spätere Teilen und Veröffentlichen.
+  - **`jobs`** — nur noch der Task. Eigene `progress jsonb`-Spalte, `kind` (`url`/`photo`/`remix`) statt Sniffing, `cancelled` als echter Status statt Soft-Delete, `recipe_id` als Ergebnis-Zeiger. Job-Zeilen werden nie gelöscht und tragen damit das Rate-Limit.
+  - **`user_recipes`** — der Kochbuch-Eintrag pro User (Hard Delete), mit `source` (`extraction`/`photo`/`remix`/`share`) als Andockpunkt fürs Teilen ohne Content-Kopie.
+  - **`complete_job()` RPC (`SECURITY DEFINER`):** Abschluss über drei Tabellen atomar. Vorher war das ein einziges `UPDATE`; ohne die Funktion gäbe es ein Crash-Fenster, in dem ein User Quota bezahlt hat und kein Rezept bekommt.
+  - **`recipeToRow()` / `rowToRecipe()` in `db.ts`:** die einzige JSON↔Spalten-Abbildung; `complete_job` füttert das Ergebnis via `jsonb_populate_record`, statt die Abbildung in SQL zu duplizieren.
+  - **`assertRecipeAccess()` in `routes.ts`:** prüft Kochbuch-Zugehörigkeit statt Autorschaft — die eine Stelle, an der später ein `visibility === 'public'`-Check hinzukommt.
+  - **API:** rezeptbezogene Endpunkte unter `/api/recipes/:recipeId/*`; `GET /api/jobs/:id` bleibt reiner Polling-Kanal und liefert `recipeId`; `POST /api/jobs/:id/cancel` und `DELETE /api/recipes/:id` trennen Abbrechen von Löschen.
+  - **Zwei getrennte Quoten:** Kochbuch-Cap zählt `user_recipes` (schrumpft beim Löschen), Rate-Limit zählt `jobs` (schrumpft nie) und schließt Remixes über `kind <> 'remix'` aus — Foto-Importe kosten weiterhin Quota.
+  - **Migration:** `backend/db/migrations/001_split_jobs_recipes.sql` (einmalig, nicht idempotent) + `001_verify.sql`. Die alte Job-UUID wird zur neuen `recipes.id`, wodurch die abhängigen Tabellen mit einem blanken Cast umhängen und bestehende Cover-Pfade weiter passen.
+* **Betroffene Dateien:** `backend/db/schema.sql`, `backend/db/migrations/*`, `backend/src/types.ts`, `backend/src/db.ts`, `backend/src/queue.ts`, `backend/src/routes.ts`, `backend/src/index.ts`, `backend/src/gamification.ts`, `backend/src/gemini.ts`, `backend/src/notifications/*`, `backend/src/scripts/*`, `shared/src/types.ts`, `shared/src/recommendations.ts`, `frontend/src/types.ts`, `frontend/src/App.tsx`, `frontend/src/hooks/*`, `frontend/src/context/*`, `frontend/src/components/*`.
+
+---
+
 ### 2026-08-20: Synthetischer `parentIngredient`-Fallback in `ingredientTaxonomy.ts` & isolierte GroupKeys entfernt
 
 * **Ersetzter Code / Anti-Pattern:**

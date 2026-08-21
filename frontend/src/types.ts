@@ -77,35 +77,54 @@ export interface Recipe {
   /** True when imageUrl is an AI-generated cover image rather than a scraped video thumbnail. */
   isAiCover?: boolean;
   tags?: string[];
-  instagramHandle?: string | null;
-  parentJobId?: string | null;
+  /** e.g. the Instagram creator the recipe came from. */
+  sourceHandle?: string | null;
+  /** The page/reel this was extracted from. NULL for photo imports. */
+  sourceUrl?: string | null;
+  /** Recipe this one was remixed from, and the instruction that produced it. */
+  parentRecipeId?: string | null;
   parentRecipeTitle?: string | null;
   remixPrompt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export type ProgressStage = 'queued' | 'scraping' | 'downloading_media' | 'extracting_frames' | 'reading_photos' | 'extracting_recipe' | 'generating_cover' | 'finalizing';
 
 export interface ProgressData {
-  isProgress: true;
   percent: number;
   stage: ProgressStage;
 }
 
-export interface Job {
+/**
+ * An extraction task. Only ever polled — it carries no recipe content, and
+ * `recipeId` appears once the job completes, at which point the client switches
+ * to the /api/recipes routes.
+ */
+export interface ExtractionJob {
   id: string;
-  url: string;
-  status: 'pending' | 'scraping' | 'processing' | 'completed' | 'failed';
-  recipe?: Recipe;
-  llmUsage?: Record<string, any> | null;
-  progress?: ProgressData;
+  kind: 'url' | 'photo' | 'remix';
+  sourceUrl: string;
+  status: 'pending' | 'scraping' | 'processing' | 'completed' | 'failed' | 'cancelled';
+  progress?: ProgressData | null;
   error?: string;
-  parentJobId?: string | null;
-  prompt?: string | null;
+  recipeId?: string | null;
+  parentRecipeId?: string | null;
+  remixPrompt?: string | null;
   createdAt: string;
   updatedAt: string;
-  isFavorite?: boolean;
-  flags?: string[];
-  collectionIds?: string[];
+}
+
+/** A recipe in the user's cookbook: shared content plus their own metadata. */
+export interface SavedRecipe {
+  recipeId: string;
+  recipe: Recipe;
+  source: 'extraction' | 'photo' | 'remix' | 'share';
+  isFavorite: boolean;
+  flags: string[];
+  collectionIds: string[];
+  addedAt: string;
+  updatedAt: string;
 }
 
 export interface Collection {

@@ -1,10 +1,10 @@
 import React from 'react';
 import { Clock, Check, Tag } from 'lucide-react';
-import type { Job } from '../../types';
+import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 
 interface RecipeListItemProps {
-  job: Job;
+  job: SavedRecipe;
   isSelected: boolean;
   isSelectMode: boolean;
   /** Pre-formatted total time, e.g. "35 Min." — null hides the badge. */

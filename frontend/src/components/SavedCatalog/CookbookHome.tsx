@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Tag, ChevronRight, ChevronDown, Settings2 } from 'lucide-react';
-import type { Collection, Job } from '../../types';
+import type { Collection, SavedRecipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import CollectionTile from './CollectionTile';
 import RecipeShelf from './RecipeShelf';
@@ -8,7 +8,7 @@ import RecipePosterCard from './RecipePosterCard';
 import type { CatalogPreset } from './catalogRoutes';
 
 interface Shelf {
-  items: Job[];
+  items: SavedRecipe[];
   total: number;
 }
 
@@ -21,9 +21,9 @@ interface RecommendedShelf extends Shelf {
 interface CookbookHomeProps {
   totalRecipes: number;
   collections: Collection[];
-  jobsByCollection: Record<string, Job[]>;
-  jobsByFlag?: Record<string, Job[]>;
-  favoriteJobs?: Job[];
+  jobsByCollection: Record<string, SavedRecipe[]>;
+  jobsByFlag?: Record<string, SavedRecipe[]>;
+  favoriteJobs?: SavedRecipe[];
   shelves: {
     recommended?: RecommendedShelf | null;
     recent: Shelf;
@@ -34,12 +34,12 @@ interface CookbookHomeProps {
   allFlags: string[];
   formatTotalTime: (recipe: any) => string | null;
   onOpenList: (preset: CatalogPreset) => void;
-  onOpenRecipe: (e: React.MouseEvent, job: Job) => void;
+  onOpenRecipe: (e: React.MouseEvent, job: SavedRecipe) => void;
   onAddCollection: () => void;
   onManageCollections: () => void;
   isSelectMode?: boolean;
   selectedIds?: Set<string>;
-  bindLongPress?: (id: string, job: Job) => any;
+  bindLongPress?: (id: string, job: SavedRecipe) => any;
 }
 
 /**
@@ -252,13 +252,13 @@ export default function CookbookHome({
                       <div className="grid grid-rows-2 grid-flow-col auto-cols-max gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
                         {shelf.items.map((job) => (
                           <RecipePosterCard
-                            key={job.id}
+                            key={job.recipeId}
                             job={job}
                             variant="shelf"
                             totalTime={formatTotalTime(job.recipe)}
-                            isSelected={selectedIds.has(job.id)}
+                            isSelected={selectedIds.has(job.recipeId)}
                             isSelectMode={isSelectMode}
-                            bindLongPress={bindLongPress ? bindLongPress(job.id, job) : undefined}
+                            bindLongPress={bindLongPress ? bindLongPress(job.recipeId, job) : undefined}
                             onClick={(e) => onOpenRecipe(e, job)}
                           />
                         ))}
@@ -267,13 +267,13 @@ export default function CookbookHome({
                       <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
                         {shelf.items.map((job) => (
                           <RecipePosterCard
-                            key={job.id}
+                            key={job.recipeId}
                             job={job}
                             variant="shelf"
                             totalTime={formatTotalTime(job.recipe)}
-                            isSelected={selectedIds.has(job.id)}
+                            isSelected={selectedIds.has(job.recipeId)}
                             isSelectMode={isSelectMode}
-                            bindLongPress={bindLongPress ? bindLongPress(job.id, job) : undefined}
+                            bindLongPress={bindLongPress ? bindLongPress(job.recipeId, job) : undefined}
                             onClick={(e) => onOpenRecipe(e, job)}
                           />
                         ))}

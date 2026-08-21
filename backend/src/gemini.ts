@@ -1464,7 +1464,7 @@ Respond in JSON only: {"title":"…","body":"…","theme":"…","emoji":"…"}`;
       model: config.GEMINI_MODEL,
       durationMs: Date.now() - startTime,
       success: true,
-      input: { type: candidate.type, category: candidate.category, jobId: candidate.jobId },
+      input: { type: candidate.type, category: candidate.category, recipeId: candidate.recipeId },
       rawOutput: text,
       tokenUsage,
       costEstimate,
@@ -1486,7 +1486,7 @@ Respond in JSON only: {"title":"…","body":"…","theme":"…","emoji":"…"}`;
       durationMs: Date.now() - startTime,
       success: false,
       error: err?.message ?? String(err),
-      input: { type: candidate.type, category: candidate.category, jobId: candidate.jobId },
+      input: { type: candidate.type, category: candidate.category, recipeId: candidate.recipeId },
     });
     return null;
   }

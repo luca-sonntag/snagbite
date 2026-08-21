@@ -1,5 +1,5 @@
 import { countKeywordMatches, getActiveHolidays, getSeason, seasonKeywords } from './season.js';
-import type { RecommendationResult, Season, SharedJob, SharedRecipe } from './types.js';
+import type { RecommendationResult, Season, SharedSavedRecipe, SharedRecipe } from './types.js';
 
 export interface RecommendationOptions {
   now?: Date;
@@ -55,13 +55,14 @@ const BRUNCH_KEYWORDS = [
  * Pure recommendation engine that analyzes a user's completed jobs and ranks
  * candidate contextual themes (holidays, seasons, Friday comfort, weekend projects, quick dinners).
  */
-export function getRecommendedShelf<T extends SharedJob = SharedJob>(
+export function getRecommendedShelf<T extends SharedSavedRecipe = SharedSavedRecipe>(
   jobs: T[],
   options: RecommendationOptions = {},
 ): RecommendationResult<T> | null {
   const now = options.now || new Date();
   const limit = options.limit || 12;
-  const validJobs = jobs.filter((j) => j.status === 'completed' && j.recipe && j.recipe.title);
+  // A cookbook entry always has a finished recipe; only a missing title is worth guarding.
+  const validJobs = jobs.filter((j) => j.recipe && j.recipe.title);
 
   if (validJobs.length < 2) {
     return null;
@@ -210,8 +211,8 @@ export function getRecommendedShelf<T extends SharedJob = SharedJob>(
   const DAY_MS = 24 * 60 * 60 * 1000;
   const recentMap = options.recentMap || {};
   const agedJobs = validJobs.filter((job) => {
-    const ageDays = (now.getTime() - new Date(job.createdAt).getTime()) / DAY_MS;
-    const lastSeen = recentMap[job.id];
+    const ageDays = (now.getTime() - new Date(job.addedAt).getTime()) / DAY_MS;
+    const lastSeen = recentMap[job.recipeId];
     const seenDaysAgo = lastSeen ? (now.getTime() - lastSeen) / DAY_MS : 999;
     return ageDays >= 21 && seenDaysAgo >= 14;
   });
@@ -221,7 +222,7 @@ export function getRecommendedShelf<T extends SharedJob = SharedJob>(
     const rediscoveryMatches = [...agedJobs].sort((a, b) => {
       const favDiff = Number(!!b.isFavorite) - Number(!!a.isFavorite);
       if (favDiff !== 0) return favDiff;
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      return new Date(a.addedAt).getTime() - new Date(b.addedAt).getTime();
     });
 
     themes.push({
@@ -247,8 +248,8 @@ export function getRecommendedShelf<T extends SharedJob = SharedJob>(
     titleKey: bestTheme.titleKey,
     defaultTitle: bestTheme.defaultTitle,
     badgeEmoji: bestTheme.badgeEmoji,
-    jobs: bestTheme.matchedJobs.slice(0, limit),
-    allJobs: bestTheme.matchedJobs,
+    recipes: bestTheme.matchedJobs.slice(0, limit),
+    allRecipes: bestTheme.matchedJobs,
     totalCount: bestTheme.matchedJobs.length,
   };
 }
