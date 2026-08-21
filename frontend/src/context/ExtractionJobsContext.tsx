@@ -202,8 +202,17 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
       try {
         data = await response.json();
       } catch {
+        if (response.status === 404) {
+          dismissJob(id);
+        }
         return;
       }
+
+      if (response.status === 404 || data?.code === 'JOB_NOT_FOUND') {
+        dismissJob(id);
+        return;
+      }
+
       if (!response.ok || !data.success || !data.job) return;
 
       const job: ExtractionJob = data.job;
@@ -248,7 +257,7 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
     } finally {
       inFlightRef.current.delete(id);
     }
-  }, [getAccessToken, finalizeCompletion, setJobsPersist]);
+  }, [getAccessToken, finalizeCompletion, setJobsPersist, dismissJob]);
 
   // Single shared ticker polling every non-terminal tracked job.
   useEffect(() => {
