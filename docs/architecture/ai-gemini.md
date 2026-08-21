@@ -48,10 +48,13 @@ Ein rezept-spezifischer Chatbot (`POST /api/jobs/:id/chat`), der dem Nutzer Frag
 
 ---
 
-## 5. Frame-Extraktion & Logging
+## 5. Frame-Extraktion, Client-Frames & Logging
 
-* **Dynamische Frame-Extraktion:** Berechnet die Anzahl der zu extrahierenden Frames dynamisch anhand der Videolänge (Ziel: 1 Frame alle 2 Sekunden, limitiert zwischen 12 und 36 Frames). Diese werden zu einem `grid.jpg` zusammengefügt, um Gemini den visuellen Kontext zu liefern. Einzelne Frames werden nach der Bildauswahl gelöscht.
-* **Auto-Cleanup:** Temporäre Audiodateien, Videodateien und Google-API-Dateien werden nach der Verarbeitung sofort gelöscht. Debug-Logs verbleiben unter `logs/{userId}/run-...` und werden nach 30 Tagen gelöscht.
+* **Multimodale Client-Frames (`imageSourceKind: 'client_frames'`):** Werden von der App client-seitig extrahierte Keyframes übermittelt, werden diese als ephemere Base64-Buffer im flüchtigen Worker-RAM gehalten und direkt als `inlineData`-Parts (`image/jpeg`) an Gemini übergeben.
+  * Der Prompt erhält eine dedizierte `visualContextClause`, die Gemini anweist, die zeitlich verteilten Keyframes mit Caption/Text abzugleichen, um im Video gezeigte, aber in der Caption fehlende Zutaten, Mengen und Arbeitsschritte zu identifizieren.
+  * Base64-Bilddaten werden im persistenten Gemini-Logger (`writeGeminiLog`) und in Debug-Dumps automatisch durch aggregierte Metadaten (`[N client frames omitted]`) geschwärzt.
+* **Serverseitige dynamische Frame-Extraktion:** Bei direkten Video-Downloads (Legacy/Test-Szenarien) berechnet der Worker die Anzahl der Frames dynamisch anhand der Videolänge und erzeugt ein `grid.jpg`. Einzelne Frames werden nach der Bildauswahl gelöscht.
+* **Auto-Cleanup:** Temporäre Audiodateien, Videodateien und Google-API-Dateien werden nach der Verarbeitung sofort gelöscht. Ephemere `client_frames`-DB-Payloads werden direkt bei Worker-Claim auf `null` gesetzt und nach LLM-Inferenz im RAM dereferenziert.
 * **Persistentes Gemini-Logging (`gemini_logs`-Tabelle):** Da Container ephemer sind, schreibt `writeGeminiLog()` (`backend/src/logger.ts`) **jeden** Gemini-Aufruf primär als eine Row in die Supabase-Tabelle `gemini_logs` (Request-Typ, Modell, Dauer, Erfolg, Fehlermeldung, Input-JSON, Token-Counts und USD-Kostenaufschlüsselung).
   * Die Tabelle ist **admin-only** (nur Service-Role-Key).
   * Der Aufruf erfolgt **fire-and-forget** (`void writeGeminiLog(...)`), ohne die Latenz des API-Calls zu belasten.

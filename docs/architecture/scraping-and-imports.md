@@ -3,9 +3,14 @@
 ## 1. Social-Media Scraping-Layer
 
 * **Pluggable Provider-Chain (`backend/src/scrapers/providers/`):** Das Social-Media-Scraping ist als erweiterbare Provider-Kette implementiert. Jeder Provider kapselt einen Scraper über das `SocialScrapeProvider`-Interface (`name`, `scrape()`) und liefert ein normalisiertes `ScrapingResult` (`caption`, `imageUrl`, `authorHandle`, `media`).
-* **Metadata & Image Carousel Mode (`backend/src/scrapers/providers/index.ts`):** Aus Urheberrechts- und ToS-Gründen werden keine Video-Streams mehr heruntergeladen. Das Scraping arbeitet rein metadatenbasiert (`rapidApiMetadataProvider`) und unterstützt statische Bilderserien (Karussells):
-  1. **RapidAPI Metadata Provider (Primary):** `rapidApiMetadataProvider` (`backend/src/scrapers/providers/rapidApiMetadata.ts`). Ruft Metadaten (Titel, Caption, Handle, Thumbnail) sowie Bild-URLs von Slideshows ab. Für reine Text- und Videoposts wird `media: { kind: 'none' }` zurückgegeben, sodass Gemini Rezepte direkt aus dem Text extrahiert. Enthält der Post keine echten Rezeptdetails (z. B. nur Teaser / DM-Bait), lehnt Gemini den Post sauber mit `NOT_A_RECIPE` ab.
-  2. **Bilderkarussell-Unterstützung:** Bei Slide-Posts (`medias[].type: "image"`) werden die statischen Folien als `media: { kind: 'images' }` heruntergeladen und von Gemini Vision per OCR in voller Auflösung gelesen.
+* **Metadata & Client-Media-Streaming Mode (`backend/src/scrapers/providers/index.ts`):** Aus Urheberrechts- und ToS-Gründen lädt das Backend keine Video-Streams mehr direkt herunter. Das Backend beschafft weiterhin nur Metadaten über RapidAPI (`rapidApiMetadataProvider`). Für Videos delegiert das Backend den Medien-Abruf an den Client (Privatkopie § 44a UrhG über Endgerät & IP des Nutzers):
+  1. **RapidAPI Metadata Provider (Primary):** `rapidApiMetadataProvider` (`backend/src/scrapers/providers/rapidApiMetadata.ts`). Ruft Metadaten (Titel, Caption, Handle, Thumbnail) sowie Video-CDN-URLs und Bild-URLs von Slideshows ab. Für Videoposts wird `media: { kind: 'client', videoUrl }` zurückgegeben.
+  2. **Client-Media-Streaming & Keyframe-Capture:**
+     - Erkennt der Worker `media.kind === 'client'`, parkt er den Job in `status: 'awaiting_frames'` mit `progress.stage: 'awaiting_frames'` und speichert das Scrapergebnis temporär in `scrape_meta`.
+     - Der Client (auf nativen Plattformen via `CapacitorHttp` zur CORS-Umgehung) lädt den Video-Stream in den Arbeitsspeicher, erzeugt über ein dynamisches Offscreen-`<video>` und `<canvas>` 3 zeitlich verteilte Keyframes (bei 25%, 50% und 75% der Videolänge) im Format 720p JPEG (q=0.70) und sendet diese via `POST /api/extract-recipe/frames`.
+     - Der Worker claimt den Job erneut, nullt `client_frames` atomar in Postgres (`claimNextJob`) und übergibt die Frames im flüchtigen RAM als `inlineData`-Parts an Gemini Vision.
+     - **Resilienz & Stale Sweep:** Falls der Client offline geht oder keine Frames liefern kann, setzt `sweepStaleAwaitingFrames(5)` den Job nach 5 Minuten automatisch auf `pending` zurück, sodass die Extraktion im Text-/Caption-Only-Modus sauber beendet wird.
+  3. **Bilderkarussell-Unterstützung:** Bei Slide-Posts (`medias[].type: "image"`) werden die statischen Folien als `media: { kind: 'images' }` heruntergeladen und von Gemini Vision per OCR in voller Auflösung gelesen.
 * **Fehlerbehandlung:** Scheitert der Provider, wirft der Orchestrator `SCRAPE_FAILED`. Enthält der Post keine Rezeptangaben, wirft Gemini `NOT_A_RECIPE`.
 
 ### Bilderkarussell-Posts (Image Carousels)
