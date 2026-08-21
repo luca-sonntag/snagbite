@@ -22,7 +22,7 @@
     from backend/.env as fallback.
 
 .PARAMETER Channel
-    Target update channel: 'production' or 'alpha'. Mandatory.
+    Target update channel: 'production', 'alpha' or 'internal'. Mandatory.
 
 .PARAMETER MinVersionCode
     Oldest native VERSION_CODE this bundle may be served to. Defaults to the
@@ -46,7 +46,7 @@
 
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('production', 'alpha')]
+    [ValidateSet('production', 'alpha', 'internal')]
     [string]$Channel,
     [int]$MinVersionCode = 0,
     [switch]$NoActivate,

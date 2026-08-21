@@ -33,6 +33,7 @@
     "deploy:production:upload": "powershell -ExecutionPolicy Bypass -File scripts/deploy-playstore.ps1 -Track production -SkipBuild",
     "deploy:ota": "powershell -ExecutionPolicy Bypass -File scripts/deploy-ota.ps1 -Channel production",
     "deploy:ota:alpha": "powershell -ExecutionPolicy Bypass -File scripts/deploy-ota.ps1 -Channel alpha",
+    "deploy:ota:internal": "powershell -ExecutionPolicy Bypass -File scripts/deploy-ota.ps1 -Channel internal",
     "postinstall": "patch-package"
   },
   "dependencies": {
