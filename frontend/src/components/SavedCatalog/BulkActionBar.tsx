@@ -64,9 +64,9 @@ export default function BulkActionBar({
           <Button
             onPress={onBulkFavorite}
             isDisabled={selectedCount === 0}
-            className="flex-1 bg-black/5 dark:bg-white/10 border-none text-gray-700 dark:text-gray-200 hover:bg-black/10 dark:hover:bg-white/15 text-sm h-11 font-bold rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition-all min-w-0"
+            className="flex-1 bg-amber-500/10 dark:bg-amber-500/15 border-none text-amber-800 dark:text-amber-300 hover:bg-amber-500/20 dark:hover:bg-amber-500/25 text-sm h-11 font-bold rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition-all min-w-0"
           >
-            <Star className={`w-4 h-4 shrink-0 text-amber-500 ${allSelectedAreFavorites ? 'fill-amber-500' : ''}`} />
+            <Star className={`w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400 ${allSelectedAreFavorites ? 'fill-amber-500' : ''}`} />
             <span className="truncate">
               {allSelectedAreFavorites ? t('catalog.bulkUnfavorite') : t('catalog.bulkFavorites')}
             </span>
@@ -75,9 +75,9 @@ export default function BulkActionBar({
           <Button
             onPress={onBulkAddToCollection}
             isDisabled={selectedCount === 0}
-            className="flex-1 bg-black/5 dark:bg-white/10 border-none text-gray-700 dark:text-gray-200 hover:bg-black/10 dark:hover:bg-white/15 text-sm h-11 font-bold rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition-all min-w-0"
+            className="flex-1 bg-emerald-500/10 dark:bg-emerald-500/15 border-none text-emerald-800 dark:text-emerald-300 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/25 text-sm h-11 font-bold rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition-all min-w-0"
           >
-            <Folder className="w-4 h-4 shrink-0 text-emerald-500" />
+            <Folder className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
             <span className="truncate">{t('catalog.bulkCollection')}</span>
           </Button>
         </div>
