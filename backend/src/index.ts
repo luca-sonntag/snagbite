@@ -98,7 +98,8 @@ async function bootstrap() {
       // '/image', '/jobs/123'), since the limiter is mounted at '/api'.
       skip: (req) => {
         if (req.path.startsWith('/image')) return true;
-        if (req.method === 'GET' && /^\/jobs(\/|$)/.test(req.path)) return true;
+        // Job polling and cookbook reads are both high-frequency and cheap.
+        if (req.method === 'GET' && /^\/(jobs|recipes)(\/|$)/.test(req.path)) return true;
         return false;
       },
     });

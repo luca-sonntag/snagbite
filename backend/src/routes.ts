@@ -2,16 +2,22 @@ import { Router, Request, Response } from 'express';
 import {
   createJob,
   createRemixJob,
-  saveCompletedRemix,
+  createRecipeForUser,
   getJob,
-  findCompletedJobByUrl,
+  getRecipe,
+  updateRecipe,
+  getSavedRecipe,
+  getLibrary,
+  addToLibrary,
+  removeFromLibrary,
+  isInLibrary,
+  cancelJob,
+  findExtractedRecipeIdByUrl,
   findActiveJobByUrl,
-  getAllJobs,
-  deleteJob,
   countActiveJobsForUser,
   getClient,
   getExtractionsForUserInTimeframe,
-  countCompletedRecipesForUser,
+  countLibraryEntries,
   updateJob,
   isAlphaActive,
   getAlphaMaxExtractions,
@@ -40,10 +46,9 @@ import {
   deletePushTokensForUser,
   getPremiumMaxConcurrentExtractions,
   getFreeMaxConcurrentExtractions,
-  restoreJob, 
-  getRecentCookPhotos, 
-  getDistinctCookedRecipeCount, 
-  getCookHistoryForJob,
+  getRecentCookPhotos,
+  getDistinctCookedRecipeCount,
+  getCookHistoryForRecipe,
   uploadCookPhoto,
   getUserStats,
   getUserBadgesDetailed,
@@ -78,7 +83,7 @@ import { MAX_IMPORT_PHOTOS, deleteImportPhotos, photoJobUrl, uploadImportPhoto }
 import { notificationTick } from './notifications/worker.js';
 import { recordCook } from './gamification.js';
 import { monthStartUtc } from './socialTime.js';
-import type { Profile, FriendSummary, FriendRequest, LeaderboardEntry, LeaderboardScope } from './types.js';
+import type { Recipe, Profile, FriendSummary, FriendRequest, LeaderboardEntry, LeaderboardScope } from './types.js';
 
 export const apiRouter = Router();
 
@@ -211,6 +216,27 @@ async function resolveConcurrencyLimit(user: any): Promise<number> {
  * Throws the matching {@link AppError} when a limit is hit; returns quietly when
  * the user may start another extraction.
  */
+/**
+ * Resolve a recipe the caller is allowed to work with, or throw.
+ *
+ * Access is "the recipe is in my cookbook", NOT "I created it" — that keeps
+ * every route correct once a recipe can be shared into someone else's library,
+ * and it is the single place a future `visibility === 'public'` check belongs.
+ */
+async function assertRecipeAccess(userId: string, recipeId: string): Promise<Recipe> {
+  if (!recipeId) {
+    throw new AppError('MISSING_FIELD', { params: { field: 'id' } });
+  }
+  const recipe = await getRecipe(recipeId);
+  if (!recipe) {
+    throw new AppError('RECIPE_NOT_FOUND');
+  }
+  if (!(await isInLibrary(userId, recipeId))) {
+    throw new AppError('RECIPE_NOT_FOUND');
+  }
+  return recipe;
+}
+
 async function enforceExtractionQuota(req: Request): Promise<void> {
   const userId = req.userId!;
 
@@ -236,8 +262,12 @@ async function enforceExtractionQuota(req: Request): Promise<void> {
   // Enforce the cookbook cap: free accounts may only keep a limited number of
   // saved recipes. Existing recipes stay accessible — the user must delete one
   // or upgrade to Premium before extracting more.
+  //
+  // This counts user_recipes and therefore SHRINKS when a recipe is removed.
+  // The rolling rate limit below counts jobs and deliberately never shrinks —
+  // the two quotas answer different questions, so do not unify them.
   if (!premium) {
-    const savedCount = await countCompletedRecipesForUser(userId);
+    const savedCount = await countLibraryEntries(userId);
     const isAlpha = user?.app_metadata?.tier === 'alpha';
     const limit = isAlpha ? await getAlphaMaxSavedRecipes() : await getFreeMaxSavedRecipes();
     if (limit >= 0 && savedCount >= limit) {
@@ -321,28 +351,26 @@ apiRouter.post('/extract-recipe', async (req: Request, res: Response): Promise<v
       throw new AppError('INVALID_URL', { message: 'URL failed to parse.' });
     }
 
-    // Check if job for this URL has already successfully completed (scoped to user, including soft-deleted ones)
-    const existingJob = await findCompletedJobByUrl(cleanUrl, req.userId!, true);
-    if (existingJob) {
-      if (existingJob.deletedAt !== null) {
-        await restoreJob(existingJob.id, req.userId!);
-      }
+    // Already extracted this URL before? Re-add the existing recipe to the
+    // cookbook instead of extracting again — free, and it works whether or not
+    // the user had previously removed it. This replaces the old
+    // findCompletedJobByUrl + restoreJob soft-delete dance.
+    const existingRecipeId = await findExtractedRecipeIdByUrl(cleanUrl, req.userId!);
+    if (existingRecipeId) {
+      await addToLibrary(req.userId!, existingRecipeId, 'extraction');
       res.status(200).json({
         success: true,
-        jobId: existingJob.id,
-        status: existingJob.status,
+        recipeId: existingRecipeId,
+        status: 'completed',
         isCached: true,
         message: 'Recipe already extracted successfully.',
       });
       return;
     }
 
-    // Check if a job for this URL is already running (scoped to user, including soft-deleted ones).
-    const activeJob = await findActiveJobByUrl(cleanUrl, req.userId!, true);
+    // Check if a job for this URL is already running (scoped to user).
+    const activeJob = await findActiveJobByUrl(cleanUrl, req.userId!);
     if (activeJob) {
-      if (activeJob.deletedAt !== null) {
-        await restoreJob(activeJob.id, req.userId!);
-      }
       res.status(202).json({
         success: true,
         jobId: activeJob.id,
@@ -423,7 +451,7 @@ apiRouter.post('/extract-recipe/photos', async (req: Request, res: Response): Pr
       throw new AppError('PHOTO_UPLOAD_FAILED', { message: uploadError?.message });
     }
 
-    const job = await createJob(photoJobUrl(uploadId), req.userId!);
+    const job = await createJob(photoJobUrl(uploadId), req.userId!, 'photo');
 
     res.status(202).json({
       success: true,
@@ -442,10 +470,13 @@ apiRouter.post('/extract-recipe/photos', async (req: Request, res: Response): Pr
 
 /**
  * Endpoint to submit a recipe remix request.
- * POST /api/jobs/:id/remix
+ * POST /api/recipes/:id/remix
  * Body: { prompt: string }
+ *
+ * Recipe-addressed but returns a job id: it starts async work rather than
+ * producing a recipe on the spot.
  */
-apiRouter.post('/jobs/:id/remix', async (req: Request, res: Response): Promise<void> => {
+apiRouter.post('/recipes/:id/remix', async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { prompt } = req.body;
@@ -458,15 +489,7 @@ apiRouter.post('/jobs/:id/remix', async (req: Request, res: Response): Promise<v
       throw new AppError('REMIX_PROMPT_TOO_LONG', { params: { max: 250 } });
     }
 
-    // Get the parent job
-    const parentJob = await getJob(id, req.userId!);
-    if (!parentJob) {
-      throw new AppError('PARENT_JOB_NOT_FOUND');
-    }
-
-    if (parentJob.status !== 'completed' || !parentJob.recipe) {
-      throw new AppError('PARENT_JOB_NOT_COMPLETED');
-    }
+    const parentRecipe = await assertRecipeAccess(req.userId!, id);
 
     // Enforce premium access for remixing
     let isPremium = false;
@@ -490,7 +513,12 @@ apiRouter.post('/jobs/:id/remix', async (req: Request, res: Response): Promise<v
     }
 
     // Create a new remix job
-    const job = await createRemixJob(parentJob.id, parentJob.url, prompt, req.userId!);
+    const job = await createRemixJob(
+      parentRecipe.id!,
+      parentRecipe.sourceUrl || `remix://${parentRecipe.id}`,
+      prompt,
+      req.userId!,
+    );
 
     res.status(202).json({
       success: true,
@@ -505,8 +533,12 @@ apiRouter.post('/jobs/:id/remix', async (req: Request, res: Response): Promise<v
 });
 
 /**
- * Endpoint to poll status and get results of an extraction job.
+ * Poll the status of an extraction job.
  * GET /api/jobs/:id
+ *
+ * Purely a progress channel: once `status` flips to 'completed' it carries
+ * `recipeId`, and the client switches to the /api/recipes/:id routes from
+ * there. The recipe itself is never returned here.
  */
 apiRouter.get('/jobs/:id', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -529,13 +561,14 @@ apiRouter.get('/jobs/:id', async (req: Request, res: Response): Promise<void> =>
       success: true,
       job: {
         id: job.id,
-        url: job.url,
+        kind: job.kind,
+        sourceUrl: job.sourceUrl,
         status: job.status,
         error: job.error,
-        recipe: job.recipe,
         progress: job.progress,
-        parentJobId: job.parentJobId,
-        prompt: job.prompt,
+        recipeId: job.recipeId,
+        parentRecipeId: job.parentRecipeId,
+        remixPrompt: job.remixPrompt,
         createdAt: job.createdAt,
         updatedAt: job.updatedAt,
       },
@@ -547,22 +580,19 @@ apiRouter.get('/jobs/:id', async (req: Request, res: Response): Promise<void> =>
 });
 
 /**
- * Per-job cook history for the recipe detail view (chip + timeline).
- * GET /api/jobs/:id/cook-history
+ * Per-recipe cook history for the recipe detail view (chip + timeline).
+ * GET /api/recipes/:id/cook-history
  */
-apiRouter.get('/jobs/:id/cook-history', async (req: Request, res: Response): Promise<void> => {
+apiRouter.get('/recipes/:id/cook-history', async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     if (!id) {
       throw new AppError('MISSING_FIELD', { params: { field: 'id' } });
     }
 
-    const job = await getJob(id, req.userId!);
-    if (!job) {
-      throw new AppError('JOB_NOT_FOUND');
-    }
+    await assertRecipeAccess(req.userId!, id);
 
-    const history = await getCookHistoryForJob(req.userId!, id);
+    const history = await getCookHistoryForRecipe(req.userId!, id);
     res.status(200).json({ success: true, ...history });
   } catch (error: any) {
     if (!(error instanceof AppError)) console.error('Error fetching cook history:', error);
@@ -573,55 +603,100 @@ apiRouter.get('/jobs/:id/cook-history', async (req: Request, res: Response): Pro
 
 
 /**
- * Endpoint to retrieve all recipe extraction jobs.
- * GET /api/jobs
+ * The authenticated user's cookbook.
+ * GET /api/recipes
  */
-apiRouter.get('/jobs', async (req: Request, res: Response): Promise<void> => {
+apiRouter.get('/recipes', async (req: Request, res: Response): Promise<void> => {
   try {
-    // Prevent browser caching of dynamic job list
+    // Prevent browser caching of the dynamic cookbook
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 
-    const jobs = await getAllJobs(req.userId!);
+    const recipes = await getLibrary(req.userId!);
     res.status(200).json({
       success: true,
-      jobs,
+      recipes,
     });
   } catch (error: any) {
-    if (!(error instanceof AppError)) console.error('Error fetching recipe history:', error);
+    if (!(error instanceof AppError)) console.error('Error fetching cookbook:', error);
     sendAppError(res, error);
   }
 });
 
 /**
- * Endpoint to delete a specific recipe extraction job.
- * DELETE /api/jobs/:id
+ * One saved recipe with the caller's own metadata.
+ * GET /api/recipes/:id
  */
-apiRouter.delete('/jobs/:id', async (req: Request, res: Response): Promise<void> => {
+apiRouter.get('/recipes/:id', async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const deleted = await deleteJob(id, req.userId!);
-    if (deleted) {
-      // transient frames are no longer uploaded
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+
+    const saved = await getSavedRecipe(req.userId!, id);
+    if (!saved) {
+      throw new AppError('RECIPE_NOT_FOUND');
     }
-    if (!deleted) {
+    res.status(200).json({ success: true, ...saved });
+  } catch (error: any) {
+    if (!(error instanceof AppError)) console.error('Error fetching recipe:', error);
+    sendAppError(res, error);
+  }
+});
+
+/**
+ * Cancel an in-flight extraction.
+ * POST /api/jobs/:id/cancel
+ *
+ * Deliberately separate from DELETE /api/recipes/:id. The two used to be the
+ * same call, which is precisely why cancellation had to be modelled as a soft
+ * delete and then excluded from the quota query by hand.
+ */
+apiRouter.post('/jobs/:id/cancel', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const cancelled = await cancelJob(id, req.userId!);
+    if (!cancelled) {
       throw new AppError('JOB_NOT_FOUND');
     }
     res.status(200).json({
       success: true,
-      message: 'Job deleted successfully.',
+      message: 'Job cancelled.',
     });
   } catch (error: any) {
-    if (!(error instanceof AppError)) console.error('Error deleting job:', error);
+    if (!(error instanceof AppError)) console.error('Error cancelling job:', error);
     sendAppError(res, error);
   }
 });
 
 /**
- * Endpoint to update a specific recipe in an existing job (e.g. adjust base servings and nutrition).
- * PATCH /api/jobs/:id
+ * Remove a recipe from the caller's cookbook.
+ * DELETE /api/recipes/:id
+ *
+ * A real delete of the cookbook entry. The job row survives, so the extraction
+ * quota is unaffected — that is what the old soft delete existed for.
+ */
+apiRouter.delete('/recipes/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const removed = await removeFromLibrary(req.userId!, id);
+    if (!removed) {
+      throw new AppError('RECIPE_NOT_FOUND');
+    }
+    res.status(200).json({
+      success: true,
+      message: 'Recipe removed from cookbook.',
+    });
+  } catch (error: any) {
+    if (!(error instanceof AppError)) console.error('Error removing recipe:', error);
+    sendAppError(res, error);
+  }
+});
+
+/**
+ * Update a recipe's content (e.g. adjust base servings and nutrition).
+ * PATCH /api/recipes/:id
  * Body: { recipe: Recipe }
  */
-apiRouter.patch('/jobs/:id', async (req: Request, res: Response): Promise<void> => {
+apiRouter.patch('/recipes/:id', async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { recipe } = req.body;
@@ -633,25 +708,22 @@ apiRouter.patch('/jobs/:id', async (req: Request, res: Response): Promise<void> 
       throw new AppError('MISSING_FIELD', { params: { field: 'recipe' } });
     }
 
-    const job = await getJob(id, req.userId!);
-    if (!job) {
-      throw new AppError('JOB_NOT_FOUND');
-    }
+    const current = await assertRecipeAccess(req.userId!, id);
 
     // Nutrition is server-owned: the client may move amounts or the serving count,
     // but the macros that follow from them are recomputed here rather than trusted.
     // Without this, a client could persist any figure it liked — which is how
     // inflated per-ingredient macros reached the database in the first place.
-    recipe.sourceNutritionalValues = job.recipe?.sourceNutritionalValues ?? null;
-    recipe.hasExplicitNutritionalValues = job.recipe?.hasExplicitNutritionalValues ?? false;
+    recipe.sourceNutritionalValues = current.sourceNutritionalValues ?? null;
+    recipe.hasExplicitNutritionalValues = current.hasExplicitNutritionalValues ?? false;
     await enrichRecipeWithCanonicalIngredients(recipe);
 
-    await updateJob(id, { recipe });
+    const updated = await updateRecipe(id, { ...current, ...recipe, id });
 
     res.status(200).json({
       success: true,
       message: 'Recipe updated successfully.',
-      recipe,
+      recipe: updated,
     });
   } catch (error: any) {
     if (!(error instanceof AppError)) console.error('Error updating recipe in job:', error);
@@ -686,7 +758,7 @@ apiRouter.get('/extractions/limit', async (req: Request, res: Response): Promise
     // Cookbook cap status (mirrors the POST /extract-recipe enforcement) so the
     // extract screen can proactively show a "cookbook full" state.
     const premium = isPremiumUser(user);
-    const savedRecipes = await countCompletedRecipesForUser(req.userId!);
+    const savedRecipes = await countLibraryEntries(req.userId!);
     const maxSavedRecipes = premium
       ? -1
       : (user?.app_metadata?.tier === 'alpha' ? await getAlphaMaxSavedRecipes() : await getFreeMaxSavedRecipes());
@@ -905,19 +977,16 @@ apiRouter.delete('/users/me', async (req: Request, res: Response): Promise<void>
 
 /**
  * Endpoint to get LLM-generated quick-action chips for the chat.
- * GET /api/jobs/:id/chat/chips?lang=de|en
+ * GET /api/recipes/:id/chat/chips?lang=de|en
  */
-apiRouter.get('/jobs/:id/chat/chips', async (req: Request, res: Response): Promise<void> => {
+apiRouter.get('/recipes/:id/chat/chips', async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const lang = (req.query.lang as string) || 'de';
 
-    const job = await getJob(id, req.userId!);
-    if (!job || !job.recipe) {
-      throw new AppError('RECIPE_NOT_FOUND');
-    }
+    const recipe = await assertRecipeAccess(req.userId!, id);
 
-    const chips = await generateChatChips(job.recipe, lang);
+    const chips = await generateChatChips(recipe, lang);
 
     res.status(200).json({ success: true, chips });
   } catch (error: any) {
@@ -928,10 +997,10 @@ apiRouter.get('/jobs/:id/chat/chips', async (req: Request, res: Response): Promi
 
 /**
  * Endpoint to confirm a pending remix and execute it.
- * POST /api/jobs/:id/chat/confirm
- * Body: { modificationRequest: string }
+ * POST /api/recipes/:id/chat/confirm
+ * Body: { modificationRequest: string, replaceCurrent?: boolean }
  */
-apiRouter.post('/jobs/:id/chat/confirm', async (req: Request, res: Response): Promise<void> => {
+apiRouter.post('/recipes/:id/chat/confirm', async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { modificationRequest, replaceCurrent } = req.body;
@@ -940,10 +1009,7 @@ apiRouter.post('/jobs/:id/chat/confirm', async (req: Request, res: Response): Pr
       throw new AppError('MISSING_FIELD', { params: { field: 'modificationRequest' } });
     }
 
-    const job = await getJob(id, req.userId!);
-    if (!job || !job.recipe) {
-      throw new AppError('RECIPE_NOT_FOUND');
-    }
+    const currentRecipe = await assertRecipeAccess(req.userId!, id);
 
     // Resolve user preferences
     let userPrefs: any;
@@ -962,7 +1028,7 @@ apiRouter.post('/jobs/:id/chat/confirm', async (req: Request, res: Response): Pr
       }
     } catch { }
 
-    const { recipe: remixedRecipe, usage: remixUsage } = await remixRecipe(job.recipe, modificationRequest, undefined, userPrefs);
+    const { recipe: remixedRecipe, usage: remixUsage } = await remixRecipe(currentRecipe, modificationRequest, undefined, userPrefs);
 
     // The remix prompt hands Gemini the parent recipe JSON, so it echoes back the
     // parent's canonicalId/matchedName/isVerified while re-estimating the macros
@@ -994,40 +1060,54 @@ apiRouter.post('/jobs/:id/chat/confirm', async (req: Request, res: Response): Pr
     }
 
     // Fallback: inherit parent recipe cover if Flux is disabled or failed
-    if (!remixedRecipe.imageUrl && job.recipe?.imageUrl) {
-      remixedRecipe.imageUrl = job.recipe.imageUrl;
-      remixedRecipe.imageUrls = job.recipe.imageUrls ?? [job.recipe.imageUrl];
+    if (!remixedRecipe.imageUrl && currentRecipe.imageUrl) {
+      remixedRecipe.imageUrl = currentRecipe.imageUrl;
+      remixedRecipe.imageUrls = currentRecipe.imageUrls ?? [currentRecipe.imageUrl];
     }
 
+    // Both branches produce a finished recipe inline rather than queueing work,
+    // so neither creates a job row — and neither costs extraction quota, which
+    // is exactly how remixes behaved before the split. The per-request Gemini
+    // cost is already recorded in gemini_logs; there is no job to hang
+    // remixLlmUsage on, and inventing one would break the strict 1:1 between a
+    // job and the recipe it produced.
     if (replaceCurrent) {
-      const mergedRecipe = {
+      const merged: Recipe = {
+        ...currentRecipe,
         ...remixedRecipe,
-        imageUrl: remixedRecipe.imageUrl || job.recipe?.imageUrl || null,
-        imageUrls: remixedRecipe.imageUrls || job.recipe?.imageUrls || (job.recipe?.imageUrl ? [job.recipe.imageUrl] : []),
         id,
-        parentJobId: job.parentJobId,
+        imageUrl: remixedRecipe.imageUrl || currentRecipe.imageUrl || null,
+        imageUrls: remixedRecipe.imageUrls
+          || currentRecipe.imageUrls
+          || (currentRecipe.imageUrl ? [currentRecipe.imageUrl] : []),
+        parentRecipeId: currentRecipe.parentRecipeId,
         remixPrompt: modificationRequest,
       };
 
-      await updateJob(id, {
-        recipe: mergedRecipe as any,
-        llmUsage: remixLlmUsage,
-        status: 'completed',
-      });
-
-      const updatedJob = await getJob(id, req.userId!);
+      const updated = await updateRecipe(id, merged);
       res.status(200).json({
         success: true,
         replaced: true,
-        updatedRecipeJson: updatedJob?.recipe,
+        updatedRecipeJson: updated,
       });
     } else {
-      // Save as a new remix job
-      const savedJob = await saveCompletedRemix(id, job.url, remixedRecipe, modificationRequest, req.userId!, remixLlmUsage);
+      // Save as a new recipe in the user's cookbook, descended from this one.
+      const saved = await createRecipeForUser(
+        req.userId!,
+        {
+          ...remixedRecipe,
+          sourceUrl: currentRecipe.sourceUrl,
+          sourceHandle: currentRecipe.sourceHandle,
+          parentRecipeId: id,
+          remixPrompt: modificationRequest,
+        },
+        'remix',
+        'remix',
+      );
       res.status(200).json({
         success: true,
-        newJobId: savedJob.id,
-        updatedRecipeJson: savedJob.recipe,
+        newRecipeId: saved.id,
+        updatedRecipeJson: saved,
       });
     }
   } catch (error: any) {
@@ -1038,10 +1118,10 @@ apiRouter.post('/jobs/:id/chat/confirm', async (req: Request, res: Response): Pr
 
 /**
  * Endpoint to chat about a recipe.
- * POST /api/jobs/:id/chat
+ * POST /api/recipes/:id/chat
  * Body: { message: string, history: Array<{role: 'user'|'model', text: string}> }
  */
-apiRouter.post('/jobs/:id/chat', async (req: Request, res: Response): Promise<void> => {
+apiRouter.post('/recipes/:id/chat', async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { message, history, stagedChanges } = req.body;
@@ -1060,11 +1140,7 @@ apiRouter.post('/jobs/:id/chat', async (req: Request, res: Response): Promise<vo
       throw new AppError('INVALID_FIELD', { params: { field: 'history' } });
     }
 
-    // Get the recipe job
-    const job = await getJob(id, req.userId!);
-    if (!job || !job.recipe) {
-      throw new AppError('RECIPE_NOT_FOUND');
-    }
+    const recipe = await assertRecipeAccess(req.userId!, id);
 
     // Enforce premium access for chat
     let isPremium = false;
@@ -1120,7 +1196,7 @@ apiRouter.post('/jobs/:id/chat', async (req: Request, res: Response): Promise<vo
 
     // Process chat request with Gemini
     const result = await chatAboutRecipe(
-      job.recipe,
+      recipe,
       message,
       history,
       req.userId!,
@@ -1143,16 +1219,21 @@ apiRouter.post('/jobs/:id/chat', async (req: Request, res: Response): Promise<vo
     // (pending remixes are saved later via /confirm endpoint)
     if (result.recipeWasModified && result.newRecipe) {
       const remixPrompt = result.toolArgs?.modification_request || 'AI Copilot modification';
-      console.log(`[chat route] Saving completed recipe remix for parent job ${id}`);
-      const savedJob = await saveCompletedRemix(
-        id,
-        job.url,
-        result.newRecipe,
-        remixPrompt,
-        req.userId!
+      console.log(`[chat route] Saving completed recipe remix descended from ${id}`);
+      const saved = await createRecipeForUser(
+        req.userId!,
+        {
+          ...result.newRecipe,
+          sourceUrl: recipe.sourceUrl,
+          sourceHandle: recipe.sourceHandle,
+          parentRecipeId: id,
+          remixPrompt,
+        },
+        'remix',
+        'remix',
       );
-      responsePayload.newJobId = savedJob.id;
-      responsePayload.updatedRecipeJson = savedJob.recipe;
+      responsePayload.newRecipeId = saved.id;
+      responsePayload.updatedRecipeJson = saved;
     }
 
     res.status(200).json(responsePayload);
@@ -1183,9 +1264,9 @@ async function checkPremium(req: Request): Promise<boolean> {
 
 /**
  * Endpoint to update a recipe's favorite status.
- * PATCH /api/jobs/:id/favorite
+ * PATCH /api/recipes/:id/favorite
  */
-apiRouter.patch('/jobs/:id/favorite', async (req: Request, res: Response): Promise<void> => {
+apiRouter.patch('/recipes/:id/favorite', async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { isFavorite } = req.body;
@@ -1194,10 +1275,7 @@ apiRouter.patch('/jobs/:id/favorite', async (req: Request, res: Response): Promi
       throw new AppError('INVALID_FIELD', { params: { field: 'isFavorite' } });
     }
 
-    const job = await getJob(id, req.userId!);
-    if (!job) {
-      throw new AppError('JOB_NOT_FOUND');
-    }
+    await assertRecipeAccess(req.userId!, id);
 
     await setFavorite(id, req.userId!, isFavorite);
     res.status(200).json({ success: true, message: 'Favorite status updated.' });
@@ -1212,9 +1290,9 @@ apiRouter.patch('/jobs/:id/favorite', async (req: Request, res: Response): Promi
  * the "I cooked this" action is deliberately NOT premium-gated (unlike the
  * cooking mode). A finished-dish photo is optional; when present it awards a
  * bonus and makes the cook leaderboard-eligible.
- * POST /api/jobs/:id/cooked
+ * POST /api/recipes/:id/cooked
  */
-apiRouter.post('/jobs/:id/cooked', async (req: Request, res: Response): Promise<void> => {
+apiRouter.post('/recipes/:id/cooked', async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { photoBase64, viaCookingMode, timerElapsed } = req.body ?? {};
@@ -1226,14 +1304,10 @@ apiRouter.post('/jobs/:id/cooked', async (req: Request, res: Response): Promise<
       throw new AppError('PHOTOS_TOO_LARGE');
     }
 
-    // Ownership + existence check, scoped to the user.
-    const job = await getJob(id, req.userId!);
-    if (!job || !job.recipe) {
-      throw new AppError('JOB_NOT_FOUND');
-    }
+    const recipe = await assertRecipeAccess(req.userId!, id);
 
     // Verify photo with Gemini Vision before accepting the cook.
-    const verification = await verifyCookedDishPhoto(job.recipe, photoBase64);
+    const verification = await verifyCookedDishPhoto(recipe, photoBase64);
     if (!verification.isMatchingDish) {
       throw new AppError('PHOTO_NOT_MATCHING', {
         params: { reason: verification.reasoning },
@@ -1602,9 +1676,9 @@ apiRouter.get('/leaderboard', async (req: Request, res: Response): Promise<void>
 
 /**
  * Endpoint to update custom tags/flags.
- * PATCH /api/jobs/:id/flags
+ * PATCH /api/recipes/:id/flags
  */
-apiRouter.patch('/jobs/:id/flags', async (req: Request, res: Response): Promise<void> => {
+apiRouter.patch('/recipes/:id/flags', async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { flags } = req.body;
@@ -1618,10 +1692,7 @@ apiRouter.patch('/jobs/:id/flags', async (req: Request, res: Response): Promise<
       throw new AppError('PREMIUM_REQUIRED', { params: { feature: 'tags' } });
     }
 
-    const job = await getJob(id, req.userId!);
-    if (!job) {
-      throw new AppError('JOB_NOT_FOUND');
-    }
+    await assertRecipeAccess(req.userId!, id);
 
     await setFlags(id, req.userId!, flags);
     res.status(200).json({ success: true, message: 'Custom flags updated.' });
@@ -1809,9 +1880,9 @@ apiRouter.delete('/collections/:id', async (req: Request, res: Response): Promis
 
 /**
  * Endpoint to associate a job/recipe with collections.
- * PATCH /api/jobs/:id/collections
+ * PATCH /api/recipes/:id/collections
  */
-apiRouter.patch('/jobs/:id/collections', async (req: Request, res: Response): Promise<void> => {
+apiRouter.patch('/recipes/:id/collections', async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { collectionIds } = req.body;
@@ -1825,10 +1896,7 @@ apiRouter.patch('/jobs/:id/collections', async (req: Request, res: Response): Pr
       throw new AppError('PREMIUM_REQUIRED', { params: { feature: 'collections' } });
     }
 
-    const job = await getJob(id, req.userId!);
-    if (!job) {
-      throw new AppError('JOB_NOT_FOUND');
-    }
+    await assertRecipeAccess(req.userId!, id);
 
     await setRecipeCollections(id, req.userId!, collectionIds);
     res.status(200).json({ success: true, message: 'Recipe collections updated.' });
