@@ -60,8 +60,9 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
 * **Interaktive Badges:** Zeit-Angaben in Zubereitungsschritten sind klickbar (blau unterstrichen).
 * **Confirm-Sheet (`TimerConfirmSheet.tsx`):** Schieberegler zur Feineinstellung (±50% der Originalzeit) & Start-Button.
 * **Globaler Zustand (`TimerContext.tsx`):** Parallele Countdown-Timer, 500ms Intervall, überleben Tab-Navigation.
-* **Alarm:** 3× Beep-Ton via Web Audio API (880 Hz) + Vibration + Native Notification Push.
+* **Alarm:** 3× Beep-Ton via Web Audio API (880 Hz) + Vibration + Native Notification Push (`TIMER_NOTIFICATION_ID = 1`).
 * **Timer-Banner (`TimerBanner.tsx`):** Sticky unter App-Header. Zeigt Countdown & Fortschrittsbalken. Klick navigiert automatisch zum Herkunftsrezept & Schritt.
+* **Rezept-Fertig-Benachrichtigungen (`native.ts`):** Lokale Benachrichtigung (`RECIPE_READY_NOTIFICATION_ID = 2`, Channel `recipe-extractions`) feuert nur dann, wenn die App im Hintergrund ist (`isAppInBackground()`). Bestehende Rezept-Bereit-Notifications werden vor dem Senden abgeräumt (`clearRecipeReadyNotification()`) bzw. überschrieben, sodass immer maximal eine Benachrichtigung dieses Typs im System-Tray verbleibt. Beim Öffnen/Resumen der App wird die Benachrichtigung automatisch geleert.
 
 ---
 
