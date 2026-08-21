@@ -13,9 +13,6 @@ export const MAX_VIDEO_DOWNLOAD_BYTES = 25 * 1024 * 1024;
 /** Overall deadline for entire keyframe capture workflow. */
 export const FRAME_CAPTURE_TIMEOUT_MS = 15000;
 
-/** Timeout per seek operation in fallback mode. */
-const SEEK_TIMEOUT_MS = 2000;
-
 /** Keyframe time fractions along the video timeline (25%, 50%, 75%). */
 export const FRAME_PERCENTAGES = [0.25, 0.50, 0.75];
 
@@ -229,148 +226,7 @@ async function extractKeyframesWebCodecs(
 }
 
 /**
- * Seeks a video element in fallback mode with a safe 50ms buffer and guaranteed resolution.
- */
-function seekToTimestamp(video: HTMLVideoElement, timestamp: number): Promise<void> {
-  return new Promise((resolve) => {
-    let resolved = false;
-    const finish = () => {
-      if (resolved) return;
-      resolved = true;
-      video.removeEventListener('seeked', onSeeked);
-      clearTimeout(timer);
-      resolve();
-    };
-
-    const onSeeked = () => {
-      setTimeout(finish, 50);
-    };
-
-    const timer = setTimeout(() => {
-      console.warn(`[videoFrames-Fallback] Seek to ${timestamp}s timed out after ${SEEK_TIMEOUT_MS}ms, proceeding.`);
-      finish();
-    }, SEEK_TIMEOUT_MS);
-
-    video.addEventListener('seeked', onSeeked, { once: true });
-    try {
-      video.currentTime = Math.min(timestamp, Math.max(0, (video.duration || 10) - 0.1));
-    } catch (err: any) {
-      console.warn(`[videoFrames-Fallback] Error setting video.currentTime: ${err.message}`);
-      finish();
-    }
-  });
-}
-
-/**
- * Fallback keyframe capture using offscreen HTML5 video element.
- */
-async function extractKeyframesVideoElement(
-  arrayBuffer: ArrayBuffer,
-  durationSeconds?: number,
-  signal?: AbortSignal,
-): Promise<string[]> {
-  let videoElement: HTMLVideoElement | null = null;
-  let objectUrl: string | null = null;
-
-  try {
-    const videoBlob = new Blob([arrayBuffer], { type: 'video/mp4' });
-    objectUrl = URL.createObjectURL(videoBlob);
-
-    videoElement = document.createElement('video');
-    videoElement.preload = 'auto';
-    videoElement.muted = true;
-    videoElement.playsInline = true;
-    videoElement.style.position = 'fixed';
-    videoElement.style.left = '-9999px';
-    videoElement.style.top = '-9999px';
-    videoElement.style.width = '320px';
-    videoElement.style.height = '240px';
-    videoElement.style.opacity = '0.01';
-    videoElement.style.pointerEvents = 'none';
-    document.body.appendChild(videoElement);
-
-    videoElement.src = objectUrl;
-    videoElement.load();
-
-    if (videoElement.readyState < 2 || !videoElement.videoWidth) {
-      await new Promise<void>((resolve, reject) => {
-        const onLoaded = () => { cleanup(); resolve(); };
-        const onError = () => { cleanup(); reject(new Error('Video load error')); };
-        const cleanup = () => {
-          videoElement?.removeEventListener('loadeddata', onLoaded);
-          videoElement?.removeEventListener('loadedmetadata', onLoaded);
-          videoElement?.removeEventListener('error', onError);
-        };
-
-        videoElement?.addEventListener('loadeddata', onLoaded);
-        videoElement?.addEventListener('loadedmetadata', onLoaded);
-        videoElement?.addEventListener('error', onError);
-
-        setTimeout(() => { cleanup(); resolve(); }, 4000);
-      });
-    }
-
-    const realDuration = (videoElement.duration && Number.isFinite(videoElement.duration) && videoElement.duration > 0)
-      ? videoElement.duration
-      : (durationSeconds || 15);
-
-    const timestamps = calculateKeyframeTimestamps(realDuration);
-    const capturedFrames: string[] = [];
-    const { maxEdge, quality } = VIDEO_FRAME_PROFILE;
-
-    for (const ts of timestamps) {
-      if (signal?.aborted) break;
-
-      await seekToTimestamp(videoElement, ts);
-
-      const origWidth = videoElement.videoWidth || 720;
-      const origHeight = videoElement.videoHeight || 1280;
-
-      let targetWidth = origWidth;
-      let targetHeight = origHeight;
-
-      if (targetWidth > maxEdge || targetHeight > maxEdge) {
-        if (targetWidth > targetHeight) {
-          targetHeight = Math.round((targetHeight * maxEdge) / targetWidth);
-          targetWidth = maxEdge;
-        } else {
-          targetWidth = Math.round((targetWidth * maxEdge) / targetHeight);
-          targetHeight = maxEdge;
-        }
-      }
-
-      const canvas = document.createElement('canvas');
-      canvas.width = targetWidth;
-      canvas.height = targetHeight;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) continue;
-
-      ctx.drawImage(videoElement, 0, 0, targetWidth, targetHeight);
-      const base64 = canvas.toDataURL('image/jpeg', quality);
-      if (base64 && base64.length > 200) {
-        capturedFrames.push(base64);
-      }
-    }
-
-    return capturedFrames;
-  } finally {
-    if (videoElement) {
-      try {
-        videoElement.pause();
-        videoElement.removeAttribute('src');
-        videoElement.load();
-        videoElement.remove();
-      } catch { /* ignore */ }
-    }
-    if (objectUrl) {
-      URL.revokeObjectURL(objectUrl);
-    }
-  }
-}
-
-/**
- * Captures 3 distributed keyframes from a video CDN URL.
- * Prefers native WebCodecs API (in-memory, headless) and falls back to offscreen video element.
+ * Captures 3 distributed keyframes from a video CDN URL using native WebCodecs API (in-memory, headless).
  * Runs only on native platforms (Android) via CapacitorHttp to bypass CORS.
  * Always returns a list of base64 JPEG strings (never throws).
  */
@@ -438,21 +294,9 @@ export async function captureKeyframes(
       return [];
     }
 
-    // 1. Try headless in-memory extraction via WebCodecs + MP4Box
-    try {
-      const frames = await extractKeyframesWebCodecs(arrayBuffer, durationSeconds, abortController.signal);
-      if (frames.length > 0) {
-        console.log(`[videoFrames] Successfully captured ${frames.length} keyframes via WebCodecs.`);
-        return frames;
-      }
-    } catch (webCodecsErr: any) {
-      console.warn(`[videoFrames] WebCodecs extraction failed, trying fallback: ${webCodecsErr.message}`);
-    }
-
-    // 2. Fallback to offscreen <video> element if WebCodecs is unavailable or fails
-    const fallbackFrames = await extractKeyframesVideoElement(arrayBuffer, durationSeconds, abortController.signal);
-    console.log(`[videoFrames] Successfully captured ${fallbackFrames.length} keyframes via VideoElement fallback.`);
-    return fallbackFrames;
+    const frames = await extractKeyframesWebCodecs(arrayBuffer, durationSeconds, abortController.signal);
+    console.log(`[videoFrames] Successfully captured ${frames.length} keyframes via WebCodecs.`);
+    return frames;
   } catch (err: any) {
     console.warn(`[videoFrames] Keyframe capture failed: ${err.message}`);
     return [];
