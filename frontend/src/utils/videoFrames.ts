@@ -163,7 +163,7 @@ export async function captureKeyframes(
         cleanup();
         resolve();
       };
-      const onError = (e: Event) => {
+      const onError = () => {
         cleanup();
         reject(new Error(`Video load error: ${videoElement?.error?.message || 'unknown'}`));
       };

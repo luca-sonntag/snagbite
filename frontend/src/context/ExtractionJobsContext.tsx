@@ -5,7 +5,7 @@ import { apiUrl } from '../api';
 import { useAuth } from './AuthContext';
 import { useI18n } from '../context/I18nContext';
 
-import { isNative, sendNativeNotification } from '../native';
+import { sendNativeNotification } from '../native';
 import { handleClientFrameRequest } from '../utils/videoFrames';
 
 export type ExtractionMode = 'link' | 'photo';

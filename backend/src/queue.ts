@@ -39,6 +39,7 @@ async function processJob(job: Job): Promise<void> {
   let videoFilePath = '';
   let framePaths: string[] = [];
   let photoUploadId: string | null = null;
+  let clientFramesInput: ClientFramesInput | undefined;
 
   const heartbeat = setInterval(() => heartbeatJob(jobId), 30_000);
 
@@ -273,7 +274,6 @@ async function processJob(job: Job): Promise<void> {
     }
 
     // Decode ephemeral client frames if present
-    let clientFramesInput: ClientFramesInput | undefined;
     if (job.clientFrames) {
       const thumbBuf = job.clientFrames.thumbnailBase64
         ? Buffer.from(job.clientFrames.thumbnailBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64')
