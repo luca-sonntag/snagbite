@@ -363,6 +363,11 @@ async function processJob(job: Job): Promise<void> {
       }
     }
 
+    if (await isJobCancelled(jobId)) {
+      console.log(`[Job ${jobId}] Job was cancelled by user, aborting before LLM extraction.`);
+      return;
+    }
+
     console.log(`[Job ${jobId}] Extracting recipe via Gemini...`);
     await updateJobProgress(jobId, 'processing', { percent: 75, stage: 'extracting_recipe' });
 
@@ -426,11 +431,20 @@ async function processJob(job: Job): Promise<void> {
     if (geminiUsage) llmUsage.gemini = geminiUsage;
     if (fluxUsage) llmUsage.flux = fluxUsage;
 
+    if (await isJobCancelled(jobId)) {
+      console.log(`[Job ${jobId}] Job was cancelled by user, aborting completion.`);
+      return;
+    }
+
     // 7. Persist the recipe, link the job to it and add it to the cookbook —
     // atomically, so a crash can never leave a completed job without a recipe
     // or a recipe in nobody's cookbook.
     await completeJob(jobId, recipe, Object.keys(llmUsage).length > 0 ? llmUsage : null);
   } catch (error: any) {
+    if (await isJobCancelled(jobId)) {
+      console.log(`[Job ${jobId}] Job was cancelled by user, keeping cancelled status.`);
+      return;
+    }
     console.error(`[Job ${jobId}] Failed during execution:`, error.message);
     // Persist a machine-readable error envelope (code + params) instead of a raw
     // message. Non-AppError throws collapse to EXTRACTION_FAILED so users never

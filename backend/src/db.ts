@@ -860,10 +860,8 @@ export async function countLibraryEntries(userId: string): Promise<number> {
  *
  * Remixes are excluded (`kind <> 'remix'`) but photo imports are NOT — they cost
  * the same pipeline work as a URL extraction and have always consumed quota.
- * Failed extractions are excluded so a failure does not burn an allowance.
- *
- * Cancelled jobs still count: cancelling used to be a soft delete, and the whole
- * point of keeping the row was that quota cannot be refunded by walking away.
+ * Failed and cancelled extractions are excluded so a failure or interruption
+ * (e.g. user backgrounding/leaving the app) does not burn an allowance.
  */
 export async function getExtractionsForUserInTimeframe(userId: string, days: number): Promise<Job[]> {
   const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
@@ -873,6 +871,7 @@ export async function getExtractionsForUserInTimeframe(userId: string, days: num
     .eq('user_id', userId)
     .neq('kind', 'remix')
     .neq('status', 'failed')
+    .neq('status', 'cancelled')
     .gte('created_at', cutoff)
     .order('created_at', { ascending: true })
     .returns<JobRow[]>();
