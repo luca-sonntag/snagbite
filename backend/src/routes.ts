@@ -468,6 +468,68 @@ apiRouter.post('/extract-recipe/photos', async (req: Request, res: Response): Pr
   }
 });
 
+const MAX_CLIENT_FRAMES = 4;
+const MAX_FRAMES_TOTAL_CHARS = 12 * 1024 * 1024; // 12 MB char limit for total base64 frames
+
+/**
+ * Endpoint to submit client-extracted video keyframes for a parked job.
+ * POST /api/extract-recipe/frames
+ * Body: { jobId: string, thumbnailBase64?: string, framesBase64?: string[] }
+ */
+apiRouter.post('/extract-recipe/frames', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { jobId, thumbnailBase64, framesBase64 } = req.body;
+
+    if (!jobId || typeof jobId !== 'string') {
+      throw new AppError('MISSING_FIELD', { params: { field: 'jobId' } });
+    }
+
+    const job = await getJob(jobId, req.userId!);
+    if (!job) {
+      throw new AppError('JOB_NOT_FOUND');
+    }
+
+    if (job.status !== 'awaiting_frames') {
+      throw new AppError('FRAMES_NOT_EXPECTED', {
+        message: `Job ${jobId} is in status '${job.status}', not 'awaiting_frames'.`,
+      });
+    }
+
+    const frames = Array.isArray(framesBase64) ? framesBase64 : [];
+    if (frames.length > MAX_CLIENT_FRAMES) {
+      throw new AppError('TOO_MANY_FRAMES', { params: { max: MAX_CLIENT_FRAMES } });
+    }
+
+    const thumbStr = typeof thumbnailBase64 === 'string' ? thumbnailBase64 : '';
+    const totalChars = thumbStr.length + frames.reduce((acc: number, f: unknown) => acc + (typeof f === 'string' ? f.length : 0), 0);
+
+    if (totalChars > MAX_FRAMES_TOTAL_CHARS) {
+      throw new AppError('FRAMES_TOO_LARGE', {
+        message: `Combined frame payload of ${totalChars} chars exceeds limit.`,
+      });
+    }
+
+    await updateJob(job.id, {
+      clientFrames: {
+        thumbnailBase64: thumbStr || undefined,
+        framesBase64: frames.filter((f: unknown): f is string => typeof f === 'string' && f.trim().length > 0),
+      },
+      status: 'pending',
+      progress: { percent: 35, stage: 'queued' },
+    });
+
+    res.status(202).json({
+      success: true,
+      jobId: job.id,
+      status: 'pending',
+      message: 'Video keyframes received and job queued for extraction.',
+    });
+  } catch (error: any) {
+    if (!(error instanceof AppError)) console.error('Error receiving client frames:', error);
+    sendAppError(res, error);
+  }
+});
+
 /**
  * Endpoint to submit a recipe remix request.
  * POST /api/recipes/:id/remix
@@ -557,6 +619,18 @@ apiRouter.get('/jobs/:id', async (req: Request, res: Response): Promise<void> =>
       throw new AppError('JOB_NOT_FOUND');
     }
 
+    let mediaRequest: { videoUrl: string; thumbnailUrl?: string; durationSeconds?: number } | undefined;
+    if (job.status === 'awaiting_frames' && job.scrapeMeta) {
+      const meta = job.scrapeMeta as any;
+      if (meta.media?.kind === 'client' && meta.media?.videoUrl) {
+        mediaRequest = {
+          videoUrl: meta.media.videoUrl,
+          thumbnailUrl: meta.imageUrl || undefined,
+          durationSeconds: meta.durationSeconds || undefined,
+        };
+      }
+    }
+
     res.status(200).json({
       success: true,
       job: {
@@ -566,6 +640,7 @@ apiRouter.get('/jobs/:id', async (req: Request, res: Response): Promise<void> =>
         status: job.status,
         error: job.error,
         progress: job.progress,
+        mediaRequest,
         recipeId: job.recipeId,
         parentRecipeId: job.parentRecipeId,
         remixPrompt: job.remixPrompt,

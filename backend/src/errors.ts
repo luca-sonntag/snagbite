@@ -27,6 +27,9 @@ export type AppErrorCode =
   | 'TOO_MANY_PHOTOS'
   | 'PHOTOS_TOO_LARGE'
   | 'PHOTO_REQUIRED'
+  | 'TOO_MANY_FRAMES'
+  | 'FRAMES_TOO_LARGE'
+  | 'FRAMES_NOT_EXPECTED'
   | 'PARENT_JOB_NOT_COMPLETED'
   // ── Auth (401) ────────────────────────────────────────────────────────────
   | 'UNAUTHORIZED'
@@ -87,6 +90,9 @@ const DEFAULT_STATUS: Record<AppErrorCode, number> = {
   TOO_MANY_PHOTOS: 400,
   PHOTOS_TOO_LARGE: 413,
   PHOTO_REQUIRED: 400,
+  TOO_MANY_FRAMES: 400,
+  FRAMES_TOO_LARGE: 413,
+  FRAMES_NOT_EXPECTED: 409,
   PARENT_JOB_NOT_COMPLETED: 400,
   UNAUTHORIZED: 401,
   PREMIUM_REQUIRED: 403,
