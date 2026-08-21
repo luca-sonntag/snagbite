@@ -71,7 +71,8 @@ export default function ActiveExtractions() {
         const displayLabel = formatSourceLabel(job.sourceLabel);
 
         const open = () => {
-          window.dispatchEvent(new CustomEvent(OPEN_RECIPE_EVENT, { detail: { jobId: job.id } }));
+          const targetRecipeId = job.recipeId || job.id;
+          window.dispatchEvent(new CustomEvent(OPEN_RECIPE_EVENT, { detail: { recipeId: targetRecipeId, jobId: job.id } }));
           dismissJob(job.id);
         };
 

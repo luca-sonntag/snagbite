@@ -658,8 +658,9 @@ export default function App() {
   useEffect(() => {
     const onComplete = () => { fetchHistory(); };
     const onOpen = (e: Event) => {
-      const detail = (e as CustomEvent<{ jobId: string }>).detail;
-      if (detail?.jobId) handleExtractionSuccess(detail.jobId);
+      const detail = (e as CustomEvent<{ jobId?: string; recipeId?: string }>).detail;
+      const targetId = detail?.recipeId || detail?.jobId;
+      if (targetId) handleExtractionSuccess(targetId);
     };
     window.addEventListener(EXTRACTION_COMPLETE_EVENT, onComplete);
     window.addEventListener(OPEN_RECIPE_EVENT, onOpen);

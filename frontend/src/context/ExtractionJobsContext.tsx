@@ -20,6 +20,8 @@ export interface ExtractionJobEntry {
   progress: ProgressData | null;
   /** Recipe title, filled once the job completes. */
   title?: string | null;
+  /** Recipe ID in the cookbook, filled once the job completes. */
+  recipeId?: string | null;
   error?: string | null;
   errorCode?: string | null;
   errorParams?: ErrorParams | null;
@@ -55,7 +57,7 @@ const POLL_INTERVAL_MS = 2000;
  */
 const COMPLETED_AUTO_DISMISS_MS = 25000;
 
-type PersistedJob = Pick<ExtractionJobEntry, 'id' | 'sourceLabel' | 'mode' | 'status' | 'title' | 'error' | 'errorCode'>;
+type PersistedJob = Pick<ExtractionJobEntry, 'id' | 'sourceLabel' | 'mode' | 'status' | 'title' | 'recipeId' | 'error' | 'errorCode'>;
 
 function isTerminal(status: ExtractionJob['status']): boolean {
   return status === 'completed' || status === 'failed' || status === 'cancelled';
@@ -75,6 +77,7 @@ function loadPersisted(): ExtractionJobEntry[] {
       status: p.status ?? 'pending',
       progress: null,
       title: p.title ?? null,
+      recipeId: p.recipeId ?? null,
       error: p.error ?? null,
       errorCode: p.errorCode ?? null,
       errorParams: null,
@@ -95,6 +98,7 @@ function persist(jobs: ExtractionJobEntry[]): void {
         mode: j.mode,
         status: j.status,
         title: j.title ?? null,
+        recipeId: j.recipeId ?? null,
         error: j.error ?? null,
         errorCode: j.errorCode ?? null,
       }));
