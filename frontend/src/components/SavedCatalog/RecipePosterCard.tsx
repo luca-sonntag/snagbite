@@ -86,7 +86,7 @@ export default function RecipePosterCard({
           )}
           <div className="flex items-center gap-1.5 shrink-0">
             {job.isFavorite && (
-              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              <Star className="w-3.5 h-3.5 text-amber-500" strokeWidth={2} />
             )}
             <PlatformIcon platform={platform} className={`w-4 h-4 shrink-0 ${iconColor}`} />
           </div>

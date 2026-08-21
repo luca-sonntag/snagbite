@@ -34,17 +34,15 @@ export default function RecipeListItem({
 
   return (
     <div
-      className={`rounded-2xl cursor-pointer active:scale-[0.99] transition-all p-2.5 flex flex-row items-center gap-3 overflow-hidden select-none bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] ${
-        isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
-      }`}
+      className={`rounded-2xl cursor-pointer active:scale-[0.99] transition-all p-2.5 flex flex-row items-center gap-3 overflow-hidden select-none bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] ${isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
+        }`}
       onClick={onClick}
       {...bindLongPress}
     >
       {/* Select mode checkbox */}
       {isSelectMode && (
-        <div className={`w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-all ${
-          isSelected ? 'bg-emerald-500 border-emerald-500' : 'border-black/20 dark:border-white/20'
-        }`}>
+        <div className={`w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-all ${isSelected ? 'bg-emerald-500 border-emerald-500' : 'border-black/20 dark:border-white/20'
+          }`}>
           {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
         </div>
       )}
@@ -66,7 +64,7 @@ export default function RecipeListItem({
             {r.title}
           </h4>
           {job.isFavorite && (
-            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
+            <Star className="w-4 h-4 text-amber-500 shrink-0" strokeWidth={1.75} />
           )}
         </div>
 
