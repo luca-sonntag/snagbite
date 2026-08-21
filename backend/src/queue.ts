@@ -1,14 +1,17 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { claimNextJob, updateJob, getJob, getClient, reclaimExpiredJobs, heartbeatJob, getMaxVideoDurationSeconds, isJobDeleted } from './db.js';
+import {
+  claimNextJob, updateJob, updateJobProgress, completeJob, getRecipe, getClient,
+  reclaimExpiredJobs, heartbeatJob, getMaxVideoDurationSeconds, isJobCancelled,
+} from './db.js';
 import { randomUUID } from 'node:crypto';
 import { getScraperForUrl } from './scrapers/index.js';
 import { downloadMedia } from './scrapers/download.js';
 import { extractRecipe, remixRecipe } from './gemini.js';
 import { generateRecipeCoverImage } from './imageGenerator.js';
 import { pruneOldGeminiLogs } from './logger.js';
-import { isPhotoJobUrl, photoUploadIdFromUrl, downloadImportPhotos, deleteImportPhotos, sweepOldPhotoImports } from './photoImport.js';
-import type { Job, LlmUsage } from './types.js';
+import { photoUploadIdFromUrl, downloadImportPhotos, deleteImportPhotos, sweepOldPhotoImports } from './photoImport.js';
+import type { Job, LlmUsage, ProgressStage } from './types.js';
 import { config } from './config.js';
 import { AppError, serializeJobError } from './errors.js';
 import { notificationTick } from './notifications/worker.js';
@@ -26,7 +29,7 @@ let notificationInterval: NodeJS.Timeout | null = null;
  */
 async function processJob(job: Job): Promise<void> {
   const jobId = job.id;
-  const url = job.url;
+  const url = job.sourceUrl;
   const safeTimestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const userSegment = job.userId ? job.userId : 'unassigned';
   const runDir = path.resolve('logs', userSegment, `run-${safeTimestamp}_${jobId}`);
@@ -81,34 +84,33 @@ async function processJob(job: Job): Promise<void> {
       }
     }
 
-    if (job.parentJobId) {
+    if (job.kind === 'remix') {
       console.log(`[Job ${jobId}] Starting remix processing...`);
-      await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 30, stage: 'extracting_recipe' } as any });
+      await updateJobProgress(jobId, 'processing', { percent: 30, stage: 'extracting_recipe' });
       await fs.mkdir(runDir, { recursive: true });
 
-      const parentJob = await getJob(job.parentJobId);
-      if (!parentJob || !parentJob.recipe) {
-        throw new AppError('PARENT_JOB_NOT_FOUND', { message: 'Parent job or recipe not found for remix.' });
+      const parentRecipe = job.parentRecipeId ? await getRecipe(job.parentRecipeId) : null;
+      if (!parentRecipe) {
+        throw new AppError('PARENT_JOB_NOT_FOUND', { message: 'Parent recipe not found for remix.' });
       }
 
       console.log(`[Job ${jobId}] Requesting remix from Gemini...`);
-      const { recipe, usage: geminiUsage } = await remixRecipe(parentJob.recipe, job.prompt || '', runDir, userPrefs);
+      const { recipe, usage: geminiUsage } = await remixRecipe(parentRecipe, job.remixPrompt || '', runDir, userPrefs);
 
       if (recipe.isRecipe === false) {
         throw new AppError('UNRELATED_REMIX_REQUEST', { message: 'The prompt was not recognized as a valid recipe modification.' });
       }
 
-      recipe.id = jobId;
-      recipe.instagramHandle = parentJob.recipe.instagramHandle;
-      recipe.parentJobId = parentJob.id;
-      recipe.parentRecipeTitle = parentJob.recipe.title;
-      recipe.remixPrompt = job.prompt || null;
+      recipe.sourceHandle = parentRecipe.sourceHandle;
+      recipe.sourceUrl = parentRecipe.sourceUrl;
+      recipe.parentRecipeId = parentRecipe.id;
+      recipe.remixPrompt = job.remixPrompt || null;
 
       let fluxUsage: any = null;
 
       // Generate AI cover image for the remixed recipe if prompt is present
       if (recipe.imagePrompt) {
-        await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 85, stage: 'generating_cover' } as any });
+        await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover' });
         const { imageUrl: aiCoverUrl, usage } = await generateRecipeCoverImage({
           prompt: recipe.imagePrompt,
           jobId,
@@ -117,18 +119,18 @@ async function processJob(job: Job): Promise<void> {
         fluxUsage = usage;
         if (aiCoverUrl) {
           recipe.imageUrl = aiCoverUrl;
-          recipe.imageUrls = [aiCoverUrl, ...(parentJob.recipe.imageUrls || [])];
+          recipe.imageUrls = [aiCoverUrl, ...(parentRecipe.imageUrls || [])];
           recipe.isAiCover = true;
         } else {
-          recipe.imageUrl = parentJob.recipe.imageUrl;
-          recipe.imageUrls = parentJob.recipe.imageUrls;
+          recipe.imageUrl = parentRecipe.imageUrl;
+          recipe.imageUrls = parentRecipe.imageUrls;
         }
       } else {
-        recipe.imageUrl = parentJob.recipe.imageUrl;
-        recipe.imageUrls = parentJob.recipe.imageUrls;
+        recipe.imageUrl = parentRecipe.imageUrl;
+        recipe.imageUrls = parentRecipe.imageUrls;
       }
 
-      await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 90, stage: 'finalizing' } as any });
+      await updateJobProgress(jobId, 'processing', { percent: 90, stage: 'finalizing' });
 
       // Canonical ingredient normalization & nutritional calculation
       await enrichRecipeWithCanonicalIngredients(recipe);
@@ -137,12 +139,7 @@ async function processJob(job: Job): Promise<void> {
       if (geminiUsage) llmUsage.gemini = geminiUsage;
       if (fluxUsage) llmUsage.flux = fluxUsage;
 
-      await updateJob(jobId, {
-        status: 'completed',
-        recipe,
-        llmUsage: Object.keys(llmUsage).length > 0 ? llmUsage : null,
-        error: null,
-      });
+      await completeJob(jobId, recipe, Object.keys(llmUsage).length > 0 ? llmUsage : null);
       return;
     }
 
@@ -152,17 +149,17 @@ async function processJob(job: Job): Promise<void> {
     // extractRecipe at full resolution; no grid is built and no cover frame is
     // selected — a photographed page makes a poor cover, so the recipe emoji is
     // the placeholder instead.
-    if (isPhotoJobUrl(url)) {
+    if (job.kind === 'photo') {
       photoUploadId = photoUploadIdFromUrl(url);
       // Both are guaranteed by the route that created the job; a job missing
       // either can never find its photos again.
-      if (!photoUploadId || !job.userId) {
-        throw new AppError('PHOTO_IMPORT_EXPIRED', { message: 'Photo job is missing its upload id or owner.' });
+      if (!photoUploadId) {
+        throw new AppError('PHOTO_IMPORT_EXPIRED', { message: 'Photo job is missing its upload id.' });
       }
       const photoUserId = job.userId;
 
       console.log(`[Job ${jobId}] Starting photo import ${photoUploadId}...`);
-      await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 20, stage: 'reading_photos' } as any });
+      await updateJobProgress(jobId, 'processing', { percent: 20, stage: 'reading_photos' });
       await fs.mkdir(runDir, { recursive: true });
 
       const { paths: photoPaths, bytes } = await downloadImportPhotos(photoUserId, photoUploadId, runDir);
@@ -177,18 +174,19 @@ async function processJob(job: Job): Promise<void> {
         console.warn(`[Job ${jobId}] Failed to persist media_bytes: ${err.message}`),
       );
 
-      await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 60, stage: 'extracting_recipe' } as any });
+      await updateJobProgress(jobId, 'processing', { percent: 60, stage: 'extracting_recipe' });
       const { recipe, usage: geminiUsage } = await extractRecipe(undefined, undefined, '', undefined, runDir, userPrefs, undefined, photoPaths, 'photo');
 
       console.log(`[Job ${jobId}] Recipe extracted from photos: "${recipe.title}"`);
-      recipe.id = jobId;
-      recipe.instagramHandle = null;
+      // A photographed page has no third-party source to attribute.
+      recipe.sourceUrl = null;
+      recipe.sourceHandle = null;
 
       let fluxUsage: any = null;
 
       // Generate photorealistic AI cover image of the finished dish for photo imports
       if (recipe.imagePrompt) {
-        await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 85, stage: 'generating_cover' } as any });
+        await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover' });
         const { imageUrl: aiCoverUrl, usage } = await generateRecipeCoverImage({
           prompt: recipe.imagePrompt,
           jobId,
@@ -210,7 +208,7 @@ async function processJob(job: Job): Promise<void> {
         recipe.isAiCover = false;
       }
 
-      await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 90, stage: 'finalizing' } as any });
+      await updateJobProgress(jobId, 'processing', { percent: 90, stage: 'finalizing' });
 
       // Canonical ingredient normalization & nutritional calculation
       await enrichRecipeWithCanonicalIngredients(recipe);
@@ -219,23 +217,18 @@ async function processJob(job: Job): Promise<void> {
       if (geminiUsage) llmUsage.gemini = geminiUsage;
       if (fluxUsage) llmUsage.flux = fluxUsage;
 
-      await updateJob(jobId, {
-        status: 'completed',
-        recipe,
-        llmUsage: Object.keys(llmUsage).length > 0 ? llmUsage : null,
-        error: null,
-      });
+      await completeJob(jobId, recipe, Object.keys(llmUsage).length > 0 ? llmUsage : null);
       return;
     }
 
-    if (await isJobDeleted(jobId)) {
-      console.log(`[Job ${jobId}] Job was cancelled/deleted by user, aborting.`);
+    if (await isJobCancelled(jobId)) {
+      console.log(`[Job ${jobId}] Job was cancelled by user, aborting.`);
       return;
     }
 
     // 1. Mark job as scraping
     console.log(`[Job ${jobId}] Starting scraping for ${url}...`);
-    await updateJob(jobId, { status: 'scraping', recipe: { isProgress: true, percent: 15, stage: 'scraping' } as any });
+    await updateJobProgress(jobId, 'scraping', { percent: 15, stage: 'scraping' });
 
     // 2. Perform scraping via the appropriate scraper
     const scraper = getScraperForUrl(url);
@@ -256,7 +249,7 @@ async function processJob(job: Job): Promise<void> {
     }
 
     // 3. Mark job as processing
-    await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 50, stage: 'downloading_media' } as any });
+    await updateJobProgress(jobId, 'processing', { percent: 50, stage: 'downloading_media' });
 
     // 4. Ensure run directory exists
     await fs.mkdir(runDir, { recursive: true });
@@ -284,7 +277,7 @@ async function processJob(job: Job): Promise<void> {
     const isCarousel = downloaded.imageFilePaths.length > 0;
 
     if (videoFilePath) {
-      await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 55, stage: 'extracting_frames' } as any });
+      await updateJobProgress(jobId, 'processing', { percent: 55, stage: 'extracting_frames' });
       try {
         const { extractFrames, createImageGrid } = await import('./frameExtractor.js');
         console.log(`[Job ${jobId}] Extracting frames from video...`);
@@ -301,7 +294,7 @@ async function processJob(job: Job): Promise<void> {
       // Image carousel: the slides take the role of video frames — build the tiled grid
       // from them so the existing best-shot selection works unchanged. A single-slide
       // post skips the grid (xstack needs >= 2 inputs); its cover is uploaded directly.
-      await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 55, stage: 'extracting_frames' } as any });
+      await updateJobProgress(jobId, 'processing', { percent: 55, stage: 'extracting_frames' });
       framePaths = downloaded.imageFilePaths;
       if (framePaths.length > 1) {
         try {
@@ -343,7 +336,7 @@ async function processJob(job: Job): Promise<void> {
         ? Promise.resolve([scrapeResult.media.imageUrls[0]])
         : Promise.resolve(null);
 
-    await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 75, stage: 'extracting_recipe' } as any });
+    await updateJobProgress(jobId, 'processing', { percent: 75, stage: 'extracting_recipe' });
 
     const [{ recipe, usage: geminiUsage }, selectedImageUrls] = await Promise.all([
       extractRecipe(
@@ -372,7 +365,7 @@ async function processJob(job: Job): Promise<void> {
 
     // Generate AI food photography cover image with FLUX.1 [schnell]
     if (recipe.imagePrompt) {
-      await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 85, stage: 'generating_cover' } as any });
+      await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover' });
       const { imageUrl: aiCoverUrl, usage } = await generateRecipeCoverImage({
         prompt: recipe.imagePrompt,
         jobId,
@@ -394,12 +387,10 @@ async function processJob(job: Job): Promise<void> {
       recipe.isAiCover = false;
     }
 
-    await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 90, stage: 'finalizing' } as any });
+    await updateJobProgress(jobId, 'processing', { percent: 90, stage: 'finalizing' });
 
-    recipe.instagramHandle = scrapeResult.authorHandle || null;
-
-    // Assign unique recipe ID equal to jobId
-    recipe.id = jobId;
+    recipe.sourceHandle = scrapeResult.authorHandle || null;
+    recipe.sourceUrl = url;
 
     // Canonical ingredient normalization & nutritional calculation
     await enrichRecipeWithCanonicalIngredients(recipe);
@@ -408,21 +399,20 @@ async function processJob(job: Job): Promise<void> {
     if (geminiUsage) llmUsage.gemini = geminiUsage;
     if (fluxUsage) llmUsage.flux = fluxUsage;
 
-    // 7. Update job as completed
-    await updateJob(jobId, {
-      status: 'completed',
-      recipe,
-      llmUsage: Object.keys(llmUsage).length > 0 ? llmUsage : null,
-      error: null,
-    });
+    // 7. Persist the recipe, link the job to it and add it to the cookbook —
+    // atomically, so a crash can never leave a completed job without a recipe
+    // or a recipe in nobody's cookbook.
+    await completeJob(jobId, recipe, Object.keys(llmUsage).length > 0 ? llmUsage : null);
   } catch (error: any) {
     console.error(`[Job ${jobId}] Failed during execution:`, error.message);
     // Persist a machine-readable error envelope (code + params) instead of a raw
     // message. Non-AppError throws collapse to EXTRACTION_FAILED so users never
     // see internal/library text; the client localizes the code (see errorCodes.ts).
+    // progress is cleared so a failed job never keeps a stale stage.
     await updateJob(jobId, {
       status: 'failed',
       error: serializeJobError(error),
+      progress: null,
     });
   } finally {
     clearInterval(heartbeat);
