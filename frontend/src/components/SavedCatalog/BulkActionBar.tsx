@@ -1,6 +1,6 @@
-import { Button } from '@heroui/react';
-import { ShoppingCart, Trash2, Folder, Star, X } from 'lucide-react';
+import { ShoppingCart, Trash2, Folder, Star, X, CheckCheck } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
+import FloatingActionBar from '../FloatingActionBar';
 
 interface BulkActionBarProps {
   selectedCount: number;
@@ -29,85 +29,110 @@ export default function BulkActionBar({
 }: BulkActionBarProps) {
   const { t } = useI18n();
 
+  const itemBase =
+    'relative flex flex-col items-center justify-center gap-1 min-w-[3.75rem] px-2 py-1.5 rounded-2xl ' +
+    'transition-all active:scale-95 cursor-pointer outline-none border-none group';
+  const itemPrimary =
+    `${itemBase} text-white bg-gradient-to-b from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 ` +
+    'shadow-sm shadow-emerald-600/25';
+  const itemNeutral =
+    `${itemBase} text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 ` +
+    'hover:bg-black/[0.04] dark:hover:bg-white/[0.06]';
+  const itemDestructive =
+    `${itemBase} text-gray-600 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 ` +
+    'hover:bg-rose-500/10 dark:hover:bg-rose-500/15';
+  const itemLabel = 'text-[10px] font-semibold tracking-wide leading-none whitespace-nowrap';
+
   return (
-    <div className="fixed bottom-[calc(1.5rem_+_var(--safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-lg bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-black/[0.08] dark:border-white/[0.12] shadow-[0_16px_40px_-8px_rgba(0,0,0,0.18),0_4px_16px_rgba(0,0,0,0.08)] rounded-3xl p-3.5 flex flex-col gap-2.5 animate-slide-up">
-      {/* Header: Selected count + Select all toggle + Dismiss button */}
-      <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="text-xs font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0">
-            {selectedCount}
-          </span>
-          <span className="text-xs font-bold text-gray-900 dark:text-white truncate">
-            {t('catalog.itemsSelected', { count: selectedCount })}
-          </span>
-        </div>
+    <FloatingActionBar className="bottom-[calc(1.5rem_+_var(--safe-area-inset-bottom))]">
+      {/* Selection counter & Cancel button */}
+      <div className="flex items-center gap-1 pl-1 pr-1.5">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex items-center gap-1.5 px-2.5 py-2 rounded-2xl bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-gray-700 dark:text-gray-200 text-xs font-bold active:scale-95 transition-all cursor-pointer border-none"
+          title={t('dialog.cancelDefault') || 'Abbrechen'}
+          aria-label={t('dialog.cancelDefault') || 'Abbrechen'}
+        >
+          <X className="w-3.5 h-3.5 text-gray-400" />
+          <span>{selectedCount}</span>
+        </button>
 
-        <div className="flex items-center gap-2 shrink-0">
-          {onToggleSelectAll && totalSelectableCount > 1 && (
-            <button
-              type="button"
-              onClick={onToggleSelectAll}
-              className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 active:scale-95 transition-all cursor-pointer"
-            >
-              {isAllSelected ? t('catalog.deselectAll') : t('catalog.selectAll')}
-            </button>
-          )}
-
+        {onToggleSelectAll && totalSelectableCount > 1 && (
           <button
             type="button"
-            onClick={onCancel}
-            className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-gray-500 dark:text-gray-400 flex items-center justify-center active:scale-90 transition-all cursor-pointer border-none"
-            aria-label={t('dialog.cancelDefault') || 'Close'}
+            onClick={onToggleSelectAll}
+            className="flex items-center justify-center p-2 rounded-2xl text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] active:scale-95 transition-all cursor-pointer border-none"
+            title={isAllSelected ? t('catalog.deselectAll') : t('catalog.selectAll')}
+            aria-label={isAllSelected ? t('catalog.deselectAll') : t('catalog.selectAll')}
           >
-            <X className="w-4 h-4" />
+            <CheckCheck className={`w-4 h-4 ${isAllSelected ? 'text-emerald-600 dark:text-emerald-400' : ''}`} />
           </button>
-        </div>
+        )}
       </div>
 
-      {/* Action Grid (2x2) */}
-      <div className="grid grid-cols-2 gap-2 w-full">
-        {/* ⭐ Favoriten */}
-        <Button
-          onPress={onBulkFavorite}
-          isDisabled={selectedCount === 0}
-          className="bg-amber-500/10 dark:bg-amber-500/20 hover:bg-amber-500/20 dark:hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 border-none text-sm h-11 font-bold rounded-2xl flex items-center justify-center gap-1.5 active:scale-95 transition-all min-w-0 shadow-none"
-        >
-          <Star className={`w-4 h-4 shrink-0 text-amber-500 ${allSelectedAreFavorites ? 'fill-amber-500' : ''}`} />
-          <span className="truncate">
-            {allSelectedAreFavorites ? t('catalog.bulkUnfavorite') : t('catalog.bulkFavorites')}
-          </span>
-        </Button>
+      {/* Subtle divider */}
+      <div className="w-px h-7 bg-black/[0.08] dark:bg-white/[0.08] my-auto mx-0.5" />
 
-        {/* 📁 Sammlung */}
-        <Button
-          onPress={onBulkAddToCollection}
-          isDisabled={selectedCount === 0}
-          className="bg-indigo-500/10 dark:bg-indigo-500/20 hover:bg-indigo-500/20 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border-none text-sm h-11 font-bold rounded-2xl flex items-center justify-center gap-1.5 active:scale-95 transition-all min-w-0 shadow-none"
-        >
-          <Folder className="w-4 h-4 shrink-0 text-indigo-500 dark:text-indigo-400" />
-          <span className="truncate">{t('catalog.bulkCollection')}</span>
-        </Button>
+      {/* ⭐ Favoriten */}
+      <button
+        type="button"
+        onClick={onBulkFavorite}
+        disabled={selectedCount === 0}
+        className={itemNeutral}
+        title={allSelectedAreFavorites ? t('catalog.bulkUnfavorite') : t('catalog.bulkFavorites')}
+        aria-label={allSelectedAreFavorites ? t('catalog.bulkUnfavorite') : t('catalog.bulkFavorites')}
+      >
+        <Star className={`w-5 h-5 transition-colors ${allSelectedAreFavorites ? 'fill-amber-400 text-amber-400' : 'text-gray-500 dark:text-gray-400 group-hover:text-amber-500'}`} />
+        <span className={itemLabel}>
+          {t('catalog.bulkFavorites')}
+        </span>
+      </button>
 
-        {/* 🛒 Einkaufsliste (Primary Action) */}
-        <Button
-          onPress={onBulkAdd}
-          isDisabled={selectedCount === 0}
-          className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm h-11 font-bold rounded-2xl flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-600/20 active:scale-95 transition-all min-w-0"
-        >
-          <ShoppingCart className="w-4 h-4 shrink-0" />
-          <span className="truncate">{t('catalog.bulkCart')}</span>
-        </Button>
+      {/* 📁 Sammlung */}
+      <button
+        type="button"
+        onClick={onBulkAddToCollection}
+        disabled={selectedCount === 0}
+        className={itemNeutral}
+        title={t('catalog.bulkCollection')}
+        aria-label={t('catalog.bulkCollection')}
+      >
+        <Folder className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-emerald-500" />
+        <span className={itemLabel}>
+          {t('catalog.bulkCollection')}
+        </span>
+      </button>
 
-        {/* 🗑️ Löschen (Destructive Action) */}
-        <Button
-          onPress={onBulkDelete}
-          isDisabled={selectedCount === 0}
-          className="bg-rose-500/10 dark:bg-rose-500/20 hover:bg-rose-500/20 dark:hover:bg-rose-500/30 text-rose-600 dark:text-rose-400 border-none text-sm h-11 font-bold rounded-2xl flex items-center justify-center gap-1.5 active:scale-95 transition-all min-w-0 shadow-none"
-        >
-          <Trash2 className="w-4 h-4 shrink-0 text-rose-500" />
-          <span className="truncate">{t('catalog.bulkDelete')}</span>
-        </Button>
-      </div>
-    </div>
+      {/* 🛒 Einkaufsliste (Primary CTA) */}
+      <button
+        type="button"
+        onClick={onBulkAdd}
+        disabled={selectedCount === 0}
+        className={itemPrimary}
+        title={t('catalog.bulkCart')}
+        aria-label={t('catalog.bulkCart')}
+      >
+        <ShoppingCart className="w-5 h-5" />
+        <span className={itemLabel}>
+          {t('catalog.bulkCart')}
+        </span>
+      </button>
+
+      {/* 🗑️ Löschen */}
+      <button
+        type="button"
+        onClick={onBulkDelete}
+        disabled={selectedCount === 0}
+        className={itemDestructive}
+        title={t('catalog.bulkDelete')}
+        aria-label={t('catalog.bulkDelete')}
+      >
+        <Trash2 className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-rose-500" />
+        <span className={itemLabel}>
+          {t('catalog.bulkDelete')}
+        </span>
+      </button>
+    </FloatingActionBar>
   );
 }
