@@ -67,10 +67,10 @@ export default function RecipePosterCard({
           </div>
         )}
 
-        {/* Favorite badge in top right */}
+        {/* Favorite badge in top right (flat clean) */}
         {job.isFavorite && (
-          <div className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-black/40 dark:bg-black/60 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xs">
-            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+          <div className="absolute top-2 right-2 z-10 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)] pointer-events-none">
+            <Star className="w-4.5 h-4.5 fill-amber-400 text-amber-400" />
           </div>
         )}
       </div>
