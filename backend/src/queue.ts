@@ -2,12 +2,12 @@ import fs from 'fs/promises';
 import path from 'path';
 import {
   claimNextJob, updateJob, updateJobProgress, completeJob, getRecipe, getClient,
-  reclaimExpiredJobs, heartbeatJob, getMaxVideoDurationSeconds, isJobCancelled,
+  reclaimExpiredJobs, sweepStaleAwaitingFrames, heartbeatJob, getMaxVideoDurationSeconds, isJobCancelled,
 } from './db.js';
 import { randomUUID } from 'node:crypto';
-import { getScraperForUrl } from './scrapers/index.js';
+import { getScraperForUrl, type ScrapingResult } from './scrapers/index.js';
 import { downloadMedia } from './scrapers/download.js';
-import { extractRecipe, remixRecipe } from './gemini.js';
+import { extractRecipe, remixRecipe, type ClientFramesInput } from './gemini.js';
 import { generateRecipeCoverImage } from './imageGenerator.js';
 import { pruneOldGeminiLogs } from './logger.js';
 import { photoUploadIdFromUrl, downloadImportPhotos, deleteImportPhotos, sweepOldPhotoImports } from './photoImport.js';
@@ -21,6 +21,7 @@ const workerId = randomUUID();
 let activeJobs = 0;
 let workerInterval: NodeJS.Timeout | null = null;
 let reclaimInterval: NodeJS.Timeout | null = null;
+let sweepInterval: NodeJS.Timeout | null = null;
 let cleanupInterval: NodeJS.Timeout | null = null;
 let notificationInterval: NodeJS.Timeout | null = null;
 
@@ -226,14 +227,20 @@ async function processJob(job: Job): Promise<void> {
       return;
     }
 
-    // 1. Mark job as scraping
-    console.log(`[Job ${jobId}] Starting scraping for ${url}...`);
-    await updateJobProgress(jobId, 'scraping', { percent: 15, stage: 'scraping' });
+    // 1. Mark job as scraping or rehydrate from scrapeMeta
+    let scrapeResult: ScrapingResult;
+    if (job.scrapeMeta) {
+      console.log(`[Job ${jobId}] Resuming job with cached scrapeMeta...`);
+      scrapeResult = job.scrapeMeta as ScrapingResult;
+    } else {
+      console.log(`[Job ${jobId}] Starting scraping for ${url}...`);
+      await updateJobProgress(jobId, 'scraping', { percent: 15, stage: 'scraping' });
 
-    // 2. Perform scraping via the appropriate scraper
-    const scraper = getScraperForUrl(url);
-    const scrapeResult = await scraper.scrape(url, jobId);
-    console.log(`[Job ${jobId}] Scraped successfully. Caption/Title length: ${scrapeResult.caption.length}`);
+      // 2. Perform scraping via the appropriate scraper
+      const scraper = getScraperForUrl(url);
+      scrapeResult = await scraper.scrape(url, jobId);
+      console.log(`[Job ${jobId}] Scraped successfully. Caption/Title length: ${scrapeResult.caption.length}`);
+    }
 
     // 2b. Enforce the video-length cap *before* downloading — the duration is known from
     // scrape metadata (RapidAPI / yt-dlp), so we reject over-limit videos without spending
@@ -246,6 +253,35 @@ async function processJob(job: Job): Promise<void> {
         params: { maxSeconds: maxDuration },
         message: `Video too long: ${actualSec}s exceeds the ${maxDuration}s limit.`,
       });
+    }
+
+    // 2c. Client-media streaming: if media is client-delegated and we don't have client_frames yet,
+    // park the job in 'awaiting_frames' so the client can capture and POST keyframes.
+    if (scrapeResult.media.kind === 'client' && !job.clientFrames) {
+      console.log(`[Job ${jobId}] Media kind is 'client' — parking job in 'awaiting_frames' for client keyframe capture.`);
+      await updateJob(jobId, {
+        scrapeMeta: scrapeResult,
+        status: 'awaiting_frames',
+        progress: { percent: 30, stage: 'awaiting_frames' },
+      });
+      // Release worker lease so heartbeat stops and status is awaiting_frames
+      await getClient()
+        .from('jobs')
+        .update({ locked_at: null, locked_by: null })
+        .eq('id', jobId);
+      return;
+    }
+
+    // Decode ephemeral client frames if present
+    let clientFramesInput: ClientFramesInput | undefined;
+    if (job.clientFrames) {
+      const thumbBuf = job.clientFrames.thumbnailBase64
+        ? Buffer.from(job.clientFrames.thumbnailBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64')
+        : undefined;
+      const frameBufs = (job.clientFrames.framesBase64 || [])
+        .map((f) => Buffer.from(f.replace(/^data:image\/\w+;base64,/, ''), 'base64'))
+        .filter((b) => b.length > 0);
+      clientFramesInput = { thumbnail: thumbBuf, frames: frameBufs };
     }
 
     // 3. Mark job as processing
@@ -349,7 +385,9 @@ async function processJob(job: Job): Promise<void> {
         runDir,
         userPrefs,
         scrapeResult.htmlContent,
-        isCarousel ? downloaded.imageFilePaths : undefined
+        isCarousel ? downloaded.imageFilePaths : undefined,
+        clientFramesInput ? 'client_frames' : 'carousel',
+        clientFramesInput
       ),
       frameSelectionPromise,
     ]);
@@ -418,6 +456,9 @@ async function processJob(job: Job): Promise<void> {
     clearInterval(heartbeat);
     const cleanupPaths = [audioFilePath, videoFilePath, ...framePaths].filter(Boolean);
     await Promise.allSettled(cleanupPaths.map((p) => fs.unlink(p).catch(() => { })));
+    clientFramesInput = undefined;
+    (job as any).clientFrames = null;
+    (job as any).scrapeMeta = null;
     // Import photos are transient in Storage as well — drop them on success and
     // on failure alike, so nothing waits for the 24h sweep. A failure to clean up
     // must never turn a completed job into a failed one.
@@ -503,6 +544,10 @@ export function startQueue(pollIntervalMs = 2000): void {
     () => reclaimExpiredJobs(config.WORKER_LEASE_TIMEOUT_MINUTES).catch(console.error),
     60_000
   );
+  sweepInterval = setInterval(
+    () => sweepStaleAwaitingFrames(config.CLIENT_FRAMES_TIMEOUT_MINUTES).catch(console.error),
+    60_000
+  );
 
   // Run cleanup once at startup, then every 12 hours.
   // Local debug run-dirs are pruned after 30 days; the persistent gemini_logs
@@ -540,6 +585,7 @@ export function startQueue(pollIntervalMs = 2000): void {
 export function stopQueue(): void {
   if (workerInterval) { clearInterval(workerInterval); workerInterval = null; }
   if (reclaimInterval) { clearInterval(reclaimInterval); reclaimInterval = null; }
+  if (sweepInterval) { clearInterval(sweepInterval); sweepInterval = null; }
   if (cleanupInterval) { clearInterval(cleanupInterval); cleanupInterval = null; }
   if (notificationInterval) { clearInterval(notificationInterval); notificationInterval = null; }
   console.log('Background job queue worker stopped.');
