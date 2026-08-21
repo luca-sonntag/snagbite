@@ -166,18 +166,19 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     try {
       const token = await getAccessToken();
       if (token) {
-        fetch(apiUrl(`/api/jobs/${jobId}/cancel`), {
+        await fetch(apiUrl(`/api/jobs/${jobId}/cancel`), {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`
           },
           keepalive: true
         }).catch(err => console.warn('Failed to cancel backgrounded job:', err));
+        fetchLimitStatus();
       }
     } catch (err) {
       console.warn('Error executing cancelActiveFreeJob:', err);
     }
-  }, [getAccessToken, stopActivePolling, t]);
+  }, [getAccessToken, stopActivePolling, t, fetchLimitStatus]);
 
   const runSimulatedProgress = useCallback(async (jobId: string, recipeId: string, targetDurationMs: number = 10000) => {
     setIsPending(true);
@@ -493,6 +494,8 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         handleBackground();
+      } else if (document.visibilityState === 'visible') {
+        fetchLimitStatus();
       }
     };
 
@@ -501,6 +504,8 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     const cleanupAppState = registerAppStateListener((isActive) => {
       if (!isActive) {
         handleBackground();
+      } else {
+        fetchLimitStatus();
       }
     });
 
@@ -508,7 +513,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       cleanupAppState();
     };
-  }, [isPremium, cancelActiveFreeJob]);
+  }, [isPremium, cancelActiveFreeJob, fetchLimitStatus]);
 
 
   const claimRewardedCredit = useCallback(async (): Promise<boolean> => {
