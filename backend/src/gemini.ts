@@ -358,7 +358,12 @@ function imageMimeType(filePath: string): string {
  * slides are designed graphics with the recipe typeset on them, photos are
  * handheld shots of paper that may be skewed, glared or handwritten.
  */
-export type ImageSourceKind = 'carousel' | 'photo';
+export type ImageSourceKind = 'carousel' | 'photo' | 'client_frames';
+
+export interface ClientFramesInput {
+  thumbnail?: Buffer;
+  frames: Buffer[];
+}
 
 export interface ExtractRecipeResult {
   recipe: Recipe;
@@ -374,7 +379,8 @@ export async function extractRecipe(
   userPrefs?: UserPreferences,
   htmlContent?: string,
   carouselImagePaths?: string[],
-  imageSourceKind: ImageSourceKind = 'carousel'
+  imageSourceKind: ImageSourceKind = 'carousel',
+  clientFrames?: ClientFramesInput
 ): Promise<ExtractRecipeResult> {
   if (!config.GEMINI_API_KEY || config.GEMINI_API_KEY === 'your_gemini_api_key_here') {
     throw new Error('Gemini API key is not configured in environment variables.');
@@ -461,6 +467,28 @@ export async function extractRecipe(
       }
     }
 
+    // 2d. Client-extracted video keyframes: attach as ephemeral inlineData (RAM only, no Google File API upload)
+    if (clientFrames) {
+      if (clientFrames.thumbnail && clientFrames.thumbnail.length > 0) {
+        contentParts.push({
+          inlineData: {
+            data: clientFrames.thumbnail.toString('base64'),
+            mimeType: 'image/jpeg',
+          },
+        });
+      }
+      for (const frame of clientFrames.frames) {
+        if (frame && frame.length > 0) {
+          contentParts.push({
+            inlineData: {
+              data: frame.toString('base64'),
+              mimeType: 'image/jpeg',
+            },
+          });
+        }
+      }
+    }
+
     // 3. Request structured content from Gemini
     const model = genAI.getGenerativeModel({
       model: config.GEMINI_MODEL,
@@ -474,11 +502,14 @@ export async function extractRecipe(
     const { targetLanguage, tempInstruction, unitSystemInstruction, languageInstruction } = getPromptUnitInstructions(userPrefs);
 
     const isPhotoSource = imageSourceKind === 'photo' && !!carouselImagePaths?.length;
+    const totalClientFrames = (clientFrames?.thumbnail ? 1 : 0) + (clientFrames?.frames?.length ?? 0);
 
     const visualContextClause = carouselImagePaths?.length
       ? isPhotoSource
         ? ` and ${carouselImagePaths.length} photo(s) the user took of a PHYSICAL recipe source — a cookbook page, a magazine clipping, or a handwritten recipe card — in page order. Carefully read ALL text visible in every photo, including cursive and old-fashioned handwriting; it is the primary and only recipe source`
         : ` and ${carouselImagePaths.length} images from a photo-carousel post in their original slide order. Recipe carousels typically show the finished dish plus slides where the ingredient list and step-by-step instructions are written as TEXT ON the images — carefully read ALL text visible in every image; it is the primary recipe source`
+      : imageSourceKind === 'client_frames' && totalClientFrames > 0
+        ? ` and ${totalClientFrames} image(s) captured from the video: ${clientFrames?.thumbnail ? 'Image 1 is the video thumbnail/cover showing the final dish. ' : ''}The following ${clientFrames?.frames?.length ?? 0} image(s) show chronological keyframes (at approx. 25%, 50%, 75% video runtime) depicting ingredient preparation and cooking steps. Use these visual frames to verify ingredients, cooking techniques, and consistency. Missing frames are normal; NEVER hallucinate steps or ingredients not shown or mentioned`
       : gridImagePath
         ? ' and an image showing a 4x4 grid of 16 chronological frames extracted from the video to provide visual context (showing ingredients, cooking steps, and final plating)'
         : '';
@@ -634,6 +665,7 @@ ${caption.trim() ? `\nDescription/Caption:\n"""\n${caption}\n"""` : ''}${htmlCon
         captionLength: caption.length,
         captionPreview: caption.slice(0, 300),
         carouselImageCount: carouselImagePaths?.length ?? 0,
+        clientFramesCount: totalClientFrames,
         imageSourceKind,
         prompt,
       },
@@ -646,6 +678,7 @@ ${caption.trim() ? `\nDescription/Caption:\n"""\n${caption}\n"""` : ''}${htmlCon
 
     return { recipe, usage: geminiUsage };
   } catch (err: any) {
+    const totalClientFrames = (clientFrames?.thumbnail ? 1 : 0) + (clientFrames?.frames?.length ?? 0);
     void writeGeminiLog({
       timestamp,
       requestType: 'extract_recipe',
@@ -659,6 +692,7 @@ ${caption.trim() ? `\nDescription/Caption:\n"""\n${caption}\n"""` : ''}${htmlCon
         captionLength: caption.length,
         captionPreview: caption.slice(0, 300),
         carouselImageCount: carouselImagePaths?.length ?? 0,
+        clientFramesCount: totalClientFrames,
         imageSourceKind,
       },
       rawOutput,
