@@ -164,20 +164,34 @@ async function extractKeyframesWebCodecs(
           description,
         });
 
+        let hasSeenFirstKeyFrame = false;
+
         mp4boxfile.onSamples = async (trackId: number, _user: any, samples: MP4Sample[]) => {
           if (trackId !== videoTrack.id || !decoder || decoder.state === 'closed') return;
 
           for (const sample of samples) {
             if (isFinished || decoder.state !== 'configured') break;
 
-            const chunk = new EncodedVideoChunk({
-              type: sample.is_sync ? 'key' : 'delta',
-              timestamp: (sample.cts * 1_000_000) / sample.timescale,
-              duration: (sample.duration * 1_000_000) / sample.timescale,
-              data: sample.data,
-            });
+            // VideoDecoder strictly requires a key frame (type: 'key') as the very first chunk after configure()
+            if (!hasSeenFirstKeyFrame) {
+              if (!sample.is_sync) {
+                continue;
+              }
+              hasSeenFirstKeyFrame = true;
+            }
 
-            decoder.decode(chunk);
+            try {
+              const chunk = new EncodedVideoChunk({
+                type: sample.is_sync ? 'key' : 'delta',
+                timestamp: (sample.cts * 1_000_000) / sample.timescale,
+                duration: (sample.duration * 1_000_000) / sample.timescale,
+                data: sample.data,
+              });
+
+              decoder.decode(chunk);
+            } catch (decodeErr: any) {
+              console.warn('[videoFrames-WebCodecs] Chunk decode skipped:', decodeErr.message);
+            }
           }
 
           try {
@@ -198,7 +212,7 @@ async function extractKeyframesWebCodecs(
           resolve(results);
         };
 
-        mp4boxfile.setExtractionOptions(videoTrack.id, null, { nbSamples: 1000 });
+        mp4boxfile.setExtractionOptions(videoTrack.id, null, { nbSamples: 1000, rapAlignment: true });
         mp4boxfile.start();
       } catch (err: any) {
         cleanup();
@@ -266,7 +280,6 @@ async function extractKeyframesVideoElement(
     videoElement.preload = 'auto';
     videoElement.muted = true;
     videoElement.playsInline = true;
-    videoElement.crossOrigin = 'anonymous';
     videoElement.style.position = 'fixed';
     videoElement.style.left = '-9999px';
     videoElement.style.top = '-9999px';
