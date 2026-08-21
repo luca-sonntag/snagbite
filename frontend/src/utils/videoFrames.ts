@@ -1,6 +1,6 @@
 import { CapacitorHttp } from '@capacitor/core';
 import { isNative } from '../native';
-import { compressImage, VIDEO_FRAME_PROFILE } from './imageCompression';
+import { VIDEO_FRAME_PROFILE } from './imageCompression';
 import { apiUrl } from '../api';
 import type { ExtractionJob } from '../types';
 import { setCachedImage } from './imageStore';
@@ -39,7 +39,8 @@ function base64ToBlob(base64Data: string, mimeType = 'video/mp4'): Blob {
 }
 
 /**
- * Seeks a video element to a specific timestamp and resolves on 'seeked'.
+ * Seeks a video element to a specific timestamp and resolves only when the decoded frame
+ * is guaranteed to be rendered and available for canvas capture.
  */
 function seekToTimestamp(video: HTMLVideoElement, timestamp: number): Promise<void> {
   return new Promise((resolve) => {
@@ -53,7 +54,17 @@ function seekToTimestamp(video: HTMLVideoElement, timestamp: number): Promise<vo
     const onSeeked = () => {
       if (done) return;
       cleanup();
-      resolve();
+      // On Chromium / Android WebView, requestVideoFrameCallback guarantees that the hardware decoder
+      // has presented the frame to the compositor surface and is ready for canvas drawImage.
+      if ('requestVideoFrameCallback' in video && typeof (video as any).requestVideoFrameCallback === 'function') {
+        (video as any).requestVideoFrameCallback(() => {
+          resolve();
+        });
+      } else {
+        requestAnimationFrame(() => {
+          setTimeout(resolve, 80);
+        });
+      }
     };
 
     const timer = setTimeout(() => {
@@ -65,7 +76,7 @@ function seekToTimestamp(video: HTMLVideoElement, timestamp: number): Promise<vo
 
     video.addEventListener('seeked', onSeeked);
     try {
-      video.currentTime = Math.min(timestamp, Math.max(0, video.duration - 0.1));
+      video.currentTime = Math.min(timestamp, Math.max(0, (video.duration || 10) - 0.1));
     } catch (err: any) {
       console.warn(`[videoFrames] Error setting video.currentTime: ${err.message}`);
       cleanup();
@@ -140,7 +151,7 @@ export async function captureKeyframes(
 
     objectUrl = URL.createObjectURL(videoBlob);
 
-    // Create offscreen video element attached to DOM for reliable Android WebView hardware rendering
+    // Create offscreen video element attached to DOM with non-zero dimensions to avoid GPU decoder throttling
     videoElement = document.createElement('video');
     videoElement.preload = 'auto';
     videoElement.muted = true;
@@ -149,40 +160,43 @@ export async function captureKeyframes(
     videoElement.style.position = 'fixed';
     videoElement.style.left = '-9999px';
     videoElement.style.top = '-9999px';
-    videoElement.style.width = '1px';
-    videoElement.style.height = '1px';
-    videoElement.style.opacity = '0';
+    videoElement.style.width = '320px';
+    videoElement.style.height = '240px';
+    videoElement.style.opacity = '0.01';
     videoElement.style.pointerEvents = 'none';
     document.body.appendChild(videoElement);
 
     videoElement.src = objectUrl;
+    videoElement.load();
 
-    // Wait for metadata / loadeddata
-    await new Promise<void>((resolve, reject) => {
-      const onLoaded = () => {
-        cleanup();
-        resolve();
-      };
-      const onError = () => {
-        cleanup();
-        reject(new Error(`Video load error: ${videoElement?.error?.message || 'unknown'}`));
-      };
-      const cleanup = () => {
-        videoElement?.removeEventListener('loadeddata', onLoaded);
-        videoElement?.removeEventListener('loadedmetadata', onLoaded);
-        videoElement?.removeEventListener('error', onError);
-      };
+    // Wait for metadata / loadeddata if not already ready
+    if (videoElement.readyState < 2 || !videoElement.videoWidth) {
+      await new Promise<void>((resolve, reject) => {
+        const onLoaded = () => {
+          cleanup();
+          resolve();
+        };
+        const onError = () => {
+          cleanup();
+          reject(new Error(`Video load error: ${videoElement?.error?.message || 'unknown'}`));
+        };
+        const cleanup = () => {
+          videoElement?.removeEventListener('loadeddata', onLoaded);
+          videoElement?.removeEventListener('loadedmetadata', onLoaded);
+          videoElement?.removeEventListener('error', onError);
+        };
 
-      videoElement?.addEventListener('loadeddata', onLoaded);
-      videoElement?.addEventListener('loadedmetadata', onLoaded);
-      videoElement?.addEventListener('error', onError);
+        videoElement?.addEventListener('loadeddata', onLoaded);
+        videoElement?.addEventListener('loadedmetadata', onLoaded);
+        videoElement?.addEventListener('error', onError);
 
-      // Fallback timer for metadata load
-      setTimeout(() => {
-        cleanup();
-        resolve();
-      }, 5000);
-    });
+        // Fallback timer for metadata load
+        setTimeout(() => {
+          cleanup();
+          resolve();
+        }, 5000);
+      });
+    }
 
     const realDuration = (videoElement.duration && Number.isFinite(videoElement.duration) && videoElement.duration > 0)
       ? videoElement.duration
@@ -192,18 +206,32 @@ export async function captureKeyframes(
     console.log(`[videoFrames] Capturing frames at timestamps: [${timestamps.join('s, ')}s] (duration: ${realDuration.toFixed(1)}s)`);
 
     const capturedFrames: string[] = [];
+    const { maxEdge, quality } = VIDEO_FRAME_PROFILE;
 
     for (const ts of timestamps) {
       if (abortController.signal.aborted) break;
 
       await seekToTimestamp(videoElement, ts);
 
-      const width = videoElement.videoWidth || 720;
-      const height = videoElement.videoHeight || 1280;
+      const origWidth = videoElement.videoWidth || 720;
+      const origHeight = videoElement.videoHeight || 1280;
+
+      let targetWidth = origWidth;
+      let targetHeight = origHeight;
+
+      if (targetWidth > maxEdge || targetHeight > maxEdge) {
+        if (targetWidth > targetHeight) {
+          targetHeight = Math.round((targetHeight * maxEdge) / targetWidth);
+          targetWidth = maxEdge;
+        } else {
+          targetWidth = Math.round((targetWidth * maxEdge) / targetHeight);
+          targetHeight = maxEdge;
+        }
+      }
 
       const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
       const ctx = canvas.getContext('2d');
 
       if (!ctx) {
@@ -211,17 +239,11 @@ export async function captureKeyframes(
         continue;
       }
 
-      ctx.drawImage(videoElement, 0, 0, width, height);
+      ctx.drawImage(videoElement, 0, 0, targetWidth, targetHeight);
 
-      const frameBlob = await new Promise<Blob | null>((res) =>
-        canvas.toBlob((b) => res(b), 'image/jpeg', 0.85)
-      );
-
-      if (frameBlob) {
-        const compressedBase64 = await compressImage(frameBlob, VIDEO_FRAME_PROFILE);
-        if (compressedBase64) {
-          capturedFrames.push(compressedBase64);
-        }
+      const base64 = canvas.toDataURL('image/jpeg', quality);
+      if (base64 && base64.length > 200) {
+        capturedFrames.push(base64);
       }
     }
 
