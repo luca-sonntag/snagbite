@@ -8,6 +8,7 @@ import { compressRecipePhotos } from '../utils/imageCompression';
 
 import { useExtractionJobs, type ExtractionMode } from '../context/ExtractionJobsContext';
 import { sendNativeNotification, requestNativeNotificationPermission, isNative, registerAppStateListener } from '../native';
+import { handleClientFrameRequest } from '../utils/videoFrames';
 
 // Tracks the currently in-flight extraction job across reloads/restarts, so a
 // still-running job can be resumed instead of the user re-submitting the same
@@ -117,12 +118,15 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
   const activePollingJobIdRef = useRef<string | null>(null);
   const activePollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const frameProcessingJobIdRef = useRef<string | null>(null);
+
   const stopActivePolling = useCallback(() => {
     if (activePollingIntervalRef.current) {
       clearInterval(activePollingIntervalRef.current);
       activePollingIntervalRef.current = null;
     }
     activePollingJobIdRef.current = null;
+    frameProcessingJobIdRef.current = null;
   }, []);
 
   const pollingStartTimeRef = useRef<number>(0);
@@ -277,6 +281,14 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           setProgress(null);
           setIsPending(false);
           localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
+        } else if (job.status === 'awaiting_frames') {
+          setProgress(job.progress || { percent: 30, stage: 'awaiting_frames' });
+          if (frameProcessingJobIdRef.current !== job.id) {
+            frameProcessingJobIdRef.current = job.id;
+            handleClientFrameRequest(job, getAccessToken).catch((err) =>
+              console.warn('[useRecipeExtraction] Keyframe capture failed:', err),
+            );
+          }
         } else {
           setProgress(job.progress || null);
         }

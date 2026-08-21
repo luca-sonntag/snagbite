@@ -8,6 +8,7 @@ const STAGE_KEY: Record<ProgressStage, string> = {
   queued: 'activeExtractions.stages.queued',
   scraping: 'activeExtractions.stages.scraping',
   downloading_media: 'activeExtractions.stages.downloading_media',
+  awaiting_frames: 'activeExtractions.stages.awaiting_frames',
   extracting_frames: 'activeExtractions.stages.extracting_frames',
   reading_photos: 'activeExtractions.stages.reading_photos',
   extracting_recipe: 'activeExtractions.stages.extracting_recipe',

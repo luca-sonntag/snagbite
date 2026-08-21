@@ -89,11 +89,17 @@ export interface Recipe {
   updatedAt?: string;
 }
 
-export type ProgressStage = 'queued' | 'scraping' | 'downloading_media' | 'extracting_frames' | 'reading_photos' | 'extracting_recipe' | 'generating_cover' | 'finalizing';
+export type ProgressStage = 'queued' | 'scraping' | 'downloading_media' | 'extracting_frames' | 'reading_photos' | 'awaiting_frames' | 'extracting_recipe' | 'generating_cover' | 'finalizing';
 
 export interface ProgressData {
   percent: number;
   stage: ProgressStage;
+}
+
+export interface MediaRequest {
+  videoUrl: string;
+  thumbnailUrl?: string;
+  durationSeconds?: number;
 }
 
 /**
@@ -105,8 +111,9 @@ export interface ExtractionJob {
   id: string;
   kind: 'url' | 'photo' | 'remix';
   sourceUrl: string;
-  status: 'pending' | 'scraping' | 'processing' | 'completed' | 'failed' | 'cancelled';
+  status: 'pending' | 'scraping' | 'processing' | 'awaiting_frames' | 'completed' | 'failed' | 'cancelled';
   progress?: ProgressData | null;
+  mediaRequest?: MediaRequest | null;
   error?: string;
   recipeId?: string | null;
   parentRecipeId?: string | null;

@@ -15,12 +15,14 @@ export interface CompressionProfile {
 /** Small preview profile: thumbnails and screenshots (the historical default). */
 export const PREVIEW_PROFILE: CompressionProfile = { maxEdge: 800, quality: 0.75 };
 
-/**
- * Photo-import profile. 800px/0.75 is far too lossy to read handwriting from —
+/** Photo-import profile. 800px/0.75 is far too lossy to read handwriting from —
  * at 1800px the strokes on a recipe card survive, at roughly 400-800 KB per
  * photo, so five photos stay comfortably inside the route's body budget.
  */
 export const RECIPE_PHOTO_PROFILE: CompressionProfile = { maxEdge: 1800, quality: 0.82 };
+
+/** Video keyframe capture profile: 720px / q0.70 for crisp Gemini multimodal extraction and small payloads. */
+export const VIDEO_FRAME_PROFILE: CompressionProfile = { maxEdge: 720, quality: 0.70 };
 
 /** Fallback profile applied when a whole photo set is still too large to send. */
 export const RECIPE_PHOTO_FALLBACK_PROFILE: CompressionProfile = { maxEdge: 1400, quality: 0.7 };

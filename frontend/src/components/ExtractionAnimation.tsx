@@ -105,6 +105,7 @@ const SCENE_TARGET_PERCENT: Record<ProgressStage, number> = {
   queued: 8,
   scraping: 25,
   downloading_media: 50,
+  awaiting_frames: 40,
   extracting_frames: 65,
   reading_photos: 30,
   extracting_recipe: 75,

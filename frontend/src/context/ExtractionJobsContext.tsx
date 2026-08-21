@@ -5,7 +5,8 @@ import { apiUrl } from '../api';
 import { useAuth } from './AuthContext';
 import { useI18n } from '../context/I18nContext';
 
-import { sendNativeNotification } from '../native';
+import { isNative, sendNativeNotification } from '../native';
+import { handleClientFrameRequest } from '../utils/videoFrames';
 
 export type ExtractionMode = 'link' | 'photo';
 
@@ -117,6 +118,8 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
   const finalizedRef = useRef<Set<string>>(new Set(jobs.filter(j => isTerminal(j.status)).map(j => j.id)));
   // Prevents overlapping polls of the same job within a slow tick.
   const inFlightRef = useRef<Set<string>>(new Set());
+  // Tracks jobs where client frame capture has already been kicked off.
+  const capturedFramesJobsRef = useRef<Set<string>>(new Set());
   // Pending auto-dismiss timers for completed cards, keyed by job id.
   const dismissTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
@@ -151,6 +154,7 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
     if (timer) { clearTimeout(timer); dismissTimersRef.current.delete(id); }
     finalizedRef.current.delete(id);
     inFlightRef.current.delete(id);
+    capturedFramesJobsRef.current.delete(id);
     setJobsPersist(prev => prev.filter(j => j.id !== id));
   }, [setJobsPersist]);
 
@@ -219,6 +223,16 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
                 errorParams: envelope?.params ?? null,
               }
             : j
+        ));
+      } else if (job.status === 'awaiting_frames') {
+        if (!capturedFramesJobsRef.current.has(id)) {
+          capturedFramesJobsRef.current.add(id);
+          handleClientFrameRequest(job, getAccessToken).catch((err) => {
+            console.warn('[ExtractionJobsContext] Frame handler failed:', err);
+          });
+        }
+        setJobsPersist(prev => prev.map(j =>
+          j.id === id ? { ...j, status: job.status, progress: job.progress ?? null } : j
         ));
       } else {
         setJobsPersist(prev => prev.map(j =>
