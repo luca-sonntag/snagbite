@@ -90,7 +90,7 @@ async function extractKeyframesWebCodecs(
       reject(new Error(`MP4Box error: ${err}`));
     };
 
-    mp4boxfile.onReady = async (info: MP4Info) => {
+    mp4boxfile.onReady = (info: MP4Info) => {
       try {
         const videoTrack = info.videoTracks[0];
         if (!videoTrack) {
@@ -238,13 +238,15 @@ async function extractKeyframesWebCodecs(
         const batchSize = Math.max(1000, totalSamples || 5000);
         mp4boxfile.setExtractionOptions(videoTrack.id, null, { nbSamples: batchSize });
         mp4boxfile.start();
+        mp4boxfile.seek(0, true);
+        mp4boxfile.flush();
 
         // Safety fallback: finalize after all samples are queued or after timeout
         setTimeout(() => {
           if (!isFinished) {
             void finalize();
           }
-        }, 4000);
+        }, 5000);
       } catch (err: any) {
         cleanup();
         reject(err);
@@ -339,71 +341,82 @@ export async function captureKeyframes(
   }
 }
 
+const inFlightCaptureJobs = new Set<string>();
+
 /**
- * Handles an awaiting_frames request: pre-caches the thumbnail, captures 3 video keyframes,
+ * Handles an awaiting_frames request: pre-caches the thumbnail, captures 16 video keyframes,
  * and POSTs them to /api/extract-recipe/frames to resume worker extraction.
  */
 export async function handleClientFrameRequest(
   job: ExtractionJob,
   getAccessToken: () => Promise<string | null>,
 ): Promise<void> {
-  const token = await getAccessToken();
-  if (!token) return;
-
-  const mediaRequest = job.mediaRequest;
-  if (!mediaRequest?.videoUrl) {
-    console.warn('[videoFrames] Received awaiting_frames but job has no videoUrl in mediaRequest.');
+  if (inFlightCaptureJobs.has(job.id)) {
     return;
   }
+  inFlightCaptureJobs.add(job.id);
 
-  // Pre-cache the cover thumbnail if provided by the scraper
-  if (mediaRequest.thumbnailUrl) {
-    try {
-      const thumbResponse = await CapacitorHttp.get({
-        url: mediaRequest.thumbnailUrl,
-        responseType: 'blob',
-      });
-      if (thumbResponse.status >= 200 && thumbResponse.status < 300) {
-        const thumbBase64 = typeof thumbResponse.data === 'string'
-          ? (thumbResponse.data.startsWith('data:') ? thumbResponse.data : `data:image/jpeg;base64,${thumbResponse.data}`)
-          : null;
-        if (thumbBase64) {
-          await setCachedImage(mediaRequest.thumbnailUrl, thumbBase64);
+  try {
+    const token = await getAccessToken();
+    if (!token) return;
+
+    const mediaRequest = job.mediaRequest;
+    if (!mediaRequest?.videoUrl) {
+      console.warn('[videoFrames] Received awaiting_frames but job has no videoUrl in mediaRequest.');
+      return;
+    }
+
+    // Pre-cache the cover thumbnail if provided by the scraper
+    if (mediaRequest.thumbnailUrl) {
+      try {
+        const thumbResponse = await CapacitorHttp.get({
+          url: mediaRequest.thumbnailUrl,
+          responseType: 'blob',
+        });
+        if (thumbResponse.status >= 200 && thumbResponse.status < 300) {
+          const thumbBase64 = typeof thumbResponse.data === 'string'
+            ? (thumbResponse.data.startsWith('data:') ? thumbResponse.data : `data:image/jpeg;base64,${thumbResponse.data}`)
+            : null;
+          if (thumbBase64) {
+            await setCachedImage(mediaRequest.thumbnailUrl, thumbBase64);
+          }
         }
+      } catch (err: any) {
+        console.warn(`[videoFrames] Failed to pre-cache thumbnail: ${err.message}`);
+      }
+    }
+
+    // Capture 16 distributed keyframes from video stream
+    const framesBase64 = await captureKeyframes(
+      mediaRequest.videoUrl,
+      mediaRequest.durationSeconds,
+    );
+
+    console.log(`[videoFrames] Submitting ${framesBase64.length} frames for job ${job.id}...`);
+
+    // Submit frames to backend to resume worker extraction
+    try {
+      const postResponse = await fetch(apiUrl('/api/extract-recipe/frames'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          jobId: job.id,
+          framesBase64,
+        }),
+      });
+
+      if (!postResponse.ok) {
+        console.warn(`[videoFrames] Failed to submit frames, status: ${postResponse.status}`);
+      } else {
+        console.log(`[videoFrames] Frames submitted successfully for job ${job.id}.`);
       }
     } catch (err: any) {
-      console.warn(`[videoFrames] Failed to pre-cache thumbnail: ${err.message}`);
+      console.warn(`[videoFrames] POST /api/extract-recipe/frames network error: ${err.message}`);
     }
-  }
-
-  // Capture 3 distributed keyframes from video stream
-  const framesBase64 = await captureKeyframes(
-    mediaRequest.videoUrl,
-    mediaRequest.durationSeconds,
-  );
-
-  console.log(`[videoFrames] Submitting ${framesBase64.length} frames for job ${job.id}...`);
-
-  // Submit frames to backend to resume worker extraction
-  try {
-    const postResponse = await fetch(apiUrl('/api/extract-recipe/frames'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        jobId: job.id,
-        framesBase64,
-      }),
-    });
-
-    if (!postResponse.ok) {
-      console.warn(`[videoFrames] Failed to submit frames, status: ${postResponse.status}`);
-    } else {
-      console.log(`[videoFrames] Frames submitted successfully for job ${job.id}.`);
-    }
-  } catch (err: any) {
-    console.warn(`[videoFrames] POST /api/extract-recipe/frames network error: ${err.message}`);
+  } finally {
+    inFlightCaptureJobs.delete(job.id);
   }
 }

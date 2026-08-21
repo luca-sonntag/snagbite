@@ -38,6 +38,7 @@ declare module 'mp4box' {
     setExtractionOptions(id: number, user?: any, options?: { nbSamples?: number; rapAlignment?: boolean }): void;
     start(): void;
     stop(): void;
+    seek(time: number, useRap?: boolean): any;
     getTrackById(id: number): any;
   }
 
