@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, Check } from 'lucide-react';
+import { Clock, Check, Star } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { detectPlatform, PlatformIcon, PLATFORM_ICON_COLOR } from './PlatformIcon';
@@ -64,6 +64,13 @@ export default function RecipePosterCard({
               }`}
           >
             {isSelected && <Check className="w-4 h-4 text-white stroke-[3px]" />}
+          </div>
+        )}
+
+        {/* Favorite badge in top right */}
+        {job.isFavorite && (
+          <div className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-black/40 dark:bg-black/60 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xs">
+            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
           </div>
         )}
       </div>

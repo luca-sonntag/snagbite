@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, Check, Tag } from 'lucide-react';
+import { Clock, Check, Tag, Star } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 
@@ -61,9 +61,14 @@ export default function RecipeListItem({
 
       {/* Metadata */}
       <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
-        <h4 className="text-sm font-bold text-gray-900 dark:text-white line-clamp-1">
-          {r.title}
-        </h4>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <h4 className="text-sm font-bold text-gray-900 dark:text-white line-clamp-1 flex-1 min-w-0">
+            {r.title}
+          </h4>
+          {job.isFavorite && (
+            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
+          )}
+        </div>
 
         <div className="flex items-center gap-1.5 min-w-0 text-xs text-gray-500 dark:text-gray-400">
           {totalTime && (
