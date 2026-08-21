@@ -140,6 +140,7 @@ export default function SavedCatalog({
     handleCardClick,
     getBulkShoppingJobs,
     handleBulkDelete,
+    handleBulkToggleFavorite,
     sortBy,
     setSortBy,
     allFlags,
@@ -346,6 +347,19 @@ export default function SavedCatalog({
     setFlagSheetJob(job);
     setIsFlagSheetOpen(true);
   };
+
+  const selectableJobs = isListLevel ? filteredJobs : completedJobs;
+  const isAllSelected = selectableJobs.length > 0 && selectableJobs.every(j => selectedIds.has(j.recipeId));
+  const selectedJobs = completedJobs.filter(j => selectedIds.has(j.recipeId));
+  const allSelectedAreFavorites = selectedJobs.length > 0 && selectedJobs.every(j => j.isFavorite);
+
+  const handleToggleSelectAll = useCallback(() => {
+    if (isAllSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(selectableJobs.map(j => j.recipeId)));
+    }
+  }, [isAllSelected, selectableJobs, setSelectedIds]);
 
   const maxSavedRecipes = limitStatus?.maxSavedRecipes ?? 5;
   const isCookbookFull = maxSavedRecipes >= 0 && completedJobs.length >= maxSavedRecipes;
@@ -567,10 +581,15 @@ export default function SavedCatalog({
       {isSelectMode && (
         <BulkActionBar
           selectedCount={selectedIds.size}
+          totalSelectableCount={selectableJobs.length}
+          isAllSelected={isAllSelected}
+          allSelectedAreFavorites={allSelectedAreFavorites}
           onCancel={() => {
             setIsSelectMode(false);
             setSelectedIds(new Set());
           }}
+          onToggleSelectAll={handleToggleSelectAll}
+          onBulkFavorite={handleBulkToggleFavorite}
           onBulkAdd={handleBulkAddToShoppingListClick}
           onBulkDelete={handleBulkDelete}
           onBulkAddToCollection={handleBulkAddToCollectionClick}

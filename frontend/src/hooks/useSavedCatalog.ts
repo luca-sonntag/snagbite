@@ -547,6 +547,56 @@ export function useSavedCatalog({
     }
   };
 
+  // Bulk toggle favorites in Multi-Select mode
+  const handleBulkToggleFavorite = async () => {
+    const selectedJobs = completedJobs.filter(j => selectedIds.has(j.recipeId));
+    if (selectedJobs.length === 0) return;
+
+    const allFavorites = selectedJobs.every(j => j.isFavorite);
+    const nextVal = !allFavorites;
+
+    // Apply optimistic updates
+    const updates: Record<string, boolean> = {};
+    for (const j of selectedJobs) {
+      updates[j.recipeId] = nextVal;
+    }
+    setOptimisticFavorites(prev => ({ ...prev, ...updates }));
+
+    setIsSelectMode(false);
+    setSelectedIds(new Set());
+
+    try {
+      const token = getAccessToken ? await getAccessToken() : null;
+      if (!token) return;
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      };
+
+      await Promise.all(
+        selectedJobs.map(job =>
+          fetch(apiUrl(`/api/recipes/${job.recipeId}/favorite`), {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify({ isFavorite: nextVal })
+          })
+        )
+      );
+
+      if (fetchHistory) {
+        fetchHistory();
+      }
+    } catch (err) {
+      console.error('Error bulk updating favorites:', err);
+      const rollback: Record<string, boolean> = {};
+      for (const j of selectedJobs) {
+        rollback[j.recipeId] = j.isFavorite ?? false;
+      }
+      setOptimisticFavorites(prev => ({ ...prev, ...rollback }));
+    }
+  };
+
   // Toggle favorite status via PATCH /api/recipes/:id/favorite
   const toggleFavorite = async (job: SavedRecipe) => {
     const nextVal = !job.isFavorite;
@@ -709,6 +759,7 @@ export function useSavedCatalog({
     handleDirectAddToShoppingList,
     getBulkShoppingJobs,
     handleBulkDelete,
+    handleBulkToggleFavorite,
     sortBy,
     setSortBy,
     allFlags,
