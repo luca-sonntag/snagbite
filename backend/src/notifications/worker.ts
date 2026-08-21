@@ -1,6 +1,6 @@
 import { config } from '../config.js';
 import {
-  getAllJobs,
+  getLibrary,
   listCollections,
   getActivePushTokens,
   getRecentNotifications,
@@ -82,13 +82,15 @@ async function chooseForUser(
   now: Date,
   local: LocalParts,
 ): Promise<Candidate | null> {
-  const jobs = await getAllJobs(user.id);
+  const recipes = await getLibrary(user.id);
   const collectionsList = await listCollections(user.id).catch(() => []);
 
-  const collections = new Map<string, { name: string; jobIds: string[] }>();
+  const collections = new Map<string, { name: string; recipeIds: string[] }>();
   for (const col of collectionsList) {
-    const jobIds = jobs.filter((j) => (j.collectionIds ?? []).includes(col.id)).map((j) => j.id);
-    collections.set(col.id, { name: col.name, jobIds });
+    const recipeIds = recipes
+      .filter((entry) => (entry.collectionIds ?? []).includes(col.id))
+      .map((entry) => entry.recipeId);
+    collections.set(col.id, { name: col.name, recipeIds });
   }
 
   // Anti-repeat state from the last 30 days.
@@ -96,9 +98,9 @@ async function chooseForUser(
   const recentTypes = new Set(
     recent.filter((r) => now.getTime() - new Date(r.sentAt).getTime() <= 14 * 86400_000).map((r) => r.type),
   );
-  const recentJobIds = new Set(recent.map((r) => r.jobId).filter((id): id is string => !!id));
+  const recentRecipeIds = new Set(recent.map((r) => r.recipeId).filter((id): id is string => !!id));
 
-  const newestSave = jobs[0] ? new Date(jobs[0].createdAt).getTime() : null;
+  const newestSave = recipes[0] ? new Date(recipes[0].addedAt).getTime() : null;
   const daysSinceLastSave = newestSave === null
     ? Infinity
     : Math.floor((now.getTime() - newestSave) / 86400_000);
@@ -110,11 +112,11 @@ async function chooseForUser(
     localWeekday: local.weekday,
     season: getSeason(now),
     holidays: getActiveHolidays(now),
-    jobs,
+    recipes,
     collections,
     categories: resolveCategories(user),
     recentTypes,
-    recentJobIds,
+    recentRecipeIds,
     daysSinceLastSave,
   };
 
@@ -148,7 +150,7 @@ async function deliver(userId: string, candidate: Candidate, copy: FcmMessage): 
 /** Build the FCM data payload used for tap routing on the device. */
 function tapData(candidate: Candidate): Record<string, string> {
   const data: Record<string, string> = { type: candidate.type };
-  if (candidate.jobId) data.jobId = candidate.jobId;
+  if (candidate.recipeId) data.recipeId = candidate.recipeId;
   if (candidate.type === 'remix_nudge' && candidate.slots.remixIdea) {
     data.remixIdea = String(candidate.slots.remixIdea);
   }
@@ -213,7 +215,7 @@ async function processUser(user: NotificationUser, now: Date, force = false): Pr
       userId: user.id,
       category: candidate.category,
       type: candidate.type,
-      jobId: candidate.jobId,
+      recipeId: candidate.recipeId,
       title: copy.title,
     });
 

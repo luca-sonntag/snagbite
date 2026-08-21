@@ -17,7 +17,7 @@ import {
   getGamificationConfig,
   getUserStats,
   getLastCookEvent,
-  getCookCountForJob,
+  getCookCountForRecipe,
   getCookCountSince,
   insertCookEvent,
   insertLedgerRows,
@@ -104,12 +104,15 @@ function evaluateBadges(p: BadgeEvalParams): string[] {
 }
 
 /**
- * Record that `userId` cooked `jobId`, awarding XP/coins and updating streak,
+ * Record that `userId` cooked `recipeId`, awarding XP/coins and updating streak,
  * level and badges. Returns everything the reward overlay needs to animate.
+ *
+ * Keyed by recipe, not by job: "the same recipe" is a property of the content,
+ * which is what the duplicate guard and the repetition factor always meant.
  */
 export async function recordCook(
   userId: string,
-  jobId: string,
+  recipeId: string,
   signals: CookSignals = {},
 ): Promise<CookedResult> {
   const config = await getGamificationConfig();
@@ -121,7 +124,7 @@ export async function recordCook(
   // Duplicate guard: same recipe re-tapped within the velocity window is a no-op
   // so a double-tap doesn't double-award. Different recipes are never blocked.
   const last = await getLastCookEvent(userId);
-  if (last && last.jobId === jobId) {
+  if (last && last.recipeId === recipeId) {
     const deltaMs = now.getTime() - new Date(last.cookedAt).getTime();
     if (deltaMs < config.velocityMinSeconds * 1000) {
       return {
@@ -136,9 +139,9 @@ export async function recordCook(
     }
   }
 
-  const priorCookCount = await getCookCountForJob(
+  const priorCookCount = await getCookCountForRecipe(
     userId,
-    jobId,
+    recipeId,
     config.repetitionWindowDays,
   );
   const cooksToday = await getCookCountSince(userId, startOfUtcDayIso(now));
@@ -167,7 +170,7 @@ export async function recordCook(
 
   const cookEventId = await insertCookEvent({
     userId,
-    jobId,
+    recipeId,
     xp: award.xp,
     coins: award.coins,
     hasPhoto,
