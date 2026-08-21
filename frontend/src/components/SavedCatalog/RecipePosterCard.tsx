@@ -67,12 +67,6 @@ export default function RecipePosterCard({
           </div>
         )}
 
-        {/* Favorite badge in top right (flat clean) */}
-        {job.isFavorite && (
-          <div className="absolute top-2 right-2 z-10 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)] pointer-events-none">
-            <Star className="w-4.5 h-4.5 fill-amber-400 text-amber-400" />
-          </div>
-        )}
       </div>
 
       {/* Meta */}
@@ -80,7 +74,7 @@ export default function RecipePosterCard({
         <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2">
           {r.title}
         </h4>
-        {/* Bottom row: total time (left) and source platform icon (right, no background) */}
+        {/* Bottom row: total time (left) and indicators (favorite + platform icon) (right) */}
         <div className="mt-auto flex items-center justify-between gap-2">
           {totalTime ? (
             <span className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -90,7 +84,12 @@ export default function RecipePosterCard({
           ) : (
             <span />
           )}
-          <PlatformIcon platform={platform} className={`w-4 h-4 shrink-0 ${iconColor}`} />
+          <div className="flex items-center gap-1.5 shrink-0">
+            {job.isFavorite && (
+              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+            )}
+            <PlatformIcon platform={platform} className={`w-4 h-4 shrink-0 ${iconColor}`} />
+          </div>
         </div>
       </div>
     </div>
