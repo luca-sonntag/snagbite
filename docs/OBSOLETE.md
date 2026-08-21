@@ -6,6 +6,18 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-21: DOM `<video>`-Element Frame-Capture durch Headless WebCodecs (`VideoDecoder` + `mp4box`) ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Offscreen HTML5 `<video>`-Elemente (`document.createElement('video')`) im DOM zur Frame-Extraktion auf Mobilgeräten.
+  - Asynchrones DOM-Laden, Event-Listener (`loadeddata`, `seeked`), GPU-Throttling für unsichtbare/versteckte DOM-Elemente und Timing-Hänger bei pausiertem Video.
+* **Ersetzt durch:**
+  - **Headless In-Memory Frame Extraktion (`WebCodecs` API & `mp4box`):** Vollständig deterministisches Parsing im RAM ohne DOM-Beteiligung.
+  - Native `VideoDecoder`-Pipeline mit Ausrichtung an Keyframe-Grenzen (`rapAlignment`) und Skalierung direkt im Ziel-Canvas.
+* **Betroffene Dateien:** `frontend/src/utils/videoFrames.ts`, `frontend/src/types/mp4box.d.ts`.
+
+---
+
 ### 2026-08-21: `jobs`-Tabelle als Alleskönner aufgetrennt in `jobs` / `recipes` / `user_recipes`
 
 * **Ersetzter Code / Anti-Pattern:**
