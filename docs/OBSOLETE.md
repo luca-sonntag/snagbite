@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-22: Quota-Verbrauch bei abgebrochenen/unterbrochenen Extraktionen (`status = 'cancelled'`) entfernt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `getExtractionsForUserInTimeframe()` in `backend/src/db.ts` zählte Jobs mit Status `'cancelled'` als verbrauchte Extraktionen für das rollierende Tageslimit.
+  - Wenn Free-User während der Extraktion die App verließen oder minimierten, wurde der Job zwar abgebrochen (`POST /api/jobs/:id/cancel`), das Kontingent war jedoch verloren, sodass der User bei erneutem Versuch ggf. in den `RATE_LIMIT_EXCEEDED` (429) Fehler lief.
+* **Ersetzt durch:**
+  - **Ausschluss abgebrochener Jobs (`.neq('status', 'cancelled')`):** Nur erfolgreich durchgeführte (`completed`) bzw. in Bearbeitung befindliche Extraktionen verbrauchen Quota. Abgebrochene und fehlgeschlagene Jobs belasten das Tageslimit nicht.
+  - **Frühzeitiger Worker-Abbruch (`queue.ts`):** Vor LLM-Aufrufen und Job-Abschluss wird `isJobCancelled()` geprüft, um unnötige KI-Kosten zu vermeiden und den `'cancelled'` Status nicht zu überschreiben.
+  - **Auto-Refresh im Frontend (`useRecipeExtraction.ts`):** Aktualisierung des Limit-Status (`fetchLimitStatus`) beim Zurückkehren in den Vordergrund.
+* **Betroffene Dateien:** `backend/src/db.ts`, `backend/src/queue.ts`, `frontend/src/hooks/useRecipeExtraction.ts`, `docs/architecture/backend-and-database.md`.
+
+---
+
 ### 2026-08-21: `selectBestFoodFrame` & Grid-Zahlen entfernt zugunsten reiner In-Memory Gemini-Rezept-Extraktion
 
 * **Ersetzter Code / Anti-Pattern:**

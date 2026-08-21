@@ -63,10 +63,10 @@ Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()` (
 * **Tabelle `jobs`:** Nur noch der **Extraktions-Task** (`id`, `user_id`, `kind`, `status`, `source_url`, `source_url_normalized`, `progress`, `recipe_id`, `parent_recipe_id`, `remix_prompt`, `error`, `llm_usage`, `media_bytes`, `locked_at`, `locked_by`).
   * `progress` (JSONB): `{percent, stage}` während des Laufs. Früher wurde der Fortschritt durch die `recipe`-Spalte geschmuggelt (`{isProgress:true, …}`), was fehlgeschlagene Jobs mit toten Platzhaltern zurückließ.
   * `llm_usage` (JSONB): Kosten/Tokens **dieses Laufs** (`gemini`, `flux`) — bewusst nicht am Rezept, damit ein geteiltes Rezept nicht die Rechnung des Extrahierenden mitträgt.
-  * **Job-Zeilen werden nie gelöscht.** Sie sind der Audit-Trail und tragen das rollierende Rate-Limit; ein Abbruch ist `status='cancelled'`, kein Soft-Delete.
+  * **Job-Zeilen werden nie gelöscht.** Sie sind der Audit-Trail; ein Abbruch ist `status='cancelled'`, kein Soft-Delete. Abgebrochene (`cancelled`) und fehlgeschlagene (`failed`) Jobs belasten das Rate-Limit nicht.
 * **Tabelle `user_recipes`:** Der **Kochbuch-Eintrag** pro User (`user_id`, `recipe_id`, `source_job_id`, `source`, `is_favorite`, `flags`, `added_at`). Wird beim Entfernen eines Rezepts **hart gelöscht** — die Quota hängt an `jobs`, also darf das Kochbuch ehrlich löschen. `source='share'` ist der Andockpunkt fürs Teilen ohne Content-Kopie.
 * **RPC `complete_job(job_id, recipe, llm_usage)`:** Schließt einen Job atomar über alle drei Tabellen ab (Rezept anlegen, Job verknüpfen, ins Kochbuch legen). Ohne die Funktion gäbe es ein Crash-Fenster, in dem ein Nutzer Quota bezahlt hat und kein Rezept bekommt.
-* **Zwei getrennte Quoten:** Der Kochbuch-Cap zählt `user_recipes` (schrumpft beim Löschen), das Rate-Limit zählt `jobs` (schrumpft nie) und schließt Remixes über `kind <> 'remix'` aus — Foto-Importe kosten weiterhin Quota.
+* **Zwei getrennte Quoten:** Der Kochbuch-Cap zählt `user_recipes` (schrumpft beim Löschen), das Rate-Limit zählt `jobs` (schließt `remix`, `failed` und `cancelled` aus — Foto-Importe und erfolgreiche URL-Extraktionen kosten Quota).
 * **Tabelle `feedback`:** Speichert In-App Bug-Reports & Feedback (`id`, `user_id`, `type`, `message`, `context`, `screenshot_urls`, `created_at`).
 * **Storage Buckets:**
   * `recipe-covers` (öffentlich): Generierte FLUX.1 Food-Fotografie-Coverbilder (`${userId}/${jobId}.jpg`).
