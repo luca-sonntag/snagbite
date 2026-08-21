@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
-import type { Job, ProgressData } from '../types';
+import type { ExtractionJob, ProgressData } from '../types';
 import { type ErrorParams, parseSerializedError } from '../errorCodes';
 import { apiUrl } from '../api';
 import { useAuth } from './AuthContext';
@@ -15,7 +15,7 @@ export interface ExtractionJobEntry {
   /** Human-readable source shown on the card (the URL, or a "Photos" label). */
   sourceLabel: string;
   mode: ExtractionMode;
-  status: Job['status'];
+  status: ExtractionJob['status'];
   progress: ProgressData | null;
   /** Recipe title, filled once the job completes. */
   title?: string | null;
@@ -56,8 +56,8 @@ const COMPLETED_AUTO_DISMISS_MS = 25000;
 
 type PersistedJob = Pick<ExtractionJobEntry, 'id' | 'sourceLabel' | 'mode' | 'status' | 'title' | 'error' | 'errorCode'>;
 
-function isTerminal(status: Job['status']): boolean {
-  return status === 'completed' || status === 'failed';
+function isTerminal(status: ExtractionJob['status']): boolean {
+  return status === 'completed' || status === 'failed' || status === 'cancelled';
 }
 
 function loadPersisted(): ExtractionJobEntry[] {
@@ -154,17 +154,16 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
     setJobsPersist(prev => prev.filter(j => j.id !== id));
   }, [setJobsPersist]);
 
-  const finalizeCompletion = useCallback(async (job: Job) => {
-    const recipeTitle = job.recipe?.title || t('recipe.recipe') || 'Recipe';
+  const finalizeCompletion = useCallback(async (job: ExtractionJob) => {
     const notifTitle = t('notification.recipeReady.title');
-    const notifBody = t('notification.recipeReady.body', { title: recipeTitle });
-    // recipeId = job.id so a notification tap routes to the recipe (App's
-    // registerNotificationTap → app:navigate-to-timer-step handler).
-    sendNativeNotification(notifTitle, notifBody, job.id, undefined, Math.floor(Date.now() / 1000));
+    const notifBody = t('notification.recipeReady.body', { title: t('recipe.recipe') || 'Recipe' });
+    // The tap routes to the produced recipe, not to the task that produced it
+    // (App's registerNotificationTap → app:navigate-to-timer-step handler).
+    sendNativeNotification(notifTitle, notifBody, job.recipeId ?? undefined, undefined, Math.floor(Date.now() / 1000));
 
     setJobsPersist(prev => prev.map(j =>
       j.id === job.id
-        ? { ...j, status: 'completed', progress: null, title: job.recipe?.title ?? j.title }
+        ? { ...j, status: 'completed', progress: null, recipeId: job.recipeId ?? null }
         : j
     ));
 
@@ -178,7 +177,7 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
     }, COMPLETED_AUTO_DISMISS_MS);
     dismissTimersRef.current.set(job.id, timer);
 
-    window.dispatchEvent(new CustomEvent(EXTRACTION_COMPLETE_EVENT, { detail: { jobId: job.id } }));
+    window.dispatchEvent(new CustomEvent(EXTRACTION_COMPLETE_EVENT, { detail: { recipeId: job.recipeId } }));
   }, [setJobsPersist, t]);
 
   const pollJob = useCallback(async (id: string) => {
@@ -199,7 +198,7 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
       }
       if (!response.ok || !data.success || !data.job) return;
 
-      const job: Job = data.job;
+      const job: ExtractionJob = data.job;
 
       if (job.status === 'completed') {
         if (finalizedRef.current.has(id)) return;

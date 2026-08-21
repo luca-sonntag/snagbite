@@ -26,18 +26,18 @@ export interface CookHistory {
  * Refetches when `refreshKey` changes (e.g. right after marking a cook) so the
  * chip and timeline update immediately.
  */
-export function useCookHistory(jobId: string | undefined, refreshKey = 0) {
+export function useCookHistory(recipeId: string | undefined, refreshKey = 0) {
   const { getAccessToken } = useAuth();
   const [history, setHistory] = useState<CookHistory | null>(null);
   const [loading, setLoading] = useState(false);
 
   const load = useCallback(async () => {
-    if (!jobId) return;
+    if (!recipeId) return;
     const token = await getAccessToken();
     if (!token) return;
     setLoading(true);
     try {
-      const res = await fetch(apiUrl(`/api/jobs/${jobId}/cook-history`), {
+      const res = await fetch(apiUrl(`/api/recipes/${recipeId}/cook-history`), {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -56,7 +56,7 @@ export function useCookHistory(jobId: string | undefined, refreshKey = 0) {
     } finally {
       setLoading(false);
     }
-  }, [jobId, getAccessToken]);
+  }, [recipeId, getAccessToken]);
 
   useEffect(() => {
     load();

@@ -473,7 +473,7 @@ export default function CookingMode({
             setIsCookedModalOpen(false);
             onClose();
           }}
-          jobId={recipe.id}
+          recipeId={recipe.id}
           recipeTitle={recipe.title}
           viaCookingMode={true}
         />

@@ -1,5 +1,5 @@
 import { X, Check } from 'lucide-react';
-import type { Job } from '../../types';
+import type { SavedRecipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import CachedImage from '../CachedImage';
 
@@ -8,7 +8,7 @@ interface ShoppingRecipeCardProps {
   recipeTitle: string;
   totalItems: number;
   checkedItems: number;
-  job?: Job;
+  job?: SavedRecipe;
   onSelect: () => void;
   onRemove: () => void;
 }

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import type { Recipe, Job, ProgressData } from '../types';
+import type { Recipe, ExtractionJob, ProgressData } from '../types';
 import { type ErrorParams, parseSerializedError } from '../errorCodes';
 import { useI18n } from '../context/I18nContext';
 import { apiUrl } from '../api';
@@ -23,12 +23,12 @@ export const MAX_IMPORT_PHOTOS = 5;
  */
 const MAX_PHOTOS_TOTAL_CHARS = 8_000_000;
 
-export function useRecipeExtraction(getAccessToken: () => Promise<string | null>, onExtractionSuccess: (jobId: string) => void) {
+export function useRecipeExtraction(getAccessToken: () => Promise<string | null>, onExtractionSuccess: (recipeId: string) => void) {
   const { t } = useI18n();
   const { user, refreshSession, isPremium } = useAuth();
   const { addJob } = useExtractionJobs();
   const [isPending, setIsPending] = useState(false);
-  const [jobStatus, setJobStatus] = useState<Job['status'] | null>(null);
+  const [jobStatus, setJobStatus] = useState<ExtractionJob['status'] | null>(null);
   const [jobError, setJobError] = useState<string | null>(null);
   const [jobErrorCode, setJobErrorCode] = useState<string | null>(null);
   const [jobErrorParams, setJobErrorParams] = useState<ErrorParams | null>(null);
@@ -155,20 +155,20 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     try {
       const token = await getAccessToken();
       if (token) {
-        fetch(apiUrl(`/api/jobs/${jobId}`), {
-          method: 'DELETE',
+        fetch(apiUrl(`/api/jobs/${jobId}/cancel`), {
+          method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`
           },
           keepalive: true
-        }).catch(err => console.warn('Failed to send DELETE for backgrounded job:', err));
+        }).catch(err => console.warn('Failed to cancel backgrounded job:', err));
       }
     } catch (err) {
       console.warn('Error executing cancelActiveFreeJob:', err);
     }
   }, [getAccessToken, stopActivePolling, t]);
 
-  const runSimulatedProgress = useCallback(async (jobId: string, targetDurationMs: number = 10000) => {
+  const runSimulatedProgress = useCallback(async (jobId: string, recipeId: string, targetDurationMs: number = 10000) => {
     setIsPending(true);
     setJobStatus('processing');
 
@@ -181,7 +181,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
 
     for (const step of steps) {
       if (activePollingJobIdRef.current !== jobId) return;
-      setProgress({ isProgress: true, percent: step.percent, stage: step.stage });
+      setProgress({ percent: step.percent, stage: step.stage });
       await new Promise(res => setTimeout(res, step.delayMs));
     }
 
@@ -194,7 +194,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     setPhotos([]);
     localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
     activePollingJobIdRef.current = null;
-    onExtractionSuccess(jobId);
+    onExtractionSuccess(recipeId);
   }, [onExtractionSuccess]);
 
   const startPolling = useCallback((id: string) => {
@@ -249,7 +249,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           if (!isPremium && remainingMs > 2000) {
             stopActivePolling();
             activePollingJobIdRef.current = job.id;
-            await runSimulatedProgress(job.id, remainingMs);
+            await runSimulatedProgress(job.id, job.recipeId, remainingMs);
             return;
           }
 
@@ -262,13 +262,12 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
 
           if (document.visibilityState !== 'visible') {
-            const recipeTitle = job.recipe?.title || t('recipe.recipe') || 'Recipe';
             const notifTitle = t('notification.recipeReady.title');
-            const notifBody = t('notification.recipeReady.body', { title: recipeTitle });
-            sendNativeNotification(notifTitle, notifBody, job.id, undefined, Math.floor(Date.now() / 1000));
+            const notifBody = t('notification.recipeReady.body', { title: t('recipe.recipe') || 'Recipe' });
+            sendNativeNotification(notifTitle, notifBody, job.recipeId, undefined, Math.floor(Date.now() / 1000));
           }
 
-          onExtractionSuccess(job.id);
+          onExtractionSuccess(job.recipeId);
         } else if (job.status === 'failed') {
           stopActivePolling();
           const envelope = job.error ? parseSerializedError(job.error) : null;
@@ -377,8 +376,8 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
         fetchLimitStatus();
         if (data.status === 'completed') {
           stopActivePolling();
-          activePollingJobIdRef.current = data.jobId;
-          runSimulatedProgress(data.jobId, 10000);
+          activePollingJobIdRef.current = data.jobId ?? null;
+          runSimulatedProgress(data.jobId ?? '', data.recipeId, 10000);
         } else {
           setJobStatus(data.status);
           localStorage.setItem(PENDING_JOB_STORAGE_KEY, data.jobId);

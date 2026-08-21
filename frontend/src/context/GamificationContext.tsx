@@ -23,7 +23,7 @@ interface GamificationState {
    * Returns the full result (or null when unauthenticated); throws on network
    * failure so the caller can surface an error.
    */
-  markCooked: (jobId: string, opts?: MarkCookedOptions) => Promise<CookedResult | null>;
+  markCooked: (recipeId: string, opts?: MarkCookedOptions) => Promise<CookedResult | null>;
 }
 
 const GamificationContext = createContext<GamificationState | undefined>(undefined);
@@ -66,7 +66,7 @@ export function GamificationProvider({ children }: { children: React.ReactNode }
   }, [session, refresh]);
 
   const markCooked = useCallback(
-    async (jobId: string, opts?: MarkCookedOptions): Promise<CookedResult | null> => {
+    async (recipeId: string, opts?: MarkCookedOptions): Promise<CookedResult | null> => {
       const token = await getAccessToken();
       if (!token) return null;
 
@@ -75,7 +75,7 @@ export function GamificationProvider({ children }: { children: React.ReactNode }
       if (opts?.viaCookingMode) body.viaCookingMode = true;
       if (opts?.timerElapsed) body.timerElapsed = true;
 
-      const res = await fetch(apiUrl(`/api/jobs/${jobId}/cooked`), {
+      const res = await fetch(apiUrl(`/api/recipes/${recipeId}/cooked`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(body),
@@ -119,7 +119,7 @@ export function GamificationProvider({ children }: { children: React.ReactNode }
       try {
         window.dispatchEvent(
           new CustomEvent('app:recipe-cooked', {
-            detail: { jobId, duplicate: result.duplicate },
+            detail: { recipeId, duplicate: result.duplicate },
           })
         );
       } catch (e) {

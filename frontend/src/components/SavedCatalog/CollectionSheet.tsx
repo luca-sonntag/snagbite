@@ -3,14 +3,14 @@ import { Button, Drawer } from '@heroui/react';
 import { Folder, Plus, Edit2, Trash2, Check, X } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useCollections } from '../../hooks/useCollections';
-import type { Job, Collection } from '../../types';
+import type { SavedRecipe, Collection } from '../../types';
 import { useAdOverlay } from '../../context/OverlayStackContext';
 
 interface CollectionSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  job?: Job;
-  selectedJobs?: Job[];
+  job?: SavedRecipe;
+  selectedJobs?: SavedRecipe[];
   /**
    * Optional override for the initial mode:
    * - `'assign'` (default): checkbox list (single-recipe or bulk)
@@ -98,7 +98,7 @@ export default function CollectionSheet({
           const intersection = Array.from(sets[0]).filter(id => sets.every(s => s.has(id)));
           setMembershipIds(intersection);
           const initialMap: Record<string, string[]> = {};
-          targetJobs.forEach(j => { initialMap[j.id] = j.collectionIds ?? []; });
+          targetJobs.forEach(j => { initialMap[j.recipeId] = j.collectionIds ?? []; });
           setBulkInitialMap(initialMap);
         }
       }
@@ -210,9 +210,9 @@ export default function CollectionSheet({
       // Single-recipe mode: replace membership with the selected set.
       // Prefer the optimistic injected handler if the parent provided one.
       if (onAssign) {
-        onAssign(job.id, membershipIds);
+        onAssign(job.recipeId, membershipIds);
       } else {
-        await updateRecipeCollections(job.id, membershipIds);
+        await updateRecipeCollections(job.recipeId, membershipIds);
       }
       onUpdated?.();
       onClose();
@@ -227,7 +227,7 @@ export default function CollectionSheet({
     // adds it to ALL selected recipes.
     const targetJobs = selectedJobs.length > 0 ? selectedJobs : [];
     const promises = targetJobs.map(async (j) => {
-      const initial = bulkInitialMap[j.id] ?? j.collectionIds ?? [];
+      const initial = bulkInitialMap[j.recipeId] ?? j.collectionIds ?? [];
       const next = Array.from(new Set([
         ...initial.filter(id => membershipIds.includes(id)),
         ...membershipIds.filter(id => !initial.includes(id)),
@@ -238,9 +238,9 @@ export default function CollectionSheet({
         next.every(id => initial.includes(id));
       if (same) return;
       if (onAssign) {
-        onAssign(j.id, next);
+        onAssign(j.recipeId, next);
       } else {
-        await updateRecipeCollections(j.id, next);
+        await updateRecipeCollections(j.recipeId, next);
       }
     });
     await Promise.all(promises);
@@ -323,7 +323,7 @@ export default function CollectionSheet({
                           totalBulk = selectedJobs.length;
                           if (totalBulk > 0) {
                             partialCount = selectedJobs.filter(j =>
-                              (bulkInitialMap[j.id] ?? j.collectionIds ?? []).includes(col.id)
+                              (bulkInitialMap[j.recipeId] ?? j.collectionIds ?? []).includes(col.id)
                             ).length;
                           }
                         }

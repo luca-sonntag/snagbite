@@ -1,11 +1,11 @@
 import React from 'react';
 import { Clock, Check } from 'lucide-react';
-import type { Job } from '../../types';
+import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { detectPlatform, PlatformIcon, PLATFORM_ICON_COLOR } from './PlatformIcon';
 
 interface RecipePosterCardProps {
-  job: Job;
+  job: SavedRecipe;
   /** Pre-formatted total time, e.g. "35 Min." — null hides the badge. */
   totalTime: string | null;
   onClick: (e: React.MouseEvent) => void;
@@ -35,7 +35,7 @@ export default function RecipePosterCard({
   bindLongPress,
 }: RecipePosterCardProps) {
   const r = job.recipe!;
-  const platform = detectPlatform(job.url);
+  const platform = detectPlatform(job.recipe?.sourceUrl ?? undefined);
   const iconColor = PLATFORM_ICON_COLOR[platform];
   const isShelf = variant === 'shelf';
 

@@ -3,12 +3,12 @@ import { ChefHat } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
 import type { SupportedLanguage } from '../i18n';
-import type { ProgressData, ProgressStage } from '../types';
+import type { ExtractionJob, ProgressData, ProgressStage } from '../types';
 
 interface ExtractionAnimationProps {
   url: string;
   isPending: boolean;
-  jobStatus: 'pending' | 'scraping' | 'processing' | 'completed' | 'failed' | null;
+  jobStatus: ExtractionJob['status'] | null;
   progress: ProgressData | null;
   /** Which stage sequence to walk — photo imports never scrape or download. */
   variant?: 'link' | 'photo';

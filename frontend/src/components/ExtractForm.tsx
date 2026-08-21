@@ -11,7 +11,7 @@ import { isTrialBannerDismissed, TRIAL_BANNER_DISMISS_EVENT } from './TrialBanne
 import PremiumModal from './PremiumModal';
 import PremiumHint from './PremiumHint';
 import PremiumUpgradeCard from './PremiumUpgradeCard';
-import type { ProgressData } from '../types';
+import type { ExtractionJob, ProgressData } from '../types';
 import ExtractionAnimation from './ExtractionAnimation';
 import ExtractionAdCard from './ExtractionAdCard';
 import { showRewardedAd } from '../utils/ads';
@@ -63,7 +63,7 @@ interface ExtractFormProps {
   isPending: boolean;
   handleFormSubmit: (e: React.FormEvent) => void;
   limitStatus?: { limit: number; used: number; remaining: number; windowDays: number; savedRecipes: number; maxSavedRecipes: number; cookbookFull: boolean; maxConcurrent?: number; activeCount?: number } | null;
-  jobStatus: 'pending' | 'scraping' | 'processing' | 'completed' | 'failed' | null;
+  jobStatus: ExtractionJob['status'] | null;
   progress: ProgressData | null;
   errorBanner?: React.ReactNode;
   mode: ExtractMode;

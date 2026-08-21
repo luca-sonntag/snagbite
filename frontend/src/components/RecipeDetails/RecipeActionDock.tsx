@@ -105,7 +105,7 @@ export default function RecipeActionDock({
       {/* Cooked / Photo Verification Button */}
       {showCooked && (
         <CookedButton
-          jobId={recipeId}
+          recipeId={recipeId}
           recipeTitle={recipeTitle}
           variant="dock"
         />

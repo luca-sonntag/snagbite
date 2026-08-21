@@ -10,7 +10,7 @@ import { compressImage, PREVIEW_PROFILE } from '../utils/imageCompression';
 interface CookedModalProps {
   isOpen: boolean;
   onClose: () => void;
-  jobId: string;
+  recipeId: string;
   recipeTitle?: string;
   viaCookingMode?: boolean;
 }
@@ -18,7 +18,7 @@ interface CookedModalProps {
 export default function CookedModal({
   isOpen,
   onClose,
-  jobId,
+  recipeId,
   recipeTitle,
   viaCookingMode,
 }: CookedModalProps) {
@@ -30,7 +30,7 @@ export default function CookedModal({
   // the timer running. We read from finishedRecipeIds (not `timers`) because the
   // timer is removed from `timers` once dismissed — but the cook is recorded
   // afterwards, so the signal must survive the dismiss.
-  const timerElapsed = finishedRecipeIds.includes(jobId);
+  const timerElapsed = finishedRecipeIds.includes(recipeId);
 
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -58,7 +58,7 @@ export default function CookedModal({
     setRejectionReason(null);
 
     try {
-      await markCooked(jobId, {
+      await markCooked(recipeId, {
         photoBase64,
         viaCookingMode,
         timerElapsed,

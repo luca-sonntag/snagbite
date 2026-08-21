@@ -141,7 +141,7 @@ export default function RecipeCopilot({ isOpen, onClose, recipe, onRemixSuccess,
         }
       }
       const token = await getAccessToken();
-      const res = await fetch(apiUrl(`/api/jobs/${recipe.id}/chat/chips?lang=${language}`), {
+      const res = await fetch(apiUrl(`/api/recipes/${recipe.id}/chat/chips?lang=${language}`), {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -252,7 +252,7 @@ export default function RecipeCopilot({ isOpen, onClose, recipe, onRemixSuccess,
       const token = await getAccessToken();
       const cleanHistory = history.map(h => ({ role: h.role, text: h.text }));
 
-      const res = await fetch(apiUrl(`/api/jobs/${recipe.id}/chat`), {
+      const res = await fetch(apiUrl(`/api/recipes/${recipe.id}/chat`), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -381,7 +381,7 @@ export default function RecipeCopilot({ isOpen, onClose, recipe, onRemixSuccess,
     setError(null);
     try {
       const token = await getAccessToken();
-      const res = await fetch(apiUrl(`/api/jobs/${recipe.id}/chat/confirm`), {
+      const res = await fetch(apiUrl(`/api/recipes/${recipe.id}/chat/confirm`), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { Sparkles, BookOpen, ShoppingCart, User, Trophy } from 'lucide-react';
 
-import type { Job } from './types';
+import type { SavedRecipe } from './types';
 import { apiUrl } from './api';
 import { registerShareIntent, registerNotificationTap, hideSplashScreen, registerBackButtonHandler, registerAppUrlOpen, registerAppStateListener } from './native';
 import { APP_OPEN_RESUME_MIN_BG_MS } from './env';
@@ -81,7 +81,7 @@ export default function App() {
   }, [activeView, subPath, navigate]);
 
   // History & multi-view states
-  const [history, setHistory] = useState<Job[]>([]);
+  const [history, setHistory] = useState<SavedRecipe[]>([]);
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const [initialSyncDone, setInitialSyncDone] = useState(false);
   const [isCatalogSelectMode, setIsCatalogSelectMode] = useState(false);
@@ -121,9 +121,9 @@ export default function App() {
   const isCatalogList = activeView === 'history' && isCatalogListRoute(subPath);
 
   // Derived: which saved job is currently open (from URL sub-path)
-  const selectedJob: Job | null =
+  const selectedJob: SavedRecipe | null =
     activeView === 'history' && subPath && !isCatalogListRoute(subPath) && historyLoaded
-      ? (history.find(j => j.id === subPath) ?? null)
+      ? (history.find(j => j.recipeId === subPath) ?? null)
       : null;
 
   // Remembers the catalog level a recipe was opened from, so closing the detail
@@ -137,9 +137,9 @@ export default function App() {
   }, [activeView, selectedJob, isCatalogList, subPath]);
 
   // Setter for selected job — navigates via URL
-  const setSelectedJob = useCallback((job: Job | null) => {
+  const setSelectedJob = useCallback((job: SavedRecipe | null) => {
     if (job) {
-      navigate('history', job.id);
+      navigate('history', job.recipeId);
     } else {
       navigate('history', catalogReturnRef.current);
     }
@@ -222,7 +222,7 @@ export default function App() {
     try {
       const token = await getAccessToken();
       if (!token) return;
-      const response = await fetch(apiUrl('/api/jobs'), {
+      const response = await fetch(apiUrl('/api/recipes'), {
         headers: {
           'Authorization': `Bearer ${token}`
         },
@@ -230,7 +230,7 @@ export default function App() {
       });
       const data = await response.json();
       if (response.ok && data.success) {
-        setHistory(data.jobs || []);
+        setHistory(data.recipes || []);
       }
     } catch (err) {
       console.error('Failed to fetch history:', err);
@@ -240,9 +240,9 @@ export default function App() {
     }
   }, [getAccessToken]);
 
-  const handleExtractionSuccess = useCallback((jobId: string) => {
-    newlyExtractedJobIdRef.current = jobId;
-    navigate('history', jobId);
+  const handleExtractionSuccess = useCallback((recipeId: string) => {
+    newlyExtractedJobIdRef.current = recipeId;
+    navigate('history', recipeId);
     fetchHistory();
   }, [fetchHistory, navigate]);
 
@@ -516,7 +516,7 @@ export default function App() {
   useEffect(() => {
     if (!historyLoaded) return;
     if (activeView === 'history' && subPath && !isCatalogListRoute(subPath)) {
-      const exists = history.some(j => j.id === subPath);
+      const exists = history.some(j => j.recipeId === subPath);
       if (exists) {
         // Clear the guard once the job is confirmed in history.
         if (newlyExtractedJobIdRef.current === subPath) {
@@ -542,9 +542,9 @@ export default function App() {
       }
 
       // 2. Check if the recipe exists in history
-      const matchedJob = history.find(j => j.id === targetId || (j.recipe && j.recipe.title === targetId));
+      const matchedJob = history.find(j => j.recipeId === targetId || (j.recipe && j.recipe.title === targetId));
       if (matchedJob) {
-        navigate('history', matchedJob.id);
+        navigate('history', matchedJob.recipeId);
       }
     }
   }, [pendingNavigation, recipe, history, navigate]);
@@ -563,9 +563,9 @@ export default function App() {
         }
 
         // 2. Check if the recipe exists in history
-        const matchedJob = history.find(j => j.id === targetId || (j.recipe && j.recipe.title === targetId));
+        const matchedJob = history.find(j => j.recipeId === targetId || (j.recipe && j.recipe.title === targetId));
         if (matchedJob) {
-          navigate('history', matchedJob.id);
+          navigate('history', matchedJob.recipeId);
         }
       }
     };
@@ -683,7 +683,7 @@ export default function App() {
     }
 
     try {
-      const job = history.find(j => j.id === id);
+      const job = history.find(j => j.recipeId === id);
       if (job?.recipe) {
         const r = job.recipe;
         const imagesToDelete = r.imageUrls && r.imageUrls.length > 0
@@ -697,7 +697,7 @@ export default function App() {
 
       const token = await getAccessToken();
       if (!token) return;
-      const response = await fetch(apiUrl(`/api/jobs/${id}`), {
+      const response = await fetch(apiUrl(`/api/recipes/${id}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -706,7 +706,7 @@ export default function App() {
 
       if (response.ok) {
         fetchHistory();
-        if (selectedJob?.id === id) {
+        if (selectedJob?.recipeId === id) {
           navigate('history');
         }
       } else {
@@ -934,12 +934,12 @@ export default function App() {
                 setRecipe(newRecipe);
                 fetchHistory();
               }}
-              isParentAvailable={recipe?.parentJobId ? history.some(j => j.id === recipe?.parentJobId) : false}
-              parentRecipeTitle={recipe?.parentRecipeTitle || (recipe?.parentJobId ? history.find(j => j.id === recipe.parentJobId)?.recipe?.title : null)}
+              isParentAvailable={recipe?.parentRecipeId ? history.some(j => j.recipeId === recipe?.parentRecipeId) : false}
+              parentRecipeTitle={recipe?.parentRecipeTitle || (recipe?.parentRecipeId ? history.find(j => j.recipeId === recipe.parentRecipeId)?.recipe?.title : null)}
               onNavigateToRecipe={(recipeId) => {
-                const parentJob = history.find(j => j.id === recipeId);
+                const parentJob = history.find(j => j.recipeId === recipeId);
                 if (parentJob) {
-                  navigate('history', parentJob.id);
+                  navigate('history', parentJob.recipeId);
                   setRecipe(null);
                   setUrl('');
                 }

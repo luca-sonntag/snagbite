@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { SearchX } from 'lucide-react';
-import type { Job, Ingredient, Recipe } from '../../types';
+import type { SavedRecipe, Ingredient, Recipe } from '../../types';
 import RecipeDetails from '../RecipeDetails';
 import ShoppingConfirmSheet from '../RecipeDetails/ShoppingConfirmSheet';
 import { useMobileNavigationBack } from '../../hooks/useMobileNavigationBack';
@@ -25,10 +25,10 @@ import CatalogLoadingState from './CatalogLoadingState';
 import { buildListRoute, isCatalogListRoute, parseListRoute, getBaseFiltersForPreset, type CatalogPreset } from './catalogRoutes';
 
 interface SavedCatalogProps {
-  history: Job[];
+  history: SavedRecipe[];
   historyLoaded?: boolean;
-  selectedJob: Job | null;
-  setSelectedJob: (job: Job | null) => void;
+  selectedJob: SavedRecipe | null;
+  setSelectedJob: (job: SavedRecipe | null) => void;
   handleDeleteJob: (e: React.MouseEvent, id: string) => void;
   onAddIngredients?: (ingredients: Ingredient[], recipeId: string, recipeTitle: string) => void;
   fetchHistory?: () => void;
@@ -166,22 +166,22 @@ export default function SavedCatalog({
   // (isFavorite, flags, collectionIds) are immediately reflected in the UI
   // without waiting for a history re-fetch.
   const selectedJobResolved = selectedJob
-    ? (completedJobs.find(j => j.id === selectedJob.id) ?? selectedJob)
+    ? (completedJobs.find(j => j.recipeId === selectedJob.recipeId) ?? selectedJob)
     : null;
   const [isCollectionSheetOpen, setIsCollectionSheetOpen] = useState(false);
-  const [collectionSheetJob, setCollectionSheetJob] = useState<Job | undefined>(undefined);
-  const [collectionSheetBulkJobs, setCollectionSheetBulkJobs] = useState<Job[]>([]);
+  const [collectionSheetJob, setCollectionSheetJob] = useState<SavedRecipe | undefined>(undefined);
+  const [collectionSheetBulkJobs, setCollectionSheetBulkJobs] = useState<SavedRecipe[]>([]);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
 
   // Bulk shopping: sequential per-recipe ShoppingConfirmSheet queue
-  const [bulkShoppingQueue, setBulkShoppingQueue] = useState<Job[]>([]);
+  const [bulkShoppingQueue, setBulkShoppingQueue] = useState<SavedRecipe[]>([]);
   const [bulkShoppingTotal, setBulkShoppingTotal] = useState(0);
   const [bulkShoppingAdded, setBulkShoppingAdded] = useState(0);
   const currentBulkShoppingJob = bulkShoppingQueue[0] ?? null;
 
   // FlagSheet states
   const [isFlagSheetOpen, setIsFlagSheetOpen] = useState(false);
-  const [flagSheetJob, setFlagSheetJob] = useState<Job | null>(null);
+  const [flagSheetJob, setFlagSheetJob] = useState<SavedRecipe | null>(null);
 
   const isAnySheetOpen = isFilterSheetOpen || isCollectionSheetOpen || isFlagSheetOpen || !!currentBulkShoppingJob;
   useEffect(() => {
@@ -222,8 +222,8 @@ export default function SavedCatalog({
 
   // Record recency centrally so deep links and notification taps count too.
   useEffect(() => {
-    if (selectedJob) markOpened(selectedJob.id);
-  }, [selectedJob?.id, markOpened]);
+    if (selectedJob) markOpened(selectedJob.recipeId);
+  }, [selectedJob?.recipeId, markOpened]);
 
   // Seed search/filters/sort from the route preset whenever the list level is
   // entered with a different preset. Tracked by ref so the user's own edits
@@ -294,7 +294,7 @@ export default function SavedCatalog({
     const job = bulkShoppingQueue[0];
     if (!job || !onAddIngredients) return;
     if (items.length > 0) {
-      onAddIngredients(items, job.id, job.recipe!.title);
+      onAddIngredients(items, job.recipeId, job.recipe!.title);
       setBulkShoppingAdded(prev => prev + 1);
     }
     // NOTE: onClose() is called by ShoppingConfirmSheet after onConfirm(),
@@ -321,14 +321,14 @@ export default function SavedCatalog({
       setIsPremiumModalOpen(true);
     } else {
       setCollectionSheetJob(undefined);
-      // Pass the FULL Job objects (not just IDs) so the sheet can pre-check the
+      // Pass the FULL SavedRecipe objects (not just IDs) so the sheet can pre-check the
       // intersection of their memberships and support per-recipe add/remove.
-      setCollectionSheetBulkJobs(completedJobs.filter(j => selectedIds.has(j.id)));
+      setCollectionSheetBulkJobs(completedJobs.filter(j => selectedIds.has(j.recipeId)));
       setIsCollectionSheetOpen(true);
     }
   };
 
-  const handleAssignCollectionsClick = (job: Job) => {
+  const handleAssignCollectionsClick = (job: SavedRecipe) => {
     if (!isPremium) {
       setIsPremiumModalOpen(true);
     } else {
@@ -338,7 +338,7 @@ export default function SavedCatalog({
     }
   };
 
-  const handleManageFlagsClick = async (job: Job) => {
+  const handleManageFlagsClick = async (job: SavedRecipe) => {
     if (!isPremium) {
       setIsPremiumModalOpen(true);
       return;
@@ -372,12 +372,12 @@ export default function SavedCatalog({
       <div className="flex flex-col gap-4">
         {selectedJobResolved.recipe && (
           <RecipeDetails
-            key={selectedJobResolved.id}
-            recipe={selectedJobResolved.recipe.id ? selectedJobResolved.recipe : { ...selectedJobResolved.recipe, id: selectedJobResolved.id }}
+            key={selectedJobResolved.recipeId}
+            recipe={selectedJobResolved.recipe}
             onAddIngredients={onAddIngredients}
-            onDelete={() => handleDeleteJob({ stopPropagation: () => { } } as any, selectedJobResolved.id)}
-            reelUrl={selectedJobResolved.url}
-            createdAt={selectedJobResolved.createdAt}
+            onDelete={() => handleDeleteJob({ stopPropagation: () => { } } as any, selectedJobResolved.recipeId)}
+            reelUrl={selectedJobResolved.recipe.sourceUrl ?? ''}
+            createdAt={selectedJobResolved.addedAt}
             onBack={() => navigateCatalog(listRouteBeforeDetailRef.current)}
             flags={selectedJobResolved.flags}
             onNavigateToShoppingList={onNavigateToShoppingList}
@@ -386,10 +386,10 @@ export default function SavedCatalog({
             onReplaceCurrent={() => {
               fetchHistory?.();
             }}
-            isParentAvailable={selectedJobResolved.recipe?.parentJobId ? history.some(j => j.id === selectedJobResolved.recipe?.parentJobId) : false}
-            parentRecipeTitle={selectedJobResolved.recipe?.parentRecipeTitle || (selectedJobResolved.recipe?.parentJobId ? history.find(j => j.id === selectedJobResolved.recipe?.parentJobId)?.recipe?.title : null)}
+            isParentAvailable={selectedJobResolved.recipe?.parentRecipeId ? history.some(j => j.recipeId === selectedJobResolved.recipe?.parentRecipeId) : false}
+            parentRecipeTitle={selectedJobResolved.recipe?.parentRecipeTitle || (selectedJobResolved.recipe?.parentRecipeId ? history.find(j => j.recipeId === selectedJobResolved.recipe?.parentRecipeId)?.recipe?.title : null)}
             onNavigateToRecipe={(recipeId) => {
-              const parentJob = history.find(j => j.id === recipeId);
+              const parentJob = history.find(j => j.recipeId === recipeId);
               if (parentJob) {
                 setSelectedJob(parentJob);
               }
@@ -537,12 +537,12 @@ export default function SavedCatalog({
         <div className="grid grid-cols-2 gap-3 py-1">
           {filteredJobs.map(job => (
             <RecipePosterCard
-              key={job.id}
+              key={job.recipeId}
               job={job}
               totalTime={formatTotalTime(job.recipe!)}
-              isSelected={selectedIds.has(job.id)}
+              isSelected={selectedIds.has(job.recipeId)}
               isSelectMode={isSelectMode}
-              bindLongPress={bindLongPress(job.id, job)}
+              bindLongPress={bindLongPress(job.recipeId, job)}
               onClick={(e) => handleCardClick(e, job)}
             />
           ))}
@@ -551,13 +551,13 @@ export default function SavedCatalog({
         <div className="flex flex-col gap-2">
           {filteredJobs.map(job => (
             <RecipeListItem
-              key={job.id}
+              key={job.recipeId}
               job={job}
-              isSelected={selectedIds.has(job.id)}
+              isSelected={selectedIds.has(job.recipeId)}
               isSelectMode={isSelectMode}
               totalTime={formatTotalTime(job.recipe!)}
               recipeTags={getRecipeTags(job.recipe!)}
-              bindLongPress={bindLongPress(job.id, job)}
+              bindLongPress={bindLongPress(job.recipeId, job)}
               onClick={(e) => handleCardClick(e, job)}
             />
           ))}
@@ -632,7 +632,7 @@ export default function SavedCatalog({
           : recipe.title;
         return (
           <ShoppingConfirmSheet
-            key={currentBulkShoppingJob.id}
+            key={currentBulkShoppingJob.recipeId}
             isOpen={true}
             onClose={handleBulkShoppingClose}
             recipe={recipe}

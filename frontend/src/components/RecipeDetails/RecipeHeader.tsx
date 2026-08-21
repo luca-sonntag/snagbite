@@ -180,22 +180,22 @@ export default function RecipeHeader({
 
         {/* Creator handle + Title: no gap between handle and title, padded right so title wraps before buttons */}
         <div className={onToggleFavorite ? 'pr-[100px]' : 'pr-[52px]'}>
-          {(recipe.instagramHandle || isPhotoImportUrl(reelUrl)) && (
+          {(recipe.sourceHandle || isPhotoImportUrl(reelUrl)) && (
             <div className="text-xs font-extrabold uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-500 dark:from-emerald-400 dark:via-teal-300 dark:to-emerald-300 mb-0.5 leading-none select-none">
-              {recipe.instagramHandle || '@PHOTOIMPORT'}
+              {recipe.sourceHandle || '@PHOTOIMPORT'}
             </div>
           )}
           <h2 className="text-xl font-bold text-gray-900 dark:text-white leading-tight break-words">{recipe.title}</h2>
         </div>
 
         {/* Remix link, description, tags, saved date */}
-        {recipe.parentJobId && resolvedParentTitle && (
+        {recipe.parentRecipeId && resolvedParentTitle && (
           <div className="text-xs flex flex-wrap items-center gap-1 text-gray-500 dark:text-gray-400 leading-normal break-words">
             <span>{t('remix.parentLinkPrefix') || 'Abgewandelt von'}</span>
             {isParentAvailable ? (
               <button
                 type="button"
-                onClick={() => onNavigateToRecipe?.(recipe.parentJobId!)}
+                onClick={() => onNavigateToRecipe?.(recipe.parentRecipeId!)}
                 className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-0.5 cursor-pointer outline-none border-none p-0 bg-transparent text-left leading-normal"
               >
                 {resolvedParentTitle}

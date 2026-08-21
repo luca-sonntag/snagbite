@@ -1,4 +1,4 @@
-import type { Collection, Job } from '../../types';
+import type { Collection, SavedRecipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import CachedImage from '../CachedImage';
 
@@ -7,7 +7,7 @@ interface CollectionTileProps {
   title?: string;
   emoji?: string | null;
   /** Members of this collection, newest first — the first two provide the cover images. */
-  jobs: Job[];
+  jobs: SavedRecipe[];
   onClick: () => void;
 }
 
@@ -47,7 +47,7 @@ export default function CollectionTile({ collection, title, emoji, jobs, onClick
         ) : (
           <div className="grid grid-cols-2 w-full h-full divide-x divide-white/20 dark:divide-black/20">
             {displayJobs.map((job) => (
-              <div key={job.id} className="relative w-full h-full overflow-hidden">
+              <div key={job.recipeId} className="relative w-full h-full overflow-hidden">
                 <CachedImage
                   src={job.recipe?.imageUrl}
                   emoji={job.recipe?.emoji}
