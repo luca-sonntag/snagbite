@@ -43,23 +43,43 @@ export async function hideSplashScreen(): Promise<void> {
 
 // ─── Local Notifications ──────────────────────────────────────────────────────
 
-const TIMER_NOTIFICATION_ID = 1;
-const TIMER_CHANNEL_ID = 'cooking-timers';
+export const TIMER_NOTIFICATION_ID = 1;
+export const RECIPE_READY_NOTIFICATION_ID = 2;
+export const EXTRACTION_INTERRUPTED_NOTIFICATION_ID = 3;
 
-// Guard so we only create the channel once per app run.
-let channelReady: Promise<void> | null = null;
+const TIMER_CHANNEL_ID = 'cooking-timers';
+const RECIPE_CHANNEL_ID = 'recipe-extractions';
+
+// Guards so channels are created once per app run.
+let timerChannelReady: Promise<void> | null = null;
+let recipeChannelReady: Promise<void> | null = null;
+
+/**
+ * Check whether the app is currently running in the background.
+ * Uses Capacitor App.getState() on native devices and document.visibilityState on web.
+ */
+export async function isAppInBackground(): Promise<boolean> {
+  if (isNative()) {
+    try {
+      const state = await App.getState();
+      return !state.isActive;
+    } catch {
+      return document.visibilityState !== 'visible';
+    }
+  }
+  return document.visibilityState !== 'visible';
+}
 
 /**
  * Create the high-importance Android notification channel used for timer
  * alerts. HIGH importance is what makes the notification pop up as a heads-up
  * banner (with sound + vibration) instead of appearing silently in the shade.
- * No-op on iOS/web. Channel settings are locked by Android after creation, so
- * changing importance later requires a new channel id.
+ * No-op on iOS/web.
  */
 async function ensureTimerChannel(): Promise<void> {
   if (Capacitor.getPlatform() !== 'android') return;
-  if (!channelReady) {
-    channelReady = LocalNotifications.createChannel({
+  if (!timerChannelReady) {
+    timerChannelReady = LocalNotifications.createChannel({
       id: TIMER_CHANNEL_ID,
       name: 'Cooking timers',
       description: 'Alerts when a cooking timer finishes',
@@ -69,11 +89,34 @@ async function ensureTimerChannel(): Promise<void> {
       vibration: true,
       lights: true,
     }).catch((err) => {
-      console.warn('Failed to create notification channel:', err);
-      channelReady = null; // allow a retry on the next attempt
+      console.warn('Failed to create timer notification channel:', err);
+      timerChannelReady = null; // allow a retry on the next attempt
     });
   }
-  await channelReady;
+  await timerChannelReady;
+}
+
+/**
+ * Create the Android notification channel used for recipe completion alerts.
+ */
+async function ensureRecipeChannel(): Promise<void> {
+  if (Capacitor.getPlatform() !== 'android') return;
+  if (!recipeChannelReady) {
+    recipeChannelReady = LocalNotifications.createChannel({
+      id: RECIPE_CHANNEL_ID,
+      name: 'Recipe extractions',
+      description: 'Alerts when recipe extraction is complete',
+      importance: 4, // HIGH
+      visibility: 1, // public — show on lock screen
+      sound: undefined,
+      vibration: true,
+      lights: true,
+    }).catch((err) => {
+      console.warn('Failed to create recipe notification channel:', err);
+      recipeChannelReady = null;
+    });
+  }
+  await recipeChannelReady;
 }
 
 /**
@@ -105,13 +148,18 @@ export async function sendNativeNotification(
   stepNum?: number,
   notificationId: number = TIMER_NOTIFICATION_ID,
   extraData?: Record<string, any>,
+  channelId: string = TIMER_CHANNEL_ID,
 ): Promise<boolean> {
   if (!isNative()) return false;
   try {
     const granted = await requestNativeNotificationPermission();
     if (!granted) return false;
 
-    await ensureTimerChannel();
+    if (channelId === TIMER_CHANNEL_ID) {
+      await ensureTimerChannel();
+    } else if (channelId === RECIPE_CHANNEL_ID) {
+      await ensureRecipeChannel();
+    }
 
     await LocalNotifications.schedule({
       notifications: [
@@ -119,7 +167,7 @@ export async function sendNativeNotification(
           id: notificationId,
           title,
           body,
-          channelId: TIMER_CHANNEL_ID,
+          channelId,
           // Status-bar (small) icon only — a monochrome silhouette of the app
           // logo. Android tints small icons to a single color, so this is the
           // app's own mark, not a generic glyph. No largeIcon: we intentionally
@@ -157,18 +205,71 @@ export async function isTimerNotificationDelivered(): Promise<boolean> {
 }
 
 /**
- * Remove our timer notification from the system tray (if present). Called when
- * a finished timer is dismissed inside the app so the tray stays in sync — the
- * app only ever posts this single timer notification, so clearing all delivered
- * ones is safe. No-op on web.
+ * Remove our timer notification from the system tray (if present).
  */
 export async function clearTimerNotification(): Promise<void> {
   if (!isNative()) return;
   try {
-    await LocalNotifications.removeAllDeliveredNotifications();
+    const { notifications } = await LocalNotifications.getDeliveredNotifications();
+    const delivered = notifications.filter((n) => n.id === TIMER_NOTIFICATION_ID);
+    if (delivered.length > 0) {
+      await LocalNotifications.removeDeliveredNotifications({ notifications: delivered });
+    }
+    await LocalNotifications.cancel({
+      notifications: [{ id: TIMER_NOTIFICATION_ID }],
+    });
   } catch (err) {
-    console.warn('removeAllDeliveredNotifications failed:', err);
+    console.warn('clearTimerNotification failed:', err);
   }
+}
+
+/**
+ * Remove any recipe ready notification from the system tray.
+ */
+export async function clearRecipeReadyNotification(): Promise<void> {
+  if (!isNative()) return;
+  try {
+    const { notifications } = await LocalNotifications.getDeliveredNotifications();
+    const delivered = notifications.filter((n) => n.id === RECIPE_READY_NOTIFICATION_ID);
+    if (delivered.length > 0) {
+      await LocalNotifications.removeDeliveredNotifications({ notifications: delivered });
+    }
+    await LocalNotifications.cancel({
+      notifications: [{ id: RECIPE_READY_NOTIFICATION_ID }],
+    });
+  } catch (err) {
+    console.warn('clearRecipeReadyNotification failed:', err);
+  }
+}
+
+/**
+ * Send a notification when recipe extraction finishes.
+ * - Only sends if the app is currently in the background.
+ * - Removes/overwrites any previous recipe ready notification so that ONLY ONE
+ *   notification of this type exists in the system tray at any time.
+ */
+export async function sendRecipeReadyNotification(
+  title: string,
+  body: string,
+  recipeId?: string,
+): Promise<boolean> {
+  if (!isNative()) return false;
+
+  const inBackground = await isAppInBackground();
+  if (!inBackground) return false;
+
+  // Clear existing recipe ready notification first to ensure single instance
+  await clearRecipeReadyNotification();
+
+  return sendNativeNotification(
+    title,
+    body,
+    recipeId,
+    undefined,
+    RECIPE_READY_NOTIFICATION_ID,
+    { route: 'recipe', recipeId },
+    RECIPE_CHANNEL_ID,
+  );
 }
 
 /**

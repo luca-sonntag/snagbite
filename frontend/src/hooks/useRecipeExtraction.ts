@@ -7,7 +7,14 @@ import { useAuth } from '../context/AuthContext';
 import { compressRecipePhotos } from '../utils/imageCompression';
 
 import { useExtractionJobs, type ExtractionMode } from '../context/ExtractionJobsContext';
-import { sendNativeNotification, requestNativeNotificationPermission, isNative, registerAppStateListener } from '../native';
+import {
+  sendNativeNotification,
+  sendRecipeReadyNotification,
+  requestNativeNotificationPermission,
+  isNative,
+  registerAppStateListener,
+  EXTRACTION_INTERRUPTED_NOTIFICATION_ID,
+} from '../native';
 import { handleClientFrameRequest } from '../utils/videoFrames';
 
 // Tracks the currently in-flight extraction job across reloads/restarts, so a
@@ -151,7 +158,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
         notifBody,
         undefined,
         undefined,
-        Math.floor(Date.now() / 1000),
+        EXTRACTION_INTERRUPTED_NOTIFICATION_ID,
         { route: 'extract', action: 'interrupted' }
       );
     }
@@ -265,11 +272,9 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           setPhotos([]);
           localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
 
-          if (document.visibilityState !== 'visible') {
-            const notifTitle = t('notification.recipeReady.title');
-            const notifBody = t('notification.recipeReady.body', { title: t('recipe.recipe') || 'Recipe' });
-            sendNativeNotification(notifTitle, notifBody, job.recipeId, undefined, Math.floor(Date.now() / 1000));
-          }
+          const notifTitle = t('notification.recipeReady.title');
+          const notifBody = t('notification.recipeReady.body', { title: t('recipe.recipe') || 'Recipe' });
+          void sendRecipeReadyNotification(notifTitle, notifBody, job.recipeId);
 
           onExtractionSuccess(job.recipeId);
         } else if (job.status === 'failed') {

@@ -3,7 +3,15 @@ import { Sparkles, BookOpen, ShoppingCart, User, Trophy } from 'lucide-react';
 
 import type { SavedRecipe } from './types';
 import { apiUrl } from './api';
-import { registerShareIntent, registerNotificationTap, hideSplashScreen, registerBackButtonHandler, registerAppUrlOpen, registerAppStateListener } from './native';
+import {
+  registerShareIntent,
+  registerNotificationTap,
+  hideSplashScreen,
+  registerBackButtonHandler,
+  registerAppUrlOpen,
+  registerAppStateListener,
+  clearRecipeReadyNotification,
+} from './native';
 import { APP_OPEN_RESUME_MIN_BG_MS } from './env';
 import { registerPushTapHandler, enablePushNotifications } from './push';
 import { parseSharedUrl } from './utils/shareUrl';
@@ -416,6 +424,7 @@ export default function App() {
         return;
       }
       // Foregrounded. Only a resume after a long background counts as an "open".
+      clearRecipeReadyNotification();
       const bgAt = appBackgroundedAtRef.current;
       appBackgroundedAtRef.current = null;
       if (bgAt == null || Date.now() - bgAt < APP_OPEN_RESUME_MIN_BG_MS) return;
@@ -576,6 +585,7 @@ export default function App() {
   // Listen for taps on native local notifications (Capacitor Android/iOS)
   useEffect(() => {
     return registerNotificationTap((recipeId, stepNum, extra) => {
+      clearRecipeReadyNotification();
       if (extra?.route === 'extract' || extra?.action === 'interrupted') {
         navigate('extract');
       } else if (recipeId) {

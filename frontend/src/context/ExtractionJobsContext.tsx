@@ -4,8 +4,7 @@ import { type ErrorParams, parseSerializedError } from '../errorCodes';
 import { apiUrl } from '../api';
 import { useAuth } from './AuthContext';
 import { useI18n } from '../context/I18nContext';
-
-import { sendNativeNotification } from '../native';
+import { sendRecipeReadyNotification } from '../native';
 import { handleClientFrameRequest } from '../utils/videoFrames';
 
 export type ExtractionMode = 'link' | 'photo';
@@ -170,7 +169,7 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
     const notifBody = t('notification.recipeReady.body', { title: t('recipe.recipe') || 'Recipe' });
     // The tap routes to the produced recipe, not to the task that produced it
     // (App's registerNotificationTap → app:navigate-to-timer-step handler).
-    sendNativeNotification(notifTitle, notifBody, job.recipeId ?? undefined, undefined, Math.floor(Date.now() / 1000));
+    void sendRecipeReadyNotification(notifTitle, notifBody, job.recipeId ?? undefined);
 
     setJobsPersist(prev => prev.map(j =>
       j.id === job.id
