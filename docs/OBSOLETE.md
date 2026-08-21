@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-21: `selectBestFoodFrame` & Grid-Zahlen entfernt zugunsten reiner In-Memory Gemini-Rezept-Extraktion
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `selectBestFoodFrame()` in `backend/src/gemini.ts` und `backend/src/queue.ts`, das separate API-Calls zur Auswahl von Cover-Frames durchführte.
+  - Text- und Zahlen-Overlays (`drawtext`) auf Grid-Kacheln in `backend/src/frameExtractor.ts`.
+* **Ersetzt durch:**
+  - **In-Memory 4x4 Grid (`createGridBufferFromFrames` via `sharp`):** Aus 16 flüchtigen Client-Frames wird im RAM ohne Disk-IO und ohne Subprozesse ein einziges unnummeriertes 4x4 Grid gebaut.
+  - Das Grid dient **ausschließlich** als hochauflösendes visuelles Kontextbild (nur 258 Tokens!) für Gemini `extractRecipe`.
+  - Cover-Bilder stammen weiterhin sauber und urheberrechtssicher aus offiziellen API-Metadaten oder FLUX-AI-Generierung.
+* **Betroffene Dateien:** `backend/src/frameExtractor.ts`, `backend/src/gemini.ts`, `backend/src/queue.ts`, `backend/src/routes.ts`, `frontend/src/utils/videoFrames.ts`.
+
+---
+
 ### 2026-08-21: DOM `<video>`-Element Frame-Capture durch Headless WebCodecs (`VideoDecoder` + `mp4box`) ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
