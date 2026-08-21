@@ -350,7 +350,7 @@ export default function RecipeDetails({
 
   // Get nutritional info (either reel-level or aggregated per-ingredient AI estimates)
   const { nutritionalValues, sourceNutritionalValues, isAiEstimated, isVerified, hasNutritionInfo } =
-    useRecipeNutrition(recipe, servings);
+    useRecipeNutrition(recipe);
 
   // Prep + cook collapsed into the single figure shown in the meta strip. Both
   // fields may be legacy strings ("20 Min."), so pull the leading number out.

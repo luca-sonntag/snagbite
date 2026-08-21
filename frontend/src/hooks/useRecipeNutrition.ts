@@ -13,7 +13,7 @@ const VERIFIED_COVERAGE_THRESHOLD = 0.9;
  * recipe source is returned separately as `sourceNutritionalValues` so the UI can
  * show it next to the computed one instead of silently replacing it.
  */
-export function useRecipeNutrition(recipe: Recipe, currentServings?: number) {
+export function useRecipeNutrition(recipe: Recipe) {
   return useMemo(() => {
     const source = recipe.sourceNutritionalValues;
     const hasSource = !!(
@@ -51,14 +51,14 @@ export function useRecipeNutrition(recipe: Recipe, currentServings?: number) {
       }
     }
 
-    const effectiveServings = Math.max(1, currentServings || recipe.servings || 1);
+    const baseServings = Math.max(1, recipe.servings || 1);
 
     if (hasIngredientEstimates) {
       const calculated: NutritionalValues = {
-        calories: totalCalories > 0 ? Math.round(totalCalories / effectiveServings) : null,
-        protein: totalProtein > 0 ? Math.round((totalProtein / effectiveServings) * 10) / 10 : null,
-        carbs: totalCarbs > 0 ? Math.round((totalCarbs / effectiveServings) * 10) / 10 : null,
-        fat: totalFat > 0 ? Math.round((totalFat / effectiveServings) * 10) / 10 : null,
+        calories: totalCalories > 0 ? Math.round(totalCalories / baseServings) : null,
+        protein: totalProtein > 0 ? Math.round((totalProtein / baseServings) * 10) / 10 : null,
+        carbs: totalCarbs > 0 ? Math.round((totalCarbs / baseServings) * 10) / 10 : null,
+        fat: totalFat > 0 ? Math.round((totalFat / baseServings) * 10) / 10 : null,
       };
 
       const coverage = totalCalories > 0 ? matchedCalories / totalCalories : 0;
@@ -91,17 +91,15 @@ export function useRecipeNutrition(recipe: Recipe, currentServings?: number) {
     );
 
     if (hasFallback && baseSource) {
-      const baseServings = Math.max(1, recipe.servings || 1);
-      const ratio = baseServings / effectiveServings;
-      const scaledFallback: NutritionalValues = {
-        calories: baseSource.calories ? Math.round(baseSource.calories * ratio) : null,
-        protein: baseSource.protein ? Math.round(baseSource.protein * ratio * 10) / 10 : null,
-        carbs: baseSource.carbs ? Math.round(baseSource.carbs * ratio * 10) / 10 : null,
-        fat: baseSource.fat ? Math.round(baseSource.fat * ratio * 10) / 10 : null,
+      const fallbackValues: NutritionalValues = {
+        calories: baseSource.calories ? Math.round(baseSource.calories) : null,
+        protein: baseSource.protein ? Math.round(baseSource.protein * 10) / 10 : null,
+        carbs: baseSource.carbs ? Math.round(baseSource.carbs * 10) / 10 : null,
+        fat: baseSource.fat ? Math.round(baseSource.fat * 10) / 10 : null,
       };
 
       return {
-        nutritionalValues: scaledFallback,
+        nutritionalValues: fallbackValues,
         sourceNutritionalValues: null,
         coverage: 0,
         isAiEstimated: true,
@@ -118,5 +116,5 @@ export function useRecipeNutrition(recipe: Recipe, currentServings?: number) {
       isVerified: false,
       hasNutritionInfo: false,
     };
-  }, [recipe, currentServings]);
+  }, [recipe]);
 }
