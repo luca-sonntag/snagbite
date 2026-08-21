@@ -36,7 +36,7 @@ function getTrackDescription(mp4boxfile: MP4File, track: MP4MediaTrack): Uint8Ar
     const trak = mp4boxfile.getTrackById(track.id);
     if (!trak?.mdia?.minf?.stbl?.stsd?.entries) return undefined;
     for (const entry of trak.mdia.minf.stbl.stsd.entries) {
-      const box = entry.avcC || entry.hvcC || entry.vpcC || entry.av1C;
+      const box = entry.avcC || entry.hvcC || entry.vpcC || entry.av1C || (entry.boxes?.find((b: any) => b.type === 'avcC' || b.type === 'hvcC' || b.type === 'vpcC' || b.type === 'av1C'));
       if (box) {
         const stream = new MP4Box.DataStream(undefined, 0, MP4Box.DataStream.BIG_ENDIAN);
         box.write(stream);
@@ -114,6 +114,31 @@ async function extractKeyframesWebCodecs(
           return resolve([]);
         }
 
+        let samplesProcessed = 0;
+        const totalSamples = videoTrack.nb_samples || 0;
+
+        const finalize = async () => {
+          if (isFinished) return;
+          isFinished = true;
+
+          try {
+            if (decoder && decoder.state === 'configured') {
+              await decoder.flush();
+            }
+          } catch (flushErr: any) {
+            console.warn('[videoFrames-WebCodecs] Flush error:', flushErr.message || flushErr);
+          }
+
+          const results: string[] = [];
+          for (let i = 0; i < targetTimestampsSec.length; i++) {
+            const frame = capturedMap.get(i);
+            if (frame) results.push(frame);
+          }
+
+          cleanup();
+          resolve(results);
+        };
+
         decoder = new VideoDecoder({
           output: (videoFrame: VideoFrame) => {
             if (isFinished) {
@@ -152,9 +177,14 @@ async function extractKeyframesWebCodecs(
             }
 
             videoFrame.close();
+
+            // If we have captured all 16 target frames, finish immediately!
+            if (capturedMap.size === targetTimestampsSec.length) {
+              void finalize();
+            }
           },
           error: (err: any) => {
-            console.warn('[videoFrames-WebCodecs] Decoder error:', err);
+            console.warn('[videoFrames-WebCodecs] Decoder error:', err.message || err);
           },
         });
 
@@ -167,15 +197,19 @@ async function extractKeyframesWebCodecs(
 
         let hasSeenFirstKeyFrame = false;
 
-        mp4boxfile.onSamples = async (trackId: number, _user: any, samples: MP4Sample[]) => {
-          if (trackId !== videoTrack.id || !decoder || decoder.state === 'closed') return;
+        mp4boxfile.onSamples = (trackId: number, _user: any, samples: MP4Sample[]) => {
+          if (trackId !== videoTrack.id || !decoder || decoder.state === 'closed' || isFinished) return;
+
+          samplesProcessed += samples.length;
 
           for (const sample of samples) {
             if (isFinished || decoder.state !== 'configured') break;
 
+            const isSync = Boolean(sample.is_sync);
+
             // VideoDecoder strictly requires a key frame (type: 'key') as the very first chunk after configure()
             if (!hasSeenFirstKeyFrame) {
-              if (!sample.is_sync) {
+              if (!isSync) {
                 continue;
               }
               hasSeenFirstKeyFrame = true;
@@ -183,7 +217,7 @@ async function extractKeyframesWebCodecs(
 
             try {
               const chunk = new EncodedVideoChunk({
-                type: sample.is_sync ? 'key' : 'delta',
+                type: isSync ? 'key' : 'delta',
                 timestamp: (sample.cts * 1_000_000) / sample.timescale,
                 duration: (sample.duration * 1_000_000) / sample.timescale,
                 data: sample.data,
@@ -195,26 +229,22 @@ async function extractKeyframesWebCodecs(
             }
           }
 
-          try {
-            if (decoder && decoder.state === 'configured') {
-              await decoder.flush();
-            }
-          } catch (flushErr) {
-            console.warn('[videoFrames-WebCodecs] Flush error:', flushErr);
+          // If we've processed all samples in the video, finalize
+          if (totalSamples > 0 && samplesProcessed >= totalSamples) {
+            void finalize();
           }
-
-          const results: string[] = [];
-          for (let i = 0; i < targetTimestampsSec.length; i++) {
-            const frame = capturedMap.get(i);
-            if (frame) results.push(frame);
-          }
-
-          cleanup();
-          resolve(results);
         };
 
-        mp4boxfile.setExtractionOptions(videoTrack.id, null, { nbSamples: 1000, rapAlignment: true });
+        const batchSize = Math.max(1000, totalSamples || 5000);
+        mp4boxfile.setExtractionOptions(videoTrack.id, null, { nbSamples: batchSize });
         mp4boxfile.start();
+
+        // Safety fallback: finalize after all samples are queued or after timeout
+        setTimeout(() => {
+          if (!isFinished) {
+            void finalize();
+          }
+        }, 4000);
       } catch (err: any) {
         cleanup();
         reject(err);

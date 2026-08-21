@@ -4,6 +4,7 @@ declare module 'mp4box' {
     codec: string;
     duration: number;
     timescale: number;
+    nb_samples?: number;
     video?: {
       width: number;
       height: number;
