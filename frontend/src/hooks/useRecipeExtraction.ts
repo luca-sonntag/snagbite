@@ -272,8 +272,11 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           setPhotos([]);
           localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
 
+          const recipeTitle = job.title?.trim();
           const notifTitle = t('notification.recipeReady.title');
-          const notifBody = t('notification.recipeReady.body', { title: t('recipe.recipe') || 'Recipe' });
+          const notifBody = recipeTitle
+            ? t('notification.recipeReady.body', { title: recipeTitle })
+            : t('notification.recipeReady.bodyFallback');
           void sendRecipeReadyNotification(notifTitle, notifBody, job.recipeId);
 
           onExtractionSuccess(job.recipeId);

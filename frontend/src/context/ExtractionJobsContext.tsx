@@ -165,15 +165,18 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
   }, [setJobsPersist]);
 
   const finalizeCompletion = useCallback(async (job: ExtractionJob) => {
+    const recipeTitle = job.title?.trim();
     const notifTitle = t('notification.recipeReady.title');
-    const notifBody = t('notification.recipeReady.body', { title: t('recipe.recipe') || 'Recipe' });
+    const notifBody = recipeTitle
+      ? t('notification.recipeReady.body', { title: recipeTitle })
+      : t('notification.recipeReady.bodyFallback');
     // The tap routes to the produced recipe, not to the task that produced it
     // (App's registerNotificationTap → app:navigate-to-timer-step handler).
     void sendRecipeReadyNotification(notifTitle, notifBody, job.recipeId ?? undefined);
 
     setJobsPersist(prev => prev.map(j =>
       j.id === job.id
-        ? { ...j, status: 'completed', progress: null, recipeId: job.recipeId ?? null }
+        ? { ...j, status: 'completed', progress: null, recipeId: job.recipeId ?? null, title: recipeTitle ?? j.title ?? null }
         : j
     ));
 

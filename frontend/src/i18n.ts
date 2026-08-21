@@ -660,6 +660,7 @@ export const uiTranslations = {
       recipeReady: {
         title: 'Rezept bereit',
         body: 'Dein Rezept „{title}“ ist bereit zum Kochen!',
+        bodyFallback: 'Dein neues Rezept ist bereit zum Kochen!',
       },
       extractionInterrupted: {
         title: '⚠️ Rezept-Import unterbrochen',
@@ -1660,6 +1661,7 @@ export const uiTranslations = {
       recipeReady: {
         title: 'Recipe Ready',
         body: 'Your recipe "{title}" is ready to cook!',
+        bodyFallback: 'Your new recipe is ready to cook!',
       },
       extractionInterrupted: {
         title: '⚠️ Recipe Import Interrupted',

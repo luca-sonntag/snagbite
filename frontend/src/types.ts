@@ -116,6 +116,7 @@ export interface ExtractionJob {
   mediaRequest?: MediaRequest | null;
   error?: string;
   recipeId?: string | null;
+  title?: string | null;
   parentRecipeId?: string | null;
   remixPrompt?: string | null;
   createdAt: string;

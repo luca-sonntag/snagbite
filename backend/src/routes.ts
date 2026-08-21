@@ -5,6 +5,7 @@ import {
   createRecipeForUser,
   getJob,
   getRecipe,
+  getRecipeTitles,
   updateRecipe,
   getSavedRecipe,
   getLibrary,
@@ -631,6 +632,12 @@ apiRouter.get('/jobs/:id', async (req: Request, res: Response): Promise<void> =>
       }
     }
 
+    let recipeTitle: string | null = null;
+    if (job.recipeId) {
+      const titles = await getRecipeTitles([job.recipeId]);
+      recipeTitle = titles.get(job.recipeId) ?? null;
+    }
+
     res.status(200).json({
       success: true,
       job: {
@@ -642,6 +649,7 @@ apiRouter.get('/jobs/:id', async (req: Request, res: Response): Promise<void> =>
         progress: job.progress,
         mediaRequest,
         recipeId: job.recipeId,
+        title: recipeTitle,
         parentRecipeId: job.parentRecipeId,
         remixPrompt: job.remixPrompt,
         createdAt: job.createdAt,
