@@ -49,7 +49,7 @@ export default function BulkActionBar({
       </div>
 
       <div className="flex flex-col gap-2 w-full mt-1">
-        {/* Row 1: Abbrechen (links) & 3 Icon-Buttons: Löschen, Favoriten, Sammlung (rechts) */}
+        {/* Row 1: Abbrechen (50% links) & 3 Icon-Buttons (50% rechts) */}
         <div className="flex gap-2 w-full items-center">
           <Button
             onPress={onCancel}
@@ -58,16 +58,16 @@ export default function BulkActionBar({
             <span className="truncate">{t('dialog.cancelDefault')}</span>
           </Button>
 
-          <div className="flex gap-2 shrink-0">
+          <div className="flex-1 flex gap-2 min-w-0">
             {/* 🗑️ Löschen */}
             <Button
               isIconOnly
               onPress={onBulkDelete}
               isDisabled={selectedCount === 0}
-              className="w-11 h-11 min-w-[44px] bg-black/5 dark:bg-white/10 border-none text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 dark:hover:bg-rose-500/15 rounded-xl flex items-center justify-center active:scale-95 transition-all"
+              className="flex-1 h-11 bg-black/5 dark:bg-white/10 border-none text-rose-500 dark:text-rose-400 hover:bg-rose-500/10 dark:hover:bg-rose-500/15 rounded-xl flex items-center justify-center active:scale-95 transition-all min-w-0"
               aria-label={t('catalog.bulkDelete')}
             >
-              <Trash2 className="w-5 h-5" />
+              <Trash2 className="w-4.5 h-4.5" strokeWidth={1.5} />
             </Button>
 
             {/* ⭐ Favoriten */}
@@ -75,10 +75,10 @@ export default function BulkActionBar({
               isIconOnly
               onPress={onBulkFavorite}
               isDisabled={selectedCount === 0}
-              className="w-11 h-11 min-w-[44px] bg-black/5 dark:bg-white/10 border-none text-gray-700 dark:text-gray-200 hover:bg-black/10 dark:hover:bg-white/15 rounded-xl flex items-center justify-center active:scale-95 transition-all"
+              className="flex-1 h-11 bg-black/5 dark:bg-white/10 border-none text-gray-700 dark:text-gray-200 hover:bg-black/10 dark:hover:bg-white/15 rounded-xl flex items-center justify-center active:scale-95 transition-all min-w-0"
               aria-label={allSelectedAreFavorites ? t('catalog.bulkUnfavorite') : t('catalog.bulkFavorites')}
             >
-              <Star className={`w-5 h-5 transition-colors ${allSelectedAreFavorites ? 'fill-amber-500 text-amber-500' : 'text-gray-600 dark:text-gray-300'}`} />
+              <Star className={`w-4.5 h-4.5 transition-colors ${allSelectedAreFavorites ? 'fill-amber-500 text-amber-500' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={1.5} />
             </Button>
 
             {/* 📁 Sammlung */}
@@ -86,10 +86,10 @@ export default function BulkActionBar({
               isIconOnly
               onPress={onBulkAddToCollection}
               isDisabled={selectedCount === 0}
-              className="w-11 h-11 min-w-[44px] bg-black/5 dark:bg-white/10 border-none text-gray-700 dark:text-gray-200 hover:bg-black/10 dark:hover:bg-white/15 rounded-xl flex items-center justify-center active:scale-95 transition-all"
+              className="flex-1 h-11 bg-black/5 dark:bg-white/10 border-none text-gray-700 dark:text-gray-200 hover:bg-black/10 dark:hover:bg-white/15 rounded-xl flex items-center justify-center active:scale-95 transition-all min-w-0"
               aria-label={t('catalog.bulkCollection')}
             >
-              <Folder className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              <Folder className="w-4.5 h-4.5 text-gray-600 dark:text-gray-300" strokeWidth={1.5} />
             </Button>
           </div>
         </div>
