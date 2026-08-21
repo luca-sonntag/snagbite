@@ -351,21 +351,21 @@ apiRouter.post('/extract-recipe', async (req: Request, res: Response): Promise<v
       throw new AppError('INVALID_URL', { message: 'URL failed to parse.' });
     }
 
-    // Already extracted this URL before? Re-add the existing recipe to the
-    // cookbook instead of extracting again — free, and it works whether or not
-    // the user had previously removed it. This replaces the old
-    // findCompletedJobByUrl + restoreJob soft-delete dance.
-    const existingRecipeId = await findExtractedRecipeIdByUrl(cleanUrl, req.userId!);
-    if (existingRecipeId) {
-      await addToLibrary(req.userId!, existingRecipeId, 'extraction');
-      res.status(200).json({
-        success: true,
-        recipeId: existingRecipeId,
-        status: 'completed',
-        isCached: true,
-        message: 'Recipe already extracted successfully.',
-      });
-      return;
+    // In production, reuse already extracted recipes to save AI quota.
+    // In development mode, allow re-extracting the same URL for prompt/model testing.
+    if (process.env.NODE_ENV === 'production') {
+      const existingRecipeId = await findExtractedRecipeIdByUrl(cleanUrl, req.userId!);
+      if (existingRecipeId) {
+        await addToLibrary(req.userId!, existingRecipeId, 'extraction');
+        res.status(200).json({
+          success: true,
+          recipeId: existingRecipeId,
+          status: 'completed',
+          isCached: true,
+          message: 'Recipe already extracted successfully.',
+        });
+        return;
+      }
     }
 
     // Check if a job for this URL is already running (scoped to user).
