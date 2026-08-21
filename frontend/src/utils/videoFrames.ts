@@ -13,15 +13,19 @@ export const MAX_VIDEO_DOWNLOAD_BYTES = 25 * 1024 * 1024;
 /** Overall deadline for entire keyframe capture workflow. */
 export const FRAME_CAPTURE_TIMEOUT_MS = 15000;
 
-/** Keyframe time fractions along the video timeline (25%, 50%, 75%). */
-export const FRAME_PERCENTAGES = [0.25, 0.50, 0.75];
+/** Number of keyframes extracted across the video timeline to form the 4x4 visual progression grid. */
+export const FRAME_COUNT = 16;
 
 /**
- * Calculates target timestamps in seconds for given duration.
+ * Calculates 16 target timestamps in seconds evenly distributed across the video duration.
  */
 export function calculateKeyframeTimestamps(durationSeconds: number): number[] {
   const duration = Math.max(1, durationSeconds);
-  return FRAME_PERCENTAGES.map((p) => Math.round(duration * p * 100) / 100);
+  const timestamps: number[] = [];
+  for (let i = 1; i <= FRAME_COUNT; i++) {
+    timestamps.push(Math.round((duration * (i / (FRAME_COUNT + 1))) * 100) / 100);
+  }
+  return timestamps;
 }
 
 /**

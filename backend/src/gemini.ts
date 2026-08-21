@@ -351,7 +351,6 @@ function imageMimeType(filePath: string): string {
     default: return 'image/jpeg';
   }
 }
-
 /**
  * Where a set of full-resolution images came from. Both kinds go through the
  * same upload path, but they need different reading instructions: carousel
@@ -362,7 +361,8 @@ export type ImageSourceKind = 'carousel' | 'photo' | 'client_frames';
 
 export interface ClientFramesInput {
   thumbnail?: Buffer;
-  frames: Buffer[];
+  frames?: Buffer[];
+  gridBuffer?: Buffer;
 }
 
 export interface ExtractRecipeResult {
@@ -388,53 +388,31 @@ export async function extractRecipe(
 
   const startTime = Date.now();
   const timestamp = new Date().toISOString();
-  let uploadResult: any;
+  let rawOutput: string | undefined;
+  let audioUploadResult: any;
   let gridUploadResult: any;
   const carouselUploadResults: any[] = [];
-  let rawOutput: string | undefined;
 
   try {
-    if (audioFilePath && mimeType) {
-      // If the MIME type is video/mp4 but it's audio-only, force audio/mp4 to avoid Gemini video-processing failures
-      const uploadMimeType = mimeType === 'video/mp4' ? 'audio/mp4' : mimeType;
-
-      // 1. Upload the audio file to Google AI File API
-      uploadResult = await fileManager.uploadFile(audioFilePath, {
-        mimeType: uploadMimeType,
-        displayName: `recipe-audio-${Date.now()}`,
-      });
-
-      // 2. Poll for file state to become ACTIVE
-      let file = await fileManager.getFile(uploadResult.file.name);
-      let attempts = 0;
-      while (file.state === 'PROCESSING') {
-        attempts++;
-        if (attempts > 30) {
-          throw new Error('Timeout waiting for audio file to process on Google AI File API.');
-        }
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        file = await fileManager.getFile(uploadResult.file.name);
-      }
-
-      if (file.state !== 'ACTIVE') {
-        throw new Error(`Google AI File API processing failed with state: ${file.state}`);
-      }
-    }
-
-    // 2b. If a grid image is provided, upload it as well
+    // 2a. If an audio file is provided, upload it to Google AI File API
     const contentParts: any[] = [];
-
-    if (uploadResult) {
+    if (audioFilePath && mimeType) {
+      console.log('[extractRecipe] Uploading audio file to Gemini File API...');
+      audioUploadResult = await fileManager.uploadFile(audioFilePath, {
+        mimeType,
+        displayName: `instagram-reel-audio-${Date.now()}`,
+      });
       contentParts.push({
         fileData: {
-          fileUri: uploadResult.file.uri,
-          mimeType: uploadResult.file.mimeType,
+          fileUri: audioUploadResult.file.uri,
+          mimeType: audioUploadResult.file.mimeType,
         },
       });
     }
 
+    // 2b. If a grid image is provided (e.g. server-side video grid), upload it as well
     if (gridImagePath) {
-      console.log('[extractRecipeFromAudio] Uploading grid image for recipe extraction context...');
+      console.log('[extractRecipe] Uploading grid image for recipe extraction context...');
       gridUploadResult = await fileManager.uploadFile(gridImagePath, {
         mimeType: 'image/jpeg',
         displayName: `instagram-reel-grid-${Date.now()}`,
@@ -477,14 +455,23 @@ export async function extractRecipe(
           },
         });
       }
-      for (const frame of clientFrames.frames) {
-        if (frame && frame.length > 0) {
-          contentParts.push({
-            inlineData: {
-              data: frame.toString('base64'),
-              mimeType: 'image/jpeg',
-            },
-          });
+      if (clientFrames.gridBuffer && clientFrames.gridBuffer.length > 0) {
+        contentParts.push({
+          inlineData: {
+            data: clientFrames.gridBuffer.toString('base64'),
+            mimeType: 'image/jpeg',
+          },
+        });
+      } else if (clientFrames.frames?.length) {
+        for (const frame of clientFrames.frames) {
+          if (frame && frame.length > 0) {
+            contentParts.push({
+              inlineData: {
+                data: frame.toString('base64'),
+                mimeType: 'image/jpeg',
+              },
+            });
+          }
         }
       }
     }
@@ -508,8 +495,8 @@ export async function extractRecipe(
       ? isPhotoSource
         ? ` and ${carouselImagePaths.length} photo(s) the user took of a PHYSICAL recipe source — a cookbook page, a magazine clipping, or a handwritten recipe card — in page order. Carefully read ALL text visible in every photo, including cursive and old-fashioned handwriting; it is the primary and only recipe source`
         : ` and ${carouselImagePaths.length} images from a photo-carousel post in their original slide order. Recipe carousels typically show the finished dish plus slides where the ingredient list and step-by-step instructions are written as TEXT ON the images — carefully read ALL text visible in every image; it is the primary recipe source`
-      : imageSourceKind === 'client_frames' && totalClientFrames > 0
-        ? ` and ${totalClientFrames} image(s) captured from the video: ${clientFrames?.thumbnail ? 'Image 1 is the video thumbnail/cover showing the final dish. ' : ''}The following ${clientFrames?.frames?.length ?? 0} image(s) show chronological keyframes (at approx. 25%, 50%, 75% video runtime) depicting ingredient preparation and cooking steps. Use these visual frames to verify ingredients, cooking techniques, and consistency. Missing frames are normal; NEVER hallucinate steps or ingredients not shown or mentioned`
+      : imageSourceKind === 'client_frames' && (clientFrames?.gridBuffer || totalClientFrames > 0)
+        ? ` and visual context image(s) from the cooking video: ${clientFrames?.thumbnail ? 'The first image is the video cover/thumbnail. ' : ''}${clientFrames?.gridBuffer ? 'The next image is a 4x4 chronological grid of 16 keyframes extracted across the video timeline. ' : ''}Use this visual context to observe ingredients (textures, colors, packaging), verify cooking techniques and pan consistency, and follow preparation steps.`
       : gridImagePath
         ? ' and an image showing a 4x4 grid of 16 chronological frames extracted from the video to provide visual context (showing ingredients, cooking steps, and final plating)'
         : '';
@@ -701,9 +688,9 @@ ${caption.trim() ? `\nDescription/Caption:\n"""\n${caption}\n"""` : ''}${htmlCon
     throw err;
   } finally {
     // 4. Ensure cleanup of the uploaded files on Gemini servers in the background (non-blocking)
-    if (uploadResult?.file?.name) {
-      fileManager.deleteFile(uploadResult.file.name).catch((err: any) => {
-        console.error(`Failed to clean up file ${uploadResult.file.name} from Gemini File API:`, err.message);
+    if (audioUploadResult?.file?.name) {
+      fileManager.deleteFile(audioUploadResult.file.name).catch((err: any) => {
+        console.error(`Failed to clean up file ${audioUploadResult.file.name} from Gemini File API:`, err.message);
       });
     }
     if (gridUploadResult?.file?.name) {
@@ -717,134 +704,6 @@ ${caption.trim() ? `\nDescription/Caption:\n"""\n${caption}\n"""` : ''}${htmlCon
           console.error(`Failed to clean up file ${imgUpload.file.name} from Gemini File API:`, err.message);
         });
       }
-    }
-  }
-}
-
-/**
- * Uploads a combined tiled grid image of video frames to Gemini File API,
- * asks which shows the finished dish most appetizingly, and returns the top 5 indices.
- * The uploaded grid image is cleaned up afterwards.
- */
-export async function selectBestFoodFrame(framePaths: string[], gridImagePath: string, logDir?: string): Promise<number[]> {
-  if (framePaths.length === 0) {
-    return [];
-  }
-
-  const startTime = Date.now();
-  const timestamp = new Date().toISOString();
-  let rawOutput: string | undefined;
-  let uploadResult: any;
-
-  try {
-    // 1. Upload the grid image to Google AI File API
-    console.log('[selectBestFoodFrame] Uploading grid image to Gemini File API...');
-    uploadResult = await fileManager.uploadFile(gridImagePath, {
-      mimeType: 'image/jpeg',
-      displayName: `frames-grid-${Date.now()}.jpg`,
-    });
-
-    const model = genAI.getGenerativeModel({
-      model: config.GEMINI_MODEL,
-      generationConfig: {
-        temperature: config.GEMINI_TEMPERATURE,
-      },
-    });
-
-    const prompt =
-      `You are a food photography expert. You are given a grid containing ${framePaths.length} frames ` +
-      `(numbered 0 to ${framePaths.length - 1}) from an Instagram cooking reel. ` +
-      'Your task: identify the best frames to document the recipe. ' +
-      '1. The FIRST frame you select MUST be the absolute best shot of the FINISHED, fully plated or cooked dish in the most appetizing way. ' +
-      '2. Then, select between 2 to 8 additional frames that show important, distinct chronological steps of the preparation/cooking process. ' +
-      'Only select frames that are sharp, clear, in-focus, and where the subject fills most of the image. Strictly exclude any blurry, shaky, or out-of-focus frames. Do not select redundant frames. ' +
-      `Respond with ONLY a comma-separated list of the selected frame indices (e.g. "14, 2, 5, 8, 11"). No explanation.`;
-
-    console.log('[selectBestFoodFrame] Requesting best frames from Gemini...');
-    const result = await model.generateContent([
-      {
-        fileData: {
-          fileUri: uploadResult.file.uri,
-          mimeType: 'image/jpeg',
-        },
-      },
-      prompt,
-    ]);
-
-    rawOutput = result.response.text().trim();
-
-    let indices = rawOutput
-      .split(',')
-      .map((s) => parseInt(s.trim(), 10))
-      .filter((n) => !isNaN(n) && n >= 0 && n < framePaths.length);
-
-    // Extract token usage and compute cost
-    const usageMeta = result.response.usageMetadata;
-    const tokenUsage: TokenUsage | undefined = usageMeta
-      ? {
-        promptTokens: usageMeta.promptTokenCount ?? 0,
-        candidateTokens: usageMeta.candidatesTokenCount ?? 0,
-        totalTokens: usageMeta.totalTokenCount ?? 0,
-      }
-      : undefined;
-    const costEstimate = tokenUsage ? estimateCost(config.GEMINI_MODEL, tokenUsage) : undefined;
-
-    if (indices.length === 0) {
-      console.warn(`[selectBestFoodFrame] Unexpected response "${rawOutput}", defaulting to last frame`);
-
-      void writeGeminiLog({
-        timestamp,
-        requestType: 'select_best_frame',
-        model: config.GEMINI_MODEL,
-        durationMs: Date.now() - startTime,
-        success: false,
-        error: `Unexpected index response: "${rawOutput}"`,
-        input: { frameCount: framePaths.length, framePaths, prompt },
-        rawOutput,
-        parsedOutput: { selectedIndices: [framePaths.length - 1], fallback: true },
-        tokenUsage,
-        costEstimate,
-        logDir,
-      });
-
-      return [framePaths.length - 1]; // fallback
-    }
-
-    void writeGeminiLog({
-      timestamp,
-      requestType: 'select_best_frame',
-      model: config.GEMINI_MODEL,
-      durationMs: Date.now() - startTime,
-      success: true,
-      input: { frameCount: framePaths.length, framePaths, prompt },
-      rawOutput,
-      parsedOutput: { selectedIndices: indices },
-      tokenUsage,
-      costEstimate,
-      logDir,
-    });
-
-    // Ensure we don't return an absurd amount, but allow up to 10
-    return indices.slice(0, 10);
-  } catch (err: any) {
-    void writeGeminiLog({
-      timestamp,
-      requestType: 'select_best_frame',
-      model: config.GEMINI_MODEL,
-      durationMs: Date.now() - startTime,
-      success: false,
-      error: err?.message ?? String(err),
-      input: { frameCount: framePaths.length, framePaths },
-      rawOutput,
-      logDir,
-    });
-    throw err;
-  } finally {
-    // Clean up uploaded grid image from Gemini File API in the background (non-blocking)
-    if (uploadResult?.file?.name) {
-      fileManager.deleteFile(uploadResult.file.name).catch((err: any) => {
-        console.error(`Failed to clean up file ${uploadResult.file.name} from Gemini File API:`, err.message);
-      });
     }
   }
 }

@@ -468,7 +468,7 @@ apiRouter.post('/extract-recipe/photos', async (req: Request, res: Response): Pr
   }
 });
 
-const MAX_CLIENT_FRAMES = 4;
+const MAX_CLIENT_FRAMES = 24;
 const MAX_FRAMES_TOTAL_CHARS = 12 * 1024 * 1024; // 12 MB char limit for total base64 frames
 
 /**

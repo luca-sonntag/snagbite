@@ -273,7 +273,7 @@ async function processJob(job: Job): Promise<void> {
       return;
     }
 
-    // Decode ephemeral client frames if present
+    // Decode ephemeral client frames if present and composite into a single in-memory grid
     if (job.clientFrames) {
       const thumbBuf = job.clientFrames.thumbnailBase64
         ? Buffer.from(job.clientFrames.thumbnailBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64')
@@ -281,7 +281,19 @@ async function processJob(job: Job): Promise<void> {
       const frameBufs = (job.clientFrames.framesBase64 || [])
         .map((f) => Buffer.from(f.replace(/^data:image\/\w+;base64,/, ''), 'base64'))
         .filter((b) => b.length > 0);
-      clientFramesInput = { thumbnail: thumbBuf, frames: frameBufs };
+
+      let clientGridBuffer: Buffer | undefined;
+      if (frameBufs.length > 1) {
+        try {
+          const { createGridBufferFromFrames } = await import('./frameExtractor.js');
+          console.log(`[Job ${jobId}] Creating in-memory 4x4 grid from ${frameBufs.length} client frames...`);
+          clientGridBuffer = await createGridBufferFromFrames(frameBufs);
+        } catch (gridErr: any) {
+          console.warn(`[Job ${jobId}] Failed to create in-memory grid from client frames:`, gridErr.message);
+        }
+      }
+
+      clientFramesInput = { thumbnail: thumbBuf, frames: frameBufs, gridBuffer: clientGridBuffer };
     }
 
     // 3. Mark job as processing
@@ -307,7 +319,7 @@ async function processJob(job: Job): Promise<void> {
       );
     }
 
-    // 6. If video is available, extract frames and create grid first
+    // 6. If video is available (legacy server-download), extract frames and create grid first
     let gridImagePath: string | undefined;
     framePaths = [];
     const isCarousel = downloaded.imageFilePaths.length > 0;
@@ -327,9 +339,6 @@ async function processJob(job: Job): Promise<void> {
         console.warn(`[Job ${jobId}] Frame extraction / grid generation failed: ${err.message}`);
       }
     } else if (isCarousel) {
-      // Image carousel: the slides take the role of video frames — build the tiled grid
-      // from them so the existing best-shot selection works unchanged. A single-slide
-      // post skips the grid (xstack needs >= 2 inputs); its cover is uploaded directly.
       await updateJobProgress(jobId, 'processing', { percent: 55, stage: 'extracting_frames' });
       framePaths = downloaded.imageFilePaths;
       if (framePaths.length > 1) {
@@ -346,58 +355,30 @@ async function processJob(job: Job): Promise<void> {
       }
     }
 
-    console.log(`[Job ${jobId}] Running recipe extraction and frame selection in parallel...`);
-
-    const frameSelectionPromise: Promise<string[] | null> = (gridImagePath && framePaths.length > 0)
-      ? (async () => {
-        try {
-          const { selectBestFoodFrame } = await import('./gemini.js');
-          console.log(`[Job ${jobId}] Asking Gemini to pick best food shots from grid...`);
-          const bestIndices = await selectBestFoodFrame(framePaths, gridImagePath, runDir);
-          console.log(`[Job ${jobId}] Best frames selected: indices ${bestIndices.join(', ')}`);
-
-          if (isCarousel && scrapeResult.media.kind === 'images') {
-             const originalUrls = scrapeResult.media.imageUrls;
-             return bestIndices.map(idx => originalUrls[idx]).filter(Boolean);
-          }
-          return null;
-        } catch (err: any) {
-          console.warn(`[Job ${jobId}] Frame selection failed: ${err.message}`);
-          return (isCarousel && scrapeResult.media.kind === 'images' && scrapeResult.media.imageUrls.length > 0)
-            ? [scrapeResult.media.imageUrls[0]]
-            : null;
-        }
-      })()
-      : (isCarousel && scrapeResult.media.kind === 'images' && scrapeResult.media.imageUrls.length > 0)
-        ? Promise.resolve([scrapeResult.media.imageUrls[0]])
-        : Promise.resolve(null);
-
+    console.log(`[Job ${jobId}] Extracting recipe via Gemini...`);
     await updateJobProgress(jobId, 'processing', { percent: 75, stage: 'extracting_recipe' });
 
-    const [{ recipe, usage: geminiUsage }, selectedImageUrls] = await Promise.all([
-      extractRecipe(
-        audioFilePath || undefined,
-        mimeType,
-        scrapeResult.caption,
-        // Carousels send every slide at full resolution instead of the downscaled grid —
-        // the recipe is usually written as text on the images and must stay readable.
-        isCarousel ? undefined : gridImagePath,
-        runDir,
-        userPrefs,
-        scrapeResult.htmlContent,
-        isCarousel ? downloaded.imageFilePaths : undefined,
-        clientFramesInput ? 'client_frames' : 'carousel',
-        clientFramesInput
-      ),
-      frameSelectionPromise,
-    ]);
+    const { recipe, usage: geminiUsage } = await extractRecipe(
+      audioFilePath || undefined,
+      mimeType,
+      scrapeResult.caption,
+      // Carousels send every slide at full resolution instead of the downscaled grid —
+      // the recipe is usually written as text on the images and must stay readable.
+      isCarousel ? undefined : gridImagePath,
+      runDir,
+      userPrefs,
+      scrapeResult.htmlContent,
+      isCarousel ? downloaded.imageFilePaths : undefined,
+      clientFramesInput ? 'client_frames' : 'carousel',
+      clientFramesInput
+    );
 
     console.log(`[Job ${jobId}] Recipe extracted: "${recipe.title}"`);
 
-    // Collect base scraped frames / thumbnail
-    const baseImageUrls = (selectedImageUrls && selectedImageUrls.length > 0)
-      ? selectedImageUrls
-      : (scrapeResult.imageUrl ? [scrapeResult.imageUrl] : []);
+    // Collect base scraped cover image (RapidAPI/TikTok metadata cover)
+    const baseImageUrls = scrapeResult.imageUrl
+      ? [scrapeResult.imageUrl]
+      : (scrapeResult.media.kind === 'images' && scrapeResult.media.imageUrls.length > 0 ? [scrapeResult.media.imageUrls[0]] : []);
 
     let fluxUsage: any = null;
 

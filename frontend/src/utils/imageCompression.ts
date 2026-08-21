@@ -21,8 +21,8 @@ export const PREVIEW_PROFILE: CompressionProfile = { maxEdge: 800, quality: 0.75
  */
 export const RECIPE_PHOTO_PROFILE: CompressionProfile = { maxEdge: 1800, quality: 0.82 };
 
-/** Video keyframe capture profile: 720px / q0.70 for crisp Gemini multimodal extraction and small payloads. */
-export const VIDEO_FRAME_PROFILE: CompressionProfile = { maxEdge: 720, quality: 0.70 };
+/** Video keyframe capture profile: 400px / q0.65 for fast multi-frame capture and compact 4x4 grid transmission (~320 KB total). */
+export const VIDEO_FRAME_PROFILE: CompressionProfile = { maxEdge: 400, quality: 0.65 };
 
 /** Fallback profile applied when a whole photo set is still too large to send. */
 export const RECIPE_PHOTO_FALLBACK_PROFILE: CompressionProfile = { maxEdge: 1400, quality: 0.7 };
