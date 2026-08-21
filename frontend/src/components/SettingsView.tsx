@@ -122,15 +122,12 @@ export default function SettingsView() {
       )}
 
       {/* Profile Card */}
-      <div className="mx-2 p-5 bg-white dark:bg-gray-900 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] rounded-3xl flex flex-col gap-4 relative overflow-hidden">
-        {isPremium && (
-          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full blur-2xl pointer-events-none -mr-8 -mt-8" />
-        )}
+      <div className={`mx-2 p-5 ${isPremium ? 'tint-premium' : 'bg-white dark:bg-gray-900'} border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] rounded-3xl flex flex-col gap-4 relative overflow-hidden`}>
         <div className="flex items-center gap-4">
-          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-lg text-white shadow-md shrink-0 ${
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-lg text-white shadow-none shrink-0 ${
             isPremium 
-              ? 'bg-gradient-to-tr from-emerald-500 to-teal-500 shadow-emerald-500/20 ring-2 ring-emerald-500/20' 
-              : 'bg-gradient-to-tr from-gray-400 to-gray-500 dark:from-gray-600 dark:to-gray-700 shadow-black/10'
+              ? 'bg-gradient-to-tr from-emerald-500 to-teal-500' 
+              : 'bg-gradient-to-tr from-gray-400 to-gray-500 dark:from-gray-600 dark:to-gray-700'
           }`}>
             {getInitials(user?.email)}
           </div>
@@ -143,17 +140,17 @@ export default function SettingsView() {
             </span>
             <div className="flex items-center gap-2 mt-1.5">
               {user?.app_metadata?.tier === 'alpha' ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 border border-amber-500/20 uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 uppercase tracking-wider border-none">
                   <Sparkles className="w-3 h-3 text-amber-500 fill-amber-500 animate-pulse" />
                   {t('app.settings.alphaActive') || 'Alpha Access'}
                 </span>
               ) : isPremium ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
-                  <Crown className="w-3 h-3 fill-emerald-500 text-emerald-500" />
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 uppercase tracking-wider border-none">
+                  <Crown className="w-3 h-3 fill-emerald-600 dark:fill-emerald-400 text-emerald-600 dark:text-emerald-400" />
                   Premium
                 </span>
               ) : (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-black/5 dark:border-white/5 uppercase tracking-wider">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-400 uppercase tracking-wider border-none">
                   Free Member
                 </span>
               )}
@@ -170,7 +167,7 @@ export default function SettingsView() {
           </div>
         ) : isPremium ? (
           <div className="pt-3.5 border-t border-black/5 dark:border-white/5 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
-            <Crown className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+            <Crown className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>
               {t('app.settings.premiumActiveDesc') || 'You have unlimited access to all premium features.'}
             </span>
