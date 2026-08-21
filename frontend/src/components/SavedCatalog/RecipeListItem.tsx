@@ -64,7 +64,9 @@ export default function RecipeListItem({
             {r.title}
           </h4>
           {job.isFavorite && (
-            <Star className="w-4 h-4 text-amber-500 shrink-0" strokeWidth={1.75} />
+            <div className="w-6 h-6 rounded-lg bg-amber-500/15 dark:bg-amber-500/25 flex items-center justify-center shrink-0">
+              <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+            </div>
           )}
         </div>
 
