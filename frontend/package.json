@@ -36,7 +36,6 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "@cookbook/shared": "*",
     "@capacitor-community/admob": "^8.0.0",
     "@capacitor/android": "^8.4.1",
     "@capacitor/app": "^8.1.0",
@@ -51,12 +50,14 @@
     "@capacitor/status-bar": "^8.0.2",
     "@capgo/capacitor-social-login": "^8.3.33",
     "@capgo/capacitor-updater": "^8.51.2",
+    "@cookbook/shared": "*",
     "@gravity-ui/icons": "^2.18.0",
     "@heroui/react": "^3.2.1",
     "@heroui/styles": "^3.2.1",
     "@revenuecat/purchases-capacitor": "^13.2.1",
     "@supabase/supabase-js": "^2.108.2",
     "lucide-react": "^1.21.0",
+    "mp4box": "^2.4.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "send-intent": "^7.0.0"
