@@ -288,6 +288,14 @@ async function processJob(job: Job): Promise<void> {
           const { createGridBufferFromFrames } = await import('./frameExtractor.js');
           console.log(`[Job ${jobId}] Creating in-memory 4x4 grid from ${frameBufs.length} client frames...`);
           clientGridBuffer = await createGridBufferFromFrames(frameBufs);
+
+          // In dev environment, persist the grid image to disk for inspection and debugging
+          if (process.env.NODE_ENV !== 'production' && clientGridBuffer) {
+            await fs.mkdir(runDir, { recursive: true });
+            const devGridPath = path.join(runDir, 'grid.jpg');
+            await fs.writeFile(devGridPath, clientGridBuffer);
+            console.log(`[Job ${jobId}] [DEV] Saved grid image to ${devGridPath}`);
+          }
         } catch (gridErr: any) {
           console.warn(`[Job ${jobId}] Failed to create in-memory grid from client frames:`, gridErr.message);
         }
