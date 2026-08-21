@@ -32,11 +32,7 @@ export default function CollectionTile({ collection, title, emoji, jobs, onClick
     >
       <div className="relative w-full aspect-[2/1] rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
         {displayJobs.length === 0 ? (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-500/10 via-transparent to-indigo-500/10">
-            <span className="text-3xl select-none" role="img" aria-hidden="true">
-              {collectionEmoji || '📁'}
-            </span>
-          </div>
+          <div className="w-full h-full bg-gradient-to-br from-emerald-500/10 via-transparent to-indigo-500/10" />
         ) : displayJobs.length === 1 ? (
           <CachedImage
             src={displayJobs[0].recipe?.imageUrl}
