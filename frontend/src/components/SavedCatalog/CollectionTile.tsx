@@ -1,6 +1,7 @@
 import type { Collection, SavedRecipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import CachedImage from '../CachedImage';
+import { Star } from 'lucide-react';
 
 interface CollectionTileProps {
   collection?: Collection;
@@ -57,9 +58,15 @@ export default function CollectionTile({ collection, title, emoji, jobs, onClick
 
         {/* Collection badge emoji in bottom-left */}
         {collectionEmoji && (
-          <span className="absolute bottom-1 left-1 w-6 h-6 rounded-lg bg-black/25 dark:bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center text-xs select-none shadow-sm z-10">
-            {collectionEmoji}
-          </span>
+          collectionEmoji === '⭐' ? (
+            <div className="absolute bottom-1.5 left-1.5 w-6 h-6 rounded-lg bg-amber-500/30 dark:bg-amber-500/30 flex items-center justify-center shadow-lg z-10">
+              <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500 drop-shadow-[0_2px_5px_rgba(0,0,0,0.65)]" />
+            </div>
+          ) : (
+            <span className="absolute bottom-1 left-1 w-6 h-6 rounded-lg bg-black/25 dark:bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center text-xs select-none shadow-sm z-10">
+              {collectionEmoji}
+            </span>
+          )
         )}
       </div>
 

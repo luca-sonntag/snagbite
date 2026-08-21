@@ -69,8 +69,8 @@ export default function RecipePosterCard({
 
         {/* Favorite badge in top right */}
         {job.isFavorite && (
-          <div className="absolute top-2 right-2 z-10 w-7 h-7 rounded-xl bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-[0_2px_10px_rgba(0,0,0,0.28)] flex items-center justify-center">
-            <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+          <div className="absolute top-2 right-2 z-10 w-7 h-7 rounded-xl bg-amber-500/30 dark:bg-amber-500/30 flex items-center justify-center shadow-lg">
+            <Star className="w-4 h-4 fill-amber-500 text-amber-500 drop-shadow-[0_2px_5px_rgba(0,0,0,0.65)]" />
           </div>
         )}
       </div>
