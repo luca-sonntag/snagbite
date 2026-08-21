@@ -15,7 +15,6 @@
     "preview": "node dist/index.js",
     "purge-hosted-frames": "tsx src/scripts/purgeHostedFrames.ts",
     "recompute-nutrition": "tsx src/scripts/recomputeRecipeNutrition.ts",
-    "migrate:llm-usage": "tsx src/scripts/migrateLlmUsage.ts",
     "seed:dev": "tsx src/scripts/seedDev.ts",
     "eval:dry-run": "tsx src/scripts/runDryRunEvaluation.ts"
   },

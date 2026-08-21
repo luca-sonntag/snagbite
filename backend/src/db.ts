@@ -154,7 +154,11 @@ function jobToRow(updates: Partial<Job>): Partial<JobRow> {
   return row;
 }
 
-function rowToRecipe(row: RecipeRow): Recipe {
+/**
+ * Row -> domain. Exported so maintenance scripts can page over `recipes`
+ * without re-deriving the mapping.
+ */
+export function rowToRecipe(row: RecipeRow): Recipe {
   const nutritionalValues = {
     calories: num(row.calories),
     protein: num(row.protein_g),

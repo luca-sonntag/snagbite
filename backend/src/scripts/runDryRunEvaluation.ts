@@ -192,10 +192,10 @@ async function run() {
     const supabase = getClient();
     const { data: jobs, error } = await supabase
       .from('jobs')
-      .select('id, url, status, error, recipe')
+      .select('id, source_url, status, error')
       .eq('status', 'completed')
       .is('error', null)
-      .not('url', 'like', 'photo://%')
+      .neq('kind', 'photo')
       .order('created_at', { ascending: false });
 
     if (error || !jobs) {
@@ -204,10 +204,11 @@ async function run() {
     }
 
     const seen = new Set<string>();
-    for (const j of jobs) {
-      if (j.url && !seen.has(j.url) && !j.url.includes('seed-')) {
-        seen.add(j.url);
-        uniqueUrls.push(j.url);
+    for (const j of jobs as any[]) {
+      const url = j.source_url;
+      if (url && !seen.has(url) && !url.includes('seed-')) {
+        seen.add(url);
+        uniqueUrls.push(url);
       }
     }
     console.log(`Found ${uniqueUrls.length} real unique recipe URLs in Supabase Dev.`);

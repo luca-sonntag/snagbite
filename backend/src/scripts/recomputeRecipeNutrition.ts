@@ -24,7 +24,7 @@
  *   npx tsx src/scripts/recomputeRecipeNutrition.ts
  *   DRY_RUN=1 npx tsx src/scripts/recomputeRecipeNutrition.ts
  */
-import { getClient } from '../db.js';
+import { getClient, rowToRecipe, recipeToRow } from '../db.js';
 import { enrichRecipeWithCanonicalIngredients } from '../matching/ingredientMatcher.js';
 import type { Recipe } from '../types.js';
 
@@ -54,22 +54,23 @@ async function main(): Promise<void> {
 
   for (;;) {
     const { data, error } = await client
-      .from('jobs')
-      .select('id, recipe')
-      .not('recipe', 'is', null)
+      .from('recipes')
+      .select('*')
       .order('created_at', { ascending: true })
       .range(from, from + PAGE_SIZE - 1);
 
-    if (error) throw new Error(`Failed to page jobs: ${error.message}`);
+    if (error) throw new Error(`Failed to page recipes: ${error.message}`);
     if (!data || data.length === 0) break;
 
     for (const row of data) {
       scanned++;
-      const recipe = row.recipe as any;
+      const recipe = rowToRecipe(row as any) as any;
 
-      // Progress placeholders and recipes without an ingredient list have nothing
-      // to derive from — leaving them untouched is the only safe outcome.
-      if (recipe?.isProgress || !hasIngredients(recipe)) {
+      // A recipe without an ingredient list has nothing to derive from — leaving
+      // it untouched is the only safe outcome. (Progress placeholders used to
+      // land here too, back when the recipe column doubled as the progress
+      // channel; they now live in jobs.progress and never reach this table.)
+      if (!hasIngredients(recipe)) {
         skipped++;
         continue;
       }
@@ -99,15 +100,18 @@ async function main(): Promise<void> {
       updated++;
       if (DRY_RUN) {
         console.log(
-          `[dry-run] job ${row.id}: ${previousTotal ?? '—'} → ${computed} kcal/serving ` +
+          `[dry-run] recipe ${row.id}: ${previousTotal ?? '—'} → ${computed} kcal/serving ` +
           `(coverage ${Math.round((recipe.nutritionCoverage ?? 0) * 100)}%)`
         );
         continue;
       }
 
-      const { error: updateError } = await client.from('jobs').update({ recipe }).eq('id', row.id);
+      const { error: updateError } = await client
+        .from('recipes')
+        .update(recipeToRow(recipe))
+        .eq('id', row.id);
       if (updateError) {
-        console.error(`Failed to update job ${row.id}: ${updateError.message}`);
+        console.error(`Failed to update recipe ${row.id}: ${updateError.message}`);
       }
     }
 

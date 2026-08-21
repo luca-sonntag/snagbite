@@ -52,7 +52,7 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
 6. 🎮 [**Gamification (Koch-Belohnungen, XP, Streaks)**](file:///c:/Users/lucas/source/repos/cookbook/docs/architecture/gamification.md)
    * `cook_events` / `point_ledger` / `user_stats` / `user_badges` & `cook-photos` Bucket
    * Server-autoritative Punkte-Engine (`gamification.ts`), tunebare JSON-Formel in `global_settings`
-   * `POST /api/jobs/:id/cooked` & `GET /api/me/gamification`, RewardOverlay & Fortschritt-Tab
+   * `POST /api/recipes/:id/cooked` & `GET /api/me/gamification`, RewardOverlay & Fortschritt-Tab
 
 ---
 
@@ -61,7 +61,7 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
 Dieses Projekt analysiert Rezept-Reels (Instagram, TikTok, YouTube Shorts, Websites) sowie abfotografierte Kochbuchseiten via Google Gemini Vision, strukturiert diese in ein präzises JSON-Schema und stellt sie in einem modernen React PWA Dashboard zur Verfügung.
 
 1. **Eingabe:** Share Target / Link-Eingabe oder Foto-Upload (`POST /api/extract-recipe/photos`).
-2. **Auth & Jobs:** Supabase JWT Auth Middleware `requireAuth`, Erstellung von `pending`-Jobs in Postgres `jobs`-Tabelle.
+2. **Auth & Jobs:** Supabase JWT Auth Middleware `requireAuth`, Erstellung von `pending`-Jobs in der Postgres-`jobs`-Tabelle (reiner Task; der Inhalt landet über `complete_job()` in `recipes`, der Kochbuch-Eintrag in `user_recipes`).
 3. **Queue & Processing:** Worker claimt Job atomar (`claim_next_job`), führt Scraping/Downloader oder Photo-Fetch durch, baut Video-Grid und ruft Gemini Multimodal API auf.
 4. **Structured Recipe Output:** Gemini liefert standardisierte Zutaten, Supermarktkategorien, Nährwerte per Portion und Schritte.
 5. **Dashboard & PWA:** Interaktive Checklisten, Portionsrechner, In-App Timers, 3-Ebenen-Katalog mit Sammlungen/Labels, Einkaufsliste, Offline-Bildercache & Recipe Copilot Chat.

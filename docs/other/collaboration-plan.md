@@ -31,6 +31,24 @@ fehlende Zutat für alles, was mit Teilen zu tun hat:
 | Push-Worker mit Kategorien/Frequenz-Cap | `backend/src/notifications/` | „X hat dir ein Rezept geschickt" |
 | Gamification (XP, Coins, Streaks, Badges) | `docs/architecture/gamification.md` | Soziale Anreize andocken |
 
+> [!NOTE]
+> **Aktualisiert am 2026-08-21.** Die `jobs`-Tabelle ist inzwischen in
+> `jobs` / `recipes` / `user_recipes` aufgetrennt (siehe `docs/OBSOLETE.md`).
+> Der Abschnitt unten beschreibt noch die Kopier-Mechanik aus der Zeit davor —
+> **Teilen ist jetzt keine Kopie mehr, sondern eine zweite `user_recipes`-Zeile
+> auf dieselbe `recipe_id`.** Konkret entfällt damit:
+>
+> * die `jobs`-Spalten `shared_from_job_id` / `shared_from_user_id` — Herkunft
+>   liegt in `recipes.created_by` und `user_recipes.source`;
+> * die Frage „`origin`-Feld oder `parent_job_id` mitbenutzen?" (offener Punkt 2)
+>   — `jobs.kind` und `recipes.origin` existieren bereits;
+> * die Quota-Sorge — Kochbuch-Cap zählt `user_recipes`, Rate-Limit zählt `jobs`.
+>
+> `user_recipes.source = 'share'` und `recipes.visibility` sind als Andockpunkte
+> bereits angelegt. **Neu zu beachten:** sobald eine `recipes`-Zeile mehreren
+> Usern gehört, braucht `PATCH /api/recipes/:id` Copy-on-Write — sonst
+> überschreibt User A das Rezept von User B.
+
 ### Die zentrale Mechanik: Teilen = Kopieren, nicht Extrahieren
 
 Der Punkt, an dem alles hängt, ist unspektakulär und genau deshalb gut: Ein Rezept
