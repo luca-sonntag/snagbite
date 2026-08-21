@@ -15,6 +15,7 @@ import { scrapeWebsite } from './website.js';
 export type MediaDownload =
   | { kind: 'direct'; videoUrl?: string; audioUrl?: string; headers?: Record<string, string> }
   | { kind: 'images'; imageUrls: string[]; headers?: Record<string, string> }
+  | { kind: 'client'; videoUrl: string; headers?: Record<string, string> }
   | { kind: 'none' };
 
 export interface ScrapingResult {

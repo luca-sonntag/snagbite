@@ -89,7 +89,7 @@ async function fileSizeBytes(filePath: string): Promise<number> {
  * missing video still lets audio + caption drive extraction.
  */
 export async function downloadMedia(media: MediaDownload, runDir: string): Promise<DownloadedMedia> {
-  if (media.kind === 'none') return { audioFilePath: '', videoFilePath: '', imageFilePaths: [], mediaBytes: 0 };
+  if (media.kind === 'none' || media.kind === 'client') return { audioFilePath: '', videoFilePath: '', imageFilePaths: [], mediaBytes: 0 };
 
   if (media.kind === 'images') {
     // Image carousel: fetch every slide in post order. Individual failures fail soft so

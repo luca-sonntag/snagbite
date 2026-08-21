@@ -41,13 +41,40 @@ const BROWSER_UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36';
 
 const MAX_CAROUSEL_IMAGES = 15;
+const MAX_HEIGHT = 720;
+
+function parseHeight(m: RapidMedia): number | null {
+  const s = `${m.quality ?? ''} ${m.extension ?? ''} ${m.url ?? ''}`;
+  const wxh = s.match(/(\d{3,4})x(\d{3,4})/);
+  if (wxh) return parseInt(wxh[2], 10);
+  const p = s.match(/(\d{3,4})\s*p/i);
+  if (p) return parseInt(p[1], 10);
+  if (/\bhd\b/i.test(s)) return 720;
+  if (/\bsd\b/i.test(s)) return 480;
+  return null;
+}
 
 function isType(m: RapidMedia, type: string): boolean {
-  return (m.type ?? '').toLowerCase().includes(type);
+  return (m.type ?? '').toLowerCase().includes(type) || (type === 'video' && /\.mp4|mp4/i.test(m.extension ?? ''));
 }
 
 function pickImages(medias: RapidMedia[]): RapidMedia[] {
   return medias.filter((m) => m.url && isType(m, 'image')).slice(0, MAX_CAROUSEL_IMAGES);
+}
+
+/** Pick the best video ≤ MAX_HEIGHT (else the smallest available), preferring mp4. */
+function pickVideo(medias: RapidMedia[]): RapidMedia | null {
+  const videos = medias.filter((m) => m.url && isType(m, 'video'));
+  if (!videos.length) return null;
+  const mp4s = videos.filter((m) => /mp4/i.test(m.extension ?? '') || /mp4/i.test(m.url ?? ''));
+  const pool = mp4s.length ? mp4s : videos;
+
+  const annotated = pool.map((m) => ({ m, h: parseHeight(m) }));
+  const underCap = annotated.filter((a) => a.h != null && a.h <= MAX_HEIGHT);
+  if (underCap.length) return underCap.sort((a, b) => b.h! - a.h!)[0].m;
+  const known = annotated.filter((a) => a.h != null);
+  if (known.length) return known.sort((a, b) => a.h! - b.h!)[0].m;
+  return pool[0];
 }
 
 /** RapidAPI often returns a generic/placeholder author (e.g. "youtube", "User"); prefer yt-dlp's when so. */
@@ -90,6 +117,7 @@ export const rapidApiMetadataProvider: SocialScrapeProvider = {
     // Image-carousel posts (IG/TikTok photo slideshows) contain static image slides
     const hasVideo = medias.some((m) => m.url && (isType(m, 'video') || /\.mp4|mp4/i.test(m.extension ?? '')));
     const carouselImages = hasVideo ? [] : pickImages(medias);
+    const video = hasVideo ? pickVideo(medias) : null;
 
     let caption = (data.title ?? '').toString();
     let authorHandle = (data.owner?.username ?? data.author ?? '').toString();
@@ -115,6 +143,12 @@ export const rapidApiMetadataProvider: SocialScrapeProvider = {
         ? {
             kind: 'images',
             imageUrls: carouselImages.map((m) => m.url!),
+            headers,
+          }
+        : video?.url
+        ? {
+            kind: 'client',
+            videoUrl: video.url,
             headers,
           }
         : {
