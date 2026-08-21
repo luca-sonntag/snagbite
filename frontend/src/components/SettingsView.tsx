@@ -46,7 +46,7 @@ const getInitials = (email?: string) => {
 
 export default function SettingsView() {
   const { t, language, setLanguage } = useI18n();
-  const { signOut, user, autoSignedIn, updateUserMetadata, deleteAccount, isPremium, isAdmin } = useAuth();
+  const { signOut, user, autoSignedIn, updateUserMetadata, deleteAccount, isAdmin } = useAuth();
   const dialog = useDialog();
   const [theme, setTheme] = useTheme();
   const [isSaving, setIsSaving] = useState(false);
@@ -60,6 +60,7 @@ export default function SettingsView() {
     getActiveOtaVersion().then(setOtaVersion).catch(() => {});
   }, []);
 
+  const isRealPremium = user?.app_metadata?.tier === 'premium';
   const preferredTempUnit = user?.user_metadata?.preferred_temperature_unit || 'Celsius';
   const preferredUnitSystem = user?.user_metadata?.preferred_unit_system || 'metric';
 
@@ -122,10 +123,10 @@ export default function SettingsView() {
       )}
 
       {/* Profile Card */}
-      <div className={`mx-2 p-5 ${isPremium ? 'tint-premium' : 'bg-white dark:bg-gray-900'} border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] rounded-3xl flex flex-col gap-4 relative overflow-hidden`}>
+      <div className={`mx-2 p-5 ${isRealPremium ? 'tint-premium' : 'bg-white dark:bg-gray-900'} border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] rounded-3xl flex flex-col gap-4 relative overflow-hidden`}>
         <div className="flex items-center gap-4">
           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-lg text-white shadow-none shrink-0 ${
-            isPremium 
+            isRealPremium 
               ? 'bg-gradient-to-tr from-emerald-500 to-teal-500' 
               : 'bg-gradient-to-tr from-gray-400 to-gray-500 dark:from-gray-600 dark:to-gray-700'
           }`}>
@@ -144,7 +145,7 @@ export default function SettingsView() {
                   <Sparkles className="w-3 h-3 text-amber-500 fill-amber-500 animate-pulse" />
                   {t('app.settings.alphaActive') || 'Alpha Access'}
                 </span>
-              ) : isPremium ? (
+              ) : isRealPremium ? (
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 uppercase tracking-wider border-none">
                   <Crown className="w-3 h-3 fill-emerald-600 dark:fill-emerald-400 text-emerald-600 dark:text-emerald-400" />
                   Premium
@@ -165,7 +166,7 @@ export default function SettingsView() {
               {t('app.settings.alphaActiveDesc') || 'You are an alpha tester! You have free access to all premium features during the alpha. Extraction limits apply.'}
             </span>
           </div>
-        ) : isPremium ? (
+        ) : isRealPremium ? (
           <div className="pt-3.5 border-t border-black/5 dark:border-white/5 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
             <Crown className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>
