@@ -67,8 +67,8 @@ function loadPersisted(): ExtractionJobEntry[] {
     if (!raw) return [];
     const parsed = JSON.parse(raw) as PersistedJob[];
     if (!Array.isArray(parsed)) return [];
-    // Never restore finished cards — they'd just clutter the tab on next launch.
-    return parsed.filter(p => !isTerminal(p.status ?? 'pending')).map(p => ({
+    // Never restore finished cards or invalid job ids — they'd just clutter the tab on next launch.
+    return parsed.filter(p => p && p.id && p.id !== 'undefined' && !isTerminal(p.status ?? 'pending')).map(p => ({
       id: p.id,
       sourceLabel: p.sourceLabel,
       mode: p.mode,
@@ -86,16 +86,18 @@ function loadPersisted(): ExtractionJobEntry[] {
 
 function persist(jobs: ExtractionJobEntry[]): void {
   try {
-    // Only running jobs survive a reload; finished/failed cards are session-scoped.
-    const slim: PersistedJob[] = jobs.filter(j => !isTerminal(j.status)).map(j => ({
-      id: j.id,
-      sourceLabel: j.sourceLabel,
-      mode: j.mode,
-      status: j.status,
-      title: j.title ?? null,
-      error: j.error ?? null,
-      errorCode: j.errorCode ?? null,
-    }));
+    // Only running jobs with valid ids survive a reload; finished/failed cards are session-scoped.
+    const slim: PersistedJob[] = jobs
+      .filter(j => j && j.id && j.id !== 'undefined' && !isTerminal(j.status))
+      .map(j => ({
+        id: j.id,
+        sourceLabel: j.sourceLabel,
+        mode: j.mode,
+        status: j.status,
+        title: j.title ?? null,
+        error: j.error ?? null,
+        errorCode: j.errorCode ?? null,
+      }));
     localStorage.setItem(STORAGE_KEY, JSON.stringify(slim));
   } catch {
     /* ignore quota/serialization errors */
@@ -132,6 +134,7 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
   }, []);
 
   const addJob = useCallback((jobId: string, meta: { sourceLabel: string; mode: ExtractionMode }) => {
+    if (!jobId || typeof jobId !== 'string' || jobId === 'undefined') return;
     setJobsPersist(prev => {
       if (prev.some(j => j.id === jobId)) return prev;
       const entry: ExtractionJobEntry = {
@@ -185,6 +188,7 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
   }, [setJobsPersist, t]);
 
   const pollJob = useCallback(async (id: string) => {
+    if (!id || typeof id !== 'string' || id === 'undefined') return;
     if (inFlightRef.current.has(id)) return;
     inFlightRef.current.add(id);
     try {

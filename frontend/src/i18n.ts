@@ -864,6 +864,7 @@ export const uiTranslations = {
       }
     },
     recipe: {
+      recipe: 'Rezept',
       copyRecipe: 'Rezept kopieren',
       copied: 'Kopiert!',
       delete: 'Rezept löschen',
@@ -1863,6 +1864,7 @@ export const uiTranslations = {
       }
     },
     recipe: {
+      recipe: 'Recipe',
       copyRecipe: 'Copy Recipe',
       copied: 'Copied!',
       delete: 'Delete Recipe',

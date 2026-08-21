@@ -378,8 +378,19 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       }
 
       if (isPremium) {
+        if (data.status === 'completed' && data.recipeId) {
+          // Already extracted / cached: directly open recipe without creating a dummy background job
+          setUrl('');
+          setPhotos([]);
+          setJobStatus(null);
+          fetchLimitStatus();
+          onExtractionSuccess(data.recipeId);
+          return;
+        }
         // Background flow: track the job in the shared store and free the form.
-        addJob(data.jobId, { sourceLabel: meta.sourceLabel, mode: meta.mode });
+        if (data.jobId) {
+          addJob(data.jobId, { sourceLabel: meta.sourceLabel, mode: meta.mode });
+        }
         setUrl('');
         setPhotos([]);
         setJobStatus(null);
@@ -389,7 +400,11 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
         if (data.status === 'completed') {
           stopActivePolling();
           activePollingJobIdRef.current = data.jobId ?? null;
-          runSimulatedProgress(data.jobId ?? '', data.recipeId, 10000);
+          if (data.recipeId) {
+            onExtractionSuccess(data.recipeId);
+          } else {
+            runSimulatedProgress(data.jobId ?? '', data.recipeId, 10000);
+          }
         } else {
           setJobStatus(data.status);
           localStorage.setItem(PENDING_JOB_STORAGE_KEY, data.jobId);
@@ -404,7 +419,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       setJobErrorParams(typed?.params ?? null);
       setIsPending(false);
     }
-  }, [getAccessToken, startPolling, fetchLimitStatus, isPremium, addJob, runSimulatedProgress, stopActivePolling]);
+  }, [getAccessToken, startPolling, fetchLimitStatus, isPremium, addJob, runSimulatedProgress, stopActivePolling, onExtractionSuccess]);
 
   const triggerExtraction = useCallback(async (targetUrl: string) => {
     const cleanUrl = targetUrl.trim();
