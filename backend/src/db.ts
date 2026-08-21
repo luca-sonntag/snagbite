@@ -28,6 +28,8 @@ interface JobRow {
   recipe_id: string | null;
   progress: unknown;
   error: string | null;
+  client_frames?: unknown;
+  scrape_meta?: unknown;
   llm_usage?: unknown;
   media_bytes?: number;
   locked_at: string | null;
@@ -132,6 +134,8 @@ function rowToJob(row: JobRow): Job {
     sourceUrlNormalized: row.source_url_normalized,
     error: row.error,
     progress: (row.progress as ProgressData) ?? null,
+    clientFrames: (row.client_frames as any) ?? null,
+    scrapeMeta: (row.scrape_meta as any) ?? null,
     recipeId: row.recipe_id,
     parentRecipeId: row.parent_recipe_id,
     remixPrompt: row.remix_prompt,
@@ -147,6 +151,8 @@ function jobToRow(updates: Partial<Job>): Partial<JobRow> {
   if (updates.status !== undefined) row.status = updates.status;
   if (updates.error !== undefined) row.error = updates.error;
   if (updates.progress !== undefined) row.progress = updates.progress;
+  if (updates.clientFrames !== undefined) row.client_frames = updates.clientFrames;
+  if (updates.scrapeMeta !== undefined) row.scrape_meta = updates.scrapeMeta;
   if (updates.recipeId !== undefined) row.recipe_id = updates.recipeId;
   if (updates.llmUsage !== undefined) row.llm_usage = updates.llmUsage;
   if (updates.mediaBytes !== undefined) row.media_bytes = updates.mediaBytes;
@@ -275,7 +281,7 @@ function normalizeUrl(urlStr: string): string {
 // ── Jobs ─────────────────────────────────────────────────────────────────────
 
 /** Statuses a job can still be working through. */
-const ACTIVE_STATUSES = ['pending', 'scraping', 'processing'] as const;
+const ACTIVE_STATUSES = ['pending', 'scraping', 'processing', 'awaiting_frames'] as const;
 
 /** Create a new pending extraction job. */
 export async function createJob(url: string, userId: string, kind: JobKind = 'url'): Promise<Job> {
@@ -414,7 +420,20 @@ export async function claimNextJob(workerId: string): Promise<Job | null> {
   if (error) throw wrapError('Failed to claim next job', error);
   const rows = data as JobRow[] | null;
   if (!rows || rows.length === 0) return null;
-  return rowToJob(rows[0]);
+
+  const job = rowToJob(rows[0]);
+
+  // If client_frames were present in the claimed row, immediately null the column
+  // in Postgres so image data exists strictly in the Worker's RAM (§ 44a UrhG transient hand-off).
+  if (rows[0].client_frames) {
+    const { error: updateErr } = await getClient()
+      .from('jobs')
+      .update({ client_frames: null })
+      .eq('id', job.id);
+    if (updateErr) console.warn(`[Job ${job.id}] Failed to null client_frames in DB: ${updateErr.message}`);
+  }
+
+  return job;
 }
 
 /** Find a still-running job for this URL, scoped to userId. */
@@ -776,6 +795,34 @@ export async function reclaimExpiredJobs(timeoutMinutes: number): Promise<void> 
     console.error('Failed to reclaim expired jobs:', error.message);
   } else if (count && count > 0) {
     console.log(`Reclaimed ${count} expired job(s) back to pending.`);
+  }
+}
+
+/**
+ * Sweeps jobs stuck in 'awaiting_frames' past their timeout back to 'pending'.
+ * Leaves scrape_meta intact so the worker can process them caption-only.
+ */
+export async function sweepStaleAwaitingFrames(timeoutMinutes: number): Promise<void> {
+  const cutoff = new Date(Date.now() - timeoutMinutes * 60 * 1000).toISOString();
+
+  const { error, count } = await getClient()
+    .from('jobs')
+    .update(
+      {
+        status: 'pending',
+        locked_at: null,
+        locked_by: null,
+        updated_at: new Date().toISOString(),
+      },
+      { count: 'exact' }
+    )
+    .eq('status', 'awaiting_frames')
+    .lt('updated_at', cutoff);
+
+  if (error) {
+    console.error('Failed to sweep stale awaiting_frames jobs:', error.message);
+  } else if (count && count > 0) {
+    console.log(`Swept ${count} stale awaiting_frames job(s) back to pending.`);
   }
 }
 

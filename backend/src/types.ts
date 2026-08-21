@@ -180,12 +180,12 @@ export interface LlmUsage {
  * deleted (they are the audit trail and back the rolling rate limit), so
  * aborting an in-flight extraction is a status, not a deletion.
  */
-export type JobStatus = 'pending' | 'scraping' | 'processing' | 'completed' | 'failed' | 'cancelled';
+export type JobStatus = 'pending' | 'scraping' | 'processing' | 'awaiting_frames' | 'completed' | 'failed' | 'cancelled';
 
 /** What produced this job. Replaces sniffing `photo://` URLs and parent ids. */
 export type JobKind = 'url' | 'photo' | 'remix';
 
-export type ProgressStage = 'queued' | 'scraping' | 'downloading_media' | 'extracting_frames' | 'reading_photos' | 'extracting_recipe' | 'generating_cover' | 'finalizing';
+export type ProgressStage = 'queued' | 'scraping' | 'downloading_media' | 'extracting_frames' | 'reading_photos' | 'awaiting_frames' | 'extracting_recipe' | 'generating_cover' | 'finalizing';
 
 /**
  * Lives in its own `jobs.progress` column. It used to be smuggled through the
@@ -195,6 +195,12 @@ export type ProgressStage = 'queued' | 'scraping' | 'downloading_media' | 'extra
 export interface ProgressData {
   percent: number;
   stage: ProgressStage;
+}
+
+/** Ephemeral client media hand-off: thumbnail + keyframes received from client. */
+export interface ClientFramesPayload {
+  thumbnailBase64?: string;
+  framesBase64: string[];
 }
 
 /** An extraction task. Owns no recipe content — only a pointer to its result. */
@@ -208,6 +214,10 @@ export interface Job {
   sourceUrlNormalized?: string | null;
   error?: string | null;
   progress?: ProgressData | null;
+  /** Ephemeral client frames payload received while status was 'awaiting_frames'. Nulled on claim. */
+  clientFrames?: ClientFramesPayload | null;
+  /** Cached scraping result preserved while job is parked in awaiting_frames. */
+  scrapeMeta?: any | null;
   /** The produced recipe. NULL until the job completes. */
   recipeId?: string | null;
   /** Remix input: the recipe being remixed and the instruction to apply. */

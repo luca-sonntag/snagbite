@@ -95,7 +95,7 @@ create table if not exists public.jobs (
                           check (kind in ('url', 'photo', 'remix')),
   status                text not null default 'pending'
                           check (status in ('pending', 'scraping', 'processing',
-                                            'completed', 'failed', 'cancelled')),
+                                            'awaiting_frames', 'completed', 'failed', 'cancelled')),
   source_url            text not null,               -- 'photo://<uploadId>' when kind='photo'
   source_url_normalized text,
   -- Remix INPUT: which recipe this job remixes, and with what instruction.
@@ -107,6 +107,11 @@ create table if not exists public.jobs (
   -- the recipe column as {isProgress:true, …}.
   progress              jsonb,
   error                 text,
+  -- Ephemeral client media hand-off: thumbnail + keyframes received from client.
+  -- Nulled immediately upon worker claim (transient; RAM-only for Gemini call).
+  client_frames         jsonb,
+  -- Cached scraping result for jobs parked in awaiting_frames, avoids 2nd scrape.
+  scrape_meta           jsonb,
   -- Token/inference cost of THIS run. Deliberately not on `recipes`: a shared or
   -- published recipe must not carry the extractor's bill.
   llm_usage             jsonb,
@@ -127,7 +132,7 @@ create index if not exists jobs_user_url_completed_idx
 -- (user, normalized URL) is allowed; createJob catches the 23505 this raises.
 create unique index if not exists jobs_active_user_url_idx
   on public.jobs (user_id, source_url_normalized)
-  where status in ('pending', 'scraping', 'processing');
+  where status in ('pending', 'scraping', 'processing', 'awaiting_frames');
 
 -- Strict 1:1 — a recipe is produced by at most one job. Nails the "no dedup
 -- across users" decision into the schema.
