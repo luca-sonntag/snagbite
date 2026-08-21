@@ -10,8 +10,8 @@ import { setCachedImage } from './imageStore';
 /** Maximum video size we will download on client for frame extraction (25 MB covers >99% of Reels/Shorts). */
 export const MAX_VIDEO_DOWNLOAD_BYTES = 25 * 1024 * 1024;
 
-/** Overall deadline for entire keyframe capture workflow. */
-export const FRAME_CAPTURE_TIMEOUT_MS = 15000;
+/** Overall deadline for entire keyframe capture workflow (covers slow CDN download + decoding). */
+export const FRAME_CAPTURE_TIMEOUT_MS = 45000;
 
 /** Number of keyframes extracted across the video timeline to form the 4x4 visual progression grid. */
 export const FRAME_COUNT = 16;
@@ -76,8 +76,10 @@ async function extractKeyframesWebCodecs(
 
     if (signal) {
       signal.addEventListener('abort', () => {
-        cleanup();
-        reject(new Error('Aborted'));
+        if (!isFinished) {
+          cleanup();
+          reject(new Error('Aborted'));
+        }
       }, { once: true });
     }
 
@@ -86,16 +88,32 @@ async function extractKeyframesWebCodecs(
     let targetTimestampsSec: number[] = [];
 
     mp4boxfile.onError = (err: string) => {
+      if (!isFinished) {
+        cleanup();
+        reject(new Error(`MP4Box error: ${err}`));
+      }
+    };
+
+    const finishWithResults = () => {
+      if (isFinished) return;
+      isFinished = true;
+
+      const results: string[] = [];
+      for (let i = 0; i < targetTimestampsSec.length; i++) {
+        const frame = capturedMap.get(i);
+        if (frame) results.push(frame);
+      }
+
       cleanup();
-      reject(new Error(`MP4Box error: ${err}`));
+      resolve(results);
     };
 
     mp4boxfile.onReady = (info: MP4Info) => {
       try {
         const videoTrack = info.videoTracks[0];
         if (!videoTrack) {
-          cleanup();
-          return resolve([]);
+          finishWithResults();
+          return;
         }
 
         const realDuration = (info.duration && info.timescale)
@@ -103,41 +121,19 @@ async function extractKeyframesWebCodecs(
           : (durationHint || 15);
 
         targetTimestampsSec = calculateKeyframeTimestamps(realDuration);
-        console.log(`[videoFrames-WebCodecs] Extracting frames at timestamps: [${targetTimestampsSec.join('s, ')}s]`);
+        console.log(`[videoFrames-WebCodecs] Extracting 16 frames across ${realDuration.toFixed(1)}s: [${targetTimestampsSec.map(t => t.toFixed(1) + 's').join(', ')}]`);
 
         const description = getTrackDescription(mp4boxfile, videoTrack);
 
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         if (!ctx) {
-          cleanup();
-          return resolve([]);
+          finishWithResults();
+          return;
         }
 
         let samplesProcessed = 0;
         const totalSamples = videoTrack.nb_samples || 0;
-
-        const finalize = async () => {
-          if (isFinished) return;
-          isFinished = true;
-
-          try {
-            if (decoder && decoder.state === 'configured') {
-              await decoder.flush();
-            }
-          } catch (flushErr: any) {
-            console.warn('[videoFrames-WebCodecs] Flush error:', flushErr.message || flushErr);
-          }
-
-          const results: string[] = [];
-          for (let i = 0; i < targetTimestampsSec.length; i++) {
-            const frame = capturedMap.get(i);
-            if (frame) results.push(frame);
-          }
-
-          cleanup();
-          resolve(results);
-        };
 
         decoder = new VideoDecoder({
           output: (videoFrame: VideoFrame) => {
@@ -180,7 +176,7 @@ async function extractKeyframesWebCodecs(
 
             // If we have captured all 16 target frames, finish immediately!
             if (capturedMap.size === targetTimestampsSec.length) {
-              void finalize();
+              finishWithResults();
             }
           },
           error: (err: any) => {
@@ -197,7 +193,7 @@ async function extractKeyframesWebCodecs(
 
         let hasSeenFirstKeyFrame = false;
 
-        mp4boxfile.onSamples = (trackId: number, _user: any, samples: MP4Sample[]) => {
+        mp4boxfile.onSamples = async (trackId: number, _user: any, samples: MP4Sample[]) => {
           if (trackId !== videoTrack.id || !decoder || decoder.state === 'closed' || isFinished) return;
 
           samplesProcessed += samples.length;
@@ -229,31 +225,40 @@ async function extractKeyframesWebCodecs(
             }
           }
 
-          // If we've processed all samples in the video, finalize
-          if (totalSamples > 0 && samplesProcessed >= totalSamples) {
-            void finalize();
+          // If all samples have been queued to the decoder and we haven't finished yet, flush the decoder
+          if (totalSamples > 0 && samplesProcessed >= totalSamples && !isFinished) {
+            try {
+              if (decoder && decoder.state === 'configured') {
+                await decoder.flush();
+              }
+            } catch (flushErr: any) {
+              if (!isFinished) {
+                console.warn('[videoFrames-WebCodecs] Flush error:', flushErr.message || flushErr);
+              }
+            }
+            finishWithResults();
           }
         };
 
         const batchSize = Math.max(1000, totalSamples || 5000);
         mp4boxfile.setExtractionOptions(videoTrack.id, null, { nbSamples: batchSize });
         mp4boxfile.start();
-        mp4boxfile.seek(0, true);
-        mp4boxfile.flush();
 
-        // Safety fallback: finalize after all samples are queued or after timeout
+        // Safety fallback: after 10s of decoding, finish with whatever frames were captured
         setTimeout(() => {
           if (!isFinished) {
-            void finalize();
+            finishWithResults();
           }
-        }, 5000);
+        }, 10000);
       } catch (err: any) {
-        cleanup();
-        reject(err);
+        if (!isFinished) {
+          cleanup();
+          reject(err);
+        }
       }
     };
 
-    // MP4Box expects a copy or direct ArrayBuffer with fileStart offset
+    // Feed in-memory buffer to MP4Box to trigger onReady and extraction
     const bufferWithStart = arrayBuffer.slice(0) as ArrayBuffer & { fileStart?: number };
     bufferWithStart.fileStart = 0;
     mp4boxfile.appendBuffer(bufferWithStart);
