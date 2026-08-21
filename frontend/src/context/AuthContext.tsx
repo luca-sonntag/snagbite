@@ -5,6 +5,7 @@ import { SocialLogin } from '@capgo/capacitor-social-login';
 import { supabase } from '../supabase';
 import { apiUrl } from '../api';
 import { TEST_LOGIN_ENABLED, TEST_USER_EMAIL, TEST_USER_PASSWORD } from '../env';
+import { ONBOARDING_KEY } from '../hooks/useOnboarding';
 
 const GOOGLE_WEB_CLIENT_ID = import.meta.env.VITE_GOOGLE_WEB_CLIENT_ID as string | undefined;
 
@@ -406,6 +407,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set before signing out so a cold restart won't silently sign the user
     // right back in with the same on-device Google account.
     localStorage.setItem(AUTO_SIGNIN_DISABLED_KEY, '1');
+    // Ensure onboarding is marked as completed locally so the welcome guide is never shown on sign-out
+    localStorage.setItem(ONBOARDING_KEY, 'true');
     if (Capacitor.getPlatform() === 'android') {
       // Best effort: clears Credential Manager's cached state. Harmlessly
       // rejects if the user never signed in via Google.
