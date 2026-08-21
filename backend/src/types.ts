@@ -52,8 +52,24 @@ export interface NutritionalValues {
 }
 
 export interface Recipe {
+  /**
+   * The recipes-table primary key. Always present on a stored recipe; optional
+   * only while a freshly extracted recipe is still in flight and has not been
+   * persisted by complete_job() yet.
+   */
   id?: string;
+  /** Gemini's "this isn't actually a recipe" verdict, kept for auditing. */
   isRecipe?: boolean;
+  /** Who extracted it. NULL once that account is deleted. */
+  createdBy?: string | null;
+  /** 'private' until sharing/publishing ships. */
+  visibility?: RecipeVisibility;
+  /** How the recipe came into being; mirrors the producing job's `kind`. */
+  origin?: RecipeOrigin;
+  /** The page/reel this was extracted from. NULL for photo imports. */
+  sourceUrl?: string | null;
+  /** Recipe this one was remixed from, and the instruction that produced it. */
+  parentRecipeId?: string | null;
   title: string;
   description: string;
   emoji?: string | null;
@@ -90,11 +106,37 @@ export interface Recipe {
   /** True when imageUrl is an AI-generated cover image rather than a scraped video thumbnail. */
   isAiCover?: boolean;
   tags?: string[];
-  instagramHandle?: string | null;
-  parentJobId?: string | null;
-  parentRecipeTitle?: string | null;
+  /** e.g. the Instagram creator the recipe came from. */
+  sourceHandle?: string | null;
+  /** The remix instruction that produced this recipe. */
   remixPrompt?: string | null;
+  /** Title of `parentRecipeId`, resolved on read for the lineage banner. */
+  parentRecipeTitle?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
+
+export type RecipeVisibility = 'private' | 'unlisted' | 'public';
+export type RecipeOrigin = 'url' | 'photo' | 'remix';
+
+/**
+ * A recipe as it appears in one user's cookbook: the shared content plus that
+ * user's own metadata. `user_recipes.id` stays server-side — the recipe id is
+ * the client-facing handle, resolved back to the library row via the unique
+ * (user_id, recipe_id).
+ */
+export interface SavedRecipe {
+  recipeId: string;
+  recipe: Recipe;
+  source: UserRecipeSource;
+  isFavorite: boolean;
+  flags: string[];
+  collectionIds: string[];
+  addedAt: string;
+  updatedAt: string;
+}
+
+export type UserRecipeSource = 'extraction' | 'photo' | 'remix' | 'share';
 
 export interface GeminiTokenUsage {
   promptTokens: number;
@@ -133,36 +175,53 @@ export interface LlmUsage {
   [key: string]: any;
 }
 
-export type JobStatus = 'pending' | 'scraping' | 'processing' | 'completed' | 'failed';
+/**
+ * `cancelled` replaces the former soft-delete-as-cancel: job rows are never
+ * deleted (they are the audit trail and back the rolling rate limit), so
+ * aborting an in-flight extraction is a status, not a deletion.
+ */
+export type JobStatus = 'pending' | 'scraping' | 'processing' | 'completed' | 'failed' | 'cancelled';
+
+/** What produced this job. Replaces sniffing `photo://` URLs and parent ids. */
+export type JobKind = 'url' | 'photo' | 'remix';
 
 export type ProgressStage = 'queued' | 'scraping' | 'downloading_media' | 'extracting_frames' | 'reading_photos' | 'extracting_recipe' | 'generating_cover' | 'finalizing';
 
+/**
+ * Lives in its own `jobs.progress` column. It used to be smuggled through the
+ * recipe column as `{isProgress:true, …}`, which is why the discriminator is
+ * gone: a progress payload can no longer be mistaken for a recipe.
+ */
 export interface ProgressData {
-  isProgress: true;
   percent: number;
   stage: ProgressStage;
 }
 
+/** An extraction task. Owns no recipe content — only a pointer to its result. */
 export interface Job {
   id: string;
-  url: string;
+  userId: string;
+  kind: JobKind;
   status: JobStatus;
+  /** 'photo://<uploadId>' when kind === 'photo'. */
+  sourceUrl: string;
+  sourceUrlNormalized?: string | null;
   error?: string | null;
-  recipe?: Recipe | null;
-  llmUsage?: LlmUsage | null;
   progress?: ProgressData | null;
-  parentJobId?: string | null;
-  prompt?: string | null;
-  userId?: string;
-  createdAt: string;
-  updatedAt: string;
-  isFavorite?: boolean;
-  flags?: string[];
-  collectionIds?: string[];
+  /** The produced recipe. NULL until the job completes. */
+  recipeId?: string | null;
+  /** Remix input: the recipe being remixed and the instruction to apply. */
+  parentRecipeId?: string | null;
+  remixPrompt?: string | null;
+  /**
+   * Token/inference cost of THIS run. Deliberately not on the recipe: a shared
+   * or published recipe must not carry the extractor's bill.
+   */
+  llmUsage?: LlmUsage | null;
   /** Total bytes of media (audio + video) downloaded by the worker for this job. */
   mediaBytes?: number;
-  /** ISO timestamp set when a user "deletes" the job (soft-delete). NULL means the job is live. */
-  deletedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Collection {
