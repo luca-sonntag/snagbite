@@ -370,11 +370,24 @@ Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
 
 # ── 8. Merge to Master and Tag ─────────────────────────────────────────
 
-Write-Host "[7/7] Merging develop to master and pushing Git tag..." -ForegroundColor Yellow
 if ($env:SNAGBITE_DEPLOY_ORCHESTRATOR -ne "true") {
-    Invoke-GitMasterMergeAndTag `
-        -TagName "v$bundleVersion" `
-        -TagMessage "OTA release $bundleVersion ($Channel channel)"
+    if ($Channel -ne 'internal') {
+        Write-Host "[7/7] Merging develop to master and pushing Git tag..." -ForegroundColor Yellow
+        Invoke-GitMasterMergeAndTag `
+            -TagName "v$bundleVersion" `
+            -TagMessage "OTA release $bundleVersion ($Channel channel)"
+    } else {
+        Write-Host "[7/7] Pushing Git tag on current branch (skipping master merge for internal)..." -ForegroundColor Yellow
+        $tagExists = (Get-GitOutput -Arguments @("tag", "-l", "v$bundleVersion"))
+        if ($tagExists) {
+            Write-Host "Tag v$bundleVersion already exists. Re-tagging..." -ForegroundColor Yellow
+            Run-Git -Arguments @("tag", "-d", "v$bundleVersion") -IgnoreError
+            Run-Git -Arguments @("push", "origin", "--delete", "v$bundleVersion") -IgnoreError
+        }
+        Run-Git -Arguments @("tag", "-a", "v$bundleVersion", "-m", "OTA internal release $bundleVersion")
+        Run-Git -Arguments @("push", "origin", "v$bundleVersion")
+        Write-Host "  [OK] Successfully pushed tag v$bundleVersion on current branch." -ForegroundColor Green
+    }
 }
 
 Write-Host ""
