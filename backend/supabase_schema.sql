@@ -174,7 +174,7 @@ ALTER TABLE public.gemini_logs ENABLE ROW LEVEL SECURITY;
 -- OTA app bundles table for self-hosted update server
 CREATE TABLE IF NOT EXISTS public.app_bundles (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  channel text NOT NULL CHECK (channel IN ('production', 'alpha')),
+  channel text NOT NULL CHECK (channel IN ('production', 'alpha', 'internal')),
   version text NOT NULL,
   storage_path text NOT NULL,
   checksum text NOT NULL,

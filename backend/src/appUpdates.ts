@@ -11,7 +11,7 @@ import { getActiveAppBundle } from './db.js';
  */
 export const appUpdatesRouter = Router();
 
-const OTA_CHANNELS = ['production', 'alpha'] as const;
+const OTA_CHANNELS = ['production', 'alpha', 'internal'] as const;
 type OtaChannel = (typeof OTA_CHANNELS)[number];
 
 /**

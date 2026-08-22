@@ -17,7 +17,7 @@ import { APP_VERSION, APP_BUILD } from '../version';
  * Everything here is inert on web and in dev (live-reload) builds.
  */
 
-/** localStorage override for the update channel (debugging/E2E): 'production' | 'alpha'. */
+/** localStorage override for the update channel (debugging/E2E): 'production' | 'alpha' | 'internal'. */
 const CHANNEL_OVERRIDE_KEY = 'snagbite.otaChannel';
 
 /** Minimum time between update checks. */
@@ -49,10 +49,10 @@ function isOtaEnabled(): boolean {
  * may not be loaded on the very first check after a cold start — that
  * self-heals on the next resume check.
  */
-async function resolveChannel(): Promise<'production' | 'alpha'> {
+async function resolveChannel(): Promise<'production' | 'alpha' | 'internal'> {
   try {
     const override = localStorage.getItem(CHANNEL_OVERRIDE_KEY);
-    if (override === 'production' || override === 'alpha') return override;
+    if (override === 'production' || override === 'alpha' || override === 'internal') return override;
   } catch {
     // localStorage unavailable — fall through to tier detection.
   }

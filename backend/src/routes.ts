@@ -2081,8 +2081,8 @@ apiRouter.get('/admin/feedback', requireAdmin, async (req: Request, res: Respons
 apiRouter.get('/admin/app-bundles', requireAdmin, async (req: Request, res: Response): Promise<void> => {
   try {
     const channel = req.query.channel as string | undefined;
-    if (channel !== undefined && channel !== 'production' && channel !== 'alpha') {
-      res.status(400).json({ success: false, error: 'Query parameter channel must be "production" or "alpha".' });
+    if (channel !== undefined && channel !== 'production' && channel !== 'alpha' && channel !== 'internal') {
+      res.status(400).json({ success: false, error: 'Query parameter channel must be "production", "alpha" or "internal".' });
       return;
     }
 

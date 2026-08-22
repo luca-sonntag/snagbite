@@ -1272,7 +1272,7 @@ export async function getJobMetrics(
 /** Row shape of the app_bundles table (snake_case columns). */
 export interface AppBundleRow {
   id: string;
-  channel: 'production' | 'alpha';
+  channel: 'production' | 'alpha' | 'internal';
   version: string;
   storage_path: string;
   checksum: string;
