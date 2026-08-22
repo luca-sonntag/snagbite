@@ -32,7 +32,7 @@
 Web-Assets der nativen App können Over-The-Air (OTA) aktualisiert werden, ohne ein neues Play-Store-Release zu erzwingen (gilt **nur** für den Web-Layer; native Plugin-Änderungen erfordern ein APK/AAB-Release).
 
 * **Plugin:** `@capgo/capacitor-updater` im **Manual-Mode** (`autoUpdate: false` in `capacitor.config.ts`, `resetWhenUpdate: true`, `appReadyTimeout: 10000`).
-* **Kanäle:** `production`, `alpha` + `internal` (spiegeln Play-Tracks). Kanalwahl: `localStorage['snagbite.otaChannel']` -> sonst `alpha` bei `tier === 'alpha'` -> sonst `production`.
+* **Kanäle:** `production`, `alpha` + `internal` (spiegeln Play-Tracks). `production` und `alpha` zielen auf `snagbite-prod`, `internal` zielt auf `snagbite-dev` & Dev-Backend. Kanalwahl: `localStorage['snagbite.otaChannel']` -> sonst `alpha` bei `tier === 'alpha'` -> sonst `production`.
 
 ### Supabase Storage & Datenbank
 * **Bucket `app-bundles` (public):** Speichert Zips unter `{channel}/{version}.zip`.

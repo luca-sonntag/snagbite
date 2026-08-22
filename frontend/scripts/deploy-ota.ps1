@@ -75,13 +75,23 @@ function Read-DotEnvValue {
 $backendProdEnv = "$repoRoot\backend\.env.production"
 $backendDevEnv  = "$repoRoot\backend\.env"
 
-$supabaseUrl = if ($env:SUPABASE_URL) { $env:SUPABASE_URL } `
-               elseif (Test-Path $backendProdEnv) { Read-DotEnvValue $backendProdEnv 'SUPABASE_URL' } `
-               else { Read-DotEnvValue $backendDevEnv 'SUPABASE_URL' }
+if ($Channel -eq 'internal') {
+    $supabaseUrl = if ($env:SUPABASE_URL) { $env:SUPABASE_URL } `
+                   elseif (Test-Path $backendDevEnv) { Read-DotEnvValue $backendDevEnv 'SUPABASE_URL' } `
+                   else { Read-DotEnvValue $backendProdEnv 'SUPABASE_URL' }
 
-$serviceKey  = if ($env:SUPABASE_SECRET_KEY) { $env:SUPABASE_SECRET_KEY } `
-               elseif (Test-Path $backendProdEnv) { Read-DotEnvValue $backendProdEnv 'SUPABASE_SECRET_KEY' } `
-               else { Read-DotEnvValue $backendDevEnv 'SUPABASE_SECRET_KEY' }
+    $serviceKey  = if ($env:SUPABASE_SECRET_KEY) { $env:SUPABASE_SECRET_KEY } `
+                   elseif (Test-Path $backendDevEnv) { Read-DotEnvValue $backendDevEnv 'SUPABASE_SECRET_KEY' } `
+                   else { Read-DotEnvValue $backendProdEnv 'SUPABASE_SECRET_KEY' }
+} else {
+    $supabaseUrl = if ($env:SUPABASE_URL) { $env:SUPABASE_URL } `
+                   elseif (Test-Path $backendProdEnv) { Read-DotEnvValue $backendProdEnv 'SUPABASE_URL' } `
+                   else { Read-DotEnvValue $backendDevEnv 'SUPABASE_URL' }
+
+    $serviceKey  = if ($env:SUPABASE_SECRET_KEY) { $env:SUPABASE_SECRET_KEY } `
+                   elseif (Test-Path $backendProdEnv) { Read-DotEnvValue $backendProdEnv 'SUPABASE_SECRET_KEY' } `
+                   else { Read-DotEnvValue $backendDevEnv 'SUPABASE_SECRET_KEY' }
+}
 
 if (-not $supabaseUrl -or -not $serviceKey) {
     Write-Error "SUPABASE_URL / SUPABASE_SECRET_KEY not found (checked env, $backendProdEnv, and $backendDevEnv)."
@@ -170,53 +180,84 @@ Write-Host ""
 
 Write-Host "[1/7] Validating frontend env..." -ForegroundColor Yellow
 
-$envPath = "$frontendDir\.env"
-$prodEnvPath = "$frontendDir\.env.production"
-if ((Test-Path $prodEnvPath) -and (Read-DotEnvValue $prodEnvPath 'VITE_API_BASE_URL')) {
-    $envPath = $prodEnvPath
-}
+if ($Channel -eq 'internal') {
+    $envPath = "$frontendDir\.env.development"
+    if (-not (Test-Path $envPath)) { $envPath = "$frontendDir\.env" }
 
-$apiBaseUrl = Read-DotEnvValue $envPath 'VITE_API_BASE_URL'
-if (-not $apiBaseUrl) {
-    Write-Error "VITE_API_BASE_URL is missing/empty in $envPath. OTA bundles run in the native webview and need an absolute backend origin."
-    exit 1
-}
-
-$parsedUri = $null
-if (-not [Uri]::TryCreate($apiBaseUrl, [UriKind]::Absolute, [ref]$parsedUri) -or ($parsedUri.Scheme -ne 'http' -and $parsedUri.Scheme -ne 'https')) {
-    Write-Error "VITE_API_BASE_URL in $envPath is not a valid http(s) URL: '$apiBaseUrl'."
-    exit 1
-}
-$blockedHosts = @('0.0.0.0', '[0000:0000:0000:0000:0000:0000:0000:0000]')
-if ($parsedUri.IsLoopback -or $blockedHosts -contains $parsedUri.Host.ToLowerInvariant()) {
-    Write-Error "VITE_API_BASE_URL in $envPath points to a loopback address ('$($parsedUri.Host)') - shipping this OTA would brick networking on every device. Use the production backend origin."
-    exit 1
-}
-
-foreach ($envFile in @($envPath, "$frontendDir\.env")) {
-    if ((Read-DotEnvValue $envFile 'VITE_TEST_LOGIN') -eq 'true') {
-        Write-Error "VITE_TEST_LOGIN=true is set in $envFile - refusing to ship a test-login build over OTA."
+    $apiBaseUrl = Read-DotEnvValue $envPath 'VITE_API_BASE_URL'
+    if (-not $apiBaseUrl) {
+        Write-Error "VITE_API_BASE_URL is missing/empty in $envPath. OTA bundles run in the native webview and need an absolute backend origin."
         exit 1
     }
-}
 
-# The backend verifies JWTs against snagbite-prod; a bundle built against any
-# other Supabase project gets 401 on every authenticated endpoint (v1.1.6 bug).
-$supabaseEnvPath = "$frontendDir\.env"
-if ((Test-Path $prodEnvPath) -and (Read-DotEnvValue $prodEnvPath 'VITE_SUPABASE_URL')) {
-    $supabaseEnvPath = $prodEnvPath
+    $parsedUri = $null
+    if (-not [Uri]::TryCreate($apiBaseUrl, [UriKind]::Absolute, [ref]$parsedUri) -or ($parsedUri.Scheme -ne 'http' -and $parsedUri.Scheme -ne 'https')) {
+        Write-Error "VITE_API_BASE_URL in $envPath is not a valid http(s) URL: '$apiBaseUrl'."
+        exit 1
+    }
+    $blockedHosts = @('0.0.0.0', '[0000:0000:0000:0000:0000:0000:0000:0000]')
+    if ($parsedUri.IsLoopback -or $blockedHosts -contains $parsedUri.Host.ToLowerInvariant()) {
+        Write-Error "VITE_API_BASE_URL in $envPath points to a loopback address ('$($parsedUri.Host)') - shipping this OTA would brick networking on every device. Use the development backend origin."
+        exit 1
+    }
+
+    $frontendSupabaseUrl = Read-DotEnvValue $envPath 'VITE_SUPABASE_URL'
+    if (-not $frontendSupabaseUrl) {
+        Write-Error "VITE_SUPABASE_URL is missing/empty in $envPath. Internal builds must pin the development Supabase project."
+        exit 1
+    }
+
+    Write-Host "  VITE_API_BASE_URL OK (from $envPath): $($parsedUri.Scheme)://$($parsedUri.Host)" -ForegroundColor Green
+    Write-Host "  VITE_SUPABASE_URL OK (from $envPath): $frontendSupabaseUrl" -ForegroundColor Green
+} else {
+    $envPath = "$frontendDir\.env"
+    $prodEnvPath = "$frontendDir\.env.production"
+    if ((Test-Path $prodEnvPath) -and (Read-DotEnvValue $prodEnvPath 'VITE_API_BASE_URL')) {
+        $envPath = $prodEnvPath
+    }
+
+    $apiBaseUrl = Read-DotEnvValue $envPath 'VITE_API_BASE_URL'
+    if (-not $apiBaseUrl) {
+        Write-Error "VITE_API_BASE_URL is missing/empty in $envPath. OTA bundles run in the native webview and need an absolute backend origin."
+        exit 1
+    }
+
+    $parsedUri = $null
+    if (-not [Uri]::TryCreate($apiBaseUrl, [UriKind]::Absolute, [ref]$parsedUri) -or ($parsedUri.Scheme -ne 'http' -and $parsedUri.Scheme -ne 'https')) {
+        Write-Error "VITE_API_BASE_URL in $envPath is not a valid http(s) URL: '$apiBaseUrl'."
+        exit 1
+    }
+    $blockedHosts = @('0.0.0.0', '[0000:0000:0000:0000:0000:0000:0000:0000]')
+    if ($parsedUri.IsLoopback -or $blockedHosts -contains $parsedUri.Host.ToLowerInvariant()) {
+        Write-Error "VITE_API_BASE_URL in $envPath points to a loopback address ('$($parsedUri.Host)') - shipping this OTA would brick networking on every device. Use the production backend origin."
+        exit 1
+    }
+
+    foreach ($envFile in @($envPath, "$frontendDir\.env")) {
+        if ((Read-DotEnvValue $envFile 'VITE_TEST_LOGIN') -eq 'true') {
+            Write-Error "VITE_TEST_LOGIN=true is set in $envFile - refusing to ship a test-login build over OTA."
+            exit 1
+        }
+    }
+
+    # The backend verifies JWTs against snagbite-prod; a bundle built against any
+    # other Supabase project gets 401 on every authenticated endpoint (v1.1.6 bug).
+    $supabaseEnvPath = "$frontendDir\.env"
+    if ((Test-Path $prodEnvPath) -and (Read-DotEnvValue $prodEnvPath 'VITE_SUPABASE_URL')) {
+        $supabaseEnvPath = $prodEnvPath
+    }
+    $frontendSupabaseUrl = Read-DotEnvValue $supabaseEnvPath 'VITE_SUPABASE_URL'
+    if (-not $frontendSupabaseUrl) {
+        Write-Error "VITE_SUPABASE_URL is missing/empty in $supabaseEnvPath. Production builds must pin the snagbite-prod Supabase project in .env.production."
+        exit 1
+    }
+    if ($frontendSupabaseUrl -match 'nmphuwywxirervquvgoa') {
+        Write-Error "VITE_SUPABASE_URL in $supabaseEnvPath points to the DEV Supabase project (snagbite-dev) - its tokens are rejected by the production backend. Pin the snagbite-prod URL in .env.production."
+        exit 1
+    }
+    Write-Host "  VITE_API_BASE_URL OK (from $envPath): $($parsedUri.Scheme)://$($parsedUri.Host)" -ForegroundColor Green
+    Write-Host "  VITE_SUPABASE_URL OK (from $supabaseEnvPath): $frontendSupabaseUrl" -ForegroundColor Green
 }
-$frontendSupabaseUrl = Read-DotEnvValue $supabaseEnvPath 'VITE_SUPABASE_URL'
-if (-not $frontendSupabaseUrl) {
-    Write-Error "VITE_SUPABASE_URL is missing/empty in $supabaseEnvPath. Production builds must pin the snagbite-prod Supabase project in .env.production."
-    exit 1
-}
-if ($frontendSupabaseUrl -match 'nmphuwywxirervquvgoa') {
-    Write-Error "VITE_SUPABASE_URL in $supabaseEnvPath points to the DEV Supabase project (snagbite-dev) - its tokens are rejected by the production backend. Pin the snagbite-prod URL in .env.production."
-    exit 1
-}
-Write-Host "  VITE_API_BASE_URL OK (from $envPath): $($parsedUri.Scheme)://$($parsedUri.Host)" -ForegroundColor Green
-Write-Host "  VITE_SUPABASE_URL OK (from $supabaseEnvPath): $frontendSupabaseUrl" -ForegroundColor Green
 
 # ── 2. Read native version (no bump - OTA never touches it) ──────────
 
@@ -236,7 +277,11 @@ Write-Host "  Native version: $versionName ($versionCode) | minVersionCode: $Min
 Write-Host "[2/7] Building frontend..." -ForegroundColor Yellow
 Push-Location $frontendDir
 try {
-    npm run build
+    if ($Channel -eq 'internal') {
+        npm run build:dev
+    } else {
+        npm run build
+    }
     if ($LASTEXITCODE -ne 0) { throw "Frontend build failed" }
 } finally {
     Pop-Location
