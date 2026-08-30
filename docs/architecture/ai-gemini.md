@@ -79,5 +79,6 @@ Ein rezept-spezifischer Chatbot (`POST /api/jobs/:id/chat`), der dem Nutzer Frag
   * `recipe.imageUrl` wird auf die Public-URL gesetzt; `recipe.isAiCover` wird auf `true` gesetzt.
   * Gescrapte Original-Frames/Slides bleiben in `recipe.imageUrls` für die Galerie erhalten.
   * Auch **Foto-Imports** und **Remixes** erhalten automatisch ein neues, passendes HD-Coverbild.
+  * **Pipeline-Parallelisierung:** Um die Gesamtlaufzeit der Rezept-Extraktion zu minimieren, laufen die FLUX.1 Cover-Generierung und das kanonische Open-Food-Facts Ingredient Matching (`enrichRecipeWithCanonicalIngredients`) zeitgleich via `Promise.all` parallel im Worker.
   * **Kosten- & Laufzeit-Tracking (`jobs.llm_usage.flux`):** Dauer und Inferenzkosten ($0.0035 / Bild) werden strukturiert in der neuen Spalte `llm_usage` auf Job-Ebene festgehalten, während `recipe` frei von technischen Kosten-Metadaten bleibt.
 
