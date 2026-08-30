@@ -6,6 +6,20 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-30: Einmalige ungesicherte RapidAPI-Scraping-Aufrufe & irreführende Fehlermeldung ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Direkte, un-retried `fetch()`-Aufrufe gegen RapidAPI (`social-download-all-in-one`) in `rapidApiMetadata.ts` und `rapidApi.ts`.
+  - Harter sofortiger Abbruch bei transienten Proxy-/Knotenfehlern (`{ error: true }`, `{ error: "unknown" }` oder HTTP 500/502).
+  - Irreführende deutsche Fehlermeldung für `SCRAPE_FAILED` („Aus diesem Link konnte leider kein Rezept erkannt werden. Das Video ist privat, gelöscht oder enthält keine Rezeptbeschreibung.“), die dem Nutzer fälschlich suggerierte, dass ein öffentlicher, funktionierender Post fehlerhaft oder privat sei.
+* **Ersetzt durch:**
+  - **In-Provider Retry mit Exponential Backoff & Jitter ([`withRetry`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/retry.ts)):** Bis zu 3 Versuche (Basis 1200ms + Jitter) fangen flüchtige RapidAPI-Proxy-Timeouts, 429 Rate-Limits und Bad-Gateway-Zustände vollautomatisch ab. Fatale Auth-Fehler (401/403) brechen sofort ab.
+  - **Detaillierte Fehler-Diagnostik:** Auslesen von `message`, `detail` und HTTP-Statuscode im Backend-Log.
+  - **Nutzerfreundliche Lokalisierung:** Klare `SCRAPE_FAILED`-Meldung im Frontend (`i18n.ts`), die auf temporäre Störungen hinweist und zum erneuten Versuch auffordert.
+* **Betroffene Dateien:** `backend/src/retry.ts`, `backend/src/scrapers/providers/rapidApiMetadata.ts`, `backend/src/scrapers/providers/rapidApi.ts`, `backend/src/scrapers/providers/types.ts`, `frontend/src/i18n.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-08-30: 3-Monats-Holiday-Lockout & starre Uhrzeit-Empfehlungen durch Hybrid-Planungs- & Discovery-Engine ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
