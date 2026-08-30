@@ -285,8 +285,8 @@ export default function RecipeHeader({
         {(recipe.category || (flags && flags.length > 0)) && (
           <div className="flex flex-wrap gap-2 mt-1">
             {recipe.category && (
-              <span className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-bold px-3.5 py-1.5 min-h-[38px] rounded-full select-none whitespace-nowrap border-none flex items-center gap-1.5">
-                <span className="text-sm leading-none">{getRecipeCategoryEmoji(recipe.category)}</span>
+              <span className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-xs font-bold px-3.5 py-1.5 min-h-[38px] rounded-full select-none whitespace-nowrap border-none flex items-center gap-1.5">
+                <span className="text-base leading-none">{getRecipeCategoryEmoji(recipe.category)}</span>
                 <span>{getRecipeCategoryLabel(recipe.category, language)}</span>
               </span>
             )}

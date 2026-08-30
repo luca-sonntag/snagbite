@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import type { SavedRecipe, Ingredient, RecipeCategory } from '../types';
+import { type SavedRecipe, type Ingredient, type RecipeCategory, RECIPE_CATEGORIES } from '../types';
 import { useI18n } from '../context/I18nContext';
 import { useDialog } from '../context/DialogContext';
 import { deleteCachedImage } from '../utils/imageStore';
@@ -396,9 +396,10 @@ export function useSavedCatalog({
     return map;
   }, [completedJobs, sortJobs]);
 
-  /** All unique categories present in the user's completed recipes. */
+  /** All unique categories present in the user's completed recipes, sorted from MAIN_COURSE to OTHER. */
   const availableCategories = useMemo(() => {
-    return Object.keys(jobsByCategory) as RecipeCategory[];
+    const present = new Set(Object.keys(jobsByCategory) as RecipeCategory[]);
+    return RECIPE_CATEGORIES.filter(cat => present.has(cat));
   }, [jobsByCategory]);
 
   const favoriteJobs = useMemo(() => {
