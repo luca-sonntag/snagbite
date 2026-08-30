@@ -26,6 +26,7 @@ export interface Collection {
 
 export interface ShoppingListItem {
   id: string;
+  userId?: string;
   name: string;
   baseName?: string;
   parentIngredient?: ParentIngredientInfo;
@@ -38,8 +39,40 @@ export interface ShoppingListItem {
   modifier?: string;
   brand?: string;
   createdAt: string;
+  updatedAt?: string;
   category?: string;
   canonicalId?: string | null;
+  inPantryWarning?: boolean;
+}
+
+export interface CreateShoppingListItemDto {
+  name: string;
+  baseName?: string;
+  parentIngredient?: ParentIngredientInfo;
+  amount: number;
+  unit: string;
+  recipeId?: string;
+  recipeTitle?: string;
+  checked?: boolean;
+  notes?: string;
+  modifier?: string;
+  brand?: string;
+  category?: string;
+  canonicalId?: string | null;
+  inPantryWarning?: boolean;
+}
+
+export interface UpdateShoppingListItemDto {
+  name?: string;
+  baseName?: string;
+  amount?: number;
+  unit?: string;
+  checked?: boolean;
+  notes?: string;
+  modifier?: string;
+  brand?: string;
+  category?: string;
+  inPantryWarning?: boolean;
 }
 
 export interface AggregatedShoppingItem {
@@ -53,6 +86,7 @@ export interface AggregatedShoppingItem {
   canonicalId?: string | null;
   modifier?: string;
   brand?: string;
+  inPantryWarning?: boolean;
   itemIds: string[];
   sources: { recipeId?: string; recipeTitle?: string; amount: number; unit: string }[];
   subItems?: {

@@ -27,6 +27,9 @@ export interface Ingredient {
   canonicalId?: string | null;
   matchedName?: string | null;
   isVerified?: boolean | null;
+  typicalPackageAmount?: number | null;
+  typicalPackageUnit?: string | null;
+  shelfLifeDays?: number | null;
 }
 
 export interface IngredientGroup {
