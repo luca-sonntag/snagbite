@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Plus, Tag, ChevronRight, ChevronDown, Settings2 } from 'lucide-react';
+import React from 'react';
+import { Plus, ChevronRight, Settings2 } from 'lucide-react';
 import type { Collection, SavedRecipe, RecipeCategory } from '../../types';
 import { useI18n } from '../../context/I18nContext';
-import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
 import { hapticLight } from '../../utils/haptics';
 import CollectionTile from './CollectionTile';
 import RecipeShelf from './RecipeShelf';
-import RecipePosterCard from './RecipePosterCard';
+import CategoryLabelBar from './CategoryLabelBar';
+import DiscoveryAccordion from './DiscoveryAccordion';
 import type { CatalogPreset } from './catalogRoutes';
 
 interface Shelf {
@@ -48,8 +48,8 @@ interface CookbookHomeProps {
 
 /**
  * Level 1 of the catalog: a browsable cookbook home instead of one long list.
- * Unifies Collections, Favorites, and Labels at the top, followed by
- * context-recommended and recent shelves.
+ * Unifies Collections, Favorites, Categories, and Labels at the top, followed by
+ * context-recommended and recent discovery shelves.
  */
 export default function CookbookHome({
   totalRecipes,
@@ -70,47 +70,11 @@ export default function CookbookHome({
   selectedIds = new Set(),
   bindLongPress,
 }: CookbookHomeProps) {
-  const { t, language } = useI18n();
-
-  // Accordion state for discovery shelves (single-open accordion: newest, recent, quick)
-  const [openShelfKey, setOpenShelfKey] = useState<'newest' | 'recent' | 'quick' | null>('newest');
-
-  const discoveryShelves = [
-    {
-      key: 'newest' as const,
-      title: t('catalog.shelfNewest'),
-      items: shelves.newest.items,
-      total: shelves.newest.total,
-      preset: { kind: 'all' } as CatalogPreset,
-      isTwoRow: true,
-    },
-    {
-      key: 'recent' as const,
-      title: t('catalog.shelfRecent'),
-      items: shelves.recent.items,
-      total: shelves.recent.total,
-      preset: { kind: 'recent' } as CatalogPreset,
-      isTwoRow: false,
-    },
-    {
-      key: 'quick' as const,
-      title: t('catalog.shelfQuick'),
-      items: shelves.quick.items,
-      total: shelves.quick.total,
-      preset: { kind: 'quick' } as CatalogPreset,
-      isTwoRow: false,
-    },
-  ].filter((s) => s.items.length > 0);
-
-  const activeShelfKey =
-    openShelfKey && discoveryShelves.some((s) => s.key === openShelfKey)
-      ? openShelfKey
-      : discoveryShelves[0]?.key || null;
+  const { t } = useI18n();
 
   return (
     <div className="flex flex-col gap-7 pb-4 pt-1">
-
-      {/* 📂 Unified Organization Hub: Sammlungen, Favoriten & Labels */}
+      {/* 📂 Unified Organization Hub: Sammlungen, Favoriten, Kategorien & Labels */}
       <section className="flex flex-col gap-2.5">
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-base font-bold text-gray-900 dark:text-white">
@@ -169,63 +133,15 @@ export default function CookbookHome({
           </button>
         </div>
 
-        {/* 🏷️ Labels / Tags Chip Bar (directly under tiles) */}
-        {allFlags.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 pt-1 pb-0.5 scroll-smooth">
-            {allFlags.map(flag => {
-              const count = jobsByFlag[flag]?.length ?? 0;
-              return (
-                <button
-                  key={flag}
-                  type="button"
-                  onClick={() => {
-                    hapticLight();
-                    onOpenList({ kind: 'flag', name: flag });
-                  }}
-                  className="min-h-[44px] px-3.5 py-2 text-xs font-semibold rounded-2xl border-none bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none hover:bg-gray-50 dark:hover:bg-gray-800 active:scale-95 transition-all duration-200 ease-out whitespace-nowrap cursor-pointer flex items-center gap-2 shrink-0 select-none"
-                >
-                  <Tag className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                  <span>{flag}</span>
-                  {count > 0 && (
-                    <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
-                      {count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        {/* 🍲 Categories Chip Bar (only categories with existing recipes, sorted canonically) */}
-        {availableCategories.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 pt-0.5 pb-0.5 scroll-smooth">
-            {availableCategories.map(cat => {
-              const count = jobsByCategory[cat]?.length ?? 0;
-              return (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => {
-                    hapticLight();
-                    onOpenList({ kind: 'category', category: cat });
-                  }}
-                  className="min-h-[44px] px-3.5 py-2 text-xs font-semibold rounded-2xl border-none bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none hover:bg-gray-50 dark:hover:bg-gray-800 active:scale-95 transition-all duration-200 ease-out whitespace-nowrap cursor-pointer flex items-center gap-2 shrink-0 select-none"
-                >
-                  <span className="text-base leading-none shrink-0">{getRecipeCategoryEmoji(cat)}</span>
-                  <span>{getRecipeCategoryLabel(cat, language)}</span>
-                  {count > 0 && (
-                    <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
-                      {count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
+        {/* 🍲 Categories & 🏷️ Labels Chip Bar (single unified horizontal scroll bar) */}
+        <CategoryLabelBar
+          availableCategories={availableCategories}
+          jobsByCategory={jobsByCategory}
+          allFlags={allFlags}
+          jobsByFlag={jobsByFlag}
+          onOpenList={onOpenList}
+        />
       </section>
-
 
       {/* Empfohlene Rezepte (Einzeilig horizontal, kontextbasiert) */}
       {shelves.recommended && shelves.recommended.items.length >= 2 && (
@@ -244,97 +160,15 @@ export default function CookbookHome({
       )}
 
       {/* Dynamic Discovery Shelves (Single Open Accordion: Neueste, Zuletzt geöffnet, Schnell gekocht) */}
-      {discoveryShelves.length > 0 && (
-        <div className="flex flex-col gap-4">
-          {discoveryShelves.map((shelf) => {
-            const isOpen = activeShelfKey === shelf.key;
-
-            return (
-              <section key={shelf.key} className="flex flex-col transition-all">
-                {/* Header Row: Title & Chevron on Left, Show All Link on Right */}
-                <div className="flex items-center justify-between gap-2 w-full select-none">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      hapticLight();
-                      setOpenShelfKey(isOpen ? null : shelf.key);
-                    }}
-                    className="flex items-center gap-2 text-left cursor-pointer flex-1 min-w-0 group py-1 active:scale-[0.99] transition-transform outline-none border-none bg-transparent min-h-[44px]"
-                    aria-expanded={isOpen}
-                  >
-                    <h3
-                      className={`text-base font-bold transition-colors ${
-                        isOpen
-                          ? 'text-gray-900 dark:text-white'
-                          : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200'
-                      }`}
-                    >
-                      {shelf.title}
-                    </h3>
-                    <ChevronDown
-                      className={`w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform duration-200 ${
-                        isOpen ? 'rotate-180 text-emerald-600 dark:text-emerald-400' : ''
-                      }`}
-                    />
-                  </button>
-
-                  {/* Show all link button on the right (always visible for all shelves) */}
-                  {shelf.total > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        hapticLight();
-                        onOpenList(shelf.preset);
-                      }}
-                      className="flex items-center gap-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0 cursor-pointer active:scale-95 transition-transform min-h-[44px] px-1 border-none bg-transparent"
-                    >
-                      {t('catalog.showAll', { count: shelf.total })}
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-
-                {/* Expanded Shelf Content */}
-                {isOpen && (
-                  <div className="pt-2.5 pb-1 animate-fade-in">
-                    {shelf.isTwoRow ? (
-                      <div className="grid grid-rows-2 grid-flow-col auto-cols-max gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
-                        {shelf.items.map((job) => (
-                          <RecipePosterCard
-                            key={job.recipeId}
-                            job={job}
-                            variant="shelf"
-                            totalTime={formatTotalTime(job.recipe)}
-                            isSelected={selectedIds.has(job.recipeId)}
-                            isSelectMode={isSelectMode}
-                            bindLongPress={bindLongPress ? bindLongPress(job.recipeId, job) : undefined}
-                            onClick={(e) => onOpenRecipe(e, job)}
-                          />
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
-                        {shelf.items.map((job) => (
-                          <RecipePosterCard
-                            key={job.recipeId}
-                            job={job}
-                            variant="shelf"
-                            totalTime={formatTotalTime(job.recipe)}
-                            isSelected={selectedIds.has(job.recipeId)}
-                            isSelectMode={isSelectMode}
-                            bindLongPress={bindLongPress ? bindLongPress(job.recipeId, job) : undefined}
-                            onClick={(e) => onOpenRecipe(e, job)}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </section>
-            );
-          })}
-        </div>
-      )}
+      <DiscoveryAccordion
+        shelves={shelves}
+        formatTotalTime={formatTotalTime}
+        onOpenList={onOpenList}
+        onOpenRecipe={onOpenRecipe}
+        isSelectMode={isSelectMode}
+        selectedIds={selectedIds}
+        bindLongPress={bindLongPress}
+      />
 
       {/* Escape hatch into the unfiltered list */}
       <button
