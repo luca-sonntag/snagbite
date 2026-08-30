@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Button } from '@heroui/react';
 import { Sparkles, Bot, Loader2, RefreshCw, Timer } from 'lucide-react';
 import { useI18n } from '../../../context/I18nContext';
@@ -67,6 +67,8 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
         const isAI = msg.role === 'model';
         const { cleanText, suggestions } = isAI ? parseSuggestions(msg.text) : { cleanText: msg.text, suggestions: [] };
 
+        const isLatest = idx === history.length - 1;
+
         return (
           <div
             key={idx}
@@ -93,8 +95,8 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
                 <CopilotMessageContent text={cleanText} isAI={isAI} />
               </div>
 
-              {/* Proactive Follow-up Quick Action Pills */}
-              {isAI && suggestions.length > 0 && (
+              {/* Proactive Follow-up Quick Action Pills: Only on latest AI message */}
+              {isAI && isLatest && suggestions.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 pt-0.5">
                   {suggestions.map((sug, sIdx) => (
                     <button
@@ -104,12 +106,15 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
                       onClick={() => {
                         hapticLight();
                         if (sug.type === 'timer') {
-                          const [secStr, ...lblParts] = sug.payload.split(':');
-                          const secs = parseInt(secStr, 10);
+                          const [valStr, ...lblParts] = sug.payload.split(':');
+                          const num = parseFloat(valStr);
                           const label = lblParts.join(':') || 'Timer';
-                          if (!isNaN(secs)) {
-                            addTimer(secs, label, recipeId);
-                            toast.info(`Timer gestartet: ${label} (${Math.round(secs / 60)} Min)`);
+                          if (!isNaN(num) && num > 0) {
+                            // If value <= 60, it represents minutes (e.g. 10 -> 600s), otherwise already in seconds
+                            const totalSeconds = num <= 60 ? Math.round(num * 60) : Math.round(num);
+                            addTimer(totalSeconds, label, recipeId);
+                            const displayMins = Math.round(totalSeconds / 60);
+                            toast.info(`Timer gestartet: ${label} (${displayMins} Min)`);
                           }
                         } else {
                           onSend(sug.payload);
