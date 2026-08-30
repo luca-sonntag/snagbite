@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Button } from '@heroui/react';
 import { Sparkles, Bot, Loader2, RefreshCw, Timer } from 'lucide-react';
 import { useI18n } from '../../../context/I18nContext';
@@ -14,16 +14,21 @@ interface CopilotSuggestion {
   payload: string;
 }
 
-const SUGGESTION_REGEX = /\[suggest:([^\]]+)\]\((prompt|timer):([^)]+)\)/g;
+const SUGGESTION_REGEX = /\[(?:suggest:\s*)?([^\]]+)\]\s*\((prompt|timer):\s*([^)]+)\)/gi;
 
-function parseSuggestions(rawText: string): { cleanText: string; suggestions: CopilotSuggestion[] } {
+export function parseSuggestions(rawText: string): { cleanText: string; suggestions: CopilotSuggestion[] } {
+  if (!rawText) return { cleanText: '', suggestions: [] };
   const suggestions: CopilotSuggestion[] = [];
   const cleanText = rawText.replace(SUGGESTION_REGEX, (_, label, type, payload) => {
-    suggestions.push({
-      label: label.trim(),
-      type: type as 'prompt' | 'timer',
-      payload: payload.trim(),
-    });
+    const trimmedLabel = String(label || '').trim();
+    const trimmedPayload = String(payload || '').trim();
+    if (trimmedLabel && trimmedPayload) {
+      suggestions.push({
+        label: trimmedLabel,
+        type: type.toLowerCase() as 'prompt' | 'timer',
+        payload: trimmedPayload,
+      });
+    }
     return '';
   }).trim();
 

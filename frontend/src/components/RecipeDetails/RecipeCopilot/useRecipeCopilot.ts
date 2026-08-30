@@ -7,6 +7,7 @@ import { useShoppingList } from '../../../hooks/useShoppingList';
 import { apiUrl } from '../../../api';
 import type { Recipe, Ingredient } from '../../../types';
 import type { Chip, PendingChange, CopilotMessage, UseRecipeCopilotProps } from './types';
+import { parseSuggestions } from './CopilotChatList';
 
 const chatStorageKey = (recipeId: string) => `recipe_copilot_chat_${recipeId}`;
 const changesStorageKey = (recipeId: string) => `recipe_copilot_changes_${recipeId}`;
@@ -198,7 +199,10 @@ export function useRecipeCopilot({
 
     try {
       const token = await getAccessToken();
-      const cleanHistory = history.map((h) => ({ role: h.role, text: h.text }));
+      const cleanHistory = history.map((h) => ({
+        role: h.role,
+        text: parseSuggestions(h.text).cleanText || h.text,
+      }));
 
       const res = await fetch(apiUrl(`/api/recipes/${recipe.id}/chat`), {
         method: 'POST',
