@@ -270,14 +270,54 @@ export function useRecipeCopilot({
 
       if (data.pendingRemix) {
         if (Array.isArray(data.operations) && data.operations.length > 0) {
-          setPendingChanges((prev) => [
-            ...prev,
-            ...data.operations.map((op: any) => ({
-              ...op,
-              id: op.id || generateChangeId(),
-              text: op.summary || 'Rezept anpassen',
-            })),
-          ]);
+          const flattened: PendingChange[] = [];
+          for (const op of data.operations) {
+            if (op.type === 'ADD_INGREDIENTS' && Array.isArray(op.newIngredients) && op.newIngredients.length > 1) {
+              for (const ing of op.newIngredients) {
+                flattened.push({
+                  id: generateChangeId(),
+                  type: 'ADD_INGREDIENTS',
+                  groupName: op.groupName,
+                  newIngredient: ing,
+                  newIngredients: [ing],
+                  summary: `${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} hinzufügen`,
+                  text: `${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} hinzufügen`,
+                });
+              }
+              if (op.newSteps && op.newSteps.length > 0) {
+                flattened.push({
+                  id: generateChangeId(),
+                  type: 'ADD_INSTRUCTION_STEP',
+                  newSteps: op.newSteps,
+                  summary: `Zubereitungsschritt: ${op.newSteps.map((s: any) => s.description).join(' ')}`,
+                  text: `Zubereitungsschritt: ${op.newSteps.map((s: any) => s.description).join(' ')}`,
+                });
+              }
+            } else if (op.type === 'ADD_INGREDIENTS' && (op.newIngredient || (Array.isArray(op.newIngredients) && op.newIngredients.length === 1))) {
+              const ing = op.newIngredient || op.newIngredients[0];
+              flattened.push({
+                ...op,
+                id: op.id || generateChangeId(),
+                newIngredient: ing,
+                newIngredients: [ing],
+                text: op.summary || `${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} hinzufügen`,
+              });
+            } else if (op.type === 'REPLACE_INGREDIENT' && op.newIngredient) {
+              const ing = op.newIngredient;
+              flattened.push({
+                ...op,
+                id: op.id || generateChangeId(),
+                text: op.summary || `${op.targetIngredientName} durch ${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} ersetzen`,
+              });
+            } else {
+              flattened.push({
+                ...op,
+                id: op.id || generateChangeId(),
+                text: op.summary || 'Rezept anpassen',
+              });
+            }
+          }
+          setPendingChanges((prev) => [...prev, ...flattened]);
         } else {
           const incomingChanges: string[] =
             Array.isArray(data.changes) && data.changes.length > 0

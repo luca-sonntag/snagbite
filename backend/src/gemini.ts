@@ -950,7 +950,7 @@ export async function chatAboutRecipe(
                       },
                       summary: {
                         type: FunctionDeclarationSchemaType.STRING,
-                        description: 'Benutzerfreundliche 1-Satz Zusammenfassung dieser spezifischen Operation (z. B. "Burrata durch 125g fettarmen Mozzarella ersetzen", "Tomaten-Gurken-Salat als Beilage hinzufügen", "Bacon entfernen").'
+                        description: 'Benutzerfreundliche Zusammenfassung dieser spezifischen Einzelzutat / Operation (z. B. "200g Tomaten hinzufügen", "Burrata durch 125g fettarmen Mozzarella ersetzen", "Bacon entfernen").'
                       },
                       targetIngredientName: {
                         type: FunctionDeclarationSchemaType.STRING,
@@ -966,7 +966,7 @@ export async function chatAboutRecipe(
                       },
                       newIngredient: {
                         type: FunctionDeclarationSchemaType.OBJECT,
-                        description: 'Bei REPLACE_INGREDIENT: Das vollständige neue Zutatenobjekt.',
+                        description: 'Bei REPLACE_INGREDIENT oder ADD_INGREDIENTS: Das vollständige neue Zutatenobjekt mit name, amount, unit, baseName etc.',
                         properties: ingredientItemSchemaProperties,
                         required: ['name', 'amount', 'unit', 'baseName']
                       },
@@ -1003,19 +1003,21 @@ export async function chatAboutRecipe(
                   }
                 }
               },
-              required: ['modification_request', 'operations']
+              required: ['operations']
             }
           },
           {
             name: 'add_missing_ingredients_to_shopping_list',
-            description: 'Setzt fehlende Zutaten direkt auf die Einkaufsliste des Nutzers.',
+            description: 'Fügt eine Liste von benötigten oder fehlenden Zutaten zur Einkaufsliste des Benutzers hinzu.',
             parameters: {
               type: FunctionDeclarationSchemaType.OBJECT,
               properties: {
                 ingredients: {
                   type: FunctionDeclarationSchemaType.ARRAY,
-                  items: { type: FunctionDeclarationSchemaType.STRING },
-                  description: 'Liste der Zutaten, die hinzugefügt werden sollen, z.B. ["Limette", "Koriander"]'
+                  description: 'Array von Zutatennamen, die auf die Einkaufsliste gesetzt werden sollen.',
+                  items: {
+                    type: FunctionDeclarationSchemaType.STRING
+                  }
                 }
               },
               required: ['ingredients']
@@ -1023,12 +1025,18 @@ export async function chatAboutRecipe(
           },
           {
             name: 'set_cooking_timer',
-            description: 'Erstellt einen Koch-Timer für eine bestimmte Dauer in Minuten mit einem optionalen Label.',
+            description: 'Startet einen Timer für einen Koch- oder Backschritt.',
             parameters: {
               type: FunctionDeclarationSchemaType.OBJECT,
               properties: {
-                duration_minutes: { type: FunctionDeclarationSchemaType.NUMBER, description: 'Dauer in Minuten' },
-                label: { type: FunctionDeclarationSchemaType.STRING, description: 'Beschreibung des Timers, wofür er ist, z.B. "Nudeln kochen" oder "Teig ruhen lassen"' }
+                duration_minutes: {
+                  type: FunctionDeclarationSchemaType.NUMBER,
+                  description: 'Dauer des Timers in GANZEN MINUTEN (z. B. 12 für 12 Minuten).'
+                },
+                label: {
+                  type: FunctionDeclarationSchemaType.STRING,
+                  description: 'Kurzer Name des Timers (z. B. "Brot überbacken", "Nudeln kochen").'
+                }
               },
               required: ['duration_minutes']
             }
@@ -1047,7 +1055,7 @@ export async function chatAboutRecipe(
 
     const targetLanguage = userPrefs?.recipeLanguage || config.RECIPE_LANGUAGE;
 
-    const systemInstruction = `You are "Recipe Copilot", a friendly, helpful, and professional sous-chef in the kitchen.
+    const systemInstruction = `You are a helpful, professional, and friendly AI sous-chef in a recipe app.
 You are helping the user with the following recipe:
 
 Title: ${recipe.title}${recipe.description ? `\nDescription: ${recipe.description}` : ''}
@@ -1061,12 +1069,13 @@ ${recipe.instructions.map(step => `${step.step}. ${step.description}`).join('\n'
 Tools at your disposal:
 1. modify_current_recipe: Call this when the user wants to adapt, scale, remix, or otherwise modify the recipe details (e.g. add a side dish, swap or add ingredients, scale servings, make it vegan, gluten-free, low-carb). Do not try to write modified recipe JSON or instructions in your text reply; always call this tool to perform the modification.
 IMPORTANT FOR RECIPE MODIFICATIONS:
-- When modifying the recipe, ALWAYS return structured "operations" containing complete, granular ingredient definitions:
-  * For adding side dishes, toppings, or new components (e.g. "Tomaten-Gurken-Salat als Beilage hinzufügen"): use type "ADD_INGREDIENTS", specify groupName (e.g. "VEGETABLES" or "Beilage: Tomaten-Gurken-Salat"), provide the REAL individual ingredients in "newIngredients" (e.g. Tomate, Gurke, Olivenöl, Essig with amount, unit, name, baseName, calories, protein, carbs, fat), and provide the preparation step in "newSteps".
+- When modifying the recipe, ALWAYS generate individual, granular operations for EACH ingredient:
+  * For adding side dishes or multiple ingredients (e.g. Tomaten-Gurken-Salat als Beilage): create a separate "ADD_INGREDIENTS" operation for EACH single ingredient (e.g. one for 200g Tomaten, one for 150g Gurke, one for 1 EL Olivenöl, one for 1 EL Balsamico) with its groupName (e.g. "Beilage: Tomaten-Gurken-Salat") and newIngredient. If preparation steps are needed, add an ADD_INSTRUCTION_STEP operation.
   * For ingredient swaps (e.g. "Bacon durch 100g Putenbruststreifen ersetzen"): use type "REPLACE_INGREDIENT" with targetIngredientName ("Bacon") and the full newIngredient object.
   * For removals (e.g. "Röstzwiebeln weglassen"): use type "REMOVE_INGREDIENT" with removeIngredientName ("Röstzwiebeln").
   * For scaling (e.g. "Auf 4 Portionen"): use type "SCALE_SERVINGS" with newServings.
-- ALWAYS populate a clear, concise "summary" for every operation (e.g. "Tomaten-Gurken-Salat als Beilage hinzufügen", "Bacon durch 100g Putenbruststreifen ersetzen").
+- NEVER bundle an entire dish into a single abstract ingredient string. Every single ingredient must be represented individually with amount, unit, name, baseName, and macros.
+- Populate a clear, concise "summary" for every single ingredient/operation (e.g. "200g Tomaten hinzufügen", "150g Gurke hinzufügen", "Burrata durch 125g fettarmen Mozzarella ersetzen").
 2. add_missing_ingredients_to_shopping_list: ALWAYS call this tool whenever the user asks to add ingredients/items to their shopping list, missing ingredients, or sends a shopping prompt (e.g. "Zutaten auf Einkaufsliste", "Setze X auf die Einkaufsliste"). NEVER just reply with text claiming you added them without calling this tool!
 3. set_cooking_timer: ALWAYS call this tool when the user asks to set a timer for a step or cooking duration (specify duration strictly in minutes).
 
@@ -1082,7 +1091,7 @@ Rules:
   * Highlight key ingredients, amounts, times, or terms in **bold** (e.g. **Gouda**, **15 Minuten**, **Schritt 2**).
   * Keep explanations clear, scannable, and easy to read while cooking.
 - Do NOT use emojis in your responses or generated modification descriptions. Maintain a clean, professional culinary tone.
-- When you call a tool, the system will execute it and return the result to you. When you called modify_current_recipe to add or swap ingredients, write a short message explaining what was done and briefly list the concrete ingredients and amounts that were staged (e.g. "Ich habe Tomaten-Gurken-Salat (200g Tomaten, 1/2 Gurke, 1 EL Olivenöl...) als Beilage vorgemerkt.").
+- When you call a tool, the system will execute it and return the result to you. When you called modify_current_recipe to add or swap ingredients, write a short message explaining what was done and briefly list the concrete ingredients and amounts that were staged (e.g. "Ich habe den Tomaten-Gurken-Salat als Beilage vorgemerkt: 200g Tomaten, 150g Gurke, 1 EL Olivenöl, 1 EL Balsamico.").
 - PROACTIVE FOLLOW-UP SUGGESTIONS (Direct 1-Tap Option Branching & Tool Boundaries):
   At the very end of your response, ALWAYS append 1-3 short, highly specific action tags derived DIRECTLY from the options, ingredients, or techniques you just presented in your response:
   * CONCRETE OPTIONS & CHOICES (triggers modify_current_recipe or explanation): If your answer lists specific side dishes, ingredient substitutions, variations, or toppings (e.g. Coleslaw, Tomatensalat, Zucchini OR Mozzarella, Feta, Ricotta), ALWAYS turn the most relevant choices into direct 1-tap action buttons:
@@ -1143,22 +1152,69 @@ When the user requests a further modification, call modify_current_recipe with o
       if (call.name === 'modify_current_recipe') {
         const rawOps = (call.args as any).operations;
         const modReq = (call.args as any).modification_request;
-        const operations: RecipeOperation[] = Array.isArray(rawOps) && rawOps.length > 0
-          ? rawOps.map((op: any, idx: number) => ({
-              id: op.id || `op_${Date.now()}_${idx}`,
-              type: op.type,
-              summary: op.summary || modReq || 'Rezept anpassen',
-              targetIngredientName: op.targetIngredientName,
-              newIngredient: op.newIngredient,
-              groupName: op.groupName,
-              newIngredients: op.newIngredients,
-              removeIngredientName: op.removeIngredientName,
-              newServings: op.newServings,
-              stepUpdates: op.stepUpdates,
-              newSteps: op.newSteps,
-              newTitle: op.newTitle,
-            }))
-          : [];
+        const operations: RecipeOperation[] = [];
+
+        if (Array.isArray(rawOps) && rawOps.length > 0) {
+          for (let idx = 0; idx < rawOps.length; idx++) {
+            const op = rawOps[idx];
+            if (op.type === 'ADD_INGREDIENTS' && Array.isArray(op.newIngredients) && op.newIngredients.length > 1) {
+              // Flatten into individual 1-ingredient operations
+              for (let iIdx = 0; iIdx < op.newIngredients.length; iIdx++) {
+                const ing = op.newIngredients[iIdx];
+                operations.push({
+                  id: `op_${Date.now()}_${idx}_${iIdx}`,
+                  type: 'ADD_INGREDIENTS',
+                  summary: `${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} hinzufügen${op.groupName ? ` (${op.groupName})` : ''}`,
+                  groupName: op.groupName,
+                  newIngredient: ing,
+                  newIngredients: [ing],
+                });
+              }
+              if (op.newSteps && op.newSteps.length > 0) {
+                operations.push({
+                  id: `op_${Date.now()}_${idx}_steps`,
+                  type: 'ADD_INSTRUCTION_STEP',
+                  summary: `Zubereitungsschritt: ${op.newSteps.map((s: any) => s.description).join(' ')}`,
+                  newSteps: op.newSteps,
+                });
+              }
+            } else if (op.type === 'ADD_INGREDIENTS' && (op.newIngredient || (Array.isArray(op.newIngredients) && op.newIngredients.length === 1))) {
+              const ing = op.newIngredient || op.newIngredients[0];
+              operations.push({
+                id: op.id || `op_${Date.now()}_${idx}`,
+                type: 'ADD_INGREDIENTS',
+                summary: `${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} hinzufügen${op.groupName ? ` (${op.groupName})` : ''}`,
+                groupName: op.groupName,
+                newIngredient: ing,
+                newIngredients: [ing],
+              });
+            } else if (op.type === 'REPLACE_INGREDIENT' && op.newIngredient) {
+              const ing = op.newIngredient;
+              operations.push({
+                id: op.id || `op_${Date.now()}_${idx}`,
+                type: 'REPLACE_INGREDIENT',
+                summary: `${op.targetIngredientName} durch ${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} ersetzen`,
+                targetIngredientName: op.targetIngredientName,
+                newIngredient: ing,
+              });
+            } else {
+              operations.push({
+                id: op.id || `op_${Date.now()}_${idx}`,
+                type: op.type,
+                summary: op.summary || modReq || 'Rezept anpassen',
+                targetIngredientName: op.targetIngredientName,
+                newIngredient: op.newIngredient,
+                groupName: op.groupName,
+                newIngredients: op.newIngredients,
+                removeIngredientName: op.removeIngredientName,
+                newServings: op.newServings,
+                stepUpdates: op.stepUpdates,
+                newSteps: op.newSteps,
+                newTitle: op.newTitle,
+              });
+            }
+          }
+        }
 
         const rawChanges = (call.args as any).changes;
         const changes: string[] = operations.length > 0
