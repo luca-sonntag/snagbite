@@ -25,6 +25,7 @@ const WelcomeGuide = lazy(() => import('./components/WelcomeGuide'));
 import { useRecipeExtraction } from './hooks/useRecipeExtraction';
 import { useShoppingList } from './hooks/useShoppingList';
 import { useAuth } from './context/AuthContext';
+import { apiUrl } from './api';
 import { useSocial } from './context/SocialContext';
 import { useGamification } from './context/GamificationContext';
 import { useHashRouter } from './hooks/useHashRouter';
@@ -346,12 +347,33 @@ export default function App() {
                     ? history.find((j) => j.recipeId === recipe.parentRecipeId)?.recipe?.title
                     : null)
                 }
-                onNavigateToRecipe={(recipeId) => {
+                onNavigateToRecipe={async (recipeId, remixRecipe) => {
                   const parentJob = history.find((j) => j.recipeId === recipeId);
                   if (parentJob) {
                     navigate('history', parentJob.recipeId);
                     setRecipe(null);
                     setUrl('');
+                    return;
+                  }
+                  if (remixRecipe) {
+                    setRecipe(remixRecipe);
+                    return;
+                  }
+                  try {
+                    const token = await getAccessToken();
+                    if (token) {
+                      const res = await fetch(apiUrl(`/api/recipes/${recipeId}`), {
+                        headers: { Authorization: `Bearer ${token}` },
+                      });
+                      if (res.ok) {
+                        const data = await res.json();
+                        if (data.success && data.recipe) {
+                          setRecipe(data.recipe);
+                        }
+                      }
+                    }
+                  } catch (err) {
+                    console.error('[App] Failed to load recipe:', err);
                   }
                 }}
               />

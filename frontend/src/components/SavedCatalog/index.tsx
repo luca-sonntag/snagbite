@@ -10,6 +10,7 @@ import { useSavedCatalog, EMPTY_FILTERS } from '../../hooks/useSavedCatalog';
 import { useAuth } from '../../context/AuthContext';
 import { useCollections } from '../../hooks/useCollections';
 import { categoryOrder, legacyCategoryMap, getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
+import { apiUrl } from '../../api';
 import PremiumModal from '../PremiumModal';
 import PremiumHint from '../PremiumHint';
 import CollectionSheet from './CollectionSheet';
@@ -443,10 +444,49 @@ export default function SavedCatalog({
             }}
             isParentAvailable={selectedJobResolved.recipe?.parentRecipeId ? history.some(j => j.recipeId === selectedJobResolved.recipe?.parentRecipeId) : false}
             parentRecipeTitle={selectedJobResolved.recipe?.parentRecipeTitle || (selectedJobResolved.recipe?.parentRecipeId ? history.find(j => j.recipeId === selectedJobResolved.recipe?.parentRecipeId)?.recipe?.title : null)}
-            onNavigateToRecipe={(recipeId) => {
+            onNavigateToRecipe={async (recipeId, remixRecipe) => {
               const parentJob = history.find(j => j.recipeId === recipeId);
               if (parentJob) {
                 setSelectedJob(parentJob);
+                return;
+              }
+              if (remixRecipe) {
+                setSelectedJob({
+                  recipeId,
+                  recipe: remixRecipe,
+                  source: 'remix',
+                  addedAt: remixRecipe.createdAt || new Date().toISOString(),
+                  updatedAt: remixRecipe.updatedAt || new Date().toISOString(),
+                  isFavorite: false,
+                  flags: [],
+                  collectionIds: [],
+                });
+                return;
+              }
+              try {
+                const token = await getAccessToken?.();
+                if (token) {
+                  const res = await fetch(apiUrl(`/api/recipes/${recipeId}`), {
+                    headers: { Authorization: `Bearer ${token}` }
+                  });
+                  if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && data.recipe) {
+                      setSelectedJob({
+                        recipeId: data.recipeId || recipeId,
+                        recipe: data.recipe,
+                        source: (data.source as any) || 'remix',
+                        addedAt: data.addedAt || new Date().toISOString(),
+                        updatedAt: data.updatedAt || new Date().toISOString(),
+                        isFavorite: data.isFavorite ?? false,
+                        flags: data.flags ?? [],
+                        collectionIds: data.collectionIds ?? [],
+                      });
+                    }
+                  }
+                }
+              } catch (err) {
+                console.error('[SavedCatalog] Failed to load recipe by id:', err);
               }
             }}
             onAssignCollections={() => handleAssignCollectionsClick(selectedJobResolved)}

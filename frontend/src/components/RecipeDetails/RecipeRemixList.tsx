@@ -9,7 +9,7 @@ import type { Recipe } from '../../types';
 
 interface RecipeRemixListProps {
   parentRecipeId: string;
-  onNavigateToRecipe?: (recipeId: string) => void;
+  onNavigateToRecipe?: (recipeId: string, remixRecipe?: Recipe) => void;
 }
 
 export default function RecipeRemixList({
@@ -77,7 +77,7 @@ export default function RecipeRemixList({
               onClick={() => {
                 hapticLight();
                 if (remix.id) {
-                  onNavigateToRecipe?.(remix.id);
+                  onNavigateToRecipe?.(remix.id, remix);
                 }
               }}
               className="w-56 shrink-0 p-2.5 rounded-2xl bg-purple-500/10 dark:bg-purple-500/15 hover:bg-purple-500/20 active:scale-[0.98] transition-all flex items-center gap-2.5 text-left border-none cursor-pointer outline-none shadow-xs"
