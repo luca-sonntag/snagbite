@@ -498,6 +498,18 @@ async function workerTick(): Promise<void> {
   }
 }
 
+/**
+ * Triggers an immediate worker tick to claim pending jobs without waiting for the polling interval.
+ */
+export function triggerWorkerTick(): void {
+  setImmediate(() => {
+    workerTick().catch((err: unknown) => {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn('[Queue] Error in triggered worker tick:', msg);
+    });
+  });
+}
+
 async function cleanupOldRunDirs(days: number): Promise<void> {
   try {
     const logsDir = path.resolve('logs');

@@ -25,7 +25,7 @@ import { enrichRecipeWithCanonicalIngredients } from '../matching/ingredientMatc
 import { recordCook } from '../gamification.js';
 import type { Recipe } from '../types.js';
 import { fetchAndSyncUser, isPremiumUser, MAX_PHOTOS_TOTAL_CHARS } from './authUtils.js';
-
+import { triggerWorkerTick } from '../queue.js';
 
 export const recipeRoutes = Router();
 
@@ -154,6 +154,7 @@ recipeRoutes.post('/recipes/:id/remix', async (req: Request, res: Response): Pro
       prompt,
       req.userId!
     );
+    triggerWorkerTick();
 
     res.status(202).json({
       success: true,

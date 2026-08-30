@@ -29,6 +29,7 @@ import {
   resolveConcurrencyLimit,
 } from './authUtils.js';
 import { handleVideoProxy } from './videoProxy.js';
+import { triggerWorkerTick } from '../queue.js';
 
 export const extractionRoutes = Router();
 
@@ -167,6 +168,7 @@ extractionRoutes.post('/extract-recipe', async (req: Request, res: Response): Pr
     await enforceExtractionQuota(req);
 
     const job = await createJob(cleanUrl, req.userId!);
+    triggerWorkerTick();
 
     res.status(202).json({
       success: true,
@@ -219,6 +221,7 @@ extractionRoutes.post('/extract-recipe/photos', async (req: Request, res: Respon
     }
 
     const job = await createJob(photoJobUrl(uploadId), req.userId!, 'photo');
+    triggerWorkerTick();
 
     res.status(202).json({
       success: true,
@@ -278,6 +281,7 @@ extractionRoutes.post('/extract-recipe/frames', async (req: Request, res: Respon
       status: 'pending',
       progress: { percent: 35, stage: 'queued' },
     });
+    triggerWorkerTick();
 
     res.status(202).json({
       success: true,
