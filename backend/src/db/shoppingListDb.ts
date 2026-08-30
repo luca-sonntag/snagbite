@@ -8,6 +8,8 @@ import {
 import { getClient, wrapError, isNoRowsError, num } from './client.js';
 import type { ShoppingListRow } from './types/shoppingList.js';
 import { createPantryItem } from './pantryDb.js';
+import { buildMappingKeys } from '../matching/baseNameCanonical.js';
+import { lookupMapping } from '../matching/mappingStore.js';
 
 export function rowToShoppingListItem(row: ShoppingListRow): ShoppingListItem {
   return {
@@ -272,28 +274,26 @@ async function autoTransferToPantry(userId: string, item: ShoppingListRow): Prom
   let packageUnit = item.unit;
   let shelfLifeDays = getDefaultShelfLifeDays(item.category, item.base_name || item.name);
 
-  // Check ingredient mappings for typical package info
-  const searchKey = (item.base_name || item.name || '').toLowerCase().trim();
-  if (searchKey) {
-    const { data: mapping } = await getClient()
-      .from('ingredient_mappings')
-      .select('typical_package_amount, typical_package_unit, shelf_life_days')
-      .eq('mapping_key', searchKey)
-      .limit(1)
-      .maybeSingle();
-
+  // 1. Check canonical ingredient mappings using alias discovery (e.g. Gewürzgurken <-> pickle)
+  const keys = buildMappingKeys(item.base_name ?? undefined, item.name);
+  if (keys.length > 0) {
+    const mapping = await lookupMapping(keys, item.category || '');
     if (mapping) {
-      if (mapping.typical_package_amount) {
-        packageAmount = Math.max(packageAmount, Number(mapping.typical_package_amount));
+      if (mapping.typicalPackageAmount && Number(mapping.typicalPackageAmount) > 0) {
+        const pkgAmt = Number(mapping.typicalPackageAmount);
+        const pkgUnit = mapping.typicalPackageUnit || item.unit;
+        if (pkgUnit.toLowerCase() === item.unit.toLowerCase()) {
+          packageAmount = Math.max(packageAmount, pkgAmt);
+        } else {
+          packageAmount = pkgAmt;
+        }
+        packageUnit = pkgUnit;
       }
-      if (mapping.typical_package_unit) {
-        packageUnit = mapping.typical_package_unit;
-      }
-      if (mapping.shelf_life_days) {
-        shelfLifeDays = mapping.shelf_life_days;
+      if (mapping.shelfLifeDays) {
+        shelfLifeDays = mapping.shelfLifeDays;
       }
     } else if (item.recipe_id) {
-      // Fallback: check the linked recipe ingredients if not yet cached in ingredient_mappings
+      // 2. Fallback: check linked recipe ingredients
       try {
         const { data: recData } = await getClient()
           .from('recipes')
@@ -303,17 +303,22 @@ async function autoTransferToPantry(userId: string, item: ShoppingListRow): Prom
           .maybeSingle();
 
         if (recData?.ingredients && Array.isArray(recData.ingredients)) {
+          const keySet = new Set(keys);
           for (const group of recData.ingredients as any[]) {
             if (!group?.items || !Array.isArray(group.items)) continue;
             for (const ing of group.items) {
-              const ingBase = (ing.baseName || ing.name || '').toLowerCase().trim();
-              const ingName = (ing.name || '').toLowerCase().trim();
-              if (ingBase === searchKey || ingName === searchKey) {
-                if (ing.typicalPackageAmount) {
-                  packageAmount = Math.max(packageAmount, Number(ing.typicalPackageAmount));
-                }
-                if (ing.typicalPackageUnit) {
-                  packageUnit = ing.typicalPackageUnit;
+              const ingKeys = buildMappingKeys(ing.baseName, ing.name);
+              const isMatch = ingKeys.some((k) => keySet.has(k));
+              if (isMatch) {
+                if (ing.typicalPackageAmount && Number(ing.typicalPackageAmount) > 0) {
+                  const pkgAmt = Number(ing.typicalPackageAmount);
+                  const pkgUnit = ing.typicalPackageUnit || item.unit;
+                  if (pkgUnit.toLowerCase() === item.unit.toLowerCase()) {
+                    packageAmount = Math.max(packageAmount, pkgAmt);
+                  } else {
+                    packageAmount = pkgAmt;
+                  }
+                  packageUnit = pkgUnit;
                 }
                 if (ing.shelfLifeDays) {
                   shelfLifeDays = ing.shelfLifeDays;
