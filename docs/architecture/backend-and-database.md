@@ -133,3 +133,21 @@ flowchart TD
   * `DELETE /api/meal-plan/:id`: Löscht einen Plan-Eintrag isoliert für den anfragenden Benutzer.
 * **Automatische Gamification-/Koch-Synchronisation:**
   * Beim erfolgreichen Kochen eines Rezepts (`POST /api/recipes/:id/cooked`) aktualisiert das Backend via `markMealPlansCookedForRecipe(userId, recipeId)` automatisch alle offenen Plan-Einträge dieses Rezepts für das aktuelle Datum (`is_cooked = true`), sodass Wochenplaner und Koch-Historie synchron bleiben.
+
+---
+
+## 6. 🥫 Vorratslager & Einkaufsliste (`pantry_items`, `shopping_list` & `pantryRoutes.ts`)
+
+* **Datenmodell (`backend/db/migrations/006_pantry_and_shopping_list.sql`):**
+  * `public.pantry_items`: Speichert Benutzervorräte mit `user_id`, `name`, `base_name`, `category`, `amount`, `unit`, `notes`, `shelf_life_days`, `expires_at`, `created_at`, `updated_at`.
+  * `public.shopping_list`: Persistiert Einkaufslisten-Einträge in Supabase mit `user_id`, `recipe_id`, `name`, `base_name`, `amount`, `unit`, `checked`, `category`, `in_pantry_warning`.
+  * `ingredient_mappings`: Erweitert um `typical_package_amount`, `typical_package_unit`, `shelf_life_days`.
+  * RLS Policies: Benutzer sehen und editieren strikt nur ihre eigenen Vorrats- und Einkaufslisten-Einträge.
+* **REST-Endpunkte:**
+  * `/api/pantry`: `GET` (Liste), `POST` (Erstellen), `PATCH /:id`, `DELETE /:id`, `POST /consume-recipe/:recipeId`, `GET /suggestions`.
+  * `/api/shopping-list`: `GET` (Liste), `POST` (Einzeln/Manuell), `POST /batch` (Batch-Import aus Rezept/Wochenplaner), `PATCH /:id` (Toggle/Edit), `POST /batch-toggle` (Multi-Check mit automatischem Vorrats-Transfer), `DELETE /:id`, `POST /delete-batch`, `POST /clear`, `POST /remove-recipe`.
+* **Smarter Vorratsabzug & Anti-Food-Waste Algorithmus (`pantryDb.ts`):**
+  * **Floor at Zero:** Beim Kochen eines Rezepts (`POST /api/recipes/:id/cooked`) werden benötigte Zutatensmengen automatisch vom Vorrat abgezogen, unter Einheitenumrechnung (`g` ↔ `kg`, `ml` ↔ `l`). Vorratsmengen werden bei 0 gefloort und fallen niemals ins Negative.
+  * **Verschwendungs-Reduzierung (`getPantryRecipeSuggestions`):** Bewertet und sortiert gespeicherte und öffentliche Rezepte anhand der Übereinstimmung mit bald ablaufenden Vorratszutaten (`expires_at <= NOW() + 3 Tage`).
+  * **Community-Rezept-Freigabe:** URL-extrahierte Rezepte sind standardmäßig `visibility = 'public'` (öffentlich), während Foto- und Remix-Rezepte privat bleiben. Benutzer können die Sichtbarkeit jederzeit über `PATCH /api/recipes/:id/visibility` anpassen.
+
