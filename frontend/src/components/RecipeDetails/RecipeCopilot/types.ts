@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Recipe } from '../../../types';
+import type { Recipe, RecipeOperation } from '../../../types';
 
 export interface Chip {
   label: string;
@@ -7,7 +7,7 @@ export interface Chip {
   category: string;
 }
 
-export interface PendingChange {
+export interface PendingChange extends Partial<RecipeOperation> {
   id: string;
   text: string;
 }
@@ -25,17 +25,17 @@ export interface RecipeCopilotProps {
   onClose: () => void;
   recipe: Recipe;
   onRemixSuccess: (newRecipe: Recipe, newJobId: string) => void;
-  onReplaceCurrent: (newRecipe: Recipe) => void;
+  onReplaceCurrent?: (newRecipe: Recipe) => void;
 }
 
 export interface CopilotTransactionCardProps {
   pendingChanges: PendingChange[];
-  choosingApply: boolean;
-  setChoosingApply: (choosing: boolean) => void;
+  choosingApply?: boolean;
+  setChoosingApply?: (choosing: boolean) => void;
   isPending: boolean;
   onRemoveChange: (id: string) => void;
   onDiscardAll: () => void;
-  onApplyChanges: (replaceCurrent: boolean) => void;
+  onApplyChanges: () => void;
 }
 
 export interface CopilotInputBarProps {
@@ -71,6 +71,6 @@ export interface UseRecipeCopilotProps {
   recipe: Recipe;
   onClose: () => void;
   onRemixSuccess: (newRecipe: Recipe, newJobId: string) => void;
-  onReplaceCurrent: (newRecipe: Recipe) => void;
+  onReplaceCurrent?: (newRecipe: Recipe) => void;
 }
 

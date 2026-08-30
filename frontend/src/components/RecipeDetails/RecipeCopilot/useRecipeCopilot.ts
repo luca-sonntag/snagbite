@@ -26,7 +26,6 @@ export function useRecipeCopilot({
   recipe,
   onClose,
   onRemixSuccess,
-  onReplaceCurrent,
 }: UseRecipeCopilotProps) {
   const { t, language } = useI18n();
   const toast = useToast();
@@ -270,18 +269,29 @@ export function useRecipeCopilot({
       }
 
       if (data.pendingRemix) {
-        const incomingChanges: string[] =
-          Array.isArray(data.changes) && data.changes.length > 0
-            ? data.changes
-            : data.modificationRequest
-              ? [data.modificationRequest]
-              : [];
-
-        if (incomingChanges.length > 0) {
+        if (Array.isArray(data.operations) && data.operations.length > 0) {
           setPendingChanges((prev) => [
             ...prev,
-            ...incomingChanges.map((text: string) => ({ id: generateChangeId(), text })),
+            ...data.operations.map((op: any) => ({
+              ...op,
+              id: op.id || generateChangeId(),
+              text: op.summary || 'Rezept anpassen',
+            })),
           ]);
+        } else {
+          const incomingChanges: string[] =
+            Array.isArray(data.changes) && data.changes.length > 0
+              ? data.changes
+              : data.modificationRequest
+                ? [data.modificationRequest]
+                : [];
+
+          if (incomingChanges.length > 0) {
+            setPendingChanges((prev) => [
+              ...prev,
+              ...incomingChanges.map((text: string) => ({ id: generateChangeId(), text })),
+            ]);
+          }
         }
       }
 
@@ -324,7 +334,7 @@ export function useRecipeCopilot({
     setChoosingApply(false);
   };
 
-  const handleApplyChanges = async (replaceCurrent: boolean) => {
+  const handleApplyChanges = async () => {
     if (pendingChanges.length === 0 || isPending) return;
     const modificationRequest = pendingChanges.map((c, i) => `${i + 1}. ${c.text}`).join('\n');
 
@@ -338,7 +348,10 @@ export function useRecipeCopilot({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ modificationRequest, replaceCurrent }),
+        body: JSON.stringify({
+          operations: pendingChanges,
+          modificationRequest,
+        }),
       });
 
       if (!res.ok) throw new Error('Failed to confirm remix.');
@@ -347,7 +360,7 @@ export function useRecipeCopilot({
       const successMsg: CopilotMessage = {
         role: 'model',
         text: t('copilot.remixCreated', { title: data.updatedRecipeJson?.title || '' }),
-        isRemixReady: !replaceCurrent,
+        isRemixReady: true,
         newJobId: data.newJobId,
         newRecipe: data.updatedRecipeJson,
       };
@@ -355,11 +368,6 @@ export function useRecipeCopilot({
 
       setPendingChanges([]);
       setChoosingApply(false);
-
-      if (replaceCurrent && data.updatedRecipeJson) {
-        onReplaceCurrent(data.updatedRecipeJson);
-        setTimeout(() => onClose(), 50);
-      }
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : 'Failed to confirm remix.';
       setError(errMsg);

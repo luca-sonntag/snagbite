@@ -1,14 +1,12 @@
 import React from 'react';
 import { Button } from '@heroui/react';
-import { ListChecks, X, RefreshCw, Plus, Trash2, Loader2, Sparkles } from 'lucide-react';
+import { ListChecks, X, Trash2, Loader2, Sparkles } from 'lucide-react';
 import { useI18n } from '../../../context/I18nContext';
 import type { CopilotTransactionCardProps } from './types';
-import { hapticLight, hapticMedium, hapticHeavy } from '../../../utils/haptics';
+import { hapticMedium, hapticHeavy } from '../../../utils/haptics';
 
 export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
   pendingChanges,
-  choosingApply,
-  setChoosingApply,
   isPending,
   onRemoveChange,
   onDiscardAll,
@@ -60,81 +58,36 @@ export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
       </div>
 
       {/* Actions */}
-      {choosingApply ? (
-        <div className="flex flex-col gap-2 pt-1">
-          <p className="text-[11px] text-gray-600 dark:text-gray-300 leading-normal font-medium">
-            {t('copilot.changesApplyPrompt')}
-          </p>
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl h-11 flex items-center justify-center gap-1.5 border-none shadow-none active:scale-95 transition-all text-xs flex-1 cursor-pointer"
-              onPress={() => {
-                hapticMedium();
-                onApplyChanges(true);
-              }}
-              isDisabled={isPending}
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              {t('copilot.remixReplaceBtn')}
-            </Button>
-            <Button
-              size="sm"
-              className="bg-white/80 dark:bg-gray-800/80 border-none text-emerald-700 dark:text-emerald-300 font-bold rounded-2xl h-11 flex items-center justify-center gap-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] active:scale-95 transition-all text-xs flex-1 hover:bg-white dark:hover:bg-gray-800 cursor-pointer"
-              onPress={() => {
-                hapticMedium();
-                onApplyChanges(false);
-              }}
-              isDisabled={isPending}
-            >
-              <Plus className="w-3.5 h-3.5" />
-              {t('copilot.remixNewBtn')}
-            </Button>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              hapticLight();
-              setChoosingApply(false);
-            }}
-            disabled={isPending}
-            className="text-[11px] text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 font-medium self-center outline-none border-none cursor-pointer bg-transparent py-1.5"
-          >
-            {t('dialog.cancelDefault')}
-          </button>
-        </div>
-      ) : (
-        <div className="flex gap-2 pt-1">
-          <Button
-            size="sm"
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl h-11 flex items-center justify-center gap-2 border-none shadow-none active:scale-95 transition-all text-xs flex-1 cursor-pointer"
-            onPress={() => {
-              hapticLight();
-              setChoosingApply(true);
-            }}
-            isDisabled={isPending}
-          >
-            {isPending ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Sparkles className="w-3.5 h-3.5" />
-            )}
-            {t('copilot.changesApply')}
-          </Button>
-          <Button
-            size="sm"
-            className="bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 font-semibold rounded-2xl h-11 px-3.5 flex items-center justify-center gap-1.5 border-none shadow-none active:scale-95 transition-all text-xs cursor-pointer"
-            onPress={() => {
-              hapticHeavy();
-              onDiscardAll();
-            }}
-            isDisabled={isPending}
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            {t('copilot.changesDiscardAll')}
-          </Button>
-        </div>
-      )}
+      <div className="flex gap-2 pt-1">
+        <Button
+          size="sm"
+          className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl h-11 flex items-center justify-center gap-2 border-none shadow-none active:scale-95 transition-all text-xs flex-1 cursor-pointer"
+          onPress={() => {
+            hapticMedium();
+            onApplyChanges();
+          }}
+          isDisabled={isPending}
+        >
+          {isPending ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Sparkles className="w-3.5 h-3.5" />
+          )}
+          {t('copilot.createRemixBtn') || 'Remix erstellen'}
+        </Button>
+        <Button
+          size="sm"
+          className="bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 font-semibold rounded-2xl h-11 px-3.5 flex items-center justify-center gap-1.5 border-none shadow-none active:scale-95 transition-all text-xs cursor-pointer"
+          onPress={() => {
+            hapticHeavy();
+            onDiscardAll();
+          }}
+          isDisabled={isPending}
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+          {t('copilot.changesDiscardAll')}
+        </Button>
+      </div>
     </div>
   );
 };

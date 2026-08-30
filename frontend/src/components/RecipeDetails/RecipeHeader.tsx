@@ -293,7 +293,7 @@ export default function RecipeHeader({
         )}
 
         {/* User's private remixes carousel for this recipe (only on top-level original recipes) */}
-        {!recipe.parentRecipeId && (
+        {recipe.id && !recipe.parentRecipeId && (
           <RecipeRemixList
             parentRecipeId={recipe.id}
             onNavigateToRecipe={onNavigateToRecipe}

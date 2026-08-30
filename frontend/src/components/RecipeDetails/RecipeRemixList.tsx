@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Sparkles, ChevronRight, Clock } from 'lucide-react';
 import { apiUrl } from '../../api';
 import { useAuth } from '../../context/AuthContext';
@@ -76,7 +76,9 @@ export default function RecipeRemixList({
               type="button"
               onClick={() => {
                 hapticLight();
-                onNavigateToRecipe?.(remix.id);
+                if (remix.id) {
+                  onNavigateToRecipe?.(remix.id);
+                }
               }}
               className="w-56 shrink-0 p-2.5 rounded-2xl bg-purple-500/10 dark:bg-purple-500/15 hover:bg-purple-500/20 active:scale-[0.98] transition-all flex items-center gap-2.5 text-left border-none cursor-pointer outline-none shadow-xs"
             >
