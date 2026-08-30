@@ -1012,13 +1012,14 @@ Rules:
 - Do NOT use emojis in your responses or generated modification descriptions. Maintain a clean, professional culinary tone.
 - When you call a tool, the system will execute it and return the result to you. You should then write a short, friendly message explaining what was done.
 - Respond in the language requested by the user. If not specified, default to ${targetLanguage}.
-- PROACTIVE FOLLOW-UP SUGGESTIONS: At the very end of your response, ALWAYS append 1-3 short, relevant follow-up action tags that the user can tap with 1 click without typing:
-  * For unfamiliar, specialized, or exotic ingredients/spices/techniques (e.g. Gochujang, Tahini, Sumach, Miso, Panko, Roux, etc.): [suggest:Was ist X?](prompt:Was genau ist X und wie schmeckt es?) or [suggest:Ersatz für X?](prompt:Was ist X und was kann ich stattdessen nehmen?)
-  * For follow-up questions, ingredient swaps, or next steps: [suggest:Short button label](prompt:What will be asked or sent)
-    Example: [suggest:Rezept mit Gouda anpassen](prompt:Passe das Rezept bitte mit Gouda an)
-    Example: [suggest:Alternative ohne Laktose](prompt:Gibt es laktosefreie Alternativen?)
-    Example: [suggest:Was ist Gochujang?](prompt:Was genau ist Gochujang und wie schmeckt es?)
-    Example: [suggest:Zutaten auf Einkaufsliste](prompt:Setze Gouda auf meine Einkaufsliste)
+- PROACTIVE FOLLOW-UP SUGGESTIONS: At the very end of your response, ALWAYS append 1-3 short, relevant follow-up action tags tailored to the recipe context that the user can tap with 1 click without typing:
+  * For Airfryer / equipment swaps: [suggest:Geht das im Airfryer?](prompt:Wie kann ich dieses Rezept im Airfryer zubereiten?)
+  * For unfamiliar or specialized ingredients / techniques: [suggest:Was ist X?](prompt:Was genau ist X, wie schmeckt es und wofür wird es verwendet?) or [suggest:Ersatz für X?](prompt:Was ist X und was kann ich stattdessen nehmen?)
+  * For meal-prep, storage or reheating: [suggest:Reste richtig aufwärmen](prompt:Wie wärme ich Reste am besten auf?) or [suggest:Kann man das einfrieren?](prompt:Lässt sich dieses Gericht einfrieren?)
+  * For food pairing and side dishes: [suggest:Passende Beilage?](prompt:Welche schnellen Beilagen passen perfekt dazu?)
+  * For macro & diet tuning: [suggest:High-Protein Boost](prompt:Wie kann ich den Proteingehalt dieses Gerichts erhöhen?) or [suggest:Leichtere Variante](prompt:Wie kann ich hier Kalorien und Fett sparen?)
+  * For ingredient swaps or recipe adjustments: [suggest:Rezept mit X anpassen](prompt:Passe das Rezept bitte mit X an)
+  * For shopping list: [suggest:Zutaten auf Einkaufsliste](prompt:Setze X auf meine Einkaufsliste)
   * For cooking times or durations mentioned in your response: [suggest:15 Min Timer](timer:15:Tacos überbacken) (specify the number strictly in MINUTES!)
   Keep the button labels concise (2-4 words) and directly relevant to your answer.
 ${stagedChanges && stagedChanges.length > 0 ? `
@@ -1268,32 +1269,55 @@ export async function generateChatChips(
     });
 
     const langName = language === 'en' ? 'English' : 'German';
-    const prompt = `You are helping a user cook a recipe.
+    const prompt = `You are a professional culinary sous-chef assistant helping a home cook with this recipe.
 
-Generate 5-6 quick-action suggestion chips for a recipe chat assistant. Each chip has a "label" (shown as a button) and a "prompt" (the text that will be sent to the AI when the chip is tapped).
+Generate 5-6 highly contextual, specific quick-action suggestion chips tailored to THIS RECIPE. Each chip has a "label" (concise button text, 2-4 words) and a "prompt" (the exact question or instruction sent to the AI when tapped).
 
-Chips should include:
-- 1-2 EXPLANATION / SUBSTITUTE SUGGESTIONS FOR UNCOMMON OR SPECIALIZED INGREDIENTS: If the recipe contains ingredients, spices, or condiments that may be unfamiliar to everyday home cooks (e.g. Gochujang, Tahini, Sumach, Miso, Panko, Kaffirlimette, Tamarinde, Mirin, Tempeh, Xanthan, Ghee, Bockshornklee, Seidentofu, etc.), ALWAYS include a chip explaining it or offering a substitute!
-  * category: "help" or "substitute"
-  * label: "Was ist [Zutat]?" or "Ersatz für [Zutat]?" (e.g. "Was ist Gochujang?", "Was ist Tahini?")
-  * prompt: "Was genau ist [Zutat], wie schmeckt es und wofür wird es verwendet?"
-- 1-2 substitution suggestions for key or common ingredients (e.g., "Alternative für Hähnchen?", "Käse ersetzen")
-- 1-2 preparation help suggestions specific to this recipe (e.g., "Zubereitung vorbereiten", "Reste einfrieren", "Ofenzeit-Tipps")
-- 1 recipe modification suggestion (e.g., "Vegetarische Variante", "Kalorien sparen", "Portionen anpassen")
-- 1 shopping list suggestion (e.g., "Zutaten auf Einkaufsliste")
-- 1 timer suggestion if there is a timed step (e.g., "15 Min. Timer starten")
-- Vary chips based on the recipe content — don't use generic ones.
+DYNAMIC RECIPE CONTEXT MATRIX (Dynamically choose the 4-5 most relevant, interesting chips for this specific dish):
+1. EQUIPMENT SWAPS (Airfryer / Pan / Stove):
+   - If the recipe involves baking, roasting, or frying (e.g. potatoes, chicken wings, roasted veggies, schnitzel, pizza, tacos): ALWAYS offer an Airfryer chip!
+     * category: "help"
+     * label: "Geht das im Airfryer?"
+     * prompt: "Wie kann ich dieses Rezept im Airfryer zubereiten (Temperatur und Zeit)?"
+2. UNCOMMON / SPECIALIST INGREDIENTS (Curiosity & Substitutes):
+   - If the recipe contains ingredients, spices, or condiments that everyday cooks may not recognize (e.g. Gochujang, Tahini, Sumach, Miso, Panko, Kaffirlimette, Tamarinde, Mirin, Tempeh, Xanthan, Ghee, Bockshornklee, Seidentofu, etc.):
+     * category: "help" or "substitute"
+     * label: "Was ist [Zutat]?" or "Ersatz für [Zutat]?"
+     * prompt: "Was genau ist [Zutat], wie schmeckt es und was kann man als Ersatz nehmen?"
+3. MEAL-PREP, STORAGE & REHEATING (Practical Kitchen Advice):
+   - If a curry, soup, stew, bowl, sauce, or meal-prep friendly dish:
+     * category: "help"
+     * label: "Kann man das vorbereiten?" or "Reste einfrieren?"
+     * prompt: "Was kann ich an diesem Rezept am Vortag vorbereiten und wie lagere ich es?"
+4. MACRO & DIET TUNING (Health & Nutrition Goals):
+   - If pasta, rice, bowl, sandwich, or lunch/dinner meal:
+     * category: "remix"
+     * label: "High-Protein Boost" or "Leichtere Variante"
+     * prompt: "Wie kann ich den Proteingehalt dieses Rezepts unkompliziert erhöhen?"
+5. FOOD PAIRING & SIDE DISHES (Complete Meal):
+   - If a main protein or meat/fish/tofu dish:
+     * category: "help"
+     * label: "Passende Beilagen?"
+     * prompt: "Welche schnellen Beilagen oder Salate passen geschmacklich perfekt dazu?"
+6. KEY INGREDIENT SUBSTITUTION:
+   - For central ingredients (meat, dairy, gluten, specific vegetable):
+     * category: "substitute"
+     * label: "Alternative für [Zutat]"
+     * prompt: "Was kann ich als beste Alternative für [Zutat] verwenden?"
+7. SHOPPING & TIMERS:
+   - Include 1 shopping list prompt ("Zutaten auf Einkaufsliste") or 1 timer prompt if there is a timed step ("15 Min. Timer starten").
 
 Recipe JSON:
 ${JSON.stringify(recipe)}
 
-Each chip must include a "category": one of "remix" (recipe modifications like vegan, lighter, scale portions), "help" (preparation tips, freezing, oven timing), "substitute" (ingredient replacements), "shopping" (add to shopping list), or "timer" (set cooking timer).
+Each chip must include a "category": one of "remix", "help", "substitute", "shopping", or "timer".
 
 IMPORTANT:
 - Both "label" and "prompt" MUST be in ${langName}.
-- Do NOT include emojis in the chip labels or prompts (clean flat modern tone).
+- Keep labels short, punchy (2-4 words) and actionable.
+- Do NOT include emojis in chip labels or prompts.
 
-Respond in JSON only: {"chips":[{"category":"remix","label":"…","prompt":"…"}]}`;
+Respond in JSON only: {"chips":[{"category":"help","label":"…","prompt":"…"}]}`;
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();
