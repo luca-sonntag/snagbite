@@ -1017,7 +1017,7 @@ Rules:
     Example: [suggest:Rezept mit Gouda anpassen](prompt:Passe das Rezept bitte mit Gouda an)
     Example: [suggest:Alternative ohne Laktose](prompt:Gibt es laktosefreie Alternativen?)
     Example: [suggest:Zutaten auf Einkaufsliste](prompt:Setze Gouda auf meine Einkaufsliste)
-  * For cooking times or durations mentioned in your response: [suggest:8 Min Timer](timer:480:Gouda schmelzen)
+  * For cooking times or durations mentioned in your response: [suggest:15 Min Timer](timer:15:Tacos überbacken) (specify the number strictly in MINUTES!)
   Keep the button labels concise (2-4 words) and directly relevant to your answer.
 ${stagedChanges && stagedChanges.length > 0 ? `
 Pending recipe changes:
