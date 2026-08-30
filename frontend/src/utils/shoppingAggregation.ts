@@ -20,16 +20,19 @@ export function aggregateShoppingItems(items: ShoppingListItem[]): GroupedShoppi
   for (const item of items) {
     const parent = getParentIngredient(item);
     const groupKeyName = normalizeFoodBaseKey(item);
-    const displayUnit = normalizeUnit(parent ? parent.unit || item.unit : item.unit);
+    const displayUnit = normalizeUnit(item.unit || (parent ? parent.unit : ''));
 
-    const key = `${groupKeyName.toLowerCase().trim()}|${displayUnit.toLowerCase().trim()}`;
+    // Key by universal food base key so all components and variants merge into one card
+    const key = groupKeyName.toLowerCase().trim();
     const targetMap = item.checked ? checkedMap : item.inPantryWarning ? inPantryMap : toBuyMap;
 
     const currentSubName = item.modifier ? `${item.name} (${item.modifier})` : item.name;
     const existing = targetMap.get(key);
 
     if (existing) {
-      existing.amount += item.amount;
+      if (existing.unit.toLowerCase().trim() === displayUnit.toLowerCase().trim()) {
+        existing.amount += item.amount;
+      }
       if (!existing.itemIds.includes(item.id)) {
         existing.itemIds.push(item.id);
       }
@@ -41,7 +44,8 @@ export function aggregateShoppingItems(items: ShoppingListItem[]): GroupedShoppi
         !existing.subItems &&
         (existing.modifier !== item.modifier ||
           existing.name !== item.name ||
-          existing.baseName !== item.baseName)
+          existing.baseName !== item.baseName ||
+          existing.unit.toLowerCase().trim() !== displayUnit.toLowerCase().trim())
       ) {
         const firstSubName = existing.modifier ? `${existing.name} (${existing.modifier})` : existing.name;
         const firstItemSource = existing.sources[0];
@@ -51,7 +55,7 @@ export function aggregateShoppingItems(items: ShoppingListItem[]): GroupedShoppi
             rawName: existing.name,
             baseName: existing.baseName || existing.name,
             modifier: existing.modifier,
-            amount: existing.amount - item.amount,
+            amount: existing.amount,
             unit: existing.unit,
             recipeTitle: firstItemSource?.recipeTitle || '',
           },
@@ -63,6 +67,7 @@ export function aggregateShoppingItems(items: ShoppingListItem[]): GroupedShoppi
         const sub = existing.subItems.find(
           (s) =>
             s.name.toLowerCase() === currentSubName.toLowerCase() &&
+            s.unit.toLowerCase().trim() === item.unit.toLowerCase().trim() &&
             s.recipeTitle === item.recipeTitle
         );
         if (sub) {

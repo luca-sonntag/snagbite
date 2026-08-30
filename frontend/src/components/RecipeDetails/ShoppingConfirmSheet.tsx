@@ -122,16 +122,14 @@ export default function ShoppingConfirmSheet({
     mergedGroups.forEach(({ groupName, items }) => {
       items.forEach((item) => {
         if (selectedIds[item.id]) {
-          const allIngs = [item.primaryIngredient, ...item.childIngredients];
-          allIngs.forEach((ing) => {
-            const baseAmount = ing.amount || 0;
-            const scaledAmount = baseAmount * scaleFactor;
-            itemsToAdd.push({
-              ...ing,
-              amount: scaledAmount,
-              unit: ing.unit || '',
-              category: groupName || ing.category,
-            });
+          const ing = item.primaryIngredient;
+          const baseAmount = ing.amount || 0;
+          const scaledAmount = baseAmount * scaleFactor;
+          itemsToAdd.push({
+            ...ing,
+            amount: scaledAmount,
+            unit: ing.unit || '',
+            category: groupName || ing.category,
           });
         }
       });
