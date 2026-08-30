@@ -89,12 +89,13 @@ Karten werden **ohne Rand** (`border-none`) und mit einem **minimalen, weichen S
 * **Primary Nav Controls:** Große haptische Buttons (`h-13 rounded-2xl font-bold`).
 
 ### 4.2 KI Rezept Copilot (`RecipeCopilot`)
-* **Header & Footer:** Trennlinien (`border-b`, `border-t`) komplett entfernt für einen offenen Chat-Fluss.
+* **Container:** Immersives Full-Screen Glassmorphism-Overlay (`fixed inset-0 z-[100] backdrop-blur-2xl bg-black/25 dark:bg-black/55`).
+* **Header & Footer:** Schwebende Glass-Bars ohne abgrenzende Ränder (`border-none`).
 * **Nachrichten-Bubbles:**
-  * **KI (Bot):** Rahmenschlanke weiße/dunkelgraue Bubbles (`bg-white dark:bg-gray-800 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] rounded-2xl rounded-tl-xs`).
-  * **User:** Flache Smaragdgrüne Bubbles (`bg-emerald-600 text-white rounded-2xl rounded-tr-xs shadow-none`).
-* **Remix- & Transaktionskarten:** Soft Emerald Cards (`bg-emerald-500/10 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] rounded-2xl`).
-* **Eingabeleiste & Quick Chips:** Flaches Pill-Input `bg-gray-100 dark:bg-gray-800 border-none rounded-2xl focus-within:ring-2 focus-within:ring-emerald-500/30`. Chips als flache Abrundungen `bg-gray-100 dark:bg-gray-800 border-none`.
+  * **KI (Bot):** Schwebende Glass-Karten (`bg-white/80 dark:bg-gray-900/80 backdrop-blur-md text-gray-900 dark:text-gray-100 rounded-3xl rounded-bl-xs shadow-[0_4px_16px_rgba(0,0,0,0.05)] border-none`).
+  * **User:** Smaragdgrüne Glass-Bubbles (`bg-emerald-600/90 text-white backdrop-blur-md rounded-3xl rounded-br-xs shadow-[0_4px_16px_rgba(16,185,129,0.25)] border-none`).
+* **Remix- & Transaktionskarten:** Schwebende Glass-Karten (`bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.08)] border-none`).
+* **Eingabeleiste & Quick Chips:** Schwebendes Glass-Dock (`bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.06)]`). Quick-Chips als flache Glass-Pills (`bg-white/60 dark:bg-gray-900/60 backdrop-blur-md`).
 
 ### 4.3 Rezept-Import / Neu-Tab (`ExtractForm`)
 * **Header:** Konsistenter Seiten-Header mit Titel (*Neues Rezept*) und Subtitel (*Aus Video, Link oder Foto erstellen*).

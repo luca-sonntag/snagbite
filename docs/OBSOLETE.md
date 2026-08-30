@@ -6,6 +6,22 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-30: Blickdichter HeroUI Drawer (Bottom-Sheet) im RecipeCopilot durch immersives Glassmorphic-Overlay ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - HeroUI `<Drawer>` und `<Drawer.Dialog>` mit festem blickdichtem Hintergrund (`bg-white dark:bg-gray-900`) und grauer Chatliste (`bg-[#f9fafb] dark:bg-gray-950`).
+  - Beim Öffnen des Copilots wurde das Rezept bzw. der Kochmodus im Hintergrund komplett von einer undurchsichtigen Sheet-Fläche überlagert.
+* **Ersetzt durch:**
+  - **Immersives Full-Screen Glassmorphism-Overlay ([`RecipeCopilot/index.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/RecipeCopilot/index.tsx)):** `fixed inset-0 z-[100] backdrop-blur-2xl bg-black/25 dark:bg-black/55`.
+  - **Schwebende Glass-Komponenten:**
+    - Schwebender Glass-Header ([`CopilotHeader.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/RecipeCopilot/CopilotHeader.tsx)) mit Bot-Live-Indicator und Glass-Pill-Buttons.
+    - Schwebende transluzente Chat-Bubbles ([`CopilotChatList.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/RecipeCopilot/CopilotChatList.tsx)).
+    - Schwebendes Glass-Dock für Input & Quick-Chips ([`CopilotInputBar.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/RecipeCopilot/CopilotInputBar.tsx)).
+    - Schwebende Transaktionskarte ([`CopilotTransactionCard.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/RecipeCopilot/CopilotTransactionCard.tsx)).
+* **Betroffene Dateien:** `frontend/src/components/RecipeDetails/RecipeCopilot/index.tsx`, `frontend/src/components/RecipeDetails/RecipeCopilot/CopilotHeader.tsx`, `frontend/src/components/RecipeDetails/RecipeCopilot/CopilotChatList.tsx`, `frontend/src/components/RecipeDetails/RecipeCopilot/CopilotInputBar.tsx`, `frontend/src/components/RecipeDetails/RecipeCopilot/CopilotTransactionCard.tsx`, `frontend/src/components/RecipeDetails/RecipeCopilot/types.ts`, `docs/styleguide.md`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-08-30: Sequenzielle Extraktions-Pipeline & 16-Einzelbild-Upload durch Pipeline-Parallelisierung und Client-Canvas-Grid ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
@@ -20,6 +36,8 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 * **Betroffene Dateien:** `backend/src/queue.ts`, `backend/src/types/jobs.ts`, `backend/src/routes/extractionRoutes.ts`, `backend/src/routes/recipeRoutes.ts`, `frontend/src/utils/gridCanvas.ts`, `frontend/src/utils/videoFrames.ts`, `frontend/src/context/ExtractionJobsContext.tsx`, `frontend/src/hooks/useRecipeExtraction.ts`, `docs/architecture/scraping-and-imports.md`, `docs/architecture/ai-gemini.md`, `docs/OBSOLETE.md`.
 
 ---
+
+### 2026-08-30: Lokale Einkaufsliste & isolierte Rezepte durch Cloud-persistiertes Vorratslager & geteilte Rezepte ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
   - Reine clientseitige `localStorage` Speicherung (`recipe_shopping_list`) in `useShoppingList.ts` ohne Cloud-Sync über mehrere Geräte oder Web/App-Wechsel.
