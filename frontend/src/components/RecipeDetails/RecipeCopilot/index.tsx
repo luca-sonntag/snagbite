@@ -81,9 +81,13 @@ export const RecipeCopilot: React.FC<RecipeCopilotProps> = ({
       role="dialog"
       aria-modal="true"
       aria-label={t('copilot.title')}
-      className="fixed inset-0 z-[100] flex flex-col justify-between overflow-hidden backdrop-blur-2xl bg-black/25 dark:bg-black/55 animate-in fade-in duration-200"
+      onClick={onClose}
+      className="fixed inset-0 z-[100] flex flex-col justify-between overflow-hidden backdrop-blur-md bg-black/10 dark:bg-black/35 animate-in fade-in duration-200"
     >
-      <div className="w-full max-w-2xl mx-auto h-[100dvh] flex flex-col justify-between relative">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-2xl mx-auto h-[100dvh] flex flex-col justify-between relative"
+      >
         {/* Header: Clean Glass Bar */}
         <CopilotHeader
           historyLength={history.length}
@@ -129,8 +133,14 @@ export const RecipeCopilot: React.FC<RecipeCopilotProps> = ({
 
         {/* Clear/Reset confirmation dialog */}
         {confirmingClear && (
-          <div className="fixed inset-0 z-[110] flex items-center justify-center p-5 bg-black/40 backdrop-blur-md animate-in fade-in duration-150">
-            <div className="w-full max-w-xs rounded-3xl border-none p-5 shadow-[0_8px_32px_rgba(0,0,0,0.2)] bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl flex flex-col gap-4 animate-in zoom-in-95 duration-200">
+          <div
+            onClick={() => setConfirmingClear(false)}
+            className="fixed inset-0 z-[110] flex items-center justify-center p-5 bg-black/30 backdrop-blur-sm animate-in fade-in duration-150"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-xs rounded-3xl border border-white/40 dark:border-white/10 p-5 shadow-[0_8px_32px_rgba(0,0,0,0.2)] bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl flex flex-col gap-4 animate-in zoom-in-95 duration-200"
+            >
               <div className="flex gap-3 items-start">
                 <div className="p-2.5 rounded-2xl border-none flex-shrink-0 flex items-center justify-center bg-amber-500/15 text-amber-500">
                   <Trash2 className="w-5 h-5" />
