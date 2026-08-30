@@ -17,9 +17,14 @@ export function calculateWeightGrams(
   if (amount <= 0) return 0;
   const normUnit = normalizeUnit(unit);
 
-  // 1. Direct grams / milliliters
+  // 1. Direct grams / milliliters / metric volume / imperial weights
   if (normUnit === 'g' || normUnit === 'ml') return amount;
+  if (normUnit === 'cl') return amount * 10;
+  if (normUnit === 'dl') return amount * 100;
   if (normUnit === 'kg' || normUnit === 'l') return amount * 1000;
+  if (normUnit === 'oz') return amount * 28.35;
+  if (normUnit === 'fl_oz') return amount * 29.57;
+  if (normUnit === 'lb') return amount * 453.6;
 
   // 2. High-precision Gemini gramsPerUnit (when available > 0)
   if (gramsPerUnit !== undefined && gramsPerUnit !== null && gramsPerUnit > 0) {
@@ -41,8 +46,14 @@ export function calculateWeightGrams(
     cup: 200,
     clove: 3,
     pinch: 0.5,
+    dash: 1,
     slice: 25,
     piece: 80,
+    leaf: 2,
+    sprig: 2,
+    stalk: 40,
+    bulb: 150,
+    head: 350,
     pack: 250,
     can: 400,
     jar: 350,

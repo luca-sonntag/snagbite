@@ -31,6 +31,8 @@ export function normalizeUnit(unit: string): string {
   if (['g', 'gramm', 'grams', 'gram', 'gr', 'g.'].includes(u)) return 'g';
   if (['kg', 'kilogramm', 'kilograms', 'kilo'].includes(u)) return 'kg';
   if (['ml', 'milliliter', 'milliliters'].includes(u)) return 'ml';
+  if (['cl', 'centiliter', 'centilitre', 'cl.'].includes(u)) return 'cl';
+  if (['dl', 'deziliter', 'deciliter', 'decilitre', 'dl.'].includes(u)) return 'dl';
   if (['l', 'liter', 'liters', 'ltr'].includes(u)) return 'l';
   if (['el', 'esslöffel', 'tbsp', 'tablespoon', 'tablespoons'].includes(u)) return 'tablespoon';
   if (['tl', 'teelöffel', 'tsp', 'teaspoon', 'teaspoons'].includes(u)) return 'teaspoon';
@@ -58,9 +60,18 @@ export function normalizeUnit(unit: string): string {
   if (['becher', 'tub', 'tubs'].includes(u)) return 'cup';
   if (['tasse', 'tassen', 'cup', 'cups'].includes(u)) return 'cup';
   if (['bund', 'bunch', 'bunches'].includes(u)) return 'bunch';
-  if (['prise', 'prisen', 'pinch', 'pinches'].includes(u)) return 'pinch';
+  if (['prise', 'prisen', 'pinch', 'pinches', 'msp', 'msp.', 'messerspitze'].includes(u)) return 'pinch';
+  if (['spritzer', 'schuss', 'dash', 'splash', 'tropfen', 'drops'].includes(u)) return 'dash';
   if (['zehe', 'zehen', 'clove', 'cloves'].includes(u)) return 'clove';
   if (['handvoll', 'handful'].includes(u)) return 'handful';
+  if (['blatt', 'blätter', 'sheet', 'sheets', 'leaf', 'leaves'].includes(u)) return 'leaf';
+  if (['kopf', 'köpfe', 'head', 'heads'].includes(u)) return 'head';
+  if (['stange', 'stangen', 'stalk', 'stalks'].includes(u)) return 'stalk';
+  if (['knolle', 'knollen', 'bulb', 'bulbs'].includes(u)) return 'bulb';
+  if (['zweig', 'zweige', 'sprig', 'sprigs'].includes(u)) return 'sprig';
+  if (['oz', 'ounce', 'ounces'].includes(u)) return 'oz';
+  if (['fl oz', 'fl. oz.', 'fluid ounce', 'fluid ounces', 'floz'].includes(u)) return 'fl_oz';
+  if (['lb', 'lbs', 'pound', 'pounds', 'pfund'].includes(u)) return 'lb';
   return 'piece';
 }
 
