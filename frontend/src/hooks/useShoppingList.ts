@@ -82,6 +82,8 @@ export function useShoppingList() {
       notes: ing.notes,
       category: ing.category,
       canonicalId: ing.canonicalId,
+      typicalPackageAmount: ing.typicalPackageAmount,
+      typicalPackageUnit: ing.typicalPackageUnit,
     }));
 
     const token = await getAccessToken();

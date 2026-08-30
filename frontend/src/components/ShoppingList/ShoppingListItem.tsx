@@ -5,6 +5,7 @@ import { useI18n } from '../../context/I18nContext';
 import { getCategoryTheme } from '../../i18n';
 import IngredientIcon from '../IngredientIcon';
 import { hapticLight, hapticHeavy } from '../../utils/haptics';
+import { extractExtraNote, getPackageRecommendation } from './shoppingItemUtils';
 
 interface ShoppingListItemProps {
   item: AggregatedShoppingItem;
@@ -23,7 +24,7 @@ export default function ShoppingListItem({
   isCollapsing = false,
   onClick,
   onDelete,
-  formatItemAmount
+  formatItemAmount,
 }: ShoppingListItemProps) {
   const { t } = useI18n();
   const [showSources, setShowSources] = useState(false);
@@ -32,68 +33,15 @@ export default function ShoppingListItem({
   const hasMultipleSources = sourceCount > 1;
 
   const animationClass = isCollapsing ? 'animate-item-collapse' : 'animate-item-expand';
+  const extraNote = useMemo(
+    () => extractExtraNote(item, formatItemAmount),
+    [item, formatItemAmount]
+  );
 
-  // Smart structural deduplication for sub-items and modifiers (100% language-agnostic):
-  // Uses baseName matching from ingredient taxonomy and accumulates modifier amounts cleanly.
-  const extraNote = useMemo(() => {
-    const mainBaseName = (item.baseName || item.name || '').toLowerCase().trim();
-
-    if (item.subItems && item.subItems.length > 0) {
-      const notes: string[] = [];
-      const modifierAmounts = new Map<string, { totalAmount: number; unit: string; mod: string }>();
-
-      for (const sub of item.subItems) {
-        const subRawName = (sub.rawName || sub.name || '').trim();
-        const subBaseName = (sub.baseName || subRawName).toLowerCase().trim();
-
-        // Structural check: is subItem a distinct ingredient type (e.g. Eigelb vs Ei)?
-        const isDistinctName =
-          subBaseName &&
-          subBaseName !== mainBaseName &&
-          (!item.parentIngredient || subBaseName !== item.parentIngredient.baseName.toLowerCase().trim());
-
-        const mod = sub.modifier?.trim();
-
-        if (isDistinctName) {
-          const amtStr = formatItemAmount(sub.amount, sub.unit);
-          const modStr = mod ? ` (${mod})` : '';
-          notes.push(`${amtStr ? `${amtStr} ` : ''}${subRawName}${modStr}`);
-        } else if (mod) {
-          // Accumulate amounts for identical modifiers (e.g. gerieben, Saft von)
-          const key = `${mod.toLowerCase()}|${sub.unit.toLowerCase()}`;
-          const existing = modifierAmounts.get(key);
-          if (existing) {
-            existing.totalAmount += sub.amount;
-          } else {
-            modifierAmounts.set(key, { totalAmount: sub.amount, unit: sub.unit, mod });
-          }
-        }
-      }
-
-      // Add accumulated modifier notes.
-      // If the modifier applies to ALL items, just show the modifier ("verquirlt").
-      // If it applies to a SUBSET, show the modifier with the partial amount in parentheses ("verquirlt (6 Stück)")
-      // so it's clear it's a subset annotation, not a replacement for the total count.
-      modifierAmounts.forEach(({ totalAmount, unit, mod }) => {
-        const isPartial = totalAmount < item.amount;
-        if (isPartial) {
-          const amtStr = formatItemAmount(totalAmount, unit);
-          notes.push(amtStr ? `${mod} (${amtStr})` : mod);
-        } else {
-          notes.push(mod);
-        }
-      });
-
-      const result = Array.from(new Set(notes.filter(Boolean))).join(', ');
-      if (result) return result;
-    }
-
-    if (item.modifier) {
-      return item.modifier.trim() || null;
-    }
-
-    return null;
-  }, [item, amountStr, formatItemAmount]);
+  const packageRecommendation = useMemo(
+    () => getPackageRecommendation(item.amount, item.unit, item.typicalPackageAmount, item.typicalPackageUnit),
+    [item.amount, item.unit, item.typicalPackageAmount, item.typicalPackageUnit]
+  );
 
   // Compact, dimmed row used inside the "Erledigt" drawer.
   if (isChecked) {
@@ -111,7 +59,6 @@ export default function ShoppingListItem({
             className="flex items-center gap-3 cursor-pointer flex-1 min-w-0 text-left outline-none border-none bg-transparent"
             aria-label={t('shopping.restoreItem')}
           >
-            {/* Category color indicator pill on the left */}
             <span
               className={`w-1 h-4 rounded-full ${theme.barClass} shrink-0 opacity-80`}
               title={item.category || undefined}
@@ -131,7 +78,6 @@ export default function ShoppingListItem({
             />
 
             <div className="flex-1 min-w-0 flex flex-col justify-center">
-              {/* 1. Name oben */}
               <div className="flex items-baseline flex-wrap gap-x-1.5 min-w-0 text-sm text-gray-400 dark:text-gray-500 line-through leading-snug">
                 <span className="break-words [overflow-wrap:anywhere]">{item.name}</span>
                 {extraNote && (
@@ -141,7 +87,6 @@ export default function ShoppingListItem({
                 )}
               </div>
 
-              {/* 2. Menge kleiner darunter */}
               {amountStr && (
                 <div className="text-xs text-gray-400 dark:text-gray-500 font-semibold tabular-nums line-through opacity-70 mt-0.5">
                   {amountStr}
@@ -212,18 +157,43 @@ export default function ShoppingListItem({
               )}
             </div>
 
-            {/* 2. Menge kleiner darunter */}
-            {amountStr && (
-              <div
-                className={`text-xs font-semibold tabular-nums leading-normal mt-0.5 transition-all duration-200 ${
-                  isCheckingOff
-                    ? 'text-gray-400 dark:text-gray-500 font-semibold line-through opacity-70'
-                    : 'text-emerald-600 dark:text-emerald-400'
-                }`}
-              >
-                {amountStr}
-              </div>
-            )}
+            {/* 2. Menge & Packungsgröße */}
+            <div className="flex items-baseline flex-wrap gap-x-1.5 mt-0.5">
+              {packageRecommendation ? (
+                <>
+                  <span
+                    className={`text-xs font-semibold tabular-nums leading-normal transition-all duration-200 ${
+                      isCheckingOff
+                        ? 'text-gray-400 dark:text-gray-500 font-semibold line-through opacity-70'
+                        : 'text-emerald-600 dark:text-emerald-400'
+                    }`}
+                  >
+                    {packageRecommendation}
+                  </span>
+                  {amountStr && (
+                    <span
+                      className={`text-[11px] font-medium transition-all duration-200 ${
+                        isCheckingOff
+                          ? 'text-gray-400 dark:text-gray-500 line-through opacity-60'
+                          : 'text-gray-500 dark:text-gray-400'
+                      }`}
+                    >
+                      · {t('shopping.recipeNeed', { amount: amountStr })}
+                    </span>
+                  )}
+                </>
+              ) : amountStr ? (
+                <div
+                  className={`text-xs font-semibold tabular-nums leading-normal transition-all duration-200 ${
+                    isCheckingOff
+                      ? 'text-gray-400 dark:text-gray-500 font-semibold line-through opacity-70'
+                      : 'text-emerald-600 dark:text-emerald-400'
+                  }`}
+                >
+                  {amountStr}
+                </div>
+              ) : null}
+            </div>
           </div>
         </button>
 
@@ -258,25 +228,22 @@ export default function ShoppingListItem({
         </div>
       </div>
 
-      {/* Per-recipe breakdown — only rendered for merged items and only when expanded */}
+      {/* Expandable recipe sources breakdown */}
       {hasMultipleSources && showSources && (
-        <div className="pl-[38px] pr-3 pb-2 -mt-0.5 flex flex-col gap-1 animate-item-expand">
-          {item.sources.map((src, sIdx) => (
-            <div
-              key={sIdx}
-              className="flex items-center justify-between gap-2 text-[11px] text-gray-500 dark:text-gray-400"
-            >
-              <span className="truncate">{src.recipeTitle || t('shopping.manual')}</span>
-              {src.amount > 0 && (
-                <span className="flex-shrink-0 font-medium tabular-nums opacity-80">
-                  {formatItemAmount(src.amount, src.unit)}
+        <div className="ml-10 mr-3 mb-2 pt-1 border-t border-black/5 dark:border-white/5 flex flex-col gap-1 text-[11px] text-gray-500 dark:text-gray-400 animate-fade-in">
+          {item.sources.map((source, idx) => {
+            const sAmount = formatItemAmount(source.amount, source.unit);
+            return (
+              <div key={idx} className="flex items-center justify-between py-0.5">
+                <span className="truncate max-w-[200px]">{source.recipeTitle || t('shopping.manual')}</span>
+                <span className="font-semibold tabular-nums text-gray-700 dark:text-gray-300 shrink-0 ml-2">
+                  {sAmount}
                 </span>
-              )}
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       )}
     </li>
   );
 }
-

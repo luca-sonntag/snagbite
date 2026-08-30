@@ -44,6 +44,8 @@ export interface ShoppingListItem {
   category?: string;
   canonicalId?: string | null;
   inPantryWarning?: boolean;
+  typicalPackageAmount?: number | null;
+  typicalPackageUnit?: string | null;
 }
 
 export interface CreateShoppingListItemDto {
@@ -61,6 +63,8 @@ export interface CreateShoppingListItemDto {
   category?: string;
   canonicalId?: string | null;
   inPantryWarning?: boolean;
+  typicalPackageAmount?: number | null;
+  typicalPackageUnit?: string | null;
 }
 
 export interface UpdateShoppingListItemDto {
@@ -74,6 +78,8 @@ export interface UpdateShoppingListItemDto {
   brand?: string;
   category?: string;
   inPantryWarning?: boolean;
+  typicalPackageAmount?: number | null;
+  typicalPackageUnit?: string | null;
 }
 
 export interface AggregatedShoppingItem {
@@ -88,6 +94,8 @@ export interface AggregatedShoppingItem {
   modifier?: string;
   brand?: string;
   inPantryWarning?: boolean;
+  typicalPackageAmount?: number | null;
+  typicalPackageUnit?: string | null;
   itemIds: string[];
   sources: { recipeId?: string; recipeTitle?: string; amount: number; unit: string }[];
   subItems?: {

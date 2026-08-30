@@ -39,6 +39,10 @@ export function aggregateShoppingItems(items: ShoppingListItem[]): GroupedShoppi
       if (!existing.category && item.category) {
         existing.category = item.category;
       }
+      if (!existing.typicalPackageAmount && item.typicalPackageAmount) {
+        existing.typicalPackageAmount = item.typicalPackageAmount;
+        existing.typicalPackageUnit = item.typicalPackageUnit;
+      }
 
       if (
         !existing.subItems &&
@@ -128,6 +132,8 @@ export function aggregateShoppingItems(items: ShoppingListItem[]): GroupedShoppi
         canonicalId: item.canonicalId || undefined,
         itemIds: [item.id],
         inPantryWarning: item.inPantryWarning,
+        typicalPackageAmount: item.typicalPackageAmount,
+        typicalPackageUnit: item.typicalPackageUnit,
         sources: [
           {
             recipeId: item.recipeId,
