@@ -5,6 +5,7 @@ import { useI18n } from '../../context/I18nContext';
 import { uiTranslations } from '../../i18n';
 import { useToast } from '../../context/ToastContext';
 import { useAdOverlay } from '../../context/OverlayStackContext';
+import { hapticLight, hapticMedium } from '../../utils/haptics';
 
 interface CustomItemFormProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export default function CustomItemForm({ isOpen, addCustomItem, onClose }: Custo
     const trimmedName = name.trim();
     if (!trimmedName) return;
 
+    hapticMedium();
     const numAmount = parseFloat(amount.replace(',', '.'));
     addCustomItem(trimmedName, isNaN(numAmount) ? 0 : numAmount, unit.trim());
 
@@ -81,8 +83,11 @@ export default function CustomItemForm({ isOpen, addCustomItem, onClose }: Custo
                   </div>
                   <button
                     type="button"
-                    onClick={onClose}
-                    className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer flex-shrink-0"
+                    onClick={() => {
+                      hapticLight();
+                      onClose();
+                    }}
+                    className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer flex-shrink-0"
                     aria-label="Close"
                   >
                     <X className="w-4 h-4" />
@@ -137,8 +142,11 @@ export default function CustomItemForm({ isOpen, addCustomItem, onClose }: Custo
                       <button
                         key={sug}
                         type="button"
-                        onClick={() => setUnit(isActive ? '' : sug)}
-                        className={`text-xs px-3 py-1.5 rounded-xl border-none transition-all cursor-pointer select-none active:scale-95 shrink-0 whitespace-nowrap font-medium ${
+                        onClick={() => {
+                          hapticLight();
+                          setUnit(isActive ? '' : sug);
+                        }}
+                        className={`text-xs min-h-[38px] px-3.5 py-1.5 rounded-xl border-none transition-all cursor-pointer select-none active:scale-95 shrink-0 whitespace-nowrap font-medium ${
                           isActive
                             ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold'
                             : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'

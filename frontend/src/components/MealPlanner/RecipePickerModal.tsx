@@ -100,9 +100,12 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                   </div>
                   <button
                     type="button"
-                    onClick={onClose}
+                    onClick={() => {
+                      hapticLight();
+                      onClose();
+                    }}
                     aria-label="Close"
-                    className="w-9 h-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 active:scale-90 transition-all flex items-center justify-center border-none cursor-pointer shrink-0"
+                    className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 active:scale-90 transition-all flex items-center justify-center border-none cursor-pointer shrink-0"
                   >
                     <X className="w-5 h-5 stroke-[2.25]" />
                   </button>
@@ -140,7 +143,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                       hapticLight();
                       setActiveFilter('all');
                     }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all duration-150 cursor-pointer border-none ${
+                    className={`min-h-[38px] px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition-all duration-150 cursor-pointer border-none ${
                       activeFilter === 'all'
                         ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/20'
                         : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
@@ -154,7 +157,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                       hapticLight();
                       setActiveFilter('quick');
                     }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all duration-150 cursor-pointer border-none ${
+                    className={`min-h-[38px] px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition-all duration-150 cursor-pointer border-none ${
                       activeFilter === 'quick'
                         ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/20'
                         : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
@@ -168,7 +171,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                       hapticLight();
                       setActiveFilter('favorites');
                     }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all duration-150 cursor-pointer border-none ${
+                    className={`min-h-[38px] px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition-all duration-150 cursor-pointer border-none ${
                       activeFilter === 'favorites'
                         ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/20'
                         : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
@@ -179,7 +182,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                   <button
                     type="button"
                     onClick={handleRandomPick}
-                    className="px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-[0.95] transition-all duration-150 cursor-pointer border-none flex items-center gap-1.5"
+                    className="min-h-[38px] px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-[0.95] transition-all duration-150 cursor-pointer border-none flex items-center gap-1.5"
                   >
                     <Sparkles className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
                     <span>{t('mealPlanner.pickerFilterRandom')}</span>
@@ -203,7 +206,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                         onClick={() => handleSelect(saved)}
                         className="w-full flex items-center gap-3 p-2.5 rounded-2xl hover:bg-emerald-50/70 dark:hover:bg-emerald-950/30 text-left active:scale-[0.98] transition-all duration-150 group border-none cursor-pointer bg-transparent"
                       >
-                        <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 ring-1 ring-black/[0.06] dark:ring-white/[0.08]">
+                        <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 ring-1 ring-black/[0.06] dark:ring-white/[0.08]">
                           <CachedImage
                             src={saved.recipe?.imageUrl}
                             alt={saved.recipe?.title || 'Recipe'}

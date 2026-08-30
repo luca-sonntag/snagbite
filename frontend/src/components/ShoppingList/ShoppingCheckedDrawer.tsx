@@ -3,6 +3,7 @@ import { Check, ChevronDown } from 'lucide-react';
 import type { AggregatedShoppingItem } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import ShoppingListItem from './ShoppingListItem';
+import { hapticLight } from '../../utils/haptics';
 
 interface ShoppingCheckedDrawerProps {
   items: AggregatedShoppingItem[];
@@ -34,9 +35,12 @@ export default function ShoppingCheckedDrawer({
     <div className="rounded-2xl md:rounded-3xl bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none overflow-hidden transition-all">
       <button
         type="button"
-        onClick={() => setIsExpanded((prev) => !prev)}
+        onClick={() => {
+          hapticLight();
+          setIsExpanded((prev) => !prev);
+        }}
         aria-expanded={isExpanded}
-        className="flex items-center justify-between gap-2.5 w-full px-4 py-3 text-left select-none hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors cursor-pointer outline-none"
+        className="flex items-center justify-between gap-2.5 w-full px-4 py-3 text-left select-none hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors cursor-pointer outline-none border-none bg-transparent min-h-[48px]"
       >
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <span className="w-6 h-6 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center flex-shrink-0">

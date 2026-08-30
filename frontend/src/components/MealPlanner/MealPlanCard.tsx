@@ -4,6 +4,7 @@ import type { MealPlanCardProps } from './types';
 import CachedImage from '../CachedImage';
 import { MealPlanCardActions } from './MealPlanCardActions';
 import { getTotalTime } from '../../hooks/useSavedCatalog';
+import { hapticLight } from '../../utils/haptics';
 
 export const MealPlanCard: React.FC<MealPlanCardProps> = ({
   entry,
@@ -20,7 +21,10 @@ export const MealPlanCard: React.FC<MealPlanCardProps> = ({
 
   return (
     <div
-      onClick={() => onSelectRecipe(entry.recipeId)}
+      onClick={() => {
+        hapticLight();
+        onSelectRecipe(entry.recipeId);
+      }}
       className={`group relative flex items-center gap-3 p-3 rounded-2xl md:rounded-3xl border-none transition-all duration-200 cursor-pointer select-none active:scale-[0.99] bg-white dark:bg-gray-900/95 shadow-xs ring-1 ring-black/[0.04] dark:ring-white/[0.06] ${
         entry.isCooked
           ? 'opacity-80'

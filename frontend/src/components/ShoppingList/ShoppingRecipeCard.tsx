@@ -2,6 +2,7 @@ import { X, Check } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import CachedImage from '../CachedImage';
+import { hapticLight, hapticHeavy } from '../../utils/haptics';
 
 interface ShoppingRecipeCardProps {
   recipeId: string;
@@ -32,17 +33,21 @@ export default function ShoppingRecipeCard({
     <div
       role="button"
       tabIndex={0}
-      onClick={onSelect}
+      onClick={() => {
+        hapticLight();
+        onSelect();
+      }}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
+          hapticLight();
           onSelect();
         }
       }}
       className="w-[8.75rem] shrink-0 flex flex-col gap-1.5 text-left active:scale-[0.97] transition-transform cursor-pointer group select-none outline-none"
     >
       {/* Cover Image Container */}
-      <div className="relative w-full aspect-[16/10] rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border border-black/5 dark:border-white/5">
+      <div className="relative w-full aspect-[16/10] rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none">
         <CachedImage
           src={job?.recipe?.imageUrl}
           emoji={job?.recipe?.emoji}
@@ -62,10 +67,11 @@ export default function ShoppingRecipeCard({
           type="button"
           onClick={(e) => {
             e.stopPropagation();
+            hapticHeavy();
             onRemove();
           }}
           aria-label={t('shopping.removeRecipeConfirmTitle')}
-          className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/45 hover:bg-red-600 active:scale-90 text-white/90 hover:text-white flex items-center justify-center backdrop-blur-md transition-all opacity-80 hover:opacity-100 z-10 cursor-pointer shadow-sm"
+          className="absolute top-1.5 right-1.5 w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-black/45 hover:bg-red-600 active:scale-90 text-white/90 hover:text-white flex items-center justify-center backdrop-blur-md transition-all opacity-80 hover:opacity-100 z-10 cursor-pointer shadow-sm border-none"
         >
           <X className="w-3.5 h-3.5 stroke-[2.5]" />
         </button>

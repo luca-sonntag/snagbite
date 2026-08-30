@@ -4,6 +4,7 @@ import type { AggregatedShoppingItem } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { getCategoryTheme } from '../../i18n';
 import IngredientIcon from '../IngredientIcon';
+import { hapticLight, hapticHeavy } from '../../utils/haptics';
 
 interface ShoppingListItemProps {
   item: AggregatedShoppingItem;
@@ -103,8 +104,11 @@ export default function ShoppingListItem({
         <div className="flex items-center justify-between gap-2 py-2 px-2 min-h-[44px]">
           <button
             type="button"
-            onClick={onClick}
-            className="flex items-center gap-3 cursor-pointer flex-1 min-w-0 text-left outline-none"
+            onClick={() => {
+              hapticLight();
+              onClick();
+            }}
+            className="flex items-center gap-3 cursor-pointer flex-1 min-w-0 text-left outline-none border-none bg-transparent"
             aria-label={t('shopping.restoreItem')}
           >
             {/* Category color indicator pill on the left */}
@@ -147,8 +151,11 @@ export default function ShoppingListItem({
           </button>
           <button
             type="button"
-            onClick={onDelete}
-            className="w-7 h-7 flex items-center justify-center text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer flex-shrink-0"
+            onClick={() => {
+              hapticHeavy();
+              onDelete();
+            }}
+            className="w-9 h-9 min-w-[36px] min-h-[36px] flex items-center justify-center text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer flex-shrink-0 border-none"
             aria-label={t('shopping.deleteItem')}
           >
             <Trash2 className="w-4 h-4" />
@@ -164,8 +171,11 @@ export default function ShoppingListItem({
       <div className="flex items-center justify-between gap-2 py-2 px-2 min-h-[44px]">
         <button
           type="button"
-          onClick={onClick}
-          className="flex items-center gap-3 cursor-pointer flex-1 min-w-0 text-left outline-none"
+          onClick={() => {
+            hapticLight();
+            onClick();
+          }}
+          className="flex items-center gap-3 cursor-pointer flex-1 min-w-0 text-left outline-none border-none bg-transparent"
           aria-label={item.name}
         >
           {isCheckingOff ? (
@@ -173,7 +183,7 @@ export default function ShoppingListItem({
               <Check className="w-3.5 h-3.5 stroke-[2.5]" />
             </span>
           ) : (
-            <span className="w-5 h-5 rounded-md border-2 border-black/15 dark:border-white/20 group-hover:border-emerald-500/60 flex items-center justify-center flex-shrink-0 transition-colors" />
+            <span className="w-5 h-5 rounded-md bg-black/5 dark:bg-white/10 group-hover:bg-emerald-500/20 border-none flex items-center justify-center flex-shrink-0 transition-colors" />
           )}
 
           <IngredientIcon
@@ -223,9 +233,10 @@ export default function ShoppingListItem({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
+                hapticLight();
                 setShowSources((s) => !s);
               }}
-              className="inline-flex items-center gap-1 pl-2 pr-1.5 h-6 rounded-full text-[10px] font-semibold text-gray-500 dark:text-gray-400 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all cursor-pointer"
+              className="inline-flex items-center gap-1 pl-2 pr-1.5 h-6 rounded-full text-[10px] font-semibold text-gray-500 dark:text-gray-400 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all cursor-pointer border-none"
               aria-label={t('shopping.recipeCount', { count: sourceCount })}
               aria-expanded={showSources}
             >
@@ -235,8 +246,11 @@ export default function ShoppingListItem({
           )}
           <button
             type="button"
-            onClick={onDelete}
-            className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-500 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer flex-shrink-0"
+            onClick={() => {
+              hapticHeavy();
+              onDelete();
+            }}
+            className="w-9 h-9 min-w-[36px] min-h-[36px] flex items-center justify-center text-gray-400 hover:text-red-500 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer flex-shrink-0 border-none"
             aria-label={t('shopping.deleteItem')}
           >
             <Trash2 className="w-4 h-4" />
