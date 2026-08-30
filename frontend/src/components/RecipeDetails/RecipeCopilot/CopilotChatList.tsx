@@ -35,6 +35,21 @@ export function parseSuggestions(rawText: string): { cleanText: string; suggesti
   return { cleanText, suggestions };
 }
 
+function renderFormattedText(text: string) {
+  if (!text) return null;
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return (
+        <strong key={i} className="font-bold text-gray-950 dark:text-white">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+}
+
 export const CopilotChatList: React.FC<CopilotChatListProps> = ({
   history,
   isPending,
@@ -83,13 +98,13 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
 
             <div className="flex flex-col gap-2 min-w-0">
               <div
-                className={`p-3.5 sm:p-4 text-[14px] leading-relaxed ${
+                className={`p-3.5 sm:p-4 text-[14px] leading-relaxed whitespace-pre-line ${
                   isAI
                     ? 'bg-white/85 dark:bg-gray-900/85 backdrop-blur-xl text-gray-800 dark:text-gray-100 rounded-3xl rounded-tl-sm shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-white/50 dark:border-white/10'
                     : 'bg-emerald-600 text-white rounded-3xl rounded-tr-sm shadow-[0_4px_20px_rgba(16,185,129,0.25)] font-normal'
                 }`}
               >
-                {cleanText}
+                {isAI ? renderFormattedText(cleanText) : cleanText}
               </div>
 
               {/* Proactive Follow-up Quick Action Pills */}
