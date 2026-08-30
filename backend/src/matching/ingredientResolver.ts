@@ -46,6 +46,9 @@ export interface ResolverResult {
   productCode: string | null;
   /** Model's own estimate per 100 g, only meaningful when productCode is null. */
   estimatedNutrients: EstimatedNutrients | null;
+  typicalPackageAmount?: number | null;
+  typicalPackageUnit?: string | null;
+  shelfLifeDays?: number | null;
   confidence: number | null;
   reasoning: string | null;
   model: string;

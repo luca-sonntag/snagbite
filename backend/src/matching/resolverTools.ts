@@ -85,6 +85,18 @@ export const RESOLVER_TOOLS: Tool[] = [
               type: FunctionDeclarationSchemaType.NUMBER,
               description: 'Only if product_code is empty: fat (g) / 100g.',
             },
+            typical_package_amount: {
+              type: FunctionDeclarationSchemaType.NUMBER,
+              description: 'Standard retail package size (e.g. 500 for 500g pasta, 1000 for 1L milk, 250 for butter, 6 for eggs, 400 for can).',
+            },
+            typical_package_unit: {
+              type: FunctionDeclarationSchemaType.STRING,
+              description: 'Unit of standard retail package (e.g. "g", "ml", "Stück", "Dose", "Packung").',
+            },
+            shelf_life_days: {
+              type: FunctionDeclarationSchemaType.INTEGER,
+              description: 'Typical shelf life in days under proper storage (e.g. 7 for milk, 3 for fresh meat, 14 for eggs, 180 for dry goods).',
+            },
           },
           required: ['product_code', 'confidence'],
         },
@@ -179,6 +191,10 @@ export function readSubmission(
   const confidence = typeof args.confidence === 'number' ? args.confidence : null;
   const reasoning = args.reasoning ? String(args.reasoning) : null;
 
+  const typicalPackageAmount = typeof args.typical_package_amount === 'number' ? args.typical_package_amount : null;
+  const typicalPackageUnit = typeof args.typical_package_unit === 'string' ? args.typical_package_unit : null;
+  const shelfLifeDays = typeof args.shelf_life_days === 'number' ? Math.round(args.shelf_life_days) : null;
+
   if (!rawCode) {
     const estimate: EstimatedNutrients = {
       calories: Number(args.estimated_calories) || 0,
@@ -189,6 +205,9 @@ export function readSubmission(
     return {
       productCode: null,
       estimatedNutrients: estimate.calories > 0 ? estimate : null,
+      typicalPackageAmount,
+      typicalPackageUnit,
+      shelfLifeDays,
       confidence,
       reasoning,
       model,
@@ -205,6 +224,9 @@ export function readSubmission(
   return {
     productCode: resolvedCode,
     estimatedNutrients: null,
+    typicalPackageAmount,
+    typicalPackageUnit,
+    shelfLifeDays,
     confidence,
     reasoning,
     model,

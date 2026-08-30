@@ -161,6 +161,18 @@ const recipeSchema = {
                   type: FunctionDeclarationSchemaType.BOOLEAN,
                   description: 'True if this is a standard, widely available commercial grocery product sold as a standalone item in supermarkets (e.g. "Frischkäse", "Butter", "Edamame", "Hähnchenbrust", "Haferflocken", "Tomatenmark", "Paprikapulver", "Gouda"). Set to false if this is a custom homemade mixture, multi-ingredient marinade, compound sauce, specialty blend, or one-off creative preparation (e.g. "secret sauce", "homemade herb butter", "onion bacon topping", "sweet chili dip", "secret exotic fantasy sauce").',
                 },
+                typicalPackageAmount: {
+                  type: FunctionDeclarationSchemaType.NUMBER,
+                  description: 'Standard retail package size sold in supermarkets (e.g. 500 for 500g pasta/rice, 1000 for 1L milk/juice, 250 for 250g butter/quark, 6 for 6 eggs, 400 for canned goods, 1 for fresh cucumber/bell pepper). Leave empty/null if unsure.',
+                },
+                typicalPackageUnit: {
+                  type: FunctionDeclarationSchemaType.STRING,
+                  description: 'The unit of measurement for standard retail package size (e.g. "g", "ml", "Stück", "Dose", "Packung", "Bund").',
+                },
+                shelfLifeDays: {
+                  type: FunctionDeclarationSchemaType.INTEGER,
+                  description: 'Estimated average shelf life in days when stored properly (e.g. 7 for fresh milk/cream, 3 for raw meat/poultry, 14 for eggs, 10 for yogurt/cheese, 7 for fresh vegetables, 180 for dry pasta/rice/canned goods, 365 for spices/oil/sugar/flour).',
+                },
               },
               required: ['name', 'baseName', 'synonyms', 'isGenericGrocery', 'amount', 'unit', 'gramsPerUnit', 'calories', 'protein', 'carbs', 'fat'],
             },
