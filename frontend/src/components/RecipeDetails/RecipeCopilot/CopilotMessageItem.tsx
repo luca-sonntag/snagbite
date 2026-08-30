@@ -63,6 +63,7 @@ export const CopilotMessageItem: React.FC<CopilotMessageItemProps> = ({
   const { t } = useI18n();
   const { addTimer } = useTimerManager();
   const toast = useToast();
+  const [clickedSuggestions, setClickedSuggestions] = React.useState<Set<number>>(new Set());
 
   const isAI = msg.role === 'model';
   const { cleanText, suggestions } = isAI ? parseSuggestions(msg.text) : { cleanText: msg.text, suggestions: [] };
@@ -95,37 +96,46 @@ export const CopilotMessageItem: React.FC<CopilotMessageItemProps> = ({
         {/* Proactive Follow-up Quick Action Pills: Only on latest AI message */}
         {isAI && isLatest && suggestions.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-0.5">
-            {suggestions.map((sug, sIdx) => (
-              <button
-                key={sIdx}
-                type="button"
-                disabled={isPending}
-                onClick={() => {
-                  hapticLight();
-                  if (sug.type === 'timer') {
-                    const [valStr, ...lblParts] = sug.payload.split(':');
-                    const num = parseFloat(valStr);
-                    const label = lblParts.join(':') || 'Timer';
-                    if (!isNaN(num) && num > 0) {
-                      const totalSeconds = num <= 60 ? Math.round(num * 60) : Math.round(num);
-                      addTimer(totalSeconds, label, recipeId);
-                      const displayMins = Math.round(totalSeconds / 60);
-                      toast.info(`Timer gestartet: ${label} (${displayMins} Min)`);
+            {suggestions.map((sug, sIdx) => {
+              const isUsed = clickedSuggestions.has(sIdx);
+              return (
+                <button
+                  key={sIdx}
+                  type="button"
+                  disabled={isPending || isUsed}
+                  onClick={() => {
+                    if (isUsed || isPending) return;
+                    setClickedSuggestions((prev) => new Set(prev).add(sIdx));
+                    hapticLight();
+                    if (sug.type === 'timer') {
+                      const [valStr, ...lblParts] = sug.payload.split(':');
+                      const num = parseFloat(valStr);
+                      const label = lblParts.join(':') || 'Timer';
+                      if (!isNaN(num) && num > 0) {
+                        const totalSeconds = num <= 60 ? Math.round(num * 60) : Math.round(num);
+                        addTimer(totalSeconds, label, recipeId);
+                        const displayMins = Math.round(totalSeconds / 60);
+                        toast.info(`Timer gestartet: ${label} (${displayMins} Min)`);
+                      }
+                    } else {
+                      onSend(sug.payload);
                     }
-                  } else {
-                    onSend(sug.payload);
-                  }
-                }}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-white dark:bg-gray-800 text-xs font-semibold text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-700 shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:bg-emerald-500/15 hover:text-emerald-700 dark:hover:text-emerald-300 active:scale-95 transition-all cursor-pointer disabled:opacity-50 min-h-[38px]"
-              >
-                {sug.type === 'timer' ? (
-                  <Timer className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-                ) : (
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                )}
-                <span>{sug.label}</span>
-              </button>
-            ))}
+                  }}
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-semibold min-h-[38px] transition-all ${
+                    isUsed
+                      ? 'opacity-40 cursor-not-allowed pointer-events-none bg-gray-100/70 dark:bg-gray-800/40 text-gray-400 dark:text-gray-500 border border-dashed border-gray-200 dark:border-gray-700 shadow-none'
+                      : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-700 shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:bg-emerald-500/15 hover:text-emerald-700 dark:hover:text-emerald-300 active:scale-95 cursor-pointer disabled:opacity-50'
+                  }`}
+                >
+                  {sug.type === 'timer' ? (
+                    <Timer className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                  ) : (
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  )}
+                  <span>{sug.label}</span>
+                </button>
+              );
+            })}
           </div>
         )}
 
