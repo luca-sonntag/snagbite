@@ -5,3 +5,5 @@ export * from './gamification.js';
 export * from './social.js';
 export * from './admin.js';
 export * from './mealPlans.js';
+export * from './pantry.js';
+export * from './shoppingList.js';

@@ -498,3 +498,87 @@ AS $$
   SET hit_count = hit_count + 1
   WHERE mapping_key = ANY(keys);
 $$;
+
+-- --- pantry & shopping list migration ---
+
+ALTER TABLE public.ingredient_mappings
+  ADD COLUMN IF NOT EXISTS typical_package_amount numeric DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS typical_package_unit text DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS shelf_life_days integer DEFAULT NULL;
+
+CREATE TABLE IF NOT EXISTS public.pantry_items (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  name text NOT NULL,
+  base_name text,
+  mapping_key text,
+  category text,
+  amount numeric NOT NULL DEFAULT 0,
+  unit text NOT NULL,
+  canonical_id text,
+  notes text,
+  expires_at date,
+  added_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS pantry_items_user_expires_idx
+  ON public.pantry_items (user_id, expires_at);
+CREATE INDEX IF NOT EXISTS pantry_items_user_key_idx
+  ON public.pantry_items (user_id, mapping_key);
+CREATE INDEX IF NOT EXISTS pantry_items_user_basename_idx
+  ON public.pantry_items (user_id, base_name);
+
+ALTER TABLE public.pantry_items ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'pantry_items' AND policyname = 'Users manage own pantry items'
+  ) THEN
+    CREATE POLICY "Users manage own pantry items"
+      ON public.pantry_items FOR ALL
+      USING (auth.uid() = user_id)
+      WITH CHECK (auth.uid() = user_id);
+  END IF;
+END $$;
+
+CREATE TABLE IF NOT EXISTS public.shopping_list (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  name text NOT NULL,
+  base_name text,
+  parent_ingredient jsonb,
+  modifier text,
+  brand text,
+  amount numeric NOT NULL DEFAULT 0,
+  unit text NOT NULL,
+  recipe_id uuid REFERENCES public.recipes(id) ON DELETE SET NULL,
+  recipe_title text,
+  checked boolean NOT NULL DEFAULT false,
+  category text,
+  canonical_id text,
+  notes text,
+  in_pantry_warning boolean NOT NULL DEFAULT false,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS shopping_list_user_checked_idx
+  ON public.shopping_list (user_id, checked, created_at DESC);
+CREATE INDEX IF NOT EXISTS shopping_list_user_recipe_idx
+  ON public.shopping_list (user_id, recipe_id);
+
+ALTER TABLE public.shopping_list ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'shopping_list' AND policyname = 'Users manage own shopping list'
+  ) THEN
+    CREATE POLICY "Users manage own shopping list"
+      ON public.shopping_list FOR ALL
+      USING (auth.uid() = user_id)
+      WITH CHECK (auth.uid() = user_id);
+  END IF;
+END $$;

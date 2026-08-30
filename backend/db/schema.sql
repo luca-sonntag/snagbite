@@ -275,7 +275,7 @@ begin
   -- populate_record over a NULL base does not apply column defaults, so the
   -- NOT NULL columns are backstopped here rather than relying on the caller.
   v_recipe.title       := coalesce(nullif(v_recipe.title, ''), 'Rezept');
-  v_recipe.visibility  := coalesce(v_recipe.visibility, 'private');
+  v_recipe.visibility  := coalesce(v_recipe.visibility, case when v_kind = 'url' then 'public' else 'private' end);
   v_recipe.is_recipe   := coalesce(v_recipe.is_recipe, true);
   v_recipe.tags        := coalesce(v_recipe.tags, '{}');
   v_recipe.equipment   := coalesce(v_recipe.equipment, '{}');
