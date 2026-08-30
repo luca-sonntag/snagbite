@@ -2,8 +2,8 @@ import React from 'react';
 import { Camera, ImagePlus, X } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { MAX_IMPORT_PHOTOS } from '../../hooks/useRecipeExtraction';
+import { hapticLight, hapticHeavy } from '../../utils/haptics';
 import type { PhotoExtractGridProps } from './types';
-
 
 export const PhotoExtractGrid: React.FC<PhotoExtractGridProps> = ({
   photos,
@@ -59,11 +59,14 @@ export const PhotoExtractGrid: React.FC<PhotoExtractGridProps> = ({
               </span>
               <button
                 type="button"
-                onClick={() => onRemovePhoto(index)}
-                className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-black/65 text-white flex items-center justify-center backdrop-blur-sm active:scale-90 transition-transform cursor-pointer border-none"
+                onClick={() => {
+                  hapticHeavy();
+                  onRemovePhoto(index);
+                }}
+                className="absolute top-1.5 right-1.5 w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-black/65 text-white flex items-center justify-center backdrop-blur-sm active:scale-90 transition-transform cursor-pointer border-none"
                 aria-label={t('form.photo.remove')}
               >
-                <X className="w-3 h-3" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
           ))}
@@ -73,18 +76,24 @@ export const PhotoExtractGrid: React.FC<PhotoExtractGridProps> = ({
       <div className="flex items-center gap-2">
         <button
           type="button"
-          onClick={() => onOpenPicker(cameraInputRef)}
+          onClick={() => {
+            hapticLight();
+            onOpenPicker(cameraInputRef);
+          }}
           disabled={photosFull}
-          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-bold bg-gray-100 dark:bg-gray-800 border-none text-gray-900 dark:text-white disabled:opacity-40 hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95 transition-all cursor-pointer shadow-none"
+          className="flex-1 flex items-center justify-center gap-2 min-h-[48px] py-3 rounded-2xl text-xs font-bold bg-gray-100 dark:bg-gray-800 border-none text-gray-900 dark:text-white disabled:opacity-40 hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95 transition-all cursor-pointer shadow-none"
         >
           <Camera className="w-4 h-4" />
           <span>{t('form.photo.takePhoto')}</span>
         </button>
         <button
           type="button"
-          onClick={() => onOpenPicker(galleryInputRef)}
+          onClick={() => {
+            hapticLight();
+            onOpenPicker(galleryInputRef);
+          }}
           disabled={photosFull}
-          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-bold bg-gray-100 dark:bg-gray-800 border-none text-gray-900 dark:text-white disabled:opacity-40 hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95 transition-all cursor-pointer shadow-none"
+          className="flex-1 flex items-center justify-center gap-2 min-h-[48px] py-3 rounded-2xl text-xs font-bold bg-gray-100 dark:bg-gray-800 border-none text-gray-900 dark:text-white disabled:opacity-40 hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95 transition-all cursor-pointer shadow-none"
         >
           <ImagePlus className="w-4 h-4" />
           <span>{t('form.photo.fromGallery')}</span>

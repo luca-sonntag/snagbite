@@ -4,6 +4,7 @@ import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
 import { enablePushNotifications, disablePushNotifications } from '../push';
 import { isNative } from '../native';
+import { hapticLight } from '../utils/haptics';
 
 // The five opt-in groups. Ids match the backend NotificationCategory union.
 const CATEGORY_IDS = ['seasonal', 'reminders', 'timing', 'taste', 'motivation'] as const;
@@ -12,17 +13,20 @@ function Toggle({ on, onClick, disabled, label }: { on: boolean; onClick: () => 
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={() => {
+        hapticLight();
+        onClick();
+      }}
       disabled={disabled}
       aria-label={label}
       aria-pressed={on}
-      className={`relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none border-2 shrink-0 disabled:opacity-50 disabled:pointer-events-none ${
-        on ? 'bg-emerald-500 border-emerald-500' : 'bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600'
+      className={`relative w-12 h-7 rounded-full transition-colors duration-200 focus:outline-none border-none shrink-0 disabled:opacity-50 disabled:pointer-events-none cursor-pointer flex items-center p-0.5 ${
+        on ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-700'
       }`}
     >
       <span
-        className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-          on ? 'translate-x-6' : 'translate-x-0'
+        className={`w-6 h-6 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+          on ? 'translate-x-5' : 'translate-x-0'
         }`}
       />
     </button>

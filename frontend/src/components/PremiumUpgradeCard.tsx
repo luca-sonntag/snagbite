@@ -1,6 +1,7 @@
 import { Crown } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
+import { hapticMedium } from '../utils/haptics';
 
 interface PremiumUpgradeCardProps {
   onUpgradeClick: () => void;
@@ -16,7 +17,10 @@ export default function PremiumUpgradeCard({ onUpgradeClick, className = '' }: P
 
   return (
     <div
-      onClick={onUpgradeClick}
+      onClick={() => {
+        hapticMedium();
+        onUpgradeClick();
+      }}
       className={`cursor-pointer p-4 tint-premium rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex items-center justify-between gap-3 hover:brightness-[0.98] dark:hover:brightness-110 active:scale-[0.99] transition-all relative overflow-hidden group ${className}`}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">

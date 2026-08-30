@@ -7,6 +7,7 @@ import { useGamification } from '../../context/GamificationContext';
 import { progressPct, xpToNextLevel } from '../../utils/levels';
 import { ALL_BADGE_KEYS, badgeEmoji, BADGE_XP } from '../../utils/badges';
 import { tint, TINT } from '../../utils/tint';
+import { hapticLight } from '../../utils/haptics';
 import type { CookPhotoItem } from '../../types';
 
 function getCulinaryRankKey(level: number): string {
@@ -149,6 +150,7 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
             accent="text-amber-500 bg-amber-500/10 dark:bg-amber-500/20"
             tintColor={TINT.amber}
             onPress={() => {
+              hapticLight();
               setShowCoinsNotice(true);
               setTimeout(() => setShowCoinsNotice(false), 3000);
             }}
@@ -170,8 +172,6 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
         />
       </div>
 
-
-
       {/* 2. "Deine Koch-Galerie" (Food Photo Feed) */}
       <div className="rounded-3xl bg-white dark:bg-gray-900 p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] space-y-4">
         <div className="flex items-center justify-between">
@@ -192,6 +192,7 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
               <Button
                 key={item.id}
                 onPress={() => {
+                  hapticLight();
                   const targetId = item.recipeId || item.jobId;
                   if (targetId) onSelectRecipe?.(targetId);
                 }}
@@ -242,7 +243,10 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
             return (
               <Button
                 key={key}
-                onPress={() => setSelectedBadgeKey(key)}
+                onPress={() => {
+                  hapticLight();
+                  setSelectedBadgeKey(key);
+                }}
                 className={`flex flex-col items-center justify-center h-[120px] w-full p-2 gap-1 text-center transition-all cursor-pointer outline-none active:scale-95 rounded-2xl border-none ${isEarned
                   ? 'bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-200'
                   : 'bg-gray-100 dark:bg-white/5 opacity-65 hover:opacity-85 text-gray-400'
@@ -357,10 +361,13 @@ function BadgeDetailModal({
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6 transition-opacity animate-in fade-in duration-200">
       <div className="relative w-full max-w-sm rounded-3xl bg-white dark:bg-gray-900 p-6 text-gray-900 dark:text-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 text-center space-y-4">
         <Button
-          onPress={onClose}
+          onPress={() => {
+            hapticLight();
+            onClose();
+          }}
           isIconOnly
           aria-label={t('dialog.cancelDefault') || 'Schließen'}
-          className="absolute top-4 right-4 h-9 w-9 p-0 text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors border-none min-w-0"
+          className="absolute top-4 right-4 h-10 w-10 min-w-[44px] min-h-[44px] p-0 text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors border-none"
         >
           <X className="w-5 h-5" />
         </Button>

@@ -6,6 +6,7 @@ import { PageHeader } from '../PageHeader';
 import ProgressOverview from './ProgressOverview';
 import LeaderboardView from '../Social/LeaderboardView';
 import FriendsView from '../Social/FriendsView';
+import { hapticSelection } from '../../utils/haptics';
 
 import { useSocial } from '../../context/SocialContext';
 
@@ -65,8 +66,11 @@ export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSel
           return (
             <Button
               key={tab.key}
-              onPress={() => setSection(tab.key)}
-              className={`relative flex-1 min-w-[76px] rounded-xl py-2 h-9 text-xs sm:text-sm font-semibold border-none transition-all duration-200 cursor-pointer ${
+              onPress={() => {
+                hapticSelection();
+                setSection(tab.key);
+              }}
+              className={`relative flex-1 min-w-[76px] rounded-xl py-2 min-h-[44px] text-xs sm:text-sm font-semibold border-none transition-all duration-200 cursor-pointer ${
                 isActive
                   ? 'bg-white text-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] dark:bg-gray-800 dark:text-white'
                   : 'bg-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
