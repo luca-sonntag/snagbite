@@ -1037,9 +1037,14 @@ When the user requests a further modification, call modify_current_recipe with o
     });
 
     const response = result.response;
-    rawOutput = response.text();
     const functionCalls = response.functionCalls ? response.functionCalls() : undefined;
     const call = functionCalls?.[0];
+
+    try {
+      rawOutput = response.text();
+    } catch {
+      rawOutput = call ? `[ToolCall: ${call.name}]` : '';
+    }
 
     if (call) {
       console.log(`[chatAboutRecipe] Gemini triggered tool call: ${call.name}`, call.args);
