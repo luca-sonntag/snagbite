@@ -58,6 +58,34 @@ export async function createPantryItem(
     expiresAt = d.toISOString().split('T')[0];
   }
 
+  // Check if an existing pantry item with matching canonical key already exists
+  const existingItems = await listPantryItems(userId);
+  const newKeys = new Set(buildMappingKeys(dto.baseName, dto.name));
+  const existing = existingItems.find((p) => {
+    if (dto.canonicalId && p.canonicalId && dto.canonicalId === p.canonicalId) return true;
+    const pKeys = buildMappingKeys(p.baseName, p.name);
+    return pKeys.some((k) => newKeys.has(k));
+  });
+
+  if (existing) {
+    // If existing item is empty (amount <= 0), replenish it directly.
+    // If existing item has the same unit, add the new amount to stock.
+    let updatedAmount = dto.amount || 0;
+    if (existing.amount > 0 && existing.unit.toLowerCase().trim() === dto.unit.toLowerCase().trim()) {
+      updatedAmount = existing.amount + (dto.amount || 0);
+    }
+
+    return updatePantryItem(existing.id, userId, {
+      name: dto.name,
+      baseName: dto.baseName ?? existing.baseName,
+      category: dto.category ?? existing.category,
+      amount: updatedAmount,
+      unit: dto.unit,
+      canonicalId: dto.canonicalId ?? existing.canonicalId ?? undefined,
+      expiresAt: expiresAt ?? existing.expiresAt,
+    });
+  }
+
   const { data, error } = await getClient()
     .from('pantry_items')
     .insert({
@@ -90,9 +118,11 @@ export async function updatePantryItem(
 
   if (dto.name !== undefined) updates.name = dto.name;
   if (dto.baseName !== undefined) updates.base_name = dto.baseName;
+  if (dto.mappingKey !== undefined) updates.mapping_key = dto.mappingKey;
   if (dto.category !== undefined) updates.category = dto.category;
   if (dto.amount !== undefined) updates.amount = Math.max(0, dto.amount);
   if (dto.unit !== undefined) updates.unit = dto.unit;
+  if (dto.canonicalId !== undefined) updates.canonical_id = dto.canonicalId;
   if (dto.notes !== undefined) updates.notes = dto.notes;
   if (dto.expiresAt !== undefined) updates.expires_at = dto.expiresAt;
 
@@ -114,7 +144,7 @@ export async function updatePantryItem(
   return rowToPantryItem(data as unknown as PantryItemRow);
 }
 
-export async function deletePantryItem(id: string, userId: string): Promise<void> {
+export async function deletePantryItem(id: string, userId: string): Promise<boolean> {
   const { error } = await getClient()
     .from('pantry_items')
     .delete()
@@ -122,16 +152,18 @@ export async function deletePantryItem(id: string, userId: string): Promise<void
     .eq('user_id', userId);
 
   if (error) throw wrapError('deletePantryItem', error);
+  return true;
 }
 
 /**
- * Deduct ingredients consumed by cooking a recipe from user's pantry, floored at 0.
+ * Deducts ingredients of a cooked recipe from user's pantry.
+ * Floors amounts at 0 rather than deleting items.
  */
-export async function consumePantryForRecipe(
-  userId: string,
-  recipe: Recipe
+export async function deductRecipeIngredientsFromPantry(
+  recipe: Recipe,
+  userId: string
 ): Promise<{ consumedCount: number }> {
-  if (!recipe.ingredients || recipe.ingredients.length === 0) {
+  if (!recipe.ingredients || !Array.isArray(recipe.ingredients)) {
     return { consumedCount: 0 };
   }
 
@@ -148,6 +180,7 @@ export async function consumePantryForRecipe(
       const ingKeys = new Set(buildMappingKeys(ing.baseName, ing.name, ing.synonyms));
 
       const match = pantryItems.find((p) => {
+        if (p.amount <= 0) return false;
         if (ing.canonicalId && p.canonicalId && ing.canonicalId === p.canonicalId) return true;
         const pKeys = buildMappingKeys(p.baseName, p.name);
         return pKeys.some((k) => ingKeys.has(k));

@@ -56,3 +56,25 @@ test('Pantry alias matching: singular/plural matching (Röstzwiebeln vs Röstzwi
   assert.equal(deduction, 80);
   assert.equal(pantryItem.amount - deduction, 20);
 });
+
+test('Pantry matching ignores empty 0-amount rows and targets active stock', () => {
+  const pantryItems = [
+    { id: 'old-empty-row', name: 'Röstzwiebeln', baseName: 'fried onion', amount: 0, unit: 'EL' },
+    { id: 'new-stock-row', name: 'Röstzwiebeln', baseName: 'fried onion', amount: 100, unit: 'g' },
+  ];
+
+  const recipeIng = { name: 'Röstzwiebeln', baseName: 'fried onion', synonyms: ['crispy onions'], amount: 80, unit: 'g' };
+  const ingKeys = new Set(buildMappingKeys(recipeIng.baseName, recipeIng.name, recipeIng.synonyms));
+
+  const match = pantryItems.find((p) => {
+    if (p.amount <= 0) return false;
+    const pKeys = buildMappingKeys(p.baseName, p.name);
+    return pKeys.some((k) => ingKeys.has(k));
+  });
+
+  assert.ok(match, 'Must find a match');
+  assert.equal(match.id, 'new-stock-row', 'Must match the row with stock > 0, ignoring the 0-amount row');
+  const deduction = calculatePantryDeduction(match, recipeIng);
+  assert.equal(deduction, 80);
+  assert.equal(match.amount - deduction, 20);
+});
