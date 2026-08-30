@@ -109,7 +109,7 @@ const ingredientItemSchemaProperties = {
   },
   shelfLifeDays: {
     type: FunctionDeclarationSchemaType.INTEGER,
-    description: 'Estimated average shelf life in days when stored properly (e.g. 7 for fresh milk/cream, 3 for raw meat/poultry, 14 for eggs, 10 for yogurt/cheese, 7 for fresh vegetables, 180 for dry pasta/rice/canned goods, 365 for spices/oil/sugar/flour).',
+    description: 'Estimated average shelf life in days when stored properly as standard unopened packaged retail supermarket goods (e.g. 4-5 for packaged raw minced meat/beef/poultry under modified atmosphere; 3-4 for packaged fresh fish/salmon; 14-21 for unopened dairy/yogurt/eggs/cheese; 7-10 for fresh produce/vegetables/potatoes; 180-365 for dry pantry staples, canned goods, fried onions/Röstzwiebeln, croutons, pasta, rice, oil, spices). Always assume standard unopened supermarket retail goods and never estimate 1 day for meat.',
   },
 };
 
