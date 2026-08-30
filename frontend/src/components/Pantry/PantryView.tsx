@@ -127,60 +127,43 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
         </button>
       </div>
 
-      {/* Action Bar: Category Filter Chips + Compact Add Button */}
-      <div className="flex items-center justify-between gap-2">
-        {/* Horizontal Scrolling Category Chips */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none flex-1 min-w-0">
-          <button
-            type="button"
-            onClick={() => {
-              hapticSelection();
-              setSelectedCategory('ALL');
-            }}
-            className={`text-xs px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all border-none outline-none cursor-pointer min-h-[38px] active:scale-95 ${
-              selectedCategory === 'ALL'
-                ? 'bg-emerald-600 text-white shadow-[0_2px_8px_rgba(16,185,129,0.25)]'
-                : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            Alle ({activeItems.length})
-          </button>
-          {categoryOrder.map((cat) => {
-            const count = activeItems.filter((i) => (i.category || 'OTHER').toUpperCase() === cat).length;
-            if (count === 0) return null;
-            return (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => {
-                  hapticSelection();
-                  setSelectedCategory(cat);
-                }}
-                className={`text-xs px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all border-none outline-none cursor-pointer min-h-[38px] active:scale-95 ${
-                  selectedCategory === cat
-                    ? 'bg-emerald-600 text-white shadow-[0_2px_8px_rgba(16,185,129,0.25)]'
-                    : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:text-gray-900 dark:hover:text-white'
-                }`}
-              >
-                {translateCategory(cat, language)} ({count})
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Add Item Button */}
+      {/* Category Filter Chips Bar */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-none">
         <button
           type="button"
           onClick={() => {
-            hapticLight();
-            setEditingItem(null);
-            setIsAddOpen(true);
+            hapticSelection();
+            setSelectedCategory('ALL');
           }}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all border-none outline-none shadow-[0_2px_8px_rgba(16,185,129,0.25)] active:scale-95 shrink-0 min-h-[38px] cursor-pointer"
+          className={`text-xs px-4 py-2.5 rounded-2xl font-bold whitespace-nowrap transition-all border-none outline-none cursor-pointer min-h-[40px] active:scale-95 ${
+            selectedCategory === 'ALL'
+              ? 'bg-emerald-600 text-white shadow-[0_2px_8px_rgba(16,185,129,0.25)]'
+              : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:text-gray-900 dark:hover:text-white'
+          }`}
         >
-          <Plus className="w-4 h-4" />
-          <span>{t('pantry.addItem')}</span>
+          Alle ({activeItems.length})
         </button>
+        {categoryOrder.map((cat) => {
+          const count = activeItems.filter((i) => (i.category || 'OTHER').toUpperCase() === cat).length;
+          if (count === 0) return null;
+          return (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => {
+                hapticSelection();
+                setSelectedCategory(cat);
+              }}
+              className={`text-xs px-4 py-2.5 rounded-2xl font-bold whitespace-nowrap transition-all border-none outline-none cursor-pointer min-h-[40px] active:scale-95 ${
+                selectedCategory === cat
+                  ? 'bg-emerald-600 text-white shadow-[0_2px_8px_rgba(16,185,129,0.25)]'
+                  : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              {translateCategory(cat, language)} ({count})
+            </button>
+          );
+        })}
       </div>
 
       {/* Items List */}
@@ -221,6 +204,20 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
           ))}
         </div>
       )}
+
+      {/* Floating Add Item FAB */}
+      <button
+        type="button"
+        onClick={() => {
+          hapticLight();
+          setEditingItem(null);
+          setIsAddOpen(true);
+        }}
+        aria-label={t('pantry.addItem')}
+        className="fixed right-4 bottom-[calc(6.5rem_+_var(--safe-area-inset-bottom))] z-30 w-14 h-14 rounded-full flex items-center justify-center text-white bg-emerald-600 hover:bg-emerald-500 shadow-xl shadow-emerald-500/25 active:scale-95 transition-all cursor-pointer border-none outline-none"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
 
       {/* Add / Edit Modal (Mobile Bottom Sheet) */}
       <PantryAddModal
