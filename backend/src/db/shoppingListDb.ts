@@ -1,8 +1,9 @@
-import type {
-  ShoppingListItem,
-  CreateShoppingListItemDto,
-  UpdateShoppingListItemDto,
-  ParentIngredientInfo,
+import {
+  type ShoppingListItem,
+  type CreateShoppingListItemDto,
+  type UpdateShoppingListItemDto,
+  type ParentIngredientInfo,
+  getDefaultShelfLifeDays,
 } from '@cookbook/shared';
 import { getClient, wrapError, isNoRowsError, num } from './client.js';
 import type { ShoppingListRow } from './types/shoppingList.js';
@@ -269,7 +270,7 @@ export async function removeRecipeFromShoppingList(userId: string, recipeId: str
 async function autoTransferToPantry(userId: string, item: ShoppingListRow): Promise<void> {
   let packageAmount = num(item.amount) || 1;
   let packageUnit = item.unit;
-  let shelfLifeDays: number | null = 7;
+  let shelfLifeDays = getDefaultShelfLifeDays(item.category, item.base_name || item.name);
 
   // Check ingredient mappings for typical package info
   const searchKey = (item.base_name || item.name || '').toLowerCase().trim();

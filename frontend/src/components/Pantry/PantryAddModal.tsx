@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import type { PantryItem, CreatePantryItemDto } from '../../types';
+import {
+  type PantryItem,
+  type CreatePantryItemDto,
+  getDefaultShelfLifeDays,
+} from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { categoryOrder, translateCategory } from '../../i18n';
 
@@ -45,14 +49,14 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
         const diff = Math.max(0, Math.ceil((exp.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
         setShelfLifeDays(String(diff));
       } else {
-        setShelfLifeDays('');
+        setShelfLifeDays(String(getDefaultShelfLifeDays(initialItem.category, initialItem.name)));
       }
     } else {
       setName('');
       setAmount('1');
       setUnit('Stück');
       setCategory('OTHER');
-      setShelfLifeDays('7');
+      setShelfLifeDays(String(getDefaultShelfLifeDays('OTHER')));
       setNotes('');
     }
   }, [initialItem, isOpen]);
@@ -188,7 +192,11 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
               </label>
               <select
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                onChange={(e) => {
+                  const newCat = e.target.value;
+                  setCategory(newCat);
+                  setShelfLifeDays(String(getDefaultShelfLifeDays(newCat, name)));
+                }}
                 aria-label={t('pantry.categoryPlaceholder')}
                 className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border-none text-gray-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all cursor-pointer"
               >

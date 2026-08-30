@@ -1,9 +1,10 @@
-import type {
-  PantryItem,
-  CreatePantryItemDto,
-  UpdatePantryItemDto,
-  PantrySuggestion,
-  Recipe,
+import {
+  type PantryItem,
+  type CreatePantryItemDto,
+  type UpdatePantryItemDto,
+  type PantrySuggestion,
+  type Recipe,
+  getDefaultShelfLifeDays,
 } from '@cookbook/shared';
 import { getClient, wrapError, isNoRowsError, num } from './client.js';
 import type { PantryItemRow } from './types/pantry.js';
@@ -45,9 +46,13 @@ export async function createPantryItem(
   dto: CreatePantryItemDto
 ): Promise<PantryItem> {
   let expiresAt = dto.expiresAt;
-  if (!expiresAt && typeof dto.shelfLifeDays === 'number' && dto.shelfLifeDays > 0) {
+  if (!expiresAt) {
+    const shelfDays =
+      typeof dto.shelfLifeDays === 'number' && dto.shelfLifeDays > 0
+        ? dto.shelfLifeDays
+        : getDefaultShelfLifeDays(dto.category, dto.baseName || dto.name);
     const d = new Date();
-    d.setDate(d.getDate() + dto.shelfLifeDays);
+    d.setDate(d.getDate() + shelfDays);
     expiresAt = d.toISOString().split('T')[0];
   }
 
