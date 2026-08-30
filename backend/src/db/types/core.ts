@@ -32,6 +32,7 @@ export interface RecipeRow {
   title: string;
   description: string | null;
   emoji: string | null;
+  category?: string | null;
   is_recipe: boolean;
   prep_time: number | null;
   cook_time: number | null;

@@ -36,6 +36,7 @@ create table if not exists public.recipes (
   title                  text not null,
   description            text,
   emoji                  text,
+  category               text,
   -- Gemini's "this isn't actually a recipe" verdict, kept for auditing.
   is_recipe              boolean not null default true,
   prep_time              int,                        -- minutes
@@ -81,6 +82,8 @@ create index if not exists recipes_public_idx     on public.recipes (created_at 
 create index if not exists recipes_parent_idx     on public.recipes (parent_recipe_id)
   where parent_recipe_id is not null;
 create index if not exists recipes_tags_idx       on public.recipes using gin (tags);
+create index if not exists recipes_category_idx   on public.recipes (category)
+  where category is not null;
 
 -- ── jobs: the extraction task ───────────────────────────────────────────────
 -- One row per extraction attempt. Job rows are NEVER deleted: they are the
