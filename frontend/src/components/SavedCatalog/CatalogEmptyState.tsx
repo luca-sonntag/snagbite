@@ -3,20 +3,21 @@ import { Card, Button } from '@heroui/react';
 import { Link, BookOpen, Plus, Clipboard } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { ShareStep1Mockup, ShareStep2Mockup, ShareStep3Mockup } from '../ShareMockups';
+import { hapticLight, hapticMedium } from '../../utils/haptics';
 
 const CatalogCopyLinkMockup = () => {
   const { language } = useI18n();
   return (
-    <div className="relative w-[132px] h-[104px] shrink-0 mx-auto rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-gray-900 p-2 overflow-hidden shadow-inner flex flex-col justify-center gap-2 select-none">
+    <div className="relative w-[132px] h-[104px] shrink-0 mx-auto rounded-2xl border-none bg-white dark:bg-gray-900 p-2 overflow-hidden shadow-xs flex flex-col justify-center gap-2 select-none">
       {/* Browser URL bar */}
-      <div className="rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 p-1 flex items-center justify-between gap-1 shadow-sm">
+      <div className="rounded-xl bg-black/5 dark:bg-white/5 border-none p-1 flex items-center justify-between gap-1 shadow-xs">
         <div className="flex-1 min-w-0 flex items-center gap-1 pl-0.5">
           <Link className="w-2.5 h-2.5 text-gray-400 shrink-0" />
           <span className="text-[7px] text-gray-400 truncate">instagram.com/reel/C3b...</span>
         </div>
         <div className="relative shrink-0">
           <div className="absolute inset-0 rounded-full bg-blue-500 animate-ping opacity-75 duration-1000" />
-          <div className="relative w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center border border-blue-400 shadow-md shadow-blue-500/20 text-white">
+          <div className="relative w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center border-none shadow-md shadow-blue-500/20 text-white">
             <Clipboard className="w-2.5 h-2.5" />
           </div>
         </div>
@@ -35,7 +36,7 @@ const CatalogCopyLinkMockup = () => {
 const CatalogExtractMockup = () => {
   const { t } = useI18n();
   return (
-    <div className="relative w-[132px] h-[104px] shrink-0 mx-auto rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-gray-900 p-2 overflow-hidden shadow-inner flex flex-col justify-between select-none">
+    <div className="relative w-[132px] h-[104px] shrink-0 mx-auto rounded-2xl border-none bg-white dark:bg-gray-900 p-2 overflow-hidden shadow-xs flex flex-col justify-between select-none">
       {/* App Header representation */}
       <div className="flex items-center justify-center gap-1 pt-0.5">
         <div className="relative w-3.5 h-3.5 shrink-0 rounded bg-emerald-500 flex items-center justify-center">
@@ -46,13 +47,13 @@ const CatalogExtractMockup = () => {
         <span className="text-[8px] font-extrabold text-gray-800 dark:text-gray-200 tracking-tight">Snagbite</span>
       </div>
       {/* Input Field representation */}
-      <div className="rounded-md bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 p-1 flex items-center shrink-0">
+      <div className="rounded-xl bg-black/5 dark:bg-white/5 border-none p-1 flex items-center shrink-0">
         <span className="text-[6px] text-gray-400 dark:text-gray-500 truncate flex-1">https://instagram.com/p/DYixug...</span>
       </div>
       {/* Extract Button representation */}
       <div className="relative mt-1">
         <div className="absolute inset-0 rounded-lg bg-emerald-500 animate-ping opacity-75 duration-1000" />
-        <div className="relative h-6 rounded-lg bg-emerald-600 border border-emerald-500 flex items-center justify-center gap-1 shadow-md shadow-emerald-500/20 text-white px-2">
+        <div className="relative h-6 rounded-lg bg-emerald-600 border-none flex items-center justify-center gap-1 shadow-md shadow-emerald-500/20 text-white px-2">
           <BookOpen className="w-2.5 h-2.5 text-white" />
           <span className="text-[8px] font-bold leading-none">
             {t('form.btnSubmit')}
@@ -63,17 +64,17 @@ const CatalogExtractMockup = () => {
   );
 };
 
-
 export default function CatalogEmptyState() {
   const { language, t } = useI18n();
   const [activeWorkflow, setActiveWorkflow] = useState<'share' | 'copy'>('share');
 
   const handleNavigateToExtract = () => {
+    hapticMedium();
     window.location.hash = '#/extract';
   };
 
   return (
-    <Card className="glass-panel p-6 sm:p-8 rounded-2xl border border-black/5 dark:border-white/5 flex flex-col gap-6 sm:gap-8 max-w-md mx-auto shadow-xl relative overflow-hidden">
+    <Card className="glass-panel p-6 sm:p-8 rounded-3xl border-none flex flex-col gap-6 sm:gap-8 max-w-md mx-auto shadow-[0_4px_24px_rgba(0,0,0,0.06)] relative overflow-hidden">
       {/* Top Ambient Glows */}
       <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
       <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
@@ -89,25 +90,31 @@ export default function CatalogEmptyState() {
       </div>
 
       {/* Workflow Toggle Tabs */}
-      <div className="flex bg-black/5 dark:bg-white/5 p-1 rounded-xl self-center border border-black/[0.03] dark:border-white/[0.03] shadow-inner shrink-0 z-10">
+      <div className="flex bg-black/5 dark:bg-white/5 p-1 rounded-2xl self-center border-none shadow-xs shrink-0 z-10">
         <button
           type="button"
-          onClick={() => setActiveWorkflow('share')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+          onClick={() => {
+            hapticLight();
+            setActiveWorkflow('share');
+          }}
+          className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-semibold transition-all active:scale-95 cursor-pointer border-none ${
             activeWorkflow === 'share'
-              ? 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 shadow-sm border border-black/5 dark:border-white/5'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              ? 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 shadow-sm'
+              : 'bg-transparent text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
           }`}
         >
           {language === 'de' ? 'Direkt teilen (Schnell)' : 'Direct Share (Fast)'}
         </button>
         <button
           type="button"
-          onClick={() => setActiveWorkflow('copy')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+          onClick={() => {
+            hapticLight();
+            setActiveWorkflow('copy');
+          }}
+          className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-semibold transition-all active:scale-95 cursor-pointer border-none ${
             activeWorkflow === 'copy'
-              ? 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 shadow-sm border border-black/5 dark:border-white/5'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              ? 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 shadow-sm'
+              : 'bg-transparent text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
           }`}
         >
           {language === 'de' ? 'Kopieren & Einfügen' : 'Copy & Paste'}
@@ -120,7 +127,7 @@ export default function CatalogEmptyState() {
           /* DIRECT SHARE WORKFLOW STEPS */
           <>
             {/* Step 1 */}
-            <div className="flex gap-4 p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 items-center justify-between hover:bg-black/[0.04] dark:hover:bg-white/[0.04] hover:border-black/10 dark:hover:border-white/10 transition-all duration-300 cursor-default">
+            <div className="flex gap-4 p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.04] border-none items-center justify-between shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-all duration-300 cursor-default">
               <div className="flex-1 flex flex-col gap-1">
                 <h4 className="font-semibold text-gray-800 dark:text-gray-200 text-xs">
                   {t('form.helpShareStep1Title')}
@@ -133,7 +140,7 @@ export default function CatalogEmptyState() {
             </div>
 
             {/* Step 2 */}
-            <div className="flex gap-4 p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 items-center justify-between hover:bg-black/[0.04] dark:hover:bg-white/[0.04] hover:border-black/10 dark:hover:border-white/10 transition-all duration-300 cursor-default">
+            <div className="flex gap-4 p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.04] border-none items-center justify-between shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-all duration-300 cursor-default">
               <div className="flex-1 flex flex-col gap-1">
                 <h4 className="font-semibold text-gray-800 dark:text-gray-200 text-xs">
                   {t('form.helpShareStep2Title')}
@@ -146,7 +153,7 @@ export default function CatalogEmptyState() {
             </div>
 
             {/* Step 3 */}
-            <div className="flex gap-4 p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 items-center justify-between hover:bg-black/[0.04] dark:hover:bg-white/[0.04] hover:border-black/10 dark:hover:border-white/10 transition-all duration-300 cursor-default">
+            <div className="flex gap-4 p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.04] border-none items-center justify-between shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-all duration-300 cursor-default">
               <div className="flex-1 flex flex-col gap-1">
                 <h4 className="font-semibold text-gray-800 dark:text-gray-200 text-xs">
                   {t('form.helpShareStep3Title')}
@@ -162,7 +169,7 @@ export default function CatalogEmptyState() {
           /* COPY & PASTE WORKFLOW STEPS */
           <>
             {/* Step 1 */}
-            <div className="flex gap-4 p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 items-center justify-between hover:bg-black/[0.04] dark:hover:bg-white/[0.04] hover:border-black/10 dark:hover:border-white/10 transition-all duration-300 cursor-default">
+            <div className="flex gap-4 p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.04] border-none items-center justify-between shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-all duration-300 cursor-default">
               <div className="flex-1 flex flex-col gap-1">
                 <h4 className="font-semibold text-gray-800 dark:text-gray-200 text-xs">
                   {t('catalog.emptyState.step1Title')}
@@ -175,7 +182,7 @@ export default function CatalogEmptyState() {
             </div>
 
             {/* Step 2 */}
-            <div className="flex gap-4 p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 items-center justify-between hover:bg-black/[0.04] dark:hover:bg-white/[0.04] hover:border-black/10 dark:hover:border-white/10 transition-all duration-300 cursor-default">
+            <div className="flex gap-4 p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.04] border-none items-center justify-between shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-all duration-300 cursor-default">
               <div className="flex-1 flex flex-col gap-1">
                 <h4 className="font-semibold text-gray-800 dark:text-gray-200 text-xs">
                   {t('catalog.emptyState.step2Title')}
@@ -188,7 +195,7 @@ export default function CatalogEmptyState() {
             </div>
 
             {/* Step 3 */}
-            <div className="flex gap-4 p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 items-center justify-between hover:bg-black/[0.04] dark:hover:bg-white/[0.04] hover:border-black/10 dark:hover:border-white/10 transition-all duration-300 cursor-default">
+            <div className="flex gap-4 p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.04] border-none items-center justify-between shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-all duration-300 cursor-default">
               <div className="flex-1 flex flex-col gap-1">
                 <h4 className="font-semibold text-gray-800 dark:text-gray-200 text-xs">
                   {t('catalog.emptyState.step3Title')}
@@ -207,7 +214,7 @@ export default function CatalogEmptyState() {
       <div className="flex justify-center pb-2">
         <Button
           onPress={handleNavigateToExtract}
-          className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 h-11 px-6 rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/35 transition-all flex items-center gap-2 border border-emerald-500/15 active:scale-95 duration-150"
+          className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 h-12 min-h-[48px] px-6 rounded-2xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/35 transition-all flex items-center gap-2 border-none active:scale-95 duration-150 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>{t('catalog.emptyState.ctaButton')}</span>

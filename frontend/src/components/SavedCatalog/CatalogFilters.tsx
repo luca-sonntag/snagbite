@@ -138,8 +138,11 @@ export default function CatalogFilters({
                 <Button
                   isIconOnly
                   variant="tertiary"
-                  className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all shrink-0 cursor-pointer"
-                  onPress={() => setViewMode(viewMode === 'card' ? 'compact' : 'card')}
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all shrink-0 cursor-pointer"
+                  onPress={() => {
+                    hapticLight();
+                    setViewMode(viewMode === 'card' ? 'compact' : 'card');
+                  }}
                   aria-label={t('catalog.viewToggle')}
                 >
                   {viewMode === 'card' ? <List className="w-5 h-5" /> : <LayoutGrid className="w-5 h-5" />}
@@ -148,12 +151,15 @@ export default function CatalogFilters({
               <Button
                 isIconOnly
                 variant="tertiary"
-                className={`w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl active:scale-95 transition-all shrink-0 cursor-pointer ${
+                className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl active:scale-95 transition-all shrink-0 cursor-pointer ${
                   isSelectMode
                     ? 'bg-emerald-600 border-0 text-white hover:bg-emerald-500 shadow-md shadow-emerald-600/10'
                     : 'bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5'
                 }`}
-                onPress={() => setIsSelectMode(!isSelectMode)}
+                onPress={() => {
+                  hapticLight();
+                  setIsSelectMode(!isSelectMode);
+                }}
                 aria-label={t('catalog.selectModeToggle')}
               >
                 <CheckSquare className="w-5 h-5" />
@@ -166,8 +172,11 @@ export default function CatalogFilters({
           <Button
             isIconOnly
             variant="tertiary"
-            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all shrink-0"
-            onPress={onBack}
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all shrink-0 cursor-pointer"
+            onPress={() => {
+              hapticLight();
+              onBack();
+            }}
             aria-label={t('catalog.backToCookbook')}
           >
             <ArrowLeft className="w-5 h-5" />
@@ -184,8 +193,11 @@ export default function CatalogFilters({
             <Button
               isIconOnly
               variant="tertiary"
-              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all shrink-0"
-              onPress={() => setViewMode(viewMode === 'card' ? 'compact' : 'card')}
+              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all shrink-0 cursor-pointer"
+              onPress={() => {
+                hapticLight();
+                setViewMode(viewMode === 'card' ? 'compact' : 'card');
+              }}
               aria-label={t('catalog.viewToggle')}
             >
               {viewMode === 'card' ? <List className="w-5 h-5" /> : <LayoutGrid className="w-5 h-5" />}
@@ -195,12 +207,15 @@ export default function CatalogFilters({
           <Button
             isIconOnly
             variant="tertiary"
-            className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl active:scale-95 transition-all shrink-0 ${
+            className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl active:scale-95 transition-all shrink-0 cursor-pointer ${
               isSelectMode
                 ? 'bg-emerald-600 border-0 text-white hover:bg-emerald-500 shadow-md shadow-emerald-600/10'
                 : 'bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5'
             }`}
-            onPress={() => setIsSelectMode(!isSelectMode)}
+            onPress={() => {
+              hapticLight();
+              setIsSelectMode(!isSelectMode);
+            }}
             aria-label={t('catalog.selectModeToggle')}
           >
             <CheckSquare className="w-5 h-5" />
@@ -223,8 +238,11 @@ export default function CatalogFilters({
           {searchQuery && (
             <button
               type="button"
-              onClick={() => setSearchQuery('')}
-              className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white text-xl font-bold w-9 h-9 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
+              onClick={() => {
+                hapticLight();
+                setSearchQuery('');
+              }}
+              className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white text-xl font-bold w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer border-none"
               aria-label={t('catalog.clearSearch')}
             >
               ×
@@ -234,8 +252,11 @@ export default function CatalogFilters({
 
         <button
           type="button"
-          onClick={onOpenFilters}
-          className={`relative h-11 min-w-[44px] px-3 rounded-xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex items-center gap-1.5 text-xs font-semibold active:scale-95 transition-all shrink-0 cursor-pointer ${
+          onClick={() => {
+            hapticLight();
+            onOpenFilters();
+          }}
+          className={`relative h-11 min-w-[44px] px-3.5 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex items-center gap-1.5 text-xs font-semibold active:scale-95 transition-all shrink-0 cursor-pointer ${
             hasActiveChips
               ? 'bg-emerald-600 text-white shadow-none'
               : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'

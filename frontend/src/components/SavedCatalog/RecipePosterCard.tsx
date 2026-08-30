@@ -3,6 +3,7 @@ import { Clock, Check, Star } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { detectPlatform, PlatformIcon, PLATFORM_ICON_COLOR } from './PlatformIcon';
+import { hapticLight } from '../../utils/haptics';
 
 interface RecipePosterCardProps {
   job: SavedRecipe;
@@ -41,9 +42,12 @@ export default function RecipePosterCard({
 
   return (
     <div
-      className={`rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] ${isShelf ? 'w-[9.5rem] shrink-0' : 'w-full'
+      className={`rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none ${isShelf ? 'w-[9.5rem] shrink-0' : 'w-full'
         } ${isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''}`}
-      onClick={onClick}
+      onClick={(e) => {
+        hapticLight();
+        onClick(e);
+      }}
       {...(bindLongPress ?? {})}
     >
       {/* Cover */}
@@ -58,9 +62,9 @@ export default function RecipePosterCard({
         {/* Select-mode checkbox */}
         {isSelectMode && (
           <div
-            className={`absolute top-2 left-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all border ${isSelected
-              ? 'bg-emerald-500 border-emerald-500 text-white shadow-md'
-              : 'bg-black/40 backdrop-blur-sm border-white/30 text-white'
+            className={`absolute top-2 left-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all border-none ${isSelected
+              ? 'bg-emerald-500 text-white shadow-md'
+              : 'bg-black/40 backdrop-blur-sm text-white shadow-xs'
               }`}
           >
             {isSelected && <Check className="w-4 h-4 text-white stroke-[3px]" />}

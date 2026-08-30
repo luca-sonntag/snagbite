@@ -2,6 +2,7 @@ import React from 'react';
 import { Clock, Check, Tag, Star } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
+import { hapticLight } from '../../utils/haptics';
 
 interface RecipeListItemProps {
   job: SavedRecipe;
@@ -34,21 +35,24 @@ export default function RecipeListItem({
 
   return (
     <div
-      className={`rounded-2xl cursor-pointer active:scale-[0.99] transition-all p-2.5 flex flex-row items-center gap-3 overflow-hidden select-none bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] ${isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
+      className={`rounded-2xl cursor-pointer active:scale-[0.99] transition-all p-2.5 flex flex-row items-center gap-3 overflow-hidden select-none bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none ${isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
         }`}
-      onClick={onClick}
+      onClick={(e) => {
+        hapticLight();
+        onClick(e);
+      }}
       {...bindLongPress}
     >
       {/* Select mode checkbox */}
       {isSelectMode && (
-        <div className={`w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-all ${isSelected ? 'bg-emerald-500 border-emerald-500' : 'border-black/20 dark:border-white/20'
+        <div className={`w-6 h-6 rounded-xl border-none flex items-center justify-center flex-shrink-0 transition-all ${isSelected ? 'bg-emerald-500 text-white shadow-xs' : 'bg-black/5 dark:bg-white/10'
           }`}>
-          {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+          {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3px]" />}
         </div>
       )}
 
-      {/* Thumbnail */}
-      <div className="w-14 h-14 rounded-xl overflow-hidden bg-black/5 dark:bg-white/5 shrink-0">
+      {/* Thumbnail (Mobile UX rule: 72x72px min) */}
+      <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shrink-0 border-none">
         <CachedImage
           src={r.imageUrl}
           emoji={r.emoji}
