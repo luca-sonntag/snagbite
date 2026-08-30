@@ -4,6 +4,8 @@ import {
   isKnownErrorCode,
   parseSerializedError,
 } from './errorCodes';
+import { type RecipeCategory, RECIPE_CATEGORIES } from './types';
+export { RECIPE_CATEGORIES };
 
 export const IngredientCategory = {
   VEGETABLES: 'VEGETABLES',
@@ -63,6 +65,61 @@ export const categoryTranslations: Record<SupportedLanguage, Record<IngredientCa
     [IngredientCategory.OTHER]: 'Other',
   }
 };
+
+export const recipeCategoryTranslations: Record<SupportedLanguage, Record<RecipeCategory, string>> = {
+  de: {
+    MAIN_COURSE: 'Hauptspeise',
+    DESSERT: 'Nachspeise',
+    BREAKFAST: 'Frühstück',
+    SNACK: 'Snack',
+    SIDE_DISH: 'Beilage',
+    BEVERAGE: 'Getränk',
+    SOUP: 'Suppe',
+    SALAD: 'Salat',
+    BAKING: 'Backen',
+    OTHER: 'Sonstiges',
+  },
+  en: {
+    MAIN_COURSE: 'Main Course',
+    DESSERT: 'Dessert',
+    BREAKFAST: 'Breakfast',
+    SNACK: 'Snack',
+    SIDE_DISH: 'Side Dish',
+    BEVERAGE: 'Beverage',
+    SOUP: 'Soup',
+    SALAD: 'Salad',
+    BAKING: 'Baking',
+    OTHER: 'Other',
+  },
+};
+
+export const recipeCategoryEmojis: Record<RecipeCategory, string> = {
+  MAIN_COURSE: '🍲',
+  DESSERT: '🍨',
+  BREAKFAST: '🥞',
+  SNACK: '🍿',
+  SIDE_DISH: '🍟',
+  BEVERAGE: '🍹',
+  SOUP: '🥣',
+  SALAD: '🥗',
+  BAKING: '🥖',
+  OTHER: '🍽️',
+};
+
+export function getRecipeCategoryLabel(
+  category: RecipeCategory | string | undefined | null,
+  language: SupportedLanguage = 'de'
+): string {
+  if (!category) return '';
+  const upper = category.toUpperCase() as RecipeCategory;
+  return recipeCategoryTranslations[language]?.[upper] ?? recipeCategoryTranslations['de'][upper] ?? category;
+}
+
+export function getRecipeCategoryEmoji(category: RecipeCategory | string | undefined | null): string {
+  if (!category) return '🍽️';
+  const upper = category.toUpperCase() as RecipeCategory;
+  return recipeCategoryEmojis[upper] ?? '🍽️';
+}
 
 // Map legacy and translated category names to canonical enum keys
 export const legacyCategoryMap: Record<string, IngredientCategory> = {
@@ -1093,6 +1150,7 @@ export const uiTranslations = {
         time: 'Zubereitungszeit',
       },
       collectionsTitle: 'Sammlungen',
+      categoriesTitle: 'Kategorien',
       addCollection: 'Neue Sammlung',
       editCollection: 'Sammlung bearbeiten',
       deleteCollection: 'Sammlung löschen',
@@ -2202,6 +2260,7 @@ export const uiTranslations = {
         time: 'Cooking time',
       },
       collectionsTitle: 'Collections',
+      categoriesTitle: 'Categories',
       addCollection: 'New Collection',
       editCollection: 'Edit Collection',
       deleteCollection: 'Delete Collection',
