@@ -978,17 +978,13 @@ export async function chatAboutRecipe(
     const systemInstruction = `You are "Recipe Copilot", a friendly, helpful, and professional sous-chef in the kitchen.
 You are helping the user with the following recipe:
 
-Title: ${recipe.title}
-Description: ${recipe.description}
+Title: ${recipe.title}${recipe.description ? `\nDescription: ${recipe.description}` : ''}
 Servings: ${recipe.servings}
 Ingredients:
-${recipe.ingredients.map(g => `- ${g.name}:\n${g.items.map(i => `  * ${i.amount} ${i.unit} ${i.name} ${i.modifier ? `(${i.modifier})` : ''}`).join('\n')}`).join('\n')}
+${recipe.ingredients.map(g => `- ${g.name}:\n${g.items.map(i => `  * ${i.amount ? i.amount + ' ' : ''}${i.unit ? i.unit + ' ' : ''}${i.name}${i.modifier ? ` (${i.modifier})` : ''}`).join('\n')}`).join('\n')}
 
 Instructions:
-${recipe.instructions.map(step => `${step.step}. ${step.description}`).join('\n')}
-
-Tips:
-${recipe.tips?.map(t => `- ${t}`).join('\n') || 'None'}
+${recipe.instructions.map(step => `${step.step}. ${step.description}`).join('\n')}${recipe.tips && recipe.tips.length > 0 ? `\n\nTips:\n${recipe.tips.map(t => `- ${t}`).join('\n')}` : ''}
 
 Tools at your disposal:
 1. modify_current_recipe: Call this when the user wants to adapt, scale, remix, or otherwise modify the recipe details (e.g. make it vegan, gluten-free, low-carb, scale to a different number of servings, swap or add ingredients). Do not try to write modified recipe JSON or instructions in your text reply; always call this tool to perform the modification.
@@ -1029,9 +1025,10 @@ ${stagedChanges.map((c, i) => `${i + 1}. ${c}`).join('\n')}
 When the user requests a further modification, call modify_current_recipe with only the NEW change(s) in the "changes" array (do not repeat the already-collected ones). Build on top of the collected changes, avoid duplicates, and briefly point out if a new request conflicts with an already-collected one.
 ` : ''}`;
 
-    // Map history & new message to Gemini Content format
+    // Map recent history (capped at last 8 turns to keep token consumption and latency low) & new message to Gemini Content format
     const contents: any[] = [];
-    for (const msg of history) {
+    const recentHistory = history.slice(-8);
+    for (const msg of recentHistory) {
       contents.push({
         role: msg.role === 'user' ? 'user' : 'model',
         parts: [{ text: msg.text }]
@@ -1307,8 +1304,19 @@ DYNAMIC RECIPE CONTEXT MATRIX (Dynamically choose the 4-5 most relevant, interes
 7. SHOPPING & TIMERS:
    - Include 1 shopping list prompt ("Zutaten auf Einkaufsliste") or 1 timer prompt if there is a timed step ("15 Min. Timer starten").
 
-Recipe JSON:
-${JSON.stringify(recipe)}
+Recipe Context:
+${JSON.stringify({
+  title: recipe.title,
+  description: recipe.description || undefined,
+  servings: recipe.servings,
+  ingredients: recipe.ingredients?.map(g => ({
+    category: g.name,
+    items: g.items?.map(i => `${i.amount ? i.amount + ' ' : ''}${i.unit ? i.unit + ' ' : ''}${i.name}${i.modifier ? ` (${i.modifier})` : ''}`.trim())
+  })),
+  instructions: recipe.instructions?.map(s => `${s.step}. ${s.description}`),
+  prepTime: recipe.prepTime,
+  cookTime: recipe.cookTime,
+})}
 
 Each chip must include a "category": one of "remix", "help", "substitute", "shopping", or "timer".
 

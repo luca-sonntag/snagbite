@@ -10,7 +10,8 @@ import {
 } from 'lucide-react';
 import { useI18n } from '../../../context/I18nContext';
 import { hapticLight } from '../../../utils/haptics';
-import CopilotMessageItem, { parseSuggestions } from './CopilotMessageItem';
+import CopilotMessageItem from './CopilotMessageItem';
+import { parseSuggestions } from './suggestionUtils';
 import type { CopilotChatListProps } from './types';
 
 export { parseSuggestions };

@@ -48,7 +48,14 @@ export function useRecipeCopilot({
   const [isPending, setIsPending] = useState(false);
   const [pendingAction] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [chips, setChips] = useState<Chip[]>([]);
+  const [chips, setChips] = useState<Chip[]>(() => {
+    try {
+      const cached = localStorage.getItem(chipsStorageKey(recipeId, language));
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
   const [chipsLoading, setChipsLoading] = useState(false);
   const [confirmingClear, setConfirmingClear] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<PendingChange[]>(() => {
@@ -97,7 +104,6 @@ export function useRecipeCopilot({
 
   const loadChips = useCallback(
     async (force = false) => {
-      setChipsLoading(true);
       try {
         if (!force) {
           const cached = localStorage.getItem(chipsKey);
@@ -106,6 +112,7 @@ export function useRecipeCopilot({
             return;
           }
         }
+        setChipsLoading(true);
         const token = await getAccessToken();
         const res = await fetch(apiUrl(`/api/recipes/${recipe.id}/chat/chips?lang=${language}`), {
           headers: { Authorization: `Bearer ${token}` },
