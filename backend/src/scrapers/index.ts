@@ -38,22 +38,7 @@ export interface Scraper {
   scrape(url: string, jobId?: string): Promise<ScrapingResult>;
 }
 
-/**
- * Normalize a provider-reported `duration` field to whole seconds.
- *
- * Providers are inconsistent: yt-dlp reports seconds, while some RapidAPI/Apify
- * responses report milliseconds. Because we only ingest short-form videos, any value
- * that would mean a >2h clip is treated as milliseconds and scaled down — this cleanly
- * separates the two clusters (short-form seconds ~5–600 vs ms ~5000–600000) without a
- * per-provider unit table. Returns `undefined` for missing/invalid input so the
- * length-cap check simply passes.
- */
-export function normalizeDurationToSeconds(raw: unknown): number | undefined {
-  if (typeof raw !== 'number' || !Number.isFinite(raw) || raw <= 0) return undefined;
-  const TWO_HOURS_SECONDS = 2 * 60 * 60;
-  const seconds = raw > TWO_HOURS_SECONDS ? raw / 1000 : raw;
-  return Math.round(seconds);
-}
+export { normalizeDurationToSeconds } from './providers/types.js';
 
 export function getScraperForUrl(url: string): Scraper {
   const urlObj = new URL(url);
