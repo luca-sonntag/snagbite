@@ -6,6 +6,7 @@ import { useCollections } from '../../hooks/useCollections';
 import { useToast } from '../../context/ToastContext';
 import type { SavedRecipe, Collection } from '../../types';
 import { useAdOverlay } from '../../context/OverlayStackContext';
+import { hapticLight, hapticMedium, hapticHeavy } from '../../utils/haptics';
 
 interface CollectionSheetProps {
   isOpen: boolean;
@@ -127,6 +128,7 @@ export default function CollectionSheet({
   };
 
   const handleCreateOpen = () => {
+    hapticLight();
     setName('');
     setSelectedEmoji('');
     setFormError(null);
@@ -134,6 +136,7 @@ export default function CollectionSheet({
   };
 
   const handleEditOpen = (col: Collection) => {
+    hapticLight();
     setEditingCollection(col);
     setName(col.name);
     setSelectedEmoji(col.emoji || '');
@@ -150,6 +153,7 @@ export default function CollectionSheet({
     if (mode === 'create') {
       const res = await createCollection(name, selectedEmoji || null);
       if (res.success) {
+        hapticMedium();
         toast.success(t('toast.collectionCreated', { name }));
         handleBackToList();
         onUpdated?.();
@@ -162,6 +166,7 @@ export default function CollectionSheet({
         emoji: selectedEmoji || null
       });
       if (res.success) {
+        hapticMedium();
         handleBackToList();
         onUpdated?.();
       } else {
@@ -172,6 +177,7 @@ export default function CollectionSheet({
 
   const handleDeleteCollection = async () => {
     if (!editingCollection) return;
+    hapticHeavy();
     const res = await deleteCollection(editingCollection.id);
     if (res.success) {
       handleBackToList();
@@ -184,12 +190,14 @@ export default function CollectionSheet({
   // Direct delete from the management overview — opens the inline confirmation
   // (rendered inside the drawer, see `pendingDelete` above).
   const handleDirectDelete = (col: Collection) => {
+    hapticLight();
     setFormError(null);
     setPendingDelete(col);
   };
 
   const handleConfirmDirectDelete = async () => {
     if (!pendingDelete) return;
+    hapticHeavy();
     setIsDeleting(true);
     const res = await deleteCollection(pendingDelete.id);
     setIsDeleting(false);
@@ -203,12 +211,14 @@ export default function CollectionSheet({
   };
 
   const handleToggleMembership = (colId: string) => {
+    hapticLight();
     setMembershipIds(prev =>
       prev.includes(colId) ? prev.filter(id => id !== colId) : [...prev, colId]
     );
   };
 
   const handleConfirmAssignment = async () => {
+    hapticMedium();
     if (job) {
       // Single-recipe mode: replace membership with the selected set.
       // Prefer the optimistic injected handler if the parent provided one.
@@ -285,8 +295,11 @@ export default function CollectionSheet({
                   {(mode === 'create' || mode === 'edit' || mode === 'manage') && (
                     <button
                       type="button"
-                      className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer"
-                      onClick={onClose}
+                      className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer"
+                      onClick={() => {
+                        hapticLight();
+                        onClose();
+                      }}
                       aria-label="Close"
                     >
                       <X className="w-4 h-4" />

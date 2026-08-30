@@ -9,6 +9,7 @@ import { buyPremium, getSubscriptionOfferings, getCachedOfferings } from '../uti
 import { useAuth } from '../context/AuthContext';
 import { LEGAL_URLS } from '../legal';
 import { useAdOverlay } from '../context/OverlayStackContext';
+import { hapticLight, hapticMedium } from '../utils/haptics';
 
 interface PremiumModalProps {
   isOpen: boolean;
@@ -89,11 +90,13 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
 
   const handleUpgrade = async () => {
     if (!selectedPackageId) return;
+    hapticMedium();
     setLoading(true);
     setErrorMsg(null);
     try {
       const purchased = await buyPremium(selectedPackageId);
       if (purchased) {
+        hapticMedium();
         setSuccess(true);
         setTimeout(() => onOpenChange(false), 1500);
       } else {
@@ -180,11 +183,14 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
               {/* Close */}
               {!loading && (
                 <button
-                  onClick={() => onOpenChange(false)}
-                  className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-black/6 hover:bg-black/10 border-none text-gray-500 hover:text-gray-800 transition-all active:scale-95 cursor-pointer z-10"
-                  aria-label={t('premium.modal.close') || 'SchlieÃŸen'}
+                  onClick={() => {
+                    hapticLight();
+                    onOpenChange(false);
+                  }}
+                  className="absolute top-4 right-4 w-10 h-10 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-black/6 hover:bg-black/10 border-none text-gray-500 hover:text-gray-800 transition-all active:scale-95 cursor-pointer z-10"
+                  aria-label={t('premium.modal.close') || 'Schließen'}
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-4 h-4" />
                 </button>
               )}
 
@@ -294,7 +300,10 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
                     <button
                       key={pkg.identifier}
                       type="button"
-                      onClick={() => setSelectedPackageId(pkg.identifier)}
+                      onClick={() => {
+                        hapticLight();
+                        setSelectedPackageId(pkg.identifier);
+                      }}
                       className={`relative pt-4 pb-3 px-3.5 rounded-2xl flex flex-col gap-0.5 border-2 transition-all active:scale-[0.97] cursor-pointer text-left w-full ${
                         isSelected
                           ? 'bg-white border-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.10)]'

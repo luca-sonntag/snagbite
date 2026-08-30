@@ -56,16 +56,14 @@ export default function RecipeInfoSection({
         </div>
 
         {/* Cook time */}
-        <div className="flex flex-col items-center gap-1 py-3.5 px-2 text-center border-l border-black/5 dark:border-white/5">
+        <div className="flex flex-col items-center gap-1 py-3.5 px-2 text-center">
           <Utensils className={iconClass} />
           <span className={statLabel}>{t('recipe.cook')}</span>
           <span className={statValue}>{formatTimeValue(cookTime)}</span>
         </div>
 
         {/* Servings */}
-        <div
-          className="flex flex-col items-center gap-1 py-3.5 px-2 text-center border-l border-black/5 dark:border-white/5"
-        >
+        <div className="flex flex-col items-center gap-1 py-3.5 px-2 text-center">
           <Users className={iconClass} />
           <span className={statLabel}>{t('recipe.serves')}</span>
           <span className={`${statValue} flex items-center gap-0.5`}>
@@ -76,7 +74,7 @@ export default function RecipeInfoSection({
 
       {/* Calorie headline + macro distribution */}
       {nutritionalValues && (
-        <div className="border-t border-black/5 dark:border-white/5">
+        <div>
           <RecipeNutrition
             variant="summary"
             nutritionalValues={nutritionalValues}

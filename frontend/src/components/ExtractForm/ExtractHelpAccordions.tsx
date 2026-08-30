@@ -2,6 +2,7 @@ import React from 'react';
 import { Accordion } from '@heroui/react';
 import { Globe, HelpCircle } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
+import { hapticLight } from '../../utils/haptics';
 import {
   InstagramIcon,
   ShareStep1Mockup,
@@ -52,7 +53,10 @@ export const ExtractHelpAccordions: React.FC = () => {
       >
         <Accordion.Item className="border-none" id="share">
           <Accordion.Heading>
-            <Accordion.Trigger className="px-5 py-4 flex items-center justify-between text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+            <Accordion.Trigger
+              onClick={() => hapticLight()}
+              className="px-5 py-4 flex items-center justify-between text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+            >
               <span className="flex items-center gap-2.5 text-sm font-bold">
                 <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                   <svg
@@ -133,7 +137,10 @@ export const ExtractHelpAccordions: React.FC = () => {
       >
         <Accordion.Item className="border-none">
           <Accordion.Heading>
-            <Accordion.Trigger className="px-5 py-4 flex items-center justify-between text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+            <Accordion.Trigger
+              onClick={() => hapticLight()}
+              className="px-5 py-4 flex items-center justify-between text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+            >
               <span className="flex items-center gap-2.5 text-sm font-bold">
                 <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                   <HelpCircle className="w-4 h-4" />

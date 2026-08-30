@@ -19,7 +19,7 @@ import { formatDateIso, addDays, getMonday } from './mealPlannerUtils';
 import { getTotalTime } from '../../hooks/useSavedCatalog';
 import CachedImage from '../CachedImage';
 import ServingsStepper from '../ServingsStepper';
-import { hapticLight, hapticSelection } from '../../utils/haptics';
+import { hapticLight, hapticMedium, hapticSelection } from '../../utils/haptics';
 
 interface AddToMealPlanSheetProps {
   isOpen: boolean;
@@ -106,6 +106,7 @@ export const AddToMealPlanSheet: React.FC<AddToMealPlanSheetProps> = ({
       });
       const data = await res.json();
       if (data.success) {
+        hapticMedium();
         window.dispatchEvent(new CustomEvent('meal-plans-updated'));
         toast.success(t('mealPlanner.addedToPlan'));
         onAddedSuccess?.();
@@ -139,7 +140,7 @@ export const AddToMealPlanSheet: React.FC<AddToMealPlanSheetProps> = ({
               <Drawer.Handle />
 
               {/* Recipe Header Card */}
-              <div className="flex items-center justify-between gap-3 pt-1 pb-3 mb-2 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex items-center justify-between gap-3 pt-1 pb-3 mb-2 border-none">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   {recipeImage && (
                     <div className="w-12 h-12 rounded-2xl overflow-hidden shrink-0 shadow-2xs bg-gray-100 dark:bg-gray-800">
@@ -173,8 +174,11 @@ export const AddToMealPlanSheet: React.FC<AddToMealPlanSheetProps> = ({
 
                 <button
                   type="button"
-                  onClick={onClose}
-                  className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer shrink-0"
+                  onClick={() => {
+                    hapticLight();
+                    onClose();
+                  }}
+                  className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer shrink-0"
                   aria-label="Close"
                 >
                   <X className="w-4 h-4" />

@@ -4,7 +4,7 @@ import { SlidersHorizontal, Star, Tag, X, Check } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { type Collection, type RecipeCategory, RECIPE_CATEGORIES } from '../../types';
 import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
-import { hapticLight } from '../../utils/haptics';
+import { hapticLight, hapticMedium } from '../../utils/haptics';
 import {
   EMPTY_FILTERS,
   TIME_FILTER_OPTIONS,
@@ -100,8 +100,11 @@ export default function FilterSheet({
                   </div>
                   <button
                     type="button"
-                    className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer"
-                    onClick={onClose}
+                    className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer"
+                    onClick={() => {
+                      hapticLight();
+                      onClose();
+                    }}
                     aria-label="Close"
                   >
                     <X className="w-4 h-4" />
@@ -120,8 +123,11 @@ export default function FilterSheet({
                       <button
                         key={option}
                         type="button"
-                        onClick={() => setDraftSort(option)}
-                        className={`px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold ${chipClass(draftSort === option)}`}
+                        onClick={() => {
+                          hapticLight();
+                          setDraftSort(option);
+                        }}
+                        className={`min-h-[44px] px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold ${chipClass(draftSort === option)}`}
                       >
                         {t(`catalog.sort.${option}`)}
                       </button>
@@ -136,8 +142,11 @@ export default function FilterSheet({
                   </h4>
                   <button
                     type="button"
-                    onClick={() => setDraft(d => ({ ...d, favoritesOnly: !d.favoritesOnly }))}
-                    className={`px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-1.5 self-start ${chipClass(draft.favoritesOnly)}`}
+                    onClick={() => {
+                      hapticLight();
+                      setDraft(d => ({ ...d, favoritesOnly: !d.favoritesOnly }));
+                    }}
+                    className={`min-h-[44px] px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-1.5 self-start ${chipClass(draft.favoritesOnly)}`}
                   >
                     <Star className={`w-3.5 h-3.5 ${draft.favoritesOnly ? 'fill-white stroke-white' : 'text-amber-500 fill-amber-500'}`} />
                     {t('catalog.favoritesFilter')}
@@ -152,8 +161,11 @@ export default function FilterSheet({
                   <div className="flex flex-wrap gap-1.5">
                     <button
                       type="button"
-                      onClick={() => setDraft(d => ({ ...d, maxTime: 0 }))}
-                      className={`px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold ${chipClass(draft.maxTime === 0)}`}
+                      onClick={() => {
+                        hapticLight();
+                        setDraft(d => ({ ...d, maxTime: 0 }));
+                      }}
+                      className={`min-h-[44px] px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold ${chipClass(draft.maxTime === 0)}`}
                     >
                       {t('catalog.timeAny')}
                     </button>
@@ -161,8 +173,11 @@ export default function FilterSheet({
                       <button
                         key={minutes}
                         type="button"
-                        onClick={() => setDraft(d => ({ ...d, maxTime: d.maxTime === minutes ? 0 : minutes }))}
-                        className={`px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold ${chipClass(draft.maxTime === minutes)}`}
+                        onClick={() => {
+                          hapticLight();
+                          setDraft(d => ({ ...d, maxTime: d.maxTime === minutes ? 0 : minutes }));
+                        }}
+                        className={`min-h-[44px] px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold ${chipClass(draft.maxTime === minutes)}`}
                       >
                         {t('catalog.timeUnder', { count: minutes })}
                       </button>
@@ -222,8 +237,11 @@ export default function FilterSheet({
                           <button
                             key={col.id}
                             type="button"
-                            onClick={() => setDraft(d => ({ ...d, collectionIds: toggleIn(d.collectionIds, col.id) }))}
-                            className={`px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-1.5 ${chipClass(isActive)}`}
+                            onClick={() => {
+                              hapticLight();
+                              setDraft(d => ({ ...d, collectionIds: toggleIn(d.collectionIds, col.id) }));
+                            }}
+                            className={`min-h-[44px] px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-1.5 ${chipClass(isActive)}`}
                           >
                             {col.emoji && <span className="text-sm leading-none">{col.emoji}</span>}
                             {col.name}
@@ -248,8 +266,11 @@ export default function FilterSheet({
                           <button
                             key={flag}
                             type="button"
-                            onClick={() => setDraft(d => ({ ...d, flags: toggleIn(d.flags, flag) }))}
-                            className={`px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-1.5 ${chipClass(isActive, 'amber')}`}
+                            onClick={() => {
+                              hapticLight();
+                              setDraft(d => ({ ...d, flags: toggleIn(d.flags, flag) }));
+                            }}
+                            className={`min-h-[44px] px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-1.5 ${chipClass(isActive, 'amber')}`}
                           >
                             <Tag className={`w-3 h-3 ${isActive ? 'text-white' : 'text-amber-500'}`} />
                             {flag}
@@ -267,13 +288,17 @@ export default function FilterSheet({
                     variant="tertiary"
                     className="flex-1 h-12 rounded-2xl text-sm font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-none active:scale-95 transition-all cursor-pointer"
                     isDisabled={draftCount === 0}
-                    onPress={() => setDraft(EMPTY_FILTERS)}
+                    onPress={() => {
+                      hapticLight();
+                      setDraft(EMPTY_FILTERS);
+                    }}
                   >
                     {t('catalog.resetFilters')}
                   </Button>
                   <Button
                     className="flex-[2] h-12 rounded-2xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white border-none shadow-none active:scale-95 transition-all cursor-pointer"
                     onPress={() => {
+                      hapticMedium();
                       onApply(draft, draftSort);
                       onClose();
                     }}

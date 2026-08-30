@@ -3,6 +3,7 @@ import { useI18n } from '../context/I18nContext';
 import type { CookedResult } from '../types';
 import { progressPct, xpToNextLevel } from '../utils/levels';
 import { badgeEmoji } from '../utils/badges';
+import { hapticMedium } from '../utils/haptics';
 
 interface RewardOverlayProps {
   reward: CookedResult | null;
@@ -28,7 +29,10 @@ export default function RewardOverlay({ reward, levelThresholds, onClose }: Rewa
       key={reward.stats.totalCooks}
       reward={reward}
       thresholds={levelThresholds}
-      onClose={onClose}
+      onClose={() => {
+        hapticMedium();
+        onClose();
+      }}
     />
   );
 }
@@ -121,7 +125,7 @@ function RewardContent({
       {showBurst && <Confetti />}
 
       <div
-        className={`relative w-full max-w-xs rounded-3xl border border-white/15 bg-gradient-to-b from-gray-900/95 to-gray-950/95 px-6 py-7 text-center shadow-2xl ${
+        className={`relative w-full max-w-xs rounded-3xl border-none bg-gradient-to-b from-gray-900/95 to-gray-950/95 px-6 py-7 text-center shadow-2xl ${
           visible ? 'reward-pop-in' : ''
         }`}
       >

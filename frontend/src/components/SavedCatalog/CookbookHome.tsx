@@ -119,8 +119,11 @@ export default function CookbookHome({
           {(collections.length > 0 || allFlags.length > 0) && (
             <button
               type="button"
-              onClick={onManageCollections}
-              className="flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0 cursor-pointer active:scale-95 transition-transform"
+              onClick={() => {
+                hapticLight();
+                onManageCollections();
+              }}
+              className="flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0 cursor-pointer active:scale-95 transition-transform min-h-[44px] px-2"
             >
               <Settings2 className="w-3.5 h-3.5" />
               {t('catalog.manageCollections')}
@@ -151,10 +154,13 @@ export default function CookbookHome({
           {/* ➕ Add Collection Button */}
           <button
             type="button"
-            onClick={onAddCollection}
-            className="w-[8.5rem] shrink-0 flex flex-col gap-1.5 text-left active:scale-[0.97] transition-transform cursor-pointer"
+            onClick={() => {
+              hapticLight();
+              onAddCollection();
+            }}
+            className="w-[8.5rem] shrink-0 flex flex-col gap-1.5 text-left active:scale-[0.97] transition-transform cursor-pointer border-none bg-transparent"
           >
-            <span className="w-full aspect-[2/1] rounded-2xl border border-dashed border-emerald-600/30 flex items-center justify-center hover:bg-emerald-500/5 transition-colors">
+            <span className="w-full aspect-[2/1] rounded-2xl bg-emerald-500/5 hover:bg-emerald-500/10 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/15 flex items-center justify-center transition-colors border-none shadow-[0_2px_6px_rgba(0,0,0,0.02)]">
               <Plus className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             </span>
             <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 px-0.5 line-clamp-1 leading-snug">
@@ -249,8 +255,11 @@ export default function CookbookHome({
                 <div className="flex items-center justify-between gap-2 w-full select-none">
                   <button
                     type="button"
-                    onClick={() => setOpenShelfKey(isOpen ? null : shelf.key)}
-                    className="flex items-center gap-2 text-left cursor-pointer flex-1 min-w-0 group py-1 active:scale-[0.99] transition-transform outline-none"
+                    onClick={() => {
+                      hapticLight();
+                      setOpenShelfKey(isOpen ? null : shelf.key);
+                    }}
+                    className="flex items-center gap-2 text-left cursor-pointer flex-1 min-w-0 group py-1 active:scale-[0.99] transition-transform outline-none border-none bg-transparent min-h-[44px]"
                     aria-expanded={isOpen}
                   >
                     <h3
@@ -273,8 +282,11 @@ export default function CookbookHome({
                   {shelf.total > 0 && (
                     <button
                       type="button"
-                      onClick={() => onOpenList(shelf.preset)}
-                      className="flex items-center gap-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0 cursor-pointer active:scale-95 transition-transform"
+                      onClick={() => {
+                        hapticLight();
+                        onOpenList(shelf.preset);
+                      }}
+                      className="flex items-center gap-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0 cursor-pointer active:scale-95 transition-transform min-h-[44px] px-1 border-none bg-transparent"
                     >
                       {t('catalog.showAll', { count: shelf.total })}
                       <ChevronRight className="w-3.5 h-3.5" />
@@ -327,8 +339,11 @@ export default function CookbookHome({
       {/* Escape hatch into the unfiltered list */}
       <button
         type="button"
-        onClick={() => onOpenList({ kind: 'all' })}
-        className="flex items-center justify-center gap-1.5 w-full h-12 rounded-2xl bg-white dark:bg-gray-900 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 active:scale-[0.99] transition-all cursor-pointer"
+        onClick={() => {
+          hapticLight();
+          onOpenList({ kind: 'all' });
+        }}
+        className="flex items-center justify-center gap-1.5 w-full h-12 min-h-[48px] rounded-2xl bg-white dark:bg-gray-900 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 active:scale-[0.99] transition-all cursor-pointer"
       >
         {t('catalog.allRecipes', { count: totalRecipes })}
         <ChevronRight className="w-4 h-4" />

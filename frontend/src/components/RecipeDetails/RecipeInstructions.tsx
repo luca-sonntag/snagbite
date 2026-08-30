@@ -108,7 +108,7 @@ export default function RecipeInstructions({
 
         {/* 2. Required Equipment */}
         {recipe.equipment && recipe.equipment.length > 0 && (
-          <div className="px-5 py-4.5 sm:px-6 border-t border-black/5 dark:border-white/5">
+          <div className="px-5 py-4.5 sm:px-6">
             <div className="flex items-start gap-4">
               <div className={medallion}>
                 <Utensils className={medallionIcon} />
@@ -121,7 +121,7 @@ export default function RecipeInstructions({
                   {recipe.equipment.map((item, idx) => (
                     <li
                       key={idx}
-                      className="py-1 px-3 bg-black/[0.04] dark:bg-white/[0.06] rounded-lg text-xs font-medium text-gray-600 dark:text-gray-300 select-none"
+                      className="py-1 px-3 bg-black/[0.04] dark:bg-white/[0.06] rounded-xl text-xs font-medium text-gray-600 dark:text-gray-300 select-none border-none"
                     >
                       {item}
                     </li>
@@ -135,7 +135,7 @@ export default function RecipeInstructions({
         {/* 3. Steps as a timeline — the rail turns emerald behind each finished
             step, so progress is legible from the left edge alone. */}
         {steps.length > 0 && (
-          <div className="border-t border-black/5 dark:border-white/5">
+          <div>
             {steps.map((step, idx) => {
               const isChecked = !!checkedSteps[step.step];
               const isActive = step.step === activeStepNum;

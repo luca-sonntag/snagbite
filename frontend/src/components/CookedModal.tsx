@@ -6,6 +6,7 @@ import { resolveErrorCode } from '../i18n';
 import { useGamification } from '../context/GamificationContext';
 import { useTimerManager } from '../hooks/useTimerManager';
 import { compressImage, PREVIEW_PROFILE } from '../utils/imageCompression';
+import { hapticLight, hapticMedium, hapticNotification } from '../utils/haptics';
 
 interface CookedModalProps {
   isOpen: boolean;
@@ -65,10 +66,12 @@ export default function CookedModal({
         viaCookingMode,
         timerElapsed,
       });
+      hapticNotification('success');
       onSuccess?.();
       handleResetAndClose();
     } catch (err: any) {
       console.error('[CookedModal] Verification failed:', err);
+      hapticNotification('error');
       const code = err?.code;
       const params = err?.params;
       const localizedReason = code
@@ -81,6 +84,7 @@ export default function CookedModal({
   };
 
   const handleMarkWithoutPhoto = async () => {
+    hapticLight();
     setIsVerifying(true);
     setRejectionReason(null);
     try {
@@ -88,10 +92,12 @@ export default function CookedModal({
         viaCookingMode,
         timerElapsed,
       });
+      hapticNotification('success');
       onSuccess?.();
       handleResetAndClose();
     } catch (err: any) {
       console.error('[CookedModal] Mark without photo failed:', err);
+      hapticNotification('error');
       const code = err?.code;
       const params = err?.params;
       const localizedReason = code
@@ -108,6 +114,7 @@ export default function CookedModal({
     e.target.value = '';
     if (!file) return;
 
+    hapticLight();
     setIsCompressing(true);
     setRejectionReason(null);
     try {
@@ -124,10 +131,12 @@ export default function CookedModal({
 
   const handleVerifyAndSubmit = async () => {
     if (!photo || isVerifying) return;
+    hapticMedium();
     await submitPhoto(photo);
   };
 
   const handleResetAndClose = () => {
+    hapticLight();
     setPhoto(null);
     setRejectionReason(null);
     setIsVerifying(false);
@@ -163,7 +172,7 @@ export default function CookedModal({
         <button
           onClick={handleResetAndClose}
           disabled={isVerifying}
-          className="absolute top-4 right-4 p-2 text-gray-400 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors disabled:opacity-40"
+          className="absolute top-4 right-4 w-10 h-10 min-w-[44px] min-h-[44px] text-gray-400 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 flex items-center justify-center transition-all cursor-pointer border-none disabled:opacity-40"
         >
           <X className="w-5 h-5" />
         </button>

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Button, Drawer } from '@heroui/react';
-import { Clock, Minus, Play, Plus } from 'lucide-react';
+import { Clock, Minus, Play, Plus, X } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useTimerManager } from '../hooks/useTimerManager';
 import { stripInlineIngredientTags } from '../utils/ingredientMatch';
 import { useAdOverlay } from '../context/OverlayStackContext';
+import { hapticLight, hapticMedium } from '../utils/haptics';
 
 interface TimerConfirmSheetProps {
   isOpen: boolean;
@@ -55,6 +56,7 @@ export default function TimerConfirmSheet({
   }, [isOpen, durationSeconds]);
 
   const handleStart = () => {
+    hapticMedium();
     addTimer(adjusted, label, recipeId, stepNum);
     onClose();
   };
@@ -76,13 +78,26 @@ export default function TimerConfirmSheet({
 
               {/* Header */}
               <Drawer.Header className="pb-3 mb-1">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center">
-                    <Clock className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center">
+                      <Clock className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white">
+                      {t('timer.confirmTitle')}
+                    </Drawer.Heading>
                   </div>
-                  <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white">
-                    {t('timer.confirmTitle')}
-                  </Drawer.Heading>
+                  <button
+                    type="button"
+                    className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer"
+                    onClick={() => {
+                      hapticLight();
+                      onClose();
+                    }}
+                    aria-label="Close"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
               </Drawer.Header>
 
@@ -96,8 +111,11 @@ export default function TimerConfirmSheet({
                 <div className="flex items-center justify-center gap-4 mb-5">
                   <button
                     type="button"
-                    onClick={() => setAdjusted(v => Math.max(minVal, v - step))}
-                    className="w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-90 transition-all flex-shrink-0 cursor-pointer border-none"
+                    onClick={() => {
+                      hapticLight();
+                      setAdjusted(v => Math.max(minVal, v - step));
+                    }}
+                    className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-90 transition-all flex-shrink-0 cursor-pointer border-none"
                     aria-label="Decrease"
                   >
                     <Minus className="w-5 h-5" />
@@ -107,8 +125,11 @@ export default function TimerConfirmSheet({
                   </span>
                   <button
                     type="button"
-                    onClick={() => setAdjusted(v => Math.min(maxVal, v + step))}
-                    className="w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-90 transition-all flex-shrink-0 cursor-pointer border-none"
+                    onClick={() => {
+                      hapticLight();
+                      setAdjusted(v => Math.min(maxVal, v + step));
+                    }}
+                    className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-90 transition-all flex-shrink-0 cursor-pointer border-none"
                     aria-label="Increase"
                   >
                     <Plus className="w-5 h-5" />
@@ -126,9 +147,12 @@ export default function TimerConfirmSheet({
                     <button
                       key={preset.seconds}
                       type="button"
-                      onClick={() => setAdjusted(preset.seconds)}
+                      onClick={() => {
+                        hapticLight();
+                        setAdjusted(preset.seconds);
+                      }}
                       className={`
-                        px-3.5 py-2 rounded-2xl text-sm font-semibold transition-all duration-150 border-none cursor-pointer
+                        min-h-[44px] px-3.5 py-2 rounded-2xl text-sm font-semibold transition-all duration-150 border-none cursor-pointer
                         active:scale-95
                         ${isPresetActive(preset.seconds)
                           ? 'bg-emerald-600 text-white dark:bg-emerald-500 font-bold shadow-none'
@@ -148,7 +172,10 @@ export default function TimerConfirmSheet({
                     variant="tertiary"
                     className="flex-1 h-12 rounded-2xl text-sm font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-none active:scale-95 transition-all cursor-pointer"
                     slot="close"
-                    onPress={onClose}
+                    onPress={() => {
+                      hapticLight();
+                      onClose();
+                    }}
                   >
                     {t('timer.confirmCancel')}
                   </Button>

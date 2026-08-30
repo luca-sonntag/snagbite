@@ -1,6 +1,7 @@
 import type { Collection, SavedRecipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import CachedImage from '../CachedImage';
+import { hapticLight } from '../../utils/haptics';
 
 interface CollectionTileProps {
   collection?: Collection;
@@ -27,10 +28,13 @@ export default function CollectionTile({ collection, title, emoji, jobs, onClick
   return (
     <button
       type="button"
-      onClick={onClick}
-      className="w-[8.5rem] shrink-0 flex flex-col gap-1.5 text-left active:scale-[0.97] transition-transform cursor-pointer group"
+      onClick={() => {
+        hapticLight();
+        onClick();
+      }}
+      className="w-[8.5rem] shrink-0 flex flex-col gap-1.5 text-left active:scale-[0.97] transition-transform cursor-pointer group border-none bg-transparent"
     >
-      <div className="relative w-full aspect-[2/1] rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
+      <div className="relative w-full aspect-[2/1] rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none">
         {displayJobs.length === 0 ? (
           <div className="w-full h-full bg-gradient-to-br from-emerald-500/10 via-transparent to-indigo-500/10" />
         ) : displayJobs.length === 1 ? (
@@ -57,7 +61,7 @@ export default function CollectionTile({ collection, title, emoji, jobs, onClick
 
         {/* Collection badge emoji in bottom-left */}
         {collectionEmoji && (
-          <span className="absolute bottom-1 left-1 w-6 h-6 rounded-lg bg-black/25 dark:bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center text-xs select-none shadow-sm z-10">
+          <span className="absolute bottom-1 left-1 w-6 h-6 rounded-lg bg-black/25 dark:bg-black/40 backdrop-blur-md border-none flex items-center justify-center text-xs select-none shadow-xs z-10">
             {collectionEmoji}
           </span>
         )}

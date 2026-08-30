@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sparkles, BookOpen, Calendar, ShoppingCart, User } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
+import { hapticSelection } from '../utils/haptics';
 import type { AppBottomNavProps } from '../types/app';
 
 export const AppBottomNav: React.FC<AppBottomNavProps> = ({
@@ -30,7 +31,7 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
   }`;
 
   const navButtonBase =
-    'flex-1 flex flex-col items-center justify-center py-2 relative transition-colors cursor-pointer border-none bg-transparent select-none active:scale-95';
+    'flex-1 flex flex-col items-center justify-center min-h-[48px] py-1.5 relative transition-all duration-200 cursor-pointer border-none bg-transparent select-none active:scale-95';
   const iconWrapperBase = 'relative flex items-center justify-center w-6 h-6 shrink-0';
   const iconBase = 'w-5 h-5 shrink-0';
   const labelBase = 'text-[10px] sm:text-[11px] tracking-tight sm:tracking-wide leading-tight mt-1 text-center truncate max-w-full';
@@ -49,11 +50,14 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
       />
 
       <div className={bottomBarClasses}>
-        <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-black/[0.08] dark:border-white/[0.12] shadow-[0_12px_36px_-6px_rgba(0,0,0,0.16),0_4px_16px_rgba(0,0,0,0.08)] w-full max-w-md mx-auto flex flex-col rounded-3xl overflow-hidden">
+        <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-none shadow-[0_12px_36px_-6px_rgba(0,0,0,0.16),0_4px_16px_rgba(0,0,0,0.08)] w-full max-w-md mx-auto flex flex-col rounded-3xl overflow-hidden">
           <div className="w-full flex justify-around items-center py-2.5 px-2">
             {/* 1. Extract / New Recipe Tab */}
             <button
-              onClick={() => onNavigate('extract')}
+              onClick={() => {
+                hapticSelection();
+                onNavigate('extract');
+              }}
               className={`${navButtonBase} ${
                 activeView === 'extract'
                   ? 'text-emerald-600 dark:text-emerald-400 font-bold'
@@ -75,6 +79,7 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
             {/* 2. Recipes / History Tab */}
             <button
               onClick={() => {
+                hapticSelection();
                 if (activeView === 'history') {
                   onNavigate('history');
                 } else {
@@ -97,7 +102,10 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
 
             {/* 3. Meal Planner Tab */}
             <button
-              onClick={() => onNavigate('meal-planner')}
+              onClick={() => {
+                hapticSelection();
+                onNavigate('meal-planner');
+              }}
               className={`${navButtonBase} ${
                 activeView === 'meal-planner'
                   ? 'text-emerald-600 dark:text-emerald-400 font-bold'
@@ -118,7 +126,10 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
 
             {/* 4. Shopping List Tab */}
             <button
-              onClick={() => onNavigate('shopping-list')}
+              onClick={() => {
+                hapticSelection();
+                onNavigate('shopping-list');
+              }}
               className={`${navButtonBase} ${
                 activeView === 'shopping-list'
                   ? 'text-emerald-600 dark:text-emerald-400 font-bold'
@@ -139,7 +150,10 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
 
             {/* 5. Profile & Gamification Tab */}
             <button
-              onClick={() => onNavigate('settings')}
+              onClick={() => {
+                hapticSelection();
+                onNavigate('settings');
+              }}
               className={`${navButtonBase} ${
                 activeView === 'settings'
                   ? 'text-emerald-600 dark:text-emerald-400 font-bold'

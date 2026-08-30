@@ -3,6 +3,7 @@ import { Select, ListBox, Popover } from '@heroui/react';
 import { LogOut, Globe, Moon, Sun, Thermometer, Scale, Info, UserMinus, Sparkles, Crown, ChevronRight, HelpCircle, MessageSquare, Shield, ScrollText, Building2, ExternalLink } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
+import { hapticLight, hapticMedium, hapticHeavy } from '../utils/haptics';
 
 import { useTheme } from '../hooks/useTheme';
 import { useDialog } from '../context/DialogContext';
@@ -66,6 +67,7 @@ export default function SettingsView() {
   const preferredUnitSystem = user?.user_metadata?.preferred_unit_system || 'metric';
 
   const handleUpdateSetting = async (key: string, value: string) => {
+    hapticLight();
     setIsSaving(true);
     setSaveMessage(null);
     const { error } = await updateUserMetadata({ [key]: value });
@@ -73,13 +75,14 @@ export default function SettingsView() {
     if (error) {
       setSaveMessage(error);
     } else {
+      hapticMedium();
       setSaveMessage(t('app.settings.saved') || 'Settings saved!');
       setTimeout(() => setSaveMessage(null), 3000);
     }
   };
 
-
   const handleDeleteAccount = async () => {
+    hapticHeavy();
     const confirmed = await dialog.confirm({
       title: t('app.dialog.deleteAccount.title') || 'Delete Account?',
       message: t('app.dialog.deleteAccount.message') || 'Are you sure you want to delete your account?',
@@ -90,6 +93,7 @@ export default function SettingsView() {
 
     if (!confirmed) return;
 
+    hapticHeavy();
     setIsSaving(true);
     setSaveMessage(null);
     const { error } = await deleteAccount();
@@ -320,7 +324,10 @@ export default function SettingsView() {
             </div>
             <div className="flex bg-black/5 dark:bg-white/5 p-1 rounded-xl shrink-0 max-[400px]:w-full">
               <button
-                onClick={() => setTheme('light')}
+                onClick={() => {
+                  hapticLight();
+                  setTheme('light');
+                }}
                 className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer max-[400px]:flex-1 ${
                   theme === 'light'
                     ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
@@ -331,7 +338,10 @@ export default function SettingsView() {
                 Light
               </button>
               <button
-                onClick={() => setTheme('dark')}
+                onClick={() => {
+                  hapticLight();
+                  setTheme('dark');
+                }}
                 className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer max-[400px]:flex-1 ${
                   theme === 'dark'
                     ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
@@ -479,7 +489,10 @@ export default function SettingsView() {
           {/* Logout Option */}
           {!autoSignedIn && (
             <button
-              onClick={() => signOut()}
+              onClick={() => {
+                hapticMedium();
+                signOut();
+              }}
               className="w-full p-4 flex items-center justify-between border-b border-black/5 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 transition-all active:scale-[0.99] text-left cursor-pointer group"
             >
               <div className="flex items-center gap-3 min-w-0 flex-1">

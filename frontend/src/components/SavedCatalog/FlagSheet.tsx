@@ -5,6 +5,7 @@ import type { SavedRecipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { useToast } from '../../context/ToastContext';
 import { useAdOverlay } from '../../context/OverlayStackContext';
+import { hapticLight, hapticMedium, hapticHeavy } from '../../utils/haptics';
 
 interface FlagSheetProps {
   isOpen: boolean;
@@ -47,6 +48,7 @@ export const FlagSheet: React.FC<FlagSheetProps> = ({
   const handleAddTag = (tagToAdd: string) => {
     const cleaned = tagToAdd.trim();
     if (!cleaned) return;
+    hapticLight();
     if (!tags.includes(cleaned)) {
       setTags(prev => [...prev, cleaned]);
     }
@@ -54,6 +56,7 @@ export const FlagSheet: React.FC<FlagSheetProps> = ({
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
+    hapticHeavy();
     setTags(prev => prev.filter(t => t !== tagToRemove));
   };
 
@@ -67,6 +70,7 @@ export const FlagSheet: React.FC<FlagSheetProps> = ({
         finalTags.push(remaining);
       }
       await onSave(job, finalTags);
+      hapticMedium();
       toast.success(t('toast.flagsSaved'));
       onClose();
     } catch (err) {
@@ -91,13 +95,26 @@ export const FlagSheet: React.FC<FlagSheetProps> = ({
 
               {/* Header */}
               <Drawer.Header className="pb-3 mb-1">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-amber-500/10 dark:bg-amber-500/20 border-none flex items-center justify-center">
-                    <Tag className="w-4.5 h-4.5 text-amber-600 dark:text-amber-400" />
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-full bg-amber-500/10 dark:bg-amber-500/20 border-none flex items-center justify-center">
+                      <Tag className="w-4.5 h-4.5 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white">
+                      {t('catalog.flagsTitle') || 'Labels / Tags'}
+                    </Drawer.Heading>
                   </div>
-                  <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white">
-                    {t('catalog.flagsTitle') || 'Labels / Tags'}
-                  </Drawer.Heading>
+                  <button
+                    type="button"
+                    className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer"
+                    onClick={() => {
+                      hapticLight();
+                      onClose();
+                    }}
+                    aria-label="Close"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
               </Drawer.Header>
 

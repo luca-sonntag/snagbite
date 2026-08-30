@@ -92,7 +92,7 @@ export default function RecipeIngredients({
         </div>
 
         {/* 2. Grouped Ingredients List */}
-        <div className="px-4.5 py-4.5 sm:px-6 border-t border-black/5 dark:border-white/5 flex flex-col gap-5">
+        <div className="px-4.5 py-4.5 sm:px-6 flex flex-col gap-5">
           {sortedIngredients.map(({ group, originalIdx }) => {
             const theme = getCategoryTheme(group.name);
             return (
@@ -126,7 +126,7 @@ export default function RecipeIngredients({
 
         {/* 3. Add to Shopping List Button (Inside Card Footer) */}
         {onAddIngredients && (
-          <div className="px-4.5 py-3.5 sm:px-6 border-t border-black/5 dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.01]">
+          <div className="px-4.5 py-3.5 sm:px-6 bg-black/[0.01] dark:bg-white/[0.01]">
             <Button
               className={`w-full h-12 min-h-[48px] rounded-2xl font-bold transition-all flex items-center justify-center gap-2 text-sm active:scale-[0.98] border-none shadow-none cursor-pointer ${
                 isAdded
