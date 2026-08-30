@@ -88,7 +88,7 @@ export default function ToastItem({ toast, onDismiss, placement = 'bottom' }: To
         transform: dragOffsetY !== 0 ? `translateY(${dragOffsetY}px)` : undefined,
         opacity: dragOffsetY !== 0 ? Math.max(0, 1 - Math.abs(dragOffsetY) / 80) : undefined,
       }}
-      className={`pointer-events-auto w-[75%] sm:w-auto sm:max-w-xs bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl md:rounded-3xl border-none shadow-[0_8px_30px_rgba(0,0,0,0.12)] p-2.5 sm:p-3 flex items-center gap-2.5 transition-transform duration-100 ${animationClass}`}
+      className={`pointer-events-auto w-4/5 max-w-md bg-white dark:bg-gray-900 rounded-2xl md:rounded-3xl border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgba(0,0,0,0.14)] p-2.5 sm:p-3 flex items-center gap-2.5 transition-transform duration-100 ${animationClass}`}
       role="status"
       aria-live="polite"
     >
