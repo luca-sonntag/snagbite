@@ -3,7 +3,8 @@ import { Button } from '@heroui/react';
 import { Search, List, LayoutGrid, CheckSquare, ArrowLeft, Star, Tag, SlidersHorizontal, X, Clock, BookOpen } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { PageHeader } from '../PageHeader';
-import type { Collection } from '../../types';
+import type { Collection, RecipeCategory } from '../../types';
+import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
 import { EMPTY_FILTERS, type CatalogFilterState, type CatalogSort } from '../../hooks/useSavedCatalog';
 import { buildListRoute, parseListRoute } from './catalogRoutes';
 
@@ -61,7 +62,7 @@ export default function CatalogFilters({
   catalogSubPath,
   onNavigateCatalog
 }: CatalogFiltersProps) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -87,6 +88,10 @@ export default function CatalogFilters({
   };
   const removeFlag = (flag: string) => {
     setFilters({ ...filters, flags: filters.flags.filter(f => f !== flag) });
+    navigateToGeneralListIfNeeded();
+  };
+  const removeCategory = (cat: RecipeCategory) => {
+    setFilters({ ...filters, categories: (filters.categories ?? []).filter(c => c !== cat) });
     navigateToGeneralListIfNeeded();
   };
   const removeFavorites = () => {
@@ -262,6 +267,14 @@ export default function CatalogFilters({
               label={t('catalog.timeUnder', { count: filters.maxTime })}
             />
           )}
+          {filters.categories?.map(cat => (
+            <ActiveChip
+              key={cat}
+              onRemove={() => removeCategory(cat)}
+              icon={<span className="text-sm leading-none">{getRecipeCategoryEmoji(cat)}</span>}
+              label={getRecipeCategoryLabel(cat, language)}
+            />
+          ))}
           {filters.collectionIds.map(id => (
             <ActiveChip
               key={id}

@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Button, Drawer } from '@heroui/react';
 import { SlidersHorizontal, Star, Tag, X, Check } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
-import type { Collection } from '../../types';
+import type { Collection, RecipeCategory } from '../../types';
+import { RECIPE_CATEGORIES, getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
 import {
   EMPTY_FILTERS,
   TIME_FILTER_OPTIONS,
@@ -55,7 +56,7 @@ export default function FilterSheet({
   allFlags,
   countMatches
 }: FilterSheetProps) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   useAdOverlay(isOpen);
   const [draft, setDraft] = useState<CatalogFilterState>(filters);
   const [draftSort, setDraftSort] = useState<CatalogSort>(sortBy);
@@ -163,6 +164,33 @@ export default function FilterSheet({
                         {t('catalog.timeUnder', { count: minutes })}
                       </button>
                     ))}
+                  </div>
+                </section>
+
+                {/* Categories */}
+                <section className="flex flex-col gap-2">
+                  <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                    {t('catalog.categoriesTitle')}
+                  </h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {RECIPE_CATEGORIES.map(cat => {
+                      const isActive = (draft.categories ?? []).includes(cat);
+                      return (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setDraft(d => ({
+                            ...d,
+                            categories: toggleIn(d.categories ?? [], cat) as RecipeCategory[]
+                          }))}
+                          className={`px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-1.5 ${chipClass(isActive)}`}
+                        >
+                          <span className="text-sm leading-none">{getRecipeCategoryEmoji(cat)}</span>
+                          <span>{getRecipeCategoryLabel(cat, language)}</span>
+                          {isActive && <Check className="w-3 h-3" />}
+                        </button>
+                      );
+                    })}
                   </div>
                 </section>
 
