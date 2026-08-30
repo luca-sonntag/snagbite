@@ -4,6 +4,7 @@ import { X, Sparkles, AlertCircle, CheckCircle2, ChevronRight, Globe } from 'luc
 import type { PantrySuggestion } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { recipeCategoryEmojis } from '../../i18n';
+import { hapticLight } from '../../utils/haptics';
 
 interface PantrySuggestionsModalProps {
   isOpen: boolean;
@@ -46,32 +47,37 @@ export const PantrySuggestionsModal: React.FC<PantrySuggestionsModalProps> = ({
           className="!z-[100]"
         >
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
+            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col p-4 sm:p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom,0px))] rounded-t-3xl border-none shadow-2xl overflow-hidden w-full max-w-lg mx-auto">
               <Drawer.Handle />
 
               {/* Header */}
-              <Drawer.Header className="pb-3 mb-1 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-                    <Sparkles className="w-5 h-5" />
+              <Drawer.Header className="pt-1 pb-3 mb-1">
+                <div className="flex items-center justify-between w-full gap-2">
+                  <div className="flex items-center gap-2.5 min-w-0 pr-1">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <Drawer.Heading className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">
+                        {t('pantry.suggestionsTitle')}
+                      </Drawer.Heading>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        {t('pantry.suggestionsSubtitle')}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <Drawer.Heading className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
-                      {t('pantry.suggestionsTitle')}
-                    </Drawer.Heading>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {t('pantry.suggestionsSubtitle')}
-                    </p>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      hapticLight();
+                      onClose();
+                    }}
+                    aria-label={t('pantry.cancel')}
+                    className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95 transition-all border-none outline-none flex items-center justify-center cursor-pointer shrink-0"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  aria-label={t('pantry.cancel')}
-                  className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95 transition-all border-none outline-none flex items-center justify-center cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
               </Drawer.Header>
 
               {/* Body */}
