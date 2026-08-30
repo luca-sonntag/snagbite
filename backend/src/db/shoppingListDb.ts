@@ -270,18 +270,22 @@ export async function removeRecipeFromShoppingList(userId: string, recipeId: str
 }
 
 async function autoTransferToPantry(userId: string, item: ShoppingListRow): Promise<void> {
+  const parent = item.parent_ingredient as { name?: string; baseName?: string; unit?: string } | null;
+  const pantryName = parent?.name || item.name;
+  const pantryBaseName = parent?.baseName || item.base_name;
+
   let packageAmount = num(item.amount) || 1;
-  let packageUnit = item.unit;
-  let shelfLifeDays = getDefaultShelfLifeDays(item.category, item.base_name || item.name);
+  let packageUnit = parent?.unit || item.unit;
+  let shelfLifeDays = getDefaultShelfLifeDays(item.category, pantryBaseName || pantryName);
 
   // 1. Check canonical ingredient mappings using alias discovery (e.g. Gewürzgurken <-> pickle)
-  const keys = buildMappingKeys(item.base_name ?? undefined, item.name, undefined, item.parent_ingredient as any);
+  const keys = buildMappingKeys(pantryBaseName ?? undefined, pantryName, undefined, parent);
   if (keys.length > 0) {
     const mapping = await lookupMapping(keys, item.category || '');
     if (mapping) {
       if (mapping.typicalPackageAmount && Number(mapping.typicalPackageAmount) > 0) {
         const pkgAmt = Number(mapping.typicalPackageAmount);
-        const pkgUnit = mapping.typicalPackageUnit || item.unit;
+        const pkgUnit = mapping.typicalPackageUnit || packageUnit;
         if (pkgUnit.toLowerCase() === item.unit.toLowerCase()) {
           packageAmount = Math.max(packageAmount, pkgAmt);
         } else {
@@ -312,7 +316,7 @@ async function autoTransferToPantry(userId: string, item: ShoppingListRow): Prom
               if (isMatch) {
                 if (ing.typicalPackageAmount && Number(ing.typicalPackageAmount) > 0) {
                   const pkgAmt = Number(ing.typicalPackageAmount);
-                  const pkgUnit = ing.typicalPackageUnit || item.unit;
+                  const pkgUnit = ing.typicalPackageUnit || packageUnit;
                   if (pkgUnit.toLowerCase() === item.unit.toLowerCase()) {
                     packageAmount = Math.max(packageAmount, pkgAmt);
                   } else {
@@ -335,8 +339,8 @@ async function autoTransferToPantry(userId: string, item: ShoppingListRow): Prom
   }
 
   await createPantryItem(userId, {
-    name: item.name,
-    baseName: item.base_name ?? undefined,
+    name: pantryName,
+    baseName: pantryBaseName ?? undefined,
     category: item.category ?? undefined,
     amount: packageAmount,
     unit: packageUnit,

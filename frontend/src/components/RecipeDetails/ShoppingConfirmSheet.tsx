@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, Drawer } from '@heroui/react';
 import { Check, Salad } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
@@ -6,6 +6,14 @@ import { getCategoryTheme } from '../../i18n';
 import { hapticLight, hapticNotification } from '../../utils/haptics';
 import type { Ingredient, Recipe } from '../../types';
 import IngredientIcon from '../IngredientIcon';
+
+interface MergedShoppingSheetItem {
+  id: string;
+  primaryIngredient: Ingredient;
+  childIngredients: Ingredient[];
+  groupCategory?: string;
+  originalGroupIdx: number;
+}
 
 interface ShoppingConfirmSheetProps {
   isOpen: boolean;
@@ -32,20 +40,73 @@ export default function ShoppingConfirmSheet({
   const { t, translateCategory } = useI18n();
   const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
 
+  // Merge ingredients that share a parent in the same recipe (e.g. Gurkenwasser -> Gewürzgurken)
+  const mergedGroups = useMemo(() => {
+    const allItemsInRecipe = sortedIngredients.flatMap((g) => g.group.items);
+    const childMap = new Map<string, Ingredient[]>();
+    const childrenSet = new Set<Ingredient>();
+
+    for (const { group } of sortedIngredients) {
+      for (const ing of group.items) {
+        if (ing.parentIngredient?.baseName || ing.parentIngredient?.name) {
+          const parentBase = (ing.parentIngredient.baseName || '').toLowerCase().trim();
+          const parentName = (ing.parentIngredient.name || '').toLowerCase().trim();
+
+          const parentInRecipe = allItemsInRecipe.find(
+            (other) =>
+              other !== ing &&
+              ((other.baseName && other.baseName.toLowerCase().trim() === parentBase) ||
+                other.name.toLowerCase().trim() === parentName)
+          );
+
+          if (parentInRecipe) {
+            childrenSet.add(ing);
+            const parentKey = `${parentInRecipe.name}-${parentInRecipe.baseName || ''}`;
+            const list = childMap.get(parentKey) || [];
+            list.push(ing);
+            childMap.set(parentKey, list);
+          }
+        }
+      }
+    }
+
+    return sortedIngredients.map(({ group, originalIdx }) => {
+      const items: MergedShoppingSheetItem[] = [];
+      group.items.forEach((ing, idx) => {
+        if (childrenSet.has(ing)) return;
+
+        const parentKey = `${ing.name}-${ing.baseName || ''}`;
+        const children = childMap.get(parentKey) || [];
+
+        items.push({
+          id: `${ing.name}-${originalIdx}-${idx}`,
+          primaryIngredient: ing,
+          childIngredients: children,
+          groupCategory: group.name,
+          originalGroupIdx: originalIdx,
+        });
+      });
+
+      return {
+        groupName: group.name,
+        originalIdx,
+        items,
+      };
+    });
+  }, [sortedIngredients]);
+
   // Initialize selection when drawer opens
   useEffect(() => {
     if (isOpen) {
       const initial: Record<string, boolean> = {};
-      sortedIngredients.forEach(({ group, originalIdx }) => {
-        group.items.forEach((ing, idx) => {
-          const uniqueId = `${ing.name}-${originalIdx}-${idx}`;
-          // Voreinstellung: Normale Zutaten ausgewählt (true), Vorratszutaten abgewählt (false)
-          initial[uniqueId] = !ing.isStaple;
+      mergedGroups.forEach(({ items }) => {
+        items.forEach((item) => {
+          initial[item.id] = !item.primaryIngredient.isStaple;
         });
       });
       setSelectedIds(initial);
     }
-  }, [isOpen, sortedIngredients]);
+  }, [isOpen, mergedGroups]);
 
   const toggleItem = (id: string) => {
     hapticLight();
@@ -58,17 +119,19 @@ export default function ShoppingConfirmSheet({
   const handleConfirm = () => {
     hapticNotification('success');
     const itemsToAdd: Ingredient[] = [];
-    sortedIngredients.forEach(({ group, originalIdx }) => {
-      group.items.forEach((ing, idx) => {
-        const uniqueId = `${ing.name}-${originalIdx}-${idx}`;
-        if (selectedIds[uniqueId]) {
-          const baseAmount = ing.amount || 0;
-          const scaledAmount = baseAmount * scaleFactor;
-          itemsToAdd.push({
-            ...ing,
-            amount: scaledAmount,
-            unit: ing.unit || '',
-            category: group.name || ing.category,
+    mergedGroups.forEach(({ groupName, items }) => {
+      items.forEach((item) => {
+        if (selectedIds[item.id]) {
+          const allIngs = [item.primaryIngredient, ...item.childIngredients];
+          allIngs.forEach((ing) => {
+            const baseAmount = ing.amount || 0;
+            const scaledAmount = baseAmount * scaleFactor;
+            itemsToAdd.push({
+              ...ing,
+              amount: scaledAmount,
+              unit: ing.unit || '',
+              category: groupName || ing.category,
+            });
           });
         }
       });
@@ -77,7 +140,6 @@ export default function ShoppingConfirmSheet({
     onClose();
   };
 
-  // Count how many are selected
   const selectedCount = Object.values(selectedIds).filter(Boolean).length;
 
   return (
@@ -114,32 +176,30 @@ export default function ShoppingConfirmSheet({
               {/* Body */}
               <Drawer.Body className="overflow-y-auto py-2 flex-1 flex flex-col gap-4">
                 <div className="flex flex-col gap-4">
-                  {sortedIngredients.map(({ group, originalIdx }, sortedIdx) => {
-                    // Check if any items in this group are displayed
-                    if (group.items.length === 0) return null;
-                    const theme = getCategoryTheme(group.name);
+                  {mergedGroups.map(({ groupName, items }, sortedIdx) => {
+                    if (items.length === 0) return null;
+                    const theme = getCategoryTheme(groupName);
 
                     return (
                       <div key={sortedIdx} className="flex flex-col gap-1.5">
                         {recipe.ingredients.length > 1 && (
                           <h4 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-2 mt-2">
                             <span className={`w-1 h-3.5 rounded-full ${theme.barClass} shrink-0`} />
-                            <span>{translateCategory(group.name)}</span>
+                            <span>{translateCategory(groupName)}</span>
                           </h4>
                         )}
                         <div className="flex flex-col gap-1">
-                          {group.items.map((ing, idx) => {
+                          {items.map((item) => {
+                            const ing = item.primaryIngredient;
                             const scaledAmount = formatAmount(ing.amount, ing.unit);
                             const amountStr = scaledAmount ? `${scaledAmount} ` : '';
                             const unitStr = ing.unit ? `${ing.unit}` : '';
-                            const name = ing.name;
-                            const uniqueId = `${name}-${originalIdx}-${idx}`;
-                            const isChecked = !!selectedIds[uniqueId];
+                            const isChecked = !!selectedIds[item.id];
 
                             return (
                               <div
-                                key={uniqueId}
-                                onClick={() => toggleItem(uniqueId)}
+                                key={item.id}
+                                onClick={() => toggleItem(item.id)}
                                 className="flex items-center gap-3 py-2.5 px-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors active:scale-[0.99]"
                               >
                                 <div className={`w-7 h-7 rounded-xl border-none flex items-center justify-center flex-shrink-0 transition-all ${
@@ -151,16 +211,15 @@ export default function ShoppingConfirmSheet({
                                 <IngredientIcon
                                   baseName={ing.baseName}
                                   canonicalId={ing.canonicalId}
-                                  category={group.name || ing.category}
-                                  name={name}
+                                  category={groupName || ing.category}
+                                  name={ing.name}
                                   size="md"
                                   className={isChecked ? '' : 'opacity-40 grayscale'}
                                 />
 
                                 <div className="flex-1 min-w-0 flex flex-col justify-center select-none">
-                                  {/* 1. Name oben */}
                                   <div className="flex items-baseline flex-wrap gap-x-1.5 min-w-0 text-sm font-medium text-gray-900 dark:text-white leading-snug">
-                                    <span className={isChecked ? '' : 'text-gray-400 dark:text-gray-500'}>{name}</span>
+                                    <span className={isChecked ? '' : 'text-gray-400 dark:text-gray-500'}>{ing.name}</span>
                                     {ing.isStaple && (
                                       <span className="inline-flex items-center text-[9px] font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full uppercase tracking-wider select-none align-middle whitespace-nowrap no-underline">
                                         {t('recipe.staplePillLabel')}
@@ -168,10 +227,25 @@ export default function ShoppingConfirmSheet({
                                     )}
                                   </div>
 
-                                  {/* 2. Menge kleiner darunter */}
                                   {(amountStr || unitStr) && (
                                     <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 leading-normal mt-0.5">
                                       {amountStr}{unitStr}
+                                    </div>
+                                  )}
+
+                                  {item.childIngredients.length > 0 && (
+                                    <div className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-1 flex flex-wrap gap-1">
+                                      {item.childIngredients.map((child, cIdx) => {
+                                        const childAmt = formatAmount(child.amount, child.unit);
+                                        return (
+                                          <span
+                                            key={cIdx}
+                                            className="bg-emerald-500/10 dark:bg-emerald-400/15 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-lg text-[10px] font-medium"
+                                          >
+                                            + {child.name}{childAmt ? ` (${childAmt} ${child.unit || ''})` : ''}
+                                          </span>
+                                        );
+                                      })}
                                     </div>
                                   )}
                                 </div>
