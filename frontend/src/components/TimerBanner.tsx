@@ -2,6 +2,7 @@ import { Bell, X, Timer } from 'lucide-react';
 import { useTimerManager } from '../hooks/useTimerManager';
 import { useI18n } from '../context/I18nContext';
 import { stripInlineIngredientTags } from '../utils/ingredientMatch';
+import { hapticLight, hapticMedium, hapticHeavy } from '../utils/haptics';
 
 /** Compute remaining seconds from a timer's endAt timestamp */
 function getRemainingSeconds(endAt: number): number {
@@ -23,7 +24,7 @@ export default function TimerBanner() {
 
   return (
     <div
-      className="w-full bg-gray-50/95 dark:bg-gray-950/95 backdrop-blur-md border-b border-black/5 dark:border-white/5 py-2.5 transition-all"
+      className="w-full bg-gray-50/95 dark:bg-gray-950/95 backdrop-blur-md border-none shadow-xs py-2.5 transition-all"
       style={{ animation: 'timerBannerSlideDown 0.25s cubic-bezier(0.32,0.72,0,1) both' }}
     >
       <div className="w-full max-w-md mx-auto px-4 flex flex-col gap-2">
@@ -41,6 +42,7 @@ export default function TimerBanner() {
             <div
               key={timer.id}
               onClick={isAssociated ? () => {
+                hapticLight();
                 setPendingNavigation({ recipeId: recipeId!, stepNum: stepNum! });
                 window.dispatchEvent(new CustomEvent('app:navigate-to-timer-step', {
                   detail: { recipeId, stepNum }
@@ -91,12 +93,14 @@ export default function TimerBanner() {
                 onClick={(e) => {
                   e.stopPropagation();
                   if (isFinished) {
+                    hapticMedium();
                     dismissFinished(timer.id);
                   } else {
+                    hapticHeavy();
                     removeTimer(timer.id);
                   }
                 }}
-                className="relative shrink-0 w-8 h-8 rounded-full bg-white/20 hover:bg-white/35 text-white flex items-center justify-center transition-colors cursor-pointer outline-none"
+                className="relative shrink-0 w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-white/20 hover:bg-white/35 text-white flex items-center justify-center transition-colors cursor-pointer outline-none border-none"
                 aria-label={isFinished ? t('timer.dismiss') : 'Cancel timer'}
               >
                 <X className="w-4 h-4" />
