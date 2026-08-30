@@ -210,6 +210,16 @@ export async function deductRecipeIngredientsFromPantry(
 }
 
 /**
+ * Deduct ingredients consumed by cooking a recipe from user's pantry, floored at 0.
+ */
+export async function consumePantryForRecipe(
+  userId: string,
+  recipe: Recipe
+): Promise<{ consumedCount: number }> {
+  return deductRecipeIngredientsFromPantry(recipe, userId);
+}
+
+/**
  * Suggestions based on expiring and available pantry ingredients.
  */
 export async function getPantryRecipeSuggestions(
