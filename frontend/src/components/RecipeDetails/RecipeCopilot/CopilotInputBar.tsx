@@ -93,10 +93,10 @@ export const CopilotInputBar: React.FC<CopilotInputBarProps> = ({
             hapticLight();
             setShowChips(!showChips);
           }}
-          className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl border-none transition-all flex items-center justify-center cursor-pointer active:scale-95 shrink-0 ${
+          className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl transition-all flex items-center justify-center cursor-pointer active:scale-95 shrink-0 shadow-xs border ${
             showChips
-              ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-              : 'bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+              ? 'bg-emerald-600 text-white border-emerald-600'
+              : 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 hover:border-emerald-500/40'
           }`}
           aria-label={t('copilot.showSuggestionsAria')}
         >

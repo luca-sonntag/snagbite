@@ -46,6 +46,7 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
   onSend,
   recipeId,
   initialChips,
+  chipsLoading,
 }) => {
   const { t } = useI18n();
   const { addTimer } = useTimerManager();
@@ -57,6 +58,7 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
       {history.length === 0 && (
         <CopilotWelcomeCard
           initialChips={initialChips}
+          chipsLoading={chipsLoading}
           isPending={isPending}
           onSend={onSend}
         />

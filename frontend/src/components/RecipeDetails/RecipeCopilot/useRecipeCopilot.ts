@@ -183,7 +183,7 @@ export function useRecipeCopilot({
     loadedRecipeIdRef.current = recipe.id;
 
     setError(null);
-    setShowChips(stored.length === 0);
+    setShowChips(false);
     loadChips();
 
     setTimeout(() => {
