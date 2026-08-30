@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Select, ListBox, Popover } from '@heroui/react';
-import { LogOut, Globe, Moon, Sun, Thermometer, Scale, Info, UserMinus, Sparkles, Crown, ChevronRight, HelpCircle, MessageSquare, Shield, ScrollText, Building2, ExternalLink, User } from 'lucide-react';
+import { LogOut, Globe, Moon, Sun, Thermometer, Scale, Info, UserMinus, Sparkles, Crown, ChevronRight, HelpCircle, MessageSquare, Shield, ScrollText, Building2, ExternalLink } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
-import { PageHeader } from './PageHeader';
+
 import { useTheme } from '../hooks/useTheme';
 import { useDialog } from '../context/DialogContext';
 import PremiumModal from './PremiumModal';
@@ -105,12 +105,7 @@ export default function SettingsView() {
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
-      {/* Header */}
-      <PageHeader
-        icon={<User className="w-6 h-6" />}
-        title={t('app.nav.settings') || 'Einstellungen'}
-        subtitle={t('app.settings.subtitle')}
-      />
+
 
       {/* Save Status / Error Notification */}
       {saveMessage && (

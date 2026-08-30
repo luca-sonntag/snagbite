@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, BookOpen, Calendar, ShoppingCart, User, Trophy } from 'lucide-react';
+import { Sparkles, BookOpen, Calendar, ShoppingCart, User } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import type { AppBottomNavProps } from '../types/app';
 
@@ -137,32 +137,7 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
               {activeView === 'shopping-list' && activeIndicator}
             </button>
 
-            {/* 5. Progress Tab */}
-            <button
-              onClick={() => onNavigate('progress')}
-              className={`${navButtonBase} ${
-                activeView === 'progress'
-                  ? 'text-emerald-600 dark:text-emerald-400 font-bold'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium'
-              }`}
-            >
-              <div className={iconWrapperBase}>
-                <Trophy className={iconBase} />
-                {incomingRequestsCount > 0 ? (
-                  <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center text-center leading-none rounded-full bg-rose-500 px-1 text-[9px] font-black text-white ring-2 ring-white dark:ring-gray-900 animate-pulse">
-                    {incomingRequestsCount}
-                  </span>
-                ) : userLevel !== null && (
-                  <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center text-center leading-none rounded-full bg-emerald-600 px-1 text-[9px] font-black text-white ring-2 ring-white dark:ring-gray-900 animate-pulse-slow">
-                    {userLevel}
-                  </span>
-                )}
-              </div>
-              <span className={labelBase}>{t('app.nav.progress')}</span>
-              {activeView === 'progress' && activeIndicator}
-            </button>
-
-            {/* 6. Settings / Profile Tab */}
+            {/* 5. Profile & Gamification Tab */}
             <button
               onClick={() => onNavigate('settings')}
               className={`${navButtonBase} ${
@@ -173,6 +148,15 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
             >
               <div className={iconWrapperBase}>
                 <User className={iconBase} />
+                {incomingRequestsCount > 0 ? (
+                  <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center text-center leading-none rounded-full bg-rose-500 px-1 text-[9px] font-black text-white ring-2 ring-white dark:ring-gray-900 animate-pulse">
+                    {incomingRequestsCount}
+                  </span>
+                ) : userLevel !== null && (
+                  <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center text-center leading-none rounded-full bg-emerald-600 px-1 text-[9px] font-black text-white ring-2 ring-white dark:ring-gray-900 animate-pulse-slow">
+                    {userLevel}
+                  </span>
+                )}
               </div>
               <span className={labelBase}>{t('app.nav.settings') || 'Profil'}</span>
               {activeView === 'settings' && activeIndicator}

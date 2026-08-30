@@ -19,8 +19,7 @@ const RecipeDetails = lazy(() => import('./components/RecipeDetails'));
 const SavedCatalog = lazy(() => import('./components/SavedCatalog/index'));
 const MealPlannerView = lazy(() => import('./components/MealPlanner'));
 const ShoppingList = lazy(() => import('./components/ShoppingList'));
-const SettingsView = lazy(() => import('./components/SettingsView'));
-const ProgressView = lazy(() => import('./components/ProgressView'));
+const ProfileView = lazy(() => import('./components/ProfileView'));
 const WelcomeGuide = lazy(() => import('./components/WelcomeGuide'));
 
 import { useRecipeExtraction } from './hooks/useRecipeExtraction';
@@ -508,29 +507,21 @@ export default function App() {
           )}
         </div>
 
-        {/* PROGRESS TAB */}
+        {/* PROFILE & GAMIFICATION TAB (Progress + Settings) */}
         <div
-          hidden={activeView !== 'progress'}
-          aria-hidden={activeView !== 'progress' || undefined}
+          hidden={activeView !== 'progress' && activeView !== 'settings'}
+          aria-hidden={(activeView !== 'progress' && activeView !== 'settings') || undefined}
         >
-          {visitedViews.has('progress') && (
+          {(visitedViews.has('progress') || visitedViews.has('settings')) && (
             <Suspense fallback={<ViewFallback />}>
-              <ProgressView
+              <ProfileView
                 pendingInviteCode={pendingInviteCode}
                 onInviteConsumed={() => setPendingInviteCode(null)}
                 onSelectRecipe={(recipeId) => {
                   navigate('history', recipeId);
                 }}
+                defaultSection={activeView === 'settings' ? 'settings' : 'overview'}
               />
-            </Suspense>
-          )}
-        </div>
-
-        {/* SETTINGS TAB */}
-        <div hidden={activeView !== 'settings'} aria-hidden={activeView !== 'settings' || undefined}>
-          {visitedViews.has('settings') && (
-            <Suspense fallback={<ViewFallback />}>
-              <SettingsView />
             </Suspense>
           )}
         </div>
