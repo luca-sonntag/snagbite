@@ -48,6 +48,12 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
   const { t } = useI18n();
   const [clickedChips, setClickedChips] = React.useState<Set<number>>(new Set());
 
+  React.useEffect(() => {
+    if (history.length === 0) {
+      setClickedChips(new Set());
+    }
+  }, [history.length, recipeId]);
+
   return (
     <div className="flex-1 overflow-y-auto pt-1 pb-4 px-4 sm:px-6 flex flex-col gap-3.5 scrollbar-none bg-transparent">
       {/* Initial Welcome Greeting Turn (Always at the top of the chat) */}
