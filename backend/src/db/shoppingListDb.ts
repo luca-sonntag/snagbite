@@ -42,7 +42,27 @@ export async function listShoppingList(userId: string): Promise<ShoppingListItem
     .order('created_at', { ascending: true });
 
   if (error) throw wrapError('listShoppingList', error);
-  return (data as unknown as ShoppingListRow[] || []).map(rowToShoppingListItem);
+  const rows = (data as unknown as ShoppingListRow[] || []);
+
+  const items: ShoppingListItem[] = [];
+  for (const row of rows) {
+    const item = rowToShoppingListItem(row);
+    const keys = buildMappingKeys(item.baseName, item.name, undefined, item.parentIngredient);
+    if (keys.length > 0) {
+      try {
+        const mapping = await lookupMapping(keys, item.category || '');
+        if (mapping?.typicalPackageAmount && Number(mapping.typicalPackageAmount) > 0) {
+          item.typicalPackageAmount = Number(mapping.typicalPackageAmount);
+          item.typicalPackageUnit = mapping.typicalPackageUnit || undefined;
+        }
+      } catch {
+        // Non-fatal
+      }
+    }
+    items.push(item);
+  }
+
+  return items;
 }
 
 export async function createShoppingListItem(
