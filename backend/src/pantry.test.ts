@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { calculatePantryDeduction } from './matching/pantryDeduction.js';
+import { buildMappingKeys } from './matching/baseNameCanonical.js';
 
 test('Pantry deduction floored at zero logic', () => {
   const pantryItem = {
@@ -40,4 +41,18 @@ test('Pantry unit conversions (g to kg, ml to l)', () => {
     calculatePantryDeduction({ amount: 1, unit: 'l', name: 'Milch' }, { amount: 250, unit: 'ml', name: 'Milch' }),
     0.25
   );
+});
+
+test('Pantry alias matching: singular/plural matching (Röstzwiebeln vs Röstzwiebel)', () => {
+  const ingKeys = new Set(buildMappingKeys(undefined, 'Röstzwiebeln'));
+  const pKeys = buildMappingKeys(undefined, 'Röstzwiebel');
+  const isMatch = pKeys.some((k) => ingKeys.has(k));
+  assert.equal(isMatch, true, 'Singular Röstzwiebel must match plural Röstzwiebeln');
+
+  // Deduction calculation: 80g recipe from 100g in pantry -> 80g deduction -> 20g remaining
+  const pantryItem = { amount: 100, unit: 'g', name: 'Röstzwiebel' };
+  const recipeIng = { amount: 80, unit: 'g', name: 'Röstzwiebeln' };
+  const deduction = calculatePantryDeduction(pantryItem, recipeIng);
+  assert.equal(deduction, 80);
+  assert.equal(pantryItem.amount - deduction, 20);
 });

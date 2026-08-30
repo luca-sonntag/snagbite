@@ -81,11 +81,11 @@ describe('buildMappingKeys', () => {
   test('canonicalizes and appends synonyms deduplicated after primary baseName', () => {
     assert.deepEqual(
       buildMappingKeys('strained tomato', 'Passierte Tomaten', ['passata', 'tomato puree', 'sieved tomatoes']),
-      ['strained tomato', 'passata', 'tomato puree', 'sieved tomato']
+      ['strained tomato', 'passierte tomate', 'passata', 'tomato puree', 'sieved tomato']
     );
     assert.deepEqual(
       buildMappingKeys('spring onion', 'Lauchzwiebeln', ['scallions', 'green onions', 'spring onion']),
-      ['spring onion']
+      ['spring onion', 'lauchzwiebel']
     );
   });
 
@@ -109,6 +109,9 @@ describe('toEnglishSingular', () => {
   test('handles irregular plural endings', () => {
     assert.equal(toEnglishSingular('strawberries'), 'strawberry');
     assert.equal(toEnglishSingular('tomatoes'), 'tomato');
+    assert.equal(toEnglishSingular('potatoes'), 'potato');
     assert.equal(toEnglishSingular('leaves'), 'leaf');
+    assert.equal(toEnglishSingular('Röstzwiebeln'), 'röstzwiebel');
+    assert.equal(toEnglishSingular('Gurken'), 'gurke');
   });
 });

@@ -105,6 +105,16 @@ export function toEnglishSingular(word: string): string {
     return lower.slice(0, -1);
   }
 
+  // 6. German culinary plurals: -eln (Zwiebeln -> Zwiebel, Röstzwiebeln -> Röstzwiebel, Kartoffeln -> Kartoffel)
+  if (lower.endsWith('eln') && lower.length > 4) {
+    return lower.slice(0, -1);
+  }
+
+  // 7. German culinary plurals: -en / -n after common vowels (Gurken -> Gurke, Tomaten -> Tomate, Erdbeeren -> Erdbeere)
+  if (/(?:ke|te|be|re|ne|se|ze|ge|de|fe|le|me)n$/.test(lower) && lower.length > 4) {
+    return lower.slice(0, -1);
+  }
+
   return lower;
 }
 
@@ -156,8 +166,7 @@ export function canonicalizeBaseName(raw: string | undefined | null): string {
  * Canonical mapping keys under which a resolved mapping is queried and stored.
  *
  * Prioritizes the model's standardized English `baseName` (e.g. "cottage cheese", "rolled oat").
- * If `synonyms` are provided, canonicalizes them and appends them as secondary mapping keys.
- * If `baseName` is absent (legacy recipe text), falls back to canonicalized `rawName`.
+ * Includes `rawName` for bilingual German-English cross-matching and appends canonicalized `synonyms`.
  * Ensures full bidirectional mapping and alias discovery in ingredient_mappings.
  */
 export function buildMappingKeys(baseName?: string, rawName?: string, synonyms?: string[]): string[] {
@@ -174,15 +183,12 @@ export function buildMappingKeys(baseName?: string, rawName?: string, synonyms?:
   };
 
   addKey(baseName);
+  addKey(rawName);
 
   if (Array.isArray(synonyms)) {
     for (const syn of synonyms) {
       addKey(syn);
     }
-  }
-
-  if (keys.length === 0) {
-    addKey(rawName);
   }
 
   return keys;

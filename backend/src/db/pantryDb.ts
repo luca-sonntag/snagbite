@@ -11,6 +11,7 @@ import type { PantryItemRow } from './types/pantry.js';
 import { rowToRecipe } from './recipesDb.js';
 import type { RecipeRow } from './client.js';
 import { calculatePantryDeduction } from '../matching/pantryDeduction.js';
+import { buildMappingKeys } from '../matching/baseNameCanonical.js';
 
 export function rowToPantryItem(row: PantryItemRow): PantryItem {
   return {
@@ -144,15 +145,12 @@ export async function consumePantryForRecipe(
   for (const group of recipe.ingredients) {
     if (!group.items) continue;
     for (const ing of group.items) {
-      const ingName = (ing.name || '').toLowerCase().trim();
-      const ingBase = (ing.baseName || '').toLowerCase().trim();
+      const ingKeys = new Set(buildMappingKeys(ing.baseName, ing.name, ing.synonyms));
 
       const match = pantryItems.find((p) => {
-        const pName = (p.name || '').toLowerCase().trim();
-        const pBase = (p.baseName || '').toLowerCase().trim();
         if (ing.canonicalId && p.canonicalId && ing.canonicalId === p.canonicalId) return true;
-        if (ingBase && pBase && ingBase === pBase) return true;
-        return ingName === pName || (ingBase && pName === ingBase) || (pBase && ingName === pBase);
+        const pKeys = buildMappingKeys(p.baseName, p.name);
+        return pKeys.some((k) => ingKeys.has(k));
       });
 
       if (match && match.amount > 0) {
