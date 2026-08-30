@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   Sparkles,
   ChefHat,
@@ -74,7 +74,7 @@ export const CopilotWelcomeCard: React.FC<CopilotWelcomeCardProps> = ({
                 onSend(chip.prompt);
               }}
               disabled={isPending}
-              className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-white/85 dark:bg-gray-800/85 backdrop-blur-xl hover:bg-white dark:hover:bg-gray-800 border border-emerald-500/20 hover:border-emerald-500/40 shadow-[0_2px_10px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_14px_rgba(16,185,129,0.12)] text-xs font-semibold text-gray-800 dark:text-gray-200 active:scale-95 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-white/85 dark:bg-gray-800/85 backdrop-blur-xl hover:bg-white dark:hover:bg-gray-800 border border-white/60 dark:border-white/10 shadow-[0_2px_10px_rgba(0,0,0,0.04)] text-xs font-semibold text-gray-800 dark:text-gray-200 active:scale-95 transition-all cursor-pointer"
             >
               {getCategoryIcon(chip.category)}
               <span className="truncate max-w-[220px]">{chip.label}</span>

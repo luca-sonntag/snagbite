@@ -122,7 +122,7 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
                           onSend(sug.payload);
                         }
                       }}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl text-xs font-semibold text-gray-800 dark:text-gray-200 border border-emerald-500/25 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:bg-emerald-500/15 hover:text-emerald-700 dark:hover:text-emerald-300 active:scale-95 transition-all cursor-pointer disabled:opacity-50 min-h-[38px]"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl text-xs font-semibold text-gray-800 dark:text-gray-200 border border-white/60 dark:border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:bg-emerald-500/15 hover:text-emerald-700 dark:hover:text-emerald-300 active:scale-95 transition-all cursor-pointer disabled:opacity-50 min-h-[38px]"
                     >
                       {sug.type === 'timer' ? (
                         <Timer className="w-3.5 h-3.5 text-rose-500 shrink-0" />
