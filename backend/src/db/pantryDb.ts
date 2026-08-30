@@ -5,6 +5,7 @@ import {
   type PantrySuggestion,
   type Recipe,
   getDefaultShelfLifeDays,
+  calculateExpiresAtDate,
 } from '@cookbook/shared';
 import { getClient, wrapError, isNoRowsError, num } from './client.js';
 import type { PantryItemRow } from './types/pantry.js';
@@ -53,9 +54,7 @@ export async function createPantryItem(
       typeof dto.shelfLifeDays === 'number' && dto.shelfLifeDays > 0
         ? dto.shelfLifeDays
         : getDefaultShelfLifeDays(dto.category, dto.baseName || dto.name);
-    const d = new Date();
-    d.setDate(d.getDate() + shelfDays);
-    expiresAt = d.toISOString().split('T')[0];
+    expiresAt = calculateExpiresAtDate(shelfDays);
   }
 
   // Check if an existing pantry item with matching canonical key already exists
