@@ -53,9 +53,9 @@ export default function RecipeStickyBar({
   return (
     <div
       id="recipe-sticky-bar"
-      className={`sticky top-[var(--app-sticky-top)] z-30 -mx-4 px-4 bg-[#f9fafb]/95 dark:bg-gray-950/95 backdrop-blur-md transition-all duration-200 ${
+      className={`sticky top-[var(--app-sticky-top)] z-30 -mx-4 px-4 bg-[#f9fafb]/95 dark:bg-gray-950/95 backdrop-blur-md transition-all duration-200 border-none ${
         isCollapsed
-          ? 'border-b border-black/5 dark:border-white/5 shadow-xs pb-0.5 before:content-[\'\'] before:absolute before:bottom-full before:inset-x-0 before:h-12 before:bg-[#f9fafb] dark:before:bg-gray-950 before:pointer-events-none'
+          ? 'shadow-[0_2px_10px_rgba(0,0,0,0.03)] pb-0.5 before:content-[\'\'] before:absolute before:bottom-full before:inset-x-0 before:h-12 before:bg-[#f9fafb] dark:before:bg-gray-950 before:pointer-events-none'
           : ''
       }`}
     >
@@ -80,7 +80,7 @@ export default function RecipeStickyBar({
             <ArrowLeft className="w-5 h-5" />
           </button>
         )}
-        <div className="w-10 h-10 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 border border-black/5 dark:border-white/10 shadow-xs flex items-center justify-center">
+        <div className="w-10 h-10 flex-shrink-0 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-none shadow-xs flex items-center justify-center">
           <CachedImage
             src={imageUrl}
             emoji={emoji}

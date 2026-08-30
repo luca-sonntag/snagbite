@@ -216,7 +216,7 @@ export default function RecipeHeader({
                 {/* Looked up rarely, so it lives here rather than competing
                     with the title for space above the fold. */}
                 {createdAt && (
-                  <div className="px-4 pt-2.5 pb-1.5 mt-1 border-t border-black/5 dark:border-white/5 text-[11px] font-medium text-gray-400 dark:text-gray-500 select-none">
+                  <div className="px-4 pt-2 pb-1.5 mt-1 text-[11px] font-medium text-gray-400 dark:text-gray-500 select-none">
                     {t('catalog.savedOn', { date: new Date(createdAt).toLocaleDateString(language) })}
                   </div>
                 )}

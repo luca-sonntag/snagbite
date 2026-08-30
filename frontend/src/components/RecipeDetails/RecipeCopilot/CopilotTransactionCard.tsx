@@ -3,8 +3,7 @@ import { Button } from '@heroui/react';
 import { ListChecks, X, RefreshCw, Plus, Trash2, Loader2, Sparkles } from 'lucide-react';
 import { useI18n } from '../../../context/I18nContext';
 import type { CopilotTransactionCardProps } from './types';
-
-
+import { hapticLight, hapticMedium, hapticHeavy } from '../../../utils/haptics';
 
 export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
   pendingChanges,
@@ -45,9 +44,12 @@ export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
             </span>
             <button
               type="button"
-              onClick={() => onRemoveChange(change.id)}
+              onClick={() => {
+                hapticHeavy();
+                onRemoveChange(change.id);
+              }}
               disabled={isPending}
-              className="flex-shrink-0 p-1 rounded-lg text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all outline-none border-none cursor-pointer disabled:opacity-40"
+              className="flex-shrink-0 w-7 h-7 min-w-[28px] min-h-[28px] rounded-lg text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all outline-none border-none flex items-center justify-center cursor-pointer disabled:opacity-40"
               aria-label={t('copilot.changesDeleteAria')}
               title={t('copilot.changesDeleteAria')}
             >
@@ -66,8 +68,11 @@ export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
           <div className="flex gap-2">
             <Button
               size="sm"
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl h-10 flex items-center justify-center gap-1.5 border-none shadow-none active:scale-95 transition-all text-xs flex-1"
-              onPress={() => onApplyChanges(true)}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl h-11 flex items-center justify-center gap-1.5 border-none shadow-none active:scale-95 transition-all text-xs flex-1 cursor-pointer"
+              onPress={() => {
+                hapticMedium();
+                onApplyChanges(true);
+              }}
               isDisabled={isPending}
             >
               <RefreshCw className="w-3.5 h-3.5" />
@@ -75,8 +80,11 @@ export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
             </Button>
             <Button
               size="sm"
-              className="bg-white dark:bg-gray-800 border-none text-emerald-700 dark:text-emerald-300 font-bold rounded-xl h-10 flex items-center justify-center gap-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] active:scale-95 transition-all text-xs flex-1 hover:bg-gray-50 dark:hover:bg-gray-700"
-              onPress={() => onApplyChanges(false)}
+              className="bg-white dark:bg-gray-800 border-none text-emerald-700 dark:text-emerald-300 font-bold rounded-2xl h-11 flex items-center justify-center gap-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] active:scale-95 transition-all text-xs flex-1 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+              onPress={() => {
+                hapticMedium();
+                onApplyChanges(false);
+              }}
               isDisabled={isPending}
             >
               <Plus className="w-3.5 h-3.5" />
@@ -85,9 +93,12 @@ export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
           </div>
           <button
             type="button"
-            onClick={() => setChoosingApply(false)}
+            onClick={() => {
+              hapticLight();
+              setChoosingApply(false);
+            }}
             disabled={isPending}
-            className="text-[11px] text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 font-medium self-center outline-none border-none cursor-pointer bg-transparent py-1"
+            className="text-[11px] text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 font-medium self-center outline-none border-none cursor-pointer bg-transparent py-1.5"
           >
             {t('dialog.cancelDefault')}
           </button>
@@ -96,8 +107,11 @@ export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
         <div className="flex gap-2 pt-1">
           <Button
             size="sm"
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl h-10 flex items-center justify-center gap-2 border-none shadow-none active:scale-95 transition-all text-xs flex-1"
-            onPress={() => setChoosingApply(true)}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl h-11 flex items-center justify-center gap-2 border-none shadow-none active:scale-95 transition-all text-xs flex-1 cursor-pointer"
+            onPress={() => {
+              hapticLight();
+              setChoosingApply(true);
+            }}
             isDisabled={isPending}
           >
             {isPending ? (
@@ -109,8 +123,11 @@ export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
           </Button>
           <Button
             size="sm"
-            className="bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 font-semibold rounded-xl h-10 px-3.5 flex items-center justify-center gap-1.5 border-none shadow-[0_1px_3px_rgba(0,0,0,0.02)] active:scale-95 transition-all text-xs"
-            onPress={onDiscardAll}
+            className="bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 font-semibold rounded-2xl h-11 px-3.5 flex items-center justify-center gap-1.5 border-none shadow-[0_1px_3px_rgba(0,0,0,0.02)] active:scale-95 transition-all text-xs cursor-pointer"
+            onPress={() => {
+              hapticHeavy();
+              onDiscardAll();
+            }}
             isDisabled={isPending}
           >
             <Trash2 className="w-3.5 h-3.5" />

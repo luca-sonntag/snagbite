@@ -11,8 +11,7 @@ import {
 } from 'lucide-react';
 import { useI18n } from '../../../context/I18nContext';
 import type { CopilotInputBarProps } from './types';
-
-
+import { hapticLight, hapticMedium } from '../../../utils/haptics';
 
 export const CopilotInputBar: React.FC<CopilotInputBarProps> = ({
   message,
@@ -59,9 +58,12 @@ export const CopilotInputBar: React.FC<CopilotInputBarProps> = ({
                 <button
                   key={idx}
                   type="button"
-                  onClick={() => onSend(chip.prompt)}
+                  onClick={() => {
+                    hapticLight();
+                    onSend(chip.prompt);
+                  }}
                   disabled={isPending}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-full border-none bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:bg-emerald-500/20 dark:hover:text-emerald-300 active:scale-95 transition-all whitespace-nowrap flex-shrink-0 cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.02)] disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-full border-none bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:bg-emerald-500/20 dark:hover:text-emerald-300 active:scale-95 transition-all whitespace-nowrap flex-shrink-0 cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.02)] disabled:opacity-50 min-h-[38px]"
                 >
                   {getCategoryIcon(chip.category)}
                   <span>{chip.label}</span>
@@ -76,14 +78,20 @@ export const CopilotInputBar: React.FC<CopilotInputBarProps> = ({
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          onSend(message);
+          if (message.trim()) {
+            hapticMedium();
+            onSend(message);
+          }
         }}
         className="flex items-center gap-2 w-full"
       >
         {!showChips && (
           <button
             type="button"
-            onClick={() => setShowChips(true)}
+            onClick={() => {
+              hapticLight();
+              setShowChips(true);
+            }}
             className="flex-shrink-0 h-12 w-11 rounded-2xl bg-gray-100 dark:bg-gray-800 border-none hover:bg-emerald-500/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
             aria-label={t('copilot.showSuggestionsAria')}
           >
