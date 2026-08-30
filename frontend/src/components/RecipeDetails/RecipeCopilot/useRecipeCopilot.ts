@@ -14,6 +14,13 @@ const changesStorageKey = (recipeId: string) => `recipe_copilot_changes_${recipe
 const chipsStorageKey = (recipeId: string, lang: string) => `recipe_copilot_chips_${recipeId}_${lang}`;
 
 
+const generateChangeId = (): string => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+};
+
 export function useRecipeCopilot({
   isOpen,
   recipe,
@@ -274,7 +281,7 @@ export function useRecipeCopilot({
         if (incomingChanges.length > 0) {
           setPendingChanges((prev) => [
             ...prev,
-            ...incomingChanges.map((text: string) => ({ id: crypto.randomUUID(), text })),
+            ...incomingChanges.map((text: string) => ({ id: generateChangeId(), text })),
           ]);
         }
       }
