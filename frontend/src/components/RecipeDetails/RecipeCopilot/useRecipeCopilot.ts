@@ -185,10 +185,6 @@ export function useRecipeCopilot({
     setError(null);
     setShowChips(false);
     loadChips();
-
-    setTimeout(() => {
-      textareaRef.current?.focus();
-    }, 100);
   }, [isOpen, chatKey, changesKey, recipe.id, loadChips]);
 
   const handleSend = async (textToSend: string) => {
