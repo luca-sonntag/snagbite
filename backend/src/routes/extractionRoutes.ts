@@ -238,7 +238,7 @@ extractionRoutes.post('/extract-recipe/photos', async (req: Request, res: Respon
 
 extractionRoutes.post('/extract-recipe/frames', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { jobId, thumbnailBase64, framesBase64 } = req.body;
+    const { jobId, thumbnailBase64, gridBase64, framesBase64 } = req.body;
 
     if (!jobId || typeof jobId !== 'string') {
       throw new AppError('MISSING_FIELD', { params: { field: 'jobId' } });
@@ -261,8 +261,10 @@ extractionRoutes.post('/extract-recipe/frames', async (req: Request, res: Respon
     }
 
     const thumbStr = typeof thumbnailBase64 === 'string' ? thumbnailBase64 : '';
+    const gridStr = typeof gridBase64 === 'string' ? gridBase64 : '';
     const totalChars =
       thumbStr.length +
+      gridStr.length +
       frames.reduce((acc: number, f: unknown) => acc + (typeof f === 'string' ? f.length : 0), 0);
 
     if (totalChars > MAX_FRAMES_TOTAL_CHARS) {
@@ -274,6 +276,7 @@ extractionRoutes.post('/extract-recipe/frames', async (req: Request, res: Respon
     await updateJob(job.id, {
       clientFrames: {
         thumbnailBase64: thumbStr || undefined,
+        gridBase64: gridStr || undefined,
         framesBase64: frames.filter(
           (f: unknown): f is string => typeof f === 'string' && f.trim().length > 0
         ),

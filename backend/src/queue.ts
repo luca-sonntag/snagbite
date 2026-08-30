@@ -279,30 +279,40 @@ async function processJob(job: Job): Promise<void> {
       const thumbBuf = job.clientFrames.thumbnailBase64
         ? Buffer.from(job.clientFrames.thumbnailBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64')
         : undefined;
-      const frameBufs = (job.clientFrames.framesBase64 || [])
-        .map((f) => Buffer.from(f.replace(/^data:image\/\w+;base64,/, ''), 'base64'))
-        .filter((b) => b.length > 0);
 
       let clientGridBuffer: Buffer | undefined;
-      if (frameBufs.length > 1) {
-        try {
-          const { createGridBufferFromFrames } = await import('./frameExtractor.js');
-          console.log(`[Job ${jobId}] Creating in-memory 4x4 grid from ${frameBufs.length} client frames...`);
-          clientGridBuffer = await createGridBufferFromFrames(frameBufs);
 
-          // In dev environment, persist the grid image to disk for inspection and debugging
-          if (process.env.NODE_ENV !== 'production' && clientGridBuffer) {
-            await fs.mkdir(runDir, { recursive: true });
-            const devGridPath = path.join(runDir, 'grid.jpg');
-            await fs.writeFile(devGridPath, clientGridBuffer);
-            console.log(`[Job ${jobId}] [DEV] Saved grid image to ${devGridPath}`);
+      if (job.clientFrames.gridBase64) {
+        console.log(`[Job ${jobId}] Using client-composited 4x4 grid...`);
+        clientGridBuffer = Buffer.from(
+          job.clientFrames.gridBase64.replace(/^data:image\/\w+;base64,/, ''),
+          'base64'
+        );
+      } else {
+        const frameBufs = (job.clientFrames.framesBase64 || [])
+          .map((f) => Buffer.from(f.replace(/^data:image\/\w+;base64,/, ''), 'base64'))
+          .filter((b) => b.length > 0);
+
+        if (frameBufs.length > 1) {
+          try {
+            const { createGridBufferFromFrames } = await import('./frameExtractor.js');
+            console.log(`[Job ${jobId}] Creating in-memory 4x4 grid from ${frameBufs.length} client frames...`);
+            clientGridBuffer = await createGridBufferFromFrames(frameBufs);
+          } catch (gridErr: any) {
+            console.warn(`[Job ${jobId}] Failed to create in-memory grid from client frames:`, gridErr.message);
           }
-        } catch (gridErr: any) {
-          console.warn(`[Job ${jobId}] Failed to create in-memory grid from client frames:`, gridErr.message);
         }
       }
 
-      clientFramesInput = { thumbnail: thumbBuf, frames: frameBufs, gridBuffer: clientGridBuffer };
+      // In dev environment, persist the grid image to disk for inspection and debugging
+      if (process.env.NODE_ENV !== 'production' && clientGridBuffer) {
+        await fs.mkdir(runDir, { recursive: true });
+        const devGridPath = path.join(runDir, 'grid.jpg');
+        await fs.writeFile(devGridPath, clientGridBuffer);
+        console.log(`[Job ${jobId}] [DEV] Saved grid image to ${devGridPath}`);
+      }
+
+      clientFramesInput = { thumbnail: thumbBuf, gridBuffer: clientGridBuffer };
     }
 
     // 3. Mark job as processing

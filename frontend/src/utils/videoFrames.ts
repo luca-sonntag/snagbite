@@ -4,6 +4,7 @@ import { apiUrl } from '../api';
 import type { ExtractionJob } from '../types';
 import { setCachedImage } from './imageStore';
 import { extractKeyframesWebCodecs, calculateKeyframeTimestamps, FRAME_COUNT } from './videoDecoder';
+import { compositeKeyframesToGridCanvas } from './gridCanvas';
 
 export { calculateKeyframeTimestamps, FRAME_COUNT };
 
@@ -188,9 +189,14 @@ export async function handleClientFrameRequest(
       token,
     );
 
-    console.log(`[videoFrames] Submitting ${framesBase64.length} frames for job ${job.id}...`);
+    // Composite keyframes directly in browser to a single lightweight 4x4 grid JPEG (~200 KB)
+    const gridBase64 = framesBase64.length > 0 ? await compositeKeyframesToGridCanvas(framesBase64) : null;
 
-    // Submit frames to backend to resume worker extraction
+    console.log(
+      `[videoFrames] Submitting ${gridBase64 ? '4x4 composite grid' : `${framesBase64.length} frames`} for job ${job.id}...`
+    );
+
+    // Submit frames/grid to backend to resume worker extraction
     try {
       const postResponse = await fetch(apiUrl('/api/extract-recipe/frames'), {
         method: 'POST',
@@ -200,14 +206,15 @@ export async function handleClientFrameRequest(
         },
         body: JSON.stringify({
           jobId: job.id,
-          framesBase64,
+          gridBase64: gridBase64 ?? undefined,
+          framesBase64: gridBase64 ? undefined : framesBase64,
         }),
       });
 
       if (!postResponse.ok) {
         console.warn(`[videoFrames] Failed to submit frames, status: ${postResponse.status}`);
       } else {
-        console.log(`[videoFrames] Frames submitted successfully for job ${job.id}.`);
+        console.log(`[videoFrames] Frames/grid submitted successfully for job ${job.id}.`);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
