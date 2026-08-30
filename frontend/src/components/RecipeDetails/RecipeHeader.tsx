@@ -10,6 +10,7 @@ import { useCookHistory } from '../../hooks/useCookHistory';
 import { formatRelative } from '../../utils/formatRelative';
 import { hapticLight, hapticNotification } from '../../utils/haptics';
 import { devReExtractRecipe } from '../../utils/dev';
+import RecipeRemixList from './RecipeRemixList';
 
 interface RecipeHeaderProps {
   recipe: Recipe;
@@ -289,6 +290,14 @@ export default function RecipeHeader({
               )}
             </button>
           </div>
+        )}
+
+        {/* User's private remixes carousel for this recipe (only on top-level original recipes) */}
+        {!recipe.parentRecipeId && (
+          <RecipeRemixList
+            parentRecipeId={recipe.id}
+            onNavigateToRecipe={onNavigateToRecipe}
+          />
         )}
       </div>
     </>
