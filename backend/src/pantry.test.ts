@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import type { Recipe } from '@cookbook/shared';
+import { calculatePantryDeduction } from './matching/pantryDeduction.js';
 
 test('Pantry deduction floored at zero logic', () => {
   const pantryItem = {
@@ -12,36 +12,32 @@ test('Pantry deduction floored at zero logic', () => {
   };
 
   // Recipe uses 200ml
-  const recipeDeduction1 = 200;
+  const recipeDeduction1 = calculatePantryDeduction(pantryItem, { amount: 200, unit: 'ml', name: 'Milch' });
   const remaining1 = Math.max(0, pantryItem.amount - recipeDeduction1);
   assert.equal(remaining1, 300);
 
   // Recipe uses 600ml (more than available)
-  const recipeDeduction2 = 600;
+  const recipeDeduction2 = calculatePantryDeduction(pantryItem, { amount: 600, unit: 'ml', name: 'Milch' });
   const remaining2 = Math.max(0, pantryItem.amount - recipeDeduction2);
   assert.equal(remaining2, 0, 'Should floor at 0 rather than negative');
 });
 
 test('Pantry unit conversions (g to kg, ml to l)', () => {
-  function calculateReduction(ingAmount: number, ingUnit: string, pantryUnit: string): number {
-    let deduction = ingAmount;
-    const iUnit = ingUnit.toLowerCase().trim();
-    const pUnit = pantryUnit.toLowerCase().trim();
-
-    if (iUnit === 'kg' && pUnit === 'g') deduction *= 1000;
-    else if (iUnit === 'g' && pUnit === 'kg') deduction /= 1000;
-    else if (iUnit === 'l' && (pUnit === 'ml' || pUnit === 'milliliter')) deduction *= 1000;
-    else if ((iUnit === 'ml' || iUnit === 'milliliter') && pUnit === 'l') deduction /= 1000;
-
-    return deduction;
-  }
-
   // 200g recipe ingredient against 1kg pantry item -> 0.2kg deduction
-  assert.equal(calculateReduction(200, 'g', 'kg'), 0.2);
+  assert.equal(
+    calculatePantryDeduction({ amount: 1, unit: 'kg', name: 'Mehl' }, { amount: 200, unit: 'g', name: 'Mehl' }),
+    0.2
+  );
 
   // 1kg recipe ingredient against 500g pantry item -> 1000g deduction
-  assert.equal(calculateReduction(1, 'kg', 'g'), 1000);
+  assert.equal(
+    calculatePantryDeduction({ amount: 500, unit: 'g', name: 'Mehl' }, { amount: 1, unit: 'kg', name: 'Mehl' }),
+    1000
+  );
 
   // 250ml recipe ingredient against 1l pantry item -> 0.25l deduction
-  assert.equal(calculateReduction(250, 'ml', 'l'), 0.25);
+  assert.equal(
+    calculatePantryDeduction({ amount: 1, unit: 'l', name: 'Milch' }, { amount: 250, unit: 'ml', name: 'Milch' }),
+    0.25
+  );
 });

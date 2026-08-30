@@ -10,6 +10,7 @@ import { getClient, wrapError, isNoRowsError, num } from './client.js';
 import type { PantryItemRow } from './types/pantry.js';
 import { rowToRecipe } from './recipesDb.js';
 import type { RecipeRow } from './client.js';
+import { calculatePantryDeduction } from '../matching/pantryDeduction.js';
 
 export function rowToPantryItem(row: PantryItemRow): PantryItem {
   return {
@@ -155,17 +156,9 @@ export async function consumePantryForRecipe(
       });
 
       if (match && match.amount > 0) {
-        // Calculate reduction with basic unit normalization (g vs kg, ml vs l)
-        let deduction = ing.amount || 0;
-        const ingUnit = (ing.unit || '').toLowerCase().trim();
-        const pantryUnit = (match.unit || '').toLowerCase().trim();
-
-        if (ingUnit === 'kg' && pantryUnit === 'g') deduction *= 1000;
-        else if (ingUnit === 'g' && pantryUnit === 'kg') deduction /= 1000;
-        else if (ingUnit === 'l' && (pantryUnit === 'ml' || pantryUnit === 'milliliter')) deduction *= 1000;
-        else if ((ingUnit === 'ml' || ingUnit === 'milliliter') && pantryUnit === 'l') deduction /= 1000;
-
-        const newAmount = Math.max(0, match.amount - deduction);
+        // Calculate intelligent reduction with multi-unit normalization (piece <-> grams, volume, containers)
+        const deduction = calculatePantryDeduction(match, ing);
+        const newAmount = Math.max(0, Math.round((match.amount - deduction) * 100) / 100);
         match.amount = newAmount;
 
         await getClient()
