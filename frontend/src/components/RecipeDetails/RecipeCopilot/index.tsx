@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@heroui/react';
 import { Trash2 } from 'lucide-react';
 import { useI18n } from '../../../context/I18nContext';
@@ -104,6 +104,10 @@ export const RecipeCopilot: React.FC<RecipeCopilotProps> = ({
           error={error}
           messagesEndRef={messagesEndRef}
           onLoadNewRecipe={handleLoadNewRecipe}
+          onSend={handleSend}
+          recipeId={recipe.id}
+          initialChips={chips}
+          chipsLoading={chipsLoading}
         />
 
         {/* Footer: Transaction Card, Quick Chips & Message Input */}

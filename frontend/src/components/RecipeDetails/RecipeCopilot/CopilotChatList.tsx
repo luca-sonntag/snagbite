@@ -1,9 +1,34 @@
 ﻿import React from 'react';
 import { Button } from '@heroui/react';
-import { Sparkles, Bot, Loader2, RefreshCw } from 'lucide-react';
+import { Sparkles, Bot, Loader2, RefreshCw, Timer } from 'lucide-react';
 import { useI18n } from '../../../context/I18nContext';
-import { hapticMedium } from '../../../utils/haptics';
+import { useTimerManager } from '../../../hooks/useTimerManager';
+import { useToast } from '../../../context/ToastContext';
+import { hapticLight, hapticMedium } from '../../../utils/haptics';
+import CopilotWelcomeCard from './CopilotWelcomeCard';
 import type { CopilotChatListProps } from './types';
+
+interface CopilotSuggestion {
+  label: string;
+  type: 'prompt' | 'timer';
+  payload: string;
+}
+
+const SUGGESTION_REGEX = /\[suggest:([^\]]+)\]\((prompt|timer):([^)]+)\)/g;
+
+function parseSuggestions(rawText: string): { cleanText: string; suggestions: CopilotSuggestion[] } {
+  const suggestions: CopilotSuggestion[] = [];
+  const cleanText = rawText.replace(SUGGESTION_REGEX, (_, label, type, payload) => {
+    suggestions.push({
+      label: label.trim(),
+      type: type as 'prompt' | 'timer',
+      payload: payload.trim(),
+    });
+    return '';
+  }).trim();
+
+  return { cleanText, suggestions };
+}
 
 export const CopilotChatList: React.FC<CopilotChatListProps> = ({
   history,
@@ -12,33 +37,36 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
   error,
   messagesEndRef,
   onLoadNewRecipe,
+  onSend,
+  recipeId,
+  initialChips,
 }) => {
   const { t } = useI18n();
+  const { addTimer } = useTimerManager();
+  const toast = useToast();
 
   return (
-    <div className="flex-1 overflow-y-auto pt-[calc(1.25rem_+_var(--safe-area-inset-top))] pb-4 px-4 sm:px-6 flex flex-col gap-4 scrollbar-none bg-transparent">
+    <div className="flex-1 overflow-y-auto pt-1 pb-4 px-4 sm:px-6 flex flex-col gap-3.5 scrollbar-none bg-transparent">
       {/* Welcome message if history is empty */}
       {history.length === 0 && (
-        <div className="my-auto flex flex-col items-center text-center max-w-sm mx-auto gap-3 py-7 px-6 rounded-3xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.06)] animate-in fade-in zoom-in-95 duration-300">
-          <div className="w-12 h-12 rounded-2xl bg-white dark:bg-gray-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-md border border-emerald-500/10">
-            <Sparkles className="w-6 h-6 animate-pulse" />
-          </div>
-          <h4 className="text-sm font-bold text-gray-900 dark:text-white">{t('copilot.title')}</h4>
-          <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-            Ich helfe dir, dieses Rezept anzupassen, Zutaten auszutauschen oder einen Timer zu starten. Frag mich einfach!
-          </p>
-        </div>
+        <CopilotWelcomeCard
+          initialChips={initialChips}
+          isPending={isPending}
+          onSend={onSend}
+        />
       )}
 
       {/* Chat bubbles */}
       {history.map((msg, idx) => {
         const isAI = msg.role === 'model';
+        const { cleanText, suggestions } = isAI ? parseSuggestions(msg.text) : { cleanText: msg.text, suggestions: [] };
+
         return (
           <div
             key={idx}
             className={`flex gap-2.5 ${
               isAI
-                ? 'self-start items-start max-w-[90%] sm:max-w-[85%]'
+                ? 'self-start items-start max-w-[92%] sm:max-w-[88%]'
                 : 'self-end justify-end max-w-[85%]'
             } animate-in fade-in slide-in-from-bottom-1 duration-200`}
           >
@@ -56,8 +84,43 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
                     : 'bg-emerald-600 text-white rounded-3xl rounded-tr-sm shadow-[0_4px_20px_rgba(16,185,129,0.25)] font-normal'
                 }`}
               >
-                {msg.text}
+                {cleanText}
               </div>
+
+              {/* Proactive Follow-up Quick Action Pills */}
+              {isAI && suggestions.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-0.5">
+                  {suggestions.map((sug, sIdx) => (
+                    <button
+                      key={sIdx}
+                      type="button"
+                      disabled={isPending}
+                      onClick={() => {
+                        hapticLight();
+                        if (sug.type === 'timer') {
+                          const [secStr, ...lblParts] = sug.payload.split(':');
+                          const secs = parseInt(secStr, 10);
+                          const label = lblParts.join(':') || 'Timer';
+                          if (!isNaN(secs)) {
+                            addTimer(secs, label, recipeId);
+                            toast.info(`Timer gestartet: ${label} (${Math.round(secs / 60)} Min)`);
+                          }
+                        } else {
+                          onSend(sug.payload);
+                        }
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl text-xs font-semibold text-gray-800 dark:text-gray-200 border border-emerald-500/25 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:bg-emerald-500/15 hover:text-emerald-700 dark:hover:text-emerald-300 active:scale-95 transition-all cursor-pointer disabled:opacity-50 min-h-[38px]"
+                    >
+                      {sug.type === 'timer' ? (
+                        <Timer className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                      ) : (
+                        <Sparkles className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                      )}
+                      <span>{sug.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Remix system card if recipe was modified */}
               {isAI && msg.isRemixReady && msg.newRecipe && msg.newJobId && (

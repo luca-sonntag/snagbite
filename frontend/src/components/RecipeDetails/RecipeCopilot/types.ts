@@ -57,6 +57,10 @@ export interface CopilotChatListProps {
   error: string | null;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   onLoadNewRecipe: (recipe: Recipe, jobId: string) => void;
+  onSend: (text: string) => void;
+  recipeId?: string;
+  initialChips?: Chip[];
+  chipsLoading?: boolean;
 }
 
 export interface CopilotHeaderProps {
