@@ -11,7 +11,7 @@ export function parseSuggestions(rawText: string): { cleanText: string; suggesti
   const suggestions: CopilotSuggestion[] = [];
   const cleanText = rawText
     .replace(SUGGESTION_REGEX, (_, rawLabel, rawType, rawPayload) => {
-      const trimmedLabel = String(rawLabel || '').trim();
+      const trimmedLabel = String(rawLabel || '').replace(/^\+\s*/, '').trim();
       const typeStr = (rawType || '').toLowerCase();
       const isTimer = typeStr === 'timer' || trimmedLabel.toLowerCase().includes('timer');
       const trimmedPayload = String(rawPayload || trimmedLabel).trim();
