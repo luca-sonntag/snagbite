@@ -59,9 +59,9 @@ inaktiv (kein Cuisine-Signal). Ohne Foto (`hasPhoto: false`) liefert `computeAwa
 * **`components/CookedModal.tsx`** — Modal für Kamera-/Galerie-Fotoaufnahme, KI-Prüfzustand („KI prüft dein Gericht...“) und Fehler-Feedback bei Nicht-Übereinstimmung.
 * **`components/CookedButton.tsx`** — Trigger-Button in `RecipeActionDock` (Floating Bar) und als Abschluss-Karte (`variant="card"`) unter den Schritten in `RecipeDetails`.
 * **`components/CookHistoryTimeline.tsx` & Recipe Header Badge** — Interaktiver Header-Pill-Badge („x-mal gekocht · zuletzt vor...“) mit Smooth-Scroll zur Historie. Das Timeline-Modul zeigt Ereigniskarten inklusive XP-Gutschriften (`+50 XP`), KI-Verifizierungsbadge, Foto-Lightbox (Großansicht), Koch-Modus / Timer-Nutzung und exaktem Zeitstempel.
-* **`components/ProgressView/`** — der Tab **„Fortschritt"** (`progress`-Route in
+* **`components/ProfileView/`** — der Tab **„Profil & Fortschritt"** (`settings`-Route in
   `useHashRouter`, Nav-Button in `App.tsx`): Level/XP-Balken, Streak/Coins/Cooks,
-  Badge-Gitter. Coins werden angezeigt, **kein Shop** (erster Wurf).
+  Badge-Gitter sowie App-Einstellungen. Coins werden angezeigt, **kein Shop** (erster Wurf).
 * **`utils/streakReminder.ts`** — best-effort lokale Notification (Streak-Erinnerung)
   über `@capacitor/local-notifications`; no-op auf Web / ohne Permission.
 
