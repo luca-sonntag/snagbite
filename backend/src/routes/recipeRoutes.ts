@@ -17,13 +17,15 @@ import {
   markMealPlansCookedForRecipe,
   consumePantryForRecipe,
   getClient,
+  getUserRecipeRemixes,
 } from '../db.js';
 import { AppError, sendAppError } from '../errors.js';
 import { chatAboutRecipe, generateChatChips, remixRecipe, verifyCookedDishPhoto } from '../gemini.js';
 import { generateRecipeCoverImage } from '../imageGenerator.js';
 import { enrichRecipeWithCanonicalIngredients } from '../matching/ingredientMatcher.js';
+import { applyRecipeOperations } from '../recipeOperations.js';
 import { recordCook } from '../gamification.js';
-import type { Recipe } from '../types.js';
+import type { Recipe, RecipeOperation } from '../types.js';
 import { fetchAndSyncUser, isPremiumUser, MAX_PHOTOS_TOTAL_CHARS } from './authUtils.js';
 import { triggerWorkerTick } from '../queue.js';
 
@@ -200,117 +202,70 @@ recipeRoutes.get('/recipes/:id/chat/chips', async (req: Request, res: Response):
   }
 });
 
+recipeRoutes.get('/recipes/:id/remixes', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    await assertRecipeAccess(req.userId!, id);
+    const remixes = await getUserRecipeRemixes(req.userId!, id);
+    res.status(200).json({ remixes });
+  } catch (error: unknown) {
+    if (!(error instanceof AppError)) console.error('Error getting recipe remixes:', error);
+    sendAppError(res, error);
+  }
+});
+
 recipeRoutes.post('/recipes/:id/chat/confirm', async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { modificationRequest, replaceCurrent } = req.body;
-
-    if (!modificationRequest || typeof modificationRequest !== 'string') {
-      throw new AppError('MISSING_FIELD', { params: { field: 'modificationRequest' } });
-    }
+    const { operations, modificationRequest } = req.body;
 
     const currentRecipe = await assertRecipeAccess(req.userId!, id);
 
-    let userPrefs: { recipeLanguage?: string; preferredTemperatureUnit?: string; preferredUnitSystem?: string } | undefined;
-    try {
-      const { data, error: authError } = await getClient().auth.admin.getUserById(req.userId!);
-      if (!authError && data?.user?.user_metadata) {
-        const meta = data.user.user_metadata;
-        const languageMap: Record<string, string> = {
-          de: 'German',
-          en: 'English',
-          german: 'German',
-          english: 'English',
-        };
-        userPrefs = {
-          recipeLanguage: meta.language ? languageMap[meta.language.toLowerCase()] : undefined,
-          preferredTemperatureUnit: meta.preferred_temperature_unit,
-          preferredUnitSystem: meta.preferred_unit_system,
-        };
+    let remixedRecipe: Recipe;
+    let summaryText = modificationRequest;
+
+    if (Array.isArray(operations) && operations.length > 0) {
+      remixedRecipe = applyRecipeOperations(currentRecipe, operations);
+      if (!summaryText) {
+        summaryText = operations.map((op: RecipeOperation) => op.summary).filter(Boolean).join(', ');
       }
-    } catch {}
-
-    const { recipe: remixedRecipe, usage: remixUsage } = await remixRecipe(
-      currentRecipe,
-      modificationRequest,
-      undefined,
-      userPrefs
-    );
-
-    const { usage: resolverUsage } = await enrichRecipeWithCanonicalIngredients(remixedRecipe);
-
-    let remixLlmUsage: { gemini?: unknown; flux?: unknown; ingredientResolver?: unknown } | undefined = remixUsage
-      ? { gemini: remixUsage }
-      : undefined;
-
-    if (resolverUsage) {
-      remixLlmUsage = { ...(remixLlmUsage || {}), ingredientResolver: resolverUsage };
+    } else if (modificationRequest && typeof modificationRequest === 'string') {
+      const { recipe } = await remixRecipe(currentRecipe, modificationRequest);
+      remixedRecipe = recipe;
+    } else {
+      throw new AppError('MISSING_FIELD', { params: { field: 'operations' } });
     }
 
-    if (remixedRecipe.imagePrompt) {
-      try {
-        const { imageUrl: aiCoverUrl, usage: fluxUsage } = await generateRecipeCoverImage({
-          prompt: remixedRecipe.imagePrompt,
-          jobId: randomUUID(),
-          userId: req.userId,
-        });
-        if (aiCoverUrl) {
-          remixedRecipe.imageUrl = aiCoverUrl;
-          remixedRecipe.imageUrls = [aiCoverUrl];
-          remixedRecipe.isAiCover = true;
-          if (fluxUsage) {
-            remixLlmUsage = { ...(remixLlmUsage || {}), flux: fluxUsage };
-          }
-        }
-      } catch (coverErr) {
-        console.warn(`[chat/confirm] Failed to generate AI cover for remix:`, coverErr);
-      }
-    }
+    // Always canonical enrich ingredients and recalculate macros
+    await enrichRecipeWithCanonicalIngredients(remixedRecipe);
 
+    // Preserve cover images
     if (!remixedRecipe.imageUrl && currentRecipe.imageUrl) {
       remixedRecipe.imageUrl = currentRecipe.imageUrl;
       remixedRecipe.imageUrls = currentRecipe.imageUrls ?? [currentRecipe.imageUrl];
     }
 
-    if (replaceCurrent) {
-      const merged: Recipe = {
-        ...currentRecipe,
+    // Always create as private remix for this user (Original is NEVER overwritten!)
+    const savedRemix = await createRecipeForUser(
+      req.userId!,
+      {
         ...remixedRecipe,
-        id,
-        imageUrl: remixedRecipe.imageUrl || currentRecipe.imageUrl || null,
-        imageUrls:
-          remixedRecipe.imageUrls ||
-          currentRecipe.imageUrls ||
-          (currentRecipe.imageUrl ? [currentRecipe.imageUrl] : []),
-        parentRecipeId: currentRecipe.parentRecipeId,
-        remixPrompt: modificationRequest,
-      };
+        sourceUrl: currentRecipe.sourceUrl,
+        sourceHandle: currentRecipe.sourceHandle,
+        parentRecipeId: id,
+        remixPrompt: summaryText || null,
+        visibility: 'private',
+        origin: 'remix',
+      },
+      'remix',
+      'remix'
+    );
 
-      const updated = await updateRecipe(id, merged);
-      res.status(200).json({
-        success: true,
-        replaced: true,
-        updatedRecipeJson: updated,
-      });
-    } else {
-      const saved = await createRecipeForUser(
-        req.userId!,
-        {
-          ...remixedRecipe,
-          sourceUrl: currentRecipe.sourceUrl,
-          sourceHandle: currentRecipe.sourceHandle,
-          parentRecipeId: id,
-          remixPrompt: modificationRequest,
-        },
-        'remix',
-        'remix'
-      );
-      res.status(200).json({
-        success: true,
-        newRecipeId: saved.id,
-        updatedRecipeJson: saved,
-      });
-    }
+    res.status(200).json({
+      success: true,
+      newRecipeId: savedRemix.id,
+      updatedRecipeJson: savedRemix,
+    });
   } catch (error: unknown) {
     if (!(error instanceof AppError)) console.error('Error confirming remix:', error);
     sendAppError(res, error);
