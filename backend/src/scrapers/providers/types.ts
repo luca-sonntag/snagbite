@@ -1,3 +1,23 @@
+/**
+ * How a scraped item's media should be fetched to local files (see `download.ts`).
+ */
+export type MediaDownload =
+  | { kind: 'direct'; videoUrl?: string; audioUrl?: string; headers?: Record<string, string> }
+  | { kind: 'images'; imageUrls: string[]; headers?: Record<string, string> }
+  | { kind: 'client'; videoUrl: string; headers?: Record<string, string> }
+  | { kind: 'none' };
+
+export interface ScrapingResult {
+  caption: string;
+  imageUrl?: string;
+  authorHandle?: string;
+  htmlContent?: string; // For text-based websites
+  /** Video length in whole seconds */
+  durationSeconds?: number;
+  /** Media source + download strategy; `{ kind: 'none' }` for text-only results. */
+  media: MediaDownload;
+}
+
 export type SocialPlatform = 'instagram' | 'tiktok' | 'youtube' | 'facebook';
 
 /**
