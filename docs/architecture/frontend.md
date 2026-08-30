@@ -38,8 +38,9 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
 3. **Detailansicht (`#/history/<jobId>`):** `RecipeDetails`.
 
 ### Katalog-Features
-* **Routing (`SavedCatalog/catalogRoutes.ts`):** `subPath` unterscheidet zwischen List-Routen (`list...`) und `jobId`s (UUIDs).
-* **Kombinierbare Filter (`FilterSheet.tsx` + `useSavedCatalog.ts`):** Facetten-Objekt `CatalogFilterState` (`favoritesOnly`, `maxTime`, `collectionIds[]`, `flags[]`). Semantik: OR innerhalb einer Facette, AND zwischen Facetten.
+* **Routing (`SavedCatalog/catalogRoutes.ts`):** `subPath` unterscheidet zwischen List-Routen (`list...`) und `jobId`s (UUIDs), inklusive Preset-Routen für Kategorien (`#/history/list/category/<category>`).
+* **Kombinierbare Filter (`FilterSheet.tsx` + `useSavedCatalog.ts`):** Facetten-Objekt `CatalogFilterState` (`favoritesOnly`, `maxTime`, `categories[]`, `collectionIds[]`, `flags[]`). Semantik: OR innerhalb einer Facette, AND zwischen Facetten.
+* **Rezept-Kategorien (Speisenart):** Feste Taxonomie (`RecipeCategory`) mit Emojis und Lokalisierung in `i18n.ts`, filterbar im `FilterSheet`, als aktive Chips in `CatalogFilters` entfernbar und als Badge in `RecipeHeader` dargestellt.
 * **Zuletzt geöffnet (`utils/recentRecipes.ts`):** Clientseitiges Recency-Tracking in `localStorage` (`recipe_recent_opened`).
 * **Sammlungen (`useCollections.ts`, `CollectionSheet.tsx`):** Benannte Rezept-Gruppen mit 2×2 Mosaik-Cover.
 * **Freitext-Labels/Flags (`FlagSheet.tsx`):** Eigene Tags pro Rezept (`job.flags`).
