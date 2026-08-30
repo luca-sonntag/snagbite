@@ -76,11 +76,11 @@ export async function createPantryItem(
     }
 
     return updatePantryItem(existing.id, userId, {
-      name: dto.name,
-      baseName: dto.baseName ?? existing.baseName,
+      name: existing.amount > 0 ? existing.name : dto.name,
+      baseName: existing.baseName ?? dto.baseName,
       category: dto.category ?? existing.category,
       amount: updatedAmount,
-      unit: dto.unit,
+      unit: existing.amount > 0 ? existing.unit : dto.unit,
       canonicalId: dto.canonicalId ?? existing.canonicalId ?? undefined,
       expiresAt: expiresAt ?? existing.expiresAt,
     });
