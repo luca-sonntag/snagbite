@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Plus, Sparkles, PackageOpen } from 'lucide-react';
 import { usePantry } from '../../context/PantryContext';
 import { useI18n } from '../../context/I18nContext';
-import { categoryOrder, translateCategory } from '../../i18n';
+import { categoryOrder, translateCategory, getCategoryTheme } from '../../i18n';
 import { useDialog } from '../../context/DialogContext';
 import { hapticLight, hapticSelection } from '../../utils/haptics';
 import type { PantryItem, CreatePantryItemDto, PantrySuggestion } from '../../types';
@@ -48,6 +48,29 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
     if (selectedCategory === 'ALL') return activeItems;
     return activeItems.filter((i) => (i.category || 'OTHER').toUpperCase() === selectedCategory);
   }, [activeItems, selectedCategory]);
+
+  // Group items by category (ordered like the supermarket aisles in ShoppingListGroup)
+  const groupedCategories = useMemo(() => {
+    const map = new Map<string, PantryItem[]>();
+    categoryOrder.forEach((cat) => {
+      map.set(cat, []);
+    });
+    map.set('OTHER', []);
+
+    filteredItems.forEach((item) => {
+      const cat = (item.category || 'OTHER').toUpperCase();
+      if (!map.has(cat)) map.set(cat, []);
+      map.get(cat)!.push(item);
+    });
+
+    const res: Array<{ category: string; items: PantryItem[] }> = [];
+    map.forEach((items, cat) => {
+      if (items.length > 0) {
+        res.push({ category: cat, items });
+      }
+    });
+    return res;
+  }, [filteredItems]);
 
   const handleOpenSuggestions = async () => {
     hapticLight();
@@ -190,18 +213,46 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
           </button>
         </div>
       ) : (
-        <div className="space-y-2.5">
-          {filteredItems.map((item) => (
-            <PantryItemCard
-              key={item.id}
-              item={item}
-              onEdit={(it) => {
-                setEditingItem(it);
-                setIsAddOpen(true);
-              }}
-              onDelete={handleDelete}
-            />
-          ))}
+        <div className="flex flex-col gap-2.5">
+          {groupedCategories.map((group) => {
+            const theme = getCategoryTheme(group.category);
+            const count = group.items.length;
+
+            return (
+              <div
+                key={group.category}
+                className="flex flex-col p-2.5 rounded-3xl bg-white dark:bg-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.03)] transition-all"
+              >
+                <div className="flex items-center justify-between gap-2 px-2 pt-1 pb-1.5 mb-0.5">
+                  <div className="flex flex-col gap-1.5 select-none flex-1 min-w-0 text-left">
+                    <div className={`w-8 h-1 rounded-full ${theme.barClass}`} />
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-gray-100 truncate">
+                        {translateCategory(group.category, language)}
+                      </span>
+                      <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
+                        {count} {count === 1 ? 'Artikel' : 'Artikel'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <ul className="flex flex-col gap-1 py-0.5">
+                  {group.items.map((item) => (
+                    <PantryItemCard
+                      key={item.id}
+                      item={item}
+                      onEdit={(it) => {
+                        setEditingItem(it);
+                        setIsAddOpen(true);
+                      }}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
         </div>
       )}
 
