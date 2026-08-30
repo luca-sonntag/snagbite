@@ -88,7 +88,7 @@ export const RecipeCopilot: React.FC<RecipeCopilotProps> = ({
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-2xl mx-auto h-[100dvh] flex flex-col justify-between relative"
       >
-        {/* Header: Clean Glass Bar */}
+        {/* Top Header: Floating Buttons without middle title */}
         <CopilotHeader
           historyLength={history.length}
           isPending={isPending}

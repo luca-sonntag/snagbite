@@ -16,11 +16,11 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
   const { t } = useI18n();
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 flex flex-col gap-4 scrollbar-none bg-transparent">
+    <div className="flex-1 overflow-y-auto pt-[calc(1.25rem_+_var(--safe-area-inset-top))] pb-4 px-4 sm:px-6 flex flex-col gap-4 scrollbar-none bg-transparent">
       {/* Welcome message if history is empty */}
       {history.length === 0 && (
-        <div className="my-auto flex flex-col items-center text-center max-w-sm mx-auto gap-3 py-7 px-6 rounded-3xl bg-white/75 dark:bg-gray-900/75 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.06)] animate-in fade-in zoom-in-95 duration-300">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-xs">
+        <div className="my-auto flex flex-col items-center text-center max-w-sm mx-auto gap-3 py-7 px-6 rounded-3xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.06)] animate-in fade-in zoom-in-95 duration-300">
+          <div className="w-12 h-12 rounded-2xl bg-white dark:bg-gray-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-md border border-emerald-500/10">
             <Sparkles className="w-6 h-6 animate-pulse" />
           </div>
           <h4 className="text-sm font-bold text-gray-900 dark:text-white">{t('copilot.title')}</h4>
@@ -43,7 +43,7 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
             } animate-in fade-in slide-in-from-bottom-1 duration-200`}
           >
             {isAI && (
-              <div className="w-8 h-8 rounded-2xl flex items-center justify-center flex-shrink-0 font-bold text-xs bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 shadow-xs border border-emerald-500/20 mt-0.5">
+              <div className="w-8 h-8 rounded-2xl flex items-center justify-center flex-shrink-0 font-bold text-xs bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-emerald-500/20 mt-0.5">
                 <Bot className="w-4 h-4" />
               </div>
             )}
@@ -95,7 +95,7 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
       {/* Loader/Pending reply */}
       {isPending && (
         <div className="flex gap-2.5 max-w-[88%] self-start items-start animate-pulse">
-          <div className="w-8 h-8 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 shadow-xs border border-emerald-500/20 mt-0.5">
+          <div className="w-8 h-8 rounded-2xl bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-emerald-500/20 mt-0.5">
             <Bot className="w-4 h-4" />
           </div>
           <div className="flex flex-col gap-1.5">
