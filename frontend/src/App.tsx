@@ -329,7 +329,7 @@ export default function App() {
                   navigate('extract');
                 }}
                 onNavigateToShoppingList={() => navigate('shopping-list')}
-                shoppingListCount={aggregatedList.unchecked.length}
+                shoppingListCount={aggregatedList.toBuy.length + aggregatedList.inPantry.length}
                 onRemixSuccess={(newRecipe) => setRecipe(newRecipe)}
                 onReplaceCurrent={(newRecipe) => {
                   setRecipe(newRecipe);
@@ -435,7 +435,7 @@ export default function App() {
                 onNavigateToShoppingList={() => {
                   navigate('shopping-list');
                 }}
-                shoppingListCount={aggregatedList.unchecked.length}
+                shoppingListCount={aggregatedList.toBuy.length + aggregatedList.inPantry.length}
                 onRemixSuccess={async (newRecipe, newJobId) => {
                   await fetchHistory();
                   if (newJobId) {
@@ -546,7 +546,7 @@ export default function App() {
         isCatalogSelectMode={isCatalogSelectMode}
         isCatalogSheetOpen={isCatalogSheetOpen}
         isPremiumModalOpen={isPremiumModalOpen}
-        uncheckedShoppingItemsCount={aggregatedList.unchecked.length}
+        uncheckedShoppingItemsCount={aggregatedList.toBuy.length + aggregatedList.inPantry.length}
         incomingRequestsCount={incomingRequestsCount}
         userLevel={userLevel}
         outstandingMealPlansCount={outstandingMealPlansCount}
