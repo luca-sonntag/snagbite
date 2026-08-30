@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-30: Horizontale Quick-Chips-Leiste & Sparkles-Toggle am unteren Rand im Copilot entfernt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Horizontale Scroll-Leiste (`showChips && <div className="flex items-center gap-2 overflow-x-auto ...">`) über der Eingabeleiste in `CopilotInputBar.tsx`.
+  - Sparkles-Toggle-Button auf der linken Seite des Eingabefeldes zum Ein-/Ausblenden der Chips.
+  - Doppelte / redundante Darstellung von Vorschlägen (sowohl in der Chat-Begrüßung als auch unten im Input-Dock).
+* **Ersetzt durch:**
+  - **Reine 1-Tap Action-Pills im Chatverlauf ([`CopilotChatList.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/RecipeCopilot/CopilotChatList.tsx), [`CopilotMessageItem.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/RecipeCopilot/CopilotMessageItem.tsx)):** Vorschläge sitzen jetzt immer direkt unter der jeweiligen Bot-Nachricht.
+  - **Fokussiertes, schlankes Input-Dock ([`CopilotInputBar.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/RecipeCopilot/CopilotInputBar.tsx)):** Nur noch das Vollhöhen-Eingabefeld und der Senden-Button für ein maximal ruhiges, aufgeräumtes Chat-Dock.
+* **Betroffene Dateien:** `frontend/src/components/RecipeDetails/RecipeCopilot/CopilotInputBar.tsx`, `frontend/src/components/RecipeDetails/RecipeCopilot/types.ts`, `frontend/src/components/RecipeDetails/RecipeCopilot/useRecipeCopilot.ts`, `frontend/src/components/RecipeDetails/RecipeCopilot/index.tsx`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-08-30: Schwebende Welcome-Card-Insel im Copilot durch natürliche Bot-Begrüßungs-Bubble ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**

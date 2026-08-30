@@ -48,7 +48,6 @@ export function useRecipeCopilot({
   const [isPending, setIsPending] = useState(false);
   const [pendingAction] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [showChips, setShowChips] = useState(true);
   const [chips, setChips] = useState<Chip[]>([]);
   const [chipsLoading, setChipsLoading] = useState(false);
   const [confirmingClear, setConfirmingClear] = useState(false);
@@ -144,7 +143,6 @@ export function useRecipeCopilot({
     } catch {
       // Ignore
     }
-    setShowChips(true);
     loadChips(true);
     setTimeout(() => textareaRef.current?.focus(), 100);
   };
@@ -183,7 +181,6 @@ export function useRecipeCopilot({
     loadedRecipeIdRef.current = recipe.id;
 
     setError(null);
-    setShowChips(false);
     loadChips();
   }, [isOpen, chatKey, changesKey, recipe.id, loadChips]);
 
@@ -193,7 +190,6 @@ export function useRecipeCopilot({
     setError(null);
     setIsPending(true);
     setMessage('');
-    setShowChips(false);
 
     (document.activeElement as HTMLElement)?.blur();
 
@@ -372,8 +368,6 @@ export function useRecipeCopilot({
     isPending,
     pendingAction,
     error,
-    showChips,
-    setShowChips,
     chips,
     chipsLoading,
     confirmingClear,

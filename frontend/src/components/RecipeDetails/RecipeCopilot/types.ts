@@ -42,10 +42,6 @@ export interface CopilotInputBarProps {
   message: string;
   setMessage: (msg: string) => void;
   isPending: boolean;
-  showChips: boolean;
-  setShowChips: (show: boolean) => void;
-  chips: Chip[];
-  chipsLoading: boolean;
   textareaRef: React.RefObject<HTMLInputElement | null>;
   onSend: (text: string) => void;
 }

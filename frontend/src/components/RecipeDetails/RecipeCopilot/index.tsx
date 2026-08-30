@@ -25,8 +25,6 @@ export const RecipeCopilot: React.FC<RecipeCopilotProps> = ({
     isPending,
     pendingAction,
     error,
-    showChips,
-    setShowChips,
     chips,
     chipsLoading,
     confirmingClear,
@@ -126,10 +124,6 @@ export const RecipeCopilot: React.FC<RecipeCopilotProps> = ({
             message={message}
             setMessage={setMessage}
             isPending={isPending}
-            showChips={showChips}
-            setShowChips={setShowChips}
-            chips={chips}
-            chipsLoading={chipsLoading}
             textareaRef={textareaRef}
             onSend={handleSend}
           />
