@@ -152,6 +152,8 @@ export default function SavedCatalog({
     shelves,
     jobsByCollection,
     jobsByFlag,
+    jobsByCategory,
+    availableCategories,
     favoriteJobs,
     markOpened
   } = useSavedCatalog({
@@ -552,6 +554,8 @@ export default function SavedCatalog({
           collections={collections}
           jobsByCollection={jobsByCollection}
           jobsByFlag={jobsByFlag}
+          jobsByCategory={jobsByCategory}
+          availableCategories={availableCategories}
           favoriteJobs={favoriteJobs}
           shelves={shelves}
           allFlags={allFlags}
@@ -640,6 +644,10 @@ export default function SavedCatalog({
         onClose={() => setIsFilterSheetOpen(false)}
         filters={filters}
         sortBy={sortBy}
+        collections={collections}
+        allFlags={allExistingFlags}
+        availableCategories={availableCategories}
+        countMatches={countMatches}
         onApply={(next, nextSort) => {
           setFilters(next);
           setSortBy(nextSort);
@@ -658,9 +666,6 @@ export default function SavedCatalog({
             return;
           }
         }}
-        collections={collections}
-        allFlags={allFlags}
-        countMatches={countMatches}
       />
 
       {sheets}

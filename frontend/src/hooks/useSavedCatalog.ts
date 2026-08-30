@@ -396,6 +396,11 @@ export function useSavedCatalog({
     return map;
   }, [completedJobs, sortJobs]);
 
+  /** All unique categories present in the user's completed recipes. */
+  const availableCategories = useMemo(() => {
+    return Object.keys(jobsByCategory) as RecipeCategory[];
+  }, [jobsByCategory]);
+
   const favoriteJobs = useMemo(() => {
     return sortJobs(completedJobs.filter(j => j.isFavorite), 'newest');
   }, [completedJobs, sortJobs]);
@@ -793,6 +798,7 @@ export function useSavedCatalog({
     jobsByCollection,
     jobsByFlag,
     jobsByCategory,
+    availableCategories,
     favoriteJobs,
     recentMap,
     markOpened

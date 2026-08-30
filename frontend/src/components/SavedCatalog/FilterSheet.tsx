@@ -3,7 +3,7 @@ import { Button, Drawer } from '@heroui/react';
 import { SlidersHorizontal, Star, Tag, X, Check } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import type { Collection, RecipeCategory } from '../../types';
-import { RECIPE_CATEGORIES, getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
+import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
 import {
   EMPTY_FILTERS,
   TIME_FILTER_OPTIONS,
@@ -21,6 +21,7 @@ interface FilterSheetProps {
   sortBy: CatalogSort;
   collections: Collection[];
   allFlags: string[];
+  availableCategories?: RecipeCategory[];
   /** Live count for the current draft, so the CTA can say how many remain. */
   countMatches: (filters: CatalogFilterState) => number;
 }
@@ -54,6 +55,7 @@ export default function FilterSheet({
   sortBy,
   collections,
   allFlags,
+  availableCategories = [],
   countMatches
 }: FilterSheetProps) {
   const { t, language } = useI18n();
@@ -167,32 +169,42 @@ export default function FilterSheet({
                   </div>
                 </section>
 
-                {/* Categories */}
-                <section className="flex flex-col gap-2">
-                  <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
-                    {t('catalog.categoriesTitle')}
-                  </h4>
-                  <div className="flex flex-wrap gap-1.5">
-                    {RECIPE_CATEGORIES.map(cat => {
-                      const isActive = (draft.categories ?? []).includes(cat);
-                      return (
-                        <button
-                          key={cat}
-                          type="button"
-                          onClick={() => setDraft(d => ({
-                            ...d,
-                            categories: toggleIn(d.categories ?? [], cat) as RecipeCategory[]
-                          }))}
-                          className={`px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-1.5 ${chipClass(isActive)}`}
-                        >
-                          <span className="text-sm leading-none">{getRecipeCategoryEmoji(cat)}</span>
-                          <span>{getRecipeCategoryLabel(cat, language)}</span>
-                          {isActive && <Check className="w-3 h-3" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </section>
+                {/* Categories (only shown when categories exist in library or active in draft) */}
+                {(() => {
+                  const visibleCategories = availableCategories.length > 0
+                    ? Array.from(new Set([...availableCategories, ...(draft.categories ?? [])]))
+                    : (draft.categories ?? []);
+
+                  if (visibleCategories.length === 0) return null;
+
+                  return (
+                    <section className="flex flex-col gap-2">
+                      <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                        {t('catalog.categoriesTitle')}
+                      </h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {visibleCategories.map(cat => {
+                          const isActive = (draft.categories ?? []).includes(cat);
+                          return (
+                            <button
+                              key={cat}
+                              type="button"
+                              onClick={() => setDraft(d => ({
+                                ...d,
+                                categories: toggleIn(d.categories ?? [], cat) as RecipeCategory[]
+                              }))}
+                              className={`px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-1.5 ${chipClass(isActive)}`}
+                            >
+                              <span className="text-sm leading-none">{getRecipeCategoryEmoji(cat)}</span>
+                              <span>{getRecipeCategoryLabel(cat, language)}</span>
+                              {isActive && <Check className="w-3 h-3" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  );
+                })()}
 
                 {/* Collections */}
                 {collections.length > 0 && (
