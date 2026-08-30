@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, Check, Star } from 'lucide-react';
+import { Clock, Check, Star, Sparkles } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { detectPlatform, PlatformIcon, PLATFORM_ICON_COLOR } from './PlatformIcon';
@@ -39,6 +39,7 @@ export default function RecipePosterCard({
   const platform = detectPlatform(job.recipe?.sourceUrl ?? undefined);
   const iconColor = PLATFORM_ICON_COLOR[platform];
   const isShelf = variant === 'shelf';
+  const remixCount = job.remixCount ?? job.recipe?.remixCount ?? 0;
 
   return (
     <div
@@ -68,6 +69,21 @@ export default function RecipePosterCard({
               }`}
           >
             {isSelected && <Check className="w-4 h-4 text-white stroke-[3px]" />}
+          </div>
+        )}
+
+        {/* Remix badge */}
+        {remixCount > 0 && (
+          <div
+            className={`absolute ${isSelectMode ? 'bottom-2 left-2' : 'top-2 left-2'} z-10 px-1.5 py-0.5 rounded-lg bg-black/60 backdrop-blur-md flex items-center gap-1 text-white shadow-xs`}
+            title={`${remixCount} Remix(es)`}
+          >
+            <Sparkles className="w-3 h-3 text-purple-400 fill-purple-400/30" />
+            {remixCount > 1 && (
+              <span className="text-[10px] font-semibold text-purple-200">
+                {remixCount}
+              </span>
+            )}
           </div>
         )}
 
