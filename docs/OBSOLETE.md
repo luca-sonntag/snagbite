@@ -6,6 +6,23 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-30: Reines localStorage-ShoppingList durch Supabase-Backend-Synchronisation & Vorratslager (Pantry) ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Reine clientseitige `localStorage` Speicherung (`recipe_shopping_list`) in `useShoppingList.ts` ohne Cloud-Sync über mehrere Geräte oder Web/App-Wechsel.
+  - Flache ungefilterte Einkaufslisten ohne Abgleich mit vorhandenen Vorräten zuhause (User kauften Zutaten doppelt).
+  - Fehlende automatische Bestandsverwaltung beim Kochen oder Einkaufen.
+  - Fehlende Veröffentlichungs- und Community-Verwertungs-Möglichkeit für KI-überarbeitete Rezepte.
+* **Ersetzt durch:**
+  - **Supabase-persistierte Einkaufsliste & Vorratslager (`shopping_list`, `pantry_items`, `pantryDb.ts`, `shoppingListDb.ts`):** RLS-gesicherte Cloud-Speicherung mit Offline-Fallback.
+  - **Automatischer Vorratstransfer & Zutatensynchronisation:** Beim Abhaken von Artikeln auf der Einkaufsliste landen diese automatisch im Vorrat (`pantry_items`), angereichert mit Supermarkt-Packungsgrößen und Haltbarkeitsdauern (`ingredient_mappings`).
+  - **Smarter Vorratsabzug beim Kochen:** Beim Kochen eines Rezepts (`POST /api/recipes/:id/cooked`) werden genutzte Zutaten unter automatischer Einheitenumrechnung (`g` ↔ `kg`, `ml` ↔ `l`) vom Vorrat abgezogen und bei 0 gefloort.
+  - **Anti-Food-Waste Empfehlungs-Engine (`getPantryRecipeSuggestions`):** Schlägt Rezepte aus dem eigenen Kochbuch sowie öffentlichen Community-Rezepten vor, die bald ablaufende Zutaten verwerten.
+  - **Rezept-Sichtbarkeit:** URL-extrahierte Rezepte sind standardmäßig öffentlich (`visibility = 'public'`), während Foto- und Remix-Rezepte privat bleiben und per `PATCH /api/recipes/:id/visibility` angepasst werden können.
+* **Betroffene Dateien:** `backend/db/migrations/006_pantry_and_shopping_list.sql`, `backend/src/db/pantryDb.ts`, `backend/src/db/shoppingListDb.ts`, `backend/src/routes/pantryRoutes.ts`, `backend/src/routes/shoppingListRoutes.ts`, `frontend/src/context/PantryContext.tsx`, `frontend/src/hooks/useShoppingList.ts`, `frontend/src/components/Pantry/`, `frontend/src/components/ShoppingList/`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-08-30: Einmalige ungesicherte RapidAPI-Scraping-Aufrufe & irreführende Fehlermeldung ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
