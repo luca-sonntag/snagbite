@@ -28,33 +28,89 @@ export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
       </div>
 
       {/* Collected changes list */}
-      <div className="flex flex-col gap-1.5 max-h-36 overflow-y-auto scrollbar-none">
-        {pendingChanges.map((change, idx) => (
-          <div
-            key={change.id}
-            className="flex items-start gap-2 p-2.5 rounded-2xl bg-black/5 dark:bg-white/5 border-none"
-          >
-            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0 w-4 text-center">
-              {idx + 1}.
-            </span>
-            <span className="text-xs text-gray-800 dark:text-gray-200 leading-snug flex-1 min-w-0 break-words font-medium">
-              {change.text}
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                hapticHeavy();
-                onRemoveChange(change.id);
-              }}
-              disabled={isPending}
-              className="flex-shrink-0 w-7 h-7 min-w-[28px] min-h-[28px] rounded-lg text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all outline-none border-none flex items-center justify-center cursor-pointer disabled:opacity-40"
-              aria-label={t('copilot.changesDeleteAria')}
-              title={t('copilot.changesDeleteAria')}
+      <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto scrollbar-none">
+        {pendingChanges.map((change, idx) => {
+          const isAdd = change.type === 'ADD_INGREDIENTS';
+          const isReplace = change.type === 'REPLACE_INGREDIENT';
+          const isRemove = change.type === 'REMOVE_INGREDIENT';
+          const isScale = change.type === 'SCALE_SERVINGS';
+
+          return (
+            <div
+              key={change.id}
+              className="flex items-start gap-2 p-2.5 rounded-2xl bg-black/5 dark:bg-white/5 border-none"
             >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        ))}
+              <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0 w-4 text-center">
+                {idx + 1}.
+              </span>
+
+              <div className="flex-1 min-w-0 flex flex-col gap-1">
+                {isAdd && change.newIngredients && change.newIngredients.length > 0 ? (
+                  <>
+                    <span className="text-xs font-bold text-gray-900 dark:text-white leading-snug">
+                      {change.groupName || change.summary || change.text}
+                    </span>
+                    <div className="flex flex-col gap-0.5 pl-1.5 border-l-2 border-emerald-500/30">
+                      {change.newIngredients.map((ing, iIdx) => (
+                        <div
+                          key={iIdx}
+                          className="flex items-center gap-1 text-[11px] text-gray-600 dark:text-gray-300"
+                        >
+                          <span className="font-medium">
+                            {ing.amount ? `${ing.amount} ` : ''}{ing.unit ? `${ing.unit} ` : ''}{ing.name}
+                          </span>
+                          {ing.modifier && (
+                            <span className="text-gray-400 dark:text-gray-500">({ing.modifier})</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : isReplace && change.targetIngredientName && change.newIngredient ? (
+                  <div className="flex flex-col gap-0.5">
+                    <div className="flex items-center gap-1.5 text-xs flex-wrap">
+                      <span className="line-through text-gray-400 dark:text-gray-500 font-medium">
+                        {change.targetIngredientName}
+                      </span>
+                      <span className="text-emerald-500 font-bold">➔</span>
+                      <span className="font-bold text-gray-900 dark:text-white">
+                        {change.newIngredient.amount ? `${change.newIngredient.amount} ` : ''}
+                        {change.newIngredient.unit ? `${change.newIngredient.unit} ` : ''}
+                        {change.newIngredient.name}
+                      </span>
+                    </div>
+                  </div>
+                ) : isRemove && change.removeIngredientName ? (
+                  <span className="text-xs text-red-500 dark:text-red-400 line-through font-medium">
+                    {change.removeIngredientName} weglassen
+                  </span>
+                ) : isScale && change.newServings ? (
+                  <span className="text-xs font-bold text-gray-900 dark:text-white">
+                    Portionen auf {change.newServings} anpassen
+                  </span>
+                ) : (
+                  <span className="text-xs text-gray-800 dark:text-gray-200 leading-snug break-words font-medium">
+                    {change.text}
+                  </span>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  hapticHeavy();
+                  onRemoveChange(change.id);
+                }}
+                disabled={isPending}
+                className="flex-shrink-0 w-7 h-7 min-w-[28px] min-h-[28px] rounded-lg text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all outline-none border-none flex items-center justify-center cursor-pointer disabled:opacity-40"
+                aria-label={t('copilot.changesDeleteAria')}
+                title={t('copilot.changesDeleteAria')}
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          );
+        })}
       </div>
 
       {/* Actions */}
