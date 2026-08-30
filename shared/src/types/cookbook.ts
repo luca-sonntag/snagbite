@@ -10,6 +10,7 @@ export interface SavedRecipe {
   isFavorite: boolean;
   flags: string[];
   collectionIds: string[];
+  remixCount?: number;
   addedAt: string;
   updatedAt: string;
 }
