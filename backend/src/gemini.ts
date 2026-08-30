@@ -1013,9 +1013,11 @@ Rules:
 - When you call a tool, the system will execute it and return the result to you. You should then write a short, friendly message explaining what was done.
 - Respond in the language requested by the user. If not specified, default to ${targetLanguage}.
 - PROACTIVE FOLLOW-UP SUGGESTIONS: At the very end of your response, ALWAYS append 1-3 short, relevant follow-up action tags that the user can tap with 1 click without typing:
+  * For unfamiliar, specialized, or exotic ingredients/spices/techniques (e.g. Gochujang, Tahini, Sumach, Miso, Panko, Roux, etc.): [suggest:Was ist X?](prompt:Was genau ist X und wie schmeckt es?) or [suggest:Ersatz für X?](prompt:Was ist X und was kann ich stattdessen nehmen?)
   * For follow-up questions, ingredient swaps, or next steps: [suggest:Short button label](prompt:What will be asked or sent)
     Example: [suggest:Rezept mit Gouda anpassen](prompt:Passe das Rezept bitte mit Gouda an)
     Example: [suggest:Alternative ohne Laktose](prompt:Gibt es laktosefreie Alternativen?)
+    Example: [suggest:Was ist Gochujang?](prompt:Was genau ist Gochujang und wie schmeckt es?)
     Example: [suggest:Zutaten auf Einkaufsliste](prompt:Setze Gouda auf meine Einkaufsliste)
   * For cooking times or durations mentioned in your response: [suggest:15 Min Timer](timer:15:Tacos überbacken) (specify the number strictly in MINUTES!)
   Keep the button labels concise (2-4 words) and directly relevant to your answer.
@@ -1271,11 +1273,15 @@ export async function generateChatChips(
 Generate 5-6 quick-action suggestion chips for a recipe chat assistant. Each chip has a "label" (shown as a button) and a "prompt" (the text that will be sent to the AI when the chip is tapped).
 
 Chips should include:
-- 2-3 substitution suggestions for key ingredients (e.g., "Substitute for chicken?")
-- 2-3 preparation help suggestions specific to this recipe (e.g., "Can I prep ahead?", "Freeze leftovers?", "Oven timing tips?")
-- 1-2 recipe modification suggestions (e.g., "Make it vegan", "Make it lighter", "Scale to 2 portions")
-- 1 shopping list suggestion (e.g., "Add missing ingredients to shopping list")
-- 1 timer suggestion if there is a timed step (e.g., "Set timer for 15 min")
+- 1-2 EXPLANATION / SUBSTITUTE SUGGESTIONS FOR UNCOMMON OR SPECIALIZED INGREDIENTS: If the recipe contains ingredients, spices, or condiments that may be unfamiliar to everyday home cooks (e.g. Gochujang, Tahini, Sumach, Miso, Panko, Kaffirlimette, Tamarinde, Mirin, Tempeh, Xanthan, Ghee, Bockshornklee, Seidentofu, etc.), ALWAYS include a chip explaining it or offering a substitute!
+  * category: "help" or "substitute"
+  * label: "Was ist [Zutat]?" or "Ersatz für [Zutat]?" (e.g. "Was ist Gochujang?", "Was ist Tahini?")
+  * prompt: "Was genau ist [Zutat], wie schmeckt es und wofür wird es verwendet?"
+- 1-2 substitution suggestions for key or common ingredients (e.g., "Alternative für Hähnchen?", "Käse ersetzen")
+- 1-2 preparation help suggestions specific to this recipe (e.g., "Zubereitung vorbereiten", "Reste einfrieren", "Ofenzeit-Tipps")
+- 1 recipe modification suggestion (e.g., "Vegetarische Variante", "Kalorien sparen", "Portionen anpassen")
+- 1 shopping list suggestion (e.g., "Zutaten auf Einkaufsliste")
+- 1 timer suggestion if there is a timed step (e.g., "15 Min. Timer starten")
 - Vary chips based on the recipe content — don't use generic ones.
 
 Recipe JSON:
