@@ -3,7 +3,9 @@ import { Button } from '@heroui/react';
 import { Search, List, LayoutGrid, CheckSquare, ArrowLeft, Star, Tag, SlidersHorizontal, X, Clock, BookOpen } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { PageHeader } from '../PageHeader';
-import type { Collection } from '../../types';
+import type { Collection, RecipeCategory } from '../../types';
+import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
+import { hapticLight } from '../../utils/haptics';
 import { EMPTY_FILTERS, type CatalogFilterState, type CatalogSort } from '../../hooks/useSavedCatalog';
 import { buildListRoute, parseListRoute } from './catalogRoutes';
 
@@ -61,7 +63,7 @@ export default function CatalogFilters({
   catalogSubPath,
   onNavigateCatalog
 }: CatalogFiltersProps) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -87,6 +89,10 @@ export default function CatalogFilters({
   };
   const removeFlag = (flag: string) => {
     setFilters({ ...filters, flags: filters.flags.filter(f => f !== flag) });
+    navigateToGeneralListIfNeeded();
+  };
+  const removeCategory = (cat: RecipeCategory) => {
+    setFilters({ ...filters, categories: (filters.categories ?? []).filter(c => c !== cat) });
     navigateToGeneralListIfNeeded();
   };
   const removeFavorites = () => {
@@ -247,26 +253,34 @@ export default function CatalogFilters({
 
       {/* Row 3: active facets as removable chips */}
       {hasActiveChips && (
-        <div className="flex gap-1.5 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 scroll-smooth">
+        <div className="flex gap-2 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 scroll-smooth">
           {filters.favoritesOnly && (
             <ActiveChip
               onRemove={removeFavorites}
-              icon={<Star className="w-3 h-3 fill-current" />}
+              icon={<Star className="w-3.5 h-3.5 fill-current" />}
               label={t('catalog.favoritesFilter')}
             />
           )}
           {filters.maxTime > 0 && (
             <ActiveChip
               onRemove={removeTime}
-              icon={<Clock className="w-3 h-3" />}
+              icon={<Clock className="w-3.5 h-3.5" />}
               label={t('catalog.timeUnder', { count: filters.maxTime })}
             />
           )}
+          {filters.categories?.map(cat => (
+            <ActiveChip
+              key={cat}
+              onRemove={() => removeCategory(cat)}
+              icon={<span className="text-base leading-none">{getRecipeCategoryEmoji(cat)}</span>}
+              label={getRecipeCategoryLabel(cat, language)}
+            />
+          ))}
           {filters.collectionIds.map(id => (
             <ActiveChip
               key={id}
               onRemove={() => removeCollection(id)}
-              icon={collectionEmoji(id) ? <span className="text-sm leading-none">{collectionEmoji(id)}</span> : undefined}
+              icon={collectionEmoji(id) ? <span className="text-base leading-none">{collectionEmoji(id)}</span> : undefined}
               label={collectionName(id)}
             />
           ))}
@@ -274,15 +288,18 @@ export default function CatalogFilters({
             <ActiveChip
               key={flag}
               onRemove={() => removeFlag(flag)}
-              icon={<Tag className="w-3 h-3" />}
+              icon={<Tag className="w-3.5 h-3.5" />}
               label={flag}
               accent="amber"
             />
           ))}
           <button
             type="button"
-            onClick={handleResetAll}
-            className="px-3 py-1.5 text-xs font-semibold rounded-full border-none bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 whitespace-nowrap shrink-0 active:scale-95 transition-all cursor-pointer"
+            onClick={() => {
+              hapticLight();
+              handleResetAll();
+            }}
+            className="min-h-[44px] px-3.5 py-2 text-xs font-semibold rounded-2xl border-none bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 whitespace-nowrap shrink-0 active:scale-95 transition-all duration-200 ease-out cursor-pointer select-none"
           >
             {t('catalog.resetFilters')}
           </button>
@@ -304,17 +321,20 @@ function ActiveChip({
   accent?: 'emerald' | 'amber';
 }) {
   const tone = accent === 'amber'
-    ? 'bg-amber-500 text-white'
-    : 'bg-emerald-600 text-white';
+    ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+    : 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20';
   return (
     <button
       type="button"
-      onClick={onRemove}
-      className={`px-3 py-1.5 text-xs font-bold rounded-full border-none shadow-none whitespace-nowrap shrink-0 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5 ${tone}`}
+      onClick={() => {
+        hapticLight();
+        onRemove();
+      }}
+      className={`min-h-[44px] px-3.5 py-2 text-xs font-bold rounded-2xl border-none whitespace-nowrap shrink-0 active:scale-95 transition-all duration-200 ease-out cursor-pointer flex items-center gap-2 select-none ${tone}`}
     >
       {icon}
       <span className="max-w-[9rem] truncate">{label}</span>
-      <X className="w-3 h-3 opacity-80" />
+      <X className="w-3.5 h-3.5 opacity-80 shrink-0" />
     </button>
   );
 }

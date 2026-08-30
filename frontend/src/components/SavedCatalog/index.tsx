@@ -9,7 +9,7 @@ import { useToast } from '../../context/ToastContext';
 import { useSavedCatalog, EMPTY_FILTERS } from '../../hooks/useSavedCatalog';
 import { useAuth } from '../../context/AuthContext';
 import { useCollections } from '../../hooks/useCollections';
-import { categoryOrder, legacyCategoryMap } from '../../i18n';
+import { categoryOrder, legacyCategoryMap, getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
 import PremiumModal from '../PremiumModal';
 import PremiumHint from '../PremiumHint';
 import CollectionSheet from './CollectionSheet';
@@ -76,7 +76,7 @@ export default function SavedCatalog({
   onNavigateCatalog,
   limitStatus
 }: SavedCatalogProps) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const toast = useToast();
   const { isPremium } = useAuth();
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
@@ -152,6 +152,8 @@ export default function SavedCatalog({
     shelves,
     jobsByCollection,
     jobsByFlag,
+    jobsByCategory,
+    availableCategories,
     favoriteJobs,
     markOpened
   } = useSavedCatalog({
@@ -212,6 +214,8 @@ export default function SavedCatalog({
       }
       case 'flag':
         return preset.name;
+      case 'category':
+        return `${getRecipeCategoryEmoji(preset.category)} ${getRecipeCategoryLabel(preset.category, language)}`;
       case 'search':
         return t('catalog.allRecipesTitle');
       default:
@@ -550,6 +554,8 @@ export default function SavedCatalog({
           collections={collections}
           jobsByCollection={jobsByCollection}
           jobsByFlag={jobsByFlag}
+          jobsByCategory={jobsByCategory}
+          availableCategories={availableCategories}
           favoriteJobs={favoriteJobs}
           shelves={shelves}
           allFlags={allFlags}
@@ -638,6 +644,10 @@ export default function SavedCatalog({
         onClose={() => setIsFilterSheetOpen(false)}
         filters={filters}
         sortBy={sortBy}
+        collections={collections}
+        allFlags={allExistingFlags}
+        availableCategories={availableCategories}
+        countMatches={countMatches}
         onApply={(next, nextSort) => {
           setFilters(next);
           setSortBy(nextSort);
@@ -656,9 +666,6 @@ export default function SavedCatalog({
             return;
           }
         }}
-        collections={collections}
-        allFlags={allFlags}
-        countMatches={countMatches}
       />
 
       {sheets}

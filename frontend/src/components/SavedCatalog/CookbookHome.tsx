@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Plus, Tag, ChevronRight, ChevronDown, Settings2 } from 'lucide-react';
-import type { Collection, SavedRecipe } from '../../types';
+import type { Collection, SavedRecipe, RecipeCategory } from '../../types';
 import { useI18n } from '../../context/I18nContext';
+import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
+import { hapticLight } from '../../utils/haptics';
 import CollectionTile from './CollectionTile';
 import RecipeShelf from './RecipeShelf';
 import RecipePosterCard from './RecipePosterCard';
@@ -23,6 +25,8 @@ interface CookbookHomeProps {
   collections: Collection[];
   jobsByCollection: Record<string, SavedRecipe[]>;
   jobsByFlag?: Record<string, SavedRecipe[]>;
+  jobsByCategory?: Partial<Record<RecipeCategory, SavedRecipe[]>>;
+  availableCategories?: RecipeCategory[];
   favoriteJobs?: SavedRecipe[];
   shelves: {
     recommended?: RecommendedShelf | null;
@@ -52,6 +56,8 @@ export default function CookbookHome({
   collections,
   jobsByCollection,
   jobsByFlag = {},
+  jobsByCategory = {},
+  availableCategories = [],
   favoriteJobs = [],
   shelves,
   allFlags,
@@ -64,7 +70,7 @@ export default function CookbookHome({
   selectedIds = new Set(),
   bindLongPress,
 }: CookbookHomeProps) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
 
   // Accordion state for discovery shelves (single-open accordion: newest, recent, quick)
   const [openShelfKey, setOpenShelfKey] = useState<'newest' | 'recent' | 'quick' | null>('newest');
@@ -159,21 +165,52 @@ export default function CookbookHome({
 
         {/* 🏷️ Labels / Tags Chip Bar (directly under tiles) */}
         {allFlags.length > 0 && (
-          <div className="flex gap-1.5 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 pt-1 pb-0.5 scroll-smooth">
+          <div className="flex gap-2 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 pt-1 pb-0.5 scroll-smooth">
             {allFlags.map(flag => {
               const count = jobsByFlag[flag]?.length ?? 0;
               return (
                 <button
                   key={flag}
                   type="button"
-                  onClick={() => onOpenList({ kind: 'flag', name: flag })}
-                  className="px-3 py-1 text-xs font-semibold rounded-full border-none bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 active:scale-95 transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 shrink-0"
+                  onClick={() => {
+                    hapticLight();
+                    onOpenList({ kind: 'flag', name: flag });
+                  }}
+                  className="min-h-[44px] px-3.5 py-2 text-xs font-semibold rounded-2xl border-none bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none hover:bg-gray-50 dark:hover:bg-gray-800 active:scale-95 transition-all duration-200 ease-out whitespace-nowrap cursor-pointer flex items-center gap-2 shrink-0 select-none"
                 >
-                  <Tag className="w-3 h-3 text-amber-500" />
+                  <Tag className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                   <span>{flag}</span>
                   {count > 0 && (
-                    <span className="text-[10px] font-bold opacity-75">
-                      ({count})
+                    <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* 🍲 Categories Chip Bar (only categories with existing recipes, sorted canonically) */}
+        {availableCategories.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 pt-0.5 pb-0.5 scroll-smooth">
+            {availableCategories.map(cat => {
+              const count = jobsByCategory[cat]?.length ?? 0;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => {
+                    hapticLight();
+                    onOpenList({ kind: 'category', category: cat });
+                  }}
+                  className="min-h-[44px] px-3.5 py-2 text-xs font-semibold rounded-2xl border-none bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none hover:bg-gray-50 dark:hover:bg-gray-800 active:scale-95 transition-all duration-200 ease-out whitespace-nowrap cursor-pointer flex items-center gap-2 shrink-0 select-none"
+                >
+                  <span className="text-base leading-none shrink-0">{getRecipeCategoryEmoji(cat)}</span>
+                  <span>{getRecipeCategoryLabel(cat, language)}</span>
+                  {count > 0 && (
+                    <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                      {count}
                     </span>
                   )}
                 </button>

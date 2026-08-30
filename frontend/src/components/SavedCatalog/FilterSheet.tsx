@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { Button, Drawer } from '@heroui/react';
 import { SlidersHorizontal, Star, Tag, X, Check } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
-import type { Collection } from '../../types';
+import { type Collection, type RecipeCategory, RECIPE_CATEGORIES } from '../../types';
+import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
+import { hapticLight } from '../../utils/haptics';
 import {
   EMPTY_FILTERS,
   TIME_FILTER_OPTIONS,
@@ -20,6 +22,7 @@ interface FilterSheetProps {
   sortBy: CatalogSort;
   collections: Collection[];
   allFlags: string[];
+  availableCategories?: RecipeCategory[];
   /** Live count for the current draft, so the CTA can say how many remain. */
   countMatches: (filters: CatalogFilterState) => number;
 }
@@ -29,8 +32,8 @@ const SORT_OPTIONS: CatalogSort[] = ['newest', 'recent', 'title', 'time'];
 function chipClass(isActive: boolean, accent: 'emerald' | 'amber' = 'emerald') {
   if (isActive) {
     return accent === 'amber'
-      ? 'bg-amber-500 text-white font-bold border-none shadow-none'
-      : 'bg-emerald-600 text-white font-bold border-none shadow-none';
+      ? 'bg-amber-500 text-white font-bold border-none shadow-md shadow-amber-500/20'
+      : 'bg-emerald-600 text-white font-bold border-none shadow-md shadow-emerald-600/20';
   }
   return accent === 'amber'
     ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 border-none'
@@ -53,9 +56,10 @@ export default function FilterSheet({
   sortBy,
   collections,
   allFlags,
+  availableCategories = [],
   countMatches
 }: FilterSheetProps) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   useAdOverlay(isOpen);
   const [draft, setDraft] = useState<CatalogFilterState>(filters);
   const [draftSort, setDraftSort] = useState<CatalogSort>(sortBy);
@@ -165,6 +169,45 @@ export default function FilterSheet({
                     ))}
                   </div>
                 </section>
+
+                {/* Categories (only shown when categories exist in library or active in draft) */}
+                {(() => {
+                  const activeSet = new Set([...availableCategories, ...(draft.categories ?? [])]);
+                  const visibleCategories = RECIPE_CATEGORIES.filter(cat => activeSet.has(cat));
+
+                  if (visibleCategories.length === 0) return null;
+
+                  return (
+                    <section className="flex flex-col gap-2">
+                      <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                        {t('catalog.categoriesTitle')}
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {visibleCategories.map(cat => {
+                          const isActive = (draft.categories ?? []).includes(cat);
+                          return (
+                            <button
+                              key={cat}
+                              type="button"
+                              onClick={() => {
+                                hapticLight();
+                                setDraft(d => ({
+                                  ...d,
+                                  categories: toggleIn(d.categories ?? [], cat) as RecipeCategory[]
+                                }));
+                              }}
+                              className={`min-h-[44px] px-3.5 py-2 text-xs rounded-2xl border-none transition-all duration-200 ease-out whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-2 select-none ${chipClass(isActive)}`}
+                            >
+                              <span className="text-base leading-none shrink-0">{getRecipeCategoryEmoji(cat)}</span>
+                              <span>{getRecipeCategoryLabel(cat, language)}</span>
+                              {isActive && <Check className="w-3.5 h-3.5 shrink-0" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  );
+                })()}
 
                 {/* Collections */}
                 {collections.length > 0 && (

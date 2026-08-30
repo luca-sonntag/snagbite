@@ -4,6 +4,7 @@ import { MoreVertical, Check, Copy, ShoppingCart, Trash2, Folder, Tag, Star, Ref
 import type { Recipe } from '../../types';
 import RecipeImageGallery from '../RecipeImageGallery';
 import { useI18n } from '../../context/I18nContext';
+import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
 import { isPhotoImportUrl } from '../../utils/photoImport';
 import { useCookHistory } from '../../hooks/useCookHistory';
 import { formatRelative } from '../../utils/formatRelative';
@@ -280,10 +281,16 @@ export default function RecipeHeader({
             )}
           </div>
         )}
-        {/* Only the labels themselves earn a row here. */}
-        {flags && flags.length > 0 && (
+        {/* Category & labels */}
+        {(recipe.category || (flags && flags.length > 0)) && (
           <div className="flex flex-wrap gap-2 mt-1">
-            {flags.map((flag, idx) => (
+            {recipe.category && (
+              <span className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-xs font-bold px-3.5 py-1.5 min-h-[38px] rounded-full select-none whitespace-nowrap border-none flex items-center gap-1.5">
+                <span className="text-base leading-none">{getRecipeCategoryEmoji(recipe.category)}</span>
+                <span>{getRecipeCategoryLabel(recipe.category, language)}</span>
+              </span>
+            )}
+            {flags && flags.length > 0 && flags.map((flag, idx) => (
               <button
                 key={`flag-${idx}`}
                 type="button"
