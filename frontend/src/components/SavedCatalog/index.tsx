@@ -9,7 +9,7 @@ import { useToast } from '../../context/ToastContext';
 import { useSavedCatalog, EMPTY_FILTERS } from '../../hooks/useSavedCatalog';
 import { useAuth } from '../../context/AuthContext';
 import { useCollections } from '../../hooks/useCollections';
-import { categoryOrder, legacyCategoryMap } from '../../i18n';
+import { categoryOrder, legacyCategoryMap, getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
 import PremiumModal from '../PremiumModal';
 import PremiumHint from '../PremiumHint';
 import CollectionSheet from './CollectionSheet';
@@ -76,7 +76,7 @@ export default function SavedCatalog({
   onNavigateCatalog,
   limitStatus
 }: SavedCatalogProps) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const toast = useToast();
   const { isPremium } = useAuth();
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
@@ -212,6 +212,8 @@ export default function SavedCatalog({
       }
       case 'flag':
         return preset.name;
+      case 'category':
+        return `${getRecipeCategoryEmoji(preset.category)} ${getRecipeCategoryLabel(preset.category, language)}`;
       case 'search':
         return t('catalog.allRecipesTitle');
       default:

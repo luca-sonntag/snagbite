@@ -19,6 +19,7 @@
  * hex characters.
  */
 import { EMPTY_FILTERS, type CatalogFilterState } from '../../hooks/useSavedCatalog';
+import type { RecipeCategory } from '../../types';
 
 export const LIST_SEGMENT = 'list';
 
@@ -30,7 +31,8 @@ export type CatalogPreset =
   | { kind: 'recent' }
   | { kind: 'recommended' }
   | { kind: 'collection'; id: string }
-  | { kind: 'flag'; name: string };
+  | { kind: 'flag'; name: string }
+  | { kind: 'category'; category: RecipeCategory };
 
 /** True when the sub-path addresses the list level rather than a recipe. */
 export function isCatalogListRoute(subPath: string | null | undefined): boolean {
@@ -55,6 +57,8 @@ export function buildListRoute(preset: CatalogPreset): string {
       return `${LIST_SEGMENT}/collection/${encodeURIComponent(preset.id)}`;
     case 'flag':
       return `${LIST_SEGMENT}/flag/${encodeURIComponent(preset.name)}`;
+    case 'category':
+      return `${LIST_SEGMENT}/category/${encodeURIComponent(preset.category)}`;
     default:
       return LIST_SEGMENT;
   }
@@ -84,6 +88,8 @@ export function parseListRoute(subPath: string | null | undefined): CatalogPrese
       return value ? { kind: 'collection', id: safeDecode(value) } : { kind: 'all' };
     case 'flag':
       return value ? { kind: 'flag', name: safeDecode(value) } : { kind: 'all' };
+    case 'category':
+      return value ? { kind: 'category', category: safeDecode(value) as RecipeCategory } : { kind: 'all' };
     default:
       return { kind: 'all' };
   }
@@ -110,6 +116,8 @@ export function getBaseFiltersForPreset(preset: CatalogPreset): CatalogFilterSta
       return { ...EMPTY_FILTERS, collectionIds: [preset.id] };
     case 'flag':
       return { ...EMPTY_FILTERS, flags: [preset.name] };
+    case 'category':
+      return { ...EMPTY_FILTERS, categories: [preset.category] };
     default:
       return EMPTY_FILTERS;
   }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import type { SavedRecipe, Ingredient } from '../types';
+import type { SavedRecipe, Ingredient, RecipeCategory } from '../types';
 import { useI18n } from '../context/I18nContext';
 import { useDialog } from '../context/DialogContext';
 import { deleteCachedImage } from '../utils/imageStore';
@@ -17,6 +17,7 @@ export interface CatalogFilterState {
   recommendedOnly: boolean;
   /** Max total time (prep + cook) in minutes; 0 = no time constraint. */
   maxTime: number;
+  categories: RecipeCategory[];
   collectionIds: string[];
   flags: string[];
 }
@@ -25,6 +26,7 @@ export const EMPTY_FILTERS: CatalogFilterState = {
   favoritesOnly: false,
   recommendedOnly: false,
   maxTime: 0,
+  categories: [],
   collectionIds: [],
   flags: []
 };
@@ -54,6 +56,7 @@ export function countActiveFilters(filters: CatalogFilterState): number {
     (filters.favoritesOnly ? 1 : 0) +
     (filters.recommendedOnly ? 1 : 0) +
     (filters.maxTime > 0 ? 1 : 0) +
+    (filters.categories?.length ?? 0) +
     filters.collectionIds.length +
     filters.flags.length
   );
@@ -294,6 +297,11 @@ export function useSavedCatalog({
         if (total <= 0 || total > facets.maxTime) return false;
       }
 
+      if (facets.categories && facets.categories.length > 0) {
+        const recipeCategory = job.recipe?.category;
+        if (!recipeCategory || !facets.categories.includes(recipeCategory as RecipeCategory)) return false;
+      }
+
       if (facets.collectionIds.length > 0) {
         const ids = job.collectionIds ?? [];
         if (!facets.collectionIds.some(id => ids.includes(id))) return false;
@@ -373,6 +381,17 @@ export function useSavedCatalog({
       (job.flags ?? []).forEach(flag => {
         (map[flag] ||= []).push(job);
       });
+    });
+    return map;
+  }, [completedJobs, sortJobs]);
+
+  /** recipeId list per category. */
+  const jobsByCategory = useMemo(() => {
+    const map: Partial<Record<RecipeCategory, SavedRecipe[]>> = {};
+    sortJobs(completedJobs, 'newest').forEach(job => {
+      if (job.recipe?.category) {
+        (map[job.recipe.category] ||= []).push(job);
+      }
     });
     return map;
   }, [completedJobs, sortJobs]);
@@ -773,6 +792,7 @@ export function useSavedCatalog({
     shelves,
     jobsByCollection,
     jobsByFlag,
+    jobsByCategory,
     favoriteJobs,
     recentMap,
     markOpened
