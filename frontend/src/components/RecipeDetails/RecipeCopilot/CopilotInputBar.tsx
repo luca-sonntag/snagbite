@@ -1,5 +1,4 @@
 import React from 'react';
-import { Button } from '@heroui/react';
 import {
   Send,
   Sparkles,
@@ -116,14 +115,14 @@ export const CopilotInputBar: React.FC<CopilotInputBarProps> = ({
         />
 
         {/* Send Button */}
-        <Button
+        <button
           type="submit"
-          isDisabled={isPending || !message.trim()}
+          disabled={isPending || !message.trim()}
           className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center active:scale-90 transition-all p-0 border-none shadow-md shadow-emerald-600/25 disabled:opacity-30 disabled:scale-100 disabled:shadow-none cursor-pointer shrink-0"
           aria-label={t('copilot.sendAria')}
         >
-          <Send className="w-4.5 h-4.5 fill-white ml-0.5" />
-        </Button>
+          <Send className="w-4.5 h-4.5 text-white" />
+        </button>
       </form>
     </div>
   );
