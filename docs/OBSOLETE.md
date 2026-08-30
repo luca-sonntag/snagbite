@@ -6,6 +6,18 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-30: Schwebende Welcome-Card-Insel im Copilot durch natürliche Bot-Begrüßungs-Bubble ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `CopilotWelcomeCard.tsx`: Eine künstliche, schwebende Kasten-Insel in der Bildschirmmitte mit redundanten Einstiegsvorschlägen, die beim Senden der ersten Nachricht abrupt verschwand.
+  - Doppelte Anzeige von Quick-Chips (in der Welcome-Card UND gleichzeitig in der horizontalen Input-Leiste).
+* **Ersetzt durch:**
+  - **Natürliche Initial-Greeting Turn ([`CopilotChatList.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/RecipeCopilot/CopilotChatList.tsx)):** Der Chat startet nahtlos mit einer ersten Bot-Nachricht oben links und bindet die 3–4 rezeptspezifischen Vorschlags-Pills direkt als 1-Tap Action Pills darunter ein.
+  - **Konsistenter, linearer Verlauf:** Wenn der Nutzer tippt oder einen Chip anklickt, bleibt der Chat-Verlauf 100% flüssig ohne Layout-Sprünge.
+* **Betroffene Dateien:** `frontend/src/components/RecipeDetails/RecipeCopilot/CopilotChatList.tsx`, `frontend/src/components/RecipeDetails/RecipeCopilot/CopilotMessageItem.tsx`, `frontend/src/components/RecipeDetails/RecipeCopilot/CopilotWelcomeCard.tsx` (gelöscht), `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-08-30: Blickdichter HeroUI Drawer (Bottom-Sheet) im RecipeCopilot durch immersives Glassmorphic-Overlay ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
