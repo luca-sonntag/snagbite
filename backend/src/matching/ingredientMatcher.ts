@@ -1,4 +1,5 @@
 import { config } from '../config.js';
+import { getDefaultShelfLifeDays } from '@cookbook/shared';
 import type { CanonicalIngredient } from '../data/canonicalIngredients.js';
 import { canonicalizeBaseName, buildMappingKeys, toEnglishSingular } from './baseNameCanonical.js';
 import {
@@ -65,39 +66,69 @@ export async function resolveAndRemember(
   }
 
   const resolved = await resolveIngredient(input, openFoodFactsAccess);
-  if (!resolved || resolved.budgetExhausted) {
-    // Graceful offline fallback (e.g. unit tests or local dev without Gemini API key)
-    if (!config.INGREDIENT_RESOLVER_ENABLED || !config.GEMINI_API_KEY) {
-      let hits = openFoodFactsAccess.search(input.baseName || input.name, input.category, 1);
-      if (hits.length === 0 && input.baseName && input.name) {
-        hits = openFoodFactsAccess.search(input.name, input.category, 1);
-      }
-      if (hits.length > 0) {
-        return { match: hits[0], estimate: null };
-      }
-    }
-    return { match: null, estimate: null, usage: resolved?.usage };
-  }
-
-  const resolvedCode = resolved.productCode;
+  const resolvedCode = resolved?.productCode;
   const item = resolvedCode ? openFoodFactsAccess.get(resolvedCode) : null;
 
+  // Offline search fallback if disabled or local dev
+  let effectiveItem = item;
+  if (!effectiveItem && (!config.INGREDIENT_RESOLVER_ENABLED || !config.GEMINI_API_KEY)) {
+    let hits = openFoodFactsAccess.search(input.baseName || input.name, input.category, 1);
+    if (hits.length === 0 && input.baseName && input.name) {
+      hits = openFoodFactsAccess.search(input.name, input.category, 1);
+    }
+    if (hits.length > 0) {
+      effectiveItem = hits[0];
+    }
+  }
+
+  // Derive per-100g nutritional estimate from recipe if not matched to an OFF product
+  let estimatedNutrients: EstimatedNutrients | null = resolved?.estimatedNutrients ?? null;
+  if (
+    !effectiveItem &&
+    !estimatedNutrients &&
+    input.calories !== undefined &&
+    input.calories !== null &&
+    input.amount &&
+    input.amount > 0
+  ) {
+    const weightGrams = calculateWeightGrams(input.amount, input.unit || 'g', null, input.gramsPerUnit);
+    if (weightGrams > 0) {
+      const factor = 100 / weightGrams;
+      estimatedNutrients = {
+        calories: Math.round((input.calories || 0) * factor),
+        protein: Math.round((input.protein || 0) * factor * 10) / 10,
+        carbs: Math.round((input.carbs || 0) * factor * 10) / 10,
+        fat: Math.round((input.fat || 0) * factor * 10) / 10,
+      };
+    }
+  }
+
+  const typicalPackageAmount = resolved?.typicalPackageAmount ?? input.typicalPackageAmount ?? null;
+  const typicalPackageUnit = resolved?.typicalPackageUnit ?? input.typicalPackageUnit ?? null;
+  const shelfLifeDays =
+    resolved?.shelfLifeDays ??
+    input.shelfLifeDays ??
+    getDefaultShelfLifeDays(category, input.baseName || input.name);
+
+  // ALWAYS store in ingredient_mappings so 100% of ingredients are learned & cached
   if (keys.length > 0) {
     await storeMapping(keys, category, {
-      productCode: item ? item.product_code || item.id : null,
-      resolution: item ? 'matched' : 'no_match',
-      estimatedNutrients: item ? null : resolved.estimatedNutrients,
-      typicalPackageAmount: resolved.typicalPackageAmount,
-      typicalPackageUnit: resolved.typicalPackageUnit,
-      shelfLifeDays: resolved.shelfLifeDays,
+      productCode: effectiveItem ? effectiveItem.product_code || effectiveItem.id : null,
+      resolution: effectiveItem ? 'matched' : 'no_match',
+      estimatedNutrients: effectiveItem ? null : estimatedNutrients,
+      typicalPackageAmount,
+      typicalPackageUnit,
+      shelfLifeDays,
       source: 'agent',
-      confidence: resolved.confidence,
-      model: resolved.model,
-      reasoning: resolved.reasoning,
+      confidence: resolved?.confidence ?? 0.8,
+      model: resolved?.model ?? config.GEMINI_MODEL,
+      reasoning:
+        resolved?.reasoning ??
+        (effectiveItem ? 'Matched to Open Food Facts product' : 'Extracted from recipe ingredients'),
     });
   }
 
-  return { match: item, estimate: item ? null : resolved.estimatedNutrients, usage: resolved.usage };
+  return { match: effectiveItem, estimate: effectiveItem ? null : estimatedNutrients, usage: resolved?.usage };
 }
 
 /**
@@ -211,6 +242,16 @@ export async function enrichRecipeWithCanonicalIngredients(
       synonyms: ing.synonyms,
       isGenericGrocery: ing.isGenericGrocery,
       parentIngredient: ing.parentIngredient,
+      typicalPackageAmount: ing.typicalPackageAmount,
+      typicalPackageUnit: ing.typicalPackageUnit,
+      shelfLifeDays: ing.shelfLifeDays,
+      calories: ing.calories,
+      protein: ing.protein,
+      carbs: ing.carbs,
+      fat: ing.fat,
+      amount: ing.amount,
+      unit: ing.unit,
+      gramsPerUnit: ing.gramsPerUnit,
     },
   }));
 

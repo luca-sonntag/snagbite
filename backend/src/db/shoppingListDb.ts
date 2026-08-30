@@ -292,6 +292,40 @@ async function autoTransferToPantry(userId: string, item: ShoppingListRow): Prom
       if (mapping.shelf_life_days) {
         shelfLifeDays = mapping.shelf_life_days;
       }
+    } else if (item.recipe_id) {
+      // Fallback: check the linked recipe ingredients if not yet cached in ingredient_mappings
+      try {
+        const { data: recData } = await getClient()
+          .from('recipes')
+          .select('ingredients')
+          .eq('id', item.recipe_id)
+          .limit(1)
+          .maybeSingle();
+
+        if (recData?.ingredients && Array.isArray(recData.ingredients)) {
+          for (const group of recData.ingredients as any[]) {
+            if (!group?.items || !Array.isArray(group.items)) continue;
+            for (const ing of group.items) {
+              const ingBase = (ing.baseName || ing.name || '').toLowerCase().trim();
+              const ingName = (ing.name || '').toLowerCase().trim();
+              if (ingBase === searchKey || ingName === searchKey) {
+                if (ing.typicalPackageAmount) {
+                  packageAmount = Math.max(packageAmount, Number(ing.typicalPackageAmount));
+                }
+                if (ing.typicalPackageUnit) {
+                  packageUnit = ing.typicalPackageUnit;
+                }
+                if (ing.shelfLifeDays) {
+                  shelfLifeDays = ing.shelfLifeDays;
+                }
+                break;
+              }
+            }
+          }
+        }
+      } catch {
+        // Non-fatal fallback
+      }
     }
   }
 
