@@ -309,7 +309,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
         setIsPending(false);
         localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
       }
-    }, 2000);
+    }, 600);
 
     activePollingIntervalRef.current = interval;
   }, [getAccessToken, isPremium, onExtractionSuccess, runSimulatedProgress, stopActivePolling, t]);

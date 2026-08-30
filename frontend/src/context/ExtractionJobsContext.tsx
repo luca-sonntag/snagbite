@@ -49,7 +49,8 @@ export const EXTRACTION_COMPLETE_EVENT = 'app:extraction-complete';
 export const OPEN_RECIPE_EVENT = 'app:open-recipe';
 
 const STORAGE_KEY = 'kb_extraction_jobs';
-const POLL_INTERVAL_MS = 2000;
+/** Active polling interval for fast responsive extraction progress updates. */
+const POLL_INTERVAL_MS = 600;
 /**
  * A finished (completed) card auto-dismisses this long after it completes, so the
  * Extract tab doesn't fill up with old cards — the recipe is already in the
@@ -138,6 +139,8 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
     });
   }, []);
 
+  const pollJobRef = useRef<((id: string) => Promise<void>) | null>(null);
+
   const addJob = useCallback((jobId: string, meta: { sourceLabel: string; mode: ExtractionMode }) => {
     if (!jobId || typeof jobId !== 'string' || jobId === 'undefined') return;
     setJobsPersist(prev => {
@@ -155,6 +158,8 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
       };
       return [...prev, entry];
     });
+    // Eagerly poll immediately on enqueue without waiting for ticker
+    setTimeout(() => { void pollJobRef.current?.(jobId); }, 20);
   }, [setJobsPersist]);
 
   const dismissJob = useCallback((id: string) => {
@@ -263,9 +268,14 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
       } else if (job.status === 'awaiting_frames') {
         if (!capturedFramesJobsRef.current.has(id)) {
           capturedFramesJobsRef.current.add(id);
-          handleClientFrameRequest(job, getAccessToken).catch((err) => {
-            console.warn('[ExtractionJobsContext] Frame handler failed:', err);
-          });
+          handleClientFrameRequest(job, getAccessToken)
+            .then(() => {
+              // Eagerly poll immediately after frames were submitted
+              setTimeout(() => { void pollJobRef.current?.(id); }, 50);
+            })
+            .catch((err) => {
+              console.warn('[ExtractionJobsContext] Frame handler failed:', err);
+            });
         }
         setJobsPersist(prev => prev.map(j =>
           j.id === id ? { ...j, status: job.status, progress: job.progress ?? null } : j
@@ -281,6 +291,8 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
       inFlightRef.current.delete(id);
     }
   }, [getAccessToken, finalizeCompletion, setJobsPersist, dismissJob, t, toast]);
+
+  pollJobRef.current = pollJob;
 
   // Single shared ticker polling every non-terminal tracked job.
   useEffect(() => {
