@@ -4,6 +4,7 @@ import { usePantry } from '../../context/PantryContext';
 import { useI18n } from '../../context/I18nContext';
 import { categoryOrder, translateCategory } from '../../i18n';
 import { useDialog } from '../../context/DialogContext';
+import { hapticLight, hapticSelection } from '../../utils/haptics';
 import type { PantryItem, CreatePantryItemDto, PantrySuggestion } from '../../types';
 import { PantryItemCard } from './PantryItemCard';
 import { PantryAddModal } from './PantryAddModal';
@@ -49,6 +50,7 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
   }, [activeItems, selectedCategory]);
 
   const handleOpenSuggestions = async () => {
+    hapticLight();
     setIsSuggestionsOpen(true);
     setLoadingSuggestions(true);
     try {
@@ -80,41 +82,51 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Waste Reduction Banner */}
-      <div className="bg-gradient-to-r from-warning-500/10 via-primary-500/10 to-transparent p-4 rounded-3xl border border-warning-500/20 flex items-center justify-between gap-3 flex-wrap">
-        <div>
+    <div className="space-y-4 pb-36">
+      {/* Anti-Food-Waste Suggestion Card */}
+      <div className="bg-white dark:bg-gray-900 p-4 sm:p-5 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex items-center justify-between gap-3 flex-wrap">
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-warning-600" />
-            <h3 className="font-bold text-sm text-foreground">{t('pantry.title')}</h3>
+            <span className="p-2 rounded-xl bg-amber-500/10 text-amber-500 shrink-0">
+              <Sparkles className="w-5 h-5" />
+            </span>
+            <div>
+              <h3 className="font-bold text-sm text-gray-900 dark:text-white">
+                {t('pantry.suggestionsTitle')}
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                {expiringCount > 0
+                  ? t('pantry.expiringAlert', { count: expiringCount })
+                  : t('pantry.totalItems', { count: activeItems.length })}
+              </p>
+            </div>
           </div>
-          <p className="text-xs text-default-500 mt-0.5">
-            {expiringCount > 0
-              ? t('pantry.expiringAlert', { count: expiringCount })
-              : t('pantry.totalItems', { count: activeItems.length })}
-          </p>
         </div>
 
         <button
           type="button"
           onClick={handleOpenSuggestions}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-warning-600 hover:bg-warning-700 text-white font-semibold text-xs transition-colors shadow-xs"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm transition-all border-none outline-none shadow-none active:scale-95 cursor-pointer min-h-[44px]"
         >
-          <Sparkles className="w-3.5 h-3.5" />
-          {t('pantry.suggestRecipesBtn')}
+          <Sparkles className="w-4 h-4" />
+          <span>{t('pantry.suggestRecipesBtn')}</span>
         </button>
       </div>
 
-      {/* Action Bar & Category Filter */}
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-1 overflow-x-auto pb-1 max-w-full">
+      {/* Action Bar: Category Filter Chips + Add Button */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        {/* Horizontal Scrolling Category Chips */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
           <button
             type="button"
-            onClick={() => setSelectedCategory('ALL')}
-            className={`text-xs px-3 py-1.5 rounded-xl font-medium transition-colors ${
+            onClick={() => {
+              hapticSelection();
+              setSelectedCategory('ALL');
+            }}
+            className={`text-xs px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all border-none outline-none cursor-pointer min-h-[38px] active:scale-95 ${
               selectedCategory === 'ALL'
-                ? 'bg-primary text-primary-foreground font-semibold'
-                : 'bg-content1 text-default-600 hover:bg-default-100'
+                ? 'bg-emerald-600 text-white shadow-[0_2px_6px_rgba(16,185,129,0.25)]'
+                : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:text-gray-900 dark:hover:text-white'
             }`}
           >
             Alle ({activeItems.length})
@@ -126,11 +138,14 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
               <button
                 key={cat}
                 type="button"
-                onClick={() => setSelectedCategory(cat)}
-                className={`text-xs px-3 py-1.5 rounded-xl font-medium whitespace-nowrap transition-colors ${
+                onClick={() => {
+                  hapticSelection();
+                  setSelectedCategory(cat);
+                }}
+                className={`text-xs px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all border-none outline-none cursor-pointer min-h-[38px] active:scale-95 ${
                   selectedCategory === cat
-                    ? 'bg-primary text-primary-foreground font-semibold'
-                    : 'bg-content1 text-default-600 hover:bg-default-100'
+                    ? 'bg-emerald-600 text-white shadow-[0_2px_6px_rgba(16,185,129,0.25)]'
+                    : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 {translateCategory(cat, language)} ({count})
@@ -139,25 +154,43 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
           })}
         </div>
 
+        {/* Add Item Button */}
         <button
           type="button"
           onClick={() => {
+            hapticLight();
             setEditingItem(null);
             setIsAddOpen(true);
           }}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs transition-colors shrink-0 min-h-[44px]"
+          className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm transition-all border-none outline-none shadow-[0_2px_6px_rgba(16,185,129,0.2)] active:scale-95 shrink-0 min-h-[44px] cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          {t('pantry.addItem')}
+          <span>{t('pantry.addItem')}</span>
         </button>
       </div>
 
       {/* Items List */}
       {filteredItems.length === 0 ? (
-        <div className="py-16 text-center text-default-400 bg-content1 rounded-3xl p-6 border border-divider/40">
-          <PackageOpen className="w-12 h-12 mx-auto text-default-300 mb-2" />
-          <h4 className="font-bold text-foreground text-base">{t('pantry.emptyTitle')}</h4>
-          <p className="text-xs text-default-500 max-w-sm mx-auto mt-1">{t('pantry.emptyDesc')}</p>
+        <div className="py-16 text-center bg-white dark:bg-gray-900 rounded-3xl p-6 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
+          <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-3 text-gray-400 dark:text-gray-500">
+            <PackageOpen className="w-8 h-8" />
+          </div>
+          <h4 className="font-bold text-gray-900 dark:text-white text-base">{t('pantry.emptyTitle')}</h4>
+          <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto mt-1 mb-4">
+            {t('pantry.emptyDesc')}
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              hapticLight();
+              setEditingItem(null);
+              setIsAddOpen(true);
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all border-none outline-none active:scale-95 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>{t('pantry.addItem')}</span>
+          </button>
         </div>
       ) : (
         <div className="space-y-2.5">
@@ -175,7 +208,7 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
         </div>
       )}
 
-      {/* Add / Edit Modal */}
+      {/* Add / Edit Modal (Mobile Bottom Sheet) */}
       <PantryAddModal
         isOpen={isAddOpen}
         initialItem={editingItem}
@@ -186,7 +219,7 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
         onSave={handleSave}
       />
 
-      {/* Waste Reduction Suggestions Modal */}
+      {/* Waste Reduction Suggestions Modal (Mobile Bottom Sheet) */}
       <PantrySuggestionsModal
         isOpen={isSuggestionsOpen}
         suggestions={suggestions}

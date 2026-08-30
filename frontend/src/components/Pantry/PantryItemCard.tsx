@@ -4,6 +4,7 @@ import type { PantryItem } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { translateCategory, getCategoryTheme } from '../../i18n';
 import { formatQuantity } from '../../utils/formatQuantity';
+import { hapticLight } from '../../utils/haptics';
 
 interface PantryItemCardProps {
   item: PantryItem;
@@ -35,72 +36,86 @@ export const PantryItemCard: React.FC<PantryItemCardProps> = ({ item, onEdit, on
   const categoryTheme = getCategoryTheme(item.category || 'OTHER');
 
   return (
-    <div className="flex items-center justify-between p-3.5 bg-content1 rounded-2xl shadow-xs transition-all hover:shadow-sm">
+    <div className="flex items-center justify-between p-3.5 sm:p-4 bg-white dark:bg-gray-900 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] transition-all">
       <div className="flex items-center gap-3 min-w-0 flex-1">
+        {/* Subtle Category Dot Indicator */}
         <div
-          className="w-2.5 h-10 rounded-full shrink-0"
+          className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
           style={{ backgroundColor: categoryTheme.hex }}
+          title={translateCategory(item.category || 'OTHER', language)}
         />
+
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-foreground text-sm sm:text-base truncate">
+            <span className="font-bold text-gray-900 dark:text-white text-sm sm:text-base truncate">
               {item.name}
             </span>
             {item.category && (
-              <span className="text-[11px] font-medium text-default-500 bg-default-100 px-2 py-0.5 rounded-md">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-lg">
                 {translateCategory(item.category, language)}
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-2 mt-1 text-xs text-default-500 flex-wrap">
-            <span className="font-medium text-foreground">
+          <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400 flex-wrap">
+            <span className="font-bold text-gray-800 dark:text-gray-200">
               {formatQuantity(item.amount)} {item.unit}
             </span>
 
             {expiryStatus === 'expired' && (
-              <span className="inline-flex items-center gap-1 text-danger font-medium bg-danger-50 px-1.5 py-0.5 rounded">
-                <AlertTriangle className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1 font-semibold text-[11px] bg-rose-500/10 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-lg">
+                <AlertTriangle className="w-3 h-3 shrink-0" />
                 {t('pantry.expiredBadge')}
               </span>
             )}
             {expiryStatus === 'today' && (
-              <span className="inline-flex items-center gap-1 text-warning-700 font-medium bg-warning-50 px-1.5 py-0.5 rounded">
-                <Clock className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1 font-semibold text-[11px] bg-rose-500/10 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-lg">
+                <Clock className="w-3 h-3 shrink-0" />
                 {t('pantry.expiresToday')}
               </span>
             )}
             {expiryStatus === 'soon' && expiryDays !== null && (
-              <span className="inline-flex items-center gap-1 text-warning-600 font-medium bg-warning-50 px-1.5 py-0.5 rounded">
-                <Clock className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1 font-semibold text-[11px] bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-lg">
+                <Clock className="w-3 h-3 shrink-0" />
                 {t('pantry.expiresInDays', { days: expiryDays })}
               </span>
             )}
             {expiryStatus === 'ok' && expiryDays !== null && (
-              <span className="inline-flex items-center gap-1 text-default-500">
-                <Clock className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1 text-[11px] bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-lg">
+                <Clock className="w-3 h-3 shrink-0" />
                 {t('pantry.expiresInDays', { days: expiryDays })}
               </span>
             )}
-            {item.notes && <span className="text-default-400 italic truncate max-w-[140px]">• {item.notes}</span>}
+            {item.notes && (
+              <span className="text-gray-400 dark:text-gray-500 italic truncate max-w-[130px]">
+                • {item.notes}
+              </span>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-1 shrink-0 ml-2">
+      {/* 44x44px Action Icon Buttons */}
+      <div className="flex items-center gap-1.5 shrink-0 ml-2">
         <button
           type="button"
-          onClick={() => onEdit(item)}
+          onClick={() => {
+            hapticLight();
+            onEdit(item);
+          }}
           aria-label={t('pantry.editItem')}
-          className="p-2 rounded-xl text-default-400 hover:text-primary hover:bg-default-100 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+          className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95 transition-all border-none outline-none flex items-center justify-center cursor-pointer"
         >
           <Edit2 className="w-4 h-4" />
         </button>
         <button
           type="button"
-          onClick={() => onDelete(item)}
+          onClick={() => {
+            hapticLight();
+            onDelete(item);
+          }}
           aria-label={t('pantry.deleteItem')}
-          className="p-2 rounded-xl text-default-400 hover:text-danger hover:bg-danger-50 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+          className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-500/10 active:scale-95 transition-all border-none outline-none flex items-center justify-center cursor-pointer"
         >
           <Trash2 className="w-4 h-4" />
         </button>

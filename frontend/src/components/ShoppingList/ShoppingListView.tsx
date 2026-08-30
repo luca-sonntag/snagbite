@@ -298,7 +298,7 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
         </div>
 
         {totalCount > 0 && (
-          <div className="h-1.5 w-full bg-default-100 rounded-full overflow-hidden">
+          <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-500 ease-out"
               style={{ width: `${progress}%` }}
@@ -316,7 +316,7 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
       {totalCount === 0 ? (
         <ShoppingEmptyState />
       ) : (
-        <div className="flex flex-col gap-3 pb-28">
+        <div className="flex flex-col gap-3 pb-36">
           {activeRecipes.length > 0 && onSelectRecipe && (
             <ShoppingRecipeCarousel
               recipes={activeRecipes}
@@ -328,14 +328,14 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
 
           {/* Group: Schon im Vorrat (Bitte prüfen) */}
           {inPantryItems.length > 0 && (
-            <div className="p-3.5 bg-warning-500/10 rounded-3xl border border-warning-500/20 space-y-2">
+            <div className="p-4 bg-amber-500/10 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] space-y-2">
               <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-warning-600" />
-                <h4 className="font-bold text-xs text-warning-800 dark:text-warning-300">
+                <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <h4 className="font-bold text-xs text-amber-800 dark:text-amber-300">
                   {t('shopping.inPantrySection')}
                 </h4>
               </div>
-              <p className="text-[11px] text-default-500">{t('shopping.inPantrySubtitle')}</p>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400">{t('shopping.inPantrySubtitle')}</p>
               <ShoppingListGroup
                 groupedCategories={[{ category: 'OTHER', items: inPantryItems }]}
                 getItemKey={getItemKey}

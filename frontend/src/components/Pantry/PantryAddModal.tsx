@@ -91,17 +91,28 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-      <div className="bg-content1 rounded-3xl w-full max-w-md p-6 shadow-xl relative animate-in fade-in zoom-in duration-200">
-        <div className="flex items-center justify-between pb-3 border-b border-divider mb-4">
-          <h3 className="text-lg font-bold text-foreground">
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div
+        className="bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl w-full max-w-lg p-5 sm:p-6 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)] relative animate-in slide-in-from-bottom duration-250 max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header without border */}
+        <div className="flex items-center justify-between pb-3 mb-2">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
             {initialItem ? t('pantry.editItem') : t('pantry.addItem')}
           </h3>
           <button
             type="button"
             onClick={onClose}
             aria-label={t('pantry.cancel')}
-            className="p-2 rounded-full text-default-400 hover:text-foreground hover:bg-default-100 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95 transition-all border-none outline-none flex items-center justify-center cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -109,7 +120,7 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-default-600 mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
               {t('shopping.placeholderName')}
             </label>
             <input
@@ -118,13 +129,13 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
               onChange={(e) => setName(e.target.value)}
               placeholder={t('pantry.namePlaceholder')}
               required
-              className="w-full px-3.5 py-2.5 rounded-xl bg-default-100 border-none text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary text-sm"
+              className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-default-600 mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
                 {t('shopping.placeholderAmount')}
               </label>
               <input
@@ -134,11 +145,11 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="1"
                 required
-                className="w-full px-3.5 py-2.5 rounded-xl bg-default-100 border-none text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary text-sm"
+                className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-default-600 mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
                 {t('shopping.placeholderUnit')}
               </label>
               <input
@@ -147,7 +158,7 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
                 onChange={(e) => setUnit(e.target.value)}
                 placeholder="g, ml, Stk."
                 required
-                className="w-full px-3.5 py-2.5 rounded-xl bg-default-100 border-none text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary text-sm"
+                className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all"
               />
             </div>
           </div>
@@ -159,8 +170,10 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
                 key={u}
                 type="button"
                 onClick={() => setUnit(u)}
-                className={`text-xs px-2.5 py-1 rounded-lg transition-colors ${
-                  unit === u ? 'bg-primary text-primary-foreground font-semibold' : 'bg-default-100 text-default-600 hover:bg-default-200'
+                className={`text-xs px-3 py-1.5 rounded-xl font-semibold transition-all border-none outline-none cursor-pointer active:scale-95 ${
+                  unit === u
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
               >
                 {u}
@@ -170,14 +183,14 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-default-600 mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
                 {t('pantry.categoryPlaceholder')}
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 aria-label={t('pantry.categoryPlaceholder')}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-default-100 border-none text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary text-sm"
+                className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border-none text-gray-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all cursor-pointer"
               >
                 {categoryOrder.map((cat) => (
                   <option key={cat} value={cat}>
@@ -187,7 +200,7 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-default-600 mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
                 {t('pantry.shelfLifeDays')}
               </label>
               <input
@@ -196,13 +209,13 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
                 value={shelfLifeDays}
                 onChange={(e) => setShelfLifeDays(e.target.value)}
                 placeholder="7"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-default-100 border-none text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary text-sm"
+                className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-default-600 mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
               {t('pantry.notesPlaceholder')}
             </label>
             <input
@@ -210,7 +223,7 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="z.B. geöffnet im Kühlschrank"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-default-100 border-none text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary text-sm"
+              className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all"
             />
           </div>
 
@@ -218,14 +231,14 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 px-4 rounded-xl bg-default-100 hover:bg-default-200 text-foreground font-semibold text-sm transition-colors min-h-[44px]"
+              className="flex-1 h-12 rounded-2xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold text-sm transition-all active:scale-95 border-none outline-none cursor-pointer flex items-center justify-center"
             >
               {t('pantry.cancel')}
             </button>
             <button
               type="submit"
               disabled={saving || !name.trim()}
-              className="flex-1 py-2.5 px-4 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm transition-colors disabled:opacity-50 min-h-[44px]"
+              className="flex-1 h-12 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm transition-all active:scale-95 border-none outline-none shadow-[0_2px_6px_rgba(16,185,129,0.25)] disabled:opacity-50 cursor-pointer flex items-center justify-center"
             >
               {saving ? '...' : t('pantry.saveItem')}
             </button>

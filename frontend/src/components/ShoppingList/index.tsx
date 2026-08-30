@@ -3,6 +3,7 @@ import { ShoppingCart, Package } from 'lucide-react';
 import type { AggregatedShoppingItem, ShoppingListItem, SavedRecipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { usePantry } from '../../context/PantryContext';
+import { hapticSelection } from '../../utils/haptics';
 import { PageHeader } from '../PageHeader';
 import { ShoppingListView } from './ShoppingListView';
 import { PantryView } from '../Pantry/PantryView';
@@ -51,30 +52,35 @@ export default function ShoppingList(props: ShoppingListProps) {
     <div className="flex flex-col gap-4">
       {/* Top Page Header with Title */}
       <PageHeader
-        icon={<ShoppingCart className="w-6 h-6" />}
+        icon={activeTab === 'shopping' ? <ShoppingCart className="w-6 h-6" /> : <Package className="w-6 h-6" />}
         title={activeTab === 'shopping' ? t('shopping.title') : t('pantry.title')}
         subtitle={activeTab === 'shopping' ? t('shopping.subtitle') : t('pantry.subtitle')}
       />
 
       {/* Segmented Tab Control */}
-      <div className="flex p-1 bg-default-100 dark:bg-default-50 rounded-2xl gap-1">
+      <div className="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl gap-1 border-none shadow-none">
         <button
           type="button"
-          onClick={() => setActiveTab('shopping')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all min-h-[44px] ${
+          onClick={() => {
+            if (activeTab !== 'shopping') {
+              hapticSelection();
+              setActiveTab('shopping');
+            }
+          }}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all duration-200 min-h-[44px] cursor-pointer border-none outline-none ${
             activeTab === 'shopping'
-              ? 'bg-content1 text-foreground shadow-xs'
-              : 'text-default-500 hover:text-foreground'
+              ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-bold shadow-[0_2px_6px_rgba(0,0,0,0.06)]'
+              : 'bg-transparent text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium'
           }`}
         >
-          <ShoppingCart className="w-4 h-4" />
+          <ShoppingCart className="w-4 h-4 shrink-0" />
           <span>{t('shopping.tabShoppingList')}</span>
           {shoppingTotal > 0 && (
             <span
-              className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${
+              className={`text-[11px] px-2 py-0.5 rounded-full font-bold transition-colors ${
                 activeTab === 'shopping'
-                  ? 'bg-primary/10 text-primary'
-                  : 'bg-default-200 text-default-600'
+                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
               }`}
             >
               {shoppingTotal}
@@ -84,21 +90,26 @@ export default function ShoppingList(props: ShoppingListProps) {
 
         <button
           type="button"
-          onClick={() => setActiveTab('pantry')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all min-h-[44px] ${
+          onClick={() => {
+            if (activeTab !== 'pantry') {
+              hapticSelection();
+              setActiveTab('pantry');
+            }
+          }}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all duration-200 min-h-[44px] cursor-pointer border-none outline-none ${
             activeTab === 'pantry'
-              ? 'bg-content1 text-foreground shadow-xs'
-              : 'text-default-500 hover:text-foreground'
+              ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-bold shadow-[0_2px_6px_rgba(0,0,0,0.06)]'
+              : 'bg-transparent text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium'
           }`}
         >
-          <Package className="w-4 h-4" />
+          <Package className="w-4 h-4 shrink-0" />
           <span>{t('shopping.tabPantry')}</span>
           {pantryActiveCount > 0 && (
             <span
-              className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${
+              className={`text-[11px] px-2 py-0.5 rounded-full font-bold transition-colors ${
                 activeTab === 'pantry'
-                  ? 'bg-warning-500/20 text-warning-700 dark:text-warning-300'
-                  : 'bg-default-200 text-default-600'
+                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
               }`}
             >
               {pantryActiveCount}
