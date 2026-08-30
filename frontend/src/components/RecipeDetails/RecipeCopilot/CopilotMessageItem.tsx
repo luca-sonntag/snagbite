@@ -111,7 +111,7 @@ export const CopilotMessageItem: React.FC<CopilotMessageItemProps> = ({
         )}
 
         {/* Remix system card if recipe was modified */}
-        {isAI && msg.isRemixReady && msg.newRecipe && msg.newJobId && (
+        {isAI && msg.isRemixReady && msg.newRecipe && (msg.newJobId || msg.newRecipe.id) && (
           <div className="p-4 border border-emerald-500/30 bg-white dark:bg-gray-900 shadow-[0_4px_20px_rgba(16,185,129,0.12)] flex flex-col gap-3 rounded-3xl animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
@@ -130,7 +130,7 @@ export const CopilotMessageItem: React.FC<CopilotMessageItemProps> = ({
               className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl h-11 flex items-center justify-center gap-1.5 border-none shadow-none active:scale-95 transition-all text-xs cursor-pointer"
               onPress={() => {
                 hapticMedium();
-                onLoadNewRecipe(msg.newRecipe!, msg.newJobId!);
+                onLoadNewRecipe(msg.newRecipe!, (msg.newJobId || msg.newRecipe?.id)!);
               }}
             >
               <RefreshCw className="w-3.5 h-3.5" />

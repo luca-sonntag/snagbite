@@ -464,6 +464,18 @@ export default function App() {
                 }}
                 shoppingListCount={aggregatedList.toBuy.length + aggregatedList.inPantry.length}
                 onRemixSuccess={async (newRecipe, newJobId) => {
+                  if (newRecipe && newJobId) {
+                    registerExtraRecipe(newJobId, {
+                      recipeId: newJobId,
+                      recipe: newRecipe,
+                      source: 'remix',
+                      addedAt: newRecipe.createdAt || new Date().toISOString(),
+                      updatedAt: newRecipe.updatedAt || new Date().toISOString(),
+                      isFavorite: false,
+                      flags: [],
+                      collectionIds: [],
+                    });
+                  }
                   await fetchHistory();
                   if (newJobId) {
                     navigate('history', newJobId);

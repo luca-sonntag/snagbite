@@ -263,6 +263,7 @@ recipeRoutes.post('/recipes/:id/chat/confirm', async (req: Request, res: Respons
 
     res.status(200).json({
       success: true,
+      newJobId: savedRemix.id,
       newRecipeId: savedRemix.id,
       updatedRecipeJson: savedRemix,
     });
@@ -353,6 +354,7 @@ recipeRoutes.post('/recipes/:id/chat', async (req: Request, res: Response): Prom
       recipeWasModified: result.recipeWasModified,
       pendingRemix: result.pendingRemix,
       modificationRequest: result.modificationRequest,
+      operations: result.operations,
       changes: result.changes,
     };
 
