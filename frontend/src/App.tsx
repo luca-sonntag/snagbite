@@ -87,6 +87,8 @@ export default function App() {
     fetchHistory,
     handleExtractionSuccess,
     handleDeleteJob,
+    extraRecipes,
+    registerExtraRecipe,
   } = useAppHistory({
     user,
     authLoading,
@@ -99,7 +101,7 @@ export default function App() {
 
   const selectedJob: SavedRecipe | null =
     activeView === 'history' && subPath && !isCatalogListRoute(subPath) && historyLoaded
-      ? history.find((j) => j.recipeId === subPath) ?? null
+      ? (history.find((j) => j.recipeId === subPath) || extraRecipes[subPath] || null)
       : null;
 
   const catalogReturnRef = useRef<string | null>(null);
@@ -111,12 +113,15 @@ export default function App() {
   const setSelectedJob = useCallback(
     (job: SavedRecipe | null) => {
       if (job) {
+        if (!history.some((j) => j.recipeId === job.recipeId)) {
+          registerExtraRecipe(job.recipeId, job);
+        }
         navigate('history', job.recipeId);
       } else {
         navigate('history', catalogReturnRef.current);
       }
     },
-    [navigate]
+    [navigate, history, registerExtraRecipe]
   );
 
   const navigateCatalog = useCallback(
