@@ -2,9 +2,10 @@ import React from 'react';
 import { Clock, AlertTriangle, Edit2, Trash2 } from 'lucide-react';
 import type { PantryItem } from '../../types';
 import { useI18n } from '../../context/I18nContext';
-import { translateCategory, getCategoryTheme } from '../../i18n';
+import { translateCategory } from '../../i18n';
 import { formatQuantity } from '../../utils/formatQuantity';
 import { hapticLight } from '../../utils/haptics';
+import { IngredientIcon } from '../IngredientIcon';
 
 interface PantryItemCardProps {
   item: PantryItem;
@@ -33,17 +34,19 @@ export const PantryItemCard: React.FC<PantryItemCardProps> = ({ item, onEdit, on
     else expiryStatus = 'ok';
   }
 
-  const categoryTheme = getCategoryTheme(item.category || 'OTHER');
-
   return (
-    <div className="flex items-center justify-between p-3.5 sm:p-4 bg-white dark:bg-gray-900 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] transition-all">
-      <div className="flex items-center gap-3 min-w-0 flex-1">
-        {/* Subtle Category Dot Indicator */}
-        <div
-          className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
-          style={{ backgroundColor: categoryTheme.hex }}
-          title={translateCategory(item.category || 'OTHER', language)}
-        />
+    <div className="flex items-center justify-between p-3.5 sm:p-4 bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all gap-3">
+      <div className="flex items-center gap-3.5 min-w-0 flex-1">
+        {/* 3D Ingredient / Category Icon with subtle background */}
+        <div className="w-11 h-11 rounded-2xl bg-gray-50 dark:bg-gray-800/80 flex items-center justify-center shrink-0 p-1 shadow-xs">
+          <IngredientIcon
+            baseName={item.baseName}
+            canonicalId={item.canonicalId}
+            category={item.category}
+            name={item.name}
+            size="sm"
+          />
+        </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
@@ -51,43 +54,43 @@ export const PantryItemCard: React.FC<PantryItemCardProps> = ({ item, onEdit, on
               {item.name}
             </span>
             {item.category && (
-              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-lg">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md">
                 {translateCategory(item.category, language)}
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400 flex-wrap">
-            <span className="font-bold text-gray-800 dark:text-gray-200">
+          <div className="flex items-center gap-2 mt-1 text-xs flex-wrap">
+            <span className="font-extrabold text-xs text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-lg">
               {formatQuantity(item.amount)} {item.unit}
             </span>
 
             {expiryStatus === 'expired' && (
-              <span className="inline-flex items-center gap-1 font-semibold text-[11px] bg-rose-500/10 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-lg">
+              <span className="inline-flex items-center gap-1 font-bold text-[11px] bg-rose-500/10 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-lg">
                 <AlertTriangle className="w-3 h-3 shrink-0" />
                 {t('pantry.expiredBadge')}
               </span>
             )}
             {expiryStatus === 'today' && (
-              <span className="inline-flex items-center gap-1 font-semibold text-[11px] bg-rose-500/10 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-lg">
+              <span className="inline-flex items-center gap-1 font-bold text-[11px] bg-rose-500/10 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-lg">
                 <Clock className="w-3 h-3 shrink-0" />
                 {t('pantry.expiresToday')}
               </span>
             )}
             {expiryStatus === 'soon' && expiryDays !== null && (
-              <span className="inline-flex items-center gap-1 font-semibold text-[11px] bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-lg">
+              <span className="inline-flex items-center gap-1 font-bold text-[11px] bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-lg">
                 <Clock className="w-3 h-3 shrink-0" />
                 {t('pantry.expiresInDays', { days: expiryDays })}
               </span>
             )}
             {expiryStatus === 'ok' && expiryDays !== null && (
-              <span className="inline-flex items-center gap-1 text-[11px] bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-lg">
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium bg-gray-100/70 dark:bg-gray-800/70 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-lg">
                 <Clock className="w-3 h-3 shrink-0" />
                 {t('pantry.expiresInDays', { days: expiryDays })}
               </span>
             )}
             {item.notes && (
-              <span className="text-gray-400 dark:text-gray-500 italic truncate max-w-[130px]">
+              <span className="text-gray-400 dark:text-gray-500 text-[11px] italic truncate max-w-[130px]">
                 • {item.notes}
               </span>
             )}

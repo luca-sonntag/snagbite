@@ -84,19 +84,29 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
   return (
     <div className="space-y-4 pb-36">
       {/* Anti-Food-Waste Suggestion Card */}
-      <div className="bg-white dark:bg-gray-900 p-4 sm:p-5 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex items-center justify-between gap-3 flex-wrap">
+      <div className="bg-white dark:bg-gray-900 p-4 sm:p-5 rounded-3xl border-none shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex items-center justify-between gap-3.5 flex-wrap">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-amber-500/10 text-amber-500 shrink-0">
+          <div className="flex items-center gap-3">
+            <span
+              className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-xs ${
+                expiringCount > 0
+                  ? 'bg-amber-500/10 text-amber-500'
+                  : 'bg-emerald-500/10 text-emerald-600'
+              }`}
+            >
               <Sparkles className="w-5 h-5" />
             </span>
             <div>
-              <h3 className="font-bold text-sm text-gray-900 dark:text-white">
+              <h3 className="font-bold text-sm sm:text-base text-gray-900 dark:text-white">
                 {t('pantry.suggestionsTitle')}
               </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-medium">
                 {expiringCount > 0
-                  ? t('pantry.expiringAlert', { count: expiringCount })
+                  ? expiringCount === 1
+                    ? t('pantry.expiringAlertOne')
+                    : t('pantry.expiringAlert', { count: expiringCount })
+                  : activeItems.length === 1
+                  ? t('pantry.totalItemsOne')
                   : t('pantry.totalItems', { count: activeItems.length })}
               </p>
             </div>
@@ -106,17 +116,21 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
         <button
           type="button"
           onClick={handleOpenSuggestions}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm transition-all border-none outline-none shadow-none active:scale-95 cursor-pointer min-h-[44px]"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm transition-all border-none outline-none shadow-[0_2px_8px_rgba(16,185,129,0.25)] active:scale-95 cursor-pointer min-h-[42px]"
         >
           <Sparkles className="w-4 h-4" />
-          <span>{t('pantry.suggestRecipesBtn')}</span>
+          <span>
+            {expiringCount > 0
+              ? t('pantry.suggestRecipesBtnExpiring')
+              : t('pantry.suggestRecipesBtn')}
+          </span>
         </button>
       </div>
 
-      {/* Action Bar: Category Filter Chips + Add Button */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      {/* Action Bar: Category Filter Chips + Compact Add Button */}
+      <div className="flex items-center justify-between gap-2">
         {/* Horizontal Scrolling Category Chips */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none flex-1 min-w-0">
           <button
             type="button"
             onClick={() => {
@@ -125,7 +139,7 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
             }}
             className={`text-xs px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all border-none outline-none cursor-pointer min-h-[38px] active:scale-95 ${
               selectedCategory === 'ALL'
-                ? 'bg-emerald-600 text-white shadow-[0_2px_6px_rgba(16,185,129,0.25)]'
+                ? 'bg-emerald-600 text-white shadow-[0_2px_8px_rgba(16,185,129,0.25)]'
                 : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:text-gray-900 dark:hover:text-white'
             }`}
           >
@@ -144,7 +158,7 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
                 }}
                 className={`text-xs px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all border-none outline-none cursor-pointer min-h-[38px] active:scale-95 ${
                   selectedCategory === cat
-                    ? 'bg-emerald-600 text-white shadow-[0_2px_6px_rgba(16,185,129,0.25)]'
+                    ? 'bg-emerald-600 text-white shadow-[0_2px_8px_rgba(16,185,129,0.25)]'
                     : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
@@ -162,7 +176,7 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
             setEditingItem(null);
             setIsAddOpen(true);
           }}
-          className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm transition-all border-none outline-none shadow-[0_2px_6px_rgba(16,185,129,0.2)] active:scale-95 shrink-0 min-h-[44px] cursor-pointer"
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all border-none outline-none shadow-[0_2px_8px_rgba(16,185,129,0.25)] active:scale-95 shrink-0 min-h-[38px] cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>{t('pantry.addItem')}</span>
