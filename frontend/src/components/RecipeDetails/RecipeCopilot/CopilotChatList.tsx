@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Button } from '@heroui/react';
 import { Sparkles, Bot, Loader2, RefreshCw, Timer } from 'lucide-react';
 import { useI18n } from '../../../context/I18nContext';
@@ -6,6 +6,7 @@ import { useTimerManager } from '../../../hooks/useTimerManager';
 import { useToast } from '../../../context/ToastContext';
 import { hapticLight, hapticMedium } from '../../../utils/haptics';
 import CopilotWelcomeCard from './CopilotWelcomeCard';
+import CopilotMessageContent from './CopilotMessageContent';
 import type { CopilotChatListProps } from './types';
 
 interface CopilotSuggestion {
@@ -33,21 +34,6 @@ export function parseSuggestions(rawText: string): { cleanText: string; suggesti
   }).trim();
 
   return { cleanText, suggestions };
-}
-
-function renderFormattedText(text: string) {
-  if (!text) return null;
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
-      return (
-        <strong key={i} className="font-bold text-gray-950 dark:text-white">
-          {part.slice(2, -2)}
-        </strong>
-      );
-    }
-    return part;
-  });
 }
 
 export const CopilotChatList: React.FC<CopilotChatListProps> = ({
@@ -98,13 +84,13 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
 
             <div className="flex flex-col gap-2 min-w-0">
               <div
-                className={`p-3.5 sm:p-4 text-[14px] leading-relaxed whitespace-pre-line ${
+                className={`p-3.5 sm:p-4 text-[14px] leading-relaxed ${
                   isAI
                     ? 'bg-white/85 dark:bg-gray-900/85 backdrop-blur-xl text-gray-800 dark:text-gray-100 rounded-3xl rounded-tl-sm shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-white/50 dark:border-white/10'
                     : 'bg-emerald-600 text-white rounded-3xl rounded-tr-sm shadow-[0_4px_20px_rgba(16,185,129,0.25)] font-normal'
                 }`}
               >
-                {isAI ? renderFormattedText(cleanText) : cleanText}
+                <CopilotMessageContent text={cleanText} isAI={isAI} />
               </div>
 
               {/* Proactive Follow-up Quick Action Pills */}
