@@ -177,3 +177,18 @@ Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird
 ### DSGVO / UMP Consent Flow & Plugin-Patch
 * **Google UMP SDK:** In `initAds()` wird vor dem ersten Ad-Request `AdMob.requestConsentInfo()` und bei Bedarf `AdMob.showConsentForm()` ausgeführt. Bei Ablehnung oder fehlendem Consent wird `npa: true` (Non-Personalized Ads) angefordert.
 * **Patched Plugin:** `@capacitor-community/admob` v8.0.0 wurde via `patch-package` angepasst, um echte Java-seitige `hideBanner()` / `resumeBanner()` Methoden auf dem Android UI-Thread ohne Deadlocks und Neuladen bereitzustellen.
+
+---
+
+## 5. 🥫 Vorratslager & Smarte Einkaufsliste (`Pantry/`, `ShoppingList/` & `PantryContext.tsx`)
+
+* **Segmented Navigation:** Die Ansicht `/shopping-list` teilt sich über ein barrierefreies Segmented Control in zwei Tabs:
+  1. **Einkaufsliste:** Strukturierte Supermarkt-Regalsortierung, automatisches Bündeln von Zutaten, Streich-Animationen und die Gruppe **„Schon im Vorrat (Bitte prüfen)"** für Zutaten, die laut Vorrat noch vorhanden sind.
+  2. **Vorrat:** Benutzer-Vorratsverwaltung mit Ablauf-Warnstufen (Grün, Gelb für $\le 3$ Tage, Rot für abgelaufen), Schnellfiltern nach Supermarktkategorie und manuellem Hinzufügen/Bearbeiten (`PantryAddModal`).
+* **Automatischer Vorratstransfer:** Beim Abhaken von Artikeln auf der Einkaufsliste werden diese automatisch in den Vorrat des Benutzers übertragen (`autoAddToPantry = true`), inklusive typischer Packungsgrößen und Haltbarkeitsdauern.
+* **Anti-Food-Waste Empfehlungen (`PantrySuggestionsModal`):**
+  * Findet Rezepte aus dem eigenen Kochbuch oder öffentlichen Community-Rezepten, die bald ablaufende Vorratszutaten verwerten.
+  * Zeigt visuelle Indikatoren für ablaufende Zutaten (`🔥 2 laufen bald ab!`), Trefferanzahl und fehlende Zutaten.
+  * Erlaubt sofortiges Kochen mit automatischem Vorratsabzug.
+* **Wochenplaner-Filter („Vorrat verwerten"):** Im Rezept-Picker des Wochenplaners (`RecipePickerModal.tsx`) sortiert der Filter-Chip *„Vorrat"* alle Rezepte nach dem Deckungsgrad mit dem aktuellen Vorratsbestand.
+

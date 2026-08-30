@@ -12,6 +12,7 @@ import { ToastProvider } from './context/ToastContext.tsx'
 import { ExtractionJobsProvider } from './context/ExtractionJobsContext.tsx'
 import ErrorBoundary from './components/ErrorBoundary.tsx'
 import { SocialProvider } from './context/SocialContext.tsx'
+import { PantryProvider } from './context/PantryContext.tsx'
 import { initNativeUi } from './native'
 import { installConsoleBuffer } from './utils/consoleBuffer'
 import { initOtaUpdates } from './utils/otaUpdater'
@@ -36,9 +37,11 @@ createRoot(document.getElementById('root')!).render(
                 <GamificationProvider>
                   <ExtractionJobsProvider>
                     <SocialProvider>
-                      <ErrorBoundary>
-                        <App />
-                      </ErrorBoundary>
+                      <PantryProvider>
+                        <ErrorBoundary>
+                          <App />
+                        </ErrorBoundary>
+                      </PantryProvider>
                     </SocialProvider>
                   </ExtractionJobsProvider>
                 </GamificationProvider>

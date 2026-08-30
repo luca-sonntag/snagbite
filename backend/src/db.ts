@@ -8,3 +8,5 @@ export * from './db/gamificationDb.js';
 export * from './db/socialDb.js';
 export * from './db/adminDb.js';
 export * from './db/mealPlansDb.js';
+export * from './db/pantryDb.js';
+export * from './db/shoppingListDb.js';

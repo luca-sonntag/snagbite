@@ -39,6 +39,16 @@ export interface ResolverInput {
   synonyms?: string[];
   isGenericGrocery?: boolean;
   parentIngredient?: ParentIngredientInfo;
+  typicalPackageAmount?: number | null;
+  typicalPackageUnit?: string | null;
+  shelfLifeDays?: number | null;
+  calories?: number | null;
+  protein?: number | null;
+  carbs?: number | null;
+  fat?: number | null;
+  amount?: number;
+  unit?: string;
+  gramsPerUnit?: number | null;
 }
 
 export interface ResolverResult {
@@ -46,6 +56,9 @@ export interface ResolverResult {
   productCode: string | null;
   /** Model's own estimate per 100 g, only meaningful when productCode is null. */
   estimatedNutrients: EstimatedNutrients | null;
+  typicalPackageAmount?: number | null;
+  typicalPackageUnit?: string | null;
+  shelfLifeDays?: number | null;
   confidence: number | null;
   reasoning: string | null;
   model: string;
@@ -63,7 +76,7 @@ export interface CatalogueAccess {
 }
 
 const MAX_TURNS = Math.max(2, config.INGREDIENT_RESOLVER_MAX_TURNS);
-const TURN_TIMEOUT_MS = 20_000;
+const TURN_TIMEOUT_MS = 30_000;
 /**
  * Ceiling on resolver calls in flight across the whole process, not per recipe.
  * Per-recipe concurrency alone would multiply by the number of recipes being

@@ -6,6 +6,36 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-30: Sequenzielle Extraktions-Pipeline & 16-Einzelbild-Upload durch Pipeline-Parallelisierung und Client-Canvas-Grid ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Sequenzielle Ausführung von FLUX.1 Cover-Bildgenerierung (`generateRecipeCoverImage`) und Open Food Facts Ingredient Normalisierung (`enrichRecipeWithCanonicalIngredients`) im Worker (`queue.ts`), was 2,5–4,5 Sekunden reine Wartezeit addierte.
+  - Upload von 16 unkomprimierten/separaten Base64-Einzelbildern (3–8 MB JSON Payload) vom Client an `POST /api/extract-recipe/frames` mit nachgelagertem serverseitigen Sharp-Compositing.
+  - Starres 2000ms Polling im Backend-Worker (`workerTick`) und Frontend (`ExtractionJobsContext.tsx`, `useRecipeExtraction.ts`), wodurch Statuswechsel (`pending` ➔ `awaiting_frames` ➔ `processing` ➔ `completed`) unnötige 3–6 Sekunden Leerlauf erzeugten.
+* **Ersetzt durch:**
+  - **Pipeline-Parallelisierung ([`backend/src/queue.ts`](file:///c:/Users/lucas/source/repos/cookbook-worktrees/fast-recipe-extraction/backend/src/queue.ts)):** Zeitgleiche Ausführung von Cover-Generierung und kanonischem Zutatabgleich via `Promise.all()` über alle Extraktionsmodi (URL, Foto, Remix) – spart 2,5–4,5s pro Extraktion.
+  - **Client-seitiges 4x4 Canvas Grid Compositing ([`frontend/src/utils/gridCanvas.ts`](file:///c:/Users/lucas/source/repos/cookbook-worktrees/fast-recipe-extraction/frontend/src/utils/gridCanvas.ts)):** Direktes Zeichnen der 16 Video-Keyframes auf ein Off-Screen HTML5-Canvas als ein einziges 1024×1024 JPEG-Grid (`gridBase64`, ~180–250 KB; 97% weniger Payload) und sofortiges Durchreichen an Gemini Vision ohne Sharp-Latenz.
+  - **Event-gesteuerter Worker-Tick ([`triggerWorkerTick`](file:///c:/Users/lucas/source/repos/cookbook-worktrees/fast-recipe-extraction/backend/src/queue.ts)):** Sofortiges Aufwecken des Workers bei Job-Erstellung und Frame-Upload.
+  - **Adaptives Fast-Polling (600ms):** Eager Polling und 600ms Intervall während aktiver Extraktionen im Frontend (`ExtractionJobsContext.tsx` & `useRecipeExtraction.ts`).
+* **Betroffene Dateien:** `backend/src/queue.ts`, `backend/src/types/jobs.ts`, `backend/src/routes/extractionRoutes.ts`, `backend/src/routes/recipeRoutes.ts`, `frontend/src/utils/gridCanvas.ts`, `frontend/src/utils/videoFrames.ts`, `frontend/src/context/ExtractionJobsContext.tsx`, `frontend/src/hooks/useRecipeExtraction.ts`, `docs/architecture/scraping-and-imports.md`, `docs/architecture/ai-gemini.md`, `docs/OBSOLETE.md`.
+
+---
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Reine clientseitige `localStorage` Speicherung (`recipe_shopping_list`) in `useShoppingList.ts` ohne Cloud-Sync über mehrere Geräte oder Web/App-Wechsel.
+  - Flache ungefilterte Einkaufslisten ohne Abgleich mit vorhandenen Vorräten zuhause (User kauften Zutaten doppelt).
+  - Fehlende automatische Bestandsverwaltung beim Kochen oder Einkaufen.
+  - Fehlende Veröffentlichungs- und Community-Verwertungs-Möglichkeit für KI-überarbeitete Rezepte.
+* **Ersetzt durch:**
+  - **Supabase-persistierte Einkaufsliste & Vorratslager (`shopping_list`, `pantry_items`, `pantryDb.ts`, `shoppingListDb.ts`):** RLS-gesicherte Cloud-Speicherung mit Offline-Fallback.
+  - **Automatischer Vorratstransfer & Zutatensynchronisation:** Beim Abhaken von Artikeln auf der Einkaufsliste landen diese automatisch im Vorrat (`pantry_items`), angereichert mit Supermarkt-Packungsgrößen und Haltbarkeitsdauern (`ingredient_mappings`).
+  - **Smarter Vorratsabzug beim Kochen:** Beim Kochen eines Rezepts (`POST /api/recipes/:id/cooked`) werden genutzte Zutaten unter automatischer Einheitenumrechnung (`g` ↔ `kg`, `ml` ↔ `l`) vom Vorrat abgezogen und bei 0 gefloort.
+  - **Anti-Food-Waste Empfehlungs-Engine (`getPantryRecipeSuggestions`):** Schlägt Rezepte aus dem eigenen Kochbuch sowie öffentlichen Community-Rezepten vor, die bald ablaufende Zutaten verwerten.
+  - **Rezept-Sichtbarkeit:** URL-extrahierte Rezepte sind standardmäßig öffentlich (`visibility = 'public'`), während Foto- und Remix-Rezepte privat bleiben und per `PATCH /api/recipes/:id/visibility` angepasst werden können.
+* **Betroffene Dateien:** `backend/db/migrations/006_pantry_and_shopping_list.sql`, `backend/src/db/pantryDb.ts`, `backend/src/db/shoppingListDb.ts`, `backend/src/routes/pantryRoutes.ts`, `backend/src/routes/shoppingListRoutes.ts`, `frontend/src/context/PantryContext.tsx`, `frontend/src/hooks/useShoppingList.ts`, `frontend/src/components/Pantry/`, `frontend/src/components/ShoppingList/`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-08-30: Einmalige ungesicherte RapidAPI-Scraping-Aufrufe & irreführende Fehlermeldung ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**

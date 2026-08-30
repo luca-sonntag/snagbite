@@ -84,6 +84,16 @@ function extractIngredients(recipe: Recipe): ResolverInput[] {
         synonyms: ing.synonyms,
         isGenericGrocery: ing.isGenericGrocery,
         parentIngredient: ing.parentIngredient,
+        typicalPackageAmount: ing.typicalPackageAmount,
+        typicalPackageUnit: ing.typicalPackageUnit,
+        shelfLifeDays: ing.shelfLifeDays,
+        calories: ing.calories,
+        protein: ing.protein,
+        carbs: ing.carbs,
+        fat: ing.fat,
+        amount: ing.amount,
+        unit: ing.unit,
+        gramsPerUnit: ing.gramsPerUnit,
       });
     }
   }

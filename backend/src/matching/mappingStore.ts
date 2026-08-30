@@ -27,6 +27,9 @@ export interface IngredientMapping {
   productCode: string | null;
   resolution: MappingResolution;
   estimatedNutrients: EstimatedNutrients | null;
+  typicalPackageAmount?: number | null;
+  typicalPackageUnit?: string | null;
+  shelfLifeDays?: number | null;
   source: MappingSource;
   confidence: number | null;
   model: string | null;
@@ -39,6 +42,9 @@ interface MappingRow {
   product_code?: string | null;
   resolution: string;
   estimated_nutrients: unknown;
+  typical_package_amount?: number | string | null;
+  typical_package_unit?: string | null;
+  shelf_life_days?: number | null;
   source: string;
   confidence: number | string | null;
   model: string | null;
@@ -64,12 +70,19 @@ function rowToMapping(row: MappingRow): IngredientMapping {
   const confidence =
     row.confidence === null || row.confidence === undefined ? null : Number(row.confidence);
   const code = row.product_code ?? null;
+  const packageAmount =
+    row.typical_package_amount !== null && row.typical_package_amount !== undefined
+      ? Number(row.typical_package_amount)
+      : null;
   return {
     mappingKey: row.mapping_key,
     category: row.category ?? '',
     productCode: code,
     resolution: row.resolution === 'no_match' ? 'no_match' : 'matched',
     estimatedNutrients: (row.estimated_nutrients as EstimatedNutrients | null) ?? null,
+    typicalPackageAmount: Number.isFinite(packageAmount as number) ? (packageAmount as number) : null,
+    typicalPackageUnit: row.typical_package_unit ?? null,
+    shelfLifeDays: typeof row.shelf_life_days === 'number' ? row.shelf_life_days : null,
     source: (['static', 'agent', 'human'].includes(row.source) ? row.source : 'agent') as MappingSource,
     confidence: Number.isFinite(confidence as number) ? (confidence as number) : null,
     model: row.model,
@@ -205,6 +218,9 @@ export async function storeMapping(
     product_code: code,
     resolution: mapping.resolution,
     estimated_nutrients: mapping.estimatedNutrients,
+    typical_package_amount: mapping.typicalPackageAmount ?? null,
+    typical_package_unit: mapping.typicalPackageUnit ?? null,
+    shelf_life_days: mapping.shelfLifeDays ?? null,
     source: mapping.source,
     confidence: mapping.confidence,
     model: mapping.model,
@@ -229,6 +245,9 @@ export async function storeMapping(
       productCode: row.product_code,
       resolution: row.resolution as MappingResolution,
       estimatedNutrients: (row.estimated_nutrients as EstimatedNutrients | null) ?? null,
+      typicalPackageAmount: typeof row.typical_package_amount === 'number' ? row.typical_package_amount : null,
+      typicalPackageUnit: row.typical_package_unit ?? null,
+      shelfLifeDays: typeof row.shelf_life_days === 'number' ? row.shelf_life_days : null,
       source: row.source as MappingSource,
       confidence: row.confidence === null ? null : Number(row.confidence),
       model: row.model,

@@ -108,34 +108,34 @@ async function processJob(job: Job): Promise<void> {
       recipe.parentRecipeId = parentRecipe.id;
       recipe.remixPrompt = job.remixPrompt || null;
 
-      let fluxUsage: any = null;
+      // Generate AI cover image and normalize ingredients in parallel
+      await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover' });
+      const coverPromise = recipe.imagePrompt
+        ? generateRecipeCoverImage({
+            prompt: recipe.imagePrompt,
+            jobId,
+            userId: job.userId,
+          })
+        : Promise.resolve({ imageUrl: null, usage: null });
 
-      // Generate AI cover image for the remixed recipe if prompt is present
-      if (recipe.imagePrompt) {
-        await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover' });
-        const { imageUrl: aiCoverUrl, usage } = await generateRecipeCoverImage({
-          prompt: recipe.imagePrompt,
-          jobId,
-          userId: job.userId,
-        });
-        fluxUsage = usage;
-        if (aiCoverUrl) {
-          recipe.imageUrl = aiCoverUrl;
-          recipe.imageUrls = [aiCoverUrl, ...(parentRecipe.imageUrls || [])];
-          recipe.isAiCover = true;
-        } else {
-          recipe.imageUrl = parentRecipe.imageUrl;
-          recipe.imageUrls = parentRecipe.imageUrls;
-        }
+      const resolverPromise = enrichRecipeWithCanonicalIngredients(recipe);
+
+      const [coverResult, resolverResult] = await Promise.all([coverPromise, resolverPromise]);
+
+      const aiCoverUrl = coverResult?.imageUrl;
+      const fluxUsage = coverResult?.usage;
+      const resolverUsage = resolverResult?.usage;
+
+      if (aiCoverUrl) {
+        recipe.imageUrl = aiCoverUrl;
+        recipe.imageUrls = [aiCoverUrl, ...(parentRecipe.imageUrls || [])];
+        recipe.isAiCover = true;
       } else {
         recipe.imageUrl = parentRecipe.imageUrl;
         recipe.imageUrls = parentRecipe.imageUrls;
       }
 
-      await updateJobProgress(jobId, 'processing', { percent: 90, stage: 'finalizing' });
-
-      // Canonical ingredient normalization & nutritional calculation
-      const { usage: resolverUsage } = await enrichRecipeWithCanonicalIngredients(recipe);
+      await updateJobProgress(jobId, 'processing', { percent: 95, stage: 'finalizing' });
 
       const llmUsage: LlmUsage = {};
       if (geminiUsage) llmUsage.gemini = geminiUsage;
@@ -185,36 +185,35 @@ async function processJob(job: Job): Promise<void> {
       recipe.sourceUrl = null;
       recipe.sourceHandle = null;
 
-      let fluxUsage: any = null;
+      // Generate photorealistic AI cover image and normalize ingredients in parallel
+      await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover' });
+      const coverPromise = recipe.imagePrompt
+        ? generateRecipeCoverImage({
+            prompt: recipe.imagePrompt,
+            jobId,
+            userId: photoUserId,
+          })
+        : Promise.resolve({ imageUrl: null, usage: null });
 
-      // Generate photorealistic AI cover image of the finished dish for photo imports
-      if (recipe.imagePrompt) {
-        await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover' });
-        const { imageUrl: aiCoverUrl, usage } = await generateRecipeCoverImage({
-          prompt: recipe.imagePrompt,
-          jobId,
-          userId: photoUserId,
-        });
-        fluxUsage = usage;
-        if (aiCoverUrl) {
-          recipe.imageUrl = aiCoverUrl;
-          recipe.imageUrls = [aiCoverUrl];
-          recipe.isAiCover = true;
-        } else {
-          recipe.imageUrl = null;
-          recipe.imageUrls = [];
-          recipe.isAiCover = false;
-        }
+      const resolverPromise = enrichRecipeWithCanonicalIngredients(recipe);
+
+      const [coverResult, resolverResult] = await Promise.all([coverPromise, resolverPromise]);
+
+      const aiCoverUrl = coverResult?.imageUrl;
+      const fluxUsage = coverResult?.usage;
+      const resolverUsage = resolverResult?.usage;
+
+      if (aiCoverUrl) {
+        recipe.imageUrl = aiCoverUrl;
+        recipe.imageUrls = [aiCoverUrl];
+        recipe.isAiCover = true;
       } else {
         recipe.imageUrl = null;
         recipe.imageUrls = [];
         recipe.isAiCover = false;
       }
 
-      await updateJobProgress(jobId, 'processing', { percent: 90, stage: 'finalizing' });
-
-      // Canonical ingredient normalization & nutritional calculation
-      const { usage: resolverUsage } = await enrichRecipeWithCanonicalIngredients(recipe);
+      await updateJobProgress(jobId, 'processing', { percent: 95, stage: 'finalizing' });
 
       const llmUsage: LlmUsage = {};
       if (geminiUsage) llmUsage.gemini = geminiUsage;
@@ -280,30 +279,40 @@ async function processJob(job: Job): Promise<void> {
       const thumbBuf = job.clientFrames.thumbnailBase64
         ? Buffer.from(job.clientFrames.thumbnailBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64')
         : undefined;
-      const frameBufs = (job.clientFrames.framesBase64 || [])
-        .map((f) => Buffer.from(f.replace(/^data:image\/\w+;base64,/, ''), 'base64'))
-        .filter((b) => b.length > 0);
 
       let clientGridBuffer: Buffer | undefined;
-      if (frameBufs.length > 1) {
-        try {
-          const { createGridBufferFromFrames } = await import('./frameExtractor.js');
-          console.log(`[Job ${jobId}] Creating in-memory 4x4 grid from ${frameBufs.length} client frames...`);
-          clientGridBuffer = await createGridBufferFromFrames(frameBufs);
 
-          // In dev environment, persist the grid image to disk for inspection and debugging
-          if (process.env.NODE_ENV !== 'production' && clientGridBuffer) {
-            await fs.mkdir(runDir, { recursive: true });
-            const devGridPath = path.join(runDir, 'grid.jpg');
-            await fs.writeFile(devGridPath, clientGridBuffer);
-            console.log(`[Job ${jobId}] [DEV] Saved grid image to ${devGridPath}`);
+      if (job.clientFrames.gridBase64) {
+        console.log(`[Job ${jobId}] Using client-composited 4x4 grid...`);
+        clientGridBuffer = Buffer.from(
+          job.clientFrames.gridBase64.replace(/^data:image\/\w+;base64,/, ''),
+          'base64'
+        );
+      } else {
+        const frameBufs = (job.clientFrames.framesBase64 || [])
+          .map((f) => Buffer.from(f.replace(/^data:image\/\w+;base64,/, ''), 'base64'))
+          .filter((b) => b.length > 0);
+
+        if (frameBufs.length > 1) {
+          try {
+            const { createGridBufferFromFrames } = await import('./frameExtractor.js');
+            console.log(`[Job ${jobId}] Creating in-memory 4x4 grid from ${frameBufs.length} client frames...`);
+            clientGridBuffer = await createGridBufferFromFrames(frameBufs);
+          } catch (gridErr: any) {
+            console.warn(`[Job ${jobId}] Failed to create in-memory grid from client frames:`, gridErr.message);
           }
-        } catch (gridErr: any) {
-          console.warn(`[Job ${jobId}] Failed to create in-memory grid from client frames:`, gridErr.message);
         }
       }
 
-      clientFramesInput = { thumbnail: thumbBuf, frames: frameBufs, gridBuffer: clientGridBuffer };
+      // In dev environment, persist the grid image to disk for inspection and debugging
+      if (process.env.NODE_ENV !== 'production' && clientGridBuffer) {
+        await fs.mkdir(runDir, { recursive: true });
+        const devGridPath = path.join(runDir, 'grid.jpg');
+        await fs.writeFile(devGridPath, clientGridBuffer);
+        console.log(`[Job ${jobId}] [DEV] Saved grid image to ${devGridPath}`);
+      }
+
+      clientFramesInput = { thumbnail: thumbBuf, gridBuffer: clientGridBuffer };
     }
 
     // 3. Mark job as processing
@@ -395,39 +404,38 @@ async function processJob(job: Job): Promise<void> {
       ? [scrapeResult.imageUrl]
       : (scrapeResult.media.kind === 'images' && scrapeResult.media.imageUrls.length > 0 ? [scrapeResult.media.imageUrls[0]] : []);
 
-    let fluxUsage: any = null;
+    // 6b. Generate AI food photography cover image and normalize ingredients in parallel
+    await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover' });
+    const coverPromise = recipe.imagePrompt
+      ? generateRecipeCoverImage({
+          prompt: recipe.imagePrompt,
+          jobId,
+          userId: job.userId,
+        })
+      : Promise.resolve({ imageUrl: null, usage: null });
 
-    // Generate AI food photography cover image with FLUX.1 [schnell]
-    if (recipe.imagePrompt) {
-      await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover' });
-      const { imageUrl: aiCoverUrl, usage } = await generateRecipeCoverImage({
-        prompt: recipe.imagePrompt,
-        jobId,
-        userId: job.userId,
-      });
-      fluxUsage = usage;
-      if (aiCoverUrl) {
-        recipe.imageUrl = aiCoverUrl;
-        recipe.imageUrls = [aiCoverUrl, ...baseImageUrls];
-        recipe.isAiCover = true;
-      } else {
-        recipe.imageUrl = baseImageUrls[0] || null;
-        recipe.imageUrls = baseImageUrls;
-        recipe.isAiCover = false;
-      }
+    const resolverPromise = enrichRecipeWithCanonicalIngredients(recipe);
+
+    const [coverResult, resolverResult] = await Promise.all([coverPromise, resolverPromise]);
+
+    const aiCoverUrl = coverResult?.imageUrl;
+    const fluxUsage = coverResult?.usage;
+    const resolverUsage = resolverResult?.usage;
+
+    if (aiCoverUrl) {
+      recipe.imageUrl = aiCoverUrl;
+      recipe.imageUrls = [aiCoverUrl, ...baseImageUrls];
+      recipe.isAiCover = true;
     } else {
       recipe.imageUrl = baseImageUrls[0] || null;
       recipe.imageUrls = baseImageUrls;
       recipe.isAiCover = false;
     }
 
-    await updateJobProgress(jobId, 'processing', { percent: 90, stage: 'finalizing' });
+    await updateJobProgress(jobId, 'processing', { percent: 95, stage: 'finalizing' });
 
     recipe.sourceHandle = scrapeResult.authorHandle || null;
     recipe.sourceUrl = url;
-
-    // Canonical ingredient normalization & nutritional calculation
-    const { usage: resolverUsage } = await enrichRecipeWithCanonicalIngredients(recipe);
 
     const llmUsage: LlmUsage = {};
     if (geminiUsage) llmUsage.gemini = geminiUsage;
@@ -496,6 +504,18 @@ async function workerTick(): Promise<void> {
       activeJobs--;
     });
   }
+}
+
+/**
+ * Triggers an immediate worker tick to claim pending jobs without waiting for the polling interval.
+ */
+export function triggerWorkerTick(): void {
+  setImmediate(() => {
+    workerTick().catch((err: unknown) => {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn('[Queue] Error in triggered worker tick:', msg);
+    });
+  });
 }
 
 async function cleanupOldRunDirs(days: number): Promise<void> {

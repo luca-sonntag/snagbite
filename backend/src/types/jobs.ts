@@ -1,10 +1,11 @@
 import type { JobStatus, JobKind, ProgressData } from '@cookbook/shared';
 import type { LlmUsage } from './llm.js';
 
-/** Ephemeral client media hand-off: thumbnail + keyframes received from client. */
+/** Ephemeral client media hand-off: thumbnail + 4x4 grid or keyframes received from client. */
 export interface ClientFramesPayload {
   thumbnailBase64?: string;
-  framesBase64: string[];
+  gridBase64?: string;
+  framesBase64?: string[];
 }
 
 /** An extraction task. Owns no recipe content — only a pointer to its result. */
