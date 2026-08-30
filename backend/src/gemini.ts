@@ -1021,7 +1021,7 @@ Rules:
   * For ingredient swaps or recipe adjustments: [suggest:Rezept mit X anpassen](prompt:Passe das Rezept bitte mit X an)
   * For shopping list: [suggest:Zutaten auf Einkaufsliste](prompt:Setze X auf meine Einkaufsliste)
   * For cooking times or durations mentioned in your response: [suggest:15 Min Timer](timer:15:Tacos überbacken) (specify the number strictly in MINUTES!)
-  Keep the button labels concise (2-4 words) and directly relevant to your answer.
+  CRITICAL SYNTAX: ALWAYS provide both parts [suggest:Short Label](prompt:What will be asked) or [suggest:Short Label](timer:MINUTES:Label). Keep button labels concise (2-4 words).
 ${stagedChanges && stagedChanges.length > 0 ? `
 Pending recipe changes:
 The user has already collected the following modifications, which will be applied together in a later remix (they are NOT applied yet):
