@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Send } from 'lucide-react';
 import { useI18n } from '../../../context/I18nContext';
 import { hapticMedium } from '../../../utils/haptics';
@@ -23,7 +23,7 @@ export const CopilotInputBar: React.FC<CopilotInputBarProps> = ({
         }
       }}
       onClick={() => textareaRef.current?.focus()}
-      className="w-full min-h-[56px] p-2 pl-4 rounded-3xl bg-white/85 dark:bg-gray-900/85 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center gap-2 cursor-text"
+      className="w-full min-h-[56px] p-2 pl-4 rounded-3xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-[0_8px_32px_rgba(0,0,0,0.14)] flex items-center gap-2 cursor-text"
     >
       {/* Text Input with full height & generous touch target */}
       <input

@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   Sparkles,
   Bot,
@@ -56,13 +56,13 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
           </div>
 
           <div className="flex flex-col gap-2 min-w-0">
-            <div className="p-3.5 sm:p-4 text-[14px] leading-relaxed bg-white/85 dark:bg-gray-900/85 backdrop-blur-xl text-gray-800 dark:text-gray-100 rounded-3xl rounded-tl-sm shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-white/50 dark:border-white/10">
+            <div className="p-3.5 sm:p-4 text-[14px] leading-relaxed bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 rounded-3xl rounded-tl-sm shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-gray-100 dark:border-gray-800">
               Hi! Wie kann ich dir bei diesem Rezept helfen? Frag mich nach Zutaten-Tausch, Schritten oder Garzeiten.
             </div>
 
             {/* Proactive Initial Recipe Suggestion Pills */}
             {chipsLoading ? (
-              <div className="flex items-center gap-2 py-1 px-1 text-xs text-gray-500 dark:text-gray-400">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-xs font-medium border border-gray-100 dark:border-gray-700 shadow-xs self-start">
                 <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-500" />
                 <span>Vorschläge werden vorbereitet…</span>
               </div>
@@ -77,7 +77,7 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
                       hapticLight();
                       onSend(chip.prompt);
                     }}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl text-xs font-semibold text-gray-800 dark:text-gray-200 border border-white/60 dark:border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:bg-emerald-500/15 hover:text-emerald-700 dark:hover:text-emerald-300 active:scale-95 transition-all cursor-pointer disabled:opacity-50 min-h-[38px]"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-white dark:bg-gray-800 text-xs font-semibold text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-700 shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:bg-emerald-500/15 hover:text-emerald-700 dark:hover:text-emerald-300 active:scale-95 transition-all cursor-pointer disabled:opacity-50 min-h-[38px]"
                   >
                     {getCategoryIcon(chip.category)}
                     <span>{chip.label}</span>
@@ -110,7 +110,7 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
             <Bot className="w-4 h-4" />
           </div>
           <div className="flex flex-col gap-1.5">
-            <div className="bg-white/85 dark:bg-gray-900/85 backdrop-blur-xl text-gray-600 dark:text-gray-300 text-xs px-4 py-3 rounded-3xl rounded-tl-sm border border-white/50 dark:border-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.05)] flex items-center gap-2.5">
+            <div className="bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 text-xs px-4 py-3 rounded-3xl rounded-tl-sm border border-gray-100 dark:border-gray-800 shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex items-center gap-2.5">
               <Loader2 className="w-4 h-4 animate-spin text-emerald-600 dark:text-emerald-400" />
               <span>{pendingAction || t('copilot.loading')}</span>
             </div>
@@ -120,7 +120,7 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
 
       {/* Error Alert */}
       {error && (
-        <div className="p-3.5 rounded-2xl bg-red-500/15 backdrop-blur-xl border border-red-500/20 text-red-600 dark:text-red-400 text-xs text-center font-medium self-center max-w-[90%] shadow-xs animate-in fade-in duration-200">
+        <div className="p-3.5 rounded-2xl bg-white dark:bg-gray-900 border border-red-500/30 text-red-600 dark:text-red-400 text-xs text-center font-medium self-center max-w-[90%] shadow-md animate-in fade-in duration-200">
           {error}
         </div>
       )}

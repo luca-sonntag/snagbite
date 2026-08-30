@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Button } from '@heroui/react';
 import { ListChecks, X, RefreshCw, Plus, Trash2, Loader2, Sparkles } from 'lucide-react';
 import { useI18n } from '../../../context/I18nContext';
@@ -19,7 +19,7 @@ export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
   if (pendingChanges.length === 0) return null;
 
   return (
-    <div className="p-3.5 sm:p-4 border-none bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.08)] flex flex-col gap-3 rounded-3xl animate-in fade-in slide-in-from-bottom-2 duration-300">
+    <div className="p-3.5 sm:p-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgba(0,0,0,0.12)] flex flex-col gap-3 rounded-3xl animate-in fade-in slide-in-from-bottom-2 duration-300">
       <div className="flex items-center gap-2">
         <div className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
           <ListChecks className="w-3.5 h-3.5" />

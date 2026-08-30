@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Button } from '@heroui/react';
 import { Sparkles, Bot, RefreshCw, Timer } from 'lucide-react';
 import { useI18n } from '../../../context/I18nContext';
@@ -79,7 +79,7 @@ export const CopilotMessageItem: React.FC<CopilotMessageItemProps> = ({
         <div
           className={`p-3.5 sm:p-4 text-[14px] leading-relaxed ${
             isAI
-              ? 'bg-white/85 dark:bg-gray-900/85 backdrop-blur-xl text-gray-800 dark:text-gray-100 rounded-3xl rounded-tl-sm shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-white/50 dark:border-white/10'
+              ? 'bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 rounded-3xl rounded-tl-sm shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-gray-100 dark:border-gray-800'
               : 'bg-emerald-600 text-white rounded-3xl rounded-tr-sm shadow-[0_4px_20px_rgba(16,185,129,0.25)] font-normal'
           }`}
         >
@@ -110,7 +110,7 @@ export const CopilotMessageItem: React.FC<CopilotMessageItemProps> = ({
                     onSend(sug.payload);
                   }
                 }}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl text-xs font-semibold text-gray-800 dark:text-gray-200 border border-white/60 dark:border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:bg-emerald-500/15 hover:text-emerald-700 dark:hover:text-emerald-300 active:scale-95 transition-all cursor-pointer disabled:opacity-50 min-h-[38px]"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-white dark:bg-gray-800 text-xs font-semibold text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-700 shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:bg-emerald-500/15 hover:text-emerald-700 dark:hover:text-emerald-300 active:scale-95 transition-all cursor-pointer disabled:opacity-50 min-h-[38px]"
               >
                 {sug.type === 'timer' ? (
                   <Timer className="w-3.5 h-3.5 text-rose-500 shrink-0" />
@@ -125,7 +125,7 @@ export const CopilotMessageItem: React.FC<CopilotMessageItemProps> = ({
 
         {/* Remix system card if recipe was modified */}
         {isAI && msg.isRemixReady && msg.newRecipe && msg.newJobId && (
-          <div className="p-4 border border-emerald-500/30 bg-white/85 dark:bg-gray-900/85 backdrop-blur-xl shadow-[0_4px_20px_rgba(16,185,129,0.12)] flex flex-col gap-3 rounded-3xl animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="p-4 border border-emerald-500/30 bg-white dark:bg-gray-900 shadow-[0_4px_20px_rgba(16,185,129,0.12)] flex flex-col gap-3 rounded-3xl animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
                 <Sparkles className="w-3.5 h-3.5 animate-spin-slow" />
