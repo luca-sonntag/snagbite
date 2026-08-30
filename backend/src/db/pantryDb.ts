@@ -177,7 +177,7 @@ export async function deductRecipeIngredientsFromPantry(
   for (const group of recipe.ingredients) {
     if (!group.items) continue;
     for (const ing of group.items) {
-      const ingKeys = new Set(buildMappingKeys(ing.baseName, ing.name, ing.synonyms));
+      const ingKeys = new Set(buildMappingKeys(ing.baseName, ing.name, ing.synonyms, ing.parentIngredient));
 
       const match = pantryItems.find((p) => {
         if (p.amount <= 0) return false;

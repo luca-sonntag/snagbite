@@ -78,3 +78,24 @@ test('Pantry matching ignores empty 0-amount rows and targets active stock', () 
   assert.equal(deduction, 80);
   assert.equal(match.amount - deduction, 20);
 });
+
+test('Pantry matching with parentIngredient: Gurkenwasser matches Gewürzgurken pantry item', () => {
+  const pantryItem = { id: 'jar-pickles', name: 'Gewürzgurken', baseName: 'pickle', amount: 670, unit: 'g' };
+  const recipeIng = {
+    name: 'Gurkenwasser',
+    baseName: 'pickle juice',
+    amount: 4,
+    unit: 'EL',
+    parentIngredient: { name: 'Gewürzgurken', baseName: 'pickle', unit: 'Glas' },
+  };
+
+  const ingKeys = new Set(buildMappingKeys(recipeIng.baseName, recipeIng.name, undefined, recipeIng.parentIngredient));
+  const pKeys = buildMappingKeys(pantryItem.baseName, pantryItem.name);
+  const isMatch = pKeys.some((k) => ingKeys.has(k));
+  assert.equal(isMatch, true, 'Gurkenwasser with parentIngredient must match Gewürzgurken');
+
+  // 4 EL = 60g deduction from 670g jar -> 610g remaining
+  const deduction = calculatePantryDeduction(pantryItem, recipeIng);
+  assert.equal(deduction, 60);
+  assert.equal(pantryItem.amount - deduction, 610);
+});

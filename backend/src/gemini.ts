@@ -34,19 +34,19 @@ const ingredientItemSchemaProperties = {
   },
   parentIngredient: {
     type: FunctionDeclarationSchemaType.OBJECT,
-    description: 'Set ONLY if this ingredient is a derived component/part that is NOT bought separately as its own package in stores (e.g. for "Eigelb" or "Eiweiß", parentIngredient MUST be { "name": "Ei", "baseName": "egg", "unit": "Stück" }; for "Zitronenabrieb" or "Zitronensaft", parentIngredient MUST be { "name": "Zitrone", "baseName": "lemon", "unit": "Stück" }; for "Knoblauchzehe", parentIngredient MUST be { "name": "Knoblauch", "baseName": "garlic", "unit": "Zehe" }; for flavored honey like "Scharfer Honig", parentIngredient MUST be { "name": "Honig", "baseName": "honey", "unit": "g" }). Leave empty or null if the ingredient is already a standalone primary grocery item sold separately in stores (e.g. "Hähnchenbrust", "Hähnchenkeule", "Rinderhackfleisch", "Butter", "Parmesan" MUST leave parentIngredient empty/null).',
+    description: 'Set whenever this ingredient is a component, extraction, byproduct, or brine/liquid naturally obtained from a primary host food item (e.g. for "Gurkenwasser" or "pickle brine", parent is { "name": "Gewürzgurken", "baseName": "pickle", "unit": "Glas" }; for "Eigelb" or "Eiweiß", parent is { "name": "Ei", "baseName": "egg", "unit": "Stück" }; for "Zitronensaft" or "Zitronenabrieb", parent is { "name": "Zitrone", "baseName": "lemon", "unit": "Stück" }; for "Aquafaba" or "Kichererbsenwasser", parent is { "name": "Kichererbsen", "baseName": "chickpea", "unit": "Dose" }; for "Knoblauchzehe", parent is { "name": "Knoblauch", "baseName": "garlic", "unit": "Zehe" }). This groups components under their host item on the shopping list and links pantry stock. Leave empty/null for standalone supermarket goods (e.g. "Hähnchenbrust", "Butter", "Käse", "Milch").',
     properties: {
       name: {
         type: FunctionDeclarationSchemaType.STRING,
-        description: 'The clean raw grocery product name in recipe language (e.g. "Ei", "Zitrone", "Knoblauch", "Honig").',
+        description: 'The clean raw grocery product name in recipe language (e.g. "Gewürzgurken", "Ei", "Zitrone", "Knoblauch", "Kichererbsen").',
       },
       baseName: {
         type: FunctionDeclarationSchemaType.STRING,
-        description: 'The English baseName for the raw parent grocery product (e.g. "egg", "lemon", "garlic", "honey").',
+        description: 'The English baseName for the raw parent grocery product (e.g. "pickle", "egg", "lemon", "garlic", "chickpea").',
       },
       unit: {
         type: FunctionDeclarationSchemaType.STRING,
-        description: 'The default grocery unit (e.g. "Stück", "Knolle", "Zehe", "g").',
+        description: 'The default grocery unit (e.g. "Glas", "Dose", "Stück", "Knolle", "Zehe", "g").',
       },
     },
     required: ['name', 'baseName'],

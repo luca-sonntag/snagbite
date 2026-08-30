@@ -275,7 +275,7 @@ async function autoTransferToPantry(userId: string, item: ShoppingListRow): Prom
   let shelfLifeDays = getDefaultShelfLifeDays(item.category, item.base_name || item.name);
 
   // 1. Check canonical ingredient mappings using alias discovery (e.g. Gewürzgurken <-> pickle)
-  const keys = buildMappingKeys(item.base_name ?? undefined, item.name);
+  const keys = buildMappingKeys(item.base_name ?? undefined, item.name, undefined, item.parent_ingredient as any);
   if (keys.length > 0) {
     const mapping = await lookupMapping(keys, item.category || '');
     if (mapping) {
@@ -307,7 +307,7 @@ async function autoTransferToPantry(userId: string, item: ShoppingListRow): Prom
           for (const group of recData.ingredients as any[]) {
             if (!group?.items || !Array.isArray(group.items)) continue;
             for (const ing of group.items) {
-              const ingKeys = buildMappingKeys(ing.baseName, ing.name);
+              const ingKeys = buildMappingKeys(ing.baseName, ing.name, ing.synonyms, ing.parentIngredient);
               const isMatch = ingKeys.some((k) => keySet.has(k));
               if (isMatch) {
                 if (ing.typicalPackageAmount && Number(ing.typicalPackageAmount) > 0) {

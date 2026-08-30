@@ -169,7 +169,12 @@ export function canonicalizeBaseName(raw: string | undefined | null): string {
  * Includes `rawName` for bilingual German-English cross-matching and appends canonicalized `synonyms`.
  * Ensures full bidirectional mapping and alias discovery in ingredient_mappings.
  */
-export function buildMappingKeys(baseName?: string, rawName?: string, synonyms?: string[]): string[] {
+export function buildMappingKeys(
+  baseName?: string,
+  rawName?: string,
+  synonyms?: string[],
+  parentIngredient?: { name?: string; baseName?: string } | null
+): string[] {
   const keys: string[] = [];
   const seen = new Set<string>();
 
@@ -184,6 +189,11 @@ export function buildMappingKeys(baseName?: string, rawName?: string, synonyms?:
 
   addKey(baseName);
   addKey(rawName);
+
+  if (parentIngredient) {
+    addKey(parentIngredient.baseName);
+    addKey(parentIngredient.name);
+  }
 
   if (Array.isArray(synonyms)) {
     for (const syn of synonyms) {
