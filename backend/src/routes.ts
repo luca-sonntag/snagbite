@@ -7,6 +7,8 @@ import { socialRoutes } from './routes/socialRoutes.js';
 import { userRoutes } from './routes/userRoutes.js';
 import { adminRoutes } from './routes/adminRoutes.js';
 import { mealPlanRoutes } from './routes/mealPlanRoutes.js';
+import { pantryRoutes } from './routes/pantryRoutes.js';
+import { shoppingListRoutes } from './routes/shoppingListRoutes.js';
 
 export const apiRouter = Router();
 
@@ -21,6 +23,8 @@ apiRouter.use(socialRoutes);
 apiRouter.use(userRoutes);
 apiRouter.use(adminRoutes);
 apiRouter.use(mealPlanRoutes);
+apiRouter.use(pantryRoutes);
+apiRouter.use(shoppingListRoutes);
 
 // Re-export helpers for backwards compatibility
 export * from './routes/authUtils.js';

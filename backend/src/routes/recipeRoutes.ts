@@ -15,6 +15,7 @@ import {
   getCookHistoryForRecipe,
   uploadCookPhoto,
   markMealPlansCookedForRecipe,
+  consumePantryForRecipe,
   getClient,
 } from '../db.js';
 import { AppError, sendAppError } from '../errors.js';
@@ -531,9 +532,45 @@ recipeRoutes.post('/recipes/:id/cooked', async (req: Request, res: Response): Pr
       console.warn('Failed to auto-mark meal plan entry as cooked:', mealPlanErr);
     }
 
+    // Automatically deduct consumed ingredients from user's pantry
+    try {
+      await consumePantryForRecipe(req.userId!, recipe);
+    } catch (pantryErr) {
+      console.warn('Failed to auto-consume ingredients from pantry:', pantryErr);
+    }
+
     res.status(200).json({ success: true, ...result });
   } catch (error: unknown) {
     if (!(error instanceof AppError)) console.error('Error recording cook:', error);
     sendAppError(res, error);
   }
 });
+
+recipeRoutes.patch('/recipes/:id/visibility', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { visibility } = req.body;
+
+    if (visibility !== 'public' && visibility !== 'private' && visibility !== 'unlisted') {
+      throw new AppError('INVALID_FIELD', { params: { field: 'visibility' } });
+    }
+
+    const recipe = await assertRecipeAccess(req.userId!, id);
+
+    const { error } = await getClient()
+      .from('recipes')
+      .update({
+        visibility,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id);
+
+    if (error) throw error;
+
+    res.status(200).json({ success: true, visibility, message: 'Recipe visibility updated.' });
+  } catch (error: unknown) {
+    if (!(error instanceof AppError)) console.error('Error updating recipe visibility:', error);
+    sendAppError(res, error);
+  }
+});
+
