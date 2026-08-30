@@ -7,6 +7,7 @@ import { useToast } from '../context/ToastContext';
 import { useFeedback } from '../hooks/useFeedback';
 import { collectFeedbackContext, compressScreenshot } from '../utils/feedbackContext';
 import { useAdOverlay } from '../context/OverlayStackContext';
+import { hapticLight, hapticMedium, hapticHeavy, hapticNotification } from '../utils/haptics';
 
 interface FeedbackDrawerProps {
   isOpen: boolean;
@@ -44,7 +45,10 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
     }
   }, [isOpen]);
 
-  const handlePickScreenshot = () => fileInputRef.current?.click();
+  const handlePickScreenshot = () => {
+    hapticLight();
+    fileInputRef.current?.click();
+  };
 
   const handleScreenshotChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
@@ -63,6 +67,7 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
         files.slice(0, remainingSlots).map((file) => compressScreenshot(file)),
       );
       setScreenshots((prev) => [...prev, ...compressed]);
+      hapticLight();
       setError(files.length > remainingSlots
         ? (t('feedback.screenshotLimit') || `You can attach up to ${MAX_SCREENSHOTS} images.`)
         : null);
@@ -73,6 +78,7 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
   };
 
   const removeScreenshot = (index: number) => {
+    hapticHeavy();
     setScreenshots((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -90,14 +96,17 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
       });
 
       if (result.success) {
+        hapticMedium();
         onClose();
         toast.success(t('toast.feedbackSuccessTitle'), {
           description: t('toast.feedbackSuccessDesc'),
         });
       } else {
+        hapticNotification('error');
         setError(result.error || t('feedback.error') || 'Could not send feedback.');
       }
     } catch (err) {
+      hapticNotification('error');
       console.error('Failed to submit feedback:', err);
       setError(t('feedback.error') || 'Could not send feedback.');
     } finally {
@@ -131,8 +140,11 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
                   </div>
                   <button
                     type="button"
-                    className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer"
-                    onClick={onClose}
+                    className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer"
+                    onClick={() => {
+                      hapticLight();
+                      onClose();
+                    }}
                     aria-label="Close"
                   >
                     <X className="w-4 h-4" />
@@ -150,8 +162,11 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
                       <button
                         key={opt.value}
                         type="button"
-                        onClick={() => setType(opt.value)}
-                        className={`flex items-center justify-center gap-2 h-11 rounded-2xl border-none text-sm font-semibold transition-all active:scale-95 cursor-pointer ${
+                        onClick={() => {
+                          hapticLight();
+                          setType(opt.value);
+                        }}
+                        className={`flex items-center justify-center gap-2 h-11 min-h-[44px] rounded-2xl border-none text-sm font-semibold transition-all active:scale-95 cursor-pointer ${
                           active
                             ? 'bg-emerald-600 text-white shadow-none'
                             : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
@@ -206,7 +221,7 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
                             type="button"
                             onClick={() => removeScreenshot(index)}
                             aria-label={t('feedback.removeScreenshot') || 'Remove screenshot'}
-                            className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-gray-900 dark:bg-gray-700 text-white flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer border-none"
+                            className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-gray-900 dark:bg-gray-700 text-white flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer border-none"
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -219,7 +234,7 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
                     <button
                       type="button"
                       onClick={handlePickScreenshot}
-                      className="flex items-center justify-center gap-2 h-12 rounded-2xl border-none bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all active:scale-[0.99] cursor-pointer"
+                      className="flex items-center justify-center gap-2 h-12 min-h-[48px] rounded-2xl border-none bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all active:scale-[0.99] cursor-pointer"
                     >
                       <ImagePlus className="w-4 h-4" />
                       {screenshots.length === 0

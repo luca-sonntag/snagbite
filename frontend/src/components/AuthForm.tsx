@@ -3,6 +3,7 @@ import { Card, Button } from '@heroui/react';
 import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../context/I18nContext';
 import { LEGAL_URLS } from '../legal';
+import { hapticMedium } from '../utils/haptics';
 
 export default function AuthForm() {
   const { signInWithGoogle, authError } = useAuth();
@@ -11,6 +12,7 @@ export default function AuthForm() {
   const [submitting, setSubmitting] = useState(false);
 
   const handleGoogleSignIn = async () => {
+    hapticMedium();
     setError(null);
     setSubmitting(true);
     try {
@@ -31,7 +33,7 @@ export default function AuthForm() {
       <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-emerald-500/10 dark:bg-emerald-500/5 blur-3xl rounded-full pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-80 h-80 bg-teal-500/10 dark:bg-teal-500/5 blur-3xl rounded-full pointer-events-none" />
 
-      <Card className="w-full max-w-sm p-8 rounded-3xl backdrop-blur-md bg-white/85 dark:bg-gray-900/85 border border-black/5 dark:border-white/10 shadow-xl relative z-10">
+      <Card className="w-full max-w-sm p-8 rounded-3xl backdrop-blur-md bg-white/85 dark:bg-gray-900/85 border-none shadow-[0_12px_40px_rgba(0,0,0,0.08)] relative z-10">
         <div className="flex flex-col items-center gap-4 text-center">
           {/* Logo */}
           <div className="w-20 h-20 mb-2">
@@ -52,7 +54,7 @@ export default function AuthForm() {
               type="button"
               isDisabled={submitting}
               onPress={handleGoogleSignIn}
-              className="w-full h-12 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700/80 font-bold rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300 flex items-center justify-center gap-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm"
+              className="w-full h-12 min-h-[48px] bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border-none font-bold rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 flex items-center justify-center gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)] active:scale-95 cursor-pointer"
             >
               {submitting ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-2 border-emerald-500 border-t-transparent" />
@@ -83,7 +85,7 @@ export default function AuthForm() {
           </div>
 
           {(error || authError) && (
-            <div className="w-full text-left text-xs text-rose-500 bg-rose-50 dark:bg-rose-950/30 border border-rose-200/50 dark:border-rose-900/50 px-4 py-3 rounded-2xl flex items-start gap-2 animate-pulse-slow">
+            <div className="w-full text-left text-xs text-rose-500 bg-rose-50 dark:bg-rose-950/30 border-none px-4 py-3 rounded-2xl flex items-start gap-2 animate-pulse-slow">
               <span className="font-semibold">⚠️</span>
               <span>{error || authError}</span>
             </div>
