@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Button } from '@heroui/react';
 import {
   Send,
@@ -47,7 +47,7 @@ export const CopilotInputBar: React.FC<CopilotInputBarProps> = ({
     <div className="flex flex-col gap-2.5">
       {/* Quick Chips Scroll Container */}
       {showChips && (
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1.5 animate-in fade-in duration-200">
           {chipsLoading ? (
             <div className="flex items-center justify-center py-1">
               <Loader2 className="w-4 h-4 animate-spin text-emerald-500" />
@@ -63,7 +63,7 @@ export const CopilotInputBar: React.FC<CopilotInputBarProps> = ({
                     onSend(chip.prompt);
                   }}
                   disabled={isPending}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-full border-none bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:bg-emerald-500/20 dark:hover:text-emerald-300 active:scale-95 transition-all whitespace-nowrap flex-shrink-0 cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.02)] disabled:opacity-50 min-h-[38px]"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-full border-none bg-white/60 dark:bg-gray-900/60 backdrop-blur-md text-gray-800 dark:text-gray-200 hover:bg-emerald-500/20 hover:text-emerald-700 dark:hover:bg-emerald-500/30 dark:hover:text-emerald-300 active:scale-95 transition-all whitespace-nowrap flex-shrink-0 cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.04)] disabled:opacity-50 min-h-[38px]"
                 >
                   {getCategoryIcon(chip.category)}
                   <span>{chip.label}</span>
@@ -92,13 +92,13 @@ export const CopilotInputBar: React.FC<CopilotInputBarProps> = ({
               hapticLight();
               setShowChips(true);
             }}
-            className="flex-shrink-0 h-12 w-11 rounded-2xl bg-gray-100 dark:bg-gray-800 border-none hover:bg-emerald-500/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+            className="flex-shrink-0 h-12 w-11 rounded-2xl bg-white/60 dark:bg-gray-900/60 backdrop-blur-md border-none hover:bg-white/80 dark:hover:bg-gray-800/80 active:scale-95 transition-all flex items-center justify-center cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
             aria-label={t('copilot.showSuggestionsAria')}
           >
-            <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <Sparkles className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
           </button>
         )}
-        <div className="relative flex-1 flex items-center bg-gray-100 dark:bg-gray-800 border-none rounded-2xl focus-within:ring-2 focus-within:ring-emerald-500/30 pr-1.5 h-12 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+        <div className="relative flex-1 flex items-center bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border-none rounded-2xl focus-within:ring-2 focus-within:ring-emerald-500/40 pr-1.5 h-12 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
           <input
             ref={textareaRef}
             value={message}

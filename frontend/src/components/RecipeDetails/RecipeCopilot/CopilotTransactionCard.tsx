@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Button } from '@heroui/react';
 import { ListChecks, X, RefreshCw, Plus, Trash2, Loader2, Sparkles } from 'lucide-react';
 import { useI18n } from '../../../context/I18nContext';
@@ -19,7 +19,7 @@ export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
   if (pendingChanges.length === 0) return null;
 
   return (
-    <div className="p-3.5 sm:p-4 border-none bg-emerald-500/10 dark:bg-emerald-500/15 shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col gap-3 rounded-2xl animate-in fade-in slide-in-from-bottom-2 duration-300">
+    <div className="p-3.5 sm:p-4 border-none bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.08)] flex flex-col gap-3 rounded-3xl animate-in fade-in slide-in-from-bottom-2 duration-300">
       <div className="flex items-center gap-2">
         <div className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
           <ListChecks className="w-3.5 h-3.5" />
@@ -34,12 +34,12 @@ export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
         {pendingChanges.map((change, idx) => (
           <div
             key={change.id}
-            className="flex items-start gap-2 p-2.5 rounded-xl bg-white dark:bg-gray-800 border-none shadow-[0_1px_3px_rgba(0,0,0,0.03)]"
+            className="flex items-start gap-2 p-2.5 rounded-2xl bg-black/5 dark:bg-white/5 border-none"
           >
             <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0 w-4 text-center">
               {idx + 1}.
             </span>
-            <span className="text-xs text-gray-700 dark:text-gray-200 leading-snug flex-1 min-w-0 break-words font-medium">
+            <span className="text-xs text-gray-800 dark:text-gray-200 leading-snug flex-1 min-w-0 break-words font-medium">
               {change.text}
             </span>
             <button
@@ -80,7 +80,7 @@ export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
             </Button>
             <Button
               size="sm"
-              className="bg-white dark:bg-gray-800 border-none text-emerald-700 dark:text-emerald-300 font-bold rounded-2xl h-11 flex items-center justify-center gap-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] active:scale-95 transition-all text-xs flex-1 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+              className="bg-white/80 dark:bg-gray-800/80 border-none text-emerald-700 dark:text-emerald-300 font-bold rounded-2xl h-11 flex items-center justify-center gap-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] active:scale-95 transition-all text-xs flex-1 hover:bg-white dark:hover:bg-gray-800 cursor-pointer"
               onPress={() => {
                 hapticMedium();
                 onApplyChanges(false);
@@ -123,7 +123,7 @@ export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
           </Button>
           <Button
             size="sm"
-            className="bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 font-semibold rounded-2xl h-11 px-3.5 flex items-center justify-center gap-1.5 border-none shadow-[0_1px_3px_rgba(0,0,0,0.02)] active:scale-95 transition-all text-xs cursor-pointer"
+            className="bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 font-semibold rounded-2xl h-11 px-3.5 flex items-center justify-center gap-1.5 border-none shadow-none active:scale-95 transition-all text-xs cursor-pointer"
             onPress={() => {
               hapticHeavy();
               onDiscardAll();

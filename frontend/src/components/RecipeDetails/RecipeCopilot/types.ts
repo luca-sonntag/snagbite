@@ -59,6 +59,13 @@ export interface CopilotChatListProps {
   onLoadNewRecipe: (recipe: Recipe, jobId: string) => void;
 }
 
+export interface CopilotHeaderProps {
+  historyLength: number;
+  isPending: boolean;
+  onClear: () => void;
+  onClose: () => void;
+}
+
 export interface UseRecipeCopilotProps {
   isOpen: boolean;
   recipe: Recipe;
@@ -66,3 +73,4 @@ export interface UseRecipeCopilotProps {
   onRemixSuccess: (newRecipe: Recipe, newJobId: string) => void;
   onReplaceCurrent: (newRecipe: Recipe) => void;
 }
+
