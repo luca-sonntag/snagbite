@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@heroui/react';
-import { Trophy } from 'lucide-react';
+import { Trophy, User } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { PageHeader } from '../PageHeader';
 import ProgressOverview from './ProgressOverview';
@@ -9,27 +9,31 @@ import FriendsView from '../Social/FriendsView';
 
 import { useSocial } from '../../context/SocialContext';
 
-export type SocialSection = 'overview' | 'leaderboard' | 'friends';
+import SettingsView from '../SettingsView';
 
-interface ProgressViewProps {
+export type ProfileSection = 'overview' | 'leaderboard' | 'friends' | 'settings';
+
+interface ProfileViewProps {
   /** Friend code from an invite link (#/invite/<code>) to prefill in Friends. */
   pendingInviteCode?: string | null;
   onInviteConsumed?: () => void;
   onSelectRecipe?: (recipeId: string) => void;
+  /** Pass an explicit section to override the default, e.g. when coming from the Settings tab in the bottom nav */
+  defaultSection?: ProfileSection;
 }
 
 /**
- * The "Fortschritt" tab container. A segmented control switches between the
- * personal overview, the friends-and-me leaderboard and the friends list.
+ * The "Profil & Fortschritt" tab container. A segmented control switches between the
+ * personal overview, the friends-and-me leaderboard, friends list, and app settings.
  */
-export default function ProgressView({ pendingInviteCode, onInviteConsumed, onSelectRecipe }: ProgressViewProps) {
+export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSelectRecipe, defaultSection = 'overview' }: ProfileViewProps) {
   const { t } = useI18n();
   const { incomingRequests, refreshFriends } = useSocial();
-  const [section, setSection] = useState<SocialSection>('overview');
+  const [section, setSection] = useState<ProfileSection>(defaultSection);
 
   const incomingCount = incomingRequests.length;
 
-  // Refresh friends and incoming requests when Progress tab is opened
+  // Refresh friends and incoming requests when Profile tab is opened
   useEffect(() => {
     refreshFriends();
   }, [refreshFriends]);
@@ -39,38 +43,39 @@ export default function ProgressView({ pendingInviteCode, onInviteConsumed, onSe
     if (pendingInviteCode) setSection('friends');
   }, [pendingInviteCode]);
 
-  const tabs: { key: SocialSection; label: string }[] = [
+  const tabs: { key: ProfileSection; label: string }[] = [
     { key: 'overview', label: t('app.social.sections.overview') },
     { key: 'leaderboard', label: t('app.social.sections.leaderboard') },
     { key: 'friends', label: t('app.social.sections.friends') },
+    { key: 'settings', label: t('app.nav.settings') || 'Profil' },
   ];
 
   return (
     <div className="flex flex-col gap-6 pb-12">
       {/* Header */}
       <PageHeader
-        icon={<Trophy className="w-6 h-6" />}
-        title={t('app.gamification.tabTitle')}
-        subtitle={t('app.gamification.subtitle')}
+        icon={section === 'settings' ? <User className="w-6 h-6" /> : <Trophy className="w-6 h-6" />}
+        title={section === 'settings' ? (t('app.nav.settings') || 'Profil') : t('app.gamification.tabTitle')}
+        subtitle={section === 'settings' ? t('app.settings.subtitle') : t('app.gamification.subtitle')}
       />
 
-      <div className="flex rounded-2xl bg-gray-100 p-1 dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
+      <div className="flex rounded-2xl bg-gray-100 p-1 dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-x-auto scrollbar-none mx-2">
         {tabs.map((tab) => {
           const isActive = section === tab.key;
           return (
             <Button
               key={tab.key}
               onPress={() => setSection(tab.key)}
-              className={`relative flex-1 rounded-xl py-2 h-9 text-sm font-semibold border-none transition-all duration-200 cursor-pointer ${
+              className={`relative flex-1 min-w-[76px] rounded-xl py-2 h-9 text-xs sm:text-sm font-semibold border-none transition-all duration-200 cursor-pointer ${
                 isActive
                   ? 'bg-white text-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] dark:bg-gray-800 dark:text-white'
                   : 'bg-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
               }`}
             >
               <span className="flex items-center justify-center gap-1.5">
-                {tab.label}
+                <span className="truncate">{tab.label}</span>
                 {tab.key === 'friends' && incomingCount > 0 && (
-                  <span className="flex h-4 min-w-[16px] items-center justify-center text-center leading-none rounded-full bg-rose-500 px-1 text-[10px] font-black text-white shadow-xs">
+                  <span className="flex h-4 min-w-[16px] items-center justify-center text-center leading-none rounded-full bg-rose-500 px-1 text-[10px] font-black text-white shadow-xs shrink-0">
                     {incomingCount}
                   </span>
                 )}
@@ -85,6 +90,7 @@ export default function ProgressView({ pendingInviteCode, onInviteConsumed, onSe
       {section === 'friends' && (
         <FriendsView pendingInviteCode={pendingInviteCode} onInviteConsumed={onInviteConsumed} />
       )}
+      {section === 'settings' && <SettingsView />}
     </div>
   );
 }
