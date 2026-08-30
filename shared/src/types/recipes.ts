@@ -56,6 +56,31 @@ export interface NutritionalValues {
 export type RecipeVisibility = 'private' | 'unlisted' | 'public';
 export type RecipeOrigin = 'url' | 'photo' | 'remix';
 
+export type RecipeCategory =
+  | 'MAIN_COURSE'
+  | 'DESSERT'
+  | 'BREAKFAST'
+  | 'SNACK'
+  | 'SIDE_DISH'
+  | 'BEVERAGE'
+  | 'SOUP'
+  | 'SALAD'
+  | 'BAKING'
+  | 'OTHER';
+
+export const RECIPE_CATEGORIES: readonly RecipeCategory[] = [
+  'MAIN_COURSE',
+  'DESSERT',
+  'BREAKFAST',
+  'SNACK',
+  'SIDE_DISH',
+  'BEVERAGE',
+  'SOUP',
+  'SALAD',
+  'BAKING',
+  'OTHER',
+] as const;
+
 export interface Recipe {
   id?: string;
   isRecipe?: boolean;
@@ -67,6 +92,7 @@ export interface Recipe {
   title: string;
   description: string;
   emoji?: string | null;
+  category?: RecipeCategory | null;
   prepTime: number | null;
   cookTime: number | null;
   servings: number;
