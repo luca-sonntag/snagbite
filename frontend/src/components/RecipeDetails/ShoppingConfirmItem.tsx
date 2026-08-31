@@ -95,16 +95,16 @@ export default function ShoppingConfirmItem({
               <span
                 className={`text-[11px] font-medium transition-colors inline-flex items-center gap-1 ${
                   isChecked
-                    ? 'text-amber-700 dark:text-amber-300'
-                    : 'text-amber-600/75 dark:text-amber-400/75'
+                    ? 'text-gray-600 dark:text-gray-300'
+                    : 'text-gray-400 dark:text-gray-500'
                 }`}
               >
                 {displayAmount && <span className="opacity-40 font-normal">·</span>}
                 <Package
                   className={`w-3 h-3 shrink-0 stroke-[2.2] ${
                     isChecked
-                      ? 'text-amber-600 dark:text-amber-400'
-                      : 'text-amber-600/70 dark:text-amber-400/70'
+                      ? 'text-gray-600 dark:text-gray-300'
+                      : 'text-gray-400 dark:text-gray-500'
                   }`}
                 />
                 <span>{t('recipe.inPantryStock', { amount: pantryStock })}</span>
@@ -113,7 +113,7 @@ export default function ShoppingConfirmItem({
               <span
                 className={`text-[11px] font-medium transition-colors inline-flex items-center gap-1 ${
                   isChecked
-                    ? 'text-gray-500 dark:text-gray-400'
+                    ? 'text-gray-600 dark:text-gray-300'
                     : 'text-gray-400 dark:text-gray-500'
                 }`}
               >
@@ -121,7 +121,7 @@ export default function ShoppingConfirmItem({
                 <Home
                   className={`w-3 h-3 shrink-0 stroke-[2.2] ${
                     isChecked
-                      ? 'text-gray-500 dark:text-gray-400'
+                      ? 'text-gray-600 dark:text-gray-300'
                       : 'text-gray-400 dark:text-gray-500'
                   }`}
                 />
