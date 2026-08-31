@@ -40,7 +40,7 @@ interface ShoppingListViewProps {
   toggleItemGroup: (name: string, modifier: string | undefined, unit: string, targetChecked: boolean) => void;
   deleteItemGroup: (name: string, modifier: string | undefined, unit: string) => void;
   clearAll: () => void;
-  clearChecked: () => void;
+  clearChecked: (transferToPantry?: boolean) => void;
   restoreItems?: (items: ShoppingListItemType[]) => void;
   restoreList?: (items: ShoppingListItemType[]) => void;
 }
@@ -59,7 +59,6 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
   deleteItemGroup,
   clearAll,
   clearChecked,
-  restoreItems,
   restoreList,
 }) => {
   const dialog = useDialog();
@@ -211,18 +210,22 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
     }
   };
 
-  const handleClearChecked = () => {
-    const checkedItems = shoppingList.filter((item) => item.checked);
-    if (checkedItems.length === 0) return;
-    clearChecked();
-    toast.info(t('toast.clearedCheckedItems', { count: checkedItems.length }), {
-      action: restoreItems
-        ? {
-            label: t('toast.undo'),
-            onClick: () => restoreItems(checkedItems),
-          }
-        : undefined,
+  const handleClearChecked = async () => {
+    const checkedItems = (shoppingList || []).filter((item) => item.checked);
+    if (checkedItems.length === 0 && aggregatedList.checked.length === 0) return;
+    const count = checkedItems.length || aggregatedList.checked.length;
+
+    const confirmed = await dialog.confirm({
+      title: t('shopping.finishShoppingConfirmTitle'),
+      message: t('shopping.finishShoppingConfirmMessage', { count }),
+      confirmLabel: t('shopping.finishShoppingConfirmBtn'),
+      cancelLabel: t('shopping.dialogClear.cancel'),
+      status: 'success',
     });
+    if (!confirmed) return;
+
+    clearChecked(true);
+    toast.success(t('shopping.transferredToPantryToast', { count }));
   };
 
   const handleRemoveRecipe = async (recipeId: string, recipeTitle: string) => {

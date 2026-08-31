@@ -182,7 +182,7 @@ shoppingListRoutes.post('/shopping-list/batch-toggle', async (req: Request, res:
       throw new AppError('INVALID_FIELD', { params: { field: 'checked' } });
     }
 
-    const items = await batchToggleShoppingListItems(req.userId!, ids, checked, autoAddToPantry !== false);
+    const items = await batchToggleShoppingListItems(req.userId!, ids, checked, autoAddToPantry === true);
     res.status(200).json({ success: true, items });
   } catch (error: unknown) {
     if (!(error instanceof AppError)) console.error('Error batch toggling shopping items:', error);
@@ -217,8 +217,8 @@ shoppingListRoutes.post('/shopping-list/delete-batch', async (req: Request, res:
 
 shoppingListRoutes.post('/shopping-list/clear', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { onlyChecked } = req.body ?? {};
-    await clearShoppingList(req.userId!, !!onlyChecked);
+    const { onlyChecked, transferToPantry } = req.body ?? {};
+    await clearShoppingList(req.userId!, !!onlyChecked, !!transferToPantry);
     res.status(200).json({ success: true, message: 'Shopping list cleared.' });
   } catch (error: unknown) {
     if (!(error instanceof AppError)) console.error('Error clearing shopping list:', error);

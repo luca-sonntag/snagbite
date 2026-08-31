@@ -270,7 +270,27 @@ export async function deleteShoppingListItems(userId: string, ids: string[]): Pr
   if (error) throw wrapError('deleteShoppingListItems', error);
 }
 
-export async function clearShoppingList(userId: string, onlyChecked = false): Promise<void> {
+export async function clearShoppingList(
+  userId: string,
+  onlyChecked = false,
+  transferToPantry = false
+): Promise<void> {
+  if (transferToPantry && onlyChecked) {
+    const { data: checkedRows } = await getClient()
+      .from('shopping_list')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('checked', true);
+
+    if (checkedRows && checkedRows.length > 0) {
+      for (const row of checkedRows as unknown as ShoppingListRow[]) {
+        await autoTransferToPantry(userId, row).catch((err) =>
+          console.warn('Failed to transfer shopping item to pantry on finish:', err)
+        );
+      }
+    }
+  }
+
   let query = getClient().from('shopping_list').delete().eq('user_id', userId);
   if (onlyChecked) {
     query = query.eq('checked', true);

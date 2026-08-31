@@ -33,7 +33,7 @@ interface ShoppingListProps {
   toggleItemGroup: (name: string, modifier: string | undefined, unit: string, targetChecked: boolean) => void;
   deleteItemGroup: (name: string, modifier: string | undefined, unit: string) => void;
   clearAll: () => void;
-  clearChecked: () => void;
+  clearChecked: (transferToPantry?: boolean) => void;
   restoreItems?: (items: ShoppingListItem[]) => void;
   restoreList?: (items: ShoppingListItem[]) => void;
 }

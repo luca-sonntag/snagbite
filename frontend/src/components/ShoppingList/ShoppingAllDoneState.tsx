@@ -1,5 +1,5 @@
 import { useI18n } from '../../context/I18nContext';
-import { CheckCheck } from 'lucide-react';
+import { CheckCheck, Package } from 'lucide-react';
 
 interface ShoppingAllDoneStateProps {
   onClear: () => void;
@@ -32,6 +32,11 @@ export default function ShoppingAllDoneState({ onClear }: ShoppingAllDoneStatePr
         <CheckCheck className="w-4 h-4 stroke-[2.25]" />
         <span>{t('shopping.finishShopping')}</span>
       </button>
+
+      <p className="text-[11px] text-amber-800/90 dark:text-amber-300/90 mt-3 max-w-[280px] leading-relaxed flex items-center justify-center gap-1.5 font-medium">
+        <Package className="w-3.5 h-3.5 shrink-0 text-amber-600 dark:text-amber-400 stroke-[2.2]" />
+        <span>{t('shopping.allDonePantryHint')}</span>
+      </p>
     </div>
   );
 }

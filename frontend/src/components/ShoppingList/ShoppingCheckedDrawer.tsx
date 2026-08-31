@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, ChevronDown } from 'lucide-react';
+import { Check, ChevronDown, Package } from 'lucide-react';
 import type { AggregatedShoppingItem } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import ShoppingListItem from './ShoppingListItem';
@@ -56,7 +56,14 @@ export default function ShoppingCheckedDrawer({
       </button>
 
       {isExpanded && (
-        <ul className="flex flex-col gap-0.5 px-2 pb-2.5 pt-0.5 animate-fade-in divide-y divide-black/[0.03] dark:divide-white/[0.03]">
+        <div className="px-2 pb-2.5 pt-0.5 animate-fade-in flex flex-col gap-1">
+          {/* Subtle Pantry Transfer Hint Banner */}
+          <div className="flex items-center gap-2 px-3 py-2 text-[11px] text-amber-800 dark:text-amber-300 bg-amber-500/10 dark:bg-amber-500/15 rounded-xl border-none font-medium">
+            <Package className="w-3.5 h-3.5 shrink-0 text-amber-600 dark:text-amber-400 stroke-[2.2]" />
+            <span>{t('shopping.notInPantryYetHint')}</span>
+          </div>
+
+          <ul className="flex flex-col gap-0.5 divide-y divide-black/[0.03] dark:divide-white/[0.03]">
           {items.map((item) => {
             const displayKey = `checked-${getItemKey(item)}`;
             return (
@@ -71,9 +78,9 @@ export default function ShoppingCheckedDrawer({
               />
             );
           })}
-        </ul>
+          </ul>
+        </div>
       )}
     </div>
   );
 }
-
