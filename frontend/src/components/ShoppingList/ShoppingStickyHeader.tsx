@@ -38,10 +38,10 @@ export const ShoppingStickyHeader: React.FC<ShoppingStickyHeaderProps> = ({
   return (
     <div
       id="shopping-sticky-header"
-      className={`sticky top-[var(--app-sticky-top,0px)] z-30 -mx-4 px-4 bg-[#f9fafb]/95 dark:bg-gray-950/95 backdrop-blur-md transition-all duration-200 flex flex-col border-none ${
+      className={`sticky top-[var(--app-sticky-top,0px)] z-30 -mx-4 px-4 bg-[#f9fafb]/95 dark:bg-gray-950/95 backdrop-blur-md transition-all duration-200 flex flex-col border-none pt-2 ${
         isCollapsed
-          ? "shadow-[0_4px_12px_rgba(0,0,0,0.03)] pb-2 before:content-[''] before:absolute before:bottom-full before:inset-x-0 before:h-12 before:bg-[#f9fafb] dark:before:bg-gray-950 before:pointer-events-none"
-          : 'pb-1'
+          ? "shadow-[0_4px_16px_rgba(0,0,0,0.04)] pb-2.5 before:content-[''] before:absolute before:bottom-full before:inset-x-0 before:h-12 before:bg-[#f9fafb] dark:before:bg-gray-950 before:pointer-events-none"
+          : 'pb-1.5'
       }`}
     >
       {/* 1. Segmented Tab Control */}
@@ -54,7 +54,7 @@ export const ShoppingStickyHeader: React.FC<ShoppingStickyHeaderProps> = ({
               onTabChange('shopping');
             }
           }}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all duration-200 min-h-[40px] cursor-pointer border-none outline-none ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all duration-200 min-h-[42px] cursor-pointer border-none outline-none ${
             activeTab === 'shopping'
               ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-bold shadow-[0_2px_6px_rgba(0,0,0,0.06)]'
               : 'bg-transparent text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium'
@@ -83,7 +83,7 @@ export const ShoppingStickyHeader: React.FC<ShoppingStickyHeaderProps> = ({
               onTabChange('pantry');
             }
           }}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all duration-200 min-h-[40px] cursor-pointer border-none outline-none ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all duration-200 min-h-[42px] cursor-pointer border-none outline-none ${
             activeTab === 'pantry'
               ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-bold shadow-[0_2px_6px_rgba(0,0,0,0.06)]'
               : 'bg-transparent text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium'
@@ -109,7 +109,7 @@ export const ShoppingStickyHeader: React.FC<ShoppingStickyHeaderProps> = ({
       <div
         className={`overflow-hidden motion-safe:transition-all motion-safe:duration-200 ${
           isCollapsed && activeTab === 'shopping' && totalCount > 0
-            ? 'max-h-16 opacity-100 pt-1.5'
+            ? 'max-h-20 opacity-100 pt-2'
             : 'max-h-0 opacity-0 pointer-events-none py-0'
         }`}
         aria-hidden={!isCollapsed}
