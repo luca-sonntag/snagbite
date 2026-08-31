@@ -33,55 +33,56 @@ export default function ShoppingConfirmSheet({
   const { pantryItems } = usePantry();
   const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
 
-  // Group items by normalized food base key so alternative forms and parts merge cleanly
-  const mergedGroups = useMemo(() => {
-    return sortedIngredients.map(({ group, originalIdx }) => {
-      const itemMap = new Map<string, MergedShoppingSheetItem>();
+  // Merge ingredients that share a parent in the same recipe across all groups (e.g. Gurkenwasser -> Gewürzgurken)
+  const allItems = useMemo(() => {
+    const allIngredientsInRecipe = sortedIngredients.flatMap((g) => g.group.items);
+    const childMap = new Map<string, Ingredient[]>();
+    const childrenSet = new Set<Ingredient>();
 
-      group.items.forEach((ing) => {
-        const id = `${ing.name}-${ing.amount}-${ing.unit}`;
-        if (!itemMap.has(id)) {
-          itemMap.set(id, {
-            id,
-            primaryIngredient: ing,
-            childIngredients: [],
-            groupCategory: group.name || ing.category,
-            originalGroupIdx: originalIdx,
-          });
-        }
-      });
+    for (const { group } of sortedIngredients) {
+      for (const ing of group.items) {
+        if (ing.parentIngredient?.baseName || ing.parentIngredient?.name) {
+          const parentBase = (ing.parentIngredient.baseName || '').toLowerCase().trim();
+          const parentName = (ing.parentIngredient.name || '').toLowerCase().trim();
 
-      // Attach sub-ingredients (e.g. Gurkenwasser from Gewürzgurken)
-      const primaryItems: MergedShoppingSheetItem[] = [];
-      itemMap.forEach((mergedItem) => {
-        const parentInfo = mergedItem.primaryIngredient.parentIngredient;
-        if (parentInfo && parentInfo.name) {
-          const parentItem = Array.from(itemMap.values()).find(
-            (p) =>
-              p.primaryIngredient.name.toLowerCase().trim() === parentInfo.name.toLowerCase().trim() ||
-              (p.primaryIngredient.baseName &&
-                p.primaryIngredient.baseName.toLowerCase().trim() === parentInfo.baseName.toLowerCase().trim())
+          const parentInRecipe = allIngredientsInRecipe.find(
+            (other) =>
+              other !== ing &&
+              ((other.baseName && other.baseName.toLowerCase().trim() === parentBase) ||
+                other.name.toLowerCase().trim() === parentName)
           );
 
-          if (parentItem && parentItem.id !== mergedItem.id) {
-            parentItem.childIngredients.push(mergedItem.primaryIngredient);
-            return;
+          if (parentInRecipe) {
+            childrenSet.add(ing);
+            const parentKey = `${parentInRecipe.name}-${parentInRecipe.baseName || ''}`;
+            const list = childMap.get(parentKey) || [];
+            list.push(ing);
+            childMap.set(parentKey, list);
           }
         }
-        primaryItems.push(mergedItem);
+      }
+    }
+
+    const items: MergedShoppingSheetItem[] = [];
+    sortedIngredients.forEach(({ group, originalIdx }) => {
+      group.items.forEach((ing, idx) => {
+        if (childrenSet.has(ing)) return;
+
+        const parentKey = `${ing.name}-${ing.baseName || ''}`;
+        const children = childMap.get(parentKey) || [];
+
+        items.push({
+          id: `${ing.name}-${originalIdx}-${idx}`,
+          primaryIngredient: ing,
+          childIngredients: children,
+          groupCategory: group.name || ing.category,
+          originalGroupIdx: originalIdx,
+        });
       });
-
-      return {
-        groupName: group.name,
-        originalIdx,
-        items: primaryItems,
-      };
     });
-  }, [sortedIngredients]);
 
-  const allItems = useMemo(() => {
-    return mergedGroups.flatMap((g) => g.items);
-  }, [mergedGroups]);
+    return items;
+  }, [sortedIngredients]);
 
   // Initialize selection when drawer opens, taking pantry stock & staple status into account
   useEffect(() => {
@@ -115,20 +116,18 @@ export default function ShoppingConfirmSheet({
   const handleConfirm = () => {
     hapticNotification('success');
     const itemsToAdd: Ingredient[] = [];
-    mergedGroups.forEach(({ groupName, items }) => {
-      items.forEach((item) => {
-        if (selectedIds[item.id]) {
-          const ing = item.primaryIngredient;
-          const baseAmount = ing.amount || 0;
-          const scaledAmount = baseAmount * scaleFactor;
-          itemsToAdd.push({
-            ...ing,
-            amount: scaledAmount,
-            unit: ing.unit || '',
-            category: groupName || ing.category,
-          });
-        }
-      });
+    allItems.forEach((item) => {
+      if (selectedIds[item.id]) {
+        const ing = item.primaryIngredient;
+        const baseAmount = ing.amount || 0;
+        const scaledAmount = baseAmount * scaleFactor;
+        itemsToAdd.push({
+          ...ing,
+          amount: scaledAmount,
+          unit: ing.unit || '',
+          category: item.groupCategory || ing.category,
+        });
+      }
     });
     onConfirm(itemsToAdd);
     onClose();
