@@ -1,4 +1,4 @@
-import { Check, Package } from 'lucide-react';
+import { Check, Package, Home } from 'lucide-react';
 import type { Ingredient } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { getCategoryTheme } from '../../i18n';
@@ -118,6 +118,13 @@ export default function ShoppingConfirmItem({
                 }`}
               >
                 {displayAmount && <span className="opacity-40 font-normal">·</span>}
+                <Home
+                  className={`w-3 h-3 shrink-0 stroke-[2.2] ${
+                    isChecked
+                      ? 'text-gray-500 dark:text-gray-400'
+                      : 'text-gray-400 dark:text-gray-500'
+                  }`}
+                />
                 <span>{t('recipe.staplePillLabel')}</span>
               </span>
             ) : null}
