@@ -10,6 +10,8 @@
 
 - healthy score für ein rezept berechnen
 
+- rezept tinder mit öffentlichen rezepten
+
 ## Bugs / Improvements (Behoben ✅)
 
 - [x] zutat text geht über Rezepte badge
