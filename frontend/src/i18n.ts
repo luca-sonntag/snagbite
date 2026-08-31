@@ -491,7 +491,7 @@ export const uiTranslations = {
         mealPlanner: 'Planer',
         shoppingList: 'Einkaufsliste',
         progress: 'Fortschritt',
-        settings: 'Einstellungen',
+        settings: 'Profil',
       },
       gamification: {
         tabTitle: 'Fortschritt',
@@ -1664,7 +1664,7 @@ export const uiTranslations = {
         mealPlanner: 'Plan',
         shoppingList: 'Shopping',
         progress: 'Progress',
-        settings: 'Settings',
+        settings: 'Profile',
       },
       gamification: {
         tabTitle: 'Progress',
