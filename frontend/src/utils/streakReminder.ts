@@ -9,13 +9,13 @@ export interface StreakReminderMessages {
 }
 
 /**
- * Best-effort: schedule a local notification for tomorrow evening reminding the
- * user to keep their cooking streak alive. No-ops on web and whenever the plugin
+ * Best-effort: schedule a local notification for the upcoming week reminding the
+ * user to keep their weekly cooking streak alive. No-ops on web and whenever the plugin
  * or notification permission is unavailable — the in-app streak display never
  * depends on this.
  */
 export async function scheduleStreakReminder(
-  _streakDays: number,
+  _streakWeeks: number,
   messages: StreakReminderMessages,
 ): Promise<void> {
   if (!Capacitor.isNativePlatform()) return;
@@ -30,9 +30,9 @@ export async function scheduleStreakReminder(
     }
     if (!granted) return;
 
-    // Tomorrow at ~18:00 local time.
+    // Schedule 6 days later at ~18:00 local time (in the next calendar week before expiry).
     const when = new Date();
-    when.setDate(when.getDate() + 1);
+    when.setDate(when.getDate() + 6);
     when.setHours(18, 0, 0, 0);
 
     await LocalNotifications.schedule({

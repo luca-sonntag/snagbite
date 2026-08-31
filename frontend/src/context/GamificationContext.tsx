@@ -131,9 +131,15 @@ export function GamificationProvider({ children }: { children: React.ReactNode }
       if (!result.duplicate && (result.earned.xp > 0 || result.newBadges.length > 0)) {
         setReward(result);
         if (result.stats.currentStreak >= 1) {
-          scheduleStreakReminder(result.stats.currentStreak, {
+          const streak = result.stats.currentStreak;
+          const bodyKey = streak === 1 ? 'app.gamification.streakReminder.bodyOne' : 'app.gamification.streakReminder.bodyOther';
+          scheduleStreakReminder(streak, {
             title: t('app.gamification.streakReminder.title'),
-            body: t('app.gamification.streakReminder.body', { days: result.stats.currentStreak }),
+            body: t(bodyKey, {
+              weeks: streak,
+              days: streak,
+              count: streak,
+            }),
           });
         }
       }
