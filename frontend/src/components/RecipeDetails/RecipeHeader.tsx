@@ -235,9 +235,9 @@ export default function RecipeHeader({
             {recipe.description}
           </p>
         )}
-        {/* Category & labels */}
-        {(recipe.category || (flags && flags.length > 0)) && (
-          <div className="flex flex-wrap gap-2 mt-1">
+        {/* Category, labels & cook stats */}
+        {(recipe.category || (flags && flags.length > 0) || (history && history.count > 0)) && (
+          <div className="flex flex-wrap items-center gap-2 mt-1">
             {recipe.category && (
               <span className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-xs font-bold px-3.5 py-1.5 min-h-[38px] rounded-full select-none whitespace-nowrap border-none flex items-center gap-1.5">
                 <span className="text-base leading-none">{getRecipeCategoryEmoji(recipe.category)}</span>
@@ -261,34 +261,32 @@ export default function RecipeHeader({
                 {flag}
               </button>
             ))}
-          </div>
-        )}
-        {history && history.count > 0 && (
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-400 dark:text-gray-500 font-medium mt-1 select-none">
-            <button
-              type="button"
-              onClick={() => {
-                hapticLight();
-                const el = document.getElementById('cook-history');
-                if (el) {
-                  const stickyTopHeight = parseInt(
-                    getComputedStyle(document.documentElement).getPropertyValue('--app-sticky-top') || '0',
-                    10
-                  );
-                  const offset = stickyTopHeight + 80;
-                  const elementPosition = el.getBoundingClientRect().top + window.scrollY;
-                  window.scrollTo({ top: elementPosition - offset, behavior: 'smooth' });
-                }
-              }}
-              className="inline-flex items-center gap-1 py-1 px-1.5 -ml-1.5 font-bold text-emerald-600 dark:text-emerald-400 hover:underline active:scale-95 cursor-pointer outline-none bg-transparent border-none transition-all"
-            >
-              <span>{t('app.gamification.cookedChip', { count: history.count })}</span>
-              {history.lastCookedAt && (
-                <span className="text-gray-400 dark:text-gray-500 font-normal">
-                  · {t('app.gamification.cookedChipLast', { when: formatRelative(history.lastCookedAt, language) })}
-                </span>
-              )}
-            </button>
+            {history && history.count > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  hapticLight();
+                  const el = document.getElementById('cook-history');
+                  if (el) {
+                    const stickyTopHeight = parseInt(
+                      getComputedStyle(document.documentElement).getPropertyValue('--app-sticky-top') || '0',
+                      10
+                    );
+                    const offset = stickyTopHeight + 80;
+                    const elementPosition = el.getBoundingClientRect().top + window.scrollY;
+                    window.scrollTo({ top: elementPosition - offset, behavior: 'smooth' });
+                  }
+                }}
+                className="inline-flex items-center gap-1 py-1.5 px-3 min-h-[38px] rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-95 cursor-pointer outline-none border-none transition-all select-none"
+              >
+                <span>{t('app.gamification.cookedChip', { count: history.count })}</span>
+                {history.lastCookedAt && (
+                  <span className="text-gray-400 dark:text-gray-500 font-normal">
+                    · {t('app.gamification.cookedChipLast', { when: formatRelative(history.lastCookedAt, language) })}
+                  </span>
+                )}
+              </button>
+            )}
           </div>
         )}
 
