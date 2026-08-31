@@ -91,7 +91,7 @@ export default function ShoppingListItem({
     <li
       className={`rounded-xl border-none transition-colors group ${animationClass} hover:bg-black/[0.03] dark:hover:bg-white/[0.03]`}
     >
-      <div className="flex items-center justify-between gap-2 py-0.5 px-2 min-h-[38px]">
+      <div className="flex items-center justify-between gap-2 py-1.5 px-2 min-h-[42px]">
         <button
           type="button"
           onClick={() => {
