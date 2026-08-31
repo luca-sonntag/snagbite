@@ -138,7 +138,7 @@ export default function RecipeNutrition({
                     <div className="flex items-center gap-1.5">
                       <span className={`w-2 h-2 rounded-[3px] shrink-0 ${isPremium ? 'bg-blue-500' : 'bg-blue-500/70'}`} />
                       <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
-                        {isPremium ? `${proteinDisplay}g` : '00g'}
+                        {`${proteinDisplay}g`}
                       </span>
                     </div>
                     <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
@@ -154,7 +154,7 @@ export default function RecipeNutrition({
                     <div className="flex items-center gap-1.5">
                       <span className={`w-2 h-2 rounded-[3px] shrink-0 ${isPremium ? 'bg-amber-500' : 'bg-amber-500/70'}`} />
                       <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
-                        {isPremium ? `${carbsDisplay}g` : '00g'}
+                        {`${carbsDisplay}g`}
                       </span>
                     </div>
                     <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
@@ -170,7 +170,7 @@ export default function RecipeNutrition({
                     <div className="flex items-center gap-1.5">
                       <span className={`w-2 h-2 rounded-[3px] shrink-0 ${isPremium ? 'bg-rose-500' : 'bg-rose-500/70'}`} />
                       <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
-                        {isPremium ? `${fatDisplay}g` : '00g'}
+                        {`${fatDisplay}g`}
                       </span>
                     </div>
                     <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
@@ -247,11 +247,33 @@ export default function RecipeNutrition({
                 /* Free mode: unified blurred wrapper over progress bar + legend with overlay button */
                 <div className="relative">
                   <div className="flex flex-col gap-1.5 filter blur-[4px] select-none opacity-45 pointer-events-none transition-all">
-                    {/* Progress bar preview: clearly uneven distribution with soft blur */}
+                    {/* Progress bar preview: actual recipe macro distribution with soft blur */}
                     <div className="h-2.5 w-full rounded-full bg-black/5 dark:bg-white/10 overflow-hidden flex shadow-inner">
-                      <div className="w-[18%] h-full bg-blue-500" />
-                      <div className="w-[54%] h-full bg-amber-500" />
-                      <div className="w-[28%] h-full bg-rose-500" />
+                      {proteinPct > 0 && (
+                        <div
+                          style={{ width: `${proteinPct}%` }}
+                          className="h-full bg-blue-500"
+                        />
+                      )}
+                      {carbsPct > 0 && (
+                        <div
+                          style={{ width: `${carbsPct}%` }}
+                          className="h-full bg-amber-500"
+                        />
+                      )}
+                      {fatPct > 0 && (
+                        <div
+                          style={{ width: `${fatPct}%` }}
+                          className="h-full bg-rose-500"
+                        />
+                      )}
+                      {totalMacroKcal === 0 && (
+                        <>
+                          <div className="w-[25%] h-full bg-blue-500" />
+                          <div className="w-[50%] h-full bg-amber-500" />
+                          <div className="w-[25%] h-full bg-rose-500" />
+                        </>
+                      )}
                     </div>
 
                     {/* Legend preview */}
@@ -259,17 +281,17 @@ export default function RecipeNutrition({
                       <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
                         <span className="w-2 h-2 rounded-[3px] bg-blue-500 shrink-0" />
                         {t('recipe.ingredientNutritionProtein')}
-                        <span className="tabular-nums font-semibold">16g</span>
+                        <span className="tabular-nums font-semibold">{proteinDisplay}g</span>
                       </span>
                       <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
                         <span className="w-2 h-2 rounded-[3px] bg-amber-500 shrink-0" />
                         {t('recipe.nutritionCarbs')}
-                        <span className="tabular-nums font-semibold">58g</span>
+                        <span className="tabular-nums font-semibold">{carbsDisplay}g</span>
                       </span>
                       <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
                         <span className="w-2 h-2 rounded-[3px] bg-rose-500 shrink-0" />
                         {t('recipe.ingredientNutritionFat')}
-                        <span className="tabular-nums font-semibold">14g</span>
+                        <span className="tabular-nums font-semibold">{fatDisplay}g</span>
                       </span>
                     </div>
                   </div>
