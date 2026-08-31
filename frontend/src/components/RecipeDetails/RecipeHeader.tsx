@@ -71,24 +71,6 @@ export default function RecipeHeader({
       <div className="relative p-2 flex flex-col gap-2">
         {/* Top right action buttons */}
         <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
-          {/* DEV Re-Extract Button */}
-          {import.meta.env.DEV && (reelUrl || recipe.sourceUrl) && (
-            <Button
-              isIconOnly
-              onClick={() => {
-                hapticNotification('success');
-                const targetUrl = reelUrl || recipe.sourceUrl;
-                if (targetUrl) {
-                  devReExtractRecipe(targetUrl);
-                }
-              }}
-              className="w-11 h-11 min-w-[44px] min-h-[44px] flex-shrink-0 bg-amber-500/15 text-amber-600 dark:text-amber-400 hover:bg-amber-500/25 border-none rounded-xl flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-xs"
-              aria-label="[DEV] Re-Extract Recipe"
-            >
-              <RefreshCw className="w-5 h-5" />
-            </Button>
-          )}
-
           {onToggleFavorite && (
             <Button
               isIconOnly
@@ -226,11 +208,7 @@ export default function RecipeHeader({
         </div>
 
         {/* Creator handle + Title: no gap between handle and title, padded right so title wraps before buttons */}
-        <div className={
-          import.meta.env.DEV && (reelUrl || recipe.sourceUrl)
-            ? (onToggleFavorite ? 'pr-[148px]' : 'pr-[100px]')
-            : (onToggleFavorite ? 'pr-[100px]' : 'pr-[52px]')
-        }>
+        <div className={onToggleFavorite ? 'pr-[100px]' : 'pr-[52px]'}>
           {(recipe.sourceHandle || isPhotoImportUrl(reelUrl)) && (
             <div className="text-xs font-extrabold uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-500 dark:from-emerald-400 dark:via-teal-300 dark:to-emerald-300 mb-0.5 leading-none select-none">
               {recipe.sourceHandle || '@PHOTOIMPORT'}
