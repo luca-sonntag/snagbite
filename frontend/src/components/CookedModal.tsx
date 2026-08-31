@@ -44,22 +44,15 @@ export default function CookedModal({
   const [rejectionReason, setRejectionReason] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const submitPhoto = async (photoBase64: string) => {
+  const submitCook = async (photoBase64?: string) => {
     setIsVerifying(true);
     setRejectionReason(null);
-
     try {
       await markCooked(recipeId, {
         photoBase64,
@@ -70,39 +63,13 @@ export default function CookedModal({
       onSuccess?.();
       handleResetAndClose();
     } catch (err: any) {
-      console.error('[CookedModal] Verification failed:', err);
+      console.error('[CookedModal] Cook recording failed:', err);
       hapticNotification('error');
       const code = err?.code;
       const params = err?.params;
       const localizedReason = code
         ? resolveErrorCode(code, params, err?.message, language)
-        : (params?.reason || (err?.message && !err.message.includes('Failed to record cook') ? err.message : t('error.codes.PHOTO_NOT_MATCHING')));
-      setRejectionReason(localizedReason);
-    } finally {
-      setIsVerifying(false);
-    }
-  };
-
-  const handleMarkWithoutPhoto = async () => {
-    hapticLight();
-    setIsVerifying(true);
-    setRejectionReason(null);
-    try {
-      await markCooked(recipeId, {
-        viaCookingMode,
-        timerElapsed,
-      });
-      hapticNotification('success');
-      onSuccess?.();
-      handleResetAndClose();
-    } catch (err: any) {
-      console.error('[CookedModal] Mark without photo failed:', err);
-      hapticNotification('error');
-      const code = err?.code;
-      const params = err?.params;
-      const localizedReason = code
-        ? resolveErrorCode(code, params, err?.message, language)
-        : (err?.message || 'Fehler beim Speichern');
+        : (params?.reason || (err?.message && !err.message.includes('Failed to record cook') ? err.message : (photoBase64 ? t('error.codes.PHOTO_NOT_MATCHING') : 'Fehler beim Speichern')));
       setRejectionReason(localizedReason);
     } finally {
       setIsVerifying(false);
@@ -121,18 +88,22 @@ export default function CookedModal({
       const dataUrl = await compressImage(file, PREVIEW_PROFILE);
       setPhoto(dataUrl);
       setIsCompressing(false);
-      // Immediately start photo verification on selection
-      await submitPhoto(dataUrl);
+      await submitCook(dataUrl);
     } catch (err: any) {
       console.warn('[CookedModal] Image compression/verification failed:', err);
       setIsCompressing(false);
     }
   };
 
-  const handleVerifyAndSubmit = async () => {
+  const handleMarkWithoutPhoto = () => {
+    hapticLight();
+    submitCook();
+  };
+
+  const handleVerifyAndSubmit = () => {
     if (!photo || isVerifying) return;
     hapticMedium();
-    await submitPhoto(photo);
+    submitCook(photo);
   };
 
   const handleResetAndClose = () => {
@@ -219,14 +190,15 @@ export default function CookedModal({
               </button>
             </div>
 
-            <div className="pt-2 text-center">
+            <div className="pt-1 text-center">
               <button
                 type="button"
                 onClick={handleMarkWithoutPhoto}
                 disabled={isVerifying}
-                className="w-full py-2.5 px-3 rounded-2xl text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 active:scale-[0.98] transition-all cursor-pointer border-none bg-transparent"
+                className="w-full min-h-[44px] flex items-center justify-center gap-2 py-3 px-3.5 rounded-2xl text-xs font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-[0.98] transition-all duration-200 ease-out cursor-pointer border-none whitespace-nowrap"
               >
-                {t('app.gamification.markWithoutPhoto')}
+                <Check className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
+                <span>{t('app.gamification.markWithoutPhoto')}</span>
               </button>
             </div>
           </div>
@@ -252,7 +224,7 @@ export default function CookedModal({
                 <button
                   type="button"
                   onClick={() => setPhoto(null)}
-                  className="absolute top-2 right-2 rounded-full bg-black/60 p-1.5 text-white backdrop-blur-md hover:bg-black/80 transition-colors"
+                  className="absolute top-2 right-2 rounded-full bg-black/60 p-2 text-white backdrop-blur-md hover:bg-black/80 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer border-none"
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
@@ -289,7 +261,7 @@ export default function CookedModal({
                     setPhoto(null);
                     setRejectionReason(null);
                   }}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 px-4 py-3.5 text-xs font-bold transition-all active:scale-[0.98] cursor-pointer outline-none border-none"
+                  className="w-full min-h-[48px] h-12 flex items-center justify-center gap-2 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 px-4 text-sm font-bold transition-all active:scale-[0.98] cursor-pointer outline-none border-none"
                 >
                   <RotateCcw className="w-4 h-4" />
                   <span>{t('app.gamification.retryPhoto')}</span>
@@ -297,16 +269,17 @@ export default function CookedModal({
                 <button
                   type="button"
                   onClick={handleMarkWithoutPhoto}
-                  className="w-full py-2 text-center text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 font-medium cursor-pointer border-none bg-transparent"
+                  className="w-full min-h-[44px] flex items-center justify-center gap-2 py-3 px-3.5 rounded-2xl text-xs font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-[0.98] transition-all cursor-pointer border-none whitespace-nowrap"
                 >
-                  {t('app.gamification.markWithoutPhoto')}
+                  <Check className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
+                  <span>{t('app.gamification.markWithoutPhoto')}</span>
                 </button>
               </div>
             ) : (
               <button
                 type="button"
                 onClick={handleVerifyAndSubmit}
-                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 px-4 py-3.5 text-xs font-bold text-white shadow-lg active:scale-[0.98] transition-all"
+                className="w-full min-h-[48px] h-12 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 px-4 text-sm font-bold text-white shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none"
               >
                 <Check className="w-4 h-4" />
                 <span>{t('app.gamification.verifyBtn')}</span>

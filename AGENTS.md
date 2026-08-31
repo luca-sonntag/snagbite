@@ -69,6 +69,10 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
    * Server-autoritative Punkte-Engine (`gamification.ts`), tunebare JSON-Formel in `global_settings`
    * `POST /api/recipes/:id/cooked` & `GET /api/me/gamification`, RewardOverlay & Fortschritt-Tab
 
+7. 🥗 [**Ernährungsphysiologische Grundlagen & Nährwerte**](file:///c:/Users/lucas/source/repos/cookbook/docs/nutrition.md)
+   * Atwater-Faktoren (4/4/9 kcal/g), Energieverteilung (% kcal) im Makrobalken & Rundung
+   * Portionsskalierung, Plausibilitätsprüfungen gegen Creator-Angaben & Wochenplaner-Aggregation
+
 ---
 
 ## 🏗️ System- & Workflow-Kurzübersicht

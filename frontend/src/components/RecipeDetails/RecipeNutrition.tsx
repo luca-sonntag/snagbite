@@ -3,7 +3,8 @@ import AiNotice from '../AiNotice';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import PremiumModal from '../PremiumModal';
-import { Flame, Crown } from 'lucide-react';
+import { Flame } from 'lucide-react';
+import MacroDistribution from './MacroDistribution';
 import type { NutritionalValues } from '../../types';
 
 type NutritionValue = string | number | null | undefined;
@@ -138,7 +139,7 @@ export default function RecipeNutrition({
                     <div className="flex items-center gap-1.5">
                       <span className={`w-2 h-2 rounded-[3px] shrink-0 ${isPremium ? 'bg-blue-500' : 'bg-blue-500/70'}`} />
                       <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
-                        {isPremium ? `${proteinDisplay}g` : '00g'}
+                        {`${proteinDisplay}g`}
                       </span>
                     </div>
                     <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
@@ -154,7 +155,7 @@ export default function RecipeNutrition({
                     <div className="flex items-center gap-1.5">
                       <span className={`w-2 h-2 rounded-[3px] shrink-0 ${isPremium ? 'bg-amber-500' : 'bg-amber-500/70'}`} />
                       <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
-                        {isPremium ? `${carbsDisplay}g` : '00g'}
+                        {`${carbsDisplay}g`}
                       </span>
                     </div>
                     <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
@@ -170,7 +171,7 @@ export default function RecipeNutrition({
                     <div className="flex items-center gap-1.5">
                       <span className={`w-2 h-2 rounded-[3px] shrink-0 ${isPremium ? 'bg-rose-500' : 'bg-rose-500/70'}`} />
                       <span className="text-gray-900 dark:text-white text-xs sm:text-sm font-semibold tabular-nums leading-tight">
-                        {isPremium ? `${fatDisplay}g` : '00g'}
+                        {`${fatDisplay}g`}
                       </span>
                     </div>
                     <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate">
@@ -191,101 +192,17 @@ export default function RecipeNutrition({
 
           {/* Macro distribution in summary variant: colored in Premium, unified blur across bar & legend in Free */}
           {isSummary && (
-            <div
-              onClick={() => !isPremium && setIsPremiumModalOpen(true)}
-              className={`relative flex flex-col gap-1.5 mt-0.5 ${!isPremium ? 'cursor-pointer group' : ''}`}
-            >
-              {isPremium ? (
-                totalMacroKcal > 0 && (
-                  <>
-                    {/* Progress bar */}
-                    <div className="h-2.5 w-full rounded-full bg-black/5 dark:bg-white/10 overflow-hidden flex shadow-inner">
-                      {proteinPct > 0 && (
-                        <div
-                          style={{ width: `${proteinPct}%` }}
-                          className="h-full bg-blue-500 transition-all duration-500"
-                          title={`${t('recipe.ingredientNutritionProtein')}: ${proteinPct}%`}
-                        />
-                      )}
-                      {carbsPct > 0 && (
-                        <div
-                          style={{ width: `${carbsPct}%` }}
-                          className="h-full bg-amber-500 transition-all duration-500"
-                          title={`${t('recipe.nutritionCarbs')}: ${carbsPct}%`}
-                        />
-                      )}
-                      {fatPct > 0 && (
-                        <div
-                          style={{ width: `${fatPct}%` }}
-                          className="h-full bg-rose-500 transition-all duration-500"
-                          title={`${t('recipe.ingredientNutritionFat')}: ${fatPct}%`}
-                        />
-                      )}
-                    </div>
-
-                    {/* Legend */}
-                    <div className="flex items-center gap-3.5 flex-wrap">
-                      <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-500 dark:text-gray-400">
-                        <span className="w-2 h-2 rounded-[3px] bg-blue-500 shrink-0" />
-                        {t('recipe.ingredientNutritionProtein')}
-                        <span className="tabular-nums font-semibold text-gray-700 dark:text-gray-300">{proteinDisplay}g</span>
-                      </span>
-                      <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-500 dark:text-gray-400">
-                        <span className="w-2 h-2 rounded-[3px] bg-amber-500 shrink-0" />
-                        {t('recipe.nutritionCarbs')}
-                        <span className="tabular-nums font-semibold text-gray-700 dark:text-gray-300">{carbsDisplay}g</span>
-                      </span>
-                      <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-500 dark:text-gray-400">
-                        <span className="w-2 h-2 rounded-[3px] bg-rose-500 shrink-0" />
-                        {t('recipe.ingredientNutritionFat')}
-                        <span className="tabular-nums font-semibold text-gray-700 dark:text-gray-300">{fatDisplay}g</span>
-                      </span>
-                    </div>
-                  </>
-                )
-              ) : (
-                /* Free mode: unified blurred wrapper over progress bar + legend with overlay button */
-                <div className="relative">
-                  <div className="flex flex-col gap-1.5 filter blur-[4px] select-none opacity-45 pointer-events-none transition-all">
-                    {/* Progress bar preview: clearly uneven distribution with soft blur */}
-                    <div className="h-2.5 w-full rounded-full bg-black/5 dark:bg-white/10 overflow-hidden flex shadow-inner">
-                      <div className="w-[18%] h-full bg-blue-500" />
-                      <div className="w-[54%] h-full bg-amber-500" />
-                      <div className="w-[28%] h-full bg-rose-500" />
-                    </div>
-
-                    {/* Legend preview */}
-                    <div className="flex items-center gap-3.5 flex-wrap pt-0.5">
-                      <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
-                        <span className="w-2 h-2 rounded-[3px] bg-blue-500 shrink-0" />
-                        {t('recipe.ingredientNutritionProtein')}
-                        <span className="tabular-nums font-semibold">16g</span>
-                      </span>
-                      <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
-                        <span className="w-2 h-2 rounded-[3px] bg-amber-500 shrink-0" />
-                        {t('recipe.nutritionCarbs')}
-                        <span className="tabular-nums font-semibold">58g</span>
-                      </span>
-                      <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-gray-600 dark:text-gray-300">
-                        <span className="w-2 h-2 rounded-[3px] bg-rose-500 shrink-0" />
-                        {t('recipe.ingredientNutritionFat')}
-                        <span className="tabular-nums font-semibold">14g</span>
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Centered Unlock CTA badge with tint-premium gradient & amber crown */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-gray-900 dark:text-white tint-premium shadow-[0_2px_10px_rgba(0,0,0,0.08)] ring-1 ring-black/5 dark:ring-white/10 group-hover:brightness-[0.98] dark:group-hover:brightness-110 px-3.5 py-1.5 rounded-full transition-all">
-                      <div className="w-4 h-4 rounded-md bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0">
-                        <Crown className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
-                      </div>
-                      <span>{t('premium.hint.unlockMacros')}</span>
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
+            <MacroDistribution
+              proteinDisplay={proteinDisplay}
+              proteinPct={proteinPct}
+              carbsDisplay={carbsDisplay}
+              carbsPct={carbsPct}
+              fatDisplay={fatDisplay}
+              fatPct={fatPct}
+              totalMacroKcal={totalMacroKcal}
+              isPremium={isPremium}
+              onUnlockPremium={() => setIsPremiumModalOpen(true)}
+            />
           )}
         </div>
       </div>

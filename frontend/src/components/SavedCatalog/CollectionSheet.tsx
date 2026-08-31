@@ -315,14 +315,6 @@ export default function CollectionSheet({
                     {formError}
                   </div>
                 )}
-                {mode === 'assign' && !job && initialMode !== 'create' && initialMode !== 'manage' && collections.length > 0 && (
-                  <div className="mb-3 px-3.5 py-2.5 text-[11px] leading-snug rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-none">
-                    {language === 'de'
-                      ? '1. Rezept auswählen (lange drücken) · 2. Sammlung wählen · 3. Häkchen setzen oder entfernen.'
-                      : '1. Select a recipe (long-press) · 2. Pick a collection · 3. Tick or untick to add or remove.'}
-                  </div>
-                )}
-
                 {mode === 'assign' ? (
                   <div className="flex flex-col gap-2">
                     {collections.length === 0 ? (
