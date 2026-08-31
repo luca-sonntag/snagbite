@@ -78,10 +78,10 @@ export default function ShoppingCheckedItem({
             hapticHeavy();
             onDelete();
           }}
-          className="w-7 h-7 min-w-[28px] min-h-[28px] flex items-center justify-center text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer flex-shrink-0 border-none"
+          className="w-6 h-6 min-w-[24px] min-h-[24px] flex items-center justify-center text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 rounded-md hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer flex-shrink-0 border-none"
           aria-label={t('shopping.deleteItem')}
         >
-          <Trash2 className="w-3.5 h-3.5" />
+          <Trash2 className="w-3 h-3" />
         </button>
       </div>
     </li>
