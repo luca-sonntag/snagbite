@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Check, Trash2, ChevronDown } from 'lucide-react';
+import { Check, Trash2, ChevronDown, Package } from 'lucide-react';
 import type { AggregatedShoppingItem } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { getCategoryTheme } from '../../i18n';
@@ -224,6 +224,7 @@ export default function ShoppingListItem({
                   }`}
                 >
                   {(packageRecommendation || amountStr) && <span className="opacity-40 font-normal">·</span>}
+                  <Package className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0 stroke-[2.2]" />
                   <span>{t('shopping.inPantryStock', { amount: pantryStockStr })}</span>
                 </span>
               )}
