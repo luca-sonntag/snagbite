@@ -1,6 +1,7 @@
-﻿import { Check, Package } from 'lucide-react';
+import { Check, Package } from 'lucide-react';
 import type { Ingredient } from '../../types';
 import { useI18n } from '../../context/I18nContext';
+import { getCategoryTheme } from '../../i18n';
 import IngredientIcon from '../IngredientIcon';
 
 export interface MergedShoppingSheetItem {
@@ -30,6 +31,7 @@ export default function ShoppingConfirmItem({
 }: ShoppingConfirmItemProps) {
   const { t } = useI18n();
   const ing = item.primaryIngredient;
+  const theme = getCategoryTheme(groupCategory || ing.category || '');
   const scaledAmount = formatAmount(ing.amount, ing.unit);
   const amountStr = scaledAmount ? `${scaledAmount} ` : '';
   const unitStr = ing.unit ? `${ing.unit}` : '';
@@ -37,12 +39,17 @@ export default function ShoppingConfirmItem({
   return (
     <div
       onClick={onToggle}
-      className={`flex items-center gap-3 py-2.5 px-3 rounded-2xl transition-colors cursor-pointer active:scale-[0.99] select-none ${
+      className={`flex items-center gap-2.5 py-2.5 px-3 rounded-2xl transition-colors cursor-pointer active:scale-[0.99] select-none ${
         pantryStock
           ? 'bg-amber-500/[0.04] dark:bg-amber-500/[0.08] hover:bg-amber-500/[0.08] dark:hover:bg-amber-500/[0.12]'
           : 'hover:bg-gray-100 dark:hover:bg-gray-800'
       }`}
     >
+      <span
+        className={`w-1 h-4 rounded-full ${theme.barClass} shrink-0 opacity-80`}
+        title={groupCategory || ing.category || undefined}
+      />
+
       <div
         className={`w-7 h-7 rounded-xl border-none flex items-center justify-center flex-shrink-0 transition-all ${
           isChecked ? 'bg-emerald-500 text-white shadow-xs' : 'bg-gray-200/80 dark:bg-gray-700/80'
