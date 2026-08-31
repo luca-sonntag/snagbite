@@ -1,6 +1,7 @@
 import type { AggregatedShoppingItem, PantryItem, ParentIngredientInfo } from '../../types';
 import { normalizeFoodBaseKey } from '../../utils/ingredientTaxonomy';
 import { formatQuantity } from '../../utils/formatQuantity';
+import { isPantryStockSufficient } from '@cookbook/shared';
 
 export interface PantryMatchableItem {
   name: string;
@@ -13,49 +14,6 @@ export interface PantryStockMatch {
   pantryItem: PantryItem;
   formattedStock: string;
   isPartial: boolean; // true if available pantry stock < required amount
-}
-
-export function normalizeUnitToBase(
-  amount: number,
-  unit?: string
-): { value: number; type: 'mass' | 'volume' | 'count' } | null {
-  if (amount == null || isNaN(amount)) return null;
-  const u = (unit || '').toLowerCase().trim();
-  if (!u) return null;
-
-  // Mass in grams
-  if (u === 'g' || u === 'gramm' || u === 'grams' || u === 'gram') return { value: amount, type: 'mass' };
-  if (u === 'kg' || u === 'kilogramm' || u === 'kilograms' || u === 'kilo') return { value: amount * 1000, type: 'mass' };
-  if (u === 'mg') return { value: amount * 0.001, type: 'mass' };
-
-  // Volume in ml
-  if (u === 'ml' || u === 'milliliter' || u === 'milliliters') return { value: amount, type: 'volume' };
-  if (u === 'l' || u === 'liter' || u === 'litre' || u === 'liters') return { value: amount * 1000, type: 'volume' };
-  if (u === 'cl') return { value: amount * 10, type: 'volume' };
-  if (u === 'dl') return { value: amount * 100, type: 'volume' };
-  if (u === 'tl' || u === 'tsp' || u === 'teelöffel') return { value: amount * 5, type: 'volume' };
-  if (u === 'el' || u === 'tbsp' || u === 'esslöffel') return { value: amount * 15, type: 'volume' };
-
-  // Count / pieces
-  if (
-    u === 'stk' ||
-    u === 'stück' ||
-    u === 'stueck' ||
-    u === 'piece' ||
-    u === 'pieces' ||
-    u === 'scheibe' ||
-    u === 'scheiben' ||
-    u === 'slice' ||
-    u === 'slices' ||
-    u === 'zehe' ||
-    u === 'zehen' ||
-    u === 'clove' ||
-    u === 'cloves'
-  ) {
-    return { value: amount, type: 'count' };
-  }
-
-  return null;
 }
 
 export function findPantryStockMatch(
@@ -80,17 +38,10 @@ export function findPantryStockMatch(
 
   if (!match || match.amount <= 0) return null;
 
-  let isPartial = false;
-  if (requiredAmount != null && requiredAmount > 0) {
-    const reqNorm = normalizeUnitToBase(requiredAmount, requiredUnit);
-    const stockNorm = normalizeUnitToBase(match.amount, match.unit);
-
-    if (reqNorm && stockNorm && reqNorm.type === stockNorm.type) {
-      isPartial = stockNorm.value < reqNorm.value;
-    } else if ((requiredUnit || '').toLowerCase().trim() === (match.unit || '').toLowerCase().trim()) {
-      isPartial = match.amount < requiredAmount;
-    }
-  }
+  const isPartial =
+    requiredAmount != null && requiredAmount > 0
+      ? !isPantryStockSufficient(match.amount, match.unit, requiredAmount, requiredUnit)
+      : false;
 
   return {
     pantryItem: match,
