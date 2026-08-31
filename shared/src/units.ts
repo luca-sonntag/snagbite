@@ -168,8 +168,8 @@ export function getPantryStockRatio(
 
 /**
  * Categorizes pantry stock into 3 distinct visual tiers:
- * - 'sufficient': >= 100% available (Emerald / Green)
- * - 'low': 50% - 99% available (Amber / Orange - should be reviewed)
+ * - 'sufficient': > 120% available with ample buffer (Emerald / Green)
+ * - 'low': 50% - 120% available (Amber / Orange - low stock or almost depleted after cooking)
  * - 'deficit': < 50% available (Rose / Red - clearly insufficient)
  */
 export function getPantryStockStatus(
@@ -179,7 +179,7 @@ export function getPantryStockStatus(
   requiredUnit?: string | null
 ): PantryStockStatus {
   const ratio = getPantryStockRatio(stockAmount, stockUnit, requiredAmount, requiredUnit);
-  if (ratio == null || ratio >= 1.0) {
+  if (ratio == null || ratio > 1.2) {
     return 'sufficient';
   }
   if (ratio >= 0.5) {

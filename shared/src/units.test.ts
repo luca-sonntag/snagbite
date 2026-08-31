@@ -31,15 +31,17 @@ describe('Shared Units & Pantry Stock Sufficiency', () => {
   });
 
   it('accurately categorizes pantry stock into 3 tiers', () => {
-    // Sufficient (>= 100%) -> sufficient (Emerald)
+    // Sufficient (> 120%) -> sufficient (Emerald)
     assert.equal(getPantryStockStatus(500, 'g', 250, 'g'), 'sufficient');
-    assert.equal(getPantryStockStatus(250, 'g', 250, 'g'), 'sufficient');
+    assert.equal(getPantryStockStatus(260, 'g', 200, 'g'), 'sufficient');
     assert.equal(getPantryStockStatus(1, 'kg', 250, 'g'), 'sufficient');
 
-    // Low / Review (50% - 99%) -> low (Orange)
-    assert.equal(getPantryStockStatus(60, 'g', 80, 'g'), 'low');
-    assert.equal(getPantryStockStatus(150, 'g', 250, 'g'), 'low');
-    assert.equal(getPantryStockStatus(1, 'Stück', 2, 'Stück'), 'low');
+    // Low / Review (50% - 120%) -> low (Orange)
+    assert.equal(getPantryStockStatus(220, 'g', 200, 'g'), 'low'); // 110% (almost depleted after cooking)
+    assert.equal(getPantryStockStatus(200, 'g', 200, 'g'), 'low'); // 100% (completely empty after cooking)
+    assert.equal(getPantryStockStatus(60, 'g', 80, 'g'), 'low'); // 75%
+    assert.equal(getPantryStockStatus(150, 'g', 250, 'g'), 'low'); // 60%
+    assert.equal(getPantryStockStatus(1, 'Stück', 2, 'Stück'), 'low'); // 50%
 
     // Deficit (< 50%) -> deficit (Red)
     assert.equal(getPantryStockStatus(20, 'g', 80, 'g'), 'deficit');
