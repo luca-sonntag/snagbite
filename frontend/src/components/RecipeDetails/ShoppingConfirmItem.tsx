@@ -2,6 +2,7 @@ import { Check, Package, Home } from 'lucide-react';
 import type { Ingredient } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { getCategoryTheme } from '../../i18n';
+import type { PantryStockMatch } from '../ShoppingList/shoppingItemUtils';
 import IngredientIcon from '../IngredientIcon';
 
 export interface MergedShoppingSheetItem {
@@ -18,7 +19,8 @@ interface ShoppingConfirmItemProps {
   onToggle: () => void;
   formatAmount: (amount: number | undefined, unit: string | undefined) => string;
   groupCategory?: string;
-  pantryStock: string | null;
+  pantryStockMatch?: PantryStockMatch | null;
+  pantryStock?: string | null;
 }
 
 export default function ShoppingConfirmItem({
@@ -27,6 +29,7 @@ export default function ShoppingConfirmItem({
   onToggle,
   formatAmount,
   groupCategory,
+  pantryStockMatch,
   pantryStock,
 }: ShoppingConfirmItemProps) {
   const { t } = useI18n();
@@ -36,6 +39,9 @@ export default function ShoppingConfirmItem({
   const amountStr = scaledAmount ? `${scaledAmount}` : '';
   const unitStr = ing.unit ? ` ${ing.unit}` : '';
   const displayAmount = (amountStr || unitStr) ? `${amountStr}${unitStr}`.trim() : null;
+
+  const stockFormatted = pantryStockMatch ? pantryStockMatch.formattedStock : pantryStock;
+  const isPartial = pantryStockMatch ? pantryStockMatch.isPartial : false;
 
   return (
     <div
@@ -77,7 +83,7 @@ export default function ShoppingConfirmItem({
         </div>
 
         {/* Amount & Status Micro-Pills (Option 4) */}
-        {(displayAmount || pantryStock || ing.isStaple) && (
+        {(displayAmount || stockFormatted || ing.isStaple) && (
           <div className="flex items-center flex-wrap gap-1.5 mt-0.5">
             {displayAmount && (
               <span
@@ -91,7 +97,7 @@ export default function ShoppingConfirmItem({
               </span>
             )}
 
-            {pantryStock ? (
+            {stockFormatted ? (
               <span
                 className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md border-none select-none transition-colors ${
                   isChecked
@@ -100,7 +106,11 @@ export default function ShoppingConfirmItem({
                 }`}
               >
                 <Package className="w-3 h-3 shrink-0 stroke-[2.2] opacity-80" />
-                <span>{t('recipe.inPantryStock', { amount: pantryStock })}</span>
+                <span>
+                  {isPartial
+                    ? t('recipe.inPantryStockPartial', { amount: stockFormatted })
+                    : t('recipe.inPantryStock', { amount: stockFormatted })}
+                </span>
               </span>
             ) : ing.isStaple ? (
               <span

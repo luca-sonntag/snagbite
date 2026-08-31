@@ -5,7 +5,7 @@ import { useI18n } from '../../context/I18nContext';
 import { usePantry } from '../../context/PantryContext';
 import { hapticLight, hapticNotification } from '../../utils/haptics';
 import type { Ingredient, Recipe } from '../../types';
-import { findPantryStock } from '../ShoppingList/shoppingItemUtils';
+import { findPantryStockMatch } from '../ShoppingList/shoppingItemUtils';
 import ShoppingConfirmItem, { type MergedShoppingSheetItem } from './ShoppingConfirmItem';
 
 interface ShoppingConfirmSheetProps {
@@ -33,57 +33,48 @@ export default function ShoppingConfirmSheet({
   const { pantryItems } = usePantry();
   const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
 
-  // Merge ingredients that share a parent in the same recipe (e.g. Gurkenwasser -> Gewürzgurken)
+  // Group items by normalized food base key so alternative forms and parts merge cleanly
   const mergedGroups = useMemo(() => {
-    const allItemsInRecipe = sortedIngredients.flatMap((g) => g.group.items);
-    const childMap = new Map<string, Ingredient[]>();
-    const childrenSet = new Set<Ingredient>();
+    return sortedIngredients.map(({ group, originalIdx }) => {
+      const itemMap = new Map<string, MergedShoppingSheetItem>();
 
-    for (const { group } of sortedIngredients) {
-      for (const ing of group.items) {
-        if (ing.parentIngredient?.baseName || ing.parentIngredient?.name) {
-          const parentBase = (ing.parentIngredient.baseName || '').toLowerCase().trim();
-          const parentName = (ing.parentIngredient.name || '').toLowerCase().trim();
+      group.items.forEach((ing) => {
+        const id = `${ing.name}-${ing.amount}-${ing.unit}`;
+        if (!itemMap.has(id)) {
+          itemMap.set(id, {
+            id,
+            primaryIngredient: ing,
+            childIngredients: [],
+            groupCategory: group.name || ing.category,
+            originalGroupIdx: originalIdx,
+          });
+        }
+      });
 
-          const parentInRecipe = allItemsInRecipe.find(
-            (other) =>
-              other !== ing &&
-              ((other.baseName && other.baseName.toLowerCase().trim() === parentBase) ||
-                other.name.toLowerCase().trim() === parentName)
+      // Attach sub-ingredients (e.g. Gurkenwasser from Gewürzgurken)
+      const primaryItems: MergedShoppingSheetItem[] = [];
+      itemMap.forEach((mergedItem) => {
+        const parentInfo = mergedItem.primaryIngredient.parentIngredient;
+        if (parentInfo && parentInfo.name) {
+          const parentItem = Array.from(itemMap.values()).find(
+            (p) =>
+              p.primaryIngredient.name.toLowerCase().trim() === parentInfo.name.toLowerCase().trim() ||
+              (p.primaryIngredient.baseName &&
+                p.primaryIngredient.baseName.toLowerCase().trim() === parentInfo.baseName.toLowerCase().trim())
           );
 
-          if (parentInRecipe) {
-            childrenSet.add(ing);
-            const parentKey = `${parentInRecipe.name}-${parentInRecipe.baseName || ''}`;
-            const list = childMap.get(parentKey) || [];
-            list.push(ing);
-            childMap.set(parentKey, list);
+          if (parentItem && parentItem.id !== mergedItem.id) {
+            parentItem.childIngredients.push(mergedItem.primaryIngredient);
+            return;
           }
         }
-      }
-    }
-
-    return sortedIngredients.map(({ group, originalIdx }) => {
-      const items: MergedShoppingSheetItem[] = [];
-      group.items.forEach((ing, idx) => {
-        if (childrenSet.has(ing)) return;
-
-        const parentKey = `${ing.name}-${ing.baseName || ''}`;
-        const children = childMap.get(parentKey) || [];
-
-        items.push({
-          id: `${ing.name}-${originalIdx}-${idx}`,
-          primaryIngredient: ing,
-          childIngredients: children,
-          groupCategory: group.name,
-          originalGroupIdx: originalIdx,
-        });
+        primaryItems.push(mergedItem);
       });
 
       return {
         groupName: group.name,
         originalIdx,
-        items,
+        items: primaryItems,
       };
     });
   }, [sortedIngredients]);
@@ -97,12 +88,21 @@ export default function ShoppingConfirmSheet({
     if (isOpen) {
       const initial: Record<string, boolean> = {};
       allItems.forEach((item) => {
-        const inStock = !!findPantryStock(item.primaryIngredient, pantryItems);
-        initial[item.id] = !inStock && !item.primaryIngredient.isStaple;
+        const requiredAmt = (item.primaryIngredient.amount || 0) * scaleFactor;
+        const stockMatch = findPantryStockMatch(
+          item.primaryIngredient,
+          pantryItems,
+          requiredAmt,
+          item.primaryIngredient.unit
+        );
+        // If stock is sufficient (not partial), it is in stock and deselected by default.
+        // If stock is partial (too little in stock), it remains selected so the user buys more.
+        const inStockAndSufficient = stockMatch ? !stockMatch.isPartial : false;
+        initial[item.id] = !inStockAndSufficient && !item.primaryIngredient.isStaple;
       });
       setSelectedIds(initial);
     }
-  }, [isOpen, allItems, pantryItems]);
+  }, [isOpen, allItems, pantryItems, scaleFactor]);
 
   const toggleItem = (id: string) => {
     hapticLight();
@@ -171,7 +171,13 @@ export default function ShoppingConfirmSheet({
               <Drawer.Body className="overflow-y-scroll py-2 pr-1 flex-1 [scrollbar-width:thin] [scrollbar-color:rgba(156,163,175,0.4)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
                 <div className="flex flex-col gap-1">
                   {allItems.map((item) => {
-                    const pantryStock = findPantryStock(item.primaryIngredient, pantryItems);
+                    const requiredAmt = (item.primaryIngredient.amount || 0) * scaleFactor;
+                    const pantryStockMatch = findPantryStockMatch(
+                      item.primaryIngredient,
+                      pantryItems,
+                      requiredAmt,
+                      item.primaryIngredient.unit
+                    );
                     return (
                       <ShoppingConfirmItem
                         key={item.id}
@@ -180,7 +186,7 @@ export default function ShoppingConfirmSheet({
                         onToggle={() => toggleItem(item.id)}
                         formatAmount={formatAmount}
                         groupCategory={item.groupCategory}
-                        pantryStock={pantryStock}
+                        pantryStockMatch={pantryStockMatch}
                       />
                     );
                   })}
