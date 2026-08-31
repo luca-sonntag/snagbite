@@ -4,7 +4,7 @@ import { translateCategory, getCategoryTheme } from '../../i18n';
 import { useI18n } from '../../context/I18nContext';
 import { usePantry } from '../../context/PantryContext';
 import ShoppingListItem from './ShoppingListItem';
-import { findPantryStock } from './shoppingItemUtils';
+import { findPantryStockMatch } from './shoppingItemUtils';
 
 interface ShoppingListGroupProps {
   groupedCategories: Array<{ category: string; items: AggregatedShoppingItem[] }>;
@@ -38,30 +38,25 @@ export default function ShoppingListGroup({
   if (groupedCategories.length === 0) return null;
 
   return (
-    <div className="rounded-2xl md:rounded-3xl bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none p-3 sm:p-4 transition-all flex flex-col gap-2">
+    <div className="flex flex-col gap-4">
       {groupedCategories.map((group) => {
-        const isGroupCollapsing = collapsingKeys.has(`group-${group.category}`);
         const theme = getCategoryTheme(group.category);
-        const openCount = group.items.length;
 
         return (
           <div
             key={group.category}
-            className={`flex flex-col transition-all ${
-              isGroupCollapsing ? 'animate-group-collapse' : 'animate-group-expand'
-            }`}
+            className="flex flex-col gap-1.5 bg-black/[0.02] dark:bg-white/[0.02] rounded-2xl p-2.5 sm:p-3"
           >
-            <div className="flex items-center justify-between gap-2 px-2 pt-1 pb-0.5">
-              <div className="flex flex-col gap-1 select-none flex-1 min-w-0 text-left">
-                <div className={`w-8 h-1 rounded-full ${theme.barClass}`} />
-                <div className="flex flex-col min-w-0">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-gray-100 truncate">
-                    {translateCategory(group.category)}
-                  </span>
-                  <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium leading-none mt-0.5">
-                    {openCount} {t('shopping.toBuyCount', { defaultValue: 'offen' })}
-                  </span>
-                </div>
+            {/* Category Header */}
+            <div className="flex items-center justify-between gap-2 px-1 pb-1">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className={`w-1.5 h-4 rounded-full ${theme.barClass}`} />
+                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 truncate">
+                  {translateCategory(group.category)}
+                </span>
+                <span className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
+                  {group.items.length}
+                </span>
               </div>
 
               <button
@@ -77,7 +72,7 @@ export default function ShoppingListGroup({
             <ul className="flex flex-col gap-0.5">
               {group.items.map((item) => {
                 const displayKey = `unchecked-${getItemKey(item)}`;
-                const pantryStock = findPantryStock(item, pantryItems);
+                const pantryStockMatch = findPantryStockMatch(item, pantryItems);
 
                 return (
                   <ShoppingListItem
@@ -86,7 +81,7 @@ export default function ShoppingListGroup({
                     isChecked={false}
                     isCheckingOff={checkingKeys?.has(displayKey)}
                     isCollapsing={collapsingKeys.has(displayKey)}
-                    pantryStockStr={pantryStock || undefined}
+                    pantryStockMatch={pantryStockMatch}
                     onClick={() => onItemToggle(item)}
                     onDelete={() => onDelete(item)}
                     formatItemAmount={formatItemAmount}

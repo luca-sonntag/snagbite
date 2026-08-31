@@ -5,6 +5,8 @@ import { isPantryStockSufficient, getPantryStockStatus, type PantryStockStatus }
 
 export interface PantryMatchableItem {
   name: string;
+  amount?: number;
+  unit?: string;
   baseName?: string;
   canonicalId?: string | null;
   parentIngredient?: ParentIngredientInfo | null;
@@ -39,12 +41,15 @@ export function findPantryStockMatch(
 
   if (!match || match.amount <= 0) return null;
 
+  const reqAmt = requiredAmount ?? item.amount;
+  const reqUnt = requiredUnit ?? item.unit;
+
   const isPartial =
-    requiredAmount != null && requiredAmount > 0
-      ? !isPantryStockSufficient(match.amount, match.unit, requiredAmount, requiredUnit)
+    reqAmt != null && reqAmt > 0
+      ? !isPantryStockSufficient(match.amount, match.unit, reqAmt, reqUnt)
       : false;
 
-  const status = getPantryStockStatus(match.amount, match.unit, requiredAmount, requiredUnit);
+  const status = getPantryStockStatus(match.amount, match.unit, reqAmt, reqUnt);
 
   return {
     pantryItem: match,
