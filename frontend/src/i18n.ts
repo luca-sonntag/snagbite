@@ -491,7 +491,7 @@ export const uiTranslations = {
         mealPlanner: 'Planer',
         shoppingList: 'Einkaufsliste',
         progress: 'Fortschritt',
-        settings: 'Profil',
+        settings: 'Einstellungen',
       },
       gamification: {
         tabTitle: 'Fortschritt',
@@ -620,7 +620,7 @@ export const uiTranslations = {
         },
       },
       social: {
-        sections: { overview: 'Übersicht', leaderboard: 'Rangliste', friends: 'Freunde' },
+        sections: { overview: 'Übersicht', leaderboard: 'Rangliste', friends: 'Freunde', settings: 'Einstellungen' },
         leaderboard: {
           monthly: 'Diesen Monat',
           weekly: 'Diese Woche',
@@ -1664,7 +1664,7 @@ export const uiTranslations = {
         mealPlanner: 'Plan',
         shoppingList: 'Shopping',
         progress: 'Progress',
-        settings: 'Profile',
+        settings: 'Settings',
       },
       gamification: {
         tabTitle: 'Progress',
@@ -1793,7 +1793,7 @@ export const uiTranslations = {
         },
       },
       social: {
-        sections: { overview: 'Overview', leaderboard: 'Leaderboard', friends: 'Friends' },
+        sections: { overview: 'Overview', leaderboard: 'Leaderboard', friends: 'Friends', settings: 'Settings' },
         leaderboard: {
           monthly: 'This month',
           weekly: 'This week',

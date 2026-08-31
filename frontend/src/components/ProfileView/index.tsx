@@ -48,7 +48,7 @@ export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSel
     { key: 'overview', label: t('app.social.sections.overview') },
     { key: 'leaderboard', label: t('app.social.sections.leaderboard') },
     { key: 'friends', label: t('app.social.sections.friends') },
-    { key: 'settings', label: t('app.nav.settings') || 'Profil' },
+    { key: 'settings', label: t('app.social.sections.settings') || t('app.nav.settings') || 'Einstellungen' },
   ];
 
   return (
@@ -56,7 +56,7 @@ export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSel
       {/* Header */}
       <PageHeader
         icon={section === 'settings' ? <User className="w-6 h-6" /> : <Trophy className="w-6 h-6" />}
-        title={section === 'settings' ? (t('app.nav.settings') || 'Profil') : t('app.gamification.tabTitle')}
+        title={section === 'settings' ? (t('app.social.sections.settings') || t('app.nav.settings') || 'Einstellungen') : t('app.gamification.tabTitle')}
         subtitle={section === 'settings' ? t('app.settings.subtitle') : t('app.gamification.subtitle')}
       />
 
