@@ -51,7 +51,7 @@ export default function ShoppingListGroup({
               isGroupCollapsing ? 'animate-group-collapse' : 'animate-group-expand'
             }`}
           >
-            <div className="flex items-center justify-between gap-2 px-1 pt-1 pb-0.5">
+            <div className="flex items-center justify-between gap-2 px-2 pt-1 pb-0.5">
               <div className="flex flex-col gap-1 select-none flex-1 min-w-0 text-left">
                 <div className={`w-8 h-1 rounded-full ${theme.barClass}`} />
                 <div className="flex flex-col min-w-0">
@@ -69,10 +69,9 @@ export default function ShoppingListGroup({
                 onClick={() => onGroupHeaderClick(group.items)}
                 aria-label={t('shopping.checkGroup', { defaultValue: 'Gruppe abhaken' })}
                 title={t('shopping.checkGroup', { defaultValue: 'Alle in dieser Kategorie abhaken' })}
-                className="flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-black/5 dark:bg-white/5 hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400 text-gray-500 dark:text-gray-400 text-[11px] font-semibold transition-all cursor-pointer active:scale-95 min-h-[28px]"
+                className="w-9 h-9 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-xl bg-black/5 dark:bg-white/5 hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400 text-gray-500 dark:text-gray-400 transition-all cursor-pointer active:scale-95 flex-shrink-0 border-none"
               >
-                <CheckCheck className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{t('shopping.checkAll', { defaultValue: 'Alle' })}</span>
+                <CheckCheck className="w-4 h-4" />
               </button>
             </div>
             <ul className="flex flex-col gap-0.5">
