@@ -69,9 +69,9 @@ export default function ShoppingListGroup({
                 onClick={() => onGroupHeaderClick(group.items)}
                 aria-label={t('shopping.checkGroup', { defaultValue: 'Gruppe abhaken' })}
                 title={t('shopping.checkGroup', { defaultValue: 'Alle in dieser Kategorie abhaken' })}
-                className="w-6 h-6 min-w-[24px] min-h-[24px] flex items-center justify-center rounded-md bg-black/5 dark:bg-white/5 hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400 text-gray-400 dark:text-gray-500 transition-all cursor-pointer active:scale-95 flex-shrink-0 border-none"
+                className="w-8 h-8 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-xl bg-black/5 dark:bg-white/5 hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400 text-gray-400 dark:text-gray-500 transition-all cursor-pointer active:scale-95 flex-shrink-0 border-none"
               >
-                <CheckCheck className="w-3 h-3" />
+                <CheckCheck className="w-4 h-4" />
               </button>
             </div>
             <ul className="flex flex-col gap-0.5">
