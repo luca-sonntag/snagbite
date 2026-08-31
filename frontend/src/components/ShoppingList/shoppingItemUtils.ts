@@ -1,7 +1,7 @@
 import type { AggregatedShoppingItem, PantryItem, ParentIngredientInfo } from '../../types';
 import { normalizeFoodBaseKey } from '../../utils/ingredientTaxonomy';
 import { formatQuantity } from '../../utils/formatQuantity';
-import { isPantryStockSufficient } from '@cookbook/shared';
+import { isPantryStockSufficient, getPantryStockStatus, type PantryStockStatus } from '@cookbook/shared';
 
 export interface PantryMatchableItem {
   name: string;
@@ -14,6 +14,7 @@ export interface PantryStockMatch {
   pantryItem: PantryItem;
   formattedStock: string;
   isPartial: boolean; // true if available pantry stock < required amount
+  status: PantryStockStatus; // 'sufficient' | 'low' | 'deficit'
 }
 
 export function findPantryStockMatch(
@@ -43,10 +44,13 @@ export function findPantryStockMatch(
       ? !isPantryStockSufficient(match.amount, match.unit, requiredAmount, requiredUnit)
       : false;
 
+  const status = getPantryStockStatus(match.amount, match.unit, requiredAmount, requiredUnit);
+
   return {
     pantryItem: match,
     formattedStock: `${formatQuantity(match.amount)} ${match.unit}`.trim(),
     isPartial,
+    status,
   };
 }
 

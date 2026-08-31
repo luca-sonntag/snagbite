@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Authoritative culinary measurement unit normalizer.
  * Maps localized German and English units to canonical standard keys.
  */
@@ -122,4 +122,68 @@ export function isPantryStockSufficient(
   }
 
   return true;
+}
+
+export type PantryStockStatus = 'sufficient' | 'low' | 'deficit';
+
+/**
+ * Calculates the available pantry stock coverage ratio compared to the recipe's requirement.
+ * Returns e.g. 1.25 for 125%, 0.75 for 75%, 0.25 for 25%.
+ */
+export function getPantryStockRatio(
+  stockAmount: number,
+  stockUnit?: string | null,
+  requiredAmount?: number | null,
+  requiredUnit?: string | null
+): number | null {
+  if (stockAmount <= 0) return 0;
+  if (requiredAmount == null || requiredAmount <= 0) return 1;
+
+  const stockBase = convertToBaseMetric(stockAmount, stockUnit);
+  const reqBase = convertToBaseMetric(requiredAmount, requiredUnit);
+
+  if (stockBase && reqBase && stockBase.type === reqBase.type) {
+    return stockBase.value / reqBase.value;
+  }
+
+  // Cross-metric fallback: 1 g ~= 1 ml for culinary liquids
+  if (
+    stockBase &&
+    reqBase &&
+    ((stockBase.type === 'mass' && reqBase.type === 'volume') ||
+      (stockBase.type === 'volume' && reqBase.type === 'mass'))
+  ) {
+    return stockBase.value / reqBase.value;
+  }
+
+  const canonStock = normalizeUnit(stockUnit);
+  const canonReq = normalizeUnit(requiredUnit);
+
+  if (canonStock === canonReq) {
+    return stockAmount / requiredAmount;
+  }
+
+  return null;
+}
+
+/**
+ * Categorizes pantry stock into 3 distinct visual tiers:
+ * - 'sufficient': >= 100% available (Emerald / Green)
+ * - 'low': 50% - 99% available (Amber / Orange - should be reviewed)
+ * - 'deficit': < 50% available (Rose / Red - clearly insufficient)
+ */
+export function getPantryStockStatus(
+  stockAmount: number,
+  stockUnit?: string | null,
+  requiredAmount?: number | null,
+  requiredUnit?: string | null
+): PantryStockStatus {
+  const ratio = getPantryStockRatio(stockAmount, stockUnit, requiredAmount, requiredUnit);
+  if (ratio == null || ratio >= 1.0) {
+    return 'sufficient';
+  }
+  if (ratio >= 0.5) {
+    return 'low';
+  }
+  return 'deficit';
 }

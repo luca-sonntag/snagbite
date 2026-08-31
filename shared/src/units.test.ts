@@ -1,4 +1,4 @@
-﻿import { describe, it } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { normalizeUnit, convertToBaseMetric, isPantryStockSufficient } from './units.js';
 
@@ -30,8 +30,20 @@ describe('Shared Units & Pantry Stock Sufficiency', () => {
     assert.equal(isPantryStockSufficient(1, 'TL', 250, 'ml'), false);
   });
 
-  it('accurately handles piece and count comparisons', () => {
-    assert.equal(isPantryStockSufficient(3, 'Stück', 2, 'Stk'), true);
-    assert.equal(isPantryStockSufficient(1, 'Stück', 2, 'Stk'), false);
+  it('accurately categorizes pantry stock into 3 tiers', () => {
+    // Sufficient (>= 100%) -> sufficient (Emerald)
+    assert.equal(getPantryStockStatus(500, 'g', 250, 'g'), 'sufficient');
+    assert.equal(getPantryStockStatus(250, 'g', 250, 'g'), 'sufficient');
+    assert.equal(getPantryStockStatus(1, 'kg', 250, 'g'), 'sufficient');
+
+    // Low / Review (50% - 99%) -> low (Orange)
+    assert.equal(getPantryStockStatus(60, 'g', 80, 'g'), 'low');
+    assert.equal(getPantryStockStatus(150, 'g', 250, 'g'), 'low');
+    assert.equal(getPantryStockStatus(1, 'Stück', 2, 'Stück'), 'low');
+
+    // Deficit (< 50%) -> deficit (Red)
+    assert.equal(getPantryStockStatus(20, 'g', 80, 'g'), 'deficit');
+    assert.equal(getPantryStockStatus(50, 'g', 250, 'g'), 'deficit');
+    assert.equal(getPantryStockStatus(1, 'Stück', 4, 'Stück'), 'deficit');
   });
 });
