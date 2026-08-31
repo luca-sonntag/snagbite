@@ -38,8 +38,8 @@ export default function ShoppingListGroup({
   if (groupedCategories.length === 0) return null;
 
   return (
-    <div className="rounded-2xl md:rounded-3xl bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none p-3 sm:p-4 transition-all flex flex-col gap-3">
-      {groupedCategories.map((group, index) => {
+    <div className="rounded-2xl md:rounded-3xl bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none p-3 sm:p-4 transition-all flex flex-col gap-2">
+      {groupedCategories.map((group) => {
         const isGroupCollapsing = collapsingKeys.has(`group-${group.category}`);
         const theme = getCategoryTheme(group.category);
         const openCount = group.items.length;
@@ -48,19 +48,17 @@ export default function ShoppingListGroup({
           <div
             key={group.category}
             className={`flex flex-col transition-all ${
-              index > 0 ? 'pt-2.5' : ''
-            } ${
               isGroupCollapsing ? 'animate-group-collapse' : 'animate-group-expand'
             }`}
           >
-            <div className="flex items-center justify-between gap-2 px-1 pt-0.5 pb-1.5 mb-0.5">
-              <div className="flex flex-col gap-1.5 select-none flex-1 min-w-0 text-left">
+            <div className="flex items-center justify-between gap-2 px-1 pt-1 pb-0.5">
+              <div className="flex flex-col gap-1 select-none flex-1 min-w-0 text-left">
                 <div className={`w-8 h-1 rounded-full ${theme.barClass}`} />
                 <div className="flex flex-col min-w-0">
                   <span className="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-gray-100 truncate">
                     {translateCategory(group.category)}
                   </span>
-                  <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium leading-none mt-0.5">
                     {openCount} {t('shopping.toBuyCount', { defaultValue: 'offen' })}
                   </span>
                 </div>
@@ -77,7 +75,7 @@ export default function ShoppingListGroup({
                 <span className="hidden sm:inline">{t('shopping.checkAll', { defaultValue: 'Alle' })}</span>
               </button>
             </div>
-            <ul className="flex flex-col gap-0.5 py-0.5">
+            <ul className="flex flex-col gap-0.5">
               {group.items.map((item) => {
                 const displayKey = `unchecked-${getItemKey(item)}`;
                 const pantryStock = findPantryStock(item, pantryItems);
