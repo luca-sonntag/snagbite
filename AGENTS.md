@@ -8,7 +8,7 @@
 >
 > **🧼 Clean Code & Modularisierung (TypeScript & React):** Halte dich ausnahmslos an die Richtlinien in [`docs/clean-code.md`](file:///c:/Users/lucas/source/repos/cookbook/docs/clean-code.md). Feste Dateigrößen-Grenzen: **Ziel 50–150 Zeilen, Soft Limit 200 Zeilen, Hard Limit 300 Zeilen**. Größere Konstrukte und Komponenten **MÜSSEN** zwingend in Subkomponenten aufgeteilt, State- und Effektlogik in Custom Hooks (`use<Feature>.ts`) ausgelagert und Hilfsfunktionen in Module separiert werden. Strikte Typensicherheit (0x `any`), Early Returns statt tiefer Verschachtelung und Einhaltung des UI Styleguides ([`docs/styleguide.md`](file:///c:/Users/lucas/source/repos/cookbook/docs/styleguide.md)).
 >
-> **🔀 Merge-Strategie:** Branches dürfen NIEMALS als Fast-Forward gemergt werden. Verwende IMMER einen expliziten Merge-Commit: `git merge --no-ff <branch> -m "Merge branch '<branch>' into <target>"`.
+> **🔀 Merge- & Rebase-Strategie (Ausschließlich lokale Branches):** Wenn der Benutzer `rebase` oder `merge` anweist, betrifft dies AUSSCHLIESSLICH lokale Branches (z. B. lokaler `main`, lokale Feature-Branches), NIEMALS `origin` oder Remote-Tracking-Branches. Branches dürfen NIEMALS als Fast-Forward gemergt werden. Verwende IMMER einen expliziten Merge-Commit: `git merge --no-ff <branch> -m "Merge branch '<branch>' into <target>"`.
 >
 > **📝 Doku & OBSOLETE.md aktuell halten:** Nach JEDER relevanten Code-Änderung (neues Feature, Architekturänderung, neue Komponente, etc.) musst du prüfen, ob die Dokumentation angepasst werden muss. Wenn durch Refactorings oder neue Ansätze alter Code, Heuristiken oder Hilfsfunktionen obsolet werden, musst du diese im Dokument [`docs/OBSOLETE.md`](file:///c:/Users/lucas/source/repos/cookbook/docs/OBSOLETE.md) festhalten.
 >
