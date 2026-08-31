@@ -1,4 +1,4 @@
-import { Check, Package, Home } from 'lucide-react';
+import { Check, Package, Home, CornerDownRight } from 'lucide-react';
 import type { Ingredient } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { getCategoryTheme } from '../../i18n';
@@ -141,18 +141,29 @@ export default function ShoppingConfirmItem({
           </div>
         )}
 
-        {/* Child ingredients */}
+        {/* Child / Derived ingredients tree structure (Option 3) */}
         {item.childIngredients.length > 0 && (
-          <div className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-1 flex flex-wrap gap-1">
+          <div className="flex flex-col gap-0.5 mt-1 pl-0.5">
             {item.childIngredients.map((child, cIdx) => {
               const childAmt = formatAmount(child.amount, child.unit);
+              const childUnitStr = child.unit ? ` ${child.unit}` : '';
+              const childDisplayAmt = (childAmt || childUnitStr) ? `${childAmt}${childUnitStr}`.trim() : null;
+
               return (
-                <span
+                <div
                   key={cIdx}
-                  className="bg-emerald-500/10 dark:bg-emerald-400/15 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-lg text-[10px] font-medium"
+                  className={`flex items-center gap-1.5 text-[11px] font-medium transition-colors ${
+                    isChecked
+                      ? 'text-gray-500 dark:text-gray-400'
+                      : 'text-gray-400 dark:text-gray-500 opacity-60'
+                  }`}
                 >
-                  + {child.name}{childAmt ? ` (${childAmt} ${child.unit || ''})` : ''}
-                </span>
+                  <CornerDownRight className="w-3 h-3 shrink-0 text-gray-400 dark:text-gray-500 stroke-[2.2] opacity-70" />
+                  <span>
+                    {child.name}
+                    {childDisplayAmt ? `: ${childDisplayAmt}` : ''}
+                  </span>
+                </div>
               );
             })}
           </div>
