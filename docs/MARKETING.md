@@ -120,7 +120,7 @@ Rezeptkarten und handgeschriebene Zettel** per KI ein. *„Rette Omas Rezepte in
 
 - **Koch-Fotos mit KI-Verifizierung:** Jeder abgeschlossene Cook braucht ein Foto des fertigen Gerichts; Gemini Vision prüft, ob es zum Rezept passt.
 - **XP, Coins, Level:** Punkte fürs Nachkochen, Level-Aufstiege mit Konfetti-Animation.
-- **Streaks:** Tägliche Koch-Serien mit lokalen Erinnerungen.
+- **Streaks:** Wöchentliche Koch-Serien mit lokalen Erinnerungen.
 - **Abzeichen (Badges):** Freischaltbare Erfolge.
 - **Fortschritts-Tab:** Level-/XP-Balken, Streak, Coins, Cook-Zähler und Badge-Galerie.
 - **Koch-Historie pro Rezept:** Timeline mit XP-Gutschriften, Verifizierungs-Badge und Foto-Lightbox („x-mal gekocht · zuletzt vor …“).
