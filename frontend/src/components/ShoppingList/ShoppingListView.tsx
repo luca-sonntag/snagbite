@@ -264,48 +264,58 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
 
   return (
     <div className="flex flex-col gap-4 relative">
-      {/* Progress & Quick Actions */}
-      <div className="w-full flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-default-500">
-            {totalCount > 0
-              ? t('shopping.progressSubtitle', { checked: checkedCount, total: totalCount })
-              : t('shopping.subtitle')}
-          </p>
+      {/* Progress & Quick Actions Card */}
+      {totalCount > 0 && (
+        <div className="bg-white dark:bg-gray-900 p-4 sm:p-5 rounded-3xl border-none shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col gap-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="w-11 h-11 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-xs">
+                <CheckCheck className="w-5 h-5" />
+              </span>
+              <div className="min-w-0">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-snug">
+                  {t('shopping.progressSubtitle', { checked: checkedCount, total: totalCount })}
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-medium">
+                  {Math.round(progress)}% {t('shopping.done')}
+                </p>
+              </div>
+            </div>
 
-          {totalCount > 0 && (
             <div className="flex items-center gap-1.5 shrink-0">
               {checkedCount > 0 && (
                 <button
+                  type="button"
                   onClick={handleClearChecked}
                   aria-label={t('shopping.clearChecked')}
                   title={t('shopping.clearChecked')}
-                  className="w-9 h-9 flex items-center justify-center rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-90 transition-all cursor-pointer"
+                  className="h-9 px-3 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-95 transition-all text-xs font-semibold flex items-center gap-1.5 cursor-pointer border-none"
                 >
-                  <CheckCheck className="w-4.5 h-4.5" />
+                  <CheckCheck className="w-4 h-4" />
+                  <span className="hidden xs:inline sm:inline">{t('shopping.clearChecked')}</span>
                 </button>
               )}
               <button
+                type="button"
                 onClick={handleClearAll}
                 aria-label={t('shopping.clearAll')}
                 title={t('shopping.clearAll')}
-                className="w-9 h-9 flex items-center justify-center rounded-xl bg-default-100 text-default-500 hover:text-rose-600 hover:bg-rose-50 active:scale-90 transition-all cursor-pointer"
+                className="w-9 h-9 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
-          )}
-        </div>
+          </div>
 
-        {totalCount > 0 && (
-          <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+          {/* Smooth Gradient Progress Bar */}
+          <div className="h-2 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden p-0.5">
             <div
-              className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-500 ease-out"
+              className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <CustomItemForm
         isOpen={showAddForm}
