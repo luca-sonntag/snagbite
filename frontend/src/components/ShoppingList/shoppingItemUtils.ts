@@ -1,4 +1,25 @@
-import type { AggregatedShoppingItem } from '../../types';
+import type { AggregatedShoppingItem, PantryItem } from '../../types';
+import { normalizeFoodBaseKey } from '../../utils/ingredientTaxonomy';
+import { formatQuantity } from '../../utils/formatQuantity';
+
+export function findPantryStock(item: AggregatedShoppingItem, pantryItems: PantryItem[]): string | null {
+  if (!pantryItems || pantryItems.length === 0) return null;
+  const itemKey = normalizeFoodBaseKey(item).toLowerCase().trim();
+  const rawItemName = (item.name || '').toLowerCase().trim();
+
+  const match = pantryItems.find((p) => {
+    if (p.amount <= 0) return false;
+    if (item.canonicalId && p.canonicalId && item.canonicalId === p.canonicalId) return true;
+    const pKey = normalizeFoodBaseKey(p).toLowerCase().trim();
+    if (pKey === itemKey) return true;
+    const pName = (p.name || '').toLowerCase().trim();
+    if (pName === rawItemName) return true;
+    return false;
+  });
+
+  if (!match || match.amount <= 0) return null;
+  return `${formatQuantity(match.amount)} ${match.unit}`.trim();
+}
 
 export function getPackageRecommendation(
   amount: number,

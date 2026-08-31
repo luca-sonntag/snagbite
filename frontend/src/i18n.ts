@@ -1251,6 +1251,10 @@ export const uiTranslations = {
       inPantrySection: 'Schon im Vorrat (Bitte prüfen)',
       inPantryBadge: 'Im Vorrat',
       inPantrySubtitle: 'Diese Zutaten hast du laut deinem Vorrat noch zuhause.',
+      inPantryStock: 'Im Vorrat: {amount}',
+      clearInPantryTitle: 'Vorratseinträge von Liste entfernen?',
+      clearInPantryMessage: 'Möchtest du alle {count} Artikel, die bereits im Vorrat sind, von der Einkaufsliste löschen?',
+      clearInPantryBtn: 'Alle entfernen',
     },
     pantry: {
       title: 'Mein Vorrat',
@@ -2426,6 +2430,10 @@ export const uiTranslations = {
       inPantrySection: 'Already in Pantry (Please check)',
       inPantryBadge: 'In Pantry',
       inPantrySubtitle: 'According to your pantry, you already have these items in stock.',
+      inPantryStock: 'In stock: {amount}',
+      clearInPantryTitle: 'Remove pantry items from list?',
+      clearInPantryMessage: 'Do you want to remove all {count} items that are already in your pantry from the shopping list?',
+      clearInPantryBtn: 'Remove all',
     },
     pantry: {
       title: 'My Pantry',

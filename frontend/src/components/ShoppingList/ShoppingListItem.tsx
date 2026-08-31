@@ -12,6 +12,8 @@ interface ShoppingListItemProps {
   isChecked: boolean;
   isCheckingOff?: boolean;
   isCollapsing?: boolean;
+  showCategoryIndicator?: boolean;
+  pantryStockStr?: string;
   onClick: () => void;
   onDelete: () => void;
   formatItemAmount: (amount: number, unit: string) => string;
@@ -22,6 +24,8 @@ export default function ShoppingListItem({
   isChecked,
   isCheckingOff = false,
   isCollapsing = false,
+  showCategoryIndicator = false,
+  pantryStockStr,
   onClick,
   onDelete,
   formatItemAmount,
@@ -111,6 +115,8 @@ export default function ShoppingListItem({
   }
 
   // Active (to-buy) row — big tap target with stacked name and amount.
+  const theme = getCategoryTheme(item.category || '');
+
   return (
     <li className={`rounded-xl hover:bg-black/[0.03] dark:hover:bg-white/[0.03] transition-colors group ${animationClass}`}>
       <div className="flex items-center justify-between gap-2 py-2 px-2 min-h-[44px]">
@@ -123,6 +129,13 @@ export default function ShoppingListItem({
           className="flex items-center gap-3 cursor-pointer flex-1 min-w-0 text-left outline-none border-none bg-transparent"
           aria-label={item.name}
         >
+          {showCategoryIndicator && (
+            <span
+              className={`w-1 h-4 rounded-full ${theme.barClass} shrink-0 opacity-80`}
+              title={item.category || undefined}
+            />
+          )}
+
           {isCheckingOff ? (
             <span className="w-5 h-5 rounded-md bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 transition-all duration-200 scale-105">
               <Check className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -157,8 +170,8 @@ export default function ShoppingListItem({
               )}
             </div>
 
-            {/* 2. Menge & Packungsgröße */}
-            <div className="flex items-baseline flex-wrap gap-x-1.5 mt-0.5">
+            {/* 2. Menge & Packungsgröße & Vorrat */}
+            <div className="flex items-center flex-wrap gap-x-1.5 gap-y-1 mt-0.5">
               {packageRecommendation ? (
                 <>
                   <span
@@ -193,6 +206,12 @@ export default function ShoppingListItem({
                   {amountStr}
                 </div>
               ) : null}
+
+              {pantryStockStr && (
+                <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-300">
+                  {t('shopping.inPantryStock', { amount: pantryStockStr })}
+                </span>
+              )}
             </div>
           </div>
         </button>

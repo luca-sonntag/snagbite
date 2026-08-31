@@ -1,14 +1,17 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Trash2, CheckCheck, AlertCircle } from 'lucide-react';
-import type { AggregatedShoppingItem, ShoppingListItem, SavedRecipe } from '../../types';
+import { Plus } from 'lucide-react';
+import type { AggregatedShoppingItem, ShoppingListItem as ShoppingListItemType, SavedRecipe } from '../../types';
 import { categoryOrder } from '../../i18n';
 import { useDialog } from '../../context/DialogContext';
 import { useI18n } from '../../context/I18nContext';
+import { usePantry } from '../../context/PantryContext';
 import { useToast } from '../../context/ToastContext';
 import { formatQuantity } from '../../utils/formatQuantity';
 
 import CustomItemForm from './CustomItemForm';
 import ShoppingListGroup from './ShoppingListGroup';
+import ShoppingProgressCard from './ShoppingProgressCard';
+import ShoppingInPantryCard from './ShoppingInPantryCard';
 import ShoppingCheckedDrawer from './ShoppingCheckedDrawer';
 import ShoppingEmptyState from './ShoppingEmptyState';
 import ShoppingAllDoneState from './ShoppingAllDoneState';
@@ -22,7 +25,7 @@ interface ActiveShoppingRecipe {
 }
 
 interface ShoppingListViewProps {
-  shoppingList?: ShoppingListItem[];
+  shoppingList?: ShoppingListItemType[];
   aggregatedList: {
     toBuy?: AggregatedShoppingItem[];
     inPantry?: AggregatedShoppingItem[];
@@ -40,8 +43,8 @@ interface ShoppingListViewProps {
   deleteItemGroup: (name: string, modifier: string | undefined, unit: string) => void;
   clearAll: () => void;
   clearChecked: () => void;
-  restoreItems?: (items: ShoppingListItem[]) => void;
-  restoreList?: (items: ShoppingListItem[]) => void;
+  restoreItems?: (items: ShoppingListItemType[]) => void;
+  restoreList?: (items: ShoppingListItemType[]) => void;
 }
 
 export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
@@ -63,6 +66,7 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
 }) => {
   const dialog = useDialog();
   const { t } = useI18n();
+  const { pantryItems } = usePantry();
   const toast = useToast();
 
   const [showAddForm, setShowAddForm] = useState(false);
@@ -237,6 +241,26 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
     }
   };
 
+  const handleClearInPantry = async () => {
+    if (inPantryItems.length === 0) return;
+    const confirmed = await dialog.confirm({
+      title: t('shopping.clearInPantryTitle'),
+      message: t('shopping.clearInPantryMessage', { count: inPantryItems.length }),
+      status: 'danger',
+      confirmLabel: t('shopping.clearInPantryBtn'),
+    });
+    if (!confirmed) return;
+
+    const allItemIds = inPantryItems.flatMap((i) => i.itemIds || []);
+    if (deleteItemIds && allItemIds.length > 0) {
+      deleteItemIds(allItemIds);
+    } else {
+      inPantryItems.forEach((it) => {
+        deleteItemGroup(it.baseName || it.name, it.modifier, it.unit);
+      });
+    }
+  };
+
   const toBuyItems = aggregatedList.toBuy || aggregatedList.unchecked || [];
   const inPantryItems = aggregatedList.inPantry || [];
   const checkedCount = aggregatedList.checked.length;
@@ -265,57 +289,13 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
   return (
     <div className="flex flex-col gap-4 relative">
       {/* Progress & Quick Actions Card */}
-      {totalCount > 0 && (
-        <div className="bg-white dark:bg-gray-900 p-4 sm:p-5 rounded-3xl border-none shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center gap-3 min-w-0">
-              <span className="w-11 h-11 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-xs">
-                <CheckCheck className="w-5 h-5" />
-              </span>
-              <div className="min-w-0">
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-snug">
-                  {t('shopping.progressSubtitle', { checked: checkedCount, total: totalCount })}
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-medium">
-                  {Math.round(progress)}% {t('shopping.done')}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5 shrink-0">
-              {checkedCount > 0 && (
-                <button
-                  type="button"
-                  onClick={handleClearChecked}
-                  aria-label={t('shopping.clearChecked')}
-                  title={t('shopping.clearChecked')}
-                  className="h-9 px-3 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-95 transition-all text-xs font-semibold flex items-center gap-1.5 cursor-pointer border-none"
-                >
-                  <CheckCheck className="w-4 h-4" />
-                  <span className="hidden xs:inline sm:inline">{t('shopping.clearChecked')}</span>
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={handleClearAll}
-                aria-label={t('shopping.clearAll')}
-                title={t('shopping.clearAll')}
-                className="w-9 h-9 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Smooth Gradient Progress Bar */}
-          <div className="h-2 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden p-0.5">
-            <div
-              className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        </div>
-      )}
+      <ShoppingProgressCard
+        checkedCount={checkedCount}
+        totalCount={totalCount}
+        progress={progress}
+        onClearChecked={handleClearChecked}
+        onClearAll={handleClearAll}
+      />
 
       <CustomItemForm
         isOpen={showAddForm}
@@ -337,31 +317,22 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
           )}
 
           {/* Group: Schon im Vorrat (Bitte prüfen) */}
-          {inPantryItems.length > 0 && (
-            <div className="p-4 bg-amber-500/10 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] space-y-2">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                <h4 className="font-bold text-xs text-amber-800 dark:text-amber-300">
-                  {t('shopping.inPantrySection')}
-                </h4>
-              </div>
-              <p className="text-[11px] text-gray-500 dark:text-gray-400">{t('shopping.inPantrySubtitle')}</p>
-              <ShoppingListGroup
-                groupedCategories={[{ category: 'OTHER', items: inPantryItems }]}
-                getItemKey={getItemKey}
-                onItemToggle={handleItemToggle}
-                onGroupHeaderClick={handleGroupHeaderClick}
-                onDelete={(item) =>
-                  deleteItemIds && item.itemIds?.length
-                    ? deleteItemIds(item.itemIds)
-                    : deleteItemGroup(item.baseName || item.name, item.modifier, item.unit)
-                }
-                formatItemAmount={formatItemAmount}
-                collapsingKeys={collapsingKeys}
-                checkingKeys={checkingKeys}
-              />
-            </div>
-          )}
+          <ShoppingInPantryCard
+            inPantryItems={inPantryItems}
+            pantryItems={pantryItems}
+            collapsingKeys={collapsingKeys}
+            checkingKeys={checkingKeys}
+            getItemKey={getItemKey}
+            onItemToggle={handleItemToggle}
+            onGroupHeaderClick={handleGroupHeaderClick}
+            onClearInPantry={handleClearInPantry}
+            onDeleteItem={(item) =>
+              deleteItemIds && item.itemIds?.length
+                ? deleteItemIds(item.itemIds)
+                : deleteItemGroup(item.baseName || item.name, item.modifier, item.unit)
+            }
+            formatItemAmount={formatItemAmount}
+          />
 
           {activeGroups.length > 0 ? (
             <ShoppingListGroup
