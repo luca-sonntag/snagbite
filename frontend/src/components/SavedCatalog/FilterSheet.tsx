@@ -85,7 +85,7 @@ export default function FilterSheet({
       <Drawer>
         <Drawer.Backdrop isOpen={isOpen} onOpenChange={(open) => { if (!open) onClose(); }} className="!z-[100]">
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
+            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[55vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
               <Drawer.Handle />
 
               <Drawer.Header className="pb-3 mb-1">
@@ -135,22 +135,61 @@ export default function FilterSheet({
                   </div>
                 </section>
 
-                {/* Favorites */}
+                {/* Schnellfilter (Favorites, Collections, Labels) */}
                 <section className="flex flex-col gap-2">
                   <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                     {t('catalog.quickFiltersLabel')}
                   </h4>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      hapticLight();
-                      setDraft(d => ({ ...d, favoritesOnly: !d.favoritesOnly }));
-                    }}
-                    className={`min-h-[44px] px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-1.5 self-start ${chipClass(draft.favoritesOnly)}`}
-                  >
-                    <Star className={`w-3.5 h-3.5 ${draft.favoritesOnly ? 'fill-white stroke-white' : 'text-amber-500 fill-amber-500'}`} />
-                    {t('catalog.favoritesFilter')}
-                  </button>
+                  <div className="flex flex-wrap gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        hapticLight();
+                        setDraft(d => ({ ...d, favoritesOnly: !d.favoritesOnly }));
+                      }}
+                      className={`min-h-[44px] px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-1.5 ${chipClass(draft.favoritesOnly)}`}
+                    >
+                      <Star className={`w-3.5 h-3.5 ${draft.favoritesOnly ? 'fill-white stroke-white' : 'text-amber-500 fill-amber-500'}`} />
+                      {t('catalog.favoritesFilter')}
+                    </button>
+
+                    {collections.map(col => {
+                      const isActive = draft.collectionIds.includes(col.id);
+                      return (
+                        <button
+                          key={col.id}
+                          type="button"
+                          onClick={() => {
+                            hapticLight();
+                            setDraft(d => ({ ...d, collectionIds: toggleIn(d.collectionIds, col.id) }));
+                          }}
+                          className={`min-h-[44px] px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-1.5 ${chipClass(isActive)}`}
+                        >
+                          {col.emoji && <span className="text-sm leading-none">{col.emoji}</span>}
+                          {col.name}
+                          {isActive && <Check className="w-3 h-3" />}
+                        </button>
+                      );
+                    })}
+
+                    {allFlags.map(flag => {
+                      const isActive = draft.flags.includes(flag);
+                      return (
+                        <button
+                          key={flag}
+                          type="button"
+                          onClick={() => {
+                            hapticLight();
+                            setDraft(d => ({ ...d, flags: toggleIn(d.flags, flag) }));
+                          }}
+                          className={`min-h-[44px] px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-1.5 ${chipClass(isActive, 'amber')}`}
+                        >
+                          <Tag className={`w-3 h-3 ${isActive ? 'text-white' : 'text-amber-500'}`} />
+                          {flag}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </section>
 
                 {/* Time */}
@@ -223,63 +262,6 @@ export default function FilterSheet({
                     </section>
                   );
                 })()}
-
-                {/* Collections */}
-                {collections.length > 0 && (
-                  <section className="flex flex-col gap-2">
-                    <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
-                      {t('catalog.collectionsTitle')}
-                    </h4>
-                    <div className="flex flex-wrap gap-1.5">
-                      {collections.map(col => {
-                        const isActive = draft.collectionIds.includes(col.id);
-                        return (
-                          <button
-                            key={col.id}
-                            type="button"
-                            onClick={() => {
-                              hapticLight();
-                              setDraft(d => ({ ...d, collectionIds: toggleIn(d.collectionIds, col.id) }));
-                            }}
-                            className={`min-h-[44px] px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-1.5 ${chipClass(isActive)}`}
-                          >
-                            {col.emoji && <span className="text-sm leading-none">{col.emoji}</span>}
-                            {col.name}
-                            {isActive && <Check className="w-3 h-3" />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </section>
-                )}
-
-                {/* Labels / flags */}
-                {allFlags.length > 0 && (
-                  <section className="flex flex-col gap-2">
-                    <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
-                      {t('catalog.flagsTitle')}
-                    </h4>
-                    <div className="flex flex-wrap gap-1.5">
-                      {allFlags.map(flag => {
-                        const isActive = draft.flags.includes(flag);
-                        return (
-                          <button
-                            key={flag}
-                            type="button"
-                            onClick={() => {
-                              hapticLight();
-                              setDraft(d => ({ ...d, flags: toggleIn(d.flags, flag) }));
-                            }}
-                            className={`min-h-[44px] px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-1.5 ${chipClass(isActive, 'amber')}`}
-                          >
-                            <Tag className={`w-3 h-3 ${isActive ? 'text-white' : 'text-amber-500'}`} />
-                            {flag}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </section>
-                )}
               </Drawer.Body>
 
               <Drawer.Footer className="pt-3">
