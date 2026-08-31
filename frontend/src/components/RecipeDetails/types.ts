@@ -12,7 +12,7 @@ export interface RecipeDetailsProps {
   onRemixSuccess?: (newRecipe: Recipe, newJobId: string) => void;
   onReplaceCurrent?: (newRecipe: Recipe) => void;
   isParentAvailable?: boolean;
-  onNavigateToRecipe?: (recipeId: string) => void;
+  onNavigateToRecipe?: (recipeId: string, remixRecipe?: Recipe) => void;
   parentRecipeTitle?: string | null;
   onAssignCollections?: () => void;
   onManageFlags?: () => void;

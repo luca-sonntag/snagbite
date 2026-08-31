@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Check, Info, AlertTriangle, AlertCircle, X } from 'lucide-react';
+import { Check, Info, AlertTriangle, AlertCircle } from 'lucide-react';
 import type { ToastItemData, ToastType } from './types';
 
 interface ToastItemProps {
@@ -81,6 +81,12 @@ export default function ToastItem({ toast, onDismiss, placement = 'bottom' }: To
 
   return (
     <div
+      onClick={() => {
+        if (toast.action) {
+          toast.action.onClick();
+        }
+        onDismiss(toast.id);
+      }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -88,13 +94,13 @@ export default function ToastItem({ toast, onDismiss, placement = 'bottom' }: To
         transform: dragOffsetY !== 0 ? `translateY(${dragOffsetY}px)` : undefined,
         opacity: dragOffsetY !== 0 ? Math.max(0, 1 - Math.abs(dragOffsetY) / 80) : undefined,
       }}
-      className={`pointer-events-auto w-[75%] sm:w-auto sm:max-w-xs bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl md:rounded-3xl border-none shadow-[0_8px_30px_rgba(0,0,0,0.12)] p-2.5 sm:p-3 flex items-center gap-2.5 transition-transform duration-100 ${animationClass}`}
+      className={`pointer-events-auto w-4/5 max-w-md bg-white dark:bg-gray-900 rounded-2xl md:rounded-3xl border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgba(0,0,0,0.14)] p-3 flex items-center gap-3 transition-transform duration-100 cursor-pointer select-none active:scale-[0.98] ${animationClass}`}
       role="status"
       aria-live="polite"
     >
       {/* Icon Medallion */}
       <div
-        className={`w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-xl flex items-center justify-center flex-shrink-0 ${getMedallionColor(
+        className={`w-8.5 h-8.5 rounded-xl flex items-center justify-center flex-shrink-0 ${getMedallionColor(
           toast.type
         )}`}
       >
@@ -112,31 +118,6 @@ export default function ToastItem({ toast, onDismiss, placement = 'bottom' }: To
           </div>
         )}
       </div>
-
-      {/* Action Button */}
-      {toast.action && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            toast.action?.onClick();
-            onDismiss(toast.id);
-          }}
-          className="px-2.5 sm:px-3 py-1.5 rounded-xl font-bold text-xs bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 active:scale-95 transition-all border-none flex-shrink-0 cursor-pointer select-none"
-        >
-          {toast.action.label}
-        </button>
-      )}
-
-      {/* Close button */}
-      <button
-        type="button"
-        onClick={() => onDismiss(toast.id)}
-        className="w-7 h-7 rounded-lg bg-gray-100/80 hover:bg-gray-200/80 dark:bg-gray-800/80 dark:hover:bg-gray-750 text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center justify-center border-none transition-all active:scale-95 cursor-pointer flex-shrink-0"
-        aria-label="Schließen"
-      >
-        <X className="w-3.5 h-3.5" />
-      </button>
     </div>
   );
 }

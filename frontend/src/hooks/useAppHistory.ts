@@ -22,8 +22,13 @@ export function useAppHistory({
   const { t } = useI18n();
 
   const [history, setHistory] = useState<SavedRecipe[]>([]);
+  const [extraRecipes, setExtraRecipes] = useState<Record<string, SavedRecipe>>({});
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const newlyExtractedJobIdRef = useRef<string | null>(null);
+
+  const registerExtraRecipe = useCallback((recipeId: string, saved: SavedRecipe) => {
+    setExtraRecipes((prev) => ({ ...prev, [recipeId]: saved }));
+  }, []);
 
   const fetchHistory = useCallback(async () => {
     const controller = new AbortController();
@@ -68,20 +73,65 @@ export function useAppHistory({
     fetchHistory();
   }, [authLoading, user, fetchHistory]);
 
-  // Validate current URL subPath against history
+  // Validate current URL subPath against history and extra recipes (e.g. remixes)
   useEffect(() => {
     if (!historyLoaded) return;
     if (activeView === 'history' && subPath && !isCatalogListRoute(subPath)) {
-      const exists = history.some((j) => j.recipeId === subPath);
-      if (exists) {
+      const existsInHistory = history.some((j) => j.recipeId === subPath);
+      const existsInExtras = !!extraRecipes[subPath];
+
+      if (existsInHistory || existsInExtras) {
         if (newlyExtractedJobIdRef.current === subPath) {
           newlyExtractedJobIdRef.current = null;
         }
-      } else if (subPath !== newlyExtractedJobIdRef.current) {
-        replace('history');
+        return;
       }
+
+      // If not known in memory, attempt to fetch from API (for direct links or remixes)
+      let isCancelled = false;
+      const checkRecipe = async () => {
+        try {
+          const token = await getAccessToken();
+          if (!token) {
+            if (!isCancelled) replace('history');
+            return;
+          }
+          const res = await fetch(apiUrl(`/api/recipes/${subPath}`), {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.recipe && !isCancelled) {
+              setExtraRecipes((prev) => ({
+                ...prev,
+                [subPath]: {
+                  recipeId: data.recipeId || subPath,
+                  recipe: data.recipe,
+                  source: (data.source as any) || 'remix',
+                  addedAt: data.addedAt || new Date().toISOString(),
+                  updatedAt: data.updatedAt || new Date().toISOString(),
+                  isFavorite: data.isFavorite ?? false,
+                  flags: data.flags ?? [],
+                  collectionIds: data.collectionIds ?? [],
+                },
+              }));
+              return;
+            }
+          }
+        } catch {
+          // ignore
+        }
+        if (!isCancelled && subPath !== newlyExtractedJobIdRef.current) {
+          replace('history');
+        }
+      };
+
+      void checkRecipe();
+      return () => {
+        isCancelled = true;
+      };
     }
-  }, [historyLoaded, history, activeView, subPath, replace]);
+  }, [historyLoaded, history, extraRecipes, activeView, subPath, replace, getAccessToken]);
 
   const handleDeleteJob = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
@@ -95,7 +145,7 @@ export function useAppHistory({
     if (!confirmed) return;
 
     try {
-      const job = history.find((j) => j.recipeId === id);
+      const job = history.find((j) => j.recipeId === id) || extraRecipes[id];
       if (job?.recipe) {
         const r = job.recipe;
         const imagesToDelete =
@@ -117,8 +167,17 @@ export function useAppHistory({
 
       if (response.ok) {
         fetchHistory();
+        setExtraRecipes((prev) => {
+          const next = { ...prev };
+          delete next[id];
+          return next;
+        });
         if (subPath === id) {
-          navigate('history');
+          if (job?.recipe?.parentRecipeId) {
+            navigate('history', job.recipe.parentRecipeId);
+          } else {
+            navigate('history');
+          }
         }
       } else {
         dialog.alert({
@@ -140,6 +199,8 @@ export function useAppHistory({
   return {
     history,
     setHistory,
+    extraRecipes,
+    registerExtraRecipe,
     historyLoaded,
     fetchHistory,
     handleExtractionSuccess,

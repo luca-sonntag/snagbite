@@ -7,18 +7,25 @@ import { useShoppingList } from '../../../hooks/useShoppingList';
 import { apiUrl } from '../../../api';
 import type { Recipe, Ingredient } from '../../../types';
 import type { Chip, PendingChange, CopilotMessage, UseRecipeCopilotProps } from './types';
+import { parseSuggestions } from './CopilotChatList';
 
 const chatStorageKey = (recipeId: string) => `recipe_copilot_chat_${recipeId}`;
 const changesStorageKey = (recipeId: string) => `recipe_copilot_changes_${recipeId}`;
 const chipsStorageKey = (recipeId: string, lang: string) => `recipe_copilot_chips_${recipeId}_${lang}`;
 
 
+const generateChangeId = (): string => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+};
+
 export function useRecipeCopilot({
   isOpen,
   recipe,
   onClose,
   onRemixSuccess,
-  onReplaceCurrent,
 }: UseRecipeCopilotProps) {
   const { t, language } = useI18n();
   const toast = useToast();
@@ -40,8 +47,14 @@ export function useRecipeCopilot({
   const [isPending, setIsPending] = useState(false);
   const [pendingAction] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [showChips, setShowChips] = useState(true);
-  const [chips, setChips] = useState<Chip[]>([]);
+  const [chips, setChips] = useState<Chip[]>(() => {
+    try {
+      const cached = localStorage.getItem(chipsStorageKey(recipeId, language));
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
   const [chipsLoading, setChipsLoading] = useState(false);
   const [confirmingClear, setConfirmingClear] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<PendingChange[]>(() => {
@@ -90,7 +103,6 @@ export function useRecipeCopilot({
 
   const loadChips = useCallback(
     async (force = false) => {
-      setChipsLoading(true);
       try {
         if (!force) {
           const cached = localStorage.getItem(chipsKey);
@@ -99,6 +111,7 @@ export function useRecipeCopilot({
             return;
           }
         }
+        setChipsLoading(true);
         const token = await getAccessToken();
         const res = await fetch(apiUrl(`/api/recipes/${recipe.id}/chat/chips?lang=${language}`), {
           headers: { Authorization: `Bearer ${token}` },
@@ -136,7 +149,6 @@ export function useRecipeCopilot({
     } catch {
       // Ignore
     }
-    setShowChips(true);
     loadChips(true);
     setTimeout(() => textareaRef.current?.focus(), 100);
   };
@@ -175,12 +187,7 @@ export function useRecipeCopilot({
     loadedRecipeIdRef.current = recipe.id;
 
     setError(null);
-    setShowChips(stored.length === 0);
     loadChips();
-
-    setTimeout(() => {
-      textareaRef.current?.focus();
-    }, 100);
   }, [isOpen, chatKey, changesKey, recipe.id, loadChips]);
 
   const handleSend = async (textToSend: string) => {
@@ -189,7 +196,6 @@ export function useRecipeCopilot({
     setError(null);
     setIsPending(true);
     setMessage('');
-    setShowChips(false);
 
     (document.activeElement as HTMLElement)?.blur();
 
@@ -198,7 +204,10 @@ export function useRecipeCopilot({
 
     try {
       const token = await getAccessToken();
-      const cleanHistory = history.map((h) => ({ role: h.role, text: h.text }));
+      const cleanHistory = history.map((h) => ({
+        role: h.role,
+        text: parseSuggestions(h.text).cleanText || h.text,
+      }));
 
       const res = await fetch(apiUrl(`/api/recipes/${recipe.id}/chat`), {
         method: 'POST',
@@ -260,18 +269,69 @@ export function useRecipeCopilot({
       }
 
       if (data.pendingRemix) {
-        const incomingChanges: string[] =
-          Array.isArray(data.changes) && data.changes.length > 0
-            ? data.changes
-            : data.modificationRequest
-              ? [data.modificationRequest]
-              : [];
+        if (Array.isArray(data.operations) && data.operations.length > 0) {
+          const flattened: PendingChange[] = [];
+          for (const op of data.operations) {
+            if (op.type === 'ADD_INGREDIENTS' && Array.isArray(op.newIngredients) && op.newIngredients.length > 1) {
+              for (const ing of op.newIngredients) {
+                flattened.push({
+                  id: generateChangeId(),
+                  type: 'ADD_INGREDIENTS',
+                  groupName: op.groupName,
+                  newIngredient: ing,
+                  newIngredients: [ing],
+                  summary: `${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} hinzufügen`,
+                  text: `${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} hinzufügen`,
+                });
+              }
+              if (op.newSteps && op.newSteps.length > 0) {
+                flattened.push({
+                  id: generateChangeId(),
+                  type: 'ADD_INSTRUCTION_STEP',
+                  newSteps: op.newSteps,
+                  summary: `Zubereitungsschritt: ${op.newSteps.map((s: any) => s.description).join(' ')}`,
+                  text: `Zubereitungsschritt: ${op.newSteps.map((s: any) => s.description).join(' ')}`,
+                });
+              }
+            } else if (op.type === 'ADD_INGREDIENTS' && (op.newIngredient || (Array.isArray(op.newIngredients) && op.newIngredients.length === 1))) {
+              const ing = op.newIngredient || op.newIngredients[0];
+              flattened.push({
+                ...op,
+                id: op.id || generateChangeId(),
+                newIngredient: ing,
+                newIngredients: [ing],
+                text: op.summary || `${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} hinzufügen`,
+              });
+            } else if (op.type === 'REPLACE_INGREDIENT' && op.newIngredient) {
+              const ing = op.newIngredient;
+              flattened.push({
+                ...op,
+                id: op.id || generateChangeId(),
+                text: op.summary || `${op.targetIngredientName} durch ${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} ersetzen`,
+              });
+            } else {
+              flattened.push({
+                ...op,
+                id: op.id || generateChangeId(),
+                text: op.summary || 'Rezept anpassen',
+              });
+            }
+          }
+          setPendingChanges((prev) => [...prev, ...flattened]);
+        } else {
+          const incomingChanges: string[] =
+            Array.isArray(data.changes) && data.changes.length > 0
+              ? data.changes
+              : data.modificationRequest
+                ? [data.modificationRequest]
+                : [];
 
-        if (incomingChanges.length > 0) {
-          setPendingChanges((prev) => [
-            ...prev,
-            ...incomingChanges.map((text: string) => ({ id: crypto.randomUUID(), text })),
-          ]);
+          if (incomingChanges.length > 0) {
+            setPendingChanges((prev) => [
+              ...prev,
+              ...incomingChanges.map((text: string) => ({ id: generateChangeId(), text })),
+            ]);
+          }
         }
       }
 
@@ -314,7 +374,7 @@ export function useRecipeCopilot({
     setChoosingApply(false);
   };
 
-  const handleApplyChanges = async (replaceCurrent: boolean) => {
+  const handleApplyChanges = async () => {
     if (pendingChanges.length === 0 || isPending) return;
     const modificationRequest = pendingChanges.map((c, i) => `${i + 1}. ${c.text}`).join('\n');
 
@@ -328,7 +388,10 @@ export function useRecipeCopilot({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ modificationRequest, replaceCurrent }),
+        body: JSON.stringify({
+          operations: pendingChanges,
+          modificationRequest,
+        }),
       });
 
       if (!res.ok) throw new Error('Failed to confirm remix.');
@@ -337,7 +400,7 @@ export function useRecipeCopilot({
       const successMsg: CopilotMessage = {
         role: 'model',
         text: t('copilot.remixCreated', { title: data.updatedRecipeJson?.title || '' }),
-        isRemixReady: !replaceCurrent,
+        isRemixReady: true,
         newJobId: data.newJobId,
         newRecipe: data.updatedRecipeJson,
       };
@@ -345,11 +408,6 @@ export function useRecipeCopilot({
 
       setPendingChanges([]);
       setChoosingApply(false);
-
-      if (replaceCurrent && data.updatedRecipeJson) {
-        onReplaceCurrent(data.updatedRecipeJson);
-        setTimeout(() => onClose(), 50);
-      }
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : 'Failed to confirm remix.';
       setError(errMsg);
@@ -365,8 +423,6 @@ export function useRecipeCopilot({
     isPending,
     pendingAction,
     error,
-    showChips,
-    setShowChips,
     chips,
     chipsLoading,
     confirmingClear,

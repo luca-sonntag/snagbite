@@ -25,14 +25,18 @@ export default function ToastContainer({ toasts, onDismiss }: ToastContainerProp
 
       // Filter to visible overlays that are actually on screen
       const visibleOverlays = candidates.filter((el) => {
-        // Exclude the toast container itself
+        // Exclude the toast container itself and closing/hidden dialogs
         if (el.closest('[aria-live="polite"]')) return false;
+        if (el.getAttribute('aria-hidden') === 'true' || el.closest('[aria-hidden="true"], [data-state="closed"]')) return false;
         const rect = el.getBoundingClientRect();
         return (
           rect.height > 80 &&
           rect.width > 80 &&
+          rect.top < window.innerHeight &&
+          rect.bottom > 50 &&
           window.getComputedStyle(el).display !== 'none' &&
-          window.getComputedStyle(el).visibility !== 'hidden'
+          window.getComputedStyle(el).visibility !== 'hidden' &&
+          parseFloat(window.getComputedStyle(el).opacity || '1') > 0.05
         );
       });
 
@@ -41,15 +45,18 @@ export default function ToastContainer({ toasts, onDismiss }: ToastContainerProp
         const overlay = visibleOverlays[visibleOverlays.length - 1];
         const rect = overlay.getBoundingClientRect();
 
-        if (rect.top >= 100) {
+        if (rect.top >= 100 && rect.top < window.innerHeight - 80) {
           // Bottom sheet / bottom modal: anchor floating 12px above its top edge
-          const heightFromBottom = window.innerHeight - rect.top;
+          const heightFromBottom = Math.max(0, window.innerHeight - rect.top);
           setBottomSheetHeight(heightFromBottom);
           setPlacement('bottom');
-        } else {
+        } else if (rect.top < 100 && rect.bottom > 100) {
           // Fullscreen or high modal: render toast at the top of viewport
           setBottomSheetHeight(null);
           setPlacement('top');
+        } else {
+          setBottomSheetHeight(null);
+          setPlacement('bottom');
         }
       } else {
         setBottomSheetHeight(null);
@@ -75,14 +82,14 @@ export default function ToastContainer({ toasts, onDismiss }: ToastContainerProp
     <div
       style={
         isAboveBottomSheet && placement === 'bottom'
-          ? { paddingBottom: `${bottomSheetHeight + 12}px` }
+          ? { paddingBottom: `calc(${bottomSheetHeight + 12}px + var(--safe-area-inset-bottom, 0px))` }
           : undefined
       }
       className={`fixed inset-x-0 pointer-events-none flex items-center gap-2 p-3 sm:p-4 transition-[padding] duration-200 z-[220] ${
         placement === 'top'
           ? 'top-0 flex-col pt-[calc(var(--safe-area-inset-top,0px)+1rem)]'
           : `bottom-0 flex-col-reverse ${
-              !isAboveBottomSheet ? 'pb-[calc(var(--safe-area-inset-bottom,0px)+7rem)]' : ''
+              !isAboveBottomSheet ? 'pb-[calc(var(--safe-area-inset-bottom,0px)+6rem)]' : ''
             }`
       }`}
       aria-live="polite"

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, Check, Tag, Star } from 'lucide-react';
+import { Clock, Check, Tag, Star, Sparkles } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
@@ -32,6 +32,7 @@ export default function RecipeListItem({
   const r = job.recipe!;
   const firstTag = recipeTags[0];
   const firstFlag = job.flags?.[0];
+  const remixCount = job.remixCount ?? job.recipe?.remixCount ?? 0;
 
   return (
     <div
@@ -67,6 +68,14 @@ export default function RecipeListItem({
           <h4 className="text-sm font-bold text-gray-900 dark:text-white line-clamp-1 flex-1 min-w-0">
             {r.title}
           </h4>
+          {remixCount > 0 && (
+            <div
+              className="w-6 h-6 rounded-lg bg-purple-500/15 dark:bg-purple-500/25 flex items-center justify-center shrink-0"
+              title={`${remixCount} Remix(es)`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-purple-500 fill-purple-500/30" />
+            </div>
+          )}
           {job.isFavorite && (
             <div className="w-6 h-6 rounded-lg bg-amber-500/15 dark:bg-amber-500/25 flex items-center justify-center shrink-0">
               <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />

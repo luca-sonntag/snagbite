@@ -1335,6 +1335,8 @@ export const uiTranslations = {
       btnStart: 'Remix starten',
       parentLinkPrefix: 'Abgewandelt von',
       parentLinkDeleted: 'gelöscht',
+      yourRemixes: 'Deine Remixes',
+      customVariation: 'Individuelle Variante',
       chips: {
         vegan: { label: 'Vegan', prompt: 'Mache es vegan' },
         highProtein: { label: 'High Protein', prompt: 'Mache es eiweißreich' },
@@ -1375,6 +1377,7 @@ export const uiTranslations = {
       remixConfirmBody: 'Möchtest du das Rezept anpassen mit: „{request}"?',
       remixReplaceBtn: 'Aktuelles ersetzen',
       remixNewBtn: 'Als neues Rezept',
+      createRemixBtn: 'Remix erstellen',
       remixCreated: 'Das Remix-Rezept „{title}“ wurde erstellt.',
       clearAria: 'Chat zurücksetzen',
       clearConfirmTitle: 'Chat zurücksetzen?',
@@ -2506,6 +2509,8 @@ export const uiTranslations = {
       btnStart: 'Start Remix',
       parentLinkPrefix: 'Remixed from',
       parentLinkDeleted: 'deleted',
+      yourRemixes: 'Your Remixes',
+      customVariation: 'Custom variation',
       chips: {
         vegan: { label: 'Vegan', prompt: 'Make it vegan' },
         highProtein: { label: 'High Protein', prompt: 'Make it high protein' },
@@ -2546,6 +2551,7 @@ export const uiTranslations = {
       remixConfirmBody: 'Do you want to modify the recipe with: "{request}"?',
       remixReplaceBtn: 'Replace current',
       remixNewBtn: 'As new recipe',
+      createRemixBtn: 'Create Remix',
       remixCreated: 'The remix recipe "{title}" has been created.',
       clearAria: 'Reset chat',
       clearConfirmTitle: 'Reset chat?',

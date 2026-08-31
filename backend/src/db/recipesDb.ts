@@ -254,7 +254,25 @@ export async function getLibrary(userId: string): Promise<SavedRecipe[]> {
 
   if (error) throw wrapError('Failed to get library', error);
 
-  const saved = data.filter((row) => row.recipes).map(rowToSavedRecipe);
+  // Compute remix counts per parent recipe ID for this user
+  const remixCounts = new Map<string, number>();
+  for (const row of data) {
+    const parentId = (row.recipes as RecipeRow)?.parent_recipe_id;
+    if (parentId) {
+      remixCounts.set(parentId, (remixCounts.get(parentId) ?? 0) + 1);
+    }
+  }
+
+  // Filter out remix recipes so only top-level (original) recipes appear in the main library
+  const topLevelRows = data.filter((row) => row.recipes && !(row.recipes as RecipeRow).parent_recipe_id);
+  const saved = topLevelRows.map(rowToSavedRecipe);
+
+  for (const entry of saved) {
+    entry.remixCount = remixCounts.get(entry.recipeId) ?? 0;
+    if (entry.recipe) {
+      entry.recipe.remixCount = entry.remixCount;
+    }
+  }
 
   try {
     const memberships = await getCollectionMembership(userId);
@@ -266,6 +284,19 @@ export async function getLibrary(userId: string): Promise<SavedRecipe[]> {
   }
 
   return saved;
+}
+
+export async function getUserRecipeRemixes(userId: string, parentRecipeId: string): Promise<Recipe[]> {
+  const { data, error } = await getClient()
+    .from('recipes')
+    .select()
+    .eq('parent_recipe_id', parentRecipeId)
+    .eq('created_by', userId)
+    .order('created_at', { ascending: false })
+    .returns<RecipeRow[]>();
+
+  if (error) throw wrapError(`Failed to get remixes for recipe ${parentRecipeId}`, error);
+  return data.map(rowToRecipe);
 }
 
 export async function countLibraryEntries(userId: string): Promise<number> {

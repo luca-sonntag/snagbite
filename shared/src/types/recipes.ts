@@ -84,6 +84,30 @@ export const RECIPE_CATEGORIES: readonly RecipeCategory[] = [
   'OTHER',
 ] as const;
 
+export type RecipeOperationType =
+  | 'REPLACE_INGREDIENT'
+  | 'ADD_INGREDIENTS'
+  | 'REMOVE_INGREDIENT'
+  | 'SCALE_SERVINGS'
+  | 'UPDATE_INSTRUCTION'
+  | 'ADD_INSTRUCTION_STEP'
+  | 'UPDATE_TITLE';
+
+export interface RecipeOperation {
+  id: string;
+  type: RecipeOperationType;
+  summary: string;
+  targetIngredientName?: string;
+  newIngredient?: Ingredient;
+  groupName?: string;
+  newIngredients?: Ingredient[];
+  removeIngredientName?: string;
+  newServings?: number;
+  stepUpdates?: Array<{ step: number; description: string; parallelPrepHint?: string }>;
+  newSteps?: Array<{ description: string; parallelPrepHint?: string }>;
+  newTitle?: string;
+}
+
 export interface Recipe {
   id?: string;
   isRecipe?: boolean;
@@ -92,6 +116,7 @@ export interface Recipe {
   origin?: RecipeOrigin;
   sourceUrl?: string | null;
   parentRecipeId?: string | null;
+  remixCount?: number;
   title: string;
   description: string;
   emoji?: string | null;

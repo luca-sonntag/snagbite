@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI, FunctionDeclarationSchemaType } from '@google/generative-ai';
 import { GoogleAIFileManager } from '@google/generative-ai/files';
 import { config } from './config.js';
-import { Recipe, GeminiUsageInfo } from './types.js';
+import { Recipe, GeminiUsageInfo, RecipeOperation } from './types.js';
 import { writeGeminiLog, estimateCost, type TokenUsage } from './logger.js';
 import { AppError } from './errors.js';
 import { withRetry } from './retry.js';
@@ -10,6 +10,108 @@ import type { Candidate } from './notifications/types.js';
 // Initialize Gemini Generative AI and File Manager
 const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
 const fileManager = new GoogleAIFileManager(config.GEMINI_API_KEY);
+
+// Reusable Ingredient Item Schema properties for structured recipe extraction & chatbot operations
+const ingredientItemSchemaProperties = {
+  name: {
+    type: FunctionDeclarationSchemaType.STRING,
+    description: 'The clean basic name of the ingredient in the recipe language, stripped of brand names, quantities, numbers, units, and superficial adjectives/processing states (e.g. use "Käse" instead of "Eat Lean Käse", "Salatcreme" instead of "Miracle Whip Balance", "Frischkäse" instead of "Philadelphia Frischkäse", "Butter" instead of "Leichte Butter", "Parmesan" instead of "Parmesan, gerieben", "Hähnchenschenkel" instead of "Hähnchenschenkel, gewürfelt"). IMPORTANT: Compound nouns where the suffix or word defines the core food identity itself (e.g. "Paprikapulver", "Knoblauchpulver", "Backpulver", "Mandelmehl", "Olivenöl", "Tomatenmark", "Kochschinken", "Schlagsahne", "Frischkäse") MUST remain fully intact as compound words in "name". Only real culinary states or adjectives (e.g. "leicht", "mager", "fettreduziert", "zuckerfrei", "gerieben", "gewürfelt", "ohne Knochen") belong in the "modifier" field.',
+  },
+  brand: {
+    type: FunctionDeclarationSchemaType.STRING,
+    description: 'Optional manufacturer or brand name mentioned in the recipe (e.g. "Eat Lean", "Miracle Whip", "Philadelphia", "Nutella", "Alpro", "Exquisa", "Oatly", "Buko"). Leave empty or null if no specific brand is named in the recipe. The generic base food name (e.g. "Käse", "Salatcreme", "Frischkäse") belongs in the "name" field.',
+  },
+  baseName: {
+    type: FunctionDeclarationSchemaType.STRING,
+    description: 'The core standard noun in singular form strictly in ENGLISH used as a universal database key to group similar ingredients across recipes in any language. Be precise and specific: \n- For dried ground spices and powders, ALWAYS include "powder" (e.g., "paprika powder" for Paprikapulver, "garlic powder" for Knoblauchpulver, "onion powder" for Zwiebelpulver, "chili powder" for Chilipulver, "baking powder" for Backpulver; NEVER use "paprika" for powder as "paprika" refers to fresh bell pepper).\n- For fresh vegetables, use specific produce terms: "bell pepper" or "red bell pepper" for Gemüsepaprika, "garlic" for Knoblauch, "onion" for Zwiebel, "spring onion" for Frühlingszwiebel/Lauchzwiebel.\n- For meats, specify the cut/type: "chicken breast" for Hähnchenbrust, "ground chicken" for Hähnchenhackfleisch, "ground beef" for Rinderhack, "cooked ham" for Kochschinken vs "cured ham"/"bacon" for Rohschinken/Speck.\n- For dairy/grains: "cottage cheese" for Hüttenkäse/körniger Frischkäse, "rolled oat" for Haferflocken, "heavy cream" for Schlagsahne, "sour cream" for Saure Sahne/Schmand, "gouda" or "shredded cheese" for generic geriebener Käse, "tortilla wrap" for Wraps/Fladenbrot vs "tortilla chips" for Nachos, "almond flour" for Mandelmehl.\n- For legumes/seeds: always singular ("chickpea", "lentil", "walnut", "flaxseed").\n\nFORMATTING RULES. The baseName is used verbatim as a database key, so identical foods MUST always produce the identical string:\n- Always lowercase and singular ("egg", never "Eggs" or "Egg").\n- AS BOUGHT IN STORES: Always describe the grocery ingredient AS BOUGHT, NEVER as prepared in this recipe. Strictly DO NOT include cooking states ("steamed", "boiled", "peeled", "cooked", "baked", "roasted", "canned", "fried", "diced", "grated", "raw" - use "apple" NOT "steamed apple", "potato" NOT "boiled potato", "carrot" NOT "diced carrots").\n- SINGLE INGREDIENTS ONLY: Never create compound dishes or multi-food combinations containing "with", "and", "of" (e.g. use "pasta" NOT "pasta with cheese sauce", "broccoli" NOT "broccoli and carrots").\n- But NEVER omit a word that defines the food identity itself: Keep "powder", "flour", "oil", "juice", "sauce", "milk", "cheese", "flakes", "dried", "smoked", "ground" (for minced meat) and the cut of meat: "paprika powder" stays "paprika powder", "chicken breast" stays "chicken breast".\n- No brand names, no quantities, no numbers, no punctuation, no parentheses.\n- Prefer the plain everyday English standard term over a regional or specialist one.',
+  },
+  synonyms: {
+    type: FunctionDeclarationSchemaType.ARRAY,
+    description: '1 to 3 alternative English culinary baseName synonyms or regional English equivalents (e.g. for "strained tomato": ["passata", "tomato puree", "sieved tomato"]; for "spring onion": ["scallion", "green onion", "salad onion"]; for "eggplant": ["aubergine"]; for "zucchini": ["courgette"]; for "chickpea": ["garbanzo bean", "garbanzo"]; for "rolled oat": ["oat flake", "oats"]; for "cream cheese": ["double cream cheese", "soft cheese"]; for "quark": ["curd", "curd cheese"]; for "arugula": ["rocket"]; for "bell pepper": ["sweet pepper", "capsicum"]; for "cilantro": ["coriander"]). MUST strictly follow the exact same English singular lowercase formatting rules as baseName. Leave empty if there are no common alternative English culinary names.',
+    items: {
+      type: FunctionDeclarationSchemaType.STRING,
+    },
+  },
+  parentIngredient: {
+    type: FunctionDeclarationSchemaType.OBJECT,
+    description: 'Set ONLY if this ingredient is a derived component/part that is NOT bought separately as its own package in stores (e.g. for "Eigelb" or "Eiweiß", parentIngredient MUST be { "name": "Ei", "baseName": "egg", "unit": "Stück" }; for "Zitronenabrieb" or "Zitronensaft", parentIngredient MUST be { "name": "Zitrone", "baseName": "lemon", "unit": "Stück" }; for "Knoblauchzehe", parentIngredient MUST be { "name": "Knoblauch", "baseName": "garlic", "unit": "Zehe" }; for flavored honey like "Scharfer Honig", parentIngredient MUST be { "name": "Honig", "baseName": "honey", "unit": "g" }). Leave empty or null if the ingredient is already a standalone primary grocery item sold separately in stores (e.g. "Hähnchenbrust", "Hähnchenkeule", "Rinderhackfleisch", "Butter", "Parmesan" MUST leave parentIngredient empty/null).',
+    properties: {
+      name: {
+        type: FunctionDeclarationSchemaType.STRING,
+        description: 'The clean raw grocery product name in recipe language (e.g. "Ei", "Zitrone", "Knoblauch", "Honig").',
+      },
+      baseName: {
+        type: FunctionDeclarationSchemaType.STRING,
+        description: 'The English baseName for the raw parent grocery product (e.g. "egg", "lemon", "garlic", "honey").',
+      },
+      unit: {
+        type: FunctionDeclarationSchemaType.STRING,
+        description: 'The default grocery unit (e.g. "Stück", "Knolle", "Zehe", "g").',
+      },
+    },
+    required: ['name', 'baseName'],
+  },
+  replacedOriginal: {
+    type: FunctionDeclarationSchemaType.STRING,
+    description: 'MUST be null or left empty for initial recipe extractions. Set ONLY during recipe remixes when an ingredient was explicitly replaced or modified from the original recipe.',
+  },
+  amount: {
+    type: FunctionDeclarationSchemaType.NUMBER,
+    description: 'The numeric quantity of the ingredient.',
+  },
+  unit: {
+    type: FunctionDeclarationSchemaType.STRING,
+    description: 'The unit of measurement (e.g., g, ml, EL, TL, Stück).',
+  },
+  gramsPerUnit: {
+    type: FunctionDeclarationSchemaType.NUMBER,
+    description: 'The estimated realistic net weight in grams for EXACTLY ONE unit of this ingredient. For example: 1 Stück Fischstäbchen = 30, 1 Stück Toastbrot = 25, 1 Stück Eigelb = 20, 1 Stück Ei = 55, 1 Stück Zwiebel = 80, 1 Stück Knoblauchzehe = 3, 1 Dose = 400, 1 EL = 15, 1 TL = 5, 1 Prise = 0.5. If unit is already g or ml, set to 1. If unit is kg or l, set to 1000.',
+  },
+  notes: {
+    type: FunctionDeclarationSchemaType.STRING,
+    description: 'Optional preparation notes specific to this ingredient.',
+  },
+  modifier: {
+    type: FunctionDeclarationSchemaType.STRING,
+    description: 'Optional product attribute that affects what you need to buy at the store (e.g. "leicht", "mager", "ohne Knochen und Haut", "geräuchert", "TK", "Bio"). IMPORTANT: Do NOT include preparation or cooking states that happen in the kitchen — these are NOT relevant for shopping and must be left out (e.g. do NOT use "verquirlt", "gewürfelt", "gehackt", "fein geschnitten", "aufgetaut", "zerdrückt", "gedünstet", "diced", "chopped", "minced", "whisked", "beaten"). Exception: "gerieben" is allowed only if the product is typically sold pre-grated (e.g. Parmesan, Gouda). Keep the modifier clean and short, in the recipe language.',
+  },
+  calories: {
+    type: FunctionDeclarationSchemaType.INTEGER,
+    description: 'Estimated calories in kcal for the ENTIRE specified ingredient amount (amount * unit). E.g., if chicken is 165 kcal/100g and amount is 500g, this MUST be 825, NOT 165. If a potato has 150 kcal and amount is 6, this MUST be 900, NOT 150. Use 0 if negligible.',
+  },
+  protein: {
+    type: FunctionDeclarationSchemaType.NUMBER,
+    description: 'Estimated protein in grams for the ENTIRE specified ingredient amount (amount * unit). E.g., if chicken has 31g protein/100g and amount is 500g, this MUST be 155, NOT 31. Use 0 if negligible.',
+  },
+  carbs: {
+    type: FunctionDeclarationSchemaType.NUMBER,
+    description: 'Estimated carbohydrates in grams for the ENTIRE specified ingredient amount (amount * unit). E.g., if potatoes have 35g carbs each and amount is 6, this MUST be 210, NOT 35. Use 0 if negligible.',
+  },
+  fat: {
+    type: FunctionDeclarationSchemaType.NUMBER,
+    description: 'Estimated fat in grams for the ENTIRE specified ingredient amount (amount * unit). E.g., if olive oil has 14g fat/EL and amount is 3 EL, this MUST be 42, NOT 14. Use 0 if negligible.',
+  },
+  isStaple: {
+    type: FunctionDeclarationSchemaType.BOOLEAN,
+    description: 'True ONLY if this is a very common basic staple that people almost always already have at home and rarely need to buy specifically for a recipe (e.g. salt, pepper, water, cooking oil, sugar, common dried spices). Set to false for anything a user would typically need to shop for (e.g. meat, cheese, vegetables, fresh herbs, specialty items).',
+  },
+  isGenericGrocery: {
+    type: FunctionDeclarationSchemaType.BOOLEAN,
+    description: 'True if this is a standard, widely available commercial grocery product sold as a standalone item in supermarkets (e.g. "Frischkäse", "Butter", "Edamame", "Hähnchenbrust", "Haferflocken", "Tomatenmark", "Paprikapulver", "Gouda"). Set to false if this is a custom homemade mixture, multi-ingredient marinade, compound sauce, specialty blend, or one-off creative preparation (e.g. "secret sauce", "homemade herb butter", "onion bacon topping", "sweet chili dip", "secret exotic fantasy sauce").',
+  },
+  typicalPackageAmount: {
+    type: FunctionDeclarationSchemaType.NUMBER,
+    description: 'Standard retail package size sold in supermarkets (e.g. 500 for 500g pasta/rice, 1000 for 1L milk/juice, 250 for 250g butter/quark, 6 for 6 eggs, 400 for canned goods, 1 for fresh cucumber/bell pepper). Leave empty/null if unsure.',
+  },
+  typicalPackageUnit: {
+    type: FunctionDeclarationSchemaType.STRING,
+    description: 'The unit of measurement for standard retail package size (e.g. "g", "ml", "Stück", "Dose", "Packung", "Bund").',
+  },
+  shelfLifeDays: {
+    type: FunctionDeclarationSchemaType.INTEGER,
+    description: 'Estimated average shelf life in days when stored properly (e.g. 7 for fresh milk/cream, 3 for raw meat/poultry, 14 for eggs, 10 for yogurt/cheese, 7 for fresh vegetables, 180 for dry pasta/rice/canned goods, 365 for spices/oil/sugar/flour).',
+  },
+};
 
 // Define response schema for Gemini Structured Outputs
 const recipeSchema = {
@@ -74,106 +176,7 @@ const recipeSchema = {
             description: 'Individual ingredients in this category.',
             items: {
               type: FunctionDeclarationSchemaType.OBJECT,
-              properties: {
-                name: {
-                  type: FunctionDeclarationSchemaType.STRING,
-                  description: 'The clean basic name of the ingredient in the recipe language, stripped of brand names, quantities, numbers, units, and superficial adjectives/processing states (e.g. use "Käse" instead of "Eat Lean Käse", "Salatcreme" instead of "Miracle Whip Balance", "Frischkäse" instead of "Philadelphia Frischkäse", "Butter" instead of "Leichte Butter", "Parmesan" instead of "Parmesan, gerieben", "Hähnchenschenkel" instead of "Hähnchenschenkel, gewürfelt"). IMPORTANT: Compound nouns where the suffix or word defines the core food identity itself (e.g. "Paprikapulver", "Knoblauchpulver", "Backpulver", "Mandelmehl", "Olivenöl", "Tomatenmark", "Kochschinken", "Schlagsahne", "Frischkäse") MUST remain fully intact as compound words in "name". Only real culinary states or adjectives (e.g. "leicht", "mager", "fettreduziert", "zuckerfrei", "gerieben", "gewürfelt", "ohne Knochen") belong in the "modifier" field.',
-                },
-                brand: {
-                  type: FunctionDeclarationSchemaType.STRING,
-                  description: 'Optional manufacturer or brand name mentioned in the recipe (e.g. "Eat Lean", "Miracle Whip", "Philadelphia", "Nutella", "Alpro", "Exquisa", "Oatly", "Buko"). Leave empty or null if no specific brand is named in the recipe. The generic base food name (e.g. "Käse", "Salatcreme", "Frischkäse") belongs in the "name" field.',
-                },
-                baseName: {
-                  type: FunctionDeclarationSchemaType.STRING,
-                  description: 'The core standard noun in singular form strictly in ENGLISH used as a universal database key to group similar ingredients across recipes in any language. Be precise and specific: \n- For dried ground spices and powders, ALWAYS include "powder" (e.g., "paprika powder" for Paprikapulver, "garlic powder" for Knoblauchpulver, "onion powder" for Zwiebelpulver, "chili powder" for Chilipulver, "baking powder" for Backpulver; NEVER use "paprika" for powder as "paprika" refers to fresh bell pepper).\n- For fresh vegetables, use specific produce terms: "bell pepper" or "red bell pepper" for Gemüsepaprika, "garlic" for Knoblauch, "onion" for Zwiebel, "spring onion" for Frühlingszwiebel/Lauchzwiebel.\n- For meats, specify the cut/type: "chicken breast" for Hähnchenbrust, "ground chicken" for Hähnchenhackfleisch, "ground beef" for Rinderhack, "cooked ham" for Kochschinken vs "cured ham"/"bacon" for Rohschinken/Speck.\n- For dairy/grains: "cottage cheese" for Hüttenkäse/körniger Frischkäse, "rolled oat" for Haferflocken, "heavy cream" for Schlagsahne, "sour cream" for Saure Sahne/Schmand, "gouda" or "shredded cheese" for generic geriebener Käse, "tortilla wrap" for Wraps/Fladenbrot vs "tortilla chips" for Nachos, "almond flour" for Mandelmehl.\n- For legumes/seeds: always singular ("chickpea", "lentil", "walnut", "flaxseed").\n\nFORMATTING RULES. The baseName is used verbatim as a database key, so identical foods MUST always produce the identical string:\n- Always lowercase and singular ("egg", never "Eggs" or "Egg").\n- AS BOUGHT IN STORES: Always describe the grocery ingredient AS BOUGHT, NEVER as prepared in this recipe. Strictly DO NOT include cooking states ("steamed", "boiled", "peeled", "cooked", "baked", "roasted", "canned", "fried", "diced", "grated", "raw" - use "apple" NOT "steamed apple", "potato" NOT "boiled potato", "carrot" NOT "diced carrots").\n- SINGLE INGREDIENTS ONLY: Never create compound dishes or multi-food combinations containing "with", "and", "of" (e.g. use "pasta" NOT "pasta with cheese sauce", "broccoli" NOT "broccoli and carrots").\n- But NEVER omit a word that defines the food identity itself: Keep "powder", "flour", "oil", "juice", "sauce", "milk", "cheese", "flakes", "dried", "smoked", "ground" (for minced meat) and the cut of meat: "paprika powder" stays "paprika powder", "chicken breast" stays "chicken breast".\n- No brand names, no quantities, no numbers, no punctuation, no parentheses.\n- Prefer the plain everyday English standard term over a regional or specialist one.',
-                },
-                synonyms: {
-                  type: FunctionDeclarationSchemaType.ARRAY,
-                  description: '1 to 3 alternative English culinary baseName synonyms or regional English equivalents (e.g. for "strained tomato": ["passata", "tomato puree", "sieved tomato"]; for "spring onion": ["scallion", "green onion", "salad onion"]; for "eggplant": ["aubergine"]; for "zucchini": ["courgette"]; for "chickpea": ["garbanzo bean", "garbanzo"]; for "rolled oat": ["oat flake", "oats"]; for "cream cheese": ["double cream cheese", "soft cheese"]; for "quark": ["curd", "curd cheese"]; for "arugula": ["rocket"]; for "bell pepper": ["sweet pepper", "capsicum"]; for "cilantro": ["coriander"]). MUST strictly follow the exact same English singular lowercase formatting rules as baseName. Leave empty if there are no common alternative English culinary names.',
-                  items: {
-                    type: FunctionDeclarationSchemaType.STRING,
-                  },
-                },
-                parentIngredient: {
-                  type: FunctionDeclarationSchemaType.OBJECT,
-                  description: 'Set ONLY if this ingredient is a derived component/part that is NOT bought separately as its own package in stores (e.g. for "Eigelb" or "Eiweiß", parentIngredient MUST be { "name": "Ei", "baseName": "egg", "unit": "Stück" }; for "Zitronenabrieb" or "Zitronensaft", parentIngredient MUST be { "name": "Zitrone", "baseName": "lemon", "unit": "Stück" }; for "Knoblauchzehe", parentIngredient MUST be { "name": "Knoblauch", "baseName": "garlic", "unit": "Zehe" }; for flavored honey like "Scharfer Honig", parentIngredient MUST be { "name": "Honig", "baseName": "honey", "unit": "g" }). Leave empty or null if the ingredient is already a standalone primary grocery item sold separately in stores (e.g. "Hähnchenbrust", "Hähnchenkeule", "Rinderhackfleisch", "Butter", "Parmesan" MUST leave parentIngredient empty/null).',
-                  properties: {
-                    name: {
-                      type: FunctionDeclarationSchemaType.STRING,
-                      description: 'The clean raw grocery product name in recipe language (e.g. "Ei", "Zitrone", "Knoblauch", "Honig").',
-                    },
-                    baseName: {
-                      type: FunctionDeclarationSchemaType.STRING,
-                      description: 'The English baseName for the raw parent grocery product (e.g. "egg", "lemon", "garlic", "honey").',
-                    },
-                    unit: {
-                      type: FunctionDeclarationSchemaType.STRING,
-                      description: 'The default grocery unit (e.g. "Stück", "Knolle", "Zehe", "g").',
-                    },
-                  },
-                  required: ['name', 'baseName'],
-                },
-                replacedOriginal: {
-                  type: FunctionDeclarationSchemaType.STRING,
-                  description: 'MUST be null or left empty for initial recipe extractions. Set ONLY during recipe remixes when an ingredient was explicitly replaced or modified from the original recipe.',
-                },
-                amount: {
-                  type: FunctionDeclarationSchemaType.NUMBER,
-                  description: 'The numeric quantity of the ingredient.',
-                },
-                unit: {
-                  type: FunctionDeclarationSchemaType.STRING,
-                  description: 'The unit of measurement (e.g., g, ml, EL, TL, Stück).',
-                },
-                gramsPerUnit: {
-                  type: FunctionDeclarationSchemaType.NUMBER,
-                  description: 'The estimated realistic net weight in grams for EXACTLY ONE unit of this ingredient. For example: 1 Stück Fischstäbchen = 30, 1 Stück Toastbrot = 25, 1 Stück Eigelb = 20, 1 Stück Ei = 55, 1 Stück Zwiebel = 80, 1 Stück Knoblauchzehe = 3, 1 Dose = 400, 1 EL = 15, 1 TL = 5, 1 Prise = 0.5. If unit is already g or ml, set to 1. If unit is kg or l, set to 1000.',
-                },
-                notes: {
-                  type: FunctionDeclarationSchemaType.STRING,
-                  description: 'Optional preparation notes specific to this ingredient.',
-                },
-                modifier: {
-                  type: FunctionDeclarationSchemaType.STRING,
-                  description: 'Optional product attribute that affects what you need to buy at the store (e.g. "leicht", "mager", "ohne Knochen und Haut", "geräuchert", "TK", "Bio"). IMPORTANT: Do NOT include preparation or cooking states that happen in the kitchen — these are NOT relevant for shopping and must be left out (e.g. do NOT use "verquirlt", "gewürfelt", "gehackt", "fein geschnitten", "aufgetaut", "zerdrückt", "gedünstet", "diced", "chopped", "minced", "whisked", "beaten"). Exception: "gerieben" is allowed only if the product is typically sold pre-grated (e.g. Parmesan, Gouda). Keep the modifier clean and short, in the recipe language.',
-                },
-                calories: {
-                  type: FunctionDeclarationSchemaType.INTEGER,
-                  description: 'Estimated calories in kcal for the ENTIRE specified ingredient amount (amount * unit). E.g., if chicken is 165 kcal/100g and amount is 500g, this MUST be 825, NOT 165. If a potato has 150 kcal and amount is 6, this MUST be 900, NOT 150. Use 0 if negligible.',
-                },
-                protein: {
-                  type: FunctionDeclarationSchemaType.NUMBER,
-                  description: 'Estimated protein in grams for the ENTIRE specified ingredient amount (amount * unit). E.g., if chicken has 31g protein/100g and amount is 500g, this MUST be 155, NOT 31. Use 0 if negligible.',
-                },
-                carbs: {
-                  type: FunctionDeclarationSchemaType.NUMBER,
-                  description: 'Estimated carbohydrates in grams for the ENTIRE specified ingredient amount (amount * unit). E.g., if potatoes have 35g carbs each and amount is 6, this MUST be 210, NOT 35. Use 0 if negligible.',
-                },
-                fat: {
-                  type: FunctionDeclarationSchemaType.NUMBER,
-                  description: 'Estimated fat in grams for the ENTIRE specified ingredient amount (amount * unit). E.g., if olive oil has 14g fat/EL and amount is 3 EL, this MUST be 42, NOT 14. Use 0 if negligible.',
-                },
-                isStaple: {
-                  type: FunctionDeclarationSchemaType.BOOLEAN,
-                  description: 'True ONLY if this is a very common basic staple that people almost always already have at home and rarely need to buy specifically for a recipe (e.g. salt, pepper, water, cooking oil, sugar, common dried spices). Set to false for anything a user would typically need to shop for (e.g. meat, cheese, vegetables, fresh herbs, specialty items).',
-                },
-                isGenericGrocery: {
-                  type: FunctionDeclarationSchemaType.BOOLEAN,
-                  description: 'True if this is a standard, widely available commercial grocery product sold as a standalone item in supermarkets (e.g. "Frischkäse", "Butter", "Edamame", "Hähnchenbrust", "Haferflocken", "Tomatenmark", "Paprikapulver", "Gouda"). Set to false if this is a custom homemade mixture, multi-ingredient marinade, compound sauce, specialty blend, or one-off creative preparation (e.g. "secret sauce", "homemade herb butter", "onion bacon topping", "sweet chili dip", "secret exotic fantasy sauce").',
-                },
-                typicalPackageAmount: {
-                  type: FunctionDeclarationSchemaType.NUMBER,
-                  description: 'Standard retail package size sold in supermarkets (e.g. 500 for 500g pasta/rice, 1000 for 1L milk/juice, 250 for 250g butter/quark, 6 for 6 eggs, 400 for canned goods, 1 for fresh cucumber/bell pepper). Leave empty/null if unsure.',
-                },
-                typicalPackageUnit: {
-                  type: FunctionDeclarationSchemaType.STRING,
-                  description: 'The unit of measurement for standard retail package size (e.g. "g", "ml", "Stück", "Dose", "Packung", "Bund").',
-                },
-                shelfLifeDays: {
-                  type: FunctionDeclarationSchemaType.INTEGER,
-                  description: 'Estimated average shelf life in days when stored properly (e.g. 7 for fresh milk/cream, 3 for raw meat/poultry, 14 for eggs, 10 for yogurt/cheese, 7 for fresh vegetables, 180 for dry pasta/rice/canned goods, 365 for spices/oil/sugar/flour).',
-                },
-              },
+              properties: ingredientItemSchemaProperties,
               required: ['name', 'baseName', 'synonyms', 'isGenericGrocery', 'amount', 'unit', 'gramsPerUnit', 'calories', 'protein', 'carbs', 'fat'],
             },
           },
@@ -904,6 +907,7 @@ export async function chatAboutRecipe(
   recipeWasModified: boolean;
   pendingRemix?: boolean;
   modificationRequest?: string;
+  operations?: RecipeOperation[];
   changes?: string[];
   newRecipe?: Recipe;
 }> {
@@ -917,33 +921,103 @@ export async function chatAboutRecipe(
         functionDeclarations: [
           {
             name: 'modify_current_recipe',
-            description: 'Passt das aktuelle Rezept basierend auf den Änderungswünschen des Nutzers an (z.B. vegan machen, laktosefrei, Portionen skalieren, Zutaten ersetzen, Schritte anpassen). Gibt alle konkreten einzelnen Änderungen als separate Punkte in einer Liste zurück.',
+            description: 'Schlägt eine oder mehrere konkrete Modifikationen am aktuellen Rezept vor (z. B. Beilage hinzufügen, Zutat austauschen/entfernen, Portionen skalieren). Gibt strukturierte Operationen (REPLACE_INGREDIENT, ADD_INGREDIENTS, REMOVE_INGREDIENT, SCALE_SERVINGS, ADD_INSTRUCTION_STEP) mit vollständigen Einzelzutaten zurück.',
             parameters: {
               type: FunctionDeclarationSchemaType.OBJECT,
               properties: {
-                changes: {
-                  type: FunctionDeclarationSchemaType.ARRAY,
-                  items: { type: FunctionDeclarationSchemaType.STRING },
-                  description: 'Liste der einzelnen konkreten Änderungen (z.B. ["Rinderhack durch veganes Hackfleisch ersetzen", "Eier durch Tofu-Rührei ersetzen", "Käse durch vegane Käsealternative ersetzen"]). Jeder Eintrag MUSS eine einzelne, präzise Zutat oder Aktion beschreiben.'
-                },
                 modification_request: {
                   type: FunctionDeclarationSchemaType.STRING,
-                  description: 'Zusammenfassung der Änderung, z.B. "Rezept veganisieren".'
+                  description: 'Kurze Zusammenfassung der Änderung (z. B. "Tomaten-Gurken-Salat als Beilage hinzufügen" oder "Burrata durch Mozzarella ersetzen").'
+                },
+                operations: {
+                  type: FunctionDeclarationSchemaType.ARRAY,
+                  description: 'Array von konkreten Rezept-Operationen.',
+                  items: {
+                    type: FunctionDeclarationSchemaType.OBJECT,
+                    properties: {
+                      type: {
+                        type: FunctionDeclarationSchemaType.STRING,
+                        description: 'Der Operationstyp: REPLACE_INGREDIENT, ADD_INGREDIENTS, REMOVE_INGREDIENT, SCALE_SERVINGS, UPDATE_INSTRUCTION, ADD_INSTRUCTION_STEP, UPDATE_TITLE',
+                        enum: [
+                          'REPLACE_INGREDIENT',
+                          'ADD_INGREDIENTS',
+                          'REMOVE_INGREDIENT',
+                          'SCALE_SERVINGS',
+                          'UPDATE_INSTRUCTION',
+                          'ADD_INSTRUCTION_STEP',
+                          'UPDATE_TITLE'
+                        ]
+                      },
+                      summary: {
+                        type: FunctionDeclarationSchemaType.STRING,
+                        description: 'Benutzerfreundliche Zusammenfassung dieser spezifischen Einzelzutat / Operation (z. B. "200g Tomaten hinzufügen", "Burrata durch 125g fettarmen Mozzarella ersetzen", "Bacon entfernen").'
+                      },
+                      targetIngredientName: {
+                        type: FunctionDeclarationSchemaType.STRING,
+                        description: 'Bei REPLACE_INGREDIENT: Der Name der Zutat im Ausgangsrezept, die ersetzt werden soll.'
+                      },
+                      removeIngredientName: {
+                        type: FunctionDeclarationSchemaType.STRING,
+                        description: 'Bei REMOVE_INGREDIENT: Der Name der Zutat, die entfernt werden soll.'
+                      },
+                      groupName: {
+                        type: FunctionDeclarationSchemaType.STRING,
+                        description: 'Bei ADD_INGREDIENTS: Optionaler Zutatengruppen- oder Kategoriename (z. B. VEGETABLES, DAIRY_EGGS oder "Beilage: Tomaten-Gurken-Salat").'
+                      },
+                      newIngredient: {
+                        type: FunctionDeclarationSchemaType.OBJECT,
+                        description: 'Bei REPLACE_INGREDIENT oder ADD_INGREDIENTS: Das vollständige neue Zutatenobjekt mit name, amount, unit, baseName etc.',
+                        properties: ingredientItemSchemaProperties,
+                        required: ['name', 'amount', 'unit', 'baseName']
+                      },
+                      newIngredients: {
+                        type: FunctionDeclarationSchemaType.ARRAY,
+                        description: 'Bei ADD_INGREDIENTS: Liste der konkreten neuen Einzelzutaten mit Menge, Einheit, Name, baseName, etc.',
+                        items: {
+                          type: FunctionDeclarationSchemaType.OBJECT,
+                          properties: ingredientItemSchemaProperties,
+                          required: ['name', 'amount', 'unit', 'baseName']
+                        }
+                      },
+                      newServings: {
+                        type: FunctionDeclarationSchemaType.NUMBER,
+                        description: 'Bei SCALE_SERVINGS: Die neue gewünschte Portionsanzahl.'
+                      },
+                      newSteps: {
+                        type: FunctionDeclarationSchemaType.ARRAY,
+                        description: 'Bei ADD_INSTRUCTION_STEP: Neue Zubereitungsschritte.',
+                        items: {
+                          type: FunctionDeclarationSchemaType.OBJECT,
+                          properties: {
+                            description: { type: FunctionDeclarationSchemaType.STRING, description: 'Zubereitungsanweisung' }
+                          },
+                          required: ['description']
+                        }
+                      },
+                      newTitle: {
+                        type: FunctionDeclarationSchemaType.STRING,
+                        description: 'Bei UPDATE_TITLE: Der neue Rezepttitel.'
+                      }
+                    },
+                    required: ['type', 'summary']
+                  }
                 }
               },
-              required: ['changes']
+              required: ['operations']
             }
           },
           {
             name: 'add_missing_ingredients_to_shopping_list',
-            description: 'Setzt fehlende Zutaten direkt auf die Einkaufsliste des Nutzers.',
+            description: 'Fügt eine Liste von benötigten oder fehlenden Zutaten zur Einkaufsliste des Benutzers hinzu.',
             parameters: {
               type: FunctionDeclarationSchemaType.OBJECT,
               properties: {
                 ingredients: {
                   type: FunctionDeclarationSchemaType.ARRAY,
-                  items: { type: FunctionDeclarationSchemaType.STRING },
-                  description: 'Liste der Zutaten, die hinzugefügt werden sollen, z.B. ["Limette", "Koriander"]'
+                  description: 'Array von Zutatennamen, die auf die Einkaufsliste gesetzt werden sollen.',
+                  items: {
+                    type: FunctionDeclarationSchemaType.STRING
+                  }
                 }
               },
               required: ['ingredients']
@@ -951,12 +1025,18 @@ export async function chatAboutRecipe(
           },
           {
             name: 'set_cooking_timer',
-            description: 'Erstellt einen Koch-Timer für eine bestimmte Dauer in Minuten mit einem optionalen Label.',
+            description: 'Startet einen Timer für einen Koch- oder Backschritt.',
             parameters: {
               type: FunctionDeclarationSchemaType.OBJECT,
               properties: {
-                duration_minutes: { type: FunctionDeclarationSchemaType.NUMBER, description: 'Dauer in Minuten' },
-                label: { type: FunctionDeclarationSchemaType.STRING, description: 'Beschreibung des Timers, wofür er ist, z.B. "Nudeln kochen" oder "Teig ruhen lassen"' }
+                duration_minutes: {
+                  type: FunctionDeclarationSchemaType.NUMBER,
+                  description: 'Dauer des Timers in GANZEN MINUTEN (z. B. 12 für 12 Minuten).'
+                },
+                label: {
+                  type: FunctionDeclarationSchemaType.STRING,
+                  description: 'Kurzer Name des Timers (z. B. "Brot überbacken", "Nudeln kochen").'
+                }
               },
               required: ['duration_minutes']
             }
@@ -975,44 +1055,68 @@ export async function chatAboutRecipe(
 
     const targetLanguage = userPrefs?.recipeLanguage || config.RECIPE_LANGUAGE;
 
-    const systemInstruction = `You are "Recipe Copilot", a friendly, helpful, and professional sous-chef in the kitchen.
+    const systemInstruction = `You are a helpful, professional, and friendly AI sous-chef in a recipe app.
 You are helping the user with the following recipe:
 
-Title: ${recipe.title}
-Description: ${recipe.description}
+Title: ${recipe.title}${recipe.description ? `\nDescription: ${recipe.description}` : ''}
 Servings: ${recipe.servings}
 Ingredients:
-${recipe.ingredients.map(g => `- ${g.name}:\n${g.items.map(i => `  * ${i.amount} ${i.unit} ${i.name} ${i.modifier ? `(${i.modifier})` : ''}`).join('\n')}`).join('\n')}
+${recipe.ingredients.map(g => `- ${g.name}:\n${g.items.map(i => `  * ${i.amount ? i.amount + ' ' : ''}${i.unit ? i.unit + ' ' : ''}${i.name}${i.modifier ? ` (${i.modifier})` : ''}`).join('\n')}`).join('\n')}
 
 Instructions:
-${recipe.instructions.map(step => `${step.step}. ${step.description}`).join('\n')}
-
-Tips:
-${recipe.tips?.map(t => `- ${t}`).join('\n') || 'None'}
+${recipe.instructions.map(step => `${step.step}. ${step.description}`).join('\n')}${recipe.tips && recipe.tips.length > 0 ? `\n\nTips:\n${recipe.tips.map(t => `- ${t}`).join('\n')}` : ''}
 
 Tools at your disposal:
-1. modify_current_recipe: Call this when the user wants to adapt, scale, remix, or otherwise modify the recipe details (e.g. make it vegan, gluten-free, low-carb, scale to a different number of servings, swap or add ingredients). Do not try to write modified recipe JSON or instructions in your text reply; always call this tool to perform the modification.
+1. modify_current_recipe: Call this when the user wants to adapt, scale, remix, or otherwise modify the recipe details (e.g. add a side dish, swap or add ingredients, scale servings, make it vegan, gluten-free, low-carb). Do not try to write modified recipe JSON or instructions in your text reply; always call this tool to perform the modification.
 IMPORTANT FOR RECIPE MODIFICATIONS:
-- When modifying the recipe (e.g. "mach vegan", "mach glutenfrei", or swapping multiple ingredients), ALWAYS split and break down the changes into a granular list of individual, concrete modifications in the "changes" array (e.g. ["Rinderhack durch veganes Hackfleisch ersetzen", "Eier durch Tofu-Rührei ersetzen", "Käse durch vegane Käsealternative ersetzen"]).
-- Do NOT bundle multiple ingredient or instruction swaps into a single long sentence. Each distinct ingredient replacement, addition, removal, or step modification must be its own item in "changes" so the user can review and remove individual items.
-2. add_missing_ingredients_to_shopping_list: Call this when the user asks to add specific items to their shopping list or says they are missing ingredients.
-3. set_cooking_timer: Call this when the user asks to set a timer for a step.
+- When modifying the recipe, ALWAYS generate individual, granular operations for EACH ingredient:
+  * For adding side dishes or multiple ingredients (e.g. Tomaten-Gurken-Salat als Beilage): create a separate "ADD_INGREDIENTS" operation for EACH single ingredient (e.g. one for 200g Tomaten, one for 150g Gurke, one for 1 EL Olivenöl, one for 1 EL Balsamico) with its groupName (e.g. "Beilage: Tomaten-Gurken-Salat") and newIngredient. If preparation steps are needed, add an ADD_INSTRUCTION_STEP operation.
+  * For ingredient swaps (e.g. "Bacon durch 100g Putenbruststreifen ersetzen"): use type "REPLACE_INGREDIENT" with targetIngredientName ("Bacon") and the full newIngredient object.
+  * For removals (e.g. "Röstzwiebeln weglassen"): use type "REMOVE_INGREDIENT" with removeIngredientName ("Röstzwiebeln").
+  * For scaling (e.g. "Auf 4 Portionen"): use type "SCALE_SERVINGS" with newServings.
+- NEVER bundle an entire dish into a single abstract ingredient string. Every single ingredient must be represented individually with amount, unit, name, baseName, and macros.
+- Populate a clear, concise "summary" for every single ingredient/operation (e.g. "200g Tomaten hinzufügen", "150g Gurke hinzufügen", "Burrata durch 125g fettarmen Mozzarella ersetzen").
+2. add_missing_ingredients_to_shopping_list: ALWAYS call this tool whenever the user asks to add ingredients/items to their shopping list, missing ingredients, or sends a shopping prompt (e.g. "Zutaten auf Einkaufsliste", "Setze X auf die Einkaufsliste"). NEVER just reply with text claiming you added them without calling this tool!
+3. set_cooking_timer: ALWAYS call this tool when the user asks to set a timer for a step or cooking duration (specify duration strictly in minutes).
 
 Rules:
-- Keep your conversational answers very short, clean, and concise (max 2-3 sentences). In the kitchen, speed is key!
+- Address the user casually and warmly ("Du / Dir" in German, NEVER formal "Sie / Ihre").
+- CONCISENESS & SPEED (Kitchen principle):
+  * Be as short as possible, but as long as necessary ("so kurz wie möglich, so lang wie nötig").
+  * Get straight to the point. No fluff, no boilerplate pleasantries, and no conversational filler (e.g. do NOT write "Ja, das ist absolut kein Problem!", "Hier sind ein paar Tipps:", "Hast du noch weitere Fragen?").
+  * Deliver precise, immediately actionable information so the user can cook without getting slowed down.
+- FORMATTING & READABILITY:
+  * Structure your responses with clean paragraph breaks and markdown.
+  * When listing ingredients, alternatives, steps, or tips, ALWAYS use bullet points on separate lines (e.g. \n• **Zutat**: Menge\n• **Zutat**: Menge). NEVER squash lists or steps into a single run-on sentence.
+  * Highlight key ingredients, amounts, times, or terms in **bold** (e.g. **Gouda**, **15 Minuten**, **Schritt 2**).
+  * Keep explanations clear, scannable, and easy to read while cooking.
 - Do NOT use emojis in your responses or generated modification descriptions. Maintain a clean, professional culinary tone.
-- When you call a tool, the system will execute it and return the result to you. You should then write a short, friendly message explaining what was done.
-- Respond in the language requested by the user. If not specified, default to ${targetLanguage}.
+- When you call a tool, the system will execute it and return the result to you. When you called modify_current_recipe to add or swap ingredients, write a short message explaining what was done and briefly list the concrete ingredients and amounts that were staged (e.g. "Ich habe den Tomaten-Gurken-Salat als Beilage vorgemerkt: 200g Tomaten, 150g Gurke, 1 EL Olivenöl, 1 EL Balsamico.").
+- PROACTIVE FOLLOW-UP SUGGESTIONS (Direct 1-Tap Option Branching & Tool Boundaries):
+  At the very end of your response, ALWAYS append 1-3 short, highly specific action tags derived DIRECTLY from the options, ingredients, or techniques you just presented in your response:
+  * CONCRETE OPTIONS & CHOICES (triggers modify_current_recipe or explanation): If your answer lists specific side dishes, ingredient substitutions, variations, or toppings (e.g. Coleslaw, Tomatensalat, Zucchini OR Mozzarella, Feta, Ricotta), ALWAYS turn the most relevant choices into direct 1-tap action buttons:
+    Example when suggesting side dishes: [suggest:Coleslaw ergänzen](prompt:Füge Coleslaw als Beilage zum Rezept hinzu)
+    Example when suggesting side dishes: [suggest:Tomatensalat hinzufügen](prompt:Füge Tomaten-Gurken-Salat als Beilage zum Rezept hinzu)
+    Example for follow-up details: [suggest:Coleslaw Rezept?](prompt:Wie bereite ich den Coleslaw genau zu?)
+    Example when suggesting swaps: [suggest:Mit Mozzarella anpassen](prompt:Passe das Rezept bitte mit Mozzarella an)
+  * COOKING TIMERS: If a specific baking, cooking, or resting time was mentioned (e.g. "12 Minuten backen"): [suggest:12 Min Timer](timer:12:Brot überbacken) (strictly in MINUTES!)
+  * SHOPPING LIST: If specific ingredients or new additions were recommended: [suggest:Zutaten auf Einkaufsliste](prompt:Setze die Zutaten für Coleslaw auf meine Einkaufsliste)
+  * RELEVANT NEXT QUESTION: E.g. [suggest:Geht das im Airfryer?](prompt:Wie kann ich das im Airfryer zubereiten?) or [suggest:Kann man das einfrieren?](prompt:Lässt sich dieses Gericht einfrieren?)
+  * STRICT TOOL & UI BOUNDARIES:
+    - NEVER suggest "Änderungen bestätigen", "Änderungen anwenden", "Remix speichern" or "Änderungen verwerfen"! The app UI already has dedicated native action buttons to apply/discard staged changes.
+    - NEVER suggest "Rezept starten", "Kochmodus starten", "Zurück zur Übersicht", or general UI navigation actions. Only suggest recipe modifications, timers, shopping list additions, or culinary questions.
+  CRITICAL SYNTAX: ALWAYS provide both parts [suggest:Short Label](prompt:What will be asked) or [suggest:Short Label](timer:MINUTES:Label). Keep button labels concise (2-4 words, natural clean wording, NO '+' or symbols).
 ${stagedChanges && stagedChanges.length > 0 ? `
 Pending recipe changes:
 The user has already collected the following modifications, which will be applied together in a later remix (they are NOT applied yet):
 ${stagedChanges.map((c, i) => `${i + 1}. ${c}`).join('\n')}
-When the user requests a further modification, call modify_current_recipe with only the NEW change(s) in the "changes" array (do not repeat the already-collected ones). Build on top of the collected changes, avoid duplicates, and briefly point out if a new request conflicts with an already-collected one.
+When the user requests a further modification, call modify_current_recipe with only the NEW change(s) in the "operations" array (do not repeat the already-collected ones). Build on top of the collected changes, avoid duplicates, and briefly point out if a new request conflicts with an already-collected one.
 ` : ''}`;
 
-    // Map history & new message to Gemini Content format
+    // Map recent history (capped at last 8 turns to keep token consumption and latency low) & new message to Gemini Content format
     const contents: any[] = [];
-    for (const msg of history) {
+    const recentHistory = history.slice(-8);
+    for (const msg of recentHistory) {
       contents.push({
         role: msg.role === 'user' ? 'user' : 'model',
         parts: [{ text: msg.text }]
@@ -1030,9 +1134,14 @@ When the user requests a further modification, call modify_current_recipe with o
     });
 
     const response = result.response;
-    rawOutput = response.text();
     const functionCalls = response.functionCalls ? response.functionCalls() : undefined;
     const call = functionCalls?.[0];
+
+    try {
+      rawOutput = response.text();
+    } catch {
+      rawOutput = call ? `[ToolCall: ${call.name}]` : '';
+    }
 
     if (call) {
       console.log(`[chatAboutRecipe] Gemini triggered tool call: ${call.name}`, call.args);
@@ -1041,21 +1150,88 @@ When the user requests a further modification, call modify_current_recipe with o
       let recipeWasModified = false;
 
       if (call.name === 'modify_current_recipe') {
-        const rawChanges = (call.args as any).changes;
+        const rawOps = (call.args as any).operations;
         const modReq = (call.args as any).modification_request;
-        const changes: string[] = Array.isArray(rawChanges) && rawChanges.length > 0
-          ? rawChanges.filter((c: unknown): c is string => typeof c === 'string' && c.trim().length > 0)
-          : (modReq ? [modReq] : []);
+        const operations: RecipeOperation[] = [];
+
+        if (Array.isArray(rawOps) && rawOps.length > 0) {
+          for (let idx = 0; idx < rawOps.length; idx++) {
+            const op = rawOps[idx];
+            if (op.type === 'ADD_INGREDIENTS' && Array.isArray(op.newIngredients) && op.newIngredients.length > 1) {
+              // Flatten into individual 1-ingredient operations
+              for (let iIdx = 0; iIdx < op.newIngredients.length; iIdx++) {
+                const ing = op.newIngredients[iIdx];
+                operations.push({
+                  id: `op_${Date.now()}_${idx}_${iIdx}`,
+                  type: 'ADD_INGREDIENTS',
+                  summary: `${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} hinzufügen${op.groupName ? ` (${op.groupName})` : ''}`,
+                  groupName: op.groupName,
+                  newIngredient: ing,
+                  newIngredients: [ing],
+                });
+              }
+              if (op.newSteps && op.newSteps.length > 0) {
+                operations.push({
+                  id: `op_${Date.now()}_${idx}_steps`,
+                  type: 'ADD_INSTRUCTION_STEP',
+                  summary: `Zubereitungsschritt: ${op.newSteps.map((s: any) => s.description).join(' ')}`,
+                  newSteps: op.newSteps,
+                });
+              }
+            } else if (op.type === 'ADD_INGREDIENTS' && (op.newIngredient || (Array.isArray(op.newIngredients) && op.newIngredients.length === 1))) {
+              const ing = op.newIngredient || op.newIngredients[0];
+              operations.push({
+                id: op.id || `op_${Date.now()}_${idx}`,
+                type: 'ADD_INGREDIENTS',
+                summary: `${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} hinzufügen${op.groupName ? ` (${op.groupName})` : ''}`,
+                groupName: op.groupName,
+                newIngredient: ing,
+                newIngredients: [ing],
+              });
+            } else if (op.type === 'REPLACE_INGREDIENT' && op.newIngredient) {
+              const ing = op.newIngredient;
+              operations.push({
+                id: op.id || `op_${Date.now()}_${idx}`,
+                type: 'REPLACE_INGREDIENT',
+                summary: `${op.targetIngredientName} durch ${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} ersetzen`,
+                targetIngredientName: op.targetIngredientName,
+                newIngredient: ing,
+              });
+            } else {
+              operations.push({
+                id: op.id || `op_${Date.now()}_${idx}`,
+                type: op.type,
+                summary: op.summary || modReq || 'Rezept anpassen',
+                targetIngredientName: op.targetIngredientName,
+                newIngredient: op.newIngredient,
+                groupName: op.groupName,
+                newIngredients: op.newIngredients,
+                removeIngredientName: op.removeIngredientName,
+                newServings: op.newServings,
+                stepUpdates: op.stepUpdates,
+                newSteps: op.newSteps,
+                newTitle: op.newTitle,
+              });
+            }
+          }
+        }
+
+        const rawChanges = (call.args as any).changes;
+        const changes: string[] = operations.length > 0
+          ? operations.map((o) => o.summary)
+          : (Array.isArray(rawChanges) ? rawChanges : (modReq ? [modReq] : []));
+
         const combinedReq = modReq || changes.join('. ');
 
-        console.log(`[chatAboutRecipe] Remix requested with ${changes.length} change(s):`, changes);
+        console.log(`[chatAboutRecipe] Remix requested with ${operations.length} structured operation(s):`, operations);
         recipeWasModified = true;
-        // Don't execute remixRecipe yet — store the prompt and let user confirm first
+        // Store structured operations and let user confirm first
         toolResponseData = {
           success: true,
-          message: `Staged ${changes.length} recipe modification(s): ${JSON.stringify(changes)}. Waiting for user confirmation.`,
+          message: `Staged ${operations.length || changes.length} recipe modification(s). Waiting for user confirmation.`,
           pendingRemix: true,
           modificationRequest: combinedReq,
+          operations,
           changes,
         };
       } else if (call.name === 'add_missing_ingredients_to_shopping_list') {
@@ -1106,22 +1282,24 @@ When the user requests a further modification, call modify_current_recipe with o
         systemInstruction
       });
 
-      const finalResponse = followUpResult.response;
-      const chatMessage = finalResponse.text() || `Führe Aktion aus: ${call.name}`;
+      const followUpResponse = followUpResult.response;
+      const chatMessage = followUpResponse.text();
 
-      // Extract token usage and compute cost
-      const usage1 = result.response.usageMetadata;
-      const usage2 = followUpResult.response.usageMetadata;
-      const tokenUsage: TokenUsage | undefined = (usage1 || usage2)
+      // Extract token usage and compute cost (aggregated across both turns)
+      const initialUsage = response.usageMetadata;
+      const followUpUsage = followUpResponse.usageMetadata;
+
+      const tokenUsage: TokenUsage | undefined = (initialUsage || followUpUsage)
         ? {
-          promptTokens: (usage1?.promptTokenCount ?? 0) + (usage2?.promptTokenCount ?? 0),
-          candidateTokens: (usage1?.candidatesTokenCount ?? 0) + (usage2?.candidatesTokenCount ?? 0),
-          totalTokens: (usage1?.totalTokenCount ?? 0) + (usage2?.totalTokenCount ?? 0),
+          promptTokens: (initialUsage?.promptTokenCount ?? 0) + (followUpUsage?.promptTokenCount ?? 0),
+          candidateTokens: (initialUsage?.candidatesTokenCount ?? 0) + (followUpUsage?.candidatesTokenCount ?? 0),
+          totalTokens: (initialUsage?.totalTokenCount ?? 0) + (followUpUsage?.totalTokenCount ?? 0),
         }
         : undefined;
+
       const costEstimate = tokenUsage ? estimateCost(config.GEMINI_MODEL, tokenUsage) : undefined;
 
-      // Log the chat call
+      // Log the full tool-assisted interaction
       void writeGeminiLog({
         timestamp,
         requestType: 'chat_recipe',
@@ -1144,6 +1322,7 @@ When the user requests a further modification, call modify_current_recipe with o
         recipeWasModified,
         pendingRemix: isPendingRemix || undefined,
         modificationRequest: isPendingRemix ? toolResponseData.modificationRequest : undefined,
+        operations: isPendingRemix ? toolResponseData.operations : undefined,
         changes: isPendingRemix ? toolResponseData.changes : undefined,
         newRecipe: remixedRecipe
       };
@@ -1245,28 +1424,66 @@ export async function generateChatChips(
     });
 
     const langName = language === 'en' ? 'English' : 'German';
-    const prompt = `You are helping a user cook a recipe.
+    const prompt = `You are a professional culinary sous-chef assistant helping a home cook with this recipe.
 
-Generate 5-6 quick-action suggestion chips for a recipe chat assistant. Each chip has a "label" (shown as a button) and a "prompt" (the text that will be sent to the AI when the chip is tapped).
+Generate 5-6 highly contextual, specific quick-action suggestion chips tailored to THIS RECIPE. Each chip has a "label" (concise button text, 2-4 words) and a "prompt" (the exact question or instruction sent to the AI when tapped).
 
-Chips should include:
-- 2-3 substitution suggestions for key ingredients (e.g., "Substitute for chicken?")
-- 2-3 preparation help suggestions specific to this recipe (e.g., "Can I prep ahead?", "Freeze leftovers?", "Oven timing tips?")
-- 1-2 recipe modification suggestions (e.g., "Make it vegan", "Make it lighter", "Scale to 2 portions")
-- 1 shopping list suggestion (e.g., "Add missing ingredients to shopping list")
-- 1 timer suggestion if there is a timed step (e.g., "Set timer for 15 min")
-- Vary chips based on the recipe content — don't use generic ones.
+DYNAMIC RECIPE CONTEXT MATRIX (Dynamically choose the 4-5 most relevant, interesting chips for this specific dish):
+1. EQUIPMENT SWAPS (Airfryer / Pan / Stove):
+   - If the recipe involves baking, roasting, or frying (e.g. potatoes, chicken wings, roasted veggies, schnitzel, pizza, tacos): ALWAYS offer an Airfryer chip!
+     * category: "help"
+     * label: "Geht das im Airfryer?"
+     * prompt: "Wie kann ich dieses Rezept im Airfryer zubereiten (Temperatur und Zeit)?"
+2. UNCOMMON / SPECIALIST INGREDIENTS (Curiosity & Substitutes):
+   - If the recipe contains ingredients, spices, or condiments that everyday cooks may not recognize (e.g. Gochujang, Tahini, Sumach, Miso, Panko, Kaffirlimette, Tamarinde, Mirin, Tempeh, Xanthan, Ghee, Bockshornklee, Seidentofu, etc.):
+     * category: "help" or "substitute"
+     * label: "Was ist [Zutat]?" or "Ersatz für [Zutat]?"
+     * prompt: "Was genau ist [Zutat], wie schmeckt es und was kann man als Ersatz nehmen?"
+3. MEAL-PREP, STORAGE & REHEATING (Practical Kitchen Advice):
+   - If a curry, soup, stew, bowl, sauce, or meal-prep friendly dish:
+     * category: "help"
+     * label: "Kann man das vorbereiten?" or "Reste einfrieren?"
+     * prompt: "Was kann ich an diesem Rezept am Vortag vorbereiten und wie lagere ich es?"
+4. MACRO & DIET TUNING (Health & Nutrition Goals):
+   - If pasta, rice, bowl, sandwich, or lunch/dinner meal:
+     * category: "remix"
+     * label: "High-Protein Boost" or "Leichtere Variante"
+     * prompt: "Wie kann ich den Proteingehalt dieses Rezepts unkompliziert erhöhen?"
+5. FOOD PAIRING & SIDE DISHES (Complete Meal):
+   - If a main protein or meat/fish/tofu dish:
+     * category: "help"
+     * label: "Passende Beilagen?"
+     * prompt: "Welche schnellen Beilagen oder Salate passen geschmacklich perfekt dazu?"
+6. KEY INGREDIENT SUBSTITUTION:
+   - For central ingredients (meat, dairy, gluten, specific vegetable):
+     * category: "substitute"
+     * label: "Alternative für [Zutat]"
+     * prompt: "Was kann ich als beste Alternative für [Zutat] verwenden?"
+7. SHOPPING & TIMERS:
+   - Include 1 shopping list prompt ("Zutaten auf Einkaufsliste") or 1 timer prompt if there is a timed step ("15 Min. Timer starten").
 
-Recipe JSON:
-${JSON.stringify(recipe)}
+Recipe Context:
+${JSON.stringify({
+  title: recipe.title,
+  description: recipe.description || undefined,
+  servings: recipe.servings,
+  ingredients: recipe.ingredients?.map(g => ({
+    category: g.name,
+    items: g.items?.map(i => `${i.amount ? i.amount + ' ' : ''}${i.unit ? i.unit + ' ' : ''}${i.name}${i.modifier ? ` (${i.modifier})` : ''}`.trim())
+  })),
+  instructions: recipe.instructions?.map(s => `${s.step}. ${s.description}`),
+  prepTime: recipe.prepTime,
+  cookTime: recipe.cookTime,
+})}
 
-Each chip must include a "category": one of "remix" (recipe modifications like vegan, lighter, scale portions), "help" (preparation tips, freezing, oven timing), "substitute" (ingredient replacements), "shopping" (add to shopping list), or "timer" (set cooking timer).
+Each chip must include a "category": one of "remix", "help", "substitute", "shopping", or "timer".
 
 IMPORTANT:
 - Both "label" and "prompt" MUST be in ${langName}.
-- Do NOT include emojis in the chip labels or prompts (clean flat modern tone).
+- Keep labels short, punchy (2-4 words) and actionable.
+- Do NOT include emojis in chip labels or prompts.
 
-Respond in JSON only: {"chips":[{"category":"remix","label":"…","prompt":"…"}]}`;
+Respond in JSON only: {"chips":[{"category":"help","label":"…","prompt":"…"}]}`;
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();

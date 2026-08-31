@@ -25,6 +25,7 @@ const WelcomeGuide = lazy(() => import('./components/WelcomeGuide'));
 import { useRecipeExtraction } from './hooks/useRecipeExtraction';
 import { useShoppingList } from './hooks/useShoppingList';
 import { useAuth } from './context/AuthContext';
+import { apiUrl } from './api';
 import { useSocial } from './context/SocialContext';
 import { useGamification } from './context/GamificationContext';
 import { useHashRouter } from './hooks/useHashRouter';
@@ -86,6 +87,8 @@ export default function App() {
     fetchHistory,
     handleExtractionSuccess,
     handleDeleteJob,
+    extraRecipes,
+    registerExtraRecipe,
   } = useAppHistory({
     user,
     authLoading,
@@ -98,7 +101,7 @@ export default function App() {
 
   const selectedJob: SavedRecipe | null =
     activeView === 'history' && subPath && !isCatalogListRoute(subPath) && historyLoaded
-      ? history.find((j) => j.recipeId === subPath) ?? null
+      ? (history.find((j) => j.recipeId === subPath) || extraRecipes[subPath] || null)
       : null;
 
   const catalogReturnRef = useRef<string | null>(null);
@@ -110,12 +113,15 @@ export default function App() {
   const setSelectedJob = useCallback(
     (job: SavedRecipe | null) => {
       if (job) {
+        if (!history.some((j) => j.recipeId === job.recipeId)) {
+          registerExtraRecipe(job.recipeId, job);
+        }
         navigate('history', job.recipeId);
       } else {
         navigate('history', catalogReturnRef.current);
       }
     },
-    [navigate]
+    [navigate, history, registerExtraRecipe]
   );
 
   const navigateCatalog = useCallback(
@@ -346,12 +352,33 @@ export default function App() {
                     ? history.find((j) => j.recipeId === recipe.parentRecipeId)?.recipe?.title
                     : null)
                 }
-                onNavigateToRecipe={(recipeId) => {
+                onNavigateToRecipe={async (recipeId, remixRecipe) => {
                   const parentJob = history.find((j) => j.recipeId === recipeId);
                   if (parentJob) {
                     navigate('history', parentJob.recipeId);
                     setRecipe(null);
                     setUrl('');
+                    return;
+                  }
+                  if (remixRecipe) {
+                    setRecipe(remixRecipe);
+                    return;
+                  }
+                  try {
+                    const token = await getAccessToken();
+                    if (token) {
+                      const res = await fetch(apiUrl(`/api/recipes/${recipeId}`), {
+                        headers: { Authorization: `Bearer ${token}` },
+                      });
+                      if (res.ok) {
+                        const data = await res.json();
+                        if (data.success && data.recipe) {
+                          setRecipe(data.recipe);
+                        }
+                      }
+                    }
+                  } catch (err) {
+                    console.error('[App] Failed to load recipe:', err);
                   }
                 }}
               />
@@ -437,6 +464,18 @@ export default function App() {
                 }}
                 shoppingListCount={aggregatedList.toBuy.length + aggregatedList.inPantry.length}
                 onRemixSuccess={async (newRecipe, newJobId) => {
+                  if (newRecipe && newJobId) {
+                    registerExtraRecipe(newJobId, {
+                      recipeId: newJobId,
+                      recipe: newRecipe,
+                      source: 'remix',
+                      addedAt: newRecipe.createdAt || new Date().toISOString(),
+                      updatedAt: newRecipe.updatedAt || new Date().toISOString(),
+                      isFavorite: false,
+                      flags: [],
+                      collectionIds: [],
+                    });
+                  }
                   await fetchHistory();
                   if (newJobId) {
                     navigate('history', newJobId);
