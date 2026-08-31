@@ -76,9 +76,9 @@ export default function ShoppingConfirmItem({
           <span className={isChecked ? '' : 'text-gray-400 dark:text-gray-500'}>{ing.name}</span>
         </div>
 
-        {/* Amount & Status (Pantry Stock or Staple in line 2) */}
+        {/* Amount & Status Micro-Pills (Option 4) */}
         {(displayAmount || pantryStock || ing.isStaple) && (
-          <div className="flex items-baseline flex-wrap gap-x-1.5 mt-0.5">
+          <div className="flex items-center flex-wrap gap-1.5 mt-0.5">
             {displayAmount && (
               <span
                 className={`text-xs font-semibold tabular-nums leading-normal transition-colors ${
@@ -93,38 +93,24 @@ export default function ShoppingConfirmItem({
 
             {pantryStock ? (
               <span
-                className={`text-[11px] font-medium transition-colors inline-flex items-center gap-1 ${
+                className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md border-none select-none transition-colors ${
                   isChecked
-                    ? 'text-gray-600 dark:text-gray-300'
-                    : 'text-gray-400 dark:text-gray-500'
+                    ? 'bg-black/5 dark:bg-white/10 text-gray-700 dark:text-gray-200'
+                    : 'bg-black/[0.04] dark:bg-white/[0.06] text-gray-500 dark:text-gray-400'
                 }`}
               >
-                {displayAmount && <span className="opacity-40 font-normal">·</span>}
-                <Package
-                  className={`w-3 h-3 shrink-0 stroke-[2.2] ${
-                    isChecked
-                      ? 'text-gray-600 dark:text-gray-300'
-                      : 'text-gray-400 dark:text-gray-500'
-                  }`}
-                />
+                <Package className="w-3 h-3 shrink-0 stroke-[2.2] opacity-80" />
                 <span>{t('recipe.inPantryStock', { amount: pantryStock })}</span>
               </span>
             ) : ing.isStaple ? (
               <span
-                className={`text-[11px] font-medium transition-colors inline-flex items-center gap-1 ${
+                className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md border-none select-none transition-colors ${
                   isChecked
-                    ? 'text-gray-600 dark:text-gray-300'
-                    : 'text-gray-400 dark:text-gray-500'
+                    ? 'bg-black/5 dark:bg-white/10 text-gray-700 dark:text-gray-200'
+                    : 'bg-black/[0.04] dark:bg-white/[0.06] text-gray-500 dark:text-gray-400'
                 }`}
               >
-                {displayAmount && <span className="opacity-40 font-normal">·</span>}
-                <Home
-                  className={`w-3 h-3 shrink-0 stroke-[2.2] ${
-                    isChecked
-                      ? 'text-gray-600 dark:text-gray-300'
-                      : 'text-gray-400 dark:text-gray-500'
-                  }`}
-                />
+                <Home className="w-3 h-3 shrink-0 stroke-[2.2] opacity-80" />
                 <span>{t('recipe.staplePillLabel')}</span>
               </span>
             ) : null}
