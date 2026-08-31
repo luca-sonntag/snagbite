@@ -195,9 +195,9 @@ export default function CookedModal({
                 type="button"
                 onClick={handleMarkWithoutPhoto}
                 disabled={isVerifying}
-                className="w-full min-h-[48px] h-12 flex items-center justify-center gap-2.5 px-4 rounded-2xl text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-[0.98] transition-all duration-200 ease-out cursor-pointer border-none"
+                className="w-full min-h-[44px] flex items-center justify-center gap-2 py-3 px-3.5 rounded-2xl text-xs font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-[0.98] transition-all duration-200 ease-out cursor-pointer border-none whitespace-nowrap"
               >
-                <Check className="w-4.5 h-4.5 text-gray-500 dark:text-gray-400 shrink-0" />
+                <Check className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
                 <span>{t('app.gamification.markWithoutPhoto')}</span>
               </button>
             </div>
@@ -269,9 +269,9 @@ export default function CookedModal({
                 <button
                   type="button"
                   onClick={handleMarkWithoutPhoto}
-                  className="w-full min-h-[48px] h-12 flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-[0.98] transition-all cursor-pointer border-none"
+                  className="w-full min-h-[44px] flex items-center justify-center gap-2 py-3 px-3.5 rounded-2xl text-xs font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-[0.98] transition-all cursor-pointer border-none whitespace-nowrap"
                 >
-                  <Check className="w-4.5 h-4.5 text-gray-500 dark:text-gray-400 shrink-0" />
+                  <Check className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
                   <span>{t('app.gamification.markWithoutPhoto')}</span>
                 </button>
               </div>
