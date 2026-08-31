@@ -27,7 +27,7 @@ export default function ShoppingCheckedItem({
 
   return (
     <li className={`rounded-xl hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors group ${animationClass}`}>
-      <div className="flex items-center justify-between gap-2 py-2 px-2 min-h-[44px]">
+      <div className="flex items-center justify-between gap-2 py-1 px-2 min-h-[40px]">
         <button
           type="button"
           onClick={() => {
@@ -78,7 +78,7 @@ export default function ShoppingCheckedItem({
             hapticHeavy();
             onDelete();
           }}
-          className="w-9 h-9 min-w-[36px] min-h-[36px] flex items-center justify-center text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer flex-shrink-0 border-none"
+          className="w-8 h-8 min-w-[32px] min-h-[32px] flex items-center justify-center text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer flex-shrink-0 border-none"
           aria-label={t('shopping.deleteItem')}
         >
           <Trash2 className="w-4 h-4" />
