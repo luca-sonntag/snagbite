@@ -9,7 +9,6 @@ import { formatQuantity } from '../../utils/formatQuantity';
 
 import CustomItemForm from './CustomItemForm';
 import ShoppingListGroup from './ShoppingListGroup';
-import ShoppingProgressCard from './ShoppingProgressCard';
 import ShoppingCheckedDrawer from './ShoppingCheckedDrawer';
 import ShoppingEmptyState from './ShoppingEmptyState';
 import ShoppingAllDoneState from './ShoppingAllDoneState';
@@ -57,9 +56,7 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
   deleteItemIds,
   toggleItemGroup,
   deleteItemGroup,
-  clearAll,
   clearChecked,
-  restoreList,
 }) => {
   const dialog = useDialog();
   const { t } = useI18n();
@@ -187,29 +184,6 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
     return `${numberStr}${unitStr}`;
   };
 
-  const handleClearAll = async () => {
-    const confirmed = await dialog.confirm({
-      title: t('shopping.dialogClear.title'),
-      message: t('shopping.dialogClear.message'),
-      confirmLabel: t('shopping.dialogClear.confirm'),
-      cancelLabel: t('shopping.dialogClear.cancel'),
-      status: 'danger',
-    });
-    if (confirmed) {
-      const allItems = [...shoppingList];
-      clearAll();
-      toast.info(t('toast.clearedAllItems'), {
-        action:
-          restoreList && allItems.length > 0
-            ? {
-                label: t('toast.undo'),
-                onClick: () => restoreList(allItems),
-              }
-            : undefined,
-      });
-    }
-  };
-
   const handleClearChecked = async () => {
     const checkedItems = (shoppingList || []).filter((item) => item.checked);
     if (checkedItems.length === 0 && aggregatedList.checked.length === 0) return;
@@ -244,7 +218,6 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
   const toBuyItems = aggregatedList.toBuy || aggregatedList.unchecked || [];
   const checkedCount = aggregatedList.checked.length;
   const totalCount = toBuyItems.length + checkedCount;
-  const progress = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0;
 
   // Active aisles to buy
   const activeGroups = useMemo(() => {
@@ -267,15 +240,6 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
 
   return (
     <div className="flex flex-col gap-4 relative">
-      {/* Progress & Quick Actions Card */}
-      <ShoppingProgressCard
-        checkedCount={checkedCount}
-        totalCount={totalCount}
-        progress={progress}
-        onClearChecked={handleClearChecked}
-        onClearAll={handleClearAll}
-      />
-
       <CustomItemForm
         isOpen={showAddForm}
         addCustomItem={addCustomItem}

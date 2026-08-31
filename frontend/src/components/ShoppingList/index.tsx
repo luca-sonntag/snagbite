@@ -3,10 +3,13 @@ import { ShoppingCart, Package } from 'lucide-react';
 import type { AggregatedShoppingItem, ShoppingListItem, SavedRecipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { usePantry } from '../../context/PantryContext';
-import { hapticSelection } from '../../utils/haptics';
+import { useDialog } from '../../context/DialogContext';
+import { useToast } from '../../context/ToastContext';
 import { PageHeader } from '../PageHeader';
 import { ShoppingListView } from './ShoppingListView';
 import { PantryView } from '../Pantry/PantryView';
+import { ShoppingStickyHeader } from './ShoppingStickyHeader';
+import { useShoppingSticky } from './useShoppingSticky';
 
 interface ActiveShoppingRecipe {
   recipeId: string;
@@ -41,12 +44,59 @@ interface ShoppingListProps {
 export default function ShoppingList(props: ShoppingListProps) {
   const { t } = useI18n();
   const { pantryItems } = usePantry();
+  const dialog = useDialog();
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState<'shopping' | 'pantry'>('shopping');
+  const { isCollapsed, setCollapseSentinel } = useShoppingSticky();
 
-  const toBuyCount = (props.aggregatedList.toBuy || props.aggregatedList.unchecked || []).length;
+  const toBuyItems = props.aggregatedList.toBuy || props.aggregatedList.unchecked || [];
+  const checkedCount = props.aggregatedList.checked.length;
   const inPantryWarningCount = (props.aggregatedList.inPantry || []).length;
-  const shoppingTotal = toBuyCount + inPantryWarningCount;
+  const shoppingTotal = toBuyItems.length + inPantryWarningCount;
+  const totalCount = toBuyItems.length + checkedCount;
+  const progress = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0;
   const pantryActiveCount = pantryItems.filter((i) => i.amount > 0).length;
+
+  const handleClearAll = async () => {
+    const confirmed = await dialog.confirm({
+      title: t('shopping.dialogClear.title'),
+      message: t('shopping.dialogClear.message'),
+      confirmLabel: t('shopping.dialogClear.confirm'),
+      cancelLabel: t('shopping.dialogClear.cancel'),
+      status: 'danger',
+    });
+    if (confirmed) {
+      const allItems = [...(props.shoppingList || [])];
+      props.clearAll();
+      toast.info(t('toast.clearedAllItems'), {
+        action:
+          props.restoreList && allItems.length > 0
+            ? {
+                label: t('toast.undo'),
+                onClick: () => props.restoreList!(allItems),
+              }
+            : undefined,
+      });
+    }
+  };
+
+  const handleClearChecked = async () => {
+    const checkedItems = (props.shoppingList || []).filter((item) => item.checked);
+    if (checkedItems.length === 0 && props.aggregatedList.checked.length === 0) return;
+    const count = checkedItems.length || props.aggregatedList.checked.length;
+
+    const confirmed = await dialog.confirm({
+      title: t('shopping.finishShoppingConfirmTitle'),
+      message: t('shopping.finishShoppingConfirmMessage', { count }),
+      confirmLabel: t('shopping.finishShoppingConfirmBtn'),
+      cancelLabel: t('shopping.dialogClear.cancel'),
+      status: 'success',
+    });
+    if (!confirmed) return;
+
+    props.clearChecked(true);
+    toast.success(t('shopping.transferredToPantryToast', { count }));
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -57,66 +107,22 @@ export default function ShoppingList(props: ShoppingListProps) {
         subtitle={activeTab === 'shopping' ? t('shopping.subtitle') : t('pantry.subtitle')}
       />
 
-      {/* Segmented Tab Control */}
-      <div className="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl gap-1 border-none shadow-none">
-        <button
-          type="button"
-          onClick={() => {
-            if (activeTab !== 'shopping') {
-              hapticSelection();
-              setActiveTab('shopping');
-            }
-          }}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all duration-200 min-h-[44px] cursor-pointer border-none outline-none ${
-            activeTab === 'shopping'
-              ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-bold shadow-[0_2px_6px_rgba(0,0,0,0.06)]'
-              : 'bg-transparent text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium'
-          }`}
-        >
-          <ShoppingCart className="w-4 h-4 shrink-0" />
-          <span>{t('shopping.tabShoppingList')}</span>
-          {shoppingTotal > 0 && (
-            <span
-              className={`text-[11px] px-2 py-0.5 rounded-full font-bold transition-colors ${
-                activeTab === 'shopping'
-                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-              }`}
-            >
-              {shoppingTotal}
-            </span>
-          )}
-        </button>
+      {/* Sentinel for sticky collapse */}
+      <div id="shopping-collapse-sentinel" ref={setCollapseSentinel} className="h-0 w-full" />
 
-        <button
-          type="button"
-          onClick={() => {
-            if (activeTab !== 'pantry') {
-              hapticSelection();
-              setActiveTab('pantry');
-            }
-          }}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all duration-200 min-h-[44px] cursor-pointer border-none outline-none ${
-            activeTab === 'pantry'
-              ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-bold shadow-[0_2px_6px_rgba(0,0,0,0.06)]'
-              : 'bg-transparent text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium'
-          }`}
-        >
-          <Package className="w-4 h-4 shrink-0" />
-          <span>{t('shopping.tabPantry')}</span>
-          {pantryActiveCount > 0 && (
-            <span
-              className={`text-[11px] px-2 py-0.5 rounded-full font-bold transition-colors ${
-                activeTab === 'pantry'
-                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-              }`}
-            >
-              {pantryActiveCount}
-            </span>
-          )}
-        </button>
-      </div>
+      {/* Sticky Header with Tabs & Progress */}
+      <ShoppingStickyHeader
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        shoppingTotal={shoppingTotal}
+        pantryActiveCount={pantryActiveCount}
+        isCollapsed={isCollapsed}
+        checkedCount={checkedCount}
+        totalCount={totalCount}
+        progress={progress}
+        onClearChecked={handleClearChecked}
+        onClearAll={handleClearAll}
+      />
 
       {/* Main Tab Content */}
       {activeTab === 'shopping' ? (
