@@ -32,9 +32,11 @@ export interface CreatePantryItemDto {
 export interface UpdatePantryItemDto {
   name?: string;
   baseName?: string;
+  mappingKey?: string;
   category?: string;
   amount?: number;
   unit?: string;
+  canonicalId?: string | null;
   notes?: string;
   expiresAt?: string | null;
 }

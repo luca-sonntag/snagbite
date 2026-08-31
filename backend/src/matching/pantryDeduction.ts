@@ -1,8 +1,21 @@
 import { normalizeUnit } from './matcherUtils.js';
 import { calculateWeightGrams } from './nutritionCalculator.js';
 import type { CanonicalIngredient } from '../data/canonicalIngredients.js';
-import type { Ingredient } from '../types.js';
-import type { PantryItem } from '../db/types/pantry.js';
+
+export interface PantryDeductionItemInput {
+  amount: number;
+  unit: string;
+  name?: string;
+  baseName?: string | null;
+}
+
+export interface PantryDeductionIngredientInput {
+  amount?: number | string | null;
+  unit?: string | null;
+  name?: string | null;
+  baseName?: string | null;
+  gramsPerUnit?: number | null;
+}
 
 /**
  * Calculates the numeric quantity to deduct from a pantry item given a consumed recipe ingredient.
@@ -14,8 +27,8 @@ import type { PantryItem } from '../db/types/pantry.js';
  * - Package containers (jar, can, pack) to metric weight
  */
 export function calculatePantryDeduction(
-  pantryItem: Pick<PantryItem, 'amount' | 'unit' | 'name' | 'baseName'>,
-  recipeIng: Pick<Ingredient, 'amount' | 'unit' | 'name' | 'baseName' | 'gramsPerUnit'>,
+  pantryItem: PantryDeductionItemInput,
+  recipeIng: PantryDeductionIngredientInput,
   canonicalMatch: CanonicalIngredient | null = null
 ): number {
   const ingAmount = Number(recipeIng.amount) || 0;
