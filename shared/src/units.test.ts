@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeUnit, convertToBaseMetric, isPantryStockSufficient } from './units.js';
+import { normalizeUnit, convertToBaseMetric, isPantryStockSufficient, getPantryStockStatus } from './units.js';
 
 describe('Shared Units & Pantry Stock Sufficiency', () => {
   it('normalizes various unit spellings', () => {
