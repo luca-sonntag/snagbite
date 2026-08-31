@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button, Drawer } from '@heroui/react';
-import { SlidersHorizontal, Star, Tag, X, Check, Folder } from 'lucide-react';
+import { SlidersHorizontal, Star, Tag, X, Folder } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { type Collection, type RecipeCategory, RECIPE_CATEGORIES } from '../../types';
 import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
@@ -32,12 +32,12 @@ const SORT_OPTIONS: CatalogSort[] = ['newest', 'recent', 'title', 'time'];
 function chipClass(isActive: boolean, accent: 'emerald' | 'amber' | 'neutral' = 'neutral') {
   if (isActive) {
     return accent === 'amber'
-      ? 'bg-amber-500 text-white font-bold border-none shadow-md shadow-amber-500/20'
-      : 'bg-emerald-600 text-white font-bold border-none shadow-md shadow-emerald-600/20';
+      ? 'bg-amber-500 text-white font-semibold border-none shadow-md shadow-amber-500/20'
+      : 'bg-emerald-600 text-white font-semibold border-none shadow-md shadow-emerald-600/20';
   }
-  if (accent === 'amber') return 'bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 border-none';
-  if (accent === 'emerald') return 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 border-none';
-  return 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border-none';
+  if (accent === 'amber') return 'bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 border-none font-semibold';
+  if (accent === 'emerald') return 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 border-none font-semibold';
+  return 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border-none font-semibold';
 }
 
 /**
@@ -164,8 +164,7 @@ export default function FilterSheet({
                           ) : (
                             <Folder className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'}`} />
                           )}
-                          {col.name}
-                          {isActive && <Check className="w-3 h-3" />}
+                          <span>{col.name}</span>
                         </button>
                       );
                     })}
@@ -180,7 +179,7 @@ export default function FilterSheet({
                           className={`min-h-[44px] px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-1.5 ${chipClass(isActive, 'amber')}`}
                         >
                           <Tag className={`w-3 h-3 ${isActive ? 'text-white' : 'text-amber-500'}`} />
-                          {flag}
+                          <span>{flag}</span>
                         </button>
                       );
                     })}
@@ -240,7 +239,6 @@ export default function FilterSheet({
                             >
                               <span className="text-base leading-none shrink-0">{getRecipeCategoryEmoji(cat)}</span>
                               <span>{getRecipeCategoryLabel(cat, language)}</span>
-                              {isActive && <Check className="w-3.5 h-3.5 shrink-0" />}
                             </button>
                           );
                         })}
