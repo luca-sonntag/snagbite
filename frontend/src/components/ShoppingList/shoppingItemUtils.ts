@@ -1,8 +1,15 @@
-import type { AggregatedShoppingItem, PantryItem } from '../../types';
+import type { AggregatedShoppingItem, PantryItem, ParentIngredientInfo } from '../../types';
 import { normalizeFoodBaseKey } from '../../utils/ingredientTaxonomy';
 import { formatQuantity } from '../../utils/formatQuantity';
 
-export function findPantryStock(item: AggregatedShoppingItem, pantryItems: PantryItem[]): string | null {
+export interface PantryMatchableItem {
+  name: string;
+  baseName?: string;
+  canonicalId?: string | null;
+  parentIngredient?: ParentIngredientInfo | null;
+}
+
+export function findPantryStock(item: PantryMatchableItem, pantryItems: PantryItem[]): string | null {
   if (!pantryItems || pantryItems.length === 0) return null;
   const itemKey = normalizeFoodBaseKey(item).toLowerCase().trim();
   const rawItemName = (item.name || '').toLowerCase().trim();
