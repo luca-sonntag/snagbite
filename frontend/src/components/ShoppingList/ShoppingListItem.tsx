@@ -133,7 +133,7 @@ export default function ShoppingListItem({
             <div className="flex-1 min-w-0 flex flex-col justify-center">
               {/* 1. Name oben */}
               <div className="flex items-baseline flex-wrap gap-x-1.5 min-w-0 text-sm text-gray-400 dark:text-gray-500 line-through leading-snug">
-                <span className="break-words">{item.name}</span>
+                <span className="break-words [overflow-wrap:anywhere]">{item.name}</span>
                 {extraNote && (
                   <span className="text-xs font-normal opacity-70 text-gray-500 dark:text-gray-400">
                     {extraNote}
@@ -198,7 +198,7 @@ export default function ShoppingListItem({
           <div className="flex-1 min-w-0 flex flex-col justify-center">
             {/* 1. Name oben */}
             <div className="flex items-baseline flex-wrap gap-x-1.5 min-w-0 text-sm font-medium text-gray-900 dark:text-white leading-snug">
-              <span className={`break-words ${isCheckingOff ? 'text-gray-400 dark:text-gray-500 line-through' : ''}`}>
+              <span className={`break-words [overflow-wrap:anywhere] ${isCheckingOff ? 'text-gray-400 dark:text-gray-500 line-through' : ''}`}>
                 {item.name}
               </span>
               {extraNote && (
