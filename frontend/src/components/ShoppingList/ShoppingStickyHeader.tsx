@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { ShoppingCart, Package, CheckCheck, Trash2 } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { hapticSelection, hapticLight } from '../../utils/haptics';
@@ -135,9 +135,9 @@ export const ShoppingStickyHeader: React.FC<ShoppingStickyHeaderProps> = ({
                       }}
                       aria-label={t('shopping.clearChecked')}
                       title={t('shopping.clearChecked')}
-                      className="h-8 px-2.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-95 transition-all text-xs font-semibold flex items-center gap-1 cursor-pointer border-none"
+                      className="h-9 px-3.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-95 transition-all text-xs font-semibold flex items-center gap-1.5 cursor-pointer border-none"
                     >
-                      <CheckCheck className="w-3.5 h-3.5" />
+                      <CheckCheck className="w-4 h-4" />
                       <span className="hidden xs:inline">{t('shopping.clearChecked')}</span>
                     </button>
                   )}
@@ -149,15 +149,15 @@ export const ShoppingStickyHeader: React.FC<ShoppingStickyHeaderProps> = ({
                     }}
                     aria-label={t('shopping.clearAll')}
                     title={t('shopping.clearAll')}
-                    className="w-8 h-8 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none"
+                    className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4.5 h-4.5" />
                   </button>
                 </div>
               </div>
 
               {/* Progress Bar */}
-              <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden p-0.5">
+              <div className="h-2 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden p-0.5">
                 <div
                   className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-300 ease-out"
                   style={{ width: `${progress}%` }}
@@ -166,23 +166,23 @@ export const ShoppingStickyHeader: React.FC<ShoppingStickyHeaderProps> = ({
             </div>
           ) : (
             /* Sleek compact sticky strip when scrolled down */
-            <div className="bg-white dark:bg-gray-900 px-3 py-1.5 rounded-xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex items-center justify-between gap-2.5">
-              <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className="bg-white dark:bg-gray-900 px-3.5 py-2 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <span className="text-xs font-bold text-gray-900 dark:text-white shrink-0 tabular-nums">
                   {checkedCount}/{totalCount}
                 </span>
-                <div className="h-1.5 flex-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                <div className="h-2 flex-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-300 ease-out"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
-                <span className="text-[10px] text-gray-500 dark:text-gray-400 font-semibold tabular-nums shrink-0">
+                <span className="text-[11px] text-gray-500 dark:text-gray-400 font-semibold tabular-nums shrink-0">
                   {Math.round(progress)}%
                 </span>
               </div>
 
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex items-center gap-1.5 shrink-0">
                 {checkedCount > 0 && (
                   <button
                     type="button"
@@ -190,10 +190,10 @@ export const ShoppingStickyHeader: React.FC<ShoppingStickyHeaderProps> = ({
                       hapticLight();
                       onClearChecked();
                     }}
-                    className="w-7 h-7 min-w-[28px] min-h-[28px] rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none"
+                    className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none"
                     aria-label={t('shopping.clearChecked')}
                   >
-                    <CheckCheck className="w-3.5 h-3.5" />
+                    <CheckCheck className="w-4.5 h-4.5" />
                   </button>
                 )}
                 <button
@@ -202,10 +202,10 @@ export const ShoppingStickyHeader: React.FC<ShoppingStickyHeaderProps> = ({
                     hapticLight();
                     onClearAll();
                   }}
-                  className="w-7 h-7 min-w-[28px] min-h-[28px] rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-red-500 dark:hover:text-red-400 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none"
+                  className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-red-500 dark:hover:text-red-400 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none"
                   aria-label={t('shopping.clearAll')}
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <Trash2 className="w-4.5 h-4.5" />
                 </button>
               </div>
             </div>
