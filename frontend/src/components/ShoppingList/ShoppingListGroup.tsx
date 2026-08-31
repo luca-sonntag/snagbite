@@ -53,13 +53,13 @@ export default function ShoppingListGroup({
             }`}
           >
             {/* Category Header */}
-            <div className="flex items-center justify-between gap-2 px-2 pt-0 pb-0.5 min-h-[22px]">
+            <div className="flex items-center justify-between gap-2 px-2 pt-1 pb-0.5">
               <div className="flex items-center gap-1.5 min-w-0">
-                <span className={`w-0.5 h-3 rounded-full ${theme.barClass} shrink-0`} />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 truncate">
+                <span className={`w-1 h-3.5 rounded-full ${theme.barClass} shrink-0`} />
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 truncate">
                   {translateCategory(group.category)}
                 </span>
-                <span className="text-[9px] text-gray-400 dark:text-gray-500 font-medium">
+                <span className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
                   {group.items.length}
                 </span>
               </div>
@@ -69,7 +69,7 @@ export default function ShoppingListGroup({
                 onClick={() => onGroupHeaderClick(group.items)}
                 aria-label={t('shopping.checkGroup', { defaultValue: 'Gruppe abhaken' })}
                 title={t('shopping.checkGroup', { defaultValue: 'Alle in dieser Kategorie abhaken' })}
-                className="w-8 h-8 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-xl bg-black/5 dark:bg-white/5 hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400 text-gray-400 dark:text-gray-500 transition-all cursor-pointer active:scale-95 flex-shrink-0 border-none"
+                className="w-8 h-8 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-xl bg-black/5 dark:bg-white/5 hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400 text-gray-500 dark:text-gray-400 transition-all cursor-pointer active:scale-95 flex-shrink-0 border-none"
               >
                 <CheckCheck className="w-4 h-4" />
               </button>
