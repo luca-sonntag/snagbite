@@ -91,7 +91,7 @@ export default function ShoppingListItem({
     <li
       className={`rounded-xl border-none transition-colors group ${animationClass} hover:bg-black/[0.03] dark:hover:bg-white/[0.03]`}
     >
-      <div className="flex items-center justify-between gap-2 py-1 px-2 min-h-[40px]">
+      <div className="flex items-center justify-between gap-2 py-0.5 px-2 min-h-[38px]">
         <button
           type="button"
           onClick={() => {
@@ -219,10 +219,10 @@ export default function ShoppingListItem({
               hapticHeavy();
               onDelete();
             }}
-            className="w-8 h-8 min-w-[32px] min-h-[32px] flex items-center justify-center text-gray-400 hover:text-red-500 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer flex-shrink-0 border-none"
+            className="w-7 h-7 min-w-[28px] min-h-[28px] flex items-center justify-center text-gray-400 hover:text-red-500 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer flex-shrink-0 border-none"
             aria-label={t('shopping.deleteItem')}
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
