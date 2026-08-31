@@ -53,13 +53,6 @@ export default function RecipeHeader({
   const { t, language } = useI18n();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { history } = useCookHistory(recipe.id, cookRefreshKey);
-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-
-  // The description is clamped to two lines so the ingredient list starts
-  // higher up. Only offer the toggle for texts that actually get cut off —
-  // roughly two lines' worth of characters at the mobile width.
-  const isDescriptionLong = (recipe.description?.length ?? 0) > 90;
-
   const resolvedParentTitle = parentRecipeTitle || recipe.parentRecipeTitle;
 
   return (
@@ -237,27 +230,9 @@ export default function RecipeHeader({
           </div>
         )}
         {recipe.description && (
-          <div>
-            <p
-              className={`text-sm text-gray-600 dark:text-gray-400 leading-relaxed break-words ${
-                isDescriptionExpanded || !isDescriptionLong ? '' : 'line-clamp-2'
-              }`}
-            >
-              {recipe.description}
-            </p>
-            {isDescriptionLong && (
-              <button
-                type="button"
-                onClick={() => {
-                  hapticLight();
-                  setIsDescriptionExpanded(v => !v);
-                }}
-                className="mt-1 py-1 px-1.5 -ml-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline active:scale-95 transition-all cursor-pointer outline-none border-none bg-transparent inline-flex items-center"
-              >
-                {isDescriptionExpanded ? t('recipe.descriptionLess') : t('recipe.descriptionMore')}
-              </button>
-            )}
-          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed break-words">
+            {recipe.description}
+          </p>
         )}
         {/* Category & labels */}
         {(recipe.category || (flags && flags.length > 0)) && (
