@@ -48,17 +48,17 @@ export default function ShoppingConfirmItem({
     if (status === 'sufficient') {
       return isChecked
         ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
-        : 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400';
+        : 'bg-emerald-500/[0.06] text-emerald-700/60 dark:bg-emerald-500/[0.08] dark:text-emerald-400/60';
     }
     if (status === 'low') {
       return isChecked
         ? 'bg-amber-500/15 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300'
-        : 'bg-amber-500/10 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400';
+        : 'bg-amber-500/[0.06] text-amber-700/60 dark:bg-amber-500/[0.08] dark:text-amber-400/60';
     }
     // deficit
     return isChecked
       ? 'bg-rose-500/15 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300'
-      : 'bg-rose-500/10 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400';
+      : 'bg-rose-500/[0.06] text-rose-700/60 dark:bg-rose-500/[0.08] dark:text-rose-400/60';
   })();
 
   return (
