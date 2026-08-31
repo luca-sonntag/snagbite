@@ -107,9 +107,6 @@ export default function ShoppingList(props: ShoppingListProps) {
         subtitle={activeTab === 'shopping' ? t('shopping.subtitle') : t('pantry.subtitle')}
       />
 
-      {/* Sentinel for sticky collapse */}
-      <div id="shopping-collapse-sentinel" ref={setCollapseSentinel} className="h-0 w-full" />
-
       {/* Sticky Header with Tabs & Progress */}
       <ShoppingStickyHeader
         activeTab={activeTab}
@@ -126,7 +123,12 @@ export default function ShoppingList(props: ShoppingListProps) {
 
       {/* Main Tab Content */}
       {activeTab === 'shopping' ? (
-        <ShoppingListView {...props} />
+        <ShoppingListView
+          {...props}
+          onClearAll={handleClearAll}
+          onClearChecked={handleClearChecked}
+          setCollapseSentinel={setCollapseSentinel}
+        />
       ) : (
         <PantryView onSelectRecipe={props.onSelectRecipe} />
       )}
