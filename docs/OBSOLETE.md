@@ -6,6 +6,18 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-08-31: Separater „Schon im Vorrat“-Kartenblock auf der Einkaufsliste durch Inline-Aisle-Highlighting ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Separater „Schon im Vorrat (Bitte prüfen)“-Block ganz oben auf der Einkaufsliste (`ShoppingInPantryCard.tsx`, Aufteilung in `toBuyMap` vs. `inPantryMap`), der Vorratszutaten aus ihren realen Supermarkt-Gängen (Obst & Gemüse, Kühlung, etc.) herausriss.
+  - Zersplitterter Supermarkt-Laufweg (Nutzer mussten an zwei getrennten Stellen nach Zutaten suchen).
+* **Ersetzt durch:**
+  - **Inline-Aisle-Integration ([`ShoppingListGroup.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ShoppingList/ShoppingListGroup.tsx), [`ShoppingListItem.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ShoppingList/ShoppingListItem.tsx)):** Alle Zutaten verbleiben in ihren natürlichen Supermarkt-Kategorien. Artikel, die bereits im Vorrat vorhanden sind, werden mit einem dezenten warmen bernsteinfarbenen Hintergrund (`bg-amber-500/10 dark:bg-amber-500/15 rounded-2xl`) und einem Vorratsmengen-Badge (`📦 Im Vorrat: {amount}`) hervorgehoben.
+  - **Gelöschte Komponenten:** `ShoppingInPantryCard.tsx` vollständig entfernt.
+* **Betroffene Dateien:** `frontend/src/utils/shoppingAggregation.ts`, `frontend/src/components/ShoppingList/ShoppingListGroup.tsx`, `frontend/src/components/ShoppingList/ShoppingListItem.tsx`, `frontend/src/components/ShoppingList/ShoppingListView.tsx`, `frontend/src/components/ShoppingList/ShoppingInPantryCard.tsx` (gelöscht), `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-08-30: Vollständiger KI-Rezept-Neuschrieb & unstrukturierte Remix-Strings durch deterministische Recipe-Operations-Engine und private Sub-Rezepte ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**

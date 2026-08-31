@@ -4,14 +4,12 @@ import type { AggregatedShoppingItem, ShoppingListItem as ShoppingListItemType, 
 import { categoryOrder } from '../../i18n';
 import { useDialog } from '../../context/DialogContext';
 import { useI18n } from '../../context/I18nContext';
-import { usePantry } from '../../context/PantryContext';
 import { useToast } from '../../context/ToastContext';
 import { formatQuantity } from '../../utils/formatQuantity';
 
 import CustomItemForm from './CustomItemForm';
 import ShoppingListGroup from './ShoppingListGroup';
 import ShoppingProgressCard from './ShoppingProgressCard';
-import ShoppingInPantryCard from './ShoppingInPantryCard';
 import ShoppingCheckedDrawer from './ShoppingCheckedDrawer';
 import ShoppingEmptyState from './ShoppingEmptyState';
 import ShoppingAllDoneState from './ShoppingAllDoneState';
@@ -66,7 +64,6 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
 }) => {
   const dialog = useDialog();
   const { t } = useI18n();
-  const { pantryItems } = usePantry();
   const toast = useToast();
 
   const [showAddForm, setShowAddForm] = useState(false);
@@ -241,30 +238,9 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
     }
   };
 
-  const handleClearInPantry = async () => {
-    if (inPantryItems.length === 0) return;
-    const confirmed = await dialog.confirm({
-      title: t('shopping.clearInPantryTitle'),
-      message: t('shopping.clearInPantryMessage', { count: inPantryItems.length }),
-      status: 'danger',
-      confirmLabel: t('shopping.clearInPantryBtn'),
-    });
-    if (!confirmed) return;
-
-    const allItemIds = inPantryItems.flatMap((i) => i.itemIds || []);
-    if (deleteItemIds && allItemIds.length > 0) {
-      deleteItemIds(allItemIds);
-    } else {
-      inPantryItems.forEach((it) => {
-        deleteItemGroup(it.baseName || it.name, it.modifier, it.unit);
-      });
-    }
-  };
-
   const toBuyItems = aggregatedList.toBuy || aggregatedList.unchecked || [];
-  const inPantryItems = aggregatedList.inPantry || [];
   const checkedCount = aggregatedList.checked.length;
-  const totalCount = toBuyItems.length + inPantryItems.length + checkedCount;
+  const totalCount = toBuyItems.length + checkedCount;
   const progress = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0;
 
   // Active aisles to buy
@@ -316,24 +292,6 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
             />
           )}
 
-          {/* Group: Schon im Vorrat (Bitte prüfen) */}
-          <ShoppingInPantryCard
-            inPantryItems={inPantryItems}
-            pantryItems={pantryItems}
-            collapsingKeys={collapsingKeys}
-            checkingKeys={checkingKeys}
-            getItemKey={getItemKey}
-            onItemToggle={handleItemToggle}
-            onGroupHeaderClick={handleGroupHeaderClick}
-            onClearInPantry={handleClearInPantry}
-            onDeleteItem={(item) =>
-              deleteItemIds && item.itemIds?.length
-                ? deleteItemIds(item.itemIds)
-                : deleteItemGroup(item.baseName || item.name, item.modifier, item.unit)
-            }
-            formatItemAmount={formatItemAmount}
-          />
-
           {activeGroups.length > 0 ? (
             <ShoppingListGroup
               groupedCategories={activeGroups}
@@ -349,9 +307,9 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
               collapsingKeys={collapsingKeys}
               checkingKeys={checkingKeys}
             />
-          ) : inPantryItems.length === 0 ? (
+          ) : (
             <ShoppingAllDoneState onClear={handleClearChecked} />
-          ) : null}
+          )}
 
           <ShoppingCheckedDrawer
             items={checkedSorted}

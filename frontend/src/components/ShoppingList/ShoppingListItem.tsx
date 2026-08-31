@@ -116,10 +116,17 @@ export default function ShoppingListItem({
 
   // Active (to-buy) row — big tap target with stacked name and amount.
   const theme = getCategoryTheme(item.category || '');
+  const hasPantryHighlight = !!pantryStockStr || !!item.inPantryWarning;
 
   return (
-    <li className={`rounded-xl hover:bg-black/[0.03] dark:hover:bg-white/[0.03] transition-colors group ${animationClass}`}>
-      <div className="flex items-center justify-between gap-2 py-2 px-2 min-h-[44px]">
+    <li
+      className={`rounded-2xl transition-all duration-200 group ${animationClass} ${
+        hasPantryHighlight
+          ? 'bg-amber-500/10 dark:bg-amber-500/15 p-1.5 my-1 border border-amber-500/20 dark:border-amber-500/30 shadow-2xs'
+          : 'hover:bg-black/[0.03] dark:hover:bg-white/[0.03]'
+      }`}
+    >
+      <div className="flex items-center justify-between gap-2 py-1 px-1.5 min-h-[44px]">
         <button
           type="button"
           onClick={() => {

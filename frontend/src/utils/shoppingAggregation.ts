@@ -14,7 +14,6 @@ export interface GroupedShoppingList {
 
 export function aggregateShoppingItems(items: ShoppingListItem[]): GroupedShoppingList {
   const toBuyMap = new Map<string, AggregatedShoppingItem>();
-  const inPantryMap = new Map<string, AggregatedShoppingItem>();
   const checkedMap = new Map<string, AggregatedShoppingItem>();
 
   for (const item of items) {
@@ -24,12 +23,15 @@ export function aggregateShoppingItems(items: ShoppingListItem[]): GroupedShoppi
 
     // Key by universal food base key so all components and variants merge into one card
     const key = groupKeyName.toLowerCase().trim();
-    const targetMap = item.checked ? checkedMap : item.inPantryWarning ? inPantryMap : toBuyMap;
+    const targetMap = item.checked ? checkedMap : toBuyMap;
 
     const currentSubName = item.modifier ? `${item.name} (${item.modifier})` : item.name;
     const existing = targetMap.get(key);
 
     if (existing) {
+      if (item.inPantryWarning) {
+        existing.inPantryWarning = true;
+      }
       if (existing.unit.toLowerCase().trim() === displayUnit.toLowerCase().trim()) {
         existing.amount += item.amount;
       }
@@ -147,9 +149,10 @@ export function aggregateShoppingItems(items: ShoppingListItem[]): GroupedShoppi
     }
   }
 
+  const toBuyList = Array.from(toBuyMap.values());
   return {
-    toBuy: Array.from(toBuyMap.values()),
-    inPantry: Array.from(inPantryMap.values()),
+    toBuy: toBuyList,
+    inPantry: toBuyList.filter((i) => i.inPantryWarning),
     checked: Array.from(checkedMap.values()),
   };
 }

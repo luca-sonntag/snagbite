@@ -2,7 +2,9 @@ import { CheckCheck } from 'lucide-react';
 import type { AggregatedShoppingItem } from '../../types';
 import { translateCategory, getCategoryTheme } from '../../i18n';
 import { useI18n } from '../../context/I18nContext';
+import { usePantry } from '../../context/PantryContext';
 import ShoppingListItem from './ShoppingListItem';
+import { findPantryStock } from './shoppingItemUtils';
 
 interface ShoppingListGroupProps {
   groupedCategories: Array<{ category: string; items: AggregatedShoppingItem[] }>;
@@ -31,6 +33,7 @@ export default function ShoppingListGroup({
   checkingKeys
 }: ShoppingListGroupProps) {
   const { t } = useI18n();
+  const { pantryItems } = usePantry();
 
   if (groupedCategories.length === 0) return null;
 
@@ -76,6 +79,8 @@ export default function ShoppingListGroup({
 
               {group.items.map((item) => {
                 const displayKey = `unchecked-${getItemKey(item)}`;
+                const pantryStock = findPantryStock(item, pantryItems);
+
                 return (
                   <ShoppingListItem
                     key={displayKey}
@@ -83,6 +88,7 @@ export default function ShoppingListGroup({
                     isChecked={false}
                     isCheckingOff={checkingKeys?.has(displayKey)}
                     isCollapsing={collapsingKeys.has(displayKey)}
+                    pantryStockStr={pantryStock || undefined}
                     onClick={() => onItemToggle(item)}
                     onDelete={() => onDelete(item)}
                     formatItemAmount={formatItemAmount}
