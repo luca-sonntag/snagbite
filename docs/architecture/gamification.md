@@ -37,7 +37,7 @@ Alles additiv, RLS aktiv (`SELECT`-own als Defense-in-Depth; Writes nur service-
   (`computeAward`, `softcapFactor`, `streakMultiplier`, `levelForXp`). Tests:
   `gamificationFormula.test.ts` (`node --import tsx --test`).
 * **`gamification.ts`** — `recordCook()` orchestriert: lädt Config/Aggregate,
-  Duplikat-/Velocity-Guard, Streak-Fortschreibung (UTC-Tage), Level, Badges,
+  Duplikat-/Velocity-Guard, Streak-Fortschreibung (UTC-Kalenderwochen), Level, Badges,
   schreibt `cook_events` + `point_ledger` + `user_stats`.
 
 Formel: `XP = 100 × Schwierigkeit × Wiederholung + Neuheit`, dann `× Streak`;

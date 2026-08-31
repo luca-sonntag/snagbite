@@ -331,7 +331,7 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
                   <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500 dark:text-gray-400 font-medium">
                     {f.currentStreak > 0 && (
                       <span className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
-                        🔥 {f.currentStreak} {f.currentStreak === 1 ? 'Tag' : 'Tage'}
+                        🔥 {f.currentStreak} {f.currentStreak === 1 ? t('app.gamification.weekSingle') : t('app.gamification.weekPlural')}
                       </span>
                     )}
                     <span>{totalCooks} {totalCooks === 1 ? 'Gericht' : 'Gerichte'}</span>

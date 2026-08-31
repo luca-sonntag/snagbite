@@ -11,7 +11,13 @@
  * A DB-side transaction/RPC is the natural upgrade if that ever matters.
  */
 import type { CookSignals, CookedResult, UserStats } from './types.js';
-import { computeAward, levelForXp } from './gamificationFormula.js';
+import {
+  computeAward,
+  levelForXp,
+  utcDateStr,
+  addDaysStr,
+  utcWeekStartStr,
+} from './gamificationFormula.js';
 import { DEFAULT_BADGE_XP } from './types.js';
 import {
   getGamificationConfig,
@@ -40,23 +46,8 @@ export const BADGE_KEYS = [
   'same_recipe_3',
 ] as const;
 
-// ── Date helpers (UTC day boundaries) ────────────────────────────────────────
-// Streaks use UTC days so the server stays authoritative without a client TZ.
-// Known simplification: a late-evening cook near the UTC boundary may land on
-// the next day; acceptable for the first pass.
-
-function utcDateStr(d: Date): string {
-  return d.toISOString().slice(0, 10);
-}
-
 function startOfUtcDayIso(d: Date): string {
   return `${utcDateStr(d)}T00:00:00.000Z`;
-}
-
-function addDaysStr(dateStr: string, days: number): string {
-  const d = new Date(`${dateStr}T00:00:00.000Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return utcDateStr(d);
 }
 
 interface BadgeEvalParams {
@@ -149,17 +140,28 @@ export async function recordCook(
 
   const hasPhoto = !!signals.hasPhoto && !!signals.photoPath;
 
-  // Streak: at most one increment per day; only verified cooks with photo count towards streaks.
+  // Streak: at most one increment per calendar week (Monday–Sunday); only verified cooks with photo count towards streaks.
   const today = utcDateStr(now);
+  const currentWeekStart = utcWeekStartStr(now);
+  const previousWeekStart = addDaysStr(currentWeekStart, -7);
+
   let currentStreak = prevStats.currentStreak || 0;
   let longestStreak = prevStats.longestStreak || 0;
   let lastCookDate = prevStats.lastCookDate;
 
   if (hasPhoto) {
-    if (prevStats.lastCookDate === today) {
-      currentStreak = prevStats.currentStreak || 1; // already cooked today — hold
-    } else if (prevStats.lastCookDate && addDaysStr(prevStats.lastCookDate, 1) === today) {
-      currentStreak = (prevStats.currentStreak || 0) + 1;
+    if (prevStats.lastCookDate) {
+      const lastCookWeekStart = utcWeekStartStr(prevStats.lastCookDate);
+      if (lastCookWeekStart === currentWeekStart) {
+        // Already cooked this week — hold streak
+        currentStreak = prevStats.currentStreak || 1;
+      } else if (lastCookWeekStart === previousWeekStart) {
+        // Cooked in the immediately preceding week — advance streak by 1 week
+        currentStreak = (prevStats.currentStreak || 0) + 1;
+      } else {
+        // Skipped at least one week — start fresh at 1
+        currentStreak = 1;
+      }
     } else {
       currentStreak = 1;
     }

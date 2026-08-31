@@ -11,13 +11,14 @@ import {
   softcapFactor,
   streakMultiplier,
   levelForXp,
+  utcWeekStartStr,
   type AwardContext,
 } from './gamificationFormula.js';
 
 const ctx = (over: Partial<AwardContext>): AwardContext => ({
   priorCookCount: 0,
   cookIndexToday: 1,
-  streakDays: 1,
+  streakWeeks: over.streakWeeks ?? over.streakDays ?? 1,
   hasPhoto: true,
   ...over,
 });
@@ -127,4 +128,20 @@ test('levelForXp thresholds', () => {
   assert.equal(levelForXp(1200, th), 3);
   assert.equal(levelForXp(15100, th), 10);
   assert.equal(levelForXp(999999, th), 10); // capped at defined levels
+});
+
+test('utcWeekStartStr returns Monday for any weekday in UTC', () => {
+  // Monday 2026-08-03 -> 2026-08-03
+  assert.equal(utcWeekStartStr('2026-08-03'), '2026-08-03');
+  // Wednesday 2026-08-05 -> 2026-08-03
+  assert.equal(utcWeekStartStr('2026-08-05'), '2026-08-03');
+  // Sunday 2026-08-09 -> 2026-08-03
+  assert.equal(utcWeekStartStr('2026-08-09'), '2026-08-03');
+  // Next Monday 2026-08-10 -> 2026-08-10
+  assert.equal(utcWeekStartStr('2026-08-10'), '2026-08-10');
+});
+
+test('streakWeeks multiplier scales the cook award', () => {
+  // 7-week streak multiplier (x1.25)
+  assert.equal(computeAward(C, ctx({ streakWeeks: 7 })).xp, 150);
 });
