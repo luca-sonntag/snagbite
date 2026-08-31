@@ -36,15 +36,15 @@ describe('Shared Units & Pantry Stock Sufficiency', () => {
     assert.equal(getPantryStockStatus(260, 'g', 200, 'g'), 'sufficient');
     assert.equal(getPantryStockStatus(1, 'kg', 250, 'g'), 'sufficient');
 
-    // Low / Review (50% - 120%) -> low (Orange)
+    // Low / Review (90% - 120%) -> low (Orange)
     assert.equal(getPantryStockStatus(220, 'g', 200, 'g'), 'low'); // 110% (almost depleted after cooking)
     assert.equal(getPantryStockStatus(200, 'g', 200, 'g'), 'low'); // 100% (completely empty after cooking)
-    assert.equal(getPantryStockStatus(60, 'g', 80, 'g'), 'low'); // 75%
-    assert.equal(getPantryStockStatus(150, 'g', 250, 'g'), 'low'); // 60%
-    assert.equal(getPantryStockStatus(1, 'Stück', 2, 'Stück'), 'low'); // 50%
+    assert.equal(getPantryStockStatus(190, 'g', 200, 'g'), 'low'); // 95% (almost full amount)
+    assert.equal(getPantryStockStatus(9, 'Stück', 10, 'Stück'), 'low'); // 90%
 
-    // Deficit (< 50%) -> deficit (Red)
-    assert.equal(getPantryStockStatus(20, 'g', 80, 'g'), 'deficit');
+    // Deficit (< 90%) -> deficit (Red)
+    assert.equal(getPantryStockStatus(60, 'g', 80, 'g'), 'deficit'); // 75%
+    assert.equal(getPantryStockStatus(20, 'g', 80, 'g'), 'deficit'); // 25%
     assert.equal(getPantryStockStatus(50, 'g', 250, 'g'), 'deficit');
     assert.equal(getPantryStockStatus(1, 'Stück', 4, 'Stück'), 'deficit');
   });
