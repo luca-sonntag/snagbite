@@ -5,11 +5,14 @@ import {
   type PantrySuggestion,
   type Recipe,
   getDefaultShelfLifeDays,
+  calculateExpiresAtDate,
 } from '@cookbook/shared';
 import { getClient, wrapError, isNoRowsError, num } from './client.js';
 import type { PantryItemRow } from './types/pantry.js';
 import { rowToRecipe } from './recipesDb.js';
 import type { RecipeRow } from './client.js';
+import { calculatePantryDeduction } from '../matching/pantryDeduction.js';
+import { buildMappingKeys } from '../matching/baseNameCanonical.js';
 
 export function rowToPantryItem(row: PantryItemRow): PantryItem {
   return {
@@ -51,9 +54,35 @@ export async function createPantryItem(
       typeof dto.shelfLifeDays === 'number' && dto.shelfLifeDays > 0
         ? dto.shelfLifeDays
         : getDefaultShelfLifeDays(dto.category, dto.baseName || dto.name);
-    const d = new Date();
-    d.setDate(d.getDate() + shelfDays);
-    expiresAt = d.toISOString().split('T')[0];
+    expiresAt = calculateExpiresAtDate(shelfDays);
+  }
+
+  // Check if an existing pantry item with matching canonical key already exists
+  const existingItems = await listPantryItems(userId);
+  const newKeys = new Set(buildMappingKeys(dto.baseName, dto.name));
+  const existing = existingItems.find((p) => {
+    if (dto.canonicalId && p.canonicalId && dto.canonicalId === p.canonicalId) return true;
+    const pKeys = buildMappingKeys(p.baseName, p.name);
+    return pKeys.some((k) => newKeys.has(k));
+  });
+
+  if (existing) {
+    // If existing item is empty (amount <= 0), replenish it directly.
+    // If existing item has the same unit, add the new amount to stock.
+    let updatedAmount = dto.amount || 0;
+    if (existing.amount > 0 && existing.unit.toLowerCase().trim() === dto.unit.toLowerCase().trim()) {
+      updatedAmount = existing.amount + (dto.amount || 0);
+    }
+
+    return updatePantryItem(existing.id, userId, {
+      name: existing.amount > 0 ? existing.name : dto.name,
+      baseName: existing.baseName ?? dto.baseName,
+      category: dto.category ?? existing.category,
+      amount: updatedAmount,
+      unit: existing.amount > 0 ? existing.unit : dto.unit,
+      canonicalId: dto.canonicalId ?? existing.canonicalId ?? undefined,
+      expiresAt: expiresAt ?? existing.expiresAt,
+    });
   }
 
   const { data, error } = await getClient()
@@ -88,9 +117,11 @@ export async function updatePantryItem(
 
   if (dto.name !== undefined) updates.name = dto.name;
   if (dto.baseName !== undefined) updates.base_name = dto.baseName;
+  if (dto.mappingKey !== undefined) updates.mapping_key = dto.mappingKey;
   if (dto.category !== undefined) updates.category = dto.category;
   if (dto.amount !== undefined) updates.amount = Math.max(0, dto.amount);
   if (dto.unit !== undefined) updates.unit = dto.unit;
+  if (dto.canonicalId !== undefined) updates.canonical_id = dto.canonicalId;
   if (dto.notes !== undefined) updates.notes = dto.notes;
   if (dto.expiresAt !== undefined) updates.expires_at = dto.expiresAt;
 
@@ -112,7 +143,7 @@ export async function updatePantryItem(
   return rowToPantryItem(data as unknown as PantryItemRow);
 }
 
-export async function deletePantryItem(id: string, userId: string): Promise<void> {
+export async function deletePantryItem(id: string, userId: string): Promise<boolean> {
   const { error } = await getClient()
     .from('pantry_items')
     .delete()
@@ -120,16 +151,18 @@ export async function deletePantryItem(id: string, userId: string): Promise<void
     .eq('user_id', userId);
 
   if (error) throw wrapError('deletePantryItem', error);
+  return true;
 }
 
 /**
- * Deduct ingredients consumed by cooking a recipe from user's pantry, floored at 0.
+ * Deducts ingredients of a cooked recipe from user's pantry.
+ * Floors amounts at 0 rather than deleting items.
  */
-export async function consumePantryForRecipe(
-  userId: string,
-  recipe: Recipe
+export async function deductRecipeIngredientsFromPantry(
+  recipe: Recipe,
+  userId: string
 ): Promise<{ consumedCount: number }> {
-  if (!recipe.ingredients || recipe.ingredients.length === 0) {
+  if (!recipe.ingredients || !Array.isArray(recipe.ingredients)) {
     return { consumedCount: 0 };
   }
 
@@ -143,29 +176,19 @@ export async function consumePantryForRecipe(
   for (const group of recipe.ingredients) {
     if (!group.items) continue;
     for (const ing of group.items) {
-      const ingName = (ing.name || '').toLowerCase().trim();
-      const ingBase = (ing.baseName || '').toLowerCase().trim();
+      const ingKeys = new Set(buildMappingKeys(ing.baseName, ing.name, ing.synonyms, ing.parentIngredient));
 
       const match = pantryItems.find((p) => {
-        const pName = (p.name || '').toLowerCase().trim();
-        const pBase = (p.baseName || '').toLowerCase().trim();
+        if (p.amount <= 0) return false;
         if (ing.canonicalId && p.canonicalId && ing.canonicalId === p.canonicalId) return true;
-        if (ingBase && pBase && ingBase === pBase) return true;
-        return ingName === pName || (ingBase && pName === ingBase) || (pBase && ingName === pBase);
+        const pKeys = buildMappingKeys(p.baseName, p.name);
+        return pKeys.some((k) => ingKeys.has(k));
       });
 
       if (match && match.amount > 0) {
-        // Calculate reduction with basic unit normalization (g vs kg, ml vs l)
-        let deduction = ing.amount || 0;
-        const ingUnit = (ing.unit || '').toLowerCase().trim();
-        const pantryUnit = (match.unit || '').toLowerCase().trim();
-
-        if (ingUnit === 'kg' && pantryUnit === 'g') deduction *= 1000;
-        else if (ingUnit === 'g' && pantryUnit === 'kg') deduction /= 1000;
-        else if (ingUnit === 'l' && (pantryUnit === 'ml' || pantryUnit === 'milliliter')) deduction *= 1000;
-        else if ((ingUnit === 'ml' || ingUnit === 'milliliter') && pantryUnit === 'l') deduction /= 1000;
-
-        const newAmount = Math.max(0, match.amount - deduction);
+        // Calculate intelligent reduction with multi-unit normalization (piece <-> grams, volume, containers)
+        const deduction = calculatePantryDeduction(match, ing);
+        const newAmount = Math.max(0, Math.round((match.amount - deduction) * 100) / 100);
         match.amount = newAmount;
 
         await getClient()
@@ -183,6 +206,16 @@ export async function consumePantryForRecipe(
   }
 
   return { consumedCount };
+}
+
+/**
+ * Deduct ingredients consumed by cooking a recipe from user's pantry, floored at 0.
+ */
+export async function consumePantryForRecipe(
+  userId: string,
+  recipe: Recipe
+): Promise<{ consumedCount: number }> {
+  return deductRecipeIngredientsFromPantry(recipe, userId);
 }
 
 /**

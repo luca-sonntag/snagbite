@@ -1,16 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, Drawer } from '@heroui/react';
-import { Check, Salad } from 'lucide-react';
+import { Salad } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
-import { getCategoryTheme } from '../../i18n';
+import { usePantry } from '../../context/PantryContext';
 import { hapticLight, hapticNotification } from '../../utils/haptics';
 import type { Ingredient, Recipe } from '../../types';
-import IngredientIcon from '../IngredientIcon';
+import { findPantryStockMatch } from '../ShoppingList/shoppingItemUtils';
+import ShoppingConfirmItem, { type MergedShoppingSheetItem } from './ShoppingConfirmItem';
 
 interface ShoppingConfirmSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  recipe: Recipe;
+  recipe?: Recipe;
   sortedIngredients: Array<{ group: { name: string; items: Ingredient[] }; originalIdx: number }>;
   scaleFactor: number;
   formatAmount: (amount: number | undefined, unit: string | undefined) => string;
@@ -22,30 +23,87 @@ interface ShoppingConfirmSheetProps {
 export default function ShoppingConfirmSheet({
   isOpen,
   onClose,
-  recipe,
   sortedIngredients,
   scaleFactor,
   formatAmount,
   onConfirm,
   recipeLabel,
 }: ShoppingConfirmSheetProps) {
-  const { t, translateCategory } = useI18n();
+  const { t } = useI18n();
+  const { pantryItems } = usePantry();
   const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
 
-  // Initialize selection when drawer opens
+  // Merge ingredients that share a parent in the same recipe across all groups (e.g. Gurkenwasser -> Gewürzgurken)
+  const allItems = useMemo(() => {
+    const allIngredientsInRecipe = sortedIngredients.flatMap((g) => g.group.items);
+    const childMap = new Map<string, Ingredient[]>();
+    const childrenSet = new Set<Ingredient>();
+
+    for (const { group } of sortedIngredients) {
+      for (const ing of group.items) {
+        if (ing.parentIngredient?.baseName || ing.parentIngredient?.name) {
+          const parentBase = (ing.parentIngredient.baseName || '').toLowerCase().trim();
+          const parentName = (ing.parentIngredient.name || '').toLowerCase().trim();
+
+          const parentInRecipe = allIngredientsInRecipe.find(
+            (other) =>
+              other !== ing &&
+              ((other.baseName && other.baseName.toLowerCase().trim() === parentBase) ||
+                other.name.toLowerCase().trim() === parentName)
+          );
+
+          if (parentInRecipe) {
+            childrenSet.add(ing);
+            const parentKey = `${parentInRecipe.name}-${parentInRecipe.baseName || ''}`;
+            const list = childMap.get(parentKey) || [];
+            list.push(ing);
+            childMap.set(parentKey, list);
+          }
+        }
+      }
+    }
+
+    const items: MergedShoppingSheetItem[] = [];
+    sortedIngredients.forEach(({ group, originalIdx }) => {
+      group.items.forEach((ing, idx) => {
+        if (childrenSet.has(ing)) return;
+
+        const parentKey = `${ing.name}-${ing.baseName || ''}`;
+        const children = childMap.get(parentKey) || [];
+
+        items.push({
+          id: `${ing.name}-${originalIdx}-${idx}`,
+          primaryIngredient: ing,
+          childIngredients: children,
+          groupCategory: group.name || ing.category,
+          originalGroupIdx: originalIdx,
+        });
+      });
+    });
+
+    return items;
+  }, [sortedIngredients]);
+
+  // Initialize selection when drawer opens, taking pantry stock & staple status into account
   useEffect(() => {
     if (isOpen) {
       const initial: Record<string, boolean> = {};
-      sortedIngredients.forEach(({ group, originalIdx }) => {
-        group.items.forEach((ing, idx) => {
-          const uniqueId = `${ing.name}-${originalIdx}-${idx}`;
-          // Voreinstellung: Normale Zutaten ausgewählt (true), Vorratszutaten abgewählt (false)
-          initial[uniqueId] = !ing.isStaple;
-        });
+      allItems.forEach((item) => {
+        const requiredAmt = (item.primaryIngredient.amount || 0) * scaleFactor;
+        const stockMatch = findPantryStockMatch(
+          item.primaryIngredient,
+          pantryItems,
+          requiredAmt,
+          item.primaryIngredient.unit
+        );
+        // If stock is sufficient (not partial), it is in stock and deselected by default.
+        // If stock is partial (too little in stock), it remains selected so the user buys more.
+        const inStockAndSufficient = stockMatch ? !stockMatch.isPartial : false;
+        initial[item.id] = !inStockAndSufficient && !item.primaryIngredient.isStaple;
       });
       setSelectedIds(initial);
     }
-  }, [isOpen, sortedIngredients]);
+  }, [isOpen, allItems, pantryItems, scaleFactor]);
 
   const toggleItem = (id: string) => {
     hapticLight();
@@ -58,26 +116,23 @@ export default function ShoppingConfirmSheet({
   const handleConfirm = () => {
     hapticNotification('success');
     const itemsToAdd: Ingredient[] = [];
-    sortedIngredients.forEach(({ group, originalIdx }) => {
-      group.items.forEach((ing, idx) => {
-        const uniqueId = `${ing.name}-${originalIdx}-${idx}`;
-        if (selectedIds[uniqueId]) {
-          const baseAmount = ing.amount || 0;
-          const scaledAmount = baseAmount * scaleFactor;
-          itemsToAdd.push({
-            ...ing,
-            amount: scaledAmount,
-            unit: ing.unit || '',
-            category: group.name || ing.category,
-          });
-        }
-      });
+    allItems.forEach((item) => {
+      if (selectedIds[item.id]) {
+        const ing = item.primaryIngredient;
+        const baseAmount = ing.amount || 0;
+        const scaledAmount = baseAmount * scaleFactor;
+        itemsToAdd.push({
+          ...ing,
+          amount: scaledAmount,
+          unit: ing.unit || '',
+          category: item.groupCategory || ing.category,
+        });
+      }
     });
     onConfirm(itemsToAdd);
     onClose();
   };
 
-  // Count how many are selected
   const selectedCount = Object.values(selectedIds).filter(Boolean).length;
 
   return (
@@ -111,75 +166,27 @@ export default function ShoppingConfirmSheet({
                 </div>
               </Drawer.Header>
 
-              {/* Body */}
-              <Drawer.Body className="overflow-y-auto py-2 flex-1 flex flex-col gap-4">
-                <div className="flex flex-col gap-4">
-                  {sortedIngredients.map(({ group, originalIdx }, sortedIdx) => {
-                    // Check if any items in this group are displayed
-                    if (group.items.length === 0) return null;
-                    const theme = getCategoryTheme(group.name);
-
+              {/* Body: persistent visible scrollbar and flat clean ingredient list */}
+              <Drawer.Body className="overflow-y-scroll py-2 pr-1 flex-1 [scrollbar-width:thin] [scrollbar-color:rgba(156,163,175,0.4)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
+                <div className="flex flex-col gap-1">
+                  {allItems.map((item) => {
+                    const requiredAmt = (item.primaryIngredient.amount || 0) * scaleFactor;
+                    const pantryStockMatch = findPantryStockMatch(
+                      item.primaryIngredient,
+                      pantryItems,
+                      requiredAmt,
+                      item.primaryIngredient.unit
+                    );
                     return (
-                      <div key={sortedIdx} className="flex flex-col gap-1.5">
-                        {recipe.ingredients.length > 1 && (
-                          <h4 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-2 mt-2">
-                            <span className={`w-1 h-3.5 rounded-full ${theme.barClass} shrink-0`} />
-                            <span>{translateCategory(group.name)}</span>
-                          </h4>
-                        )}
-                        <div className="flex flex-col gap-1">
-                          {group.items.map((ing, idx) => {
-                            const scaledAmount = formatAmount(ing.amount, ing.unit);
-                            const amountStr = scaledAmount ? `${scaledAmount} ` : '';
-                            const unitStr = ing.unit ? `${ing.unit}` : '';
-                            const name = ing.name;
-                            const uniqueId = `${name}-${originalIdx}-${idx}`;
-                            const isChecked = !!selectedIds[uniqueId];
-
-                            return (
-                              <div
-                                key={uniqueId}
-                                onClick={() => toggleItem(uniqueId)}
-                                className="flex items-center gap-3 py-2.5 px-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors active:scale-[0.99]"
-                              >
-                                <div className={`w-7 h-7 rounded-xl border-none flex items-center justify-center flex-shrink-0 transition-all ${
-                                  isChecked ? 'bg-emerald-500 text-white shadow-xs' : 'bg-gray-200/80 dark:bg-gray-700/80'
-                                }`}>
-                                  {isChecked && <Check className="w-4 h-4 text-white stroke-[3px]" />}
-                                </div>
-
-                                <IngredientIcon
-                                  baseName={ing.baseName}
-                                  canonicalId={ing.canonicalId}
-                                  category={group.name || ing.category}
-                                  name={name}
-                                  size="md"
-                                  className={isChecked ? '' : 'opacity-40 grayscale'}
-                                />
-
-                                <div className="flex-1 min-w-0 flex flex-col justify-center select-none">
-                                  {/* 1. Name oben */}
-                                  <div className="flex items-baseline flex-wrap gap-x-1.5 min-w-0 text-sm font-medium text-gray-900 dark:text-white leading-snug">
-                                    <span className={isChecked ? '' : 'text-gray-400 dark:text-gray-500'}>{name}</span>
-                                    {ing.isStaple && (
-                                      <span className="inline-flex items-center text-[9px] font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full uppercase tracking-wider select-none align-middle whitespace-nowrap no-underline">
-                                        {t('recipe.staplePillLabel')}
-                                      </span>
-                                    )}
-                                  </div>
-
-                                  {/* 2. Menge kleiner darunter */}
-                                  {(amountStr || unitStr) && (
-                                    <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 leading-normal mt-0.5">
-                                      {amountStr}{unitStr}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
+                      <ShoppingConfirmItem
+                        key={item.id}
+                        item={item}
+                        isChecked={!!selectedIds[item.id]}
+                        onToggle={() => toggleItem(item.id)}
+                        formatAmount={formatAmount}
+                        groupCategory={item.groupCategory}
+                        pantryStockMatch={pantryStockMatch}
+                      />
                     );
                   })}
                 </div>

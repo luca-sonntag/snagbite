@@ -14,34 +14,44 @@ export interface GroupedShoppingList {
 
 export function aggregateShoppingItems(items: ShoppingListItem[]): GroupedShoppingList {
   const toBuyMap = new Map<string, AggregatedShoppingItem>();
-  const inPantryMap = new Map<string, AggregatedShoppingItem>();
   const checkedMap = new Map<string, AggregatedShoppingItem>();
 
   for (const item of items) {
     const parent = getParentIngredient(item);
     const groupKeyName = normalizeFoodBaseKey(item);
-    const displayUnit = normalizeUnit(parent ? parent.unit || item.unit : item.unit);
+    const displayUnit = normalizeUnit(item.unit || (parent ? parent.unit : ''));
 
-    const key = `${groupKeyName.toLowerCase().trim()}|${displayUnit.toLowerCase().trim()}`;
-    const targetMap = item.checked ? checkedMap : item.inPantryWarning ? inPantryMap : toBuyMap;
+    // Key by universal food base key so all components and variants merge into one card
+    const key = groupKeyName.toLowerCase().trim();
+    const targetMap = item.checked ? checkedMap : toBuyMap;
 
     const currentSubName = item.modifier ? `${item.name} (${item.modifier})` : item.name;
     const existing = targetMap.get(key);
 
     if (existing) {
-      existing.amount += item.amount;
+      if (item.inPantryWarning) {
+        existing.inPantryWarning = true;
+      }
+      if (existing.unit.toLowerCase().trim() === displayUnit.toLowerCase().trim()) {
+        existing.amount += item.amount;
+      }
       if (!existing.itemIds.includes(item.id)) {
         existing.itemIds.push(item.id);
       }
       if (!existing.category && item.category) {
         existing.category = item.category;
       }
+      if (!existing.typicalPackageAmount && item.typicalPackageAmount) {
+        existing.typicalPackageAmount = item.typicalPackageAmount;
+        existing.typicalPackageUnit = item.typicalPackageUnit;
+      }
 
       if (
         !existing.subItems &&
         (existing.modifier !== item.modifier ||
           existing.name !== item.name ||
-          existing.baseName !== item.baseName)
+          existing.baseName !== item.baseName ||
+          existing.unit.toLowerCase().trim() !== displayUnit.toLowerCase().trim())
       ) {
         const firstSubName = existing.modifier ? `${existing.name} (${existing.modifier})` : existing.name;
         const firstItemSource = existing.sources[0];
@@ -51,7 +61,7 @@ export function aggregateShoppingItems(items: ShoppingListItem[]): GroupedShoppi
             rawName: existing.name,
             baseName: existing.baseName || existing.name,
             modifier: existing.modifier,
-            amount: existing.amount - item.amount,
+            amount: existing.amount,
             unit: existing.unit,
             recipeTitle: firstItemSource?.recipeTitle || '',
           },
@@ -63,6 +73,7 @@ export function aggregateShoppingItems(items: ShoppingListItem[]): GroupedShoppi
         const sub = existing.subItems.find(
           (s) =>
             s.name.toLowerCase() === currentSubName.toLowerCase() &&
+            s.unit.toLowerCase().trim() === item.unit.toLowerCase().trim() &&
             s.recipeTitle === item.recipeTitle
         );
         if (sub) {
@@ -123,6 +134,8 @@ export function aggregateShoppingItems(items: ShoppingListItem[]): GroupedShoppi
         canonicalId: item.canonicalId || undefined,
         itemIds: [item.id],
         inPantryWarning: item.inPantryWarning,
+        typicalPackageAmount: item.typicalPackageAmount,
+        typicalPackageUnit: item.typicalPackageUnit,
         sources: [
           {
             recipeId: item.recipeId,
@@ -136,9 +149,10 @@ export function aggregateShoppingItems(items: ShoppingListItem[]): GroupedShoppi
     }
   }
 
+  const toBuyList = Array.from(toBuyMap.values());
   return {
-    toBuy: Array.from(toBuyMap.values()),
-    inPantry: Array.from(inPantryMap.values()),
+    toBuy: toBuyList,
+    inPantry: toBuyList.filter((i) => i.inPantryWarning),
     checked: Array.from(checkedMap.values()),
   };
 }

@@ -19,16 +19,14 @@ export default function RecipeRemixList({
   const { getAccessToken } = useAuth();
   const { t } = useI18n();
   const [remixes, setRemixes] = useState<Recipe[]>([]);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     let isCancelled = false;
     async function loadRemixes() {
       if (!parentRecipeId) return;
-      const token = await getAccessToken();
-      if (!token) return;
-      setLoading(true);
       try {
+        const token = await getAccessToken();
+        if (!token || isCancelled) return;
         const res = await fetch(apiUrl(`/api/recipes/${parentRecipeId}/remixes`), {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -40,8 +38,6 @@ export default function RecipeRemixList({
         }
       } catch (err) {
         console.warn('[RecipeRemixList] Failed to fetch remixes:', err);
-      } finally {
-        if (!isCancelled) setLoading(false);
       }
     }
 
@@ -51,7 +47,7 @@ export default function RecipeRemixList({
     };
   }, [parentRecipeId, getAccessToken]);
 
-  if (!loading && remixes.length === 0) {
+  if (remixes.length === 0) {
     return null;
   }
 

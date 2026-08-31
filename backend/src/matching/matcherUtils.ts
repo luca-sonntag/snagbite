@@ -22,47 +22,7 @@ export function normalizeSearchTerm(term: string): string {
     .trim();
 }
 
-/**
- * Normalizes culinary measurement units to canonical keys.
- */
-export function normalizeUnit(unit: string): string {
-  if (!unit) return 'piece';
-  const u = unit.toLowerCase().trim();
-  if (['g', 'gramm', 'grams', 'gram', 'gr', 'g.'].includes(u)) return 'g';
-  if (['kg', 'kilogramm', 'kilograms', 'kilo'].includes(u)) return 'kg';
-  if (['ml', 'milliliter', 'milliliters'].includes(u)) return 'ml';
-  if (['l', 'liter', 'liters', 'ltr'].includes(u)) return 'l';
-  if (['el', 'esslöffel', 'tbsp', 'tablespoon', 'tablespoons'].includes(u)) return 'tablespoon';
-  if (['tl', 'teelöffel', 'tsp', 'teaspoon', 'teaspoons'].includes(u)) return 'teaspoon';
-  if (['stk', 'stück', 'stueck', 'piece', 'pieces', 'pc', 'pcs', 'x'].includes(u)) return 'piece';
-  if (['scheibe', 'scheiben', 'slice', 'slices'].includes(u)) return 'slice';
-  if (
-    [
-      'packung',
-      'packungen',
-      'pkg',
-      'pack',
-      'packs',
-      'package',
-      'packages',
-      'pck',
-      'pckg',
-      'päckchen',
-      'paeckchen',
-      'beutel',
-    ].includes(u)
-  )
-    return 'pack';
-  if (['dose', 'dosen', 'can', 'cans', 'tin'].includes(u)) return 'can';
-  if (['glas', 'gläser', 'glaeser', 'jar', 'jars'].includes(u)) return 'jar';
-  if (['becher', 'tub', 'tubs'].includes(u)) return 'cup';
-  if (['tasse', 'tassen', 'cup', 'cups'].includes(u)) return 'cup';
-  if (['bund', 'bunch', 'bunches'].includes(u)) return 'bunch';
-  if (['prise', 'prisen', 'pinch', 'pinches'].includes(u)) return 'pinch';
-  if (['zehe', 'zehen', 'clove', 'cloves'].includes(u)) return 'clove';
-  if (['handvoll', 'handful'].includes(u)) return 'handful';
-  return 'piece';
-}
+export { normalizeUnit } from '@cookbook/shared';
 
 /**
  * Normalizes supermarket category names to match canonical categories.

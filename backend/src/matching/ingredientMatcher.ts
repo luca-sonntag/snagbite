@@ -105,10 +105,14 @@ export async function resolveAndRemember(
 
   const typicalPackageAmount = resolved?.typicalPackageAmount ?? input.typicalPackageAmount ?? null;
   const typicalPackageUnit = resolved?.typicalPackageUnit ?? input.typicalPackageUnit ?? null;
-  const shelfLifeDays =
+  const rawShelfLife =
     resolved?.shelfLifeDays ??
     input.shelfLifeDays ??
     getDefaultShelfLifeDays(category, input.baseName || input.name);
+
+  // Guarantee supermarket-realistic minimum shelf life (avoid 1-day fresh counter panic)
+  const isMeatOrFish = category === 'MEAT_POULTRY' || category === 'SEAFOOD';
+  const shelfLifeDays = isMeatOrFish ? Math.max(3, rawShelfLife) : Math.max(2, rawShelfLife);
 
   // ALWAYS store in ingredient_mappings so 100% of ingredients are learned & cached
   if (keys.length > 0) {

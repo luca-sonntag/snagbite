@@ -82,6 +82,8 @@ export function useShoppingList() {
       notes: ing.notes,
       category: ing.category,
       canonicalId: ing.canonicalId,
+      typicalPackageAmount: ing.typicalPackageAmount,
+      typicalPackageUnit: ing.typicalPackageUnit,
     }));
 
     const token = await getAccessToken();
@@ -151,7 +153,7 @@ export function useShoppingList() {
     setShoppingList((prev) => [newItem, ...prev]);
   };
 
-  // Toggle check state of item IDs (with auto-pantry transfer on backend)
+  // Toggle check state of item IDs (in-cart status only; pantry transfer happens on finishShopping)
   const toggleItemIds = async (itemIds: string[], targetChecked: boolean) => {
     if (!itemIds || itemIds.length === 0) return;
     const idSet = new Set(itemIds);
@@ -163,11 +165,8 @@ export function useShoppingList() {
         await fetch(apiUrl('/api/shopping-list/batch-toggle'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ ids: itemIds, checked: targetChecked, autoAddToPantry: true }),
+          body: JSON.stringify({ ids: itemIds, checked: targetChecked, autoAddToPantry: false }),
         });
-        if (targetChecked) {
-          window.dispatchEvent(new CustomEvent('pantry-updated'));
-        }
       } catch (err) {
         console.error('[ShoppingList] Toggle failed:', err);
       }
@@ -206,15 +205,21 @@ export function useShoppingList() {
     }
   };
 
-  const clearChecked = async () => {
+  const clearChecked = async (transferToPantry = true) => {
     setShoppingList((prev) => prev.filter((item) => !item.checked));
     const token = await getAccessToken();
     if (token) {
       fetch(apiUrl('/api/shopping-list/clear'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ onlyChecked: true }),
-      }).catch(() => {});
+        body: JSON.stringify({ onlyChecked: true, transferToPantry }),
+      })
+        .then(() => {
+          if (transferToPantry) {
+            window.dispatchEvent(new CustomEvent('pantry-updated'));
+          }
+        })
+        .catch(() => {});
     }
   };
 

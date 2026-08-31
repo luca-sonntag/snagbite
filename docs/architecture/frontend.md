@@ -191,4 +191,8 @@ Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird
   * Zeigt visuelle Indikatoren für ablaufende Zutaten (`🔥 2 laufen bald ab!`), Trefferanzahl und fehlende Zutaten.
   * Erlaubt sofortiges Kochen mit automatischem Vorratsabzug.
 * **Wochenplaner-Filter („Vorrat verwerten"):** Im Rezept-Picker des Wochenplaners (`RecipePickerModal.tsx`) sortiert der Filter-Chip *„Vorrat"* alle Rezepte nach dem Deckungsgrad mit dem aktuellen Vorratsbestand.
+* **Vorratsabgleich im Einkaufs-Bestätigungssheet (`ShoppingConfirmSheet.tsx` & `ShoppingConfirmItem.tsx`):**
+  * Beim Hinzufügen von Zutaten aus einem Rezept oder im Batch-Modus aus dem Wochenplaner gleicht `findPantryStock(ingredient, pantryItems)` jede Zutat live mit dem echten Vorratsspeicher ab.
+  * Zeigt drei klare Zustände: Vorhandene Vorratsartikel (mit `<Package />`-Badge, z. B. `200 g im Vorrat`, vorausgewählt abgewählt), statische Grundzutaten/Staples (neutrales `VORRAT`-Badge, abgewählt) und zu kaufende Zutaten (vorausgewählt angewählt).
+
 

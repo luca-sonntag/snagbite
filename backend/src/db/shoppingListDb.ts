@@ -8,6 +8,8 @@ import {
 import { getClient, wrapError, isNoRowsError, num } from './client.js';
 import type { ShoppingListRow } from './types/shoppingList.js';
 import { createPantryItem } from './pantryDb.js';
+import { buildMappingKeys } from '../matching/baseNameCanonical.js';
+import { lookupMapping } from '../matching/mappingStore.js';
 
 export function rowToShoppingListItem(row: ShoppingListRow): ShoppingListItem {
   return {
@@ -40,7 +42,27 @@ export async function listShoppingList(userId: string): Promise<ShoppingListItem
     .order('created_at', { ascending: true });
 
   if (error) throw wrapError('listShoppingList', error);
-  return (data as unknown as ShoppingListRow[] || []).map(rowToShoppingListItem);
+  const rows = (data as unknown as ShoppingListRow[] || []);
+
+  const items: ShoppingListItem[] = [];
+  for (const row of rows) {
+    const item = rowToShoppingListItem(row);
+    const keys = buildMappingKeys(item.baseName, item.name, undefined, item.parentIngredient);
+    if (keys.length > 0) {
+      try {
+        const mapping = await lookupMapping(keys, item.category || '');
+        if (mapping?.typicalPackageAmount && Number(mapping.typicalPackageAmount) > 0) {
+          item.typicalPackageAmount = Number(mapping.typicalPackageAmount);
+          item.typicalPackageUnit = mapping.typicalPackageUnit || undefined;
+        }
+      } catch {
+        // Non-fatal
+      }
+    }
+    items.push(item);
+  }
+
+  return items;
 }
 
 export async function createShoppingListItem(
@@ -248,7 +270,27 @@ export async function deleteShoppingListItems(userId: string, ids: string[]): Pr
   if (error) throw wrapError('deleteShoppingListItems', error);
 }
 
-export async function clearShoppingList(userId: string, onlyChecked = false): Promise<void> {
+export async function clearShoppingList(
+  userId: string,
+  onlyChecked = false,
+  transferToPantry = false
+): Promise<void> {
+  if (transferToPantry && onlyChecked) {
+    const { data: checkedRows } = await getClient()
+      .from('shopping_list')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('checked', true);
+
+    if (checkedRows && checkedRows.length > 0) {
+      for (const row of checkedRows as unknown as ShoppingListRow[]) {
+        await autoTransferToPantry(userId, row).catch((err) =>
+          console.warn('Failed to transfer shopping item to pantry on finish:', err)
+        );
+      }
+    }
+  }
+
   let query = getClient().from('shopping_list').delete().eq('user_id', userId);
   if (onlyChecked) {
     query = query.eq('checked', true);
@@ -268,32 +310,34 @@ export async function removeRecipeFromShoppingList(userId: string, recipeId: str
 }
 
 async function autoTransferToPantry(userId: string, item: ShoppingListRow): Promise<void> {
+  const parent = item.parent_ingredient as { name?: string; baseName?: string; unit?: string } | null;
+  const pantryName = parent?.name || item.name;
+  const pantryBaseName = parent?.baseName || item.base_name;
+
   let packageAmount = num(item.amount) || 1;
-  let packageUnit = item.unit;
-  let shelfLifeDays = getDefaultShelfLifeDays(item.category, item.base_name || item.name);
+  let packageUnit = parent?.unit || item.unit;
+  let shelfLifeDays = getDefaultShelfLifeDays(item.category, pantryBaseName || pantryName);
 
-  // Check ingredient mappings for typical package info
-  const searchKey = (item.base_name || item.name || '').toLowerCase().trim();
-  if (searchKey) {
-    const { data: mapping } = await getClient()
-      .from('ingredient_mappings')
-      .select('typical_package_amount, typical_package_unit, shelf_life_days')
-      .eq('mapping_key', searchKey)
-      .limit(1)
-      .maybeSingle();
-
+  // 1. Check canonical ingredient mappings using alias discovery (e.g. Gewürzgurken <-> pickle)
+  const keys = buildMappingKeys(pantryBaseName ?? undefined, pantryName, undefined, parent);
+  if (keys.length > 0) {
+    const mapping = await lookupMapping(keys, item.category || '');
     if (mapping) {
-      if (mapping.typical_package_amount) {
-        packageAmount = Math.max(packageAmount, Number(mapping.typical_package_amount));
+      if (mapping.typicalPackageAmount && Number(mapping.typicalPackageAmount) > 0) {
+        const pkgAmt = Number(mapping.typicalPackageAmount);
+        const pkgUnit = mapping.typicalPackageUnit || packageUnit;
+        if (pkgUnit.toLowerCase() === item.unit.toLowerCase()) {
+          packageAmount = Math.max(packageAmount, pkgAmt);
+        } else {
+          packageAmount = pkgAmt;
+        }
+        packageUnit = pkgUnit;
       }
-      if (mapping.typical_package_unit) {
-        packageUnit = mapping.typical_package_unit;
-      }
-      if (mapping.shelf_life_days) {
-        shelfLifeDays = mapping.shelf_life_days;
+      if (mapping.shelfLifeDays) {
+        shelfLifeDays = mapping.shelfLifeDays;
       }
     } else if (item.recipe_id) {
-      // Fallback: check the linked recipe ingredients if not yet cached in ingredient_mappings
+      // 2. Fallback: check linked recipe ingredients
       try {
         const { data: recData } = await getClient()
           .from('recipes')
@@ -303,17 +347,22 @@ async function autoTransferToPantry(userId: string, item: ShoppingListRow): Prom
           .maybeSingle();
 
         if (recData?.ingredients && Array.isArray(recData.ingredients)) {
+          const keySet = new Set(keys);
           for (const group of recData.ingredients as any[]) {
             if (!group?.items || !Array.isArray(group.items)) continue;
             for (const ing of group.items) {
-              const ingBase = (ing.baseName || ing.name || '').toLowerCase().trim();
-              const ingName = (ing.name || '').toLowerCase().trim();
-              if (ingBase === searchKey || ingName === searchKey) {
-                if (ing.typicalPackageAmount) {
-                  packageAmount = Math.max(packageAmount, Number(ing.typicalPackageAmount));
-                }
-                if (ing.typicalPackageUnit) {
-                  packageUnit = ing.typicalPackageUnit;
+              const ingKeys = buildMappingKeys(ing.baseName, ing.name, ing.synonyms, ing.parentIngredient);
+              const isMatch = ingKeys.some((k) => keySet.has(k));
+              if (isMatch) {
+                if (ing.typicalPackageAmount && Number(ing.typicalPackageAmount) > 0) {
+                  const pkgAmt = Number(ing.typicalPackageAmount);
+                  const pkgUnit = ing.typicalPackageUnit || packageUnit;
+                  if (pkgUnit.toLowerCase() === item.unit.toLowerCase()) {
+                    packageAmount = Math.max(packageAmount, pkgAmt);
+                  } else {
+                    packageAmount = pkgAmt;
+                  }
+                  packageUnit = pkgUnit;
                 }
                 if (ing.shelfLifeDays) {
                   shelfLifeDays = ing.shelfLifeDays;
@@ -330,8 +379,8 @@ async function autoTransferToPantry(userId: string, item: ShoppingListRow): Prom
   }
 
   await createPantryItem(userId, {
-    name: item.name,
-    baseName: item.base_name ?? undefined,
+    name: pantryName,
+    baseName: pantryBaseName ?? undefined,
     category: item.category ?? undefined,
     amount: packageAmount,
     unit: packageUnit,

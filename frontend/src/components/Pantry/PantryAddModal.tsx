@@ -4,6 +4,8 @@ import {
   type PantryItem,
   type CreatePantryItemDto,
   getDefaultShelfLifeDays,
+  calculateExpiresAtDate,
+  getDaysRemaining,
 } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { categoryOrder, translateCategory } from '../../i18n';
@@ -42,12 +44,8 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
       setNotes(initialItem.notes || '');
 
       if (initialItem.expiresAt) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const exp = new Date(initialItem.expiresAt);
-        exp.setHours(0, 0, 0, 0);
-        const diff = Math.max(0, Math.ceil((exp.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
-        setShelfLifeDays(String(diff));
+        const remaining = getDaysRemaining(initialItem.expiresAt);
+        setShelfLifeDays(remaining !== null ? String(Math.max(0, remaining)) : '');
       } else {
         setShelfLifeDays(String(getDefaultShelfLifeDays(initialItem.category, initialItem.name)));
       }
@@ -74,9 +72,7 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
 
       let expiresAt: string | undefined;
       if (numDays !== undefined && !isNaN(numDays)) {
-        const expDate = new Date();
-        expDate.setDate(expDate.getDate() + numDays);
-        expiresAt = expDate.toISOString();
+        expiresAt = calculateExpiresAtDate(numDays);
       }
 
       await onSave({

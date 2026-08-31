@@ -1,5 +1,6 @@
 import React from 'react';
 import { Clock, AlertTriangle, Edit2, Trash2 } from 'lucide-react';
+import { getDaysRemaining } from '@cookbook/shared';
 import type { PantryItem } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { formatQuantity } from '../../utils/formatQuantity';
@@ -15,18 +16,11 @@ interface PantryItemCardProps {
 export const PantryItemCard: React.FC<PantryItemCardProps> = ({ item, onEdit, onDelete }) => {
   const { t } = useI18n();
 
-  // Expiration calculation
+  // Expiration calculation (timezone-safe without off-by-one errors)
   let expiryStatus: 'none' | 'expired' | 'today' | 'soon' | 'ok' = 'none';
-  let expiryDays: number | null = null;
+  const expiryDays = getDaysRemaining(item.expiresAt);
 
-  if (item.expiresAt) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const exp = new Date(item.expiresAt);
-    exp.setHours(0, 0, 0, 0);
-    const diffTime = exp.getTime() - today.getTime();
-    expiryDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
+  if (expiryDays !== null) {
     if (expiryDays < 0) expiryStatus = 'expired';
     else if (expiryDays === 0) expiryStatus = 'today';
     else if (expiryDays <= 3) expiryStatus = 'soon';

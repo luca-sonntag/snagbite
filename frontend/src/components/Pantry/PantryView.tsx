@@ -5,6 +5,7 @@ import { useI18n } from '../../context/I18nContext';
 import { categoryOrder, translateCategory, getCategoryTheme } from '../../i18n';
 import { useDialog } from '../../context/DialogContext';
 import { hapticLight, hapticSelection } from '../../utils/haptics';
+import { getDaysRemaining } from '@cookbook/shared';
 import type { PantryItem, CreatePantryItemDto, PantrySuggestion } from '../../types';
 import { PantryItemCard } from './PantryItemCard';
 import { PantryAddModal } from './PantryAddModal';
@@ -29,16 +30,10 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
 
   // Stats
   const { expiringCount, activeItems } = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
     const active = pantryItems.filter((i) => i.amount > 0);
     const expiring = active.filter((i) => {
-      if (!i.expiresAt) return false;
-      const exp = new Date(i.expiresAt);
-      exp.setHours(0, 0, 0, 0);
-      const diff = Math.ceil((exp.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-      return diff <= 3;
+      const diff = getDaysRemaining(i.expiresAt);
+      return diff !== null && diff <= 3;
     });
 
     return { expiringCount: expiring.length, activeItems: active };

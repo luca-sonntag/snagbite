@@ -49,3 +49,40 @@ export function getDefaultShelfLifeDays(
 
   return 14;
 }
+
+/**
+ * Calculates a standard expiration date string 'YYYY-MM-DD' from now + shelfDays,
+ * safely avoiding midnight timezone shift bugs.
+ */
+export function calculateExpiresAtDate(shelfDays: number, fromDate: Date = new Date()): string {
+  const d = new Date(fromDate);
+  d.setDate(d.getDate() + shelfDays);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Calculates remaining whole days until expiration from an ISO/date string,
+ * avoiding timezone offset and boundary truncation issues.
+ */
+export function getDaysRemaining(expiresAt?: string | null, fromDate: Date = new Date()): number | null {
+  if (!expiresAt) return null;
+  const datePart = expiresAt.split('T')[0];
+  const parts = datePart.split('-').map(Number);
+  if (parts.length !== 3 || parts.some(isNaN)) return null;
+
+  const [expYear, expMonth, expDay] = parts;
+  const fromYear = fromDate.getFullYear();
+  const fromMonth = fromDate.getMonth();
+  const fromDay = fromDate.getDate();
+
+  // Compare calendar days using UTC midnight representation of date components
+  const expUtc = Date.UTC(expYear, expMonth - 1, expDay);
+  const fromUtc = Date.UTC(fromYear, fromMonth, fromDay);
+
+  const diffMs = expUtc - fromUtc;
+  return Math.round(diffMs / (1000 * 60 * 60 * 24));
+}
+

@@ -1,5 +1,5 @@
 import { useI18n } from '../../context/I18nContext';
-import { CheckCheck } from 'lucide-react';
+import { CheckCheck, Package } from 'lucide-react';
 
 interface ShoppingAllDoneStateProps {
   onClear: () => void;
@@ -32,6 +32,12 @@ export default function ShoppingAllDoneState({ onClear }: ShoppingAllDoneStatePr
         <CheckCheck className="w-4 h-4 stroke-[2.25]" />
         <span>{t('shopping.finishShopping')}</span>
       </button>
+
+      {/* Clean Flat harmonious pantry hint capsule */}
+      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/[0.03] dark:bg-white/[0.05] text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-3.5 max-w-[290px] leading-snug">
+        <Package className="w-3.5 h-3.5 shrink-0 text-gray-400 dark:text-gray-500 stroke-[2.2] opacity-80" />
+        <span>{t('shopping.allDonePantryHint')}</span>
+      </div>
     </div>
   );
 }
