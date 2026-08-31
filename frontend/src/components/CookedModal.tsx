@@ -195,9 +195,9 @@ export default function CookedModal({
                 type="button"
                 onClick={handleMarkWithoutPhoto}
                 disabled={isVerifying}
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl text-xs font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-[0.98] transition-all cursor-pointer border-none"
+                className="w-full min-h-[48px] h-12 flex items-center justify-center gap-2.5 px-4 rounded-2xl text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-[0.98] transition-all duration-200 ease-out cursor-pointer border-none"
               >
-                <Check className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
+                <Check className="w-4.5 h-4.5 text-gray-500 dark:text-gray-400 shrink-0" />
                 <span>{t('app.gamification.markWithoutPhoto')}</span>
               </button>
             </div>
@@ -224,7 +224,7 @@ export default function CookedModal({
                 <button
                   type="button"
                   onClick={() => setPhoto(null)}
-                  className="absolute top-2 right-2 rounded-full bg-black/60 p-1.5 text-white backdrop-blur-md hover:bg-black/80 transition-colors"
+                  className="absolute top-2 right-2 rounded-full bg-black/60 p-2 text-white backdrop-blur-md hover:bg-black/80 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer border-none"
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
@@ -261,7 +261,7 @@ export default function CookedModal({
                     setPhoto(null);
                     setRejectionReason(null);
                   }}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 px-4 py-3.5 text-xs font-bold transition-all active:scale-[0.98] cursor-pointer outline-none border-none"
+                  className="w-full min-h-[48px] h-12 flex items-center justify-center gap-2 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 px-4 text-sm font-bold transition-all active:scale-[0.98] cursor-pointer outline-none border-none"
                 >
                   <RotateCcw className="w-4 h-4" />
                   <span>{t('app.gamification.retryPhoto')}</span>
@@ -269,9 +269,9 @@ export default function CookedModal({
                 <button
                   type="button"
                   onClick={handleMarkWithoutPhoto}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl text-xs font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-[0.98] transition-all cursor-pointer border-none"
+                  className="w-full min-h-[48px] h-12 flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-[0.98] transition-all cursor-pointer border-none"
                 >
-                  <Check className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
+                  <Check className="w-4.5 h-4.5 text-gray-500 dark:text-gray-400 shrink-0" />
                   <span>{t('app.gamification.markWithoutPhoto')}</span>
                 </button>
               </div>
@@ -279,7 +279,7 @@ export default function CookedModal({
               <button
                 type="button"
                 onClick={handleVerifyAndSubmit}
-                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 px-4 py-3.5 text-xs font-bold text-white shadow-lg active:scale-[0.98] transition-all"
+                className="w-full min-h-[48px] h-12 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 px-4 text-sm font-bold text-white shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none"
               >
                 <Check className="w-4 h-4" />
                 <span>{t('app.gamification.verifyBtn')}</span>
