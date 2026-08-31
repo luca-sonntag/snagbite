@@ -120,13 +120,13 @@ export default function ShoppingListItem({
 
   return (
     <li
-      className={`rounded-2xl transition-all duration-200 group ${animationClass} ${
+      className={`rounded-xl border-none transition-colors group ${animationClass} ${
         hasPantryHighlight
-          ? 'bg-amber-500/10 dark:bg-amber-500/15 p-1.5 my-1 border border-amber-500/20 dark:border-amber-500/30 shadow-2xs'
+          ? 'bg-amber-500/[0.06] dark:bg-amber-500/[0.10]'
           : 'hover:bg-black/[0.03] dark:hover:bg-white/[0.03]'
       }`}
     >
-      <div className="flex items-center justify-between gap-2 py-1 px-1.5 min-h-[44px]">
+      <div className="flex items-center justify-between gap-2 py-1.5 px-2 min-h-[44px]">
         <button
           type="button"
           onClick={() => {
@@ -178,7 +178,7 @@ export default function ShoppingListItem({
             </div>
 
             {/* 2. Menge & Packungsgröße & Vorrat */}
-            <div className="flex items-center flex-wrap gap-x-1.5 gap-y-1 mt-0.5">
+            <div className="flex items-baseline flex-wrap gap-x-1.5 mt-0.5">
               {packageRecommendation ? (
                 <>
                   <span
@@ -215,8 +215,14 @@ export default function ShoppingListItem({
               ) : null}
 
               {pantryStockStr && (
-                <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-300">
-                  {t('shopping.inPantryStock', { amount: pantryStockStr })}
+                <span
+                  className={`text-[11px] font-semibold transition-all duration-200 ${
+                    isCheckingOff
+                      ? 'text-gray-400 dark:text-gray-500 line-through opacity-60'
+                      : 'text-amber-600 dark:text-amber-400'
+                  }`}
+                >
+                  · {t('shopping.inPantryStock', { amount: pantryStockStr })}
                 </span>
               )}
             </div>
