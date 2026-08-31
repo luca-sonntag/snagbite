@@ -38,8 +38,8 @@ export default function ShoppingListGroup({
   if (groupedCategories.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-2">
-      {groupedCategories.map((group) => {
+    <div className="rounded-2xl md:rounded-3xl bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none p-3 sm:p-4 transition-all flex flex-col gap-3">
+      {groupedCategories.map((group, index) => {
         const isGroupCollapsing = collapsingKeys.has(`group-${group.category}`);
         const theme = getCategoryTheme(group.category);
         const openCount = group.items.length;
@@ -47,11 +47,13 @@ export default function ShoppingListGroup({
         return (
           <div
             key={group.category}
-            className={`flex flex-col p-2.5 rounded-2xl bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] transition-all ${
+            className={`flex flex-col transition-all ${
+              index > 0 ? 'pt-2.5' : ''
+            } ${
               isGroupCollapsing ? 'animate-group-collapse' : 'animate-group-expand'
             }`}
           >
-            <div className="flex items-center justify-between gap-2 px-2 pt-1 pb-1.5 mb-0.5">
+            <div className="flex items-center justify-between gap-2 px-1 pt-0.5 pb-1.5 mb-0.5">
               <div className="flex flex-col gap-1.5 select-none flex-1 min-w-0 text-left">
                 <div className={`w-8 h-1 rounded-full ${theme.barClass}`} />
                 <div className="flex flex-col min-w-0">
@@ -69,14 +71,13 @@ export default function ShoppingListGroup({
                 onClick={() => onGroupHeaderClick(group.items)}
                 aria-label={t('shopping.checkGroup', { defaultValue: 'Gruppe abhaken' })}
                 title={t('shopping.checkGroup', { defaultValue: 'Alle in dieser Kategorie abhaken' })}
-                className="flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-black/5 dark:bg-white/5 hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400 text-gray-500 dark:text-gray-400 text-[11px] font-semibold transition-all cursor-pointer active:scale-95"
+                className="flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-black/5 dark:bg-white/5 hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400 text-gray-500 dark:text-gray-400 text-[11px] font-semibold transition-all cursor-pointer active:scale-95 min-h-[28px]"
               >
                 <CheckCheck className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">{t('shopping.checkAll', { defaultValue: 'Alle' })}</span>
               </button>
             </div>
-            <ul className="flex flex-col gap-1 py-0.5">
-
+            <ul className="flex flex-col gap-0.5 py-0.5">
               {group.items.map((item) => {
                 const displayKey = `unchecked-${getItemKey(item)}`;
                 const pantryStock = findPantryStock(item, pantryItems);
