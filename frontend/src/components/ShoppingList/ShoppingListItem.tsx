@@ -192,13 +192,14 @@ export default function ShoppingListItem({
                   </span>
                   {amountStr && (
                     <span
-                      className={`text-[11px] font-medium transition-all duration-200 ${
+                      className={`text-[11px] font-medium transition-all duration-200 inline-flex items-center gap-1 ${
                         isCheckingOff
                           ? 'text-gray-400 dark:text-gray-500 line-through opacity-60'
                           : 'text-gray-500 dark:text-gray-400'
                       }`}
                     >
-                      · {t('shopping.recipeNeed', { amount: amountStr })}
+                      <span className="opacity-40 font-normal">·</span>
+                      <span>{t('shopping.recipeNeed', { amount: amountStr })}</span>
                     </span>
                   )}
                 </>
