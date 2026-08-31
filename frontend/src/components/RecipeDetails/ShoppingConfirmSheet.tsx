@@ -1,9 +1,8 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, Drawer } from '@heroui/react';
 import { Salad } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { usePantry } from '../../context/PantryContext';
-import { getCategoryTheme } from '../../i18n';
 import { hapticLight, hapticNotification } from '../../utils/haptics';
 import type { Ingredient, Recipe } from '../../types';
 import { findPantryStock } from '../ShoppingList/shoppingItemUtils';
@@ -12,7 +11,7 @@ import ShoppingConfirmItem, { type MergedShoppingSheetItem } from './ShoppingCon
 interface ShoppingConfirmSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  recipe: Recipe;
+  recipe?: Recipe;
   sortedIngredients: Array<{ group: { name: string; items: Ingredient[] }; originalIdx: number }>;
   scaleFactor: number;
   formatAmount: (amount: number | undefined, unit: string | undefined) => string;
@@ -24,14 +23,13 @@ interface ShoppingConfirmSheetProps {
 export default function ShoppingConfirmSheet({
   isOpen,
   onClose,
-  recipe,
   sortedIngredients,
   scaleFactor,
   formatAmount,
   onConfirm,
   recipeLabel,
 }: ShoppingConfirmSheetProps) {
-  const { t, translateCategory } = useI18n();
+  const { t } = useI18n();
   const { pantryItems } = usePantry();
   const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
 
@@ -90,19 +88,21 @@ export default function ShoppingConfirmSheet({
     });
   }, [sortedIngredients]);
 
+  const allItems = useMemo(() => {
+    return mergedGroups.flatMap((g) => g.items);
+  }, [mergedGroups]);
+
   // Initialize selection when drawer opens, taking pantry stock & staple status into account
   useEffect(() => {
     if (isOpen) {
       const initial: Record<string, boolean> = {};
-      mergedGroups.forEach(({ items }) => {
-        items.forEach((item) => {
-          const inStock = !!findPantryStock(item.primaryIngredient, pantryItems);
-          initial[item.id] = !inStock && !item.primaryIngredient.isStaple;
-        });
+      allItems.forEach((item) => {
+        const inStock = !!findPantryStock(item.primaryIngredient, pantryItems);
+        initial[item.id] = !inStock && !item.primaryIngredient.isStaple;
       });
       setSelectedIds(initial);
     }
-  }, [isOpen, mergedGroups, pantryItems]);
+  }, [isOpen, allItems, pantryItems]);
 
   const toggleItem = (id: string) => {
     hapticLight();
@@ -167,38 +167,21 @@ export default function ShoppingConfirmSheet({
                 </div>
               </Drawer.Header>
 
-              {/* Body */}
-              <Drawer.Body className="overflow-y-auto py-2 flex-1 flex flex-col gap-4">
-                <div className="flex flex-col gap-4">
-                  {mergedGroups.map(({ groupName, items }, sortedIdx) => {
-                    if (items.length === 0) return null;
-                    const theme = getCategoryTheme(groupName);
-
+              {/* Body: persistent visible scrollbar and flat clean ingredient list */}
+              <Drawer.Body className="overflow-y-scroll py-2 pr-1 flex-1 [scrollbar-width:thin] [scrollbar-color:rgba(156,163,175,0.4)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
+                <div className="flex flex-col gap-1">
+                  {allItems.map((item) => {
+                    const pantryStock = findPantryStock(item.primaryIngredient, pantryItems);
                     return (
-                      <div key={sortedIdx} className="flex flex-col gap-1.5">
-                        {recipe.ingredients.length > 1 && (
-                          <h4 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-2 mt-2">
-                            <span className={`w-1 h-3.5 rounded-full ${theme.barClass} shrink-0`} />
-                            <span>{translateCategory(groupName)}</span>
-                          </h4>
-                        )}
-                        <div className="flex flex-col gap-1">
-                          {items.map((item) => {
-                            const pantryStock = findPantryStock(item.primaryIngredient, pantryItems);
-                            return (
-                              <ShoppingConfirmItem
-                                key={item.id}
-                                item={item}
-                                isChecked={!!selectedIds[item.id]}
-                                onToggle={() => toggleItem(item.id)}
-                                formatAmount={formatAmount}
-                                groupCategory={groupName}
-                                pantryStock={pantryStock}
-                              />
-                            );
-                          })}
-                        </div>
-                      </div>
+                      <ShoppingConfirmItem
+                        key={item.id}
+                        item={item}
+                        isChecked={!!selectedIds[item.id]}
+                        onToggle={() => toggleItem(item.id)}
+                        formatAmount={formatAmount}
+                        groupCategory={item.groupCategory}
+                        pantryStock={pantryStock}
+                      />
                     );
                   })}
                 </div>

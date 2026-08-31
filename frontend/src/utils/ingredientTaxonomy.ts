@@ -33,7 +33,7 @@ export function normalizeUnit(rawUnit?: string): string {
 /**
  * Resolves the raw parent ingredient if explicitly provided by AI schema.
  */
-export function getParentIngredient(item: { parentIngredient?: ParentIngredientInfo }): ParentIngredientInfo | null {
+export function getParentIngredient(item: { parentIngredient?: ParentIngredientInfo | null }): ParentIngredientInfo | null {
   return item.parentIngredient?.name && item.parentIngredient?.baseName ? item.parentIngredient : null;
 }
 
@@ -44,7 +44,7 @@ export function getParentIngredient(item: { parentIngredient?: ParentIngredientI
 export function normalizeFoodBaseKey(item: {
   name: string;
   baseName?: string;
-  parentIngredient?: ParentIngredientInfo;
+  parentIngredient?: ParentIngredientInfo | null;
 }): string {
   const parent = getParentIngredient(item);
   const rawKey = parent?.baseName || item.baseName || item.name;
@@ -55,7 +55,7 @@ export function normalizeFoodBaseKey(item: {
  * Resolves the display name for a shopping list item cleanly.
  */
 export function getIngredientDisplayName(
-  item: { name: string; baseName?: string; parentIngredient?: ParentIngredientInfo }
+  item: { name: string; baseName?: string; parentIngredient?: ParentIngredientInfo | null }
 ): string {
   const parent = getParentIngredient(item);
   if (parent?.name) {
