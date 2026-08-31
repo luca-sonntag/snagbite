@@ -122,7 +122,7 @@ export default function ShoppingListItem({
     <li
       className={`rounded-xl border-none transition-colors group ${animationClass} ${
         hasPantryHighlight
-          ? 'bg-amber-500/[0.06] dark:bg-amber-500/[0.10]'
+          ? 'bg-amber-500/[0.04] dark:bg-amber-500/[0.08]'
           : 'hover:bg-black/[0.03] dark:hover:bg-white/[0.03]'
       }`}
     >
@@ -177,7 +177,7 @@ export default function ShoppingListItem({
               )}
             </div>
 
-            {/* 2. Menge & Packungsgröße & Vorrat */}
+            {/* 2. Menge & Packungsgröße & Vorrat (Option 3) */}
             <div className="flex items-baseline flex-wrap gap-x-1.5 mt-0.5">
               {packageRecommendation ? (
                 <>
@@ -216,13 +216,14 @@ export default function ShoppingListItem({
 
               {pantryStockStr && (
                 <span
-                  className={`text-[11px] font-semibold transition-all duration-200 ${
+                  className={`text-[11px] font-semibold transition-all duration-200 inline-flex items-center gap-1 ${
                     isCheckingOff
                       ? 'text-gray-400 dark:text-gray-500 line-through opacity-60'
-                      : 'text-amber-600 dark:text-amber-400'
+                      : 'text-amber-700 dark:text-amber-300'
                   }`}
                 >
-                  · {t('shopping.inPantryStock', { amount: pantryStockStr })}
+                  {(packageRecommendation || amountStr) && <span className="opacity-40 font-normal">·</span>}
+                  <span>{t('shopping.inPantryStock', { amount: pantryStockStr })}</span>
                 </span>
               )}
             </div>
