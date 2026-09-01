@@ -1,5 +1,7 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { getClient } from '../db.js';
-import { packIngredientIcons } from '../ingredientIconPacker.js';
+import { packIngredientIcons, getIngredientImagesDir } from '../ingredientIconPacker.js';
 import { isMappingConfirmed } from '../audit/auditManifest.js';
 import {
   loadDailyBudget,
@@ -105,6 +107,15 @@ async function runPipeline() {
   let iconsConfirmed = 0;
   let totalCostRunUsd = 0;
 
+  interface ChangedIconItem {
+    mappingKey: string;
+    action: string;
+    oldPath: string | null;
+    newPath: string;
+    reasoning: string;
+  }
+  const changedIcons: ChangedIconItem[] = [];
+
   for (let i = 0; i < queue.length; i++) {
     const item = queue[i];
     const prefix = `[${i + 1}/${queue.length}][${item.mapping_key}]`;
@@ -140,6 +151,16 @@ async function runPipeline() {
       if (iconRes.zoomApplied) iconsZoomed++;
       if (iconRes.generated) iconsGenerated++;
       if (iconRes.status === 'ai_confirmed') iconsConfirmed++;
+
+      if (iconRes.generated || iconRes.zoomApplied) {
+        changedIcons.push({
+          mappingKey: item.mapping_key,
+          action: iconRes.generated ? (iconRes.oldFilePath ? 'regeneriert (Vision-Fix)' : 'neu generiert') : 'gezoomt (Rand-Fix)',
+          oldPath: iconRes.oldFilePath || null,
+          newPath: iconRes.filePath,
+          reasoning: iconRes.reasoning,
+        });
+      }
 
       console.log(
         `${prefix} 🎨 Icon: [${iconRes.filename}] Status: ${iconRes.status} (Rand: ${(iconRes.marginPct * 100).toFixed(0)}%, Zoom: ${iconRes.zoomApplied ? 'Ja' : 'Nein'}, Gen: ${iconRes.generated ? 'Ja' : 'Nein'})`
@@ -179,7 +200,47 @@ async function runPipeline() {
   console.log(`⭐ Icons bestätigt:         ${iconsConfirmed}`);
   console.log(`💰 Kosten dieses Laufs:     $${totalCostRunUsd.toFixed(5)} USD`);
   console.log(`📈 Gesamte Tagesausgaben:   $${finalBudget.totalSpentUsd.toFixed(4)} / $${dailyBudgetLimit.toFixed(2)} USD`);
-  console.log(`======================================================\n`);
+  console.log(`======================================================`);
+
+  if (changedIcons.length > 0) {
+    console.log(`\n======================================================`);
+    console.log(`🖼️  VERGLEICHS-ÜBERSICHT MODIFIZIERTER ICONS (${changedIcons.length})`);
+    console.log(`======================================================`);
+    for (const icon of changedIcons) {
+      const oldLink = icon.oldPath ? `file:///${icon.oldPath.replace(/\\/g, '/')}` : 'keine Altversion';
+      const newLink = `file:///${icon.newPath.replace(/\\/g, '/')}`;
+      console.log(`• [${icon.mappingKey}] (${icon.action})`);
+      if (icon.oldPath) console.log(`  ⏮️  Alt: ${oldLink}`);
+      console.log(`  ⏭️  Neu: ${newLink}`);
+      console.log(`  💬 Grund: ${icon.reasoning}`);
+    }
+    console.log(`======================================================\n`);
+
+    try {
+      const reportPath = path.join(getIngredientImagesDir(), 'AUDIT_REPORT.md');
+      const mdLines: string[] = [
+        '# 📋 Ingredient Audit Report',
+        `*Stand: ${new Date().toISOString()}*\n`,
+        `### 📊 Zusammenfassung`,
+        `- Geprüfte Zutaten: ${auditedCount}`,
+        `- Modifizierte Mappings: ${mappingsUpdated}`,
+        `- Gezoomte Icons: ${iconsZoomed}`,
+        `- Neu generierte Icons: ${iconsGenerated}\n`,
+        `### 🖼️ Bild-Vergleich (Alt vs. Neu)`,
+        '| Zutat | Aktion | Alt (Backup) | Neu (Aktuell) | Begründung |',
+        '| :--- | :--- | :--- | :--- | :--- |',
+      ];
+      for (const icon of changedIcons) {
+        const oldMd = icon.oldPath ? `[Alt ansehen](file:///${icon.oldPath.replace(/\\/g, '/')})` : '—';
+        const newMd = `[Neu ansehen](file:///${icon.newPath.replace(/\\/g, '/')})`;
+        mdLines.push(`| **${icon.mappingKey}** | ${icon.action} | ${oldMd} | ${newMd} | ${icon.reasoning.replace(/\|/g, '/')} |`);
+      }
+      fs.writeFileSync(reportPath, mdLines.join('\n'), 'utf-8');
+      console.log(`📄 Detaillierter Review-Report gespeichert: file:///${reportPath.replace(/\\/g, '/')}\n`);
+    } catch (err: unknown) {
+      console.warn('[auditIngredientPipeline] Warning writing report:', err);
+    }
+  }
 }
 
 runPipeline().catch((err) => {

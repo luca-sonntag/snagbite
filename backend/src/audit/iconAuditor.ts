@@ -18,6 +18,8 @@ export const MAX_REVIEW_ATTEMPTS = 3;
 
 export interface AuditIconResult {
   filename: string;
+  filePath: string;
+  oldFilePath?: string;
   existed: boolean;
   generated: boolean;
   zoomApplied: boolean;
@@ -54,6 +56,7 @@ export async function auditSingleIcon(params: {
   if (!params.force && isIconConfirmed(filename) && fs.existsSync(filePath)) {
     return {
       filename,
+      filePath,
       existed: true,
       generated: false,
       zoomApplied: false,
@@ -71,6 +74,7 @@ export async function auditSingleIcon(params: {
     const exists = fs.existsSync(filePath);
     return {
       filename,
+      filePath,
       existed: exists,
       generated: !exists,
       zoomApplied: false,
@@ -89,15 +93,13 @@ export async function auditSingleIcon(params: {
   let visualPass = false;
   let finalReasoning = 'Geometric and vision checks passed.';
   let activePromptOverride: string | undefined = undefined;
+  let archivedOldPath: string | undefined = undefined;
   let currentPrompt = '';
   let geometry: IconGeometryResult = {
-    width: 512,
-    height: 512,
+    width: 512, height: 512,
     bbox: { minX: 0, minY: 0, maxX: 0, maxY: 0, objectWidth: 0, objectHeight: 0 },
     margins: { top: 0.2, bottom: 0.2, left: 0.2, right: 0.2, minMarginPct: 0.2, avgMarginPct: 0.2 },
-    isClipped: false,
-    isTooSmall: false,
-    isAcceptable: false,
+    isClipped: false, isTooSmall: false, isAcceptable: false,
   };
   let attempt = 1;
 
@@ -126,6 +128,7 @@ export async function auditSingleIcon(params: {
       filename = gen.filename;
       filePath = gen.filePath;
       currentPrompt = gen.prompt;
+      if (gen.oldFilePath) archivedOldPath = gen.oldFilePath;
 
       if (!gen.accepted) {
         finalReasoning = 'Newly generated icon was rejected by user in interactive debug mode.';
@@ -143,6 +146,12 @@ export async function auditSingleIcon(params: {
     // Geometric analysis & Lossless Auto-Zoom
     geometry = await analyzeIconGeometry(filePath);
     if (geometry.isTooSmall) {
+      const oldDir = path.join(imagesDir, 'old');
+      const oldFilePath = path.join(oldDir, filename);
+      if (fs.existsSync(filePath) && !fs.existsSync(oldFilePath)) {
+        if (!fs.existsSync(oldDir)) fs.mkdirSync(oldDir, { recursive: true });
+        try { fs.copyFileSync(filePath, oldFilePath); archivedOldPath = oldFilePath; } catch {}
+      }
       const zoomedBuffer = await autoZoomAndPadIcon(filePath, 0.2);
       fs.writeFileSync(filePath, zoomedBuffer);
       geometry = await analyzeIconGeometry(filePath);
@@ -167,6 +176,7 @@ export async function auditSingleIcon(params: {
       totalCostUsd += gen.costUsd;
       generated = true;
       currentPrompt = gen.prompt;
+      if (gen.oldFilePath && !archivedOldPath) archivedOldPath = gen.oldFilePath;
       if (!gen.accepted) {
         finalReasoning = 'Regenerated clipping fix icon was rejected by user in interactive debug mode.';
         break;
@@ -231,6 +241,7 @@ export async function auditSingleIcon(params: {
         totalCostUsd += gen.costUsd;
         generated = true;
         currentPrompt = gen.prompt;
+        if (gen.oldFilePath && !archivedOldPath) archivedOldPath = gen.oldFilePath;
         if (!gen.accepted) {
           finalReasoning = 'Regenerated vision fix icon was rejected by user in interactive debug mode.';
           break;
@@ -268,6 +279,8 @@ export async function auditSingleIcon(params: {
 
   return {
     filename,
+    filePath,
+    oldFilePath: archivedOldPath,
     existed: true,
     generated,
     zoomApplied,

@@ -19,6 +19,7 @@ export interface TriggerIconGenParams {
 export interface TriggerIconGenResult {
   filename: string;
   filePath: string;
+  oldFilePath?: string;
   prompt: string;
   costUsd: number;
   accepted: boolean;
@@ -31,6 +32,17 @@ export async function triggerIconGeneration(
   const targetFilename = `${params.slug}.webp`;
   const targetFilePath = path.join(params.imagesDir, targetFilename);
   const existsOld = fs.existsSync(targetFilePath);
+
+  const oldDir = path.join(params.imagesDir, 'old');
+  const oldFilePath = path.join(oldDir, targetFilename);
+  if (existsOld && !fs.existsSync(oldFilePath)) {
+    if (!fs.existsSync(oldDir)) fs.mkdirSync(oldDir, { recursive: true });
+    try {
+      fs.copyFileSync(targetFilePath, oldFilePath);
+    } catch (err) {
+      console.warn(`[iconGeneratorHelper] Could not backup old icon:`, err);
+    }
+  }
 
   if (params.interactive) {
     const candidateSlug = `${params.slug}_candidate`;
@@ -67,6 +79,7 @@ export async function triggerIconGeneration(
       return {
         filename: targetFilename,
         filePath: targetFilePath,
+        oldFilePath: existsOld ? oldFilePath : undefined,
         prompt: genRes.prompt,
         costUsd: genRes.costs.totalCostUsd,
         accepted: true,
@@ -77,6 +90,7 @@ export async function triggerIconGeneration(
       return {
         filename: targetFilename,
         filePath: targetFilePath,
+        oldFilePath: existsOld ? oldFilePath : undefined,
         prompt: genRes.prompt,
         costUsd: genRes.costs.totalCostUsd,
         accepted: false,
@@ -105,6 +119,7 @@ export async function triggerIconGeneration(
   return {
     filename: genRes.filename,
     filePath: genRes.filePath,
+    oldFilePath: existsOld ? oldFilePath : undefined,
     prompt: genRes.prompt,
     costUsd: genRes.costs.totalCostUsd,
     accepted: true,
