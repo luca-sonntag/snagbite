@@ -22,6 +22,7 @@
     "icons:unpack": "tsx src/scripts/zipIngredientIcons.ts --unpack",
     "icons:generate-missing": "tsx src/scripts/generateMissingIngredientIcons.ts",
     "mappings:backfill": "tsx src/scripts/backfillIngredientMappings.ts",
+    "mappings:consolidate": "tsx src/scripts/consolidateMappingsToCanonical.ts",
     "audit:ingredients": "tsx src/scripts/auditIngredientPipeline.ts",
     "build:off": "tsx src/scripts/buildOpenFoodFactsIndex.ts",
     "test": "node --import tsx --test src/**/*.test.ts"

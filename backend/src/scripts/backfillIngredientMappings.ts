@@ -144,13 +144,18 @@ async function resolveInputs(
 async function runAiOrManualBackfill(options: CliOptions, metrics: BackfillMetrics): Promise<void> {
   const { data: existingRows } = await getClient()
     .from('ingredient_mappings')
-    .select('mapping_key, category');
-  const existingKeys = new Set((existingRows || []).map((r) => r.mapping_key.toLowerCase().trim()));
+    .select('mapping_key, mapping_key_de, aliases, category');
+  const existingKeys = new Set<string>();
   const existingByCategory: Record<string, string[]> = {};
   for (const r of existingRows || []) {
+    if (r.mapping_key) existingKeys.add(r.mapping_key.toLowerCase().trim());
+    if (r.mapping_key_de) existingKeys.add(r.mapping_key_de.toLowerCase().trim());
+    if (Array.isArray(r.aliases)) {
+      for (const a of r.aliases) existingKeys.add(a.toLowerCase().trim());
+    }
     const cat = (r.category || 'OTHER').toUpperCase().trim();
     if (!existingByCategory[cat]) existingByCategory[cat] = [];
-    existingByCategory[cat].push(r.mapping_key);
+    if (r.mapping_key) existingByCategory[cat].push(r.mapping_key);
   }
   console.log(`📦 Bisherige Mappings in DB: ${existingKeys.size} (über ${Object.keys(existingByCategory).length} Kategorien verteilt)`);
 

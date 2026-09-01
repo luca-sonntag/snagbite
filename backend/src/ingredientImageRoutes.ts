@@ -45,11 +45,11 @@ ingredientImageRouter.get('/api/dev/ingredients', async (req: Request, res: Resp
     const iconFiles = files.filter(f => f.toLowerCase().endsWith('.webp') && !f.toLowerCase().startsWith('category_'));
 
     // 2. Fetch database mappings from Postgres (ingredient_mappings)
-    let dbMappings: Array<{ mapping_key: string; category: string | null; product_code: string | null; hit_count?: number }> = [];
+    let dbMappings: Array<{ mapping_key: string; mapping_key_de: string | null; category: string | null; product_code: string | null; hit_count?: number }> = [];
     try {
       const { data, error } = await getClient()
         .from('ingredient_mappings')
-        .select('mapping_key, category, product_code, hit_count')
+        .select('mapping_key, mapping_key_de, category, product_code, hit_count')
         .order('hit_count', { ascending: false });
       if (!error && data) {
         dbMappings = data;
@@ -87,7 +87,7 @@ ingredientImageRouter.get('/api/dev/ingredients', async (req: Request, res: Resp
         items.push({
           id: key,
           slug: key.replace(/\s+/g, '_'),
-          name_de: formatted,
+          name_de: m.mapping_key_de || formatted,
           name_en: formatted,
           category: m.category || 'OTHER',
           hasImage,
