@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import sharp from 'sharp';
 import { GoogleGenerativeAI, FunctionDeclarationSchemaType } from '@google/generative-ai';
 import { config } from '../config.js';
 import { recordAuditSpend } from './budgetTracker.js';
@@ -55,7 +56,15 @@ export async function reviewIconWithGeminiVision(
   }
 
   try {
-    const imageBuffer = fs.readFileSync(filePath);
+    const rawBuffer = fs.readFileSync(filePath);
+    // When an icon has a transparent alpha channel, Gemini Vision's internal image decoder
+    // flattens alpha on black. Flattening onto solid #FFFFFF guarantees Gemini sees the
+    // isolated subject on a clean studio white background:
+    const flattenedBuffer = await sharp(rawBuffer)
+      .flatten({ background: { r: 255, g: 255, b: 255 } })
+      .png()
+      .toBuffer();
+
     const model = client.getGenerativeModel({
       model: config.GEMINI_MODEL || 'gemini-3.1-flash-lite',
       generationConfig: {
@@ -81,12 +90,14 @@ Design system art direction rules:
 
 Strict evaluation criteria:
 1. Is the subject cleanly isolated on a pure solid white background?
+   (The image is rendered on solid white. Transparent assets and studio white backgrounds with subtle soft natural contact shadows underneath are fully allowed.)
 2. Does the image visually depict or represent "${mappingKey}"?
 3. Are there NO forbidden artifacts?
    - FORBIDDEN: Eating utensils (spoons, forks, knives, straws, chopsticks).
    - FORBIDDEN: Large dinner plates, cutting boards, napkins, table surfaces.
    - FORBIDDEN: Human hands, fingers, or body parts.
    - FORBIDDEN: Text, brand logos, packaging watermarks.
+   - FORBIDDEN: Floating debris, disconnected stray crumbs or dust hovering in empty space.
    - REMINDER: A simple small white ceramic pinch bowl or dipping bowl containing spices/sauce is NOT a forbidden utensil/plate; it is explicitly valid.
    - REMINDER: A subtle soft drop shadow or contact shadow underneath is explicitly valid.
 ${baselineSection}
@@ -102,8 +113,8 @@ Reply in valid JSON format only:
       prompt,
       {
         inlineData: {
-          data: imageBuffer.toString('base64'),
-          mimeType: 'image/webp',
+          data: flattenedBuffer.toString('base64'),
+          mimeType: 'image/png',
         },
       },
     ]);

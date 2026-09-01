@@ -11,6 +11,7 @@ import {
   getIconsManifestPath,
   resetManifestsCache,
 } from './auditManifest.js';
+import { getIngredientImagesDir } from '../ingredientImageService.js';
 
 import os from 'node:os';
 import path from 'node:path';
@@ -35,32 +36,44 @@ describe('iconAuditor & visionReviewer', () => {
   });
 
   test('returns confirmed cache hit if already audited in manifest', async () => {
-    fs.writeFileSync(iconPath, 'dummy-icon-content');
-    saveIconsManifest({
-      version: 1,
-      lastUpdated: new Date().toISOString(),
-      entries: {
-        'apple.webp': {
-          filename: 'apple.webp',
-          status: 'ai_confirmed',
-          auditedAt: new Date().toISOString(),
-          marginPct: 0.2,
-          zoomApplied: false,
-          regenerated: false,
-          visualPass: true,
+    const imagesDir = getIngredientImagesDir();
+    const testIconFile = path.join(imagesDir, 'apple.webp');
+    const existedBefore = fs.existsSync(testIconFile);
+    if (!existedBefore) {
+      fs.writeFileSync(testIconFile, 'dummy-icon-content');
+    }
+
+    try {
+      saveIconsManifest({
+        version: 1,
+        lastUpdated: new Date().toISOString(),
+        entries: {
+          'apple.webp': {
+            filename: 'apple.webp',
+            status: 'ai_confirmed',
+            auditedAt: new Date().toISOString(),
+            marginPct: 0.2,
+            zoomApplied: false,
+            regenerated: false,
+            visualPass: true,
+          },
         },
-      },
-    });
+      });
 
-    const res = await auditSingleIcon({
-      mappingKey: 'apple',
-      category: 'FRUITS_VEGETABLES',
-      force: false,
-    });
+      const res = await auditSingleIcon({
+        mappingKey: 'apple',
+        category: 'FRUITS_VEGETABLES',
+        force: false,
+      });
 
-    assert.equal(res.status, 'ai_confirmed');
-    assert.equal(res.costUsd, 0);
-    assert.ok(res.reasoning.includes('manifest cache'));
+      assert.equal(res.status, 'ai_confirmed');
+      assert.equal(res.costUsd, 0);
+      assert.ok(res.reasoning.includes('manifest cache'));
+    } finally {
+      if (!existedBefore && fs.existsSync(testIconFile)) {
+        fs.unlinkSync(testIconFile);
+      }
+    }
   });
 
   test('dry-run mode simulates check without throwing or creating files', async () => {

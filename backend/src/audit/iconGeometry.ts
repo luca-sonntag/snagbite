@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import sharp from 'sharp';
+import { cleanAlphaDebrisAndIslands } from './alphaCleaner.js';
 import type { IconGeometryResult } from './types.js';
 
 export const TARGET_MARGIN_PCT = 0.2; // 20% margin
@@ -190,6 +191,9 @@ export async function centerAndScaleTransparentIcon(
 
   const { data, info } = await image.raw().toBuffer({ resolveWithObject: true });
   const channels = info.channels;
+  if (channels === 4) {
+    cleanAlphaDebrisAndIslands(data, width, height);
+  }
 
   // Find exact alpha bounding box
   let minX = width;
@@ -201,7 +205,7 @@ export async function centerAndScaleTransparentIcon(
     for (let x = 0; x < width; x++) {
       const idx = (y * width + x) * channels;
       const alpha = channels === 4 ? data[idx + 3] : 255;
-      if (alpha > 15) {
+      if (alpha > 20) {
         if (x < minX) minX = x;
         if (x > maxX) maxX = x;
         if (y < minY) minY = y;
@@ -218,14 +222,15 @@ export async function centerAndScaleTransparentIcon(
   const objectWidth = maxX - minX + 1;
   const objectHeight = maxY - minY + 1;
 
-  // Crop exact object bounding box
-  const cropped = await sharp(buffer)
+  // Crop exact object bounding box from cleaned pixel buffer
+  const cropped = await sharp(data, { raw: { width, height, channels } })
     .extract({
       left: minX,
       top: minY,
       width: objectWidth,
       height: objectHeight,
     })
+    .png()
     .toBuffer();
 
   // Target size (e.g. 512 * 0.6 = 307px max dimension)
