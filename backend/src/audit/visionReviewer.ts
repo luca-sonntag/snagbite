@@ -52,6 +52,7 @@ Design system art direction rules:
   * Clear cylindrical glass cruets or bottles holding oils, vinegars or liquids are FULLY ALLOWED.
   * Tumblers/glasses holding beverages are FULLY ALLOWED.
   * Whole produce (fruits, vegetables), cuts of meat, cheese blocks, or bakery pieces should be isolated without plates or bowls.
+- Shadows: Subtle, soft natural contact shadows or gentle, light drop shadows directly underneath the food item/vessel are FULLY ALLOWED and welcome (they ground the object on the white background). Only harsh dark black room shadows or large cast shadows that dirty the white canvas are forbidden.
 
 Strict evaluation criteria:
 1. Is the subject cleanly isolated on a pure solid white background?
@@ -62,11 +63,12 @@ Strict evaluation criteria:
    - FORBIDDEN: Human hands, fingers, or body parts.
    - FORBIDDEN: Text, brand logos, packaging watermarks.
    - REMINDER: A simple small white ceramic pinch bowl or dipping bowl containing spices/sauce is NOT a forbidden utensil/plate; it is explicitly valid.
+   - REMINDER: A subtle soft drop shadow or contact shadow underneath is explicitly valid.
 ${baselineSection}
 
 ADAPTIVE PROMPT REGENERATION:
 If "pass" is false, you MUST provide an "adaptedPrompt" specifically tailored for text-to-image AI (FLUX.1 [schnell]) to fix the issues seen in the current image. If a previous baseline was provided above, use it as a template and adjust the vessel, cut, framing, or exclusions so the next generation succeeds.
-Format for adaptedPrompt: "${mappingKey}, [exact visual staging instructions], isolated on pure solid white background, dead center, 1:1 square icon, 45-degree three-quarter perspective, generous 25% white padding on all sides, studio lighting, zero shadows, no plates, no utensils, no hands, no text".
+Format for adaptedPrompt: "${mappingKey}, [exact visual staging instructions], isolated on pure solid white background, dead center, 1:1 square icon, 45-degree three-quarter perspective, generous 25% white padding on all sides, studio lighting, subtle soft natural contact shadow or gentle drop shadow, no harsh cast shadow, no plates, no utensils, no hands, no text".
 
 Reply in valid JSON format only:
 {"pass": true/false, "reason": "brief explanation", "adaptedPrompt": "prompt if pass is false, else null"}`;

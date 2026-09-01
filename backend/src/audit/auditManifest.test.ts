@@ -15,25 +15,28 @@ import {
   getIconsManifestPath,
 } from './auditManifest.js';
 
+import os from 'node:os';
+import path from 'node:path';
+
 describe('auditManifest', () => {
+  const testMapPath = path.join(os.tmpdir(), `test_mappings_manifest_manifest_${process.pid}.json`);
+  const testIconPath = path.join(os.tmpdir(), `test_icons_manifest_manifest_${process.pid}.json`);
+  process.env.TEST_MAPPINGS_MANIFEST_PATH = testMapPath;
+  process.env.TEST_ICONS_MANIFEST_PATH = testIconPath;
+
   const mapPath = getMappingsManifestPath();
   const iconPath = getIconsManifestPath();
-  let origMap: string | null = null;
-  let origIcon: string | null = null;
 
   beforeEach(() => {
     resetManifestsCache();
-    if (fs.existsSync(mapPath)) origMap = fs.readFileSync(mapPath, 'utf-8');
-    if (fs.existsSync(iconPath)) origIcon = fs.readFileSync(iconPath, 'utf-8');
+    if (fs.existsSync(mapPath)) fs.unlinkSync(mapPath);
+    if (fs.existsSync(iconPath)) fs.unlinkSync(iconPath);
   });
 
   afterEach(() => {
     resetManifestsCache();
-    if (origMap !== null) fs.writeFileSync(mapPath, origMap, 'utf-8');
-    else if (fs.existsSync(mapPath)) fs.unlinkSync(mapPath);
-
-    if (origIcon !== null) fs.writeFileSync(iconPath, origIcon, 'utf-8');
-    else if (fs.existsSync(iconPath)) fs.unlinkSync(iconPath);
+    if (fs.existsSync(mapPath)) fs.unlinkSync(mapPath);
+    if (fs.existsSync(iconPath)) fs.unlinkSync(iconPath);
   });
 
   test('records and queries mapping confirmation status correctly', () => {

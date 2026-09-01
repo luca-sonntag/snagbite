@@ -12,19 +12,22 @@ import {
   resetManifestsCache,
 } from './auditManifest.js';
 
+import os from 'node:os';
+import path from 'node:path';
+
 describe('iconAuditor & visionReviewer', () => {
+  const testManifestPath = path.join(os.tmpdir(), `test_icons_manifest_auditor_${process.pid}.json`);
+  process.env.TEST_ICONS_MANIFEST_PATH = testManifestPath;
   const iconPath = getIconsManifestPath();
-  let origIcon: string | null = null;
 
   beforeEach(() => {
     resetManifestsCache();
-    if (fs.existsSync(iconPath)) origIcon = fs.readFileSync(iconPath, 'utf-8');
+    if (fs.existsSync(iconPath)) fs.unlinkSync(iconPath);
   });
 
   afterEach(() => {
     resetManifestsCache();
-    if (origIcon !== null) fs.writeFileSync(iconPath, origIcon, 'utf-8');
-    else if (fs.existsSync(iconPath)) fs.unlinkSync(iconPath);
+    if (fs.existsSync(iconPath)) fs.unlinkSync(iconPath);
   });
 
   test('MAX_REVIEW_ATTEMPTS is 3', () => {

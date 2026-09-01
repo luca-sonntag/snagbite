@@ -9,11 +9,11 @@ import type {
 } from './types.js';
 
 export function getMappingsManifestPath(): string {
-  return path.join(getIngredientImagesDir(), 'mappings_manifest.json');
+  return process.env.TEST_MAPPINGS_MANIFEST_PATH || path.join(getIngredientImagesDir(), 'mappings_manifest.json');
 }
 
 export function getIconsManifestPath(): string {
-  return path.join(getIngredientImagesDir(), 'icons_manifest.json');
+  return process.env.TEST_ICONS_MANIFEST_PATH || path.join(getIngredientImagesDir(), 'icons_manifest.json');
 }
 
 function makeMappingKey(key: string, category: string): string {

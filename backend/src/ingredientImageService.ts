@@ -403,7 +403,7 @@ export async function buildIngredientPrompt(
     visualTags = getFallbackCategoryTags(item.category, cleanName, item.name_de);
   }
 
-  const prompt = `${cleanName}, isolated on pure solid white background, dead center, 1:1 square icon, 45-degree three-quarter perspective, generous 20% white padding on all sides, complete object fully contained in frame without edge clipping, ${visualTags}, professional commercial culinary studio lighting, soft symmetrical fill light, crisp sharp focus, vibrant natural food colors, zero shadows, no floor shadow, no drop shadow, not cropped, nothing touching the frame edges, no text, no brand labels, no watermark`;
+  const prompt = `${cleanName}, isolated on pure solid white background, dead center, 1:1 square icon, 45-degree three-quarter perspective, generous 20% white padding on all sides, complete object fully contained in frame without edge clipping, ${visualTags}, professional commercial culinary studio lighting, soft symmetrical fill light, crisp sharp focus, vibrant natural food colors, subtle soft natural contact shadow underneath, no harsh dark cast shadows, not cropped, nothing touching the frame edges, no text, no brand labels, no watermark`;
 
   return { prompt, geminiCost };
 }
