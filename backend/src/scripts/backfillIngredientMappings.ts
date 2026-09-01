@@ -142,14 +142,21 @@ async function resolveInputs(
 }
 
 async function runAiOrManualBackfill(options: CliOptions, metrics: BackfillMetrics): Promise<void> {
+  const { data: existingRows } = await getClient()
+    .from('ingredient_mappings')
+    .select('mapping_key');
+  const existingKeys = new Set((existingRows || []).map((r) => r.mapping_key.toLowerCase().trim()));
+  console.log(`📦 Bisherige Mappings in DB: ${existingKeys.size} (werden bei Generierung ausgeschlossen)`);
+
   let rawInputs: ResolverInput[] = [];
 
   if (options.ingredientsList) {
-    rawInputs = parseManualIngredientList(options.ingredientsList);
-    console.log(`📝 Parsed ${rawInputs.length} manually specified ingredient(s)...\n`);
+    const { inputs, skippedCount } = parseManualIngredientList(options.ingredientsList, existingKeys);
+    rawInputs = inputs;
+    console.log(`📝 ${rawInputs.length} neue manuelle Zutat(en) übernommen (${skippedCount} Duplikate/bereits vorhanden übersprungen)...\n`);
   } else {
     const count = options.aiCount ?? (options.all ? 100 : options.limit);
-    console.log(`🤖 Requesting ${count} ingredients from Gemini AI...`);
+    console.log(`🤖 Requesting ${count} fresh ingredients from Gemini AI...`);
     if (options.aiCategory) console.log(`🎯 Category filter: ${options.aiCategory}`);
     if (options.aiPrompt) console.log(`💡 Custom prompt:   ${options.aiPrompt}`);
     console.log('');
@@ -158,8 +165,14 @@ async function runAiOrManualBackfill(options: CliOptions, metrics: BackfillMetri
       prompt: options.aiPrompt,
       category: options.aiCategory,
       count,
+      existingKeys,
     });
-    console.log(`✨ Generated ${rawInputs.length} ingredient(s) via Gemini AI.\n`);
+    console.log(`✨ ${rawInputs.length} garantiert neue Zutat(en) von KI generiert (Duplikate ausgeschlossen).\n`);
+  }
+
+  if (rawInputs.length === 0) {
+    console.log('ℹ️ Keine neuen Zutaten zu verarbeiten (alle existieren bereits oder Liste war leer).');
+    return;
   }
 
   await resolveInputs(rawInputs, options.concurrency, options.verbose, metrics);
