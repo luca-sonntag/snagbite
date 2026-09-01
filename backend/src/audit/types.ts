@@ -64,6 +64,7 @@ export interface DailyBudgetLog {
   totalSpentUsd: number;
   geminiSpentUsd: number;
   fluxSpentUsd: number;
+  bgbusterSpentUsd?: number;
   totalAudits: number;
   totalGenerations: number;
   lastUpdated: string;

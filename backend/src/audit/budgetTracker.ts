@@ -46,6 +46,7 @@ export function loadDailyBudget(): DailyBudgetLog {
       totalSpentUsd: Number(parsed.totalSpentUsd) || 0,
       geminiSpentUsd: Number(parsed.geminiSpentUsd) || 0,
       fluxSpentUsd: Number(parsed.fluxSpentUsd) || 0,
+      bgbusterSpentUsd: Number(parsed.bgbusterSpentUsd) || 0,
       totalAudits: Number(parsed.totalAudits) || 0,
       totalGenerations: Number(parsed.totalGenerations) || 0,
       lastUpdated: parsed.lastUpdated || new Date().toISOString(),
@@ -71,15 +72,18 @@ export function saveDailyBudget(budget: DailyBudgetLog): void {
 export function recordAuditSpend(params: {
   geminiCostUsd?: number;
   fluxCostUsd?: number;
+  bgbusterCostUsd?: number;
   isGeneration?: boolean;
 }): DailyBudgetLog {
   const current = loadDailyBudget();
   const gemini = Number(params.geminiCostUsd || 0);
   const flux = Number(params.fluxCostUsd || 0);
-  const total = gemini + flux;
+  const bgbuster = Number(params.bgbusterCostUsd || 0);
+  const total = gemini + flux + bgbuster;
 
   current.geminiSpentUsd = Number((current.geminiSpentUsd + gemini).toFixed(6));
   current.fluxSpentUsd = Number((current.fluxSpentUsd + flux).toFixed(6));
+  current.bgbusterSpentUsd = Number(((current.bgbusterSpentUsd || 0) + bgbuster).toFixed(6));
   current.totalSpentUsd = Number((current.totalSpentUsd + total).toFixed(6));
   current.totalAudits += 1;
   if (params.isGeneration) {

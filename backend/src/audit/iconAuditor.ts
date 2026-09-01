@@ -11,6 +11,7 @@ import { isBudgetExhausted, DEFAULT_DAILY_BUDGET_USD } from './budgetTracker.js'
 import { reviewIconWithGeminiVision } from './visionReviewer.js';
 import { AbortPipelineError } from './interactivePrompt.js';
 import { triggerIconGeneration } from './iconGeneratorHelper.js';
+import { ensureTransparentAndCenteredIcon } from './transparentIconHelper.js';
 import type { IconAuditEntry, AuditStatus, IconGeometryResult } from './types.js';
 
 export { AbortPipelineError };
@@ -55,17 +56,9 @@ export async function auditSingleIcon(params: {
   // 1. Cache Check
   if (!params.force && isIconConfirmed(filename) && fs.existsSync(filePath)) {
     return {
-      filename,
-      filePath,
-      existed: true,
-      generated: false,
-      zoomApplied: false,
-      visualPass: true,
-      status: 'ai_confirmed',
-      marginPct: 0.2,
-      costUsd: 0,
-      reasoning: 'Icon already verified and confirmed in manifest cache.',
-      attempts: 1,
+      filename, filePath, existed: true, generated: false, zoomApplied: false,
+      visualPass: true, status: 'ai_confirmed', marginPct: 0.2, costUsd: 0,
+      reasoning: 'Icon already verified and confirmed in manifest cache.', attempts: 1,
     };
   }
 
@@ -73,17 +66,10 @@ export async function auditSingleIcon(params: {
   if (params.dryRun) {
     const exists = fs.existsSync(filePath);
     return {
-      filename,
-      filePath,
-      existed: exists,
-      generated: !exists,
-      zoomApplied: false,
-      visualPass: true,
-      status: exists ? 'ai_confirmed' : 'pending',
-      marginPct: 0.2,
-      costUsd: exists ? 0 : 0.0035,
+      filename, filePath, existed: exists, generated: !exists, zoomApplied: false,
+      visualPass: true, status: exists ? 'ai_confirmed' : 'pending', marginPct: 0.2,
+      costUsd: exists ? 0 : 0.0035, attempts: 1,
       reasoning: exists ? '[DRY RUN] Icon exists.' : '[DRY RUN] Missing icon would be generated via Flux.',
-      attempts: 1,
     };
   }
 
@@ -143,9 +129,17 @@ export async function auditSingleIcon(params: {
       }
     }
 
-    // Geometric analysis & Lossless Auto-Zoom
+    // 1. Transparent background & lossless centering (BGBuster, if available)
+    const transRes = await ensureTransparentAndCenteredIcon(filePath, imagesDir);
+    if (transRes.applied) {
+      totalCostUsd += transRes.costUsd;
+      if (transRes.oldFilePath && !archivedOldPath) archivedOldPath = transRes.oldFilePath;
+      zoomApplied = true;
+    }
+
+    // 2. Geometric analysis & Fallback White Auto-Zoom
     geometry = await analyzeIconGeometry(filePath);
-    if (geometry.isTooSmall) {
+    if (!transRes.applied && geometry.isTooSmall) {
       const oldDir = path.join(imagesDir, 'old');
       const oldFilePath = path.join(oldDir, filename);
       if (fs.existsSync(filePath) && !fs.existsSync(oldFilePath)) {

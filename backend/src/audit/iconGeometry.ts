@@ -148,3 +148,108 @@ export async function autoZoomAndPadIcon(
 
   return finalWebp;
 }
+
+/**
+ * Checks whether an image has transparency (at least 1% of pixels have alpha < 50).
+ */
+export async function isImageTransparent(input: Buffer | string): Promise<boolean> {
+  const buffer = typeof input === 'string' ? fs.readFileSync(input) : input;
+  const image = sharp(buffer);
+  const metadata = await image.metadata();
+  if (!metadata.hasAlpha) return false;
+
+  const { data, info } = await image.raw().toBuffer({ resolveWithObject: true });
+  if (info.channels !== 4) return false;
+
+  let transparentCount = 0;
+  const totalPixels = info.width * info.height;
+  for (let i = 3; i < data.length; i += 4) {
+    if (data[i] < 50) {
+      transparentCount++;
+      if (transparentCount > totalPixels * 0.01) return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Extracts the alpha bounding box of an isolated/transparent icon, scales it
+ * to targetMarginPct, and places it dead-center on a transparent canvasSize x canvasSize WebP.
+ * Handles both Zoom-In and Zoom-Out losslessly.
+ */
+export async function centerAndScaleTransparentIcon(
+  input: Buffer | string,
+  targetMarginPct: number = TARGET_MARGIN_PCT,
+  canvasSize: number = 512
+): Promise<Buffer> {
+  const buffer = typeof input === 'string' ? fs.readFileSync(input) : input;
+  const image = sharp(buffer);
+  const metadata = await image.metadata();
+  const width = metadata.width || canvasSize;
+  const height = metadata.height || canvasSize;
+
+  const { data, info } = await image.raw().toBuffer({ resolveWithObject: true });
+  const channels = info.channels;
+
+  // Find exact alpha bounding box
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const idx = (y * width + x) * channels;
+      const alpha = channels === 4 ? data[idx + 3] : 255;
+      if (alpha > 15) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+
+  // If no content found, return original
+  if (maxX === -1 || maxY === -1) {
+    return buffer;
+  }
+
+  const objectWidth = maxX - minX + 1;
+  const objectHeight = maxY - minY + 1;
+
+  // Crop exact object bounding box
+  const cropped = await sharp(buffer)
+    .extract({
+      left: minX,
+      top: minY,
+      width: objectWidth,
+      height: objectHeight,
+    })
+    .toBuffer();
+
+  // Target size (e.g. 512 * 0.6 = 307px max dimension)
+  const maxTargetDimension = Math.round(canvasSize * (1 - 2 * targetMarginPct));
+
+  const resizedObject = await sharp(cropped)
+    .resize(maxTargetDimension, maxTargetDimension, {
+      fit: 'inside',
+      withoutEnlargement: false,
+    })
+    .toBuffer();
+
+  // Center resized object onto 100% transparent canvas
+  const finalWebp = await sharp({
+    create: {
+      width: canvasSize,
+      height: canvasSize,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    },
+  })
+    .composite([{ input: resizedObject, gravity: 'center' }])
+    .webp({ quality: 90, effort: 6 })
+    .toBuffer();
+
+  return finalWebp;
+}

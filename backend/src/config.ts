@@ -83,6 +83,8 @@ export interface Config {
   GENERATE_RECIPE_COVERS: boolean;
   /** fal.ai API key (format: 'Key ...' or raw key). */
   FAL_KEY?: string;
+  /** BGBuster API key for background removal on ingredient icons. */
+  BGBUSTER_API_KEY?: string;
 }
 
 // Validation helper
@@ -149,6 +151,7 @@ export const config: Config = {
   NOTIFICATION_DRY_RUN: getEnv('NOTIFICATION_DRY_RUN', 'false') === 'true',
   GENERATE_RECIPE_COVERS: getEnv('GENERATE_RECIPE_COVERS', 'true') === 'true',
   FAL_KEY: process.env.FAL_KEY || process.env.FLUX_API_KEY,
+  BGBUSTER_API_KEY: process.env.BGBUSTER_API_KEY,
 };
 
 /**

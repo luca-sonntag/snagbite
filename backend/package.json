@@ -29,9 +29,9 @@
     "test": "node --import tsx --test src/**/*.test.ts"
   },
   "dependencies": {
+    "@bgbuster/sdk": "^0.0.2",
     "@cookbook/shared": "*",
     "@google/generative-ai": "^0.11.0",
-
     "@supabase/supabase-js": "^2.108.2",
     "adm-zip": "^0.6.0",
     "cheerio": "^1.2.0",
