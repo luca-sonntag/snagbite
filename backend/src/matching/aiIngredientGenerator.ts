@@ -80,11 +80,6 @@ export async function generateIngredientsWithAi(
   if (options.prompt) {
     userInstruction += ` Additional user guidance: "${options.prompt}".`;
   }
-  if (existingArray.length > 0) {
-    // Pass up to 250 known existing keys so Gemini knows what to avoid
-    const sampleExisting = existingArray.slice(0, 250).join(', ');
-    userInstruction += ` IMPORTANT: Do NOT generate or include any of these already mapped ingredients: [${sampleExisting}].`;
-  }
 
   const res = await model.generateContent(userInstruction);
   const text = res.response.text().trim();
