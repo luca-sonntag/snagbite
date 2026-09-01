@@ -467,6 +467,8 @@ $function$;
 CREATE TABLE IF NOT EXISTS public.ingredient_mappings (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   mapping_key text NOT NULL,
+  mapping_key_de text DEFAULT NULL,
+  aliases text[] DEFAULT '{}'::text[],
   category text NOT NULL DEFAULT '',
   product_code text,
   resolution text NOT NULL CHECK (resolution IN ('matched', 'no_match')),
@@ -483,6 +485,10 @@ CREATE TABLE IF NOT EXISTS public.ingredient_mappings (
 
 CREATE INDEX IF NOT EXISTS ingredient_mappings_key_idx
   ON public.ingredient_mappings (mapping_key);
+CREATE INDEX IF NOT EXISTS ingredient_mappings_key_de_idx
+  ON public.ingredient_mappings (mapping_key_de);
+CREATE INDEX IF NOT EXISTS ingredient_mappings_aliases_gin
+  ON public.ingredient_mappings USING gin(aliases);
 CREATE INDEX IF NOT EXISTS ingredient_mappings_source_created_idx
   ON public.ingredient_mappings (source, created_at DESC);
 

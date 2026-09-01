@@ -6,6 +6,20 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-01: Separate Icon-Generierungs-Skripte durch All-in-One Pipeline (`npm run icons`) ersetzt
+
+* **Ersetzter Code / Getrennte Workflows:**
+  - `generateMissingIngredientIcons.ts` (`npm run icons:generate-missing`): Separates Skript, das lediglich fehlende Icons erzeugte, aber keine Geometrie-Prüfung, kein Auto-Zooming und kein Gemini Vision Review durchführte.
+  - `generateIngredientImage.ts` (`npm run generate:ingredient-image`): Manuelles Entwickler-Skript mit CLI-Flags.
+* **Ersetzt durch:**
+  - **All-in-One Icon & Audit Pipeline ([`auditIngredientPipeline.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/scripts/auditIngredientPipeline.ts), Shortcut `npm run icons`):**
+    - Übernimmt autonom die Generierung fehlender Icons (`--missing-only`), Geometrie-Auditing, Auto-Zooming, Gemini Vision Review mit adaptiven Prompt-Retries, Versions-Sicherung in `old/` und automatisches Repacken des `ingredient-icons.zip`-Archivs.
+    - Gezielte Einzel-Zutaten-Audits via `--key "name"`.
+    - Vollständig automatisierte Prompt-Generierung (manuelle `--prompt`-Flags entfernt).
+* **Betroffene Dateien:** `backend/src/scripts/auditIngredientPipeline.ts`, `backend/src/audit/types.ts`, `backend/package.json`, `backend/src/scripts/README.md`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-08-31: Separater „Schon im Vorrat“-Kartenblock auf der Einkaufsliste durch Inline-Aisle-Highlighting ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**

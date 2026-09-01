@@ -116,20 +116,32 @@ export async function resolveAndRemember(
 
   // ALWAYS store in ingredient_mappings so 100% of ingredients are learned & cached
   if (keys.length > 0) {
-    await storeMapping(keys, category, {
-      productCode: effectiveItem ? effectiveItem.product_code || effectiveItem.id : null,
-      resolution: effectiveItem ? 'matched' : 'no_match',
-      estimatedNutrients: effectiveItem ? null : estimatedNutrients,
-      typicalPackageAmount,
-      typicalPackageUnit,
-      shelfLifeDays,
-      source: 'agent',
-      confidence: resolved?.confidence ?? 0.8,
-      model: resolved?.model ?? config.GEMINI_MODEL,
-      reasoning:
-        resolved?.reasoning ??
-        (effectiveItem ? 'Matched to Open Food Facts product' : 'Extracted from recipe ingredients'),
-    });
+    const mappingKey = canonicalizeBaseName(input.baseName) || keys[0];
+    const mappingKeyDe = canonicalizeBaseName(input.name);
+    const aliases = keys.filter((k) => k !== mappingKey && k !== mappingKeyDe);
+
+    await storeMapping(
+      {
+        mappingKey,
+        mappingKeyDe: mappingKeyDe !== mappingKey ? mappingKeyDe : null,
+        aliases,
+        category,
+      },
+      {
+        productCode: effectiveItem ? effectiveItem.product_code || effectiveItem.id : null,
+        resolution: effectiveItem ? 'matched' : 'no_match',
+        estimatedNutrients: effectiveItem ? null : estimatedNutrients,
+        typicalPackageAmount,
+        typicalPackageUnit,
+        shelfLifeDays,
+        source: 'agent',
+        confidence: resolved?.confidence ?? 0.8,
+        model: resolved?.model ?? config.GEMINI_MODEL,
+        reasoning:
+          resolved?.reasoning ??
+          (effectiveItem ? 'Matched to Open Food Facts product' : 'Extracted from recipe ingredients'),
+      }
+    );
   }
 
   return { match: effectiveItem, estimate: effectiveItem ? null : estimatedNutrients, usage: resolved?.usage };

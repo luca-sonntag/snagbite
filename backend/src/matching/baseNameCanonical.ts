@@ -41,7 +41,8 @@ const PROTECTED_WORDS = new Set([
   'flakes', 'seed', 'seeds', 'meal', 'syrup', 'extract', 'vinegar', 'broth', 'stock',
   'water', 'zest', 'peel', 'ground', 'dried', 'smoked', 'raw', 'cooked',
   'yolk', 'white', 'breast', 'thigh', 'leg', 'wing', 'mince', 'salt',
-  'sugar', 'honey', 'wine', 'beer',
+  'sugar', 'honey', 'wine', 'beer', 'heart', 'liver', 'tongue', 'kidney',
+  'chicken', 'beef', 'pork', 'turkey', 'duck', 'lamb', 'veal', 'goose',
 ]);
 
 for (const word of PROTECTED_WORDS) NOISE_WORDS.delete(word);
@@ -187,8 +188,17 @@ export function buildMappingKeys(
     }
   };
 
-  addKey(baseName);
-  addKey(rawName);
+  const isSpecificModifier =
+    Boolean(rawName) &&
+    /(?:^|\b)(?:mager|zero|light|diet|skimmed|entrahmt|fettarm)/i.test(rawName!) &&
+    (!baseName || !/(?:^|\b)(?:mager|zero|light|diet|skimmed|entrahmt|fettarm)/i.test(baseName));
+
+  if (isSpecificModifier) {
+    addKey(rawName);
+  } else {
+    addKey(baseName);
+    addKey(rawName);
+  }
 
   if (parentIngredient) {
     addKey(parentIngredient.baseName);
@@ -197,7 +207,13 @@ export function buildMappingKeys(
 
   if (Array.isArray(synonyms)) {
     for (const syn of synonyms) {
-      addKey(syn);
+      if (isSpecificModifier) {
+        if (/(?:^|\b)(?:mager|zero|light|diet|skimmed|entrahmt|fettarm)/i.test(syn)) {
+          addKey(syn);
+        }
+      } else {
+        addKey(syn);
+      }
     }
   }
 

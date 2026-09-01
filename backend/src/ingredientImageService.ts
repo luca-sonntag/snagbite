@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, FunctionDeclarationSchemaType } from '@google/generative-ai';
 import { config } from './config.js';
 import type { CanonicalIngredient } from './data/canonicalIngredients.js';
 import { openFoodFactsAccess } from './matching/openFoodFactsIndex.js';
@@ -303,8 +303,20 @@ export async function describeIngredientVisuallyWithGemini(item: CanonicalIngred
       model: modelName,
       generationConfig: {
         temperature: 0.1,
-        maxOutputTokens: 60,
-      },
+        maxOutputTokens: 120,
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: FunctionDeclarationSchemaType.OBJECT,
+          description: 'Visual description of the ingredient icon',
+          properties: {
+            visualDescription: {
+              type: FunctionDeclarationSchemaType.STRING,
+              description: 'Dense, compact English visual subject description (8 to 15 words max), comma-separated visual tags',
+            },
+          },
+          required: ['visualDescription'],
+        },
+      } as any,
       systemInstruction:
         'You are an expert food photography art director creating an ultra-consistent design system of isolated studio culinary icon assets. ' +
         'Given a food ingredient in German/English and its category, output a dense, compact English visual subject description (8 to 15 words max). ' +
@@ -319,10 +331,11 @@ export async function describeIngredientVisuallyWithGemini(item: CanonicalIngred
         '   - WHOLE PRODUCE (Fruits, Vegetables): "single whole pristine piece with natural stem, 45-degree three-quarter view, floating isolated without bowl or plate". ' +
         '   - FRESH HERB SPRIGS: "fresh vibrant crisp herb sprig with aromatic leaves, 45-degree three-quarter view". ' +
         '   - RAW MEAT / FISH / POULTRY: "single raw prime cut or neat fillet, 45-degree three-quarter view, fresh butcher sheen, isolated without plate or tray". ' +
-        '   - CHEESE / BUTTER: "single artisanal wedge or clean geometric block, 45-degree three-quarter view". ' +
+        '   - CHEESE / BUTTER: MUST ALWAYS BE "single pristine triangular artisanal cheese wedge with natural rind or clean solid block, 45-degree three-quarter view". NEVER describe shredded, grated, sliced, or melted cheese unless the ingredient name explicitly demands it. ' +
         '   - GRAINS / FLAKES / SEEDS / NUTS: "neat compact clean mound in the center, 45-degree three-quarter view". ' +
         '   - BEVERAGES: "in a crystal-clear minimalist straight glass tumbler, 45-degree three-quarter view". ' +
-        '3. PROHIBITIONS: ' +
+        '3. PROHIBITIONS & CANONICAL FORM: ' +
+        '   - DEFAULT CANONICAL FORM: Always depict the intact, iconic whole staple (whole fruit, whole cut, artisanal wedge, solid block). NEVER describe scattered piles of shreds, bits, slices, or diced cubes unless the ingredient name itself explicitly demands it (e.g. "shredded", "gerieben", "diced", "cubes"). ' +
         '   - NEVER include utensils (no spoons, forks, knives, straws). ' +
         '   - NEVER include plates, cutting boards, paper towels, or table mats. ' +
         '   - NEVER describe multiple scattered items spread across the scene. Exactly ONE single centered object or ONE single vessel. ' +
@@ -331,7 +344,13 @@ export async function describeIngredientVisuallyWithGemini(item: CanonicalIngred
 
     const userPrompt = `Ingredient: "${item.name_de}" (English: "${item.name_en}", Category: ${item.category})`;
     const res = await model.generateContent(userPrompt);
-    const text = res.response.text().trim().replace(/^["']|["']$/g, '').replace(/\.$/, '');
+    let text = '';
+    try {
+      const parsed = JSON.parse(res.response.text().trim());
+      text = (parsed.visualDescription || '').trim().replace(/^["']|["']$/g, '').replace(/\.$/, '');
+    } catch {
+      text = res.response.text().trim().replace(/^["']|["']$/g, '').replace(/\.$/, '');
+    }
 
     // Extract exact token usage metadata from Gemini response
     const usage = (res.response as any).usageMetadata;
@@ -402,7 +421,7 @@ export async function buildIngredientPrompt(
     visualTags = getFallbackCategoryTags(item.category, cleanName, item.name_de);
   }
 
-  const prompt = `${cleanName}, isolated on pure solid white background, dead center, 1:1 square icon, 45-degree three-quarter perspective, generous 20% white padding on all sides, complete object fully contained in frame without edge clipping, ${visualTags}, professional commercial culinary studio lighting, soft symmetrical fill light, crisp sharp focus, vibrant natural food colors, zero shadows, no floor shadow, no drop shadow, not cropped, nothing touching the frame edges, no text, no brand labels, no watermark`;
+  const prompt = `${cleanName}, isolated on pure solid white background, dead center, 1:1 square icon, 45-degree three-quarter perspective, generous 20% white padding on all sides, complete object fully contained in frame without edge clipping, ${visualTags}, professional commercial culinary studio lighting, soft symmetrical fill light, crisp sharp focus, vibrant natural food colors, subtle soft natural contact shadow underneath, no harsh dark cast shadows, not cropped, nothing touching the frame edges, no text, no brand labels, no watermark`;
 
   return { prompt, geminiCost };
 }

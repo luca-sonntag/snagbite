@@ -45,8 +45,18 @@ Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()` (
   * **CLI-Befehle:**
     * `npm run icons:zip`: Packt alle aktuellen `.webp`-Dateien aus `backend/public/ingredient-icons/` in `ingredient-icons.zip`.
     * `npm run icons:unpack`: Entpackt das Zip-Archiv manuell (unterstützt `--force`).
-    * Der Batch-Generator (`generateBaseNameIngredientIcons.ts`) aktualisiert das Zip-Archiv nach erfolgreicher Generierung automatisch.
+    * `npm run audit:ingredients`: Startet die autonome Audit-Pipeline (unterstützt `--dry-run`, `--interactive` / `-i` / `--debug`, `--limit <N>`, `--budget <USD>`, `--force`, `--key <key>`).
+    * `npm run mappings:backfill`: Befüllt die `ingredient_mappings`-Tabelle (unterstützt `--prod` für Rezepte aus Production, `--ai` / `--ai-prompt` / `--ai-category` / `--count` für synthetische KI-Zutatenlisten, oder `--ingredients="..."` für manuelle Listen).
+    * Der Batch-Generator (`generateBaseNameIngredientIcons.ts`) und die Audit-Pipeline aktualisieren das Zip-Archiv nach Änderungen automatisch.
 
+### Autonome KI-Audit-Pipeline (`backend/src/audit/`)
+* **Ziel:** Kontinuierliche Validierung von OpenFoodFacts-Nährwert-Mappings und Qualitätsprüfung der 512×512 Zutat-Icons.
+* **Ablauf pro Zutat:**
+  1. **Mapping-Plausibilität & OFF-Recherche (`mappingAuditor.ts`):** Prüft Name, Kategorie und Nährwerte. Bei `no_match` oder unplausiblen Zuordnungen führt Gemini eine erweiterte Suche mit Synonymen und Übersetzungen im lokalen SQLite OpenFoodFacts-Index durch und aktualisiert das Mapping in Supabase.
+  2. **Icon-Geometrie & Auto-Zoom (`iconGeometry.ts`):** Pixel-Bounding-Box-Analyse gegen weißen Hintergrund. Bei zu kleinen Motiven (> 25% Randabstand) skaliert Sharp das Motiv verlustfrei auf exakt 20% Randabstand (**$0 API-Kosten**). Bei Rand-Clipping (< 8% Rand) wird das Icon mit Flux-1 neu generiert.
+  3. **Multimodal Vision Check (`iconAuditor.ts`):** Gemini Flash Lite Vision validiert das gerenderte Motiv auf Isoliertheit und Korrektheit.
+* **Lokale Manifeste & Caching (`auditManifest.ts`):** Bestätigte Mappings (`mappings_manifest.json`) und Icons (`icons_manifest.json`) werden lokal gecached, sodass Aliasse und Folgeläufe $0 zusätzliche Kosten verursachen.
+* **Tagesbudget-Schutz (`budgetTracker.ts`):** Überwacht tägliche Ausgaben in `daily_budget.json` gegen `DAILY_AUDIT_BUDGET_USD` (Default: $1.00/Tag) und pausiert die Pipeline bei Erreichen des Limits automatisch.
 
 ---
 
