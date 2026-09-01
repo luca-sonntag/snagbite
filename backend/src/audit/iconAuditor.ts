@@ -14,8 +14,10 @@ import {
   DEFAULT_DAILY_BUDGET_USD,
 } from './budgetTracker.js';
 import { reviewIconWithGeminiVision } from './visionReviewer.js';
+import { promptForComparison, AbortPipelineError } from './interactivePrompt.js';
 import type { IconAuditEntry, AuditStatus, IconGeometryResult } from './types.js';
 
+export { AbortPipelineError };
 export const MAX_REVIEW_ATTEMPTS = 3;
 
 export interface AuditIconResult {
@@ -31,31 +33,84 @@ export interface AuditIconResult {
   attempts?: number;
 }
 
-async function triggerIconGeneration(
-  slug: string,
-  mappingKey: string,
-  category: string,
-  productCode: string | undefined,
-  reasoning: string | undefined,
-  imagesDir: string
-): Promise<{ filename: string; filePath: string; costUsd: number }> {
+async function triggerIconGeneration(params: {
+  slug: string;
+  mappingKey: string;
+  category: string;
+  productCode: string | undefined;
+  reasoning: string | undefined;
+  imagesDir: string;
+  interactive?: boolean;
+}): Promise<{ filename: string; filePath: string; costUsd: number; accepted: boolean }> {
+  const targetFilename = `${params.slug}.webp`;
+  const targetFilePath = path.join(params.imagesDir, targetFilename);
+  const existsOld = fs.existsSync(targetFilePath);
+
+  if (params.interactive) {
+    const candidateSlug = `${params.slug}_candidate`;
+    const candidatePseudoItem: CanonicalIngredient = {
+      id: candidateSlug,
+      product_code: params.productCode || params.slug,
+      name_de: params.reasoning || params.mappingKey,
+      name_en: params.mappingKey,
+      category: params.category || 'OTHER',
+      nutrients_per_100g: { calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 },
+      aliases: [params.mappingKey],
+    };
+
+    const genRes = await generateIngredientIcon(candidatePseudoItem, { outDir: params.imagesDir });
+    recordAuditSpend({ fluxCostUsd: 0.0035, isGeneration: true });
+
+    const decision = await promptForComparison({
+      mappingKey: params.mappingKey,
+      oldPath: existsOld ? targetFilePath : null,
+      candidatePath: genRes.filePath,
+    });
+
+    if (decision === 'abort') {
+      if (fs.existsSync(genRes.filePath)) fs.unlinkSync(genRes.filePath);
+      throw new AbortPipelineError();
+    }
+
+    if (decision === 'accept') {
+      fs.copyFileSync(genRes.filePath, targetFilePath);
+      if (fs.existsSync(genRes.filePath)) fs.unlinkSync(genRes.filePath);
+      return {
+        filename: targetFilename,
+        filePath: targetFilePath,
+        costUsd: genRes.costs.totalCostUsd,
+        accepted: true,
+      };
+    } else {
+      if (fs.existsSync(genRes.filePath)) fs.unlinkSync(genRes.filePath);
+      return {
+        filename: targetFilename,
+        filePath: targetFilePath,
+        costUsd: genRes.costs.totalCostUsd,
+        accepted: false,
+      };
+    }
+  }
+
+  // Non-interactive standard flow
   const pseudoItem: CanonicalIngredient = {
-    id: slug,
-    product_code: productCode || slug,
-    name_de: reasoning || mappingKey,
-    name_en: mappingKey,
-    category: category || 'OTHER',
+    id: params.slug,
+    product_code: params.productCode || params.slug,
+    name_de: params.reasoning || params.mappingKey,
+    name_en: params.mappingKey,
+    category: params.category || 'OTHER',
     nutrients_per_100g: { calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 },
-    aliases: [mappingKey],
+    aliases: [params.mappingKey],
   };
 
-  const genRes = await generateIngredientIcon(pseudoItem, { outDir: imagesDir });
+  const genRes = await generateIngredientIcon(pseudoItem, { outDir: params.imagesDir });
   recordAuditSpend({ fluxCostUsd: 0.0035, isGeneration: true });
 
   return {
     filename: genRes.filename,
     filePath: genRes.filePath,
     costUsd: genRes.costs.totalCostUsd,
+    accepted: true,
   };
 }
 
@@ -67,6 +122,7 @@ export async function auditSingleIcon(params: {
   dryRun?: boolean;
   force?: boolean;
   dailyBudgetLimit?: number;
+  interactive?: boolean;
 }): Promise<AuditIconResult> {
   const imagesDir = getIngredientImagesDir();
   const budgetLimit = params.dailyBudgetLimit ?? DEFAULT_DAILY_BUDGET_USD;
@@ -137,18 +193,26 @@ export async function auditSingleIcon(params: {
         break;
       }
 
-      const gen = await triggerIconGeneration(
+      const gen = await triggerIconGeneration({
         slug,
-        params.mappingKey,
-        params.category,
-        params.productCode,
-        params.reasoning,
-        imagesDir
-      );
+        mappingKey: params.mappingKey,
+        category: params.category,
+        productCode: params.productCode,
+        reasoning: params.reasoning,
+        imagesDir,
+        interactive: params.interactive,
+      });
+
       totalCostUsd += gen.costUsd;
       generated = true;
       filename = gen.filename;
       filePath = gen.filePath;
+
+      if (!gen.accepted) {
+        finalReasoning = 'Newly generated icon was rejected by user in interactive debug mode.';
+        visualPass = false;
+        break;
+      }
     }
 
     // Geometric analysis & Lossless Auto-Zoom
@@ -160,16 +224,22 @@ export async function auditSingleIcon(params: {
       zoomApplied = true;
     } else if (geometry.isClipped && attempt < MAX_REVIEW_ATTEMPTS && !isBudgetExhausted(budgetLimit)) {
       console.log(`[iconAuditor] ✂️ Clipping detected for "${params.mappingKey}". Regenerating with Flux (Attempt ${attempt + 1}/${MAX_REVIEW_ATTEMPTS})...`);
-      const gen = await triggerIconGeneration(
+      const gen = await triggerIconGeneration({
         slug,
-        params.mappingKey,
-        params.category,
-        params.productCode,
-        params.reasoning,
-        imagesDir
-      );
+        mappingKey: params.mappingKey,
+        category: params.category,
+        productCode: params.productCode,
+        reasoning: params.reasoning,
+        imagesDir,
+        interactive: params.interactive,
+      });
+
       totalCostUsd += gen.costUsd;
       generated = true;
+      if (!gen.accepted) {
+        finalReasoning = 'Regenerated clipping fix icon was rejected by user in interactive debug mode.';
+        break;
+      }
       geometry = await analyzeIconGeometry(filePath);
     }
 
@@ -183,7 +253,6 @@ export async function auditSingleIcon(params: {
         `[iconAuditor] ❌ Vision review rejected "${params.mappingKey}" (Attempt ${attempt}/${MAX_REVIEW_ATTEMPTS}): ${vision.reasoning}`
       );
 
-      // Check if we can retry with a fresh generation
       if (attempt < MAX_REVIEW_ATTEMPTS) {
         if (isBudgetExhausted(budgetLimit)) {
           console.log(`[iconAuditor] 🛑 Daily budget limit ($${budgetLimit.toFixed(2)}) reached. Halting review retries.`);
@@ -193,25 +262,28 @@ export async function auditSingleIcon(params: {
         }
 
         console.log(`[iconAuditor] 🔄 Restarting generation for "${params.mappingKey}" based on vision review feedback...`);
-        const gen = await triggerIconGeneration(
+        const gen = await triggerIconGeneration({
           slug,
-          params.mappingKey,
-          params.category,
-          params.productCode,
-          params.reasoning,
-          imagesDir
-        );
+          mappingKey: params.mappingKey,
+          category: params.category,
+          productCode: params.productCode,
+          reasoning: params.reasoning,
+          imagesDir,
+          interactive: params.interactive,
+        });
+
         totalCostUsd += gen.costUsd;
         generated = true;
-        // Loop continues to next attempt to re-check the new image
+        if (!gen.accepted) {
+          finalReasoning = 'Regenerated vision fix icon was rejected by user in interactive debug mode.';
+          break;
+        }
         continue;
       } else {
-        // Max attempts reached
         visualPass = false;
         break;
       }
     } else {
-      // Vision review passed!
       visualPass = true;
       finalReasoning = vision.reasoning;
       break;

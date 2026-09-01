@@ -8,7 +8,7 @@ import {
   DEFAULT_DAILY_BUDGET_USD,
 } from '../audit/budgetTracker.js';
 import { auditSingleMapping } from '../audit/mappingAuditor.js';
-import { auditSingleIcon } from '../audit/iconAuditor.js';
+import { auditSingleIcon, AbortPipelineError } from '../audit/iconAuditor.js';
 import type { PipelineCliOptions } from '../audit/types.js';
 
 function parseCliArgs(): PipelineCliOptions {
@@ -31,6 +31,8 @@ function parseCliArgs(): PipelineCliOptions {
       options.limit = parseInt(args[++i], 10);
     } else if ((arg === '--budget' || arg === '-b') && args[i + 1]) {
       options.dailyBudgetUsd = parseFloat(args[++i]);
+    } else if (arg === '--interactive' || arg === '-i' || arg === '--debug' || arg === '-d') {
+      options.interactive = true;
     } else if ((arg === '--key' || arg === '-k') && args[i + 1]) {
       options.key = args[++i].toLowerCase().trim();
     }
@@ -47,6 +49,7 @@ async function runPipeline() {
   console.log(`🔍 Autonome KI-Audit-Pipeline (Mappings & Icons)`);
   console.log(`======================================================`);
   console.log(`✨ Dry-Run Modus:    ${options.dryRun ? 'AKTIV (keine Schreibvorgänge)' : 'Nein'}`);
+  console.log(`🔎 Interaktiv/Debug: ${options.interactive ? 'AKTIV (Vergleich nach Generierung)' : 'Nein'}`);
   console.log(`⚡ Force-Re-Audit:   ${options.force ? 'Ja' : 'Nein'}`);
   console.log(`💰 Tagesbudget:      $${dailyBudgetLimit.toFixed(2)} USD`);
   if (options.limit) console.log(`🔢 Limit:            Max. ${options.limit} Mappings`);
@@ -130,6 +133,7 @@ async function runPipeline() {
         dryRun: options.dryRun,
         force: options.force,
         dailyBudgetLimit,
+        interactive: options.interactive,
       });
 
       totalCostRunUsd += iconRes.costUsd;
@@ -143,6 +147,10 @@ async function runPipeline() {
 
       auditedCount++;
     } catch (err: unknown) {
+      if (err instanceof AbortPipelineError) {
+        console.log(`\n🛑 Pipeline vorzeitig vom Benutzer im interaktiven Modus beendet.`);
+        break;
+      }
       const msg = err instanceof Error ? err.message : String(err);
       console.error(`${prefix} ❌ Fehler beim Audit: ${msg}`);
     }

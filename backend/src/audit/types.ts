@@ -76,4 +76,5 @@ export interface PipelineCliOptions {
   force: boolean;
   key?: string;
   autoZip: boolean;
+  interactive?: boolean;
 }
