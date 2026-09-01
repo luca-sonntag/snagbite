@@ -5,18 +5,31 @@ import { parseManualIngredientList } from './aiIngredientGenerator.js';
 describe('aiIngredientGenerator', () => {
   test('parseManualIngredientList parses comma-separated names into ResolverInput array', () => {
     const raw = 'Gouda, Rinderhackfleisch,  Schnittlauch ,  , Olivenöl';
-    const parsed = parseManualIngredientList(raw);
+    const { inputs, skippedCount } = parseManualIngredientList(raw);
 
-    assert.equal(parsed.length, 4);
-    assert.equal(parsed[0].name, 'Gouda');
-    assert.equal(parsed[0].baseName, 'gouda');
-    assert.equal(parsed[1].name, 'Rinderhackfleisch');
-    assert.equal(parsed[2].name, 'Schnittlauch');
-    assert.equal(parsed[3].name, 'Olivenöl');
+    assert.equal(inputs.length, 4);
+    assert.equal(skippedCount, 0);
+    assert.equal(inputs[0].name, 'Gouda');
+    assert.equal(inputs[0].baseName, 'gouda');
+    assert.equal(inputs[1].name, 'Rinderhackfleisch');
+    assert.equal(inputs[2].name, 'Schnittlauch');
+    assert.equal(inputs[3].name, 'Olivenöl');
+  });
+
+  test('parseManualIngredientList filters out existing keys and duplicates', () => {
+    const raw = 'Gouda, gouda, Rinderhackfleisch, Butter';
+    const existing = new Set(['butter']);
+    const { inputs, skippedCount } = parseManualIngredientList(raw, existing);
+
+    assert.equal(inputs.length, 2);
+    assert.equal(skippedCount, 2); // 1 duplicate gouda, 1 existing butter
+    assert.equal(inputs[0].name, 'Gouda');
+    assert.equal(inputs[1].name, 'Rinderhackfleisch');
   });
 
   test('parseManualIngredientList handles empty input gracefully', () => {
-    const parsed = parseManualIngredientList('');
-    assert.deepEqual(parsed, []);
+    const { inputs, skippedCount } = parseManualIngredientList('');
+    assert.deepEqual(inputs, []);
+    assert.equal(skippedCount, 0);
   });
 });
