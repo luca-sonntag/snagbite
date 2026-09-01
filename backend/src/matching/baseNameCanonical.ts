@@ -187,8 +187,17 @@ export function buildMappingKeys(
     }
   };
 
-  addKey(baseName);
-  addKey(rawName);
+  const isSpecificModifier =
+    Boolean(rawName) &&
+    /(?:^|\b)(?:mager|zero|light|diet|skimmed|entrahmt|fettarm)/i.test(rawName!) &&
+    (!baseName || !/(?:^|\b)(?:mager|zero|light|diet|skimmed|entrahmt|fettarm)/i.test(baseName));
+
+  if (isSpecificModifier) {
+    addKey(rawName);
+  } else {
+    addKey(baseName);
+    addKey(rawName);
+  }
 
   if (parentIngredient) {
     addKey(parentIngredient.baseName);
@@ -197,7 +206,13 @@ export function buildMappingKeys(
 
   if (Array.isArray(synonyms)) {
     for (const syn of synonyms) {
-      addKey(syn);
+      if (isSpecificModifier) {
+        if (/(?:^|\b)(?:mager|zero|light|diet|skimmed|entrahmt|fettarm)/i.test(syn)) {
+          addKey(syn);
+        }
+      } else {
+        addKey(syn);
+      }
     }
   }
 
