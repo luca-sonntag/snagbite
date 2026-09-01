@@ -77,4 +77,6 @@ export interface PipelineCliOptions {
   key?: string;
   autoZip: boolean;
   interactive?: boolean;
+  missingOnly?: boolean;
+  iconsOnly?: boolean;
 }

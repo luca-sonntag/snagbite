@@ -9,12 +9,12 @@ Alle Befehle werden aus dem Ordner `backend` (oder aus dem Repository-Root mit `
 
 | Skript | npm-Befehl | Zweck |
 | :--- | :--- | :--- |
-| [`auditIngredientPipeline.ts`](#1-auditingredientpipelinets) | `npm run audit:ingredients` | Autonome KI-Auditierung von Mappings & Icons mit Vision-Feedback |
+| [`auditIngredientPipeline.ts`](#1-auditingredientpipelinets) | **`npm run icons`** *(oder `npm run audit:ingredients`)* | **All-in-One Pipeline:** Generiert fehlende Icons, auditiert Geometrie/Vision & packt Zip |
 | [`consolidateMappingsToCanonical.ts`](#2-consolidatemappingstocanonicalts) | `npm run mappings:consolidate` | Mergt Mapping-Duplikate in das 1-Row-Schema (`mapping_key_de`, `aliases`) |
 | [`straightenAllMappings.ts`](#3-straightenallmappingsts) | *npx tsx* | Disambiguiert vage Organ-Keys (`heart` -> `chicken heart`) & übersetzt DE-Keys |
 | [`cleanAllGermanIcons.ts`](#4-cleanallgermaniconsts) | *npx tsx* | Benennt deutsche `.webp`-Icon-Dateien ins Englische um und packt das Zip |
-| [`generateMissingIngredientIcons.ts`](#5-generatemissingingredienticonsts) | `npm run icons:generate-missing` | Generiert fehlende Icons für alle existierenden DB-Mappings via FLUX |
-| [`generateIngredientImage.ts`](#6-generateingredientimagets) | `npm run generate:ingredient-image` | Generiert einzelne oder Batch-Icons nach Suchbegriff oder OFF-Code |
+| [`generateMissingIngredientIcons.ts`](#5-generatemissingingredienticonsts) | *(ersetzt durch `npm run icons`)* | *(Historisch)* Generiert fehlende Icons via FLUX |
+| [`generateIngredientImage.ts`](#6-generateingredientimagets) | *(ersetzt durch `npm run icons`)* | *(Historisch)* Manuelles Generierungsskript für Entwickler |
 | [`generateCategoryIcons.ts`](#7-generatecategoryiconsts) | *npx tsx* | Generiert Fallback-Icons für alle 15 Rezept-Kategorien (Trio-Cluster) |
 | [`zipIngredientIcons.ts`](#8-zipingredienticonsts) | `npm run icons:zip` / `icons:unpack` | Packt oder entpackt das `ingredient-icons.zip`-Archiv |
 | [`sliceCategoryIcons.mjs`](#9-slicecategoryiconsmjs) | *node* | Zerschneidet ein 4x4 Grid-Sheet in 16 einzelne Kategorie-Icons |
@@ -30,31 +30,46 @@ Alle Befehle werden aus dem Ordner `backend` (oder aus dem Repository-Root mit `
 
 ---
 
-## 🔍 1. Audit & Konsolidierung
+## 🔍 1. All-in-One Icon- & Audit-Pipeline
 
 ### 1. `auditIngredientPipeline.ts`
-Vollautonomes KI-Auditierungssystem für Zutaten-Mappings und Icon-Qualität. Prüft geometrische Maße, führt lossless Auto-Zoom durch und nutzt Gemini Multimodal Vision zur visuellen Freigabe. Bei Beanstandung modifiziert Gemini Vision den Prompt und FLUX generiert das Bild nach.
+Die **zentrale All-in-One Pipeline** für den gesamten Lebenszyklus aller Ingredient-Icons:
+1. **Fehlende Icons generieren:** Erkennt fehlende Bilder automatisch und generiert sie mit FLUX.1 [schnell].
+2. **Geometrie & Auto-Zoom:** Prüft Zentrierung und Mindest-Randabstand (~20 %) verlustfrei per Sharp.
+3. **Gemini Vision Review:** Bewertet Studio-Qualität, freigestellten weißen Hintergrund und dezente Kontaktschatten.
+4. **Adaptive Retries:** Bei Fehlern passt Gemini Vision den Prompt selbst an und generiert bis zu 3x nach.
+5. **Backup & Zip:** Sichert Altversionen in `old/`, schreibt `AUDIT_REPORT.md` und aktualisiert `ingredient-icons.zip`.
 
-* **npm-Shortcut:** `npm run audit:ingredients [-- <FLAGS>]`
+* **npm-Shortcut:** **`npm run icons [-- <FLAGS>]`** *(oder `npm run audit:ingredients`)*
 * **Direkt:** `npx tsx src/scripts/auditIngredientPipeline.ts [FLAGS]`
 * **Flags & Optionen:**
+  * `--missing-only`, `-m`: **Nur fehlende Icons generieren:** Überspringt bestehende Bilder komplett (ideal für schnelle Massen-Generierung).
+  * `--icons-only`: **Nur Icons prüfen/generieren:** Überspringt den Stufe-1 Datenbank-Abgleich mit Open Food Facts.
   * `--dry-run`: Führt den gesamten Ablauf ohne Schreibzugriffe auf DB oder Dateisystem aus.
   * `--force`: Prüft auch bereits im Manifest als `ai_confirmed` markierte Einträge erneut.
   * `--interactive`, `-i`, `--debug`, `-d`: Öffnet bei Neugenerierung einen interaktiven Terminal-Vergleich (Alt vs. Neu mit Tastatur-Auswahl: Accept / Reject / Abort).
-  * `--limit <N>`, `-l <N>`: Begrenzt die Anzahl der zu prüfenden Mappings (z. B. `--limit 10`).
+  * `--limit <N>`, `-l <N>`: Begrenzt die Anzahl der zu verarbeitenden Mappings (z. B. `--limit 10`).
   * `--budget <USD>`, `-b <USD>`: Setzt das maximale Tagesbudget für Gemini/FLUX (Default: `$2.00`).
-  * `--key <NAME>`, `-k <NAME>`: Auditiert gezielt ein einzelnes Mapping (z. B. `--key "chicken heart"`).
+  * `--key <NAME>`, `-k <NAME>`: Auditiert oder generiert gezielt ein einzelnes Mapping (z. B. `--key "chicken heart"`).
   * `--no-zip`: Verhindert das automatische Aktualisieren von `ingredient-icons.zip` am Ende des Laufs.
 * **Beispiele:**
   ```bash
-  # Testlauf für 5 Zutaten ohne Änderungen
-  npm run audit:ingredients -- --dry-run --limit 5
+  # Standard: Fehlende Icons generieren + unbestätigte Icons auditieren
+  npm run icons
 
-  # Einzelnes Icon im interaktiven Debug-Modus prüfen
-  npm run audit:ingredients -- --key "apple" -i
+  # Nur fehlende Icons generieren (schnell)
+  npm run icons -- --missing-only
 
+  # Gezielt ein einzelnes Icon prüfen / nachgenerieren
+  npm run icons -- --key "chicken breast"
+
+  # Einzelnes Icon im interaktiven Debug-Modus mit Terminal-Freigabe prüfen
+  npm run icons -- --key "apple" -i
+
+  # Testlauf für 5 Zutaten ohne Schreibzugriffe (Simulation)
+  npm run icons -- --dry-run --limit 5
   # Vollständiger Batch mit erhöhtem Tagesbudget
-  npm run audit:ingredients -- --budget 5.00
+  npm run icons -- --budget 5.00
   ```
 
 ---

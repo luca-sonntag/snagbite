@@ -2,7 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { getClient } from '../db.js';
 import { packIngredientIcons, getIngredientImagesDir } from '../ingredientIconPacker.js';
-import { isMappingConfirmed } from '../audit/auditManifest.js';
+import { isMappingConfirmed, isIconConfirmed } from '../audit/auditManifest.js';
+import { findExistingIngredientImage } from '../ingredientImageService.js';
 import {
   loadDailyBudget,
   isBudgetExhausted,
@@ -29,6 +30,10 @@ function parseCliArgs(): PipelineCliOptions {
       options.force = true;
     } else if (arg === '--no-zip') {
       options.autoZip = false;
+    } else if (arg === '--missing-only' || arg === '-m') {
+      options.missingOnly = true;
+    } else if (arg === '--icons-only') {
+      options.iconsOnly = true;
     } else if ((arg === '--limit' || arg === '-l') && args[i + 1]) {
       options.limit = parseInt(args[++i], 10);
     } else if ((arg === '--budget' || arg === '-b') && args[i + 1]) {
@@ -48,11 +53,13 @@ async function runPipeline() {
   const dailyBudgetLimit = options.dailyBudgetUsd ?? (parseFloat(process.env.DAILY_AUDIT_BUDGET_USD || '') || DEFAULT_DAILY_BUDGET_USD);
 
   console.log(`\n======================================================`);
-  console.log(`🔍 Autonome KI-Audit-Pipeline (Mappings & Icons)`);
+  console.log(`🍳 All-in-One Ingredient Icons & Audit Pipeline`);
   console.log(`======================================================`);
   console.log(`✨ Dry-Run Modus:    ${options.dryRun ? 'AKTIV (keine Schreibvorgänge)' : 'Nein'}`);
   console.log(`🔎 Interaktiv/Debug: ${options.interactive ? 'AKTIV (Vergleich nach Generierung)' : 'Nein'}`);
   console.log(`⚡ Force-Re-Audit:   ${options.force ? 'Ja' : 'Nein'}`);
+  if (options.missingOnly) console.log(`🚀 Modus:            NUR FEHLENDE ICONS GENERIEREN`);
+  if (options.iconsOnly)   console.log(`🎨 Modus:            NUR ICONS (Mapping-Check übersprungen)`);
   console.log(`💰 Tagesbudget:      $${dailyBudgetLimit.toFixed(2)} USD`);
   if (options.limit) console.log(`🔢 Limit:            Max. ${options.limit} Mappings`);
   if (options.key) console.log(`🎯 Einzel-Key:       ${options.key}`);
@@ -86,14 +93,29 @@ async function runPipeline() {
   console.log(`📦 Gefundene Mappings in DB: ${rows.length}`);
 
   // 2. Filter out already confirmed mappings unless force
-  const pendingRows = options.force
-    ? rows
-    : rows.filter((r) => !isMappingConfirmed(r.mapping_key, r.category || ''));
+  const imagesDir = getIngredientImagesDir();
+  const pendingRows = rows.filter((r) => {
+    if (options.force) return true;
+    const existingFile = findExistingIngredientImage(r.mapping_key, imagesDir);
+    const iconFileExists = !!existingFile && fs.existsSync(path.join(imagesDir, existingFile));
 
-  console.log(`🎯 Zu prüfende Mappings: ${pendingRows.length} (bereits bestätigt: ${rows.length - pendingRows.length})`);
+    if (options.missingOnly) {
+      return !iconFileExists;
+    }
+
+    if (options.iconsOnly) {
+      return !iconFileExists || !isIconConfirmed(existingFile);
+    }
+
+    const mappingConfirmed = isMappingConfirmed(r.mapping_key, r.category || '');
+    const iconConfirmed = iconFileExists && isIconConfirmed(existingFile);
+    return !mappingConfirmed || !iconConfirmed;
+  });
+
+  console.log(`🎯 Zu verarbeitende Einträge: ${pendingRows.length} (übersprungen/bestätigt: ${rows.length - pendingRows.length})`);
 
   if (pendingRows.length === 0) {
-    console.log(`\n✅ Alle Mappings sind bereits als 'ai_confirmed' verifiziert! Nichts zu tun.`);
+    console.log(`\n✅ Alle Einträge sind bereits verifiziert und vorhanden! Nichts zu tun.`);
     return;
   }
 
@@ -126,21 +148,26 @@ async function runPipeline() {
       break;
     }
 
-    console.log(`${prefix} 🔎 Auditiere Mapping (Kategorie: ${item.category || 'N/A'})...`);
+    console.log(`${prefix} 🔎 Auditiere (Kategorie: ${item.category || 'N/A'})...`);
 
     try {
-      // Stufe 1: Mapping Plausibilität & OFF Match
-      const mapRes = await auditSingleMapping(item, { dryRun: options.dryRun, force: options.force });
-      totalCostRunUsd += mapRes.costUsd;
-      if (mapRes.updatedInDatabase) mappingsUpdated++;
-      console.log(`${prefix} 🥗 Mapping: ${mapRes.resolution} (Code: ${mapRes.updatedProductCode || 'none'}) - ${mapRes.notes}`);
+      let updatedProductCode = item.product_code || undefined;
+
+      // Stufe 1: Mapping Plausibilität & OFF Match (wird bei --icons-only übersprungen)
+      if (!options.iconsOnly) {
+        const mapRes = await auditSingleMapping(item, { dryRun: options.dryRun, force: options.force });
+        totalCostRunUsd += mapRes.costUsd;
+        if (mapRes.updatedInDatabase) mappingsUpdated++;
+        if (mapRes.updatedProductCode) updatedProductCode = mapRes.updatedProductCode;
+        console.log(`${prefix} 🥗 Mapping: ${mapRes.resolution} (Code: ${mapRes.updatedProductCode || 'none'}) - ${mapRes.notes}`);
+      }
 
       // Stufe 2: Icon Qualität, Zoom & Vision Check
       const iconRes = await auditSingleIcon({
         mappingKey: item.mapping_key,
         category: item.category,
         reasoning: item.reasoning || undefined,
-        productCode: mapRes.updatedProductCode || undefined,
+        productCode: updatedProductCode,
         dryRun: options.dryRun,
         force: options.force,
         dailyBudgetLimit,
