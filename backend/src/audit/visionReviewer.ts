@@ -38,11 +38,23 @@ export async function reviewIconWithGeminiVision(
       generationConfig: { temperature: 0.1, maxOutputTokens: 100 },
     });
 
-    const prompt = `Inspect this ingredient icon for "${mappingKey}" (category: ${category}).
+    const prompt = `Inspect this culinary ingredient icon for "${mappingKey}" (category: ${category}).
+Design system art direction rules:
+- Standardized vessels are ALLOWED and INTENDED by design:
+  * Tiny minimalist white porcelain pinch bowls or dipping bowls holding spices, seasonings, salts, powders, ground herbs, sauces, pastes, dips, yogurt or spreads are FULLY ALLOWED.
+  * Clear cylindrical glass cruets or bottles holding oils, vinegars or liquids are FULLY ALLOWED.
+  * Tumblers/glasses holding beverages are FULLY ALLOWED.
+  * Whole produce (fruits, vegetables), cuts of meat, cheese blocks, or bakery pieces should be isolated without plates or bowls.
+
 Strict evaluation criteria:
-1. Is the subject isolated on a pure solid white background?
-2. Does it visually represent the ingredient "${mappingKey}"?
-3. Are there NO forbidden artifacts (no human hands, no utensils, no plates, no text/labels)?
+1. Is the subject cleanly isolated on a pure solid white background?
+2. Does the image visually depict or represent "${mappingKey}"?
+3. Are there NO forbidden artifacts?
+   - FORBIDDEN: Eating utensils (spoons, forks, knives, straws, chopsticks).
+   - FORBIDDEN: Large dinner plates, cutting boards, napkins, table surfaces.
+   - FORBIDDEN: Human hands, fingers, or body parts.
+   - FORBIDDEN: Text, brand logos, packaging watermarks.
+   - REMINDER: A simple small white ceramic pinch bowl or dipping bowl containing spices/sauce is NOT a forbidden utensil/plate; it is explicitly valid.
 
 Reply in valid JSON format only:
 {"pass": true/false, "reason": "brief explanation"}`;

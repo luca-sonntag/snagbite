@@ -41,7 +41,7 @@ async function triggerIconGeneration(params: {
   reasoning: string | undefined;
   imagesDir: string;
   interactive?: boolean;
-}): Promise<{ filename: string; filePath: string; costUsd: number; accepted: boolean }> {
+}): Promise<{ filename: string; filePath: string; costUsd: number; accepted: boolean; userApproved: boolean }> {
   const targetFilename = `${params.slug}.webp`;
   const targetFilePath = path.join(params.imagesDir, targetFilename);
   const existsOld = fs.existsSync(targetFilePath);
@@ -80,6 +80,7 @@ async function triggerIconGeneration(params: {
         filePath: targetFilePath,
         costUsd: genRes.costs.totalCostUsd,
         accepted: true,
+        userApproved: true,
       };
     } else {
       if (fs.existsSync(genRes.filePath)) fs.unlinkSync(genRes.filePath);
@@ -88,6 +89,7 @@ async function triggerIconGeneration(params: {
         filePath: targetFilePath,
         costUsd: genRes.costs.totalCostUsd,
         accepted: false,
+        userApproved: false,
       };
     }
   }
@@ -111,6 +113,7 @@ async function triggerIconGeneration(params: {
     filePath: genRes.filePath,
     costUsd: genRes.costs.totalCostUsd,
     accepted: true,
+    userApproved: false,
   };
 }
 
@@ -213,6 +216,12 @@ export async function auditSingleIcon(params: {
         visualPass = false;
         break;
       }
+
+      if (gen.userApproved) {
+        visualPass = true;
+        finalReasoning = 'Manually approved by user in interactive debug mode.';
+        break;
+      }
     }
 
     // Geometric analysis & Lossless Auto-Zoom
@@ -238,6 +247,11 @@ export async function auditSingleIcon(params: {
       generated = true;
       if (!gen.accepted) {
         finalReasoning = 'Regenerated clipping fix icon was rejected by user in interactive debug mode.';
+        break;
+      }
+      if (gen.userApproved) {
+        visualPass = true;
+        finalReasoning = 'Manually approved by user in interactive debug mode.';
         break;
       }
       geometry = await analyzeIconGeometry(filePath);
@@ -276,6 +290,11 @@ export async function auditSingleIcon(params: {
         generated = true;
         if (!gen.accepted) {
           finalReasoning = 'Regenerated vision fix icon was rejected by user in interactive debug mode.';
+          break;
+        }
+        if (gen.userApproved) {
+          visualPass = true;
+          finalReasoning = 'Manually approved by user in interactive debug mode.';
           break;
         }
         continue;
