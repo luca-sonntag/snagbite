@@ -14,7 +14,7 @@ import {
   DEFAULT_DAILY_BUDGET_USD,
 } from './budgetTracker.js';
 import { reviewIconWithGeminiVision } from './visionReviewer.js';
-import type { IconAuditEntry, AuditStatus } from './types.js';
+import type { IconAuditEntry, AuditStatus, IconGeometryResult } from './types.js';
 
 export const MAX_REVIEW_ATTEMPTS = 3;
 
@@ -117,7 +117,15 @@ export async function auditSingleIcon(params: {
   let zoomApplied = false;
   let visualPass = false;
   let finalReasoning = 'Geometric and vision checks passed.';
-  let geometry = await analyzeIconGeometry(filePath);
+  let geometry: IconGeometryResult = {
+    width: 512,
+    height: 512,
+    bbox: { minX: 0, minY: 0, maxX: 0, maxY: 0, objectWidth: 0, objectHeight: 0 },
+    margins: { top: 0.2, bottom: 0.2, left: 0.2, right: 0.2, minMarginPct: 0.2, avgMarginPct: 0.2 },
+    isClipped: false,
+    isTooSmall: false,
+    isAcceptable: false,
+  };
   let attempt = 1;
 
   // 2. Retry loop: Generation -> Geometric Auto-Zoom -> Vision Review -> Retry if rejected

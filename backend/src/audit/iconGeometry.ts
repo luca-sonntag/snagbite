@@ -12,6 +12,18 @@ const WHITE_THRESHOLD = 242; // Pixel is non-white if any RGB channel is <= 242
 export async function analyzeIconGeometry(
   input: Buffer | string
 ): Promise<IconGeometryResult> {
+  if (typeof input === 'string' && !fs.existsSync(input)) {
+    return {
+      width: 512,
+      height: 512,
+      bbox: { minX: 0, minY: 0, maxX: 0, maxY: 0, objectWidth: 0, objectHeight: 0 },
+      margins: { top: 1, bottom: 1, left: 1, right: 1, minMarginPct: 1, avgMarginPct: 1 },
+      isClipped: false,
+      isTooSmall: true,
+      isAcceptable: false,
+    };
+  }
+
   const buffer = typeof input === 'string' ? fs.readFileSync(input) : input;
   const image = sharp(buffer);
   const metadata = await image.metadata();
