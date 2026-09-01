@@ -144,9 +144,15 @@ async function resolveInputs(
 async function runAiOrManualBackfill(options: CliOptions, metrics: BackfillMetrics): Promise<void> {
   const { data: existingRows } = await getClient()
     .from('ingredient_mappings')
-    .select('mapping_key');
+    .select('mapping_key, category');
   const existingKeys = new Set((existingRows || []).map((r) => r.mapping_key.toLowerCase().trim()));
-  console.log(`📦 Bisherige Mappings in DB: ${existingKeys.size} (werden bei Generierung ausgeschlossen)`);
+  const existingByCategory: Record<string, string[]> = {};
+  for (const r of existingRows || []) {
+    const cat = (r.category || 'OTHER').toUpperCase().trim();
+    if (!existingByCategory[cat]) existingByCategory[cat] = [];
+    existingByCategory[cat].push(r.mapping_key);
+  }
+  console.log(`📦 Bisherige Mappings in DB: ${existingKeys.size} (über ${Object.keys(existingByCategory).length} Kategorien verteilt)`);
 
   let rawInputs: ResolverInput[] = [];
 
@@ -166,6 +172,7 @@ async function runAiOrManualBackfill(options: CliOptions, metrics: BackfillMetri
       category: options.aiCategory,
       count,
       existingKeys,
+      existingByCategory,
     });
     console.log(`✨ ${rawInputs.length} garantiert neue Zutat(en) von KI generiert (Duplikate ausgeschlossen).\n`);
   }

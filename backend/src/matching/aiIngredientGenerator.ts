@@ -18,6 +18,7 @@ export interface AiIngredientGenOptions {
   category?: string;
   count?: number;
   existingKeys?: Set<string> | string[];
+  existingByCategory?: Record<string, string[]>;
 }
 
 export function parseManualIngredientList(
@@ -66,14 +67,19 @@ async function generateSingleBatch(params: {
   category: string;
   batchNum: number;
   prompt?: string;
+  existingInCat?: string[];
 }): Promise<any[]> {
-  // Always query at least 35 items so Gemini explores beyond the top 5 staples
-  const requestedCount = Math.max(35, Math.ceil(params.count * 1.25));
+  const requestedCount = Math.max(30, Math.ceil(params.count * 1.25));
   let userInstruction = `Generate exactly ${requestedCount} distinct culinary grocery ingredients commonly found in supermarkets, markets and recipes.`;
   userInstruction += ` Focus exclusively on the category: "${params.category}".`;
-  if (params.batchNum > 1) {
+
+  if (params.existingInCat && params.existingInCat.length > 0) {
+    const compactList = params.existingInCat.slice(0, 150).join(', ');
+    userInstruction += `\nAlready present in category "${params.category}" (do NOT repeat any of these): [${compactList}].`;
+  } else if (params.batchNum > 1) {
     userInstruction += ` (Round ${params.batchNum}: explore broader varieties, specialty ingredients, regional staples, and lesser-known items to ensure uniqueness).`;
   }
+
   if (params.prompt) {
     userInstruction += ` Additional user guidance: "${params.prompt}".`;
   }
@@ -104,6 +110,13 @@ export async function generateIngredientsWithAi(
 
   const existingArray = options.existingKeys ? Array.from(options.existingKeys) : [];
   const existingSet = new Set(existingArray.map((k) => k.toLowerCase().trim()));
+  const existingByCategory: Record<string, string[]> = {};
+  if (options.existingByCategory) {
+    for (const [cat, keys] of Object.entries(options.existingByCategory)) {
+      existingByCategory[cat] = [...keys];
+    }
+  }
+
   const seenBatch = new Set<string>();
   const result: ResolverInput[] = [];
 
@@ -128,15 +141,15 @@ export async function generateIngredientsWithAi(
   let consecutiveEmptyBatches = 0;
   const MAX_CONSECUTIVE_EMPTY = Math.max(10, categories.length * 2);
 
-  // Keep generating batches until the EXACT target count is fulfilled or safety threshold reached
   while (result.length < targetCount && consecutiveEmptyBatches < MAX_CONSECUTIVE_EMPTY) {
     const remaining = targetCount - result.length;
     const currentBatchSize = Math.max(30, Math.min(BATCH_SIZE, remaining));
     const currentCategory = categories[categoryIndex % categories.length];
     categoryIndex++;
 
+    const existingInCat = existingByCategory[currentCategory] || [];
     console.log(
-      `  📦 [AI Batch ${batchNum}] Requesting ${currentBatchSize} ingredients (Category: ${currentCategory}, Progress: ${result.length}/${targetCount})...`
+      `  📦 [AI Batch ${batchNum}] Requesting ${currentBatchSize} ingredients (Category: ${currentCategory}, known in cat: ${existingInCat.length}, Progress: ${result.length}/${targetCount})...`
     );
 
     try {
@@ -146,6 +159,7 @@ export async function generateIngredientsWithAi(
         category: currentCategory,
         batchNum,
         prompt: options.prompt,
+        existingInCat,
       });
 
       let addedInBatch = 0;
@@ -169,6 +183,9 @@ export async function generateIngredientsWithAi(
           synonyms: Array.isArray(item.synonyms) ? item.synonyms : [],
           isGenericGrocery: true,
         });
+
+        if (!existingByCategory[currentCategory]) existingByCategory[currentCategory] = [];
+        existingByCategory[currentCategory].push(baseName);
 
         addedInBatch++;
         if (result.length >= targetCount) break;
