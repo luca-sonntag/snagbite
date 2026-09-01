@@ -64,11 +64,16 @@ async function generateSingleBatch(params: {
   model: any;
   count: number;
   category: string;
+  batchNum: number;
   prompt?: string;
 }): Promise<any[]> {
-  const requestedCount = Math.ceil(params.count * 1.25);
-  let userInstruction = `Generate exactly ${requestedCount} distinct, staple culinary grocery ingredients commonly found in supermarkets and everyday home cooking.`;
+  // Always query at least 35 items so Gemini explores beyond the top 5 staples
+  const requestedCount = Math.max(35, Math.ceil(params.count * 1.25));
+  let userInstruction = `Generate exactly ${requestedCount} distinct culinary grocery ingredients commonly found in supermarkets, markets and recipes.`;
   userInstruction += ` Focus exclusively on the category: "${params.category}".`;
+  if (params.batchNum > 1) {
+    userInstruction += ` (Round ${params.batchNum}: explore broader varieties, specialty ingredients, regional staples, and lesser-known items to ensure uniqueness).`;
+  }
   if (params.prompt) {
     userInstruction += ` Additional user guidance: "${params.prompt}".`;
   }
@@ -105,7 +110,7 @@ export async function generateIngredientsWithAi(
   const model = client.getGenerativeModel({
     model: modelName,
     generationConfig: {
-      temperature: 0.4,
+      temperature: 0.5,
       responseMimeType: 'application/json',
     },
     systemInstruction:
@@ -114,16 +119,19 @@ export async function generateIngredientsWithAi(
       'Output a valid JSON array of objects following this schema: ' +
       '[{"name": string (German ingredient name), "baseName": string (canonical English base name), "category": string, "synonyms": string[] (optional synonyms)}]. ' +
       'RULES FOR baseName: MUST ALWAYS be the pure, singular, unadorned English culinary head noun without any adjectives. NEVER include freshness ("fresh"), size ("large", "small"), quality ("organic"), state ("raw", "cooked"), or cut/handling ("chopped", "diced", "sliced", "minced"). Example: use "cilantro" NOT "fresh cilantro", "avocado" NOT "ripe avocado", "rosemary" NOT "fresh rosemary sprigs", "bacon" NOT "diced bacon". ' +
-      'Prioritize everyday, widely used culinary staples first before uncommon specialty items.',
+      'Include a rich mix of common staples and specific culinary ingredients.',
   });
 
   const categories = options.category ? [options.category] : CULINARY_CATEGORIES;
   let categoryIndex = 0;
   let batchNum = 1;
-  const maxBatches = Math.max(20, Math.ceil(targetCount / 5));
+  let consecutiveEmptyBatches = 0;
+  const MAX_CONSECUTIVE_EMPTY = Math.max(10, categories.length * 2);
 
-  while (result.length < targetCount && batchNum <= maxBatches) {
-    const currentBatchSize = Math.max(30, Math.min(BATCH_SIZE, targetCount - result.length));
+  // Keep generating batches until the EXACT target count is fulfilled or safety threshold reached
+  while (result.length < targetCount && consecutiveEmptyBatches < MAX_CONSECUTIVE_EMPTY) {
+    const remaining = targetCount - result.length;
+    const currentBatchSize = Math.max(30, Math.min(BATCH_SIZE, remaining));
     const currentCategory = categories[categoryIndex % categories.length];
     categoryIndex++;
 
@@ -136,6 +144,7 @@ export async function generateIngredientsWithAi(
         model,
         count: currentBatchSize,
         category: currentCategory,
+        batchNum,
         prompt: options.prompt,
       });
 
@@ -166,13 +175,20 @@ export async function generateIngredientsWithAi(
       }
 
       console.log(`     ↳ +${addedInBatch} neue Zutaten übernommen (Stand: ${result.length}/${targetCount})`);
+
+      if (addedInBatch === 0) {
+        consecutiveEmptyBatches++;
+      } else {
+        consecutiveEmptyBatches = 0;
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       console.warn(`  ⚠️ Batch ${batchNum} Fehler: ${msg}`);
+      consecutiveEmptyBatches++;
     }
 
     batchNum++;
   }
 
-  return result;
+  return result.slice(0, targetCount);
 }
