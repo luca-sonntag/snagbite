@@ -1,6 +1,11 @@
 import { GoogleGenerativeAI, FunctionDeclarationSchemaType } from '@google/generative-ai';
 import { canonicalizeBaseName } from './baseNameCanonical.js';
 import type { ResolverInput } from './ingredientResolver.js';
+import {
+  BASE_NAME_SCHEMA_DESCRIPTION,
+  SYNONYMS_SCHEMA_DESCRIPTION,
+  BASE_NAME_INSTRUCTION_PROMPT,
+} from './baseNamePrompt.js';
 
 const ingredientBatchSchema = {
   type: FunctionDeclarationSchemaType.ARRAY,
@@ -10,11 +15,11 @@ const ingredientBatchSchema = {
     properties: {
       name: {
         type: FunctionDeclarationSchemaType.STRING,
-        description: 'German ingredient name as bought in stores',
+        description: 'German ingredient name as bought in stores (e.g. "Käse", "Salatcreme", "Frischkäse")',
       },
       baseName: {
         type: FunctionDeclarationSchemaType.STRING,
-        description: 'Canonical English base name (preserving animal species for meat cuts/organs and plant source for oils/flours)',
+        description: BASE_NAME_SCHEMA_DESCRIPTION,
       },
       category: {
         type: FunctionDeclarationSchemaType.STRING,
@@ -22,7 +27,7 @@ const ingredientBatchSchema = {
       },
       synonyms: {
         type: FunctionDeclarationSchemaType.ARRAY,
-        description: 'Optional synonyms or alternative spellings',
+        description: SYNONYMS_SCHEMA_DESCRIPTION,
         items: { type: FunctionDeclarationSchemaType.STRING },
       },
     },
@@ -167,14 +172,8 @@ export async function generateIngredientsWithAi(
     systemInstruction:
       'You are an expert culinary database architect and chef. ' +
       'Generate a realistic, diverse list of essential culinary grocery ingredients. ' +
-      'Output a valid JSON array of objects following this schema: ' +
-      '[{"name": string (German ingredient name), "baseName": string (canonical English base name), "category": string, "synonyms": string[] (optional synonyms)}]. ' +
-      'RULES FOR baseName: MUST ALWAYS be in English (never German). ' +
-      'CRITICAL IDENTITY RULE: For meats, cuts, organs, flours, oils, and plant milks, ALWAYS PRESERVE the species, animal, or grain type: ' +
-      'use "chicken heart" NOT "heart", "beef liver" NOT "liver", "turkey breast" NOT "breast", "pork loin" NOT "loin", "salmon fillet" NOT "fillet", "spelt flour" NOT "flour", "olive oil" NOT "oil", "almond milk" NOT "milk", "bell pepper" NOT "pepper". ' +
-      'NEVER reduce specific foods to generic body parts. ' +
-      'ONLY strip cut/prep adjectives like "fresh", "large", "small", "organic", "raw", "cooked", "chopped", "diced", "sliced", "minced". ' +
-      'Explore deep culinary variety beyond the most basic items.',
+      'Explore deep culinary variety beyond the most basic items.\n\n' +
+      BASE_NAME_INSTRUCTION_PROMPT,
   });
 
   const categories = options.category ? [options.category] : CULINARY_CATEGORIES;
