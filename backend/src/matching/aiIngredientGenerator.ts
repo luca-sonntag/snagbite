@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { canonicalizeBaseName } from './baseNameCanonical.js';
 import type { ResolverInput } from './ingredientResolver.js';
 
 export interface AiIngredientGenOptions {
@@ -22,17 +23,24 @@ export function parseManualIngredientList(
   for (const rawName of raw.split(',')) {
     const name = rawName.trim();
     if (!name) continue;
-    const key = name.toLowerCase();
+    const baseName = canonicalizeBaseName(name) || name.toLowerCase();
+    const nameLower = name.toLowerCase();
 
-    if (existingSet.has(key) || seen.has(key)) {
+    if (
+      existingSet.has(baseName) ||
+      existingSet.has(nameLower) ||
+      seen.has(baseName) ||
+      seen.has(nameLower)
+    ) {
       skippedCount++;
       continue;
     }
 
-    seen.add(key);
+    seen.add(baseName);
+    seen.add(nameLower);
     inputs.push({
       name,
-      baseName: key,
+      baseName,
       category: 'OTHER',
       isGenericGrocery: true,
     });
@@ -70,6 +78,7 @@ export async function generateIngredientsWithAi(
       'Generate a realistic, diverse list of culinary grocery ingredients. ' +
       'Output a valid JSON array of objects following this schema: ' +
       '[{"name": string (German ingredient name), "baseName": string (canonical English base name), "category": string (e.g. DAIRY, PRODUCE, MEAT_FISH, GRAINS_PASTA, SPICES_HERBS, BAKING, OILS_CONDIMENTS, OTHER), "synonyms": string[] (optional synonyms)}]. ' +
+      'RULES FOR baseName: MUST ALWAYS be the pure, singular, unadorned English culinary head noun without any adjectives. NEVER include freshness ("fresh"), size ("large", "small"), quality ("organic"), state ("raw", "cooked"), or cut/handling ("chopped", "diced", "sliced", "minced"). Example: use "cilantro" NOT "fresh cilantro", "avocado" NOT "ripe avocado", "rosemary" NOT "fresh rosemary sprigs", "bacon" NOT "diced bacon". ' +
       'Ensure names are natural and representative. Do NOT repeat any ingredients.',
   });
 
@@ -94,7 +103,9 @@ export async function generateIngredientsWithAi(
 
   for (const item of rawList) {
     const name = (item.name || '').trim();
-    const baseName = (item.baseName || name).toLowerCase().trim();
+    const rawBaseName = (item.baseName || name).trim();
+    // Deterministically canonicalize baseName to strip 'fresh', 'large', plurals etc.
+    const baseName = canonicalizeBaseName(rawBaseName) || rawBaseName.toLowerCase();
     const nameLower = name.toLowerCase();
 
     if (!name || !baseName) continue;
