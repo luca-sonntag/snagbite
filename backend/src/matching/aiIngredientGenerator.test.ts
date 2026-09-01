@@ -27,6 +27,15 @@ describe('aiIngredientGenerator', () => {
     assert.equal(inputs[1].name, 'Rinderhackfleisch');
   });
 
+  test('parseManualIngredientList strips noise words like fresh from baseName', () => {
+    const raw = 'Fresh Cilantro, Large Egg, Chopped Walnuts';
+    const { inputs } = parseManualIngredientList(raw);
+
+    assert.equal(inputs[0].baseName, 'cilantro');
+    assert.equal(inputs[1].baseName, 'egg');
+    assert.equal(inputs[2].baseName, 'walnut');
+  });
+
   test('parseManualIngredientList handles empty input gracefully', () => {
     const { inputs, skippedCount } = parseManualIngredientList('');
     assert.deepEqual(inputs, []);
