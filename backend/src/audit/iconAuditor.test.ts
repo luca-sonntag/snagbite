@@ -32,6 +32,7 @@ describe('iconAuditor & visionReviewer', () => {
   });
 
   test('returns confirmed cache hit if already audited in manifest', async () => {
+    fs.writeFileSync(iconPath, 'dummy-icon-content');
     saveIconsManifest({
       version: 1,
       lastUpdated: new Date().toISOString(),
