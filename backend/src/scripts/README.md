@@ -35,10 +35,27 @@ Alle Befehle werden aus dem Ordner `backend` (oder aus dem Repository-Root mit `
 ### 1. `auditIngredientPipeline.ts`
 Die **zentrale All-in-One Pipeline** für den gesamten Lebenszyklus aller Ingredient-Icons:
 1. **Fehlende Icons generieren:** Erkennt fehlende Bilder automatisch und generiert sie mit FLUX.1 [schnell].
-2. **Geometrie & Auto-Zoom:** Prüft Zentrierung und Mindest-Randabstand (~20 %) verlustfrei per Sharp.
-3. **Gemini Vision Review:** Bewertet Studio-Qualität, freigestellten weißen Hintergrund und dezente Kontaktschatten.
-4. **Adaptive Retries:** Bei Fehlern passt Gemini Vision den Prompt selbst an und generiert bis zu 3x nach.
-5. **Backup & Zip:** Sichert Altversionen in `old/`, schreibt `AUDIT_REPORT.md` und aktualisiert `ingredient-icons.zip`.
+2. **Hintergrundentfernung & Transparenz (BGBuster):** Entfernt Bildhintergründe per BGBuster API für native, transparente WebP-Icons.
+3. **Deterministische Zentrierung & Skalierung (Sharp):** Ermittelt die Alpha-Bounding-Box, bereinigt Kleinstpartikel/Alpha-Dunst und skaliert das Motiv verlustfrei auf exakt 20 % Rand (512x512).
+4. **Gemini Vision Review:** Prüft Motiv, Erkennbarkeit und Artefaktfreiheit (auf solidem weißem Canvas).
+5. **Adaptive Retries:** Bei Fehlern passt Gemini Vision den Prompt selbst an und generiert bis zu 3x nach.
+6. **Backup & Zip:** Sichert Altversionen in `old/`, schreibt `AUDIT_REPORT.md` und aktualisiert `ingredient-icons.zip`.
+
+#### 💰 Kostenstruktur pro Icon
+
+| Komponente | Dienst / Modell | Kosten pro Aufruf | Wann fällt es an? |
+| :--- | :--- | :--- | :--- |
+| **Generierung** | FLUX.1 [schnell] via fal.ai | **~$0,0035 USD** | Nur wenn Icon fehlt oder nach Vision-Ablehnung |
+| **Freistellen** | BGBuster API (`@bgbuster/sdk`) | **~$0,0035 USD** (~0,003 €) | Nur bei noch nicht transparenten Icons |
+| **Vision Audit** | Gemini 3.1 Flash Lite Vision | **~$0,00028 USD** | Bei jedem Audit (außer Manifest-Cache-Hits) |
+| **Zentrierung** | Sharp (lokales Node.js) | **$0,00000 USD** | Immer (lokale Bildverarbeitung) |
+| **OFF Matching** | Lokales SQLite FTS5 | **$0,00000 USD** | Immer (lokale Datenbank) |
+
+* **Komplett neue Zutat** (FLUX + BGBuster + Gemini): **ca. $0,0073 USD** (< 1 Cent pro fertigem Icon)
+* **Bestehendes Bild freistellen** (BGBuster + Gemini): **ca. $0,0038 USD**
+* **Re-Audit / Cache-Hit** (bereits bestätigt): **$0,00000 USD** (0 Cent)
+* **Tagesbudget:** Mit dem Flag `--budget <USD>` (Default: `$1.00`) stoppt die Pipeline automatisch, sobald das Limit erreicht wird. Das Budget wird taggenau in `backend/public/ingredient-icons/daily_budget.json` erfasst (`fluxSpentUsd`, `bgbusterSpentUsd`, `geminiSpentUsd`).
+* **API-Key Konfiguration:** `BGBUSTER_API_KEY=...` in `backend/.env`. Wenn kein Key hinterlegt ist, fällt die Pipeline automatisch auf soliden weißen Studio-Hintergrund zurück.
 
 * **npm-Shortcut:** **`npm run icons [-- <FLAGS>]`** *(oder `npm run audit:ingredients`)*
 * **Direkt:** `npx tsx src/scripts/auditIngredientPipeline.ts [FLAGS]`
@@ -49,8 +66,8 @@ Die **zentrale All-in-One Pipeline** für den gesamten Lebenszyklus aller Ingred
   * `--force`: Prüft auch bereits im Manifest als `ai_confirmed` markierte Einträge erneut.
   * `--interactive`, `-i`, `--debug`, `-d`: Öffnet bei Neugenerierung einen interaktiven Terminal-Vergleich (Alt vs. Neu mit Tastatur-Auswahl: Accept / Reject / Abort).
   * `--limit <N>`, `-l <N>`: Begrenzt die Anzahl der zu verarbeitenden Mappings (z. B. `--limit 10`).
-  * `--budget <USD>`, `-b <USD>`: Setzt das maximale Tagesbudget für Gemini/FLUX (Default: `$2.00`).
-  * `--key <NAME>`, `-k <NAME>`: Auditiert oder generiert gezielt ein einzelnes Mapping (z. B. `--key "chicken heart"`).
+  * `--budget <USD>`, `-b <USD>`: Setzt das maximale Tagesbudget für Gemini/FLUX/BGBuster (Default: `$1.00`).
+  * `--key <NAME>`, `-k <NAME>`: Auditiert oder generiert gezielt ein einzelnes Mapping (z. B. `--key "chicken breast"`).
   * `--no-zip`: Verhindert das automatische Aktualisieren von `ingredient-icons.zip` am Ende des Laufs.
 * **Beispiele:**
   ```bash
