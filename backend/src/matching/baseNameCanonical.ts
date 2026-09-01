@@ -41,7 +41,8 @@ const PROTECTED_WORDS = new Set([
   'flakes', 'seed', 'seeds', 'meal', 'syrup', 'extract', 'vinegar', 'broth', 'stock',
   'water', 'zest', 'peel', 'ground', 'dried', 'smoked', 'raw', 'cooked',
   'yolk', 'white', 'breast', 'thigh', 'leg', 'wing', 'mince', 'salt',
-  'sugar', 'honey', 'wine', 'beer',
+  'sugar', 'honey', 'wine', 'beer', 'heart', 'liver', 'tongue', 'kidney',
+  'chicken', 'beef', 'pork', 'turkey', 'duck', 'lamb', 'veal', 'goose',
 ]);
 
 for (const word of PROTECTED_WORDS) NOISE_WORDS.delete(word);

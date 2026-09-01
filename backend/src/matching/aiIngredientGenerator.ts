@@ -140,7 +140,11 @@ export async function generateIngredientsWithAi(
       'Generate a realistic, diverse list of essential culinary grocery ingredients. ' +
       'Output a valid JSON array of objects following this schema: ' +
       '[{"name": string (German ingredient name), "baseName": string (canonical English base name), "category": string, "synonyms": string[] (optional synonyms)}]. ' +
-      'RULES FOR baseName: MUST ALWAYS be the pure, singular, unadorned English culinary head noun without any adjectives. NEVER include freshness ("fresh"), size ("large", "small"), quality ("organic"), state ("raw", "cooked"), or cut/handling ("chopped", "diced", "sliced", "minced"). Example: use "cilantro" NOT "fresh cilantro", "avocado" NOT "ripe avocado", "rosemary" NOT "fresh rosemary sprigs", "bacon" NOT "diced bacon". ' +
+      'RULES FOR baseName: MUST ALWAYS be in English (never German). ' +
+      'CRITICAL IDENTITY RULE: For meats, cuts, organs, flours, oils, and plant milks, ALWAYS PRESERVE the species, animal, or grain type: ' +
+      'use "chicken heart" NOT "heart", "beef liver" NOT "liver", "turkey breast" NOT "breast", "pork loin" NOT "loin", "salmon fillet" NOT "fillet", "spelt flour" NOT "flour", "olive oil" NOT "oil", "almond milk" NOT "milk", "bell pepper" NOT "pepper". ' +
+      'NEVER reduce specific foods to generic body parts. ' +
+      'ONLY strip cut/prep adjectives like "fresh", "large", "small", "organic", "raw", "cooked", "chopped", "diced", "sliced", "minced". ' +
       'Explore deep culinary variety beyond the most basic items.',
   });
 

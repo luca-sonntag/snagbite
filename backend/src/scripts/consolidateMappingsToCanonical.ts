@@ -36,8 +36,8 @@ interface RawMappingRow {
 function isLikelyGerman(word: string): boolean {
   const w = word.toLowerCase();
   if (/[äöüß]/.test(w)) return true;
-  if (/(?:fleisch|kohl|zwiebel|wurzel|kartoffel|suppe|kaese|käse|milch|sahne|quark|butter|essig|oel|öl|brot|mehl|schote|blatt|fisch|filet|brust)$/.test(w)) return true;
-  if (/(?:eln|en)$/.test(w) && w.length > 5 && !w.endsWith('chicken') && !w.endsWith('bacon') && !w.endsWith('onion')) return true;
+  if (/(?:fleisch|kohl|zwiebel|wurzel|kartoffel|suppe|kaese|käse|milch|sahne|quark|butter|essig|oel|öl|brot|mehl|schote|blatt|fisch|filet|brust|herz|herzen|zunge|leber|nudel|apfel|staerke|stärke|wuerfel|würfel|pulver)$/.test(w)) return true;
+  if (/(?:eln|en)$/.test(w) && w.length > 5 && !w.endsWith('chicken') && !w.endsWith('bacon') && !w.endsWith('onion') && !w.endsWith('salmon')) return true;
   return false;
 }
 
@@ -88,8 +88,15 @@ async function run(): Promise<void> {
     // Sort keys: English first, then German
     const allKeys = Array.from(new Set(groupRows.map((r) => r.mapping_key.toLowerCase().trim())));
 
-    let englishKey = allKeys.find((k) => !isLikelyGerman(k));
-    if (!englishKey) englishKey = canonicalizeBaseName(allKeys[0]) || allKeys[0];
+    const englishCandidates = allKeys.filter((k) => !isLikelyGerman(k));
+    const GENERIC_VAGUE = new Set(['heart', 'liver', 'tongue', 'breast', 'thigh', 'wing', 'fillet', 'meat', 'flour', 'oil', 'cheese', 'pasta', 'bread']);
+    englishCandidates.sort((a, b) => {
+      const aVague = GENERIC_VAGUE.has(a) ? 1 : 0;
+      const bVague = GENERIC_VAGUE.has(b) ? 1 : 0;
+      if (aVague !== bVague) return aVague - bVague;
+      return b.length - a.length;
+    });
+    let englishKey = englishCandidates[0] || canonicalizeBaseName(allKeys[0]) || allKeys[0];
 
     const germanCandidates = allKeys.filter((k) => k !== englishKey);
     let germanKey = germanCandidates.find((k) => isLikelyGerman(k)) || germanCandidates[0] || null;
