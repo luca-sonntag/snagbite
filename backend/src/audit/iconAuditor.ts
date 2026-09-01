@@ -51,7 +51,7 @@ async function triggerIconGeneration(params: {
     const candidatePseudoItem: CanonicalIngredient = {
       id: candidateSlug,
       product_code: params.productCode || params.slug,
-      name_de: params.reasoning || params.mappingKey,
+      name_de: params.mappingKey,
       name_en: params.mappingKey,
       category: params.category || 'OTHER',
       nutrients_per_100g: { calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 },
@@ -98,7 +98,7 @@ async function triggerIconGeneration(params: {
   const pseudoItem: CanonicalIngredient = {
     id: params.slug,
     product_code: params.productCode || params.slug,
-    name_de: params.reasoning || params.mappingKey,
+    name_de: params.mappingKey,
     name_en: params.mappingKey,
     category: params.category || 'OTHER',
     nutrients_per_100g: { calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 },

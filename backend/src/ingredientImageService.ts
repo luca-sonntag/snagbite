@@ -319,10 +319,11 @@ export async function describeIngredientVisuallyWithGemini(item: CanonicalIngred
         '   - WHOLE PRODUCE (Fruits, Vegetables): "single whole pristine piece with natural stem, 45-degree three-quarter view, floating isolated without bowl or plate". ' +
         '   - FRESH HERB SPRIGS: "fresh vibrant crisp herb sprig with aromatic leaves, 45-degree three-quarter view". ' +
         '   - RAW MEAT / FISH / POULTRY: "single raw prime cut or neat fillet, 45-degree three-quarter view, fresh butcher sheen, isolated without plate or tray". ' +
-        '   - CHEESE / BUTTER: "single artisanal wedge or clean geometric block, 45-degree three-quarter view". ' +
+        '   - CHEESE / BUTTER: MUST ALWAYS BE "single pristine triangular artisanal cheese wedge with natural rind or clean solid block, 45-degree three-quarter view". NEVER describe shredded, grated, sliced, or melted cheese unless the ingredient name explicitly demands it. ' +
         '   - GRAINS / FLAKES / SEEDS / NUTS: "neat compact clean mound in the center, 45-degree three-quarter view". ' +
         '   - BEVERAGES: "in a crystal-clear minimalist straight glass tumbler, 45-degree three-quarter view". ' +
-        '3. PROHIBITIONS: ' +
+        '3. PROHIBITIONS & CANONICAL FORM: ' +
+        '   - DEFAULT CANONICAL FORM: Always depict the intact, iconic whole staple (whole fruit, whole cut, artisanal wedge, solid block). NEVER describe scattered piles of shreds, bits, slices, or diced cubes unless the ingredient name itself explicitly demands it (e.g. "shredded", "gerieben", "diced", "cubes"). ' +
         '   - NEVER include utensils (no spoons, forks, knives, straws). ' +
         '   - NEVER include plates, cutting boards, paper towels, or table mats. ' +
         '   - NEVER describe multiple scattered items spread across the scene. Exactly ONE single centered object or ONE single vessel. ' +
