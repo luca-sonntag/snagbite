@@ -21,7 +21,8 @@ export interface VisionReviewResult {
 export async function reviewIconWithGeminiVision(
   filePath: string,
   mappingKey: string,
-  category: string
+  category: string,
+  currentPrompt?: string
 ): Promise<VisionReviewResult> {
   const client = getGemini();
   if (!client || !fs.existsSync(filePath)) {
@@ -40,6 +41,10 @@ export async function reviewIconWithGeminiVision(
       generationConfig: { temperature: 0.2, maxOutputTokens: 300 },
     });
 
+    const baselineSection = currentPrompt
+      ? `\nPREVIOUS GENERATION PROMPT BASELINE:\n"${currentPrompt}"\nUse this previous prompt as your foundation. Surgically adjust or refine it to fix the observed issues while retaining the clean isolated icon style.`
+      : '';
+
     const prompt = `Inspect this culinary ingredient icon for "${mappingKey}" (category: ${category}).
 Design system art direction rules:
 - Standardized vessels are ALLOWED and INTENDED by design:
@@ -57,9 +62,10 @@ Strict evaluation criteria:
    - FORBIDDEN: Human hands, fingers, or body parts.
    - FORBIDDEN: Text, brand logos, packaging watermarks.
    - REMINDER: A simple small white ceramic pinch bowl or dipping bowl containing spices/sauce is NOT a forbidden utensil/plate; it is explicitly valid.
+${baselineSection}
 
 ADAPTIVE PROMPT REGENERATION:
-If "pass" is false, you MUST provide an "adaptedPrompt" specifically tailored for text-to-image AI (FLUX.1 [schnell]) to fix the issues seen in the current image. You have full creative freedom to adjust staging, vessel (e.g. tiny white pinch bowl), angle, cut, and explicit negative qualifiers so the next generation succeeds.
+If "pass" is false, you MUST provide an "adaptedPrompt" specifically tailored for text-to-image AI (FLUX.1 [schnell]) to fix the issues seen in the current image. If a previous baseline was provided above, use it as a template and adjust the vessel, cut, framing, or exclusions so the next generation succeeds.
 Format for adaptedPrompt: "${mappingKey}, [exact visual staging instructions], isolated on pure solid white background, dead center, 1:1 square icon, 45-degree three-quarter perspective, generous 25% white padding on all sides, studio lighting, zero shadows, no plates, no utensils, no hands, no text".
 
 Reply in valid JSON format only:

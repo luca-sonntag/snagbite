@@ -19,6 +19,7 @@ export interface TriggerIconGenParams {
 export interface TriggerIconGenResult {
   filename: string;
   filePath: string;
+  prompt: string;
   costUsd: number;
   accepted: boolean;
   userApproved: boolean;
@@ -66,6 +67,7 @@ export async function triggerIconGeneration(
       return {
         filename: targetFilename,
         filePath: targetFilePath,
+        prompt: genRes.prompt,
         costUsd: genRes.costs.totalCostUsd,
         accepted: true,
         userApproved: true,
@@ -75,6 +77,7 @@ export async function triggerIconGeneration(
       return {
         filename: targetFilename,
         filePath: targetFilePath,
+        prompt: genRes.prompt,
         costUsd: genRes.costs.totalCostUsd,
         accepted: false,
         userApproved: false,
@@ -102,6 +105,7 @@ export async function triggerIconGeneration(
   return {
     filename: genRes.filename,
     filePath: genRes.filePath,
+    prompt: genRes.prompt,
     costUsd: genRes.costs.totalCostUsd,
     accepted: true,
     userApproved: false,

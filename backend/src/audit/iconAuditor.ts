@@ -3,6 +3,7 @@ import path from 'node:path';
 import {
   findExistingIngredientImage,
   getIngredientImagesDir,
+  buildIngredientPrompt,
 } from '../ingredientImageService.js';
 import { analyzeIconGeometry, autoZoomAndPadIcon } from './iconGeometry.js';
 import { isIconConfirmed, recordIconAudit } from './auditManifest.js';
@@ -88,6 +89,7 @@ export async function auditSingleIcon(params: {
   let visualPass = false;
   let finalReasoning = 'Geometric and vision checks passed.';
   let activePromptOverride: string | undefined = undefined;
+  let currentPrompt = '';
   let geometry: IconGeometryResult = {
     width: 512,
     height: 512,
@@ -123,6 +125,7 @@ export async function auditSingleIcon(params: {
       generated = true;
       filename = gen.filename;
       filePath = gen.filePath;
+      currentPrompt = gen.prompt;
 
       if (!gen.accepted) {
         finalReasoning = 'Newly generated icon was rejected by user in interactive debug mode.';
@@ -163,6 +166,7 @@ export async function auditSingleIcon(params: {
 
       totalCostUsd += gen.costUsd;
       generated = true;
+      currentPrompt = gen.prompt;
       if (!gen.accepted) {
         finalReasoning = 'Regenerated clipping fix icon was rejected by user in interactive debug mode.';
         break;
@@ -175,8 +179,21 @@ export async function auditSingleIcon(params: {
       geometry = await analyzeIconGeometry(filePath);
     }
 
-    // Multimodal Vision Review
-    const vision = await reviewIconWithGeminiVision(filePath, params.mappingKey, params.category);
+    // Multimodal Vision Review (using current/baseline prompt as template)
+    if (!currentPrompt) {
+      const base = await buildIngredientPrompt({
+        id: slug,
+        product_code: params.productCode || slug,
+        name_de: params.mappingKey,
+        name_en: params.mappingKey,
+        category: params.category || 'OTHER',
+        nutrients_per_100g: { calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 },
+        aliases: [params.mappingKey],
+      }, { useGemini: false });
+      currentPrompt = base.prompt;
+    }
+
+    const vision = await reviewIconWithGeminiVision(filePath, params.mappingKey, params.category, currentPrompt);
     totalCostUsd += vision.costUsd;
 
     if (!vision.visualPass) {
@@ -196,6 +213,7 @@ export async function auditSingleIcon(params: {
         if (vision.adaptedPrompt) {
           console.log(`[iconAuditor] 🎨 AI adapted image prompt for retry: "${vision.adaptedPrompt.slice(0, 95)}..."`);
           activePromptOverride = vision.adaptedPrompt;
+          currentPrompt = vision.adaptedPrompt;
         }
 
         console.log(`[iconAuditor] 🔄 Restarting generation for "${params.mappingKey}" with adapted prompt...`);
@@ -212,6 +230,7 @@ export async function auditSingleIcon(params: {
 
         totalCostUsd += gen.costUsd;
         generated = true;
+        currentPrompt = gen.prompt;
         if (!gen.accepted) {
           finalReasoning = 'Regenerated vision fix icon was rejected by user in interactive debug mode.';
           break;
