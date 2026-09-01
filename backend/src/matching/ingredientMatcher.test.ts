@@ -99,7 +99,7 @@ describe('Ingredient Matcher & Normalizer (Open Food Facts + Hybrid Search)', ()
     });
 
     test('returns null for unlisted exotic fantasy ingredients', async () => {
-      const exotic = await findCanonicalIngredient('Unbekannte Fantasie-Geheimsauce XYZ 999', 'secret exotic fantasy sauce');
+      const exotic = await findCanonicalIngredient('Unbekannte Fantasie-Geheimsauce XYZ 999', 'xyzzz_fantasy_nonexistent_sauce_999');
       assert.equal(exotic, null);
     });
   });
