@@ -66,7 +66,9 @@ async function runPipeline() {
   console.log(`------------------------------------------------------`);
 
   const budgetStatus = getDailyBudgetStatus(dailyBudgetLimit);
+  const currentBudgetLog = loadDailyBudget();
   console.log(`📊 Bisherige Tagesausgaben: $${budgetStatus.spentUsd.toFixed(4)} / $${dailyBudgetLimit.toFixed(2)} (Verbleibend: $${budgetStatus.remainingUsd.toFixed(4)})`);
+  console.log(`   └─ FLUX: $${currentBudgetLog.fluxSpentUsd.toFixed(4)} | BGBuster: $${(currentBudgetLog.bgbusterSpentUsd || 0).toFixed(4)} | Gemini: $${currentBudgetLog.geminiSpentUsd.toFixed(4)}`);
 
   if (!options.force && budgetStatus.isExceeded) {
     console.log(`\n🛑 Tagesbudget von $${dailyBudgetLimit.toFixed(2)} bereits erreicht. Pipeline pausiert bis morgen.`);
@@ -227,6 +229,7 @@ async function runPipeline() {
   console.log(`⭐ Icons bestätigt:         ${iconsConfirmed}`);
   console.log(`💰 Kosten dieses Laufs:     $${totalCostRunUsd.toFixed(5)} USD`);
   console.log(`📈 Gesamte Tagesausgaben:   $${finalBudget.totalSpentUsd.toFixed(4)} / $${dailyBudgetLimit.toFixed(2)} USD`);
+  console.log(`   └─ FLUX: $${finalBudget.fluxSpentUsd.toFixed(4)} | BGBuster: $${(finalBudget.bgbusterSpentUsd || 0).toFixed(4)} | Gemini: $${finalBudget.geminiSpentUsd.toFixed(4)}`);
   console.log(`======================================================`);
 
   if (changedIcons.length > 0) {
