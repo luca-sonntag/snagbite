@@ -129,6 +129,7 @@ async function runPipeline() {
         productCode: mapRes.updatedProductCode || undefined,
         dryRun: options.dryRun,
         force: options.force,
+        dailyBudgetLimit,
       });
 
       totalCostRunUsd += iconRes.costUsd;
