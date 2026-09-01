@@ -13,6 +13,13 @@ export const CULINARY_CATEGORIES = [
   'OTHER',
 ] as const;
 
+export const CULINARY_THEMES = [
+  'everyday supermarket staples and common home cooking basics',
+  'international, regional, and ethnic staples (e.g. Mediterranean, Asian, Middle Eastern, Latin American)',
+  'artisan, specialty, deli, cured, smoked, fermented, pickled or aged variants',
+  'heirloom varieties, specific cultivars, specialty grains, pulses, and craft cooking essentials',
+] as const;
+
 export interface AiIngredientGenOptions {
   prompt?: string;
   category?: string;
@@ -69,15 +76,17 @@ async function generateSingleBatch(params: {
   prompt?: string;
   existingInCat?: string[];
 }): Promise<any[]> {
-  const requestedCount = Math.max(30, Math.ceil(params.count * 1.25));
-  let userInstruction = `Generate exactly ${requestedCount} distinct culinary grocery ingredients commonly found in supermarkets, markets and recipes.`;
+  const requestedCount = Math.max(35, Math.ceil(params.count * 1.25));
+  const themeIndex = Math.floor((params.batchNum - 1) / CULINARY_CATEGORIES.length);
+  const theme = CULINARY_THEMES[themeIndex % CULINARY_THEMES.length];
+
+  let userInstruction = `Generate exactly ${requestedCount} distinct culinary grocery ingredients commonly found in supermarkets, markets, and recipes.`;
   userInstruction += ` Focus exclusively on the category: "${params.category}".`;
+  userInstruction += ` Thematic focus for this batch: ${theme}.`;
 
   if (params.existingInCat && params.existingInCat.length > 0) {
-    const compactList = params.existingInCat.slice(0, 150).join(', ');
+    const compactList = params.existingInCat.slice(-180).join(', ');
     userInstruction += `\nAlready present in category "${params.category}" (do NOT repeat any of these): [${compactList}].`;
-  } else if (params.batchNum > 1) {
-    userInstruction += ` (Round ${params.batchNum}: explore broader varieties, specialty ingredients, regional staples, and lesser-known items to ensure uniqueness).`;
   }
 
   if (params.prompt) {
@@ -106,7 +115,7 @@ export async function generateIngredientsWithAi(
   const client = new GoogleGenerativeAI(apiKey);
   const targetCount = Math.max(1, options.count ?? 50);
   const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-  const BATCH_SIZE = 40;
+  const BATCH_SIZE = 45;
 
   const existingArray = options.existingKeys ? Array.from(options.existingKeys) : [];
   const existingSet = new Set(existingArray.map((k) => k.toLowerCase().trim()));
@@ -123,7 +132,7 @@ export async function generateIngredientsWithAi(
   const model = client.getGenerativeModel({
     model: modelName,
     generationConfig: {
-      temperature: 0.5,
+      temperature: 0.85,
       responseMimeType: 'application/json',
     },
     systemInstruction:
@@ -132,18 +141,18 @@ export async function generateIngredientsWithAi(
       'Output a valid JSON array of objects following this schema: ' +
       '[{"name": string (German ingredient name), "baseName": string (canonical English base name), "category": string, "synonyms": string[] (optional synonyms)}]. ' +
       'RULES FOR baseName: MUST ALWAYS be the pure, singular, unadorned English culinary head noun without any adjectives. NEVER include freshness ("fresh"), size ("large", "small"), quality ("organic"), state ("raw", "cooked"), or cut/handling ("chopped", "diced", "sliced", "minced"). Example: use "cilantro" NOT "fresh cilantro", "avocado" NOT "ripe avocado", "rosemary" NOT "fresh rosemary sprigs", "bacon" NOT "diced bacon". ' +
-      'Include a rich mix of common staples and specific culinary ingredients.',
+      'Explore deep culinary variety beyond the most basic items.',
   });
 
   const categories = options.category ? [options.category] : CULINARY_CATEGORIES;
   let categoryIndex = 0;
   let batchNum = 1;
   let consecutiveEmptyBatches = 0;
-  const MAX_CONSECUTIVE_EMPTY = Math.max(10, categories.length * 2);
+  const MAX_CONSECUTIVE_EMPTY = Math.max(15, categories.length * 3);
 
   while (result.length < targetCount && consecutiveEmptyBatches < MAX_CONSECUTIVE_EMPTY) {
     const remaining = targetCount - result.length;
-    const currentBatchSize = Math.max(30, Math.min(BATCH_SIZE, remaining));
+    const currentBatchSize = Math.max(35, Math.min(BATCH_SIZE, remaining));
     const currentCategory = categories[categoryIndex % categories.length];
     categoryIndex++;
 
@@ -170,6 +179,13 @@ export async function generateIngredientsWithAi(
         const nameLower = name.toLowerCase();
 
         if (!name || !baseName) continue;
+
+        // Remember ANY returned candidate in this category to prevent repeating it
+        if (!existingByCategory[currentCategory]) existingByCategory[currentCategory] = [];
+        if (!existingByCategory[currentCategory].includes(baseName)) {
+          existingByCategory[currentCategory].push(baseName);
+        }
+
         if (existingSet.has(baseName) || existingSet.has(nameLower)) continue;
         if (seenBatch.has(baseName) || seenBatch.has(nameLower)) continue;
 
@@ -183,9 +199,6 @@ export async function generateIngredientsWithAi(
           synonyms: Array.isArray(item.synonyms) ? item.synonyms : [],
           isGenericGrocery: true,
         });
-
-        if (!existingByCategory[currentCategory]) existingByCategory[currentCategory] = [];
-        existingByCategory[currentCategory].push(baseName);
 
         addedInBatch++;
         if (result.length >= targetCount) break;
