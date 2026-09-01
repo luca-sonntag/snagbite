@@ -14,10 +14,19 @@ function getTodayIsoDate(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function loadDailyBudget(): DailyBudgetLog {
-  const filePath = getDailyBudgetFilePath();
-  const today = getTodayIsoDate();
+let budgetCache: DailyBudgetLog | null = null;
 
+export function resetBudgetCache(): void {
+  budgetCache = null;
+}
+
+export function loadDailyBudget(): DailyBudgetLog {
+  const today = getTodayIsoDate();
+  if (budgetCache && budgetCache.date === today) {
+    return budgetCache;
+  }
+
+  const filePath = getDailyBudgetFilePath();
   const fallback: DailyBudgetLog = {
     date: today,
     totalSpentUsd: 0,
@@ -29,6 +38,7 @@ export function loadDailyBudget(): DailyBudgetLog {
   };
 
   if (!fs.existsSync(filePath)) {
+    budgetCache = fallback;
     return fallback;
   }
 
@@ -38,10 +48,11 @@ export function loadDailyBudget(): DailyBudgetLog {
 
     if (parsed.date !== today) {
       // New day: roll over to fresh day counters
+      budgetCache = fallback;
       return fallback;
     }
 
-    return {
+    budgetCache = {
       date: parsed.date || today,
       totalSpentUsd: Number(parsed.totalSpentUsd) || 0,
       geminiSpentUsd: Number(parsed.geminiSpentUsd) || 0,
@@ -51,14 +62,17 @@ export function loadDailyBudget(): DailyBudgetLog {
       totalGenerations: Number(parsed.totalGenerations) || 0,
       lastUpdated: parsed.lastUpdated || new Date().toISOString(),
     };
+    return budgetCache;
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     console.warn(`[budgetTracker] Could not parse daily budget file (${msg}), resetting.`);
+    budgetCache = fallback;
     return fallback;
   }
 }
 
 export function saveDailyBudget(budget: DailyBudgetLog): void {
+  budgetCache = budget;
   const filePath = getDailyBudgetFilePath();
   const dir = path.dirname(filePath);
   if (!fs.existsSync(dir)) {

@@ -9,6 +9,7 @@ import {
   isBudgetExhausted,
   getDailyBudgetStatus,
   getDailyBudgetFilePath,
+  resetBudgetCache,
 } from './budgetTracker.js';
 
 describe('budgetTracker', () => {
@@ -16,12 +17,14 @@ describe('budgetTracker', () => {
   let originalContent: string | null = null;
 
   beforeEach(() => {
+    resetBudgetCache();
     if (fs.existsSync(testBudgetPath)) {
       originalContent = fs.readFileSync(testBudgetPath, 'utf-8');
     }
   });
 
   afterEach(() => {
+    resetBudgetCache();
     if (originalContent !== null) {
       fs.writeFileSync(testBudgetPath, originalContent, 'utf-8');
     } else if (fs.existsSync(testBudgetPath)) {

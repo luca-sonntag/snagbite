@@ -80,4 +80,5 @@ export interface PipelineCliOptions {
   interactive?: boolean;
   missingOnly?: boolean;
   iconsOnly?: boolean;
+  concurrency?: number;
 }

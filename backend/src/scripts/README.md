@@ -65,14 +65,21 @@ Die **zentrale All-in-One Pipeline** für den gesamten Lebenszyklus aller Ingred
   * `--dry-run`: Führt den gesamten Ablauf ohne Schreibzugriffe auf DB oder Dateisystem aus.
   * `--force`: Prüft auch bereits im Manifest als `ai_confirmed` markierte Einträge erneut.
   * `--interactive`, `-i`, `--debug`, `-d`: Öffnet bei Neugenerierung einen interaktiven Terminal-Vergleich (Alt vs. Neu mit Tastatur-Auswahl: Accept / Reject / Abort).
+  * `--concurrency <N>`, `-c <N>`: **Parallele Worker:** Anzahl nebenläufiger Worker für Generierung, Freistellen und Audit (Default: `3`, im interaktiven Modus automatisch `1`).
   * `--limit <N>`, `-l <N>`: Begrenzt die Anzahl der zu verarbeitenden Mappings (z. B. `--limit 10`).
   * `--budget <USD>`, `-b <USD>`: Setzt das maximale Tagesbudget für Gemini/FLUX/BGBuster (Default: `$1.00`).
   * `--key <NAME>`, `-k <NAME>`: Auditiert oder generiert gezielt ein einzelnes Mapping (z. B. `--key "chicken breast"`).
   * `--no-zip`: Verhindert das automatische Aktualisieren von `ingredient-icons.zip` am Ende des Laufs.
 * **Beispiele:**
   ```bash
-  # Standard: Fehlende Icons generieren + unbestätigte Icons auditieren
+  # Standard: Fehlende Icons generieren + unbestätigte Icons auditieren (3 Worker parallel)
   npm run icons
+
+  # Schnelle parallele Abarbeitung mit 5 Workern
+  npm run icons -- -c 5
+
+  # Nur fehlende Icons generieren mit 4 parallelen Workern
+  npm run icons -- --missing-only -c 4
 
   # Nur fehlende Icons generieren (schnell)
   npm run icons -- --missing-only

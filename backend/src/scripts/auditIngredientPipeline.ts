@@ -42,6 +42,8 @@ function parseCliArgs(): PipelineCliOptions {
       options.interactive = true;
     } else if ((arg === '--key' || arg === '-k') && args[i + 1]) {
       options.key = args[++i].toLowerCase().trim();
+    } else if ((arg === '--concurrency' || arg === '-c') && args[i + 1]) {
+      options.concurrency = parseInt(args[++i], 10);
     }
   }
 
@@ -51,6 +53,7 @@ function parseCliArgs(): PipelineCliOptions {
 async function runPipeline() {
   const options = parseCliArgs();
   const dailyBudgetLimit = options.dailyBudgetUsd ?? (parseFloat(process.env.DAILY_AUDIT_BUDGET_USD || '') || DEFAULT_DAILY_BUDGET_USD);
+  const concurrency = options.interactive ? 1 : Math.max(1, options.concurrency ?? 3);
 
   console.log(`\n======================================================`);
   console.log(`🍳 All-in-One Ingredient Icons & Audit Pipeline`);
@@ -58,6 +61,7 @@ async function runPipeline() {
   console.log(`✨ Dry-Run Modus:    ${options.dryRun ? 'AKTIV (keine Schreibvorgänge)' : 'Nein'}`);
   console.log(`🔎 Interaktiv/Debug: ${options.interactive ? 'AKTIV (Vergleich nach Generierung)' : 'Nein'}`);
   console.log(`⚡ Force-Re-Audit:   ${options.force ? 'Ja' : 'Nein'}`);
+  console.log(`🚀 Concurrency:      ${concurrency} parallele Worker`);
   if (options.missingOnly) console.log(`🚀 Modus:            NUR FEHLENDE ICONS GENERIEREN`);
   if (options.iconsOnly)   console.log(`🎨 Modus:            NUR ICONS (Mapping-Check übersprungen)`);
   console.log(`💰 Tagesbudget:      $${dailyBudgetLimit.toFixed(2)} USD`);
@@ -140,16 +144,19 @@ async function runPipeline() {
   }
   const changedIcons: ChangedIconItem[] = [];
 
-  for (let i = 0; i < queue.length; i++) {
-    const item = queue[i];
-    const prefix = `[${i + 1}/${queue.length}][${item.mapping_key}]`;
+  let aborted = false;
 
-    // Budget guard
+  const processItem = async (item: typeof queue[0], index: number) => {
+    if (aborted) return;
     if (isBudgetExhausted(dailyBudgetLimit)) {
-      console.log(`\n🛑 Tagesbudget ($${dailyBudgetLimit.toFixed(2)}) während des Laufs erreicht. Beende aktuellen Batch.`);
-      break;
+      if (!aborted) {
+        aborted = true;
+        console.log(`\n🛑 Tagesbudget ($${dailyBudgetLimit.toFixed(2)}) während des Laufs erreicht. Beende aktuellen Batch.`);
+      }
+      return;
     }
 
+    const prefix = `[${index + 1}/${queue.length}][${item.mapping_key}]`;
     console.log(`${prefix} 🔎 Auditiere (Kategorie: ${item.category || 'N/A'})...`);
 
     try {
@@ -198,13 +205,24 @@ async function runPipeline() {
       auditedCount++;
     } catch (err: unknown) {
       if (err instanceof AbortPipelineError) {
+        aborted = true;
         console.log(`\n🛑 Pipeline vorzeitig vom Benutzer im interaktiven Modus beendet.`);
-        break;
+        return;
       }
       const msg = err instanceof Error ? err.message : String(err);
       console.error(`${prefix} ❌ Fehler beim Audit: ${msg}`);
     }
-  }
+  };
+
+  let nextIndex = 0;
+  const workers = Array.from({ length: Math.min(concurrency, queue.length) }, async () => {
+    while (nextIndex < queue.length && !aborted) {
+      const idx = nextIndex++;
+      await processItem(queue[idx], idx);
+    }
+  });
+
+  await Promise.all(workers);
 
   // Auto-zip packaging if any icons were modified
   if (options.autoZip && !options.dryRun && (iconsZoomed > 0 || iconsGenerated > 0)) {
@@ -222,11 +240,7 @@ async function runPipeline() {
   console.log(`\n======================================================`);
   console.log(`🎉 Audit-Lauf abgeschlossen!`);
   console.log(`======================================================`);
-  console.log(`✅ Geprüfte Zutaten:       ${auditedCount}`);
-  console.log(`📝 DB-Mappings aktualisiert: ${mappingsUpdated}`);
-  console.log(`🔎 Icons gezoomt (Auto-Fix): ${iconsZoomed}`);
-  console.log(`🎨 Icons neu generiert:    ${iconsGenerated}`);
-  console.log(`⭐ Icons bestätigt:         ${iconsConfirmed}`);
+  console.log(`✅ Geprüft: ${auditedCount} | 📝 Mappings: ${mappingsUpdated} | 🔎 Gezoomt: ${iconsZoomed} | 🎨 Generiert: ${iconsGenerated} | ⭐ Bestätigt: ${iconsConfirmed}`);
   console.log(`💰 Kosten dieses Laufs:     $${totalCostRunUsd.toFixed(5)} USD`);
   console.log(`📈 Gesamte Tagesausgaben:   $${finalBudget.totalSpentUsd.toFixed(4)} / $${dailyBudgetLimit.toFixed(2)} USD`);
   console.log(`   └─ FLUX: $${finalBudget.fluxSpentUsd.toFixed(4)} | BGBuster: $${(finalBudget.bgbusterSpentUsd || 0).toFixed(4)} | Gemini: $${finalBudget.geminiSpentUsd.toFixed(4)}`);
