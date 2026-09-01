@@ -46,6 +46,7 @@ Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()` (
     * `npm run icons:zip`: Packt alle aktuellen `.webp`-Dateien aus `backend/public/ingredient-icons/` in `ingredient-icons.zip`.
     * `npm run icons:unpack`: Entpackt das Zip-Archiv manuell (unterstützt `--force`).
     * `npm run audit:ingredients`: Startet die autonome Audit-Pipeline (unterstützt `--dry-run`, `--interactive` / `-i` / `--debug`, `--limit <N>`, `--budget <USD>`, `--force`, `--key <key>`).
+    * `npm run mappings:backfill`: Befüllt die `ingredient_mappings`-Tabelle (unterstützt `--prod` für Rezepte aus Production, `--ai` / `--ai-prompt` / `--ai-category` / `--count` für synthetische KI-Zutatenlisten, oder `--ingredients="..."` für manuelle Listen).
     * Der Batch-Generator (`generateBaseNameIngredientIcons.ts`) und die Audit-Pipeline aktualisieren das Zip-Archiv nach Änderungen automatisch.
 
 ### Autonome KI-Audit-Pipeline (`backend/src/audit/`)
