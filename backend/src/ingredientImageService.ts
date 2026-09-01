@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, FunctionDeclarationSchemaType } from '@google/generative-ai';
 import { config } from './config.js';
 import type { CanonicalIngredient } from './data/canonicalIngredients.js';
 import { openFoodFactsAccess } from './matching/openFoodFactsIndex.js';
@@ -303,8 +303,20 @@ export async function describeIngredientVisuallyWithGemini(item: CanonicalIngred
       model: modelName,
       generationConfig: {
         temperature: 0.1,
-        maxOutputTokens: 60,
-      },
+        maxOutputTokens: 120,
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: FunctionDeclarationSchemaType.OBJECT,
+          description: 'Visual description of the ingredient icon',
+          properties: {
+            visualDescription: {
+              type: FunctionDeclarationSchemaType.STRING,
+              description: 'Dense, compact English visual subject description (8 to 15 words max), comma-separated visual tags',
+            },
+          },
+          required: ['visualDescription'],
+        },
+      } as any,
       systemInstruction:
         'You are an expert food photography art director creating an ultra-consistent design system of isolated studio culinary icon assets. ' +
         'Given a food ingredient in German/English and its category, output a dense, compact English visual subject description (8 to 15 words max). ' +
@@ -332,7 +344,13 @@ export async function describeIngredientVisuallyWithGemini(item: CanonicalIngred
 
     const userPrompt = `Ingredient: "${item.name_de}" (English: "${item.name_en}", Category: ${item.category})`;
     const res = await model.generateContent(userPrompt);
-    const text = res.response.text().trim().replace(/^["']|["']$/g, '').replace(/\.$/, '');
+    let text = '';
+    try {
+      const parsed = JSON.parse(res.response.text().trim());
+      text = (parsed.visualDescription || '').trim().replace(/^["']|["']$/g, '').replace(/\.$/, '');
+    } catch {
+      text = res.response.text().trim().replace(/^["']|["']$/g, '').replace(/\.$/, '');
+    }
 
     // Extract exact token usage metadata from Gemini response
     const usage = (res.response as any).usageMetadata;

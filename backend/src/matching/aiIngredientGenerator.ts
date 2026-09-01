@@ -1,6 +1,34 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, FunctionDeclarationSchemaType } from '@google/generative-ai';
 import { canonicalizeBaseName } from './baseNameCanonical.js';
 import type { ResolverInput } from './ingredientResolver.js';
+
+const ingredientBatchSchema = {
+  type: FunctionDeclarationSchemaType.ARRAY,
+  description: 'List of culinary grocery ingredients',
+  items: {
+    type: FunctionDeclarationSchemaType.OBJECT,
+    properties: {
+      name: {
+        type: FunctionDeclarationSchemaType.STRING,
+        description: 'German ingredient name as bought in stores',
+      },
+      baseName: {
+        type: FunctionDeclarationSchemaType.STRING,
+        description: 'Canonical English base name (preserving animal species for meat cuts/organs and plant source for oils/flours)',
+      },
+      category: {
+        type: FunctionDeclarationSchemaType.STRING,
+        description: 'Supermarket culinary category',
+      },
+      synonyms: {
+        type: FunctionDeclarationSchemaType.ARRAY,
+        description: 'Optional synonyms or alternative spellings',
+        items: { type: FunctionDeclarationSchemaType.STRING },
+      },
+    },
+    required: ['name', 'baseName', 'category'],
+  },
+};
 
 export const CULINARY_CATEGORIES = [
   'PRODUCE',
@@ -134,7 +162,8 @@ export async function generateIngredientsWithAi(
     generationConfig: {
       temperature: 0.85,
       responseMimeType: 'application/json',
-    },
+      responseSchema: ingredientBatchSchema,
+    } as any,
     systemInstruction:
       'You are an expert culinary database architect and chef. ' +
       'Generate a realistic, diverse list of essential culinary grocery ingredients. ' +

@@ -1,7 +1,27 @@
 import fs from 'node:fs';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, FunctionDeclarationSchemaType } from '@google/generative-ai';
 import { config } from '../config.js';
 import { recordAuditSpend } from './budgetTracker.js';
+
+const visionReviewSchema = {
+  type: FunctionDeclarationSchemaType.OBJECT,
+  description: 'Visual quality audit review result for an ingredient icon.',
+  properties: {
+    pass: {
+      type: FunctionDeclarationSchemaType.BOOLEAN,
+      description: 'True if the icon satisfies all visual quality standards (studio background, isolated, accurate subject, correct vessel, no forbidden artifacts).',
+    },
+    reason: {
+      type: FunctionDeclarationSchemaType.STRING,
+      description: 'Brief, constructive explanation of the evaluation decision.',
+    },
+    adaptedPrompt: {
+      type: FunctionDeclarationSchemaType.STRING,
+      description: 'If pass is false, a refined text-to-image prompt for FLUX.1 [schnell] fixing the issues. If pass is true, leave empty string or null.',
+    },
+  },
+  required: ['pass', 'reason'],
+};
 
 let geminiClient: GoogleGenerativeAI | null = null;
 function getGemini(): GoogleGenerativeAI | null {
@@ -38,7 +58,12 @@ export async function reviewIconWithGeminiVision(
     const imageBuffer = fs.readFileSync(filePath);
     const model = client.getGenerativeModel({
       model: config.GEMINI_MODEL || 'gemini-3.1-flash-lite',
-      generationConfig: { temperature: 0.2, maxOutputTokens: 300 },
+      generationConfig: {
+        temperature: 0.2,
+        maxOutputTokens: 400,
+        responseMimeType: 'application/json',
+        responseSchema: visionReviewSchema,
+      } as any,
     });
 
     const baselineSection = currentPrompt
@@ -84,8 +109,7 @@ Reply in valid JSON format only:
     ]);
 
     const text = res.response.text().trim();
-    const cleanJson = text.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(cleanJson);
+    const parsed = JSON.parse(text);
     const visualPass = Boolean(parsed.pass);
     const reasoning = parsed.reason || 'Vision audit verified';
     const adaptedPrompt = typeof parsed.adaptedPrompt === 'string' && parsed.adaptedPrompt.trim() ? parsed.adaptedPrompt.trim() : null;
