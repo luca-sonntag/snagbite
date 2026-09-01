@@ -2,19 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   findExistingIngredientImage,
-  generateIngredientIcon,
   getIngredientImagesDir,
 } from '../ingredientImageService.js';
-import type { CanonicalIngredient } from '../data/canonicalIngredients.js';
 import { analyzeIconGeometry, autoZoomAndPadIcon } from './iconGeometry.js';
 import { isIconConfirmed, recordIconAudit } from './auditManifest.js';
-import {
-  recordAuditSpend,
-  isBudgetExhausted,
-  DEFAULT_DAILY_BUDGET_USD,
-} from './budgetTracker.js';
+import { isBudgetExhausted, DEFAULT_DAILY_BUDGET_USD } from './budgetTracker.js';
 import { reviewIconWithGeminiVision } from './visionReviewer.js';
-import { promptForComparison, AbortPipelineError } from './interactivePrompt.js';
+import { AbortPipelineError } from './interactivePrompt.js';
+import { triggerIconGeneration } from './iconGeneratorHelper.js';
 import type { IconAuditEntry, AuditStatus, IconGeometryResult } from './types.js';
 
 export { AbortPipelineError };
@@ -31,90 +26,6 @@ export interface AuditIconResult {
   costUsd: number;
   reasoning: string;
   attempts?: number;
-}
-
-async function triggerIconGeneration(params: {
-  slug: string;
-  mappingKey: string;
-  category: string;
-  productCode: string | undefined;
-  reasoning: string | undefined;
-  imagesDir: string;
-  interactive?: boolean;
-}): Promise<{ filename: string; filePath: string; costUsd: number; accepted: boolean; userApproved: boolean }> {
-  const targetFilename = `${params.slug}.webp`;
-  const targetFilePath = path.join(params.imagesDir, targetFilename);
-  const existsOld = fs.existsSync(targetFilePath);
-
-  if (params.interactive) {
-    const candidateSlug = `${params.slug}_candidate`;
-    const candidatePseudoItem: CanonicalIngredient = {
-      id: candidateSlug,
-      product_code: params.productCode || params.slug,
-      name_de: params.mappingKey,
-      name_en: params.mappingKey,
-      category: params.category || 'OTHER',
-      nutrients_per_100g: { calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 },
-      aliases: [params.mappingKey],
-    };
-
-    const genRes = await generateIngredientIcon(candidatePseudoItem, { outDir: params.imagesDir });
-    recordAuditSpend({ fluxCostUsd: 0.0035, isGeneration: true });
-
-    const decision = await promptForComparison({
-      mappingKey: params.mappingKey,
-      oldPath: existsOld ? targetFilePath : null,
-      candidatePath: genRes.filePath,
-    });
-
-    if (decision === 'abort') {
-      if (fs.existsSync(genRes.filePath)) fs.unlinkSync(genRes.filePath);
-      throw new AbortPipelineError();
-    }
-
-    if (decision === 'accept') {
-      fs.copyFileSync(genRes.filePath, targetFilePath);
-      if (fs.existsSync(genRes.filePath)) fs.unlinkSync(genRes.filePath);
-      return {
-        filename: targetFilename,
-        filePath: targetFilePath,
-        costUsd: genRes.costs.totalCostUsd,
-        accepted: true,
-        userApproved: true,
-      };
-    } else {
-      if (fs.existsSync(genRes.filePath)) fs.unlinkSync(genRes.filePath);
-      return {
-        filename: targetFilename,
-        filePath: targetFilePath,
-        costUsd: genRes.costs.totalCostUsd,
-        accepted: false,
-        userApproved: false,
-      };
-    }
-  }
-
-  // Non-interactive standard flow
-  const pseudoItem: CanonicalIngredient = {
-    id: params.slug,
-    product_code: params.productCode || params.slug,
-    name_de: params.mappingKey,
-    name_en: params.mappingKey,
-    category: params.category || 'OTHER',
-    nutrients_per_100g: { calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 },
-    aliases: [params.mappingKey],
-  };
-
-  const genRes = await generateIngredientIcon(pseudoItem, { outDir: params.imagesDir });
-  recordAuditSpend({ fluxCostUsd: 0.0035, isGeneration: true });
-
-  return {
-    filename: genRes.filename,
-    filePath: genRes.filePath,
-    costUsd: genRes.costs.totalCostUsd,
-    accepted: true,
-    userApproved: false,
-  };
 }
 
 export async function auditSingleIcon(params: {
@@ -176,6 +87,7 @@ export async function auditSingleIcon(params: {
   let zoomApplied = false;
   let visualPass = false;
   let finalReasoning = 'Geometric and vision checks passed.';
+  let activePromptOverride: string | undefined = undefined;
   let geometry: IconGeometryResult = {
     width: 512,
     height: 512,
@@ -203,6 +115,7 @@ export async function auditSingleIcon(params: {
         productCode: params.productCode,
         reasoning: params.reasoning,
         imagesDir,
+        promptOverride: activePromptOverride,
         interactive: params.interactive,
       });
 
@@ -233,6 +146,10 @@ export async function auditSingleIcon(params: {
       zoomApplied = true;
     } else if (geometry.isClipped && attempt < MAX_REVIEW_ATTEMPTS && !isBudgetExhausted(budgetLimit)) {
       console.log(`[iconAuditor] ✂️ Clipping detected for "${params.mappingKey}". Regenerating with Flux (Attempt ${attempt + 1}/${MAX_REVIEW_ATTEMPTS})...`);
+      const clipPrompt = activePromptOverride
+        ? `${activePromptOverride}, smaller scale in center, generous 25% empty white space margin, completely contained without edge clipping`
+        : `${params.mappingKey}, smaller scale in center, generous 25% empty white space margin, completely contained without edge clipping, isolated on pure white background`;
+
       const gen = await triggerIconGeneration({
         slug,
         mappingKey: params.mappingKey,
@@ -240,6 +157,7 @@ export async function auditSingleIcon(params: {
         productCode: params.productCode,
         reasoning: params.reasoning,
         imagesDir,
+        promptOverride: clipPrompt,
         interactive: params.interactive,
       });
 
@@ -275,7 +193,12 @@ export async function auditSingleIcon(params: {
           break;
         }
 
-        console.log(`[iconAuditor] 🔄 Restarting generation for "${params.mappingKey}" based on vision review feedback...`);
+        if (vision.adaptedPrompt) {
+          console.log(`[iconAuditor] 🎨 AI adapted image prompt for retry: "${vision.adaptedPrompt.slice(0, 95)}..."`);
+          activePromptOverride = vision.adaptedPrompt;
+        }
+
+        console.log(`[iconAuditor] 🔄 Restarting generation for "${params.mappingKey}" with adapted prompt...`);
         const gen = await triggerIconGeneration({
           slug,
           mappingKey: params.mappingKey,
@@ -283,6 +206,7 @@ export async function auditSingleIcon(params: {
           productCode: params.productCode,
           reasoning: params.reasoning,
           imagesDir,
+          promptOverride: activePromptOverride,
           interactive: params.interactive,
         });
 

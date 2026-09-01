@@ -14,6 +14,7 @@ function getGemini(): GoogleGenerativeAI | null {
 export interface VisionReviewResult {
   visualPass: boolean;
   reasoning: string;
+  adaptedPrompt?: string | null;
   costUsd: number;
 }
 
@@ -27,6 +28,7 @@ export async function reviewIconWithGeminiVision(
     return {
       visualPass: true,
       reasoning: 'Vision check skipped (Gemini not configured or file missing).',
+      adaptedPrompt: null,
       costUsd: 0,
     };
   }
@@ -35,7 +37,7 @@ export async function reviewIconWithGeminiVision(
     const imageBuffer = fs.readFileSync(filePath);
     const model = client.getGenerativeModel({
       model: config.GEMINI_MODEL || 'gemini-3.1-flash-lite',
-      generationConfig: { temperature: 0.1, maxOutputTokens: 100 },
+      generationConfig: { temperature: 0.2, maxOutputTokens: 300 },
     });
 
     const prompt = `Inspect this culinary ingredient icon for "${mappingKey}" (category: ${category}).
@@ -56,8 +58,12 @@ Strict evaluation criteria:
    - FORBIDDEN: Text, brand logos, packaging watermarks.
    - REMINDER: A simple small white ceramic pinch bowl or dipping bowl containing spices/sauce is NOT a forbidden utensil/plate; it is explicitly valid.
 
+ADAPTIVE PROMPT REGENERATION:
+If "pass" is false, you MUST provide an "adaptedPrompt" specifically tailored for text-to-image AI (FLUX.1 [schnell]) to fix the issues seen in the current image. You have full creative freedom to adjust staging, vessel (e.g. tiny white pinch bowl), angle, cut, and explicit negative qualifiers so the next generation succeeds.
+Format for adaptedPrompt: "${mappingKey}, [exact visual staging instructions], isolated on pure solid white background, dead center, 1:1 square icon, 45-degree three-quarter perspective, generous 25% white padding on all sides, studio lighting, zero shadows, no plates, no utensils, no hands, no text".
+
 Reply in valid JSON format only:
-{"pass": true/false, "reason": "brief explanation"}`;
+{"pass": true/false, "reason": "brief explanation", "adaptedPrompt": "prompt if pass is false, else null"}`;
 
     const res = await model.generateContent([
       prompt,
@@ -74,19 +80,21 @@ Reply in valid JSON format only:
     const parsed = JSON.parse(cleanJson);
     const visualPass = Boolean(parsed.pass);
     const reasoning = parsed.reason || 'Vision audit verified';
+    const adaptedPrompt = typeof parsed.adaptedPrompt === 'string' && parsed.adaptedPrompt.trim() ? parsed.adaptedPrompt.trim() : null;
 
-    const usage = (res.response as any).usageMetadata;
-    const tokens = usage?.totalTokenCount || 200;
+    const usage = (res.response as unknown as { usageMetadata?: { totalTokenCount?: number } }).usageMetadata;
+    const tokens = usage?.totalTokenCount || 250;
     const costUsd = Number((tokens * 0.00000015).toFixed(7));
     recordAuditSpend({ geminiCostUsd: costUsd });
 
-    return { visualPass, reasoning, costUsd };
+    return { visualPass, reasoning, adaptedPrompt, costUsd };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     console.warn(`[visionReviewer] Warning reviewing ${filePath}: ${msg}`);
     return {
       visualPass: true,
       reasoning: `Vision check warning (${msg}), accepted on geometric pass.`,
+      adaptedPrompt: null,
       costUsd: 0,
     };
   }

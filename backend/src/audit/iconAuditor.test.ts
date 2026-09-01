@@ -74,9 +74,10 @@ describe('iconAuditor & visionReviewer', () => {
     assert.ok(res.reasoning.includes('[DRY RUN]'));
   });
 
-  test('reviewIconWithGeminiVision handles non-existent file gracefully', async () => {
+  test('reviewIconWithGeminiVision handles non-existent file gracefully and returns adaptedPrompt null', async () => {
     const res = await reviewIconWithGeminiVision('/non/existent/path.webp', 'apple', 'FRUITS_VEGETABLES');
     assert.equal(res.visualPass, true);
+    assert.equal(res.adaptedPrompt, null);
     assert.equal(res.costUsd, 0);
   });
 });
