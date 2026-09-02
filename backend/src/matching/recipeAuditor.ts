@@ -1,133 +1,21 @@
-import { GoogleGenerativeAI, FunctionDeclarationSchemaType } from '@google/generative-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { config } from '../config.js';
 import type { Recipe, GeminiUsageInfo } from '../types.js';
 import { estimateCost, type TokenUsage } from '../logger.js';
 import { withRetry } from '../retry.js';
+import {
+  auditPatchSchema,
+  buildAuditPrompt,
+  type RecipeAuditPatch,
+  type RecipeAuditResult,
+  type IngredientCorrection,
+  type AddedIngredient,
+  type RemovedIngredient,
+  type StepCorrection,
+  type AddedStep,
+} from './recipeAuditorSchema.js';
 
-export interface IngredientCorrection {
-  originalName: string;
-  correctedBaseName?: string;
-  correctedCategory?: string;
-  correctedSynonyms?: string[];
-  reason: string;
-}
-
-export interface AddedIngredient {
-  name: string;
-  amount?: number;
-  unit?: string;
-  baseName: string;
-  category: string;
-  synonyms?: string[];
-  reason: string;
-}
-
-export interface RemovedIngredient {
-  name: string;
-  reason: string;
-}
-
-export interface StepCorrection {
-  stepNumber: number;
-  correctedDescription: string;
-  reason: string;
-}
-
-export interface AddedStep {
-  insertAfterStep?: number;
-  description: string;
-  reason: string;
-}
-
-export interface RecipeAuditPatch {
-  ingredientCorrections?: IngredientCorrection[];
-  addedIngredients?: AddedIngredient[];
-  removedIngredients?: RemovedIngredient[];
-  stepCorrections?: StepCorrection[];
-  addedSteps?: AddedStep[];
-  removedStepNumbers?: number[];
-}
-
-export interface RecipeAuditResult {
-  patch: RecipeAuditPatch | null;
-  usage?: GeminiUsageInfo;
-}
-
-const auditPatchSchema = {
-  type: FunctionDeclarationSchemaType.OBJECT,
-  properties: {
-    ingredientCorrections: {
-      type: FunctionDeclarationSchemaType.ARRAY,
-      description: 'Corrections to baseName, category, or synonyms of existing ingredients to fix misclassifications, umbrella collapsing (e.g. Mozzarella collapsed to cheese, Pfeffer mapped to bell pepper), or wrong supermarket categories.',
-      items: {
-        type: FunctionDeclarationSchemaType.OBJECT,
-        properties: {
-          originalName: { type: FunctionDeclarationSchemaType.STRING, description: 'The exact ingredient name in the recipe as written.' },
-          correctedBaseName: { type: FunctionDeclarationSchemaType.STRING, description: 'Specific singular English baseName (e.g. "mozzarella", "black pepper").' },
-          correctedCategory: { type: FunctionDeclarationSchemaType.STRING, description: 'Supermarket category (e.g. "DAIRY", "SPICES_SEASONINGS", "PRODUCE").' },
-          correctedSynonyms: { type: FunctionDeclarationSchemaType.ARRAY, items: { type: FunctionDeclarationSchemaType.STRING } },
-          reason: { type: FunctionDeclarationSchemaType.STRING },
-        },
-        required: ['originalName', 'reason'],
-      },
-    },
-    addedIngredients: {
-      type: FunctionDeclarationSchemaType.ARRAY,
-      items: {
-        type: FunctionDeclarationSchemaType.OBJECT,
-        properties: {
-          name: { type: FunctionDeclarationSchemaType.STRING },
-          amount: { type: FunctionDeclarationSchemaType.NUMBER },
-          unit: { type: FunctionDeclarationSchemaType.STRING },
-          baseName: { type: FunctionDeclarationSchemaType.STRING },
-          category: { type: FunctionDeclarationSchemaType.STRING },
-          synonyms: { type: FunctionDeclarationSchemaType.ARRAY, items: { type: FunctionDeclarationSchemaType.STRING } },
-          reason: { type: FunctionDeclarationSchemaType.STRING },
-        },
-        required: ['name', 'baseName', 'category', 'reason'],
-      },
-    },
-    removedIngredients: {
-      type: FunctionDeclarationSchemaType.ARRAY,
-      items: {
-        type: FunctionDeclarationSchemaType.OBJECT,
-        properties: {
-          name: { type: FunctionDeclarationSchemaType.STRING },
-          reason: { type: FunctionDeclarationSchemaType.STRING },
-        },
-        required: ['name', 'reason'],
-      },
-    },
-    stepCorrections: {
-      type: FunctionDeclarationSchemaType.ARRAY,
-      items: {
-        type: FunctionDeclarationSchemaType.OBJECT,
-        properties: {
-          stepNumber: { type: FunctionDeclarationSchemaType.INTEGER },
-          correctedDescription: { type: FunctionDeclarationSchemaType.STRING },
-          reason: { type: FunctionDeclarationSchemaType.STRING },
-        },
-        required: ['stepNumber', 'correctedDescription', 'reason'],
-      },
-    },
-    addedSteps: {
-      type: FunctionDeclarationSchemaType.ARRAY,
-      items: {
-        type: FunctionDeclarationSchemaType.OBJECT,
-        properties: {
-          insertAfterStep: { type: FunctionDeclarationSchemaType.INTEGER },
-          description: { type: FunctionDeclarationSchemaType.STRING },
-          reason: { type: FunctionDeclarationSchemaType.STRING },
-        },
-        required: ['description', 'reason'],
-      },
-    },
-    removedStepNumbers: {
-      type: FunctionDeclarationSchemaType.ARRAY,
-      items: { type: FunctionDeclarationSchemaType.INTEGER },
-    },
-  },
-};
+export type { RecipeAuditPatch, RecipeAuditResult, IngredientCorrection, AddedIngredient, RemovedIngredient, StepCorrection, AddedStep };
 
 export async function auditRecipe(recipe: Recipe): Promise<RecipeAuditResult> {
   if (!config.GEMINI_API_KEY || config.GEMINI_API_KEY === 'your_gemini_api_key_here') {
@@ -146,24 +34,7 @@ export async function auditRecipe(recipe: Recipe): Promise<RecipeAuditResult> {
       } as unknown as Record<string, unknown>,
     });
 
-    const prompt = `You are a strict 2nd-stage Culinary Recipe Auditor & Ingredient Disambiguation Engine.
-Review the recipe JSON below and identify any ingredient misclassifications, umbrella collapsing, or mismatches:
-1. SPECIFICITY INVARIANCE: Never collapse specific varieties into umbrella terms:
-   - "Mozzarella" / "Mozzarella (gerieben)" MUST have baseName "mozzarella", NOT "cheese".
-   - "Feta" / "Schafskäse" MUST have baseName "feta", NOT "cheese".
-   - "Gouda" -> "gouda", "Cheddar" -> "cheddar", "Parmesan" -> "parmesan" (NOT "cheese").
-   - "Lachs" / "Salmon" -> "salmon" or "salmon fillet", "Thunfisch" -> "tuna" (NOT "fish").
-2. STRICT SPICE VS PRODUCE DISAMBIGUATION:
-   - "Pfeffer" / "Schwarzer Pfeffer" (spice) MUST have baseName "black pepper", category "SPICES_SEASONINGS" (NEVER "pepper", "bell pepper", or "PRODUCE").
-   - "Paprika" / "Gemüsepaprika" (produce) MUST have baseName "bell pepper", category "FRUITS_VEGETABLES" / "PRODUCE".
-   - "Paprikapulver" (spice) MUST have baseName "paprika powder", category "SPICES_SEASONINGS".
-3. INLINE TAG ALIGNMENT:
-   - If baseName is corrected, update step descriptions containing [Word](ing:oldBaseName) to [Word](ing:newBaseName).
-4. If everything is already accurate and complete, return an empty patch {}.
-
-Recipe to audit:
-${JSON.stringify({ title: recipe.title, description: recipe.description, ingredients: recipe.ingredients, instructions: recipe.instructions }, null, 2)}`;
-
+    const prompt = buildAuditPrompt(recipe);
     const result = await withRetry(() => model.generateContent([prompt]), { maxAttempts: 2, baseDelayMs: 1000 });
     const text = result.response.text();
     if (!text) return { patch: null };
@@ -226,11 +97,9 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
 
   // 3. Add ingredients
   if (patch.addedIngredients?.length) {
-    if (result.ingredients.length === 0) {
-      result.ingredients.push({ name: 'Zutaten', items: [] });
-    }
+    if (result.ingredients.length === 0) result.ingredients.push({ name: 'Zutaten', items: [] });
     for (const added of patch.addedIngredients) {
-      result.ingredients[0].items.push({
+      const newIng = {
         name: added.name,
         amount: added.amount ?? 1,
         unit: added.unit ?? 'Stück',
@@ -238,7 +107,18 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
         category: added.category,
         synonyms: added.synonyms ?? [],
         isGenericGrocery: true,
-      });
+      };
+      const catUpper = added.category.toUpperCase().trim();
+      let targetGroup = result.ingredients.find((g) => g.name.toUpperCase().trim() === catUpper);
+      if (!targetGroup) {
+        if (result.ingredients.length === 1 && result.ingredients[0].name.toLowerCase() === 'zutaten') {
+          targetGroup = result.ingredients[0];
+        } else {
+          targetGroup = { name: added.category, items: [] };
+          result.ingredients.push(targetGroup);
+        }
+      }
+      targetGroup.items.push(newIng);
     }
   }
 
@@ -261,7 +141,9 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
   if (patch.addedSteps?.length) {
     for (const added of patch.addedSteps) {
       const newStep = { step: 0, description: added.description };
-      if (added.insertAfterStep !== undefined) {
+      if (added.insertAfterStep === 0) {
+        result.instructions.unshift(newStep);
+      } else if (added.insertAfterStep !== undefined && added.insertAfterStep > 0) {
         const idx = result.instructions.findIndex((s) => s.step === added.insertAfterStep);
         if (idx >= 0) result.instructions.splice(idx + 1, 0, newStep);
         else result.instructions.push(newStep);
@@ -273,18 +155,35 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
 
   // 7. Align inline tags for corrected baseNames
   if (patch.ingredientCorrections?.length) {
+    const origIngredients = recipe.ingredients.flatMap((g) => g.items);
     for (const corr of patch.ingredientCorrections) {
-      if (corr.correctedBaseName) {
-        const origIng = recipe.ingredients.flatMap((g) => g.items).find(
-          (i) => i.name.toLowerCase().trim() === corr.originalName.toLowerCase().trim()
-        );
-        const oldBase = origIng?.baseName;
-        if (oldBase && oldBase.toLowerCase() !== corr.correctedBaseName.toLowerCase()) {
-          const tagRegex = new RegExp(`\\(ing:${oldBase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)`, 'gi');
-          for (const s of result.instructions) {
-            s.description = s.description.replace(tagRegex, `(ing:${corr.correctedBaseName})`);
+      if (!corr.correctedBaseName) continue;
+      const origIng = origIngredients.find(
+        (i) => i.name.toLowerCase().trim() === corr.originalName.toLowerCase().trim()
+      );
+      const oldBase = origIng?.baseName?.toLowerCase().trim();
+      const corrOrig = corr.originalName.toLowerCase().trim();
+      const newBase = corr.correctedBaseName;
+
+      for (const s of result.instructions) {
+        s.description = s.description.replace(/\[([^\]]+)\]\(ing:([^)]+)\)/g, (fullMatch, label, tagBase) => {
+          const cleanLabel = (label as string).toLowerCase().trim();
+          const cleanTagBase = (tagBase as string).toLowerCase().trim();
+
+          const labelMatchesOrig = cleanLabel === corrOrig || cleanLabel.includes(corrOrig) || corrOrig.includes(cleanLabel);
+          const baseMatchesOld = Boolean(oldBase && cleanTagBase === oldBase);
+
+          // Disambiguate against other ingredients sharing the old baseName
+          const otherMatchesLabel = origIngredients.some(
+            (other) => other.name.toLowerCase().trim() !== corrOrig &&
+              (cleanLabel.includes(other.name.toLowerCase().trim()) || other.name.toLowerCase().trim().includes(cleanLabel))
+          );
+
+          if (labelMatchesOrig || (baseMatchesOld && !otherMatchesLabel)) {
+            return `[${label}](ing:${newBase})`;
           }
-        }
+          return fullMatch;
+        });
       }
     }
   }

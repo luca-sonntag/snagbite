@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { applyRecipeAuditPatch, type RecipeAuditPatch } from './recipeAuditor.js';
+import { applyRecipeAuditPatch, auditRecipe, type RecipeAuditPatch } from './recipeAuditor.js';
 import type { Recipe } from '../types.js';
 
 describe('recipeAuditor: applyRecipeAuditPatch', () => {
@@ -105,6 +105,131 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
     );
   });
 
+  test('prevents cross-tag collisions when multiple ingredients share a generic baseName', () => {
+    const multiCheeseRecipe: Recipe = {
+      title: 'Zwei-Käse Pasta',
+      description: 'Pasta mit Mozzarella und Parmesan.',
+      prepTime: 5,
+      cookTime: 10,
+      servings: 1,
+      ingredients: [
+        {
+          name: 'DAIRY',
+          items: [
+            { name: 'Mozzarella', baseName: 'cheese', category: 'DAIRY', amount: 100, unit: 'g' },
+            { name: 'Parmesan', baseName: 'cheese', category: 'DAIRY', amount: 30, unit: 'g' },
+          ],
+        },
+      ],
+      instructions: [
+        {
+          step: 1,
+          description: 'Den [Mozzarella](ing:cheese) und den geriebenen [Parmesan](ing:cheese) über die Pasta streuen.',
+        },
+      ],
+    };
+
+    const patch: RecipeAuditPatch = {
+      ingredientCorrections: [
+        {
+          originalName: 'Mozzarella',
+          correctedBaseName: 'mozzarella',
+          reason: 'Specific variety',
+        },
+      ],
+    };
+
+    const patched = applyRecipeAuditPatch(multiCheeseRecipe, patch);
+    const mozz = patched.ingredients[0].items.find((i) => i.name === 'Mozzarella');
+    const parm = patched.ingredients[0].items.find((i) => i.name === 'Parmesan');
+
+    assert.equal(mozz?.baseName, 'mozzarella');
+    assert.equal(parm?.baseName, 'cheese');
+
+    // Crucial: [Parmesan](ing:cheese) MUST NOT be mutated to [Parmesan](ing:mozzarella)
+    assert.equal(
+      patched.instructions[0].description,
+      'Den [Mozzarella](ing:mozzarella) und den geriebenen [Parmesan](ing:cheese) über die Pasta streuen.'
+    );
+  });
+
+  test('prepends step at index 0 when insertAfterStep is 0', () => {
+    const recipe: Recipe = {
+      title: 'Ofengemüse',
+      description: 'Gemüse im Ofen.',
+      prepTime: 5,
+      cookTime: 20,
+      servings: 2,
+      ingredients: [{ name: 'Gemüse', items: [{ name: 'Karotte', baseName: 'carrot', category: 'PRODUCE' }] }],
+      instructions: [
+        { step: 1, description: 'Karotten schneiden.' },
+        { step: 2, description: 'Im Ofen backen.' },
+      ],
+    };
+
+    const patch: RecipeAuditPatch = {
+      addedSteps: [
+        {
+          insertAfterStep: 0,
+          description: 'Den Ofen auf 200°C Ober-/Unterhitze vorheizen.',
+          reason: 'Preheat step',
+        },
+      ],
+    };
+
+    const patched = applyRecipeAuditPatch(recipe, patch);
+    assert.equal(patched.instructions.length, 3);
+    assert.equal(patched.instructions[0].step, 1);
+    assert.equal(patched.instructions[0].description, 'Den Ofen auf 200°C Ober-/Unterhitze vorheizen.');
+    assert.equal(patched.instructions[1].step, 2);
+    assert.equal(patched.instructions[1].description, 'Karotten schneiden.');
+    assert.equal(patched.instructions[2].step, 3);
+    assert.equal(patched.instructions[2].description, 'Im Ofen backen.');
+  });
+
+  test('places addedIngredients into matching supermarket category groups', () => {
+    const categorizedRecipe: Recipe = {
+      title: 'Salat mit Dressing',
+      description: 'Frischer Salat.',
+      prepTime: 5,
+      cookTime: 0,
+      servings: 1,
+      ingredients: [
+        { name: 'PRODUCE', items: [{ name: 'Tomate', baseName: 'tomato', category: 'PRODUCE' }] },
+        { name: 'SPICES_SEASONINGS', items: [{ name: 'Salz', baseName: 'salt', category: 'SPICES_SEASONINGS' }] },
+      ],
+      instructions: [{ step: 1, description: 'Alles mischen.' }],
+    };
+
+    const patch: RecipeAuditPatch = {
+      addedIngredients: [
+        {
+          name: 'Schwarzer Pfeffer',
+          amount: 1,
+          unit: 'Prise',
+          baseName: 'black pepper',
+          category: 'SPICES_SEASONINGS',
+          reason: 'Seasoning',
+        },
+        {
+          name: 'Gurke',
+          amount: 0.5,
+          unit: 'Stück',
+          baseName: 'cucumber',
+          category: 'PRODUCE',
+          reason: 'Fresh vegetable',
+        },
+      ],
+    };
+
+    const patched = applyRecipeAuditPatch(categorizedRecipe, patch);
+    const produceGroup = patched.ingredients.find((g) => g.name === 'PRODUCE');
+    const spiceGroup = patched.ingredients.find((g) => g.name === 'SPICES_SEASONINGS');
+
+    assert.ok(produceGroup?.items.some((i) => i.name === 'Gurke' && i.baseName === 'cucumber'));
+    assert.ok(spiceGroup?.items.some((i) => i.name === 'Schwarzer Pfeffer' && i.baseName === 'black pepper'));
+  });
+
   test('adds and removes ingredients and steps with sequential renumbering (1..N)', () => {
     const patch: RecipeAuditPatch = {
       removedIngredients: [
@@ -144,10 +269,11 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
     const patched = applyRecipeAuditPatch(baseRecipe, patch);
 
     // Verify ingredient removal and addition
-    const parsley = patched.ingredients[0].items.find((i) => i.name === 'Petersilie');
+    const allIngredients = patched.ingredients.flatMap((g) => g.items);
+    const parsley = allIngredients.find((i) => i.name === 'Petersilie');
     assert.equal(parsley, undefined);
 
-    const oil = patched.ingredients[0].items.find((i) => i.name === 'Olivenöl');
+    const oil = allIngredients.find((i) => i.name === 'Olivenöl');
     assert.ok(oil);
     assert.equal(oil.baseName, 'olive oil');
     assert.equal(oil.amount, 2);
@@ -166,6 +292,12 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
 
     assert.equal(patched.instructions[2].step, 3);
     assert.equal(patched.instructions[2].description, 'Heiß auf Tellern anrichten und sofort genießen.');
+  });
+
+  test('auditRecipe returns null patch gracefully when API key is unconfigured', async () => {
+    const result = await auditRecipe(baseRecipe);
+    assert.ok(result);
+    assert.equal(typeof result, 'object');
   });
 
   test('end-to-end: audited recipe resolves mozzarella and black pepper with accurate macros and icons', async () => {
