@@ -10,7 +10,7 @@ import {
   type RemovedIngredient, type StepCorrection, type AddedStep,
 } from './recipeAuditorSchema.js';
 import { isDevEnvironment, logAuditDevSummary } from './recipeAuditorDevLogger.js';
-
+import { placeIngredientInGroup, normalizeToCategoryKey } from './categoryGroups.js';
 export type { RecipeAuditPatch, RecipeAuditResult, IngredientCorrection, AddedIngredient, RemovedIngredient, StepCorrection, AddedStep };
 
 export async function auditRecipe(recipe: Recipe): Promise<RecipeAuditResult> {
@@ -54,11 +54,8 @@ export async function auditRecipe(recipe: Recipe): Promise<RecipeAuditResult> {
 
 export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | null | undefined): Recipe {
   if (!patch) return { ...recipe };
-  const hasChanges = Boolean(
-    patch.ingredientCorrections?.length || patch.addedIngredients?.length ||
-    patch.removedIngredients?.length || patch.stepCorrections?.length ||
-    patch.addedSteps?.length || patch.removedStepNumbers?.length
-  );
+  const hasChanges = Boolean(patch.ingredientCorrections?.length || patch.addedIngredients?.length ||
+    patch.removedIngredients?.length || patch.stepCorrections?.length || patch.addedSteps?.length || patch.removedStepNumbers?.length);
   if (!hasChanges) return { ...recipe };
 
   const norm = (s?: string) => (s || '').toLowerCase().replace(/[,;:./\\()\-–—_!?'"`„“"»«[\]]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -76,47 +73,52 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
       .filter((g) => g.items.length > 0);
   }
 
-  // 2. Correct ingredients
+  // 2. Correct ingredients & relocate across category groups
   if (patch.ingredientCorrections?.length) {
-    for (const group of result.ingredients) {
-      group.items = group.items.map((ing) => {
-        const ingNorm = norm(ing.name);
-        const corr = patch.ingredientCorrections?.find((c) => norm(c.originalName) === ingNorm);
-        if (!corr) return ing;
-        return {
-          ...ing,
+    for (const corr of patch.ingredientCorrections) {
+      const corrOrigNorm = norm(corr.originalName);
+      for (const group of result.ingredients) {
+        const itemIdx = group.items.findIndex((i) => norm(i.name) === corrOrigNorm);
+        if (itemIdx === -1) continue;
+
+        const oldItem = group.items[itemIdx];
+        const targetCategory = corr.correctedCategory
+          ? normalizeToCategoryKey(corr.correctedCategory)
+          : (oldItem.category ? normalizeToCategoryKey(oldItem.category) : normalizeToCategoryKey(group.name));
+
+        const updatedItem = {
+          ...oldItem,
           ...(corr.correctedBaseName ? { baseName: corr.correctedBaseName.trim() } : {}),
-          ...(corr.correctedCategory ? { category: corr.correctedCategory.trim() } : {}),
+          category: targetCategory,
           ...(corr.correctedSynonyms ? { synonyms: corr.correctedSynonyms.map((s) => s.trim()).filter(Boolean) } : {}),
         };
-      });
+
+        const currentGroupCat = normalizeToCategoryKey(group.name);
+        if (targetCategory !== currentGroupCat && group.name.toLowerCase() !== 'zutaten') {
+          group.items.splice(itemIdx, 1);
+          placeIngredientInGroup(result.ingredients, updatedItem, targetCategory);
+        } else {
+          group.items[itemIdx] = updatedItem;
+        }
+        break;
+      }
     }
+    result.ingredients = result.ingredients.filter((g) => g.items.length > 0);
   }
 
   // 3. Add ingredients
   if (patch.addedIngredients?.length) {
-    if (result.ingredients.length === 0) result.ingredients.push({ name: 'Zutaten', items: [] });
     for (const added of patch.addedIngredients) {
-      const newIng = {
+      const cat = normalizeToCategoryKey(added.category);
+      placeIngredientInGroup(result.ingredients, {
         name: added.name.trim(),
         amount: added.amount ?? 1,
         unit: added.unit?.trim() ?? 'Stück',
         baseName: added.baseName.trim(),
-        category: added.category.trim(),
+        category: cat,
         synonyms: (added.synonyms ?? []).map((s) => s.trim()).filter(Boolean),
         isGenericGrocery: true,
-      };
-      const catUpper = added.category.toUpperCase().trim();
-      let targetGroup = result.ingredients.find((g) => g.name.toUpperCase().trim() === catUpper);
-      if (!targetGroup) {
-        if (result.ingredients.length === 1 && result.ingredients[0].name.toLowerCase() === 'zutaten') {
-          targetGroup = result.ingredients[0];
-        } else {
-          targetGroup = { name: added.category.trim(), items: [] };
-          result.ingredients.push(targetGroup);
-        }
-      }
-      targetGroup.items.push(newIng);
+      }, cat);
     }
   }
 
@@ -191,8 +193,6 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
     }
   }
 
-  // 8. Sequential step renumbering (1..N)
   result.instructions = result.instructions.map((s, idx) => ({ ...s, step: idx + 1 }));
-
   return result;
 }

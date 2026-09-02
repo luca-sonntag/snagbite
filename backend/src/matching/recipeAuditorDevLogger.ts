@@ -1,4 +1,4 @@
-﻿import type { Recipe, GeminiUsageInfo } from '../types.js';
+import type { Recipe, GeminiUsageInfo } from '../types.js';
 import type { RecipeAuditPatch } from './recipeAuditorSchema.js';
 
 /**
@@ -56,13 +56,17 @@ export function logAuditDevSummary(
   if (hasCorrections) {
     console.log(`  🔧 INGREDIENT CORRECTIONS (${patch.ingredientCorrections!.length}):`);
     for (const corr of patch.ingredientCorrections!) {
-      const orig = (recipe.ingredients || [])
-        .flatMap((g) => g.items || [])
-        .find((i) => (i.name || '').trim().toLowerCase() === corr.originalName.trim().toLowerCase());
+      const origGroup = (recipe.ingredients || []).find((g) =>
+        (g.items || []).some((i) => (i.name || '').trim().toLowerCase() === corr.originalName.trim().toLowerCase())
+      );
+      const orig = origGroup?.items.find((i) => (i.name || '').trim().toLowerCase() === corr.originalName.trim().toLowerCase());
       const oldBase = orig?.baseName ? `"${orig.baseName}"` : 'unset';
       const newBase = corr.correctedBaseName ? `"${corr.correctedBaseName}"` : oldBase;
       const catChange = corr.correctedCategory ? ` [cat: ${corr.correctedCategory}]` : '';
       console.log(`     • "${corr.originalName}": baseName ${oldBase} -> ${newBase}${catChange}`);
+      if (corr.correctedCategory && origGroup && origGroup.name.toUpperCase() !== corr.correctedCategory.toUpperCase()) {
+        console.log(`       ↳ Relocation: group "${origGroup.name}" -> "${corr.correctedCategory}"`);
+      }
       console.log(`       ↳ Reason: ${corr.reason}`);
     }
   }

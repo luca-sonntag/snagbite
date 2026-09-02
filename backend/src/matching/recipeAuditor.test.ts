@@ -87,16 +87,20 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
 
     const patched = applyRecipeAuditPatch(baseRecipe, patch);
 
-    const mozz = patched.ingredients[0].items.find((i) => i.name === 'Mozzarella (gerieben)');
+    const dairyGroup = patched.ingredients.find((g) => g.name === 'DAIRY_EGGS');
+    assert.ok(dairyGroup, 'DAIRY_EGGS category group should be created and populated');
+    const mozz = dairyGroup.items.find((i) => i.name === 'Mozzarella (gerieben)');
     assert.ok(mozz);
     assert.equal(mozz.baseName, 'mozzarella');
-    assert.equal(mozz.category, 'DAIRY');
+    assert.equal(mozz.category, 'DAIRY_EGGS');
     assert.deepEqual(mozz.synonyms, ['fresh mozzarella', 'shredded mozzarella']);
 
-    const pepper = patched.ingredients[0].items.find((i) => i.name === 'Pfeffer');
+    const spiceGroup = patched.ingredients.find((g) => g.name === 'SPICES_HERBS');
+    assert.ok(spiceGroup, 'SPICES_HERBS category group should be created and populated');
+    const pepper = spiceGroup.items.find((i) => i.name === 'Pfeffer');
     assert.ok(pepper);
     assert.equal(pepper.baseName, 'black pepper');
-    assert.equal(pepper.category, 'SPICES_SEASONINGS');
+    assert.equal(pepper.category, 'SPICES_HERBS');
 
     // Verify inline step tags were automatically aligned
     assert.equal(
@@ -424,17 +428,18 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
     const auditedRecipe = applyRecipeAuditPatch(baseRecipe, patch);
     await enrichRecipeWithCanonicalIngredients(auditedRecipe);
 
-    const mozz = auditedRecipe.ingredients[0].items.find((i) => i.name === 'Mozzarella (gerieben)');
+    const flatItems = auditedRecipe.ingredients.flatMap((g) => g.items);
+    const mozz = flatItems.find((i) => i.name === 'Mozzarella (gerieben)');
     assert.ok(mozz);
     assert.equal(mozz.baseName, 'mozzarella');
-    assert.equal(mozz.category, 'DAIRY');
+    assert.equal(mozz.category, 'DAIRY_EGGS');
     // Ensure mozzarella received canonical product match
     assert.ok(mozz.matchedName?.toLowerCase().includes('mozzarella') || mozz.canonicalId);
 
-    const pepper = auditedRecipe.ingredients[0].items.find((i) => i.name === 'Pfeffer');
+    const pepper = flatItems.find((i) => i.name === 'Pfeffer');
     assert.ok(pepper);
     assert.equal(pepper.baseName, 'black pepper');
-    assert.equal(pepper.category, 'SPICES_SEASONINGS');
+    assert.equal(pepper.category, 'SPICES_HERBS');
     // Ensure pepper receives spice classification and negligible spice calories (< 10 kcal)
     assert.ok((pepper.calories || 0) < 10, 'Pepper should have negligible spice calories');
 
@@ -523,10 +528,72 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
 
     assert.equal(mozz.baseName, 'mozzarella');
     assert.equal(pap.baseName, 'paprika powder');
-    assert.equal(pap.category, 'SPICES_SEASONINGS');
+    assert.equal(pap.category, 'SPICES_HERBS');
     assert.equal(
       patched.instructions[0].description,
       'Den [Bio-Mozzarella / Büffelmozzarella](ing:mozzarella) mit [Paprikapulver](ing:paprika powder) würzen.'
     );
   });
+
+  test('relocates ingredient across category groups and normalizes categories into canonical keys', () => {
+    const miscategorizedRecipe: Recipe = {
+      title: 'Hackbällchen Nudel Pfanne',
+      description: 'Schnelle Pfanne',
+      servings: 2,
+      prepTime: 10,
+      cookTime: 15,
+      equipment: ['Pfanne'],
+      ingredients: [
+        {
+          name: 'OILS_CONDIMENTS',
+          items: [
+            { name: 'Mais', baseName: 'corn', category: 'OILS_CONDIMENTS', amount: 150, unit: 'g' },
+          ],
+        },
+        {
+          name: 'PANTRY_BAKING',
+          items: [
+            { name: 'Sahne Protein', baseName: 'protein powder', category: 'PANTRY_BAKING', amount: 30, unit: 'g' },
+          ],
+        },
+      ],
+      instructions: [{ step: 1, description: 'Alles anbraten.' }],
+    };
+
+    const patch: RecipeAuditPatch = {
+      ingredientCorrections: [
+        {
+          originalName: 'Mais',
+          correctedCategory: 'VEGETABLES',
+          reason: 'Mais is a vegetable, not an oil or condiment.',
+        },
+        {
+          originalName: 'Sahne Protein',
+          correctedCategory: 'SUPPLEMENTS', // Should normalize to PANTRY_BAKING
+          reason: 'Protein powder supplement belongs in pantry baking.',
+        },
+      ],
+    };
+
+    const patched = applyRecipeAuditPatch(miscategorizedRecipe, patch);
+
+    // OILS_CONDIMENTS was left empty by Mais moving out, so it must be pruned
+    const oilsGroup = patched.ingredients.find((g) => g.name === 'OILS_CONDIMENTS');
+    assert.equal(oilsGroup, undefined, 'Empty OILS_CONDIMENTS group should be pruned');
+
+    // Mais must now be in VEGETABLES group
+    const vegGroup = patched.ingredients.find((g) => g.name === 'VEGETABLES');
+    assert.ok(vegGroup, 'VEGETABLES group should be created and contain Mais');
+    const corn = vegGroup.items.find((i) => i.name === 'Mais');
+    assert.ok(corn);
+    assert.equal(corn.category, 'VEGETABLES');
+
+    // Sahne Protein must be normalized to canonical PANTRY_BAKING
+    const pantryGroup = patched.ingredients.find((g) => g.name === 'PANTRY_BAKING');
+    assert.ok(pantryGroup);
+    const protein = pantryGroup.items.find((i) => i.name === 'Sahne Protein');
+    assert.ok(protein);
+    assert.equal(protein.category, 'PANTRY_BAKING');
+  });
 });
+
