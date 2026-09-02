@@ -33,5 +33,6 @@ export interface LlmUsage {
   gemini?: GeminiUsageInfo;
   flux?: FluxUsageInfo;
   ingredientResolver?: GeminiUsageInfo;
+  recipeAuditor?: GeminiUsageInfo;
   [key: string]: unknown;
 }

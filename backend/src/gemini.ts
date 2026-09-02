@@ -6,7 +6,7 @@ import { writeGeminiLog, estimateCost, type TokenUsage } from './logger.js';
 import { AppError } from './errors.js';
 import { withRetry } from './retry.js';
 import type { Candidate } from './notifications/types.js';
-import { BASE_NAME_SCHEMA_DESCRIPTION, SYNONYMS_SCHEMA_DESCRIPTION } from './matching/baseNamePrompt.js';
+import { BASE_NAME_SCHEMA_DESCRIPTION, SYNONYMS_SCHEMA_DESCRIPTION, BASE_NAME_INSTRUCTION_PROMPT } from './matching/baseNamePrompt.js';
 
 // Initialize Gemini Generative AI and File Manager
 const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
@@ -615,6 +615,8 @@ Key Constraints:
      * NEVER output generic tautological placeholder phrases (e.g. "Tipp: Die Zutaten vorbereiten", "Für den nächsten Schritt bereitstellen", "Zutaten bereitstellen").
      * NEVER add a hint to the final step.
    - EXPECTATION: In most recipes, only 0 or 1 step (e.g. the long bake or simmer step) should have a "parallelPrepHint". If there is no passive waiting time of >= 5 minutes, leave "parallelPrepHint" completely omitted/undefined.
+22. BaseName Specificity Invariance & Disambiguation:
+${BASE_NAME_INSTRUCTION_PROMPT}
 ${caption.trim() ? `\nDescription/Caption:\n"""\n${caption}\n"""` : ''}${htmlContent ? `\nWebsite Content:\n"""\n${htmlContent.slice(0, 30000)}\n"""` : ''}`;
 
     contentParts.push(prompt);
@@ -819,6 +821,8 @@ Important Constraints:
 14. Standalone Grocery Product vs. Custom Mixture (isGenericGrocery): Set "isGenericGrocery" to true for standard commercial grocery items, and false for custom mixes/sauces.
 15. Updated Food Photography Image Prompt: In the "imagePrompt" field, provide a newly updated, ultra-compact keyword-dense food photography prompt strictly in ENGLISH for FLUX.1 [schnell] with authentic natural food photography style (cozy kitchen, soft daylight, realistic home-cooked textures, NO fake studio/plastic look) that precisely reflects the remixed dish using short comma-separated key phrases.
 16. Parallel Preparation Chef Hints (parallelPrepHint): Follow the exact same strict criteria as the base extraction: "parallelPrepHint" is purely additive and MUST NEVER replace or remove actions from the main step descriptions. ONLY include a "parallelPrepHint" if the step has an explicit passive waiting duration of >= 5 minutes (e.g. baking, simmering, chilling) and subsequent steps contain independent advance prep. NEVER generate hints for active hands-on steps, placeholder phrases, or the final step.
+17. BaseName Specificity Invariance & Disambiguation:
+${BASE_NAME_INSTRUCTION_PROMPT}
 
 User's Remix Request:
 "${remixPrompt}"
