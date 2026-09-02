@@ -75,6 +75,11 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
    * Atwater-Faktoren (4/4/9 kcal/g), Energieverteilung (% kcal) im Makrobalken & Rundung
    * Portionsskalierung, Plausibilitätsprüfungen gegen Creator-Angaben & Wochenplaner-Aggregation
 
+8. 📊 [**Wirtschaftlichkeit, Monetarisierung & Unit Economics**](file:///c:/Users/lucas/source/repos/cookbook/docs/unit-economics.md)
+   * Vollständige P&L-Simulation für 100 bis 100.000 Nutzer (Free vs. Premium-Abonnements via RevenueCat)
+   * Detaillierte Kostenaufstellung aller LLM-Calls (Gemini 3.1/2.5 Flash-Lite & FLUX.1 [schnell] Cover)
+   * Reale AdMob-Monetarisierungsmodelle (Rewarded Video Arbitrage, App-Open Interstitial & MREC)
+
 ---
 
 ## 🏗️ System- & Workflow-Kurzübersicht
