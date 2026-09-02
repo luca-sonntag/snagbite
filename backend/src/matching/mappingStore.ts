@@ -4,7 +4,9 @@
  */
 
 import { getClient } from '../db.js';
+import { CATEGORY_GROUPS, getMajorCategoryGroup, areCategoriesCompatible } from './categoryGroups.js';
 
+export { CATEGORY_GROUPS, getMajorCategoryGroup, areCategoriesCompatible };
 export type MappingResolution = 'matched' | 'no_match';
 export type MappingSource = 'static' | 'agent' | 'human';
 
@@ -59,15 +61,6 @@ interface MappingRow {
 const cache = new Map<string, IngredientMapping | null>();
 const CACHE_MAX_ENTRIES = 5000;
 const pendingHits = new Set<string>();
-
-import {
-  CATEGORY_GROUPS,
-  getMajorCategoryGroup,
-  areCategoriesCompatible,
-} from './categoryGroups.js';
-
-export { CATEGORY_GROUPS, getMajorCategoryGroup, areCategoriesCompatible };
-
 const cacheId = (key: string, cat: string) => `${key.toLowerCase().trim()} ${cat.toUpperCase().trim()}`;
 
 function rowToMapping(row: MappingRow): IngredientMapping {
