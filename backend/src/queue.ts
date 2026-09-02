@@ -17,6 +17,7 @@ import { AppError, serializeJobError } from './errors.js';
 import { notificationTick } from './notifications/worker.js';
 import { enrichRecipeWithCanonicalIngredients } from './matching/ingredientMatcher.js';
 import { auditRecipe, applyRecipeAuditPatch } from './matching/recipeAuditor.js';
+import { isDevEnvironment, logExtractionDevSummary } from './matching/recipeAuditorDevLogger.js';
 
 const workerId = randomUUID();
 let activeJobs = 0;
@@ -102,6 +103,10 @@ async function processJob(job: Job): Promise<void> {
 
       if (rawRecipe.isRecipe === false) {
         throw new AppError('UNRELATED_REMIX_REQUEST', { message: 'The prompt was not recognized as a valid recipe modification.' });
+      }
+
+      if (isDevEnvironment()) {
+        logExtractionDevSummary(rawRecipe, 'remix', geminiUsage);
       }
 
       let recipe = rawRecipe;
@@ -197,6 +202,9 @@ async function processJob(job: Job): Promise<void> {
       const { recipe: rawRecipe, usage: geminiUsage } = await extractRecipe(undefined, undefined, '', undefined, runDir, userPrefs, undefined, photoPaths, 'photo');
 
       console.log(`[Job ${jobId}] Recipe extracted from photos: "${rawRecipe.title}"`);
+      if (isDevEnvironment()) {
+        logExtractionDevSummary(rawRecipe, 'photo', geminiUsage);
+      }
       // A photographed page has no third-party source to attribute.
       rawRecipe.sourceUrl = null;
       rawRecipe.sourceHandle = null;
@@ -430,6 +438,9 @@ async function processJob(job: Job): Promise<void> {
     );
 
     console.log(`[Job ${jobId}] Recipe extracted: "${rawRecipe.title}"`);
+    if (isDevEnvironment()) {
+      logExtractionDevSummary(rawRecipe, isCarousel ? 'web' : 'video', geminiUsage);
+    }
 
     // 2nd-stage recipe audit & ingredient disambiguation
     let recipe = rawRecipe;
