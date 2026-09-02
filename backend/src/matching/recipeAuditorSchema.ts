@@ -138,21 +138,23 @@ export const auditPatchSchema = {
 export function buildAuditPrompt(recipe: Recipe): string {
   return `You are a strict 2nd-stage Culinary Recipe Auditor & Ingredient Disambiguation Engine.
 Review the recipe JSON below and identify any ingredient misclassifications, umbrella collapsing, or category mismatches:
-1. SPECIFICITY INVARIANCE: Never collapse specific varieties into umbrella terms:
+1. NO-OP GUARD (CRITICAL): ONLY include an ingredient in ingredientCorrections if you are ACTUALLY fixing an error. If an ingredient already has the correct baseName and category in the input recipe, DO NOT include it! If no genuine fixes are needed, return an empty patch {}.
+2. STRICT SINGULAR NOUNS: Always enforce singular English baseNames (e.g. "canned tomato", NOT "canned tomatoes"; "chili flake", NOT "chili flakes"; "mushroom", NOT "mushrooms"). Never change an existing singular baseName to plural.
+3. SPECIFICITY INVARIANCE: Never collapse specific varieties into umbrella terms:
    - "Mozzarella" / "Mozzarella (gerieben)" MUST have baseName "mozzarella" (NOT "cheese") and category "DAIRY_EGGS".
    - "Feta" / "Schafskäse" MUST have baseName "feta" (NOT "cheese") and category "DAIRY_EGGS".
    - "Gouda" -> "gouda", "Cheddar" -> "cheddar", "Parmesan" -> "parmesan" (NOT "cheese") with category "DAIRY_EGGS".
    - "Lachs" / "Salmon" -> "salmon" or "salmon fillet", "Thunfisch" -> "tuna" (NOT "fish") with category "SEAFOOD".
-2. STRICT SPICE VS PRODUCE & PANTRY DISAMBIGUATION:
+4. STRICT SPICE VS PRODUCE & PANTRY DISAMBIGUATION:
    - "Pfeffer" / "Schwarzer Pfeffer" (spice) MUST have baseName "black pepper" and category "SPICES_HERBS" (NEVER "pepper", "bell pepper", or "VEGETABLES").
    - "Paprika" / "Gemüsepaprika" (produce) MUST have baseName "bell pepper" and category "VEGETABLES".
    - "Paprikapulver" (spice) MUST have baseName "paprika powder" and category "SPICES_HERBS".
    - "Mais" / "Corn" (vegetable) MUST have baseName "corn" and category "VEGETABLES" (NEVER "OILS_CONDIMENTS").
    - "Protein Pulver" / "Sahne Protein" MUST have category "PANTRY_BAKING" (NEVER invent custom categories like SUPPLEMENTS).
-3. CANONICAL CATEGORIES ONLY: Any corrected or added category MUST be strictly one of: ${RECIPE_CATEGORY_KEYS.join(', ')}.
-4. INLINE TAG ALIGNMENT:
+5. CANONICAL CATEGORIES ONLY: Any corrected or added category MUST be strictly one of: ${RECIPE_CATEGORY_KEYS.join(', ')}.
+6. INLINE TAG ALIGNMENT:
    - If baseName is corrected, update step descriptions containing [Word](ing:oldBaseName) to [Word](ing:newBaseName).
-5. If everything is already accurate and complete, return an empty patch {}.
+7. If everything is already accurate and complete, return an empty patch {}.
 
 Recipe to audit:
 ${JSON.stringify({ title: recipe.title, description: recipe.description, ingredients: recipe.ingredients, instructions: recipe.instructions }, null, 2)}`;

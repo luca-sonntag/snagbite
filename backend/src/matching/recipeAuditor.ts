@@ -169,6 +169,7 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
       const origIng = origIngredients.find((i) => norm(i.name) === corrOrigNorm);
       const oldBase = origIng?.baseName?.toLowerCase().trim();
       const newBase = corr.correctedBaseName.trim();
+      if (oldBase && oldBase === newBase.toLowerCase()) continue;
 
       for (const s of result.instructions) {
         if (!s.description) continue;
