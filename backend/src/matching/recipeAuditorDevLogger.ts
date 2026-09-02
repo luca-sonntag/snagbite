@@ -1,11 +1,44 @@
 import type { Recipe, GeminiUsageInfo } from '../types.js';
 import type { RecipeAuditPatch } from './recipeAuditorSchema.js';
+import { writeGeminiLog, type TokenUsage, type CostEstimate } from '../logger.js';
 
 /**
  * Returns true if running in a non-production environment or if DEBUG_AUDIT is enabled.
  */
 export function isDevEnvironment(): boolean {
   return process.env.NODE_ENV !== 'production' || process.env.DEBUG_AUDIT === 'true';
+}
+
+/**
+ * Persists recipe audit calls to `gemini_logs` and outputs dev summary in non-production.
+ */
+export async function recordAuditLog(
+  recipe: Recipe,
+  patch: RecipeAuditPatch | null,
+  usage?: GeminiUsageInfo,
+  rawOutput?: string,
+  error?: string
+): Promise<void> {
+  const model = usage?.model || 'gemini-2.5-flash-lite';
+  const durationMs = usage?.durationMs || 0;
+
+  await writeGeminiLog({
+    timestamp: new Date().toISOString(),
+    requestType: 'audit_recipe',
+    model,
+    durationMs,
+    success: !error,
+    error,
+    input: { title: recipe.title },
+    rawOutput,
+    parsedOutput: patch ?? undefined,
+    tokenUsage: usage?.tokenUsage as TokenUsage | undefined,
+    costEstimate: usage?.costEstimate as CostEstimate | undefined,
+  }).catch(() => {});
+
+  if (isDevEnvironment()) {
+    logAuditDevSummary(recipe, patch, usage);
+  }
 }
 
 /**
@@ -18,9 +51,12 @@ export function logAuditDevSummary(
 ): void {
   const durationStr = usage?.durationMs ? `${usage.durationMs}ms` : 'n/a';
   const costStr = usage?.costEstimate?.totalCostFormatted ?? 'n/a';
+  const tokenStr = usage?.tokenUsage
+    ? `${usage.tokenUsage.totalTokens} tokens (in ${usage.tokenUsage.promptTokens} / out ${usage.tokenUsage.candidateTokens})`
+    : 'n/a';
 
   if (!patch) {
-    console.log(`\n🔍 [RecipeAuditor:DEV] Audit for "${recipe.title || 'Untitled'}" (${durationStr}, ${costStr}): No patch returned.`);
+    console.log(`\n🔍 [RecipeAuditor:DEV] Audit for "${recipe.title || 'Untitled'}" (${durationStr} | ${tokenStr} | cost≈${costStr}): No patch returned.`);
     return;
   }
 
@@ -31,11 +67,11 @@ export function logAuditDevSummary(
   );
 
   if (!hasChanges) {
-    console.log(`\n🔍 [RecipeAuditor:DEV] Audit for "${recipe.title || 'Untitled'}" (${durationStr}, ${costStr}): 0 corrections needed (clean).`);
+    console.log(`\n🔍 [RecipeAuditor:DEV] Audit for "${recipe.title || 'Untitled'}" (${durationStr} | ${tokenStr} | cost≈${costStr}): 0 corrections needed (clean).`);
     return;
   }
 
-  console.log(`\n🔍 [RecipeAuditor:DEV] Audit Patch for "${recipe.title || 'Untitled'}" (${durationStr}, ${costStr}):`);
+  console.log(`\n🔍 [RecipeAuditor:DEV] Audit Patch for "${recipe.title || 'Untitled'}" (${durationStr} | ${tokenStr} | cost≈${costStr}):`);
   console.log(JSON.stringify(patch, null, 2));
 }
 

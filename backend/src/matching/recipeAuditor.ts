@@ -9,7 +9,7 @@ import {
   type IngredientCorrection, type AddedIngredient,
   type RemovedIngredient, type StepCorrection, type AddedStep,
 } from './recipeAuditorSchema.js';
-import { isDevEnvironment, logAuditDevSummary } from './recipeAuditorDevLogger.js';
+import { recordAuditLog } from './recipeAuditorDevLogger.js';
 import { placeIngredientInGroup, normalizeToCategoryKey } from './categoryGroups.js';
 export type { RecipeAuditPatch, RecipeAuditResult, IngredientCorrection, AddedIngredient, RemovedIngredient, StepCorrection, AddedStep };
 
@@ -40,13 +40,12 @@ export async function auditRecipe(recipe: Recipe): Promise<RecipeAuditResult> {
     const costEstimate = tokenUsage ? estimateCost(modelName, tokenUsage) : undefined;
     const usage: GeminiUsageInfo = { tokenUsage, costEstimate, durationMs: Date.now() - startTime, model: modelName };
 
-    if (isDevEnvironment()) {
-      logAuditDevSummary(recipe, patch, usage);
-    }
+    await recordAuditLog(recipe, patch, usage, text);
 
     return { patch, usage };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
+    await recordAuditLog(recipe, null, undefined, undefined, msg);
     console.warn('[recipeAuditor] audit failed, proceeding with original recipe:', msg);
     return { patch: null };
   }
