@@ -25,6 +25,7 @@
     "mappings:consolidate": "tsx src/scripts/consolidateMappingsToCanonical.ts",
     "icons": "tsx src/scripts/auditIngredientPipeline.ts",
     "audit:ingredients": "tsx src/scripts/auditIngredientPipeline.ts",
+    "audit:test": "tsx src/scripts/testRecipeAuditor.ts",
     "build:off": "tsx src/scripts/buildOpenFoodFactsIndex.ts",
     "test": "node --import tsx --test src/**/*.test.ts"
   },
