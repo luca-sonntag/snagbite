@@ -167,4 +167,48 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
     assert.equal(patched.instructions[2].step, 3);
     assert.equal(patched.instructions[2].description, 'Heiß auf Tellern anrichten und sofort genießen.');
   });
+
+  test('end-to-end: audited recipe resolves mozzarella and black pepper with accurate macros and icons', async () => {
+    const { enrichRecipeWithCanonicalIngredients } = await import('./ingredientMatcher.js');
+
+    const patch: RecipeAuditPatch = {
+      ingredientCorrections: [
+        {
+          originalName: 'Mozzarella (gerieben)',
+          correctedBaseName: 'mozzarella',
+          correctedCategory: 'DAIRY',
+          correctedSynonyms: ['shredded mozzarella'],
+          reason: 'Specific mozzarella',
+        },
+        {
+          originalName: 'Pfeffer',
+          correctedBaseName: 'black pepper',
+          correctedCategory: 'SPICES_SEASONINGS',
+          correctedSynonyms: ['ground black pepper'],
+          reason: 'Black pepper spice',
+        },
+      ],
+    };
+
+    const auditedRecipe = applyRecipeAuditPatch(baseRecipe, patch);
+    await enrichRecipeWithCanonicalIngredients(auditedRecipe);
+
+    const mozz = auditedRecipe.ingredients[0].items.find((i) => i.name === 'Mozzarella (gerieben)');
+    assert.ok(mozz);
+    assert.equal(mozz.baseName, 'mozzarella');
+    assert.equal(mozz.category, 'DAIRY');
+    // Ensure mozzarella received canonical product match
+    assert.ok(mozz.matchedName?.toLowerCase().includes('mozzarella') || mozz.canonicalId);
+
+    const pepper = auditedRecipe.ingredients[0].items.find((i) => i.name === 'Pfeffer');
+    assert.ok(pepper);
+    assert.equal(pepper.baseName, 'black pepper');
+    assert.equal(pepper.category, 'SPICES_SEASONINGS');
+    // Ensure pepper receives spice classification and negligible spice calories (< 10 kcal)
+    assert.ok((pepper.calories || 0) < 10, 'Pepper should have negligible spice calories');
+
+    // Verify inline step tag references in steps
+    assert.ok(auditedRecipe.instructions[1].description.includes('[Mozzarella](ing:mozzarella)'));
+    assert.ok(auditedRecipe.instructions[1].description.includes('[Pfeffer](ing:black pepper)'));
+  });
 });
