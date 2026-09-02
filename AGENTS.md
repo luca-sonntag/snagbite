@@ -47,8 +47,8 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
    * `@google/generative-ai` SDK, Structured JSON Schemas, Kategorisierung & Mengennormalisierung
    * Anti-Halluzination & Teaser-Post-Erkennung (`isRecipe: false` & `NOT_A_RECIPE` Error Code)
    * Mehrfachrezept-Erkennung (`containsMultipleRecipes` & `MULTIPLE_RECIPES` 422 Error Code)
-   * Recipe Copilot (AI Function Calling, Two-Phase Remix Confirmation, LLM Quick Chips)
-   * Dynamische Frame-Extraktion & Persistentes Gemini Logging (`gemini_logs` DB Table)
+   * Recipe Copilot (AI Function Calling, Deterministische Operations-Engine, LLM Quick Chips)
+   * Gamification Foto-Prüfung (`verifyCookedDishPhoto`), Smart Push-Notifications & Persistentes Logging (`gemini_logs`)
 
 4. 🎨 [**Frontend-Layer (React 19 & HeroUI v3)**](file:///c:/Users/lucas/source/repos/cookbook/docs/architecture/frontend.md)
    * React 19, HeroUI v3, Tailwind CSS v4 PWA & Capacitor Android-App Shell

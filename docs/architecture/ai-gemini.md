@@ -1,84 +1,146 @@
-# 🤖 KI-Layer (Google Gemini Integration)
+# 🤖 KI-Layer (Google Gemini Integration & Kostenarchitektur)
 
-## 1. Multimodale Verarbeitung & Structured Outputs
+## 1. Übersicht & Modell-Konfiguration
 
-* **Technologie:** `@google/generative-ai` SDK (Gemini 1.5/2.5/3.1/3.5 Flash).
-* **Funktion:** Audiodatei wird über die Google AI File API hochgeladen. Gemini verarbeitet Audio, Video-Frames/Grid und Text (`caption`) in einem einzigen multimodalen Aufruf.
-* **Structured Outputs & Clean Parsing:** Gemini wird durch ein strenges JSON-Schema gezwungen, das Rezept exakt nach einem detaillierten Schema (Titel, Beschreibung, Zutaten mit Mengen/Einheiten/Modifizierern, Schritte, Ausrüstung, Nährwertschätzungen, Kochtipps, Alternativzutaten und ein passendes Rezept-Emoji) zu strukturieren.
-  * **Kategorisierung & Standardisierung:** Das Schema erzwingt die Zuordnung von Zutaten in feste englische Enum-Supermarktkategorien (z.B. `PRODUCE`, `DAIRY_EGGS`) und generiert pro Zutat einen englischen `baseName` (z.B. "onion" statt "rote Zwiebeln") sowie optional ein `parentIngredient` (z. B. `{ name: "Ei", baseName: "egg", unit: "Stück" }` für `Eigelb` oder `Eiweiß`), welches auf das einzukaufende Rohstoff-Produkt verweist.
-  * **Rezept-Kategorie & Speisenart (`category`):** Gemini ordnet jedes extrahierte Rezept zwingend einer vordefinierten Kategorie zu (`MAIN_COURSE`, `DESSERT`, `BREAKFAST`, `SNACK`, `SIDE_DISH`, `BEVERAGE`, `SOUP`, `SALAD`, `BAKING`, `OTHER`). Dies ermöglicht eine standardisierte, lokalisierte Filterung im Frontend-Katalog.
-  * **Rezept-Emoji-Generierung:** Wählt basierend auf dem Rezepttitel und der Hauptzutat ein passendes Emoji (z. B. 🥔 bei Kartoffelrezepten, 🍕 bei Pizza), welches als visueller Platzhalter bei fehlenden Bildern dient.
-  * **Bereinigung der Zutatennamen:** Zutatennamen (`name`) werden im Prompt explizit von Mengen, Zahlen, Maßeinheiten und Modifizierern/Eigenschaften (wie "leicht", "mager", "gerieben") gesäubert; diese Daten fließen sauber in die dedizierten Felder `amount`, `unit` und `modifier`.
-  * **Nährwerte pro Zutat:** Das Schema erzwingt für jede Zutat Nährwertangaben (`calories`, `protein`, `carbs`, `fat`) bezogen auf die konkrete Zutat und die gesamte angegebene Menge (nicht pro 100g oder pro Einzelstück).
-  * **Dekomposition von Verbundzutaten:** Im Prompt ist geregelt, dass während des Rezept-Videos zubereitete Verbundkomponenten (wie "Smash Burger Patties" oder "selbstgemachtes Pesto") in ihre atomaren Rohbestandteile zersetzt werden müssen (z. B. Rinderhack, Chesterkäse, Basilikum, Olivenöl).
-  * **Parallele Zubereitung & Wartezeit-Tipps (`parallelPrepHint`):** Bei Schritten mit echter, passiver Wartezeit (z. B. Backen im Ofen, Köcheln, Kühlen $\ge$ 5 Min.) generiert Gemini bei Vorhandensein vorbereitbarer Folgeschritte einen kurzen, maßgeschneiderten Chefkoch-Tipp pro Schritt (z. B. *„Tipp: Nutze die 20 Min. Backzeit, um schon die Burger Buns aufzuschneiden und die Sauce anzurühren.“*). **Anti-Kannibalisierungs-Garantie:** Der Tipp ist rein additiv – die regulären Hauptschritte (`instructions.description`) bleiben zu 100 % autark, vollständig und chronologisch; keine Vorbereitungsaktion darf exklusiv in den Tipp ausgelagert werden. Bei aktiven Hands-on-Schritten (Schneiden, Belegen, Rühren) oder dem finalen Schritt wird das Feld strikt weggelassen, um redundanten Fülltext zu verhindern. Dies ermöglicht dem Nutzer im Kochmodus und in den Rezeptdetails eine effiziente, parallele Zubereitung.
+* **SDK:** `@google/generative-ai` SDK (`backend/src/gemini.ts`).
+* **Standard-Modelle:**
+  * `config.GEMINI_MODEL`: Standardmäßig `gemini-3.1-flash-lite` (Fallback/Alternative: `gemini-2.5-flash-lite`).
+  * `config.GEMINI_RERANKER_MODEL`: Standardmäßig `gemini-3.1-flash-lite` (genutzt für Open Food Facts Reranking & Resolver).
+* **Bildgenerierung (Cover):** FLUX.1 [schnell] via fal.ai API (Direct-Inference, 4 Steps, $0.0035 / Bild).
+* **Kontext & Multimodalität:** Native Verarbeitung von Audio (File API Upload), Video-Frames / 4x4-Grid (`inlineData`) und Text in einem einzigen API-Aufruf mit bis zu 1.000.000 Tokens Kontextfenster.
 
 ---
 
-## 2. Mehrfachrezept-Erkennung (Ambiguitäts-Check)
+## 2. Vollständige Gemini-Touchpoint- & Request-Übersicht
 
-Videos und Bilderkarussells können mehrere eigenständige Rezepte enthalten (z. B. „5 High-Protein Meals"-Roundups, bei denen jede Slide ein anderes Gericht zeigt).
-* Ein im `recipeSchema` als `required` festgelegtes `containsMultipleRecipes` Boolean-Flag plus die prioritäre Prompt-Regel #1 („Multi-Recipe Ambiguity“) zwingen Gemini zur expliziten Angabe, ob mehrere unterschiedliche Gerichte ohne klar dominierendes Einzelrezept vorliegen.
-* **Komponenten EINES Gerichts** (Soße, Beilage, Topping) zählen explizit nicht als Mehrfachrezept.
-* Ist das Flag `true`, schlägt die Extraktion mit dem dedizierten, nicht-retrybaren Fehlercode `MULTIPLE_RECIPES` (422) fehl, statt mehrere Gerichte zu einem unbrauchbaren Misch-Rezept zu verschmelzen; das Frontend zeigt eine lokalisierte Meldung (`error.codes.MULTIPLE_RECIPES`).
-* Bei Remixes wird das Flag verworfen (Ausgangsbasis ist immer genau ein Rezept), und in beiden Pfaden wird es vor dem Persistieren vom Rezept-Objekt entfernt.
+Im gesamten Backend gibt es **7 aktive Gemini-Funktionen** (sowie Offline-/Admin-Tools). Jeder Aufruf wird strikt geloggt und kategorisiert (`GeminiRequestType` in `backend/src/logger.ts`):
 
----
-
-## 3. Rekonstruktion, Anti-Halluzination & Präferenzen
-
-* **Anti-Halluzination & Teaser-Post-Erkennung:** Wenn ein Social-Media-Post nur Teaser-Text oder DM-Bait enthält (z. B. *"Kommentiere X für das Rezept"* oder Beschreibungen ohne konkrete Zutaten/Mengen/Schritte), zwingt das Schema (`isRecipe: false`) und Prompt-Constraint #1 Gemini dazu, den Post abzulehnen (`NOT_A_RECIPE`), anstatt frei erfundene Rezepte zu halluzinieren.
-* **Rekonstruktion nur bei vorhandenem Grundrezept:** Falls ein vollständiges Grundrezept existiert, aber eine offensichtliche Kleinkomponente (z. B. Brokkolini als Beilage im Titel/Bild) in der Auflistung vergessen wurde, darf diese ergänzt werden. Das Erfinden eines Rezepts aus dem Nichts ist strikt untersagt.
-* **Portions- und Nährwertoptimierung:** Verbessertes Schätzen der Portionen anhand der Gesamtmengen (statt pauschalem Servings-Default von 1). Gewürze werden mit Kleinstwerten (z. B. 5 kcal) versehen, während Wasser, Eis oder Salz zwingend auf 0 Kalorien/Makronährstoffe gesetzt werden.
-* **Gekochte vs. Ungekochte Zustände:** Erkennt, ob die Mengenangaben von quellenden Zutaten (z. B. Reis, Nudeln, Linsen) sich auf den rohen oder gekochten Zustand beziehen (z. B. 250g gekochter Reis vs. 250g ungekochter Reis).
-* **Sprach- & Unit-System-Steuerung:** Bevorzugte Rezeptsprache, Temperatureinheit (Celsius, Fahrenheit oder beides) und Maßsystem (metrisch oder imperial) werden primär per-Benutzer im Profil/Settings-Tab konfiguriert und in Supabase Auth `user_metadata` gespeichert. Der Worker ruft diese Präferenzen via Admin Auth API ab und weist Gemini an, das Rezept entsprechend zu übersetzen und umzurechnen. Values in `.env` dienen als serverweiter Fallback.
+| Request-Typ | Funktion / Datei | Trigger / Endpunkt | Tokens In (Ø) | Tokens Out (Ø) | Kosten / Call (3.1 Lite) | Kosten / Call (2.5 Lite) | Frequenz / Aufkommen |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **`extract_recipe`** | `extractRecipeFromMedia` (`gemini.ts`) | Job-Queue (URL- oder Foto-Import) | ~8.000 | ~1.500 | **0,00425 $** | **0,00140 $** | 1x pro importiertem Rezept |
+| **`resolve_ingredient`** | `resolveIngredient` (`ingredientResolver.ts`) | Während Extraktion (`enrichRecipe...`) | ~1.000 | ~120 | **0,00043 $** | **0,00015 $** | Nur bei unbekannten Zutaten (~0–2x/Rezept, danach 100% DB-gecacht) |
+| **`chat_recipe`** | `chatAboutRecipe` (`gemini.ts`) | `POST /api/recipes/:id/chat` | ~2.200 | ~250 | **0,00092 $** | **0,00032 $** | Nur bei Nutzerinteraktion (Ø 1–3 Nachrichten/Chat) |
+| **`chat_chips`** | `generateChatChips` (`gemini.ts`) | `GET /api/recipes/:id/chat/chips` | ~900 | ~180 | **0,00050 $** | **0,00016 $** | 1x pro Chat-Session (clientseitig gecacht) |
+| **`verify_cook_photo`** | `verifyCookedDishPhoto` (`gemini.ts`) | `POST /api/recipes/:id/cooked` | ~1.200 | ~150 | **0,00053 $** | **0,00018 $** | 1x beim Hochladen eines Koch-Beweisfotos (XP/Streaks) |
+| **`remix_recipe`** | `remixRecipe` (`gemini.ts`) | Fallback bei unstrukturiertem Remix | ~3.500 | ~1.500 | **0,00312 $** | **0,00095 $** | Sehr selten (<5% der Rezepte; primär greift `recipeOperations.ts`) |
+| **`notification_copy`** | `generateNotificationCopy` (`gemini.ts`) | Push-Worker (`notifications/worker.ts`) | ~600 | ~80 | **0,00027 $** | **0,00009 $** | Max. 3x pro Nutzer / Woche (gedrosselt via Config) |
+| *`select_best_frame`* | *Ausgemustert* | *Historisch* | *–* | *–* | *0,00 $* | *0,00 $* | Ersetzt durch FLUX.1 [schnell] Cover-Generierung |
 
 ---
 
-## 4. Recipe Copilot (Function Calling / Tool Use)
+## 3. Die End-to-End Rezept-Pipeline im Detail
 
-Ein rezept-spezifischer Chatbot (`POST /api/jobs/:id/chat`), der dem Nutzer Fragen zur Zubereitung oder Zutaten beantwortet. Gemini ist mit Tools (`modify_current_recipe`, `add_missing_ingredients_to_shopping_list`, `set_cooking_timer`) ausgestattet.
-
-* **Two-Phase Remix Confirmation:** Wenn Gemini `modify_current_recipe` aufruft, wird der Remix **nicht** sofort ausgeführt. Stattdessen erhält der Client `pendingRemix: true` + `modificationRequest` und zeigt im Chat eine amber-farbene Bestätigungskarte mit zwei Optionen:
-  * **"Aktuelles ersetzen"**: Überschreibt das bestehende Rezept via `updateJob` in-place (Bilder bleiben erhalten).
-  * **"Als neues Rezept"**: Erstellt neuen Job via `saveCompletedRemix`.
-  * Erst beim Klick wird `POST /api/jobs/:id/chat/confirm` mit `replaceCurrent: true/false` aufgerufen.
-* **LLM-generierte Quick-Chips:** Beim Öffnen des Chats werden rezept-spezifische Vorschlags-Chips via `GET /api/jobs/:id/chat/chips?lang=de|en` geladen. Gemini generiert 5-6 Chips mit `category` (remix/help/substitute/shopping/timer).
-* **Client-seitiges Session-Caching:** Der Chat wird pro Rezept lokal gecacht (`recipe_copilot_chat_{recipeId}`). Die Chips werden ebenfalls pro Rezept und Sprache gecacht (`recipe_copilot_chips_{recipeId}_{lang}`). Ein **Reset-Button** (Papierkorb im Header) löscht nach Bestätigung den Cache und generiert frische Chips.
+```
+1. EINGABE
+   [Share Target / URL] oder [Foto-Upload (Buchseite/Karte)]
+                 │
+                 ▼
+2. JOB-CREATION & QUEUE
+   `POST /api/jobs` ➔ Supabase `jobs` (Status: pending)
+   Worker claimt Job atomar (`claim_next_job`)
+                 │
+                 ▼
+3. SCRAPING & MEDIEN-VORBEREITUNG
+   ├── Audio-Stream via Google AI File API hochladen (`files.uploadFile`)
+   ├── Keyframes: 4x4 Grid aus Client-Frames oder Video generieren
+   └── Caption & Metadaten (Dauer, Quelle, Creator) extrahieren
+                 │
+                 ▼
+4. MULTIMODALER GEMINI CALL (`extractRecipeFromMedia`)
+   Gemini 3.1 Flash-Lite verarbeitet Audio + Grid + Text in EINEM Call.
+   Strikte Schematisierung (`responseSchema: recipeSchema`):
+   • 21 Prompt-Constraints (Anti-Halluzination, Mengennormalisierung,
+     Makros pro Zutat, Inline-Ingredient- & Timer-Tags `[Tag](ing:...)`)
+   • Mehrfachrezept-Erkennung (`containsMultipleRecipes` ➔ 422 Abbruch)
+                 │
+                 ▼
+5. PIPELINE-PARALLELISIERUNG (`Promise.all`)
+   ┌───────────────────────────────────┴───────────────────────────────────┐
+   ▼                                                                       ▼
+Cover-Generierung (FLUX.1 [schnell])              Kanonische Zutaten-Auflösung (OpenFoodFacts)
+• Prompt: `recipe.imagePrompt`                    • `enrichRecipeWithCanonicalIngredients`
+• Inferenz: fal.ai Direct API ($0.0035)           • DB-Lookup `ingredient_mappings` (0$ / Cache-Hit)
+• Upload nach Supabase `recipe-covers` Bucket     • Bei Miss: Gemini Tool-Resolver (`submit_match`)
+   └───────────────────────────────────┬───────────────────────────────────┘
+                                       ▼
+6. PERSISTIERUNG & VOLLENDUNG
+   `completeJob(jobId, recipe, llmUsage)`
+   • Datensatz landet in `recipes` & `user_recipes`
+   • `llmUsage` erfasst Gemini- & FLUX-Kosten transparent auf Job-Ebene
+   • Ephemere Dateien & Google-API-Files werden gelöscht
+```
 
 ---
 
-## 5. Frame-Extraktion, Client-Frames & Logging
+## 4. Recipe Copilot & Deterministische Operations-Engine
 
-* **Multimodale Client-Frames (`imageSourceKind: 'client_frames'`):** Werden von der App client-seitig extrahierte Keyframes übermittelt, werden diese als ephemere Base64-Buffer im flüchtigen Worker-RAM gehalten und direkt als `inlineData`-Parts (`image/jpeg`) an Gemini übergeben.
-  * Der Prompt erhält eine dedizierte `visualContextClause`, die Gemini anweist, die zeitlich verteilten Keyframes mit Caption/Text abzugleichen, um im Video gezeigte, aber in der Caption fehlende Zutaten, Mengen und Arbeitsschritte zu identifizieren.
-  * Base64-Bilddaten werden im persistenten Gemini-Logger (`writeGeminiLog`) und in Debug-Dumps automatisch durch aggregierte Metadaten (`[N client frames omitted]`) geschwärzt.
-* **Serverseitige dynamische Frame-Extraktion:** Bei direkten Video-Downloads (Legacy/Test-Szenarien) berechnet der Worker die Anzahl der Frames dynamisch anhand der Videolänge und erzeugt ein `grid.jpg`. Einzelne Frames werden nach der Bildauswahl gelöscht.
-* **Auto-Cleanup:** Temporäre Audiodateien, Videodateien und Google-API-Dateien werden nach der Verarbeitung sofort gelöscht. Ephemere `client_frames`-DB-Payloads werden direkt bei Worker-Claim auf `null` gesetzt und nach LLM-Inferenz im RAM dereferenziert.
-* **Persistentes Gemini-Logging (`gemini_logs`-Tabelle):** Da Container ephemer sind, schreibt `writeGeminiLog()` (`backend/src/logger.ts`) **jeden** Gemini-Aufruf primär als eine Row in die Supabase-Tabelle `gemini_logs` (Request-Typ, Modell, Dauer, Erfolg, Fehlermeldung, Input-JSON, Token-Counts und USD-Kostenaufschlüsselung).
-  * Die Tabelle ist **admin-only** (nur Service-Role-Key).
-  * Der Aufruf erfolgt **fire-and-forget** (`void writeGeminiLog(...)`), ohne die Latenz des API-Calls zu belasten.
-  * Admin-Metriken (`getLlmMetrics`) aggregieren direkt über `gemini_logs` per SQL.
-  * Der 12-Stunden-Cleanup löscht Rows älter als 90 Tage (`pruneOldGeminiLogs(90)`).
+* **Chat-Endpunkt:** `POST /api/recipes/:id/chat`
+* **Deterministischer Remix (`recipeOperations.ts`):**
+  * Statt das Rezept bei Modifikationen (z. B. "mach es vegetarisch", "Portionen verdoppeln") unkontrolliert als Freitext komplett neu zu generieren, liefert Gemini über Function Calling strukturierte Atomic Operations (`REPLACE_INGREDIENT`, `ADD_INGREDIENTS`, `REMOVE_INGREDIENT`, `SCALE_SERVINGS`, `ADD_INSTRUCTION_STEP`).
+  * Die Ausführung erfolgt deterministisch im Backend (< 1ms), wodurch Halluzinationen verhindert und 80% der Tokens gespart werden.
+  * Modifizierte Rezepte werden als **private Remixe** (`parent_recipe_id = id`) gespeichert. Das Originalrezept bleibt unverändert.
+* **LLM Quick-Action Chips:** `GET /api/recipes/:id/chat/chips` liefert 5–6 rezeptspezifische Vorschlags-Pills, gecacht pro Rezept und Sprache.
 
 ---
 
-## 6. Fotorealistische Cover-Generierung mit FLUX.1 [schnell]
+## 5. Gamification Cook-Verification & Push-Notifications
 
-* **Problem & Motivation:** Social-Media-Thumbnails sind oft unruhig, mit Text/Emojis überladen oder zeigen Zwischenschritte. Foto-Imports (abfotografierte Kochbücher/Rezeptkarten) hatten bislang überhaupt kein Coverbild (nur ein Emoji).
-* **Gemini Food-Photography Prompt-Engineering (`imagePrompt`):**
-  * Im `recipeSchema` erzwingt das Pflichtfeld `imagePrompt` einen präzisen, fotorealistischen Food-Fotografie-Prompt strictly in englischer Sprache.
-  * Gemini analysiert Titel, Beschreibung, Zutatenliste und Zubereitungsschritte und formuliert einen maßgeschneiderten Bild-Prompt für das fertige Gericht:
-    * **Fokus auf das fertige Gericht:** z. B. schmelzender Käse mit zarter Bräunung, glänzende Sauce, frische Kräuter-Garnitur, dezenter Dampf.
-    * **Passendes Koch-/Serviergeschirr:** z. B. weiße Keramik-Auflaufform, rustikale gusseiserne Pfanne, Schieferplatte oder Schale.
-    * **Kamera & Beleuchtung:** 45-Grad-Winkel oder Nahaufnahme (Makro), warmes natürliches Ambient-Licht, geringe Tiefenschärfe (*shallow depth of field* mit weichem Bokeh).
-    * **Negative Constraints:** Kein Text, keine Logos, keine Wasserzeichen, keine Hände, kein Rohzutaten-Müll.
-* **FLUX.1 [schnell] 4-Step Ausführung via fal.ai (`backend/src/imageGenerator.ts`):**
-  * Direct Inference über `https://fal.run/fal-ai/flux-1/schnell` mit `image_size: "landscape_4_3"`, 4 Steps und `output_format: "jpeg"`.
-  * Speicherung im permanenten öffentlichen Supabase Storage Bucket `recipe-covers` (`${userId}/${jobId}.jpg`).
-  * `recipe.imageUrl` wird auf die Public-URL gesetzt; `recipe.isAiCover` wird auf `true` gesetzt.
-  * Gescrapte Original-Frames/Slides bleiben in `recipe.imageUrls` für die Galerie erhalten.
-  * Auch **Foto-Imports** und **Remixes** erhalten automatisch ein neues, passendes HD-Coverbild.
-  * **Pipeline-Parallelisierung:** Um die Gesamtlaufzeit der Rezept-Extraktion zu minimieren, laufen die FLUX.1 Cover-Generierung und das kanonische Open-Food-Facts Ingredient Matching (`enrichRecipeWithCanonicalIngredients`) zeitgleich via `Promise.all` parallel im Worker.
-  * **Kosten- & Laufzeit-Tracking (`jobs.llm_usage.flux`):** Dauer und Inferenzkosten ($0.0035 / Bild) werden strukturiert in der neuen Spalte `llm_usage` auf Job-Ebene festgehalten, während `recipe` frei von technischen Kosten-Metadaten bleibt.
+* **Foto-Beweis beim Kochen (`verifyCookedDishPhoto`):**
+  * Wenn ein Nutzer ein Gericht nachkocht und ein Beweisfoto hochlädt (`POST /api/recipes/:id/cooked`), prüft Gemini Vision:
+    1. **Authentizitäts-Check:** Erkennt Screenshots von Instagram/TikTok, Bildschirmfotos oder Fake-Bilder und lehnt sie ab.
+    2. **Rezept-Match:** Vergleicht das fertige Gericht mit Titel und Hauptzutaten des Rezepts.
+    3. Bei Erfolg werden Gamification-Punkte, Streaks und Badges autoritativ vergeben.
+* **Smart Push-Notifications (`generateNotificationCopy`):**
+  * Generiert ansprechende, saisonale Benachrichtigungstexte für Rezept-Vorschläge oder Erinnerungen.
+  * Capping: Maximal 3 Notifications pro Nutzer pro 7 Tage (`NOTIFICATION_MAX_PER_WEEK: 3`).
 
+---
+
+## 6. Gesamtkosten pro extrahiertem Rezept
+
+Bei einem regulären Video- oder Foto-Import fallen folgende KI-Kosten an:
+
+| Komponente | Anbieter / Modell | Tokens / Einheiten | Kosten (Gemini 3.1 Lite) | Kosten (Gemini 2.5 Lite) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Rezept-Extraktion** | Gemini Flash-Lite | ~8.000 In / ~1.500 Out | 0,00425 $ | 0,00140 $ |
+| **OFF Ingredient Matching** | Gemini Reranker (Ø 0.2 Calls) | ~200 In / ~25 Out | 0,00009 $ | 0,00003 $ |
+| **HD-Coverbild** | FLUX.1 [schnell] (fal.ai) | 1 Bild (4 Steps) | 0,00350 $ | 0,00350 $ |
+| **Gesamtkosten / Rezept** | – | – | **~ 0,0078 $** *(0,78 Cent)* | **~ 0,0049 $** *(0,49 Cent)* |
+
+---
+
+## 7. Skalierungs- & Kostenmodell bei X Nutzern
+
+### A. Kontingente & Nutzerverhalten (Defaults in `config.ts`)
+* **Free-Nutzer:**
+  * Rate-Limit: **3 Extraktionen pro Tag** (Rolling 24h-Window).
+  * Realer Durchschnitt: **~5 Rezepte / Monat** + 2 Chat-Fragen + 1 Foto-Check.
+* **Premium-Nutzer:**
+  * Rate-Limit: **30 Extraktionen pro Tag**.
+  * Realer Durchschnitt: **~25 Rezepte / Monat** + 10 Chat-Fragen + 4 Foto-Checks.
+* **Angenommener Mix:** 90 % Free-Nutzer, 10 % zahlende Premium-Abonnenten.
+
+### B. Monatliche Gesamtkosten nach Nutzerzahlen (Gemini 3.1 Flash-Lite + FLUX.1)
+
+| Aktive Nutzer (MAU) | Rezepte / Monat gesamt | Gemini API-Kosten | FLUX.1 Cover-Kosten | Gesamte KI-Kosten / Monat | Ø Kosten pro aktivem User |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **100 Nutzer** | ~ 700 Rezepte | ~ 3,60 $ | ~ 2,45 $ | **~ 6,05 $** | 0,061 $ *(6,1 Cent)* |
+| **500 Nutzer** | ~ 3.500 Rezepte | ~ 18,00 $ | ~ 12,25 $ | **~ 30,25 $** | 0,061 $ |
+| **1.000 Nutzer** | ~ 7.000 Rezepte | ~ 36,00 $ | ~ 24,50 $ | **~ 60,50 $** | 0,061 $ |
+| **5.000 Nutzer** | ~ 35.000 Rezepte | ~ 180,00 $ | ~ 122,50 $ | **~ 302,50 $** | 0,061 $ |
+| **10.000 Nutzer** | ~ 70.000 Rezepte | ~ 360,00 $ | ~ 245,00 $ | **~ 605,00 $** | 0,061 $ |
+| **50.000 Nutzer** | ~ 350.000 Rezepte | ~ 1.800,00 $ | ~ 1.225,00 $ | **~ 3.025,00 $** | 0,061 $ |
+
+### C. Wirtschaftlichkeit (Unit Economics)
+* Bei 1.000 aktiven Nutzern (100 Premium @ z.B. 2,99 $/Monat = **299 $ Umsatz** + AdMob-Einnahmen der 900 Free-User):
+  * Gesamte KI-Kosten: **~60 $ / Monat**.
+  * **Bruttomarge der KI-Kosten:** **> 80 %**.
+
+---
+
+## 8. Persistentes Monitoring (`gemini_logs` DB-Tabelle)
+
+* **Logging-Funktion:** `writeGeminiLog()` in `backend/src/logger.ts` schreibt jeden Aufruf asynchron (`fire-and-forget`) in die Supabase-Tabelle `gemini_logs`.
+* **Felder:** `request_type`, `model`, `duration_ms`, `success`, `error_message`, `token_prompt`, `token_candidate`, `token_total`, `cost_usd`, `cost_formatted`.
+* **Admin-Metriken:** `GET /api/admin/metrics?range=30d` aggregiert die Inferenzkosten in Echtzeit.
+* **Auto-Pruning:** Ein täglicher Cron-Job löscht Log-Einträge älter als 90 Tage (`pruneOldGeminiLogs(90)`).
