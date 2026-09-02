@@ -16,6 +16,7 @@ import { config } from './config.js';
 import { AppError, serializeJobError } from './errors.js';
 import { notificationTick } from './notifications/worker.js';
 import { enrichRecipeWithCanonicalIngredients } from './matching/ingredientMatcher.js';
+import { auditRecipe, applyRecipeAuditPatch } from './matching/recipeAuditor.js';
 
 const workerId = randomUUID();
 let activeJobs = 0;
@@ -178,12 +179,27 @@ async function processJob(job: Job): Promise<void> {
       );
 
       await updateJobProgress(jobId, 'processing', { percent: 60, stage: 'extracting_recipe' });
-      const { recipe, usage: geminiUsage } = await extractRecipe(undefined, undefined, '', undefined, runDir, userPrefs, undefined, photoPaths, 'photo');
+      const { recipe: rawRecipe, usage: geminiUsage } = await extractRecipe(undefined, undefined, '', undefined, runDir, userPrefs, undefined, photoPaths, 'photo');
 
-      console.log(`[Job ${jobId}] Recipe extracted from photos: "${recipe.title}"`);
+      console.log(`[Job ${jobId}] Recipe extracted from photos: "${rawRecipe.title}"`);
       // A photographed page has no third-party source to attribute.
-      recipe.sourceUrl = null;
-      recipe.sourceHandle = null;
+      rawRecipe.sourceUrl = null;
+      rawRecipe.sourceHandle = null;
+
+      // 2nd-stage recipe audit & ingredient disambiguation
+      let recipe = rawRecipe;
+      let auditUsage: GeminiUsageInfo | undefined;
+      try {
+        console.log(`[Job ${jobId}] Auditing recipe and disambiguating ingredients...`);
+        const auditResult = await auditRecipe(recipe);
+        if (auditResult.patch) {
+          recipe = applyRecipeAuditPatch(recipe, auditResult.patch);
+          auditUsage = auditResult.usage;
+        }
+      } catch (auditErr: unknown) {
+        const msg = auditErr instanceof Error ? auditErr.message : String(auditErr);
+        console.warn(`[Job ${jobId}] Recipe audit non-fatal failure: ${msg}`);
+      }
 
       // Generate photorealistic AI cover image and normalize ingredients in parallel
       await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover' });
@@ -217,6 +233,7 @@ async function processJob(job: Job): Promise<void> {
 
       const llmUsage: LlmUsage = {};
       if (geminiUsage) llmUsage.gemini = geminiUsage;
+      if (auditUsage) llmUsage.recipeAuditor = auditUsage;
       if (fluxUsage) llmUsage.flux = fluxUsage;
       if (resolverUsage) llmUsage.ingredientResolver = resolverUsage;
 
@@ -382,7 +399,7 @@ async function processJob(job: Job): Promise<void> {
     console.log(`[Job ${jobId}] Extracting recipe via Gemini...`);
     await updateJobProgress(jobId, 'processing', { percent: 75, stage: 'extracting_recipe' });
 
-    const { recipe, usage: geminiUsage } = await extractRecipe(
+    const { recipe: rawRecipe, usage: geminiUsage } = await extractRecipe(
       audioFilePath || undefined,
       mimeType,
       scrapeResult.caption,
@@ -397,7 +414,22 @@ async function processJob(job: Job): Promise<void> {
       clientFramesInput
     );
 
-    console.log(`[Job ${jobId}] Recipe extracted: "${recipe.title}"`);
+    console.log(`[Job ${jobId}] Recipe extracted: "${rawRecipe.title}"`);
+
+    // 2nd-stage recipe audit & ingredient disambiguation
+    let recipe = rawRecipe;
+    let auditUsage: GeminiUsageInfo | undefined;
+    try {
+      console.log(`[Job ${jobId}] Auditing recipe and disambiguating ingredients...`);
+      const auditResult = await auditRecipe(recipe);
+      if (auditResult.patch) {
+        recipe = applyRecipeAuditPatch(recipe, auditResult.patch);
+        auditUsage = auditResult.usage;
+      }
+    } catch (auditErr: unknown) {
+      const msg = auditErr instanceof Error ? auditErr.message : String(auditErr);
+      console.warn(`[Job ${jobId}] Recipe audit non-fatal failure: ${msg}`);
+    }
 
     // Collect base scraped cover image (RapidAPI/TikTok metadata cover)
     const baseImageUrls = scrapeResult.imageUrl
@@ -439,6 +471,7 @@ async function processJob(job: Job): Promise<void> {
 
     const llmUsage: LlmUsage = {};
     if (geminiUsage) llmUsage.gemini = geminiUsage;
+    if (auditUsage) llmUsage.recipeAuditor = auditUsage;
     if (fluxUsage) llmUsage.flux = fluxUsage;
     if (resolverUsage) llmUsage.ingredientResolver = resolverUsage;
 
