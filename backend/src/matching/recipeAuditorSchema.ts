@@ -1,4 +1,5 @@
 import { FunctionDeclarationSchemaType } from '@google/generative-ai';
+import { RECIPE_CATEGORY_KEYS } from './categoryGroups.js';
 import type { Recipe, GeminiUsageInfo } from '../types.js';
 
 export interface IngredientCorrection {
@@ -61,7 +62,11 @@ export const auditPatchSchema = {
         properties: {
           originalName: { type: FunctionDeclarationSchemaType.STRING, description: 'The exact ingredient name in the recipe as written.' },
           correctedBaseName: { type: FunctionDeclarationSchemaType.STRING, description: 'Specific singular English baseName (e.g. "mozzarella", "black pepper").' },
-          correctedCategory: { type: FunctionDeclarationSchemaType.STRING, description: 'Supermarket category (e.g. "DAIRY", "SPICES_SEASONINGS", "PRODUCE").' },
+          correctedCategory: {
+            type: FunctionDeclarationSchemaType.STRING,
+            enum: [...RECIPE_CATEGORY_KEYS],
+            description: 'Canonical supermarket category key (e.g. VEGETABLES for corn/Mais, DAIRY_EGGS for mozzarella/cheese, SPICES_HERBS for black pepper, PANTRY_BAKING for protein powder/baking).',
+          },
           correctedSynonyms: { type: FunctionDeclarationSchemaType.ARRAY, items: { type: FunctionDeclarationSchemaType.STRING } },
           reason: { type: FunctionDeclarationSchemaType.STRING },
         },
@@ -77,7 +82,11 @@ export const auditPatchSchema = {
           amount: { type: FunctionDeclarationSchemaType.NUMBER },
           unit: { type: FunctionDeclarationSchemaType.STRING },
           baseName: { type: FunctionDeclarationSchemaType.STRING },
-          category: { type: FunctionDeclarationSchemaType.STRING },
+          category: {
+            type: FunctionDeclarationSchemaType.STRING,
+            enum: [...RECIPE_CATEGORY_KEYS],
+            description: 'Canonical supermarket category key.',
+          },
           synonyms: { type: FunctionDeclarationSchemaType.ARRAY, items: { type: FunctionDeclarationSchemaType.STRING } },
           reason: { type: FunctionDeclarationSchemaType.STRING },
         },
@@ -128,19 +137,22 @@ export const auditPatchSchema = {
 
 export function buildAuditPrompt(recipe: Recipe): string {
   return `You are a strict 2nd-stage Culinary Recipe Auditor & Ingredient Disambiguation Engine.
-Review the recipe JSON below and identify any ingredient misclassifications, umbrella collapsing, or mismatches:
+Review the recipe JSON below and identify any ingredient misclassifications, umbrella collapsing, or category mismatches:
 1. SPECIFICITY INVARIANCE: Never collapse specific varieties into umbrella terms:
-   - "Mozzarella" / "Mozzarella (gerieben)" MUST have baseName "mozzarella", NOT "cheese".
-   - "Feta" / "Schafskäse" MUST have baseName "feta", NOT "cheese".
-   - "Gouda" -> "gouda", "Cheddar" -> "cheddar", "Parmesan" -> "parmesan" (NOT "cheese").
-   - "Lachs" / "Salmon" -> "salmon" or "salmon fillet", "Thunfisch" -> "tuna" (NOT "fish").
-2. STRICT SPICE VS PRODUCE DISAMBIGUATION:
-   - "Pfeffer" / "Schwarzer Pfeffer" (spice) MUST have baseName "black pepper", category "SPICES_SEASONINGS" (NEVER "pepper", "bell pepper", or "PRODUCE").
-   - "Paprika" / "Gemüsepaprika" (produce) MUST have baseName "bell pepper", category "FRUITS_VEGETABLES" / "PRODUCE".
-   - "Paprikapulver" (spice) MUST have baseName "paprika powder", category "SPICES_SEASONINGS".
-3. INLINE TAG ALIGNMENT:
+   - "Mozzarella" / "Mozzarella (gerieben)" MUST have baseName "mozzarella" (NOT "cheese") and category "DAIRY_EGGS".
+   - "Feta" / "Schafskäse" MUST have baseName "feta" (NOT "cheese") and category "DAIRY_EGGS".
+   - "Gouda" -> "gouda", "Cheddar" -> "cheddar", "Parmesan" -> "parmesan" (NOT "cheese") with category "DAIRY_EGGS".
+   - "Lachs" / "Salmon" -> "salmon" or "salmon fillet", "Thunfisch" -> "tuna" (NOT "fish") with category "SEAFOOD".
+2. STRICT SPICE VS PRODUCE & PANTRY DISAMBIGUATION:
+   - "Pfeffer" / "Schwarzer Pfeffer" (spice) MUST have baseName "black pepper" and category "SPICES_HERBS" (NEVER "pepper", "bell pepper", or "VEGETABLES").
+   - "Paprika" / "Gemüsepaprika" (produce) MUST have baseName "bell pepper" and category "VEGETABLES".
+   - "Paprikapulver" (spice) MUST have baseName "paprika powder" and category "SPICES_HERBS".
+   - "Mais" / "Corn" (vegetable) MUST have baseName "corn" and category "VEGETABLES" (NEVER "OILS_CONDIMENTS").
+   - "Protein Pulver" / "Sahne Protein" MUST have category "PANTRY_BAKING" (NEVER invent custom categories like SUPPLEMENTS).
+3. CANONICAL CATEGORIES ONLY: Any corrected or added category MUST be strictly one of: ${RECIPE_CATEGORY_KEYS.join(', ')}.
+4. INLINE TAG ALIGNMENT:
    - If baseName is corrected, update step descriptions containing [Word](ing:oldBaseName) to [Word](ing:newBaseName).
-4. If everything is already accurate and complete, return an empty patch {}.
+5. If everything is already accurate and complete, return an empty patch {}.
 
 Recipe to audit:
 ${JSON.stringify({ title: recipe.title, description: recipe.description, ingredients: recipe.ingredients, instructions: recipe.instructions }, null, 2)}`;
