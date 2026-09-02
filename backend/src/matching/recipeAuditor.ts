@@ -9,6 +9,7 @@ import {
   type IngredientCorrection, type AddedIngredient,
   type RemovedIngredient, type StepCorrection, type AddedStep,
 } from './recipeAuditorSchema.js';
+import { isDevEnvironment, logAuditDevSummary } from './recipeAuditorDevLogger.js';
 
 export type { RecipeAuditPatch, RecipeAuditResult, IngredientCorrection, AddedIngredient, RemovedIngredient, StepCorrection, AddedStep };
 
@@ -38,6 +39,10 @@ export async function auditRecipe(recipe: Recipe): Promise<RecipeAuditResult> {
       : undefined;
     const costEstimate = tokenUsage ? estimateCost(modelName, tokenUsage) : undefined;
     const usage: GeminiUsageInfo = { tokenUsage, costEstimate, durationMs: Date.now() - startTime, model: modelName };
+
+    if (isDevEnvironment()) {
+      logAuditDevSummary(recipe, patch, usage);
+    }
 
     return { patch, usage };
   } catch (err: unknown) {
