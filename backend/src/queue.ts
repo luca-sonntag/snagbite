@@ -98,16 +98,30 @@ async function processJob(job: Job): Promise<void> {
       }
 
       console.log(`[Job ${jobId}] Requesting remix from Gemini...`);
-      const { recipe, usage: geminiUsage } = await remixRecipe(parentRecipe, job.remixPrompt || '', runDir, userPrefs);
+      const { recipe: rawRecipe, usage: geminiUsage } = await remixRecipe(parentRecipe, job.remixPrompt || '', runDir, userPrefs);
 
-      if (recipe.isRecipe === false) {
+      if (rawRecipe.isRecipe === false) {
         throw new AppError('UNRELATED_REMIX_REQUEST', { message: 'The prompt was not recognized as a valid recipe modification.' });
       }
 
+      let recipe = rawRecipe;
       recipe.sourceHandle = parentRecipe.sourceHandle;
       recipe.sourceUrl = parentRecipe.sourceUrl;
       recipe.parentRecipeId = parentRecipe.id;
       recipe.remixPrompt = job.remixPrompt || null;
+
+      let auditUsage: GeminiUsageInfo | undefined;
+      try {
+        console.log(`[Job ${jobId}] Auditing remixed recipe and disambiguating ingredients...`);
+        const auditResult = await auditRecipe(recipe);
+        if (auditResult.patch) {
+          recipe = applyRecipeAuditPatch(recipe, auditResult.patch);
+          auditUsage = auditResult.usage;
+        }
+      } catch (auditErr: unknown) {
+        const msg = auditErr instanceof Error ? auditErr.message : String(auditErr);
+        console.warn(`[Job ${jobId}] Remix audit non-fatal failure: ${msg}`);
+      }
 
       // Generate AI cover image and normalize ingredients in parallel
       await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover' });
@@ -140,6 +154,7 @@ async function processJob(job: Job): Promise<void> {
 
       const llmUsage: LlmUsage = {};
       if (geminiUsage) llmUsage.gemini = geminiUsage;
+      if (auditUsage) llmUsage.recipeAuditor = auditUsage;
       if (fluxUsage) llmUsage.flux = fluxUsage;
       if (resolverUsage) llmUsage.ingredientResolver = resolverUsage;
 
