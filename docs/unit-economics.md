@@ -34,15 +34,53 @@ Dieses Dokument bietet eine vollständige betriebswirtschaftliche Analyse des Pr
 
 ---
 
-### B. Fixe & Basisinfrastruktur-Kosten (pro Monat)
+### B. Exakte Server- & Infrastrukturkosten: Railway & Supabase (Tiers, Quoten & reale Abrechnung)
 
-| Dienst | Zweck | Starter (bis 1.000 MAU) | Wachsend (bis 10.000 MAU) | Scale (bis 50.000 MAU) |
-| :--- | :--- | :--- | :--- | :--- |
-| **Railway Container** | Node.js Backend & Queue Worker | 5,00 $ | 15,00 $ | 40,00 $ |
-| **Supabase Postgres** | Datenbank, Auth & Storage Buckets | 0,00 $ *(Free Tier)* | 25,00 $ *(Pro Tier)* | 50,00 $ *(Pro + Storage Add-on)* |
-| **RapidAPI Social Scraper** | Instagram / TikTok Metadaten | 0,00 $ – 10,00 $ | 30,00 $ | 75,00 $ |
-| **Developer Accounts** | Google Play (25 $ einmalig), Apple (99 $/Jahr) | ~ 8,25 $ | ~ 8,25 $ | ~ 8,25 $ |
-| **Infrastruktur Fixkosten** | **Summe** | **~ 23,25 $ / Monat** | **~ 78,25 $ / Monat** | **~ 173,25 $ / Monat** |
+#### 1. Railway (Node.js API-Server & Extraktions-Worker)
+Railway rechnet sekundengenau nach verbrauchten Hardwareressourcen ab. Die monatliche Grundgebühr der Pläne fungiert als vollwertiges Nutzungsguthaben:
+* **Hobby Plan (5,00 $ / Monat):** Beinhaltet 5,00 $ monatliches Guthaben. Ausreichend für Prototyping und bis zu ~1.000 MAU.
+* **Pro Plan (20,00 $ / Monat):** Beinhaltet 20,00 $ monatliches Guthaben. Bietet garantierte Verfügbarkeit, kein Sleep, horizontales Autoscaling und höhere Ressourcenlimits. Empfohlen ab 5.000 MAU.
+* **Ressourcenpreise über dem Inklusiv-Guthaben:**
+  * **vCPU:** 20,00 $ pro vCPU / Monat (~0,0000077 $ / vCPU-Sekunde)
+  * **RAM:** 10,00 $ pro GB / Monat (~0,0000038 $ / GB-Sekunde)
+  * **Network Egress:** 0,05 $ pro GB
+* **Realer Container-Verbrauch unserer App:**
+  * Unser Backend führt Node 22, ffmpeg (Audio-Extraktion), Sharp (4x4-Grid-Compositing) und den Worker (`WORKER_CONCURRENCY: 3`) aus.
+  * Basis-Last (Idle / leichter Traffic): ~0,2 vCPU & ~400 MB RAM $\rightarrow$ **ca. 5,00 $ – 8,00 $ / Monat**.
+  * Mittlere Last (1.000–5.000 MAU): ~0,5 vCPU & ~1 GB RAM $\rightarrow$ **ca. 15,00 $ – 20,00 $ / Monat**.
+  * Hohe Last (10.000–50.000 MAU): 1–2 vCPU & ~2 GB RAM $\rightarrow$ **ca. 35,00 $ – 65,00 $ / Monat**.
+  * Scale (100.000 MAU): 2–4 vCPU & ~4 GB RAM $\rightarrow$ **ca. 110,00 $ – 130,00 $ / Monat**.
+
+---
+
+#### 2. Supabase (Postgres-Datenbank, Auth, Realtime & Storage)
+* **Free Plan (0,00 $ / Monat):**
+  * 50.000 MAU (Auth), 500 MB Datenbankgröße, 1 GB File Storage, 5 GB Egress.
+  * **Kritische Einschränkung:** Pausiert automatisch nach 7 Tagen Inaktivität! Für eine Live-App im Play Store/App Store ist daher ab Launch der **Pro Plan** zwingend erforderlich, um Ausfälle zu verhindern und automatische tägliche Backups zu gewährleisten.
+* **Pro Plan (25,00 $ / Monat pro Organisation):**
+  * **100.000 MAU inklusive!** (Erst danach 0,00325 $ pro weiterem MAU).
+  * **8 GB Datenbank inklusive!** Ein vollständiges Rezept belegt als JSONB in Postgres ca. 6–10 KB. 8 GB reichen für **über 800.000 bis 1.000.000 gespeicherte Rezepte**!
+  * **100 GB File Storage inklusive!** Ein generiertes FLUX.1 Coverbild im `recipe-covers` Bucket ist als optimiertes JPEG ca. 80–120 KB groß. 100 GB Speicherplatz fassen **über 1.000.000 HD-Coverbilder**!
+  * **250 GB Egress inklusive!** (Vollkommen ausreichend für hunderte Millionen API-Aufrufe und Bildabrufe über CDN).
+  * **10,00 $ Compute-Credit inklusive:** Deckt die Standard-„Micro“-Compute-Instanz zu 100 % ab.
+  * **Tägliche Backups (7 Tage Historie).**
+* **Compute-Add-ons (für extrem viele gleichzeitige DB-Queries bei >50k Nutzern):**
+  * *Micro (inklusive):* 2 vCPU Shared, 1 GB RAM $\rightarrow$ **0,00 $ Aufpreis** (reicht bis 50.000 MAU).
+  * *Small (ab 50.000 MAU):* 2 vCPU Dedicated, 2 GB RAM $\rightarrow$ **+15,00 $ / Monat**.
+  * *Medium (ab 100.000 MAU):* 2 vCPU Dedicated, 4 GB RAM $\rightarrow$ **+60,00 $ / Monat**.
+
+---
+
+#### 3. Konkrete Zuordnungs-Matrix: Welche Tiers zahlen wir bei welcher Nutzerzahl?
+
+| MAU (Aktive Nutzer) | Railway Tier & Konfiguration | Railway Kosten / M. | Supabase Tier & Instanz | Supabase Kosten / M. | RapidAPI Scraper | Entwickler-Accounts (Play Store / Apple) | **Gesamte Server- & Basiskosten / Monat** |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **100** | **Hobby Plan** (0,2 vCPU, 512 MB) | **5,00 $** | **Pro Plan** *(kein Pausieren, Backups)* | **25,00 $** | 0,00 $ *(Free)* | ~ 8,25 $ | **~ 38,25 $ / Monat** |
+| **1.000** | **Hobby Plan** (0,3 vCPU, 768 MB) | **7,00 $** | **Pro Plan** (Micro Compute, 8 GB DB) | **25,00 $** | 10,00 $ *(Starter)* | ~ 8,25 $ | **~ 50,25 $ / Monat** |
+| **5.000** | **Pro Plan** (0,5 vCPU, 1 GB RAM) | **20,00 $** | **Pro Plan** (Micro Compute, 8 GB DB) | **25,00 $** | 30,00 $ *(Pro)* | ~ 8,25 $ | **~ 83,25 $ / Monat** |
+| **10.000** | **Pro Plan** (1 vCPU, 1,5 GB RAM) | **30,00 $** | **Pro Plan** (Micro Compute, 8 GB DB) | **25,00 $** | 50,00 $ *(Pro Plus)* | ~ 8,25 $ | **~ 113,25 $ / Monat** |
+| **50.000** | **Pro Plan** (2 Replicas, je 1 vCPU, 2 GB) | **65,00 $** | **Pro Plan + Small Compute** (+15 $) | **40,00 $** | 100,00 $ *(Ultra)* | ~ 8,25 $ | **~ 213,25 $ / Monat** |
+| **100.000** | **Pro Plan** (3 Replicas, 4 vCPU, 4 GB) | **120,00 $** | **Pro Plan + Medium Compute** (+60 $) | **85,00 $** | 150,00 $ *(Mega)* | ~ 8,25 $ | **~ 363,25 $ / Monat** |
 
 ---
 
@@ -130,15 +168,15 @@ Angenommene Basis-Verteilung der aktiven Nutzer (MAU):
 
 ### A. Basis-Szenario: 8 % Premium-Conversion (35% Monats- / 65% Jahresabo)
 
-| MAU (Aktive Nutzer) | Brutto-Einnahmen (AdMob + Abos) | Store-Gebühren (15%) | Netto-Umsatz | Variable KI-Kosten (Gemini + FLUX) | Fixkosten (DB + Server) | **Monatlicher Reingewinn (Net Profit)** | **Netto-Marge** |
+| MAU (Aktive Nutzer) | Brutto-Einnahmen (AdMob + Abos) | Store-Gebühren (15%) | Netto-Umsatz | Variable KI-Kosten (Gemini + FLUX) | Fixkosten (Railway + Supabase + Scraper) | **Monatlicher Reingewinn (Net Profit)** | **Netto-Marge** |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **100** | 35,20 $ | 3,80 $ | 31,40 $ | 6,40 $ | 23,25 $ | **+ 1,75 $** *(Break-Even)* | ~ 5,5 % |
-| **500** | 176,00 $ | 19,00 $ | 157,00 $ | 32,00 $ | 23,25 $ | **+ 101,75 $** | 64,8 % |
-| **1.000** | 352,00 $ | 38,00 $ | 314,00 $ | 64,00 $ | 35,00 $ | **+ 215,00 $** | 68,5 % |
-| **5.000** | 1.760,00 $ | 190,00 $ | 1.570,00 $ | 320,00 $ | 78,25 $ | **+ 1.171,75 $** | 74,6 % |
-| **10.000** | 3.520,00 $ | 380,00 $ | 3.140,00 $ | 640,00 $ | 110,00 $ | **+ 2.390,00 $** | 76,1 % |
-| **50.000** | 17.600,00 $ | 1.900,00 $ | 15.700,00 $ | 3.200,00 $ | 173,25 $ | **+ 12.326,75 $** | 78,5 % |
-| **100.000** | 35.200,00 $ | 3.800,00 $ | 31.400,00 $ | 6.400,00 $ | 320,00 $ | **+ 24.680,00 $** | 78,6 % |
+| **100** | 35,20 $ | 3,80 $ | 31,40 $ | 6,40 $ | 38,25 $ *(mit Pro DB)* | **– 13,25 $** *(bzw. +11,75 $ mit Free DB)*| – |
+| **500** | 176,00 $ | 19,00 $ | 157,00 $ | 32,00 $ | 45,00 $ | **+ 80,00 $** | 51,0 % |
+| **1.000** | 352,00 $ | 38,00 $ | 314,00 $ | 64,00 $ | 50,25 $ | **+ 199,75 $** | 63,6 % |
+| **5.000** | 1.760,00 $ | 190,00 $ | 1.570,00 $ | 320,00 $ | 83,25 $ | **+ 1.166,75 $** | 74,3 % |
+| **10.000** | 3.520,00 $ | 380,00 $ | 3.140,00 $ | 640,00 $ | 113,25 $ | **+ 2.386,75 $** | 76,0 % |
+| **50.000** | 17.600,00 $ | 1.900,00 $ | 15.700,00 $ | 3.200,00 $ | 213,25 $ | **+ 12.286,75 $** | 78,3 % |
+| **100.000** | 35.200,00 $ | 3.800,00 $ | 31.400,00 $ | 6.400,00 $ | 363,25 $ | **+ 24.636,75 $** | 78,5 % |
 
 ---
 
@@ -146,13 +184,13 @@ Angenommene Basis-Verteilung der aktiven Nutzer (MAU):
 
 Durch das attraktive Jahresangebot (**„29,99 € statt 59,88 € – nur 2,50 € / Monat“**) und In-App Trial-Aktionen steigt die Conversion-Rate im Food-Bereich typischerweise auf **12 %**:
 
-| MAU (Aktive Nutzer) | Netto-Umsatz / Monat | Variable KI-Kosten | Fixkosten | **Monatlicher Reingewinn (Net Profit)** | **Netto-Marge** |
+| MAU (Aktive Nutzer) | Netto-Umsatz / Monat | Variable KI-Kosten | Fixkosten (Railway + Supabase) | **Monatlicher Reingewinn (Net Profit)** | **Netto-Marge** |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **1.000 Nutzer** | ~ 410,00 $ | ~ 74,00 $ | ~ 35,00 $ | **~ 301,00 $ / Monat** | 73,4 % |
-| **5.000 Nutzer** | ~ 2.050,00 $ | ~ 370,00 $ | ~ 78,25 $ | **~ 1.601,75 $ / Monat** | 78,1 % |
-| **10.000 Nutzer** | ~ 4.100,00 $ | ~ 740,00 $ | ~ 110,00 $ | **~ 3.250,00 $ / Monat** | 79,3 % |
-| **50.000 Nutzer** | ~ 20.500,00 $ | ~ 3.700,00 $ | ~ 173,25 $ | **~ 16.626,75 $ / Monat** | 81,1 % |
-| **100.000 Nutzer** | ~ 41.000,00 $ | ~ 7.400,00 $ | ~ 320,00 $ | **~ 33.280,00 $ / Monat** | 81,2 % |
+| **1.000 Nutzer** | ~ 410,00 $ | ~ 74,00 $ | ~ 50,25 $ | **~ 285,75 $ / Monat** | 69,7 % |
+| **5.000 Nutzer** | ~ 2.050,00 $ | ~ 370,00 $ | ~ 83,25 $ | **~ 1.596,75 $ / Monat** | 77,9 % |
+| **10.000 Nutzer** | ~ 4.100,00 $ | ~ 740,00 $ | ~ 113,25 $ | **~ 3.246,75 $ / Monat** | 79,2 % |
+| **50.000 Nutzer** | ~ 20.500,00 $ | ~ 3.700,00 $ | ~ 213,25 $ | **~ 16.586,75 $ / Monat** | 80,9 % |
+| **100.000 Nutzer** | ~ 41.000,00 $ | ~ 7.400,00 $ | ~ 363,25 $ | **~ 33.236,75 $ / Monat** | 81,1 % |
 
 ---
 
