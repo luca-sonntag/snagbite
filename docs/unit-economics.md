@@ -169,7 +169,59 @@ Ein oft übersehener Vorteil im Software-Geschäft ist die **Liquidität**:
 
 ---
 
-## 7. Hebel zur weiteren Gewinnmaximierung
+## 7. Steuer- & Abgaben-Realität in Österreich (Vom App-Gewinn zum privaten Netto)
+
+Um zu verstehen, wie viel Geld am Ende **tatsächlich auf dem privaten Bankkonto** in Österreich ankommt, müssen die österreichischen Rechts- und Abgabenvorschriften berücksichtigt werden.
+
+### A. Das österreichische Abgabensystem für App-Betreiber
+
+1. **Umsatzsteuer-Erleichterung durch App Stores (Merchant of Record):**
+   * Google Play und Apple fungieren in der EU als **Merchant of Record (MoR)** für alle In-App-Abonnements (RevenueCat). Sie berechnen die länderspezifische Mehrwertsteuer (z. B. 20 % in Österreich, 19 % in Deutschland) und führen diese **automatisch direkt an die jeweiligen EU-Finanzämter** ab.
+   * AdMob-Werbeeinnahmen und Store-Auszahlungen erfolgen als B2B-Umsätze aus Irland (Google Ireland Ltd. / Apple Distribution International Ltd.) steuerfrei über das **Reverse-Charge-Verfahren** (Art. 196 MwSt-SystRL). Es fällt in Österreich keine zusätzliche Umsatzsteuerbelastung für den Entwickler an.
+2. **Sozialversicherung der Selbständigen (SVS - GSVG):**
+   * Beitragssätze: **Pensionsversicherung (18,50 %)** + **Krankenversicherung (6,80 %)** + **Selbständigenvorsorge (1,53 %)** + Unfallversicherung (~12,95 € / Monat).
+   * **Gesamtsatz: ca. 26,83 %** auf die Beitragsgrundlage.
+   * *Steuervorteil:* SVS-Beiträge sind in Österreich **vollständig als Betriebsausgaben absetzbar** und reduzieren den steuerpflichtigen Gewinn 1:1!
+   * *Deckelung:* Die SVS ist nach oben durch die Höchstbeitragsgrundlage (ab ca. 89.000 € Gewinn) auf max. ca. 22.500 € / Jahr gedeckelt.
+3. **Gewinnfreibetrag (GFB - § 10 EStG):**
+   * **Grundfreibetrag:** 15 % der ersten 33.000 € Gewinn sind **völlig steuerfrei** (bis zu 4.950 € steuerfreier Bonus ohne Investitionserfordernis).
+4. **Einkommensteuertarif Österreich (Stand 2026 nach Abschaffung der kalten Progression):**
+   * Bis 13.539 €: **0 %** (Steuerfreier Grundfreibetrag)
+   * 13.539 € bis 21.992 €: **20 %**
+   * 21.992 € bis 36.458 €: **30 %**
+   * 36.458 € bis 70.365 €: **40 %**
+   * 70.365 € bis 104.859 €: **48 %**
+   * Über 104.859 €: **50 %** (bzw. 55 % über 1 Mio. €)
+
+---
+
+### B. Konkrete Netto-Einkommenstabelle (Einzelunternehmen / Österreich)
+
+*Berechnung auf Jahresbasis (USD in EUR zum Kurs 1,08 umgerechnet, Basis-Szenario mit 8 % Premium):*
+
+| MAU (Aktive Nutzer) | Vorsteuer-Betriebsgewinn / Jahr (EBIT) | SVS-Beiträge (~26,8 %) | Gewinnfreibetrag (15 % GFB) | Zu versteuerndes Einkommen | Einkommensteuer (Österreich) | **Tatsächliches Netto auf dem Privatkonto / Jahr** | **Reines Netto / Monat** |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **100** | ~ 20 € | 0 € *(Freibetrag)* | – | ~ 20 € | **0 €** *(0 %)* | **~ 20 €** | ~ 2 € |
+| **1.000** | ~ 2.390 € | 0 € *(unter Geringf.)* | – | ~ 2.390 € | **0 €** *(unter 13.539 €)* | **~ 2.390 €** | **~ 199 €** |
+| **5.000** | ~ 13.000 € | ~ 2.800 € | ~ 1.530 € | ~ 8.670 € | **0 €** *(unter 13.539 €)* | **~ 10.200 €** | **~ 850 €** |
+| **10.000** | ~ 26.500 € | ~ 5.800 € | ~ 3.100 € | ~ 17.600 € | **~ 812 €** *(nur 20% auf >13.539 €)* | **~ 19.888 €** | **~ 1.657 €** |
+| **50.000** | ~ 137.000 € | ~ 22.500 € *(gedeckelt)* | 4.950 € *(Max)* | ~ 109.550 € | **~ 36.400 €** *(effektiv ~33 %)* | **~ 78.100 €** | **~ 6.508 €** |
+| **100.000** | ~ 274.000 € | ~ 22.500 € *(gedeckelt)* | 4.950 € | ~ 246.550 € | **~ 104.900 €** *(effektiv ~42 %)* | **~ 146.600 €** | **~ 12.216 €** |
+
+---
+
+### C. Strategische Rechtsform: Einzelunternehmen vs. GmbH / FlexCo
+
+Ab einem Vorsteuergewinn von ca. **60.000 € bis 80.000 € / Jahr** empfiehlt sich in Österreich der Wechsel in eine **Kapitalgesellschaft (GmbH oder die neue FlexCo / Flexible Kapitalgesellschaft)**:
+
+* **Körperschaftsteuer (KöSt):** Pauschal **nur 23 %** auf Unternehmensgewinne.
+* **Thesaurierungs-Vorteil:** Solange Gewinne im Unternehmen verbleiben (z. B. für Werbeausgaben, Serverkosten, Rücklagen oder neue App-Features), zahlt man **keine persönliche Einkommensteuer**, sondern lediglich 23 % KöSt.
+  * *Beispiel bei 50.000 Nutzern:* Von 137.000 € Gewinn bleiben nach 23 % KöSt **über 105.000 € Cash im Unternehmen**, um Marketing und Skalierung steuerbegünstigt voranzutreiben.
+* **Ausschüttung:** Erst wenn Geld als Dividende an dich privat ausgeschüttet wird, fällt 27,5 % KESt an (Gesamtsteuerbelastung: 44,18 % – statt bis zu 50 % Spitzensteuersatz).
+
+---
+
+## 8. Hebel zur weiteren Gewinnmaximierung
 
 1. **Modell-Fallback auf `gemini-2.5-flash-lite`:**  
    Senkt die Gemini-Kosten um **67 %** (von 0,00425 $ auf 0,00140 $ pro Rezept). Bei 50.000 Nutzern spart dies monatlich **über 850 $ zusätzliche KI-Kosten** ein.
@@ -182,9 +234,9 @@ Ein oft übersehener Vorteil im Software-Geschäft ist die **Liquidität**:
 
 ---
 
-## 8. Fazit
+## 9. Fazit
 
-Mit der Preisstruktur von **4,99 € monatlich** und **29,99 € jährlich**:
-1. **Verstärkt sich die Profitabilität deutlich:** Der Reingewinn steigt über alle Kohorten um **10 % bis 40 %**.
-2. **Cashflow-Garantie:** Das 29,99 € Jahresabo erzeugt sofortige Liquidität, die die jährlichen KI-Kosten um den Faktor 9 überdeckt.
-3. **Robuste Unit Economics:** Selbst im schlechtesten Fall (reine Free-User-Nutzung) verdient die App an jeder werbefinanzierten Extraktion Geld (+0,012 $ pro Rewarded Ad).
+Unter Berücksichtigung aller österreichischen Steuern und SVS-Beiträge:
+1. **Bis ca. 5.000 aktive Nutzer:** Fällt in Österreich dank Grundfreibetrag (13.539 €), Gewinnfreibetrag (15 %) und SVS-Betriebsausgabenabzug **nahezu 0 € Einkommensteuer** an. Fast 80 % des Betriebsgewinns landen direkt netto auf dem Privatkonto.
+2. **Ab 10.000 Nutzern:** Erreicht die App bereits ein vollwertiges Netto-Gehalt von **~ 1.650 € netto / Monat** auf dem Privatkonto.
+3. **Bei 50.000 Nutzern:** Generiert das Projekt **~ 6.500 € Netto pro Monat** (oder über 105.000 € Reinvestitionskapital in einer GmbH/FlexCo).
