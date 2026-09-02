@@ -112,6 +112,7 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
       prepTime: 5,
       cookTime: 10,
       servings: 1,
+      equipment: ['Topf', 'Reibe'],
       ingredients: [
         {
           name: 'DAIRY',
@@ -160,7 +161,8 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
       prepTime: 5,
       cookTime: 20,
       servings: 2,
-      ingredients: [{ name: 'Gemüse', items: [{ name: 'Karotte', baseName: 'carrot', category: 'PRODUCE' }] }],
+      equipment: ['Backblech'],
+      ingredients: [{ name: 'Gemüse', items: [{ name: 'Karotte', baseName: 'carrot', category: 'PRODUCE', amount: 2, unit: 'Stück' }] }],
       instructions: [
         { step: 1, description: 'Karotten schneiden.' },
         { step: 2, description: 'Im Ofen backen.' },
@@ -290,9 +292,10 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
       prepTime: 5,
       cookTime: 0,
       servings: 1,
+      equipment: ['Schüssel'],
       ingredients: [
-        { name: 'PRODUCE', items: [{ name: 'Tomate', baseName: 'tomato', category: 'PRODUCE' }] },
-        { name: 'SPICES_SEASONINGS', items: [{ name: 'Salz', baseName: 'salt', category: 'SPICES_SEASONINGS' }] },
+        { name: 'PRODUCE', items: [{ name: 'Tomate', baseName: 'tomato', category: 'PRODUCE', amount: 2, unit: 'Stück' }] },
+        { name: 'SPICES_SEASONINGS', items: [{ name: 'Salz', baseName: 'salt', category: 'SPICES_SEASONINGS', amount: 1, unit: 'Prise' }] },
       ],
       instructions: [{ step: 1, description: 'Alles mischen.' }],
     };

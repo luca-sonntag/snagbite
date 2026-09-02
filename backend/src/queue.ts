@@ -11,7 +11,7 @@ import { extractRecipe, remixRecipe, type ClientFramesInput } from './gemini.js'
 import { generateRecipeCoverImage } from './imageGenerator.js';
 import { pruneOldGeminiLogs } from './logger.js';
 import { photoUploadIdFromUrl, downloadImportPhotos, deleteImportPhotos, sweepOldPhotoImports } from './photoImport.js';
-import type { Job, LlmUsage, ProgressStage } from './types.js';
+import type { Job, LlmUsage, ProgressStage, GeminiUsageInfo } from './types.js';
 import { config } from './config.js';
 import { AppError, serializeJobError } from './errors.js';
 import { notificationTick } from './notifications/worker.js';
