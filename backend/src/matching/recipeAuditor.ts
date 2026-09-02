@@ -64,6 +64,7 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
   );
   if (!hasChanges) return { ...recipe };
 
+  const norm = (s?: string) => (s || '').toLowerCase().replace(/[,;:.()]/g, ' ').replace(/\s+/g, ' ').trim();
   const result: Recipe = {
     ...recipe,
     ingredients: (recipe.ingredients || []).map((g) => ({ ...g, items: (g.items || []).map((i) => ({ ...i })) })),
@@ -72,24 +73,24 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
 
   // 1. Remove ingredients
   if (patch.removedIngredients?.length) {
-    const removeSet = new Set(patch.removedIngredients.map((r) => r.name.toLowerCase().trim()));
+    const removeNorms = new Set(patch.removedIngredients.map((r) => norm(r.name)));
     result.ingredients = result.ingredients
-      .map((g) => ({ ...g, items: g.items.filter((i) => !removeSet.has(i.name.toLowerCase().trim())) }))
+      .map((g) => ({ ...g, items: g.items.filter((i) => !removeNorms.has(norm(i.name))) }))
       .filter((g) => g.items.length > 0);
   }
 
   // 2. Correct ingredients
   if (patch.ingredientCorrections?.length) {
-    const corrMap = new Map(patch.ingredientCorrections.map((c) => [c.originalName.toLowerCase().trim(), c]));
     for (const group of result.ingredients) {
       group.items = group.items.map((ing) => {
-        const corr = corrMap.get(ing.name.toLowerCase().trim());
+        const ingNorm = norm(ing.name);
+        const corr = patch.ingredientCorrections?.find((c) => norm(c.originalName) === ingNorm);
         if (!corr) return ing;
         return {
           ...ing,
-          ...(corr.correctedBaseName ? { baseName: corr.correctedBaseName } : {}),
-          ...(corr.correctedCategory ? { category: corr.correctedCategory } : {}),
-          ...(corr.correctedSynonyms ? { synonyms: corr.correctedSynonyms } : {}),
+          ...(corr.correctedBaseName ? { baseName: corr.correctedBaseName.trim() } : {}),
+          ...(corr.correctedCategory ? { category: corr.correctedCategory.trim() } : {}),
+          ...(corr.correctedSynonyms ? { synonyms: corr.correctedSynonyms.map((s) => s.trim()).filter(Boolean) } : {}),
         };
       });
     }
@@ -100,12 +101,12 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
     if (result.ingredients.length === 0) result.ingredients.push({ name: 'Zutaten', items: [] });
     for (const added of patch.addedIngredients) {
       const newIng = {
-        name: added.name,
+        name: added.name.trim(),
         amount: added.amount ?? 1,
-        unit: added.unit ?? 'Stück',
-        baseName: added.baseName,
-        category: added.category,
-        synonyms: added.synonyms ?? [],
+        unit: added.unit?.trim() ?? 'Stück',
+        baseName: added.baseName.trim(),
+        category: added.category.trim(),
+        synonyms: (added.synonyms ?? []).map((s) => s.trim()).filter(Boolean),
         isGenericGrocery: true,
       };
       const catUpper = added.category.toUpperCase().trim();
@@ -114,7 +115,7 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
         if (result.ingredients.length === 1 && result.ingredients[0].name.toLowerCase() === 'zutaten') {
           targetGroup = result.ingredients[0];
         } else {
-          targetGroup = { name: added.category, items: [] };
+          targetGroup = { name: added.category.trim(), items: [] };
           result.ingredients.push(targetGroup);
         }
       }
@@ -137,16 +138,23 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
     }
   }
 
-  // 6. Add steps
+  // 6. Add steps (preserving relative order for multi-inserts at identical anchors)
   if (patch.addedSteps?.length) {
+    let zeroOffset = 0;
+    const lastInsertedIndices = new Map<number, number>();
     for (const added of patch.addedSteps) {
       const newStep = { step: 0, description: added.description };
       if (added.insertAfterStep === 0) {
-        result.instructions.unshift(newStep);
+        result.instructions.splice(zeroOffset++, 0, newStep);
       } else if (added.insertAfterStep !== undefined && added.insertAfterStep > 0) {
-        const idx = result.instructions.findIndex((s) => s.step === added.insertAfterStep);
-        if (idx >= 0) result.instructions.splice(idx + 1, 0, newStep);
-        else result.instructions.push(newStep);
+        const prevInsert = lastInsertedIndices.get(added.insertAfterStep);
+        const anchorIdx = prevInsert !== undefined ? prevInsert : result.instructions.findIndex((s) => s.step === added.insertAfterStep);
+        if (anchorIdx >= 0) {
+          result.instructions.splice(anchorIdx + 1, 0, newStep);
+          lastInsertedIndices.set(added.insertAfterStep, anchorIdx + 1);
+        } else {
+          result.instructions.push(newStep);
+        }
       } else {
         result.instructions.push(newStep);
       }
@@ -155,29 +163,27 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
 
   // 7. Align inline tags for corrected baseNames
   if (patch.ingredientCorrections?.length) {
-    const origIngredients = recipe.ingredients.flatMap((g) => g.items);
+    const origIngredients = (recipe.ingredients || []).flatMap((g) => g.items || []);
     for (const corr of patch.ingredientCorrections) {
       if (!corr.correctedBaseName) continue;
-      const origIng = origIngredients.find(
-        (i) => i.name.toLowerCase().trim() === corr.originalName.toLowerCase().trim()
-      );
+      const corrOrigNorm = norm(corr.originalName);
+      const origIng = origIngredients.find((i) => norm(i.name) === corrOrigNorm);
       const oldBase = origIng?.baseName?.toLowerCase().trim();
-      const corrOrig = corr.originalName.toLowerCase().trim();
-      const newBase = corr.correctedBaseName;
+      const newBase = corr.correctedBaseName.trim();
 
       for (const s of result.instructions) {
+        if (!s.description) continue;
         s.description = s.description.replace(/\[([^\]]+)\]\(ing:([^)]+)\)/g, (fullMatch, label, tagBase) => {
-          const cleanLabel = (label as string).toLowerCase().trim();
+          const labelNorm = norm(label as string);
           const cleanTagBase = (tagBase as string).toLowerCase().trim();
 
-          const labelMatchesOrig = cleanLabel === corrOrig || cleanLabel.includes(corrOrig) || corrOrig.includes(cleanLabel);
+          const labelMatchesOrig = labelNorm === corrOrigNorm || labelNorm.includes(corrOrigNorm) || corrOrigNorm.includes(labelNorm);
           const baseMatchesOld = Boolean(oldBase && cleanTagBase === oldBase);
 
-          // Disambiguate against other ingredients sharing the old baseName
-          const otherMatchesLabel = origIngredients.some(
-            (other) => other.name.toLowerCase().trim() !== corrOrig &&
-              (cleanLabel.includes(other.name.toLowerCase().trim()) || other.name.toLowerCase().trim().includes(cleanLabel))
-          );
+          const otherMatchesLabel = origIngredients.some((other) => {
+            const otherNorm = norm(other.name);
+            return otherNorm !== corrOrigNorm && (labelNorm.includes(otherNorm) || otherNorm.includes(labelNorm));
+          });
 
           if (labelMatchesOrig || (baseMatchesOld && !otherMatchesLabel)) {
             return `[${label}](ing:${newBase})`;

@@ -153,7 +153,7 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
     );
   });
 
-  test('prepends step at index 0 when insertAfterStep is 0', () => {
+  test('prepends step at index 0 when insertAfterStep is 0 and preserves order on multiple additions', () => {
     const recipe: Recipe = {
       title: 'Ofengemüse',
       description: 'Gemüse im Ofen.',
@@ -172,19 +172,115 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
         {
           insertAfterStep: 0,
           description: 'Den Ofen auf 200°C Ober-/Unterhitze vorheizen.',
-          reason: 'Preheat step',
+          reason: 'Preheat step 1',
+        },
+        {
+          insertAfterStep: 0,
+          description: 'Ein Backblech mit Backpapier auslegen.',
+          reason: 'Preheat step 2',
+        },
+        {
+          insertAfterStep: 1,
+          description: 'Karotten mit Olivenöl und Salz marinieren.',
+          reason: 'Substep 1a',
+        },
+        {
+          insertAfterStep: 1,
+          description: 'Auf dem Blech verteilen.',
+          reason: 'Substep 1b',
         },
       ],
     };
 
     const patched = applyRecipeAuditPatch(recipe, patch);
-    assert.equal(patched.instructions.length, 3);
+    assert.equal(patched.instructions.length, 6);
     assert.equal(patched.instructions[0].step, 1);
     assert.equal(patched.instructions[0].description, 'Den Ofen auf 200°C Ober-/Unterhitze vorheizen.');
     assert.equal(patched.instructions[1].step, 2);
-    assert.equal(patched.instructions[1].description, 'Karotten schneiden.');
+    assert.equal(patched.instructions[1].description, 'Ein Backblech mit Backpapier auslegen.');
     assert.equal(patched.instructions[2].step, 3);
-    assert.equal(patched.instructions[2].description, 'Im Ofen backen.');
+    assert.equal(patched.instructions[2].description, 'Karotten schneiden.');
+    assert.equal(patched.instructions[3].step, 4);
+    assert.equal(patched.instructions[3].description, 'Karotten mit Olivenöl und Salz marinieren.');
+    assert.equal(patched.instructions[4].step, 5);
+    assert.equal(patched.instructions[4].description, 'Auf dem Blech verteilen.');
+    assert.equal(patched.instructions[5].step, 6);
+    assert.equal(patched.instructions[5].description, 'Im Ofen backen.');
+  });
+
+  test('handles punctuation variance in ingredient correction names and ingredient removals', () => {
+    const punctRecipe: Recipe = {
+      title: 'Punctuation Test',
+      description: 'Test recipe with punctuation.',
+      prepTime: 5,
+      cookTime: 5,
+      servings: 1,
+      equipment: [],
+      ingredients: [
+        {
+          name: 'Zutaten',
+          items: [
+            { name: 'Mozzarella, gerieben', baseName: 'cheese', category: 'DAIRY', amount: 100, unit: 'g' },
+            { name: 'Frische Petersilie (gehackt)', baseName: 'parsley', category: 'PRODUCE', amount: 1, unit: 'EL' },
+          ],
+        },
+      ],
+      instructions: [
+        { step: 1, description: 'Den [Mozzarella](ing:cheese) darüberstreuen.' },
+      ],
+    };
+
+    const patch: RecipeAuditPatch = {
+      ingredientCorrections: [
+        {
+          originalName: 'Mozzarella (gerieben)', // Note: parens vs comma in recipe
+          correctedBaseName: 'mozzarella',
+          reason: 'Specific variety',
+        },
+      ],
+      removedIngredients: [
+        {
+          name: 'Frische Petersilie, gehackt', // Note: comma vs parens in recipe
+          reason: 'Unneeded garnish',
+        },
+      ],
+    };
+
+    const patched = applyRecipeAuditPatch(punctRecipe, patch);
+    const mozz = patched.ingredients[0].items.find((i) => i.name === 'Mozzarella, gerieben');
+    assert.ok(mozz);
+    assert.equal(mozz.baseName, 'mozzarella');
+    assert.equal(patched.ingredients[0].items.some((i) => i.name.includes('Petersilie')), false);
+    assert.equal(patched.instructions[0].description, 'Den [Mozzarella](ing:mozzarella) darüberstreuen.');
+  });
+
+  test('handles recipes with empty ingredients or instructions gracefully without crashing', () => {
+    const emptyRecipe: Recipe = {
+      title: 'Empty Recipe',
+      description: 'Empty',
+      prepTime: null,
+      cookTime: null,
+      servings: 1,
+      equipment: [],
+      ingredients: [],
+      instructions: [],
+    };
+
+    const patch: RecipeAuditPatch = {
+      addedIngredients: [
+        { name: 'Wasser', amount: 200, unit: 'ml', baseName: 'water', category: 'BEVERAGES', reason: 'Base' },
+      ],
+      addedSteps: [
+        { description: 'Wasser trinken.', reason: 'Hydrate' },
+      ],
+    };
+
+    const patched = applyRecipeAuditPatch(emptyRecipe, patch);
+    assert.equal(patched.ingredients.length, 1);
+    assert.equal(patched.ingredients[0].items[0].name, 'Wasser');
+    assert.equal(patched.instructions.length, 1);
+    assert.equal(patched.instructions[0].step, 1);
+    assert.equal(patched.instructions[0].description, 'Wasser trinken.');
   });
 
   test('places addedIngredients into matching supermarket category groups', () => {
