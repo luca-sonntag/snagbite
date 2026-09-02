@@ -221,6 +221,49 @@ Ab einem Vorsteuergewinn von ca. **60.000 € bis 80.000 € / Jahr** empfiehlt 
 
 ---
 
+### D. Der reale Fall: Nebenberuflich selbstständig mit 56.000 € ASVG-Hauptjob
+
+Wenn du hauptberuflich angestellt bist (56.000 € Brutto/Jahr) und die App **nebenberuflich** betreibst, ändern sich die steuerlichen und sozialversicherungsrechtlichen Regeln fundamental:
+
+#### 1. Der Grenzsteuersatz (40 % ab dem ersten Euro)
+* Bei 56.000 € Jahresbrutto als Angestellter liegt dein laufendes zu versteuerndes Einkommen nach Abzug der ASVG-Sozialversicherung (~18,12 %) und Freibeträge bereits bei ca. **38.500 € bis 39.500 €**.
+* **Konsequenz:** Die österreichischen Steuerstufen 0 % (bis 13.539 €), 20 % (bis 21.992 €) und 30 % (bis 36.458 €) sind **durch deinen Hauptjob bereits vollständig ausgeschöpft**.
+* **Jeder Euro Gewinn aus der App fällt sofort in den Grenzsteuersatz von 40 %** (und ab ca. 70.365 € Gesamteinkommen in **48 %**).
+* *Ausnahme:* Nebeneinkünfte bis **730 € Gewinn im Jahr** sind über den Veranlagungsfreibetrag (§ 41 Abs. 1 Z 1 EStG) steuerfrei.
+
+#### 2. SVS-Mehrfachversicherung & Differenzvorschreibung
+* **Bis 6.613 € Jahresgewinn (SVS-Geringfügigkeitsgrenze):**
+  * **0 € Kranken- und Pensionsversicherung bei der SVS!** Du bist über deinen Hauptjob bereits vollversichert. Es fällt nur die Unfallversicherung an (~155 € / Jahr).
+* **Über 6.613 € Jahresgewinn:**
+  * Die SVS-Pflichtversicherung greift mit ca. 26,83 %.
+  * **Steuerlicher Vorteil:** Da die SVS voll abzugsfähige Betriebsausgabe ist und du in der 40 %-Steuerklasse bist, **„erstattet“ dir das Finanzamt 40 % deiner SVS-Beiträge** über die geringere Einkommensteuer!
+* **Höchstbeitragsgrundlagen-Deckel (HBGl):**
+  * Dein Hauptjob (56.000 €) wird auf die jährliche Höchstbeitragsgrundlage angerechnet. Die SVS darf dir Beiträge nur bis zur Differenz zur Höchstgrenze (ca. 83.000 € – 97.000 €) vorschreiben. Auf Gewinne darüber zahlst du **0 % SVS**.
+
+#### 3. Der 15 % Gewinnfreibetrag (GFB)
+* Steht dir **auch nebenberuflich** in voller Höhe zu: 15 % deines App-Gewinns (bis 33.000 €) bleiben steuerfrei.
+
+#### Reale Netto-Auszahlungstabelle (Hauptjob 56.000 € + App-Nebengewerbe)
+
+*Berechnung für das Einzelunternehmen (nach Betriebsausgaben, KI-Kosten und Servern):*
+
+| MAU (Aktive Nutzer) | App-Betriebsgewinn (EBIT) / Jahr | SVS-Beitrag (Nebenberuf) | 15 % Gewinnfreibetrag | Einkommensteuer (40 % Grenzsteuer) | **Tatsächliches Netto auf Privatkonto / Jahr** | **Reines Netto / Monat** | Netto-Quote vom Gewinn |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **100** | ~ 20 € | 0 € | – | **0 €** *(unter 730 € Freibetrag)* | **~ 20 €** | ~ 2 € | 100 % |
+| **1.000** | ~ 2.390 € | ~ 155 € *(nur UV)* | 358 € | ~ 750 € *(40 % auf Rest)* | **~ 1.485 €** | **~ 124 €** | **62,1 %** |
+| **5.000** | ~ 13.000 € | ~ 2.800 € | 1.530 € | ~ 3.468 € | **~ 6.732 €** | **~ 561 €** | **51,8 %** |
+| **10.000** | ~ 26.500 € | ~ 5.800 € | 3.100 € | ~ 7.040 € | **~ 10.560 €** | **~ 880 €** | **40,0 %** |
+| **50.000** | ~ 137.000 € | ~ 7.500 € *(HBGl-Deckel!)* | 4.950 € *(Max)* | ~ 58.000 € *(40–48 % Stufen)* | **~ 66.500 €** | **~ 5.540 €** | **48,5 %** |
+| **100.000** | ~ 274.000 € | ~ 7.500 € *(gedeckelt)* | 4.950 € | ~ 125.000 € *(48–50 %)* | **~ 136.500 €** | **~ 11.375 €** | **49,8 %** |
+
+#### 💡 Wichtige strategische Empfehlung für dich:
+Da dein Lebensunterhalt durch den 56.000 € Hauptjob bereits komplett gesichert und krankenversichert ist:
+* **Bei 10.000 bis 50.000 Nutzern lohnt sich eine FlexCo oder GmbH ganz besonders:**
+  * Wenn du dir den Gewinn privat auszahlst, gehen rund 50–60 % an Steuern und SVS verloren.
+  * **In einer FlexCo / GmbH zahlst du nur 23 % KöSt.** Du kannst das Geld in der Firma lassen, um Werbeanzeigen zu schalten, Hardware / Apple Testgeräte steuerlich abzusetzen, Server zu bezahlen oder Rücklagen aufzubauen – und verfügst über **77 % des erwirtschafteten Geldes** statt nur 40–50 %!
+
+---
+
 ## 8. Hebel zur weiteren Gewinnmaximierung
 
 1. **Modell-Fallback auf `gemini-2.5-flash-lite`:**  
