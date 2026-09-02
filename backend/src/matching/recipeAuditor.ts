@@ -4,23 +4,16 @@ import type { Recipe, GeminiUsageInfo } from '../types.js';
 import { estimateCost, type TokenUsage } from '../logger.js';
 import { withRetry } from '../retry.js';
 import {
-  auditPatchSchema,
-  buildAuditPrompt,
-  type RecipeAuditPatch,
-  type RecipeAuditResult,
-  type IngredientCorrection,
-  type AddedIngredient,
-  type RemovedIngredient,
-  type StepCorrection,
-  type AddedStep,
+  auditPatchSchema, buildAuditPrompt,
+  type RecipeAuditPatch, type RecipeAuditResult,
+  type IngredientCorrection, type AddedIngredient,
+  type RemovedIngredient, type StepCorrection, type AddedStep,
 } from './recipeAuditorSchema.js';
 
 export type { RecipeAuditPatch, RecipeAuditResult, IngredientCorrection, AddedIngredient, RemovedIngredient, StepCorrection, AddedStep };
 
 export async function auditRecipe(recipe: Recipe): Promise<RecipeAuditResult> {
-  if (!config.GEMINI_API_KEY || config.GEMINI_API_KEY === 'your_gemini_api_key_here') {
-    return { patch: null };
-  }
+  if (!config.GEMINI_API_KEY || config.GEMINI_API_KEY === 'your_gemini_api_key_here') return { patch: null };
   const modelName = 'gemini-2.5-flash-lite';
   const startTime = Date.now();
   try {
@@ -34,8 +27,7 @@ export async function auditRecipe(recipe: Recipe): Promise<RecipeAuditResult> {
       } as unknown as Record<string, unknown>,
     });
 
-    const prompt = buildAuditPrompt(recipe);
-    const result = await withRetry(() => model.generateContent([prompt]), { maxAttempts: 2, baseDelayMs: 1000 });
+    const result = await withRetry(() => model.generateContent([buildAuditPrompt(recipe)]), { maxAttempts: 2, baseDelayMs: 1000 });
     const text = result.response.text();
     if (!text) return { patch: null };
     const patch = JSON.parse(text) as RecipeAuditPatch;
@@ -64,7 +56,7 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
   );
   if (!hasChanges) return { ...recipe };
 
-  const norm = (s?: string) => (s || '').toLowerCase().replace(/[,;:.()]/g, ' ').replace(/\s+/g, ' ').trim();
+  const norm = (s?: string) => (s || '').toLowerCase().replace(/[,;:./\\()\-–—_!?'"`„“"»«[\]]/g, ' ').replace(/\s+/g, ' ').trim();
   const result: Recipe = {
     ...recipe,
     ingredients: (recipe.ingredients || []).map((g) => ({ ...g, items: (g.items || []).map((i) => ({ ...i })) })),

@@ -442,4 +442,91 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
     assert.ok(auditedRecipe.instructions[1].description.includes('[Mozzarella](ing:mozzarella)'));
     assert.ok(auditedRecipe.instructions[1].description.includes('[Pfeffer](ing:black pepper)'));
   });
+
+  test('handles arbitrary step insertion order and non-existent anchor fallback', () => {
+    const recipe: Recipe = {
+      title: 'Anchor Test',
+      description: 'Test anchors',
+      prepTime: 5,
+      cookTime: 10,
+      servings: 1,
+      equipment: [],
+      ingredients: [],
+      instructions: [
+        { step: 1, description: 'Schritt 1' },
+        { step: 2, description: 'Schritt 2' },
+        { step: 3, description: 'Schritt 3' },
+      ],
+    };
+
+    const patch: RecipeAuditPatch = {
+      addedSteps: [
+        { insertAfterStep: 2, description: 'Nach Schritt 2', reason: 'After 2' },
+        { insertAfterStep: 1, description: 'Nach Schritt 1', reason: 'After 1' },
+        { insertAfterStep: 99, description: 'Nach unbekannt (Fallback)', reason: 'Unknown anchor' },
+      ],
+    };
+
+    const patched = applyRecipeAuditPatch(recipe, patch);
+    assert.equal(patched.instructions.length, 6);
+    assert.equal(patched.instructions[0].description, 'Schritt 1');
+    assert.equal(patched.instructions[1].description, 'Nach Schritt 1');
+    assert.equal(patched.instructions[2].description, 'Schritt 2');
+    assert.equal(patched.instructions[3].description, 'Nach Schritt 2');
+    assert.equal(patched.instructions[4].description, 'Schritt 3');
+    assert.equal(patched.instructions[5].description, 'Nach unbekannt (Fallback)');
+    assert.deepEqual(patched.instructions.map((s) => s.step), [1, 2, 3, 4, 5, 6]);
+  });
+
+  test('handles hyphens, slashes, and quotes in ingredient names during corrections and removals', () => {
+    const complexPunctRecipe: Recipe = {
+      title: 'Complex Punctuation',
+      description: 'Hyphen and slash test',
+      prepTime: 5,
+      cookTime: 5,
+      servings: 1,
+      equipment: [],
+      ingredients: [
+        {
+          name: 'Zutaten',
+          items: [
+            { name: 'Bio-Mozzarella / Büffelmozzarella', baseName: 'cheese', category: 'DAIRY', amount: 125, unit: 'g' },
+            { name: '„Edelsüß“ Paprikapulver - mild', baseName: 'pepper', category: 'PRODUCE', amount: 1, unit: 'TL' },
+          ],
+        },
+      ],
+      instructions: [
+        { step: 1, description: 'Den [Bio-Mozzarella / Büffelmozzarella](ing:cheese) mit [Paprikapulver](ing:pepper) würzen.' },
+      ],
+    };
+
+    const patch: RecipeAuditPatch = {
+      ingredientCorrections: [
+        {
+          originalName: 'Bio Mozzarella Büffelmozzarella', // No hyphen/slash in LLM output
+          correctedBaseName: 'mozzarella',
+          correctedCategory: 'DAIRY',
+          reason: 'Specific mozzarella',
+        },
+        {
+          originalName: 'Edelsüß Paprikapulver mild', // No quotes/hyphen in LLM output
+          correctedBaseName: 'paprika powder',
+          correctedCategory: 'SPICES_SEASONINGS',
+          reason: 'Spice, not produce',
+        },
+      ],
+    };
+
+    const patched = applyRecipeAuditPatch(complexPunctRecipe, patch);
+    const mozz = patched.ingredients[0].items[0];
+    const pap = patched.ingredients[0].items[1];
+
+    assert.equal(mozz.baseName, 'mozzarella');
+    assert.equal(pap.baseName, 'paprika powder');
+    assert.equal(pap.category, 'SPICES_SEASONINGS');
+    assert.equal(
+      patched.instructions[0].description,
+      'Den [Bio-Mozzarella / Büffelmozzarella](ing:mozzarella) mit [Paprikapulver](ing:paprika powder) würzen.'
+    );
+  });
 });
