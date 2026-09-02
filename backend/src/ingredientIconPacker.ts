@@ -45,7 +45,7 @@ export function packIngredientIcons(options: { verbose?: boolean } = {}): PackIc
   }
 
   const allFiles = fs.readdirSync(iconsDir);
-  const iconFiles = allFiles.filter((f) => f.endsWith('.webp') || f === 'generation_costs.jsonl');
+  const iconFiles = allFiles.filter((f) => f.endsWith('.webp') || f.endsWith('.json') || f.endsWith('.jsonl'));
 
   if (iconFiles.length === 0) {
     throw new Error(`No .webp icon files found in: ${iconsDir}`);
