@@ -60,6 +60,98 @@ const cache = new Map<string, IngredientMapping | null>();
 const CACHE_MAX_ENTRIES = 5000;
 const pendingHits = new Set<string>();
 
+const CATEGORY_GROUPS: Record<string, string> = {
+  // Produce / Fruits / Vegetables
+  PRODUCE: 'PRODUCE',
+  FRUITS_VEGETABLES: 'PRODUCE',
+  VEGETABLES: 'PRODUCE',
+  FRUITS: 'PRODUCE',
+  OBST: 'PRODUCE',
+  GEMÜSE: 'PRODUCE',
+  'OBST & GEMÜSE': 'PRODUCE',
+
+  // Spices / Herbs / Seasonings / Oils
+  SPICES_SEASONINGS: 'SPICES',
+  SPICES_HERBS: 'SPICES',
+  SPICES_OILS: 'SPICES',
+  SPICES: 'SPICES',
+  GEWÜRZE: 'SPICES',
+  'GEWÜRZE & ÖLE': 'SPICES',
+  OILS_CONDIMENTS: 'SPICES',
+  OILS: 'SPICES',
+  ÖLE: 'SPICES',
+
+  // Dairy & Eggs
+  DAIRY: 'DAIRY',
+  DAIRY_EGGS: 'DAIRY',
+  MOLKEREIPRODUKTE: 'DAIRY',
+  MILCHPRODUKTE: 'DAIRY',
+  KÄSE: 'DAIRY',
+  CHEESE: 'DAIRY',
+
+  // Meat & Fish & Seafood
+  MEAT_FISH: 'MEAT_FISH',
+  MEAT_POULTRY: 'MEAT_FISH',
+  SEAFOOD: 'MEAT_FISH',
+  MEAT: 'MEAT_FISH',
+  FISH: 'MEAT_FISH',
+  FLEISCH: 'MEAT_FISH',
+  FISCH: 'MEAT_FISH',
+  'FLEISCH & FISCH': 'MEAT_FISH',
+
+  // Grains & Pasta & Bakery
+  GRAINS_PASTA: 'GRAINS',
+  GRAINS_BAKERY: 'GRAINS',
+  GRAINS: 'GRAINS',
+  PASTA: 'GRAINS',
+  GETREIDE: 'GRAINS',
+  NUDELN: 'GRAINS',
+  BREAD: 'GRAINS',
+  BROT: 'GRAINS',
+  BACKWAREN: 'GRAINS',
+  BREAD_BAKERY: 'GRAINS',
+
+  // Baking & Pantry
+  BAKING_COOKING: 'BAKING',
+  PANTRY_BAKING: 'BAKING',
+  BACKEN: 'BAKING',
+  BACKZUTATEN: 'BAKING',
+  BAKING: 'BAKING',
+
+  // Sweets & Snacks
+  SWEETS_SNACKS: 'SWEETS',
+  SWEETS: 'SWEETS',
+  SNACKS: 'SWEETS',
+  SÜSSWAREN: 'SWEETS',
+
+  // Beverages
+  BEVERAGES: 'BEVERAGES',
+  GETRÄNKE: 'BEVERAGES',
+  DRINKS: 'BEVERAGES',
+
+  // Canned & Preserved
+  CANNED_PRESERVED: 'CANNED',
+  CANNED: 'CANNED',
+  KONSERVEN: 'CANNED',
+};
+
+export function getMajorCategoryGroup(cat?: string | null): string {
+  if (!cat) return '';
+  const upper = cat.toUpperCase().trim();
+  return CATEGORY_GROUPS[upper] || upper;
+}
+
+export function areCategoriesCompatible(catA?: string | null, catB?: string | null): boolean {
+  if (!catA || !catB) return true;
+  const upperA = catA.toUpperCase().trim();
+  const upperB = catB.toUpperCase().trim();
+  if (upperA === upperB) return true;
+  const groupA = getMajorCategoryGroup(upperA);
+  const groupB = getMajorCategoryGroup(upperB);
+  if (!groupA || !groupB) return true;
+  return groupA === groupB;
+}
+
 const cacheId = (key: string, cat: string) => `${key.toLowerCase().trim()} ${cat.toUpperCase().trim()}`;
 
 function rowToMapping(row: MappingRow): IngredientMapping {
@@ -93,12 +185,15 @@ function remember(id: string, mapping: IngredientMapping | null): void {
 
 function rememberMappingInCache(mapping: IngredientMapping): void {
   const cat = mapping.category.toUpperCase().trim();
+  const major = getMajorCategoryGroup(cat);
   const keys = [mapping.mappingKey, mapping.mappingKeyDe, ...(mapping.aliases || [])].filter(
     (k): k is string => Boolean(k && k.length >= 2)
   );
   for (const k of keys) {
     remember(cacheId(k, cat), mapping);
-    remember(cacheId(k, ''), mapping);
+    if (major && major !== cat) {
+      remember(cacheId(k, major), mapping);
+    }
   }
 }
 
@@ -109,15 +204,21 @@ const trackHit = (mapping: IngredientMapping): IngredientMapping => {
 
 export async function lookupMapping(keys: string[], category: string): Promise<IngredientMapping | null> {
   const cat = (category || '').toUpperCase().trim();
+  const major = getMajorCategoryGroup(cat);
   const unknown: string[] = [];
 
   for (const key of keys) {
     if (!key) continue;
-    const exact = cache.get(cacheId(key, cat));
-    if (exact) return trackHit(exact);
-    const loose = cache.get(cacheId(key, ''));
-    if (loose) return trackHit(loose);
-    if (exact === undefined && loose === undefined) unknown.push(key);
+    if (cat) {
+      const exact = cache.get(cacheId(key, cat));
+      if (exact && areCategoriesCompatible(cat, exact.category)) return trackHit(exact);
+      if (major) {
+        const groupHit = cache.get(cacheId(key, major));
+        if (groupHit && areCategoriesCompatible(cat, groupHit.category)) return trackHit(groupHit);
+      }
+    }
+    const exactMiss = cache.get(cacheId(key, cat));
+    if (exactMiss === undefined) unknown.push(key);
   }
 
   if (unknown.length === 0) return null;
@@ -146,10 +247,23 @@ export async function lookupMapping(keys: string[], category: string): Promise<I
   for (const row of rows) rememberMappingInCache(rowToMapping(row));
 
   for (const key of keys) {
-    const exact = cache.get(cacheId(key, cat));
-    if (exact) return trackHit(exact);
-    const loose = cache.get(cacheId(key, ''));
-    if (loose) return trackHit(loose);
+    if (!key) continue;
+    if (cat) {
+      const exact = cache.get(cacheId(key, cat));
+      if (exact && areCategoriesCompatible(cat, exact.category)) return trackHit(exact);
+      if (major) {
+        const groupHit = cache.get(cacheId(key, major));
+        if (groupHit && areCategoriesCompatible(cat, groupHit.category)) return trackHit(groupHit);
+      }
+    } else {
+      for (const row of rows) {
+        const m = rowToMapping(row);
+        const rowKeys = [m.mappingKey, m.mappingKeyDe, ...(m.aliases || [])].map((k) => (k || '').toLowerCase().trim());
+        if (rowKeys.includes(key.toLowerCase().trim())) {
+          return trackHit(m);
+        }
+      }
+    }
   }
 
   for (const key of unknown) remember(cacheId(key, cat), null);
