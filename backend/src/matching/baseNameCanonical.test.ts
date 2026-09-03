@@ -30,6 +30,11 @@ describe('canonicalizeBaseName', () => {
     assert.equal(canonicalizeBaseName('curd cheese'), 'quark');
     assert.equal(canonicalizeBaseName('ground meat'), 'ground beef');
     assert.equal(canonicalizeBaseName('sweet pepper'), 'bell pepper');
+    assert.equal(canonicalizeBaseName('bellpepper'), 'bell pepper');
+    assert.equal(canonicalizeBaseName('capsicum'), 'bell pepper');
+    assert.equal(canonicalizeBaseName('black peppercorns'), 'black pepper');
+    assert.equal(canonicalizeBaseName('black peppercorn'), 'black pepper');
+    assert.equal(canonicalizeBaseName('ground black pepper'), 'black pepper');
   });
 
   test('never strips words that change the food identity', () => {

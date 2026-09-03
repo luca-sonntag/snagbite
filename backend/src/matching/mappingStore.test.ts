@@ -60,4 +60,66 @@ describe('mappingStore canonical 1-row lookup', () => {
     const miss = await lookupMapping(['fantasy_berry'], 'PRODUCE');
     assert.equal(miss, null);
   });
+
+  test('enforces category isolation between incompatible categories (SPICES vs PRODUCE)', async () => {
+    // Store pepper under PRODUCE (e.g. bell pepper)
+    await storeMapping(
+      {
+        mappingKey: 'pepper',
+        mappingKeyDe: 'paprika',
+        aliases: ['bell pepper', 'sweet pepper'],
+        category: 'PRODUCE',
+      },
+      {
+        productCode: '4388844031814',
+        resolution: 'matched',
+        estimatedNutrients: null,
+        typicalPackageAmount: 1,
+        typicalPackageUnit: 'Stück',
+        shelfLifeDays: 7,
+        source: 'agent',
+        confidence: 0.9,
+        model: 'gemini-2.5-flash',
+        reasoning: 'Paprika Gemüse',
+      }
+    );
+
+    // Store black pepper under SPICES_SEASONINGS
+    await storeMapping(
+      {
+        mappingKey: 'black pepper',
+        mappingKeyDe: 'pfeffer',
+        aliases: ['schwarzer pfeffer', 'black peppercorn'],
+        category: 'SPICES_SEASONINGS',
+      },
+      {
+        productCode: '3379140028173',
+        resolution: 'matched',
+        estimatedNutrients: null,
+        typicalPackageAmount: 50,
+        typicalPackageUnit: 'g',
+        shelfLifeDays: 365,
+        source: 'agent',
+        confidence: 0.95,
+        model: 'gemini-2.5-flash',
+        reasoning: 'Schwarzer Pfeffer Gewürz',
+      }
+    );
+
+    // Looking up SPICES_SEASONINGS with key 'pfeffer' must NOT match PRODUCE pepper
+    const spiceHit = await lookupMapping(['pfeffer', 'black pepper'], 'SPICES_SEASONINGS');
+    assert.ok(spiceHit);
+    assert.equal(spiceHit.mappingKey, 'black pepper');
+    assert.equal(spiceHit.category, 'SPICES_SEASONINGS');
+
+    // Looking up PRODUCE with key 'paprika' must NOT match SPICES black pepper
+    const produceHit = await lookupMapping(['paprika', 'bell pepper'], 'PRODUCE');
+    assert.ok(produceHit);
+    assert.equal(produceHit.mappingKey, 'pepper');
+    assert.equal(produceHit.category, 'PRODUCE');
+
+    // Cross-category lookups with unmapped keys in different categories must return null
+    const crossMiss = await lookupMapping(['pepper'], 'DAIRY');
+    assert.equal(crossMiss, null);
+  });
 });

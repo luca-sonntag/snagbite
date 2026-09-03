@@ -4,7 +4,9 @@
  */
 
 import { getClient } from '../db.js';
+import { CATEGORY_GROUPS, getMajorCategoryGroup, areCategoriesCompatible } from './categoryGroups.js';
 
+export { CATEGORY_GROUPS, getMajorCategoryGroup, areCategoriesCompatible };
 export type MappingResolution = 'matched' | 'no_match';
 export type MappingSource = 'static' | 'agent' | 'human';
 
@@ -59,7 +61,6 @@ interface MappingRow {
 const cache = new Map<string, IngredientMapping | null>();
 const CACHE_MAX_ENTRIES = 5000;
 const pendingHits = new Set<string>();
-
 const cacheId = (key: string, cat: string) => `${key.toLowerCase().trim()} ${cat.toUpperCase().trim()}`;
 
 function rowToMapping(row: MappingRow): IngredientMapping {
@@ -93,12 +94,15 @@ function remember(id: string, mapping: IngredientMapping | null): void {
 
 function rememberMappingInCache(mapping: IngredientMapping): void {
   const cat = mapping.category.toUpperCase().trim();
+  const major = getMajorCategoryGroup(cat);
   const keys = [mapping.mappingKey, mapping.mappingKeyDe, ...(mapping.aliases || [])].filter(
     (k): k is string => Boolean(k && k.length >= 2)
   );
   for (const k of keys) {
     remember(cacheId(k, cat), mapping);
-    remember(cacheId(k, ''), mapping);
+    if (major && major !== cat) {
+      remember(cacheId(k, major), mapping);
+    }
   }
 }
 
@@ -109,15 +113,21 @@ const trackHit = (mapping: IngredientMapping): IngredientMapping => {
 
 export async function lookupMapping(keys: string[], category: string): Promise<IngredientMapping | null> {
   const cat = (category || '').toUpperCase().trim();
+  const major = getMajorCategoryGroup(cat);
   const unknown: string[] = [];
 
   for (const key of keys) {
     if (!key) continue;
-    const exact = cache.get(cacheId(key, cat));
-    if (exact) return trackHit(exact);
-    const loose = cache.get(cacheId(key, ''));
-    if (loose) return trackHit(loose);
-    if (exact === undefined && loose === undefined) unknown.push(key);
+    if (cat) {
+      const exact = cache.get(cacheId(key, cat));
+      if (exact && areCategoriesCompatible(cat, exact.category)) return trackHit(exact);
+      if (major) {
+        const groupHit = cache.get(cacheId(key, major));
+        if (groupHit && areCategoriesCompatible(cat, groupHit.category)) return trackHit(groupHit);
+      }
+    }
+    const exactMiss = cache.get(cacheId(key, cat));
+    if (exactMiss === undefined) unknown.push(key);
   }
 
   if (unknown.length === 0) return null;
@@ -146,10 +156,23 @@ export async function lookupMapping(keys: string[], category: string): Promise<I
   for (const row of rows) rememberMappingInCache(rowToMapping(row));
 
   for (const key of keys) {
-    const exact = cache.get(cacheId(key, cat));
-    if (exact) return trackHit(exact);
-    const loose = cache.get(cacheId(key, ''));
-    if (loose) return trackHit(loose);
+    if (!key) continue;
+    if (cat) {
+      const exact = cache.get(cacheId(key, cat));
+      if (exact && areCategoriesCompatible(cat, exact.category)) return trackHit(exact);
+      if (major) {
+        const groupHit = cache.get(cacheId(key, major));
+        if (groupHit && areCategoriesCompatible(cat, groupHit.category)) return trackHit(groupHit);
+      }
+    } else {
+      for (const row of rows) {
+        const m = rowToMapping(row);
+        const rowKeys = [m.mappingKey, m.mappingKeyDe, ...(m.aliases || [])].map((k) => (k || '').toLowerCase().trim());
+        if (rowKeys.includes(key.toLowerCase().trim())) {
+          return trackHit(m);
+        }
+      }
+    }
   }
 
   for (const key of unknown) remember(cacheId(key, cat), null);

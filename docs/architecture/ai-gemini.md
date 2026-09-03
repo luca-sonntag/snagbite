@@ -13,11 +13,12 @@
 
 ## 2. Vollständige Gemini-Touchpoint- & Request-Übersicht
 
-Im gesamten Backend gibt es **7 aktive Gemini-Funktionen** (sowie Offline-/Admin-Tools). Jeder Aufruf wird strikt geloggt und kategorisiert (`GeminiRequestType` in `backend/src/logger.ts`):
+Im gesamten Backend gibt es **8 aktive Gemini-Funktionen** (sowie Offline-/Admin-Tools). Jeder Aufruf wird strikt geloggt und kategorisiert (`GeminiRequestType` in `backend/src/logger.ts`):
 
 | Request-Typ | Funktion / Datei | Trigger / Endpunkt | Tokens In (Ø) | Tokens Out (Ø) | Kosten / Call (3.1 Lite) | Kosten / Call (2.5 Lite) | Frequenz / Aufkommen |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **`extract_recipe`** | `extractRecipeFromMedia` (`gemini.ts`) | Job-Queue (URL- oder Foto-Import) | ~8.000 | ~1.500 | **0,00425 $** | **0,00140 $** | 1x pro importiertem Rezept |
+| **`extract_recipe`** | `extractRecipe` (`gemini.ts`) | Job-Queue (URL- oder Foto-Import) | ~8.000 | ~1.500 | **0,00425 $** | **0,00140 $** | 1x pro importiertem Rezept |
+| **`audit_recipe`** | `auditRecipe` (`recipeAuditor.ts`) | Direkt nach Extraktion in Queue | ~1.500 | ~200 | **0,00065 $** | **0,00021 $** | 1x pro extrahiertem Rezept (Disambiguierung & Invarianz-Audit) |
 | **`resolve_ingredient`** | `resolveIngredient` (`ingredientResolver.ts`) | Während Extraktion (`enrichRecipe...`) | ~1.000 | ~120 | **0,00043 $** | **0,00015 $** | Nur bei unbekannten Zutaten (~0–2x/Rezept, danach 100% DB-gecacht) |
 | **`chat_recipe`** | `chatAboutRecipe` (`gemini.ts`) | `POST /api/recipes/:id/chat` | ~2.200 | ~250 | **0,00092 $** | **0,00032 $** | Nur bei Nutzerinteraktion (Ø 1–3 Nachrichten/Chat) |
 | **`chat_chips`** | `generateChatChips` (`gemini.ts`) | `GET /api/recipes/:id/chat/chips` | ~900 | ~180 | **0,00050 $** | **0,00016 $** | 1x pro Chat-Session (clientseitig gecacht) |
@@ -46,15 +47,22 @@ Im gesamten Backend gibt es **7 aktive Gemini-Funktionen** (sowie Offline-/Admin
    └── Caption & Metadaten (Dauer, Quelle, Creator) extrahieren
                  │
                  ▼
-4. MULTIMODALER GEMINI CALL (`extractRecipeFromMedia`)
-   Gemini 3.1 Flash-Lite verarbeitet Audio + Grid + Text in EINEM Call.
+4. MULTIMODALER GEMINI CALL (`extractRecipe`)
+   Gemini verarbeitet Audio + Grid + Text in EINEM Call.
    Strikte Schematisierung (`responseSchema: recipeSchema`):
-   • 21 Prompt-Constraints (Anti-Halluzination, Mengennormalisierung,
+   • 22 Prompt-Constraints (Anti-Halluzination, Mengennormalisierung,
      Makros pro Zutat, Inline-Ingredient- & Timer-Tags `[Tag](ing:...)`)
    • Mehrfachrezept-Erkennung (`containsMultipleRecipes` ➔ 422 Abbruch)
                  │
                  ▼
-5. PIPELINE-PARALLELISIERUNG (`Promise.all`)
+5. 2ND-STAGE AI RECIPE AUDIT & PATCH (`recipeAuditor.ts`)
+   Gemini 2.5 Flash-Lite auditiert das Rezept auf Spezifitätsinvarianz & Disambiguierung:
+   • Verhindert Kollaps auf Umbrella-Begriffe (Mozzarella -> mozzarella, nicht cheese)
+   • Strikte Gewürz-Disambiguierung (Pfeffer -> black pepper / SPICES_SEASONINGS)
+   • Deterministisches Patching via `applyRecipeAuditPatch()` & 1..N Schritt-Renumbering
+                 │
+                 ▼
+6. PIPELINE-PARALLELISIERUNG (`Promise.all`)
    ┌───────────────────────────────────┴───────────────────────────────────┐
    ▼                                                                       ▼
 Cover-Generierung (FLUX.1 [schnell])              Kanonische Zutaten-Auflösung (OpenFoodFacts)
@@ -63,10 +71,10 @@ Cover-Generierung (FLUX.1 [schnell])              Kanonische Zutaten-Auflösung 
 • Upload nach Supabase `recipe-covers` Bucket     • Bei Miss: Gemini Tool-Resolver (`submit_match`)
    └───────────────────────────────────┬───────────────────────────────────┘
                                        ▼
-6. PERSISTIERUNG & VOLLENDUNG
+7. PERSISTIERUNG & VOLLENDUNG
    `completeJob(jobId, recipe, llmUsage)`
    • Datensatz landet in `recipes` & `user_recipes`
-   • `llmUsage` erfasst Gemini- & FLUX-Kosten transparent auf Job-Ebene
+   • `llmUsage` erfasst Gemini-, Auditor- & FLUX-Kosten transparent auf Job-Ebene
    • Ephemere Dateien & Google-API-Files werden gelöscht
 ```
 
