@@ -316,6 +316,7 @@ const recipeSchema = {
     'instructions',
     'equipment',
     'hasExplicitNutritionalValues',
+    'hasIncompleteSourceInfo',
     'transcript',
     'tags',
     'emoji',
