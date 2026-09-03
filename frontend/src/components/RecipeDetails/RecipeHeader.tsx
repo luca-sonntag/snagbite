@@ -11,6 +11,7 @@ import { formatRelative } from '../../utils/formatRelative';
 import { hapticLight, hapticNotification } from '../../utils/haptics';
 import { devReExtractRecipe } from '../../utils/dev';
 import RecipeRemixList from './RecipeRemixList';
+import IncompleteSourceCard from './IncompleteSourceCard';
 
 interface RecipeHeaderProps {
   recipe: Recipe;
@@ -220,9 +221,7 @@ export default function RecipeHeader({
                 type="button"
                 onClick={() => onNavigateToRecipe?.(recipe.parentRecipeId!)}
                 className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-0.5 cursor-pointer outline-none border-none p-0 bg-transparent text-left leading-normal"
-              >
-                {resolvedParentTitle}
-              </button>
+              >{resolvedParentTitle}</button>
             ) : (
               <span className="font-semibold text-gray-400 dark:text-gray-500 italic">
                 {resolvedParentTitle} ({t('remix.parentLinkDeleted') || 'gelöscht'})
@@ -235,6 +234,11 @@ export default function RecipeHeader({
             {recipe.description}
           </p>
         )}
+
+        {recipe.hasIncompleteSourceInfo && (
+          <IncompleteSourceCard />
+        )}
+
         {/* Category, labels & cook stats */}
         {(recipe.category || (flags && flags.length > 0) || (history && history.count > 0)) && (
           <div className="flex flex-wrap items-center gap-2 mt-1">
@@ -248,10 +252,7 @@ export default function RecipeHeader({
               <button
                 key={`flag-${idx}`}
                 type="button"
-                onClick={() => {
-                  hapticLight();
-                  onManageFlags?.();
-                }}
+                onClick={() => { hapticLight(); onManageFlags?.(); }}
                 disabled={!onManageFlags}
                 className={`bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold px-3.5 py-1.5 min-h-[38px] rounded-full select-none whitespace-nowrap border-none flex items-center gap-1.5 outline-none ${
                   onManageFlags ? 'cursor-pointer active:scale-95 transition-all' : ''
@@ -268,13 +269,8 @@ export default function RecipeHeader({
                   hapticLight();
                   const el = document.getElementById('cook-history');
                   if (el) {
-                    const stickyTopHeight = parseInt(
-                      getComputedStyle(document.documentElement).getPropertyValue('--app-sticky-top') || '0',
-                      10
-                    );
-                    const offset = stickyTopHeight + 80;
-                    const elementPosition = el.getBoundingClientRect().top + window.scrollY;
-                    window.scrollTo({ top: elementPosition - offset, behavior: 'smooth' });
+                    const stickyTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--app-sticky-top') || '0', 10);
+                    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - (stickyTop + 80), behavior: 'smooth' });
                   }
                 }}
                 className="inline-flex items-center gap-1 py-1.5 px-3 min-h-[38px] rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-95 cursor-pointer outline-none border-none transition-all select-none"
