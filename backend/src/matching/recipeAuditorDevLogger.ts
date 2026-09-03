@@ -90,6 +90,7 @@ export function logExtractionDevSummary(
     title: recipe.title,
     description: recipe.description,
     category: recipe.category,
+    hasIncompleteSourceInfo: recipe.hasIncompleteSourceInfo ?? false,
     servings: recipe.servings,
     prepTime: recipe.prepTime,
     cookTime: recipe.cookTime,

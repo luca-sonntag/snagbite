@@ -265,6 +265,10 @@ const recipeSchema = {
       type: FunctionDeclarationSchemaType.BOOLEAN,
       description: 'True ONLY if the overall recipe nutritional values are explicitly stated in the source text or audio.',
     },
+    hasIncompleteSourceInfo: {
+      type: FunctionDeclarationSchemaType.BOOLEAN,
+      description: 'True ONLY if the source content (video caption, audio, text) lacked complete recipe details (such as missing specific ingredients, quantities, or explicit cooking steps) and the recipe had to be visually deduced or estimated from the video imagery. False if the recipe had complete, explicit ingredients and instructions in the source caption, audio, or text.',
+    },
     transcript: {
       type: FunctionDeclarationSchemaType.STRING,
       description: 'Accurate transcription of the spoken audio track. If there are no spoken words in the audio track, you MUST write "NO_SPOKEN_WORDS". Do NOT translate this string and do NOT under any circumstances hallucinate.',
@@ -575,7 +579,7 @@ Key Constraints:
 5. Preferred Units:
    - Temperature Units: ${tempInstruction}
    - Weight & Volume Units: ${unitSystemInstruction}
-6. Missing Data & Nutrition: If any information for a specific field is missing, leave it empty (empty string "", null, or empty array []). You MUST set "hasExplicitNutritionalValues" to true ONLY IF the recipe nutritional values are explicitly stated in the source text or audio. If they are not, set it to false and set "nutritionalValues" to null (do NOT estimate or calculate overall nutritional values at the recipe level). Note that "nutritionalValues" MUST represent values per single serving/portion. If the source lists total values for the entire recipe, divide them by the number of servings/portions first.
+6. Missing Data & Nutrition: If any information for a specific field is missing, leave it empty (empty string "", null, or empty array []). You MUST set "hasExplicitNutritionalValues" to true ONLY IF the recipe nutritional values are explicitly stated in the source text or audio. If they are not, set it to false and set "nutritionalValues" to null (do NOT estimate or calculate overall nutritional values at the recipe level). Note that "nutritionalValues" MUST represent values per single serving/portion. If the source lists total values for the entire recipe, divide them by the number of servings/portions first. You MUST set "hasIncompleteSourceInfo" to true if the source content (caption, voiceover, or text) lacked complete, concrete recipe specifications (e.g. no full ingredient list or exact quantities provided, requiring the recipe to be visually deduced or estimated from video actions). Set it to false if the source provided explicit, complete written or spoken recipe ingredients and instructions.
 7. Clean Ingredient Names: ${CLEAN_INGREDIENT_NAMES_INSTRUCTION}
 8. Ingredient Decomposition: ${INGREDIENT_DECOMPOSITION_INSTRUCTION}
 9. Ingredient-level Nutritional Values: For each ingredient, you MUST estimate its nutritional values (calories, protein, carbs, fat) based on the ENTIRE specified quantity (amount * unit). Do NOT output per-100g, per-100ml, or single-unit values unless the quantity is exactly 100g, 100ml, or 1 unit. E.g., if chicken breast has 165 kcal per 100g and the recipe specifies 500g, the calories field MUST be 825, NOT 165. If a potato has 150 kcal and the amount is 6, the calories field MUST be 900, NOT 150. If olive oil has 14g fat/EL and the amount is 3 EL, the fat field MUST be 42, NOT 14.
@@ -677,6 +681,8 @@ ${caption.trim() ? `\nDescription/Caption:\n"""\n${caption}\n"""` : ''}${htmlCon
     ) {
       recipe.transcript = null;
     }
+
+    recipe.hasIncompleteSourceInfo = Boolean(recipe.hasIncompleteSourceInfo);
 
     // Extract token usage and compute cost
     const usageMeta = result.response.usageMetadata;
