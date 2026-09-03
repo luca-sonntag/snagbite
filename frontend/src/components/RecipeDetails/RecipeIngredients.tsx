@@ -54,15 +54,7 @@ export default function RecipeIngredients({
 
   return (
     <div className="flex flex-col gap-4 pb-4">
-      {/* Section Header (OUTSIDE card) */}
-      <div className="flex items-center gap-3">
-        <h3 className="text-base font-bold text-gray-900 dark:text-white">{t('recipe.tabIngredients')}</h3>
-        {ingredientCount > 0 && (
-          <span className="ml-auto text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 rounded-full px-2.5 py-1 tabular-nums select-none">
-            {ingredientCount}
-          </span>
-        )}
-      </div>
+
 
       {/* Main Cohesive Card Group (Portions + Ingredients List + Shopping Button) */}
       <div className="glass-panel rounded-2xl overflow-hidden">

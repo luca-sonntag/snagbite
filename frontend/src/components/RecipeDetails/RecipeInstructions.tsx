@@ -47,15 +47,7 @@ export default function RecipeInstructions({
 
   return (
     <div className="flex flex-col gap-4 pb-4">
-      {/* Section Header (OUTSIDE card) */}
-      <div className="flex items-center gap-3">
-        <h3 className="text-base font-bold text-gray-900 dark:text-white">{t('recipe.stepByStep')}</h3>
-        {totalStepsCount > 0 && (
-          <span className="ml-auto text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 rounded-full px-2.5 py-1 tabular-nums select-none">
-            {totalStepsCount}
-          </span>
-        )}
-      </div>
+
 
       {/* Main Cohesive Card Group (Progress + Equipment + Steps) */}
       <div className="glass-panel rounded-2xl overflow-hidden">
@@ -219,15 +211,7 @@ export default function RecipeInstructions({
       {/* Tips Section */}
       {recipe.tips && recipe.tips.length > 0 && (
         <div className="flex flex-col gap-4 mt-2">
-          {/* Section Header (OUTSIDE card) */}
-          <div className="flex items-center gap-3">
-            <h3 className="text-base font-bold text-gray-900 dark:text-white">
-              {t('recipe.tipsTitle')}
-            </h3>
-            <span className="ml-auto text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 rounded-full px-2.5 py-1 tabular-nums select-none">
-              {recipe.tips.length}
-            </span>
-          </div>
+
 
           {/* Clean Flat Card Container */}
           <div className="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-2.5">
