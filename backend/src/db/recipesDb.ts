@@ -55,6 +55,7 @@ export function rowToRecipe(row: RecipeRow): Recipe {
     sourceNutritionalValues:
       (row.source_nutritional_values as Recipe['sourceNutritionalValues']) ?? null,
     hasExplicitNutritionalValues: row.has_explicit_nutritional_values,
+    hasIncompleteSourceInfo: Boolean(row.has_incomplete_source_info),
     nutritionCoverage: num(row.nutrition_coverage) ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -94,6 +95,7 @@ export function recipeToRow(recipe: Recipe): Record<string, unknown> {
     fat_g: n?.fat ?? null,
     source_nutritional_values: recipe.sourceNutritionalValues ?? null,
     has_explicit_nutritional_values: recipe.hasExplicitNutritionalValues ?? false,
+    has_incomplete_source_info: recipe.hasIncompleteSourceInfo ?? false,
     nutrition_coverage: recipe.nutritionCoverage ?? null,
   };
 }

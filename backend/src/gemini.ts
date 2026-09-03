@@ -120,7 +120,7 @@ const recipeSchema = {
   properties: {
     isRecipe: {
       type: FunctionDeclarationSchemaType.BOOLEAN,
-      description: 'Whether the source content contains an actual, extractable food recipe with specific ingredients or preparation instructions. Set to false if it is unrelated content (e.g. vlog, comedy), OR if the source is merely a teaser/announcement/caption-bait (e.g. "Comment RECIPE for DM", "Link in bio", "DM me for ingredients", or marketing descriptions without the actual recipe ingredients/instructions). NEVER invent, guess, or hallucinate a recipe when the ingredients and steps are not present in the provided input.',
+      description: 'Whether the source content contains an actual, extractable food recipe with specific ingredients or preparation instructions (either written in text, spoken in audio, or demonstrated visually in video images). Set to false if it is unrelated content (e.g. vlog, comedy), OR if the source is merely a teaser/announcement/caption-bait (e.g. "Comment RECIPE for DM", "Link in bio", "DM me for ingredients", or marketing descriptions without showing the actual recipe ingredients/instructions). If the video visually demonstrates the preparation of the dish with visible ingredients even without a written caption, set isRecipe to true and set hasIncompleteSourceInfo to true.',
     },
     containsMultipleRecipes: {
       type: FunctionDeclarationSchemaType.BOOLEAN,
@@ -265,6 +265,10 @@ const recipeSchema = {
       type: FunctionDeclarationSchemaType.BOOLEAN,
       description: 'True ONLY if the overall recipe nutritional values are explicitly stated in the source text or audio.',
     },
+    hasIncompleteSourceInfo: {
+      type: FunctionDeclarationSchemaType.BOOLEAN,
+      description: 'True ONLY if the source content (video caption, audio, text) lacked complete recipe details (such as missing specific ingredients, quantities, or explicit cooking steps) and the recipe had to be visually deduced or estimated from the video imagery. False if the recipe had complete, explicit ingredients and instructions in the source caption, audio, or text.',
+    },
     transcript: {
       type: FunctionDeclarationSchemaType.STRING,
       description: 'Accurate transcription of the spoken audio track. If there are no spoken words in the audio track, you MUST write "NO_SPOKEN_WORDS". Do NOT translate this string and do NOT under any circumstances hallucinate.',
@@ -312,6 +316,7 @@ const recipeSchema = {
     'instructions',
     'equipment',
     'hasExplicitNutritionalValues',
+    'hasIncompleteSourceInfo',
     'transcript',
     'tags',
     'emoji',
@@ -559,11 +564,12 @@ export async function extractRecipe(
 Reconstruct the complete recipe, resolving any contradictions culinary-wise. Ensure to follow the field-level guidelines specified in the descriptions of the output schema.
 
 Key Constraints:
-1. Recipe Existence & Anti-Hallucination: The source content MUST contain the actual recipe details (specific ingredients with quantities and/or step-by-step cooking instructions). You MUST set "isRecipe" to false if:
+1. Recipe Existence & Anti-Hallucination: The source content MUST contain the actual recipe details (specific ingredients with quantities and/or step-by-step cooking instructions in text, audio, or video imagery). You MUST set "isRecipe" to false if:
    a) The content is unrelated (comedy, vlogs, fitness motivation, general chat, etc.).
-   b) The content is merely a teaser, promo, or engagement bait without the full recipe (e.g. "Comment BUCKEYE and I'll send you the recipe", "Recipe in my ebook", "Link in bio", "DM for full recipe", or appetizing marketing descriptions/macros without the actual list of ingredients and preparation steps).
-   c) The source mentions only the dish name/concept but completely omits the concrete ingredients and instructions.
+   b) The content is merely a teaser, promo, or engagement bait without the full recipe (e.g. "Comment BUCKEYE and I'll send you the recipe", "Recipe in my ebook", "Link in bio", "DM for full recipe", or appetizing marketing descriptions/macros without showing the actual list of ingredients and preparation steps).
+   c) The source mentions only the dish name/concept but completely omits the concrete ingredients and instructions, AND the video images do not clearly demonstrate how the food is prepared.
    NEVER under any circumstances invent, fabricate, or hallucinate ingredients, amounts, or cooking steps when they are not present in the provided source text, audio, or images.
+   VISUAL RECIPE EXCEPTION: If the written caption does not contain an ingredient list or preparation steps, but the video images (4x4 grid) visually demonstrate the clear, step-by-step cooking, preparation, or assembly of the dish with identifiable ingredients (e.g. burgers, wraps, sandwiches, bowls, or skillet cooking), this IS a valid recipe! Set "isRecipe" to true, reconstruct the recipe from the visual video steps, and set "hasIncompleteSourceInfo" to true.
 2. Multi-Recipe Ambiguity: Before attempting to extract a recipe, evaluate if the content represents a multi-recipe collection, roundup, or compilation. You MUST set "containsMultipleRecipes" to true if ANY of the following apply:
    a) The title, caption, or cover image text indicates multiple dishes/recipes (e.g. "High protein dinners...", "5 meals to get lean", "3 lunch ideas", "What I eat in a day", "4 low-calorie recipes").
    b) The carousel images or video scenes present multiple distinct standalone main dishes across different slides/segments (e.g. Slide 2 is "Smash Burger & Sweet Potato Fries", Slide 4 is "Bang Bang Chicken", Slide 6 is "Beef Burrito Bowl").
@@ -575,11 +581,11 @@ Key Constraints:
 5. Preferred Units:
    - Temperature Units: ${tempInstruction}
    - Weight & Volume Units: ${unitSystemInstruction}
-6. Missing Data & Nutrition: If any information for a specific field is missing, leave it empty (empty string "", null, or empty array []). You MUST set "hasExplicitNutritionalValues" to true ONLY IF the recipe nutritional values are explicitly stated in the source text or audio. If they are not, set it to false and set "nutritionalValues" to null (do NOT estimate or calculate overall nutritional values at the recipe level). Note that "nutritionalValues" MUST represent values per single serving/portion. If the source lists total values for the entire recipe, divide them by the number of servings/portions first.
+6. Missing Data & Nutrition: If any information for a specific field is missing, leave it empty (empty string "", null, or empty array []). You MUST set "hasExplicitNutritionalValues" to true ONLY IF the recipe nutritional values are explicitly stated in the source text or audio. If they are not, set it to false and set "nutritionalValues" to null (do NOT estimate or calculate overall nutritional values at the recipe level). Note that "nutritionalValues" MUST represent values per single serving/portion. If the source lists total values for the entire recipe, divide them by the number of servings/portions first. You MUST set "hasIncompleteSourceInfo" to true if the source content (caption, voiceover, or text) lacked complete, concrete recipe specifications (e.g. no full ingredient list or exact quantities provided, requiring the recipe to be visually deduced or estimated from video actions). Set it to false if the source provided explicit, complete written or spoken recipe ingredients and instructions.
 7. Clean Ingredient Names: ${CLEAN_INGREDIENT_NAMES_INSTRUCTION}
 8. Ingredient Decomposition: ${INGREDIENT_DECOMPOSITION_INSTRUCTION}
 9. Ingredient-level Nutritional Values: For each ingredient, you MUST estimate its nutritional values (calories, protein, carbs, fat) based on the ENTIRE specified quantity (amount * unit). Do NOT output per-100g, per-100ml, or single-unit values unless the quantity is exactly 100g, 100ml, or 1 unit. E.g., if chicken breast has 165 kcal per 100g and the recipe specifies 500g, the calories field MUST be 825, NOT 165. If a potato has 150 kcal and the amount is 6, the calories field MUST be 900, NOT 150. If olive oil has 14g fat/EL and the amount is 3 EL, the fat field MUST be 42, NOT 14.
-10. Infer Minor Missing Components (Only for Existing Recipes): If the source already contains a full recipe with ingredients and instructions, but the title or visual images explicitly show an obvious missing minor garnish or component (e.g., 'Air-Fried Broccolini' in the title and green broccolini on the plate) that was accidentally omitted from the written list, you may infer that specific item. NEVER use this rule to fabricate an entire recipe from a title or teaser when no base recipe is provided.
+10. Infer Minor Missing Components (Only for Existing Recipes): If the source already contains a full recipe with ingredients and instructions, but the title or visual images explicitly show an obvious missing minor garnish or component (e.g., 'Air-Fried Broccolini' in the title and green broccolini on the plate) that was accidentally omitted from the written list, you may infer that specific item. NEVER use this rule to fabricate an entire recipe from a title or teaser when no base recipe or visual video preparation steps are provided.
 11. Serving Size Estimation: Identify the number of servings or portions the recipe makes. Look for clues like 'serves 4' or estimate based on the ingredient amounts (e.g., 500g chicken and 6 potatoes typically serves 3-4 people). Avoid defaulting to 1 serving if the ingredient amounts are clearly meant for a family-sized meal.
 12. Zero-Calorie & Low-Calorie Ingredients: Ingredients like water, ice, salt, or baking soda MUST have 0 calories, protein, carbs, and fat. For spices, seasonings, or herbs in small quantities (like teaspoons), focus your calculation energy on the high-calorie/high-macro ingredients (meats, oils, dairy, grains, starches) and estimate very small values (e.g., 5 kcal) or 0.
 13. Cooked vs. Raw/Dry States of Expandable Ingredients: ${COOKED_VS_RAW_INSTRUCTION}
@@ -677,6 +683,8 @@ ${caption.trim() ? `\nDescription/Caption:\n"""\n${caption}\n"""` : ''}${htmlCon
     ) {
       recipe.transcript = null;
     }
+
+    recipe.hasIncompleteSourceInfo = Boolean(recipe.hasIncompleteSourceInfo);
 
     // Extract token usage and compute cost
     const usageMeta = result.response.usageMetadata;

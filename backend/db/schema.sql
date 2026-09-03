@@ -69,6 +69,7 @@ create table if not exists public.recipes (
   -- never queried, so it stays JSONB.
   source_nutritional_values       jsonb,
   has_explicit_nutritional_values boolean not null default false,
+  has_incomplete_source_info      boolean not null default false,
   -- Share (0..1) of the calories backed by an Open Food Facts match rather than an estimate.
   nutrition_coverage              numeric,
 
