@@ -1,4 +1,4 @@
-import { ArrowLeft, Clock, Users, Flame } from 'lucide-react';
+import { ArrowLeft, Clock, Users, Flame, Info, List, ChefHat } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { hapticSelection, hapticLight } from '../../utils/haptics';
 import CachedImage from '../CachedImage';
@@ -40,9 +40,9 @@ export default function RecipeStickyBar({
   const { t } = useI18n();
 
   const sections = [
-    { id: 'details' as const, label: 'Details' },
-    { id: 'ingredients' as const, label: t('recipe.tabIngredients') },
-    { id: 'instructions' as const, label: t('recipe.tabInstructions') },
+    { id: 'details' as const, label: 'Details', icon: Info },
+    { id: 'ingredients' as const, label: t('recipe.tabIngredients'), icon: List },
+    { id: 'instructions' as const, label: t('recipe.tabInstructions'), icon: ChefHat },
   ];
 
   const handleTabClick = (sectionId: 'ingredients' | 'instructions' | 'details') => {
@@ -117,6 +117,7 @@ export default function RecipeStickyBar({
       <div className="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl gap-1 border-none shadow-none mt-2 mb-2">
         {sections.map((section) => {
           const isActive = activeSection === section.id;
+          const Icon = section.icon;
           return (
             <button
               key={section.id}
@@ -128,7 +129,8 @@ export default function RecipeStickyBar({
                   : 'bg-transparent text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium'
               }`}
             >
-              <span>{section.label}</span>
+              <Icon className="w-4 h-4 shrink-0" />
+              <span className="truncate">{section.label}</span>
             </button>
           );
         })}
