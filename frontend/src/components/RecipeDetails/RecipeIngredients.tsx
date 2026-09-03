@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@heroui/react';
-import { Check, Salad, Users, ShoppingCart } from 'lucide-react';
+import { Check, Salad, Users, ShoppingCart, List } from 'lucide-react';
 import type { Ingredient, Recipe } from '../../types';
 import type { SortedIngredientGroup } from './types';
 import { useI18n } from '../../context/I18nContext';
@@ -57,9 +57,7 @@ export default function RecipeIngredients({
       {/* Section Header (OUTSIDE card) */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-3">
-          <div className={medallion}>
-            <Salad className={medallionIcon} />
-          </div>
+          <List className="w-5 h-5 text-gray-900 dark:text-white" />
           <h3 className="text-base font-bold text-gray-900 dark:text-white">{t('recipe.tabIngredients')}</h3>
           {ingredientCount > 0 && (
             <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 rounded-full px-2.5 py-1 tabular-nums select-none">
