@@ -53,6 +53,7 @@ Im gesamten Backend gibt es **8 aktive Gemini-Funktionen** (sowie Offline-/Admin
    • 22 Prompt-Constraints (Anti-Halluzination, Mengennormalisierung,
      Makros pro Zutat, Inline-Ingredient- & Timer-Tags `[Tag](ing:...)`)
    • Mehrfachrezept-Erkennung (`containsMultipleRecipes` ➔ 422 Abbruch)
+   • Unvollständige Quellen (`hasIncompleteSourceInfo: true` bei visueller Rekonstruktion ohne Textvorgaben)
                  │
                  ▼
 5. 2ND-STAGE AI RECIPE AUDIT & PATCH (`recipeAuditor.ts`)
