@@ -1,4 +1,4 @@
-import { ArrowLeft, Clock, Users, Flame } from 'lucide-react';
+import { ArrowLeft, Clock, Users, Flame, Info, List, ChefHat } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { hapticSelection, hapticLight } from '../../utils/haptics';
 import CachedImage from '../CachedImage';
@@ -40,9 +40,9 @@ export default function RecipeStickyBar({
   const { t } = useI18n();
 
   const sections = [
-    { id: 'details' as const, label: 'Details' },
-    { id: 'ingredients' as const, label: t('recipe.tabIngredients') },
-    { id: 'instructions' as const, label: t('recipe.tabInstructions') },
+    { id: 'details' as const, label: 'Details', icon: Info },
+    { id: 'ingredients' as const, label: t('recipe.tabIngredients'), icon: List },
+    { id: 'instructions' as const, label: t('recipe.tabInstructions'), icon: ChefHat },
   ];
 
   const handleTabClick = (sectionId: 'ingredients' | 'instructions' | 'details') => {
@@ -113,32 +113,28 @@ export default function RecipeStickyBar({
         </div>
       </div>
 
-      {/* Navigation tabs with min 48px touch target */}
-      <nav className="flex w-full mt-1" aria-label="Recipe Navigation">
+      {/* Segmented Tab Control */}
+      <div className="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl gap-1 border-none shadow-none mt-2 mb-2">
         {sections.map((section) => {
           const isActive = activeSection === section.id;
+          const Icon = section.icon;
           return (
             <button
               key={section.id}
               type="button"
               onClick={() => handleTabClick(section.id)}
-              className={`flex-1 text-center min-h-[48px] py-3 text-sm font-semibold transition-all relative flex items-center justify-center cursor-pointer outline-none border-none select-none ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all duration-200 min-h-[42px] cursor-pointer border-none outline-none ${
                 isActive
-                  ? 'text-emerald-600 dark:text-emerald-400 font-bold'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-bold shadow-[0_2px_6px_rgba(0,0,0,0.06)]'
+                  : 'bg-transparent text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium'
               }`}
             >
-              <span>{section.label}</span>
-              {/* Smooth sliding scale underline */}
-              <span
-                className={`absolute bottom-0 inset-x-0 h-0.5 bg-emerald-600 dark:bg-emerald-500 transition-all duration-200 ease-out origin-center ${
-                  isActive ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'
-                }`}
-              />
+              <Icon className="w-4 h-4 shrink-0" />
+              <span className="truncate">{section.label}</span>
             </button>
           );
         })}
-      </nav>
+      </div>
     </div>
   );
 }
