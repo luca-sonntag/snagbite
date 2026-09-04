@@ -11,7 +11,7 @@ import { extractRecipe, remixRecipe, type ClientFramesInput } from './gemini.js'
 import { generateRecipeCoverImage } from './imageGenerator.js';
 import { pruneOldGeminiLogs } from './logger.js';
 import { photoUploadIdFromUrl, downloadImportPhotos, deleteImportPhotos, sweepOldPhotoImports } from './photoImport.js';
-import type { Job, LlmUsage, ProgressStage, GeminiUsageInfo } from './types.js';
+import type { Job, LlmUsage, ProgressStage, GeminiUsageInfo, RecipePreviewData, Recipe } from './types.js';
 import { config } from './config.js';
 import { AppError, serializeJobError } from './errors.js';
 import { notificationTick } from './notifications/worker.js';
@@ -26,6 +26,21 @@ let reclaimInterval: NodeJS.Timeout | null = null;
 let sweepInterval: NodeJS.Timeout | null = null;
 let cleanupInterval: NodeJS.Timeout | null = null;
 let notificationInterval: NodeJS.Timeout | null = null;
+
+function buildRecipePreview(recipe: Recipe, fallbackThumbnail?: string, authorHandle?: string | null): RecipePreviewData {
+  const allItems = (recipe.ingredients || []).flatMap((g) => g.items || []);
+  return {
+    thumbnailUrl: fallbackThumbnail,
+    authorHandle: authorHandle || undefined,
+    title: recipe.title,
+    servings: recipe.servings,
+    totalTimeMinutes: (recipe.prepTime || 0) + (recipe.cookTime || 0) || undefined,
+    category: recipe.category || undefined,
+    ingredientCount: allItems.length,
+    ingredientsSample: allItems.slice(0, 5).map((i) => `${i.amount ? i.amount + ' ' : ''}${i.unit ? i.unit + ' ' : ''}${i.name}`.trim()),
+    stepCount: recipe.instructions?.length || 0,
+  };
+}
 
 /**
  * Processes a single job end-to-end.
@@ -128,8 +143,10 @@ async function processJob(job: Job): Promise<void> {
         console.warn(`[Job ${jobId}] Remix audit non-fatal failure: ${msg}`);
       }
 
+      const remixPreview = buildRecipePreview(recipe, parentRecipe.imageUrl || undefined, parentRecipe.sourceHandle);
+
       // Generate AI cover image and normalize ingredients in parallel
-      await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover' });
+      await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover', preview: remixPreview });
       const coverPromise = recipe.imagePrompt
         ? generateRecipeCoverImage({
             prompt: recipe.imagePrompt,
@@ -155,7 +172,14 @@ async function processJob(job: Job): Promise<void> {
         recipe.imageUrls = parentRecipe.imageUrls;
       }
 
-      await updateJobProgress(jobId, 'processing', { percent: 95, stage: 'finalizing' });
+      await updateJobProgress(jobId, 'processing', {
+        percent: 95,
+        stage: 'finalizing',
+        preview: {
+          ...remixPreview,
+          coverUrl: recipe.imageUrl || undefined,
+        },
+      });
 
       const llmUsage: LlmUsage = {};
       if (geminiUsage) llmUsage.gemini = geminiUsage;
@@ -224,8 +248,10 @@ async function processJob(job: Job): Promise<void> {
         console.warn(`[Job ${jobId}] Recipe audit non-fatal failure: ${msg}`);
       }
 
+      const photoPreview = buildRecipePreview(recipe);
+
       // Generate photorealistic AI cover image and normalize ingredients in parallel
-      await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover' });
+      await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover', preview: photoPreview });
       const coverPromise = recipe.imagePrompt
         ? generateRecipeCoverImage({
             prompt: recipe.imagePrompt,
@@ -252,7 +278,14 @@ async function processJob(job: Job): Promise<void> {
         recipe.isAiCover = false;
       }
 
-      await updateJobProgress(jobId, 'processing', { percent: 95, stage: 'finalizing' });
+      await updateJobProgress(jobId, 'processing', {
+        percent: 95,
+        stage: 'finalizing',
+        preview: {
+          ...photoPreview,
+          coverUrl: recipe.imageUrl || undefined,
+        },
+      });
 
       const llmUsage: LlmUsage = {};
       if (geminiUsage) llmUsage.gemini = geminiUsage;
@@ -356,7 +389,12 @@ async function processJob(job: Job): Promise<void> {
     }
 
     // 3. Mark job as processing
-    await updateJobProgress(jobId, 'processing', { percent: 50, stage: 'downloading_media' });
+    const initialThumbnail = scrapeResult.imageUrl || (scrapeResult.media.kind === 'images' && scrapeResult.media.imageUrls.length > 0 ? scrapeResult.media.imageUrls[0] : undefined);
+    const initialPreview: RecipePreviewData = {
+      thumbnailUrl: initialThumbnail,
+      authorHandle: scrapeResult.authorHandle || undefined,
+    };
+    await updateJobProgress(jobId, 'processing', { percent: 50, stage: 'downloading_media', preview: initialPreview });
 
     // 4. Ensure run directory exists
     await fs.mkdir(runDir, { recursive: true });
@@ -384,7 +422,7 @@ async function processJob(job: Job): Promise<void> {
     const isCarousel = downloaded.imageFilePaths.length > 0;
 
     if (videoFilePath) {
-      await updateJobProgress(jobId, 'processing', { percent: 55, stage: 'extracting_frames' });
+      await updateJobProgress(jobId, 'processing', { percent: 55, stage: 'extracting_frames', preview: initialPreview });
       try {
         const { extractFrames, createImageGrid } = await import('./frameExtractor.js');
         console.log(`[Job ${jobId}] Extracting frames from video...`);
@@ -398,7 +436,7 @@ async function processJob(job: Job): Promise<void> {
         console.warn(`[Job ${jobId}] Frame extraction / grid generation failed: ${err.message}`);
       }
     } else if (isCarousel) {
-      await updateJobProgress(jobId, 'processing', { percent: 55, stage: 'extracting_frames' });
+      await updateJobProgress(jobId, 'processing', { percent: 55, stage: 'extracting_frames', preview: initialPreview });
       framePaths = downloaded.imageFilePaths;
       if (framePaths.length > 1) {
         try {
@@ -420,7 +458,7 @@ async function processJob(job: Job): Promise<void> {
     }
 
     console.log(`[Job ${jobId}] Extracting recipe via Gemini...`);
-    await updateJobProgress(jobId, 'processing', { percent: 75, stage: 'extracting_recipe' });
+    await updateJobProgress(jobId, 'processing', { percent: 65, stage: 'extracting_recipe', preview: initialPreview });
 
     const { recipe: rawRecipe, usage: geminiUsage } = await extractRecipe(
       audioFilePath || undefined,
@@ -462,8 +500,10 @@ async function processJob(job: Job): Promise<void> {
       ? [scrapeResult.imageUrl]
       : (scrapeResult.media.kind === 'images' && scrapeResult.media.imageUrls.length > 0 ? [scrapeResult.media.imageUrls[0]] : []);
 
+    const recipePreview = buildRecipePreview(recipe, baseImageUrls[0] || initialPreview.thumbnailUrl, scrapeResult.authorHandle);
+
     // 6b. Generate AI food photography cover image and normalize ingredients in parallel
-    await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover' });
+    await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover', preview: recipePreview });
     const coverPromise = recipe.imagePrompt
       ? generateRecipeCoverImage({
           prompt: recipe.imagePrompt,
@@ -490,7 +530,14 @@ async function processJob(job: Job): Promise<void> {
       recipe.isAiCover = false;
     }
 
-    await updateJobProgress(jobId, 'processing', { percent: 95, stage: 'finalizing' });
+    await updateJobProgress(jobId, 'processing', {
+      percent: 95,
+      stage: 'finalizing',
+      preview: {
+        ...recipePreview,
+        coverUrl: recipe.imageUrl || undefined,
+      },
+    });
 
     recipe.sourceHandle = scrapeResult.authorHandle || null;
     recipe.sourceUrl = url;
