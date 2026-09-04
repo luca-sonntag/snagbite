@@ -20,7 +20,7 @@ export default function ExtractionProgressBar({
     <div className="w-full flex flex-col gap-2.5 pt-2 border-t border-gray-100 dark:border-gray-800/80">
       {/* Stage Title and Percent Counter */}
       <div className="flex items-center justify-between text-xs">
-        <span className="font-bold text-gray-800 dark:text-gray-200">
+        <span className="font-semibold text-gray-700 dark:text-gray-300">
           {t(`job.progress.stages.${displayedStage}`)}
         </span>
         <span className="font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
@@ -36,17 +36,17 @@ export default function ExtractionProgressBar({
         />
       </div>
 
-      {/* Rotating Cooking Quote (Fixed height: Zero Layout Shift) */}
+      {/* Grounded Cooking Quote (Fixed height: Zero Layout Shift) */}
       <p
         key={funnyText}
-        className="text-[11px] text-gray-500 dark:text-gray-400 h-4 truncate italic animate-fade-in text-center"
+        className="text-[11px] text-gray-400 dark:text-gray-500 font-medium h-4 truncate animate-fade-in text-center"
       >
         {funnyText}
       </p>
 
       {/* Background Notification Notice for Premium */}
       {isPremium && (
-        <p className="text-[10px] leading-relaxed text-gray-400 dark:text-gray-500 text-center pt-1 border-t border-gray-100 dark:border-gray-800/40">
+        <p className="text-[10px] leading-relaxed text-gray-400 dark:text-gray-500 text-center pt-0.5">
           {t('job.backgroundNotice')}
         </p>
       )}

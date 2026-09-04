@@ -22,18 +22,18 @@ export default function ProgressiveRecipeCard({
       compact ? 'p-3.5 gap-2.5' : 'p-4 sm:p-5 gap-3.5'
     }`}>
       {/* Top Header Live Status Strip */}
-      <div className="flex items-center justify-between text-xs px-0.5">
-        <div className="flex items-center gap-2 font-semibold text-gray-700 dark:text-gray-300">
-          <span className="relative flex h-2.5 w-2.5">
+      <div className="flex items-center justify-between text-xs px-1">
+        <div className="flex items-center gap-2 font-medium text-gray-500 dark:text-gray-400">
+          <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
           </span>
           <span>{t('job.preview.analyzingBadge')}</span>
         </div>
 
-        <div className="flex items-center text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/15 px-2.5 py-0.5 rounded-full tabular-nums">
-          <span>{percent}%</span>
-        </div>
+        <span className="text-xs font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
+          {percent}%
+        </span>
       </div>
 
       {/* Media Cover Preview with Scanning Laser */}

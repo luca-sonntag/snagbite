@@ -36,9 +36,9 @@ export default function IngredientsStream({ preview, compact = false }: Ingredie
 
   return (
     <div className="flex flex-col justify-between w-full h-[52px] overflow-hidden">
-      <div className="flex items-center text-xs font-semibold text-gray-600 dark:text-gray-300 h-4">
+      <div className="flex items-center text-xs font-medium text-gray-500 dark:text-gray-400 h-4">
         <div className="flex items-center gap-1.5">
-          <Utensils className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+          <Utensils className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
           <span>{t('job.preview.ingredientsFound', { count })}</span>
         </div>
       </div>
@@ -48,13 +48,13 @@ export default function IngredientsStream({ preview, compact = false }: Ingredie
           <span
             key={ing + idx}
             style={{ animationDelay: `${idx * 60}ms` }}
-            className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 animate-scale-pop shadow-2xs shrink-0 whitespace-nowrap max-w-[120px] truncate"
+            className="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-medium bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 border border-gray-100 dark:border-gray-800 animate-scale-pop shrink-0 whitespace-nowrap max-w-[130px] truncate"
           >
             {ing}
           </span>
         ))}
         {remainingCount > 0 && (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold text-gray-400 dark:text-gray-500 shrink-0">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-xl text-[11px] font-medium text-gray-400 dark:text-gray-500 shrink-0">
             +{remainingCount}
           </span>
         )}

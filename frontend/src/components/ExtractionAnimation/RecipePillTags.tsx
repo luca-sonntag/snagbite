@@ -69,9 +69,9 @@ export default function RecipePillTags({ preview, compact = false }: RecipePillT
         <span
           key={pill.key}
           style={{ animationDelay: `${idx * 80}ms` }}
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 animate-scale-pop shadow-xs shrink-0 whitespace-nowrap"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 animate-scale-pop shrink-0 whitespace-nowrap"
         >
-          {pill.icon}
+          <span className="text-gray-400 dark:text-gray-500">{pill.icon}</span>
           <span>{pill.text}</span>
         </span>
       ))}

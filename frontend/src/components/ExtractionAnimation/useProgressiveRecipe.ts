@@ -8,59 +8,57 @@ import type { ExtractionAnimationProps, PlatformType, ProgressiveRecipeState } f
 const FUNNY_TEXTS: Record<SupportedLanguage, Record<'pending' | 'scraping' | 'processing' | 'completed' | 'failed', string[]>> = {
   de: {
     pending: [
-      'Kochmütze wird gerichtet...',
-      'Arbeitsplatte wird vorbereitet...',
-      'Kochschürze wird festgeknotet...',
-      'Der Ofen wird vorgeheizt...',
-      'Frische Zutaten werden sortiert...',
-      'Kochlöffel wird bereitgelegt...'
+      'Küche wird vorbereitet...',
+      'Zutaten werden sortiert...',
+      'Rezept wird aufgerufen...',
+      'Arbeitsfläche wird eingerichtet...',
+      'Kochbereich wird vorbereitet...'
     ],
     scraping: [
       'Rezeptur wird studiert...',
-      'Geheime Gewürze werden entdeckt...',
       'Zutatenliste wird zusammengestellt...',
-      'Chefkoch studiert die Zubereitung...',
-      'Frische Kräuter werden gezupft...',
-      'Schritt-für-Schritt-Ablauf wird erfasst...'
+      'Zubereitungsschritte werden erfasst...',
+      'Mengenangaben werden abgestimmt...',
+      'Aromen und Gewürze werden notiert...',
+      'Ablauf wird strukturiert...'
     ],
     processing: [
-      'Soße wird abgeschmeckt und verfeinert...',
-      'Zwiebeln werden geschnitten (ohne Tränen!)...',
-      'Portionsgrößen werden perfekt berechnet...',
-      'Eine Prise Magie wird hinzugefügt...',
-      'Schritte werden leicht verständlich formuliert...',
-      'Nährwerte werden präzise ermittelt...'
+      'Mengenangaben werden präzise berechnet...',
+      'Portionsgrößen werden abgestimmt...',
+      'Garzeiten und Temperaturen werden optimiert...',
+      'Schritte werden übersichtlich formuliert...',
+      'Nährwerte werden ermittelt...',
+      'Rezeptkarte wird fertiggestellt...'
     ],
-    completed: ['Rezept wird frisch serviert!'],
-    failed: ['Der Topf ist übergelaufen!']
+    completed: ['Rezept ist fertig angerichtet!'],
+    failed: ['Rezept konnte nicht geladen werden']
   },
   en: {
     pending: [
-      'Adjusting the chef\'s hat...',
-      'Prepping the kitchen counter...',
-      'Tying the apron...',
-      'Preheating the oven...',
-      'Sorting fresh ingredients...',
-      'Setting out the wooden spoon...'
+      'Preparing kitchen workspace...',
+      'Sorting ingredients...',
+      'Loading recipe...',
+      'Setting up cooking station...',
+      'Preparing recipe card...'
     ],
     scraping: [
       'Studying recipe details...',
-      'Discovering secret seasonings...',
-      'Gathering the ingredient list...',
-      'Studying the cooking technique...',
-      'Plucking fresh garden herbs...',
-      'Capturing step-by-step instructions...'
+      'Gathering ingredient list...',
+      'Reading cooking instructions...',
+      'Balancing ingredient quantities...',
+      'Noting seasoning and flavours...',
+      'Structuring steps...'
     ],
     processing: [
-      'Tasting and perfecting the sauce...',
-      'Chopping onions (without tears!)...',
-      'Balancing portion sizes...',
-      'Adding a pinch of cooking magic...',
-      'Writing clear cooking steps...',
-      'Calculating nutritional values...'
+      'Calculating ingredient portions...',
+      'Adjusting serving sizes...',
+      'Reviewing cooking times...',
+      'Formatting clear instructions...',
+      'Calculating nutrition info...',
+      'Finalizing recipe card...'
     ],
     completed: ['Recipe is ready to serve!'],
-    failed: ['The pot boiled over!']
+    failed: ['Could not load recipe']
   }
 };
 

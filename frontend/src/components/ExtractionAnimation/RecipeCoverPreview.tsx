@@ -1,5 +1,5 @@
 import React from 'react';
-import { Camera, Globe, ChefHat } from 'lucide-react';
+import { Camera, Globe } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { InstagramIcon } from '../ShareMockups';
 import type { PlatformType } from './types';
@@ -21,14 +21,14 @@ const YoutubeIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 const TikTokIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89 2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z" />
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z" />
   </svg>
 );
 
 export default function RecipeCoverPreview({
   platform,
   preview,
-  isCompleted,
+  isCompleted: _isCompleted,
   compact = false,
 }: RecipeCoverPreviewProps) {
   const { t } = useI18n();
@@ -55,16 +55,9 @@ export default function RecipeCoverPreview({
           className="w-full h-full object-cover object-center animate-fade-in transition-transform duration-700"
         />
       ) : (
-        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-emerald-500/10 via-gray-100 to-emerald-500/5 dark:from-emerald-950/30 dark:via-gray-800 dark:to-emerald-900/20">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center animate-pulse">
-            <ChefHat className="w-6 h-6" />
-          </div>
+        <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 animate-pulse">
+          <div className="w-12 h-12 rounded-2xl bg-gray-200 dark:bg-gray-700/50" />
         </div>
-      )}
-
-      {/* Laser Scanning Beam (active while extracting) */}
-      {!isCompleted && (
-        <div className="absolute inset-x-0 h-14 bg-gradient-to-b from-transparent via-emerald-400/35 to-transparent blur-[2px] pointer-events-none animate-scanning-beam" />
       )}
 
       {/* Top Floating Badges */}
@@ -75,7 +68,7 @@ export default function RecipeCoverPreview({
         </div>
 
         {preview?.authorHandle && (
-          <div className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-emerald-300 text-[11px] font-medium shadow-sm max-w-[130px] truncate">
+          <div className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white/90 text-[11px] font-medium shadow-sm max-w-[130px] truncate">
             @{preview.authorHandle.replace(/^@/, '')}
           </div>
         )}
