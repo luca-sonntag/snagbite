@@ -287,10 +287,16 @@ export default function App() {
   const isAppReady = !authLoading && (!user || historyLoaded || emergencyReady);
 
   useEffect(() => {
-    if (splashFinished) {
-      preloadSecondaryChunks();
-    }
-  }, [splashFinished]);
+    preloadSecondaryChunks();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const preMountTimer = setTimeout(() => {
+      setVisitedViews((prev) => new Set([...prev, 'meal-planner', 'shopping-list', 'settings', 'progress']));
+    }, 400);
+    return () => clearTimeout(preMountTimer);
+  }, [user]);
 
   return (
     <>

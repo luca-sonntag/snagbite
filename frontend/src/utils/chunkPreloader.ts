@@ -11,30 +11,12 @@ export function preloadSecondaryChunks(): void {
   if (typeof window === 'undefined' || preloadingStarted) return;
   preloadingStarted = true;
 
-  const loaders = [
-    () => import('../components/RecipeDetails'),
-    () => import('../components/MealPlanner'),
-    () => import('../components/ShoppingList'),
-    () => import('../components/ProfileView'),
-    () => import('../components/PremiumModal'),
-  ];
-
-  // Stagger chunk fetching during idle time to avoid network or main-thread congestion
-  loaders.forEach((loadChunk, index) => {
-    const delay = 800 + index * 350;
-    if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(
-        () => {
-          loadChunk().catch(() => {});
-        },
-        { timeout: delay + 1000 }
-      );
-    } else {
-      setTimeout(() => {
-        loadChunk().catch(() => {});
-      }, delay);
-    }
-  });
+  // Immediately fire dynamic imports so chunks are cached in memory right away
+  import('../components/RecipeDetails').catch(() => {});
+  import('../components/MealPlanner').catch(() => {});
+  import('../components/ShoppingList').catch(() => {});
+  import('../components/ProfileView').catch(() => {});
+  import('../components/PremiumModal').catch(() => {});
 }
 
 export function preloadChunk(
