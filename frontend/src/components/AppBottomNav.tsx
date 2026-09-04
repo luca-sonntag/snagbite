@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, BookOpen, Calendar, ShoppingCart, User } from 'lucide-react';
+import { PlusCircle, BookOpen, Calendar, ShoppingCart, User } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { hapticSelection } from '../utils/haptics';
 import { preloadChunk } from '../utils/chunkPreloader';
@@ -66,7 +66,7 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
               }`}
             >
               <div className={iconWrapperBase}>
-                <Sparkles className={iconBase} />
+                <PlusCircle className={iconBase} />
                 {isPending && (
                   <span className="absolute -top-1 -right-2 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white dark:bg-gray-900 shadow-sm">
                     <span className="h-2.5 w-2.5 rounded-full border-[1.5px] border-emerald-600 dark:border-emerald-400 border-t-transparent animate-spin" />

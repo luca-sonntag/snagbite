@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Button, Spinner } from '@heroui/react';
-import { BookOpen, Camera, Globe, Link2, Play, Sparkles } from 'lucide-react';
+import { BookOpen, Camera, Globe, Link2, Play, PlusCircle } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import { useExtractionJobs } from '../../context/ExtractionJobsContext';
@@ -119,7 +119,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
     <div className={`flex flex-col gap-4 w-full ${isPending ? 'flex-1 justify-between min-h-0' : ''}`}>
       {!isPending && (
         <PageHeader
-          icon={<Sparkles className="w-6 h-6" />}
+          icon={<PlusCircle className="w-6 h-6" />}
           title={t('form.headerTitle') || t('app.title')}
           subtitle={t('form.headerSubtitle')}
         />
