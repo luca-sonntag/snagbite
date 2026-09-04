@@ -1,5 +1,5 @@
 import { Button } from '@heroui/react';
-import { Play, Check, ChefHat, Utensils, ListChecks, Lightbulb, Sparkles } from 'lucide-react';
+import { Play, Check, Utensils, ListChecks, Sparkles } from 'lucide-react';
 import type { Recipe } from '../../types';
 import RecipeInstructionText from '../RecipeInstructionText';
 import { useI18n } from '../../context/I18nContext';

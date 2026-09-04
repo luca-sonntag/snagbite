@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@heroui/react';
-import { Check, Salad, Users, ShoppingCart } from 'lucide-react';
+import { Check, Users, ShoppingCart } from 'lucide-react';
 import type { Ingredient, Recipe } from '../../types';
 import type { SortedIngredientGroup } from './types';
 import { useI18n } from '../../context/I18nContext';
@@ -41,10 +41,6 @@ export default function RecipeIngredients({
   const [selectedNutrition, setSelectedNutrition] = useState<{ ingredient: Ingredient; category: string } | null>(null);
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
 
-  const ingredientCount = sortedIngredients.reduce(
-    (sum, { group }) => sum + group.items.length,
-    0
-  );
 
   const medallion =
     'w-9 h-9 rounded-full bg-emerald-500/5 flex items-center justify-center flex-shrink-0';
