@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@heroui/react';
-import { Trophy, User } from 'lucide-react';
+import { Trophy, User, Users, Settings } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { PageHeader } from '../PageHeader';
 import ProgressOverview from './ProgressOverview';
@@ -44,25 +44,26 @@ export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSel
     if (pendingInviteCode) setSection('friends');
   }, [pendingInviteCode]);
 
-  const tabs: { key: ProfileSection; label: string }[] = [
-    { key: 'overview', label: t('app.social.sections.overview') },
-    { key: 'leaderboard', label: t('app.social.sections.leaderboard') },
-    { key: 'friends', label: t('app.social.sections.friends') },
-    { key: 'settings', label: t('app.social.sections.settings') || 'Einstellungen' },
+  const tabs = [
+    { key: 'overview' as const, label: t('app.social.sections.overview'), icon: User },
+    { key: 'leaderboard' as const, label: t('app.social.sections.leaderboard'), icon: Trophy },
+    { key: 'friends' as const, label: t('app.social.sections.friends'), icon: Users },
+    { key: 'settings' as const, label: t('app.social.sections.settings') || 'Einstellungen', icon: Settings },
   ];
 
   return (
     <div className="flex flex-col gap-6 pb-12">
       {/* Header */}
       <PageHeader
-        icon={section === 'settings' ? <User className="w-6 h-6" /> : <Trophy className="w-6 h-6" />}
+        icon={section === 'settings' ? <Settings className="w-6 h-6" /> : <Trophy className="w-6 h-6" />}
         title={section === 'settings' ? (t('app.social.sections.settings') || 'Einstellungen') : t('app.gamification.tabTitle')}
         subtitle={section === 'settings' ? t('app.settings.subtitle') : t('app.gamification.subtitle')}
       />
 
-      <div className="flex rounded-2xl bg-gray-100 p-1 dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-x-auto scrollbar-none mx-2">
+      <div className="flex rounded-2xl bg-gray-100 p-1 dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-x-auto scrollbar-none mx-2 gap-1">
         {tabs.map((tab) => {
           const isActive = section === tab.key;
+          const Icon = tab.icon;
           return (
             <Button
               key={tab.key}
@@ -70,13 +71,14 @@ export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSel
                 hapticSelection();
                 setSection(tab.key);
               }}
-              className={`relative flex-1 min-w-[76px] rounded-xl py-2 min-h-[44px] text-xs sm:text-sm font-semibold border-none transition-all duration-200 cursor-pointer ${
+              className={`relative flex-1 min-w-[76px] rounded-xl py-2 px-2.5 sm:px-3 min-h-[44px] text-xs sm:text-sm font-semibold border-none transition-all duration-200 cursor-pointer ${
                 isActive
-                  ? 'bg-white text-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] dark:bg-gray-800 dark:text-white'
-                  : 'bg-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                  ? 'bg-white text-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] dark:bg-gray-800 dark:text-white font-bold'
+                  : 'bg-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white font-medium'
               }`}
             >
-              <span className="flex items-center justify-center gap-1.5">
+              <span className="flex items-center justify-center gap-1.5 sm:gap-2">
+                <Icon className="w-4 h-4 shrink-0" />
                 <span className="truncate">{tab.label}</span>
                 {tab.key === 'friends' && incomingCount > 0 && (
                   <span className="flex h-4 min-w-[16px] items-center justify-center text-center leading-none rounded-full bg-rose-500 px-1 text-[10px] font-black text-white shadow-xs shrink-0">
