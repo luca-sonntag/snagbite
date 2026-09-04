@@ -20,7 +20,7 @@ export interface ExtractFormProps {
   setUrlError?: (error: string) => void;
   validateUrl: (url: string) => boolean;
   isPending: boolean;
-  handleFormSubmit: (e: React.FormEvent) => void;
+  handleFormSubmit: (e: React.FormEvent, overrideUrl?: string) => void;
   limitStatus?: LimitStatus | null;
   jobStatus: ExtractionJob['status'] | null;
   progress: ProgressData | null;
@@ -86,7 +86,7 @@ export interface UrlExtractSheetProps {
   cookbookFull: boolean;
   isWatchingAd: boolean;
   setIsWatchingAd: (watching: boolean) => void;
-  handleFormSubmit: (e: React.FormEvent) => void;
+  handleFormSubmit: (e: React.FormEvent, overrideUrl?: string) => void;
   claimRewardedCredit?: () => Promise<boolean>;
   limitStatus?: LimitStatus | null;
   isRealPremium?: boolean;
@@ -121,4 +121,5 @@ export interface UseExtractFormProps {
   blockedByLimit: boolean;
   atConcurrencyLimit: boolean;
   setIsPremiumModalOpen: (open: boolean) => void;
+  onAutoSubmit?: (url: string) => void;
 }

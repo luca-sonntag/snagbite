@@ -265,13 +265,13 @@ export default function App() {
     hideSplashScreen();
   }, []);
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = (e: React.FormEvent, overrideUrl?: string) => {
     e.preventDefault();
     if (extractMode === 'photo') {
       triggerPhotoExtraction();
       return;
     }
-    triggerExtraction(url);
+    triggerExtraction(overrideUrl ?? url);
   };
 
   const [splashFinished, setSplashFinished] = useState(false);

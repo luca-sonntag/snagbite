@@ -18,6 +18,7 @@ export function useExtractForm({
   blockedByLimit,
   atConcurrencyLimit,
   setIsPremiumModalOpen,
+  onAutoSubmit,
 }: UseExtractFormProps) {
   const { t } = useI18n();
   const [canPaste, setCanPaste] = useState(false);
@@ -101,14 +102,18 @@ export function useExtractForm({
       let text = '';
       if (Capacitor.isNativePlatform()) {
         const result = await CapClipboard.read();
-        text = result.value;
+        text = result.value ?? '';
       } else {
         text = await navigator.clipboard.readText();
       }
-      if (text) {
-        setUrl(text);
-        validateUrl(text);
+      const cleanText = text.trim();
+      if (cleanText) {
+        setUrl(cleanText);
+        const isValid = validateUrl(cleanText);
         setDetectedClipboardUrl(null);
+        if (isValid && !blockedByLimit && !atConcurrencyLimit) {
+          onAutoSubmit?.(cleanText);
+        }
       }
     } catch (err) {
       console.error('Failed to read clipboard:', err);

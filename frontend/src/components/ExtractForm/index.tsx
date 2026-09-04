@@ -77,6 +77,9 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
     blockedByLimit,
     atConcurrencyLimit,
     setIsPremiumModalOpen,
+    onAutoSubmit: (pastedUrl: string) => {
+      handleSheetSubmit({ preventDefault: () => {} } as React.FormEvent, pastedUrl);
+    },
   });
 
   const trialBannerShowing =
@@ -92,10 +95,10 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
     setMode('link');
     setUrl(demoUrl);
     validateUrl(demoUrl);
-    setIsLinkSheetOpen(true);
+    handleSheetSubmit({ preventDefault: () => {} } as React.FormEvent, demoUrl);
   };
 
-  const handleSheetSubmit = (e: React.FormEvent) => {
+  const handleSheetSubmit = (e: React.FormEvent, overrideUrl?: string) => {
     if (atConcurrencyLimit) {
       e.preventDefault();
       return;
@@ -107,7 +110,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
     }
     setIsLinkSheetOpen(false);
     setIsPhotoSheetOpen(false);
-    handleFormSubmit(e);
+    handleFormSubmit(e, overrideUrl);
   };
 
   return (
