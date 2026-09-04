@@ -57,6 +57,31 @@ export interface ExtractDemoRecipesProps {
   onDemoClick: (url: string) => void;
 }
 
+export interface ExtractModeTilesProps {
+  mode: ExtractMode;
+  setMode: (mode: ExtractMode) => void;
+  photosCount: number;
+  disabled?: boolean;
+}
+
+export interface MagicClipboardBannerProps {
+  detectedUrl: string;
+  onApply: (url: string) => void;
+  onDismiss: () => void;
+  disabled?: boolean;
+}
+
+export interface ExtractQuotaBadgeProps {
+  limitStatus?: LimitStatus | null;
+  isRealPremium?: boolean;
+  activeCount?: number;
+  maxConcurrent?: number;
+}
+
+export interface QuickShareTipCardProps {
+  onLearnMore?: () => void;
+}
+
 export interface UseExtractFormProps {
   url: string;
   setUrl: (url: string) => void;
@@ -69,4 +94,5 @@ export interface UseExtractFormProps {
   blockedByLimit: boolean;
   atConcurrencyLimit: boolean;
   setIsPremiumModalOpen: (open: boolean) => void;
+  handleFormSubmit?: (e: React.FormEvent) => void;
 }
