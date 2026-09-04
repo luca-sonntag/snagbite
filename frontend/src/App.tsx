@@ -44,10 +44,10 @@ import { preloadSecondaryChunks } from './utils/chunkPreloader';
 
 function ViewFallback() {
   return (
-    <div className="w-full flex flex-col items-center justify-center py-20 gap-3">
-      <div className="relative w-8 h-8 flex items-center justify-center">
+    <div className="w-full min-h-[55vh] flex-1 flex flex-col items-center justify-center my-auto py-12 gap-3 select-none">
+      <div className="relative w-9 h-9 flex items-center justify-center">
         <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" />
-        <div className="animate-spin rounded-full h-7 w-7 border-2 border-emerald-500 border-t-transparent" />
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent" />
       </div>
     </div>
   );
@@ -522,6 +522,7 @@ export default function App() {
         <div
           hidden={activeView !== 'meal-planner'}
           aria-hidden={activeView !== 'meal-planner' || undefined}
+          className={activeView === 'meal-planner' ? 'flex-1 flex flex-col min-h-0' : ''}
         >
           {visitedViews.has('meal-planner') && (
             <Suspense fallback={<ViewFallback />}>
@@ -540,6 +541,7 @@ export default function App() {
         <div
           hidden={activeView !== 'shopping-list'}
           aria-hidden={activeView !== 'shopping-list' || undefined}
+          className={activeView === 'shopping-list' ? 'flex-1 flex flex-col min-h-0' : ''}
         >
           {visitedViews.has('shopping-list') && (
             <Suspense fallback={<ViewFallback />}>
@@ -570,6 +572,7 @@ export default function App() {
         <div
           hidden={activeView !== 'progress' && activeView !== 'settings'}
           aria-hidden={(activeView !== 'progress' && activeView !== 'settings') || undefined}
+          className={(activeView === 'progress' || activeView === 'settings') ? 'flex-1 flex flex-col min-h-0' : ''}
         >
           {(visitedViews.has('progress') || visitedViews.has('settings')) && (
             <Suspense fallback={<ViewFallback />}>
