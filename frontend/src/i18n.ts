@@ -485,6 +485,11 @@ export const uiTranslations = {
     app: {
       title: 'Snagbite',
       subtitle: 'Rezept-Assistent',
+      loading: {
+        preparingCookbook: 'Dein Kochbuch wird angerichtet…',
+        loadingRecipes: 'Rezepte werden geladen…',
+        gettingReady: 'Gleich geht’s an den Herd…',
+      },
       nav: {
         newRecipe: 'Neu',
         savedRecipes: 'Rezepte',
@@ -1676,6 +1681,11 @@ export const uiTranslations = {
     app: {
       title: 'Snagbite',
       subtitle: 'Recipe Assistant',
+      loading: {
+        preparingCookbook: 'Setting your table…',
+        loadingRecipes: 'Loading your recipes…',
+        gettingReady: 'Getting ready to cook…',
+      },
       nav: {
         newRecipe: 'New',
         savedRecipes: 'Recipes',

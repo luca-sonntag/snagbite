@@ -107,6 +107,72 @@ html.dark body {
   animation: fade-in 0.3s ease-out forwards;
 }
 
+/* Startup Preloader Animations */
+@keyframes logo-breathe {
+  0%, 100% {
+    transform: scale(0.98);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.animate-logo-breathe {
+  animation: logo-breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes glow-breathe {
+  0%, 100% {
+    transform: scale(0.92);
+    opacity: 0.15;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.32;
+  }
+}
+
+.animate-glow-breathe {
+  animation: glow-breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes shimmer-sweep {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  40%, 100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+.animate-shimmer-sweep {
+  animation: shimmer-sweep 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes tine-bounce {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.animate-tine-bounce-1 {
+  animation: tine-bounce 1.2s ease-in-out infinite;
+  animation-delay: 0ms;
+}
+.animate-tine-bounce-2 {
+  animation: tine-bounce 1.2s ease-in-out infinite;
+  animation-delay: 180ms;
+}
+.animate-tine-bounce-3 {
+  animation: tine-bounce 1.2s ease-in-out infinite;
+  animation-delay: 360ms;
+}
+
 @keyframes radar-sweep {
   0% {
     transform: scale(0.8);
