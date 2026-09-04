@@ -1,4 +1,4 @@
-import { Loader2, CheckCircle2, AlertCircle, ChefHat, X, ChevronRight } from 'lucide-react';
+import { Loader2, CheckCircle2, AlertCircle, X, ChevronRight } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { resolveErrorCode } from '../i18n';
 import { useExtractionJobs, OPEN_RECIPE_EVENT } from '../context/ExtractionJobsContext';
@@ -15,6 +15,10 @@ const STAGE_KEY: Record<ProgressStage, string> = {
   generating_cover: 'activeExtractions.stages.generating_cover',
   finalizing: 'activeExtractions.stages.finalizing',
 };
+
+interface ActiveExtractionsProps {
+  excludeId?: string;
+}
 
 /**
  * Lists the current user's in-flight and just-finished background extractions.
@@ -40,14 +44,15 @@ function formatSourceLabel(rawLabel: string): string {
   return rawLabel;
 }
 
-export default function ActiveExtractions() {
+export default function ActiveExtractions({ excludeId }: ActiveExtractionsProps = {}) {
   const { t, language } = useI18n();
   const { jobs, dismissJob } = useExtractionJobs();
 
-  if (jobs.length === 0) return null;
+  const visibleJobs = excludeId ? jobs.filter(j => j.id !== excludeId) : jobs;
+  if (visibleJobs.length === 0) return null;
 
-  const anyRunning = jobs.some(j => j.status !== 'completed' && j.status !== 'failed');
-  const onlyFailed = jobs.every(j => j.status === 'failed');
+  const anyRunning = visibleJobs.some(j => j.status !== 'completed' && j.status !== 'failed');
+  const onlyFailed = visibleJobs.every(j => j.status === 'failed');
   const sectionTitle = anyRunning
     ? t('activeExtractions.title')
     : onlyFailed
@@ -60,7 +65,7 @@ export default function ActiveExtractions() {
         {sectionTitle}
       </span>
 
-      {jobs.map(job => {
+      {visibleJobs.map(job => {
         const isDone = job.status === 'completed';
         const isFailed = job.status === 'failed';
         const isRunning = !isDone && !isFailed;
@@ -146,9 +151,11 @@ export default function ActiveExtractions() {
               >
                 <X className="w-3.5 h-3.5" />
               </button>
-            ) : (
-              <ChefHat className="relative shrink-0 w-4 h-4 text-emerald-500/50" />
-            )}
+            ) : percent !== null ? (
+              <span className="relative shrink-0 text-xs font-semibold text-gray-400 dark:text-gray-500 tabular-nums">
+                {Math.round(percent)}%
+              </span>
+            ) : null}
           </div>
         );
       })}

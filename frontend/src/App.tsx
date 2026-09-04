@@ -421,7 +421,7 @@ export default function App() {
                 progress={latestRunning.progress}
                 variant={latestRunning.mode === 'photo' ? 'photo' : 'link'}
               />
-              <ActiveExtractions />
+              <ActiveExtractions excludeId={latestRunning.id} />
               <ErrorBanner
                 isPending={false}
                 jobStatus={jobStatus}
