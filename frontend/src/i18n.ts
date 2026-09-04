@@ -494,7 +494,7 @@ export const uiTranslations = {
         settings: 'Profil',
       },
       gamification: {
-        tabTitle: 'Fortschritt',
+        tabTitle: 'Profil',
         subtitle: 'Deine Koch-Erfolge, Level und Freunde',
         level: 'Level {level}',
         levelShort: 'Lvl {level}',
@@ -1685,7 +1685,7 @@ export const uiTranslations = {
         settings: 'Profile',
       },
       gamification: {
-        tabTitle: 'Progress',
+        tabTitle: 'Profile',
         subtitle: 'Your cooking achievements, level and friends',
         level: 'Level {level}',
         levelShort: 'Lvl {level}',
