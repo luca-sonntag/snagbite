@@ -15,9 +15,23 @@ export type JobStatus = 'pending' | 'scraping' | 'processing' | 'awaiting_frames
 export type JobKind = 'url' | 'photo' | 'remix';
 export type ProgressStage = 'queued' | 'scraping' | 'downloading_media' | 'extracting_frames' | 'reading_photos' | 'awaiting_frames' | 'extracting_recipe' | 'generating_cover' | 'finalizing';
 
+export interface RecipePreviewData {
+  thumbnailUrl?: string;
+  authorHandle?: string;
+  title?: string;
+  category?: string;
+  servings?: number;
+  totalTimeMinutes?: number;
+  ingredientCount?: number;
+  ingredientsSample?: string[];
+  stepCount?: number;
+  coverUrl?: string;
+}
+
 export interface ProgressData {
   percent: number;
   stage: ProgressStage;
+  preview?: RecipePreviewData;
 }
 
 export interface MediaRequest {
