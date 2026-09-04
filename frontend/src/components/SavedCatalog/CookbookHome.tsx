@@ -48,8 +48,8 @@ interface CookbookHomeProps {
 
 /**
  * Level 1 of the catalog: a browsable cookbook home instead of one long list.
- * Highlights context-recommended dishes at the top, followed by Collections,
- * Favorites, Categories, Labels, and dynamic discovery shelves.
+ * Unifies Collections, Favorites, Categories, and Labels at the top, followed by
+ * context-recommended and recent discovery shelves.
  */
 export default function CookbookHome({
   totalRecipes,
@@ -74,22 +74,6 @@ export default function CookbookHome({
 
   return (
     <div className="flex flex-col gap-7 pb-4 pt-1">
-      {/* Empfohlene Rezepte (Einzeilig horizontal, kontextbasiert) */}
-      {shelves.recommended && shelves.recommended.items.length >= 2 && (
-        <RecipeShelf
-          title={shelves.recommended.title}
-          subtitle={t('catalog.recommendations.subtitle')}
-          jobs={shelves.recommended.items}
-          totalCount={shelves.recommended.total}
-          formatTotalTime={formatTotalTime}
-          onOpenAll={() => onOpenList({ kind: 'recommended' })}
-          onOpenRecipe={onOpenRecipe}
-          isSelectMode={isSelectMode}
-          selectedIds={selectedIds}
-          bindLongPress={bindLongPress}
-        />
-      )}
-
       {/* 📂 Unified Organization Hub: Sammlungen, Favoriten, Kategorien & Labels */}
       <section className="flex flex-col gap-2.5">
         <div className="flex items-center justify-between gap-2">
@@ -158,6 +142,22 @@ export default function CookbookHome({
           onOpenList={onOpenList}
         />
       </section>
+
+      {/* Empfohlene Rezepte (Einzeilig horizontal, kontextbasiert) */}
+      {shelves.recommended && shelves.recommended.items.length >= 2 && (
+        <RecipeShelf
+          title={shelves.recommended.title}
+          subtitle={t('catalog.recommendations.subtitle')}
+          jobs={shelves.recommended.items}
+          totalCount={shelves.recommended.total}
+          formatTotalTime={formatTotalTime}
+          onOpenAll={() => onOpenList({ kind: 'recommended' })}
+          onOpenRecipe={onOpenRecipe}
+          isSelectMode={isSelectMode}
+          selectedIds={selectedIds}
+          bindLongPress={bindLongPress}
+        />
+      )}
 
       {/* Dynamic Discovery Shelves (Single Open Accordion: Neueste, Zuletzt geöffnet, Schnell gekocht) */}
       <DiscoveryAccordion
