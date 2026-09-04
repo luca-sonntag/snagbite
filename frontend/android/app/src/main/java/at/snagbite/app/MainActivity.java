@@ -14,8 +14,8 @@ import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
     // Safety net: if React never mounts (e.g. JS hydration error) we still hide
-    // the splash after 3s so the user isn't trapped. See AGENTS.md "Splash-Hang".
-    private static final long SPLASH_SAFETY_TIMEOUT_MS = 3000L;
+    // the splash after 12s so the user isn't trapped. See AGENTS.md "Splash-Hang".
+    private static final long SPLASH_SAFETY_TIMEOUT_MS = 12000L;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final Runnable splashSafetyTimeout = new Runnable() {
         @Override
