@@ -37,7 +37,7 @@ function buildRecipePreview(recipe: Recipe, fallbackThumbnail?: string, authorHa
     totalTimeMinutes: (recipe.prepTime || 0) + (recipe.cookTime || 0) || undefined,
     category: recipe.category || undefined,
     ingredientCount: allItems.length,
-    ingredientsSample: allItems.slice(0, 5).map((i) => `${i.amount ? i.amount + ' ' : ''}${i.unit ? i.unit + ' ' : ''}${i.name}`.trim()),
+    ingredientsSample: allItems.slice(0, 8).map((i) => (i.name || '').trim()),
     stepCount: recipe.instructions?.length || 0,
   };
 }

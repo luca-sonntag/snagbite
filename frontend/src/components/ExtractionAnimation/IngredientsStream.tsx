@@ -7,6 +7,12 @@ interface IngredientsStreamProps {
   compact?: boolean;
 }
 
+function cleanIngredientName(raw: string): string {
+  if (!raw) return '';
+  const cleaned = raw.replace(/^[\d½¼¾⅓⅔⅛\s\/\.,\-]+(?:\s*(?:g|kg|ml|l|tl|el|prise|stk|stück|packung|scheibe|scheiben|dose|tbsp|tsp|cup|cups|oz|lb|slice|slices)\b)?\s*/i, '').trim();
+  return cleaned || raw;
+}
+
 export default function IngredientsStream({ preview, compact = false }: IngredientsStreamProps) {
   const { t } = useI18n();
 
@@ -50,9 +56,9 @@ export default function IngredientsStream({ preview, compact = false }: Ingredie
           <span
             key={ing + idx}
             style={{ animationDelay: `${idx * 50}ms` }}
-            className="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-medium bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 border border-gray-100 dark:border-gray-800 animate-scale-pop shrink-0 whitespace-nowrap max-w-[140px] truncate"
+            className="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-medium bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 border border-gray-100 dark:border-gray-800 animate-scale-pop shrink-0 whitespace-nowrap max-w-[150px] truncate"
           >
-            {ing}
+            {cleanIngredientName(ing)}
           </span>
         ))}
         {remainingCount > 0 && (
