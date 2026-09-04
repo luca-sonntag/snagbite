@@ -751,6 +751,19 @@ export const uiTranslations = {
           finalizing: 'Fast fertig, wird serviert...'
         }
       },
+      preview: {
+        analyzingBadge: 'KI-Analyse läuft...',
+        photoImportBadge: 'Foto-Scan',
+        titleDiscovering: 'Rezeptname wird ermittelt...',
+        creatorUnknown: 'Rezept-Video',
+        ingredientsFound: '{count} Zutaten erkannt',
+        ingredientsSkeleton: 'Zutaten werden analysiert...',
+        stepsFound: '{count} Zubereitungsschritte strukturiert',
+        enhancingCover: 'Food-Cover wird veredelt...',
+        timeSuffix: 'Min.',
+        servingsSuffix: 'Portionen',
+        servingsSingle: 'Portion',
+      },
       backgroundNotice: 'Dein Rezept wird im Hintergrund vorbereitet. Du kannst die App verlassen – du wirst benachrichtigt, sobald es fertig ist.'
     },
     theme: {
@@ -1946,6 +1959,19 @@ export const uiTranslations = {
           generating_cover: 'Generating cover image...',
           finalizing: 'Almost ready, serving now...'
         }
+      },
+      preview: {
+        analyzingBadge: 'AI Analysis in progress...',
+        photoImportBadge: 'Photo Scan',
+        titleDiscovering: 'Determining recipe name...',
+        creatorUnknown: 'Recipe Video',
+        ingredientsFound: '{count} ingredients detected',
+        ingredientsSkeleton: 'Analyzing ingredients...',
+        stepsFound: '{count} steps structured',
+        enhancingCover: 'Enhancing food photography...',
+        timeSuffix: 'min',
+        servingsSuffix: 'servings',
+        servingsSingle: 'serving',
       },
       backgroundNotice: 'Your recipe is being prepared in the background. You can leave the app — we will notify you once it is ready.'
     },
