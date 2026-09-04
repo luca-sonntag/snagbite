@@ -99,12 +99,16 @@ Karten werden **ohne Rand** (`border-none`) und mit einem **minimalen, weichen S
 
 ### 4.3 Rezept-Import / Neu-Tab (`ExtractForm`)
 * **Header:** Konsistenter Seiten-Header mit Titel (*Neues Rezept*) und Subtitel (*Aus Video, Link oder Foto erstellen*).
-* **Visuelle Action-Kacheln (`ExtractModeTiles`):** 2 flache Kacheln nebeneinander (*Video & Link* vs. *Foto-Scanner*) mit dezenten Plattform-Punkten, Squircle-Icon-Boxen und sanftem Ring-Glow (`ring-2 ring-emerald-500/40`) im aktiven Zustand.
-* **Magic Clipboard Banner (`MagicClipboardBanner`):** Erscheint automatisch bei erkanntem Social-Link in der Zwischenablage mit Sparkle-Badge und 1-Klick-Import.
-* **Smarte Eingabeleiste (`UrlExtractInput`):** Großzügige, rahmenlose Box mit Sparkle-Icon, schnellem Clear-Button (`×`) und taktilem Inline-Chip (*📋 Einfügen*), wenn leer.
-* **Plattform-Badges:** Subtile, elegante Badges mit feinen Markenfarben (Instagram Pink, TikTok Cyan, YouTube Rot, Web Blau).
+* **Hauptansicht (Clean Flat Premium):** Keine Textfelder oder überladene Banner auf der Hauptseite. Ausschließlich 2 ruhige, edle Aktionskarten (`ExtractActionCards`):
+  * *Video oder Link importieren* (Film-Icon, Instagram, TikTok, YouTube, Web)
+  * *Kochbuch scannen* (Kamera-Icon, Foto-Zähler-Badge)
+* **Bottom Sheets für Eingabe (`UrlExtractSheet` & `PhotoExtractSheet`):**
+  * Klick auf eine Aktionskarte öffnet ein flüssiges Bottom Sheet (`placement="bottom"`).
+  * `UrlExtractSheet`: Saubere URL-Eingabe mit `Link2`-Icon, *„Einfügen“*-Button, subtilen Plattform-Icons und `BookOpen`-Submit (*„Rezept erstellen“*).
+  * `PhotoExtractSheet`: Foto-Upload-Grid (`PhotoExtractGrid`) mit Kamera- & Galerie-Buttons und Bild-Vorschau.
+* **Keine Emojis:** Keine Sparkles, Emojis oder verspielte Zauber-Formulierungen. Reine, elegante Typografie und professionelle Lucide-Icons.
 * **Beispiel-Karten:** Clean Flat Style 2-Spalten-Kacheln mit haptischem Feedback (`active:scale-95`).
-* **Akkordeons & Tipps:** Flache, rahmenlose Boxen (`bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]`) mit `rounded-2xl` Step-Karten und kompakter `QuickShareTipCard` im sichtbaren Bereich.
+* **Akkordeons & Tipps:** Flache, rahmenlose Boxen (`bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]`) mit `rounded-2xl` Step-Karten.
 
 ---
 
