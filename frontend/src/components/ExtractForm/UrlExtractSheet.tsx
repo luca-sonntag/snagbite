@@ -1,0 +1,138 @@
+import React from 'react';
+import { Drawer } from '@heroui/react';
+import { X } from 'lucide-react';
+import { useI18n } from '../../context/I18nContext';
+import { hapticLight } from '../../utils/haptics';
+import UrlExtractInput from './UrlExtractInput';
+import ExtractSubmitButton from './ExtractSubmitButton';
+import ExtractQuotaBadge from './ExtractQuotaBadge';
+import PremiumHint from '../PremiumHint';
+import type { UrlExtractSheetProps } from './types';
+
+export const UrlExtractSheet: React.FC<UrlExtractSheetProps> = ({
+  isOpen,
+  onClose,
+  url,
+  setUrl,
+  urlError,
+  validateUrl,
+  isPending,
+  canPaste,
+  onPaste,
+  submitDisabled,
+  extractionLimitReached,
+  cookbookFull,
+  isWatchingAd,
+  setIsWatchingAd,
+  handleFormSubmit,
+  claimRewardedCredit,
+  limitStatus,
+  isRealPremium,
+  onOpenPremiumModal,
+}) => {
+  const { t } = useI18n();
+
+  return (
+    <Drawer>
+      <Drawer.Backdrop
+        isOpen={isOpen}
+        onOpenChange={(open) => {
+          if (!open) onClose();
+        }}
+        className="!z-[100]"
+      >
+        <Drawer.Content placement="bottom" className="!z-[100]">
+          <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
+            <Drawer.Handle />
+
+            <Drawer.Header className="pb-3 mb-1">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white">
+                    {t('form.sheet.linkTitle')}
+                  </Drawer.Heading>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    {t('form.sheet.linkSubtitle')}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    hapticLight();
+                    onClose();
+                  }}
+                  className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 border-none cursor-pointer transition-colors"
+                  aria-label="Close"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </Drawer.Header>
+
+            <Drawer.Body className="overflow-y-auto py-2 flex flex-col gap-4">
+              <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
+                <UrlExtractInput
+                  url={url}
+                  setUrl={setUrl}
+                  urlError={urlError}
+                  validateUrl={validateUrl}
+                  isPending={isPending}
+                  canPaste={canPaste}
+                  onPaste={onPaste}
+                />
+
+                <ExtractSubmitButton
+                  mode="link"
+                  isPending={isPending}
+                  isUploadingPhotos={false}
+                  submitDisabled={submitDisabled}
+                  extractionLimitReached={extractionLimitReached}
+                  cookbookFull={cookbookFull}
+                  isWatchingAd={isWatchingAd}
+                  setIsWatchingAd={setIsWatchingAd}
+                  url={url}
+                  photosCount={0}
+                  handleFormSubmit={handleFormSubmit}
+                  claimRewardedCredit={claimRewardedCredit}
+                />
+
+                {cookbookFull ? (
+                  <div className="flex justify-center -mt-1">
+                    <PremiumHint
+                      variant="inline"
+                      onClick={onOpenPremiumModal}
+                      label={t('premium.hint.catalogFull', {
+                        count: limitStatus?.savedRecipes ?? 0,
+                        limit: limitStatus?.maxSavedRecipes ?? 5,
+                      })}
+                    />
+                  </div>
+                ) : extractionLimitReached ? (
+                  <div className="flex flex-col gap-2.5 -mt-1">
+                    <PremiumHint
+                      variant="banner"
+                      onClick={onOpenPremiumModal}
+                      label={t('premium.hint.extractionLimitReached', {
+                        used: limitStatus?.used ?? 0,
+                        limit: limitStatus?.limit ?? 0,
+                      })}
+                      cta={t('premium.hint.upgrade')}
+                    />
+                  </div>
+                ) : (
+                  <ExtractQuotaBadge
+                    limitStatus={limitStatus}
+                    isRealPremium={isRealPremium}
+                  />
+                )}
+              </form>
+            </Drawer.Body>
+          </Drawer.Dialog>
+        </Drawer.Content>
+      </Drawer.Backdrop>
+    </Drawer>
+  );
+};
+
+export default UrlExtractSheet;
