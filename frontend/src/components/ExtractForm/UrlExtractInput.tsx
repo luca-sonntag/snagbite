@@ -1,6 +1,6 @@
 import React from 'react';
 import { TextField, Label, Input, FieldError } from '@heroui/react';
-import { Sparkles, Clipboard, X } from 'lucide-react';
+import { Link2, Clipboard, X } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { hapticLight } from '../../utils/haptics';
 import { PlatformIcon } from '../SavedCatalog/PlatformIcon';
@@ -31,7 +31,7 @@ export const UrlExtractInput: React.FC<UrlExtractInputProps> = ({
       >
         <Label className="sr-only">{t('form.urlLabel')}</Label>
         <div className="relative flex items-center">
-          <Sparkles className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500 pointer-events-none" />
+          <Link2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
           <Input
             placeholder={t('form.urlPlaceholderShort')}
             className="w-full !bg-gray-100/90 dark:!bg-gray-800/90 border-none rounded-2xl pl-10 !pr-24 py-3.5 text-sm text-gray-900 dark:text-white shadow-none focus:ring-2 focus:ring-emerald-500/25 focus:outline-none transition-all"

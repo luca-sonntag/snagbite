@@ -57,17 +57,10 @@ export interface ExtractDemoRecipesProps {
   onDemoClick: (url: string) => void;
 }
 
-export interface ExtractModeTilesProps {
-  mode: ExtractMode;
-  setMode: (mode: ExtractMode) => void;
-  photosCount: number;
-  disabled?: boolean;
-}
-
-export interface MagicClipboardBannerProps {
-  detectedUrl: string;
-  onApply: (url: string) => void;
-  onDismiss: () => void;
+export interface ExtractActionCardsProps {
+  onOpenLinkSheet: () => void;
+  onOpenPhotoSheet: () => void;
+  photosCount?: number;
   disabled?: boolean;
 }
 
@@ -78,8 +71,42 @@ export interface ExtractQuotaBadgeProps {
   maxConcurrent?: number;
 }
 
-export interface QuickShareTipCardProps {
-  onLearnMore?: () => void;
+export interface UrlExtractSheetProps {
+  isOpen: boolean;
+  onClose: () => void;
+  url: string;
+  setUrl: (url: string) => void;
+  urlError: string;
+  validateUrl: (url: string) => boolean;
+  isPending: boolean;
+  canPaste: boolean;
+  onPaste: () => void;
+  submitDisabled: boolean;
+  extractionLimitReached: boolean;
+  cookbookFull: boolean;
+  isWatchingAd: boolean;
+  setIsWatchingAd: (watching: boolean) => void;
+  handleFormSubmit: (e: React.FormEvent) => void;
+  claimRewardedCredit?: () => Promise<boolean>;
+  limitStatus?: LimitStatus | null;
+  isRealPremium?: boolean;
+  onOpenPremiumModal: () => void;
+}
+
+export interface PhotoExtractSheetProps {
+  isOpen: boolean;
+  onClose: () => void;
+  photos: File[];
+  photoPreviews: string[];
+  cameraInputRef: React.RefObject<HTMLInputElement | null>;
+  galleryInputRef: React.RefObject<HTMLInputElement | null>;
+  onPhotoChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemovePhoto: (index: number) => void;
+  onOpenPicker: (ref: React.RefObject<HTMLInputElement | null>) => void;
+  isPending: boolean;
+  isUploadingPhotos: boolean;
+  submitDisabled: boolean;
+  handleFormSubmit: (e: React.FormEvent) => void;
 }
 
 export interface UseExtractFormProps {

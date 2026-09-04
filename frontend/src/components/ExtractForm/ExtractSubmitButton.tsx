@@ -1,12 +1,12 @@
 import React from 'react';
 import { Button, Spinner } from '@heroui/react';
-import { Play, Sparkles } from 'lucide-react';
+import { Play, BookOpen } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { showRewardedAd } from '../../utils/ads';
 import type { ExtractMode } from './types';
 
 interface ExtractSubmitButtonProps {
-  mode: ExtractMode;
+  mode?: ExtractMode;
   isPending: boolean;
   isUploadingPhotos: boolean;
   submitDisabled: boolean;
@@ -21,7 +21,7 @@ interface ExtractSubmitButtonProps {
 }
 
 export const ExtractSubmitButton: React.FC<ExtractSubmitButtonProps> = ({
-  mode,
+  mode: _mode,
   isPending,
   isUploadingPhotos,
   submitDisabled,
@@ -104,8 +104,8 @@ export const ExtractSubmitButton: React.FC<ExtractSubmitButtonProps> = ({
             </>
           ) : (
             <>
-              <Sparkles className="w-4 h-4" />
-              <span>{mode === 'link' ? t('form.btnSubmitMagic') : t('form.btnSubmit')}</span>
+              <BookOpen className="w-4 h-4" />
+              <span>{t('form.btnSubmit')}</span>
             </>
           )}
         </span>
