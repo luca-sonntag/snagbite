@@ -96,14 +96,20 @@ export default function ActiveExtractions() {
               />
             )}
 
-            <div className={`relative shrink-0 w-9 h-9 rounded-2xl flex items-center justify-center ${
+            <div className={`relative shrink-0 w-9 h-9 rounded-2xl overflow-hidden flex items-center justify-center ${
               isDone
                 ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
                 : isFailed
                   ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
                   : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
             }`}>
-              {isDone ? (
+              {job.progress?.preview?.thumbnailUrl ? (
+                <img
+                  src={job.progress.preview.thumbnailUrl}
+                  alt="Thumb"
+                  className="w-full h-full object-cover object-center"
+                />
+              ) : isDone ? (
                 <CheckCircle2 className="w-5 h-5" />
               ) : isFailed ? (
                 <AlertCircle className="w-5 h-5" />
@@ -115,8 +121,8 @@ export default function ActiveExtractions() {
             <div className="relative min-w-0 flex-1">
               <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
                 {isDone
-                  ? (job.title || t('activeExtractions.ready'))
-                  : displayLabel}
+                  ? (job.title || job.progress?.preview?.title || t('activeExtractions.ready'))
+                  : (job.progress?.preview?.title || displayLabel)}
               </p>
               <p className={`text-xs leading-relaxed ${
                 isFailed ? 'text-gray-500 dark:text-gray-400 whitespace-normal break-words font-normal mt-0.5' : 'text-gray-500 dark:text-gray-400 truncate font-medium'

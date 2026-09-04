@@ -141,6 +141,8 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
             jobStatus={jobStatus}
             progress={progress}
             variant={mode === 'photo' ? 'photo' : 'link'}
+            photoPreviewUrl={mode === 'photo' ? photoPreviews[0] : undefined}
+            compact={!isRealPremium}
           />
           {!isRealPremium && <ExtractionAdCard isActive={isActive} />}
         </div>
