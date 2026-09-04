@@ -2,6 +2,7 @@ import React from 'react';
 import { Sparkles, BookOpen, Calendar, ShoppingCart, User } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { hapticSelection } from '../utils/haptics';
+import { preloadChunk } from '../utils/chunkPreloader';
 import type { AppBottomNavProps } from '../types/app';
 
 export const AppBottomNav: React.FC<AppBottomNavProps> = ({
@@ -106,6 +107,8 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
                 hapticSelection();
                 onNavigate('meal-planner');
               }}
+              onPointerDown={() => preloadChunk('planner')}
+              onMouseEnter={() => preloadChunk('planner')}
               className={`${navButtonBase} ${
                 activeView === 'meal-planner'
                   ? 'text-emerald-600 dark:text-emerald-400 font-bold'
@@ -130,6 +133,8 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
                 hapticSelection();
                 onNavigate('shopping-list');
               }}
+              onPointerDown={() => preloadChunk('shopping')}
+              onMouseEnter={() => preloadChunk('shopping')}
               className={`${navButtonBase} ${
                 activeView === 'shopping-list'
                   ? 'text-emerald-600 dark:text-emerald-400 font-bold'
@@ -154,6 +159,8 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
                 hapticSelection();
                 onNavigate('progress');
               }}
+              onPointerDown={() => preloadChunk('profile')}
+              onMouseEnter={() => preloadChunk('profile')}
               className={`${navButtonBase} ${
                 activeView === 'settings' || activeView === 'progress'
                   ? 'text-emerald-600 dark:text-emerald-400 font-bold'

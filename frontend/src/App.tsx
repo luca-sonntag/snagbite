@@ -40,6 +40,7 @@ import { useAppHistory } from './hooks/useAppHistory';
 import { useAppAds } from './hooks/useAppAds';
 import { useAppNativeListeners } from './hooks/useAppNativeListeners';
 import { useMealPlanBadge } from './hooks/useMealPlanBadge';
+import { preloadSecondaryChunks } from './utils/chunkPreloader';
 
 function ViewFallback() {
   return (
@@ -284,6 +285,12 @@ export default function App() {
   }, []);
 
   const isAppReady = !authLoading && (!user || historyLoaded || emergencyReady);
+
+  useEffect(() => {
+    if (splashFinished) {
+      preloadSecondaryChunks();
+    }
+  }, [splashFinished]);
 
   return (
     <>
