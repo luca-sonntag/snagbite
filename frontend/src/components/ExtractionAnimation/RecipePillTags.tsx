@@ -8,7 +8,7 @@ interface RecipePillTagsProps {
   compact?: boolean;
 }
 
-export default function RecipePillTags({ preview, compact = false }: RecipePillTagsProps) {
+export default function RecipePillTags({ preview, compact: _compact = false }: RecipePillTagsProps) {
   const { t, language } = useI18n();
 
   const hasAnyMeta = !!(
@@ -20,8 +20,9 @@ export default function RecipePillTags({ preview, compact = false }: RecipePillT
 
   if (!hasAnyMeta) {
     return (
-      <div className="flex items-center gap-1.5 h-7 overflow-hidden flex-nowrap">
+      <div className="flex flex-wrap items-center gap-1.5 min-h-[54px] max-h-[56px] overflow-hidden">
         <div className="w-20 h-6 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse shrink-0" />
+        <div className="w-24 h-6 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse shrink-0" />
         <div className="w-24 h-6 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse shrink-0" />
         <div className="w-20 h-6 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse shrink-0" />
       </div>
@@ -55,7 +56,7 @@ export default function RecipePillTags({ preview, compact = false }: RecipePillT
     });
   }
 
-  if (preview?.stepCount && (!compact || pills.length < 3)) {
+  if (preview?.stepCount) {
     pills.push({
       key: 'steps',
       icon: <ListChecks className="w-3.5 h-3.5" />,
@@ -64,7 +65,7 @@ export default function RecipePillTags({ preview, compact = false }: RecipePillT
   }
 
   return (
-    <div className="flex items-center gap-1.5 h-7 overflow-x-auto no-scrollbar flex-nowrap select-none">
+    <div className="flex flex-wrap items-center gap-1.5 min-h-[54px] max-h-[56px] overflow-hidden select-none">
       {pills.map((pill, idx) => (
         <span
           key={pill.key}
