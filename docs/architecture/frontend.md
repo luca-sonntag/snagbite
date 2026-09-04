@@ -33,7 +33,7 @@
 ## 2. 📚 3-Ebenen-Katalog (SavedCatalog)
 
 Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
-1. **Kochbuch-Home (`#/history`, `CookbookHome.tsx`):** Browsebare Startseite. Sucheinstieg, dynamisches kontextbasiertes Empfehlungs-Regal (`RecipeShelf.tsx` ganz oben als visueller Appetit- und Inspirations-Hook, gespeist aus `@cookbook/shared`), gefolgt vom **einheitlichen Organisations-Hub** (⭐ Favoriten als permanenter Smart-Folder Kachel #1, 📂 benutzerdefinierte Sammlungs-Kacheln `CollectionTile`, ➕ "Neue Sammlung" sowie direkt darunter eine kompakte, kombinierte Leiste mit 🍲 Kategorie- und 🏷️ Label-/Tag-Chips `CategoryLabelBar` mit Rezept-Counts), **Single-Open-Akkordeon für Entdeckungs-Shelves** (`DiscoveryAccordion.tsx`: Zuletzt gespeichert [2-reihig], Zuletzt geöffnet [1-reihig], Schnell gekocht [1-reihig] – immer genau ein Regal zur Zeit geöffnet mit Umschalt-Headern und `Alle X >` Quick-Link) und "Alle N Rezepte ansehen".
+1. **Kochbuch-Home (`#/history`, `CookbookHome.tsx`):** Browsebare Startseite. Sucheinstieg, **einheitlicher Organisations-Hub** ganz oben (⭐ Favoriten als permanenter Smart-Folder Kachel #1, 📂 benutzerdefinierte Sammlungs-Kacheln `CollectionTile`, ➕ "Neue Sammlung" sowie direkt darunter eine kompakte, kombinierte Leiste mit 🍲 Kategorie- und 🏷️ Label-/Tag-Chips `CategoryLabelBar` mit Rezept-Counts), dynamisches kontextbasiertes Empfehlungs-Regal (`RecipeShelf.tsx` ganz oben, gespeist aus `@cookbook/shared`), **Single-Open-Akkordeon für Entdeckungs-Shelves** (`DiscoveryAccordion.tsx`: Zuletzt gespeichert [2-reihig], Zuletzt geöffnet [1-reihig], Schnell gekocht [1-reihig] – immer genau ein Regal zur Zeit geöffnet mit Umschalt-Headern und `Alle X >` Quick-Link) und "Alle N Rezepte ansehen".
 2. **Listen-Ebene (`#/history/list...`, `SavedCatalog/index.tsx`):** Vollständige, filter-/sortierbare Liste mit `CatalogFilters.tsx` als Sticky-Header, `FilterSheet` und wahlweise 2-Spalten-Poster-Grid (`viewMode: 'card'`) oder dichten Zeilen (`viewMode: 'compact'`). Nur hier existieren Multi-Select und `BulkActionBar`.
 3. **Detailansicht (`#/history/<jobId>`):** `RecipeDetails`.
 
@@ -196,4 +196,14 @@ Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird
   * Beim Hinzufügen von Zutaten aus einem Rezept oder im Batch-Modus aus dem Wochenplaner gleicht `findPantryStock(ingredient, pantryItems)` jede Zutat live mit dem echten Vorratsspeicher ab.
   * Zeigt drei klare Zustände: Vorhandene Vorratsartikel (mit `<Package />`-Badge, z. B. `200 g im Vorrat`, vorausgewählt abgewählt), statische Grundzutaten/Staples (neutrales `VORRAT`-Badge, abgewählt) und zu kaufende Zutaten (vorausgewählt angewählt).
 
+---
 
+## 9. 🍳 Lebendige Rezept-Blaupause: Progressiver Extraktions-Screen (`ExtractionAnimation/`)
+
+* **Live Materializing Recipe Card:** Statt eines statischen Ladebalkens baut sich die Rezeptkarte Schritt für Schritt synchron mit den Extraktions-Meilensteinen auf:
+  1. **Phase 1 (Blaupause):** Plattform-Badge (Instagram, TikTok, YouTube Shorts, Foto-Scan), animierter Laser-Scanner (`animate-scanning-beam`), Skeletons für Titel und Meta-Badges. Bei Foto-Imports wird das Originalfoto sofort ab Millisekunde 0 eingeblendet.
+  2. **Phase 2 (Entdeckung):** Post-Thumbnail & Creator-Handle klinken sich ein.
+  3. **Phase 3 (Rezept-Materialisierung):** Rezepttitel blendet ein, Meta-Pills (Zeit, Portionen, Kategorie) ploppen mit taktilem Micro-Bounce auf (`animate-scale-pop`, `hapticLight()`), Zutaten-Chips materialisieren sich mit Mengen und Zähler-Badge.
+  4. **Phase 4 (Cover & Finalisierung):** Generiertes KI-Food-Cover schärft sich ein, Schritt-Zähler bestätigt die Strukturierung.
+* **Architektur:** Modularisiert in Subkomponenten (`RecipeCoverPreview.tsx`, `RecipePillTags.tsx`, `IngredientsStream.tsx`, `ExtractionProgressBar.tsx`, `ProgressiveRecipeCard.tsx`, `useProgressiveRecipe.ts`) unter 150 Zeilen.
+* **AdMob-Harmonisierung:** Im Free-Tier wechselt die Karte automatisch in den `compact`-Modus, sodass sie harmonisch über dem MREC-Ad-Banner Platz findet.
