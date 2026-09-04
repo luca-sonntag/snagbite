@@ -21,7 +21,7 @@ export default function IngredientsStream({ preview, compact = false }: Ingredie
           <Utensils className="w-3.5 h-3.5" />
           <span>{t('job.preview.ingredientsSkeleton')}</span>
         </div>
-        <div className="flex flex-wrap gap-1.5 overflow-hidden max-h-[56px]">
+        <div className="flex-1 flex flex-wrap content-center gap-1.5 overflow-hidden max-h-[56px]">
           <div className="w-24 h-6 rounded-xl bg-gray-100 dark:bg-gray-800/80 animate-pulse shrink-0" />
           <div className="w-28 h-6 rounded-xl bg-gray-100 dark:bg-gray-800/80 animate-pulse shrink-0" />
           <div className="w-20 h-6 rounded-xl bg-gray-100 dark:bg-gray-800/80 animate-pulse shrink-0" />
@@ -45,7 +45,7 @@ export default function IngredientsStream({ preview, compact = false }: Ingredie
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-1.5 overflow-hidden max-h-[56px]">
+      <div className="flex-1 flex flex-wrap content-center gap-1.5 overflow-hidden max-h-[56px]">
         {visibleSamples.map((ing, idx) => (
           <span
             key={ing + idx}

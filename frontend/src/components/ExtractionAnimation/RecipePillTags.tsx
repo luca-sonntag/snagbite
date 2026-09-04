@@ -20,7 +20,7 @@ export default function RecipePillTags({ preview, compact: _compact = false }: R
 
   if (!hasAnyMeta) {
     return (
-      <div className="flex flex-wrap items-center gap-1.5 min-h-[54px] max-h-[56px] overflow-hidden">
+      <div className="flex flex-wrap items-center content-center gap-1.5 min-h-[54px] max-h-[56px] overflow-hidden">
         <div className="w-20 h-6 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse shrink-0" />
         <div className="w-24 h-6 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse shrink-0" />
         <div className="w-24 h-6 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse shrink-0" />
@@ -65,7 +65,7 @@ export default function RecipePillTags({ preview, compact: _compact = false }: R
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5 min-h-[54px] max-h-[56px] overflow-hidden select-none">
+    <div className="flex flex-wrap items-center content-center gap-1.5 min-h-[54px] max-h-[56px] overflow-hidden select-none">
       {pills.map((pill, idx) => (
         <span
           key={pill.key}
