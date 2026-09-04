@@ -1,23 +1,17 @@
 import React, { useState } from 'react';
-import { Card } from '@heroui/react';
 import { PlusCircle } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import { useExtractionJobs } from '../../context/ExtractionJobsContext';
 import { PageHeader } from '../PageHeader';
 import PremiumModal from '../PremiumModal';
-import PremiumHint from '../PremiumHint';
 import PremiumUpgradeCard from '../PremiumUpgradeCard';
 import ExtractionAnimation from '../ExtractionAnimation';
 import ExtractionAdCard from '../ExtractionAdCard';
 import { useExtractForm } from './useExtractForm';
-import PhotoExtractGrid from './PhotoExtractGrid';
-import UrlExtractInput from './UrlExtractInput';
-import ExtractModeTiles from './ExtractModeTiles';
-import MagicClipboardBanner from './MagicClipboardBanner';
-import ExtractQuotaBadge from './ExtractQuotaBadge';
-import ExtractSubmitButton from './ExtractSubmitButton';
-import QuickShareTipCard from './QuickShareTipCard';
+import ExtractActionCards from './ExtractActionCards';
+import UrlExtractSheet from './UrlExtractSheet';
+import PhotoExtractSheet from './PhotoExtractSheet';
 import ExtractDemoRecipes from './ExtractDemoRecipes';
 import ExtractHelpAccordions from './ExtractHelpAccordions';
 import type { ExtractFormProps } from './types';
@@ -47,6 +41,8 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
   const { activeCount: liveActiveCount } = useExtractionJobs();
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isWatchingAd, setIsWatchingAd] = useState(false);
+  const [isLinkSheetOpen, setIsLinkSheetOpen] = useState(false);
+  const [isPhotoSheetOpen, setIsPhotoSheetOpen] = useState(false);
 
   const isRealPremium = user?.app_metadata?.tier === 'premium';
   const cookbookFull = !isRealPremium && !!limitStatus?.cookbookFull;
@@ -57,7 +53,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
   const maxConcurrent = limitStatus?.maxConcurrent ?? 1;
   const showConcurrency = isPremium && maxConcurrent > 1;
   const atConcurrencyLimit = showConcurrency && liveActiveCount >= maxConcurrent;
-  const submitDisabled = blockedByLimit || atConcurrencyLimit || (mode === 'photo' && photos.length === 0);
+  const submitDisabled = blockedByLimit || atConcurrencyLimit;
 
   const {
     canPaste,
@@ -66,13 +62,9 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
     galleryInputRef,
     photoPreviews,
     handlePaste,
-    handleDemoClick,
     handlePhotoChange,
     removePhoto,
     openPicker,
-    detectedClipboardUrl,
-    applyClipboardUrl,
-    dismissClipboardBanner,
   } = useExtractForm({
     url,
     setUrl,
@@ -91,6 +83,33 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
     !isPremium && !trialLoading && hasTrialAvailable && trialDays > 0 && !trialDismissed;
   const hideUpgradeCard = isRealPremium || trialLoading || trialBannerShowing;
 
+  const handleDemoClick = (demoUrl: string) => {
+    if (isPending || atConcurrencyLimit) return;
+    if (blockedByLimit) {
+      setIsPremiumModalOpen(true);
+      return;
+    }
+    setMode('link');
+    setUrl(demoUrl);
+    validateUrl(demoUrl);
+    setIsLinkSheetOpen(true);
+  };
+
+  const handleSheetSubmit = (e: React.FormEvent) => {
+    if (atConcurrencyLimit) {
+      e.preventDefault();
+      return;
+    }
+    if (blockedByLimit) {
+      e.preventDefault();
+      setIsPremiumModalOpen(true);
+      return;
+    }
+    setIsLinkSheetOpen(false);
+    setIsPhotoSheetOpen(false);
+    handleFormSubmit(e);
+  };
+
   return (
     <div className={`flex flex-col gap-4 w-full ${isPending ? 'flex-1 justify-between min-h-0' : ''}`}>
       {!isPending && (
@@ -108,17 +127,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
 
       {errorBanner}
 
-      {/* Magic Clipboard Quick-Import Banner */}
-      {!isPending && mode === 'link' && detectedClipboardUrl && (
-        <MagicClipboardBanner
-          detectedUrl={detectedClipboardUrl}
-          onApply={applyClipboardUrl}
-          onDismiss={dismissClipboardBanner}
-          disabled={submitDisabled}
-        />
-      )}
-
-      {/* Extraction Animation (during active job) */}
+      {/* Extraction Animation (active job) */}
       {isPending ? (
         <div className="flex flex-col w-full flex-1 justify-between gap-3 min-h-0">
           <div className="flex-1 flex items-center justify-center min-h-0 py-1">
@@ -139,129 +148,70 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
           )}
         </div>
       ) : (
-        <div className="flex flex-col gap-3.5 w-full">
-          {/* Visual Action Tiles (Mode Switcher) */}
-          <ExtractModeTiles
-            mode={mode}
-            setMode={setMode}
+        <div className="flex flex-col gap-4 w-full">
+          {/* Main Action Cards (Clean Flat Premium) */}
+          <ExtractActionCards
+            onOpenLinkSheet={() => {
+              setMode('link');
+              setIsLinkSheetOpen(true);
+            }}
+            onOpenPhotoSheet={() => {
+              setMode('photo');
+              setIsPhotoSheetOpen(true);
+            }}
             photosCount={photos.length}
             disabled={isPending}
           />
 
-          {/* Input Card */}
-          <Card className="!bg-white dark:!bg-gray-900 p-5 sm:p-6 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
-            <form
-              onSubmit={(e) => {
-                if (atConcurrencyLimit) {
-                  e.preventDefault();
-                  return;
-                }
-                if (blockedByLimit) {
-                  e.preventDefault();
-                  setIsPremiumModalOpen(true);
-                  return;
-                }
-                handleFormSubmit(e);
-              }}
-              className="flex flex-col gap-3.5"
-            >
-              {mode === 'photo' ? (
-                <>
-                  <PhotoExtractGrid
-                    photos={photos}
-                    photoPreviews={photoPreviews}
-                    cameraInputRef={cameraInputRef}
-                    galleryInputRef={galleryInputRef}
-                    onPhotoChange={handlePhotoChange}
-                    onRemovePhoto={removePhoto}
-                    onOpenPicker={openPicker}
-                  />
-                  <p className="text-center text-[11px] leading-relaxed text-gray-400 dark:text-gray-500 pt-1">
-                    {t('form.photo.tips')}
-                  </p>
-                </>
-              ) : (
-                <UrlExtractInput
-                  url={url}
-                  setUrl={setUrl}
-                  urlError={urlError}
-                  validateUrl={validateUrl}
-                  isPending={isPending}
-                  canPaste={canPaste}
-                  onPaste={handlePaste}
-                />
-              )}
-
-              {/* Action Button: Rewarded Video Ad (if limit reached) vs Submit */}
-              <ExtractSubmitButton
-                mode={mode}
-                isPending={isPending}
-                isUploadingPhotos={isUploadingPhotos}
-                submitDisabled={submitDisabled}
-                extractionLimitReached={extractionLimitReached}
-                cookbookFull={cookbookFull}
-                isWatchingAd={isWatchingAd}
-                setIsWatchingAd={setIsWatchingAd}
-                url={url}
-                photosCount={photos.length}
-                handleFormSubmit={handleFormSubmit}
-                claimRewardedCredit={claimRewardedCredit}
-              />
-
-              {/* Quota & Limit Indicators */}
-              {cookbookFull ? (
-                <div className="flex justify-center -mt-1">
-                  <PremiumHint
-                    variant="inline"
-                    onClick={() => setIsPremiumModalOpen(true)}
-                    label={t('premium.hint.catalogFull', {
-                      count: limitStatus?.savedRecipes ?? 0,
-                      limit: limitStatus?.maxSavedRecipes ?? 5,
-                    })}
-                  />
-                </div>
-              ) : extractionLimitReached ? (
-                <div className="flex flex-col gap-2.5 -mt-1">
-                  <PremiumHint
-                    variant="banner"
-                    onClick={() => setIsPremiumModalOpen(true)}
-                    label={t('premium.hint.extractionLimitReached', {
-                      used: limitStatus?.used ?? 0,
-                      limit: limitStatus?.limit ?? 0,
-                    })}
-                    cta={t('premium.hint.upgrade')}
-                  />
-                </div>
-              ) : (
-                <ExtractQuotaBadge
-                  limitStatus={limitStatus}
-                  isRealPremium={isRealPremium}
-                  activeCount={liveActiveCount}
-                  maxConcurrent={maxConcurrent}
-                />
-              )}
-
-              {/* Premium Modal */}
-              <PremiumModal isOpen={isPremiumModalOpen} onOpenChange={setIsPremiumModalOpen} />
-            </form>
-          </Card>
-        </div>
-      )}
-
-      {/* Quick Share Tip & Accordions — hidden during active extraction */}
-      {!isPending && mode === 'link' && (
-        <>
-          <QuickShareTipCard
-            onLearnMore={() => {
-              const el = document.getElementById('share-help-accordion');
-              el?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          />
+          {/* Inspiration / Demo Recipes */}
           <ExtractDemoRecipes onDemoClick={handleDemoClick} />
-          <div id="share-help-accordion">
-            <ExtractHelpAccordions />
-          </div>
-        </>
+
+          {/* Step-by-Step Help Guide */}
+          <ExtractHelpAccordions />
+
+          {/* Video / Link Bottom Sheet */}
+          <UrlExtractSheet
+            isOpen={isLinkSheetOpen}
+            onClose={() => setIsLinkSheetOpen(false)}
+            url={url}
+            setUrl={setUrl}
+            urlError={urlError}
+            validateUrl={validateUrl}
+            isPending={isPending}
+            canPaste={canPaste}
+            onPaste={handlePaste}
+            submitDisabled={submitDisabled}
+            extractionLimitReached={extractionLimitReached}
+            cookbookFull={cookbookFull}
+            isWatchingAd={isWatchingAd}
+            setIsWatchingAd={setIsWatchingAd}
+            handleFormSubmit={handleSheetSubmit}
+            claimRewardedCredit={claimRewardedCredit}
+            limitStatus={limitStatus}
+            isRealPremium={isRealPremium}
+            onOpenPremiumModal={() => setIsPremiumModalOpen(true)}
+          />
+
+          {/* Photo Scanner Bottom Sheet */}
+          <PhotoExtractSheet
+            isOpen={isPhotoSheetOpen}
+            onClose={() => setIsPhotoSheetOpen(false)}
+            photos={photos}
+            photoPreviews={photoPreviews}
+            cameraInputRef={cameraInputRef}
+            galleryInputRef={galleryInputRef}
+            onPhotoChange={handlePhotoChange}
+            onRemovePhoto={removePhoto}
+            onOpenPicker={openPicker}
+            isPending={isPending}
+            isUploadingPhotos={isUploadingPhotos}
+            submitDisabled={submitDisabled}
+            handleFormSubmit={handleSheetSubmit}
+          />
+
+          {/* Premium Modal */}
+          <PremiumModal isOpen={isPremiumModalOpen} onOpenChange={setIsPremiumModalOpen} />
+        </div>
       )}
     </div>
   );
