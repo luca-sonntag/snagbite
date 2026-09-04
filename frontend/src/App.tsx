@@ -13,6 +13,7 @@ import NotificationPrompt from './components/NotificationPrompt';
 import AppTopBanners from './components/AppTopBanners';
 import AppBottomNav from './components/AppBottomNav';
 import AppOverlays from './components/AppOverlays';
+import AppSplashScreen from './components/AppSplashScreen';
 
 // Lazy-loaded heavy views
 const RecipeDetails = lazy(() => import('./components/RecipeDetails'));
@@ -41,8 +42,11 @@ import { useMealPlanBadge } from './hooks/useMealPlanBadge';
 
 function ViewFallback() {
   return (
-    <div className="w-full flex items-center justify-center py-16">
-      <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent" />
+    <div className="w-full flex flex-col items-center justify-center py-20 gap-3">
+      <div className="relative w-8 h-8 flex items-center justify-center">
+        <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" />
+        <div className="animate-spin rounded-full h-7 w-7 border-2 border-emerald-500 border-t-transparent" />
+      </div>
     </div>
   );
 }
@@ -268,30 +272,40 @@ export default function App() {
     triggerExtraction(url);
   };
 
-  // Auth gate
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#064e3b]">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-white/70 border-t-transparent" />
-      </div>
-    );
-  }
+  const [splashFinished, setSplashFinished] = useState(false);
+  const [emergencyReady, setEmergencyReady] = useState(false);
 
-  if (!user && showOnboarding) {
-    return (
-      <Suspense fallback={null}>
-        <WelcomeGuide onClose={completeOnboarding} />
-      </Suspense>
-    );
-  }
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setEmergencyReady(true);
+    }, 3500);
+    return () => clearTimeout(timer);
+  }, []);
 
-  if (!user) {
-    return <AuthForm />;
-  }
+  const isAppReady = !authLoading && (!user || historyLoaded || emergencyReady);
 
   return (
-    <div className="min-h-screen flex flex-col items-center transition-colors duration-300">
-      <AppTopBanners activeView={activeView} isPending={isPending} recipe={recipe} />
+    <>
+      {!splashFinished && (
+        <AppSplashScreen
+          isReady={isAppReady}
+          onFinished={() => setSplashFinished(true)}
+        />
+      )}
+
+      {!authLoading && !user && (
+        showOnboarding ? (
+          <Suspense fallback={null}>
+            <WelcomeGuide onClose={completeOnboarding} />
+          </Suspense>
+        ) : (
+          <AuthForm />
+        )
+      )}
+
+      {user && (
+        <div className="min-h-screen flex flex-col items-center transition-colors duration-300">
+          <AppTopBanners activeView={activeView} isPending={isPending} recipe={recipe} />
 
       <main
         className={`w-full max-w-md mx-auto px-4 mt-1 flex-1 flex flex-col gap-6 ${
@@ -593,6 +607,8 @@ export default function App() {
         onNavigate={navigate}
         onFetchHistory={fetchHistory}
       />
-    </div>
+        </div>
+      )}
+    </>
   );
 }
