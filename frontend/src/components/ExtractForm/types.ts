@@ -85,7 +85,7 @@ export interface QuickShareTipCardProps {
 export interface UseExtractFormProps {
   url: string;
   setUrl: (url: string) => void;
-  urlError: string;
+  urlError?: string;
   setUrlError?: (error: string) => void;
   validateUrl: (url: string) => boolean;
   isPending: boolean;
@@ -94,5 +94,4 @@ export interface UseExtractFormProps {
   blockedByLimit: boolean;
   atConcurrencyLimit: boolean;
   setIsPremiumModalOpen: (open: boolean) => void;
-  handleFormSubmit?: (e: React.FormEvent) => void;
 }
