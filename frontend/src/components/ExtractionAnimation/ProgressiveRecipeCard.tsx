@@ -1,4 +1,3 @@
-import { Sparkles } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import RecipeCoverPreview from './RecipeCoverPreview';
 import RecipePillTags from './RecipePillTags';
@@ -32,8 +31,7 @@ export default function ProgressiveRecipeCard({
           <span>{t('job.preview.analyzingBadge')}</span>
         </div>
 
-        <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/15 px-2 py-0.5 rounded-full">
-          <Sparkles className="w-3 h-3" />
+        <div className="flex items-center text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/15 px-2.5 py-0.5 rounded-full tabular-nums">
           <span>{percent}%</span>
         </div>
       </div>

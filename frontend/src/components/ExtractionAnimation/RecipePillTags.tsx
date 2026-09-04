@@ -1,5 +1,6 @@
-import { Clock, Users, Tag, Sparkles } from 'lucide-react';
+import { Clock, Users, Tag, ListChecks } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
+import { getRecipeCategoryLabel } from '../../i18n';
 import type { RecipePreviewData } from '../../types';
 
 interface RecipePillTagsProps {
@@ -8,7 +9,7 @@ interface RecipePillTagsProps {
 }
 
 export default function RecipePillTags({ preview, compact = false }: RecipePillTagsProps) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
 
   const hasAnyMeta = !!(
     preview?.totalTimeMinutes ||
@@ -50,14 +51,14 @@ export default function RecipePillTags({ preview, compact = false }: RecipePillT
     pills.push({
       key: 'category',
       icon: <Tag className="w-3.5 h-3.5" />,
-      text: preview.category,
+      text: getRecipeCategoryLabel(preview.category, language),
     });
   }
 
   if (preview?.stepCount && (!compact || pills.length < 3)) {
     pills.push({
       key: 'steps',
-      icon: <Sparkles className="w-3.5 h-3.5" />,
+      icon: <ListChecks className="w-3.5 h-3.5" />,
       text: t('job.preview.stepsFound', { count: preview.stepCount }),
     });
   }

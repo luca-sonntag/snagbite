@@ -1,5 +1,6 @@
 import React from 'react';
-import { Camera, Globe, Sparkles } from 'lucide-react';
+import { Camera, Globe, ChefHat } from 'lucide-react';
+import { useI18n } from '../../context/I18nContext';
 import { InstagramIcon } from '../ShareMockups';
 import type { PlatformType } from './types';
 import type { RecipePreviewData } from '../../types';
@@ -20,7 +21,7 @@ const YoutubeIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 const TikTokIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z" />
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89 2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z" />
   </svg>
 );
 
@@ -30,13 +31,14 @@ export default function RecipeCoverPreview({
   isCompleted,
   compact = false,
 }: RecipeCoverPreviewProps) {
+  const { t } = useI18n();
   const imageUrl = preview?.coverUrl || preview?.thumbnailUrl;
 
   const platformBadge = {
     instagram: { label: 'Instagram', icon: <InstagramIcon className="w-3.5 h-3.5 fill-pink-400" /> },
     tiktok: { label: 'TikTok', icon: <TikTokIcon className="w-3.5 h-3.5 text-cyan-400" /> },
     youtube: { label: 'Shorts', icon: <YoutubeIcon className="w-3.5 h-3.5 text-red-400" /> },
-    photo: { label: 'Foto-Scan', icon: <Camera className="w-3.5 h-3.5 text-emerald-400" /> },
+    photo: { label: t('job.preview.photoImportBadge') || 'Rezeptkarte', icon: <Camera className="w-3.5 h-3.5 text-emerald-400" /> },
     web: { label: 'Web', icon: <Globe className="w-3.5 h-3.5 text-blue-400" /> },
   }[platform];
 
@@ -55,7 +57,7 @@ export default function RecipeCoverPreview({
       ) : (
         <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-emerald-500/10 via-gray-100 to-emerald-500/5 dark:from-emerald-950/30 dark:via-gray-800 dark:to-emerald-900/20">
           <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center animate-pulse">
-            <Sparkles className="w-6 h-6" />
+            <ChefHat className="w-6 h-6" />
           </div>
         </div>
       )}

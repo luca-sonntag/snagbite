@@ -16,7 +16,7 @@ const FUNNY_TEXTS: Record<SupportedLanguage, Record<'pending' | 'scraping' | 'pr
       'Kochlöffel wird bereitgelegt...'
     ],
     scraping: [
-      'Rezept-Video wird analysiert...',
+      'Rezeptur wird studiert...',
       'Geheime Gewürze werden entdeckt...',
       'Zutatenliste wird zusammengestellt...',
       'Chefkoch studiert die Zubereitung...',
@@ -44,7 +44,7 @@ const FUNNY_TEXTS: Record<SupportedLanguage, Record<'pending' | 'scraping' | 'pr
       'Setting out the wooden spoon...'
     ],
     scraping: [
-      'Watching the recipe video...',
+      'Studying recipe details...',
       'Discovering secret seasonings...',
       'Gathering the ingredient list...',
       'Studying the cooking technique...',

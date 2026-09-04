@@ -36,14 +36,11 @@ export default function IngredientsStream({ preview, compact = false }: Ingredie
 
   return (
     <div className="flex flex-col justify-between w-full h-[52px] overflow-hidden">
-      <div className="flex items-center justify-between text-xs font-semibold text-gray-600 dark:text-gray-300 h-4">
+      <div className="flex items-center text-xs font-semibold text-gray-600 dark:text-gray-300 h-4">
         <div className="flex items-center gap-1.5">
           <Utensils className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
           <span>{t('job.preview.ingredientsFound', { count })}</span>
         </div>
-        <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/15 px-2 py-0.5 rounded-full">
-          {count}
-        </span>
       </div>
 
       <div className="flex items-center gap-1.5 h-6 overflow-hidden flex-nowrap">
