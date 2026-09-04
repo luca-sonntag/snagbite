@@ -51,9 +51,11 @@ export default function ProgressiveRecipeCard({
             {preview.title}
           </h3>
         ) : (
-          <div className="space-y-1.5 py-0.5">
-            <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded-lg w-4/5 animate-pulse" />
-            <div className="h-3 bg-gray-100 dark:bg-gray-800/60 rounded-md w-1/2 animate-pulse" />
+          <div className="flex flex-col justify-center gap-1.5 py-0.5">
+            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 leading-tight truncate animate-pulse">
+              {t(`job.preview.platformScanning.${platform}`) || t('job.preview.titleDiscovering')}
+            </h3>
+            <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-md w-2/5 animate-pulse" />
           </div>
         )}
       </div>

@@ -16,26 +16,28 @@ export default function IngredientsStream({ preview, compact = false }: Ingredie
 
   if (!hasIngredients) {
     return (
-      <div className="flex flex-col justify-between w-full h-[52px] overflow-hidden">
-        <div className="flex items-center gap-2 text-xs font-medium text-gray-400 dark:text-gray-500 h-4">
+      <div className="flex flex-col justify-between w-full h-[78px] overflow-hidden">
+        <div className="flex items-center gap-1.5 text-xs font-medium text-gray-400 dark:text-gray-500 h-4">
           <Utensils className="w-3.5 h-3.5" />
           <span>{t('job.preview.ingredientsSkeleton')}</span>
         </div>
-        <div className="flex items-center gap-2 h-6 overflow-hidden flex-nowrap">
-          <div className="w-24 h-6 rounded-full bg-gray-100 dark:bg-gray-800/80 animate-pulse shrink-0" />
-          <div className="w-28 h-6 rounded-full bg-gray-100 dark:bg-gray-800/80 animate-pulse shrink-0" />
-          <div className="w-20 h-6 rounded-full bg-gray-100 dark:bg-gray-800/80 animate-pulse shrink-0" />
+        <div className="flex flex-wrap gap-1.5 overflow-hidden max-h-[56px]">
+          <div className="w-24 h-6 rounded-xl bg-gray-100 dark:bg-gray-800/80 animate-pulse shrink-0" />
+          <div className="w-28 h-6 rounded-xl bg-gray-100 dark:bg-gray-800/80 animate-pulse shrink-0" />
+          <div className="w-20 h-6 rounded-xl bg-gray-100 dark:bg-gray-800/80 animate-pulse shrink-0" />
+          <div className="w-18 h-6 rounded-xl bg-gray-100 dark:bg-gray-800/80 animate-pulse shrink-0" />
+          <div className="w-32 h-6 rounded-xl bg-gray-100 dark:bg-gray-800/80 animate-pulse shrink-0" />
         </div>
       </div>
     );
   }
 
-  const maxVisible = compact ? 3 : 5;
+  const maxVisible = compact ? 6 : 8;
   const visibleSamples = samples.slice(0, maxVisible);
   const remainingCount = Math.max(0, count - visibleSamples.length);
 
   return (
-    <div className="flex flex-col justify-between w-full h-[52px] overflow-hidden">
+    <div className="flex flex-col justify-between w-full h-[78px] overflow-hidden">
       <div className="flex items-center text-xs font-medium text-gray-500 dark:text-gray-400 h-4">
         <div className="flex items-center gap-1.5">
           <Utensils className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
@@ -43,12 +45,12 @@ export default function IngredientsStream({ preview, compact = false }: Ingredie
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 h-6 overflow-hidden flex-nowrap">
+      <div className="flex flex-wrap gap-1.5 overflow-hidden max-h-[56px]">
         {visibleSamples.map((ing, idx) => (
           <span
             key={ing + idx}
-            style={{ animationDelay: `${idx * 60}ms` }}
-            className="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-medium bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 border border-gray-100 dark:border-gray-800 animate-scale-pop shrink-0 whitespace-nowrap max-w-[130px] truncate"
+            style={{ animationDelay: `${idx * 50}ms` }}
+            className="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-medium bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 border border-gray-100 dark:border-gray-800 animate-scale-pop shrink-0 whitespace-nowrap max-w-[140px] truncate"
           >
             {ing}
           </span>

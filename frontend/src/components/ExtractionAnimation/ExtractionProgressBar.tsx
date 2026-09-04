@@ -46,7 +46,7 @@ export default function ExtractionProgressBar({
 
       {/* Background Notification Notice for Premium */}
       {isPremium && (
-        <p className="text-[10px] leading-relaxed text-gray-400 dark:text-gray-500 text-center pt-0.5">
+        <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center truncate max-w-full pt-0.5">
           {t('job.backgroundNotice')}
         </p>
       )}

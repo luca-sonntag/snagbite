@@ -1,5 +1,5 @@
 import React from 'react';
-import { Camera, Globe } from 'lucide-react';
+import { Camera, Globe, BookOpen } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { InstagramIcon } from '../ShareMockups';
 import type { PlatformType } from './types';
@@ -45,7 +45,7 @@ export default function RecipeCoverPreview({
   return (
     <div
       className={`relative w-full overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800 select-none ${
-        compact ? 'aspect-[16/8] max-h-32' : 'aspect-[16/9] sm:aspect-[2/1]'
+        compact ? 'aspect-[2.3/1] max-h-28' : 'aspect-[2/1] sm:aspect-[2.1/1]'
       }`}
     >
       {imageUrl ? (
@@ -55,8 +55,10 @@ export default function RecipeCoverPreview({
           className="w-full h-full object-cover object-center animate-fade-in transition-transform duration-700"
         />
       ) : (
-        <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 animate-pulse">
-          <div className="w-12 h-12 rounded-2xl bg-gray-200 dark:bg-gray-700/50" />
+        <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800/90 relative overflow-hidden">
+          <div className="w-11 h-11 rounded-2xl bg-gray-200/80 dark:bg-gray-700/60 flex items-center justify-center text-gray-400 dark:text-gray-500 animate-pulse shadow-2xs">
+            <BookOpen className="w-5 h-5 stroke-[1.75]" />
+          </div>
         </div>
       )}
 
@@ -74,8 +76,10 @@ export default function RecipeCoverPreview({
         )}
       </div>
 
-      {/* Bottom Subtle Gradient Scrim */}
-      <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+      {/* Bottom Subtle Gradient Scrim - only active when real image is loaded */}
+      {imageUrl && (
+        <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+      )}
     </div>
   );
 }

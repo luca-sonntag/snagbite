@@ -20,10 +20,10 @@ export default function RecipePillTags({ preview, compact = false }: RecipePillT
 
   if (!hasAnyMeta) {
     return (
-      <div className="flex items-center gap-2 h-7 overflow-hidden flex-nowrap">
-        <div className="w-20 h-6 rounded-full bg-gray-100 dark:bg-gray-800 animate-pulse shrink-0" />
-        <div className="w-24 h-6 rounded-full bg-gray-100 dark:bg-gray-800 animate-pulse shrink-0" />
-        <div className="w-18 h-6 rounded-full bg-gray-100 dark:bg-gray-800 animate-pulse shrink-0" />
+      <div className="flex items-center gap-1.5 h-7 overflow-hidden flex-nowrap">
+        <div className="w-20 h-6 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse shrink-0" />
+        <div className="w-24 h-6 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse shrink-0" />
+        <div className="w-20 h-6 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse shrink-0" />
       </div>
     );
   }
@@ -64,7 +64,7 @@ export default function RecipePillTags({ preview, compact = false }: RecipePillT
   }
 
   return (
-    <div className="flex items-center gap-2 h-7 overflow-hidden flex-nowrap">
+    <div className="flex items-center gap-1.5 h-7 overflow-x-auto no-scrollbar flex-nowrap select-none">
       {pills.map((pill, idx) => (
         <span
           key={pill.key}
