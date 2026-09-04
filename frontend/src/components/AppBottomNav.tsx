@@ -152,10 +152,10 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
             <button
               onClick={() => {
                 hapticSelection();
-                onNavigate('settings');
+                onNavigate('progress');
               }}
               className={`${navButtonBase} ${
-                activeView === 'settings'
+                activeView === 'settings' || activeView === 'progress'
                   ? 'text-emerald-600 dark:text-emerald-400 font-bold'
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium'
               }`}
@@ -173,7 +173,7 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
                 )}
               </div>
               <span className={labelBase}>{t('app.nav.settings') || 'Profil'}</span>
-              {activeView === 'settings' && activeIndicator}
+              {(activeView === 'settings' || activeView === 'progress') && activeIndicator}
             </button>
           </div>
         </div>
