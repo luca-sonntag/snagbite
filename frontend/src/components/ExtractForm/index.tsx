@@ -116,7 +116,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
   const hideUpgradeCard = isRealPremium || trialLoading || trialBannerShowing;
 
   return (
-    <div className={`flex flex-col gap-4 w-full ${isPending ? 'flex-1 justify-center my-auto min-h-0' : ''}`}>
+    <div className={`flex flex-col gap-4 w-full ${isPending ? 'flex-1 justify-between min-h-0' : ''}`}>
       {!isPending && (
         <PageHeader
           icon={<Sparkles className="w-6 h-6" />}
@@ -134,17 +134,23 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
 
       {/* Input Card or Extraction Animation Card */}
       {isPending ? (
-        <div className="flex flex-col w-full gap-4 my-auto justify-center">
-          <ExtractionAnimation
-            url={url}
-            isPending={isPending}
-            jobStatus={jobStatus}
-            progress={progress}
-            variant={mode === 'photo' ? 'photo' : 'link'}
-            photoPreviewUrl={mode === 'photo' ? photoPreviews[0] : undefined}
-            compact={!isRealPremium}
-          />
-          {!isRealPremium && <ExtractionAdCard isActive={isActive} />}
+        <div className="flex flex-col w-full flex-1 justify-between gap-3 min-h-0">
+          <div className="flex-1 flex items-center justify-center min-h-0 py-1">
+            <ExtractionAnimation
+              url={url}
+              isPending={isPending}
+              jobStatus={jobStatus}
+              progress={progress}
+              variant={mode === 'photo' ? 'photo' : 'link'}
+              photoPreviewUrl={mode === 'photo' ? photoPreviews[0] : undefined}
+              compact={!isRealPremium}
+            />
+          </div>
+          {!isRealPremium && (
+            <div className="shrink-0 w-full pb-1">
+              <ExtractionAdCard isActive={isActive} />
+            </div>
+          )}
         </div>
       ) : (
         <Card className="!bg-white dark:!bg-gray-900 p-5 sm:p-6 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">

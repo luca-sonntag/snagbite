@@ -19,7 +19,9 @@ export default function ProgressiveRecipeCard({
   const { displayedStage, percent, preview, platform, funnyText, isCompleted } = state;
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_4px_20px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.25)] p-4 sm:p-5 flex flex-col gap-3.5 w-full text-left transition-all duration-300">
+    <div className={`bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_4px_20px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.25)] flex flex-col w-full text-left transition-all duration-300 ${
+      compact ? 'p-3.5 gap-2.5' : 'p-4 sm:p-5 gap-3.5'
+    }`}>
       {/* Top Header Live Status Strip */}
       <div className="flex items-center justify-between text-xs px-0.5">
         <div className="flex items-center gap-2 font-semibold text-gray-700 dark:text-gray-300">
@@ -44,14 +46,14 @@ export default function ProgressiveRecipeCard({
         compact={compact}
       />
 
-      {/* Recipe Title or Skeleton Pulse */}
-      <div className="flex flex-col gap-1 min-h-[2.5rem] justify-center">
+      {/* Recipe Title or Skeleton Pulse (Strict fixed height: Zero Layout Shift) */}
+      <div className="flex flex-col justify-center h-11 overflow-hidden">
         {preview?.title ? (
-          <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 animate-fade-in">
+          <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 animate-fade-in">
             {preview.title}
           </h3>
         ) : (
-          <div className="space-y-2 py-1">
+          <div className="space-y-1.5 py-0.5">
             <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded-lg w-4/5 animate-pulse" />
             <div className="h-3 bg-gray-100 dark:bg-gray-800/60 rounded-md w-1/2 animate-pulse" />
           </div>

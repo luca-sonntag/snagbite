@@ -36,10 +36,10 @@ export default function ExtractionProgressBar({
         />
       </div>
 
-      {/* Rotating Cooking Quote */}
+      {/* Rotating Cooking Quote (Fixed height: Zero Layout Shift) */}
       <p
         key={funnyText}
-        className="text-[11px] text-gray-500 dark:text-gray-400 min-h-[1.1rem] italic animate-fade-in text-center"
+        className="text-[11px] text-gray-500 dark:text-gray-400 h-4 truncate italic animate-fade-in text-center"
       >
         {funnyText}
       </p>

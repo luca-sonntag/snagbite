@@ -43,7 +43,7 @@ export default function RecipeCoverPreview({
   return (
     <div
       className={`relative w-full overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800 select-none ${
-        compact ? 'aspect-[16/8] max-h-36' : 'aspect-[16/9] sm:aspect-[2/1]'
+        compact ? 'aspect-[16/8] max-h-32' : 'aspect-[16/9] sm:aspect-[2/1]'
       }`}
     >
       {imageUrl ? (
