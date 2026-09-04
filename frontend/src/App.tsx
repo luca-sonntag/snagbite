@@ -15,9 +15,10 @@ import AppBottomNav from './components/AppBottomNav';
 import AppOverlays from './components/AppOverlays';
 import AppSplashScreen from './components/AppSplashScreen';
 
-// Lazy-loaded heavy views
+import SavedCatalog from './components/SavedCatalog/index';
+
+// Lazy-loaded secondary views
 const RecipeDetails = lazy(() => import('./components/RecipeDetails'));
-const SavedCatalog = lazy(() => import('./components/SavedCatalog/index'));
 const MealPlannerView = lazy(() => import('./components/MealPlanner'));
 const ShoppingList = lazy(() => import('./components/ShoppingList'));
 const ProfileView = lazy(() => import('./components/ProfileView'));
@@ -463,52 +464,50 @@ export default function App() {
         {/* HISTORY / SAVED RECIPES TAB */}
         <div hidden={activeView !== 'history'} aria-hidden={activeView !== 'history' || undefined}>
           {visitedViews.has('history') && (
-            <Suspense fallback={<ViewFallback />}>
-              <SavedCatalog
-                history={history}
-                historyLoaded={historyLoaded}
-                selectedJob={selectedJob}
-                setSelectedJob={setSelectedJob}
-                handleDeleteJob={handleDeleteJob}
-                onAddIngredients={addRecipeIngredients}
-                fetchHistory={fetchHistory}
-                getAccessToken={getAccessToken}
-                onNavigateToShoppingList={() => {
-                  navigate('shopping-list');
-                }}
-                shoppingListCount={aggregatedList.toBuy.length + aggregatedList.inPantry.length}
-                onRemixSuccess={async (newRecipe, newJobId) => {
-                  if (newRecipe && newJobId) {
-                    registerExtraRecipe(newJobId, {
-                      recipeId: newJobId,
-                      recipe: newRecipe,
-                      source: 'remix',
-                      addedAt: newRecipe.createdAt || new Date().toISOString(),
-                      updatedAt: newRecipe.updatedAt || new Date().toISOString(),
-                      isFavorite: false,
-                      flags: [],
-                      collectionIds: [],
-                    });
-                  }
-                  await fetchHistory();
-                  if (newJobId) {
-                    navigate('history', newJobId);
-                  } else {
-                    setRecipe(newRecipe);
-                    setUrl('');
-                    navigate('extract');
-                  }
-                }}
-                onReplaceCurrent={() => {
-                  fetchHistory();
-                }}
-                onSelectModeChange={setIsCatalogSelectMode}
-                onOverlaySheetChange={setIsCatalogSheetOpen}
-                catalogSubPath={subPath}
-                onNavigateCatalog={navigateCatalog}
-                limitStatus={limitStatus}
-              />
-            </Suspense>
+            <SavedCatalog
+              history={history}
+              historyLoaded={historyLoaded}
+              selectedJob={selectedJob}
+              setSelectedJob={setSelectedJob}
+              handleDeleteJob={handleDeleteJob}
+              onAddIngredients={addRecipeIngredients}
+              fetchHistory={fetchHistory}
+              getAccessToken={getAccessToken}
+              onNavigateToShoppingList={() => {
+                navigate('shopping-list');
+              }}
+              shoppingListCount={aggregatedList.toBuy.length + aggregatedList.inPantry.length}
+              onRemixSuccess={async (newRecipe, newJobId) => {
+                if (newRecipe && newJobId) {
+                  registerExtraRecipe(newJobId, {
+                    recipeId: newJobId,
+                    recipe: newRecipe,
+                    source: 'remix',
+                    addedAt: newRecipe.createdAt || new Date().toISOString(),
+                    updatedAt: newRecipe.updatedAt || new Date().toISOString(),
+                    isFavorite: false,
+                    flags: [],
+                    collectionIds: [],
+                  });
+                }
+                await fetchHistory();
+                if (newJobId) {
+                  navigate('history', newJobId);
+                } else {
+                  setRecipe(newRecipe);
+                  setUrl('');
+                  navigate('extract');
+                }
+              }}
+              onReplaceCurrent={() => {
+                fetchHistory();
+              }}
+              onSelectModeChange={setIsCatalogSelectMode}
+              onOverlaySheetChange={setIsCatalogSheetOpen}
+              catalogSubPath={subPath}
+              onNavigateCatalog={navigateCatalog}
+              limitStatus={limitStatus}
+            />
           )}
         </div>
 
