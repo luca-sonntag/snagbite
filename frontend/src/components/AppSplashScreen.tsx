@@ -8,9 +8,9 @@ interface AppSplashScreenProps {
   onFinished?: () => void;
 }
 
-const MIN_DISPLAY_TIME_MS = 750;
+const MIN_DISPLAY_TIME_MS = 1600;
 const EXIT_TRANSITION_MS = 320;
-const QUOTE_ROTATION_INTERVAL_MS = 1800;
+const QUOTE_ROTATION_INTERVAL_MS = 1100;
 
 export default function AppSplashScreen({ isReady, onFinished }: AppSplashScreenProps) {
   const { t } = useI18n();

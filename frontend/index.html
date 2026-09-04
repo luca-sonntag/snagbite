@@ -11,11 +11,13 @@
         document.documentElement.setAttribute('data-theme', 'dark');
         document.documentElement.style.setProperty('--app-bg', '#09090b');
         document.documentElement.style.setProperty('--app-text', '#ffffff');
+        document.documentElement.style.setProperty('--app-subtext', '#a1a1aa');
       } else {
         document.documentElement.classList.remove('dark');
         document.documentElement.setAttribute('data-theme', 'light');
         document.documentElement.style.setProperty('--app-bg', '#f9fafb');
         document.documentElement.style.setProperty('--app-text', '#111827');
+        document.documentElement.style.setProperty('--app-subtext', '#6b7280');
       }
     })();
   </script>
@@ -61,9 +63,25 @@
           <span style="width:8px;height:8px;border-radius:9999px;background-color:#10b981;animation:inline-bounce 1.2s ease-in-out infinite;animation-delay:180ms;"></span>
           <span style="width:8px;height:8px;border-radius:9999px;background-color:#10b981;animation:inline-bounce 1.2s ease-in-out infinite;animation-delay:360ms;"></span>
         </div>
+        <div style="height:24px;margin-top:12px;display:flex;align-items:center;justify-content:center;">
+          <p id="preloader-text" style="margin:0;font-size:12px;font-weight:600;color:var(--app-subtext,#6b7280);text-align:center;padding:0 16px;">
+            Dein Kochbuch wird angerichtet…
+          </p>
+        </div>
       </div>
     </div>
   </div>
+  <script>
+    (function () {
+      try {
+        const lang = localStorage.getItem('kb_language') || (navigator.language && navigator.language.startsWith('de') ? 'de' : 'en');
+        const el = document.getElementById('preloader-text');
+        if (el && lang === 'en') {
+          el.textContent = 'Setting your table…';
+        }
+      } catch (e) {}
+    })();
+  </script>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 
