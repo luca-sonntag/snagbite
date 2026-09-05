@@ -80,6 +80,10 @@ export async function getMaxVideoDurationSeconds(): Promise<number> {
   return getGlobalSetting('max_video_duration_seconds', config.MAX_VIDEO_DURATION_SECONDS);
 }
 
+export async function getRewardedAdBonusCredits(): Promise<number> {
+  return getGlobalSetting('rewarded_ad_bonus_credits', 3);
+}
+
 export async function getAllGlobalSettings(): Promise<GlobalSetting[]> {
   const { data, error } = await getClient()
     .from('global_settings')

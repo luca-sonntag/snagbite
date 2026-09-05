@@ -7,6 +7,7 @@ import {
   deletePushToken,
   createFeedback,
   isAlphaActive,
+  getRewardedAdBonusCredits,
 } from '../db.js';
 import { config } from '../config.js';
 import { AppError, sendAppError } from '../errors.js';
@@ -20,9 +21,10 @@ userRoutes.post('/me/rewarded-ad-claimed', async (req: Request, res: Response): 
     const user = await fetchAndSyncUser(userId);
     const currentMeta = (user?.app_metadata || {}) as Record<string, unknown>;
 
+    const bonusPerAd = await getRewardedAdBonusCredits();
     const currentCredits =
       typeof currentMeta.bonus_credits === 'number' ? currentMeta.bonus_credits : 0;
-    const newCredits = currentCredits + 1;
+    const newCredits = currentCredits + bonusPerAd;
 
     const { error } = await getClient().auth.admin.updateUserById(userId, {
       app_metadata: {
@@ -44,11 +46,12 @@ userRoutes.post('/me/rewarded-ad-claimed', async (req: Request, res: Response): 
     const remaining = limit < 0 ? -1 : baseRemaining + newCredits;
 
     console.log(
-      `[RewardedAd] Granted +1 extraction credit to user ${userId}. Total bonus_credits=${newCredits}, remaining=${remaining}`
+      `[RewardedAd] Granted +${bonusPerAd} extraction credit(s) to user ${userId}. Total bonus_credits=${newCredits}, remaining=${remaining}`
     );
 
     res.status(200).json({
       success: true,
+      addedCredits: bonusPerAd,
       bonusCredits: newCredits,
       limit,
       used,

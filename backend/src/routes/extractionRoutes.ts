@@ -14,6 +14,7 @@ import {
   getAlphaMaxSavedRecipes,
   getFreeMaxExtractions,
   getFreeMaxSavedRecipes,
+  getRewardedAdBonusCredits,
   addToLibrary,
   getClient,
 } from '../db.js';
@@ -405,6 +406,7 @@ extractionRoutes.get('/extractions/limit', async (req: Request, res: Response): 
 
     const maxConcurrent = await resolveConcurrencyLimit(user);
     const activeCount = await countActiveJobsForUser(req.userId!);
+    const rewardedAdBonusCredits = await getRewardedAdBonusCredits();
 
     if (limit < 0) {
       res.status(200).json({
@@ -419,6 +421,7 @@ extractionRoutes.get('/extractions/limit', async (req: Request, res: Response): 
         cookbookFull,
         maxConcurrent,
         activeCount,
+        rewardedAdBonusCredits,
       });
       return;
     }
@@ -442,6 +445,7 @@ extractionRoutes.get('/extractions/limit', async (req: Request, res: Response): 
       cookbookFull,
       maxConcurrent,
       activeCount,
+      rewardedAdBonusCredits,
     });
   } catch (error: unknown) {
     if (!(error instanceof AppError)) console.error('Error fetching rate limit status:', error);
