@@ -4,6 +4,7 @@ import {
   BannerAdPosition,
   BannerAdPluginEvents,
   RewardAdPluginEvents,
+  RewardInterstitialAdPluginEvents,
   InterstitialAdPluginEvents,
   AdmobConsentStatus,
 } from '@capacitor-community/admob';
@@ -28,11 +29,16 @@ const TEST_BANNER_AD_ID = 'ca-app-pub-3940256099942544/6300978111';
 /** Google's public TEST rewarded video ad unit ID. */
 const TEST_REWARDED_AD_ID = 'ca-app-pub-3940256099942544/5224354917';
 
+/** Google's public TEST rewarded interstitial ad unit ID (5s skippable). */
+const TEST_REWARDED_INTERSTITIAL_AD_ID = 'ca-app-pub-3940256099942544/5354046379';
+
 /** Google's public TEST interstitial ad unit ID (used for the app-open ad). */
 const TEST_INTERSTITIAL_AD_ID = 'ca-app-pub-3940256099942544/1033173712';
 
 const CONFIGURED_BANNER_AD_ID = import.meta.env.VITE_ADMOB_BANNER_ID as string | undefined;
 const CONFIGURED_REWARDED_AD_ID = import.meta.env.VITE_ADMOB_REWARDED_ID as string | undefined;
+const CONFIGURED_REWARDED_INTERSTITIAL_AD_ID =
+  (import.meta.env.VITE_ADMOB_REWARDED_INTERSTITIAL_ID as string | undefined) || CONFIGURED_REWARDED_AD_ID;
 const CONFIGURED_INTERSTITIAL_AD_ID = import.meta.env.VITE_ADMOB_INTERSTITIAL_ID as string | undefined;
 
 /**
@@ -50,6 +56,7 @@ const CONFIGURED_TEST_DEVICES = (import.meta.env.VITE_ADMOB_TEST_DEVICES as stri
 /** Real ad unit if configured in environment, otherwise Google's test unit. */
 const BANNER_AD_ID = CONFIGURED_BANNER_AD_ID || TEST_BANNER_AD_ID;
 const REWARDED_AD_ID = CONFIGURED_REWARDED_AD_ID || TEST_REWARDED_AD_ID;
+const REWARDED_INTERSTITIAL_AD_ID = CONFIGURED_REWARDED_INTERSTITIAL_AD_ID || TEST_REWARDED_INTERSTITIAL_AD_ID;
 const INTERSTITIAL_AD_ID = CONFIGURED_INTERSTITIAL_AD_ID || TEST_INTERSTITIAL_AD_ID;
 
 /**
@@ -336,26 +343,79 @@ export async function addBannerLoadListener(
 }
 
 /**
- * Show a Rewarded Video Ad.
- * Returns a promise that resolves to `true` if the user successfully completed
- * watching the video ad and earned the reward, or `false` if dismissed/failed/cancelled.
+ * Show a Rewarded Video / Rewarded Interstitial Ad.
+ * Prefers the 5-second skippable Rewarded Interstitial format for a fast, user-friendly experience.
+ * Falls back seamlessly to classic Rewarded Video if Rewarded Interstitial is unavailable or fails to load.
  *
- * In web / non-native environment, simulates a rewarded video delay (2s) and returns `true`
+ * Returns a promise that resolves to `true` if the user successfully completed
+ * watching the ad (or reached the 5s reward grant) and earned the reward,
+ * or `false` if dismissed early/failed/cancelled.
+ *
+ * In web / non-native environment, simulates a brief delay (1.5s) and returns `true`
  * so the feature can be tested in browser development mode.
  */
-export async function showRewardedAd(): Promise<boolean> {
-  if (!isNative()) {
-    console.log('[AdMob] Web dev mode: simulating rewarded video ad (2s)...');
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    return true;
-  }
+async function showRewardInterstitialAdInternal(): Promise<boolean> {
+  return new Promise<boolean>(async (resolve, reject) => {
+    let earned = false;
+    let rewardedHandle: any = null;
+    let dismissedHandle: any = null;
+    let failedHandle: any = null;
 
-  await initAds();
-  if (!canRequestAds) {
-    console.warn('[AdMob] cannot request ads (consent declined)');
-    return false;
-  }
+    const cleanup = () => {
+      rewardedHandle?.remove?.().catch(() => {});
+      dismissedHandle?.remove?.().catch(() => {});
+      failedHandle?.remove?.().catch(() => {});
+    };
 
+    const EVENT_REWARDED =
+      typeof RewardInterstitialAdPluginEvents !== 'undefined'
+        ? RewardInterstitialAdPluginEvents.Rewarded
+        : 'onRewardedInterstitialAdReward';
+    const EVENT_DISMISSED =
+      typeof RewardInterstitialAdPluginEvents !== 'undefined'
+        ? RewardInterstitialAdPluginEvents.Dismissed
+        : 'onRewardedInterstitialAdDismissed';
+    const EVENT_FAILED_TO_SHOW =
+      typeof RewardInterstitialAdPluginEvents !== 'undefined'
+        ? RewardInterstitialAdPluginEvents.FailedToShow
+        : 'onRewardedInterstitialAdFailedToShow';
+
+    try {
+      rewardedHandle = await AdMob.addListener(EVENT_REWARDED as any, (reward: unknown) => {
+        console.log('[AdMob] user earned reward from interstitial:', reward);
+        earned = true;
+      });
+
+      dismissedHandle = await AdMob.addListener(EVENT_DISMISSED as any, () => {
+        console.log('[AdMob] rewarded interstitial ad dismissed. earned =', earned);
+        cleanup();
+        resolve(earned);
+      });
+
+      failedHandle = await AdMob.addListener(EVENT_FAILED_TO_SHOW as any, (err: unknown) => {
+        console.warn('[AdMob] rewarded interstitial ad failed to show:', err);
+        cleanup();
+        resolve(false);
+      });
+
+      console.log('[AdMob] preparing rewarded interstitial ad (5s skippable)...');
+      await AdMob.prepareRewardInterstitialAd({
+        adId: REWARDED_INTERSTITIAL_AD_ID,
+        isTesting: IS_TESTING,
+        npa: !personalizedAllowed,
+      });
+
+      console.log('[AdMob] showing rewarded interstitial ad...');
+      await AdMob.showRewardInterstitialAd();
+    } catch (err) {
+      console.warn('[AdMob] error preparing/showing rewarded interstitial ad:', err);
+      cleanup();
+      reject(err);
+    }
+  });
+}
+
+async function showRewardVideoAdInternal(): Promise<boolean> {
   return new Promise<boolean>(async (resolve) => {
     let earned = false;
     let rewardedHandle: any = null;
@@ -368,43 +428,73 @@ export async function showRewardedAd(): Promise<boolean> {
       failedHandle?.remove?.().catch(() => {});
     };
 
-    const EVENT_REWARDED = typeof RewardAdPluginEvents !== 'undefined' ? RewardAdPluginEvents.Rewarded : 'onRewardedVideoAdReward';
-    const EVENT_DISMISSED = typeof RewardAdPluginEvents !== 'undefined' ? RewardAdPluginEvents.Dismissed : 'onRewardedVideoAdDismissed';
-    const EVENT_FAILED_TO_SHOW = typeof RewardAdPluginEvents !== 'undefined' ? RewardAdPluginEvents.FailedToShow : 'onRewardedVideoAdFailedToShow';
+    const EVENT_REWARDED =
+      typeof RewardAdPluginEvents !== 'undefined'
+        ? RewardAdPluginEvents.Rewarded
+        : 'onRewardedVideoAdReward';
+    const EVENT_DISMISSED =
+      typeof RewardAdPluginEvents !== 'undefined'
+        ? RewardAdPluginEvents.Dismissed
+        : 'onRewardedVideoAdDismissed';
+    const EVENT_FAILED_TO_SHOW =
+      typeof RewardAdPluginEvents !== 'undefined'
+        ? RewardAdPluginEvents.FailedToShow
+        : 'onRewardedVideoAdFailedToShow';
 
     try {
       rewardedHandle = await AdMob.addListener(EVENT_REWARDED as any, (reward: unknown) => {
-        console.log('[AdMob] user earned reward:', reward);
+        console.log('[AdMob] user earned reward from video:', reward);
         earned = true;
       });
 
       dismissedHandle = await AdMob.addListener(EVENT_DISMISSED as any, () => {
-        console.log('[AdMob] rewarded ad dismissed. earned =', earned);
+        console.log('[AdMob] rewarded video ad dismissed. earned =', earned);
         cleanup();
         resolve(earned);
       });
 
       failedHandle = await AdMob.addListener(EVENT_FAILED_TO_SHOW as any, (err: unknown) => {
-        console.warn('[AdMob] rewarded ad failed to show:', err);
+        console.warn('[AdMob] rewarded video ad failed to show:', err);
         cleanup();
         resolve(false);
       });
 
-      console.log('[AdMob] preparing rewarded video ad...');
+      console.log('[AdMob] preparing fallback rewarded video ad...');
       await AdMob.prepareRewardVideoAd({
         adId: REWARDED_AD_ID,
         isTesting: IS_TESTING,
         npa: !personalizedAllowed,
       });
 
-      console.log('[AdMob] showing rewarded video ad...');
+      console.log('[AdMob] showing fallback rewarded video ad...');
       await AdMob.showRewardVideoAd();
     } catch (err) {
-      console.error('[AdMob] error during rewarded ad flow:', err);
+      console.error('[AdMob] error during rewarded video ad flow:', err);
       cleanup();
       resolve(false);
     }
   });
+}
+
+export async function showRewardedAd(): Promise<boolean> {
+  if (!isNative()) {
+    console.log('[AdMob] Web dev mode: simulating rewarded interstitial ad (1.5s)...');
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    return true;
+  }
+
+  await initAds();
+  if (!canRequestAds) {
+    console.warn('[AdMob] cannot request ads (consent declined)');
+    return false;
+  }
+
+  try {
+    return await showRewardInterstitialAdInternal();
+  } catch (err) {
+    console.info('[AdMob] Rewarded interstitial failed to load/show, falling back to rewarded video:', err);
+    return await showRewardVideoAdInternal();
+  }
 }
 
 /* -------------------------------------------------------------------------- */
