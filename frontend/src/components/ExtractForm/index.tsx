@@ -12,6 +12,7 @@ import ExtractionAdCard from '../ExtractionAdCard';
 import { useExtractForm } from './useExtractForm';
 import ExtractActionCards from './ExtractActionCards';
 import ExtractQuotaBadge from './ExtractQuotaBadge';
+import ExtractRewardedAdButton from './ExtractRewardedAdButton';
 import UrlExtractSheet from './UrlExtractSheet';
 import PhotoExtractSheet from './PhotoExtractSheet';
 import ExtractDemoRecipes from './ExtractDemoRecipes';
@@ -36,6 +37,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
   photos,
   setPhotos,
   isUploadingPhotos,
+  claimRewardedCredit,
 }) => {
   const { t } = useI18n();
   const { user, isPremium, hasTrialAvailable, trialDays, trialLoading } = useAuth();
@@ -188,6 +190,10 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
                   limit: limitStatus?.limit ?? 0,
                 })}
                 cta={t('premium.hint.upgrade')}
+              />
+              <ExtractRewardedAdButton
+                claimRewardedCredit={claimRewardedCredit}
+                disabled={isPending}
               />
             </div>
           ) : (
