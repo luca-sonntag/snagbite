@@ -5,11 +5,13 @@ import { useAuth } from '../../context/AuthContext';
 import { useExtractionJobs } from '../../context/ExtractionJobsContext';
 import { PageHeader } from '../PageHeader';
 import PremiumModal from '../PremiumModal';
+import PremiumHint from '../PremiumHint';
 import PremiumUpgradeCard from '../PremiumUpgradeCard';
 import ExtractionAnimation from '../ExtractionAnimation';
 import ExtractionAdCard from '../ExtractionAdCard';
 import { useExtractForm } from './useExtractForm';
 import ExtractActionCards from './ExtractActionCards';
+import ExtractQuotaBadge from './ExtractQuotaBadge';
 import UrlExtractSheet from './UrlExtractSheet';
 import PhotoExtractSheet from './PhotoExtractSheet';
 import ExtractDemoRecipes from './ExtractDemoRecipes';
@@ -166,6 +168,39 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
             disabled={isPending}
           />
 
+          {/* Kochbuch voll / Limit Status unter den Import-Karten */}
+          {cookbookFull ? (
+            <div className="flex justify-center -mt-1">
+              <PremiumHint
+                variant="inline"
+                onClick={() => setIsPremiumModalOpen(true)}
+                label={t('premium.hint.catalogFull', {
+                  count: limitStatus?.savedRecipes ?? 0,
+                  limit: limitStatus?.maxSavedRecipes ?? 5,
+                })}
+              />
+            </div>
+          ) : extractionLimitReached ? (
+            <div className="flex flex-col gap-2.5 -mt-1">
+              <PremiumHint
+                variant="banner"
+                onClick={() => setIsPremiumModalOpen(true)}
+                label={t('premium.hint.extractionLimitReached', {
+                  used: limitStatus?.used ?? 0,
+                  limit: limitStatus?.limit ?? 0,
+                })}
+                cta={t('premium.hint.upgrade')}
+              />
+            </div>
+          ) : (
+            <ExtractQuotaBadge
+              limitStatus={limitStatus}
+              isRealPremium={isRealPremium}
+              activeCount={liveActiveCount}
+              maxConcurrent={maxConcurrent}
+            />
+          )}
+
           {/* Inspiration / Demo Recipes */}
           <ExtractDemoRecipes onDemoClick={handleDemoClick} />
 
@@ -190,9 +225,6 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
             setIsWatchingAd={setIsWatchingAd}
             handleFormSubmit={handleSheetSubmit}
             claimRewardedCredit={claimRewardedCredit}
-            limitStatus={limitStatus}
-            isRealPremium={isRealPremium}
-            onOpenPremiumModal={() => setIsPremiumModalOpen(true)}
           />
 
           {/* Photo Scanner Bottom Sheet */}

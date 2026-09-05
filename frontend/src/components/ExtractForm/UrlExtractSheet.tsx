@@ -5,8 +5,6 @@ import { useI18n } from '../../context/I18nContext';
 import { hapticLight } from '../../utils/haptics';
 import UrlExtractInput from './UrlExtractInput';
 import ExtractSubmitButton from './ExtractSubmitButton';
-import ExtractQuotaBadge from './ExtractQuotaBadge';
-import PremiumHint from '../PremiumHint';
 import type { UrlExtractSheetProps } from './types';
 
 export const UrlExtractSheet: React.FC<UrlExtractSheetProps> = ({
@@ -26,9 +24,6 @@ export const UrlExtractSheet: React.FC<UrlExtractSheetProps> = ({
   setIsWatchingAd,
   handleFormSubmit,
   claimRewardedCredit,
-  limitStatus,
-  isRealPremium,
-  onOpenPremiumModal,
 }) => {
   const { t } = useI18n();
 
@@ -96,36 +91,6 @@ export const UrlExtractSheet: React.FC<UrlExtractSheetProps> = ({
                   handleFormSubmit={handleFormSubmit}
                   claimRewardedCredit={claimRewardedCredit}
                 />
-
-                {cookbookFull ? (
-                  <div className="flex justify-center -mt-1">
-                    <PremiumHint
-                      variant="inline"
-                      onClick={onOpenPremiumModal}
-                      label={t('premium.hint.catalogFull', {
-                        count: limitStatus?.savedRecipes ?? 0,
-                        limit: limitStatus?.maxSavedRecipes ?? 5,
-                      })}
-                    />
-                  </div>
-                ) : extractionLimitReached ? (
-                  <div className="flex flex-col gap-2.5 -mt-1">
-                    <PremiumHint
-                      variant="banner"
-                      onClick={onOpenPremiumModal}
-                      label={t('premium.hint.extractionLimitReached', {
-                        used: limitStatus?.used ?? 0,
-                        limit: limitStatus?.limit ?? 0,
-                      })}
-                      cta={t('premium.hint.upgrade')}
-                    />
-                  </div>
-                ) : (
-                  <ExtractQuotaBadge
-                    limitStatus={limitStatus}
-                    isRealPremium={isRealPremium}
-                  />
-                )}
               </form>
             </Drawer.Body>
           </Drawer.Dialog>

@@ -88,9 +88,6 @@ export interface UrlExtractSheetProps {
   setIsWatchingAd: (watching: boolean) => void;
   handleFormSubmit: (e: React.FormEvent, overrideUrl?: string) => void;
   claimRewardedCredit?: () => Promise<boolean>;
-  limitStatus?: LimitStatus | null;
-  isRealPremium?: boolean;
-  onOpenPremiumModal: () => void;
 }
 
 export interface PhotoExtractSheetProps {
