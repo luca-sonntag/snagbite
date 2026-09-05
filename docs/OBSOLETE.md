@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-05: Rewarded Interstitial durch klassisches Rewarded Video mit konfigurierbarem Credit-Reward (`global_settings`) ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Experimentelles 5s-Rewarded-Interstitial (`showRewardInterstitialAdInternal`, `REWARDED_INTERSTITIAL_AD_ID`): Wurde vom Nutzer vorzeitig geschlossen, feuerte AdMob kein Belohnungs-Event (kein Reward erhalten). Zudem bieten klassische Rewarded Videos signifikant höhere eCPMs.
+  - Fest verdrahtete `+1 Rezept` Gutschrift im Backend (`POST /api/me/rewarded-ad-claimed`) und statische Übersetzungsstrings (`+1 Rezept`).
+* **Ersetzt durch:**
+  - **Klassisches Rewarded Video ([`frontend/src/utils/ads.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/utils/ads.ts)):** Direkter Aufruf von `showRewardVideoAdInternal()` mit `REWARDED_AD_ID`.
+  - **Dynamisch konfigurierbarer Belohnungswert ([`backend/src/db/settingsDb.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/settingsDb.ts)):** Einstellung `rewarded_ad_bonus_credits` in `global_settings` (Standard: 3), änderbar über `/api/admin/settings`.
+  - **Vollständiger Datenfluss ins UI ([`useRecipeExtraction.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/hooks/useRecipeExtraction.ts), [`ExtractRewardedAdButton.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ExtractForm/ExtractRewardedAdButton.tsx)):** Übertragung via `GET /api/extractions/limit`, dynamische Button-Beschriftung (*„Video ansehen (+X Rezepte)“* / Singular *„Video ansehen (+1 Rezept)“*) und Erfolgs-Toast.
+* **Betroffene Dateien:** `shared/src/types/extractions.ts`, `backend/supabase_schema.sql`, `backend/src/db/settingsDb.ts`, `backend/src/routes/userRoutes.ts`, `backend/src/routes/extractionRoutes.ts`, `frontend/src/utils/ads.ts`, `frontend/src/hooks/useRecipeExtraction.ts`, `frontend/src/components/ExtractForm/ExtractRewardedAdButton.tsx`, `frontend/src/components/ExtractForm/index.tsx`, `frontend/src/i18n.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-05: Rewarded Video Ad Button im Extraktions-Bottom-Sheet entfernt
 
 * **Ersetzter Code / Anti-Pattern:**
