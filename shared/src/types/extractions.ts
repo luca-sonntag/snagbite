@@ -9,6 +9,7 @@ export interface LimitStatus {
   cookbookFull: boolean;
   maxConcurrent: number;
   activeCount: number;
+  rewardedAdBonusCredits?: number;
 }
 
 export type JobStatus = 'pending' | 'scraping' | 'processing' | 'awaiting_frames' | 'completed' | 'failed' | 'cancelled';
