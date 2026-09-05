@@ -47,7 +47,11 @@ export const ExtractActionCards: React.FC<ExtractActionCardsProps> = ({
           hapticLight();
           onOpenLinkSheet();
         }}
-        className="w-full p-4 sm:p-5 rounded-3xl bg-white dark:bg-gray-900 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:bg-gray-50 dark:hover:bg-gray-800/50 active:scale-[0.99] transition-all flex items-center justify-between gap-4 text-left cursor-pointer outline-none select-none group"
+        className={`w-full p-4 sm:p-5 rounded-3xl bg-white dark:bg-gray-900 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] transition-all flex items-center justify-between gap-4 text-left outline-none select-none ${
+          disabled
+            ? 'opacity-50 cursor-not-allowed shadow-none'
+            : 'hover:bg-gray-50 dark:hover:bg-gray-800/50 active:scale-[0.99] cursor-pointer group'
+        }`}
       >
         <div className="flex items-center gap-3.5 min-w-0 flex-1">
           <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -83,7 +87,11 @@ export const ExtractActionCards: React.FC<ExtractActionCardsProps> = ({
           hapticLight();
           onOpenPhotoSheet();
         }}
-        className="w-full p-4 sm:p-5 rounded-3xl bg-white dark:bg-gray-900 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:bg-gray-50 dark:hover:bg-gray-800/50 active:scale-[0.99] transition-all flex items-center justify-between gap-4 text-left cursor-pointer outline-none select-none group"
+        className={`w-full p-4 sm:p-5 rounded-3xl bg-white dark:bg-gray-900 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] transition-all flex items-center justify-between gap-4 text-left outline-none select-none ${
+          disabled
+            ? 'opacity-50 cursor-not-allowed shadow-none'
+            : 'hover:bg-gray-50 dark:hover:bg-gray-800/50 active:scale-[0.99] cursor-pointer group'
+        }`}
       >
         <div className="flex items-center gap-3.5 min-w-0 flex-1">
           <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">

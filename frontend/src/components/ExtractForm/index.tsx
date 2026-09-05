@@ -36,13 +36,11 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
   photos,
   setPhotos,
   isUploadingPhotos,
-  claimRewardedCredit,
 }) => {
   const { t } = useI18n();
   const { user, isPremium, hasTrialAvailable, trialDays, trialLoading } = useAuth();
   const { activeCount: liveActiveCount } = useExtractionJobs();
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
-  const [isWatchingAd, setIsWatchingAd] = useState(false);
   const [isLinkSheetOpen, setIsLinkSheetOpen] = useState(false);
   const [isPhotoSheetOpen, setIsPhotoSheetOpen] = useState(false);
 
@@ -165,7 +163,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
               setIsPhotoSheetOpen(true);
             }}
             photosCount={photos.length}
-            disabled={isPending}
+            disabled={isPending || submitDisabled}
           />
 
           {/* Kochbuch voll / Limit Status unter den Import-Karten */}
@@ -219,12 +217,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
             canPaste={canPaste}
             onPaste={handlePaste}
             submitDisabled={submitDisabled}
-            extractionLimitReached={extractionLimitReached}
-            cookbookFull={cookbookFull}
-            isWatchingAd={isWatchingAd}
-            setIsWatchingAd={setIsWatchingAd}
             handleFormSubmit={handleSheetSubmit}
-            claimRewardedCredit={claimRewardedCredit}
           />
 
           {/* Photo Scanner Bottom Sheet */}

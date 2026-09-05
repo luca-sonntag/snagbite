@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-05: Rewarded Video Ad Button im Extraktions-Bottom-Sheet entfernt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Bedingter Rewarded-Video-Ad-Button („Video ansehen & Rezept erstellen (+1)“) innerhalb des URL-Bottom-Sheets in `ExtractSubmitButton.tsx`, der bei Erreichen des Extraktionslimits eingeblendet wurde.
+  - Verleitete zu unruhigen UI-Wechseln und erlaubte das Öffnen von Eingabe-Sheets trotz Limitüberschreitung.
+* **Ersetzt durch:**
+  - **Disabled Import Cards & Externe Limit-Banner:** Wenn das Limit erreicht ist (`cookbookFull` oder `extractionLimitReached`), sind die Haupt-Aktionskarten auf der Startseite direkt `disabled` (50% Opacity, `cursor-not-allowed`, keine Klick-Aktionen).
+  - Unmittelbar unter den Kacheln informiert die `PremiumHint`-Komponente transparent über den Grund und bietet den Upgrade-CTA an.
+  - `ExtractSubmitButton.tsx` ist auf einen schlanken, strikt typisierten Submit-Button reduziert.
+* **Betroffene Dateien:** `frontend/src/components/ExtractForm/ExtractSubmitButton.tsx`, `frontend/src/components/ExtractForm/ExtractActionCards.tsx`, `frontend/src/components/ExtractForm/UrlExtractSheet.tsx`, `frontend/src/components/ExtractForm/PhotoExtractSheet.tsx`, `frontend/src/components/ExtractForm/index.tsx`, `frontend/src/components/ExtractForm/types.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-01: Separate Icon-Generierungs-Skripte durch All-in-One Pipeline (`npm run icons`) ersetzt
 
 * **Ersetzter Code / Getrennte Workflows:**

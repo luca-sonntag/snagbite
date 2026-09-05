@@ -82,12 +82,7 @@ export interface UrlExtractSheetProps {
   canPaste: boolean;
   onPaste: () => void;
   submitDisabled: boolean;
-  extractionLimitReached: boolean;
-  cookbookFull: boolean;
-  isWatchingAd: boolean;
-  setIsWatchingAd: (watching: boolean) => void;
   handleFormSubmit: (e: React.FormEvent, overrideUrl?: string) => void;
-  claimRewardedCredit?: () => Promise<boolean>;
 }
 
 export interface PhotoExtractSheetProps {

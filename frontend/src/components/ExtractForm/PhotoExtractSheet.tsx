@@ -83,13 +83,6 @@ export const PhotoExtractSheet: React.FC<PhotoExtractSheetProps> = ({
                   isPending={isPending}
                   isUploadingPhotos={isUploadingPhotos}
                   submitDisabled={submitDisabled || photos.length === 0}
-                  extractionLimitReached={false}
-                  cookbookFull={false}
-                  isWatchingAd={false}
-                  setIsWatchingAd={() => {}}
-                  url=""
-                  photosCount={photos.length}
-                  handleFormSubmit={handleFormSubmit}
                 />
               </form>
             </Drawer.Body>

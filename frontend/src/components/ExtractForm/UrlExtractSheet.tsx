@@ -18,12 +18,7 @@ export const UrlExtractSheet: React.FC<UrlExtractSheetProps> = ({
   canPaste,
   onPaste,
   submitDisabled,
-  extractionLimitReached,
-  cookbookFull,
-  isWatchingAd,
-  setIsWatchingAd,
   handleFormSubmit,
-  claimRewardedCredit,
 }) => {
   const { t } = useI18n();
 
@@ -82,14 +77,6 @@ export const UrlExtractSheet: React.FC<UrlExtractSheetProps> = ({
                   isPending={isPending}
                   isUploadingPhotos={false}
                   submitDisabled={submitDisabled}
-                  extractionLimitReached={extractionLimitReached}
-                  cookbookFull={cookbookFull}
-                  isWatchingAd={isWatchingAd}
-                  setIsWatchingAd={setIsWatchingAd}
-                  url={url}
-                  photosCount={0}
-                  handleFormSubmit={handleFormSubmit}
-                  claimRewardedCredit={claimRewardedCredit}
                 />
               </form>
             </Drawer.Body>
