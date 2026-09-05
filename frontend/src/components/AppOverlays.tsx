@@ -3,6 +3,7 @@ import React, { lazy, Suspense, useState, useEffect } from 'react';
 const PremiumModal = lazy(() => import('./PremiumModal'));
 const WelcomeGuide = lazy(() => import('./WelcomeGuide'));
 const AlphaWelcome = lazy(() => import('./AlphaWelcome'));
+import { DevTools } from './DevTools';
 import type { AppOverlaysProps } from '../types/app';
 
 
@@ -47,6 +48,9 @@ export const AppOverlays: React.FC<AppOverlaysProps> = ({
           <AlphaWelcome onClose={onCompleteAlphaWelcome} />
         </Suspense>
       )}
+
+      {/* Dev mode in-app developer tools & console overlay */}
+      <DevTools />
     </>
   );
 };
