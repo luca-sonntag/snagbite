@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import type { Recipe, ExtractionJob, ProgressData } from '../types';
+import type { Recipe, ExtractionJob, ProgressData, LimitStatus } from '../types';
 import { type ErrorParams, parseSerializedError } from '../errorCodes';
 import { useI18n } from '../context/I18nContext';
 import { apiUrl } from '../api';
@@ -48,7 +48,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
   // re-submit the same photos without the form having to hand them around.
   const [photos, setPhotos] = useState<File[]>([]);
   const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
-  const [limitStatus, setLimitStatus] = useState<{ limit: number; used: number; remaining: number; windowDays: number; tier: 'free' | 'alpha' | 'premium'; savedRecipes: number; maxSavedRecipes: number; cookbookFull: boolean; maxConcurrent: number; activeCount: number } | null>(null);
+  const [limitStatus, setLimitStatus] = useState<LimitStatus | null>(null);
 
   const fetchLimitStatus = useCallback(async () => {
     try {
@@ -74,7 +74,8 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           maxSavedRecipes: data.maxSavedRecipes ?? -1,
           cookbookFull: data.cookbookFull ?? false,
           maxConcurrent: data.maxConcurrent ?? 1,
-          activeCount: data.activeCount ?? 0
+          activeCount: data.activeCount ?? 0,
+          rewardedAdBonusCredits: data.rewardedAdBonusCredits ?? 3,
         });
 
         // Auto-refresh auth session on tier mismatch (e.g. after alpha auto-assignment)

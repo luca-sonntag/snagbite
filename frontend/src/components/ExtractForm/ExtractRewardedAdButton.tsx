@@ -2,18 +2,22 @@ import React, { useState } from 'react';
 import { Button, Spinner } from '@heroui/react';
 import { Play } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
+import { useToast } from '../../context/ToastContext';
 import { showRewardedAd } from '../../utils/ads';
 
 interface ExtractRewardedAdButtonProps {
   claimRewardedCredit?: () => Promise<boolean>;
   disabled?: boolean;
+  bonusCredits?: number;
 }
 
 export const ExtractRewardedAdButton: React.FC<ExtractRewardedAdButtonProps> = ({
   claimRewardedCredit,
   disabled = false,
+  bonusCredits = 3,
 }) => {
   const { t } = useI18n();
+  const toast = useToast();
   const [isWatchingAd, setIsWatchingAd] = useState(false);
 
   const handleWatchAd = async () => {
@@ -22,14 +26,29 @@ export const ExtractRewardedAdButton: React.FC<ExtractRewardedAdButtonProps> = (
     try {
       const earned = await showRewardedAd();
       if (earned && claimRewardedCredit) {
-        await claimRewardedCredit();
+        const success = await claimRewardedCredit();
+        if (success) {
+          toast.success(
+            bonusCredits === 1
+              ? t('ads.rewardedSuccessSingular')
+              : t('ads.rewardedSuccess', { count: bonusCredits })
+          );
+        } else {
+          toast.danger(t('ads.rewardedFailed'));
+        }
       }
     } catch (err) {
       console.error('Error watching rewarded ad:', err);
+      toast.danger(t('ads.rewardedFailed'));
     } finally {
       setIsWatchingAd(false);
     }
   };
+
+  const buttonLabel =
+    bonusCredits === 1
+      ? t('ads.rewardedBtnSingular')
+      : t('ads.rewardedBtn', { count: bonusCredits });
 
   return (
     <Button
@@ -47,7 +66,7 @@ export const ExtractRewardedAdButton: React.FC<ExtractRewardedAdButtonProps> = (
       ) : (
         <>
           <Play className="w-3.5 h-3.5 fill-current" />
-          <span>{t('ads.rewardedBtn')}</span>
+          <span>{buttonLabel}</span>
         </>
       )}
     </Button>

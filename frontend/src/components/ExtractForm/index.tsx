@@ -193,6 +193,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
               />
               <ExtractRewardedAdButton
                 claimRewardedCredit={claimRewardedCredit}
+                bonusCredits={limitStatus?.rewardedAdBonusCredits ?? 3}
                 disabled={isPending}
               />
             </div>

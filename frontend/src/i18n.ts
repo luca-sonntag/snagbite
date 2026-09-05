@@ -429,11 +429,13 @@ export const uiTranslations = {
   de: {
     ads: {
       label: 'Werbung',
-      rewardedTitle: 'Gratis-Rezept freischalten',
-      rewardedDesc: 'Schau einen kurzen Clip an, um sofort +1 Rezept zu erhalten.',
-      rewardedBtn: 'Kurzclip ansehen (+1 Rezept)',
+      rewardedTitle: 'Gratis-Rezepte freischalten',
+      rewardedDesc: 'Schau ein Video an, um sofort +{count} Rezepte zu erhalten.',
+      rewardedBtn: 'Video ansehen (+{count} Rezepte)',
+      rewardedBtnSingular: 'Video ansehen (+1 Rezept)',
       rewardedLoading: 'Wird geladen...',
-      rewardedSuccess: '+1 Rezept erfolgreich freigeschaltet!',
+      rewardedSuccess: '+{count} Rezepte erfolgreich freigeschaltet!',
+      rewardedSuccessSingular: '+1 Rezept erfolgreich freigeschaltet!',
       rewardedFailed: 'Konnte nicht geladen werden. Bitte versuche es später erneut.',
     },
     onboarding: {
@@ -1658,11 +1660,13 @@ export const uiTranslations = {
   en: {
     ads: {
       label: 'Advertisement',
-      rewardedTitle: 'Unlock Free Recipe',
-      rewardedDesc: 'Watch a short clip to instantly get +1 free recipe.',
-      rewardedBtn: 'Watch short clip (+1 Recipe)',
+      rewardedTitle: 'Unlock Free Recipes',
+      rewardedDesc: 'Watch a video to instantly get +{count} free recipes.',
+      rewardedBtn: 'Watch video (+{count} Recipes)',
+      rewardedBtnSingular: 'Watch video (+1 Recipe)',
       rewardedLoading: 'Loading...',
-      rewardedSuccess: '+1 recipe credit successfully unlocked!',
+      rewardedSuccess: '+{count} recipe credits successfully unlocked!',
+      rewardedSuccessSingular: '+1 recipe credit successfully unlocked!',
       rewardedFailed: 'Failed to load ad. Please try again later.',
     },
     onboarding: {
