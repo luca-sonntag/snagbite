@@ -6,6 +6,20 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-06: Komplexer 3-Schritte-Share-Mockup im leeren Kochbuch durch minimale Welcome-Card ersetzt & Filter/Suche erhalten
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Komplexer 3-Schritte-Mockup (`ShareStep1Mockup`, `ShareStep2Mockup`, `ShareStep3Mockup`, `CatalogCopyLinkMockup`, `CatalogExtractMockup`) und Workflow-Tabs (`Direkt teilen` / `Kopieren & Einfügen`) in `CatalogEmptyState.tsx`.
+  - Komplettes Ausblenden des Headers, der Suchleiste und der Filter (`CatalogFilters`) im leeren Kochbuchzustand durch frühen Return (`if (completedJobs.length === 0)` in `SavedCatalog/index.tsx`).
+  - Rendern der öffentlichen Community-Empfehlungen (`PublicRecipeRecommendationsShelf`) oberhalb der kontextbasierten Empfehlungen (`shelves.recommended`) bzw. im leeren Kochbuchzustand.
+* **Ersetzt durch:**
+  - **Dauerhafte Such- und Filterleiste ([`SavedCatalog/index.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/index.tsx)):** `CatalogFilters` bleibt immer im Seitenlayout sichtbar; im leeren Kochbuch wird darunter die fokussierte Empty State Card gerendert.
+  - **Minimalistische Empty State Card ([`CatalogEmptyState.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CatalogEmptyState.tsx)):** Großes `BookOpen`-Icon in abgerundetem Container, Titel (*„Dein Kochbuch wartet auf Rezepte!“*), Beschreibung und primärer Aktions-Button (*„Rezept hinzufügen“*) mit Weiterleitung zu `#/extract`.
+  - **Empfehlungs-Reihenfolge ([`CookbookHome.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CookbookHome.tsx)):** Öffentliche Empfehlungen werden unterhalb der Standard-Empfehlungen gerendert und bleiben leer/ausgeblendet, wenn noch keine eigenen Rezepte existieren (`totalRecipes > 0`).
+* **Betroffene Dateien:** `frontend/src/components/SavedCatalog/CatalogEmptyState.tsx`, `frontend/src/components/SavedCatalog/CookbookHome.tsx`, `frontend/src/components/SavedCatalog/index.tsx`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-06: Statische Hardcoded Demo-Rezepte & „Täglich neu“-Badge durch rein dynamische Demo-Rezepte aus der DB ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
