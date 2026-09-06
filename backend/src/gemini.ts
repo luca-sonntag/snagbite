@@ -1084,9 +1084,10 @@ Tools at your disposal:
 IMPORTANT FOR RECIPE MODIFICATIONS:
 - When modifying the recipe, ALWAYS generate individual, granular operations for EACH ingredient:
   * For adding side dishes or multiple ingredients (e.g. Tomaten-Gurken-Salat als Beilage): create a separate "ADD_INGREDIENTS" operation for EACH single ingredient (e.g. one for 200g Tomaten, one for 150g Gurke, one for 1 EL Olivenöl, one for 1 EL Balsamico) with its groupName (e.g. "Beilage: Tomaten-Gurken-Salat") and newIngredient. If preparation steps are needed, add an ADD_INSTRUCTION_STEP operation.
-  * For ingredient swaps (e.g. "Bacon durch 100g Putenbruststreifen ersetzen"): use type "REPLACE_INGREDIENT" with targetIngredientName ("Bacon") and the full newIngredient object.
+  * For ingredient swaps (e.g. "Bacon durch 100g Putenbruststreifen ersetzen"): use type "REPLACE_INGREDIENT" with targetIngredientName ("Bacon") and the full newIngredient object. Always use the exact name of the existing ingredient from the list above.
   * For removals (e.g. "Röstzwiebeln weglassen"): use type "REMOVE_INGREDIENT" with removeIngredientName ("Röstzwiebeln").
   * For scaling (e.g. "Auf 4 Portionen"): use type "SCALE_SERVINGS" with newServings.
+  * For title changes (CRITICAL): When replacing or modifying a core or title-defining ingredient (e.g. replacing "Apfel" with "Birne" in "Apfel-Zimt Spekulatius Tiramisu"), or significantly transforming the dish (e.g. making it vegan, protein-rich, gluten-free), you MUST ALWAYS include an "UPDATE_TITLE" operation with the newly adapted, delicious recipe title (e.g. newTitle: "Birnen-Zimt Spekulatius Tiramisu" or "Veganes Tiramisu")!
 - NEVER bundle an entire dish into a single abstract ingredient string. Every single ingredient must be represented individually with amount, unit, name, baseName, and macros.
 - Populate a clear, concise "summary" for every single ingredient/operation (e.g. "200g Tomaten hinzufügen", "150g Gurke hinzufügen", "Burrata durch 125g fettarmen Mozzarella ersetzen").
 2. add_missing_ingredients_to_shopping_list: ALWAYS call this tool whenever the user asks to add ingredients/items to their shopping list, missing ingredients, or sends a shopping prompt (e.g. "Zutaten auf Einkaufsliste", "Setze X auf die Einkaufsliste"). NEVER just reply with text claiming you added them without calling this tool!

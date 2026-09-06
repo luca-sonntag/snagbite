@@ -1,4 +1,4 @@
-import { describe, it } from 'node:test';
+ï»¿import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { applyRecipeOperations } from './recipeOperations.js';
 import type { Recipe, RecipeOperation } from './types.js';
@@ -19,7 +19,7 @@ const mockBaseRecipe: Recipe = {
           name: 'Burrata',
           baseName: 'burrata',
           amount: 1,
-          unit: 'Stück',
+          unit: 'Stï¿½ck',
           category: 'DAIRY_EGGS',
         },
       ],
@@ -98,21 +98,21 @@ describe('applyRecipeOperations', () => {
       {
         id: 'op-add-salad',
         type: 'ADD_INGREDIENTS',
-        summary: 'Tomaten-Gurken-Salat als Beilage hinzufügen',
+        summary: 'Tomaten-Gurken-Salat als Beilage hinzufï¿½gen',
         groupName: 'VEGETABLES',
         newIngredients: [
           {
             name: 'Tomate',
             baseName: 'tomato',
             amount: 2,
-            unit: 'Stück',
+            unit: 'Stï¿½ck',
             category: 'VEGETABLES',
           },
           {
             name: 'Gurke',
             baseName: 'cucumber',
             amount: 0.5,
-            unit: 'Stück',
+            unit: 'Stï¿½ck',
             category: 'VEGETABLES',
           },
         ],
@@ -120,7 +120,7 @@ describe('applyRecipeOperations', () => {
       {
         id: 'op-add-step',
         type: 'ADD_INSTRUCTION_STEP',
-        summary: 'Salat-Zubereitungsschritt anfügen',
+        summary: 'Salat-Zubereitungsschritt anfï¿½gen',
         newSteps: [
           {
             description: 'Tomate und Gurke klein schneiden, anrichten und zum Brot servieren.',
@@ -162,5 +162,56 @@ describe('applyRecipeOperations', () => {
       ?.items.find((i) => i.name === 'Bacon');
     assert.ok(bacon);
     assert.strictEqual(bacon.amount, 200); // 100g * 2 = 200g
+  });
+  it('correctly replaces ingredient with umlaut/stem match and adapts title and instructions', () => {
+    const appleRecipe: Recipe = {
+      id: 'apple-recipe',
+      title: 'Apfel-Zimt Spekulatius Tiramisu',
+      servings: 2,
+      equipment: [],
+      ingredients: [
+        {
+          name: 'PRODUCE',
+          items: [
+            {
+              name: 'Ã„pfel (Boskoop)',
+              baseName: 'apfel',
+              amount: 2,
+              unit: 'StÃ¼ck',
+              category: 'PRODUCE',
+            },
+          ],
+        },
+      ],
+      instructions: [
+        {
+          step: 1,
+          description: 'Die Ã„pfel schÃ¤len, in Spalten schneiden und andÃ¼nsten.',
+        },
+      ],
+    };
+
+    const ops: RecipeOperation[] = [
+      {
+        id: 'op-pear',
+        type: 'REPLACE_INGREDIENT',
+        summary: 'Apfel durch Birne ersetzen',
+        targetIngredientName: 'Apfel',
+        newIngredient: {
+          name: 'Birnen (Abate Fetel)',
+          baseName: 'birne',
+          amount: 2,
+          unit: 'StÃ¼ck',
+          category: 'PRODUCE',
+        },
+      },
+    ];
+
+    const remixed = applyRecipeOperations(appleRecipe, ops);
+    const produceGroup = remixed.ingredients.find((g) => g.name === 'PRODUCE');
+    assert.ok(produceGroup);
+    assert.strictEqual(produceGroup.items[0].name, 'Birnen (Abate Fetel)');
+    assert.strictEqual(remixed.title, 'Birnen (Abate Fetel)-Zimt Spekulatius Tiramisu');
+    assert.ok(remixed.instructions[0].description.includes('Birnen (Abate Fetel)'));
   });
 });
