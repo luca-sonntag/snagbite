@@ -68,17 +68,15 @@ export default function CollectionTile({
           </div>
         )}
 
-        {/* Favorite badge in bottom-left */}
-        {isFavorite && (
-          <div className="absolute bottom-1 left-1 w-6 h-6 rounded-lg bg-amber-500/30 dark:bg-amber-500/30 flex items-center justify-center shadow-lg z-10">
-            <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500 drop-shadow-[0_2px_5px_rgba(0,0,0,0.65)]" />
-          </div>
-        )}
       </div>
 
       <div className="flex flex-col px-0.5">
         <span className="text-xs font-bold text-gray-900 dark:text-white line-clamp-2 leading-snug">
-          {collectionEmoji && <span className="mr-1">{collectionEmoji}</span>}
+          {isFavorite ? (
+            <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500 inline mr-1 -translate-y-px" />
+          ) : collectionEmoji ? (
+            <span className="mr-1">{collectionEmoji}</span>
+          ) : null}
           {displayName}
         </span>
         <span className="text-[11px] text-gray-500 dark:text-gray-400">
