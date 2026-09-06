@@ -7,6 +7,7 @@ import CollectionTile from './CollectionTile';
 import RecipeShelf from './RecipeShelf';
 import CategoryLabelBar from './CategoryLabelBar';
 import DiscoveryAccordion from './DiscoveryAccordion';
+import PublicRecipeRecommendationsShelf from './PublicRecipeRecommendationsShelf';
 import type { CatalogPreset } from './catalogRoutes';
 
 interface Shelf {
@@ -44,6 +45,7 @@ interface CookbookHomeProps {
   isSelectMode?: boolean;
   selectedIds?: Set<string>;
   bindLongPress?: (id: string, job: SavedRecipe) => any;
+  onRecipeSaved?: (savedId: string) => void;
 }
 
 /**
@@ -69,6 +71,7 @@ export default function CookbookHome({
   isSelectMode = false,
   selectedIds = new Set(),
   bindLongPress,
+  onRecipeSaved,
 }: CookbookHomeProps) {
   const { t } = useI18n();
 
@@ -142,6 +145,11 @@ export default function CookbookHome({
           onOpenList={onOpenList}
         />
       </section>
+
+      {/* 🌟 Öffentliche Empfehlungen / Community Discoveries */}
+      {onRecipeSaved && (
+        <PublicRecipeRecommendationsShelf onRecipeSaved={onRecipeSaved} />
+      )}
 
       {/* Empfohlene Rezepte (Einzeilig horizontal, kontextbasiert) */}
       {shelves.recommended && shelves.recommended.items.length >= 2 && (

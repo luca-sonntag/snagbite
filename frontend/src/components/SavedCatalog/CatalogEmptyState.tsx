@@ -4,6 +4,11 @@ import { Link, BookOpen, Plus, Clipboard } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { ShareStep1Mockup, ShareStep2Mockup, ShareStep3Mockup } from '../ShareMockups';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
+import PublicRecipeRecommendationsShelf from './PublicRecipeRecommendationsShelf';
+
+interface CatalogEmptyStateProps {
+  onRecipeSaved?: (savedId: string) => void;
+}
 
 const CatalogCopyLinkMockup = () => {
   const { language } = useI18n();
@@ -64,7 +69,7 @@ const CatalogExtractMockup = () => {
   );
 };
 
-export default function CatalogEmptyState() {
+export default function CatalogEmptyState({ onRecipeSaved }: CatalogEmptyStateProps = {}) {
   const { language, t } = useI18n();
   const [activeWorkflow, setActiveWorkflow] = useState<'share' | 'copy'>('share');
 
@@ -74,10 +79,18 @@ export default function CatalogEmptyState() {
   };
 
   return (
-    <Card className="glass-panel p-6 sm:p-8 rounded-3xl border-none flex flex-col gap-6 sm:gap-8 max-w-md mx-auto shadow-[0_4px_24px_rgba(0,0,0,0.06)] relative overflow-hidden">
-      {/* Top Ambient Glows */}
-      <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
-      <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
+    <div className="flex flex-col gap-6 max-w-md mx-auto w-full">
+      {/* Public Recipe Discoveries for Empty Cookbook */}
+      {onRecipeSaved && (
+        <div className="w-full">
+          <PublicRecipeRecommendationsShelf onRecipeSaved={onRecipeSaved} />
+        </div>
+      )}
+
+      <Card className="glass-panel p-6 sm:p-8 rounded-3xl border-none flex flex-col gap-6 sm:gap-8 w-full shadow-[0_4px_24px_rgba(0,0,0,0.06)] relative overflow-hidden">
+        {/* Top Ambient Glows */}
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
 
       {/* Header Section */}
       <div className="text-center flex flex-col items-center justify-center pt-2">
@@ -221,5 +234,6 @@ export default function CatalogEmptyState() {
         </Button>
       </div>
     </Card>
+  </div>
   );
 }
