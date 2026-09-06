@@ -127,10 +127,10 @@ export const CopilotMessageItem: React.FC<CopilotMessageItemProps> = ({
               Eine neue Version des Rezepts wurde generiert:{' '}
               <span className="font-bold italic text-gray-900 dark:text-white">„{msg.newRecipe.title}“</span>.
             </p>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-2 w-full">
               <Button
                 size="sm"
-                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl h-11 flex items-center justify-center gap-1.5 border-none shadow-none active:scale-95 transition-all text-xs cursor-pointer"
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl h-11 flex items-center justify-center gap-1.5 border-none shadow-none active:scale-95 transition-all text-xs cursor-pointer"
                 onPress={() => {
                   hapticMedium();
                   onLoadNewRecipe(msg.newRecipe!, (msg.newJobId || msg.newRecipe?.id)!);
@@ -143,7 +143,7 @@ export const CopilotMessageItem: React.FC<CopilotMessageItemProps> = ({
                 <Button
                   size="sm"
                   variant="secondary"
-                  className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold rounded-2xl h-11 px-3 flex items-center justify-center gap-1.5 border-none active:scale-95 transition-all text-xs cursor-pointer"
+                  className="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold rounded-2xl h-10 flex items-center justify-center gap-1.5 border-none active:scale-95 transition-all text-xs cursor-pointer"
                   onPress={() => {
                     hapticLight();
                     onStartNewRemix();
