@@ -524,12 +524,8 @@ export default function SavedCatalog({
   // ---------------------------------------------------------------------------
   // Empty / loading
   // ---------------------------------------------------------------------------
-  if (completedJobs.length === 0) {
-    return !historyLoaded ? (
-      <CatalogLoadingState />
-    ) : (
-      <CatalogEmptyState onRecipeSaved={onRecipeSaved} />
-    );
+  if (!historyLoaded && completedJobs.length === 0) {
+    return <CatalogLoadingState />;
   }
 
   const sheets = (
@@ -594,7 +590,9 @@ export default function SavedCatalog({
 
       {premiumBanner}
 
-      {!isListLevel ? (
+      {completedJobs.length === 0 ? (
+        <CatalogEmptyState />
+      ) : !isListLevel ? (
         <CookbookHome
           totalRecipes={completedJobs.length}
           collections={collections}

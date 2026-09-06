@@ -146,11 +146,6 @@ export default function CookbookHome({
         />
       </section>
 
-      {/* 🌟 Öffentliche Empfehlungen / Community Discoveries */}
-      {onRecipeSaved && (
-        <PublicRecipeRecommendationsShelf onRecipeSaved={onRecipeSaved} />
-      )}
-
       {/* Empfohlene Rezepte (Einzeilig horizontal, kontextbasiert) */}
       {shelves.recommended && shelves.recommended.items.length >= 2 && (
         <RecipeShelf
@@ -165,6 +160,11 @@ export default function CookbookHome({
           selectedIds={selectedIds}
           bindLongPress={bindLongPress}
         />
+      )}
+
+      {/* 🌟 Öffentliche Empfehlungen / Community Discoveries (unter Empfehlungen) */}
+      {totalRecipes > 0 && onRecipeSaved && (
+        <PublicRecipeRecommendationsShelf onRecipeSaved={onRecipeSaved} />
       )}
 
       {/* Dynamic Discovery Shelves (Single Open Accordion: Neueste, Zuletzt geöffnet, Schnell gekocht) */}
