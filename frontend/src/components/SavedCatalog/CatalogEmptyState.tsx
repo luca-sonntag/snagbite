@@ -35,7 +35,7 @@ export default function CatalogEmptyState({ onRecipeSaved }: CatalogEmptyStatePr
             <h3 className="text-lg font-bold text-gray-950 dark:text-white leading-snug">
               {t('catalog.emptyState.welcomeTitle')}
             </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs leading-relaxed">
+            <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed">
               {t('catalog.emptyState.welcomeDesc')}
             </p>
           </div>

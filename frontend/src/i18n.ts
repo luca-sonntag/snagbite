@@ -1114,7 +1114,7 @@ export const uiTranslations = {
       emptyDesc: 'Erstelle Rezepte im "Neues Rezept" Tab, um sie hier zu speichern!',
       emptyState: {
         welcomeTitle: 'Dein Kochbuch wartet auf Rezepte!',
-        welcomeDesc: 'Snagbite verwandelt Kochvideos von Instagram, TikTok oder YouTube in strukturierte Rezepte mit Einkaufslisten und Nährwertangaben.',
+        welcomeDesc: 'Füge eigene Rezepte per Link oder Foto hinzu, oder speichere dir direkt Inspirationen aus den Entdeckungen unten.',
         ctaButton: 'Rezept hinzufügen',
         step1Title: '1. Entdecken',
         step1Desc: 'Suche ein Rezept-Video auf Instagram, TikTok oder YouTube.',
@@ -2347,7 +2347,7 @@ export const uiTranslations = {
       emptyDesc: 'Create recipes in the "New" tab to save them here!',
       emptyState: {
         welcomeTitle: 'Your Cookbook is Waiting for Recipes!',
-        welcomeDesc: 'Snagbite turns cooking videos from Instagram, TikTok, or YouTube into structured recipes with shopping lists and nutritional values.',
+        welcomeDesc: 'Add your own recipes via link or photo, or save inspirations directly from the discoveries below.',
         ctaButton: 'Add First Recipe',
         step1Title: '1. Discover',
         step1Desc: 'Find a cooking video or Reel on Instagram, TikTok, or YouTube.',
