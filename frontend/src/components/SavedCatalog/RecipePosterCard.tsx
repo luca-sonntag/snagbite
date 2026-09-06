@@ -123,5 +123,6 @@ export default function RecipePosterCard({
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }

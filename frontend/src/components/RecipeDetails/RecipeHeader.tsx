@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Popover, Button } from '@heroui/react';
 import { MoreVertical, Check, Copy, ShoppingCart, Trash2, Folder, Tag, Star, RefreshCw } from 'lucide-react';
-import type { Recipe } from '../../types';
 import RecipeImageGallery from '../RecipeImageGallery';
 import { useI18n } from '../../context/I18nContext';
 import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
@@ -13,7 +12,7 @@ import { devReExtractRecipe } from '../../utils/dev';
 import RecipeRemixList from './RecipeRemixList';
 import IncompleteSourceCard from './IncompleteSourceCard';
 
-import { RecipeHeaderProps } from './types';
+import type { RecipeHeaderProps } from './types';
 
 export default function RecipeHeader({
   recipe,
