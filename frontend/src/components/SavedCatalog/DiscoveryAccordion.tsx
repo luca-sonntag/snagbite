@@ -47,7 +47,7 @@ export default function DiscoveryAccordion({
       items: shelves.newest.items,
       total: shelves.newest.total,
       preset: { kind: 'all' } as CatalogPreset,
-      isTwoRow: true,
+      isTwoRow: shelves.newest.items.length >= 2,
     },
     {
       key: 'recent' as const,
@@ -129,7 +129,7 @@ export default function DiscoveryAccordion({
             {/* Expanded Shelf Content */}
             {isOpen && (
               <div className="pt-2.5 pb-1 animate-fade-in">
-                {shelf.isTwoRow ? (
+                {shelf.isTwoRow && shelf.items.length >= 2 ? (
                   <div className="grid grid-rows-2 grid-flow-col auto-cols-max gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
                     {shelf.items.map((job) => (
                       <RecipePosterCard
