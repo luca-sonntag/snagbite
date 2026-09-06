@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 import androidx.core.graphics.Insets;
@@ -40,6 +41,23 @@ public class MainActivity extends BridgeActivity {
         mainHandler.postDelayed(splashSafetyTimeout, SPLASH_SAFETY_TIMEOUT_MS);
         bridgeSafeAreaInsets();
         disableWebViewOverScroll();
+        allowMixedContentInDebug();
+    }
+
+    /**
+     * In debug builds, allow the WebView (served over https://localhost) to
+     * make cleartext HTTP requests to a local development backend (e.g.
+     * http://192.168.x.x:3000 or http://localhost:3000) without being blocked
+     * by Chromium's mixed-content policy.
+     */
+    private void allowMixedContentInDebug() {
+        try {
+            if (getBridge() != null && getBridge().getWebView() != null) {
+                if ((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                    getBridge().getWebView().getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+                }
+            }
+        } catch (Throwable ignored) { }
     }
 
     private void disableWebViewOverScroll() {

@@ -179,6 +179,30 @@ function Remove-CapacitorLiveConfig {
     }
 }
 
+function Set-CapacitorStaticConfig {
+    if (-not (Test-Path $assetsConfigFile)) { return }
+    try {
+        if (-not (Test-Path $backupConfigFile)) {
+            Copy-Item -Path $assetsConfigFile -Destination $backupConfigFile -Force
+        }
+        $rawJson = Get-Content $assetsConfigFile -Raw
+        $config = $rawJson | ConvertFrom-Json
+        if (-not $config.server) {
+            $config | Add-Member -NotePropertyName "server" -NotePropertyValue (New-Object PSObject) -Force
+        }
+        if ($config.server.url) {
+            $config.server.PSObject.Properties.Remove('url')
+        }
+        $config.server | Add-Member -NotePropertyName "cleartext" -NotePropertyValue $true -Force
+
+        $updatedJson = $config | ConvertTo-Json -Depth 10
+        Set-Content -Path $assetsConfigFile -Value $updatedJson -Encoding utf8
+        $script:didModifyConfig = $true
+    } catch {
+        Write-Warning "Failed to inject cleartext into capacitor.config.json: $_"
+    }
+}
+
 # -----------------------------------------------------------------------------
 # 2. Resolve Target IP & Dev Server URL
 # -----------------------------------------------------------------------------
@@ -264,7 +288,7 @@ if ($Mode -eq 'devlocal') {
 # 5. Configure Live-Reload URL in Android Assets (or clean for static)
 # -----------------------------------------------------------------------------
 if ($Static) {
-    Remove-CapacitorLiveConfig
+    Set-CapacitorStaticConfig
 } elseif (-not $ServerOnly) {
     Set-CapacitorLiveConfig -Url $liveUrl
 }
@@ -326,7 +350,7 @@ if ($needsDeploy) {
 
     # Re-apply or clean live URL after sync
     if ($Static) {
-        Remove-CapacitorLiveConfig
+        Set-CapacitorStaticConfig
     } elseif (-not $ServerOnly) {
         Set-CapacitorLiveConfig -Url $liveUrl
     }
@@ -401,22 +425,7 @@ try {
         Write-Host "[OK] Background backend process stopped." -ForegroundColor Green
     }
 
-    if (-not $Static) {
-        Write-Host "[ROLLBACK] Restoring original capacitor.config.json..." -ForegroundColor Yellow
-        if (Test-Path $backupConfigFile) {
-            Copy-Item -Path $backupConfigFile -Destination $assetsConfigFile -Force
-            Remove-Item -Path $backupConfigFile -Force -ErrorAction SilentlyContinue
-            Write-Host "[OK] Android configuration restored to clean state." -ForegroundColor Green
-        } elseif ($didModifyConfig -and (Test-Path $assetsConfigFile)) {
-            try {
-                $rawJson = Get-Content $assetsConfigFile -Raw
-                $config = $rawJson | ConvertFrom-Json
-                if ($config.server) {
-                    $config.PSObject.Properties.Remove('server')
-                    Set-Content -Path $assetsConfigFile -Value ($config | ConvertTo-Json -Depth 10) -Encoding utf8
-                }
-                Write-Host "[OK] Server property removed from capacitor.config.json." -ForegroundColor Green
-            } catch {}
-        }
-    }
+    Write-Host "[ROLLBACK] Restoring original capacitor.config.json..." -ForegroundColor Yellow
+    Remove-CapacitorLiveConfig
+    Write-Host "[OK] Android configuration restored to clean state." -ForegroundColor Green
 }
