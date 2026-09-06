@@ -42,58 +42,67 @@ export default function RecipePosterCard({
   const remixCount = job.remixCount ?? job.recipe?.remixCount ?? 0;
 
   return (
-    <div
-      className={`rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none ${isShelf ? 'w-[9.5rem] shrink-0' : 'w-full'
-        } ${isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''}`}
-      onClick={(e) => {
-        hapticLight();
-        onClick(e);
-      }}
-      {...(bindLongPress ?? {})}
-    >
-      {/* Cover */}
-      <div className="relative w-full aspect-[4/3] bg-black/5 dark:bg-white/5 overflow-hidden">
-        <CachedImage
-          src={r.imageUrl}
-          emoji={r.emoji}
-          alt={r.title}
-          className="w-full h-full object-cover object-center pointer-events-none select-none"
-        />
+    <div className={`relative ${isShelf ? 'w-[9.5rem] shrink-0' : 'w-full'}`}>
+      {/* Stacked card effect when recipe has remixes */}
+      {remixCount > 0 && (
+        <>
+          <div className="absolute -bottom-1 inset-x-2 h-4 rounded-b-2xl bg-purple-500/20 dark:bg-purple-500/25 -z-10 shadow-xs transition-transform" />
+          {remixCount > 1 && (
+            <div className="absolute -bottom-2 inset-x-4 h-4 rounded-b-xl bg-purple-500/10 dark:bg-purple-500/15 -z-20 transition-transform" />
+          )}
+        </>
+      )}
 
-        {/* Select-mode checkbox */}
-        {isSelectMode && (
-          <div
-            className={`absolute top-2 left-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all border-none ${isSelected
-              ? 'bg-emerald-500 text-white shadow-md'
-              : 'bg-black/40 backdrop-blur-sm text-white shadow-xs'
-              }`}
-          >
-            {isSelected && <Check className="w-4 h-4 text-white stroke-[3px]" />}
-          </div>
-        )}
+      <div
+        className={`w-full rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none ${isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
+          }`}
+        onClick={(e) => {
+          hapticLight();
+          onClick(e);
+        }}
+        {...(bindLongPress ?? {})}
+      >
+        {/* Cover */}
+        <div className="relative w-full aspect-[4/3] bg-black/5 dark:bg-white/5 overflow-hidden">
+          <CachedImage
+            src={r.imageUrl}
+            emoji={r.emoji}
+            alt={r.title}
+            className="w-full h-full object-cover object-center pointer-events-none select-none"
+          />
 
-        {/* Remix badge */}
-        {remixCount > 0 && (
-          <div
-            className={`absolute ${isSelectMode ? 'bottom-2 left-2' : 'top-2 left-2'} z-10 px-1.5 py-0.5 rounded-lg bg-black/60 backdrop-blur-md flex items-center gap-1 text-white shadow-xs`}
-            title={`${remixCount} Remix(es)`}
-          >
-            <Sparkles className="w-3 h-3 text-purple-400 fill-purple-400/30" />
-            {remixCount > 1 && (
-              <span className="text-[10px] font-semibold text-purple-200">
+          {/* Select-mode checkbox */}
+          {isSelectMode && (
+            <div
+              className={`absolute top-2 left-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all border-none ${isSelected
+                ? 'bg-emerald-500 text-white shadow-md'
+                : 'bg-black/40 backdrop-blur-sm text-white shadow-xs'
+                }`}
+            >
+              {isSelected && <Check className="w-4 h-4 text-white stroke-[3px]" />}
+            </div>
+          )}
+
+          {/* Remix badge (Glassmorphic) */}
+          {remixCount > 0 && (
+            <div
+              className={`absolute ${isSelectMode ? 'bottom-2 left-2' : 'top-2 left-2'} z-10 px-2 py-1 rounded-xl bg-purple-600/40 dark:bg-purple-500/30 backdrop-blur-md flex items-center gap-1 text-white shadow-md border-none`}
+              title={`${remixCount} Remix(es)`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-purple-200 fill-purple-300/40 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]" />
+              <span className="text-[11px] font-bold tracking-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">
                 {remixCount}
               </span>
-            )}
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* Favorite badge in top right */}
-        {job.isFavorite && (
-          <div className="absolute top-2 right-2 z-10 w-7 h-7 rounded-xl bg-amber-500/30 dark:bg-amber-500/30 flex items-center justify-center shadow-lg">
-            <Star className="w-4 h-4 fill-amber-500 text-amber-500 drop-shadow-[0_2px_5px_rgba(0,0,0,0.65)]" />
-          </div>
-        )}
-      </div>
+          {/* Favorite badge in top right */}
+          {job.isFavorite && (
+            <div className="absolute top-2 right-2 z-10 w-7 h-7 rounded-xl bg-amber-500/30 dark:bg-amber-500/30 flex items-center justify-center shadow-lg">
+              <Star className="w-4 h-4 fill-amber-500 text-amber-500 drop-shadow-[0_2px_5px_rgba(0,0,0,0.65)]" />
+            </div>
+          )}
+        </div>
 
       {/* Meta */}
       <div className="flex flex-col gap-1 px-3 py-2.5 flex-1">
