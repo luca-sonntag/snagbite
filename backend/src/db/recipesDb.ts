@@ -192,6 +192,18 @@ export async function addToLibrary(
 }
 
 export async function removeFromLibrary(userId: string, recipeId: string): Promise<boolean> {
+  // If this recipe is a parent recipe with user remixes, remove those remixes as well
+  const remixes = await getUserRecipeRemixes(userId, recipeId);
+  for (const remix of remixes) {
+    if (remix.id) {
+      await getClient()
+        .from('user_recipes')
+        .delete()
+        .eq('user_id', userId)
+        .eq('recipe_id', remix.id);
+    }
+  }
+
   const { data, error } = await getClient()
     .from('user_recipes')
     .delete()
@@ -200,6 +212,19 @@ export async function removeFromLibrary(userId: string, recipeId: string): Promi
     .select('id');
 
   if (error) throw wrapError('Failed to remove recipe from library', error);
+
+  // If this was a private remix created by the user, also clean up the recipes table
+  try {
+    await getClient()
+      .from('recipes')
+      .delete()
+      .eq('id', recipeId)
+      .eq('created_by', userId)
+      .eq('origin', 'remix');
+  } catch (cleanupErr) {
+    console.warn(`[removeFromLibrary] Could not clean up private remix ${recipeId} from recipes:`, cleanupErr);
+  }
+
   return (data?.length ?? 0) > 0;
 }
 
@@ -290,15 +315,17 @@ export async function getLibrary(userId: string): Promise<SavedRecipe[]> {
 
 export async function getUserRecipeRemixes(userId: string, parentRecipeId: string): Promise<Recipe[]> {
   const { data, error } = await getClient()
-    .from('recipes')
-    .select()
-    .eq('parent_recipe_id', parentRecipeId)
-    .eq('created_by', userId)
-    .order('created_at', { ascending: false })
-    .returns<RecipeRow[]>();
+    .from('user_recipes')
+    .select(SAVED_RECIPE_SELECT)
+    .eq('user_id', userId)
+    .order('added_at', { ascending: false })
+    .returns<UserRecipeRow[]>();
 
   if (error) throw wrapError(`Failed to get remixes for recipe ${parentRecipeId}`, error);
-  return data.map(rowToRecipe);
+
+  return (data ?? [])
+    .filter((row) => row.recipes && (row.recipes as RecipeRow).parent_recipe_id === parentRecipeId)
+    .map((row) => rowToRecipe(row.recipes as RecipeRow));
 }
 
 export async function countLibraryEntries(userId: string): Promise<number> {
