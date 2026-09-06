@@ -1,12 +1,11 @@
 import { useMemo, useState } from 'react';
-import { Popover } from '@heroui/react';
 import { Clock } from 'lucide-react';
 import type { Recipe } from '../types';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
 import TimerConfirmSheet from './TimerConfirmSheet';
 import PremiumModal from './PremiumModal';
-import IngredientIcon from './IngredientIcon';
+import InstructionIngredientPopover from './InstructionIngredientPopover';
 
 interface RecipeInstructionTextProps {
   /**
@@ -29,7 +28,7 @@ interface RecipeInstructionTextProps {
  */
 const getChipClass = (variant: 'list' | 'focused' = 'list') =>
   variant === 'focused'
-    ? 'bg-black/[0.05] dark:bg-white/[0.08] rounded-lg px-2 py-0.5 text-gray-700 dark:text-gray-300 font-medium inline'
+    ? 'bg-black/[0.05] dark:bg-white/[0.08] rounded-xl px-2.5 py-1 text-gray-700 dark:text-gray-300 font-medium inline'
     : 'bg-black/[0.06] dark:bg-white/[0.09] rounded px-1.5 py-[1.5px] text-gray-700 dark:text-gray-300 font-medium inline';
 
 export default function RecipeInstructionText({
@@ -120,9 +119,9 @@ export default function RecipeInstructionText({
     );
 
     const escapedLegacyTerms = uniqueLegacyTerms.map(t => {
-      let esc = t.term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      let esc = t.term.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
       if (t.term.length <= 3) {
-        esc = `(?<=^|[\\s.,:;!?()\[\\]{}'\"\\-\\/])${esc}(?=$|[\\s.,:;!?()\[\\]{}'\"\\-\\/])`;
+        esc = `(?<=^|[\\s.,:;!?()[\\]{}'"\\-/])${esc}(?=$|[\\s.,:;!?()[\\]{}'"\\-/])`;
       }
       return esc;
     });
@@ -144,53 +143,13 @@ export default function RecipeInstructionText({
             );
 
             return (
-              <span key={index} onClick={(e) => e.stopPropagation()} className="inline">
-                <Popover>
-                  <Popover.Trigger>
-                    <span className="font-semibold text-emerald-600 dark:text-emerald-500 cursor-pointer hover:underline decoration-emerald-500/30 underline-offset-4 transition-all outline-none">
-                      {wordInText}
-                    </span>
-                  </Popover.Trigger>
-                  <Popover.Content
-                    placement="top"
-                    className="bg-white dark:bg-gray-950 text-gray-700 dark:text-gray-300 border border-black/10 dark:border-white/10 rounded-xl shadow-lg px-4 py-2.5"
-                  >
-                    <Popover.Dialog className="outline-none border-none p-0 m-0">
-                      {matchedIng ? (
-                        <div className="flex items-center gap-2.5 min-w-[160px] max-w-[280px]">
-                          <IngredientIcon
-                            baseName={matchedIng.baseName}
-                            canonicalId={matchedIng.canonicalId}
-                            category={matchedIng.category}
-                            name={matchedIng.name}
-                            size="sm"
-                          />
-                          <div className="flex-1 min-w-0 flex flex-col justify-center">
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="text-sm font-bold text-gray-900 dark:text-white leading-tight truncate">
-                                {matchedIng.name}
-                              </span>
-                              {(matchedIng.amount > 0 || matchedIng.unit) && (
-                                <span className="text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/50 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30 px-2 py-0.5 rounded-lg shrink-0 whitespace-nowrap">
-                                  {formatAmount(matchedIng.amount, matchedIng.unit)}
-                                  {matchedIng.unit ? ` ${matchedIng.unit}` : ''}
-                                </span>
-                              )}
-                            </div>
-                            {(matchedIng.modifier || matchedIng.notes) && (
-                              <span className="text-xs text-gray-500 dark:text-gray-400 italic mt-0.5 leading-tight truncate">
-                                {[matchedIng.modifier, matchedIng.notes].filter(Boolean).join(' • ')}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="text-sm font-semibold text-gray-900 dark:text-white">{inlineIngMatch[2]}</span>
-                      )}
-                    </Popover.Dialog>
-                  </Popover.Content>
-                </Popover>
-              </span>
+              <InstructionIngredientPopover
+                key={index}
+                displayText={wordInText}
+                matchedIngredient={matchedIng}
+                fallbackText={inlineIngMatch[2]}
+                formatAmount={formatAmount}
+              />
             );
           }
 
@@ -256,60 +215,20 @@ export default function RecipeInstructionText({
             }
 
             return (
-              <span key={index} onClick={(e) => e.stopPropagation()} className="inline">
-                <Popover>
-                  <Popover.Trigger>
-                    <span className="font-semibold text-emerald-600 dark:text-emerald-500 cursor-pointer hover:underline decoration-emerald-500/30 underline-offset-4 transition-all outline-none">
-                      {part}
-                    </span>
-                  </Popover.Trigger>
-                  <Popover.Content
-                    placement="top"
-                    className="bg-white dark:bg-gray-950 text-gray-700 dark:text-gray-300 border border-black/10 dark:border-white/10 rounded-xl shadow-lg px-4 py-2.5"
-                  >
-                    <Popover.Dialog className="outline-none border-none p-0 m-0">
-                      {matched.ingredient ? (
-                        <div className="flex items-center gap-2.5 min-w-[160px] max-w-[280px]">
-                          <IngredientIcon
-                            baseName={matched.ingredient.baseName}
-                            canonicalId={matched.ingredient.canonicalId}
-                            category={matched.ingredient.category}
-                            name={matched.ingredient.name}
-                            size="sm"
-                          />
-                          <div className="flex-1 min-w-0 flex flex-col justify-center">
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="text-sm font-bold text-gray-900 dark:text-white leading-tight truncate">
-                                {matched.ingredient.name}
-                              </span>
-                              {(matched.ingredient.amount > 0 || matched.ingredient.unit) && (
-                                <span className="text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/50 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30 px-2 py-0.5 rounded-lg shrink-0 whitespace-nowrap">
-                                  {formatAmount(matched.ingredient.amount, matched.ingredient.unit)}
-                                  {matched.ingredient.unit ? ` ${matched.ingredient.unit}` : ''}
-                                </span>
-                              )}
-                            </div>
-                            {(matched.ingredient.modifier || matched.ingredient.notes) && (
-                              <span className="text-xs text-gray-500 dark:text-gray-400 italic mt-0.5 leading-tight truncate">
-                                {[matched.ingredient.modifier, matched.ingredient.notes].filter(Boolean).join(' • ')}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="text-sm font-semibold text-gray-900 dark:text-white">{matched.info}</span>
-                      )}
-                    </Popover.Dialog>
-                  </Popover.Content>
-                </Popover>
-              </span>
+              <InstructionIngredientPopover
+                key={index}
+                displayText={part}
+                matchedIngredient={matched.ingredient}
+                fallbackText={matched.info}
+                formatAmount={formatAmount}
+              />
             );
           }
           return part;
         })}
       </>
     );
-  }, [text, recipe.equipment, allIngredients, formatAmount, t, isPremium]);
+  }, [text, recipe.equipment, allIngredients, formatAmount, t, isPremium, variant]);
 
   return (
     <>
