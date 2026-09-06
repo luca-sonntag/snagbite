@@ -14,10 +14,6 @@
 
 - Response bei Rezept kochen ohne Foto fehlt
 
-- überarbeitung von extraction page, style, struktur, aufbau, weniger technisch
-
-- extraction animation soll keine technischen schritte des erstellungsprozesses preisgeben, zb. cover image generieren oder video herunterladen, nichts davon soll der user sehen
-
 - neue bilder für demo rezepte generieren (flux)
 
 - update von premium features und update von paywall
@@ -30,15 +26,12 @@
 - [x] Pfeffer mappt korrekt auf Speisepfeffer / `black pepper` mit Kategorie `SPICES_SEASONINGS` und Pfeffer-Icon (behoben durch Disambiguation & Category Isolation)
 - [x] Autonome KI-Audit-Pipeline für Mappings & Zutat-Icons (`backend/src/audit/`, `npm run audit:ingredients`)
 - [x] zutat text geht über Rezepte badge
+- [x] überarbeitung von extraction page, style, struktur, aufbau, weniger technisch
+- [x] extraction animation soll keine technischen schritte des erstellungsprozesses preisgeben, zb. cover image generieren oder video herunterladen, nichts davon soll der user sehen
+- [x] text in cooking mode soll mehr abstand innerhalb haben (behoben: Zeilenabstand auf leading-[1.8] erhöht, Innenabstand py-3.5 und Chip-Padding optimiert)
 
 ![picture 0](../images/471caba0ddc884b4bc8bf0c61118e1f21d88a4f110980a04fd70820afead89df.png)
 
 
 ## Bugs / Findings
-- text in cooking mode soll mehr abstand innerhalb haben
-
-![picture 8](../images/7796089d34ce80e1fa6fb62780b3f944136aaf3a5d7bf1b8980cde93dd38d21c.png)  
-
-
-
-
+*(Aktuell keine offenen Punkte)*
