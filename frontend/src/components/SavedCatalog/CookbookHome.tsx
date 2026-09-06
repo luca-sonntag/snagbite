@@ -72,7 +72,7 @@ export default function CookbookHome({
   const favJobs = favoriteJobs.length > 0 ? favoriteJobs : (shelves.favorites?.items ?? []);
 
   return (
-    <div className="flex flex-col gap-7 pb-4 pt-1">
+    <div className="flex flex-col gap-6 pb-4">
       {/* 📂 Unified Organization Hub: Sammlungen, Favoriten, Kategorien & Labels */}
       <section className="flex flex-col gap-2.5">
         {/* Row of Tiles: 1. ⭐ Favoriten Smart-Folder + 2. User Collections + 3. ➕ Neue Sammlung */}

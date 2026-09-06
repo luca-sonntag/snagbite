@@ -560,7 +560,7 @@ export default function SavedCatalog({
   // Level 1 & 2: Unified Layout
   // ---------------------------------------------------------------------------
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-2">
       <CatalogFilters
         title={isListLevel ? listTitle : t('catalog.myCookbookTitle')}
         searchQuery={searchQuery}
