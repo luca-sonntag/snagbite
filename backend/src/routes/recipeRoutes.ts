@@ -369,6 +369,8 @@ recipeRoutes.post('/recipes/:id/chat', async (req: Request, res: Response): Prom
           sourceHandle: recipe.sourceHandle,
           parentRecipeId: id,
           remixPrompt,
+          visibility: 'private',
+          origin: 'remix',
         },
         'remix',
         'remix'
