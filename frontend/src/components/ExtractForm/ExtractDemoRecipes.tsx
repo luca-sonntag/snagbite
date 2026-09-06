@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, ChefHat } from 'lucide-react';
+import { Clock, ChefHat, Check, Loader2, Plus } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import { InstagramIcon } from '../ShareMockups';
@@ -15,9 +15,11 @@ const TikTokIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoClick }) => {
-  const { t, language } = useI18n();
+  const { t } = useI18n();
   const { getAccessToken } = useAuth();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -42,10 +44,40 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
     return null;
   }
 
+  const handleCardClick = async (recipe: Recipe) => {
+    if (!recipe.id) return;
+    const isSaved = savedIds.has(recipe.id);
+    const isSaving = savingIds.has(recipe.id);
+
+    if (isSaving) return;
+
+    if (isSaved) {
+      hapticLight();
+      window.location.hash = `/recipe/${recipe.id}`;
+      return;
+    }
+
+    hapticLight();
+    setSavingIds((prev) => new Set(prev).add(recipe.id!));
+    try {
+      await onDemoClick(recipe.sourceUrl || '', recipe);
+      setSavedIds((prev) => new Set(prev).add(recipe.id!));
+    } finally {
+      setSavingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(recipe.id!);
+        return next;
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col gap-2.5">
-      <div className="flex items-center justify-between px-1">
+      <div className="flex flex-col px-1 gap-0.5">
         <h3 className="text-xs font-bold text-gray-900 dark:text-white">{t('form.demoTitle')}</h3>
+        <p className="text-[11px] text-gray-500 dark:text-gray-400 font-normal">
+          {t('form.demoSubtitle')}
+        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -55,15 +87,16 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
           const imageUrl = recipe.imageUrl || recipe.imageUrls?.[0] || '';
           const isTikTok = recipe.sourceUrl?.includes('tiktok');
           const isInstagram = recipe.sourceUrl?.includes('instagram');
+          const isSaved = recipe.id ? savedIds.has(recipe.id) : false;
+          const isSaving = recipe.id ? savingIds.has(recipe.id) : false;
 
           return (
             <div
               key={recipe.id || idx}
-              onClick={() => {
-                hapticLight();
-                onDemoClick(recipe.sourceUrl || '', recipe);
-              }}
-              className="rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none group"
+              onClick={() => handleCardClick(recipe)}
+              className={`rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none group ${
+                isSaved ? 'ring-1 ring-emerald-500/30 dark:ring-emerald-400/30' : ''
+              }`}
             >
               <div className="relative w-full aspect-[4/3] bg-gray-100 dark:bg-gray-800 overflow-hidden">
                 {imageUrl ? (
@@ -97,9 +130,22 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
                     <Clock className="w-3 h-3 text-emerald-500 shrink-0" />
                     {timeDisplay}
                   </span>
-                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-                    {language === 'de' ? 'Speichern →' : 'Save →'}
-                  </span>
+                  {isSaving ? (
+                    <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                      <Loader2 className="w-3 h-3 animate-spin shrink-0" />
+                      {t('form.demoSavingAction')}
+                    </span>
+                  ) : isSaved ? (
+                    <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                      <Check className="w-3 h-3 shrink-0" />
+                      {t('form.demoSavedAction')}
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                      <Plus className="w-3 h-3 shrink-0" />
+                      {t('form.demoSaveAction')}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -109,4 +155,5 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
     </div>
   );
 };
+
 export default ExtractDemoRecipes;

@@ -27,6 +27,8 @@ const WelcomeGuide = lazy(() => import('./components/WelcomeGuide'));
 import { useRecipeExtraction } from './hooks/useRecipeExtraction';
 import { useShoppingList } from './hooks/useShoppingList';
 import { useAuth } from './context/AuthContext';
+import { useToast } from './context/ToastContext';
+import { useI18n } from './context/I18nContext';
 import { apiUrl } from './api';
 import { savePublicRecipeToCookbook } from './api/publicRecipesApi';
 import { useSocial } from './context/SocialContext';
@@ -56,6 +58,8 @@ function ViewFallback() {
 
 export default function App() {
   const { user, isPremium, loading: authLoading, getAccessToken } = useAuth();
+  const toast = useToast();
+  const { language } = useI18n();
   const { snapshot: gamificationSnapshot } = useGamification();
   const { incomingRequests } = useSocial();
   const { outstandingCount: outstandingMealPlansCount } = useMealPlanBadge({ user, authLoading, getAccessToken });
@@ -284,12 +288,22 @@ export default function App() {
           registerExtraRecipe(publicRecipe.id, res.savedRecipe);
         }
         await fetchHistory();
+        toast.success(
+          language === 'de'
+            ? `"${publicRecipe.title}" wurde in dein Kochbuch gespeichert!`
+            : `"${publicRecipe.title}" saved to your cookbook!`
+        );
         navigate('history', publicRecipe.id);
       } catch (err) {
         console.error('Failed to save public recipe:', err);
+        toast.danger(
+          language === 'de'
+            ? 'Rezept konnte nicht gespeichert werden.'
+            : 'Could not save recipe.'
+        );
       }
     },
-    [getAccessToken, registerExtraRecipe, fetchHistory, navigate]
+    [getAccessToken, registerExtraRecipe, fetchHistory, navigate, toast, language]
   );
 
   const [splashFinished, setSplashFinished] = useState(false);
