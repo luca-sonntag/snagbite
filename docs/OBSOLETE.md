@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-06: Statische Hardcoded Demo-Rezepte & „Täglich neu“-Badge durch rein dynamische Demo-Rezepte aus der DB ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `STATIC_FALLBACKS` in `ExtractDemoRecipes.tsx`: Hardcodierte Dummy-Rezepte (*Pesto-Käse-Twists*, *Flammkuchen aus dem Mixer*) mit fest verdrahteten URLs und statischen Asset-Pfaden (`/demo/*.jpg`).
+  - Statisches Badge `Täglich neu` mit `Sparkles`-Icon im Demo-Karten-Header.
+  - Permanentes Anzeigen des Demo-Blocks selbst dann, wenn keine echten Rezepte vorhanden sind.
+* **Ersetzt durch:**
+  - **Dynamischer Datenbank-Fetch:** Demo-Rezepte werden ausschließlich via `GET /api/public/recipe/demo` aus der Datenbank bezogen (gefiltert nach `is_demo = true`).
+  - **Bedingte Sichtbarkeit:** Der Block „Beliebte Rezepte zum Ausprobieren“ wird nur noch gerendert, wenn tatsächlich Demo-Rezepte in der Datenbank existieren (`recipes.length > 0`), andernfalls wird `null` zurückgegeben.
+* **Betroffene Dateien:** `frontend/src/components/ExtractForm/ExtractDemoRecipes.tsx`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-05: Rewarded Interstitial durch klassisches Rewarded Video mit konfigurierbarem Credit-Reward (`global_settings`) ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
