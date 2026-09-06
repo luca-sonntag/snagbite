@@ -163,7 +163,7 @@ describe('applyRecipeOperations', () => {
     assert.ok(bacon);
     assert.strictEqual(bacon.amount, 200); // 100g * 2 = 200g
   });
-  it('correctly replaces ingredient with umlaut/stem match and adapts title and instructions', () => {
+  it('correctly replaces ingredient with umlaut/stem match, keeps title unchanged without UPDATE_TITLE, and adapts title when UPDATE_TITLE is present', () => {
     const appleRecipe: Recipe = {
       id: 'apple-recipe',
       title: 'Apfel-Zimt Spekulatius Tiramisu',
@@ -191,7 +191,7 @@ describe('applyRecipeOperations', () => {
       ],
     };
 
-    const ops: RecipeOperation[] = [
+    const replaceOpOnly: RecipeOperation[] = [
       {
         id: 'op-pear',
         type: 'REPLACE_INGREDIENT',
@@ -207,11 +207,23 @@ describe('applyRecipeOperations', () => {
       },
     ];
 
-    const remixed = applyRecipeOperations(appleRecipe, ops);
-    const produceGroup = remixed.ingredients.find((g) => g.name === 'PRODUCE');
-    assert.ok(produceGroup);
-    assert.strictEqual(produceGroup.items[0].name, 'Birnen (Abate Fetel)');
-    assert.strictEqual(remixed.title, 'Birnen (Abate Fetel)-Zimt Spekulatius Tiramisu');
-    assert.ok(remixed.instructions[0].description.includes('Birnen (Abate Fetel)'));
+    // 1. Without UPDATE_TITLE, title remains unchanged but instructions adapt
+    const remixedNoTitle = applyRecipeOperations(appleRecipe, replaceOpOnly);
+    assert.strictEqual(remixedNoTitle.title, 'Apfel-Zimt Spekulatius Tiramisu');
+    assert.ok(remixedNoTitle.instructions[0].description.includes('Birnen (Abate Fetel)'));
+
+    // 2. With separate UPDATE_TITLE operation, title adapts as its own change
+    const opsWithTitle: RecipeOperation[] = [
+      ...replaceOpOnly,
+      {
+        id: 'op-title',
+        type: 'UPDATE_TITLE',
+        summary: 'Titel anpassen: Birnen-Zimt Spekulatius Tiramisu',
+        newTitle: 'Birnen-Zimt Spekulatius Tiramisu',
+      },
+    ];
+    const remixedWithTitle = applyRecipeOperations(appleRecipe, opsWithTitle);
+    assert.strictEqual(remixedWithTitle.title, 'Birnen-Zimt Spekulatius Tiramisu');
+    assert.ok(remixedWithTitle.instructions[0].description.includes('Birnen (Abate Fetel)'));
   });
 });

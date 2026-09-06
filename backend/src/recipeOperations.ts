@@ -284,17 +284,11 @@ export function applyRecipeOperations(baseRecipe: Recipe, operations: RecipeOper
     }
   }
 
-  // Auto-adapt title and instructions if a core ingredient was replaced and no explicit UPDATE_TITLE was provided
-  const hasExplicitTitleUpdate = operations.some((op) => op.type === 'UPDATE_TITLE' && op.newTitle?.trim());
-
+  // Auto-adapt instructions if a core ingredient was replaced
   for (const op of operations) {
     if (op.type === 'REPLACE_INGREDIENT' && op.targetIngredientName && op.newIngredient?.name) {
       const target = op.targetIngredientName;
       const replacement = op.newIngredient.name;
-
-      if (!hasExplicitTitleUpdate) {
-        recipe.title = replaceInTextPreservingCase(recipe.title, target, replacement);
-      }
 
       for (const step of recipe.instructions) {
         step.description = replaceInTextPreservingCase(step.description, target, replacement);

@@ -1082,14 +1082,18 @@ ${recipe.instructions.map(step => `${step.step}. ${step.description}`).join('\n'
 Tools at your disposal:
 1. modify_current_recipe: Call this when the user wants to adapt, scale, remix, or otherwise modify the recipe details (e.g. add a side dish, swap or add ingredients, scale servings, make it vegan, gluten-free, low-carb). Do not try to write modified recipe JSON or instructions in your text reply; always call this tool to perform the modification.
 IMPORTANT FOR RECIPE MODIFICATIONS:
-- When modifying the recipe, ALWAYS generate individual, granular operations for EACH ingredient:
+- EVERY OPERATION MUST BE STRICTLY ATOMIC AND DO EXACTLY ONE THING:
+  * For ingredient swaps (e.g. "Bacon durch 100g Putenbruststreifen ersetzen"): use type "REPLACE_INGREDIENT" with targetIngredientName ("Bacon"), the full newIngredient object, and summary "Bacon durch 100g Putenbruststreifen ersetzen". NEVER append "und Titel anpassen" or similar text to an ingredient swap operation! Always use the exact name of the existing ingredient from the list above.
+  * For title changes (CRITICAL RULE): Adjusting the recipe title MUST ALWAYS be its OWN completely separate operation of type "UPDATE_TITLE". NEVER merge title adaptation into an ingredient operation or summary (e.g. NEVER write "Apfel durch Birne ersetzen und Titel anpassen")!
+    Instead, emit TWO separate operations:
+    1. REPLACE_INGREDIENT: targetIngredientName: "Apfel", newIngredient: { ... }, summary: "Apfel durch Birne ersetzen"
+    2. UPDATE_TITLE: newTitle: "Birnen-Zimt Spekulatius Tiramisu", summary: "Titel anpassen: Birnen-Zimt Spekulatius Tiramisu"
+    Whenever replacing a core or title-defining ingredient (e.g. replacing "Apfel" with "Birne" in "Apfel-Zimt Spekulatius Tiramisu"), or transforming the dish (vegan, low-carb, protein), ALWAYS add a separate "UPDATE_TITLE" operation!
   * For adding side dishes or multiple ingredients (e.g. Tomaten-Gurken-Salat als Beilage): create a separate "ADD_INGREDIENTS" operation for EACH single ingredient (e.g. one for 200g Tomaten, one for 150g Gurke, one for 1 EL Olivenöl, one for 1 EL Balsamico) with its groupName (e.g. "Beilage: Tomaten-Gurken-Salat") and newIngredient. If preparation steps are needed, add an ADD_INSTRUCTION_STEP operation.
-  * For ingredient swaps (e.g. "Bacon durch 100g Putenbruststreifen ersetzen"): use type "REPLACE_INGREDIENT" with targetIngredientName ("Bacon") and the full newIngredient object. Always use the exact name of the existing ingredient from the list above.
   * For removals (e.g. "Röstzwiebeln weglassen"): use type "REMOVE_INGREDIENT" with removeIngredientName ("Röstzwiebeln").
   * For scaling (e.g. "Auf 4 Portionen"): use type "SCALE_SERVINGS" with newServings.
-  * For title changes (CRITICAL): When replacing or modifying a core or title-defining ingredient (e.g. replacing "Apfel" with "Birne" in "Apfel-Zimt Spekulatius Tiramisu"), or significantly transforming the dish (e.g. making it vegan, protein-rich, gluten-free), you MUST ALWAYS include an "UPDATE_TITLE" operation with the newly adapted, delicious recipe title (e.g. newTitle: "Birnen-Zimt Spekulatius Tiramisu" or "Veganes Tiramisu")!
-- NEVER bundle an entire dish into a single abstract ingredient string. Every single ingredient must be represented individually with amount, unit, name, baseName, and macros.
-- Populate a clear, concise "summary" for every single ingredient/operation (e.g. "200g Tomaten hinzufügen", "150g Gurke hinzufügen", "Burrata durch 125g fettarmen Mozzarella ersetzen").
+- NEVER bundle an entire dish or multiple distinct actions into a single operation. Every single ingredient and title change must be represented individually.
+- Populate a clear, concise "summary" for every single operation (e.g. "200g Tomaten hinzufügen", "150g Gurke hinzufügen", "Burrata durch 125g fettarmen Mozzarella ersetzen", "Titel anpassen: Birnen-Zimt Spekulatius Tiramisu").
 2. add_missing_ingredients_to_shopping_list: ALWAYS call this tool whenever the user asks to add ingredients/items to their shopping list, missing ingredients, or sends a shopping prompt (e.g. "Zutaten auf Einkaufsliste", "Setze X auf die Einkaufsliste"). NEVER just reply with text claiming you added them without calling this tool!
 3. set_cooking_timer: ALWAYS call this tool when the user asks to set a timer for a step or cooking duration (specify duration strictly in minutes).
 
@@ -1167,11 +1171,29 @@ When the user requests a further modification, call modify_current_recipe with o
         const rawOps = (call.args as any).operations;
         const modReq = (call.args as any).modification_request;
         const operations: RecipeOperation[] = [];
+        const cleanOpSummary = (raw?: string): string => {
+          if (!raw) return '';
+          return raw
+            .replace(/(?:,|\s+und)\s+(?:den\s+)?titel(?:\s+(?:anpassen|ändern|updaten))?/gi, '')
+            .trim();
+        };
+
+        const pendingTitleUpdates: string[] = [];
 
         if (Array.isArray(rawOps) && rawOps.length > 0) {
           for (let idx = 0; idx < rawOps.length; idx++) {
             const op = rawOps[idx];
-            if (op.type === 'ADD_INGREDIENTS' && Array.isArray(op.newIngredients) && op.newIngredients.length > 1) {
+            if (op.type === 'UPDATE_TITLE') {
+              const title = (op.newTitle || (op as any).title || '').trim();
+              if (title) {
+                operations.push({
+                  id: op.id || `op_${Date.now()}_${idx}_title`,
+                  type: 'UPDATE_TITLE',
+                  summary: `Titel anpassen: ${title}`,
+                  newTitle: title,
+                });
+              }
+            } else if (op.type === 'ADD_INGREDIENTS' && Array.isArray(op.newIngredients) && op.newIngredients.length > 1) {
               // Flatten into individual 1-ingredient operations
               for (let iIdx = 0; iIdx < op.newIngredients.length; iIdx++) {
                 const ing = op.newIngredients[iIdx];
@@ -1204,18 +1226,22 @@ When the user requests a further modification, call modify_current_recipe with o
               });
             } else if (op.type === 'REPLACE_INGREDIENT' && op.newIngredient) {
               const ing = op.newIngredient;
+              const summary = cleanOpSummary(op.summary) || `${op.targetIngredientName} durch ${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} ersetzen`;
               operations.push({
                 id: op.id || `op_${Date.now()}_${idx}`,
                 type: 'REPLACE_INGREDIENT',
-                summary: `${op.targetIngredientName} durch ${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} ersetzen`,
+                summary,
                 targetIngredientName: op.targetIngredientName,
                 newIngredient: ing,
               });
+              if (op.newTitle?.trim()) {
+                pendingTitleUpdates.push(op.newTitle.trim());
+              }
             } else {
               operations.push({
                 id: op.id || `op_${Date.now()}_${idx}`,
                 type: op.type,
-                summary: op.summary || modReq || 'Rezept anpassen',
+                summary: cleanOpSummary(op.summary) || cleanOpSummary(modReq) || 'Rezept anpassen',
                 targetIngredientName: op.targetIngredientName,
                 newIngredient: op.newIngredient,
                 groupName: op.groupName,
@@ -1226,8 +1252,22 @@ When the user requests a further modification, call modify_current_recipe with o
                 newSteps: op.newSteps,
                 newTitle: op.newTitle,
               });
+              if (op.newTitle?.trim()) {
+                pendingTitleUpdates.push(op.newTitle.trim());
+              }
             }
           }
+        }
+
+        // Ensure title update is ALWAYS its own separate operation
+        const hasExistingTitleOp = operations.some((o) => o.type === 'UPDATE_TITLE');
+        if (!hasExistingTitleOp && pendingTitleUpdates.length > 0) {
+          operations.push({
+            id: `op_${Date.now()}_title_extracted`,
+            type: 'UPDATE_TITLE',
+            summary: `Titel anpassen: ${pendingTitleUpdates[0]}`,
+            newTitle: pendingTitleUpdates[0],
+          });
         }
 
         const rawChanges = (call.args as any).changes;
