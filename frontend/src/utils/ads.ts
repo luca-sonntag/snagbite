@@ -8,7 +8,7 @@ import {
   AdmobConsentStatus,
 } from '@capacitor-community/admob';
 import { isNative } from '../native';
-import { APP_OPEN_MIN_INTERVAL_MS } from '../env';
+import { APP_OPEN_MIN_INTERVAL_MS, ADMOB_USE_TEST_ADS } from '../env';
 
 /**
  * Google AdMob integration for the freemium extraction ad.
@@ -47,17 +47,24 @@ const CONFIGURED_TEST_DEVICES = (import.meta.env.VITE_ADMOB_TEST_DEVICES as stri
   .map((id) => id.trim())
   .filter(Boolean) ?? [];
 
+/**
+ * Test mode toggle:
+ * If ADMOB_USE_TEST_ADS is true (or VITE_ADMOB_REWARDED_TEST_MODE='true'), test ad unit IDs are used.
+ * Otherwise, real configured production ad unit IDs are used with fallback to test IDs.
+ */
+const USE_TEST_REWARDED = ADMOB_USE_TEST_ADS || import.meta.env.VITE_ADMOB_REWARDED_TEST_MODE === 'true';
+
 /** Real ad unit if configured in environment, otherwise Google's test unit. */
-const BANNER_AD_ID = CONFIGURED_BANNER_AD_ID || TEST_BANNER_AD_ID;
-const REWARDED_AD_ID = CONFIGURED_REWARDED_AD_ID || TEST_REWARDED_AD_ID;
-const INTERSTITIAL_AD_ID = CONFIGURED_INTERSTITIAL_AD_ID || TEST_INTERSTITIAL_AD_ID;
+const BANNER_AD_ID = ADMOB_USE_TEST_ADS ? TEST_BANNER_AD_ID : (CONFIGURED_BANNER_AD_ID || TEST_BANNER_AD_ID);
+const REWARDED_AD_ID = USE_TEST_REWARDED ? TEST_REWARDED_AD_ID : (CONFIGURED_REWARDED_AD_ID || TEST_REWARDED_AD_ID);
+const INTERSTITIAL_AD_ID = ADMOB_USE_TEST_ADS ? TEST_INTERSTITIAL_AD_ID : (CONFIGURED_INTERSTITIAL_AD_ID || TEST_INTERSTITIAL_AD_ID);
 
 /**
- * Serve test ads unless a real ad unit id is configured in environment.
+ * Serve test ads if forced via env OR unless a real ad unit id is configured in environment.
  * Requesting live ads on an unregistered/dev build is an AdMob policy violation,
- * so we stay in test mode until `VITE_ADMOB_BANNER_ID` is provided.
+ * so we stay in test mode when forced or until `VITE_ADMOB_BANNER_ID` is provided.
  */
-const IS_TESTING = !CONFIGURED_BANNER_AD_ID;
+const IS_TESTING = ADMOB_USE_TEST_ADS || !CONFIGURED_BANNER_AD_ID;
 
 let initialized = false;
 let initPromise: Promise<void> | null = null;
@@ -123,6 +130,9 @@ export async function initAds(): Promise<void> {
 
   initPromise = (async () => {
     try {
+      console.log(
+        `[AdMob] Initializing (${IS_TESTING ? 'TEST MODE' : 'PRODUCTION MODE'}, rewarded: ${USE_TEST_REWARDED ? 'TEST' : 'PROD'})...`
+      );
       await AdMob.initialize({
         initializeForTesting: IS_TESTING,
         // Real ad IDs but registered test devices → SDK serves safe test ads.
@@ -391,10 +401,12 @@ async function showRewardVideoAdInternal(): Promise<boolean> {
         resolve(false);
       });
 
-      console.log('[AdMob] preparing rewarded video ad...');
+      console.log(
+        `[AdMob] preparing rewarded video ad (${USE_TEST_REWARDED ? 'TEST' : 'PROD'}, id: ${REWARDED_AD_ID})...`
+      );
       await AdMob.prepareRewardVideoAd({
         adId: REWARDED_AD_ID,
-        isTesting: IS_TESTING,
+        isTesting: IS_TESTING || USE_TEST_REWARDED,
         npa: !personalizedAllowed,
       });
 

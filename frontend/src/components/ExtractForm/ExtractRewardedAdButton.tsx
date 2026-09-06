@@ -36,6 +36,8 @@ export const ExtractRewardedAdButton: React.FC<ExtractRewardedAdButtonProps> = (
         } else {
           toast.danger(t('ads.rewardedFailed'));
         }
+      } else if (!earned) {
+        toast.danger(t('ads.rewardedFailed'));
       }
     } catch (err) {
       console.error('Error watching rewarded ad:', err);
