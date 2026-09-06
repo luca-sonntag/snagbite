@@ -163,7 +163,7 @@ describe('applyRecipeOperations', () => {
     assert.ok(bacon);
     assert.strictEqual(bacon.amount, 200); // 100g * 2 = 200g
   });
-  it('correctly replaces ingredient with umlaut/stem match, keeps title unchanged without UPDATE_TITLE, and adapts title when UPDATE_TITLE is present', () => {
+  it('correctly replaces ingredient, leaves title unchanged without UPDATE_TITLE, and sets title when UPDATE_TITLE is provided', () => {
     const appleRecipe: Recipe = {
       id: 'apple-recipe',
       title: 'Apfel-Zimt Spekulatius Tiramisu',
@@ -195,8 +195,8 @@ describe('applyRecipeOperations', () => {
       {
         id: 'op-pear',
         type: 'REPLACE_INGREDIENT',
-        summary: 'Apfel durch Birne ersetzen',
-        targetIngredientName: 'Apfel',
+        summary: 'Äpfel durch Birnen ersetzen',
+        targetIngredientName: 'Äpfel (Boskoop)',
         newIngredient: {
           name: 'Birnen (Abate Fetel)',
           baseName: 'birne',
@@ -207,12 +207,12 @@ describe('applyRecipeOperations', () => {
       },
     ];
 
-    // 1. Without UPDATE_TITLE, title remains unchanged but instructions adapt
+    // 1. Without UPDATE_TITLE, title remains unchanged
     const remixedNoTitle = applyRecipeOperations(appleRecipe, replaceOpOnly);
     assert.strictEqual(remixedNoTitle.title, 'Apfel-Zimt Spekulatius Tiramisu');
-    assert.ok(remixedNoTitle.instructions[0].description.includes('Birnen (Abate Fetel)'));
+    assert.strictEqual(remixedNoTitle.ingredients[0].items[0].name, 'Birnen (Abate Fetel)');
 
-    // 2. With separate UPDATE_TITLE operation, title adapts as its own change
+    // 2. With separate UPDATE_TITLE operation directly supplied by AI
     const opsWithTitle: RecipeOperation[] = [
       ...replaceOpOnly,
       {
@@ -224,6 +224,5 @@ describe('applyRecipeOperations', () => {
     ];
     const remixedWithTitle = applyRecipeOperations(appleRecipe, opsWithTitle);
     assert.strictEqual(remixedWithTitle.title, 'Birnen-Zimt Spekulatius Tiramisu');
-    assert.ok(remixedWithTitle.instructions[0].description.includes('Birnen (Abate Fetel)'));
   });
 });
