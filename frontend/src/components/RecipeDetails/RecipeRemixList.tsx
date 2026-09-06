@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, ChevronRight, Clock, Plus } from 'lucide-react';
+import { Layers, ChevronRight, Clock, Plus } from 'lucide-react';
 import { apiUrl } from '../../api';
 import { useAuth } from '../../context/AuthContext';
 import { useI18n } from '../../context/I18nContext';
@@ -66,7 +66,7 @@ export default function RecipeRemixList({
     <section className="mt-3 flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-xs font-bold text-purple-600 dark:text-purple-400">
-          <Sparkles className="w-3.5 h-3.5 fill-purple-500/20" />
+          <Layers className="w-3.5 h-3.5" />
           <span>{t('remix.yourRemixes') || 'Deine Remixes'} ({remixes.length})</span>
         </div>
       </div>

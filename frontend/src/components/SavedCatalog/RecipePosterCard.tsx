@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, Check, Star, Sparkles } from 'lucide-react';
+import { Clock, Check, Star, Layers } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { detectPlatform, PlatformIcon, PLATFORM_ICON_COLOR } from './PlatformIcon';
@@ -86,10 +86,10 @@ export default function RecipePosterCard({
           {/* Remix badge (Glassmorphic) */}
           {remixCount > 0 && (
             <div
-              className={`absolute ${isSelectMode ? 'bottom-2 left-2' : 'top-2 left-2'} z-10 px-2 py-1 rounded-xl bg-purple-600/40 dark:bg-purple-500/30 backdrop-blur-md flex items-center gap-1 text-white shadow-md border-none`}
+              className={`absolute ${isSelectMode ? 'bottom-2 left-2' : 'top-2 left-2'} z-10 px-2 py-1 rounded-xl bg-purple-600/40 dark:bg-purple-500/30 backdrop-blur-md flex items-center gap-1.5 text-white shadow-md border-none`}
               title={`${remixCount} Remix(es)`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-purple-200 fill-purple-300/40 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]" />
+              <Layers className="w-3.5 h-3.5 text-purple-200 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]" />
               <span className="text-[11px] font-bold tracking-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">
                 {remixCount}
               </span>

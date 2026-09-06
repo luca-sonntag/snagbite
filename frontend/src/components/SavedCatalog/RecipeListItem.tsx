@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, Check, Tag, Star, Sparkles } from 'lucide-react';
+import { Clock, Check, Tag, Star, Layers } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { useI18n } from '../../context/I18nContext';
@@ -91,7 +91,7 @@ export default function RecipeListItem({
             <>
               {totalTime && <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700 shrink-0" />}
               <span className="shrink-0 flex items-center gap-1 text-purple-600 dark:text-purple-400 font-semibold">
-                <Sparkles className="w-3 h-3 fill-purple-500/20" />
+                <Layers className="w-3 h-3" />
                 <span>{remixCount === 1 ? t('remix.singleCount') : t('remix.multipleCount', { count: remixCount })}</span>
               </span>
             </>
