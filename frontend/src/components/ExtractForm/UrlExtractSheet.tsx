@@ -52,10 +52,10 @@ export const UrlExtractSheet: React.FC<UrlExtractSheetProps> = ({
                     hapticLight();
                     onClose();
                   }}
-                  className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 border-none cursor-pointer transition-colors"
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 border-none cursor-pointer transition-all"
                   aria-label="Close"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
             </Drawer.Header>

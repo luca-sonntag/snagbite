@@ -31,19 +31,19 @@ export const UrlExtractInput: React.FC<UrlExtractInputProps> = ({
       >
         <Label className="sr-only">{t('form.urlLabel')}</Label>
         <div className="relative flex items-center">
-          <Link2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
+          <Link2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-400 dark:text-gray-500 pointer-events-none" />
           <Input
             placeholder={t('form.urlPlaceholderShort')}
-            className="w-full !bg-gray-100/90 dark:!bg-gray-800/90 border-none rounded-2xl pl-10 !pr-24 py-3.5 text-sm text-gray-900 dark:text-white shadow-none focus:ring-2 focus:ring-emerald-500/25 focus:outline-none transition-all"
+            className="w-full h-14 !bg-gray-100/90 dark:!bg-gray-800/90 border-none rounded-2xl pl-10.5 !pr-32 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 shadow-none focus:ring-2 focus:ring-emerald-500/25 focus:outline-none transition-all"
             disabled={isPending}
           />
 
           {/* Right Action buttons */}
-          <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+          <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center">
             {url ? (
               <button
                 type="button"
-                className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-none cursor-pointer"
+                className="w-11 h-11 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all duration-200 ease-out border-none cursor-pointer"
                 onClick={() => {
                   hapticLight();
                   setUrl('');
@@ -51,12 +51,12 @@ export const UrlExtractInput: React.FC<UrlExtractInputProps> = ({
                 disabled={isPending}
                 aria-label="Clear URL"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4.5 h-4.5" />
               </button>
             ) : canPaste ? (
               <button
                 type="button"
-                className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-gray-700 shadow-[0_1px_3px_rgba(0,0,0,0.06)] text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 active:scale-95 transition-all border-none cursor-pointer flex items-center gap-1.5"
+                className="h-11 px-3.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/15 dark:bg-emerald-500/15 active:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 font-bold text-xs sm:text-sm flex items-center gap-1.5 border-none cursor-pointer transition-all duration-200 ease-out active:scale-95 select-none"
                 onClick={() => {
                   hapticLight();
                   onPaste();
@@ -64,7 +64,7 @@ export const UrlExtractInput: React.FC<UrlExtractInputProps> = ({
                 disabled={isPending}
                 title={t('form.pasteTooltip')}
               >
-                <Clipboard className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <Clipboard className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <span>{t('form.pasteAction')}</span>
               </button>
             ) : null}
