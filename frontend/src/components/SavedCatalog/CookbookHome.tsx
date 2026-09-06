@@ -163,7 +163,7 @@ export default function CookbookHome({
       )}
 
       {/* 🌟 Öffentliche Empfehlungen / Community Discoveries (unter Empfehlungen) */}
-      {totalRecipes > 0 && onRecipeSaved && (
+      {onRecipeSaved && (
         <PublicRecipeRecommendationsShelf onRecipeSaved={onRecipeSaved} />
       )}
 

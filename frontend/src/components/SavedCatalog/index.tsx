@@ -591,7 +591,7 @@ export default function SavedCatalog({
       {premiumBanner}
 
       {completedJobs.length === 0 ? (
-        <CatalogEmptyState />
+        <CatalogEmptyState onRecipeSaved={onRecipeSaved} />
       ) : !isListLevel ? (
         <CookbookHome
           totalRecipes={completedJobs.length}
