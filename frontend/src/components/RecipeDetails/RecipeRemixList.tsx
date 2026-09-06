@@ -15,7 +15,11 @@ interface RecipeRemixListProps {
 
 function formatRemixPrompt(raw?: string | null): string {
   if (!raw) return '';
-  return raw.replace(/^(\d+[\.\)]\s*|[-*•]\s*)/, '').trim();
+  return raw
+    .replace(/^(\d+[\.\)]\s*|[-*•]\s*)/, '')
+    .replace(/\s*\([A-Z_]+\)/g, '')
+    .replace(/\s*(hinzufügen|ersetzen|austauschen|ergänzen)\s*$/i, '')
+    .trim();
 }
 
 export default function RecipeRemixList({
@@ -84,7 +88,7 @@ export default function RecipeRemixList({
                   onNavigateToRecipe?.(remix.id, remix);
                 }
               }}
-              className="w-64 shrink-0 p-2.5 rounded-2xl bg-white dark:bg-zinc-850/90 hover:bg-gray-50 dark:hover:bg-zinc-800 active:scale-[0.98] transition-all flex items-center gap-3 text-left border border-purple-500/20 dark:border-purple-500/30 hover:border-purple-500/40 shadow-xs cursor-pointer outline-none group"
+              className="h-[76px] w-64 shrink-0 p-2.5 rounded-2xl bg-white dark:bg-zinc-850/90 hover:bg-gray-50 dark:hover:bg-zinc-800 active:scale-[0.98] transition-all flex items-center gap-3 text-left border border-purple-500/20 dark:border-purple-500/30 hover:border-purple-500/40 shadow-xs cursor-pointer outline-none group"
             >
               <div className="w-13 h-13 rounded-xl overflow-hidden bg-black/5 dark:bg-white/5 shrink-0">
                 <CachedImage
@@ -100,7 +104,7 @@ export default function RecipeRemixList({
                   {remix.title}
                 </h5>
                 {promptText ? (
-                  <span className="text-[11px] font-medium text-purple-700 dark:text-purple-300 italic line-clamp-1 bg-purple-500/10 dark:bg-purple-500/20 px-1.5 py-0.5 rounded-md mt-0.5 inline-block max-w-full">
+                  <span className="text-[11px] font-medium text-purple-700 dark:text-purple-300 italic truncate block bg-purple-500/10 dark:bg-purple-500/20 px-1.5 py-0.5 rounded-md mt-0.5 max-w-full">
                     „{promptText}“
                   </span>
                 ) : (
@@ -129,7 +133,7 @@ export default function RecipeRemixList({
               hapticLight();
               onRemixClick();
             }}
-            className="w-32 shrink-0 p-2.5 rounded-2xl border-2 border-dashed border-purple-500/30 hover:border-purple-500/60 dark:border-purple-500/40 dark:hover:border-purple-500/70 bg-purple-500/5 hover:bg-purple-500/10 flex flex-col items-center justify-center gap-1.5 text-center cursor-pointer transition-all active:scale-[0.98] outline-none"
+            className="h-[76px] w-32 shrink-0 p-2.5 rounded-2xl border-2 border-dashed border-purple-500/30 hover:border-purple-500/60 dark:border-purple-500/40 dark:hover:border-purple-500/70 bg-purple-500/5 hover:bg-purple-500/10 flex flex-col items-center justify-center gap-1.5 text-center cursor-pointer transition-all active:scale-[0.98] outline-none"
           >
             <div className="w-7 h-7 rounded-full bg-purple-500/15 dark:bg-purple-500/25 flex items-center justify-center text-purple-600 dark:text-purple-400">
               <Plus className="w-4 h-4" />
