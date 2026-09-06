@@ -36,8 +36,12 @@
 .PARAMETER ServerOnly
     Runs only the live-reload server without syncing or modifying Android files.
 
+.PARAMETER Static
+    Builds the frontend statically into the APK (no live-reload) pointing to local backend.
+
 .EXAMPLE
     .\cap-live-remote.ps1
+    .\cap-live-remote.ps1 -Static
     .\cap-live-remote.ps1 -Connect 192.168.1.45:5555
     .\cap-live-remote.ps1 -Mode development
 #>
@@ -51,6 +55,7 @@ param(
     [switch]$Launch,
     [switch]$NoDeploy,
     [switch]$ServerOnly,
+    [switch]$Static,
     [switch]$Help
 )
 
@@ -157,31 +162,63 @@ function Set-CapacitorLiveConfig {
     }
 }
 
+function Remove-CapacitorLiveConfig {
+    if (Test-Path $backupConfigFile) {
+        Copy-Item -Path $backupConfigFile -Destination $assetsConfigFile -Force
+        Remove-Item -Path $backupConfigFile -Force -ErrorAction SilentlyContinue
+    }
+    if (Test-Path $assetsConfigFile) {
+        try {
+            $rawJson = Get-Content $assetsConfigFile -Raw
+            $config = $rawJson | ConvertFrom-Json
+            if ($config.server) {
+                $config.PSObject.Properties.Remove('server')
+                Set-Content -Path $assetsConfigFile -Value ($config | ConvertTo-Json -Depth 10) -Encoding utf8
+            }
+        } catch {}
+    }
+}
+
 # -----------------------------------------------------------------------------
 # 2. Resolve Target IP & Dev Server URL
 # -----------------------------------------------------------------------------
 $targetIp = if ([string]::IsNullOrWhiteSpace($Ip)) { Get-LocalLanIp } else { $Ip.Trim() }
+$backendPort = 3000
+$backendApiUrl = if ($Mode -eq 'devlocal') {
+    if ($targetIp -eq '127.0.0.1') { "http://localhost:${backendPort}" } else { "http://${targetIp}:${backendPort}" }
+} else {
+    "https://cookbook-development.up.railway.app"
+}
 $liveUrl = "http://${targetIp}:${Port}"
 $backendProcess = $null
 $didModifyConfig = $false
 
 Write-Host ""
 Write-Host "=================================================================" -ForegroundColor Cyan
-Write-Host "  >> Snagbite - Wireless Capacitor Live Reload" -ForegroundColor Cyan
+if ($Static) {
+    Write-Host "  >> Snagbite - Capacitor Static App (Built-in Assets)" -ForegroundColor Cyan
+} else {
+    Write-Host "  >> Snagbite - Wireless Capacitor Live Reload" -ForegroundColor Cyan
+}
 Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host "  [LAN] Host IP   : " -NoNewline; Write-Host $targetIp -ForegroundColor Green
-Write-Host "  [WEB] Live URL  : " -NoNewline; Write-Host $liveUrl -ForegroundColor Yellow
+if ($Static) {
+    Write-Host "  [APP] Build Mode: " -NoNewline; Write-Host "Static (Assets compiled into APK)" -ForegroundColor Yellow
+} else {
+    Write-Host "  [WEB] Live URL  : " -NoNewline; Write-Host $liveUrl -ForegroundColor Yellow
+}
+Write-Host "  [API] Backend   : " -NoNewline; Write-Host $backendApiUrl -ForegroundColor Green
 Write-Host "  [ENV] Vite Mode : " -NoNewline; Write-Host $Mode -ForegroundColor Magenta
 
 # -----------------------------------------------------------------------------
 # 3. Auto-start Local Backend if needed (Mode: devlocal)
 # -----------------------------------------------------------------------------
 if ($Mode -eq 'devlocal') {
-    $isBackendRunning = Test-PortOpen -HostAddress "127.0.0.1" -PortNumber 3000
+    $isBackendRunning = Test-PortOpen -HostAddress "127.0.0.1" -PortNumber $backendPort
     if ($isBackendRunning) {
-        Write-Host "  [API] Backend   : " -NoNewline; Write-Host "http://127.0.0.1:3000 (Already running)" -ForegroundColor Green
+        Write-Host "  [API] Backend Status: " -NoNewline; Write-Host "http://127.0.0.1:$backendPort (Already running)" -ForegroundColor Green
     } else {
-        Write-Host "  [API] Backend   : " -NoNewline; Write-Host "Starting local backend on port 3000..." -ForegroundColor Yellow
+        Write-Host "  [API] Backend Status: " -NoNewline; Write-Host "Starting local backend on port $backendPort..." -ForegroundColor Yellow
         $psi = New-Object System.Diagnostics.ProcessStartInfo
         $psi.FileName = "cmd.exe"
         $psi.Arguments = "/c npm run dev"
@@ -191,42 +228,61 @@ if ($Mode -eq 'devlocal') {
         $backendProcess = [System.Diagnostics.Process]::Start($psi)
 
         $waited = 0
-        while (-not (Test-PortOpen -HostAddress "127.0.0.1" -PortNumber 3000) -and ($waited -lt 15)) {
+        while (-not (Test-PortOpen -HostAddress "127.0.0.1" -PortNumber $backendPort) -and ($waited -lt 15)) {
             Start-Sleep -Milliseconds 500
             $waited += 0.5
         }
-        if (Test-PortOpen -HostAddress "127.0.0.1" -PortNumber 3000) {
-            Write-Host "  [API] Backend   : " -NoNewline; Write-Host "http://127.0.0.1:3000 (Ready, PID: $($backendProcess.Id))" -ForegroundColor Green
+        if (Test-PortOpen -HostAddress "127.0.0.1" -PortNumber $backendPort) {
+            Write-Host "  [API] Backend Status: " -NoNewline; Write-Host "http://127.0.0.1:$backendPort (Ready, PID: $($backendProcess.Id))" -ForegroundColor Green
         } else {
-            Write-Warning "Backend process started, waiting for port 3000..."
+            Write-Warning "Backend process started, waiting for port $backendPort..."
         }
     }
 } else {
-    Write-Host "  [API] Backend   : " -NoNewline; Write-Host "Railway Cloud Dev (development mode)" -ForegroundColor Cyan
+    Write-Host "  [API] Backend Status: " -NoNewline; Write-Host "Railway Cloud Dev (development mode)" -ForegroundColor Cyan
 }
 
 # -----------------------------------------------------------------------------
-# 4. Optional Wireless ADB Connection
+# 4. Optional Wireless ADB Connection & Port Reverse
 # -----------------------------------------------------------------------------
 if (-not [string]::IsNullOrWhiteSpace($Connect)) {
     Write-Host "[ADB] Connecting to Wireless ADB target: $Connect..." -ForegroundColor Yellow
     try { & adb connect $Connect } catch { Write-Warning "Could not run adb connect." }
 }
 
+# Reverse backend port for connected ADB devices so localhost:3000 always resolves to host PC
+if ($Mode -eq 'devlocal') {
+    try {
+        $devicesOutput = & adb devices 2>$null | Out-String
+        if ($devicesOutput -match '(\S+)\s+device\b') {
+            & adb reverse tcp:3000 tcp:3000 2>$null | Out-Null
+        }
+    } catch {}
+}
+
 # -----------------------------------------------------------------------------
-# 5. Configure Live-Reload URL in Android Assets
+# 5. Configure Live-Reload URL in Android Assets (or clean for static)
 # -----------------------------------------------------------------------------
-if (-not $ServerOnly) {
+if ($Static) {
+    Remove-CapacitorLiveConfig
+} elseif (-not $ServerOnly) {
     Set-CapacitorLiveConfig -Url $liveUrl
 }
 
 # -----------------------------------------------------------------------------
-# 6. ADB Inspection & Auto-Deployment Check
+# 6. ADB Inspection, Build, Sync & Deploy
 # -----------------------------------------------------------------------------
 $needsDeploy = $Build -or $Launch
 $installedDeviceUrl = Get-DeviceInstalledLiveUrl
 
-if ($installedDeviceUrl) {
+if ($Static) {
+    if (-not $NoDeploy) { $needsDeploy = $true }
+    if ($installedDeviceUrl) {
+        Write-Host "  [PHONE] App Config: " -NoNewline; Write-Host "Static assets (Rebuilding & deploying latest APK...)" -ForegroundColor Yellow
+    } else {
+        Write-Host "  [PHONE] ADB Device: " -NoNewline; Write-Host "No ADB device connected (Wireless ADB available via -Connect <IP:Port>)" -ForegroundColor DarkGray
+    }
+} elseif ($installedDeviceUrl) {
     if ($installedDeviceUrl -eq $liveUrl) {
         Write-Host "  [PHONE] App Config: " -NoNewline; Write-Host "$installedDeviceUrl (Up to date - no reinstall needed!)" -ForegroundColor Green
     } elseif ($installedDeviceUrl -eq '[NOT_INSTALLED]') {
@@ -242,17 +298,41 @@ if ($installedDeviceUrl) {
 Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host ""
 
+# If Static, compile the frontend assets with VITE_API_BASE_URL before syncing
+if ($Static) {
+    Write-Host "[BUILD] Compiling frontend assets with VITE_API_BASE_URL = $backendApiUrl (Mode: $Mode)..." -ForegroundColor Yellow
+    $prevApi = $env:VITE_API_BASE_URL
+    try {
+        $env:VITE_API_BASE_URL = $backendApiUrl
+        Push-Location $frontendDir
+        & npx.cmd vite build --mode $Mode
+        if ($LASTEXITCODE -ne 0) {
+            throw "Vite build failed with exit code $LASTEXITCODE"
+        }
+    } finally {
+        if ($prevApi) {
+            $env:VITE_API_BASE_URL = $prevApi
+        } else {
+            $env:VITE_API_BASE_URL = $null
+        }
+        Pop-Location
+    }
+}
+
 if ($needsDeploy) {
     Write-Host "[SYNC] Syncing Capacitor plugins and dependencies..." -ForegroundColor Yellow
     Push-Location $frontendDir
     try { & npx.cmd cap sync android } finally { Pop-Location }
 
-    # Re-apply live URL to assets after sync
-    if (-not $ServerOnly) {
+    # Re-apply or clean live URL after sync
+    if ($Static) {
+        Remove-CapacitorLiveConfig
+    } elseif (-not $ServerOnly) {
         Set-CapacitorLiveConfig -Url $liveUrl
     }
 
-    Write-Host "[BUILD] Building debug APK with live URL ($liveUrl)..." -ForegroundColor Yellow
+    $apkDesc = if ($Static) { "static assets (API: $backendApiUrl)" } else { "live URL ($liveUrl)" }
+    Write-Host "[BUILD] Building debug APK with $apkDesc..." -ForegroundColor Yellow
     Push-Location $androidDir
     try {
         & .\gradlew.bat assembleDebug
@@ -275,26 +355,43 @@ if ($needsDeploy) {
 # -----------------------------------------------------------------------------
 # 7. Start Frontend Dev Server & Wait with Safe Rollback
 # -----------------------------------------------------------------------------
-Write-Host "Mobile Phone Instructions:" -ForegroundColor White
-Write-Host "  1. Make sure your phone is connected to the SAME Wi-Fi network." -ForegroundColor Gray
-Write-Host "  2. Test in mobile browser: " -NoNewline; Write-Host $liveUrl -ForegroundColor Cyan
-Write-Host "  3. Open the Snagbite App on your phone to start live-coding!" -ForegroundColor Gray
-Write-Host ""
-Write-Host "[!] Press Ctrl+C to stop live-reload and restore original Android config." -ForegroundColor DarkYellow
-Write-Host ""
-
 try {
-    $isFrontendRunning = Test-PortOpen -HostAddress "127.0.0.1" -PortNumber $Port
-    if ($isFrontendRunning) {
-        Write-Host "[INFO] Vite dev server is already running on port $Port." -ForegroundColor Green
-        Write-Host "Keeping live-reload configuration active. Press Ctrl+C to exit..." -ForegroundColor White
-        while ($true) { Start-Sleep -Seconds 2 }
+    if ($Static) {
+        Write-Host ""
+        Write-Host "=================================================================" -ForegroundColor Green
+        Write-Host "  [OK] Snagbite (Static) installed and running on device!" -ForegroundColor Green
+        Write-Host "  [API] App connects to: $backendApiUrl" -ForegroundColor Cyan
+        Write-Host "=================================================================" -ForegroundColor Green
+        Write-Host ""
+
+        if ($backendProcess -and -not $backendProcess.HasExited) {
+            Write-Host "[INFO] Local backend was started in background (PID: $($backendProcess.Id))." -ForegroundColor Yellow
+            Write-Host "Press Ctrl+C to stop the local backend..." -ForegroundColor White
+            while ($true) { Start-Sleep -Seconds 2 }
+        } else {
+            Write-Host "Backend is running in your other terminal. App is ready to test!" -ForegroundColor Green
+        }
     } else {
-        Write-Host "[VITE] Starting Vite dev server bound to 0.0.0.0:$Port..." -ForegroundColor Green
-        Push-Location $frontendDir
-        try {
-            & npx.cmd vite --host 0.0.0.0 --port $Port --mode $Mode
-        } finally { Pop-Location }
+        Write-Host "Mobile Phone Instructions:" -ForegroundColor White
+        Write-Host "  1. Make sure your phone is connected to the SAME Wi-Fi network." -ForegroundColor Gray
+        Write-Host "  2. Test in mobile browser: " -NoNewline; Write-Host $liveUrl -ForegroundColor Cyan
+        Write-Host "  3. Open the Snagbite App on your phone to start live-coding!" -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "[!] Press Ctrl+C to stop live-reload and restore original Android config." -ForegroundColor DarkYellow
+        Write-Host ""
+
+        $isFrontendRunning = Test-PortOpen -HostAddress "127.0.0.1" -PortNumber $Port
+        if ($isFrontendRunning) {
+            Write-Host "[INFO] Vite dev server is already running on port $Port." -ForegroundColor Green
+            Write-Host "Keeping live-reload configuration active. Press Ctrl+C to exit..." -ForegroundColor White
+            while ($true) { Start-Sleep -Seconds 2 }
+        } else {
+            Write-Host "[VITE] Starting Vite dev server bound to 0.0.0.0:$Port..." -ForegroundColor Green
+            Push-Location $frontendDir
+            try {
+                & npx.cmd vite --host 0.0.0.0 --port $Port --mode $Mode
+            } finally { Pop-Location }
+        }
     }
 } finally {
     Write-Host ""
@@ -304,20 +401,22 @@ try {
         Write-Host "[OK] Background backend process stopped." -ForegroundColor Green
     }
 
-    Write-Host "[ROLLBACK] Restoring original capacitor.config.json..." -ForegroundColor Yellow
-    if (Test-Path $backupConfigFile) {
-        Copy-Item -Path $backupConfigFile -Destination $assetsConfigFile -Force
-        Remove-Item -Path $backupConfigFile -Force -ErrorAction SilentlyContinue
-        Write-Host "[OK] Android configuration restored to clean state." -ForegroundColor Green
-    } elseif ($didModifyConfig -and (Test-Path $assetsConfigFile)) {
-        try {
-            $rawJson = Get-Content $assetsConfigFile -Raw
-            $config = $rawJson | ConvertFrom-Json
-            if ($config.server) {
-                $config.PSObject.Properties.Remove('server')
-                Set-Content -Path $assetsConfigFile -Value ($config | ConvertTo-Json -Depth 10) -Encoding utf8
-            }
-            Write-Host "[OK] Server property removed from capacitor.config.json." -ForegroundColor Green
-        } catch {}
+    if (-not $Static) {
+        Write-Host "[ROLLBACK] Restoring original capacitor.config.json..." -ForegroundColor Yellow
+        if (Test-Path $backupConfigFile) {
+            Copy-Item -Path $backupConfigFile -Destination $assetsConfigFile -Force
+            Remove-Item -Path $backupConfigFile -Force -ErrorAction SilentlyContinue
+            Write-Host "[OK] Android configuration restored to clean state." -ForegroundColor Green
+        } elseif ($didModifyConfig -and (Test-Path $assetsConfigFile)) {
+            try {
+                $rawJson = Get-Content $assetsConfigFile -Raw
+                $config = $rawJson | ConvertFrom-Json
+                if ($config.server) {
+                    $config.PSObject.Properties.Remove('server')
+                    Set-Content -Path $assetsConfigFile -Value ($config | ConvertTo-Json -Depth 10) -Encoding utf8
+                }
+                Write-Host "[OK] Server property removed from capacitor.config.json." -ForegroundColor Green
+            } catch {}
+        }
     }
 }

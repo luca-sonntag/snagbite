@@ -5,8 +5,9 @@
 ### Capacitor Live-Reload (WLAN & USB)
 * **Live-Reload (Empfohlen):** `npm run cap:live` führt `frontend/scripts/cap-live-remote.ps1` aus. Das Skript ermittelt blitzschnell die lokale LAN-IP des Entwickler-PCs (`Get-NetRoute`), startet automatisch das **lokale Backend** (Port 3000) und den **Vite-Dev-Server** (Port 5173 auf `0.0.0.0`), prüft via ADB die installierte APK auf dem Smartphone, setzt `server.url = http://<LAN_IP>:5173` in `capacitor.config.json` und schließt alle gestarteten Hintergrundprozesse sowie Config-Modifikationen beim Beenden (`Ctrl+C`) sauber wieder ab.
 * **Optionen:**
-  * `npm run cap:live`: Standardmodus mit lokalem Frontend & lokalem Backend.
+  * `npm run cap:live`: Standardmodus mit lokalem Frontend & lokalem Backend (Live-Reload via Vite).
   * `npm run cap:live:cloud`: Live-Reload verknüpft mit dem Railway Cloud Dev Backend (`-Mode development`).
+  * `npm run cap:run:local`: Statische Web-Assets fest in die APK kompiliert (kein Live-Reload) mit automatischer Anbindung an das lokale Backend (`-Static`).
   * `.\scripts\cap-live-remote.ps1 -Connect <phone-ip>:5555 -Launch`: Verbindet ADB kabellos und startet die App direkt auf dem Smartphone.
 * **Automatisches Rollback & Process-Cleanup:** Beim Beenden des Live-Reload-Skripts (`Ctrl+C`) werden eventuell im Hintergrund gestartete Backend-Instanzen beendet und `capacitor.config.json` automatisch auf den Ursprungszustand zurückgesetzt, um versehentliches Einchecken oder Blockieren von Release-Builds (`release.ps1`) zu verhindern.
 

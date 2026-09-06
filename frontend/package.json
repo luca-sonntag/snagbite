@@ -17,6 +17,7 @@
     "cap:sync": "npm run build && cap sync android",
     "cap:open": "cap open android",
     "cap:run": "npm run build && cap sync android && cap run android",
+    "cap:run:local": "powershell -ExecutionPolicy Bypass -File scripts/cap-live-remote.ps1 -Static",
     "cap:live": "powershell -ExecutionPolicy Bypass -File scripts/cap-live-remote.ps1",
     "cap:live:cloud": "powershell -ExecutionPolicy Bypass -File scripts/cap-live-remote.ps1 -Mode development",
     "release": "powershell -ExecutionPolicy Bypass -File scripts/release.ps1",

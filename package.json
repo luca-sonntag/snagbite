@@ -24,7 +24,8 @@
     "icons:zip": "npm run icons:zip -w backend",
     "icons:unpack": "npm run icons:unpack -w backend",
     "cap:live": "npm run cap:live -w frontend",
-    "cap:live:cloud": "npm run cap:live:cloud -w frontend"
+    "cap:live:cloud": "npm run cap:live:cloud -w frontend",
+    "cap:run:local": "npm run cap:run:local -w frontend"
   },
   "devDependencies": {
     "concurrently": "^10.0.3"
