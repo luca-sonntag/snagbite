@@ -42,7 +42,17 @@ export default function RecipePosterCard({
   const remixCount = job.remixCount ?? job.recipe?.remixCount ?? 0;
 
   return (
-    <div className={`relative ${isShelf ? 'w-[9.5rem] shrink-0' : 'w-full'}`}>
+    <div className={`relative isolate ${isShelf ? 'w-[9.5rem] shrink-0' : 'w-full'}`}>
+      {/* Real Stacked Card Deck Effect (clean flat minimal) */}
+      {remixCount > 0 && (
+        <>
+          {remixCount > 1 && (
+            <div className="absolute -top-2.5 inset-x-3.5 h-full rounded-2xl bg-gray-100 dark:bg-zinc-850 border border-black/[0.08] dark:border-white/[0.08] shadow-2xs -z-20 pointer-events-none transition-transform" />
+          )}
+          <div className="absolute -top-1.5 inset-x-2 h-full rounded-2xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 shadow-xs -z-10 pointer-events-none transition-transform" />
+        </>
+      )}
+
       <div
         className={`w-full rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none ${isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
           }`}
