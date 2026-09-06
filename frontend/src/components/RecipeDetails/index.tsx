@@ -72,6 +72,9 @@ export default function RecipeDetails({
     isCopied,
     isCopilotOpen,
     setIsCopilotOpen,
+    isCopilotForceNewRemix,
+    setIsCopilotForceNewRemix,
+    openCopilot,
     isCookingMode,
     setIsCookingMode,
     initialStepOverride,
@@ -113,13 +116,7 @@ export default function RecipeDetails({
         isFavorite={isFavorite}
         onToggleFavorite={onToggleFavorite}
         cookRefreshKey={cookRefreshKey}
-        onRemixClick={() => {
-          if (isPremium) {
-            setIsCopilotOpen(true);
-          } else {
-            setIsPremiumModalOpen(true);
-          }
-        }}
+        onRemixClick={() => openCopilot(true)}
       />
 
       {/* Sentinel for the sticky bar's collapsed title row */}
@@ -217,13 +214,7 @@ export default function RecipeDetails({
           onStartCooking={handleStartCooking}
           recipeId={recipe.id}
           recipeTitle={recipe.title}
-          onRemixClick={() => {
-            if (isPremium) {
-              setIsCopilotOpen(true);
-            } else {
-              setIsPremiumModalOpen(true);
-            }
-          }}
+          onRemixClick={() => openCopilot(false)}
           onPlanClick={() => setIsAddToPlanOpen(true)}
         />
       )}
@@ -249,10 +240,14 @@ export default function RecipeDetails({
       {recipe.id && onRemixSuccess && (
         <RecipeCopilot
           isOpen={isCopilotOpen}
-          onClose={() => setIsCopilotOpen(false)}
+          onClose={() => {
+            setIsCopilotOpen(false);
+            setIsCopilotForceNewRemix(false);
+          }}
           recipe={recipe}
           onRemixSuccess={onRemixSuccess}
           onReplaceCurrent={onReplaceCurrent!}
+          forceNewRemix={isCopilotForceNewRemix}
         />
       )}
 

@@ -27,6 +27,7 @@ export function useRecipeCopilot({
   onClose,
   onRemixSuccess,
   initialPrompt,
+  forceNewRemix,
 }: UseRecipeCopilotProps) {
   const { t, language } = useI18n();
   const toast = useToast();
@@ -157,6 +158,25 @@ export function useRecipeCopilot({
     setTimeout(() => textareaRef.current?.focus(), 100);
   };
 
+  const startNewRemixSession = () => {
+    setConfirmingClear(false);
+    setHistory([]);
+    setPendingChanges([]);
+    setChoosingApply(false);
+    setMessage('');
+    setError(null);
+    try {
+      localStorage.removeItem(chatKey);
+      localStorage.removeItem(changesKey);
+    } catch {
+      // Ignore
+    }
+    loadChips(true);
+    autoPromptTriggeredRef.current = true;
+    const promptText = initialPrompt || t('copilot.autoVariantPrompt');
+    void handleSendRef.current?.(promptText, []);
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -180,29 +200,45 @@ export function useRecipeCopilot({
     } catch {
       stored = [];
     }
-    setHistory(stored);
 
-    let storedChanges: PendingChange[] = [];
-    try {
-      const savedChanges = localStorage.getItem(changesKey);
-      storedChanges = savedChanges ? JSON.parse(savedChanges) : [];
-    } catch {
-      storedChanges = [];
+    const hasCompletedRemix = stored.some((m) => m.isRemixReady);
+    const shouldStartFresh = forceNewRemix || hasCompletedRemix;
+
+    if (shouldStartFresh) {
+      stored = [];
+      setHistory([]);
+      setPendingChanges([]);
+      try {
+        localStorage.removeItem(chatKey);
+        localStorage.removeItem(changesKey);
+      } catch {
+        // Ignore
+      }
+    } else {
+      setHistory(stored);
+      let storedChanges: PendingChange[] = [];
+      try {
+        const savedChanges = localStorage.getItem(changesKey);
+        storedChanges = savedChanges ? JSON.parse(savedChanges) : [];
+      } catch {
+        storedChanges = [];
+      }
+      setPendingChanges(storedChanges);
     }
-    setPendingChanges(storedChanges);
+
     setChoosingApply(false);
     loadedRecipeIdRef.current = recipe.id;
 
     setError(null);
     loadChips();
 
-    // Automatically send initial prompt for recipe variations if conversation is empty
+    // Automatically send initial prompt for recipe variations if conversation is empty or starting fresh
     if (!autoPromptTriggeredRef.current && stored.length === 0) {
       autoPromptTriggeredRef.current = true;
       const promptText = initialPrompt || t('copilot.autoVariantPrompt');
       void handleSendRef.current?.(promptText, []);
     }
-  }, [isOpen, chatKey, changesKey, recipe.id, loadChips, initialPrompt, t]);
+  }, [isOpen, chatKey, changesKey, recipe.id, loadChips, initialPrompt, forceNewRemix, t]);
 
   const handleSend = async (textToSend: string, overrideHistory?: CopilotMessage[]) => {
     if (!textToSend.trim() || isPending) return;
@@ -470,5 +506,6 @@ export function useRecipeCopilot({
     discardAllChanges,
     handleApplyChanges,
     performClearSession,
+    startNewRemixSession,
   };
 }

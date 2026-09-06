@@ -16,6 +16,7 @@ export const RecipeCopilot: React.FC<RecipeCopilotProps> = ({
   onRemixSuccess,
   onReplaceCurrent,
   initialPrompt,
+  forceNewRemix,
 }) => {
   const { t } = useI18n();
 
@@ -41,6 +42,7 @@ export const RecipeCopilot: React.FC<RecipeCopilotProps> = ({
     discardAllChanges,
     handleApplyChanges,
     performClearSession,
+    startNewRemixSession,
   } = useRecipeCopilot({
     isOpen,
     recipe,
@@ -48,6 +50,7 @@ export const RecipeCopilot: React.FC<RecipeCopilotProps> = ({
     onRemixSuccess,
     onReplaceCurrent,
     initialPrompt,
+    forceNewRemix,
   });
 
   // Lock body scroll & listen to Escape key when open
@@ -105,6 +108,7 @@ export const RecipeCopilot: React.FC<RecipeCopilotProps> = ({
           messagesEndRef={messagesEndRef}
           onLoadNewRecipe={handleLoadNewRecipe}
           onSend={handleSend}
+          onStartNewRemix={startNewRemixSession}
           recipeId={recipe.id}
           initialChips={chips}
           chipsLoading={chipsLoading}
