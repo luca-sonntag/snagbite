@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, Globe, Clock, Plus, Check } from 'lucide-react';
+import { Globe, Clock, Plus, Check } from 'lucide-react';
 import type { Recipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
@@ -67,18 +67,13 @@ export default function PublicRecipeRecommendationsShelf({
   return (
     <section className="flex flex-col gap-2.5">
       <div className="flex items-center justify-between gap-2 px-0.5">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="w-7 h-7 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-            <Sparkles className="w-4 h-4" />
-          </span>
-          <div className="flex flex-col min-w-0">
-            <h3 className="text-base font-bold text-gray-900 dark:text-white truncate">
-              {language === 'de' ? 'Öffentliche Entdeckungen' : 'Community Discoveries'}
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">
-              {language === 'de' ? 'Ausgewählte Rezepte für dein Kochbuch' : 'Curated recipes for your cookbook'}
-            </p>
-          </div>
+        <div className="flex flex-col min-w-0">
+          <h3 className="text-base font-bold text-gray-900 dark:text-white truncate">
+            {language === 'de' ? 'Öffentliche Entdeckungen' : 'Community Discoveries'}
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-normal mt-0.5">
+            {language === 'de' ? 'Ausgewählte Rezepte für dein Kochbuch' : 'Curated recipes for your cookbook'}
+          </p>
         </div>
       </div>
 
