@@ -21,6 +21,27 @@ export interface RecipeDetailsProps {
   onToggleFavorite?: () => void;
 }
 
+export interface RecipeHeaderProps {
+  recipe: Recipe;
+  reelUrl?: string;
+  createdAt?: string;
+  onBack?: () => void;
+  onNavigateToShoppingList?: () => void;
+  onDelete?: () => void;
+  onCopyRecipe: () => void;
+  isCopied: boolean;
+  isParentAvailable?: boolean;
+  onNavigateToRecipe?: (recipeId: string, remixRecipe?: Recipe) => void;
+  parentRecipeTitle?: string | null;
+  onAssignCollections?: () => void;
+  onManageFlags?: () => void;
+  flags?: string[];
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
+  cookRefreshKey?: number;
+  onRemixClick?: () => void;
+}
+
 export type RecipeSectionId = 'ingredients' | 'instructions' | 'details';
 
 export interface SortedIngredientGroup {

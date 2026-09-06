@@ -113,6 +113,13 @@ export default function RecipeDetails({
         isFavorite={isFavorite}
         onToggleFavorite={onToggleFavorite}
         cookRefreshKey={cookRefreshKey}
+        onRemixClick={() => {
+          if (isPremium) {
+            setIsCopilotOpen(true);
+          } else {
+            setIsPremiumModalOpen(true);
+          }
+        }}
       />
 
       {/* Sentinel for the sticky bar's collapsed title row */}

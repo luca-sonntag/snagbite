@@ -13,25 +13,7 @@ import { devReExtractRecipe } from '../../utils/dev';
 import RecipeRemixList from './RecipeRemixList';
 import IncompleteSourceCard from './IncompleteSourceCard';
 
-interface RecipeHeaderProps {
-  recipe: Recipe;
-  reelUrl?: string;
-  createdAt?: string;
-  onBack?: () => void;
-  onNavigateToShoppingList?: () => void;
-  onDelete?: () => void;
-  onCopyRecipe: () => void;
-  isCopied: boolean;
-  isParentAvailable?: boolean;
-  onNavigateToRecipe?: (recipeId: string, remixRecipe?: Recipe) => void;
-  parentRecipeTitle?: string | null;
-  onAssignCollections?: () => void;
-  onManageFlags?: () => void;
-  flags?: string[];
-  isFavorite?: boolean;
-  onToggleFavorite?: () => void;
-  cookRefreshKey?: number;
-}
+import { RecipeHeaderProps } from './types';
 
 export default function RecipeHeader({
   recipe,
@@ -51,6 +33,7 @@ export default function RecipeHeader({
   isFavorite = false,
   onToggleFavorite,
   cookRefreshKey = 0,
+  onRemixClick,
 }: RecipeHeaderProps) {
   const { t, language } = useI18n();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -291,6 +274,7 @@ export default function RecipeHeader({
           <RecipeRemixList
             parentRecipeId={recipe.id}
             onNavigateToRecipe={onNavigateToRecipe}
+            onRemixClick={onRemixClick}
           />
         )}
       </div>
