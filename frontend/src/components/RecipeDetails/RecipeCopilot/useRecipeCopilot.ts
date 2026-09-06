@@ -319,16 +319,32 @@ export function useRecipeCopilot({
               });
             } else if (op.type === 'REPLACE_INGREDIENT' && op.newIngredient) {
               const ing = op.newIngredient;
+              const rawText = op.summary || `${op.targetIngredientName} durch ${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} ersetzen`;
+              const cleanText = rawText.replace(/(?:,|\s+und)\s+(?:den\s+)?titel(?:\s+(?:anpassen|ändern|updaten))?/gi, '').trim();
               flattened.push({
                 ...op,
                 id: op.id || generateChangeId(),
-                text: op.summary || `${op.targetIngredientName} durch ${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} ersetzen`,
+                text: cleanText,
+                summary: cleanText,
+              });
+            } else if (op.type === 'UPDATE_TITLE') {
+              const newTitle = (op.newTitle || (op as any).title || '').trim();
+              const text = op.summary || (newTitle ? `Titel anpassen: ${newTitle}` : 'Titel anpassen');
+              flattened.push({
+                ...op,
+                id: op.id || generateChangeId(),
+                type: 'UPDATE_TITLE',
+                newTitle,
+                text,
+                summary: text,
               });
             } else {
+              const cleanText = (op.summary || 'Rezept anpassen').replace(/(?:,|\s+und)\s+(?:den\s+)?titel(?:\s+(?:anpassen|ändern|updaten))?/gi, '').trim();
               flattened.push({
                 ...op,
                 id: op.id || generateChangeId(),
-                text: op.summary || 'Rezept anpassen',
+                text: cleanText,
+                summary: cleanText,
               });
             }
           }

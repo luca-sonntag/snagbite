@@ -34,6 +34,7 @@ export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
           const isReplace = change.type === 'REPLACE_INGREDIENT';
           const isRemove = change.type === 'REMOVE_INGREDIENT';
           const isScale = change.type === 'SCALE_SERVINGS';
+          const isUpdateTitle = change.type === 'UPDATE_TITLE';
 
           return (
             <div
@@ -88,6 +89,15 @@ export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
                   <span className="text-xs font-bold text-gray-900 dark:text-white">
                     Portionen auf {change.newServings} anpassen
                   </span>
+                ) : isUpdateTitle ? (
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
+                      {t('copilot.updateTitleLabel') || 'Titel anpassen'}
+                    </span>
+                    <span className="text-xs font-bold text-gray-900 dark:text-white leading-snug">
+                      {change.newTitle || change.text}
+                    </span>
+                  </div>
                 ) : (
                   <span className="text-xs text-gray-800 dark:text-gray-200 leading-snug break-words font-medium">
                     {change.text}
