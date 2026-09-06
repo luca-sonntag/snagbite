@@ -26,6 +26,7 @@ export function useRecipeCopilot({
   recipe,
   onClose,
   onRemixSuccess,
+  initialPrompt,
 }: UseRecipeCopilotProps) {
   const { t, language } = useI18n();
   const toast = useToast();
@@ -70,6 +71,8 @@ export function useRecipeCopilot({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLInputElement>(null);
   const loadedRecipeIdRef = useRef(recipe.id);
+  const autoPromptTriggeredRef = useRef(false);
+  const handleSendRef = useRef<((text: string, overrideHistory?: CopilotMessage[]) => Promise<void>) | null>(null);
 
   const chatKey = chatStorageKey(recipeId);
   const changesKey = changesStorageKey(recipeId);
@@ -142,6 +145,7 @@ export function useRecipeCopilot({
     setChoosingApply(false);
     setMessage('');
     setError(null);
+    autoPromptTriggeredRef.current = true;
     try {
       localStorage.removeItem(chatKey);
       localStorage.removeItem(changesKey);
@@ -164,7 +168,10 @@ export function useRecipeCopilot({
   }, [isOpen, history]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      autoPromptTriggeredRef.current = false;
+      return;
+    }
 
     let stored: CopilotMessage[] = [];
     try {
@@ -188,9 +195,16 @@ export function useRecipeCopilot({
 
     setError(null);
     loadChips();
-  }, [isOpen, chatKey, changesKey, recipe.id, loadChips]);
 
-  const handleSend = async (textToSend: string) => {
+    // Automatically send initial prompt for recipe variations if conversation is empty
+    if (!autoPromptTriggeredRef.current && stored.length === 0) {
+      autoPromptTriggeredRef.current = true;
+      const promptText = initialPrompt || t('copilot.autoVariantPrompt');
+      void handleSendRef.current?.(promptText, []);
+    }
+  }, [isOpen, chatKey, changesKey, recipe.id, loadChips, initialPrompt, t]);
+
+  const handleSend = async (textToSend: string, overrideHistory?: CopilotMessage[]) => {
     if (!textToSend.trim() || isPending) return;
 
     setError(null);
@@ -200,11 +214,12 @@ export function useRecipeCopilot({
     (document.activeElement as HTMLElement)?.blur();
 
     const userMsg: CopilotMessage = { role: 'user', text: textToSend };
-    setHistory((prev) => [...prev, userMsg]);
+    setHistory((prev) => [...(overrideHistory ?? prev), userMsg]);
 
     try {
       const token = await getAccessToken();
-      const cleanHistory = history.map((h) => ({
+      const currentHistory = overrideHistory ?? history;
+      const cleanHistory = currentHistory.map((h) => ({
         role: h.role,
         text: parseSuggestions(h.text).cleanText || h.text,
       }));
@@ -354,9 +369,10 @@ export function useRecipeCopilot({
       setIsPending(false);
     }
   };
+  handleSendRef.current = handleSend;
 
   const handleLoadNewRecipe = (newRecipe: Recipe, newJobId: string) => {
-    onRemixSuccess(newRecipe, newJobId);
+    onRemixSuccess?.(newRecipe, newJobId);
     toast.success(t('copilot.remixSuccessToast'));
     setTimeout(() => onClose(), 50);
   };

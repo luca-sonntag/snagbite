@@ -26,6 +26,7 @@ export interface RecipeCopilotProps {
   recipe: Recipe;
   onRemixSuccess: (newRecipe: Recipe, newJobId: string) => void;
   onReplaceCurrent?: (newRecipe: Recipe) => void;
+  initialPrompt?: string;
 }
 
 export interface CopilotTransactionCardProps {
@@ -72,5 +73,6 @@ export interface UseRecipeCopilotProps {
   onClose: () => void;
   onRemixSuccess: (newRecipe: Recipe, newJobId: string) => void;
   onReplaceCurrent?: (newRecipe: Recipe) => void;
+  initialPrompt?: string;
 }
 

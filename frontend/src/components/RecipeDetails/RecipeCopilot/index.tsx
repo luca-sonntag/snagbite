@@ -15,6 +15,7 @@ export const RecipeCopilot: React.FC<RecipeCopilotProps> = ({
   recipe,
   onRemixSuccess,
   onReplaceCurrent,
+  initialPrompt,
 }) => {
   const { t } = useI18n();
 
@@ -46,6 +47,7 @@ export const RecipeCopilot: React.FC<RecipeCopilotProps> = ({
     onClose,
     onRemixSuccess,
     onReplaceCurrent,
+    initialPrompt,
   });
 
   // Lock body scroll & listen to Escape key when open
