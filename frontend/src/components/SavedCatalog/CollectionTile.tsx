@@ -1,3 +1,4 @@
+import { Star } from 'lucide-react';
 import type { Collection, SavedRecipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import CachedImage from '../CachedImage';
@@ -7,6 +8,7 @@ interface CollectionTileProps {
   collection?: Collection;
   title?: string;
   emoji?: string | null;
+  isFavorite?: boolean;
   /** Members of this collection, newest first — the first two provide the cover images. */
   jobs: SavedRecipe[];
   onClick: () => void;
@@ -17,7 +19,14 @@ interface CollectionTileProps {
  * (1 row high, 2 recipes side-by-side) with real recipe images,
  * and the collection badge emoji at the bottom left.
  */
-export default function CollectionTile({ collection, title, emoji, jobs, onClick }: CollectionTileProps) {
+export default function CollectionTile({
+  collection,
+  title,
+  emoji,
+  isFavorite = false,
+  jobs,
+  onClick,
+}: CollectionTileProps) {
   const { t } = useI18n();
   const displayName = title || collection?.name || '';
   const collectionEmoji = emoji !== undefined ? emoji : (collection?.emoji || null);
@@ -59,12 +68,16 @@ export default function CollectionTile({ collection, title, emoji, jobs, onClick
           </div>
         )}
 
-        {/* Collection badge emoji in bottom-left */}
-        {collectionEmoji && (
+        {/* Collection badge in bottom-left */}
+        {isFavorite ? (
+          <div className="absolute bottom-1 left-1 w-6 h-6 rounded-lg bg-amber-500/30 dark:bg-amber-500/30 flex items-center justify-center shadow-lg z-10">
+            <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500 drop-shadow-[0_2px_5px_rgba(0,0,0,0.65)]" />
+          </div>
+        ) : collectionEmoji ? (
           <span className="absolute bottom-1 left-1 w-6 h-6 rounded-lg bg-black/25 dark:bg-black/40 backdrop-blur-md border-none flex items-center justify-center text-xs select-none shadow-xs z-10">
             {collectionEmoji}
           </span>
-        )}
+        ) : null}
       </div>
 
       <div className="flex flex-col px-0.5">

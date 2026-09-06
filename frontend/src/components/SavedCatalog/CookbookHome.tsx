@@ -82,7 +82,7 @@ export default function CookbookHome({
           {favJobs.length > 0 && (
             <CollectionTile
               title={t('catalog.favoritesFilter')}
-              emoji="⭐"
+              isFavorite
               jobs={favJobs}
               onClick={() => onOpenList({ kind: 'favorites' })}
             />
