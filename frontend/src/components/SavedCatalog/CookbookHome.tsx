@@ -1,6 +1,7 @@
 import { Plus, ChevronRight } from 'lucide-react';
 import type { Collection, SavedRecipe, RecipeCategory } from '../../types';
 import { useI18n } from '../../context/I18nContext';
+import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
 import { hapticLight } from '../../utils/haptics';
 import CollectionTile from './CollectionTile';
 import RecipeShelf from './RecipeShelf';
@@ -68,14 +69,14 @@ export default function CookbookHome({
   selectedIds = new Set(),
   bindLongPress,
 }: CookbookHomeProps) {
-  const { t } = useI18n();
+  const { language, t } = useI18n();
   const favJobs = favoriteJobs.length > 0 ? favoriteJobs : (shelves.favorites?.items ?? []);
 
   return (
     <div className="flex flex-col gap-6 pb-4">
       {/* 📂 Unified Organization Hub: Sammlungen, Favoriten, Kategorien & Labels */}
       <section className="flex flex-col gap-2.5">
-        {/* Row of Tiles: 1. ⭐ Favoriten Smart-Folder + 2. User Collections + 3. ➕ Neue Sammlung */}
+        {/* Row of Tiles: 1. ⭐ Favoriten + 2. 🍲 Speisen-Kategorien + 3. User Collections + 4. ➕ Neue Sammlung */}
         <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
           {/* ⭐ Favoriten Smart-Tile (nur wenn Rezepte enthalten sind) */}
           {favJobs.length > 0 && (
@@ -86,6 +87,21 @@ export default function CookbookHome({
               onClick={() => onOpenList({ kind: 'favorites' })}
             />
           )}
+
+          {/* 🍲 Speisen-Kategorien als Sammlungen */}
+          {availableCategories.map(cat => {
+            const jobs = jobsByCategory[cat] ?? [];
+            if (jobs.length === 0) return null;
+            return (
+              <CollectionTile
+                key={cat}
+                title={getRecipeCategoryLabel(cat, language)}
+                emoji={getRecipeCategoryEmoji(cat)}
+                jobs={jobs}
+                onClick={() => onOpenList({ kind: 'category', category: cat })}
+              />
+            );
+          })}
 
           {/* User Collections */}
           {collections.map(col => (
@@ -115,10 +131,8 @@ export default function CookbookHome({
           </button>
         </div>
 
-        {/* 🍲 Categories & 🏷️ Labels Chip Bar (single unified horizontal scroll bar) */}
+        {/* 🏷️ Labels Chip Bar (only rendered if user has custom labels) */}
         <CategoryLabelBar
-          availableCategories={availableCategories}
-          jobsByCategory={jobsByCategory}
           allFlags={allFlags}
           jobsByFlag={jobsByFlag}
           onOpenList={onOpenList}
