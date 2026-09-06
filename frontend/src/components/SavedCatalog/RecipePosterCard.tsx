@@ -43,16 +43,6 @@ export default function RecipePosterCard({
 
   return (
     <div className={`relative ${isShelf ? 'w-[9.5rem] shrink-0' : 'w-full'}`}>
-      {/* Stacked card effect when recipe has remixes */}
-      {remixCount > 0 && (
-        <>
-          <div className="absolute -bottom-1 inset-x-2 h-4 rounded-b-2xl bg-purple-500/20 dark:bg-purple-500/25 -z-10 shadow-xs transition-transform" />
-          {remixCount > 1 && (
-            <div className="absolute -bottom-2 inset-x-4 h-4 rounded-b-xl bg-purple-500/10 dark:bg-purple-500/15 -z-20 transition-transform" />
-          )}
-        </>
-      )}
-
       <div
         className={`w-full rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none ${isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
           }`}
