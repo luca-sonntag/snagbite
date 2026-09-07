@@ -91,7 +91,7 @@ export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
                   </span>
                 ) : isUpdateTitle ? (
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                       {t('copilot.updateTitleLabel') || 'Titel anpassen'}
                     </span>
                     <span className="text-xs font-bold text-gray-900 dark:text-white leading-snug">

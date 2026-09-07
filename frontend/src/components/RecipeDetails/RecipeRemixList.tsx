@@ -133,14 +133,20 @@ export default function RecipeRemixList({
               hapticLight();
               onRemixClick();
             }}
-            className="h-[76px] w-28 shrink-0 p-2.5 rounded-2xl border-none bg-gray-100/70 hover:bg-gray-200/70 dark:bg-gray-900/70 dark:hover:bg-gray-800/70 flex flex-col items-center justify-center gap-1.5 text-center cursor-pointer transition-all active:scale-[0.98] outline-none group"
+            className="h-[76px] px-3.5 shrink-0 rounded-2xl border-none bg-emerald-500/10 hover:bg-emerald-500/15 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/20 active:scale-[0.98] transition-all flex items-center gap-3 text-left cursor-pointer outline-none group"
           >
-            <div className="w-7 h-7 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
-              <Plus className="w-4 h-4" />
+            <div className="w-13 h-13 rounded-xl bg-emerald-600/15 dark:bg-emerald-400/15 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform shrink-0 shadow-2xs">
+              <Plus className="w-5 h-5 stroke-[2.5]" />
             </div>
-            <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 line-clamp-1">
-              {t('remix.newRemixBtn') || 'Neuer Remix'}
-            </span>
+
+            <div className="flex flex-col min-w-0 pr-1">
+              <span className="text-xs font-bold text-emerald-900 dark:text-emerald-200 leading-snug group-hover:text-emerald-700 dark:group-hover:text-emerald-100 transition-colors">
+                {t('remix.newRemixBtn') || 'Neuer Remix'}
+              </span>
+              <span className="text-[11px] font-medium text-emerald-700/70 dark:text-emerald-300/70 truncate mt-0.5">
+                {t('remix.createVariation') || 'Variante kreieren'}
+              </span>
+            </div>
           </button>
         )}
       </div>

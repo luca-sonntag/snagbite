@@ -90,7 +90,7 @@ export default function RecipeListItem({
           {remixCount > 0 && (
             <>
               {totalTime && <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700 shrink-0" />}
-              <span className="shrink-0 flex items-center gap-1 text-purple-600 dark:text-purple-400 font-semibold">
+              <span className="shrink-0 flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
                 <Layers className="w-3 h-3" />
                 <span>{remixCount === 1 ? t('remix.singleCount') : t('remix.multipleCount', { count: remixCount })}</span>
               </span>

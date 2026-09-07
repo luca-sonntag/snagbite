@@ -42,7 +42,7 @@ export default function RecipePosterCard({
   const remixCount = job.remixCount ?? job.recipe?.remixCount ?? 0;
 
   return (
-    <div className={`relative isolate ${isShelf ? 'w-[9.5rem] shrink-0' : 'w-full'}`}>
+    <div className={`relative isolate ${isShelf ? 'w-[9.5rem] shrink-0' : 'w-full'} h-full flex flex-col`}>
       {/* Real Stacked Card Deck Effect (clean flat minimal) */}
       {remixCount > 0 && (
         <>
@@ -54,7 +54,7 @@ export default function RecipePosterCard({
       )}
 
       <div
-        className={`w-full rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none ${isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
+        className={`w-full h-full rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none ${isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
           }`}
         onClick={(e) => {
           hapticLight();
@@ -63,7 +63,7 @@ export default function RecipePosterCard({
         {...(bindLongPress ?? {})}
       >
         {/* Cover */}
-        <div className="relative w-full aspect-[4/3] bg-black/5 dark:bg-white/5 overflow-hidden">
+        <div className="relative w-full aspect-[4/3] bg-black/5 dark:bg-white/5 overflow-hidden shrink-0">
           <CachedImage
             src={r.imageUrl}
             emoji={r.emoji}
@@ -83,14 +83,14 @@ export default function RecipePosterCard({
             </div>
           )}
 
-          {/* Remix badge (Glassmorphic) */}
+          {/* Remix badge (Glassmorphic Emerald) */}
           {remixCount > 0 && (
             <div
-              className={`absolute ${isSelectMode ? 'bottom-2 left-2' : 'top-2 left-2'} z-10 px-2 py-1 rounded-xl bg-purple-600/40 dark:bg-purple-500/30 backdrop-blur-md flex items-center gap-1.5 text-white shadow-md border-none`}
+              className={`absolute ${isSelectMode ? 'bottom-2 left-2' : 'top-2 left-2'} z-10 px-2 py-1 rounded-xl bg-emerald-600/75 dark:bg-emerald-600/65 backdrop-blur-md flex items-center gap-1.5 text-white shadow-md border-none`}
               title={`${remixCount} Remix(es)`}
             >
-              <Layers className="w-3.5 h-3.5 text-purple-200 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]" />
-              <span className="text-[11px] font-bold tracking-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">
+              <Layers className="w-3.5 h-3.5 text-emerald-100 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]" />
+              <span className="text-[11px] font-bold tracking-tight text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
                 {remixCount}
               </span>
             </div>
@@ -105,8 +105,8 @@ export default function RecipePosterCard({
         </div>
 
       {/* Meta */}
-      <div className="flex flex-col gap-1 px-3 py-2.5 flex-1">
-        <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2">
+      <div className="flex flex-col px-3 py-2.5 flex-1 justify-between gap-1.5">
+        <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 min-h-[2.5rem]">
           {r.title}
         </h4>
         {/* Bottom row: total time (left) and source platform icon (right, no background) */}

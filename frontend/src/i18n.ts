@@ -1395,6 +1395,7 @@ export const uiTranslations = {
       singleCount: '1 Remix',
       multipleCount: '{count} Remixes',
       newRemixBtn: 'Neuer Remix',
+      createVariation: 'Variante kreieren',
       chips: {
         vegan: { label: 'Vegan', prompt: 'Mache es vegan' },
         highProtein: { label: 'High Protein', prompt: 'Mache es eiweißreich' },
@@ -2630,6 +2631,7 @@ export const uiTranslations = {
       singleCount: '1 Remix',
       multipleCount: '{count} Remixes',
       newRemixBtn: 'New Remix',
+      createVariation: 'Create variation',
       chips: {
         vegan: { label: 'Vegan', prompt: 'Make it vegan' },
         highProtein: { label: 'High Protein', prompt: 'Make it high protein' },
