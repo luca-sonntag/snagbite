@@ -232,8 +232,9 @@ export function useRecipeCopilot({
     setError(null);
     loadChips();
 
-    // Automatically send initial prompt for recipe variations if conversation is empty or starting fresh
-    if (!autoPromptTriggeredRef.current && stored.length === 0) {
+    // Automatically send initial prompt for recipe variations ONLY when explicitly requested (forceNewRemix or initialPrompt)
+    const shouldSendAutoPrompt = Boolean(initialPrompt || forceNewRemix);
+    if (!autoPromptTriggeredRef.current && stored.length === 0 && shouldSendAutoPrompt) {
       autoPromptTriggeredRef.current = true;
       const promptText = initialPrompt || t('copilot.autoVariantPrompt');
       void handleSendRef.current?.(promptText, []);
