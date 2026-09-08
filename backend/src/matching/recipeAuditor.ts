@@ -87,6 +87,7 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
 
         const updatedItem = {
           ...oldItem,
+          ...(corr.correctedName ? { name: corr.correctedName.trim() } : {}),
           ...(corr.correctedBaseName ? { baseName: corr.correctedBaseName.trim() } : {}),
           category: targetCategory,
           ...(corr.correctedSynonyms ? { synonyms: corr.correctedSynonyms.map((s) => s.trim()).filter(Boolean) } : {}),
