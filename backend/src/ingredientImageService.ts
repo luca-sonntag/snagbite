@@ -515,7 +515,7 @@ export function findExistingIngredientImage(ingredientId: string, outDir?: strin
   const matched = files.find(
     (f) =>
       f.toLowerCase().endsWith('.webp') &&
-      (f.toLowerCase() === `${slug}.webp` || f.toLowerCase().startsWith(`${slug}_`))
+      (f.toLowerCase() === `${slug}.webp` || (canonical && f.toLowerCase() === `${canonical}.webp`))
   );
 
   return matched || null;
