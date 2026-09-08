@@ -1,4 +1,4 @@
-﻿import { describe, it } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { applyRecipeOperations } from './recipeOperations.js';
 import type { Recipe, RecipeOperation } from './types.js';
@@ -167,6 +167,9 @@ describe('applyRecipeOperations', () => {
     const appleRecipe: Recipe = {
       id: 'apple-recipe',
       title: 'Apfel-Zimt Spekulatius Tiramisu',
+      description: 'Test recipe',
+      prepTime: 10,
+      cookTime: 20,
       servings: 2,
       equipment: [],
       ingredients: [
