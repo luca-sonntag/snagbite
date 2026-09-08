@@ -22,9 +22,16 @@ The very first words establish the exact spatial construction and vessel of the 
   * CRITICAL: If the dish is a stuffed pocket, sandwich, or burger, NEVER describe it as loose meat on an open flatbread or board!
 - WRAPS & ROLLS (Dürüm, Burritos, Taquitos, Egg rolls, Summer rolls, Enchiladas):
   * Specify tight roll and presentation: "Tightly wrapped flour tortilla burrito sliced diagonally in half showing colorful inner filling..."
-- BAKED, LAYERED & CASSEROLES (Lasagna, Potato Gratin, Casseroles, Pies, Shepherd's Pie):
-  * Start with vessel and continuous crust: "Baked layered potato casserole in a ceramic baking dish with golden-brown melted cheese crust, one portion scooped out showing inner layers..."
+- BAKED, LAYERED & CASSEROLES (Lasagna, Potato Gratin, Casseroles, Pies, Shepherd's Pie, Bakes, Cakes):
+  * Start with vessel and continuous crust: "Baked layered potato casserole in a rectangular ceramic baking dish with golden-brown melted cheese crust, one portion scooped out showing inner layers..."
   * NEVER start with the internal filling!
+  * VESSEL GEOMETRY & MATERIAL FIDELITY (MANDATORY):
+    Observe the actual vessel geometry from final frames / photos:
+    - If rectangular or square: MUST explicitly state "rectangular ceramic baking dish", "rectangular glass casserole dish", or "square baking pan". NEVER write generic "baking dish" without a shape attribute (which causes AI to hallucinate a round pie dish)!
+    - If round: state "round pie dish", "round tart pan", "round springform pan", or "round cast iron skillet".
+    - If loaf-shaped: state "rectangular loaf pan".
+    - If oval: state "oval gratin dish".
+    - Specify vessel material whenever evident: "clear glass", "white ceramic", "black cast iron", "stoneware".
 - PLATED ENTREES (Steaks, Cutlets, Stir-fries, Curries, Pasta, Plated Skewers):
   * Explicitly specify the ceramic plate: "served on a round ceramic dinner plate" or "in a shallow pasta bowl".
   * CRITICAL VESSEL BIAS GUARD: Text-to-image models strongly default to messy rustic wooden cutting boards for street food / meat dishes. Unless the recipe explicitly plates on a wooden board, ALWAYS specify a ceramic dinner plate!
