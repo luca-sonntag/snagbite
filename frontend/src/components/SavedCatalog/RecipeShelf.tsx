@@ -65,7 +65,7 @@ export default function RecipeShelf({
         </span>
       </button>
 
-      <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
+      <div className="flex items-stretch gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 pt-3 pb-2 scroll-smooth">
         {jobs.map(job => (
           <RecipePosterCard
             key={job.recipeId}

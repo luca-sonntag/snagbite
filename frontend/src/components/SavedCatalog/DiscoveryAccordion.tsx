@@ -130,7 +130,7 @@ export default function DiscoveryAccordion({
             {isOpen && (
               <div className="pt-2.5 pb-1 animate-fade-in">
                 {shelf.isTwoRow && shelf.items.length >= 2 ? (
-                  <div className="grid grid-rows-2 grid-flow-col auto-cols-max gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
+                  <div className="grid grid-rows-2 grid-flow-col auto-cols-max gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 pt-3 pb-2 scroll-smooth">
                     {shelf.items.map((job) => (
                       <RecipePosterCard
                         key={job.recipeId}
@@ -145,7 +145,7 @@ export default function DiscoveryAccordion({
                     ))}
                   </div>
                 ) : (
-                  <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
+                  <div className="flex items-stretch gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 pt-3 pb-2 scroll-smooth">
                     {shelf.items.map((job) => (
                       <RecipePosterCard
                         key={job.recipeId}

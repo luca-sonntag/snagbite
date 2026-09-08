@@ -26,6 +26,8 @@ export interface RecipeCopilotProps {
   recipe: Recipe;
   onRemixSuccess: (newRecipe: Recipe, newJobId: string) => void;
   onReplaceCurrent?: (newRecipe: Recipe) => void;
+  initialPrompt?: string;
+  forceNewRemix?: boolean;
 }
 
 export interface CopilotTransactionCardProps {
@@ -54,6 +56,7 @@ export interface CopilotChatListProps {
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   onLoadNewRecipe: (recipe: Recipe, jobId: string) => void;
   onSend: (text: string) => void;
+  onStartNewRemix?: () => void;
   recipeId?: string;
   initialChips?: Chip[];
   chipsLoading?: boolean;
@@ -72,5 +75,7 @@ export interface UseRecipeCopilotProps {
   onClose: () => void;
   onRemixSuccess: (newRecipe: Recipe, newJobId: string) => void;
   onReplaceCurrent?: (newRecipe: Recipe) => void;
+  initialPrompt?: string;
+  forceNewRemix?: boolean;
 }
 

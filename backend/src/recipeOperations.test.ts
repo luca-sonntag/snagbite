@@ -19,7 +19,7 @@ const mockBaseRecipe: Recipe = {
           name: 'Burrata',
           baseName: 'burrata',
           amount: 1,
-          unit: 'St¸ck',
+          unit: 'StÔøΩck',
           category: 'DAIRY_EGGS',
         },
       ],
@@ -98,21 +98,21 @@ describe('applyRecipeOperations', () => {
       {
         id: 'op-add-salad',
         type: 'ADD_INGREDIENTS',
-        summary: 'Tomaten-Gurken-Salat als Beilage hinzuf¸gen',
+        summary: 'Tomaten-Gurken-Salat als Beilage hinzufÔøΩgen',
         groupName: 'VEGETABLES',
         newIngredients: [
           {
             name: 'Tomate',
             baseName: 'tomato',
             amount: 2,
-            unit: 'St¸ck',
+            unit: 'StÔøΩck',
             category: 'VEGETABLES',
           },
           {
             name: 'Gurke',
             baseName: 'cucumber',
             amount: 0.5,
-            unit: 'St¸ck',
+            unit: 'StÔøΩck',
             category: 'VEGETABLES',
           },
         ],
@@ -120,7 +120,7 @@ describe('applyRecipeOperations', () => {
       {
         id: 'op-add-step',
         type: 'ADD_INSTRUCTION_STEP',
-        summary: 'Salat-Zubereitungsschritt anf¸gen',
+        summary: 'Salat-Zubereitungsschritt anfÔøΩgen',
         newSteps: [
           {
             description: 'Tomate und Gurke klein schneiden, anrichten und zum Brot servieren.',
@@ -162,5 +162,70 @@ describe('applyRecipeOperations', () => {
       ?.items.find((i) => i.name === 'Bacon');
     assert.ok(bacon);
     assert.strictEqual(bacon.amount, 200); // 100g * 2 = 200g
+  });
+  it('correctly replaces ingredient, leaves title unchanged without UPDATE_TITLE, and sets title when UPDATE_TITLE is provided', () => {
+    const appleRecipe: Recipe = {
+      id: 'apple-recipe',
+      title: 'Apfel-Zimt Spekulatius Tiramisu',
+      description: 'Test recipe',
+      prepTime: 10,
+      cookTime: 20,
+      servings: 2,
+      equipment: [],
+      ingredients: [
+        {
+          name: 'PRODUCE',
+          items: [
+            {
+              name: '√Ñpfel (Boskoop)',
+              baseName: 'apfel',
+              amount: 2,
+              unit: 'St√ºck',
+              category: 'PRODUCE',
+            },
+          ],
+        },
+      ],
+      instructions: [
+        {
+          step: 1,
+          description: 'Die √Ñpfel sch√§len, in Spalten schneiden und and√ºnsten.',
+        },
+      ],
+    };
+
+    const replaceOpOnly: RecipeOperation[] = [
+      {
+        id: 'op-pear',
+        type: 'REPLACE_INGREDIENT',
+        summary: '√Ñpfel durch Birnen ersetzen',
+        targetIngredientName: '√Ñpfel (Boskoop)',
+        newIngredient: {
+          name: 'Birnen (Abate Fetel)',
+          baseName: 'birne',
+          amount: 2,
+          unit: 'St√ºck',
+          category: 'PRODUCE',
+        },
+      },
+    ];
+
+    // 1. Without UPDATE_TITLE, title remains unchanged
+    const remixedNoTitle = applyRecipeOperations(appleRecipe, replaceOpOnly);
+    assert.strictEqual(remixedNoTitle.title, 'Apfel-Zimt Spekulatius Tiramisu');
+    assert.strictEqual(remixedNoTitle.ingredients[0].items[0].name, 'Birnen (Abate Fetel)');
+
+    // 2. With separate UPDATE_TITLE operation directly supplied by AI
+    const opsWithTitle: RecipeOperation[] = [
+      ...replaceOpOnly,
+      {
+        id: 'op-title',
+        type: 'UPDATE_TITLE',
+        summary: 'Titel anpassen: Birnen-Zimt Spekulatius Tiramisu',
+        newTitle: 'Birnen-Zimt Spekulatius Tiramisu',
+      },
+    ];
+    const remixedWithTitle = applyRecipeOperations(appleRecipe, opsWithTitle);
+    assert.strictEqual(remixedWithTitle.title, 'Birnen-Zimt Spekulatius Tiramisu');
   });
 });

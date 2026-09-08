@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@heroui/react';
-import { Sparkles, Bot, RefreshCw, Timer } from 'lucide-react';
+import { Sparkles, Bot, RefreshCw, Timer, Plus } from 'lucide-react';
 import { useI18n } from '../../../context/I18nContext';
 import { useTimerManager } from '../../../hooks/useTimerManager';
 import { useToast } from '../../../context/ToastContext';
@@ -21,6 +21,7 @@ interface CopilotMessageItemProps {
   recipeId?: string;
   onSend: (text: string) => void;
   onLoadNewRecipe: (recipe: Recipe, jobId: string) => void;
+  onStartNewRemix?: () => void;
 }
 
 export const CopilotMessageItem: React.FC<CopilotMessageItemProps> = ({
@@ -30,6 +31,7 @@ export const CopilotMessageItem: React.FC<CopilotMessageItemProps> = ({
   recipeId,
   onSend,
   onLoadNewRecipe,
+  onStartNewRemix,
 }) => {
   const { t } = useI18n();
   const { addTimer } = useTimerManager();
@@ -125,17 +127,33 @@ export const CopilotMessageItem: React.FC<CopilotMessageItemProps> = ({
               Eine neue Version des Rezepts wurde generiert:{' '}
               <span className="font-bold italic text-gray-900 dark:text-white">„{msg.newRecipe.title}“</span>.
             </p>
-            <Button
-              size="sm"
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl h-11 flex items-center justify-center gap-1.5 border-none shadow-none active:scale-95 transition-all text-xs cursor-pointer"
-              onPress={() => {
-                hapticMedium();
-                onLoadNewRecipe(msg.newRecipe!, (msg.newJobId || msg.newRecipe?.id)!);
-              }}
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              {t('copilot.remixLoadBtn')}
-            </Button>
+            <div className="flex flex-col gap-2 w-full">
+              <Button
+                size="sm"
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl h-11 flex items-center justify-center gap-1.5 border-none shadow-none active:scale-95 transition-all text-xs cursor-pointer"
+                onPress={() => {
+                  hapticMedium();
+                  onLoadNewRecipe(msg.newRecipe!, (msg.newJobId || msg.newRecipe?.id)!);
+                }}
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                {t('copilot.remixLoadBtn')}
+              </Button>
+              {onStartNewRemix && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold rounded-2xl h-10 flex items-center justify-center gap-1.5 border-none active:scale-95 transition-all text-xs cursor-pointer"
+                  onPress={() => {
+                    hapticLight();
+                    onStartNewRemix();
+                  }}
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{t('remix.newRemixBtn') || 'Neuer Remix'}</span>
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </div>

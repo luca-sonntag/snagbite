@@ -433,7 +433,18 @@ export default function SavedCatalog({
             key={selectedJobResolved.recipeId}
             recipe={selectedJobResolved.recipe}
             onAddIngredients={onAddIngredients}
-            onDelete={() => handleDeleteJob({ stopPropagation: () => { } } as any, selectedJobResolved.recipeId)}
+            onDelete={async () => {
+              const parentRecipeId = selectedJobResolved.recipe?.parentRecipeId;
+              await handleDeleteJob({ stopPropagation: () => { } } as any, selectedJobResolved.recipeId);
+              if (parentRecipeId) {
+                const parentJob = history.find((j) => j.recipeId === parentRecipeId);
+                if (parentJob) {
+                  setSelectedJob(parentJob);
+                  return;
+                }
+              }
+              navigateCatalog(listRouteBeforeDetailRef.current);
+            }}
             reelUrl={selectedJobResolved.recipe.sourceUrl ?? ''}
             createdAt={selectedJobResolved.addedAt}
             onBack={() => navigateCatalog(listRouteBeforeDetailRef.current)}

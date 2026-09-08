@@ -13,7 +13,13 @@ function matchesIngredientName(ing: Ingredient, targetName: string): boolean {
   const baseName = (ing.baseName || '').trim().toLowerCase();
   const matchedName = (ing.matchedName || '').trim().toLowerCase();
 
-  return name === target || baseName === target || matchedName === target || name.includes(target) || target.includes(name);
+  return (
+    name === target ||
+    baseName === target ||
+    matchedName === target ||
+    name.includes(target) ||
+    target.includes(name)
+  );
 }
 
 /**
@@ -42,7 +48,9 @@ export function applyRecipeOperations(baseRecipe: Recipe, operations: RecipeOper
         };
 
         for (const group of recipe.ingredients) {
-          const idx = group.items.findIndex((item) => matchesIngredientName(item, op.targetIngredientName!));
+          const idx = group.items.findIndex((item) =>
+            matchesIngredientName(item, op.targetIngredientName!)
+          );
           if (idx !== -1) {
             group.items[idx] = newIng;
             replaced = true;
@@ -53,7 +61,9 @@ export function applyRecipeOperations(baseRecipe: Recipe, operations: RecipeOper
         // If target was not found in existing groups, add as new ingredient
         if (!replaced) {
           const targetCategory = newIng.category || 'OTHER';
-          let targetGroup = recipe.ingredients.find((g) => g.name.toUpperCase() === targetCategory.toUpperCase());
+          let targetGroup = recipe.ingredients.find(
+            (g) => g.name.toUpperCase() === targetCategory.toUpperCase()
+          );
           if (!targetGroup) {
             targetGroup = { name: targetCategory, items: [] };
             recipe.ingredients.push(targetGroup);

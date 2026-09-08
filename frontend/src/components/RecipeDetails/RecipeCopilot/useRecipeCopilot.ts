@@ -26,6 +26,8 @@ export function useRecipeCopilot({
   recipe,
   onClose,
   onRemixSuccess,
+  initialPrompt,
+  forceNewRemix,
 }: UseRecipeCopilotProps) {
   const { t, language } = useI18n();
   const toast = useToast();
@@ -70,6 +72,8 @@ export function useRecipeCopilot({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLInputElement>(null);
   const loadedRecipeIdRef = useRef(recipe.id);
+  const autoPromptTriggeredRef = useRef(false);
+  const handleSendRef = useRef<((text: string, overrideHistory?: CopilotMessage[]) => Promise<void>) | null>(null);
 
   const chatKey = chatStorageKey(recipeId);
   const changesKey = changesStorageKey(recipeId);
@@ -142,6 +146,7 @@ export function useRecipeCopilot({
     setChoosingApply(false);
     setMessage('');
     setError(null);
+    autoPromptTriggeredRef.current = true;
     try {
       localStorage.removeItem(chatKey);
       localStorage.removeItem(changesKey);
@@ -151,6 +156,25 @@ export function useRecipeCopilot({
     }
     loadChips(true);
     setTimeout(() => textareaRef.current?.focus(), 100);
+  };
+
+  const startNewRemixSession = () => {
+    setConfirmingClear(false);
+    setHistory([]);
+    setPendingChanges([]);
+    setChoosingApply(false);
+    setMessage('');
+    setError(null);
+    try {
+      localStorage.removeItem(chatKey);
+      localStorage.removeItem(changesKey);
+    } catch {
+      // Ignore
+    }
+    loadChips(true);
+    autoPromptTriggeredRef.current = true;
+    const promptText = initialPrompt || t('copilot.autoVariantPrompt');
+    void handleSendRef.current?.(promptText, []);
   };
 
   const scrollToBottom = () => {
@@ -164,7 +188,10 @@ export function useRecipeCopilot({
   }, [isOpen, history]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      autoPromptTriggeredRef.current = false;
+      return;
+    }
 
     let stored: CopilotMessage[] = [];
     try {
@@ -173,24 +200,48 @@ export function useRecipeCopilot({
     } catch {
       stored = [];
     }
-    setHistory(stored);
 
-    let storedChanges: PendingChange[] = [];
-    try {
-      const savedChanges = localStorage.getItem(changesKey);
-      storedChanges = savedChanges ? JSON.parse(savedChanges) : [];
-    } catch {
-      storedChanges = [];
+    const hasCompletedRemix = stored.some((m) => m.isRemixReady);
+    const shouldStartFresh = forceNewRemix || hasCompletedRemix;
+
+    if (shouldStartFresh) {
+      stored = [];
+      setHistory([]);
+      setPendingChanges([]);
+      try {
+        localStorage.removeItem(chatKey);
+        localStorage.removeItem(changesKey);
+      } catch {
+        // Ignore
+      }
+    } else {
+      setHistory(stored);
+      let storedChanges: PendingChange[] = [];
+      try {
+        const savedChanges = localStorage.getItem(changesKey);
+        storedChanges = savedChanges ? JSON.parse(savedChanges) : [];
+      } catch {
+        storedChanges = [];
+      }
+      setPendingChanges(storedChanges);
     }
-    setPendingChanges(storedChanges);
+
     setChoosingApply(false);
     loadedRecipeIdRef.current = recipe.id;
 
     setError(null);
     loadChips();
-  }, [isOpen, chatKey, changesKey, recipe.id, loadChips]);
 
-  const handleSend = async (textToSend: string) => {
+    // Automatically send initial prompt for recipe variations ONLY when explicitly requested (forceNewRemix or initialPrompt)
+    const shouldSendAutoPrompt = Boolean(initialPrompt || forceNewRemix);
+    if (!autoPromptTriggeredRef.current && stored.length === 0 && shouldSendAutoPrompt) {
+      autoPromptTriggeredRef.current = true;
+      const promptText = initialPrompt || t('copilot.autoVariantPrompt');
+      void handleSendRef.current?.(promptText, []);
+    }
+  }, [isOpen, chatKey, changesKey, recipe.id, loadChips, initialPrompt, forceNewRemix, t]);
+
+  const handleSend = async (textToSend: string, overrideHistory?: CopilotMessage[]) => {
     if (!textToSend.trim() || isPending) return;
 
     setError(null);
@@ -200,11 +251,12 @@ export function useRecipeCopilot({
     (document.activeElement as HTMLElement)?.blur();
 
     const userMsg: CopilotMessage = { role: 'user', text: textToSend };
-    setHistory((prev) => [...prev, userMsg]);
+    setHistory((prev) => [...(overrideHistory ?? prev), userMsg]);
 
     try {
       const token = await getAccessToken();
-      const cleanHistory = history.map((h) => ({
+      const currentHistory = overrideHistory ?? history;
+      const cleanHistory = currentHistory.map((h) => ({
         role: h.role,
         text: parseSuggestions(h.text).cleanText || h.text,
       }));
@@ -304,16 +356,32 @@ export function useRecipeCopilot({
               });
             } else if (op.type === 'REPLACE_INGREDIENT' && op.newIngredient) {
               const ing = op.newIngredient;
+              const rawText = op.summary || `${op.targetIngredientName} durch ${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} ersetzen`;
+              const cleanText = rawText.replace(/(?:,|\s+und)\s+(?:den\s+)?titel(?:\s+(?:anpassen|ändern|updaten))?/gi, '').trim();
               flattened.push({
                 ...op,
                 id: op.id || generateChangeId(),
-                text: op.summary || `${op.targetIngredientName} durch ${ing.amount ? ing.amount + ' ' : ''}${ing.unit ? ing.unit + ' ' : ''}${ing.name} ersetzen`,
+                text: cleanText,
+                summary: cleanText,
+              });
+            } else if (op.type === 'UPDATE_TITLE') {
+              const newTitle = (op.newTitle || (op as any).title || '').trim();
+              const text = op.summary || (newTitle ? `Titel anpassen: ${newTitle}` : 'Titel anpassen');
+              flattened.push({
+                ...op,
+                id: op.id || generateChangeId(),
+                type: 'UPDATE_TITLE',
+                newTitle,
+                text,
+                summary: text,
               });
             } else {
+              const cleanText = (op.summary || 'Rezept anpassen').replace(/(?:,|\s+und)\s+(?:den\s+)?titel(?:\s+(?:anpassen|ändern|updaten))?/gi, '').trim();
               flattened.push({
                 ...op,
                 id: op.id || generateChangeId(),
-                text: op.summary || 'Rezept anpassen',
+                text: cleanText,
+                summary: cleanText,
               });
             }
           }
@@ -354,9 +422,10 @@ export function useRecipeCopilot({
       setIsPending(false);
     }
   };
+  handleSendRef.current = handleSend;
 
   const handleLoadNewRecipe = (newRecipe: Recipe, newJobId: string) => {
-    onRemixSuccess(newRecipe, newJobId);
+    onRemixSuccess?.(newRecipe, newJobId);
     toast.success(t('copilot.remixSuccessToast'));
     setTimeout(() => onClose(), 50);
   };
@@ -438,5 +507,6 @@ export function useRecipeCopilot({
     discardAllChanges,
     handleApplyChanges,
     performClearSession,
+    startNewRemixSession,
   };
 }

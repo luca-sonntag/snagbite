@@ -41,6 +41,7 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
   messagesEndRef,
   onLoadNewRecipe,
   onSend,
+  onStartNewRemix,
   recipeId,
   initialChips,
   chipsLoading,
@@ -115,6 +116,7 @@ export const CopilotChatList: React.FC<CopilotChatListProps> = ({
           recipeId={recipeId}
           onSend={onSend}
           onLoadNewRecipe={onLoadNewRecipe}
+          onStartNewRemix={onStartNewRemix}
         />
       ))}
 

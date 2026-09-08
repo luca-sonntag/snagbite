@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Popover, Button } from '@heroui/react';
 import { MoreVertical, Check, Copy, ShoppingCart, Trash2, Folder, Tag, Star, RefreshCw } from 'lucide-react';
-import type { Recipe } from '../../types';
 import RecipeImageGallery from '../RecipeImageGallery';
 import { useI18n } from '../../context/I18nContext';
 import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
@@ -13,25 +12,7 @@ import { devReExtractRecipe } from '../../utils/dev';
 import RecipeRemixList from './RecipeRemixList';
 import IncompleteSourceCard from './IncompleteSourceCard';
 
-interface RecipeHeaderProps {
-  recipe: Recipe;
-  reelUrl?: string;
-  createdAt?: string;
-  onBack?: () => void;
-  onNavigateToShoppingList?: () => void;
-  onDelete?: () => void;
-  onCopyRecipe: () => void;
-  isCopied: boolean;
-  isParentAvailable?: boolean;
-  onNavigateToRecipe?: (recipeId: string, remixRecipe?: Recipe) => void;
-  parentRecipeTitle?: string | null;
-  onAssignCollections?: () => void;
-  onManageFlags?: () => void;
-  flags?: string[];
-  isFavorite?: boolean;
-  onToggleFavorite?: () => void;
-  cookRefreshKey?: number;
-}
+import type { RecipeHeaderProps } from './types';
 
 export default function RecipeHeader({
   recipe,
@@ -51,6 +32,7 @@ export default function RecipeHeader({
   isFavorite = false,
   onToggleFavorite,
   cookRefreshKey = 0,
+  onRemixClick,
 }: RecipeHeaderProps) {
   const { t, language } = useI18n();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -291,6 +273,7 @@ export default function RecipeHeader({
           <RecipeRemixList
             parentRecipeId={recipe.id}
             onNavigateToRecipe={onNavigateToRecipe}
+            onRemixClick={onRemixClick}
           />
         )}
       </div>

@@ -1,7 +1,8 @@
 import React from 'react';
-import { Clock, Check, Tag, Star, Sparkles } from 'lucide-react';
+import { Clock, Check, Tag, Star, Layers } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
+import { useI18n } from '../../context/I18nContext';
 import { hapticLight } from '../../utils/haptics';
 
 interface RecipeListItemProps {
@@ -30,30 +31,35 @@ export default function RecipeListItem({
   onClick,
 }: RecipeListItemProps) {
   const r = job.recipe!;
-  const firstTag = recipeTags[0];
-  const firstFlag = job.flags?.[0];
+  const { t } = useI18n();
+  const firstTag = recipeTags[0] ?? null;
+  const firstFlag = (job.flags && job.flags.length > 0) ? job.flags[0] : null;
   const remixCount = job.remixCount ?? job.recipe?.remixCount ?? 0;
 
   return (
     <div
-      className={`rounded-2xl cursor-pointer active:scale-[0.99] transition-all p-2.5 flex flex-row items-center gap-3 overflow-hidden select-none bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none ${isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
-        }`}
+      className={`rounded-2xl p-2 flex items-center gap-3 cursor-pointer active:scale-[0.99] transition-all select-none border-none ${
+        isSelected
+          ? 'bg-emerald-500/10 ring-2 ring-emerald-500'
+          : 'bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)]'
+      }`}
       onClick={(e) => {
         hapticLight();
         onClick(e);
       }}
-      {...bindLongPress}
+      {...(bindLongPress ?? {})}
     >
-      {/* Select mode checkbox */}
-      {isSelectMode && (
-        <div className={`w-6 h-6 rounded-xl border-none flex items-center justify-center flex-shrink-0 transition-all ${isSelected ? 'bg-emerald-500 text-white shadow-xs' : 'bg-black/5 dark:bg-white/10'
-          }`}>
-          {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3px]" />}
-        </div>
-      )}
-
-      {/* Thumbnail (Mobile UX rule: 72x72px min) */}
-      <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shrink-0 border-none">
+      {/* Thumbnail (Mobile UX rule: 72x72px min) + select checkbox */}
+      <div className="relative w-18 h-18 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shrink-0 border-none">
+        {isSelectMode && (
+          <div
+            className={`absolute top-1 left-1 z-10 w-6 h-6 rounded-xl flex items-center justify-center transition-all border-none ${
+              isSelected ? 'bg-emerald-500 text-white shadow-xs' : 'bg-black/40 text-white'
+            }`}
+          >
+            {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3px]" />}
+          </div>
+        )}
         <CachedImage
           src={r.imageUrl}
           emoji={r.emoji}
@@ -68,14 +74,6 @@ export default function RecipeListItem({
           <h4 className="text-sm font-bold text-gray-900 dark:text-white line-clamp-1 flex-1 min-w-0">
             {r.title}
           </h4>
-          {remixCount > 0 && (
-            <div
-              className="w-6 h-6 rounded-lg bg-purple-500/15 dark:bg-purple-500/25 flex items-center justify-center shrink-0"
-              title={`${remixCount} Remix(es)`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-purple-500 fill-purple-500/30" />
-            </div>
-          )}
           {job.isFavorite && (
             <div className="w-6 h-6 rounded-lg bg-amber-500/15 dark:bg-amber-500/25 flex items-center justify-center shrink-0">
               <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
@@ -89,9 +87,18 @@ export default function RecipeListItem({
               <Clock className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> {totalTime}
             </span>
           )}
-          {firstTag && (
+          {remixCount > 0 && (
             <>
               {totalTime && <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700 shrink-0" />}
+              <span className="shrink-0 flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
+                <Layers className="w-3 h-3" />
+                <span>{remixCount === 1 ? t('remix.singleCount') : t('remix.multipleCount', { count: remixCount })}</span>
+              </span>
+            </>
+          )}
+          {firstTag && (
+            <>
+              {(totalTime || remixCount > 0) && <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700 shrink-0" />}
               <span className="truncate">{firstTag}</span>
             </>
           )}
