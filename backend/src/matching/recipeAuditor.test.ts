@@ -128,6 +128,7 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
       prepTime: 5,
       cookTime: 20,
       servings: 2,
+      equipment: [],
       ingredients: [
         {
           name: 'DAIRY_EGGS',
@@ -629,6 +630,22 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
     const protein = pantryGroup.items.find((i) => i.name === 'Sahne Protein');
     assert.ok(protein);
     assert.equal(protein.category, 'PANTRY_BAKING');
+  });
+
+  test('applies correctedImagePrompt when present in audit patch', () => {
+    const initialRecipe: Recipe = {
+      ...baseRecipe,
+      imagePrompt: 'Kebab on flatbread with meat and garlic sauce on wooden board',
+    };
+
+    const patch: RecipeAuditPatch = {
+      correctedImagePrompt:
+        'German Döner Kebab sandwich in toasted triangular flatbread pocket with waffle grill marks, filled with thinly shaved crispy roasted meat strips, thinly sliced red onions, shredded lettuce, slathered with thick herb yogurt sauce, served on a round ceramic plate, soft natural daylight, 35mm food photography',
+    };
+
+    const patched = applyRecipeAuditPatch(initialRecipe, patch);
+    assert.equal(patched.imagePrompt, patch.correctedImagePrompt);
+    assert.notEqual(patched, initialRecipe, 'Result should be a new object');
   });
 });
 

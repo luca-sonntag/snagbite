@@ -45,6 +45,7 @@ export interface RecipeAuditPatch {
   stepCorrections?: StepCorrection[];
   addedSteps?: AddedStep[];
   removedStepNumbers?: number[];
+  correctedImagePrompt?: string;
 }
 
 export interface RecipeAuditResult {
@@ -134,12 +135,16 @@ export const auditPatchSchema = {
       type: FunctionDeclarationSchemaType.ARRAY,
       items: { type: FunctionDeclarationSchemaType.INTEGER },
     },
+    correctedImagePrompt: {
+      type: FunctionDeclarationSchemaType.STRING,
+      description: 'Corrected ultra-compact English FLUX.1 [schnell] imagePrompt if the existing prompt suffers from wrong form factor (e.g. open flatbread instead of stuffed pocket sandwich, missing bread crust/waffle grill texture, wrong protein cut like chunks instead of shaved strips, hallucinated toppings, or wooden board instead of ceramic plate). Omit if already accurate.',
+    },
   },
 };
 
 export function buildAuditPrompt(recipe: Recipe): string {
   return `You are a strict 2nd-stage Culinary Recipe Auditor & Ingredient Disambiguation Engine.
-Review the recipe JSON below and identify any ingredient misclassifications, umbrella collapsing, or category mismatches:
+Review the recipe JSON below and identify any ingredient misclassifications, umbrella collapsing, category mismatches, or food photography prompt discrepancies:
 1. NO-OP GUARD (CRITICAL): ONLY include an ingredient in ingredientCorrections if you are ACTUALLY fixing an error. If an ingredient already has the correct baseName and category in the input recipe, DO NOT include it! If no genuine fixes are needed, return an empty patch {}.
 2. STRICT SINGULAR NOUNS: Always enforce singular English baseNames (e.g. "canned tomato", NOT "canned tomatoes"; "chili flake", NOT "chili flakes"; "mushroom", NOT "mushrooms"). Never change an existing singular baseName to plural.
 3. SPECIFICITY INVARIANCE & PRODUCT FORM INVARIANCE:
@@ -162,8 +167,14 @@ Review the recipe JSON below and identify any ingredient misclassifications, umb
 5. CANONICAL CATEGORIES ONLY: Any corrected or added category MUST be strictly one of: ${RECIPE_CATEGORY_KEYS.join(', ')}.
 6. INLINE TAG ALIGNMENT:
    - If baseName is corrected, update step descriptions containing [Word](ing:oldBaseName) to [Word](ing:newBaseName).
-7. If everything is already accurate and complete, return an empty patch {}.
+7. FORM FACTOR & FOOD PHOTOGRAPHY AUDIT (correctedImagePrompt):
+   If the recipe has an "imagePrompt", evaluate whether its primary form factor, bread enclosure, protein cut, and serving vessel align with the recipe instructions, title, and ingredients:
+   - Form Factor & Enclosure Alignment: If instructions or title describe cutting open/filling bread pockets, buns, or wraps (e.g. Döner in Fladenbrot, Pita pocket, Burger bun, Burrito, Panini), but imagePrompt describes an open platter or loose ingredients on a flatbread/board, provide a correctedImagePrompt specifying the exact closed/stuffed sandwich or pocket (e.g. "German Döner Kebab sandwich in a toasted triangular flatbread pocket with waffle grill press marks on crust, stuffed with shaved roasted meat strips...").
+   - Protein Cut Alignment: If instructions specify shaved meat strips (döner/gyros), pulled/shredded meat, or schnitzel cutlets, ensure imagePrompt does not describe generic chunks, meatballs, or skewers.
+   - Serving Vessel & Anti-Hallucination: Ensure the dish is served on a ceramic dinner plate, not a rustic wooden board with hallucinated cherry tomatoes or coriander twigs if absent in the recipe.
+   - NO-OP Guard: If imagePrompt is already accurate, DO NOT include correctedImagePrompt!
+8. If everything is already accurate and complete, return an empty patch {}.
 
 Recipe to audit:
-${JSON.stringify({ title: recipe.title, description: recipe.description, ingredients: recipe.ingredients, instructions: recipe.instructions }, null, 2)}`;
+${JSON.stringify({ title: recipe.title, description: recipe.description, ingredients: recipe.ingredients, instructions: recipe.instructions, imagePrompt: recipe.imagePrompt }, null, 2)}`;
 }
