@@ -83,11 +83,11 @@ async function runPipeline() {
   console.log(`\n📡 Lade Mappings aus Supabase...`);
   let query = getClient()
     .from('ingredient_mappings')
-    .select('mapping_key, category, product_code, resolution, estimated_nutrients, source, confidence, reasoning')
+    .select('mapping_key, mapping_key_de, category, product_code, resolution, estimated_nutrients, source, confidence, reasoning')
     .order('hit_count', { ascending: false });
 
   if (options.key) {
-    query = query.eq('mapping_key', options.key);
+    query = query.or(`mapping_key.eq.${options.key},mapping_key_de.eq.${options.key}`);
   }
 
   const { data: rawRows, error } = await query;
