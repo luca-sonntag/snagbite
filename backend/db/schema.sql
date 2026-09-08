@@ -70,6 +70,7 @@ create table if not exists public.recipes (
   source_nutritional_values       jsonb,
   has_explicit_nutritional_values boolean not null default false,
   has_incomplete_source_info      boolean not null default false,
+  is_demo                         boolean not null default false,
   -- Share (0..1) of the calories backed by an Open Food Facts match rather than an estimate.
   nutrition_coverage              numeric,
 
@@ -80,6 +81,8 @@ create table if not exists public.recipes (
 create index if not exists recipes_created_by_idx on public.recipes (created_by);
 create index if not exists recipes_public_idx     on public.recipes (created_at desc)
   where visibility = 'public';
+create index if not exists recipes_demo_public_idx on public.recipes (created_at desc)
+  where is_demo = true and visibility = 'public';
 create index if not exists recipes_parent_idx     on public.recipes (parent_recipe_id)
   where parent_recipe_id is not null;
 create index if not exists recipes_tags_idx       on public.recipes using gin (tags);

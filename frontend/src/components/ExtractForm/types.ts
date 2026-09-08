@@ -1,5 +1,5 @@
 import React from 'react';
-import type { ExtractionJob, ProgressData, LimitStatus } from '../../types';
+import type { ExtractionJob, ProgressData, LimitStatus, Recipe } from '../../types';
 
 export type ExtractMode = 'link' | 'photo';
 
@@ -31,6 +31,7 @@ export interface ExtractFormProps {
   setPhotos: (photos: File[]) => void;
   isUploadingPhotos: boolean;
   claimRewardedCredit?: () => Promise<boolean>;
+  onSavePublicRecipe?: (recipe: Recipe) => Promise<void>;
 }
 
 export interface PhotoExtractGridProps {
@@ -54,7 +55,7 @@ export interface UrlExtractInputProps {
 }
 
 export interface ExtractDemoRecipesProps {
-  onDemoClick: (url: string) => void;
+  onDemoClick: (url: string, recipe?: Recipe) => void;
 }
 
 export interface ExtractActionCardsProps {

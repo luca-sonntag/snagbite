@@ -131,6 +131,7 @@ export interface Recipe {
   sourceNutritionalValues?: NutritionalValues | null;
   hasExplicitNutritionalValues?: boolean;
   hasIncompleteSourceInfo?: boolean;
+  isDemo?: boolean;
   nutritionCoverage?: number;
   tips?: string[];
   alternativeIngredients?: AlternativeIngredient[];

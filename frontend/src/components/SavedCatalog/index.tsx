@@ -41,6 +41,7 @@ interface SavedCatalogProps {
   onReplaceCurrent?: (newRecipe: Recipe) => void;
   onSelectModeChange?: (active: boolean) => void;
   onOverlaySheetChange?: (isOpen: boolean) => void;
+  onRecipeSaved?: (savedId: string) => void;
   /** Current `#/history/...` sub-path — `null` = cookbook home. */
   catalogSubPath?: string | null;
   /** Navigates within the catalog tab (`null` returns to the cookbook home). */
@@ -73,6 +74,7 @@ export default function SavedCatalog({
   onRemixSuccess,
   onSelectModeChange,
   onOverlaySheetChange,
+  onRecipeSaved,
   catalogSubPath = null,
   onNavigateCatalog,
   limitStatus
@@ -522,8 +524,8 @@ export default function SavedCatalog({
   // ---------------------------------------------------------------------------
   // Empty / loading
   // ---------------------------------------------------------------------------
-  if (completedJobs.length === 0) {
-    return !historyLoaded ? <CatalogLoadingState /> : <CatalogEmptyState />;
+  if (!historyLoaded && completedJobs.length === 0) {
+    return <CatalogLoadingState />;
   }
 
   const sheets = (
@@ -588,7 +590,9 @@ export default function SavedCatalog({
 
       {premiumBanner}
 
-      {!isListLevel ? (
+      {completedJobs.length === 0 ? (
+        <CatalogEmptyState onRecipeSaved={onRecipeSaved} />
+      ) : !isListLevel ? (
         <CookbookHome
           totalRecipes={completedJobs.length}
           collections={collections}
@@ -607,6 +611,7 @@ export default function SavedCatalog({
           isSelectMode={isSelectMode}
           selectedIds={selectedIds}
           bindLongPress={bindLongPress}
+          onRecipeSaved={onRecipeSaved}
         />
       ) : filteredJobs.length === 0 ? (
         <div className="flex flex-col items-center gap-3 text-center py-14 px-6">

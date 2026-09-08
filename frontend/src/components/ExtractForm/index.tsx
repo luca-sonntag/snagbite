@@ -38,6 +38,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
   setPhotos,
   isUploadingPhotos,
   claimRewardedCredit,
+  onSavePublicRecipe,
 }) => {
   const { t } = useI18n();
   const { user, isPremium, hasTrialAvailable, trialDays, trialLoading } = useAuth();
@@ -88,8 +89,16 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
     !isPremium && !trialLoading && hasTrialAvailable && trialDays > 0 && !trialDismissed;
   const hideUpgradeCard = isRealPremium || trialLoading || trialBannerShowing;
 
-  const handleDemoClick = (demoUrl: string) => {
+  const handleDemoClick = (demoUrl: string, recipe?: import('../../types').Recipe) => {
     if (isPending || atConcurrencyLimit) return;
+    if (recipe && recipe.id && onSavePublicRecipe) {
+      if (cookbookFull) {
+        setIsPremiumModalOpen(true);
+        return;
+      }
+      onSavePublicRecipe(recipe);
+      return;
+    }
     if (blockedByLimit) {
       setIsPremiumModalOpen(true);
       return;

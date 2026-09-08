@@ -6,6 +6,35 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-06: Komplexer 3-Schritte-Share-Mockup im leeren Kochbuch durch minimale Welcome-Card ersetzt & Filter/Suche erhalten
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Komplexer 3-Schritte-Mockup (`ShareStep1Mockup`, `ShareStep2Mockup`, `ShareStep3Mockup`, `CatalogCopyLinkMockup`, `CatalogExtractMockup`) und Workflow-Tabs (`Direkt teilen` / `Kopieren & Einfügen`) in `CatalogEmptyState.tsx`.
+  - Komplettes Ausblenden des Headers, der Suchleiste und der Filter (`CatalogFilters`) im leeren Kochbuchzustand durch frühen Return (`if (completedJobs.length === 0)` in `SavedCatalog/index.tsx`).
+  - Rendern der öffentlichen Community-Empfehlungen (`PublicRecipeRecommendationsShelf`) oberhalb der kontextbasierten Empfehlungen (`shelves.recommended`) bzw. im leeren Kochbuchzustand.
+* **Ersetzt durch:**
+  - **Dauerhafte Such- und Filterleiste ([`SavedCatalog/index.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/index.tsx)):** `CatalogFilters` bleibt immer im Seitenlayout sichtbar; im leeren Kochbuch wird darunter die fokussierte Empty State Card gerendert.
+  - **Minimalistische Empty State Card ([`CatalogEmptyState.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CatalogEmptyState.tsx)):** Großes `BookOpen`-Icon in abgerundetem Container, Titel (*„Dein Kochbuch wartet auf Rezepte!“*), Beschreibung und primärer Aktions-Button (*„Rezept hinzufügen“*) mit Weiterleitung zu `#/extract`.
+  - **Empfehlungs-Reihenfolge ([`CookbookHome.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CookbookHome.tsx), [`CatalogEmptyState.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CatalogEmptyState.tsx)):** Öffentliche Empfehlungen werden unterhalb der Standard-Empfehlungen (im befüllten Kochbuch) bzw. unterhalb der Welcome-Card (im leeren Kochbuch) gerendert, damit Nutzer direkt Rezepte entdecken und speichern können.
+* **Betroffene Dateien:** `frontend/src/components/SavedCatalog/CatalogEmptyState.tsx`, `frontend/src/components/SavedCatalog/CookbookHome.tsx`, `frontend/src/components/SavedCatalog/index.tsx`, `docs/OBSOLETE.md`.
+
+---
+
+### 2026-09-06: Statische Hardcoded Demo-Rezepte & „Täglich neu“-Badge durch rein dynamische Demo-Rezepte aus der DB ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `STATIC_FALLBACKS` in `ExtractDemoRecipes.tsx`: Hardcodierte Dummy-Rezepte (*Pesto-Käse-Twists*, *Flammkuchen aus dem Mixer*) mit fest verdrahteten URLs und statischen Asset-Pfaden (`/demo/*.jpg`).
+  - Statisches Badge `Täglich neu` mit `Sparkles`-Icon im Demo-Karten-Header.
+  - Permanentes Anzeigen des Demo-Blocks selbst dann, wenn keine echten Rezepte vorhanden sind.
+  - Veraltete Demo-Bilder im Assets-Ordner (`frontend/public/demo/*.jpg`, ~3.5 MB tote Bilddaten).
+* **Ersetzt durch:**
+  - **Dynamischer Datenbank-Fetch:** Demo-Rezepte werden ausschließlich via `GET /api/public/recipe/demo` aus der Datenbank bezogen (gefiltert nach `is_demo = true`).
+  - **Bedingte Sichtbarkeit:** Der Block „Beliebte Rezepte zum Ausprobieren“ wird nur noch gerendert, wenn tatsächlich Demo-Rezepte in der Datenbank existieren (`recipes.length > 0`), andernfalls wird `null` zurückgegeben.
+  - **Gelöschte Assets:** Der gesamte Ordner `frontend/public/demo/` wurde gelöscht.
+* **Betroffene Dateien:** `frontend/src/components/ExtractForm/ExtractDemoRecipes.tsx`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-05: Rewarded Interstitial durch klassisches Rewarded Video mit konfigurierbarem Credit-Reward (`global_settings`) ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**

@@ -229,9 +229,10 @@ async function processJob(job: Job): Promise<void> {
       if (isDevEnvironment()) {
         logExtractionDevSummary(rawRecipe, 'photo', geminiUsage);
       }
-      // A photographed page has no third-party source to attribute.
+      // A photographed page has no third-party source to attribute and remains private.
       rawRecipe.sourceUrl = null;
       rawRecipe.sourceHandle = null;
+      rawRecipe.visibility = 'private';
 
       // 2nd-stage recipe audit & ingredient disambiguation
       let recipe = rawRecipe;
@@ -541,6 +542,8 @@ async function processJob(job: Job): Promise<void> {
 
     recipe.sourceHandle = scrapeResult.authorHandle || null;
     recipe.sourceUrl = url;
+    // Social media recipe extractions are public by default (remixes and photo imports stay private)
+    recipe.visibility = 'public';
 
     const llmUsage: LlmUsage = {};
     if (geminiUsage) llmUsage.gemini = geminiUsage;

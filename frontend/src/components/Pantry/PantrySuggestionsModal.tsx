@@ -3,8 +3,10 @@ import { Drawer } from '@heroui/react';
 import { X, Sparkles, AlertCircle, CheckCircle2, ChevronRight, Globe } from 'lucide-react';
 import type { PantrySuggestion } from '../../types';
 import { useI18n } from '../../context/I18nContext';
+import { useAuth } from '../../context/AuthContext';
 import { recipeCategoryEmojis } from '../../i18n';
 import { hapticLight } from '../../utils/haptics';
+import { savePublicRecipeToCookbook } from '../../api/publicRecipesApi';
 
 interface PantrySuggestionsModalProps {
   isOpen: boolean;
@@ -22,6 +24,7 @@ export const PantrySuggestionsModal: React.FC<PantrySuggestionsModalProps> = ({
   onSelectRecipe,
 }) => {
   const { t } = useI18n();
+  const { getAccessToken } = useAuth();
 
   // Strict deduplication by normalized title and recipe id
   const uniqueSuggestions = React.useMemo(() => {
@@ -116,8 +119,17 @@ export const PantrySuggestionsModal: React.FC<PantrySuggestionsModalProps> = ({
                     return (
                       <div
                         key={recipeId}
-                        onClick={() => {
-                          if (recipeId) onSelectRecipe(recipeId);
+                        onClick={async () => {
+                          if (recipeId) {
+                            if (sug.isPublic) {
+                              try {
+                                await savePublicRecipeToCookbook(recipeId, getAccessToken);
+                              } catch (err) {
+                                console.warn('[PantrySuggestionsModal] Failed to auto-save public recipe:', err);
+                              }
+                            }
+                            onSelectRecipe(recipeId);
+                          }
                           onClose();
                         }}
                         className="p-3 bg-gray-50/80 hover:bg-gray-100 dark:bg-gray-800/60 dark:hover:bg-gray-800 rounded-3xl cursor-pointer transition-all border-none shadow-none flex items-center gap-3.5 active:scale-[0.98]"

@@ -55,6 +55,7 @@ export interface RecipeRow {
   source_nutritional_values: unknown;
   has_explicit_nutritional_values: boolean;
   has_incomplete_source_info?: boolean | null;
+  is_demo?: boolean;
   nutrition_coverage: number | string | null;
   created_at: string;
   updated_at: string;
