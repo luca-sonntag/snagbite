@@ -73,6 +73,10 @@ const CANONICAL_SYNONYMS: Record<string, string> = {
   'heavy whipping cream': 'heavy cream',
   'whipping cream': 'heavy cream',
   'sour cream': 'sour cream',
+  'grated cheese': 'shredded cheese',
+  'shredded cheese': 'shredded cheese',
+  'gratin cheese': 'shredded cheese',
+  'pizza cheese': 'shredded cheese',
 };
 
 /** Leading articles and quantifiers that carry no food identity. */
@@ -154,7 +158,15 @@ export function canonicalizeBaseName(raw: string | undefined | null): string {
   // Drop leading filler, but never reduce the name to nothing.
   while (words.length > 1 && LEADING_FILLER.has(words[0])) words.shift();
 
-  const kept = words.filter(w => !NOISE_WORDS.has(w));
+  // Pre-packaged shredded/grated cheese blends are a distinct commercial grocery commodity.
+  // Preserve their cut descriptor so they map deterministically to 'shredded cheese' instead of generic 'cheese'.
+  const isShreddedCheese =
+    words.includes('cheese') &&
+    words.some(w => w === 'shredded' || w === 'grated' || w === 'gratin');
+
+  const kept = isShreddedCheese
+    ? words.filter(w => !NOISE_WORDS.has(w) || w === 'shredded' || w === 'grated')
+    : words.filter(w => !NOISE_WORDS.has(w));
   // If every word was noise the input was pure description — keep the original
   // words rather than emitting an empty key.
   words = kept.length > 0 ? kept : words;
