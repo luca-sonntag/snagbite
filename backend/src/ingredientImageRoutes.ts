@@ -188,7 +188,15 @@ ingredientImageRouter.get(['/api/ingredient-icons/:filename', '/api/dev/ingredie
   try {
     const rawParam = req.params.filename || req.params.id || '';
     const cleanId = rawParam.replace(/\.webp$/i, '').toLowerCase().trim();
-    const filename = findExistingIngredientImage(cleanId);
+
+    const synParam = req.query.synonyms || req.query.syn;
+    const synonyms = typeof synParam === 'string'
+      ? synParam.split(',').map((s: string) => s.trim()).filter(Boolean)
+      : Array.isArray(synParam)
+        ? (synParam as string[]).map((s: any) => String(s).trim()).filter(Boolean)
+        : undefined;
+
+    const filename = findExistingIngredientImage(cleanId, undefined, synonyms);
     if (!filename) {
       return res.status(404).send('Ingredient icon not found');
     }

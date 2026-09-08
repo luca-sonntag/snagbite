@@ -61,6 +61,7 @@ export const CookingModeIngredients: React.FC<CookingModeIngredientsProps> = ({
                   canonicalId={ing.canonicalId}
                   category={ing.category}
                   name={ing.name}
+                  synonyms={ing.synonyms}
                   size="md"
                 />
                 <div className="flex-1 min-w-0 flex flex-col justify-center leading-snug">
