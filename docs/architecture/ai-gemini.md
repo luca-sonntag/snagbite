@@ -52,6 +52,10 @@ Im gesamten Backend gibt es **8 aktive Gemini-Funktionen** (sowie Offline-/Admin
    Strikte Schematisierung (`responseSchema: recipeSchema`):
    • 22 Prompt-Constraints (Anti-Halluzination, Mengennormalisierung,
      Makros pro Zutat, Inline-Ingredient- & Timer-Tags `[Tag](ing:...)`)
+   • Formgetreue Food Photography Prompts (`foodPhotographyPrompt.ts`):
+     Formfaktor-Taxonomie (Pockets/Sandwiches, Wraps, Casseroles, Tellergerichte),
+     Protein-Morphologie (geschabte Streifen vs. Brocken), Kräutersoßen-Integration
+     und Anti-Halluzination gegen unzutreffende Standardgarnituren (Tomaten/Koriander).
    • Mehrfachrezept-Erkennung (`containsMultipleRecipes` ➔ 422 Abbruch)
    • Unvollständige Quellen (`hasIncompleteSourceInfo: true` bei visueller Rekonstruktion ohne Textvorgaben)
                  │
@@ -60,6 +64,9 @@ Im gesamten Backend gibt es **8 aktive Gemini-Funktionen** (sowie Offline-/Admin
    Gemini 2.5 Flash-Lite auditiert das Rezept auf Spezifitätsinvarianz & Disambiguierung:
    • Verhindert Kollaps auf Umbrella-Begriffe (Mozzarella -> mozzarella, nicht cheese)
    • Strikte Gewürz-Disambiguierung (Pfeffer -> black pepper / SPICES_SEASONINGS)
+   • Formfaktor- & Bildprompt-Audit (`correctedImagePrompt`): Gleicht Zubereitungsschritte
+     (z. B. Fladenbrot aufschneiden und befüllen) mit dem `imagePrompt` ab und korrigiert
+     Diskrepanzen vor der Bildgenerierung deterministisch.
    • Deterministisches Patching via `applyRecipeAuditPatch()` & 1..N Schritt-Renumbering
                  │
                  ▼
