@@ -48,6 +48,10 @@ describe('canonicalizeBaseName', () => {
     assert.equal(canonicalizeBaseName('smoked salmon'), 'smoked salmon');
     assert.equal(canonicalizeBaseName('dried tomatoes'), 'dried tomato');
     assert.equal(canonicalizeBaseName('egg yolk'), 'egg yolk');
+    assert.equal(canonicalizeBaseName('shredded cheese'), 'shredded cheese');
+    assert.equal(canonicalizeBaseName('grated cheese'), 'shredded cheese');
+    assert.equal(canonicalizeBaseName('gratin cheese'), 'shredded cheese');
+    assert.equal(canonicalizeBaseName('shredded carrots'), 'carrot');
   });
 
   test('different spellings of the same food produce one key', () => {

@@ -109,6 +109,41 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
     );
   });
 
+  test('corrects ingredient name when collapsed to raw umbrella term (e.g. Käse -> Gratinkäse)', () => {
+    const patch: RecipeAuditPatch = {
+      ingredientCorrections: [
+        {
+          originalName: 'Käse',
+          correctedName: 'Gratinkäse',
+          correctedBaseName: 'shredded cheese',
+          correctedCategory: 'DAIRY_EGGS',
+          reason: 'Preserve product form invariance: Käse with shredded cheese baseName should be Gratinkäse.',
+        },
+      ],
+    };
+
+    const recipeWithRawCheese: Recipe = {
+      title: 'Auflauf',
+      description: 'Schneller Auflauf mit Gratinkäse.',
+      prepTime: 5,
+      cookTime: 20,
+      servings: 2,
+      ingredients: [
+        {
+          name: 'DAIRY_EGGS',
+          items: [{ name: 'Käse', baseName: 'cheese', category: 'DAIRY_EGGS', amount: 80, unit: 'g', modifier: 'light' }],
+        },
+      ],
+      instructions: [{ step: 1, description: 'Den [Käse](ing:cheese) darüber streuen.' }],
+    };
+
+    const patched = applyRecipeAuditPatch(recipeWithRawCheese, patch);
+    const item = patched.ingredients[0].items[0];
+    assert.equal(item.name, 'Gratinkäse');
+    assert.equal(item.baseName, 'shredded cheese');
+    assert.equal(patched.instructions[0].description, 'Den [Käse](ing:shredded cheese) darüber streuen.');
+  });
+
   test('prevents cross-tag collisions when multiple ingredients share a generic baseName', () => {
     const multiCheeseRecipe: Recipe = {
       title: 'Zwei-Käse Pasta',

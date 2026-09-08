@@ -7,6 +7,7 @@ export interface IngredientIconProps {
   canonicalId?: string | null;
   category?: string;
   name?: string;
+  synonyms?: string[] | null;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
@@ -28,12 +29,13 @@ export const IngredientIcon: React.FC<IngredientIconProps> = ({
   canonicalId,
   category = '',
   name = '',
+  synonyms,
   size = 'md',
   className = '',
 }) => {
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const iconUrl = getIngredientIconUrl(baseName, canonicalId);
+  const iconUrl = getIngredientIconUrl(baseName, canonicalId, synonyms);
   const categoryIconUrl = getCategoryIconUrl(category);
 
   // Clean flat circular container

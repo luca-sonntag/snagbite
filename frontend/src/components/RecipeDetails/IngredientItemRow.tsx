@@ -72,6 +72,7 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
           canonicalId={ingredient.canonicalId}
           category={categoryName}
           name={name}
+          synonyms={ingredient.synonyms}
           size="md"
         />
         <div className="flex-1 min-w-0 flex flex-col justify-center">

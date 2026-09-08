@@ -454,6 +454,47 @@ export function findExistingIngredientImage(ingredientId: string, outDir?: strin
 
   if (!slug && !canonical) return null;
 
+  // Generic umbrella baseNames whose specific synonyms (e.g. 'grated cheese' -> 'shredded_cheese.webp')
+  // should take precedence over the generic umbrella icon (e.g. 'cheese.webp').
+  const GENERIC_UMBRELLA_BASENAMES = new Set([
+    'cheese',
+    'fish',
+    'meat',
+    'poultry',
+    'seafood',
+    'oil',
+    'flour',
+    'spice',
+    'herb',
+    'pasta',
+    'noodle',
+    'pepper',
+    'salad',
+  ]);
+
+  const checkSynonyms = (): string | null => {
+    if (!Array.isArray(synonyms)) return null;
+    for (const syn of synonyms) {
+      if (!syn) continue;
+      const sRaw = syn.toLowerCase().trim();
+      const sCanonical = canonicalizeBaseName(sRaw).replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+      const sSlug = sRaw.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+      if (sSlug && fs.existsSync(path.join(dir, `${sSlug}.webp`))) {
+        return `${sSlug}.webp`;
+      }
+      if (sCanonical && fs.existsSync(path.join(dir, `${sCanonical}.webp`))) {
+        return `${sCanonical}.webp`;
+      }
+    }
+    return null;
+  };
+
+  // 0. Prioritize specific synonym match if the baseName is a generic umbrella category
+  if (canonical && GENERIC_UMBRELLA_BASENAMES.has(canonical) || slug && GENERIC_UMBRELLA_BASENAMES.has(slug)) {
+    const synMatch = checkSynonyms();
+    if (synMatch) return synMatch;
+  }
+
   // 1. Direct match on slug (e.g. "strained_tomato.webp")
   if (slug && fs.existsSync(path.join(dir, `${slug}.webp`))) {
     return `${slug}.webp`;
@@ -471,19 +512,9 @@ export function findExistingIngredientImage(ingredientId: string, outDir?: strin
   }
 
   // 4. Check synonyms if provided (e.g. "passata" with synonym ["strained tomato"] -> "strained_tomato.webp")
-  if (Array.isArray(synonyms)) {
-    for (const syn of synonyms) {
-      if (!syn) continue;
-      const sRaw = syn.toLowerCase().trim();
-      const sCanonical = canonicalizeBaseName(sRaw).replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
-      const sSlug = sRaw.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
-      if (sSlug && fs.existsSync(path.join(dir, `${sSlug}.webp`))) {
-        return `${sSlug}.webp`;
-      }
-      if (sCanonical && fs.existsSync(path.join(dir, `${sCanonical}.webp`))) {
-        return `${sCanonical}.webp`;
-      }
-    }
+  const synFallback = checkSynonyms();
+  if (synFallback) {
+    return synFallback;
   }
 
   // 5. If identifier is a barcode or product code, resolve its English/German name via Open Food Facts

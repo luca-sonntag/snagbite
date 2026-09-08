@@ -4,6 +4,7 @@ import type { Recipe, GeminiUsageInfo } from '../types.js';
 
 export interface IngredientCorrection {
   originalName: string;
+  correctedName?: string;
   correctedBaseName?: string;
   correctedCategory?: string;
   correctedSynonyms?: string[];
@@ -56,12 +57,13 @@ export const auditPatchSchema = {
   properties: {
     ingredientCorrections: {
       type: FunctionDeclarationSchemaType.ARRAY,
-      description: 'Corrections to baseName, category, or synonyms of existing ingredients to fix misclassifications, umbrella collapsing (e.g. Mozzarella collapsed to cheese, Pfeffer mapped to bell pepper), or wrong supermarket categories.',
+      description: 'Corrections to name, baseName, category, or synonyms of existing ingredients to fix misclassifications, umbrella collapsing (e.g. Mozzarella collapsed to cheese, Käse when shredded cheese is meant, Pfeffer mapped to bell pepper), or wrong supermarket categories.',
       items: {
         type: FunctionDeclarationSchemaType.OBJECT,
         properties: {
           originalName: { type: FunctionDeclarationSchemaType.STRING, description: 'The exact ingredient name in the recipe as written.' },
-          correctedBaseName: { type: FunctionDeclarationSchemaType.STRING, description: 'Specific singular English baseName (e.g. "mozzarella", "black pepper").' },
+          correctedName: { type: FunctionDeclarationSchemaType.STRING, description: 'Corrected ingredient name in the recipe language if the original was inappropriately collapsed to a raw umbrella term (e.g. change "Käse" to "Gratinkäse" when baseName is "shredded cheese", change "Rindfleisch" to "Rinderhackfleisch" when baseName is "ground beef").' },
+          correctedBaseName: { type: FunctionDeclarationSchemaType.STRING, description: 'Specific singular English baseName (e.g. "shredded cheese", "mozzarella", "black pepper").' },
           correctedCategory: {
             type: FunctionDeclarationSchemaType.STRING,
             enum: [...RECIPE_CATEGORY_KEYS],
@@ -140,11 +142,17 @@ export function buildAuditPrompt(recipe: Recipe): string {
 Review the recipe JSON below and identify any ingredient misclassifications, umbrella collapsing, or category mismatches:
 1. NO-OP GUARD (CRITICAL): ONLY include an ingredient in ingredientCorrections if you are ACTUALLY fixing an error. If an ingredient already has the correct baseName and category in the input recipe, DO NOT include it! If no genuine fixes are needed, return an empty patch {}.
 2. STRICT SINGULAR NOUNS: Always enforce singular English baseNames (e.g. "canned tomato", NOT "canned tomatoes"; "chili flake", NOT "chili flakes"; "mushroom", NOT "mushrooms"). Never change an existing singular baseName to plural.
-3. SPECIFICITY INVARIANCE: Never collapse specific varieties into umbrella terms:
-   - "Mozzarella" / "Mozzarella (gerieben)" MUST have baseName "mozzarella" (NOT "cheese") and category "DAIRY_EGGS".
-   - "Feta" / "Schafskäse" MUST have baseName "feta" (NOT "cheese") and category "DAIRY_EGGS".
-   - "Gouda" -> "gouda", "Cheddar" -> "cheddar", "Parmesan" -> "parmesan" (NOT "cheese") with category "DAIRY_EGGS".
-   - "Lachs" / "Salmon" -> "salmon" or "salmon fillet", "Thunfisch" -> "tuna" (NOT "fish") with category "SEAFOOD".
+3. SPECIFICITY INVARIANCE & PRODUCT FORM INVARIANCE:
+   - Specific Varieties: Never collapse specific varieties into umbrella terms:
+     * "Mozzarella" / "Mozzarella (gerieben)" MUST have baseName "mozzarella" (NOT "cheese") and category "DAIRY_EGGS".
+     * "Feta" / "Schafskäse" MUST have baseName "feta" (NOT "cheese") and category "DAIRY_EGGS".
+     * "Gouda" -> "gouda", "Cheddar" -> "cheddar", "Parmesan" -> "parmesan" (NOT "cheese") with category "DAIRY_EGGS".
+     * "Lachs" / "Salmon" -> "salmon" or "salmon fillet", "Thunfisch" -> "tuna" (NOT "fish") with category "SEAFOOD".
+   - Product Form & Identity Invariance in "name": Never collapse confectioned retail commodities to generic raw umbrella terms in "name":
+     * If an ingredient is shredded/grated cheese (baseName: "shredded cheese") but name is generically "Käse" or "Cheese", provide correctedName: "Gratinkäse" or "Reibekäse".
+     * If an ingredient is ground beef (baseName: "ground beef") but name is generically "Rindfleisch" or "Fleisch", provide correctedName: "Rinderhackfleisch" or "Hackfleisch".
+     * If an ingredient is tomato paste (baseName: "tomato paste") but name is generically "Tomate", provide correctedName: "Tomatenmark".
+     * If an ingredient is rolled oats (baseName: "rolled oat") but name is generically "Hafer", provide correctedName: "Haferflocken".
 4. STRICT SPICE VS PRODUCE & PANTRY DISAMBIGUATION:
    - "Pfeffer" / "Schwarzer Pfeffer" (spice) MUST have baseName "black pepper" and category "SPICES_HERBS" (NEVER "pepper", "bell pepper", or "VEGETABLES").
    - "Paprika" / "Gemüsepaprika" (produce) MUST have baseName "bell pepper" and category "VEGETABLES".
