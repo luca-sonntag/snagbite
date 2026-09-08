@@ -53,7 +53,7 @@ Im gesamten Backend gibt es **8 aktive Gemini-Funktionen** (sowie Offline-/Admin
    • 22 Prompt-Constraints (Anti-Halluzination, Mengennormalisierung,
      Makros pro Zutat, Inline-Ingredient- & Timer-Tags `[Tag](ing:...)`)
    • Formgetreue Food Photography Prompts (`foodPhotographyPrompt.ts`):
-     Formfaktor-Taxonomie (Pockets/Sandwiches, Wraps, Casseroles, Tellergerichte),
+     Formfaktor-Taxonomie (Pockets/Sandwiches, Wraps, Casseroles/Backform-Geometrie wie rechteckig vs. rund & Material wie Glas/Keramik, Tellergerichte),
      Protein-Morphologie (geschabte Streifen vs. Brocken), Kräutersoßen-Integration
      und Anti-Halluzination gegen unzutreffende Standardgarnituren (Tomaten/Koriander).
    • Mehrfachrezept-Erkennung (`containsMultipleRecipes` ➔ 422 Abbruch)
