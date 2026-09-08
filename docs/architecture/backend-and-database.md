@@ -38,6 +38,7 @@ Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()` (
 
 ### Statische Assets & Zutat-Icons Distribution (`/api/ingredient-icons/*` & `/api/category-icons/*`)
 * **Icons-Katalog:** Das Backend liefert über 760 KI-generierte Zutat-Icons (`.webp`) und 20 Kategorie-Icons aus (`backend/src/ingredientImageRoutes.ts`).
+* **Spezifitäts-Kaskade & Progressive Enhancement:** Bei generischen Oberbegriffen (z. B. `baseName: "cheese"`) prüft der Icon-Resolver via `req.query.syn` / `synonyms`, ob ein spezifischeres Synonym-Icon existiert (z. B. `["grated cheese"]` ➔ `shredded_cheese.webp`). Vorverpackter Streukäse (Gratinkäse, Reibekäse) wird als eigene Food Identity `shredded cheese` geführt.
 * **Optimierte Git- & Container-Auslieferung:**
   * Um das Git-Repository nicht mit hunderten einzelnen Binärdateien aufzublähen, werden alle Zutat-Icons in einem einzigen komprimierten Archiv `backend/public/ingredient-icons.zip` (~13 MB) in Git versioniert.
   * In `.gitignore` sind die entpackten `backend/public/ingredient-icons/*.webp` ignoriert.
