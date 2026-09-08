@@ -7,6 +7,7 @@ import { AppError } from './errors.js';
 import { withRetry } from './retry.js';
 import type { Candidate } from './notifications/types.js';
 import { BASE_NAME_SCHEMA_DESCRIPTION, SYNONYMS_SCHEMA_DESCRIPTION, BASE_NAME_INSTRUCTION_PROMPT } from './matching/baseNamePrompt.js';
+import { FOOD_PHOTOGRAPHY_SCHEMA_DESCRIPTION, FOOD_PHOTOGRAPHY_PROMPT_INSTRUCTION } from './prompts/foodPhotographyPrompt.js';
 
 // Initialize Gemini Generative AI and File Manager
 const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
@@ -300,7 +301,7 @@ const recipeSchema = {
     },
     imagePrompt: {
       type: FunctionDeclarationSchemaType.STRING,
-      description: 'An ultra-compact, keyword-dense food photography prompt in ENGLISH for FLUX.1 text-to-image AI. Style: authentic, natural, cozy home-cooked realism (NOT sterile, artificial, or overly polished studio plastic). CRITICAL: The very first 2-5 words MUST name the primary dish format/vessel as seen in the final plating/baked state (e.g. "Baked layered potato casserole in a glass baking dish", "Plate of creamy pasta", "Stuffed wrap cut in half", "Cast iron skillet bake"). NEVER start with internal fillings or loose sub-ingredients if it is a layered/baked/casserole dish. Mirror the real final appearance from the last frames: surface crust, cheese browning, layers, garnishes. Format as short comma-separated phrases. Include natural atmosphere: soft natural window light, subtle natural imperfections, rustic tabletop, 35mm food photography, shallow depth of field. Absolutely NO CGI, NO plastic gloss, NO text, NO watermarks, NO hands, NO humans.',
+      description: FOOD_PHOTOGRAPHY_SCHEMA_DESCRIPTION,
     },
   },
   required: [
@@ -602,14 +603,7 @@ Key Constraints:
    - "Ca. [15 Minuten](timer:900) garen."
    - "Für [1,5 Stunden](timer:5400) köcheln lassen."
    - "Etwa [45 Sekunden](timer:45) anbraten."
-18. Food Photography Image Prompt (imagePrompt): Generate an ultra-compact, keyword-dense prompt strictly in ENGLISH for text-to-image AI (FLUX.1 [schnell]) depicting the finished dish:
-   a) Primary Visual Structure First: The first 2 to 5 words MUST establish the primary visual format and serving vessel of the finished meal as seen in the final frames/plating (e.g. "Baked layered potato casserole in a baking dish", "Creamy pasta on a ceramic plate", "Cast iron skillet frittata", "Layered gratin with browned cheese top", "Bowl of ramen with broth and toppings").
-      - CRITICAL: If the dish is baked, layered, or assembled under a top layer/crust (like a casserole, gratin, pie, lasagna, or shepherd's pie), NEVER start with the internal filling (e.g. NEVER start with "Meatballs in tomato sauce..." which causes AI to draw isolated meatballs in a pan). Start with the overall casserole / gratin format!
-   b) Observe Final Frames (Plating & Surface): Look at the final frames (e.g. tiles 13–16 of the video grid or final photos). Faithfully reflect the actual visible surface (e.g., continuous golden-brown bubbling melted cheese crust, fresh chopped herbs) and note any visible cross-section or scooped portion (e.g., "one slice removed showing distinct inner layers of fluffy mashed potato and savory meatball filling in rich sauce").
-   c) Authentic, Natural Realism (Avoid Fake Studio Look): Must look like a real home-cooked meal in a cozy kitchen with natural lighting — NOT a sterile, plastic, over-rendered commercial 3D/CGI studio shoot. Avoid buzzwords like "8k", "hyperrealistic", or "flawless". Use natural aesthetics: "soft natural window daylight, subtle real food imperfections, authentic homemade texture, cozy dining atmosphere, 35mm food photography".
-   d) Short, Keyword-Dense Format: Do NOT write full sentences or conversational descriptions. Use concise, comma-separated keywords and short descriptive phrases.
-   e) Structure Template: "[Overall Dish Format in Vessel, e.g. Baked layered potato casserole in a rectangular baking dish], [visible surface appearance & textures e.g. continuous golden-brown bubbling cheese gratin crust], [inner layer cross-section if applicable e.g. portion cut open revealing fluffy mashed potatoes over meatballs in rich tomato sauce], [serveware & setting], soft natural window daylight, shallow depth of field, authentic home-cooked food photography, 35mm lens".
-   f) Strict Exclusions: Absolutely NO plastic sheen, NO CGI/3D render, NO text, NO labels, NO logos, NO watermarks, NO hands, NO humans, and NO raw prep clutter.
+18. ${FOOD_PHOTOGRAPHY_PROMPT_INSTRUCTION}
 19. Alternative English BaseName Synonyms (synonyms): For every ingredient, you MUST populate the "synonyms" array with 1 to 3 alternative common English singular culinary names or regional English equivalents (e.g. for "strained tomato": ["passata", "tomato puree", "sieved tomato"]; for "spring onion": ["scallion", "green onion", "salad onion"]; for "eggplant": ["aubergine"]; for "zucchini": ["courgette"]; for "chickpea": ["garbanzo bean", "garbanzo"]; for "rolled oat": ["oat flake", "oats"]; for "cream cheese": ["double cream cheese", "soft cheese"]; for "quark": ["curd", "curd cheese"]; for "arugula": ["rocket"]; for "bell pepper": ["sweet pepper", "capsicum"]). Follow the exact same English singular lowercase formatting rules as baseName. Output an empty array [] ONLY if there are genuinely no alternative names.
 20. Standalone Grocery Product vs. Custom Mixture (isGenericGrocery): For every ingredient, you MUST set "isGenericGrocery" to true if it is a standard, widely available commercial grocery product sold standalone in supermarkets (e.g. "Frischkäse", "Butter", "Edamame", "Hähnchenbrust", "Haferflocken", "Tomatenmark", "Paprikapulver", "Gouda"). Set it to false for homemade mixtures, compound sauces, marinades, or special recipe-specific blends (e.g. "secret sauce", "homemade herb butter", "onion bacon topping", "sweet chili dip", "secret exotic fantasy sauce").
 21. Parallel Preparation Chef Hints (parallelPrepHint):
@@ -827,7 +821,8 @@ Important Constraints:
 12. Common Pantry Staples: ${STAPLE_INGREDIENT_INSTRUCTION}
 13. Alternative English BaseName Synonyms (synonyms): For every added or modified ingredient, populate the "synonyms" array with 1 to 3 alternative English singular culinary names (e.g. for "strained tomato": ["passata", "tomato puree"]).
 14. Standalone Grocery Product vs. Custom Mixture (isGenericGrocery): Set "isGenericGrocery" to true for standard commercial grocery items, and false for custom mixes/sauces.
-15. Updated Food Photography Image Prompt: In the "imagePrompt" field, provide a newly updated, ultra-compact keyword-dense food photography prompt strictly in ENGLISH for FLUX.1 [schnell] with authentic natural food photography style (cozy kitchen, soft daylight, realistic home-cooked textures, NO fake studio/plastic look) that precisely reflects the remixed dish using short comma-separated key phrases.
+15. Updated Food Photography Image Prompt: In the "imagePrompt" field, provide a newly updated prompt strictly following the food photography guidelines:
+${FOOD_PHOTOGRAPHY_PROMPT_INSTRUCTION}
 16. Parallel Preparation Chef Hints (parallelPrepHint): Follow the exact same strict criteria as the base extraction: "parallelPrepHint" is purely additive and MUST NEVER replace or remove actions from the main step descriptions. ONLY include a "parallelPrepHint" if the step has an explicit passive waiting duration of >= 5 minutes (e.g. baking, simmering, chilling) and subsequent steps contain independent advance prep. NEVER generate hints for active hands-on steps, placeholder phrases, or the final step.
 17. BaseName Specificity Invariance & Disambiguation:
 ${BASE_NAME_INSTRUCTION_PROMPT}
