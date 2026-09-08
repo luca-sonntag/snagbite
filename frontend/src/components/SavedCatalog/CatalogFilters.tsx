@@ -125,7 +125,7 @@ export default function CatalogFilters({
   };
 
   return (
-    <div className="sticky top-[var(--app-sticky-top)] z-20 bg-gray-50/90 dark:bg-gray-950/90 backdrop-blur-md pb-3 -mx-4 px-4 md:-mx-6 md:px-6 flex flex-col gap-2.5 pt-3">
+    <div className="sticky top-[var(--app-sticky-top)] z-20 bg-gray-50/90 dark:bg-gray-950/90 backdrop-blur-md pb-1.5 -mx-4 px-4 md:-mx-6 md:px-6 flex flex-col gap-2.5 pt-3">
       {/* Row 1: PageHeader (Home) OR Back navigation (List Level) */}
       {!onBack ? (
         <PageHeader

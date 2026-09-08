@@ -1,7 +1,7 @@
-import React from 'react';
-import { Plus, ChevronRight, Settings2 } from 'lucide-react';
+import { Plus, ChevronRight } from 'lucide-react';
 import type { Collection, SavedRecipe, RecipeCategory } from '../../types';
 import { useI18n } from '../../context/I18nContext';
+import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
 import { hapticLight } from '../../utils/haptics';
 import CollectionTile from './CollectionTile';
 import RecipeShelf from './RecipeShelf';
@@ -41,7 +41,7 @@ interface CookbookHomeProps {
   onOpenList: (preset: CatalogPreset) => void;
   onOpenRecipe: (e: React.MouseEvent, job: SavedRecipe) => void;
   onAddCollection: () => void;
-  onManageCollections: () => void;
+  onManageCollections?: () => void;
   isSelectMode?: boolean;
   selectedIds?: Set<string>;
   bindLongPress?: (id: string, job: SavedRecipe) => any;
@@ -67,46 +67,44 @@ export default function CookbookHome({
   onOpenList,
   onOpenRecipe,
   onAddCollection,
-  onManageCollections,
   isSelectMode = false,
   selectedIds = new Set(),
   bindLongPress,
   onRecipeSaved,
 }: CookbookHomeProps) {
-  const { t } = useI18n();
+  const { language, t } = useI18n();
+  const favJobs = favoriteJobs.length > 0 ? favoriteJobs : (shelves.favorites?.items ?? []);
 
   return (
-    <div className="flex flex-col gap-7 pb-4 pt-1">
+    <div className="flex flex-col gap-6 pb-4">
       {/* 📂 Unified Organization Hub: Sammlungen, Favoriten, Kategorien & Labels */}
       <section className="flex flex-col gap-2.5">
-        <div className="flex items-center justify-between gap-2">
-          <h3 className="text-base font-bold text-gray-900 dark:text-white">
-            {t('catalog.collectionsTitle')}
-          </h3>
-          {(collections.length > 0 || allFlags.length > 0) && (
-            <button
-              type="button"
-              onClick={() => {
-                hapticLight();
-                onManageCollections();
-              }}
-              className="flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0 cursor-pointer active:scale-95 transition-transform min-h-[44px] px-2"
-            >
-              <Settings2 className="w-3.5 h-3.5" />
-              {t('catalog.manageCollections')}
-            </button>
-          )}
-        </div>
-
-        {/* Row of Tiles: 1. ⭐ Favoriten Smart-Folder + 2. User Collections + 3. ➕ Neue Sammlung */}
+        {/* Row of Tiles: 1. ⭐ Favoriten + 2. 🍲 Speisen-Kategorien + 3. User Collections + 4. ➕ Neue Sammlung */}
         <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
-          {/* ⭐ Favoriten Smart-Tile (Always 1st tile) */}
-          <CollectionTile
-            title={t('catalog.favoritesFilter')}
-            emoji="⭐"
-            jobs={favoriteJobs.length > 0 ? favoriteJobs : shelves.favorites.items}
-            onClick={() => onOpenList({ kind: 'favorites' })}
-          />
+          {/* ⭐ Favoriten Smart-Tile (nur wenn Rezepte enthalten sind) */}
+          {favJobs.length > 0 && (
+            <CollectionTile
+              title={t('catalog.favoritesFilter')}
+              isFavorite
+              jobs={favJobs}
+              onClick={() => onOpenList({ kind: 'favorites' })}
+            />
+          )}
+
+          {/* 🍲 Speisen-Kategorien als Sammlungen */}
+          {availableCategories.map(cat => {
+            const jobs = jobsByCategory[cat] ?? [];
+            if (jobs.length === 0) return null;
+            return (
+              <CollectionTile
+                key={cat}
+                title={getRecipeCategoryLabel(cat, language)}
+                emoji={getRecipeCategoryEmoji(cat)}
+                jobs={jobs}
+                onClick={() => onOpenList({ kind: 'category', category: cat })}
+              />
+            );
+          })}
 
           {/* User Collections */}
           {collections.map(col => (
@@ -136,10 +134,8 @@ export default function CookbookHome({
           </button>
         </div>
 
-        {/* 🍲 Categories & 🏷️ Labels Chip Bar (single unified horizontal scroll bar) */}
+        {/* 🏷️ Labels Chip Bar (only rendered if user has custom labels) */}
         <CategoryLabelBar
-          availableCategories={availableCategories}
-          jobsByCategory={jobsByCategory}
           allFlags={allFlags}
           jobsByFlag={jobsByFlag}
           onOpenList={onOpenList}
