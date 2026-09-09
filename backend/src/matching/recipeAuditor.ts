@@ -53,8 +53,15 @@ export async function auditRecipe(recipe: Recipe): Promise<RecipeAuditResult> {
 
 export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | null | undefined): Recipe {
   if (!patch) return { ...recipe };
-  const hasChanges = Boolean(patch.ingredientCorrections?.length || patch.addedIngredients?.length ||
-    patch.removedIngredients?.length || patch.stepCorrections?.length || patch.addedSteps?.length || patch.removedStepNumbers?.length);
+  const hasChanges = Boolean(
+    patch.ingredientCorrections?.length ||
+    patch.addedIngredients?.length ||
+    patch.removedIngredients?.length ||
+    patch.stepCorrections?.length ||
+    patch.addedSteps?.length ||
+    patch.removedStepNumbers?.length ||
+    (patch.correctedImagePrompt && patch.correctedImagePrompt.trim())
+  );
   if (!hasChanges) return { ...recipe };
 
   const norm = (s?: string) => (s || '').toLowerCase().replace(/[,;:./\\()\-–—_!?'"`„“"»«[\]]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -192,6 +199,11 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
         });
       }
     }
+  }
+
+  // 6. Correct imagePrompt if patched
+  if (patch.correctedImagePrompt && patch.correctedImagePrompt.trim()) {
+    result.imagePrompt = patch.correctedImagePrompt.trim();
   }
 
   result.instructions = result.instructions.map((s, idx) => ({ ...s, step: idx + 1 }));
