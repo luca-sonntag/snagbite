@@ -71,7 +71,6 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
           const timeDisplay = totalMin > 0 ? totalMin + ' Min.' : '15 Min.';
           const imageUrl = recipe.imageUrl || recipe.imageUrls?.[0] || '';
           const isSaved = recipe.id ? savedIds.has(recipe.id) : false;
-          const isSaving = recipe.id ? savingIds.has(recipe.id) : false;
 
           return (
             <div
