@@ -14,7 +14,7 @@ const TikTokIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoClick }) => {
+export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoClick, className = '' }) => {
   const { t } = useI18n();
   const { getAccessToken } = useAuth();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -73,7 +73,7 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
   };
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className={`flex flex-col gap-2.5 pt-3 ${className}`}>
       <div className="flex flex-col px-1 gap-0.5">
         <h3 className="text-xs font-bold text-gray-900 dark:text-white">{t('form.demoTitle')}</h3>
         <p className="text-[11px] text-gray-500 dark:text-gray-400 font-normal">
