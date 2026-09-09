@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Globe, Clock, Plus, Check } from 'lucide-react';
+import { Globe, Clock, Eye, Check } from 'lucide-react';
 import type { Recipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
 import { fetchPublicRecipeRecommendations, savePublicRecipeToCookbook } from '../../api/publicRecipesApi';
+import { PublicRecipePreviewModal } from '../PublicRecipe';
 
 interface PublicRecipeRecommendationsShelfProps {
   onRecipeSaved: (savedId: string) => void;
@@ -13,12 +14,12 @@ interface PublicRecipeRecommendationsShelfProps {
 export default function PublicRecipeRecommendationsShelf({
   onRecipeSaved,
 }: PublicRecipeRecommendationsShelfProps) {
-  const { language } = useI18n();
+  const { t } = useI18n();
   const { getAccessToken } = useAuth();
   const [recommendations, setRecommendations] = useState<Recipe[]>([]);
-  const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [selectedPreviewRecipe, setSelectedPreviewRecipe] = useState<Recipe | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -43,24 +44,27 @@ export default function PublicRecipeRecommendationsShelf({
 
   if (loading || recommendations.length === 0) return null;
 
-  const handleSave = async (recipe: Recipe) => {
-    if (!recipe.id || savingIds.has(recipe.id) || savedIds.has(recipe.id)) return;
+  const handleCardClick = (recipe: Recipe) => {
+    if (!recipe.id) return;
     hapticLight();
-    setSavingIds((prev) => new Set(prev).add(recipe.id!));
+    if (savedIds.has(recipe.id)) {
+      window.location.hash = `/recipe/${recipe.id}`;
+      return;
+    }
+    setSelectedPreviewRecipe(recipe);
+  };
 
+  const handleSavePreviewRecipe = async (recipe: Recipe) => {
+    if (!recipe.id) return;
     try {
       await savePublicRecipeToCookbook(recipe.id, getAccessToken);
       hapticMedium();
       setSavedIds((prev) => new Set(prev).add(recipe.id!));
       onRecipeSaved(recipe.id);
+      window.location.hash = `/recipe/${recipe.id}`;
     } catch (err) {
       console.error('[PublicRecipeRecommendationsShelf] Save failed:', err);
-    } finally {
-      setSavingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(recipe.id!);
-        return next;
-      });
+      throw err;
     }
   };
 
@@ -69,10 +73,10 @@ export default function PublicRecipeRecommendationsShelf({
       <div className="flex items-center justify-between gap-2 px-0.5">
         <div className="flex flex-col min-w-0">
           <h3 className="text-base font-bold text-gray-900 dark:text-white truncate">
-            {language === 'de' ? 'Öffentliche Entdeckungen' : 'Community Discoveries'}
+            {t('catalog.publicDiscovery.title')}
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 font-normal mt-0.5">
-            {language === 'de' ? 'Ausgewählte Rezepte für dein Kochbuch' : 'Curated recipes for your cookbook'}
+            {t('catalog.publicDiscovery.subtitle')}
           </p>
         </div>
       </div>
@@ -82,13 +86,13 @@ export default function PublicRecipeRecommendationsShelf({
           const totalMin = (recipe.prepTime || 0) + (recipe.cookTime || 0);
           const timeDisplay = totalMin > 0 ? totalMin + ' Min.' : null;
           const isSaved = recipe.id ? savedIds.has(recipe.id) : false;
-          const isSaving = recipe.id ? savingIds.has(recipe.id) : false;
           const imageUrl = recipe.imageUrl || recipe.imageUrls?.[0];
 
           return (
             <div
               key={recipe.id}
-              className="w-[10rem] shrink-0 rounded-2xl overflow-hidden flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none select-none"
+              onClick={() => handleCardClick(recipe)}
+              className="w-[10rem] shrink-0 rounded-2xl overflow-hidden flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none select-none cursor-pointer active:scale-[0.98] transition-all"
             >
               <div className="relative w-full aspect-[4/3] bg-black/5 dark:bg-white/5 overflow-hidden">
                 {imageUrl ? (
@@ -122,25 +126,25 @@ export default function PublicRecipeRecommendationsShelf({
 
                 <button
                   type="button"
-                  onClick={() => handleSave(recipe)}
-                  disabled={isSaved || isSaving}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCardClick(recipe);
+                  }}
                   className={`mt-2 flex items-center justify-center gap-1.5 w-full py-1.5 px-2 rounded-xl text-[11px] font-bold transition-all border-none outline-none ${
                     isSaved
-                      ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-default'
-                      : isSaving
-                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 opacity-70 cursor-wait'
+                      ? 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer'
                       : 'bg-emerald-500/10 hover:bg-emerald-500/15 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 active:scale-95 cursor-pointer'
                   }`}
                 >
                   {isSaved ? (
                     <>
-                      <Check className="w-3.5 h-3.5" />
-                      <span>{language === 'de' ? 'Gespeichert' : 'Saved'}</span>
+                      <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                      <span>{t('catalog.publicDiscovery.savedAction')}</span>
                     </>
                   ) : (
                     <>
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>{language === 'de' ? 'Speichern' : 'Save'}</span>
+                      <Eye className="w-3.5 h-3.5 shrink-0" />
+                      <span>{t('catalog.publicDiscovery.viewAction')}</span>
                     </>
                   )}
                 </button>
@@ -149,6 +153,17 @@ export default function PublicRecipeRecommendationsShelf({
           );
         })}
       </div>
+
+      <PublicRecipePreviewModal
+        isOpen={Boolean(selectedPreviewRecipe)}
+        onClose={() => setSelectedPreviewRecipe(null)}
+        recipe={selectedPreviewRecipe}
+        isSaved={selectedPreviewRecipe?.id ? savedIds.has(selectedPreviewRecipe.id) : false}
+        onSave={handleSavePreviewRecipe}
+        onOpenRecipe={(id) => {
+          window.location.hash = `/recipe/${id}`;
+        }}
+      />
     </section>
   );
 }
