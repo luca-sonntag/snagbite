@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-09: Redundante Social-Media- & Plattform-Icons auf Rezeptkarten (Demo- & Kochbuch-Karten) entfernt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Plattform-Badge-Overlay (`TikTokIcon`, `InstagramIcon`, `ChefHat` im Backdrop-Pill oben rechts auf Cover-Bildern) in `ExtractDemoRecipes.tsx`.
+  - Social-Media-Plattform-Icon (`PlatformIcon` mit Farbcodierung) in der Metazeile von `RecipePosterCard.tsx` im Kochbuch (Katalog & Startseiten-Shelves).
+  - Doppel-Badges auf Rezept-Thumbnails, die das Food-Foto verdeckten und irrelevanten visuellen Clutter darstellten (Verstoß gegen Anti-Slop Badge-Test).
+* **Ersetzt durch:**
+  - **Fokus auf das Food-Foto:** Cover-Bilder bleiben oben frei von Fremdmarken-Logos; nur das funktionale Zeit-Badge (`🕒 XX Min.`) bleibt dezent platziert.
+  - **Ruhige Meta-Zeile im Kochbuch:** Die untere Zeile in `RecipePosterCard` zeigt ausschließlich die Gesamtzeit an, wodurch die Kachel typografisch ruhig und aufgeräumt bleibt.
+* **Betroffene Dateien:** `frontend/src/components/ExtractForm/ExtractDemoRecipes.tsx`, `frontend/src/components/SavedCatalog/RecipePosterCard.tsx`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-06: Komplexer 3-Schritte-Share-Mockup im leeren Kochbuch durch minimale Welcome-Card ersetzt & Filter/Suche erhalten
 
 * **Ersetzter Code / Anti-Pattern:**
