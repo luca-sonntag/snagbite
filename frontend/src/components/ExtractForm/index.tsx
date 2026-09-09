@@ -41,7 +41,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
   onSavePublicRecipe,
 }) => {
   const { t } = useI18n();
-  const { user, isPremium, hasTrialAvailable, trialDays, trialLoading } = useAuth();
+  const { user, isPremium } = useAuth();
   const { activeCount: liveActiveCount } = useExtractionJobs();
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isLinkSheetOpen, setIsLinkSheetOpen] = useState(false);
@@ -60,7 +60,6 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
 
   const {
     canPaste,
-    trialDismissed,
     cameraInputRef,
     galleryInputRef,
     photoPreviews,
@@ -85,9 +84,6 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
     },
   });
 
-  const trialBannerShowing =
-    !isPremium && !trialLoading && hasTrialAvailable && trialDays > 0 && !trialDismissed;
-  const hideUpgradeCard = isRealPremium || trialLoading || trialBannerShowing;
 
   const handleDemoClick = (demoUrl: string, recipe?: import('../../types').Recipe) => {
     if (isPending || atConcurrencyLimit) return;
@@ -135,7 +131,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
       )}
 
       {/* Premium Upgrade Promotion */}
-      {!isPending && !hideUpgradeCard && !blockedByLimit && (
+      {!isPending && !blockedByLimit && (
         <PremiumUpgradeCard onUpgradeClick={() => setIsPremiumModalOpen(true)} />
       )}
 

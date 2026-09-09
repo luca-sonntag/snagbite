@@ -8,7 +8,6 @@ import ExtractionAnimation from './components/ExtractionAnimation';
 import ErrorBanner from './components/ErrorBanner';
 import { isCatalogListRoute } from './components/SavedCatalog/catalogRoutes';
 import AuthForm from './components/AuthForm';
-import TrialBanner from './components/TrialBanner';
 import NotificationPrompt from './components/NotificationPrompt';
 import AppTopBanners from './components/AppTopBanners';
 import AppBottomNav from './components/AppBottomNav';
@@ -364,10 +363,6 @@ export default function App() {
                 : 'pb-24'
         } ${!isViewingRecipe ? 'pt-4' : ''}`}
       >
-        {!(isPending && !isPremium) && !isViewingRecipe && (
-          <TrialBanner onOpenPremium={() => setIsPremiumModalOpen(true)} />
-        )}
-
         {!(isPending && !isPremium) && !isViewingRecipe && (
           <NotificationPrompt savedCount={history.length} />
         )}

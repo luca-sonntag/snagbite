@@ -4,7 +4,6 @@ import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { useI18n } from '../../context/I18nContext';
 import { MAX_IMPORT_PHOTOS } from '../../hooks/useRecipeExtraction';
-import { isTrialBannerDismissed, TRIAL_BANNER_DISMISS_EVENT } from '../TrialBanner';
 import type { UseExtractFormProps } from './types';
 
 export function useExtractForm({
@@ -22,18 +21,11 @@ export function useExtractForm({
 }: UseExtractFormProps) {
   const { t } = useI18n();
   const [canPaste, setCanPaste] = useState(false);
-  const [trialDismissed, setTrialDismissed] = useState(isTrialBannerDismissed);
   const [detectedClipboardUrl, setDetectedClipboardUrl] = useState<string | null>(null);
   const [dismissedUrl, setDismissedUrl] = useState<string | null>(null);
 
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const onDismiss = () => setTrialDismissed(true);
-    window.addEventListener(TRIAL_BANNER_DISMISS_EVENT, onDismiss);
-    return () => window.removeEventListener(TRIAL_BANNER_DISMISS_EVENT, onDismiss);
-  }, []);
 
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
@@ -162,7 +154,6 @@ export function useExtractForm({
 
   return {
     canPaste,
-    trialDismissed,
     cameraInputRef,
     galleryInputRef,
     photoPreviews,
