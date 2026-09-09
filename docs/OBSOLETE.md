@@ -6,6 +6,20 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-10: Veralteter Hook-Name `useAdOverlay` zu `useModalOverlay` umbenannt & Body-Scroll-Lock zentralisiert
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `useAdOverlay`: Missverständlicher Name für einen Hook, der nicht Ads steuert, sondern Overlays (Modals, Sheets, Drawers, Dialogs) registriert, um versehentliche Kollisionen mit nativen AdMob-Bannern zu verhindern.
+  - Fragmentiertes, manuelles Body-Scroll-Locking in einzelnen Komponenten (`document.body.style.overflow = 'hidden'`), das bei verschachtelten Overlays versagt (Scroll-Position geht verloren, Seite springt auf `scrollY = 0`) und auf Touch-Geräten (iOS Safari, Android WebViews) unzuverlässig ist.
+* **Ersetzt durch:**
+  - **Neuer Hook-Name [`useModalOverlay`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/context/OverlayStackContext.tsx):** Eindeutige Semantik für alle modalen Oberflächen. `useAdOverlay` bleibt als abwärtskompatibler Alias erhalten.
+  - **Zentraler Body-Scroll-Lock in [`OverlayStackProvider`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/context/OverlayStackContext.tsx):** Nutzt [`useBodyScrollLock`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/hooks/useBodyScrollLock.ts) reaktiv über den globalen Ref-Count (`isAnyOverlayOpen` / `depth.current`).
+  - **Verschachtelungs-Sicherheit:** Der echte Scroll-Stand wird exakt beim Öffnen des ersten Overlays (0 → 1) fixiert (`position: fixed; top: -scrollY`) und erst wiederhergestellt, wenn das allerletzte Overlay schließt (1 → 0).
+  - **Zero Boilerplate:** Jede Komponente, die `useModalOverlay(isOpen)` einbindet, erhält automatisch und transparent sowohl Ad-Hiding als auch zuverlässiges Hintergrund-Scroll-Locking.
+* **Betroffene Dateien:** `frontend/src/context/OverlayStackContext.tsx`, `frontend/src/hooks/useBodyScrollLock.ts`, `frontend/src/context/DialogContext.tsx`, `frontend/src/components/FeedbackDrawer.tsx`, `frontend/src/components/MealPlanner/RecipePickerModal.tsx`, `frontend/src/components/MealPlanner/AddToMealPlanSheet.tsx`, `frontend/src/components/PremiumModal.tsx`, `frontend/src/components/TimerConfirmSheet.tsx`, `frontend/src/components/SavedCatalog/CollectionSheet.tsx`, `frontend/src/components/ShoppingList/CustomItemForm.tsx`, `frontend/src/components/SavedCatalog/FilterSheet.tsx`, `frontend/src/components/RecipeDetails/IngredientNutritionSheet.tsx`, `frontend/src/components/SavedCatalog/FlagSheet.tsx`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-09: Redundante Social-Media-Icons & Cover-Overlays auf Rezeptkarten entfernt, Metadaten unter Titel vereinheitlicht
 
 * **Ersetzter Code / Anti-Pattern:**
