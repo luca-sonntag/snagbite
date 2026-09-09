@@ -45,7 +45,7 @@ export default function TrialBanner({ onOpenPremium }: TrialBannerProps) {
 
   // Show the banner only when RevenueCat has confirmed a trial offering
   // exists, the user hasn't dismissed it, and they aren't already premium.
-  const show = !trialLoading
+  const show = true || !trialLoading
     && !isPremium
     && !dismissed
     && hasTrialAvailable
@@ -79,7 +79,7 @@ export default function TrialBanner({ onOpenPremium }: TrialBannerProps) {
               <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight truncate">
                 {t('premium.modal.trialBanner.title')}
               </h3>
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-wider shrink-0">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-semibold shrink-0">
                 <Timer className="w-2.5 h-2.5" />
                 {trialDays} {t('premium.modal.trialBanner.days')}
               </span>
