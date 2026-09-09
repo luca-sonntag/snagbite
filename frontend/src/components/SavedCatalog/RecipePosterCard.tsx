@@ -118,8 +118,8 @@ export default function RecipePosterCard({
               <span />
             )}
             {calories ? (
-              <span className="flex items-center gap-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400 shrink-0 whitespace-nowrap">
-                <Flame className="w-3.5 h-3.5 text-amber-500 shrink-0 fill-amber-500/20" />
+              <span className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400 shrink-0 whitespace-nowrap">
+                <Flame className="w-3 h-3 text-orange-400/80 dark:text-orange-400/70 shrink-0" />
                 <span>{calories} kcal</span>
               </span>
             ) : r.servings && r.servings > 0 ? (
