@@ -90,7 +90,7 @@ export default function PublicRecipeRecommendationsShelf({
       </div>
 
       <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
-        {recommendations.map((recipe) => {
+        {recommendations.map((recipe, index) => {
           const totalMin = (recipe.prepTime || 0) + (recipe.cookTime || 0);
           const timeDisplay = totalMin > 0 ? `${totalMin} Min.` : null;
           const isSaved = checkIsSaved(recipe.id);
