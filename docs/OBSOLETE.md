@@ -19,7 +19,6 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 * **Betroffene Dateien:** `frontend/src/context/OverlayStackContext.tsx`, `frontend/src/hooks/useBodyScrollLock.ts`, `frontend/src/context/DialogContext.tsx`, `frontend/src/components/FeedbackDrawer.tsx`, `frontend/src/components/MealPlanner/RecipePickerModal.tsx`, `frontend/src/components/MealPlanner/AddToMealPlanSheet.tsx`, `frontend/src/components/PremiumModal.tsx`, `frontend/src/components/TimerConfirmSheet.tsx`, `frontend/src/components/SavedCatalog/CollectionSheet.tsx`, `frontend/src/components/ShoppingList/CustomItemForm.tsx`, `frontend/src/components/SavedCatalog/FilterSheet.tsx`, `frontend/src/components/RecipeDetails/IngredientNutritionSheet.tsx`, `frontend/src/components/SavedCatalog/FlagSheet.tsx`, `docs/OBSOLETE.md`.
 
 ---
-
 ### 2026-09-10: Vereinfachte Vorschau-Listen (`PreviewNutritionRow`, `PreviewIngredientsList`) durch vollwertige `RecipeDetails`-Komponenten ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**

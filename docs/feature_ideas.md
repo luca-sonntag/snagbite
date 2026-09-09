@@ -8,19 +8,17 @@
 
 - Für das vorschlagen von rezepten im Vorrat - eventuell hat user keine passenden rezepte, man könnte doch eventuell auf öffentliche rezepte zurückgreifen (aktuell sind alle rezepte in der recipes tabelle auf private visability, wie könnten wir das ausbauen?)
 
-- healthy score für ein rezept berechnen
+- healthy score für ein rezept berechnen (eventuell zusätzlich von food database mikronährstoffe etc.)
 
 - rezept tinder mit öffentlichen rezepten
 
 - Response bei Rezept kochen ohne Foto fehlt
 
-- neue bilder für demo rezepte generieren (flux)
-
 - update von premium features und update von paywall
 
 - einführung von animation illustrationen über iconscout (extraktion, empty states, ...)
 
-## Bugs / Improvements (Behoben ✅)
+## Findings (Behoben ✅)
 
 - [x] Mozzarella bekommt korrekten baseName `mozzarella` und mappt auf Mozzarella-Icon (behoben durch 2nd-Stage Recipe Auditor & Specificity Invariance)
 - [x] Pfeffer mappt korrekt auf Speisepfeffer / `black pepper` mit Kategorie `SPICES_SEASONINGS` und Pfeffer-Icon (behoben durch Disambiguation & Category Isolation)
@@ -33,5 +31,14 @@
 ![picture 0](../images/471caba0ddc884b4bc8bf0c61118e1f21d88a4f110980a04fd70820afead89df.png)
 
 
-## Bugs / Findings
-*(Aktuell keine offenen Punkte)*
+## Findings
+- Öffentliche Rezepte ausbauen:
+    - view zum browsen von allen öffentlichen rezepten, aber anders als wenn man zb bei Zuletzt gespeichert auf "Alle 15" klickt und alle 15 aufgelistet werden. Es soll ein erlebnis sein, spaß machen
+    - "Rezept ansehen" button nicht bei allen öffentlichen rezepten anzeigen, wiederholung
+    - Rezept preview overlay etwas schmäler machen
+
+![picture 11](../images/8ac24aaa909f03719f5b4e1755b1bf468f420e5d3f6f3220cca1cb2a02fb33d5.png)
+
+- Wochenplaner
+    - ich möchte keinen leeren screen wenn ich auf einen tag bin wo kein rezept geplant ist, grundsätzlich möchte ich immer alle zukünftig geplanten rezepte auf einen blick immer sichtbar haben.
+    - Woche einkaufen button soll für jedes rezept den zutaten auswahl bottom sheet zeigen
