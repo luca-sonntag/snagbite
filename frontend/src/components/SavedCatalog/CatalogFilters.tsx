@@ -354,7 +354,8 @@ export default function CatalogFilters({
         </div>
       )}
     </div>
-    </>
+  )}
+</>
   );
 }
 
