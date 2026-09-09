@@ -20,8 +20,7 @@ interface RecipePosterCardProps {
 }
 
 /**
- * Compact recipe poster: image with duration badge overlay, title below.
- * Follows the same clean cover-badge language as ExtractDemoRecipes.
+ * Compact recipe poster: clean food photo, title and unified duration/calories meta below.
  */
 export default function RecipePosterCard({
   job,
@@ -61,7 +60,7 @@ export default function RecipePosterCard({
         }}
         {...(bindLongPress ?? {})}
       >
-        {/* Cover */}
+        {/* Cover - 100% clean pristine photo presentation */}
         <div className="relative w-full aspect-[4/3] bg-black/5 dark:bg-white/5 overflow-hidden shrink-0">
           <CachedImage
             src={r.imageUrl}
@@ -69,9 +68,6 @@ export default function RecipePosterCard({
             alt={r.title}
             className="w-full h-full object-cover object-center pointer-events-none select-none"
           />
-
-          {/* Subtle bottom vignette for natural badge contrast */}
-          <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/35 via-black/10 to-transparent pointer-events-none" />
 
           {/* Select-mode checkbox */}
           {isSelectMode && (
@@ -105,30 +101,31 @@ export default function RecipePosterCard({
               <Star className="w-4 h-4 fill-amber-500 text-amber-500 drop-shadow-[0_2px_5px_rgba(0,0,0,0.65)]" />
             </div>
           )}
-
-          {/* Duration badge overlay with refined glass edge */}
-          {totalTime && (
-            <div className="absolute bottom-2 left-2 z-10 px-2 py-0.5 rounded-lg bg-black/55 backdrop-blur-md text-white text-[11px] font-medium flex items-center gap-1 shadow-sm ring-1 ring-white/15 pointer-events-none">
-              <Clock className="w-3 h-3 text-emerald-400 shrink-0" />
-              <span className="whitespace-nowrap">{totalTime}</span>
-            </div>
-          )}
         </div>
 
-        {/* Meta: Title & coupled subtle calories */}
+        {/* Meta: Title & coupled subtle info */}
         <div className="flex flex-col p-3 flex-1 justify-start gap-1">
           <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2">
             {r.title}
           </h4>
-          {caloriesFormatted ? (
-            <p className="text-[11px] font-medium text-gray-400 dark:text-gray-500 tracking-tight leading-none">
-              {caloriesFormatted}
-            </p>
-          ) : r.servings && r.servings > 0 ? (
-            <p className="text-[11px] font-medium text-gray-400 dark:text-gray-500 tracking-tight leading-none">
-              {r.servings} Port.
-            </p>
-          ) : null}
+          {(totalTime || caloriesFormatted || (r.servings && r.servings > 0)) && (
+            <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 dark:text-gray-500 truncate mt-0.5">
+              {totalTime && (
+                <span className="flex items-center gap-1 shrink-0">
+                  <Clock className="w-3 h-3 text-emerald-500 shrink-0" />
+                  <span>{totalTime}</span>
+                </span>
+              )}
+              {totalTime && (caloriesFormatted || (r.servings && r.servings > 0)) && (
+                <span className="text-gray-300 dark:text-gray-600 shrink-0">·</span>
+              )}
+              {caloriesFormatted ? (
+                <span className="truncate">{caloriesFormatted}</span>
+              ) : r.servings && r.servings > 0 ? (
+                <span className="shrink-0">{r.servings} Port.</span>
+              ) : null}
+            </div>
+          )}
         </div>
       </div>
     </div>
