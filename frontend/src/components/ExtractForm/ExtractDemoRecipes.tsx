@@ -2,17 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Clock, ChefHat, Check, Loader2, Plus } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
-import { InstagramIcon } from '../ShareMockups';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
 import { fetchPublicDemoRecipes } from '../../api/publicRecipesApi';
 import type { Recipe } from '../../types';
 import type { ExtractDemoRecipesProps } from './types';
-
-const TikTokIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" {...props}>
-    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z" />
-  </svg>
-);
 
 export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoClick, className = '' }) => {
   const { t } = useI18n();
@@ -86,8 +79,6 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
           const totalMin = (recipe.prepTime || 0) + (recipe.cookTime || 0);
           const timeDisplay = totalMin > 0 ? totalMin + ' Min.' : '15 Min.';
           const imageUrl = recipe.imageUrl || recipe.imageUrls?.[0] || '';
-          const isTikTok = recipe.sourceUrl?.includes('tiktok');
-          const isInstagram = recipe.sourceUrl?.includes('instagram');
           const isSaved = recipe.id ? savedIds.has(recipe.id) : false;
           const isSaving = recipe.id ? savingIds.has(recipe.id) : false;
 
@@ -111,15 +102,6 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
                     <ChefHat className="w-8 h-8 opacity-40" />
                   </div>
                 )}
-                <div className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/45 backdrop-blur-md text-white">
-                  {isTikTok ? (
-                    <TikTokIcon className="w-3.5 h-3.5" />
-                  ) : isInstagram ? (
-                    <InstagramIcon className="w-3.5 h-3.5" />
-                  ) : (
-                    <ChefHat className="w-3.5 h-3.5" />
-                  )}
-                </div>
                 <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-lg bg-black/50 backdrop-blur-md text-white text-[11px] font-medium flex items-center gap-1 shadow-xs pointer-events-none">
                   <Clock className="w-3 h-3 text-emerald-400 shrink-0" />
                   <span className="whitespace-nowrap">{timeDisplay}</span>

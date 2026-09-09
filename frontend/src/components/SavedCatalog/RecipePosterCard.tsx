@@ -2,7 +2,6 @@ import React from 'react';
 import { Clock, Check, Star, Layers } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
-import { detectPlatform, PlatformIcon, PLATFORM_ICON_COLOR } from './PlatformIcon';
 import { hapticLight } from '../../utils/haptics';
 
 interface RecipePosterCardProps {
@@ -36,8 +35,6 @@ export default function RecipePosterCard({
   bindLongPress,
 }: RecipePosterCardProps) {
   const r = job.recipe!;
-  const platform = detectPlatform(job.recipe?.sourceUrl ?? undefined);
-  const iconColor = PLATFORM_ICON_COLOR[platform];
   const isShelf = variant === 'shelf';
   const remixCount = job.remixCount ?? job.recipe?.remixCount ?? 0;
 
@@ -109,18 +106,13 @@ export default function RecipePosterCard({
         <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 min-h-[2.5rem]">
           {r.title}
         </h4>
-        {/* Bottom row: total time (left) and source platform icon (right, no background) */}
-        <div className="mt-auto flex items-center justify-between gap-2">
-          {totalTime ? (
-            <span className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
-              <Clock className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-              {totalTime}
-            </span>
-          ) : (
-            <span />
-          )}
-          <PlatformIcon platform={platform} className={`w-4 h-4 shrink-0 ${iconColor}`} />
-        </div>
+        {/* Bottom row: total time */}
+        {totalTime ? (
+          <div className="mt-auto flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+            <Clock className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+            <span>{totalTime}</span>
+          </div>
+        ) : null}
       </div>
     </div>
   </div>
