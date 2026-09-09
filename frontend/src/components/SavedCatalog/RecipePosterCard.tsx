@@ -37,6 +37,7 @@ export default function RecipePosterCard({
   const remixCount = job.remixCount ?? job.recipe?.remixCount ?? 0;
   const rawCalories = r.nutritionalValues?.calories ?? r.sourceNutritionalValues?.calories;
   const calories = rawCalories && rawCalories > 0 ? Math.round(rawCalories) : null;
+  const caloriesFormatted = calories ? calories.toLocaleString('de-DE') + ' kcal' : null;
 
   return (
     <div className={`relative isolate ${isShelf ? 'w-[9.5rem] shrink-0' : 'w-full'} h-full flex flex-col`}>
@@ -51,7 +52,7 @@ export default function RecipePosterCard({
       )}
 
       <div
-        className={`w-full h-full rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all duration-200 ease-out select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.03),0_1px_2px_rgba(0,0,0,0.02)] border-none ${
+        className={`w-full h-full rounded-2xl overflow-hidden cursor-pointer active:scale-[0.96] transition-transform duration-150 ease-out select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.03),0_1px_2px_rgba(0,0,0,0.02)] border-none ${
           isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
         }`}
         onClick={(e) => {
@@ -68,6 +69,9 @@ export default function RecipePosterCard({
             alt={r.title}
             className="w-full h-full object-cover object-center pointer-events-none select-none"
           />
+
+          {/* Subtle bottom vignette for natural badge contrast */}
+          <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/35 via-black/10 to-transparent pointer-events-none" />
 
           {/* Select-mode checkbox */}
           {isSelectMode && (
@@ -102,26 +106,26 @@ export default function RecipePosterCard({
             </div>
           )}
 
-          {/* Duration badge overlay (same style as ExtractDemoRecipes) */}
+          {/* Duration badge overlay with refined glass edge */}
           {totalTime && (
-            <div className="absolute bottom-2 left-2 z-10 px-2 py-0.5 rounded-lg bg-black/50 backdrop-blur-md text-white text-[11px] font-medium flex items-center gap-1 shadow-xs pointer-events-none">
+            <div className="absolute bottom-2 left-2 z-10 px-2 py-0.5 rounded-lg bg-black/55 backdrop-blur-md text-white text-[11px] font-medium flex items-center gap-1 shadow-sm ring-1 ring-white/15 pointer-events-none">
               <Clock className="w-3 h-3 text-emerald-400 shrink-0" />
               <span className="whitespace-nowrap">{totalTime}</span>
             </div>
           )}
         </div>
 
-        {/* Meta: Title & subtle calories */}
-        <div className="flex flex-col px-3 py-2.5 flex-1 justify-between gap-1">
-          <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 min-h-[2.5rem]">
+        {/* Meta: Title & coupled subtle calories */}
+        <div className="flex flex-col p-3 flex-1 justify-start gap-1">
+          <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2">
             {r.title}
           </h4>
-          {calories ? (
-            <p className="text-[11px] font-medium text-gray-400 dark:text-gray-500 tracking-tight">
-              {calories} kcal
+          {caloriesFormatted ? (
+            <p className="text-[11px] font-medium text-gray-400 dark:text-gray-500 tracking-tight leading-none">
+              {caloriesFormatted}
             </p>
           ) : r.servings && r.servings > 0 ? (
-            <p className="text-[11px] font-medium text-gray-400 dark:text-gray-500 tracking-tight">
+            <p className="text-[11px] font-medium text-gray-400 dark:text-gray-500 tracking-tight leading-none">
               {r.servings} Port.
             </p>
           ) : null}

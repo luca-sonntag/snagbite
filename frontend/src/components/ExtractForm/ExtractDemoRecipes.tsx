@@ -102,7 +102,9 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
                     <ChefHat className="w-8 h-8 opacity-40" />
                   </div>
                 )}
-                <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-lg bg-black/50 backdrop-blur-md text-white text-[11px] font-medium flex items-center gap-1 shadow-xs pointer-events-none">
+                {/* Subtle bottom vignette for natural badge contrast */}
+                <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/35 via-black/10 to-transparent pointer-events-none" />
+                <div className="absolute bottom-2 left-2 z-10 px-2 py-0.5 rounded-lg bg-black/55 backdrop-blur-md text-white text-[11px] font-medium flex items-center gap-1 shadow-sm ring-1 ring-white/15 pointer-events-none">
                   <Clock className="w-3 h-3 text-emerald-400 shrink-0" />
                   <span className="whitespace-nowrap">{timeDisplay}</span>
                 </div>
