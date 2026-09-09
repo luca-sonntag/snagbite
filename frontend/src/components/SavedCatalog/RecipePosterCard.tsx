@@ -35,6 +35,8 @@ export default function RecipePosterCard({
   const r = job.recipe!;
   const isShelf = variant === 'shelf';
   const remixCount = job.remixCount ?? job.recipe?.remixCount ?? 0;
+  const rawCalories = r.nutritionalValues?.calories ?? r.sourceNutritionalValues?.calories;
+  const calories = rawCalories && rawCalories > 0 ? Math.round(rawCalories) : null;
 
   return (
     <div className={`relative isolate ${isShelf ? 'w-[9.5rem] shrink-0' : 'w-full'} h-full flex flex-col`}>
@@ -109,11 +111,20 @@ export default function RecipePosterCard({
           )}
         </div>
 
-        {/* Meta: Title only */}
-        <div className="flex flex-col p-3 flex-1 justify-center">
+        {/* Meta: Title & subtle calories */}
+        <div className="flex flex-col px-3 py-2.5 flex-1 justify-between gap-1">
           <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 min-h-[2.5rem]">
             {r.title}
           </h4>
+          {calories ? (
+            <p className="text-[11px] font-medium text-gray-400 dark:text-gray-500 tracking-tight">
+              {calories} kcal
+            </p>
+          ) : r.servings && r.servings > 0 ? (
+            <p className="text-[11px] font-medium text-gray-400 dark:text-gray-500 tracking-tight">
+              {r.servings} Port.
+            </p>
+          ) : null}
         </div>
       </div>
     </div>
