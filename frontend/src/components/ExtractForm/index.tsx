@@ -39,6 +39,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
   isUploadingPhotos,
   claimRewardedCredit,
   onSavePublicRecipe,
+  savedRecipeIds,
 }) => {
   const { t } = useI18n();
   const { user, isPremium } = useAuth();
@@ -212,7 +213,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
           )}
 
           {/* Inspiration / Demo Recipes */}
-          <ExtractDemoRecipes onDemoClick={handleDemoClick} />
+          <ExtractDemoRecipes onDemoClick={handleDemoClick} savedRecipeIds={savedRecipeIds} />
 
           {/* Step-by-Step Help Guide */}
           <ExtractHelpAccordions />

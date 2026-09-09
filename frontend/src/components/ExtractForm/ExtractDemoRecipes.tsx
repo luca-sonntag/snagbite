@@ -10,12 +10,21 @@ import PublicRecipePreviewModal from '../PublicRecipe/PublicRecipePreviewModal';
 import type { Recipe } from '../../types';
 import type { ExtractDemoRecipesProps } from './types';
 
-export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoClick, className = '' }) => {
+export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({
+  onDemoClick,
+  savedRecipeIds,
+  className = '',
+}) => {
   const { t } = useI18n();
   const { getAccessToken } = useAuth();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [selectedPreviewRecipe, setSelectedPreviewRecipe] = useState<Recipe | null>(null);
+
+  const checkIsSaved = (recipeId?: string) => {
+    if (!recipeId) return false;
+    return savedIds.has(recipeId) || (savedRecipeIds?.has(recipeId) ?? false);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -43,7 +52,7 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
   const handleCardClick = (recipe: Recipe) => {
     if (!recipe.id) return;
     hapticLight();
-    if (savedIds.has(recipe.id)) {
+    if (checkIsSaved(recipe.id)) {
       window.location.hash = `/recipe/${recipe.id}`;
       return;
     }
@@ -71,7 +80,7 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
           const totalMin = (recipe.prepTime || 0) + (recipe.cookTime || 0);
           const timeDisplay = totalMin > 0 ? `${totalMin} Min.` : null;
           const imageUrl = recipe.imageUrl || recipe.imageUrls?.[0] || '';
-          const isSaved = recipe.id ? savedIds.has(recipe.id) : false;
+          const isSaved = checkIsSaved(recipe.id);
           const calories = getRecipeCalories(recipe);
           const caloriesFormatted = formatCalories(calories);
 
@@ -153,7 +162,7 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
         isOpen={Boolean(selectedPreviewRecipe)}
         onClose={() => setSelectedPreviewRecipe(null)}
         recipe={selectedPreviewRecipe}
-        isSaved={selectedPreviewRecipe?.id ? savedIds.has(selectedPreviewRecipe.id) : false}
+        isSaved={checkIsSaved(selectedPreviewRecipe?.id)}
         onSave={handleSavePreviewRecipe}
       />
     </div>

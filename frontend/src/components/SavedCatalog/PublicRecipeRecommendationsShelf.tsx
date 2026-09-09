@@ -10,10 +10,12 @@ import CachedImage from '../CachedImage';
 import PublicRecipePreviewModal from '../PublicRecipe/PublicRecipePreviewModal';
 interface PublicRecipeRecommendationsShelfProps {
   onRecipeSaved: (savedId: string) => void;
+  savedRecipeIds?: Set<string>;
 }
 
 export default function PublicRecipeRecommendationsShelf({
   onRecipeSaved,
+  savedRecipeIds,
 }: PublicRecipeRecommendationsShelfProps) {
   const { t } = useI18n();
   const { getAccessToken } = useAuth();
@@ -21,6 +23,11 @@ export default function PublicRecipeRecommendationsShelf({
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [selectedPreviewRecipe, setSelectedPreviewRecipe] = useState<Recipe | null>(null);
+
+  const checkIsSaved = (recipeId?: string) => {
+    if (!recipeId) return false;
+    return savedIds.has(recipeId) || (savedRecipeIds?.has(recipeId) ?? false);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -48,7 +55,7 @@ export default function PublicRecipeRecommendationsShelf({
   const handleCardClick = (recipe: Recipe) => {
     if (!recipe.id) return;
     hapticLight();
-    if (savedIds.has(recipe.id)) {
+    if (checkIsSaved(recipe.id)) {
       window.location.hash = `/recipe/${recipe.id}`;
       return;
     }
@@ -86,7 +93,7 @@ export default function PublicRecipeRecommendationsShelf({
         {recommendations.map((recipe) => {
           const totalMin = (recipe.prepTime || 0) + (recipe.cookTime || 0);
           const timeDisplay = totalMin > 0 ? `${totalMin} Min.` : null;
-          const isSaved = recipe.id ? savedIds.has(recipe.id) : false;
+          const isSaved = checkIsSaved(recipe.id);
           const imageUrl = recipe.imageUrl || recipe.imageUrls?.[0];
           const calories = getRecipeCalories(recipe);
           const caloriesFormatted = formatCalories(calories);
@@ -165,7 +172,7 @@ export default function PublicRecipeRecommendationsShelf({
         isOpen={Boolean(selectedPreviewRecipe)}
         onClose={() => setSelectedPreviewRecipe(null)}
         recipe={selectedPreviewRecipe}
-        isSaved={selectedPreviewRecipe?.id ? savedIds.has(selectedPreviewRecipe.id) : false}
+        isSaved={checkIsSaved(selectedPreviewRecipe?.id)}
         onSave={handleSavePreviewRecipe}
         onOpenRecipe={(id) => {
           window.location.hash = `/recipe/${id}`;

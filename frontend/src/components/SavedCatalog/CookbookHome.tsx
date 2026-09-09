@@ -46,6 +46,7 @@ interface CookbookHomeProps {
   selectedIds?: Set<string>;
   bindLongPress?: (id: string, job: SavedRecipe) => any;
   onRecipeSaved?: (savedId: string) => void;
+  savedRecipeIds?: Set<string>;
 }
 
 /**
@@ -71,6 +72,7 @@ export default function CookbookHome({
   selectedIds = new Set(),
   bindLongPress,
   onRecipeSaved,
+  savedRecipeIds,
 }: CookbookHomeProps) {
   const { language, t } = useI18n();
   const favJobs = favoriteJobs.length > 0 ? favoriteJobs : (shelves.favorites?.items ?? []);
@@ -160,7 +162,10 @@ export default function CookbookHome({
 
       {/* 🌟 Öffentliche Empfehlungen / Community Discoveries (unter Empfehlungen) */}
       {onRecipeSaved && (
-        <PublicRecipeRecommendationsShelf onRecipeSaved={onRecipeSaved} />
+        <PublicRecipeRecommendationsShelf
+          onRecipeSaved={onRecipeSaved}
+          savedRecipeIds={savedRecipeIds}
+        />
       )}
 
       {/* Dynamic Discovery Shelves (Single Open Accordion: Neueste, Zuletzt geöffnet, Schnell gekocht) */}

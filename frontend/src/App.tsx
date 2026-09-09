@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
 
 import type { SavedRecipe } from './types';
 import { hideSplashScreen } from './native';
@@ -113,6 +113,18 @@ export default function App() {
     activeView === 'history' && subPath && !isCatalogListRoute(subPath) && historyLoaded
       ? (history.find((j) => j.recipeId === subPath) || extraRecipes[subPath] || null)
       : null;
+
+  const savedRecipeIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const item of history) {
+      if (item.recipeId) ids.add(item.recipeId);
+      if (item.recipe?.id) ids.add(item.recipe.id);
+    }
+    for (const id of Object.keys(extraRecipes)) {
+      ids.add(id);
+    }
+    return ids;
+  }, [history, extraRecipes]);
 
   const catalogReturnRef = useRef<string | null>(null);
   useEffect(() => {
@@ -480,6 +492,7 @@ export default function App() {
               isUploadingPhotos={isUploadingPhotos}
               claimRewardedCredit={claimRewardedCredit}
               onSavePublicRecipe={handleSavePublicRecipe}
+              savedRecipeIds={savedRecipeIds}
               errorBanner={
                 extractionJobs.length > 0 ||
                 (jobStatus === 'failed' && jobErrorCode !== 'RATE_LIMIT_EXCEEDED') ? (

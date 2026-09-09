@@ -201,6 +201,15 @@ export default function SavedCatalog({
     return Array.from(new Set(completedJobs.flatMap(j => j.flags || [])));
   }, [completedJobs]);
 
+  const savedRecipeIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const j of completedJobs) {
+      if (j.recipeId) ids.add(j.recipeId);
+      if (j.recipe?.id) ids.add(j.recipe.id);
+    }
+    return ids;
+  }, [completedJobs]);
+
   const listTitle = useMemo(() => {
     switch (preset.kind) {
       case 'favorites':
@@ -623,6 +632,7 @@ export default function SavedCatalog({
           selectedIds={selectedIds}
           bindLongPress={bindLongPress}
           onRecipeSaved={onRecipeSaved}
+          savedRecipeIds={savedRecipeIds}
         />
       ) : filteredJobs.length === 0 ? (
         <div className="flex flex-col items-center gap-3 text-center py-14 px-6">
