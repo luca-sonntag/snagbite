@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Globe, Clock, Eye, Check } from 'lucide-react';
+import { Globe, Clock, Eye } from 'lucide-react';
 import type { Recipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
@@ -147,10 +147,7 @@ export default function PublicRecipeRecommendationsShelf({
                   }`}
                 >
                   {isSaved ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                      <span>{t('catalog.publicDiscovery.savedAction')}</span>
-                    </>
+                    <span>{t('catalog.publicDiscovery.savedAction')}</span>
                   ) : (
                     <>
                       <Eye className="w-3.5 h-3.5 shrink-0" />

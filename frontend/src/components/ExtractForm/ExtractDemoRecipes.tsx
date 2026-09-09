@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, ChefHat, Check, Eye } from 'lucide-react';
+import { Clock, ChefHat, Eye } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
@@ -135,10 +135,7 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
                   }`}
                 >
                   {isSaved ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 stroke-[2.5]" />
-                      <span className="whitespace-nowrap">{t('form.demoSavedAction')}</span>
-                    </>
+                    <span className="whitespace-nowrap">{t('form.demoSavedAction')}</span>
                   ) : (
                     <>
                       <Eye className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
