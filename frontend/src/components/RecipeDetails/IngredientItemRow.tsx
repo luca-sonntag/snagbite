@@ -11,11 +11,12 @@ interface IngredientItemRowProps {
   categoryName: string;
   originalIdx: number;
   itemIdx: number;
-  isPremium: boolean;
-  scaleFactor: number;
+  isPremium?: boolean;
+  scaleFactor?: number;
   formatAmount: (amount: number | undefined, unit: string | undefined) => string;
-  onSelectNutrition: (ingredient: Ingredient, category: string) => void;
-  onOpenPremium: () => void;
+  onSelectNutrition?: (ingredient: Ingredient, category: string) => void;
+  onOpenPremium?: () => void;
+  hideNutrition?: boolean;
 }
 
 export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
@@ -23,11 +24,12 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
   categoryName,
   originalIdx,
   itemIdx,
-  isPremium,
-  scaleFactor,
+  isPremium = false,
+  scaleFactor = 1,
   formatAmount,
   onSelectNutrition,
   onOpenPremium,
+  hideNutrition = false,
 }) => {
   const { t } = useI18n();
 
@@ -38,7 +40,7 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
   const uniqueId = `${name}-${originalIdx}-${itemIdx}`;
   const parent = getParentIngredient(ingredient);
   const showParentBadge = parent && parent.name.toLowerCase().trim() !== name.toLowerCase().trim();
-  const hasCalories = ingredient.calories !== undefined && ingredient.calories !== null;
+  const hasCalories = !hideNutrition && ingredient.calories !== undefined && ingredient.calories !== null;
 
   const handleNutritionClick = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -46,9 +48,9 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
 
     hapticLight();
     if (!isPremium) {
-      onOpenPremium();
+      onOpenPremium?.();
     } else {
-      onSelectNutrition(ingredient, categoryName);
+      onSelectNutrition?.(ingredient, categoryName);
     }
   };
 

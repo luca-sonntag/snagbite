@@ -32,6 +32,7 @@ export interface ExtractFormProps {
   isUploadingPhotos: boolean;
   claimRewardedCredit?: () => Promise<boolean>;
   onSavePublicRecipe?: (recipe: Recipe) => Promise<void>;
+  savedRecipeIds?: Set<string>;
 }
 
 export interface PhotoExtractGridProps {
@@ -55,7 +56,8 @@ export interface UrlExtractInputProps {
 }
 
 export interface ExtractDemoRecipesProps {
-  onDemoClick: (url: string, recipe?: Recipe) => void;
+  onDemoClick: (url: string, recipe?: Recipe) => Promise<void> | void;
+  savedRecipeIds?: Set<string>;
   className?: string;
 }
 

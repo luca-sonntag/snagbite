@@ -39,6 +39,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
   isUploadingPhotos,
   claimRewardedCredit,
   onSavePublicRecipe,
+  savedRecipeIds,
 }) => {
   const { t } = useI18n();
   const { user, isPremium } = useAuth();
@@ -85,14 +86,14 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
   });
 
 
-  const handleDemoClick = (demoUrl: string, recipe?: import('../../types').Recipe) => {
+  const handleDemoClick = async (demoUrl: string, recipe?: import('../../types').Recipe) => {
     if (isPending || atConcurrencyLimit) return;
     if (recipe && recipe.id && onSavePublicRecipe) {
       if (cookbookFull) {
         setIsPremiumModalOpen(true);
         return;
       }
-      onSavePublicRecipe(recipe);
+      await onSavePublicRecipe(recipe);
       return;
     }
     if (blockedByLimit) {
@@ -212,7 +213,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
           )}
 
           {/* Inspiration / Demo Recipes */}
-          <ExtractDemoRecipes onDemoClick={handleDemoClick} />
+          <ExtractDemoRecipes onDemoClick={handleDemoClick} savedRecipeIds={savedRecipeIds} />
 
           {/* Step-by-Step Help Guide */}
           <ExtractHelpAccordions />
