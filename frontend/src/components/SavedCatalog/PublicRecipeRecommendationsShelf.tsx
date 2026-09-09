@@ -100,42 +100,45 @@ export default function PublicRecipeRecommendationsShelf({
 
           return (
             <div
-              key={recipe.id}
+              key={recipe.id || index}
               onClick={() => handleCardClick(recipe)}
-              className="w-[10rem] shrink-0 rounded-2xl overflow-hidden flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none select-none cursor-pointer active:scale-[0.98] transition-all"
+              className="w-44 shrink-0 flex flex-col rounded-2xl overflow-hidden bg-white dark:bg-gray-900 shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 border-none group cursor-pointer active:scale-[0.98] transition-transform"
             >
-              <div className="relative w-full aspect-[4/3] bg-black/5 dark:bg-white/5 overflow-hidden shrink-0">
+              {/* Image */}
+              <div className="relative aspect-[4/3] w-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
                 <CachedImage
                   src={imageUrl}
                   emoji={recipe.emoji}
                   alt={recipe.title}
-                  className="w-full h-full object-cover object-center pointer-events-none select-none"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
                 />
-                <div className="absolute top-2 left-2 p-1 rounded-md bg-black/50 backdrop-blur-xs text-white">
-                  <Globe className="w-3 h-3" />
+                <div className="absolute top-2 left-2 z-10 p-1 rounded-lg bg-black/40 backdrop-blur-md text-white">
+                  <Globe className="w-3.5 h-3.5" />
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1 p-2.5 flex-1 justify-between">
+              {/* Info */}
+              <div className="p-3 flex flex-col justify-between flex-1">
                 <div>
                   <h4 className="text-xs font-bold text-gray-900 dark:text-white leading-snug line-clamp-2">
                     {recipe.title}
                   </h4>
                   {(timeDisplay || caloriesFormatted || (recipe.servings && recipe.servings > 0)) && (
-                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 dark:text-gray-500 truncate mt-1">
+                    <div className="flex items-center gap-1.5 text-[11px] font-medium truncate mt-1">
                       {timeDisplay && (
-                        <span className="flex items-center gap-1 shrink-0">
-                          <Clock className="w-3 h-3 text-emerald-500 shrink-0" />
+                        <span className="flex items-center gap-1 shrink-0 px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-semibold text-[11px]">
+                          <Clock className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
                           <span>{timeDisplay}</span>
                         </span>
                       )}
-                      {timeDisplay && (caloriesFormatted || (recipe.servings && recipe.servings > 0)) && (
-                        <span className="text-gray-300 dark:text-gray-600 shrink-0">·</span>
-                      )}
                       {caloriesFormatted ? (
-                        <span className="truncate">{caloriesFormatted}</span>
+                        <span className="truncate px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px]">
+                          {caloriesFormatted}
+                        </span>
                       ) : recipe.servings && recipe.servings > 0 ? (
-                        <span className="shrink-0">{recipe.servings} Port.</span>
+                        <span className="shrink-0 px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px]">
+                          {recipe.servings} Port.
+                        </span>
                       ) : null}
                     </div>
                   )}
