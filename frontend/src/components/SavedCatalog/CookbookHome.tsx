@@ -79,8 +79,8 @@ export default function CookbookHome({
 
   return (
     <div className="flex flex-col gap-6 pb-4">
-      {/* 📂 Unified Organization Hub: Sammlungen, Favoriten, Kategorien & Labels (50% Overlap with Hero) */}
-      <section className="flex flex-col gap-2.5 -mt-12 relative z-10">
+      {/* 📂 Unified Organization Hub: Sammlungen, Favoriten, Kategorien & Labels */}
+      <section className="flex flex-col gap-2.5">
         {/* Row of Tiles: 1. ⭐ Favoriten + 2. 🍲 Speisen-Kategorien + 3. User Collections + 4. ➕ Neue Sammlung */}
         <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-2 scroll-smooth">
           {/* ⭐ Favoriten Smart-Tile (nur wenn Rezepte enthalten sind) */}

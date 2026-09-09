@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@heroui/react';
 import { Search, List, LayoutGrid, CheckSquare, ArrowLeft, Star, Tag, SlidersHorizontal, X, Clock, BookOpen } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
-import HeroWaveHeader from '../HeroWaveHeader';
+import { PageHeader } from '../PageHeader';
 import type { Collection, RecipeCategory } from '../../types';
 import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
 import { hapticLight } from '../../utils/haptics';
@@ -184,84 +184,21 @@ export default function CatalogFilters({
   );
 
   return (
-    <>
-      {/* Level 1: Deep Editorial Emerald Hero Header (only at root) */}
-      {!onBack && (
-        <HeroWaveHeader
+    <div
+      className={`sticky top-[var(--app-sticky-top)] z-20 bg-[#f4f6f5]/95 dark:bg-gray-950/95 backdrop-blur-md pb-2 -mx-4 px-4 md:-mx-6 md:px-6 flex flex-col gap-2.5 pt-3 transition-shadow duration-200 border-none ${
+        isScrolled
+          ? 'shadow-[0_4px_16px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.4)]'
+          : ''
+      }`}
+    >
+      {/* Row 1: PageHeader (Home) OR Back navigation (List Level) */}
+      {!onBack ? (
+        <PageHeader
           icon={<BookOpen className="w-6 h-6" />}
           title={title}
           subtitle={t('catalog.subtitle') || `${t('catalog.recipeCount', { count: resultCount })} · ${t(`catalog.sort.${sortBy}`)}`}
           action={
-            <div className="flex items-center gap-1.5">
-              {showViewModeToggle && (
-                <Button
-                  isIconOnly
-                  variant="tertiary"
-                  className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl bg-white/15 text-white hover:bg-white/25 active:scale-95 transition-all border-none shrink-0 cursor-pointer"
-                  onPress={() => {
-                    hapticLight();
-                    setViewMode(viewMode === 'card' ? 'compact' : 'card');
-                  }}
-                  aria-label={t('catalog.viewToggle')}
-                >
-                  {viewMode === 'card' ? <List className="w-5 h-5" /> : <LayoutGrid className="w-5 h-5" />}
-                </Button>
-              )}
-              <Button
-                isIconOnly
-                variant="tertiary"
-                className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl active:scale-95 transition-all border-none shrink-0 cursor-pointer ${
-                  isSelectMode
-                    ? 'bg-white text-emerald-850 shadow-md font-bold'
-                    : 'bg-white/15 text-white hover:bg-white/25'
-                }`}
-                onPress={() => {
-                  hapticLight();
-                  setIsSelectMode(!isSelectMode);
-                }}
-                aria-label={t('catalog.selectModeToggle')}
-              >
-                <CheckSquare className="w-5 h-5" />
-              </Button>
-            </div>
-          }
-        >
-          {searchBarInput}
-        </HeroWaveHeader>
-      )}
-
-      {/* Sticky Bar: Level 2 Back Navigation OR Scrolled Sticky Search + Active Chips */}
-      {(onBack || isScrolled || hasActiveChips) && (
-        <div
-          className={`sticky top-[var(--app-sticky-top)] z-20 bg-[#f4f6f5]/95 dark:bg-gray-950/95 backdrop-blur-md pb-2 -mx-4 px-4 md:-mx-6 md:px-6 flex flex-col gap-2.5 pt-3 transition-shadow duration-200 border-none ${
-            isScrolled || onBack
-              ? 'shadow-[0_4px_16px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.4)]'
-              : ''
-          }`}
-        >
-          {/* Row 1: Back navigation (List Level only) */}
-          {onBack && (
-            <div className="flex items-center gap-1 min-h-[44px]">
-              <Button
-                isIconOnly
-                variant="tertiary"
-                className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all shrink-0 cursor-pointer"
-                onPress={() => {
-                  hapticLight();
-                  onBack();
-                }}
-                aria-label={t('catalog.backToCookbook')}
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-
-              <div className="flex-1 min-w-0">
-                <h2 className="text-base font-bold text-gray-900 dark:text-white truncate leading-tight">{title}</h2>
-                <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-tight truncate">
-                  {t('catalog.recipeCount', { count: resultCount })} · {t(`catalog.sort.${sortBy}`)}
-                </p>
-              </div>
-
+            <div className="flex items-center gap-1">
               {showViewModeToggle && (
                 <Button
                   isIconOnly
@@ -276,7 +213,6 @@ export default function CatalogFilters({
                   {viewMode === 'card' ? <List className="w-5 h-5" /> : <LayoutGrid className="w-5 h-5" />}
                 </Button>
               )}
-
               <Button
                 isIconOnly
                 variant="tertiary"
@@ -294,10 +230,66 @@ export default function CatalogFilters({
                 <CheckSquare className="w-5 h-5" />
               </Button>
             </div>
+          }
+        />
+      ) : (
+        <div className="flex items-center gap-1 min-h-[44px]">
+          <Button
+            isIconOnly
+            variant="tertiary"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all shrink-0 cursor-pointer"
+            onPress={() => {
+              hapticLight();
+              onBack();
+            }}
+            aria-label={t('catalog.backToCookbook')}
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+
+          <div className="flex-1 min-w-0">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white truncate leading-tight">{title}</h2>
+            <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-tight truncate">
+              {t('catalog.recipeCount', { count: resultCount })} · {t(`catalog.sort.${sortBy}`)}
+            </p>
+          </div>
+
+          {showViewModeToggle && (
+            <Button
+              isIconOnly
+              variant="tertiary"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all shrink-0 cursor-pointer"
+              onPress={() => {
+                hapticLight();
+                setViewMode(viewMode === 'card' ? 'compact' : 'card');
+              }}
+              aria-label={t('catalog.viewToggle')}
+            >
+              {viewMode === 'card' ? <List className="w-5 h-5" /> : <LayoutGrid className="w-5 h-5" />}
+            </Button>
           )}
 
-          {/* Scrolled or List-level Search Input */}
-          {(onBack || isScrolled) && searchBarInput}
+          <Button
+            isIconOnly
+            variant="tertiary"
+            className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl active:scale-95 transition-all shrink-0 cursor-pointer ${
+              isSelectMode
+                ? 'bg-emerald-600 border-0 text-white hover:bg-emerald-500 shadow-sm shadow-emerald-600/20'
+                : 'bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5'
+            }`}
+            onPress={() => {
+              hapticLight();
+              setIsSelectMode(!isSelectMode);
+            }}
+            aria-label={t('catalog.selectModeToggle')}
+          >
+            <CheckSquare className="w-5 h-5" />
+          </Button>
+        </div>
+      )}
+
+      {/* Row 2: Search Input */}
+      {searchBarInput}
 
       {/* Row 3: active facets as removable chips */}
       {hasActiveChips && (
@@ -354,8 +346,6 @@ export default function CatalogFilters({
         </div>
       )}
     </div>
-  )}
-</>
   );
 }
 
