@@ -136,8 +136,8 @@ export default function RecipeDetails({
         calories={hasNutritionInfo ? metaCalories : null}
       />
 
-      {/* Single scrollable layout containing all sections */}
-      <div className="flex flex-col gap-8 mt-5 pb-16">
+      {/* Single scrollable layout containing all sections with ample bottom padding for action dock */}
+      <div className="flex flex-col gap-6 mt-4 pb-40">
         {/* Info & Nutrition Details section */}
         <section id="details" style={{ scrollMarginTop: 'calc(var(--app-sticky-top) + 60px)' }}>
           <RecipeInfoSection

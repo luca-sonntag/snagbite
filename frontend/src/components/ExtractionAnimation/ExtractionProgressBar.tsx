@@ -37,16 +37,20 @@ export default function ExtractionProgressBar({
       </div>
 
       {/* Grounded Cooking Quote (Fixed height: Zero Layout Shift) */}
-      <p
-        key={funnyText}
-        className="text-[11px] text-gray-400 dark:text-gray-500 font-medium h-4 truncate animate-fade-in text-center"
-      >
-        {funnyText}
-      </p>
+      {funnyText && funnyText !== t(`job.progress.stages.${displayedStage}`) ? (
+        <p
+          key={funnyText}
+          className="text-[11px] text-gray-400 dark:text-gray-500 font-medium h-4 truncate animate-fade-in text-center"
+        >
+          {funnyText}
+        </p>
+      ) : (
+        <div className="h-4" />
+      )}
 
       {/* Background Notification Notice for Premium */}
       {isPremium && (
-        <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center truncate max-w-full pt-0.5">
+        <p className="text-[11px] leading-relaxed text-gray-400 dark:text-gray-500 text-center max-w-full pt-0.5">
           {t('job.backgroundNotice')}
         </p>
       )}

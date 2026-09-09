@@ -2,7 +2,6 @@ import React from 'react';
 import { Clock, Check, Star, Layers } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
-import { detectPlatform, PlatformIcon, PLATFORM_ICON_COLOR } from './PlatformIcon';
 import { hapticLight } from '../../utils/haptics';
 
 interface RecipePosterCardProps {
@@ -21,10 +20,7 @@ interface RecipePosterCardProps {
 }
 
 /**
- * Compact recipe poster: image, title, total time. Deliberately omits the
- * description and tag pills that the old card carried — those belong in the
- * detail view, and dropping them roughly triples how many recipes fit on a
- * screen. Delete moved to the multi-select bar / detail view.
+ * Compact recipe poster: clean food photo, title and unified duration/calories meta below.
  */
 export default function RecipePosterCard({
   job,
@@ -36,10 +32,11 @@ export default function RecipePosterCard({
   bindLongPress,
 }: RecipePosterCardProps) {
   const r = job.recipe!;
-  const platform = detectPlatform(job.recipe?.sourceUrl ?? undefined);
-  const iconColor = PLATFORM_ICON_COLOR[platform];
   const isShelf = variant === 'shelf';
   const remixCount = job.remixCount ?? job.recipe?.remixCount ?? 0;
+  const rawCalories = r.nutritionalValues?.calories ?? r.sourceNutritionalValues?.calories;
+  const calories = rawCalories && rawCalories > 0 ? Math.round(rawCalories) : null;
+  const caloriesFormatted = calories ? calories.toLocaleString('de-DE') + ' kcal' : null;
 
   return (
     <div className={`relative isolate ${isShelf ? 'w-[9.5rem] shrink-0' : 'w-full'} h-full flex flex-col`}>
@@ -47,22 +44,23 @@ export default function RecipePosterCard({
       {remixCount > 0 && (
         <>
           {remixCount > 1 && (
-            <div className="absolute -top-2.5 inset-x-3.5 h-full rounded-2xl bg-gray-100 dark:bg-zinc-850 border border-black/[0.08] dark:border-white/[0.08] shadow-2xs -z-20 pointer-events-none transition-transform" />
+            <div className="absolute -top-2 inset-x-3.5 h-full rounded-2xl bg-gray-100 dark:bg-gray-800 border-none shadow-[0_1px_3px_rgba(0,0,0,0.02)] -z-20 pointer-events-none transition-transform" />
           )}
-          <div className="absolute -top-1.5 inset-x-2 h-full rounded-2xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 shadow-xs -z-10 pointer-events-none transition-transform" />
+          <div className="absolute -top-1 inset-x-2 h-full rounded-2xl bg-gray-50 dark:bg-gray-800/80 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] -z-10 pointer-events-none transition-transform" />
         </>
       )}
 
       <div
-        className={`w-full h-full rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none ${isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
-          }`}
+        className={`w-full h-full rounded-2xl overflow-hidden cursor-pointer active:scale-[0.96] transition-transform duration-150 ease-out select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.03),0_1px_2px_rgba(0,0,0,0.02)] border-none ${
+          isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
+        }`}
         onClick={(e) => {
           hapticLight();
           onClick(e);
         }}
         {...(bindLongPress ?? {})}
       >
-        {/* Cover */}
+        {/* Cover - 100% clean pristine photo presentation */}
         <div className="relative w-full aspect-[4/3] bg-black/5 dark:bg-white/5 overflow-hidden shrink-0">
           <CachedImage
             src={r.imageUrl}
@@ -74,10 +72,11 @@ export default function RecipePosterCard({
           {/* Select-mode checkbox */}
           {isSelectMode && (
             <div
-              className={`absolute top-2 left-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all border-none ${isSelected
-                ? 'bg-emerald-500 text-white shadow-md'
-                : 'bg-black/40 backdrop-blur-sm text-white shadow-xs'
-                }`}
+              className={`absolute top-2 left-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all border-none ${
+                isSelected
+                  ? 'bg-emerald-500 text-white shadow-md'
+                  : 'bg-black/40 backdrop-blur-sm text-white shadow-xs'
+              }`}
             >
               {isSelected && <Check className="w-4 h-4 text-white stroke-[3px]" />}
             </div>
@@ -86,7 +85,7 @@ export default function RecipePosterCard({
           {/* Remix badge (Glassmorphic Emerald) */}
           {remixCount > 0 && (
             <div
-              className={`absolute ${isSelectMode ? 'bottom-2 left-2' : 'top-2 left-2'} z-10 px-2 py-1 rounded-xl bg-emerald-600/75 dark:bg-emerald-600/65 backdrop-blur-md flex items-center gap-1.5 text-white shadow-md border-none`}
+              className={`absolute ${isSelectMode ? 'bottom-2 right-2' : 'top-2 left-2'} z-10 px-2 py-1 rounded-xl bg-emerald-600/75 dark:bg-emerald-600/65 backdrop-blur-md flex items-center gap-1.5 text-white shadow-md border-none`}
               title={`${remixCount} Remix(es)`}
             >
               <Layers className="w-3.5 h-3.5 text-emerald-100 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]" />
@@ -104,25 +103,31 @@ export default function RecipePosterCard({
           )}
         </div>
 
-      {/* Meta */}
-      <div className="flex flex-col px-3 py-2.5 flex-1 justify-between gap-1.5">
-        <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 min-h-[2.5rem]">
-          {r.title}
-        </h4>
-        {/* Bottom row: total time (left) and source platform icon (right, no background) */}
-        <div className="mt-auto flex items-center justify-between gap-2">
-          {totalTime ? (
-            <span className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
-              <Clock className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-              {totalTime}
-            </span>
-          ) : (
-            <span />
+        {/* Meta: Title & coupled subtle info */}
+        <div className="flex flex-col p-3 flex-1 justify-start gap-1">
+          <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2">
+            {r.title}
+          </h4>
+          {(totalTime || caloriesFormatted || (r.servings && r.servings > 0)) && (
+            <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 dark:text-gray-500 truncate mt-0.5">
+              {totalTime && (
+                <span className="flex items-center gap-1 shrink-0">
+                  <Clock className="w-3 h-3 text-emerald-500 shrink-0" />
+                  <span>{totalTime}</span>
+                </span>
+              )}
+              {totalTime && (caloriesFormatted || (r.servings && r.servings > 0)) && (
+                <span className="text-gray-300 dark:text-gray-600 shrink-0">·</span>
+              )}
+              {caloriesFormatted ? (
+                <span className="truncate">{caloriesFormatted}</span>
+              ) : r.servings && r.servings > 0 ? (
+                <span className="shrink-0">{r.servings} Port.</span>
+              ) : null}
+            </div>
           )}
-          <PlatformIcon platform={platform} className={`w-4 h-4 shrink-0 ${iconColor}`} />
         </div>
       </div>
     </div>
-  </div>
-);
+  );
 }

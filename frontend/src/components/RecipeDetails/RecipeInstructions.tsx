@@ -40,17 +40,15 @@ export default function RecipeInstructions({
   // blocks read down a single edge instead of each starting somewhere else.
   const railColumn = 'w-9 flex-shrink-0 flex flex-col items-center';
   const medallion =
-    'w-9 h-9 rounded-full bg-emerald-500/5 flex items-center justify-center flex-shrink-0';
-  const medallionIcon = 'w-[18px] h-[18px] text-emerald-600 dark:text-emerald-400';
+    'w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 flex items-center justify-center flex-shrink-0';
+  const medallionIcon = 'w-4 h-4 text-emerald-600 dark:text-emerald-400';
   const blockLabel =
-    'text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500';
+    'text-xs font-medium text-gray-500 dark:text-gray-400';
 
   return (
     <div className="flex flex-col gap-4 pb-4">
-
-
       {/* Main Cohesive Card Group (Progress + Equipment + Steps) */}
-      <div className="glass-panel rounded-2xl overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
         {/* 1. Cooking Progress & Start Button */}
         <div className="px-5 py-5 sm:px-6 flex flex-col gap-4">
           <div className="flex items-start gap-4">
@@ -176,7 +174,7 @@ export default function RecipeInstructions({
                     {/* Ring, tint and label are already three signals; the
                         pulsing sparkle made the section restless. */}
                     {isActive && (
-                      <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
+                      <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-0.5">
                         {t('recipe.currentStep')}
                       </span>
                     )}

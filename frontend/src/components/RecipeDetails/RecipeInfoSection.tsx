@@ -40,41 +40,40 @@ export default function RecipeInfoSection({
 }: RecipeInfoSectionProps) {
   const { t } = useI18n();
 
-  const iconClass = 'w-[17px] h-[17px] text-emerald-600 dark:text-emerald-400';
-  const statLabel =
-    'text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500';
-  const statValue = 'text-sm font-bold text-gray-900 dark:text-white';
+  const iconClass = 'w-4 h-4 text-emerald-600 dark:text-emerald-400';
+  const statLabel = 'text-xs font-medium text-gray-500 dark:text-gray-400 leading-tight';
+  const statValue = 'text-base font-bold text-gray-900 dark:text-white tabular-nums leading-tight';
 
   return (
-    <div className="glass-panel rounded-2xl overflow-hidden">
-      <div className="grid grid-cols-3">
+    <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden">
+      <div className="grid grid-cols-3 divide-x divide-gray-100/70 dark:divide-gray-800/60">
         {/* Prep time */}
-        <div className="flex flex-col items-center gap-1 py-3.5 px-2 text-center">
+        <div className="flex flex-col items-center gap-1.5 py-4 px-2 text-center">
           <Clock className={iconClass} />
           <span className={statLabel}>{t('recipe.prep')}</span>
           <span className={statValue}>{formatTimeValue(prepTime)}</span>
         </div>
 
         {/* Cook time */}
-        <div className="flex flex-col items-center gap-1 py-3.5 px-2 text-center">
+        <div className="flex flex-col items-center gap-1.5 py-4 px-2 text-center">
           <Utensils className={iconClass} />
           <span className={statLabel}>{t('recipe.cook')}</span>
           <span className={statValue}>{formatTimeValue(cookTime)}</span>
         </div>
 
         {/* Servings */}
-        <div className="flex flex-col items-center gap-1 py-3.5 px-2 text-center">
+        <div className="flex flex-col items-center gap-1.5 py-4 px-2 text-center">
           <Users className={iconClass} />
           <span className={statLabel}>{t('recipe.serves')}</span>
           <span className={`${statValue} flex items-center gap-0.5`}>
-            <span className="tabular-nums">{servings}</span>
+            <span>{servings}</span>
           </span>
         </div>
       </div>
 
       {/* Calorie headline + macro distribution */}
       {nutritionalValues && (
-        <div>
+        <div className="border-t border-gray-100/70 dark:border-gray-800/60">
           <RecipeNutrition
             variant="summary"
             nutritionalValues={nutritionalValues}

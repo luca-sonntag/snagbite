@@ -43,26 +43,24 @@ export default function RecipeIngredients({
 
 
   const medallion =
-    'w-9 h-9 rounded-full bg-emerald-500/5 flex items-center justify-center flex-shrink-0';
-  const medallionIcon = 'w-[18px] h-[18px] text-emerald-600 dark:text-emerald-400';
+    'w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 flex items-center justify-center flex-shrink-0';
+  const medallionIcon = 'w-4 h-4 text-emerald-600 dark:text-emerald-400';
   const blockLabel =
-    'text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500';
+    'text-xs font-medium text-gray-500 dark:text-gray-400';
 
   return (
     <div className="flex flex-col gap-4 pb-4">
-
-
       {/* Main Cohesive Card Group (Portions + Ingredients List + Shopping Button) */}
-      <div className="glass-panel rounded-2xl overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
         {/* 1. Servings / Portion scaling header inside card */}
-        <div className="px-4.5 py-3.5 sm:px-6 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+        <div className="px-4.5 py-4 sm:px-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
             <div className={medallion}>
               <Users className={medallionIcon} />
             </div>
             <div className="flex flex-col">
               <span className={blockLabel}>{t('recipe.serves')}</span>
-              <span className="text-xs font-bold text-gray-800 dark:text-gray-200 mt-0.5">
+              <span className="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
                 {t('recipe.servingsCount', { count: servings })}
               </span>
             </div>
@@ -81,7 +79,7 @@ export default function RecipeIngredients({
             return (
               <div key={group.name} className="flex flex-col gap-2.5">
                 {group.name && (
-                  <h4 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                  <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
                     <span className={`w-1 h-3.5 rounded-full ${theme.barClass} shrink-0`} />
                     <span>{translateCategory(group.name)}</span>
                   </h4>

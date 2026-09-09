@@ -124,7 +124,13 @@ export default function PublicRecipeRecommendationsShelf({
                   type="button"
                   onClick={() => handleSave(recipe)}
                   disabled={isSaved || isSaving}
-                  className="mt-2 flex items-center justify-center gap-1.5 w-full py-1.5 px-2 rounded-xl text-[11px] font-bold transition-all border-none outline-none cursor-pointer"
+                  className={`mt-2 flex items-center justify-center gap-1.5 w-full py-1.5 px-2 rounded-xl text-[11px] font-bold transition-all border-none outline-none ${
+                    isSaved
+                      ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-default'
+                      : isSaving
+                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 opacity-70 cursor-wait'
+                      : 'bg-emerald-500/10 hover:bg-emerald-500/15 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 active:scale-95 cursor-pointer'
+                  }`}
                 >
                   {isSaved ? (
                     <>

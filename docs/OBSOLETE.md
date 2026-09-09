@@ -6,6 +6,21 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-09: Redundante Social-Media-Icons & Cover-Overlays auf Rezeptkarten entfernt, Metadaten unter Titel vereinheitlicht
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Plattform-Badge-Overlay (`TikTokIcon`, `InstagramIcon`, `ChefHat` im Backdrop-Pill oben rechts auf Cover-Bildern) in `ExtractDemoRecipes.tsx`.
+  - Social-Media-Plattform-Icon (`PlatformIcon` mit Farbcodierung) in der Metazeile von `RecipePosterCard.tsx` im Kochbuch (Katalog & Startseiten-Shelves).
+  - Doppel-Badges auf Rezept-Thumbnails, die das Food-Foto verdeckten und irrelevanten visuellen Clutter darstellten (Verstoß gegen Anti-Slop Badge-Test).
+  - Dunkle Vignette (`bg-gradient-to-t`) und Glassmorphic-Dauer-Badge (`Clock + 30 Min.`) auf dem Cover-Bild im Kochbuch, die das Cover wie einen Video-Player wirken ließen.
+  - Separate Meta-Unterzeilen mit knalligen Emojis/Farben (z. B. `🔥 1438 kcal` in Orange) oder isolierten Titeln mit leeren Abständen.
+* **Ersetzt durch:**
+  - **100 % sauberes Cover-Foto:** Das Food-Foto in `RecipePosterCard.tsx` bleibt vollkommen ungestört und ohne künstliche Abdunklung oder Overlays (abgesehen von System-Badges wie Favorit oder Remix-Stapel).
+  - **Kompakte, gekoppelte Metazeile unter dem Titel:** Die Zubereitungsdauer und die dezent formatierten Kalorien (z. B. `30 Min. · 1.438 kcal` bzw. `Port.`) stehen gemeinsam in einer typografisch ruhigen Zeile (`text-[11px] font-medium text-gray-400 dark:text-gray-500`) mit dezentem `Clock`-Icon direkt unter dem Titel.
+* **Betroffene Dateien:** `frontend/src/components/ExtractForm/ExtractDemoRecipes.tsx`, `frontend/src/components/SavedCatalog/RecipePosterCard.tsx`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-06: Komplexer 3-Schritte-Share-Mockup im leeren Kochbuch durch minimale Welcome-Card ersetzt & Filter/Suche erhalten
 
 * **Ersetzter Code / Anti-Pattern:**

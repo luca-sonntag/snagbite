@@ -56,6 +56,7 @@ export interface UrlExtractInputProps {
 
 export interface ExtractDemoRecipesProps {
   onDemoClick: (url: string, recipe?: Recipe) => void;
+  className?: string;
 }
 
 export interface ExtractActionCardsProps {

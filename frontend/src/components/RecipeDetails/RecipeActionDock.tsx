@@ -40,15 +40,14 @@ export default function RecipeActionDock({
   const showCooked = !!recipeId;
 
   const itemBase =
-    'relative flex flex-col items-center justify-center gap-1 min-w-[3.75rem] px-2 py-2 rounded-2xl ' +
-    'transition-all active:scale-95 cursor-pointer outline-none border-none group';
+    'relative flex flex-col items-center justify-center gap-1 min-w-[3.75rem] px-2.5 py-2 rounded-2xl ' +
+    'transition-all active:scale-[0.96] cursor-pointer outline-none border-none group select-none';
   const itemPrimary =
-    `${itemBase} text-white bg-gradient-to-b from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 ` +
-    'shadow-sm shadow-emerald-600/25 mr-1';
+    `${itemBase} text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm shadow-emerald-600/20 mr-1`;
   const itemNeutral =
     `${itemBase} text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 ` +
     'hover:bg-black/[0.04] dark:hover:bg-white/[0.06]';
-  const itemLabel = 'text-[10px] font-semibold tracking-wide leading-none whitespace-nowrap';
+  const itemLabel = 'text-[11px] font-semibold leading-tight whitespace-nowrap';
 
   return (
     <FloatingActionBar className="bottom-[calc(7rem_+_var(--safe-area-inset-bottom))]" isHidden={isHidden}>

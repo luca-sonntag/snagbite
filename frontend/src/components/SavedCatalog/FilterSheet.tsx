@@ -115,7 +115,7 @@ export default function FilterSheet({
               <Drawer.Body className="overflow-y-auto py-2 flex-1 flex flex-col gap-6">
                 {/* Sort */}
                 <section className="flex flex-col gap-2">
-                  <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                  <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400">
                     {t('catalog.sortLabel')}
                   </h4>
                   <div className="flex flex-wrap gap-1.5">
@@ -137,7 +137,7 @@ export default function FilterSheet({
 
                 {/* Schnellfilter (Favorites, Collections, Labels) */}
                 <section className="flex flex-col gap-2">
-                  <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                  <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400">
                     {t('catalog.quickFiltersLabel')}
                   </h4>
                   <div className="flex flex-wrap gap-1.5">
@@ -188,7 +188,7 @@ export default function FilterSheet({
 
                 {/* Time */}
                 <section className="flex flex-col gap-2">
-                  <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                  <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400">
                     {t('catalog.timeLabel')}
                   </h4>
                   <div className="flex flex-wrap gap-1.5">
@@ -221,7 +221,7 @@ export default function FilterSheet({
 
                   return (
                     <section className="flex flex-col gap-2">
-                      <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                      <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400">
                         {t('catalog.categoriesTitle')}
                       </h4>
                       <div className="flex flex-wrap gap-2">

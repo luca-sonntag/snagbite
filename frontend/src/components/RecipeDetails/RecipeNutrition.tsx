@@ -65,7 +65,7 @@ export default function RecipeNutrition({
     'w-9 h-9 rounded-full bg-emerald-500/5 flex items-center justify-center flex-shrink-0';
   const iconClass = 'w-[18px] h-[18px] text-emerald-600 dark:text-emerald-400';
   const statLabel =
-    'text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500';
+    'text-xs font-medium text-gray-500 dark:text-gray-400';
 
   // Only worth showing when it actually disagrees with the computed figure — an
   // identical number twice is noise, a diverging one is information (the source
