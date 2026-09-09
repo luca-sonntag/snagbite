@@ -76,7 +76,7 @@ export const UrlExtractInput: React.FC<UrlExtractInputProps> = ({
 
       {/* Subtle, refined platform badges with brand accents */}
       <div className="flex items-center justify-center gap-2 pt-0.5">
-        <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
           {t('form.platformsTitle')}
         </span>
         <div className="flex items-center gap-1.5">

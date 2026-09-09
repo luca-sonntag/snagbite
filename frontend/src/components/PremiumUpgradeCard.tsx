@@ -40,7 +40,7 @@ export default function PremiumUpgradeCard({ onUpgradeClick, className = '' }: P
       </div>
       <button
         type="button"
-        className="bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs h-9 px-3.5 rounded-xl shadow-none active:scale-95 transition-all flex items-center gap-1 shrink-0 border-none cursor-pointer"
+        className="bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs h-9 px-3.5 rounded-xl shadow-sm shadow-amber-500/20 active:scale-95 transition-all flex items-center gap-1 shrink-0 border-none cursor-pointer"
       >
         <span>{language === 'de' ? 'Upgrade' : 'Upgrade'}</span>
       </button>

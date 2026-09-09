@@ -131,18 +131,18 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
                     {timeDisplay}
                   </span>
                   {isSaving ? (
-                    <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                    <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 opacity-70">
                       <Loader2 className="w-3 h-3 animate-spin shrink-0" />
                       {t('form.demoSavingAction')}
                     </span>
                   ) : isSaved ? (
-                    <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-                      <Check className="w-3 h-3 shrink-0" />
+                    <span className="flex items-center gap-1 text-[11px] font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-lg">
+                      <Check className="w-3.5 h-3.5 shrink-0" />
                       {t('form.demoSavedAction')}
                     </span>
                   ) : (
-                    <span className="flex items-center gap-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-                      <Plus className="w-3 h-3 shrink-0" />
+                    <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/15 dark:bg-emerald-500/15 px-2 py-0.5 rounded-lg transition-colors">
+                      <Plus className="w-3.5 h-3.5 shrink-0" />
                       {t('form.demoSaveAction')}
                     </span>
                   )}
