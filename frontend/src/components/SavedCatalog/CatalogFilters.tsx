@@ -133,9 +133,59 @@ export default function CatalogFilters({
     }
   };
 
+  const searchBarInput = (
+    <div className="flex gap-2 items-center">
+      <div className="flex-1 relative">
+        <input
+          ref={inputRef}
+          type="text"
+          value={searchQuery}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          placeholder={t('catalog.searchPlaceholder')}
+          className="w-full bg-white dark:bg-gray-800 border-none rounded-2xl pl-10 pr-10 py-2.5 text-base text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-emerald-400/40 focus:outline-none transition-all shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
+        />
+        <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+        {searchQuery && (
+          <button
+            type="button"
+            onClick={() => {
+              hapticLight();
+              setSearchQuery('');
+            }}
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 dark:hover:text-white text-xl font-bold w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer border-none"
+            aria-label={t('catalog.clearSearch')}
+          >
+            ×
+          </button>
+        )}
+      </div>
+
+      <button
+        type="button"
+        onClick={() => {
+          hapticLight();
+          onOpenFilters();
+        }}
+        className={`relative h-11 min-w-[44px] px-3.5 rounded-2xl border-none shadow-[0_4px_16px_rgba(0,0,0,0.08)] flex items-center gap-1.5 text-xs font-semibold active:scale-95 transition-all shrink-0 cursor-pointer ${
+          hasActiveChips
+            ? 'bg-emerald-500 text-white shadow-none'
+            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-700'
+        }`}
+        aria-label={t('catalog.filterTitle')}
+      >
+        <SlidersHorizontal className="w-4 h-4" />
+        {hasActiveChips && (
+          <span className="min-w-[1.25rem] h-5 px-1 rounded-full bg-emerald-700 text-white text-[11px] font-bold flex items-center justify-center">
+            {activeFilterCount}
+          </span>
+        )}
+      </button>
+    </div>
+  );
+
   return (
     <>
-      {/* Level 1: Lush Animated Emerald Hero Wave Header (only at root) */}
+      {/* Level 1: Deep Editorial Emerald Hero Header (only at root) */}
       {!onBack && (
         <HeroWaveHeader
           icon={<BookOpen className="w-6 h-6" />}
@@ -175,124 +225,79 @@ export default function CatalogFilters({
               </Button>
             </div>
           }
-        />
-      )}
-
-      {/* Sticky Bar: Level 2 Back Navigation + Floating Search & Filters */}
-      <div
-        className={`sticky top-[var(--app-sticky-top)] z-20 bg-[#f4f6f5]/95 dark:bg-gray-950/95 backdrop-blur-md pb-2 -mx-4 px-4 md:-mx-6 md:px-6 flex flex-col gap-2.5 transition-shadow duration-200 border-none ${
-          !onBack ? '-mt-6 pt-0' : 'pt-3'
-        } ${
-          isScrolled
-            ? 'shadow-[0_4px_16px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.4)]'
-            : ''
-        }`}
-      >
-        {/* Row 1: Back navigation (List Level only) */}
-        {onBack && (
-        <div className="flex items-center gap-1 min-h-[44px]">
-          <Button
-            isIconOnly
-            variant="tertiary"
-            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all shrink-0 cursor-pointer"
-            onPress={() => {
-              hapticLight();
-              onBack();
-            }}
-            aria-label={t('catalog.backToCookbook')}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-
-          <div className="flex-1 min-w-0">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white truncate leading-tight">{title}</h2>
-            <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-tight truncate">
-              {t('catalog.recipeCount', { count: resultCount })} · {t(`catalog.sort.${sortBy}`)}
-            </p>
-          </div>
-
-          {showViewModeToggle && (
-            <Button
-              isIconOnly
-              variant="tertiary"
-              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all shrink-0 cursor-pointer"
-              onPress={() => {
-                hapticLight();
-                setViewMode(viewMode === 'card' ? 'compact' : 'card');
-              }}
-              aria-label={t('catalog.viewToggle')}
-            >
-              {viewMode === 'card' ? <List className="w-5 h-5" /> : <LayoutGrid className="w-5 h-5" />}
-            </Button>
-          )}
-
-          <Button
-            isIconOnly
-            variant="tertiary"
-            className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl active:scale-95 transition-all shrink-0 cursor-pointer ${
-              isSelectMode
-                ? 'bg-emerald-600 border-0 text-white hover:bg-emerald-500 shadow-sm shadow-emerald-600/20'
-                : 'bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5'
-            }`}
-            onPress={() => {
-              hapticLight();
-              setIsSelectMode(!isSelectMode);
-            }}
-            aria-label={t('catalog.selectModeToggle')}
-          >
-            <CheckSquare className="w-5 h-5" />
-          </Button>
-        </div>
-      )}
-
-      {/* Row 2: search + filter trigger */}
-      <div className="flex gap-2 items-center">
-        <div className="flex-1 relative">
-          <input
-            ref={inputRef}
-            type="text"
-            value={searchQuery}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder={t('catalog.searchPlaceholder')}
-            className="w-full bg-white dark:bg-gray-800/90 border-none rounded-xl pl-10 pr-10 py-2.5 text-base text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all shadow-[0_2px_6px_rgba(0,0,0,0.03)]"
-          />
-          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => {
-                hapticLight();
-                setSearchQuery('');
-              }}
-              className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white text-xl font-bold w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer border-none"
-              aria-label={t('catalog.clearSearch')}
-            >
-              ×
-            </button>
-          )}
-        </div>
-
-        <button
-          type="button"
-          onClick={() => {
-            hapticLight();
-            onOpenFilters();
-          }}
-          className={`relative h-11 min-w-[44px] px-3.5 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex items-center gap-1.5 text-xs font-semibold active:scale-95 transition-all shrink-0 cursor-pointer ${
-            hasActiveChips
-              ? 'bg-emerald-600 text-white shadow-none'
-              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-          }`}
-          aria-label={t('catalog.filterTitle')}
         >
-          <SlidersHorizontal className="w-4 h-4" />
-          {hasActiveChips && (
-            <span className="min-w-[1.25rem] h-5 px-1 rounded-full bg-white text-emerald-700 text-[11px] font-bold flex items-center justify-center">
-              {activeFilterCount}
-            </span>
+          {searchBarInput}
+        </HeroWaveHeader>
+      )}
+
+      {/* Sticky Bar: Level 2 Back Navigation OR Scrolled Sticky Search + Active Chips */}
+      {(onBack || isScrolled || hasActiveChips) && (
+        <div
+          className={`sticky top-[var(--app-sticky-top)] z-20 bg-[#f4f6f5]/95 dark:bg-gray-950/95 backdrop-blur-md pb-2 -mx-4 px-4 md:-mx-6 md:px-6 flex flex-col gap-2.5 pt-3 transition-shadow duration-200 border-none ${
+            isScrolled || onBack
+              ? 'shadow-[0_4px_16px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.4)]'
+              : ''
+          }`}
+        >
+          {/* Row 1: Back navigation (List Level only) */}
+          {onBack && (
+            <div className="flex items-center gap-1 min-h-[44px]">
+              <Button
+                isIconOnly
+                variant="tertiary"
+                className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all shrink-0 cursor-pointer"
+                onPress={() => {
+                  hapticLight();
+                  onBack();
+                }}
+                aria-label={t('catalog.backToCookbook')}
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+
+              <div className="flex-1 min-w-0">
+                <h2 className="text-base font-bold text-gray-900 dark:text-white truncate leading-tight">{title}</h2>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-tight truncate">
+                  {t('catalog.recipeCount', { count: resultCount })} · {t(`catalog.sort.${sortBy}`)}
+                </p>
+              </div>
+
+              {showViewModeToggle && (
+                <Button
+                  isIconOnly
+                  variant="tertiary"
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all shrink-0 cursor-pointer"
+                  onPress={() => {
+                    hapticLight();
+                    setViewMode(viewMode === 'card' ? 'compact' : 'card');
+                  }}
+                  aria-label={t('catalog.viewToggle')}
+                >
+                  {viewMode === 'card' ? <List className="w-5 h-5" /> : <LayoutGrid className="w-5 h-5" />}
+                </Button>
+              )}
+
+              <Button
+                isIconOnly
+                variant="tertiary"
+                className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl active:scale-95 transition-all shrink-0 cursor-pointer ${
+                  isSelectMode
+                    ? 'bg-emerald-600 border-0 text-white hover:bg-emerald-500 shadow-sm shadow-emerald-600/20'
+                    : 'bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5'
+                }`}
+                onPress={() => {
+                  hapticLight();
+                  setIsSelectMode(!isSelectMode);
+                }}
+                aria-label={t('catalog.selectModeToggle')}
+              >
+                <CheckSquare className="w-5 h-5" />
+              </Button>
+            </div>
           )}
-        </button>
-      </div>
+
+          {/* Scrolled or List-level Search Input */}
+          {(onBack || isScrolled) && searchBarInput}
 
       {/* Row 3: active facets as removable chips */}
       {hasActiveChips && (
