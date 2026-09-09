@@ -66,7 +66,20 @@ Bevor eine UI-Komponente als fertig betrachtet wird, führe diesen 5-Punkte-Chec
 
 ---
 
-## 🔗 Referenzen & Verknüpfungen
+## 📚 Detaillierte Referenz-Module (Code-Rezepte & Physik)
+
+Konsultiere bei der Umsetzung immer das passende Spezial-Modul:
+
+1. 🍳 [**Food & Recipe Layouts**](references/food-layouts.md):
+   * Vorher/Nachher-JSX für Zutatenlisten, Kochschritte und proportionale Nährwertbalken ohne Kachel-Verschachtelungen.
+2. 🍏 [**Apple Fluid Motion & Gesten**](references/apple-motion.md):
+   * Exakte Federkonstanten (`stiffness`, `damping`), Apples Momentum-Projektionsformel für Sheets, Swipe-to-Dismiss und `@capacitor/haptics`-Feedback.
+3. 🏔️ [**Elevation Tokens & Border-Free Surfaces**](references/elevation-tokens.md):
+   * Mehrschichtige Schatten (*Ambient + Key Light*), Dark-Mode Luminanz-Staffelung (`#1a1917` bis `#363531`) und `border-none` Alternativen.
+
+---
+
+## 🔗 Externe Guidelines & Dokumentation
 * **Design-Tokens & Styleguide:** [`docs/styleguide.md`](file:///c:/Users/lucas/source/repos/cookbook/docs/styleguide.md)
 * **Mobile Guidelines:** [`docs/mobile-ux-rules.md`](file:///c:/Users/lucas/source/repos/cookbook/docs/mobile-ux-rules.md)
 * **HeroUI v3 Best Practices:** [`.agents/skills/heroui-react/SKILL.md`](file:///c:/Users/lucas/source/repos/cookbook/.agents/skills/heroui-react/SKILL.md)
