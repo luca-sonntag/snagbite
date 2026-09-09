@@ -4,6 +4,8 @@ import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
 import { fetchPublicDemoRecipes } from '../../api/publicRecipesApi';
+import { getRecipeCalories, formatCalories } from '../../utils/formatNutrition';
+import CachedImage from '../CachedImage';
 import PublicRecipePreviewModal from '../PublicRecipe/PublicRecipePreviewModal';
 import type { Recipe } from '../../types';
 import type { ExtractDemoRecipesProps } from './types';
@@ -67,9 +69,11 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
       <div className="grid grid-cols-2 gap-3">
         {recipes.map((recipe, idx) => {
           const totalMin = (recipe.prepTime || 0) + (recipe.cookTime || 0);
-          const timeDisplay = totalMin > 0 ? totalMin + ' Min.' : '15 Min.';
+          const timeDisplay = totalMin > 0 ? `${totalMin} Min.` : null;
           const imageUrl = recipe.imageUrl || recipe.imageUrls?.[0] || '';
           const isSaved = recipe.id ? savedIds.has(recipe.id) : false;
+          const calories = getRecipeCalories(recipe);
+          const caloriesFormatted = formatCalories(calories);
 
           return (
             <div
@@ -79,30 +83,44 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
                 isSaved ? 'ring-1 ring-emerald-500/30 dark:ring-emerald-400/30' : ''
               }`}
             >
-              <div className="relative w-full aspect-[4/3] bg-gray-100 dark:bg-gray-800 overflow-hidden">
-                {imageUrl ? (
-                  <img
-                    src={imageUrl}
-                    alt={recipe.title}
-                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <ChefHat className="w-8 h-8 opacity-40" />
-                  </div>
-                )}
-                {/* Subtle bottom vignette for natural badge contrast */}
-                <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/35 via-black/10 to-transparent pointer-events-none" />
-                <div className="absolute bottom-2 left-2 z-10 px-2 py-0.5 rounded-lg bg-black/55 backdrop-blur-md text-white text-[11px] font-medium flex items-center gap-1 shadow-sm ring-1 ring-white/15 pointer-events-none">
-                  <Clock className="w-3 h-3 text-emerald-400 shrink-0" />
-                  <span className="whitespace-nowrap">{timeDisplay}</span>
-                </div>
+              <div className="relative w-full aspect-[4/3] bg-black/5 dark:bg-white/5 overflow-hidden shrink-0">
+                <CachedImage
+                  src={imageUrl}
+                  emoji={recipe.emoji}
+                  alt={recipe.title}
+                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
+                  fallbackComponent={
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <ChefHat className="w-8 h-8 opacity-40" />
+                    </div>
+                  }
+                />
               </div>
 
               <div className="flex flex-col gap-2.5 p-3 flex-1 justify-between">
-                <h4 className="text-xs font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 min-h-[2rem] group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                  {recipe.title}
-                </h4>
+                <div>
+                  <h4 className="text-xs font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                    {recipe.title}
+                  </h4>
+                  {(timeDisplay || caloriesFormatted || (recipe.servings && recipe.servings > 0)) && (
+                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 dark:text-gray-500 truncate mt-1">
+                      {timeDisplay && (
+                        <span className="flex items-center gap-1 shrink-0">
+                          <Clock className="w-3 h-3 text-emerald-500 shrink-0" />
+                          <span>{timeDisplay}</span>
+                        </span>
+                      )}
+                      {timeDisplay && (caloriesFormatted || (recipe.servings && recipe.servings > 0)) && (
+                        <span className="text-gray-300 dark:text-gray-600 shrink-0">·</span>
+                      )}
+                      {caloriesFormatted ? (
+                        <span className="truncate">{caloriesFormatted}</span>
+                      ) : recipe.servings && recipe.servings > 0 ? (
+                        <span className="shrink-0">{recipe.servings} Port.</span>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
 
                 <button
                   type="button"

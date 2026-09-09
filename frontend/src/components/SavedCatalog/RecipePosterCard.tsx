@@ -3,6 +3,7 @@ import { Clock, Check, Star, Layers } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
+import { getRecipeCalories, formatCalories } from '../../utils/formatNutrition';
 
 interface RecipePosterCardProps {
   job: SavedRecipe;
@@ -34,9 +35,8 @@ export default function RecipePosterCard({
   const r = job.recipe!;
   const isShelf = variant === 'shelf';
   const remixCount = job.remixCount ?? job.recipe?.remixCount ?? 0;
-  const rawCalories = r.nutritionalValues?.calories ?? r.sourceNutritionalValues?.calories;
-  const calories = rawCalories && rawCalories > 0 ? Math.round(rawCalories) : null;
-  const caloriesFormatted = calories ? calories.toLocaleString('de-DE') + ' kcal' : null;
+  const calories = getRecipeCalories(r);
+  const caloriesFormatted = formatCalories(calories);
 
   return (
     <div className={`relative isolate ${isShelf ? 'w-[9.5rem] shrink-0' : 'w-full'} h-full flex flex-col`}>

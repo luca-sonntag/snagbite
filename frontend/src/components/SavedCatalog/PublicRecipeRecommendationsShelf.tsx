@@ -5,6 +5,8 @@ import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
 import { fetchPublicRecipeRecommendations, savePublicRecipeToCookbook } from '../../api/publicRecipesApi';
+import { getRecipeCalories, formatCalories } from '../../utils/formatNutrition';
+import CachedImage from '../CachedImage';
 import PublicRecipePreviewModal from '../PublicRecipe/PublicRecipePreviewModal';
 interface PublicRecipeRecommendationsShelfProps {
   onRecipeSaved: (savedId: string) => void;
@@ -83,9 +85,11 @@ export default function PublicRecipeRecommendationsShelf({
       <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
         {recommendations.map((recipe) => {
           const totalMin = (recipe.prepTime || 0) + (recipe.cookTime || 0);
-          const timeDisplay = totalMin > 0 ? totalMin + ' Min.' : null;
+          const timeDisplay = totalMin > 0 ? `${totalMin} Min.` : null;
           const isSaved = recipe.id ? savedIds.has(recipe.id) : false;
           const imageUrl = recipe.imageUrl || recipe.imageUrls?.[0];
+          const calories = getRecipeCalories(recipe);
+          const caloriesFormatted = formatCalories(calories);
 
           return (
             <div
@@ -93,18 +97,13 @@ export default function PublicRecipeRecommendationsShelf({
               onClick={() => handleCardClick(recipe)}
               className="w-[10rem] shrink-0 rounded-2xl overflow-hidden flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none select-none cursor-pointer active:scale-[0.98] transition-all"
             >
-              <div className="relative w-full aspect-[4/3] bg-black/5 dark:bg-white/5 overflow-hidden">
-                {imageUrl ? (
-                  <img
-                    src={imageUrl}
-                    alt={recipe.title}
-                    className="w-full h-full object-cover object-center pointer-events-none"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-3xl">
-                    {recipe.emoji || '🍲'}
-                  </div>
-                )}
+              <div className="relative w-full aspect-[4/3] bg-black/5 dark:bg-white/5 overflow-hidden shrink-0">
+                <CachedImage
+                  src={imageUrl}
+                  emoji={recipe.emoji}
+                  alt={recipe.title}
+                  className="w-full h-full object-cover object-center pointer-events-none select-none"
+                />
                 <div className="absolute top-2 left-2 p-1 rounded-md bg-black/50 backdrop-blur-xs text-white">
                   <Globe className="w-3 h-3" />
                 </div>
@@ -115,11 +114,23 @@ export default function PublicRecipeRecommendationsShelf({
                   <h4 className="text-xs font-bold text-gray-900 dark:text-white leading-snug line-clamp-2">
                     {recipe.title}
                   </h4>
-                  {timeDisplay && (
-                    <span className="flex items-center gap-1 text-[10px] text-gray-500 dark:text-gray-400 mt-1">
-                      <Clock className="w-3 h-3 text-emerald-500 shrink-0" />
-                      {timeDisplay}
-                    </span>
+                  {(timeDisplay || caloriesFormatted || (recipe.servings && recipe.servings > 0)) && (
+                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 dark:text-gray-500 truncate mt-1">
+                      {timeDisplay && (
+                        <span className="flex items-center gap-1 shrink-0">
+                          <Clock className="w-3 h-3 text-emerald-500 shrink-0" />
+                          <span>{timeDisplay}</span>
+                        </span>
+                      )}
+                      {timeDisplay && (caloriesFormatted || (recipe.servings && recipe.servings > 0)) && (
+                        <span className="text-gray-300 dark:text-gray-600 shrink-0">·</span>
+                      )}
+                      {caloriesFormatted ? (
+                        <span className="truncate">{caloriesFormatted}</span>
+                      ) : recipe.servings && recipe.servings > 0 ? (
+                        <span className="shrink-0">{recipe.servings} Port.</span>
+                      ) : null}
+                    </div>
                   )}
                 </div>
 
