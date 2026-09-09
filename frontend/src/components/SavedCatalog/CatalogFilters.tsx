@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@heroui/react';
 import { Search, List, LayoutGrid, CheckSquare, ArrowLeft, Star, Tag, SlidersHorizontal, X, Clock, BookOpen } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
-import { PageHeader } from '../PageHeader';
+import HeroWaveHeader from '../HeroWaveHeader';
 import type { Collection, RecipeCategory } from '../../types';
 import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
 import { hapticLight } from '../../utils/haptics';
@@ -134,26 +134,20 @@ export default function CatalogFilters({
   };
 
   return (
-    <div
-      className={`sticky top-[var(--app-sticky-top)] z-20 bg-[#f9fafb]/95 dark:bg-gray-950/95 backdrop-blur-md pb-2 -mx-4 px-4 md:-mx-6 md:px-6 flex flex-col gap-2.5 pt-3 transition-shadow duration-200 border-none ${
-        isScrolled
-          ? 'shadow-[0_4px_16px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.4)]'
-          : ''
-      }`}
-    >
-      {/* Row 1: PageHeader (Home) OR Back navigation (List Level) */}
-      {!onBack ? (
-        <PageHeader
+    <>
+      {/* Level 1: Lush Animated Emerald Hero Wave Header (only at root) */}
+      {!onBack && (
+        <HeroWaveHeader
           icon={<BookOpen className="w-6 h-6" />}
           title={title}
           subtitle={t('catalog.subtitle') || `${t('catalog.recipeCount', { count: resultCount })} · ${t(`catalog.sort.${sortBy}`)}`}
           action={
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               {showViewModeToggle && (
                 <Button
                   isIconOnly
                   variant="tertiary"
-                  className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all shrink-0 cursor-pointer"
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl bg-white/15 text-white hover:bg-white/25 active:scale-95 transition-all border-none shrink-0 cursor-pointer"
                   onPress={() => {
                     hapticLight();
                     setViewMode(viewMode === 'card' ? 'compact' : 'card');
@@ -166,10 +160,10 @@ export default function CatalogFilters({
               <Button
                 isIconOnly
                 variant="tertiary"
-                className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl active:scale-95 transition-all shrink-0 cursor-pointer ${
+                className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl active:scale-95 transition-all border-none shrink-0 cursor-pointer ${
                   isSelectMode
-                    ? 'bg-emerald-600 border-0 text-white hover:bg-emerald-500 shadow-sm shadow-emerald-600/20'
-                    : 'bg-transparent border-0 text-gray-500 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5'
+                    ? 'bg-white text-emerald-850 shadow-md font-bold'
+                    : 'bg-white/15 text-white hover:bg-white/25'
                 }`}
                 onPress={() => {
                   hapticLight();
@@ -182,7 +176,20 @@ export default function CatalogFilters({
             </div>
           }
         />
-      ) : (
+      )}
+
+      {/* Sticky Bar: Level 2 Back Navigation + Floating Search & Filters */}
+      <div
+        className={`sticky top-[var(--app-sticky-top)] z-20 bg-[#f4f6f5]/95 dark:bg-gray-950/95 backdrop-blur-md pb-2 -mx-4 px-4 md:-mx-6 md:px-6 flex flex-col gap-2.5 transition-shadow duration-200 border-none ${
+          !onBack ? '-mt-4 pt-1' : 'pt-3'
+        } ${
+          isScrolled
+            ? 'shadow-[0_4px_16px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.4)]'
+            : ''
+        }`}
+      >
+        {/* Row 1: Back navigation (List Level only) */}
+        {onBack && (
         <div className="flex items-center gap-1 min-h-[44px]">
           <Button
             isIconOnly
@@ -342,6 +349,7 @@ export default function CatalogFilters({
         </div>
       )}
     </div>
+    </>
   );
 }
 
