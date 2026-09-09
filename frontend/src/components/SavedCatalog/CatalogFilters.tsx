@@ -181,7 +181,7 @@ export default function CatalogFilters({
       {/* Sticky Bar: Level 2 Back Navigation + Floating Search & Filters */}
       <div
         className={`sticky top-[var(--app-sticky-top)] z-20 bg-[#f4f6f5]/95 dark:bg-gray-950/95 backdrop-blur-md pb-2 -mx-4 px-4 md:-mx-6 md:px-6 flex flex-col gap-2.5 transition-shadow duration-200 border-none ${
-          !onBack ? '-mt-4 pt-1' : 'pt-3'
+          !onBack ? '-mt-6 pt-0' : 'pt-3'
         } ${
           isScrolled
             ? 'shadow-[0_4px_16px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.4)]'

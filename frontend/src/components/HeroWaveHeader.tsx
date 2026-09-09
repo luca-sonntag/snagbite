@@ -30,14 +30,14 @@ export const HeroWaveHeader: React.FC<HeroWaveHeaderProps> = ({
 }) => {
   return (
     <header
-      className={`relative -mx-4 md:-mx-6 -mt-4 mb-3 overflow-hidden bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-800 dark:from-emerald-950 dark:via-emerald-900/90 dark:to-teal-950 text-white shadow-[0_8px_24px_-6px_rgba(6,78,59,0.25)] ${className}`}
+      className={`relative -mx-4 md:-mx-6 -mt-4 overflow-hidden bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-800 dark:from-emerald-950 dark:via-emerald-900/90 dark:to-teal-950 text-white shadow-[0_10px_30px_-8px_rgba(6,78,59,0.3)] ${className}`}
     >
       {/* Ambient background glow points */}
-      <div className="absolute -top-12 -left-12 w-48 h-48 rounded-full bg-emerald-400/20 blur-2xl pointer-events-none" />
-      <div className="absolute top-0 -right-16 w-56 h-56 rounded-full bg-teal-300/15 blur-3xl pointer-events-none" />
+      <div className="absolute -top-10 -left-10 w-52 h-52 rounded-full bg-emerald-400/20 blur-2xl pointer-events-none" />
+      <div className="absolute top-0 -right-12 w-60 h-60 rounded-full bg-teal-300/15 blur-3xl pointer-events-none" />
 
       {/* Main Content Area */}
-      <div className="relative z-10 px-4 md:px-6 pt-[calc(var(--safe-area-inset-top)+1rem)] pb-4">
+      <div className="relative z-10 px-4 md:px-6 pt-[calc(var(--safe-area-inset-top)+1.25rem)] pb-3">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5 drop-shadow-sm">
@@ -60,39 +60,39 @@ export const HeroWaveHeader: React.FC<HeroWaveHeaderProps> = ({
         </div>
 
         {/* Optional floating children slot (e.g. Search Bar) */}
-        {children && <div className="mt-3.5 relative z-10">{children}</div>}
+        {children && <div className="mt-4 relative z-10">{children}</div>}
       </div>
 
       {/* Animated Multi-Layer Organic Wave Bottom Border */}
-      <div className="relative w-full h-7 overflow-hidden leading-none select-none pointer-events-none text-[#f4f6f5] dark:text-gray-950">
+      <div className="relative w-full h-10 overflow-hidden leading-none select-none pointer-events-none text-[#f4f6f5] dark:text-gray-950">
         {/* Layer 1: Translucent background wave drifting horizontally */}
         <svg
-          className="absolute bottom-0 left-[-5%] w-[110%] h-full animate-wave-drift-1 fill-white/15 dark:fill-white/10"
-          viewBox="0 0 1200 60"
+          className="absolute bottom-0 left-[-6%] w-[112%] h-full animate-wave-drift-1 fill-white/15 dark:fill-white/10"
+          viewBox="0 0 1200 80"
           preserveAspectRatio="none"
           aria-hidden="true"
         >
-          <path d="M0,18 C240,42 480,-4 720,24 C960,48 1080,10 1200,18 L1200,60 L0,60 Z" />
+          <path d="M0,25 C200,55 420,5 640,38 C860,70 1060,15 1200,30 L1200,80 L0,80 Z" />
         </svg>
 
         {/* Layer 2: Secondary subtle counter-wave */}
         <svg
-          className="absolute bottom-0 left-[-5%] w-[110%] h-full animate-wave-drift-2 fill-emerald-300/20 dark:fill-teal-400/10"
-          viewBox="0 0 1200 60"
+          className="absolute bottom-0 left-[-6%] w-[112%] h-full animate-wave-drift-2 fill-emerald-300/25 dark:fill-teal-400/10"
+          viewBox="0 0 1200 80"
           preserveAspectRatio="none"
           aria-hidden="true"
         >
-          <path d="M0,28 C180,4 420,44 660,18 C900,-6 1060,34 1200,24 L1200,60 L0,60 Z" />
+          <path d="M0,35 C180,10 400,60 620,28 C840,-5 1040,45 1200,32 L1200,80 L0,80 Z" />
         </svg>
 
         {/* Layer 3: Foreground transition wave matching canvas background */}
         <svg
           className="absolute bottom-0 left-0 w-full h-full fill-current"
-          viewBox="0 0 1200 60"
+          viewBox="0 0 1200 80"
           preserveAspectRatio="none"
           aria-hidden="true"
         >
-          <path d="M0,20 C300,48 600,4 900,32 C1050,44 1140,28 1200,22 L1200,60 L0,60 Z" />
+          <path d="M0,28 C260,65 520,8 780,45 C980,62 1100,25 1200,32 L1200,80 L0,80 Z" />
         </svg>
       </div>
     </header>
