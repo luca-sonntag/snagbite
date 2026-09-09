@@ -70,7 +70,7 @@
 
 body {
   margin: 0;
-  background-color: #f9fafb; /* Light mode background */
+  background-color: #f4f6f5; /* Light mode canvas with soft organic contrast */
   color: #111827; /* Dark slate text */
   min-height: 100vh;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -105,6 +105,41 @@ html.dark body {
 
 .animate-fade-in {
   animation: fade-in 0.3s ease-out forwards;
+}
+
+/* Organic Hero Wave Keyframes (GPU-composited transforms) */
+@keyframes wave-drift-1 {
+  0% {
+    transform: translate3d(-3%, 0, 0) scaleY(1);
+  }
+  50% {
+    transform: translate3d(3%, 1px, 0) scaleY(1.04);
+  }
+  100% {
+    transform: translate3d(-3%, 0, 0) scaleY(1);
+  }
+}
+
+@keyframes wave-drift-2 {
+  0% {
+    transform: translate3d(2%, 0, 0) scaleY(1.03);
+  }
+  50% {
+    transform: translate3d(-4%, -1px, 0) scaleY(0.97);
+  }
+  100% {
+    transform: translate3d(2%, 0, 0) scaleY(1.03);
+  }
+}
+
+.animate-wave-drift-1 {
+  animation: wave-drift-1 14s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-wave-drift-2 {
+  animation: wave-drift-2 18s ease-in-out infinite;
+  will-change: transform;
 }
 
 /* Progressive Recipe Extraction Animations */
