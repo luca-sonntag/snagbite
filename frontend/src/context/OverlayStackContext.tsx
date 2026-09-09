@@ -1,19 +1,21 @@
 import { createContext, useContext, useCallback, useRef, useState, useEffect } from 'react';
 import { hideAdBanner, resumeAdBanner } from '../utils/ads';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 
 /**
- * Overlay-Stack: A simple ref-counted registry that tracks how many overlays
+ * Overlay-Stack: A ref-counted registry that tracks how many overlays
  * (dialogs, sheets, drawers, modals, paywalls) are currently open.
  *
- * When the count transitions from 0 → 1 the native AdMob banner is hidden.
- * When the count transitions back to 0 the banner is resumed.
+ * When the count transitions from 0 → 1:
+ *  - Native AdMob banner is hidden
+ *  - Underlying body and html scroll is locked (preserving scroll position)
+ *
+ * When the count transitions back to 0:
+ *  - Native AdMob banner is resumed
+ *  - Underlying scroll is restored to the previous position
  *
  * Usage in any overlay component:
- *   const { pushOverlay, popOverlay } = useOverlayStack();
- *   useEffect(() => { if (isOpen) { pushOverlay(); return popOverlay; } }, [isOpen]);
- *
- * Or use the convenience hook:
- *   useAdOverlay(isOpen);
+ *   useModalOverlay(isOpen);
  */
 
 interface OverlayStackContextValue {
@@ -40,9 +42,10 @@ export function useOverlayStack(): OverlayStackContextValue {
 
 /**
  * Convenience hook: automatically pushes/pops the overlay stack when `isOpen` changes.
- * Drop this single line into any overlay component that accepts an `isOpen` prop.
+ * Drop this single line into any overlay component (modal, sheet, dialog, drawer) that accepts an `isOpen` prop.
+ * Ensures native AdMob banners are hidden while active to prevent covering action buttons.
  */
-export function useAdOverlay(isOpen: boolean): void {
+export function useModalOverlay(isOpen: boolean): void {
   const { pushOverlay, popOverlay } = useOverlayStack();
   const pushed = useRef(false);
 
@@ -67,9 +70,17 @@ export function useAdOverlay(isOpen: boolean): void {
   }, [popOverlay]);
 }
 
+/**
+ * @deprecated Use `useModalOverlay` instead. Renamed for clarity since overlays are not ads.
+ */
+export const useAdOverlay = useModalOverlay;
+
 export function OverlayStackProvider({ children }: { children: React.ReactNode }) {
   const depth = useRef(0);
   const [isAnyOverlayOpen, setIsAnyOverlayOpen] = useState(false);
+
+  // Global scroll lock: locks documentElement and body whenever any overlay is open
+  useBodyScrollLock(isAnyOverlayOpen);
 
   const pushOverlay = useCallback(() => {
     depth.current += 1;

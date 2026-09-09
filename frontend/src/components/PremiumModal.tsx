@@ -8,7 +8,7 @@ import { useI18n } from '../context/I18nContext';
 import { buyPremium, getSubscriptionOfferings, getCachedOfferings } from '../utils/purchase';
 import { useAuth } from '../context/AuthContext';
 import { LEGAL_URLS } from '../legal';
-import { useAdOverlay } from '../context/OverlayStackContext';
+import { useModalOverlay } from '../context/OverlayStackContext';
 import { hapticLight, hapticMedium } from '../utils/haptics';
 
 interface PremiumModalProps {
@@ -31,7 +31,7 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
   const [isLoadingPackages, setIsLoadingPackages] = useState(false);
 
   // Register with overlay stack for ad hide/resume
-  useAdOverlay(isOpen);
+  useModalOverlay(isOpen);
 
   useEffect(() => {
     if (isOpen) {

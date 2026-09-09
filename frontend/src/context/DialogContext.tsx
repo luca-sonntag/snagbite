@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Button } from '@heroui/react';
 import { AlertTriangle, Info, CheckCircle2, X } from 'lucide-react';
 import { useI18n } from './I18nContext';
-import { useAdOverlay } from './OverlayStackContext';
+import { useModalOverlay } from './OverlayStackContext';
 
 export type DialogStatus = 'danger' | 'warning' | 'success' | 'info';
 export type DialogType = 'alert' | 'confirm';
@@ -68,7 +68,7 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
   });
 
   // Register with overlay stack for ad hide/resume
-  useAdOverlay(state.isOpen);
+  useModalOverlay(state.isOpen);
 
   const showDialog = useCallback((type: DialogType, options: DialogOptions) => {
     return new Promise<boolean>((resolve) => {

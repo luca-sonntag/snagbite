@@ -5,7 +5,7 @@ import { useI18n } from '../../context/I18nContext';
 import { useCollections } from '../../hooks/useCollections';
 import { useToast } from '../../context/ToastContext';
 import type { SavedRecipe, Collection } from '../../types';
-import { useAdOverlay } from '../../context/OverlayStackContext';
+import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight, hapticMedium, hapticHeavy } from '../../utils/haptics';
 
 interface CollectionSheetProps {
@@ -39,7 +39,7 @@ export default function CollectionSheet({
 }: CollectionSheetProps) {
   const { t, language } = useI18n();
   const toast = useToast();
-  useAdOverlay(isOpen);
+  useModalOverlay(isOpen);
   const {
     collections,
     refreshCollections,

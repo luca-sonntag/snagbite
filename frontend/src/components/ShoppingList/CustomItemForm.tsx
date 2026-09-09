@@ -4,7 +4,7 @@ import { Plus, X, Check } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { uiTranslations } from '../../i18n';
 import { useToast } from '../../context/ToastContext';
-import { useAdOverlay } from '../../context/OverlayStackContext';
+import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
 
 interface CustomItemFormProps {
@@ -16,7 +16,7 @@ interface CustomItemFormProps {
 export default function CustomItemForm({ isOpen, addCustomItem, onClose }: CustomItemFormProps) {
   const { t, language } = useI18n();
   const toast = useToast();
-  useAdOverlay(isOpen);
+  useModalOverlay(isOpen);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   // Manual item state

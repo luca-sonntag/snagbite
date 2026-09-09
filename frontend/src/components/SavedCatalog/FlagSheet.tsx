@@ -4,7 +4,7 @@ import { Tag, X } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { useToast } from '../../context/ToastContext';
-import { useAdOverlay } from '../../context/OverlayStackContext';
+import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight, hapticMedium, hapticHeavy } from '../../utils/haptics';
 
 interface FlagSheetProps {
@@ -24,7 +24,7 @@ export const FlagSheet: React.FC<FlagSheetProps> = ({
 }) => {
   const { t, language } = useI18n();
   const toast = useToast();
-  useAdOverlay(isOpen);
+  useModalOverlay(isOpen);
   const [tags, setTags] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);

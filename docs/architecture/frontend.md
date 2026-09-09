@@ -17,7 +17,7 @@
 * **`DialogContext.tsx`:** Stellt globalen Dialog-Service (`useDialog()`) bereit, um native Browser-Dialoge durch moderne HeroUI-Dialoge zu ersetzen.
 * **`ToastContext.tsx`:** Globales Toast-Benachrichtigungssystem (`useToast()`), das rahmenlose Benachrichtigungen im Clean Flat Style elastisch von oben hineingleiten lässt (`top-toast` via `ToastContainer` & `ToastItem`), Safe Areas (`--safe-area-inset-top`) beachtet und Swipe-Up Gesten unterstützt.
 * **`I18nContext.tsx`:** Verwaltet Internationalisierung (Deutsch/Englisch) mit `localStorage`-Persistenz und Browsersprachen-Erkennung.
-* **`OverlayStackContext.tsx`:** Globaler Ref-Counted Overlay-Stack (`pushOverlay`, `popOverlay`, `isAnyOverlayOpen`) und Convenience-Hook `useAdOverlay(isOpen)`. Blendet das native AdMob-Banner synchron aus, sobald ein beliebiges Modal, Sheet oder Drawer geöffnet wird, und stellt es nach dem Schließen wieder her.
+* **`OverlayStackContext.tsx`:** Globaler Ref-Counted Overlay-Stack (`pushOverlay`, `popOverlay`, `isAnyOverlayOpen`) und Convenience-Hook `useModalOverlay(isOpen)` (Alias: `useAdOverlay`). Blendet das native AdMob-Banner synchron aus und lockt via `useBodyScrollLock` den Body/HTML-Scroll (mit Scroll-Positions-Preservation), sobald ein beliebiges Modal, Sheet oder Drawer geöffnet wird, und stellt beides nach dem Schließen des letzten Overlays wieder her.
 
 ### Lokalisierung & Error-Code System
 * **Lokalisierung (`frontend/src/i18n.ts`):** Übersetzungen für Supermarktabteilungen, Emojis, Sortierung, UI-Texte, Auth und dynamische Recommendation-Themen.
@@ -164,11 +164,11 @@ Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird
 * **Web-Dev-Simulation:** Im Browser-Entwicklungsmodus wird eine 2-Sekunden-Verzögerung simuliert und `true` zurückgegeben.
 
 ### Overlay-Stack & Z-Index-Konflikt-Schutz (`OverlayStackContext.tsx`)
-* **Problem:** Native Android AdViews schweben systembedingt über jedem Web-DOM-Inhalt und würden HeroUI-Dialoge, Bottom-Sheets und Menüs überdecken.
-* **Lösung:** Globaler ref-counted Stack. Jeder geöffnete Overlay-Dialog (z. B. `PremiumModal`, `FeedbackDrawer`, `CollectionSheet`, `FilterSheet`, `FlagSheet`, `TimerConfirmSheet`, `DialogContext`) ruft `useAdOverlay(isOpen)` auf.
+* **Problem:** Native Android AdViews schweben systembedingt über jedem Web-DOM-Inhalt und würden HeroUI-Dialoge, Bottom-Sheets und Menüs überdecken. Zudem führt Touch-Scrolling auf mobilen Geräten im Hintergrund zu unruhigem Scroll-Verhalten (Background Scrolling / Touch Bleed-through).
+* **Lösung:** Globaler ref-counted Stack. Jeder geöffnete Overlay-Dialog (z. B. `PremiumModal`, `FeedbackDrawer`, `CollectionSheet`, `FilterSheet`, `FlagSheet`, `TimerConfirmSheet`, `DialogContext`, `PublicRecipePreviewModal`) ruft `useModalOverlay(isOpen)` auf.
 * **Verhalten:**
-  * Stack-Tiefe `0 ➔ 1`: Ruft `hideAdBanner()` auf.
-  * Stack-Tiefe `1 ➔ 0`: Ruft `resumeAdBanner()` auf.
+  * Stack-Tiefe `0 ➔ 1`: Ruft `hideAdBanner()` auf und aktiviert `useBodyScrollLock` (`document.documentElement` + `body` fixiert, `scrollY` gemerkt).
+  * Stack-Tiefe `1 ➔ 0`: Ruft `resumeAdBanner()` auf und stellt die exakte Scroll-Position via `window.scrollTo(0, scrollY)` wieder her.
   * Sofortige Pointerdown-Interzeption vor Abschluss von Klickanimationen.
 
 ### Stale Impression & Resume Delay Logik
