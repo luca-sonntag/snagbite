@@ -88,9 +88,7 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({
             <div
               key={recipe.id || idx}
               onClick={() => handleCardClick(recipe)}
-              className={`rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all duration-200 ease-out select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none group ${
-                isSaved ? 'ring-1 ring-emerald-500/30 dark:ring-emerald-400/30' : ''
-              }`}
+              className="rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all duration-200 ease-out select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none group"
             >
               <div className="relative w-full aspect-[4/3] bg-black/5 dark:bg-white/5 overflow-hidden shrink-0">
                 <CachedImage
