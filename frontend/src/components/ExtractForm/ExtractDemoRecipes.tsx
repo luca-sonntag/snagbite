@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, ChefHat, Check, Loader2, Plus } from 'lucide-react';
+import { Clock, ChefHat, Check, Eye } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
 import { fetchPublicDemoRecipes } from '../../api/publicRecipesApi';
+import { PublicRecipePreviewModal } from '../PublicRecipe';
 import type { Recipe } from '../../types';
 import type { ExtractDemoRecipesProps } from './types';
 
@@ -11,7 +12,6 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
   const { t } = useI18n();
   const { getAccessToken } = useAuth();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -37,32 +37,23 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
     return null;
   }
 
-  const handleCardClick = async (recipe: Recipe) => {
+  const [selectedPreviewRecipe, setSelectedPreviewRecipe] = useState<Recipe | null>(null);
+
+  const handleCardClick = (recipe: Recipe) => {
     if (!recipe.id) return;
-    const isSaved = savedIds.has(recipe.id);
-    const isSaving = savingIds.has(recipe.id);
-
-    if (isSaving) return;
-
-    if (isSaved) {
-      hapticLight();
+    hapticLight();
+    if (savedIds.has(recipe.id)) {
       window.location.hash = `/recipe/${recipe.id}`;
       return;
     }
+    setSelectedPreviewRecipe(recipe);
+  };
 
-    hapticLight();
-    setSavingIds((prev) => new Set(prev).add(recipe.id!));
-    try {
-      await onDemoClick(recipe.sourceUrl || '', recipe);
-      setSavedIds((prev) => new Set(prev).add(recipe.id!));
-      hapticMedium();
-    } finally {
-      setSavingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(recipe.id!);
-        return next;
-      });
-    }
+  const handleSavePreviewRecipe = async (recipe: Recipe) => {
+    if (!recipe.id) return;
+    await onDemoClick(recipe.sourceUrl || '', recipe);
+    setSavedIds((prev) => new Set(prev).add(recipe.id!));
+    hapticMedium();
   };
 
   return (
@@ -121,29 +112,21 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
                     e.stopPropagation();
                     handleCardClick(recipe);
                   }}
-                  disabled={isSaving}
                   className={`w-full min-h-[44px] px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold whitespace-nowrap transition-all duration-200 ease-out active:scale-[0.97] select-none cursor-pointer border-none ${
                     isSaved
                       ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 shadow-xs'
-                      : isSaving
-                      ? 'bg-emerald-500/5 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 opacity-70 cursor-wait'
                       : 'bg-emerald-500/10 hover:bg-emerald-500/15 active:bg-emerald-500/25 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400'
                   }`}
                 >
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
-                      <span className="whitespace-nowrap">{t('form.demoSavingAction')}</span>
-                    </>
-                  ) : isSaved ? (
+                  {isSaved ? (
                     <>
                       <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 stroke-[2.5]" />
                       <span className="whitespace-nowrap">{t('form.demoSavedAction')}</span>
                     </>
                   ) : (
                     <>
-                      <Plus className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
-                      <span className="whitespace-nowrap">{t('form.demoSaveAction')}</span>
+                      <Eye className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
+                      <span className="whitespace-nowrap">{t('form.demoViewAction')}</span>
                     </>
                   )}
                 </button>
@@ -152,6 +135,14 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
           );
         })}
       </div>
+
+      <PublicRecipePreviewModal
+        isOpen={Boolean(selectedPreviewRecipe)}
+        onClose={() => setSelectedPreviewRecipe(null)}
+        recipe={selectedPreviewRecipe}
+        isSaved={selectedPreviewRecipe?.id ? savedIds.has(selectedPreviewRecipe.id) : false}
+        onSave={handleSavePreviewRecipe}
+      />
     </div>
   );
 };
