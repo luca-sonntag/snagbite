@@ -10,16 +10,6 @@ export function useBodyScrollLock(isLocked: boolean) {
     if (!isLocked || typeof window === 'undefined') return;
 
     const scrollY = window.scrollY;
-    const originalBodyStyles = {
-      position: document.body.style.position,
-      top: document.body.style.top,
-      left: document.body.style.left,
-      right: document.body.style.right,
-      width: document.body.style.width,
-      overflow: document.body.style.overflow,
-    };
-    const originalHtmlOverflow = document.documentElement.style.overflow;
-
     // Lock both html and body
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
@@ -30,13 +20,13 @@ export function useBodyScrollLock(isLocked: boolean) {
     document.body.style.width = '100%';
 
     return () => {
-      document.documentElement.style.overflow = originalHtmlOverflow;
-      document.body.style.position = originalBodyStyles.position;
-      document.body.style.top = originalBodyStyles.top;
-      document.body.style.left = originalBodyStyles.left;
-      document.body.style.right = originalBodyStyles.right;
-      document.body.style.width = originalBodyStyles.width;
-      document.body.style.overflow = originalBodyStyles.overflow;
+      document.documentElement.style.removeProperty('overflow');
+      document.body.style.removeProperty('overflow');
+      document.body.style.removeProperty('position');
+      document.body.style.removeProperty('top');
+      document.body.style.removeProperty('left');
+      document.body.style.removeProperty('right');
+      document.body.style.removeProperty('width');
 
       window.scrollTo(0, scrollY);
     };
