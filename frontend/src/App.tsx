@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
-
 import type { SavedRecipe } from './types';
 import { hideSplashScreen } from './native';
 import ExtractForm, { type ExtractMode } from './components/ExtractForm';
@@ -114,6 +113,8 @@ export default function App() {
       ? (history.find((j) => j.recipeId === subPath) || extraRecipes[subPath] || null)
       : null;
 
+  const catalogReturnRef = useRef<string | null>(null);
+
   const savedRecipeIds = useMemo(() => {
     const ids = new Set<string>();
     for (const item of history) {
@@ -126,7 +127,6 @@ export default function App() {
     return ids;
   }, [history, extraRecipes]);
 
-  const catalogReturnRef = useRef<string | null>(null);
   useEffect(() => {
     if (activeView !== 'history' || selectedJob) return;
     catalogReturnRef.current = isCatalogList ? subPath : null;
