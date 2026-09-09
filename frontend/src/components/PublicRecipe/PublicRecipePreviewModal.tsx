@@ -135,7 +135,7 @@ export const PublicRecipePreviewModal: React.FC<PublicRecipePreviewModalProps> =
       onClick={onClose}
     >
       <div
-        className="relative w-[94vw] max-w-lg max-h-[88vh] rounded-3xl bg-gray-50 dark:bg-gray-950 shadow-2xl overflow-hidden flex flex-col border-none animate-in zoom-in-95 duration-200"
+        className="relative w-[90vw] sm:w-[440px] max-w-[440px] max-h-[88vh] rounded-3xl bg-gray-50 dark:bg-gray-950 shadow-2xl overflow-hidden flex flex-col border-none animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Scrollable Content Body */}
