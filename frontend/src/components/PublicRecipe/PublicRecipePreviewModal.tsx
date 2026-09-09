@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Clock, Plus, Check, Loader2, ChefHat, ExternalLink } from 'lucide-react';
+import { Plus, Check, Loader2, ExternalLink } from 'lucide-react';
 import type { Recipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { useRecipeScaling } from '../../hooks/useRecipeScaling';
+import { useRecipeNutrition } from '../../hooks/useRecipeNutrition';
+import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
-import PreviewIngredientsList from './PreviewIngredientsList';
-import PreviewNutritionRow from './PreviewNutritionRow';
+import RecipeInfoSection from '../RecipeDetails/RecipeInfoSection';
+import PreviewHeroHeader from './PreviewHeroHeader';
+import PreviewIngredientsCard from './PreviewIngredientsCard';
 
 export interface PublicRecipePreviewModalProps {
   isOpen: boolean;
@@ -25,8 +28,9 @@ export const PublicRecipePreviewModal: React.FC<PublicRecipePreviewModalProps> =
   onSave,
   onOpenRecipe,
 }) => {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const [isSaving, setIsSaving] = useState(false);
+  const [showTotalNutrition, setShowTotalNutrition] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -42,22 +46,59 @@ export const PublicRecipePreviewModal: React.FC<PublicRecipePreviewModalProps> =
   }, [isOpen, onClose]);
 
   const scaling = useRecipeScaling(recipe || ({} as Recipe));
+  const { servings, setServings, scaleFactor, formatAmount } = scaling;
+
+  const {
+    nutritionalValues,
+    sourceNutritionalValues,
+    isAiEstimated,
+    isVerified,
+    hasNutritionInfo,
+  } = useRecipeNutrition(recipe || ({} as Recipe));
+
+  const formatTimeValue = useCallback(
+    (time: string | number | null | undefined) => {
+      if (time === undefined || time === null || time === '') return '—';
+      if (typeof time === 'number') return t('recipe.minutes', { count: time });
+      const strTime = String(time).trim();
+      const match = strTime.match(/\d+/);
+      if (match) return t('recipe.minutes', { count: match[0] });
+      return strTime;
+    },
+    [t]
+  );
+
+  const getNutritionDisplayValue = useCallback(
+    (
+      val: string | number | null | undefined,
+      unit: string = 'g',
+      isTotal: boolean = false,
+      includeUnit: boolean = true
+    ) => {
+      if (val === undefined || val === null || val === '') return '—';
+      let numericVal: number;
+      let originalUnit = '';
+      if (typeof val === 'number') {
+        numericVal = val;
+      } else {
+        const match = String(val).trim().match(/^([\d.,]+)\s*([a-zA-Z%]*)$/);
+        if (!match) return String(val);
+        numericVal = parseFloat(match[1].replace(',', '.'));
+        originalUnit = match[2] || '';
+        if (isNaN(numericVal)) return String(val);
+      }
+      if (numericVal === 0) return '—';
+      const finalVal = isTotal ? numericVal * servings : numericVal;
+      return includeUnit
+        ? `${Math.round(finalVal)}${originalUnit || unit}`
+        : String(Math.round(finalVal));
+    },
+    [servings]
+  );
 
   if (!isOpen || !recipe) return null;
 
-  const totalMin = (recipe.prepTime || 0) + (recipe.cookTime || 0);
-  const timeDisplay = totalMin > 0 ? `${totalMin} Min.` : null;
   const imageUrl = recipe.imageUrl || recipe.imageUrls?.[0] || null;
-
-  const calories =
-    recipe.nutritionalValues?.calories ?? recipe.sourceNutritionalValues?.calories ?? null;
-  const protein =
-    recipe.nutritionalValues?.protein ?? recipe.sourceNutritionalValues?.protein ?? null;
-  const carbs =
-    recipe.nutritionalValues?.carbs ?? recipe.sourceNutritionalValues?.carbs ?? null;
-  const fat =
-    recipe.nutritionalValues?.fat ?? recipe.sourceNutritionalValues?.fat ?? null;
-  const hasNutrition = calories !== null || protein !== null || carbs !== null || fat !== null;
 
   const handleActionClick = async () => {
     if (isSaving) return;
@@ -94,87 +135,74 @@ export const PublicRecipePreviewModal: React.FC<PublicRecipePreviewModalProps> =
       onClick={onClose}
     >
       <div
-        className="relative w-[92vw] max-w-lg max-h-[85vh] rounded-3xl bg-white dark:bg-gray-900 shadow-2xl overflow-hidden flex flex-col border-none animate-in zoom-in-95 duration-200"
+        className="relative w-[94vw] max-w-lg max-h-[88vh] rounded-3xl bg-gray-50 dark:bg-gray-950 shadow-2xl overflow-hidden flex flex-col border-none animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Media / Hero Header */}
-        <div className="relative w-full aspect-[16/10] bg-gray-100 dark:bg-gray-800 shrink-0 overflow-hidden">
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={recipe.title}
-              className="w-full h-full object-cover object-center pointer-events-none"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
-              <ChefHat className="w-14 h-14 opacity-40" />
-            </div>
-          )}
-
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none" />
-
-          {/* Close Floating Button */}
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="absolute top-3 right-3 z-10 w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-black/55 hover:bg-black/75 text-white flex items-center justify-center backdrop-blur-md active:scale-95 transition-all border-none cursor-pointer shadow-sm"
-          >
-            <X className="w-5 h-5" />
-          </button>
-
-          {/* Meta Badges on Hero */}
-          <div className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 flex-wrap pointer-events-none">
-            {timeDisplay && (
-              <span className="px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm ring-1 ring-white/15">
-                <Clock className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>{timeDisplay}</span>
-              </span>
-            )}
-            <span className="px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm ring-1 ring-white/15">
-              <span>
-                {scaling.servings} {scaling.servings === 1 ? t('recipe.serves') : t('recipe.serves')}
-              </span>
-            </span>
-          </div>
-        </div>
-
         {/* Scrollable Content Body */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 scrollbar-thin">
-          <div className="flex flex-col gap-1">
-            <h3
-              id="preview-modal-title"
-              className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-snug"
-            >
-              {recipe.title}
-            </h3>
-            {recipe.description && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
-                {recipe.description}
-              </p>
-            )}
+        <div className="flex-1 overflow-y-auto scrollbar-thin flex flex-col">
+          <PreviewHeroHeader
+            imageUrl={imageUrl}
+            title={recipe.title}
+            sourceUrl={recipe.sourceUrl}
+            onClose={onClose}
+          />
+
+          <div className="p-4 sm:p-5 flex flex-col gap-4">
+            {/* Title & Metadata */}
+            <div className="flex flex-col gap-1.5">
+              {recipe.sourceHandle && (
+                <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 select-none leading-none">
+                  {recipe.sourceHandle}
+                </div>
+              )}
+              <h2
+                id="preview-modal-title"
+                className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white leading-tight break-words"
+              >
+                {recipe.title}
+              </h2>
+              {recipe.description && (
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed break-words">
+                  {recipe.description}
+                </p>
+              )}
+              {recipe.category && (
+                <div className="flex items-center gap-2 pt-1">
+                  <span className="bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 text-xs font-bold px-3 py-1.5 min-h-[34px] rounded-full select-none inline-flex items-center gap-1.5 shadow-[0_1px_4px_rgba(0,0,0,0.04)] border-none">
+                    <span className="text-base leading-none">
+                      {getRecipeCategoryEmoji(recipe.category)}
+                    </span>
+                    <span>{getRecipeCategoryLabel(recipe.category, language)}</span>
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Metrics Row & Nutrition Card (RecipeDetails Info Section) */}
+            <RecipeInfoSection
+              prepTime={recipe.prepTime}
+              cookTime={recipe.cookTime}
+              formatTimeValue={formatTimeValue}
+              servings={servings}
+              nutritionalValues={hasNutritionInfo ? nutritionalValues : null}
+              sourceNutritionalValues={sourceNutritionalValues}
+              isAiEstimated={isAiEstimated}
+              isVerified={isVerified}
+              showTotalNutrition={showTotalNutrition}
+              onToggleTotalNutrition={setShowTotalNutrition}
+              getNutritionDisplayValue={getNutritionDisplayValue}
+            />
+
+            {/* Ingredients Card (RecipeDetails Ingredients Card) */}
+            <PreviewIngredientsCard
+              recipe={recipe}
+              servings={servings}
+              scaleFactor={scaleFactor}
+              formatAmount={formatAmount}
+              onDecreaseServings={() => setServings((s) => Math.max(1, s - 1))}
+              onIncreaseServings={() => setServings((s) => s + 1)}
+            />
           </div>
-
-          {/* Nutrition Summary Strip */}
-          {hasNutrition && (
-            <PreviewNutritionRow
-              calories={calories}
-              protein={protein}
-              carbs={carbs}
-              fat={fat}
-            />
-          )}
-
-          {/* Ingredients Section */}
-          {recipe.ingredients && recipe.ingredients.length > 0 && (
-            <PreviewIngredientsList
-              ingredients={recipe.ingredients}
-              servings={scaling.servings}
-              onDecreaseServings={() => scaling.setServings((s) => Math.max(1, s - 1))}
-              onIncreaseServings={() => scaling.setServings((s) => s + 1)}
-              formatAmount={scaling.formatAmount}
-            />
-          )}
         </div>
 
         {/* Sticky Action Dock */}

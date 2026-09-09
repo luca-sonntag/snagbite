@@ -20,6 +20,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ---
 
+### 2026-09-10: Vereinfachte Vorschau-Listen (`PreviewNutritionRow`, `PreviewIngredientsList`) durch vollwertige `RecipeDetails`-Komponenten ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `PreviewNutritionRow.tsx`: Isolierte Nährwertzeile mit vereinfachtem Kcal/Makro-Layout, die nicht zum visuellen Design von `RecipeNutrition` passte.
+  - `PreviewIngredientsList.tsx`: Rudimentäre Zutatenliste ohne standardisierte Kategorie-Sortierung, ohne einheitliche Icons (`IngredientIcon`), ohne klickbare Nährwert-Pills und ohne Verknüpfung zum `IngredientNutritionSheet`.
+* **Ersetzt durch:**
+  - **Wiederverwendung von [`RecipeInfoSection.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/RecipeInfoSection.tsx):** Rendert Vorbereitung, Zubereitung, Portionen sowie die detaillierte Kalorien-Headline mit geschätztem Flammen-Badge, mehrfarbigem Makrobalken und Makro-Legende.
+  - **Neues [`PreviewIngredientsCard.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/PublicRecipe/PreviewIngredientsCard.tsx):** Etabliert das exakte Karten-Design von `RecipeIngredients` mit Medaillon-Portionszeile, `RecipeServingsStepper`, sortierten Gruppen nach Taxonomie (`categoryOrder`, `legacyCategoryMap`), vertikalen Farbindikatoren (`theme.barClass`), `IngredientItemRow` und interaktivem `IngredientNutritionSheet`.
+  - **Neues [`PreviewHeroHeader.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/PublicRecipe/PreviewHeroHeader.tsx):** Elegantes Hero-Cover mit `CachedImage`, Frosted-Glass Schließen-Button (`min-w-[44px] min-h-[44px]`) und dynamischem Quell-Badge (`Quelle ansehen` / `Foto-Import`).
+* **Betroffene Dateien:** `frontend/src/components/PublicRecipe/PublicRecipePreviewModal.tsx`, `frontend/src/components/PublicRecipe/PreviewHeroHeader.tsx`, `frontend/src/components/PublicRecipe/PreviewIngredientsCard.tsx`, `frontend/src/components/PublicRecipe/index.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-09: Direktes Speichern öffentlicher Rezepte per Karten-Klick durch schwebendes Vorschau-Overlay (`PublicRecipePreviewModal`) ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
