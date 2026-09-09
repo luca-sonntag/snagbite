@@ -46,7 +46,7 @@ export const PublicRecipePreviewModal: React.FC<PublicRecipePreviewModalProps> =
   }, [isOpen, onClose]);
 
   const scaling = useRecipeScaling(recipe || ({} as Recipe));
-  const { servings, setServings, scaleFactor, formatAmount } = scaling;
+  const { servings, scaleFactor, formatAmount } = scaling;
 
   const {
     nutritionalValues,
@@ -199,8 +199,6 @@ export const PublicRecipePreviewModal: React.FC<PublicRecipePreviewModalProps> =
               servings={servings}
               scaleFactor={scaleFactor}
               formatAmount={formatAmount}
-              onDecreaseServings={() => setServings((s) => Math.max(1, s - 1))}
-              onIncreaseServings={() => setServings((s) => s + 1)}
             />
           </div>
         </div>

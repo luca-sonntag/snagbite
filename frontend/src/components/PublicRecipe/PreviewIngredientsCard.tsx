@@ -1,22 +1,16 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Users } from 'lucide-react';
-import type { Ingredient, Recipe } from '../../types';
+import type { Recipe } from '../../types';
 import type { SortedIngredientGroup } from '../RecipeDetails/types';
 import { useI18n } from '../../context/I18nContext';
-import { useAuth } from '../../context/AuthContext';
 import { getCategoryTheme, categoryOrder, legacyCategoryMap } from '../../i18n';
-import RecipeServingsStepper from '../RecipeDetails/RecipeServingsStepper';
 import IngredientItemRow from '../RecipeDetails/IngredientItemRow';
-import IngredientNutritionSheet from '../RecipeDetails/IngredientNutritionSheet';
-import PremiumModal from '../PremiumModal';
 
 export interface PreviewIngredientsCardProps {
   recipe: Recipe;
   servings: number;
   scaleFactor: number;
   formatAmount: (amount: number | undefined, unit: string | undefined) => string;
-  onDecreaseServings: () => void;
-  onIncreaseServings: () => void;
 }
 
 export const PreviewIngredientsCard: React.FC<PreviewIngredientsCardProps> = ({
@@ -24,13 +18,8 @@ export const PreviewIngredientsCard: React.FC<PreviewIngredientsCardProps> = ({
   servings,
   scaleFactor,
   formatAmount,
-  onDecreaseServings,
-  onIncreaseServings,
 }) => {
   const { t, translateCategory } = useI18n();
-  const { isPremium } = useAuth();
-  const [selectedNutrition, setSelectedNutrition] = useState<{ ingredient: Ingredient; category: string } | null>(null);
-  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
 
   const sortedIngredients: SortedIngredientGroup[] = useMemo(() => {
     if (!recipe.ingredients) return [];
@@ -55,7 +44,7 @@ export const PreviewIngredientsCard: React.FC<PreviewIngredientsCardProps> = ({
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
-      {/* 1. Servings Header */}
+      {/* 1. Servings Header (Display only, no stepper in preview) */}
       <div className="px-4.5 py-4 sm:px-6 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
@@ -70,11 +59,6 @@ export const PreviewIngredientsCard: React.FC<PreviewIngredientsCardProps> = ({
             </span>
           </div>
         </div>
-        <RecipeServingsStepper
-          servings={servings}
-          onDecreaseServings={onDecreaseServings}
-          onIncreaseServings={onIncreaseServings}
-        />
       </div>
 
       {/* 2. Grouped Ingredients */}
@@ -97,11 +81,9 @@ export const PreviewIngredientsCard: React.FC<PreviewIngredientsCardProps> = ({
                     categoryName={group.name}
                     originalIdx={originalIdx}
                     itemIdx={idx}
-                    isPremium={isPremium}
                     scaleFactor={scaleFactor}
                     formatAmount={formatAmount}
-                    onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
-                    onOpenPremium={() => setIsPremiumModalOpen(true)}
+                    hideNutrition={true}
                   />
                 ))}
               </ul>
@@ -109,22 +91,6 @@ export const PreviewIngredientsCard: React.FC<PreviewIngredientsCardProps> = ({
           );
         })}
       </div>
-
-      {/* 3. Ingredient Nutrition Sheet */}
-      <IngredientNutritionSheet
-        isOpen={Boolean(selectedNutrition)}
-        onClose={() => setSelectedNutrition(null)}
-        ingredient={selectedNutrition?.ingredient ?? null}
-        category={selectedNutrition?.category}
-        scaleFactor={scaleFactor}
-        servings={servings}
-      />
-
-      {/* 4. Premium Upsell Modal */}
-      <PremiumModal
-        isOpen={isPremiumModalOpen}
-        onOpenChange={setIsPremiumModalOpen}
-      />
     </div>
   );
 };
