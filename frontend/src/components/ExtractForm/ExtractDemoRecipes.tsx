@@ -13,6 +13,7 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
   const { getAccessToken } = useAuth();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const [selectedPreviewRecipe, setSelectedPreviewRecipe] = useState<Recipe | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,8 +37,6 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
   if (recipes.length === 0) {
     return null;
   }
-
-  const [selectedPreviewRecipe, setSelectedPreviewRecipe] = useState<Recipe | null>(null);
 
   const handleCardClick = (recipe: Recipe) => {
     if (!recipe.id) return;
