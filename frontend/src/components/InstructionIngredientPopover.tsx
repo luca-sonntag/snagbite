@@ -28,13 +28,13 @@ export const InstructionIngredientPopover: React.FC<InstructionIngredientPopover
     <span onClick={(e) => e.stopPropagation()} className="inline">
       <Popover>
         <Popover.Trigger>
-          <span className="font-semibold text-emerald-600 dark:text-emerald-500 cursor-pointer hover:underline decoration-emerald-500/30 underline-offset-4 transition-all outline-none">
+          <span className="font-medium text-gray-900 dark:text-gray-100 underline decoration-gray-300 dark:decoration-gray-700 underline-offset-4 hover:text-emerald-600 dark:hover:text-emerald-400 hover:decoration-emerald-500/50 cursor-pointer transition-colors outline-none">
             {displayText}
           </span>
         </Popover.Trigger>
         <Popover.Content
           placement="top"
-          className="bg-white dark:bg-gray-950 text-gray-700 dark:text-gray-300 border border-black/10 dark:border-white/10 rounded-xl shadow-lg px-4 py-2.5"
+          className="bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-none rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.1)] px-4 py-2.5"
         >
           <Popover.Dialog className="outline-none border-none p-0 m-0">
             {matchedIngredient ? (
