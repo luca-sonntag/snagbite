@@ -20,6 +20,21 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ---
 
+### 2026-09-09: Direktes Speichern öffentlicher Rezepte per Karten-Klick durch schwebendes Vorschau-Overlay (`PublicRecipePreviewModal`) ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Direkter Aufruf von `savePublicRecipeToCookbook` sofort beim Antippen einer Rezeptkarte auf der Startseite (`ExtractDemoRecipes.tsx`) oder im Kochbuch (`PublicRecipeRecommendationsShelf.tsx`), wodurch Rezepte ohne vorherige Einsichtnahme ungefragt ins Kochbuch importiert wurden.
+  - Buttons auf öffentlichen Karten mit der Beschriftung „+ Ins Kochbuch“ / „Speichern“, die den Anschein erweckten, man müsse blind speichern.
+  - Veralteter Subtitle auf der Startseite: *„Tippe auf ein Rezept, um es direkt in dein Kochbuch zu speichern“*.
+* **Ersetzt durch:**
+  - **Schwebendes Vorschau-Overlay ([`PublicRecipePreviewModal.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/PublicRecipe/PublicRecipePreviewModal.tsx)):** Tippen auf die Karte oder den Button öffnet ein zentriertes, modales Overlay (~92% Breite, max 85% Höhe) mit abgedunkeltem Backdrop.
+  - **Fokussierte Teaser-Ansicht:** Zeigt Cover-Foto mit Zeit/Portionen-Badge, Titel, optionale Nährwerte (Makrobalken via `PreviewNutritionRow`) und Zutatenliste via `PreviewIngredientsList` (inkl. Portions-Skalierung). Zubereitungsschritte und Kochmodus/Gamification sind bewusst ausgeblendet.
+  - **Bewusstes Speichern:** Fixierter Aktions-Dock am unteren Rand des Overlays mit „+ Ins Kochbuch speichern“. Nach dem Speichern schließt sich das Overlay und leitet direkt zur Vollansicht des Rezepts im Kochbuch weiter.
+  - **Einheitliche Kartenbeschriftung:** Karten-Button heißt nun „Rezept ansehen“ (bzw. „Im Kochbuch“, falls bereits vorhanden).
+* **Betroffene Dateien:** `frontend/src/components/PublicRecipe/PublicRecipePreviewModal.tsx`, `frontend/src/components/PublicRecipe/PreviewIngredientsList.tsx`, `frontend/src/components/PublicRecipe/PreviewNutritionRow.tsx`, `frontend/src/components/ExtractForm/ExtractDemoRecipes.tsx`, `frontend/src/components/SavedCatalog/PublicRecipeRecommendationsShelf.tsx`, `frontend/src/i18n.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-09: Redundante Social-Media-Icons & Cover-Overlays auf Rezeptkarten entfernt, Metadaten unter Titel vereinheitlicht
 
 * **Ersetzter Code / Anti-Pattern:**
