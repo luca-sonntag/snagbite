@@ -6,15 +6,16 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
-### 2026-09-09: Redundante Social-Media- & Plattform-Icons auf Rezeptkarten (Demo- & Kochbuch-Karten) entfernt
+### 2026-09-09: Redundante Social-Media- & Plattform-Icons auf Rezeptkarten entfernt, Dauer-Badge ins Cover verlagert
 
 * **Ersetzter Code / Anti-Pattern:**
   - Plattform-Badge-Overlay (`TikTokIcon`, `InstagramIcon`, `ChefHat` im Backdrop-Pill oben rechts auf Cover-Bildern) in `ExtractDemoRecipes.tsx`.
   - Social-Media-Plattform-Icon (`PlatformIcon` mit Farbcodierung) in der Metazeile von `RecipePosterCard.tsx` im Kochbuch (Katalog & Startseiten-Shelves).
   - Doppel-Badges auf Rezept-Thumbnails, die das Food-Foto verdeckten und irrelevanten visuellen Clutter darstellten (Verstoß gegen Anti-Slop Badge-Test).
+  - Separate Meta-Unterzeile mit Zeitanzeige oder aufdringlichen Kalorienangaben unterhalb des Titels in `RecipePosterCard.tsx`.
 * **Ersetzt durch:**
-  - **Fokus auf das Food-Foto:** Cover-Bilder bleiben oben frei von Fremdmarken-Logos; nur das funktionale Zeit-Badge (`🕒 XX Min.`) bleibt dezent platziert.
-  - **Ruhige Meta-Zeile im Kochbuch:** Die untere Zeile in `RecipePosterCard` zeigt ausschließlich die Gesamtzeit an, wodurch die Kachel typografisch ruhig und aufgeräumt bleibt.
+  - **Einheitliches Cover-Badge:** Die Zubereitungszeit (`🕒 XX Min.`) wandert als dezentes Glasmorphismus-Pill (`bg-black/50 backdrop-blur-md`) unten links direkt auf das Rezeptbild – identisch zum Look auf der Startseite (`ExtractDemoRecipes`).
+  - **Reine Typografie darunter:** Der Textbereich unter dem Cover enthält ausschließlich den fokussierten Rezepttitel (`line-clamp-2 min-h-[2.5rem]`). Keine leeren Lücken mehr und kein visueller Clutter.
 * **Betroffene Dateien:** `frontend/src/components/ExtractForm/ExtractDemoRecipes.tsx`, `frontend/src/components/SavedCatalog/RecipePosterCard.tsx`, `docs/OBSOLETE.md`.
 
 ---
