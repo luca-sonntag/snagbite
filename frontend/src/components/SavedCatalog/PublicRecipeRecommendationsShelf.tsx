@@ -5,7 +5,7 @@ import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
 import { fetchPublicRecipeRecommendations, savePublicRecipeToCookbook } from '../../api/publicRecipesApi';
-import { PublicRecipePreviewModal } from '../PublicRecipe';
+import PublicRecipePreviewModal from '../PublicRecipe/PublicRecipePreviewModal';
 
 interface PublicRecipeRecommendationsShelfProps {
   onRecipeSaved: (savedId: string) => void;

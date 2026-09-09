@@ -4,7 +4,7 @@ import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
 import { fetchPublicDemoRecipes } from '../../api/publicRecipesApi';
-import { PublicRecipePreviewModal } from '../PublicRecipe';
+import PublicRecipePreviewModal from '../PublicRecipe/PublicRecipePreviewModal';
 import type { Recipe } from '../../types';
 import type { ExtractDemoRecipesProps } from './types';
 
