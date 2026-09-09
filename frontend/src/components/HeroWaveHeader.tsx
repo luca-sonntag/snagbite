@@ -30,26 +30,27 @@ export const HeroWaveHeader: React.FC<HeroWaveHeaderProps> = ({
 }) => {
   return (
     <header
-      className={`relative -mx-4 md:-mx-6 -mt-4 overflow-hidden bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-800 dark:from-emerald-950 dark:via-emerald-900/90 dark:to-teal-950 text-white shadow-[0_10px_30px_-8px_rgba(6,78,59,0.3)] ${className}`}
+      className={`relative -mx-4 md:-mx-6 -mt-4 pb-14 overflow-hidden bg-gradient-to-b from-emerald-950 via-emerald-800 to-teal-900 dark:from-emerald-950 dark:via-emerald-900/80 dark:to-gray-950 text-white rounded-b-[2.25rem] shadow-[0_14px_36px_-10px_rgba(6,78,59,0.35)] ${className}`}
     >
-      {/* Ambient background glow points */}
-      <div className="absolute -top-10 -left-10 w-52 h-52 rounded-full bg-emerald-400/20 blur-2xl pointer-events-none" />
-      <div className="absolute top-0 -right-12 w-60 h-60 rounded-full bg-teal-300/15 blur-3xl pointer-events-none" />
+      {/* Ambient background glow accents */}
+      <div className="absolute -top-12 -left-12 w-56 h-56 rounded-full bg-emerald-400/20 blur-3xl pointer-events-none" />
+      <div className="absolute top-4 -right-16 w-64 h-64 rounded-full bg-teal-300/15 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 inset-x-0 h-12 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
 
       {/* Main Content Area */}
-      <div className="relative z-10 px-4 md:px-6 pt-[calc(var(--safe-area-inset-top)+1.25rem)] pb-3">
+      <div className="relative z-10 px-4 md:px-6 pt-[calc(var(--safe-area-inset-top)+1.25rem)]">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5 drop-shadow-sm">
               {icon && (
-                <span className="p-2 rounded-2xl bg-white/15 text-emerald-100 backdrop-blur-md shadow-inner border border-white/20 shrink-0 flex items-center justify-center">
+                <span className="p-2.5 rounded-2xl bg-white/15 text-white backdrop-blur-md shadow-inner border border-white/20 shrink-0 flex items-center justify-center">
                   {icon}
                 </span>
               )}
               <span className="truncate">{title}</span>
             </h1>
             {subtitle && (
-              <p className="text-xs text-emerald-100/80 mt-1 truncate font-medium">
+              <p className="text-xs text-emerald-100/85 mt-1 truncate font-medium tracking-wide">
                 {subtitle}
               </p>
             )}
@@ -59,41 +60,8 @@ export const HeroWaveHeader: React.FC<HeroWaveHeaderProps> = ({
           )}
         </div>
 
-        {/* Optional floating children slot (e.g. Search Bar) */}
+        {/* Content slot for embedded or floating controls (e.g. Search Bar) */}
         {children && <div className="mt-4 relative z-10">{children}</div>}
-      </div>
-
-      {/* Animated Multi-Layer Organic Wave Bottom Border */}
-      <div className="relative w-full h-10 overflow-hidden leading-none select-none pointer-events-none text-[#f4f6f5] dark:text-gray-950">
-        {/* Layer 1: Translucent background wave drifting horizontally */}
-        <svg
-          className="absolute bottom-0 left-[-6%] w-[112%] h-full animate-wave-drift-1 fill-white/15 dark:fill-white/10"
-          viewBox="0 0 1200 80"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <path d="M0,25 C200,55 420,5 640,38 C860,70 1060,15 1200,30 L1200,80 L0,80 Z" />
-        </svg>
-
-        {/* Layer 2: Secondary subtle counter-wave */}
-        <svg
-          className="absolute bottom-0 left-[-6%] w-[112%] h-full animate-wave-drift-2 fill-emerald-300/25 dark:fill-teal-400/10"
-          viewBox="0 0 1200 80"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <path d="M0,35 C180,10 400,60 620,28 C840,-5 1040,45 1200,32 L1200,80 L0,80 Z" />
-        </svg>
-
-        {/* Layer 3: Foreground transition wave matching canvas background */}
-        <svg
-          className="absolute bottom-0 left-0 w-full h-full fill-current"
-          viewBox="0 0 1200 80"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <path d="M0,28 C260,65 520,8 780,45 C980,62 1100,25 1200,32 L1200,80 L0,80 Z" />
-        </svg>
       </div>
     </header>
   );
