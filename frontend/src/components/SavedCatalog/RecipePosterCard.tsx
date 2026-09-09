@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, Check, Star, Layers } from 'lucide-react';
+import { Clock, Check, Star, Layers, Flame } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
@@ -20,10 +20,8 @@ interface RecipePosterCardProps {
 }
 
 /**
- * Compact recipe poster: image, title, total time. Deliberately omits the
- * description and tag pills that the old card carried — those belong in the
- * detail view, and dropping them roughly triples how many recipes fit on a
- * screen. Delete moved to the multi-select bar / detail view.
+ * Compact recipe poster: image, title, total time and calories.
+ * Displays total time on the left and calories/servings on the right.
  */
 export default function RecipePosterCard({
   job,
@@ -37,6 +35,8 @@ export default function RecipePosterCard({
   const r = job.recipe!;
   const isShelf = variant === 'shelf';
   const remixCount = job.remixCount ?? job.recipe?.remixCount ?? 0;
+  const rawCalories = r.nutritionalValues?.calories ?? r.sourceNutritionalValues?.calories;
+  const calories = rawCalories && rawCalories > 0 ? Math.round(rawCalories) : null;
 
   return (
     <div className={`relative isolate ${isShelf ? 'w-[9.5rem] shrink-0' : 'w-full'} h-full flex flex-col`}>
@@ -106,11 +106,27 @@ export default function RecipePosterCard({
         <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 min-h-[2.5rem]">
           {r.title}
         </h4>
-        {/* Bottom row: total time */}
-        {totalTime ? (
-          <div className="mt-auto flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
-            <Clock className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-            <span>{totalTime}</span>
+        {/* Bottom row: total time (left) and calories / servings (right) */}
+        {(totalTime || calories) ? (
+          <div className="mt-auto flex items-center justify-between gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+            {totalTime ? (
+              <span className="flex items-center gap-1 min-w-0 truncate">
+                <Clock className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                <span className="truncate">{totalTime}</span>
+              </span>
+            ) : (
+              <span />
+            )}
+            {calories ? (
+              <span className="flex items-center gap-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400 shrink-0 whitespace-nowrap">
+                <Flame className="w-3.5 h-3.5 text-amber-500 shrink-0 fill-amber-500/20" />
+                <span>{calories} kcal</span>
+              </span>
+            ) : r.servings && r.servings > 0 ? (
+              <span className="text-[11px] font-medium text-gray-400 dark:text-gray-500 shrink-0 whitespace-nowrap">
+                {r.servings} Port.
+              </span>
+            ) : null}
           </div>
         ) : null}
       </div>
