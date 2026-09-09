@@ -31,8 +31,8 @@ export default function ProgressiveRecipeCard({
           <span>{t('job.preview.analyzingBadge')}</span>
         </div>
 
-        <span className="text-xs font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
-          {percent}%
+        <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/15 px-2 py-0.5 rounded-full select-none">
+          Live
         </span>
       </div>
 
@@ -55,7 +55,7 @@ export default function ProgressiveRecipeCard({
             <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 leading-tight truncate animate-pulse">
               {t(`job.preview.platformScanning.${platform}`) || t('job.preview.titleDiscovering')}
             </h3>
-            <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-md w-2/5 animate-pulse" />
+            <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full w-3/4 animate-pulse" />
           </div>
         )}
       </div>
