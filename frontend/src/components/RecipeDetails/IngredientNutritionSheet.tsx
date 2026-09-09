@@ -1,7 +1,7 @@
 import { Drawer, Button } from '@heroui/react';
 import { Flame, ShieldCheck, Sparkles, X } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
-import { useAdOverlay } from '../../context/OverlayStackContext';
+import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight } from '../../utils/haptics';
 import type { Ingredient } from '../../types';
 import IngredientIcon from '../IngredientIcon';
@@ -24,7 +24,7 @@ export default function IngredientNutritionSheet({
   servings = 1,
 }: IngredientNutritionSheetProps) {
   const { t } = useI18n();
-  useAdOverlay(isOpen);
+  useModalOverlay(isOpen);
 
   if (!ingredient) return null;
 

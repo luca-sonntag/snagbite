@@ -12,7 +12,7 @@ import {
   type CatalogFilterState,
   type CatalogSort
 } from '../../hooks/useSavedCatalog';
-import { useAdOverlay } from '../../context/OverlayStackContext';
+import { useModalOverlay } from '../../context/OverlayStackContext';
 
 interface FilterSheetProps {
   isOpen: boolean;
@@ -60,7 +60,7 @@ export default function FilterSheet({
   countMatches
 }: FilterSheetProps) {
   const { t, language } = useI18n();
-  useAdOverlay(isOpen);
+  useModalOverlay(isOpen);
   const [draft, setDraft] = useState<CatalogFilterState>(filters);
   const [draftSort, setDraftSort] = useState<CatalogSort>(sortBy);
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);

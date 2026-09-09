@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useFeedback } from '../hooks/useFeedback';
 import { collectFeedbackContext, compressScreenshot } from '../utils/feedbackContext';
-import { useAdOverlay } from '../context/OverlayStackContext';
+import { useModalOverlay } from '../context/OverlayStackContext';
 import { hapticLight, hapticMedium, hapticHeavy, hapticNotification } from '../utils/haptics';
 
 interface FeedbackDrawerProps {
@@ -24,7 +24,7 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
   const toast = useToast();
   const { submitFeedback } = useFeedback();
 
-  useAdOverlay(isOpen);
+  useModalOverlay(isOpen);
 
   const [type, setType] = useState<FeedbackType>('bug');
   const [message, setMessage] = useState('');

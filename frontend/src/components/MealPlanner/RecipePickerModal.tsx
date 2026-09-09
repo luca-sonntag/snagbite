@@ -5,7 +5,7 @@ import type { RecipePickerModalProps } from './types';
 import CachedImage from '../CachedImage';
 import { useI18n } from '../../context/I18nContext';
 import { useToast } from '../../context/ToastContext';
-import { useAdOverlay } from '../../context/OverlayStackContext';
+import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
 import { getTotalTime } from '../../hooks/useSavedCatalog';
 
@@ -27,7 +27,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
   onClose,
   onSelectRecipe,
 }) => {
-  useAdOverlay(isOpen);
+  useModalOverlay(isOpen);
   const { t, language } = useI18n();
   const { pantryItems } = usePantry();
   const toast = useToast();

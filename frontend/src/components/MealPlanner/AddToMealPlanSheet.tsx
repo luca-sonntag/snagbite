@@ -12,7 +12,7 @@ import {
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { useAdOverlay } from '../../context/OverlayStackContext';
+import { useModalOverlay } from '../../context/OverlayStackContext';
 import { apiUrl } from '../../api';
 import type { Recipe } from '../../types';
 import { formatDateIso, addDays, getMonday } from './mealPlannerUtils';
@@ -38,7 +38,7 @@ export const AddToMealPlanSheet: React.FC<AddToMealPlanSheetProps> = ({
   initialServings = 2,
   onAddedSuccess,
 }) => {
-  useAdOverlay(isOpen);
+  useModalOverlay(isOpen);
   const { t, language } = useI18n();
   const { getAccessToken, user } = useAuth();
   const toast = useToast();
