@@ -51,7 +51,7 @@ export default function RecipePosterCard({
       )}
 
       <div
-        className={`w-full h-full rounded-2xl overflow-hidden cursor-pointer active:scale-[0.96] transition-transform duration-150 ease-out select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.03),0_1px_2px_rgba(0,0,0,0.02)] border-none ${
+        className={`w-full h-full rounded-2xl overflow-hidden cursor-pointer active:scale-[0.96] transition-transform duration-150 ease-out select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 border-none ${
           isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
         }`}
         onClick={(e) => {
@@ -103,26 +103,27 @@ export default function RecipePosterCard({
           )}
         </div>
 
-        {/* Meta: Title & coupled subtle info */}
+        {/* Meta: Title & coupled punchy info pills */}
         <div className="flex flex-col p-3 flex-1 justify-start gap-1">
           <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2">
             {r.title}
           </h4>
           {(totalTime || caloriesFormatted || (r.servings && r.servings > 0)) && (
-            <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 dark:text-gray-500 truncate mt-0.5">
+            <div className="flex items-center gap-1.5 text-[11px] font-medium truncate mt-1">
               {totalTime && (
-                <span className="flex items-center gap-1 shrink-0">
-                  <Clock className="w-3 h-3 text-emerald-500 shrink-0" />
+                <span className="flex items-center gap-1 shrink-0 px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-semibold text-[11px]">
+                  <Clock className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span>{totalTime}</span>
                 </span>
               )}
-              {totalTime && (caloriesFormatted || (r.servings && r.servings > 0)) && (
-                <span className="text-gray-300 dark:text-gray-600 shrink-0">·</span>
-              )}
               {caloriesFormatted ? (
-                <span className="truncate">{caloriesFormatted}</span>
+                <span className="truncate px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px]">
+                  {caloriesFormatted}
+                </span>
               ) : r.servings && r.servings > 0 ? (
-                <span className="shrink-0">{r.servings} Port.</span>
+                <span className="shrink-0 px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px]">
+                  {r.servings} Port.
+                </span>
               ) : null}
             </div>
           )}
