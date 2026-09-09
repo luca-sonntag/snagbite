@@ -450,7 +450,7 @@ export default function CollectionSheet({
                   <div className="flex flex-col gap-4">
                     {/* Collection Name Input */}
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1">
+                      <label className="text-xs font-medium text-gray-500 dark:text-gray-400 px-1">
                         {t('catalog.collectionName') || 'Name der Sammlung'}
                       </label>
                       <input
@@ -464,7 +464,7 @@ export default function CollectionSheet({
 
                     {/* Emoji Select Grid */}
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1">
+                      <label className="text-xs font-medium text-gray-500 dark:text-gray-400 px-1">
                         {t('catalog.collectionEmoji') || 'Symbol / Emoji'}
                       </label>
                       <div className="flex flex-wrap gap-2 py-1.5">

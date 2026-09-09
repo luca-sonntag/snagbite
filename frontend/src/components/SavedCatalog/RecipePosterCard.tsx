@@ -47,14 +47,14 @@ export default function RecipePosterCard({
       {remixCount > 0 && (
         <>
           {remixCount > 1 && (
-            <div className="absolute -top-2.5 inset-x-3.5 h-full rounded-2xl bg-gray-100 dark:bg-zinc-850 border border-black/[0.08] dark:border-white/[0.08] shadow-2xs -z-20 pointer-events-none transition-transform" />
+            <div className="absolute -top-2 inset-x-3.5 h-full rounded-2xl bg-gray-100 dark:bg-gray-800 border-none shadow-[0_1px_3px_rgba(0,0,0,0.02)] -z-20 pointer-events-none transition-transform" />
           )}
-          <div className="absolute -top-1.5 inset-x-2 h-full rounded-2xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 shadow-xs -z-10 pointer-events-none transition-transform" />
+          <div className="absolute -top-1 inset-x-2 h-full rounded-2xl bg-gray-50 dark:bg-gray-800/80 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] -z-10 pointer-events-none transition-transform" />
         </>
       )}
 
       <div
-        className={`w-full h-full rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none ${isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
+        className={`w-full h-full rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.03),0_1px_2px_rgba(0,0,0,0.02)] border-none ${isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
           }`}
         onClick={(e) => {
           hapticLight();
