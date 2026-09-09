@@ -3,7 +3,7 @@ import { Clock, ChefHat, Check, Loader2, Plus } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import { InstagramIcon } from '../ShareMockups';
-import { hapticLight } from '../../utils/haptics';
+import { hapticLight, hapticMedium } from '../../utils/haptics';
 import { fetchPublicDemoRecipes } from '../../api/publicRecipesApi';
 import type { Recipe } from '../../types';
 import type { ExtractDemoRecipesProps } from './types';
@@ -62,6 +62,7 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
     try {
       await onDemoClick(recipe.sourceUrl || '', recipe);
       setSavedIds((prev) => new Set(prev).add(recipe.id!));
+      hapticMedium();
     } finally {
       setSavingIds((prev) => {
         const next = new Set(prev);
@@ -94,7 +95,7 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
             <div
               key={recipe.id || idx}
               onClick={() => handleCardClick(recipe)}
-              className={`rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none group ${
+              className={`rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all duration-200 ease-out select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none group ${
                 isSaved ? 'ring-1 ring-emerald-500/30 dark:ring-emerald-400/30' : ''
               }`}
             >
@@ -119,34 +120,49 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({ onDemoCl
                     <ChefHat className="w-3.5 h-3.5" />
                   )}
                 </div>
+                <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-lg bg-black/50 backdrop-blur-md text-white text-[11px] font-medium flex items-center gap-1 shadow-xs pointer-events-none">
+                  <Clock className="w-3 h-3 text-emerald-400 shrink-0" />
+                  <span className="whitespace-nowrap">{timeDisplay}</span>
+                </div>
               </div>
 
-              <div className="flex flex-col gap-1 p-3 flex-1">
+              <div className="flex flex-col gap-2.5 p-3 flex-1 justify-between">
                 <h4 className="text-xs font-bold text-gray-900 dark:text-white leading-snug line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                   {recipe.title}
                 </h4>
-                <div className="mt-auto pt-1 flex items-center justify-between">
-                  <span className="flex items-center gap-1 text-[11px] font-medium text-gray-500 dark:text-gray-400">
-                    <Clock className="w-3 h-3 text-emerald-500 shrink-0" />
-                    {timeDisplay}
-                  </span>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCardClick(recipe);
+                  }}
+                  disabled={isSaving}
+                  className={`w-full min-h-[44px] px-3 py-2 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold whitespace-nowrap transition-all duration-200 ease-out active:scale-[0.97] select-none cursor-pointer ${
+                    isSaved
+                      ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 shadow-xs'
+                      : isSaving
+                      ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 opacity-80 cursor-wait'
+                      : 'bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white shadow-[0_2px_8px_rgba(16,185,129,0.25)]'
+                  }`}
+                >
                   {isSaving ? (
-                    <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 opacity-70">
-                      <Loader2 className="w-3 h-3 animate-spin shrink-0" />
-                      {t('form.demoSavingAction')}
-                    </span>
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
+                      <span className="whitespace-nowrap">{t('form.demoSavingAction')}</span>
+                    </>
                   ) : isSaved ? (
-                    <span className="flex items-center gap-1 text-[11px] font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-lg">
-                      <Check className="w-3.5 h-3.5 shrink-0" />
-                      {t('form.demoSavedAction')}
-                    </span>
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 stroke-[2.5]" />
+                      <span className="whitespace-nowrap">{t('form.demoSavedAction')}</span>
+                    </>
                   ) : (
-                    <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/15 dark:bg-emerald-500/15 px-2 py-0.5 rounded-lg transition-colors">
-                      <Plus className="w-3.5 h-3.5 shrink-0" />
-                      {t('form.demoSaveAction')}
-                    </span>
+                    <>
+                      <Plus className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
+                      <span className="whitespace-nowrap">{t('form.demoSaveAction')}</span>
+                    </>
                   )}
-                </div>
+                </button>
               </div>
             </div>
           );
