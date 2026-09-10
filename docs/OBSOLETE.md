@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-10: Diffuse Hintergrund-Wellen (`AmbientDiagonalWaves`) & massiver Header-Block (`HeroWaveHeader`) durch edlen Slate-50 Canvas ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `HeroWaveHeader.tsx`: Wuchtiger, vollflächiger Smaragd-Farbblock im Header, der die App optisch erdrückt und von den eigentlichen Rezeptinhalten ablenkt.
+  - `AmbientDiagonalWaves.tsx`: Großflächige, animierte SVG-Wellenbänder im Hintergrund des App-Canvas.
+  - **Problem:** Die halbtransparenten Wellenbänder wirkten hinter den UI-Elementen wie diffuse, fleckenartige Verfärbungen und unruhige Schlieren statt wie ein klares, intentionales Design-Element. Sie schwächten zudem den Kontrast zu den Inhalten ab.
+* **Ersetzt durch:**
+  - **Edler Slate-50 Canvas (`#f8fafc`):** Saubere, dezente Tonalität im Hintergrund. Weiße Karten und modale Oberflächen treten durch feine Umrandung (`ring-1 ring-black/[0.04]`) und weiche Schatten plastisch, kontrastreich und taktil hervor.
+  - **Rückkehr zu standardisiertem `PageHeader`:** Luftiger, klarer nativer Header ohne massive Farbklötze.
+* **Betroffene Dateien:** `frontend/src/components/AmbientDiagonalWaves.tsx` (gelöscht), `frontend/src/components/HeroWaveHeader.tsx` (gelöscht), `frontend/src/App.tsx`, `frontend/src/index.css`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-10: Veralteter Hook-Name `useAdOverlay` zu `useModalOverlay` umbenannt & Body-Scroll-Lock zentralisiert
 
 * **Ersetzter Code / Anti-Pattern:**

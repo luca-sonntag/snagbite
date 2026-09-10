@@ -42,7 +42,6 @@ import { useAppAds } from './hooks/useAppAds';
 import { useAppNativeListeners } from './hooks/useAppNativeListeners';
 import { useMealPlanBadge } from './hooks/useMealPlanBadge';
 import { preloadSecondaryChunks } from './utils/chunkPreloader';
-import AmbientDiagonalWaves from './components/AmbientDiagonalWaves';
 
 function ViewFallback() {
   return (
@@ -362,8 +361,7 @@ export default function App() {
       )}
 
       {user && (
-        <div className="min-h-screen flex flex-col items-center transition-colors duration-300 relative">
-          <AmbientDiagonalWaves />
+        <div className="min-h-screen flex flex-col items-center transition-colors duration-300">
           <AppTopBanners activeView={activeView} isPending={isPending} recipe={recipe} />
 
       <main

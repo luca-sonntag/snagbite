@@ -70,8 +70,8 @@
 
 body {
   margin: 0;
-  background-color: #f4f6f5; /* Light mode canvas with soft organic contrast */
-  color: #111827; /* Dark slate text */
+  background-color: #f8fafc; /* Crisp Slate-50 canvas making elevated white cards pop */
+  color: #0f172a; /* Deep slate text for sharp readable contrast */
   min-height: 100vh;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
