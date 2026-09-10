@@ -77,33 +77,22 @@ export default function PublicRecipeRecommendationsShelf({
   };
 
   return (
-    <section className="relative -mx-4 md:-mx-6 px-4 md:px-6 py-6 my-2 overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 text-white shadow-xl shadow-emerald-950/20 flex flex-col gap-3">
-      {/* Decorative Wave Currents & Ambient Light */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-400/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-8 -left-8 w-56 h-56 bg-teal-300/10 rounded-full blur-2xl pointer-events-none" />
-
-      {/* Subtle Animated Wave Ribbon in Section Background */}
-      <svg
-        className="absolute -bottom-1 inset-x-0 w-full h-12 opacity-15 pointer-events-none animate-wave-drift-1 fill-white"
-        viewBox="0 0 1200 60"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-      >
-        <path d="M0,18 C240,42 480,-4 720,24 C960,48 1080,10 1200,18 L1200,60 L0,60 Z" />
-      </svg>
+    <section className="relative -mx-4 md:-mx-6 px-4 md:px-6 py-5 my-2.5 overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500/[0.08] via-teal-500/[0.05] to-emerald-500/[0.02] dark:from-emerald-950/40 dark:via-emerald-900/20 dark:to-transparent ring-1 ring-emerald-500/20 dark:ring-emerald-500/20 flex flex-col gap-3.5">
+      {/* Soft ambient mint glow in background */}
+      <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-400/10 dark:bg-emerald-400/5 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header */}
       <div className="relative z-10 flex items-center justify-between gap-2 px-0.5">
         <div className="flex flex-col min-w-0">
           <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-xl bg-white/15 text-emerald-200 backdrop-blur-md shrink-0 flex items-center justify-center">
+            <span className="p-1.5 rounded-xl bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 shrink-0 flex items-center justify-center shadow-xs">
               <Globe className="w-4 h-4" />
             </span>
-            <h3 className="text-base font-bold text-white tracking-tight truncate">
+            <h3 className="text-base sm:text-lg font-extrabold text-gray-950 dark:text-white tracking-tight truncate">
               {t('catalog.publicDiscovery.title')}
             </h3>
           </div>
-          <p className="text-xs text-emerald-200/80 font-medium mt-1">
+          <p className="text-xs text-emerald-800/80 dark:text-emerald-300/80 font-medium mt-1">
             {t('catalog.publicDiscovery.subtitle')}
           </p>
         </div>
