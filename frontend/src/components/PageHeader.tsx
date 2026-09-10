@@ -27,16 +27,16 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   return (
     <div className={`w-full flex items-center justify-between ${className}`}>
       <div className="min-w-0 flex-1">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-2.5">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-950 dark:text-white tracking-tight flex items-center gap-2.5">
           {icon && (
-            <span className="p-2 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0 flex items-center justify-center">
+            <span className="p-2 rounded-2xl bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 shrink-0 flex items-center justify-center shadow-xs">
               {icon}
             </span>
           )}
           <span className="truncate">{title}</span>
         </h1>
         {subtitle && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 truncate">
             {subtitle}
           </p>
         )}

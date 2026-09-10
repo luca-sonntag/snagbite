@@ -49,17 +49,17 @@ export default function RecipeShelf({
         className="flex items-center justify-between gap-2 w-full text-left cursor-pointer group active:scale-[0.99] transition-transform"
       >
         <div className="flex flex-col min-w-0">
-          <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
+          <h3 className="text-base sm:text-lg font-extrabold tracking-tight text-gray-950 dark:text-white flex items-center">
             {icon && <span className="shrink-0 mr-2">{icon}</span>}
             <span className="truncate">{title}</span>
           </h3>
           {subtitle && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 font-normal mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
               {subtitle}
             </p>
           )}
         </div>
-        <span className="flex items-center gap-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
+        <span className="flex items-center gap-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 shrink-0 group-hover:translate-x-0.5 transition-transform">
           {t('catalog.showAll', { count: totalCount })}
           <ChevronRight className="w-3.5 h-3.5" />
         </span>

@@ -95,10 +95,10 @@ export default function DiscoveryAccordion({
                 aria-expanded={isOpen}
               >
                 <h3
-                  className={`text-base font-bold transition-colors ${
+                  className={`transition-colors ${
                     isOpen
-                      ? 'text-gray-900 dark:text-white'
-                      : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200'
+                      ? 'text-base sm:text-lg font-extrabold tracking-tight text-gray-950 dark:text-white'
+                      : 'text-base font-bold text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300'
                   }`}
                 >
                   {shelf.title}
@@ -118,7 +118,7 @@ export default function DiscoveryAccordion({
                     hapticLight();
                     onOpenList(shelf.preset);
                   }}
-                  className="flex items-center gap-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0 cursor-pointer active:scale-95 transition-transform min-h-[44px] px-1 border-none bg-transparent"
+                  className="flex items-center gap-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 shrink-0 cursor-pointer active:scale-95 transition-transform min-h-[44px] px-1 border-none bg-transparent"
                 >
                   {t('catalog.showAll', { count: shelf.total })}
                   <ChevronRight className="w-3.5 h-3.5" />
