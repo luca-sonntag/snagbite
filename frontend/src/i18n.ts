@@ -1119,6 +1119,7 @@ export const uiTranslations = {
       publicDiscovery: {
         title: 'Öffentliche Entdeckungen',
         subtitle: 'Ausgewählte Rezepte für dein Kochbuch',
+        badge: 'Community',
         viewAction: 'Rezept ansehen',
         savedAction: 'Im Kochbuch',
       },
@@ -2374,6 +2375,7 @@ export const uiTranslations = {
       publicDiscovery: {
         title: 'Community Discoveries',
         subtitle: 'Curated recipes for your cookbook',
+        badge: 'Community',
         viewAction: 'View Recipe',
         savedAction: 'In Cookbook',
       },
