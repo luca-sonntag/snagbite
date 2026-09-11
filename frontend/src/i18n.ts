@@ -487,6 +487,7 @@ export const uiTranslations = {
     app: {
       title: 'Snagbite',
       subtitle: 'Rezept-Assistent',
+      pressBackAgainToExit: 'Zum Beenden noch einmal tippen',
       loading: {
         preparingCookbook: 'Dein Kochbuch wird angerichtet…',
         loadingRecipes: 'Rezepte werden geladen…',
@@ -1744,6 +1745,7 @@ export const uiTranslations = {
     app: {
       title: 'Snagbite',
       subtitle: 'Recipe Assistant',
+      pressBackAgainToExit: 'Press back again to exit',
       loading: {
         preparingCookbook: 'Setting your table…',
         loadingRecipes: 'Loading your recipes…',
