@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@heroui/react';
-import { Search, List, LayoutGrid, CheckSquare, ArrowLeft, Star, Tag, SlidersHorizontal, X, Clock, BookOpen } from 'lucide-react';
+import { Search, List, LayoutGrid, CheckSquare, ArrowLeft, Star, Tag, SlidersHorizontal, X, Clock } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { PageHeader } from '../PageHeader';
 import type { Collection, RecipeCategory } from '../../types';
@@ -194,7 +194,6 @@ export default function CatalogFilters({
       {/* Row 1: PageHeader (Home) OR Back navigation (List Level) */}
       {!onBack ? (
         <PageHeader
-          icon={<BookOpen className="w-6 h-6" />}
           title={title}
           subtitle={t('catalog.subtitle') || `${t('catalog.recipeCount', { count: resultCount })} · ${t(`catalog.sort.${sortBy}`)}`}
           action={

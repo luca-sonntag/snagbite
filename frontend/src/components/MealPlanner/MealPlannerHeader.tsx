@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingCart, ShoppingBag, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
+import { ShoppingCart, ShoppingBag, Loader2 } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { PageHeader } from '../PageHeader';
 import { hapticLight } from '../../utils/haptics';
@@ -43,7 +43,6 @@ export const MealPlannerHeader: React.FC<MealPlannerHeaderProps> = ({
 
   return (
     <PageHeader
-      icon={<CalendarIcon className="w-5 h-5 stroke-[2.25]" />}
       title={t('mealPlanner.title')}
       subtitle={t('mealPlanner.subtitle')}
       action={shopAction}

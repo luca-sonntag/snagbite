@@ -5,8 +5,6 @@ export interface PageHeaderProps {
   title: React.ReactNode;
   /** Subtitle or description under the title */
   subtitle?: React.ReactNode;
-  /** Optional icon displayed in a rounded badge on the left */
-  icon?: React.ReactNode;
   /** Optional action slot on the right (e.g. buttons, menu, status) */
   action?: React.ReactNode;
   /** Extra container classes */
@@ -15,25 +13,19 @@ export interface PageHeaderProps {
 
 /**
  * Standardized Page Header for top-level views.
- * Features an icon badge, bold title, descriptive subtitle, and optional right-aligned action slot.
+ * Features a bold title, descriptive subtitle, and optional right-aligned action slot.
  */
 export const PageHeader: React.FC<PageHeaderProps> = ({
   title,
   subtitle,
-  icon,
   action,
   className = '',
 }) => {
   return (
     <div className={`w-full flex items-center justify-between ${className}`}>
       <div className="min-w-0 flex-1">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-950 dark:text-white tracking-tight flex items-center gap-2.5">
-          {icon && (
-            <span className="p-2 rounded-2xl bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 shrink-0 flex items-center justify-center shadow-xs">
-              {icon}
-            </span>
-          )}
-          <span className="truncate">{title}</span>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-950 dark:text-white tracking-tight truncate">
+          {title}
         </h1>
         {subtitle && (
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 truncate">

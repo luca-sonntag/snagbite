@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ShoppingCart, Package } from 'lucide-react';
 import type { AggregatedShoppingItem, ShoppingListItem, SavedRecipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { usePantry } from '../../context/PantryContext';
@@ -102,7 +101,6 @@ export default function ShoppingList(props: ShoppingListProps) {
     <div className="flex flex-col gap-4">
       {/* Top Page Header with Title */}
       <PageHeader
-        icon={activeTab === 'shopping' ? <ShoppingCart className="w-6 h-6" /> : <Package className="w-6 h-6" />}
         title={activeTab === 'shopping' ? t('shopping.title') : t('pantry.title')}
         subtitle={activeTab === 'shopping' ? t('shopping.subtitle') : t('pantry.subtitle')}
       />

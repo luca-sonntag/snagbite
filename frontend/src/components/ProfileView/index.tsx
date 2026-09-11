@@ -62,7 +62,6 @@ export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSel
     <div className="flex flex-col gap-6 pb-12">
       {/* Header */}
       <PageHeader
-        icon={section === 'settings' ? <Settings className="w-6 h-6" /> : <User className="w-6 h-6" />}
         title={section === 'settings' ? (t('app.social.sections.settings') || 'Einstellungen') : t('app.gamification.tabTitle')}
         subtitle={section === 'settings' ? t('app.settings.subtitle') : t('app.gamification.subtitle')}
         action={
