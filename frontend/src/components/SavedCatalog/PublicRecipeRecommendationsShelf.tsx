@@ -114,7 +114,7 @@ export default function PublicRecipeRecommendationsShelf({
             <div
               key={recipe.id || index}
               onClick={() => handleCardClick(recipe)}
-              className="w-[9.5rem] shrink-0 flex flex-col rounded-2xl overflow-hidden bg-white dark:bg-gray-900 shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 border-none group cursor-pointer active:scale-[0.96] transition-transform duration-150 ease-out select-none"
+              className="w-40 shrink-0 flex flex-col rounded-2xl overflow-hidden bg-white dark:bg-gray-900 shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 border-none group cursor-pointer active:scale-[0.96] transition-transform duration-150 ease-out select-none"
             >
               {/* Image */}
               <div className="relative aspect-[4/3] w-full bg-black/5 dark:bg-white/5 overflow-hidden shrink-0">
@@ -133,24 +133,24 @@ export default function PublicRecipeRecommendationsShelf({
               </div>
 
               {/* Info */}
-              <div className="flex flex-col p-3 flex-1 justify-start gap-1">
+              <div className="flex flex-col p-2.5 sm:p-3 flex-1 justify-start gap-1">
                 <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2">
                   {recipe.title}
                 </h4>
                 {(timeDisplay || caloriesFormatted || (recipe.servings && recipe.servings > 0)) && (
-                  <div className="flex items-center gap-1.5 text-[11px] font-medium truncate mt-1">
+                  <div className="flex items-center gap-1 text-[11px] font-medium mt-1">
                     {timeDisplay && (
-                      <span className="flex items-center gap-1 shrink-0 px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-semibold text-[11px]">
+                      <span className="flex items-center gap-1 shrink-0 px-1.5 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-semibold text-[11px]">
                         <Clock className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
                         <span>{timeDisplay}</span>
                       </span>
                     )}
                     {caloriesFormatted ? (
-                      <span className="truncate px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px]">
+                      <span className="shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px]">
                         {caloriesFormatted}
                       </span>
                     ) : recipe.servings && recipe.servings > 0 ? (
-                      <span className="shrink-0 px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px]">
+                      <span className="shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px]">
                         {recipe.servings} Port.
                       </span>
                     ) : null}

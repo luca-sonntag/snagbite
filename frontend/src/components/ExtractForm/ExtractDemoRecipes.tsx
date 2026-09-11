@@ -110,7 +110,7 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({
                     {recipe.title}
                   </h4>
                   {(timeDisplay || caloriesFormatted || (recipe.servings && recipe.servings > 0)) && (
-                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 dark:text-gray-500 truncate mt-1">
+                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 dark:text-gray-500 mt-1">
                       {timeDisplay && (
                         <span className="flex items-center gap-1 shrink-0">
                           <Clock className="w-3 h-3 text-emerald-500 shrink-0" />
@@ -121,9 +121,9 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({
                         <span className="text-gray-300 dark:text-gray-600 shrink-0">·</span>
                       )}
                       {caloriesFormatted ? (
-                        <span className="truncate">{caloriesFormatted}</span>
+                        <span className="shrink-0 whitespace-nowrap">{caloriesFormatted}</span>
                       ) : recipe.servings && recipe.servings > 0 ? (
-                        <span className="shrink-0">{recipe.servings} Port.</span>
+                        <span className="shrink-0 whitespace-nowrap">{recipe.servings} Port.</span>
                       ) : null}
                     </div>
                   )}
