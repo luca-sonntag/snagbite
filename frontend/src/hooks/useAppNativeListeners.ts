@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   registerShareIntent,
   registerNotificationTap,
@@ -9,6 +9,9 @@ import {
 import { registerPushTapHandler, enablePushNotifications } from '../push';
 import { parseSharedUrl } from '../utils/shareUrl';
 import { EXTRACTION_COMPLETE_EVENT, OPEN_RECIPE_EVENT } from '../context/ExtractionJobsContext';
+import { useOverlayStack } from '../context/OverlayStackContext';
+import { useToast } from '../context/ToastContext';
+import { useI18n } from '../context/I18nContext';
 import type { UseAppNativeListenersProps } from '../types/app';
 
 // Module-level flag to ensure the Web Share Target is only processed once per page load.
@@ -40,37 +43,81 @@ export function useAppNativeListeners({
   isPending,
   isPremium,
 }: UseAppNativeListenersProps) {
+  const { handleBack: handleOverlayBack } = useOverlayStack();
+  const toast = useToast();
+  const { t } = useI18n();
+  const lastBackPressRef = useRef<number>(0);
+
   // Android hardware back-button & edge swipe-back gesture
   useEffect(() => {
     return registerBackButtonHandler(() => {
+      // 1. Overlays and in-page custom back handlers (LIFO stack)
+      if (handleOverlayBack()) {
+        return true;
+      }
+
+      // 2. Legacy gallery history state fallback
       if (window.history.state && window.history.state.galleryOpen) {
         window.history.back();
         return true;
       }
+
+      // 3. Extraction in progress for free users (don't exit while ad/extract running)
       if (isPending && !isPremium) {
         return true;
       }
+
+      // 4. Recipe details view -> back to catalog list or home
       if (activeView === 'history' && selectedJob) {
         navigate('history', catalogReturnRef.current);
         return true;
       }
+
+      // 5. Catalog list view (sammlung / all / quick etc.) -> back to cookbook home
       if (isCatalogList) {
         navigate('history');
         return true;
       }
+
+      // 6. Extracted recipe preview in extract tab -> reset back to extract form
       if (activeView === 'extract' && recipe) {
         setRecipe(null);
         setUrl('');
         navigate('extract');
         return true;
       }
+
+      // 7. Non-history tabs (meal-planner, shopping-list, pantry, profile, extract) -> back to history
       if (activeView !== 'history') {
         navigate('history');
         return true;
       }
-      return false;
+
+      // 8. Root screen (CookbookHome) exit guard: double-tap to exit within 2s
+      const now = Date.now();
+      if (now - lastBackPressRef.current < 2000) {
+        return false;
+      }
+
+      lastBackPressRef.current = now;
+      toast.show(t('app.pressBackAgainToExit') || 'Zum Beenden noch einmal tippen', 'default');
+      return true;
     });
-  }, [activeView, selectedJob, isCatalogList, recipe, navigate, setRecipe, setUrl, isPending, isPremium, catalogReturnRef]);
+  }, [
+    handleOverlayBack,
+    activeView,
+    selectedJob,
+    isCatalogList,
+    recipe,
+    navigate,
+    setRecipe,
+    setUrl,
+    isPending,
+    isPremium,
+    catalogReturnRef,
+    toast,
+    t,
+  ]);
 
   // Listen to state-based pending navigation
   useEffect(() => {
