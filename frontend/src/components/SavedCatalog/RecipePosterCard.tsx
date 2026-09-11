@@ -104,12 +104,12 @@ export default function RecipePosterCard({
         </div>
 
         {/* Meta: Title & coupled punchy info pills */}
-        <div className="flex flex-col p-2.5 sm:p-3 flex-1 justify-start gap-1">
+        <div className="flex flex-col p-2.5 sm:p-3 flex-1 justify-between gap-1.5">
           <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2">
             {r.title}
           </h4>
           {(totalTime || caloriesFormatted || (r.servings && r.servings > 0)) && (
-            <div className="flex items-center gap-1 text-[11px] font-medium mt-1">
+            <div className="flex items-center justify-between gap-1 w-full text-[11px] font-medium mt-auto pt-1">
               {totalTime && (
                 <span className="flex items-center gap-1 shrink-0 px-1.5 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-semibold text-[11px]">
                   <Clock className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
@@ -117,11 +117,11 @@ export default function RecipePosterCard({
                 </span>
               )}
               {caloriesFormatted ? (
-                <span className="shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px]">
+                <span className={`shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px] ${!totalTime ? 'ml-auto' : ''}`}>
                   {caloriesFormatted}
                 </span>
               ) : r.servings && r.servings > 0 ? (
-                <span className="shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px]">
+                <span className={`shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px] ${!totalTime ? 'ml-auto' : ''}`}>
                   {r.servings} Port.
                 </span>
               ) : null}

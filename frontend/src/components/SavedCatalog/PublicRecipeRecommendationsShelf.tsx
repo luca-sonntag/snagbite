@@ -133,12 +133,12 @@ export default function PublicRecipeRecommendationsShelf({
               </div>
 
               {/* Info */}
-              <div className="flex flex-col p-2.5 sm:p-3 flex-1 justify-start gap-1">
+              <div className="flex flex-col p-2.5 sm:p-3 flex-1 justify-between gap-1.5">
                 <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2">
                   {recipe.title}
                 </h4>
                 {(timeDisplay || caloriesFormatted || (recipe.servings && recipe.servings > 0)) && (
-                  <div className="flex items-center gap-1 text-[11px] font-medium mt-1">
+                  <div className="flex items-center justify-between gap-1 w-full text-[11px] font-medium mt-auto pt-1">
                     {timeDisplay && (
                       <span className="flex items-center gap-1 shrink-0 px-1.5 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-semibold text-[11px]">
                         <Clock className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
@@ -146,11 +146,11 @@ export default function PublicRecipeRecommendationsShelf({
                       </span>
                     )}
                     {caloriesFormatted ? (
-                      <span className="shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px]">
+                      <span className={`shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px] ${!timeDisplay ? 'ml-auto' : ''}`}>
                         {caloriesFormatted}
                       </span>
                     ) : recipe.servings && recipe.servings > 0 ? (
-                      <span className="shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px]">
+                      <span className={`shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px] ${!timeDisplay ? 'ml-auto' : ''}`}>
                         {recipe.servings} Port.
                       </span>
                     ) : null}
