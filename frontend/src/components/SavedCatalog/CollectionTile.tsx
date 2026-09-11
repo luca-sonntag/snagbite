@@ -43,7 +43,7 @@ export default function CollectionTile({
       }}
       className="w-[8.5rem] shrink-0 flex flex-col gap-1.5 text-left active:scale-[0.97] transition-transform cursor-pointer group border-none bg-transparent"
     >
-      <div className="relative w-full aspect-[2/1] rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shadow-[0_8px_20px_-4px_rgba(0,0,0,0.18)] ring-2 ring-white dark:ring-gray-800/80 border-none transition-shadow group-hover:shadow-[0_12px_24px_-4px_rgba(0,0,0,0.22)]">
+      <div className="relative w-full aspect-[2/1] rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none">
         {displayJobs.length === 0 ? (
           <div className="w-full h-full bg-gradient-to-br from-emerald-500/10 via-transparent to-indigo-500/10" />
         ) : displayJobs.length === 1 ? (

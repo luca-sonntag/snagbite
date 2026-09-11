@@ -82,7 +82,7 @@ export default function CookbookHome({
       {/* 📂 Unified Organization Hub: Sammlungen, Favoriten, Kategorien & Labels */}
       <section className="flex flex-col gap-2.5">
         {/* Row of Tiles: 1. ⭐ Favoriten + 2. 🍲 Speisen-Kategorien + 3. User Collections + 4. ➕ Neue Sammlung */}
-        <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-2 scroll-smooth">
+        <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
           {/* ⭐ Favoriten Smart-Tile (nur wenn Rezepte enthalten sind) */}
           {favJobs.length > 0 && (
             <CollectionTile
@@ -127,10 +127,10 @@ export default function CookbookHome({
             }}
             className="w-[8.5rem] shrink-0 flex flex-col gap-1.5 text-left active:scale-[0.97] transition-transform cursor-pointer border-none bg-transparent"
           >
-            <span className="w-full aspect-[2/1] rounded-2xl bg-white dark:bg-gray-800 hover:bg-emerald-50/50 dark:hover:bg-gray-750 flex items-center justify-center transition-all border-none shadow-[0_8px_20px_-4px_rgba(0,0,0,0.18)] ring-2 ring-white dark:ring-gray-800/80">
+            <span className="w-full aspect-[2/1] rounded-2xl bg-emerald-500/5 hover:bg-emerald-500/10 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/15 flex items-center justify-center transition-colors border-none shadow-[0_2px_6px_rgba(0,0,0,0.02)]">
               <Plus className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             </span>
-            <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 px-0.5 line-clamp-1 leading-snug">
+            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 px-0.5 line-clamp-1 leading-snug">
               {t('catalog.addCollection')}
             </span>
           </button>
