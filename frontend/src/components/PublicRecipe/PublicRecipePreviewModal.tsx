@@ -7,6 +7,7 @@ import { useRecipeScaling } from '../../hooks/useRecipeScaling';
 import { useRecipeNutrition } from '../../hooks/useRecipeNutrition';
 import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
+import { useModalOverlay } from '../../context/OverlayStackContext';
 import RecipeInfoSection from '../RecipeDetails/RecipeInfoSection';
 import PreviewHeroHeader from './PreviewHeroHeader';
 import PreviewIngredientsCard from './PreviewIngredientsCard';
@@ -32,15 +33,16 @@ export const PublicRecipePreviewModal: React.FC<PublicRecipePreviewModalProps> =
   const [isSaving, setIsSaving] = useState(false);
   const [showTotalNutrition, setShowTotalNutrition] = useState(false);
 
+  // Register with overlay stack to lock body scroll and hide AdMob banners while open
+  useModalOverlay(isOpen);
+
   useEffect(() => {
     if (!isOpen) return;
-    document.body.style.overflow = 'hidden';
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, onClose]);
@@ -131,11 +133,11 @@ export const PublicRecipePreviewModal: React.FC<PublicRecipePreviewModalProps> =
       role="dialog"
       aria-modal="true"
       aria-labelledby="preview-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center px-4 sm:px-6 pt-[calc(var(--safe-area-inset-top,0px)+1.25rem)] pb-[calc(var(--safe-area-inset-bottom,0px)+1.25rem)] bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="relative w-[90vw] sm:w-[440px] max-w-[440px] max-h-[88vh] rounded-3xl bg-gray-50 dark:bg-gray-950 shadow-2xl overflow-hidden flex flex-col border-none animate-in zoom-in-95 duration-200"
+        className="relative w-[90vw] sm:w-[440px] max-w-[440px] max-h-[calc(100dvh-var(--safe-area-inset-top,0px)-var(--safe-area-inset-bottom,0px)-3.5rem)] sm:max-h-[85vh] rounded-3xl bg-gray-50 dark:bg-gray-950 shadow-2xl overflow-hidden flex flex-col border-none animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Scrollable Content Body */}
