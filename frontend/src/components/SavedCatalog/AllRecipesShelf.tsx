@@ -84,11 +84,11 @@ export default function AllRecipesShelf({
       </div>
 
       {/* Vertical Timeline Groups */}
-      <div className="space-y-9 pt-1">
+      <div className="pt-1">
         {timelineGroups.map((group, index) => (
-          <div key={group.id} className="space-y-3.5">
-            {/* Centered Timeline Header with Left & Right Divider Lines */}
-            <div className={`flex items-center gap-3 w-full px-1 ${index > 0 ? 'pt-3' : 'pt-1'}`}>
+          <div key={group.id} className={index > 0 ? 'mt-7' : 'mt-1.5'}>
+            {/* Centered Timeline Header with Left & Right Divider Lines (Equal vertical spacing) */}
+            <div className={`flex items-center gap-3 w-full px-1 ${index > 0 ? 'mb-7' : 'mb-4'}`}>
               <div className="h-px flex-1 bg-gray-200/80 dark:bg-gray-800" />
               <div className="flex items-center gap-2 shrink-0">
                 <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white font-heading tracking-tight">
