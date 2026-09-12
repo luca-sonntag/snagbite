@@ -88,7 +88,7 @@ export default function RecipeHeroCarousel({
           <div
             key={slide.id || idx}
             className={`${
-              slides.length > 1 ? 'w-[84%] sm:w-[88%] md:w-[90%]' : 'w-full'
+              slides.length > 1 ? 'w-[86%] sm:w-[89%] md:w-[92%]' : 'w-full'
             } shrink-0 snap-start`}
           >
             <RecipeHeroCard

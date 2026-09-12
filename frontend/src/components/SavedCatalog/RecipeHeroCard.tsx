@@ -52,7 +52,7 @@ export default function RecipeHeroCard({
       }}
       className="relative group rounded-3xl overflow-hidden bg-gray-900 shadow-[0_8px_30px_rgba(0,0,0,0.12)] border-none select-none cursor-pointer active:scale-[0.98] transition-transform duration-200"
     >
-      <div className="relative aspect-[16/10] w-full overflow-hidden">
+      <div className="relative aspect-[4/3] sm:aspect-[16/10] w-full overflow-hidden">
         <CachedImage
           src={r.imageUrl}
           emoji={r.emoji}
@@ -60,7 +60,7 @@ export default function RecipeHeroCard({
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none select-none"
         />
         {/* Soft Ambient Scrim */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 via-45% to-transparent pointer-events-none" />
 
         {/* Top Badges */}
         <div className="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none">
