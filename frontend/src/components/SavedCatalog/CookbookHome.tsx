@@ -166,8 +166,8 @@ export default function CookbookHome({
         />
       )}
 
-      {/* 5. Format B: Bento Grid for Fast & Nutrient-Dense Dishes */}
-      {bentoRecipes.length > 0 && (
+      {/* 5. Format B: Bento Grid for Fast & Nutrient-Dense Dishes (only when at least 3 recipes are available) */}
+      {bentoRecipes.length >= 3 && (
         <RecipeBentoSection
           recipes={bentoRecipes}
           formatTotalTime={formatTotalTime}

@@ -27,7 +27,7 @@ export default function RecipeBentoSection({
 }: RecipeBentoSectionProps) {
   const { t } = useI18n();
 
-  if (!recipes || recipes.length === 0) return null;
+  if (!recipes || recipes.length < 3) return null;
 
   const mainJob = recipes[0];
   const sideJobs = recipes.slice(1, 3);
