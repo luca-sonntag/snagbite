@@ -13,6 +13,7 @@ export interface InstructionIngredientPopoverProps {
     unit?: string;
     modifier?: string;
     notes?: string;
+    synonyms?: string[];
   };
   fallbackText?: string;
   formatAmount: (amount: number, unit?: string) => string;
@@ -44,6 +45,7 @@ export const InstructionIngredientPopover: React.FC<InstructionIngredientPopover
                   canonicalId={matchedIngredient.canonicalId}
                   category={matchedIngredient.category}
                   name={matchedIngredient.name}
+                  synonyms={matchedIngredient.synonyms}
                   size="sm"
                 />
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
