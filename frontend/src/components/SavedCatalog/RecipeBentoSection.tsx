@@ -83,14 +83,16 @@ export default function RecipeBentoSection({
           {/* Scrim overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none" />
 
-          {/* Top Badges */}
-          <div className="absolute top-2 inset-x-2 flex items-center justify-between pointer-events-none">
-            {mainScore !== null && mainScoreLetter && mainScoreColor ? (
-              <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${mainScoreColor.onMediaBg} ${mainScoreColor.onMediaText} backdrop-blur-md shadow-xs ring-1 ring-white/15`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${mainScoreColor.pillBg}`} />
-                <span>Score {mainScore} • {mainScoreLetter}</span>
-              </span>
-            ) : <span />}
+            {/* Top Badges */}
+            <div className="absolute top-2 inset-x-2 flex items-center justify-between pointer-events-none">
+              {mainScore !== null && mainScoreLetter && mainScoreColor ? (
+                <span
+                  className={`w-5 h-5 rounded-full ${mainScoreColor.pillBg} text-white font-black text-[10.5px] flex items-center justify-center leading-none shadow-md backdrop-blur-xs select-none`}
+                  title={`Health Score: ${mainScoreLetter} (${mainScore}/100)`}
+                >
+                  {mainScoreLetter}
+                </span>
+              ) : <span />}
 
             {mainJob.isFavorite && (
               <div className="w-6 h-6 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center text-amber-400">
