@@ -1,5 +1,5 @@
 import type { MouseEvent } from 'react';
-import { BookOpen, ArrowRight, Layers } from 'lucide-react';
+import { BookOpen, ArrowRight } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import RecipePosterCard from './RecipePosterCard';
 import { useI18n } from '../../context/I18nContext';
@@ -40,9 +40,8 @@ export default function AllRecipesShelf({
       {/* Header */}
       <div className="flex items-center justify-between px-0.5">
         <div>
-          <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-1.5 tracking-tight font-heading">
-            <Layers className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-            <span>{t('catalog.magazine.allShelfTitle')}</span>
+          <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight font-heading">
+            {t('catalog.magazine.allShelfTitle')}
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
             {t('catalog.magazine.allShelfSubtitle')}

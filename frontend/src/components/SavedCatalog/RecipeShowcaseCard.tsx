@@ -1,5 +1,5 @@
 import { useMemo, type MouseEvent } from 'react';
-import { Clock, History, Star } from 'lucide-react';
+import { Clock, Star } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
@@ -47,9 +47,8 @@ export default function RecipeShowcaseCard({
     <section className="space-y-2.5">
       {/* Header */}
       <div className="px-0.5">
-        <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-1.5 tracking-tight font-heading">
-          <History className="w-4 h-4 text-amber-500" />
-          <span>{t('catalog.magazine.rediscoveredTitle')}</span>
+        <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight font-heading">
+          {t('catalog.magazine.rediscoveredTitle')}
         </h3>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
           {t('catalog.magazine.rediscoveredSubtitle', { days: daysAgo })}
