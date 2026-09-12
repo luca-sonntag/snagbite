@@ -46,6 +46,7 @@ export default function RecipeShowcaseCard({
   const ingredientsPreview = useMemo(() => {
     if (!r.ingredients || r.ingredients.length === 0) return null;
     return r.ingredients
+      .flatMap((g) => g.items || [])
       .slice(0, 3)
       .map((item) => item.name)
       .filter(Boolean)

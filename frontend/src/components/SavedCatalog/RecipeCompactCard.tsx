@@ -38,7 +38,7 @@ export default function RecipeCompactCard({
         hapticLight();
         onClick(e);
       }}
-      className="group relative flex items-center gap-2.5 p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-gray-900/90 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border-none cursor-pointer active:scale-[0.98] hover:shadow-md transition-all duration-150 select-none overflow-hidden"
+      className="group relative flex-1 h-full flex items-center gap-2.5 p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-gray-900/90 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border-none cursor-pointer active:scale-[0.98] hover:shadow-md transition-all duration-150 select-none overflow-hidden"
     >
       {/* Thumbnail with overlay time badge */}
       <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0 rounded-xl overflow-hidden bg-black/5 dark:bg-white/5">
@@ -85,11 +85,11 @@ export default function RecipeCompactCard({
         </h4>
 
         {/* Bottom meta: calories & protein */}
-        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 font-medium">
-          {caloriesFormatted && <span>{caloriesFormatted}</span>}
-          {caloriesFormatted && protein && protein > 0 && <span>•</span>}
+        <div className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 font-medium truncate">
+          {caloriesFormatted && <span className="shrink-0">{caloriesFormatted}</span>}
+          {caloriesFormatted && protein && protein > 0 && <span className="shrink-0">•</span>}
           {protein && protein > 0 && (
-            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+            <span className="text-emerald-600 dark:text-emerald-400 font-semibold shrink-0">
               {Math.round(protein)}g Protein
             </span>
           )}

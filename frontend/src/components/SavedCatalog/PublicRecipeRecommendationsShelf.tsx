@@ -77,31 +77,25 @@ export default function PublicRecipeRecommendationsShelf({
   };
 
   return (
-    <section className="relative p-4 sm:p-5 my-5 overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500/[0.08] via-teal-500/[0.05] to-emerald-500/[0.02] dark:from-emerald-950/40 dark:via-emerald-900/20 dark:to-transparent ring-1 ring-emerald-500/20 dark:ring-emerald-500/20 flex flex-col gap-3.5 shadow-xs">
-      {/* Soft ambient mint glow in background */}
-      <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-400/10 dark:bg-emerald-400/5 rounded-full blur-3xl pointer-events-none" />
-
+    <section className="space-y-3 pt-2 select-none">
       {/* Header */}
-      <div className="relative z-10 flex items-center justify-between gap-3 px-0.5">
-        <div className="flex flex-col min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-xl bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 shrink-0 flex items-center justify-center shadow-xs">
-              <Globe className="w-4 h-4" />
-            </span>
-            <h3 className="text-base sm:text-lg font-extrabold text-gray-950 dark:text-white tracking-tight truncate">
-              {t('catalog.publicDiscovery.title')}
-            </h3>
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+      <div className="flex items-center justify-between px-0.5">
+        <div>
+          <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-1.5 tracking-tight font-heading">
+            <Globe className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+            <span>{t('catalog.publicDiscovery.title')}</span>
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
             {t('catalog.publicDiscovery.subtitle')}
           </p>
         </div>
-        <span className="px-2.5 py-1 rounded-full bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold shrink-0 self-center">
+        <span className="px-2.5 py-0.5 rounded-full bg-teal-500/15 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 text-[11px] font-bold shrink-0 self-center">
           {t('catalog.publicDiscovery.badge')}
         </span>
       </div>
 
-      <div className="relative z-10 flex items-stretch gap-3 overflow-x-auto scrollbar-none -mx-4 sm:-mx-5 px-4 sm:px-5 py-1 scroll-smooth">
+      {/* Horizontal Recipe Shelf */}
+      <div className="flex items-stretch gap-3 overflow-x-auto pb-3 pt-1 scrollbar-none snap-x -mx-4 px-4 sm:mx-0 sm:px-0">
         {recommendations.map((recipe, index) => {
           const totalMin = (recipe.prepTime || 0) + (recipe.cookTime || 0);
           const timeDisplay = totalMin > 0 ? `${totalMin} Min.` : null;
