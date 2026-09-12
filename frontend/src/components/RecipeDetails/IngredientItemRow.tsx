@@ -62,9 +62,9 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
           handleNutritionClick();
         }
       }}
-      className={`group flex items-center justify-between gap-3 px-3 py-2.5 sm:px-3.5 sm:py-2.5 rounded-2xl bg-slate-50/80 hover:bg-slate-100/90 dark:bg-gray-800/40 dark:hover:bg-gray-800/70 transition-all border-none ${
+      className={`group flex items-center justify-between gap-3 py-2.5 px-1.5 transition-all ${
         hasCalories
-          ? 'cursor-pointer active:scale-[0.99]'
+          ? 'cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] active:scale-[0.99] rounded-xl'
           : ''
       }`}
     >
@@ -124,10 +124,10 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
         <button
           type="button"
           onClick={handleNutritionClick}
-          className={`min-h-[32px] px-2.5 py-1 rounded-full inline-flex items-center gap-1 text-xs font-bold shrink-0 border-none transition-all active:scale-95 cursor-pointer select-none shadow-2xs ${
+          className={`min-h-[32px] px-2.5 py-1 rounded-full inline-flex items-center gap-1 text-xs font-semibold shrink-0 border-none transition-all active:scale-95 cursor-pointer select-none ${
             isPremium
-              ? 'bg-white hover:bg-gray-50 dark:bg-gray-750 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200'
-              : 'bg-white/80 hover:bg-white dark:bg-gray-750 dark:hover:bg-gray-700 text-gray-400 dark:text-gray-400'
+              ? 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'
+              : 'bg-black/[0.04] hover:bg-black/[0.08] dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-gray-400 dark:text-gray-500'
           }`}
           title={isPremium && ingredient.matchedName ? t('recipe.verifiedIngredientTooltip', { name: ingredient.matchedName }) : undefined}
           aria-label={t('recipe.nutritionTitle')}
