@@ -19,6 +19,7 @@ test('Shopping aggregation splits items into toBuy, inPantry, and checked', () =
       id: '2',
       name: 'Butter',
       baseName: 'butter',
+      synonyms: ['dairy butter'],
       amount: 250,
       unit: 'g',
       checked: false,
@@ -39,12 +40,15 @@ test('Shopping aggregation splits items into toBuy, inPantry, and checked', () =
 
   const grouped = aggregateShoppingItems(items);
 
-  assert.equal(grouped.toBuy.length, 1);
+  assert.equal(grouped.toBuy.length, 2);
   assert.equal(grouped.toBuy[0].baseName, 'milk');
+  assert.equal(grouped.toBuy[1].baseName, 'butter');
+  assert.deepEqual(grouped.toBuy[1].synonyms, ['dairy butter']);
 
   assert.equal(grouped.inPantry.length, 1);
   assert.equal(grouped.inPantry[0].baseName, 'butter');
   assert.equal(grouped.inPantry[0].inPantryWarning, true);
+  assert.deepEqual(grouped.inPantry[0].synonyms, ['dairy butter']);
 
   assert.equal(grouped.checked.length, 1);
   assert.equal(grouped.checked[0].baseName, 'egg');

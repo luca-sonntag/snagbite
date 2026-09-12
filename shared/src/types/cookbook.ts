@@ -30,6 +30,7 @@ export interface ShoppingListItem {
   userId?: string;
   name: string;
   baseName?: string;
+  synonyms?: string[];
   parentIngredient?: ParentIngredientInfo;
   amount: number;
   unit: string;
@@ -51,6 +52,7 @@ export interface ShoppingListItem {
 export interface CreateShoppingListItemDto {
   name: string;
   baseName?: string;
+  synonyms?: string[];
   parentIngredient?: ParentIngredientInfo;
   amount: number;
   unit: string;
@@ -70,6 +72,7 @@ export interface CreateShoppingListItemDto {
 export interface UpdateShoppingListItemDto {
   name?: string;
   baseName?: string;
+  synonyms?: string[];
   amount?: number;
   unit?: string;
   checked?: boolean;
@@ -85,6 +88,7 @@ export interface UpdateShoppingListItemDto {
 export interface AggregatedShoppingItem {
   name: string;
   baseName?: string;
+  synonyms?: string[];
   parentIngredient?: ParentIngredientInfo;
   unit: string;
   amount: number;

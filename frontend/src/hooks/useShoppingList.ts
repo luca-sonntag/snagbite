@@ -6,6 +6,7 @@ import { useI18n } from '../context/I18nContext';
 import { apiUrl } from '../api';
 import { getParentIngredient, normalizeUnit } from '../utils/ingredientTaxonomy';
 import { aggregateShoppingItems, extractActiveRecipes } from '../utils/shoppingAggregation';
+import { findGroupMatchedIds } from '../components/ShoppingList/shoppingItemUtils';
 
 export function useShoppingList() {
   const { session, isPremium, getAccessToken } = useAuth();
@@ -33,7 +34,13 @@ export function useShoppingList() {
       });
       if (res.ok) {
         const data = await res.json();
-        setShoppingList(data.items ?? []);
+        setShoppingList((prev) => {
+          const prevSynonyms = new Map(prev.map((i) => [i.id, i.synonyms]));
+          return (data.items ?? []).map((item: ShoppingListItem) => ({
+            ...item,
+            synonyms: item.synonyms ?? prevSynonyms.get(item.id),
+          }));
+        });
       }
     } catch (err) {
       console.warn('[ShoppingList] Load failed:', err);
@@ -71,6 +78,7 @@ export function useShoppingList() {
     const newItems = ingredients.map((ing) => ({
       name: ing.name,
       baseName: ing.baseName,
+      synonyms: ing.synonyms,
       parentIngredient: ing.parentIngredient || getParentIngredient(ing) || undefined,
       modifier: ing.modifier,
       brand: ing.brand,
@@ -96,7 +104,11 @@ export function useShoppingList() {
         });
         if (res.ok) {
           const data = await res.json();
-          setShoppingList((prev) => [...prev.filter((i) => i.recipeId !== recipeId), ...(data.items ?? [])]);
+          const returnedItems = (data.items ?? []).map((item: ShoppingListItem, idx: number) => ({
+            ...item,
+            synonyms: item.synonyms ?? newItems[idx]?.synonyms,
+          }));
+          setShoppingList((prev) => [...prev.filter((i) => i.recipeId !== recipeId), ...returnedItems]);
           return;
         }
       } catch (err) {
@@ -253,18 +265,7 @@ export function useShoppingList() {
     unit: string,
     targetChecked: boolean
   ) => {
-    const keyName = groupKeyName.toLowerCase().trim();
-    const keyUnit = normalizeUnit(unit).toLowerCase().trim();
-    const matchedIds = shoppingList
-      .filter((item) => {
-        const matchName =
-          (item.baseName || item.name || '').toLowerCase().trim() === keyName ||
-          (item.name || '').toLowerCase().trim() === keyName;
-        const matchUnit = normalizeUnit(item.unit).toLowerCase().trim() === keyUnit;
-        return matchName && matchUnit;
-      })
-      .map((i) => i.id);
-    toggleItemIds(matchedIds, targetChecked);
+    toggleItemIds(findGroupMatchedIds(shoppingList, groupKeyName, unit), targetChecked);
   };
 
   const deleteItemGroup = (
@@ -272,18 +273,7 @@ export function useShoppingList() {
     _modifier: string | undefined,
     unit: string
   ) => {
-    const keyName = groupKeyName.toLowerCase().trim();
-    const keyUnit = normalizeUnit(unit).toLowerCase().trim();
-    const matchedIds = shoppingList
-      .filter((item) => {
-        const matchName =
-          (item.baseName || item.name || '').toLowerCase().trim() === keyName ||
-          (item.name || '').toLowerCase().trim() === keyName;
-        const matchUnit = normalizeUnit(item.unit).toLowerCase().trim() === keyUnit;
-        return matchName && matchUnit;
-      })
-      .map((i) => i.id);
-    deleteItemIds(matchedIds);
+    deleteItemIds(findGroupMatchedIds(shoppingList, groupKeyName, unit));
   };
 
   return {

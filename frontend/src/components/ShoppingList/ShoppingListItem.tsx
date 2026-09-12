@@ -121,6 +121,7 @@ export default function ShoppingListItem({
             canonicalId={item.canonicalId}
             category={item.category}
             name={item.name}
+            synonyms={item.synonyms}
             size="md"
             className={isCheckingOff ? 'opacity-40 grayscale' : ''}
           />
