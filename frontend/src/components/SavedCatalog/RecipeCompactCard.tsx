@@ -27,7 +27,6 @@ export default function RecipeCompactCard({
 
   const calories = getRecipeCalories(r);
   const caloriesFormatted = formatCalories(calories);
-  const protein = r.nutritionalValues?.protein;
   const score = typeof r.healthScore === 'number' ? r.healthScore : null;
   const scoreColor = score !== null ? getHealthScoreColor(score) : null;
   const scoreLetter = score !== null ? getHealthScoreLetter(score) : null;
@@ -63,10 +62,29 @@ export default function RecipeCompactCard({
 
       {/* Content */}
       <div className="flex-1 min-w-0 flex flex-col justify-between p-2.5 sm:p-3 overflow-hidden">
-        {/* Top line: Compact Health Score with letter or Category */}
-        <div className="flex items-center gap-1.5 min-w-0">
-          {score !== null && scoreLetter && scoreColor ? (
-            <div className="inline-flex items-center gap-1 shrink-0">
+        {/* Top line: Category or subtle label */}
+        {r.category ? (
+          <div className="flex items-center min-w-0">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 truncate">
+              {r.category}
+            </span>
+          </div>
+        ) : <div />}
+
+        {/* Title */}
+        <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors my-auto py-0.5">
+          {r.title}
+        </h4>
+
+        {/* Bottom line: Calories (left) & Health Score (right) */}
+        <div className="flex items-center justify-between gap-1 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+          {caloriesFormatted ? (
+            <span className="shrink-0 whitespace-nowrap">{caloriesFormatted}</span>
+          ) : <span />}
+
+          {/* Health Score rechts unten */}
+          {score !== null && scoreLetter && scoreColor && (
+            <div className="inline-flex items-center gap-1 shrink-0 ml-auto tabular-nums">
               <span
                 className={`w-4 h-4 rounded-full ${scoreColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-2xs select-none`}
                 title={`Health Score: ${scoreLetter} (${score}/100)`}
@@ -77,26 +95,6 @@ export default function RecipeCompactCard({
                 Score {score}
               </span>
             </div>
-          ) : r.category ? (
-            <span className="text-[10px] font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 truncate">
-              {r.category}
-            </span>
-          ) : null}
-        </div>
-
-        {/* Title */}
-        <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors my-auto py-0.5">
-          {r.title}
-        </h4>
-
-        {/* Bottom meta: calories & protein */}
-        <div className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
-          {caloriesFormatted && <span className="shrink-0 whitespace-nowrap">{caloriesFormatted}</span>}
-          {caloriesFormatted && protein && protein > 0 && <span className="shrink-0 text-gray-300 dark:text-gray-600">•</span>}
-          {protein && protein > 0 && (
-            <span className="text-emerald-600 dark:text-emerald-400 font-bold shrink-0 whitespace-nowrap">
-              {Math.round(protein)}g Protein
-            </span>
           )}
         </div>
       </div>
