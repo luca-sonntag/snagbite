@@ -67,7 +67,7 @@ export default function CollectionTile({
       </div>
 
       <div className="flex flex-col px-0.5">
-        <span className="text-xs font-bold text-gray-900 dark:text-white line-clamp-2 leading-snug">
+        <span className="text-xs font-bold text-gray-900 dark:text-white line-clamp-2 leading-snug break-words [overflow-wrap:anywhere] [word-break:break-word] hyphens-auto">
           {isFavorite && (
             <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500 inline mr-1 -translate-y-px" />
           )}
