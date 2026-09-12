@@ -1281,6 +1281,10 @@ export const uiTranslations = {
       },
       magazine: {
         heroHighlight: 'Tages-Highlight',
+        heroCommunityBadge: 'Community-Tipp',
+        heroVitalBadge: 'Dein Vital-Star',
+        saveToCookbook: 'In Kochbuch speichern',
+        alreadySaved: 'Bereits im Kochbuch',
         heroCookNow: 'Jetzt kochen',
         scoreBadge: 'Score {score} • {letter}',
         bentoTitle: 'Blitz-Gerichte & Nährstoff-Champions',
@@ -2632,6 +2636,10 @@ export const uiTranslations = {
       },
       magazine: {
         heroHighlight: "Today's Highlight",
+        heroCommunityBadge: 'Community Pick',
+        heroVitalBadge: 'Your Vital Pick',
+        saveToCookbook: 'Save to cookbook',
+        alreadySaved: 'Already saved',
         heroCookNow: 'Cook now',
         scoreBadge: 'Score {score} • {letter}',
         bentoTitle: 'Quick Dishes & Nutrient Champions',
