@@ -1,13 +1,16 @@
 import type { MouseEvent } from 'react';
 import { Clock, Check, Star, Layers } from 'lucide-react';
-import type { SavedRecipe } from '../../types';
+import type { SavedRecipe, Recipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
 import { getRecipeCalories, formatCalories } from '../../utils/formatNutrition';
 import { getHealthScoreColor, getHealthScoreLetter } from '../RecipeDetails/HealthScoreBadge';
+import { useI18n } from '../../context/I18nContext';
 
 interface RecipePosterCardProps {
-  job: SavedRecipe;
+  /** Provide either a full SavedRecipe job or a raw Recipe */
+  job?: SavedRecipe;
+  recipe?: Recipe;
   /** Pre-formatted total time, e.g. "35 Min." — null hides the badge. */
   totalTime: string | null;
   onClick: (e: MouseEvent) => void;
@@ -19,6 +22,8 @@ interface RecipePosterCardProps {
   isSelected?: boolean;
   isSelectMode?: boolean;
   bindLongPress?: any;
+  /** Explicitly marks recipe as already saved (e.g. for public discovery shelf) */
+  isSaved?: boolean;
 }
 
 /**
@@ -26,16 +31,23 @@ interface RecipePosterCardProps {
  */
 export default function RecipePosterCard({
   job,
+  recipe,
   totalTime,
   onClick,
   variant = 'grid',
   isSelected = false,
   isSelectMode = false,
   bindLongPress,
+  isSaved,
 }: RecipePosterCardProps) {
-  const r = job.recipe!;
+  const { t } = useI18n();
+  const r = recipe ?? job?.recipe;
+  if (!r) return null;
+
   const isShelf = variant === 'shelf';
-  const remixCount = job.remixCount ?? job.recipe?.remixCount ?? 0;
+  const remixCount = job?.remixCount ?? r.remixCount ?? 0;
+  const isFavorite = job?.isFavorite ?? false;
+  const showSavedBadge = isSaved !== undefined ? isSaved : false;
   const calories = getRecipeCalories(r);
   const caloriesFormatted = formatCalories(calories);
   const healthScoreNum = typeof r.healthScore === 'number' ? r.healthScore : null;
@@ -99,12 +111,17 @@ export default function RecipePosterCard({
             </div>
           )}
 
-          {/* Favorite badge in top right */}
-          {job.isFavorite && (
+          {/* Badges in top right: Saved in cookbook OR Favorite star */}
+          {showSavedBadge ? (
+            <div className="absolute top-2 right-2 z-10 px-2 py-0.5 rounded-full bg-emerald-600/90 backdrop-blur-md text-[10px] font-bold text-white flex items-center gap-1 shadow-xs">
+              <Check className="w-3 h-3" />
+              <span>{t('catalog.publicDiscovery.savedAction')}</span>
+            </div>
+          ) : isFavorite ? (
             <div className="absolute top-2 right-2 z-10 w-7 h-7 rounded-xl bg-amber-500/30 dark:bg-amber-500/30 flex items-center justify-center shadow-lg">
               <Star className="w-4 h-4 fill-amber-500 text-amber-500 drop-shadow-[0_2px_5px_rgba(0,0,0,0.65)]" />
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Meta: Title & coupled punchy info pills */}
