@@ -1,5 +1,5 @@
 import { useMemo, type MouseEvent } from 'react';
-import { Clock, Sparkles, Star } from 'lucide-react';
+import { Clock, History, Star } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
@@ -48,7 +48,7 @@ export default function RecipeShowcaseCard({
       {/* Header */}
       <div className="px-0.5">
         <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-1.5 tracking-tight font-heading">
-          <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" />
+          <History className="w-4 h-4 text-amber-500" />
           <span>{t('catalog.magazine.rediscoveredTitle')}</span>
         </h3>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -91,31 +91,33 @@ export default function RecipeShowcaseCard({
             {r.title}
           </h4>
 
-          {/* Unified Bottom Meta - Matching RecipePosterCard & RecipeCompactCard */}
+          {/* Unified Bottom Meta - Duration left, Calories + Health Score right */}
           <div className="flex items-center justify-between gap-1.5 w-full text-[11px] font-medium mt-auto pt-1 select-none">
-            <div className="flex items-center gap-1.5 min-w-0 truncate">
-              {totalTime && (
-                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
-                  <Clock className="w-2.5 h-2.5 text-gray-500 dark:text-gray-400 shrink-0" />
-                  <span>{totalTime}</span>
-                </span>
-              )}
+            {totalTime ? (
+              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
+                <Clock className="w-2.5 h-2.5 text-gray-500 dark:text-gray-400 shrink-0" />
+                <span>{totalTime}</span>
+              </span>
+            ) : (
+              <span />
+            )}
+
+            {/* Right side: Calories directly to the left of Health Score */}
+            <div className="flex items-center gap-1.5 shrink-0 ml-auto">
               {calories && (
-                <span className="whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium truncate">
+                <span className="whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium text-[11px]">
                   {calories}
                 </span>
               )}
+              {score !== null && scoreLetter && scoreColor && (
+                <span
+                  className={`w-4 h-4 rounded-full ${scoreColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-2xs shrink-0 select-none`}
+                  title={`Health Score: ${scoreLetter} (${score}/100)`}
+                >
+                  {scoreLetter}
+                </span>
+              )}
             </div>
-
-            {/* Health Score Pill */}
-            {score !== null && scoreLetter && scoreColor && (
-              <span
-                className={`w-4 h-4 rounded-full ${scoreColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-2xs shrink-0 select-none`}
-                title={`Health Score: ${scoreLetter} (${score}/100)`}
-              >
-                {scoreLetter}
-              </span>
-            )}
           </div>
         </div>
       </article>
