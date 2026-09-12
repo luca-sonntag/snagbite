@@ -21,6 +21,7 @@ import {
   isNutritionallyPlausible,
   applyCanonicalMatchToIngredient,
 } from './nutritionCalculator.js';
+import { computeRecipeHealthScore } from './healthScoreCalculator.js';
 import { openFoodFactsAccess } from './openFoodFactsIndex.js';
 
 // Re-exported so existing callers, routes and unit tests keep importing from ingredientMatcher.
@@ -314,6 +315,7 @@ export async function enrichRecipeWithCanonicalIngredients(
   let totalCarbs = 0;
   let totalFat = 0;
   let totalFiber = 0;
+  let totalSugar = 0;
 
   for (const { ing, id } of flatItems) {
     const canonical = matchedCanonicalMap.get(id) ?? null;
@@ -325,6 +327,8 @@ export async function enrichRecipeWithCanonicalIngredients(
     totalProtein += calculated.protein;
     totalCarbs += calculated.carbs;
     totalFat += calculated.fat;
+    totalFiber += calculated.fiber ?? 0;
+    totalSugar += calculated.sugar ?? 0;
   }
 
   const servings = recipe.servings && recipe.servings > 0 ? recipe.servings : 1;
@@ -334,7 +338,16 @@ export async function enrichRecipeWithCanonicalIngredients(
     protein: Math.round((totalProtein / servings) * 10) / 10,
     carbs: Math.round((totalCarbs / servings) * 10) / 10,
     fat: Math.round((totalFat / servings) * 10) / 10,
+    fiber: totalFiber > 0 ? Math.round((totalFiber / servings) * 10) / 10 : null,
+    sugar: totalSugar > 0 ? Math.round((totalSugar / servings) * 10) / 10 : null,
   };
+
+  const { score, breakdown } = computeRecipeHealthScore(recipe);
+  recipe.healthScore = score;
+  recipe.healthScoreBreakdown = breakdown;
+  recipe.nutritionalValues.vegetableGrams = breakdown.metrics.vegetableGramsPerServing ?? null;
+  recipe.nutritionalValues.plantCount = breakdown.metrics.plantIngredientsCount ?? null;
+  recipe.nutritionalValues.novaGroup = breakdown.metrics.averageNovaGroup ?? null;
 
   const totalItems = flatItems.length;
   const verifiedCount = flatItems.filter(f => f.ing.isVerified).length;

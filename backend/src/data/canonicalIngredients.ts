@@ -4,6 +4,8 @@ export interface CanonicalNutrients {
   carbs: number;
   fat: number;
   fiber: number;
+  sugar?: number;
+  nova_group?: number;
 }
 
 export interface CanonicalIngredient {
