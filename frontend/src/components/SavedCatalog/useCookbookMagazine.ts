@@ -63,7 +63,7 @@ export function useCookbookMagazine({
           recipe: candidate.recipe,
           totalTime: formatTotalTime(candidate.recipe),
           badgeText: heroBadgeText,
-          badgeVariant: 'emerald',
+          badgeVariant: 'amber',
           isCommunity: false,
           isSaved: true,
         });
@@ -77,7 +77,7 @@ export function useCookbookMagazine({
           recipe: firstComm,
           totalTime: formatTotalTime(firstComm),
           badgeText: t('catalog.magazine.heroCommunityBadge'),
-          badgeVariant: 'indigo',
+          badgeVariant: 'amber',
           isCommunity: true,
           isSaved: savedRecipeIds?.has(firstComm.id) || false,
         });
@@ -136,7 +136,7 @@ export function useCookbookMagazine({
             recipe: thirdCandidate.recipe,
             totalTime: formatTotalTime(thirdCandidate.recipe),
             badgeText: t('catalog.magazine.rediscoveredTitle'),
-            badgeVariant: 'emerald',
+            badgeVariant: 'blue',
             isCommunity: false,
             isSaved: true,
           });

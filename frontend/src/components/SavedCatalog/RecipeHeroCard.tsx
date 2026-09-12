@@ -6,12 +6,23 @@ import { hapticLight, hapticMedium } from '../../utils/haptics';
 import { useI18n } from '../../context/I18nContext';
 import { getHealthScoreLetter, getHealthScoreColor } from '../RecipeDetails/HealthScoreBadge';
 
+export type HeroBadgeVariant = 'amber' | 'emerald' | 'indigo' | 'blue' | 'rose' | 'teal';
+
+const BADGE_VARIANT_STYLES: Record<HeroBadgeVariant, string> = {
+  amber: 'bg-amber-500/90 text-white shadow-amber-500/20',
+  emerald: 'bg-emerald-600/90 text-white shadow-emerald-600/20',
+  indigo: 'bg-indigo-600/90 text-white shadow-indigo-600/20',
+  blue: 'bg-blue-600/90 text-white shadow-blue-600/20',
+  teal: 'bg-teal-600/90 text-white shadow-teal-600/20',
+  rose: 'bg-rose-500/90 text-white shadow-rose-500/20',
+};
+
 export interface RecipeHeroCardProps {
   job?: SavedRecipe;
   recipe?: Recipe;
   totalTime: string | null;
   badgeText?: string;
-  badgeVariant?: 'emerald' | 'indigo' | 'amber';
+  badgeVariant?: HeroBadgeVariant;
   isCommunity?: boolean;
   isSaved?: boolean;
   onSaveCommunity?: (e: MouseEvent, recipe: Recipe) => void;
@@ -28,7 +39,7 @@ export default function RecipeHeroCard({
   recipe,
   totalTime,
   badgeText,
-  badgeVariant = 'emerald',
+  badgeVariant = 'amber',
   isCommunity = false,
   isSaved = false,
   onSaveCommunity,
@@ -66,14 +77,10 @@ export default function RecipeHeroCard({
         <div className="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none">
           <span
             className={`px-2.5 py-1 rounded-full ${
-              badgeVariant === 'indigo'
-                ? 'bg-indigo-600/90 text-white'
-                : badgeVariant === 'amber'
-                ? 'bg-amber-500/90 text-white'
-                : 'bg-emerald-500/90 text-white'
+              BADGE_VARIANT_STYLES[badgeVariant] ?? BADGE_VARIANT_STYLES.amber
             } backdrop-blur-md text-[11px] font-bold shadow-sm flex items-center gap-1`}
           >
-            {isCommunity && <Sparkles className="w-3 h-3 text-indigo-200" />}
+            {isCommunity && <Sparkles className="w-3 h-3 text-white/90" />}
             {badgeText || t('catalog.magazine.heroHighlight')}
           </span>
 

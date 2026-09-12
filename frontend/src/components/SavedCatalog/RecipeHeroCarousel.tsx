@@ -1,6 +1,6 @@
 import { useState, useRef, type MouseEvent } from 'react';
 import type { SavedRecipe, Recipe } from '../../types';
-import RecipeHeroCard from './RecipeHeroCard';
+import RecipeHeroCard, { type HeroBadgeVariant } from './RecipeHeroCard';
 import { hapticLight } from '../../utils/haptics';
 
 export interface HeroSlideItem {
@@ -9,10 +9,19 @@ export interface HeroSlideItem {
   recipe: Recipe;
   totalTime: string | null;
   badgeText: string;
-  badgeVariant: 'emerald' | 'indigo' | 'amber';
+  badgeVariant?: HeroBadgeVariant;
   isCommunity: boolean;
   isSaved?: boolean;
 }
+
+const ACTIVE_DOT_COLORS: Record<HeroBadgeVariant, string> = {
+  amber: 'bg-amber-500',
+  emerald: 'bg-emerald-500',
+  indigo: 'bg-indigo-500',
+  blue: 'bg-blue-500',
+  teal: 'bg-teal-500',
+  rose: 'bg-rose-500',
+};
 
 interface RecipeHeroCarouselProps {
   slides: HeroSlideItem[];
@@ -120,7 +129,7 @@ export default function RecipeHeroCarousel({
                 onClick={() => scrollToSlide(idx)}
                 className={`transition-all duration-300 rounded-full border-none cursor-pointer p-0 h-1.5 ${
                   isActive
-                    ? 'w-5 bg-emerald-500 shadow-xs'
+                    ? `w-5 ${slide.badgeVariant ? ACTIVE_DOT_COLORS[slide.badgeVariant] : 'bg-emerald-500'} shadow-xs`
                     : 'w-1.5 bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600'
                 }`}
                 aria-label={`Slide ${idx + 1}: ${slide.badgeText}`}
