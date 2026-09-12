@@ -43,16 +43,6 @@ export default function RecipeShowcaseCard({
     return { formattedDate: formatted, daysAgo: days };
   }, [job.addedAt, language]);
 
-  const ingredientsPreview = useMemo(() => {
-    if (!r.ingredients || r.ingredients.length === 0) return null;
-    return r.ingredients
-      .flatMap((g) => g.items || [])
-      .slice(0, 3)
-      .map((item) => item.name)
-      .filter(Boolean)
-      .join(', ');
-  }, [r.ingredients]);
-
   return (
     <section className="space-y-2.5">
       {/* Header */}
@@ -66,16 +56,16 @@ export default function RecipeShowcaseCard({
         </p>
       </div>
 
-      {/* Wide Showcase Card */}
+      {/* Clean Flat Showcase Card - Harmonized with Poster & Compact Cards */}
       <article
         onClick={(e) => {
           hapticLight();
           onOpenRecipe(e, job);
         }}
-        className="group relative rounded-2xl p-3 sm:p-3.5 bg-gradient-to-br from-amber-500/10 via-emerald-500/5 to-white/70 dark:from-amber-950/25 dark:via-emerald-950/15 dark:to-gray-900/90 shadow-[0_2px_14px_rgba(0,0,0,0.04)] border border-amber-500/15 dark:border-amber-400/15 flex items-center gap-3.5 cursor-pointer active:scale-[0.98] hover:shadow-md transition-all duration-150 select-none overflow-hidden"
+        className="group relative rounded-2xl overflow-hidden bg-white dark:bg-gray-900 shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 border-none flex items-stretch cursor-pointer active:scale-[0.98] hover:shadow-md transition-all duration-150 select-none"
       >
-        {/* Thumbnail */}
-        <div className="relative w-20 h-20 sm:w-22 sm:h-22 rounded-xl overflow-hidden shrink-0 bg-black/5 dark:bg-white/5 shadow-xs">
+        {/* Full Height Left Cover Image */}
+        <div className="relative w-28 sm:w-36 shrink-0 overflow-hidden bg-black/5 dark:bg-white/5 self-stretch">
           <CachedImage
             src={r.imageUrl}
             emoji={r.emoji}
@@ -83,51 +73,49 @@ export default function RecipeShowcaseCard({
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
           />
           {job.isFavorite && (
-            <div className="absolute top-1 right-1 w-5 h-5 rounded-md bg-black/40 backdrop-blur-xs flex items-center justify-center text-amber-400 pointer-events-none">
-              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+            <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center text-amber-400 pointer-events-none">
+              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
             </div>
           )}
         </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
-          {/* Top Line: Saved Date + Health Score */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
-              {t('catalog.magazine.savedOn', { date: formattedDate })}
-            </span>
-            {score !== null && scoreLetter && scoreColor && (
-              <span
-                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${scoreColor.badgeBg} ${scoreColor.badgeText} shadow-2xs`}
-              >
-                <span className={`w-1.5 h-1.5 rounded-full ${scoreColor.pillBg}`} />
-                <span>Score {score} • {scoreLetter}</span>
-              </span>
-            )}
-          </div>
+        {/* Content Area */}
+        <div className="flex-1 min-w-0 flex flex-col justify-between p-3 sm:p-3.5 overflow-hidden">
+          {/* Top Line: Subtle Saved Date */}
+          <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 tracking-tight">
+            {t('catalog.magazine.savedOn', { date: formattedDate })}
+          </span>
 
           {/* Title */}
-          <h4 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+          <h4 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors my-auto py-1 font-heading">
             {r.title}
           </h4>
 
-          {/* Ingredients Preview */}
-          {ingredientsPreview && (
-            <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
-              {ingredientsPreview}
-            </p>
-          )}
+          {/* Unified Bottom Meta - Matching RecipePosterCard & RecipeCompactCard */}
+          <div className="flex items-center justify-between gap-1.5 w-full text-[11px] font-medium mt-auto pt-1 select-none">
+            <div className="flex items-center gap-1.5 min-w-0 truncate">
+              {totalTime && (
+                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
+                  <Clock className="w-2.5 h-2.5 text-gray-500 dark:text-gray-400 shrink-0" />
+                  <span>{totalTime}</span>
+                </span>
+              )}
+              {calories && (
+                <span className="whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium truncate">
+                  {calories}
+                </span>
+              )}
+            </div>
 
-          {/* Bottom Meta */}
-          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 font-medium pt-0.5">
-            {totalTime && (
-              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
-                <Clock className="w-3 h-3 shrink-0" />
-                <span>{totalTime}</span>
+            {/* Health Score Pill */}
+            {score !== null && scoreLetter && scoreColor && (
+              <span
+                className={`w-4 h-4 rounded-full ${scoreColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-2xs shrink-0 select-none`}
+                title={`Health Score: ${scoreLetter} (${score}/100)`}
+              >
+                {scoreLetter}
               </span>
             )}
-            {totalTime && calories && <span>•</span>}
-            {calories && <span>{calories}</span>}
           </div>
         </div>
       </article>
