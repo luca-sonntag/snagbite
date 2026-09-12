@@ -1,5 +1,5 @@
 import type { MouseEvent } from 'react';
-import { Clock, Star, Zap } from 'lucide-react';
+import { Clock, Star } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
@@ -46,9 +46,8 @@ export default function RecipeBentoSection({
       {/* Section Header */}
       <div className="flex items-center justify-between px-0.5">
         <div>
-          <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-1.5 tracking-tight font-heading">
-            <Zap className="w-4 h-4 text-amber-500 fill-amber-500" />
-            <span>{t('catalog.magazine.bentoTitle')}</span>
+          <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight font-heading">
+            {t('catalog.magazine.bentoTitle')}
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
             {t('catalog.magazine.bentoSubtitle')}

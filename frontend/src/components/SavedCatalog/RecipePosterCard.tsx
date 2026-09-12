@@ -114,32 +114,35 @@ export default function RecipePosterCard({
           </h4>
           {(totalTime || caloriesFormatted || (r.servings && r.servings > 0) || (r.healthScore !== undefined && r.healthScore !== null)) && (
             <div className="flex items-center justify-between gap-1.5 w-full text-[11px] font-medium mt-auto pt-1 select-none">
-              {totalTime && (
-                <span className="flex items-center gap-1 min-w-0 truncate text-emerald-700 dark:text-emerald-400 font-semibold text-[11px]">
-                  <Clock className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span className="truncate">{totalTime}</span>
-                </span>
-              )}
-              <div className="flex items-center gap-1.5 shrink-0 ml-auto tabular-nums">
-                {healthColor && healthLetter && healthScoreNum !== null && (
-                  <span
-                    className={`w-4 h-4 rounded-full ${healthColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-2xs select-none`}
-                    title={`Healthy Score: ${healthLetter} (${healthScoreNum}/100)`}
-                    aria-label={`Healthy Score: ${healthLetter}`}
-                  >
-                    {healthLetter}
+              {/* Links: Dauer (grauer Pill) und Kalorien */}
+              <div className="flex items-center gap-1.5 min-w-0 truncate">
+                {totalTime && (
+                  <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
+                    <Clock className="w-2.5 h-2.5 text-gray-500 dark:text-gray-400 shrink-0" />
+                    <span>{totalTime}</span>
                   </span>
                 )}
                 {caloriesFormatted ? (
-                  <span className="whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium">
+                  <span className="whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium truncate">
                     {caloriesFormatted}
                   </span>
                 ) : r.servings && r.servings > 0 ? (
-                  <span className="whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium">
+                  <span className="whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium truncate">
                     {r.servings} Port.
                   </span>
                 ) : null}
               </div>
+
+              {/* Rechts: Health Score Buchstabenbadge */}
+              {healthColor && healthLetter && healthScoreNum !== null && (
+                <span
+                  className={`w-4 h-4 rounded-full ${healthColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-2xs shrink-0 select-none`}
+                  title={`Healthy Score: ${healthLetter} (${healthScoreNum}/100)`}
+                  aria-label={`Healthy Score: ${healthLetter}`}
+                >
+                  {healthLetter}
+                </span>
+              )}
             </div>
           )}
         </div>
