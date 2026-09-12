@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Tag, Clock, Users } from 'lucide-react';
 import RecipeImageGallery from '../RecipeImageGallery';
 import { useI18n } from '../../context/I18nContext';
-import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
+import { getRecipeCategoryLabel } from '../../i18n';
 import { useCookHistory } from '../../hooks/useCookHistory';
 import { formatRelative } from '../../utils/formatRelative';
 import { hapticLight } from '../../utils/haptics';
@@ -73,8 +73,7 @@ export default function RecipeHeader({
         {(recipe.category || totalTimeLabel || (recipe.servings && recipe.servings > 0) || (flags && flags.length > 0) || (history && history.count > 0)) && (
           <div className="flex flex-wrap items-center gap-2">
             {recipe.category && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold text-xs select-none border-none">
-                <span className="text-sm leading-none">{getRecipeCategoryEmoji(recipe.category)}</span>
+              <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold text-xs select-none border-none">
                 <span>{getRecipeCategoryLabel(recipe.category, language)}</span>
               </span>
             )}

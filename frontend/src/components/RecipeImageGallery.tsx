@@ -116,7 +116,7 @@ export default function RecipeImageGallery({
       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 via-50% to-transparent pointer-events-none z-10" />
 
       {/* Bottom Content: Meta row, Title & Creator handle */}
-      <div className="absolute bottom-7 inset-x-4 sm:bottom-8 sm:inset-x-5 z-20 flex flex-col gap-1 text-white pointer-events-none">
+      <div className="absolute bottom-9 inset-x-4 sm:bottom-10 sm:inset-x-5 z-20 flex flex-col gap-1 text-white pointer-events-none pb-1">
         {/* Meta Bar: Platform/Import badge & Slide indicator */}
         <div className="flex items-center justify-between gap-2 min-h-[30px]">
           {reelUrl ? (
@@ -157,9 +157,9 @@ export default function RecipeImageGallery({
           {recipe.title}
         </h1>
 
-        {/* Creator Handle */}
+        {/* Creator Handle with ample bottom spacing */}
         {formattedHandle && (
-          <p className="text-xs sm:text-sm text-gray-200/90 font-medium truncate leading-none mt-0.5 drop-shadow-xs">
+          <p className="text-xs sm:text-sm text-gray-200/90 font-medium truncate leading-none mt-1 mb-1 drop-shadow-xs">
             {formattedHandle}
           </p>
         )}
