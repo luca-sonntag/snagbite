@@ -36,38 +36,61 @@ export default function RecipeHeroCarousel({
 
   const handleScroll = () => {
     const el = scrollRef.current;
-    if (!el) return;
-    const width = el.clientWidth;
-    if (width > 0) {
-      const nextIndex = Math.round(el.scrollLeft / width);
-      if (nextIndex !== activeIndex && nextIndex >= 0 && nextIndex < slides.length) {
-        setActiveIndex(nextIndex);
+    if (!el || !el.children.length) return;
+    const scrollLeft = el.scrollLeft;
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll > 0 && scrollLeft >= maxScroll - 12) {
+      setActiveIndex(slides.length - 1);
+      return;
+    }
+    const firstOffset = (el.children[0] as HTMLElement).offsetLeft;
+    let closestIndex = 0;
+    let minDistance = Infinity;
+    for (let i = 0; i < el.children.length; i++) {
+      const child = el.children[i] as HTMLElement;
+      const target = child.offsetLeft - firstOffset;
+      const distance = Math.abs(target - scrollLeft);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestIndex = i;
       }
+    }
+    if (closestIndex !== activeIndex && closestIndex >= 0 && closestIndex < slides.length) {
+      setActiveIndex(closestIndex);
     }
   };
 
   const scrollToSlide = (index: number) => {
     const el = scrollRef.current;
-    if (!el) return;
+    if (!el || !el.children.length) return;
     hapticLight();
-    const width = el.clientWidth;
-    el.scrollTo({
-      left: index * width,
-      behavior: 'smooth',
-    });
-    setActiveIndex(index);
+    const child = el.children[index] as HTMLElement | undefined;
+    const firstChild = el.children[0] as HTMLElement;
+    if (child && firstChild) {
+      const targetLeft = child.offsetLeft - firstChild.offsetLeft;
+      el.scrollTo({
+        left: targetLeft,
+        behavior: 'smooth',
+      });
+      setActiveIndex(index);
+    }
   };
 
   return (
     <section className="relative flex flex-col gap-2 select-none" aria-label="Hero Highlights">
-      {/* Snap-scroll container */}
+      {/* Snap-scroll container with peek effect and gap */}
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth"
+        className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-none no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 scroll-pl-4 sm:scroll-pl-0 scroll-smooth"
       >
         {slides.map((slide, idx) => (
-          <div key={slide.id || idx} className="w-full shrink-0 snap-center">
+          <div
+            key={slide.id || idx}
+            className={`${
+              slides.length > 1 ? 'w-[84%] sm:w-[88%] md:w-[90%]' : 'w-full'
+            } shrink-0 snap-start`}
+          >
             <RecipeHeroCard
               job={slide.job}
               recipe={slide.recipe}
