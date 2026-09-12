@@ -628,6 +628,7 @@ export default function SavedCatalog({
       ) : !isListLevel ? (
         <CookbookHome
           totalRecipes={completedJobs.length}
+          items={completedJobs}
           collections={collections}
           jobsByCollection={jobsByCollection}
           jobsByFlag={jobsByFlag}

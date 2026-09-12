@@ -10,7 +10,7 @@ import RecipeCompactCard from './RecipeCompactCard';
 
 interface RecipeBentoSectionProps {
   recipes: SavedRecipe[];
-  formatTotalTime: (job: SavedRecipe) => string | null;
+  formatTotalTime: (recipe: any) => string | null;
   onOpenRecipe: (e: MouseEvent, job: SavedRecipe) => void;
   onSeeAll?: () => void;
 }
@@ -37,7 +37,7 @@ export default function RecipeBentoSection({
   const mainScore = typeof mainRecipe.healthScore === 'number' ? mainRecipe.healthScore : null;
   const mainScoreColor = mainScore !== null ? getHealthScoreColor(mainScore) : null;
   const mainScoreLetter = mainScore !== null ? getHealthScoreLetter(mainScore) : null;
-  const mainTime = formatTotalTime(mainJob);
+  const mainTime = formatTotalTime(mainRecipe);
   const mainCalories = formatCalories(getRecipeCalories(mainRecipe));
   const mainProtein = mainRecipe.nutritionalValues?.protein;
 
@@ -126,7 +126,7 @@ export default function RecipeBentoSection({
               <RecipeCompactCard
                 key={job.recipeId}
                 job={job}
-                totalTime={formatTotalTime(job)}
+                totalTime={job.recipe ? formatTotalTime(job.recipe) : null}
                 onClick={(e) => onOpenRecipe(e, job)}
               />
             ))}

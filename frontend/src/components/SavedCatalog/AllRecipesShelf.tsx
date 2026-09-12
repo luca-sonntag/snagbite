@@ -8,7 +8,7 @@ import { hapticLight } from '../../utils/haptics';
 interface AllRecipesShelfProps {
   items: SavedRecipe[];
   totalCount: number;
-  formatTotalTime: (job: SavedRecipe) => string | null;
+  formatTotalTime: (recipe: any) => string | null;
   onOpenRecipe: (e: MouseEvent, job: SavedRecipe) => void;
   onViewAll: () => void;
 }
@@ -60,7 +60,7 @@ export default function AllRecipesShelf({
             <RecipePosterCard
               job={job}
               variant="shelf"
-              totalTime={formatTotalTime(job)}
+              totalTime={job.recipe ? formatTotalTime(job.recipe) : null}
               onClick={(e) => onOpenRecipe(e, job)}
             />
           </div>
