@@ -12,6 +12,7 @@ import {
   UserRecipeRow,
 } from './client.js';
 import { getCollectionMembership } from './collectionsDb.js';
+import { computeRecipeHealthScore, isVegetableOrFruitCategory } from '../matching/healthScoreCalculator.js';
 
 export function rowToRecipe(row: RecipeRow): Recipe {
   const nutritionalValues =
@@ -19,7 +20,7 @@ export function rowToRecipe(row: RecipeRow): Recipe {
       ? (row.nutritional_values as Recipe['nutritionalValues'])
       : undefined;
 
-  return {
+  const recipe: Recipe = {
     id: row.id,
     createdBy: row.created_by,
     visibility: row.visibility as Recipe['visibility'],
@@ -61,6 +62,27 @@ export function rowToRecipe(row: RecipeRow): Recipe {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+
+  // Auto-heal / dynamic sync: recompute if healthScore is missing or if breakdown has 0g veg despite having produce items
+  if (
+    recipe.ingredients?.length &&
+    (recipe.healthScore === null ||
+      recipe.healthScoreBreakdown === null ||
+      (recipe.healthScoreBreakdown.metrics?.vegetableGramsPerServing === 0 &&
+        recipe.ingredients.some((g) =>
+          g.items?.some((i) => isVegetableOrFruitCategory(i.category || g.name))
+        )))
+  ) {
+    const computed = computeRecipeHealthScore(recipe);
+    recipe.healthScore = computed.score;
+    recipe.healthScoreBreakdown = computed.breakdown;
+    if (recipe.nutritionalValues) {
+      recipe.nutritionalValues.vegetableGrams = computed.breakdown.metrics.vegetableGramsPerServing ?? null;
+      recipe.nutritionalValues.plantCount = computed.breakdown.metrics.plantIngredientsCount ?? null;
+    }
+  }
+
+  return recipe;
 }
 
 export function recipeToRow(recipe: Recipe): Record<string, unknown> {

@@ -6,19 +6,31 @@ import type {
   HealthScorePillar,
 } from '@cookbook/shared';
 import { calculateWeightGrams } from './nutritionCalculator.js';
+import { getMajorCategoryGroup, normalizeToCategoryKey } from './categoryGroups.js';
 
-const PLANT_CATEGORIES = new Set([
-  'VEGETABLES',
-  'FRUITS',
-  'NUTS_SEEDS',
-  'SPICES_HERBS',
-  'GRAINS_PASTA',
-]);
+export function isVegetableOrFruitCategory(cat?: string | null): boolean {
+  if (!cat) return false;
+  const upper = cat.toUpperCase().trim();
+  if (getMajorCategoryGroup(upper) === 'PRODUCE') return true;
+  const key = normalizeToCategoryKey(upper);
+  return key === 'VEGETABLES' || key === 'FRUITS';
+}
 
-const VEGETABLE_CATEGORIES = new Set([
-  'VEGETABLES',
-  'FRUITS',
-]);
+export function isPlantCategory(cat?: string | null): boolean {
+  if (!cat) return false;
+  const upper = cat.toUpperCase().trim();
+  if (isVegetableOrFruitCategory(upper)) return true;
+  const major = getMajorCategoryGroup(upper);
+  if (major === 'SPICES' || major === 'GRAINS' || major === 'NUTS_SEEDS') return true;
+  const key = normalizeToCategoryKey(upper);
+  return (
+    key === 'VEGETABLES' ||
+    key === 'FRUITS' ||
+    key === 'NUTS_SEEDS' ||
+    key === 'SPICES_HERBS' ||
+    key === 'GRAINS_PASTA'
+  );
+}
 
 function getGrade(score: number): HealthScoreGrade {
   if (score >= 85) return 'EXCELLENT';
@@ -188,11 +200,11 @@ export function computeRecipeHealthScore(recipe: Recipe): {
         const grams = calculateWeightGrams(item.amount, item.unit, null, item.gramsPerUnit);
         totalDishWeightGrams += grams;
 
-        if (VEGETABLE_CATEGORIES.has(itemCategory)) {
+        if (isVegetableOrFruitCategory(itemCategory)) {
           totalVegWeightGrams += grams;
         }
 
-        if (PLANT_CATEGORIES.has(itemCategory)) {
+        if (isPlantCategory(itemCategory)) {
           const key = (item.baseName || item.name || '').toLowerCase().trim();
           if (key) distinctPlants.add(key);
         }

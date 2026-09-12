@@ -120,4 +120,94 @@ describe('healthScoreCalculator', () => {
     assert.ok(result.score >= 0 && result.score <= 100);
     assert.ok(result.breakdown.pillars.macroBalance.score >= 0);
   });
+
+  it('correctly recognizes vegetables with category FRUITS_VEGETABLES (e.g. Brokkoli in Gnocchi-Auflauf)', () => {
+    const recipe: Recipe = {
+      title: 'High Protein Gnocchi-Auflauf',
+      description: 'Gnocchi bake with broccoli and protein sauce',
+      servings: 3,
+      ingredients: [
+        {
+          name: 'Zutaten',
+          items: [
+            {
+              name: 'Brokkoli',
+              amount: 230,
+              unit: 'g',
+              baseName: 'broccoli',
+              category: 'FRUITS_VEGETABLES',
+              calories: 60,
+              protein: 6.2,
+              carbs: 4.1,
+              fat: 0.7,
+              fiber: 6.7,
+              gramsPerUnit: 1,
+              novaGroup: 1,
+            },
+            {
+              name: 'Gnocchi',
+              amount: 400,
+              unit: 'g',
+              baseName: 'gnocchi',
+              category: 'GRAINS_PASTA',
+              calories: 540,
+              protein: 12,
+              carbs: 110,
+              fat: 2,
+              fiber: 4,
+              novaGroup: 3,
+            },
+            {
+              name: 'Hähnchenbrust',
+              amount: 400,
+              unit: 'g',
+              baseName: 'chicken breast',
+              category: 'MEAT_POULTRY',
+              calories: 440,
+              protein: 92,
+              carbs: 0,
+              fat: 8,
+              fiber: 0,
+              novaGroup: 1,
+            },
+            {
+              name: 'Tomatensauce',
+              amount: 400,
+              unit: 'g',
+              baseName: 'tomato sauce',
+              category: 'FRUITS_VEGETABLES',
+              calories: 120,
+              protein: 4,
+              carbs: 18,
+              fat: 1,
+              fiber: 6,
+              novaGroup: 2,
+            },
+          ],
+        },
+      ],
+      nutritionalValues: {
+        calories: 618,
+        protein: 60,
+        carbs: 45,
+        fat: 15,
+        fiber: 3.7,
+        sugar: 4.1,
+      },
+      instructions: [],
+      equipment: [],
+      prepTime: 15,
+      cookTime: 22,
+    };
+
+    const { score, breakdown } = computeRecipeHealthScore(recipe);
+    // (230g Brokkoli + 400g Tomatensauce) / 3 servings = 210g veg per serving
+    assert.ok(breakdown.metrics.vegetableGramsPerServing! >= 200, `Expected >= 200g veg, got ${breakdown.metrics.vegetableGramsPerServing}`);
+    assert.ok(breakdown.metrics.plantIngredientsCount! >= 3, `Expected >= 3 plants, got ${breakdown.metrics.plantIngredientsCount}`);
+    assert.ok(
+      !breakdown.cautions.includes('Geringer Gemüseanteil (< 40g)'),
+      'Should not caution low vegetables when recipe has abundant broccoli and tomato sauce'
+    );
+    assert.ok(score >= 65, `Expected score >= 65 for balanced high protein bake, got ${score}`);
+  });
 });
