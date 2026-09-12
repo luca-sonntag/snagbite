@@ -127,7 +127,7 @@ export default function CookbookHome({
         onOpenFilters={onOpenFilters}
       />
 
-      {/* 2. Circular Story Hub (Option A: 100% circular Instagram-style highlights) */}
+      {/* 2. Clean Flat Squircle Collection Hub */}
       <section className="space-y-3">
         <CollectionStoryHub
           totalRecipes={totalRecipes}

@@ -19,7 +19,7 @@ interface CollectionStoryHubProps {
 }
 
 /**
- * Horizontal Instagram-style Story Highlight Hub for collections.
+ * Horizontal Clean Flat Squircle Hub for collections.
  * Positioned right below the search bar to give instant 1-tap access to
  * "All Recipes", Favorites, Categories, and User Collections above the fold.
  */
@@ -63,29 +63,27 @@ export default function CollectionStoryHub({
 
       {/* Horizontal Carousel */}
       <div className="flex items-start gap-3 overflow-x-auto no-scrollbar scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1 scroll-smooth">
-        {/* 1. All Recipes Smart Story Bubble */}
+        {/* 1. All Recipes Clean Flat Tile */}
         <CollectionStoryBubble
           title={t('catalog.storyHub.all')}
           count={totalRecipes}
           icon={<BookOpen className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />}
           imageUrl={allRecipesThumbnail}
-          ringGradient="from-emerald-400 via-teal-500 to-indigo-500"
           onClick={() => onOpenList({ kind: 'all' })}
         />
 
-        {/* 2. Favorites Smart Story Bubble */}
+        {/* 2. Favorites Clean Flat Tile */}
         {favoriteJobs.length > 0 && (
           <CollectionStoryBubble
             title={t('catalog.favoritesFilter')}
             count={favoriteJobs.length}
             icon={<Star className="w-6 h-6 text-amber-500 fill-amber-500" />}
             imageUrl={getCollectionImage(favoriteJobs)}
-            ringGradient="from-amber-500 via-orange-400 to-yellow-300"
             onClick={() => onOpenList({ kind: 'favorites' })}
           />
         )}
 
-        {/* 3. Categories Story Bubbles */}
+        {/* 3. Categories Clean Flat Tiles */}
         {availableCategories.map(cat => {
           const jobs = jobsByCategory[cat] ?? [];
           if (jobs.length === 0) return null;
@@ -96,13 +94,12 @@ export default function CollectionStoryHub({
               count={jobs.length}
               icon={<UtensilsCrossed className="w-6 h-6 text-teal-600 dark:text-teal-400" />}
               imageUrl={getCollectionImage(jobs)}
-              ringGradient="from-teal-400 via-emerald-500 to-cyan-500"
               onClick={() => onOpenList({ kind: 'category', category: cat })}
             />
           );
         })}
 
-        {/* 4. User Collections Story Bubbles */}
+        {/* 4. User Collections Clean Flat Tiles */}
         {collections.map(col => {
           const jobs = jobsByCollection[col.id] ?? [];
           return (
@@ -112,7 +109,6 @@ export default function CollectionStoryHub({
               count={jobs.length}
               icon={<Folder className="w-6 h-6 text-rose-500 dark:text-rose-400" />}
               imageUrl={getCollectionImage(jobs)}
-              ringGradient="from-rose-500 via-pink-400 to-orange-400"
               onClick={() => onOpenList({ kind: 'collection', id: col.id })}
             />
           );
