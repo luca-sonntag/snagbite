@@ -1,5 +1,5 @@
 import type { MouseEvent } from 'react';
-import { Star, Clock } from 'lucide-react';
+import { Star, Clock, Flame } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
@@ -54,14 +54,14 @@ export default function RecipeHeroCard({
         <div className="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none">
           <div className="flex items-center gap-2">
             <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-600/90 backdrop-blur-md text-white text-[11px] font-bold shadow-sm">
-              <span>🔥</span>
+              <Flame className="w-3.5 h-3.5 text-amber-300 fill-amber-300 shrink-0" />
               <span>{t('catalog.magazine.heroHighlight')}</span>
             </span>
 
             {/* Health Score Pill */}
             {score !== null && scoreLetter && scoreColors && (
-              <span className={`flex items-center gap-1 px-2.5 py-1 rounded-full ${scoreColors.badgeBg} backdrop-blur-md text-[11px] font-extrabold shadow-sm ${scoreColors.badgeText}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${scoreColors.pillBg}`} />
+              <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full ${scoreColors.onMediaBg} backdrop-blur-md text-[11px] font-extrabold shadow-sm ${scoreColors.onMediaText} ring-1 ring-white/15`}>
+                <span className={`w-2 h-2 rounded-full ${scoreColors.pillBg}`} />
                 <span>{t('catalog.magazine.scoreBadge', { score, letter: scoreLetter })}</span>
               </span>
             )}
@@ -77,24 +77,28 @@ export default function RecipeHeroCard({
 
         {/* Bottom Content Container */}
         <div className="absolute bottom-3 inset-x-3 text-white flex flex-col gap-1.5">
-          {/* Punchy Info Pills */}
-          <div className="flex items-center gap-2 text-xs font-medium text-emerald-300 flex-wrap">
+          {/* Punchy Info Pills - Crisp White & High Legibility */}
+          <div className="flex items-center gap-2 text-xs font-semibold text-white/95 flex-wrap drop-shadow-xs">
             {totalTime && (
-              <span className="flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5" />
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/90 text-white font-bold text-[11px] shadow-xs">
+                <Clock className="w-3 h-3 text-white shrink-0" />
                 <span>{totalTime}</span>
               </span>
             )}
             {protein && protein > 0 && (
               <>
-                <span>•</span>
-                <span>💪 {Math.round(protein)}g Protein</span>
+                {totalTime && <span className="text-white/40">•</span>}
+                <span className="text-white font-medium">
+                  {Math.round(protein)}g Protein
+                </span>
               </>
             )}
             {vegGrams && vegGrams > 0 && (
               <>
-                <span>•</span>
-                <span className="text-emerald-400 font-semibold">🥗 {t('catalog.magazine.vegGrams', { grams: vegGrams })}</span>
+                {(totalTime || (protein && protein > 0)) && <span className="text-white/40">•</span>}
+                <span className="text-white font-medium">
+                  {t('catalog.magazine.vegGrams', { grams: vegGrams })}
+                </span>
               </>
             )}
           </div>
