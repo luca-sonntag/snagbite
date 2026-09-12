@@ -71,8 +71,8 @@ export default function RecipeHeader({
         topRightActions={topRightActions}
       />
 
-      {/* Recipe details body below cover (Sheet-Overlap with soft curved top) */}
-      <div className="relative -mt-6 -mx-4 rounded-t-3xl bg-white dark:bg-gray-950 px-4 pt-5 pb-2 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_-8px_24px_rgba(0,0,0,0.4)] flex flex-col gap-3 z-20">
+      {/* Recipe details body below cover */}
+      <div className="relative px-1 pt-3.5 flex flex-col gap-3">
 
         {/* Editorial Quick-Facts Lead-in: Category · Total Time · Servings · Health Score · Flags */}
         {(recipe.category || totalTimeLabel || (recipe.servings && recipe.servings > 0) || (healthColor && healthLetter) || (flags && flags.length > 0) || (history && history.count > 0)) && (

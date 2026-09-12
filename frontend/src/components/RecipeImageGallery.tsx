@@ -116,7 +116,7 @@ export default function RecipeImageGallery({
       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 via-50% to-transparent pointer-events-none z-10" />
 
       {/* Bottom Content: Meta row, Title & Creator handle */}
-      <div className="absolute bottom-9 inset-x-4 sm:bottom-10 sm:inset-x-5 z-20 flex flex-col gap-1 text-white pointer-events-none pb-1">
+      <div className="absolute bottom-5 inset-x-4 sm:bottom-6 sm:inset-x-5 z-20 flex flex-col gap-1 text-white pointer-events-none pb-0.5">
         {/* Meta Bar: Platform/Import badge & Slide indicator */}
         <div className="flex items-center justify-between gap-2 min-h-[30px]">
           {reelUrl ? (
@@ -171,7 +171,7 @@ export default function RecipeImageGallery({
     <>
       {/* Inline Gallery */}
       {availableImages.length > 1 ? (
-        <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950">
+        <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950 rounded-b-3xl sm:rounded-b-[2rem] overflow-hidden shadow-xs">
           {overlayHeader}
           <div
             ref={scrollContainerRef}
@@ -208,7 +208,7 @@ export default function RecipeImageGallery({
           </div>
         </div>
       ) : availableImages.length === 1 ? (
-        <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950">
+        <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950 rounded-b-3xl sm:rounded-b-[2rem] overflow-hidden shadow-xs">
           {overlayHeader}
           <CachedImage
             src={availableImages[0]}
@@ -219,7 +219,7 @@ export default function RecipeImageGallery({
           />
         </div>
       ) : (
-        <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950">
+        <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950 rounded-b-3xl sm:rounded-b-[2rem] overflow-hidden shadow-xs">
           {overlayHeader}
           <div className="w-full aspect-[4/3] sm:aspect-[16/10] bg-gradient-to-br from-emerald-950 via-gray-900 to-indigo-950 flex items-center justify-center">
             {recipe.emoji ? (
