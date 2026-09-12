@@ -28,29 +28,29 @@ export default function HealthScoreHero({
   colors,
   isEn,
 }: HealthScoreHeroProps) {
-  const radius = 42;
+  const radius = 38;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - Math.min(100, Math.max(0, score)) / 100);
 
   return (
-    <div className="bg-gradient-to-b from-gray-50/90 to-gray-50/40 dark:from-gray-800/60 dark:to-gray-800/20 rounded-3xl p-4 sm:p-5 flex flex-col items-center text-center relative overflow-hidden border-none">
+    <div className="bg-gradient-to-b from-gray-50/90 to-gray-50/40 dark:from-gray-800/60 dark:to-gray-800/20 rounded-3xl p-3.5 sm:p-4 flex flex-col items-center text-center relative overflow-hidden border-none">
       {/* Radial progress ring (Hero size) */}
-      <div className="relative w-24 h-24 flex items-center justify-center mb-2.5">
-        <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
+      <div className="relative w-20 h-20 flex items-center justify-center mb-2">
+        <svg className="w-20 h-20 -rotate-90" viewBox="0 0 90 90">
           <circle
-            cx="50"
-            cy="50"
+            cx="45"
+            cy="45"
             r={radius}
             className="stroke-gray-200/70 dark:stroke-gray-700/60"
-            strokeWidth="7"
+            strokeWidth="6"
             fill="none"
           />
           <circle
-            cx="50"
-            cy="50"
+            cx="45"
+            cy="45"
             r={radius}
             className={`${colors.strokeClass} transition-all duration-700 ease-out`}
-            strokeWidth="7"
+            strokeWidth="6"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
@@ -58,10 +58,10 @@ export default function HealthScoreHero({
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className={`text-3xl font-black tabular-nums tracking-tight leading-none ${colors.badgeText}`}>
+          <span className={`text-2xl font-black tabular-nums tracking-tight leading-none ${colors.badgeText}`}>
             {score}
           </span>
-          <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 mt-0.5">
+          <span className="text-[9.5px] font-semibold text-gray-400 dark:text-gray-500 mt-0.5">
             /100
           </span>
         </div>

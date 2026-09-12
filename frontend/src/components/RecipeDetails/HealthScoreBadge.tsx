@@ -110,14 +110,16 @@ export default function HealthScoreBadge({
       }}
       className={`w-full group ${
         fullWidth
-          ? 'px-4.5 sm:px-5 py-3.5 bg-gray-50/75 dark:bg-gray-800/40 hover:bg-gray-100/80 dark:hover:bg-gray-800/60 rounded-b-3xl'
+          ? 'px-4.5 sm:px-5 py-3.5 bg-transparent hover:bg-gray-50/60 dark:hover:bg-gray-800/40 active:bg-gray-100/60 dark:active:bg-gray-800/60 rounded-b-3xl'
           : `rounded-2xl ${isSmall ? 'p-2.5' : 'p-3 sm:p-3.5 min-h-[52px]'} bg-gray-50/90 dark:bg-gray-800/40 hover:bg-gray-100/80 dark:hover:bg-gray-800/70`
       } border-none select-none cursor-pointer active:scale-[0.99] transition-all flex items-center justify-between gap-3 text-left`}
       aria-label={`${t('recipe.healthScoreTitle')}: ${score}/100`}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {/* Apple Health-style circular mini-gauge */}
-        <div className="relative w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 bg-white dark:bg-gray-800 shadow-xs">
+        <div className={`relative w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
+          fullWidth ? 'bg-gray-100/70 dark:bg-gray-800' : 'bg-white dark:bg-gray-800 shadow-xs'
+        }`}>
           <svg className="w-10 h-10 -rotate-90" viewBox="0 0 40 40">
             <circle
               cx="20"

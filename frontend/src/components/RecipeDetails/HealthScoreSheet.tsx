@@ -1,5 +1,5 @@
 import { Drawer, Button } from '@heroui/react';
-import { HeartPulse, CheckCircle2, AlertCircle, Sparkles, X } from 'lucide-react';
+import { HeartPulse, AlertCircle, Sparkles, X } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight } from '../../utils/haptics';
@@ -13,14 +13,6 @@ interface HealthScoreSheetProps {
   onClose: () => void;
   score: number;
   breakdown?: HealthScoreBreakdown | null;
-}
-
-function getPillarFill(score: number, maxScore: number): string {
-  const pct = (score / maxScore) * 100;
-  if (pct >= 85) return 'bg-emerald-500';
-  if (pct >= 70) return 'bg-teal-500';
-  if (pct >= 50) return 'bg-amber-500';
-  return 'bg-orange-500';
 }
 
 export default function HealthScoreSheet({
@@ -45,14 +37,7 @@ export default function HealthScoreSheet({
     return t('recipe.healthScoreGradeCheatMeal');
   };
 
-  const { pillars, metrics, highlights, cautions, smartSwapTip } = breakdown;
-
-  const pillarList = [
-    { key: 'macro', data: pillars.macroBalance },
-    { key: 'fiber', data: pillars.fiberSatiety },
-    { key: 'plant', data: pillars.plantPower },
-    { key: 'purity', data: pillars.processingPurity },
-  ];
+  const { metrics, cautions, smartSwapTip } = breakdown;
 
   return (
     <div onClick={(e) => e.stopPropagation()}>
@@ -99,8 +84,8 @@ export default function HealthScoreSheet({
                 </div>
               </Drawer.Header>
 
-              {/* Scrollable Content Body */}
-              <Drawer.Body className="overflow-y-auto flex-1 flex flex-col gap-4.5 overscroll-contain pr-1 -mr-1">
+              {/* Concise, uncluttered Content Body */}
+              <Drawer.Body className="overflow-y-auto flex-1 flex flex-col gap-3.5 overscroll-contain pr-1 -mr-1">
                 {/* Hero Score Gauge & 5-Zone Spectrum */}
                 <HealthScoreHero
                   score={score}
@@ -109,84 +94,24 @@ export default function HealthScoreSheet({
                   isEn={isEn}
                 />
 
-                {/* 2x2 Balanced Key Metrics Grid (Fixes orphan item bug) */}
+                {/* 2x2 Clean Key Metrics Grid */}
                 <HealthScoreMetricsGrid metrics={metrics} isEn={isEn} />
 
-                {/* 4 Pillars Breakdown with Adaptive Progress Colors */}
-                <div className="flex flex-col gap-2.5 pt-1">
-                  <span className="text-xs font-bold text-gray-900 dark:text-white">
-                    {isEn ? 'Evaluation Pillars' : 'Säulen der Bewertung'}
-                  </span>
-                  <div className="flex flex-col gap-3">
-                    {pillarList.map(({ key, data }) => {
-                      const pct = Math.round((data.score / data.maxScore) * 100);
-                      const fillClass = getPillarFill(data.score, data.maxScore);
-                      return (
-                        <div key={key} className="flex flex-col gap-1.5">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="font-semibold text-gray-800 dark:text-gray-200">
-                              {data.label}
-                            </span>
-                            <span className="font-bold tabular-nums text-gray-900 dark:text-white">
-                              {data.score} <span className="font-normal text-gray-400">/{data.maxScore}</span>
-                            </span>
-                          </div>
-                          <div className="w-full h-2 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
-                            <div
-                              className={`h-full rounded-full ${fillClass} transition-all duration-700 ease-out`}
-                              style={{ width: `${pct}%` }}
-                            />
-                          </div>
-                          <span className="text-[11px] text-gray-500 dark:text-gray-400 leading-tight">
-                            {data.explanation}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Highlights (Stärken) */}
-                {highlights.length > 0 && (
-                  <div className="flex flex-col gap-2 pt-1">
-                    <h4 className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                      <span>{t('recipe.healthScoreHighlightsTitle')}</span>
-                    </h4>
-                    <div className="flex flex-col gap-1.5">
-                      {highlights.map((h, i) => (
-                        <div key={i} className="flex items-start gap-2.5 text-xs text-gray-700 dark:text-gray-300 leading-snug">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
-                          <span>{h}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Cautions (Zu beachten) */}
-                {cautions.length > 0 && (
-                  <div className="flex flex-col gap-2 pt-0.5">
-                    <h4 className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
-                      <AlertCircle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                      <span>{t('recipe.healthScoreCautionsTitle')}</span>
-                    </h4>
-                    <div className="flex flex-col gap-1.5">
-                      {cautions.map((c, i) => (
-                        <div key={i} className="flex items-start gap-2.5 text-xs text-gray-700 dark:text-gray-300 leading-snug">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-1.5" />
-                          <span>{c}</span>
-                        </div>
-                      ))}
-                    </div>
+                {/* Optional Caution Notice (concise single banner) */}
+                {cautions && cautions.length > 0 && (
+                  <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-amber-500/[0.08] dark:bg-amber-500/15 border-none">
+                    <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                    <span className="text-xs text-amber-800 dark:text-amber-300 font-medium leading-tight">
+                      {cautions.join(' · ')}
+                    </span>
                   </div>
                 )}
 
                 {/* Smart Swap AI Tip */}
                 {smartSwapTip && (
-                  <div className="bg-emerald-500/[0.08] dark:bg-emerald-500/15 rounded-2xl p-3.5 flex items-start gap-3 border-none">
-                    <div className="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 mt-0.5">
-                      <Sparkles className="w-4 h-4" />
+                  <div className="bg-emerald-500/[0.08] dark:bg-emerald-500/15 rounded-2xl p-3 flex items-start gap-2.5 border-none">
+                    <div className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 mt-0.5">
+                      <Sparkles className="w-3.5 h-3.5" />
                     </div>
                     <div className="flex flex-col gap-0.5 min-w-0">
                       <span className="text-xs font-bold text-emerald-900 dark:text-emerald-200">
@@ -207,7 +132,7 @@ export default function HealthScoreSheet({
                     hapticLight();
                     onClose();
                   }}
-                  className="w-full py-3 rounded-2xl font-semibold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border-none active:scale-[0.98] transition-all h-12 text-sm cursor-pointer"
+                  className="w-full py-2.5 rounded-2xl font-semibold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border-none active:scale-[0.98] transition-all h-11 text-sm cursor-pointer"
                 >
                   {t('recipe.healthScoreClose')}
                 </Button>
