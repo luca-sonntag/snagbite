@@ -14,20 +14,10 @@ import {
 import { getCollectionMembership } from './collectionsDb.js';
 
 export function rowToRecipe(row: RecipeRow): Recipe {
-  let nutritionalValues: Recipe['nutritionalValues'] | undefined;
-  if (row.nutritional_values && typeof row.nutritional_values === 'object') {
-    nutritionalValues = row.nutritional_values as Recipe['nutritionalValues'];
-  } else {
-    const legacy = {
-      calories: num(row.calories),
-      protein: num(row.protein_g),
-      carbs: num(row.carbs_g),
-      fat: num(row.fat_g),
-    };
-    if (Object.values(legacy).some((v) => v !== null)) {
-      nutritionalValues = legacy;
-    }
-  }
+  const nutritionalValues =
+    row.nutritional_values && typeof row.nutritional_values === 'object'
+      ? (row.nutritional_values as Recipe['nutritionalValues'])
+      : undefined;
 
   return {
     id: row.id,
@@ -100,10 +90,6 @@ export function recipeToRow(recipe: Recipe): Record<string, unknown> {
     ingredients: recipe.ingredients ?? [],
     instructions: recipe.instructions ?? [],
     alternative_ingredients: recipe.alternativeIngredients ?? null,
-    calories: n?.calories ?? null,
-    protein_g: n?.protein ?? null,
-    carbs_g: n?.carbs ?? null,
-    fat_g: n?.fat ?? null,
     nutritional_values: n ?? null,
     source_nutritional_values: recipe.sourceNutritionalValues ?? null,
     health_score: recipe.healthScore ?? null,

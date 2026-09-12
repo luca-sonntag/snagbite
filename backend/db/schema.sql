@@ -59,12 +59,11 @@ create table if not exists public.recipes (
   alternative_ingredients jsonb,
 
   -- Per-serving nutrition, always derived from the ingredients by
-  -- enrichRecipeWithCanonicalIngredients — never client-authored. Flattened
-  -- into columns because these are the axes we filter and sort on.
-  calories                        numeric,
-  protein_g                       numeric,
-  carbs_g                         numeric,
-  fat_g                           numeric,
+  -- enrichRecipeWithCanonicalIngredients — never client-authored. Consolidated
+  -- into JSONB (calories, protein, carbs, fat, fiber, sugar, nova_group, vegetable_grams, plant_count).
+  nutritional_values              jsonb,
+  health_score                    numeric,
+  health_score_breakdown          jsonb,
   -- Per-serving nutrition as literally stated by the source. Pure provenance,
   -- never queried, so it stays JSONB.
   source_nutritional_values       jsonb,
@@ -78,16 +77,18 @@ create table if not exists public.recipes (
   updated_at timestamptz not null default now()
 );
 
-create index if not exists recipes_created_by_idx on public.recipes (created_by);
-create index if not exists recipes_public_idx     on public.recipes (created_at desc)
+create index if not exists recipes_created_by_idx   on public.recipes (created_by);
+create index if not exists recipes_public_idx       on public.recipes (created_at desc)
   where visibility = 'public';
-create index if not exists recipes_demo_public_idx on public.recipes (created_at desc)
+create index if not exists recipes_demo_public_idx  on public.recipes (created_at desc)
   where is_demo = true and visibility = 'public';
-create index if not exists recipes_parent_idx     on public.recipes (parent_recipe_id)
+create index if not exists recipes_parent_idx       on public.recipes (parent_recipe_id)
   where parent_recipe_id is not null;
-create index if not exists recipes_tags_idx       on public.recipes using gin (tags);
-create index if not exists recipes_category_idx   on public.recipes (category)
+create index if not exists recipes_tags_idx         on public.recipes using gin (tags);
+create index if not exists recipes_category_idx     on public.recipes (category)
   where category is not null;
+create index if not exists recipes_health_score_idx on public.recipes (health_score desc)
+  where health_score is not null;
 
 -- ── jobs: the extraction task ───────────────────────────────────────────────
 -- One row per extraction attempt. Job rows are NEVER deleted: they are the

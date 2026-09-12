@@ -16,10 +16,6 @@ export interface MealPlanRow {
     prep_time: number | null;
     cook_time: number | null;
     servings: number | string | null;
-    calories: number | string | null;
-    protein_g: number | string | null;
-    carbs_g: number | string | null;
-    fat_g: number | string | null;
     nutritional_values?: unknown;
     ingredients: unknown;
   } | null;

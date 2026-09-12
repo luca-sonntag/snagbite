@@ -28,7 +28,15 @@ SET nutritional_values = jsonb_strip_nulls(jsonb_build_object(
 WHERE nutritional_values IS NULL 
   AND (calories IS NOT NULL OR protein_g IS NOT NULL OR carbs_g IS NOT NULL OR fat_g IS NOT NULL);
 
+-- Drop legacy scalar columns now that nutritional_values JSONB is canonical
+ALTER TABLE public.recipes 
+DROP COLUMN IF EXISTS calories,
+DROP COLUMN IF EXISTS protein_g,
+DROP COLUMN IF EXISTS carbs_g,
+DROP COLUMN IF EXISTS fat_g;
+
 -- Index on health_score for catalog filtering & sorting
 CREATE INDEX IF NOT EXISTS recipes_health_score_idx 
 ON public.recipes (health_score desc) 
 WHERE health_score IS NOT NULL;
+
