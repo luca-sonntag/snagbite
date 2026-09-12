@@ -20,6 +20,7 @@ export interface MealPlanRow {
     protein_g: number | string | null;
     carbs_g: number | string | null;
     fat_g: number | string | null;
+    nutritional_values?: unknown;
     ingredients: unknown;
   } | null;
 }

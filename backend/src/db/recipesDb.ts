@@ -14,13 +14,20 @@ import {
 import { getCollectionMembership } from './collectionsDb.js';
 
 export function rowToRecipe(row: RecipeRow): Recipe {
-  const nutritionalValues = {
-    calories: num(row.calories),
-    protein: num(row.protein_g),
-    carbs: num(row.carbs_g),
-    fat: num(row.fat_g),
-  };
-  const hasNutrition = Object.values(nutritionalValues).some((v) => v !== null);
+  let nutritionalValues: Recipe['nutritionalValues'] | undefined;
+  if (row.nutritional_values && typeof row.nutritional_values === 'object') {
+    nutritionalValues = row.nutritional_values as Recipe['nutritionalValues'];
+  } else {
+    const legacy = {
+      calories: num(row.calories),
+      protein: num(row.protein_g),
+      carbs: num(row.carbs_g),
+      fat: num(row.fat_g),
+    };
+    if (Object.values(legacy).some((v) => v !== null)) {
+      nutritionalValues = legacy;
+    }
+  }
 
   return {
     id: row.id,
@@ -51,9 +58,12 @@ export function rowToRecipe(row: RecipeRow): Recipe {
     instructions: (row.instructions as Recipe['instructions']) ?? [],
     alternativeIngredients:
       (row.alternative_ingredients as Recipe['alternativeIngredients']) ?? undefined,
-    ...(hasNutrition ? { nutritionalValues } : {}),
+    ...(nutritionalValues ? { nutritionalValues } : {}),
     sourceNutritionalValues:
       (row.source_nutritional_values as Recipe['sourceNutritionalValues']) ?? null,
+    healthScore: num(row.health_score) ?? null,
+    healthScoreBreakdown:
+      (row.health_score_breakdown as Recipe['healthScoreBreakdown']) ?? null,
     hasExplicitNutritionalValues: row.has_explicit_nutritional_values,
     hasIncompleteSourceInfo: Boolean(row.has_incomplete_source_info),
     isDemo: Boolean(row.is_demo),
@@ -94,7 +104,10 @@ export function recipeToRow(recipe: Recipe): Record<string, unknown> {
     protein_g: n?.protein ?? null,
     carbs_g: n?.carbs ?? null,
     fat_g: n?.fat ?? null,
+    nutritional_values: n ?? null,
     source_nutritional_values: recipe.sourceNutritionalValues ?? null,
+    health_score: recipe.healthScore ?? null,
+    health_score_breakdown: recipe.healthScoreBreakdown ?? null,
     has_explicit_nutritional_values: recipe.hasExplicitNutritionalValues ?? false,
     has_incomplete_source_info: recipe.hasIncompleteSourceInfo ?? false,
     is_demo: recipe.isDemo ?? false,

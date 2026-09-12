@@ -52,7 +52,10 @@ export interface RecipeRow {
   protein_g: number | string | null;
   carbs_g: number | string | null;
   fat_g: number | string | null;
+  nutritional_values?: unknown;
   source_nutritional_values: unknown;
+  health_score?: number | string | null;
+  health_score_breakdown?: unknown;
   has_explicit_nutritional_values: boolean;
   has_incomplete_source_info?: boolean | null;
   is_demo?: boolean;
