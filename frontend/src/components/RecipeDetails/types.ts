@@ -40,6 +40,7 @@ export interface RecipeHeaderProps {
   onToggleFavorite?: () => void;
   cookRefreshKey?: number;
   onRemixClick?: () => void;
+  totalTimeLabel?: string | null;
 }
 
 export type RecipeSectionId = 'ingredients' | 'instructions' | 'details';

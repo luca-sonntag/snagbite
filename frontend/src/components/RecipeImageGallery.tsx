@@ -116,7 +116,7 @@ export default function RecipeImageGallery({
       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 via-50% to-transparent pointer-events-none z-10" />
 
       {/* Bottom Content: Meta row, Title & Creator handle */}
-      <div className="absolute bottom-3.5 inset-x-4 sm:bottom-4 sm:inset-x-5 z-20 flex flex-col gap-1 text-white pointer-events-none">
+      <div className="absolute bottom-7 inset-x-4 sm:bottom-8 sm:inset-x-5 z-20 flex flex-col gap-1 text-white pointer-events-none">
         {/* Meta Bar: Platform/Import badge & Slide indicator */}
         <div className="flex items-center justify-between gap-2 min-h-[30px]">
           {reelUrl ? (
@@ -171,7 +171,7 @@ export default function RecipeImageGallery({
     <>
       {/* Inline Gallery */}
       {availableImages.length > 1 ? (
-        <div className="-mx-4 -mt-4 mb-4 relative group select-none bg-gray-950">
+        <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950">
           {overlayHeader}
           <div
             ref={scrollContainerRef}
@@ -208,7 +208,7 @@ export default function RecipeImageGallery({
           </div>
         </div>
       ) : availableImages.length === 1 ? (
-        <div className="-mx-4 -mt-4 mb-4 relative group select-none bg-gray-950">
+        <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950">
           {overlayHeader}
           <CachedImage
             src={availableImages[0]}
@@ -219,7 +219,7 @@ export default function RecipeImageGallery({
           />
         </div>
       ) : (
-        <div className="-mx-4 -mt-4 mb-4 relative group select-none bg-gray-950">
+        <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950">
           {overlayHeader}
           <div className="w-full aspect-[4/3] sm:aspect-[16/10] bg-gradient-to-br from-emerald-950 via-gray-900 to-indigo-950 flex items-center justify-center">
             {recipe.emoji ? (
