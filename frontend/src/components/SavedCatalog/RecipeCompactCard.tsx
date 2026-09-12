@@ -57,7 +57,7 @@ export default function RecipeCompactCard({
       {/* Content */}
       <div className="flex-1 min-w-0 flex flex-col justify-between p-2.5 sm:p-3 overflow-hidden">
         {/* Title */}
-        <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors my-auto py-0.5">
+        <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-3 tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors my-auto py-0.5 break-words [overflow-wrap:anywhere]">
           {r.title}
         </h4>
 
