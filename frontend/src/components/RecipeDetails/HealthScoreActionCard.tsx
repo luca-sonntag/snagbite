@@ -1,4 +1,4 @@
-import { ChefHat, ChevronRight } from 'lucide-react';
+import { MessageCircle, ChevronRight } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { hapticLight } from '../../utils/haptics';
 
@@ -35,7 +35,7 @@ export default function HealthScoreActionCard({
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-          <ChefHat className="w-5 h-5" />
+          <MessageCircle className="w-5 h-5" />
         </div>
         <div className="flex flex-col min-w-0 flex-1">
           <span className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white leading-snug truncate">
