@@ -75,6 +75,8 @@ function rowToCanonicalIngredient(row: OFFRow): CanonicalIngredient {
       carbs: row.carbs,
       fat: row.fat,
       fiber: row.fiber || 0,
+      sugar: row.sugar ?? undefined,
+      nova_group: row.nova_group ?? undefined,
     },
     aliases: [row.name, row.generic_name || '', row.brand || ''].filter(Boolean),
   };

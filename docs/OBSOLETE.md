@@ -6,6 +6,46 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-12: AI-Slop-Banner (`HealthScoreCopilotCard`) & redundanter Footer-Button im HealthScoreSheet durch integrierten Hero-Card Trigger ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `HealthScoreCopilotCard.tsx`: Separate mintfarbene Marketing-Box ("Rezept gesünder machen mit KI") mit Fließtext-Pitch und grellem Pfeil-Button, die unterhalb des Nährwert-Checks lag und nur durch Scrollen erreichbar war (AI-Slop & Scroll-Hürde).
+  - `<Drawer.Footer>` mit redundantem "Verstanden"-Button im `HealthScoreSheet.tsx`, der vertikalen Bildschirmplatz blockierte, obwohl das Sheet bereits über das "X" im Header und Swipe-to-Dismiss geschlossen werden kann.
+* **Ersetzt durch:**
+  - **Direkte Integration in [`HealthScoreHeroCard.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/HealthScoreHeroCard.tsx):** Eleganter, dezenter Quiet-Luxury Aktionsbutton (`[ ✨ Rezept mit Copilot optimieren ]` bzw. `[ ✨ Varianten mit Copilot entdecken ]`) unmittelbar unter dem 5-Zonen-Farbspektrum im sichtbaren Bereich (Above the fold).
+  - **Zero AI-Slop & sofortige Sichtbarkeit:** Keine aufdringlichen Marketing-Erklärtexte, kein Scrollen erforderlich. Sofortige haptische Interaktion und nahtlose Übergabe an den Recipe Copilot.
+  - **Entfernung des Footers:** Mehr Platz für die tatsächlichen Nährwertanalysen im Drawer.
+* **Betroffene Dateien:** `frontend/src/components/RecipeDetails/HealthScoreCopilotCard.tsx` (gelöscht), `frontend/src/components/RecipeDetails/HealthScoreHeroCard.tsx`, `frontend/src/components/RecipeDetails/HealthScoreSheet.tsx`, `frontend/src/i18n.ts`, `docs/OBSOLETE.md`.
+
+---
+
+### 2026-09-12: Statische Schwellenwert-Upgrade-Tipps (`smartSwapTip` / `HealthScoreSmartTip`) durch dynamische AI Recipe Copilot Anbindung ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `HealthScoreSmartTip.tsx`: Statische UI-Box mit Sparkles-Icon, die lediglich zwei feste Heuristik-Strings ("Zucker reduzieren" oder "Gemüse/Vollkorn hinzufügen") anzeigte.
+  - `smartSwapTip` in `backend/src/matching/healthScoreCalculator.ts`: Schwellenwert-basierte Erzeugung statischer Strings, die unabhängig vom Rezept stets identisch formuliert waren.
+* **Ersetzt durch:**
+  - **[`HealthScoreCopilotCard.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/HealthScoreCopilotCard.tsx):** Taktile Aktionskarte im Health Score Sheet ("Rezept gesünder machen mit KI").
+  - **Dynamische Übergabe des Healthy-Score-Kontexts an Gemini:** `chatAboutRecipe` erhält Score, Note, Schwachstellen (Cautions) und Highlights im System-Prompt.
+  - **Automatischer Upgrade-Prompt:** Beim Klick auf den CTA-Button schließt sich das Sheet und der Recipe Copilot öffnet sich direkt mit einem maßgeschneiderten Prompt zur ernährungsphysiologischen Aufwertung.
+* **Betroffene Dateien:** `frontend/src/components/RecipeDetails/HealthScoreSmartTip.tsx` (gelöscht), `frontend/src/components/RecipeDetails/HealthScoreCopilotCard.tsx` (neu), `frontend/src/components/RecipeDetails/HealthScoreSheet.tsx`, `frontend/src/components/RecipeDetails/RecipeNutrition.tsx`, `frontend/src/components/RecipeDetails/RecipeInfoSection.tsx`, `frontend/src/components/RecipeDetails/useRecipeDetails.ts`, `frontend/src/components/RecipeDetails/index.tsx`, `backend/src/matching/healthScoreCalculator.ts`, `backend/src/gemini.ts`, `frontend/src/i18n.ts`.
+
+---
+
+### 2026-09-12: Isolierte Nährwert-Skalare (`calories`, `protein_g`, `carbs_g`, `fat_g`) durch konsolidierte `nutritional_values` JSONB-Spalte & 4-Säulen Healthy Score abgelöst
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Reine 4-Spalten-Speicherung (`calories numeric`, `protein_g numeric`, `carbs_g numeric`, `fat_g numeric`) in der Postgres-Tabelle `recipes`.
+  - Keine persistente Speicherung von Ballaststoffen (`fiber`), Zucker (`sugar`), Verarbeitungsgrad (`novaGroup`), Gemüsegewicht (`vegetableGrams`) oder Pflanzenvielfalt (`plantCount`).
+  - Dual-Write und Fallback-Leselogik für alte Spalten.
+* **Ersetzt durch:**
+  - **Konsolidierte JSONB-Spalte `nutritional_values`:** Bündelt Kalorien, Makros, Ballaststoffe, Zucker, NOVA-Grad und Mikronährstoffe in einem erweiterbaren Dokument.
+  - **Vollständiges Droppen der Alt-Spalten in Migration 011:** Migration 011 migriert Altdaten via `jsonb_build_object` in `nutritional_values` und führt anschließend `ALTER TABLE recipes DROP COLUMN calories, protein_g, carbs_g, fat_g` aus. Keine Altlasten oder redundanten Dual-Writes in Backend-Mappern (`rowToRecipe` / `recipeToRow` / `mealPlansDb`).
+  - **`health_score numeric` & `health_score_breakdown jsonb`:** Persistente Speicherung des deterministischen 4-Säulen-Scores (0–100) mit vollständiger Nachvollziehbarkeit im UI via `HealthScoreBadge` und `HealthScoreSheet`.
+* **Betroffene Dateien:** `backend/db/migrations/011_consolidate_nutritional_values_and_health_score.sql`, `backend/db/schema.sql`, `backend/src/db/recipesDb.ts`, `backend/src/db/mealPlansDb.ts`, `backend/src/db/types/core.ts`, `backend/src/db/types/mealPlans.ts`, `shared/src/types/recipes.ts`, `backend/src/matching/healthScoreCalculator.ts`.
+
+---
+
 ### 2026-09-10: Diffuse Hintergrund-Wellen (`AmbientDiagonalWaves`) & massiver Header-Block (`HeroWaveHeader`) durch edlen Slate-50 Canvas ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**

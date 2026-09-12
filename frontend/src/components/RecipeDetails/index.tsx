@@ -47,52 +47,22 @@ export default function RecipeDetails({
     scaleFactor,
     formatAmount,
     checkedSteps,
-    toggleStep,
-    handleToggleStep,
-    activeStepNum,
-    totalStepsCount,
-    completedStepsCount,
-    progressPercent,
-    activeSection,
-    isHeaderCollapsed,
-    setCollapseSentinel,
-    scrollToSection,
-    nutritionalValues,
-    sourceNutritionalValues,
-    isAiEstimated,
-    isVerified,
-    hasNutritionInfo,
-    showTotalNutrition,
-    handleToggleTotalNutrition,
-    formatTimeValue,
-    getNutritionDisplayValue,
-    totalTimeLabel,
-    metaCalories,
-    sortedIngredients,
-    isCopied,
-    isCopilotOpen,
-    setIsCopilotOpen,
-    isCopilotForceNewRemix,
-    setIsCopilotForceNewRemix,
-    openCopilot,
-    isCookingMode,
-    setIsCookingMode,
-    initialStepOverride,
-    setInitialStepOverride,
-    isCookedModalOpen,
-    setIsCookedModalOpen,
-    isAdded,
-    isShoppingConfirmOpen,
-    setIsShoppingConfirmOpen,
-    isAddToPlanOpen,
-    setIsAddToPlanOpen,
-    handleStartCooking,
-    handleAddToShoppingList,
-    handleAddAndNavigateToShoppingList,
-    handleConfirmShoppingListSelection,
-    copyRecipe,
-    cookRefreshKey,
-    cookHistory,
+    toggleStep, handleToggleStep,
+    activeStepNum, totalStepsCount, completedStepsCount, progressPercent,
+    activeSection, isHeaderCollapsed, setCollapseSentinel, scrollToSection,
+    nutritionalValues, sourceNutritionalValues, isAiEstimated, isVerified, hasNutritionInfo,
+    showTotalNutrition, handleToggleTotalNutrition,
+    formatTimeValue, getNutritionDisplayValue, totalTimeLabel, metaCalories,
+    sortedIngredients, isCopied,
+    isCopilotOpen, setIsCopilotOpen, isCopilotForceNewRemix, setIsCopilotForceNewRemix,
+    copilotInitialPrompt, setCopilotInitialPrompt, openCopilot,
+    isCookingMode, setIsCookingMode, initialStepOverride, setInitialStepOverride,
+    isCookedModalOpen, setIsCookedModalOpen,
+    isAdded, isShoppingConfirmOpen, setIsShoppingConfirmOpen,
+    isAddToPlanOpen, setIsAddToPlanOpen,
+    handleStartCooking, handleAddToShoppingList,
+    handleAddAndNavigateToShoppingList, handleConfirmShoppingListSelection,
+    copyRecipe, cookRefreshKey, cookHistory,
   } = useRecipeDetails({ recipe, onAddIngredients, onNavigateToShoppingList });
 
   return (
@@ -147,11 +117,14 @@ export default function RecipeDetails({
             servings={servings}
             nutritionalValues={hasNutritionInfo ? nutritionalValues : null}
             sourceNutritionalValues={sourceNutritionalValues}
+            healthScore={recipe.healthScore}
+            healthScoreBreakdown={recipe.healthScoreBreakdown}
             isAiEstimated={isAiEstimated}
             isVerified={isVerified}
             showTotalNutrition={showTotalNutrition}
             onToggleTotalNutrition={handleToggleTotalNutrition}
             getNutritionDisplayValue={getNutritionDisplayValue}
+            onOpenCopilot={(prompt) => openCopilot(false, prompt)}
           />
         </section>
 
@@ -243,11 +216,13 @@ export default function RecipeDetails({
           onClose={() => {
             setIsCopilotOpen(false);
             setIsCopilotForceNewRemix(false);
+            setCopilotInitialPrompt(undefined);
           }}
           recipe={recipe}
           onRemixSuccess={onRemixSuccess}
           onReplaceCurrent={onReplaceCurrent!}
           forceNewRemix={isCopilotForceNewRemix}
+          initialPrompt={copilotInitialPrompt}
         />
       )}
 

@@ -12,17 +12,15 @@ import {
   UserRecipeRow,
 } from './client.js';
 import { getCollectionMembership } from './collectionsDb.js';
+import { computeRecipeHealthScore, isVegetableOrFruitCategory } from '../matching/healthScoreCalculator.js';
 
 export function rowToRecipe(row: RecipeRow): Recipe {
-  const nutritionalValues = {
-    calories: num(row.calories),
-    protein: num(row.protein_g),
-    carbs: num(row.carbs_g),
-    fat: num(row.fat_g),
-  };
-  const hasNutrition = Object.values(nutritionalValues).some((v) => v !== null);
+  const nutritionalValues =
+    row.nutritional_values && typeof row.nutritional_values === 'object'
+      ? (row.nutritional_values as Recipe['nutritionalValues'])
+      : undefined;
 
-  return {
+  const recipe: Recipe = {
     id: row.id,
     createdBy: row.created_by,
     visibility: row.visibility as Recipe['visibility'],
@@ -51,9 +49,12 @@ export function rowToRecipe(row: RecipeRow): Recipe {
     instructions: (row.instructions as Recipe['instructions']) ?? [],
     alternativeIngredients:
       (row.alternative_ingredients as Recipe['alternativeIngredients']) ?? undefined,
-    ...(hasNutrition ? { nutritionalValues } : {}),
+    ...(nutritionalValues ? { nutritionalValues } : {}),
     sourceNutritionalValues:
       (row.source_nutritional_values as Recipe['sourceNutritionalValues']) ?? null,
+    healthScore: num(row.health_score) ?? null,
+    healthScoreBreakdown:
+      (row.health_score_breakdown as Recipe['healthScoreBreakdown']) ?? null,
     hasExplicitNutritionalValues: row.has_explicit_nutritional_values,
     hasIncompleteSourceInfo: Boolean(row.has_incomplete_source_info),
     isDemo: Boolean(row.is_demo),
@@ -61,6 +62,27 @@ export function rowToRecipe(row: RecipeRow): Recipe {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+
+  // Auto-heal / dynamic sync: recompute if healthScore is missing or if breakdown has 0g veg despite having produce items
+  if (
+    recipe.ingredients?.length &&
+    (recipe.healthScore === null ||
+      recipe.healthScoreBreakdown === null ||
+      (recipe.healthScoreBreakdown.metrics?.vegetableGramsPerServing === 0 &&
+        recipe.ingredients.some((g) =>
+          g.items?.some((i) => isVegetableOrFruitCategory(i.category || g.name))
+        )))
+  ) {
+    const computed = computeRecipeHealthScore(recipe);
+    recipe.healthScore = computed.score;
+    recipe.healthScoreBreakdown = computed.breakdown;
+    if (recipe.nutritionalValues) {
+      recipe.nutritionalValues.vegetableGrams = computed.breakdown.metrics.vegetableGramsPerServing ?? null;
+      recipe.nutritionalValues.plantCount = computed.breakdown.metrics.plantIngredientsCount ?? null;
+    }
+  }
+
+  return recipe;
 }
 
 export function recipeToRow(recipe: Recipe): Record<string, unknown> {
@@ -90,11 +112,10 @@ export function recipeToRow(recipe: Recipe): Record<string, unknown> {
     ingredients: recipe.ingredients ?? [],
     instructions: recipe.instructions ?? [],
     alternative_ingredients: recipe.alternativeIngredients ?? null,
-    calories: n?.calories ?? null,
-    protein_g: n?.protein ?? null,
-    carbs_g: n?.carbs ?? null,
-    fat_g: n?.fat ?? null,
+    nutritional_values: n ?? null,
     source_nutritional_values: recipe.sourceNutritionalValues ?? null,
+    health_score: recipe.healthScore ?? null,
+    health_score_breakdown: recipe.healthScoreBreakdown ?? null,
     has_explicit_nutritional_values: recipe.hasExplicitNutritionalValues ?? false,
     has_incomplete_source_info: recipe.hasIncompleteSourceInfo ?? false,
     is_demo: recipe.isDemo ?? false,

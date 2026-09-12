@@ -5,13 +5,17 @@ import { useAuth } from '../../context/AuthContext';
 import PremiumModal from '../PremiumModal';
 import { Flame } from 'lucide-react';
 import MacroDistribution from './MacroDistribution';
-import type { NutritionalValues } from '../../types';
+import HealthScoreBadge from './HealthScoreBadge';
+import HealthScoreSheet from './HealthScoreSheet';
+import type { NutritionalValues, HealthScoreBreakdown } from '../../types';
 
 type NutritionValue = string | number | null | undefined;
 
 interface RecipeNutritionProps {
   nutritionalValues: NutritionalValues;
   sourceNutritionalValues?: NutritionalValues | null;
+  healthScore?: number | null;
+  healthScoreBreakdown?: HealthScoreBreakdown | null;
   isAiEstimated: boolean;
   isVerified?: boolean;
   showTotalNutrition?: boolean;
@@ -23,19 +27,24 @@ interface RecipeNutritionProps {
    * per-macro breakdown that sits in its own section further down.
    */
   variant?: 'summary' | 'detail';
+  onOpenCopilot?: (initialPrompt?: string) => void;
 }
 
 export default function RecipeNutrition({
   nutritionalValues,
   sourceNutritionalValues,
+  healthScore,
+  healthScoreBreakdown,
   isAiEstimated,
   isVerified,
   getNutritionDisplayValue,
-  variant = 'detail'
+  variant = 'detail',
+  onOpenCopilot,
 }: RecipeNutritionProps) {
   const { t } = useI18n();
   const { isPremium } = useAuth();
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  const [isHealthScoreSheetOpen, setIsHealthScoreSheetOpen] = useState(false);
 
   const parseNum = (val: NutritionValue): number => {
     if (val === undefined || val === null || val === '') return 0;
@@ -204,6 +213,18 @@ export default function RecipeNutrition({
               onUnlockPremium={() => setIsPremiumModalOpen(true)}
             />
           )}
+
+          {/* Health Score Panel (Full-width across the nutrition box) */}
+          {healthScore !== undefined && healthScore !== null && (
+            <div className="-mx-4.5 sm:-mx-5 -mb-3.5 mt-3 border-t border-gray-100/70 dark:border-gray-800/60 overflow-hidden rounded-b-3xl">
+              <HealthScoreBadge
+                score={healthScore}
+                breakdown={healthScoreBreakdown}
+                onClick={() => setIsHealthScoreSheetOpen(true)}
+                fullWidth
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -211,6 +232,16 @@ export default function RecipeNutrition({
         isOpen={isPremiumModalOpen}
         onOpenChange={setIsPremiumModalOpen}
       />
+
+      {healthScore !== undefined && healthScore !== null && (
+        <HealthScoreSheet
+          isOpen={isHealthScoreSheetOpen}
+          onClose={() => setIsHealthScoreSheetOpen(false)}
+          score={healthScore}
+          breakdown={healthScoreBreakdown}
+          onOpenCopilot={onOpenCopilot}
+        />
+      )}
     </>
   );
 }

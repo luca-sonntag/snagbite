@@ -22,6 +22,11 @@ export interface Ingredient {
   protein?: number | null;
   carbs?: number | null;
   fat?: number | null;
+  fiber?: number | null;
+  sugar?: number | null;
+  saturatedFat?: number | null;
+  sodium?: number | null;
+  novaGroup?: number | null;
   isStaple?: boolean;
   isGenericGrocery?: boolean;
   canonicalId?: string | null;
@@ -54,6 +59,48 @@ export interface NutritionalValues {
   protein?: number | null;
   carbs?: number | null;
   fat?: number | null;
+  fiber?: number | null;
+  sugar?: number | null;
+  saturatedFat?: number | null;
+  unsaturatedFat?: number | null;
+  sodium?: number | null;
+  salt?: number | null;
+  novaGroup?: number | null;
+  vegetableGrams?: number | null;
+  plantCount?: number | null;
+  micronutrients?: Record<string, number | null>;
+}
+
+export type HealthScoreGrade = 'EXCELLENT' | 'BALANCED' | 'SOLID' | 'INDULGENT' | 'CHEAT_MEAL';
+
+export interface HealthScorePillar {
+  score: number;
+  maxScore: number;
+  label: string;
+  explanation: string;
+}
+
+export interface HealthScoreBreakdown {
+  score: number;
+  grade: HealthScoreGrade;
+  pillars: {
+    macroBalance: HealthScorePillar;
+    fiberSatiety: HealthScorePillar;
+    plantPower: HealthScorePillar;
+    processingPurity: HealthScorePillar;
+  };
+  metrics: {
+    caloriesPer100g?: number | null;
+    fiberGramsPerServing?: number | null;
+    sugarGramsPerServing?: number | null;
+    vegetableGramsPerServing?: number | null;
+    plantIngredientsCount?: number | null;
+    averageNovaGroup?: number | null;
+    proteinEnergyPct?: number | null;
+  };
+  highlights: string[];
+  cautions: string[];
+  smartSwapTip?: string | null;
 }
 
 export type RecipeVisibility = 'private' | 'unlisted' | 'public';
@@ -129,6 +176,8 @@ export interface Recipe {
   equipment: string[];
   nutritionalValues?: NutritionalValues;
   sourceNutritionalValues?: NutritionalValues | null;
+  healthScore?: number | null;
+  healthScoreBreakdown?: HealthScoreBreakdown | null;
   hasExplicitNutritionalValues?: boolean;
   hasIncompleteSourceInfo?: boolean;
   isDemo?: boolean;

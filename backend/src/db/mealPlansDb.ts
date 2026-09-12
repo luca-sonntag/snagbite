@@ -4,6 +4,7 @@ import type {
   CreateMealPlanDto,
   UpdateMealPlanDto,
   IngredientGroup,
+  NutritionalValues,
 } from '@cookbook/shared';
 import { getClient, wrapError, isNoRowsError, num } from './client.js';
 import type { MealPlanRow } from './types/mealPlans.js';
@@ -26,16 +27,14 @@ const MEAL_PLAN_SELECT_FIELDS = `
     prep_time,
     cook_time,
     servings,
-    calories,
-    protein_g,
-    carbs_g,
-    fat_g,
+    nutritional_values,
     ingredients
   )
 `;
 
 export function rowToMealPlanEntry(row: MealPlanRow): MealPlanEntry {
   const recipeData = row.recipes;
+  const nv = (recipeData?.nutritional_values as NutritionalValues | undefined) ?? null;
   return {
     id: row.id,
     userId: row.user_id,
@@ -55,10 +54,10 @@ export function rowToMealPlanEntry(row: MealPlanRow): MealPlanEntry {
           prepTime: recipeData.prep_time,
           cookTime: recipeData.cook_time,
           servings: num(recipeData.servings) ?? 2,
-          calories: num(recipeData.calories),
-          protein: num(recipeData.protein_g),
-          carbs: num(recipeData.carbs_g),
-          fat: num(recipeData.fat_g),
+          calories: num(nv?.calories),
+          protein: num(nv?.protein),
+          carbs: num(nv?.carbs),
+          fat: num(nv?.fat),
           ingredients: (recipeData.ingredients as IngredientGroup[]) ?? [],
         }
       : undefined,

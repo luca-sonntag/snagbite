@@ -38,6 +38,7 @@ export function useRecipeDetails({ recipe, onAddIngredients, onNavigateToShoppin
   const [isAdded, setIsAdded] = useState(false);
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [isCopilotForceNewRemix, setIsCopilotForceNewRemix] = useState(false);
+  const [copilotInitialPrompt, setCopilotInitialPrompt] = useState<string | undefined>(undefined);
   const [isCookingMode, setIsCookingMode] = useState(false);
   const [isCookedModalOpen, setIsCookedModalOpen] = useState(false);
   const [initialStepOverride, setInitialStepOverride] = useState<number | undefined>(undefined);
@@ -45,9 +46,10 @@ export function useRecipeDetails({ recipe, onAddIngredients, onNavigateToShoppin
   const [isAddToPlanOpen, setIsAddToPlanOpen] = useState(false);
   const [shouldNavigateAfterAdd, setShouldNavigateAfterAdd] = useState(false);
 
-  const openCopilot = useCallback((forceNewRemix = false) => {
+  const openCopilot = useCallback((forceNewRemix = false, initialPrompt?: string) => {
     if (isPremium) {
       setIsCopilotForceNewRemix(forceNewRemix);
+      setCopilotInitialPrompt(initialPrompt);
       setIsCopilotOpen(true);
     } else {
       setIsPremiumModalOpen(true);
@@ -258,7 +260,8 @@ export function useRecipeDetails({ recipe, onAddIngredients, onNavigateToShoppin
     formatTimeValue, getNutritionDisplayValue, totalTimeLabel, metaCalories,
     sortedIngredients,
     isCopied, isCopilotOpen, setIsCopilotOpen,
-    isCopilotForceNewRemix, setIsCopilotForceNewRemix, openCopilot,
+    isCopilotForceNewRemix, setIsCopilotForceNewRemix,
+    copilotInitialPrompt, setCopilotInitialPrompt, openCopilot,
     isCookingMode, setIsCookingMode, initialStepOverride, setInitialStepOverride,
     isCookedModalOpen, setIsCookedModalOpen,
     isAdded, isShoppingConfirmOpen, setIsShoppingConfirmOpen,

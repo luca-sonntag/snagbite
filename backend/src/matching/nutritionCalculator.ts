@@ -139,6 +139,10 @@ export function applyCanonicalMatchToIngredient(
   protein: number;
   carbs: number;
   fat: number;
+  fiber?: number;
+  sugar?: number;
+  novaGroup?: number | null;
+  weightGrams?: number;
 } {
   if (ingredient.baseName) {
     ingredient.baseName = canonicalizeBaseName(ingredient.baseName);
@@ -169,12 +173,17 @@ export function applyCanonicalMatchToIngredient(
       ingredient.fat = Math.round(cachedEstimate.fat * factor * 10) / 10;
     }
 
+    const grams = calculateWeightGrams(ingredient.amount, ingredient.unit, null, ingredient.gramsPerUnit);
     return {
       matched: false,
       calories: ingredient.calories ?? 0,
       protein: ingredient.protein ?? 0,
       carbs: ingredient.carbs ?? 0,
       fat: ingredient.fat ?? 0,
+      fiber: ingredient.fiber ?? 0,
+      sugar: ingredient.sugar ?? 0,
+      novaGroup: ingredient.novaGroup ?? null,
+      weightGrams: grams,
     };
   }
 
@@ -190,6 +199,13 @@ export function applyCanonicalMatchToIngredient(
   const prot = Math.round(effectiveMatch.nutrients_per_100g.protein * factor * 10) / 10;
   const carb = Math.round(effectiveMatch.nutrients_per_100g.carbs * factor * 10) / 10;
   const fat = Math.round(effectiveMatch.nutrients_per_100g.fat * factor * 10) / 10;
+  const fiber = effectiveMatch.nutrients_per_100g.fiber
+    ? Math.round(effectiveMatch.nutrients_per_100g.fiber * factor * 10) / 10
+    : 0;
+  const sugar = effectiveMatch.nutrients_per_100g.sugar
+    ? Math.round(effectiveMatch.nutrients_per_100g.sugar * factor * 10) / 10
+    : 0;
+  const nova = effectiveMatch.nutrients_per_100g.nova_group ?? null;
 
   ingredient.canonicalId = effectiveMatch.id;
   ingredient.matchedName = effectiveMatch.name_de;
@@ -198,10 +214,23 @@ export function applyCanonicalMatchToIngredient(
   ingredient.protein = prot;
   ingredient.carbs = carb;
   ingredient.fat = fat;
+  if (fiber > 0) ingredient.fiber = fiber;
+  if (sugar > 0) ingredient.sugar = sugar;
+  if (nova !== null) ingredient.novaGroup = nova;
 
   if (!ingredient.category || ingredient.category === 'OTHER') {
     ingredient.category = effectiveMatch.category;
   }
 
-  return { matched: true, calories: cal, protein: prot, carbs: carb, fat };
+  return {
+    matched: true,
+    calories: cal,
+    protein: prot,
+    carbs: carb,
+    fat,
+    fiber,
+    sugar,
+    novaGroup: nova,
+    weightGrams,
+  };
 }
