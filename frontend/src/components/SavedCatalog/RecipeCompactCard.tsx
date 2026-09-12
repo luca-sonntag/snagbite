@@ -47,12 +47,6 @@ export default function RecipeCompactCard({
           alt={r.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
         />
-        {totalTime && (
-          <div className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-emerald-500/90 text-white text-[9.5px] font-bold flex items-center gap-1 shadow-xs pointer-events-none">
-            <Clock className="w-2.5 h-2.5 shrink-0 text-white" />
-            <span>{totalTime}</span>
-          </div>
-        )}
         {job.isFavorite && (
           <div className="absolute top-1.5 left-1.5 w-5 h-5 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center text-amber-400 pointer-events-none">
             <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
@@ -67,21 +61,31 @@ export default function RecipeCompactCard({
           {r.title}
         </h4>
 
-        {/* Bottom line: Calories (left) & Health Score (right) */}
-        <div className="flex items-center justify-between gap-1 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
-          {caloriesFormatted ? (
-            <span className="shrink-0 whitespace-nowrap">{caloriesFormatted}</span>
-          ) : <span />}
-
-          {/* Health Score rechts unten: nur Buchstabe */}
-          {score !== null && scoreLetter && scoreColor && (
-            <span
-              className={`w-4 h-4 rounded-full ${scoreColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-2xs shrink-0 ml-auto select-none`}
-              title={`Health Score: ${scoreLetter} (${score}/100)`}
-            >
-              {scoreLetter}
-            </span>
+        {/* Bottom Section: Dauer über kcal */}
+        <div className="flex flex-col gap-1 mt-auto pt-1">
+          {totalTime && (
+            <div className="self-start px-1.5 py-0.5 rounded-md bg-emerald-500/90 text-white text-[9.5px] font-bold flex items-center gap-1 shadow-2xs">
+              <Clock className="w-2.5 h-2.5 shrink-0 text-white" />
+              <span>{totalTime}</span>
+            </div>
           )}
+
+          {/* Bottom line: Calories (left) & Health Score (right) */}
+          <div className="flex items-center justify-between gap-1 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+            {caloriesFormatted ? (
+              <span className="shrink-0 whitespace-nowrap">{caloriesFormatted}</span>
+            ) : <span />}
+
+            {/* Health Score rechts unten: nur Buchstabe */}
+            {score !== null && scoreLetter && scoreColor && (
+              <span
+                className={`w-4 h-4 rounded-full ${scoreColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-2xs shrink-0 ml-auto select-none`}
+                title={`Health Score: ${scoreLetter} (${score}/100)`}
+              >
+                {scoreLetter}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </div>

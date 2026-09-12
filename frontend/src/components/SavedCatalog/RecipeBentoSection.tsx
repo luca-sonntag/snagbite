@@ -94,31 +94,35 @@ export default function RecipeBentoSection({
 
           {/* Bottom Meta */}
           <div className="absolute bottom-2.5 inset-x-2.5 text-white flex flex-col gap-1 pointer-events-none">
-            {mainTime && (
-              <span className="self-start px-1.5 py-0.5 rounded-md bg-emerald-500/90 text-white text-[10px] font-bold flex items-center gap-1">
-                <Clock className="w-2.5 h-2.5" />
-                <span>{mainTime}</span>
-              </span>
-            )}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {mainTime && (
+                <span className="self-start px-1.5 py-0.5 rounded-md bg-emerald-500/90 text-white text-[10px] font-bold flex items-center gap-1">
+                  <Clock className="w-2.5 h-2.5" />
+                  <span>{mainTime}</span>
+                </span>
+              )}
+
+              {/* Health Score neben Dauer mit Punkt-Separator */}
+              {mainScore !== null && mainScoreLetter && mainScoreColor && (
+                <>
+                  {mainTime && <span className="text-white/40">•</span>}
+                  <span
+                    className={`w-4 h-4 rounded-full ${mainScoreColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-md shrink-0 select-none`}
+                    title={`Health Score: ${mainScoreLetter} (${mainScore}/100)`}
+                  >
+                    {mainScoreLetter}
+                  </span>
+                </>
+              )}
+            </div>
+
             <h4 className="font-bold text-xs sm:text-sm leading-tight text-white line-clamp-2 drop-shadow-xs">
               {mainRecipe.title}
             </h4>
-            <div className="flex items-center justify-between gap-1 text-[10px] text-gray-200 font-medium">
-              <div className="flex items-center gap-1.5 min-w-0 truncate">
-                {mainCalories && <span>{mainCalories}</span>}
-                {mainCalories && mainProtein && <span>•</span>}
-                {mainProtein && <span>{Math.round(mainProtein)}g Protein</span>}
-              </div>
-
-              {/* Health Score rechts unten */}
-              {mainScore !== null && mainScoreLetter && mainScoreColor && (
-                <span
-                  className={`w-4.5 h-4.5 rounded-full ${mainScoreColor.pillBg} text-white font-black text-[10px] flex items-center justify-center leading-none shadow-md shrink-0 ml-auto select-none`}
-                  title={`Health Score: ${mainScoreLetter} (${mainScore}/100)`}
-                >
-                  {mainScoreLetter}
-                </span>
-              )}
+            <div className="flex items-center gap-1.5 text-[10px] text-gray-200 font-medium">
+              {mainCalories && <span>{mainCalories}</span>}
+              {mainCalories && mainProtein && <span>•</span>}
+              {mainProtein && <span>{Math.round(mainProtein)}g Protein</span>}
             </div>
           </div>
         </article>
