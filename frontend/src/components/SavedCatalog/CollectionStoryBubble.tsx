@@ -1,11 +1,11 @@
-import { Plus } from 'lucide-react';
+import { Plus, Folder } from 'lucide-react';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
 
 interface CollectionStoryBubbleProps {
   title: string;
   count?: number;
-  emoji?: string | null;
+  icon?: React.ReactNode;
   imageUrl?: string | null;
   ringGradient?: string;
   isAddButton?: boolean;
@@ -15,12 +15,12 @@ interface CollectionStoryBubbleProps {
 /**
  * 100% circular Instagram-style Story Highlight bubble (rounded-full).
  * Features an outer gradient ring, clean background contrast gap,
- * appetizing food thumbnail/emoji and tactile touch feedback.
+ * appetizing food thumbnail and tactile touch feedback.
  */
 export default function CollectionStoryBubble({
   title,
   count,
-  emoji,
+  icon,
   imageUrl,
   ringGradient = 'from-emerald-400 via-teal-500 to-cyan-400',
   isAddButton = false,
@@ -63,20 +63,12 @@ export default function CollectionStoryBubble({
           {imageUrl ? (
             <CachedImage
               src={imageUrl}
-              emoji={emoji}
               alt={title}
               className="w-full h-full rounded-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
             />
           ) : (
             <div className="w-full h-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-              <span className="text-xl select-none drop-shadow-sm">{emoji || '🍲'}</span>
-            </div>
-          )}
-
-          {/* Semi-transparent emoji overlay when image is present */}
-          {imageUrl && emoji && (
-            <div className="absolute inset-0 bg-black/30 flex items-center justify-center pointer-events-none">
-              <span className="text-xl select-none drop-shadow-md">{emoji}</span>
+              {icon || <Folder className="w-6 h-6 text-gray-400 dark:text-gray-500" />}
             </div>
           )}
         </div>
@@ -89,3 +81,4 @@ export default function CollectionStoryBubble({
     </button>
   );
 }
+

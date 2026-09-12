@@ -7,7 +7,6 @@ import { hapticLight } from '../../utils/haptics';
 interface CollectionTileProps {
   collection?: Collection;
   title?: string;
-  emoji?: string | null;
   isFavorite?: boolean;
   /** Members of this collection, newest first — the first two provide the cover images. */
   jobs: SavedRecipe[];
@@ -17,19 +16,17 @@ interface CollectionTileProps {
 /**
  * Collection tile displaying a 2-up side-by-side recipe image split cover
  * (1 row high, 2 recipes side-by-side) with real recipe images,
- * and the collection title with emoji.
+ * and the collection title.
  */
 export default function CollectionTile({
   collection,
   title,
-  emoji,
   isFavorite = false,
   jobs,
   onClick,
 }: CollectionTileProps) {
   const { t } = useI18n();
   const displayName = title || collection?.name || '';
-  const collectionEmoji = emoji !== undefined ? emoji : (collection?.emoji || null);
 
   const validJobs = jobs.filter(j => j.recipe);
   const displayJobs = validJobs.slice(0, 2);
@@ -71,11 +68,9 @@ export default function CollectionTile({
 
       <div className="flex flex-col px-0.5">
         <span className="text-xs font-bold text-gray-900 dark:text-white line-clamp-2 leading-snug">
-          {isFavorite ? (
+          {isFavorite && (
             <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500 inline mr-1 -translate-y-px" />
-          ) : collectionEmoji ? (
-            <span className="mr-1">{collectionEmoji}</span>
-          ) : null}
+          )}
           {displayName}
         </span>
         <span className="text-[11px] text-gray-500 dark:text-gray-400">

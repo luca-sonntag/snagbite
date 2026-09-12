@@ -1,6 +1,7 @@
+import { BookOpen, Star, UtensilsCrossed, Folder } from 'lucide-react';
 import type { Collection, SavedRecipe, RecipeCategory } from '../../types';
 import { useI18n } from '../../context/I18nContext';
-import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
+import { getRecipeCategoryLabel } from '../../i18n';
 import CollectionStoryBubble from './CollectionStoryBubble';
 import type { CatalogPreset } from './catalogRoutes';
 
@@ -62,29 +63,29 @@ export default function CollectionStoryHub({
 
       {/* Horizontal Carousel */}
       <div className="flex items-start gap-3 overflow-x-auto no-scrollbar scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1 scroll-smooth">
-        {/* 📚 1. All Recipes Smart Story Bubble */}
+        {/* 1. All Recipes Smart Story Bubble */}
         <CollectionStoryBubble
           title={t('catalog.storyHub.all')}
           count={totalRecipes}
-          emoji="📚"
+          icon={<BookOpen className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />}
           imageUrl={allRecipesThumbnail}
           ringGradient="from-emerald-400 via-teal-500 to-indigo-500"
           onClick={() => onOpenList({ kind: 'all' })}
         />
 
-        {/* ⭐ 2. Favorites Smart Story Bubble */}
+        {/* 2. Favorites Smart Story Bubble */}
         {favoriteJobs.length > 0 && (
           <CollectionStoryBubble
             title={t('catalog.favoritesFilter')}
             count={favoriteJobs.length}
-            emoji="⭐"
+            icon={<Star className="w-6 h-6 text-amber-500 fill-amber-500" />}
             imageUrl={getCollectionImage(favoriteJobs)}
             ringGradient="from-amber-500 via-orange-400 to-yellow-300"
             onClick={() => onOpenList({ kind: 'favorites' })}
           />
         )}
 
-        {/* 🍲 3. Categories Story Bubbles */}
+        {/* 3. Categories Story Bubbles */}
         {availableCategories.map(cat => {
           const jobs = jobsByCategory[cat] ?? [];
           if (jobs.length === 0) return null;
@@ -93,7 +94,7 @@ export default function CollectionStoryHub({
               key={cat}
               title={getRecipeCategoryLabel(cat, language)}
               count={jobs.length}
-              emoji={getRecipeCategoryEmoji(cat)}
+              icon={<UtensilsCrossed className="w-6 h-6 text-teal-600 dark:text-teal-400" />}
               imageUrl={getCollectionImage(jobs)}
               ringGradient="from-teal-400 via-emerald-500 to-cyan-500"
               onClick={() => onOpenList({ kind: 'category', category: cat })}
@@ -101,7 +102,7 @@ export default function CollectionStoryHub({
           );
         })}
 
-        {/* 📁 4. User Collections Story Bubbles */}
+        {/* 4. User Collections Story Bubbles */}
         {collections.map(col => {
           const jobs = jobsByCollection[col.id] ?? [];
           return (
@@ -109,7 +110,7 @@ export default function CollectionStoryHub({
               key={col.id}
               title={col.name}
               count={jobs.length}
-              emoji={col.emoji}
+              icon={<Folder className="w-6 h-6 text-rose-500 dark:text-rose-400" />}
               imageUrl={getCollectionImage(jobs)}
               ringGradient="from-rose-500 via-pink-400 to-orange-400"
               onClick={() => onOpenList({ kind: 'collection', id: col.id })}
