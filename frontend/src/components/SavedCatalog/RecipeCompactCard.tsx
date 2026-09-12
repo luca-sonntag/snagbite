@@ -82,19 +82,14 @@ export default function RecipeCompactCard({
             <span className="shrink-0 whitespace-nowrap">{caloriesFormatted}</span>
           ) : <span />}
 
-          {/* Health Score rechts unten */}
+          {/* Health Score rechts unten: nur Buchstabe */}
           {score !== null && scoreLetter && scoreColor && (
-            <div className="inline-flex items-center gap-1 shrink-0 ml-auto tabular-nums">
-              <span
-                className={`w-4 h-4 rounded-full ${scoreColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-2xs select-none`}
-                title={`Health Score: ${scoreLetter} (${score}/100)`}
-              >
-                {scoreLetter}
-              </span>
-              <span className={`text-[10px] font-extrabold ${scoreColor.badgeText} whitespace-nowrap`}>
-                Score {score}
-              </span>
-            </div>
+            <span
+              className={`w-4 h-4 rounded-full ${scoreColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-2xs shrink-0 ml-auto select-none`}
+              title={`Health Score: ${scoreLetter} (${score}/100)`}
+            >
+              {scoreLetter}
+            </span>
           )}
         </div>
       </div>
