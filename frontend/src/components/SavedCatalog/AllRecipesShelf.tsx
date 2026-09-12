@@ -84,20 +84,23 @@ export default function AllRecipesShelf({
       </div>
 
       {/* Vertical Timeline Groups */}
-      <div className="space-y-7">
-        {timelineGroups.map((group) => (
-          <div key={group.id} className="space-y-2.5">
-            {/* Timeline Cluster Header with Bridging Divider Line */}
-            <div className="flex items-center gap-3 px-0.5 pt-1">
-              <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white font-heading tracking-tight shrink-0">
-                {group.label}
-              </h4>
+      <div className="space-y-9 pt-1">
+        {timelineGroups.map((group, index) => (
+          <div key={group.id} className="space-y-3.5">
+            {/* Centered Timeline Header with Left & Right Divider Lines */}
+            <div className={`flex items-center gap-3 w-full px-1 ${index > 0 ? 'pt-3' : 'pt-1'}`}>
               <div className="h-px flex-1 bg-gray-200/80 dark:bg-gray-800" />
-              <span className="px-2.5 py-0.5 rounded-full bg-gray-100/90 dark:bg-gray-800 text-[10.5px] font-semibold text-gray-500 dark:text-gray-400 shrink-0">
-                {group.items.length === 1
-                  ? t('catalog.recipeCountSingle')
-                  : t('catalog.recipeCount', { count: group.items.length })}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white font-heading tracking-tight">
+                  {group.label}
+                </h4>
+                <span className="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-[10.5px] font-semibold text-gray-500 dark:text-gray-400">
+                  {group.items.length === 1
+                    ? t('catalog.recipeCountSingle')
+                    : t('catalog.recipeCount', { count: group.items.length })}
+                </span>
+              </div>
+              <div className="h-px flex-1 bg-gray-200/80 dark:bg-gray-800" />
             </div>
 
             {/* 2-Column Recipe Grid */}
