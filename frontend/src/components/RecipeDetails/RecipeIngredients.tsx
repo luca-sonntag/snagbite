@@ -53,8 +53,8 @@ export default function RecipeIngredients({
       {/* Main Cohesive Card Group (Portions + Ingredients List + Shopping Button) */}
       <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
         {/* 1. Servings / Portion scaling header inside card */}
-        <div className="px-4.5 py-4 sm:px-6 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
+        <div className="px-4.5 py-3.5 sm:px-6 bg-slate-50/70 dark:bg-gray-850/50 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
             <div className={medallion}>
               <Users className={medallionIcon} />
             </div>
@@ -73,18 +73,23 @@ export default function RecipeIngredients({
         </div>
 
         {/* 2. Grouped Ingredients List */}
-        <div className="px-4.5 py-4.5 sm:px-6 flex flex-col gap-5">
+        <div className="px-4 py-4 sm:px-5 flex flex-col gap-5">
           {sortedIngredients.map(({ group, originalIdx }) => {
             const theme = getCategoryTheme(group.name);
             return (
-              <div key={group.name} className="flex flex-col gap-2.5">
+              <div key={group.name} className="flex flex-col gap-2">
                 {group.name && (
-                  <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                    <span className={`w-1 h-3.5 rounded-full ${theme.barClass} shrink-0`} />
-                    <span>{translateCategory(group.name)}</span>
-                  </h4>
+                  <div className="flex items-center justify-between gap-2 px-1 pt-0.5">
+                    <span className="inline-flex items-center gap-2 text-xs font-bold text-gray-700 dark:text-gray-300">
+                      <span className={`w-2 h-2 rounded-full ${theme.barClass} shrink-0`} />
+                      <span>{translateCategory(group.name)}</span>
+                    </span>
+                    <span className="text-[11px] font-medium text-gray-400 dark:text-gray-500 tabular-nums">
+                      {group.items.length} {group.items.length === 1 ? t('recipe.ingredient') || 'Zutat' : t('recipe.ingredients') || 'Zutaten'}
+                    </span>
+                  </div>
                 )}
-                <ul className="flex flex-col gap-1">
+                <ul className="flex flex-col gap-1.5">
                   {group.items.map((ing, idx) => (
                     <IngredientItemRow
                       key={`${ing.name}-${originalIdx}-${idx}`}
