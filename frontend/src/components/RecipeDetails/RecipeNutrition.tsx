@@ -5,13 +5,17 @@ import { useAuth } from '../../context/AuthContext';
 import PremiumModal from '../PremiumModal';
 import { Flame } from 'lucide-react';
 import MacroDistribution from './MacroDistribution';
-import type { NutritionalValues } from '../../types';
+import HealthScoreBadge from './HealthScoreBadge';
+import HealthScoreSheet from './HealthScoreSheet';
+import type { NutritionalValues, HealthScoreBreakdown } from '../../types';
 
 type NutritionValue = string | number | null | undefined;
 
 interface RecipeNutritionProps {
   nutritionalValues: NutritionalValues;
   sourceNutritionalValues?: NutritionalValues | null;
+  healthScore?: number | null;
+  healthScoreBreakdown?: HealthScoreBreakdown | null;
   isAiEstimated: boolean;
   isVerified?: boolean;
   showTotalNutrition?: boolean;
@@ -28,6 +32,8 @@ interface RecipeNutritionProps {
 export default function RecipeNutrition({
   nutritionalValues,
   sourceNutritionalValues,
+  healthScore,
+  healthScoreBreakdown,
   isAiEstimated,
   isVerified,
   getNutritionDisplayValue,
@@ -36,6 +42,7 @@ export default function RecipeNutrition({
   const { t } = useI18n();
   const { isPremium } = useAuth();
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  const [isHealthScoreSheetOpen, setIsHealthScoreSheetOpen] = useState(false);
 
   const parseNum = (val: NutritionValue): number => {
     if (val === undefined || val === null || val === '') return 0;
@@ -204,6 +211,17 @@ export default function RecipeNutrition({
               onUnlockPremium={() => setIsPremiumModalOpen(true)}
             />
           )}
+
+          {/* Health Score Badge (Clean Flat interactive trigger) */}
+          {healthScore !== undefined && healthScore !== null && (
+            <div className="pt-2.5 mt-1 border-t border-gray-100/70 dark:border-gray-800/60 flex items-center justify-between">
+              <HealthScoreBadge
+                score={healthScore}
+                breakdown={healthScoreBreakdown}
+                onClick={() => setIsHealthScoreSheetOpen(true)}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -211,6 +229,15 @@ export default function RecipeNutrition({
         isOpen={isPremiumModalOpen}
         onOpenChange={setIsPremiumModalOpen}
       />
+
+      {healthScore !== undefined && healthScore !== null && (
+        <HealthScoreSheet
+          isOpen={isHealthScoreSheetOpen}
+          onClose={() => setIsHealthScoreSheetOpen(false)}
+          score={healthScore}
+          breakdown={healthScoreBreakdown}
+        />
+      )}
     </>
   );
 }

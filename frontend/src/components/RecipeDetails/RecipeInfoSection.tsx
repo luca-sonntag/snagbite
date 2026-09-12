@@ -1,7 +1,7 @@
 import { Clock, Utensils, Users } from 'lucide-react';
 import RecipeNutrition from './RecipeNutrition';
 import { useI18n } from '../../context/I18nContext';
-import type { NutritionalValues } from '../../types';
+import type { NutritionalValues, HealthScoreBreakdown } from '../../types';
 
 interface RecipeInfoSectionProps {
   prepTime?: string | number | null;
@@ -13,6 +13,8 @@ interface RecipeInfoSectionProps {
   nutritionalValues: NutritionalValues | null;
   /** What the recipe source claimed, shown only when it diverges from the computed figure. */
   sourceNutritionalValues?: NutritionalValues | null;
+  healthScore?: number | null;
+  healthScoreBreakdown?: HealthScoreBreakdown | null;
   isAiEstimated: boolean;
   isVerified?: boolean;
   showTotalNutrition: boolean;
@@ -32,6 +34,8 @@ export default function RecipeInfoSection({
   servings,
   nutritionalValues,
   sourceNutritionalValues,
+  healthScore,
+  healthScoreBreakdown,
   isAiEstimated,
   isVerified,
   showTotalNutrition,
@@ -78,6 +82,8 @@ export default function RecipeInfoSection({
             variant="summary"
             nutritionalValues={nutritionalValues}
             sourceNutritionalValues={sourceNutritionalValues}
+            healthScore={healthScore}
+            healthScoreBreakdown={healthScoreBreakdown}
             isAiEstimated={isAiEstimated}
             isVerified={isVerified}
             showTotalNutrition={showTotalNutrition}

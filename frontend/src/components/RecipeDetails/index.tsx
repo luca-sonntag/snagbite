@@ -147,6 +147,8 @@ export default function RecipeDetails({
             servings={servings}
             nutritionalValues={hasNutritionInfo ? nutritionalValues : null}
             sourceNutritionalValues={sourceNutritionalValues}
+            healthScore={recipe.healthScore}
+            healthScoreBreakdown={recipe.healthScoreBreakdown}
             isAiEstimated={isAiEstimated}
             isVerified={isVerified}
             showTotalNutrition={showTotalNutrition}

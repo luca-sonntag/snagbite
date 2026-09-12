@@ -1,15 +1,16 @@
-import React from 'react';
-import { Clock, Check, Star, Layers } from 'lucide-react';
+import type { MouseEvent } from 'react';
+import { Clock, Check, Star, Layers, HeartPulse } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
 import { getRecipeCalories, formatCalories } from '../../utils/formatNutrition';
+import { getHealthScoreColor } from '../RecipeDetails/HealthScoreBadge';
 
 interface RecipePosterCardProps {
   job: SavedRecipe;
   /** Pre-formatted total time, e.g. "35 Min." — null hides the badge. */
   totalTime: string | null;
-  onClick: (e: React.MouseEvent) => void;
+  onClick: (e: MouseEvent) => void;
   /**
    * `grid` fills its column (2-up catalog grid), `shelf` is a fixed-width
    * card for the horizontally scrolling rows on the cookbook home.
@@ -108,7 +109,7 @@ export default function RecipePosterCard({
           <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2">
             {r.title}
           </h4>
-          {(totalTime || caloriesFormatted || (r.servings && r.servings > 0)) && (
+          {(totalTime || caloriesFormatted || (r.servings && r.servings > 0) || r.healthScore) && (
             <div className="flex items-center justify-between gap-1 w-full text-[11px] font-medium mt-auto pt-1">
               {totalTime && (
                 <span className="flex items-center gap-1 shrink-0 px-1.5 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-semibold text-[11px]">
@@ -116,15 +117,26 @@ export default function RecipePosterCard({
                   <span>{totalTime}</span>
                 </span>
               )}
-              {caloriesFormatted ? (
-                <span className={`shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px] ${!totalTime ? 'ml-auto' : ''}`}>
-                  {caloriesFormatted}
-                </span>
-              ) : r.servings && r.servings > 0 ? (
-                <span className={`shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px] ${!totalTime ? 'ml-auto' : ''}`}>
-                  {r.servings} Port.
-                </span>
-              ) : null}
+              <div className="flex items-center gap-1 shrink-0 ml-auto">
+                {r.healthScore !== undefined && r.healthScore !== null && (
+                  <span
+                    className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg ${getHealthScoreColor(r.healthScore).badgeBg} ${getHealthScoreColor(r.healthScore).badgeText} font-bold text-[10.5px] tabular-nums`}
+                    title={`Healthy Score: ${r.healthScore}/100`}
+                  >
+                    <HeartPulse className="w-3 h-3 shrink-0" />
+                    <span>{r.healthScore}</span>
+                  </span>
+                )}
+                {caloriesFormatted ? (
+                  <span className="shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px]">
+                    {caloriesFormatted}
+                  </span>
+                ) : r.servings && r.servings > 0 ? (
+                  <span className="shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px]">
+                    {r.servings} Port.
+                  </span>
+                ) : null}
+              </div>
             </div>
           )}
         </div>
