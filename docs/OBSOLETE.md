@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-12: AI-Slop-Banner (`HealthScoreCopilotCard`) & redundanter Footer-Button im HealthScoreSheet durch integrierten Hero-Card Trigger ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `HealthScoreCopilotCard.tsx`: Separate mintfarbene Marketing-Box ("Rezept gesünder machen mit KI") mit Fließtext-Pitch und grellem Pfeil-Button, die unterhalb des Nährwert-Checks lag und nur durch Scrollen erreichbar war (AI-Slop & Scroll-Hürde).
+  - `<Drawer.Footer>` mit redundantem "Verstanden"-Button im `HealthScoreSheet.tsx`, der vertikalen Bildschirmplatz blockierte, obwohl das Sheet bereits über das "X" im Header und Swipe-to-Dismiss geschlossen werden kann.
+* **Ersetzt durch:**
+  - **Direkte Integration in [`HealthScoreHeroCard.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/HealthScoreHeroCard.tsx):** Eleganter, dezenter Quiet-Luxury Aktionsbutton (`[ ✨ Rezept mit Copilot optimieren ]` bzw. `[ ✨ Varianten mit Copilot entdecken ]`) unmittelbar unter dem 5-Zonen-Farbspektrum im sichtbaren Bereich (Above the fold).
+  - **Zero AI-Slop & sofortige Sichtbarkeit:** Keine aufdringlichen Marketing-Erklärtexte, kein Scrollen erforderlich. Sofortige haptische Interaktion und nahtlose Übergabe an den Recipe Copilot.
+  - **Entfernung des Footers:** Mehr Platz für die tatsächlichen Nährwertanalysen im Drawer.
+* **Betroffene Dateien:** `frontend/src/components/RecipeDetails/HealthScoreCopilotCard.tsx` (gelöscht), `frontend/src/components/RecipeDetails/HealthScoreHeroCard.tsx`, `frontend/src/components/RecipeDetails/HealthScoreSheet.tsx`, `frontend/src/i18n.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-12: Statische Schwellenwert-Upgrade-Tipps (`smartSwapTip` / `HealthScoreSmartTip`) durch dynamische AI Recipe Copilot Anbindung ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
