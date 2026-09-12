@@ -38,10 +38,10 @@ export default function RecipeCompactCard({
         hapticLight();
         onClick(e);
       }}
-      className="group relative flex-1 h-full min-h-[96px] sm:min-h-[104px] flex items-stretch rounded-2xl bg-white dark:bg-gray-900/90 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border-none cursor-pointer active:scale-[0.98] hover:shadow-md transition-all duration-150 select-none overflow-hidden"
+      className="group relative flex-1 min-w-0 flex items-stretch rounded-2xl bg-white dark:bg-gray-900/90 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border-none cursor-pointer active:scale-[0.98] hover:shadow-md transition-all duration-150 select-none overflow-hidden"
     >
       {/* Thumbnail: Full card height presentation */}
-      <div className="relative w-24 sm:w-28 shrink-0 overflow-hidden bg-black/5 dark:bg-white/5 self-stretch">
+      <div className="relative w-22 sm:w-26 shrink-0 overflow-hidden bg-black/5 dark:bg-white/5 self-stretch">
         <CachedImage
           src={r.imageUrl}
           emoji={r.emoji}
@@ -62,31 +62,36 @@ export default function RecipeCompactCard({
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-w-0 flex flex-col justify-center p-2.5 sm:p-3 gap-1 overflow-hidden">
-        {/* Top line: Health Score Pill or Category */}
-        <div className="flex items-center gap-1.5">
+      <div className="flex-1 min-w-0 flex flex-col justify-between p-2.5 sm:p-3 overflow-hidden">
+        {/* Top line: Compact Health Score with letter or Category */}
+        <div className="flex items-center gap-1.5 min-w-0">
           {score !== null && scoreLetter && scoreColor ? (
-            <span
-              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${scoreColor.badgeBg} ${scoreColor.badgeText} shadow-2xs`}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${scoreColor.pillBg}`} />
-              <span>Score {score} • {scoreLetter}</span>
-            </span>
+            <div className="inline-flex items-center gap-1 shrink-0">
+              <span
+                className={`w-4 h-4 rounded-full ${scoreColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-2xs select-none`}
+                title={`Health Score: ${scoreLetter} (${score}/100)`}
+              >
+                {scoreLetter}
+              </span>
+              <span className={`text-[10px] font-extrabold ${scoreColor.badgeText} whitespace-nowrap`}>
+                Score {score}
+              </span>
+            </div>
           ) : r.category ? (
-            <span className="text-[10px] font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <span className="text-[10px] font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 truncate">
               {r.category}
             </span>
           ) : null}
         </div>
 
         {/* Title */}
-        <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+        <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors my-auto py-0.5">
           {r.title}
         </h4>
 
         {/* Bottom meta: calories & protein */}
-        <div className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 font-medium flex-wrap">
-          {caloriesFormatted && <span className="shrink-0">{caloriesFormatted}</span>}
+        <div className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+          {caloriesFormatted && <span className="shrink-0 whitespace-nowrap">{caloriesFormatted}</span>}
           {caloriesFormatted && protein && protein > 0 && <span className="shrink-0 text-gray-300 dark:text-gray-600">•</span>}
           {protein && protein > 0 && (
             <span className="text-emerald-600 dark:text-emerald-400 font-bold shrink-0 whitespace-nowrap">

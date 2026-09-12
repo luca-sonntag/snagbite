@@ -65,57 +65,55 @@ export default function RecipeBentoSection({
       </div>
 
       {/* Grid Layout */}
-      <div className={`grid ${sideJobs.length > 0 ? 'grid-cols-2' : 'grid-cols-1'} gap-2.5 sm:gap-3 items-stretch`}>
+      <div className={`grid ${sideJobs.length > 0 ? 'grid-cols-2' : 'grid-cols-1'} gap-2.5 sm:gap-3`}>
         {/* Left: 3:4 Portrait Card */}
         <article
           onClick={(e) => {
             hapticLight();
             onOpenRecipe(e, mainJob);
           }}
-          className="group relative rounded-2xl overflow-hidden bg-gray-900 shadow-[0_2px_12px_rgba(0,0,0,0.06)] border-none cursor-pointer active:scale-[0.98] transition-all select-none flex flex-col justify-end"
+          className="group relative aspect-[3/4] w-full rounded-2xl overflow-hidden bg-gray-900 shadow-[0_2px_12px_rgba(0,0,0,0.06)] border-none cursor-pointer active:scale-[0.98] transition-all select-none"
         >
-          <div className="relative aspect-[3/4] w-full overflow-hidden">
-            <CachedImage
-              src={mainRecipe.imageUrl}
-              emoji={mainRecipe.emoji}
-              alt={mainRecipe.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none select-none"
-            />
-            {/* Scrim overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none" />
+          <CachedImage
+            src={mainRecipe.imageUrl}
+            emoji={mainRecipe.emoji}
+            alt={mainRecipe.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none select-none"
+          />
+          {/* Scrim overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none" />
 
-            {/* Top Badges */}
-            <div className="absolute top-2 inset-x-2 flex items-center justify-between pointer-events-none">
-              {mainScore !== null && mainScoreLetter && mainScoreColor ? (
-                <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${mainScoreColor.onMediaBg} ${mainScoreColor.onMediaText} backdrop-blur-md shadow-xs ring-1 ring-white/15`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${mainScoreColor.pillBg}`} />
-                  <span>Score {mainScore} • {mainScoreLetter}</span>
-                </span>
-              ) : <span />}
+          {/* Top Badges */}
+          <div className="absolute top-2 inset-x-2 flex items-center justify-between pointer-events-none">
+            {mainScore !== null && mainScoreLetter && mainScoreColor ? (
+              <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${mainScoreColor.onMediaBg} ${mainScoreColor.onMediaText} backdrop-blur-md shadow-xs ring-1 ring-white/15`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${mainScoreColor.pillBg}`} />
+                <span>Score {mainScore} • {mainScoreLetter}</span>
+              </span>
+            ) : <span />}
 
-              {mainJob.isFavorite && (
-                <div className="w-6 h-6 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center text-amber-400">
-                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                </div>
-              )}
-            </div>
-
-            {/* Bottom Meta */}
-            <div className="absolute bottom-2.5 inset-x-2.5 text-white flex flex-col gap-1 pointer-events-none">
-              {mainTime && (
-                <span className="self-start px-1.5 py-0.5 rounded-md bg-emerald-500/90 text-white text-[10px] font-bold flex items-center gap-1">
-                  <Clock className="w-2.5 h-2.5" />
-                  <span>{mainTime}</span>
-                </span>
-              )}
-              <h4 className="font-bold text-xs sm:text-sm leading-tight text-white line-clamp-2 drop-shadow-xs">
-                {mainRecipe.title}
-              </h4>
-              <div className="flex items-center gap-1.5 text-[10px] text-gray-200 font-medium">
-                {mainCalories && <span>{mainCalories}</span>}
-                {mainCalories && mainProtein && <span>•</span>}
-                {mainProtein && <span>{Math.round(mainProtein)}g Protein</span>}
+            {mainJob.isFavorite && (
+              <div className="w-6 h-6 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center text-amber-400">
+                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
               </div>
+            )}
+          </div>
+
+          {/* Bottom Meta */}
+          <div className="absolute bottom-2.5 inset-x-2.5 text-white flex flex-col gap-1 pointer-events-none">
+            {mainTime && (
+              <span className="self-start px-1.5 py-0.5 rounded-md bg-emerald-500/90 text-white text-[10px] font-bold flex items-center gap-1">
+                <Clock className="w-2.5 h-2.5" />
+                <span>{mainTime}</span>
+              </span>
+            )}
+            <h4 className="font-bold text-xs sm:text-sm leading-tight text-white line-clamp-2 drop-shadow-xs">
+              {mainRecipe.title}
+            </h4>
+            <div className="flex items-center gap-1.5 text-[10px] text-gray-200 font-medium">
+              {mainCalories && <span>{mainCalories}</span>}
+              {mainCalories && mainProtein && <span>•</span>}
+              {mainProtein && <span>{Math.round(mainProtein)}g Protein</span>}
             </div>
           </div>
         </article>
