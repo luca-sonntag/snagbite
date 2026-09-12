@@ -39,8 +39,8 @@ export default function CollectionStoryBubble({
         className="flex flex-col items-center gap-1.5 shrink-0 w-[68px] cursor-pointer group active:scale-95 transition-transform select-none border-none bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 rounded-2xl"
         aria-label={title}
       >
-        <div className="w-16 h-16 rounded-full border-2 border-dashed border-gray-300 dark:border-gray-700/80 hover:border-emerald-500/80 bg-gray-50/80 dark:bg-gray-900/40 flex items-center justify-center transition-colors">
-          <Plus className="w-6 h-6 text-emerald-600 dark:text-emerald-400 stroke-[2.5]" />
+        <div className="w-16 h-16 rounded-full border border-dashed border-emerald-600/40 dark:border-emerald-400/40 hover:border-emerald-500 dark:hover:border-emerald-400 bg-emerald-500/5 dark:bg-emerald-500/10 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/15 flex items-center justify-center transition-colors">
+          <Plus className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
         </div>
         <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 tracking-tight truncate max-w-full text-center">
           {title}
