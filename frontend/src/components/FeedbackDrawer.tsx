@@ -24,7 +24,7 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
   const toast = useToast();
   const { submitFeedback } = useFeedback();
 
-  useModalOverlay(isOpen);
+  useModalOverlay(isOpen, onClose);
 
   const [type, setType] = useState<FeedbackType>('bug');
   const [message, setMessage] = useState('');

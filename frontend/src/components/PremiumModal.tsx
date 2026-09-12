@@ -30,8 +30,8 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
   const [isLoadingPackages, setIsLoadingPackages] = useState(false);
 
-  // Register with overlay stack for ad hide/resume
-  useModalOverlay(isOpen);
+  // Register with overlay stack for ad hide/resume and back-button dismissal
+  useModalOverlay(isOpen, () => onOpenChange(false));
 
   useEffect(() => {
     if (isOpen) {

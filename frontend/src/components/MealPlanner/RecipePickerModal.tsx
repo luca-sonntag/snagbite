@@ -27,7 +27,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
   onClose,
   onSelectRecipe,
 }) => {
-  useModalOverlay(isOpen);
+  useModalOverlay(isOpen, onClose);
   const { t, language } = useI18n();
   const { pantryItems } = usePantry();
   const toast = useToast();

@@ -24,7 +24,7 @@ export default function IngredientNutritionSheet({
   servings = 1,
 }: IngredientNutritionSheetProps) {
   const { t } = useI18n();
-  useModalOverlay(isOpen);
+  useModalOverlay(isOpen, onClose);
 
   if (!ingredient) return null;
 

@@ -33,8 +33,8 @@ export const PublicRecipePreviewModal: React.FC<PublicRecipePreviewModalProps> =
   const [isSaving, setIsSaving] = useState(false);
   const [showTotalNutrition, setShowTotalNutrition] = useState(false);
 
-  // Register with overlay stack to lock body scroll and hide AdMob banners while open
-  useModalOverlay(isOpen);
+  // Register with overlay stack to lock body scroll, hide AdMob banners, and close on back
+  useModalOverlay(isOpen, onClose);
 
   useEffect(() => {
     if (!isOpen) return;

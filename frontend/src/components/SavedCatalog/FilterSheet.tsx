@@ -60,7 +60,7 @@ export default function FilterSheet({
   countMatches
 }: FilterSheetProps) {
   const { t, language } = useI18n();
-  useModalOverlay(isOpen);
+  useModalOverlay(isOpen, onClose);
   const [draft, setDraft] = useState<CatalogFilterState>(filters);
   const [draftSort, setDraftSort] = useState<CatalogSort>(sortBy);
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);

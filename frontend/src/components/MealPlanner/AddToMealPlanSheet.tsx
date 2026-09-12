@@ -38,7 +38,7 @@ export const AddToMealPlanSheet: React.FC<AddToMealPlanSheetProps> = ({
   initialServings = 2,
   onAddedSuccess,
 }) => {
-  useModalOverlay(isOpen);
+  useModalOverlay(isOpen, onClose);
   const { t, language } = useI18n();
   const { getAccessToken, user } = useAuth();
   const toast = useToast();

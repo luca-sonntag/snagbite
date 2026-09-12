@@ -16,7 +16,7 @@ interface CustomItemFormProps {
 export default function CustomItemForm({ isOpen, addCustomItem, onClose }: CustomItemFormProps) {
   const { t, language } = useI18n();
   const toast = useToast();
-  useModalOverlay(isOpen);
+  useModalOverlay(isOpen, onClose);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   // Manual item state

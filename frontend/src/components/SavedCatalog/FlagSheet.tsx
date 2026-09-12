@@ -24,7 +24,7 @@ export const FlagSheet: React.FC<FlagSheetProps> = ({
 }) => {
   const { t, language } = useI18n();
   const toast = useToast();
-  useModalOverlay(isOpen);
+  useModalOverlay(isOpen, onClose);
   const [tags, setTags] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);

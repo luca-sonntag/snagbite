@@ -44,7 +44,7 @@ export default function TimerConfirmSheet({
 }: TimerConfirmSheetProps) {
   const { t } = useI18n();
   const { addTimer } = useTimerManager();
-  useModalOverlay(isOpen);
+  useModalOverlay(isOpen, onClose);
 
   const [adjusted, setAdjusted] = useState(durationSeconds);
 

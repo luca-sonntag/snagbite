@@ -67,8 +67,15 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
     resolve: null,
   });
 
-  // Register with overlay stack for ad hide/resume
-  useModalOverlay(state.isOpen);
+  const handleClose = useCallback((value: boolean) => {
+    if (state.resolve) {
+      state.resolve(value);
+    }
+    setState((prev) => ({ ...prev, isOpen: false, resolve: null }));
+  }, [state]);
+
+  // Register with overlay stack for ad hide/resume and back-button dismissal
+  useModalOverlay(state.isOpen, () => handleClose(false));
 
   const showDialog = useCallback((type: DialogType, options: DialogOptions) => {
     return new Promise<boolean>((resolve) => {
@@ -93,13 +100,6 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
   const confirm = useCallback((options: DialogOptions) => {
     return showDialog('confirm', options);
   }, [showDialog]);
-
-  const handleClose = useCallback((value: boolean) => {
-    if (state.resolve) {
-      state.resolve(value);
-    }
-    setState((prev) => ({ ...prev, isOpen: false, resolve: null }));
-  }, [state]);
 
   // Determine Icon based on status
   const getIcon = () => {

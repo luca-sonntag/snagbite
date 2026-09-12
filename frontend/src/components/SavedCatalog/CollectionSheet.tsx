@@ -39,7 +39,7 @@ export default function CollectionSheet({
 }: CollectionSheetProps) {
   const { t, language } = useI18n();
   const toast = useToast();
-  useModalOverlay(isOpen);
+  useModalOverlay(isOpen, onClose);
   const {
     collections,
     refreshCollections,
