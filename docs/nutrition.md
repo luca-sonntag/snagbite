@@ -1,4 +1,4 @@
-﻿# 🥗 Ernährungsphysiologische Grundlagen & Nährwert-Architektur
+# 🥗 Ernährungsphysiologische Grundlagen & Nährwert-Architektur
 
 Dieses Dokument beschreibt die ernährungsphysiologischen Standards, Berechnungsformeln und UX-Designentscheidungen für Nährwerte, Kalorien und Makronährstoff-Verteilungen in der Snagbite-App.
 
@@ -106,11 +106,32 @@ Im Wochenplaner (`frontend/src/components/MealPlanner/`) werden die Nährwerte a
 
 ---
 
-## 6. Technische Komponenten & Dateistruktur
+## 6. Healthy Score & 4-Säulen-Modell (0–100 Punkte)
+
+Der **Healthy Score** bewertet Gerichte ganzheitlich nach wissenschaftlich fundierten Standards (DGE, WHO, Nutri-Score 2024 & NOVA-Klassifikation):
+
+1. **Säule 1: Makro- & Energie-Balance (0–30 Pkt):**
+   * Protein-Energie-Verhältnis (optimal: 15–30 % der Kalorien aus Eiweiß).
+   * Energiedichte pro 100g (Bonus für wasser- und nährstoffreiche Speisen).
+   * Zucker-Moderation (Abzug für > 10g Zucker/Portion).
+2. **Säule 2: Ballaststoffe & Sättigung (0–25 Pkt):**
+   * DGE-Orientierungswert: $\ge 30\,\text{g/Tag}$. Volle Punkte ab $\ge 10\,\text{g}$ pro Portion.
+3. **Säule 3: Pflanzenkraft & Mikronährstoff-Dichte (0–25 Pkt):**
+   * Gemüsegewicht: WHO-Kriterium ($\ge 200\,\text{g}$ frisches Gemüse/Obst pro Portion = 15 Pkt).
+   * Pflanzenvielfalt ("Plant Diversity"): $\ge 5$ unterschiedliche Pflanzenzutaten = 10 Pkt.
+4. **Säule 4: Zutaten-Reinheit & NOVA (0–20 Pkt):**
+   * Basierend auf dem gewichteten NOVA-Verarbeitungsgrad aus Open Food Facts (1 = unverarbeitet, 4 = UPF).
+
+---
+
+## 7. Technische Komponenten & Dateistruktur
 
 | Komponente | Pfad | Beschreibung |
 | :--- | :--- | :--- |
 | `RecipeNutrition` | [`frontend/src/components/RecipeDetails/RecipeNutrition.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/RecipeNutrition.tsx) | Hauptkomponente für Nährwerte (Summary- und Detail-Grid, Calories Headline, Free/Premium Guard). |
+| `HealthScoreBadge` | [`frontend/src/components/RecipeDetails/HealthScoreBadge.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/HealthScoreBadge.tsx) | Interaktives Clean Flat Badge mit Score, Farb-Codierung und Touch-Target $\ge 44\times 44\text{px}$. |
+| `HealthScoreSheet` | [`frontend/src/components/RecipeDetails/HealthScoreSheet.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/HealthScoreSheet.tsx) | HeroUI Drawer mit den 4 Säulen, Metriken (Gemüse, Fiber, Zucker, NOVA) und Highlights. |
+| `healthScoreCalculator` | [`backend/src/matching/healthScoreCalculator.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/matching/healthScoreCalculator.ts) | Deterministische 4-Säulen-Berechnungsengine für den Health Score. |
 | `MacroDistribution` | [`frontend/src/components/RecipeDetails/MacroDistribution.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/MacroDistribution.tsx) | Progress-Balken, Energieverteilung, Prozentberechnung und Legende. |
-| `Gemini Service` | [`backend/src/services/gemini.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/services/gemini.ts) | Structured Output Schema für Nährwert-Extraktion (`calories`, `protein`, `carbs`, `fat`). |
-| `Types` | [`frontend/src/types/index.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/types/index.ts) | Typdefinitionen für `NutritionalValues` (`calories`, `protein`, `carbs`, `fat`, etc.). |
+| `Types` | [`shared/src/types/recipes.ts`](file:///c:/Users/lucas/source/repos/cookbook/shared/src/types/recipes.ts) | Typdefinitionen für `NutritionalValues`, `HealthScoreBreakdown`, `HealthScoreGrade`. |
+
