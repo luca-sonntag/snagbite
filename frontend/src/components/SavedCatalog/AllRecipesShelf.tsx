@@ -1,4 +1,4 @@
-import type { MouseEvent } from 'react';
+import { useRef, useEffect, type MouseEvent } from 'react';
 import { BookOpen, ArrowRight } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import RecipePosterCard from './RecipePosterCard';
@@ -32,6 +32,20 @@ export default function AllRecipesShelf({
   bindLongPress,
 }: AllRecipesShelfProps) {
   const { t } = useI18n();
+  const shelfRef = useRef<HTMLDivElement>(null);
+
+  // Always reset horizontal scroll to the very beginning (leftmost card)
+  useEffect(() => {
+    if (shelfRef.current) {
+      shelfRef.current.scrollLeft = 0;
+    }
+    const rafId = requestAnimationFrame(() => {
+      if (shelfRef.current) {
+        shelfRef.current.scrollLeft = 0;
+      }
+    });
+    return () => cancelAnimationFrame(rafId);
+  }, [items?.[0]?.recipeId]);
 
   if (!items || items.length === 0) return null;
 
@@ -48,18 +62,22 @@ export default function AllRecipesShelf({
           </p>
         </div>
         <button
+          type="button"
           onClick={() => {
             hapticLight();
             onViewAll();
           }}
-          className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer select-none"
+          className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors cursor-pointer select-none"
         >
-          {totalCount} &gt;
+          {t('catalog.showAll', { count: totalCount })}
         </button>
       </div>
 
       {/* Horizontal Recipe Shelf */}
-      <div className="flex items-stretch gap-3 overflow-x-auto pb-3 pt-1 scrollbar-none snap-x -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div
+        ref={shelfRef}
+        className="flex items-stretch gap-3 overflow-x-auto pb-3 pt-1 scrollbar-none snap-x -mx-4 px-4 sm:mx-0 sm:px-0"
+      >
         {items.slice(0, 10).map((job) => (
           <div key={job.recipeId} className="snap-start shrink-0">
             <RecipePosterCard
@@ -75,21 +93,26 @@ export default function AllRecipesShelf({
         ))}
       </div>
 
-      {/* Prominent Browse & Filter Full Catalog Button */}
+      {/* Prominent Browse & Filter Full Catalog Button (Clean Flat Magazine Style) */}
       <button
+        type="button"
         onClick={() => {
           hapticLight();
           onViewAll();
         }}
-        className="w-full py-3.5 px-4 rounded-2xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-750 text-gray-900 dark:text-white font-bold text-sm flex items-center justify-between gap-2 transition-all active:scale-[0.98] border-none shadow-xs cursor-pointer select-none"
+        className="group w-full py-3.5 px-4 rounded-2xl bg-white dark:bg-gray-900 shadow-[0_4px_16px_rgba(0,0,0,0.05),0_1px_3px_rgba(0,0,0,0.03)] ring-1 ring-black/5 dark:ring-white/10 hover:ring-emerald-500/30 dark:hover:ring-emerald-500/30 hover:shadow-md text-gray-900 dark:text-white font-bold text-sm flex items-center justify-between gap-3 transition-all duration-150 active:scale-[0.98] border-none cursor-pointer select-none"
       >
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-xl bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-            <BookOpen className="w-4 h-4" />
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <BookOpen className="w-4.5 h-4.5" />
           </div>
-          <span>{t('catalog.magazine.allShelfButton', { count: totalCount })}</span>
+          <span className="truncate text-left font-bold text-sm tracking-tight text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+            {t('catalog.magazine.allShelfButton', { count: totalCount })}
+          </span>
         </div>
-        <ArrowRight className="w-4 h-4 text-gray-400" />
+        <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800/80 flex items-center justify-center shrink-0 text-gray-400 dark:text-gray-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-950/40 group-hover:translate-x-0.5 transition-all">
+          <ArrowRight className="w-4 h-4" />
+        </div>
       </button>
     </section>
   );
