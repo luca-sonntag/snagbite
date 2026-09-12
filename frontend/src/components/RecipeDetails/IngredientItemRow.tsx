@@ -61,13 +61,13 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
           handleNutritionClick();
         }
       }}
-      className={`group relative flex items-start gap-2.5 p-3 rounded-2xl transition-all border-none bg-white dark:bg-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-md ${
+      className={`group relative flex items-center gap-2.5 p-2.5 sm:p-3 rounded-2xl transition-all border-none shadow-none bg-gray-50/80 dark:bg-gray-800/40 hover:bg-gray-100/80 dark:hover:bg-gray-800/70 odd:last:col-span-2 ${
         hasCalories
           ? 'cursor-pointer active:scale-[0.98]'
           : ''
       }`}
     >
-      <div className="shrink-0 mt-0.5">
+      <div className="shrink-0">
         <IngredientIcon
           baseName={ingredient.baseName}
           canonicalId={ingredient.canonicalId}
