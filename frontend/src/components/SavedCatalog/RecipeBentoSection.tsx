@@ -4,7 +4,7 @@ import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
 import { useI18n } from '../../context/I18nContext';
-import { getRecipeCalories, formatCalories } from '../../utils/formatNutrition';
+import { getRecipeCalories } from '../../utils/formatNutrition';
 import { getHealthScoreColor, getHealthScoreLetter } from '../RecipeDetails/HealthScoreBadge';
 import RecipeCompactCard from './RecipeCompactCard';
 
@@ -42,7 +42,7 @@ export default function RecipeBentoSection({
   const mainScoreColor = mainScore !== null ? getHealthScoreColor(mainScore) : null;
   const mainScoreLetter = mainScore !== null ? getHealthScoreLetter(mainScore) : null;
   const mainTime = formatTotalTime(mainRecipe);
-  const mainCalories = formatCalories(getRecipeCalories(mainRecipe));
+  const mainCalories = getRecipeCalories(mainRecipe) ?? mainRecipe.nutritionalValues?.calories ?? null;
   const mainProtein = mainRecipe.nutritionalValues?.protein;
 
   return (
@@ -95,38 +95,51 @@ export default function RecipeBentoSection({
             )}
           </div>
 
-          {/* Bottom Meta */}
+          {/* Bottom Meta: Inhalt gleicht Hero Card (Dauer-Zeile mit kcal/Score darf wrappen, darunter Titel ohne Autor) */}
           <div className="absolute bottom-2.5 inset-x-2.5 text-white flex flex-col gap-1 pointer-events-none">
-            <div className="flex items-center gap-1.5 flex-wrap">
+            {/* 1. Meta-Zeile: Dauer, kcal, Health Score, Protein (darf wrappen) */}
+            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-white/90 flex-wrap drop-shadow-xs">
               {mainTime && (
-                <span className="self-start px-1.5 py-0.5 rounded-md bg-emerald-500/90 text-white text-[10px] font-bold flex items-center gap-1">
-                  <Clock className="w-2.5 h-2.5" />
+                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/90 text-white font-bold text-[10px] shadow-xs shrink-0">
+                  <Clock className="w-2.5 h-2.5 text-white shrink-0" />
                   <span>{mainTime}</span>
                 </span>
               )}
 
-              {/* Health Score neben Dauer mit Punkt-Separator */}
-              {mainScore !== null && mainScoreLetter && mainScoreColor && (
-                <>
-                  {mainTime && <span className="text-white/40">•</span>}
-                  <span
-                    className={`w-4 h-4 rounded-full ${mainScoreColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-md shrink-0 select-none`}
-                    title={`Health Score: ${mainScoreLetter} (${mainScore}/100)`}
-                  >
-                    {mainScoreLetter}
+              {/* Calories vor Health Score direkt nebeneinander */}
+              {(mainCalories !== null && mainCalories !== undefined) || (mainScore !== null && mainScoreLetter && mainScoreColor) ? (
+                <div className="flex items-center gap-1 shrink-0">
+                  {mainTime && <span className="text-white/30 text-[9px] mr-0.5">•</span>}
+                  {mainCalories !== null && mainCalories !== undefined && (
+                    <span className="text-white/90 font-medium">
+                      {Math.round(mainCalories)} kcal
+                    </span>
+                  )}
+                  {mainScore !== null && mainScoreLetter && mainScoreColor && (
+                    <span
+                      className={`w-3.5 h-3.5 rounded-full ${mainScoreColor.pillBg} text-white font-black text-[9px] flex items-center justify-center leading-none shadow-md shrink-0 select-none`}
+                      title={`Health Score: ${mainScoreLetter} (${mainScore}/100)`}
+                    >
+                      {mainScoreLetter}
+                    </span>
+                  )}
+                </div>
+              ) : null}
+
+              {mainProtein && mainProtein > 0 && (
+                <div className="flex items-center gap-1 shrink-0">
+                  <span className="text-white/30 text-[9px]">•</span>
+                  <span className="text-white/90 font-medium">
+                    {Math.round(mainProtein)}g Protein
                   </span>
-                </>
+                </div>
               )}
             </div>
 
-            <h4 className="font-bold text-xs sm:text-sm leading-tight text-white line-clamp-2 drop-shadow-xs">
+            {/* 2. Titel direkt unter der Dauer-Zeile (kein Autor) */}
+            <h4 className="font-bold text-xs sm:text-sm leading-tight text-white line-clamp-2 drop-shadow-xs pt-0.5 font-heading">
               {mainRecipe.title}
             </h4>
-            <div className="flex items-center gap-1.5 text-[10px] text-gray-200 font-medium">
-              {mainCalories && <span>{mainCalories}</span>}
-              {mainCalories && mainProtein && <span>•</span>}
-              {mainProtein && <span>{Math.round(mainProtein)}g Protein</span>}
-            </div>
           </div>
         </article>
 
