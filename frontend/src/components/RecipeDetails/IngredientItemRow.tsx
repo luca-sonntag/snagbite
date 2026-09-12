@@ -61,7 +61,7 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
           handleNutritionClick();
         }
       }}
-      className={`group relative flex items-center gap-2.5 p-2.5 sm:p-3 rounded-2xl transition-all border-none shadow-none bg-gray-50/80 dark:bg-gray-800/40 hover:bg-gray-100/80 dark:hover:bg-gray-800/70 odd:last:col-span-2 ${
+      className={`group relative flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl transition-all border-none shadow-none bg-transparent hover:bg-black/[0.02] dark:hover:bg-white/[0.02] odd:last:col-span-2 ${
         hasCalories
           ? 'cursor-pointer active:scale-[0.98]'
           : ''
