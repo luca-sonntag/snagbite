@@ -9,17 +9,19 @@ import PublicRecipePreviewModal from '../PublicRecipe/PublicRecipePreviewModal';
 interface PublicRecipeRecommendationsShelfProps {
   onRecipeSaved: (savedId: string) => void;
   savedRecipeIds?: Set<string>;
+  recommendations?: Recipe[];
 }
 
 export default function PublicRecipeRecommendationsShelf({
   onRecipeSaved,
   savedRecipeIds,
+  recommendations: passedRecs,
 }: PublicRecipeRecommendationsShelfProps) {
   const { t } = useI18n();
   const { getAccessToken } = useAuth();
-  const [recommendations, setRecommendations] = useState<Recipe[]>([]);
+  const [recommendations, setRecommendations] = useState<Recipe[]>(passedRecs ?? []);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!passedRecs || passedRecs.length === 0);
   const [selectedPreviewRecipe, setSelectedPreviewRecipe] = useState<Recipe | null>(null);
 
   const checkIsSaved = (recipeId?: string) => {
@@ -28,6 +30,12 @@ export default function PublicRecipeRecommendationsShelf({
   };
 
   useEffect(() => {
+    if (passedRecs && passedRecs.length > 0) {
+      setRecommendations(passedRecs);
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
     const load = async () => {
       try {
@@ -46,7 +54,7 @@ export default function PublicRecipeRecommendationsShelf({
     return () => {
       cancelled = true;
     };
-  }, [getAccessToken]);
+  }, [passedRecs, getAccessToken]);
 
   if (loading || recommendations.length === 0) return null;
 

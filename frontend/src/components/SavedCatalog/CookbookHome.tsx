@@ -1,14 +1,17 @@
-import type { MouseEvent } from 'react';
-import type { Collection, SavedRecipe, RecipeCategory } from '../../types';
+import { useState, useEffect, type MouseEvent } from 'react';
+import type { Collection, SavedRecipe, Recipe, RecipeCategory } from '../../types';
 import CollectionStoryHub from './CollectionStoryHub';
 import CategoryLabelBar from './CategoryLabelBar';
 import CookbookGreetingHeader from './CookbookGreetingHeader';
 import CookbookVibeChips from './CookbookVibeChips';
-import RecipeHeroCard from './RecipeHeroCard';
+import RecipeHeroCarousel, { type HeroSlideItem } from './RecipeHeroCarousel';
 import RecipeBentoSection from './RecipeBentoSection';
 import RecipeShowcaseCard from './RecipeShowcaseCard';
 import AllRecipesShelf from './AllRecipesShelf';
 import PublicRecipeRecommendationsShelf from './PublicRecipeRecommendationsShelf';
+import PublicRecipePreviewModal from '../PublicRecipe/PublicRecipePreviewModal';
+import { useAuth } from '../../context/AuthContext';
+import { fetchPublicRecipeRecommendations, savePublicRecipeToCookbook } from '../../api/publicRecipesApi';
 import type { CatalogPreset } from './catalogRoutes';
 import { useCookbookMagazine } from './useCookbookMagazine';
 
@@ -93,25 +96,69 @@ export default function CookbookHome({
   activeFilterCount = 0,
   onOpenFilters,
 }: CookbookHomeProps) {
+  const { getAccessToken } = useAuth();
+  const [communityRecommendations, setCommunityRecommendations] = useState<Recipe[]>([]);
+  const [selectedPreviewRecipe, setSelectedPreviewRecipe] = useState<Recipe | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const items = await fetchPublicRecipeRecommendations(getAccessToken, 6);
+        if (!cancelled && items.length > 0) {
+          setCommunityRecommendations(items);
+        }
+      } catch (err) {
+        console.warn('[CookbookHome] Error loading community recommendations:', err);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [getAccessToken]);
+
   const allCompletedJobs = items ?? shelves.newest?.items ?? [];
   const favJobs = favoriteJobs.length > 0 ? favoriteJobs : (shelves.favorites?.items ?? []);
 
   const {
     activeVibe,
     setActiveVibe,
-    heroRecipe,
-    heroBadgeText,
+    heroSlides,
     bentoRecipes,
     bentoTitle,
     bentoSubtitle,
     rediscoveredRecipe,
     allRecipes,
-    heroTotalTime,
   } = useCookbookMagazine({
     items: allCompletedJobs,
     recommendedShelf: shelves.recommended,
+    communityRecipes: communityRecommendations,
+    savedRecipeIds,
     formatTotalTime,
   });
+
+  const handleOpenSlide = (e: MouseEvent, slide: HeroSlideItem) => {
+    if (slide.isCommunity) {
+      if (slide.recipe.id && savedRecipeIds?.has(slide.recipe.id)) {
+        window.location.hash = `/recipe/${slide.recipe.id}`;
+      } else {
+        setSelectedPreviewRecipe(slide.recipe);
+      }
+    } else if (slide.job) {
+      onOpenRecipe(e, slide.job);
+    }
+  };
+
+  const handleSaveCommunityFromHero = async (_e: MouseEvent, recipe: Recipe) => {
+    if (!recipe.id || !onRecipeSaved) return;
+    try {
+      await savePublicRecipeToCookbook(recipe.id, getAccessToken);
+      onRecipeSaved(recipe.id);
+    } catch (err) {
+      console.error('[CookbookHome] Failed to save community recipe from hero:', err);
+    }
+  };
 
   // First recipe image for the "Alle Rezepte" story bubble thumbnail
   const firstRecipeThumbnail = allCompletedJobs[0]?.recipe?.imageUrl ?? null;
@@ -158,13 +205,12 @@ export default function CookbookHome({
         onSelectVibe={setActiveVibe}
       />
 
-      {/* 4. COVER STORY Part 1: Cinematic 16:10 Spotlight Dish */}
-      {heroRecipe && (
-        <RecipeHeroCard
-          job={heroRecipe}
-          badgeText={heroBadgeText}
-          totalTime={heroTotalTime}
-          onOpenRecipe={onOpenRecipe}
+      {/* 4. COVER STORY Part 1: Modern 3-Slide Hero Carousel */}
+      {heroSlides.length > 0 && (
+        <RecipeHeroCarousel
+          slides={heroSlides}
+          onOpenSlide={handleOpenSlide}
+          onSaveCommunity={handleSaveCommunityFromHero}
         />
       )}
 
@@ -183,6 +229,7 @@ export default function CookbookHome({
       {/* 6. NEUER INPUT: Community Discoveries (if active) */}
       {onRecipeSaved && (
         <PublicRecipeRecommendationsShelf
+          recommendations={communityRecommendations}
           onRecipeSaved={onRecipeSaved}
           savedRecipeIds={savedRecipeIds}
         />
@@ -208,6 +255,22 @@ export default function CookbookHome({
         selectedIds={selectedIds}
         bindLongPress={bindLongPress}
       />
+
+      {/* Community Recipe Preview Modal */}
+      {selectedPreviewRecipe && (
+        <PublicRecipePreviewModal
+          isOpen={Boolean(selectedPreviewRecipe)}
+          onClose={() => setSelectedPreviewRecipe(null)}
+          recipe={selectedPreviewRecipe}
+          isSaved={selectedPreviewRecipe.id ? savedRecipeIds?.has(selectedPreviewRecipe.id) : false}
+          onSave={async (rec) => {
+            if (!rec.id || !onRecipeSaved) return;
+            await savePublicRecipeToCookbook(rec.id, getAccessToken);
+            onRecipeSaved(rec.id);
+            window.location.hash = `/recipe/${rec.id}`;
+          }}
+        />
+      )}
     </div>
   );
 }
