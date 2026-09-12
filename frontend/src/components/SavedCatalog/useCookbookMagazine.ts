@@ -174,16 +174,6 @@ export function useCookbookMagazine({
       return withoutHero.slice(0, 3);
     }
 
-    // If recommended shelf has items, prioritize theme-complementary items
-    if (recommendedShelf && recommendedShelf.items && recommendedShelf.items.length >= 2) {
-      const recWithoutHero = recommendedShelf.items.filter((j) => !heroRecipeIds.has(j.recipeId));
-      if (recWithoutHero.length >= 3) {
-        return recWithoutHero.slice(0, 3);
-      }
-      const remainder = withoutHero.filter((j) => !recWithoutHero.some((r) => r.recipeId === j.recipeId));
-      return [...recWithoutHero, ...remainder].slice(0, 3);
-    }
-
     // Daily rotated quick candidates (<= 25 min)
     const quickCandidates = withoutHero.filter((j) => {
       const t = getTotalTime(j.recipe);
@@ -200,7 +190,7 @@ export function useCookbookMagazine({
     const remainder = withoutHero.filter((j) => !quickCandidates.includes(j));
     remainder.sort((a, b) => (b.recipe?.healthScore ?? 0) - (a.recipe?.healthScore ?? 0));
     return [...quickCandidates, ...remainder].slice(0, 3);
-  }, [pool, heroSlides, activeVibe, recommendedShelf, dayOfYear]);
+  }, [pool, heroSlides, activeVibe, dayOfYear]);
 
   // 3. Rediscovered Recipe (Older saved recipe, distinct from hero slides & bento)
   const rediscoveredRecipe = useMemo(() => {

@@ -103,16 +103,13 @@ export function getMagazineTitles(
     }
   }
 
-  if (recommendedShelf && recommendedShelf.items && recommendedShelf.items.length >= 2) {
-    return {
-      heroBadgeText: recommendedShelf.title || t('catalog.magazine.heroHighlight'),
-      bentoTitle: t('catalog.magazine.bentoContextTitle'),
-      bentoSubtitle: t('catalog.magazine.bentoContextSubtitle'),
-    };
-  }
+  const heroBadge =
+    recommendedShelf?.items && recommendedShelf.items.length >= 2 && recommendedShelf.title
+      ? recommendedShelf.title
+      : t('catalog.magazine.heroHighlight');
 
   return {
-    heroBadgeText: t('catalog.magazine.heroHighlight'),
+    heroBadgeText: heroBadge,
     bentoTitle: t('catalog.magazine.bentoDefaultTitle'),
     bentoSubtitle: t('catalog.magazine.bentoDefaultSubtitle'),
   };
