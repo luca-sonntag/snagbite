@@ -47,10 +47,15 @@ interface CookbookHomeProps {
   onAddCollection: () => void;
   onManageCollections?: () => void;
   isSelectMode?: boolean;
+  onToggleSelectMode?: () => void;
   selectedIds?: Set<string>;
   bindLongPress?: (id: string, job: SavedRecipe) => any;
   onRecipeSaved?: (savedId: string) => void;
   savedRecipeIds?: Set<string>;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
+  activeFilterCount?: number;
+  onOpenFilters?: () => void;
 }
 
 /**
@@ -79,10 +84,15 @@ export default function CookbookHome({
   onOpenRecipe,
   onAddCollection,
   isSelectMode = false,
+  onToggleSelectMode,
   selectedIds = new Set(),
   bindLongPress,
   onRecipeSaved,
   savedRecipeIds,
+  searchQuery = '',
+  onSearchChange,
+  activeFilterCount = 0,
+  onOpenFilters,
 }: CookbookHomeProps) {
   const allCompletedJobs = items ?? shelves.newest?.items ?? [];
   const favJobs = favoriteJobs.length > 0 ? favoriteJobs : (shelves.favorites?.items ?? []);
@@ -106,7 +116,14 @@ export default function CookbookHome({
   return (
     <div className="flex flex-col gap-6 pb-6 animate-fade-in select-none">
       {/* 1. Contextual Greeting Header */}
-      <CookbookGreetingHeader />
+      <CookbookGreetingHeader
+        isSelectMode={isSelectMode}
+        onToggleSelectMode={onToggleSelectMode}
+        searchQuery={searchQuery}
+        onSearchChange={onSearchChange}
+        activeFilterCount={activeFilterCount}
+        onOpenFilters={onOpenFilters}
+      />
 
       {/* 2. Circular Story Hub (Option A: 100% circular Instagram-style highlights) */}
       <section className="space-y-3">
