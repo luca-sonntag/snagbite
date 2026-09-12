@@ -8,11 +8,9 @@ import RecipeHeroCard from './RecipeHeroCard';
 import RecipeBentoSection from './RecipeBentoSection';
 import RecipeShowcaseCard from './RecipeShowcaseCard';
 import AllRecipesShelf from './AllRecipesShelf';
-import RecipeShelf from './RecipeShelf';
 import PublicRecipeRecommendationsShelf from './PublicRecipeRecommendationsShelf';
 import type { CatalogPreset } from './catalogRoutes';
 import { useCookbookMagazine } from './useCookbookMagazine';
-import { useI18n } from '../../context/I18nContext';
 
 interface Shelf {
   items: SavedRecipe[];
@@ -95,7 +93,6 @@ export default function CookbookHome({
   activeFilterCount = 0,
   onOpenFilters,
 }: CookbookHomeProps) {
-  const { t } = useI18n();
   const allCompletedJobs = items ?? shelves.newest?.items ?? [];
   const favJobs = favoriteJobs.length > 0 ? favoriteJobs : (shelves.favorites?.items ?? []);
 
@@ -103,12 +100,16 @@ export default function CookbookHome({
     activeVibe,
     setActiveVibe,
     heroRecipe,
+    heroBadgeText,
     bentoRecipes,
+    bentoTitle,
+    bentoSubtitle,
     rediscoveredRecipe,
     allRecipes,
     heroTotalTime,
   } = useCookbookMagazine({
     items: allCompletedJobs,
+    recommendedShelf: shelves.recommended,
     formatTotalTime,
   });
 
@@ -157,42 +158,37 @@ export default function CookbookHome({
         onSelectVibe={setActiveVibe}
       />
 
-      {/* 4. Format A: Cinematic 16:10 Spotlight Dish */}
+      {/* 4. COVER STORY Part 1: Cinematic 16:10 Spotlight Dish */}
       {heroRecipe && (
         <RecipeHeroCard
           job={heroRecipe}
+          badgeText={heroBadgeText}
           totalTime={heroTotalTime}
           onOpenRecipe={onOpenRecipe}
         />
       )}
 
-      {/* 5. Format B: Bento Grid for Fast & Nutrient-Dense Dishes (only when at least 3 recipes are available) */}
+      {/* 5. COVER STORY Part 2: Bento Grid for Fast & Nutrient-Dense Dishes (only when at least 3 recipes are available) */}
       {bentoRecipes.length >= 3 && (
         <RecipeBentoSection
           recipes={bentoRecipes}
+          title={bentoTitle}
+          subtitle={bentoSubtitle}
           formatTotalTime={formatTotalTime}
           onOpenRecipe={onOpenRecipe}
-          onSeeAll={() => onOpenList({ kind: 'quick' })}
+          onSeeAll={() => onOpenList({ kind: activeVibe ? 'all' : 'quick' })}
         />
       )}
 
-      {/* Recommended Shelf (if context recommendation matches) */}
-      {shelves.recommended && shelves.recommended.items.length >= 2 && (
-        <RecipeShelf
-          title={shelves.recommended.title}
-          subtitle={t('catalog.recommendations.subtitle')}
-          jobs={shelves.recommended.items}
-          totalCount={shelves.recommended.total}
-          formatTotalTime={formatTotalTime}
-          onOpenAll={() => onOpenList({ kind: 'recommended' })}
-          onOpenRecipe={onOpenRecipe}
-          isSelectMode={isSelectMode}
-          selectedIds={selectedIds}
-          bindLongPress={bindLongPress}
+      {/* 6. NEUER INPUT: Community Discoveries (if active) */}
+      {onRecipeSaved && (
+        <PublicRecipeRecommendationsShelf
+          onRecipeSaved={onRecipeSaved}
+          savedRecipeIds={savedRecipeIds}
         />
       )}
 
-      {/* 6. Format C: Rediscovered Gems */}
+      {/* 7. NOSTALGIE-SPOTLIGHT: Format C: Rediscovered Gems */}
       {rediscoveredRecipe && (
         <RecipeShowcaseCard
           job={rediscoveredRecipe}
@@ -201,21 +197,16 @@ export default function CookbookHome({
         />
       )}
 
-      {/* 🌟 Community Discoveries (if active) */}
-      {onRecipeSaved && (
-        <PublicRecipeRecommendationsShelf
-          onRecipeSaved={onRecipeSaved}
-          savedRecipeIds={savedRecipeIds}
-        />
-      )}
-
-      {/* 7. Format D: Dedicated "Alle deine Rezepte" Shelf at Bottom */}
+      {/* 8. VOLLSTÄNDIGE BIBLIOTHEK: Dedicated "Alle deine Rezepte" Shelf at Bottom */}
       <AllRecipesShelf
         items={allRecipes}
         totalCount={totalRecipes}
         formatTotalTime={formatTotalTime}
         onOpenRecipe={onOpenRecipe}
         onViewAll={() => onOpenList({ kind: 'all' })}
+        isSelectMode={isSelectMode}
+        selectedIds={selectedIds}
+        bindLongPress={bindLongPress}
       />
     </div>
   );

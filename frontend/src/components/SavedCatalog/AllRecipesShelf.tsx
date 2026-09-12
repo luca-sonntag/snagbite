@@ -11,6 +11,9 @@ interface AllRecipesShelfProps {
   formatTotalTime: (recipe: any) => string | null;
   onOpenRecipe: (e: MouseEvent, job: SavedRecipe) => void;
   onViewAll: () => void;
+  isSelectMode?: boolean;
+  selectedIds?: Set<string>;
+  bindLongPress?: (id: string, job: SavedRecipe) => any;
 }
 
 /**
@@ -24,6 +27,9 @@ export default function AllRecipesShelf({
   formatTotalTime,
   onOpenRecipe,
   onViewAll,
+  isSelectMode = false,
+  selectedIds,
+  bindLongPress,
 }: AllRecipesShelfProps) {
   const { t } = useI18n();
 
@@ -61,6 +67,9 @@ export default function AllRecipesShelf({
               job={job}
               variant="shelf"
               totalTime={job.recipe ? formatTotalTime(job.recipe) : null}
+              isSelected={selectedIds?.has(job.recipeId)}
+              isSelectMode={isSelectMode}
+              bindLongPress={bindLongPress ? bindLongPress(job.recipeId, job) : undefined}
               onClick={(e) => onOpenRecipe(e, job)}
             />
           </div>
