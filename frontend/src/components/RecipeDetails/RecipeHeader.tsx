@@ -72,7 +72,7 @@ export default function RecipeHeader({
       />
 
       {/* Recipe details body below cover (Sheet-Overlap with inverted curve on canvas) */}
-      <div className="relative -mt-6 -mx-4 rounded-t-3xl sm:rounded-t-[2rem] bg-[#f8fafc] dark:bg-gray-950 px-4 pt-5 pb-2 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_-8px_24px_rgba(0,0,0,0.4)] flex flex-col gap-3 z-20">
+      <div className="relative -mt-6 -mx-4 rounded-t-3xl sm:rounded-t-[2rem] bg-[#f1f5f9] dark:bg-gray-950 px-4 pt-5 pb-2 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_-8px_24px_rgba(0,0,0,0.4)] flex flex-col gap-3 z-20">
 
         {/* Editorial Quick-Facts Lead-in: Category · Total Time · Servings · Health Score · Flags */}
         {(recipe.category || totalTimeLabel || (recipe.servings && recipe.servings > 0) || (healthColor && healthLetter) || (flags && flags.length > 0) || (history && history.count > 0)) && (
@@ -83,13 +83,13 @@ export default function RecipeHeader({
               </span>
             )}
             {totalTimeLabel && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-xs select-none">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-xs select-none shadow-2xs">
                 <Clock className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
                 <span>{totalTimeLabel}</span>
               </span>
             )}
             {recipe.servings && recipe.servings > 0 && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-xs select-none">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-xs select-none shadow-2xs">
                 <Users className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
                 <span>{t('recipe.servingsCount', { count: recipe.servings }) || `${recipe.servings} Portionen`}</span>
               </span>

@@ -70,7 +70,7 @@
 
 body {
   margin: 0;
-  background-color: #f8fafc; /* Crisp Slate-50 canvas making elevated white cards pop */
+  background-color: #f1f5f9; /* Crisp slate canvas making elevated white cards pop */
   color: #0f172a; /* Deep slate text for sharp readable contrast */
   min-height: 100vh;
   transition: background-color 0.3s ease, color 0.3s ease;

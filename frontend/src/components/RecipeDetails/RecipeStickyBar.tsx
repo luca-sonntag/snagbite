@@ -53,9 +53,9 @@ export default function RecipeStickyBar({
   return (
     <div
       id="recipe-sticky-bar"
-      className={`sticky top-[var(--app-sticky-top)] z-30 -mx-4 px-4 bg-[#f8fafc]/95 dark:bg-gray-950/95 backdrop-blur-md transition-all duration-200 border-none ${
+      className={`sticky top-[var(--app-sticky-top)] z-30 -mx-4 px-4 bg-[#f1f5f9]/95 dark:bg-gray-950/95 backdrop-blur-md transition-all duration-200 border-none ${
         isCollapsed
-          ? 'shadow-[0_2px_10px_rgba(0,0,0,0.03)] pb-0.5 before:content-[\'\'] before:absolute before:bottom-full before:inset-x-0 before:h-12 before:bg-[#f8fafc] dark:before:bg-gray-950 before:pointer-events-none'
+          ? 'shadow-[0_2px_10px_rgba(0,0,0,0.03)] pb-0.5 before:content-[\'\'] before:absolute before:bottom-full before:inset-x-0 before:h-12 before:bg-[#f1f5f9] dark:before:bg-gray-950 before:pointer-events-none'
           : ''
       }`}
     >
