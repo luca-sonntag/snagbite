@@ -84,15 +84,16 @@ export default function AllRecipesShelf({
       </div>
 
       {/* Vertical Timeline Groups */}
-      <div className="space-y-6">
+      <div className="space-y-7">
         {timelineGroups.map((group) => (
           <div key={group.id} className="space-y-2.5">
-            {/* Timeline Cluster Header */}
-            <div className="flex items-center justify-between px-0.5">
-              <h4 className="text-xs font-bold text-gray-700 dark:text-gray-300 font-heading">
+            {/* Timeline Cluster Header with Bridging Divider Line */}
+            <div className="flex items-center gap-3 px-0.5 pt-1">
+              <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white font-heading tracking-tight shrink-0">
                 {group.label}
               </h4>
-              <span className="text-[11px] font-medium text-gray-400 dark:text-gray-500">
+              <div className="h-px flex-1 bg-gray-200/80 dark:bg-gray-800" />
+              <span className="px-2.5 py-0.5 rounded-full bg-gray-100/90 dark:bg-gray-800 text-[10.5px] font-semibold text-gray-500 dark:text-gray-400 shrink-0">
                 {group.items.length === 1
                   ? t('catalog.recipeCountSingle')
                   : t('catalog.recipeCount', { count: group.items.length })}
