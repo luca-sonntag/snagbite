@@ -86,23 +86,18 @@ export default function RecipeHeroCard({
                 hapticMedium();
                 onSaveCommunity?.(e, r);
               }}
-              className={`pointer-events-auto h-8 px-2.5 rounded-full backdrop-blur-md flex items-center gap-1.5 font-bold text-[11px] shadow-md transition-all active:scale-90 border-none cursor-pointer ${
+              className={`pointer-events-auto w-8 h-8 rounded-full backdrop-blur-md flex items-center justify-center shadow-md transition-all active:scale-90 border-none cursor-pointer ${
                 isSaved
                   ? 'bg-emerald-500/90 text-white'
                   : 'bg-black/50 text-white hover:bg-black/70'
               }`}
               title={isSaved ? t('catalog.magazine.alreadySaved') : t('catalog.magazine.saveToCookbook')}
+              aria-label={isSaved ? t('catalog.magazine.alreadySaved') : t('catalog.magazine.saveToCookbook')}
             >
               {isSaved ? (
-                <>
-                  <Check className="w-3.5 h-3.5 text-white" />
-                  <span className="hidden sm:inline">{t('catalog.magazine.alreadySaved')}</span>
-                </>
+                <Check className="w-4 h-4 text-white" />
               ) : (
-                <>
-                  <BookmarkPlus className="w-3.5 h-3.5 text-indigo-200" />
-                  <span>{t('catalog.magazine.saveToCookbook')}</span>
-                </>
+                <BookmarkPlus className="w-4 h-4 text-indigo-200" />
               )}
             </button>
           ) : job?.isFavorite ? (
@@ -113,12 +108,12 @@ export default function RecipeHeroCard({
         </div>
 
         {/* Bottom Content Container */}
-        <div className="absolute bottom-3 inset-x-3 text-white flex flex-col gap-1.5">
-          {/* Punchy Info Pills - Crisp White & High Legibility */}
-          <div className="flex items-center gap-2 text-xs font-semibold text-white/95 flex-wrap drop-shadow-xs">
+        <div className="absolute bottom-3 inset-x-3 text-white flex flex-col gap-1">
+          {/* Punchy Info Pills - Crisp, compact & high legibility */}
+          <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold text-white/90 flex-wrap drop-shadow-xs">
             {totalTime && (
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/90 text-white font-bold text-[11px] shadow-xs">
-                <Clock className="w-3 h-3 text-white shrink-0" />
+              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/90 text-white font-bold text-[10px] shadow-xs">
+                <Clock className="w-2.5 h-2.5 text-white shrink-0" />
                 <span>{totalTime}</span>
               </span>
             )}
@@ -126,9 +121,9 @@ export default function RecipeHeroCard({
             {/* Health Score direkt hinter Dauer mit Punkt-Separator */}
             {score !== null && scoreLetter && scoreColors && (
               <>
-                {totalTime && <span className="text-white/40">•</span>}
+                {totalTime && <span className="text-white/30 text-[9px]">•</span>}
                 <span
-                  className={`w-4.5 h-4.5 rounded-full ${scoreColors.pillBg} text-white font-black text-[10px] flex items-center justify-center leading-none shadow-md shrink-0 select-none`}
+                  className={`w-3.5 h-3.5 rounded-full ${scoreColors.pillBg} text-white font-black text-[9px] flex items-center justify-center leading-none shadow-md shrink-0 select-none`}
                   title={`Health Score: ${scoreLetter} (${score}/100)`}
                 >
                   {scoreLetter}
@@ -138,33 +133,37 @@ export default function RecipeHeroCard({
 
             {protein && protein > 0 && (
               <>
-                {(totalTime || score !== null) && <span className="text-white/40">•</span>}
-                <span className="text-white font-medium">
+                {(totalTime || score !== null) && <span className="text-white/30 text-[9px]">•</span>}
+                <span className="text-white/90 font-medium">
                   {Math.round(protein)}g Protein
                 </span>
               </>
             )}
             {vegGrams && vegGrams > 0 && (
               <>
-                {(totalTime || score !== null || (protein && protein > 0)) && <span className="text-white/40">•</span>}
-                <span className="text-white font-medium">
+                {(totalTime || score !== null || (protein && protein > 0)) && (
+                  <span className="text-white/30 text-[9px]">•</span>
+                )}
+                <span className="text-white/90 font-medium">
                   {t('catalog.magazine.vegGrams', { grams: vegGrams })}
                 </span>
               </>
             )}
           </div>
 
-          {/* Title */}
-          <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-snug line-clamp-2 font-heading">
-            {r.title}
-          </h3>
-
-          {/* Creator handle & Cook CTA (ohne Pfeil) */}
-          <div className="pt-1 flex items-center justify-between gap-2">
-            <span className="text-xs text-gray-300 font-medium truncate">
-              {r.sourceHandle ? `@${r.sourceHandle.replace(/^@/, '')}` : ''}
-            </span>
-            <span className="shrink-0 px-3.5 py-1.5 rounded-xl bg-white text-gray-950 font-bold text-xs group-hover:bg-gray-100 active:scale-95 transition-all shadow-md">
+          {/* Title, Author & Cook CTA - Snug fit without vertical gaps */}
+          <div className="flex items-end justify-between gap-2 pt-0.5">
+            <div className="min-w-0 flex-1 flex flex-col">
+              <h3 className="text-base sm:text-lg font-bold text-white tracking-tight leading-tight line-clamp-1 font-heading">
+                {r.title}
+              </h3>
+              {r.sourceHandle && (
+                <p className="text-[10.5px] text-gray-300/85 font-medium truncate leading-none mt-0.5">
+                  {`@${r.sourceHandle.replace(/^@/, '')}`}
+                </p>
+              )}
+            </div>
+            <span className="shrink-0 px-3 py-1.5 rounded-xl bg-white text-gray-950 font-bold text-xs group-hover:bg-gray-100 active:scale-95 transition-all shadow-md">
               {t('catalog.magazine.heroCookNow')}
             </span>
           </div>
