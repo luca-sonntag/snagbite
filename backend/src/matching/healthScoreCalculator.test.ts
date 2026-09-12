@@ -210,4 +210,57 @@ describe('healthScoreCalculator', () => {
     );
     assert.ok(score >= 65, `Expected score >= 65 for balanced high protein bake, got ${score}`);
   });
+
+  it('rates high-protein, clean whole-food meals (e.g. protein omelette) as solid Grade C rather than punishing with D', () => {
+    const recipe: Recipe = {
+      title: 'Protein-Pizza-Omelett',
+      description: 'High protein fitness breakfast',
+      servings: 1,
+      ingredients: [
+        {
+          name: 'DAIRY_EGGS',
+          items: [
+            { name: 'Gratinkäse light', amount: 100, unit: 'g', gramsPerUnit: 1, novaGroup: 1 },
+            { name: 'Skyr', amount: 200, unit: 'g', gramsPerUnit: 1, sugar: 8.8, novaGroup: 1 },
+            { name: 'Ei', amount: 2, unit: 'Stück', gramsPerUnit: 60, novaGroup: 1 },
+          ],
+        },
+        {
+          name: 'MEAT_POULTRY',
+          items: [
+            { name: 'Salami light', amount: 1, unit: 'Portion', gramsPerUnit: 25, sugar: 0.3, novaGroup: 1 },
+          ],
+        },
+        {
+          name: 'SPICES_HERBS',
+          items: [
+            { name: 'Pizzagewürz', amount: 1, unit: 'TL', gramsPerUnit: 5, novaGroup: 1 },
+          ],
+        },
+      ],
+      nutritionalValues: {
+        calories: 610,
+        protein: 66.3,
+        carbs: 11.1,
+        fat: 31.4,
+        sugar: 9.1,
+        fiber: null,
+      },
+      instructions: [],
+      equipment: [],
+    };
+
+    const { score, breakdown } = computeRecipeHealthScore(recipe);
+    assert.equal(breakdown.grade, 'SOLID', `Expected Grade SOLID (C), got ${breakdown.grade} (score: ${score})`);
+    assert.ok(score >= 50 && score <= 60, `Expected score in 50-60 range, got ${score}`);
+    assert.ok(
+      breakdown.highlights.some((h) => h.includes('Eiweiß')),
+      'Should highlight high protein content'
+    );
+    assert.ok(
+      breakdown.cautions.includes('Geringer Gemüseanteil (< 40g)'),
+      'Should still honestly caution lack of vegetables'
+    );
+  });
 });
+

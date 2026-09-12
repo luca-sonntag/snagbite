@@ -23,13 +23,7 @@ export function isPlantCategory(cat?: string | null): boolean {
   const major = getMajorCategoryGroup(upper);
   if (major === 'SPICES' || major === 'GRAINS' || major === 'NUTS_SEEDS') return true;
   const key = normalizeToCategoryKey(upper);
-  return (
-    key === 'VEGETABLES' ||
-    key === 'FRUITS' ||
-    key === 'NUTS_SEEDS' ||
-    key === 'SPICES_HERBS' ||
-    key === 'GRAINS_PASTA'
-  );
+  return key === 'VEGETABLES' || key === 'FRUITS' || key === 'NUTS_SEEDS' || key === 'SPICES_HERBS' || key === 'GRAINS_PASTA';
 }
 
 function getGrade(score: number): HealthScoreGrade {
@@ -53,12 +47,15 @@ function calculateMacroPillar(
   // 1. Protein balance (0 - 12)
   let proteinScore = 4;
   if (proteinEnergyPct >= 15 && proteinEnergyPct <= 32) {
-    proteinScore = 12;
-  } else if (proteinEnergyPct >= 10 && proteinEnergyPct <= 42) {
-    proteinScore = 8;
+    proteinScore = 12; // Ausgewogene goldene Mitte nach DGE/WHO
+  } else if (proteinEnergyPct > 32) {
+    proteinScore = 10; // High-Protein / Fitness (stark sättigend & Muskelschutz)
+  } else if (proteinEnergyPct >= 10) {
+    proteinScore = 8; // Solide Grundversorgung
   }
 
   // 2. Calorie density per 100g (0 - 10)
+  // Aligned with CDC/Rolls standard: <= 150 kcal/100g is low energy density
   const totalGramsPerServing = servings > 0 && totalDishWeightGrams > 0
     ? totalDishWeightGrams / servings
     : 0;
@@ -67,11 +64,11 @@ function calculateMacroPillar(
     : 160;
 
   let densityScore = 4;
-  if (caloriesPer100g <= 135) {
+  if (caloriesPer100g <= 150) {
     densityScore = 10;
-  } else if (caloriesPer100g <= 195) {
+  } else if (caloriesPer100g <= 210) {
     densityScore = 8;
-  } else if (caloriesPer100g <= 270) {
+  } else if (caloriesPer100g <= 280) {
     densityScore = 5;
   } else {
     densityScore = 2;
@@ -139,13 +136,9 @@ function calculatePlantPillar(
 
   // 2. Plant diversity (0 - 10)
   let diversityScore = 2;
-  if (plantCount >= 6) {
-    diversityScore = 10;
-  } else if (plantCount >= 4) {
-    diversityScore = 7;
-  } else if (plantCount >= 2) {
-    diversityScore = 4;
-  }
+  if (plantCount >= 6) diversityScore = 10;
+  else if (plantCount >= 4) diversityScore = 7;
+  else if (plantCount >= 2) diversityScore = 4;
 
   const score = Math.min(25, vegScore + diversityScore);
   return {
@@ -248,7 +241,9 @@ export function computeRecipeHealthScore(recipe: Recipe): {
     cautions.push('Wenig Ballaststoffe (< 2.5g)');
   }
 
-  if (macroPillarRes.proteinEnergyPct >= 16 && macroPillarRes.proteinEnergyPct <= 35) {
+  if (macroPillarRes.proteinEnergyPct >= 35) {
+    highlights.push(`Sehr hoher Eiweißgehalt (${macroPillarRes.proteinEnergyPct}% der Kalorien)`);
+  } else if (macroPillarRes.proteinEnergyPct >= 16) {
     highlights.push(`Gutes Eiweiß-Verhältnis (${macroPillarRes.proteinEnergyPct}% der Kalorien)`);
   }
 
