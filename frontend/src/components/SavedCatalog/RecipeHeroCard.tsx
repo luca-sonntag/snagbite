@@ -1,16 +1,21 @@
 import type { MouseEvent } from 'react';
-import { Star, Clock } from 'lucide-react';
-import type { SavedRecipe } from '../../types';
+import { Star, Clock, Sparkles, BookmarkPlus, Check } from 'lucide-react';
+import type { SavedRecipe, Recipe } from '../../types';
 import CachedImage from '../CachedImage';
-import { hapticLight } from '../../utils/haptics';
+import { hapticLight, hapticMedium } from '../../utils/haptics';
 import { useI18n } from '../../context/I18nContext';
 import { getHealthScoreLetter, getHealthScoreColor } from '../RecipeDetails/HealthScoreBadge';
 
-interface RecipeHeroCardProps {
-  job: SavedRecipe;
+export interface RecipeHeroCardProps {
+  job?: SavedRecipe;
+  recipe?: Recipe;
   totalTime: string | null;
   badgeText?: string;
-  onOpenRecipe: (e: MouseEvent, job: SavedRecipe) => void;
+  badgeVariant?: 'emerald' | 'indigo' | 'amber';
+  isCommunity?: boolean;
+  isSaved?: boolean;
+  onSaveCommunity?: (e: MouseEvent, recipe: Recipe) => void;
+  onOpenRecipe: (e: MouseEvent, recipe: Recipe, job?: SavedRecipe) => void;
 }
 
 /**
@@ -20,12 +25,17 @@ interface RecipeHeroCardProps {
  */
 export default function RecipeHeroCard({
   job,
+  recipe,
   totalTime,
   badgeText,
+  badgeVariant = 'emerald',
+  isCommunity = false,
+  isSaved = false,
+  onSaveCommunity,
   onOpenRecipe,
 }: RecipeHeroCardProps) {
   const { t } = useI18n();
-  const r = job.recipe;
+  const r = recipe || job?.recipe;
   if (!r) return null;
 
   const score = r.healthScore ?? null;
@@ -38,7 +48,7 @@ export default function RecipeHeroCard({
     <article
       onClick={(e) => {
         hapticLight();
-        onOpenRecipe(e, job);
+        onOpenRecipe(e, r, job);
       }}
       className="relative group rounded-3xl overflow-hidden bg-gray-900 shadow-[0_8px_30px_rgba(0,0,0,0.12)] border-none select-none cursor-pointer active:scale-[0.98] transition-transform duration-200"
     >
@@ -54,16 +64,52 @@ export default function RecipeHeroCard({
 
         {/* Top Badges */}
         <div className="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none">
-          <span className="px-2.5 py-1 rounded-full bg-emerald-500/90 backdrop-blur-md text-white text-[11px] font-bold shadow-sm">
+          <span
+            className={`px-2.5 py-1 rounded-full ${
+              badgeVariant === 'indigo'
+                ? 'bg-indigo-600/90 text-white'
+                : badgeVariant === 'amber'
+                ? 'bg-amber-500/90 text-white'
+                : 'bg-emerald-500/90 text-white'
+            } backdrop-blur-md text-[11px] font-bold shadow-sm flex items-center gap-1`}
+          >
+            {isCommunity && <Sparkles className="w-3 h-3 text-indigo-200" />}
             {badgeText || t('catalog.magazine.heroHighlight')}
           </span>
 
-          {/* Favorite Star */}
-          {job.isFavorite && (
+          {/* Right Action: Bookmark/Save for Community or Favorite Star for own */}
+          {isCommunity ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                hapticMedium();
+                onSaveCommunity?.(e, r);
+              }}
+              className={`pointer-events-auto h-8 px-2.5 rounded-full backdrop-blur-md flex items-center gap-1.5 font-bold text-[11px] shadow-md transition-all active:scale-90 border-none cursor-pointer ${
+                isSaved
+                  ? 'bg-emerald-500/90 text-white'
+                  : 'bg-black/50 text-white hover:bg-black/70'
+              }`}
+              title={isSaved ? t('catalog.magazine.alreadySaved') : t('catalog.magazine.saveToCookbook')}
+            >
+              {isSaved ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-white" />
+                  <span className="hidden sm:inline">{t('catalog.magazine.alreadySaved')}</span>
+                </>
+              ) : (
+                <>
+                  <BookmarkPlus className="w-3.5 h-3.5 text-indigo-200" />
+                  <span>{t('catalog.magazine.saveToCookbook')}</span>
+                </>
+              )}
+            </button>
+          ) : job?.isFavorite ? (
             <div className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-amber-400 shadow-md">
               <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Bottom Content Container */}
