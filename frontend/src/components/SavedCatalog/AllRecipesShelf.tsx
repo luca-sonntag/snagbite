@@ -1,9 +1,10 @@
-import { useRef, useEffect, type MouseEvent } from 'react';
+import { useState, useMemo, type MouseEvent } from 'react';
 import { BookOpen, ArrowRight } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import RecipePosterCard from './RecipePosterCard';
 import { useI18n } from '../../context/I18nContext';
 import { hapticLight } from '../../utils/haptics';
+import { groupRecipesByTimeline } from './recipeTimelineUtils';
 
 interface AllRecipesShelfProps {
   items: SavedRecipe[];
@@ -16,10 +17,12 @@ interface AllRecipesShelfProps {
   bindLongPress?: (id: string, job: SavedRecipe) => any;
 }
 
+const INITIAL_LIMIT = 16;
+
 /**
- * Dedicated shelf at the bottom of the magazine feed.
- * Features a horizontally scrollable showcase of recent recipes using the beloved
- * RecipePosterCard, anchored by a prominent button to open the full Level 2 catalog.
+ * Dedicated vertical timeline section at the bottom of the magazine feed.
+ * Organizes recipes into chronological natural time clusters (Today, Yesterday,
+ * This week, Last week, Month/Year) in a responsive 2-column poster grid.
  */
 export default function AllRecipesShelf({
   items,
@@ -31,27 +34,34 @@ export default function AllRecipesShelf({
   selectedIds,
   bindLongPress,
 }: AllRecipesShelfProps) {
-  const { t } = useI18n();
-  const shelfRef = useRef<HTMLDivElement>(null);
+  const { t, language } = useI18n();
+  const [showAll, setShowAll] = useState(false);
 
-  // Always reset horizontal scroll to the very beginning (leftmost card)
-  useEffect(() => {
-    if (shelfRef.current) {
-      shelfRef.current.scrollLeft = 0;
+  const displayedItems = useMemo(() => {
+    if (showAll || items.length <= INITIAL_LIMIT) {
+      return items;
     }
-    const rafId = requestAnimationFrame(() => {
-      if (shelfRef.current) {
-        shelfRef.current.scrollLeft = 0;
-      }
-    });
-    return () => cancelAnimationFrame(rafId);
-  }, [items?.[0]?.recipeId]);
+    return items.slice(0, INITIAL_LIMIT);
+  }, [items, showAll]);
+
+  const timelineGroups = useMemo(() => {
+    return groupRecipesByTimeline(
+      displayedItems,
+      {
+        today: t('catalog.magazine.timelineToday'),
+        yesterday: t('catalog.magazine.timelineYesterday'),
+        thisWeek: t('catalog.magazine.timelineThisWeek'),
+        lastWeek: t('catalog.magazine.timelineLastWeek'),
+      },
+      language === 'de' ? 'de-DE' : 'en-US'
+    );
+  }, [displayedItems, language, t]);
 
   if (!items || items.length === 0) return null;
 
   return (
-    <section className="space-y-3 pt-2">
-      {/* Header */}
+    <section className="space-y-4 pt-2">
+      {/* Section Header */}
       <div className="flex items-center justify-between px-0.5">
         <div>
           <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight font-heading">
@@ -73,25 +83,55 @@ export default function AllRecipesShelf({
         </button>
       </div>
 
-      {/* Horizontal Recipe Shelf */}
-      <div
-        ref={shelfRef}
-        className="flex items-stretch gap-3 overflow-x-auto pb-3 pt-1 scrollbar-none snap-x -mx-4 px-4 sm:mx-0 sm:px-0"
-      >
-        {items.slice(0, 10).map((job) => (
-          <div key={job.recipeId} className="snap-start shrink-0">
-            <RecipePosterCard
-              job={job}
-              variant="shelf"
-              totalTime={job.recipe ? formatTotalTime(job.recipe) : null}
-              isSelected={selectedIds?.has(job.recipeId)}
-              isSelectMode={isSelectMode}
-              bindLongPress={bindLongPress ? bindLongPress(job.recipeId, job) : undefined}
-              onClick={(e) => onOpenRecipe(e, job)}
-            />
+      {/* Vertical Timeline Groups */}
+      <div className="space-y-6">
+        {timelineGroups.map((group) => (
+          <div key={group.id} className="space-y-2.5">
+            {/* Timeline Cluster Header */}
+            <div className="flex items-center justify-between px-0.5">
+              <h4 className="text-xs font-bold text-gray-700 dark:text-gray-300 font-heading">
+                {group.label}
+              </h4>
+              <span className="text-[11px] font-medium text-gray-400 dark:text-gray-500">
+                {group.items.length === 1
+                  ? t('catalog.recipeCountSingle')
+                  : t('catalog.recipeCount', { count: group.items.length })}
+              </span>
+            </div>
+
+            {/* 2-Column Recipe Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              {group.items.map((job) => (
+                <div key={job.recipeId} className="w-full">
+                  <RecipePosterCard
+                    job={job}
+                    variant="grid"
+                    totalTime={job.recipe ? formatTotalTime(job.recipe) : null}
+                    isSelected={selectedIds?.has(job.recipeId)}
+                    isSelectMode={isSelectMode}
+                    bindLongPress={bindLongPress ? bindLongPress(job.recipeId, job) : undefined}
+                    onClick={(e) => onOpenRecipe(e, job)}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
+
+      {/* Expand timeline in-place if user has more than initial limit */}
+      {items.length > INITIAL_LIMIT && !showAll && (
+        <button
+          type="button"
+          onClick={() => {
+            hapticLight();
+            setShowAll(true);
+          }}
+          className="w-full py-2.5 px-4 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/60 dark:hover:bg-gray-800 text-xs font-bold text-gray-600 dark:text-gray-300 border-none transition-all active:scale-[0.98] cursor-pointer"
+        >
+          {t('catalog.magazine.timelineShowMore', { count: items.length - INITIAL_LIMIT })}
+        </button>
+      )}
 
       {/* Prominent Browse & Filter Full Catalog Button (Clean Flat Magazine Style) */}
       <button
