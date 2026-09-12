@@ -11,12 +11,12 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 * **Ersetzter Code / Anti-Pattern:**
   - Reine 4-Spalten-Speicherung (`calories numeric`, `protein_g numeric`, `carbs_g numeric`, `fat_g numeric`) in der Postgres-Tabelle `recipes`.
   - Keine persistente Speicherung von Ballaststoffen (`fiber`), Zucker (`sugar`), Verarbeitungsgrad (`novaGroup`), Gemüsegewicht (`vegetableGrams`) oder Pflanzenvielfalt (`plantCount`).
-  - Fehlende Transparenz für ganzheitliche Ernährungsbewertungen.
+  - Dual-Write und Fallback-Leselogik für alte Spalten.
 * **Ersetzt durch:**
   - **Konsolidierte JSONB-Spalte `nutritional_values`:** Bündelt Kalorien, Makros, Ballaststoffe, Zucker, NOVA-Grad und Mikronährstoffe in einem erweiterbaren Dokument.
+  - **Vollständiges Droppen der Alt-Spalten in Migration 011:** Migration 011 migriert Altdaten via `jsonb_build_object` in `nutritional_values` und führt anschließend `ALTER TABLE recipes DROP COLUMN calories, protein_g, carbs_g, fat_g` aus. Keine Altlasten oder redundanten Dual-Writes in Backend-Mappern (`rowToRecipe` / `recipeToRow` / `mealPlansDb`).
   - **`health_score numeric` & `health_score_breakdown jsonb`:** Persistente Speicherung des deterministischen 4-Säulen-Scores (0–100) mit vollständiger Nachvollziehbarkeit im UI via `HealthScoreBadge` und `HealthScoreSheet`.
-  - **Dual-Support:** `recipeToRow` schreibt zur Abwärtskompatibilität parallel in `nutritional_values` und die 4 Alt-Spalten; `rowToRecipe` liest bevorzugt aus JSONB.
-* **Betroffene Dateien:** `backend/db/migrations/011_consolidate_nutritional_values_and_health_score.sql`, `backend/src/db/recipesDb.ts`, `backend/src/db/mealPlansDb.ts`, `backend/src/db/types/core.ts`, `shared/src/types/recipes.ts`, `backend/src/matching/healthScoreCalculator.ts`.
+* **Betroffene Dateien:** `backend/db/migrations/011_consolidate_nutritional_values_and_health_score.sql`, `backend/db/schema.sql`, `backend/src/db/recipesDb.ts`, `backend/src/db/mealPlansDb.ts`, `backend/src/db/types/core.ts`, `backend/src/db/types/mealPlans.ts`, `shared/src/types/recipes.ts`, `backend/src/matching/healthScoreCalculator.ts`.
 
 ---
 
