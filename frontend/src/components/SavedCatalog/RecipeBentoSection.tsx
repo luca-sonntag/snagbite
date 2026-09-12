@@ -67,14 +67,14 @@ export default function RecipeBentoSection({
       </div>
 
       {/* Grid Layout */}
-      <div className={`grid ${sideJobs.length > 0 ? 'grid-cols-2' : 'grid-cols-1'} gap-2.5 sm:gap-3`}>
-        {/* Left: 3:4 Portrait Card */}
+      <div className={`grid ${sideJobs.length > 0 ? 'grid-cols-2' : 'grid-cols-1'} gap-2.5 sm:gap-3 items-stretch`}>
+        {/* Left: 3:4 Portrait Card (Stretches to match stacked right cards) */}
         <article
           onClick={(e) => {
             hapticLight();
             onOpenRecipe(e, mainJob);
           }}
-          className="group relative aspect-[3/4] w-full rounded-2xl overflow-hidden bg-gray-900 shadow-[0_2px_12px_rgba(0,0,0,0.06)] border-none cursor-pointer active:scale-[0.98] transition-all select-none"
+          className="group relative w-full h-full min-h-[220px] sm:min-h-[250px] rounded-2xl overflow-hidden bg-gray-900 shadow-[0_2px_12px_rgba(0,0,0,0.06)] border-none cursor-pointer active:scale-[0.98] transition-all select-none"
         >
           <CachedImage
             src={mainRecipe.imageUrl}
@@ -135,7 +135,7 @@ export default function RecipeBentoSection({
 
         {/* Right: Two Stacked Compact Cards */}
         {sideJobs.length > 0 && (
-          <div className="flex flex-col gap-2.5 sm:gap-3 justify-between">
+          <div className="flex flex-col gap-2.5 sm:gap-3 justify-between h-full">
             {sideJobs.map((job) => (
               <RecipeCompactCard
                 key={job.recipeId}
