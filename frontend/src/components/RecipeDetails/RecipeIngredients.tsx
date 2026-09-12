@@ -121,10 +121,10 @@ export default function RecipeIngredients({
         {onAddIngredients && (
           <div className="px-4.5 py-3.5 sm:px-6 bg-white dark:bg-gray-900">
             <Button
-              className={`w-full h-12 min-h-[48px] rounded-2xl font-bold transition-all flex items-center justify-center gap-2 text-sm active:scale-[0.98] cursor-pointer shadow-sm ${
+              className={`w-full h-12 min-h-[48px] rounded-2xl font-bold transition-all flex items-center justify-center gap-2 text-sm active:scale-[0.98] border-none shadow-none cursor-pointer ${
                 isAdded
-                  ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
-                  : 'bg-white hover:bg-emerald-50/50 dark:bg-gray-800/90 dark:hover:bg-gray-800 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 dark:border-emerald-500/30'
+                  ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
+                  : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400'
               }`}
               onPress={() => {
                 hapticLight();
