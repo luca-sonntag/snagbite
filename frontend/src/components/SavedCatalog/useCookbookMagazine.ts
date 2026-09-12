@@ -1,10 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import type { SavedRecipe, Recipe } from '../../types';
 import { getTotalTime } from '../../hooks/useSavedCatalog';
 import { useI18n } from '../../context/I18nContext';
-import type { VibeId } from './CookbookVibeChips';
 import type { HeroSlideItem } from './RecipeHeroCarousel';
-import { matchesVibe, getMagazineTitles, type RecommendedShelfLike } from './magazineCuratorUtils';
+import { getMagazineTitles, type RecommendedShelfLike } from './magazineCuratorUtils';
 
 interface UseCookbookMagazineOptions {
   items: SavedRecipe[];
@@ -27,42 +26,32 @@ export function useCookbookMagazine({
   formatTotalTime,
 }: UseCookbookMagazineOptions) {
   const { t } = useI18n();
-  const [activeVibe, setActiveVibe] = useState<VibeId | null>(null);
-
-  // Filtered pool based on active vibe
-  const pool = useMemo(() => {
-    if (!activeVibe) return items;
-    const filtered = items.filter((j) => matchesVibe(j, activeVibe));
-    return filtered.length > 0 ? filtered : items;
-  }, [items, activeVibe]);
 
   // Day-of-year integer for smooth, deterministic daily rotation
   const dayOfYear = Math.floor(Date.now() / 86400000);
 
-  // Dynamic titles and badges reacting to vibe and recommendation theme
+  // Dynamic titles and badges reacting to recommendation theme
   const { heroBadgeText, bentoTitle, bentoSubtitle } = useMemo(() => {
-    return getMagazineTitles(activeVibe, recommendedShelf, t);
-  }, [activeVibe, recommendedShelf, t]);
+    return getMagazineTitles(recommendedShelf, t);
+  }, [recommendedShelf, t]);
 
   // 1. 3-Slide Hero Carousel (Daily Spotlight, Vital Star, Community Inspiration)
   const heroSlides = useMemo((): HeroSlideItem[] => {
-    if (pool.length === 0 && communityRecipes.length === 0) return [];
+    if (items.length === 0 && communityRecipes.length === 0) return [];
 
     const slides: HeroSlideItem[] = [];
     const usedRecipeIds = new Set<string>();
 
     // Slide 1: Primary Spotlight (Own recipe, or Community recipe if 0 own recipes)
-    if (pool.length > 0) {
+    if (items.length > 0) {
       let candidate: SavedRecipe;
-      if (activeVibe) {
-        candidate = pool[0];
-      } else if (recommendedShelf && recommendedShelf.items && recommendedShelf.items.length >= 2) {
+      if (recommendedShelf && recommendedShelf.items && recommendedShelf.items.length >= 2) {
         const recWithImage = recommendedShelf.items.filter((j) => j.recipe?.imageUrl);
-        candidate = recWithImage.length > 0 ? recWithImage[dayOfYear % recWithImage.length] : pool[0];
+        candidate = recWithImage.length > 0 ? recWithImage[dayOfYear % recWithImage.length] : items[0];
       } else {
-        const withImage = pool.filter((j) => j.recipe?.imageUrl);
+        const withImage = items.filter((j) => j.recipe?.imageUrl);
         const highScores = withImage.filter((j) => (j.recipe?.healthScore ?? 0) >= 70);
-        const candidateSet = highScores.length > 0 ? highScores : (withImage.length > 0 ? withImage : pool);
+        const candidateSet = highScores.length > 0 ? highScores : (withImage.length > 0 ? withImage : items);
         candidate = candidateSet[dayOfYear % candidateSet.length];
       }
 
@@ -95,9 +84,9 @@ export function useCookbookMagazine({
       }
     }
 
-    // Slide 2: Vital Star / High Health Score (Score >= 70 from own pool, distinct from Slide 1)
-    if (pool.length > 1) {
-      const remainingPool = pool.filter((j) => !usedRecipeIds.has(j.recipeId));
+    // Slide 2: Vital Star / High Health Score (Score >= 70 from own items, distinct from Slide 1)
+    if (items.length > 1) {
+      const remainingPool = items.filter((j) => !usedRecipeIds.has(j.recipeId));
       const vitalPool = remainingPool.filter((j) => (j.recipe?.healthScore ?? 0) >= 70 && j.recipe?.imageUrl);
       const candidates = vitalPool.length > 0 ? vitalPool : remainingPool;
       const vitalCandidate = candidates[(dayOfYear + 1) % candidates.length];
@@ -135,8 +124,8 @@ export function useCookbookMagazine({
           });
         }
       }
-    } else if (pool.length > 2) {
-      const remainingPool = pool.filter((j) => !usedRecipeIds.has(j.recipeId));
+    } else if (items.length > 2) {
+      const remainingPool = items.filter((j) => !usedRecipeIds.has(j.recipeId));
       if (remainingPool.length > 0) {
         const thirdCandidate = remainingPool[(dayOfYear + 2) % remainingPool.length];
         if (thirdCandidate?.recipe) {
@@ -156,7 +145,7 @@ export function useCookbookMagazine({
     }
 
     return slides;
-  }, [pool, communityRecipes, savedRecipeIds, activeVibe, recommendedShelf, heroBadgeText, dayOfYear, formatTotalTime, t]);
+  }, [items, communityRecipes, savedRecipeIds, recommendedShelf, heroBadgeText, dayOfYear, formatTotalTime, t]);
 
   // Primary hero recipe (for convenience/fallback)
   const heroRecipe = heroSlides[0]?.job ?? null;
@@ -166,13 +155,8 @@ export function useCookbookMagazine({
     const heroRecipeIds = new Set(
       heroSlides.map((s) => s.job?.recipeId || s.recipe.id).filter(Boolean) as string[]
     );
-    const withoutHero = pool.filter((j) => !heroRecipeIds.has(j.recipeId));
+    const withoutHero = items.filter((j) => !heroRecipeIds.has(j.recipeId));
     if (withoutHero.length === 0) return [];
-
-    // If active vibe, pick directly from the filtered pool
-    if (activeVibe) {
-      return withoutHero.slice(0, 3);
-    }
 
     // Daily rotated quick candidates (<= 25 min)
     const quickCandidates = withoutHero.filter((j) => {
@@ -190,7 +174,7 @@ export function useCookbookMagazine({
     const remainder = withoutHero.filter((j) => !quickCandidates.includes(j));
     remainder.sort((a, b) => (b.recipe?.healthScore ?? 0) - (a.recipe?.healthScore ?? 0));
     return [...quickCandidates, ...remainder].slice(0, 3);
-  }, [pool, heroSlides, activeVibe, dayOfYear]);
+  }, [items, heroSlides, dayOfYear]);
 
   // 3. Rediscovered Recipe (Older saved recipe, distinct from hero slides & bento)
   const rediscoveredRecipe = useMemo(() => {
@@ -201,7 +185,7 @@ export function useCookbookMagazine({
     }
     for (const b of bentoRecipes) usedIds.add(b.recipeId);
 
-    const candidates = pool.filter((j) => !usedIds.has(j.recipeId) && j.recipe?.imageUrl);
+    const candidates = items.filter((j) => !usedIds.has(j.recipeId) && j.recipe?.imageUrl);
     if (candidates.length === 0) return null;
 
     const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
@@ -216,7 +200,7 @@ export function useCookbookMagazine({
     }
 
     return null;
-  }, [pool, heroSlides, bentoRecipes, dayOfYear]);
+  }, [items, heroSlides, bentoRecipes, dayOfYear]);
 
   const heroTotalTime = useMemo(() => {
     const primary = heroSlides[0]?.recipe;
@@ -224,8 +208,6 @@ export function useCookbookMagazine({
   }, [heroSlides, formatTotalTime]);
 
   return {
-    activeVibe,
-    setActiveVibe,
     heroSlides,
     heroRecipe,
     heroBadgeText,
@@ -233,7 +215,7 @@ export function useCookbookMagazine({
     bentoTitle,
     bentoSubtitle,
     rediscoveredRecipe,
-    allRecipes: pool,
+    allRecipes: items,
     heroTotalTime,
   };
 }

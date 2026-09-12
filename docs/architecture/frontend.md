@@ -33,14 +33,13 @@
 ## 2. 📚 3-Ebenen-Katalog (SavedCatalog)
 
 Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
-1. **Kochbuch-Home (`#/history`, `CookbookHome.tsx`):** Redaktioneller, inspirierender **Culinary Magazine Feed**. Bricht mit repetitiven Rastern durch 5 abwechslungsreiche Formate:
+1. **Kochbuch-Home (`#/history`, `CookbookHome.tsx`):** Redaktioneller, inspirierender **Culinary Magazine Feed**. Bricht mit repetitiven Rastern durch harmonische, redaktionelle Formate:
    * **Persönlicher Header & Story-Highlights:** Kontextuelle Begrüßung (`CookbookGreetingHeader.tsx`) + 100% kreisrunde Instagram-Highlights (`CollectionStoryHub.tsx`, 64×64px, Kontrastring) mit direktem `[📚 Alle Rezepte]`-Shortcut, Favoriten, Kategorien und User-Sammlungen.
-   * **Taktile Vibe-Quick-Chips (`CookbookVibeChips.tsx`):** Sofortiges In-Place-Filtering nach Stimmungen (Vital & Fit 70+, Blitz-Gerichte <25 Min, High-Protein, One-Pot, Veggie, Süßes).
-   * **Format A (Hero Spotlight, `RecipeHeroCard.tsx`):** 16:10 Vollbild-Fotografie, Scrim-Gradient, integriertes Health-Score-Badge (`Score 88 • A`), Nährstoff-Highlights und „Jetzt kochen“-CTA.
-   * **Format B (Bento-Grid, `RecipeBentoSection.tsx`):** 3:4 Portrait-Highlight links + 2 gestapelte Kompakt-Karten (`RecipeCompactCard.tsx`) rechts für schnelle Gerichte.
-   * **Format C (Wiederentdeckte Schätze, `RecipeShowcaseCard.tsx`):** Horizontaler Banner für ältere, unprobierte Rezept-Perlen mit Datumsstempel und Zutaten-Teaser.
+   * **Format A (Hero Carousel, `RecipeHeroCarousel.tsx`):** 3-Slide Karussell (Tages-Highlight, Vital-Star mit Health Score ≥70, frische Community-Inspiration) im 4:3-Magazinformat mit dezentem Scrim, Health-Score-Badge, Nährstoffzeile und Save-CTA.
+   * **Format B (Bento-Grid, `RecipeBentoSection.tsx`):** 3:4 Portrait-Highlight links + 2 gestapelte Kompakt-Karten (`RecipeCompactCard.tsx`) rechts für schnelle Gerichte (≤ 25 Min.).
+   * **Format C (Wiederentdeckte Schätze, `RecipeShowcaseCard.tsx`):** Horizontaler Banner für ältere (≥ 14 Tage), unprobierte Rezept-Perlen mit Datumsstempel und Zutaten-Teaser.
    * **Format D (Alle deine Rezepte, `AllRecipesShelf.tsx`):** Horizontales Regal der unveränderten `RecipePosterCard`s mit prominentem Vollkatalog-Button (`Alle N Rezepte durchsuchen & filtern`).
-   * **Kuratorischer Hook (`useCookbookMagazine.ts`):** Berechnet die redaktionellen Slots und das Vibe-Matching deterministisch und strikt ohne sprachabhängige String-Heuristiken.
+   * **Kuratorischer Hook (`useCookbookMagazine.ts`):** Berechnet die redaktionellen Slots deterministisch und strikt ohne sprachabhängige String-Heuristiken.
 2. **Listen-Ebene (`#/history/list...`, `SavedCatalog/index.tsx`):** Vollständige, filter-/sortierbare Liste mit `CatalogFilters.tsx` als Sticky-Header, `FilterSheet` (inklusive Healthy-Score-Sortierung) und wahlweise 2-Spalten-Poster-Grid (`viewMode: 'card'`) oder dichten Zeilen (`viewMode: 'compact'`). Nur hier existieren Multi-Select und `BulkActionBar`.
 3. **Detailansicht (`#/history/<jobId>`):** `RecipeDetails`.
 

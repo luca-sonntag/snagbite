@@ -6,6 +6,21 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-12: Entfernung der redundanten Vibe-Quick-Chips (`CookbookVibeChips.tsx`) & In-Place-Vibe-Logik
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `CookbookVibeChips.tsx`: Horizontale Pill-Filterleiste (*Vital & Fit*, *Unter 25m*, *High Protein*, *One-Pot*, *Veggie*, *Süßes*) oberhalb des Hero-Karussells.
+  - Vibe-Filterzustand (`activeVibe`) in `useCookbookMagazine.ts` und `CookbookHome.tsx`.
+  - `matchesVibe()` und dynamische Vibe-Titel in `magazineCuratorUtils.ts`.
+  - Übersetzungskeys `catalog.vibes` und `catalog.magazine.vibes` in `i18n.ts`.
+  - *Begründung:* Das 3-Slide Hero-Karussell (Slide 2: Vital Star) und die Bento-Sektion (Blitzgerichte $\le 25\text{ Min.}$) decken diesen kuratorischen Mehrwert bereits inhärent ab. Die zusätzlichen Chips erzeugten ein unruhiges "Karussell-Sandwich" (drei horizontale Scrollleisten übereinander) und verwässerten die klare Magazin-Hierarchie.
+* **Ersetzt durch:**
+  - Ungetrübter vertikaler Fluss: Direkt nach den Instagram-Story-Bubbles folgt das 4:3 Hero-Karussell.
+  - Vollständige Filterung und Suche verbleibt sauber und gebündelt auf der Listenebene (`SavedCatalog/index.tsx` & `FilterSheet.tsx`).
+* **Betroffene Dateien:** `frontend/src/components/SavedCatalog/CookbookVibeChips.tsx` (gelöscht), `frontend/src/components/SavedCatalog/CookbookHome.tsx`, `frontend/src/components/SavedCatalog/useCookbookMagazine.ts`, `frontend/src/components/SavedCatalog/magazineCuratorUtils.ts`, `frontend/src/i18n.ts`, `docs/architecture/frontend.md`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-12: Repetitive 2-Row Shelf-Accordions (`DiscoveryAccordion` / `TwoRowRecipeShelf`) durch redaktionellen Culinary Magazine Feed ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**

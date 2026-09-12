@@ -3,7 +3,6 @@ import type { Collection, SavedRecipe, Recipe, RecipeCategory } from '../../type
 import CollectionStoryHub from './CollectionStoryHub';
 import CategoryLabelBar from './CategoryLabelBar';
 import CookbookGreetingHeader from './CookbookGreetingHeader';
-import CookbookVibeChips from './CookbookVibeChips';
 import RecipeHeroCarousel, { type HeroSlideItem } from './RecipeHeroCarousel';
 import RecipeBentoSection from './RecipeBentoSection';
 import RecipeShowcaseCard from './RecipeShowcaseCard';
@@ -64,7 +63,6 @@ interface CookbookHomeProps {
  * Level 1 of the catalog: Vibrant Culinary Magazine Feed.
  * Replaces the repetitive horizontal shelves with varied editorial formats:
  * - Circular Story Hub (Collections, All Recipes shortcut, Categories)
- * - Vibe Quick Chips (Vital & Fit, Quick, High-Protein, One-Pot, Veggie, Sweet)
  * - Format A: Cinematic 16:10 Hero Card with Health Score and Macros
  * - Format B: Bento Grid (3:4 portrait card + 2 stacked compact cards)
  * - Format C: Rediscovered Gems banner
@@ -122,8 +120,6 @@ export default function CookbookHome({
   const favJobs = favoriteJobs.length > 0 ? favoriteJobs : (shelves.favorites?.items ?? []);
 
   const {
-    activeVibe,
-    setActiveVibe,
     heroSlides,
     bentoRecipes,
     bentoTitle,
@@ -199,13 +195,7 @@ export default function CookbookHome({
         )}
       </section>
 
-      {/* 3. Vibe Quick Chips */}
-      <CookbookVibeChips
-        activeVibe={activeVibe}
-        onSelectVibe={setActiveVibe}
-      />
-
-      {/* 4. COVER STORY Part 1: Modern 3-Slide Hero Carousel */}
+      {/* 3. COVER STORY Part 1: Modern 3-Slide Hero Carousel */}
       {heroSlides.length > 0 && (
         <RecipeHeroCarousel
           slides={heroSlides}
@@ -214,7 +204,7 @@ export default function CookbookHome({
         />
       )}
 
-      {/* 5. COVER STORY Part 2: Bento Grid for Fast & Nutrient-Dense Dishes (only when at least 3 recipes are available) */}
+      {/* 4. COVER STORY Part 2: Bento Grid for Fast & Nutrient-Dense Dishes (only when at least 3 recipes are available) */}
       {bentoRecipes.length >= 3 && (
         <RecipeBentoSection
           recipes={bentoRecipes}
@@ -222,11 +212,11 @@ export default function CookbookHome({
           subtitle={bentoSubtitle}
           formatTotalTime={formatTotalTime}
           onOpenRecipe={onOpenRecipe}
-          onSeeAll={() => onOpenList({ kind: activeVibe ? 'all' : 'quick' })}
+          onSeeAll={() => onOpenList({ kind: 'quick' })}
         />
       )}
 
-      {/* 6. NEUER INPUT: Community Discoveries (if active) */}
+      {/* 5. NEUER INPUT: Community Discoveries (if active) */}
       {onRecipeSaved && (
         <PublicRecipeRecommendationsShelf
           recommendations={communityRecommendations}
@@ -235,7 +225,7 @@ export default function CookbookHome({
         />
       )}
 
-      {/* 7. NOSTALGIE-SPOTLIGHT: Format C: Rediscovered Gems */}
+      {/* 6. NOSTALGIE-SPOTLIGHT: Format C: Rediscovered Gems */}
       {rediscoveredRecipe && (
         <RecipeShowcaseCard
           job={rediscoveredRecipe}
@@ -244,7 +234,7 @@ export default function CookbookHome({
         />
       )}
 
-      {/* 8. VOLLSTÄNDIGE BIBLIOTHEK: Dedicated "Alle deine Rezepte" Shelf at Bottom */}
+      {/* 7. VOLLSTÄNDIGE BIBLIOTHEK: Dedicated "Alle deine Rezepte" Shelf at Bottom */}
       <AllRecipesShelf
         items={allRecipes}
         totalCount={totalRecipes}
