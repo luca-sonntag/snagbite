@@ -171,7 +171,7 @@ export default function RecipeImageGallery({
     <>
       {/* Inline Gallery */}
       {availableImages.length > 1 ? (
-        <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950 rounded-b-3xl sm:rounded-b-[2rem] overflow-hidden shadow-xs">
+        <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950">
           {overlayHeader}
           <div
             ref={scrollContainerRef}
@@ -208,7 +208,7 @@ export default function RecipeImageGallery({
           </div>
         </div>
       ) : availableImages.length === 1 ? (
-        <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950 rounded-b-3xl sm:rounded-b-[2rem] overflow-hidden shadow-xs">
+        <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950">
           {overlayHeader}
           <CachedImage
             src={availableImages[0]}
@@ -219,7 +219,7 @@ export default function RecipeImageGallery({
           />
         </div>
       ) : (
-        <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950 rounded-b-3xl sm:rounded-b-[2rem] overflow-hidden shadow-xs">
+        <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950">
           {overlayHeader}
           <div className="w-full aspect-[4/3] sm:aspect-[16/10] bg-gradient-to-br from-emerald-950 via-gray-900 to-indigo-950 flex items-center justify-center">
             {recipe.emoji ? (
