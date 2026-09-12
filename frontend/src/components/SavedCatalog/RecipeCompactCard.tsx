@@ -64,8 +64,8 @@ export default function RecipeCompactCard({
         {/* Bottom Section: Dauer über kcal */}
         <div className="flex flex-col gap-1 mt-auto pt-1">
           {totalTime && (
-            <div className="self-start px-1.5 py-0.5 rounded-md bg-emerald-500/90 text-white text-[9.5px] font-bold flex items-center gap-1 shadow-2xs">
-              <Clock className="w-2.5 h-2.5 shrink-0 text-white" />
+            <div className="self-start px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] flex items-center gap-1">
+              <Clock className="w-2.5 h-2.5 shrink-0 text-gray-500 dark:text-gray-400" />
               <span>{totalTime}</span>
             </div>
           )}
