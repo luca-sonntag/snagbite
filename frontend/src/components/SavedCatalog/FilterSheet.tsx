@@ -27,7 +27,7 @@ interface FilterSheetProps {
   countMatches: (filters: CatalogFilterState) => number;
 }
 
-const SORT_OPTIONS: CatalogSort[] = ['newest', 'recent', 'title', 'time'];
+const SORT_OPTIONS: CatalogSort[] = ['newest', 'recent', 'title', 'time', 'healthScore'];
 
 function chipClass(isActive: boolean, accent: 'emerald' | 'amber' | 'neutral' = 'neutral') {
   if (isActive) {
