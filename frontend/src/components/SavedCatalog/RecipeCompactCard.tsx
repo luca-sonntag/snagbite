@@ -38,10 +38,10 @@ export default function RecipeCompactCard({
         hapticLight();
         onClick(e);
       }}
-      className="group relative flex-1 h-full flex items-center gap-2.5 p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-gray-900/90 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border-none cursor-pointer active:scale-[0.98] hover:shadow-md transition-all duration-150 select-none overflow-hidden"
+      className="group relative flex-1 h-full min-h-[96px] sm:min-h-[104px] flex items-stretch rounded-2xl bg-white dark:bg-gray-900/90 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border-none cursor-pointer active:scale-[0.98] hover:shadow-md transition-all duration-150 select-none overflow-hidden"
     >
-      {/* Thumbnail with overlay time badge */}
-      <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0 rounded-xl overflow-hidden bg-black/5 dark:bg-white/5">
+      {/* Thumbnail: Full card height presentation */}
+      <div className="relative w-24 sm:w-28 shrink-0 overflow-hidden bg-black/5 dark:bg-white/5 self-stretch">
         <CachedImage
           src={r.imageUrl}
           emoji={r.emoji}
@@ -49,25 +49,25 @@ export default function RecipeCompactCard({
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
         />
         {totalTime && (
-          <div className="absolute bottom-1 right-1 px-1 py-0.5 rounded-md bg-black/75 backdrop-blur-xs text-[9px] font-semibold text-white flex items-center gap-0.5 pointer-events-none">
-            <Clock className="w-2.5 h-2.5 shrink-0 text-emerald-300" />
+          <div className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-emerald-500/90 text-white text-[9.5px] font-bold flex items-center gap-1 shadow-xs pointer-events-none">
+            <Clock className="w-2.5 h-2.5 shrink-0 text-white" />
             <span>{totalTime}</span>
           </div>
         )}
         {job.isFavorite && (
-          <div className="absolute top-1 left-1 w-4 h-4 rounded-md bg-black/40 backdrop-blur-xs flex items-center justify-center text-amber-400 pointer-events-none">
-            <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+          <div className="absolute top-1.5 left-1.5 w-5 h-5 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center text-amber-400 pointer-events-none">
+            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
+      <div className="flex-1 min-w-0 flex flex-col justify-center p-2.5 sm:p-3 gap-1 overflow-hidden">
         {/* Top line: Health Score Pill or Category */}
         <div className="flex items-center gap-1.5">
           {score !== null && scoreLetter && scoreColor ? (
             <span
-              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${scoreColor.badgeBg} ${scoreColor.badgeText}`}
+              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${scoreColor.badgeBg} ${scoreColor.badgeText} shadow-2xs`}
             >
               <span className={`w-1.5 h-1.5 rounded-full ${scoreColor.pillBg}`} />
               <span>Score {score} • {scoreLetter}</span>
@@ -80,16 +80,16 @@ export default function RecipeCompactCard({
         </div>
 
         {/* Title */}
-        <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+        <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
           {r.title}
         </h4>
 
         {/* Bottom meta: calories & protein */}
-        <div className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 font-medium truncate">
+        <div className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 font-medium flex-wrap">
           {caloriesFormatted && <span className="shrink-0">{caloriesFormatted}</span>}
-          {caloriesFormatted && protein && protein > 0 && <span className="shrink-0">•</span>}
+          {caloriesFormatted && protein && protein > 0 && <span className="shrink-0 text-gray-300 dark:text-gray-600">•</span>}
           {protein && protein > 0 && (
-            <span className="text-emerald-600 dark:text-emerald-400 font-semibold shrink-0">
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold shrink-0 whitespace-nowrap">
               {Math.round(protein)}g Protein
             </span>
           )}

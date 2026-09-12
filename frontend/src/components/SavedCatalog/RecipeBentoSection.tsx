@@ -87,8 +87,9 @@ export default function RecipeBentoSection({
             {/* Top Badges */}
             <div className="absolute top-2 inset-x-2 flex items-center justify-between pointer-events-none">
               {mainScore !== null && mainScoreLetter && mainScoreColor ? (
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${mainScoreColor.badgeBg} ${mainScoreColor.badgeText} backdrop-blur-md shadow-xs`}>
-                  Score {mainScore} • {mainScoreLetter}
+                <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${mainScoreColor.onMediaBg} ${mainScoreColor.onMediaText} backdrop-blur-md shadow-xs ring-1 ring-white/15`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${mainScoreColor.pillBg}`} />
+                  <span>Score {mainScore} • {mainScoreLetter}</span>
                 </span>
               ) : <span />}
 
