@@ -72,15 +72,15 @@ export default function RecipeIngredients({
           />
         </div>
 
-        {/* 1.2 Grouped Category Sections with Soft Clean-Flat Tiles */}
-        <div className="px-4.5 py-4 sm:px-6 flex flex-col gap-4">
+        {/* 1.2 Grouped Category Sections */}
+        <div className="px-4.5 py-3 sm:px-6 flex flex-col divide-y divide-gray-100/70 dark:divide-gray-800/60">
           {sortedIngredients.map(({ group, originalIdx }) => {
             const theme = getCategoryTheme(group.name);
             return (
-              <div key={group.name || originalIdx} className="flex flex-col gap-2">
-                {/* Category Header */}
+              <div key={group.name || originalIdx} className="py-3.5 first:pt-1 last:pb-1 flex flex-col gap-1.5">
+                {/* Category Header Bar */}
                 {group.name && (
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center justify-between gap-2 pb-1">
                     <div className="flex items-center gap-2">
                       <span className={`w-2 h-2 rounded-full ${theme.barClass} shrink-0`} />
                       <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
@@ -95,8 +95,8 @@ export default function RecipeIngredients({
                   </div>
                 )}
 
-                {/* Multiple Soft Tiles per row: 2 columns grid */}
-                <ul className="grid grid-cols-2 gap-2 list-none p-0 m-0">
+                {/* Ingredients List with soft hairline dividers */}
+                <ul className="flex flex-col divide-y divide-gray-100/60 dark:divide-gray-800/50 list-none p-0 m-0">
                   {group.items.map((ing, idx) => (
                     <IngredientItemRow
                       key={`${ing.name}-${originalIdx}-${idx}`}
