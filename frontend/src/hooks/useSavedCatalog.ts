@@ -124,7 +124,8 @@ export function useSavedCatalog({
   // Sorting state persisted to localStorage
   const [sortBy, setSortBy] = useState<CatalogSort>(() => {
     const stored = localStorage.getItem('recipe_catalog_sort');
-    return (['newest', 'recent', 'title', 'time'] as const).includes(stored as CatalogSort)
+    const validSorts: readonly CatalogSort[] = ['newest', 'recent', 'title', 'time', 'healthScore'];
+    return (validSorts as readonly string[]).includes(stored ?? '')
       ? (stored as CatalogSort)
       : 'newest';
   });

@@ -1,4 +1,3 @@
-import React from 'react';
 import type { Collection, SavedRecipe, RecipeCategory } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';

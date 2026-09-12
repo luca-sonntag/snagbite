@@ -1,4 +1,3 @@
-import React from 'react';
 import { Plus } from 'lucide-react';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
