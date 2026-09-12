@@ -214,7 +214,7 @@ export default function RecipeNutrition({
 
           {/* Health Score Badge (Clean Flat interactive trigger) */}
           {healthScore !== undefined && healthScore !== null && (
-            <div className="pt-2.5 mt-1 border-t border-gray-100/70 dark:border-gray-800/60 flex items-center justify-between">
+            <div className="pt-2 mt-0.5">
               <HealthScoreBadge
                 score={healthScore}
                 breakdown={healthScoreBreakdown}

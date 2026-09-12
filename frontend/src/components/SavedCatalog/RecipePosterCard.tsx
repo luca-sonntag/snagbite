@@ -117,10 +117,10 @@ export default function RecipePosterCard({
                   <span>{totalTime}</span>
                 </span>
               )}
-              <div className="flex items-center gap-1 shrink-0 ml-auto">
+              <div className="flex items-center gap-1.5 shrink-0 ml-auto">
                 {r.healthScore !== undefined && r.healthScore !== null && (
                   <span
-                    className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg ${getHealthScoreColor(r.healthScore).badgeBg} ${getHealthScoreColor(r.healthScore).badgeText} font-bold text-[10.5px] tabular-nums`}
+                    className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md ${getHealthScoreColor(r.healthScore).badgeBg} ${getHealthScoreColor(r.healthScore).badgeText} font-bold text-[10.5px] tabular-nums`}
                     title={`Healthy Score: ${r.healthScore}/100`}
                   >
                     <HeartPulse className="w-3 h-3 shrink-0" />
@@ -128,11 +128,11 @@ export default function RecipePosterCard({
                   </span>
                 )}
                 {caloriesFormatted ? (
-                  <span className="shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px]">
+                  <span className="shrink-0 whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium text-[11px] tabular-nums">
                     {caloriesFormatted}
                   </span>
                 ) : r.servings && r.servings > 0 ? (
-                  <span className="shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px]">
+                  <span className="shrink-0 whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium text-[11px]">
                     {r.servings} Port.
                   </span>
                 ) : null}
