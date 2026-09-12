@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-12: Statische Schwellenwert-Upgrade-Tipps (`smartSwapTip` / `HealthScoreSmartTip`) durch dynamische AI Recipe Copilot Anbindung ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `HealthScoreSmartTip.tsx`: Statische UI-Box mit Sparkles-Icon, die lediglich zwei feste Heuristik-Strings ("Zucker reduzieren" oder "Gemüse/Vollkorn hinzufügen") anzeigte.
+  - `smartSwapTip` in `backend/src/matching/healthScoreCalculator.ts`: Schwellenwert-basierte Erzeugung statischer Strings, die unabhängig vom Rezept stets identisch formuliert waren.
+* **Ersetzt durch:**
+  - **[`HealthScoreCopilotCard.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/HealthScoreCopilotCard.tsx):** Taktile Aktionskarte im Health Score Sheet ("Rezept gesünder machen mit KI").
+  - **Dynamische Übergabe des Healthy-Score-Kontexts an Gemini:** `chatAboutRecipe` erhält Score, Note, Schwachstellen (Cautions) und Highlights im System-Prompt.
+  - **Automatischer Upgrade-Prompt:** Beim Klick auf den CTA-Button schließt sich das Sheet und der Recipe Copilot öffnet sich direkt mit einem maßgeschneiderten Prompt zur ernährungsphysiologischen Aufwertung.
+* **Betroffene Dateien:** `frontend/src/components/RecipeDetails/HealthScoreSmartTip.tsx` (gelöscht), `frontend/src/components/RecipeDetails/HealthScoreCopilotCard.tsx` (neu), `frontend/src/components/RecipeDetails/HealthScoreSheet.tsx`, `frontend/src/components/RecipeDetails/RecipeNutrition.tsx`, `frontend/src/components/RecipeDetails/RecipeInfoSection.tsx`, `frontend/src/components/RecipeDetails/useRecipeDetails.ts`, `frontend/src/components/RecipeDetails/index.tsx`, `backend/src/matching/healthScoreCalculator.ts`, `backend/src/gemini.ts`, `frontend/src/i18n.ts`.
+
+---
+
 ### 2026-09-12: Isolierte Nährwert-Skalare (`calories`, `protein_g`, `carbs_g`, `fat_g`) durch konsolidierte `nutritional_values` JSONB-Spalte & 4-Säulen Healthy Score abgelöst
 
 * **Ersetzter Code / Anti-Pattern:**

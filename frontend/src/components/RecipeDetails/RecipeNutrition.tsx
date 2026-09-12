@@ -27,6 +27,7 @@ interface RecipeNutritionProps {
    * per-macro breakdown that sits in its own section further down.
    */
   variant?: 'summary' | 'detail';
+  onOpenCopilot?: (initialPrompt?: string) => void;
 }
 
 export default function RecipeNutrition({
@@ -37,7 +38,8 @@ export default function RecipeNutrition({
   isAiEstimated,
   isVerified,
   getNutritionDisplayValue,
-  variant = 'detail'
+  variant = 'detail',
+  onOpenCopilot,
 }: RecipeNutritionProps) {
   const { t } = useI18n();
   const { isPremium } = useAuth();
@@ -237,6 +239,7 @@ export default function RecipeNutrition({
           onClose={() => setIsHealthScoreSheetOpen(false)}
           score={healthScore}
           breakdown={healthScoreBreakdown}
+          onOpenCopilot={onOpenCopilot}
         />
       )}
     </>

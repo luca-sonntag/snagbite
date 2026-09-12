@@ -20,6 +20,7 @@ interface RecipeInfoSectionProps {
   showTotalNutrition: boolean;
   onToggleTotalNutrition: (isTotal: boolean) => void;
   getNutritionDisplayValue: (val: string | number | null | undefined, unit?: string, isTotal?: boolean, includeUnit?: boolean) => string;
+  onOpenCopilot?: (initialPrompt?: string) => void;
 }
 
 /**
@@ -41,6 +42,7 @@ export default function RecipeInfoSection({
   showTotalNutrition,
   onToggleTotalNutrition,
   getNutritionDisplayValue,
+  onOpenCopilot,
 }: RecipeInfoSectionProps) {
   const { t } = useI18n();
 
@@ -89,6 +91,7 @@ export default function RecipeInfoSection({
             showTotalNutrition={showTotalNutrition}
             onToggleTotalNutrition={onToggleTotalNutrition}
             getNutritionDisplayValue={getNutritionDisplayValue}
+            onOpenCopilot={onOpenCopilot}
           />
         </div>
       )}

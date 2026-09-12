@@ -8,13 +8,14 @@ import { getHealthScoreColor } from './HealthScoreBadge';
 import HealthScoreHeroCard from './HealthScoreHeroCard';
 import HealthScoreMetricsGrid from './HealthScoreMetricsGrid';
 import HealthScoreNutritionCheck from './HealthScoreNutritionCheck';
-import HealthScoreSmartTip from './HealthScoreSmartTip';
+import HealthScoreCopilotCard from './HealthScoreCopilotCard';
 
 interface HealthScoreSheetProps {
   isOpen: boolean;
   onClose: () => void;
   score: number;
   breakdown?: HealthScoreBreakdown | null;
+  onOpenCopilot?: (initialPrompt?: string) => void;
 }
 
 export default function HealthScoreSheet({
@@ -22,6 +23,7 @@ export default function HealthScoreSheet({
   onClose,
   score,
   breakdown,
+  onOpenCopilot,
 }: HealthScoreSheetProps) {
   const { t, language } = useI18n();
   useModalOverlay(isOpen, onClose);
@@ -39,7 +41,7 @@ export default function HealthScoreSheet({
     return t('recipe.healthScoreGradeCheatMeal');
   };
 
-  const { metrics, highlights = [], cautions = [], smartSwapTip } = breakdown;
+  const { metrics, highlights = [], cautions = [] } = breakdown;
 
   return (
     <div onClick={(e) => e.stopPropagation()}>
@@ -106,9 +108,17 @@ export default function HealthScoreSheet({
                   isEn={isEn}
                 />
 
-                {/* 4. Smart Swap AI Tip */}
-                {smartSwapTip && (
-                  <HealthScoreSmartTip tip={smartSwapTip} isEn={isEn} />
+                {/* 4. Dynamic AI Copilot Nutrition Upgrade Card */}
+                {onOpenCopilot && (
+                  <HealthScoreCopilotCard
+                    score={score}
+                    grade={breakdown.grade}
+                    cautions={cautions}
+                    onOpenCopilot={(prompt) => {
+                      onClose();
+                      onOpenCopilot(prompt);
+                    }}
+                  />
                 )}
               </Drawer.Body>
 
