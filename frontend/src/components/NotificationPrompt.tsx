@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Bell, Check, X } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
+import { useModalOverlay } from '../context/OverlayStackContext';
 import { enablePushNotifications } from '../push';
 import { isNative } from '../native';
 
@@ -36,6 +37,13 @@ export default function NotificationPrompt({ savedCount }: NotificationPromptPro
     !isDismissedInMeta &&
     !dismissedLocally;
 
+  const handleDismiss = () => {
+    localStorage.setItem(PROMPT_DISMISSED_AT_KEY, Date.now().toString());
+    setDismissedLocally(true);
+  };
+
+  useModalOverlay(shouldShow, handleDismiss);
+
   useEffect(() => {
     if (!shouldShow) return;
     const prevBodyOverflow = document.body.style.overflow;
@@ -50,11 +58,6 @@ export default function NotificationPrompt({ savedCount }: NotificationPromptPro
   }, [shouldShow]);
 
   if (!shouldShow) return null;
-
-  const handleDismiss = () => {
-    localStorage.setItem(PROMPT_DISMISSED_AT_KEY, Date.now().toString());
-    setDismissedLocally(true);
-  };
 
   const handleEnable = async () => {
     if (busy) return;

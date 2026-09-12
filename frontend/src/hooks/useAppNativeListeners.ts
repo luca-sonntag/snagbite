@@ -100,7 +100,7 @@ export function useAppNativeListeners({
       }
 
       lastBackPressRef.current = now;
-      toast.show(t('app.pressBackAgainToExit') || 'Zum Beenden noch einmal tippen', 'default');
+      toast.info(t('app.pressBackAgainToExit') || 'Zum Beenden noch einmal tippen', { duration: 2000 });
       return true;
     });
   }, [

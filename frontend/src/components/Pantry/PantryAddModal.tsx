@@ -8,6 +8,7 @@ import {
   getDaysRemaining,
 } from '../../types';
 import { useI18n } from '../../context/I18nContext';
+import { useModalOverlay } from '../../context/OverlayStackContext';
 import { categoryOrder, translateCategory } from '../../i18n';
 
 interface PantryAddModalProps {
@@ -26,6 +27,7 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
   initialItem,
 }) => {
   const { t, language } = useI18n();
+  useModalOverlay(isOpen, onClose);
 
   const [name, setName] = useState('');
   const [amount, setAmount] = useState<string>('1');

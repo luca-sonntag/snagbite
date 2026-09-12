@@ -5,6 +5,7 @@ import { extractInlineIngredientTags, textMentionsTerm } from '../../utils/ingre
 import { extractFirstDuration } from './timeUtils';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
+import { useModalOverlay } from '../../context/OverlayStackContext';
 
 import CookingModeHeader from './CookingModeHeader';
 import CookingModeTimers from './CookingModeTimers';
@@ -28,6 +29,7 @@ export default function CookingMode({
 }: CookingModeProps) {
   const { t } = useI18n();
   const { isPremium } = useAuth();
+  useModalOverlay(true, onClose);
 
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);

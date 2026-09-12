@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '../context/I18nContext';
+import { useModalOverlay } from '../context/OverlayStackContext';
 import type { CookedResult } from '../types';
 import { progressPct, xpToNextLevel } from '../utils/levels';
 import { badgeEmoji } from '../utils/badges';
@@ -22,6 +23,8 @@ interface RewardOverlayProps {
  * renders nothing.
  */
 export default function RewardOverlay({ reward, levelThresholds, onClose }: RewardOverlayProps) {
+  useModalOverlay(!!reward, onClose);
+
   if (!reward) return null;
   // Keyed by the cook's running total so each new reward remounts and re-animates.
   return (

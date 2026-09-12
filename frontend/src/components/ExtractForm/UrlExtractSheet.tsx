@@ -2,6 +2,7 @@ import React from 'react';
 import { Drawer } from '@heroui/react';
 import { X } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
+import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight } from '../../utils/haptics';
 import UrlExtractInput from './UrlExtractInput';
 import ExtractSubmitButton from './ExtractSubmitButton';
@@ -21,6 +22,7 @@ export const UrlExtractSheet: React.FC<UrlExtractSheetProps> = ({
   handleFormSubmit,
 }) => {
   const { t } = useI18n();
+  useModalOverlay(isOpen, onClose);
 
   return (
     <Drawer>

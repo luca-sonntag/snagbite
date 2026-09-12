@@ -14,6 +14,7 @@ import {
   Tag,
 } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
+import { useModalOverlay } from '../context/OverlayStackContext';
 import { ShareStep2Mockup, ShareStep3Mockup } from './ShareMockups';
 import { hapticLight, hapticSelection, hapticMedium } from '../utils/haptics';
 
@@ -167,6 +168,14 @@ export default function WelcomeGuide({ onClose }: WelcomeGuideProps) {
       advance();
     }
   }, [isLast, advance, onClose]);
+
+  useModalOverlay(true, () => {
+    if (index > 0) {
+      back();
+    } else {
+      onClose();
+    }
+  });
 
   // Scroll-lock + keyboard controls (mirrors PremiumModal's overlay behavior).
   useEffect(() => {

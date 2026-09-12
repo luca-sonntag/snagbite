@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Button } from '@heroui/react';
 import { Trash2 } from 'lucide-react';
 import { useI18n } from '../../../context/I18nContext';
+import { useModalOverlay } from '../../../context/OverlayStackContext';
 import { useRecipeCopilot } from './useRecipeCopilot';
 import CopilotHeader from './CopilotHeader';
 import CopilotChatList from './CopilotChatList';
@@ -51,6 +52,14 @@ export const RecipeCopilot: React.FC<RecipeCopilotProps> = ({
     onReplaceCurrent,
     initialPrompt,
     forceNewRemix,
+  });
+
+  useModalOverlay(isOpen, () => {
+    if (confirmingClear) {
+      setConfirmingClear(false);
+    } else {
+      onClose();
+    }
   });
 
   // Lock body scroll & listen to Escape key when open

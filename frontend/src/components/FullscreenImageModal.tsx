@@ -2,6 +2,7 @@ import { createPortal } from 'react-dom';
 import { Button } from '@heroui/react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useImageGallery } from '../hooks/useImageGallery';
+import { useModalOverlay } from '../context/OverlayStackContext';
 import CachedImage from './CachedImage';
 
 interface FullscreenImageModalProps {
@@ -41,6 +42,8 @@ export default function FullscreenImageModal({
     handleTouchMove,
     handleTouchEnd,
   } = useImageGallery(images, initialIndex, onClose);
+
+  useModalOverlay(fullscreenIndex !== null && images.length > 0, onClose);
 
   if (fullscreenIndex === null || images.length === 0) {
     return null;

@@ -4,6 +4,7 @@ import { X, Sparkles, AlertCircle, CheckCircle2, ChevronRight, Globe } from 'luc
 import type { PantrySuggestion } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
+import { useModalOverlay } from '../../context/OverlayStackContext';
 import { recipeCategoryEmojis } from '../../i18n';
 import { hapticLight } from '../../utils/haptics';
 import { savePublicRecipeToCookbook } from '../../api/publicRecipesApi';
@@ -25,6 +26,7 @@ export const PantrySuggestionsModal: React.FC<PantrySuggestionsModalProps> = ({
 }) => {
   const { t } = useI18n();
   const { getAccessToken } = useAuth();
+  useModalOverlay(isOpen, onClose);
 
   // Strict deduplication by normalized title and recipe id
   const uniqueSuggestions = React.useMemo(() => {

@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { useCallback, useRef, useState, type ChangeEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { Camera, Image as ImageIcon, Check, AlertTriangle, RotateCcw, X, Loader2 } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { resolveErrorCode } from '../i18n';
 import { useGamification } from '../context/GamificationContext';
 import { useTimerManager } from '../hooks/useTimerManager';
+import { useModalOverlay } from '../context/OverlayStackContext';
 import { compressImage, PREVIEW_PROFILE } from '../utils/imageCompression';
 import { hapticLight, hapticMedium, hapticNotification } from '../utils/haptics';
 
@@ -43,10 +44,16 @@ export default function CookedModal({
   const [isVerifying, setIsVerifying] = useState(false);
   const [rejectionReason, setRejectionReason] = useState<string | null>(null);
 
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
+  const handleResetAndClose = useCallback(() => {
+    hapticLight();
+    setPhoto(null);
+    setRejectionReason(null);
+    setIsVerifying(false);
+    setIsCompressing(false);
+    onClose();
+  }, [onClose]);
+
+  useModalOverlay(isOpen, handleResetAndClose);
 
   if (!isOpen) return null;
 
@@ -104,15 +111,6 @@ export default function CookedModal({
     if (!photo || isVerifying) return;
     hapticMedium();
     submitCook(photo);
-  };
-
-  const handleResetAndClose = () => {
-    hapticLight();
-    setPhoto(null);
-    setRejectionReason(null);
-    setIsVerifying(false);
-    setIsCompressing(false);
-    onClose();
   };
 
   return createPortal(

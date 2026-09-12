@@ -3,6 +3,7 @@ import { Button, Drawer } from '@heroui/react';
 import { Salad } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { usePantry } from '../../context/PantryContext';
+import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight, hapticNotification } from '../../utils/haptics';
 import type { Ingredient, Recipe } from '../../types';
 import { findPantryStockMatch } from '../ShoppingList/shoppingItemUtils';
@@ -31,6 +32,7 @@ export default function ShoppingConfirmSheet({
 }: ShoppingConfirmSheetProps) {
   const { t } = useI18n();
   const { pantryItems } = usePantry();
+  useModalOverlay(isOpen, onClose);
   const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
 
   // Merge ingredients that share a parent in the same recipe across all groups (e.g. Gurkenwasser -> Gewürzgurken)

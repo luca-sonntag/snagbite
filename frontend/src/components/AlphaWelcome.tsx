@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { FlaskConical, Sparkles, Settings, MessageSquare, CalendarCheck, Check } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
+import { useModalOverlay } from '../context/OverlayStackContext';
 import { hapticMedium } from '../utils/haptics';
 
 interface AlphaWelcomeProps {
@@ -17,6 +18,7 @@ interface AlphaWelcomeProps {
  */
 export default function AlphaWelcome({ onClose }: AlphaWelcomeProps) {
   const { t } = useI18n();
+  useModalOverlay(true, onClose);
 
   // Scroll-lock + Escape to close (mirrors WelcomeGuide/PremiumModal).
   useEffect(() => {
