@@ -33,7 +33,7 @@ export default function HealthScoreHeroCard({
   const strokeDashoffset = circumference * (1 - Math.min(100, Math.max(0, score)) / 100);
 
   return (
-    <div className="bg-gradient-to-br from-gray-50/90 via-white to-gray-50/50 dark:from-gray-800/80 dark:via-gray-800/50 dark:to-gray-900/90 rounded-3xl p-4 sm:p-4.5 ring-1 ring-black/[0.04] dark:ring-white/[0.06] shadow-xs border-none flex flex-col gap-3 select-none">
+    <div className="bg-gray-50 dark:bg-gray-800/80 rounded-3xl p-4.5 sm:p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.02)] flex flex-col gap-3.5 select-none">
       {/* Top row: Gauge left, Grade & Verdict right */}
       <div className="flex items-center gap-4">
         {/* Gauge Hero (Large, Left) */}
@@ -43,7 +43,7 @@ export default function HealthScoreHeroCard({
               cx="44"
               cy="44"
               r={radius}
-              className="stroke-gray-200/60 dark:stroke-gray-700/50"
+              className="stroke-gray-200/80 dark:stroke-gray-700/60"
               strokeWidth="6.5"
               fill="none"
             />
@@ -83,20 +83,20 @@ export default function HealthScoreHeroCard({
       </div>
 
       {/* 5-Zone Spectrum Indicator */}
-      <div className="pt-2.5 border-t border-gray-100 dark:border-gray-800/60">
-        <div className="grid grid-cols-5 text-center text-[10px] font-bold text-gray-400 dark:text-gray-500 mb-1">
-          <span className={score < 35 ? `${colors.badgeText} font-black scale-110` : ''}>E</span>
-          <span className={score >= 35 && score < 50 ? `${colors.badgeText} font-black scale-110` : ''}>D</span>
-          <span className={score >= 50 && score < 70 ? `${colors.badgeText} font-black scale-110` : ''}>C</span>
-          <span className={score >= 70 && score < 85 ? `${colors.badgeText} font-black scale-110` : ''}>B</span>
-          <span className={score >= 85 ? `${colors.badgeText} font-black scale-110` : ''}>A</span>
+      <div className="pt-1 flex flex-col gap-1.5">
+        <div className="w-full h-2 rounded-full bg-gray-200/60 dark:bg-gray-700/60 flex items-center overflow-hidden p-0.5 gap-1">
+          <div className={`h-full flex-1 rounded-full transition-all duration-300 bg-rose-500 ${score < 35 ? 'opacity-100' : 'opacity-25'}`} />
+          <div className={`h-full flex-1 rounded-full transition-all duration-300 bg-orange-500 ${score >= 35 && score < 50 ? 'opacity-100' : 'opacity-25'}`} />
+          <div className={`h-full flex-1 rounded-full transition-all duration-300 bg-amber-500 ${score >= 50 && score < 70 ? 'opacity-100' : 'opacity-25'}`} />
+          <div className={`h-full flex-1 rounded-full transition-all duration-300 bg-teal-500 ${score >= 70 && score < 85 ? 'opacity-100' : 'opacity-25'}`} />
+          <div className={`h-full flex-1 rounded-full transition-all duration-300 bg-emerald-500 ${score >= 85 ? 'opacity-100' : 'opacity-25'}`} />
         </div>
-        <div className="w-full h-2 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center overflow-hidden p-0.5 gap-0.5">
-          <div className={`h-full flex-1 rounded-sm bg-rose-500 ${score < 35 ? 'opacity-100 ring-1 ring-rose-500/50' : 'opacity-25'}`} />
-          <div className={`h-full flex-1 rounded-sm bg-orange-500 ${score >= 35 && score < 50 ? 'opacity-100 ring-1 ring-orange-500/50' : 'opacity-25'}`} />
-          <div className={`h-full flex-1 rounded-sm bg-amber-500 ${score >= 50 && score < 70 ? 'opacity-100 ring-1 ring-amber-500/50' : 'opacity-25'}`} />
-          <div className={`h-full flex-1 rounded-sm bg-teal-500 ${score >= 70 && score < 85 ? 'opacity-100 ring-1 ring-teal-500/50' : 'opacity-25'}`} />
-          <div className={`h-full flex-1 rounded-sm bg-emerald-500 ${score >= 85 ? 'opacity-100 ring-1 ring-emerald-500/50' : 'opacity-25'}`} />
+        <div className="grid grid-cols-5 text-center text-[10.5px] font-bold">
+          <span className={score < 35 ? `${colors.badgeText} font-black` : 'text-gray-400 dark:text-gray-500 font-medium'}>E</span>
+          <span className={score >= 35 && score < 50 ? `${colors.badgeText} font-black` : 'text-gray-400 dark:text-gray-500 font-medium'}>D</span>
+          <span className={score >= 50 && score < 70 ? `${colors.badgeText} font-black` : 'text-gray-400 dark:text-gray-500 font-medium'}>C</span>
+          <span className={score >= 70 && score < 85 ? `${colors.badgeText} font-black` : 'text-gray-400 dark:text-gray-500 font-medium'}>B</span>
+          <span className={score >= 85 ? `${colors.badgeText} font-black` : 'text-gray-400 dark:text-gray-500 font-medium'}>A</span>
         </div>
       </div>
     </div>

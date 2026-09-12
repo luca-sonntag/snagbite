@@ -52,21 +52,21 @@ export default function HealthScoreSheet({
           className="!z-[100]"
         >
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-[#fbfbfb] dark:!bg-gray-900 max-h-[88vh] flex flex-col p-4 sm:p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-8px_30px_rgba(0,0,0,0.12)] overflow-hidden w-full max-w-lg mx-auto">
+            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col !p-0 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)] overflow-hidden w-full max-w-lg mx-auto">
               <Drawer.Handle />
 
               {/* Fixed Header Bar with tactile close button */}
-              <Drawer.Header className="pb-2.5 mb-1 shrink-0">
+              <Drawer.Header className="px-5 pt-3.5 pb-2 shrink-0 border-none">
                 <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-2.5">
-                    <div className={`w-8 h-8 rounded-xl ${colors.badgeBg} flex items-center justify-center shrink-0`}>
-                      <HeartPulse className={`w-4.5 h-4.5 ${colors.iconColor}`} />
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-2xl ${colors.badgeBg} flex items-center justify-center shrink-0`}>
+                      <HeartPulse className={`w-5 h-5 ${colors.iconColor}`} />
                     </div>
                     <div>
-                      <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white leading-tight tracking-tight">
+                      <Drawer.Heading className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-tight tracking-tight">
                         {t('recipe.healthScoreTitle')}
                       </Drawer.Heading>
-                      <p className="text-[11px] text-gray-400 dark:text-gray-500 leading-tight">
+                      <p className="text-xs text-gray-400 dark:text-gray-500 leading-tight mt-0.5">
                         DGE, WHO & NOVA Standard
                       </p>
                     </div>
@@ -78,16 +78,16 @@ export default function HealthScoreSheet({
                       hapticLight();
                       onClose();
                     }}
-                    className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 transition-colors border-none cursor-pointer active:scale-95"
+                    className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:text-gray-900 dark:hover:text-white shrink-0 active:scale-95 transition-all cursor-pointer border-none"
                     aria-label={t('recipe.healthScoreClose')}
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-4.5 h-4.5" />
                   </button>
                 </div>
               </Drawer.Header>
 
-              {/* Scrollable Luxury Content Body */}
-              <Drawer.Body className="overflow-y-auto flex-1 flex flex-col gap-3.5 overscroll-contain pr-1 -mr-1">
+              {/* Scrollable Content Body */}
+              <Drawer.Body className="overflow-y-auto flex-1 flex flex-col gap-3.5 overscroll-contain px-5 py-2">
                 {/* 1. Luxury Hero Card (Gauge Left, Grade & Verdict Right, Spectrum Bottom) */}
                 <HealthScoreHeroCard
                   score={score}
@@ -112,14 +112,14 @@ export default function HealthScoreSheet({
                 )}
               </Drawer.Body>
 
-              {/* Fixed Footer with Apple-grade CTA Button */}
-              <Drawer.Footer className="pt-2 shrink-0">
+              {/* Fixed Footer with Styleguide Soft CTA Button */}
+              <Drawer.Footer className="px-5 pt-2 pb-1 shrink-0 border-none">
                 <Button
                   onPress={() => {
                     hapticLight();
                     onClose();
                   }}
-                  className="w-full py-3 rounded-2xl font-semibold bg-gray-900 hover:bg-gray-800 text-white dark:bg-white dark:hover:bg-gray-100 dark:text-gray-900 border-none active:scale-[0.98] transition-all h-12 text-sm shadow-sm cursor-pointer"
+                  className="w-full py-3.5 rounded-2xl font-semibold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border-none active:scale-[0.98] transition-all h-12 text-sm cursor-pointer"
                 >
                   {t('recipe.healthScoreClose')}
                 </Button>
