@@ -100,7 +100,6 @@ describe('healthScoreCalculator', () => {
 
     assert.ok(score <= 45, `Expected score <= 45 for deep-fried sugary donuts, got ${score}`);
     assert.ok(breakdown.cautions.length > 0, 'Should have warnings for sugar or processing');
-    assert.ok(breakdown.smartSwapTip !== null, 'Should suggest healthier adjustments');
   });
 
   it('safely handles empty or missing ingredients without throwing', () => {

@@ -261,12 +261,7 @@ export function computeRecipeHealthScore(recipe: Recipe): {
     cautions.push('Hoher Anteil industriell verarbeiteter Zutaten (NOVA 3-4)');
   }
 
-  let smartSwapTip: string | null = null;
-  if (sugar >= 12) {
-    smartSwapTip = 'Tipp: Zucker oder süße Saucen reduzieren, um den Score weiter zu steigern.';
-  } else if (fiber < 3 && vegetableGramsPerServing < 100) {
-    smartSwapTip = 'Tipp: Eine Extraportion Gemüse oder Vollkorn hinzufügen für mehr Ballaststoffe.';
-  }
+  const smartSwapTip: string | null = null;
 
   const breakdown: HealthScoreBreakdown = {
     score: totalScore,

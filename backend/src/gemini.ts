@@ -1068,6 +1068,7 @@ You are helping the user with the following recipe:
 
 Title: ${recipe.title}${recipe.description ? `\nDescription: ${recipe.description}` : ''}
 Servings: ${recipe.servings}
+${recipe.healthScore !== undefined && recipe.healthScore !== null ? `Health Score: ${recipe.healthScore}/100${recipe.healthScoreBreakdown?.grade ? ` (Grade: ${recipe.healthScoreBreakdown.grade})` : ''}\n` : ''}${recipe.healthScoreBreakdown?.highlights?.length ? `Health Highlights: ${recipe.healthScoreBreakdown.highlights.join(', ')}\n` : ''}${recipe.healthScoreBreakdown?.cautions?.length ? `Health Improvement Opportunities: ${recipe.healthScoreBreakdown.cautions.join(', ')}\n` : ''}
 Ingredients:
 ${recipe.ingredients.map(g => `- ${g.name}:\n${g.items.map(i => `  * ${i.amount ? i.amount + ' ' : ''}${i.unit ? i.unit + ' ' : ''}${i.name}${i.modifier ? ` (${i.modifier})` : ''}`).join('\n')}`).join('\n')}
 
@@ -1075,7 +1076,7 @@ Instructions:
 ${recipe.instructions.map(step => `${step.step}. ${step.description}`).join('\n')}${recipe.tips && recipe.tips.length > 0 ? `\n\nTips:\n${recipe.tips.map(t => `- ${t}`).join('\n')}` : ''}
 
 Tools at your disposal:
-1. modify_current_recipe: Call this when the user wants to adapt, scale, remix, or otherwise modify the recipe details (e.g. add a side dish, swap or add ingredients, scale servings, make it vegan, gluten-free, low-carb). Do not try to write modified recipe JSON or instructions in your text reply; always call this tool to perform the modification.
+1. modify_current_recipe: Call this when the user wants to adapt, scale, remix, or otherwise modify the recipe details (e.g. make it healthier, add a side dish, swap or add ingredients, scale servings, make it vegan, gluten-free, low-carb). When the user asks to improve the Health Score, address the recipe's specific improvement opportunities (e.g. adding vegetables, increasing fiber, reducing sugar) with concrete, delicious culinary options and call modify_current_recipe. Do not try to write modified recipe JSON or instructions in your text reply; always call this tool to perform the modification.
 IMPORTANT FOR RECIPE MODIFICATIONS:
 - EVERY OPERATION MUST BE STRICTLY ATOMIC AND DO EXACTLY ONE THING:
   * For ingredient swaps (e.g. "Bacon durch 100g Putenbruststreifen ersetzen"): use type "REPLACE_INGREDIENT" with targetIngredientName ("Bacon"), the full newIngredient object, and summary "Bacon durch 100g Putenbruststreifen ersetzen". NEVER append "und Titel anpassen" or similar text to an ingredient swap operation! ALWAYS use the exact verbatim name of the existing ingredient from the list above (e.g. if the list says "Äpfel", use targetIngredientName: "Äpfel", NOT "Apfel").
@@ -1493,8 +1494,12 @@ DYNAMIC RECIPE CONTEXT MATRIX (Dynamically choose the 4-5 most relevant, interes
      * category: "help"
      * label: "Kann man das vorbereiten?" or "Reste einfrieren?"
      * prompt: "Was kann ich an diesem Rezept am Vortag vorbereiten und wie lagere ich es?"
-4. MACRO & DIET TUNING (Health & Nutrition Goals):
-   - If pasta, rice, bowl, sandwich, or lunch/dinner meal:
+4. HEALTH SCORE & NUTRITION UPGRADES (Healthy Choices):
+   - If the recipe has an average or lower Health Score (< 70) or has nutritional cautions (e.g. low vegetables, low fiber, high sugar):
+     * category: "remix"
+     * label: "Gesünder machen" or "Health Score steigern"
+     * prompt: "Wie kann ich dieses Rezept ernährungsphysiologisch aufwerten, um den Health Score zu steigern?"
+   - Or if pasta, rice, bowl, sandwich, or lunch/dinner meal:
      * category: "remix"
      * label: "High-Protein Boost" or "Leichtere Variante"
      * prompt: "Wie kann ich den Proteingehalt dieses Rezepts unkompliziert erhöhen?"
@@ -1516,6 +1521,9 @@ ${JSON.stringify({
   title: recipe.title,
   description: recipe.description || undefined,
   servings: recipe.servings,
+  healthScore: recipe.healthScore ?? undefined,
+  healthScoreGrade: recipe.healthScoreBreakdown?.grade ?? undefined,
+  healthCautions: recipe.healthScoreBreakdown?.cautions ?? undefined,
   ingredients: recipe.ingredients?.map(g => ({
     category: g.name,
     items: g.items?.map(i => `${i.amount ? i.amount + ' ' : ''}${i.unit ? i.unit + ' ' : ''}${i.name}${i.modifier ? ` (${i.modifier})` : ''}`.trim())
