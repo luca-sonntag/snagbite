@@ -43,7 +43,6 @@ export default function RecipeBentoSection({
   const mainScoreLetter = mainScore !== null ? getHealthScoreLetter(mainScore) : null;
   const mainTime = formatTotalTime(mainRecipe);
   const mainCalories = getRecipeCalories(mainRecipe) ?? mainRecipe.nutritionalValues?.calories ?? null;
-  const mainProtein = mainRecipe.nutritionalValues?.protein;
 
   return (
     <section className="space-y-3">
@@ -95,10 +94,10 @@ export default function RecipeBentoSection({
             )}
           </div>
 
-          {/* Bottom Meta: Inhalt gleicht Hero Card (Dauer-Zeile mit kcal/Score darf wrappen, darunter Titel ohne Autor) */}
+          {/* Bottom Meta: Inhalt gleicht Hero Card (Dauer, kcal, Health Score ohne Wrapping, darunter Titel ohne Autor) */}
           <div className="absolute bottom-2.5 inset-x-2.5 text-white flex flex-col gap-1 pointer-events-none">
-            {/* 1. Meta-Zeile: Dauer, kcal, Health Score, Protein (darf wrappen) */}
-            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-white/90 flex-wrap drop-shadow-xs">
+            {/* 1. Meta-Zeile: Nur Dauer, kcal, Health Score (kein Wrapping) */}
+            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-white/90 whitespace-nowrap overflow-hidden drop-shadow-xs">
               {mainTime && (
                 <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/90 text-white font-bold text-[10px] shadow-xs shrink-0">
                   <Clock className="w-2.5 h-2.5 text-white shrink-0" />
@@ -125,15 +124,6 @@ export default function RecipeBentoSection({
                   )}
                 </div>
               ) : null}
-
-              {mainProtein && mainProtein > 0 && (
-                <div className="flex items-center gap-1 shrink-0">
-                  <span className="text-white/30 text-[9px]">•</span>
-                  <span className="text-white/90 font-medium">
-                    {Math.round(mainProtein)}g Protein
-                  </span>
-                </div>
-              )}
             </div>
 
             {/* 2. Titel direkt unter der Dauer-Zeile (kein Autor) */}
