@@ -6,6 +6,7 @@ import ShoppingConfirmSheet from '../RecipeDetails/ShoppingConfirmSheet';
 import { useMobileNavigationBack } from '../../hooks/useMobileNavigationBack';
 import { useI18n } from '../../context/I18nContext';
 import { useToast } from '../../context/ToastContext';
+import { useBackHandler } from '../../context/OverlayStackContext';
 import { useSavedCatalog, EMPTY_FILTERS } from '../../hooks/useSavedCatalog';
 import { useAuth } from '../../context/AuthContext';
 import { useCollections } from '../../hooks/useCollections';
@@ -167,6 +168,18 @@ export default function SavedCatalog({
     getAccessToken,
     onSelectModeChange
   });
+
+  // Android back button: exit bulk selection mode before navigating away
+  useBackHandler(isSelectMode, () => {
+    setIsSelectMode(false);
+    return true;
+  }, 50);
+
+  // Android back button: clear active search query before navigating away
+  useBackHandler(Boolean(searchQuery.trim()), () => {
+    setSearchQuery('');
+    return true;
+  }, 40);
 
   const { collections, refreshCollections } = useCollections();
 
