@@ -10,6 +10,8 @@ import RecipeCompactCard from './RecipeCompactCard';
 
 interface RecipeBentoSectionProps {
   recipes: SavedRecipe[];
+  title?: string;
+  subtitle?: string;
   formatTotalTime: (recipe: any) => string | null;
   onOpenRecipe: (e: MouseEvent, job: SavedRecipe) => void;
   onSeeAll?: () => void;
@@ -21,6 +23,8 @@ interface RecipeBentoSectionProps {
  */
 export default function RecipeBentoSection({
   recipes,
+  title,
+  subtitle,
   formatTotalTime,
   onOpenRecipe,
   onSeeAll,
@@ -47,10 +51,10 @@ export default function RecipeBentoSection({
       <div className="flex items-center justify-between px-0.5">
         <div>
           <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight font-heading">
-            {t('catalog.magazine.bentoTitle')}
+            {title || t('catalog.magazine.bentoDefaultTitle')}
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {t('catalog.magazine.bentoSubtitle')}
+            {subtitle || t('catalog.magazine.bentoDefaultSubtitle')}
           </p>
         </div>
         {onSeeAll && recipes.length > 3 && (
