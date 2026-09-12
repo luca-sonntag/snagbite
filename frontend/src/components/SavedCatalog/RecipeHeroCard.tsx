@@ -9,6 +9,7 @@ import { getHealthScoreLetter, getHealthScoreColor } from '../RecipeDetails/Heal
 interface RecipeHeroCardProps {
   job: SavedRecipe;
   totalTime: string | null;
+  badgeText?: string;
   onOpenRecipe: (e: MouseEvent, job: SavedRecipe) => void;
 }
 
@@ -20,6 +21,7 @@ interface RecipeHeroCardProps {
 export default function RecipeHeroCard({
   job,
   totalTime,
+  badgeText,
   onOpenRecipe,
 }: RecipeHeroCardProps) {
   const { t } = useI18n();
@@ -53,7 +55,7 @@ export default function RecipeHeroCard({
         {/* Top Badges */}
         <div className="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none">
           <span className="px-2.5 py-1 rounded-full bg-emerald-500/90 backdrop-blur-md text-white text-[11px] font-bold shadow-sm">
-            {t('catalog.magazine.heroHighlight')}
+            {badgeText || t('catalog.magazine.heroHighlight')}
           </span>
 
           {/* Favorite Star */}
