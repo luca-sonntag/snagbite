@@ -215,7 +215,7 @@ export function useCookbookMagazine({
       return older[dayOfYear % older.length];
     }
 
-    return candidates[candidates.length - 1];
+    return null;
   }, [pool, heroSlides, bentoRecipes, dayOfYear]);
 
   const heroTotalTime = useMemo(() => {
