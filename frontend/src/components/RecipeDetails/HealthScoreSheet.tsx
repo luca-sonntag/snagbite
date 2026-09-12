@@ -1,5 +1,5 @@
 import { Drawer, Button } from '@heroui/react';
-import { HeartPulse, AlertCircle, Sparkles, X } from 'lucide-react';
+import { HeartPulse, Sparkles, X } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight } from '../../utils/haptics';
@@ -7,6 +7,7 @@ import type { HealthScoreBreakdown } from '../../types';
 import { getHealthScoreColor } from './HealthScoreBadge';
 import HealthScoreHero from './HealthScoreHero';
 import HealthScoreMetricsGrid from './HealthScoreMetricsGrid';
+import HealthScoreProsCons from './HealthScoreProsCons';
 
 interface HealthScoreSheetProps {
   isOpen: boolean;
@@ -37,7 +38,7 @@ export default function HealthScoreSheet({
     return t('recipe.healthScoreGradeCheatMeal');
   };
 
-  const { metrics, cautions, smartSwapTip } = breakdown;
+  const { metrics, highlights = [], cautions = [], smartSwapTip } = breakdown;
 
   return (
     <div onClick={(e) => e.stopPropagation()}>
@@ -97,15 +98,12 @@ export default function HealthScoreSheet({
                 {/* 2x2 Clean Key Metrics Grid */}
                 <HealthScoreMetricsGrid metrics={metrics} isEn={isEn} />
 
-                {/* Optional Caution Notice (concise single banner) */}
-                {cautions && cautions.length > 0 && (
-                  <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-amber-500/[0.08] dark:bg-amber-500/15 border-none">
-                    <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                    <span className="text-xs text-amber-800 dark:text-amber-300 font-medium leading-tight">
-                      {cautions.join(' · ')}
-                    </span>
-                  </div>
-                )}
+                {/* Structured Plus- & Minuspunkte */}
+                <HealthScoreProsCons
+                  highlights={highlights}
+                  cautions={cautions}
+                  isEn={isEn}
+                />
 
                 {/* Smart Swap AI Tip */}
                 {smartSwapTip && (
