@@ -1,4 +1,4 @@
-import { Sparkles } from 'lucide-react';
+import { ChefHat, ChevronRight } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { hapticLight } from '../../utils/haptics';
 import type { HealthScoreColorSet } from './HealthScoreBadge';
@@ -120,19 +120,27 @@ export default function HealthScoreHeroCard({
         </div>
       </div>
 
-      {/* Copilot Action (Immediate above-the-fold access, zero slop) */}
+      {/* Culinary Action Row (Integrated, quiet luxury, zero AI slop) */}
       {onOpenCopilot && (
         <button
           type="button"
           onClick={handleCopilotClick}
-          className="w-full mt-0.5 h-10 rounded-2xl bg-white dark:bg-gray-700/70 hover:bg-gray-100/90 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-100 font-semibold text-xs flex items-center justify-center gap-2 border-none shadow-[0_1px_3px_rgba(0,0,0,0.04)] active:scale-[0.98] transition-all cursor-pointer select-none"
+          className="w-full mt-1 pt-3 pb-0.5 border-t border-gray-200/60 dark:border-gray-700/50 flex items-center justify-between text-xs font-semibold text-gray-800 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer border-none bg-transparent select-none group"
         >
-          <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <span>
-            {score >= 85
-              ? t('recipe.healthScoreCopilotActionVariations')
-              : t('recipe.healthScoreCopilotActionOptimize')}
-          </span>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-6 h-6 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <ChefHat className="w-3.5 h-3.5" />
+            </div>
+            <span className="font-semibold text-xs text-gray-800 dark:text-gray-200 truncate">
+              {score >= 85
+                ? t('recipe.healthScoreActionVariations')
+                : t('recipe.healthScoreActionSwap')}
+            </span>
+          </div>
+          <div className="flex items-center gap-0.5 text-[11px] font-medium text-gray-400 dark:text-gray-500 shrink-0 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+            <span>{score >= 85 ? t('recipe.healthScoreActionVariationsHint') : t('recipe.healthScoreActionSwapHint')}</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </div>
         </button>
       )}
     </div>
