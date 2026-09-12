@@ -1,15 +1,10 @@
-import { ChefHat, ChevronRight } from 'lucide-react';
-import { useI18n } from '../../context/I18nContext';
-import { hapticLight } from '../../utils/haptics';
 import type { HealthScoreColorSet } from './HealthScoreBadge';
 
 interface HealthScoreHeroCardProps {
   score: number;
-  grade: string;
   gradeLabel: string;
   colors: HealthScoreColorSet;
   isEn: boolean;
-  onOpenCopilot?: (prompt: string) => void;
 }
 
 export function getVerdictDescription(score: number, isEn: boolean): string {
@@ -29,28 +24,13 @@ export function getVerdictDescription(score: number, isEn: boolean): string {
 
 export default function HealthScoreHeroCard({
   score,
-  grade,
   gradeLabel,
   colors,
   isEn,
-  onOpenCopilot,
 }: HealthScoreHeroCardProps) {
-  const { t } = useI18n();
   const radius = 36;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - Math.min(100, Math.max(0, score)) / 100);
-
-  const handleCopilotClick = () => {
-    if (!onOpenCopilot) return;
-    hapticLight();
-    const prompt = score >= 85
-      ? t('recipe.healthScoreCopilotPromptVariations')
-      : t('recipe.healthScoreCopilotPrompt', {
-          score: score.toString(),
-          grade,
-        });
-    onOpenCopilot(prompt);
-  };
 
   return (
     <div className="bg-gray-50 dark:bg-gray-800/80 rounded-3xl p-4.5 sm:p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.02)] flex flex-col gap-3.5 select-none">
@@ -119,30 +99,6 @@ export default function HealthScoreHeroCard({
           <span className={score >= 85 ? `${colors.badgeText} font-black` : 'text-gray-400 dark:text-gray-500 font-medium'}>A</span>
         </div>
       </div>
-
-      {/* Culinary Action Row (Integrated, quiet luxury, zero AI slop) */}
-      {onOpenCopilot && (
-        <button
-          type="button"
-          onClick={handleCopilotClick}
-          className="w-full mt-1 pt-3 pb-0.5 border-t border-gray-200/60 dark:border-gray-700/50 flex items-center justify-between text-xs font-semibold text-gray-800 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer border-none bg-transparent select-none group"
-        >
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-6 h-6 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-              <ChefHat className="w-3.5 h-3.5" />
-            </div>
-            <span className="font-semibold text-xs text-gray-800 dark:text-gray-200 truncate">
-              {score >= 85
-                ? t('recipe.healthScoreActionVariations')
-                : t('recipe.healthScoreActionSwap')}
-            </span>
-          </div>
-          <div className="flex items-center gap-0.5 text-[11px] font-medium text-gray-400 dark:text-gray-500 shrink-0 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-            <span>{score >= 85 ? t('recipe.healthScoreActionVariationsHint') : t('recipe.healthScoreActionSwapHint')}</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </div>
-        </button>
-      )}
     </div>
   );
 }

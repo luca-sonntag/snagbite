@@ -6,6 +6,7 @@ import { hapticLight } from '../../utils/haptics';
 import type { HealthScoreBreakdown } from '../../types';
 import { getHealthScoreColor } from './HealthScoreBadge';
 import HealthScoreHeroCard from './HealthScoreHeroCard';
+import HealthScoreActionCard from './HealthScoreActionCard';
 import HealthScoreMetricsGrid from './HealthScoreMetricsGrid';
 import HealthScoreNutritionCheck from './HealthScoreNutritionCheck';
 
@@ -89,27 +90,30 @@ export default function HealthScoreSheet({
 
               {/* Scrollable Content Body */}
               <Drawer.Body className="overflow-y-auto flex-1 flex flex-col gap-3.5 overscroll-contain px-5 pt-1 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))]">
-                {/* 1. Luxury Hero Card (Gauge Left, Grade & Verdict Right, Spectrum Bottom + Integrated Copilot Trigger) */}
+                {/* 1. Luxury Hero Card (Gauge Left, Grade & Verdict Right, Spectrum Bottom) */}
                 <HealthScoreHeroCard
                   score={score}
-                  grade={breakdown.grade}
                   gradeLabel={getGradeLabel()}
                   colors={colors}
                   isEn={isEn}
-                  onOpenCopilot={
-                    onOpenCopilot
-                      ? (prompt) => {
-                          onClose();
-                          onOpenCopilot(prompt);
-                        }
-                      : undefined
-                  }
                 />
 
-                {/* 2. Key Metrics 2x2 Bento Cards */}
+                {/* 2. Sleek Action Card (Above-the-fold culinary customization trigger) */}
+                {onOpenCopilot && (
+                  <HealthScoreActionCard
+                    score={score}
+                    grade={breakdown.grade}
+                    onOpenCopilot={(prompt) => {
+                      onClose();
+                      onOpenCopilot(prompt);
+                    }}
+                  />
+                )}
+
+                {/* 3. Key Metrics 2x2 Bento Cards */}
                 <HealthScoreMetricsGrid metrics={metrics} isEn={isEn} />
 
-                {/* 3. Nutrition Audit (Yuka-style clean checklist) */}
+                {/* 4. Nutrition Audit (Yuka-style clean checklist) */}
                 <HealthScoreNutritionCheck
                   highlights={highlights}
                   cautions={cautions}
