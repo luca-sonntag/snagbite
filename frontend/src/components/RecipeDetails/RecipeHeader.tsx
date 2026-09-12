@@ -9,6 +9,7 @@ import { hapticLight } from '../../utils/haptics';
 import RecipeRemixList from './RecipeRemixList';
 import IncompleteSourceCard from './IncompleteSourceCard';
 import RecipeHeaderActions from './RecipeHeaderActions';
+import { getHealthScoreColor, getHealthScoreLetter } from './HealthScoreBadge';
 
 import type { RecipeHeaderProps } from './types';
 
@@ -37,6 +38,10 @@ export default function RecipeHeader({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { history } = useCookHistory(recipe.id, cookRefreshKey);
   const resolvedParentTitle = parentRecipeTitle || recipe.parentRecipeTitle;
+
+  const healthScoreNum = typeof recipe.healthScore === 'number' ? recipe.healthScore : null;
+  const healthColor = healthScoreNum !== null ? getHealthScoreColor(healthScoreNum) : null;
+  const healthLetter = healthScoreNum !== null ? getHealthScoreLetter(healthScoreNum) : null;
 
   const topRightActions = (
     <RecipeHeaderActions
@@ -69,8 +74,8 @@ export default function RecipeHeader({
       {/* Recipe details body below cover (Sheet-Overlap with soft curved top) */}
       <div className="relative -mt-6 -mx-4 rounded-t-3xl bg-white dark:bg-gray-950 px-4 pt-5 pb-2 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_-8px_24px_rgba(0,0,0,0.4)] flex flex-col gap-3 z-20">
 
-        {/* Editorial Quick-Facts Lead-in: Category · Total Time · Servings · Flags */}
-        {(recipe.category || totalTimeLabel || (recipe.servings && recipe.servings > 0) || (flags && flags.length > 0) || (history && history.count > 0)) && (
+        {/* Editorial Quick-Facts Lead-in: Category · Total Time · Servings · Health Score · Flags */}
+        {(recipe.category || totalTimeLabel || (recipe.servings && recipe.servings > 0) || (healthColor && healthLetter) || (flags && flags.length > 0) || (history && history.count > 0)) && (
           <div className="flex flex-wrap items-center gap-2">
             {recipe.category && (
               <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold text-xs select-none border-none">
@@ -88,6 +93,24 @@ export default function RecipeHeader({
                 <Users className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
                 <span>{t('recipe.servingsCount', { count: recipe.servings }) || `${recipe.servings} Portionen`}</span>
               </span>
+            )}
+            {healthColor && healthLetter && healthScoreNum !== null && (
+              <button
+                type="button"
+                onClick={() => {
+                  hapticLight();
+                  const el = document.getElementById('details');
+                  if (el) {
+                    const stickyTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--app-sticky-top') || '0', 10);
+                    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - (stickyTop + 80), behavior: 'smooth' });
+                  }
+                }}
+                className={`w-6 h-6 rounded-full ${healthColor.pillBg} text-white font-black text-xs flex items-center justify-center leading-none shadow-2xs shrink-0 select-none cursor-pointer active:scale-95 transition-transform border-none outline-none`}
+                title={`Health Score: ${healthLetter} (${healthScoreNum}/100)`}
+                aria-label={`Health Score: ${healthLetter}`}
+              >
+                {healthLetter}
+              </button>
             )}
             {flags && flags.length > 0 && flags.map((flag, idx) => (
               <button
