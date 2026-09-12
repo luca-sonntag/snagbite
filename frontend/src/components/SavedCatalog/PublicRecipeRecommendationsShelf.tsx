@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Globe, Clock, Check } from 'lucide-react';
+import { Clock, Check } from 'lucide-react';
 import type { Recipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
 import { fetchPublicRecipeRecommendations, savePublicRecipeToCookbook } from '../../api/publicRecipesApi';
 import { getRecipeCalories, formatCalories } from '../../utils/formatNutrition';
+import { getHealthScoreColor, getHealthScoreLetter } from '../RecipeDetails/HealthScoreBadge';
 import CachedImage from '../CachedImage';
 import PublicRecipePreviewModal from '../PublicRecipe/PublicRecipePreviewModal';
 interface PublicRecipeRecommendationsShelfProps {
@@ -81,9 +82,8 @@ export default function PublicRecipeRecommendationsShelf({
       {/* Header */}
       <div className="flex items-center justify-between px-0.5">
         <div>
-          <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-1.5 tracking-tight font-heading">
-            <Globe className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-            <span>{t('catalog.publicDiscovery.title')}</span>
+          <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight font-heading">
+            {t('catalog.publicDiscovery.title')}
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
             {t('catalog.publicDiscovery.subtitle')}
@@ -103,6 +103,9 @@ export default function PublicRecipeRecommendationsShelf({
           const imageUrl = recipe.imageUrl || recipe.imageUrls?.[0];
           const calories = getRecipeCalories(recipe);
           const caloriesFormatted = formatCalories(calories);
+          const healthScoreNum = typeof recipe.healthScore === 'number' ? recipe.healthScore : null;
+          const healthColor = healthScoreNum !== null ? getHealthScoreColor(healthScoreNum) : null;
+          const healthLetter = healthScoreNum !== null ? getHealthScoreLetter(healthScoreNum) : null;
 
           return (
             <div
@@ -131,23 +134,37 @@ export default function PublicRecipeRecommendationsShelf({
                 <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2">
                   {recipe.title}
                 </h4>
-                {(timeDisplay || caloriesFormatted || (recipe.servings && recipe.servings > 0)) && (
-                  <div className="flex items-center justify-between gap-1 w-full text-[11px] font-medium mt-auto pt-1">
-                    {timeDisplay && (
-                      <span className="flex items-center gap-1 shrink-0 px-1.5 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-semibold text-[11px]">
-                        <Clock className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                        <span>{timeDisplay}</span>
+                {(timeDisplay || caloriesFormatted || (recipe.servings && recipe.servings > 0) || healthScoreNum !== null) && (
+                  <div className="flex items-center justify-between gap-1.5 w-full text-[11px] font-medium mt-auto pt-1 select-none">
+                    {/* Links: Dauer (grauer Pill) und Kalorien */}
+                    <div className="flex items-center gap-1.5 min-w-0 truncate">
+                      {timeDisplay && (
+                        <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
+                          <Clock className="w-2.5 h-2.5 text-gray-500 dark:text-gray-400 shrink-0" />
+                          <span>{timeDisplay}</span>
+                        </span>
+                      )}
+                      {caloriesFormatted ? (
+                        <span className="whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium truncate">
+                          {caloriesFormatted}
+                        </span>
+                      ) : recipe.servings && recipe.servings > 0 ? (
+                        <span className="whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium truncate">
+                          {recipe.servings} Port.
+                        </span>
+                      ) : null}
+                    </div>
+
+                    {/* Rechts: Health Score Buchstabenbadge */}
+                    {healthColor && healthLetter && healthScoreNum !== null && (
+                      <span
+                        className={`w-4 h-4 rounded-full ${healthColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-2xs shrink-0 select-none`}
+                        title={`Healthy Score: ${healthLetter} (${healthScoreNum}/100)`}
+                        aria-label={`Healthy Score: ${healthLetter}`}
+                      >
+                        {healthLetter}
                       </span>
                     )}
-                    {caloriesFormatted ? (
-                      <span className={`shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px] ${!timeDisplay ? 'ml-auto' : ''}`}>
-                        {caloriesFormatted}
-                      </span>
-                    ) : recipe.servings && recipe.servings > 0 ? (
-                      <span className={`shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium text-[11px] ${!timeDisplay ? 'ml-auto' : ''}`}>
-                        {recipe.servings} Port.
-                      </span>
-                    ) : null}
                   </div>
                 )}
               </div>
