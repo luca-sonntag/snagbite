@@ -71,6 +71,14 @@ export function getHealthScoreColor(score: number): HealthScoreColorSet {
   };
 }
 
+export function getHealthScoreLetter(score: number): 'A' | 'B' | 'C' | 'D' | 'E' {
+  if (score >= 85) return 'A';
+  if (score >= 70) return 'B';
+  if (score >= 50) return 'C';
+  if (score >= 35) return 'D';
+  return 'E';
+}
+
 export default function HealthScoreBadge({
   score,
   breakdown,

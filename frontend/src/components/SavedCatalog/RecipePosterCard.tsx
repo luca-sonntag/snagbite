@@ -1,10 +1,10 @@
 import type { MouseEvent } from 'react';
-import { Clock, Check, Star, Layers, HeartPulse } from 'lucide-react';
+import { Clock, Check, Star, Layers } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
 import { getRecipeCalories, formatCalories } from '../../utils/formatNutrition';
-import { getHealthScoreColor } from '../RecipeDetails/HealthScoreBadge';
+import { getHealthScoreColor, getHealthScoreLetter } from '../RecipeDetails/HealthScoreBadge';
 
 interface RecipePosterCardProps {
   job: SavedRecipe;
@@ -38,6 +38,9 @@ export default function RecipePosterCard({
   const remixCount = job.remixCount ?? job.recipe?.remixCount ?? 0;
   const calories = getRecipeCalories(r);
   const caloriesFormatted = formatCalories(calories);
+  const healthScoreNum = typeof r.healthScore === 'number' ? r.healthScore : null;
+  const healthColor = healthScoreNum !== null ? getHealthScoreColor(healthScoreNum) : null;
+  const healthLetter = healthScoreNum !== null ? getHealthScoreLetter(healthScoreNum) : null;
 
   return (
     <div className={`relative isolate ${isShelf ? 'w-40 shrink-0' : 'w-full'} h-full flex flex-col`}>
@@ -118,13 +121,13 @@ export default function RecipePosterCard({
                 </span>
               )}
               <div className="flex items-center gap-1.5 shrink-0 ml-auto tabular-nums">
-                {r.healthScore !== undefined && r.healthScore !== null && (
+                {healthColor && healthLetter && healthScoreNum !== null && (
                   <span
-                    className={`inline-flex items-center gap-0.5 font-bold ${getHealthScoreColor(r.healthScore).badgeText}`}
-                    title={`Healthy Score: ${r.healthScore}/100`}
+                    className={`w-4 h-4 rounded-full ${healthColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-2xs select-none`}
+                    title={`Healthy Score: ${healthLetter} (${healthScoreNum}/100)`}
+                    aria-label={`Healthy Score: ${healthLetter}`}
                   >
-                    <HeartPulse className="w-3 h-3 shrink-0" />
-                    <span>{r.healthScore}</span>
+                    {healthLetter}
                   </span>
                 )}
                 {caloriesFormatted ? (
