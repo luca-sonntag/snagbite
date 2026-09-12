@@ -12,6 +12,7 @@ import RecipeShelf from './RecipeShelf';
 import PublicRecipeRecommendationsShelf from './PublicRecipeRecommendationsShelf';
 import type { CatalogPreset } from './catalogRoutes';
 import { useCookbookMagazine } from './useCookbookMagazine';
+import { useI18n } from '../../context/I18nContext';
 
 interface Shelf {
   items: SavedRecipe[];
@@ -94,6 +95,7 @@ export default function CookbookHome({
   activeFilterCount = 0,
   onOpenFilters,
 }: CookbookHomeProps) {
+  const { t } = useI18n();
   const allCompletedJobs = items ?? shelves.newest?.items ?? [];
   const favJobs = favoriteJobs.length > 0 ? favoriteJobs : (shelves.favorites?.items ?? []);
 
@@ -178,7 +180,7 @@ export default function CookbookHome({
       {shelves.recommended && shelves.recommended.items.length >= 2 && (
         <RecipeShelf
           title={shelves.recommended.title}
-          subtitle={shelves.recommended.badgeEmoji}
+          subtitle={t('catalog.recommendations.subtitle')}
           jobs={shelves.recommended.items}
           totalCount={shelves.recommended.total}
           formatTotalTime={formatTotalTime}

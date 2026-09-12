@@ -98,7 +98,7 @@ export default function RecipeShowcaseCard({
             </span>
             {score !== null && scoreLetter && scoreColor && (
               <span
-                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${scoreColor.badgeBg} ${scoreColor.badgeText}`}
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${scoreColor.badgeBg} ${scoreColor.badgeText} shadow-2xs`}
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${scoreColor.pillBg}`} />
                 <span>Score {score} • {scoreLetter}</span>
