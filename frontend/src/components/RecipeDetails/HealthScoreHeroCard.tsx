@@ -33,7 +33,7 @@ export default function HealthScoreHeroCard({
   const strokeDashoffset = circumference * (1 - Math.min(100, Math.max(0, score)) / 100);
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-800/80 rounded-3xl p-4.5 sm:p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.02)] flex flex-col gap-3.5 select-none">
+    <div className="bg-white dark:bg-gray-900 rounded-3xl p-4.5 sm:p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col gap-3.5 select-none">
       {/* Top row: Gauge left, Grade & Verdict right */}
       <div className="flex items-center gap-4">
         {/* Gauge Hero (Large, Left) */}
@@ -43,7 +43,7 @@ export default function HealthScoreHeroCard({
               cx="44"
               cy="44"
               r={radius}
-              className="stroke-gray-200/80 dark:stroke-gray-700/60"
+              className="stroke-gray-100 dark:stroke-gray-800"
               strokeWidth="6.5"
               fill="none"
             />
@@ -84,7 +84,7 @@ export default function HealthScoreHeroCard({
 
       {/* 5-Zone Spectrum Indicator */}
       <div className="pt-1 flex flex-col gap-1.5">
-        <div className="w-full h-2 rounded-full bg-gray-200/60 dark:bg-gray-700/60 flex items-center overflow-hidden p-0.5 gap-1">
+        <div className="w-full h-2 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center overflow-hidden p-0.5 gap-1">
           <div className={`h-full flex-1 rounded-full transition-all duration-300 bg-rose-500 ${score < 35 ? 'opacity-100' : 'opacity-25'}`} />
           <div className={`h-full flex-1 rounded-full transition-all duration-300 bg-orange-500 ${score >= 35 && score < 50 ? 'opacity-100' : 'opacity-25'}`} />
           <div className={`h-full flex-1 rounded-full transition-all duration-300 bg-amber-500 ${score >= 50 && score < 70 ? 'opacity-100' : 'opacity-25'}`} />

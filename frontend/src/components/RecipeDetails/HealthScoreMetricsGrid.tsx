@@ -34,7 +34,7 @@ export default function HealthScoreMetricsGrid({
   return (
     <div className="grid grid-cols-2 gap-2.5 select-none">
       {/* 1. Gemüse & Obst */}
-      <div className="bg-gray-50 dark:bg-gray-800/80 p-3.5 sm:p-4 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.02)] flex flex-col justify-between">
+      <div className="bg-white dark:bg-gray-900 p-3.5 sm:p-4 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col justify-between">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">
           <Salad className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <span className="truncate">{isEn ? 'Veggies & Fruit' : 'Gemüse & Obst'}</span>
@@ -48,7 +48,7 @@ export default function HealthScoreMetricsGrid({
       </div>
 
       {/* 2. Ballaststoffe */}
-      <div className="bg-gray-50 dark:bg-gray-800/80 p-3.5 sm:p-4 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.02)] flex flex-col justify-between">
+      <div className="bg-white dark:bg-gray-900 p-3.5 sm:p-4 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col justify-between">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">
           <Wheat className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
           <span className="truncate">{isEn ? 'Fiber' : 'Ballaststoffe'}</span>
@@ -62,7 +62,7 @@ export default function HealthScoreMetricsGrid({
       </div>
 
       {/* 3. Pflanzenvielfalt */}
-      <div className="bg-gray-50 dark:bg-gray-800/80 p-3.5 sm:p-4 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.02)] flex flex-col justify-between">
+      <div className="bg-white dark:bg-gray-900 p-3.5 sm:p-4 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col justify-between">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">
           <Sprout className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <span className="truncate">{isEn ? 'Plant Diversity' : 'Pflanzenvielfalt'}</span>
@@ -76,7 +76,7 @@ export default function HealthScoreMetricsGrid({
       </div>
 
       {/* 4. Zuckergehalt */}
-      <div className="bg-gray-50 dark:bg-gray-800/80 p-3.5 sm:p-4 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.02)] flex flex-col justify-between">
+      <div className="bg-white dark:bg-gray-900 p-3.5 sm:p-4 rounded-2xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col justify-between">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">
           <Candy className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
           <span className="truncate">{isEn ? 'Sugar' : 'Zuckergehalt'}</span>

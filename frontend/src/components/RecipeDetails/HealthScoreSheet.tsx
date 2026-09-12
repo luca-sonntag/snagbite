@@ -54,7 +54,7 @@ export default function HealthScoreSheet({
           className="!z-[100]"
         >
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col !p-0 rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)] overflow-hidden w-full max-w-lg mx-auto">
+            <Drawer.Dialog className="relative !bg-[#f8fafc] dark:!bg-gray-950 max-h-[85vh] flex flex-col !p-0 rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)] overflow-hidden w-full max-w-lg mx-auto">
               <Drawer.Handle />
 
               {/* Fixed Header Bar with tactile close button */}
@@ -80,7 +80,7 @@ export default function HealthScoreSheet({
                       hapticLight();
                       onClose();
                     }}
-                    className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:text-gray-900 dark:hover:text-white shrink-0 active:scale-95 transition-all cursor-pointer border-none"
+                    className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-white dark:bg-gray-900 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center justify-center text-gray-500 hover:text-gray-900 dark:hover:text-white shrink-0 active:scale-95 transition-all cursor-pointer border-none"
                     aria-label={t('recipe.healthScoreClose')}
                   >
                     <X className="w-4.5 h-4.5" />
