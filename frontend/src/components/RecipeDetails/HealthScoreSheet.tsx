@@ -1,4 +1,4 @@
-import { Drawer, Button } from '@heroui/react';
+import { Drawer } from '@heroui/react';
 import { HeartPulse, X } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useModalOverlay } from '../../context/OverlayStackContext';
@@ -8,7 +8,6 @@ import { getHealthScoreColor } from './HealthScoreBadge';
 import HealthScoreHeroCard from './HealthScoreHeroCard';
 import HealthScoreMetricsGrid from './HealthScoreMetricsGrid';
 import HealthScoreNutritionCheck from './HealthScoreNutritionCheck';
-import HealthScoreCopilotCard from './HealthScoreCopilotCard';
 
 interface HealthScoreSheetProps {
   isOpen: boolean;
@@ -54,7 +53,7 @@ export default function HealthScoreSheet({
           className="!z-[100]"
         >
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col !p-0 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)] overflow-hidden w-full max-w-lg mx-auto">
+            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col !p-0 rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)] overflow-hidden w-full max-w-lg mx-auto">
               <Drawer.Handle />
 
               {/* Fixed Header Bar with tactile close button */}
@@ -89,13 +88,22 @@ export default function HealthScoreSheet({
               </Drawer.Header>
 
               {/* Scrollable Content Body */}
-              <Drawer.Body className="overflow-y-auto flex-1 flex flex-col gap-3.5 overscroll-contain px-5 py-2">
-                {/* 1. Luxury Hero Card (Gauge Left, Grade & Verdict Right, Spectrum Bottom) */}
+              <Drawer.Body className="overflow-y-auto flex-1 flex flex-col gap-3.5 overscroll-contain px-5 pt-1 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))]">
+                {/* 1. Luxury Hero Card (Gauge Left, Grade & Verdict Right, Spectrum Bottom + Integrated Copilot Trigger) */}
                 <HealthScoreHeroCard
                   score={score}
+                  grade={breakdown.grade}
                   gradeLabel={getGradeLabel()}
                   colors={colors}
                   isEn={isEn}
+                  onOpenCopilot={
+                    onOpenCopilot
+                      ? (prompt) => {
+                          onClose();
+                          onOpenCopilot(prompt);
+                        }
+                      : undefined
+                  }
                 />
 
                 {/* 2. Key Metrics 2x2 Bento Cards */}
@@ -107,33 +115,7 @@ export default function HealthScoreSheet({
                   cautions={cautions}
                   isEn={isEn}
                 />
-
-                {/* 4. Dynamic AI Copilot Nutrition Upgrade Card */}
-                {onOpenCopilot && (
-                  <HealthScoreCopilotCard
-                    score={score}
-                    grade={breakdown.grade}
-                    cautions={cautions}
-                    onOpenCopilot={(prompt) => {
-                      onClose();
-                      onOpenCopilot(prompt);
-                    }}
-                  />
-                )}
               </Drawer.Body>
-
-              {/* Fixed Footer with Styleguide Soft CTA Button */}
-              <Drawer.Footer className="px-5 pt-2 pb-1 shrink-0 border-none">
-                <Button
-                  onPress={() => {
-                    hapticLight();
-                    onClose();
-                  }}
-                  className="w-full py-3.5 rounded-2xl font-semibold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border-none active:scale-[0.98] transition-all h-12 text-sm cursor-pointer"
-                >
-                  {t('recipe.healthScoreClose')}
-                </Button>
-              </Drawer.Footer>
             </Drawer.Dialog>
           </Drawer.Content>
         </Drawer.Backdrop>

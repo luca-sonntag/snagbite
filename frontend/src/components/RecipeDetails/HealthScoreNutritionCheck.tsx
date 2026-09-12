@@ -41,7 +41,7 @@ export default function HealthScoreNutritionCheck({
           {highlights.length > 0 && cautions.length > 0 && <span className="opacity-40">·</span>}
           {cautions.length > 0 && (
             <span className="text-amber-600 dark:text-amber-400">
-              {cautions.length} {isEn ? 'tips' : 'Tipps'}
+              {cautions.length} {isEn ? (cautions.length === 1 ? 'tip' : 'tips') : (cautions.length === 1 ? 'Tipp' : 'Tipps')}
             </span>
           )}
         </div>
