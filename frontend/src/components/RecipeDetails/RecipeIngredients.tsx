@@ -50,102 +50,95 @@ export default function RecipeIngredients({
 
   return (
     <div className="flex flex-col gap-4 pb-4">
-      {/* 1. Cohesive Unified Ingredients Card */}
-      <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
-        {/* 1.1 Servings Header */}
-        <div className="px-4.5 py-4 sm:px-6 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className={medallion}>
-              <Users className={medallionIcon} />
-            </div>
-            <div className="flex flex-col">
-              <span className={blockLabel}>{t('recipe.serves')}</span>
-              <span className="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
-                {t('recipe.servingsCount', { count: servings })}
-              </span>
-            </div>
+      {/* 1. Servings Header Card */}
+      <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none px-4.5 py-4 sm:px-6 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className={medallion}>
+            <Users className={medallionIcon} />
           </div>
-          <RecipeServingsStepper
-            servings={servings}
-            onDecreaseServings={onDecreaseServings}
-            onIncreaseServings={onIncreaseServings}
-          />
-        </div>
-
-        {/* 1.2 Grouped Category Sections */}
-        <div className="px-4.5 py-3 sm:px-6 flex flex-col divide-y divide-gray-100/70 dark:divide-gray-800/60">
-          {sortedIngredients.map(({ group, originalIdx }) => {
-            const theme = getCategoryTheme(group.name);
-            return (
-              <div key={group.name || originalIdx} className="py-3.5 first:pt-1 last:pb-1 flex flex-col gap-1.5">
-                {/* Category Header Bar */}
-                {group.name && (
-                  <div className="flex items-center justify-between gap-2 pb-1">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${theme.barClass} shrink-0`} />
-                      <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
-                        {translateCategory(group.name)}
-                      </span>
-                    </div>
-                    <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 tabular-nums">
-                      {group.items.length === 1
-                        ? t('recipe.ingredientCount')
-                        : t('recipe.ingredientsCount', { count: group.items.length })}
-                    </span>
-                  </div>
-                )}
-
-                {/* Ingredients List */}
-                <ul className="flex flex-col divide-y divide-gray-100/50 dark:divide-gray-800/40">
-                  {group.items.map((ing, idx) => (
-                    <IngredientItemRow
-                      key={`${ing.name}-${originalIdx}-${idx}`}
-                      ingredient={ing}
-                      categoryName={group.name}
-                      originalIdx={originalIdx}
-                      itemIdx={idx}
-                      isPremium={isPremium}
-                      scaleFactor={scaleFactor}
-                      formatAmount={formatAmount}
-                      onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
-                      onOpenPremium={() => setIsPremiumModalOpen(true)}
-                    />
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* 1.3 Integrated Shopping List Button Footer */}
-        {onAddIngredients && (
-          <div className="px-4.5 py-3.5 sm:px-6 bg-black/[0.01] dark:bg-white/[0.01]">
-            <Button
-              className={`w-full h-12 min-h-[48px] rounded-2xl font-bold transition-all flex items-center justify-center gap-2 text-sm active:scale-[0.98] border-none shadow-none cursor-pointer ${
-                isAdded
-                  ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
-                  : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400'
-              }`}
-              onPress={() => {
-                hapticLight();
-                onAddIngredients();
-              }}
-            >
-              {isAdded ? (
-                <>
-                  <Check className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
-                  <span>{t('recipe.addedToShopping')}</span>
-                </>
-              ) : (
-                <>
-                  <ShoppingCart className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
-                  <span>{t('recipe.addToShopping')}</span>
-                </>
-              )}
-            </Button>
+          <div className="flex flex-col">
+            <span className={blockLabel}>{t('recipe.serves')}</span>
+            <span className="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
+              {t('recipe.servingsCount', { count: servings })}
+            </span>
           </div>
-        )}
+        </div>
+        <RecipeServingsStepper
+          servings={servings}
+          onDecreaseServings={onDecreaseServings}
+          onIncreaseServings={onIncreaseServings}
+        />
       </div>
+
+      {/* 2. Grouped Category Sections with Multi-Box Grid */}
+      {sortedIngredients.map(({ group, originalIdx }) => {
+        const theme = getCategoryTheme(group.name);
+        return (
+          <div key={group.name || originalIdx} className="flex flex-col gap-2">
+            {/* Category Header */}
+            {group.name && (
+              <div className="flex items-center justify-between gap-2 px-1 pt-1">
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${theme.barClass} shrink-0`} />
+                  <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
+                    {translateCategory(group.name)}
+                  </span>
+                </div>
+                <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 tabular-nums">
+                  {group.items.length === 1
+                    ? t('recipe.ingredientCount')
+                    : t('recipe.ingredientsCount', { count: group.items.length })}
+                </span>
+              </div>
+            )}
+
+            {/* Multiple Boxes per row: 2 columns on mobile, 3 on tablet/desktop */}
+            <ul className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-2.5 list-none p-0 m-0">
+              {group.items.map((ing, idx) => (
+                <IngredientItemRow
+                  key={`${ing.name}-${originalIdx}-${idx}`}
+                  ingredient={ing}
+                  categoryName={group.name}
+                  originalIdx={originalIdx}
+                  itemIdx={idx}
+                  isPremium={isPremium}
+                  scaleFactor={scaleFactor}
+                  formatAmount={formatAmount}
+                  onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
+                  onOpenPremium={() => setIsPremiumModalOpen(true)}
+                />
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+
+      {/* 3. Add to Shopping List Button */}
+      {onAddIngredients && (
+        <Button
+          className={`w-full h-12 min-h-[48px] rounded-2xl font-bold transition-all flex items-center justify-center gap-2 text-sm active:scale-[0.98] border-none shadow-none cursor-pointer ${
+            isAdded
+              ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
+              : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400'
+          }`}
+          onPress={() => {
+            hapticLight();
+            onAddIngredients();
+          }}
+        >
+          {isAdded ? (
+            <>
+              <Check className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
+              <span>{t('recipe.addedToShopping')}</span>
+            </>
+          ) : (
+            <>
+              <ShoppingCart className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
+              <span>{t('recipe.addToShopping')}</span>
+            </>
+          )}
+        </Button>
+      )}
 
       {/* Alternative ingredients section */}
       {recipe.alternativeIngredients && recipe.alternativeIngredients.length > 0 && (
