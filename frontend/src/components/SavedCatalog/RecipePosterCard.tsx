@@ -102,6 +102,19 @@ export default function RecipePosterCard({
               <Star className="w-4 h-4 fill-amber-500 text-amber-500 drop-shadow-[0_2px_5px_rgba(0,0,0,0.65)]" />
             </div>
           )}
+
+          {/* Health Score badge (Glassmorphic on photo) */}
+          {r.healthScore !== undefined && r.healthScore !== null && (
+            <div
+              className="absolute bottom-2 left-2 z-10 px-2 py-0.5 rounded-xl bg-black/60 dark:bg-black/70 backdrop-blur-md flex items-center gap-1 text-white shadow-md border-none select-none"
+              title={`Healthy Score: ${r.healthScore}/100`}
+            >
+              <HeartPulse className={`w-3.5 h-3.5 ${getHealthScoreColor(r.healthScore).iconColor}`} />
+              <span className="text-[11px] font-bold tracking-tight text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)] tabular-nums">
+                {r.healthScore}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Meta: Title & coupled punchy info pills */}
@@ -109,7 +122,7 @@ export default function RecipePosterCard({
           <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2">
             {r.title}
           </h4>
-          {(totalTime || caloriesFormatted || (r.servings && r.servings > 0) || r.healthScore) && (
+          {(totalTime || caloriesFormatted || (r.servings && r.servings > 0)) && (
             <div className="flex items-center justify-between gap-1 w-full text-[11px] font-medium mt-auto pt-1">
               {totalTime && (
                 <span className="flex items-center gap-1 shrink-0 px-1.5 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-semibold text-[11px]">
@@ -117,26 +130,15 @@ export default function RecipePosterCard({
                   <span>{totalTime}</span>
                 </span>
               )}
-              <div className="flex items-center gap-1.5 shrink-0 ml-auto">
-                {r.healthScore !== undefined && r.healthScore !== null && (
-                  <span
-                    className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md ${getHealthScoreColor(r.healthScore).badgeBg} ${getHealthScoreColor(r.healthScore).badgeText} font-bold text-[10.5px] tabular-nums`}
-                    title={`Healthy Score: ${r.healthScore}/100`}
-                  >
-                    <HeartPulse className="w-3 h-3 shrink-0" />
-                    <span>{r.healthScore}</span>
-                  </span>
-                )}
-                {caloriesFormatted ? (
-                  <span className="shrink-0 whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium text-[11px] tabular-nums">
-                    {caloriesFormatted}
-                  </span>
-                ) : r.servings && r.servings > 0 ? (
-                  <span className="shrink-0 whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium text-[11px]">
-                    {r.servings} Port.
-                  </span>
-                ) : null}
-              </div>
+              {caloriesFormatted ? (
+                <span className="shrink-0 whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium text-[11px] tabular-nums ml-auto">
+                  {caloriesFormatted}
+                </span>
+              ) : r.servings && r.servings > 0 ? (
+                <span className="shrink-0 whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium text-[11px] ml-auto">
+                  {r.servings} Port.
+                </span>
+              ) : null}
             </div>
           )}
         </div>

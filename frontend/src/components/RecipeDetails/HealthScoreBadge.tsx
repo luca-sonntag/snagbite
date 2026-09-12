@@ -8,6 +8,7 @@ interface HealthScoreBadgeProps {
   breakdown?: HealthScoreBreakdown | null;
   onClick: () => void;
   size?: 'sm' | 'md';
+  fullWidth?: boolean;
 }
 
 export interface HealthScoreColorSet {
@@ -75,6 +76,7 @@ export default function HealthScoreBadge({
   breakdown,
   onClick,
   size = 'md',
+  fullWidth = false,
 }: HealthScoreBadgeProps) {
   const { t } = useI18n();
   const colors = getHealthScoreColor(score);
@@ -106,9 +108,11 @@ export default function HealthScoreBadge({
         hapticLight();
         onClick();
       }}
-      className={`w-full group bg-gray-50/90 dark:bg-gray-800/40 hover:bg-gray-100/80 dark:hover:bg-gray-800/70 rounded-2xl ${
-        isSmall ? 'p-2.5' : 'p-3 sm:p-3.5 min-h-[52px]'
-      } border-none select-none cursor-pointer active:scale-[0.98] transition-all flex items-center justify-between gap-3 text-left`}
+      className={`w-full group ${
+        fullWidth
+          ? 'px-4.5 sm:px-5 py-3.5 bg-gray-50/75 dark:bg-gray-800/40 hover:bg-gray-100/80 dark:hover:bg-gray-800/60 rounded-b-3xl'
+          : `rounded-2xl ${isSmall ? 'p-2.5' : 'p-3 sm:p-3.5 min-h-[52px]'} bg-gray-50/90 dark:bg-gray-800/40 hover:bg-gray-100/80 dark:hover:bg-gray-800/70`
+      } border-none select-none cursor-pointer active:scale-[0.99] transition-all flex items-center justify-between gap-3 text-left`}
       aria-label={`${t('recipe.healthScoreTitle')}: ${score}/100`}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">

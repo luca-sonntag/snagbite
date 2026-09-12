@@ -1,4 +1,4 @@
-﻿import type { HealthScoreColorSet } from './HealthScoreBadge';
+import type { HealthScoreColorSet } from './HealthScoreBadge';
 
 interface HealthScoreHeroProps {
   score: number;
@@ -79,19 +79,19 @@ export default function HealthScoreHero({
 
       {/* 5-Zone Spectrum Indicator */}
       <div className="w-full max-w-xs mt-3 pt-2.5 border-t border-gray-200/50 dark:border-gray-700/40">
-        <div className="flex justify-between items-center text-[10px] font-bold text-gray-400 dark:text-gray-500 mb-1 px-1">
-          <span className={score < 35 ? `${colors.badgeText} font-black` : ''}>E</span>
-          <span className={score >= 35 && score < 50 ? `${colors.badgeText} font-black` : ''}>D</span>
-          <span className={score >= 50 && score < 70 ? `${colors.badgeText} font-black` : ''}>C</span>
-          <span className={score >= 70 && score < 85 ? `${colors.badgeText} font-black` : ''}>B</span>
-          <span className={score >= 85 ? `${colors.badgeText} font-black` : ''}>A</span>
+        <div className="grid grid-cols-5 text-center text-[11px] font-bold text-gray-400 dark:text-gray-500 mb-1">
+          <span className={score < 35 ? `${colors.badgeText} font-black text-xs scale-110` : ''}>E</span>
+          <span className={score >= 35 && score < 50 ? `${colors.badgeText} font-black text-xs scale-110` : ''}>D</span>
+          <span className={score >= 50 && score < 70 ? `${colors.badgeText} font-black text-xs scale-110` : ''}>C</span>
+          <span className={score >= 70 && score < 85 ? `${colors.badgeText} font-black text-xs scale-110` : ''}>B</span>
+          <span className={score >= 85 ? `${colors.badgeText} font-black text-xs scale-110` : ''}>A</span>
         </div>
-        <div className="w-full h-1.5 rounded-full bg-gray-200/80 dark:bg-gray-700/70 flex overflow-hidden">
-          <div className={`h-full flex-1 bg-rose-500 ${score < 35 ? 'opacity-100' : 'opacity-30'}`} />
-          <div className={`h-full flex-1 bg-orange-500 ${score >= 35 && score < 50 ? 'opacity-100' : 'opacity-30'}`} />
-          <div className={`h-full flex-1 bg-amber-500 ${score >= 50 && score < 70 ? 'opacity-100' : 'opacity-30'}`} />
-          <div className={`h-full flex-1 bg-teal-500 ${score >= 70 && score < 85 ? 'opacity-100' : 'opacity-30'}`} />
-          <div className={`h-full flex-1 bg-emerald-500 ${score >= 85 ? 'opacity-100' : 'opacity-30'}`} />
+        <div className="w-full h-2 rounded-full bg-gray-200/80 dark:bg-gray-700/70 flex items-center overflow-hidden p-0.5 gap-0.5">
+          <div className={`h-full flex-1 rounded-sm bg-rose-500 ${score < 35 ? 'opacity-100 ring-1 ring-rose-500/50' : 'opacity-30'}`} />
+          <div className={`h-full flex-1 rounded-sm bg-orange-500 ${score >= 35 && score < 50 ? 'opacity-100 ring-1 ring-orange-500/50' : 'opacity-30'}`} />
+          <div className={`h-full flex-1 rounded-sm bg-amber-500 ${score >= 50 && score < 70 ? 'opacity-100 ring-1 ring-amber-500/50' : 'opacity-30'}`} />
+          <div className={`h-full flex-1 rounded-sm bg-teal-500 ${score >= 70 && score < 85 ? 'opacity-100 ring-1 ring-teal-500/50' : 'opacity-30'}`} />
+          <div className={`h-full flex-1 rounded-sm bg-emerald-500 ${score >= 85 ? 'opacity-100 ring-1 ring-emerald-500/50' : 'opacity-30'}`} />
         </div>
       </div>
     </div>

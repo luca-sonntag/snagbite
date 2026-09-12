@@ -65,20 +65,20 @@ export default function HealthScoreSheet({
           className="!z-[100]"
         >
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 !p-0 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-8px_30px_rgba(0,0,0,0.12)] max-h-[90vh] overflow-y-auto">
+            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[88vh] flex flex-col p-4 sm:p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-8px_30px_rgba(0,0,0,0.12)] overflow-hidden w-full max-w-lg mx-auto">
               <Drawer.Handle />
 
-              <div className="p-4 sm:p-6 flex flex-col gap-4.5 text-gray-900 dark:text-white max-w-lg mx-auto w-full">
-                {/* Header Bar with tactile close button */}
-                <div className="flex items-center justify-between pt-0.5">
+              {/* Fixed Header Bar with tactile close button */}
+              <Drawer.Header className="pb-2 mb-1 shrink-0">
+                <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-2.5">
                     <div className={`w-8 h-8 rounded-xl ${colors.badgeBg} flex items-center justify-center shrink-0`}>
                       <HeartPulse className={`w-4.5 h-4.5 ${colors.iconColor}`} />
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">
+                      <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white leading-tight">
                         {t('recipe.healthScoreTitle')}
-                      </h3>
+                      </Drawer.Heading>
                       <p className="text-[11px] text-gray-400 dark:text-gray-500 leading-tight">
                         DGE, WHO & NOVA Standard
                       </p>
@@ -97,7 +97,10 @@ export default function HealthScoreSheet({
                     <X className="w-4 h-4" />
                   </button>
                 </div>
+              </Drawer.Header>
 
+              {/* Scrollable Content Body */}
+              <Drawer.Body className="overflow-y-auto flex-1 flex flex-col gap-4.5 overscroll-contain pr-1 -mr-1">
                 {/* Hero Score Gauge & 5-Zone Spectrum */}
                 <HealthScoreHero
                   score={score}
@@ -195,18 +198,20 @@ export default function HealthScoreSheet({
                     </div>
                   </div>
                 )}
+              </Drawer.Body>
 
-                {/* Tactile Close Button */}
+              {/* Fixed Footer with Close Button */}
+              <Drawer.Footer className="pt-2 shrink-0">
                 <Button
                   onPress={() => {
                     hapticLight();
                     onClose();
                   }}
-                  className="w-full py-3.5 mt-1 rounded-2xl font-semibold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border-none active:scale-[0.98] transition-all h-12 text-sm cursor-pointer"
+                  className="w-full py-3 rounded-2xl font-semibold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border-none active:scale-[0.98] transition-all h-12 text-sm cursor-pointer"
                 >
                   {t('recipe.healthScoreClose')}
                 </Button>
-              </div>
+              </Drawer.Footer>
             </Drawer.Dialog>
           </Drawer.Content>
         </Drawer.Backdrop>

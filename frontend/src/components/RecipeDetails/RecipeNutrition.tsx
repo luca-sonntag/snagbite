@@ -212,13 +212,14 @@ export default function RecipeNutrition({
             />
           )}
 
-          {/* Health Score Badge (Clean Flat interactive trigger) */}
+          {/* Health Score Panel (Full-width across the nutrition box) */}
           {healthScore !== undefined && healthScore !== null && (
-            <div className="pt-2 mt-0.5">
+            <div className="-mx-4.5 sm:-mx-5 -mb-3.5 mt-3 border-t border-gray-100/70 dark:border-gray-800/60 overflow-hidden rounded-b-3xl">
               <HealthScoreBadge
                 score={healthScore}
                 breakdown={healthScoreBreakdown}
                 onClick={() => setIsHealthScoreSheetOpen(true)}
+                fullWidth
               />
             </div>
           )}
