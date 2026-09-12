@@ -83,17 +83,8 @@ export default function RecipeBentoSection({
           {/* Scrim overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none" />
 
-            {/* Top Badges */}
-            <div className="absolute top-2 inset-x-2 flex items-center justify-between pointer-events-none">
-              {mainScore !== null && mainScoreLetter && mainScoreColor ? (
-                <span
-                  className={`w-5 h-5 rounded-full ${mainScoreColor.pillBg} text-white font-black text-[10.5px] flex items-center justify-center leading-none shadow-md backdrop-blur-xs select-none`}
-                  title={`Health Score: ${mainScoreLetter} (${mainScore}/100)`}
-                >
-                  {mainScoreLetter}
-                </span>
-              ) : <span />}
-
+          {/* Top Badges */}
+          <div className="absolute top-2 right-2 pointer-events-none">
             {mainJob.isFavorite && (
               <div className="w-6 h-6 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center text-amber-400">
                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
@@ -112,10 +103,22 @@ export default function RecipeBentoSection({
             <h4 className="font-bold text-xs sm:text-sm leading-tight text-white line-clamp-2 drop-shadow-xs">
               {mainRecipe.title}
             </h4>
-            <div className="flex items-center gap-1.5 text-[10px] text-gray-200 font-medium">
-              {mainCalories && <span>{mainCalories}</span>}
-              {mainCalories && mainProtein && <span>•</span>}
-              {mainProtein && <span>{Math.round(mainProtein)}g Protein</span>}
+            <div className="flex items-center justify-between gap-1 text-[10px] text-gray-200 font-medium">
+              <div className="flex items-center gap-1.5 min-w-0 truncate">
+                {mainCalories && <span>{mainCalories}</span>}
+                {mainCalories && mainProtein && <span>•</span>}
+                {mainProtein && <span>{Math.round(mainProtein)}g Protein</span>}
+              </div>
+
+              {/* Health Score rechts unten */}
+              {mainScore !== null && mainScoreLetter && mainScoreColor && (
+                <span
+                  className={`w-4.5 h-4.5 rounded-full ${mainScoreColor.pillBg} text-white font-black text-[10px] flex items-center justify-center leading-none shadow-md shrink-0 ml-auto select-none`}
+                  title={`Health Score: ${mainScoreLetter} (${mainScore}/100)`}
+                >
+                  {mainScoreLetter}
+                </span>
+              )}
             </div>
           </div>
         </article>
