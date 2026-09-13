@@ -1,4 +1,4 @@
-import { BookOpen, Star, UtensilsCrossed, Folder } from 'lucide-react';
+import { BookOpen, Star, UtensilsCrossed } from 'lucide-react';
 import type { Collection, SavedRecipe, RecipeCategory } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { getRecipeCategoryLabel } from '../../i18n';
@@ -99,7 +99,7 @@ export default function CollectionStoryHub({
           );
         })}
 
-        {/* 4. User Collections Clean Flat Tiles */}
+        {/* 4. User Collections Clean Flat Tiles (empty collections show as clean empty cards) */}
         {collections.map(col => {
           const jobs = jobsByCollection[col.id] ?? [];
           return (
@@ -107,7 +107,6 @@ export default function CollectionStoryHub({
               key={col.id}
               title={col.name}
               count={jobs.length}
-              icon={<Folder className="w-6 h-6 text-rose-500 dark:text-rose-400" />}
               imageUrl={getCollectionImage(jobs)}
               onClick={() => onOpenList({ kind: 'collection', id: col.id })}
             />

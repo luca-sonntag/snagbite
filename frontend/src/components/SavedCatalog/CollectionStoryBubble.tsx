@@ -1,4 +1,4 @@
-import { Plus, Folder } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
 
@@ -62,10 +62,12 @@ export default function CollectionStoryBubble({
             alt={title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
           />
-        ) : (
-          <div className="w-full h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-            {icon || <Folder className="w-6 h-6 text-gray-400 dark:text-gray-500" />}
+        ) : icon ? (
+          <div className="w-full h-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
+            {icon}
           </div>
+        ) : (
+          <div className="w-full h-full bg-gray-50/80 dark:bg-gray-800/50" />
         )}
       </div>
 
