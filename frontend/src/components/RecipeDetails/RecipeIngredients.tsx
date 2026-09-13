@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@heroui/react';
-import { Check, Users, ShoppingCart } from 'lucide-react';
+import { Check, Users, ShoppingCart, ChevronRight } from 'lucide-react';
 import ProBadge from '../ProBadge';
 import type { Ingredient, Recipe } from '../../types';
 import type { SortedIngredientGroup } from './types';
@@ -123,18 +123,22 @@ export default function RecipeIngredients({
 
         {/* 1.3 Single PRO hint for ingredient nutrition */}
         {!isPremium && hasAnyNutrition && (
-          <div className="px-4.5 py-3 sm:px-6 bg-gray-50/60 dark:bg-gray-800/30 flex items-center justify-between gap-3">
+          <div
+            onClick={() => {
+              hapticLight();
+              setIsPremiumModalOpen(true);
+            }}
+            className="px-4.5 py-3 sm:px-6 bg-gray-50/60 dark:bg-gray-800/30 flex items-center justify-between gap-3 cursor-pointer group hover:bg-gray-100/60 dark:hover:bg-gray-800/50 transition-colors"
+          >
             <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate">
               {t('recipe.ingredientNutritionProHint') || 'Detaillierte Nährwerte & Makros pro Zutat'}
             </span>
-            <ProBadge
-              variant="interactive"
-              hasChevron
-              onClick={() => {
-                hapticLight();
-                setIsPremiumModalOpen(true);
-              }}
-            />
+            <div className="flex items-center gap-2 shrink-0">
+              <ProBadge variant="chip" />
+              <div className="w-7 h-7 rounded-full shadow-xs flex items-center justify-center bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">
+                <ChevronRight className="w-4 h-4" />
+              </div>
+            </div>
           </div>
         )}
 

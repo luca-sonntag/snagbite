@@ -170,6 +170,7 @@ export default function MacroDistribution({
             <ProBadge
               variant="interactive"
               label={t('premium.hint.unlockMacros')}
+              onClick={onUnlockPremium}
             />
           </div>
         </div>

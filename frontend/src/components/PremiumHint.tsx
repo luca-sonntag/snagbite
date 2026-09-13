@@ -41,7 +41,7 @@ export default function PremiumHint({
       onClick={onClick}
       className={`w-full cursor-pointer flex items-center gap-3 p-4 rounded-3xl tint-premium border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:brightness-[0.98] dark:hover:brightness-110 active:scale-[0.99] transition-all text-left ${className}`}
     >
-      <span className="w-10 h-10 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 font-black text-xs tracking-wider">
+      <span className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 font-black text-xs tracking-wider shadow-xs">
         PRO
       </span>
       <span className="flex-1 min-w-0 text-xs font-semibold text-gray-900 dark:text-white leading-snug">

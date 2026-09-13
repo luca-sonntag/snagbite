@@ -59,7 +59,7 @@ export default function PremiumUpgradeCard({ onUpgradeClick, className = '' }: P
       )}
 
       <div className={`flex items-center gap-3 min-w-0 flex-1 ${showTrial ? 'pr-2' : ''}`}>
-        <div className="w-10 h-10 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 font-black text-xs tracking-wider">
+        <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 font-black text-xs tracking-wider shadow-xs">
           PRO
         </div>
         <div className="min-w-0 flex-1">

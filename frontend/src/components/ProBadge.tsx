@@ -42,7 +42,8 @@ export default function ProBadge({
   if (variant === 'chip') {
     return (
       <span
-        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-700 dark:text-amber-300 select-none ${className}`}
+        className={`inline-flex items-center justify-center px-1.5 py-0.5 rounded-md text-[9.5px] font-black uppercase tracking-wider bg-amber-500 text-white shadow-xs select-none leading-none ${className}`}
+        aria-label="PRO"
       >
         PRO
       </span>
@@ -52,11 +53,11 @@ export default function ProBadge({
   return (
     <span
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full tint-premium shadow-xs ring-1 ring-black/5 dark:ring-white/10 text-[11px] font-bold text-gray-900 dark:text-white hover:brightness-[0.98] dark:hover:brightness-110 transition-all select-none ${
+      className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-gray-800 shadow-md ring-1 ring-black/5 dark:ring-white/10 text-xs font-bold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700/80 transition-all select-none ${
         onClick ? 'cursor-pointer active:scale-95' : ''
       } ${className}`}
     >
-      <span className="px-1.5 py-0.5 rounded-md bg-amber-500 text-white text-[9px] font-black uppercase tracking-wider shadow-xs leading-none">
+      <span className="px-1.5 py-0.5 rounded-md bg-amber-500 text-white text-[9.5px] font-black uppercase tracking-wider shadow-xs leading-none">
         PRO
       </span>
       {label && <span className="truncate">{label}</span>}

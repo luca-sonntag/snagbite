@@ -119,14 +119,11 @@ export default function HealthScoreBadge({
       </div>
 
       {/* Tactile Chevron Target & Status indicator */}
-      <div className="shrink-0">
-        {!isPremium ? (
-          <ProBadge variant="interactive" hasChevron />
-        ) : (
-          <div className="w-7 h-7 rounded-full shadow-xs flex items-center justify-center bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">
-            <ChevronRight className="w-4 h-4" />
-          </div>
-        )}
+      <div className="flex items-center gap-2 shrink-0">
+        {!isPremium && <ProBadge variant="chip" />}
+        <div className="w-7 h-7 rounded-full shadow-xs flex items-center justify-center bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">
+          <ChevronRight className="w-4 h-4" />
+        </div>
       </div>
     </button>
   );
