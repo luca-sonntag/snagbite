@@ -9,26 +9,34 @@ export function useBodyScrollLock(isLocked: boolean) {
   useEffect(() => {
     if (!isLocked || typeof window === 'undefined') return;
 
-    const scrollY = window.scrollY;
-    // Lock both html and body
+    // Lock both html and body without setting position: fixed,
+    // which breaks viewport coordinates and containing block calculations for portaled overlays/popovers
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevBodyOverscroll = document.body.style.overscrollBehavior;
+
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.width = '100%';
+    document.body.style.overscrollBehavior = 'none';
 
     return () => {
-      document.documentElement.style.removeProperty('overflow');
-      document.body.style.removeProperty('overflow');
-      document.body.style.removeProperty('position');
-      document.body.style.removeProperty('top');
-      document.body.style.removeProperty('left');
-      document.body.style.removeProperty('right');
-      document.body.style.removeProperty('width');
+      if (prevHtmlOverflow) {
+        document.documentElement.style.overflow = prevHtmlOverflow;
+      } else {
+        document.documentElement.style.removeProperty('overflow');
+      }
 
-      window.scrollTo(0, scrollY);
+      if (prevBodyOverflow) {
+        document.body.style.overflow = prevBodyOverflow;
+      } else {
+        document.body.style.removeProperty('overflow');
+      }
+
+      if (prevBodyOverscroll) {
+        document.body.style.overscrollBehavior = prevBodyOverscroll;
+      } else {
+        document.body.style.removeProperty('overscroll-behavior');
+      }
     };
   }, [isLocked]);
 }
