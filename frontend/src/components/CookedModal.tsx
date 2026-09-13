@@ -76,7 +76,7 @@ export default function CookedModal({
       hapticNotification('error');
       const errObj =
         err && typeof err === 'object'
-          ? (err as { code?: string; params?: Record<string, unknown>; message?: string })
+          ? (err as { code?: string; params?: Record<string, string | number>; message?: string })
           : null;
       const code = errObj?.code;
       const params = errObj?.params;
