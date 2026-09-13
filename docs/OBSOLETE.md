@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-13: Umbenennung & Generalisierung von `RecommendationThemeSheet` zu `HeroThemeSheet`
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `RecommendationThemeSheet.tsx`: Komponente war semantisch ausschließlich an die "Empfehlungen"-Slide des Hero-Karussells gekoppelt und nutzte fest verdrahtete Amber-Theme-Farben und Untertitel.
+  - Fehlende Möglichkeit, aus dem Vital-Star-Hero-Slide heraus eine Gesamtauswahl aller gesunden Rezepte (Health Score $\ge 70$) als interaktives Drawer-Sheet zu öffnen.
+* **Ersetzt durch:**
+  - **Generalisiertes [`HeroThemeSheet.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/HeroThemeSheet.tsx):** Wiederverwendbares Bottom-Drawer-Sheet für thematische Auswahlen aus dem Hero-Karussell (Empfehlungen / Themen sowie Vital-Stars).
+  - **Dynamische Akzentuierung:** `badgeVariant`-Prop steuert Akzentfarben (z. B. `emerald` für Vital-Stars, `amber` für Empfehlungen) inklusive Footer-CTA-Styling.
+  - **Volle Katalog-Preset-Integration (`preset.kind === 'vital'`):** Direkter Sprung von der Hero-Drawer in den Vollkatalog mit automatischer Vorfilterung nach Health Score $\ge 70$ und Sortierung nach `healthScore`.
+* **Betroffene Dateien:** `frontend/src/components/SavedCatalog/HeroThemeSheet.tsx` (umbenannt von `RecommendationThemeSheet.tsx`), `frontend/src/components/SavedCatalog/CookbookHome.tsx`, `frontend/src/components/SavedCatalog/useCookbookMagazine.ts`, `frontend/src/components/SavedCatalog/catalogRoutes.ts`, `frontend/src/components/SavedCatalog/index.tsx`, `frontend/src/i18n.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-12: Entfernung der redundanten Vibe-Quick-Chips (`CookbookVibeChips.tsx`) & In-Place-Vibe-Logik
 
 * **Ersetzter Code / Anti-Pattern:**
