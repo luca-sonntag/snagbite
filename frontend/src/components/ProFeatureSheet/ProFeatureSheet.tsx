@@ -52,32 +52,34 @@ export default function ProFeatureSheet({
             <Drawer.Handle />
 
             {/* Header: Feature Icon, Title, Badge & Close */}
-            <Drawer.Header className="pt-2 pb-3 px-0 flex items-start justify-between gap-3 border-none">
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="w-10 h-10 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="text-base font-bold text-gray-900 dark:text-white leading-tight">
-                      {feature.title}
-                    </h2>
-                    <ProBadge variant="chip" />
+            <Drawer.Header className="pt-2 pb-3 px-0 border-none">
+              <div className="flex items-start justify-between gap-3 w-full">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
+                    <Icon className="w-5 h-5" />
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug truncate">
-                    {feature.tagline}
-                  </p>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h2 className="text-base font-bold text-gray-900 dark:text-white leading-tight">
+                        {feature.title}
+                      </h2>
+                      <ProBadge variant="chip" />
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug truncate">
+                      {feature.tagline}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <button
-                type="button"
-                onClick={handleClose}
-                className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-90 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-all border-none cursor-pointer shrink-0"
-                aria-label={isDe ? 'Schließen' : 'Close'}
-              >
-                <X className="w-4 h-4" />
-              </button>
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-90 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-all border-none cursor-pointer shrink-0"
+                  aria-label={isDe ? 'Schließen' : 'Close'}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </Drawer.Header>
 
             {/* Body: Screenshot & Value Bullets */}
