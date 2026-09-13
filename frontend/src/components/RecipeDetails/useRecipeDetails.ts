@@ -13,6 +13,7 @@ import { useCookHistory } from '../../hooks/useCookHistory';
 import { useAuth } from '../../context/AuthContext';
 import { useScrollSpy } from './useScrollSpy';
 import { copyRecipeToClipboard } from './copyRecipeToClipboard';
+import type { ProFeatureId } from '../ProFeatureSheet';
 
 interface UseRecipeDetailsOptions {
   recipe: Recipe;
@@ -35,6 +36,7 @@ export function useRecipeDetails({ recipe, onAddIngredients, onNavigateToShoppin
   // Local UI states
   const [isCopied, setIsCopied] = useState(false);
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  const [activeProFeature, setActiveProFeature] = useState<ProFeatureId | null>(null);
   const [isAdded, setIsAdded] = useState(false);
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [isCopilotForceNewRemix, setIsCopilotForceNewRemix] = useState(false);
@@ -52,7 +54,7 @@ export function useRecipeDetails({ recipe, onAddIngredients, onNavigateToShoppin
       setCopilotInitialPrompt(initialPrompt);
       setIsCopilotOpen(true);
     } else {
-      setIsPremiumModalOpen(true);
+      setActiveProFeature('recipe_copilot');
     }
   }, [isPremium]);
 
@@ -235,7 +237,11 @@ export function useRecipeDetails({ recipe, onAddIngredients, onNavigateToShoppin
 
   // --- Cooking mode ---
   const handleStartCooking = useCallback(() => {
-    isPremium ? setIsCookingMode(true) : setIsPremiumModalOpen(true);
+    if (isPremium) {
+      setIsCookingMode(true);
+    } else {
+      setActiveProFeature('cooking_mode');
+    }
   }, [isPremium]);
 
   // --- Clipboard copy ---
@@ -251,6 +257,7 @@ export function useRecipeDetails({ recipe, onAddIngredients, onNavigateToShoppin
 
   return {
     isPremium, isPremiumModalOpen, setIsPremiumModalOpen,
+    activeProFeature, setActiveProFeature,
     servings, setServings, scaleFactor, formatAmount,
     checkedSteps, toggleStep, handleToggleStep,
     activeStepNum, totalStepsCount, completedStepsCount, progressPercent,

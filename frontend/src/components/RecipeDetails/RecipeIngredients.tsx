@@ -12,6 +12,7 @@ import RecipeServingsStepper from './RecipeServingsStepper';
 import IngredientItemRow from './IngredientItemRow';
 import AlternativeIngredientsList from './AlternativeIngredientsList';
 import PremiumModal from '../PremiumModal';
+import ProFeatureSheet from '../ProFeatureSheet';
 
 interface RecipeIngredientsProps {
   recipe: Recipe;
@@ -41,6 +42,7 @@ export default function RecipeIngredients({
   const { t, translateCategory } = useI18n();
   const [selectedNutrition, setSelectedNutrition] = useState<{ ingredient: Ingredient; category: string } | null>(null);
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  const [isProFeatureSheetOpen, setIsProFeatureSheetOpen] = useState(false);
   const hasAnyNutrition = sortedIngredients.some(({ group }) =>
     group.items.some((ing) => ing.calories !== undefined && ing.calories !== null)
   );
@@ -112,7 +114,7 @@ export default function RecipeIngredients({
                       scaleFactor={scaleFactor}
                       formatAmount={formatAmount}
                       onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
-                      onOpenPremium={() => setIsPremiumModalOpen(true)}
+                      onOpenPremium={() => setIsProFeatureSheetOpen(true)}
                     />
                   ))}
                 </ul>
@@ -126,7 +128,7 @@ export default function RecipeIngredients({
           <div
             onClick={() => {
               hapticLight();
-              setIsPremiumModalOpen(true);
+              setIsProFeatureSheetOpen(true);
             }}
             className="px-4.5 py-3 sm:px-6 bg-gray-50/60 dark:bg-gray-800/30 flex items-center justify-between gap-3 cursor-pointer group hover:bg-gray-100/60 dark:hover:bg-gray-800/50 transition-colors"
           >
@@ -185,6 +187,16 @@ export default function RecipeIngredients({
         category={selectedNutrition?.category}
         scaleFactor={scaleFactor}
         servings={servings}
+      />
+
+      <ProFeatureSheet
+        isOpen={isProFeatureSheetOpen}
+        featureId="ingredient_nutrition"
+        onClose={() => setIsProFeatureSheetOpen(false)}
+        onUpgrade={() => {
+          setIsProFeatureSheetOpen(false);
+          setIsPremiumModalOpen(true);
+        }}
       />
 
       <PremiumModal

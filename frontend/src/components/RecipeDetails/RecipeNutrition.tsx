@@ -7,6 +7,7 @@ import { Flame } from 'lucide-react';
 import MacroDistribution from './MacroDistribution';
 import HealthScoreBadge from './HealthScoreBadge';
 import HealthScoreSheet from './HealthScoreSheet';
+import ProFeatureSheet, { type ProFeatureId } from '../ProFeatureSheet';
 import type { NutritionalValues, HealthScoreBreakdown } from '../../types';
 
 type NutritionValue = string | number | null | undefined;
@@ -45,6 +46,7 @@ export default function RecipeNutrition({
   const { isPremium } = useAuth();
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isHealthScoreSheetOpen, setIsHealthScoreSheetOpen] = useState(false);
+  const [activeProFeature, setActiveProFeature] = useState<ProFeatureId | null>(null);
 
   const parseNum = (val: NutritionValue): number => {
     if (val === undefined || val === null || val === '') return 0;
@@ -142,7 +144,7 @@ export default function RecipeNutrition({
 
                   {/* Protein */}
                   <div
-                    onClick={() => !isPremium && setIsPremiumModalOpen(true)}
+                    onClick={() => !isPremium && setActiveProFeature('macros')}
                     className={!isPremium ? 'filter blur-[2.5px] select-none opacity-60 cursor-pointer' : ''}
                   >
                     <div className="flex items-center gap-1.5">
@@ -158,7 +160,7 @@ export default function RecipeNutrition({
 
                   {/* Carbs */}
                   <div
-                    onClick={() => !isPremium && setIsPremiumModalOpen(true)}
+                    onClick={() => !isPremium && setActiveProFeature('macros')}
                     className={!isPremium ? 'filter blur-[2.5px] select-none opacity-60 cursor-pointer' : ''}
                   >
                     <div className="flex items-center gap-1.5">
@@ -174,7 +176,7 @@ export default function RecipeNutrition({
 
                   {/* Fat */}
                   <div
-                    onClick={() => !isPremium && setIsPremiumModalOpen(true)}
+                    onClick={() => !isPremium && setActiveProFeature('macros')}
                     className={!isPremium ? 'filter blur-[2.5px] select-none opacity-60 cursor-pointer' : ''}
                   >
                     <div className="flex items-center gap-1.5">
@@ -210,7 +212,7 @@ export default function RecipeNutrition({
               fatPct={fatPct}
               totalMacroKcal={totalMacroKcal}
               isPremium={isPremium}
-              onUnlockPremium={() => setIsPremiumModalOpen(true)}
+              onUnlockPremium={() => setActiveProFeature('macros')}
             />
           )}
 
@@ -222,7 +224,7 @@ export default function RecipeNutrition({
                 breakdown={healthScoreBreakdown}
                 onClick={() => {
                   if (!isPremium) {
-                    setIsPremiumModalOpen(true);
+                    setActiveProFeature('healthy_score');
                   } else {
                     setIsHealthScoreSheetOpen(true);
                   }
@@ -234,6 +236,16 @@ export default function RecipeNutrition({
           )}
         </div>
       </div>
+
+      <ProFeatureSheet
+        isOpen={!!activeProFeature}
+        featureId={activeProFeature}
+        onClose={() => setActiveProFeature(null)}
+        onUpgrade={() => {
+          setActiveProFeature(null);
+          setIsPremiumModalOpen(true);
+        }}
+      />
 
       <PremiumModal
         isOpen={isPremiumModalOpen}

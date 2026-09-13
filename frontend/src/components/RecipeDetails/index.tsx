@@ -13,6 +13,7 @@ import CookedModal from '../CookedModal';
 import CookHistoryTimeline from '../CookHistoryTimeline';
 import RecipeCopilot from './RecipeCopilot';
 import PremiumModal from '../PremiumModal';
+import ProFeatureSheet from '../ProFeatureSheet';
 import ShoppingConfirmSheet from './ShoppingConfirmSheet';
 import AddToMealPlanSheet from '../MealPlanner/AddToMealPlanSheet';
 import { useI18n } from '../../context/I18nContext';
@@ -42,6 +43,8 @@ export default function RecipeDetails({
     isPremium,
     isPremiumModalOpen,
     setIsPremiumModalOpen,
+    activeProFeature,
+    setActiveProFeature,
     servings,
     setServings,
     scaleFactor,
@@ -226,6 +229,17 @@ export default function RecipeDetails({
           initialPrompt={copilotInitialPrompt}
         />
       )}
+
+      {/* Pro Feature Spotlight Bottom Sheet */}
+      <ProFeatureSheet
+        isOpen={!!activeProFeature}
+        featureId={activeProFeature}
+        onClose={() => setActiveProFeature(null)}
+        onUpgrade={() => {
+          setActiveProFeature(null);
+          setIsPremiumModalOpen(true);
+        }}
+      />
 
       {/* Premium Upgrade Modal */}
       <PremiumModal
