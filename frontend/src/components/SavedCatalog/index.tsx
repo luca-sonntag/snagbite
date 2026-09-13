@@ -429,11 +429,10 @@ export default function SavedCatalog({
     }
   }, [isAllSelected, selectableJobs, setSelectedIds]);
 
-  const maxSavedRecipes = limitStatus?.maxSavedRecipes ?? 5;
-  const isCookbookFull = maxSavedRecipes >= 0 && completedJobs.length >= maxSavedRecipes;
-  const isCookbookAlmostFull = maxSavedRecipes >= 0 && completedJobs.length >= maxSavedRecipes - 1;
-
-  const premiumBanner = !isPremium && isCookbookAlmostFull && (
+  const maxSavedRecipes = limitStatus?.maxSavedRecipes ?? -1;
+  const isCookbookFull = !isPremium && !!limitStatus?.cookbookFull;
+  const isCookbookAlmostFull = !isPremium && limitStatus && !isCookbookFull && maxSavedRecipes > 0 && completedJobs.length >= maxSavedRecipes - 1;
+  const premiumBanner = !isPremium && limitStatus && (isCookbookFull || isCookbookAlmostFull) && (
     <PremiumHint
       variant="banner"
       onClick={() => setIsPremiumModalOpen(true)}

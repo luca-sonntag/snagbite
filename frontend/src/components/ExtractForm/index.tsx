@@ -180,7 +180,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
                 onClick={() => setIsPremiumModalOpen(true)}
                 label={t('premium.hint.catalogFull', {
                   count: limitStatus?.savedRecipes ?? 0,
-                  limit: limitStatus?.maxSavedRecipes ?? 5,
+                  limit: limitStatus?.maxSavedRecipes ?? 100,
                 })}
               />
             </div>

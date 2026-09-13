@@ -272,10 +272,10 @@ export default function App() {
   }, [authLoading, user, replace]);
 
   useEffect(() => {
-    if (!authLoading && user && activeView === 'extract') {
+    if (!authLoading && user) {
       fetchLimitStatus();
     }
-  }, [activeView, user, authLoading, fetchLimitStatus]);
+  }, [authLoading, user, activeView, fetchLimitStatus]);
 
   useEffect(() => {
     hideSplashScreen();
