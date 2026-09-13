@@ -1,5 +1,7 @@
 # Feature Ideas
 
+> 🏁 **Google Play Store Go-Live:** Alle verbindlichen Compliance-, AdMob-, Paywall- und Release-Schritte vor der Veröffentlichung sind in der [**Google Play Store Go-Live Checklist**](go-live-checklist.md) dokumentiert.
+
 ## Features
 
 - Rezepte manuell ändern und speichern
@@ -57,6 +59,9 @@
   - Einmaliges, warmherziges Info-Overlay/Bottom-Sheet für Free-Nutzer vor der allerersten Werbeeinblendung (z. B. vor dem ersten Interstitial oder Extraktions-Ad).
   - Tonalität: Ehrlich, nahbar und transparent auf Augenhöhe – erklären, dass KI-Videoanalysen, Cloud-Server und Datenhaltung laufende Kosten verursachen und die App dank dezenter Werbung für alle kostenlos angeboten werden kann.
   - Nutzerführung: Schafft Verständnis und Wohlwollen, nimmt Frustration und bietet eine sympathische Wahlmöglichkeit (z. B. „Alles klar, verstanden!“ als primärer Button und ein dezenter Hinweis „Lieber werbefrei? Zu Premium“).
+
+- **Google Play Store Go-Live & Release-Vorbereitung:**
+  - Verbindliche Abarbeitung aller Store-Voraussetzungen (Restore Purchases Button, AdMob `app-ads.txt`, Data Safety, Reviewer-Account, Closed Testing) gemäß der [**Google Play Store Go-Live Checklist**](go-live-checklist.md).
 
 ## Findings (Behoben ✅)
 
