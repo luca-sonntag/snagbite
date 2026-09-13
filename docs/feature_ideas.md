@@ -12,10 +12,6 @@
 
 - rezept tinder mit öffentlichen rezepten
 
-- Response bei Rezept kochen ohne Foto fehlt
-
-- update von premium features und update von paywall
-
 - einführung von animation illustrationen über iconscout (extraktion, empty states, ...)
 
 - **Rezept-Schwierigkeitsgrade (Difficulty Levels):**
@@ -45,20 +41,11 @@
   - Onboarding- und Einführungserlebnis für neue Nutzer überarbeiten, modernisieren und aktualisieren.
   - Empty States (z. B. leeres Kochbuch, Wochenplaner, Einkaufsliste, Vorrat) auffrischen und Nutzer intuitiv zur ersten Aktion führen.
 
-- **Empty-State-Mockups vereinfachen:**
-  - Mockups und visuelle Darstellungen in den verschiedenen Empty States vereinfachen und entrümpeln.
-  - Fokus auf eine klare, reduzierte Bildsprache ohne überladene UI-Elemente.
-
 - **Vorrat-Feature: Workflow, UI & UX komplett überdenken:**
   - Den gesamten Ablauf rund um den Vorrat (Pantry) grundlegend hinterfragen und neu konzipieren: Nutzerführung, Pflegeaufwand und echter Alltagsmehrwert.
   - Workflow & Interaktionsdesign überarbeiten: Extrem schnelles Hinzufügen/Verwalten von Zutaten, nahtlose Synchronisation mit Einkaufsliste und automatisches Abbuchen beim Kochen.
   - UI & UX modernisieren: Aufgeräumte Bestandsübersicht, klare Kategorisierung und visuell ansprechendes Layout im Einklang mit dem Clean-Flat-Designsystem.
   - Smarteres Rezept-Matching: Präzise Vorschläge („Was kann ich kochen?“), Hervorhebung fast vollständiger Rezepte („Nur noch 1 Zutat fehlt“) und Rückgriff auf öffentliche Rezepte bei geringem Vorrat.
-
-- **Transparente & sympathische Overlay-Message vor erster Werbung (Free-Tier):**
-  - Einmaliges, warmherziges Info-Overlay/Bottom-Sheet für Free-Nutzer vor der allerersten Werbeeinblendung (z. B. vor dem ersten Interstitial oder Extraktions-Ad).
-  - Tonalität: Ehrlich, nahbar und transparent auf Augenhöhe – erklären, dass KI-Videoanalysen, Cloud-Server und Datenhaltung laufende Kosten verursachen und die App dank dezenter Werbung für alle kostenlos angeboten werden kann.
-  - Nutzerführung: Schafft Verständnis und Wohlwollen, nimmt Frustration und bietet eine sympathische Wahlmöglichkeit (z. B. „Alles klar, verstanden!“ als primärer Button und ein dezenter Hinweis „Lieber werbefrei? Zu Premium“).
 
 - **Google Play Store Go-Live & Release-Vorbereitung:**
   - Verbindliche Abarbeitung aller Store-Voraussetzungen (Restore Purchases Button, AdMob `app-ads.txt`, Data Safety, Reviewer-Account, Closed Testing) gemäß der [**Google Play Store Go-Live Checklist**](go-live-checklist.md).
@@ -70,6 +57,11 @@
   - **Smart Resume beim nächsten App-Start:** Sobald neues Kontingent vorhanden ist oder die App neu geöffnet wird, weist ein dezentes Overlay/Bottom-Sheet darauf hin: *„Du hast 1 Rezept in der Warteliste. Jetzt analysieren?“* (Nutzer behält volle Kontrolle, kein automatischer ungewollter Credit-Verbrauch).
 
 ## Findings (Behoben ✅)
+
+- [x] Paywall-Compliance & Feature-Update: Restore-Purchases-Button (`Purchases.restorePurchases()`), Verlinkung von AGB und Datenschutzerklärung, Bereinigung von UTF-8 Encoding-Glitches und saubere Klarstellung der echten Premium-Vorteile (`frontend/src/components/PremiumModal/`)
+- [x] Response bei Rezept kochen ohne Foto: Sofortiges Toast-Feedback bei 0 XP / Duplikat und Ladezustand (`CookedModal.tsx`, `GamificationContext.tsx`)
+- [x] Transparente & sympathische Overlay-Message vor erster Werbung (Free-Tier): Warmherziges Pre-Ad Transparenz-Sheet (`PreAdTransparencySheet.tsx`) vor der allerersten Werbeeinblendung via `useAppAds.ts` & `AppOverlays.tsx`
+- [x] Empty-State-Mockups vereinfachen: Überkomplizierte Mini-Mockups in `ShoppingEmptyState.tsx` entfernt und durch Clean Flat Design mit klarem CTA ersetzt
 
 - [x] Healthy Score für Rezepte berechnen & visualisieren (4-Säulen-Modell, konsolidierte `nutritional_values` JSONB-Spalte, `HealthScoreBadge` & `HealthScoreSheet`)
 - [x] Mozzarella bekommt korrekten baseName `mozzarella` und mappt auf Mozzarella-Icon (behoben durch 2nd-Stage Recipe Auditor & Specificity Invariance)
