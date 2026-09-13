@@ -185,6 +185,13 @@ Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird
 * **Google UMP SDK:** In `initAds()` wird vor dem ersten Ad-Request `AdMob.requestConsentInfo()` und bei Bedarf `AdMob.showConsentForm()` ausgeführt. Bei Ablehnung oder fehlendem Consent wird `npa: true` (Non-Personalized Ads) angefordert.
 * **Patched Plugin:** `@capacitor-community/admob` v8.0.0 wurde via `patch-package` angepasst, um echte Java-seitige `hideBanner()` / `resumeBanner()` Methoden auf dem Android UI-Thread ohne Deadlocks und Neuladen bereitzustellen.
 
+### 🌟 Dynamisches Feature-Spotlight (`ProFeatureSheet/`)
+* **Kontextuelles Feature-Gating:** Statt Free-Nutzer beim Antippen von gesperrten Elementen direkt mit einer generischen Paywall zu überfordern, öffnet die App ein gezieltes Feature-Spotlight-Sheet (`ProFeatureSheet.tsx`).
+* **Dynamische Inhalte (`proFeaturesData.ts`):** Lädt Überschriften, Taglines und Nutzen-Bullet-Points abhängig vom angetippten Feature (`macros`, `healthy_score`, `ingredient_nutrition`, `cooking_mode`, `recipe_copilot`, `unlimited_extractions`, `collections_labels`) vollständig auf Deutsch und Englisch.
+* **Screenshot-Asset-Pipeline (`frontend/public/pro-features/`):** Erkennt automatisch PNG-Screenshots (`<feature-id>.png`).
+* **Graceful Fallback (`ProFeatureScreenshot.tsx`):** Sollte eine Screenshot-Datei noch nicht im Ordner liegen, fängt die Komponente Bildfehler geräuschlos ab und rendert eine gestaltete Platzhalterkarte im Clean Flat Style.
+* **Nahtloser Upgrade-Flow:** Der primäre CTA (*„Snagbite PRO freischalten"*) schließt das Spotlight-Sheet und öffnet übergangslos das `PremiumModal`.
+
 ---
 
 ## 5. 🥫 Vorratslager & Smarte Einkaufsliste (`Pantry/`, `ShoppingList/` & `PantryContext.tsx`)
