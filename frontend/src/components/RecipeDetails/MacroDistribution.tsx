@@ -1,4 +1,4 @@
-import { Crown } from 'lucide-react';
+import ProBadge from '../ProBadge';
 import { useI18n } from '../../context/I18nContext';
 
 interface MacroDistributionProps {
@@ -165,14 +165,12 @@ export default function MacroDistribution({
             />
           </div>
 
-          {/* Centered Unlock CTA badge with tint-premium gradient & amber crown */}
+          {/* Centered Unlock CTA badge with ProBadge */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-gray-900 dark:text-white tint-premium shadow-[0_2px_10px_rgba(0,0,0,0.08)] ring-1 ring-black/5 dark:ring-white/10 group-hover:brightness-[0.98] dark:group-hover:brightness-110 px-3.5 py-1.5 rounded-full transition-all">
-              <div className="w-4 h-4 rounded-full bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0">
-                <Crown className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
-              </div>
-              <span>{t('premium.hint.unlockMacros')}</span>
-            </span>
+            <ProBadge
+              variant="interactive"
+              label={t('premium.hint.unlockMacros')}
+            />
           </div>
         </div>
       )}

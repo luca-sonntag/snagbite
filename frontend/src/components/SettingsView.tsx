@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Select, ListBox, Popover } from '@heroui/react';
-import { LogOut, Globe, Moon, Sun, Thermometer, Scale, Info, UserMinus, Sparkles, Crown, ChevronRight, HelpCircle, MessageSquare, Shield, ScrollText, Building2, ExternalLink } from 'lucide-react';
+import { LogOut, Globe, Moon, Sun, Thermometer, Scale, Info, UserMinus, Sparkles, ChevronRight, HelpCircle, MessageSquare, Shield, ScrollText, Building2, ExternalLink } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
 import { hapticLight, hapticMedium, hapticHeavy } from '../utils/haptics';
@@ -8,6 +8,7 @@ import { hapticLight, hapticMedium, hapticHeavy } from '../utils/haptics';
 import { useTheme } from '../hooks/useTheme';
 import { useDialog } from '../context/DialogContext';
 import PremiumModal from './PremiumModal';
+import ProBadge from './ProBadge';
 import { FeedbackDrawer } from './FeedbackDrawer';
 import { APP_VERSION_LABEL } from '../version';
 import { getActiveOtaVersion } from '../utils/otaUpdater';
@@ -146,10 +147,7 @@ export default function SettingsView() {
                   {t('app.settings.alphaActive') || 'Alpha Access'}
                 </span>
               ) : isRealPremium ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 uppercase tracking-wider border-none">
-                  <Crown className="w-3 h-3 fill-emerald-600 dark:fill-emerald-400 text-emerald-600 dark:text-emerald-400" />
-                  PRO
-                </span>
+                <ProBadge variant="chip" />
               ) : (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-400 uppercase tracking-wider border-none">
                   Free Member
@@ -168,7 +166,7 @@ export default function SettingsView() {
           </div>
         ) : isRealPremium ? (
           <div className="pt-3.5 border-t border-black/5 dark:border-white/5 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
-            <Crown className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
             <span>
               {t('app.settings.premiumActiveDesc') || (language === 'de' ? 'Du hast unbegrenzten Zugriff auf alle PRO-Funktionen.' : 'You have unlimited access to all PRO features.')}
             </span>

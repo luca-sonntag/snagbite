@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@heroui/react';
-import { Check, Users, ShoppingCart, Crown, ChevronRight } from 'lucide-react';
+import { Check, Users, ShoppingCart } from 'lucide-react';
+import ProBadge from '../ProBadge';
 import type { Ingredient, Recipe } from '../../types';
 import type { SortedIngredientGroup } from './types';
 import { useI18n } from '../../context/I18nContext';
@@ -126,20 +127,14 @@ export default function RecipeIngredients({
             <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate">
               {t('recipe.ingredientNutritionProHint') || 'Detaillierte Nährwerte & Makros pro Zutat'}
             </span>
-            <button
-              type="button"
+            <ProBadge
+              variant="interactive"
+              hasChevron
               onClick={() => {
                 hapticLight();
                 setIsPremiumModalOpen(true);
               }}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full tint-premium shadow-xs ring-1 ring-black/5 dark:ring-white/10 text-[11px] font-bold text-gray-900 dark:text-white shrink-0 group-hover:brightness-[0.98] dark:group-hover:brightness-110 active:scale-95 transition-all cursor-pointer border-none"
-            >
-              <div className="w-4 h-4 rounded-full bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0">
-                <Crown className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
-              </div>
-              <span>{t('recipe.healthScoreProBadge') || 'PRO'}</span>
-              <ChevronRight className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 -mr-0.5" />
-            </button>
+            />
           </div>
         )}
 

@@ -4,7 +4,7 @@ import type { Recipe } from '../../types';
 import RecipeInstructionText from '../RecipeInstructionText';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
-import PremiumCrownBadge from '../PremiumCrownBadge';
+import ProBadge from '../ProBadge';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
 
 interface RecipeInstructionsProps {
@@ -89,7 +89,7 @@ export default function RecipeInstructions({
           >
             <Play className="w-4.5 h-4.5 fill-white ml-0.5" />
             <span>{t('recipe.startCooking')}</span>
-            {!isPremium && <PremiumCrownBadge />}
+            {!isPremium && <ProBadge variant="corner" />}
           </Button>
         </div>
 

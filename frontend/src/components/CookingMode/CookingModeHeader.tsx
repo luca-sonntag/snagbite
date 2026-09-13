@@ -4,7 +4,7 @@ import { X, Timer, MessageCircle } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useTimerContext } from '../../context/TimerContext';
 import { hapticLight } from '../../utils/haptics';
-import PremiumCrownBadge from '../PremiumCrownBadge';
+import ProBadge from '../ProBadge';
 
 interface CookingModeHeaderProps {
   currentStepIndex: number;
@@ -70,7 +70,7 @@ export const CookingModeHeader: React.FC<CookingModeHeaderProps> = ({
           >
             <Timer className="w-5 h-5" />
           </Button>
-          {!isPremium && <PremiumCrownBadge />}
+          {!isPremium && <ProBadge variant="corner" />}
         </div>
 
         <div className="relative">
@@ -86,7 +86,7 @@ export const CookingModeHeader: React.FC<CookingModeHeaderProps> = ({
           >
             <MessageCircle className="w-5 h-5" />
           </Button>
-          {!isPremium && <PremiumCrownBadge />}
+          {!isPremium && <ProBadge variant="corner" />}
         </div>
       </div>
     </header>

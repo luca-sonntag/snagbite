@@ -1,6 +1,7 @@
 import React from 'react';
 import { Drawer, Button } from '@heroui/react';
-import { HeartHandshake, Sparkles, ShieldCheck, CheckCircle2, Crown, X } from 'lucide-react';
+import { HeartHandshake, Sparkles, ShieldCheck, CheckCircle2, X } from 'lucide-react';
+import ProBadge from '../ProBadge';
 import { useI18n } from '../../context/I18nContext';
 import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
@@ -139,9 +140,9 @@ export const PreAdTransparencySheet: React.FC<PreAdTransparencySheetProps> = ({
               <button
                 type="button"
                 onClick={handleOpenPremium}
-                className="w-full h-11 min-h-[44px] rounded-2xl font-semibold bg-transparent hover:bg-black/5 dark:hover:bg-white/5 text-gray-600 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400 border-none active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs select-none"
+                className="w-full h-11 min-h-[44px] rounded-2xl font-semibold bg-transparent hover:bg-black/5 dark:hover:bg-white/5 text-gray-600 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400 border-none active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 text-xs select-none"
               >
-                <Crown className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                <ProBadge variant="chip" />
                 <span>{t('preAdNotice.goPremium')}</span>
               </button>
             </Drawer.Footer>

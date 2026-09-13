@@ -1,4 +1,4 @@
-import { Sparkles, Check, Crown } from 'lucide-react';
+import { Sparkles, Check } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { hapticLight } from '../../utils/haptics';
 
@@ -74,7 +74,6 @@ export default function HealthScorePaywallPreview({
         }}
         className="w-full h-12 rounded-2xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-bold text-sm flex items-center justify-center gap-2 border-none shadow-md shadow-emerald-600/20 cursor-pointer transition-all"
       >
-        <Crown className="w-4 h-4 fill-white" />
         <span>{t('recipe.healthScorePaywallCta') || (isEn ? 'Unlock Snagbite PRO' : 'Snagbite PRO freischalten')}</span>
       </button>
     </div>

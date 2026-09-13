@@ -1,4 +1,4 @@
-import { Crown } from 'lucide-react';
+import ProBadge from './ProBadge';
 
 interface PremiumHintProps {
   onClick: () => void;
@@ -12,10 +12,8 @@ interface PremiumHintProps {
 }
 
 /**
- * Unified premium upsell hint. Every touchpoint (catalog banner, extract-form
- * link, …) shares one "gold crown on emerald" language so they read as the same
- * system as the PremiumModal and the Settings upgrade card. This is the single
- * source of truth for that style — do not restyle the hints at the call sites.
+ * Unified PRO upsell hint. Every touchpoint (catalog banner, extract-form
+ * link, …) shares one modern typographic PRO chip language.
  */
 export default function PremiumHint({
   onClick,
@@ -29,9 +27,9 @@ export default function PremiumHint({
       <button
         type="button"
         onClick={onClick}
-        className={`inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:text-amber-500 dark:hover:text-amber-300 transition-colors ${className}`}
+        className={`inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:text-amber-500 dark:hover:text-amber-300 transition-colors border-none bg-transparent cursor-pointer ${className}`}
       >
-        <Crown className="w-3 h-3 fill-amber-600 dark:fill-amber-400 text-amber-600 dark:text-amber-400" />
+        <ProBadge variant="chip" />
         <span>{label}</span>
       </button>
     );
@@ -43,8 +41,8 @@ export default function PremiumHint({
       onClick={onClick}
       className={`w-full cursor-pointer flex items-center gap-3 p-4 rounded-3xl tint-premium border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:brightness-[0.98] dark:hover:brightness-110 active:scale-[0.99] transition-all text-left ${className}`}
     >
-      <span className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-        <Crown className="w-5 h-5 fill-amber-500 text-amber-500" />
+      <span className="w-10 h-10 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 font-black text-xs tracking-wider">
+        PRO
       </span>
       <span className="flex-1 min-w-0 text-xs font-semibold text-gray-900 dark:text-white leading-snug">
         {label}

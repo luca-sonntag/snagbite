@@ -2,7 +2,7 @@ import { ShoppingCart, ShoppingBag, Play, MessageCircle, Calendar } from 'lucide
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import FloatingActionBar from '../FloatingActionBar';
-import PremiumCrownBadge from '../PremiumCrownBadge';
+import ProBadge from '../ProBadge';
 import CookedButton from '../CookedButton';
 import { useHideOnScroll } from '../../hooks/useHideOnScroll';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
@@ -66,7 +66,7 @@ export default function RecipeActionDock({
           <span className={itemLabel}>
             {t('recipe.dockCook')}
           </span>
-          {!isPremium && <PremiumCrownBadge />}
+          {!isPremium && <ProBadge variant="corner" />}
         </button>
       )}
 
@@ -103,7 +103,7 @@ export default function RecipeActionDock({
           <span className={itemLabel}>
             {t('recipe.dockChat')}
           </span>
-          {!isPremium && <PremiumCrownBadge />}
+          {!isPremium && <ProBadge variant="corner" />}
         </button>
       )}
 

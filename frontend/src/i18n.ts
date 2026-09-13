@@ -1750,7 +1750,7 @@ export const uiTranslations = {
         catalogAlmostFull: 'Kochbuch fast voll ({count}/{limit}). Mit Snagbite PRO speicherst du unbegrenzt.',
         extractionLimitReached: 'Tageslimit ({used}/{limit}) erreicht – Schau ein kurzes Video zum Erstellen oder upgrade auf Snagbite PRO.',
         unlockNutrition: 'Nährwerte freischalten',
-        unlockMacros: 'PRO • Makros freischalten',
+        unlockMacros: 'Makros freischalten',
         upgrade: 'Upgrade'
       }
     },
@@ -3172,7 +3172,7 @@ export const uiTranslations = {
         catalogAlmostFull: 'Cookbook almost full ({count}/{limit}). Save unlimited recipes with Snagbite PRO.',
         extractionLimitReached: 'Daily limit reached ({used}/{limit}) – Watch a short video to create or upgrade to Snagbite PRO.',
         unlockNutrition: 'Unlock nutrition',
-        unlockMacros: 'Unlock macros with PRO',
+        unlockMacros: 'Unlock macros',
         upgrade: 'Upgrade'
       }
     },
