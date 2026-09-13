@@ -113,7 +113,7 @@ export default function RecipeImageGallery({
       )}
 
       {/* Soft Ambient Scrim for high contrast (Hero style from bottom) */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 via-50% to-transparent pointer-events-none z-10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 via-40% to-transparent pointer-events-none z-10" />
 
       {/* Bottom Content: Meta row, Title & Creator handle */}
       <div className="absolute bottom-9 inset-x-4 sm:bottom-10 sm:inset-x-5 z-20 flex flex-col gap-1 text-white pointer-events-none pb-1">

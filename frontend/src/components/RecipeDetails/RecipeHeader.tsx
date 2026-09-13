@@ -72,7 +72,7 @@ export default function RecipeHeader({
       />
 
       {/* Recipe details body below cover (Sheet-Overlap with inverted curve on canvas) */}
-      <div className="relative -mt-6 -mx-4 rounded-t-3xl sm:rounded-t-[2rem] bg-[#f8fafc] dark:bg-gray-950 px-4 pt-5 pb-2 shadow-[0_-14px_20px_-8px_rgba(0,0,0,0.12)] dark:shadow-[0_-14px_20px_-8px_rgba(0,0,0,0.4)] flex flex-col gap-3 z-20">
+      <div className="relative -mt-6 -mx-4 rounded-t-3xl sm:rounded-t-[2rem] bg-[#f8fafc] dark:bg-gray-950 px-4 pt-5 pb-2 shadow-[0_-4px_12px_-3px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_12px_-3px_rgba(0,0,0,0.25)] flex flex-col gap-3 z-20">
 
         {/* Editorial Quick-Facts Lead-in: Category · Total Time · Servings · Health Score · Flags */}
         {(recipe.category || totalTimeLabel || (recipe.servings && recipe.servings > 0) || (healthColor && healthLetter) || (flags && flags.length > 0) || (history && history.count > 0)) && (
