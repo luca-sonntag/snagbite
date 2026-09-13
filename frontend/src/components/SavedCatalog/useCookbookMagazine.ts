@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, type MouseEvent } from 'react';
 import type { SavedRecipe, Recipe } from '../../types';
 import { getTotalTime } from '../../hooks/useSavedCatalog';
 import { useI18n } from '../../context/I18nContext';
@@ -11,6 +11,7 @@ interface UseCookbookMagazineOptions {
   communityRecipes?: Recipe[];
   savedRecipeIds?: Set<string>;
   formatTotalTime: (recipe: any) => string | null;
+  onOpenTheme?: (e: MouseEvent) => void;
 }
 
 /**
@@ -24,6 +25,7 @@ export function useCookbookMagazine({
   communityRecipes = [],
   savedRecipeIds,
   formatTotalTime,
+  onOpenTheme,
 }: UseCookbookMagazineOptions) {
   const { t } = useI18n();
 
@@ -45,8 +47,9 @@ export function useCookbookMagazine({
     // Slide 1: Primary Spotlight (Own recipe, or Community recipe if 0 own recipes)
     if (items.length > 0) {
       let candidate: SavedRecipe;
-      if (recommendedShelf && recommendedShelf.items && recommendedShelf.items.length >= 2) {
-        const recWithImage = recommendedShelf.items.filter((j) => j.recipe?.imageUrl);
+      const hasTheme = Boolean(recommendedShelf && recommendedShelf.items && recommendedShelf.items.length >= 2);
+      if (hasTheme) {
+        const recWithImage = recommendedShelf!.items!.filter((j) => j.recipe?.imageUrl);
         candidate = recWithImage.length > 0 ? recWithImage[dayOfYear % recWithImage.length] : items[0];
       } else {
         const withImage = items.filter((j) => j.recipe?.imageUrl);
@@ -64,6 +67,8 @@ export function useCookbookMagazine({
           totalTime: formatTotalTime(candidate.recipe),
           badgeText: heroBadgeText,
           badgeVariant: 'amber',
+          themeRecipeCount: hasTheme ? recommendedShelf!.items!.length : undefined,
+          onOpenTheme: hasTheme ? onOpenTheme : undefined,
           isCommunity: false,
           isSaved: true,
         });
@@ -145,7 +150,7 @@ export function useCookbookMagazine({
     }
 
     return slides;
-  }, [items, communityRecipes, savedRecipeIds, recommendedShelf, heroBadgeText, dayOfYear, formatTotalTime, t]);
+  }, [items, communityRecipes, savedRecipeIds, recommendedShelf, heroBadgeText, onOpenTheme, dayOfYear, formatTotalTime, t]);
 
   // Primary hero recipe (for convenience/fallback)
   const heroRecipe = heroSlides[0]?.job ?? null;
@@ -207,10 +212,16 @@ export function useCookbookMagazine({
     return primary ? formatTotalTime(primary) : null;
   }, [heroSlides, formatTotalTime]);
 
+  const themeRecipes = useMemo(() => {
+    return (recommendedShelf?.items && recommendedShelf.items.length >= 2) ? recommendedShelf.items : [];
+  }, [recommendedShelf]);
+
   return {
     heroSlides,
     heroRecipe,
     heroBadgeText,
+    themeRecipes,
+    themeTitle: heroBadgeText,
     bentoRecipes,
     bentoTitle,
     bentoSubtitle,

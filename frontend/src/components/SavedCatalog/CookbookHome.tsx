@@ -9,6 +9,7 @@ import RecipeShowcaseCard from './RecipeShowcaseCard';
 import AllRecipesShelf from './AllRecipesShelf';
 import PublicRecipeRecommendationsShelf from './PublicRecipeRecommendationsShelf';
 import PublicRecipePreviewModal from '../PublicRecipe/PublicRecipePreviewModal';
+import RecommendationThemeSheet from './RecommendationThemeSheet';
 import { useAuth } from '../../context/AuthContext';
 import { fetchPublicRecipeRecommendations, savePublicRecipeToCookbook } from '../../api/publicRecipesApi';
 import type { CatalogPreset } from './catalogRoutes';
@@ -97,6 +98,7 @@ export default function CookbookHome({
   const { getAccessToken } = useAuth();
   const [communityRecommendations, setCommunityRecommendations] = useState<Recipe[]>([]);
   const [selectedPreviewRecipe, setSelectedPreviewRecipe] = useState<Recipe | null>(null);
+  const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -121,6 +123,8 @@ export default function CookbookHome({
 
   const {
     heroSlides,
+    themeRecipes,
+    themeTitle,
     bentoRecipes,
     bentoTitle,
     bentoSubtitle,
@@ -132,6 +136,7 @@ export default function CookbookHome({
     communityRecipes: communityRecommendations,
     savedRecipeIds,
     formatTotalTime,
+    onOpenTheme: () => setIsThemeSheetOpen(true),
   });
 
   const handleOpenSlide = (e: MouseEvent, slide: HeroSlideItem) => {
@@ -261,6 +266,17 @@ export default function CookbookHome({
           }}
         />
       )}
+
+      {/* Recommendation Theme Drawer */}
+      <RecommendationThemeSheet
+        isOpen={isThemeSheetOpen}
+        onClose={() => setIsThemeSheetOpen(false)}
+        themeTitle={themeTitle}
+        recipes={themeRecipes}
+        formatTotalTime={formatTotalTime}
+        onOpenRecipe={onOpenRecipe}
+        onOpenCatalog={() => onOpenList({ kind: 'recommended' })}
+      />
     </div>
   );
 }

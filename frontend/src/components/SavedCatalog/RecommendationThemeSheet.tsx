@@ -63,7 +63,7 @@ export default function RecommendationThemeSheet({
                 <Button
                   isIconOnly
                   size="sm"
-                  variant="flat"
+                  variant="ghost"
                   onPress={onClose}
                   className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border-none shrink-0"
                   aria-label="Schließen"

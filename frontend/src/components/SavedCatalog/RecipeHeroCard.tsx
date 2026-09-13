@@ -94,12 +94,12 @@ export default function RecipeHeroCard({
               className={`pointer-events-auto px-2.5 py-1 rounded-full ${
                 BADGE_VARIANT_STYLES[badgeVariant] ?? BADGE_VARIANT_STYLES.amber
               } backdrop-blur-md text-[10.5px] sm:text-[11px] font-bold shadow-md flex items-center gap-1.5 tracking-tight active:scale-95 transition-transform border-none cursor-pointer select-none`}
-              aria-label={`${badgeText || t('catalog.magazine.heroHighlight')} - ${t('catalog.magazine.heroThemeRecipesCount', { count: themeRecipeCount })}`}
+              aria-label={`${badgeText || t('catalog.magazine.heroHighlight')} - ${t('catalog.magazine.heroThemeRecipesCount', { count: themeRecipeCount ?? 0 })}`}
             >
               <span>{badgeText || t('catalog.magazine.heroHighlight')}</span>
               <span className="opacity-60 font-normal">•</span>
               <span className="font-semibold text-white/95">
-                {t('catalog.magazine.heroThemeRecipesCount', { count: themeRecipeCount })}
+                {t('catalog.magazine.heroThemeRecipesCount', { count: themeRecipeCount ?? 0 })}
               </span>
               <ChevronRight className="w-3 h-3 stroke-[2.5] text-white/85 shrink-0" />
             </button>
