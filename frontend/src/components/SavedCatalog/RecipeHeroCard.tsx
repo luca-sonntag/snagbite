@@ -199,18 +199,20 @@ export default function RecipeHeroCard({
             )}
           </div>
 
-          {/* Title, Author & Cook CTA - Snug fit without vertical gaps */}
-          <div className="flex items-end justify-between gap-2 pt-0.5">
-            <div className="min-w-0 flex-1 flex flex-col">
-              <h3 className="text-base sm:text-lg font-bold text-white tracking-tight leading-tight line-clamp-1 font-heading">
-                {r.title}
-              </h3>
-              {r.sourceHandle && (
-                <p className="text-[10.5px] text-gray-300/85 font-medium truncate leading-none mt-0.5">
-                  {`@${r.sourceHandle.replace(/^@/, '')}`}
-                </p>
-              )}
-            </div>
+          {/* Title - 100% full width, up to 2 lines without horizontal crunch */}
+          <h3 className="text-base sm:text-lg font-bold text-white tracking-tight leading-snug line-clamp-2 font-heading pt-0.5 drop-shadow-xs">
+            {r.title}
+          </h3>
+
+          {/* Bottom Bar: Author Handle & Cook CTA */}
+          <div className="flex items-center justify-between gap-2 pt-0.5">
+            {r.sourceHandle ? (
+              <p className="text-[11px] text-gray-300/85 font-medium truncate leading-none">
+                {`@${r.sourceHandle.replace(/^@/, '')}`}
+              </p>
+            ) : (
+              <span />
+            )}
             <span className="shrink-0 px-3 py-1.5 rounded-xl bg-white text-gray-950 font-bold text-xs group-hover:bg-gray-100 active:scale-95 transition-all shadow-md">
               {t('catalog.magazine.heroCookNow')}
             </span>
