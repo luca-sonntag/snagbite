@@ -474,7 +474,7 @@ export const uiTranslations = {
     alphaWelcome: {
       badge: 'Alpha-Test',
       title: 'Willkommen zum Alpha-Test!',
-      intro: 'Schön, dass du dabei bist! Du gehörst zu den Ersten, die Snagbite ausprobieren. Als Alpha-Tester hast du kostenlosen Zugriff auf alle Premium-Features.',
+      intro: 'Schön, dass du dabei bist! Du gehörst zu den Ersten, die Snagbite ausprobieren. Als Alpha-Tester hast du kostenlosen Zugriff auf alle Snagbite PRO Features.',
       info: {
         heading: 'Wichtige Infos für Alpha-Tester',
         early: 'Die App steckt noch in einer frühen Phase – einzelne Funktionen können sich ändern oder noch nicht rundlaufen.',
@@ -701,12 +701,12 @@ export const uiTranslations = {
         saving: 'Speichern...',
         saved: 'Einstellungen gespeichert!',
         deleteAccount: 'Konto löschen',
-        upgradePremium: 'Auf Premium upgraden',
+        upgradePremium: 'Auf Snagbite PRO upgraden',
         premiumActive: 'Aktiv',
-        premiumActiveDesc: 'Du hast unbegrenzten Zugriff auf alle Premium-Features.',
+        premiumActiveDesc: 'Du hast unbegrenzten Zugriff auf alle PRO-Funktionen.',
         alphaActive: 'Alpha-Zugriff',
-        alphaActiveDesc: 'Du bist Alpha-Tester! Du hast kostenlosen Zugriff auf alle Premium-Features während der Alpha. Tageslimits gelten weiterhin.',
-        premiumCardDesc: 'Schalte unbegrenzten Rezept-Import, KI-Chat & Remix und smarte Einkaufslisten frei.',
+        alphaActiveDesc: 'Du bist Alpha-Tester! Du hast kostenlosen Zugriff auf alle PRO-Features während der Alpha. Tageslimits gelten weiterhin.',
+        premiumCardDesc: 'Schalte unbegrenzte Rezept-Analysen, Recipe Copilot und smarte Nährwert-Insights frei.',
         legal: {
           section: 'Rechtliches',
           privacy: 'Datenschutzerklärung',
@@ -717,7 +717,7 @@ export const uiTranslations = {
       dialog: {
         deleteAccount: {
           title: 'Konto löschen?',
-          message: 'Möchtest du dein Konto wirklich unwiderruflich löschen? Alle deine gespeicherten Rezepte und Einkaufslisten gehen dauerhaft verloren. **Bitte beachte: Falls du ein aktives Premium-Abonnement hast, musst du dieses zusätzlich im Google Play Store kündigen, um weitere Zahlungen zu verhindern.**',
+          message: 'Möchtest du dein Konto wirklich unwiderruflich löschen? Alle deine gespeicherten Rezepte und Einkaufslisten gehen dauerhaft verloren. **Bitte beachte: Falls du ein aktives Snagbite PRO Abonnement hast, musst du dieses zusätzlich im Google Play Store kündigen, um weitere Zahlungen zu verhindern.**',
           confirm: 'Konto löschen',
           cancel: 'Abbrechen',
         },
@@ -1024,7 +1024,7 @@ export const uiTranslations = {
         submitFailed: 'Auftrag konnte nicht übermittelt werden.',
         submissionError: 'Bei der Übermittlung ist ein Fehler aufgetreten.',
         serverError: 'Der Server hat keine gültige Antwort zurückgegeben. Bitte versuche es erneut.',
-        backgroundCancelled: 'Der Rezept-Import wurde abgebrochen, da die App in den Hintergrund gewechselt ist (Hintergrund-Verarbeitung ist nur in Premium enthalten).',
+        backgroundCancelled: 'Der Rezept-Import wurde abgebrochen, da die App in den Hintergrund gewechselt ist (Hintergrund-Verarbeitung ist nur mit Snagbite PRO verfügbar).',
       }
     },
     recipe: {
@@ -1386,7 +1386,7 @@ export const uiTranslations = {
       manageFlags: 'Labels verwalten',
       noCollections: 'Keine Sammlungen erstellt',
       noFlags: 'Keine Labels erstellt',
-      premiumFeatureTitle: 'Premium-Funktion',
+      premiumFeatureTitle: 'Snagbite PRO Feature',
       premiumFeatureCollectionsDesc: 'Erstelle Sammlungen und ordne Rezepte zu, um dein Kochbuch perfekt zu strukturieren.',
       premiumFeatureFlagsDesc: 'Erstelle eigene Labels und Tags, um Rezepte noch flexibler zu filtern.',
       bulkAddToCollection: 'Zu Sammlung hinzufügen',
@@ -1589,7 +1589,7 @@ export const uiTranslations = {
       shoppingListToast: 'Zutaten zur Einkaufsliste hinzugefügt: {ingredients}',
       timerToast: 'Timer für {label} ({duration} Min.) gestartet!',
       timerNoLabel: 'Kochschritt',
-      errorForbidden: 'Der Copilot ist ein Premium-Feature. Bitte upgrade auf Pro.',
+      errorForbidden: 'Der Copilot ist ein Snagbite PRO Feature. Bitte upgrade auf PRO.',
       errorGeneral: 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.',
       chipsHeaderRemix: 'Rezept anpassen',
       chipsHeaderHelp: 'Zubereitungshilfe',
@@ -1896,7 +1896,7 @@ export const uiTranslations = {
     alphaWelcome: {
       badge: 'Alpha Test',
       title: 'Welcome to the Alpha Test!',
-      intro: "Glad to have you on board! You're one of the first to try Snagbite. As an alpha tester you get free access to all premium features.",
+      intro: "Glad to have you on board! You're one of the first to try Snagbite. As an alpha tester you get free access to all Snagbite PRO features.",
       info: {
         heading: 'Important info for alpha testers',
         early: 'The app is still in an early stage — some features may change or not work perfectly yet.',
@@ -2123,12 +2123,12 @@ export const uiTranslations = {
         saving: 'Saving...',
         saved: 'Settings saved!',
         deleteAccount: 'Delete Account',
-        upgradePremium: 'Upgrade to Premium',
+        upgradePremium: 'Upgrade to Snagbite PRO',
         premiumActive: 'Active',
-        premiumActiveDesc: 'You have unlimited access to all premium features.',
+        premiumActiveDesc: 'You have unlimited access to all PRO features.',
         alphaActive: 'Alpha Access',
-        alphaActiveDesc: 'You are an alpha tester! You have free access to all premium features during the alpha. Daily limits apply.',
-        premiumCardDesc: 'Unlock unlimited recipe imports, advanced remix capabilities, and smart shopping lists.',
+        alphaActiveDesc: 'You are an alpha tester! You have free access to all PRO features during the alpha. Daily limits apply.',
+        premiumCardDesc: 'Unlock unlimited recipe analysis, Recipe Copilot, and deep nutrition insights.',
         legal: {
           section: 'Legal',
           privacy: 'Privacy Policy',
@@ -2139,7 +2139,7 @@ export const uiTranslations = {
       dialog: {
         deleteAccount: {
           title: 'Delete Account?',
-          message: 'Are you sure you want to permanently delete your account? All your saved recipes and shopping lists will be permanently lost. **Note: If you have an active Premium subscription, you must also cancel it in the Google Play Store to prevent future charges.**',
+          message: 'Are you sure you want to permanently delete your account? All your saved recipes and shopping lists will be permanently lost. **Note: If you have an active Snagbite PRO subscription, you must also cancel it in the Google Play Store to prevent future charges.**',
           confirm: 'Delete Account',
           cancel: 'Cancel',
         },
@@ -2446,7 +2446,7 @@ export const uiTranslations = {
         submitFailed: 'Failed to submit extraction job.',
         submissionError: 'An error occurred during submission.',
         serverError: 'The server returned an unexpected response. Please try again.',
-        backgroundCancelled: 'Recipe import cancelled because the app entered the background (background processing is Premium only).',
+        backgroundCancelled: 'Recipe import cancelled because the app entered the background (background processing is available with Snagbite PRO only).',
       }
     },
     recipe: {
@@ -2807,7 +2807,7 @@ export const uiTranslations = {
       manageFlags: 'Manage Labels',
       noCollections: 'No collections created yet',
       noFlags: 'No labels created yet',
-      premiumFeatureTitle: 'Premium Feature',
+      premiumFeatureTitle: 'Snagbite PRO Feature',
       premiumFeatureCollectionsDesc: 'Create collections and organize recipes to perfectly structure your cookbook.',
       premiumFeatureFlagsDesc: 'Create your own custom labels and tags to filter recipes even more flexibly.',
       bulkAddToCollection: 'Add to Collection',
@@ -3010,7 +3010,7 @@ export const uiTranslations = {
       shoppingListToast: 'Added ingredients to shopping list: {ingredients}',
       timerToast: 'Started timer for {label} ({duration} min.)!',
       timerNoLabel: 'Cooking step',
-      errorForbidden: 'The Copilot is a premium feature. Please upgrade to Pro.',
+      errorForbidden: 'The Copilot is a Snagbite PRO feature. Please upgrade to PRO.',
       errorGeneral: 'An error occurred. Please try again.',
       chipsHeaderRemix: 'Customize Recipe',
       chipsHeaderHelp: 'Preparation Help',
