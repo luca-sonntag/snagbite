@@ -35,6 +35,18 @@
   - Paginierung (Cursor-basiert oder Page/Limit) mit effizientem Nachladen im Hintergrund (Infinite Scroll / Background Prefetching).
   - Nahtlose Synchronisation mit dem lokalen IndexedDB-Cache (`recipe-image-cache`) und flüssiges Rendering ohne UI-Ruckler.
 
+- **Ingredient Mappings & Icons vollständig berichtigen:**
+  - Alle Zutat-Mappings, Normalisierungen (`baseName`) und zugeordneten Icons im Backend und Frontend überprüfen und berichtigen.
+  - Inkonsistente oder fehlerhafte Zuordnungen bereinigen, damit jede Zutat verlässlich ihr passendes SVG/Icon und die richtige Supermarktkategorie erhält.
+
+- **New User Experience (NUX) überarbeiten & aktualisieren:**
+  - Onboarding- und Einführungserlebnis für neue Nutzer überarbeiten, modernisieren und aktualisieren.
+  - Empty States (z. B. leeres Kochbuch, Wochenplaner, Einkaufsliste, Vorrat) auffrischen und Nutzer intuitiv zur ersten Aktion führen.
+
+- **Empty-State-Mockups vereinfachen:**
+  - Mockups und visuelle Darstellungen in den verschiedenen Empty States vereinfachen und entrümpeln.
+  - Fokus auf eine klare, reduzierte Bildsprache ohne überladene UI-Elemente.
+
 ## Findings (Behoben ✅)
 
 - [x] Healthy Score für Rezepte berechnen & visualisieren (4-Säulen-Modell, konsolidierte `nutritional_values` JSONB-Spalte, `HealthScoreBadge` & `HealthScoreSheet`)
