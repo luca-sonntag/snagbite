@@ -58,39 +58,34 @@ export default function PremiumUpgradeCard({ onUpgradeClick, className = '' }: P
         </button>
       )}
 
-      <div className={`flex items-center gap-3 min-w-0 flex-1 ${showTrial ? 'pr-2' : ''}`}>
-        <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 font-black text-xs tracking-wider shadow-xs">
-          PRO
-        </div>
-        <div className="min-w-0 flex-1">
-          {showTrial ? (
-            <>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
-                  {t('premium.modal.trialBanner.title')}
-                </h3>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 text-xs font-semibold shrink-0">
-                  <Timer className="w-2.5 h-2.5" />
-                  {trialDays} {t('premium.modal.trialBanner.days')}
-                </span>
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
-                {t('premium.modal.trialBanner.body')}
-              </p>
-            </>
-          ) : (
-            <>
+      <div className={`min-w-0 flex-1 ${showTrial ? 'pr-2' : ''}`}>
+        {showTrial ? (
+          <>
+            <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
-                Snagbite PRO
+                {t('premium.modal.trialBanner.title')}
               </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
-                {language === 'de'
-                  ? 'Unbegrenzte Extraktionen, 100% werbefrei, Recipe Copilot & Healthy-Score'
-                  : 'Unlimited extractions, 100% ad-free, Recipe Copilot & Healthy Score'}
-              </p>
-            </>
-          )}
-        </div>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 text-xs font-semibold shrink-0">
+                <Timer className="w-2.5 h-2.5" />
+                {trialDays} {t('premium.modal.trialBanner.days')}
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
+              {t('premium.modal.trialBanner.body')}
+            </p>
+          </>
+        ) : (
+          <>
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
+              Snagbite PRO
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
+              {language === 'de'
+                ? 'Unbegrenzte Extraktionen, 100% werbefrei, Recipe Copilot & Healthy-Score'
+                : 'Unlimited extractions, 100% ad-free, Recipe Copilot & Healthy Score'}
+            </p>
+          </>
+        )}
       </div>
 
       <button

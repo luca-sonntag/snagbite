@@ -78,27 +78,19 @@ export default function TrialBanner({ onOpenPremium, className = '' }: TrialBann
         <X className="w-3 h-3 text-gray-400 dark:text-gray-500" />
       </button>
 
-      <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
-        {/* PRO badge — same amber square language as PremiumUpgradeCard */}
-        <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 font-black text-xs tracking-wider shadow-xs">
-          PRO
+      <div className="min-w-0 flex-1 pr-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
+            {t('premium.modal.trialBanner.title')}
+          </h3>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 text-xs font-semibold shrink-0">
+            <Timer className="w-2.5 h-2.5" />
+            {trialDays} {t('premium.modal.trialBanner.days')}
+          </span>
         </div>
-
-        {/* Content */}
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
-              {t('premium.modal.trialBanner.title')}
-            </h3>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 text-xs font-semibold shrink-0">
-              <Timer className="w-2.5 h-2.5" />
-              {trialDays} {t('premium.modal.trialBanner.days')}
-            </span>
-          </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
-            {t('premium.modal.trialBanner.body')}
-          </p>
-        </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
+          {t('premium.modal.trialBanner.body')}
+        </p>
       </div>
 
       {/* Amber action button */}
