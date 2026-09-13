@@ -6,6 +6,16 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-13: Entrümpelung von `ShoppingEmptyState.tsx` (Überkomplizierte Fake-Mockups durch Clean Flat Empty State ersetzt)
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `RecipeCardMockup`, `AddToCartMockup`, `AisleListMockup`: Überkomplizierte, winzige Mockups mit simulierten CSS-Ping-Animationen (`animate-ping`) und Fake-Skelett-Boxen innerhalb des Einkaufslisten-Empty-States, die visuell unruhig und überladen wirkten.
+* **Ersetzt durch:**
+  - **Modernes, reduziertes Clean Flat Empty State Design ([`ShoppingEmptyState.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ShoppingList/ShoppingEmptyState.tsx)):** Zentrierter sanfter Smaragd-Kreis mit `ShoppingCart`-Icon, klare typografische Hierarchie ohne Ränder (`border-none`, `rounded-3xl`), prägnanter 1-2 Satz Hilfstext und 48px-Touch-Target CTA-Button (*"Rezepte entdecken"* via `window.location.hash = '#/'`).
+* **Betroffene Dateien:** `frontend/src/components/ShoppingList/ShoppingEmptyState.tsx`, `frontend/src/i18n.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-13: Umbenennung & Generalisierung von `RecommendationThemeSheet` zu `HeroThemeSheet`
 
 * **Ersetzter Code / Anti-Pattern:**
