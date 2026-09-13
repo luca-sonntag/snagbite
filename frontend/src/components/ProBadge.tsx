@@ -60,11 +60,11 @@ export default function ProBadge({
   return (
     <span
       onClick={onClick}
-      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md bg-white/70 dark:bg-gray-850/70 shadow-sm ring-1 ring-black/[0.08] dark:ring-white/[0.12] text-[11px] font-medium text-gray-700 dark:text-gray-200 hover:bg-white/85 dark:hover:bg-gray-800/85 transition-all select-none ${
+      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md bg-white/75 dark:bg-gray-850/75 shadow-sm border-none text-[11px] font-medium text-gray-700 dark:text-gray-200 hover:bg-white/90 dark:hover:bg-gray-800/90 transition-all select-none ${
         onClick ? 'cursor-pointer active:scale-95' : ''
       } ${className}`}
     >
-      <span className="px-1.5 py-[2px] rounded-[4px] text-[8px] font-bold uppercase tracking-[0.14em] bg-black/5 dark:bg-white/10 text-gray-600 dark:text-gray-300 ring-1 ring-black/[0.06] dark:ring-white/[0.08] leading-none">
+      <span className="px-1.5 py-[2px] rounded-[4px] text-[8px] font-bold uppercase tracking-[0.14em] bg-black/5 dark:bg-white/10 text-gray-600 dark:text-gray-300 leading-none border-none">
         PRO
       </span>
       {label && <span className="truncate">{label}</span>}
