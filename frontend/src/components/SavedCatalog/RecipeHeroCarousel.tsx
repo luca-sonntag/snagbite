@@ -10,6 +10,8 @@ export interface HeroSlideItem {
   totalTime: string | null;
   badgeText: string;
   badgeVariant?: HeroBadgeVariant;
+  themeRecipeCount?: number;
+  onOpenTheme?: (e: MouseEvent) => void;
   isCommunity: boolean;
   isSaved?: boolean;
 }
@@ -106,6 +108,8 @@ export default function RecipeHeroCarousel({
               totalTime={slide.totalTime}
               badgeText={slide.badgeText}
               badgeVariant={slide.badgeVariant}
+              themeRecipeCount={slide.themeRecipeCount}
+              onOpenTheme={slide.onOpenTheme}
               isCommunity={slide.isCommunity}
               isSaved={slide.isSaved}
               onSaveCommunity={onSaveCommunity}

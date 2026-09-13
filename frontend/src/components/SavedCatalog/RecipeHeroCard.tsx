@@ -1,5 +1,5 @@
 import type { MouseEvent } from 'react';
-import { Star, Clock, Sparkles, BookmarkPlus, Check } from 'lucide-react';
+import { Star, Clock, Sparkles, BookmarkPlus, Check, ChevronRight } from 'lucide-react';
 import type { SavedRecipe, Recipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
@@ -24,6 +24,8 @@ export interface RecipeHeroCardProps {
   totalTime: string | null;
   badgeText?: string;
   badgeVariant?: HeroBadgeVariant;
+  themeRecipeCount?: number;
+  onOpenTheme?: (e: MouseEvent) => void;
   isCommunity?: boolean;
   isSaved?: boolean;
   onSaveCommunity?: (e: MouseEvent, recipe: Recipe) => void;
@@ -41,6 +43,8 @@ export default function RecipeHeroCard({
   totalTime,
   badgeText,
   badgeVariant = 'amber',
+  themeRecipeCount,
+  onOpenTheme,
   isCommunity = false,
   isSaved = false,
   onSaveCommunity,
@@ -56,6 +60,8 @@ export default function RecipeHeroCard({
   const calories = getRecipeCalories(r);
   const vegGrams = r.healthScoreBreakdown?.metrics?.vegetableGramsPerServing;
   const protein = r.nutritionalValues?.protein;
+
+  const hasMultipleThemeRecipes = Boolean(themeRecipeCount && themeRecipeCount >= 2 && onOpenTheme);
 
   return (
     <article
@@ -77,14 +83,36 @@ export default function RecipeHeroCard({
 
         {/* Top Badges */}
         <div className="absolute top-2.5 inset-x-2.5 sm:top-3 sm:inset-x-3 flex items-center justify-between pointer-events-none">
-          <span
-            className={`px-2 py-0.5 rounded-full ${
-              BADGE_VARIANT_STYLES[badgeVariant] ?? BADGE_VARIANT_STYLES.amber
-            } backdrop-blur-md text-[10px] sm:text-[10.5px] font-bold shadow-sm flex items-center gap-1 tracking-tight`}
-          >
-            {isCommunity && <Sparkles className="w-2.5 h-2.5 text-white/90 shrink-0" />}
-            {badgeText || t('catalog.magazine.heroHighlight')}
-          </span>
+          {hasMultipleThemeRecipes ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                hapticLight();
+                onOpenTheme?.(e);
+              }}
+              className={`pointer-events-auto px-2.5 py-1 rounded-full ${
+                BADGE_VARIANT_STYLES[badgeVariant] ?? BADGE_VARIANT_STYLES.amber
+              } backdrop-blur-md text-[10.5px] sm:text-[11px] font-bold shadow-md flex items-center gap-1.5 tracking-tight active:scale-95 transition-transform border-none cursor-pointer select-none`}
+              aria-label={`${badgeText || t('catalog.magazine.heroHighlight')} - ${t('catalog.magazine.heroThemeRecipesCount', { count: themeRecipeCount })}`}
+            >
+              <span>{badgeText || t('catalog.magazine.heroHighlight')}</span>
+              <span className="opacity-60 font-normal">•</span>
+              <span className="font-semibold text-white/95">
+                {t('catalog.magazine.heroThemeRecipesCount', { count: themeRecipeCount })}
+              </span>
+              <ChevronRight className="w-3 h-3 stroke-[2.5] text-white/85 shrink-0" />
+            </button>
+          ) : (
+            <span
+              className={`px-2 py-0.5 rounded-full ${
+                BADGE_VARIANT_STYLES[badgeVariant] ?? BADGE_VARIANT_STYLES.amber
+              } backdrop-blur-md text-[10px] sm:text-[10.5px] font-bold shadow-sm flex items-center gap-1 tracking-tight`}
+            >
+              {isCommunity && <Sparkles className="w-2.5 h-2.5 text-white/90 shrink-0" />}
+              {badgeText || t('catalog.magazine.heroHighlight')}
+            </span>
+          )}
 
           {/* Right Action: Bookmark/Save for Community or Favorite Star for own */}
           {isCommunity ? (
