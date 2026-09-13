@@ -67,12 +67,17 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({
   };
 
   return (
-    <div className={`flex flex-col gap-2.5 pt-3 ${className}`}>
-      <div className="flex flex-col px-1 gap-0.5">
-        <h3 className="text-xs font-bold text-gray-900 dark:text-white">{t('form.demoTitle')}</h3>
-        <p className="text-[11px] text-gray-500 dark:text-gray-400 font-normal">
-          {t('form.demoSubtitle')}
-        </p>
+    <div className={`flex flex-col gap-3 pt-3 ${className}`}>
+      {/* Section Header */}
+      <div className="flex items-center justify-between px-0.5">
+        <div>
+          <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight font-heading">
+            {t('form.demoTitle')}
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            {t('form.demoSubtitle')}
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
