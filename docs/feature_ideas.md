@@ -56,6 +56,12 @@
   - **Vormerken bei aufgebrauchtem Kontingent:** Wenn das tägliche Extraktions-Limit erreicht ist, können Links trotzdem geteilt und in eine Warteliste abgelegt werden („Für später vormerken“).
   - **Smart Resume beim nächsten App-Start:** Sobald neues Kontingent vorhanden ist oder die App neu geöffnet wird, weist ein dezentes Overlay/Bottom-Sheet darauf hin: *„Du hast 1 Rezept in der Warteliste. Jetzt analysieren?“* (Nutzer behält volle Kontrolle, kein automatischer ungewollter Credit-Verbrauch).
 
+- **Smarte Push-Benachrichtigungen: Hero-Zutaten statt Basis-Zutaten (Ingredient Spotlight Filter):**
+  - **Problem & Feedback:** Aktuell fragt der Benachrichtigungs-Generator (`ingredient_spotlight`, siehe [push-notifications.md](push-notifications.md)) unpassend nach absoluten Grundnahrungsmitteln, Fetten oder Gewürzen (z. B. *„Lust auf Butter? Du hast x Rezepte mit Butter, Lust auf [Rezept]?“*). Niemand hat isoliert Lust auf „Butter“, „Salz“, „Pfeffer“, „Speiseöl“ oder „Zwiebeln“.
+  - **Ausschluss von Basis- & Würz-Kategorien (Anti-Fragile):** Filterung im Kandidaten-Generator (`genIngredientSpotlight` in `backend/src/notifications/candidates.ts`) anhand strukturierter Kategorien (z. B. Ignorieren von `SPICES_SEASONINGS`, `OILS_VINEGARS`, `BAKING_COOKING`) sowie einer zentralen Ausschlussliste für geschmacksneutrale Küchenbasics (Salz, Pfeffer, Butter, Öl, Wasser, Zucker, Mehl, Speisestärke, Zwiebel, Knoblauch).
+  - **Fokus auf echte Charakter-/Hero-Zutaten:** Benachrichtigungen ausschließlich für geschmacksprägende Hauptzutaten triggern, auf die man tatsächlich Appetit entwickeln kann (z. B. Avocado, Lachs, Kürbis, Burrata, Erdbeeren, Spargel, Pilze, Garnelen, Pasta, Süßkartoffel).
+  - **Prompt-Optimierung für Gemini (`generateNotificationCopy`):** Den LLM-Prompt in `backend/src/gemini.ts` schärfen, sodass niemals plumpe Vorlagen wie *„Lust auf [Zutat]?“* generiert werden, sondern der kulinarische Kontext sympathisch, abwechslungsreich und appetitlich formuliert wird (z. B. *„Pasta-Lust? Du hast ein leckeres Rezept gespeichert...“*).
+
 ## Findings (Behoben ✅)
 
 - [x] Paywall-Compliance & Feature-Update: Restore-Purchases-Button (`Purchases.restorePurchases()`), Verlinkung von AGB und Datenschutzerklärung, Bereinigung von UTF-8 Encoding-Glitches und saubere Klarstellung der echten Premium-Vorteile (`frontend/src/components/PremiumModal/`)
