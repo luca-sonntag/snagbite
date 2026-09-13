@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState, type ChangeEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { Camera, Image as ImageIcon, Check, AlertTriangle, RotateCcw, X, Loader2 } from 'lucide-react';
+import { Camera, X, Loader2 } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { resolveErrorCode } from '../i18n';
 import { useGamification } from '../context/GamificationContext';
@@ -8,6 +8,8 @@ import { useTimerManager } from '../hooks/useTimerManager';
 import { useModalOverlay } from '../context/OverlayStackContext';
 import { compressImage, PREVIEW_PROFILE } from '../utils/imageCompression';
 import { hapticLight, hapticMedium, hapticNotification } from '../utils/haptics';
+import CookedModalPhotoView from './CookedModalPhotoView';
+import CookedModalInitialView from './CookedModalInitialView';
 
 interface CookedModalProps {
   isOpen: boolean;
@@ -69,14 +71,24 @@ export default function CookedModal({
       hapticNotification('success');
       onSuccess?.();
       handleResetAndClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[CookedModal] Cook recording failed:', err);
       hapticNotification('error');
-      const code = err?.code;
-      const params = err?.params;
-      const localizedReason = code
-        ? resolveErrorCode(code, params, err?.message, language)
-        : (params?.reason || (err?.message && !err.message.includes('Failed to record cook') ? err.message : (photoBase64 ? t('error.codes.PHOTO_NOT_MATCHING') : 'Fehler beim Speichern')));
+      const errObj =
+        err && typeof err === 'object'
+          ? (err as { code?: string; params?: Record<string, unknown>; message?: string })
+          : null;
+      const code = errObj?.code;
+      const params = errObj?.params;
+      const rawReason = typeof params?.reason === 'string' ? params.reason : undefined;
+      const fallbackReason =
+        rawReason ||
+        (errObj?.message && !errObj.message.includes('Failed to record cook')
+          ? errObj.message
+          : photoBase64
+            ? t('error.codes.PHOTO_NOT_MATCHING')
+            : t('app.gamification.cookError'));
+      const localizedReason = code ? resolveErrorCode(code, params, errObj?.message, language) : fallbackReason;
       setRejectionReason(localizedReason);
     } finally {
       setIsVerifying(false);
@@ -96,7 +108,7 @@ export default function CookedModal({
       setPhoto(dataUrl);
       setIsCompressing(false);
       await submitCook(dataUrl);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.warn('[CookedModal] Image compression/verification failed:', err);
       setIsCompressing(false);
     }
@@ -104,6 +116,7 @@ export default function CookedModal({
 
   const handleMarkWithoutPhoto = () => {
     hapticLight();
+    setPhoto(null);
     submitCook();
   };
 
@@ -116,21 +129,8 @@ export default function CookedModal({
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] transition-opacity animate-in fade-in duration-200">
       {/* Hidden file inputs for Camera and Gallery */}
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        hidden
-        onChange={handlePhotoSelect}
-      />
-      <input
-        ref={galleryInputRef}
-        type="file"
-        accept="image/*"
-        hidden
-        onChange={handlePhotoSelect}
-      />
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" hidden onChange={handlePhotoSelect} />
+      <input ref={galleryInputRef} type="file" accept="image/*" hidden onChange={handlePhotoSelect} />
 
       <div
         role="dialog"
@@ -163,43 +163,13 @@ export default function CookedModal({
 
         {/* Body content based on state */}
         {!photo && !isCompressing && (
-          <div className="space-y-4 py-2">
-            <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-              {t('app.gamification.modalSubtitle')}
-            </p>
-
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => cameraInputRef.current?.click()}
-                className="flex flex-col items-center justify-center gap-2 p-5 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 font-bold transition-all active:scale-[0.97]"
-              >
-                <Camera className="w-7 h-7" />
-                <span className="text-xs">{t('app.gamification.takePhoto')}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => galleryInputRef.current?.click()}
-                className="flex flex-col items-center justify-center gap-2 p-5 rounded-2xl bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-200 font-bold transition-all active:scale-[0.97]"
-              >
-                <ImageIcon className="w-7 h-7" />
-                <span className="text-xs">{t('app.gamification.chooseGallery')}</span>
-              </button>
-            </div>
-
-            <div className="pt-1 text-center">
-              <button
-                type="button"
-                onClick={handleMarkWithoutPhoto}
-                disabled={isVerifying}
-                className="w-full min-h-[44px] flex items-center justify-center gap-2 py-3 px-3.5 rounded-2xl text-xs font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-[0.98] transition-all duration-200 ease-out cursor-pointer border-none whitespace-nowrap"
-              >
-                <Check className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
-                <span>{t('app.gamification.markWithoutPhoto')}</span>
-              </button>
-            </div>
-          </div>
+          <CookedModalInitialView
+            isVerifying={isVerifying}
+            rejectionReason={rejectionReason}
+            onTakePhoto={() => cameraInputRef.current?.click()}
+            onChooseGallery={() => galleryInputRef.current?.click()}
+            onMarkWithoutPhoto={handleMarkWithoutPhoto}
+          />
         )}
 
         {isCompressing && (
@@ -210,80 +180,17 @@ export default function CookedModal({
         )}
 
         {photo && !isCompressing && (
-          <div className="space-y-4 py-1">
-            {/* Image Preview Container */}
-            <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-gray-100 dark:bg-black/40">
-              <img
-                src={photo}
-                alt="Uploaded dish preview"
-                className="h-full w-full object-cover"
-              />
-              {!isVerifying && (
-                <button
-                  type="button"
-                  onClick={() => setPhoto(null)}
-                  className="absolute top-2 right-2 rounded-full bg-black/60 p-2 text-white backdrop-blur-md hover:bg-black/80 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer border-none"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-
-            {/* Rejection Message if AI rejected previous attempt */}
-            {rejectionReason && (
-              <div className="rounded-2xl bg-rose-500/5 dark:bg-rose-500/10 p-3.5 flex items-start gap-3 text-rose-700 dark:text-rose-300">
-                <AlertTriangle className="w-5 h-5 shrink-0 text-rose-500 dark:text-rose-400 mt-0.5" />
-                <div className="space-y-1 text-xs">
-                  <p className="font-semibold text-rose-900 dark:text-rose-200">{t('app.gamification.rejectionTitle')}</p>
-                  <p className="leading-normal text-rose-700 dark:text-rose-300/90">{rejectionReason}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Verifying Status, Retry Button, or Submit Button */}
-            {isVerifying ? (
-              <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-500/15 p-4 text-center space-y-2">
-                <div className="flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-400 font-bold text-sm">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>{t('app.gamification.verifyingTitle')}</span>
-                </div>
-                <p className="text-[11px] text-emerald-800 dark:text-emerald-200/80">
-                  {t('app.gamification.verifyingDesc')}
-                </p>
-              </div>
-            ) : rejectionReason ? (
-              <div className="space-y-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPhoto(null);
-                    setRejectionReason(null);
-                  }}
-                  className="w-full min-h-[48px] h-12 flex items-center justify-center gap-2 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 px-4 text-sm font-bold transition-all active:scale-[0.98] cursor-pointer outline-none border-none"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  <span>{t('app.gamification.retryPhoto')}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleMarkWithoutPhoto}
-                  className="w-full min-h-[44px] flex items-center justify-center gap-2 py-3 px-3.5 rounded-2xl text-xs font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-[0.98] transition-all cursor-pointer border-none whitespace-nowrap"
-                >
-                  <Check className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
-                  <span>{t('app.gamification.markWithoutPhoto')}</span>
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={handleVerifyAndSubmit}
-                className="w-full min-h-[48px] h-12 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 px-4 text-sm font-bold text-white shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none"
-              >
-                <Check className="w-4 h-4" />
-                <span>{t('app.gamification.verifyBtn')}</span>
-              </button>
-            )}
-          </div>
+          <CookedModalPhotoView
+            photo={photo}
+            isVerifying={isVerifying}
+            rejectionReason={rejectionReason}
+            onClearPhoto={() => {
+              setPhoto(null);
+              setRejectionReason(null);
+            }}
+            onSubmit={handleVerifyAndSubmit}
+            onMarkWithoutPhoto={handleMarkWithoutPhoto}
+          />
         )}
       </div>
     </div>,

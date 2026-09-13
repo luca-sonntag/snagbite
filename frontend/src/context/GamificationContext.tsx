@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { apiUrl } from '../api';
 import { useAuth } from './AuthContext';
 import { useI18n } from './I18nContext';
+import { useToast } from './ToastContext';
 import type { CookedResult, GamificationSnapshot } from '../types';
 import RewardOverlay from '../components/RewardOverlay';
 import { scheduleStreakReminder } from '../utils/streakReminder';
@@ -31,6 +32,7 @@ const GamificationContext = createContext<GamificationState | undefined>(undefin
 export function GamificationProvider({ children }: { children: React.ReactNode }) {
   const { session, getAccessToken } = useAuth();
   const { t } = useI18n();
+  const toast = useToast();
   const [snapshot, setSnapshot] = useState<GamificationSnapshot | null>(null);
   const [loading, setLoading] = useState(false);
   const [reward, setReward] = useState<CookedResult | null>(null);
@@ -81,15 +83,15 @@ export function GamificationProvider({ children }: { children: React.ReactNode }
         body: JSON.stringify(body),
       });
       if (!res.ok) {
-        let errJson: any;
+        let errJson: { error?: string; code?: string; params?: Record<string, unknown> } | undefined;
         try {
-          errJson = await res.json();
+          errJson = (await res.json()) as { error?: string; code?: string; params?: Record<string, unknown> };
         } catch {
           /* non-JSON response */
         }
         const errObj = new Error(errJson?.error || 'Failed to record cook') as Error & {
           code?: string;
-          params?: Record<string, any>;
+          params?: Record<string, unknown>;
         };
         if (errJson?.code) errObj.code = errJson.code;
         if (errJson?.params) errObj.params = errJson.params;
@@ -142,10 +144,14 @@ export function GamificationProvider({ children }: { children: React.ReactNode }
             }),
           });
         }
+      } else if (result.duplicate) {
+        toast.info(t('app.gamification.toastDuplicate'));
+      } else {
+        toast.success(t('app.gamification.toastCookedNoXp'));
       }
       return result;
     },
-    [getAccessToken],
+    [getAccessToken, refresh, t, toast],
   );
 
   return (
