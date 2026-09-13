@@ -1,6 +1,6 @@
 import type { MouseEvent } from 'react';
 import { Button, Drawer } from '@heroui/react';
-import { X, Clock, Sparkles, ArrowRight } from 'lucide-react';
+import { X, Clock, ArrowRight } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { useI18n } from '../../context/I18nContext';
@@ -45,31 +45,30 @@ export default function RecommendationThemeSheet({
             <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
               <Drawer.Handle />
 
-              {/* Header */}
-              <Drawer.Header className="pb-3 pt-1 flex items-center justify-between gap-3 border-none">
-                <div className="flex-1 min-w-0">
-                  <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 font-bold text-[10px] tracking-tight mb-1">
-                    <Sparkles className="w-2.5 h-2.5 text-amber-500 shrink-0" />
-                    <span>{themeTitle}</span>
+              {/* Header: Pure typography with top-right close button */}
+              <Drawer.Header className="!p-0 !pb-3 !pt-1 border-none">
+                <div className="flex items-start justify-between gap-3 w-full text-left">
+                  <div className="flex-1 min-w-0 pr-1">
+                    <Drawer.Heading className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-snug">
+                      {themeTitle}
+                    </Drawer.Heading>
+                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-normal mt-0.5">
+                      {t('catalog.magazine.themeSheetSubtitle', { count: recipes.length })}
+                    </p>
                   </div>
-                  <Drawer.Heading className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">
-                    {themeTitle}
-                  </Drawer.Heading>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-normal mt-0.5">
-                    {t('catalog.magazine.themeSheetSubtitle', { count: recipes.length })}
-                  </p>
-                </div>
 
-                <Button
-                  isIconOnly
-                  size="sm"
-                  variant="ghost"
-                  onPress={onClose}
-                  className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border-none shrink-0"
-                  aria-label="Schließen"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      hapticLight();
+                      onClose();
+                    }}
+                    className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border-none flex items-center justify-center shrink-0 active:scale-95 transition-all cursor-pointer mt-0.5"
+                    aria-label="Schließen"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </Drawer.Header>
 
               {/* Recipe List */}
