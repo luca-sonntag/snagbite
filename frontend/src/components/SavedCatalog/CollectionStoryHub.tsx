@@ -1,4 +1,4 @@
-import { BookOpen, Star, UtensilsCrossed } from 'lucide-react';
+import { Star, UtensilsCrossed } from 'lucide-react';
 import type { Collection, SavedRecipe, RecipeCategory } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { getRecipeCategoryLabel } from '../../i18n';
@@ -6,7 +6,7 @@ import CollectionStoryBubble from './CollectionStoryBubble';
 import type { CatalogPreset } from './catalogRoutes';
 
 interface CollectionStoryHubProps {
-  totalRecipes: number;
+  totalRecipes?: number;
   allRecipesThumbnail?: string | null;
   favoriteJobs?: SavedRecipe[];
   availableCategories?: RecipeCategory[];
@@ -24,8 +24,8 @@ interface CollectionStoryHubProps {
  * "All Recipes", Favorites, Categories, and User Collections above the fold.
  */
 export default function CollectionStoryHub({
-  totalRecipes,
-  allRecipesThumbnail,
+  totalRecipes: _totalRecipes,
+  allRecipesThumbnail: _allRecipesThumbnail,
   favoriteJobs = [],
   availableCategories = [],
   jobsByCategory = {},
@@ -63,16 +63,7 @@ export default function CollectionStoryHub({
 
       {/* Horizontal Carousel */}
       <div className="flex items-start gap-3 overflow-x-auto no-scrollbar scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1 scroll-smooth">
-        {/* 1. All Recipes Clean Flat Tile */}
-        <CollectionStoryBubble
-          title={t('catalog.storyHub.all')}
-          count={totalRecipes}
-          icon={<BookOpen className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />}
-          imageUrl={allRecipesThumbnail}
-          onClick={() => onOpenList({ kind: 'all' })}
-        />
-
-        {/* 2. Favorites Clean Flat Tile */}
+        {/* 1. Favorites Clean Flat Tile */}
         {favoriteJobs.length > 0 && (
           <CollectionStoryBubble
             title={t('catalog.favoritesFilter')}
