@@ -275,27 +275,13 @@ export async function buyPremium(packageId?: string): Promise<boolean> {
     // Check if the user has active entitlements.
     let isPremium = customerInfo.entitlements.active['premium'] !== undefined;
 
-    // If entitlement not immediately active, try a restore/refresh (important for test purchases)
+    // If entitlement not immediately active, try restorePurchases
     if (!isPremium) {
       console.log('[RevenueCat] Premium entitlement not immediately active. Trying restorePurchases...');
       try {
-        const { customerInfo: restoredInfo } = await Purchases.restorePurchases();
-        console.log('[RevenueCat] Restored customerInfo:', JSON.stringify(restoredInfo, null, 2));
-        isPremium = restoredInfo.entitlements.active['premium'] !== undefined;
+        isPremium = await restorePurchases();
       } catch (restoreErr) {
-        console.warn('[RevenueCat] restorePurchases failed:', restoreErr);
-      }
-    }
-
-    // If still not active, try one more getCustomerInfo refresh
-    if (!isPremium) {
-      console.log('[RevenueCat] Still not active after restore. Trying getCustomerInfo refresh...');
-      try {
-        const { customerInfo: refreshedInfo } = await Purchases.getCustomerInfo();
-        console.log('[RevenueCat] Refreshed customerInfo:', JSON.stringify(refreshedInfo, null, 2));
-        isPremium = refreshedInfo.entitlements.active['premium'] !== undefined;
-      } catch (refreshErr) {
-        console.warn('[RevenueCat] getCustomerInfo refresh failed:', refreshErr);
+        console.warn('[RevenueCat] restorePurchases in buyPremium failed:', restoreErr);
       }
     }
 
@@ -319,4 +305,46 @@ export async function buyPremium(packageId?: string): Promise<boolean> {
     throw new Error(err.message || 'Purchase failed.');
   }
 }
+
+/**
+ * Restores previous purchases with RevenueCat (Google Play / App Store)
+ * and synchronizes the entitlement status with the backend.
+ * Returns true if an active 'premium' entitlement was found and restored.
+ */
+export async function restorePurchases(): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) {
+    console.log('[RevenueCat] restorePurchases called on non-native platform.');
+    return false;
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error('User must be logged in to restore purchases.');
+  }
+
+  await initBilling(user.id);
+
+  if (!isRCInitialized) {
+    throw new Error('Billing service is not initialized.');
+  }
+
+  try {
+    const { customerInfo } = await Purchases.restorePurchases();
+    console.log('[RevenueCat] Restored customerInfo:', JSON.stringify(customerInfo, null, 2));
+    let isPremium = customerInfo.entitlements.active['premium'] !== undefined;
+
+    if (!isPremium) {
+      // Fallback: double-check via getCustomerInfo
+      const { customerInfo: refreshedInfo } = await Purchases.getCustomerInfo();
+      isPremium = refreshedInfo.entitlements.active['premium'] !== undefined;
+    }
+
+    await syncBillingStatus(isPremium);
+    return isPremium;
+  } catch (err: any) {
+    console.error('[RevenueCat] restorePurchases error:', err);
+    throw new Error(err.message || 'Restore failed.');
+  }
+}
+
 

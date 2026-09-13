@@ -484,6 +484,27 @@ export const uiTranslations = {
       },
       cta: "Los geht's",
     },
+    preAdNotice: {
+      badge: 'Snagbite bleibt kostenlos',
+      title: 'Transparenz ist uns wichtig',
+      description: 'KI-Videoanalysen, Cloud-Server und Datenhaltung verursachen laufende Rechenkosten. Damit Snagbite für alle kostenlos bleiben kann, zeigen wir gelegentlich dezente Werbung.',
+      features: {
+        ai: {
+          title: 'Echte KI-Power',
+          desc: 'Komplexe Video- & Bildanalysen in Sekunden',
+        },
+        free: {
+          title: 'Freier Zugang',
+          desc: 'Alle Kernfunktionen bleiben für jeden offen',
+        },
+        respect: {
+          title: 'Dezent & Fair',
+          desc: 'Keine aufdringlichen Werbeunterbrechungen',
+        },
+      },
+      confirm: 'Alles klar, verstanden!',
+      goPremium: 'Lieber werbefrei? Zu Premium',
+    },
     app: {
       title: 'Snagbite',
       subtitle: 'Rezept-Assistent',
@@ -1639,7 +1660,14 @@ export const uiTranslations = {
         cancelSubtitle: 'Kein Risiko. Jederzeit kündbar.',
         termsNoticePrefix: 'Mit dem Kauf stimmst du den ',
         termsLink: 'AGB',
+        and: 'und der',
+        privacyLink: 'Datenschutzerklärung',
         termsNoticeSuffix: ' zu.',
+        restore: 'Käufe wiederherstellen',
+        restoring: 'Wiederherstellen...',
+        restoreSuccess: 'Käufe erfolgreich wiederhergestellt!',
+        restoreNone: 'Keine aktiven Käufe gefunden.',
+        restoreError: 'Wiederherstellung fehlgeschlagen. Bitte versuche es erneut.',
         trialBanner: {
           title: 'Premium kostenlos testen',
           body: 'Schalte alles frei. Jederzeit kündbar.',
@@ -1672,16 +1700,20 @@ export const uiTranslations = {
         },
         features: {
           extractions: {
-            title: 'Mehr Rezept-Importe',
-            desc: 'Bis zu 30 täglich aus Videos, Web & Fotos — im Hintergrund & mehrere gleichzeitig.'
+            title: 'Unbegrenzte KI-Rezept-Extraktionen',
+            desc: 'Rezepte aus Reels, TikToks & Fotos ohne Tageslimit extrahieren.'
           },
-          nutrition: {
-            title: 'Nährwerte & Makros',
-            desc: 'Kalorien, Makros & Portionen pro Portion auf einen Blick.'
+          noAds: {
+            title: '100% Werbefrei',
+            desc: 'Keine Werbe-Banner oder Interstitials.'
           },
           remix: {
-            title: 'Rezept-KI-Chat',
-            desc: 'Rezepte per Chat anpassen, Zutaten ersetzen & Kochtipps holen.'
+            title: 'Recipe Copilot & KI-Remix',
+            desc: 'Rezepte unbegrenzt mit KI anpassen und Zutaten austauschen.'
+          },
+          nutrition: {
+            title: 'Detaillierte Nährwert-Analysen',
+            desc: 'Makronährstoffe, Kalorien pro Portion und Healthy-Score Insights.'
           },
           shoppingList: {
             title: 'Smarte Einkaufsliste',
@@ -1694,10 +1726,6 @@ export const uiTranslations = {
           cookingMode: {
             title: 'Kochmodus',
             desc: 'Schritt-für-Schritt kochen mit Timer & Fokusansicht.'
-          },
-          noAds: {
-            title: 'Keine Werbung',
-            desc: 'Genieße die App ohne Banner-Werbung.'
           }
         }
       },
@@ -1867,6 +1895,27 @@ export const uiTranslations = {
         settingsPath: 'Settings',
       },
       cta: "Let's go",
+    },
+    preAdNotice: {
+      badge: 'Snagbite stays free',
+      title: 'Transparency matters to us',
+      description: 'AI video analysis, cloud servers, and data storage cause ongoing compute costs. To keep Snagbite free for everyone, we occasionally display unobtrusive ads.',
+      features: {
+        ai: {
+          title: 'Real AI Compute',
+          desc: 'Complex video and photo parsing in seconds',
+        },
+        free: {
+          title: 'Free Access',
+          desc: 'All core features remain open for everyone',
+        },
+        respect: {
+          title: 'Subtle & Fair',
+          desc: 'No intrusive pop-up spam or aggressive banners',
+        },
+      },
+      confirm: 'Got it, sounds good!',
+      goPremium: 'Prefer ad-free? Go Premium',
     },
     app: {
       title: 'Snagbite',
@@ -3022,7 +3071,14 @@ export const uiTranslations = {
         cancelSubtitle: 'No risk. Cancel anytime.',
         termsNoticePrefix: 'By purchasing you agree to the ',
         termsLink: 'Terms & Conditions',
+        and: 'and the',
+        privacyLink: 'Privacy Policy',
         termsNoticeSuffix: '.',
+        restore: 'Restore purchases',
+        restoring: 'Restoring...',
+        restoreSuccess: 'Purchases successfully restored!',
+        restoreNone: 'No active purchases found.',
+        restoreError: 'Restore failed. Please try again.',
         trialBanner: {
           title: 'Try Premium free',
           body: 'Unlock everything. Cancel anytime.',
@@ -3055,16 +3111,20 @@ export const uiTranslations = {
         },
         features: {
           extractions: {
-            title: 'More Recipe Imports',
-            desc: 'Up to 30 a day from videos, web & photos — in the background & several at once.'
+            title: 'Unlimited AI Recipe Extractions',
+            desc: 'Extract recipes from Reels, TikToks & photos without daily limits.'
           },
-          nutrition: {
-            title: 'Nutrition & Macros',
-            desc: 'Calories, macros & portions per serving at a glance.'
+          noAds: {
+            title: '100% Ad-Free',
+            desc: 'No ad banners or interstitial ads.'
           },
           remix: {
-            title: 'Recipe AI Chat',
-            desc: 'Adapt recipes via chat, replace ingredients & get cooking tips.'
+            title: 'Recipe Copilot & AI Remix',
+            desc: 'Customize recipes without limits using AI and swap ingredients.'
+          },
+          nutrition: {
+            title: 'Detailed Nutrition Analyses',
+            desc: 'Macronutrients, calories per portion, and healthy-score insights.'
           },
           shoppingList: {
             title: 'Smart Shopping List',
@@ -3077,10 +3137,6 @@ export const uiTranslations = {
           cookingMode: {
             title: 'Cooking Mode',
             desc: 'Step-by-step cooking with timer & focus view.'
-          },
-          noAds: {
-            title: 'No Ads',
-            desc: 'Enjoy the app without banner ads.'
           }
         }
       },
