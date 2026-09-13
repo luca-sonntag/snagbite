@@ -1,4 +1,4 @@
-import { ChevronRight, Lock } from 'lucide-react';
+import { ChevronRight, Crown } from 'lucide-react';
 import { hapticLight } from '../../utils/haptics';
 import { useI18n } from '../../context/I18nContext';
 import type { HealthScoreBreakdown } from '../../types';
@@ -121,7 +121,7 @@ export default function HealthScoreBadge({
       <div className="flex items-center gap-2 shrink-0">
         {!isPremium && (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-700 dark:text-amber-300">
-            <Lock className="w-2.5 h-2.5" />
+            <Crown className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
             <span>{t('recipe.healthScoreProBadge') || 'PRO'}</span>
           </span>
         )}

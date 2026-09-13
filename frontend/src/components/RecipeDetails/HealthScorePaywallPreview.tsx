@@ -36,7 +36,7 @@ export default function HealthScorePaywallPreview({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-1">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">
-              Premium Deep-Dive
+              Snagbite PRO Deep-Dive
             </span>
           </div>
           <h4 className="text-base font-bold text-gray-900 dark:text-white leading-snug">
@@ -75,7 +75,7 @@ export default function HealthScorePaywallPreview({
         className="w-full h-12 rounded-2xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-bold text-sm flex items-center justify-center gap-2 border-none shadow-md shadow-emerald-600/20 cursor-pointer transition-all"
       >
         <Crown className="w-4 h-4 fill-white" />
-        <span>{t('recipe.healthScorePaywallCta') || (isEn ? 'Upgrade to Premium' : 'Jetzt freischalten')}</span>
+        <span>{t('recipe.healthScorePaywallCta') || (isEn ? 'Unlock Snagbite PRO' : 'Snagbite PRO freischalten')}</span>
       </button>
     </div>
   );
