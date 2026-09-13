@@ -233,9 +233,11 @@ export default function SavedCatalog({
         return t('catalog.shelfRecent');
       case 'recommended':
         return shelves.recommended?.title ?? t('catalog.shelfRecommended');
+      case 'vital':
+        return t('catalog.magazine.vitalSheetTitle');
       case 'collection': {
         const col = collections.find(c => c.id === preset.id);
-        return col ? `${col.emoji ? col.emoji + ' ' : ''}${col.name}` : t('catalog.allRecipesTitle');
+        return col ? col.name : t('catalog.allRecipesTitle');
       }
       case 'flag':
         return preset.name;
@@ -283,7 +285,7 @@ export default function SavedCatalog({
     if (preset.kind !== 'search') {
       setSearchQuery('');
       setFilters(getBaseFiltersForPreset(preset));
-      setSortBy(preset.kind === 'recent' ? 'recent' : 'newest');
+      setSortBy(preset.kind === 'recent' ? 'recent' : preset.kind === 'vital' ? 'healthScore' : 'newest');
     }
   }, [catalogSubPath, preset, setFilters, setSearchQuery, setSortBy]);
 
@@ -596,30 +598,32 @@ export default function SavedCatalog({
   // ---------------------------------------------------------------------------
   return (
     <div className="flex flex-col gap-2">
-      <CatalogFilters
-        title={isListLevel ? listTitle : t('catalog.myCookbookTitle')}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        autoFocusSearch={isListLevel && preset.kind === 'search'}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        filters={filters}
-        setFilters={setFilters}
-        activeFilterCount={activeFilterCount}
-        onOpenFilters={() => setIsFilterSheetOpen(true)}
-        collections={collections}
-        isSelectMode={isSelectMode}
-        setIsSelectMode={(active) => {
-          setIsSelectMode(active);
-          if (!active) setSelectedIds(new Set());
-        }}
-        onBack={isListLevel ? () => navigateCatalog(null) : undefined}
-        resultCount={isListLevel ? filteredJobs.length : completedJobs.length}
-        sortBy={sortBy}
-        showViewModeToggle={isListLevel}
-        catalogSubPath={catalogSubPath}
-        onNavigateCatalog={navigateCatalogSkipSync}
-      />
+      {isListLevel && (
+        <CatalogFilters
+          title={listTitle}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          autoFocusSearch={preset.kind === 'search'}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          filters={filters}
+          setFilters={setFilters}
+          activeFilterCount={activeFilterCount}
+          onOpenFilters={() => setIsFilterSheetOpen(true)}
+          collections={collections}
+          isSelectMode={isSelectMode}
+          setIsSelectMode={(active) => {
+            setIsSelectMode(active);
+            if (!active) setSelectedIds(new Set());
+          }}
+          onBack={() => navigateCatalog(null)}
+          resultCount={filteredJobs.length}
+          sortBy={sortBy}
+          showViewModeToggle={true}
+          catalogSubPath={catalogSubPath}
+          onNavigateCatalog={navigateCatalogSkipSync}
+        />
+      )}
 
       {premiumBanner}
 
@@ -628,6 +632,7 @@ export default function SavedCatalog({
       ) : !isListLevel ? (
         <CookbookHome
           totalRecipes={completedJobs.length}
+          items={completedJobs}
           collections={collections}
           jobsByCollection={jobsByCollection}
           jobsByFlag={jobsByFlag}
@@ -642,10 +647,24 @@ export default function SavedCatalog({
           onAddCollection={handleAddCollectionClick}
           onManageCollections={handleAddCollectionClick}
           isSelectMode={isSelectMode}
+          onToggleSelectMode={() => {
+            const next = !isSelectMode;
+            setIsSelectMode(next);
+            if (!next) setSelectedIds(new Set());
+          }}
           selectedIds={selectedIds}
           bindLongPress={bindLongPress}
           onRecipeSaved={onRecipeSaved}
           savedRecipeIds={savedRecipeIds}
+          searchQuery={searchQuery}
+          onSearchChange={(val) => {
+            setSearchQuery(val);
+            if (val) {
+              navigateCatalogSkipSync(buildListRoute({ kind: 'search' }));
+            }
+          }}
+          activeFilterCount={activeFilterCount}
+          onOpenFilters={() => setIsFilterSheetOpen(true)}
         />
       ) : filteredJobs.length === 0 ? (
         <div className="flex flex-col items-center gap-3 text-center py-14 px-6">

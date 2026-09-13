@@ -87,6 +87,7 @@ export default function RecipeDetails({
         onToggleFavorite={onToggleFavorite}
         cookRefreshKey={cookRefreshKey}
         onRemixClick={() => openCopilot(true)}
+        totalTimeLabel={totalTimeLabel}
       />
 
       {/* Sentinel for the sticky bar's collapsed title row */}

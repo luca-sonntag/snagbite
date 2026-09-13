@@ -87,6 +87,7 @@ export default function IngredientNutritionSheet({
                       canonicalId={ingredient.canonicalId}
                       category={category || ingredient.category}
                       name={ingredient.name}
+                      synonyms={ingredient.synonyms}
                       size="lg"
                     />
                     <div className="flex-1 min-w-0">

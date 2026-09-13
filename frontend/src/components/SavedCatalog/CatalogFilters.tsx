@@ -247,7 +247,7 @@ export default function CatalogFilters({
           </Button>
 
           <div className="flex-1 min-w-0">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white truncate leading-tight">{title}</h2>
+            <h2 className="text-base font-bold text-gray-900 dark:text-white leading-tight break-words [overflow-wrap:anywhere] [word-break:break-word] line-clamp-2">{title}</h2>
             <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-tight truncate">
               {t('catalog.recipeCount', { count: resultCount })} · {t(`catalog.sort.${sortBy}`)}
             </p>

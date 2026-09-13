@@ -45,6 +45,9 @@ export function aggregateShoppingItems(items: ShoppingListItem[]): GroupedShoppi
         existing.typicalPackageAmount = item.typicalPackageAmount;
         existing.typicalPackageUnit = item.typicalPackageUnit;
       }
+      if (!existing.synonyms && item.synonyms) {
+        existing.synonyms = item.synonyms;
+      }
 
       if (
         !existing.subItems &&
@@ -132,6 +135,7 @@ export function aggregateShoppingItems(items: ShoppingListItem[]): GroupedShoppi
         checked: item.checked,
         category: item.category,
         canonicalId: item.canonicalId || undefined,
+        synonyms: item.synonyms,
         itemIds: [item.id],
         inPantryWarning: item.inPantryWarning,
         typicalPackageAmount: item.typicalPackageAmount,

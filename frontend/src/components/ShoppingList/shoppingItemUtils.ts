@@ -1,5 +1,5 @@
-import type { AggregatedShoppingItem, PantryItem, ParentIngredientInfo } from '../../types';
-import { normalizeFoodBaseKey } from '../../utils/ingredientTaxonomy';
+import type { AggregatedShoppingItem, PantryItem, ParentIngredientInfo, ShoppingListItem } from '../../types';
+import { normalizeFoodBaseKey, normalizeUnit } from '../../utils/ingredientTaxonomy';
 import { formatQuantity } from '../../utils/formatQuantity';
 import { isPantryStockSufficient, getPantryStockStatus, type PantryStockStatus } from '@cookbook/shared';
 
@@ -160,4 +160,22 @@ export function extractExtraNote(
   }
 
   return null;
+}
+
+export function findGroupMatchedIds(
+  items: ShoppingListItem[],
+  groupKeyName: string,
+  unit: string
+): string[] {
+  const keyName = groupKeyName.toLowerCase().trim();
+  const keyUnit = normalizeUnit(unit).toLowerCase().trim();
+  return items
+    .filter((item) => {
+      const matchName =
+        (item.baseName || item.name || '').toLowerCase().trim() === keyName ||
+        (item.name || '').toLowerCase().trim() === keyName;
+      const matchUnit = normalizeUnit(item.unit).toLowerCase().trim() === keyUnit;
+      return matchName && matchUnit;
+    })
+    .map((i) => i.id);
 }

@@ -27,7 +27,7 @@ interface FilterSheetProps {
   countMatches: (filters: CatalogFilterState) => number;
 }
 
-const SORT_OPTIONS: CatalogSort[] = ['newest', 'recent', 'title', 'time'];
+const SORT_OPTIONS: CatalogSort[] = ['newest', 'recent', 'title', 'time', 'healthScore'];
 
 function chipClass(isActive: boolean, accent: 'emerald' | 'amber' | 'neutral' = 'neutral') {
   if (isActive) {
@@ -159,11 +159,7 @@ export default function FilterSheet({
                           onClick={() => { hapticLight(); setDraft(d => ({ ...d, collectionIds: toggleIn(d.collectionIds, col.id) })); }}
                           className={`min-h-[44px] px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-1.5 ${chipClass(isActive, 'emerald')}`}
                         >
-                          {col.emoji ? (
-                            <span className="text-sm leading-none">{col.emoji}</span>
-                          ) : (
-                            <Folder className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'}`} />
-                          )}
+                          <Folder className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'}`} />
                           <span>{col.name}</span>
                         </button>
                       );

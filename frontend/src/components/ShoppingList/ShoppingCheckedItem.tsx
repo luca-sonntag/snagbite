@@ -51,6 +51,7 @@ export default function ShoppingCheckedItem({
             canonicalId={item.canonicalId}
             category={item.category}
             name={item.name}
+            synonyms={item.synonyms}
             size="md"
             className="opacity-40 grayscale"
           />

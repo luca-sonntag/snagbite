@@ -6,6 +6,53 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-13: Umbenennung & Generalisierung von `RecommendationThemeSheet` zu `HeroThemeSheet`
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `RecommendationThemeSheet.tsx`: Komponente war semantisch ausschließlich an die "Empfehlungen"-Slide des Hero-Karussells gekoppelt und nutzte fest verdrahtete Amber-Theme-Farben und Untertitel.
+  - Fehlende Möglichkeit, aus dem Vital-Star-Hero-Slide heraus eine Gesamtauswahl aller gesunden Rezepte (Health Score $\ge 70$) als interaktives Drawer-Sheet zu öffnen.
+* **Ersetzt durch:**
+  - **Generalisiertes [`HeroThemeSheet.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/HeroThemeSheet.tsx):** Wiederverwendbares Bottom-Drawer-Sheet für thematische Auswahlen aus dem Hero-Karussell (Empfehlungen / Themen sowie Vital-Stars).
+  - **Dynamische Akzentuierung:** `badgeVariant`-Prop steuert Akzentfarben (z. B. `emerald` für Vital-Stars, `amber` für Empfehlungen) inklusive Footer-CTA-Styling.
+  - **Volle Katalog-Preset-Integration (`preset.kind === 'vital'`):** Direkter Sprung von der Hero-Drawer in den Vollkatalog mit automatischer Vorfilterung nach Health Score $\ge 70$ und Sortierung nach `healthScore`.
+* **Betroffene Dateien:** `frontend/src/components/SavedCatalog/HeroThemeSheet.tsx` (umbenannt von `RecommendationThemeSheet.tsx`), `frontend/src/components/SavedCatalog/CookbookHome.tsx`, `frontend/src/components/SavedCatalog/useCookbookMagazine.ts`, `frontend/src/components/SavedCatalog/catalogRoutes.ts`, `frontend/src/components/SavedCatalog/index.tsx`, `frontend/src/i18n.ts`, `docs/OBSOLETE.md`.
+
+---
+
+### 2026-09-12: Entfernung der redundanten Vibe-Quick-Chips (`CookbookVibeChips.tsx`) & In-Place-Vibe-Logik
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `CookbookVibeChips.tsx`: Horizontale Pill-Filterleiste (*Vital & Fit*, *Unter 25m*, *High Protein*, *One-Pot*, *Veggie*, *Süßes*) oberhalb des Hero-Karussells.
+  - Vibe-Filterzustand (`activeVibe`) in `useCookbookMagazine.ts` und `CookbookHome.tsx`.
+  - `matchesVibe()` und dynamische Vibe-Titel in `magazineCuratorUtils.ts`.
+  - Übersetzungskeys `catalog.vibes` und `catalog.magazine.vibes` in `i18n.ts`.
+  - *Begründung:* Das 3-Slide Hero-Karussell (Slide 2: Vital Star) und die Bento-Sektion (Blitzgerichte $\le 25\text{ Min.}$) decken diesen kuratorischen Mehrwert bereits inhärent ab. Die zusätzlichen Chips erzeugten ein unruhiges "Karussell-Sandwich" (drei horizontale Scrollleisten übereinander) und verwässerten die klare Magazin-Hierarchie.
+* **Ersetzt durch:**
+  - Ungetrübter vertikaler Fluss: Direkt nach den Instagram-Story-Bubbles folgt das 4:3 Hero-Karussell.
+  - Vollständige Filterung und Suche verbleibt sauber und gebündelt auf der Listenebene (`SavedCatalog/index.tsx` & `FilterSheet.tsx`).
+* **Betroffene Dateien:** `frontend/src/components/SavedCatalog/CookbookVibeChips.tsx` (gelöscht), `frontend/src/components/SavedCatalog/CookbookHome.tsx`, `frontend/src/components/SavedCatalog/useCookbookMagazine.ts`, `frontend/src/components/SavedCatalog/magazineCuratorUtils.ts`, `frontend/src/i18n.ts`, `docs/architecture/frontend.md`, `docs/OBSOLETE.md`.
+
+---
+
+### 2026-09-12: Repetitive 2-Row Shelf-Accordions (`DiscoveryAccordion` / `TwoRowRecipeShelf`) durch redaktionellen Culinary Magazine Feed ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `DiscoveryAccordion.tsx`: Eintönige, vertikale Akkordeon-Tabs („Neueste Rezepte“, „Zuletzt geöffnet“, „Schnell gekocht“), die jeweils ein starres, 2-reihiges horizontales Raster identischer 4:3-Karten einbetteten.
+  - `TwoRowRecipeShelf.tsx`: Repetitives 2-Reihen-Raster ohne visuelle Hierarchie, Inspiration oder Magazin-Charakter.
+  - Veraltetes rechteckiges Sammlungs-Horizontal-Raster (`CollectionTile.tsx` auf Home), bei dem Sammlungen wie standardmäßige Buttons untergingen.
+  - Würfel- / Roulette-Zufallsfunktion vorerst auf Nutzerwunsch entfernt.
+* **Ersetzt durch:**
+  - **100% kreisrunde Story-Highlights ([`CollectionStoryHub.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CollectionStoryHub.tsx)):** Instagram-inspirierte Bubbles (`rounded-full`, 64×64px, Kontrastring) direkt above-the-fold inklusive dediziertem „📚 Alle Rezepte“-Shortcut.
+  - **Taktile Vibe-Quick-Chips ([`CookbookVibeChips.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CookbookVibeChips.tsx)):** Sofortiges In-Place-Filtering nach Stimmungen (Vital & Fit 70+, Blitz-Gerichte <25 Min, High-Protein, One-Pot, Veggie, Süßes).
+  - **Format A: Cinematic 16:10 Hero Spotlight ([`RecipeHeroCard.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/RecipeHeroCard.tsx)):** Appetitliche Vollbild-Fotografie mit dunklem Gradient-Scrim, Health-Score-Badge (`Score 88 • A`), Nährstoffzeile und direktem „Jetzt kochen“-CTA.
+  - **Format B: Bento-Grid ([`RecipeBentoSection.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/RecipeBentoSection.tsx)):** 3:4 Portrait-Karte links + 2 gestapelte Mini-Karten ([`RecipeCompactCard.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/RecipeCompactCard.tsx)) rechts.
+  - **Format C: Wiederentdeckte Schätze ([`RecipeShowcaseCard.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/RecipeShowcaseCard.tsx)):** Horizontaler Banner für ältere, unprobierte Rezept-Perlen.
+  - **Format D: Dediziertes „Alle deine Rezepte“-Shelf ([`AllRecipesShelf.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/AllRecipesShelf.tsx)):** Bewahrung der geschätzten `RecipePosterCard`s in horizontaler Leiste mit prominentem Vollkatalog-Aktionsbutton.
+  - **Kuratorischer Custom Hook ([`useCookbookMagazine.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/useCookbookMagazine.ts)):** Auslagerung der redaktionellen Slot-Berechnung und des Vibe-Matchings unter strikter Einhaltung der Anti-Fragility-Regeln (0x String-/Keyword-Heuristiken).
+* **Betroffene Dateien:** `frontend/src/components/SavedCatalog/CookbookHome.tsx`, `frontend/src/components/SavedCatalog/CollectionStoryHub.tsx`, `frontend/src/components/SavedCatalog/CookbookVibeChips.tsx`, `frontend/src/components/SavedCatalog/RecipeHeroCard.tsx`, `frontend/src/components/SavedCatalog/RecipeBentoSection.tsx`, `frontend/src/components/SavedCatalog/RecipeCompactCard.tsx`, `frontend/src/components/SavedCatalog/RecipeShowcaseCard.tsx`, `frontend/src/components/SavedCatalog/AllRecipesShelf.tsx`, `frontend/src/components/SavedCatalog/useCookbookMagazine.ts`, `frontend/src/i18n.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-12: AI-Slop-Banner (`HealthScoreCopilotCard`) & redundanter Footer-Button im HealthScoreSheet durch integrierten Hero-Card Trigger ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**

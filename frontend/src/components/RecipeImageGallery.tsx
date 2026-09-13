@@ -1,10 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@heroui/react';
-import {
-  ArrowLeft,
-  Camera,
-  ChefHat
-} from 'lucide-react';
+import { ArrowLeft, Camera, ChefHat } from 'lucide-react';
 import type { Recipe } from '../types';
 import { useImageGallery } from '../hooks/useImageGallery';
 import { useI18n } from '../context/I18nContext';
@@ -13,119 +9,33 @@ import FullscreenImageModal from './FullscreenImageModal';
 import { getCachedImage } from '../utils/imageStore';
 import { isPhotoImportUrl } from '../utils/photoImport';
 import { hapticLight } from '../utils/haptics';
+import { PlatformIcon, detectPlatform, PLATFORM_ICON_COLOR } from './SavedCatalog/PlatformIcon';
 
-const InstagramIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-  </svg>
-);
-
-const TikTokIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="-2 -2 28 28"
-    fill="currentColor"
-    {...props}
-  >
-    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
-  </svg>
-);
-
-const YouTubeIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    {...props}
-  >
-    <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.54 3.5 12 3.5 12 3.5s-7.54 0-9.38.55A3.02 3.02 0 0 0 .5 6.19C0 8.04 0 12 0 12s0 3.96.5 5.81a3.02 3.02 0 0 0 2.12 2.14C4.46 20.5 12 20.5 12 20.5s7.54 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14C24 15.96 24 12 24 12s0-3.96-.5-5.81zM9.75 15.02V8.98L15.5 12l-5.75 3.02z" />
-  </svg>
-);
-
-const GlobeIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <circle cx="12" cy="12" r="10" />
-    <line x1="2" y1="12" x2="22" y2="12" />
-    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-  </svg>
-);
-
-type Platform = 'instagram' | 'tiktok' | 'youtube' | 'website';
-
-function detectPlatform(url: string): Platform {
-  try {
-    const host = new URL(url).hostname.toLowerCase();
-    if (host.includes('instagram.com')) return 'instagram';
-    if (host.includes('tiktok.com')) return 'tiktok';
-    if (host.includes('youtube.com') || host.includes('youtu.be')) return 'youtube';
-  } catch { /* ignore */ }
-  return 'website';
-}
-
-function PlatformIcon({ platform, className }: { platform: Platform; className?: string }) {
-  switch (platform) {
-    case 'instagram': return <InstagramIcon className={className} />;
-    case 'tiktok': return <TikTokIcon className={className} />;
-    case 'youtube': return <YouTubeIcon className={className} />;
-    default: return <GlobeIcon className={className} />;
-  }
-}
-
-function platformIconColor(platform: Platform): string {
-  switch (platform) {
-    case 'instagram': return 'text-pink-400';
-    case 'tiktok': return 'text-cyan-300';
-    case 'youtube': return 'text-red-400';
-    default: return 'text-blue-300';
-  }
-}
-
-interface RecipeImageGalleryProps {
+export interface RecipeImageGalleryProps {
   recipe: Recipe;
   reelUrl?: string;
   onBack?: () => void;
+  topRightActions?: React.ReactNode;
 }
 
-export default function RecipeImageGallery({ recipe, reelUrl, onBack }: RecipeImageGalleryProps) {
+export default function RecipeImageGallery({
+  recipe,
+  reelUrl,
+  onBack,
+  topRightActions,
+}: RecipeImageGalleryProps) {
   const { t } = useI18n();
+  const [activeSlide, setActiveSlide] = useState(0);
 
   // Derive initial list (excluding local: URLs since they need to be verified asynchronously)
   const initialImages = (recipe.imageUrls && recipe.imageUrls.length > 0
     ? recipe.imageUrls
     : (recipe.imageUrl ? [recipe.imageUrl] : [])
-  ).filter(url => !url.startsWith('local:'));
+  ).filter((url) => !url.startsWith('local:'));
 
-  const [availableImages, setAvailableImages] = React.useState<string[]>(initialImages);
+  const [availableImages, setAvailableImages] = useState<string[]>(initialImages);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let isMounted = true;
     async function checkLocalImages() {
       const urls = recipe.imageUrls && recipe.imageUrls.length > 0
@@ -167,8 +77,19 @@ export default function RecipeImageGallery({ recipe, reelUrl, onBack }: RecipeIm
     handleImageClick,
   } = useImageGallery(images);
 
-  const overlayButtons = (
+  const formattedHandle = recipe.sourceHandle
+    ? `@${recipe.sourceHandle.replace(/^@/, '')}`
+    : isPhotoImportUrl(reelUrl)
+      ? '@Foto-Import'
+      : null;
+
+  const platform = detectPlatform(reelUrl);
+
+  const overlayHeader = (
     <>
+      {/* Top Ambient Scrim for Back & Action Buttons */}
+      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/65 via-black/20 to-transparent pointer-events-none z-10" />
+
       {/* Floating Back Button (44x44px touch target) */}
       {onBack && (
         <Button
@@ -184,39 +105,65 @@ export default function RecipeImageGallery({ recipe, reelUrl, onBack }: RecipeIm
         </Button>
       )}
 
-      {/* Floating Bottom Actions */}
-      {reelUrl && (() => {
-        // A photo import has no source to open — label its origin instead of
-        // rendering a link to an unresolvable photo:// URL.
-        if (isPhotoImportUrl(reelUrl)) {
-          return (
-            <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2">
-              <span className="bg-black/65 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 backdrop-blur-md border border-white/10 shadow-lg select-none">
+      {/* Floating Top Right Actions */}
+      {topRightActions && (
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+          {topRightActions}
+        </div>
+      )}
+
+      {/* Soft Ambient Scrim for high contrast (Hero style from bottom) */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 via-40% to-transparent pointer-events-none z-10" />
+
+      {/* Bottom Content: Meta row, Title & Creator handle */}
+      <div className="absolute bottom-9 inset-x-4 sm:bottom-10 sm:inset-x-5 z-20 flex flex-col gap-1 text-white pointer-events-none pb-1">
+        {/* Meta Bar: Platform/Import badge & Slide indicator */}
+        <div className="flex items-center justify-between gap-2 min-h-[30px]">
+          {reelUrl ? (
+            isPhotoImportUrl(reelUrl) ? (
+              <span className="bg-black/65 text-white text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 backdrop-blur-md border border-white/10 shadow-sm pointer-events-auto select-none">
                 <Camera className="w-3.5 h-3.5 text-emerald-300" />
                 <span>{t('catalog.photoImport')}</span>
               </span>
-            </div>
-          );
-        }
+            ) : (
+              <a
+                href={reelUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  hapticLight();
+                }}
+                className="bg-black/65 hover:bg-emerald-600/90 text-white text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 backdrop-blur-md border border-white/10 shadow-sm transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer pointer-events-auto select-none"
+              >
+                <PlatformIcon
+                  platform={platform}
+                  className={`w-3.5 h-3.5 ${PLATFORM_ICON_COLOR[platform]}`}
+                />
+                <span>{t('catalog.viewReel')}</span>
+              </a>
+            )
+          ) : <div />}
 
-        const platform = detectPlatform(reelUrl);
-        const iconColor = platformIconColor(platform);
+          {availableImages.length > 1 && (
+            <span className="bg-black/60 text-white text-[10.5px] font-bold px-2.5 py-0.5 rounded-full backdrop-blur-md border border-white/10 shadow-sm pointer-events-none select-none">
+              {activeSlide + 1} / {availableImages.length}
+            </span>
+          )}
+        </div>
 
-        return (
-          <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2">
-            <a
-              href={reelUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => hapticLight()}
-              className="bg-black/65 hover:bg-emerald-600/90 text-white text-xs font-semibold px-3 py-1.5 min-h-[36px] rounded-full flex items-center gap-1.5 backdrop-blur-md border border-white/10 shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
-            >
-              <PlatformIcon platform={platform} className={`w-3.5 h-3.5 ${iconColor}`} />
-              <span>{t('catalog.viewReel')}</span>
-            </a>
-          </div>
-        );
-      })()}
+        {/* Recipe Title (Hero style directly in cover) */}
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight font-heading break-words drop-shadow-md">
+          {recipe.title}
+        </h1>
+
+        {/* Creator Handle with ample bottom spacing */}
+        {formattedHandle && (
+          <p className="text-xs sm:text-sm text-gray-200/90 font-medium truncate leading-none mt-1 mb-1 drop-shadow-xs">
+            {formattedHandle}
+          </p>
+        )}
+      </div>
     </>
   );
 
@@ -224,10 +171,19 @@ export default function RecipeImageGallery({ recipe, reelUrl, onBack }: RecipeIm
     <>
       {/* Inline Gallery */}
       {availableImages.length > 1 ? (
-        <div className="-mx-4 -mt-4 mb-4 relative group">
-          {overlayButtons}
+        <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950">
+          {overlayHeader}
           <div
             ref={scrollContainerRef}
+            onScroll={(e) => {
+              const container = e.currentTarget;
+              if (container.clientWidth > 0) {
+                const idx = Math.round(container.scrollLeft / container.clientWidth);
+                if (idx !== activeSlide && idx >= 0 && idx < availableImages.length) {
+                  setActiveSlide(idx);
+                }
+              }
+            }}
             onPointerDown={handlePointerDown}
             onPointerLeave={handlePointerLeave}
             onPointerUp={handlePointerUp}
@@ -235,49 +191,45 @@ export default function RecipeImageGallery({ recipe, reelUrl, onBack }: RecipeIm
             className={`flex overflow-x-auto ${isDragging ? 'cursor-grabbing' : 'md:cursor-pointer cursor-grab snap-x snap-mandatory'}`}
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {availableImages.map((img, idx) => {
-              return (
-                <div key={idx} className="w-full shrink-0 snap-center snap-always relative">
-                  <CachedImage
-                    src={img}
-                    emoji={recipe.emoji}
-                    draggable={false}
-                    alt={`${recipe.title} - view ${idx + 1}`}
-                    className={`w-full aspect-video object-cover object-center transition-transform duration-300 ${isDragging ? 'cursor-grabbing' : 'cursor-pointer'
-                      }`}
-                    onClick={() => handleImageClick(idx)}
-                  />
-                  <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full pointer-events-none opacity-80 backdrop-blur-sm">
-                    {idx + 1} / {availableImages.length}
-                  </div>
-                </div>
-              );
-            })}
+            {availableImages.map((img, idx) => (
+              <div key={idx} className="w-full shrink-0 snap-center snap-always relative">
+                <CachedImage
+                  src={img}
+                  emoji={recipe.emoji}
+                  draggable={false}
+                  alt={`${recipe.title} - view ${idx + 1}`}
+                  className={`w-full aspect-[4/3] sm:aspect-[16/10] object-cover object-center transition-transform duration-300 ${
+                    isDragging ? 'cursor-grabbing' : 'cursor-pointer'
+                  }`}
+                  onClick={() => handleImageClick(idx)}
+                />
+              </div>
+            ))}
           </div>
         </div>
       ) : availableImages.length === 1 ? (
-        <div className="-mx-4 -mt-4 mb-4 bg-black/5 dark:bg-white/5 relative group">
-          {overlayButtons}
+        <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950">
+          {overlayHeader}
           <CachedImage
             src={availableImages[0]}
             emoji={recipe.emoji}
             alt={recipe.title}
-            className="w-full aspect-video object-cover object-center cursor-pointer"
-            onClick={() => {
-              setFullscreenIndex(0);
-            }}
+            className="w-full aspect-[4/3] sm:aspect-[16/10] object-cover object-center cursor-pointer"
+            onClick={() => setFullscreenIndex(0)}
           />
         </div>
       ) : (
-        <div className="-mx-4 -mt-4 mb-4 aspect-video bg-gradient-to-br from-emerald-500/10 via-transparent to-indigo-500/10 border-b border-black/5 dark:border-white/5 relative flex items-center justify-center overflow-hidden">
-          {overlayButtons}
-          {recipe.emoji ? (
-            <span className="text-5xl select-none" role="img" aria-label="recipe emoji">
-              {recipe.emoji}
-            </span>
-          ) : (
-            <ChefHat className="w-12 h-12 text-emerald-500/20 dark:text-emerald-400/15 animate-pulse" />
-          )}
+        <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950">
+          {overlayHeader}
+          <div className="w-full aspect-[4/3] sm:aspect-[16/10] bg-gradient-to-br from-emerald-950 via-gray-900 to-indigo-950 flex items-center justify-center">
+            {recipe.emoji ? (
+              <span className="text-6xl select-none" role="img" aria-label="recipe emoji">
+                {recipe.emoji}
+              </span>
+            ) : (
+              <ChefHat className="w-16 h-16 text-emerald-400/25 animate-pulse" />
+            )}
+          </div>
         </div>
       )}
 

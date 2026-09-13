@@ -1,14 +1,20 @@
-import { Plus, ChevronRight } from 'lucide-react';
-import type { Collection, SavedRecipe, RecipeCategory } from '../../types';
-import { useI18n } from '../../context/I18nContext';
-import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
-import { hapticLight } from '../../utils/haptics';
-import CollectionTile from './CollectionTile';
-import RecipeShelf from './RecipeShelf';
+import { useState, useEffect, type MouseEvent } from 'react';
+import type { Collection, SavedRecipe, Recipe, RecipeCategory } from '../../types';
+import CollectionStoryHub from './CollectionStoryHub';
 import CategoryLabelBar from './CategoryLabelBar';
-import DiscoveryAccordion from './DiscoveryAccordion';
+import CookbookGreetingHeader from './CookbookGreetingHeader';
+import RecipeHeroCarousel, { type HeroSlideItem } from './RecipeHeroCarousel';
+import RecipeBentoSection from './RecipeBentoSection';
+import RecipeShowcaseCard from './RecipeShowcaseCard';
+import AllRecipesShelf from './AllRecipesShelf';
 import PublicRecipeRecommendationsShelf from './PublicRecipeRecommendationsShelf';
+import PublicRecipePreviewModal from '../PublicRecipe/PublicRecipePreviewModal';
+import HeroThemeSheet from './HeroThemeSheet';
+import { useAuth } from '../../context/AuthContext';
+import { useI18n } from '../../context/I18nContext';
+import { fetchPublicRecipeRecommendations, savePublicRecipeToCookbook } from '../../api/publicRecipesApi';
 import type { CatalogPreset } from './catalogRoutes';
+import { useCookbookMagazine } from './useCookbookMagazine';
 
 interface Shelf {
   items: SavedRecipe[];
@@ -23,6 +29,7 @@ interface RecommendedShelf extends Shelf {
 
 interface CookbookHomeProps {
   totalRecipes: number;
+  items?: SavedRecipe[];
   collections: Collection[];
   jobsByCollection: Record<string, SavedRecipe[]>;
   jobsByFlag?: Record<string, SavedRecipe[]>;
@@ -39,23 +46,33 @@ interface CookbookHomeProps {
   allFlags: string[];
   formatTotalTime: (recipe: any) => string | null;
   onOpenList: (preset: CatalogPreset) => void;
-  onOpenRecipe: (e: React.MouseEvent, job: SavedRecipe) => void;
+  onOpenRecipe: (e: MouseEvent, job: SavedRecipe) => void;
   onAddCollection: () => void;
   onManageCollections?: () => void;
   isSelectMode?: boolean;
+  onToggleSelectMode?: () => void;
   selectedIds?: Set<string>;
   bindLongPress?: (id: string, job: SavedRecipe) => any;
   onRecipeSaved?: (savedId: string) => void;
   savedRecipeIds?: Set<string>;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
+  activeFilterCount?: number;
+  onOpenFilters?: () => void;
 }
 
 /**
- * Level 1 of the catalog: a browsable cookbook home instead of one long list.
- * Unifies Collections, Favorites, Categories, and Labels at the top, followed by
- * context-recommended and recent discovery shelves.
+ * Level 1 of the catalog: Vibrant Culinary Magazine Feed.
+ * Replaces the repetitive horizontal shelves with varied editorial formats:
+ * - Circular Story Hub (Collections, All Recipes shortcut, Categories)
+ * - Format A: Cinematic 16:10 Hero Card with Health Score and Macros
+ * - Format B: Bento Grid (3:4 portrait card + 2 stacked compact cards)
+ * - Format C: Rediscovered Gems banner
+ * - Format D: All Recipes shelf using preserved RecipePosterCards
  */
 export default function CookbookHome({
   totalRecipes,
+  items,
   collections,
   jobsByCollection,
   jobsByFlag = {},
@@ -69,128 +86,203 @@ export default function CookbookHome({
   onOpenRecipe,
   onAddCollection,
   isSelectMode = false,
+  onToggleSelectMode,
   selectedIds = new Set(),
   bindLongPress,
   onRecipeSaved,
   savedRecipeIds,
+  searchQuery = '',
+  onSearchChange,
+  activeFilterCount = 0,
+  onOpenFilters,
 }: CookbookHomeProps) {
-  const { language, t } = useI18n();
+  const { getAccessToken } = useAuth();
+  const { t } = useI18n();
+  const [communityRecommendations, setCommunityRecommendations] = useState<Recipe[]>([]);
+  const [selectedPreviewRecipe, setSelectedPreviewRecipe] = useState<Recipe | null>(null);
+  const [activeHeroSheet, setActiveHeroSheet] = useState<'theme' | 'vital' | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const items = await fetchPublicRecipeRecommendations(getAccessToken, 6);
+        if (!cancelled && items.length > 0) {
+          setCommunityRecommendations(items);
+        }
+      } catch (err) {
+        console.warn('[CookbookHome] Error loading community recommendations:', err);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [getAccessToken]);
+
+  const allCompletedJobs = items ?? shelves.newest?.items ?? [];
   const favJobs = favoriteJobs.length > 0 ? favoriteJobs : (shelves.favorites?.items ?? []);
 
+  const {
+    heroSlides,
+    themeRecipes,
+    themeTitle,
+    vitalRecipes,
+    bentoRecipes,
+    bentoTitle,
+    bentoSubtitle,
+    rediscoveredRecipe,
+    allRecipes,
+  } = useCookbookMagazine({
+    items: allCompletedJobs,
+    recommendedShelf: shelves.recommended,
+    communityRecipes: communityRecommendations,
+    savedRecipeIds,
+    formatTotalTime,
+    onOpenTheme: () => setActiveHeroSheet('theme'),
+    onOpenVital: () => setActiveHeroSheet('vital'),
+  });
+
+  const handleOpenSlide = (e: MouseEvent, slide: HeroSlideItem) => {
+    if (slide.isCommunity) {
+      if (slide.recipe.id && savedRecipeIds?.has(slide.recipe.id)) {
+        window.location.hash = `/recipe/${slide.recipe.id}`;
+      } else {
+        setSelectedPreviewRecipe(slide.recipe);
+      }
+    } else if (slide.job) {
+      onOpenRecipe(e, slide.job);
+    }
+  };
+
+  const handleSaveCommunityFromHero = async (_e: MouseEvent, recipe: Recipe) => {
+    if (!recipe.id || !onRecipeSaved) return;
+    try {
+      await savePublicRecipeToCookbook(recipe.id, getAccessToken);
+      onRecipeSaved(recipe.id);
+    } catch (err) {
+      console.error('[CookbookHome] Failed to save community recipe from hero:', err);
+    }
+  };
+
+  // First recipe image for the "Alle Rezepte" story bubble thumbnail
+  const firstRecipeThumbnail = allCompletedJobs[0]?.recipe?.imageUrl ?? null;
+
   return (
-    <div className="flex flex-col gap-6 pb-4">
-      {/* 📂 Unified Organization Hub: Sammlungen, Favoriten, Kategorien & Labels */}
-      <section className="flex flex-col gap-2.5">
-        {/* Row of Tiles: 1. ⭐ Favoriten + 2. 🍲 Speisen-Kategorien + 3. User Collections + 4. ➕ Neue Sammlung */}
-        <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 py-1.5 scroll-smooth">
-          {/* ⭐ Favoriten Smart-Tile (nur wenn Rezepte enthalten sind) */}
-          {favJobs.length > 0 && (
-            <CollectionTile
-              title={t('catalog.favoritesFilter')}
-              isFavorite
-              jobs={favJobs}
-              onClick={() => onOpenList({ kind: 'favorites' })}
-            />
-          )}
+    <div className="flex flex-col gap-6 pb-6 animate-fade-in select-none">
+      {/* 1. Contextual Greeting Header */}
+      <CookbookGreetingHeader
+        isSelectMode={isSelectMode}
+        onToggleSelectMode={onToggleSelectMode}
+        searchQuery={searchQuery}
+        onSearchChange={onSearchChange}
+        activeFilterCount={activeFilterCount}
+        onOpenFilters={onOpenFilters}
+      />
 
-          {/* 🍲 Speisen-Kategorien als Sammlungen */}
-          {availableCategories.map(cat => {
-            const jobs = jobsByCategory[cat] ?? [];
-            if (jobs.length === 0) return null;
-            return (
-              <CollectionTile
-                key={cat}
-                title={getRecipeCategoryLabel(cat, language)}
-                emoji={getRecipeCategoryEmoji(cat)}
-                jobs={jobs}
-                onClick={() => onOpenList({ kind: 'category', category: cat })}
-              />
-            );
-          })}
-
-          {/* User Collections */}
-          {collections.map(col => (
-            <CollectionTile
-              key={col.id}
-              collection={col}
-              jobs={jobsByCollection[col.id] ?? []}
-              onClick={() => onOpenList({ kind: 'collection', id: col.id })}
-            />
-          ))}
-
-          {/* ➕ Add Collection Button */}
-          <button
-            type="button"
-            onClick={() => {
-              hapticLight();
-              onAddCollection();
-            }}
-            className="w-[8.5rem] shrink-0 flex flex-col gap-1.5 text-left active:scale-[0.97] transition-transform cursor-pointer border-none bg-transparent"
-          >
-            <span className="w-full aspect-[2/1] rounded-2xl bg-emerald-500/5 hover:bg-emerald-500/10 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/15 flex items-center justify-center transition-colors border-none shadow-[0_2px_6px_rgba(0,0,0,0.02)]">
-              <Plus className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            </span>
-            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 px-0.5 line-clamp-1 leading-snug">
-              {t('catalog.addCollection')}
-            </span>
-          </button>
-        </div>
-
-        {/* 🏷️ Labels Chip Bar (only rendered if user has custom labels) */}
-        <CategoryLabelBar
-          allFlags={allFlags}
-          jobsByFlag={jobsByFlag}
+      {/* 2. Clean Flat Squircle Collection Hub */}
+      <section className="space-y-3">
+        <CollectionStoryHub
+          totalRecipes={totalRecipes}
+          allRecipesThumbnail={firstRecipeThumbnail}
+          favoriteJobs={favJobs}
+          availableCategories={availableCategories}
+          jobsByCategory={jobsByCategory}
+          collections={collections}
+          jobsByCollection={jobsByCollection}
           onOpenList={onOpenList}
+          onAddCollection={onAddCollection}
         />
+
+        {/* Custom Labels / Tags if user created any */}
+        {allFlags.length > 0 && (
+          <CategoryLabelBar
+            allFlags={allFlags}
+            jobsByFlag={jobsByFlag}
+            onOpenList={onOpenList}
+          />
+        )}
       </section>
 
-      {/* Empfohlene Rezepte (Einzeilig horizontal, kontextbasiert) */}
-      {shelves.recommended && shelves.recommended.items.length >= 2 && (
-        <RecipeShelf
-          title={shelves.recommended.title}
-          subtitle={t('catalog.recommendations.subtitle')}
-          jobs={shelves.recommended.items}
-          totalCount={shelves.recommended.total}
-          formatTotalTime={formatTotalTime}
-          onOpenAll={() => onOpenList({ kind: 'recommended' })}
-          onOpenRecipe={onOpenRecipe}
-          isSelectMode={isSelectMode}
-          selectedIds={selectedIds}
-          bindLongPress={bindLongPress}
+      {/* 3. COVER STORY Part 1: Modern 3-Slide Hero Carousel */}
+      {heroSlides.length > 0 && (
+        <RecipeHeroCarousel
+          slides={heroSlides}
+          onOpenSlide={handleOpenSlide}
+          onSaveCommunity={handleSaveCommunityFromHero}
         />
       )}
 
-      {/* 🌟 Öffentliche Empfehlungen / Community Discoveries (unter Empfehlungen) */}
+      {/* 4. COVER STORY Part 2: Bento Grid for Fast & Nutrient-Dense Dishes (only when at least 3 recipes are available) */}
+      {bentoRecipes.length >= 3 && (
+        <RecipeBentoSection
+          recipes={bentoRecipes}
+          title={bentoTitle}
+          subtitle={bentoSubtitle}
+          formatTotalTime={formatTotalTime}
+          onOpenRecipe={onOpenRecipe}
+          onSeeAll={() => onOpenList({ kind: 'quick' })}
+        />
+      )}
+
+      {/* 5. NEUER INPUT: Community Discoveries (if active) */}
       {onRecipeSaved && (
         <PublicRecipeRecommendationsShelf
+          recommendations={communityRecommendations}
           onRecipeSaved={onRecipeSaved}
           savedRecipeIds={savedRecipeIds}
         />
       )}
 
-      {/* Dynamic Discovery Shelves (Single Open Accordion: Neueste, Zuletzt geöffnet, Schnell gekocht) */}
-      <DiscoveryAccordion
-        shelves={shelves}
+      {/* 6. NOSTALGIE-SPOTLIGHT: Format C: Rediscovered Gems */}
+      {rediscoveredRecipe && (
+        <RecipeShowcaseCard
+          job={rediscoveredRecipe}
+          totalTime={rediscoveredRecipe.recipe ? formatTotalTime(rediscoveredRecipe.recipe) : null}
+          onOpenRecipe={onOpenRecipe}
+        />
+      )}
+
+      {/* 7. VOLLSTÄNDIGE BIBLIOTHEK: Dedicated "Alle deine Rezepte" Shelf at Bottom */}
+      <AllRecipesShelf
+        items={allRecipes}
+        totalCount={totalRecipes}
         formatTotalTime={formatTotalTime}
-        onOpenList={onOpenList}
         onOpenRecipe={onOpenRecipe}
+        onViewAll={() => onOpenList({ kind: 'all' })}
         isSelectMode={isSelectMode}
         selectedIds={selectedIds}
         bindLongPress={bindLongPress}
       />
 
-      {/* Escape hatch into the unfiltered list */}
-      <button
-        type="button"
-        onClick={() => {
-          hapticLight();
-          onOpenList({ kind: 'all' });
-        }}
-        className="flex items-center justify-center gap-1.5 w-full h-12 min-h-[48px] rounded-2xl bg-white dark:bg-gray-900 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 active:scale-[0.99] transition-all cursor-pointer"
-      >
-        {t('catalog.allRecipes', { count: totalRecipes })}
-        <ChevronRight className="w-4 h-4" />
-      </button>
+      {/* Community Recipe Preview Modal */}
+      {selectedPreviewRecipe && (
+        <PublicRecipePreviewModal
+          isOpen={Boolean(selectedPreviewRecipe)}
+          onClose={() => setSelectedPreviewRecipe(null)}
+          recipe={selectedPreviewRecipe}
+          isSaved={selectedPreviewRecipe.id ? savedRecipeIds?.has(selectedPreviewRecipe.id) : false}
+          onSave={async (rec) => {
+            if (!rec.id || !onRecipeSaved) return;
+            await savePublicRecipeToCookbook(rec.id, getAccessToken);
+            onRecipeSaved(rec.id);
+            window.location.hash = `/recipe/${rec.id}`;
+          }}
+        />
+      )}
+
+      {/* Hero Theme & Vital Stars Drawer */}
+      <HeroThemeSheet
+        isOpen={activeHeroSheet !== null}
+        onClose={() => setActiveHeroSheet(null)}
+        themeTitle={activeHeroSheet === 'vital' ? t('catalog.magazine.vitalSheetTitle') : themeTitle}
+        themeSubtitle={activeHeroSheet === 'vital' ? t('catalog.magazine.vitalSheetSubtitle', { count: vitalRecipes.length }) : undefined}
+        badgeVariant={activeHeroSheet === 'vital' ? 'emerald' : 'amber'}
+        recipes={activeHeroSheet === 'vital' ? vitalRecipes : themeRecipes}
+        formatTotalTime={formatTotalTime}
+        onOpenRecipe={onOpenRecipe}
+        onOpenCatalog={() => onOpenList({ kind: activeHeroSheet === 'vital' ? 'vital' : 'recommended' })}
+      />
     </div>
   );
 }

@@ -17,6 +17,8 @@ export interface CatalogFilterState {
   recommendedOnly: boolean;
   /** Max total time (prep + cook) in minutes; 0 = no time constraint. */
   maxTime: number;
+  /** Min health score (0-100); 0 = no constraint. */
+  minHealthScore?: number;
   categories: RecipeCategory[];
   collectionIds: string[];
   flags: string[];
@@ -26,6 +28,7 @@ export const EMPTY_FILTERS: CatalogFilterState = {
   favoritesOnly: false,
   recommendedOnly: false,
   maxTime: 0,
+  minHealthScore: 0,
   categories: [],
   collectionIds: [],
   flags: []
@@ -33,7 +36,7 @@ export const EMPTY_FILTERS: CatalogFilterState = {
 
 export const TIME_FILTER_OPTIONS = [15, 30, 60] as const;
 
-export type CatalogSort = 'newest' | 'recent' | 'title' | 'time';
+export type CatalogSort = 'newest' | 'recent' | 'title' | 'time' | 'healthScore';
 
 /** Number of recipes shown per horizontal shelf on the cookbook home. */
 export const SHELF_SIZE = 12;
@@ -56,6 +59,7 @@ export function countActiveFilters(filters: CatalogFilterState): number {
     (filters.favoritesOnly ? 1 : 0) +
     (filters.recommendedOnly ? 1 : 0) +
     (filters.maxTime > 0 ? 1 : 0) +
+    ((filters.minHealthScore ?? 0) > 0 ? 1 : 0) +
     (filters.categories?.length ?? 0) +
     filters.collectionIds.length +
     filters.flags.length
@@ -120,7 +124,8 @@ export function useSavedCatalog({
   // Sorting state persisted to localStorage
   const [sortBy, setSortBy] = useState<CatalogSort>(() => {
     const stored = localStorage.getItem('recipe_catalog_sort');
-    return (['newest', 'recent', 'title', 'time'] as const).includes(stored as CatalogSort)
+    const validSorts: readonly CatalogSort[] = ['newest', 'recent', 'title', 'time', 'healthScore'];
+    return (validSorts as readonly string[]).includes(stored ?? '')
       ? (stored as CatalogSort)
       : 'newest';
   });
@@ -245,6 +250,12 @@ export function useSavedCatalog({
       if (order === 'time') {
         return getTotalTime(a.recipe) - getTotalTime(b.recipe);
       }
+      if (order === 'healthScore') {
+        const scoreA = a.recipe?.healthScore ?? 0;
+        const scoreB = b.recipe?.healthScore ?? 0;
+        if (scoreB !== scoreA) return scoreB - scoreA;
+        return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
+      }
       if (order === 'recent') {
         const aSeen = recentMap[a.recipeId] ?? 0;
         const bSeen = recentMap[b.recipeId] ?? 0;
@@ -295,6 +306,11 @@ export function useSavedCatalog({
       if (facets.maxTime > 0) {
         const total = getTotalTime(job.recipe);
         if (total <= 0 || total > facets.maxTime) return false;
+      }
+
+      if (facets.minHealthScore && facets.minHealthScore > 0) {
+        const score = job.recipe?.healthScore ?? 0;
+        if (score < facets.minHealthScore) return false;
       }
 
       if (facets.categories && facets.categories.length > 0) {

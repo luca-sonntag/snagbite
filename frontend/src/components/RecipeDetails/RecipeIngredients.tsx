@@ -50,9 +50,9 @@ export default function RecipeIngredients({
 
   return (
     <div className="flex flex-col gap-4 pb-4">
-      {/* Main Cohesive Card Group (Portions + Ingredients List + Shopping Button) */}
+      {/* 1. Single Cohesive Card for All Ingredients */}
       <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
-        {/* 1. Servings / Portion scaling header inside card */}
+        {/* 1.1 Servings Header */}
         <div className="px-4.5 py-4 sm:px-6 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div className={medallion}>
@@ -72,19 +72,31 @@ export default function RecipeIngredients({
           />
         </div>
 
-        {/* 2. Grouped Ingredients List */}
-        <div className="px-4.5 py-4.5 sm:px-6 flex flex-col gap-5">
+        {/* 1.2 Grouped Category Sections */}
+        <div className="px-4.5 py-3 sm:px-6 flex flex-col divide-y divide-gray-100/70 dark:divide-gray-800/60">
           {sortedIngredients.map(({ group, originalIdx }) => {
             const theme = getCategoryTheme(group.name);
             return (
-              <div key={group.name} className="flex flex-col gap-2.5">
+              <div key={group.name || originalIdx} className="py-3.5 first:pt-1 last:pb-1 flex flex-col gap-1.5">
+                {/* Category Header Bar */}
                 {group.name && (
-                  <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                    <span className={`w-1 h-3.5 rounded-full ${theme.barClass} shrink-0`} />
-                    <span>{translateCategory(group.name)}</span>
-                  </h4>
+                  <div className="flex items-center justify-between gap-2 pb-1">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${theme.barClass} shrink-0`} />
+                      <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
+                        {translateCategory(group.name)}
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 tabular-nums">
+                      {group.items.length === 1
+                        ? t('recipe.ingredientCount')
+                        : t('recipe.ingredientsCount', { count: group.items.length })}
+                    </span>
+                  </div>
                 )}
-                <ul className="flex flex-col gap-1">
+
+                {/* Ingredients List with soft hairline dividers */}
+                <ul className="flex flex-col divide-y divide-gray-100/60 dark:divide-gray-800/50 list-none p-0 m-0">
                   {group.items.map((ing, idx) => (
                     <IngredientItemRow
                       key={`${ing.name}-${originalIdx}-${idx}`}
@@ -105,9 +117,9 @@ export default function RecipeIngredients({
           })}
         </div>
 
-        {/* 3. Add to Shopping List Button (Inside Card Footer) */}
+        {/* 1.3 Integrated Shopping List Button Footer */}
         {onAddIngredients && (
-          <div className="px-4.5 py-3.5 sm:px-6 bg-black/[0.01] dark:bg-white/[0.01]">
+          <div className="px-4.5 py-3.5 sm:px-6 bg-white dark:bg-gray-900">
             <Button
               className={`w-full h-12 min-h-[48px] rounded-2xl font-bold transition-all flex items-center justify-center gap-2 text-sm active:scale-[0.98] border-none shadow-none cursor-pointer ${
                 isAdded

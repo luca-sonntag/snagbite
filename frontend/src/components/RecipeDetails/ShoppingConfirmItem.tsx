@@ -89,6 +89,7 @@ export default function ShoppingConfirmItem({
         canonicalId={ing.canonicalId}
         category={groupCategory || ing.category}
         name={ing.name}
+        synonyms={ing.synonyms}
         size="md"
         className={isChecked ? '' : 'opacity-40 grayscale'}
       />
