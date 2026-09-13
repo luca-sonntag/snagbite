@@ -114,12 +114,14 @@ export default function CollectionStoryHub({
           );
         })}
 
-        {/* ➕ 5. Add Collection Button */}
-        <CollectionStoryBubble
-          title={t('catalog.storyHub.new')}
-          isAddButton
-          onClick={onAddCollection}
-        />
+        {/* ➕ 5. Add Collection Button (Sticky right when collections overflow) */}
+        <div className="sticky -right-4 z-20 shrink-0 pl-4 pr-4 -mr-4 bg-gradient-to-l from-[#f8fafc] from-75% to-transparent dark:from-gray-950 dark:from-75% dark:to-transparent py-0.5 pointer-events-auto">
+          <CollectionStoryBubble
+            title={t('catalog.storyHub.new')}
+            isAddButton
+            onClick={onAddCollection}
+          />
+        </div>
       </div>
     </section>
   );
