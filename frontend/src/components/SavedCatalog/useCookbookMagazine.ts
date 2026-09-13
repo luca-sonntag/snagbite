@@ -12,6 +12,7 @@ interface UseCookbookMagazineOptions {
   savedRecipeIds?: Set<string>;
   formatTotalTime: (recipe: any) => string | null;
   onOpenTheme?: (e: MouseEvent) => void;
+  onOpenVital?: (e: MouseEvent) => void;
 }
 
 /**
@@ -26,6 +27,7 @@ export function useCookbookMagazine({
   savedRecipeIds,
   formatTotalTime,
   onOpenTheme,
+  onOpenVital,
 }: UseCookbookMagazineOptions) {
   const { t } = useI18n();
 
@@ -36,6 +38,13 @@ export function useCookbookMagazine({
   const { heroBadgeText, bentoTitle, bentoSubtitle } = useMemo(() => {
     return getMagazineTitles(recommendedShelf, t);
   }, [recommendedShelf, t]);
+
+  // All vital recipes (healthScore >= 70) sorted by score descending
+  const vitalRecipes = useMemo(() => {
+    return items
+      .filter((j) => (j.recipe?.healthScore ?? 0) >= 70)
+      .sort((a, b) => (b.recipe?.healthScore ?? 0) - (a.recipe?.healthScore ?? 0));
+  }, [items]);
 
   // 1. 3-Slide Hero Carousel (Daily Spotlight, Vital Star, Community Inspiration)
   const heroSlides = useMemo((): HeroSlideItem[] => {
@@ -98,6 +107,7 @@ export function useCookbookMagazine({
 
       if (vitalCandidate?.recipe) {
         usedRecipeIds.add(vitalCandidate.recipeId);
+        const hasVitalTheme = Boolean(vitalRecipes.length >= 2 && onOpenVital);
         slides.push({
           id: `hero-2-${vitalCandidate.recipeId}`,
           job: vitalCandidate,
@@ -105,6 +115,8 @@ export function useCookbookMagazine({
           totalTime: formatTotalTime(vitalCandidate.recipe),
           badgeText: t('catalog.magazine.heroVitalBadge'),
           badgeVariant: 'emerald',
+          themeRecipeCount: hasVitalTheme ? vitalRecipes.length : undefined,
+          onOpenTheme: hasVitalTheme ? onOpenVital : undefined,
           isCommunity: false,
           isSaved: true,
           isVital: true,
@@ -151,7 +163,7 @@ export function useCookbookMagazine({
     }
 
     return slides;
-  }, [items, communityRecipes, savedRecipeIds, recommendedShelf, heroBadgeText, onOpenTheme, dayOfYear, formatTotalTime, t]);
+  }, [items, communityRecipes, savedRecipeIds, recommendedShelf, heroBadgeText, onOpenTheme, onOpenVital, vitalRecipes, dayOfYear, formatTotalTime, t]);
 
   // Primary hero recipe (for convenience/fallback)
   const heroRecipe = heroSlides[0]?.job ?? null;
@@ -223,6 +235,7 @@ export function useCookbookMagazine({
     heroBadgeText,
     themeRecipes,
     themeTitle: heroBadgeText,
+    vitalRecipes,
     bentoRecipes,
     bentoTitle,
     bentoSubtitle,

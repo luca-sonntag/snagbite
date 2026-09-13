@@ -9,10 +9,12 @@ import { hapticLight } from '../../utils/haptics';
 import { getRecipeCalories } from '../../utils/formatNutrition';
 import { getHealthScoreLetter, getHealthScoreColor } from '../RecipeDetails/HealthScoreBadge';
 
-export interface RecommendationThemeSheetProps {
+export interface HeroThemeSheetProps {
   isOpen: boolean;
   onClose: () => void;
   themeTitle: string;
+  themeSubtitle?: string;
+  badgeVariant?: 'amber' | 'emerald' | 'indigo' | 'blue' | 'teal' | 'rose';
   recipes: SavedRecipe[];
   formatTotalTime: (recipe: any) => string | null;
   onOpenRecipe: (e: MouseEvent, job: SavedRecipe) => void;
@@ -20,18 +22,20 @@ export interface RecommendationThemeSheetProps {
 }
 
 /**
- * Mobile-first bottom drawer showing all recipes matching the active hero recommendation theme.
+ * Mobile-first bottom drawer showing all recipes matching the active hero theme (Recommendation or Vital Stars).
  * Gives immediate visibility to the full theme selection without leaving the magazine feed.
  */
-export default function RecommendationThemeSheet({
+export default function HeroThemeSheet({
   isOpen,
   onClose,
   themeTitle,
+  themeSubtitle,
+  badgeVariant = 'amber',
   recipes,
   formatTotalTime,
   onOpenRecipe,
   onOpenCatalog,
-}: RecommendationThemeSheetProps) {
+}: HeroThemeSheetProps) {
   const { t } = useI18n();
   useModalOverlay(isOpen, onClose);
 
@@ -53,7 +57,7 @@ export default function RecommendationThemeSheet({
                       {themeTitle}
                     </Drawer.Heading>
                     <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-normal mt-0.5">
-                      {t('catalog.magazine.themeSheetSubtitle', { count: recipes.length })}
+                      {themeSubtitle || t('catalog.magazine.themeSheetSubtitle', { count: recipes.length })}
                     </p>
                   </div>
 
@@ -148,7 +152,11 @@ export default function RecommendationThemeSheet({
                       onClose();
                       onOpenCatalog();
                     }}
-                    className="w-full h-12 rounded-2xl font-bold bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white border-none shadow-md shadow-amber-500/25 transition-all text-sm flex items-center justify-center gap-2"
+                    className={`w-full h-12 rounded-2xl font-bold ${
+                      badgeVariant === 'emerald'
+                        ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25'
+                        : 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/25'
+                    } active:scale-[0.98] text-white border-none shadow-md transition-all text-sm flex items-center justify-center gap-2`}
                   >
                     <span>{t('catalog.magazine.themeSheetOpenCatalog')}</span>
                     <ArrowRight className="w-4 h-4" />

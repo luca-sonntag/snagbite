@@ -233,6 +233,8 @@ export default function SavedCatalog({
         return t('catalog.shelfRecent');
       case 'recommended':
         return shelves.recommended?.title ?? t('catalog.shelfRecommended');
+      case 'vital':
+        return t('catalog.magazine.vitalSheetTitle');
       case 'collection': {
         const col = collections.find(c => c.id === preset.id);
         return col ? col.name : t('catalog.allRecipesTitle');
@@ -283,7 +285,7 @@ export default function SavedCatalog({
     if (preset.kind !== 'search') {
       setSearchQuery('');
       setFilters(getBaseFiltersForPreset(preset));
-      setSortBy(preset.kind === 'recent' ? 'recent' : 'newest');
+      setSortBy(preset.kind === 'recent' ? 'recent' : preset.kind === 'vital' ? 'healthScore' : 'newest');
     }
   }, [catalogSubPath, preset, setFilters, setSearchQuery, setSortBy]);
 

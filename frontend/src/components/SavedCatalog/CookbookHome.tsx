@@ -9,8 +9,9 @@ import RecipeShowcaseCard from './RecipeShowcaseCard';
 import AllRecipesShelf from './AllRecipesShelf';
 import PublicRecipeRecommendationsShelf from './PublicRecipeRecommendationsShelf';
 import PublicRecipePreviewModal from '../PublicRecipe/PublicRecipePreviewModal';
-import RecommendationThemeSheet from './RecommendationThemeSheet';
+import HeroThemeSheet from './HeroThemeSheet';
 import { useAuth } from '../../context/AuthContext';
+import { useI18n } from '../../context/I18nContext';
 import { fetchPublicRecipeRecommendations, savePublicRecipeToCookbook } from '../../api/publicRecipesApi';
 import type { CatalogPreset } from './catalogRoutes';
 import { useCookbookMagazine } from './useCookbookMagazine';
@@ -96,9 +97,10 @@ export default function CookbookHome({
   onOpenFilters,
 }: CookbookHomeProps) {
   const { getAccessToken } = useAuth();
+  const { t } = useI18n();
   const [communityRecommendations, setCommunityRecommendations] = useState<Recipe[]>([]);
   const [selectedPreviewRecipe, setSelectedPreviewRecipe] = useState<Recipe | null>(null);
-  const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
+  const [activeHeroSheet, setActiveHeroSheet] = useState<'theme' | 'vital' | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -125,6 +127,7 @@ export default function CookbookHome({
     heroSlides,
     themeRecipes,
     themeTitle,
+    vitalRecipes,
     bentoRecipes,
     bentoTitle,
     bentoSubtitle,
@@ -136,7 +139,8 @@ export default function CookbookHome({
     communityRecipes: communityRecommendations,
     savedRecipeIds,
     formatTotalTime,
-    onOpenTheme: () => setIsThemeSheetOpen(true),
+    onOpenTheme: () => setActiveHeroSheet('theme'),
+    onOpenVital: () => setActiveHeroSheet('vital'),
   });
 
   const handleOpenSlide = (e: MouseEvent, slide: HeroSlideItem) => {
@@ -267,15 +271,17 @@ export default function CookbookHome({
         />
       )}
 
-      {/* Recommendation Theme Drawer */}
-      <RecommendationThemeSheet
-        isOpen={isThemeSheetOpen}
-        onClose={() => setIsThemeSheetOpen(false)}
-        themeTitle={themeTitle}
-        recipes={themeRecipes}
+      {/* Hero Theme & Vital Stars Drawer */}
+      <HeroThemeSheet
+        isOpen={activeHeroSheet !== null}
+        onClose={() => setActiveHeroSheet(null)}
+        themeTitle={activeHeroSheet === 'vital' ? t('catalog.magazine.vitalSheetTitle') : themeTitle}
+        themeSubtitle={activeHeroSheet === 'vital' ? t('catalog.magazine.vitalSheetSubtitle', { count: vitalRecipes.length }) : undefined}
+        badgeVariant={activeHeroSheet === 'vital' ? 'emerald' : 'amber'}
+        recipes={activeHeroSheet === 'vital' ? vitalRecipes : themeRecipes}
         formatTotalTime={formatTotalTime}
         onOpenRecipe={onOpenRecipe}
-        onOpenCatalog={() => onOpenList({ kind: 'recommended' })}
+        onOpenCatalog={() => onOpenList({ kind: activeHeroSheet === 'vital' ? 'vital' : 'recommended' })}
       />
     </div>
   );

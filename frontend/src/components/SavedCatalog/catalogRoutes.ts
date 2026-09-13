@@ -30,6 +30,7 @@ export type CatalogPreset =
   | { kind: 'quick' }
   | { kind: 'recent' }
   | { kind: 'recommended' }
+  | { kind: 'vital' }
   | { kind: 'collection'; id: string }
   | { kind: 'flag'; name: string }
   | { kind: 'category'; category: RecipeCategory };
@@ -53,6 +54,8 @@ export function buildListRoute(preset: CatalogPreset): string {
       return `${LIST_SEGMENT}/recent`;
     case 'recommended':
       return `${LIST_SEGMENT}/recommended`;
+    case 'vital':
+      return `${LIST_SEGMENT}/vital`;
     case 'collection':
       return `${LIST_SEGMENT}/collection/${encodeURIComponent(preset.id)}`;
     case 'flag':
@@ -84,6 +87,8 @@ export function parseListRoute(subPath: string | null | undefined): CatalogPrese
       return { kind: 'recent' };
     case 'recommended':
       return { kind: 'recommended' };
+    case 'vital':
+      return { kind: 'vital' };
     case 'collection':
       return value ? { kind: 'collection', id: safeDecode(value) } : { kind: 'all' };
     case 'flag':
@@ -112,6 +117,8 @@ export function getBaseFiltersForPreset(preset: CatalogPreset): CatalogFilterSta
       return { ...EMPTY_FILTERS, maxTime: 30 };
     case 'recommended':
       return { ...EMPTY_FILTERS, recommendedOnly: true };
+    case 'vital':
+      return { ...EMPTY_FILTERS, minHealthScore: 70 };
     case 'collection':
       return { ...EMPTY_FILTERS, collectionIds: [preset.id] };
     case 'flag':
