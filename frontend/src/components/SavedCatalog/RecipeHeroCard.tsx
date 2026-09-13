@@ -147,9 +147,9 @@ export default function RecipeHeroCard({
         </div>
 
         {/* Bottom Content Container */}
-        <div className="absolute bottom-3 inset-x-3 text-white flex flex-col gap-1">
+        <div className="absolute bottom-3 inset-x-3 text-white flex flex-col">
           {/* Punchy Info Pills - Crisp, compact & high legibility */}
-          <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold text-white/90 flex-wrap drop-shadow-xs">
+          <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold text-white/90 flex-wrap drop-shadow-xs mb-1.5">
             {totalTime && (
               <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/90 text-white font-bold text-[10px] shadow-xs shrink-0">
                 <Clock className="w-2.5 h-2.5 text-white shrink-0" />
@@ -200,20 +200,20 @@ export default function RecipeHeroCard({
           </div>
 
           {/* Title - 100% full width, up to 2 lines without horizontal crunch */}
-          <h3 className="text-base sm:text-lg font-bold text-white tracking-tight leading-snug line-clamp-2 font-heading pt-0.5 drop-shadow-xs">
+          <h3 className="text-base sm:text-lg font-bold text-white tracking-tight leading-tight line-clamp-2 font-heading drop-shadow-xs">
             {r.title}
           </h3>
 
-          {/* Bottom Bar: Author Handle & Cook CTA */}
-          <div className="flex items-center justify-between gap-2 pt-0.5">
+          {/* Bottom Bar: Author Handle & Cook CTA - Snug directly under title */}
+          <div className="flex items-center justify-between gap-2 mt-0.5">
             {r.sourceHandle ? (
-              <p className="text-[11px] text-gray-300/85 font-medium truncate leading-none">
+              <p className="text-[10.5px] text-gray-300/85 font-medium truncate leading-none">
                 {`@${r.sourceHandle.replace(/^@/, '')}`}
               </p>
             ) : (
               <span />
             )}
-            <span className="shrink-0 px-3 py-1.5 rounded-xl bg-white text-gray-950 font-bold text-xs group-hover:bg-gray-100 active:scale-95 transition-all shadow-md">
+            <span className="shrink-0 px-2.5 py-1 rounded-xl bg-white text-gray-950 font-bold text-xs group-hover:bg-gray-100 active:scale-95 transition-all shadow-md">
               {t('catalog.magazine.heroCookNow')}
             </span>
           </div>
