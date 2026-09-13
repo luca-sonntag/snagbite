@@ -28,6 +28,7 @@ export interface RecipeHeroCardProps {
   onOpenTheme?: (e: MouseEvent) => void;
   isCommunity?: boolean;
   isSaved?: boolean;
+  isVital?: boolean;
   onSaveCommunity?: (e: MouseEvent, recipe: Recipe) => void;
   onOpenRecipe: (e: MouseEvent, recipe: Recipe, job?: SavedRecipe) => void;
 }
@@ -47,6 +48,7 @@ export default function RecipeHeroCard({
   onOpenTheme,
   isCommunity = false,
   isSaved = false,
+  isVital = false,
   onSaveCommunity,
   onOpenRecipe,
 }: RecipeHeroCardProps) {
@@ -175,7 +177,7 @@ export default function RecipeHeroCard({
               </div>
             ) : null}
 
-            {protein && protein > 0 && (
+            {isVital && protein && protein > 0 && (
               <div className="flex items-center gap-1 shrink-0">
                 {(totalTime || calories !== undefined || score !== null) && (
                   <span className="text-white/30 text-[9px]">•</span>
@@ -185,13 +187,13 @@ export default function RecipeHeroCard({
                 </span>
               </div>
             )}
-            {vegGrams && vegGrams > 0 && (
+            {isVital && vegGrams && vegGrams > 0 && (
               <div className="flex items-center gap-1 shrink-0">
                 {(totalTime || calories !== undefined || score !== null || (protein && protein > 0)) && (
                   <span className="text-white/30 text-[9px]">•</span>
                 )}
                 <span className="text-white/90 font-medium">
-                  {t('catalog.magazine.vegGrams', { grams: vegGrams })}
+                  {t('catalog.magazine.vegGrams', { grams: Math.round(vegGrams) })}
                 </span>
               </div>
             )}

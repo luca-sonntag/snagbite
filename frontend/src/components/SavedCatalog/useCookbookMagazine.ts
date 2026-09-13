@@ -107,6 +107,7 @@ export function useCookbookMagazine({
           badgeVariant: 'emerald',
           isCommunity: false,
           isSaved: true,
+          isVital: true,
         });
       }
     }

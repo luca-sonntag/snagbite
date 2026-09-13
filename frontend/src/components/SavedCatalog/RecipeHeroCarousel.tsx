@@ -14,6 +14,7 @@ export interface HeroSlideItem {
   onOpenTheme?: (e: MouseEvent) => void;
   isCommunity: boolean;
   isSaved?: boolean;
+  isVital?: boolean;
 }
 
 const ACTIVE_DOT_COLORS: Record<HeroBadgeVariant, string> = {
@@ -112,6 +113,7 @@ export default function RecipeHeroCarousel({
               onOpenTheme={slide.onOpenTheme}
               isCommunity={slide.isCommunity}
               isSaved={slide.isSaved}
+              isVital={slide.isVital}
               onSaveCommunity={onSaveCommunity}
               onOpenRecipe={(e) => onOpenSlide(e, slide)}
             />
