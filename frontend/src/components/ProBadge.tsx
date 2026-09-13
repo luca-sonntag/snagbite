@@ -31,7 +31,7 @@ export default function ProBadge({
   if (variant === 'corner') {
     return (
       <span
-        className={`absolute -top-1 -right-1 z-10 flex items-center justify-center px-1 h-3.5 min-w-[18px] rounded-full bg-gray-500 text-white dark:bg-gray-600 dark:text-gray-100 text-[7.5px] font-bold uppercase tracking-[0.1em] ring-1.5 ring-white dark:ring-gray-900 pointer-events-none select-none leading-none shadow-xs ${className}`}
+        className={`absolute -top-1 -right-1 z-10 flex items-center justify-center px-1.5 py-[2px] rounded-[4px] bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[7.5px] font-bold uppercase tracking-[0.14em] ring-1.5 ring-white dark:ring-gray-900 shadow-xs pointer-events-none select-none leading-none ${className}`}
         aria-label="PRO"
       >
         PRO
