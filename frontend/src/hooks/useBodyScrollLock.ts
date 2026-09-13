@@ -1,44 +1,103 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+
+/**
+ * Unconditionally and completely unlocks scrolling on both documentElement and body.
+ * Removes inline overflow and overscroll-behavior styles and resets them to empty string.
+ * Never restores a previously 'hidden' overflow value.
+ */
+export function forceUnlockBodyScroll(): void {
+  if (typeof window === 'undefined') return;
+
+  const html = document.documentElement;
+  const body = document.body;
+
+  html.style.removeProperty('overflow');
+  body.style.removeProperty('overflow');
+  html.style.removeProperty('overscroll-behavior');
+  body.style.removeProperty('overscroll-behavior');
+  html.style.removeProperty('padding-right');
+  body.style.removeProperty('padding-right');
+  html.style.removeProperty('scrollbar-gutter');
+  body.style.removeProperty('scrollbar-gutter');
+
+  if (html.style.overflow) {
+    html.style.overflow = '';
+  }
+  if (body.style.overflow) {
+    body.style.overflow = '';
+  }
+  if (body.style.overscrollBehavior) {
+    body.style.overscrollBehavior = '';
+  }
+}
 
 /**
  * Robust cross-platform body scroll lock for modals, sheets, and overlays.
- * Works on Desktop, iOS Safari, Android Chrome, and Capacitor WebViews
- * by locking both documentElement and body (using position: fixed + scroll position preservation).
+ * Locks both documentElement and body without setting position: fixed.
+ *
+ * When unlocked, forcefully restores scrolling both immediately and after delayed
+ * timeouts (150ms, 350ms) to counteract late unmount animations from HeroUI / React Aria
+ * (usePreventScroll) which might write back their cached 'hidden' overflow values.
  */
-export function useBodyScrollLock(isLocked: boolean) {
+export function useBodyScrollLock(isLocked: boolean): void {
+  const isLockedRef = useRef(isLocked);
+  isLockedRef.current = isLocked;
+
   useEffect(() => {
-    if (!isLocked || typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return;
 
-    // Lock both html and body without setting position: fixed,
-    // which breaks viewport coordinates and containing block calculations for portaled overlays/popovers
-    const prevHtmlOverflow = document.documentElement.style.overflow;
-    const prevBodyOverflow = document.body.style.overflow;
-    const prevBodyOverscroll = document.body.style.overscrollBehavior;
+    if (isLocked) {
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+      document.body.style.overscrollBehavior = 'none';
 
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    document.body.style.overscrollBehavior = 'none';
+      return () => {
+        // Immediate release when lock condition turns false or unmounts
+        forceUnlockBodyScroll();
 
-    return () => {
-      if (prevHtmlOverflow) {
-        document.documentElement.style.overflow = prevHtmlOverflow;
-      } else {
-        document.documentElement.style.removeProperty('overflow');
-      }
+        // Delayed check to counteract late React Aria / HeroUI exit animations restoring 'hidden'
+        setTimeout(() => {
+          if (!isLockedRef.current) {
+            document.documentElement.style.removeProperty('overflow');
+            document.body.style.removeProperty('overflow');
+            document.documentElement.style.removeProperty('padding-right');
+            document.documentElement.style.removeProperty('scrollbar-gutter');
+            forceUnlockBodyScroll();
+          }
+        }, 350);
+      };
+    } else {
+      // Immediate unconditional release when not locked
+      document.documentElement.style.removeProperty('overflow');
+      document.body.style.removeProperty('overflow');
+      document.documentElement.style.removeProperty('overscroll-behavior');
+      document.body.style.removeProperty('overscroll-behavior');
+      forceUnlockBodyScroll();
 
-      if (prevBodyOverflow) {
-        document.body.style.overflow = prevBodyOverflow;
-      } else {
-        document.body.style.removeProperty('overflow');
-      }
+      // Catch late unmount cleanups from HeroUI / React Aria (transitions typically 200-300ms)
+      const t1 = setTimeout(() => {
+        if (!isLockedRef.current) {
+          forceUnlockBodyScroll();
+        }
+      }, 150);
 
-      if (prevBodyOverscroll) {
-        document.body.style.overscrollBehavior = prevBodyOverscroll;
-      } else {
-        document.body.style.removeProperty('overscroll-behavior');
-      }
-    };
+      const t2 = setTimeout(() => {
+        if (!isLockedRef.current) {
+          document.documentElement.style.removeProperty('overflow');
+          document.body.style.removeProperty('overflow');
+          document.documentElement.style.removeProperty('padding-right');
+          document.documentElement.style.removeProperty('scrollbar-gutter');
+          forceUnlockBodyScroll();
+        }
+      }, 350);
+
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
+    }
   }, [isLocked]);
 }
 
 export default useBodyScrollLock;
+

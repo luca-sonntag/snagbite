@@ -30,7 +30,6 @@ export function usePremiumModal(isOpen: boolean, onOpenChange: (open: boolean) =
 
   useEffect(() => {
     if (!isOpen) {
-      document.body.style.overflow = '';
       return;
     }
 
@@ -38,7 +37,6 @@ export function usePremiumModal(isOpen: boolean, onOpenChange: (open: boolean) =
     setErrorMsg(null);
     setLoading(false);
     setRestoring(false);
-    document.body.style.overflow = 'hidden';
 
     if (cachedPackages && cachedPackages.length > 0) {
       autoSelect(cachedPackages);
@@ -60,10 +58,6 @@ export function usePremiumModal(isOpen: boolean, onOpenChange: (open: boolean) =
     };
 
     loadOfferings();
-
-    return () => {
-      document.body.style.overflow = '';
-    };
   }, [isOpen, cachedPackages, autoSelect]);
 
   useEffect(() => {

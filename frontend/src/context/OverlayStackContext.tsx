@@ -1,6 +1,6 @@
 import { createContext, useContext, useCallback, useRef, useState, useEffect } from 'react';
 import { hideAdBanner, resumeAdBanner } from '../utils/ads';
-import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
+import { useBodyScrollLock, forceUnlockBodyScroll } from '../hooks/useBodyScrollLock';
 
 /**
  * Overlay-Stack: A stack-based registry that tracks open overlays
@@ -154,6 +154,29 @@ export function OverlayStackProvider({ children }: { children: React.ReactNode }
     if (overlaysRef.current.length === 0) {
       setIsAnyOverlayOpen(false);
       void resumeAdBanner();
+
+      // Unconditionally clear scroll lock styles immediately
+      forceUnlockBodyScroll();
+      document.documentElement.style.removeProperty('overflow');
+      document.body.style.removeProperty('overflow');
+      document.documentElement.style.removeProperty('overscroll-behavior');
+      document.body.style.removeProperty('overscroll-behavior');
+      document.documentElement.style.removeProperty('padding-right');
+      document.body.style.removeProperty('padding-right');
+
+      // Delayed cleanup to counteract late unmount animations from HeroUI / React Aria
+      setTimeout(() => {
+        if (overlaysRef.current.length === 0) {
+          forceUnlockBodyScroll();
+          document.documentElement.style.removeProperty('overflow');
+          document.body.style.removeProperty('overflow');
+          document.documentElement.style.removeProperty('overscroll-behavior');
+          document.body.style.removeProperty('overscroll-behavior');
+          document.documentElement.style.removeProperty('padding-right');
+          document.body.style.removeProperty('padding-right');
+          document.documentElement.style.removeProperty('scrollbar-gutter');
+        }
+      }, 350);
     }
   }, []);
 
