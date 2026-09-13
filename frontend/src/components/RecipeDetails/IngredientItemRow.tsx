@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, Crown } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import type { Ingredient } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { getParentIngredient } from '../../utils/ingredientTaxonomy';
@@ -124,10 +124,10 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
         <button
           type="button"
           onClick={handleNutritionClick}
-          className={`min-h-[28px] px-2 py-0.5 rounded-full inline-flex items-center gap-1 text-xs font-semibold shrink-0 border-none transition-all active:scale-95 cursor-pointer select-none ${
+          className={`min-h-[32px] px-2.5 py-1 rounded-full inline-flex items-center gap-1 text-xs font-semibold shrink-0 border-none transition-all active:scale-95 cursor-pointer select-none ${
             isPremium
               ? 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'
-              : 'bg-amber-500/15 hover:bg-amber-500/25'
+              : 'bg-black/[0.04] hover:bg-black/[0.08] dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-gray-400 dark:text-gray-500'
           }`}
           title={isPremium && ingredient.matchedName ? t('recipe.verifiedIngredientTooltip', { name: ingredient.matchedName }) : undefined}
           aria-label={t('recipe.nutritionTitle')}
@@ -138,12 +138,7 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
               <ChevronRight className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 -ml-0.5" />
             </>
           ) : (
-            <>
-              <Crown className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
-              <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-300">
-                PRO
-              </span>
-            </>
+            <ChevronRight className="w-4 h-4" />
           )}
         </button>
       )}

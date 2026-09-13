@@ -118,16 +118,20 @@ export default function HealthScoreBadge({
       </div>
 
       {/* Tactile Chevron Target & Status indicator */}
-      <div className="flex items-center gap-2 shrink-0">
-        {!isPremium && (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-700 dark:text-amber-300">
-            <Crown className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
+      <div className="shrink-0">
+        {!isPremium ? (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full tint-premium shadow-xs ring-1 ring-black/5 dark:ring-white/10 text-[11px] font-bold text-gray-900 dark:text-white group-hover:brightness-[0.98] dark:group-hover:brightness-110 transition-all">
+            <div className="w-4 h-4 rounded-full bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0">
+              <Crown className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
+            </div>
             <span>{t('recipe.healthScoreProBadge') || 'PRO'}</span>
+            <ChevronRight className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 -mr-0.5" />
           </span>
+        ) : (
+          <div className="w-7 h-7 rounded-full shadow-xs flex items-center justify-center bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">
+            <ChevronRight className="w-4 h-4" />
+          </div>
         )}
-        <div className="w-7 h-7 rounded-full shadow-xs flex items-center justify-center bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors shrink-0">
-          <ChevronRight className="w-4 h-4" />
-        </div>
       </div>
     </button>
   );

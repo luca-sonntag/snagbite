@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@heroui/react';
-import { Check, Users, ShoppingCart } from 'lucide-react';
+import { Check, Users, ShoppingCart, Crown, ChevronRight } from 'lucide-react';
 import type { Ingredient, Recipe } from '../../types';
 import type { SortedIngredientGroup } from './types';
 import { useI18n } from '../../context/I18nContext';
@@ -40,6 +40,9 @@ export default function RecipeIngredients({
   const { t, translateCategory } = useI18n();
   const [selectedNutrition, setSelectedNutrition] = useState<{ ingredient: Ingredient; category: string } | null>(null);
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  const hasAnyNutrition = sortedIngredients.some(({ group }) =>
+    group.items.some((ing) => ing.calories !== undefined && ing.calories !== null)
+  );
 
 
   const medallion =
@@ -117,7 +120,30 @@ export default function RecipeIngredients({
           })}
         </div>
 
-        {/* 1.3 Integrated Shopping List Button Footer */}
+        {/* 1.3 Single PRO hint for ingredient nutrition */}
+        {!isPremium && hasAnyNutrition && (
+          <div className="px-4.5 py-3 sm:px-6 bg-gray-50/60 dark:bg-gray-800/30 flex items-center justify-between gap-3">
+            <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate">
+              {t('recipe.ingredientNutritionProHint') || 'Detaillierte Nährwerte & Makros pro Zutat'}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                hapticLight();
+                setIsPremiumModalOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full tint-premium shadow-xs ring-1 ring-black/5 dark:ring-white/10 text-[11px] font-bold text-gray-900 dark:text-white shrink-0 group-hover:brightness-[0.98] dark:group-hover:brightness-110 active:scale-95 transition-all cursor-pointer border-none"
+            >
+              <div className="w-4 h-4 rounded-full bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0">
+                <Crown className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
+              </div>
+              <span>{t('recipe.healthScoreProBadge') || 'PRO'}</span>
+              <ChevronRight className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 -mr-0.5" />
+            </button>
+          </div>
+        )}
+
+        {/* 1.4 Integrated Shopping List Button Footer */}
         {onAddIngredients && (
           <div className="px-4.5 py-3.5 sm:px-6 bg-white dark:bg-gray-900">
             <Button
