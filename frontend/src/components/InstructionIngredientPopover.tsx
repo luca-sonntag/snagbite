@@ -34,8 +34,9 @@ export const InstructionIngredientPopover: React.FC<InstructionIngredientPopover
           </span>
         </Popover.Trigger>
         <Popover.Content
+          isNonModal
           placement="top"
-          className="bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-none rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.1)] px-4 py-2.5"
+          className="z-[100] bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-none rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.1)] px-4 py-2.5"
         >
           <Popover.Dialog className="outline-none border-none p-0 m-0">
             {matchedIngredient ? (
