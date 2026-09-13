@@ -1119,6 +1119,11 @@ export const uiTranslations = {
       healthScoreCopilotPrompt: 'Wie kann ich dieses Rezept ernährungsphysiologisch aufwerten und den Healthy Score (aktuell {score}/100, Note {grade}) steigern? Schlage mir konkrete Zutaten-Alternativen oder passende Ergänzungen vor.',
       healthScoreCopilotPromptVariations: 'Kannst du mir spannende gesunde Variationen oder passende Beilagen für dieses Rezept vorschlagen?',
       healthScoreClose: 'Schließen',
+      healthScoreLockedSubtitle: 'Deep-Dive & Nährwerte freischalten',
+      healthScoreProBadge: 'PRO',
+      healthScorePaywallTitle: 'Healthy Score Deep-Dive freischalten',
+      healthScorePaywallSubtitle: 'Erhalte die vollständige 4-Säulen-Analyse, Makro-Verteilung, NOVA-Klassifizierung und smarte Optimierungsvorschläge.',
+      healthScorePaywallCta: 'Jetzt Premium freischalten',
       aiGeneratedNotice: 'KI-generierter Inhalt',
       aiGeneratedDisclaimer: 'Dieses Rezept wurde KI-gestützt aus einem Social-Media-Video erstellt und kann Fehler aufweisen. Bitte prüfe die Angaben sorgfältig.',
       tabIngredients: 'Zutaten',
@@ -1698,34 +1703,39 @@ export const uiTranslations = {
           rowCollections: 'Sammlungen & Labels',
           rowCookingMode: 'Kochmodus & Timer'
         },
+        featuresTitle: 'Alle Premium-Vorteile',
         features: {
           extractions: {
-            title: 'Unbegrenzte KI-Rezept-Extraktionen',
-            desc: 'Rezepte aus Reels, TikToks & Fotos ohne Tageslimit extrahieren.'
+            title: 'Unbegrenzte KI-Extraktionen',
+            desc: 'Reels, TikToks & Fotos ohne Tageslimit analysieren'
           },
           noAds: {
             title: '100% Werbefrei',
-            desc: 'Keine Werbe-Banner oder Interstitials.'
+            desc: 'Keine Banner, keine Interstitials, keine Unterbrechungen'
+          },
+          healthScore: {
+            title: 'Healthy Score & Nährwert-Deep-Dive',
+            desc: '4-Säulen-Analyse, Makro-Verteilung, Nova-Klassifizierung & Insights'
           },
           remix: {
             title: 'Recipe Copilot & KI-Remix',
-            desc: 'Rezepte unbegrenzt mit KI anpassen und Zutaten austauschen.'
+            desc: 'Zutaten flexibel austauschen, Rezepte per KI adaptieren'
+          },
+          cookingMode: {
+            title: 'Fokus-Kochmodus',
+            desc: 'Schritt-für-Schritt Fokus-Ansicht mit integrierten parallelen Timern'
+          },
+          collections: {
+            title: 'Sammlungen & Eigene Labels',
+            desc: 'Eigene Ordner & benutzerdefinierte Rezept-Tags'
           },
           nutrition: {
-            title: 'Detaillierte Nährwert-Analysen',
-            desc: 'Makronährstoffe, Kalorien pro Portion und Healthy-Score Insights.'
+            title: 'Healthy Score & Nährwert-Deep-Dive',
+            desc: '4-Säulen-Analyse, Makro-Verteilung, Nova-Klassifizierung & Insights'
           },
           shoppingList: {
             title: 'Smarte Einkaufsliste',
-            desc: 'Zutaten aus beliebig vielen Rezepten kombinieren.'
-          },
-          collections: {
-            title: 'Sammlungen & Labels',
-            desc: 'Rezepte in eigene Sammlungen organisieren.'
-          },
-          cookingMode: {
-            title: 'Kochmodus',
-            desc: 'Schritt-für-Schritt kochen mit Timer & Fokusansicht.'
+            desc: 'Zutaten aus beliebig vielen Rezepten kombinieren'
           }
         }
       },
@@ -2531,6 +2541,11 @@ export const uiTranslations = {
       healthScoreCopilotPrompt: 'How can I nutritionally optimize this recipe to boost its Healthy Score (currently {score}/100, Grade {grade})? Suggest concrete ingredient swaps or fitting additions.',
       healthScoreCopilotPromptVariations: 'Can you suggest exciting healthy variations or complementary side dishes for this recipe?',
       healthScoreClose: 'Close',
+      healthScoreLockedSubtitle: 'Unlock deep-dive & nutrition',
+      healthScoreProBadge: 'PRO',
+      healthScorePaywallTitle: 'Unlock Health Score Deep-Dive',
+      healthScorePaywallSubtitle: 'Get comprehensive 4-pillar analysis, macro distribution, NOVA classification, and smart optimization suggestions.',
+      healthScorePaywallCta: 'Upgrade to Premium',
       aiGeneratedNotice: 'AI-Generated Content',
       aiGeneratedDisclaimer: 'This recipe was created from a social media video with AI assistance and may contain errors. Please verify the information carefully.',
       tabIngredients: 'Ingredients',
@@ -3109,34 +3124,39 @@ export const uiTranslations = {
           rowCollections: 'Collections & Labels',
           rowCookingMode: 'Cooking Mode & Timers'
         },
+        featuresTitle: 'All Premium Features',
         features: {
           extractions: {
-            title: 'Unlimited AI Recipe Extractions',
-            desc: 'Extract recipes from Reels, TikToks & photos without daily limits.'
+            title: 'Unlimited AI Extractions',
+            desc: 'Analyze Reels, TikToks & photos without daily limits'
           },
           noAds: {
             title: '100% Ad-Free',
-            desc: 'No ad banners or interstitial ads.'
+            desc: 'No banners, no interstitials, no interruptions'
+          },
+          healthScore: {
+            title: 'Healthy Score & Nutrition Deep-Dive',
+            desc: '4-pillar analysis, macro distribution, NOVA classification & insights'
           },
           remix: {
             title: 'Recipe Copilot & AI Remix',
-            desc: 'Customize recipes without limits using AI and swap ingredients.'
+            desc: 'Flexibly swap ingredients, adapt recipes with AI'
+          },
+          cookingMode: {
+            title: 'Focus Cooking Mode',
+            desc: 'Step-by-step focus view with integrated parallel timers'
+          },
+          collections: {
+            title: 'Collections & Custom Labels',
+            desc: 'Custom folders & personalized recipe tags'
           },
           nutrition: {
-            title: 'Detailed Nutrition Analyses',
-            desc: 'Macronutrients, calories per portion, and healthy-score insights.'
+            title: 'Healthy Score & Nutrition Deep-Dive',
+            desc: '4-pillar analysis, macro distribution, NOVA classification & insights'
           },
           shoppingList: {
             title: 'Smart Shopping List',
-            desc: 'Combine ingredients from as many recipes as you like.'
-          },
-          collections: {
-            title: 'Collections & Labels',
-            desc: 'Organise recipes into your own collections.'
-          },
-          cookingMode: {
-            title: 'Cooking Mode',
-            desc: 'Step-by-step cooking with timer & focus view.'
+            desc: 'Combine ingredients from as many recipes as you like'
           }
         }
       },

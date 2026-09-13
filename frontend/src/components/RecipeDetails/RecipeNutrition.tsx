@@ -220,7 +220,14 @@ export default function RecipeNutrition({
               <HealthScoreBadge
                 score={healthScore}
                 breakdown={healthScoreBreakdown}
-                onClick={() => setIsHealthScoreSheetOpen(true)}
+                onClick={() => {
+                  if (!isPremium) {
+                    setIsPremiumModalOpen(true);
+                  } else {
+                    setIsHealthScoreSheetOpen(true);
+                  }
+                }}
+                isPremium={isPremium}
                 fullWidth
               />
             </div>
@@ -240,6 +247,11 @@ export default function RecipeNutrition({
           score={healthScore}
           breakdown={healthScoreBreakdown}
           onOpenCopilot={onOpenCopilot}
+          isPremium={isPremium}
+          onOpenPremium={() => {
+            setIsHealthScoreSheetOpen(false);
+            setIsPremiumModalOpen(true);
+          }}
         />
       )}
     </>

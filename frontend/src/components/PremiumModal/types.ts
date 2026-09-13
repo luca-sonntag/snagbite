@@ -5,7 +5,16 @@ export interface PremiumModalProps {
   onOpenChange: (isOpen: boolean) => void;
 }
 
+export type PremiumFeatureId =
+  | 'extractions'
+  | 'noAds'
+  | 'healthScore'
+  | 'remix'
+  | 'cookingMode'
+  | 'collections';
+
 export interface PremiumFeatureItem {
+  id: PremiumFeatureId;
   title: string;
   desc: string;
   icon: ReactNode;

@@ -9,6 +9,7 @@ import HealthScoreHeroCard from './HealthScoreHeroCard';
 import HealthScoreActionCard from './HealthScoreActionCard';
 import HealthScoreMetricsGrid from './HealthScoreMetricsGrid';
 import HealthScoreNutritionCheck from './HealthScoreNutritionCheck';
+import HealthScorePaywallPreview from './HealthScorePaywallPreview';
 
 interface HealthScoreSheetProps {
   isOpen: boolean;
@@ -16,6 +17,8 @@ interface HealthScoreSheetProps {
   score: number;
   breakdown?: HealthScoreBreakdown | null;
   onOpenCopilot?: (initialPrompt?: string) => void;
+  isPremium?: boolean;
+  onOpenPremium?: () => void;
 }
 
 export default function HealthScoreSheet({
@@ -24,6 +27,8 @@ export default function HealthScoreSheet({
   score,
   breakdown,
   onOpenCopilot,
+  isPremium = false,
+  onOpenPremium,
 }: HealthScoreSheetProps) {
   const { t, language } = useI18n();
   useModalOverlay(isOpen, onClose);
@@ -98,27 +103,39 @@ export default function HealthScoreSheet({
                   isEn={isEn}
                 />
 
-                {/* 2. Sleek Action Card (Above-the-fold culinary customization trigger) */}
-                {onOpenCopilot && (
-                  <HealthScoreActionCard
-                    score={score}
-                    grade={breakdown.grade}
-                    onOpenCopilot={(prompt) => {
+                {!isPremium ? (
+                  <HealthScorePaywallPreview
+                    isEn={isEn}
+                    onUnlock={() => {
                       onClose();
-                      onOpenCopilot(prompt);
+                      onOpenPremium?.();
                     }}
                   />
+                ) : (
+                  <>
+                    {/* 2. Sleek Action Card (Above-the-fold culinary customization trigger) */}
+                    {onOpenCopilot && (
+                      <HealthScoreActionCard
+                        score={score}
+                        grade={breakdown.grade}
+                        onOpenCopilot={(prompt) => {
+                          onClose();
+                          onOpenCopilot(prompt);
+                        }}
+                      />
+                    )}
+
+                    {/* 3. Key Metrics 2x2 Bento Cards */}
+                    <HealthScoreMetricsGrid metrics={metrics} isEn={isEn} />
+
+                    {/* 4. Nutrition Audit (Yuka-style clean checklist) */}
+                    <HealthScoreNutritionCheck
+                      highlights={highlights}
+                      cautions={cautions}
+                      isEn={isEn}
+                    />
+                  </>
                 )}
-
-                {/* 3. Key Metrics 2x2 Bento Cards */}
-                <HealthScoreMetricsGrid metrics={metrics} isEn={isEn} />
-
-                {/* 4. Nutrition Audit (Yuka-style clean checklist) */}
-                <HealthScoreNutritionCheck
-                  highlights={highlights}
-                  cautions={cautions}
-                  isEn={isEn}
-                />
               </Drawer.Body>
             </Drawer.Dialog>
           </Drawer.Content>

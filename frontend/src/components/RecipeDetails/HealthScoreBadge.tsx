@@ -1,7 +1,14 @@
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Lock } from 'lucide-react';
 import { hapticLight } from '../../utils/haptics';
 import { useI18n } from '../../context/I18nContext';
 import type { HealthScoreBreakdown } from '../../types';
+import {
+  getHealthScoreColor,
+  getHealthScoreLetter,
+  type HealthScoreColorSet,
+} from './healthScoreUtils';
+
+export { getHealthScoreColor, getHealthScoreLetter, type HealthScoreColorSet };
 
 interface HealthScoreBadgeProps {
   score: number;
@@ -9,98 +16,7 @@ interface HealthScoreBadgeProps {
   onClick: () => void;
   size?: 'sm' | 'md';
   fullWidth?: boolean;
-}
-
-export interface HealthScoreColorSet {
-  badgeBg: string;
-  badgeText: string;
-  ringStroke: string;
-  pillBg: string;
-  iconColor: string;
-  strokeClass: string;
-  solidBg: string;
-  solidText: string;
-  onMediaBg: string;
-  onMediaText: string;
-}
-
-export function getHealthScoreColor(score: number): HealthScoreColorSet {
-  if (score >= 85) {
-    return {
-      badgeBg: 'bg-emerald-500/15 dark:bg-emerald-500/20',
-      badgeText: 'text-emerald-900 dark:text-emerald-200',
-      ringStroke: '#10b981',
-      pillBg: 'bg-emerald-600',
-      iconColor: 'text-emerald-600 dark:text-emerald-400',
-      strokeClass: 'stroke-emerald-500',
-      solidBg: 'bg-emerald-600',
-      solidText: 'text-white',
-      onMediaBg: 'bg-emerald-950/75 dark:bg-black/75',
-      onMediaText: 'text-emerald-300',
-    };
-  }
-  if (score >= 70) {
-    return {
-      badgeBg: 'bg-teal-500/15 dark:bg-teal-500/20',
-      badgeText: 'text-teal-900 dark:text-teal-200',
-      ringStroke: '#14b8a6',
-      pillBg: 'bg-teal-600',
-      iconColor: 'text-teal-600 dark:text-teal-400',
-      strokeClass: 'stroke-teal-500',
-      solidBg: 'bg-teal-600',
-      solidText: 'text-white',
-      onMediaBg: 'bg-teal-950/75 dark:bg-black/75',
-      onMediaText: 'text-teal-300',
-    };
-  }
-  if (score >= 50) {
-    return {
-      badgeBg: 'bg-amber-500/15 dark:bg-amber-500/20',
-      badgeText: 'text-amber-950 dark:text-amber-200',
-      ringStroke: '#f59e0b',
-      pillBg: 'bg-amber-500',
-      iconColor: 'text-amber-600 dark:text-amber-400',
-      strokeClass: 'stroke-amber-500',
-      solidBg: 'bg-amber-500',
-      solidText: 'text-slate-950 font-black',
-      onMediaBg: 'bg-amber-950/75 dark:bg-black/75',
-      onMediaText: 'text-amber-300',
-    };
-  }
-  if (score >= 35) {
-    return {
-      badgeBg: 'bg-orange-500/15 dark:bg-orange-500/20',
-      badgeText: 'text-orange-950 dark:text-orange-200',
-      ringStroke: '#f97316',
-      pillBg: 'bg-orange-500',
-      iconColor: 'text-orange-600 dark:text-orange-400',
-      strokeClass: 'stroke-orange-500',
-      solidBg: 'bg-orange-500',
-      solidText: 'text-white',
-      onMediaBg: 'bg-orange-950/75 dark:bg-black/75',
-      onMediaText: 'text-orange-300',
-    };
-  }
-  return {
-    badgeBg: 'bg-rose-500/15 dark:bg-rose-500/20',
-    badgeText: 'text-rose-950 dark:text-rose-200',
-    ringStroke: '#f43f5e',
-    pillBg: 'bg-rose-600',
-    iconColor: 'text-rose-600 dark:text-rose-400',
-    strokeClass: 'stroke-rose-500',
-    solidBg: 'bg-rose-600',
-    solidText: 'text-white',
-    onMediaBg: 'bg-rose-950/75 dark:bg-black/75',
-    onMediaText: 'text-rose-300',
-  };
-}
-
-export function getHealthScoreLetter(score: number): 'A' | 'B' | 'C' | 'D' | 'E' {
-  if (score >= 85) return 'A';
-  if (score >= 70) return 'B';
-  if (score >= 50) return 'C';
-  if (score >= 35) return 'D';
-  return 'E';
+  isPremium?: boolean;
 }
 
 export default function HealthScoreBadge({
@@ -109,6 +25,7 @@ export default function HealthScoreBadge({
   onClick,
   size = 'md',
   fullWidth = false,
+  isPremium = false,
 }: HealthScoreBadgeProps) {
   const { t } = useI18n();
   const colors = getHealthScoreColor(score);
@@ -194,15 +111,23 @@ export default function HealthScoreBadge({
           </div>
           {!isSmall && (
             <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate leading-snug">
-              {highlightSnippet}
+              {!isPremium ? (t('recipe.healthScoreLockedSubtitle') || 'Deep-Dive & Nährwerte freischalten') : highlightSnippet}
             </span>
           )}
         </div>
       </div>
 
-      {/* Tactile Chevron Target */}
-      <div className="w-7 h-7 rounded-full bg-white dark:bg-gray-800 shadow-xs flex items-center justify-center shrink-0 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">
-        <ChevronRight className="w-4 h-4" />
+      {/* Tactile Chevron Target & Status indicator */}
+      <div className="flex items-center gap-2 shrink-0">
+        {!isPremium && (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-700 dark:text-amber-300">
+            <Lock className="w-2.5 h-2.5" />
+            <span>{t('recipe.healthScoreProBadge') || 'PRO'}</span>
+          </span>
+        )}
+        <div className="w-7 h-7 rounded-full shadow-xs flex items-center justify-center bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors shrink-0">
+          <ChevronRight className="w-4 h-4" />
+        </div>
       </div>
     </button>
   );
