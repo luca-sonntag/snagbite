@@ -53,6 +53,11 @@
   - UI & UX modernisieren: Aufgeräumte Bestandsübersicht, klare Kategorisierung und visuell ansprechendes Layout im Einklang mit dem Clean-Flat-Designsystem.
   - Smarteres Rezept-Matching: Präzise Vorschläge („Was kann ich kochen?“), Hervorhebung fast vollständiger Rezepte („Nur noch 1 Zutat fehlt“) und Rückgriff auf öffentliche Rezepte bei geringem Vorrat.
 
+- **Transparente & sympathische Overlay-Message vor erster Werbung (Free-Tier):**
+  - Einmaliges, warmherziges Info-Overlay/Bottom-Sheet für Free-Nutzer vor der allerersten Werbeeinblendung (z. B. vor dem ersten Interstitial oder Extraktions-Ad).
+  - Tonalität: Ehrlich, nahbar und transparent auf Augenhöhe – erklären, dass KI-Videoanalysen, Cloud-Server und Datenhaltung laufende Kosten verursachen und die App dank dezenter Werbung für alle kostenlos angeboten werden kann.
+  - Nutzerführung: Schafft Verständnis und Wohlwollen, nimmt Frustration und bietet eine sympathische Wahlmöglichkeit (z. B. „Alles klar, verstanden!“ als primärer Button und ein dezenter Hinweis „Lieber werbefrei? Zu Premium“).
+
 ## Findings (Behoben ✅)
 
 - [x] Healthy Score für Rezepte berechnen & visualisieren (4-Säulen-Modell, konsolidierte `nutritional_values` JSONB-Spalte, `HealthScoreBadge` & `HealthScoreSheet`)
