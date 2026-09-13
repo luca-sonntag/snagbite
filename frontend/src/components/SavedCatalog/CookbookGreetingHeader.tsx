@@ -3,6 +3,7 @@ import { Search, CheckSquare, SlidersHorizontal } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import { hapticLight } from '../../utils/haptics';
+import { useCookbookGreeting } from './useCookbookGreeting';
 
 interface CookbookGreetingHeaderProps {
   isSelectMode?: boolean;
@@ -49,41 +50,7 @@ export default function CookbookGreetingHeader({
     return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
   }, [user]);
 
-  const { greetingText, subtitleText } = useMemo(() => {
-    const now = new Date();
-    const hour = now.getHours();
-    const day = now.getDay(); // 0 = Sunday, 6 = Saturday
-    const isWeekend = day === 0 || day === 6;
-
-    if (isWeekend && hour >= 7 && hour < 14) {
-      return {
-        greetingText: t('catalog.greeting.weekend'),
-        subtitleText: t('catalog.greeting.subtitleWeekend'),
-      };
-    }
-    if (hour >= 5 && hour < 11) {
-      return {
-        greetingText: t('catalog.greeting.morning'),
-        subtitleText: t('catalog.greeting.subtitleMorning'),
-      };
-    }
-    if (hour >= 11 && hour < 15) {
-      return {
-        greetingText: t('catalog.greeting.noon'),
-        subtitleText: t('catalog.greeting.subtitleNoon'),
-      };
-    }
-    if (hour >= 15 && hour < 22) {
-      return {
-        greetingText: t('catalog.greeting.evening'),
-        subtitleText: t('catalog.greeting.subtitleEvening'),
-      };
-    }
-    return {
-      greetingText: t('catalog.greeting.night'),
-      subtitleText: t('catalog.greeting.subtitleNight'),
-    };
-  }, [t]);
+  const { greetingText, subtitleText } = useCookbookGreeting();
 
   return (
     <header className="flex flex-col gap-2 pt-2 pb-0.5 select-none">
