@@ -201,6 +201,7 @@ export default function CookingMode({
         onOpenTimer={handleOpenTimer}
         onOpenCopilot={handleOpenCopilot}
         hasCoverImage={Boolean(recipe.imageUrl || recipe.emoji)}
+        isPremium={isPremium}
       />
 
       {/* Active Timers Banner Section */}

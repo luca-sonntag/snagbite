@@ -28,7 +28,7 @@ export default function HealthScorePaywallPreview({
       ];
 
   return (
-    <div className="relative rounded-3xl p-5 bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-transparent border border-amber-200/60 dark:border-amber-500/20 shadow-xs flex flex-col gap-4 text-left">
+    <div className="relative rounded-3xl p-5 bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-transparent border-none shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col gap-4 text-left">
       <div className="flex items-start gap-3.5">
         <div className="w-10 h-10 rounded-2xl bg-amber-500/15 flex items-center justify-center shrink-0 text-amber-600 dark:text-amber-400">
           <Sparkles className="w-5 h-5" />
