@@ -63,6 +63,12 @@
 - **Google Play Store Go-Live & Release-Vorbereitung:**
   - Verbindliche Abarbeitung aller Store-Voraussetzungen (Restore Purchases Button, AdMob `app-ads.txt`, Data Safety, Reviewer-Account, Closed Testing) gemäß der [**Google Play Store Go-Live Checklist**](go-live-checklist.md).
 
+- **Extraktions-Warteliste & Job-Historie auf der „NEU“-Seite (Fail-Safe Queue):**
+  - **Schutz vor Link-Verlust:** Schlägt eine Extraktion temporär fehl (Netzwerkabbruch, API-Timeout, Instagram-Glitch), darf der Video-Link niemals verloren gehen – der Nutzer hat im Social-Media-Feed meist schon weitergescrollt.
+  - **Job-Historie & Retry:** Auf der „Neu“-Seite eine kompakte Liste der letzten Extraktions-Jobs und fehlgeschlagenen Links anzeigen (inkl. 1-Klick-Retry und Link kopieren/öffnen).
+  - **Vormerken bei aufgebrauchtem Kontingent:** Wenn das tägliche Extraktions-Limit erreicht ist, können Links trotzdem geteilt und in eine Warteliste abgelegt werden („Für später vormerken“).
+  - **Smart Resume beim nächsten App-Start:** Sobald neues Kontingent vorhanden ist oder die App neu geöffnet wird, weist ein dezentes Overlay/Bottom-Sheet darauf hin: *„Du hast 1 Rezept in der Warteliste. Jetzt analysieren?“* (Nutzer behält volle Kontrolle, kein automatischer ungewollter Credit-Verbrauch).
+
 ## Findings (Behoben ✅)
 
 - [x] Healthy Score für Rezepte berechnen & visualisieren (4-Säulen-Modell, konsolidierte `nutritional_values` JSONB-Spalte, `HealthScoreBadge` & `HealthScoreSheet`)
