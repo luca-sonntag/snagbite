@@ -73,7 +73,7 @@ export default function AppSplashScreen({ isReady, onFinished }: AppSplashScreen
 
       {/* Main Logo Container with Gentle Breathing */}
       <div className="relative z-10 flex flex-col items-center">
-        <div className="relative w-22 h-22 rounded-3xl p-1 shadow-[0_12px_36px_rgba(16,185,129,0.22)] animate-logo-breathe overflow-hidden">
+        <div className="relative w-22 h-22 rounded-3xl bg-white dark:bg-gray-900 p-4 shadow-[0_12px_36px_rgba(16,185,129,0.22)] animate-logo-breathe overflow-hidden flex items-center justify-center">
           <img
             src="/logo-login.png"
             alt="Snagbite"
