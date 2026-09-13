@@ -11,11 +11,42 @@ export function useAppAds({
   isPending,
   recipe,
   showOnboarding,
+  onShowPreAdNotice,
 }: UseAppAdsProps) {
   const appOpenAttemptedRef = useRef(false);
   const appBackgroundedAtRef = useRef<number | null>(null);
   const appOpenBlockedRef = useRef(true);
   appOpenBlockedRef.current = isPremium || isPending || !!recipe || showOnboarding;
+
+  const executeAppOpenFlow = () => {
+    if (appOpenBlockedRef.current) return;
+
+    import('../utils/ads')
+      .then(({ maybeShowAppOpenAd, appOpenAdWouldShow, hasSeenPreAdNotice, triggerPreAdNotice }) => {
+        if (appOpenBlockedRef.current) return;
+
+        // Free-tier gating: If user hasn't seen the pre-ad transparency notice yet,
+        // show the notice before ever showing an app-open ad.
+        if (!isPremium && !hasSeenPreAdNotice()) {
+          if (appOpenAdWouldShow()) {
+            const proceedWithAd = () => {
+              if (appOpenBlockedRef.current) return;
+              maybeShowAppOpenAd().catch((err) => console.error('Failed to show app-open ad after notice:', err));
+            };
+
+            if (onShowPreAdNotice) {
+              onShowPreAdNotice(proceedWithAd);
+            } else {
+              triggerPreAdNotice(proceedWithAd);
+            }
+            return;
+          }
+        }
+
+        maybeShowAppOpenAd().catch((err) => console.error('Failed to load ads module:', err));
+      })
+      .catch((err) => console.error('Failed to load ads module:', err));
+  };
 
   // Initialize Billing and Ads once user is resolved
   useEffect(() => {
@@ -50,14 +81,11 @@ export function useAppAds({
       .catch(() => {});
 
     const id = setTimeout(() => {
-      if (appOpenBlockedRef.current) return;
-      import('../utils/ads')
-        .then(({ maybeShowAppOpenAd }) => maybeShowAppOpenAd())
-        .catch((err) => console.error('Failed to load ads module:', err));
+      executeAppOpenFlow();
     }, 1200);
 
     return () => clearTimeout(id);
-  }, [authLoading, user, showOnboarding]);
+  }, [authLoading, user, showOnboarding, isPremium]);
 
   // App-Open ad on RESUME
   useEffect(() => {
@@ -81,10 +109,7 @@ export function useAppAds({
 
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
-        if (appOpenBlockedRef.current) return;
-        import('../utils/ads')
-          .then(({ maybeShowAppOpenAd }) => maybeShowAppOpenAd())
-          .catch((err) => console.error('Failed to load ads module:', err));
+        executeAppOpenFlow();
       }, 1200);
     });
 
@@ -92,5 +117,5 @@ export function useAppAds({
       if (timer) clearTimeout(timer);
       cleanup();
     };
-  }, []);
+  }, [isPremium]);
 }

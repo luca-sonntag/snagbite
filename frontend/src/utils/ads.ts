@@ -465,6 +465,35 @@ const APP_OPEN_LAST_SHOWN_KEY = 'snagbite:appOpenAd:lastShownAt';
 /** Set the first time an app-open ad would be eligible; that first time is skipped. */
 const APP_OPEN_FIRST_LAUNCH_KEY = 'snagbite:appOpenAd:firstLaunchSeen';
 
+/** Key set when user has acknowledged the pre-ad transparency notice. */
+export const PRE_AD_NOTICE_SEEN_KEY = 'has_seen_pre_ad_notice';
+
+/** Event dispatched to request displaying the pre-ad transparency sheet. */
+export const SHOW_PRE_AD_NOTICE_EVENT = 'app:show-pre-ad-notice';
+
+/** Check if the user has already seen the pre-ad transparency notice. */
+export function hasSeenPreAdNotice(): boolean {
+  try {
+    return localStorage.getItem(PRE_AD_NOTICE_SEEN_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+/** Mark the pre-ad transparency notice as seen in localStorage. */
+export function markPreAdNoticeSeen(): void {
+  try {
+    localStorage.setItem(PRE_AD_NOTICE_SEEN_KEY, 'true');
+  } catch {}
+}
+
+/** Trigger the pre-ad transparency notice sheet, with an optional callback when confirmed. */
+export function triggerPreAdNotice(onConfirm?: () => void): void {
+  window.dispatchEvent(
+    new CustomEvent(SHOW_PRE_AD_NOTICE_EVENT, { detail: { onConfirm } })
+  );
+}
+
 /**
  * Show the app-open ad only when we have a real interstitial unit configured,
  * or when running test builds (test unit serves safe test ads). In a production

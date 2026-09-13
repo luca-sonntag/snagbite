@@ -31,6 +31,9 @@ export interface AppOverlaysProps {
   onCompleteOnboarding: () => void;
   showAlphaWelcome: boolean;
   onCompleteAlphaWelcome: () => void;
+  showPreAdNotice?: boolean;
+  setShowPreAdNotice?: (open: boolean) => void;
+  onConfirmPreAdNotice?: () => void;
 }
 
 export interface UseAppAdsProps {
@@ -40,6 +43,7 @@ export interface UseAppAdsProps {
   isPending: boolean;
   recipe: Recipe | null;
   showOnboarding: boolean;
+  onShowPreAdNotice?: (onConfirm?: () => void) => void;
 }
 
 export interface UseAppHistoryProps {
