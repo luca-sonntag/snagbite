@@ -37,9 +37,8 @@ export default function CollectionStoryBubble({
         className="flex flex-col items-center gap-1.5 shrink-0 w-[68px] sm:w-[72px] cursor-pointer group active:scale-95 transition-transform select-none border-none bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 rounded-2xl"
         aria-label={title}
       >
-        <div className="w-16 h-16 rounded-2xl bg-white dark:bg-gray-900 shadow-[0_3px_10px_rgba(16,185,129,0.15),0_1px_2px_rgba(0,0,0,0.04)] ring-1 ring-emerald-500/25 dark:ring-emerald-500/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center transition-colors border-none relative overflow-hidden">
-          <div className="absolute inset-0 bg-emerald-500/10 group-hover:bg-emerald-500/15 dark:bg-emerald-500/20 transition-colors" />
-          <Plus className="w-6 h-6 text-emerald-600 dark:text-emerald-400 relative z-10" />
+        <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/15 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center transition-colors border-none shadow-[0_3px_10px_rgba(16,185,129,0.12),0_1px_2px_rgba(0,0,0,0.04)] ring-1 ring-emerald-500/20 dark:ring-emerald-500/30">
+          <Plus className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
         </div>
         <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 tracking-tight text-center px-0.5 leading-tight break-words [overflow-wrap:anywhere] [word-break:break-word] hyphens-auto max-w-full">
           {title}
