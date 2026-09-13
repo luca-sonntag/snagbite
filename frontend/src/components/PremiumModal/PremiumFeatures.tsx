@@ -57,7 +57,7 @@ export function PremiumFeatures() {
       <div className="px-5 pt-1.5 pb-3">
         <div className="flex items-center justify-between mb-2">
           <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em]">
-            {t('premium.modal.featuresTitle') || 'Alles in Premium'}
+            {t('premium.modal.featuresTitle') || 'Alle PRO-Vorteile'}
           </p>
           <span className="text-[10px] font-bold text-amber-700 bg-amber-500/10 px-2 py-0.5 rounded-full">
             6 Features

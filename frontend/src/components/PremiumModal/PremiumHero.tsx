@@ -29,7 +29,7 @@ export function PremiumHero({ onClose, disabled }: PremiumHeroProps) {
 
         <div className="flex flex-col items-center text-center gap-2 relative">
           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600/70 mt-1">
-            Premium
+            PRO
           </span>
 
           <h2
@@ -40,7 +40,7 @@ export function PremiumHero({ onClose, disabled }: PremiumHeroProps) {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            {t('premium.modal.title') || 'Snagbite Premium'}
+            {t('premium.modal.title') || 'Snagbite PRO'}
           </h2>
 
           <p className="text-[13px] text-gray-500 leading-relaxed max-w-[210px] mx-auto">

@@ -81,7 +81,7 @@ export default function PremiumUpgradeCard({ onUpgradeClick, className = '' }: P
           ) : (
             <>
               <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
-                Snagbite Premium
+                Snagbite PRO
               </h3>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
                 {language === 'de'

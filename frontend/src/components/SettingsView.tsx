@@ -148,7 +148,7 @@ export default function SettingsView() {
               ) : isRealPremium ? (
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 uppercase tracking-wider border-none">
                   <Crown className="w-3 h-3 fill-emerald-600 dark:fill-emerald-400 text-emerald-600 dark:text-emerald-400" />
-                  Premium
+                  PRO
                 </span>
               ) : (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-400 uppercase tracking-wider border-none">
@@ -163,14 +163,14 @@ export default function SettingsView() {
           <div className="pt-3.5 border-t border-black/5 dark:border-white/5 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
             <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
             <span>
-              {t('app.settings.alphaActiveDesc') || 'You are an alpha tester! You have free access to all premium features during the alpha. Extraction limits apply.'}
+              {t('app.settings.alphaActiveDesc') || (language === 'de' ? 'Du bist Alpha-Tester! Du hast kostenlosen Zugriff auf alle PRO-Funktionen während der Alpha.' : 'You are an alpha tester! You have free access to all PRO features during the alpha.')}
             </span>
           </div>
         ) : isRealPremium ? (
           <div className="pt-3.5 border-t border-black/5 dark:border-white/5 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
             <Crown className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>
-              {t('app.settings.premiumActiveDesc') || 'You have unlimited access to all premium features.'}
+              {t('app.settings.premiumActiveDesc') || (language === 'de' ? 'Du hast unbegrenzten Zugriff auf alle PRO-Funktionen.' : 'You have unlimited access to all PRO features.')}
             </span>
           </div>
         ) : null}
