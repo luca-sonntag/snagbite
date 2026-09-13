@@ -120,7 +120,7 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
   * **Free:** 3 Extraktionen/Tag, max. 5 gespeicherte Rezepte, max. 1 Rezept auf Einkaufsliste, Nährwerte geblurt, Timer/Kochmodus/Copilot/Sammlungen/Labels gesperrt.
   * **Alpha:** 10 Extraktionen/Tag, max. 20 gespeicherte Rezepte, alle Features freigeschaltet.
   * **Premium:** 50 Extraktionen/Tag, unbegrenztes Kochbuch, alle Features freigeschaltet.
-* **Gating-Komponenten:** `PremiumModal.tsx` (Upsell-Dialog), `PremiumHint.tsx` (Goldene Crown auf Emerald-Fläche), `PremiumCrownBadge.tsx` (Crown-Marker auf Gated Buttons), `PremiumUpgradeCard.tsx` (Werbekarte).
+* **Gating-Komponenten:** `PremiumModal.tsx` (Upsell-Dialog), `PremiumHint.tsx` (Dezente amberfarbene PRO-Hinweise), `ProBadge.tsx` (Zentrale PRO-Chip-Komponente für Buttons, Header & Gated Sections), `PremiumUpgradeCard.tsx` (Werbekarte).
 
 ---
 

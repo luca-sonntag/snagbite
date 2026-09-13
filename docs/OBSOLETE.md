@@ -6,6 +6,22 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-14: Abschaffung verspielter Kronen-Icons (`PremiumCrownBadge` & `Crown`) zugunsten einheitlicher `ProBadge`-Komponente
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `PremiumCrownBadge.tsx`: Verspieltes, absolutes Mini-Kronen-Icon (`Crown` aus `lucide-react`) an Action-Buttons (Kochen, Copilot, Timer).
+  - Verstreute, uneinheitliche Kronen-Icons und gelbe Gating-Badges über Buttons, Makro-Verteilungen, Zutatendetails, Healthy-Score und Werbe-Hinweisen.
+  - Das Kronen-Icon vermittelte den Eindruck eines verspielten Mobile-Games statt einer modernen, kuratierten kulinarischen PWA.
+* **Ersetzt durch:**
+  - **Zentrale, typografische Single-Source-of-Truth-Komponente ([`ProBadge.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ProBadge.tsx)):**
+    - `variant="corner"`: Kompakter, kontrastreicher Micro-Chip (`bg-amber-500 text-white font-black text-[8.5px] uppercase`) für Action-Dock-Buttons.
+    - `variant="chip"`: Minimalistischer Inline-Tag (`bg-amber-500/15 text-amber-700 dark:text-amber-300 font-black text-[10px]`) für Einstellungen und Hinweistexte.
+    - `variant="interactive"`: Einheitliche, ruhige Pill im Clean Flat Style (`tint-premium`) mit integriertem `PRO`-Tag, optionalem Label und Chevron für gesperrte Detailansichten (Healthy-Score, Makros, Zutaten).
+  - `PremiumCrownBadge.tsx` wurde zu einem abwärtskompatiblen `@deprecated`-Wrapper um `<ProBadge variant="corner" />` reduziert.
+* **Betroffene Dateien:** `frontend/src/components/ProBadge.tsx` (neu), `frontend/src/components/PremiumCrownBadge.tsx`, `frontend/src/components/CookingMode/CookingModeHeader.tsx`, `frontend/src/components/RecipeDetails/RecipeActionDock.tsx`, `frontend/src/components/RecipeDetails/RecipeInstructions.tsx`, `frontend/src/components/RecipeDetails/HealthScoreBadge.tsx`, `frontend/src/components/RecipeDetails/HealthScorePaywallPreview.tsx`, `frontend/src/components/RecipeDetails/MacroDistribution.tsx`, `frontend/src/components/RecipeDetails/RecipeIngredients.tsx`, `frontend/src/components/SettingsView.tsx`, `frontend/src/components/PremiumHint.tsx`, `frontend/src/components/PremiumUpgradeCard.tsx`, `frontend/src/components/TrialBanner.tsx`, `frontend/src/components/Ads/PreAdTransparencySheet.tsx`, `frontend/src/i18n.ts`, `docs/architecture/frontend.md`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-13: Entrümpelung von `ShoppingEmptyState.tsx` (Überkomplizierte Fake-Mockups durch Clean Flat Empty State ersetzt)
 
 * **Ersetzter Code / Anti-Pattern:**
