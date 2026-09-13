@@ -66,7 +66,7 @@ export default function RecipeActionDock({
           <span className={itemLabel}>
             {t('recipe.dockCook')}
           </span>
-          {!isPremium && <ProBadge variant="corner" />}
+          {!isPremium && <ProBadge variant="corner" hasShadow />}
         </button>
       )}
 
@@ -103,7 +103,7 @@ export default function RecipeActionDock({
           <span className={itemLabel}>
             {t('recipe.dockChat')}
           </span>
-          {!isPremium && <ProBadge variant="corner" />}
+          {!isPremium && <ProBadge variant="corner" hasShadow />}
         </button>
       )}
 

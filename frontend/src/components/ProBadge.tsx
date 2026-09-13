@@ -12,6 +12,8 @@ export interface ProBadgeProps {
   label?: string;
   /** Whether to show a trailing chevron (interactive variant) */
   hasChevron?: boolean;
+  /** Whether to add a soft drop shadow */
+  hasShadow?: boolean;
   /** Click handler */
   onClick?: (e: React.MouseEvent) => void;
   className?: string;
@@ -25,13 +27,16 @@ export default function ProBadge({
   variant = 'chip',
   label,
   hasChevron = false,
+  hasShadow = false,
   onClick,
   className = '',
 }: ProBadgeProps) {
   if (variant === 'corner') {
     return (
       <span
-        className={`absolute -top-1 -right-1 z-10 flex items-center justify-center px-1.5 py-[2px] rounded-[4px] bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[7.5px] font-bold uppercase tracking-[0.14em] ring-1.5 ring-white dark:ring-gray-900 shadow-xs pointer-events-none select-none leading-none ${className}`}
+        className={`absolute -top-1 -right-1 z-10 flex items-center justify-center px-1.5 py-[2px] rounded-[4px] bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[7.5px] font-bold uppercase tracking-[0.14em] ring-1.5 ring-white dark:ring-gray-900 pointer-events-none select-none leading-none ${
+          hasShadow ? 'shadow-[0_1.5px_4px_rgba(0,0,0,0.14),0_1px_2px_rgba(0,0,0,0.08)]' : 'shadow-xs'
+        } ${className}`}
         aria-label="PRO"
       >
         PRO
@@ -42,7 +47,9 @@ export default function ProBadge({
   if (variant === 'chip') {
     return (
       <span
-        className={`inline-flex items-center justify-center px-1.5 py-[2px] rounded-[4px] text-[8px] font-bold uppercase tracking-[0.14em] bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 ring-1 ring-black/[0.06] dark:ring-white/[0.08] select-none leading-none ${className}`}
+        className={`inline-flex items-center justify-center px-1.5 py-[2px] rounded-[4px] text-[8px] font-bold uppercase tracking-[0.14em] bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 ring-1 ring-black/[0.06] dark:ring-white/[0.08] select-none leading-none ${
+          hasShadow ? 'shadow-[0_1.5px_4px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.08)]' : ''
+        } ${className}`}
         aria-label="PRO"
       >
         PRO
