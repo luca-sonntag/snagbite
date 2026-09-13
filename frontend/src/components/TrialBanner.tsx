@@ -81,7 +81,7 @@ export default function TrialBanner({ onOpenPremium, className = '' }: TrialBann
       <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
         {/* Crown icon — same amber square language as PremiumUpgradeCard */}
         <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-          <Crown className="w-5 h-5" />
+          <Crown className="w-5 h-5 fill-amber-500" />
         </div>
 
         {/* Content */}

@@ -60,7 +60,7 @@ export default function PremiumUpgradeCard({ onUpgradeClick, className = '' }: P
 
       <div className={`flex items-center gap-3 min-w-0 flex-1 ${showTrial ? 'pr-2' : ''}`}>
         <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-          <Crown className="w-5 h-5" />
+          <Crown className="w-5 h-5 fill-amber-500" />
         </div>
         <div className="min-w-0 flex-1">
           {showTrial ? (
@@ -85,8 +85,8 @@ export default function PremiumUpgradeCard({ onUpgradeClick, className = '' }: P
               </h3>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
                 {language === 'de'
-                  ? 'Mehr Rezept-Importe, Nährwerte, KI-Chat, Sammlungen & Kochmodus'
-                  : 'More recipe imports, nutrition info, AI chat, collections & cooking mode'}
+                  ? 'Unbegrenzte Extraktionen, 100% werbefrei, Recipe Copilot & Healthy-Score'
+                  : 'Unlimited extractions, 100% ad-free, Recipe Copilot & Healthy Score'}
               </p>
             </>
           )}

@@ -141,7 +141,7 @@ export const PreAdTransparencySheet: React.FC<PreAdTransparencySheetProps> = ({
                 onClick={handleOpenPremium}
                 className="w-full h-11 min-h-[44px] rounded-2xl font-semibold bg-transparent hover:bg-black/5 dark:hover:bg-white/5 text-gray-600 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400 border-none active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs select-none"
               >
-                <Crown className="w-3.5 h-3.5 text-amber-500" />
+                <Crown className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                 <span>{t('preAdNotice.goPremium')}</span>
               </button>
             </Drawer.Footer>
