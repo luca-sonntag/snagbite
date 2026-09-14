@@ -3,8 +3,10 @@ import type { CopilotMessage } from '../../RecipeDetails/RecipeCopilot/types';
 import { useI18n } from '../../../context/I18nContext';
 
 export default function RecipeCopilotPreview() {
-  const { language } = useI18n();
+  const { t, language } = useI18n();
   const isEn = language.startsWith('en');
+
+  const chipLabel = t('copilot.chipRecalculateNutrition');
 
   const sampleMessages: CopilotMessage[] = [
     {
@@ -14,8 +16,8 @@ export default function RecipeCopilotPreview() {
     {
       role: 'model',
       text: isEn
-        ? 'Done! I replaced heavy cream with oat cuisine and butter with olive oil. [[chip:action:Recalculate nutrition]]'
-        : 'Gerne! Ich habe Sahne durch Hafer-Cuisine ersetzt und Butter durch Olivenöl getauscht. [[chip:action:Nährwerte neu berechnen]]',
+        ? `Done! I replaced heavy cream with oat cuisine and butter with olive oil. [suggest:${chipLabel}](prompt:${chipLabel})`
+        : `Gerne! Ich habe Sahne durch Hafer-Cuisine ersetzt und Butter durch Olivenöl getauscht. [suggest:${chipLabel}](prompt:${chipLabel})`,
     },
   ];
 

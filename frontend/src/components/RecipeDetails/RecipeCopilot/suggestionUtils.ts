@@ -4,14 +4,17 @@ export interface CopilotSuggestion {
   payload: string;
 }
 
-const SUGGESTION_REGEX = /\[(?:suggest:\s*)?([^\]]+)\](?:\s*\((?:(prompt|timer):\s*)?([^)]+)\))?/gi;
+const SUGGESTION_REGEX = /\[\[?(?:(?:suggest|chip(?::action)?):\s*)?([^\]]+)\]\]?(?:\s*\((?:(prompt|timer):\s*)?([^)]+)\))?/gi;
 
 export function parseSuggestions(rawText: string): { cleanText: string; suggestions: CopilotSuggestion[] } {
   if (!rawText) return { cleanText: '', suggestions: [] };
   const suggestions: CopilotSuggestion[] = [];
   const cleanText = rawText
     .replace(SUGGESTION_REGEX, (_, rawLabel, rawType, rawPayload) => {
-      const trimmedLabel = String(rawLabel || '').replace(/^\+\s*/, '').trim();
+      let trimmedLabel = String(rawLabel || '').replace(/^\+\s*/, '').trim();
+      trimmedLabel = trimmedLabel.replace(/^\[+/, '').replace(/\]+$/, '');
+      trimmedLabel = trimmedLabel.replace(/^(?:suggest|chip(?::action)?):\s*/i, '').trim();
+
       const typeStr = (rawType || '').toLowerCase();
       const isTimer = typeStr === 'timer' || trimmedLabel.toLowerCase().includes('timer');
       const trimmedPayload = String(rawPayload || trimmedLabel).trim();
@@ -25,6 +28,7 @@ export function parseSuggestions(rawText: string): { cleanText: string; suggesti
       }
       return '';
     })
+    .replace(/\s*\]+\s*$/, '')
     .replace(/\n\s*\n\s*\n/g, '\n\n')
     .trim();
 
