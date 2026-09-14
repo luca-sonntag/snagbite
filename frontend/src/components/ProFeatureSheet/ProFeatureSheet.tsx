@@ -5,7 +5,7 @@ import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
 import ProBadge from '../ProBadge';
 import { getProFeatureContent } from './proFeaturesData';
-import ProFeatureScreenshot from './ProFeatureScreenshot';
+import ProFeaturePreview from './ProFeaturePreview';
 import type { ProFeatureSheetProps } from './types';
 
 /**
@@ -82,14 +82,10 @@ export default function ProFeatureSheet({
               </div>
             </Drawer.Header>
 
-            {/* Body: Screenshot & Value Bullets */}
+            {/* Body: Native Feature Micro-Preview & Value Bullets */}
             <Drawer.Body className="px-0 py-1 overflow-y-auto flex flex-col gap-4">
-              {/* Dynamic Feature Screenshot */}
-              <ProFeatureScreenshot
-                src={feature.screenshotUrl}
-                alt={feature.title}
-                icon={feature.icon}
-              />
+              {/* Dynamic Native Feature Micro-Preview */}
+              <ProFeaturePreview featureId={featureId} />
 
               {/* Feature Value Bullets */}
               <div className="flex flex-col gap-2.5 py-1">

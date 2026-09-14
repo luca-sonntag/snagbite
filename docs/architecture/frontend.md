@@ -188,8 +188,10 @@ Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird
 ### 🌟 Dynamisches Feature-Spotlight (`ProFeatureSheet/`)
 * **Kontextuelles Feature-Gating:** Statt Free-Nutzer beim Antippen von gesperrten Elementen direkt mit einer generischen Paywall zu überfordern, öffnet die App ein gezieltes Feature-Spotlight-Sheet (`ProFeatureSheet.tsx`).
 * **Dynamische Inhalte (`proFeaturesData.ts`):** Lädt Überschriften, Taglines und Nutzen-Bullet-Points abhängig vom angetippten Feature (`macros`, `healthy_score`, `ingredient_nutrition`, `cooking_mode`, `recipe_copilot`, `unlimited_extractions`, `collections_labels`) vollständig auf Deutsch und Englisch.
-* **Screenshot-Asset-Pipeline (`frontend/public/pro-features/`):** Erkennt automatisch PNG-Screenshots (`<feature-id>.png`).
-* **Graceful Fallback (`ProFeatureScreenshot.tsx`):** Sollte eine Screenshot-Datei noch nicht im Ordner liegen, fängt die Komponente Bildfehler geräuschlos ab und rendert eine gestaltete Platzhalterkarte im Clean Flat Style.
+* **Native UI-Micro-Previews (`ProFeaturePreview.tsx` & `previews/`):**
+  * Verwendet keine sperrigen statischen Screenshots mehr, sondern rendert die wichtigsten visuellen Elemente jedes Features direkt über die echten, modularisierten Originalkomponenten der App (0% Code-Duplizierung).
+  * Wiederverwendete Original-Subkomponenten: `HealthScoreHeroCard`, `MacroDistribution`, `IngredientItemRow`, `CookingTimerCard` (aus `CookingModeTimers` extrahiert), `CopilotMessageItem` und `CollectionStoryBubble`.
+  * Gestochen scharf auf jedem Display, perfekt proportioniert ohne Abschneiden oder Layout-Jumps.
 * **Nahtloser Upgrade-Flow:** Der primäre CTA (*„Snagbite PRO freischalten"*) schließt das Spotlight-Sheet und öffnet übergangslos das `PremiumModal`.
 
 ---

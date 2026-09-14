@@ -6,6 +6,17 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-14: Ersetzung statischer Screenshots in `ProFeatureSheet` durch native UI-Micro-Previews (`ProFeaturePreview` & Reusable Subcomponents)
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `ProFeatureScreenshot.tsx`: Statische PNG-Bilder zur Feature-Vorschau in Bottom Sheets. Führt zu unschönen Abschnitten (hochformatige Smartphonescreens passen nicht in kompakte 160–200px Sheets), unleserlichen Miniaturschriften bei Skalierung und Inception-Effekten (App im Screenshot der App).
+* **Ersetzt durch:**
+  - **Natives UI-Micro-Preview-System ([`ProFeaturePreview.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ProFeatureSheet/ProFeaturePreview.tsx)):**
+    - Zentrale Preview-Komponenten im Ordner `frontend/src/components/ProFeatureSheet/previews/` (`HealthScorePreview`, `MacrosPreview`, `IngredientNutritionPreview`, `CookingModePreview`, `RecipeCopilotPreview`, `CollectionsPreview`, `UnlimitedExtractionsPreview`).
+    - Strikte Wiederverwendung der echten Subkomponenten ohne Code-Duplizierung (`HealthScoreHeroCard`, `MacroDistribution`, `IngredientItemRow`, `CookingTimerCard`, `CopilotMessageItem`, `CollectionStoryBubble`).
+    - Gestochen scharf auf jedem Display, 100% konsistent mit dem tatsächlichen Feature-Design.
+* **Betroffene Dateien:** `frontend/src/components/ProFeatureSheet/ProFeatureScreenshot.tsx` (gelöscht), `frontend/src/components/ProFeatureSheet/ProFeaturePreview.tsx` (neu), `frontend/src/components/ProFeatureSheet/previews/` (neu), `frontend/src/components/CookingMode/CookingTimerCard.tsx` (neu), `frontend/src/components/CookingMode/CookingModeTimers.tsx`, `docs/OBSOLETE.md`.
+
 ### 2026-09-14: Abschaffung verspielter Kronen-Icons (`PremiumCrownBadge` & `Crown`) zugunsten einheitlicher `ProBadge`-Komponente
 
 * **Ersetzter Code / Anti-Pattern:**
