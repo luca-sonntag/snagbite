@@ -31,10 +31,18 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
 }) => {
   const { t } = useI18n();
 
-  const scaledAmount = formatAmount(ingredient.amount, ingredient.unit);
-  const amountStr = scaledAmount ? `${scaledAmount} ` : '';
-  const unitStr = ingredient.unit ? `${ingredient.unit} ` : '';
-  const displayAmount = `${amountStr}${unitStr}`.trim();
+  const rawFormatted = formatAmount(ingredient.amount, ingredient.unit)?.trim() ?? '';
+  const unit = (ingredient.unit ?? '').trim();
+  const alreadyHasUnit =
+    Boolean(unit) &&
+    (rawFormatted.endsWith(` ${unit}`) ||
+      rawFormatted.toLowerCase().endsWith(unit.toLowerCase()));
+  const displayAmount =
+    alreadyHasUnit || !unit
+      ? rawFormatted
+      : rawFormatted
+      ? `${rawFormatted} ${unit}`.trim()
+      : '';
   const name = ingredient.name;
   const uniqueId = `${name}-${originalIdx}-${itemIdx}`;
   const parent = getParentIngredient(ingredient);
