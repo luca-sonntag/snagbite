@@ -604,6 +604,7 @@ export default function App() {
           {visitedViews.has('shopping-list') && (
             <Suspense fallback={<ViewFallback />}>
               <ShoppingList
+                isActive={activeView === 'shopping-list'}
                 shoppingList={shoppingList}
                 aggregatedList={aggregatedList}
                 activeRecipes={activeRecipes}

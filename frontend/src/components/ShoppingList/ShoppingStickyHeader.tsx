@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { ShoppingCart, Package, CheckCheck, Trash2 } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { hapticSelection, hapticLight } from '../../utils/haptics';
@@ -40,7 +40,7 @@ export const ShoppingStickyHeader: React.FC<ShoppingStickyHeaderProps> = ({
       id="shopping-sticky-header"
       className={`sticky top-[var(--app-sticky-top,0px)] z-30 -mx-4 px-4 bg-[#f9fafb]/95 dark:bg-gray-950/95 backdrop-blur-md transition-all duration-200 flex flex-col border-none pt-2 ${
         isCollapsed
-          ? "shadow-[0_4px_16px_rgba(0,0,0,0.04)] pb-2.5 before:content-[''] before:absolute before:bottom-full before:inset-x-0 before:h-12 before:bg-[#f9fafb] dark:before:bg-gray-950 before:pointer-events-none"
+          ? 'shadow-[0_4px_16px_rgba(0,0,0,0.04)] pb-2.5'
           : 'pb-1.5'
       }`}
     >

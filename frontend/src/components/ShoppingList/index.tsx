@@ -18,6 +18,7 @@ interface ActiveShoppingRecipe {
 }
 
 interface ShoppingListProps {
+  isActive?: boolean;
   shoppingList?: ShoppingListItem[];
   aggregatedList: {
     toBuy?: AggregatedShoppingItem[];
@@ -46,7 +47,7 @@ export default function ShoppingList(props: ShoppingListProps) {
   const dialog = useDialog();
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<'shopping' | 'pantry'>('shopping');
-  const { isCollapsed, setCollapseSentinel } = useShoppingSticky();
+  const { isCollapsed, setCollapseSentinel } = useShoppingSticky(props.isActive ?? true);
 
   const toBuyItems = props.aggregatedList.toBuy || props.aggregatedList.unchecked || [];
   const checkedCount = props.aggregatedList.checked.length;
