@@ -33,6 +33,7 @@ export interface ExtractFormProps {
   claimRewardedCredit?: () => Promise<boolean>;
   onSavePublicRecipe?: (recipe: Recipe) => Promise<void>;
   savedRecipeIds?: Set<string>;
+  initialOpenSheet?: 'link' | 'photo' | null;
 }
 
 export interface PhotoExtractGridProps {

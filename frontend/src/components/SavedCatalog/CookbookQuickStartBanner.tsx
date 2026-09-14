@@ -21,7 +21,7 @@ export default function CookbookQuickStartBanner({ className = '' }: CookbookQui
 
   const handleAddPhoto = () => {
     hapticLight();
-    window.location.hash = '#/extract?mode=photo';
+    window.location.hash = '#/extract/photo';
   };
 
   return (

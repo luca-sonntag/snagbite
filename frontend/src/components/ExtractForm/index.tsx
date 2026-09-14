@@ -39,13 +39,38 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
   claimRewardedCredit,
   onSavePublicRecipe,
   savedRecipeIds,
+  initialOpenSheet,
 }) => {
   const { t } = useI18n();
   const { user, isPremium } = useAuth();
   const { activeCount: liveActiveCount } = useExtractionJobs();
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
-  const [isLinkSheetOpen, setIsLinkSheetOpen] = useState(false);
-  const [isPhotoSheetOpen, setIsPhotoSheetOpen] = useState(false);
+  const [isLinkSheetOpen, setIsLinkSheetOpen] = useState(initialOpenSheet === 'link');
+  const [isPhotoSheetOpen, setIsPhotoSheetOpen] = useState(initialOpenSheet === 'photo');
+
+  React.useEffect(() => {
+    if (initialOpenSheet === 'photo') {
+      setMode('photo');
+      setIsPhotoSheetOpen(true);
+    } else if (initialOpenSheet === 'link') {
+      setMode('link');
+      setIsLinkSheetOpen(true);
+    }
+  }, [initialOpenSheet, setMode]);
+
+  const handleCloseLinkSheet = () => {
+    setIsLinkSheetOpen(false);
+    if (window.location.hash.includes('link')) {
+      window.history.replaceState(null, '', '#/extract');
+    }
+  };
+
+  const handleClosePhotoSheet = () => {
+    setIsPhotoSheetOpen(false);
+    if (window.location.hash.includes('photo')) {
+      window.history.replaceState(null, '', '#/extract');
+    }
+  };
 
   const isRealPremium = user?.app_metadata?.tier === 'premium';
   const cookbookFull = !isRealPremium && !!limitStatus?.cookbookFull;
@@ -219,7 +244,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
           {/* Video / Link Bottom Sheet */}
           <UrlExtractSheet
             isOpen={isLinkSheetOpen}
-            onClose={() => setIsLinkSheetOpen(false)}
+            onClose={handleCloseLinkSheet}
             url={url}
             setUrl={setUrl}
             urlError={urlError}
@@ -234,7 +259,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
           {/* Photo Scanner Bottom Sheet */}
           <PhotoExtractSheet
             isOpen={isPhotoSheetOpen}
-            onClose={() => setIsPhotoSheetOpen(false)}
+            onClose={handleClosePhotoSheet}
             photos={photos}
             photoPreviews={photoPreviews}
             cameraInputRef={cameraInputRef}

@@ -64,7 +64,7 @@ export default function App() {
   const userLevel = gamificationSnapshot?.stats?.level ?? null;
   const incomingRequestsCount = incomingRequests.length;
 
-  const { tab: activeView, subPath, navigate, replace } = useHashRouter();
+  const { tab: activeView, subPath, query, navigate, replace } = useHashRouter();
 
   // Invite deep link (#/invite/<code>)
   const [pendingInviteCode, setPendingInviteCode] = useState<string | null>(null);
@@ -493,6 +493,13 @@ export default function App() {
               claimRewardedCredit={claimRewardedCredit}
               onSavePublicRecipe={handleSavePublicRecipe}
               savedRecipeIds={savedRecipeIds}
+              initialOpenSheet={
+                activeView === 'extract' && (subPath === 'photo' || query?.mode === 'photo')
+                  ? 'photo'
+                  : activeView === 'extract' && (subPath === 'link' || query?.mode === 'link')
+                  ? 'link'
+                  : null
+              }
               errorBanner={
                 extractionJobs.length > 0 ||
                 (jobStatus === 'failed' && jobErrorCode !== 'RATE_LIMIT_EXCEEDED') ? (
