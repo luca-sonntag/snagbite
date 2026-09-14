@@ -222,3 +222,35 @@ Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird
   4. **Phase 4 (Cover & Finalisierung):** Generiertes KI-Food-Cover schärft sich ein, Schritt-Zähler bestätigt die Strukturierung.
 * **Architektur:** Modularisiert in Subkomponenten (`RecipeCoverPreview.tsx`, `RecipePillTags.tsx`, `IngredientsStream.tsx`, `ExtractionProgressBar.tsx`, `ProgressiveRecipeCard.tsx`, `useProgressiveRecipe.ts`) unter 150 Zeilen.
 * **AdMob-Harmonisierung:** Im Free-Tier wechselt die Karte automatisch in den `compact`-Modus, sodass sie harmonisch über dem MREC-Ad-Banner Platz findet.
+
+---
+
+## 10. 🛠️ DevTools & Overlay-Aktivierungssystem (`DevTools/`)
+
+Für schnelles Testen, Gestalten und Inspizieren selten auftretender Dialoge, Sheets und Overlays (die sonst nur bei Erststarts, Level-Ups oder bestimmten User-States sichtbar sind) existiert in Development-Builds ein zentraler DevTools-Controller:
+
+* **Globales Konsolen-API (`window.dev` & `window.cookbookDev`):**
+  * `dev.show(name, options?)` (z. B. `dev.show('onboarding')`, `dev.show('reward', { levelUp: true })`)
+  * Direkte Autocomplete-Methoden:
+    * `dev.show.onboarding()`: Erststart-Guide (`WelcomeGuide.tsx`)
+    * `dev.show.adNotice()`: Werbe-Transparenzhinweis (`PreAdTransparencySheet.tsx`)
+    * `dev.show.premium()`: Paywall & Mitgliedschafts-Modal (`PremiumModal.tsx`)
+    * `dev.show.alphaWelcome()`: Alpha-Tester-Begrüßung (`AlphaWelcome.tsx`)
+    * `dev.show.reward(options?)`: Gamification Koch-Belohnung (`RewardOverlay.tsx`, XP-Bar, Konfetti, Level-Up)
+    * `dev.show.feedback()`: In-App Bug-Report-Drawer (`FeedbackDrawer.tsx`)
+    * `dev.show.proFeature(id?)`: Feature-Spotlight-Sheet (`ProFeatureSheet.tsx`, z. B. `'recipe_copilot'`, `'macros'`)
+    * `dev.show.cooked(options?)`: Koch-Abschlussmodal mit Fotoupload (`CookedModal.tsx`)
+    * `dev.show.notificationPrompt()`: Push-Benachrichtigungs-Opt-in (`NotificationPrompt.tsx`)
+    * `dev.show.timerConfirm(options?)`: Timer-Startbestätigung (`TimerConfirmSheet.tsx`)
+    * `dev.show.alert(options?)` & `dev.show.confirm(options?)`: Native-Style HeroUI-Dialoge (`DialogContext`)
+    * `dev.show.toast(options?)`: In-App Toasts (`ToastContext`)
+    * `dev.show.ota(options?)`: OTA Live-Update Top-Banner (`OtaUpdateBanner.tsx`)
+  * `dev.close()`: Schließt das aktuell aktive Dev-Overlay sofort.
+  * `dev.help()` / `dev.list()`: Gibt eine formatierte `console.table()` mit allen verfügbaren Dialogen, Aliasen und Beispielen in der Konsole aus.
+* **1-Klick Eruda Snippets (Mobile DevTools):**
+  * Für physische Testgeräte und Emulatoren registriert `erudaSnippets.ts` Shortcuts im Eruda-Tool `snippets`.
+  * Ermöglicht das Aktivieren jedes Dialogs per Fingertipp ohne Eingabe auf der Bildschirmtastatur.
+* **Lazy-Loaded Dev Host (`DevOverlayHost.tsx`):**
+  * Alle dev-getriggerten Overlays werden via `React.lazy()` und `Suspense` dynamisch nachgeladen, wodurch der reguläre Bundle-Overhead im Dev-Modus 0 KB beträgt.
+  * Automatische Anbindung an den `OverlayStackContext` (Android Hardware-Back-Button und Scroll-Lock).
+

@@ -59,6 +59,7 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
    * Client-seitiges Image Caching (IndexedDB `recipe-image-cache` + `/api/image` Proxy)
    * In-App Koch-Timer (`TimerContext`, `TimerBanner`, `TimerConfirmSheet`) & Share Target Integration
    * In-App Bug-Reports & Feedback (`FeedbackDrawer.tsx` & Console Ring Buffer)
+   * In-App DevTools & Overlay-Controller (`DevTools/`, `window.dev.show` / `dev.help`, 1-Klick Eruda Snippets, `DevOverlayHost`)
    * AdMob Monetarisierung (MREC `ExtractionAdCard`, App-Open Interstitial beim Start, Rewarded Video Ads, UMP Consent, Patched Plugin)
 
 5. 🚀 [**Deployment, Play Store & OTA Updates**](file:///c:/Users/lucas/source/repos/cookbook/docs/architecture/deployment-and-ota.md)
