@@ -245,6 +245,8 @@ describe('healthScoreCalculator', () => {
         sugar: 9.1,
         fiber: null,
       },
+      prepTime: null,
+      cookTime: null,
       instructions: [],
       equipment: [],
     };

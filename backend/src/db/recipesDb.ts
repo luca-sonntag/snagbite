@@ -66,8 +66,8 @@ export function rowToRecipe(row: RecipeRow): Recipe {
   // Auto-heal / dynamic sync: recompute if healthScore is missing or if breakdown has 0g veg despite having produce items
   if (
     recipe.ingredients?.length &&
-    (recipe.healthScore === null ||
-      recipe.healthScoreBreakdown === null ||
+    (!recipe.healthScore ||
+      !recipe.healthScoreBreakdown ||
       (recipe.healthScoreBreakdown.metrics?.vegetableGramsPerServing === 0 &&
         recipe.ingredients.some((g) =>
           g.items?.some((i) => isVegetableOrFruitCategory(i.category || g.name))
