@@ -1,4 +1,4 @@
-# 📸 Snagbite PRO Feature Screenshots
+# 📸 Snagbite Pro Feature Screenshots
 
 Lege hier deine Feature-Screenshots als PNG-Dateien ab. Die `ProFeatureSheet`-Komponente erkennt die Dateien automatisch anhand ihres Namens.
 

@@ -192,7 +192,7 @@ Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird
   * Verwendet keine sperrigen statischen Screenshots mehr, sondern rendert die wichtigsten visuellen Elemente jedes Features direkt über die echten, modularisierten Originalkomponenten der App (0% Code-Duplizierung).
   * Wiederverwendete Original-Subkomponenten: `HealthScoreHeroCard`, `MacroDistribution`, `IngredientItemRow`, `CookingTimerCard` (aus `CookingModeTimers` extrahiert), `CopilotMessageItem` und `CollectionStoryBubble`.
   * Gestochen scharf auf jedem Display, perfekt proportioniert ohne Abschneiden oder Layout-Jumps.
-* **Nahtloser Upgrade-Flow:** Der primäre CTA (*„Snagbite PRO freischalten"*) schließt das Spotlight-Sheet und öffnet übergangslos das `PremiumModal`.
+* **Nahtloser Upgrade-Flow:** Der primäre CTA (*„Snagbite Pro freischalten"*) schließt das Spotlight-Sheet und öffnet übergangslos das `PremiumModal`.
 
 ---
 
