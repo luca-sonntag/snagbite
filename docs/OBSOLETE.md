@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-14: Steriler Vollseiten-Empty-State (`CatalogEmptyState`) durch lebendigen „Magazine-First Cold Start“ ersetzt
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Vollständiges Abschalten des Magazins (`CookbookHome`) bei `completedJobs.length === 0` in `SavedCatalog/index.tsx`.
+  - Anzeigen einer sterilen, weißen Vollseiten-Card `CatalogEmptyState` mit Buch-Icon, die neuen Benutzern ein leeres Datenbankformular präsentierte und Cold-Start-Frust erzeugte.
+* **Ersetzt durch:**
+  - **Magazine-First Cold Start ([`CookbookHome.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CookbookHome.tsx), [`SavedCatalog/index.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/index.tsx)):** Das redaktionelle Magazin bleibt auf Level 1 immer aktiv und lebendig.
+  - **Kompaktes Quick-Start-Banner ([`CookbookQuickStartBanner.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CookbookQuickStartBanner.tsx)):** Schlankes, flaches Aktions-Banner am oberen Rand für Link-Import und Foto-Scan, ohne den Magazin-Feed zu blockieren.
+  - **Kuratierte Cold-Start-Feeds ([`useCookbookMagazine.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/useCookbookMagazine.ts), [`CollectionStoryHub.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CollectionStoryHub.tsx)):** Hero-Carousel (3 Slides), Bento-Grid (3 schnelle Gerichte) und Inspiration-Story-Bubbles speisen sich bei 0 eigenen Rezepten nahtlos aus öffentlichen Community-Entdeckungen mit 1-Klick-Speicherfunktion.
+* **Betroffene Dateien:** `frontend/src/components/SavedCatalog/index.tsx`, `frontend/src/components/SavedCatalog/CookbookHome.tsx`, `frontend/src/components/SavedCatalog/useCookbookMagazine.ts`, `frontend/src/components/SavedCatalog/CollectionStoryHub.tsx`, `frontend/src/components/SavedCatalog/CookbookQuickStartBanner.tsx`, `frontend/src/components/SavedCatalog/cookbookHomeTypes.ts`, `frontend/src/i18n.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-14: Ersetzung statischer Screenshots in `ProFeatureSheet` durch native UI-Micro-Previews (`ProFeaturePreview` & Reusable Subcomponents)
 
 * **Ersetzter Code / Anti-Pattern:**
