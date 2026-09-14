@@ -1684,7 +1684,7 @@ export const uiTranslations = {
         restoreError: 'Wiederherstellung fehlgeschlagen. Bitte versuche es erneut.',
         trialBanner: {
           title: 'Snagbite Pro kostenlos testen',
-          body: 'Schalte alles frei. Jederzeit kündbar.',
+          body: 'Unbegrenzte Extraktionen, 100% werbefrei und alle Pro-Features. Jederzeit kündbar.',
           cta: 'Kostenlos starten',
           dismiss: 'Später',
           days: 'Tage',
@@ -3114,7 +3114,7 @@ export const uiTranslations = {
         restoreError: 'Restore failed. Please try again.',
         trialBanner: {
           title: 'Try Snagbite Pro free',
-          body: 'Unlock everything. Cancel anytime.',
+          body: 'Unlimited extractions, 100% ad-free and all Pro features. Cancel anytime.',
           cta: 'Start free',
           dismiss: 'Later',
           days: 'days',
