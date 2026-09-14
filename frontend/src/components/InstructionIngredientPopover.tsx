@@ -17,6 +17,7 @@ export interface InstructionIngredientPopoverProps {
   };
   fallbackText?: string;
   formatAmount: (amount: number, unit?: string) => string;
+  variant?: 'list' | 'focused';
 }
 
 export const InstructionIngredientPopover: React.FC<InstructionIngredientPopoverProps> = ({
@@ -24,6 +25,7 @@ export const InstructionIngredientPopover: React.FC<InstructionIngredientPopover
   matchedIngredient,
   fallbackText,
   formatAmount,
+  variant = 'list',
 }) => {
   const rawScaled = matchedIngredient
     ? formatAmount(matchedIngredient.amount, matchedIngredient.unit)?.trim() ?? ''
@@ -35,11 +37,19 @@ export const InstructionIngredientPopover: React.FC<InstructionIngredientPopover
   const displayAmount =
     alreadyHasUnit || !unit ? rawScaled : `${rawScaled} ${unit}`.trim();
 
+  const isFocused = variant === 'focused';
+
   return (
     <span onClick={(e) => e.stopPropagation()} className="inline">
       <Popover>
         <Popover.Trigger>
-          <span className="font-medium text-gray-900 dark:text-gray-100 underline decoration-gray-300 dark:decoration-gray-700 underline-offset-4 hover:text-emerald-600 dark:hover:text-emerald-400 hover:decoration-emerald-500/50 cursor-pointer transition-colors outline-none">
+          <span
+            className={
+              isFocused
+                ? 'font-semibold text-emerald-800 dark:text-emerald-200 bg-emerald-500/12 dark:bg-emerald-500/20 px-2 py-0.5 rounded-lg hover:bg-emerald-500/20 dark:hover:bg-emerald-500/30 cursor-pointer transition-all active:scale-95 outline-none inline-flex items-center'
+                : 'font-medium text-gray-900 dark:text-gray-100 underline decoration-gray-300 dark:decoration-gray-700 underline-offset-4 hover:text-emerald-600 dark:hover:text-emerald-400 hover:decoration-emerald-500/50 cursor-pointer transition-colors outline-none'
+            }
+          >
             {displayText}
           </span>
         </Popover.Trigger>

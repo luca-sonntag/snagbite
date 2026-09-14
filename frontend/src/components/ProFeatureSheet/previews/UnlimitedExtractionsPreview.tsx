@@ -1,7 +1,8 @@
 import type { SVGProps } from 'react';
-import { Camera, Infinity as InfinityIcon, Sparkles } from 'lucide-react';
+import { Camera, Infinity as InfinityIcon } from 'lucide-react';
 import { InstagramIcon } from '../../ShareMockups';
 import { useI18n } from '../../../context/I18nContext';
+import ProBadge from '../../ProBadge';
 
 const TikTokIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="-2 -2 28 28" fill="currentColor" {...props}>
@@ -28,7 +29,7 @@ export default function UnlimitedExtractionsPreview() {
   const isEn = language.startsWith('en');
 
   return (
-    <div className="w-full bg-white dark:bg-gray-900 rounded-3xl p-4 sm:p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col gap-3.5 select-none">
+    <div className="w-full bg-gray-50/75 dark:bg-gray-800/35 rounded-3xl p-4 sm:p-5 border border-black/[0.04] dark:border-white/[0.06] shadow-xs flex flex-col gap-3.5 select-none">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
@@ -38,10 +39,7 @@ export default function UnlimitedExtractionsPreview() {
             {isEn ? 'Unlimited AI Extractions' : 'Unbegrenzte KI-Extraktionen'}
           </span>
         </div>
-        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/15 px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
-          <Sparkles className="w-2.5 h-2.5" />
-          <span>PRO</span>
-        </span>
+        <ProBadge variant="chip" />
       </div>
 
       {/* Platform Chips */}

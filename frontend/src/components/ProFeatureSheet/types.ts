@@ -9,11 +9,18 @@ export type ProFeatureId =
   | 'unlimited_extractions'
   | 'collections_labels';
 
+export interface ProFeatureHighlight {
+  icon: ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+}
+
 export interface ProFeatureContent {
   id: ProFeatureId;
   title: string;
   tagline: string;
   bullets: string[];
+  highlights?: ProFeatureHighlight[];
   screenshotUrl: string;
   icon: ComponentType<{ className?: string }>;
 }

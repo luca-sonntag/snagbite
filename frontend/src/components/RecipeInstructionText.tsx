@@ -149,6 +149,7 @@ export default function RecipeInstructionText({
                 matchedIngredient={matchedIng}
                 fallbackText={inlineIngMatch[2]}
                 formatAmount={formatAmount}
+                variant={variant}
               />
             );
           }
@@ -171,9 +172,11 @@ export default function RecipeInstructionText({
                   }
                   setTimerSheet({ isOpen: true, seconds, label: text });
                 } : undefined}
-                className={`inline-flex items-center gap-0.5 align-middle font-semibold transition-all select-none ${
+                className={`inline-flex items-center gap-1.5 align-middle font-semibold transition-all select-none ${
                   canTimer
-                    ? 'text-blue-600 dark:text-blue-500 cursor-pointer hover:underline decoration-blue-500/30 underline-offset-4 active:scale-95'
+                    ? variant === 'focused'
+                      ? 'text-blue-700 dark:text-blue-300 bg-blue-500/12 dark:bg-blue-500/20 px-2 py-0.5 rounded-lg hover:bg-blue-500/20 dark:hover:bg-blue-500/30 cursor-pointer active:scale-95'
+                      : 'text-blue-600 dark:text-blue-500 cursor-pointer hover:underline decoration-blue-500/30 underline-offset-4 active:scale-95'
                     : 'text-gray-500 dark:text-gray-400 cursor-default'
                 }`}
                 title={canTimer ? 'Timer starten / Start timer' : undefined}
@@ -221,6 +224,7 @@ export default function RecipeInstructionText({
                 matchedIngredient={matched.ingredient}
                 fallbackText={matched.info}
                 formatAmount={formatAmount}
+                variant={variant}
               />
             );
           }

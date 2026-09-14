@@ -6,7 +6,7 @@ export default function CollectionsPreview() {
   const isEn = language.startsWith('en');
 
   return (
-    <div className="w-full bg-white dark:bg-gray-900 rounded-3xl p-3.5 sm:p-4 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex items-center justify-around gap-2 select-none">
+    <div className="w-full bg-gray-50/75 dark:bg-gray-800/35 rounded-3xl p-3.5 sm:p-4 border border-black/[0.04] dark:border-white/[0.06] shadow-xs flex items-center justify-around gap-2 select-none">
       <CollectionStoryBubble
         title="Meal Prep"
         count={8}

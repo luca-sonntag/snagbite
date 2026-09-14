@@ -30,7 +30,7 @@ const SAMPLE_ITEMS: { ingredient: Ingredient; category: string }[] = [
 
 export default function IngredientNutritionPreview() {
   return (
-    <div className="w-full bg-white dark:bg-gray-900 rounded-3xl p-1.5 sm:p-2 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] select-none">
+    <div className="w-full bg-gray-50/75 dark:bg-gray-800/35 rounded-3xl p-1.5 sm:p-2 border border-black/[0.04] dark:border-white/[0.06] shadow-xs select-none">
       <ul className="divide-y divide-gray-100/70 dark:divide-gray-800/60">
         {SAMPLE_ITEMS.map((item, idx) => (
           <IngredientItemRow
