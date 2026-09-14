@@ -87,7 +87,18 @@ export const AddToMealPlanSheet: React.FC<AddToMealPlanSheetProps> = ({
   };
 
   const handleSubmit = async () => {
-    if (!user || isSubmitting) return;
+    if (!user) {
+      toast.danger(t('auth.pleaseSignIn') || 'Bitte melde dich an');
+      return;
+    }
+    if (isSubmitting) return;
+
+    const targetRecipeId = recipeId || recipe?.id;
+    if (!targetRecipeId) {
+      toast.danger(t('mealPlanner.addError') || 'Fehler beim Planen des Rezepts');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const token = await getAccessToken();
@@ -98,25 +109,25 @@ export const AddToMealPlanSheet: React.FC<AddToMealPlanSheetProps> = ({
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          recipeId,
+          recipeId: targetRecipeId,
           planDate: selectedDate,
           mealType: 'dinner',
           servings,
         }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
         hapticMedium();
         window.dispatchEvent(new CustomEvent('meal-plans-updated'));
         toast.success(t('mealPlanner.addedToPlan'));
         onAddedSuccess?.();
         onClose();
       } else {
-        toast.danger('Fehler beim Hinzufügen zum Plan');
+        toast.danger(data?.error?.message || t('mealPlanner.addError') || 'Fehler beim Hinzufügen zum Plan');
       }
     } catch (err) {
       console.error('Failed to add recipe to meal plan:', err);
-      toast.danger('Netzwerkfehler');
+      toast.danger(t('common.networkError') || 'Netzwerkfehler');
     } finally {
       setIsSubmitting(false);
     }
