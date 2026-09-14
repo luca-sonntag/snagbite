@@ -12,9 +12,11 @@ const ALL_CATEGORY_IDS = ['seasonal', 'reminders', 'timing', 'taste', 'motivatio
 
 interface NotificationPromptProps {
   savedCount: number;
+  forceShow?: boolean;
+  onForceClose?: () => void;
 }
 
-export default function NotificationPrompt({ savedCount }: NotificationPromptProps) {
+export default function NotificationPrompt({ savedCount, forceShow, onForceClose }: NotificationPromptProps) {
   const { t } = useI18n();
   const { user, updateUserMetadata, getAccessToken } = useAuth();
   const [busy, setBusy] = useState(false);
@@ -31,13 +33,18 @@ export default function NotificationPrompt({ savedCount }: NotificationPromptPro
   const isDismissedInMeta = user?.user_metadata?.notification_prompt_dismissed === true;
 
   const shouldShow =
-    !!user &&
-    savedCount >= 1 &&
-    !isEnabled &&
-    !isDismissedInMeta &&
-    !dismissedLocally;
+    forceShow ??
+    (!!user &&
+      savedCount >= 1 &&
+      !isEnabled &&
+      !isDismissedInMeta &&
+      !dismissedLocally);
 
   const handleDismiss = () => {
+    if (forceShow) {
+      onForceClose?.();
+      return;
+    }
     localStorage.setItem(PROMPT_DISMISSED_AT_KEY, Date.now().toString());
     setDismissedLocally(true);
   };
@@ -61,6 +68,10 @@ export default function NotificationPrompt({ savedCount }: NotificationPromptPro
 
   const handleEnable = async () => {
     if (busy) return;
+    if (forceShow && !user) {
+      onForceClose?.();
+      return;
+    }
     setBusy(true);
     try {
       const granted = await enablePushNotifications(getAccessToken);
@@ -85,6 +96,7 @@ export default function NotificationPrompt({ savedCount }: NotificationPromptPro
       });
       localStorage.removeItem(PROMPT_DISMISSED_AT_KEY);
       setDismissedLocally(true);
+      if (forceShow) onForceClose?.();
     } catch (err) {
       console.warn('Failed to enable notifications from prompt:', err);
     } finally {
