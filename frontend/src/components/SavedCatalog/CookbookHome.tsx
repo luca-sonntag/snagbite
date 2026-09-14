@@ -124,7 +124,7 @@ export default function CookbookHome({
   };
 
   const handleOpenCommunityCategory = (category: RecipeCategory, label: string) => {
-    const matching = communityRecommendations.filter((c) => (c.category || 'other') === category);
+    const matching = communityRecommendations.filter((c) => (c.category || 'OTHER') === category);
     const asSaved: SavedRecipe[] = matching.map((c) => ({
       recipeId: c.id!,
       recipe: c,

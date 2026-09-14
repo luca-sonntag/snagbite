@@ -1,5 +1,5 @@
 import { Star, UtensilsCrossed } from 'lucide-react';
-import type { Collection, SavedRecipe, RecipeCategory } from '../../types';
+import type { Collection, SavedRecipe, Recipe, RecipeCategory } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { getRecipeCategoryLabel } from '../../i18n';
 import CollectionStoryBubble from './CollectionStoryBubble';
@@ -51,7 +51,7 @@ export default function CollectionStoryHub({
 
   const communityCategories = communityRecipes.reduce<Array<{ category: RecipeCategory; count: number; image: string | null }>>(
     (acc, rec) => {
-      const cat = rec.category || 'other';
+      const cat = rec.category || 'OTHER';
       const existing = acc.find(item => item.category === cat);
       if (!existing) {
         acc.push({ category: cat, count: 1, image: rec.imageUrl || null });
