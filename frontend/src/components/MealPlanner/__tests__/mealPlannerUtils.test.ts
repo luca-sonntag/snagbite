@@ -5,6 +5,9 @@ import {
   formatDateIso,
   addDays,
   scaleIngredientGroups,
+  formatShoppingAmount,
+  formatUpcomingDateSeparator,
+  sortIngredientGroupsByCategory,
 } from '../mealPlannerUtils.js';
 
 describe('mealPlannerUtils', () => {
@@ -76,4 +79,41 @@ describe('mealPlannerUtils', () => {
       assert.deepEqual(scaleIngredientGroups([], 4, 2), []);
     });
   });
+
+  describe('formatShoppingAmount', () => {
+    it('formats integer and decimal amounts properly', () => {
+      assert.equal(formatShoppingAmount(undefined), '');
+      assert.equal(formatShoppingAmount(0), '');
+      assert.equal(formatShoppingAmount(2), '2');
+      assert.equal(formatShoppingAmount(2.5), '2.5');
+      assert.equal(formatShoppingAmount(2.54), '2.5');
+    });
+  });
+
+  describe('formatUpcomingDateSeparator', () => {
+    it('formats future date with relative label when available', () => {
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      const tomorrowIso = formatDateIso(tomorrow);
+
+      const label = formatUpcomingDateSeparator(tomorrowIso, 'de', {
+        tomorrow: 'Morgen',
+      });
+      assert.ok(label.startsWith('Morgen • '));
+    });
+  });
+
+  describe('sortIngredientGroupsByCategory', () => {
+    it('sorts groups by category order', () => {
+      const groups = [
+        { name: 'PANTRY_BAKING', items: [] },
+        { name: 'VEGETABLES', items: [] },
+      ];
+      const sorted = sortIngredientGroupsByCategory(groups);
+      assert.equal(sorted[0].group.name, 'VEGETABLES');
+      assert.equal(sorted[1].group.name, 'PANTRY_BAKING');
+    });
+  });
 });
+

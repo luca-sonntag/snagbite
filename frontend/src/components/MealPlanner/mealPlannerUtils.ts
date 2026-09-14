@@ -1,4 +1,5 @@
 import type { Ingredient, IngredientGroup } from '../../types';
+import { categoryOrder, legacyCategoryMap } from '../../i18n';
 
 export function getMonday(date: Date): Date {
   const d = new Date(date);
@@ -41,3 +42,71 @@ export function scaleIngredientGroups(
   }
   return scaled;
 }
+
+/**
+ * Formats a date string (YYYY-MM-DD) into a user-friendly separator label.
+ * e.g. "Morgen • Mittwoch, 16. September" or "Freitag, 18. September"
+ */
+export function formatUpcomingDateSeparator(
+  dateStr: string,
+  language: string,
+  relativeLabels?: { today?: string; tomorrow?: string; dayAfterTomorrow?: string },
+): string {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const targetDate = new Date(y, m - 1, d);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const targetMidnight = new Date(y, m - 1, d);
+  targetMidnight.setHours(0, 0, 0, 0);
+
+  const diffMs = targetMidnight.getTime() - today.getTime();
+  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+  const locale = language === 'en' ? 'en-US' : 'de-DE';
+  const weekday = targetDate.toLocaleDateString(locale, { weekday: 'long' });
+  const dayMonth = language === 'en'
+    ? targetDate.toLocaleDateString(locale, { month: 'long', day: 'numeric' })
+    : `${targetDate.getDate()}. ${targetDate.toLocaleDateString(locale, { month: 'long' })}`;
+
+  const fullDate = `${weekday}, ${dayMonth}`;
+
+  if (diffDays === 0 && relativeLabels?.today) {
+    return `${relativeLabels.today} • ${fullDate}`;
+  }
+  if (diffDays === 1 && relativeLabels?.tomorrow) {
+    return `${relativeLabels.tomorrow} • ${fullDate}`;
+  }
+  if (diffDays === 2 && relativeLabels?.dayAfterTomorrow) {
+    return `${relativeLabels.dayAfterTomorrow} • ${fullDate}`;
+  }
+
+  return fullDate;
+}
+
+/**
+ * Sorts ingredient groups by category order
+ */
+export function sortIngredientGroupsByCategory(
+  ingredients: IngredientGroup[] | undefined,
+): Array<{ group: IngredientGroup; originalIdx: number }> {
+  if (!ingredients) return [];
+  const mapped = ingredients.map((group, originalIdx) => ({ group, originalIdx }));
+  return mapped.sort((a, b) => {
+    const rank = (name: string) => {
+      const up = name.trim().toUpperCase();
+      const direct = categoryOrder.indexOf(up as any);
+      if (direct !== -1) return direct;
+      const key = legacyCategoryMap[name.trim().toLowerCase()];
+      return key ? categoryOrder.indexOf(key) : 999;
+    };
+    return rank(a.group.name) - rank(b.group.name);
+  });
+}
+
+export function formatShoppingAmount(amount: number | undefined): string {
+  if (!amount) return '';
+  const r = Math.round(amount * 10) / 10;
+  return r % 1 === 0 ? String(r) : r.toFixed(1);
+}
+
