@@ -15,14 +15,16 @@ export default function CookingModePreview() {
     () => [
       {
         name: isEn ? 'Coconut milk' : 'Kokosmilch',
-        baseName: isEn ? 'Coconut milk' : 'Kokosmilch',
+        baseName: 'coconut_milk',
+        canonicalId: 'coconut_milk',
         amount: 400,
         unit: 'ml',
         category: 'Milchprodukte & Alternativen',
       },
       {
         name: isEn ? 'Red curry paste' : 'Rote Currypaste',
-        baseName: isEn ? 'Rote Currypaste' : 'Rote Currypaste',
+        baseName: 'curry_paste',
+        canonicalId: 'curry_paste',
         amount: 2,
         unit: isEn ? 'tbsp' : 'EL',
         category: 'Gewürze & Kräuter',
@@ -97,8 +99,8 @@ export default function CookingModePreview() {
           variant="focused"
           text={
             isEn
-              ? 'Stir in [Red curry paste](ing:Red curry paste), add [Coconut milk](ing:Coconut milk), and simmer gently on medium heat for [12 minutes](timer:720).'
-              : '[Rote Currypaste](ing:Rote Currypaste) einrühren, [Kokosmilch](ing:Kokosmilch) hinzugeben und bei mittlerer Hitze für [12 Minuten](timer:720) sanft köcheln lassen.'
+              ? 'Stir in [Red curry paste](ing:curry_paste), add [Coconut milk](ing:coconut_milk), and simmer gently on medium heat for [12 minutes](timer:720).'
+              : '[Rote Currypaste](ing:curry_paste) einrühren, [Kokosmilch](ing:coconut_milk) hinzugeben und bei mittlerer Hitze für [12 Minuten](timer:720) sanft köcheln lassen.'
           }
           recipe={mockRecipe}
           formatAmount={(amount, unit) => `${amount} ${unit ?? ''}`.trim()}
