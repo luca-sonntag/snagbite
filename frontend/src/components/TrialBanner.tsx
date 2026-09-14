@@ -63,7 +63,7 @@ export default function TrialBanner({ onOpenPremium, className = '' }: TrialBann
         hapticMedium();
         onOpenPremium();
       }}
-      className={`cursor-pointer p-4 tint-premium rounded-3xl border-none shadow-[0_2px_8px_rgba(0,0,0,0.03),0_1px_2px_rgba(0,0,0,0.02)] flex items-center justify-between gap-3 hover:brightness-[0.98] dark:hover:brightness-110 active:scale-[0.99] transition-all relative overflow-hidden group ${className}`}
+      className={`cursor-pointer p-4 tint-premium rounded-3xl border-none shadow-[0_2px_8px_rgba(0,0,0,0.03),0_1px_2px_rgba(0,0,0,0.02)] flex flex-col justify-between gap-2.5 hover:brightness-[0.98] dark:hover:brightness-110 active:scale-[0.99] transition-all relative overflow-hidden group ${className}`}
     >
       {/* Dismiss button — top right */}
       <button
@@ -78,7 +78,8 @@ export default function TrialBanner({ onOpenPremium, className = '' }: TrialBann
         <X className="w-3 h-3 text-gray-400 dark:text-gray-500" />
       </button>
 
-      <div className="min-w-0 flex-1 pr-2">
+      {/* Top row: Title and Days Badge */}
+      <div className="min-w-0 pr-7">
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
             {t('premium.modal.trialBanner.title')}
@@ -88,18 +89,22 @@ export default function TrialBanner({ onOpenPremium, className = '' }: TrialBann
             {trialDays} {t('premium.modal.trialBanner.days')}
           </span>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
-          {t('premium.modal.trialBanner.body')}
-        </p>
       </div>
 
-      {/* Amber action button */}
-      <button
-        type="button"
-        className="bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs h-9 px-3.5 rounded-xl shadow-sm shadow-amber-500/20 active:scale-95 transition-all flex items-center gap-1 shrink-0 border-none cursor-pointer"
-      >
-        <span>{t('premium.modal.trialBanner.cta')}</span>
-      </button>
+      {/* Bottom row: Subtitle on the left, Action button on the bottom right */}
+      <div className="flex items-end justify-between gap-3">
+        <p className="text-xs text-gray-500 dark:text-gray-400 leading-snug flex-1">
+          {t('premium.modal.trialBanner.body')}
+        </p>
+
+        {/* Amber action button */}
+        <button
+          type="button"
+          className="bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs h-9 px-3.5 rounded-xl shadow-sm shadow-amber-500/20 active:scale-95 transition-all flex items-center gap-1 shrink-0 border-none cursor-pointer self-end"
+        >
+          <span>{t('premium.modal.trialBanner.cta')}</span>
+        </button>
+      </div>
     </div>
   );
 }

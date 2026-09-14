@@ -45,7 +45,7 @@ export default function PremiumUpgradeCard({ onUpgradeClick, className = '' }: P
         hapticMedium();
         onUpgradeClick();
       }}
-      className={`cursor-pointer p-4 tint-premium rounded-3xl border-none shadow-[0_2px_8px_rgba(0,0,0,0.03),0_1px_2px_rgba(0,0,0,0.02)] flex items-center justify-between gap-3 hover:brightness-[0.98] dark:hover:brightness-110 active:scale-[0.99] transition-all relative overflow-hidden group ${className}`}
+      className={`cursor-pointer p-4 tint-premium rounded-3xl border-none shadow-[0_2px_8px_rgba(0,0,0,0.03),0_1px_2px_rgba(0,0,0,0.02)] flex flex-col justify-between gap-2.5 hover:brightness-[0.98] dark:hover:brightness-110 active:scale-[0.99] transition-all relative overflow-hidden group ${className}`}
     >
       {showTrial && (
         <button
@@ -58,42 +58,42 @@ export default function PremiumUpgradeCard({ onUpgradeClick, className = '' }: P
         </button>
       )}
 
-      <div className={`min-w-0 flex-1 ${showTrial ? 'pr-2' : ''}`}>
+      {/* Top row: Title and Days Badge */}
+      <div className={`min-w-0 ${showTrial ? 'pr-7' : ''}`}>
         {showTrial ? (
-          <>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
-                {t('premium.modal.trialBanner.title')}
-              </h3>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 text-xs font-semibold shrink-0">
-                <Timer className="w-2.5 h-2.5" />
-                {trialDays} {t('premium.modal.trialBanner.days')}
-              </span>
-            </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
-              {t('premium.modal.trialBanner.body')}
-            </p>
-          </>
-        ) : (
-          <>
+          <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
-              Snagbite Pro
+              {t('premium.modal.trialBanner.title')}
             </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
-              {language === 'de'
-                ? 'Unbegrenzte Extraktionen, 100% werbefrei, Recipe Copilot & Healthy-Score'
-                : 'Unlimited extractions, 100% ad-free, Recipe Copilot & Healthy Score'}
-            </p>
-          </>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 text-xs font-semibold shrink-0">
+              <Timer className="w-2.5 h-2.5" />
+              {trialDays} {t('premium.modal.trialBanner.days')}
+            </span>
+          </div>
+        ) : (
+          <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
+            Snagbite Pro
+          </h3>
         )}
       </div>
 
-      <button
-        type="button"
-        className="bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs h-9 px-3.5 rounded-xl shadow-sm shadow-amber-500/20 active:scale-95 transition-all flex items-center gap-1 shrink-0 border-none cursor-pointer"
-      >
-        <span>{showTrial ? t('premium.modal.trialBanner.cta') : 'Upgrade'}</span>
-      </button>
+      {/* Bottom row: Subtitle on the left, Action button on the bottom right */}
+      <div className="flex items-end justify-between gap-3">
+        <p className="text-xs text-gray-500 dark:text-gray-400 leading-snug flex-1">
+          {showTrial
+            ? t('premium.modal.trialBanner.body')
+            : language === 'de'
+              ? 'Unbegrenzte Extraktionen, 100% werbefrei, Recipe Copilot & Healthy-Score'
+              : 'Unlimited extractions, 100% ad-free, Recipe Copilot & Healthy Score'}
+        </p>
+
+        <button
+          type="button"
+          className="bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs h-9 px-3.5 rounded-xl shadow-sm shadow-amber-500/20 active:scale-95 transition-all flex items-center gap-1 shrink-0 border-none cursor-pointer self-end"
+        >
+          <span>{showTrial ? t('premium.modal.trialBanner.cta') : 'Upgrade'}</span>
+        </button>
+      </div>
     </div>
   );
 }
