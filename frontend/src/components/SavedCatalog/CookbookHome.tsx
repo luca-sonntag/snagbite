@@ -1,5 +1,5 @@
 import { useState, useEffect, type MouseEvent } from 'react';
-import type { SavedRecipe, Recipe, RecipeCategory } from '../../types';
+import type { SavedRecipe, Recipe } from '../../types';
 import CollectionStoryHub from './CollectionStoryHub';
 import CategoryLabelBar from './CategoryLabelBar';
 import CookbookGreetingHeader from './CookbookGreetingHeader';
@@ -57,10 +57,6 @@ export default function CookbookHome({
   const [communityRecommendations, setCommunityRecommendations] = useState<Recipe[]>([]);
   const [selectedPreviewRecipe, setSelectedPreviewRecipe] = useState<Recipe | null>(null);
   const [activeHeroSheet, setActiveHeroSheet] = useState<'theme' | 'vital' | null>(null);
-  const [activeCategorySheet, setActiveCategorySheet] = useState<{
-    title: string;
-    recipes: SavedRecipe[];
-  } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -123,24 +119,6 @@ export default function CookbookHome({
     }
   };
 
-  const handleOpenCommunityCategory = (category: RecipeCategory, label: string) => {
-    const matching = communityRecommendations.filter((c) => (c.category || 'OTHER') === category);
-    const asSaved: SavedRecipe[] = matching.map((c) => ({
-      recipeId: c.id!,
-      recipe: c,
-      source: 'share',
-      isFavorite: false,
-      flags: [],
-      collectionIds: [],
-      addedAt: c.createdAt || new Date().toISOString(),
-      updatedAt: c.createdAt || new Date().toISOString(),
-    }));
-    setActiveCategorySheet({
-      title: label,
-      recipes: asSaved,
-    });
-  };
-
   const handleSaveCommunityFromHero = async (_e: MouseEvent, recipe: Recipe) => {
     if (!recipe.id || !onRecipeSaved) return;
     try {
@@ -171,31 +149,31 @@ export default function CookbookHome({
         <CookbookQuickStartBanner />
       )}
 
-      {/* 2. Clean Flat Squircle Collection Hub */}
-      <section className="space-y-3">
-        <CollectionStoryHub
-          totalRecipes={totalRecipes}
-          allRecipesThumbnail={firstRecipeThumbnail}
-          favoriteJobs={favJobs}
-          availableCategories={availableCategories}
-          jobsByCategory={jobsByCategory}
-          collections={collections}
-          jobsByCollection={jobsByCollection}
-          communityRecipes={communityRecommendations}
-          onOpenCommunityCategory={handleOpenCommunityCategory}
-          onOpenList={onOpenList}
-          onAddCollection={onAddCollection}
-        />
-
-        {/* Custom Labels / Tags if user created any */}
-        {allFlags.length > 0 && (
-          <CategoryLabelBar
-            allFlags={allFlags}
-            jobsByFlag={jobsByFlag}
+      {/* 2. Clean Flat Squircle Collection Hub (only when user has saved recipes) */}
+      {totalRecipes > 0 && (
+        <section className="space-y-3">
+          <CollectionStoryHub
+            totalRecipes={totalRecipes}
+            allRecipesThumbnail={firstRecipeThumbnail}
+            favoriteJobs={favJobs}
+            availableCategories={availableCategories}
+            jobsByCategory={jobsByCategory}
+            collections={collections}
+            jobsByCollection={jobsByCollection}
             onOpenList={onOpenList}
+            onAddCollection={onAddCollection}
           />
-        )}
-      </section>
+
+          {/* Custom Labels / Tags if user created any */}
+          {allFlags.length > 0 && (
+            <CategoryLabelBar
+              allFlags={allFlags}
+              jobsByFlag={jobsByFlag}
+              onOpenList={onOpenList}
+            />
+          )}
+        </section>
+      )}
 
       {/* 3. COVER STORY Part 1: Modern 3-Slide Hero Carousel */}
       {heroSlides.length > 0 && (
@@ -276,20 +254,6 @@ export default function CookbookHome({
         onOpenRecipe={onOpenRecipe}
         onOpenCatalog={() => onOpenList({ kind: activeHeroSheet === 'vital' ? 'vital' : 'recommended' })}
       />
-
-      {/* Cold Start Category Theme Drawer */}
-      {activeCategorySheet && (
-        <HeroThemeSheet
-          isOpen={Boolean(activeCategorySheet)}
-          onClose={() => setActiveCategorySheet(null)}
-          themeTitle={activeCategorySheet.title}
-          themeSubtitle={t('catalog.publicDiscovery.subtitle')}
-          badgeVariant="teal"
-          recipes={activeCategorySheet.recipes}
-          formatTotalTime={formatTotalTime}
-          onOpenRecipe={handleOpenBentoRecipe}
-        />
-      )}
     </div>
   );
 }
