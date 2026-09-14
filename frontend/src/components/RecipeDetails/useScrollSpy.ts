@@ -19,14 +19,25 @@ export function useScrollSpy(recipe: Recipe) {
       );
 
       // 1. Collapse state
-      const stickyBar = document.getElementById('recipe-sticky-bar');
-      if (stickyBar) {
-        const barRect = stickyBar.getBoundingClientRect();
-        const isStuck = barRect.top <= stickyTopHeight + 1;
-        const isPastHeader = collapseSentinel
-          ? collapseSentinel.getBoundingClientRect().top <= stickyTopHeight + 2
-          : isStuck;
-        setIsHeaderCollapsed(isStuck && isPastHeader);
+      if (window.scrollY <= 2) {
+        setIsHeaderCollapsed(false);
+      } else {
+        const stickyBar = document.getElementById('recipe-sticky-bar');
+        if (stickyBar && stickyBar.offsetParent !== null) {
+          const barRect = stickyBar.getBoundingClientRect();
+          if (barRect.height > 0 && barRect.width > 0) {
+            const isStuck = barRect.top <= stickyTopHeight + 1;
+            const isPastHeader =
+              collapseSentinel && collapseSentinel.offsetParent !== null
+                ? collapseSentinel.getBoundingClientRect().top <= stickyTopHeight + 2
+                : isStuck;
+            setIsHeaderCollapsed(isStuck && isPastHeader);
+          } else {
+            setIsHeaderCollapsed(false);
+          }
+        } else {
+          setIsHeaderCollapsed(false);
+        }
       }
 
       // 2. Section scroll spy
