@@ -1,4 +1,5 @@
-import type { Ingredient, IngredientGroup } from '../../types';
+import type { Ingredient, IngredientGroup, MealPlanEntry } from '../../types';
+import type { WeekDayInfo } from './types';
 import { categoryOrder, legacyCategoryMap } from '../../i18n';
 
 export function getMonday(date: Date): Date {
@@ -108,5 +109,41 @@ export function formatShoppingAmount(amount: number | undefined): string {
   if (!amount) return '';
   const r = Math.round(amount * 10) / 10;
   return r % 1 === 0 ? String(r) : r.toFixed(1);
+}
+
+export function formatDateHuman(iso: string | undefined, language: string): string {
+  if (!iso) return '';
+  const d = new Date(iso + 'T00:00:00');
+  const locale = language === 'en' ? 'en-US' : 'de-DE';
+  return d.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' });
+}
+
+export function buildWeekDaysInfo(
+  currentWeekStart: Date,
+  mealPlans: MealPlanEntry[],
+  language: string,
+  todayStr: string,
+): WeekDayInfo[] {
+  const dayNamesDe = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+  const dayNamesEn = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const dayNames = language === 'en' ? dayNamesEn : dayNamesDe;
+
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = addDays(currentWeekStart, i);
+    const dStr = formatDateIso(d);
+    const dayPlans = mealPlans.filter((p) => p.planDate === dStr);
+    const plannedCount = dayPlans.length;
+    const cookedCount = dayPlans.filter((p) => p.isCooked).length;
+
+    return {
+      date: d,
+      dateStr: dStr,
+      dayName: dayNames[i],
+      dayNumber: d.getDate(),
+      isToday: dStr === todayStr,
+      plannedCount,
+      cookedCount,
+    };
+  });
 }
 

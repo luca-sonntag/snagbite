@@ -8,6 +8,8 @@ import {
   formatShoppingAmount,
   formatUpcomingDateSeparator,
   sortIngredientGroupsByCategory,
+  formatDateHuman,
+  buildWeekDaysInfo,
 } from '../mealPlannerUtils.js';
 
 describe('mealPlannerUtils', () => {
@@ -113,6 +115,42 @@ describe('mealPlannerUtils', () => {
       const sorted = sortIngredientGroupsByCategory(groups);
       assert.equal(sorted[0].group.name, 'VEGETABLES');
       assert.equal(sorted[1].group.name, 'PANTRY_BAKING');
+    });
+  });
+
+  describe('formatDateHuman', () => {
+    it('formats date correctly in German and English', () => {
+      const de = formatDateHuman('2026-09-16', 'de');
+      assert.ok(de.includes('16'));
+      const en = formatDateHuman('2026-09-16', 'en');
+      assert.ok(en.includes('16'));
+      assert.equal(formatDateHuman(undefined, 'de'), '');
+    });
+  });
+
+  describe('buildWeekDaysInfo', () => {
+    it('builds 7 days info with correct counts', () => {
+      const monday = new Date(2026, 8, 14); // 2026-09-14
+      const mealPlans = [
+        {
+          id: 'p1',
+          recipeId: 'r1',
+          planDate: '2026-09-14',
+          mealType: 'dinner' as const,
+          servings: 2,
+          isCooked: true,
+          createdAt: '2026-09-14T10:00:00Z',
+          updatedAt: '2026-09-14T10:00:00Z',
+        },
+      ];
+      const days = buildWeekDaysInfo(monday, mealPlans, 'de', '2026-09-14');
+      assert.equal(days.length, 7);
+      assert.equal(days[0].dateStr, '2026-09-14');
+      assert.equal(days[0].dayName, 'Mo');
+      assert.equal(days[0].isToday, true);
+      assert.equal(days[0].plannedCount, 1);
+      assert.equal(days[0].cookedCount, 1);
+      assert.equal(days[1].plannedCount, 0);
     });
   });
 });
