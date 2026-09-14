@@ -114,7 +114,6 @@ export default function RecipeIngredients({
                       scaleFactor={scaleFactor}
                       formatAmount={formatAmount}
                       onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
-                      onOpenPremium={() => setIsProFeatureSheetOpen(true)}
                     />
                   ))}
                 </ul>

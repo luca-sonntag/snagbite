@@ -15,7 +15,6 @@ interface IngredientItemRowProps {
   scaleFactor?: number;
   formatAmount: (amount: number | undefined, unit: string | undefined) => string;
   onSelectNutrition?: (ingredient: Ingredient, category: string) => void;
-  onOpenPremium?: () => void;
   hideNutrition?: boolean;
 }
 
@@ -28,7 +27,6 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
   scaleFactor = 1,
   formatAmount,
   onSelectNutrition,
-  onOpenPremium,
   hideNutrition = false,
 }) => {
   const { t } = useI18n();
@@ -36,34 +34,34 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
   const scaledAmount = formatAmount(ingredient.amount, ingredient.unit);
   const amountStr = scaledAmount ? `${scaledAmount} ` : '';
   const unitStr = ingredient.unit ? `${ingredient.unit} ` : '';
+  const displayAmount = `${amountStr}${unitStr}`.trim();
   const name = ingredient.name;
   const uniqueId = `${name}-${originalIdx}-${itemIdx}`;
   const parent = getParentIngredient(ingredient);
   const showParentBadge = parent && parent.name.toLowerCase().trim() !== name.toLowerCase().trim();
   const hasCalories = !hideNutrition && ingredient.calories !== undefined && ingredient.calories !== null;
+  const canOpenNutrition = isPremium && hasCalories;
 
   const handleNutritionClick = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (!hasCalories) return;
+    if (!canOpenNutrition) return;
 
     hapticLight();
-    if (!isPremium) {
-      onOpenPremium?.();
-    } else {
-      onSelectNutrition?.(ingredient, categoryName);
-    }
+    onSelectNutrition?.(ingredient, categoryName);
   };
 
   return (
     <li
       key={uniqueId}
       onClick={() => {
-        if (hasCalories) {
+        if (canOpenNutrition) {
           handleNutritionClick();
         }
       }}
-      className={`group flex items-center justify-between gap-3 py-3 px-1.5 transition-all ${
-        hasCalories
+      className={`group flex items-center justify-between gap-3 ${
+        isPremium ? 'py-3' : 'py-1.5'
+      } px-1.5 transition-all ${
+        canOpenNutrition
           ? 'cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] active:scale-[0.99] rounded-xl'
           : ''
       }`}
@@ -104,43 +102,44 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
             )}
           </div>
 
-          {/* Amount & notes */}
-          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 font-normal mt-0.5">
-            {(amountStr || unitStr) && (
-              <span className="font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                {`${amountStr}${unitStr}`.trim()}
-              </span>
-            )}
-            {ingredient.notes && (
-              <span className="text-[11px] text-gray-400 dark:text-gray-500 truncate">
-                {ingredient.notes}
-              </span>
-            )}
-          </div>
+          {/* Amount & notes (for premium users amount stays here; for free users notes stay here) */}
+          {((isPremium && displayAmount) || ingredient.notes) && (
+            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 font-normal mt-0.5">
+              {isPremium && displayAmount && (
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                  {displayAmount}
+                </span>
+              )}
+              {ingredient.notes && (
+                <span className="text-[11px] text-gray-400 dark:text-gray-500 truncate">
+                  {ingredient.notes}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      {hasCalories && (
-        <button
-          type="button"
-          onClick={handleNutritionClick}
-          className={`min-h-[32px] px-2.5 py-1 rounded-full inline-flex items-center gap-1 text-xs font-semibold shrink-0 border-none transition-all active:scale-95 cursor-pointer select-none ${
-            isPremium
-              ? 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'
-              : 'bg-black/[0.04] hover:bg-black/[0.08] dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-gray-400 dark:text-gray-500'
-          }`}
-          title={isPremium && ingredient.matchedName ? t('recipe.verifiedIngredientTooltip', { name: ingredient.matchedName }) : undefined}
-          aria-label={t('recipe.nutritionTitle')}
-        >
-          {isPremium ? (
-            <>
-              <span className="tabular-nums">{Math.round(ingredient.calories! * scaleFactor)} kcal</span>
-              <ChevronRight className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 -ml-0.5" />
-            </>
-          ) : (
-            <ChevronRight className="w-4 h-4" />
-          )}
-        </button>
+      {/* Right side: Amount for free users, Kcal chevron chip for premium users */}
+      {!isPremium ? (
+        displayAmount ? (
+          <span className="font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums text-xs shrink-0 text-right">
+            {displayAmount}
+          </span>
+        ) : null
+      ) : (
+        hasCalories && (
+          <button
+            type="button"
+            onClick={handleNutritionClick}
+            className="min-h-[32px] px-2.5 py-1 rounded-full inline-flex items-center gap-1 text-xs font-semibold shrink-0 border-none transition-all active:scale-95 cursor-pointer select-none bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
+            title={ingredient.matchedName ? t('recipe.verifiedIngredientTooltip', { name: ingredient.matchedName }) : undefined}
+            aria-label={t('recipe.nutritionTitle')}
+          >
+            <span className="tabular-nums">{Math.round(ingredient.calories! * scaleFactor)} kcal</span>
+            <ChevronRight className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 -ml-0.5" />
+          </button>
+        )
       )}
     </li>
   );
