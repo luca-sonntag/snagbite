@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Drawer } from '@heroui/react';
-import { X, Search, Clock, Flame, ChefHat, Sparkles, Plus } from 'lucide-react';
+import { X, Search, Clock, ChefHat, Sparkles, Plus } from 'lucide-react';
 import type { RecipePickerModalProps } from './types';
 import CachedImage from '../CachedImage';
 import { useI18n } from '../../context/I18nContext';
@@ -252,20 +252,22 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                           <h4 className="text-xs sm:text-sm font-extrabold text-gray-900 dark:text-white truncate group-hover:text-emerald-600 transition-colors">
                             {saved.recipe?.title}
                           </h4>
-                          <div className="flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400 mt-1 font-semibold">
-                            {totalTime > 0 && (
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-3.5 h-3.5 text-gray-400" />
-                                <span>{totalTime} min</span>
-                              </span>
-                            )}
-                            {calories && (
-                              <span className="flex items-center gap-1">
-                                <Flame className="w-3.5 h-3.5 text-amber-500" />
+                          {(totalTime > 0 || !!calories) && (
+                            <div className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 mt-1 font-semibold">
+                              {totalTime > 0 && (
+                                <span className="flex items-center gap-1">
+                                  <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                  <span>{totalTime} min</span>
+                                </span>
+                              )}
+                              {totalTime > 0 && !!calories && (
+                                <span className="text-gray-300 dark:text-gray-600 text-[9px] leading-none select-none">•</span>
+                              )}
+                              {!!calories && (
                                 <span>{Math.round(calories)} kcal</span>
-                              </span>
-                            )}
-                          </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <div className="w-8.5 h-8.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-400 group-hover:bg-emerald-600 group-hover:text-white transition-colors flex items-center justify-center shrink-0 shadow-2xs pointer-events-none">
                           <Plus className="w-4 h-4 stroke-[2.5]" />

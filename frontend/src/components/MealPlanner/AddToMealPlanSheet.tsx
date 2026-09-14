@@ -6,7 +6,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  Flame,
   X,
 } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
@@ -166,20 +165,22 @@ export const AddToMealPlanSheet: React.FC<AddToMealPlanSheetProps> = ({
                     <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate">
                       {recipe.title}
                     </h3>
-                    <div className="flex items-center gap-2.5 mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                      {totalTime > 0 && (
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5 text-gray-400" />
-                          <span>{totalTime} min</span>
-                        </span>
-                      )}
-                      {calories ? (
-                        <span className="flex items-center gap-1">
-                          <Flame className="w-3.5 h-3.5 text-amber-500" />
-                          <span>{calories} kcal</span>
-                        </span>
-                      ) : null}
-                    </div>
+                    {(totalTime > 0 || !!calories) && (
+                      <div className="flex items-center gap-1.5 mt-0.5 text-xs text-gray-500 dark:text-gray-400 font-semibold">
+                        {totalTime > 0 && (
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5 text-gray-400" />
+                            <span>{totalTime} min</span>
+                          </span>
+                        )}
+                        {totalTime > 0 && !!calories && (
+                          <span className="text-gray-300 dark:text-gray-600 text-[10px] leading-none select-none">•</span>
+                        )}
+                        {calories ? (
+                          <span>{Math.round(Number(calories))} kcal</span>
+                        ) : null}
+                      </div>
+                    )}
                   </div>
                 </div>
 

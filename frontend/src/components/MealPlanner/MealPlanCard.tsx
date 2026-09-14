@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, Flame } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import type { MealPlanCardProps } from './types';
 import CachedImage from '../CachedImage';
 import { MealPlanCardActions } from './MealPlanCardActions';
@@ -53,20 +53,22 @@ export const MealPlanCard: React.FC<MealPlanCardProps> = ({
         </h4>
 
         {/* Badges: Total Time (Prep + Cook) & Calories */}
-        <div className="flex items-center gap-2.5 mt-1 text-xs font-semibold text-gray-500 dark:text-gray-400">
-          {totalTime > 0 && (
-            <span className="flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
-              <span>{totalTime} min</span>
-            </span>
-          )}
-          {calories && (
-            <span className="flex items-center gap-1">
-              <Flame className="w-3.5 h-3.5 text-amber-500" />
+        {(totalTime > 0 || !!calories) && (
+          <div className="flex items-center gap-1.5 mt-1 text-xs font-semibold text-gray-500 dark:text-gray-400">
+            {totalTime > 0 && (
+              <span className="flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
+                <span>{totalTime} min</span>
+              </span>
+            )}
+            {totalTime > 0 && !!calories && (
+              <span className="text-gray-300 dark:text-gray-600 text-[10px] leading-none select-none">•</span>
+            )}
+            {!!calories && (
               <span>{Math.round(calories)} kcal</span>
-            </span>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* Bottom Actions Cluster */}
         <MealPlanCardActions
