@@ -117,10 +117,10 @@ export default function RecipeImageGallery({
 
       {/* Bottom Content: Meta row, Title & Creator handle */}
       <div className="absolute bottom-9 inset-x-4 sm:bottom-10 sm:inset-x-5 z-20 flex flex-col gap-1 text-white pointer-events-none pb-1">
-        {/* Meta Bar: Platform/Import badge & Slide indicator */}
-        <div className="flex items-center justify-between gap-2 min-h-[30px]">
-          {reelUrl ? (
-            isPhotoImportUrl(reelUrl) ? (
+        {/* Meta Bar: Platform/Import badge */}
+        {reelUrl && (
+          <div className="flex items-center gap-2 min-h-[30px]">
+            {isPhotoImportUrl(reelUrl) ? (
               <span className="bg-black/65 text-white text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 backdrop-blur-md border border-white/10 shadow-sm pointer-events-auto select-none">
                 <Camera className="w-3.5 h-3.5 text-emerald-300" />
                 <span>{t('catalog.photoImport')}</span>
@@ -142,26 +142,32 @@ export default function RecipeImageGallery({
                 />
                 <span>{t('catalog.viewReel')}</span>
               </a>
-            )
-          ) : <div />}
-
-          {availableImages.length > 1 && (
-            <span className="bg-black/60 text-white text-[10.5px] font-bold px-2.5 py-0.5 rounded-full backdrop-blur-md border border-white/10 shadow-sm pointer-events-none select-none">
-              {activeSlide + 1} / {availableImages.length}
-            </span>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* Recipe Title (Hero style directly in cover) */}
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight font-heading break-words drop-shadow-md">
           {recipe.title}
         </h1>
 
-        {/* Creator Handle with ample bottom spacing */}
-        {formattedHandle && (
-          <p className="text-xs sm:text-sm text-gray-200/90 font-medium truncate leading-none mt-1 mb-1 drop-shadow-xs">
-            {formattedHandle}
-          </p>
+        {/* Creator Handle & Slide indicator */}
+        {(formattedHandle || availableImages.length > 1) && (
+          <div className="flex items-center justify-between gap-2 mt-1 mb-1">
+            {formattedHandle ? (
+              <p className="text-xs sm:text-sm text-gray-200/90 font-medium truncate leading-none drop-shadow-xs min-w-0">
+                {formattedHandle}
+              </p>
+            ) : (
+              <div />
+            )}
+
+            {availableImages.length > 1 && (
+              <span className="bg-black/60 text-white text-[10.5px] font-bold px-2.5 py-0.5 rounded-full backdrop-blur-md border border-white/10 shadow-sm pointer-events-none select-none shrink-0 ml-auto">
+                {activeSlide + 1} / {availableImages.length}
+              </span>
+            )}
+          </div>
         )}
       </div>
     </>
