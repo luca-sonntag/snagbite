@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Calendar, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { hapticLight, hapticSelection } from '../../utils/haptics';
 import { MealPlanCard } from './MealPlanCard';
@@ -83,9 +83,8 @@ export const UpcomingMealPlans: React.FC<UpcomingMealPlansProps> = ({
                       onSelectDate(dateStr);
                     }
                   }}
-                  className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 active:scale-98 transition-colors cursor-pointer border-none bg-transparent p-0 text-left"
+                  className="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 active:scale-98 transition-colors cursor-pointer border-none bg-transparent p-0 text-left"
                 >
-                  <Calendar className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 stroke-[2.25] shrink-0" />
                   <span className="capitalize">{dateHeader}</span>
                 </button>
 

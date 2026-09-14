@@ -1,5 +1,5 @@
 import React from 'react';
-import { CalendarPlus, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { hapticLight } from '../../utils/haptics';
 import type { DayEmptyBannerProps } from './types';
@@ -16,18 +16,13 @@ export const DayEmptyBanner: React.FC<DayEmptyBannerProps> = ({
 
   return (
     <div className="w-full flex items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl md:rounded-3xl bg-white dark:bg-gray-900/90 shadow-2xs ring-1 ring-black/[0.04] dark:ring-white/[0.06] animate-fade-in select-none">
-      <div className="flex items-center gap-3 min-w-0">
-        <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
-          <CalendarPlus className="w-5 h-5 stroke-[2]" />
-        </div>
-        <div className="min-w-0">
-          <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white truncate">
-            {t('mealPlanner.dayEmptyBannerTitle')}
-          </h4>
-          <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mt-0.5">
-            {t('mealPlanner.dayEmptyBannerSubtitle')}
-          </p>
-        </div>
+      <div className="min-w-0">
+        <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white truncate">
+          {t('mealPlanner.dayEmptyBannerTitle')}
+        </h4>
+        <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mt-0.5">
+          {t('mealPlanner.dayEmptyBannerSubtitle')}
+        </p>
       </div>
 
       <button
