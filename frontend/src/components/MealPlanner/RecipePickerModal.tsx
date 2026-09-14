@@ -8,17 +8,10 @@ import { useToast } from '../../context/ToastContext';
 import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
 import { getTotalTime } from '../../hooks/useSavedCatalog';
-
+import { formatDateHuman } from './mealPlannerUtils';
 import { usePantry } from '../../context/PantryContext';
 
 type FilterType = 'all' | 'pantry' | 'quick' | 'favorites';
-
-function formatDateHuman(iso: string | undefined, language: string): string {
-  if (!iso) return '';
-  const d = new Date(iso + 'T00:00:00');
-  const locale = language === 'en' ? 'en-US' : 'de-DE';
-  return d.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' });
-}
 
 export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
   isOpen,
@@ -92,29 +85,28 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
     const randomIndex = Math.floor(Math.random() * history.length);
     const chosen = history[randomIndex];
     toast.success(t('mealPlanner.randomPicked'));
-    onSelectRecipe(chosen);
+    onSelectRecipe(chosen, dateStr);
     onClose();
   };
 
   const handleSelect = (saved: (typeof history)[0]) => {
     hapticMedium();
-    onSelectRecipe(saved);
+    onSelectRecipe(saved, dateStr);
     onClose();
   };
 
   return (
-    <div onClick={(e) => e.stopPropagation()}>
-      <Drawer>
-        <Drawer.Backdrop
-          isOpen={isOpen}
-          onOpenChange={(open) => {
-            if (!open) onClose();
-          }}
-          className="!z-[100]"
-        >
-          <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col p-4 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom,0px))] rounded-t-3xl border-none shadow-2xl overflow-hidden select-none w-full max-w-lg mx-auto">
-              <Drawer.Handle />
+    <Drawer>
+      <Drawer.Backdrop
+        isOpen={isOpen}
+        onOpenChange={(open) => {
+          if (!open) onClose();
+        }}
+        className="!z-[100]"
+      >
+        <Drawer.Content placement="bottom" className="!z-[100]">
+          <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col p-4 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom,0px))] rounded-t-3xl border-none shadow-2xl overflow-hidden w-full max-w-lg mx-auto">
+            <Drawer.Handle />
 
               {/* Header */}
               <Drawer.Header className="pt-1 pb-2">
@@ -245,18 +237,18 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                     return (
                       <button
                         type="button"
-                        key={saved.recipeId}
+                        key={saved.recipeId || (saved as unknown as { id?: string }).id}
                         onClick={() => handleSelect(saved)}
                         className="w-full flex items-center gap-3 p-2.5 rounded-2xl hover:bg-emerald-50/70 dark:hover:bg-emerald-950/30 text-left active:scale-[0.98] transition-all duration-150 group border-none cursor-pointer bg-transparent"
                       >
-                        <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 ring-1 ring-black/[0.06] dark:ring-white/[0.08]">
+                        <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 ring-1 ring-black/[0.06] dark:ring-white/[0.08] pointer-events-none">
                           <CachedImage
                             src={saved.recipe?.imageUrl}
                             alt={saved.recipe?.title || 'Recipe'}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 pointer-events-none">
                           <h4 className="text-xs sm:text-sm font-extrabold text-gray-900 dark:text-white truncate group-hover:text-emerald-600 transition-colors">
                             {saved.recipe?.title}
                           </h4>
@@ -275,7 +267,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                             )}
                           </div>
                         </div>
-                        <div className="w-8.5 h-8.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-400 group-hover:bg-emerald-600 group-hover:text-white transition-colors flex items-center justify-center shrink-0 shadow-2xs">
+                        <div className="w-8.5 h-8.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-400 group-hover:bg-emerald-600 group-hover:text-white transition-colors flex items-center justify-center shrink-0 shadow-2xs pointer-events-none">
                           <Plus className="w-4 h-4 stroke-[2.5]" />
                         </div>
                       </button>
@@ -292,7 +284,6 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
           </Drawer.Content>
         </Drawer.Backdrop>
       </Drawer>
-    </div>
   );
 };
 

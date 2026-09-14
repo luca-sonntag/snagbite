@@ -101,5 +101,5 @@ export interface RecipePickerModalProps {
   dateStr: string;
   history: SavedRecipe[];
   onClose: () => void;
-  onSelectRecipe: (recipe: SavedRecipe) => void;
+  onSelectRecipe: (recipe: SavedRecipe, dateStr?: string) => void;
 }
