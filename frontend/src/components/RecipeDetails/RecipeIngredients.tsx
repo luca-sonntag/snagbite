@@ -94,9 +94,7 @@ export default function RecipeIngredients({
                       </span>
                     </div>
                     <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 tabular-nums">
-                      {group.items.length === 1
-                        ? t('recipe.ingredientCount')
-                        : t('recipe.ingredientsCount', { count: group.items.length })}
+                      {group.items.length}
                     </span>
                   </div>
                 )}
