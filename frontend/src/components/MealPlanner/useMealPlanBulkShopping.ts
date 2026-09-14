@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import type { MealPlanEntry, SavedRecipe, Ingredient, Recipe } from '../../types';
+import type { MealPlanEntry, SavedRecipe, Ingredient, Recipe, MealPlanRecipeSummary } from '../../types';
 import type { BulkShoppingItem } from './types';
 import { useToast } from '../../context/ToastContext';
 import { useI18n } from '../../context/I18nContext';
@@ -67,7 +67,7 @@ export function useMealPlanBulkShopping({
       string,
       {
         entry: MealPlanEntry;
-        recipe: Recipe;
+        recipe: Recipe | MealPlanRecipeSummary;
         totalServings: number;
         baseServings: number;
       }
@@ -138,10 +138,12 @@ export function useMealPlanBulkShopping({
       if (!currentBulkItem || !addRecipeIngredients) return;
 
       if (selectedIngredients.length > 0) {
+        const recipeId = currentBulkItem.recipe.id || currentBulkItem.entry.recipeId;
+        const recipeTitle = currentBulkItem.recipe.title || 'Rezept';
         addRecipeIngredients(
           selectedIngredients,
-          currentBulkItem.recipe.id,
-          currentBulkItem.recipe.title,
+          recipeId,
+          recipeTitle,
         );
         setAddedItemsCount((prev) => prev + selectedIngredients.length);
         setAddedRecipesCount((prev) => prev + 1);

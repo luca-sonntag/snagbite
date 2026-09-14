@@ -1,4 +1,4 @@
-import type { MealPlanEntry, MealType, SavedRecipe, Ingredient, Recipe } from '../../types';
+import type { MealPlanEntry, MealType, SavedRecipe, Ingredient, Recipe, MealPlanRecipeSummary } from '../../types';
 
 export interface WeekDayInfo {
   date: Date;
@@ -38,7 +38,7 @@ export interface UpcomingMealPlansProps {
 
 export interface BulkShoppingItem {
   entry: MealPlanEntry;
-  recipe: Recipe;
+  recipe: Recipe | MealPlanRecipeSummary;
   targetServings: number;
   baseServings: number;
   scaleFactor: number;
@@ -75,6 +75,7 @@ export interface DailyInsightPillProps {
 export interface DayMealSlotsProps {
   selectedDateStr: string;
   entries: MealPlanEntry[];
+  hasAnyFutureEntries?: boolean;
   onAddRecipe: () => void;
   onUpdateServings: (id: string, servings: number) => void;
   onToggleCooked: (entry: MealPlanEntry) => void;

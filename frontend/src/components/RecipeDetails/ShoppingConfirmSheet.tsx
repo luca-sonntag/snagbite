@@ -5,14 +5,14 @@ import { useI18n } from '../../context/I18nContext';
 import { usePantry } from '../../context/PantryContext';
 import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight, hapticNotification } from '../../utils/haptics';
-import type { Ingredient, Recipe } from '../../types';
+import type { Ingredient, Recipe, MealPlanRecipeSummary } from '../../types';
 import { findPantryStockMatch } from '../ShoppingList/shoppingItemUtils';
 import ShoppingConfirmItem, { type MergedShoppingSheetItem } from './ShoppingConfirmItem';
 
 interface ShoppingConfirmSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  recipe?: Recipe;
+  recipe?: Recipe | MealPlanRecipeSummary;
   sortedIngredients: Array<{ group: { name: string; items: Ingredient[] }; originalIdx: number }>;
   scaleFactor: number;
   formatAmount: (amount: number | undefined, unit: string | undefined) => string;
