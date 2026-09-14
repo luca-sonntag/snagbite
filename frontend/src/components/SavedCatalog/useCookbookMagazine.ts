@@ -98,7 +98,7 @@ export function useCookbookMagazine({
       }
     }
 
-    // Slide 2: Vital Star / High Health Score (Score >= 70 from own items, distinct from Slide 1)
+    // Slide 2: Vital Star / High Health Score (Score >= 70, distinct from Slide 1)
     if (items.length > 1) {
       const remainingPool = items.filter((j) => !usedRecipeIds.has(j.recipeId));
       const vitalPool = remainingPool.filter((j) => (j.recipe?.healthScore ?? 0) >= 70 && j.recipe?.imageUrl);
@@ -119,6 +119,25 @@ export function useCookbookMagazine({
           onOpenTheme: hasVitalTheme ? onOpenVital : undefined,
           isCommunity: false,
           isSaved: true,
+          isVital: true,
+        });
+      }
+    } else if (communityRecipes.length > 1) {
+      const remainingPool = communityRecipes.filter((c) => c.id && !usedRecipeIds.has(c.id));
+      const vitalPool = remainingPool.filter((c) => (c.healthScore ?? 0) >= 70);
+      const candidates = vitalPool.length > 0 ? vitalPool : remainingPool;
+      const vitalCandidate = candidates[0];
+
+      if (vitalCandidate?.id) {
+        usedRecipeIds.add(vitalCandidate.id);
+        slides.push({
+          id: `hero-2-comm-${vitalCandidate.id}`,
+          recipe: vitalCandidate,
+          totalTime: formatTotalTime(vitalCandidate),
+          badgeText: t('catalog.magazine.heroVitalBadge'),
+          badgeVariant: 'emerald',
+          isCommunity: true,
+          isSaved: savedRecipeIds?.has(vitalCandidate.id) || false,
           isVital: true,
         });
       }
@@ -174,10 +193,46 @@ export function useCookbookMagazine({
       heroSlides.map((s) => s.job?.recipeId || s.recipe.id).filter(Boolean) as string[]
     );
     const withoutHero = items.filter((j) => !heroRecipeIds.has(j.recipeId));
-    if (withoutHero.length === 0) return [];
 
-    // Daily rotated quick candidates (<= 25 min)
-    const quickCandidates = withoutHero.filter((j) => {
+    if (withoutHero.length >= 3) {
+      // Daily rotated quick candidates (<= 25 min)
+      const quickCandidates = withoutHero.filter((j) => {
+        const t = getTotalTime(j.recipe);
+        return t > 0 && t <= 25;
+      });
+
+      if (quickCandidates.length >= 3) {
+        const offset = dayOfYear % quickCandidates.length;
+        const rotated = [...quickCandidates.slice(offset), ...quickCandidates.slice(0, offset)];
+        return rotated.slice(0, 3);
+      }
+
+      // Blend quick candidates with highest health-score recipes
+      const remainder = withoutHero.filter((j) => !quickCandidates.includes(j));
+      remainder.sort((a, b) => (b.recipe?.healthScore ?? 0) - (a.recipe?.healthScore ?? 0));
+      return [...quickCandidates, ...remainder].slice(0, 3);
+    }
+
+    // Cold start / few recipes: supplement with community recipes
+    const availableComm = communityRecipes.filter(
+      (c) => c.id && !heroRecipeIds.has(c.id) && !items.some((j) => j.recipeId === c.id)
+    );
+
+    const commJobs: SavedRecipe[] = availableComm.map((c) => ({
+      recipeId: c.id!,
+      recipe: c,
+      source: 'share',
+      isFavorite: false,
+      flags: [],
+      collectionIds: [],
+      addedAt: c.createdAt || new Date().toISOString(),
+      updatedAt: c.createdAt || new Date().toISOString(),
+    }));
+
+    const combined = [...withoutHero, ...commJobs];
+    if (combined.length === 0) return [];
+
+    const quickCandidates = combined.filter((j) => {
       const t = getTotalTime(j.recipe);
       return t > 0 && t <= 25;
     });
@@ -188,11 +243,10 @@ export function useCookbookMagazine({
       return rotated.slice(0, 3);
     }
 
-    // Blend quick candidates with highest health-score recipes
-    const remainder = withoutHero.filter((j) => !quickCandidates.includes(j));
+    const remainder = combined.filter((j) => !quickCandidates.includes(j));
     remainder.sort((a, b) => (b.recipe?.healthScore ?? 0) - (a.recipe?.healthScore ?? 0));
     return [...quickCandidates, ...remainder].slice(0, 3);
-  }, [items, heroSlides, dayOfYear]);
+  }, [items, communityRecipes, heroSlides, dayOfYear]);
 
   // 3. Rediscovered Recipe (Older saved recipe, distinct from hero slides & bento)
   const rediscoveredRecipe = useMemo(() => {
