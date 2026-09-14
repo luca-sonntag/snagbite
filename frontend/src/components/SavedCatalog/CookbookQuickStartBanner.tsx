@@ -1,4 +1,4 @@
-import { Plus, Camera, Sparkles } from 'lucide-react';
+import { Plus, Camera } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { hapticMedium, hapticLight } from '../../utils/haptics';
 
@@ -33,20 +33,14 @@ export default function CookbookQuickStartBanner({ className = '' }: CookbookQui
       <div className="absolute -bottom-10 -left-10 w-28 h-28 bg-teal-500/15 rounded-full blur-2xl pointer-events-none" />
 
       <div className="relative z-10 flex flex-col gap-3">
-        {/* Header Row: Icon + Title & Description */}
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-            <Sparkles className="w-5 h-5" />
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm sm:text-base font-bold text-gray-950 dark:text-white leading-snug">
-              {t('catalog.quickStart.title')}
-            </h3>
-            <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5 leading-relaxed">
-              {t('catalog.quickStart.description')}
-            </p>
-          </div>
+        {/* Header Row: Title & Description */}
+        <div className="flex flex-col min-w-0">
+          <h3 className="text-sm sm:text-base font-bold text-gray-950 dark:text-white leading-snug">
+            {t('catalog.quickStart.title')}
+          </h3>
+          <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5 leading-relaxed">
+            {t('catalog.quickStart.description')}
+          </p>
         </div>
 
         {/* Action Buttons Row */}

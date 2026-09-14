@@ -1,5 +1,5 @@
 import type { MouseEvent } from 'react';
-import { Star, Clock, Sparkles, BookmarkPlus, Check, ChevronRight } from 'lucide-react';
+import { Star, Clock, BookmarkPlus, Check, ChevronRight } from 'lucide-react';
 import type { SavedRecipe, Recipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
@@ -109,9 +109,8 @@ export default function RecipeHeroCard({
             <span
               className={`px-2 py-0.5 rounded-full ${
                 BADGE_VARIANT_STYLES[badgeVariant] ?? BADGE_VARIANT_STYLES.amber
-              } backdrop-blur-md text-[10px] sm:text-[10.5px] font-bold shadow-sm flex items-center gap-1 tracking-tight`}
+              } backdrop-blur-md text-[10px] sm:text-[10.5px] font-bold shadow-sm flex items-center tracking-tight`}
             >
-              {isCommunity && <Sparkles className="w-2.5 h-2.5 text-white/90 shrink-0" />}
               {badgeText || t('catalog.magazine.heroHighlight')}
             </span>
           )}
