@@ -23,7 +23,6 @@ import CatalogFilters from './CatalogFilters';
 import FilterSheet from './FilterSheet';
 import CookbookHome from './CookbookHome';
 import BulkActionBar from './BulkActionBar';
-import CatalogEmptyState from './CatalogEmptyState';
 import CatalogLoadingState from './CatalogLoadingState';
 import { buildListRoute, isCatalogListRoute, parseListRoute, getBaseFiltersForPreset, type CatalogPreset } from './catalogRoutes';
 
@@ -626,9 +625,7 @@ export default function SavedCatalog({
 
       {premiumBanner}
 
-      {completedJobs.length === 0 ? (
-        <CatalogEmptyState onRecipeSaved={onRecipeSaved} />
-      ) : !isListLevel ? (
+      {!isListLevel ? (
         <CookbookHome
           totalRecipes={completedJobs.length}
           items={completedJobs}
