@@ -4,12 +4,13 @@ interface ErudaSnippetsTool {
 }
 
 interface ErudaInstance {
-  get: (toolName: string) => ErudaSnippetsTool | undefined;
+  get: (toolName: string) => unknown;
 }
 
-export function registerErudaSnippets(eruda: ErudaInstance): void {
+export function registerErudaSnippets(eruda: unknown): void {
   try {
-    const snippets = eruda.get('snippets');
+    const instance = eruda as ErudaInstance | undefined;
+    const snippets = instance?.get?.('snippets') as ErudaSnippetsTool | undefined;
     if (!snippets || typeof snippets.add !== 'function') return;
 
     // Register 1-tap overlay triggers for mobile DevTools

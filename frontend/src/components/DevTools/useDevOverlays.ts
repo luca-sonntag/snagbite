@@ -61,7 +61,15 @@ export function useDevOverlays() {
         const opts = (nextOverlay.options as DevToastOptions) ?? {};
         const type = opts.type ?? 'info';
         const msg = opts.message ?? 'DevTools Test Toast';
-        toast[type](msg);
+        if (type === 'danger' || type === 'error') {
+          toast.danger(msg);
+        } else if (type === 'warning') {
+          toast.warning(msg);
+        } else if (type === 'success') {
+          toast.success(msg);
+        } else {
+          toast.info(msg);
+        }
         setActiveOverlay(null);
         return;
       }

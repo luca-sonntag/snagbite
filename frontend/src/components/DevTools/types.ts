@@ -59,7 +59,7 @@ export interface DevConfirmOptions {
 
 export interface DevToastOptions {
   message?: string;
-  type?: 'info' | 'success' | 'error' | 'warning';
+  type?: 'info' | 'success' | 'danger' | 'error' | 'warning';
 }
 
 export interface DevOtaOptions {

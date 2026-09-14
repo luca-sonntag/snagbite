@@ -113,24 +113,24 @@ function buildMockReward(opts?: DevRewardOptions): CookedResult {
 
   return {
     duplicate: false,
+    leveledUp: isLevelUp,
     earned: {
       xp: xpGained,
-      base: opts?.base ?? 100,
-      photoBonus: opts?.photoBonus ?? 50,
-      streakBonus: opts?.streakBonus ?? 0,
-      timerBonus: opts?.timerBonus ?? 0,
+      coins: Math.round(xpGained * 0.1),
+      reasons: ['Base XP', 'Photo bonus'],
     },
     newBadges: opts?.badges ?? (isLevelUp ? ['level_master'] : ['photo_chef']),
     previousLevel,
     previousXp: prevXp,
     stats: {
+      userId: 'dev-user',
       level: currentLevel,
       xp: prevXp + xpGained,
+      coins: 42,
       currentStreak: opts?.streak ?? 3,
       longestStreak: 5,
       totalCooks: 12,
-      photosUploaded: 4,
-      lastCookedAt: new Date().toISOString(),
+      lastCookDate: new Date().toISOString(),
     },
   };
 }
