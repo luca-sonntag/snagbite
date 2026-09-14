@@ -179,10 +179,12 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
         dateStr={pickerSlot?.date ?? selectedDate}
         history={history}
         onClose={() => setPickerSlot(null)}
-        onSelectRecipe={(saved) => {
-          if (pickerSlot) {
-            addPlan(saved, pickerSlot.date);
+        onSelectRecipe={(saved, targetDate) => {
+          const dateToUse = targetDate || pickerSlot?.date || selectedDate;
+          if (dateToUse) {
+            addPlan(saved, dateToUse);
           }
+          setPickerSlot(null);
         }}
       />
 

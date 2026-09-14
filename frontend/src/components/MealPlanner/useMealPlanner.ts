@@ -6,9 +6,10 @@ import { useToast } from '../../context/ToastContext';
 import { useI18n } from '../../context/I18nContext';
 import { apiUrl } from '../../api';
 import { hapticLight } from '../../utils/haptics';
-import { getMonday, formatDateIso, addDays } from './mealPlannerUtils';
+import { getMonday, formatDateIso, addDays, buildWeekDaysInfo } from './mealPlannerUtils';
+import { useMealPlanActions } from './useMealPlanActions';
 
-export { getMonday, formatDateIso, addDays };
+export { getMonday, formatDateIso, addDays, buildWeekDaysInfo };
 
 export function useMealPlanner() {
   const { getAccessToken, user } = useAuth();
@@ -118,31 +119,12 @@ export function useMealPlanner() {
     setSelectedDate(formatDateIso(today));
   }, []);
 
+  const todayStr = useMemo(() => formatDateIso(new Date()), []);
+
   // Compute 7 days info for the week picker
   const weekDays = useMemo<WeekDayInfo[]>(() => {
-    const todayStr = formatDateIso(new Date());
-    const dayNamesDe = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
-    const dayNamesEn = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const dayNames = language === 'en' ? dayNamesEn : dayNamesDe;
-
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = addDays(currentWeekStart, i);
-      const dStr = formatDateIso(d);
-      const dayPlans = mealPlans.filter((p) => p.planDate === dStr);
-      const plannedCount = dayPlans.length;
-      const cookedCount = dayPlans.filter((p) => p.isCooked).length;
-
-      return {
-        date: d,
-        dateStr: dStr,
-        dayName: dayNames[i],
-        dayNumber: d.getDate(),
-        isToday: dStr === todayStr,
-        plannedCount,
-        cookedCount,
-      };
-    });
-  }, [currentWeekStart, mealPlans, language]);
+    return buildWeekDaysInfo(currentWeekStart, mealPlans, language, todayStr);
+  }, [currentWeekStart, mealPlans, language, todayStr]);
 
   // Add a recipe to meal plan
   const addPlan = useCallback(
@@ -152,12 +134,35 @@ export function useMealPlanner() {
       arg3?: MealType | number,
       arg4?: number,
     ) => {
-      if (!user) return;
+      if (!user) {
+        toast.danger(t('auth.pleaseSignIn') || 'Bitte melde dich an, um Rezepte zu planen');
+        return;
+      }
+
+      const targetRecipeId =
+        recipe.recipeId ||
+        (recipe as unknown as { id?: string }).id ||
+        recipe.recipe?.id;
+
+      if (!targetRecipeId) {
+        console.error('addPlan: Cannot resolve recipeId from recipe:', recipe);
+        toast.danger(t('mealPlanner.addError') || 'Fehler beim Planen des Rezepts');
+        return;
+      }
+
+      const targetDate = planDate || selectedDate;
+      if (!targetDate) {
+        console.error('addPlan: Missing target planDate');
+        toast.danger(t('mealPlanner.addError') || 'Fehler beim Planen des Rezepts');
+        return;
+      }
+
       const mealType: MealType = typeof arg3 === 'string' ? arg3 : 'dinner';
       const servingsParam = typeof arg3 === 'number' ? arg3 : arg4;
       const targetServings =
         servingsParam ??
         (recipe.recipe?.servings ? Number(recipe.recipe.servings) : 2);
+
       try {
         const token = await getAccessToken();
         const res = await fetch(apiUrl('/api/meal-plan'), {
@@ -167,126 +172,44 @@ export function useMealPlanner() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            recipeId: recipe.recipeId,
-            planDate,
+            recipeId: targetRecipeId,
+            planDate: targetDate,
             mealType,
             servings: targetServings,
           }),
         });
+
         const data = await res.json();
-        if (data.success && data.mealPlan) {
-          setMealPlans((prev) => [...prev, data.mealPlan]);
+        if (!res.ok || !data.success) {
+          console.error('Failed to create meal plan:', res.status, data);
+          toast.danger(data?.error?.message || t('mealPlanner.addError') || 'Fehler beim Planen des Rezepts');
+          return;
+        }
+
+        if (data.mealPlan) {
+          setMealPlans((prev) => [...prev.filter((p) => p.id !== data.mealPlan.id), data.mealPlan]);
           window.dispatchEvent(new CustomEvent('meal-plans-updated'));
           toast.success(t('mealPlanner.addedToPlan'));
         }
       } catch (err) {
         console.error('Failed to create meal plan:', err);
+        toast.danger(t('common.networkError') || 'Netzwerkfehler beim Planen');
       }
     },
-    [user, getAccessToken, toast, t],
+    [user, getAccessToken, toast, t, selectedDate],
   );
 
-  // Update servings
-  const updateServings = useCallback(
-    async (id: string, newServings: number) => {
-      if (newServings < 1) return;
-      setMealPlans((prev) => prev.map((p) => (p.id === id ? { ...p, servings: newServings } : p)));
-      try {
-        const token = await getAccessToken();
-        await fetch(apiUrl(`/api/meal-plan/${id}`), {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ servings: newServings }),
-        });
-      } catch (err) {
-        console.error('Failed to update servings:', err);
-        fetchPlans();
-      }
-    },
-    [getAccessToken, fetchPlans],
-  );
+  // Meal plan CRUD mutations
+  const { updateServings, toggleCooked, moveToTomorrow, deletePlan } = useMealPlanActions({
+    setMealPlans,
+    fetchPlans,
+    getAccessToken,
+  });
 
-  // Toggle cooked status
-  const toggleCooked = useCallback(
-    async (entry: MealPlanEntry) => {
-      const nextCooked = !entry.isCooked;
-      setMealPlans((prev) => prev.map((p) => (p.id === entry.id ? { ...p, isCooked: nextCooked } : p)));
-      window.dispatchEvent(new CustomEvent('meal-plans-updated'));
-      try {
-        const token = await getAccessToken();
-        await fetch(apiUrl(`/api/meal-plan/${entry.id}`), {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ isCooked: nextCooked }),
-        });
-      } catch (err) {
-        console.error('Failed to toggle cooked state:', err);
-        fetchPlans();
-      }
-    },
-    [getAccessToken, fetchPlans],
-  );
-
-  // Move entry to tomorrow
-  const moveToTomorrow = useCallback(
-    async (entry: MealPlanEntry) => {
-      const currentDate = new Date(entry.planDate + 'T00:00:00');
-      const tomorrow = addDays(currentDate, 1);
-      const tomorrowStr = formatDateIso(tomorrow);
-      setMealPlans((prev) =>
-        prev.map((p) => (p.id === entry.id ? { ...p, planDate: tomorrowStr } : p)),
-      );
-      window.dispatchEvent(new CustomEvent('meal-plans-updated'));
-      try {
-        const token = await getAccessToken();
-        await fetch(apiUrl(`/api/meal-plan/${entry.id}`), {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ planDate: tomorrowStr }),
-        });
-        toast.success(t('mealPlanner.movedToTomorrow'));
-      } catch (err) {
-        console.error('Failed to move plan to tomorrow:', err);
-        fetchPlans();
-      }
-    },
-    [getAccessToken, toast, t, fetchPlans],
-  );
-
-  // Delete plan entry
-  const deletePlan = useCallback(
-    async (id: string) => {
-      setMealPlans((prev) => prev.filter((p) => p.id !== id));
-      window.dispatchEvent(new CustomEvent('meal-plans-updated'));
-      try {
-        const token = await getAccessToken();
-        await fetch(apiUrl(`/api/meal-plan/${id}`), {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        toast.info(t('mealPlanner.removeFromPlan'));
-      } catch (err) {
-        console.error('Failed to delete meal plan:', err);
-        fetchPlans();
-      }
-    },
-    [getAccessToken, toast, t, fetchPlans],
-  );
 
   const activeDayEntries = useMemo(() => {
     return mealPlans.filter((p) => p.planDate === selectedDate);
   }, [mealPlans, selectedDate]);
-
-  const todayStr = useMemo(() => formatDateIso(new Date()), []);
 
   const futurePlannedEntries = useMemo(() => {
     return mealPlans.filter((p) => p.planDate >= todayStr);
