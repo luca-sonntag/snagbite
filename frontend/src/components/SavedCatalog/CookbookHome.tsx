@@ -1,5 +1,5 @@
 import { useState, useEffect, type MouseEvent } from 'react';
-import type { Collection, SavedRecipe, Recipe, RecipeCategory } from '../../types';
+import type { SavedRecipe, Recipe, RecipeCategory } from '../../types';
 import CollectionStoryHub from './CollectionStoryHub';
 import CategoryLabelBar from './CategoryLabelBar';
 import CookbookGreetingHeader from './CookbookGreetingHeader';
@@ -10,56 +10,12 @@ import AllRecipesShelf from './AllRecipesShelf';
 import PublicRecipeRecommendationsShelf from './PublicRecipeRecommendationsShelf';
 import PublicRecipePreviewModal from '../PublicRecipe/PublicRecipePreviewModal';
 import HeroThemeSheet from './HeroThemeSheet';
+import CookbookQuickStartBanner from './CookbookQuickStartBanner';
 import { useAuth } from '../../context/AuthContext';
 import { useI18n } from '../../context/I18nContext';
 import { fetchPublicRecipeRecommendations, savePublicRecipeToCookbook } from '../../api/publicRecipesApi';
-import type { CatalogPreset } from './catalogRoutes';
 import { useCookbookMagazine } from './useCookbookMagazine';
-
-interface Shelf {
-  items: SavedRecipe[];
-  total: number;
-}
-
-interface RecommendedShelf extends Shelf {
-  themeId: string;
-  title: string;
-  badgeEmoji?: string;
-}
-
-interface CookbookHomeProps {
-  totalRecipes: number;
-  items?: SavedRecipe[];
-  collections: Collection[];
-  jobsByCollection: Record<string, SavedRecipe[]>;
-  jobsByFlag?: Record<string, SavedRecipe[]>;
-  jobsByCategory?: Partial<Record<RecipeCategory, SavedRecipe[]>>;
-  availableCategories?: RecipeCategory[];
-  favoriteJobs?: SavedRecipe[];
-  shelves: {
-    recommended?: RecommendedShelf | null;
-    recent: Shelf;
-    favorites: Shelf;
-    quick: Shelf;
-    newest: Shelf;
-  };
-  allFlags: string[];
-  formatTotalTime: (recipe: any) => string | null;
-  onOpenList: (preset: CatalogPreset) => void;
-  onOpenRecipe: (e: MouseEvent, job: SavedRecipe) => void;
-  onAddCollection: () => void;
-  onManageCollections?: () => void;
-  isSelectMode?: boolean;
-  onToggleSelectMode?: () => void;
-  selectedIds?: Set<string>;
-  bindLongPress?: (id: string, job: SavedRecipe) => any;
-  onRecipeSaved?: (savedId: string) => void;
-  savedRecipeIds?: Set<string>;
-  searchQuery?: string;
-  onSearchChange?: (query: string) => void;
-  activeFilterCount?: number;
-  onOpenFilters?: () => void;
-}
+import type { CookbookHomeProps } from './cookbookHomeTypes';
 
 /**
  * Level 1 of the catalog: Vibrant Culinary Magazine Feed.
@@ -101,12 +57,16 @@ export default function CookbookHome({
   const [communityRecommendations, setCommunityRecommendations] = useState<Recipe[]>([]);
   const [selectedPreviewRecipe, setSelectedPreviewRecipe] = useState<Recipe | null>(null);
   const [activeHeroSheet, setActiveHeroSheet] = useState<'theme' | 'vital' | null>(null);
+  const [activeCategorySheet, setActiveCategorySheet] = useState<{
+    title: string;
+    recipes: SavedRecipe[];
+  } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       try {
-        const items = await fetchPublicRecipeRecommendations(getAccessToken, 6);
+        const items = await fetchPublicRecipeRecommendations(getAccessToken, 12);
         if (!cancelled && items.length > 0) {
           setCommunityRecommendations(items);
         }
@@ -155,6 +115,32 @@ export default function CookbookHome({
     }
   };
 
+  const handleOpenBentoRecipe = (e: MouseEvent, job: SavedRecipe) => {
+    if (job.recipe?.id && !savedRecipeIds?.has(job.recipe.id) && !items?.some((j) => j.recipeId === job.recipeId)) {
+      setSelectedPreviewRecipe(job.recipe);
+    } else {
+      onOpenRecipe(e, job);
+    }
+  };
+
+  const handleOpenCommunityCategory = (category: RecipeCategory, label: string) => {
+    const matching = communityRecommendations.filter((c) => (c.category || 'other') === category);
+    const asSaved: SavedRecipe[] = matching.map((c) => ({
+      recipeId: c.id!,
+      recipe: c,
+      source: 'share',
+      isFavorite: false,
+      flags: [],
+      collectionIds: [],
+      addedAt: c.createdAt || new Date().toISOString(),
+      updatedAt: c.createdAt || new Date().toISOString(),
+    }));
+    setActiveCategorySheet({
+      title: label,
+      recipes: asSaved,
+    });
+  };
+
   const handleSaveCommunityFromHero = async (_e: MouseEvent, recipe: Recipe) => {
     if (!recipe.id || !onRecipeSaved) return;
     try {
@@ -173,12 +159,17 @@ export default function CookbookHome({
       {/* 1. Contextual Greeting Header */}
       <CookbookGreetingHeader
         isSelectMode={isSelectMode}
-        onToggleSelectMode={onToggleSelectMode}
+        onToggleSelectMode={totalRecipes > 0 ? onToggleSelectMode : undefined}
         searchQuery={searchQuery}
         onSearchChange={onSearchChange}
         activeFilterCount={activeFilterCount}
         onOpenFilters={onOpenFilters}
       />
+
+      {/* Quick-Start Banner for cold start */}
+      {totalRecipes === 0 && (
+        <CookbookQuickStartBanner />
+      )}
 
       {/* 2. Clean Flat Squircle Collection Hub */}
       <section className="space-y-3">
@@ -190,6 +181,8 @@ export default function CookbookHome({
           jobsByCategory={jobsByCategory}
           collections={collections}
           jobsByCollection={jobsByCollection}
+          communityRecipes={communityRecommendations}
+          onOpenCommunityCategory={handleOpenCommunityCategory}
           onOpenList={onOpenList}
           onAddCollection={onAddCollection}
         />
@@ -220,7 +213,7 @@ export default function CookbookHome({
           title={bentoTitle}
           subtitle={bentoSubtitle}
           formatTotalTime={formatTotalTime}
-          onOpenRecipe={onOpenRecipe}
+          onOpenRecipe={handleOpenBentoRecipe}
           onSeeAll={() => onOpenList({ kind: 'quick' })}
         />
       )}
@@ -283,6 +276,20 @@ export default function CookbookHome({
         onOpenRecipe={onOpenRecipe}
         onOpenCatalog={() => onOpenList({ kind: activeHeroSheet === 'vital' ? 'vital' : 'recommended' })}
       />
+
+      {/* Cold Start Category Theme Drawer */}
+      {activeCategorySheet && (
+        <HeroThemeSheet
+          isOpen={Boolean(activeCategorySheet)}
+          onClose={() => setActiveCategorySheet(null)}
+          themeTitle={activeCategorySheet.title}
+          themeSubtitle={t('catalog.publicDiscovery.subtitle')}
+          badgeVariant="teal"
+          recipes={activeCategorySheet.recipes}
+          formatTotalTime={formatTotalTime}
+          onOpenRecipe={handleOpenBentoRecipe}
+        />
+      )}
     </div>
   );
 }
