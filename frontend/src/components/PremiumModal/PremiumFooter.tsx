@@ -64,7 +64,7 @@ export function PremiumFooter({
           className="w-full h-[52px] min-h-[44px] rounded-2xl bg-gray-100 border-none text-gray-500 text-sm font-bold flex items-center justify-center gap-2 cursor-default"
         >
           <Check className="w-5 h-5 text-emerald-500" />
-          {t('premium.modal.owned') || 'Du hast Snagbite PRO'}
+          {t('premium.modal.owned') || 'Du hast Snagbite Pro'}
         </button>
       ) : isLoadingPackages ? (
         <button
@@ -91,7 +91,7 @@ export function PremiumFooter({
             <span>
               {hasSelectedTrial
                 ? t('premium.modal.ctaWithTrial') || 'Kostenlose Testphase starten'
-                : t('premium.modal.ctaWithoutTrial') || 'Snagbite PRO freischalten'}
+                : t('premium.modal.ctaWithoutTrial') || 'Snagbite Pro freischalten'}
             </span>
           )}
         </button>

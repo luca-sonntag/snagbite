@@ -108,7 +108,7 @@ export default function ProFeatureSheet({
                 className="w-full h-12 min-h-[48px] rounded-2xl font-bold bg-amber-500 hover:bg-amber-400 active:scale-[0.98] text-white shadow-md shadow-amber-500/25 border-none transition-all cursor-pointer text-sm flex items-center justify-center gap-2"
                 onPress={handleUpgrade}
               >
-                <span>{isDe ? 'Snagbite PRO freischalten' : 'Unlock Snagbite PRO'}</span>
+                <span>{isDe ? 'Snagbite Pro freischalten' : 'Unlock Snagbite Pro'}</span>
               </Button>
 
               <button

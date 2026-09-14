@@ -40,7 +40,7 @@ export function PremiumHero({ onClose, disabled }: PremiumHeroProps) {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            {t('premium.modal.title') || 'Snagbite PRO'}
+            {t('premium.modal.title') || 'Snagbite Pro'}
           </h2>
 
           <p className="text-[13px] text-gray-500 leading-relaxed max-w-[210px] mx-auto">
