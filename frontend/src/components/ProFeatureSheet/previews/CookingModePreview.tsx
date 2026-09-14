@@ -6,6 +6,7 @@ import CookingModeIngredients from '../../CookingMode/CookingModeIngredients';
 import RecipeInstructionText from '../../RecipeInstructionText';
 import CachedImage from '../../CachedImage';
 import { useI18n } from '../../../context/I18nContext';
+import { formatQuantity } from '../../../utils/formatQuantity';
 
 export default function CookingModePreview() {
   const { language } = useI18n();
@@ -103,7 +104,7 @@ export default function CookingModePreview() {
               : '[Rote Currypaste](ing:curry_paste) einrühren, [Kokosmilch](ing:coconut_milk) hinzugeben und bei mittlerer Hitze für [12 Minuten](timer:720) sanft köcheln lassen.'
           }
           recipe={mockRecipe}
-          formatAmount={(amount, unit) => `${amount} ${unit ?? ''}`.trim()}
+          formatAmount={formatQuantity}
           stepNum={3}
         />
       </div>
@@ -111,7 +112,7 @@ export default function CookingModePreview() {
       {/* 5. Contextual Step Ingredients List */}
       <CookingModeIngredients
         ingredients={stepIngredients}
-        formatAmount={(amount, unit) => `${amount} ${unit ?? ''}`.trim()}
+        formatAmount={formatQuantity}
         className="px-0.5 pt-1 pb-0.5"
       />
     </div>

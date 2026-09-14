@@ -49,9 +49,14 @@ export const CookingModeIngredients: React.FC<CookingModeIngredientsProps> = ({
         /* 2-Column Grid with comfortable spacing */
         <ul className="grid grid-cols-2 gap-x-3.5 sm:gap-x-8 gap-y-3 text-xs sm:text-sm">
           {ingredients.map((ing, i) => {
-            const scaledAmount = formatAmount(ing.amount, ing.unit);
-            const amountStr = scaledAmount ? `${scaledAmount} ` : '';
-            const unitStr = ing.unit ? `${ing.unit} ` : '';
+            const scaledAmount = formatAmount(ing.amount, ing.unit)?.trim() ?? '';
+            const unit = ing.unit?.trim() ?? '';
+            const alreadyHasUnit =
+              Boolean(unit) &&
+              (scaledAmount.endsWith(` ${unit}`) ||
+                scaledAmount.toLowerCase().endsWith(unit.toLowerCase()));
+            const displayAmount =
+              alreadyHasUnit || !unit ? scaledAmount : `${scaledAmount} ${unit}`.trim();
 
             return (
               <li
@@ -85,9 +90,9 @@ export const CookingModeIngredients: React.FC<CookingModeIngredientsProps> = ({
 
                   {/* Amount & notes */}
                   <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-normal mt-0.5">
-                    {(amountStr || unitStr) && (
+                    {displayAmount && (
                       <span className="font-bold text-emerald-600 dark:text-emerald-400 tabular-nums truncate text-xs sm:text-sm">
-                        {`${amountStr}${unitStr}`.trim()}
+                        {displayAmount}
                       </span>
                     )}
                     {ing.notes && (

@@ -25,6 +25,16 @@ export const InstructionIngredientPopover: React.FC<InstructionIngredientPopover
   fallbackText,
   formatAmount,
 }) => {
+  const rawScaled = matchedIngredient
+    ? formatAmount(matchedIngredient.amount, matchedIngredient.unit)?.trim() ?? ''
+    : '';
+  const unit = matchedIngredient?.unit?.trim() ?? '';
+  const alreadyHasUnit =
+    Boolean(unit) &&
+    (rawScaled.endsWith(` ${unit}`) || rawScaled.toLowerCase().endsWith(unit.toLowerCase()));
+  const displayAmount =
+    alreadyHasUnit || !unit ? rawScaled : `${rawScaled} ${unit}`.trim();
+
   return (
     <span onClick={(e) => e.stopPropagation()} className="inline">
       <Popover>
@@ -54,10 +64,9 @@ export const InstructionIngredientPopover: React.FC<InstructionIngredientPopover
                     <span className="text-sm font-bold text-gray-900 dark:text-white leading-tight truncate">
                       {matchedIngredient.name}
                     </span>
-                    {(matchedIngredient.amount > 0 || matchedIngredient.unit) && (
+                    {displayAmount && (
                       <span className="text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/50 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30 px-2 py-0.5 rounded-lg shrink-0 whitespace-nowrap">
-                        {formatAmount(matchedIngredient.amount, matchedIngredient.unit)}
-                        {matchedIngredient.unit ? ` ${matchedIngredient.unit}` : ''}
+                        {displayAmount}
                       </span>
                     )}
                   </div>
