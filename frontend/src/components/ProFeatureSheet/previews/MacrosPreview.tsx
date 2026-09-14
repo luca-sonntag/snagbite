@@ -6,7 +6,7 @@ export default function MacrosPreview() {
   const isEn = language.startsWith('en');
 
   return (
-    <div className="w-full bg-gray-50/75 dark:bg-gray-800/35 rounded-3xl p-4 sm:p-5 border border-black/[0.04] dark:border-white/[0.06] shadow-xs flex flex-col gap-3 select-none">
+    <div className="w-full bg-white dark:bg-gray-900 rounded-3xl p-4 sm:p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col gap-3 select-none">
       <div className="flex items-center justify-between">
         <div className="flex items-baseline gap-1.5">
           <span className="text-gray-900 dark:text-white text-2xl font-black tabular-nums leading-none">
@@ -16,7 +16,7 @@ export default function MacrosPreview() {
             {t('recipe.nutritionPerServing')}
           </span>
         </div>
-        <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 dark:bg-emerald-500/15 px-2.5 py-0.5 rounded-full">
+        <span className="text-[10.5px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/15 px-2.5 py-1 rounded-full uppercase tracking-wider">
           {isEn ? 'Macro Balance' : 'Makro-Balance'}
         </span>
       </div>

@@ -22,14 +22,14 @@ export const CookingModeIngredients: React.FC<CookingModeIngredientsProps> = ({
   return (
     <div className={`w-full flex flex-col text-left ${className}`}>
       {/* Section Header inside cohesive card */}
-      <div className="flex items-center justify-between gap-2 mb-2.5 shrink-0">
-        <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300">
-          {t('recipe.ingredientsForStep').replace(/:$/, '')}
+      <div className="flex items-center justify-between gap-2 mb-3 shrink-0">
+        <h3 className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+          {t('recipe.ingredientsForStep')}
         </h3>
         <span
-          className={`text-[11px] font-semibold rounded-full px-2 py-0.5 tabular-nums select-none ${
+          className={`text-[11px] font-bold rounded-full px-2.5 py-0.5 tabular-nums select-none ${
             count > 0
-              ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
+              ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10'
               : 'text-gray-400 dark:text-gray-500 bg-black/[0.04] dark:bg-white/[0.06]'
           }`}
         >

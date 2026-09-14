@@ -62,7 +62,7 @@ export default function CookingModePreview() {
   );
 
   return (
-    <div className="w-full bg-gray-50/75 dark:bg-gray-800/35 rounded-3xl p-4 sm:p-5 border border-black/[0.04] dark:border-white/[0.06] shadow-sm flex flex-col gap-3.5 select-none">
+    <div className="w-full bg-white dark:bg-gray-900 rounded-3xl p-3.5 sm:p-4 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex flex-col gap-3 select-none">
       {/* 1. Active Timer at Top */}
       <CookingTimerCard
         label={isEn ? 'Simmer gently' : 'Sanft köcheln'}
@@ -72,22 +72,13 @@ export default function CookingModePreview() {
       />
 
       {/* 2. Recipe Cover Image */}
-      <div className="w-full h-36 sm:h-44 rounded-2xl overflow-hidden relative shadow-xs shrink-0 bg-gray-200 dark:bg-gray-800">
+      <div className="w-full h-24 sm:h-28 rounded-2xl overflow-hidden relative shadow-xs shrink-0 bg-gray-100 dark:bg-gray-800/80">
         <CachedImage
           src={mockRecipe.imageUrl}
           emoji={mockRecipe.emoji}
           alt={mockRecipe.title}
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
-        <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-white">
-          <span className="text-xs font-bold drop-shadow-sm truncate">
-            {mockRecipe.title}
-          </span>
-          <span className="text-[10px] font-semibold bg-black/40 backdrop-blur-xs px-2 py-0.5 rounded-full shrink-0">
-            {isEn ? 'Step 3' : 'Schritt 3'}
-          </span>
-        </div>
       </div>
 
       {/* 3. Step Progress Row */}
@@ -122,7 +113,7 @@ export default function CookingModePreview() {
       <CookingModeIngredients
         ingredients={stepIngredients}
         formatAmount={formatQuantity}
-        className="px-0.5 pt-1.5 pb-0.5"
+        className="px-0.5 pt-1 pb-0.5"
       />
     </div>
   );
