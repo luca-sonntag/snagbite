@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import type { Recipe } from '../../../types';
+import type { StepIngredientItem } from '../../CookingMode/types';
 import CookingTimerCard from '../../CookingMode/CookingTimerCard';
-import CookingModeBottomNav from '../../CookingMode/CookingModeBottomNav';
+import CookingModeIngredients from '../../CookingMode/CookingModeIngredients';
 import RecipeInstructionText from '../../RecipeInstructionText';
 import CachedImage from '../../CachedImage';
 import { useI18n } from '../../../context/I18nContext';
@@ -9,6 +10,26 @@ import { useI18n } from '../../../context/I18nContext';
 export default function CookingModePreview() {
   const { language } = useI18n();
   const isEn = language.startsWith('en');
+
+  const stepIngredients: StepIngredientItem[] = useMemo(
+    () => [
+      {
+        name: isEn ? 'Coconut milk' : 'Kokosmilch',
+        baseName: isEn ? 'Coconut milk' : 'Kokosmilch',
+        amount: 400,
+        unit: 'ml',
+        category: 'Milchprodukte & Alternativen',
+      },
+      {
+        name: isEn ? 'Red curry paste' : 'Rote Currypaste',
+        baseName: isEn ? 'Rote Currypaste' : 'Rote Currypaste',
+        amount: 2,
+        unit: isEn ? 'tbsp' : 'EL',
+        category: 'Gewürze & Kräuter',
+      },
+    ],
+    [isEn]
+  );
 
   const mockRecipe: Recipe = useMemo(
     () => ({
@@ -25,15 +46,7 @@ export default function CookingModePreview() {
       ingredients: [
         {
           name: 'Sauce',
-          items: [
-            {
-              name: isEn ? 'Coconut milk' : 'Kokosmilch',
-              baseName: isEn ? 'Coconut milk' : 'Kokosmilch',
-              amount: 400,
-              unit: 'ml',
-              category: 'Milchprodukte & Alternativen',
-            },
-          ],
+          items: stepIngredients,
         },
       ],
       instructions: [
@@ -42,7 +55,7 @@ export default function CookingModePreview() {
         { step: 3, description: 'Step 3' },
       ],
     }),
-    [isEn]
+    [isEn, stepIngredients]
   );
 
   return (
@@ -84,8 +97,8 @@ export default function CookingModePreview() {
           variant="focused"
           text={
             isEn
-              ? '[Coconut milk](ing:Coconut milk) add, stir well, and simmer gently on medium heat for [12 minutes](timer:720).'
-              : '[Kokosmilch](ing:Kokosmilch) hinzugeben, gut umrühren und bei mittlerer Hitze für [12 Minuten](timer:720) sanft köcheln lassen.'
+              ? 'Stir in [Red curry paste](ing:Red curry paste), add [Coconut milk](ing:Coconut milk), and simmer gently on medium heat for [12 minutes](timer:720).'
+              : '[Rote Currypaste](ing:Rote Currypaste) einrühren, [Kokosmilch](ing:Kokosmilch) hinzugeben und bei mittlerer Hitze für [12 Minuten](timer:720) sanft köcheln lassen.'
           }
           recipe={mockRecipe}
           formatAmount={(amount, unit) => `${amount} ${unit ?? ''}`.trim()}
@@ -93,13 +106,11 @@ export default function CookingModePreview() {
         />
       </div>
 
-      {/* 5. Bottom Navigation Bar */}
-      <CookingModeBottomNav
-        isFirstStep={false}
-        isLastStep={false}
-        onPrev={() => {}}
-        onNext={() => {}}
-        onFinish={() => {}}
+      {/* 5. Contextual Step Ingredients List */}
+      <CookingModeIngredients
+        ingredients={stepIngredients}
+        formatAmount={(amount, unit) => `${amount} ${unit ?? ''}`.trim()}
+        className="px-0.5 pt-1 pb-0.5"
       />
     </div>
   );

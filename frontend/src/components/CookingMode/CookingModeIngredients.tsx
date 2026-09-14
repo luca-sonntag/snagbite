@@ -7,18 +7,20 @@ import IngredientIcon from '../IngredientIcon';
 interface CookingModeIngredientsProps {
   ingredients: StepIngredientItem[];
   formatAmount: (amount: number, unit?: string) => string;
+  className?: string;
 }
 
 export const CookingModeIngredients: React.FC<CookingModeIngredientsProps> = ({
   ingredients,
   formatAmount,
+  className = 'px-2 py-4 sm:px-4 sm:py-5',
 }) => {
   const { t } = useI18n();
 
   const count = ingredients?.length ?? 0;
 
   return (
-    <div className="w-full px-2 py-4 sm:px-4 sm:py-5 flex flex-col text-left">
+    <div className={`w-full flex flex-col text-left ${className}`}>
       {/* Section Header inside cohesive card */}
       <div className="flex items-center justify-between gap-2 mb-3 shrink-0">
         <h3 className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
