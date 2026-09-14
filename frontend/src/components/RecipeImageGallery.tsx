@@ -116,10 +116,10 @@ export default function RecipeImageGallery({
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 via-40% to-transparent pointer-events-none z-10" />
 
       {/* Bottom Content: Meta row, Title & Creator handle */}
-      <div className="absolute bottom-9 inset-x-4 sm:bottom-10 sm:inset-x-5 z-20 flex flex-col gap-1 text-white pointer-events-none pb-1">
+      <div className="absolute bottom-[38px] inset-x-4 sm:bottom-10 sm:inset-x-5 z-20 flex flex-col text-white pointer-events-none">
         {/* Meta Bar: Platform/Import badge */}
         {reelUrl && (
-          <div className="flex items-center gap-2 min-h-[30px]">
+          <div className="flex items-center gap-2 min-h-[30px] mb-1">
             {isPhotoImportUrl(reelUrl) ? (
               <span className="bg-black/65 text-white text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 backdrop-blur-md border border-white/10 shadow-sm pointer-events-auto select-none">
                 <Camera className="w-3.5 h-3.5 text-emerald-300" />
@@ -153,7 +153,7 @@ export default function RecipeImageGallery({
 
         {/* Creator Handle & Slide indicator */}
         {(formattedHandle || availableImages.length > 1) && (
-          <div className="flex items-center justify-between gap-2 mt-1 mb-1">
+          <div className="flex items-center justify-between gap-2 mt-0.5">
             {formattedHandle ? (
               <p className="text-xs sm:text-sm text-gray-200/90 font-medium truncate leading-none drop-shadow-xs min-w-0">
                 {formattedHandle}
