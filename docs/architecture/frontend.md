@@ -80,10 +80,11 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
 * **Übersicht (`/#/meal-planner`):** Nav-Tab in der `AppBottomNav` mit interaktivem 7-Tage-Slider (Mo–So), Wochen-Navigation (Vor/Zurück/Heute) und flexibler, dynamischer Tagesliste geplanter Gerichte ohne starre Mahlzeiten-Kategorien.
 * **Deep Integration:**
   * **Rezeptansicht (`AddToMealPlanSheet.tsx`):** Direkter "Planen"-Button im `RecipeActionDock` mit 1-Klick-Tagesauswahl und dynamischem Portions-Stepper.
-  * **Einkaufslisten-Batch-Sync:** Button "Woche einkaufen" skaliert alle Zutaten der geplanten Gerichte anhand der eingestellten Portionen und aggregiert sie in die smarte Einkaufsliste.
+  * **Sequenzieller Wocheneinkauf (`useMealPlanBulkShopping.ts` & `MealPlanShoppingSheets.tsx`):** Button "Woche einkaufen" öffnet für jedes ungekochte Rezept der Woche sequenziell das `ShoppingConfirmSheet` (mit portionsskalierten Zutaten, automatischem Vorratsabgleich / Pantry-Check und Zutatenauswahl).
+  * **Anti-Leerer-Screen & Zukünftige Rezepte (`DayEmptyBanner.tsx` & `UpcomingMealPlans.tsx`):** An Tagen ohne geplantes Rezept erscheint statt eines leeren Platzhalters ein schlanker Banner (`DayEmptyBanner`) mit 1-Klick-Planen-Button. Darunter werden stets alle zukünftig geplanten Rezepte chronologisch pro Tag mit klaren Datums-Separatoren (`UpcomingMealPlans.tsx`) auf einen Blick dargestellt.
   * **Interaktive Karten (`MealPlanCard.tsx`):** Schnelle Portionsanpassung per Stepper, Direktstart in den Kochmodus (`CookingMode`) und Gekocht-Status-Toggle.
   * **Event-Synchronisation mit Kochmodus:** `useMealPlanner` und `useMealPlanBadge` hören auf `app:recipe-cooked` und `meal-plans-updated`, um bei Abschluss eines Rezepts im Kochmodus oder Recipe Details den Status im Wochenplaner sowie den Tab-Badge sofort in Echtzeit zu aktualisieren.
-* **Modularisierung:** Strikte Aufteilung in `useMealPlanner.ts`, `mealPlannerUtils.ts`, `MealPlannerHeader.tsx`, `WeekDayPicker.tsx`, `DayMealSlots.tsx`, `EmptyDayState.tsx`, `MealPlanCard.tsx`, `RecipePickerModal.tsx` und `AddToMealPlanSheet.tsx` (< 150–200 Zeilen pro Komponente).
+* **Modularisierung:** Strikte Aufteilung in `useMealPlanner.ts`, `useMealPlanBulkShopping.ts`, `mealPlannerUtils.ts`, `MealPlannerHeader.tsx`, `WeekDayPicker.tsx`, `DayMealSlots.tsx`, `DayEmptyBanner.tsx`, `UpcomingMealPlans.tsx`, `MealPlanShoppingSheets.tsx`, `EmptyDayState.tsx`, `MealPlanCard.tsx`, `RecipePickerModal.tsx` und `AddToMealPlanSheet.tsx` (< 150–200 Zeilen pro Komponente).
 
 ---
 

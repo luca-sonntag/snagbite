@@ -6,6 +6,18 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-15: Stille Batch-Zutatenübernahme im Wochenplaner durch interaktive sequenzielle Shopping-Sheets ersetzt & Leere Tag-Screens durch Zukünftige-Rezepte-Übersicht abgelöst
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `addWeekToShoppingList` in `useMealPlanner.ts`: Stummes, unreflektiertes Einfügen aller Zutaten aller geplanten Rezepte im Hintergrund ohne Vorratsprüfung (Pantry), ohne Möglichkeit, vorhandene Zutaten abzuwählen, und ohne visuelle Bestätigung.
+  - Bildfüllender `EmptyDayState` an Tagen ohne geplante Gerichte: Wenn ein Tag ohne Rezept ausgewählt wurde, war der gesamte Screen unter dem Kalender leer und unbrauchbar, selbst wenn an kommenden Tagen viele Rezepte geplant waren. Zukünftig geplante Gerichte waren nicht auf einen Blick erfassbar.
+  - Harte 7-Tage-Begrenzung (`startDate=${startDateStr}&endDate=${endDateStr}`) beim Abrufen der Mahlzeiten: Verhindert, dass zukünftige Rezepte künftiger Wochen im Überblick sichtbar sind.
+* **Ersetzt durch:**
+  - **Sequenzieller Wocheneinkauf ([`useMealPlanBulkShopping.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/MealPlanner/useMealPlanBulkShopping.ts), [`MealPlanShoppingSheets.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/MealPlanner/MealPlanShoppingSheets.tsx)):** Öffnet für jedes ungekochte geplante Rezept der Woche nacheinander das vertraute `ShoppingConfirmSheet` mit automatischer Portionsskalierung, Vorrats-Pantry-Check und Zutatenauswahl.
+  - **Kompaktes Tages-Banner ([`DayEmptyBanner.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/MealPlanner/DayEmptyBanner.tsx)):** Ersetzt den leeren Screen an freien Tagen durch ein schlankes 56px-Banner mit direktem 1-Klick-Planen-Button.
+  - **Zukünftig geplante Rezepte auf einen Blick ([`UpcomingMealPlans.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/MealPlanner/UpcomingMealPlans.tsx)):** Strikte Gruppierung aller kommenden Rezepte pro Tag mit Datums-Separatoren, Schnell-Planungs-Action und voller Kachel-Interaktivität (Portionen, Kochen, Gekocht-Status, Löschen).
+* **Betroffene Dateien:** `frontend/src/components/MealPlanner/useMealPlanner.ts`, `frontend/src/components/MealPlanner/useMealPlanBulkShopping.ts`, `frontend/src/components/MealPlanner/DayMealSlots.tsx`, `frontend/src/components/MealPlanner/DayEmptyBanner.tsx`, `frontend/src/components/MealPlanner/UpcomingMealPlans.tsx`, `frontend/src/components/MealPlanner/MealPlanShoppingSheets.tsx`, `frontend/src/components/MealPlanner/types.ts`, `frontend/src/components/MealPlanner/mealPlannerUtils.ts`, `frontend/src/components/RecipeDetails/ShoppingConfirmSheet.tsx`, `frontend/src/App.tsx`, `docs/architecture/frontend.md`, `docs/OBSOLETE.md`.
+
 ### 2026-09-14: Steriler Vollseiten-Empty-State (`CatalogEmptyState`) durch lebendigen „Magazine-First Cold Start“ ersetzt
 
 * **Ersetzter Code / Anti-Pattern:**
