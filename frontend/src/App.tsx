@@ -590,6 +590,7 @@ export default function App() {
                   navigate('history', recipeId);
                 }}
                 addRecipeIngredients={addRecipeIngredients}
+                onNavigateToShoppingList={() => navigate('shopping-list')}
               />
             </Suspense>
           )}

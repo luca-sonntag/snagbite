@@ -1,19 +1,16 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import type { MealPlanEntry, MealType, SavedRecipe, Ingredient } from '../../types';
+import type { MealPlanEntry, MealType, SavedRecipe } from '../../types';
 import type { WeekDayInfo } from './types';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { useI18n } from '../../context/I18nContext';
 import { apiUrl } from '../../api';
-import { hapticLight, hapticMedium } from '../../utils/haptics';
-import { getMonday, formatDateIso, addDays, scaleIngredientGroups } from './mealPlannerUtils';
+import { hapticLight } from '../../utils/haptics';
+import { getMonday, formatDateIso, addDays } from './mealPlannerUtils';
 
 export { getMonday, formatDateIso, addDays };
 
-export function useMealPlanner(
-  history: SavedRecipe[],
-  addRecipeIngredients?: (ingredients: Ingredient[], recipeId: string, recipeTitle: string) => void,
-) {
+export function useMealPlanner() {
   const { getAccessToken, user } = useAuth();
   const toast = useToast();
   const { t, language } = useI18n();
@@ -22,8 +19,6 @@ export function useMealPlanner(
   const [selectedDate, setSelectedDate] = useState<string>(() => formatDateIso(new Date()));
   const [mealPlans, setMealPlans] = useState<MealPlanEntry[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isAddingToShopping, setIsAddingToShopping] = useState<boolean>(false);
-  const [isShopAdded, setIsShopAdded] = useState<boolean>(false);
   const [pickerDate, setPickerDate] = useState<string | null>(null);
 
   const pickerSlot = useMemo(() => {
@@ -36,20 +31,19 @@ export function useMealPlanner(
 
   const weekEnd = useMemo(() => addDays(currentWeekStart, 6), [currentWeekStart]);
   const startDateStr = useMemo(() => formatDateIso(currentWeekStart), [currentWeekStart]);
-  const endDateStr = useMemo(() => formatDateIso(weekEnd), [weekEnd]);
 
   const isCurrentWeek = useMemo(() => {
     const todayMonday = getMonday(new Date());
     return formatDateIso(todayMonday) === startDateStr;
   }, [startDateStr]);
 
-  // Fetch meal plans for the selected week
+  // Fetch meal plans starting from the viewed week into the future
   const fetchPlans = useCallback(async () => {
     if (!user) return;
     try {
       setIsLoading(true);
       const token = await getAccessToken();
-      const res = await fetch(apiUrl(`/api/meal-plan?startDate=${startDateStr}&endDate=${endDateStr}`), {
+      const res = await fetch(apiUrl(`/api/meal-plan?startDate=${startDateStr}`), {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -61,7 +55,7 @@ export function useMealPlanner(
     } finally {
       setIsLoading(false);
     }
-  }, [user, getAccessToken, startDateStr, endDateStr]);
+  }, [user, getAccessToken, startDateStr]);
 
   useEffect(() => {
     fetchPlans();
@@ -101,7 +95,6 @@ export function useMealPlanner(
   // Navigation handlers
   const goToPrevWeek = useCallback(() => {
     hapticLight();
-    setIsShopAdded(false);
     setCurrentWeekStart((prev) => {
       const next = addDays(prev, -7);
       setSelectedDate(formatDateIso(next));
@@ -111,7 +104,6 @@ export function useMealPlanner(
 
   const goToNextWeek = useCallback(() => {
     hapticLight();
-    setIsShopAdded(false);
     setCurrentWeekStart((prev) => {
       const next = addDays(prev, 7);
       setSelectedDate(formatDateIso(next));
@@ -121,7 +113,6 @@ export function useMealPlanner(
 
   const goToToday = useCallback(() => {
     hapticLight();
-    setIsShopAdded(false);
     const today = new Date();
     setCurrentWeekStart(getMonday(today));
     setSelectedDate(formatDateIso(today));
@@ -291,50 +282,21 @@ export function useMealPlanner(
     [getAccessToken, toast, t, fetchPlans],
   );
 
-  // Batch add week ingredients to shopping list (only today and future days)
-  const addWeekToShoppingList = useCallback(async () => {
-    if (!addRecipeIngredients) return;
-    setIsAddingToShopping(true);
-    try {
-      const todayStr = formatDateIso(new Date());
-      let addedCount = 0;
-      for (const entry of mealPlans) {
-        // Skip past days - only add recipes for today or later
-        if (entry.planDate < todayStr) continue;
-
-        const fullRecipe = history.find((h) => h.recipeId === entry.recipeId)?.recipe || entry.recipe;
-        if (!fullRecipe || !fullRecipe.ingredients) continue;
-
-        const baseServings = fullRecipe.servings ? Number(fullRecipe.servings) : 2;
-        const targetServings = entry.servings || baseServings;
-        const scaledIngredients = scaleIngredientGroups(fullRecipe.ingredients, targetServings, baseServings);
-
-        if (scaledIngredients.length > 0) {
-          addRecipeIngredients(scaledIngredients, entry.recipeId, fullRecipe.title || 'Rezept');
-          addedCount++;
-        }
-      }
-
-      if (addedCount > 0) {
-        hapticMedium();
-        setIsShopAdded(true);
-        toast.success(t('mealPlanner.addedToShoppingList'));
-      } else {
-        toast.info(t('mealPlanner.noPlannedRecipes'));
-      }
-    } finally {
-      setIsAddingToShopping(false);
-    }
-  }, [addRecipeIngredients, mealPlans, history, toast, t]);
-
   const activeDayEntries = useMemo(() => {
     return mealPlans.filter((p) => p.planDate === selectedDate);
   }, [mealPlans, selectedDate]);
 
-  const futurePlannedCount = useMemo(() => {
-    const todayStr = formatDateIso(new Date());
-    return mealPlans.filter((p) => p.planDate >= todayStr).length;
-  }, [mealPlans]);
+  const todayStr = useMemo(() => formatDateIso(new Date()), []);
+
+  const futurePlannedEntries = useMemo(() => {
+    return mealPlans.filter((p) => p.planDate >= todayStr);
+  }, [mealPlans, todayStr]);
+
+  const upcomingPlannedEntries = useMemo(() => {
+    return mealPlans.filter((p) => p.planDate >= todayStr && p.planDate !== selectedDate);
+  }, [mealPlans, todayStr, selectedDate]);
+
+  const futurePlannedCount = futurePlannedEntries.length;
 
   return {
     currentWeekStart,
@@ -344,11 +306,11 @@ export function useMealPlanner(
     setSelectedDate,
     mealPlans,
     activeDayEntries,
+    futurePlannedEntries,
+    upcomingPlannedEntries,
     futurePlannedCount,
     weekDays,
     isLoading,
-    isAddingToShopping,
-    isShopAdded,
     pickerSlot,
     setPickerSlot,
     goToPrevWeek,
@@ -359,6 +321,5 @@ export function useMealPlanner(
     toggleCooked,
     moveToTomorrow,
     deletePlan,
-    addWeekToShoppingList,
   };
 }

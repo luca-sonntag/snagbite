@@ -2,11 +2,14 @@ import React, { useState, useCallback } from 'react';
 import type { MealPlannerViewProps } from './types';
 import type { MealPlanEntry } from '../../types';
 import { useMealPlanner } from './useMealPlanner';
+import { useMealPlanBulkShopping } from './useMealPlanBulkShopping';
 import { MealPlannerHeader } from './MealPlannerHeader';
 import { WeekNavigator } from './WeekNavigator';
 import { WeekDayPicker } from './WeekDayPicker';
 import { DailyInsightPill } from './DailyInsightPill';
 import { DayMealSlots } from './DayMealSlots';
+import { UpcomingMealPlans } from './UpcomingMealPlans';
+import { MealPlanShoppingSheets } from './MealPlanShoppingSheets';
 import { RecipePickerModal } from './RecipePickerModal';
 import CookedModal from '../CookedModal';
 import { useSwipeGesture } from '../../hooks/useSwipeGesture';
@@ -16,6 +19,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
   onSelectRecipe,
   onOpenCookMode,
   addRecipeIngredients,
+  onNavigateToShoppingList,
 }) => {
   const {
     currentWeekStart,
@@ -25,11 +29,11 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     setSelectedDate,
     mealPlans,
     activeDayEntries,
+    futurePlannedEntries,
+    upcomingPlannedEntries,
     futurePlannedCount,
     weekDays,
     isLoading,
-    isAddingToShopping,
-    isShopAdded,
     pickerSlot,
     setPickerSlot,
     goToPrevWeek,
@@ -39,8 +43,23 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     updateServings,
     moveToTomorrow,
     deletePlan,
-    addWeekToShoppingList,
-  } = useMealPlanner(history, addRecipeIngredients);
+  } = useMealPlanner();
+
+  const {
+    isAddingToShopping,
+    isShopAdded,
+    startBulkShopping,
+    currentBulkItem,
+    handleBulkShoppingConfirm,
+    handleBulkShoppingClose,
+  } = useMealPlanBulkShopping({
+    mealPlans,
+    currentWeekStart,
+    weekEnd,
+    history,
+    addRecipeIngredients,
+    onNavigateToShoppingList,
+  });
 
   const [cookedModalRecipe, setCookedModalRecipe] = useState<{ id: string; title: string } | null>(null);
 
@@ -55,7 +74,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
 
   const goToNextDay = useCallback(() => {
     const days = weekDays;
-    const idx = days.findIndex(d => d.dateStr === selectedDate);
+    const idx = days.findIndex((d) => d.dateStr === selectedDate);
     if (idx < days.length - 1) {
       setSelectedDate(days[idx + 1].dateStr);
     } else {
@@ -65,7 +84,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
 
   const goToPrevDay = useCallback(() => {
     const days = weekDays;
-    const idx = days.findIndex(d => d.dateStr === selectedDate);
+    const idx = days.findIndex((d) => d.dateStr === selectedDate);
     if (idx > 0) {
       setSelectedDate(days[idx - 1].dateStr);
     } else {
@@ -79,13 +98,13 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
   });
 
   return (
-    <div className="w-full flex flex-col gap-3 overflow-hidden">
+    <div className="w-full flex flex-col gap-3 pb-24 overflow-hidden">
       {/* Header with page title & shopping action */}
       <MealPlannerHeader
         plannedTotalCount={futurePlannedCount}
         isAddingToShopping={isAddingToShopping}
         isShopAdded={isShopAdded}
-        onShopWeek={addWeekToShoppingList}
+        onShopWeek={startBulkShopping}
       />
 
       {/* Unified Calendar Widget Card */}
@@ -120,13 +139,15 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
       ) : (
         <div
           key={selectedDate}
-          className="animate-fade-in"
+          className="space-y-4 animate-fade-in"
           style={{ animationDuration: '200ms' }}
           {...swipeHandlers}
         >
+          {/* Active selected day meal slots or empty banner */}
           <DayMealSlots
             selectedDateStr={selectedDate}
             entries={activeDayEntries}
+            hasAnyFutureEntries={futurePlannedEntries.length > 0}
             onAddRecipe={() => setPickerSlot({ date: selectedDate })}
             onUpdateServings={updateServings}
             onToggleCooked={handleToggleCooked}
@@ -134,6 +155,19 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
             onMoveToTomorrow={moveToTomorrow}
             onSelectRecipe={onSelectRecipe}
             onOpenCookMode={onOpenCookMode}
+          />
+
+          {/* All upcoming planned recipes grouped by day with date separator */}
+          <UpcomingMealPlans
+            entries={upcomingPlannedEntries}
+            onAddRecipeForDate={(dateStr) => setPickerSlot({ date: dateStr })}
+            onUpdateServings={updateServings}
+            onToggleCooked={handleToggleCooked}
+            onDeleteEntry={deletePlan}
+            onMoveToTomorrow={moveToTomorrow}
+            onSelectRecipe={onSelectRecipe}
+            onOpenCookMode={onOpenCookMode}
+            onSelectDate={setSelectedDate}
           />
         </div>
       )}
@@ -150,6 +184,13 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
             addPlan(saved, pickerSlot.date);
           }
         }}
+      />
+
+      {/* Sequential Shopping Confirmation Sheet for Week Shopping */}
+      <MealPlanShoppingSheets
+        currentBulkItem={currentBulkItem}
+        onConfirm={handleBulkShoppingConfirm}
+        onClose={handleBulkShoppingClose}
       />
 
       {/* Gamification Cooked Verification Modal */}
