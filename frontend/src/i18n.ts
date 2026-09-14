@@ -474,7 +474,7 @@ export const uiTranslations = {
     alphaWelcome: {
       badge: 'Alpha-Test',
       title: 'Willkommen zum Alpha-Test!',
-      intro: 'Schön, dass du dabei bist! Du gehörst zu den Ersten, die Snagbite ausprobieren. Als Alpha-Tester hast du kostenlosen Zugriff auf alle Snagbite PRO Features.',
+      intro: 'Schön, dass du dabei bist! Du gehörst zu den Ersten, die Snagbite ausprobieren. Als Alpha-Tester hast du kostenlosen Zugriff auf alle Snagbite Pro Features.',
       info: {
         heading: 'Wichtige Infos für Alpha-Tester',
         early: 'Die App steckt noch in einer frühen Phase – einzelne Funktionen können sich ändern oder noch nicht rundlaufen.',
@@ -503,7 +503,7 @@ export const uiTranslations = {
         },
       },
       confirm: 'Alles klar, verstanden!',
-      goPremium: 'Lieber werbefrei? Zu Snagbite PRO',
+      goPremium: 'Lieber werbefrei? Zu Snagbite Pro',
     },
     app: {
       title: 'Snagbite',
@@ -701,7 +701,7 @@ export const uiTranslations = {
         saving: 'Speichern...',
         saved: 'Einstellungen gespeichert!',
         deleteAccount: 'Konto löschen',
-        upgradePremium: 'Auf Snagbite PRO upgraden',
+        upgradePremium: 'Auf Snagbite Pro upgraden',
         premiumActive: 'Aktiv',
         premiumActiveDesc: 'Du hast unbegrenzten Zugriff auf alle PRO-Funktionen.',
         alphaActive: 'Alpha-Zugriff',
@@ -717,7 +717,7 @@ export const uiTranslations = {
       dialog: {
         deleteAccount: {
           title: 'Konto löschen?',
-          message: 'Möchtest du dein Konto wirklich unwiderruflich löschen? Alle deine gespeicherten Rezepte und Einkaufslisten gehen dauerhaft verloren. **Bitte beachte: Falls du ein aktives Snagbite PRO Abonnement hast, musst du dieses zusätzlich im Google Play Store kündigen, um weitere Zahlungen zu verhindern.**',
+          message: 'Möchtest du dein Konto wirklich unwiderruflich löschen? Alle deine gespeicherten Rezepte und Einkaufslisten gehen dauerhaft verloren. **Bitte beachte: Falls du ein aktives Snagbite Pro Abonnement hast, musst du dieses zusätzlich im Google Play Store kündigen, um weitere Zahlungen zu verhindern.**',
           confirm: 'Konto löschen',
           cancel: 'Abbrechen',
         },
@@ -852,7 +852,7 @@ export const uiTranslations = {
         PHOTOS_TOO_LARGE: 'Die Fotos sind insgesamt zu groß. Bitte wähle weniger Fotos aus.',
         PARENT_JOB_NOT_COMPLETED: 'Das Ursprungsrezept ist noch nicht fertig. Bitte warte, bis es abgeschlossen ist.',
         UNAUTHORIZED: 'Nicht autorisiert. Bitte melde dich erneut an.',
-        COOKBOOK_FULL: 'Kochbuch voll ({counts}). Lösche ein Rezept oder hol dir Snagbite PRO, um weitere Rezepte zu speichern.',
+        COOKBOOK_FULL: 'Kochbuch voll ({counts}). Lösche ein Rezept oder hol dir Snagbite Pro, um weitere Rezepte zu speichern.',
         RATE_LIMIT_EXCEEDED: 'Du hast dein Limit von {limit} Rezepten pro {period} erreicht. {retry}',
         ACTIVE_JOB_EXISTS: 'Du hast bereits {count} laufende Rezept-Import(e). Bitte warte, bis diese abgeschlossen sind.',
         TOO_MANY_REQUESTS: 'Zu viele Anfragen. Bitte versuche es später noch einmal.',
@@ -892,11 +892,11 @@ export const uiTranslations = {
         INTERNAL_ERROR: 'Ein interner Serverfehler ist aufgetreten. Bitte versuche es später erneut.',
       },
       premium: {
-        remix: 'Rezept-Remix ist eine PRO-Funktion. Hol dir Snagbite PRO, um Rezepte anzupassen.',
-        chat: 'Der KI-Küchenchef-Chat ist eine PRO-Funktion. Hol dir Snagbite PRO, um mit dem Rezept-Copilot zu chatten.',
-        collections: 'Sammlungen sind eine PRO-Funktion. Hol dir Snagbite PRO, um sie zu nutzen.',
-        tags: 'Eigene Tags sind eine PRO-Funktion. Hol dir Snagbite PRO, um sie zu nutzen.',
-        generic: 'Das ist eine PRO-Funktion. Hol dir Snagbite PRO, um sie zu nutzen.',
+        remix: 'Rezept-Remix ist eine PRO-Funktion. Hol dir Snagbite Pro, um Rezepte anzupassen.',
+        chat: 'Der KI-Küchenchef-Chat ist eine PRO-Funktion. Hol dir Snagbite Pro, um mit dem Rezept-Copilot zu chatten.',
+        collections: 'Sammlungen sind eine PRO-Funktion. Hol dir Snagbite Pro, um sie zu nutzen.',
+        tags: 'Eigene Tags sind eine PRO-Funktion. Hol dir Snagbite Pro, um sie zu nutzen.',
+        generic: 'Das ist eine PRO-Funktion. Hol dir Snagbite Pro, um sie zu nutzen.',
       },
       field: {
         url: 'Der Link',
@@ -1024,7 +1024,7 @@ export const uiTranslations = {
         submitFailed: 'Auftrag konnte nicht übermittelt werden.',
         submissionError: 'Bei der Übermittlung ist ein Fehler aufgetreten.',
         serverError: 'Der Server hat keine gültige Antwort zurückgegeben. Bitte versuche es erneut.',
-        backgroundCancelled: 'Der Rezept-Import wurde abgebrochen, da die App in den Hintergrund gewechselt ist (Hintergrund-Verarbeitung ist nur mit Snagbite PRO verfügbar).',
+        backgroundCancelled: 'Der Rezept-Import wurde abgebrochen, da die App in den Hintergrund gewechselt ist (Hintergrund-Verarbeitung ist nur mit Snagbite Pro verfügbar).',
       }
     },
     recipe: {
@@ -1124,7 +1124,7 @@ export const uiTranslations = {
       ingredientNutritionProHint: 'Detaillierte Nährwerte & Makros pro Zutat',
       healthScorePaywallTitle: 'Healthy Score Deep-Dive freischalten',
       healthScorePaywallSubtitle: 'Erhalte die vollständige 4-Säulen-Analyse, Makro-Verteilung, NOVA-Klassifizierung und smarte Optimierungsvorschläge.',
-      healthScorePaywallCta: 'Snagbite PRO freischalten',
+      healthScorePaywallCta: 'Snagbite Pro freischalten',
       aiGeneratedNotice: 'KI-generierter Inhalt',
       aiGeneratedDisclaimer: 'Dieses Rezept wurde KI-gestützt aus einem Social-Media-Video erstellt und kann Fehler aufweisen. Bitte prüfe die Angaben sorgfältig.',
       tabIngredients: 'Zutaten',
@@ -1387,7 +1387,7 @@ export const uiTranslations = {
       manageFlags: 'Labels verwalten',
       noCollections: 'Keine Sammlungen erstellt',
       noFlags: 'Keine Labels erstellt',
-      premiumFeatureTitle: 'Snagbite PRO Feature',
+      premiumFeatureTitle: 'Snagbite Pro Feature',
       premiumFeatureCollectionsDesc: 'Erstelle Sammlungen und ordne Rezepte zu, um dein Kochbuch perfekt zu strukturieren.',
       premiumFeatureFlagsDesc: 'Erstelle eigene Labels und Tags, um Rezepte noch flexibler zu filtern.',
       bulkAddToCollection: 'Zu Sammlung hinzufügen',
@@ -1590,7 +1590,7 @@ export const uiTranslations = {
       shoppingListToast: 'Zutaten zur Einkaufsliste hinzugefügt: {ingredients}',
       timerToast: 'Timer für {label} ({duration} Min.) gestartet!',
       timerNoLabel: 'Kochschritt',
-      errorForbidden: 'Der Copilot ist ein Snagbite PRO Feature. Bitte upgrade auf PRO.',
+      errorForbidden: 'Der Copilot ist ein Snagbite Pro Feature. Bitte upgrade auf PRO.',
       errorGeneral: 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.',
       chipsHeaderRemix: 'Rezept anpassen',
       chipsHeaderHelp: 'Zubereitungshilfe',
@@ -1641,14 +1641,14 @@ export const uiTranslations = {
     },
     premium: {
       modal: {
-        title: 'Snagbite PRO',
+        title: 'Snagbite Pro',
         subtitle: 'Mehr kochen, weniger tippen.',
-        cta: 'Jetzt Snagbite PRO freischalten',
+        cta: 'Jetzt Snagbite Pro freischalten',
         loading: 'Zahlung wird verarbeitet...',
         success: 'Erfolgreich freigeschaltet!',
         error: 'Fehler bei der Zahlung. Bitte versuche es erneut.',
         close: 'Schließen',
-        owned: 'Du hast Snagbite PRO',
+        owned: 'Du hast Snagbite Pro',
         alphaOwned: 'Käufe während der Alpha deaktiviert',
         verifying: 'Verifiziere Status...',
         footer: 'Jederzeit kündbar · Sicher über Google Play',
@@ -1662,7 +1662,7 @@ export const uiTranslations = {
         priceMonthlyEquivalent: '{price} / Monat',
         trialBadge: '{days} Tage kostenlos',
         ctaWithTrial: 'Kostenlose Testphase starten',
-        ctaWithoutTrial: 'Snagbite PRO freischalten',
+        ctaWithoutTrial: 'Snagbite Pro freischalten',
         cancelSubtitle: 'Kein Risiko. Jederzeit kündbar.',
         termsNoticePrefix: 'Mit dem Kauf stimmst du den ',
         termsLink: 'AGB',
@@ -1675,7 +1675,7 @@ export const uiTranslations = {
         restoreNone: 'Keine aktiven Käufe gefunden.',
         restoreError: 'Wiederherstellung fehlgeschlagen. Bitte versuche es erneut.',
         trialBanner: {
-          title: 'Snagbite PRO kostenlos testen',
+          title: 'Snagbite Pro kostenlos testen',
           body: 'Schalte alles frei. Jederzeit kündbar.',
           cta: 'Kostenlos starten',
           dismiss: 'Später',
@@ -1741,14 +1741,14 @@ export const uiTranslations = {
         }
       },
       shoppingListLimit: {
-        title: 'Snagbite PRO-Funktion',
-        message: 'Du hast bereits Zutaten von einem anderen Rezept auf deiner Einkaufsliste. Hol dir Snagbite PRO, um Zutaten aus beliebig vielen Rezepten zu kombinieren!'
+        title: 'Snagbite Pro-Funktion',
+        message: 'Du hast bereits Zutaten von einem anderen Rezept auf deiner Einkaufsliste. Hol dir Snagbite Pro, um Zutaten aus beliebig vielen Rezepten zu kombinieren!'
       },
       hint: {
-        extractUnlimited: 'Snagbite PRO: Unbegrenzt freischalten',
-        catalogFull: 'Kochbuch voll ({count}/{limit}). Mit Snagbite PRO speicherst du unbegrenzt.',
-        catalogAlmostFull: 'Kochbuch fast voll ({count}/{limit}). Mit Snagbite PRO speicherst du unbegrenzt.',
-        extractionLimitReached: 'Tageslimit ({used}/{limit}) erreicht – Schau ein kurzes Video zum Erstellen oder upgrade auf Snagbite PRO.',
+        extractUnlimited: 'Snagbite Pro: Unbegrenzt freischalten',
+        catalogFull: 'Kochbuch voll ({count}/{limit}). Mit Snagbite Pro speicherst du unbegrenzt.',
+        catalogAlmostFull: 'Kochbuch fast voll ({count}/{limit}). Mit Snagbite Pro speicherst du unbegrenzt.',
+        extractionLimitReached: 'Tageslimit ({used}/{limit}) erreicht – Schau ein kurzes Video zum Erstellen oder upgrade auf Snagbite Pro.',
         unlockNutrition: 'Nährwerte freischalten',
         unlockMacros: 'Makros freischalten',
         upgrade: 'Upgrade'
@@ -1897,7 +1897,7 @@ export const uiTranslations = {
     alphaWelcome: {
       badge: 'Alpha Test',
       title: 'Welcome to the Alpha Test!',
-      intro: "Glad to have you on board! You're one of the first to try Snagbite. As an alpha tester you get free access to all Snagbite PRO features.",
+      intro: "Glad to have you on board! You're one of the first to try Snagbite. As an alpha tester you get free access to all Snagbite Pro features.",
       info: {
         heading: 'Important info for alpha testers',
         early: 'The app is still in an early stage — some features may change or not work perfectly yet.',
@@ -1926,7 +1926,7 @@ export const uiTranslations = {
         },
       },
       confirm: 'Got it, sounds good!',
-      goPremium: 'Prefer ad-free? Get Snagbite PRO',
+      goPremium: 'Prefer ad-free? Get Snagbite Pro',
     },
     app: {
       title: 'Snagbite',
@@ -2124,7 +2124,7 @@ export const uiTranslations = {
         saving: 'Saving...',
         saved: 'Settings saved!',
         deleteAccount: 'Delete Account',
-        upgradePremium: 'Upgrade to Snagbite PRO',
+        upgradePremium: 'Upgrade to Snagbite Pro',
         premiumActive: 'Active',
         premiumActiveDesc: 'You have unlimited access to all PRO features.',
         alphaActive: 'Alpha Access',
@@ -2140,7 +2140,7 @@ export const uiTranslations = {
       dialog: {
         deleteAccount: {
           title: 'Delete Account?',
-          message: 'Are you sure you want to permanently delete your account? All your saved recipes and shopping lists will be permanently lost. **Note: If you have an active Snagbite PRO subscription, you must also cancel it in the Google Play Store to prevent future charges.**',
+          message: 'Are you sure you want to permanently delete your account? All your saved recipes and shopping lists will be permanently lost. **Note: If you have an active Snagbite Pro subscription, you must also cancel it in the Google Play Store to prevent future charges.**',
           confirm: 'Delete Account',
           cancel: 'Cancel',
         },
@@ -2275,7 +2275,7 @@ export const uiTranslations = {
         PHOTOS_TOO_LARGE: 'Your photos are too large in total. Please pick fewer photos.',
         PARENT_JOB_NOT_COMPLETED: 'The original recipe is not ready yet. Please wait until it finishes.',
         UNAUTHORIZED: 'Unauthorized. Please sign in again.',
-        COOKBOOK_FULL: 'Cookbook full ({counts}). Delete a recipe or upgrade to Snagbite PRO to save more.',
+        COOKBOOK_FULL: 'Cookbook full ({counts}). Delete a recipe or upgrade to Snagbite Pro to save more.',
         RATE_LIMIT_EXCEEDED: 'You have reached your limit of {limit} recipes per {period}. {retry}',
         ACTIVE_JOB_EXISTS: 'You already have {count} recipe import(s) in progress. Please wait for them to finish.',
         TOO_MANY_REQUESTS: 'Too many requests. Please try again later.',
@@ -2315,11 +2315,11 @@ export const uiTranslations = {
         INTERNAL_ERROR: 'An internal server error occurred. Please try again later.',
       },
       premium: {
-        remix: 'Recipe Remix is a PRO feature. Upgrade to Snagbite PRO to customize recipes.',
-        chat: 'AI Kitchen Chef chat is a PRO feature. Upgrade to Snagbite PRO to chat with Recipe Copilot.',
-        collections: 'Collections are a PRO feature. Upgrade to Snagbite PRO to use them.',
-        tags: 'Custom tags are a PRO feature. Upgrade to Snagbite PRO to use them.',
-        generic: 'This is a PRO feature. Upgrade to Snagbite PRO to use it.',
+        remix: 'Recipe Remix is a PRO feature. Upgrade to Snagbite Pro to customize recipes.',
+        chat: 'AI Kitchen Chef chat is a PRO feature. Upgrade to Snagbite Pro to chat with Recipe Copilot.',
+        collections: 'Collections are a PRO feature. Upgrade to Snagbite Pro to use them.',
+        tags: 'Custom tags are a PRO feature. Upgrade to Snagbite Pro to use them.',
+        generic: 'This is a PRO feature. Upgrade to Snagbite Pro to use it.',
       },
       field: {
         url: 'The link',
@@ -2447,7 +2447,7 @@ export const uiTranslations = {
         submitFailed: 'Failed to submit extraction job.',
         submissionError: 'An error occurred during submission.',
         serverError: 'The server returned an unexpected response. Please try again.',
-        backgroundCancelled: 'Recipe import cancelled because the app entered the background (background processing is available with Snagbite PRO only).',
+        backgroundCancelled: 'Recipe import cancelled because the app entered the background (background processing is available with Snagbite Pro only).',
       }
     },
     recipe: {
@@ -2547,7 +2547,7 @@ export const uiTranslations = {
       ingredientNutritionProHint: 'Detailed nutrition & macros per ingredient',
       healthScorePaywallTitle: 'Unlock Health Score Deep-Dive',
       healthScorePaywallSubtitle: 'Get comprehensive 4-pillar analysis, macro distribution, NOVA classification, and smart optimization suggestions.',
-      healthScorePaywallCta: 'Unlock Snagbite PRO',
+      healthScorePaywallCta: 'Unlock Snagbite Pro',
       aiGeneratedNotice: 'AI-Generated Content',
       aiGeneratedDisclaimer: 'This recipe was created from a social media video with AI assistance and may contain errors. Please verify the information carefully.',
       tabIngredients: 'Ingredients',
@@ -2809,7 +2809,7 @@ export const uiTranslations = {
       manageFlags: 'Manage Labels',
       noCollections: 'No collections created yet',
       noFlags: 'No labels created yet',
-      premiumFeatureTitle: 'Snagbite PRO Feature',
+      premiumFeatureTitle: 'Snagbite Pro Feature',
       premiumFeatureCollectionsDesc: 'Create collections and organize recipes to perfectly structure your cookbook.',
       premiumFeatureFlagsDesc: 'Create your own custom labels and tags to filter recipes even more flexibly.',
       bulkAddToCollection: 'Add to Collection',
@@ -3012,7 +3012,7 @@ export const uiTranslations = {
       shoppingListToast: 'Added ingredients to shopping list: {ingredients}',
       timerToast: 'Started timer for {label} ({duration} min.)!',
       timerNoLabel: 'Cooking step',
-      errorForbidden: 'The Copilot is a Snagbite PRO feature. Please upgrade to PRO.',
+      errorForbidden: 'The Copilot is a Snagbite Pro feature. Please upgrade to PRO.',
       errorGeneral: 'An error occurred. Please try again.',
       chipsHeaderRemix: 'Customize Recipe',
       chipsHeaderHelp: 'Preparation Help',
@@ -3063,14 +3063,14 @@ export const uiTranslations = {
     },
     premium: {
       modal: {
-        title: 'Snagbite PRO',
+        title: 'Snagbite Pro',
         subtitle: 'Cook more. Type less.',
-        cta: 'Unlock Snagbite PRO Now',
+        cta: 'Unlock Snagbite Pro Now',
         loading: 'Processing payment...',
         success: 'Successfully unlocked!',
         error: 'Payment failed. Please try again.',
         close: 'Close',
-        owned: 'You have Snagbite PRO',
+        owned: 'You have Snagbite Pro',
         alphaOwned: 'Purchases disabled during alpha',
         verifying: 'Verifying Status...',
         footer: 'Cancel anytime · Secure via Google Play',
@@ -3084,7 +3084,7 @@ export const uiTranslations = {
         priceMonthlyEquivalent: '{price} / month',
         trialBadge: '{days} days free',
         ctaWithTrial: 'Start Free Trial',
-        ctaWithoutTrial: 'Unlock Snagbite PRO',
+        ctaWithoutTrial: 'Unlock Snagbite Pro',
         cancelSubtitle: 'No risk. Cancel anytime.',
         termsNoticePrefix: 'By purchasing you agree to the ',
         termsLink: 'Terms & Conditions',
@@ -3097,7 +3097,7 @@ export const uiTranslations = {
         restoreNone: 'No active purchases found.',
         restoreError: 'Restore failed. Please try again.',
         trialBanner: {
-          title: 'Try Snagbite PRO free',
+          title: 'Try Snagbite Pro free',
           body: 'Unlock everything. Cancel anytime.',
           cta: 'Start free',
           dismiss: 'Later',
@@ -3163,14 +3163,14 @@ export const uiTranslations = {
         }
       },
       shoppingListLimit: {
-        title: 'Snagbite PRO Feature',
-        message: 'You already have ingredients from another recipe on your shopping list. Upgrade to Snagbite PRO to combine ingredients from multiple recipes!'
+        title: 'Snagbite Pro Feature',
+        message: 'You already have ingredients from another recipe on your shopping list. Upgrade to Snagbite Pro to combine ingredients from multiple recipes!'
       },
       hint: {
-        extractUnlimited: 'Snagbite PRO: Unlock unlimited',
-        catalogFull: 'Cookbook full ({count}/{limit}). Save unlimited recipes with Snagbite PRO.',
-        catalogAlmostFull: 'Cookbook almost full ({count}/{limit}). Save unlimited recipes with Snagbite PRO.',
-        extractionLimitReached: 'Daily limit reached ({used}/{limit}) – Watch a short video to create or upgrade to Snagbite PRO.',
+        extractUnlimited: 'Snagbite Pro: Unlock unlimited',
+        catalogFull: 'Cookbook full ({count}/{limit}). Save unlimited recipes with Snagbite Pro.',
+        catalogAlmostFull: 'Cookbook almost full ({count}/{limit}). Save unlimited recipes with Snagbite Pro.',
+        extractionLimitReached: 'Daily limit reached ({used}/{limit}) – Watch a short video to create or upgrade to Snagbite Pro.',
         unlockNutrition: 'Unlock nutrition',
         unlockMacros: 'Unlock macros',
         upgrade: 'Upgrade'
@@ -3411,8 +3411,8 @@ export function translateApiError(errorMsg: string | null | undefined, lang: Sup
     const limit = m ? m[2] : '5';
     const countStr = count ? `${count}/${limit}` : `${limit}`;
     return lang === 'de'
-      ? `Kochbuch voll (${countStr}). Lösche ein Rezept oder hol dir Snagbite PRO, um weitere Rezepte zu speichern.`
-      : `Cookbook full (${countStr}). Delete a recipe or upgrade to Snagbite PRO to save more.`;
+      ? `Kochbuch voll (${countStr}). Lösche ein Rezept oder hol dir Snagbite Pro, um weitere Rezepte zu speichern.`
+      : `Cookbook full (${countStr}). Delete a recipe or upgrade to Snagbite Pro to save more.`;
   }
 
   if (lowerMsg.includes('youtube shorts')) {
