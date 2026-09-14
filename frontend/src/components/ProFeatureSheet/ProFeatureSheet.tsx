@@ -82,11 +82,8 @@ export default function ProFeatureSheet({
               </div>
             </Drawer.Header>
 
-            {/* Body: Native Feature Micro-Preview & Value Bullets */}
+            {/* Body: Value Bullets & Native Feature Micro-Preview */}
             <Drawer.Body className="px-0 py-1 overflow-y-auto flex flex-col gap-4">
-              {/* Dynamic Native Feature Micro-Preview */}
-              <ProFeaturePreview featureId={featureId} />
-
               {/* Feature Value Bullets */}
               <div className="flex flex-col gap-2.5 py-1">
                 {feature.bullets.map((bullet, idx) => (
@@ -100,6 +97,9 @@ export default function ProFeatureSheet({
                   </div>
                 ))}
               </div>
+
+              {/* Dynamic Native Feature Micro-Preview */}
+              <ProFeaturePreview featureId={featureId} />
             </Drawer.Body>
 
             {/* Footer: CTAs */}
