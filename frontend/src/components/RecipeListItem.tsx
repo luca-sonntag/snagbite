@@ -109,16 +109,16 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 pointer-events-none">
-        {/* Title line */}
+      <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 py-0.5 pointer-events-none">
+        {/* Line 1: Title */}
         <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
           {r.title}
         </h4>
 
-        {/* Bottom meta line: Duration pill + Favorite Star + Remix Badge + Tag on left, Calories + Health Score on right */}
-        {(totalTimeStr || isFavorite || remixCount > 0 || firstTag || caloriesFormatted || healthScoreNum !== null) && (
-          <div className="flex items-center justify-between gap-1.5 mt-1.5 text-xs select-none">
-            {/* Left Cluster: Gray Duration Pill, Favorite Star, Remix Badge & 1 Tag */}
+        {/* Line 2: Meta line (Duration pill + Favorite Star + Tag on left, Calories + Health Score on right) */}
+        {(totalTimeStr || isFavorite || firstTag || caloriesFormatted || healthScoreNum !== null) && (
+          <div className="flex items-center justify-between gap-1.5 text-xs select-none">
+            {/* Left Cluster: Gray Duration Pill, Favorite Star & 1 Tag */}
             <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
               {totalTimeStr && (
                 <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
@@ -129,20 +129,9 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
               {isFavorite && !isSelectMode && (
                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
               )}
-              {remixCount > 0 && (
-                <>
-                  {totalTimeStr && !isFavorite && (
-                    <span className="text-gray-300 dark:text-gray-600 text-[9px] leading-none select-none">•</span>
-                  )}
-                  <span className="shrink-0 flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">
-                    <Layers className="w-3 h-3 shrink-0" />
-                    <span>{remixCount === 1 ? t('remix.singleCount') : t('remix.multipleCount', { count: remixCount })}</span>
-                  </span>
-                </>
-              )}
               {firstTag && (
                 <>
-                  {(remixCount > 0 || (totalTimeStr && !isFavorite)) && (
+                  {totalTimeStr && !isFavorite && (
                     <span className="text-gray-300 dark:text-gray-600 text-[9px] leading-none select-none">•</span>
                   )}
                   <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 truncate max-w-[7rem] sm:max-w-[10rem]">
@@ -162,6 +151,14 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
 
               <HealthScoreLetterBadge score={healthScoreNum} size="sm" />
             </div>
+          </div>
+        )}
+
+        {/* Line 3: Remix Info (when enabled and recipe has remixes) */}
+        {remixCount > 0 && (
+          <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px] select-none">
+            <Layers className="w-3 h-3 shrink-0" />
+            <span>{remixCount === 1 ? t('remix.singleCount') : t('remix.multipleCount', { count: remixCount })}</span>
           </div>
         )}
       </div>
