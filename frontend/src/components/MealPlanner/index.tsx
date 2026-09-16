@@ -22,6 +22,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
   onOpenCookMode,
   addRecipeIngredients,
   onNavigateToShoppingList,
+  isActive = true,
 }) => {
   const { t, language } = useI18n();
 
@@ -89,22 +90,31 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
   });
 
   const hasInitialScrolledRef = useRef(false);
+  const prevIsActiveRef = useRef(false);
 
-  // Initial scroll alignment to 'Heute' (centered) on mount once agenda dates are populated and rendered
+  // When switching into the meal planner or when agenda dates are populated, preselect today and scroll into view
   useEffect(() => {
-    if (hasInitialScrolledRef.current || isLoading) return;
-    if (agendaDates.includes(todayStr)) {
+    if (!isActive) {
+      prevIsActiveRef.current = false;
+      return;
+    }
+
+    const isFirstActiveTransition = !prevIsActiveRef.current;
+    prevIsActiveRef.current = true;
+
+    if (isFirstActiveTransition || (!hasInitialScrolledRef.current && !isLoading && agendaDates.includes(todayStr))) {
+      setSelectedDate(todayStr);
+      goToToday();
       const timer = setTimeout(() => {
         const el = document.getElementById(`day-section-${todayStr}`);
         if (el) {
           hasInitialScrolledRef.current = true;
-          setSelectedDate(todayStr);
           scrollToDate(todayStr, 'auto', 'center');
         }
-      }, 60);
+      }, 50);
       return () => clearTimeout(timer);
     }
-  }, [todayStr, scrollToDate, agendaDates, isLoading, setSelectedDate]);
+  }, [isActive, todayStr, scrollToDate, agendaDates, isLoading, setSelectedDate, goToToday]);
 
   return (
     <div className="w-full flex flex-col gap-3 pb-24">

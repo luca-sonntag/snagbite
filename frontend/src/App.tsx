@@ -591,6 +591,7 @@ export default function App() {
                 }}
                 addRecipeIngredients={addRecipeIngredients}
                 onNavigateToShoppingList={() => navigate('shopping-list')}
+                isActive={activeView === 'meal-planner'}
               />
             </Suspense>
           )}
