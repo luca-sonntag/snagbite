@@ -25,23 +25,23 @@ export const MealPlanCard: React.FC<MealPlanCardProps> = ({
         hapticLight();
         onSelectRecipe(entry.recipeId);
       }}
-      className={`group relative flex items-center gap-3 p-3 rounded-2xl md:rounded-3xl border-none transition-all duration-200 cursor-pointer select-none active:scale-[0.99] bg-white dark:bg-gray-900/95 shadow-xs ring-1 ring-black/[0.04] dark:ring-white/[0.06] ${
+      className={`group relative flex items-stretch gap-3 rounded-2xl md:rounded-3xl border-none transition-all duration-200 cursor-pointer select-none active:scale-[0.99] bg-white dark:bg-gray-900/95 shadow-xs ring-1 ring-black/[0.04] dark:ring-white/[0.06] overflow-hidden ${
         entry.isCooked
           ? 'opacity-80'
           : 'hover:shadow-md dark:hover:bg-gray-850'
       }`}
     >
-      {/* Recipe Thumbnail with 1px outline */}
-      <div className="relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-gray-100 dark:bg-gray-800 ring-1 ring-black/[0.06] dark:ring-white/[0.08]">
+      {/* Recipe Thumbnail: Flush with full card height */}
+      <div className="relative w-24 sm:w-28 shrink-0 overflow-hidden bg-gray-100 dark:bg-gray-800 self-stretch">
         <CachedImage
           src={recipe?.imageUrl}
           alt={recipe?.title || 'Recipe'}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
         />
       </div>
 
       {/* Recipe Content */}
-      <div className="flex-1 min-w-0 pr-0.5 @container">
+      <div className="flex-1 min-w-0 py-3 pr-3.5 flex flex-col justify-between @container">
         <h4
           className={`text-sm sm:text-base font-extrabold line-clamp-1 leading-snug transition-colors ${
             entry.isCooked
