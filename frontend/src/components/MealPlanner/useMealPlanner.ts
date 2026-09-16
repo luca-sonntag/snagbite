@@ -6,10 +6,10 @@ import { useToast } from '../../context/ToastContext';
 import { useI18n } from '../../context/I18nContext';
 import { apiUrl } from '../../api';
 import { hapticLight } from '../../utils/haptics';
-import { getMonday, formatDateIso, addDays, buildWeekDaysInfo } from './mealPlannerUtils';
+import { getMonday, formatDateIso, addDays, buildWeekDaysInfo, buildAgendaDates } from './mealPlannerUtils';
 import { useMealPlanActions } from './useMealPlanActions';
 
-export { getMonday, formatDateIso, addDays, buildWeekDaysInfo };
+export { getMonday, formatDateIso, addDays, buildWeekDaysInfo, buildAgendaDates };
 
 export function useMealPlanner() {
   const { getAccessToken, user } = useAuth();
@@ -38,13 +38,19 @@ export function useMealPlanner() {
     return formatDateIso(todayMonday) === startDateStr;
   }, [startDateStr]);
 
-  // Fetch meal plans starting from the viewed week into the future
+  // Load from 28 days before today's Monday to include recent history in agenda stream
+  const historyStartDateStr = useMemo(() => {
+    const pastMonday = addDays(getMonday(new Date()), -28);
+    return formatDateIso(pastMonday);
+  }, []);
+
+  // Fetch meal plans starting from 4 weeks in the past into the future
   const fetchPlans = useCallback(async () => {
     if (!user) return;
     try {
       setIsLoading(true);
       const token = await getAccessToken();
-      const res = await fetch(apiUrl(`/api/meal-plan?startDate=${startDateStr}`), {
+      const res = await fetch(apiUrl(`/api/meal-plan?startDate=${historyStartDateStr}`), {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -56,7 +62,7 @@ export function useMealPlanner() {
     } finally {
       setIsLoading(false);
     }
-  }, [user, getAccessToken, startDateStr]);
+  }, [user, getAccessToken, historyStartDateStr]);
 
   useEffect(() => {
     fetchPlans();
@@ -221,13 +227,19 @@ export function useMealPlanner() {
 
   const futurePlannedCount = futurePlannedEntries.length;
 
+  const agendaDates = useMemo(() => {
+    return buildAgendaDates(new Date(), mealPlans, currentWeekStart);
+  }, [mealPlans, currentWeekStart]);
+
   return {
     currentWeekStart,
+    setCurrentWeekStart,
     weekEnd,
     isCurrentWeek,
     selectedDate,
     setSelectedDate,
     mealPlans,
+    agendaDates,
     activeDayEntries,
     futurePlannedEntries,
     upcomingPlannedEntries,
