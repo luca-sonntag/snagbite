@@ -25,7 +25,7 @@ export const MealPlanCard = React.memo<MealPlanCardProps>(({
         hapticLight();
         onSelectRecipe(entry.recipeId);
       }}
-      className={`group relative flex items-stretch gap-3 rounded-2xl md:rounded-3xl border-none transition-all duration-200 cursor-pointer select-none active:scale-[0.99] bg-white dark:bg-gray-900/95 shadow-xs ring-1 ring-black/[0.04] dark:ring-white/[0.06] overflow-hidden ${
+      className={`group relative flex items-stretch gap-3 rounded-2xl md:rounded-3xl border-none transition-all duration-200 cursor-pointer select-none touch-manipulation active:scale-[0.99] bg-white dark:bg-gray-900/95 shadow-xs ring-1 ring-black/[0.04] dark:ring-white/[0.06] overflow-hidden ${
         entry.isCooked
           ? 'opacity-80'
           : 'hover:shadow-md dark:hover:bg-gray-850'

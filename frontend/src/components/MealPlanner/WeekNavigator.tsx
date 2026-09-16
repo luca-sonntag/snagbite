@@ -47,7 +47,7 @@ export const WeekNavigator: React.FC<WeekNavigatorProps> = ({
         {!isCurrentWeek && (
           <button
             onClick={handleToday}
-            className="px-2.5 py-1 text-[11px] font-bold rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 shadow-2xs active:scale-95 transition-all duration-150 cursor-pointer border-none"
+            className="min-h-[36px] sm:min-h-[40px] px-3.5 py-1.5 text-xs font-bold rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 shadow-2xs active:scale-95 transition-all duration-150 cursor-pointer border-none touch-manipulation"
           >
             {t('mealPlanner.today')}
           </button>

@@ -26,7 +26,7 @@ export const PastMealPlanCard = React.memo<PastMealPlanCardProps>(({
         hapticLight();
         onSelectRecipe(entry.recipeId);
       }}
-      className="group relative flex items-stretch gap-3 rounded-2xl border-none transition-all duration-200 cursor-pointer select-none active:scale-[0.99] bg-white/70 dark:bg-gray-900/70 shadow-2xs ring-1 ring-black/[0.03] dark:ring-white/[0.04] overflow-hidden opacity-75 hover:opacity-100 hover:shadow-xs"
+      className="group relative flex items-stretch gap-3 rounded-2xl border-none transition-all duration-200 cursor-pointer select-none touch-manipulation active:scale-[0.99] bg-white/70 dark:bg-gray-900/70 shadow-2xs ring-1 ring-black/[0.03] dark:ring-white/[0.04] overflow-hidden opacity-75 hover:opacity-100 hover:shadow-xs"
     >
       {/* Recipe Thumbnail: Flush with full card height */}
       <div className="relative w-20 sm:w-24 shrink-0 overflow-hidden bg-gray-100 dark:bg-gray-800 self-stretch">
