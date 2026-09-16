@@ -28,8 +28,7 @@ export function useMealPlanScrollSpy({
   const onDeselectDayRef = useRef(onDeselectDay);
   onDeselectDayRef.current = onDeselectDay;
 
-  const lastWeekChangeTimeRef = useRef<number>(0);
-  const pendingWeekChangeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Deselect active day when user manually scrolls
   useEffect(() => {
@@ -52,11 +51,10 @@ export function useMealPlanScrollSpy({
       const element = document.getElementById(`day-section-${targetDateStr}`);
       if (!element) return;
 
-      if (pendingWeekChangeTimerRef.current) {
-        clearTimeout(pendingWeekChangeTimerRef.current);
-        pendingWeekChangeTimerRef.current = null;
+      if (scrollDebounceTimerRef.current) {
+        clearTimeout(scrollDebounceTimerRef.current);
+        scrollDebounceTimerRef.current = null;
       }
-      lastWeekChangeTimeRef.current = Date.now();
 
       isProgrammaticScrollRef.current = true;
       if (programmaticTimerRef.current) clearTimeout(programmaticTimerRef.current);
@@ -102,7 +100,7 @@ export function useMealPlanScrollSpy({
     [],
   );
 
-  // IntersectionObserver to keep sticky week navigator in sync during scrolling (throttled to max 1 per 700ms)
+  // Center-weighted IntersectionObserver with rest-debounce to keep calendar header calm
   useEffect(() => {
     if (agendaDates.length === 0) return;
 
@@ -110,14 +108,20 @@ export function useMealPlanScrollSpy({
       (entries) => {
         if (isProgrammaticScrollRef.current) return;
 
-        // Find intersecting entries
+        // Find entries intersecting the central screen zone
         const visibleEntries = entries.filter((e) => e.isIntersecting);
         if (visibleEntries.length === 0) return;
 
-        // Sort by distance to top of viewport
-        visibleEntries.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        const topEntry = visibleEntries[0];
-        const dateStr = topEntry.target.getAttribute('data-date');
+        // Find the day section closest to the vertical center of the viewport
+        const viewportCenter = window.innerHeight / 2;
+        visibleEntries.sort((a, b) => {
+          const aCenter = a.boundingClientRect.top + a.boundingClientRect.height / 2;
+          const bCenter = b.boundingClientRect.top + b.boundingClientRect.height / 2;
+          return Math.abs(aCenter - viewportCenter) - Math.abs(bCenter - viewportCenter);
+        });
+
+        const centerEntry = visibleEntries[0];
+        const dateStr = centerEntry.target.getAttribute('data-date');
         if (!dateStr) return;
 
         const newMonday = getMonday(new Date(dateStr + 'T00:00:00'));
@@ -125,28 +129,20 @@ export function useMealPlanScrollSpy({
         const currentMondayIso = formatDateIso(currentWeekStartRef.current);
 
         if (newMondayIso !== currentMondayIso) {
-          const now = Date.now();
-          const elapsed = now - lastWeekChangeTimeRef.current;
-
-          if (pendingWeekChangeTimerRef.current) {
-            clearTimeout(pendingWeekChangeTimerRef.current);
-            pendingWeekChangeTimerRef.current = null;
+          if (scrollDebounceTimerRef.current) {
+            clearTimeout(scrollDebounceTimerRef.current);
           }
-
-          if (elapsed >= 700) {
-            lastWeekChangeTimeRef.current = now;
-            onWeekChangeRef.current(newMonday);
-          } else {
-            pendingWeekChangeTimerRef.current = setTimeout(() => {
-              lastWeekChangeTimeRef.current = Date.now();
+          // Rest-debounce: only switch weeks once scrolling pauses or slows down (~220ms)
+          scrollDebounceTimerRef.current = setTimeout(() => {
+            if (formatDateIso(newMonday) !== formatDateIso(currentWeekStartRef.current)) {
               onWeekChangeRef.current(newMonday);
-            }, 700 - elapsed);
-          }
+            }
+          }, 220);
         }
       },
       {
-        rootMargin: '-140px 0px -60% 0px',
-        threshold: [0, 0.2, 0.5],
+        rootMargin: '-35% 0px -35% 0px',
+        threshold: [0, 0.1, 0.5],
       },
     );
 
@@ -164,7 +160,7 @@ export function useMealPlanScrollSpy({
     return () => {
       if (programmaticTimerRef.current) clearTimeout(programmaticTimerRef.current);
       if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
-      if (pendingWeekChangeTimerRef.current) clearTimeout(pendingWeekChangeTimerRef.current);
+      if (scrollDebounceTimerRef.current) clearTimeout(scrollDebounceTimerRef.current);
     };
   }, []);
 
