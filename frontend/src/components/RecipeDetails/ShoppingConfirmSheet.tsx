@@ -6,7 +6,6 @@ import { usePantry } from '../../context/PantryContext';
 import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight, hapticNotification } from '../../utils/haptics';
 import { formatQuantity } from '../../utils/formatQuantity';
-import { getCategoryTheme } from '../../i18n';
 import type { Ingredient, Recipe, MealPlanRecipeSummary } from '../../types';
 import { findPantryStockMatch } from '../ShoppingList/shoppingItemUtils';
 import ShoppingConfirmItem, { type MergedShoppingSheetItem } from './ShoppingConfirmItem';
@@ -33,7 +32,7 @@ export default function ShoppingConfirmSheet({
   onConfirm,
   recipeLabel,
 }: ShoppingConfirmSheetProps) {
-  const { t, translateCategory } = useI18n();
+  const { t } = useI18n();
   const { pantryItems } = usePantry();
   useModalOverlay(isOpen, onClose);
 
@@ -100,25 +99,6 @@ export default function ShoppingConfirmSheet({
 
     return items;
   }, [sortedIngredients]);
-
-  // Group items by category to display each in its own white card
-  const groupedCategories = useMemo(() => {
-    const groups: Array<{ category: string; items: MergedShoppingSheetItem[] }> = [];
-    const groupMap = new Map<string, MergedShoppingSheetItem[]>();
-
-    for (const item of allItems) {
-      const cat = item.groupCategory || item.primaryIngredient.category || 'other';
-      let list = groupMap.get(cat);
-      if (!list) {
-        list = [];
-        groupMap.set(cat, list);
-        groups.push({ category: cat, items: list });
-      }
-      list.push(item);
-    }
-
-    return groups;
-  }, [allItems]);
 
   // Initialize selection when drawer opens or portions change, taking pantry stock & staple status into account
   useEffect(() => {
@@ -220,58 +200,27 @@ export default function ShoppingConfirmSheet({
                 />
               </div>
 
-              {/* Body: persistent visible scrollbar and white cards per category */}
+              {/* Body: persistent visible scrollbar and flat clean ingredient list */}
               <Drawer.Body className="overflow-y-scroll py-2 pr-1 flex-1 [scrollbar-width:thin] [scrollbar-color:rgba(156,163,175,0.4)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
-                <div className="flex flex-col gap-2.5">
-                  {groupedCategories.map((group) => {
-                    const theme = getCategoryTheme(group.category);
-                    const categoryTitle = translateCategory(group.category);
-                    const totalInGroup = group.items.length;
-                    const selectedInGroup = group.items.filter((item) => selectedIds[item.id]).length;
-
+                <div className="flex flex-col gap-1.5">
+                  {allItems.map((item) => {
+                    const requiredAmt = (item.primaryIngredient.amount || 0) * activeScaleFactor;
+                    const pantryStockMatch = findPantryStockMatch(
+                      item.primaryIngredient,
+                      pantryItems,
+                      requiredAmt,
+                      item.primaryIngredient.unit
+                    );
                     return (
-                      <div
-                        key={group.category}
-                        className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xs border-none p-3 sm:p-3.5 flex flex-col gap-1"
-                      >
-                        {/* Category Header Bar */}
-                        <div className="flex items-center justify-between gap-2 px-1 pb-1">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className={`w-2 h-2 rounded-full ${theme.barClass} shrink-0`} />
-                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300 truncate">
-                              {categoryTitle}
-                            </span>
-                          </div>
-                          <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 tabular-nums">
-                            {selectedInGroup}/{totalInGroup}
-                          </span>
-                        </div>
-
-                        {/* Category Ingredients List */}
-                        <div className="flex flex-col gap-0.5">
-                          {group.items.map((item) => {
-                            const requiredAmt = (item.primaryIngredient.amount || 0) * activeScaleFactor;
-                            const pantryStockMatch = findPantryStockMatch(
-                              item.primaryIngredient,
-                              pantryItems,
-                              requiredAmt,
-                              item.primaryIngredient.unit
-                            );
-                            return (
-                              <ShoppingConfirmItem
-                                key={item.id}
-                                item={item}
-                                isChecked={!!selectedIds[item.id]}
-                                onToggle={() => toggleItem(item.id)}
-                                formatAmount={scaledFormatAmount}
-                                groupCategory={item.groupCategory}
-                                pantryStockMatch={pantryStockMatch}
-                                hideCategoryBar={true}
-                              />
-                            );
-                          })}
-                        </div>
-                      </div>
+                      <ShoppingConfirmItem
+                        key={item.id}
+                        item={item}
+                        isChecked={!!selectedIds[item.id]}
+                        onToggle={() => toggleItem(item.id)}
+                        formatAmount={scaledFormatAmount}
+                        groupCategory={item.groupCategory}
+                        pantryStockMatch={pantryStockMatch}
+                      />
                     );
                   })}
                 </div>
