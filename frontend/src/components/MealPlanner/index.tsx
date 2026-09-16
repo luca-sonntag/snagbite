@@ -169,9 +169,18 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
           ))}
         </div>
       ) : (
-        <div className="flex flex-col gap-6 pt-1">
-          {agendaWeekGroups.map((weekGroup) => (
+        <div className="flex flex-col gap-4 sm:gap-5 pt-1">
+          {agendaWeekGroups.map((weekGroup, weekIndex) => (
             <div key={weekGroup.weekKey} className="flex flex-col gap-1.5">
+              {weekIndex > 0 && (
+                <div
+                  className="w-full flex items-center justify-center pt-2 pb-3 select-none"
+                  aria-hidden="true"
+                >
+                  <div className="w-24 sm:w-32 h-[1px] bg-gray-200/90 dark:bg-gray-800/80 rounded-full" />
+                </div>
+              )}
+
               {weekGroup.dates.map((dateStr) => {
                 const isToday = dateStr === todayStr;
                 const isPast = dateStr < todayStr;
