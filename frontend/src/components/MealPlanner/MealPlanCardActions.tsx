@@ -1,10 +1,11 @@
-import React from 'react';
-import { Trash2, CheckCircle2, Play, CalendarClock } from 'lucide-react';
+import React, { useState } from 'react';
+import { MoreVertical, Play, CheckCircle2, CalendarClock, Trash2 } from 'lucide-react';
+import { Button, Popover } from '@heroui/react';
 import type { MealPlanEntry } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { hapticLight, hapticMedium, hapticHeavy } from '../../utils/haptics';
 
-export interface MealPlanCardActionsProps {
+export interface MealPlanCardMenuProps {
   entry: MealPlanEntry;
   onUpdateServings?: (id: string, servings: number) => void;
   onToggleCooked: (entry: MealPlanEntry) => void;
@@ -13,7 +14,7 @@ export interface MealPlanCardActionsProps {
   onOpenCookMode?: (recipeId: string) => void;
 }
 
-export const MealPlanCardActions: React.FC<MealPlanCardActionsProps> = ({
+export const MealPlanCardMenu: React.FC<MealPlanCardMenuProps> = ({
   entry,
   onToggleCooked,
   onDeleteEntry,
@@ -21,124 +22,96 @@ export const MealPlanCardActions: React.FC<MealPlanCardActionsProps> = ({
   onOpenCookMode,
 }) => {
   const { t } = useI18n();
-
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    hapticHeavy();
-    onDeleteEntry(entry.id);
-  };
-
-  if (entry.isCooked) {
-    return (
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="flex items-center justify-between mt-2 pt-0.5 gap-2 select-none"
-      >
-        <div className="flex items-center gap-1.5 min-w-0">
-          <span className="text-xs font-bold text-gray-500 dark:text-gray-400 truncate">
-            {entry.servings} {t('mealPlanner.servings')}
-          </span>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 shrink-0">
-            <CheckCircle2 className="w-3 h-3 stroke-[2.2]" />
-            <span>{t('mealPlanner.cooked')}</span>
-          </span>
-        </div>
-
-        <div className="flex items-center gap-1.5 shrink-0">
-          {/* Toggle Cooked Back */}
-          <button
-            onClick={() => {
-              hapticMedium();
-              onToggleCooked(entry);
-            }}
-            title={t('mealPlanner.markAsCooked')}
-            aria-label={t('mealPlanner.markAsCooked')}
-            className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full transition-all duration-150 flex items-center justify-center border-none bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-90 cursor-pointer touch-manipulation"
-          >
-            <CheckCircle2 className="w-4 h-4 stroke-[2.25]" />
-          </button>
-
-          {/* Delete Entry */}
-          <button
-            onClick={handleDelete}
-            title={t('mealPlanner.deleteAction')}
-            aria-label={t('mealPlanner.deleteConfirmBtn')}
-            className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full bg-gray-100 hover:bg-rose-50 dark:bg-gray-800 dark:hover:bg-rose-950/30 text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 active:scale-90 transition-all duration-150 flex items-center justify-center cursor-pointer border-none touch-manipulation"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div
-      onClick={(e) => e.stopPropagation()}
-      className="flex items-center justify-between mt-2 pt-0.5 gap-2 select-none"
-    >
-      {/* Servings display */}
-      <span className="text-xs font-bold text-gray-600 dark:text-gray-300">
-        {entry.servings} {t('mealPlanner.servings')}
-      </span>
-
-      {/* Action Buttons Cluster */}
-      <div className="flex items-center gap-1.5 shrink-0">
-        {/* Cook Mode (Play) */}
-        {onOpenCookMode && (
-          <button
-            onClick={() => {
-              hapticMedium();
-              onOpenCookMode(entry.recipeId);
-            }}
-            title={t('mealPlanner.cookNow')}
-            aria-label={t('mealPlanner.cookNow')}
-            className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs shadow-emerald-600/30 active:scale-90 transition-all duration-150 flex items-center justify-center cursor-pointer border-none touch-manipulation"
-          >
-            <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
-          </button>
-        )}
-
-        {/* Cooked Status Button */}
-        <button
-          onClick={() => {
-            hapticMedium();
-            onToggleCooked(entry);
+    <Popover isOpen={isOpen} onOpenChange={setIsOpen}>
+      <Popover.Trigger>
+        <Button
+          isIconOnly
+          variant="ghost"
+          onClick={(e) => {
+            e.stopPropagation();
+            hapticLight();
           }}
-          title={t('mealPlanner.markAsCooked')}
-          aria-label={t('mealPlanner.markAsCooked')}
-          className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full transition-all duration-150 flex items-center justify-center border-none bg-gray-100 hover:bg-emerald-50 dark:bg-gray-800 dark:hover:bg-emerald-950/30 text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 active:scale-90 cursor-pointer touch-manipulation"
+          className="w-8 h-8 min-w-[32px] min-h-[32px] rounded-full text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all cursor-pointer border-none flex items-center justify-center -mr-1"
+          aria-label={t('mealPlanner.options') || 'Optionen'}
         >
-          <CheckCircle2 className="w-4 h-4 stroke-[2.25]" />
-        </button>
+          <MoreVertical className="w-4 h-4" />
+        </Button>
+      </Popover.Trigger>
+      <Popover.Content placement="bottom end" className="p-1.5 min-w-[190px] bg-white dark:bg-gray-900 border-none rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
+        <Popover.Dialog className="outline-none border-none p-0 m-0">
+          <div className="flex flex-col w-full gap-0.5">
+            {/* 1. Kochen starten */}
+            {onOpenCookMode && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  hapticMedium();
+                  setIsOpen(false);
+                  onOpenCookMode(entry.recipeId);
+                }}
+                className="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-semibold text-gray-800 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer border-none"
+              >
+                <Play className="w-4 h-4 text-emerald-600 dark:text-emerald-400 fill-current" />
+                <span>{t('mealPlanner.cookNow')}</span>
+              </button>
+            )}
 
-        {/* Move to Tomorrow */}
-        {onMoveToTomorrow && (
-          <button
-            onClick={() => {
-              hapticLight();
-              onMoveToTomorrow(entry);
-            }}
-            title={t('mealPlanner.moveToTomorrow')}
-            aria-label={t('mealPlanner.moveToTomorrow')}
-            className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 active:scale-90 transition-all duration-150 flex items-center justify-center cursor-pointer border-none touch-manipulation"
-          >
-            <CalendarClock className="w-3.5 h-3.5" />
-          </button>
-        )}
+            {/* 2. Gekocht Toggle */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                hapticMedium();
+                setIsOpen(false);
+                onToggleCooked(entry);
+              }}
+              className="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-semibold text-gray-800 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer border-none"
+            >
+              <CheckCircle2 className={`w-4 h-4 ${entry.isCooked ? 'text-gray-400' : 'text-emerald-600 dark:text-emerald-400'}`} />
+              <span>
+                {entry.isCooked
+                  ? (t('mealPlanner.markAsUncooked') || 'Als ungekocht markieren')
+                  : t('mealPlanner.markAsCooked')}
+              </span>
+            </button>
 
-        {/* Delete Entry */}
-        <button
-          onClick={handleDelete}
-          title={t('mealPlanner.deleteAction')}
-          aria-label={t('mealPlanner.deleteConfirmBtn')}
-          className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full bg-gray-100 hover:bg-rose-50 dark:bg-gray-800 dark:hover:bg-rose-950/30 text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 active:scale-90 transition-all duration-150 flex items-center justify-center cursor-pointer border-none touch-manipulation"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
-      </div>
-    </div>
+            {/* 3. Auf morgen verschieben */}
+            {onMoveToTomorrow && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  hapticLight();
+                  setIsOpen(false);
+                  onMoveToTomorrow(entry);
+                }}
+                className="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-semibold text-gray-800 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer border-none"
+              >
+                <CalendarClock className="w-4 h-4 text-blue-500" />
+                <span>{t('mealPlanner.moveToTomorrow')}</span>
+              </button>
+            )}
+
+            {/* 4. Aus Planer löschen */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                hapticHeavy();
+                setIsOpen(false);
+                onDeleteEntry(entry.id);
+              }}
+              className="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer border-none"
+            >
+              <Trash2 className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+              <span>{t('mealPlanner.deleteAction')}</span>
+            </button>
+          </div>
+        </Popover.Dialog>
+      </Popover.Content>
+    </Popover>
   );
 };
 
-export default MealPlanCardActions;
+export const MealPlanCardActions = MealPlanCardMenu;
+export default MealPlanCardMenu;
