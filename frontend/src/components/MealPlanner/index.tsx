@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Plus } from 'lucide-react';
 import type { MealPlannerViewProps } from './types';
 import type { MealPlanEntry } from '../../types';
@@ -12,6 +12,7 @@ import { DailyInsightPill } from './DailyInsightPill';
 import { MealPlanWeekGroup } from './MealPlanWeekGroup';
 import { MealPlanShoppingSheets } from './MealPlanShoppingSheets';
 import { RecipePickerModal } from './RecipePickerModal';
+import CookedModal from '../CookedModal';
 import { useI18n } from '../../context/I18nContext';
 import { formatDateIso, addDays, formatWeekRange } from './mealPlannerUtils';
 
@@ -69,8 +70,22 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     onNavigateToShoppingList,
   });
 
+  const [cookedModalTarget, setCookedModalTarget] = useState<{
+    id: string;
+    title: string;
+    entry: MealPlanEntry;
+  } | null>(null);
+
   const handleToggleCooked = useCallback((entry: MealPlanEntry) => {
-    toggleCooked(entry);
+    if (entry.isCooked) {
+      toggleCooked(entry);
+    } else {
+      setCookedModalTarget({
+        id: entry.recipeId,
+        title: entry.recipe?.title || 'Rezept',
+        entry,
+      });
+    }
   }, [toggleCooked]);
 
   const todayStr = useMemo(() => formatDateIso(new Date()), []);
@@ -233,6 +248,20 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
         onConfirm={handleBulkShoppingConfirm}
         onClose={handleBulkShoppingClose}
       />
+
+      {/* Gamification Cooked Verification Modal */}
+      {cookedModalTarget && (
+        <CookedModal
+          isOpen={!!cookedModalTarget}
+          recipeId={cookedModalTarget.id}
+          recipeTitle={cookedModalTarget.title}
+          onSuccess={() => {
+            toggleCooked(cookedModalTarget.entry);
+            setCookedModalTarget(null);
+          }}
+          onClose={() => setCookedModalTarget(null)}
+        />
+      )}
     </div>
   );
 };

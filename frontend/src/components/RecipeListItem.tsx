@@ -30,6 +30,8 @@ export interface RecipeListItemProps {
   thumbnailOverlay?: React.ReactNode;
   /** Whether the recipe is marked as cooked/completed */
   isCooked?: boolean;
+  /** If true, the cover image spans flush to the top/bottom/left edges of the card without padding */
+  flushImage?: boolean;
   className?: string;
 }
 
@@ -50,7 +52,7 @@ function getFirstRecipeTag(recipe?: Recipe | MealPlanRecipeSummary | null): stri
  * (SavedCatalog list view, RecipePickerModal, HeroThemeSheet, MealPlanner, etc.).
  *
  * Features:
- * - 64-72px thumbnail with high-contrast presentation
+ * - 64-72px thumbnail with high-contrast presentation (or flush cover with flushImage=true)
  * - Line 1: Bold title with hover emerald transition
  * - Line 2: Creator handle (@handle) or Tag or custom Subtitle
  * - Line 3: Emerald duration, favorite star, calories, and centralized circular Health Score badge
@@ -72,6 +74,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
   extraMeta,
   thumbnailOverlay,
   isCooked = false,
+  flushImage = false,
   className = '',
 }) => {
   const { t } = useI18n();
@@ -102,7 +105,11 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
 
   return (
     <div
-      className={`group w-full rounded-2xl p-2.5 sm:p-3 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-all duration-150 select-none border-none touch-manipulation ${
+      className={`group w-full rounded-2xl flex gap-3 cursor-pointer active:scale-[0.98] transition-all duration-150 select-none border-none touch-manipulation overflow-hidden ${
+        flushImage
+          ? 'p-0 items-stretch'
+          : 'p-2.5 sm:p-3 items-center'
+      } ${
         isSelected
           ? 'bg-emerald-500/10 ring-2 ring-emerald-500 shadow-sm'
           : isCooked
@@ -115,8 +122,14 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
       }}
       {...(bindLongPress ?? {})}
     >
-      {/* Thumbnail (64-72px) with Checkbox in select mode or custom thumbnail overlay */}
-      <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-xl sm:rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shrink-0 border-none pointer-events-none">
+      {/* Thumbnail */}
+      <div
+        className={`relative overflow-hidden bg-black/5 dark:bg-white/5 shrink-0 border-none pointer-events-none ${
+          flushImage
+            ? 'w-20 sm:w-24 self-stretch rounded-none'
+            : 'w-16 h-16 sm:w-18 sm:h-18 rounded-xl sm:rounded-2xl'
+        }`}
+      >
         {isSelectMode && (
           <div
             className={`absolute top-1.5 left-1.5 z-10 w-6 h-6 rounded-xl flex items-center justify-center transition-all border-none ${
@@ -147,7 +160,11 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-w-0 flex flex-col justify-center py-0.5 pointer-events-none">
+      <div
+        className={`flex-1 min-w-0 flex flex-col justify-center pointer-events-none ${
+          flushImage ? 'py-2.5 sm:py-3 pr-2' : 'py-0.5'
+        }`}
+      >
         {/* Line 1: Title */}
         <h4
           className={`text-sm font-bold line-clamp-1 leading-snug transition-colors ${
@@ -233,11 +250,18 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
 
       {/* Far Right: Optional Custom Action (e.g. 3-dots menu) or Arrow */}
       {rightAction ? (
-        <div className="shrink-0 -mr-1 z-10" onClick={(e) => e.stopPropagation()}>
+        <div
+          className={`shrink-0 z-10 self-center ${flushImage ? 'pr-2 sm:pr-3' : '-mr-1'}`}
+          onClick={(e) => e.stopPropagation()}
+        >
           {rightAction}
         </div>
       ) : showArrow ? (
-        <ArrowRight className="w-4 h-4 text-gray-300 dark:text-gray-600 shrink-0 mr-1 pointer-events-none" />
+        <ArrowRight
+          className={`w-4 h-4 text-gray-300 dark:text-gray-600 shrink-0 self-center pointer-events-none ${
+            flushImage ? 'mr-3' : 'mr-1'
+          }`}
+        />
       ) : null}
     </div>
   );

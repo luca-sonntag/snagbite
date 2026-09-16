@@ -16,6 +16,7 @@ export const PastMealPlanCard = React.memo<PastMealPlanCardProps>(({
       recipe={entry.recipe}
       onClick={() => onSelectRecipe(entry.recipeId)}
       isCooked={entry.isCooked}
+      flushImage={true}
       showArrow={false}
       className="opacity-60 hover:opacity-85 grayscale-[20%] transition-all"
       extraMeta={
