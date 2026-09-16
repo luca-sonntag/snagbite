@@ -116,7 +116,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
       {/* Sticky Calendar Top Container */}
       <div
         id="meal-planner-sticky-header"
-        className="sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md z-20 pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 flex flex-col gap-2"
+        className="sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md z-20 -mt-4 pt-3 sm:pt-3.5 pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 flex flex-col gap-2"
       >
         {/* Header with title & bulk shopping action */}
         <MealPlannerHeader
