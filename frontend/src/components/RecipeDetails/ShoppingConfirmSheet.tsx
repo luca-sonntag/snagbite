@@ -159,7 +159,7 @@ export default function ShoppingConfirmSheet({
       <Drawer>
         <Drawer.Backdrop isOpen={isOpen} onOpenChange={(open) => { if (!open) onClose(); }} className="!z-[100]">
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
+            <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 max-h-[85vh] flex flex-col p-4 sm:p-5 pb-[calc(0.75rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
               <Drawer.Handle />
 
               {/* Header */}
@@ -253,7 +253,7 @@ export default function ShoppingConfirmSheet({
               </Drawer.Body>
 
               {/* Footer */}
-              <Drawer.Footer className="pt-3 flex gap-2">
+              <Drawer.Footer className="pt-2 px-0 pb-0 flex gap-2">
                 <Button
                   variant="tertiary"
                   onPress={onClose}
