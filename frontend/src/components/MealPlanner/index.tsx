@@ -98,13 +98,15 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
   const calendarSwipe = useSwipeGesture({
     onSwipeLeft: goToNextWeek,
     onSwipeRight: goToPrevWeek,
-    interactive: true,
+    nextClassName: 'animate-week-in-right',
+    prevClassName: 'animate-week-in-left',
   });
 
   const daySwipe = useSwipeGesture({
     onSwipeLeft: goToNextDay,
     onSwipeRight: goToPrevDay,
-    interactive: true,
+    nextClassName: 'animate-tab-in-right',
+    prevClassName: 'animate-tab-in-left',
   });
 
   return (
@@ -124,15 +126,15 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
           weekEnd={weekEnd}
           isCurrentWeek={isCurrentWeek}
           onPrevWeek={() => {
-            calendarSwipe.setDirection('prev');
+            calendarSwipe.setNavDirection('prev');
             goToPrevWeek();
           }}
           onNextWeek={() => {
-            calendarSwipe.setDirection('next');
+            calendarSwipe.setNavDirection('next');
             goToNextWeek();
           }}
           onToday={() => {
-            calendarSwipe.setDirection(null);
+            calendarSwipe.setNavDirection(null);
             goToToday();
           }}
         />
@@ -153,7 +155,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
               days={weekDays}
               selectedDate={selectedDate}
               onSelectDate={(d) => {
-                daySwipe.setDirection(null);
+                daySwipe.setNavDirection(null);
                 setSelectedDate(d);
               }}
             />
