@@ -11,7 +11,11 @@ interface UseMealPlanBulkShoppingOptions {
   currentWeekStart: Date;
   weekEnd: Date;
   history: SavedRecipe[];
-  addRecipeIngredients?: (ingredients: Ingredient[], recipeId: string, recipeTitle: string) => void;
+  addRecipeIngredients?: (
+    ingredients: Ingredient[],
+    recipeId: string,
+    recipeTitle: string
+  ) => Promise<boolean> | boolean | void;
   onNavigateToShoppingList?: () => void;
 }
 
@@ -134,22 +138,25 @@ export function useMealPlanBulkShopping({
   }, [addRecipeIngredients, currentWeekStart, weekEnd, mealPlans, history, toast, t]);
 
   const handleBulkShoppingConfirm = useCallback(
-    (selectedIngredients: Ingredient[]) => {
+    async (selectedIngredients: Ingredient[]) => {
       if (!currentBulkItem || !addRecipeIngredients) return;
 
       if (selectedIngredients.length > 0) {
         const recipeId = currentBulkItem.recipe.id || currentBulkItem.entry.recipeId;
         const recipeTitle = currentBulkItem.recipe.title || 'Rezept';
-        addRecipeIngredients(
+        const result = await addRecipeIngredients(
           selectedIngredients,
           recipeId,
           recipeTitle,
         );
+        if (result === false) {
+          // Free-tier limit reached or add failed: cancel rest of queue immediately
+          setQueue([]);
+          return;
+        }
         setAddedItemsCount((prev) => prev + selectedIngredients.length);
         setAddedRecipesCount((prev) => prev + 1);
       }
-      // Note: ShoppingConfirmSheet invokes onClose() right after onConfirm().
-      // Advancing the queue is therefore performed in handleBulkShoppingClose.
     },
     [currentBulkItem, addRecipeIngredients],
   );

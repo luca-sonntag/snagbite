@@ -6,7 +6,7 @@ import type { Ingredient } from '../../types';
 
 interface MealPlanShoppingSheetsProps {
   currentBulkItem: BulkShoppingItem | null;
-  onConfirm: (items: Ingredient[]) => void;
+  onConfirm: (items: Ingredient[]) => Promise<void> | void;
   onClose: () => void;
 }
 

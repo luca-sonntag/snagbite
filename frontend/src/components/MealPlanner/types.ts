@@ -15,7 +15,7 @@ export interface MealPlannerViewProps {
   onSelectRecipe: (recipeId: string) => void;
   onOpenCookMode?: (recipeId: string) => void;
   onOpenCookedModal?: (recipeId: string, recipeTitle: string) => void;
-  addRecipeIngredients?: (ingredients: Ingredient[], recipeId: string, recipeTitle: string) => void;
+  addRecipeIngredients?: (ingredients: Ingredient[], recipeId: string, recipeTitle: string) => Promise<boolean> | boolean | void;
   onNavigateToShoppingList?: () => void;
 }
 
