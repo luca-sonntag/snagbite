@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button, Drawer } from '@heroui/react';
-import { Salad, Users } from 'lucide-react';
+import { Salad } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { usePantry } from '../../context/PantryContext';
 import { useModalOverlay } from '../../context/OverlayStackContext';
@@ -186,13 +186,10 @@ export default function ShoppingConfirmSheet({
               </Drawer.Header>
 
               {/* Dedicated Servings Stepper Row under Header */}
-              <div className="flex items-center justify-between px-3.5 py-2.5 mb-2 rounded-2xl bg-white dark:bg-gray-900 shadow-2xs border-none select-none">
-                <div className="flex items-center gap-2 min-w-0">
-                  <Users className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span className="text-xs font-bold text-gray-700 dark:text-gray-200 truncate">
-                    {t('mealPlanner.servings') || 'Portionen'}
-                  </span>
-                </div>
+              <div className="flex items-center justify-between px-3.5 py-2 mb-2 rounded-2xl bg-white dark:bg-gray-900 shadow-2xs border-none select-none">
+                <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                  {t('mealPlanner.servings') || 'Portionen'}
+                </span>
                 <ServingsStepper
                   servings={servings}
                   onDecrease={() => setServings((s) => Math.max(1, s - 1))}
