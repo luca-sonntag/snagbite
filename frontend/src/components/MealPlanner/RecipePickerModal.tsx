@@ -94,11 +94,11 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
         className="!z-[100]"
       >
         <Drawer.Content placement="bottom" className="!z-[100]">
-          <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 max-h-[85vh] flex flex-col p-4 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom,0px))] rounded-t-3xl border-none shadow-2xl overflow-hidden w-full max-w-lg mx-auto">
+          <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 max-h-[85vh] h-[85vh] flex flex-col min-h-0 p-4 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom,0px))] rounded-t-3xl border-none shadow-2xl overflow-hidden w-full max-w-lg mx-auto">
             <Drawer.Handle />
 
             {/* Header */}
-            <Drawer.Header className="pt-1 pb-2">
+            <Drawer.Header className="pt-1 pb-2 shrink-0">
               <div className="flex items-center justify-between w-full">
                 <div className="min-w-0 pr-2">
                   <Drawer.Heading className="text-base sm:text-lg font-extrabold text-gray-900 dark:text-white truncate">
@@ -192,7 +192,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
             </div>
 
             {/* Scrollable Recipe Body */}
-            <Drawer.Body className="overflow-y-auto px-0.5 py-2 flex-1 flex flex-col gap-2 sm:gap-2.5 overscroll-contain">
+            <Drawer.Body className="overflow-y-auto min-h-0 px-0.5 py-2 flex-1 flex flex-col gap-2 sm:gap-2.5 overscroll-contain">
               {filteredHistory.length > 0 ? (
                 filteredHistory.map((saved) => (
                   <RecipeListItem

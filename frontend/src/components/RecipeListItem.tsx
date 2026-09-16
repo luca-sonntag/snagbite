@@ -105,10 +105,10 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
 
   return (
     <div
-      className={`group w-full rounded-2xl flex gap-3 cursor-pointer active:scale-[0.98] transition-all duration-150 select-none border-none touch-manipulation overflow-hidden ${
+      className={`group w-full shrink-0 rounded-2xl flex gap-3 cursor-pointer active:scale-[0.98] transition-all duration-150 select-none border-none touch-manipulation overflow-hidden ${
         flushImage
           ? 'p-0 items-stretch min-h-[82px] sm:min-h-[88px]'
-          : 'p-2.5 sm:p-3 items-center'
+          : 'p-2.5 sm:p-3 items-center min-h-[76px] sm:min-h-[84px]'
       } ${
         isSelected
           ? 'bg-emerald-500/10 ring-2 ring-emerald-500 shadow-sm'
