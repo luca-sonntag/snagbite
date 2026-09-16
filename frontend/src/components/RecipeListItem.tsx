@@ -134,6 +134,15 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
         />
 
+        {/* Cooked Checkmark Overlay */}
+        {isCooked && (
+          <div className="absolute inset-0 z-10 bg-black/35 flex items-center justify-center pointer-events-none backdrop-blur-[0.5px]">
+            <span className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-xs">
+              <Check className="w-3.5 h-3.5 stroke-[3px]" />
+            </span>
+          </div>
+        )}
+
         {thumbnailOverlay}
       </div>
 
