@@ -93,17 +93,21 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
 
   const hasInitialScrolledRef = useRef(false);
 
-  // Initial scroll alignment to 'Heute' (centered) on mount once agenda dates are populated
+  // Initial scroll alignment to 'Heute' (centered) on mount once agenda dates are populated and rendered
   useEffect(() => {
-    if (hasInitialScrolledRef.current) return;
-    if (agendaDates.length > 0) {
-      hasInitialScrolledRef.current = true;
+    if (hasInitialScrolledRef.current || isLoading) return;
+    if (agendaDates.includes(todayStr)) {
       const timer = setTimeout(() => {
-        scrollToDate(todayStr, 'auto', 'center');
-      }, 50);
+        const el = document.getElementById(`day-section-${todayStr}`);
+        if (el) {
+          hasInitialScrolledRef.current = true;
+          setSelectedDate(todayStr);
+          scrollToDate(todayStr, 'auto', 'center');
+        }
+      }, 60);
       return () => clearTimeout(timer);
     }
-  }, [todayStr, scrollToDate, agendaDates]);
+  }, [todayStr, scrollToDate, agendaDates, isLoading, setSelectedDate]);
 
   const agendaWeekGroups = useMemo(() => groupDatesByWeek(agendaDates), [agendaDates]);
 
