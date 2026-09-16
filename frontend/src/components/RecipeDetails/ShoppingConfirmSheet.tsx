@@ -5,17 +5,19 @@ import { useI18n } from '../../context/I18nContext';
 import { usePantry } from '../../context/PantryContext';
 import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight, hapticNotification } from '../../utils/haptics';
+import { formatQuantity } from '../../utils/formatQuantity';
 import type { Ingredient, Recipe, MealPlanRecipeSummary } from '../../types';
 import { findPantryStockMatch } from '../ShoppingList/shoppingItemUtils';
 import ShoppingConfirmItem, { type MergedShoppingSheetItem } from './ShoppingConfirmItem';
+import ServingsStepper from '../ServingsStepper';
 
 interface ShoppingConfirmSheetProps {
   isOpen: boolean;
   onClose: () => void;
   recipe?: Recipe | MealPlanRecipeSummary;
   sortedIngredients: Array<{ group: { name: string; items: Ingredient[] }; originalIdx: number }>;
-  scaleFactor: number;
-  formatAmount: (amount: number | undefined, unit: string | undefined) => string;
+  scaleFactor?: number;
+  formatAmount?: (amount: number | undefined, unit: string | undefined) => string;
   onConfirm: (selectedIngredients: Ingredient[]) => Promise<void> | void;
   /** Optional label shown in the header when the sheet is used in bulk mode */
   recipeLabel?: string;
@@ -24,18 +26,30 @@ interface ShoppingConfirmSheetProps {
 export default function ShoppingConfirmSheet({
   isOpen,
   onClose,
+  recipe,
   sortedIngredients,
-  scaleFactor,
-  formatAmount,
+  scaleFactor = 1,
   onConfirm,
   recipeLabel,
 }: ShoppingConfirmSheetProps) {
   const { t } = useI18n();
   const { pantryItems } = usePantry();
   useModalOverlay(isOpen, onClose);
+
+  const baseServings = Math.max(1, Number(recipe?.servings) || 2);
+  const initialServings = Math.max(1, Math.round(baseServings * (scaleFactor || 1)));
+  const [servings, setServings] = useState<number>(initialServings);
   const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
 
-  // Merge ingredients that share a parent in the same recipe across all groups (e.g. Gurkenwasser -> Gewürzgurken)
+  useEffect(() => {
+    if (isOpen) {
+      setServings(initialServings);
+    }
+  }, [isOpen, initialServings]);
+
+  const activeScaleFactor = servings / baseServings;
+
+  // Merge ingredients that share a parent in the same recipe across all groups
   const allItems = useMemo(() => {
     const allIngredientsInRecipe = sortedIngredients.flatMap((g) => g.group.items);
     const childMap = new Map<string, Ingredient[]>();
@@ -86,26 +100,24 @@ export default function ShoppingConfirmSheet({
     return items;
   }, [sortedIngredients]);
 
-  // Initialize selection when drawer opens, taking pantry stock & staple status into account
+  // Initialize selection when drawer opens or portions change, taking pantry stock & staple status into account
   useEffect(() => {
     if (isOpen) {
       const initial: Record<string, boolean> = {};
       allItems.forEach((item) => {
-        const requiredAmt = (item.primaryIngredient.amount || 0) * scaleFactor;
+        const requiredAmt = (item.primaryIngredient.amount || 0) * activeScaleFactor;
         const stockMatch = findPantryStockMatch(
           item.primaryIngredient,
           pantryItems,
           requiredAmt,
           item.primaryIngredient.unit
         );
-        // If stock is sufficient (not partial), it is in stock and deselected by default.
-        // If stock is partial (too little in stock), it remains selected so the user buys more.
         const inStockAndSufficient = stockMatch ? !stockMatch.isPartial : false;
         initial[item.id] = !inStockAndSufficient && !item.primaryIngredient.isStaple;
       });
       setSelectedIds(initial);
     }
-  }, [isOpen, allItems, pantryItems, scaleFactor]);
+  }, [isOpen, allItems, pantryItems, activeScaleFactor]);
 
   const toggleItem = (id: string) => {
     hapticLight();
@@ -122,7 +134,7 @@ export default function ShoppingConfirmSheet({
       if (selectedIds[item.id]) {
         const ing = item.primaryIngredient;
         const baseAmount = ing.amount || 0;
-        const scaledAmount = baseAmount * scaleFactor;
+        const scaledAmount = baseAmount * activeScaleFactor;
         itemsToAdd.push({
           ...ing,
           amount: scaledAmount,
@@ -133,6 +145,11 @@ export default function ShoppingConfirmSheet({
     });
     await onConfirm(itemsToAdd);
     onClose();
+  };
+
+  const scaledFormatAmount = (amount: number | undefined, unit: string | undefined) => {
+    if (!amount) return '';
+    return formatQuantity(amount * activeScaleFactor, unit);
   };
 
   const selectedCount = Object.values(selectedIds).filter(Boolean).length;
@@ -146,25 +163,37 @@ export default function ShoppingConfirmSheet({
               <Drawer.Handle />
 
               {/* Header */}
-              <Drawer.Header className="pb-3 mb-1">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center">
+              <Drawer.Header className="pb-3 mb-1 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center shrink-0">
                     <Salad className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  <div>
-                    <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white">
+                  <div className="min-w-0">
+                    <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white truncate">
                       {t('recipe.shoppingConfirmTitle')}
                     </Drawer.Heading>
                     {recipeLabel ? (
-                      <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5 truncate max-w-[220px]">
+                      <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5 truncate max-w-[170px] sm:max-w-[260px]">
                         {recipeLabel}
                       </p>
                     ) : (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 font-normal mt-0.5">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-normal mt-0.5 truncate">
                         {t('recipe.shoppingConfirmSubtitle')}
                       </p>
                     )}
                   </div>
+                </div>
+
+                {/* Servings Stepper */}
+                <div className="shrink-0">
+                  <ServingsStepper
+                    servings={servings}
+                    onDecrease={() => setServings((s) => Math.max(1, s - 1))}
+                    onIncrease={() => setServings((s) => s + 1)}
+                    size="md"
+                    showIcon={true}
+                    ariaLabel={t('mealPlanner.servings')}
+                  />
                 </div>
               </Drawer.Header>
 
@@ -172,7 +201,7 @@ export default function ShoppingConfirmSheet({
               <Drawer.Body className="overflow-y-scroll py-2 pr-1 flex-1 [scrollbar-width:thin] [scrollbar-color:rgba(156,163,175,0.4)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
                 <div className="flex flex-col gap-1">
                   {allItems.map((item) => {
-                    const requiredAmt = (item.primaryIngredient.amount || 0) * scaleFactor;
+                    const requiredAmt = (item.primaryIngredient.amount || 0) * activeScaleFactor;
                     const pantryStockMatch = findPantryStockMatch(
                       item.primaryIngredient,
                       pantryItems,
@@ -185,7 +214,7 @@ export default function ShoppingConfirmSheet({
                         item={item}
                         isChecked={!!selectedIds[item.id]}
                         onToggle={() => toggleItem(item.id)}
-                        formatAmount={formatAmount}
+                        formatAmount={scaledFormatAmount}
                         groupCategory={item.groupCategory}
                         pantryStockMatch={pantryStockMatch}
                       />
