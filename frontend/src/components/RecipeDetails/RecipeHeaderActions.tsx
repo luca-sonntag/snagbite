@@ -89,7 +89,7 @@ export default function RecipeHeaderActions({
                 }}
                 className="flex items-center gap-3 w-full px-4 py-3.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer outline-none border-none"
               >
-                <Folder className="w-4 h-4 text-emerald-500" />
+                <Folder className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
                 <span>{t('catalog.bulkAddToCollection') || 'Zu Sammlung hinzufügen'}</span>
               </button>
             )}
@@ -103,7 +103,7 @@ export default function RecipeHeaderActions({
                 }}
                 className="flex items-center gap-3 w-full px-4 py-3.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer outline-none border-none"
               >
-                <Tag className="w-4 h-4 text-emerald-500" />
+                <Tag className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
                 <span>{t('catalog.manageRecipeFlagsTitle') || 'Labels verwalten'}</span>
               </button>
             )}
@@ -118,12 +118,12 @@ export default function RecipeHeaderActions({
             >
               {isCopied ? (
                 <>
-                  <Check className="w-4 h-4 text-emerald-500" />
+                  <Check className="w-4 h-4 text-emerald-500 shrink-0" />
                   <span className="text-emerald-500 font-bold">{t('recipe.copied')}</span>
                 </>
               ) : (
                 <>
-                  <Copy className="w-4 h-4 text-emerald-500" />
+                  <Copy className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
                   <span>{t('recipe.copyRecipe')}</span>
                 </>
               )}
@@ -138,7 +138,7 @@ export default function RecipeHeaderActions({
                 }}
                 className="flex items-center gap-3 w-full px-4 py-3.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer outline-none border-none"
               >
-                <ShoppingCart className="w-4 h-4 text-emerald-500" />
+                <ShoppingCart className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
                 <span>{t('recipe.goToShoppingList')}</span>
               </button>
             )}
@@ -152,7 +152,7 @@ export default function RecipeHeaderActions({
                 }}
                 className="flex items-center gap-3 w-full px-4 py-3.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/10 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer outline-none border-none"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
                 <span>{t('recipe.delete')}</span>
               </button>
             )}
@@ -169,7 +169,7 @@ export default function RecipeHeaderActions({
                 }}
                 className="flex items-center gap-3 w-full px-4 py-3.5 text-sm font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer outline-none border-none"
               >
-                <RefreshCw className="w-4 h-4 text-amber-500" />
+                <RefreshCw className="w-4 h-4 text-amber-500 shrink-0" />
                 <span>[DEV] Neu extrahieren</span>
               </button>
             )}
