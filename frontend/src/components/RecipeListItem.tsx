@@ -105,20 +105,15 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
 
       {/* Content */}
       <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 pointer-events-none">
-        {/* Title line with inline favorite star */}
-        <div className="flex items-center gap-1.5 min-w-0">
-          <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-            {r.title}
-          </h4>
-          {isFavorite && !isSelectMode && (
-            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
-          )}
-        </div>
+        {/* Title line */}
+        <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+          {r.title}
+        </h4>
 
-        {/* Bottom meta line: Duration pill + Tag on left, Calories + Health Score on right */}
-        {(totalTimeStr || firstTag || caloriesFormatted || (healthScoreNum !== null && healthColor && healthLetter)) && (
+        {/* Bottom meta line: Duration pill + Favorite Star + Tag on left, Calories + Health Score on right */}
+        {(totalTimeStr || isFavorite || firstTag || caloriesFormatted || (healthScoreNum !== null && healthColor && healthLetter)) && (
           <div className="flex items-center justify-between gap-1.5 mt-1.5 text-xs select-none">
-            {/* Left Cluster: Gray Duration Pill & 1 Tag */}
+            {/* Left Cluster: Gray Duration Pill, Favorite Star & 1 Tag */}
             <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
               {totalTimeStr && (
                 <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
@@ -126,9 +121,17 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
                   <span>{totalTimeStr}</span>
                 </span>
               )}
-              {firstTag && (
+              {isFavorite && !isSelectMode && (
                 <>
                   {totalTimeStr && <span className="text-gray-300 dark:text-gray-600 text-[9px] leading-none select-none">•</span>}
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
+                </>
+              )}
+              {firstTag && (
+                <>
+                  {(totalTimeStr || (isFavorite && !isSelectMode)) && (
+                    <span className="text-gray-300 dark:text-gray-600 text-[9px] leading-none select-none">•</span>
+                  )}
                   <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 truncate max-w-[7rem] sm:max-w-[10rem]">
                     {firstTag}
                   </span>
