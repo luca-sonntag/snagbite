@@ -14,6 +14,7 @@ export interface MealPlanWeekGroupProps {
   todayStr: string;
   selectedDate: string | null;
   highlightedDate: string | null;
+  onSelectDay?: (dateStr: string) => void;
   onExpandWeek: (weekKey: string) => void;
   onSelectRecipe: (recipeId: string) => void;
   onOpenCookMode?: (recipeId: string) => void;
@@ -32,6 +33,7 @@ export const MealPlanWeekGroup = React.memo<MealPlanWeekGroupProps>(({
   todayStr,
   selectedDate,
   highlightedDate,
+  onSelectDay,
   onExpandWeek,
   onSelectRecipe,
   onOpenCookMode,
@@ -118,6 +120,7 @@ export const MealPlanWeekGroup = React.memo<MealPlanWeekGroupProps>(({
             isToday={isToday}
             isPast={isPast}
             isHighlighted={isHighlighted}
+            onSelectDay={onSelectDay}
             onSelectRecipe={onSelectRecipe}
             onOpenCookMode={onOpenCookMode}
             onAddRecipeForDate={onAddRecipeForDate}

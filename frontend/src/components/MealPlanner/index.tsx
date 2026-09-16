@@ -179,6 +179,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
               todayStr={todayStr}
               selectedDate={selectedDate}
               highlightedDate={highlightedDate}
+              onSelectDay={setSelectedDate}
               onExpandWeek={expandWeek}
               onSelectRecipe={onSelectRecipe}
               onOpenCookMode={onOpenCookMode}
