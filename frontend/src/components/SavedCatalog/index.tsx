@@ -715,6 +715,7 @@ export default function SavedCatalog({
               recipeTags={getRecipeTags(job.recipe!)}
               bindLongPress={bindLongPress(job.recipeId, job)}
               onClick={(e) => handleCardClick(e, job)}
+              showRemix={true}
             />
           ))}
         </div>
