@@ -11,6 +11,8 @@ export interface UseSwipeGestureOptions {
   maxVertical?: number;
   /** Enable interactive drag translation during swipe gesture (default: true) */
   interactive?: boolean;
+  /** Animation variant to apply on direction switch (default: 'week') */
+  animationVariant?: 'week' | 'tab' | 'step';
 }
 
 export interface SwipeGestureResult {
@@ -39,6 +41,7 @@ export function useSwipeGesture({
   threshold = 45,
   maxVertical = 100,
   interactive = true,
+  animationVariant = 'week',
 }: UseSwipeGestureOptions): SwipeGestureResult {
   const [dragOffset, setDragOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -111,9 +114,9 @@ export function useSwipeGesture({
 
   const animationClass =
     direction === 'next'
-      ? 'animate-tab-in-right'
+      ? `animate-${animationVariant}-in-right`
       : direction === 'prev'
-        ? 'animate-tab-in-left'
+        ? `animate-${animationVariant}-in-left`
         : '';
 
   const containerStyle: CSSProperties = {

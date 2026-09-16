@@ -118,13 +118,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
       />
 
       {/* Unified Calendar Widget Card */}
-      <div
-        className="w-full flex flex-col gap-1.5 p-2 rounded-3xl bg-gray-100/75 dark:bg-gray-900/90 border-none shadow-2xs select-none overflow-hidden"
-        onTouchStart={calendarSwipe.onTouchStart}
-        onTouchMove={calendarSwipe.onTouchMove}
-        onTouchEnd={calendarSwipe.onTouchEnd}
-        style={calendarSwipe.containerStyle}
-      >
+      <div className="w-full flex flex-col gap-1.5 p-2 rounded-3xl bg-gray-100/75 dark:bg-gray-900/90 border-none shadow-2xs select-none">
         <WeekNavigator
           weekStart={currentWeekStart}
           weekEnd={weekEnd}
@@ -142,19 +136,30 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
             goToToday();
           }}
         />
+
+        {/* Swipeable Calendar Days Strip */}
         <div
-          key={currentWeekStart.toISOString()}
-          className={`w-full ${calendarSwipe.animationClass}`}
+          className="w-full overflow-hidden"
+          onTouchStart={calendarSwipe.onTouchStart}
+          onTouchMove={calendarSwipe.onTouchMove}
+          onTouchEnd={calendarSwipe.onTouchEnd}
         >
-          <WeekDayPicker
-            days={weekDays}
-            selectedDate={selectedDate}
-            onSelectDate={(d) => {
-              daySwipe.setDirection(null);
-              setSelectedDate(d);
-            }}
-          />
+          <div
+            key={currentWeekStart.toISOString()}
+            className={`w-full ${calendarSwipe.animationClass}`}
+            style={calendarSwipe.containerStyle}
+          >
+            <WeekDayPicker
+              days={weekDays}
+              selectedDate={selectedDate}
+              onSelectDate={(d) => {
+                daySwipe.setDirection(null);
+                setSelectedDate(d);
+              }}
+            />
+          </div>
         </div>
+
         {/* Daily Macro/Time Insight integrated into widget */}
         <DailyInsightPill entries={activeDayEntries} />
       </div>

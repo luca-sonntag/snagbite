@@ -415,6 +415,37 @@ html.dark .glass-panel {
   animation: tab-slide-in-left 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Directional slide-in for meal planner calendar week */
+@keyframes week-slide-in-right {
+  from {
+    opacity: 0.35;
+    transform: translateX(48px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes week-slide-in-left {
+  from {
+    opacity: 0.35;
+    transform: translateX(-48px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-week-in-right {
+  animation: week-slide-in-right 0.26s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+}
+
+.animate-week-in-left {
+  animation: week-slide-in-left 0.26s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+}
+
 /* Direction-aware step transitions for Cooking Mode */
 @keyframes step-slide-in-right {
   from {
