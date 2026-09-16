@@ -11,6 +11,7 @@ import {
   formatDateHuman,
   buildWeekDaysInfo,
   buildAgendaDates,
+  groupDatesByWeek,
 } from '../mealPlannerUtils.js';
 
 describe('mealPlannerUtils', () => {
@@ -205,6 +206,33 @@ describe('mealPlannerUtils', () => {
       assert.ok(extendedDates.includes('2026-09-21'));
       assert.ok(extendedDates.includes('2026-09-27'));
       assert.equal(extendedDates[extendedDates.length - 1], '2026-09-27');
+    });
+  });
+
+  describe('groupDatesByWeek', () => {
+    it('correctly groups dates into distinct calendar week buckets', () => {
+      const dates = [
+        '2026-09-12', // Sat (CW 37, Monday is 2026-09-07)
+        '2026-09-14', // Mon (CW 38, Monday is 2026-09-14)
+        '2026-09-15', // Tue (CW 38)
+        '2026-09-16', // Wed (CW 38)
+        '2026-09-21', // Mon (CW 39, Monday is 2026-09-21)
+      ];
+
+      const groups = groupDatesByWeek(dates);
+      assert.equal(groups.length, 3);
+
+      // Week 1: 2026-09-07 (contains 2026-09-12)
+      assert.equal(groups[0].weekKey, '2026-09-07');
+      assert.deepEqual(groups[0].dates, ['2026-09-12']);
+
+      // Week 2: 2026-09-14 (contains 2026-09-14, 2026-09-15, 2026-09-16)
+      assert.equal(groups[1].weekKey, '2026-09-14');
+      assert.deepEqual(groups[1].dates, ['2026-09-14', '2026-09-15', '2026-09-16']);
+
+      // Week 3: 2026-09-21 (contains 2026-09-21)
+      assert.equal(groups[2].weekKey, '2026-09-21');
+      assert.deepEqual(groups[2].dates, ['2026-09-21']);
     });
   });
 });

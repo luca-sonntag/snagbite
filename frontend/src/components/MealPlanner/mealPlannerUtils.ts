@@ -198,3 +198,37 @@ export function buildAgendaDates(
   return Array.from(dateSet).sort((a, b) => a.localeCompare(b));
 }
 
+export interface AgendaWeekGroup {
+  weekKey: string;
+  weekStart: Date;
+  weekEnd: Date;
+  dates: string[];
+}
+
+/**
+ * Groups an array of sorted date strings (YYYY-MM-DD) by calendar week (Monday–Sunday).
+ */
+export function groupDatesByWeek(dates: string[]): AgendaWeekGroup[] {
+  const groupsMap = new Map<string, AgendaWeekGroup>();
+
+  for (const dateStr of dates) {
+    const d = new Date(dateStr + 'T00:00:00');
+    const monday = getMonday(d);
+    const mondayStr = formatDateIso(monday);
+
+    let group = groupsMap.get(mondayStr);
+    if (!group) {
+      group = {
+        weekKey: mondayStr,
+        weekStart: monday,
+        weekEnd: addDays(monday, 6),
+        dates: [],
+      };
+      groupsMap.set(mondayStr, group);
+    }
+    group.dates.push(dateStr);
+  }
+
+  return Array.from(groupsMap.values());
+}
+
