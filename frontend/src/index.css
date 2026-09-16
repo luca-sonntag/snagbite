@@ -32,7 +32,7 @@
   --color-gray-300: #d4d4d8;
   --color-gray-200: #e4e4e7;
   --color-gray-100: #f4f4f5;
-  --color-gray-50:  #fafafa;
+  --color-gray-50:  #f8fafc;
 
   --color-slate-950: #09090b;
   --color-slate-900: #121215;
@@ -42,6 +42,7 @@
   --color-slate-600: #3f3f46;
   --color-slate-500: #71717a;
   --color-slate-400: #a1a1aa;
+  --color-slate-50:  #f8fafc;
 }
 
 @import "@heroui/styles";

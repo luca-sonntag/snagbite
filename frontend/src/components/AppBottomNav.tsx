@@ -44,7 +44,7 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
     <>
       {/* Subtle bottom gradient fade to soften scrolling content behind floating bars */}
       <div
-        className={`fixed bottom-0 inset-x-0 h-28 pointer-events-none z-30 bg-gradient-to-t from-[#f9fafb] via-[#f9fafb]/80 to-transparent dark:from-[#000000] dark:via-[#000000]/80 transition-opacity duration-300 ${
+        className={`fixed bottom-0 inset-x-0 h-28 pointer-events-none z-30 bg-gradient-to-t from-[#f8fafc] via-[#f8fafc]/80 to-transparent dark:from-[#000000] dark:via-[#000000]/80 transition-opacity duration-300 ${
           isBottomBarHidden ? 'opacity-0' : 'opacity-100'
         }`}
         aria-hidden="true"

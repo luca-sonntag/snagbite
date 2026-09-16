@@ -38,7 +38,7 @@ export const ShoppingStickyHeader: React.FC<ShoppingStickyHeaderProps> = ({
   return (
     <div
       id="shopping-sticky-header"
-      className={`sticky top-[var(--app-sticky-top,0px)] z-30 -mx-4 px-4 bg-[#f9fafb]/95 dark:bg-gray-950/95 backdrop-blur-md transition-all duration-200 flex flex-col border-none pt-2 ${
+      className={`sticky top-[var(--app-sticky-top,0px)] z-30 -mx-4 px-4 bg-[#f8fafc]/95 dark:bg-gray-950/95 backdrop-blur-md transition-all duration-200 flex flex-col border-none pt-2 ${
         isCollapsed
           ? 'shadow-[0_4px_16px_rgba(0,0,0,0.04)] pb-2.5'
           : 'pb-1.5'
