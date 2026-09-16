@@ -10,6 +10,7 @@ export interface MealPlanCardMenuProps {
   entry: MealPlanEntry;
   onUpdateServings?: (id: string, servings: number) => void;
   onToggleCooked: (entry: MealPlanEntry) => void;
+  onCookTodayAndPull?: (entry: MealPlanEntry) => void;
   onDeleteEntry: (id: string) => void;
   onMoveToTomorrow?: (entry: MealPlanEntry) => void;
   onMoveToToday?: (entry: MealPlanEntry) => void;
@@ -19,9 +20,9 @@ export interface MealPlanCardMenuProps {
 export const MealPlanCardMenu: React.FC<MealPlanCardMenuProps> = ({
   entry,
   onToggleCooked,
+  onCookTodayAndPull,
   onDeleteEntry,
   onMoveToTomorrow,
-  onMoveToToday,
   onOpenCookMode,
 }) => {
   const { t } = useI18n();
@@ -89,21 +90,22 @@ export const MealPlanCardMenu: React.FC<MealPlanCardMenuProps> = ({
             ) : (
               /* ZUKUNFT: Auf heute vorziehen & kochen */
               <>
-                {onMoveToToday && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      hapticMedium();
-                      setIsOpen(false);
-                      onMoveToToday(entry);
-                      onToggleCooked({ ...entry, planDate: todayStr });
-                    }}
-                    className="flex items-center gap-3 w-full px-3.5 py-3 min-h-[44px] text-sm font-semibold text-gray-800 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer border-none touch-manipulation"
-                  >
-                    <Zap className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
-                    <span>{t('mealPlanner.cookTodayAndPull')}</span>
-                  </button>
-                )}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    hapticMedium();
+                    setIsOpen(false);
+                    if (onCookTodayAndPull) {
+                      onCookTodayAndPull(entry);
+                    } else {
+                      onToggleCooked(entry);
+                    }
+                  }}
+                  className="flex items-center gap-3 w-full px-3.5 py-3 min-h-[44px] text-sm font-semibold text-gray-800 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer border-none touch-manipulation"
+                >
+                  <Zap className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
+                  <span>{t('mealPlanner.cookTodayAndPull')}</span>
+                </button>
               </>
             )}
 
@@ -145,3 +147,5 @@ export const MealPlanCardMenu: React.FC<MealPlanCardMenuProps> = ({
 
 export const MealPlanCardActions = MealPlanCardMenu;
 export default MealPlanCardMenu;
+
+

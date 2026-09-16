@@ -19,6 +19,7 @@ export interface MealPlanDaySectionProps {
   onAddRecipeForDate: (dateStr: string) => void;
   onUpdateServings: (id: string, servings: number) => void;
   onToggleCooked: (entry: MealPlanEntry) => void;
+  onCookTodayAndPull?: (entry: MealPlanEntry) => void;
   onDeleteEntry: (id: string) => void;
   onMoveToTomorrow?: (entry: MealPlanEntry) => void;
   onMoveToToday?: (entry: MealPlanEntry) => void;
@@ -36,6 +37,7 @@ export const MealPlanDaySection = React.memo<MealPlanDaySectionProps>(({
   onAddRecipeForDate,
   onUpdateServings,
   onToggleCooked,
+  onCookTodayAndPull,
   onDeleteEntry,
   onMoveToTomorrow,
   onMoveToToday,
@@ -121,6 +123,7 @@ export const MealPlanDaySection = React.memo<MealPlanDaySectionProps>(({
                 entry={entry}
                 onUpdateServings={onUpdateServings}
                 onToggleCooked={onToggleCooked}
+                onCookTodayAndPull={onCookTodayAndPull}
                 onDeleteEntry={onDeleteEntry}
                 onMoveToTomorrow={onMoveToTomorrow}
                 onMoveToToday={onMoveToToday}

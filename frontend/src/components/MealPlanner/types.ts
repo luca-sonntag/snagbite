@@ -31,6 +31,7 @@ export interface MealPlanDaySectionProps {
   onAddRecipeForDate: (dateStr: string) => void;
   onUpdateServings: (id: string, servings: number) => void;
   onToggleCooked: (entry: MealPlanEntry) => void;
+  onCookTodayAndPull?: (entry: MealPlanEntry) => void;
   onDeleteEntry: (id: string) => void;
   onMoveToTomorrow?: (entry: MealPlanEntry) => void;
   onMoveToToday?: (entry: MealPlanEntry) => void;
@@ -81,6 +82,7 @@ export interface MealPlanCardProps {
   entry: MealPlanEntry;
   onUpdateServings: (id: string, servings: number) => void;
   onToggleCooked: (entry: MealPlanEntry) => void;
+  onCookTodayAndPull?: (entry: MealPlanEntry) => void;
   onDeleteEntry: (id: string) => void;
   onMoveToTomorrow?: (entry: MealPlanEntry) => void;
   onMoveToToday?: (entry: MealPlanEntry) => void;

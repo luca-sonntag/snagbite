@@ -6,6 +6,7 @@ import { MealPlanCardMenu } from './MealPlanCardActions';
 export const MealPlanCard = React.memo<MealPlanCardProps>(({
   entry,
   onToggleCooked,
+  onCookTodayAndPull,
   onDeleteEntry,
   onMoveToTomorrow,
   onMoveToToday,
@@ -31,6 +32,7 @@ export const MealPlanCard = React.memo<MealPlanCardProps>(({
         <MealPlanCardMenu
           entry={entry}
           onToggleCooked={onToggleCooked}
+          onCookTodayAndPull={onCookTodayAndPull}
           onDeleteEntry={onDeleteEntry}
           onMoveToTomorrow={onMoveToTomorrow}
           onMoveToToday={onMoveToToday}

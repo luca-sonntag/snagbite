@@ -196,12 +196,13 @@ describe('mealPlannerUtils', () => {
       assert.ok(dates.includes('2026-09-17'));
       assert.ok(dates.includes('2026-09-18'));
       assert.ok(dates.includes('2026-09-19'));
-      assert.ok(dates.includes('2026-09-20'));
-      // Should include 2026-09-25 (future planned)
+      // Should include 2026-09-21 through 2026-09-27 (full week for future planned recipe)
+      assert.ok(dates.includes('2026-09-21'));
       assert.ok(dates.includes('2026-09-25'));
+      assert.ok(dates.includes('2026-09-27'));
       // Should be sorted chronologically
       assert.equal(dates[0], '2026-09-01');
-      assert.equal(dates[dates.length - 1], '2026-09-25');
+      assert.equal(dates[dates.length - 1], '2026-09-27');
 
       // Extended (extendedWeeks = 1): also includes next week 2026-09-21..2026-09-27
       const extendedDates = buildAgendaDates(wednesday, mealPlans, 1);

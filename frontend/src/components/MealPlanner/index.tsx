@@ -50,6 +50,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     addPlan,
     updateServings,
     toggleCooked,
+    pullToTodayAndMarkCooked,
     moveToTomorrow,
     moveToToday,
     deletePlan,
@@ -75,7 +76,10 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     id: string;
     title: string;
     entry: MealPlanEntry;
+    pullToToday?: boolean;
   } | null>(null);
+
+  const todayStr = useMemo(() => formatDateIso(new Date()), []);
 
   const handleToggleCooked = useCallback((entry: MealPlanEntry) => {
     if (entry.isCooked) {
@@ -85,11 +89,19 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
         id: entry.recipeId,
         title: entry.recipe?.title || 'Rezept',
         entry,
+        pullToToday: entry.planDate !== todayStr,
       });
     }
-  }, [toggleCooked]);
+  }, [toggleCooked, todayStr]);
 
-  const todayStr = useMemo(() => formatDateIso(new Date()), []);
+  const handleCookTodayAndPull = useCallback((entry: MealPlanEntry) => {
+    setCookedModalTarget({
+      id: entry.recipeId,
+      title: entry.recipe?.title || 'Rezept',
+      entry,
+      pullToToday: true,
+    });
+  }, []);
 
   // Bidirectional ScrollSpy: connects vertical list with sticky calendar header
   const { highlightedDate, scrollToDate } = useMealPlanScrollSpy({
@@ -205,6 +217,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
               onAddRecipeForDate={(d) => setPickerSlot({ date: d })}
               onUpdateServings={updateServings}
               onToggleCooked={handleToggleCooked}
+              onCookTodayAndPull={handleCookTodayAndPull}
               onDeleteEntry={deletePlan}
               onMoveToTomorrow={moveToTomorrow}
               onMoveToToday={moveToToday}
@@ -258,7 +271,11 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
           recipeId={cookedModalTarget.id}
           recipeTitle={cookedModalTarget.title}
           onSuccess={() => {
-            toggleCooked(cookedModalTarget.entry);
+            if (cookedModalTarget.pullToToday) {
+              pullToTodayAndMarkCooked(cookedModalTarget.entry);
+            } else {
+              toggleCooked(cookedModalTarget.entry);
+            }
             setCookedModalTarget(null);
           }}
           onClose={() => setCookedModalTarget(null)}

@@ -123,6 +123,34 @@ export function useMealPlanActions({
     [getAccessToken, toast, t, fetchPlans, setMealPlans],
   );
 
+  // Move entry to today and mark cooked (pull forward & cook)
+  const pullToTodayAndMarkCooked = useCallback(
+    async (entry: MealPlanEntry) => {
+      const todayStr = formatDateIso(new Date());
+      setMealPlans((prev) =>
+        prev.map((p) =>
+          p.id === entry.id ? { ...p, planDate: todayStr, isCooked: true } : p,
+        ),
+      );
+      window.dispatchEvent(new CustomEvent('meal-plans-updated'));
+      try {
+        const token = await getAccessToken();
+        await fetch(apiUrl(`/api/meal-plan/${entry.id}`), {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ planDate: todayStr, isCooked: true }),
+        });
+      } catch (err) {
+        console.error('Failed to pull to today and mark cooked:', err);
+        fetchPlans();
+      }
+    },
+    [getAccessToken, fetchPlans, setMealPlans],
+  );
+
   // Delete plan entry
   const deletePlan = useCallback(
     async (id: string) => {
@@ -146,6 +174,7 @@ export function useMealPlanActions({
   return {
     updateServings,
     toggleCooked,
+    pullToTodayAndMarkCooked,
     moveToTomorrow,
     moveToToday,
     deletePlan,

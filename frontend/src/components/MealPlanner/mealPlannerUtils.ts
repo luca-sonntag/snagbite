@@ -201,10 +201,20 @@ export function buildAgendaDates(
     }
   }
 
-  // 3. All dates with existing meal plans (past & future)
+  // 3. Planned recipes:
+  // - Current and future weeks: always include all 7 days of that entire week
+  // - Past weeks: include only the specific planned date
+  const currentMondayStr = formatDateIso(currentMonday);
   for (const plan of mealPlans) {
     if (plan.planDate) {
-      dateSet.add(plan.planDate);
+      if (plan.planDate >= currentMondayStr) {
+        const planMonday = getMonday(new Date(plan.planDate + 'T00:00:00'));
+        for (let i = 0; i < 7; i++) {
+          dateSet.add(formatDateIso(addDays(planMonday, i)));
+        }
+      } else {
+        dateSet.add(plan.planDate);
+      }
     }
   }
 
