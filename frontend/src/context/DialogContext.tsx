@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { createPortal } from 'react-dom';
-import { Button } from '@heroui/react';
+import { Button, Modal } from '@heroui/react';
 import { AlertTriangle, Info, CheckCircle2, X } from 'lucide-react';
 import { useI18n } from './I18nContext';
 import { useModalOverlay } from './OverlayStackContext';
@@ -148,66 +147,68 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
     <DialogContext.Provider value={{ alert, confirm }}>
       {children}
 
-      {state.isOpen && createPortal(
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300"
-            onClick={() => state.type === 'confirm' ? null : handleClose(false)}
-          />
-
-          {/* Modal Container */}
-          <div className="relative w-full max-w-sm rounded-3xl border-none p-6 shadow-[0_10px_40px_rgba(0,0,0,0.15)] bg-white dark:bg-gray-900 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
-            {/* Close Button for Alert, or optional */}
-            {state.type === 'alert' && (
-              <button 
-                onClick={() => handleClose(false)}
-                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center justify-center transition-all border-none active:scale-95 cursor-pointer"
-                aria-label={t('dialog.closeAria')}
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-
-            {/* Header: Icon + Title */}
-            <div className="flex gap-3.5 items-start">
-              <div className={`w-11 h-11 rounded-2xl flex-shrink-0 flex items-center justify-center ${getStatusClasses()}`}>
-                {getIcon()}
-              </div>
-              <div className="flex-1 min-w-0 pt-0.5">
-                <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">
-                  {state.title}
-                </h3>
-              </div>
-            </div>
-
-            {/* Body Description */}
-            <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed pl-14.5 whitespace-pre-line">
-              {renderMessage(state.message)}
-            </div>
-
-            {/* Footer Buttons */}
-            <div className="flex justify-end gap-2.5 mt-2 pl-14.5">
-              {state.type === 'confirm' && (
-                <Button 
-                  variant="tertiary"
-                  onPress={() => handleClose(false)}
-                  className="rounded-2xl font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-none active:scale-95 transition-all px-4 py-2.5 h-11 cursor-pointer"
+      <Modal>
+        <Modal.Backdrop
+          isOpen={state.isOpen}
+          onOpenChange={(open) => {
+            if (!open) handleClose(false);
+          }}
+          isDismissable={state.type !== 'confirm'}
+          className="!z-[200]"
+        >
+          <Modal.Container placement="center" className="!z-[200] p-4">
+            <Modal.Dialog className="relative w-full max-w-sm rounded-3xl border-none p-6 shadow-[0_10px_40px_rgba(0,0,0,0.15)] bg-white dark:bg-gray-900 flex flex-col gap-4">
+              {/* Close Button for Alert */}
+              {state.type === 'alert' && (
+                <button 
+                  type="button"
+                  onClick={() => handleClose(false)}
+                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center justify-center transition-all border-none active:scale-95 cursor-pointer"
+                  aria-label={t('dialog.closeAria')}
                 >
-                  {state.cancelLabel}
-                </Button>
+                  <X className="w-4 h-4" />
+                </button>
               )}
-              <Button 
-                onPress={() => handleClose(true)}
-                className={getConfirmButtonClasses()}
-              >
-                {state.confirmLabel}
-              </Button>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
+
+              {/* Header: Icon + Title */}
+              <div className="flex gap-3.5 items-start">
+                <div className={`w-11 h-11 rounded-2xl flex-shrink-0 flex items-center justify-center ${getStatusClasses()}`}>
+                  {getIcon()}
+                </div>
+                <div className="flex-1 min-w-0 pt-0.5">
+                  <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">
+                    {state.title}
+                  </h3>
+                </div>
+              </div>
+
+              {/* Body Description */}
+              <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed pl-14.5 whitespace-pre-line">
+                {renderMessage(state.message)}
+              </div>
+
+              {/* Footer Buttons */}
+              <div className="flex justify-end gap-2.5 mt-2 pl-14.5">
+                {state.type === 'confirm' && (
+                  <Button 
+                    variant="tertiary"
+                    onPress={() => handleClose(false)}
+                    className="rounded-2xl font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-none active:scale-95 transition-all px-4 py-2.5 h-11 cursor-pointer"
+                  >
+                    {state.cancelLabel}
+                  </Button>
+                )}
+                <Button 
+                  onPress={() => handleClose(true)}
+                  className={getConfirmButtonClasses()}
+                >
+                  {state.confirmLabel}
+                </Button>
+              </div>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
     </DialogContext.Provider>
   );
 }
