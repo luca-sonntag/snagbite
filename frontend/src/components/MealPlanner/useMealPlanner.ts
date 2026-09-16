@@ -74,10 +74,9 @@ export function useMealPlanner() {
       const customEvent = e as CustomEvent<{ recipeId?: string }>;
       const cookedRecipeId = customEvent.detail?.recipeId;
       if (cookedRecipeId) {
-        const todayIso = formatDateIso(new Date());
         setMealPlans((prev) =>
           prev.map((p) =>
-            p.recipeId === cookedRecipeId && (p.planDate === todayIso || p.planDate === selectedDate)
+            p.recipeId === cookedRecipeId
               ? { ...p, isCooked: true }
               : p,
           ),
