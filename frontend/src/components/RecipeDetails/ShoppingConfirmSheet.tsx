@@ -158,12 +158,12 @@ export default function ShoppingConfirmSheet({
     <div onClick={(e) => e.stopPropagation()}>
       <Drawer>
         <Drawer.Backdrop isOpen={isOpen} onOpenChange={(open) => { if (!open) onClose(); }} className="!z-[100]">
-          <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
+          <Drawer.Content placement="bottom" className="!z-[100] !bg-[#f8fafc] dark:!bg-[#09090b]">
+            <Drawer.Dialog className="relative !bg-[#f8fafc] dark:!bg-[#09090b] max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
               <Drawer.Handle />
 
               {/* Header */}
-              <Drawer.Header className="pb-2 mb-1">
+              <Drawer.Header className="pb-2 mb-1 !bg-transparent border-none">
                 <div className="flex items-center gap-2.5">
                   <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center shrink-0">
                     <Salad className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
@@ -186,7 +186,7 @@ export default function ShoppingConfirmSheet({
               </Drawer.Header>
 
               {/* Dedicated Servings Stepper Row under Header */}
-              <div className="flex items-center justify-between py-1.5 px-0.5 mb-2 bg-transparent border-none select-none">
+              <div className="flex items-center justify-between py-1.5 px-0.5 mb-2 !bg-transparent border-none select-none">
                 <span className="text-sm font-extrabold text-gray-800 dark:text-gray-200">
                   {t('mealPlanner.servings') || 'Portionen'}
                 </span>
@@ -202,12 +202,12 @@ export default function ShoppingConfirmSheet({
               </div>
 
               {/* Body Container with full-width top & bottom scroll shadows */}
-              <div className="relative -mx-5 px-5 flex-1 min-h-0 flex flex-col">
+              <div className="relative -mx-5 px-5 flex-1 min-h-0 flex flex-col !bg-transparent">
                 {/* Top scroll shadow spanning full sheet width */}
                 <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-black/[0.08] dark:from-black/[0.35] to-transparent pointer-events-none z-10" />
 
                 {/* Body: persistent visible scrollbar and flat clean ingredient list */}
-                <Drawer.Body className="overflow-y-scroll py-2 pr-1 flex-1 [scrollbar-width:thin] [scrollbar-color:rgba(156,163,175,0.4)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
+                <Drawer.Body className="overflow-y-scroll py-2 pr-1 flex-1 !bg-transparent [scrollbar-width:thin] [scrollbar-color:rgba(156,163,175,0.4)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
                   <div className="flex flex-col gap-1.5 py-0.5">
                     {allItems.map((item) => {
                       const requiredAmt = (item.primaryIngredient.amount || 0) * activeScaleFactor;
@@ -237,7 +237,7 @@ export default function ShoppingConfirmSheet({
               </div>
 
               {/* Footer */}
-              <Drawer.Footer className="pt-3 flex gap-2.5 bg-transparent border-none">
+              <Drawer.Footer className="pt-3 flex gap-2.5 !bg-transparent border-none">
                 <Button
                   variant="tertiary"
                   onPress={onClose}
