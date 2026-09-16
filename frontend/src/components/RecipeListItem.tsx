@@ -83,7 +83,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
       }}
       {...(bindLongPress ?? {})}
     >
-      {/* Thumbnail (72-80px) with Checkbox or Favorite Star overlay on top corner */}
+      {/* Thumbnail (72-80px) with Checkbox in select mode */}
       <div className="relative w-18 h-18 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shrink-0 border-none ring-1 ring-black/[0.04] dark:ring-white/[0.06] pointer-events-none">
         {isSelectMode && (
           <div
@@ -92,13 +92,6 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
             }`}
           >
             {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3px]" />}
-          </div>
-        )}
-
-        {/* Favorite star neatly overlaid on the top-right corner of the image thumbnail */}
-        {isFavorite && !isSelectMode && (
-          <div className="absolute top-1.5 right-1.5 z-10 w-5 h-5 rounded-full bg-black/45 backdrop-blur-xs flex items-center justify-center text-amber-400 pointer-events-none shadow-xs">
-            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
           </div>
         )}
 
@@ -112,10 +105,15 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
 
       {/* Content */}
       <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 pointer-events-none">
-        {/* Title line */}
-        <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-          {r.title}
-        </h4>
+        {/* Title line with inline favorite star */}
+        <div className="flex items-center gap-1.5 min-w-0">
+          <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+            {r.title}
+          </h4>
+          {isFavorite && !isSelectMode && (
+            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
+          )}
+        </div>
 
         {/* Bottom meta line: Duration pill + Tag on left, Calories + Health Score on right */}
         {(totalTimeStr || firstTag || caloriesFormatted || (healthScoreNum !== null && healthColor && healthLetter)) && (
