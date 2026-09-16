@@ -159,7 +159,7 @@ export default function ShoppingConfirmSheet({
       <Drawer>
         <Drawer.Backdrop isOpen={isOpen} onOpenChange={(open) => { if (!open) onClose(); }} className="!z-[100]">
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 max-h-[85vh] flex flex-col p-4 sm:p-5 pb-[calc(0.75rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
+            <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
               <Drawer.Handle />
 
               {/* Header */}
@@ -227,7 +227,7 @@ export default function ShoppingConfirmSheet({
               </div>
 
               {/* Body: persistent visible scrollbar and flat clean ingredient list */}
-              <Drawer.Body className="overflow-y-scroll py-2 pr-1 flex-1 [scrollbar-width:thin] [scrollbar-color:rgba(156,163,175,0.4)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
+              <Drawer.Body className="overflow-y-scroll pt-1 pb-1 pr-1 flex-1 [scrollbar-width:thin] [scrollbar-color:rgba(156,163,175,0.4)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
                 <div className="flex flex-col gap-1.5">
                   {allItems.map((item) => {
                     const requiredAmt = (item.primaryIngredient.amount || 0) * activeScaleFactor;
@@ -253,7 +253,7 @@ export default function ShoppingConfirmSheet({
               </Drawer.Body>
 
               {/* Footer */}
-              <Drawer.Footer className="pt-2 px-0 pb-0 flex gap-2">
+              <Drawer.Footer className="pt-1.5 flex gap-2">
                 <Button
                   variant="tertiary"
                   onPress={onClose}
