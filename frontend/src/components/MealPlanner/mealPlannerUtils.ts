@@ -149,13 +149,12 @@ export function buildWeekDaysInfo(
 
 /**
  * Builds the chronological list of dates to render in the Unified Agenda Stream.
- * Always includes all 7 days of the current week (and the currently focused week if different),
- * plus any dates that have planned recipes.
+ * Stably includes all 7 days of the current week, all 7 days of the next week,
+ * plus any dates that have planned recipes (past & future).
  */
 export function buildAgendaDates(
   todayDate: Date,
   mealPlans: MealPlanEntry[],
-  focusedWeekStart?: Date,
 ): string[] {
   const dateSet = new Set<string>();
 
@@ -165,15 +164,12 @@ export function buildAgendaDates(
     dateSet.add(formatDateIso(addDays(currentMonday, i)));
   }
 
-  // 2. Focused week (if user navigated to another week): all 7 days
-  if (focusedWeekStart) {
-    const focusedMonday = getMonday(focusedWeekStart);
-    for (let i = 0; i < 7; i++) {
-      dateSet.add(formatDateIso(addDays(focusedMonday, i)));
-    }
+  // 2. Next week: all 7 days for continuous seamless forward planning
+  for (let i = 7; i < 14; i++) {
+    dateSet.add(formatDateIso(addDays(currentMonday, i)));
   }
 
-  // 3. All dates with existing meal plans
+  // 3. All dates with existing meal plans (past & future)
   for (const plan of mealPlans) {
     if (plan.planDate) {
       dateSet.add(plan.planDate);

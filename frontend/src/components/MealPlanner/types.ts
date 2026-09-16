@@ -19,21 +19,24 @@ export interface MealPlannerViewProps {
   onNavigateToShoppingList?: () => void;
 }
 
-export interface DayEmptyBannerProps {
-  selectedDateStr: string;
-  onAddRecipe: () => void;
-}
-
-export interface UpcomingMealPlansProps {
+export interface MealPlanDaySectionProps {
+  dateStr: string;
   entries: MealPlanEntry[];
+  isToday: boolean;
+  isPast: boolean;
+  isHighlighted?: boolean;
+  onSelectRecipe: (recipeId: string) => void;
+  onOpenCookMode?: (recipeId: string) => void;
   onAddRecipeForDate: (dateStr: string) => void;
   onUpdateServings: (id: string, servings: number) => void;
   onToggleCooked: (entry: MealPlanEntry) => void;
   onDeleteEntry: (id: string) => void;
   onMoveToTomorrow?: (entry: MealPlanEntry) => void;
+}
+
+export interface PastMealPlanCardProps {
+  entry: MealPlanEntry;
   onSelectRecipe: (recipeId: string) => void;
-  onOpenCookMode?: (recipeId: string) => void;
-  onSelectDate?: (dateStr: string) => void;
 }
 
 export interface BulkShoppingItem {
@@ -64,25 +67,12 @@ export interface WeekNavigatorProps {
 
 export interface WeekDayPickerProps {
   days: WeekDayInfo[];
-  selectedDate: string;
+  selectedDate: string | null;
   onSelectDate: (dateStr: string) => void;
 }
 
 export interface DailyInsightPillProps {
   entries: MealPlanEntry[];
-}
-
-export interface DayMealSlotsProps {
-  selectedDateStr: string;
-  entries: MealPlanEntry[];
-  hasAnyFutureEntries?: boolean;
-  onAddRecipe: () => void;
-  onUpdateServings: (id: string, servings: number) => void;
-  onToggleCooked: (entry: MealPlanEntry) => void;
-  onDeleteEntry: (id: string) => void;
-  onMoveToTomorrow?: (entry: MealPlanEntry) => void;
-  onSelectRecipe: (recipeId: string) => void;
-  onOpenCookMode?: (recipeId: string) => void;
 }
 
 export interface MealPlanCardProps {

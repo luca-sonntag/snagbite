@@ -6,7 +6,7 @@ import { MealPlanCardActions } from './MealPlanCardActions';
 import { getTotalTime } from '../../hooks/useSavedCatalog';
 import { hapticLight } from '../../utils/haptics';
 
-export const MealPlanCard: React.FC<MealPlanCardProps> = ({
+export const MealPlanCard = React.memo<MealPlanCardProps>(({
   entry,
   onUpdateServings,
   onToggleCooked,
@@ -82,6 +82,6 @@ export const MealPlanCard: React.FC<MealPlanCardProps> = ({
       </div>
     </div>
   );
-};
+});
 
 export default MealPlanCard;

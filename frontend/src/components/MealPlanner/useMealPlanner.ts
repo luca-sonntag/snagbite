@@ -17,7 +17,7 @@ export function useMealPlanner() {
   const { t, language } = useI18n();
 
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => getMonday(new Date()));
-  const [selectedDate, setSelectedDate] = useState<string>(() => formatDateIso(new Date()));
+  const [selectedDate, setSelectedDate] = useState<string | null>(() => formatDateIso(new Date()));
   const [mealPlans, setMealPlans] = useState<MealPlanEntry[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [pickerDate, setPickerDate] = useState<string | null>(null);
@@ -214,6 +214,7 @@ export function useMealPlanner() {
 
 
   const activeDayEntries = useMemo(() => {
+    if (!selectedDate) return [];
     return mealPlans.filter((p) => p.planDate === selectedDate);
   }, [mealPlans, selectedDate]);
 
@@ -228,8 +229,8 @@ export function useMealPlanner() {
   const futurePlannedCount = futurePlannedEntries.length;
 
   const agendaDates = useMemo(() => {
-    return buildAgendaDates(new Date(), mealPlans, currentWeekStart);
-  }, [mealPlans, currentWeekStart]);
+    return buildAgendaDates(new Date(), mealPlans);
+  }, [mealPlans]);
 
   return {
     currentWeekStart,

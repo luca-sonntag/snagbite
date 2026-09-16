@@ -1,19 +1,18 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import type { MealPlannerViewProps } from './types';
 import type { MealPlanEntry } from '../../types';
 import { useMealPlanner } from './useMealPlanner';
 import { useMealPlanBulkShopping } from './useMealPlanBulkShopping';
+import { useMealPlanScrollSpy } from './useMealPlanScrollSpy';
 import { MealPlannerHeader } from './MealPlannerHeader';
 import { WeekNavigator } from './WeekNavigator';
 import { WeekDayPicker } from './WeekDayPicker';
 import { DailyInsightPill } from './DailyInsightPill';
-import { DayMealSlots } from './DayMealSlots';
-import { UpcomingMealPlans } from './UpcomingMealPlans';
+import { MealPlanDaySection } from './MealPlanDaySection';
 import { MealPlanShoppingSheets } from './MealPlanShoppingSheets';
 import { RecipePickerModal } from './RecipePickerModal';
 import CookedModal from '../CookedModal';
-import { useSwipeGesture } from '../../hooks/useSwipeGesture';
-import { hapticSelection } from '../../utils/haptics';
+import { formatDateIso, addDays } from './mealPlannerUtils';
 
 export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
   history,
@@ -24,21 +23,19 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
 }) => {
   const {
     currentWeekStart,
+    setCurrentWeekStart,
     weekEnd,
     isCurrentWeek,
     selectedDate,
     setSelectedDate,
     mealPlans,
+    agendaDates,
     activeDayEntries,
-    futurePlannedEntries,
-    upcomingPlannedEntries,
     futurePlannedCount,
     weekDays,
     isLoading,
     pickerSlot,
     setPickerSlot,
-    goToPrevWeek,
-    goToNextWeek,
     goToToday,
     addPlan,
     updateServings,
@@ -73,144 +70,121 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     }
   }, []);
 
-  const goToNextDay = useCallback(() => {
-    hapticSelection();
-    const days = weekDays;
-    const idx = days.findIndex((d) => d.dateStr === selectedDate);
-    if (idx < days.length - 1) {
-      setSelectedDate(days[idx + 1].dateStr);
-    } else {
-      goToNextWeek();
-    }
-  }, [weekDays, selectedDate, setSelectedDate, goToNextWeek]);
+  const todayStr = useMemo(() => formatDateIso(new Date()), []);
 
-  const goToPrevDay = useCallback(() => {
-    hapticSelection();
-    const days = weekDays;
-    const idx = days.findIndex((d) => d.dateStr === selectedDate);
-    if (idx > 0) {
-      setSelectedDate(days[idx - 1].dateStr);
-    } else {
-      goToPrevWeek();
-    }
-  }, [weekDays, selectedDate, setSelectedDate, goToPrevWeek]);
+  const handleDeselectDay = useCallback(() => {
+    setSelectedDate(null);
+  }, [setSelectedDate]);
 
-  const calendarSwipe = useSwipeGesture({
-    onSwipeLeft: goToNextWeek,
-    onSwipeRight: goToPrevWeek,
-    nextClassName: 'animate-week-in-right',
-    prevClassName: 'animate-week-in-left',
+  // Bidirectional ScrollSpy: connects vertical list with sticky calendar header
+  const { highlightedDate, scrollToDate } = useMealPlanScrollSpy({
+    agendaDates,
+    currentWeekStart,
+    onWeekChange: setCurrentWeekStart,
+    onDeselectDay: handleDeselectDay,
   });
 
-  const daySwipe = useSwipeGesture({
-    onSwipeLeft: goToNextDay,
-    onSwipeRight: goToPrevDay,
-    nextClassName: 'animate-tab-in-right',
-    prevClassName: 'animate-tab-in-left',
-  });
+  const hasInitialScrolledRef = useRef(false);
+
+  // Initial scroll alignment to 'Heute' (centered) on mount once agenda dates are populated
+  useEffect(() => {
+    if (hasInitialScrolledRef.current) return;
+    if (agendaDates.length > 0) {
+      hasInitialScrolledRef.current = true;
+      const timer = setTimeout(() => {
+        scrollToDate(todayStr, 'auto', 'center');
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [todayStr, scrollToDate, agendaDates]);
 
   return (
-    <div className="w-full flex flex-col gap-3 pb-24 overflow-hidden">
-      {/* Header with page title & shopping action */}
-      <MealPlannerHeader
-        plannedTotalCount={futurePlannedCount}
-        isAddingToShopping={isAddingToShopping}
-        isShopAdded={isShopAdded}
-        onShopWeek={startBulkShopping}
-      />
+    <div className="w-full flex flex-col gap-3 pb-24">
+      {/* Sticky Calendar Top Container */}
+      <div
+        id="meal-planner-sticky-header"
+        className="sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md z-20 pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 flex flex-col gap-2"
+      >
+        {/* Header with title & bulk shopping action */}
+        <MealPlannerHeader
+          plannedTotalCount={futurePlannedCount}
+          isAddingToShopping={isAddingToShopping}
+          isShopAdded={isShopAdded}
+          onShopWeek={startBulkShopping}
+        />
 
-      {/* Unified Calendar Widget */}
-      <div className="w-full flex flex-col gap-1 select-none">
+        {/* Week Navigator */}
         <WeekNavigator
           weekStart={currentWeekStart}
           weekEnd={weekEnd}
           isCurrentWeek={isCurrentWeek}
           onPrevWeek={() => {
-            calendarSwipe.setNavDirection('prev');
-            goToPrevWeek();
+            const prevMonday = addDays(currentWeekStart, -7);
+            setCurrentWeekStart(prevMonday);
+            scrollToDate(formatDateIso(prevMonday), 'smooth');
           }}
           onNextWeek={() => {
-            calendarSwipe.setNavDirection('next');
-            goToNextWeek();
+            const nextMonday = addDays(currentWeekStart, 7);
+            setCurrentWeekStart(nextMonday);
+            scrollToDate(formatDateIso(nextMonday), 'smooth');
           }}
           onToday={() => {
-            calendarSwipe.setNavDirection(null);
             goToToday();
+            setSelectedDate(todayStr);
+            scrollToDate(todayStr, 'smooth', 'center');
           }}
         />
 
-        {/* Swipeable Calendar Days Strip */}
-        <div
-          className="w-full overflow-hidden"
-          onTouchStart={calendarSwipe.onTouchStart}
-          onTouchMove={calendarSwipe.onTouchMove}
-          onTouchEnd={calendarSwipe.onTouchEnd}
-        >
-          <div
-            key={currentWeekStart.toISOString()}
-            className={`w-full ${calendarSwipe.animationClass}`}
-            style={calendarSwipe.containerStyle}
-          >
-            <WeekDayPicker
-              days={weekDays}
-              selectedDate={selectedDate}
-              onSelectDate={(d) => {
-                daySwipe.setNavDirection(null);
-                setSelectedDate(d);
-              }}
-            />
-          </div>
-        </div>
+        {/* 7-Days Strip */}
+        <WeekDayPicker
+          days={weekDays}
+          selectedDate={selectedDate}
+          onSelectDate={(d) => {
+            setSelectedDate(d);
+            scrollToDate(d, 'smooth', d === todayStr ? 'center' : 'start');
+          }}
+        />
 
-        {/* Daily Macro/Time Insight integrated into widget */}
+        {/* Daily Insight Pill (Nutrition & Cooking Time for active day) */}
         <DailyInsightPill entries={activeDayEntries} />
       </div>
 
-      {/* Loading state skeleton vs Day Slots */}
+      {/* Unified Agenda Stream */}
       {isLoading && mealPlans.length === 0 ? (
-        <div className="space-y-3 pt-4">
+        <div className="space-y-3 pt-2">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-20 rounded-2xl bg-gray-200/60 dark:bg-gray-800/50 animate-pulse"
+              className="h-24 rounded-2xl bg-gray-200/60 dark:bg-gray-800/50 animate-pulse"
             />
           ))}
         </div>
       ) : (
-        <div
-          key={selectedDate}
-          className={`space-y-4 ${daySwipe.animationClass || 'animate-fade-in'}`}
-          style={daySwipe.containerStyle}
-          onTouchStart={daySwipe.onTouchStart}
-          onTouchMove={daySwipe.onTouchMove}
-          onTouchEnd={daySwipe.onTouchEnd}
-        >
-          {/* Active selected day meal slots or empty banner */}
-          <DayMealSlots
-            selectedDateStr={selectedDate}
-            entries={activeDayEntries}
-            hasAnyFutureEntries={futurePlannedEntries.length > 0}
-            onAddRecipe={() => setPickerSlot({ date: selectedDate })}
-            onUpdateServings={updateServings}
-            onToggleCooked={handleToggleCooked}
-            onDeleteEntry={deletePlan}
-            onMoveToTomorrow={moveToTomorrow}
-            onSelectRecipe={onSelectRecipe}
-            onOpenCookMode={onOpenCookMode}
-          />
+        <div className="flex flex-col gap-5 pt-1">
+          {agendaDates.map((dateStr) => {
+            const isToday = dateStr === todayStr;
+            const isPast = dateStr < todayStr;
+            const dayEntries = mealPlans.filter((p) => p.planDate === dateStr);
+            const isHighlighted = highlightedDate === dateStr || selectedDate === dateStr;
 
-          {/* All upcoming planned recipes grouped by day with date separator */}
-          <UpcomingMealPlans
-            entries={upcomingPlannedEntries}
-            onAddRecipeForDate={(dateStr) => setPickerSlot({ date: dateStr })}
-            onUpdateServings={updateServings}
-            onToggleCooked={handleToggleCooked}
-            onDeleteEntry={deletePlan}
-            onMoveToTomorrow={moveToTomorrow}
-            onSelectRecipe={onSelectRecipe}
-            onOpenCookMode={onOpenCookMode}
-            onSelectDate={setSelectedDate}
-          />
+            return (
+              <MealPlanDaySection
+                key={dateStr}
+                dateStr={dateStr}
+                entries={dayEntries}
+                isToday={isToday}
+                isPast={isPast}
+                isHighlighted={isHighlighted}
+                onSelectRecipe={onSelectRecipe}
+                onOpenCookMode={onOpenCookMode}
+                onAddRecipeForDate={(d) => setPickerSlot({ date: d })}
+                onUpdateServings={updateServings}
+                onToggleCooked={handleToggleCooked}
+                onDeleteEntry={deletePlan}
+                onMoveToTomorrow={moveToTomorrow}
+              />
+            );
+          })}
         </div>
       )}
 
@@ -218,11 +192,11 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
       <RecipePickerModal
         isOpen={!!pickerSlot}
         mealType={pickerSlot?.mealType ?? null}
-        dateStr={pickerSlot?.date ?? selectedDate}
+        dateStr={pickerSlot?.date ?? selectedDate ?? todayStr}
         history={history}
         onClose={() => setPickerSlot(null)}
         onSelectRecipe={(saved, targetDate) => {
-          const dateToUse = targetDate || pickerSlot?.date || selectedDate;
+          const dateToUse = targetDate || pickerSlot?.date || selectedDate || todayStr;
           if (dateToUse) {
             addPlan(saved, dateToUse);
           }

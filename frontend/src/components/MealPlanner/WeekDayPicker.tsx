@@ -11,7 +11,7 @@ export const WeekDayPicker: React.FC<WeekDayPickerProps> = ({
   return (
     <div className="w-full grid grid-cols-7 gap-1 pt-1 pb-1">
       {days.map((day) => {
-        const isSelected = day.dateStr === selectedDate;
+        const isSelected = selectedDate !== null && day.dateStr === selectedDate;
         const isAllCooked =
           day.plannedCount > 0 && (day.cookedCount ?? 0) >= day.plannedCount;
 

@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-16: Getrennte Tages- und Zukunftsansicht im Wochenplaner durch Unified Agenda Stream mit bidirektionalem ScrollSpy abgelöst
+
+* **Ersetzter Code / Anti-Pattern:**
+  - Getrennte Darstellung von „Mahlzeiten des ausgewählten Tages“ (`DayMealSlots.tsx`, `DayEmptyBanner.tsx`) und „Zukünftig geplanten Rezepten“ (`UpcomingMealPlans.tsx`), die zu visueller Redundanz, fragmentierter UI und doppelten Kalender-Headern führte.
+  - Fehlen vergangener Rezept-Einträge im regulären Wochenplaner-Feed (Historie war abgeschnitten).
+* **Ersetzt durch:**
+  - **Unified Agenda Stream ([`MealPlanDaySection.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/MealPlanner/MealPlanDaySection.tsx), [`index.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/MealPlanner/index.tsx)):** Ein einziger durchgängiger, chronologischer Stream (Vergangenheit -> Aktuelle Woche -> Zukunft).
+  - **Kompakte Vergangenheits-Karten ([`PastMealPlanCard.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/MealPlanner/PastMealPlanCard.tsx)):** Dezent eingegraute (`opacity-75`), kompakte Karten im Read-Only-Modus für vergangene Tage ohne Eingabeelemente.
+  - **Bidirektionaler ScrollSpy ([`useMealPlanScrollSpy.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/MealPlanner/useMealPlanScrollSpy.ts)):** Sticky Kalender-Header synchronisiert automatisch die aktive Woche und den sichtbaren Tag beim Scrollen; Klick auf Wochentag scrollt weich zur entsprechenden Tagessektion mit kurzem Highlight-Pulse.
+* **Betroffene Dateien:** `frontend/src/components/MealPlanner/UpcomingMealPlans.tsx` (gelöscht), `frontend/src/components/MealPlanner/DayMealSlots.tsx` (gelöscht), `frontend/src/components/MealPlanner/DayEmptyBanner.tsx` (gelöscht), `frontend/src/components/MealPlanner/MealPlanDaySection.tsx` (neu), `frontend/src/components/MealPlanner/PastMealPlanCard.tsx` (neu), `frontend/src/components/MealPlanner/useMealPlanScrollSpy.ts` (neu), `frontend/src/components/MealPlanner/index.tsx`, `frontend/src/components/MealPlanner/useMealPlanner.ts`, `frontend/src/components/MealPlanner/mealPlannerUtils.ts`, `frontend/src/components/MealPlanner/types.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-15: Stille Batch-Zutatenübernahme im Wochenplaner durch interaktive sequenzielle Shopping-Sheets ersetzt & Leere Tag-Screens durch Zukünftige-Rezepte-Übersicht abgelöst
 
 * **Ersetzter Code / Anti-Pattern:**

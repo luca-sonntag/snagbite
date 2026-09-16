@@ -10,6 +10,7 @@ import {
   sortIngredientGroupsByCategory,
   formatDateHuman,
   buildWeekDaysInfo,
+  buildAgendaDates,
 } from '../mealPlannerUtils.js';
 
 describe('mealPlannerUtils', () => {
@@ -153,5 +154,55 @@ describe('mealPlannerUtils', () => {
       assert.equal(days[1].plannedCount, 0);
     });
   });
+
+  describe('buildAgendaDates', () => {
+    it('always includes all 7 days of the current week plus meal plan dates', () => {
+      const wednesday = new Date(2026, 8, 16); // 2026-09-16 (Monday is 2026-09-14)
+      const mealPlans = [
+        {
+          id: 'p1',
+          recipeId: 'r1',
+          planDate: '2026-09-01', // Past date
+          mealType: 'dinner' as const,
+          servings: 2,
+          isCooked: true,
+          createdAt: '2026-09-01T10:00:00Z',
+          updatedAt: '2026-09-01T10:00:00Z',
+        },
+        {
+          id: 'p2',
+          recipeId: 'r2',
+          planDate: '2026-09-25', // Future date
+          mealType: 'dinner' as const,
+          servings: 2,
+          isCooked: false,
+          createdAt: '2026-09-25T10:00:00Z',
+          updatedAt: '2026-09-25T10:00:00Z',
+        },
+      ];
+
+      const dates = buildAgendaDates(wednesday, mealPlans);
+
+      // Should include 2026-09-01 (past)
+      assert.ok(dates.includes('2026-09-01'));
+      // Should include 2026-09-14 through 2026-09-20 (current week)
+      assert.ok(dates.includes('2026-09-14'));
+      assert.ok(dates.includes('2026-09-15'));
+      assert.ok(dates.includes('2026-09-16'));
+      assert.ok(dates.includes('2026-09-17'));
+      assert.ok(dates.includes('2026-09-18'));
+      assert.ok(dates.includes('2026-09-19'));
+      assert.ok(dates.includes('2026-09-20'));
+      // Should include 2026-09-21 through 2026-09-27 (next week)
+      assert.ok(dates.includes('2026-09-21'));
+      assert.ok(dates.includes('2026-09-27'));
+      // Should include 2026-09-25 (future)
+      assert.ok(dates.includes('2026-09-25'));
+      // Should be sorted chronologically
+      assert.equal(dates[0], '2026-09-01');
+      assert.equal(dates[dates.length - 1], '2026-09-27');
+    });
+  });
 });
+
 
