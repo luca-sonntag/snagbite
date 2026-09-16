@@ -34,13 +34,13 @@ export const MealPlanCardMenu: React.FC<MealPlanCardMenuProps> = ({
             e.stopPropagation();
             hapticLight();
           }}
-          className="w-8 h-8 min-w-[32px] min-h-[32px] rounded-full text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all cursor-pointer border-none flex items-center justify-center -mr-1"
+          className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all cursor-pointer border-none flex items-center justify-center -mr-1.5 touch-manipulation"
           aria-label={t('mealPlanner.options') || 'Optionen'}
         >
-          <MoreVertical className="w-4 h-4" />
+          <MoreVertical className="w-5 h-5" />
         </Button>
       </Popover.Trigger>
-      <Popover.Content placement="bottom end" className="p-1.5 min-w-[190px] bg-white dark:bg-gray-900 border-none rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
+      <Popover.Content placement="bottom end" className="p-1.5 min-w-[210px] bg-white dark:bg-gray-900 border-none rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
         <Popover.Dialog className="outline-none border-none p-0 m-0">
           <div className="flex flex-col w-full gap-0.5">
             {/* 1. Kochen starten */}
@@ -52,9 +52,9 @@ export const MealPlanCardMenu: React.FC<MealPlanCardMenuProps> = ({
                   setIsOpen(false);
                   onOpenCookMode(entry.recipeId);
                 }}
-                className="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-semibold text-gray-800 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer border-none"
+                className="flex items-center gap-3 w-full px-3.5 py-3 min-h-[44px] text-sm font-semibold text-gray-800 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer border-none touch-manipulation"
               >
-                <Play className="w-4 h-4 text-emerald-600 dark:text-emerald-400 fill-current" />
+                <Play className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0 fill-current" />
                 <span>{t('mealPlanner.cookNow')}</span>
               </button>
             )}
@@ -67,9 +67,9 @@ export const MealPlanCardMenu: React.FC<MealPlanCardMenuProps> = ({
                 setIsOpen(false);
                 onToggleCooked(entry);
               }}
-              className="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-semibold text-gray-800 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer border-none"
+              className="flex items-center gap-3 w-full px-3.5 py-3 min-h-[44px] text-sm font-semibold text-gray-800 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer border-none touch-manipulation"
             >
-              <CheckCircle2 className={`w-4 h-4 ${entry.isCooked ? 'text-gray-400' : 'text-emerald-600 dark:text-emerald-400'}`} />
+              <CheckCircle2 className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
               <span>
                 {entry.isCooked
                   ? (t('mealPlanner.markAsUncooked') || 'Als ungekocht markieren')
@@ -86,14 +86,14 @@ export const MealPlanCardMenu: React.FC<MealPlanCardMenuProps> = ({
                   setIsOpen(false);
                   onMoveToTomorrow(entry);
                 }}
-                className="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-semibold text-gray-800 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer border-none"
+                className="flex items-center gap-3 w-full px-3.5 py-3 min-h-[44px] text-sm font-semibold text-gray-800 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer border-none touch-manipulation"
               >
-                <CalendarClock className="w-4 h-4 text-blue-500" />
+                <CalendarClock className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
                 <span>{t('mealPlanner.moveToTomorrow')}</span>
               </button>
             )}
 
-            {/* 4. Aus Planer löschen */}
+            {/* 4. Aus Planer löschen (bleibt rot für Destruktivität) */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -101,9 +101,9 @@ export const MealPlanCardMenu: React.FC<MealPlanCardMenuProps> = ({
                 setIsOpen(false);
                 onDeleteEntry(entry.id);
               }}
-              className="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer border-none"
+              className="flex items-center gap-3 w-full px-3.5 py-3 min-h-[44px] text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer border-none touch-manipulation"
             >
-              <Trash2 className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+              <Trash2 className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
               <span>{t('mealPlanner.deleteAction')}</span>
             </button>
           </div>
