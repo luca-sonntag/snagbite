@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button, Drawer } from '@heroui/react';
-import { Salad } from 'lucide-react';
+import { Salad, Users } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { usePantry } from '../../context/PantryContext';
 import { useModalOverlay } from '../../context/OverlayStackContext';
@@ -163,8 +163,8 @@ export default function ShoppingConfirmSheet({
               <Drawer.Handle />
 
               {/* Header */}
-              <Drawer.Header className="pb-3 mb-1 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2.5 min-w-0">
+              <Drawer.Header className="pb-2 mb-1">
+                <div className="flex items-center gap-2.5">
                   <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center shrink-0">
                     <Salad className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
@@ -173,7 +173,7 @@ export default function ShoppingConfirmSheet({
                       {t('recipe.shoppingConfirmTitle')}
                     </Drawer.Heading>
                     {recipeLabel ? (
-                      <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5 truncate max-w-[170px] sm:max-w-[260px]">
+                      <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5 truncate max-w-[240px] sm:max-w-[320px]">
                         {recipeLabel}
                       </p>
                     ) : (
@@ -183,19 +183,25 @@ export default function ShoppingConfirmSheet({
                     )}
                   </div>
                 </div>
-
-                {/* Servings Stepper */}
-                <div className="shrink-0">
-                  <ServingsStepper
-                    servings={servings}
-                    onDecrease={() => setServings((s) => Math.max(1, s - 1))}
-                    onIncrease={() => setServings((s) => s + 1)}
-                    size="md"
-                    showIcon={true}
-                    ariaLabel={t('mealPlanner.servings')}
-                  />
-                </div>
               </Drawer.Header>
+
+              {/* Dedicated Servings Stepper Row under Header */}
+              <div className="flex items-center justify-between px-3.5 py-2.5 mb-2 rounded-2xl bg-white dark:bg-gray-900 shadow-2xs border-none select-none">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Users className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span className="text-xs font-bold text-gray-700 dark:text-gray-200 truncate">
+                    {t('mealPlanner.servings') || 'Portionen'}
+                  </span>
+                </div>
+                <ServingsStepper
+                  servings={servings}
+                  onDecrease={() => setServings((s) => Math.max(1, s - 1))}
+                  onIncrease={() => setServings((s) => s + 1)}
+                  size="sm"
+                  showIcon={false}
+                  ariaLabel={t('mealPlanner.servings')}
+                />
+              </div>
 
               {/* Body: persistent visible scrollbar and flat clean ingredient list */}
               <Drawer.Body className="overflow-y-scroll py-2 pr-1 flex-1 [scrollbar-width:thin] [scrollbar-color:rgba(156,163,175,0.4)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
