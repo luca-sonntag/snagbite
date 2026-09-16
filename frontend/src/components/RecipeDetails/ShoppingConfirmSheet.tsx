@@ -32,7 +32,7 @@ export default function ShoppingConfirmSheet({
   onConfirm,
   recipeLabel,
 }: ShoppingConfirmSheetProps) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { pantryItems } = usePantry();
   useModalOverlay(isOpen, onClose);
 
@@ -198,6 +198,32 @@ export default function ShoppingConfirmSheet({
                   showIcon={false}
                   ariaLabel={t('mealPlanner.servings')}
                 />
+              </div>
+
+              {/* Selection Count & Quick Toggle Bar */}
+              <div className="flex items-center justify-between px-1 mb-1 select-none">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                  {language === 'en'
+                    ? `${selectedCount} of ${allItems.length} selected`
+                    : `${selectedCount} von ${allItems.length} ausgewählt`}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    hapticLight();
+                    const allSelected = selectedCount === allItems.length;
+                    const next: Record<string, boolean> = {};
+                    allItems.forEach((it) => {
+                      next[it.id] = !allSelected;
+                    });
+                    setSelectedIds(next);
+                  }}
+                  className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer border-none bg-transparent"
+                >
+                  {selectedCount === allItems.length
+                    ? (language === 'en' ? 'Deselect all' : 'Keine')
+                    : (language === 'en' ? 'Select all' : 'Alle auswählen')}
+                </button>
               </div>
 
               {/* Body: persistent visible scrollbar and flat clean ingredient list */}
