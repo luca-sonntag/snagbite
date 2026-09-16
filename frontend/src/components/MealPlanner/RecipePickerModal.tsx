@@ -3,7 +3,7 @@ import { Drawer } from '@heroui/react';
 import { X, Search, ChefHat } from 'lucide-react';
 import type { RecipePickerModalProps } from './types';
 import type { SavedRecipe } from '../../types';
-import { RecipePickerItem } from './RecipePickerItem';
+import { RecipeListItem } from '../RecipeListItem';
 import { useI18n } from '../../context/I18nContext';
 import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
@@ -214,13 +214,13 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
             </div>
 
             {/* Scrollable Recipe Body */}
-            <Drawer.Body className="overflow-y-auto px-0.5 py-2 flex-1 flex flex-col gap-2.5 sm:gap-3 overscroll-contain">
+            <Drawer.Body className="overflow-y-auto px-0.5 py-2 flex-1 flex flex-col gap-2 sm:gap-2.5 overscroll-contain">
               {filteredHistory.length > 0 ? (
                 filteredHistory.map((saved) => (
-                  <RecipePickerItem
+                  <RecipeListItem
                     key={saved.recipeId || (saved as unknown as { id?: string }).id}
-                    saved={saved}
-                    onSelect={handleSelect}
+                    job={saved}
+                    onClick={() => handleSelect(saved)}
                   />
                 ))
               ) : (
