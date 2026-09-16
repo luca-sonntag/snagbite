@@ -21,6 +21,7 @@ interface ShoppingConfirmItemProps {
   groupCategory?: string;
   pantryStockMatch?: PantryStockMatch | null;
   pantryStock?: string | null;
+  hideCategoryBar?: boolean;
 }
 
 export default function ShoppingConfirmItem({
@@ -31,6 +32,7 @@ export default function ShoppingConfirmItem({
   groupCategory,
   pantryStockMatch,
   pantryStock,
+  hideCategoryBar = false,
 }: ShoppingConfirmItemProps) {
   const { t } = useI18n();
   const ing = item.primaryIngredient;
@@ -67,10 +69,12 @@ export default function ShoppingConfirmItem({
       className="group flex items-center gap-3 py-2 px-2.5 rounded-2xl hover:bg-black/[0.03] dark:hover:bg-white/[0.03] active:scale-[0.99] transition-colors cursor-pointer select-none"
     >
       {/* Category color bar */}
-      <span
-        className={`w-1 h-4 rounded-full ${theme.barClass} shrink-0 opacity-80`}
-        title={groupCategory || ing.category || undefined}
-      />
+      {!hideCategoryBar && (
+        <span
+          className={`w-1 h-4 rounded-full ${theme.barClass} shrink-0 opacity-80`}
+          title={groupCategory || ing.category || undefined}
+        />
+      )}
 
       {/* Checkbox indicator */}
       <div
