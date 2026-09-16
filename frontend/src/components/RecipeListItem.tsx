@@ -8,7 +8,8 @@ import { getRecipeCalories, formatCalories } from '../utils/formatNutrition';
 import { getHealthScoreColor, getHealthScoreLetter } from './RecipeDetails/HealthScoreBadge';
 
 export interface RecipeListItemProps {
-  job: SavedRecipe;
+  job?: SavedRecipe;
+  recipe?: Recipe;
   isSelected?: boolean;
   isSelectMode?: boolean;
   /** Pre-formatted total time, e.g. "35 Min." — null hides the badge. If omitted, computed automatically from recipe. */
@@ -31,15 +32,18 @@ function getFirstRecipeTag(recipe?: Recipe | null): string | null {
 }
 
 /**
- * Unified horizontal recipe card list item for both SavedCatalog list view and RecipePickerModal.
+ * Universal horizontal recipe card list item used across the entire app
+ * (SavedCatalog list view, RecipePickerModal, and all recipe lists).
+ *
  * Features:
- * - 80px thumbnail with high-contrast presentation
- * - Title line with optional favorite indicator
- * - Bottom meta line: Gray duration pill + 1 Tag on the left, Calories + circular Health Score badge on the right
- * - Clean tactile touch target with no auxiliary plus button
+ * - 80px thumbnail with optional favorite star badge on the image corner
+ * - Clean title row without floating right-side icons
+ * - Bottom meta row: Gray duration pill + 1 Tag on left, Calories + circular Health Score badge on right
+ * - High-contrast, tactile touch target with no auxiliary plus button
  */
 export const RecipeListItem = React.memo<RecipeListItemProps>(({
   job,
+  recipe,
   isSelected = false,
   isSelectMode = false,
   totalTime,
@@ -47,9 +51,10 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
   bindLongPress,
   onClick,
 }) => {
-  const r = job.recipe;
+  const r = recipe ?? job?.recipe;
   if (!r) return null;
 
+  const isFavorite = Boolean(job?.isFavorite);
   const calculatedTime = getTotalTime(r);
   const totalTimeStr =
     totalTime !== undefined
@@ -78,7 +83,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
       }}
       {...(bindLongPress ?? {})}
     >
-      {/* Thumbnail (Mobile UX rule: 72-80px min) + select checkbox */}
+      {/* Thumbnail (72-80px) with Checkbox or Favorite Star overlay on top corner */}
       <div className="relative w-18 h-18 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shrink-0 border-none ring-1 ring-black/[0.04] dark:ring-white/[0.06] pointer-events-none">
         {isSelectMode && (
           <div
@@ -89,6 +94,14 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
             {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3px]" />}
           </div>
         )}
+
+        {/* Favorite star neatly overlaid on the top-right corner of the image thumbnail */}
+        {isFavorite && !isSelectMode && (
+          <div className="absolute top-1.5 right-1.5 z-10 w-5 h-5 rounded-full bg-black/45 backdrop-blur-xs flex items-center justify-center text-amber-400 pointer-events-none shadow-xs">
+            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+          </div>
+        )}
+
         <CachedImage
           src={r.imageUrl}
           emoji={r.emoji}
@@ -99,19 +112,12 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
 
       {/* Content */}
       <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 pointer-events-none">
-        {/* Title row */}
-        <div className="flex items-center gap-1.5 min-w-0">
-          <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white line-clamp-1 flex-1 min-w-0 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-            {r.title}
-          </h4>
-          {job.isFavorite && !isSelectMode && (
-            <div className="w-6 h-6 rounded-lg bg-amber-500/15 dark:bg-amber-500/25 flex items-center justify-center shrink-0">
-              <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-            </div>
-          )}
-        </div>
+        {/* Title line */}
+        <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+          {r.title}
+        </h4>
 
-        {/* Bottom meta row: Duration pill + Tag on left, Calories + Health Score on right */}
+        {/* Bottom meta line: Duration pill + Tag on left, Calories + Health Score on right */}
         {(totalTimeStr || firstTag || caloriesFormatted || (healthScoreNum !== null && healthColor && healthLetter)) && (
           <div className="flex items-center justify-between gap-1.5 mt-1.5 text-xs select-none">
             {/* Left Cluster: Gray Duration Pill & 1 Tag */}
