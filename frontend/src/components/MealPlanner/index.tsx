@@ -9,12 +9,12 @@ import { MealPlannerHeader } from './MealPlannerHeader';
 import { WeekNavigator } from './WeekNavigator';
 import { WeekDayPicker } from './WeekDayPicker';
 import { DailyInsightPill } from './DailyInsightPill';
-import { MealPlanDaySection } from './MealPlanDaySection';
+import { MealPlanWeekGroup } from './MealPlanWeekGroup';
 import { MealPlanShoppingSheets } from './MealPlanShoppingSheets';
 import { RecipePickerModal } from './RecipePickerModal';
 import CookedModal from '../CookedModal';
 import { useI18n } from '../../context/I18nContext';
-import { formatDateIso, addDays, formatWeekRange, groupDatesByWeek, formatWeekGroupHeader } from './mealPlannerUtils';
+import { formatDateIso, addDays, formatWeekRange } from './mealPlannerUtils';
 
 export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
   history,
@@ -34,6 +34,8 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     setSelectedDate,
     mealPlans,
     agendaDates,
+    agendaWeekGroups,
+    expandWeek,
     extendNextWeek,
     nextExtendWeekStart,
     nextExtendWeekEnd,
@@ -109,8 +111,6 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     }
   }, [todayStr, scrollToDate, agendaDates, isLoading, setSelectedDate]);
 
-  const agendaWeekGroups = useMemo(() => groupDatesByWeek(agendaDates), [agendaDates]);
-
   return (
     <div className="w-full flex flex-col gap-3 pb-24">
       {/* Sticky Calendar Top Container */}
@@ -175,43 +175,24 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
       ) : (
         <div className="flex flex-col gap-6 pt-1">
           {agendaWeekGroups.map((weekGroup, weekIndex) => (
-            <div key={weekGroup.weekKey} className="flex flex-col gap-1.5">
-              {weekIndex > 0 && (
-                <div
-                  className="w-full flex items-center px-1.5 pt-3 pb-0.5 select-none"
-                  aria-hidden="true"
-                >
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                    {formatWeekGroupHeader(weekGroup.weekStart, weekGroup.weekEnd, language)}
-                  </span>
-                </div>
-              )}
-
-              {weekGroup.dates.map((dateStr) => {
-                const isToday = dateStr === todayStr;
-                const isPast = dateStr < todayStr;
-                const dayEntries = mealPlans.filter((p) => p.planDate === dateStr);
-                const isHighlighted = highlightedDate === dateStr || selectedDate === dateStr;
-
-                return (
-                  <MealPlanDaySection
-                    key={dateStr}
-                    dateStr={dateStr}
-                    entries={dayEntries}
-                    isToday={isToday}
-                    isPast={isPast}
-                    isHighlighted={isHighlighted}
-                    onSelectRecipe={onSelectRecipe}
-                    onOpenCookMode={onOpenCookMode}
-                    onAddRecipeForDate={(d) => setPickerSlot({ date: d })}
-                    onUpdateServings={updateServings}
-                    onToggleCooked={handleToggleCooked}
-                    onDeleteEntry={deletePlan}
-                    onMoveToTomorrow={moveToTomorrow}
-                  />
-                );
-              })}
-            </div>
+            <MealPlanWeekGroup
+              key={weekGroup.weekKey}
+              weekGroup={weekGroup}
+              weekIndex={weekIndex}
+              prevWeek={weekIndex > 0 ? agendaWeekGroups[weekIndex - 1] : null}
+              mealPlans={mealPlans}
+              todayStr={todayStr}
+              selectedDate={selectedDate}
+              highlightedDate={highlightedDate}
+              onExpandWeek={expandWeek}
+              onSelectRecipe={onSelectRecipe}
+              onOpenCookMode={onOpenCookMode}
+              onAddRecipeForDate={(d) => setPickerSlot({ date: d })}
+              onUpdateServings={updateServings}
+              onToggleCooked={handleToggleCooked}
+              onDeleteEntry={deletePlan}
+              onMoveToTomorrow={moveToTomorrow}
+            />
           ))}
 
           {/* Progressive Week Extension Button */}

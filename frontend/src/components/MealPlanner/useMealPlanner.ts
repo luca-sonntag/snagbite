@@ -6,10 +6,10 @@ import { useToast } from '../../context/ToastContext';
 import { useI18n } from '../../context/I18nContext';
 import { apiUrl } from '../../api';
 import { hapticLight } from '../../utils/haptics';
-import { getMonday, formatDateIso, addDays, buildWeekDaysInfo, buildAgendaDates } from './mealPlannerUtils';
+import { getMonday, formatDateIso, addDays, buildWeekDaysInfo, buildAgendaDates, groupDatesByWeek } from './mealPlannerUtils';
 import { useMealPlanActions } from './useMealPlanActions';
 
-export { getMonday, formatDateIso, addDays, buildWeekDaysInfo, buildAgendaDates };
+export { getMonday, formatDateIso, addDays, buildWeekDaysInfo, buildAgendaDates, groupDatesByWeek };
 
 export function useMealPlanner() {
   const { getAccessToken, user } = useAuth();
@@ -228,25 +228,33 @@ export function useMealPlanner() {
 
   const futurePlannedCount = futurePlannedEntries.length;
 
-  const [extendedWeeks, setExtendedWeeks] = useState<number>(0);
+  const [expandedWeekKeys, setExpandedWeekKeys] = useState<string[]>([]);
 
-  const extendNextWeek = useCallback(() => {
+  const expandWeek = useCallback((weekKey: string) => {
     hapticLight();
-    setExtendedWeeks((prev) => prev + 1);
+    setExpandedWeekKeys((prev) => (prev.includes(weekKey) ? prev : [...prev, weekKey]));
   }, []);
+
+  const agendaDates = useMemo(() => {
+    return buildAgendaDates(new Date(), mealPlans, expandedWeekKeys);
+  }, [mealPlans, expandedWeekKeys]);
+
+  const agendaWeekGroups = useMemo(() => groupDatesByWeek(agendaDates), [agendaDates]);
 
   const nextExtendWeekStart = useMemo(() => {
     const currentMonday = getMonday(new Date());
-    return addDays(currentMonday, (extendedWeeks + 1) * 7);
-  }, [extendedWeeks]);
+    if (agendaWeekGroups.length === 0) return addDays(currentMonday, 7);
+    const latestWeek = agendaWeekGroups[agendaWeekGroups.length - 1];
+    return addDays(latestWeek.weekStart, 7);
+  }, [agendaWeekGroups]);
 
   const nextExtendWeekEnd = useMemo(() => {
     return addDays(nextExtendWeekStart, 6);
   }, [nextExtendWeekStart]);
 
-  const agendaDates = useMemo(() => {
-    return buildAgendaDates(new Date(), mealPlans, extendedWeeks);
-  }, [mealPlans, extendedWeeks]);
+  const extendNextWeek = useCallback(() => {
+    expandWeek(formatDateIso(nextExtendWeekStart));
+  }, [expandWeek, nextExtendWeekStart]);
 
   return {
     currentWeekStart,
@@ -257,7 +265,9 @@ export function useMealPlanner() {
     setSelectedDate,
     mealPlans,
     agendaDates,
-    extendedWeeks,
+    agendaWeekGroups,
+    expandedWeekKeys,
+    expandWeek,
     extendNextWeek,
     nextExtendWeekStart,
     nextExtendWeekEnd,

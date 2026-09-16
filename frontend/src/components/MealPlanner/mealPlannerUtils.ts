@@ -171,7 +171,7 @@ export function formatWeekRange(start: Date, end: Date, language: string): strin
 export function buildAgendaDates(
   todayDate: Date,
   mealPlans: MealPlanEntry[],
-  extendedWeeks: number = 0,
+  expandedWeekKeysOrCount: string[] | Set<string> | number = [],
 ): string[] {
   const dateSet = new Set<string>();
 
@@ -181,10 +181,23 @@ export function buildAgendaDates(
     dateSet.add(formatDateIso(addDays(currentMonday, i)));
   }
 
-  // 2. Extended future weeks (progressively loaded)
-  for (let w = 1; w <= extendedWeeks; w++) {
-    for (let i = 0; i < 7; i++) {
-      dateSet.add(formatDateIso(addDays(currentMonday, w * 7 + i)));
+  // 2. Extended/expanded weeks
+  if (typeof expandedWeekKeysOrCount === 'number') {
+    for (let w = 1; w <= expandedWeekKeysOrCount; w++) {
+      for (let i = 0; i < 7; i++) {
+        dateSet.add(formatDateIso(addDays(currentMonday, w * 7 + i)));
+      }
+    }
+  } else {
+    const weekKeysSet = Array.isArray(expandedWeekKeysOrCount)
+      ? new Set(expandedWeekKeysOrCount)
+      : expandedWeekKeysOrCount;
+
+    for (const weekKey of weekKeysSet) {
+      const monday = new Date(weekKey + 'T00:00:00');
+      for (let i = 0; i < 7; i++) {
+        dateSet.add(formatDateIso(addDays(monday, i)));
+      }
     }
   }
 
@@ -203,6 +216,7 @@ export interface AgendaWeekGroup {
   weekStart: Date;
   weekEnd: Date;
   dates: string[];
+  isComplete: boolean;
 }
 
 /**
@@ -223,13 +237,18 @@ export function groupDatesByWeek(dates: string[]): AgendaWeekGroup[] {
         weekStart: monday,
         weekEnd: addDays(monday, 6),
         dates: [],
+        isComplete: false,
       };
       groupsMap.set(mondayStr, group);
     }
     group.dates.push(dateStr);
   }
 
-  return Array.from(groupsMap.values());
+  const groups = Array.from(groupsMap.values());
+  for (const g of groups) {
+    g.isComplete = g.dates.length === 7;
+  }
+  return groups;
 }
 
 /**
