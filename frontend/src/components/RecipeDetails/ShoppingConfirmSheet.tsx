@@ -200,31 +200,40 @@ export default function ShoppingConfirmSheet({
                 />
               </div>
 
-              {/* Body: persistent visible scrollbar and flat clean ingredient list */}
-              <Drawer.Body className="overflow-y-scroll py-2 pr-1 flex-1 [scrollbar-width:thin] [scrollbar-color:rgba(156,163,175,0.4)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
-                <div className="flex flex-col gap-1">
-                  {allItems.map((item) => {
-                    const requiredAmt = (item.primaryIngredient.amount || 0) * activeScaleFactor;
-                    const pantryStockMatch = findPantryStockMatch(
-                      item.primaryIngredient,
-                      pantryItems,
-                      requiredAmt,
-                      item.primaryIngredient.unit
-                    );
-                    return (
-                      <ShoppingConfirmItem
-                        key={item.id}
-                        item={item}
-                        isChecked={!!selectedIds[item.id]}
-                        onToggle={() => toggleItem(item.id)}
-                        formatAmount={scaledFormatAmount}
-                        groupCategory={item.groupCategory}
-                        pantryStockMatch={pantryStockMatch}
-                      />
-                    );
-                  })}
-                </div>
-              </Drawer.Body>
+              {/* Body Container with subtle top & bottom scroll shadows */}
+              <div className="relative flex-1 min-h-0 flex flex-col">
+                {/* Top scroll shadow */}
+                <div className="absolute top-0 left-0 right-0 h-3.5 bg-gradient-to-b from-black/[0.06] dark:from-black/[0.3] to-transparent pointer-events-none z-10" />
+
+                {/* Body: persistent visible scrollbar and flat clean ingredient list */}
+                <Drawer.Body className="overflow-y-scroll py-1.5 pr-1 flex-1 [scrollbar-width:thin] [scrollbar-color:rgba(156,163,175,0.4)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
+                  <div className="flex flex-col gap-1.5 py-0.5">
+                    {allItems.map((item) => {
+                      const requiredAmt = (item.primaryIngredient.amount || 0) * activeScaleFactor;
+                      const pantryStockMatch = findPantryStockMatch(
+                        item.primaryIngredient,
+                        pantryItems,
+                        requiredAmt,
+                        item.primaryIngredient.unit
+                      );
+                      return (
+                        <ShoppingConfirmItem
+                          key={item.id}
+                          item={item}
+                          isChecked={!!selectedIds[item.id]}
+                          onToggle={() => toggleItem(item.id)}
+                          formatAmount={scaledFormatAmount}
+                          groupCategory={item.groupCategory}
+                          pantryStockMatch={pantryStockMatch}
+                        />
+                      );
+                    })}
+                  </div>
+                </Drawer.Body>
+
+                {/* Bottom scroll shadow */}
+                <div className="absolute bottom-0 left-0 right-0 h-3.5 bg-gradient-to-t from-black/[0.06] dark:from-black/[0.3] to-transparent pointer-events-none z-10" />
+              </div>
 
               {/* Footer */}
               <Drawer.Footer className="pt-3 flex gap-2">
