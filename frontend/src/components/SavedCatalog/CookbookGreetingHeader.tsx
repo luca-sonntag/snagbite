@@ -1,9 +1,10 @@
 import { useMemo, useRef, useState, useEffect } from 'react';
-import { Search, CheckSquare, SlidersHorizontal } from 'lucide-react';
+import { Search, CheckSquare } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import { hapticLight } from '../../utils/haptics';
 import { useCookbookGreeting } from './useCookbookGreeting';
+import SearchBar from '../SearchBar';
 
 interface CookbookGreetingHeaderProps {
   isSelectMode?: boolean;
@@ -115,54 +116,15 @@ export default function CookbookGreetingHeader({
 
       {/* Expandable Combined Search & Filter Bar */}
       {isSearchOpen && (
-        <div className="flex items-center gap-2 pt-1 animate-in fade-in duration-200">
-          <div className="flex-1 relative">
-            <input
-              ref={inputRef}
-              type="text"
-              value={searchQuery}
-              onChange={(e) => onSearchChange?.(e.target.value)}
-              placeholder={t('catalog.searchPlaceholder')}
-              className="w-full bg-white dark:bg-gray-800 border-none rounded-2xl pl-10 pr-10 py-2.5 text-base text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-emerald-400/40 focus:outline-none transition-all shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
-            />
-            <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => {
-                  hapticLight();
-                  onSearchChange?.('');
-                }}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 dark:hover:text-white text-xl font-bold w-10 h-10 flex items-center justify-center rounded-full cursor-pointer border-none bg-transparent"
-                aria-label={t('catalog.clearSearch')}
-              >
-                ×
-              </button>
-            )}
-          </div>
-
-          {onOpenFilters && (
-            <button
-              type="button"
-              onClick={() => {
-                hapticLight();
-                onOpenFilters();
-              }}
-              className={`relative h-11 min-w-[44px] px-3.5 rounded-2xl border-none shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex items-center gap-1.5 text-xs font-semibold active:scale-95 transition-all shrink-0 cursor-pointer ${
-                activeFilterCount > 0
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
-              }`}
-              aria-label={t('catalog.filterTitle')}
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-              {activeFilterCount > 0 && (
-                <span className="min-w-[1.25rem] h-5 px-1 rounded-full bg-emerald-700 text-white text-[11px] font-bold flex items-center justify-center">
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
-          )}
+        <div className="pt-1 animate-in fade-in duration-200">
+          <SearchBar
+            inputRef={inputRef}
+            value={searchQuery}
+            onChange={(val) => onSearchChange?.(val)}
+            onOpenFilters={onOpenFilters}
+            activeFilterCount={activeFilterCount}
+            autoFocus
+          />
         </div>
       )}
     </header>

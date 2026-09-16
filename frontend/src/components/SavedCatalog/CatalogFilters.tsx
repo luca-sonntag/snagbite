@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@heroui/react';
-import { Search, List, LayoutGrid, CheckSquare, ArrowLeft, Star, Tag, SlidersHorizontal, X, Clock } from 'lucide-react';
+import { List, LayoutGrid, CheckSquare, ArrowLeft, Star, Tag, X, Clock } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { PageHeader } from '../PageHeader';
 import type { Collection, RecipeCategory } from '../../types';
@@ -8,6 +8,7 @@ import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
 import { hapticLight } from '../../utils/haptics';
 import { EMPTY_FILTERS, type CatalogFilterState, type CatalogSort } from '../../hooks/useSavedCatalog';
 import { buildListRoute, parseListRoute } from './catalogRoutes';
+import SearchBar from '../SearchBar';
 
 interface CatalogFiltersProps {
   title: string;
@@ -134,53 +135,14 @@ export default function CatalogFilters({
   };
 
   const searchBarInput = (
-    <div className="flex gap-2 items-center">
-      <div className="flex-1 relative">
-        <input
-          ref={inputRef}
-          type="text"
-          value={searchQuery}
-          onChange={(e) => handleSearchChange(e.target.value)}
-          placeholder={t('catalog.searchPlaceholder')}
-          className="w-full bg-white dark:bg-gray-800 border-none rounded-2xl pl-10 pr-10 py-2.5 text-base text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-emerald-400/40 focus:outline-none transition-all shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
-        />
-        <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-        {searchQuery && (
-          <button
-            type="button"
-            onClick={() => {
-              hapticLight();
-              setSearchQuery('');
-            }}
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 dark:hover:text-white text-xl font-bold w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer border-none"
-            aria-label={t('catalog.clearSearch')}
-          >
-            ×
-          </button>
-        )}
-      </div>
-
-      <button
-        type="button"
-        onClick={() => {
-          hapticLight();
-          onOpenFilters();
-        }}
-        className={`relative h-11 min-w-[44px] px-3.5 rounded-2xl border-none shadow-[0_4px_16px_rgba(0,0,0,0.08)] flex items-center gap-1.5 text-xs font-semibold active:scale-95 transition-all shrink-0 cursor-pointer ${
-          hasActiveChips
-            ? 'bg-emerald-500 text-white shadow-none'
-            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-700'
-        }`}
-        aria-label={t('catalog.filterTitle')}
-      >
-        <SlidersHorizontal className="w-4 h-4" />
-        {hasActiveChips && (
-          <span className="min-w-[1.25rem] h-5 px-1 rounded-full bg-emerald-700 text-white text-[11px] font-bold flex items-center justify-center">
-            {activeFilterCount}
-          </span>
-        )}
-      </button>
-    </div>
+    <SearchBar
+      inputRef={inputRef}
+      value={searchQuery}
+      onChange={handleSearchChange}
+      autoFocus={autoFocusSearch}
+      onOpenFilters={onOpenFilters}
+      activeFilterCount={hasActiveChips ? activeFilterCount : 0}
+    />
   );
 
   return (
