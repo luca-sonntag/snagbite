@@ -2,6 +2,7 @@ import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import type { Ingredient } from '../../types';
 import { useI18n } from '../../context/I18nContext';
+import { getCategoryTheme } from '../../i18n';
 import { getParentIngredient } from '../../utils/ingredientTaxonomy';
 import IngredientIcon from '../IngredientIcon';
 import { hapticLight } from '../../utils/haptics';
@@ -30,6 +31,7 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
   hideNutrition = false,
 }) => {
   const { t } = useI18n();
+  const theme = getCategoryTheme(categoryName || ingredient.category || '');
 
   const rawFormatted = formatAmount(ingredient.amount, ingredient.unit)?.trim() ?? '';
   const unit = (ingredient.unit ?? '').trim();
@@ -66,23 +68,28 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
           handleNutritionClick();
         }
       }}
-      className={`group flex items-center justify-between gap-3 ${
-        isPremium ? 'py-3' : 'py-1.5'
-      } px-1.5 transition-all ${
-        canOpenNutrition
-          ? 'cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] active:scale-[0.99] rounded-xl'
-          : ''
+      className={`group flex items-center justify-between gap-3 py-1.5 px-3 rounded-2xl bg-white/60 dark:bg-gray-900/60 hover:bg-white/80 dark:hover:bg-gray-900/80 shadow-[0_1px_2px_rgba(0,0,0,0.03)] dark:shadow-none backdrop-blur-xs active:scale-[0.99] transition-all border-none select-none ${
+        canOpenNutrition ? 'cursor-pointer' : ''
       }`}
     >
       <div className="flex items-center gap-3 flex-1 min-w-0">
+        {/* Category color bar */}
+        <span
+          className={`w-1 h-4 rounded-full ${theme.barClass} shrink-0 opacity-80`}
+          title={categoryName || ingredient.category || undefined}
+        />
+
+        {/* Ingredient Icon */}
         <IngredientIcon
           baseName={ingredient.baseName}
           canonicalId={ingredient.canonicalId}
-          category={categoryName}
+          category={categoryName || ingredient.category}
           name={name}
           synonyms={ingredient.synonyms}
           size="md"
         />
+
+        {/* Details */}
         <div className="flex-1 min-w-0 flex flex-col justify-center">
           {ingredient.replacedOriginal && (
             <span className="text-[11px] leading-tight text-red-500/70 dark:text-red-400/70 line-through font-normal truncate block mb-0.5">
@@ -99,56 +106,46 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
             )}
             <span>{name}</span>
             {showParentBadge && (
-              <span className="text-xs text-gray-400 dark:text-gray-400 font-normal">
+              <span className="text-xs text-gray-400 dark:text-gray-500 font-normal">
                 {t('recipe.parentDerivedLabel', { parent: parent.name })}
               </span>
             )}
             {ingredient.modifier && (
-              <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">
+              <span className="text-xs text-gray-400 dark:text-gray-500 font-normal">
                 ({ingredient.modifier})
               </span>
             )}
           </div>
 
-          {/* Amount & notes (for premium users amount stays here; for free users notes stay here) */}
-          {((isPremium && displayAmount) || ingredient.notes) && (
-            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 font-normal mt-0.5">
-              {isPremium && displayAmount && (
-                <span className="font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                  {displayAmount}
-                </span>
-              )}
-              {ingredient.notes && (
-                <span className="text-[11px] text-gray-400 dark:text-gray-500 truncate">
-                  {ingredient.notes}
-                </span>
-              )}
+          {/* Notes */}
+          {ingredient.notes && (
+            <div className="text-[11px] text-gray-400 dark:text-gray-500 truncate mt-0.5">
+              {ingredient.notes}
             </div>
           )}
         </div>
       </div>
 
-      {/* Right side: Amount for free users, Kcal chevron chip for premium users */}
-      {!isPremium ? (
-        displayAmount ? (
-          <span className="font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums text-xs shrink-0 text-right">
+      {/* Right side: Amount and/or Kcal chevron chip for premium users */}
+      <div className="flex items-center gap-2 shrink-0 self-center">
+        {displayAmount && (
+          <span className="font-semibold text-xs tabular-nums text-gray-500 dark:text-gray-400 text-right">
             {displayAmount}
           </span>
-        ) : null
-      ) : (
-        hasCalories && (
+        )}
+        {canOpenNutrition && (
           <button
             type="button"
             onClick={handleNutritionClick}
-            className="min-h-[32px] px-2.5 py-1 rounded-full inline-flex items-center gap-1 text-xs font-semibold shrink-0 border-none transition-all active:scale-95 cursor-pointer select-none bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
+            className="min-h-[28px] px-2 py-0.5 rounded-full inline-flex items-center gap-1 text-[11px] font-semibold shrink-0 border-none transition-all active:scale-95 cursor-pointer select-none bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/15 text-gray-600 dark:text-gray-300"
             title={ingredient.matchedName ? t('recipe.verifiedIngredientTooltip', { name: ingredient.matchedName }) : undefined}
             aria-label={t('recipe.nutritionTitle')}
           >
             <span className="tabular-nums">{Math.round(ingredient.calories! * scaleFactor)} kcal</span>
             <ChevronRight className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 -ml-0.5" />
           </button>
-        )
-      )}
+        )}
+      </div>
     </li>
   );
 };

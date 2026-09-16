@@ -55,121 +55,116 @@ export default function RecipeIngredients({
     'text-xs font-medium text-gray-500 dark:text-gray-400';
 
   return (
-    <div className="flex flex-col gap-4 pb-4">
-      {/* 1. Single Cohesive Card for All Ingredients */}
-      <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
-        {/* 1.1 Servings Header */}
-        <div className="px-4.5 py-4 sm:px-6 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className={medallion}>
-              <Users className={medallionIcon} />
-            </div>
-            <div className="flex flex-col">
-              <span className={blockLabel}>{t('recipe.serves')}</span>
-              <span className="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
-                {t('recipe.servingsCount', { count: servings })}
-              </span>
-            </div>
+    <div className="flex flex-col gap-3 pb-4">
+      {/* 1. Servings Card */}
+      <div className="bg-white/60 dark:bg-gray-900/60 shadow-[0_1px_2px_rgba(0,0,0,0.03)] dark:shadow-none backdrop-blur-xs rounded-2xl p-3 sm:px-4 flex items-center justify-between gap-4 border-none">
+        <div className="flex items-center gap-3">
+          <div className={medallion}>
+            <Users className={medallionIcon} />
           </div>
-          <RecipeServingsStepper
-            servings={servings}
-            onDecreaseServings={onDecreaseServings}
-            onIncreaseServings={onIncreaseServings}
-          />
+          <div className="flex flex-col">
+            <span className={blockLabel}>{t('recipe.serves')}</span>
+            <span className="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
+              {t('recipe.servingsCount', { count: servings })}
+            </span>
+          </div>
         </div>
+        <RecipeServingsStepper
+          servings={servings}
+          onDecreaseServings={onDecreaseServings}
+          onIncreaseServings={onIncreaseServings}
+        />
+      </div>
 
-        {/* 1.2 Grouped Category Sections */}
-        <div className="px-4.5 py-3 sm:px-6 flex flex-col divide-y divide-gray-100/70 dark:divide-gray-800/60">
-          {sortedIngredients.map(({ group, originalIdx }) => {
-            const theme = getCategoryTheme(group.name);
-            return (
-              <div key={group.name || originalIdx} className="py-3.5 first:pt-1 last:pb-1 flex flex-col gap-1.5">
-                {/* Category Header Bar */}
-                {group.name && (
-                  <div className="flex items-center justify-between gap-2 pb-1">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${theme.barClass} shrink-0`} />
-                      <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
-                        {translateCategory(group.name)}
-                      </span>
-                    </div>
-                    <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 tabular-nums">
-                      {group.items.length}
+      {/* 2. Grouped Category Sections */}
+      <div className="flex flex-col gap-3">
+        {sortedIngredients.map(({ group, originalIdx }) => {
+          const theme = getCategoryTheme(group.name);
+          return (
+            <div key={group.name || originalIdx} className="flex flex-col gap-1.5">
+              {/* Category Header */}
+              {group.name && (
+                <div className="flex items-center justify-between gap-2 px-1 pt-1 pb-0.5 select-none">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${theme.barClass} shrink-0`} />
+                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
+                      {translateCategory(group.name)}
                     </span>
                   </div>
-                )}
+                  <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 tabular-nums">
+                    {group.items.length}
+                  </span>
+                </div>
+              )}
 
-                {/* Ingredients List with soft hairline dividers */}
-                <ul className="flex flex-col divide-y divide-gray-100/60 dark:divide-gray-800/50 list-none p-0 m-0">
-                  {group.items.map((ing, idx) => (
-                    <IngredientItemRow
-                      key={`${ing.name}-${originalIdx}-${idx}`}
-                      ingredient={ing}
-                      categoryName={group.name}
-                      originalIdx={originalIdx}
-                      itemIdx={idx}
-                      isPremium={isPremium}
-                      scaleFactor={scaleFactor}
-                      formatAmount={formatAmount}
-                      onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
-                    />
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
-        </div>
+              {/* Individual Ingredient Cards */}
+              <ul className="flex flex-col gap-1.5 list-none p-0 m-0">
+                {group.items.map((ing, idx) => (
+                  <IngredientItemRow
+                    key={`${ing.name}-${originalIdx}-${idx}`}
+                    ingredient={ing}
+                    categoryName={group.name}
+                    originalIdx={originalIdx}
+                    itemIdx={idx}
+                    isPremium={isPremium}
+                    scaleFactor={scaleFactor}
+                    formatAmount={formatAmount}
+                    onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
+                  />
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
 
-        {/* 1.3 Single PRO hint for ingredient nutrition */}
-        {!isPremium && hasAnyNutrition && (
-          <div
-            onClick={() => {
-              hapticLight();
-              setIsProFeatureSheetOpen(true);
-            }}
-            className="px-4.5 py-3 sm:px-6 bg-gray-50/60 dark:bg-gray-800/30 flex items-center justify-between gap-3 cursor-pointer group hover:bg-gray-100/60 dark:hover:bg-gray-800/50 transition-colors"
-          >
-            <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate">
-              {t('recipe.ingredientNutritionProHint') || 'Detaillierte Nährwerte & Makros pro Zutat'}
-            </span>
-            <div className="flex items-center gap-2 shrink-0">
-              <ProBadge variant="chip" />
-              <div className="w-7 h-7 rounded-full shadow-xs flex items-center justify-center bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">
-                <ChevronRight className="w-4 h-4" />
-              </div>
+      {/* 3. PRO hint for ingredient nutrition */}
+      {!isPremium && hasAnyNutrition && (
+        <div
+          onClick={() => {
+            hapticLight();
+            setIsProFeatureSheetOpen(true);
+          }}
+          className="bg-white/60 dark:bg-gray-900/60 shadow-[0_1px_2px_rgba(0,0,0,0.03)] dark:shadow-none backdrop-blur-xs rounded-2xl px-4 py-3 flex items-center justify-between gap-3 cursor-pointer group hover:bg-white/80 dark:hover:bg-gray-900/80 transition-all border-none"
+        >
+          <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate">
+            {t('recipe.ingredientNutritionProHint') || 'Detaillierte Nährwerte & Makros pro Zutat'}
+          </span>
+          <div className="flex items-center gap-2 shrink-0">
+            <ProBadge variant="chip" />
+            <div className="w-7 h-7 rounded-full shadow-xs flex items-center justify-center bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">
+              <ChevronRight className="w-4 h-4" />
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* 1.4 Integrated Shopping List Button Footer */}
-        {onAddIngredients && (
-          <div className="px-4.5 py-3.5 sm:px-6 bg-white dark:bg-gray-900">
-            <Button
-              className={`w-full h-12 min-h-[48px] rounded-2xl font-bold transition-all flex items-center justify-center gap-2 text-sm active:scale-[0.98] border-none shadow-none cursor-pointer ${
-                isAdded
-                  ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
-                  : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400'
-              }`}
-              onPress={() => {
-                hapticLight();
-                onAddIngredients();
-              }}
-            >
-              {isAdded ? (
-                <>
-                  <Check className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
-                  <span>{t('recipe.addedToShopping')}</span>
-                </>
-              ) : (
-                <>
-                  <ShoppingCart className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
-                  <span>{t('recipe.addToShopping')}</span>
-                </>
-              )}
-            </Button>
-          </div>
-        )}
-      </div>
+      {/* 4. Integrated Shopping List Button */}
+      {onAddIngredients && (
+        <Button
+          className={`w-full h-12 min-h-[48px] rounded-2xl font-bold transition-all flex items-center justify-center gap-2 text-sm active:scale-[0.98] border-none shadow-none cursor-pointer ${
+            isAdded
+              ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
+              : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400'
+          }`}
+          onPress={() => {
+            hapticLight();
+            onAddIngredients();
+          }}
+        >
+          {isAdded ? (
+            <>
+              <Check className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
+              <span>{t('recipe.addedToShopping')}</span>
+            </>
+          ) : (
+            <>
+              <ShoppingCart className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
+              <span>{t('recipe.addToShopping')}</span>
+            </>
+          )}
+        </Button>
+      )}
 
       {/* Alternative ingredients section */}
       {recipe.alternativeIngredients && recipe.alternativeIngredients.length > 0 && (
