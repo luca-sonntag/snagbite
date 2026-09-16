@@ -33,6 +33,7 @@ export interface MealPlanDaySectionProps {
   onToggleCooked: (entry: MealPlanEntry) => void;
   onDeleteEntry: (id: string) => void;
   onMoveToTomorrow?: (entry: MealPlanEntry) => void;
+  onMoveToToday?: (entry: MealPlanEntry) => void;
 }
 
 export interface PastMealPlanCardProps {
@@ -82,6 +83,7 @@ export interface MealPlanCardProps {
   onToggleCooked: (entry: MealPlanEntry) => void;
   onDeleteEntry: (id: string) => void;
   onMoveToTomorrow?: (entry: MealPlanEntry) => void;
+  onMoveToToday?: (entry: MealPlanEntry) => void;
   onSelectRecipe: (recipeId: string) => void;
   onOpenCookMode?: (recipeId: string) => void;
 }

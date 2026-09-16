@@ -21,6 +21,7 @@ export interface MealPlanDaySectionProps {
   onToggleCooked: (entry: MealPlanEntry) => void;
   onDeleteEntry: (id: string) => void;
   onMoveToTomorrow?: (entry: MealPlanEntry) => void;
+  onMoveToToday?: (entry: MealPlanEntry) => void;
 }
 
 export const MealPlanDaySection = React.memo<MealPlanDaySectionProps>(({
@@ -37,6 +38,7 @@ export const MealPlanDaySection = React.memo<MealPlanDaySectionProps>(({
   onToggleCooked,
   onDeleteEntry,
   onMoveToTomorrow,
+  onMoveToToday,
 }) => {
   const { t, language } = useI18n();
 
@@ -121,6 +123,7 @@ export const MealPlanDaySection = React.memo<MealPlanDaySectionProps>(({
                 onToggleCooked={onToggleCooked}
                 onDeleteEntry={onDeleteEntry}
                 onMoveToTomorrow={onMoveToTomorrow}
+                onMoveToToday={onMoveToToday}
                 onSelectRecipe={onSelectRecipe}
                 onOpenCookMode={onOpenCookMode}
               />

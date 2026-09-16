@@ -107,7 +107,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
     <div
       className={`group w-full rounded-2xl flex gap-3 cursor-pointer active:scale-[0.98] transition-all duration-150 select-none border-none touch-manipulation overflow-hidden ${
         flushImage
-          ? 'p-0 items-stretch'
+          ? 'p-0 items-stretch min-h-[82px] sm:min-h-[88px]'
           : 'p-2.5 sm:p-3 items-center'
       } ${
         isSelected
@@ -126,7 +126,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
       <div
         className={`relative overflow-hidden bg-black/5 dark:bg-white/5 shrink-0 border-none pointer-events-none ${
           flushImage
-            ? 'w-20 sm:w-24 self-stretch rounded-none'
+            ? 'w-24 sm:w-28 self-stretch rounded-none'
             : 'w-16 h-16 sm:w-18 sm:h-18 rounded-xl sm:rounded-2xl'
         }`}
       >

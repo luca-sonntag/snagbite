@@ -51,6 +51,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     updateServings,
     toggleCooked,
     moveToTomorrow,
+    moveToToday,
     deletePlan,
   } = useMealPlanner();
 
@@ -206,6 +207,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
               onToggleCooked={handleToggleCooked}
               onDeleteEntry={deletePlan}
               onMoveToTomorrow={moveToTomorrow}
+              onMoveToToday={moveToToday}
             />
           ))}
 

@@ -95,6 +95,34 @@ export function useMealPlanActions({
     [getAccessToken, toast, t, fetchPlans, setMealPlans],
   );
 
+  // Move entry to today (pull forward)
+  const moveToToday = useCallback(
+    async (entry: MealPlanEntry) => {
+      const todayStr = formatDateIso(new Date());
+      if (entry.planDate === todayStr) return;
+      setMealPlans((prev) =>
+        prev.map((p) => (p.id === entry.id ? { ...p, planDate: todayStr } : p)),
+      );
+      window.dispatchEvent(new CustomEvent('meal-plans-updated'));
+      try {
+        const token = await getAccessToken();
+        await fetch(apiUrl(`/api/meal-plan/${entry.id}`), {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ planDate: todayStr }),
+        });
+        toast.success(t('mealPlanner.movedToToday'));
+      } catch (err) {
+        console.error('Failed to move plan to today:', err);
+        fetchPlans();
+      }
+    },
+    [getAccessToken, toast, t, fetchPlans, setMealPlans],
+  );
+
   // Delete plan entry
   const deletePlan = useCallback(
     async (id: string) => {
@@ -119,6 +147,7 @@ export function useMealPlanActions({
     updateServings,
     toggleCooked,
     moveToTomorrow,
+    moveToToday,
     deletePlan,
   };
 }

@@ -205,7 +205,7 @@ export function useMealPlanner() {
   );
 
   // Meal plan CRUD mutations
-  const { updateServings, toggleCooked, moveToTomorrow, deletePlan } = useMealPlanActions({
+  const { updateServings, toggleCooked, moveToTomorrow, moveToToday, deletePlan } = useMealPlanActions({
     setMealPlans,
     fetchPlans,
     getAccessToken,
@@ -285,6 +285,7 @@ export function useMealPlanner() {
     updateServings,
     toggleCooked,
     moveToTomorrow,
+    moveToToday,
     deletePlan,
   };
 }
