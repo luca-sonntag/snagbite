@@ -201,7 +201,7 @@ export default function ShoppingConfirmSheet({
               </div>
 
               {/* Selection Count & Quick Toggle Bar */}
-              <div className="flex items-center justify-between px-1.5 pt-2.5 pb-2 select-none">
+              <div className="flex items-center justify-between px-1.5 pt-1 pb-2 select-none">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                   {language === 'en'
                     ? `${selectedCount} of ${allItems.length} selected`
