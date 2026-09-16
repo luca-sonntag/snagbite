@@ -201,7 +201,7 @@ export default function ShoppingConfirmSheet({
               </div>
 
               {/* Selection Count & Quick Toggle Bar */}
-              <div className="flex items-center justify-between px-1 mb-1 select-none">
+              <div className="flex items-center justify-between px-1.5 pt-2.5 pb-2 select-none">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                   {language === 'en'
                     ? `${selectedCount} of ${allItems.length} selected`
@@ -218,7 +218,7 @@ export default function ShoppingConfirmSheet({
                     });
                     setSelectedIds(next);
                   }}
-                  className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer border-none bg-transparent"
+                  className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer border-none bg-transparent py-0.5"
                 >
                   {selectedCount === allItems.length
                     ? (language === 'en' ? 'Deselect all' : 'Keine')
