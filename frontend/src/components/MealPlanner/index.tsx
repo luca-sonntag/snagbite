@@ -81,16 +81,11 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
 
   const todayStr = useMemo(() => formatDateIso(new Date()), []);
 
-  const handleDeselectDay = useCallback(() => {
-    setSelectedDate(null);
-  }, [setSelectedDate]);
-
   // Bidirectional ScrollSpy: connects vertical list with sticky calendar header
   const { highlightedDate, scrollToDate } = useMealPlanScrollSpy({
     agendaDates,
     currentWeekStart,
     onWeekChange: setCurrentWeekStart,
-    onDeselectDay: handleDeselectDay,
   });
 
   const hasInitialScrolledRef = useRef(false);

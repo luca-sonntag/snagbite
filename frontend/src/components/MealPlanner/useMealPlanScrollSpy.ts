@@ -5,14 +5,12 @@ interface UseMealPlanScrollSpyOptions {
   agendaDates: string[];
   currentWeekStart: Date;
   onWeekChange: (newWeekStart: Date) => void;
-  onDeselectDay?: () => void;
 }
 
 export function useMealPlanScrollSpy({
   agendaDates,
   currentWeekStart,
   onWeekChange,
-  onDeselectDay,
 }: UseMealPlanScrollSpyOptions) {
   const [highlightedDate, setHighlightedDate] = useState<string | null>(null);
   const isProgrammaticScrollRef = useRef(false);
@@ -25,21 +23,7 @@ export function useMealPlanScrollSpy({
   const onWeekChangeRef = useRef(onWeekChange);
   onWeekChangeRef.current = onWeekChange;
 
-  const onDeselectDayRef = useRef(onDeselectDay);
-  onDeselectDayRef.current = onDeselectDay;
-
   const scrollDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Deselect active day when user manually scrolls
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!isProgrammaticScrollRef.current) {
-        onDeselectDayRef.current?.();
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Smoothly scroll to a target date section in the agenda stream
   const scrollToDate = useCallback(
