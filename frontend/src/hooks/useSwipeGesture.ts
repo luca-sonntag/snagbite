@@ -44,6 +44,7 @@ export function useSwipeGesture({
       startRef.current = null;
 
       if (dy > maxVertical) return; // too much vertical movement
+      if (dy >= Math.abs(dx)) return; // vertical scroll, not a swipe
       if (Math.abs(dx) < threshold) return; // not enough horizontal
 
       if (dx < 0) {

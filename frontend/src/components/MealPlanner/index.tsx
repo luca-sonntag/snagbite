@@ -13,6 +13,7 @@ import { MealPlanShoppingSheets } from './MealPlanShoppingSheets';
 import { RecipePickerModal } from './RecipePickerModal';
 import CookedModal from '../CookedModal';
 import { useSwipeGesture } from '../../hooks/useSwipeGesture';
+import { hapticSelection } from '../../utils/haptics';
 
 export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
   history,
@@ -73,6 +74,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
   }, []);
 
   const goToNextDay = useCallback(() => {
+    hapticSelection();
     const days = weekDays;
     const idx = days.findIndex((d) => d.dateStr === selectedDate);
     if (idx < days.length - 1) {
@@ -83,6 +85,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
   }, [weekDays, selectedDate, setSelectedDate, goToNextWeek]);
 
   const goToPrevDay = useCallback(() => {
+    hapticSelection();
     const days = weekDays;
     const idx = days.findIndex((d) => d.dateStr === selectedDate);
     if (idx > 0) {
@@ -97,6 +100,11 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     onSwipeRight: goToPrevDay,
   });
 
+  const calendarSwipeHandlers = useSwipeGesture({
+    onSwipeLeft: goToNextWeek,
+    onSwipeRight: goToPrevWeek,
+  });
+
   return (
     <div className="w-full flex flex-col gap-3 pb-24 overflow-hidden">
       {/* Header with page title & shopping action */}
@@ -108,7 +116,10 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
       />
 
       {/* Unified Calendar Widget Card */}
-      <div className="w-full flex flex-col gap-1.5 p-2 rounded-3xl bg-gray-100/75 dark:bg-gray-900/90 border-none shadow-2xs">
+      <div
+        className="w-full flex flex-col gap-1.5 p-2 rounded-3xl bg-gray-100/75 dark:bg-gray-900/90 border-none shadow-2xs select-none touch-pan-y"
+        {...calendarSwipeHandlers}
+      >
         <WeekNavigator
           weekStart={currentWeekStart}
           weekEnd={weekEnd}
