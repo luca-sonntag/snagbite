@@ -28,7 +28,26 @@ export default function ToastContainer({ toasts, onDismiss }: ToastContainerProp
         // Exclude the toast container itself and closing/hidden dialogs
         if (el.closest('[aria-live="polite"]')) return false;
         if (el.getAttribute('aria-hidden') === 'true' || el.closest('[aria-hidden="true"], [data-state="closed"]')) return false;
+
+        // Exclude floating popovers, dropdowns, contextual action menus, tooltips
+        if (
+          el.closest('[data-slot="popover"], [data-slot="menu"], [role="menu"], [role="tooltip"], [data-popover="true"]') ||
+          el.getAttribute('data-slot') === 'popover' ||
+          el.getAttribute('role') === 'menu'
+        ) {
+          return false;
+        }
+
         const rect = el.getBoundingClientRect();
+
+        // Popovers/menus are small floating boxes (< 300px), not bottom sheets or full modals
+        // A true bottom sheet / modal covers a significant portion of the screen width
+        const isWideOverlay = rect.width >= Math.min(window.innerWidth * 0.75, 340);
+        const isFullDrawerOrModal = Boolean(el.closest('[data-slot="drawer"], [data-slot="modal"]'));
+        if (!isWideOverlay && !isFullDrawerOrModal) {
+          return false;
+        }
+
         return (
           rect.height > 80 &&
           rect.width > 80 &&
