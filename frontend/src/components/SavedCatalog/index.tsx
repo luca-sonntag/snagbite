@@ -32,7 +32,11 @@ interface SavedCatalogProps {
   selectedJob: SavedRecipe | null;
   setSelectedJob: (job: SavedRecipe | null) => void;
   handleDeleteJob: (e: React.MouseEvent, id: string) => void;
-  onAddIngredients?: (ingredients: Ingredient[], recipeId: string, recipeTitle: string) => void;
+  onAddIngredients?: (
+    ingredients: Ingredient[],
+    recipeId: string,
+    recipeTitle: string
+  ) => Promise<boolean> | boolean | void;
   fetchHistory?: () => void;
   getAccessToken?: () => Promise<string | null>;
   onNavigateToShoppingList?: () => void;
@@ -326,11 +330,15 @@ export default function SavedCatalog({
     setBulkShoppingQueue(jobs);
   };
 
-  const handleBulkShoppingConfirm = (items: Ingredient[]) => {
+  const handleBulkShoppingConfirm = async (items: Ingredient[]) => {
     const job = bulkShoppingQueue[0];
     if (!job || !onAddIngredients) return;
     if (items.length > 0) {
-      onAddIngredients(items, job.recipeId, job.recipe!.title);
+      const success = await onAddIngredients(items, job.recipeId, job.recipe!.title);
+      if (success === false) {
+        setBulkShoppingQueue([]);
+        return;
+      }
       setBulkShoppingAdded(prev => prev + 1);
       setBulkShoppingAddedItemsCount(prev => prev + items.length);
 
@@ -347,9 +355,6 @@ export default function SavedCatalog({
         });
       }
     }
-    // NOTE: onClose() is called by ShoppingConfirmSheet after onConfirm(),
-    // which triggers handleBulkShoppingClose → advances the queue.
-    // Do NOT call setBulkShoppingQueue here or every other recipe is skipped.
   };
 
   const handleBulkShoppingClose = () => {

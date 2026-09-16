@@ -69,7 +69,11 @@ export function countActiveFilters(filters: CatalogFilterState): number {
 interface UseSavedCatalogProps {
   history: SavedRecipe[];
   setSelectedJob: (job: SavedRecipe | null) => void;
-  onAddIngredients?: (ingredients: Ingredient[], recipeId: string, recipeTitle: string) => void;
+  onAddIngredients?: (
+    ingredients: Ingredient[],
+    recipeId: string,
+    recipeTitle: string
+  ) => Promise<boolean> | boolean | void;
   fetchHistory?: () => void;
   getAccessToken?: () => Promise<string | null>;
   onSelectModeChange?: (active: boolean) => void;
@@ -506,7 +510,7 @@ export function useSavedCatalog({
   };
 
   // Direct add all ingredients of a recipe to shopping list
-  const handleDirectAddToShoppingList = (e: React.MouseEvent, job: SavedRecipe) => {
+  const handleDirectAddToShoppingList = async (e: React.MouseEvent, job: SavedRecipe) => {
     e.stopPropagation();
     const r = job.recipe!;
     if (!onAddIngredients) return;
@@ -524,7 +528,8 @@ export function useSavedCatalog({
 
     if (itemsToAdd.length === 0) return;
 
-    onAddIngredients(itemsToAdd, job.recipeId, r.title);
+    const success = await onAddIngredients(itemsToAdd, job.recipeId, r.title);
+    if (success === false) return;
 
     // Checkmark success animation trigger
     setAddedRecipeIds(prev => ({ ...prev, [job.recipeId]: true }));
