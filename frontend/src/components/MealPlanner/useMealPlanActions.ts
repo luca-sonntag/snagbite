@@ -26,7 +26,7 @@ export function useMealPlanActions({
       setMealPlans((prev) => prev.map((p) => (p.id === id ? { ...p, servings: newServings } : p)));
       try {
         const token = await getAccessToken();
-        await fetch(apiUrl(`/api/meal-plan/${id}`), {
+        const res = await fetch(apiUrl(`/api/meal-plan/${id}`), {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -34,6 +34,11 @@ export function useMealPlanActions({
           },
           body: JSON.stringify({ servings: newServings }),
         });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data?.error?.message || 'Failed to update servings');
+        }
+        window.dispatchEvent(new CustomEvent('meal-plans-updated', { detail: { source: 'useMealPlanActions' } }));
       } catch (err) {
         console.error('Failed to update servings:', err);
         fetchPlans();
@@ -47,10 +52,9 @@ export function useMealPlanActions({
     async (entry: MealPlanEntry) => {
       const nextCooked = !entry.isCooked;
       setMealPlans((prev) => prev.map((p) => (p.id === entry.id ? { ...p, isCooked: nextCooked } : p)));
-      window.dispatchEvent(new CustomEvent('meal-plans-updated'));
       try {
         const token = await getAccessToken();
-        await fetch(apiUrl(`/api/meal-plan/${entry.id}`), {
+        const res = await fetch(apiUrl(`/api/meal-plan/${entry.id}`), {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -58,6 +62,11 @@ export function useMealPlanActions({
           },
           body: JSON.stringify({ isCooked: nextCooked }),
         });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data?.error?.message || 'Failed to toggle cooked state');
+        }
+        window.dispatchEvent(new CustomEvent('meal-plans-updated', { detail: { source: 'useMealPlanActions' } }));
       } catch (err) {
         console.error('Failed to toggle cooked state:', err);
         fetchPlans();
@@ -75,10 +84,9 @@ export function useMealPlanActions({
       setMealPlans((prev) =>
         prev.map((p) => (p.id === entry.id ? { ...p, planDate: tomorrowStr } : p)),
       );
-      window.dispatchEvent(new CustomEvent('meal-plans-updated'));
       try {
         const token = await getAccessToken();
-        await fetch(apiUrl(`/api/meal-plan/${entry.id}`), {
+        const res = await fetch(apiUrl(`/api/meal-plan/${entry.id}`), {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -86,9 +94,15 @@ export function useMealPlanActions({
           },
           body: JSON.stringify({ planDate: tomorrowStr }),
         });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data?.error?.message || 'Failed to move plan to tomorrow');
+        }
         toast.success(t('mealPlanner.movedToTomorrow'));
+        window.dispatchEvent(new CustomEvent('meal-plans-updated', { detail: { source: 'useMealPlanActions' } }));
       } catch (err) {
         console.error('Failed to move plan to tomorrow:', err);
+        toast.danger(t('common.networkError') || 'Fehler beim Verschieben');
         fetchPlans();
       }
     },
@@ -103,10 +117,9 @@ export function useMealPlanActions({
       setMealPlans((prev) =>
         prev.map((p) => (p.id === entry.id ? { ...p, planDate: todayStr } : p)),
       );
-      window.dispatchEvent(new CustomEvent('meal-plans-updated'));
       try {
         const token = await getAccessToken();
-        await fetch(apiUrl(`/api/meal-plan/${entry.id}`), {
+        const res = await fetch(apiUrl(`/api/meal-plan/${entry.id}`), {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -114,9 +127,15 @@ export function useMealPlanActions({
           },
           body: JSON.stringify({ planDate: todayStr }),
         });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data?.error?.message || 'Failed to move plan to today');
+        }
         toast.success(t('mealPlanner.movedToToday'));
+        window.dispatchEvent(new CustomEvent('meal-plans-updated', { detail: { source: 'useMealPlanActions' } }));
       } catch (err) {
         console.error('Failed to move plan to today:', err);
+        toast.danger(t('common.networkError') || 'Fehler beim Verschieben');
         fetchPlans();
       }
     },
@@ -132,10 +151,9 @@ export function useMealPlanActions({
           p.id === entry.id ? { ...p, planDate: todayStr, isCooked: true } : p,
         ),
       );
-      window.dispatchEvent(new CustomEvent('meal-plans-updated'));
       try {
         const token = await getAccessToken();
-        await fetch(apiUrl(`/api/meal-plan/${entry.id}`), {
+        const res = await fetch(apiUrl(`/api/meal-plan/${entry.id}`), {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -143,6 +161,11 @@ export function useMealPlanActions({
           },
           body: JSON.stringify({ planDate: todayStr, isCooked: true }),
         });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data?.error?.message || 'Failed to pull to today and mark cooked');
+        }
+        window.dispatchEvent(new CustomEvent('meal-plans-updated', { detail: { source: 'useMealPlanActions' } }));
       } catch (err) {
         console.error('Failed to pull to today and mark cooked:', err);
         fetchPlans();
@@ -155,14 +178,18 @@ export function useMealPlanActions({
   const deletePlan = useCallback(
     async (id: string) => {
       setMealPlans((prev) => prev.filter((p) => p.id !== id));
-      window.dispatchEvent(new CustomEvent('meal-plans-updated'));
       try {
         const token = await getAccessToken();
-        await fetch(apiUrl(`/api/meal-plan/${id}`), {
+        const res = await fetch(apiUrl(`/api/meal-plan/${id}`), {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` },
         });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data?.error?.message || 'Failed to delete meal plan');
+        }
         toast.info(t('mealPlanner.removeFromPlan'));
+        window.dispatchEvent(new CustomEvent('meal-plans-updated', { detail: { source: 'useMealPlanActions' } }));
       } catch (err) {
         console.error('Failed to delete meal plan:', err);
         fetchPlans();

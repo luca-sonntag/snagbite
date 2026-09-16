@@ -85,7 +85,11 @@ export function useMealPlanner() {
       fetchPlans();
     };
 
-    const handleMealPlansUpdated = () => {
+    const handleMealPlansUpdated = (e: Event) => {
+      const customEvent = e as CustomEvent<{ source?: string }>;
+      if (customEvent.detail?.source === 'useMealPlanActions') {
+        return;
+      }
       fetchPlans();
     };
 
@@ -193,7 +197,7 @@ export function useMealPlanner() {
 
         if (data.mealPlan) {
           setMealPlans((prev) => [...prev.filter((p) => p.id !== data.mealPlan.id), data.mealPlan]);
-          window.dispatchEvent(new CustomEvent('meal-plans-updated'));
+          window.dispatchEvent(new CustomEvent('meal-plans-updated', { detail: { source: 'useMealPlanActions' } }));
           toast.success(t('mealPlanner.addedToPlan'));
         }
       } catch (err) {
