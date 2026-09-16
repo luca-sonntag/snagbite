@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { Plus } from 'lucide-react';
 import type { MealPlannerViewProps } from './types';
 import type { MealPlanEntry } from '../../types';
 import { useMealPlanner } from './useMealPlanner';
@@ -12,7 +13,8 @@ import { MealPlanDaySection } from './MealPlanDaySection';
 import { MealPlanShoppingSheets } from './MealPlanShoppingSheets';
 import { RecipePickerModal } from './RecipePickerModal';
 import CookedModal from '../CookedModal';
-import { formatDateIso, addDays } from './mealPlannerUtils';
+import { useI18n } from '../../context/I18nContext';
+import { formatDateIso, addDays, formatWeekRange } from './mealPlannerUtils';
 
 export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
   history,
@@ -21,6 +23,8 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
   addRecipeIngredients,
   onNavigateToShoppingList,
 }) => {
+  const { t, language } = useI18n();
+
   const {
     currentWeekStart,
     setCurrentWeekStart,
@@ -30,6 +34,9 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     setSelectedDate,
     mealPlans,
     agendaDates,
+    extendNextWeek,
+    nextExtendWeekStart,
+    nextExtendWeekEnd,
     activeDayEntries,
     futurePlannedCount,
     weekDays,
@@ -185,6 +192,21 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
               />
             );
           })}
+
+          {/* Progressive Week Extension Button */}
+          <div className="pt-2 pb-4 flex justify-center">
+            <button
+              onClick={extendNextWeek}
+              className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gray-100/90 dark:bg-gray-800/80 hover:bg-gray-200/90 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-150 active:scale-[0.98] cursor-pointer border-none shadow-2xs"
+            >
+              <Plus className="w-4 h-4 text-gray-400 dark:text-gray-500 stroke-[2.25]" />
+              <span>
+                {t('mealPlanner.planNextWeek', {
+                  range: formatWeekRange(nextExtendWeekStart, nextExtendWeekEnd, language),
+                }) || `+ Nächste Woche planen (${formatWeekRange(nextExtendWeekStart, nextExtendWeekEnd, language)})`}
+              </span>
+            </button>
+          </div>
         </div>
       )}
 

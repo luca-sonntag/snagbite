@@ -181,6 +181,7 @@ describe('mealPlannerUtils', () => {
         },
       ];
 
+      // Default (extendedWeeks = 0): current 7 days + meal plan dates
       const dates = buildAgendaDates(wednesday, mealPlans);
 
       // Should include 2026-09-01 (past)
@@ -193,14 +194,17 @@ describe('mealPlannerUtils', () => {
       assert.ok(dates.includes('2026-09-18'));
       assert.ok(dates.includes('2026-09-19'));
       assert.ok(dates.includes('2026-09-20'));
-      // Should include 2026-09-21 through 2026-09-27 (next week)
-      assert.ok(dates.includes('2026-09-21'));
-      assert.ok(dates.includes('2026-09-27'));
-      // Should include 2026-09-25 (future)
+      // Should include 2026-09-25 (future planned)
       assert.ok(dates.includes('2026-09-25'));
       // Should be sorted chronologically
       assert.equal(dates[0], '2026-09-01');
-      assert.equal(dates[dates.length - 1], '2026-09-27');
+      assert.equal(dates[dates.length - 1], '2026-09-25');
+
+      // Extended (extendedWeeks = 1): also includes next week 2026-09-21..2026-09-27
+      const extendedDates = buildAgendaDates(wednesday, mealPlans, 1);
+      assert.ok(extendedDates.includes('2026-09-21'));
+      assert.ok(extendedDates.includes('2026-09-27'));
+      assert.equal(extendedDates[extendedDates.length - 1], '2026-09-27');
     });
   });
 });

@@ -3,22 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { hapticLight } from '../../utils/haptics';
 import type { WeekNavigatorProps } from './types';
-
-function formatWeekRange(start: Date, end: Date, language: string): string {
-  const locale = language === 'en' ? 'en-US' : 'de-DE';
-  const startDay = start.getDate();
-  const endDay = end.getDate();
-  const startMonth = start.toLocaleDateString(locale, { month: 'short' });
-  const endMonth = end.toLocaleDateString(locale, { month: 'short' });
-
-  if (startMonth === endMonth) {
-    return locale === 'en-US'
-      ? `${startMonth} ${startDay} – ${endDay}`
-      : `${startDay}. – ${endDay}. ${startMonth}`;
-  }
-
-  return `${startDay}. ${startMonth} – ${endDay}. ${endMonth}`;
-}
+import { formatWeekRange } from './mealPlannerUtils';
 
 export const WeekNavigator: React.FC<WeekNavigatorProps> = ({
   weekStart,

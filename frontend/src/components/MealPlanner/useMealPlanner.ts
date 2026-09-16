@@ -228,9 +228,25 @@ export function useMealPlanner() {
 
   const futurePlannedCount = futurePlannedEntries.length;
 
+  const [extendedWeeks, setExtendedWeeks] = useState<number>(0);
+
+  const extendNextWeek = useCallback(() => {
+    hapticLight();
+    setExtendedWeeks((prev) => prev + 1);
+  }, []);
+
+  const nextExtendWeekStart = useMemo(() => {
+    const currentMonday = getMonday(new Date());
+    return addDays(currentMonday, (extendedWeeks + 1) * 7);
+  }, [extendedWeeks]);
+
+  const nextExtendWeekEnd = useMemo(() => {
+    return addDays(nextExtendWeekStart, 6);
+  }, [nextExtendWeekStart]);
+
   const agendaDates = useMemo(() => {
-    return buildAgendaDates(new Date(), mealPlans);
-  }, [mealPlans]);
+    return buildAgendaDates(new Date(), mealPlans, extendedWeeks);
+  }, [mealPlans, extendedWeeks]);
 
   return {
     currentWeekStart,
@@ -241,6 +257,10 @@ export function useMealPlanner() {
     setSelectedDate,
     mealPlans,
     agendaDates,
+    extendedWeeks,
+    extendNextWeek,
+    nextExtendWeekStart,
+    nextExtendWeekEnd,
     activeDayEntries,
     futurePlannedEntries,
     upcomingPlannedEntries,

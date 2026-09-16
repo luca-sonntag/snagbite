@@ -147,14 +147,31 @@ export function buildWeekDaysInfo(
   });
 }
 
+export function formatWeekRange(start: Date, end: Date, language: string): string {
+  const locale = language === 'en' ? 'en-US' : 'de-DE';
+  const startDay = start.getDate();
+  const endDay = end.getDate();
+  const startMonth = start.toLocaleDateString(locale, { month: 'short' });
+  const endMonth = end.toLocaleDateString(locale, { month: 'short' });
+
+  if (startMonth === endMonth) {
+    return locale === 'en-US'
+      ? `${startMonth} ${startDay} – ${endDay}`
+      : `${startDay}. – ${endDay}. ${startMonth}`;
+  }
+
+  return `${startDay}. ${startMonth} – ${endDay}. ${endMonth}`;
+}
+
 /**
  * Builds the chronological list of dates to render in the Unified Agenda Stream.
- * Stably includes all 7 days of the current week, all 7 days of the next week,
+ * Stably includes all 7 days of the current week, any progressively extended future weeks,
  * plus any dates that have planned recipes (past & future).
  */
 export function buildAgendaDates(
   todayDate: Date,
   mealPlans: MealPlanEntry[],
+  extendedWeeks: number = 0,
 ): string[] {
   const dateSet = new Set<string>();
 
@@ -164,9 +181,11 @@ export function buildAgendaDates(
     dateSet.add(formatDateIso(addDays(currentMonday, i)));
   }
 
-  // 2. Next week: all 7 days for continuous seamless forward planning
-  for (let i = 7; i < 14; i++) {
-    dateSet.add(formatDateIso(addDays(currentMonday, i)));
+  // 2. Extended future weeks (progressively loaded)
+  for (let w = 1; w <= extendedWeeks; w++) {
+    for (let i = 0; i < 7; i++) {
+      dateSet.add(formatDateIso(addDays(currentMonday, w * 7 + i)));
+    }
   }
 
   // 3. All dates with existing meal plans (past & future)
