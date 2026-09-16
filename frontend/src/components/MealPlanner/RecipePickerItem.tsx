@@ -19,9 +19,9 @@ export const RecipePickerItem: React.FC<RecipePickerItemProps> = React.memo(({ s
     <button
       type="button"
       onClick={() => onSelect(saved)}
-      className="w-full min-h-[64px] flex items-center gap-3 p-2.5 rounded-2xl hover:bg-emerald-50/70 dark:hover:bg-emerald-950/30 text-left active:scale-[0.98] transition-all duration-150 group border-none cursor-pointer bg-transparent touch-manipulation"
+      className="w-full flex items-center gap-3.5 p-2.5 sm:p-3 rounded-2xl bg-gray-50/90 dark:bg-gray-800/60 hover:bg-emerald-50/80 dark:hover:bg-emerald-950/40 text-left active:scale-[0.98] transition-all duration-150 group border-none cursor-pointer touch-manipulation ring-1 ring-black/[0.04] dark:ring-white/[0.05] shadow-2xs"
     >
-      <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 ring-1 ring-black/[0.06] dark:ring-white/[0.08] pointer-events-none">
+      <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 ring-1 ring-black/[0.06] dark:ring-white/[0.08] pointer-events-none shadow-2xs">
         <CachedImage
           src={saved.recipe?.imageUrl}
           alt={saved.recipe?.title || 'Recipe'}

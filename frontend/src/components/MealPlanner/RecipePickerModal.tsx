@@ -214,7 +214,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
             </div>
 
             {/* Scrollable Recipe Body */}
-            <Drawer.Body className="overflow-y-auto px-0 py-1 flex-1 flex flex-col gap-1.5 overscroll-contain">
+            <Drawer.Body className="overflow-y-auto px-0.5 py-2 flex-1 flex flex-col gap-2.5 sm:gap-3 overscroll-contain">
               {filteredHistory.length > 0 ? (
                 filteredHistory.map((saved) => (
                   <RecipePickerItem
