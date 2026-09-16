@@ -122,10 +122,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
                 </span>
               )}
               {isFavorite && !isSelectMode && (
-                <>
-                  {totalTimeStr && <span className="text-gray-300 dark:text-gray-600 text-[9px] leading-none select-none">•</span>}
-                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
-                </>
+                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
               )}
               {firstTag && (
                 <>
