@@ -186,7 +186,7 @@ export default function ShoppingConfirmSheet({
               </Drawer.Header>
 
               {/* Dedicated Servings Stepper Row under Header */}
-              <div className="flex items-center justify-between px-3.5 py-2 mb-2 rounded-2xl bg-white dark:bg-gray-900 shadow-2xs border-none select-none">
+              <div className="flex items-center justify-between px-1.5 py-1 select-none">
                 <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
                   {t('mealPlanner.servings') || 'Portionen'}
                 </span>
