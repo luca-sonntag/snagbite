@@ -186,8 +186,8 @@ export default function ShoppingConfirmSheet({
               </Drawer.Header>
 
               {/* Dedicated Servings Stepper Row under Header */}
-              <div className="flex items-center justify-between px-3.5 py-2 mb-2 rounded-2xl bg-white dark:bg-gray-900 shadow-2xs border-none select-none">
-                <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
+              <div className="flex items-center justify-between py-1.5 px-0.5 mb-2 bg-transparent border-none select-none">
+                <span className="text-sm font-extrabold text-gray-800 dark:text-gray-200">
                   {t('mealPlanner.servings') || 'Portionen'}
                 </span>
                 <ServingsStepper
@@ -196,6 +196,7 @@ export default function ShoppingConfirmSheet({
                   onIncrease={() => setServings((s) => s + 1)}
                   size="sm"
                   showIcon={false}
+                  className="bg-gray-200/70 dark:bg-gray-800/80"
                   ariaLabel={t('mealPlanner.servings')}
                 />
               </div>
@@ -236,11 +237,11 @@ export default function ShoppingConfirmSheet({
               </div>
 
               {/* Footer */}
-              <Drawer.Footer className="pt-3 flex gap-2">
+              <Drawer.Footer className="pt-3 flex gap-2.5 bg-transparent border-none">
                 <Button
                   variant="tertiary"
                   onPress={onClose}
-                  className="w-full h-12 rounded-2xl font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-none active:scale-95 transition-all cursor-pointer"
+                  className="w-full h-12 rounded-2xl font-bold bg-gray-200/80 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-200 border-none active:scale-95 transition-all cursor-pointer"
                 >
                   {t('recipe.shoppingConfirmCancel')}
                 </Button>
