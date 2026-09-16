@@ -177,7 +177,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                   className="w-full flex items-center justify-center pt-2 pb-3 select-none"
                   aria-hidden="true"
                 >
-                  <div className="w-24 sm:w-32 h-[1px] bg-gray-200/90 dark:bg-gray-800/80 rounded-full" />
+                  <div className="w-3/4 h-[1px] bg-gray-200/90 dark:bg-gray-800/80 rounded-full" />
                 </div>
               )}
 
