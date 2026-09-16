@@ -232,3 +232,28 @@ export function groupDatesByWeek(dates: string[]): AgendaWeekGroup[] {
   return Array.from(groupsMap.values());
 }
 
+/**
+ * Calculates the ISO-8601 calendar week number for a given date.
+ */
+export function getCalendarWeek(date: Date): number {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+}
+
+/**
+ * Formats a calendar week header label (e.g. "KW 38 · 14. – 20. Sep").
+ */
+export function formatWeekGroupHeader(
+  weekStart: Date,
+  weekEnd: Date,
+  language: string,
+): string {
+  const kw = getCalendarWeek(weekStart);
+  const kwPrefix = language === 'en' ? `CW ${kw}` : `KW ${kw}`;
+  const range = formatWeekRange(weekStart, weekEnd, language);
+  return `${kwPrefix} · ${range}`;
+}
+

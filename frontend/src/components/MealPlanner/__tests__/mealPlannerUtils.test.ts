@@ -12,6 +12,8 @@ import {
   buildWeekDaysInfo,
   buildAgendaDates,
   groupDatesByWeek,
+  getCalendarWeek,
+  formatWeekGroupHeader,
 } from '../mealPlannerUtils.js';
 
 describe('mealPlannerUtils', () => {
@@ -233,6 +235,34 @@ describe('mealPlannerUtils', () => {
       // Week 3: 2026-09-21 (contains 2026-09-21)
       assert.equal(groups[2].weekKey, '2026-09-21');
       assert.deepEqual(groups[2].dates, ['2026-09-21']);
+    });
+  });
+
+  describe('getCalendarWeek', () => {
+    it('returns ISO calendar week 38 for 2026-09-14', () => {
+      const d = new Date(2026, 8, 14);
+      assert.equal(getCalendarWeek(d), 38);
+    });
+
+    it('returns ISO calendar week 1 for first week of January', () => {
+      const d = new Date(2026, 0, 5); // Monday Jan 5, 2026 is CW 2, Jan 1 is CW 1
+      assert.equal(getCalendarWeek(new Date(2026, 0, 1)), 1);
+    });
+  });
+
+  describe('formatWeekGroupHeader', () => {
+    it('formats German week header with KW prefix and date range', () => {
+      const start = new Date(2026, 8, 14);
+      const end = new Date(2026, 8, 20);
+      const header = formatWeekGroupHeader(start, end, 'de');
+      assert.equal(header, 'KW 38 · 14. – 20. Sep');
+    });
+
+    it('formats English week header with CW prefix and date range', () => {
+      const start = new Date(2026, 8, 14);
+      const end = new Date(2026, 8, 20);
+      const header = formatWeekGroupHeader(start, end, 'en');
+      assert.equal(header, 'CW 38 · Sep 14 – 20');
     });
   });
 });

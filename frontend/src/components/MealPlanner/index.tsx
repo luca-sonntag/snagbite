@@ -14,7 +14,7 @@ import { MealPlanShoppingSheets } from './MealPlanShoppingSheets';
 import { RecipePickerModal } from './RecipePickerModal';
 import CookedModal from '../CookedModal';
 import { useI18n } from '../../context/I18nContext';
-import { formatDateIso, addDays, formatWeekRange, groupDatesByWeek } from './mealPlannerUtils';
+import { formatDateIso, addDays, formatWeekRange, groupDatesByWeek, formatWeekGroupHeader } from './mealPlannerUtils';
 
 export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
   history,
@@ -169,15 +169,17 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
           ))}
         </div>
       ) : (
-        <div className="flex flex-col gap-4 sm:gap-5 pt-1">
+        <div className="flex flex-col gap-6 pt-1">
           {agendaWeekGroups.map((weekGroup, weekIndex) => (
             <div key={weekGroup.weekKey} className="flex flex-col gap-1.5">
               {weekIndex > 0 && (
                 <div
-                  className="w-full flex items-center justify-center pt-2 pb-3 select-none"
+                  className="w-full flex items-center px-1.5 pt-3 pb-0.5 select-none"
                   aria-hidden="true"
                 >
-                  <div className="w-3/4 h-[1px] bg-gray-200/90 dark:bg-gray-800/80 rounded-full" />
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                    {formatWeekGroupHeader(weekGroup.weekStart, weekGroup.weekEnd, language)}
+                  </span>
                 </div>
               )}
 
