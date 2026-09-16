@@ -47,11 +47,15 @@ export const MealPlanWeekGroup = React.memo<MealPlanWeekGroupProps>(({
     prevWeek &&
     weekGroup.weekStart.getTime() - prevWeek.weekStart.getTime() > 7 * 24 * 60 * 60 * 1000;
   const nextMissingMonday = prevWeek ? addDays(prevWeek.weekStart, 7) : null;
+  const isPastWeek = formatDateIso(weekGroup.weekEnd) < todayStr;
+  const isMissingWeekPast = nextMissingMonday
+    ? formatDateIso(addDays(nextMissingMonday, 6)) < todayStr
+    : true;
 
   return (
     <div className="flex flex-col gap-1.5">
-      {/* Skipped week in-between reload button */}
-      {hasSkippedWeeksBefore && nextMissingMonday && (
+      {/* Skipped week in-between reload button (only for current/future gaps) */}
+      {hasSkippedWeeksBefore && nextMissingMonday && !isMissingWeekPast && (
         <div className="pt-1 pb-1 flex justify-center">
           <button
             onClick={() => onExpandWeek(formatDateIso(nextMissingMonday))}
@@ -83,8 +87,8 @@ export const MealPlanWeekGroup = React.memo<MealPlanWeekGroupProps>(({
         </div>
       )}
 
-      {/* Incomplete Week expansion button */}
-      {!weekGroup.isComplete && (
+      {/* Incomplete Week expansion button (only for current/future weeks) */}
+      {!weekGroup.isComplete && !isPastWeek && (
         <div className="pt-1 pb-1 flex justify-center">
           <button
             onClick={() => onExpandWeek(weekGroup.weekKey)}
