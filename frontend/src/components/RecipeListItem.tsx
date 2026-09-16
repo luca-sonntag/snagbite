@@ -169,7 +169,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
         <h4
           className={`text-sm font-bold line-clamp-1 leading-snug transition-colors ${
             isCooked
-              ? 'text-gray-500 dark:text-gray-400 line-through decoration-gray-400/50'
+              ? 'text-gray-700 dark:text-gray-300'
               : 'text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400'
           }`}
         >
