@@ -23,7 +23,7 @@ interface HealthScoreBadgeProps {
 
 export default function HealthScoreBadge({
   score,
-  breakdown,
+  breakdown: _breakdown,
   onClick,
   size = 'md',
   fullWidth = false,
@@ -44,13 +44,6 @@ export default function HealthScoreBadge({
   const radius = 17;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - Math.min(100, Math.max(0, score)) / 100);
-
-  const highlightSnippet =
-    breakdown?.highlights && breakdown.highlights.length > 0
-      ? breakdown.highlights[0]
-      : breakdown?.metrics?.vegetableGramsPerServing && breakdown.metrics.vegetableGramsPerServing > 0
-      ? `${breakdown.metrics.vegetableGramsPerServing}g Gemüse pro Portion`
-      : t('recipe.healthScoreSheetSubtitle');
 
   return (
     <button
@@ -100,22 +93,15 @@ export default function HealthScoreBadge({
         </div>
 
         {/* Labels & Micro-context */}
-        <div className="flex flex-col min-w-0 flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
-              {t('recipe.healthScoreTitle')}
-            </span>
-            <span
-              className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold leading-tight ${colors.badgeBg} ${colors.badgeText}`}
-            >
-              {getGradeLabel()}
-            </span>
-          </div>
-          {!isSmall && (
-            <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate leading-snug">
-              {!isPremium ? (t('recipe.healthScoreLockedSubtitle') || 'Deep-Dive & Nährwerte freischalten') : highlightSnippet}
-            </span>
-          )}
+        <div className="flex items-center gap-2 flex-wrap min-w-0 flex-1">
+          <span className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
+            {t('recipe.healthScoreTitle')}
+          </span>
+          <span
+            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold leading-tight ${colors.badgeBg} ${colors.badgeText}`}
+          >
+            {getGradeLabel()}
+          </span>
         </div>
       </div>
 
