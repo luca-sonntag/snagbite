@@ -119,8 +119,8 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
         onShopWeek={startBulkShopping}
       />
 
-      {/* Unified Calendar Widget Card */}
-      <div className="w-full flex flex-col gap-1.5 p-2 rounded-3xl bg-gray-100/75 dark:bg-gray-900/90 border-none shadow-2xs select-none">
+      {/* Unified Calendar Widget */}
+      <div className="w-full flex flex-col gap-1 select-none">
         <WeekNavigator
           weekStart={currentWeekStart}
           weekEnd={weekEnd}

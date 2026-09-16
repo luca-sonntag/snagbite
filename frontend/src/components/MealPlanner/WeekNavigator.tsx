@@ -50,7 +50,7 @@ export const WeekNavigator: React.FC<WeekNavigatorProps> = ({
       <button
         onClick={handlePrev}
         aria-label={t('mealPlanner.prevWeek')}
-        className="w-11 h-11 flex items-center justify-center rounded-2xl text-gray-600 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-800 active:scale-[0.92] transition-transform duration-150 cursor-pointer border-none"
+        className="w-11 h-11 flex items-center justify-center rounded-2xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.92] transition-transform duration-150 cursor-pointer border-none"
       >
         <ChevronLeft className="w-5 h-5 stroke-[2.25]" />
       </button>
@@ -62,7 +62,7 @@ export const WeekNavigator: React.FC<WeekNavigatorProps> = ({
         {!isCurrentWeek && (
           <button
             onClick={handleToday}
-            className="px-2.5 py-1 text-[11px] font-bold rounded-xl bg-white/80 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-750 shadow-2xs active:scale-95 transition-all duration-150 cursor-pointer border-none"
+            className="px-2.5 py-1 text-[11px] font-bold rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 shadow-2xs active:scale-95 transition-all duration-150 cursor-pointer border-none"
           >
             {t('mealPlanner.today')}
           </button>
@@ -72,7 +72,7 @@ export const WeekNavigator: React.FC<WeekNavigatorProps> = ({
       <button
         onClick={handleNext}
         aria-label={t('mealPlanner.nextWeek')}
-        className="w-11 h-11 flex items-center justify-center rounded-2xl text-gray-600 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-800 active:scale-[0.92] transition-transform duration-150 cursor-pointer border-none"
+        className="w-11 h-11 flex items-center justify-center rounded-2xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.92] transition-transform duration-150 cursor-pointer border-none"
       >
         <ChevronRight className="w-5 h-5 stroke-[2.25]" />
       </button>
