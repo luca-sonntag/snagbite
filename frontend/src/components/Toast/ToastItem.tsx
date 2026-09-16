@@ -49,11 +49,11 @@ export default function ToastItem({ toast, onDismiss, placement = 'bottom' }: To
       case 'success':
         return <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400 stroke-[2.5px]" />;
       case 'info':
-        return <Info className="w-5 h-5 text-blue-600 dark:text-blue-400" />;
+        return <Info className="w-5 h-5 text-gray-600 dark:text-gray-300 stroke-[2.25px]" />;
       case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400" />;
+        return <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 stroke-[2.25px]" />;
       case 'danger':
-        return <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400" />;
+        return <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400 stroke-[2.25px]" />;
     }
   };
 
@@ -62,7 +62,7 @@ export default function ToastItem({ toast, onDismiss, placement = 'bottom' }: To
       case 'success':
         return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
       case 'info':
-        return 'bg-blue-500/10 text-blue-600 dark:text-blue-400';
+        return 'bg-gray-500/10 dark:bg-white/10 text-gray-600 dark:text-gray-300';
       case 'warning':
         return 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
       case 'danger':
