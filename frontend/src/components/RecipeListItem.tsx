@@ -86,7 +86,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
       className={`group w-full rounded-2xl p-2.5 sm:p-3 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-all duration-150 select-none border-none touch-manipulation ${
         isSelected
           ? 'bg-emerald-500/10 ring-2 ring-emerald-500 shadow-sm'
-          : 'bg-gray-50/90 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800'
+          : 'bg-white dark:bg-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-md'
       }`}
       onClick={(e) => {
         hapticLight();

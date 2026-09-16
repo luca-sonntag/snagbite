@@ -48,7 +48,7 @@ export default function ProFeatureSheet({
         className="!z-[110]"
       >
         <Drawer.Content placement="bottom" className="!z-[110]">
-          <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[88vh] flex flex-col p-5 sm:p-6 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
+          <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 max-h-[88vh] flex flex-col p-5 sm:p-6 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
             <Drawer.Handle />
 
             {/* Header: Feature Icon, Title, Badge & Close */}

@@ -52,7 +52,7 @@ export const PantrySuggestionsModal: React.FC<PantrySuggestionsModalProps> = ({
           className="!z-[100]"
         >
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col p-4 sm:p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom,0px))] rounded-t-3xl border-none shadow-2xl overflow-hidden w-full max-w-lg mx-auto">
+            <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 max-h-[85vh] flex flex-col p-4 sm:p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom,0px))] rounded-t-3xl border-none shadow-2xl overflow-hidden w-full max-w-lg mx-auto">
               <Drawer.Handle />
 
               {/* Header */}

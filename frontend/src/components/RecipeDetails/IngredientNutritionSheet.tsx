@@ -35,7 +35,7 @@ export default function IngredientNutritionSheet({
           className="!z-[100]"
         >
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 !p-0 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
+            <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 !p-0 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
               <Drawer.Handle />
               <div className="p-5 sm:p-6 max-w-lg mx-auto w-full">
                 <IngredientNutritionDetails

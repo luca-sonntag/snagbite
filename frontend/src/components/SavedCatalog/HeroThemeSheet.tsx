@@ -44,7 +44,7 @@ export default function HeroThemeSheet({
       <Drawer>
         <Drawer.Backdrop isOpen={isOpen} onOpenChange={(open) => { if (!open) onClose(); }} className="!z-[100]">
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
+            <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
               <Drawer.Handle />
 
               {/* Header: Pure typography with top-right close button */}
@@ -65,7 +65,7 @@ export default function HeroThemeSheet({
                       hapticLight();
                       onClose();
                     }}
-                    className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border-none flex items-center justify-center shrink-0 active:scale-95 transition-all cursor-pointer mt-0.5"
+                    className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full bg-gray-200/60 dark:bg-gray-800 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border-none flex items-center justify-center shrink-0 active:scale-95 transition-all cursor-pointer mt-0.5"
                     aria-label="Schließen"
                   >
                     <X className="w-4 h-4" />

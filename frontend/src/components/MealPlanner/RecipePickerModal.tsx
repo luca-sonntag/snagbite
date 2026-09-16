@@ -93,7 +93,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
         className="!z-[100]"
       >
         <Drawer.Content placement="bottom" className="!z-[100]">
-          <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col p-4 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom,0px))] rounded-t-3xl border-none shadow-2xl overflow-hidden w-full max-w-lg mx-auto">
+          <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 max-h-[85vh] flex flex-col p-4 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom,0px))] rounded-t-3xl border-none shadow-2xl overflow-hidden w-full max-w-lg mx-auto">
             <Drawer.Handle />
 
             {/* Header */}
@@ -114,7 +114,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                     onClose();
                   }}
                   aria-label="Close"
-                  className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 active:scale-90 transition-all flex items-center justify-center border-none cursor-pointer shrink-0 touch-manipulation"
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full hover:bg-gray-200/60 dark:hover:bg-gray-800 text-gray-500 active:scale-90 transition-all flex items-center justify-center border-none cursor-pointer shrink-0 touch-manipulation"
                 >
                   <X className="w-5 h-5 stroke-[2.25]" />
                 </button>
@@ -135,7 +135,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('catalog.searchPlaceholder') || 'Rezept suchen...'}
-                  className="w-full min-h-[44px] pl-10 pr-11 py-2.5 text-base sm:text-sm font-medium rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 border-none focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all touch-manipulation shadow-2xs"
+                  className="w-full min-h-[44px] pl-10 pr-11 py-2.5 text-base sm:text-sm font-medium rounded-2xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 border-none focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all touch-manipulation shadow-2xs"
                 />
                 {searchQuery && (
                   <button
@@ -145,15 +145,15 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                       setSearchQuery('');
                     }}
                     aria-label="Clear search"
-                    className="w-10 h-10 min-w-[40px] min-h-[40px] absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 active:scale-90 transition-all border-none bg-transparent cursor-pointer touch-manipulation"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 flex items-center justify-center cursor-pointer border-none"
                   >
-                    <X className="w-4 h-4 stroke-[2.25]" />
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
 
-              {/* Filter Chips - Scrollbar completely hidden across all browsers */}
-              <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] w-full py-0.5">
+              {/* Horizontal Scrollable Filter Chips */}
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
                 <button
                   type="button"
                   onClick={() => {
@@ -163,7 +163,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                   className={`min-h-[40px] sm:min-h-[44px] px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold shrink-0 transition-all duration-150 cursor-pointer border-none touch-manipulation ${
                     activeFilter === 'all'
                       ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/25 scale-[1.02]'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200/80 dark:hover:bg-gray-750 active:scale-[0.97]'
+                      : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.97] shadow-2xs'
                   }`}
                 >
                   {t('mealPlanner.pickerFilterAll')}
@@ -176,8 +176,8 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                   }}
                   className={`min-h-[40px] sm:min-h-[44px] px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold shrink-0 transition-all duration-150 cursor-pointer border-none touch-manipulation flex items-center gap-1.5 ${
                     activeFilter === 'pantry'
-                      ? 'bg-amber-600 text-white shadow-sm shadow-amber-600/25 scale-[1.02]'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200/80 dark:hover:bg-gray-750 active:scale-[0.97]'
+                      ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/25 scale-[1.02]'
+                      : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.97] shadow-2xs'
                   }`}
                 >
                   <span>{t('shopping.tabPantry')}</span>
@@ -191,7 +191,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                   className={`min-h-[40px] sm:min-h-[44px] px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold shrink-0 transition-all duration-150 cursor-pointer border-none touch-manipulation ${
                     activeFilter === 'quick'
                       ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/25 scale-[1.02]'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200/80 dark:hover:bg-gray-750 active:scale-[0.97]'
+                      : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.97] shadow-2xs'
                   }`}
                 >
                   {t('mealPlanner.pickerFilterQuick')}
@@ -205,7 +205,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                   className={`min-h-[40px] sm:min-h-[44px] px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold shrink-0 transition-all duration-150 cursor-pointer border-none touch-manipulation ${
                     activeFilter === 'favorites'
                       ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/25 scale-[1.02]'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200/80 dark:hover:bg-gray-750 active:scale-[0.97]'
+                      : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.97] shadow-2xs'
                   }`}
                 >
                   {t('mealPlanner.pickerFilterFavorites')}
