@@ -64,7 +64,7 @@ export default function ShoppingConfirmItem({
   return (
     <div
       onClick={onToggle}
-      className="group flex items-center justify-between gap-3 py-1.5 px-3 rounded-2xl bg-white dark:bg-gray-900 shadow-2xs hover:bg-gray-50/80 dark:hover:bg-gray-850 active:scale-[0.99] transition-all cursor-pointer select-none border-none"
+      className="group flex items-center justify-between gap-3 py-1.5 px-3 rounded-2xl bg-white/80 dark:bg-gray-900/80 hover:bg-white/95 dark:hover:bg-gray-900/95 shadow-2xs backdrop-blur-xs active:scale-[0.99] transition-all cursor-pointer select-none border-none"
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {/* Category color bar */}
