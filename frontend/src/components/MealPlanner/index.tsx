@@ -167,7 +167,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
           ))}
         </div>
       ) : (
-        <div className="flex flex-col gap-5 pt-1">
+        <div className="flex flex-col gap-1.5 pt-1">
           {agendaDates.map((dateStr) => {
             const isToday = dateStr === todayStr;
             const isPast = dateStr < todayStr;

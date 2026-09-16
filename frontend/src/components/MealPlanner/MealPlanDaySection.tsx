@@ -53,7 +53,7 @@ export const MealPlanDaySection = React.memo<MealPlanDaySectionProps>(({
     <section
       id={`day-section-${dateStr}`}
       data-date={dateStr}
-      className="w-full flex flex-col gap-2"
+      className={`w-full flex flex-col gap-2 ${entries.length > 0 ? 'mb-3 sm:mb-4' : ''}`}
     >
       {/* Date Header: Clean Gray / Active Emerald Card */}
       {isPast ? (
