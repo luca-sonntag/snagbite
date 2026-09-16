@@ -1,8 +1,8 @@
-﻿import React from 'react';
+import React from 'react';
 import { Plus } from 'lucide-react';
 import type { MealPlanEntry } from '../../types';
 import type { AgendaWeekGroup } from './mealPlannerUtils';
-import { formatWeekRange, formatWeekGroupHeader, formatDateIso, addDays } from './mealPlannerUtils';
+import { formatWeekRange, getCalendarWeek, formatDateIso, addDays } from './mealPlannerUtils';
 import { MealPlanDaySection } from './MealPlanDaySection';
 import { useI18n } from '../../context/I18nContext';
 
@@ -67,14 +67,18 @@ export const MealPlanWeekGroup = React.memo<MealPlanWeekGroupProps>(({
         </div>
       )}
 
-      {/* Week Header */}
+      {/* Week Header with comfortable spacing */}
       {weekIndex > 0 && (
         <div
-          className="w-full flex items-center px-1.5 pt-3 pb-0.5 select-none"
+          className="w-full flex items-center gap-2.5 px-1.5 pt-3.5 pb-0.5 select-none"
           aria-hidden="true"
         >
           <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-            {formatWeekGroupHeader(weekGroup.weekStart, weekGroup.weekEnd, language)}
+            {language === 'en' ? `CW ${getCalendarWeek(weekGroup.weekStart)}` : `KW ${getCalendarWeek(weekGroup.weekStart)}`}
+          </span>
+          <span className="text-[10px] text-gray-300 dark:text-gray-600 font-bold">·</span>
+          <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+            {formatWeekRange(weekGroup.weekStart, weekGroup.weekEnd, language)}
           </span>
         </div>
       )}
