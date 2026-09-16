@@ -4,7 +4,7 @@ import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
 import { getRecipeCalories, formatCalories } from '../../utils/formatNutrition';
-import { getHealthScoreColor, getHealthScoreLetter } from '../RecipeDetails/HealthScoreBadge';
+import { HealthScoreLetterBadge } from '../RecipeDetails/HealthScoreBadge';
 
 interface RecipeCompactCardProps {
   job: SavedRecipe;
@@ -28,8 +28,6 @@ export default function RecipeCompactCard({
   const calories = getRecipeCalories(r);
   const caloriesFormatted = formatCalories(calories);
   const score = typeof r.healthScore === 'number' ? r.healthScore : null;
-  const scoreColor = score !== null ? getHealthScoreColor(score) : null;
-  const scoreLetter = score !== null ? getHealthScoreLetter(score) : null;
 
   return (
     <div
@@ -81,15 +79,7 @@ export default function RecipeCompactCard({
             <span className="shrink-0 whitespace-nowrap">{caloriesFormatted}</span>
           ) : <span />}
 
-          {/* Health Score rechts unten: nur Buchstabe */}
-          {score !== null && scoreLetter && scoreColor && (
-            <span
-              className={`w-4 h-4 rounded-full ${scoreColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-2xs shrink-0 ml-auto select-none`}
-              title={`Health Score: ${scoreLetter} (${score}/100)`}
-            >
-              {scoreLetter}
-            </span>
-          )}
+          <HealthScoreLetterBadge score={score} size="sm" className="ml-auto" />
         </div>
       </div>
     </div>

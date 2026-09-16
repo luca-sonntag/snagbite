@@ -5,7 +5,7 @@ import CachedImage from './CachedImage';
 import { hapticLight } from '../utils/haptics';
 import { getTotalTime } from '../hooks/useSavedCatalog';
 import { getRecipeCalories, formatCalories } from '../utils/formatNutrition';
-import { getHealthScoreColor, getHealthScoreLetter } from './RecipeDetails/HealthScoreBadge';
+import { HealthScoreLetterBadge } from './RecipeDetails/HealthScoreBadge';
 
 export interface RecipeListItemProps {
   job?: SavedRecipe;
@@ -36,9 +36,9 @@ function getFirstRecipeTag(recipe?: Recipe | null): string | null {
  * (SavedCatalog list view, RecipePickerModal, and all recipe lists).
  *
  * Features:
- * - 80px thumbnail with optional favorite star badge on the image corner
+ * - 80px thumbnail with high-contrast presentation
  * - Clean title row without floating right-side icons
- * - Bottom meta row: Gray duration pill + 1 Tag on left, Calories + circular Health Score badge on right
+ * - Bottom meta row: Gray duration pill + 1 Tag on left, Calories + centrally-rendered circular Health Score badge on right
  * - High-contrast, tactile touch target with no auxiliary plus button
  */
 export const RecipeListItem = React.memo<RecipeListItemProps>(({
@@ -67,8 +67,6 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
   const calories = getRecipeCalories(r);
   const caloriesFormatted = formatCalories(calories);
   const healthScoreNum = typeof r.healthScore === 'number' ? r.healthScore : null;
-  const healthColor = healthScoreNum !== null ? getHealthScoreColor(healthScoreNum) : null;
-  const healthLetter = healthScoreNum !== null ? getHealthScoreLetter(healthScoreNum) : null;
 
   return (
     <div
@@ -111,7 +109,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
         </h4>
 
         {/* Bottom meta line: Duration pill + Favorite Star + Tag on left, Calories + Health Score on right */}
-        {(totalTimeStr || isFavorite || firstTag || caloriesFormatted || (healthScoreNum !== null && healthColor && healthLetter)) && (
+        {(totalTimeStr || isFavorite || firstTag || caloriesFormatted || healthScoreNum !== null) && (
           <div className="flex items-center justify-between gap-1.5 mt-1.5 text-xs select-none">
             {/* Left Cluster: Gray Duration Pill, Favorite Star & 1 Tag */}
             <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
@@ -144,15 +142,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
                 </span>
               )}
 
-              {healthColor && healthLetter && healthScoreNum !== null && (
-                <span
-                  className={`w-4 h-4 rounded-full ${healthColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-2xs shrink-0 select-none`}
-                  title={`Health Score: ${healthLetter} (${healthScoreNum}/100)`}
-                  aria-label={`Health Score: ${healthLetter}`}
-                >
-                  {healthLetter}
-                </span>
-              )}
+              <HealthScoreLetterBadge score={healthScoreNum} size="sm" />
             </div>
           </div>
         )}

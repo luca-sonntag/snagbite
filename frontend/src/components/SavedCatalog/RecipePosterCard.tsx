@@ -4,7 +4,7 @@ import type { SavedRecipe, Recipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
 import { getRecipeCalories, formatCalories } from '../../utils/formatNutrition';
-import { getHealthScoreColor, getHealthScoreLetter } from '../RecipeDetails/HealthScoreBadge';
+import { HealthScoreLetterBadge } from '../RecipeDetails/HealthScoreBadge';
 import { useI18n } from '../../context/I18nContext';
 
 interface RecipePosterCardProps {
@@ -51,8 +51,6 @@ export default function RecipePosterCard({
   const calories = getRecipeCalories(r);
   const caloriesFormatted = formatCalories(calories);
   const healthScoreNum = typeof r.healthScore === 'number' ? r.healthScore : null;
-  const healthColor = healthScoreNum !== null ? getHealthScoreColor(healthScoreNum) : null;
-  const healthLetter = healthScoreNum !== null ? getHealthScoreLetter(healthScoreNum) : null;
 
   return (
     <div className={`relative isolate ${isShelf ? 'w-40 shrink-0' : 'w-full'} h-full flex flex-col`}>
@@ -144,24 +142,16 @@ export default function RecipePosterCard({
               {/* Rechts: Kalorien kleben links am Health Score Badge */}
               <div className="flex items-center gap-1.5 shrink-0 ml-auto">
                 {caloriesFormatted ? (
-                  <span className="whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium text-[11px]">
-                    {caloriesFormatted}
-                  </span>
-                ) : r.servings && r.servings > 0 ? (
-                  <span className="whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium text-[11px]">
-                    {r.servings} Port.
-                  </span>
-                ) : null}
+                   <span className="whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium text-[11px]">
+                     {caloriesFormatted}
+                   </span>
+                 ) : r.servings && r.servings > 0 ? (
+                   <span className="whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium text-[11px]">
+                     {r.servings} Port.
+                   </span>
+                 ) : null}
 
-                {healthColor && healthLetter && healthScoreNum !== null && (
-                  <span
-                    className={`w-4 h-4 rounded-full ${healthColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-2xs shrink-0 select-none`}
-                    title={`Health Score: ${healthLetter} (${healthScoreNum}/100)`}
-                    aria-label={`Health Score: ${healthLetter}`}
-                  >
-                    {healthLetter}
-                  </span>
-                )}
+                <HealthScoreLetterBadge score={healthScoreNum} size="sm" />
               </div>
             </div>
           )}

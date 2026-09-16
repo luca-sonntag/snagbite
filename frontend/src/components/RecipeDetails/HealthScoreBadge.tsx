@@ -8,8 +8,9 @@ import {
   getHealthScoreLetter,
   type HealthScoreColorSet,
 } from './healthScoreUtils';
+import { HealthScoreLetterBadge } from './HealthScoreLetterBadge';
 
-export { getHealthScoreColor, getHealthScoreLetter, type HealthScoreColorSet };
+export { getHealthScoreColor, getHealthScoreLetter, HealthScoreLetterBadge, type HealthScoreColorSet };
 
 interface HealthScoreBadgeProps {
   score: number;
