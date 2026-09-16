@@ -64,112 +64,115 @@ export default function ShoppingConfirmItem({
   return (
     <div
       onClick={onToggle}
-      className="group flex items-center gap-3 py-2.5 px-3 rounded-2xl bg-white dark:bg-gray-900 shadow-2xs hover:bg-gray-50/80 dark:hover:bg-gray-850 active:scale-[0.99] transition-all cursor-pointer select-none border-none"
+      className="group flex items-center justify-between gap-3 py-2.5 px-3 rounded-2xl bg-white dark:bg-gray-900 shadow-2xs hover:bg-gray-50/80 dark:hover:bg-gray-850 active:scale-[0.99] transition-all cursor-pointer select-none border-none"
     >
-      {/* Category color bar */}
-      <span
-        className={`w-1 h-4 rounded-full ${theme.barClass} shrink-0 opacity-80`}
-        title={groupCategory || ing.category || undefined}
-      />
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        {/* Category color bar */}
+        <span
+          className={`w-1 h-4 rounded-full ${theme.barClass} shrink-0 opacity-80`}
+          title={groupCategory || ing.category || undefined}
+        />
 
-      {/* Checkbox indicator */}
-      <div
-        className={`w-6 h-6 rounded-lg border-none flex items-center justify-center flex-shrink-0 transition-all ${
-          isChecked
-            ? 'bg-emerald-500 text-white shadow-xs'
-            : 'bg-black/5 dark:bg-white/10 group-hover:bg-emerald-500/20'
-        }`}
-      >
-        {isChecked && <Check className="w-3.5 h-3.5 stroke-[3px]" />}
-      </div>
-
-      {/* Ingredient Icon */}
-      <IngredientIcon
-        baseName={ing.baseName}
-        canonicalId={ing.canonicalId}
-        category={groupCategory || ing.category}
-        name={ing.name}
-        synonyms={ing.synonyms}
-        size="md"
-        className={isChecked ? '' : 'opacity-40 grayscale'}
-      />
-
-      {/* Details */}
-      <div className="flex-1 min-w-0 flex flex-col justify-center">
-        {/* Name (always clean in line 1) */}
-        <div className="flex items-baseline flex-wrap gap-x-1.5 min-w-0 text-sm font-medium text-gray-900 dark:text-white leading-snug">
-          <span className={isChecked ? '' : 'text-gray-400 dark:text-gray-500'}>{ing.name}</span>
+        {/* Checkbox indicator */}
+        <div
+          className={`w-6 h-6 rounded-lg border-none flex items-center justify-center flex-shrink-0 transition-all ${
+            isChecked
+              ? 'bg-emerald-500 text-white shadow-xs'
+              : 'bg-black/5 dark:bg-white/10 group-hover:bg-emerald-500/20'
+          }`}
+        >
+          {isChecked && <Check className="w-3.5 h-3.5 stroke-[3px]" />}
         </div>
 
-        {/* Amount & Status Micro-Pills (Option 4) */}
-        {(displayAmount || stockFormatted || ing.isStaple) && (
-          <div className="flex items-center flex-wrap gap-1.5 mt-0.5">
-            {displayAmount && (
-              <span
-                className={`text-xs font-semibold tabular-nums leading-normal transition-colors ${
-                  isChecked
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : 'text-gray-400 dark:text-gray-500'
-                }`}
-              >
-                {displayAmount}
-              </span>
-            )}
+        {/* Ingredient Icon */}
+        <IngredientIcon
+          baseName={ing.baseName}
+          canonicalId={ing.canonicalId}
+          category={groupCategory || ing.category}
+          name={ing.name}
+          synonyms={ing.synonyms}
+          size="md"
+          className={isChecked ? '' : 'opacity-40 grayscale'}
+        />
 
-            {stockFormatted ? (
-              <span
-                className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md border-none select-none transition-colors ${stockBadgeClasses}`}
-              >
-                <Package className="w-3 h-3 shrink-0 stroke-[2.2] opacity-80" />
-                <span>
-                  {isPartial
-                    ? t('recipe.inPantryStockPartial', { amount: stockFormatted })
-                    : t('recipe.inPantryStock', { amount: stockFormatted })}
-                </span>
-              </span>
-            ) : ing.isStaple ? (
-              <span
-                className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md border-none select-none transition-colors ${
-                  isChecked
-                    ? 'bg-black/5 dark:bg-white/10 text-gray-700 dark:text-gray-200'
-                    : 'bg-black/[0.04] dark:bg-white/[0.06] text-gray-500 dark:text-gray-400'
-                }`}
-              >
-                <Home className="w-3 h-3 shrink-0 stroke-[2.2] opacity-80" />
-                <span>{t('recipe.staplePillLabel')}</span>
-              </span>
-            ) : null}
+        {/* Details */}
+        <div className="flex-1 min-w-0 flex flex-col justify-center">
+          {/* Name */}
+          <div className="flex items-baseline flex-wrap gap-x-1.5 min-w-0 text-sm font-medium text-gray-900 dark:text-white leading-snug">
+            <span className={isChecked ? '' : 'text-gray-400 dark:text-gray-500'}>{ing.name}</span>
           </div>
-        )}
 
-        {/* Child / Derived ingredients tree structure (Option 3) */}
-        {item.childIngredients.length > 0 && (
-          <div className="flex flex-col gap-0.5 mt-1 pl-0.5">
-            {item.childIngredients.map((child, cIdx) => {
-              const childAmt = formatAmount(child.amount, child.unit);
-              const childUnitStr = child.unit ? ` ${child.unit}` : '';
-              const childDisplayAmt = (childAmt || childUnitStr) ? `${childAmt}${childUnitStr}`.trim() : null;
-
-              return (
-                <div
-                  key={cIdx}
-                  className={`flex items-center gap-1.5 text-[11px] font-medium transition-colors ${
+          {/* Status Micro-Pills (Pantry Stock / Staple) */}
+          {(stockFormatted || ing.isStaple) && (
+            <div className="flex items-center flex-wrap gap-1.5 mt-0.5">
+              {stockFormatted ? (
+                <span
+                  className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md border-none select-none transition-colors ${stockBadgeClasses}`}
+                >
+                  <Package className="w-3 h-3 shrink-0 stroke-[2.2] opacity-80" />
+                  <span>
+                    {isPartial
+                      ? t('recipe.inPantryStockPartial', { amount: stockFormatted })
+                      : t('recipe.inPantryStock', { amount: stockFormatted })}
+                  </span>
+                </span>
+              ) : ing.isStaple ? (
+                <span
+                  className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md border-none select-none transition-colors ${
                     isChecked
-                      ? 'text-gray-500 dark:text-gray-400'
-                      : 'text-gray-400 dark:text-gray-500 opacity-60'
+                      ? 'bg-black/5 dark:bg-white/10 text-gray-700 dark:text-gray-200'
+                      : 'bg-black/[0.04] dark:bg-white/[0.06] text-gray-500 dark:text-gray-400'
                   }`}
                 >
-                  <CornerDownRight className="w-3 h-3 shrink-0 text-gray-400 dark:text-gray-500 stroke-[2.2] opacity-70" />
-                  <span>
-                    {child.name}
-                    {childDisplayAmt ? `: ${childDisplayAmt}` : ''}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                  <Home className="w-3 h-3 shrink-0 stroke-[2.2] opacity-80" />
+                  <span>{t('recipe.staplePillLabel')}</span>
+                </span>
+              ) : null}
+            </div>
+          )}
+
+          {/* Child / Derived ingredients tree structure */}
+          {item.childIngredients.length > 0 && (
+            <div className="flex flex-col gap-0.5 mt-1 pl-0.5">
+              {item.childIngredients.map((child, cIdx) => {
+                const childAmt = formatAmount(child.amount, child.unit);
+                const childUnitStr = child.unit ? ` ${child.unit}` : '';
+                const childDisplayAmt = (childAmt || childUnitStr) ? `${childAmt}${childUnitStr}`.trim() : null;
+
+                return (
+                  <div
+                    key={cIdx}
+                    className={`flex items-center gap-1.5 text-[11px] font-medium transition-colors ${
+                      isChecked
+                        ? 'text-gray-500 dark:text-gray-400'
+                        : 'text-gray-400 dark:text-gray-500 opacity-60'
+                    }`}
+                  >
+                    <CornerDownRight className="w-3 h-3 shrink-0 text-gray-400 dark:text-gray-500 stroke-[2.2] opacity-70" />
+                    <span>
+                      {child.name}
+                      {childDisplayAmt ? `: ${childDisplayAmt}` : ''}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Right side: Amount */}
+      {displayAmount && (
+        <span
+          className={`font-semibold text-xs tabular-nums shrink-0 text-right self-center transition-colors ${
+            isChecked
+              ? 'text-emerald-600 dark:text-emerald-400'
+              : 'text-gray-400 dark:text-gray-500'
+          }`}
+        >
+          {displayAmount}
+        </span>
+      )}
     </div>
   );
 }
