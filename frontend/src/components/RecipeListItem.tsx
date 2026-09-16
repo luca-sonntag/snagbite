@@ -134,8 +134,8 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
             /* Arrow Mode: Meta grouped on left with arrow on far right */
             <div className="flex items-center gap-2 mt-1 text-[11px] font-medium text-gray-500 dark:text-gray-400 select-none">
               {totalTimeStr && (
-                <span className="flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
-                  <Clock className="w-3 h-3 shrink-0" />
+                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
+                  <Clock className="w-2.5 h-2.5 text-gray-500 dark:text-gray-400 shrink-0" />
                   <span>{totalTimeStr}</span>
                 </span>
               )}
@@ -161,8 +161,8 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
               {/* Left Cluster: Time, Favorite Star, Remix Badge */}
               <div className="flex items-center gap-2 min-w-0 overflow-hidden">
                 {totalTimeStr && (
-                  <span className="flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
-                    <Clock className="w-3 h-3 shrink-0" />
+                  <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
+                    <Clock className="w-2.5 h-2.5 text-gray-500 dark:text-gray-400 shrink-0" />
                     <span>{totalTimeStr}</span>
                   </span>
                 )}
