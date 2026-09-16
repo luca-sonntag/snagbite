@@ -86,7 +86,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
       className={`group w-full rounded-2xl p-2.5 sm:p-3 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-all duration-150 select-none border-none touch-manipulation ${
         isSelected
           ? 'bg-emerald-500/10 ring-2 ring-emerald-500 shadow-sm'
-          : 'bg-white dark:bg-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.04)] ring-1 ring-black/[0.04] dark:ring-white/[0.06] hover:shadow-md hover:ring-emerald-500/20'
+          : 'bg-gray-50/90 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800'
       }`}
       onClick={(e) => {
         hapticLight();
@@ -95,7 +95,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
       {...(bindLongPress ?? {})}
     >
       {/* Thumbnail (64-72px) with Checkbox in select mode */}
-      <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-xl sm:rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shrink-0 border-none ring-1 ring-black/[0.04] dark:ring-white/[0.06] pointer-events-none">
+      <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-xl sm:rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shrink-0 border-none pointer-events-none">
         {isSelectMode && (
           <div
             className={`absolute top-1.5 left-1.5 z-10 w-6 h-6 rounded-xl flex items-center justify-center transition-all border-none ${
