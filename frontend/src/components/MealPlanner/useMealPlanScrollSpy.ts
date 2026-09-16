@@ -28,6 +28,9 @@ export function useMealPlanScrollSpy({
   const onDeselectDayRef = useRef(onDeselectDay);
   onDeselectDayRef.current = onDeselectDay;
 
+  const lastWeekChangeTimeRef = useRef<number>(0);
+  const pendingWeekChangeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Deselect active day when user manually scrolls
   useEffect(() => {
     const handleScroll = () => {
@@ -48,6 +51,12 @@ export function useMealPlanScrollSpy({
     ) => {
       const element = document.getElementById(`day-section-${targetDateStr}`);
       if (!element) return;
+
+      if (pendingWeekChangeTimerRef.current) {
+        clearTimeout(pendingWeekChangeTimerRef.current);
+        pendingWeekChangeTimerRef.current = null;
+      }
+      lastWeekChangeTimeRef.current = Date.now();
 
       isProgrammaticScrollRef.current = true;
       if (programmaticTimerRef.current) clearTimeout(programmaticTimerRef.current);
@@ -93,7 +102,7 @@ export function useMealPlanScrollSpy({
     [],
   );
 
-  // IntersectionObserver to keep sticky week navigator in sync during scrolling
+  // IntersectionObserver to keep sticky week navigator in sync during scrolling (throttled to max 1 per 700ms)
   useEffect(() => {
     if (agendaDates.length === 0) return;
 
@@ -112,8 +121,27 @@ export function useMealPlanScrollSpy({
         if (!dateStr) return;
 
         const newMonday = getMonday(new Date(dateStr + 'T00:00:00'));
-        if (formatDateIso(newMonday) !== formatDateIso(currentWeekStartRef.current)) {
-          onWeekChangeRef.current(newMonday);
+        const newMondayIso = formatDateIso(newMonday);
+        const currentMondayIso = formatDateIso(currentWeekStartRef.current);
+
+        if (newMondayIso !== currentMondayIso) {
+          const now = Date.now();
+          const elapsed = now - lastWeekChangeTimeRef.current;
+
+          if (pendingWeekChangeTimerRef.current) {
+            clearTimeout(pendingWeekChangeTimerRef.current);
+            pendingWeekChangeTimerRef.current = null;
+          }
+
+          if (elapsed >= 700) {
+            lastWeekChangeTimeRef.current = now;
+            onWeekChangeRef.current(newMonday);
+          } else {
+            pendingWeekChangeTimerRef.current = setTimeout(() => {
+              lastWeekChangeTimeRef.current = Date.now();
+              onWeekChangeRef.current(newMonday);
+            }, 700 - elapsed);
+          }
         }
       },
       {
@@ -136,6 +164,7 @@ export function useMealPlanScrollSpy({
     return () => {
       if (programmaticTimerRef.current) clearTimeout(programmaticTimerRef.current);
       if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+      if (pendingWeekChangeTimerRef.current) clearTimeout(pendingWeekChangeTimerRef.current);
     };
   }, []);
 
