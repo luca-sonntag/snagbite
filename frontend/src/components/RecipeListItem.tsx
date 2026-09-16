@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, Check, Star, Layers } from 'lucide-react';
+import { Clock, Check, Star, Layers, ArrowRight } from 'lucide-react';
 import type { SavedRecipe, Recipe } from '../types';
 import CachedImage from './CachedImage';
 import { useI18n } from '../context/I18nContext';
@@ -19,6 +19,7 @@ export interface RecipeListItemProps {
   bindLongPress?: any;
   onClick: (e: React.MouseEvent) => void;
   showRemix?: boolean;
+  showArrow?: boolean;
 }
 
 function getFirstRecipeTag(recipe?: Recipe | null): string | null {
@@ -35,13 +36,14 @@ function getFirstRecipeTag(recipe?: Recipe | null): string | null {
 
 /**
  * Universal horizontal recipe card list item used across the entire app
- * (SavedCatalog list view, RecipePickerModal, and all recipe lists).
+ * (SavedCatalog list view, RecipePickerModal, HeroThemeSheet, etc.).
  *
  * Features:
- * - 80px thumbnail with high-contrast presentation
- * - Clean title row without floating right-side icons
- * - Bottom meta row: Gray duration pill + Favorite star + Optional Remix count + 1 Tag on left, Calories + centrally-rendered circular Health Score badge on right
- * - High-contrast, tactile touch target with no auxiliary plus button
+ * - 64-72px thumbnail with high-contrast presentation
+ * - Line 1: Bold title with hover emerald transition
+ * - Line 2: Creator handle (@handle) or Tag
+ * - Line 3: Emerald duration, favorite star, calories, and centralized circular Health Score badge
+ * - Switchable right chevron arrow (`showArrow`), with right-aligned (rechtsbündig) calories/health score when disabled
  */
 export const RecipeListItem = React.memo<RecipeListItemProps>(({
   job,
@@ -53,6 +55,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
   bindLongPress,
   onClick,
   showRemix = false,
+  showArrow = false,
 }) => {
   const { t } = useI18n();
   const r = recipe ?? job?.recipe;
@@ -71,6 +74,9 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
       : null;
 
   const firstTag = recipeTags?.[0] ?? getFirstRecipeTag(r);
+  const handleText = r.sourceHandle ? `@${r.sourceHandle.replace(/^@/, '')}` : null;
+  const subtitle = handleText ?? firstTag;
+
   const calories = getRecipeCalories(r);
   const caloriesFormatted = formatCalories(calories);
   const healthScoreNum = typeof r.healthScore === 'number' ? r.healthScore : null;
@@ -88,8 +94,8 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
       }}
       {...(bindLongPress ?? {})}
     >
-      {/* Thumbnail (72-80px) with Checkbox in select mode */}
-      <div className="relative w-18 h-18 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shrink-0 border-none ring-1 ring-black/[0.04] dark:ring-white/[0.06] pointer-events-none">
+      {/* Thumbnail (64-72px) with Checkbox in select mode */}
+      <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-xl sm:rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shrink-0 border-none ring-1 ring-black/[0.04] dark:ring-white/[0.06] pointer-events-none">
         {isSelectMode && (
           <div
             className={`absolute top-1.5 left-1.5 z-10 w-6 h-6 rounded-xl flex items-center justify-center transition-all border-none ${
@@ -109,59 +115,86 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 py-0.5 pointer-events-none">
+      <div className="flex-1 min-w-0 flex flex-col justify-center py-0.5 pointer-events-none">
         {/* Line 1: Title */}
-        <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+        <h4 className="text-sm font-bold text-gray-900 dark:text-white line-clamp-1 leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
           {r.title}
         </h4>
 
-        {/* Line 2: Meta line (Duration pill + Favorite Star + Tag on left, Calories + Health Score on right) */}
-        {(totalTimeStr || isFavorite || firstTag || caloriesFormatted || healthScoreNum !== null) && (
-          <div className="flex items-center justify-between gap-1.5 text-xs select-none">
-            {/* Left Cluster: Gray Duration Pill, Favorite Star & 1 Tag */}
-            <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
+        {/* Line 2: Creator Handle or Tag */}
+        {subtitle && (
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium truncate mt-0.5">
+            {subtitle}
+          </p>
+        )}
+
+        {/* Line 3: Meta line */}
+        {(totalTimeStr || isFavorite || caloriesFormatted || healthScoreNum !== null || (showRemix && remixCount > 0)) && (
+          showArrow ? (
+            /* Arrow Mode: Meta grouped on left with arrow on far right */
+            <div className="flex items-center gap-2 mt-1 text-[11px] font-medium text-gray-500 dark:text-gray-400 select-none">
               {totalTimeStr && (
-                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
-                  <Clock className="w-2.5 h-2.5 text-gray-500 dark:text-gray-400 shrink-0" />
+                <span className="flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
+                  <Clock className="w-3 h-3 shrink-0" />
                   <span>{totalTimeStr}</span>
                 </span>
               )}
               {isFavorite && !isSelectMode && (
                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
               )}
-              {firstTag && (
-                <>
-                  {totalTimeStr && !isFavorite && (
-                    <span className="text-gray-300 dark:text-gray-600 text-[9px] leading-none select-none">•</span>
-                  )}
-                  <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 truncate max-w-[7rem] sm:max-w-[10rem]">
-                    {firstTag}
-                  </span>
-                </>
-              )}
-            </div>
-
-            {/* Right Cluster: Calories & Health Score Badge */}
-            <div className="flex items-center gap-1.5 shrink-0 ml-auto">
               {caloriesFormatted && (
-                <span className="whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium text-[11px]">
-                  {caloriesFormatted}
+                <span className="shrink-0">{caloriesFormatted}</span>
+              )}
+              {healthScoreNum !== null && (
+                <HealthScoreLetterBadge score={healthScoreNum} size="sm" />
+              )}
+              {showRemix && remixCount > 0 && (
+                <span className="shrink-0 flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
+                  <Layers className="w-3 h-3 shrink-0" />
+                  <span>{remixCount === 1 ? t('remix.singleCount') : t('remix.multipleCount', { count: remixCount })}</span>
                 </span>
               )}
-
-              <HealthScoreLetterBadge score={healthScoreNum} size="sm" />
             </div>
-          </div>
-        )}
+          ) : (
+            /* Standard Mode: Left cluster + right-aligned (rechtsbündig) Calories & Health Score */
+            <div className="flex items-center justify-between gap-1.5 mt-1 text-[11px] font-medium text-gray-500 dark:text-gray-400 select-none">
+              {/* Left Cluster: Time, Favorite Star, Remix Badge */}
+              <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+                {totalTimeStr && (
+                  <span className="flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
+                    <Clock className="w-3 h-3 shrink-0" />
+                    <span>{totalTimeStr}</span>
+                  </span>
+                )}
+                {isFavorite && !isSelectMode && (
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
+                )}
+                {showRemix && remixCount > 0 && (
+                  <span className="shrink-0 flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
+                    <Layers className="w-3 h-3 shrink-0" />
+                    <span>{remixCount === 1 ? t('remix.singleCount') : t('remix.multipleCount', { count: remixCount })}</span>
+                  </span>
+                )}
+              </div>
 
-        {/* Line 3: Remix Info (when enabled and recipe has remixes) */}
-        {remixCount > 0 && (
-          <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px] select-none">
-            <Layers className="w-3 h-3 shrink-0" />
-            <span>{remixCount === 1 ? t('remix.singleCount') : t('remix.multipleCount', { count: remixCount })}</span>
-          </div>
+              {/* Right Cluster (rechtsbündig): Calories & Health Score */}
+              <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+                {caloriesFormatted && (
+                  <span className="whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium">
+                    {caloriesFormatted}
+                  </span>
+                )}
+                <HealthScoreLetterBadge score={healthScoreNum} size="sm" />
+              </div>
+            </div>
+          )
         )}
       </div>
+
+      {/* Far Right: Optional Arrow */}
+      {showArrow && (
+        <ArrowRight className="w-4 h-4 text-gray-300 dark:text-gray-600 shrink-0 mr-1" />
+      )}
     </div>
   );
 });

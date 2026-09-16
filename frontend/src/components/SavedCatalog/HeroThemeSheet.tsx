@@ -1,13 +1,11 @@
 import type { MouseEvent } from 'react';
 import { Button, Drawer } from '@heroui/react';
-import { X, Clock, ArrowRight } from 'lucide-react';
+import { X, ArrowRight } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
-import CachedImage from '../CachedImage';
+import { RecipeListItem } from '../RecipeListItem';
 import { useI18n } from '../../context/I18nContext';
 import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight } from '../../utils/haptics';
-import { getRecipeCalories } from '../../utils/formatNutrition';
-import { getHealthScoreLetter, getHealthScoreColor } from '../RecipeDetails/HealthScoreBadge';
 
 export interface HeroThemeSheetProps {
   isOpen: boolean;
@@ -77,70 +75,18 @@ export default function HeroThemeSheet({
 
               {/* Recipe List */}
               <div className="flex-1 overflow-y-auto space-y-2 py-2 pr-0.5 -mr-0.5">
-                {recipes.map((job) => {
-                  const r = job.recipe;
-                  if (!r) return null;
-                  const totalTime = formatTotalTime(r);
-                  const calories = getRecipeCalories(r);
-                  const score = r.healthScore ?? null;
-                  const scoreLetter = score !== null ? getHealthScoreLetter(score) : null;
-                  const scoreColors = score !== null ? getHealthScoreColor(score) : null;
-
-                  return (
-                    <article
-                      key={job.recipeId}
-                      onClick={(e) => {
-                        hapticLight();
-                        onClose();
-                        onOpenRecipe(e, job);
-                      }}
-                      className="flex items-center gap-3 p-2.5 rounded-2xl bg-gray-50/90 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.99] transition-all cursor-pointer border-none"
-                    >
-                      <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-gray-200 dark:bg-gray-700 relative">
-                        <CachedImage
-                          src={r.imageUrl}
-                          emoji={r.emoji}
-                          alt={r.title}
-                          className="w-full h-full object-cover pointer-events-none"
-                        />
-                      </div>
-
-                      <div className="flex-1 min-w-0 flex flex-col justify-center">
-                        <h4 className="text-sm font-bold text-gray-900 dark:text-white line-clamp-1 leading-snug">
-                          {r.title}
-                        </h4>
-                        {r.sourceHandle && (
-                          <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium truncate mt-0.5">
-                            {`@${r.sourceHandle.replace(/^@/, '')}`}
-                          </p>
-                        )}
-
-                        <div className="flex items-center gap-2 mt-1 text-[11px] font-medium text-gray-500 dark:text-gray-400">
-                          {totalTime && (
-                            <span className="flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400">
-                              <Clock className="w-3 h-3 shrink-0" />
-                              <span>{totalTime}</span>
-                            </span>
-                          )}
-
-                          {calories !== undefined && calories !== null && (
-                            <span>{Math.round(calories)} kcal</span>
-                          )}
-
-                          {score !== null && scoreLetter && scoreColors && (
-                            <span
-                              className={`w-3.5 h-3.5 rounded-full ${scoreColors.pillBg} text-white font-black text-[9px] flex items-center justify-center leading-none`}
-                            >
-                              {scoreLetter}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <ArrowRight className="w-4 h-4 text-gray-300 dark:text-gray-600 shrink-0 mr-1" />
-                    </article>
-                  );
-                })}
+                {recipes.map((job) => (
+                  <RecipeListItem
+                    key={job.recipeId}
+                    job={job}
+                    totalTime={job.recipe ? formatTotalTime(job.recipe) : null}
+                    showArrow={true}
+                    onClick={(e) => {
+                      onClose();
+                      onOpenRecipe(e, job);
+                    }}
+                  />
+                ))}
               </div>
 
               {/* Footer CTA: Open in Full Catalog */}

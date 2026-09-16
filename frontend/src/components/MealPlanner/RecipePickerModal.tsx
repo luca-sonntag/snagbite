@@ -220,6 +220,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                   <RecipeListItem
                     key={saved.recipeId || (saved as unknown as { id?: string }).id}
                     job={saved}
+                    showArrow={true}
                     onClick={() => handleSelect(saved)}
                   />
                 ))
