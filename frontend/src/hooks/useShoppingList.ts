@@ -61,7 +61,11 @@ export function useShoppingList() {
   }, [shoppingList]);
 
   // Add scaled ingredients from a recipe
-  const addRecipeIngredients = async (ingredients: Ingredient[], recipeId: string, recipeTitle: string) => {
+  const addRecipeIngredients = async (
+    ingredients: Ingredient[],
+    recipeId: string,
+    recipeTitle: string
+  ): Promise<boolean> => {
     if (!isPremium) {
       const otherRecipes = shoppingList.filter((item) => item.recipeId && item.recipeId !== recipeId);
       if (otherRecipes.length > 0) {
@@ -71,7 +75,7 @@ export function useShoppingList() {
           status: 'warning',
           confirmLabel: 'OK',
         });
-        return;
+        return false;
       }
     }
 
@@ -109,7 +113,7 @@ export function useShoppingList() {
             synonyms: item.synonyms ?? newItems[idx]?.synonyms,
           }));
           setShoppingList((prev) => [...prev.filter((i) => i.recipeId !== recipeId), ...returnedItems]);
-          return;
+          return true;
         }
       } catch (err) {
         console.error('[ShoppingList] Batch add failed:', err);
@@ -125,6 +129,7 @@ export function useShoppingList() {
         createdAt: new Date().toISOString(),
       })),
     ]);
+    return true;
   };
 
   // Add custom manual item
