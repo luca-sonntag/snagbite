@@ -60,6 +60,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     isAddingToShopping,
     isShopAdded,
     startBulkShopping,
+    startSingleShopping,
     currentBulkItem,
     handleBulkShoppingConfirm,
     handleBulkShoppingClose,
@@ -221,6 +222,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
               onDeleteEntry={deletePlan}
               onMoveToTomorrow={moveToTomorrow}
               onMoveToToday={moveToToday}
+              onAddToShoppingList={startSingleShopping}
             />
           ))}
 

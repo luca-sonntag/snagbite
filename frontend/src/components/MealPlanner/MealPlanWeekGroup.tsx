@@ -25,6 +25,7 @@ export interface MealPlanWeekGroupProps {
   onDeleteEntry: (id: string) => void;
   onMoveToTomorrow?: (entry: MealPlanEntry) => void;
   onMoveToToday?: (entry: MealPlanEntry) => void;
+  onAddToShoppingList?: (entry: MealPlanEntry) => void;
 }
 
 export const MealPlanWeekGroup = React.memo<MealPlanWeekGroupProps>(({
@@ -46,6 +47,7 @@ export const MealPlanWeekGroup = React.memo<MealPlanWeekGroupProps>(({
   onDeleteEntry,
   onMoveToTomorrow,
   onMoveToToday,
+  onAddToShoppingList,
 }) => {
   const { t, language } = useI18n();
 
@@ -134,6 +136,7 @@ export const MealPlanWeekGroup = React.memo<MealPlanWeekGroupProps>(({
             onDeleteEntry={onDeleteEntry}
             onMoveToTomorrow={onMoveToTomorrow}
             onMoveToToday={onMoveToToday}
+            onAddToShoppingList={onAddToShoppingList}
           />
         );
       })}

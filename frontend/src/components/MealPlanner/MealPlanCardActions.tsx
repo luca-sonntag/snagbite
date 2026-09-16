@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { MoreVertical, Play, CheckCircle2, CalendarClock, Zap, Trash2 } from 'lucide-react';
+import { MoreVertical, Play, CheckCircle2, ShoppingCart, CalendarClock, Zap, Trash2 } from 'lucide-react';
 import { Button, Popover } from '@heroui/react';
 import type { MealPlanEntry } from '../../types';
 import { useI18n } from '../../context/I18nContext';
@@ -15,6 +15,7 @@ export interface MealPlanCardMenuProps {
   onMoveToTomorrow?: (entry: MealPlanEntry) => void;
   onMoveToToday?: (entry: MealPlanEntry) => void;
   onOpenCookMode?: (recipeId: string) => void;
+  onAddToShoppingList?: (entry: MealPlanEntry) => void;
 }
 
 export const MealPlanCardMenu: React.FC<MealPlanCardMenuProps> = ({
@@ -24,6 +25,7 @@ export const MealPlanCardMenu: React.FC<MealPlanCardMenuProps> = ({
   onDeleteEntry,
   onMoveToTomorrow,
   onOpenCookMode,
+  onAddToShoppingList,
 }) => {
   const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
@@ -107,6 +109,22 @@ export const MealPlanCardMenu: React.FC<MealPlanCardMenuProps> = ({
                   <span>{t('mealPlanner.cookTodayAndPull')}</span>
                 </button>
               </>
+            )}
+
+            {/* Zur Einkaufsliste hinzufügen */}
+            {onAddToShoppingList && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  hapticLight();
+                  setIsOpen(false);
+                  onAddToShoppingList(entry);
+                }}
+                className="flex items-center gap-3 w-full px-3.5 py-3 min-h-[44px] text-sm font-semibold text-gray-800 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer border-none touch-manipulation"
+              >
+                <ShoppingCart className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
+                <span>{t('mealPlanner.addToShoppingList') || 'Zur Einkaufsliste hinzufügen'}</span>
+              </button>
             )}
 
             {/* Verschieben */}

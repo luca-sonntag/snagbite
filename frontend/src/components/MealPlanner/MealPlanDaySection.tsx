@@ -1,29 +1,11 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
-import type { MealPlanEntry } from '../../types';
+import type { MealPlanDaySectionProps } from './types';
 import { MealPlanCard } from './MealPlanCard';
 import { PastMealPlanCard } from './PastMealPlanCard';
 import { formatUpcomingDateSeparator } from './mealPlannerUtils';
 import { useI18n } from '../../context/I18nContext';
 import { hapticLight } from '../../utils/haptics';
-
-export interface MealPlanDaySectionProps {
-  dateStr: string;
-  entries: MealPlanEntry[];
-  isToday: boolean;
-  isPast: boolean;
-  isHighlighted?: boolean;
-  onSelectDay?: (dateStr: string) => void;
-  onSelectRecipe: (recipeId: string) => void;
-  onOpenCookMode?: (recipeId: string) => void;
-  onAddRecipeForDate: (dateStr: string) => void;
-  onUpdateServings: (id: string, servings: number) => void;
-  onToggleCooked: (entry: MealPlanEntry) => void;
-  onCookTodayAndPull?: (entry: MealPlanEntry) => void;
-  onDeleteEntry: (id: string) => void;
-  onMoveToTomorrow?: (entry: MealPlanEntry) => void;
-  onMoveToToday?: (entry: MealPlanEntry) => void;
-}
 
 export const MealPlanDaySection = React.memo<MealPlanDaySectionProps>(({
   dateStr,
@@ -41,6 +23,7 @@ export const MealPlanDaySection = React.memo<MealPlanDaySectionProps>(({
   onDeleteEntry,
   onMoveToTomorrow,
   onMoveToToday,
+  onAddToShoppingList,
 }) => {
   const { t, language } = useI18n();
 
@@ -129,6 +112,7 @@ export const MealPlanDaySection = React.memo<MealPlanDaySectionProps>(({
                 onMoveToToday={onMoveToToday}
                 onSelectRecipe={onSelectRecipe}
                 onOpenCookMode={onOpenCookMode}
+                onAddToShoppingList={onAddToShoppingList}
               />
             ),
           )}

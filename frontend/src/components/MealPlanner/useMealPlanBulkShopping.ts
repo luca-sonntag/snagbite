@@ -19,6 +19,24 @@ interface UseMealPlanBulkShoppingOptions {
   onNavigateToShoppingList?: () => void;
 }
 
+function createBulkShoppingItem(
+  entry: MealPlanEntry,
+  recipe: Recipe | MealPlanRecipeSummary,
+  servings: number,
+  baseServings: number,
+  labelSuffix?: string,
+): BulkShoppingItem {
+  return {
+    entry,
+    recipe,
+    targetServings: servings,
+    baseServings,
+    scaleFactor: servings / baseServings,
+    sortedIngredients: sortIngredientGroupsByCategory(recipe.ingredients),
+    recipeLabel: labelSuffix ? `${recipe.title} ${labelSuffix}` : recipe.title,
+  };
+}
+
 export function useMealPlanBulkShopping({
   mealPlans,
   currentWeekStart,
@@ -45,13 +63,10 @@ export function useMealPlanBulkShopping({
     const todayStr = formatDateIso(new Date());
     const weekStartStr = formatDateIso(currentWeekStart);
     const weekEndStr = formatDateIso(weekEnd);
-
-    // If viewing current week, start from today. If future week, start from week start.
     const effectiveStart = weekStartStr > todayStr ? weekStartStr : todayStr;
 
-    // Filter recipes for this week that are not in the past
     const weekEntries = mealPlans.filter(
-      (p) => p.planDate >= effectiveStart && p.planDate <= weekEndStr,
+      (p) => p.planDate >= effectiveStart && p.planDate <= weekEndStr && !p.isCooked,
     );
 
     if (weekEntries.length === 0) {
@@ -59,14 +74,6 @@ export function useMealPlanBulkShopping({
       return;
     }
 
-    // Filter out already cooked recipes
-    const unCookedEntries = weekEntries.filter((p) => !p.isCooked);
-    if (unCookedEntries.length === 0) {
-      toast.info(t('mealPlanner.allCooked'));
-      return;
-    }
-
-    // Consolidate entries by recipeId (in case same recipe planned multiple days)
     const recipeMap = new Map<
       string,
       {
@@ -77,18 +84,15 @@ export function useMealPlanBulkShopping({
       }
     >();
 
-    for (const entry of unCookedEntries) {
+    for (const entry of weekEntries) {
       const fullRecipe =
         history.find((h) => h.recipeId === entry.recipeId)?.recipe || entry.recipe;
-
-      if (!fullRecipe || !fullRecipe.ingredients || fullRecipe.ingredients.length === 0) {
-        continue;
-      }
+      if (!fullRecipe?.ingredients || fullRecipe.ingredients.length === 0) continue;
 
       const baseServings = fullRecipe.servings ? Number(fullRecipe.servings) : 2;
       const plannedServings = entry.servings || baseServings;
-
       const existing = recipeMap.get(entry.recipeId);
+
       if (existing) {
         existing.totalServings += plannedServings;
       } else {
@@ -101,29 +105,18 @@ export function useMealPlanBulkShopping({
       }
     }
 
-    const items: BulkShoppingItem[] = [];
     const recipeList = Array.from(recipeMap.values());
     const totalCount = recipeList.length;
-
-    recipeList.forEach(({ entry, recipe, totalServings, baseServings }, index) => {
-      const scaleFactor = totalServings / baseServings;
-      const sortedIngredients = sortIngredientGroupsByCategory(recipe.ingredients);
-      const pos = index + 1;
-      const recipeLabel =
-        totalCount > 1
-          ? `${recipe.title} (${pos}/${totalCount})`
-          : recipe.title;
-
-      items.push({
-        entry,
-        recipe,
-        targetServings: totalServings,
-        baseServings,
-        scaleFactor,
-        sortedIngredients,
-        recipeLabel,
-      });
-    });
+    const items: BulkShoppingItem[] = recipeList.map(
+      ({ entry, recipe, totalServings, baseServings }, index) =>
+        createBulkShoppingItem(
+          entry,
+          recipe,
+          totalServings,
+          baseServings,
+          totalCount > 1 ? `(${index + 1}/${totalCount})` : undefined,
+        ),
+    );
 
     if (items.length === 0) {
       toast.info(t('mealPlanner.noPlannedRecipes'));
@@ -136,6 +129,32 @@ export function useMealPlanBulkShopping({
     setBulkShoppingTotal(items.length);
     setQueue(items);
   }, [addRecipeIngredients, currentWeekStart, weekEnd, mealPlans, history, toast, t]);
+
+  // Start single recipe shopping flow from card action menu
+  const startSingleShopping = useCallback(
+    (entry: MealPlanEntry) => {
+      if (!addRecipeIngredients) return;
+
+      const fullRecipe =
+        history.find((h) => h.recipeId === entry.recipeId)?.recipe || entry.recipe;
+
+      if (!fullRecipe?.ingredients || fullRecipe.ingredients.length === 0) {
+        toast.info(t('mealPlanner.noIngredients') || 'Keine Zutaten gefunden');
+        return;
+      }
+
+      const baseServings = fullRecipe.servings ? Number(fullRecipe.servings) : 2;
+      const plannedServings = entry.servings || baseServings;
+      const item = createBulkShoppingItem(entry, fullRecipe, plannedServings, baseServings);
+
+      hapticLight();
+      setAddedRecipesCount(0);
+      setAddedItemsCount(0);
+      setBulkShoppingTotal(1);
+      setQueue([item]);
+    },
+    [addRecipeIngredients, history, toast, t],
+  );
 
   const handleBulkShoppingConfirm = useCallback(
     async (selectedIngredients: Ingredient[]) => {
@@ -150,7 +169,6 @@ export function useMealPlanBulkShopping({
           recipeTitle,
         );
         if (result === false) {
-          // Free-tier limit reached or add failed: cancel rest of queue immediately
           setQueue([]);
           return;
         }
@@ -188,6 +206,7 @@ export function useMealPlanBulkShopping({
     isAddingToShopping: queue.length > 0,
     isShopAdded,
     startBulkShopping,
+    startSingleShopping,
     currentBulkItem,
     bulkShoppingTotal,
     bulkShoppingQueueLength: queue.length,

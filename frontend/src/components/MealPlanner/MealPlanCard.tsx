@@ -12,6 +12,7 @@ export const MealPlanCard = React.memo<MealPlanCardProps>(({
   onMoveToToday,
   onSelectRecipe,
   onOpenCookMode,
+  onAddToShoppingList,
 }) => {
   const recipe = entry.recipe;
 
@@ -37,6 +38,7 @@ export const MealPlanCard = React.memo<MealPlanCardProps>(({
           onMoveToTomorrow={onMoveToTomorrow}
           onMoveToToday={onMoveToToday}
           onOpenCookMode={onOpenCookMode}
+          onAddToShoppingList={onAddToShoppingList}
         />
       }
     />

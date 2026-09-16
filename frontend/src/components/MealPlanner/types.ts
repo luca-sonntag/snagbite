@@ -26,6 +26,7 @@ export interface MealPlanDaySectionProps {
   isToday: boolean;
   isPast: boolean;
   isHighlighted?: boolean;
+  onSelectDay?: (dateStr: string) => void;
   onSelectRecipe: (recipeId: string) => void;
   onOpenCookMode?: (recipeId: string) => void;
   onAddRecipeForDate: (dateStr: string) => void;
@@ -35,6 +36,7 @@ export interface MealPlanDaySectionProps {
   onDeleteEntry: (id: string) => void;
   onMoveToTomorrow?: (entry: MealPlanEntry) => void;
   onMoveToToday?: (entry: MealPlanEntry) => void;
+  onAddToShoppingList?: (entry: MealPlanEntry) => void;
 }
 
 export interface PastMealPlanCardProps {
@@ -88,6 +90,7 @@ export interface MealPlanCardProps {
   onMoveToToday?: (entry: MealPlanEntry) => void;
   onSelectRecipe: (recipeId: string) => void;
   onOpenCookMode?: (recipeId: string) => void;
+  onAddToShoppingList?: (entry: MealPlanEntry) => void;
 }
 
 export interface RecipePickerModalProps {
