@@ -6,6 +6,8 @@ export interface MealPlanRecipeSummary {
   id: string;
   title: string;
   imageUrl?: string | null;
+  emoji?: string | null;
+  healthScore?: number | null;
   prepTime?: number | null;
   cookTime?: number | null;
   servings: number;

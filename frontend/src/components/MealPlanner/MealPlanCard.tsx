@@ -4,6 +4,8 @@ import type { MealPlanCardProps } from './types';
 import CachedImage from '../CachedImage';
 import { MealPlanCardActions } from './MealPlanCardActions';
 import { getTotalTime } from '../../hooks/useSavedCatalog';
+import { getRecipeCalories, formatCalories } from '../../utils/formatNutrition';
+import { getHealthScoreColor, getHealthScoreLetter } from '../RecipeDetails/HealthScoreBadge';
 import { hapticLight } from '../../utils/haptics';
 
 export const MealPlanCard = React.memo<MealPlanCardProps>(({
@@ -16,8 +18,12 @@ export const MealPlanCard = React.memo<MealPlanCardProps>(({
   onOpenCookMode,
 }) => {
   const recipe = entry.recipe;
-  const calories = recipe?.calories;
+  const calories = getRecipeCalories(recipe);
+  const caloriesFormatted = formatCalories(calories);
   const totalTime = getTotalTime(recipe);
+  const healthScoreNum = typeof recipe?.healthScore === 'number' ? recipe.healthScore : null;
+  const healthColor = healthScoreNum !== null ? getHealthScoreColor(healthScoreNum) : null;
+  const healthLetter = healthScoreNum !== null ? getHealthScoreLetter(healthScoreNum) : null;
 
   return (
     <div
@@ -35,6 +41,7 @@ export const MealPlanCard = React.memo<MealPlanCardProps>(({
       <div className="relative w-24 sm:w-28 shrink-0 overflow-hidden bg-gray-100 dark:bg-gray-800 self-stretch">
         <CachedImage
           src={recipe?.imageUrl}
+          emoji={recipe?.emoji}
           alt={recipe?.title || 'Recipe'}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
         />
@@ -52,21 +59,33 @@ export const MealPlanCard = React.memo<MealPlanCardProps>(({
           {recipe?.title || 'Rezept'}
         </h4>
 
-        {/* Badges: Total Time (Prep + Cook) & Calories */}
-        {(totalTime > 0 || !!calories) && (
-          <div className="flex items-center gap-1.5 mt-1 text-xs font-semibold text-gray-500 dark:text-gray-400">
-            {totalTime > 0 && (
-              <span className="flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
-                <span>{totalTime} min</span>
+        {/* Badges: Total Time Pill on left, Calories & Health Score on right */}
+        {(totalTime > 0 || caloriesFormatted || (healthScoreNum !== null && healthColor && healthLetter)) && (
+          <div className="flex items-center justify-between gap-1.5 my-1 text-xs select-none">
+            {totalTime > 0 ? (
+              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[10px] shrink-0">
+                <Clock className="w-2.5 h-2.5 text-gray-500 dark:text-gray-400 shrink-0" />
+                <span>{totalTime} Min.</span>
               </span>
-            )}
-            {totalTime > 0 && !!calories && (
-              <span className="text-gray-300 dark:text-gray-600 text-[10px] leading-none select-none">•</span>
-            )}
-            {!!calories && (
-              <span>{Math.round(calories)} kcal</span>
-            )}
+            ) : <span />}
+
+            <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+              {caloriesFormatted && (
+                <span className="whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium text-[11px]">
+                  {caloriesFormatted}
+                </span>
+              )}
+
+              {healthColor && healthLetter && healthScoreNum !== null && (
+                <span
+                  className={`w-4 h-4 rounded-full ${healthColor.pillBg} text-white font-black text-[9.5px] flex items-center justify-center leading-none shadow-2xs shrink-0 select-none`}
+                  title={`Health Score: ${healthLetter} (${healthScoreNum}/100)`}
+                  aria-label={`Health Score: ${healthLetter}`}
+                >
+                  {healthLetter}
+                </span>
+              )}
+            </div>
           </div>
         )}
 

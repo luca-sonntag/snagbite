@@ -1,22 +1,28 @@
-import type { Recipe } from '../types';
+import type { Recipe, MealPlanRecipeSummary } from '../types';
 
 /**
  * Resolves the headline calories figure for a recipe card or poster.
- * Checks nutritionalValues, sourceNutritionalValues, or calculates from ingredients.
+ * Checks direct calories, nutritionalValues, sourceNutritionalValues, or calculates from ingredients.
  */
-export function getRecipeCalories(recipe?: Recipe | null): number | null {
+export function getRecipeCalories(recipe?: Recipe | MealPlanRecipeSummary | null): number | null {
   if (!recipe) return null;
 
+  // Direct calories on MealPlanRecipeSummary or Recipe
+  if ('calories' in recipe && typeof (recipe as MealPlanRecipeSummary).calories === 'number' && ((recipe as MealPlanRecipeSummary).calories ?? 0) > 0) {
+    return Math.round((recipe as MealPlanRecipeSummary).calories!);
+  }
+
+  const r = recipe as Recipe;
   const direct =
-    recipe.nutritionalValues?.calories ?? recipe.sourceNutritionalValues?.calories;
+    r.nutritionalValues?.calories ?? r.sourceNutritionalValues?.calories;
   if (typeof direct === 'number' && direct > 0) {
     return Math.round(direct);
   }
 
   // If calories are not present at the top level, derive from ingredients if present
-  if (recipe.ingredients && recipe.ingredients.length > 0) {
+  if (r.ingredients && r.ingredients.length > 0) {
     let totalCalories = 0;
-    for (const group of recipe.ingredients) {
+    for (const group of r.ingredients) {
       if (!group.items) continue;
       for (const ing of group.items) {
         if (ing.calories && ing.calories > 0) {
@@ -24,7 +30,7 @@ export function getRecipeCalories(recipe?: Recipe | null): number | null {
         }
       }
     }
-    const baseServings = Math.max(1, recipe.servings || 1);
+    const baseServings = Math.max(1, r.servings || 1);
     if (totalCalories > 0) {
       return Math.round(totalCalories / baseServings);
     }

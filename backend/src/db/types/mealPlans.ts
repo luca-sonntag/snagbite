@@ -13,6 +13,8 @@ export interface MealPlanRow {
     id: string;
     title: string;
     image_url: string | null;
+    emoji: string | null;
+    health_score: number | null;
     prep_time: number | null;
     cook_time: number | null;
     servings: number | string | null;
