@@ -158,12 +158,12 @@ export default function ShoppingConfirmSheet({
     <div onClick={(e) => e.stopPropagation()}>
       <Drawer>
         <Drawer.Backdrop isOpen={isOpen} onOpenChange={(open) => { if (!open) onClose(); }} className="!z-[100]">
-          <Drawer.Content placement="bottom" className="!z-[100] !bg-[#f8fafc] dark:!bg-[#09090b]">
-            <Drawer.Dialog className="relative !bg-[#f8fafc] dark:!bg-[#09090b] max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
+          <Drawer.Content placement="bottom" className="!z-[100]">
+            <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
               <Drawer.Handle />
 
               {/* Header */}
-              <Drawer.Header className="pb-2 mb-1 !bg-transparent border-none">
+              <Drawer.Header className="pb-2 mb-1">
                 <div className="flex items-center gap-2.5">
                   <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center shrink-0">
                     <Salad className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
@@ -186,8 +186,8 @@ export default function ShoppingConfirmSheet({
               </Drawer.Header>
 
               {/* Dedicated Servings Stepper Row under Header */}
-              <div className="flex items-center justify-between py-1.5 px-0.5 mb-2 !bg-transparent border-none select-none">
-                <span className="text-sm font-extrabold text-gray-800 dark:text-gray-200">
+              <div className="flex items-center justify-between px-3.5 py-2 mb-2 rounded-2xl bg-white dark:bg-gray-900 shadow-2xs border-none select-none">
+                <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
                   {t('mealPlanner.servings') || 'Portionen'}
                 </span>
                 <ServingsStepper
@@ -196,52 +196,42 @@ export default function ShoppingConfirmSheet({
                   onIncrease={() => setServings((s) => s + 1)}
                   size="sm"
                   showIcon={false}
-                  className="bg-gray-200/70 dark:bg-gray-800/80"
                   ariaLabel={t('mealPlanner.servings')}
                 />
               </div>
 
-              {/* Body Container with full-width top & bottom scroll shadows */}
-              <div className="relative -mx-5 px-5 flex-1 min-h-0 flex flex-col !bg-transparent">
-                {/* Top scroll shadow spanning full sheet width */}
-                <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-black/[0.08] dark:from-black/[0.35] to-transparent pointer-events-none z-10" />
-
-                {/* Body: persistent visible scrollbar and flat clean ingredient list */}
-                <Drawer.Body className="overflow-y-scroll py-2 pr-1 flex-1 !bg-transparent [scrollbar-width:thin] [scrollbar-color:rgba(156,163,175,0.4)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
-                  <div className="flex flex-col gap-1.5 py-0.5">
-                    {allItems.map((item) => {
-                      const requiredAmt = (item.primaryIngredient.amount || 0) * activeScaleFactor;
-                      const pantryStockMatch = findPantryStockMatch(
-                        item.primaryIngredient,
-                        pantryItems,
-                        requiredAmt,
-                        item.primaryIngredient.unit
-                      );
-                      return (
-                        <ShoppingConfirmItem
-                          key={item.id}
-                          item={item}
-                          isChecked={!!selectedIds[item.id]}
-                          onToggle={() => toggleItem(item.id)}
-                          formatAmount={scaledFormatAmount}
-                          groupCategory={item.groupCategory}
-                          pantryStockMatch={pantryStockMatch}
-                        />
-                      );
-                    })}
-                  </div>
-                </Drawer.Body>
-
-                {/* Bottom scroll shadow spanning full sheet width */}
-                <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-black/[0.08] dark:from-black/[0.35] to-transparent pointer-events-none z-10" />
-              </div>
+              {/* Body: persistent visible scrollbar and flat clean ingredient list */}
+              <Drawer.Body className="overflow-y-scroll py-2 pr-1 flex-1 [scrollbar-width:thin] [scrollbar-color:rgba(156,163,175,0.4)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
+                <div className="flex flex-col gap-1">
+                  {allItems.map((item) => {
+                    const requiredAmt = (item.primaryIngredient.amount || 0) * activeScaleFactor;
+                    const pantryStockMatch = findPantryStockMatch(
+                      item.primaryIngredient,
+                      pantryItems,
+                      requiredAmt,
+                      item.primaryIngredient.unit
+                    );
+                    return (
+                      <ShoppingConfirmItem
+                        key={item.id}
+                        item={item}
+                        isChecked={!!selectedIds[item.id]}
+                        onToggle={() => toggleItem(item.id)}
+                        formatAmount={scaledFormatAmount}
+                        groupCategory={item.groupCategory}
+                        pantryStockMatch={pantryStockMatch}
+                      />
+                    );
+                  })}
+                </div>
+              </Drawer.Body>
 
               {/* Footer */}
-              <Drawer.Footer className="pt-3 flex gap-2.5 !bg-transparent border-none">
+              <Drawer.Footer className="pt-3 flex gap-2">
                 <Button
                   variant="tertiary"
                   onPress={onClose}
-                  className="w-full h-12 rounded-2xl font-bold bg-gray-200/80 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-200 border-none active:scale-95 transition-all cursor-pointer"
+                  className="w-full h-12 rounded-2xl font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-none active:scale-95 transition-all cursor-pointer"
                 >
                   {t('recipe.shoppingConfirmCancel')}
                 </Button>
