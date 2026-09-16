@@ -1,7 +1,6 @@
 import { Check, Package, Home, CornerDownRight } from 'lucide-react';
 import type { Ingredient } from '../../types';
 import { useI18n } from '../../context/I18nContext';
-import { getCategoryTheme } from '../../i18n';
 import type { PantryStockMatch } from '../ShoppingList/shoppingItemUtils';
 import IngredientIcon from '../IngredientIcon';
 
@@ -34,7 +33,6 @@ export default function ShoppingConfirmItem({
 }: ShoppingConfirmItemProps) {
   const { t } = useI18n();
   const ing = item.primaryIngredient;
-  const theme = getCategoryTheme(groupCategory || ing.category || '');
   const scaledAmount = formatAmount(ing.amount, ing.unit);
   const amountStr = scaledAmount ? `${scaledAmount}` : '';
   const unitStr = ing.unit ? ` ${ing.unit}` : '';
@@ -67,12 +65,6 @@ export default function ShoppingConfirmItem({
       className="group flex items-center justify-between gap-3 py-1.5 px-3 rounded-2xl bg-white/60 dark:bg-gray-900/60 hover:bg-white/80 dark:hover:bg-gray-900/80 shadow-[0_1px_2px_rgba(0,0,0,0.03)] dark:shadow-none backdrop-blur-xs active:scale-[0.99] transition-all cursor-pointer select-none border-none"
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        {/* Category color bar */}
-        <span
-          className={`w-1 h-4 rounded-full ${theme.barClass} shrink-0 opacity-80`}
-          title={groupCategory || ing.category || undefined}
-        />
-
         {/* Checkbox indicator */}
         <div
           className={`w-6 h-6 rounded-lg border-none flex items-center justify-center flex-shrink-0 transition-all ${
