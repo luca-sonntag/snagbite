@@ -16,7 +16,7 @@ interface ShoppingConfirmSheetProps {
   sortedIngredients: Array<{ group: { name: string; items: Ingredient[] }; originalIdx: number }>;
   scaleFactor: number;
   formatAmount: (amount: number | undefined, unit: string | undefined) => string;
-  onConfirm: (selectedIngredients: Ingredient[]) => void;
+  onConfirm: (selectedIngredients: Ingredient[]) => Promise<void> | void;
   /** Optional label shown in the header when the sheet is used in bulk mode */
   recipeLabel?: string;
 }
@@ -115,7 +115,7 @@ export default function ShoppingConfirmSheet({
     }));
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     hapticNotification('success');
     const itemsToAdd: Ingredient[] = [];
     allItems.forEach((item) => {
@@ -131,7 +131,7 @@ export default function ShoppingConfirmSheet({
         });
       }
     });
-    onConfirm(itemsToAdd);
+    await onConfirm(itemsToAdd);
     onClose();
   };
 

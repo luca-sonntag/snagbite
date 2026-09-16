@@ -17,7 +17,11 @@ import type { ProFeatureId } from '../ProFeatureSheet';
 
 interface UseRecipeDetailsOptions {
   recipe: Recipe;
-  onAddIngredients?: (ingredients: Ingredient[], recipeId: string, recipeTitle: string) => void;
+  onAddIngredients?: (
+    ingredients: Ingredient[],
+    recipeId: string,
+    recipeTitle: string
+  ) => Promise<boolean> | boolean | void;
   onNavigateToShoppingList?: () => void;
 }
 
@@ -217,23 +221,28 @@ export function useRecipeDetails({ recipe, onAddIngredients, onNavigateToShoppin
     setIsShoppingConfirmOpen(true);
   }, []);
 
-  const handleConfirmShoppingListSelection = useCallback((itemsToAdd: Ingredient[]) => {
-    if (!onAddIngredients || itemsToAdd.length === 0) return;
-    const recipeId = recipe.id || recipe.title;
-    onAddIngredients(itemsToAdd, recipeId, recipe.title);
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
-    const title = itemsToAdd.length === 1
-      ? t('toast.ingredientsAddedSingle', { name: itemsToAdd[0].name })
-      : t('toast.ingredientsAddedMany', { count: itemsToAdd.length });
-    toast.success(title, {
-      description: recipe.title,
-      action: onNavigateToShoppingList
-        ? { label: t('toast.viewShoppingList'), onClick: () => onNavigateToShoppingList() }
-        : undefined,
-    });
-    if (shouldNavigateAfterAdd) onNavigateToShoppingList?.();
-  }, [onAddIngredients, recipe.id, recipe.title, t, toast, onNavigateToShoppingList, shouldNavigateAfterAdd]);
+  const handleConfirmShoppingListSelection = useCallback(
+    async (itemsToAdd: Ingredient[]) => {
+      if (!onAddIngredients || itemsToAdd.length === 0) return;
+      const recipeId = recipe.id || recipe.title;
+      const success = await onAddIngredients(itemsToAdd, recipeId, recipe.title);
+      if (success === false) return;
+      setIsAdded(true);
+      setTimeout(() => setIsAdded(false), 2000);
+      const title =
+        itemsToAdd.length === 1
+          ? t('toast.ingredientsAddedSingle', { name: itemsToAdd[0].name })
+          : t('toast.ingredientsAddedMany', { count: itemsToAdd.length });
+      toast.success(title, {
+        description: recipe.title,
+        action: onNavigateToShoppingList
+          ? { label: t('toast.viewShoppingList'), onClick: () => onNavigateToShoppingList() }
+          : undefined,
+      });
+      if (shouldNavigateAfterAdd) onNavigateToShoppingList?.();
+    },
+    [onAddIngredients, recipe.id, recipe.title, t, toast, onNavigateToShoppingList, shouldNavigateAfterAdd]
+  );
 
   // --- Cooking mode ---
   const handleStartCooking = useCallback(() => {

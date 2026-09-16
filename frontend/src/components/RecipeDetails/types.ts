@@ -2,7 +2,7 @@ import type { Recipe, Ingredient } from '../../types';
 
 export interface RecipeDetailsProps {
   recipe: Recipe;
-  onAddIngredients?: (ingredients: Ingredient[], recipeId: string, recipeTitle: string) => void;
+  onAddIngredients?: (ingredients: Ingredient[], recipeId: string, recipeTitle: string) => Promise<boolean> | boolean | void;
   onDelete?: () => void;
   reelUrl?: string;
   createdAt?: string;
