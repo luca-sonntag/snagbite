@@ -95,14 +95,16 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     }
   }, [weekDays, selectedDate, setSelectedDate, goToPrevWeek]);
 
-  const swipeHandlers = useSwipeGesture({
-    onSwipeLeft: goToNextDay,
-    onSwipeRight: goToPrevDay,
-  });
-
-  const calendarSwipeHandlers = useSwipeGesture({
+  const calendarSwipe = useSwipeGesture({
     onSwipeLeft: goToNextWeek,
     onSwipeRight: goToPrevWeek,
+    interactive: true,
+  });
+
+  const daySwipe = useSwipeGesture({
+    onSwipeLeft: goToNextDay,
+    onSwipeRight: goToPrevDay,
+    interactive: true,
   });
 
   return (
@@ -117,22 +119,42 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
 
       {/* Unified Calendar Widget Card */}
       <div
-        className="w-full flex flex-col gap-1.5 p-2 rounded-3xl bg-gray-100/75 dark:bg-gray-900/90 border-none shadow-2xs select-none touch-pan-y"
-        {...calendarSwipeHandlers}
+        className="w-full flex flex-col gap-1.5 p-2 rounded-3xl bg-gray-100/75 dark:bg-gray-900/90 border-none shadow-2xs select-none overflow-hidden"
+        onTouchStart={calendarSwipe.onTouchStart}
+        onTouchMove={calendarSwipe.onTouchMove}
+        onTouchEnd={calendarSwipe.onTouchEnd}
+        style={calendarSwipe.containerStyle}
       >
         <WeekNavigator
           weekStart={currentWeekStart}
           weekEnd={weekEnd}
           isCurrentWeek={isCurrentWeek}
-          onPrevWeek={goToPrevWeek}
-          onNextWeek={goToNextWeek}
-          onToday={goToToday}
+          onPrevWeek={() => {
+            calendarSwipe.setDirection('prev');
+            goToPrevWeek();
+          }}
+          onNextWeek={() => {
+            calendarSwipe.setDirection('next');
+            goToNextWeek();
+          }}
+          onToday={() => {
+            calendarSwipe.setDirection(null);
+            goToToday();
+          }}
         />
-        <WeekDayPicker
-          days={weekDays}
-          selectedDate={selectedDate}
-          onSelectDate={setSelectedDate}
-        />
+        <div
+          key={currentWeekStart.toISOString()}
+          className={`w-full ${calendarSwipe.animationClass}`}
+        >
+          <WeekDayPicker
+            days={weekDays}
+            selectedDate={selectedDate}
+            onSelectDate={(d) => {
+              daySwipe.setDirection(null);
+              setSelectedDate(d);
+            }}
+          />
+        </div>
         {/* Daily Macro/Time Insight integrated into widget */}
         <DailyInsightPill entries={activeDayEntries} />
       </div>
@@ -150,9 +172,11 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
       ) : (
         <div
           key={selectedDate}
-          className="space-y-4 animate-fade-in"
-          style={{ animationDuration: '200ms' }}
-          {...swipeHandlers}
+          className={`space-y-4 ${daySwipe.animationClass || 'animate-fade-in'}`}
+          style={daySwipe.containerStyle}
+          onTouchStart={daySwipe.onTouchStart}
+          onTouchMove={daySwipe.onTouchMove}
+          onTouchEnd={daySwipe.onTouchEnd}
         >
           {/* Active selected day meal slots or empty banner */}
           <DayMealSlots
