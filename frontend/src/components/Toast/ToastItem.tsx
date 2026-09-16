@@ -5,10 +5,9 @@ import type { ToastItemData, ToastType } from './types';
 interface ToastItemProps {
   toast: ToastItemData;
   onDismiss: (id: string) => void;
-  placement?: 'top' | 'bottom';
 }
 
-export default function ToastItem({ toast, onDismiss, placement = 'bottom' }: ToastItemProps) {
+export default function ToastItem({ toast, onDismiss }: ToastItemProps) {
   const touchStartY = useRef<number | null>(null);
   const [dragOffsetY, setDragOffsetY] = useState(0);
 
@@ -19,26 +18,14 @@ export default function ToastItem({ toast, onDismiss, placement = 'bottom' }: To
   const handleTouchMove = (e: React.TouchEvent) => {
     if (touchStartY.current === null) return;
     const diff = e.touches[0].clientY - touchStartY.current;
-    if (placement === 'top') {
-      if (diff < 0) setDragOffsetY(diff);
-    } else {
-      if (diff > 0) setDragOffsetY(diff);
-    }
+    if (diff > 0) setDragOffsetY(diff);
   };
 
   const handleTouchEnd = () => {
-    if (placement === 'top') {
-      if (dragOffsetY < -25) {
-        onDismiss(toast.id);
-      } else {
-        setDragOffsetY(0);
-      }
+    if (dragOffsetY > 25) {
+      onDismiss(toast.id);
     } else {
-      if (dragOffsetY > 25) {
-        onDismiss(toast.id);
-      } else {
-        setDragOffsetY(0);
-      }
+      setDragOffsetY(0);
     }
     touchStartY.current = null;
   };
@@ -70,14 +57,9 @@ export default function ToastItem({ toast, onDismiss, placement = 'bottom' }: To
     }
   };
 
-  const animationClass =
-    placement === 'top'
-      ? toast.isExiting
-        ? 'animate-toast-out-top'
-        : 'animate-toast-in-top'
-      : toast.isExiting
-      ? 'animate-toast-out-bottom'
-      : 'animate-toast-in-bottom';
+  const animationClass = toast.isExiting
+    ? 'animate-toast-out-bottom'
+    : 'animate-toast-in-bottom';
 
   return (
     <div

@@ -12,7 +12,6 @@ interface ToastContainerProps {
 export default function ToastContainer({ toasts, onDismiss }: ToastContainerProps) {
   const { isAnyOverlayOpen } = useOverlayStack();
   const [bottomSheetHeight, setBottomSheetHeight] = useState<number | null>(null);
-  const [placement, setPlacement] = useState<'top' | 'bottom'>('bottom');
 
   useEffect(() => {
     const updateHeight = () => {
@@ -68,18 +67,11 @@ export default function ToastContainer({ toasts, onDismiss }: ToastContainerProp
           // Bottom sheet / bottom modal: anchor floating 12px above its top edge
           const heightFromBottom = Math.max(0, window.innerHeight - rect.top);
           setBottomSheetHeight(heightFromBottom);
-          setPlacement('bottom');
-        } else if (rect.top < 100 && rect.bottom > 100) {
-          // Fullscreen or high modal: render toast at the top of viewport
-          setBottomSheetHeight(null);
-          setPlacement('top');
         } else {
           setBottomSheetHeight(null);
-          setPlacement('bottom');
         }
       } else {
         setBottomSheetHeight(null);
-        setPlacement('bottom');
       }
     };
 
@@ -100,16 +92,12 @@ export default function ToastContainer({ toasts, onDismiss }: ToastContainerProp
   return createPortal(
     <div
       style={
-        isAboveBottomSheet && placement === 'bottom'
+        isAboveBottomSheet
           ? { paddingBottom: `calc(${bottomSheetHeight + 12}px + var(--safe-area-inset-bottom, 0px))` }
           : undefined
       }
-      className={`fixed inset-x-0 pointer-events-none flex items-center gap-2 p-3 sm:p-4 transition-[padding] duration-200 z-[220] ${
-        placement === 'top'
-          ? 'top-0 flex-col pt-[calc(var(--safe-area-inset-top,0px)+1rem)]'
-          : `bottom-0 flex-col-reverse ${
-              !isAboveBottomSheet ? 'pb-[calc(var(--safe-area-inset-bottom,0px)+6rem)]' : ''
-            }`
+      className={`fixed inset-x-0 bottom-0 pointer-events-none flex flex-col-reverse items-center gap-2 p-3 sm:p-4 transition-[padding] duration-200 z-[220] ${
+        !isAboveBottomSheet ? 'pb-[calc(var(--safe-area-inset-bottom,0px)+6rem)]' : ''
       }`}
       aria-live="polite"
       aria-atomic="false"
@@ -119,7 +107,6 @@ export default function ToastContainer({ toasts, onDismiss }: ToastContainerProp
           key={toast.id}
           toast={toast}
           onDismiss={onDismiss}
-          placement={placement}
         />
       ))}
     </div>,
