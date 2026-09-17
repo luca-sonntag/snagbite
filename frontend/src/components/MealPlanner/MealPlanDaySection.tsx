@@ -51,7 +51,7 @@ export const MealPlanDaySection = React.memo<MealPlanDaySectionProps>(({
         hasEntries
           ? `flex flex-col p-1.5 sm:p-2 rounded-2xl gap-1.5 sm:gap-2 mb-2 sm:mb-3 shadow-2xs ${
               isHighlighted
-                ? 'bg-emerald-500/15 dark:bg-emerald-950/40 ring-2 ring-emerald-500 shadow-sm'
+                ? 'bg-emerald-500/15 dark:bg-emerald-950/40 shadow-xs'
                 : isToday
                 ? 'bg-emerald-500/10 dark:bg-emerald-950/30'
                 : isPast
