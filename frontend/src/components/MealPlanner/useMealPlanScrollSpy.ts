@@ -23,8 +23,6 @@ export function useMealPlanScrollSpy({
   const onWeekChangeRef = useRef(onWeekChange);
   onWeekChangeRef.current = onWeekChange;
 
-  const scrollDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   // Smoothly scroll to a target date section in the agenda stream
   const scrollToDate = useCallback(
     (
@@ -41,11 +39,6 @@ export function useMealPlanScrollSpy({
             });
           }
           return;
-        }
-
-        if (scrollDebounceTimerRef.current) {
-          clearTimeout(scrollDebounceTimerRef.current);
-          scrollDebounceTimerRef.current = null;
         }
 
         isProgrammaticScrollRef.current = true;
@@ -107,61 +100,60 @@ export function useMealPlanScrollSpy({
     [],
   );
 
-  // IntersectionObserver with rest-debounce to keep calendar header calm
+  // Active viewport scroll listener to reliably sync the calendar week
   useEffect(() => {
     if (agendaDates.length === 0) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (isProgrammaticScrollRef.current) return;
+    let rafId: number | null = null;
 
-        // Find entries intersecting below the sticky calendar header
-        const visibleEntries = entries.filter((e) => e.isIntersecting);
-        if (visibleEntries.length === 0) return;
+    const handleScroll = () => {
+      if (isProgrammaticScrollRef.current) return;
+
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        if (isProgrammaticScrollRef.current) return;
 
         const stickyHeader = document.getElementById('meal-planner-sticky-header');
         const headerHeight = stickyHeader ? stickyHeader.getBoundingClientRect().height : 180;
-        const targetActiveZone = headerHeight + 60;
+        const scanLine = headerHeight + 40;
 
-        visibleEntries.sort((a, b) => {
-          const aTop = a.boundingClientRect.top;
-          const bTop = b.boundingClientRect.top;
-          return Math.abs(aTop - targetActiveZone) - Math.abs(bTop - targetActiveZone);
-        });
+        let activeDateStr: string | null = null;
 
-        const centerEntry = visibleEntries[0];
-        const dateStr = centerEntry.target.getAttribute('data-date');
-        if (!dateStr) return;
-
-        const newMonday = getMonday(new Date(dateStr + 'T00:00:00'));
-        const newMondayIso = formatDateIso(newMonday);
-        const currentMondayIso = formatDateIso(currentWeekStartRef.current);
-
-        if (newMondayIso !== currentMondayIso) {
-          if (scrollDebounceTimerRef.current) {
-            clearTimeout(scrollDebounceTimerRef.current);
+        for (const dateStr of agendaDates) {
+          const el = document.getElementById(`day-section-${dateStr}`);
+          if (!el) continue;
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= scanLine && rect.bottom >= scanLine) {
+            activeDateStr = dateStr;
+            break;
           }
-          // Rest-debounce: only switch weeks once scrolling pauses or slows down (~220ms)
-          scrollDebounceTimerRef.current = setTimeout(() => {
-            if (formatDateIso(newMonday) !== formatDateIso(currentWeekStartRef.current)) {
-              onWeekChangeRef.current(newMonday);
-            }
-          }, 220);
+          if (rect.top > scanLine) {
+            activeDateStr = dateStr;
+            break;
+          }
         }
-      },
-      {
-        rootMargin: '-20% 0px -40% 0px',
-        threshold: [0, 0.1, 0.5],
-      },
-    );
 
-    agendaDates.forEach((dateStr) => {
-      const el = document.getElementById(`day-section-${dateStr}`);
-      if (el) observer.observe(el);
-    });
+        if (!activeDateStr && agendaDates.length > 0) {
+          activeDateStr = agendaDates[agendaDates.length - 1];
+        }
 
+        if (activeDateStr) {
+          const newMonday = getMonday(new Date(activeDateStr + 'T00:00:00'));
+          const newMondayIso = formatDateIso(newMonday);
+          const currentMondayIso = formatDateIso(currentWeekStartRef.current);
+
+          if (newMondayIso !== currentMondayIso) {
+            onWeekChangeRef.current(newMonday);
+          }
+        }
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
-      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+      if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, [agendaDates]);
 
@@ -169,7 +161,6 @@ export function useMealPlanScrollSpy({
     return () => {
       if (programmaticTimerRef.current) clearTimeout(programmaticTimerRef.current);
       if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
-      if (scrollDebounceTimerRef.current) clearTimeout(scrollDebounceTimerRef.current);
     };
   }, []);
 
