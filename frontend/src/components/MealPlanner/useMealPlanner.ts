@@ -246,8 +246,11 @@ export function useMealPlanner() {
   }, []);
 
   const agendaDates = useMemo(() => {
-    return buildAgendaDates(new Date(), mealPlans, expandedWeekKeys);
-  }, [mealPlans, expandedWeekKeys]);
+    return buildAgendaDates(new Date(), mealPlans, [
+      ...expandedWeekKeys,
+      formatDateIso(currentWeekStart),
+    ]);
+  }, [mealPlans, expandedWeekKeys, currentWeekStart]);
 
   const agendaWeekGroups = useMemo(() => groupDatesByWeek(agendaDates), [agendaDates]);
 

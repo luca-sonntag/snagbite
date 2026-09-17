@@ -32,54 +32,65 @@ export function useMealPlanScrollSpy({
       behavior: ScrollBehavior = 'smooth',
       align: 'start' | 'center' = 'start',
     ) => {
-      const element = document.getElementById(`day-section-${targetDateStr}`);
-      if (!element) return;
+      const performScroll = (retryCount = 0) => {
+        const element = document.getElementById(`day-section-${targetDateStr}`);
+        if (!element) {
+          if (retryCount < 3) {
+            requestAnimationFrame(() => {
+              setTimeout(() => performScroll(retryCount + 1), 50);
+            });
+          }
+          return;
+        }
 
-      if (scrollDebounceTimerRef.current) {
-        clearTimeout(scrollDebounceTimerRef.current);
-        scrollDebounceTimerRef.current = null;
-      }
+        if (scrollDebounceTimerRef.current) {
+          clearTimeout(scrollDebounceTimerRef.current);
+          scrollDebounceTimerRef.current = null;
+        }
 
-      isProgrammaticScrollRef.current = true;
-      if (programmaticTimerRef.current) clearTimeout(programmaticTimerRef.current);
-      programmaticTimerRef.current = setTimeout(() => {
-        isProgrammaticScrollRef.current = false;
-      }, 700);
+        isProgrammaticScrollRef.current = true;
+        if (programmaticTimerRef.current) clearTimeout(programmaticTimerRef.current);
+        programmaticTimerRef.current = setTimeout(() => {
+          isProgrammaticScrollRef.current = false;
+        }, 700);
 
-      // Trigger visual highlight pulse
-      setHighlightedDate(targetDateStr);
-      if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
-      highlightTimerRef.current = setTimeout(() => {
-        setHighlightedDate(null);
-      }, 1400);
+        // Trigger visual highlight pulse
+        setHighlightedDate(targetDateStr);
+        if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+        highlightTimerRef.current = setTimeout(() => {
+          setHighlightedDate(null);
+        }, 1400);
 
-      const targetMonday = getMonday(new Date(targetDateStr + 'T00:00:00'));
-      if (formatDateIso(targetMonday) !== formatDateIso(currentWeekStartRef.current)) {
-        onWeekChangeRef.current(targetMonday);
-      }
+        const targetMonday = getMonday(new Date(targetDateStr + 'T00:00:00'));
+        if (formatDateIso(targetMonday) !== formatDateIso(currentWeekStartRef.current)) {
+          onWeekChangeRef.current(targetMonday);
+        }
 
-      // Calculate sticky header & available viewport area
-      const stickyHeader = document.getElementById('meal-planner-sticky-header');
-      const headerHeight = stickyHeader ? stickyHeader.getBoundingClientRect().height : 180;
-      const bottomNavOffset = 64;
-      const availableHeight = Math.max(200, window.innerHeight - headerHeight - bottomNavOffset);
+        // Calculate sticky header & available viewport area
+        const stickyHeader = document.getElementById('meal-planner-sticky-header');
+        const headerHeight = stickyHeader ? stickyHeader.getBoundingClientRect().height : 180;
+        const bottomNavOffset = 64;
+        const availableHeight = Math.max(200, window.innerHeight - headerHeight - bottomNavOffset);
 
-      const elementRect = element.getBoundingClientRect();
-      const currentScrollY = window.scrollY || document.documentElement.scrollTop;
+        const elementRect = element.getBoundingClientRect();
+        const currentScrollY = window.scrollY || document.documentElement.scrollTop;
 
-      let targetY: number;
-      if (align === 'center' && elementRect.height < availableHeight) {
-        const targetCenterInViewport = headerHeight + availableHeight / 2;
-        const elementCenterInDoc = currentScrollY + elementRect.top + elementRect.height / 2;
-        targetY = elementCenterInDoc - targetCenterInViewport;
-      } else {
-        targetY = currentScrollY + elementRect.top - (headerHeight + 8);
-      }
+        let targetY: number;
+        if (align === 'center' && elementRect.height < availableHeight) {
+          const targetCenterInViewport = headerHeight + availableHeight / 2;
+          const elementCenterInDoc = currentScrollY + elementRect.top + elementRect.height / 2;
+          targetY = elementCenterInDoc - targetCenterInViewport;
+        } else {
+          targetY = currentScrollY + elementRect.top - (headerHeight + 8);
+        }
 
-      window.scrollTo({
-        top: Math.max(0, targetY),
-        behavior,
-      });
+        window.scrollTo({
+          top: Math.max(0, targetY),
+          behavior,
+        });
+      };
+
+      performScroll(0);
     },
     [],
   );
