@@ -18,7 +18,7 @@ export const PastMealPlanCard = React.memo<PastMealPlanCardProps>(({
       isCooked={entry.isCooked}
       flushImage={true}
       showArrow={false}
-      className="opacity-60 hover:opacity-85 grayscale-[20%] transition-all"
+      className="rounded-none shadow-none opacity-60 hover:opacity-85 grayscale-[20%] transition-all"
       extraMeta={
         entry.servings > 0 ? (
           <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 shrink-0">

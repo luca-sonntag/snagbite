@@ -49,7 +49,7 @@ export const MealPlanDaySection = React.memo<MealPlanDaySectionProps>(({
       data-date={dateStr}
       className={`w-full transition-all duration-200 ${
         hasEntries
-          ? `flex flex-col p-1.5 sm:p-2 rounded-2xl gap-1.5 sm:gap-2 mb-2 sm:mb-3 ${
+          ? `flex flex-col rounded-2xl overflow-hidden mb-2 sm:mb-3 ${
               isHighlighted
                 ? 'bg-emerald-600 dark:bg-emerald-600 shadow-md shadow-emerald-600/25'
                 : isToday
@@ -67,7 +67,7 @@ export const MealPlanDaySection = React.memo<MealPlanDaySectionProps>(({
         aria-label={isPast ? formattedDate : (t('mealPlanner.addRecipe') || 'Rezept hinzufügen')}
         className={`group w-full flex items-center justify-between select-none border-none touch-manipulation transition-all duration-200 cursor-pointer ${
           hasEntries
-            ? `min-h-[38px] px-2.5 py-1.5 rounded-t-xl rounded-b-none ${
+            ? `min-h-[44px] px-3.5 py-2.5 rounded-none ${
                 isHighlighted
                   ? 'bg-transparent hover:bg-white/10 dark:hover:bg-white/10'
                   : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/5'
@@ -114,7 +114,7 @@ export const MealPlanDaySection = React.memo<MealPlanDaySectionProps>(({
 
       {/* Recipe Cards List */}
       {hasEntries && (
-        <div className="flex flex-col gap-1.5 sm:gap-2">
+        <div className="flex flex-col divide-y divide-gray-100 dark:divide-gray-800/60">
           {entries.map((entry) =>
             isPast ? (
               <PastMealPlanCard
