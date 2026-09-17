@@ -168,7 +168,6 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
           onNextWeek={() => {
             const nextMonday = addDays(currentWeekStart, 7);
             const mondayStr = formatDateIso(nextMonday);
-            expandWeek(mondayStr);
             setCurrentWeekStart(nextMonday);
             setSelectedDate(mondayStr);
             scrollToDate(mondayStr, 'smooth', 'center');

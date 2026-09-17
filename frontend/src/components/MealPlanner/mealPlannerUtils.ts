@@ -171,7 +171,7 @@ export function formatWeekRange(start: Date, end: Date, language: string): strin
 export function buildAgendaDates(
   todayDate: Date,
   mealPlans: MealPlanEntry[],
-  expandedWeekKeysOrCount: string[] | Set<string> | number = [],
+  activeWeekStartOrExpanded: Date | string | string[] | Set<string> = [],
 ): string[] {
   const dateSet = new Set<string>();
   const todayStr = formatDateIso(todayDate);
@@ -186,36 +186,41 @@ export function buildAgendaDates(
     }
   }
 
-  // 2. Extended/expanded future weeks
-  if (typeof expandedWeekKeysOrCount === 'number') {
-    for (let w = 1; w <= expandedWeekKeysOrCount; w++) {
-      for (let i = 0; i < 7; i++) {
-        const d = formatDateIso(addDays(currentMonday, w * 7 + i));
-        if (d >= todayStr) {
-          dateSet.add(d);
-        }
+  // 2. Currently active week (if in future) or explicit active weeks
+  const weeksToInclude: Date[] = [];
+  if (activeWeekStartOrExpanded instanceof Date) {
+    weeksToInclude.push(activeWeekStartOrExpanded);
+  } else if (typeof activeWeekStartOrExpanded === 'string') {
+    if (activeWeekStartOrExpanded) {
+      weeksToInclude.push(new Date(activeWeekStartOrExpanded + 'T00:00:00'));
+    }
+  } else if (typeof activeWeekStartOrExpanded === 'number') {
+    for (let w = 1; w <= activeWeekStartOrExpanded; w++) {
+      weeksToInclude.push(addDays(currentMonday, w * 7));
+    }
+  } else if (Array.isArray(activeWeekStartOrExpanded) || activeWeekStartOrExpanded instanceof Set) {
+    for (const item of activeWeekStartOrExpanded) {
+      if (item) {
+        weeksToInclude.push(new Date(item + 'T00:00:00'));
       }
     }
-  } else {
-    const weekKeysSet = Array.isArray(expandedWeekKeysOrCount)
-      ? new Set(expandedWeekKeysOrCount)
-      : expandedWeekKeysOrCount;
+  }
 
-    for (const weekKey of weekKeysSet) {
-      if (weekKey >= currentMondayStr) {
-        const monday = new Date(weekKey + 'T00:00:00');
-        for (let i = 0; i < 7; i++) {
-          const d = formatDateIso(addDays(monday, i));
-          if (d >= todayStr) {
-            dateSet.add(d);
-          }
+  for (const weekDate of weeksToInclude) {
+    const monday = getMonday(weekDate);
+    const mondayStr = formatDateIso(monday);
+    if (mondayStr > currentMondayStr) {
+      for (let i = 0; i < 7; i++) {
+        const d = formatDateIso(addDays(monday, i));
+        if (d >= todayStr) {
+          dateSet.add(d);
         }
       }
     }
   }
 
   // 3. Planned recipes:
-  // - Future planned recipes: include their days
+  // - Future planned recipes: include their dates
   // - Past planned recipes (< todayStr): include ONLY the specific dates that have recipes
   for (const plan of mealPlans) {
     if (plan.planDate) {
