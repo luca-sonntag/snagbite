@@ -19,7 +19,7 @@ export function useMealPlanner() {
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => getMonday(new Date()));
   const [selectedDate, setSelectedDate] = useState<string | null>(() => formatDateIso(new Date()));
   const [mealPlans, setMealPlans] = useState<MealPlanEntry[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [pickerDate, setPickerDate] = useState<string | null>(null);
 
   const pickerSlot = useMemo(() => {
@@ -46,7 +46,10 @@ export function useMealPlanner() {
 
   // Fetch meal plans starting from 4 weeks in the past into the future
   const fetchPlans = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
     try {
       setIsLoading(true);
       const token = await getAccessToken();

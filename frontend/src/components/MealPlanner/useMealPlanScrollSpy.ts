@@ -35,9 +35,9 @@ export function useMealPlanScrollSpy({
       const performScroll = (retryCount = 0) => {
         const element = document.getElementById(`day-section-${targetDateStr}`);
         if (!element) {
-          if (retryCount < 3) {
+          if (retryCount < 8) {
             requestAnimationFrame(() => {
-              setTimeout(() => performScroll(retryCount + 1), 50);
+              setTimeout(() => performScroll(retryCount + 1), 40);
             });
           }
           return;
