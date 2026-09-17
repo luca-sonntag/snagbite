@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChefHat } from 'lucide-react';
 import { useCachedImage } from '../hooks/useCachedImage';
 
@@ -6,29 +6,34 @@ interface CachedImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement
   src: string | null | undefined;
   fallbackComponent?: React.ReactNode;
   emoji?: string | null;
+  skeletonClassName?: string;
 }
 
 /**
  * Drop-in replacement for <img> that automatically compresses and caches
- * images in IndexedDB on the client side.
+ * images in IndexedDB on the client side with a smooth skeleton shimmer.
  */
-export default function CachedImage({ src: originalUrl, fallbackComponent, emoji, className, alt, ...props }: CachedImageProps) {
+export default function CachedImage({
+  src: originalUrl,
+  fallbackComponent,
+  emoji,
+  className = '',
+  skeletonClassName = '',
+  alt,
+  onLoad,
+  onError,
+  ...props
+}: CachedImageProps) {
   const { src, isLoading } = useCachedImage(originalUrl);
-  const [hasError, setHasError] = React.useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setHasError(false);
-  }, [src]);
+    setIsLoaded(false);
+  }, [originalUrl, src]);
 
-  if (isLoading && !src) {
-    return (
-      <div className={`flex items-center justify-center bg-black/5 dark:bg-white/5 animate-pulse ${className}`}>
-        <div className="w-5 h-5 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
-      </div>
-    );
-  }
-
-  if (!src || hasError) {
+  if ((!isLoading && !src) || hasError) {
     return fallbackComponent ? (
       <>{fallbackComponent}</>
     ) : (
@@ -45,12 +50,32 @@ export default function CachedImage({ src: originalUrl, fallbackComponent, emoji
   }
 
   return (
-    <img
-      src={src}
-      alt={alt || ''}
-      className={className}
-      onError={() => setHasError(true)}
-      {...props}
-    />
+    <div className={`relative overflow-hidden ${className}`}>
+      {/* Clean skeleton shimmer while fetching from cache/network or decoding */}
+      {(!isLoaded || isLoading) && (
+        <div className={`absolute inset-0 bg-gray-200/90 dark:bg-gray-800/90 animate-pulse flex items-center justify-center pointer-events-none ${skeletonClassName}`}>
+          <div className="w-full h-full bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer-sweep pointer-events-none" />
+        </div>
+      )}
+
+      {src && (
+        <img
+          src={src}
+          alt={alt || ''}
+          className={`w-full h-full object-cover transition-opacity duration-300 ${
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          onLoad={(e) => {
+            setIsLoaded(true);
+            onLoad?.(e);
+          }}
+          onError={(e) => {
+            setHasError(true);
+            onError?.(e);
+          }}
+          {...props}
+        />
+      )}
+    </div>
   );
 }
