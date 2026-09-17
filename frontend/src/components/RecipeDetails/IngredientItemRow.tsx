@@ -66,7 +66,7 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
           handleNutritionClick();
         }
       }}
-      className={`group flex items-center justify-between gap-3 py-1.5 px-3 rounded-2xl bg-white/60 dark:bg-gray-900/60 hover:bg-white/80 dark:hover:bg-gray-900/80 shadow-[0_1px_2px_rgba(0,0,0,0.03)] dark:shadow-none backdrop-blur-xs active:scale-[0.99] transition-all border-none select-none ${
+      className={`group flex items-center justify-between gap-3 px-4.5 py-3 sm:px-6 transition-colors hover:bg-black/[0.015] dark:hover:bg-white/[0.02] active:bg-black/[0.03] dark:active:bg-white/[0.04] select-none ${
         canOpenNutrition ? 'cursor-pointer' : ''
       }`}
     >
@@ -121,7 +121,7 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
       {/* Right side: Amount and/or Kcal chevron chip for premium users */}
       <div className="flex items-center gap-2 shrink-0 self-center">
         {displayAmount && (
-          <span className="font-semibold text-xs tabular-nums text-gray-500 dark:text-gray-400 text-right">
+          <span className="font-bold text-sm tabular-nums text-gray-800 dark:text-gray-200 text-right">
             {displayAmount}
           </span>
         )}

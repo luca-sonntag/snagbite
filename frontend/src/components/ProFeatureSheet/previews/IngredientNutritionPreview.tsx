@@ -54,7 +54,7 @@ export default function IngredientNutritionPreview() {
   return (
     <div className="w-full flex flex-col gap-3 select-none">
       {/* 1. Interactive Recipe Ingredients List */}
-      <div className="w-full bg-white dark:bg-gray-900 rounded-3xl p-1.5 sm:p-2 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
+      <div className="w-full bg-white dark:bg-gray-900 rounded-3xl overflow-hidden border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
         <ul className="divide-y divide-gray-100/70 dark:divide-gray-800/60 list-none p-0 m-0">
           {sampleItems.map((item, idx) => (
             <IngredientItemRow
