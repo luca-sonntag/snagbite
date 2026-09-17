@@ -104,7 +104,7 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
             )}
             {ingredient.modifier && (
               <span className="text-xs text-gray-400 dark:text-gray-500 font-normal">
-                ({ingredient.modifier})
+                {ingredient.modifier.replace(/^\((.+)\)$/, '$1').trim()}
               </span>
             )}
           </div>
