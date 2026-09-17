@@ -75,12 +75,20 @@ export const AddToMealPlanSheet: React.FC<AddToMealPlanSheetProps> = ({
 
   const handlePrevWeek = () => {
     hapticLight();
-    setWeekStart((prev) => addDays(prev, -7));
+    setWeekStart((prev) => {
+      const next = addDays(prev, -7);
+      setSelectedDate(formatDateIso(next));
+      return next;
+    });
   };
 
   const handleNextWeek = () => {
     hapticLight();
-    setWeekStart((prev) => addDays(prev, 7));
+    setWeekStart((prev) => {
+      const next = addDays(prev, 7);
+      setSelectedDate(formatDateIso(next));
+      return next;
+    });
   };
 
   const handleToday = () => {
