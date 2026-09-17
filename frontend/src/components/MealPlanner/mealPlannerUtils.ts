@@ -174,18 +174,26 @@ export function buildAgendaDates(
   expandedWeekKeysOrCount: string[] | Set<string> | number = [],
 ): string[] {
   const dateSet = new Set<string>();
-
-  // 1. Current real week: all 7 days
+  const todayStr = formatDateIso(todayDate);
   const currentMonday = getMonday(todayDate);
+  const currentMondayStr = formatDateIso(currentMonday);
+
+  // 1. Current real week: only today and future days (>= todayStr)
   for (let i = 0; i < 7; i++) {
-    dateSet.add(formatDateIso(addDays(currentMonday, i)));
+    const d = formatDateIso(addDays(currentMonday, i));
+    if (d >= todayStr) {
+      dateSet.add(d);
+    }
   }
 
-  // 2. Extended/expanded weeks
+  // 2. Extended/expanded future weeks
   if (typeof expandedWeekKeysOrCount === 'number') {
     for (let w = 1; w <= expandedWeekKeysOrCount; w++) {
       for (let i = 0; i < 7; i++) {
-        dateSet.add(formatDateIso(addDays(currentMonday, w * 7 + i)));
+        const d = formatDateIso(addDays(currentMonday, w * 7 + i));
+        if (d >= todayStr) {
+          dateSet.add(d);
+        }
       }
     }
   } else {
@@ -194,27 +202,24 @@ export function buildAgendaDates(
       : expandedWeekKeysOrCount;
 
     for (const weekKey of weekKeysSet) {
-      const monday = new Date(weekKey + 'T00:00:00');
-      for (let i = 0; i < 7; i++) {
-        dateSet.add(formatDateIso(addDays(monday, i)));
+      if (weekKey >= currentMondayStr) {
+        const monday = new Date(weekKey + 'T00:00:00');
+        for (let i = 0; i < 7; i++) {
+          const d = formatDateIso(addDays(monday, i));
+          if (d >= todayStr) {
+            dateSet.add(d);
+          }
+        }
       }
     }
   }
 
   // 3. Planned recipes:
-  // - Current and future weeks: always include all 7 days of that entire week
-  // - Past weeks: include only the specific planned date
-  const currentMondayStr = formatDateIso(currentMonday);
+  // - Future planned recipes: include their days
+  // - Past planned recipes (< todayStr): include ONLY the specific dates that have recipes
   for (const plan of mealPlans) {
     if (plan.planDate) {
-      if (plan.planDate >= currentMondayStr) {
-        const planMonday = getMonday(new Date(plan.planDate + 'T00:00:00'));
-        for (let i = 0; i < 7; i++) {
-          dateSet.add(formatDateIso(addDays(planMonday, i)));
-        }
-      } else {
-        dateSet.add(plan.planDate);
-      }
+      dateSet.add(plan.planDate);
     }
   }
 
