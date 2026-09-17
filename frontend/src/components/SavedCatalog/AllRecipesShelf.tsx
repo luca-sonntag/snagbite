@@ -1,5 +1,5 @@
 import { useState, useMemo, type MouseEvent } from 'react';
-import { BookOpen, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import RecipePosterCard from './RecipePosterCard';
 import { useI18n } from '../../context/I18nContext';
@@ -146,14 +146,9 @@ export default function AllRecipesShelf({
         }}
         className="group w-full py-3.5 px-4 rounded-2xl bg-white dark:bg-gray-900 shadow-[0_4px_16px_rgba(0,0,0,0.05),0_1px_3px_rgba(0,0,0,0.03)] ring-1 ring-black/5 dark:ring-white/10 hover:ring-emerald-500/30 dark:hover:ring-emerald-500/30 hover:shadow-md text-gray-900 dark:text-white font-bold text-sm flex items-center justify-between gap-3 transition-all duration-150 active:scale-[0.98] border-none cursor-pointer select-none"
       >
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <BookOpen className="w-4.5 h-4.5" />
-          </div>
-          <span className="truncate text-left font-bold text-sm tracking-tight text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-            {t('catalog.magazine.allShelfButton', { count: totalCount })}
-          </span>
-        </div>
+        <span className="truncate text-left font-bold text-sm tracking-tight text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+          {t('catalog.magazine.allShelfButton', { count: totalCount })}
+        </span>
         <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800/80 flex items-center justify-center shrink-0 text-gray-400 dark:text-gray-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-950/40 group-hover:translate-x-0.5 transition-all">
           <ArrowRight className="w-4 h-4" />
         </div>
