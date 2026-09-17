@@ -220,11 +220,24 @@ export function buildAgendaDates(
   }
 
   // 3. Planned recipes:
-  // - Future planned recipes: include their dates
-  // - Past planned recipes (< todayStr): include ONLY the specific dates that have recipes
+  // - Future or current weeks: if a week has at least one planned recipe, generate all 7 days (>= todayStr)
+  // - Past weeks (< currentMonday): include only the specific dates that have recipes
   for (const plan of mealPlans) {
     if (plan.planDate) {
-      dateSet.add(plan.planDate);
+      const planDate = new Date(plan.planDate + 'T00:00:00');
+      const planMonday = getMonday(planDate);
+      const planMondayStr = formatDateIso(planMonday);
+
+      if (planMondayStr >= currentMondayStr) {
+        for (let i = 0; i < 7; i++) {
+          const d = formatDateIso(addDays(planMonday, i));
+          if (d >= todayStr) {
+            dateSet.add(d);
+          }
+        }
+      } else {
+        dateSet.add(plan.planDate);
+      }
     }
   }
 
