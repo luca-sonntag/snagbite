@@ -62,7 +62,8 @@ export function useMealPlanScrollSpy({
         }, 1400);
 
         const targetMonday = getMonday(new Date(targetDateStr + 'T00:00:00'));
-        if (formatDateIso(targetMonday) !== formatDateIso(currentWeekStartRef.current)) {
+        const targetMondayIso = formatDateIso(targetMonday);
+        if (targetMondayIso !== formatDateIso(currentWeekStartRef.current)) {
           onWeekChangeRef.current(targetMonday);
         }
 
@@ -72,7 +73,17 @@ export function useMealPlanScrollSpy({
         const bottomNavOffset = 64;
         const availableHeight = Math.max(200, window.innerHeight - headerHeight - bottomNavOffset);
 
-        const elementRect = element.getBoundingClientRect();
+        // Keep KW week header visible when scrolling to the beginning of a week
+        const weekHeader = document.getElementById(`week-header-${targetMondayIso}`);
+        let scrollTargetElement: HTMLElement = element;
+        if (weekHeader) {
+          const isFirstInWeek = element.parentElement?.querySelector('[data-date]') === element;
+          if (isFirstInWeek || targetDateStr === targetMondayIso) {
+            scrollTargetElement = weekHeader;
+          }
+        }
+
+        const elementRect = scrollTargetElement.getBoundingClientRect();
         const currentScrollY = window.scrollY || document.documentElement.scrollTop;
 
         let targetY: number;
@@ -82,7 +93,7 @@ export function useMealPlanScrollSpy({
           targetY = elementCenterInDoc - targetCenterInViewport;
         } else {
           // Align directly below the sticky calendar header
-          targetY = currentScrollY + elementRect.top - (headerHeight + 8);
+          targetY = currentScrollY + elementRect.top - (headerHeight + 6);
         }
 
         window.scrollTo({
