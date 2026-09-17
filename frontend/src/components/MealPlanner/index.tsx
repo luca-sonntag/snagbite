@@ -134,7 +134,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     if (!hasInitialScrolledRef.current && !isLoading && agendaDates.includes(todayStr)) {
       hasInitialScrolledRef.current = true;
       const timer = setTimeout(() => {
-        scrollToDate(todayStr, 'auto', 'center');
+        scrollToDate(todayStr, 'auto', 'start');
       }, 60);
       return () => clearTimeout(timer);
     }
@@ -164,17 +164,17 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
             const prevMonday = addDays(currentWeekStart, -7);
             const mondayStr = formatDateIso(prevMonday);
             goToPrevWeek();
-            scrollToDate(mondayStr, 'smooth', 'center');
+            scrollToDate(mondayStr, 'smooth', 'start');
           }}
           onNextWeek={() => {
             const nextMonday = addDays(currentWeekStart, 7);
             const mondayStr = formatDateIso(nextMonday);
             goToNextWeek();
-            scrollToDate(mondayStr, 'smooth', 'center');
+            scrollToDate(mondayStr, 'smooth', 'start');
           }}
           onToday={() => {
             goToToday();
-            scrollToDate(todayStr, 'smooth', 'center');
+            scrollToDate(todayStr, 'smooth', 'start');
           }}
         />
 
@@ -184,7 +184,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
           selectedDate={selectedDate}
           onSelectDate={(d) => {
             setSelectedDate(d);
-            scrollToDate(d, 'smooth', 'center');
+            scrollToDate(d, 'smooth', 'start');
           }}
         />
 

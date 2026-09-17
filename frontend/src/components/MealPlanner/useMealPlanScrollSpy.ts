@@ -30,7 +30,7 @@ export function useMealPlanScrollSpy({
     (
       targetDateStr: string,
       behavior: ScrollBehavior = 'smooth',
-      align: 'start' | 'center' = 'center',
+      align: 'start' | 'center' = 'start',
     ) => {
       const performScroll = (retryCount = 0) => {
         const element = document.getElementById(`day-section-${targetDateStr}`);
@@ -81,6 +81,7 @@ export function useMealPlanScrollSpy({
           const elementCenterInDoc = currentScrollY + elementRect.top + elementRect.height / 2;
           targetY = elementCenterInDoc - targetCenterInViewport;
         } else {
+          // Align directly below the sticky calendar header
           targetY = currentScrollY + elementRect.top - (headerHeight + 8);
         }
 
@@ -95,7 +96,7 @@ export function useMealPlanScrollSpy({
     [],
   );
 
-  // Center-weighted IntersectionObserver with rest-debounce to keep calendar header calm
+  // IntersectionObserver with rest-debounce to keep calendar header calm
   useEffect(() => {
     if (agendaDates.length === 0) return;
 
@@ -103,16 +104,18 @@ export function useMealPlanScrollSpy({
       (entries) => {
         if (isProgrammaticScrollRef.current) return;
 
-        // Find entries intersecting the central screen zone
+        // Find entries intersecting below the sticky calendar header
         const visibleEntries = entries.filter((e) => e.isIntersecting);
         if (visibleEntries.length === 0) return;
 
-        // Find the day section closest to the vertical center of the viewport
-        const viewportCenter = window.innerHeight / 2;
+        const stickyHeader = document.getElementById('meal-planner-sticky-header');
+        const headerHeight = stickyHeader ? stickyHeader.getBoundingClientRect().height : 180;
+        const targetActiveZone = headerHeight + 60;
+
         visibleEntries.sort((a, b) => {
-          const aCenter = a.boundingClientRect.top + a.boundingClientRect.height / 2;
-          const bCenter = b.boundingClientRect.top + b.boundingClientRect.height / 2;
-          return Math.abs(aCenter - viewportCenter) - Math.abs(bCenter - viewportCenter);
+          const aTop = a.boundingClientRect.top;
+          const bTop = b.boundingClientRect.top;
+          return Math.abs(aTop - targetActiveZone) - Math.abs(bTop - targetActiveZone);
         });
 
         const centerEntry = visibleEntries[0];
@@ -136,7 +139,7 @@ export function useMealPlanScrollSpy({
         }
       },
       {
-        rootMargin: '-35% 0px -35% 0px',
+        rootMargin: '-20% 0px -40% 0px',
         threshold: [0, 0.1, 0.5],
       },
     );
