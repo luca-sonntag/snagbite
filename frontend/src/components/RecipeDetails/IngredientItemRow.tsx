@@ -75,7 +75,7 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
       <div className="flex items-center gap-3 flex-1 min-w-0">
         {/* Category color bar */}
         <span
-          className={`w-1 h-4 rounded-full ${theme.barClass} shrink-0 opacity-80`}
+          className={`w-1.5 h-4.5 rounded-full ${theme.barClass} shrink-0 opacity-85`}
           title={categoryName || ingredient.category || undefined}
         />
 
