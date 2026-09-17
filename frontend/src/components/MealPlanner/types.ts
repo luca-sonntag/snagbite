@@ -76,10 +76,6 @@ export interface WeekDayPickerProps {
   onSelectDate: (dateStr: string) => void;
 }
 
-export interface DailyInsightPillProps {
-  entries: MealPlanEntry[];
-}
-
 export interface MealPlanCardProps {
   entry: MealPlanEntry;
   onUpdateServings: (id: string, servings: number) => void;

@@ -8,7 +8,6 @@ import { useMealPlanScrollSpy } from './useMealPlanScrollSpy';
 import { MealPlannerHeader } from './MealPlannerHeader';
 import { WeekNavigator } from './WeekNavigator';
 import { WeekDayPicker } from './WeekDayPicker';
-import { DailyInsightPill } from './DailyInsightPill';
 import { MealPlanWeekGroup } from './MealPlanWeekGroup';
 import { MealPlanShoppingSheets } from './MealPlanShoppingSheets';
 import { RecipePickerModal } from './RecipePickerModal';
@@ -40,7 +39,6 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     extendNextWeek,
     nextExtendWeekStart,
     nextExtendWeekEnd,
-    activeDayEntries,
     futurePlannedCount,
     weekDays,
     isLoading,
@@ -187,9 +185,6 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
             scrollToDate(d, 'smooth', 'start');
           }}
         />
-
-        {/* Daily Insight Pill (Nutrition & Cooking Time for active day) */}
-        <DailyInsightPill entries={activeDayEntries} />
       </div>
 
       {/* Unified Agenda Stream */}

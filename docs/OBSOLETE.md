@@ -6,6 +6,16 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-17: Entfernung der redundanten Mahlzeitenanzahl- & Dauer-Chips (`DailyInsightPill.tsx`) im Wochenplaner
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `DailyInsightPill.tsx`: Rendern zusätzlicher Pill-Chips ("1 Mahlzeit", "45 min") im Sticky-Header unter der 7-Tage-Leiste, die vertikalen Raum im fixierten Header beanspruchten und redundante Information duplizierten, die bereits auf den Rezeptkarten bzw. im Wochentags-Badge sichtbar ist.
+* **Ersetzt durch:**
+  - **Schlanker, kompakter Sticky-Kalender-Header:** Vollständige Entfernung der Pill-Chips. Die Tages-Badges (`WeekDayPicker`) und Rezeptkarten im Agenda-Stream zeigen Dauer und Einträge direkt und aufgeräumt an.
+* **Betroffene Dateien:** `frontend/src/components/MealPlanner/DailyInsightPill.tsx` (gelöscht), `frontend/src/components/MealPlanner/index.tsx`, `frontend/src/components/MealPlanner/types.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-16: Getrennte Tages- und Zukunftsansicht im Wochenplaner durch Unified Agenda Stream mit bidirektionalem ScrollSpy abgelöst
 
 * **Ersetzter Code / Anti-Pattern:**

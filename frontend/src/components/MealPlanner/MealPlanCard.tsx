@@ -22,7 +22,6 @@ export const MealPlanCard = React.memo<MealPlanCardProps>(({
       onClick={() => onSelectRecipe(entry.recipeId)}
       isCooked={entry.isCooked}
       flushImage={true}
-      className="rounded-none shadow-none"
       extraMeta={
         entry.servings > 0 ? (
           <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 shrink-0">
