@@ -49,14 +49,12 @@ export const MealPlanDaySection = React.memo<MealPlanDaySectionProps>(({
       data-date={dateStr}
       className={`w-full transition-all duration-200 ${
         hasEntries
-          ? `flex flex-col rounded-2xl overflow-hidden mb-2 sm:mb-3 ${
-              isHighlighted
-                ? 'bg-emerald-600 dark:bg-emerald-600 shadow-md shadow-emerald-600/25'
-                : isToday
-                ? 'bg-emerald-500/10 dark:bg-emerald-950/30 shadow-2xs'
+          ? `flex flex-col p-1.5 sm:p-2 rounded-2xl gap-1.5 sm:gap-2 mb-2 sm:mb-3 shadow-2xs ${
+              isToday
+                ? 'bg-emerald-500/10 dark:bg-emerald-950/30'
                 : isPast
-                ? 'bg-gray-100/70 dark:bg-gray-800/60 shadow-2xs'
-                : 'bg-gray-100/90 dark:bg-gray-800/80 shadow-2xs'
+                ? 'bg-gray-100/70 dark:bg-gray-800/60'
+                : 'bg-gray-100/90 dark:bg-gray-800/80'
             }`
           : 'flex flex-col gap-2'
       }`}
@@ -66,16 +64,12 @@ export const MealPlanDaySection = React.memo<MealPlanDaySectionProps>(({
         onClick={handleDayCardClick}
         aria-label={isPast ? formattedDate : (t('mealPlanner.addRecipe') || 'Rezept hinzufügen')}
         className={`group w-full flex items-center justify-between select-none border-none touch-manipulation transition-all duration-200 cursor-pointer ${
-          hasEntries
-            ? `min-h-[44px] px-3.5 py-2.5 rounded-none ${
-                isHighlighted
-                  ? 'bg-transparent hover:bg-white/10 dark:hover:bg-white/10'
-                  : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/5'
-              } active:scale-[0.99]`
+          isHighlighted
+            ? 'min-h-[44px] px-3.5 py-2.5 rounded-2xl bg-emerald-600 text-white shadow-md shadow-emerald-600/25 scale-[1.01]'
+            : hasEntries
+            ? 'min-h-[38px] px-2.5 py-1.5 rounded-xl bg-transparent hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.99]'
             : `min-h-[44px] px-3.5 py-2.5 rounded-2xl ${
-                isHighlighted
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/25 scale-[1.01]'
-                  : isToday
+                isToday
                   ? 'bg-emerald-500/10 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-500/15'
                   : isPast
                   ? 'bg-gray-100/70 dark:bg-gray-800/60 hover:bg-gray-200/70 dark:hover:bg-gray-750 text-gray-500 dark:text-gray-400 shadow-2xs'
@@ -114,7 +108,7 @@ export const MealPlanDaySection = React.memo<MealPlanDaySectionProps>(({
 
       {/* Recipe Cards List */}
       {hasEntries && (
-        <div className="flex flex-col divide-y divide-gray-100 dark:divide-gray-800/60">
+        <div className="flex flex-col gap-1.5 sm:gap-2">
           {entries.map((entry) =>
             isPast ? (
               <PastMealPlanCard
