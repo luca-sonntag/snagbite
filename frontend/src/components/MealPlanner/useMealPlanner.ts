@@ -105,12 +105,17 @@ export function useMealPlanner() {
     };
   }, [fetchPlans]);
 
+  const [activeNavigatedFutureWeek, setActiveNavigatedFutureWeek] = useState<string | null>(null);
+
   // Navigation handlers
   const goToPrevWeek = useCallback(() => {
     hapticLight();
     setCurrentWeekStart((prev) => {
       const next = addDays(prev, -7);
-      setSelectedDate(formatDateIso(next));
+      const nextIso = formatDateIso(next);
+      const currentRealMondayIso = formatDateIso(getMonday(new Date()));
+      setActiveNavigatedFutureWeek(nextIso > currentRealMondayIso ? nextIso : null);
+      setSelectedDate(nextIso);
       return next;
     });
   }, []);
@@ -119,7 +124,10 @@ export function useMealPlanner() {
     hapticLight();
     setCurrentWeekStart((prev) => {
       const next = addDays(prev, 7);
-      setSelectedDate(formatDateIso(next));
+      const nextIso = formatDateIso(next);
+      const currentRealMondayIso = formatDateIso(getMonday(new Date()));
+      setActiveNavigatedFutureWeek(nextIso > currentRealMondayIso ? nextIso : null);
+      setSelectedDate(nextIso);
       return next;
     });
   }, []);
@@ -127,6 +135,7 @@ export function useMealPlanner() {
   const goToToday = useCallback(() => {
     hapticLight();
     const today = new Date();
+    setActiveNavigatedFutureWeek(null);
     setCurrentWeekStart(getMonday(today));
     setSelectedDate(formatDateIso(today));
   }, []);
@@ -244,13 +253,16 @@ export function useMealPlanner() {
   const expandWeek = useCallback((weekKey: string) => {
     hapticLight();
     const monday = new Date(weekKey + 'T00:00:00');
+    const mondayIso = formatDateIso(monday);
+    const currentRealMondayIso = formatDateIso(getMonday(new Date()));
+    setActiveNavigatedFutureWeek(mondayIso > currentRealMondayIso ? mondayIso : null);
     setCurrentWeekStart(monday);
     setSelectedDate(weekKey);
   }, []);
 
   const agendaDates = useMemo(() => {
-    return buildAgendaDates(new Date(), mealPlans, currentWeekStart);
-  }, [mealPlans, currentWeekStart]);
+    return buildAgendaDates(new Date(), mealPlans, activeNavigatedFutureWeek ?? []);
+  }, [mealPlans, activeNavigatedFutureWeek]);
 
   const agendaWeekGroups = useMemo(() => groupDatesByWeek(agendaDates), [agendaDates]);
 
