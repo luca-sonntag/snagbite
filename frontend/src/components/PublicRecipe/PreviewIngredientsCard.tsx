@@ -3,7 +3,7 @@ import { Users } from 'lucide-react';
 import type { Recipe } from '../../types';
 import type { SortedIngredientGroup } from '../RecipeDetails/types';
 import { useI18n } from '../../context/I18nContext';
-import { getCategoryTheme, categoryOrder, legacyCategoryMap } from '../../i18n';
+import { categoryOrder, legacyCategoryMap } from '../../i18n';
 import IngredientItemRow from '../RecipeDetails/IngredientItemRow';
 
 export interface PreviewIngredientsCardProps {
@@ -19,7 +19,7 @@ export const PreviewIngredientsCard: React.FC<PreviewIngredientsCardProps> = ({
   scaleFactor,
   formatAmount,
 }) => {
-  const { t, translateCategory } = useI18n();
+  const { t } = useI18n();
 
   const sortedIngredients: SortedIngredientGroup[] = useMemo(() => {
     if (!recipe.ingredients) return [];
@@ -61,43 +61,23 @@ export const PreviewIngredientsCard: React.FC<PreviewIngredientsCardProps> = ({
         </div>
       </div>
 
-      {/* 2. Grouped Ingredients */}
-      <div className="flex flex-col divide-y divide-gray-100/70 dark:divide-gray-800/60">
-        {sortedIngredients.map(({ group, originalIdx }) => {
-          const theme = getCategoryTheme(group.name);
-          return (
-            <div key={group.name} className="flex flex-col">
-              {group.name && (
-                <div className="px-4.5 py-2 sm:px-6 bg-black/[0.02] dark:bg-white/[0.02] flex items-center justify-between gap-2 select-none border-b border-gray-100/60 dark:border-gray-800/50">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${theme.barClass} shrink-0`} />
-                    <span className="text-xs font-bold text-gray-600 dark:text-gray-300">
-                      {translateCategory(group.name)}
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 tabular-nums">
-                    {group.items.length}
-                  </span>
-                </div>
-              )}
-              <ul className="flex flex-col divide-y divide-gray-100/60 dark:divide-gray-800/50 list-none p-0 m-0">
-                {group.items.map((ing, idx) => (
-                  <IngredientItemRow
-                    key={`${ing.name}-${originalIdx}-${idx}`}
-                    ingredient={ing}
-                    categoryName={group.name}
-                    originalIdx={originalIdx}
-                    itemIdx={idx}
-                    scaleFactor={scaleFactor}
-                    formatAmount={formatAmount}
-                    hideNutrition={true}
-                  />
-                ))}
-              </ul>
-            </div>
-          );
-        })}
-      </div>
+      {/* 2. Ingredients List */}
+      <ul className="flex flex-col divide-y divide-gray-100/60 dark:divide-gray-800/50 list-none p-0 m-0">
+        {sortedIngredients.flatMap(({ group, originalIdx }) =>
+          group.items.map((ing, idx) => (
+            <IngredientItemRow
+              key={`${ing.name}-${originalIdx}-${idx}`}
+              ingredient={ing}
+              categoryName={group.name}
+              originalIdx={originalIdx}
+              itemIdx={idx}
+              scaleFactor={scaleFactor}
+              formatAmount={formatAmount}
+              hideNutrition={true}
+            />
+          ))
+        )}
+      </ul>
     </div>
   );
 };

@@ -5,7 +5,6 @@ import ProBadge from '../ProBadge';
 import type { Ingredient, Recipe } from '../../types';
 import type { SortedIngredientGroup } from './types';
 import { useI18n } from '../../context/I18nContext';
-import { getCategoryTheme } from '../../i18n';
 import { hapticLight } from '../../utils/haptics';
 import IngredientNutritionSheet from './IngredientNutritionSheet';
 import RecipeServingsStepper from './RecipeServingsStepper';
@@ -39,7 +38,7 @@ export default function RecipeIngredients({
   onDecreaseServings,
   onIncreaseServings,
 }: RecipeIngredientsProps) {
-  const { t, translateCategory } = useI18n();
+  const { t } = useI18n();
   const [selectedNutrition, setSelectedNutrition] = useState<{ ingredient: Ingredient; category: string } | null>(null);
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isProFeatureSheetOpen, setIsProFeatureSheetOpen] = useState(false);
@@ -56,7 +55,7 @@ export default function RecipeIngredients({
 
   return (
     <div className="flex flex-col gap-4 pb-4">
-      {/* 1. Unified Cohesive Recipe Card (Servings + Categories + Ingredients + Pro Hint + Shopping CTA) */}
+      {/* 1. Unified Cohesive Recipe Card (Servings + Ingredients + Pro Hint + Shopping CTA) */}
       <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
         {/* 1.1 Servings Header */}
         <div className="px-4.5 py-4 sm:px-6 flex items-center justify-between gap-4">
@@ -78,47 +77,24 @@ export default function RecipeIngredients({
           />
         </div>
 
-        {/* 1.2 Grouped Category Sections */}
-        <div className="flex flex-col divide-y divide-gray-100/70 dark:divide-gray-800/60">
-          {sortedIngredients.map(({ group, originalIdx }) => {
-            const theme = getCategoryTheme(group.name);
-            return (
-              <div key={group.name || originalIdx} className="flex flex-col">
-                {/* Category Header */}
-                {group.name && (
-                  <div className="px-4.5 py-2 sm:px-6 bg-black/[0.02] dark:bg-white/[0.02] flex items-center justify-between gap-2 select-none border-b border-gray-100/60 dark:border-gray-800/50">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${theme.barClass} shrink-0`} />
-                      <span className="text-xs font-bold text-gray-600 dark:text-gray-300">
-                        {translateCategory(group.name)}
-                      </span>
-                    </div>
-                    <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 tabular-nums">
-                      {group.items.length}
-                    </span>
-                  </div>
-                )}
-
-                {/* Ingredients List with hairlines */}
-                <ul className="flex flex-col divide-y divide-gray-100/60 dark:divide-gray-800/50 list-none p-0 m-0">
-                  {group.items.map((ing, idx) => (
-                    <IngredientItemRow
-                      key={`${ing.name}-${originalIdx}-${idx}`}
-                      ingredient={ing}
-                      categoryName={group.name}
-                      originalIdx={originalIdx}
-                      itemIdx={idx}
-                      isPremium={isPremium}
-                      scaleFactor={scaleFactor}
-                      formatAmount={formatAmount}
-                      onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
-                    />
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
-        </div>
+        {/* 1.2 Pure Ingredients List */}
+        <ul className="flex flex-col divide-y divide-gray-100/60 dark:divide-gray-800/50 list-none p-0 m-0">
+          {sortedIngredients.flatMap(({ group, originalIdx }) =>
+            group.items.map((ing, idx) => (
+              <IngredientItemRow
+                key={`${ing.name}-${originalIdx}-${idx}`}
+                ingredient={ing}
+                categoryName={group.name}
+                originalIdx={originalIdx}
+                itemIdx={idx}
+                isPremium={isPremium}
+                scaleFactor={scaleFactor}
+                formatAmount={formatAmount}
+                onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
+              />
+            ))
+          )}
+        </ul>
 
         {/* 1.3 PRO hint for ingredient nutrition */}
         {!isPremium && hasAnyNutrition && (
