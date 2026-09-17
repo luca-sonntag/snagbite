@@ -184,7 +184,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
           selectedDate={selectedDate}
           onSelectDate={(d) => {
             setSelectedDate(d);
-            scrollToDate(d, 'smooth', d === todayStr ? 'center' : 'start');
+            scrollToDate(d, 'smooth', 'center');
           }}
         />
 

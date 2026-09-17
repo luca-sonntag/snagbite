@@ -30,7 +30,7 @@ export function useMealPlanScrollSpy({
     (
       targetDateStr: string,
       behavior: ScrollBehavior = 'smooth',
-      align: 'start' | 'center' = 'start',
+      align: 'start' | 'center' = 'center',
     ) => {
       const performScroll = (retryCount = 0) => {
         const element = document.getElementById(`day-section-${targetDateStr}`);
