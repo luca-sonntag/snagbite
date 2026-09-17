@@ -6,34 +6,36 @@ interface CachedImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement
   src: string | null | undefined;
   fallbackComponent?: React.ReactNode;
   emoji?: string | null;
-  skeletonClassName?: string;
 }
 
 /**
  * Drop-in replacement for <img> that automatically compresses and caches
- * images in IndexedDB on the client side with a smooth skeleton shimmer.
+ * images in IndexedDB on the client side with a visible skeleton shimmer while loading.
  */
 export default function CachedImage({
   src: originalUrl,
   fallbackComponent,
   emoji,
   className = '',
-  skeletonClassName = '',
   alt,
-  onLoad,
-  onError,
   ...props
 }: CachedImageProps) {
   const { src, isLoading } = useCachedImage(originalUrl);
   const [hasError, setHasError] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     setHasError(false);
-    setIsLoaded(false);
-  }, [originalUrl, src]);
+  }, [src]);
 
-  if ((!isLoading && !src) || hasError) {
+  if (isLoading && !src) {
+    return (
+      <div className={`relative overflow-hidden bg-gray-200/90 dark:bg-gray-800/90 animate-pulse flex items-center justify-center ${className}`}>
+        <div className="w-full h-full bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer-sweep pointer-events-none" />
+      </div>
+    );
+  }
+
+  if (!src || hasError) {
     return fallbackComponent ? (
       <>{fallbackComponent}</>
     ) : (
@@ -50,32 +52,12 @@ export default function CachedImage({
   }
 
   return (
-    <div className={`relative overflow-hidden ${className}`}>
-      {/* Clean skeleton shimmer while fetching from cache/network or decoding */}
-      {(!isLoaded || isLoading) && (
-        <div className={`absolute inset-0 bg-gray-200/90 dark:bg-gray-800/90 animate-pulse flex items-center justify-center pointer-events-none ${skeletonClassName}`}>
-          <div className="w-full h-full bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer-sweep pointer-events-none" />
-        </div>
-      )}
-
-      {src && (
-        <img
-          src={src}
-          alt={alt || ''}
-          className={`w-full h-full object-cover transition-opacity duration-300 ${
-            isLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-          onLoad={(e) => {
-            setIsLoaded(true);
-            onLoad?.(e);
-          }}
-          onError={(e) => {
-            setHasError(true);
-            onError?.(e);
-          }}
-          {...props}
-        />
-      )}
-    </div>
+    <img
+      src={src}
+      alt={alt || ''}
+      className={className}
+      onError={() => setHasError(true)}
+      {...props}
+    />
   );
 }
