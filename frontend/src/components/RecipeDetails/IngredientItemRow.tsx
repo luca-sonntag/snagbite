@@ -2,6 +2,7 @@ import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import type { Ingredient } from '../../types';
 import { useI18n } from '../../context/I18nContext';
+import { getCategoryTheme } from '../../i18n';
 import { getParentIngredient } from '../../utils/ingredientTaxonomy';
 import IngredientIcon from '../IngredientIcon';
 import { hapticLight } from '../../utils/haptics';
@@ -30,6 +31,7 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
   hideNutrition = false,
 }) => {
   const { t } = useI18n();
+  const theme = getCategoryTheme(categoryName || ingredient.category || '');
 
   const rawFormatted = formatAmount(ingredient.amount, ingredient.unit)?.trim() ?? '';
   const unit = (ingredient.unit ?? '').trim();
@@ -71,6 +73,12 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
       }`}
     >
       <div className="flex items-center gap-3 flex-1 min-w-0">
+        {/* Category color bar */}
+        <span
+          className={`w-1 h-4 rounded-full ${theme.barClass} shrink-0 opacity-80`}
+          title={categoryName || ingredient.category || undefined}
+        />
+
         {/* Ingredient Icon */}
         <IngredientIcon
           baseName={ingredient.baseName}
