@@ -118,22 +118,22 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
   useEffect(() => {
     if (!isActive) {
       prevIsActiveRef.current = false;
+      hasInitialScrolledRef.current = false;
       return;
     }
 
-    const isFirstActiveTransition = !prevIsActiveRef.current;
-    prevIsActiveRef.current = true;
-
-    if (isFirstActiveTransition || (!hasInitialScrolledRef.current && !isLoading && agendaDates.includes(todayStr))) {
+    if (!prevIsActiveRef.current) {
+      prevIsActiveRef.current = true;
+      hasInitialScrolledRef.current = false;
       setSelectedDate(todayStr);
       goToToday();
+    }
+
+    if (!hasInitialScrolledRef.current && !isLoading && agendaDates.includes(todayStr)) {
+      hasInitialScrolledRef.current = true;
       const timer = setTimeout(() => {
-        const el = document.getElementById(`day-section-${todayStr}`);
-        if (el) {
-          hasInitialScrolledRef.current = true;
-          scrollToDate(todayStr, 'auto', 'center');
-        }
-      }, 50);
+        scrollToDate(todayStr, 'auto', 'center');
+      }, 60);
       return () => clearTimeout(timer);
     }
   }, [isActive, todayStr, scrollToDate, agendaDates, isLoading, setSelectedDate, goToToday]);
@@ -168,6 +168,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
           onNextWeek={() => {
             const nextMonday = addDays(currentWeekStart, 7);
             const mondayStr = formatDateIso(nextMonday);
+            expandWeek(mondayStr);
             setCurrentWeekStart(nextMonday);
             setSelectedDate(mondayStr);
             scrollToDate(mondayStr, 'smooth');
