@@ -121,7 +121,7 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
       {/* Right side: Amount and/or Kcal chevron chip for premium users */}
       <div className="flex items-center gap-2 shrink-0 self-center">
         {displayAmount && (
-          <span className="font-bold text-sm tabular-nums text-gray-800 dark:text-gray-200 text-right">
+          <span className="text-xs font-medium tabular-nums text-gray-500 dark:text-gray-400 text-right">
             {displayAmount}
           </span>
         )}

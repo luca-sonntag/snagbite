@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@heroui/react';
-import { Check, Users, ShoppingCart, ChevronRight } from 'lucide-react';
+import { Check, ShoppingCart, ChevronRight } from 'lucide-react';
 import ProBadge from '../ProBadge';
 import type { Ingredient, Recipe } from '../../types';
 import type { SortedIngredientGroup } from './types';
@@ -46,29 +46,19 @@ export default function RecipeIngredients({
     group.items.some((ing) => ing.calories !== undefined && ing.calories !== null)
   );
 
-
-  const medallion =
-    'w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 flex items-center justify-center flex-shrink-0';
-  const medallionIcon = 'w-4 h-4 text-emerald-600 dark:text-emerald-400';
-  const blockLabel =
-    'text-xs font-medium text-gray-500 dark:text-gray-400';
-
   return (
     <div className="flex flex-col gap-4 pb-4">
       {/* 1. Unified Cohesive Recipe Card (Servings + Ingredients + Pro Hint + Shopping CTA) */}
       <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
         {/* 1.1 Servings Header */}
-        <div className="px-4.5 py-4 sm:px-6 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className={medallion}>
-              <Users className={medallionIcon} />
-            </div>
-            <div className="flex flex-col">
-              <span className={blockLabel}>{t('recipe.serves')}</span>
-              <span className="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
-                {t('recipe.servingsCount', { count: servings })}
-              </span>
-            </div>
+        <div className="px-4.5 py-3.5 sm:px-6 flex items-center justify-between gap-4">
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+              {t('recipe.serves')}
+            </span>
+            <span className="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
+              {t('recipe.servingsCount', { count: servings })}
+            </span>
           </div>
           <RecipeServingsStepper
             servings={servings}
