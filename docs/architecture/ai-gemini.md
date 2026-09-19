@@ -32,32 +32,46 @@ Im gesamten Backend gibt es **8 aktive Gemini-Funktionen** (sowie Offline-/Admin
 ## 3. Die End-to-End Rezept-Pipeline im Detail
 
 ```
-1. EINGABE
-   [Share Target / URL] oder [Foto-Upload (Buchseite/Karte)]
+1. EINGABE & QUOTA-GATING
+   ├── URL-Import: `POST /api/extract-recipe` (Instagram, TikTok, YouTube Shorts, Web)
+   ├── Foto-Upload: `POST /api/extract-recipe/photos` (Buchseite/Rezeptkarte, bis zu 5 Fotos)
+   └── Rezept-Remix: `POST /api/recipes/:id/remix` (Parent-Rezept Modifikation, Pro-Feature)
+   * Cache-Fast-Track: Existiert die URL bereits in der DB (`findExtractedRecipeIdByUrl`),
+     erfolgt ein Sofort-Link ins Kochbuch (`addToLibrary`) ➔ 200 OK (`isCached: true`, 0$ Inferenz).
+   * Gating-Kaskade (`enforceExtractionQuota`): Concurrency Limit ➔ Cookbook Cap (Free) ➔
+     Rolling Window Rate Limit (Verrechnung mit AdMob Rewarded-Ad Bonus-Credits).
                  │
                  ▼
 2. JOB-CREATION & QUEUE
-   `POST /api/jobs` ➔ Supabase `jobs` (Status: pending)
-   Worker claimt Job atomar (`claim_next_job`)
+   Job wird in Supabase `jobs` angelegt (`status: pending`, `kind: 'url' | 'photo' | 'remix'`).
+   `triggerWorkerTick()` weckt den asynchronen Worker sofort ohne Polling-Latenz auf.
+   Worker claimt Job atomar via Postgres RPC `claim_next_job` (Worker-Lease & Heartbeat).
                  │
                  ▼
-3. SCRAPING & MEDIEN-VORBEREITUNG
-   ├── Audio-Stream via Google AI File API hochladen (`files.uploadFile`)
-   ├── Keyframes: 4x4 Grid aus Client-Frames oder Video generieren
-   └── Caption & Metadaten (Dauer, Quelle, Creator) extrahieren
+3. MEDIEN-VORBEREITUNG (ZWEIPHASIG BEI VIDEOS)
+   ├── URL / Video (Client-Media-Streaming Mode):
+   │   1. RapidAPI Scraper holt Metadaten & Video-CDN-URL (Dauer-Check gegen `max_video_duration_seconds`).
+   │   2. Worker parkt Job in `status: 'awaiting_frames'` und speichert `scrape_meta`.
+   │   3. Client lädt Stream in den RAM, decodiert via `WebCodecs` 16 Keyframes auf Canvas zu einem
+   │      einzelnen 4x4-Grid (1024×1024 JPEG, ~200 KB) und sendet es via `POST /api/extract-recipe/frames`.
+   │   4. Worker claimt Job erneut, lädt Audio herunter und lädt es via Google AI File API (`files.uploadFile`) hoch.
+   ├── Foto-Import:
+   │   Download der transienten Seiten aus Supabase Bucket `recipe-photos` in vollen Auflösungen.
+   └── Image-Carousel / Slideshow:
+       Download der Einzel-Slides in voller Auflösung (Fallback-Grid).
                  │
                  ▼
-4. MULTIMODALER GEMINI CALL (`extractRecipe`)
-   Gemini verarbeitet Audio + Grid + Text in EINEM Call.
+4. MULTIMODALER GEMINI CALL (`extractRecipe` / `remixRecipe`)
+   Gemini verarbeitet Audio + Grid (oder Fotos) + Caption in EINEM Call.
    Strikte Schematisierung (`responseSchema: recipeSchema`):
    • 22 Prompt-Constraints (Anti-Halluzination, Mengennormalisierung,
      Makros pro Zutat, Inline-Ingredient- & Timer-Tags `[Tag](ing:...)`)
    • Formgetreue Food Photography Prompts (`foodPhotographyPrompt.ts`):
-     Formfaktor-Taxonomie (Pockets/Sandwiches, Wraps, Casseroles/Backform-Geometrie wie rechteckig vs. rund & Material wie Glas/Keramik, Tellergerichte),
-     Protein-Morphologie (geschabte Streifen vs. Brocken), Kräutersoßen-Integration
-     und Anti-Halluzination gegen unzutreffende Standardgarnituren (Tomaten/Koriander).
+     Formfaktor-Taxonomie (Pockets/Sandwiches, Wraps, Casseroles/Backformen, Tellergerichte),
+     Protein-Morphologie, Kräutersoßen-Integration und Anti-Halluzinations-Filter.
    • Mehrfachrezept-Erkennung (`containsMultipleRecipes` ➔ 422 Abbruch)
-   • Unvollständige Quellen (`hasIncompleteSourceInfo: true` bei visueller Rekonstruktion ohne Textvorgaben)
+   • Unvollständige Quellen (`hasIncompleteSourceInfo: true` bei visueller Rekonstruktion)
+   • Fortschritt-Update mit `RecipePreviewData` (Titel, Servings, Zeit, Zutaten-Vorschau).
                  │
                  ▼
 5. 2ND-STAGE AI RECIPE AUDIT & PATCH (`recipeAuditor.ts`)
@@ -65,9 +79,8 @@ Im gesamten Backend gibt es **8 aktive Gemini-Funktionen** (sowie Offline-/Admin
    • Verhindert Kollaps auf Umbrella-Begriffe (Mozzarella -> mozzarella, nicht cheese)
    • Strikte Gewürz-Disambiguierung (Pfeffer -> black pepper / SPICES_SEASONINGS)
    • Formfaktor- & Bildprompt-Audit (`correctedImagePrompt`): Gleicht Zubereitungsschritte
-     (z. B. Fladenbrot aufschneiden und befüllen) mit dem `imagePrompt` ab und korrigiert
-     Diskrepanzen vor der Bildgenerierung deterministisch.
-   • Deterministisches Patching via `applyRecipeAuditPatch()` & 1..N Schritt-Renumbering
+     (z. B. Teigtasche falten) mit dem `imagePrompt` ab und korrigiert Diskrepanzen deterministisch.
+   • Deterministisches Patching via `applyRecipeAuditPatch()` & 1..N Schritt-Renumbering.
                  │
                  ▼
 6. PIPELINE-PARALLELISIERUNG (`Promise.all`)
@@ -76,14 +89,15 @@ Im gesamten Backend gibt es **8 aktive Gemini-Funktionen** (sowie Offline-/Admin
 Cover-Generierung (FLUX.1 [schnell])              Kanonische Zutaten-Auflösung (OpenFoodFacts)
 • Prompt: `recipe.imagePrompt`                    • `enrichRecipeWithCanonicalIngredients`
 • Inferenz: fal.ai Direct API ($0.0035)           • DB-Lookup `ingredient_mappings` (0$ / Cache-Hit)
-• Upload nach Supabase `recipe-covers` Bucket     • Bei Miss: Gemini Tool-Resolver (`submit_match`)
+• Upload nach Supabase `recipe-covers` Bucket     • Bei Miss: SQLite FTS5 Suche + Tool-Resolver
+• Gilt für ALLE Jobs (URL, Photo, Remix)          • Exakte Makro- & Kalorienberechnung pro Portion
    └───────────────────────────────────┬───────────────────────────────────┘
                                        ▼
 7. PERSISTIERUNG & VOLLENDUNG
-   `completeJob(jobId, recipe, llmUsage)`
-   • Datensatz landet in `recipes` & `user_recipes`
-   • `llmUsage` erfasst Gemini-, Auditor- & FLUX-Kosten transparent auf Job-Ebene
-   • Ephemere Dateien & Google-API-Files werden gelöscht
+   Postgres RPC `complete_job(jobId, recipe, llmUsage)`:
+   • Schließt Job atomar ab: Datensatz in `recipes`, Eintrag in `user_recipes`, Job-Status `completed`.
+   • `llmUsage` erfasst Gemini-, Auditor- & FLUX-Kosten transparent auf Job-Ebene.
+   • Ephemere Dateien (Audio, Video, Frames) und transienter `recipe-photos` Storage werden gelöscht.
 ```
 
 ---

@@ -6,6 +6,18 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-19: Bereinigung der Rezept-Pipeline-Doku: „Kein Coverbild bei Foto-Imports“ & „Gemini-Best-Shot-Auswahl“ obsolet
+
+* **Ersetzter Code / Veraltete Annahmen:**
+  - Veraltete Doku-Aussage, Foto-Imports hätten kein Coverbild (`recipe.imageUrl = null`) und nutzten nur einen Emoji-Fallback.
+  - Veraltete Referenzen auf `select_best_frame` / `selectBestFrame` ("Gemini-Best-Shot-Auswahl" aus Kachel-Grid).
+* **Ersetzt durch:**
+  - **Einheitliche FLUX.1 [schnell] Cover-Generierung:** Alle 3 Import-Kanäle (`url`, `photo`, `remix`) generieren über `recipe.imagePrompt` in `stage: 'generating_cover'` (85 %) via fal.ai ein ansprechendes Food-Fotografie-Titelbild (`recipe.isAiCover = true`) parallel zur Zutatennormalisierung.
+  - **Vollständige Ausmusterung von `select_best_frame`:** Das Kachel-Grid dient nur noch Gemini Multimodal als visuelle Rezept-Referenz; Coverbilder werden durch FLUX.1 oder das Scraper-Originalbild bezogen.
+* **Betroffene Dokumente:** `docs/architecture/scraping-and-imports.md`, `docs/architecture/ai-gemini.md`, `docs/architecture/backend-and-database.md`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-17: Entfernung der redundanten Mahlzeitenanzahl- & Dauer-Chips (`DailyInsightPill.tsx`) im Wochenplaner
 
 * **Ersetzter Code / Anti-Pattern:**
