@@ -31,7 +31,7 @@ export const RESOLVER_TOOLS: Tool[] = [
             },
             limit: {
               type: FunctionDeclarationSchemaType.INTEGER,
-              description: 'Number of results to return (default: 4, max: 6).',
+              description: 'Number of results to return (default: 12, max: 20).',
             },
           },
           required: ['query'],
@@ -160,7 +160,7 @@ export function executeTool(call: FunctionCall, catalogue: CatalogueAccess): Rec
       const query = String(args.query ?? '').trim();
       if (!query) return { error: 'query parameter is required.' };
       const category = args.category ? String(args.category).trim() : undefined;
-      const limit = Math.min(Math.max(1, Number(args.limit) || 4), 6);
+      const limit = Math.min(Math.max(1, Number(args.limit) || 12), 20);
       const results = catalogue.search(query, category, limit);
       return {
         results: results.map(withNutrients),

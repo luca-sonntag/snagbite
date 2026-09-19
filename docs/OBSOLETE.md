@@ -6,6 +6,23 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-19: Veraltetes Open Food Facts Ranking & 4-Kandidaten-Flaschenhals im Ingredient Resolver
+
+* **Ersetzter Code / Anti-Pattern:**
+  - `(bm25 / (0.5 + nova_group * 0.4 + ingredients_count * 0.05))`: Heuristik, die durch `COALESCE(p.ingredients_count, 1)` und `COALESCE(p.nova_group, 2)` unverarbeitete Grundnahrungsmittel stark bevorzugen sollte. Da nach EU-LMIV unverpackte/reine Grundnahrungsmittel (Kartoffeln, Zwiebeln, Eier, rohe Hähnchenbrust) keine Zutatenliste deklarieren müssen, ist `ingredients_count` bei über 55 % aller Produkte in Open Food Facts `NULL` und nur bei 1,24 % gleich 1. Das alte Ranking behandelte alle 240.000+ NULL-Produkte fälschlicherweise als pure Monoprodukte, wodurch beliebte Fertiggerichte nach oben gespült wurden und echte Monoprodukte mit korrekter Deklaration verdrängt wurden.
+  - Harter Flaschenhals von lediglich 4 vorab abgerufenen Kandidaten (`catalogue.search(..., 4)`) im `ingredientResolver.ts` sowie Tool-Limit 4–6: Führte dazu, dass Gemini in Turn 1 zu wenige Optionen vorfand und oft in eine teurere zweite Runde mit `search_ingredients` gezwungen wurde oder falsche Produkte wählte.
+* **Ersetzt durch:**
+  - **Neues Purity & Exact-Match Ranking ([`openFoodFactsIndex.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/matching/openFoodFactsIndex.ts)):**
+    - Exakter Treffer (+100) und Präfixtreffer (+80) auf Produktnamen.
+    - Wortanzahl- und Titellängen-Abzug (`-4 * word_count`): Bevorzugt kurze, reine Zutatennamen ("Hähnchenbrust") vor langen Rezept-/Menütiteln.
+    - Präpositionen-Strafe (`-40` bei ` mit ` oder ` in `): Drängt Verbundgerichte ("Hähnchenbrust in Rahmsoße", "Nudeln mit Tomatensauce") zuverlässig nach unten.
+    - Kategorie-Soft-Bonus (`+15`): Unterstützt passende Kategorien (`DAIRY`, `MEAT_FISH`, etc.) ohne unkategorisierte Treffer (`OTHER`) komplett auszuschließen.
+    - Logarithmische Scan-Dämpfung (`MIN(LN(scans + 1) * 2, 20)`): Beliebtheit hilft, überwältigt aber nicht die semantische Exaktheit.
+  - **Anhebung der Resolver-Kandidaten auf 15:** Sowohl die Turn-1-Vorauswahl als auch das `search_ingredients`-Tool liefern bis zu 15 Treffer, sodass Gemini zu >90 % im ersten Turn direkt matchen kann.
+* **Betroffene Dateien:** `backend/src/matching/openFoodFactsIndex.ts`, `backend/src/matching/openFoodFactsIndex.test.ts`, `backend/src/matching/ingredientResolver.ts`, `backend/src/matching/resolverTools.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-19: Bereinigung der Rezept-Pipeline-Doku: „Kein Coverbild bei Foto-Imports“ & „Gemini-Best-Shot-Auswahl“ obsolet
 
 * **Ersetzter Code / Veraltete Annahmen:**

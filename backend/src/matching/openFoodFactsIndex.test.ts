@@ -52,8 +52,25 @@ describe('Open Food Facts Local SQLite Catalogue', () => {
     assert.strictEqual(direct?.id, code);
   });
 
+  test('ranks pure staples higher than prepared dishes with prepositions or lengthy names', () => {
+    const hits = openFoodFactsAccess.search('Hähnchenbrust', 'MEAT_FISH', 5);
+    assert.ok(hits.length > 0, 'Should find Hähnchenbrust');
+    assert.strictEqual(hits[0].name_de.toLowerCase().startsWith('hähnchenbrust'), true, 'Top hit must start with Hähnchenbrust');
+    assert.strictEqual(hits[0].name_de.toLowerCase().includes(' mit '), false, 'Top hit must not be a combo dish with "mit"');
+    assert.strictEqual(hits[0].name_de.toLowerCase().includes(' in '), false, 'Top hit must not be a combo dish with "in"');
+    assert.ok(hits[0].nutrients_per_100g.protein >= 20, 'Raw chicken breast must be high protein (>=20g)');
+    assert.ok(hits[0].nutrients_per_100g.fat <= 5, 'Raw chicken breast must be lean (<=5g fat)');
+  });
+
+  test('applies category soft boost when matching category is provided', () => {
+    const hits = openFoodFactsAccess.search('Feta', 'DAIRY', 3);
+    assert.ok(hits.length > 0, 'Should find Feta');
+    assert.strictEqual(hits[0].category, 'DAIRY', 'Top hit should belong to DAIRY category');
+  });
+
   test('returns empty array gracefully for complete fantasy terms', () => {
     const hits = openFoodFactsAccess.search('XylophoniumFantasyUnobtainium999', undefined, 3);
     assert.strictEqual(hits.length, 0);
   });
 });
+
