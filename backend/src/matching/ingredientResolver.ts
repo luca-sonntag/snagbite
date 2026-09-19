@@ -174,12 +174,12 @@ export async function resolveIngredient(
 
     // Pre-search top candidates to fast-track matching in Turn 1
     const searchTerm = input.name || input.baseName || '';
-    let initialCandidates = catalogue.search(searchTerm, input.category, 4);
+    let initialCandidates = catalogue.search(searchTerm, input.category, 15);
     if (initialCandidates.length === 0 && input.baseName && input.baseName !== searchTerm) {
-      initialCandidates = catalogue.search(input.baseName, input.category, 4);
+      initialCandidates = catalogue.search(input.baseName, input.category, 15);
     }
     if (initialCandidates.length === 0 && input.synonyms?.length) {
-      initialCandidates = catalogue.search(input.synonyms[0], input.category, 4);
+      initialCandidates = catalogue.search(input.synonyms[0], input.category, 15);
     }
 
     const chat = model.startChat();
