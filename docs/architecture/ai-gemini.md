@@ -102,7 +102,24 @@ Cover-Generierung (FLUX.1 [schnell])              Kanonische Zutaten-Auflösung 
 
 ---
 
-## 4. Recipe Copilot & Deterministische Operations-Engine
+## 4. Kanonische Zutaten-Auflösung & Open Food Facts Resolver
+
+* **Matching-Pipeline (`ingredientMatcher.ts` & `ingredientResolver.ts`):**
+  1. **Mapping-Store Cache (0$):** Schneller Lookup in `ingredient_mappings` nach kanonisiertem `baseName`, Originalnamen und Synonymen.
+  2. **Lokaler SQLite FTS5 Index (`openFoodFactsIndex.ts`):** Suche über 438.000 DACH-Produkte mit <1ms Latenz:
+     * **Exact-Match & Präfix-Bonus:** Bevorzugt exakte Wortübereinstimmungen (+100 / +80).
+     * **Titellängen-Abzug:** Wortanzahl-Penalty (`-4 * word_count`), um kurze Grundnahrungsmittel ("Hähnchenbrust") vor langen Fertiggerichten oder Menütiteln zu priorisieren.
+     * **Präpositionen-Penalty:** Straft zusammengesetzte Verbundgerichte mit "mit" oder "in" um -40 Punkte ab.
+     * **Kategorie-Soft-Bonus:** +15 Punkte bei Übereinstimmung mit der kanonischen Kategorie (`DAIRY`, `MEAT_FISH`, etc.).
+     * **Scan-Dämpfung:** Logarithmische Deckelung der Scan-Popularität (`MIN(LN(scans + 1) * 2, 20)`).
+  3. **AI Tool Resolver (`ingredientResolver.ts`):**
+     * Startet mit **15 vorab gerankten Kandidaten** im System-Prompt, wodurch Gemini in über 90 % der Fälle Turn 1 ohne zusätzlichen Tool-Call abschließen kann (`submit_match`).
+     * Bei Bedarf Function Calling via `search_ingredients` (bis zu 20 Treffer) oder `get_ingredient`.
+     * Fällt bei Nichtauffinden ehrlich auf geschätzte Makros pro 100g zurück (`estimatedNutrients`).
+
+---
+
+## 5. Recipe Copilot & Deterministische Operations-Engine
 
 * **Chat-Endpunkt:** `POST /api/recipes/:id/chat`
 * **Deterministischer Remix (`recipeOperations.ts`):**
@@ -113,7 +130,7 @@ Cover-Generierung (FLUX.1 [schnell])              Kanonische Zutaten-Auflösung 
 
 ---
 
-## 5. Gamification Cook-Verification & Push-Notifications
+## 6. Gamification Cook-Verification & Push-Notifications
 
 * **Foto-Beweis beim Kochen (`verifyCookedDishPhoto`):**
   * Wenn ein Nutzer ein Gericht nachkocht und ein Beweisfoto hochlädt (`POST /api/recipes/:id/cooked`), prüft Gemini Vision:
@@ -126,7 +143,7 @@ Cover-Generierung (FLUX.1 [schnell])              Kanonische Zutaten-Auflösung 
 
 ---
 
-## 6. Gesamtkosten pro extrahiertem Rezept
+## 7. Gesamtkosten pro extrahiertem Rezept
 
 Bei einem regulären Video- oder Foto-Import fallen folgende KI-Kosten an:
 
@@ -139,7 +156,7 @@ Bei einem regulären Video- oder Foto-Import fallen folgende KI-Kosten an:
 
 ---
 
-## 7. Skalierungs- & Kostenmodell bei X Nutzern
+## 8. Skalierungs- & Kostenmodell bei X Nutzern
 
 ### A. Kontingente & Nutzerverhalten (Defaults in `config.ts`)
 * **Free-Nutzer:**
@@ -168,7 +185,7 @@ Bei einem regulären Video- oder Foto-Import fallen folgende KI-Kosten an:
 
 ---
 
-## 8. Persistentes Monitoring (`gemini_logs` DB-Tabelle)
+## 9. Persistentes Monitoring (`gemini_logs` DB-Tabelle)
 
 * **Logging-Funktion:** `writeGeminiLog()` in `backend/src/logger.ts` schreibt jeden Aufruf asynchron (`fire-and-forget`) in die Supabase-Tabelle `gemini_logs`.
 * **Felder:** `request_type`, `model`, `duration_ms`, `success`, `error_message`, `token_prompt`, `token_candidate`, `token_total`, `cost_usd`, `cost_formatted`.

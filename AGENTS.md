@@ -48,6 +48,7 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
    * Anti-Halluzination & Teaser-Post-Erkennung (`isRecipe: false` & `NOT_A_RECIPE` Error Code)
    * Mehrfachrezept-Erkennung (`containsMultipleRecipes` & `MULTIPLE_RECIPES` 422 Error Code)
    * Recipe Copilot (AI Function Calling, Deterministische Operations-Engine, LLM Quick Chips)
+   * Kanonische Zutaten-Auflösung & Open Food Facts Resolver (SQLite FTS5, Exact-Match/Length-Penalty Ranking, 15 Kandidaten)
    * Gamification Foto-Prüfung (`verifyCookedDishPhoto`), Smart Push-Notifications & Persistentes Logging (`gemini_logs`)
 
 4. 🎨 [**Frontend-Layer (React 19 & HeroUI v3)**](file:///c:/Users/lucas/source/repos/cookbook/docs/architecture/frontend.md)
