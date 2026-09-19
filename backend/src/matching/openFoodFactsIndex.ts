@@ -82,11 +82,38 @@ function rowToCanonicalIngredient(row: OFFRow): CanonicalIngredient {
   };
 }
 
+function mapToOffCategory(category?: string): string | null {
+  if (!category) return null;
+  const upper = category.toUpperCase().trim();
+  if (['DAIRY', 'DAIRY_EGGS', 'CHEESE', 'KÄSE', 'MILCHPRODUKTE', 'MOLKEREIPRODUKTE'].includes(upper)) return 'DAIRY';
+  if (['MEAT_FISH', 'MEAT', 'FISH', 'MEAT_POULTRY', 'SEAFOOD', 'FLEISCH', 'FISCH', 'FLEISCH & FISCH'].includes(upper)) return 'MEAT_FISH';
+  if (['PRODUCE', 'FRUITS_VEGETABLES', 'VEGETABLES', 'FRUITS', 'OBST', 'GEMÜSE', 'OBST & GEMÜSE', 'OBST UND GEMÜSE'].includes(upper)) return 'FRUITS_VEGETABLES';
+  if (['GRAINS', 'GRAINS_PASTA', 'PASTA', 'BREAD', 'BROT', 'NUDELN', 'GETREIDE', 'BACKWAREN'].includes(upper)) return 'GRAINS_PASTA';
+  if (['SPICES', 'SPICES_SEASONINGS', 'SPICES_HERBS', 'SPICES_OILS', 'OILS', 'GEWÜRZE', 'ÖLE', 'GEWÜRZE & ÖLE', 'OILS_CONDIMENTS'].includes(upper)) return 'SPICES_OILS';
+  if (['BEVERAGES', 'GETRÄNKE', 'DRINKS'].includes(upper)) return 'BEVERAGES';
+  if (['SWEETS', 'SWEETS_SNACKS', 'SÜSSWAREN', 'SNACKS', 'DESSERT'].includes(upper)) return 'SWEETS';
+  return null;
+}
+
 let dbInstance: DatabaseSync | null = null;
 let searchStmt: any = null;
 let likeSearchStmt: any = null;
 let getByCodeStmt: any = null;
 let listCategoryStmt: any = null;
+
+const scoreFormula = (termParam: string, catParam: string) => `
+  (CASE 
+    WHEN lower(p.name) = lower(${termParam}) THEN 100.0
+    WHEN lower(p.name) LIKE lower(${termParam} || ' %') THEN 80.0
+    WHEN lower(p.name) LIKE lower('% ' || ${termParam} || ' %') THEN 60.0
+    WHEN lower(p.name) LIKE lower('%' || ${termParam}) THEN 50.0
+    ELSE 20.0
+  END)
+  - (LENGTH(p.name) - LENGTH(REPLACE(p.name, ' ', ''))) * 4.0
+  - (CASE WHEN p.name LIKE '% mit %' OR p.name LIKE '% in %' THEN 40.0 ELSE 0.0 END)
+  + (CASE WHEN ${catParam} IS NOT NULL AND ${catParam} != '' AND p.category = ${catParam} THEN 15.0 ELSE 0.0 END)
+  + MIN(LN(COALESCE(p.unique_scans, 0) + 1.0) * 2.0, 20.0)
+`;
 
 function getDB(): DatabaseSync | null {
   if (dbInstance) return dbInstance;
@@ -102,12 +129,12 @@ function getDB(): DatabaseSync | null {
       SELECT p.id, p.code, p.name, p.generic_name, p.brand, p.category,
              p.calories, p.protein, p.carbs, p.fat, p.sugar, p.fiber,
              p.nova_group, p.ingredients_count, p.unique_scans,
-             (bm25(products_fts, 10.0, 4.0, 2.0, 1.0) / (0.5 + COALESCE(p.nova_group, 2) * 0.4 + MIN(COALESCE(p.ingredients_count, 1), 10) * 0.05)) AS rank
+             (${scoreFormula('?2', '?3')} - (bm25(products_fts, 10.0, 4.0, 2.0, 1.0) * 5.0)) AS score
       FROM products_fts f
       JOIN products p ON f.rowid = p.id
-      WHERE products_fts MATCH ?
-      ORDER BY rank ASC, p.unique_scans DESC
-      LIMIT ?;
+      WHERE products_fts MATCH ?1
+      ORDER BY score DESC
+      LIMIT ?4;
     `);
 
     getByCodeStmt = dbInstance.prepare(`
@@ -117,19 +144,12 @@ function getDB(): DatabaseSync | null {
     likeSearchStmt = dbInstance.prepare(`
       SELECT p.id, p.code, p.name, p.generic_name, p.brand, p.category,
              p.calories, p.protein, p.carbs, p.fat, p.sugar, p.fiber,
-             p.nova_group, p.ingredients_count, p.unique_scans
+             p.nova_group, p.ingredients_count, p.unique_scans,
+             (${scoreFormula('?3', '?4')}) AS score
       FROM products p
-      WHERE (p.name LIKE ? OR p.generic_name LIKE ?)
-      ORDER BY 
-        (CASE 
-          WHEN lower(p.name) = lower(?) THEN 1
-          WHEN lower(p.name) LIKE lower(?) THEN 2
-          ELSE 3
-        END) ASC,
-        COALESCE(p.nova_group, 2) ASC,
-        COALESCE(p.ingredients_count, 1) ASC,
-        p.unique_scans DESC
-      LIMIT ?;
+      WHERE (p.name LIKE ?1 OR p.generic_name LIKE ?2)
+      ORDER BY score DESC
+      LIMIT ?5;
     `);
 
     listCategoryStmt = dbInstance.prepare(`
@@ -147,13 +167,14 @@ function getDB(): DatabaseSync | null {
  * Open Food Facts Catalogue Access interface for resolver tools.
  */
 export const openFoodFactsAccess: CatalogueAccess = {
-  search(query: string, _category?: string, limit = 6): CanonicalIngredient[] {
+  search(query: string, category?: string, limit = 15): CanonicalIngredient[] {
     const db = getDB();
     if (!db || !searchStmt) return [];
 
     const cleaned = cleanQueryForFTS(query);
     if (!cleaned) return [];
 
+    const offCategory = mapToOffCategory(category);
     const results: CanonicalIngredient[] = [];
     const seenCodes = new Set<string>();
 
@@ -175,7 +196,7 @@ export const openFoodFactsAccess: CatalogueAccess = {
           `%${cleaned}%`,
           `%${cleaned}%`,
           cleaned,
-          `${cleaned}%`,
+          offCategory,
           limit
         ) as OFFRow[];
         likeHits.forEach(addHit);
@@ -188,7 +209,7 @@ export const openFoodFactsAccess: CatalogueAccess = {
     if (results.length < limit) {
       const exactQuery = words.map(w => `"${w}"`).join(' ');
       try {
-        const hits = searchStmt.all(exactQuery, limit) as OFFRow[];
+        const hits = searchStmt.all(exactQuery, cleaned, offCategory, limit) as OFFRow[];
         hits.forEach(addHit);
       } catch {
         // ignore FTS syntax errors
@@ -202,7 +223,7 @@ export const openFoodFactsAccess: CatalogueAccess = {
           `%${cleaned}%`,
           `%${cleaned}%`,
           cleaned,
-          `${cleaned}%`,
+          offCategory,
           limit
         ) as OFFRow[];
         likeHits.forEach(addHit);
@@ -215,7 +236,7 @@ export const openFoodFactsAccess: CatalogueAccess = {
     if (results.length < limit) {
       const ftsQuery = words.map(w => (w.length >= 4 ? `"${w}"*` : `"${w}"`)).join(' ');
       try {
-        const hits = searchStmt.all(ftsQuery, limit) as OFFRow[];
+        const hits = searchStmt.all(ftsQuery, cleaned, offCategory, limit) as OFFRow[];
         hits.forEach(addHit);
       } catch {
         // ignore
@@ -226,7 +247,7 @@ export const openFoodFactsAccess: CatalogueAccess = {
     if (results.length < limit && words.length > 1) {
       try {
         const orQuery = words.map(w => (w.length >= 4 ? `"${w}"*` : `"${w}"`)).join(' OR ');
-        const hits = searchStmt.all(orQuery, limit) as OFFRow[];
+        const hits = searchStmt.all(orQuery, cleaned, offCategory, limit) as OFFRow[];
         hits.forEach(addHit);
       } catch {
         // ignore
