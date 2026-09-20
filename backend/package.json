@@ -16,6 +16,7 @@
     "purge-hosted-frames": "tsx src/scripts/purgeHostedFrames.ts",
     "recompute-nutrition": "tsx src/scripts/recomputeRecipeNutrition.ts",
     "seed:dev": "tsx src/scripts/seedDev.ts",
+    "seed:reviewer": "tsx src/scripts/seedReviewerAccount.ts",
     "eval:dry-run": "tsx src/scripts/runDryRunEvaluation.ts",
     "generate:ingredient-image": "tsx src/scripts/generateIngredientImage.ts",
     "icons:zip": "tsx src/scripts/zipIngredientIcons.ts",
