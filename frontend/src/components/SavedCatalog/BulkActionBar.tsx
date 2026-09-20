@@ -31,7 +31,7 @@ export default function BulkActionBar({
   const { t } = useI18n();
 
   return (
-    <div className="fixed bottom-[calc(1.5rem_+_var(--safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-lg bg-white dark:bg-gray-900 border-none shadow-[0_4px_20px_rgba(0,0,0,0.08)] rounded-3xl p-4 flex flex-col gap-2.5 animate-slide-up">
+    <div className="fixed bottom-[calc(0.75rem_+_var(--safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1.5rem)] max-w-md bg-white/85 dark:bg-gray-900/85 backdrop-blur-md border-none shadow-[0_8px_30px_-4px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)] rounded-3xl p-3.5 sm:p-4 flex flex-col gap-2.5 animate-slide-up">
       {/* Header: Item count + Select-All toggle */}
       <div className="flex items-center justify-between px-1">
         <span className="text-xs font-semibold text-gray-900 dark:text-white">
