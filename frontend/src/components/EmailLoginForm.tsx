@@ -75,7 +75,7 @@ export default function EmailLoginForm({ onBackToGoogle }: EmailLoginFormProps) 
               placeholder={t('auth.emailPlaceholder')}
               required
               autoComplete="email"
-              className="w-full h-11 pl-10 pr-3.5 rounded-xl bg-black/5 dark:bg-white/5 border-none text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+              className="w-full h-11 pl-10 pr-3.5 rounded-xl bg-white dark:bg-gray-800 border-none shadow-[0_2px_8px_rgba(0,0,0,0.04)] text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
             />
           </div>
         </div>
@@ -93,7 +93,7 @@ export default function EmailLoginForm({ onBackToGoogle }: EmailLoginFormProps) 
               placeholder={t('auth.passwordPlaceholder')}
               required
               autoComplete="current-password"
-              className="w-full h-11 pl-10 pr-3.5 rounded-xl bg-black/5 dark:bg-white/5 border-none text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+              className="w-full h-11 pl-10 pr-3.5 rounded-xl bg-white dark:bg-gray-800 border-none shadow-[0_2px_8px_rgba(0,0,0,0.04)] text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
             />
           </div>
         </div>
