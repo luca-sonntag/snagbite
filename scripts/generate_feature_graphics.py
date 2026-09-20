@@ -78,24 +78,32 @@ def generate_banner(lang, subtitle_text, output_path):
     text_x = icon_x + icon_size + 55
     title_y = icon_y + 35
     
-    # Category / Tag Pill
+    # Category / Tag Pill with maximum contrast (dark emerald text on crisp white pill)
     pill_text = "SMART AI COOKBOOK" if lang == 'en' else "SMARTES KI-KOCHBUCH"
-    pill_w = 260 if lang == 'en' else 270
-    pill_h = 32
-    pill_y = title_y - 45
-    draw.rounded_rectangle([text_x, pill_y, text_x + pill_w, pill_y + pill_h], radius=16, fill=(255, 255, 255, 30))
-    draw.text((text_x + 16, pill_y + 6), pill_text, font=font_badge, fill=(167, 243, 208, 255))
+    pill_bbox = font_badge.getbbox(pill_text)
+    text_w = pill_bbox[2] - pill_bbox[0]
+    text_h = pill_bbox[3] - pill_bbox[1]
+    pad_x = 18
+    pad_y = 7
+    pill_w = text_w + pad_x * 2
+    pill_h = text_h + pad_y * 2
+    pill_y = title_y - 48
     
-    # App Title
+    # White rounded pill
+    draw.rounded_rectangle([text_x, pill_y, text_x + pill_w, pill_y + pill_h], radius=pill_h // 2, fill=(255, 255, 255, 255))
+    # Dark emerald text (#064e3b) for strong, razor-sharp contrast
+    draw.text((text_x + pad_x, pill_y + pad_y - pill_bbox[1]), pill_text, font=font_badge, fill=(6, 78, 59, 255))
+    
+    # App Title (White)
     draw.text((text_x, title_y), "Snagbite", font=font_title, fill=(255, 255, 255, 255))
     
-    # Subtitle / Pillar text
+    # Subtitle / Pillar text (Light mint / emerald-100)
     sub_y = title_y + 88
-    draw.text((text_x, sub_y), subtitle_text, font=font_sub, fill=(209, 250, 229, 230))
+    draw.text((text_x, sub_y), subtitle_text, font=font_sub, fill=(236, 253, 245, 255))
     
-    # Second Line: Highlights
+    # Second Line: Highlights (Emerald-200)
     hl_text = "Reels · Photos · Meal Planner · Timer · Groceries" if lang == 'en' else "Reels · Fotos · Wochenplaner · Timer · Einkaufsliste"
-    draw.text((text_x, sub_y + 38), hl_text, font=get_font(20, bold=False), fill=(110, 231, 183, 200))
+    draw.text((text_x, sub_y + 38), hl_text, font=get_font(20, bold=False), fill=(167, 243, 208, 240))
     
     # Convert to RGB and save (Play Console accepts PNG / JPG)
     final_img = canvas.convert('RGB')
