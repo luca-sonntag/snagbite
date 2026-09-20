@@ -256,7 +256,7 @@ export default function LandingPage() {
             </Accordion.Heading>
             <Accordion.Panel>
               <Accordion.Body className="px-5 sm:px-6 pb-5 pt-1 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                Ja, absolut. Deine extrahierten Rezepte werden sicher in deiner persönlichen Datenbank gespeichert und sind durch Zugriffskontrollen auf Datenbankebene (Row-Level-Security) geschützt. Das bedeutet, dass ausschließlich du Zugriff auf deine eigenen Inhalte hast. Wir verkaufen deine Daten niemals weiter.
+                Ja, absolut. Deine persönlichen Daten, Notizen, Vorräte und privaten Foto-Scans sind durch Zugriffskontrollen auf Datenbankebene (Row-Level-Security) strikt geschützt. Aus öffentlichen Web-Links extrahierte Rezepte stehen der Community pseudonym zur Verfügung, ohne deine Identität oder E-Mail preiszugeben. Die Sichtbarkeit kannst du für jedes Rezept individuell steuern. Wir verkaufen deine Daten niemals weiter.
               </Accordion.Body>
             </Accordion.Panel>
           </Accordion.Item>
@@ -284,7 +284,21 @@ export default function LandingPage() {
             </Accordion.Heading>
             <Accordion.Panel>
               <Accordion.Body className="px-5 sm:px-6 pb-5 pt-1 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                Sobald du ein Rezept in deinen Einkaufswagen legst, extrahiert die App alle benötigten Zutaten. Sie bereinigt diese von ungenauen Angaben und sortiert sie vollautomatisch nach Supermarkt-Kategorien (wie Obst & Gemüse, Molkereiprodukte, Konserven), um dir den Einkauf so stressfrei wie möglich zu machen.
+                Sobald du ein Rezept in deinen Einkaufswagen legst, extrahiert die App alle benötigten Zutaten. Sie bereinigt diese von ungenauen Angaben und sortiert sie vollautomatisch nach Supermarkt-Kategorien (wie Obst &amp; Gemüse, Molkereiprodukte, Konserven), um dir den Einkauf so stressfrei wie möglich zu machen.
+              </Accordion.Body>
+            </Accordion.Panel>
+          </Accordion.Item>
+
+          <Accordion.Item className="border-none bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-[0_2px_6px_rgba(0,0,0,0.03)]" id="6">
+            <Accordion.Heading>
+              <Accordion.Trigger className="px-5 sm:px-6 py-4 flex items-center justify-between text-gray-900 dark:text-white font-bold text-base hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                Sind die Nährwerte und der Healthy Score garantiert exakt?
+                <Accordion.Indicator className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+              </Accordion.Trigger>
+            </Accordion.Heading>
+            <Accordion.Panel>
+              <Accordion.Body className="px-5 sm:px-6 pb-5 pt-1 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                Nährwertprofile, Portionsangaben und der Healthy Score basieren auf fortschrittlichen KI-Schätzungen und algorithmischen Datenbankabgleichen (u.&nbsp;a. Open Food Facts). Sie dienen als praktische Orientierungshilfe im Alltag, stellen jedoch keine medizinische oder ernährungswissenschaftliche Beratung dar. Prüfe Zutaten und Allergene vor dem Verzehr stets eigenverantwortlich.
               </Accordion.Body>
             </Accordion.Panel>
           </Accordion.Item>

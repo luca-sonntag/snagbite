@@ -5,11 +5,11 @@ import { Smartphone, ShieldCheck, Mail, CreditCard } from 'lucide-react';
 
 export default function DataDeletionPage() {
   const steps = [
-    { num: '1', text: 'Öffne die Snagbite App auf deinem Mobilgerät.' },
-    { num: '2', text: 'Navigiere zum Profil- oder Settings-Tab unten rechts.' },
-    { num: '3', text: 'Scrolle ganz nach unten.' },
+    { num: '1', text: 'Öffne die Snagbite App auf deinem Smartphone.' },
+    { num: '2', text: 'Navigiere zum Tab „Profil & Fortschritt“ (unten rechts) und tippe auf das Zahnrad-Icon (Einstellungen).' },
+    { num: '3', text: 'Scrolle ganz nach unten zum Bereich „Konto-Aktionen“.' },
     { num: '4', text: 'Tippe auf den roten Button „Account & Daten löschen“.' },
-    { num: '5', text: 'Bestätige die Sicherheitsabfrage.' },
+    { num: '5', text: 'Bestätige die Sicherheitsabfrage im Dialog.' },
   ];
 
   return (
@@ -27,7 +27,7 @@ export default function DataDeletionPage() {
           Daten löschen
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Du hast das Recht auf Löschung deiner personenbezogenen Daten (Art. 17 DSGVO).
+          Vollständiges Recht auf Löschung deiner personenbezogenen Daten (Art. 17 DSGVO / Google Play Data Safety).
         </p>
       </div>
 
@@ -46,7 +46,7 @@ export default function DataDeletionPage() {
                   <span className="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                     {step.num}
                   </span>
-                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{step.text}</p>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed m-0">{step.text}</p>
                 </div>
               ))}
             </div>
@@ -55,10 +55,22 @@ export default function DataDeletionPage() {
           {/* Info callout: What happens */}
           <div className="p-5 rounded-2xl border border-emerald-500/15 bg-emerald-500/5 dark:bg-emerald-500/10 flex gap-4 items-start text-sm">
             <ShieldCheck className="w-6 h-6 text-emerald-500 shrink-0 mt-0.5" />
-            <div>
-              <strong className="text-gray-800 dark:text-gray-200 block mb-1">Was passiert nach der Löschung?</strong>
-              <p className="text-gray-600 dark:text-gray-450 leading-relaxed m-0">
-                Dein Konto, alle gespeicherten Rezepte, Sammlungen und Einkaufslisten werden unwiderruflich von unseren Servern entfernt. Rezeptbilder liegen ohnehin nur lokal auf deinem Gerät und werden mit den App-Daten bzw. bei einer Deinstallation automatisch mitentfernt. Diese Aktion ist endgültig.
+            <div className="flex flex-col gap-1.5">
+              <strong className="text-gray-800 dark:text-gray-200 block">Was wird unwiderruflich gelöscht?</strong>
+              <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed m-0">
+                Bei der Kontolöschung werden alle deine persönlichen Daten vollständig und unwiderruflich von unseren Servern und Datenbanken entfernt:
+              </p>
+              <ul className="list-disc pl-4 text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                <li>Dein Benutzerkonto (E-Mail, Login-Daten, Passworthash)</li>
+                <li>Deine persönlichen Kochbuch-Einträge, Sammlungen, Labels und Notizen</li>
+                <li>Dein Wochenplaner, deine Einkaufslisten und Vorratsbestände</li>
+                <li>Deine Gamification-Daten (XP-Punkte, Level, Streaks, Koch-Historie und Badges)</li>
+                <li>Deine privat hochgeladenen Kochbeweis-Fotos und Feedback-Screenshots</li>
+                <li>Dein soziales Profil (Anzeigename, Avatar, Freundescode) und Freundschaften</li>
+                <li>Deine registrierten Push-Benachrichtigungstokens</li>
+              </ul>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 italic m-0 pt-1">
+                Diese Aktion ist endgültig und kann nicht rückgängig gemacht werden.
               </p>
             </div>
           </div>

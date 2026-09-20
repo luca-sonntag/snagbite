@@ -53,10 +53,12 @@ export default function LegalPage() {
               <Mail className="w-4 h-4 text-gray-400 shrink-0" />
               <a href={`mailto:${legal.email}`} className="text-emerald-500 hover:underline">{legal.email}</a>
             </div>
-            <div className="flex items-center gap-3">
-              <Phone className="w-4 h-4 text-gray-400 shrink-0" />
-              <span>{legal.phone}</span>
-            </div>
+            {legal.phone && (
+              <div className="flex items-center gap-3">
+                <Phone className="w-4 h-4 text-gray-400 shrink-0" />
+                <span>{legal.phone}</span>
+              </div>
+            )}
           </div>
         </Card>
       </div>
@@ -76,7 +78,7 @@ export default function LegalPage() {
             {legal.tradeAuthority && !legal.tradeAuthority.startsWith('AUSFÜLLEN') && (
               <li><strong>Gewerbebehörde:</strong> {legal.tradeAuthority}</li>
             )}
-            <li><strong>Unternehmensgegenstand:</strong> Betrieb der App und Website „Snagbite" (KI-gestützte Extraktion von Rezepten aus öffentlich zugänglichen Social-Media-Inhalten).</li>
+            <li><strong>Unternehmensgegenstand:</strong> Entwicklung und Betrieb der App und Website „Snagbite" (KI-gestützte Strukturierung von Kochrezepten aus öffentlich zugänglichen Internet- und physischen Quellen, intelligente Vorrats- und Mahlzeitenplanung sowie interaktive Kochassistenz).</li>
           </ul>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
             Anwendbare Rechtsvorschriften: Gewerbeordnung (GewO), abrufbar unter{' '}
@@ -107,13 +109,19 @@ export default function LegalPage() {
           </p>
         </section>
 
-        <section>
-          <h2 className="text-lg font-bold mb-2">Urheberrecht &amp; Haftung</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Die Inhalte dieser Website und der App unterliegen dem österreichischen Urheberrecht. Über die App verarbeitete Videos, Bilder und Texte Dritter (z.&nbsp;B. der jeweiligen Creator) bleiben im Eigentum ihrer Rechteinhaber; Snagbite beansprucht daran keine Rechte.
+        <section className="flex flex-col gap-3">
+          <h2 className="text-lg font-bold mb-1">Urheberrecht, KI-Hinweise &amp; Haftung</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed m-0">
+            <strong>Fremdinhalte &amp; Privatkopie:</strong> Über die App verarbeitete Videos, Bilder und Texte Dritter (z.&nbsp;B. der jeweiligen Creator) verbleiben im ausschließlichen Eigentum ihrer jeweiligen Rechteinhaber; Snagbite beansprucht daran keine Rechte. Der Medienabruf erfolgt flüchtig auf Veranlassung des Nutzers auf dessen Endgerät im Rahmen der gesetzlichen Privatkopie-Schranke (§ 42 UrhG AT / § 53 UrhG DE).
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Als Diensteanbieter sind wir für eigene Inhalte verantwortlich, jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen. Unsere Angebote können Links zu externen Websites Dritter enthalten, auf deren Inhalte wir keinen Einfluss haben. Für diese fremden Inhalte übernehmen wir keine Gewähr; verantwortlich ist stets der jeweilige Anbieter der verlinkten Seite.
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed m-0">
+            <strong>KI-Coverbilder:</strong> Durch KI generierte Rezept-Coverbilder sind unverbindliche, rein illustrative Symbolbilder (Serviervorschläge) und bilden nicht das reale physische Kochergebnis ab.
+          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed m-0">
+            <strong>Keine Gesundheitsberatung:</strong> Nährwerte und der Healthy Score sind algorithmische Schätzungen ohne Gewähr und stellen keine medizinische, ernährungsphysiologische oder diätetische Beratung dar. Allergene und Zubereitungssicherheit sind stets eigenverantwortlich zu prüfen.
+          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed m-0">
+            <strong>Haftung für Links:</strong> Unsere Angebote können Links zu externen Websites Dritter enthalten, auf deren Inhalte wir keinen Einfluss haben. Für diese fremden Inhalte übernehmen wir keine Gewähr; verantwortlich ist stets der jeweilige Anbieter der verlinkten Seite.
           </p>
         </section>
 

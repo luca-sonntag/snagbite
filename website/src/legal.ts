@@ -14,15 +14,15 @@
 
 export const legal = {
   /** Voller Name bzw. Firmenwortlaut des Medieninhabers/Diensteanbieters. */
-  operatorName: 'AUSFÜLLEN: Vor- und Nachname bzw. Firmenwortlaut',
+  operatorName: 'Luca Sonntag',
   /** Straße + Hausnummer der ladungsfähigen Geschäftsanschrift. */
-  street: 'AUSFÜLLEN: Straße und Hausnummer',
+  street: 'Jahnstraße 15A/8',
   /** PLZ + Ort. */
-  city: 'AUSFÜLLEN: PLZ und Ort',
+  city: 'St. Pölten, 3100',
   /** Land des Sitzes. */
   country: 'Österreich',
   /** Kontakt-Telefonnummer (optional, aber empfohlen). */
-  phone: 'AUSFÜLLEN: Telefonnummer (optional)',
+  phone: '',
   /** Zentrale Kontakt-E-Mail-Adresse. */
   email: 'snagbite.app@gmail.com',
 
@@ -30,7 +30,7 @@ export const legal = {
    * Umsatzsteuer-Identifikationsnummer (falls vorhanden, sonst leer lassen –
    * Kleinunternehmer ohne UID können dieses Feld auf '' setzen).
    */
-  vatId: 'AUSFÜLLEN: UID-Nummer (falls vorhanden)',
+  vatId: 'ATU83529727',
   /**
    * Firmenbuchnummer und Firmenbuchgericht (nur falls im Firmenbuch
    * eingetragen – als Einzelunternehmer ohne Eintragung leer lassen: '').
@@ -40,10 +40,10 @@ export const legal = {
    * Zuständige Gewerbebehörde bzw. Hinweis auf die Gewerbeberechtigung
    * (falls ein Gewerbe angemeldet ist, sonst '').
    */
-  tradeAuthority: 'AUSFÜLLEN: zuständige Gewerbebehörde (falls Gewerbe angemeldet)',
+  tradeAuthority: 'Magistrat der Stadt St. Pölten',
 
   /** Firmensitz/Wohnort für die medienrechtliche Offenlegung (§ 25 MedienG). */
-  mediaOwnerLocation: 'AUSFÜLLEN: Wohnort bzw. Sitz',
+  mediaOwnerLocation: 'St. Pölten',
 
   /** Preise der Premium-Abonnements (Anzeige). */
   priceMonthly: '3,99 €',
