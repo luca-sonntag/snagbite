@@ -18,6 +18,7 @@
 * **`ToastContext.tsx`:** Globales Toast-Benachrichtigungssystem (`useToast()`), das rahmenlose Benachrichtigungen im Clean Flat Style elastisch von oben hineingleiten lässt (`top-toast` via `ToastContainer` & `ToastItem`), Safe Areas (`--safe-area-inset-top`) beachtet und Swipe-Up Gesten unterstützt.
 * **`I18nContext.tsx`:** Verwaltet Internationalisierung (Deutsch/Englisch) mit `localStorage`-Persistenz und Browsersprachen-Erkennung.
 * **`OverlayStackContext.tsx`:** Globaler Ref-Counted Overlay-Stack (`pushOverlay`, `popOverlay`, `isAnyOverlayOpen`) und Convenience-Hook `useModalOverlay(isOpen)` (Alias: `useAdOverlay`). Blendet das native AdMob-Banner synchron aus und lockt via `useBodyScrollLock` den Body/HTML-Scroll (mit Scroll-Positions-Preservation), sobald ein beliebiges Modal, Sheet oder Drawer geöffnet wird, und stellt beides nach dem Schließen des letzten Overlays wieder her.
+* **`ExtractionQueueContext.tsx`:** Verwaltet die lokale Extraktions-Warteliste (`waitlist`) und fehlgeschlagene Jobs (`failedJobs`) mit nutzer-isolierter `localStorage`-Persistenz (`kb_extraction_waitlist_${userId}`, `kb_extraction_failed_${userId}`). Bietet atomare Aktionen (`addToWaitlist`, `removeFromWaitlist`, `addFailedJob`, `removeFailedJob`, `moveToWaitlist`, `retryFailedJob`, `clearFailedJobs`) sowie State-Steuerung für das dezent getriggerte `SmartResumeSheet` beim App-Start.
 
 ### Lokalisierung & Error-Code System
 * **Lokalisierung (`frontend/src/i18n.ts`):** Übersetzungen für Supermarktabteilungen, Emojis, Sortierung, UI-Texte, Auth und dynamische Recommendation-Themen.
@@ -254,4 +255,27 @@ Für schnelles Testen, Gestalten und Inspizieren selten auftretender Dialoge, Sh
 * **Lazy-Loaded Dev Host (`DevOverlayHost.tsx`):**
   * Alle dev-getriggerten Overlays werden via `React.lazy()` und `Suspense` dynamisch nachgeladen, wodurch der reguläre Bundle-Overhead im Dev-Modus 0 KB beträgt.
   * Automatische Anbindung an den `OverlayStackContext` (Android Hardware-Back-Button und Scroll-Lock).
+
+---
+
+## 11. 📋 Extraktions-Warteliste, Fail-Safe Queue & Smart Resume
+
+* **Architektur (`ExtractionQueueContext.tsx`):**
+  * Hält zwei getrennte Zustände:
+    1. `waitlist`: Vom Nutzer oder per Auto-Queue (bei Kontingent-Erschöpfung) vorgemerkte Rezept-Links (`ExtractionWaitlistItem`).
+    2. `failedJobs`: Bei Netzwerk-, Scraper- oder API-Fehlern abgebrochene Extraktionen (`FailedExtractionJob`), inklusive serialisiertem Fehlercode, Parametern und Timestamp.
+  * **Zero-Migration User-Scoped Persistenz:** Speichert beide Listen unter `kb_extraction_waitlist_${userId}` und `kb_extraction_failed_${userId}` im Browser/WebView `localStorage`. Vollständig offlinefähig, sofort verfügbar und strikt zwischen verschiedenen Benutzerkonten isoliert.
+* **Fail-Safe Queue (Schutz vor Link-Verlust):**
+  * Verhindert Datenverlust bei Social-Media-Links (Instagram Reels, TikTok, Shorts), da Nutzer im Feed meist weiterscrollen.
+  * Fehlgeschlagene Extraktionen (sowohl synchrone Aufrufe in `useRecipeExtraction` als auch asynchrone Worker-Jobs in `ExtractionJobsContext`) werden automatisch in `failedJobs` erfasst.
+  * **Interaktive Fail-Safe-Karten (`FailedJobCard.tsx`):** Bietet 1-Klick-Retry, Link in Zwischenablage kopieren, Öffnen des Original-Posts im Browser/App sowie Verschieben in die Warteliste für später.
+* **Vormerken bei aufgebrauchtem Tageskontingent:**
+  * **Auto-Queue bei Share-Target / Android Intent (`useAppNativeListeners.ts`):** Wird ein Social-Media-Link geteilt, während das Kontingent verbraucht ist (`limitStatus.remaining <= 0`), wird der Link ohne Blockade direkt in die Warteliste gelegt und der Nutzer per Toast informiert.
+  * **Manuelles Vormerken (`UrlExtractSheet.tsx` & `ExtractSubmitButton.tsx`):** Der URL-Eingabebereich bleibt klickbar und schaltet bei aufgebrauchtem Kontingent nahtlos auf den Bookmark-Modus um (*„Auf Warteliste setzen"*).
+* **Smart Resume beim App-Start (`SmartResumeSheet.tsx`):**
+  * Wird die App neu geöffnet und das Tageskontingent ist wieder verfügbar (`limitStatus.remaining > 0`), prüft die App, ob Elemente in der Warteliste existieren.
+  * Öffnet nach initialem Sync ein dezent gestaltetes HeroUI Drawer Bottom-Sheet mit Rezept-Domain-Badge, relativer Zeitangabe und CTA zur direkten Extraktion (*„Jetzt analysieren"*).
+  * **Volle Nutzerkontrolle:** Keine automatischen, ungewollten Extraktionen und kein unbedachter Credit-Abzug. Der Nutzer entscheidet proaktiv.
+* **UI-Integration auf der „NEU“-Seite (`ExtractionQueueSection.tsx`):**
+  * Rendert auf der Extraktionsseite (`ExtractForm`) oberhalb des Eingabefeldes eine aufgeräumte Sektion mit horizontal scrollbaren Badges, Statuskarten und Empty-States im Clean Flat Style.
 
