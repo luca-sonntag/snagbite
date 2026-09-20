@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { compressRecipePhotos } from '../utils/imageCompression';
 
 import { useExtractionJobs, type ExtractionMode } from '../context/ExtractionJobsContext';
+import { useExtractionQueue } from '../context/ExtractionQueueContext';
 import {
   sendNativeNotification,
   sendRecipeReadyNotification,
@@ -35,6 +36,8 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
   const { t } = useI18n();
   const { user, refreshSession, isPremium } = useAuth();
   const { addJob } = useExtractionJobs();
+  const { addFailedJob, removeFromWaitlist, removeFailedJob } = useExtractionQueue();
+  const currentExtractUrlRef = useRef<string>('');
   const [isPending, setIsPending] = useState(false);
   const [jobStatus, setJobStatus] = useState<ExtractionJob['status'] | null>(null);
   const [jobError, setJobError] = useState<string | null>(null);
@@ -149,6 +152,14 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     setJobStatus('failed');
     setJobError('form.validation.backgroundCancelled');
     setProgress(null);
+
+    if (currentExtractUrlRef.current) {
+      addFailedJob({
+        sourceUrl: currentExtractUrlRef.current,
+        mode: 'link',
+        error: 'form.validation.backgroundCancelled',
+      });
+    }
 
     // Fire local notification to inform the user that extraction was interrupted due to backgrounding
     if (document.visibilityState !== 'visible') {
@@ -274,6 +285,12 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           setPhotos([]);
           localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
 
+          if (currentExtractUrlRef.current) {
+            removeFromWaitlist(currentExtractUrlRef.current);
+            removeFailedJob(currentExtractUrlRef.current);
+            currentExtractUrlRef.current = '';
+          }
+
           const recipeTitle = job.title?.trim();
           const notifTitle = t('notification.recipeReady.title');
           const notifBody = recipeTitle
@@ -288,6 +305,15 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           setJobError(job.error || 'form.validation.failedExtraction');
           setJobErrorCode(envelope?.code ?? null);
           setJobErrorParams(envelope?.params ?? null);
+          if (currentExtractUrlRef.current) {
+            addFailedJob({
+              sourceUrl: currentExtractUrlRef.current,
+              mode: 'link',
+              error: job.error || 'form.validation.failedExtraction',
+              errorCode: envelope?.code ?? null,
+              errorParams: envelope?.params ?? null,
+            });
+          }
           setProgress(null);
           setIsPending(false);
           localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
@@ -306,6 +332,13 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
         stopActivePolling();
         setJobStatus('failed');
         setJobError(err instanceof Error ? err.message : 'form.validation.lostConnection');
+        if (currentExtractUrlRef.current) {
+          addFailedJob({
+            sourceUrl: currentExtractUrlRef.current,
+            mode: 'link',
+            error: err instanceof Error ? err.message : 'form.validation.lostConnection',
+          });
+        }
         setProgress(null);
         setIsPending(false);
         localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
@@ -350,6 +383,10 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     setRecipe(null);
     setProgress(null);
 
+    if (meta.mode === 'link') {
+      currentExtractUrlRef.current = meta.sourceLabel;
+    }
+
     try {
       const token = await getAccessToken();
       if (!token) {
@@ -390,6 +427,10 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       if (isPremium) {
         if (data.status === 'completed' && data.recipeId) {
           // Already extracted / cached: directly open recipe without creating a dummy background job
+          if (meta.mode === 'link') {
+            removeFromWaitlist(meta.sourceLabel);
+            removeFailedJob(meta.sourceLabel);
+          }
           setUrl('');
           setPhotos([]);
           setJobStatus(null);
@@ -400,6 +441,10 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
         // Background flow: track the job in the shared store and free the form.
         if (data.jobId) {
           addJob(data.jobId, { sourceLabel: meta.sourceLabel, mode: meta.mode });
+          if (meta.mode === 'link') {
+            removeFromWaitlist(meta.sourceLabel);
+            removeFailedJob(meta.sourceLabel);
+          }
         }
         setUrl('');
         setPhotos([]);
@@ -411,6 +456,10 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           stopActivePolling();
           activePollingJobIdRef.current = data.jobId ?? null;
           if (data.recipeId) {
+            if (meta.mode === 'link') {
+              removeFromWaitlist(meta.sourceLabel);
+              removeFailedJob(meta.sourceLabel);
+            }
             onExtractionSuccess(data.recipeId);
           } else {
             runSimulatedProgress(data.jobId ?? '', data.recipeId, 10000);
@@ -427,6 +476,15 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       setJobError(err instanceof Error ? err.message : 'form.validation.submissionError');
       setJobErrorCode(typed?.code ?? null);
       setJobErrorParams(typed?.params ?? null);
+      if (meta.mode === 'link' && currentExtractUrlRef.current) {
+        addFailedJob({
+          sourceUrl: currentExtractUrlRef.current,
+          mode: 'link',
+          error: err instanceof Error ? err.message : 'form.validation.submissionError',
+          errorCode: typed?.code ?? null,
+          errorParams: typed?.params ?? null,
+        });
+      }
       setIsPending(false);
     }
   }, [getAccessToken, startPolling, fetchLimitStatus, isPremium, addJob, runSimulatedProgress, stopActivePolling, onExtractionSuccess]);
