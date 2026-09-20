@@ -24,18 +24,15 @@ Diese Checkliste fasst alle zwingenden rechtlichen, technischen, monetären und 
   - [ ] In der Google Play Console unter *App-Inhalte > Löschen von Nutzerkonten* hinterlegt (inkl. Bestätigung, dass alle Nutzerdaten, Rezepte und Sammlungen gelöscht werden).
   - [ ] In-App-Löschung in `SettingsView.tsx` (`handleDeleteAccount`) getestet und funktionsfähig.
 - [ ] **Formular zur Datensicherheit (Data Safety Form):**
-  - [ ] *Erfasste Datentypen deklariert:*
-    - **E-Mail & Nutzer-ID:** Zweck: App-Funktionalität, Kontoerstellung (Supabase Auth).
-    - **Kaufverlauf:** Zweck: App-Funktionalität, Abonnements (Google Play Billing / RevenueCat).
-    - **Fotos & Videos:** Zweck: App-Funktionalität (Rezeptkarten-Upload `photo://` & Kochbeweise).
-    - **App-Aktivität & Interaktionen:** Zweck: App-Funktionalität (Gespeicherte Rezepte, Sammlungen, Vorrat).
-    - **Gerätekennungen & Werbe-ID:** Zweck: Werbung & Analyse (Google AdMob).
-    - **Absturzprotokolle / Diagnosedaten:** Zweck: Analyse & Fehlerbehebung.
-  - [ ] Datenübertragung per HTTPS verschlüsselt (Art. 32 DSGVO).
+  - [ ] Ausfüllhilfe in [`docs/compliance/data-safety-guide.md`](file:///c:/Users/lucas/source/repos/cookbook/docs/compliance/data-safety-guide.md) zur Hand nehmen und alle Abschnitte in der Console eintragen.
+  - [x] Datenübertragung per HTTPS verschlüsselt (Art. 32 DSGVO).
 - [ ] **App-Zugriff für Google-Prüfer (Reviewer Credentials):**
-  - [ ] In der Play Console unter *App-Inhalte > App-Zugriff* Zugangsdaten hinterlegt.
-  - [ ] Dedizierter Demo-Account erstellt (z. B. `reviewer@snagbite.app`).
-  - [ ] Demo-Account mit 5–10 repräsentativen Rezepten, Sammlungen und Vorratszutaten vorbefüllt, damit Reviewer sofort alle Features testen können.
+  - [ ] In der Play Console unter *App-Inhalte > Anmeldedaten / App-Zugriff* Zugangsdaten hinterlegt:
+    - Nutzername: `reviewer@snagbite.app`
+    - Passwort: `[Gewähltes Passwort]`
+    - Anleitung: *„Auf 'Bereits ein Konto? Mit E-Mail anmelden' tippen und diese Zugangsdaten eingeben.“*
+  - [x] Reviewer-Login in der App (`EmailLoginForm.tsx`) und Seed-Script (`npm run seed:reviewer` in `backend/`) implementiert.
+  - [ ] Seed-Script gegen Supabase Production ausgeführt, damit der Reviewer-Account mit 8 Rezepten, Sammlungen, Vorrat und Premium vorbefüllt ist.
 - [ ] **IARC-Altersfreigabe & Zielgruppe:**
   - [ ] Fragebogen zur Inhaltseinstufung (IARC) ausgefüllt (Einstufung: PEGI 3 / USK 0).
   - [ ] Zielgruppe festgelegt (Erwachsene / ab 13 Jahre, keine gezielte Ausrichtung auf Kinder).
@@ -45,10 +42,11 @@ Diese Checkliste fasst alle zwingenden rechtlichen, technischen, monetären und 
 ## 💰 2. Monetarisierung: AdMob & RevenueCat
 
 - [ ] **AdMob `app-ads.txt` bereitgestellt:**
-  - [ ] Datei `website/public/app-ads.txt` angelegt und deployed unter `https://snagbite.app/app-ads.txt`:
+  - [x] Datei `website/public/app-ads.txt` angelegt mit Inhalt:
     ```text
     google.com, pub-4240071009231066, DIRECT, f08c47fec0942fa0
     ```
+  - [ ] Website deployed und unter `https://snagbite.app/app-ads.txt` erreichbar.
   - [ ] Im AdMob-Dashboard verifiziert, dass die Domain gecrawlt wurde (Status: *Autorisiert*).
 - [ ] **AdMob DSGVO / UMP Consent Message:**
   - [ ] Im AdMob-Dashboard unter *Datenschutz & Mitteilungen > DSGVO* eine aktive Einwilligungsnachricht für EU-Nutzer eingerichtet und veröffentlicht.
@@ -78,15 +76,15 @@ Diese Checkliste fasst alle zwingenden rechtlichen, technischen, monetären und 
 - [ ] **App-Versionierung:**
   - [ ] `frontend/android/version.properties` auf finale Startversion gesetzt (z. B. `VERSION_NAME=1.0.0`, `VERSION_CODE=1`).
 - [ ] **Netzwerksicherheit (`AndroidManifest.xml`):**
-  - [ ] `android:usesCleartextTraffic="true"` für Release-Builds geprüft/abgesichert, damit keine Sicherheitswarnung in den Play Store Pre-Launch Reports auftritt.
+  - [x] `network_security_config.xml` angelegt und in `AndroidManifest.xml` referenziert (keine Cleartext-Warnungen mehr im Pre-Launch Report).
   - [ ] `VITE_API_BASE_URL` in `frontend/.env.production` zeigt auf die Live-HTTPS-Domain des Backends.
 - [ ] **Digital Asset Links (`assetlinks.json`):**
   - [ ] Datei unter `https://snagbite.app/.well-known/assetlinks.json` deployed.
   - [ ] SHA256-Fingerprint des Play Store App-Signing-Zertifikats eingetragen.
   - [ ] Deep Linking via `https://snagbite.app/invite/*` verifiziert (`android:autoVerify="true"` öffnet direkt die App).
 - [ ] **App-Icons & Splash Screen:**
-  - [ ] Adaptives App-Icon (`res/mipmap-anydpi-v26/ic_launcher.xml`) für Android 8–15 vorhanden.
-  - [ ] Monochromes App-Icon für Android 13+ Themed Icons vorhanden.
+  - [x] Adaptives App-Icon (`res/mipmap-anydpi-v26/ic_launcher.xml`) für Android 8–15 vorhanden.
+  - [x] Monochromes App-Icon für Android 13+ Themed Icons (`<monochrome>`-Tag) vorhanden.
   - [ ] Splash Screen (`res/drawable/splash.png` und Hintergrundfarbe `#064e3b`) schließt flüssig ohne Hänger ab.
 - [ ] **Hardware Back-Button:**
   - [ ] Zurück-Gesten auf Subscreens (Rezept-Details, Katalog-Filter, Modals, Drawer) schließen das Overlay statt die App.
@@ -125,21 +123,21 @@ Diese Checkliste fasst alle zwingenden rechtlichen, technischen, monetären und 
 ## 🎨 6. Store Listing & Marketing Assets
 
 - [ ] **App-Icon:**
-  - [ ] 512 × 512 px PNG, 32-Bit Farbformat, max. 1 MB.
+  - [x] 512 × 512 px PNG, 32-Bit Farbformat in `frontend/android/fastlane/metadata/android/*/images/icon.png`.
 - [ ] **Feature Graphic (Banner):**
-  - [ ] 1024 × 500 px PNG oder JPG, zentriertes Key Visual ohne Randanschnitte.
+  - [x] 1024 × 500 px PNG im Snagbite Emerald Theme in `frontend/android/fastlane/metadata/android/*/images/featureGraphic.png`.
 - [ ] **Screenshots (Smartphone):**
-  - [ ] Mindestens 4–8 hochauflösende Screenshots (9:16, z. B. 1080 × 2400 px).
-  - [ ] Visuell ansprechende Mockups mit Highlight-Texten:
+  - [ ] Mindestens 4–8 hochauflösende Screenshots (9:16, z. B. 1080 × 2400 px) manuell erstellen und in der Play Console / Fastlane hinterlegen:
     1. *Rezept-Extraktion:* „Aus Reels & TikToks in Sekunden ein strukturiertes Rezept.“
     2. *Rezeptansicht & Nährwerte:* „Zutaten, Portionsrechner & automatischer Healthy Score.“
     3. *Interaktiver Kochmodus:* „Fokus-Schritte mit integrierten Timern.“
     4. *Intelligente Einkaufsliste:* „Nach Supermarktregalen sortiert.“
-    5. *Gamification & Fortschritt:* „Rezepte kochen, XP sammeln und Streaks halten.“
-- [ ] **Store-Texte:**
-  - [ ] **App-Titel:** Snagbite: Rezepte & Kochbuch (max. 30 Zeichen).
-  - [ ] **Kurzbeschreibung:** Aus Social-Media-Videos, Fotos & Links mit KI sofort strukturierte Rezepte kochen. (max. 80 Zeichen).
-  - [ ] **Vollständige Beschreibung:** Detaillierte Feature-Übersicht, Nährwert-Erklärung, Abo-Konditionen (max. 4.000 Zeichen, DE & EN).
+    5. *Wochenplaner:* „Mahlzeiten stressfrei im Voraus planen.“
+    6. *Gamification & Fortschritt:* „Rezepte kochen, XP sammeln und Streaks halten.“
+- [ ] **Store-Texte (DE & EN hinterlegt in `fastlane/metadata/android/`):**
+  - [x] **App-Titel:** `Snagbite: Rezepte & Kochbuch` (DE, 29 Zeichen) / `Snagbite: Recipe & Cookbook` (EN, 28 Zeichen).
+  - [x] **Kurzbeschreibung (unter 80 Zeichen):** `Dein smartes KI-Kochbuch: Importieren, organisieren, einkaufen & kochen.` (DE, 72 Zeichen) / `Your smart AI cookbook: Import recipes, organize, plan meals & cook.` (EN, 68 Zeichen).
+  - [x] **Vollständige Beschreibung:** Vollständige, gegliederte All-in-One Feature-Übersicht (DE & EN, < 4.000 Zeichen).
 - [ ] **Kategorie & Tags:**
   - [ ] Primäre Kategorie: *Essen und Trinken* (Food & Drink).
   - [ ] Tags: *Rezepte*, *Kochbuch*, *Einkaufsliste*, *Mahlzeitenplaner*, *Kochen*.
