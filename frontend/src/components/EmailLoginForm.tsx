@@ -100,8 +100,7 @@ export default function EmailLoginForm({ onBackToGoogle }: EmailLoginFormProps) 
       </div>
 
       {error && (
-        <div className="w-full text-left text-xs text-rose-500 bg-rose-50 dark:bg-rose-950/30 border-none px-3.5 py-2.5 rounded-xl flex items-start gap-2">
-          <span className="font-semibold shrink-0">⚠️</span>
+        <div className="w-full text-left text-xs text-rose-500 bg-rose-50 dark:bg-rose-950/30 border-none px-3.5 py-2.5 rounded-xl">
           <span className="leading-snug">{error}</span>
         </div>
       )}
@@ -119,7 +118,7 @@ export default function EmailLoginForm({ onBackToGoogle }: EmailLoginFormProps) 
       </Button>
 
       {/* Info notice for new users */}
-      <div className="p-3 rounded-xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/15 flex gap-2.5 items-start text-left mt-1">
+      <div className="p-3 rounded-xl bg-emerald-500/5 dark:bg-emerald-500/10 border-none flex gap-2.5 items-start text-left mt-1">
         <Info className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
         <div className="text-[11px] text-gray-500 dark:text-gray-400 leading-snug">
           <span>{t('auth.newToSnagbiteNotice')} </span>
