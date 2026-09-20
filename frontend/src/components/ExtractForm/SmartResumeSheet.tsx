@@ -5,7 +5,7 @@ import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import { useExtractionQueue } from '../../context/ExtractionQueueContext';
 import { useModalOverlay } from '../../context/OverlayStackContext';
-import { hapticLight, hapticSuccess } from '../../utils/haptics';
+import { hapticLight, hapticMedium } from '../../utils/haptics';
 import { getSourceChannel } from '../../utils/sourceLabel';
 import type { LimitStatus } from '../../types';
 
@@ -53,7 +53,7 @@ export const SmartResumeSheet: React.FC<SmartResumeSheetProps> = ({
   const channel = getSourceChannel(nextItem.url);
 
   const handleStartAnalysis = () => {
-    hapticSuccess();
+    hapticMedium();
     try {
       sessionStorage.setItem('kb_smart_resume_seen', '1');
     } catch {

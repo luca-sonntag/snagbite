@@ -3,7 +3,7 @@ import { RefreshCw, Copy, ExternalLink, Bookmark, X, AlertCircle, Check } from '
 import { useI18n } from '../../context/I18nContext';
 import { useToast } from '../../context/ToastContext';
 import { resolveErrorCode } from '../../i18n';
-import { hapticLight, hapticSuccess } from '../../utils/haptics';
+import { hapticLight, hapticMedium } from '../../utils/haptics';
 import type { FailedExtractionEntry } from '../../context/ExtractionQueueContext';
 
 interface FailedJobCardProps {
@@ -24,7 +24,7 @@ export const FailedJobCard: React.FC<FailedJobCardProps> = ({
   const [copied, setCopied] = useState(false);
 
   const localizedError =
-    resolveErrorCode(entry.errorCode, entry.errorParams, entry.error, language) ||
+    resolveErrorCode(entry.errorCode, entry.errorParams ?? undefined, entry.error, language) ||
     t('error.default');
 
   const handleCopy = async (e: React.MouseEvent) => {
@@ -47,7 +47,7 @@ export const FailedJobCard: React.FC<FailedJobCardProps> = ({
   };
 
   const handleRetry = () => {
-    hapticSuccess();
+    hapticMedium();
     onRetry(entry.sourceUrl);
   };
 

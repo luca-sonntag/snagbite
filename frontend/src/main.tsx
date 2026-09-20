@@ -36,8 +36,8 @@ createRoot(document.getElementById('root')!).render(
             <DialogProvider>
               <TimerProvider>
                 <GamificationProvider>
-                  <ExtractionJobsProvider>
-                    <ExtractionQueueProvider>
+                  <ExtractionQueueProvider>
+                    <ExtractionJobsProvider>
                       <SocialProvider>
                         <PantryProvider>
                           <ErrorBoundary>
@@ -45,8 +45,8 @@ createRoot(document.getElementById('root')!).render(
                           </ErrorBoundary>
                         </PantryProvider>
                       </SocialProvider>
-                    </ExtractionQueueProvider>
-                  </ExtractionJobsProvider>
+                    </ExtractionJobsProvider>
+                  </ExtractionQueueProvider>
                 </GamificationProvider>
               </TimerProvider>
             </DialogProvider>

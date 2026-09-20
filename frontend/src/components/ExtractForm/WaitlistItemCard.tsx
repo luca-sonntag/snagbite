@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Play, Copy, ExternalLink, Trash2, Check, Globe } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useToast } from '../../context/ToastContext';
-import { hapticLight, hapticSuccess } from '../../utils/haptics';
+import { hapticLight, hapticMedium } from '../../utils/haptics';
 import { getSourceChannel } from '../../utils/sourceLabel';
 import type { WaitlistItem } from '../../context/ExtractionQueueContext';
 
@@ -56,7 +56,7 @@ export const WaitlistItemCard: React.FC<WaitlistItemCardProps> = ({
   };
 
   const handleAnalyze = () => {
-    hapticSuccess();
+    hapticMedium();
     onAnalyze(item.url);
   };
 
