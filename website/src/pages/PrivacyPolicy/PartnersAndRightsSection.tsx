@@ -56,11 +56,11 @@ export const PartnersAndRightsSection: React.FC = () => {
 
           <div className="p-4 rounded-xl glass-panel flex flex-col justify-between gap-2">
             <div>
-              <strong className="text-gray-900 dark:text-white block">Apify s.r.o. &amp; RapidAPI (Tschechien / USA)</strong>
+              <strong className="text-gray-900 dark:text-white block">RapidAPI / RapiData LLC (USA)</strong>
               <p className="mt-1 leading-relaxed">Beschaffung von öffentlich zugänglichen Beitragsmetadaten und CDN-Links zum vom Nutzer geteilten Social-Media-Beitrag.</p>
             </div>
-            <a href="https://apify.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:underline inline-flex items-center gap-1 mt-1">
-              Datenschutz Apify <ExternalLink className="w-3 h-3" />
+            <a href="https://rapidapi.com/privacy/" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:underline inline-flex items-center gap-1 mt-1">
+              Datenschutz RapidAPI <ExternalLink className="w-3 h-3" />
             </a>
           </div>
 
