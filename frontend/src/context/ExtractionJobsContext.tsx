@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import type { ExtractionJob } from '../types';
 import { parseSerializedError } from '../errorCodes';
 import { apiUrl } from '../api';
@@ -7,6 +7,7 @@ import { useI18n } from '../context/I18nContext';
 import { useToast } from './ToastContext';
 import { sendRecipeReadyNotification } from '../native';
 import { handleClientFrameRequest } from '../utils/videoFrames';
+import { useExtractionQueue } from './ExtractionQueueContext';
 import {
   type ExtractionMode,
   type ExtractionJobEntry,
@@ -44,6 +45,7 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
   const { getAccessToken } = useAuth();
   const { t } = useI18n();
   const toast = useToast();
+  const { addFailedJob, removeFromWaitlist, removeFailedJob } = useExtractionQueue();
 
   const [jobs, setJobs] = useState<ExtractionJobEntry[]>(() => loadPersisted());
 
@@ -184,9 +186,14 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
         dismissTimersRef.current.set(job.id, timer);
       }
 
+      if (job.sourceUrl) {
+        removeFromWaitlist(job.sourceUrl);
+        removeFailedJob(job.sourceUrl);
+      }
+
       window.dispatchEvent(new CustomEvent(EXTRACTION_COMPLETE_EVENT, { detail: { recipeId: job.recipeId } }));
     },
-    [dismissJob, setJobsPersist, t, toast]
+    [dismissJob, setJobsPersist, t, toast, removeFromWaitlist, removeFailedJob]
   );
 
   const pollJob = useCallback(
@@ -229,6 +236,18 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
           finalizedRef.current.add(id);
           const envelope = job.error ? parseSerializedError(job.error) : null;
           toast.danger(t('toast.recipeFailedTitle'));
+
+          const jobEntry = jobsRef.current.find((j) => j.id === id);
+          if (jobEntry && jobEntry.mode === 'link') {
+            addFailedJob({
+              sourceUrl: jobEntry.sourceLabel,
+              mode: 'link',
+              error: job.error ?? 'form.validation.failedExtraction',
+              errorCode: envelope?.code ?? null,
+              errorParams: envelope?.params ?? null,
+            });
+          }
+
           setJobsPersist((prev) =>
             prev.map((j) =>
               j.id === id
