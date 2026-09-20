@@ -20,9 +20,9 @@ export const AdMobAndAiSection: React.FC = () => {
             Eingesetzte Werbeformate &amp; Verarbeitungszwecke:
           </p>
           <ul className="list-disc pl-5 space-y-1.5">
-            <li><strong>MREC-Werbekarten:</strong> Statische oder animierte Anzeigenkarten während der Rezept-Extraktion.</li>
-            <li><strong>App-Open Interstitials:</strong> Gelegentliche bildschirmfüllende Anzeigen beim Starten bzw. Wiederaufrufen der App.</li>
-            <li><strong>Rewarded Video Ads (Belohnungswerbung):</strong> Nutzer der kostenlosen Version können sich freiwillig kurze Werbevideos ansehen, um zusätzliche Extraktions-Guthaben (Bonus-Credits) freizuschalten.</li>
+            <li><strong>Werbebanner:</strong> Kompakte Anzeigenkarten während der Rezept-Erstellung.</li>
+            <li><strong>Start-Anzeigen (App-Open):</strong> Gelegentliche Anzeigen beim Starten bzw. Wiederaufrufen der App.</li>
+            <li><strong>Belohnungsvideos (Rewarded Ads):</strong> Nutzer der kostenlosen Version können sich freiwillig kurze Werbevideos ansehen, um zusätzliche Extraktions-Credits freizuschalten.</li>
           </ul>
 
           <p className="font-semibold text-gray-800 dark:text-gray-200 pt-2">

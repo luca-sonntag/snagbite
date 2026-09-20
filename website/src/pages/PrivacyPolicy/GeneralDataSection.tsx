@@ -52,9 +52,8 @@ export const GeneralDataSection: React.FC = () => {
               Wenn du öffentlich zugängliche Rezept-Links (z.&nbsp;B. von Instagram, TikTok, YouTube Shorts, Facebook oder Websites) in Snagbite teilst oder einfügst:
             </p>
             <ul className="list-disc pl-5 text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <li><strong>Technischer Ablauf des Videoabrufs:</strong> Aus Gründen des Urheberrechts und des Datenschutzes lädt unser Backend-Server keine Videodateien herunter. Der Mediendownload erfolgt auf deine Veranlassung <strong>direkt über dein Endgerät und deine persönliche Internetverbindung</strong> von den CDN-Servern der jeweiligen Social-Media-Plattform.</li>
-              <li><strong>Flüchtige Verarbeitung im Arbeitsspeicher (RAM):</strong> Dein Endgerät decodiert das Video lokal im flüchtigen RAM zu 16 zeitlich verteilten Standbildern (Keyframes) und fügt diese zu einer Bildkachel zusammen, die zur Textextraktion übermittelt wird. Das Rohvideo wird <strong>nicht dauerhaft</strong> auf deinem Gerät oder unseren Servern gespeichert.</li>
-              <li><strong>Hinweis zu Verbindungsdaten &amp; Mobilfunk:</strong> Beim direkten Medienabruf wird deine IP-Adresse an die Server der jeweiligen Plattform (Meta, ByteDance, Google) übertragen. Bei Mobilfunkverbindungen fällt das übliche Datenvolumen deines Tarifs an.</li>
+              <li><strong>Direkter Medienabruf:</strong> Dein Endgerät ruft die öffentlich zugänglichen Mediendaten direkt von den Servern der jeweiligen Plattform ab. Dabei wird deine IP-Adresse an den jeweiligen Anbieter (Meta, ByteDance, Google) übertragen und es kann mobiles Datenvolumen deines Tarifs anfallen.</li>
+              <li><strong>Keine dauerhafte Speicherung:</strong> Das Video wird lediglich flüchtig zur Rezept-Erstellung verarbeitet und <strong>nicht dauerhaft</strong> auf deinem Gerät oder unseren Servern gespeichert.</li>
             </ul>
           </div>
 
@@ -64,7 +63,7 @@ export const GeneralDataSection: React.FC = () => {
               c) Foto-Import (Kochbuch-Scan &amp; Rezeptkarten per OCR)
             </h3>
             <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-              Du kannst eigene Fotos von physischen Rezepten (Buchseiten, Zeitschriftenartikel, handgeschriebene Notizen) über die Kamera oder Bildauswahl hochladen. Diese Fotos werden verschlüsselt an unseren privaten Storage-Bucket übermittelt und von Google Gemini Vision per Texterkennung analysiert. Nach erfolgreicher Extraktion (oder nach spätestens 24 Stunden) werden die Quelldateien vom Server unwiderruflich gelöscht.
+              Du kannst eigene Fotos von physischen Rezepten (Buchseiten, Zeitschriftenartikel, handgeschriebene Notizen) über die Kamera oder Bildauswahl hochladen. Diese Fotos werden verschlüsselt an unsere Server übermittelt und per Texterkennung analysiert. Nach erfolgreicher Rezept-Erstellung (spätestens nach 24 Stunden) werden die Originaldateien vollständig von unseren Servern gelöscht.
             </p>
           </div>
 

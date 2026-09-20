@@ -35,10 +35,10 @@ export const TermsServicesSection: React.FC = () => {
         <div className="p-4 rounded-2xl glass-panel text-xs text-gray-600 dark:text-gray-400 flex flex-col gap-2">
           <div className="font-bold text-gray-900 dark:text-white flex items-center gap-1.5 text-sm">
             <Video className="w-4 h-4 text-emerald-500" />
-            Technischer Ablauf: Clientseitiger Videoabruf auf Veranlassung des Nutzers
+            Medienabruf über dein Endgerät
           </div>
           <p className="leading-relaxed m-0">
-            Aus urheberrechtlichen Gründen lädt der Server von Snagbite keine Videodateien herunter. Der Medienabruf erfolgt technisch <strong>direkt auf deinem Endgerät und über deine Internetverbindung</strong> von den CDN-Servern der jeweiligen Plattform. Die Videodaten werden ausschließlich flüchtig im Arbeitsspeicher (RAM) decodiert, um Bildraster für die KI-Textextraktion zu erstellen. Es findet keine dauerhafte Speicherung der Rohvideodatei auf deinem Gerät oder unseren Servern statt. Für anfallenden mobilen Datenverbrauch bist du selbst verantwortlich.
+            Um Rezepte aus geteilten Video-Links zu erstellen, ruft die App die öffentlich zugänglichen Inhalte direkt über dein Endgerät ab. Die Videodaten werden dabei nur kurzzeitig zur Extraktion verarbeitet und nicht dauerhaft auf deinem Gerät oder unseren Servern gespeichert. Der Abruf ist ausschließlich für deinen privaten, nicht-kommerziellen Eigengebrauch bestimmt. Bei Mobilfunkverbindungen kann Datenvolumen deines Tarifs anfallen.
           </p>
         </div>
 
@@ -105,7 +105,7 @@ export const TermsServicesSection: React.FC = () => {
 
         <div className="space-y-2 text-xs text-gray-600 dark:text-gray-400">
           <p className="leading-relaxed">
-            <strong>Community-Rezepte &amp; Nutzerinhalte:</strong> Sofern du ein Rezept öffentlich freigibst (<code>visibility = 'public'</code>), räumst du uns das unentgeltliche, nicht-exklusive und weltweite Recht ein, diese Inhalte innerhalb der App für andere Nutzer anzuzeigen und suchbar zu machen. Du sicherst zu, dass deine geteilten Inhalte frei von Rechten Dritter sind.
+            <strong>Community-Rezepte &amp; Nutzerinhalte:</strong> Sofern du ein Rezept öffentlich für die Community freigibst, räumst du uns das unentgeltliche, nicht-exklusive und weltweite Recht ein, diese Inhalte innerhalb der App für andere Nutzer anzuzeigen und suchbar zu machen. Du sicherst zu, dass deine geteilten Inhalte frei von Rechten Dritter sind.
           </p>
           <p className="leading-relaxed">
             <strong>Verbot unzulässiger Inhalte &amp; Gamification-Fairness:</strong> Es ist untersagt, beleidigende, diskriminierende, pornografische oder rechtswidrige Inhalte (als Benutzername, Avatar, Rezepttitel oder Kochbeweisfoto) hochzuladen. Die Manipulation von Gamification-Werten (z.&nbsp;B. Einreichen gefälschter Kochfotos zur Erschleichung von XP) führt zur Aberkennung der Punkte und zum Ausschluss vom Leaderboard.

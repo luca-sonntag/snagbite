@@ -84,10 +84,10 @@ export const PartnersAndRightsSection: React.FC = () => {
       </section>
 
       <section id="dauer" className="scroll-mt-24 border-b border-gray-150 dark:border-gray-800 pb-8 flex flex-col gap-3">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">8. Speicherdauer &amp; Storage-Konzepte</h2>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">8. Speicherdauer der Daten</h2>
         <ul className="list-disc pl-5 text-xs text-gray-600 dark:text-gray-400 space-y-2 leading-relaxed">
-          <li><strong>Konto-, Rezept- und Profilinhalte:</strong> Werden für die Dauer deines aktiven Nutzerkontos gespeichert und bei Kontolöschung unwiderruflich entfernt.</li>
-          <li><strong>Foto-Import-Quelldateien:</strong> Werden flüchtig im Storage abgelegt und nach der OCR-Textextraktion unverzüglich, spätestens jedoch nach 24 Stunden, gelöscht.</li>
+          <li><strong>Konto-, Rezept- und Profilinhalte:</strong> Werden für die Dauer deines aktiven Benutzerkontos gespeichert und bei Kontolöschung unwiderruflich entfernt.</li>
+          <li><strong>Hochgeladene Rezeptfotos:</strong> Werden nach der Texterkennung unverzüglich, spätestens jedoch nach 24 Stunden, vollständig vom Server gelöscht.</li>
           <li><strong>Kochbeweis-Fotos:</strong> Werden privat gespeichert, solange das zugehörige Koch-Event in deiner Historie existiert oder bis du deinen Account löschst.</li>
           <li><strong>KI-Coverbilder:</strong> Bleiben gespeichert, solange das zugehörige Rezept in der Datenbank existiert.</li>
           <li><strong>Push-Tokens:</strong> Werden bei Deaktivierung in den Einstellungen oder Kontolöschung gelöscht.</li>
@@ -120,7 +120,7 @@ export const PartnersAndRightsSection: React.FC = () => {
           10. Community-Rezepte &amp; Sichtbarkeit
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-          Aus öffentlich zugänglichen Internet-Links extrahierte Rezepte werden standardmäßig als öffentlich (<code>visibility = 'public'</code>) eingestuft, um der Community Inspirationen und Vorrats-Rezeptvorschläge zu ermöglichen. Diese Rezepte werden <strong>strikt pseudonym</strong> bereitgestellt – ohne Verknüpfung zu deiner E-Mail-Adresse oder deinem Klarnamen. Eigene Foto-Scans und Remix-Rezepte sind stets standardmäßig privat. Du kannst die Sichtbarkeit deiner Rezepte jederzeit in den Rezept-Einstellungen anpassen.
+          Aus öffentlich zugänglichen Internet-Links erstellte Rezepte stehen der Community als öffentlich einsehbare Rezepte zur Verfügung, um Vorrats- und Rezeptideen zu teilen. Dies geschieht strikt pseudonym – ohne deinen Namen oder deine E-Mail-Adresse offenzulegen. Eigene Foto-Scans und persönliche Rezepte bleiben stets privat. Du kannst die Sichtbarkeit deiner Rezepte jederzeit in den Rezept-Einstellungen anpassen.
         </p>
       </section>
 
