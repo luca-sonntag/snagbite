@@ -4,6 +4,7 @@ const PremiumModal = lazy(() => import('./PremiumModal'));
 const WelcomeGuide = lazy(() => import('./WelcomeGuide'));
 const AlphaWelcome = lazy(() => import('./AlphaWelcome'));
 const PreAdTransparencySheet = lazy(() => import('./Ads/PreAdTransparencySheet'));
+import SmartResumeSheet from './ExtractForm/SmartResumeSheet';
 import { DevTools } from './DevTools';
 import { SHOW_PRE_AD_NOTICE_EVENT, markPreAdNoticeSeen } from '../utils/ads';
 import type { AppOverlaysProps } from '../types/app';
@@ -18,6 +19,9 @@ export const AppOverlays: React.FC<AppOverlaysProps> = ({
   showPreAdNotice: externalShowPreAdNotice,
   setShowPreAdNotice: externalSetShowPreAdNotice,
   onConfirmPreAdNotice,
+  limitStatus,
+  onAnalyzeUrl,
+  onNavigateExtract,
 }) => {
   // Mount the (lazy) premium modal only once it's first opened, then keep it
   // mounted so its close transition still runs.
@@ -109,6 +113,15 @@ export const AppOverlays: React.FC<AppOverlaysProps> = ({
             onOpenPremium={handleOpenPremiumFromPreAd}
           />
         </Suspense>
+      )}
+
+      {/* Smart Resume Sheet for Queued Recipes */}
+      {!showOnboarding && !showAlphaWelcome && !isPreAdNoticeOpen && onAnalyzeUrl && onNavigateExtract && (
+        <SmartResumeSheet
+          limitStatus={limitStatus}
+          onAnalyze={onAnalyzeUrl}
+          onNavigateToWaitlist={onNavigateExtract}
+        />
       )}
 
       {/* Dev mode in-app developer tools & console overlay */}
