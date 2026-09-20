@@ -106,8 +106,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 .setContentIntent(pendingIntent);
 
         // Preferred visual: the recipe's AI-generated cover, rendered as an expandable
-        // BigPictureStyle banner. Falls back to the gradient/emoji icon (BigTextStyle)
-        // when no cover was sent or the download failed.
+        // BigPictureStyle banner. Falls back to BigTextStyle when no cover was sent or download failed.
         String imageUrl = data != null ? data.get("imageUrl") : null;
         Bitmap coverBitmap = (imageUrl != null && !imageUrl.isEmpty()) ? fetchBitmap(imageUrl) : null;
 
@@ -119,14 +118,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                             .setSummaryText(body));
         } else {
             builder.setStyle(new NotificationCompat.BigTextStyle().bigText(body));
-
-            String iconUrl = data != null ? data.get("iconUrl") : null;
-            if (iconUrl != null && !iconUrl.isEmpty()) {
-                Bitmap iconBitmap = fetchBitmap(iconUrl);
-                if (iconBitmap != null) {
-                    builder.setLargeIcon(iconBitmap);
-                }
-            }
         }
 
         notificationManager.notify((int) System.currentTimeMillis(), builder.build());
