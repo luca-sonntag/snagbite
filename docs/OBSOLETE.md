@@ -6,6 +6,16 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-21: Entfernung des redundanten Duplikats `companyInfo.ts` zugunsten von `legal.ts`
+
+* **Ersetzter Code / Veraltete Struktur:**
+  - `website/src/companyInfo.ts`: Ein verwaistes, redundantes Duplikat der Stammdaten-Datei `website/src/legal.ts`, das ungenutzt im Repository verblieb und Gefahr lief, inhaltlich zu divergieren.
+* **Ersetzt durch:**
+  - **Single Source of Truth ([`website/src/legal.ts`](file:///c:/Users/lucas/source/repos/cookbook/website/src/legal.ts)):** Alle Webseiten und Rechtsdokumente (`LegalPage.tsx`, `PrivacyPolicyPage.tsx`, `TermsPage.tsx`, `DataDeletionPage.tsx`) beziehen Stammdaten, Anschrift, E-Mail und Preise einheitlich aus `legal.ts`.
+* **Betroffene Dateien:** `website/src/companyInfo.ts` (gelöscht), `website/src/legal.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-20: Entfernung des deckenden Bottom-Gradienten & aktiven Unterstrichs in `AppBottomNav`
 
 * **Ersetzter Code / Veraltete UI-Struktur:**
