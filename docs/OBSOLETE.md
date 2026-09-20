@@ -6,6 +6,22 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-20: Vollständige Entfernung des `bannerGenerator` und `/api/push-icon` Emoji-Icon-Fallbacks
+
+* **Ersetzter Code / Veraltete Architektur:**
+  - `backend/src/bannerGenerator.ts` & `backend/src/bannerGenerator.test.ts`: Nach der früheren Entfernung des großen 800x400 SVG-Banners verblieb die Datei ausschließlich für `generateIconPNG` (FCM Large-Icon Fallback `/api/push-icon?theme=...&emoji=...`).
+  - Endpunkt `GET /api/push-icon` in `backend/src/index.ts`.
+  - Gemini Prompt- & Schema-Felder `theme` und `emoji` in `generateNotificationCopy` (`backend/src/gemini.ts`), die ausschließlich für die Parametrisierung von `/api/push-icon` existierten.
+  - Dynamischer URL-Bau `${baseUrl}/api/push-icon` und `dataPayload.iconUrl = iconUrl` in `backend/src/notifications/worker.ts`.
+  - Android-seitiger Bitmap-Download von `data.get("iconUrl")` in `MyFirebaseMessagingService.java`.
+* **Ersetzt durch:**
+  - **Schlanke, bildfokussierte Benachrichtigungen:** Push-Benachrichtigungen setzen primär auf das echte KI-Cover des Rezepts (`BigPictureStyle`). Fehlt ein Cover (z. B. bei Reaktivierungs- oder Meilenstein-Nudges), greift direkt der native `BigTextStyle` mit dem App-eigenen `smallIcon`.
+  - **Token- und Latenz-Einsparung:** Das Gemini-Prompt-Schema in `generateNotificationCopy` fordert nur noch `title` und `body` an; die Generierung von Theme-Farben und Emojis entfällt vollständig.
+  - **Codebasis bereinigt:** Keine ungenutzten SVG-Gradienten-, Twemoji-/Noto-Emoji-Fetch- und Hex-Permutations-Logiken mehr im Backend.
+* **Betroffene Dateien:** `backend/src/bannerGenerator.ts` (gelöscht), `backend/src/bannerGenerator.test.ts` (gelöscht), `backend/src/index.ts`, `backend/src/notifications/worker.ts`, `backend/src/gemini.ts`, `frontend/android/app/src/main/java/at/snagbite/app/MyFirebaseMessagingService.java`, `docs/other/collaboration-plan.md`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-19: Veraltetes Open Food Facts Ranking & 4-Kandidaten-Flaschenhals im Ingredient Resolver
 
 * **Ersetzter Code / Anti-Pattern:**

@@ -26,7 +26,7 @@ fehlende Zutat für alles, was mit Teilen zu tun hat:
 | `FriendsView.tsx`, `LeaderboardView.tsx`, `Avatar.tsx` | `frontend/src/components/Social/` | UI-Heimat für alles Soziale |
 | `collections` + `recipe_collections` | `backend/supabase_schema.sql` | Basis für geteilte Sammlungen |
 | KI-Cover im **public** Bucket `recipe-covers` | `imageGenerator.ts` | Direkt verlinkbar, kein Signed-URL-Tanz |
-| `sharp` im Backend | `backend/src/bannerGenerator.ts` | Share-Cards serverseitig komponieren |
+| `sharp` im Backend | `backend/src/audit/iconGeometry.ts`, `imageGenerator.ts` | Share-Cards serverseitig komponieren (Sharp bereits im Backend) |
 | Deep Links `snagbite://invite/<code>` + Website-Landing | `frontend/src/App.tsx:73`, `website/src/pages/InviteLandingPage.tsx` | Blaupause für `snagbite://r/<token>` |
 | Push-Worker mit Kategorien/Frequenz-Cap | `backend/src/notifications/` | „X hat dir ein Rezept geschickt" |
 | Gamification (XP, Coins, Streaks, Badges) | `docs/architecture/gamification.md` | Soziale Anreize andocken |
@@ -151,8 +151,8 @@ Nutzer etwas Neues tun müssen.
 
 ### E. Share-Card fürs Story-Sharing (serverseitig via `sharp`)
 Ein 9:16- bzw. 4:5-PNG aus Cover + Titel + Emoji + Kochzeit + dezentem Snagbite-Branding
-und QR/Kurzlink. `bannerGenerator.ts` macht mit `sharp` bereits genau diese Art von
-Komposition — das ist ein kurzer Weg zu einem sehr sichtbaren Ergebnis.
+und QR/Kurzlink. Mit `sharp` (im Backend bereits für Bildverarbeitung im Einsatz) kann
+diese Art von Komposition schlank umgesetzt werden — das ist ein kurzer Weg zu einem sehr sichtbaren Ergebnis.
 Über `@capacitor/share` (schon als Dependency da, siehe `FriendsView.tsx:71`) direkt
 in Instagram Stories teilbar.
 
