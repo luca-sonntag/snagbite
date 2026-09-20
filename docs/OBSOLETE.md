@@ -6,7 +6,20 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
-### 2026-09-20: Vollständige Entfernung des `bannerGenerator` und `/api/push-icon` Emoji-Icon-Fallbacks
+### 2026-09-20: Entfernung des deckenden Bottom-Gradienten & aktiven Unterstrichs in `AppBottomNav`
+
+* **Ersetzter Code / Veraltete UI-Struktur:**
+  - `activeIndicator` (`<span className="absolute bottom-0 w-5 h-0.5 bg-emerald-600 rounded-full ..."/>`): Ein Unterstrich unter dem Label des aktiven Navigationstabs in `AppBottomNav.tsx`.
+  - Fester Gradienten-Backdrop (`<div className="fixed bottom-0 inset-x-0 h-28 pointer-events-none z-30 bg-gradient-to-t from-[#f8fafc] via-[#f8fafc]/80 to-transparent dark:from-[#000000] ..."/>`): Eine 112px hohe Maske am unteren Bildschirmrand, die scrollende Inhalte hinter und um die Navigationsleiste weiß bzw. schwarz ausblendete.
+* **Ersetzt durch:**
+  - **Kompaktes Floating-Pill-Design:** Reines Frosted-Glass (`bg-white/85 dark:bg-gray-900/85 backdrop-blur-md`) ohne störenden Gradienten-Schleier, wodurch scrollende Inhalte rundherum um die Bar sichtbar bleiben.
+  - **Schlankere Typografie & Farbkodierung:** Aktiver Zustand wird pur über Akzentfarbe (`text-emerald-600 dark:text-emerald-400`) und `font-bold` signalisiert; der Unterstrich entfällt für ein ruhigeres Gesamtbild.
+  - **Optimiertes Spacing:** Reduzierte Innenabstände (`py-2 px-3` statt `py-2.5 px-2`) und optimierte Button-Mindesthöhe (`min-h-[46px]` statt `48px`), um Bildschirmfläche zu sparen.
+* **Betroffene Dateien:** `frontend/src/components/AppBottomNav.tsx`, `docs/OBSOLETE.md`.
+
+---
+
+
 
 * **Ersetzter Code / Veraltete Architektur:**
   - `backend/src/bannerGenerator.ts` & `backend/src/bannerGenerator.test.ts`: Nach der früheren Entfernung des großen 800x400 SVG-Banners verblieb die Datei ausschließlich für `generateIconPNG` (FCM Large-Icon Fallback `/api/push-icon?theme=...&emoji=...`).
