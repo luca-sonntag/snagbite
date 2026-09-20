@@ -41,7 +41,7 @@ export default function AuthForm() {
           </div>
 
           <div className="space-y-1.5 mb-2">
-            <h1 className="text-3xl font-black bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 bg-clip-text text-transparent tracking-tight">
+            <h1 className="text-3xl font-black text-emerald-500 dark:text-emerald-400 tracking-tight">
               {t('app.title')}
             </h1>
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400 max-w-[280px]">
