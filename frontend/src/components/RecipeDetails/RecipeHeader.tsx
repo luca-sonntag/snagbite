@@ -1,32 +1,17 @@
 import { useState } from 'react';
-import { Popover, Button } from '@heroui/react';
-import { MoreVertical, Check, Copy, ShoppingCart, Trash2, Folder, Tag, Plus, Star } from 'lucide-react';
-import type { Recipe } from '../../types';
+import { Tag, Clock, Users } from 'lucide-react';
 import RecipeImageGallery from '../RecipeImageGallery';
 import { useI18n } from '../../context/I18nContext';
-import { isPhotoImportUrl } from '../../utils/photoImport';
+import { getRecipeCategoryLabel } from '../../i18n';
 import { useCookHistory } from '../../hooks/useCookHistory';
 import { formatRelative } from '../../utils/formatRelative';
+import { hapticLight } from '../../utils/haptics';
+import RecipeRemixList from './RecipeRemixList';
+import IncompleteSourceCard from './IncompleteSourceCard';
+import RecipeHeaderActions from './RecipeHeaderActions';
+import { getHealthScoreColor, getHealthScoreLetter } from './HealthScoreBadge';
 
-interface RecipeHeaderProps {
-  recipe: Recipe;
-  reelUrl?: string;
-  createdAt?: string;
-  onBack?: () => void;
-  onNavigateToShoppingList?: () => void;
-  onDelete?: () => void;
-  onCopyRecipe: () => void;
-  isCopied: boolean;
-  isParentAvailable?: boolean;
-  onNavigateToRecipe?: (recipeId: string) => void;
-  parentRecipeTitle?: string | null;
-  onAssignCollections?: () => void;
-  onManageFlags?: () => void;
-  flags?: string[];
-  isFavorite?: boolean;
-  onToggleFavorite?: () => void;
-  cookRefreshKey?: number;
-}
+import type { RecipeHeaderProps } from './types';
 
 export default function RecipeHeader({
   recipe,
@@ -46,230 +31,113 @@ export default function RecipeHeader({
   isFavorite = false,
   onToggleFavorite,
   cookRefreshKey = 0,
+  onRemixClick,
+  totalTimeLabel,
 }: RecipeHeaderProps) {
   const { t, language } = useI18n();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { history } = useCookHistory(recipe.id, cookRefreshKey);
-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-
-  // The description is clamped to two lines so the ingredient list starts
-  // higher up. Only offer the toggle for texts that actually get cut off —
-  // roughly two lines' worth of characters at the mobile width.
-  const isDescriptionLong = (recipe.description?.length ?? 0) > 90;
-
   const resolvedParentTitle = parentRecipeTitle || recipe.parentRecipeTitle;
+
+  const healthScoreNum = typeof recipe.healthScore === 'number' ? recipe.healthScore : null;
+  const healthColor = healthScoreNum !== null ? getHealthScoreColor(healthScoreNum) : null;
+  const healthLetter = healthScoreNum !== null ? getHealthScoreLetter(healthScoreNum) : null;
+
+  const topRightActions = (
+    <RecipeHeaderActions
+      isFavorite={isFavorite}
+      onToggleFavorite={onToggleFavorite}
+      isMenuOpen={isMenuOpen}
+      setIsMenuOpen={setIsMenuOpen}
+      onAssignCollections={onAssignCollections}
+      onManageFlags={onManageFlags}
+      onCopyRecipe={onCopyRecipe}
+      isCopied={isCopied}
+      onNavigateToShoppingList={onNavigateToShoppingList}
+      onDelete={onDelete}
+      reelUrl={reelUrl}
+      sourceUrl={recipe.sourceUrl}
+      createdAt={createdAt}
+    />
+  );
 
   return (
     <>
-      {/* Responsive Image Gallery */}
-      <RecipeImageGallery recipe={recipe} reelUrl={reelUrl} onBack={onBack} />
+      {/* Responsive Image Gallery with Hero Cover Title & Scrim */}
+      <RecipeImageGallery
+        recipe={recipe}
+        reelUrl={reelUrl}
+        onBack={onBack}
+        topRightActions={topRightActions}
+      />
 
-      {/* Recipe title header */}
-      <div className="relative p-2 flex flex-col gap-2">
-        {/* Top right action buttons */}
-        <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
-          {onToggleFavorite && (
-            <Button
-              isIconOnly
-              onClick={onToggleFavorite}
-              className={`w-11 h-11 min-w-[44px] min-h-[44px] flex-shrink-0 border-none rounded-xl flex items-center justify-center transition-all ${
-                isFavorite
-                  ? 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20'
-                  : 'bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
-              }`}
-              aria-label="Toggle Favorite"
-            >
-              <Star className={`w-5 h-5 ${isFavorite ? 'fill-amber-500 text-amber-500' : ''}`} />
-            </Button>
-          )}
-          <Popover isOpen={isMenuOpen} onOpenChange={setIsMenuOpen}>
-            <Popover.Trigger>
-              <Button
-                isIconOnly
-                className="w-11 h-11 min-w-[44px] min-h-[44px] flex-shrink-0 bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white border-none rounded-xl flex items-center justify-center transition-all"
-                aria-label="Options"
-              >
-                <MoreVertical className="w-5 h-5" />
-              </Button>
-            </Popover.Trigger>
-            <Popover.Content placement="bottom end" className="p-1.5 min-w-[180px] bg-white dark:bg-gray-950 border border-black/10 dark:border-white/10 rounded-xl shadow-lg">
-              <div className="flex flex-col w-full">
-                {onAssignCollections && (
-                  <button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      onAssignCollections();
-                    }}
-                    className="flex items-center gap-3 w-full px-4.5 py-3.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg text-left transition-colors cursor-pointer outline-none border-none"
-                  >
-                    <Folder className="w-4 h-4 text-emerald-500" />
-                    <span>{t('catalog.bulkAddToCollection') || 'Zu Sammlung hinzufügen'}</span>
-                  </button>
-                )}
+      {/* Recipe details body below cover (Sheet-Overlap with inverted curve on canvas) */}
+      <div className="relative -mt-6 -mx-4 rounded-t-3xl sm:rounded-t-[2rem] bg-[#f8fafc] dark:bg-gray-950 px-4 pt-5 pb-2 shadow-[0_-4px_12px_-3px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_12px_-3px_rgba(0,0,0,0.25)] flex flex-col gap-3 z-20">
 
-                {onManageFlags && (
-                  <button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      onManageFlags();
-                    }}
-                    className="flex items-center gap-3 w-full px-4.5 py-3.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg text-left transition-colors cursor-pointer outline-none border-none"
-                  >
-                    <Tag className="w-4 h-4 text-emerald-500" />
-                    <span>{t('catalog.manageRecipeFlagsTitle') || 'Labels verwalten'}</span>
-                  </button>
-                )}
-
-                <button
-                  onClick={() => {
-                    onCopyRecipe();
-                    setIsMenuOpen(false);
-                  }}
-                  className="flex items-center gap-3 w-full px-4.5 py-3.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg text-left transition-colors cursor-pointer outline-none border-none"
-                >
-                  {isCopied ? (
-                    <>
-                      <Check className="w-4 h-4 text-emerald-500" />
-                      <span className="text-emerald-500 font-bold">{t('recipe.copied')}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-4 h-4 text-emerald-500" />
-                      <span>{t('recipe.copyRecipe')}</span>
-                    </>
-                  )}
-                </button>
-
-                {onNavigateToShoppingList && (
-                  <button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      onNavigateToShoppingList();
-                    }}
-                    className="flex items-center gap-3 w-full px-4.5 py-3.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg text-left transition-colors cursor-pointer outline-none border-none"
-                  >
-                    <ShoppingCart className="w-4 h-4 text-emerald-500" />
-                    <span>{t('recipe.goToShoppingList')}</span>
-                  </button>
-                )}
-
-                {onDelete && (
-                  <button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      onDelete();
-                    }}
-                    className="flex items-center gap-3 w-full px-4.5 py-3.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/10 rounded-lg text-left transition-colors cursor-pointer outline-none border-none"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    <span>{t('recipe.delete')}</span>
-                  </button>
-                )}
-              </div>
-            </Popover.Content>
-          </Popover>
-        </div>
-
-        {/* Creator handle + Title: no gap between handle and title, padded right so title wraps before buttons */}
-        <div className={onToggleFavorite ? 'pr-[100px]' : 'pr-[52px]'}>
-          {(recipe.instagramHandle || isPhotoImportUrl(reelUrl)) && (
-            <div className="text-xs font-extrabold uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-500 dark:from-emerald-400 dark:via-teal-300 dark:to-emerald-300 mb-0.5 leading-none select-none">
-              {recipe.instagramHandle || '@PHOTOIMPORT'}
-            </div>
-          )}
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white leading-tight break-words">{recipe.title}</h2>
-        </div>
-
-        {/* Remix link, description, tags, saved date */}
-        {recipe.parentJobId && resolvedParentTitle && (
-          <div className="text-xs flex flex-wrap items-center gap-1 text-gray-500 dark:text-gray-400 leading-normal break-words">
-            <span>{t('remix.parentLinkPrefix') || 'Abgewandelt von'}</span>
-            {isParentAvailable ? (
-              <button
-                type="button"
-                onClick={() => onNavigateToRecipe?.(recipe.parentJobId!)}
-                className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-0.5 cursor-pointer outline-none border-none p-0 bg-transparent text-left leading-normal"
-              >
-                {resolvedParentTitle}
-              </button>
-            ) : (
-              <span className="font-semibold text-gray-400 dark:text-gray-500 italic">
-                {resolvedParentTitle} ({t('remix.parentLinkDeleted') || 'gelöscht'})
+        {/* Editorial Quick-Facts Lead-in: Category · Total Time · Servings · Health Score · Flags */}
+        {(recipe.category || totalTimeLabel || (recipe.servings && recipe.servings > 0) || (healthColor && healthLetter) || (flags && flags.length > 0) || (history && history.count > 0)) && (
+          <div className="flex flex-wrap items-center gap-2">
+            {recipe.category && (
+              <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold text-xs select-none border-none">
+                <span>{getRecipeCategoryLabel(recipe.category, language)}</span>
               </span>
             )}
-            {recipe.remixPrompt && (
-              <span className="italic text-gray-400 dark:text-gray-500 ml-1">
-                ({recipe.remixPrompt})
+            {totalTimeLabel && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-xs select-none">
+                <Clock className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
+                <span>{totalTimeLabel}</span>
               </span>
             )}
-          </div>
-        )}
-        {recipe.description && (
-          <div>
-            <p
-              className={`text-sm text-gray-600 dark:text-gray-400 leading-relaxed break-words ${isDescriptionExpanded || !isDescriptionLong ? '' : 'line-clamp-2'
-                }`}
-            >
-              {recipe.description}
-            </p>
-            {isDescriptionLong && (
+            {recipe.servings && recipe.servings > 0 && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-xs select-none">
+                <Users className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
+                <span>{t('recipe.servingsCount', { count: recipe.servings }) || `${recipe.servings} Portionen`}</span>
+              </span>
+            )}
+            {healthColor && healthLetter && healthScoreNum !== null && (
               <button
                 type="button"
-                onClick={() => setIsDescriptionExpanded(v => !v)}
-                className="mt-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer outline-none border-none bg-transparent p-0"
+                onClick={() => {
+                  hapticLight();
+                  const el = document.getElementById('details');
+                  if (el) {
+                    const stickyTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--app-sticky-top') || '0', 10);
+                    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - (stickyTop + 80), behavior: 'smooth' });
+                  }
+                }}
+                className={`w-6 h-6 rounded-full ${healthColor.pillBg} text-white font-black text-xs flex items-center justify-center leading-none shadow-2xs shrink-0 select-none cursor-pointer active:scale-95 transition-transform border-none outline-none`}
+                title={`Health Score: ${healthLetter} (${healthScoreNum}/100)`}
+                aria-label={`Health Score: ${healthLetter}`}
               >
-                {isDescriptionExpanded ? t('recipe.descriptionLess') : t('recipe.descriptionMore')}
+                {healthLetter}
               </button>
             )}
-          </div>
-        )}
-        {((flags && flags.length > 0) || onManageFlags) && (
-          <div className="flex flex-wrap gap-1.5 mt-1">
-            {flags && flags.map((flag, idx) => (
-              <span
+            {flags && flags.length > 0 && flags.map((flag, idx) => (
+              <button
                 key={`flag-${idx}`}
-                className="bg-amber-500/10 text-amber-600 dark:text-amber-400 text-sm font-bold px-3 py-1 rounded-full select-none whitespace-nowrap border border-amber-500/20 flex items-center gap-1"
-              >
-                <Tag className="w-3.5 h-3.5" />
-                {flag}
-              </span>
-            ))}
-            {onManageFlags && (
-              <button
                 type="button"
-                onClick={onManageFlags}
-                className="bg-transparent border border-dashed border-black/20 dark:border-white/20 hover:border-black/40 dark:hover:border-white/40 text-gray-500 hover:text-emerald-500 dark:text-gray-400 text-sm font-bold px-3 py-1 rounded-full select-none whitespace-nowrap flex items-center gap-1 active:scale-95 transition-all cursor-pointer outline-none"
+                onClick={() => { hapticLight(); onManageFlags?.(); }}
+                disabled={!onManageFlags}
+                className={`bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-semibold px-3 py-1.5 rounded-full select-none whitespace-nowrap border-none flex items-center gap-1.5 outline-none ${
+                  onManageFlags ? 'cursor-pointer active:scale-95 transition-all' : ''
+                }`}
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span>{language === 'de' ? 'Label' : 'Label'}</span>
+                <Tag className="w-3 h-3" />
+                <span>{flag}</span>
               </button>
-            )}
-          </div>
-        )}
-        {(createdAt || (history && history.count > 0)) && (
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-400 dark:text-gray-500 font-medium mt-1 select-none">
-            {createdAt && (
-              <span>
-                {t('catalog.savedOn', { date: new Date(createdAt).toLocaleDateString(language) })}
-              </span>
-            )}
-            {createdAt && history && history.count > 0 && <span>·</span>}
+            ))}
             {history && history.count > 0 && (
               <button
                 type="button"
                 onClick={() => {
+                  hapticLight();
                   const el = document.getElementById('cook-history');
                   if (el) {
-                    const stickyTopHeight = parseInt(
-                      getComputedStyle(document.documentElement).getPropertyValue('--app-sticky-top') || '0',
-                      10
-                    );
-                    const offset = stickyTopHeight + 80;
-                    const elementPosition = el.getBoundingClientRect().top + window.scrollY;
-                    window.scrollTo({ top: elementPosition - offset, behavior: 'smooth' });
+                    const stickyTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--app-sticky-top') || '0', 10);
+                    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - (stickyTop + 80), behavior: 'smooth' });
                   }
                 }}
-                className="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer outline-none bg-transparent p-0 border-none transition-colors"
+                className="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-95 cursor-pointer outline-none border-none transition-all select-none"
               >
                 <span>{t('app.gamification.cookedChip', { count: history.count })}</span>
                 {history.lastCookedAt && (
@@ -280,6 +148,44 @@ export default function RecipeHeader({
               </button>
             )}
           </div>
+        )}
+
+        {/* Remix link, description, tags, saved date */}
+        {recipe.parentRecipeId && resolvedParentTitle && (
+          <div className="text-xs flex flex-wrap items-center gap-1 text-gray-500 dark:text-gray-400 leading-normal break-words">
+            <span>{t('remix.parentLinkPrefix') || 'Abgewandelt von'}</span>
+            {isParentAvailable ? (
+              <button
+                type="button"
+                onClick={() => onNavigateToRecipe?.(recipe.parentRecipeId!)}
+                className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-0.5 cursor-pointer outline-none border-none p-0 bg-transparent text-left leading-normal"
+              >{resolvedParentTitle}</button>
+            ) : (
+              <span className="font-semibold text-gray-400 dark:text-gray-500 italic">
+                {resolvedParentTitle} ({t('remix.parentLinkDeleted') || 'gelöscht'})
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Description as clean editorial intro */}
+        {recipe.description && (
+          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed break-words font-normal">
+            {recipe.description}
+          </p>
+        )}
+
+        {recipe.hasIncompleteSourceInfo && (
+          <IncompleteSourceCard />
+        )}
+
+        {/* User's private remixes carousel for this recipe (only on top-level original recipes) */}
+        {recipe.id && !recipe.parentRecipeId && (
+          <RecipeRemixList
+            parentRecipeId={recipe.id}
+            onNavigateToRecipe={onNavigateToRecipe}
+            onRemixClick={onRemixClick}
+          />
         )}
       </div>
     </>

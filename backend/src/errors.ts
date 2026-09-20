@@ -27,6 +27,9 @@ export type AppErrorCode =
   | 'TOO_MANY_PHOTOS'
   | 'PHOTOS_TOO_LARGE'
   | 'PHOTO_REQUIRED'
+  | 'TOO_MANY_FRAMES'
+  | 'FRAMES_TOO_LARGE'
+  | 'FRAMES_NOT_EXPECTED'
   | 'PARENT_JOB_NOT_COMPLETED'
   // ── Auth (401) ────────────────────────────────────────────────────────────
   | 'UNAUTHORIZED'
@@ -62,6 +65,13 @@ export type AppErrorCode =
   | 'REMIX_CONFIRM_FAILED'
   | 'CHAT_FAILED'
   | 'ACCOUNT_DELETE_FAILED'
+  // ── Social (friends / profile) ────────────────────────────────────────────
+  | 'FRIEND_CODE_INVALID'
+  | 'FRIEND_SELF'
+  | 'ALREADY_FRIENDS'
+  | 'REQUEST_EXISTS'
+  | 'FRIENDSHIP_NOT_FOUND'
+  | 'PROFILE_NAME_INVALID'
   | 'INTERNAL_ERROR';
 
 /** Structured, JSON-serializable values interpolated into the localized message. */
@@ -80,6 +90,9 @@ const DEFAULT_STATUS: Record<AppErrorCode, number> = {
   TOO_MANY_PHOTOS: 400,
   PHOTOS_TOO_LARGE: 413,
   PHOTO_REQUIRED: 400,
+  TOO_MANY_FRAMES: 400,
+  FRAMES_TOO_LARGE: 413,
+  FRAMES_NOT_EXPECTED: 409,
   PARENT_JOB_NOT_COMPLETED: 400,
   UNAUTHORIZED: 401,
   PREMIUM_REQUIRED: 403,
@@ -110,6 +123,12 @@ const DEFAULT_STATUS: Record<AppErrorCode, number> = {
   REMIX_CONFIRM_FAILED: 500,
   CHAT_FAILED: 500,
   ACCOUNT_DELETE_FAILED: 500,
+  FRIEND_CODE_INVALID: 404,
+  FRIEND_SELF: 400,
+  ALREADY_FRIENDS: 409,
+  REQUEST_EXISTS: 409,
+  FRIENDSHIP_NOT_FOUND: 404,
+  PROFILE_NAME_INVALID: 400,
   INTERNAL_ERROR: 500,
 };
 

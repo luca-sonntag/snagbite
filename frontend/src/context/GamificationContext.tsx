@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { apiUrl } from '../api';
 import { useAuth } from './AuthContext';
 import { useI18n } from './I18nContext';
+import { useToast } from './ToastContext';
 import type { CookedResult, GamificationSnapshot } from '../types';
 import RewardOverlay from '../components/RewardOverlay';
 import { scheduleStreakReminder } from '../utils/streakReminder';
@@ -23,7 +24,7 @@ interface GamificationState {
    * Returns the full result (or null when unauthenticated); throws on network
    * failure so the caller can surface an error.
    */
-  markCooked: (jobId: string, opts?: MarkCookedOptions) => Promise<CookedResult | null>;
+  markCooked: (recipeId: string, opts?: MarkCookedOptions) => Promise<CookedResult | null>;
 }
 
 const GamificationContext = createContext<GamificationState | undefined>(undefined);
@@ -31,6 +32,7 @@ const GamificationContext = createContext<GamificationState | undefined>(undefin
 export function GamificationProvider({ children }: { children: React.ReactNode }) {
   const { session, getAccessToken } = useAuth();
   const { t } = useI18n();
+  const toast = useToast();
   const [snapshot, setSnapshot] = useState<GamificationSnapshot | null>(null);
   const [loading, setLoading] = useState(false);
   const [reward, setReward] = useState<CookedResult | null>(null);
@@ -66,7 +68,7 @@ export function GamificationProvider({ children }: { children: React.ReactNode }
   }, [session, refresh]);
 
   const markCooked = useCallback(
-    async (jobId: string, opts?: MarkCookedOptions): Promise<CookedResult | null> => {
+    async (recipeId: string, opts?: MarkCookedOptions): Promise<CookedResult | null> => {
       const token = await getAccessToken();
       if (!token) return null;
 
@@ -75,21 +77,21 @@ export function GamificationProvider({ children }: { children: React.ReactNode }
       if (opts?.viaCookingMode) body.viaCookingMode = true;
       if (opts?.timerElapsed) body.timerElapsed = true;
 
-      const res = await fetch(apiUrl(`/api/jobs/${jobId}/cooked`), {
+      const res = await fetch(apiUrl(`/api/recipes/${recipeId}/cooked`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(body),
       });
       if (!res.ok) {
-        let errJson: any;
+        let errJson: { error?: string; code?: string; params?: Record<string, unknown> } | undefined;
         try {
-          errJson = await res.json();
+          errJson = (await res.json()) as { error?: string; code?: string; params?: Record<string, unknown> };
         } catch {
           /* non-JSON response */
         }
         const errObj = new Error(errJson?.error || 'Failed to record cook') as Error & {
           code?: string;
-          params?: Record<string, any>;
+          params?: Record<string, unknown>;
         };
         if (errJson?.code) errObj.code = errJson.code;
         if (errJson?.params) errObj.params = errJson.params;
@@ -115,19 +117,41 @@ export function GamificationProvider({ children }: { children: React.ReactNode }
       // Async refresh to fetch latest photos from backend
       refresh();
 
+      // Dispatch event to notify components (e.g. useRecipeProgress, useMealPlanBadge) to update state
+      try {
+        window.dispatchEvent(
+          new CustomEvent('app:recipe-cooked', {
+            detail: { recipeId, duplicate: result.duplicate },
+          })
+        );
+        window.dispatchEvent(new CustomEvent('meal-plans-updated'));
+      } catch (e) {
+        console.warn('Failed to dispatch app:recipe-cooked event', e);
+      }
+
       // Only celebrate a real reward (a duplicate re-tap awards nothing).
       if (!result.duplicate && (result.earned.xp > 0 || result.newBadges.length > 0)) {
         setReward(result);
         if (result.stats.currentStreak >= 1) {
-          scheduleStreakReminder(result.stats.currentStreak, {
+          const streak = result.stats.currentStreak;
+          const bodyKey = streak === 1 ? 'app.gamification.streakReminder.bodyOne' : 'app.gamification.streakReminder.bodyOther';
+          scheduleStreakReminder(streak, {
             title: t('app.gamification.streakReminder.title'),
-            body: t('app.gamification.streakReminder.body', { days: result.stats.currentStreak }),
+            body: t(bodyKey, {
+              weeks: streak,
+              days: streak,
+              count: streak,
+            }),
           });
         }
+      } else if (result.duplicate) {
+        toast.info(t('app.gamification.toastDuplicate'));
+      } else {
+        toast.success(t('app.gamification.toastCookedNoXp'));
       }
       return result;
     },
-    [getAccessToken],
+    [getAccessToken, refresh, t, toast],
   );
 
   return (

@@ -1,10 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 // Versioned key: bump the suffix to re-show the guide to everyone after a
 // major onboarding revamp. Matches the app's other localStorage-gated
 // preferences (theme, recipe_language).
-const ONBOARDING_KEY = 'snagbite_onboarding_v1_seen';
+export const ONBOARDING_KEY = 'snagbite_onboarding_v1_seen';
 
 /**
  * First-launch onboarding gate.
@@ -24,9 +24,20 @@ export function useOnboarding() {
 
   const metadataCompleted = user?.user_metadata?.onboarding_completed === true;
 
+  // If the user is currently authenticated or has completed metadata, mark onboarding
+  // as seen locally so signing out won't mistakenly show the first-launch guide.
+  useEffect(() => {
+    if (user || metadataCompleted) {
+      if (localStorage.getItem(ONBOARDING_KEY) !== 'true') {
+        localStorage.setItem(ONBOARDING_KEY, 'true');
+      }
+      setSeen(true);
+    }
+  }, [user, metadataCompleted]);
+
   // Show on first launch, unless already completed locally or on another
   // device — but an explicit replay always wins.
-  const shouldShow = replaying || (!seen && !metadataCompleted);
+  const shouldShow = replaying || (!seen && !metadataCompleted && !user);
 
   const complete = useCallback(() => {
     localStorage.setItem(ONBOARDING_KEY, 'true');

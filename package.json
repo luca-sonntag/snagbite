@@ -6,17 +6,26 @@
   "workspaces": [
     "backend",
     "frontend",
-    "healthcheck"
+    "healthcheck",
+    "website",
+    "shared"
   ],
   "scripts": {
-    "dev": "concurrently -n \"backend,frontend\" -c \"blue,green\" \"npm run dev -w backend\" \"npm run dev -w frontend\"",
-    "build": "npm run build -w frontend && npm run build -w backend",
+    "dev": "concurrently -n \"backend,frontend,website\" -c \"blue,green,magenta\" \"npm run dev -w backend\" \"npm run dev -w frontend\" \"npm run dev -w website\"",
+    "build": "npm run build -w shared && npm run build -w frontend && npm run build -w backend",
     "start": "npm run start -w backend",
     "preview": "npm run preview -w backend",
     "deploy": "powershell -ExecutionPolicy Bypass -File deploy.ps1",
     "deploy:all:internal": "powershell -ExecutionPolicy Bypass -File deploy.ps1 -All -Bump patch -Track internal",
     "deploy:all:alpha": "powershell -ExecutionPolicy Bypass -File deploy.ps1 -All -Bump patch -Track alpha",
-    "healthcheck": "npm run start --prefix healthcheck"
+    "healthcheck": "npm run start --prefix healthcheck",
+    "generate:ingredient-image": "npm run generate:ingredient-image -w backend --",
+    "generate:basename-icons": "npm run generate:basename-icons -w backend --",
+    "icons:zip": "npm run icons:zip -w backend",
+    "icons:unpack": "npm run icons:unpack -w backend",
+    "cap:live": "npm run cap:live -w frontend",
+    "cap:live:cloud": "npm run cap:live:cloud -w frontend",
+    "cap:run:local": "npm run cap:run:local -w frontend"
   },
   "devDependencies": {
     "concurrently": "^10.0.3"

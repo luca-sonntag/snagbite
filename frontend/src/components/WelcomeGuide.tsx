@@ -14,7 +14,9 @@ import {
   Tag,
 } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
+import { useModalOverlay } from '../context/OverlayStackContext';
 import { ShareStep2Mockup, ShareStep3Mockup } from './ShareMockups';
+import { hapticLight, hapticSelection, hapticMedium } from '../utils/haptics';
 
 interface WelcomeGuideProps {
   /** Called on skip and on the final CTA. */
@@ -26,7 +28,7 @@ interface WelcomeGuideProps {
 const WelcomeArt = () => (
   <div className="relative">
     <div className="absolute inset-0 rounded-[2rem] bg-emerald-500/25 blur-2xl" />
-    <div className="relative w-28 h-28 rounded-[2rem] bg-white dark:bg-gray-900 border border-black/5 dark:border-white/10 flex items-center justify-center shadow-xl">
+    <div className="relative w-28 h-28 rounded-[2rem] bg-white dark:bg-gray-900 border-none flex items-center justify-center shadow-xl">
       <img src="/icon-512.png" alt="" className="w-16 h-16 object-contain rounded-2xl" />
     </div>
     <div className="absolute -top-2 -right-2 w-9 h-9 rounded-full bg-amber-400 flex items-center justify-center shadow-lg shadow-amber-500/30">
@@ -47,7 +49,7 @@ const CookbookArt = () => (
     {[0, 1].map((i) => (
       <div
         key={i}
-        className="rounded-2xl bg-white dark:bg-gray-900 border border-black/5 dark:border-white/10 shadow-sm overflow-hidden"
+        className="rounded-2xl bg-white dark:bg-gray-900 border-none shadow-sm overflow-hidden"
       >
         <div className="h-20 bg-gradient-to-br from-emerald-500/25 to-teal-500/10 flex items-center justify-center">
           <ChefHat className="w-7 h-7 text-emerald-500/50" />
@@ -73,7 +75,7 @@ const OrganizeArt = () => {
       {chips.map(({ icon: Icon, label, tint }, i) => (
         <div
           key={i}
-          className={`flex items-center gap-2 px-3.5 py-2.5 rounded-full border border-black/5 dark:border-white/10 shadow-sm ${tint}`}
+          className={`flex items-center gap-2 px-3.5 py-2.5 rounded-full border-none shadow-sm ${tint}`}
         >
           <Icon className="w-4 h-4 shrink-0" strokeWidth={2} />
           <div className={`h-2 rounded bg-current opacity-40 ${label}`} />
@@ -84,7 +86,7 @@ const OrganizeArt = () => {
 };
 
 const ShoppingArt = () => (
-  <div className="w-60 rounded-2xl bg-white dark:bg-gray-900 border border-black/5 dark:border-white/10 shadow-sm p-3.5 flex flex-col gap-3">
+  <div className="w-60 rounded-2xl bg-white dark:bg-gray-900 border-none shadow-sm p-3.5 flex flex-col gap-3">
     <div className="flex items-center gap-2">
       <ShoppingCart className="w-4 h-4 text-emerald-500" />
       <div className="h-2 w-16 rounded bg-black/15 dark:bg-white/15" />
@@ -92,10 +94,10 @@ const ShoppingArt = () => (
     {[true, false, false].map((checked, i) => (
       <div key={i} className="flex items-center gap-2.5">
         <div
-          className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
+          className={`w-4 h-4 rounded-md border-none flex items-center justify-center shrink-0 ${
             checked
-              ? 'bg-emerald-500 border-emerald-500'
-              : 'border-black/20 dark:border-white/25'
+              ? 'bg-emerald-500'
+              : 'bg-black/10 dark:bg-white/15'
           }`}
         >
           {checked && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
@@ -121,7 +123,7 @@ const CookingArt = () => {
       {tiles.map(({ icon: Icon, label }) => (
         <div
           key={label}
-          className="w-20 h-24 rounded-2xl bg-white dark:bg-gray-900 border border-black/5 dark:border-white/10 shadow-sm flex flex-col items-center justify-center gap-2"
+          className="w-20 h-24 rounded-2xl bg-white dark:bg-gray-900 border-none shadow-sm flex flex-col items-center justify-center gap-2"
         >
           <div className="w-11 h-11 rounded-xl bg-emerald-500/10 flex items-center justify-center">
             <Icon className="w-6 h-6 text-emerald-500" strokeWidth={1.75} />
@@ -150,15 +152,30 @@ export default function WelcomeGuide({ onClose }: WelcomeGuideProps) {
   const isLast = index === SLIDES.length - 1;
 
   // Swipe/keyboard advance stops at the last slide; only the CTA button closes.
-  const advance = useCallback(
-    () => setIndex((i) => Math.min(i + 1, SLIDES.length - 1)),
-    []
-  );
-  const back = useCallback(() => setIndex((i) => Math.max(i - 1, 0)), []);
+  const advance = useCallback(() => {
+    hapticSelection();
+    setIndex((i) => Math.min(i + 1, SLIDES.length - 1));
+  }, []);
+  const back = useCallback(() => {
+    hapticSelection();
+    setIndex((i) => Math.max(i - 1, 0));
+  }, []);
   const handleNext = useCallback(() => {
-    if (isLast) onClose();
-    else advance();
+    if (isLast) {
+      hapticMedium();
+      onClose();
+    } else {
+      advance();
+    }
   }, [isLast, advance, onClose]);
+
+  useModalOverlay(true, () => {
+    if (index > 0) {
+      back();
+    } else {
+      onClose();
+    }
+  });
 
   // Scroll-lock + keyboard controls (mirrors PremiumModal's overlay behavior).
   useEffect(() => {
@@ -210,7 +227,10 @@ export default function WelcomeGuide({ onClose }: WelcomeGuideProps) {
         <div className="flex justify-end items-center h-10 shrink-0">
           {!isLast && (
             <button
-              onClick={onClose}
+              onClick={() => {
+                hapticLight();
+                onClose();
+              }}
               className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
             >
               {t('onboarding.skip')}
@@ -245,7 +265,10 @@ export default function WelcomeGuide({ onClose }: WelcomeGuideProps) {
             {SLIDES.map((s, i) => (
               <button
                 key={s.key}
-                onClick={() => setIndex(i)}
+                onClick={() => {
+                  hapticSelection();
+                  setIndex(i);
+                }}
                 aria-label={`${i + 1}`}
                 className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
                   i === index ? 'w-6 bg-emerald-500' : 'w-2 bg-gray-300 dark:bg-gray-700'

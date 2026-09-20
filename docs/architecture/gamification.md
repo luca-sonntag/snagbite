@@ -7,7 +7,9 @@ für Social/Shop/AI-Verifizierung.
 
 ## 1. Leitprinzipien
 
-* **Foto-Pflicht & KI-Verifizierung via Gemini Vision.** Jeder Cook erfordert ein **Foto des fertigen Gerichts** (`photoBase64`). Das Backend prüft das Foto via Gemini Vision (`verifyCookedDishPhoto`), ob es visuell zum Rezept passt. Nur bei positiver KI-Verifizierung wird der Cook gezählt und belohnt.
+* **2-Wege-Erfassung & Foto-Verifizierung:**
+  * **Mit Foto (+XP & Belohnungen):** Ein Foto des fertigen Gerichts (`photoBase64`) wird via Gemini Vision (`verifyCookedDishPhoto`) validiert und in Supabase `cook-photos` abgelegt. Bei Erfolg winken volle XP, Coins, Badges, Levelaufstiege und Leaderboard-Berechtigung (`verified: true`).
+  * **Ohne Foto (0 XP, rein organisatorisch):** Nutzer können Mahlzeiten auch ohne Foto als gekocht erfassen (z. B. im Wochenplaner oder Rezept). Dabei werden 0 XP und 0 Coins gutgeschrieben (`verified: false`), aber der Kochvorgang wird in `cook_events` und im Wochenplaner als erledigt vermerkt.
 * **Anti-Grind über Diminishing Returns**, nicht über Misstrauen: Wiederholungen
   desselben Rezepts fallen schnell ab, plus ein Tages-Softcap.
 * **Server-autoritativ.** Punkte werden ausschließlich im Backend (service-role)
@@ -18,7 +20,7 @@ für Social/Shop/AI-Verifizierung.
 
 Alles additiv, RLS aktiv (`SELECT`-own als Defense-in-Depth; Writes nur service-role):
 
-* **`cook_events`** — append-only Ereignis (User, Rezept, XP/Coins, `has_photo`,
+* **`cook_events`** — append-only Ereignis (User, `recipe_id`, XP/Coins, `has_photo`,
   `verified`, `leaderboard_eligible`, `trust_score`, `via_cooking_mode`,
   `timer_elapsed`).
 * **`point_ledger`** — append-only, eine Zeile pro Gutschrift (ermöglicht spätere
@@ -35,18 +37,18 @@ Alles additiv, RLS aktiv (`SELECT`-own als Defense-in-Depth; Writes nur service-
   (`computeAward`, `softcapFactor`, `streakMultiplier`, `levelForXp`). Tests:
   `gamificationFormula.test.ts` (`node --import tsx --test`).
 * **`gamification.ts`** — `recordCook()` orchestriert: lädt Config/Aggregate,
-  Duplikat-/Velocity-Guard, Streak-Fortschreibung (UTC-Tage), Level, Badges,
+  Duplikat-/Velocity-Guard, Streak-Fortschreibung (UTC-Kalenderwochen), Level, Badges,
   schreibt `cook_events` + `point_ledger` + `user_stats`.
 
 Formel: `XP = 100 × Schwierigkeit × Wiederholung + Neuheit`, dann `× Streak`;
 `Coins = ⌊XP × 0.1⌋`. Schwierigkeit ist zum Start flach ×1 (kein `difficulty`-Feld
 im Recipe/Gemini-Schema); Cuisine-Neuheit ist als Config-Wert vorhanden, aber
-inaktiv (kein Cuisine-Signal).
+inaktiv (kein Cuisine-Signal). Ohne Foto (`hasPhoto: false`) liefert `computeAward` strikt `xp: 0` und `coins: 0`.
 
 ## 4. Endpoints (`backend/src/routes.ts`)
 
-* `POST /api/jobs/:id/cooked` — verbucht einen Cook (erfordert `photoBase64`; verifiziert per Gemini Vision, lädt Foto in Supabase `cook-photos` hoch). Antwort enthält `stats`, `earned`, `newBadges`, `previousXp/previousLevel/leveledUp` für die Overlay-Animation.
-* `GET /api/jobs/:id/cook-history` — liefert `count`, `firstCookedAt`, `lastCookedAt` sowie `items` (`xpAwarded`, `coinsAwarded`, `hasPhoto`, `photoUrl`, `verified`, `viaCookingMode`, `timerElapsed`) für das Rezept-Detail-Badge & die Koch-Historie.
+* `POST /api/recipes/:id/cooked` — verbucht einen Cook (optional mit `photoBase64`; bei Foto verifiziert per Gemini Vision und hochgeladen in `cook-photos`; ohne Foto als 0-XP-Eintrag verbucht). Synchronisiert automatisch offene `meal_plans`-Einträge für den aktuellen Tag. Antwort enthält `stats`, `earned`, `newBadges`, `previousXp/previousLevel/leveledUp` für die Overlay-Animation.
+* `GET /api/recipes/:id/cook-history` — liefert `count`, `firstCookedAt`, `lastCookedAt` sowie `items` (`xpAwarded`, `coinsAwarded`, `hasPhoto`, `photoUrl`, `verified`, `viaCookingMode`, `timerElapsed`) für das Rezept-Detail-Badge & die Koch-Historie.
 * `GET /api/me/gamification` — `stats` + `badges` + `levelThresholds` für den Tab.
 
 ## 5. Frontend
@@ -57,15 +59,52 @@ inaktiv (kein Cuisine-Signal).
 * **`components/CookedModal.tsx`** — Modal für Kamera-/Galerie-Fotoaufnahme, KI-Prüfzustand („KI prüft dein Gericht...“) und Fehler-Feedback bei Nicht-Übereinstimmung.
 * **`components/CookedButton.tsx`** — Trigger-Button in `RecipeActionDock` (Floating Bar) und als Abschluss-Karte (`variant="card"`) unter den Schritten in `RecipeDetails`.
 * **`components/CookHistoryTimeline.tsx` & Recipe Header Badge** — Interaktiver Header-Pill-Badge („x-mal gekocht · zuletzt vor...“) mit Smooth-Scroll zur Historie. Das Timeline-Modul zeigt Ereigniskarten inklusive XP-Gutschriften (`+50 XP`), KI-Verifizierungsbadge, Foto-Lightbox (Großansicht), Koch-Modus / Timer-Nutzung und exaktem Zeitstempel.
-* **`components/ProgressView/`** — der Tab **„Fortschritt"** (`progress`-Route in
+* **`components/ProfileView/`** — der Tab **„Profil & Fortschritt"** (`settings`-Route in
   `useHashRouter`, Nav-Button in `App.tsx`): Level/XP-Balken, Streak/Coins/Cooks,
-  Badge-Gitter. Coins werden angezeigt, **kein Shop** (erster Wurf).
+  Badge-Gitter sowie App-Einstellungen. Coins werden angezeigt, **kein Shop** (erster Wurf).
 * **`utils/streakReminder.ts`** — best-effort lokale Notification (Streak-Erinnerung)
   über `@capacitor/local-notifications`; no-op auf Web / ohne Permission.
 
 ## 6. Für später freigehalten
 
-Leaderboard (Query über `point_ledger`, `leaderboard_eligible` steht schon),
 Coin-Shop (`coins` akkumulieren bereits), Foto-KI-/Peer-Verifizierung (hebt
 `trust_score`), Challenges/Seasonal, Schwierigkeits-/Cuisine-Tuning
 (Config-Werte vorhanden) — alles ohne Schema-Änderung andockbar.
+(Freundesliste & Leaderboard sind inzwischen gebaut — siehe §7.)
+
+## 7. Social — Freundesliste & Leaderboard
+
+Aufbau auf dem Gamification-Fundament (`point_ledger` trägt die wöchentliche,
+`user_stats.xp` die Allzeit-Wertung). Additiv, server-autoritativ.
+
+**Datenmodell** (`backend/supabase_schema.sql`):
+* **`profiles`** — `user_id`, selbstgewählter `display_name`, `avatar_url`
+  (optional, aus Google-`user_metadata`), eindeutiger `friend_code`. Anzeigename/
+  Avatar sind `SELECT`-bar für alle Authenticated (Freundssicht); die E-Mail wird
+  **nie** an Freunde ausgeliefert.
+* **`friendships`** — mutual (`pending`/`accepted`), eine Zeile pro (requester,
+  addressee)-Paar; „meine Freunde" prüft beide Richtungen.
+* **RPC `weekly_xp_for_users(uids, since)`** — `SUM(delta_xp)` aus `point_ledger` für das Zeitfenster (z.B. Monatsanfang) im Freundeskreis.
+* **RPC `global_weekly_xp(since, limit_count)`** — `SUM(delta_xp)` aus `point_ledger` über alle Nutzer sortiert nach XP für das globale Monats-Leaderboard.
+
+**Backend:** `ensureProfile` legt bei Erstzugriff ein Profil an (Anzeigename aus
+`full_name` ?? E-Mail-Localpart, Avatar aus Metadaten, kollisionsgeprüfter
+`friend_code`). Monatsfenster via reinem, getestetem `socialTime.ts` (`monthStartUtc`,
+1. des Monats 00:00 UTC). Endpoints (`routes.ts`):
+* `GET/PATCH /api/me/profile` — Profil laden & Namen anpassen.
+* `GET /api/friends`, `GET /api/friends/requests` — Freundesliste & Anfragen.
+* `POST /api/friends/request` — Freundschaftsanfrage per Code (`code`) oder per User-ID (`targetUserId`, z.B. direkt aus dem globalen Leaderboard; Auto-Accept bei beidseitigen Anfragen).
+* `POST /api/friends/:id/respond` — Anfragen annehmen/ablehnen.
+* `DELETE /api/friends/:id` — Freund entfernen oder offene Anfrage abbrechen.
+* `GET /api/leaderboard?window=monthly|all&scope=friends|global` — Rangliste mit Scope (Freunde oder alle Nutzer) und Zeitfenster (diesen Monat oder Gesamt). Liefert Einträge inklusive berechnetem Beziehungsstatus (`friendshipStatus: 'none' | 'pending_sent' | 'pending_received' | 'friends' | 'self'`).
+
+**Frontend:** `SocialContext` (profile/friends/requests + Methoden `sendRequest`, `sendRequestByUserId`, `respondRequest`, `fetchLeaderboard`) neben dem Gamification-Provider.
+* **Segmented-Nav:** **Übersicht | Rangliste | Freunde** im Fortschritt-Tab.
+* **LeaderboardView:** Bietet Umschalter zwischen **Freunde** und **Global** sowie **Diesen Monat** und **Gesamt**. In der globalen Ansicht kann direkt pro Zeile eine Freundschaftsanfrage gesendet (`+ Freund`), eine offene Anfrage angenommen (`Annehmen`) oder der Status (`Angefragt`, `Freunde ✓`) eingesehen werden.
+* **FriendsView:** Profilkarte + teilbarer Freundescode, per-Code hinzufügen, Anfragen, Liste, `Social/Avatar`.
+* **Deep Linking & App Links:** Android App Links via `/.well-known/assetlinks.json` und Custom Schemes (`snagbite://`, `at.snagbite.app://`).
+* **Web Landingpage:** `website` unter `/invite/:code` öffnet die native App per Intent / Custom Scheme.
+
+**Freigehalten:** Liga-Ranglisten (verified-only via `leaderboard_eligible`), Blockieren/Melden.
+
+

@@ -1,5 +1,6 @@
 import ffmpegStatic from 'ffmpeg-static';
 import ffmpeg from 'fluent-ffmpeg';
+import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs/promises';
 import { spawn } from 'child_process';
@@ -80,9 +81,63 @@ export async function extractFrames(
 }
 
 /**
+ * Creates a single tiled grid JPEG buffer from an array of image Buffers in memory.
+ * Pure RAM processing with sharp, no disk IO, no subprocesses, and no text/number overlays.
+ */
+export async function createGridBufferFromFrames(
+  frameBuffers: Buffer[],
+  tileSize = 300
+): Promise<Buffer> {
+  if (frameBuffers.length === 0) {
+    throw new Error('No frames provided for grid creation.');
+  }
+
+  const count = frameBuffers.length;
+  const colCount = Math.ceil(Math.sqrt(count));
+  const rowCount = Math.ceil(count / colCount);
+
+  const gridWidth = colCount * tileSize;
+  const gridHeight = rowCount * tileSize;
+
+  // Resize all input buffers to square tiles in parallel
+  const resizedTiles = await Promise.all(
+    frameBuffers.map((buf) =>
+      sharp(buf)
+        .resize(tileSize, tileSize, { fit: 'cover', position: 'center' })
+        .toBuffer()
+    )
+  );
+
+  // Build sharp composite layout without numbers/overlays
+  const composites: sharp.OverlayOptions[] = [];
+  for (let i = 0; i < resizedTiles.length; i++) {
+    const col = i % colCount;
+    const row = Math.floor(i / colCount);
+    composites.push({
+      input: resizedTiles[i],
+      left: col * tileSize,
+      top: row * tileSize,
+    });
+  }
+
+  // Composite tiles onto a solid black background
+  return sharp({
+    create: {
+      width: gridWidth,
+      height: gridHeight,
+      channels: 3,
+      background: { r: 0, g: 0, b: 0 },
+    },
+  })
+    .composite(composites)
+    .jpeg({ quality: 80 })
+    .toBuffer();
+}
+
+/**
  * Creates a tiled grid image from an array of frame image paths.
- * Each frame is cropped to a centered square, scaled to 300x300, and labeled with its index.
- * The final grid is combined using the ffmpeg xstack filter.
+ * Each frame is cropped to a centered square, scaled to 300x300.
+ * The final grid is combined using the ffmpeg xstack filter without number overlays.
  */
 export async function createImageGrid(
   framePaths: string[],
@@ -97,32 +152,6 @@ export async function createImageGrid(
   const rowCount = Math.ceil(count / colCount);
   const scaleSize = 300;
 
-  // Find standard font file for text drawing (important for Linux/Alpine Docker environments)
-  const fontCandidates = [
-    'C:\\Windows\\Fonts\\arial.ttf',
-    '/usr/share/fonts/ttf-dejavu/DejaVuSans.ttf',
-    '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-    '/usr/share/fonts/liberation/LiberationSans-Regular.ttf',
-    '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
-    '/usr/share/fonts/TTF/DejaVuSans.ttf',
-  ];
-
-  let fontOption = '';
-  for (const candidate of fontCandidates) {
-    try {
-      await fs.access(candidate);
-      const escapedPath = candidate.replace(/\\/g, '/').replace(/:/g, '\\:');
-      fontOption = `fontfile='${escapedPath}'`;
-      break;
-    } catch {
-      // Font not found, try next candidate
-    }
-  }
-
-  if (!fontOption) {
-    fontOption = "font='Sans'";
-  }
-
   return new Promise((resolve, reject) => {
     const args: string[] = [];
 
@@ -131,10 +160,10 @@ export async function createImageGrid(
       args.push('-i', framePath);
     }
 
-    // Build filter complex
+    // Build filter complex without drawtext/numbers
     let filterComplex = '';
     for (let i = 0; i < count; i++) {
-      filterComplex += `[${i}:v]crop=w=in_w:h=in_w,scale=${scaleSize}:${scaleSize},drawtext=text='${i}':${fontOption}:fontcolor=white:fontsize=36:box=1:boxcolor=black@0.6:boxborderw=8:x=15:y=15[v${i}];`;
+      filterComplex += `[${i}:v]crop=w=in_w:h=in_w,scale=${scaleSize}:${scaleSize}[v${i}];`;
     }
 
     // Build xstack layout

@@ -5,6 +5,7 @@ import { SocialLogin } from '@capgo/capacitor-social-login';
 import { supabase } from '../supabase';
 import { apiUrl } from '../api';
 import { TEST_LOGIN_ENABLED, TEST_USER_EMAIL, TEST_USER_PASSWORD } from '../env';
+import { ONBOARDING_KEY } from '../hooks/useOnboarding';
 
 const GOOGLE_WEB_CLIENT_ID = import.meta.env.VITE_GOOGLE_WEB_CLIENT_ID as string | undefined;
 
@@ -39,7 +40,8 @@ function ensureSocialLoginInitialized() {
 // user dismissal) is expected and swallowed: the caller falls back to the
 // normal AuthForm with no visible error.
 async function attemptSilentGoogleSignIn(): Promise<{ success: boolean; error?: string }> {
-  if (Capacitor.getPlatform() !== 'android') return { success: false };
+  if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') return { success: false };
+  if (!Capacitor.isPluginAvailable('SocialLogin')) return { success: false };
   if (!GOOGLE_WEB_CLIENT_ID) return { success: false };
   if (localStorage.getItem(AUTO_SIGNIN_DISABLED_KEY)) return { success: false };
   // No silent sign-in before the user has seen the legal notice and consented
@@ -286,6 +288,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAdminStatus(session.access_token);
   }, [session, checkAdminStatus]);
 
+  /**
+   * Reconcile the locally cached tier with the authoritative server tier in the
+   * background. Runs on session load so the paywall (and the rest of the app)
+   * already reflects the correct tier by the time it's opened, instead of the
+   * modal having to verify on open. Only acts on a genuine mismatch to avoid
+   * needless session refreshes.
+   */
+  const reconcileServerTier = useCallback(async (token: string, localTier: string | undefined) => {
+    try {
+      const res = await fetch(apiUrl('/api/extractions/limit'), {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.success && data.tier && data.tier !== localTier) {
+        console.log(`[Auth] Tier mismatch (local: ${localTier}, server: ${data.tier}). Refreshing session...`);
+        await refreshSession();
+      }
+    } catch (err) {
+      console.warn('[Auth] Background tier reconciliation failed:', err);
+    }
+  }, [refreshSession]);
+
+  useEffect(() => {
+    if (!session) return;
+    const localTier = session.user?.app_metadata?.tier;
+    // Premium/alpha are already authoritative locally — nothing to reconcile.
+    if (localTier === 'premium' || localTier === 'alpha') return;
+    reconcileServerTier(session.access_token, localTier);
+  }, [session, reconcileServerTier]);
+
   const signIn = useCallback(async (email: string, password: string) => {
     setAuthError(null);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -314,7 +347,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthError(null);
     // Native (Capacitor): use the OS account-picker dialog to get a Google ID
     // token, then exchange it for a Supabase session — no browser redirect.
-    if (Capacitor.isNativePlatform()) {
+    if (Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('SocialLogin')) {
       if (!GOOGLE_WEB_CLIENT_ID) {
         return { error: 'Google sign-in is not configured (missing VITE_GOOGLE_WEB_CLIENT_ID).' };
       }
@@ -375,7 +408,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set before signing out so a cold restart won't silently sign the user
     // right back in with the same on-device Google account.
     localStorage.setItem(AUTO_SIGNIN_DISABLED_KEY, '1');
-    if (Capacitor.getPlatform() === 'android') {
+    // Ensure onboarding is marked as completed locally so the welcome guide is never shown on sign-out
+    localStorage.setItem(ONBOARDING_KEY, 'true');
+    if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android' && Capacitor.isPluginAvailable('SocialLogin')) {
       // Best effort: clears Credential Manager's cached state. Harmlessly
       // rejects if the user never signed in via Google.
       await SocialLogin.logout({ provider: 'google' }).catch(() => {});

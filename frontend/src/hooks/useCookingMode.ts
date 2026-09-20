@@ -6,28 +6,38 @@ interface UseCookingModeProps {
   onClose: () => void;
 }
 
+export type StepSlideDirection = 'forward' | 'backward';
+
 export function useCookingMode({
   instructionsCount,
   initialStepIndex = 0,
   onClose,
 }: UseCookingModeProps) {
   const [cookingStepIndex, setCookingStepIndex] = useState(initialStepIndex);
-  const [, setWakeLock] = useState<any>(null);
+  const [slideDirection, setSlideDirection] = useState<StepSlideDirection>('forward');
+  const [, setWakeLock] = useState<WakeLockSentinel | null>(null);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   const handleNextCookingStep = () => {
     if (cookingStepIndex < instructionsCount - 1) {
-      setCookingStepIndex(prev => prev + 1);
+      setSlideDirection('forward');
+      setCookingStepIndex((prev) => prev + 1);
     }
   };
 
   const handlePrevCookingStep = () => {
     if (cookingStepIndex > 0) {
-      setCookingStepIndex(prev => prev - 1);
+      setSlideDirection('backward');
+      setCookingStepIndex((prev) => prev - 1);
     }
   };
 
-  // Touch handlers
+  const jumpToStep = (index: number) => {
+    setSlideDirection(index >= cookingStepIndex ? 'forward' : 'backward');
+    setCookingStepIndex(index);
+  };
+
+  // Touch handlers for swiping between steps
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStartX(e.touches[0].clientX);
   };
@@ -59,14 +69,15 @@ export function useCookingMode({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [cookingStepIndex, instructionsCount, onClose]);
 
-  // Screen Wake Lock
+  // Screen Wake Lock to keep screen active while cooking
   useEffect(() => {
-    let activeWakeLock: any = null;
+    let activeWakeLock: WakeLockSentinel | null = null;
     const requestWakeLock = async () => {
-      const nav = navigator as any;
-      if (nav.wakeLock) {
+      if ('wakeLock' in navigator) {
         try {
-          activeWakeLock = await nav.wakeLock.request('screen');
+          activeWakeLock = await (navigator as Navigator & {
+            wakeLock: { request: (type: string) => Promise<WakeLockSentinel> };
+          }).wakeLock.request('screen');
           setWakeLock(activeWakeLock);
         } catch (err) {
           console.warn('Could not acquire Screen Wake Lock:', err);
@@ -78,7 +89,7 @@ export function useCookingMode({
 
     return () => {
       if (activeWakeLock) {
-        activeWakeLock.release().catch((err: any) => {
+        activeWakeLock.release().catch((err: unknown) => {
           console.warn('Error releasing Wake Lock:', err);
         });
       }
@@ -87,7 +98,8 @@ export function useCookingMode({
 
   return {
     cookingStepIndex,
-    setCookingStepIndex,
+    slideDirection,
+    setCookingStepIndex: jumpToStep,
     handleNextCookingStep,
     handlePrevCookingStep,
     handleTouchStart,

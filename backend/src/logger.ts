@@ -142,7 +142,16 @@ export function estimateCost(model: string, usage: TokenUsage): CostEstimate {
 
 // ---------------------------------------------------------------------------
 
-export type GeminiRequestType = 'extract_recipe' | 'select_best_frame' | 'remix_recipe' | 'chat_recipe' | 'chat_chips' | 'notification_copy' | 'verify_cook_photo';
+export type GeminiRequestType =
+  | 'extract_recipe'
+  | 'select_best_frame'
+  | 'remix_recipe'
+  | 'chat_recipe'
+  | 'chat_chips'
+  | 'notification_copy'
+  | 'verify_cook_photo'
+  | 'resolve_ingredient'
+  | 'audit_recipe';
 
 export interface GeminiLogEntry {
   /** ISO timestamp of when the request was initiated */

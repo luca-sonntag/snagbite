@@ -1,9 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 // Versioned key: bump the suffix to re-show the alpha welcome to everyone after
 // a major revision. Mirrors useOnboarding's localStorage-gated approach.
-const ALPHA_WELCOME_KEY = 'snagbite_alpha_welcome_v1_seen';
+export const ALPHA_WELCOME_KEY = 'snagbite_alpha_welcome_v1_seen';
 
 /**
  * Alpha welcome gate — shown once to alpha testers after their first login.
@@ -22,6 +22,16 @@ export function useAlphaWelcome() {
 
   const isAlpha = user?.app_metadata?.tier === 'alpha';
   const metadataSeen = user?.user_metadata?.alpha_welcome_seen === true;
+
+  // Sync locally if seen in metadata on another device
+  useEffect(() => {
+    if (metadataSeen) {
+      if (localStorage.getItem(ALPHA_WELCOME_KEY) !== 'true') {
+        localStorage.setItem(ALPHA_WELCOME_KEY, 'true');
+      }
+      setSeen(true);
+    }
+  }, [metadataSeen]);
 
   // Show once for alpha testers, unless already dismissed locally or on
   // another device.

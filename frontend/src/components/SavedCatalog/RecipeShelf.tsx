@@ -1,21 +1,22 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
-import type { Job } from '../../types';
+import type { SavedRecipe } from '../../types';
 import RecipePosterCard from './RecipePosterCard';
 import { useI18n } from '../../context/I18nContext';
 
 interface RecipeShelfProps {
   title: string;
-  icon: React.ReactNode;
-  jobs: Job[];
+  subtitle?: string;
+  icon?: React.ReactNode;
+  jobs: SavedRecipe[];
   /** Total number of matches — drives whether "show all" is worth offering. */
   totalCount: number;
   formatTotalTime: (recipe: any) => string | null;
   onOpenAll: () => void;
-  onOpenRecipe: (e: React.MouseEvent, job: Job) => void;
+  onOpenRecipe: (e: React.MouseEvent, job: SavedRecipe) => void;
   isSelectMode?: boolean;
   selectedIds?: Set<string>;
-  bindLongPress?: (id: string, job: Job) => any;
+  bindLongPress?: (id: string, job: SavedRecipe) => any;
 }
 
 /**
@@ -25,6 +26,7 @@ interface RecipeShelfProps {
  */
 export default function RecipeShelf({
   title,
+  subtitle,
   icon,
   jobs,
   totalCount,
@@ -46,26 +48,33 @@ export default function RecipeShelf({
         onClick={onOpenAll}
         className="flex items-center justify-between gap-2 w-full text-left cursor-pointer group active:scale-[0.99] transition-transform"
       >
-        <h3 className="flex items-center gap-2 text-base font-bold text-gray-900 dark:text-white">
-          <span className="shrink-0">{icon}</span>
-          {title}
-        </h3>
-        <span className="flex items-center gap-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
+        <div className="flex flex-col min-w-0">
+          <h3 className="text-base sm:text-lg font-extrabold tracking-tight text-gray-950 dark:text-white flex items-center">
+            {icon && <span className="shrink-0 mr-2">{icon}</span>}
+            <span className="truncate">{title}</span>
+          </h3>
+          {subtitle && (
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+              {subtitle}
+            </p>
+          )}
+        </div>
+        <span className="flex items-center gap-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 shrink-0 group-hover:translate-x-0.5 transition-transform">
           {t('catalog.showAll', { count: totalCount })}
           <ChevronRight className="w-3.5 h-3.5" />
         </span>
       </button>
 
-      <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 pb-1 scroll-smooth">
+      <div className="flex items-stretch gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 md:-mx-6 md:px-6 pt-3 pb-2 scroll-smooth">
         {jobs.map(job => (
           <RecipePosterCard
-            key={job.id}
+            key={job.recipeId}
             job={job}
             variant="shelf"
             totalTime={formatTotalTime(job.recipe)}
-            isSelected={selectedIds.has(job.id)}
+            isSelected={selectedIds.has(job.recipeId)}
             isSelectMode={isSelectMode}
-            bindLongPress={bindLongPress ? bindLongPress(job.id, job) : undefined}
+            bindLongPress={bindLongPress ? bindLongPress(job.recipeId, job) : undefined}
             onClick={(e) => onOpenRecipe(e, job)}
           />
         ))}

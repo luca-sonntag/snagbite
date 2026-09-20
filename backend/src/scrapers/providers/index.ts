@@ -1,7 +1,6 @@
 import type { ScrapingResult } from '../index.js';
 import { AppError } from '../../errors.js';
-import { apifyActorProvider } from './apifyActor.js';
-import { localYtdlpProvider } from './localYtdlp.js';
+import { rapidApiMetadataProvider } from './rapidApiMetadata.js';
 import { rapidApiProvider } from './rapidApi.js';
 import type { SocialScrapeContext, SocialScrapeProvider } from './types.js';
 
@@ -16,16 +15,10 @@ export { detectPlatform } from './types.js';
  * {@link SocialScrapeProvider} under `providers/` and inserting it here — order is
  * priority, and `isEnabled()` gates it on configuration.
  *
- * Order rationale:
- *  1. rapidApi   — direct CDN URLs + caption, no proxy, ~2–7s. Handles the common case.
- *  2. localYtdlp — free/fast, but only when this host's IP isn't blocked by the platform.
- *  3. apifyActor — paid residential-proxy fallback; the only path that survives a
- *                  blocked IP. Disabled unless APIFY_SOCIAL_ACTOR_ID is configured.
+ * Mode: Metadata & Image Carousel Only (no video downloads to respect ToS and copyright).
  */
 export const socialProviders: SocialScrapeProvider[] = [
-  rapidApiProvider,
-  localYtdlpProvider,
-  apifyActorProvider,
+  rapidApiMetadataProvider,
 ];
 
 /**

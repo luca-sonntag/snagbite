@@ -1,30 +1,53 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { claimNextJob, updateJob, getJob, getClient, reclaimExpiredJobs, heartbeatJob, uploadRecipeFrame, sweepOldRecipeFrames, getMaxVideoDurationSeconds, isJobDeleted } from './db.js';
+import {
+  claimNextJob, updateJob, updateJobProgress, completeJob, getRecipe, getClient,
+  reclaimExpiredJobs, sweepStaleAwaitingFrames, heartbeatJob, getMaxVideoDurationSeconds, isJobCancelled,
+} from './db.js';
 import { randomUUID } from 'node:crypto';
-import { getScraperForUrl } from './scrapers/index.js';
+import { getScraperForUrl, type ScrapingResult } from './scrapers/index.js';
 import { downloadMedia } from './scrapers/download.js';
-import { extractRecipe, remixRecipe } from './gemini.js';
+import { extractRecipe, remixRecipe, type ClientFramesInput } from './gemini.js';
+import { generateRecipeCoverImage } from './imageGenerator.js';
 import { pruneOldGeminiLogs } from './logger.js';
-import { isPhotoJobUrl, photoUploadIdFromUrl, downloadImportPhotos, deleteImportPhotos, sweepOldPhotoImports } from './photoImport.js';
-import type { Job } from './types.js';
+import { photoUploadIdFromUrl, downloadImportPhotos, deleteImportPhotos, sweepOldPhotoImports } from './photoImport.js';
+import type { Job, LlmUsage, ProgressStage, GeminiUsageInfo, RecipePreviewData, Recipe } from './types.js';
 import { config } from './config.js';
 import { AppError, serializeJobError } from './errors.js';
 import { notificationTick } from './notifications/worker.js';
+import { enrichRecipeWithCanonicalIngredients } from './matching/ingredientMatcher.js';
+import { auditRecipe, applyRecipeAuditPatch } from './matching/recipeAuditor.js';
+import { isDevEnvironment, logExtractionDevSummary } from './matching/recipeAuditorDevLogger.js';
 
 const workerId = randomUUID();
 let activeJobs = 0;
 let workerInterval: NodeJS.Timeout | null = null;
 let reclaimInterval: NodeJS.Timeout | null = null;
+let sweepInterval: NodeJS.Timeout | null = null;
 let cleanupInterval: NodeJS.Timeout | null = null;
 let notificationInterval: NodeJS.Timeout | null = null;
+
+function buildRecipePreview(recipe: Recipe, fallbackThumbnail?: string, authorHandle?: string | null): RecipePreviewData {
+  const allItems = (recipe.ingredients || []).flatMap((g) => g.items || []);
+  return {
+    thumbnailUrl: fallbackThumbnail,
+    authorHandle: authorHandle || undefined,
+    title: recipe.title,
+    servings: recipe.servings,
+    totalTimeMinutes: (recipe.prepTime || 0) + (recipe.cookTime || 0) || undefined,
+    category: recipe.category || undefined,
+    ingredientCount: allItems.length,
+    ingredientsSample: allItems.slice(0, 8).map((i) => (i.name || '').trim()),
+    stepCount: recipe.instructions?.length || 0,
+  };
+}
 
 /**
  * Processes a single job end-to-end.
  */
 async function processJob(job: Job): Promise<void> {
   const jobId = job.id;
-  const url = job.url;
+  const url = job.sourceUrl;
   const safeTimestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const userSegment = job.userId ? job.userId : 'unassigned';
   const runDir = path.resolve('logs', userSegment, `run-${safeTimestamp}_${jobId}`);
@@ -33,6 +56,7 @@ async function processJob(job: Job): Promise<void> {
   let videoFilePath = '';
   let framePaths: string[] = [];
   let photoUploadId: string | null = null;
+  let clientFramesInput: ClientFramesInput | undefined;
 
   const heartbeat = setInterval(() => heartbeatJob(jobId), 30_000);
 
@@ -79,32 +103,91 @@ async function processJob(job: Job): Promise<void> {
       }
     }
 
-    if (job.parentJobId) {
+    if (job.kind === 'remix') {
       console.log(`[Job ${jobId}] Starting remix processing...`);
-      await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 30, stage: 'extracting_recipe' } as any });
+      await updateJobProgress(jobId, 'processing', { percent: 30, stage: 'extracting_recipe' });
       await fs.mkdir(runDir, { recursive: true });
 
-      const parentJob = await getJob(job.parentJobId);
-      if (!parentJob || !parentJob.recipe) {
-        throw new AppError('PARENT_JOB_NOT_FOUND', { message: 'Parent job or recipe not found for remix.' });
+      const parentRecipe = job.parentRecipeId ? await getRecipe(job.parentRecipeId) : null;
+      if (!parentRecipe) {
+        throw new AppError('PARENT_JOB_NOT_FOUND', { message: 'Parent recipe not found for remix.' });
       }
 
       console.log(`[Job ${jobId}] Requesting remix from Gemini...`);
-      const recipe = await remixRecipe(parentJob.recipe, job.prompt || '', runDir, userPrefs);
+      const { recipe: rawRecipe, usage: geminiUsage } = await remixRecipe(parentRecipe, job.remixPrompt || '', runDir, userPrefs);
 
-      if (recipe.isRecipe === false) {
+      if (rawRecipe.isRecipe === false) {
         throw new AppError('UNRELATED_REMIX_REQUEST', { message: 'The prompt was not recognized as a valid recipe modification.' });
       }
 
-      recipe.id = jobId;
-      recipe.imageUrl = parentJob.recipe.imageUrl;
-      recipe.imageUrls = parentJob.recipe.imageUrls;
-      recipe.instagramHandle = parentJob.recipe.instagramHandle;
-      recipe.parentJobId = parentJob.id;
-      recipe.parentRecipeTitle = parentJob.recipe.title;
-      recipe.remixPrompt = job.prompt || null;
+      if (isDevEnvironment()) {
+        logExtractionDevSummary(rawRecipe, 'remix', geminiUsage);
+      }
 
-      await updateJob(jobId, { status: 'completed', recipe, error: null });
+      let recipe = rawRecipe;
+      recipe.sourceHandle = parentRecipe.sourceHandle;
+      recipe.sourceUrl = parentRecipe.sourceUrl;
+      recipe.parentRecipeId = parentRecipe.id;
+      recipe.remixPrompt = job.remixPrompt || null;
+
+      let auditUsage: GeminiUsageInfo | undefined;
+      try {
+        console.log(`[Job ${jobId}] Auditing remixed recipe and disambiguating ingredients...`);
+        const auditResult = await auditRecipe(recipe);
+        if (auditResult.patch) {
+          recipe = applyRecipeAuditPatch(recipe, auditResult.patch);
+          auditUsage = auditResult.usage;
+        }
+      } catch (auditErr: unknown) {
+        const msg = auditErr instanceof Error ? auditErr.message : String(auditErr);
+        console.warn(`[Job ${jobId}] Remix audit non-fatal failure: ${msg}`);
+      }
+
+      const remixPreview = buildRecipePreview(recipe, parentRecipe.imageUrl || undefined, parentRecipe.sourceHandle);
+
+      // Generate AI cover image and normalize ingredients in parallel
+      await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover', preview: remixPreview });
+      const coverPromise = recipe.imagePrompt
+        ? generateRecipeCoverImage({
+            prompt: recipe.imagePrompt,
+            jobId,
+            userId: job.userId,
+          })
+        : Promise.resolve({ imageUrl: null, usage: null });
+
+      const resolverPromise = enrichRecipeWithCanonicalIngredients(recipe);
+
+      const [coverResult, resolverResult] = await Promise.all([coverPromise, resolverPromise]);
+
+      const aiCoverUrl = coverResult?.imageUrl;
+      const fluxUsage = coverResult?.usage;
+      const resolverUsage = resolverResult?.usage;
+
+      if (aiCoverUrl) {
+        recipe.imageUrl = aiCoverUrl;
+        recipe.imageUrls = [aiCoverUrl, ...(parentRecipe.imageUrls || [])];
+        recipe.isAiCover = true;
+      } else {
+        recipe.imageUrl = parentRecipe.imageUrl;
+        recipe.imageUrls = parentRecipe.imageUrls;
+      }
+
+      await updateJobProgress(jobId, 'processing', {
+        percent: 95,
+        stage: 'finalizing',
+        preview: {
+          ...remixPreview,
+          coverUrl: recipe.imageUrl || undefined,
+        },
+      });
+
+      const llmUsage: LlmUsage = {};
+      if (geminiUsage) llmUsage.gemini = geminiUsage;
+      if (auditUsage) llmUsage.recipeAuditor = auditUsage;
+      if (fluxUsage) llmUsage.flux = fluxUsage;
+      if (resolverUsage) llmUsage.ingredientResolver = resolverUsage;
+
+      await completeJob(jobId, recipe, Object.keys(llmUsage).length > 0 ? llmUsage : null);
       return;
     }
 
@@ -114,17 +197,17 @@ async function processJob(job: Job): Promise<void> {
     // extractRecipe at full resolution; no grid is built and no cover frame is
     // selected — a photographed page makes a poor cover, so the recipe emoji is
     // the placeholder instead.
-    if (isPhotoJobUrl(url)) {
+    if (job.kind === 'photo') {
       photoUploadId = photoUploadIdFromUrl(url);
       // Both are guaranteed by the route that created the job; a job missing
       // either can never find its photos again.
-      if (!photoUploadId || !job.userId) {
-        throw new AppError('PHOTO_IMPORT_EXPIRED', { message: 'Photo job is missing its upload id or owner.' });
+      if (!photoUploadId) {
+        throw new AppError('PHOTO_IMPORT_EXPIRED', { message: 'Photo job is missing its upload id.' });
       }
       const photoUserId = job.userId;
 
       console.log(`[Job ${jobId}] Starting photo import ${photoUploadId}...`);
-      await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 20, stage: 'reading_photos' } as any });
+      await updateJobProgress(jobId, 'processing', { percent: 20, stage: 'reading_photos' });
       await fs.mkdir(runDir, { recursive: true });
 
       const { paths: photoPaths, bytes } = await downloadImportPhotos(photoUserId, photoUploadId, runDir);
@@ -139,33 +222,101 @@ async function processJob(job: Job): Promise<void> {
         console.warn(`[Job ${jobId}] Failed to persist media_bytes: ${err.message}`),
       );
 
-      await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 60, stage: 'extracting_recipe' } as any });
-      const recipe = await extractRecipe(undefined, undefined, '', undefined, runDir, userPrefs, undefined, photoPaths, 'photo');
+      await updateJobProgress(jobId, 'processing', { percent: 60, stage: 'extracting_recipe' });
+      const { recipe: rawRecipe, usage: geminiUsage } = await extractRecipe(undefined, undefined, '', undefined, runDir, userPrefs, undefined, photoPaths, 'photo');
 
-      console.log(`[Job ${jobId}] Recipe extracted from photos: "${recipe.title}"`);
-      await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 90, stage: 'finalizing' } as any });
+      console.log(`[Job ${jobId}] Recipe extracted from photos: "${rawRecipe.title}"`);
+      if (isDevEnvironment()) {
+        logExtractionDevSummary(rawRecipe, 'photo', geminiUsage);
+      }
+      // A photographed page has no third-party source to attribute and remains private.
+      rawRecipe.sourceUrl = null;
+      rawRecipe.sourceHandle = null;
+      rawRecipe.visibility = 'private';
 
-      recipe.id = jobId;
-      recipe.imageUrl = null;
-      recipe.instagramHandle = null;
+      // 2nd-stage recipe audit & ingredient disambiguation
+      let recipe = rawRecipe;
+      let auditUsage: GeminiUsageInfo | undefined;
+      try {
+        console.log(`[Job ${jobId}] Auditing recipe and disambiguating ingredients...`);
+        const auditResult = await auditRecipe(recipe);
+        if (auditResult.patch) {
+          recipe = applyRecipeAuditPatch(recipe, auditResult.patch);
+          auditUsage = auditResult.usage;
+        }
+      } catch (auditErr: unknown) {
+        const msg = auditErr instanceof Error ? auditErr.message : String(auditErr);
+        console.warn(`[Job ${jobId}] Recipe audit non-fatal failure: ${msg}`);
+      }
 
-      await updateJob(jobId, { status: 'completed', recipe, error: null });
+      const photoPreview = buildRecipePreview(recipe);
+
+      // Generate photorealistic AI cover image and normalize ingredients in parallel
+      await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover', preview: photoPreview });
+      const coverPromise = recipe.imagePrompt
+        ? generateRecipeCoverImage({
+            prompt: recipe.imagePrompt,
+            jobId,
+            userId: photoUserId,
+          })
+        : Promise.resolve({ imageUrl: null, usage: null });
+
+      const resolverPromise = enrichRecipeWithCanonicalIngredients(recipe);
+
+      const [coverResult, resolverResult] = await Promise.all([coverPromise, resolverPromise]);
+
+      const aiCoverUrl = coverResult?.imageUrl;
+      const fluxUsage = coverResult?.usage;
+      const resolverUsage = resolverResult?.usage;
+
+      if (aiCoverUrl) {
+        recipe.imageUrl = aiCoverUrl;
+        recipe.imageUrls = [aiCoverUrl];
+        recipe.isAiCover = true;
+      } else {
+        recipe.imageUrl = null;
+        recipe.imageUrls = [];
+        recipe.isAiCover = false;
+      }
+
+      await updateJobProgress(jobId, 'processing', {
+        percent: 95,
+        stage: 'finalizing',
+        preview: {
+          ...photoPreview,
+          coverUrl: recipe.imageUrl || undefined,
+        },
+      });
+
+      const llmUsage: LlmUsage = {};
+      if (geminiUsage) llmUsage.gemini = geminiUsage;
+      if (auditUsage) llmUsage.recipeAuditor = auditUsage;
+      if (fluxUsage) llmUsage.flux = fluxUsage;
+      if (resolverUsage) llmUsage.ingredientResolver = resolverUsage;
+
+      await completeJob(jobId, recipe, Object.keys(llmUsage).length > 0 ? llmUsage : null);
       return;
     }
 
-    if (await isJobDeleted(jobId)) {
-      console.log(`[Job ${jobId}] Job was cancelled/deleted by user, aborting.`);
+    if (await isJobCancelled(jobId)) {
+      console.log(`[Job ${jobId}] Job was cancelled by user, aborting.`);
       return;
     }
 
-    // 1. Mark job as scraping
-    console.log(`[Job ${jobId}] Starting scraping for ${url}...`);
-    await updateJob(jobId, { status: 'scraping', recipe: { isProgress: true, percent: 15, stage: 'scraping' } as any });
+    // 1. Mark job as scraping or rehydrate from scrapeMeta
+    let scrapeResult: ScrapingResult;
+    if (job.scrapeMeta) {
+      console.log(`[Job ${jobId}] Resuming job with cached scrapeMeta...`);
+      scrapeResult = job.scrapeMeta as ScrapingResult;
+    } else {
+      console.log(`[Job ${jobId}] Starting scraping for ${url}...`);
+      await updateJobProgress(jobId, 'scraping', { percent: 15, stage: 'scraping' });
 
-    // 2. Perform scraping via the appropriate scraper
-    const scraper = getScraperForUrl(url);
-    const scrapeResult = await scraper.scrape(url, jobId);
-    console.log(`[Job ${jobId}] Scraped successfully. Caption/Title length: ${scrapeResult.caption.length}`);
+      // 2. Perform scraping via the appropriate scraper
+      const scraper = getScraperForUrl(url);
+      scrapeResult = await scraper.scrape(url, jobId);
+      console.log(`[Job ${jobId}] Scraped successfully. Caption/Title length: ${scrapeResult.caption.length}`);
+    }
 
     // 2b. Enforce the video-length cap *before* downloading — the duration is known from
     // scrape metadata (RapidAPI / yt-dlp), so we reject over-limit videos without spending
@@ -180,8 +331,71 @@ async function processJob(job: Job): Promise<void> {
       });
     }
 
+    // 2c. Client-media streaming: if media is client-delegated and we don't have client_frames yet,
+    // park the job in 'awaiting_frames' so the client can capture and POST keyframes.
+    if (scrapeResult.media.kind === 'client' && !job.clientFrames) {
+      console.log(`[Job ${jobId}] Media kind is 'client' — parking job in 'awaiting_frames' for client keyframe capture.`);
+      await updateJob(jobId, {
+        scrapeMeta: scrapeResult,
+        status: 'awaiting_frames',
+        progress: { percent: 30, stage: 'awaiting_frames' },
+      });
+      // Release worker lease so heartbeat stops and status is awaiting_frames
+      await getClient()
+        .from('jobs')
+        .update({ locked_at: null, locked_by: null })
+        .eq('id', jobId);
+      return;
+    }
+
+    // Decode ephemeral client frames if present and composite into a single in-memory grid
+    if (job.clientFrames) {
+      const thumbBuf = job.clientFrames.thumbnailBase64
+        ? Buffer.from(job.clientFrames.thumbnailBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64')
+        : undefined;
+
+      let clientGridBuffer: Buffer | undefined;
+
+      if (job.clientFrames.gridBase64) {
+        console.log(`[Job ${jobId}] Using client-composited 4x4 grid...`);
+        clientGridBuffer = Buffer.from(
+          job.clientFrames.gridBase64.replace(/^data:image\/\w+;base64,/, ''),
+          'base64'
+        );
+      } else {
+        const frameBufs = (job.clientFrames.framesBase64 || [])
+          .map((f) => Buffer.from(f.replace(/^data:image\/\w+;base64,/, ''), 'base64'))
+          .filter((b) => b.length > 0);
+
+        if (frameBufs.length > 1) {
+          try {
+            const { createGridBufferFromFrames } = await import('./frameExtractor.js');
+            console.log(`[Job ${jobId}] Creating in-memory 4x4 grid from ${frameBufs.length} client frames...`);
+            clientGridBuffer = await createGridBufferFromFrames(frameBufs);
+          } catch (gridErr: any) {
+            console.warn(`[Job ${jobId}] Failed to create in-memory grid from client frames:`, gridErr.message);
+          }
+        }
+      }
+
+      // In dev environment, persist the grid image to disk for inspection and debugging
+      if (process.env.NODE_ENV !== 'production' && clientGridBuffer) {
+        await fs.mkdir(runDir, { recursive: true });
+        const devGridPath = path.join(runDir, 'grid.jpg');
+        await fs.writeFile(devGridPath, clientGridBuffer);
+        console.log(`[Job ${jobId}] [DEV] Saved grid image to ${devGridPath}`);
+      }
+
+      clientFramesInput = { thumbnail: thumbBuf, gridBuffer: clientGridBuffer };
+    }
+
     // 3. Mark job as processing
-    await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 50, stage: 'downloading_media' } as any });
+    const initialThumbnail = scrapeResult.imageUrl || (scrapeResult.media.kind === 'images' && scrapeResult.media.imageUrls.length > 0 ? scrapeResult.media.imageUrls[0] : undefined);
+    const initialPreview: RecipePreviewData = {
+      thumbnailUrl: initialThumbnail,
+      authorHandle: scrapeResult.authorHandle || undefined,
+    };
+    await updateJobProgress(jobId, 'processing', { percent: 50, stage: 'downloading_media', preview: initialPreview });
 
     // 4. Ensure run directory exists
     await fs.mkdir(runDir, { recursive: true });
@@ -203,13 +417,13 @@ async function processJob(job: Job): Promise<void> {
       );
     }
 
-    // 6. If video is available, extract frames and create grid first
+    // 6. If video is available (legacy server-download), extract frames and create grid first
     let gridImagePath: string | undefined;
     framePaths = [];
     const isCarousel = downloaded.imageFilePaths.length > 0;
 
     if (videoFilePath) {
-      await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 55, stage: 'extracting_frames' } as any });
+      await updateJobProgress(jobId, 'processing', { percent: 55, stage: 'extracting_frames', preview: initialPreview });
       try {
         const { extractFrames, createImageGrid } = await import('./frameExtractor.js');
         console.log(`[Job ${jobId}] Extracting frames from video...`);
@@ -223,10 +437,7 @@ async function processJob(job: Job): Promise<void> {
         console.warn(`[Job ${jobId}] Frame extraction / grid generation failed: ${err.message}`);
       }
     } else if (isCarousel) {
-      // Image carousel: the slides take the role of video frames — build the tiled grid
-      // from them so the existing best-shot selection works unchanged. A single-slide
-      // post skips the grid (xstack needs >= 2 inputs); its cover is uploaded directly.
-      await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 55, stage: 'extracting_frames' } as any });
+      await updateJobProgress(jobId, 'processing', { percent: 55, stage: 'extracting_frames', preview: initialPreview });
       framePaths = downloaded.imageFilePaths;
       if (framePaths.length > 1) {
         try {
@@ -242,107 +453,135 @@ async function processJob(job: Job): Promise<void> {
       }
     }
 
-    console.log(`[Job ${jobId}] Running recipe extraction and frame selection in parallel...`);
-
-    // Carousel fallback when Gemini selection is unavailable/fails: the first slide is
-    // typically the hero shot, so hand it off as the cover via the same transient upload.
-    const uploadFirstCarouselImage = async (): Promise<string[] | null> => {
-      try {
-        const buffer = await fs.readFile(framePaths[0]);
-        await uploadRecipeFrame(jobId, 0, buffer);
-        return [`local:${jobId}:0`];
-      } catch (err: any) {
-        console.warn(`[Job ${jobId}] Carousel cover upload failed: ${err.message}`);
-        return null;
-      }
-    };
-
-    const frameSelectionPromise: Promise<string[] | null> = (gridImagePath && framePaths.length > 0)
-      ? (async () => {
-        try {
-          const { selectBestFoodFrame } = await import('./gemini.js');
-          console.log(`[Job ${jobId}] Asking Gemini to pick best food shots from grid...`);
-          const bestIndices = await selectBestFoodFrame(framePaths, gridImagePath, runDir);
-          console.log(`[Job ${jobId}] Best frames selected: indices ${bestIndices.join(', ')}`);
-
-          // Upload best frames to Supabase Storage as a transient hand-off: the
-          // extracting device pulls them once (GET /api/jobs/:id/frames) and they
-          // are deleted right after. The recipe stores only local references, so
-          // we never persist/rehost third-party video frames server-side.
-          const localRefs: string[] = [];
-          for (let i = 0; i < bestIndices.length; i++) {
-            const idx = bestIndices[i];
-            const buffer = await fs.readFile(framePaths[idx]);
-            await uploadRecipeFrame(jobId, i, buffer);
-            localRefs.push(`local:${jobId}:${i}`);
-          }
-
-          return localRefs;
-        } catch (err: any) {
-          console.warn(`[Job ${jobId}] Frame selection failed (falling back to cover): ${err.message}`);
-          return isCarousel ? uploadFirstCarouselImage() : null;
-        }
-      })()
-      : (isCarousel && framePaths.length > 0)
-        ? uploadFirstCarouselImage()
-        : Promise.resolve(null);
-
-    await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 75, stage: 'extracting_recipe' } as any });
-
-    const [recipe, selectedImageUrls] = await Promise.all([
-      extractRecipe(
-        audioFilePath || undefined,
-        mimeType,
-        scrapeResult.caption,
-        // Carousels send every slide at full resolution instead of the downscaled grid —
-        // the recipe is usually written as text on the images and must stay readable.
-        isCarousel ? undefined : gridImagePath,
-        runDir,
-        userPrefs,
-        scrapeResult.htmlContent,
-        isCarousel ? downloaded.imageFilePaths : undefined
-      ),
-      frameSelectionPromise,
-    ]);
-
-    console.log(`[Job ${jobId}] Recipe extracted: "${recipe.title}"`);
-    await updateJob(jobId, { status: 'processing', recipe: { isProgress: true, percent: 90, stage: 'finalizing' } as any });
-
-    // Assign image: prefer Gemini-selected frames, fall back to scraper thumbnail
-    if (selectedImageUrls && selectedImageUrls.length > 0) {
-      recipe.imageUrls = selectedImageUrls;
-      recipe.imageUrl = selectedImageUrls[0];
-    } else {
-      recipe.imageUrl = scrapeResult.imageUrl ?? null;
-      if (recipe.imageUrl) {
-        recipe.imageUrls = [recipe.imageUrl];
-      }
+    if (await isJobCancelled(jobId)) {
+      console.log(`[Job ${jobId}] Job was cancelled by user, aborting before LLM extraction.`);
+      return;
     }
 
-    recipe.instagramHandle = scrapeResult.authorHandle || null;
+    console.log(`[Job ${jobId}] Extracting recipe via Gemini...`);
+    await updateJobProgress(jobId, 'processing', { percent: 65, stage: 'extracting_recipe', preview: initialPreview });
 
-    // Assign unique recipe ID equal to jobId
-    recipe.id = jobId;
+    const { recipe: rawRecipe, usage: geminiUsage } = await extractRecipe(
+      audioFilePath || undefined,
+      mimeType,
+      scrapeResult.caption,
+      // Carousels send every slide at full resolution instead of the downscaled grid —
+      // the recipe is usually written as text on the images and must stay readable.
+      isCarousel ? undefined : gridImagePath,
+      runDir,
+      userPrefs,
+      scrapeResult.htmlContent,
+      isCarousel ? downloaded.imageFilePaths : undefined,
+      clientFramesInput ? 'client_frames' : 'carousel',
+      clientFramesInput
+    );
 
-    // 7. Update job as completed
-    await updateJob(jobId, {
-      status: 'completed',
-      recipe,
-      error: null,
+    console.log(`[Job ${jobId}] Recipe extracted: "${rawRecipe.title}"`);
+    if (isDevEnvironment()) {
+      logExtractionDevSummary(rawRecipe, isCarousel ? 'web' : 'video', geminiUsage);
+    }
+
+    // 2nd-stage recipe audit & ingredient disambiguation
+    let recipe = rawRecipe;
+    let auditUsage: GeminiUsageInfo | undefined;
+    try {
+      console.log(`[Job ${jobId}] Auditing recipe and disambiguating ingredients...`);
+      const auditResult = await auditRecipe(recipe);
+      if (auditResult.patch) {
+        recipe = applyRecipeAuditPatch(recipe, auditResult.patch);
+        auditUsage = auditResult.usage;
+      }
+    } catch (auditErr: unknown) {
+      const msg = auditErr instanceof Error ? auditErr.message : String(auditErr);
+      console.warn(`[Job ${jobId}] Recipe audit non-fatal failure: ${msg}`);
+    }
+
+    // Collect base scraped cover image (RapidAPI/TikTok metadata cover)
+    const baseImageUrls = scrapeResult.imageUrl
+      ? [scrapeResult.imageUrl]
+      : (scrapeResult.media.kind === 'images' && scrapeResult.media.imageUrls.length > 0 ? [scrapeResult.media.imageUrls[0]] : []);
+
+    const recipePreview = buildRecipePreview(recipe, baseImageUrls[0] || initialPreview.thumbnailUrl, scrapeResult.authorHandle);
+
+    // 6b. Generate AI food photography cover image and normalize ingredients in parallel
+    await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover', preview: recipePreview });
+    const coverPromise = recipe.imagePrompt
+      ? generateRecipeCoverImage({
+          prompt: recipe.imagePrompt,
+          jobId,
+          userId: job.userId,
+        })
+      : Promise.resolve({ imageUrl: null, usage: null });
+
+    const resolverPromise = enrichRecipeWithCanonicalIngredients(recipe);
+
+    const [coverResult, resolverResult] = await Promise.all([coverPromise, resolverPromise]);
+
+    const aiCoverUrl = coverResult?.imageUrl;
+    const fluxUsage = coverResult?.usage;
+    const resolverUsage = resolverResult?.usage;
+
+    if (aiCoverUrl) {
+      recipe.imageUrl = aiCoverUrl;
+      recipe.imageUrls = [aiCoverUrl, ...baseImageUrls];
+      recipe.isAiCover = true;
+    } else {
+      recipe.imageUrl = baseImageUrls[0] || null;
+      recipe.imageUrls = baseImageUrls;
+      recipe.isAiCover = false;
+    }
+
+    await updateJobProgress(jobId, 'processing', {
+      percent: 95,
+      stage: 'finalizing',
+      preview: {
+        ...recipePreview,
+        coverUrl: recipe.imageUrl || undefined,
+      },
     });
+
+    recipe.sourceHandle = scrapeResult.authorHandle || null;
+    recipe.sourceUrl = url;
+    // Social media recipe extractions are public by default (remixes and photo imports stay private)
+    recipe.visibility = 'public';
+
+    const llmUsage: LlmUsage = {};
+    if (geminiUsage) llmUsage.gemini = geminiUsage;
+    if (auditUsage) llmUsage.recipeAuditor = auditUsage;
+    if (fluxUsage) llmUsage.flux = fluxUsage;
+    if (resolverUsage) llmUsage.ingredientResolver = resolverUsage;
+
+    if (await isJobCancelled(jobId)) {
+      console.log(`[Job ${jobId}] Job was cancelled by user, aborting completion.`);
+      return;
+    }
+
+    // 7. Persist the recipe, link the job to it and add it to the cookbook —
+    // atomically, so a crash can never leave a completed job without a recipe
+    // or a recipe in nobody's cookbook.
+    await completeJob(jobId, recipe, Object.keys(llmUsage).length > 0 ? llmUsage : null);
   } catch (error: any) {
+    if (await isJobCancelled(jobId)) {
+      console.log(`[Job ${jobId}] Job was cancelled by user, keeping cancelled status.`);
+      return;
+    }
     console.error(`[Job ${jobId}] Failed during execution:`, error.message);
     // Persist a machine-readable error envelope (code + params) instead of a raw
     // message. Non-AppError throws collapse to EXTRACTION_FAILED so users never
     // see internal/library text; the client localizes the code (see errorCodes.ts).
+    // progress is cleared so a failed job never keeps a stale stage.
     await updateJob(jobId, {
       status: 'failed',
       error: serializeJobError(error),
+      progress: null,
     });
   } finally {
     clearInterval(heartbeat);
     const cleanupPaths = [audioFilePath, videoFilePath, ...framePaths].filter(Boolean);
     await Promise.allSettled(cleanupPaths.map((p) => fs.unlink(p).catch(() => { })));
+    clientFramesInput = undefined;
+    (job as any).clientFrames = null;
+    (job as any).scrapeMeta = null;
     // Import photos are transient in Storage as well — drop them on success and
     // on failure alike, so nothing waits for the 24h sweep. A failure to clean up
     // must never turn a completed job into a failed one.
@@ -374,6 +613,18 @@ async function workerTick(): Promise<void> {
       activeJobs--;
     });
   }
+}
+
+/**
+ * Triggers an immediate worker tick to claim pending jobs without waiting for the polling interval.
+ */
+export function triggerWorkerTick(): void {
+  setImmediate(() => {
+    workerTick().catch((err: unknown) => {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn('[Queue] Error in triggered worker tick:', msg);
+    });
+  });
 }
 
 async function cleanupOldRunDirs(days: number): Promise<void> {
@@ -428,6 +679,10 @@ export function startQueue(pollIntervalMs = 2000): void {
     () => reclaimExpiredJobs(config.WORKER_LEASE_TIMEOUT_MINUTES).catch(console.error),
     60_000
   );
+  sweepInterval = setInterval(
+    () => sweepStaleAwaitingFrames(config.CLIENT_FRAMES_TIMEOUT_MINUTES).catch(console.error),
+    60_000
+  );
 
   // Run cleanup once at startup, then every 12 hours.
   // Local debug run-dirs are pruned after 30 days; the persistent gemini_logs
@@ -435,10 +690,7 @@ export function startQueue(pollIntervalMs = 2000): void {
   const runCleanup = () => {
     cleanupOldRunDirs(30);
     void pruneOldGeminiLogs(90);
-    // Backstop for transient recipe frames the device never pulled (see db.ts).
-    sweepOldRecipeFrames(24)
-      .then(n => { if (n > 0) console.log(`[cleanup] Swept ${n} orphaned recipe frame(s).`); })
-      .catch(err => console.error('[cleanup] Frame sweep failed:', err));
+
     // Backstop for photo imports whose job never ran (see photoImport.ts).
     sweepOldPhotoImports(24)
       .then(n => { if (n > 0) console.log(`[cleanup] Swept ${n} orphaned import photo(s).`); })
@@ -468,6 +720,7 @@ export function startQueue(pollIntervalMs = 2000): void {
 export function stopQueue(): void {
   if (workerInterval) { clearInterval(workerInterval); workerInterval = null; }
   if (reclaimInterval) { clearInterval(reclaimInterval); reclaimInterval = null; }
+  if (sweepInterval) { clearInterval(sweepInterval); sweepInterval = null; }
   if (cleanupInterval) { clearInterval(cleanupInterval); cleanupInterval = null; }
   if (notificationInterval) { clearInterval(notificationInterval); notificationInterval = null; }
   console.log('Background job queue worker stopped.');

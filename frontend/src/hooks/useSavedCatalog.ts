@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import type { Job, Ingredient, Recipe } from '../types';
+import { type SavedRecipe, type Ingredient, type RecipeCategory, RECIPE_CATEGORIES } from '../types';
 import { useI18n } from '../context/I18nContext';
 import { useDialog } from '../context/DialogContext';
 import { deleteCachedImage } from '../utils/imageStore';
 import { markRecipeOpened, pruneRecentMap, readRecentMap, type RecentMap } from '../utils/recentRecipes';
+import { getRecommendedShelf } from '@cookbook/shared';
 import { apiUrl } from '../api';
 
 /**
@@ -13,28 +14,40 @@ import { apiUrl } from '../api';
  */
 export interface CatalogFilterState {
   favoritesOnly: boolean;
+  recommendedOnly: boolean;
   /** Max total time (prep + cook) in minutes; 0 = no time constraint. */
   maxTime: number;
+  /** Min health score (0-100); 0 = no constraint. */
+  minHealthScore?: number;
+  categories: RecipeCategory[];
   collectionIds: string[];
   flags: string[];
 }
 
 export const EMPTY_FILTERS: CatalogFilterState = {
   favoritesOnly: false,
+  recommendedOnly: false,
   maxTime: 0,
+  minHealthScore: 0,
+  categories: [],
   collectionIds: [],
   flags: []
 };
 
 export const TIME_FILTER_OPTIONS = [15, 30, 60] as const;
 
-export type CatalogSort = 'newest' | 'recent' | 'title' | 'time';
+export type CatalogSort = 'newest' | 'recent' | 'title' | 'time' | 'healthScore';
 
 /** Number of recipes shown per horizontal shelf on the cookbook home. */
 export const SHELF_SIZE = 12;
 
-/** Total prep + cook time in minutes; tolerates legacy string values. */
-export function getTotalTime(recipe: Pick<Recipe, 'prepTime' | 'cookTime'> | undefined | null): number {
+/** Number of recipes shown in the vertical 2-column shelf on the cookbook home. */
+export const SHELF_VERTICAL_SIZE = 24;
+
+/** Total prep + cook time in minutes; tolerates legacy string values and optional fields. */
+export function getTotalTime(
+  recipe: { prepTime?: number | string | null; cookTime?: number | string | null } | undefined | null
+): number {
   if (!recipe) return 0;
   const toMinutes = (value: unknown) =>
     typeof value === 'number' ? value : (parseInt(String(value ?? ''), 10) || 0);
@@ -44,16 +57,23 @@ export function getTotalTime(recipe: Pick<Recipe, 'prepTime' | 'cookTime'> | und
 export function countActiveFilters(filters: CatalogFilterState): number {
   return (
     (filters.favoritesOnly ? 1 : 0) +
+    (filters.recommendedOnly ? 1 : 0) +
     (filters.maxTime > 0 ? 1 : 0) +
+    ((filters.minHealthScore ?? 0) > 0 ? 1 : 0) +
+    (filters.categories?.length ?? 0) +
     filters.collectionIds.length +
     filters.flags.length
   );
 }
 
 interface UseSavedCatalogProps {
-  history: Job[];
-  setSelectedJob: (job: Job | null) => void;
-  onAddIngredients?: (ingredients: Ingredient[], recipeId: string, recipeTitle: string) => void;
+  history: SavedRecipe[];
+  setSelectedJob: (job: SavedRecipe | null) => void;
+  onAddIngredients?: (
+    ingredients: Ingredient[],
+    recipeId: string,
+    recipeTitle: string
+  ) => Promise<boolean> | boolean | void;
   fetchHistory?: () => void;
   getAccessToken?: () => Promise<string | null>;
   onSelectModeChange?: (active: boolean) => void;
@@ -75,13 +95,13 @@ export function useSavedCatalog({
   const [optimisticCollections, setOptimisticCollections] = useState<Record<string, string[]>>({});
 
   const completedJobs = useMemo(() => {
+    // No status filter: a cookbook entry only exists for a finished recipe.
     return history
-      .filter(h => h.status === 'completed' && h.recipe)
       .map(job => ({
         ...job,
-        isFavorite: optimisticFavorites[job.id] !== undefined ? optimisticFavorites[job.id] : (job.isFavorite ?? false),
-        flags: optimisticFlags[job.id] !== undefined ? optimisticFlags[job.id] : (job.flags ?? []),
-        collectionIds: optimisticCollections[job.id] !== undefined ? optimisticCollections[job.id] : (job.collectionIds ?? [])
+        isFavorite: optimisticFavorites[job.recipeId] !== undefined ? optimisticFavorites[job.recipeId] : (job.isFavorite ?? false),
+        flags: optimisticFlags[job.recipeId] !== undefined ? optimisticFlags[job.recipeId] : (job.flags ?? []),
+        collectionIds: optimisticCollections[job.recipeId] !== undefined ? optimisticCollections[job.recipeId] : (job.collectionIds ?? [])
       }));
   }, [history, optimisticFavorites, optimisticFlags, optimisticCollections]);
 
@@ -108,7 +128,8 @@ export function useSavedCatalog({
   // Sorting state persisted to localStorage
   const [sortBy, setSortBy] = useState<CatalogSort>(() => {
     const stored = localStorage.getItem('recipe_catalog_sort');
-    return (['newest', 'recent', 'title', 'time'] as const).includes(stored as CatalogSort)
+    const validSorts: readonly CatalogSort[] = ['newest', 'recent', 'title', 'time', 'healthScore'];
+    return (validSorts as readonly string[]).includes(stored ?? '')
       ? (stored as CatalogSort)
       : 'newest';
   });
@@ -120,14 +141,14 @@ export function useSavedCatalog({
   // "Recently opened" tracking (localStorage, see utils/recentRecipes.ts)
   const [recentMap, setRecentMap] = useState<RecentMap>(() => readRecentMap());
 
-  const markOpened = useCallback((jobId: string) => {
-    setRecentMap(markRecipeOpened(jobId));
+  const markOpened = useCallback((recipeId: string) => {
+    setRecentMap(markRecipeOpened(recipeId));
   }, []);
 
   // Drop entries for deleted recipes once the history has loaded.
   useEffect(() => {
     if (completedJobs.length === 0) return;
-    setRecentMap(pruneRecentMap(new Set(completedJobs.map(j => j.id))));
+    setRecentMap(pruneRecentMap(new Set(completedJobs.map(j => j.recipeId))));
   }, [completedJobs]);
 
   // Derive unique flags from completed recipes
@@ -147,15 +168,16 @@ export function useSavedCatalog({
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  // Notify parent of select mode changes
+  // Notify parent of select mode changes (only when value actually changes)
+  const prevSelectModeRef = useRef(isSelectMode);
   useEffect(() => {
-    onSelectModeChange?.(isSelectMode);
-    return () => {
-      onSelectModeChange?.(false);
-    };
+    if (prevSelectModeRef.current !== isSelectMode) {
+      prevSelectModeRef.current = isSelectMode;
+      onSelectModeChange?.(isSelectMode);
+    }
   }, [isSelectMode, onSelectModeChange]);
 
-  // Direct shopping list addition success states (mapping job.id -> isAdded)
+  // Direct shopping list addition success states (mapping recipeId -> isAdded)
   const [addedRecipeIds, setAddedRecipeIds] = useState<Record<string, boolean>>({});
 
   // Pointer/Long press logic
@@ -224,7 +246,7 @@ export function useSavedCatalog({
   }, [completedJobs, language]);
 
   /** Applies the current sort order to any job subset. */
-  const sortJobs = useCallback((jobs: Job[], order: CatalogSort): Job[] => {
+  const sortJobs = useCallback((jobs: SavedRecipe[], order: CatalogSort): SavedRecipe[] => {
     return [...jobs].sort((a, b) => {
       if (order === 'title') {
         return (a.recipe?.title || '').localeCompare(b.recipe?.title || '', language);
@@ -232,20 +254,26 @@ export function useSavedCatalog({
       if (order === 'time') {
         return getTotalTime(a.recipe) - getTotalTime(b.recipe);
       }
+      if (order === 'healthScore') {
+        const scoreA = a.recipe?.healthScore ?? 0;
+        const scoreB = b.recipe?.healthScore ?? 0;
+        if (scoreB !== scoreA) return scoreB - scoreA;
+        return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
+      }
       if (order === 'recent') {
-        const aSeen = recentMap[a.id] ?? 0;
-        const bSeen = recentMap[b.id] ?? 0;
+        const aSeen = recentMap[a.recipeId] ?? 0;
+        const bSeen = recentMap[b.recipeId] ?? 0;
         // Never-opened recipes sink to the bottom, ordered by save date.
         if (aSeen !== bSeen) return bSeen - aSeen;
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
       }
       // default: 'newest'
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
     });
   }, [language, recentMap]);
 
   /** Free-text match over title, description, tags and ingredient names. */
-  const matchesSearch = useCallback((job: Job, query: string): boolean => {
+  const matchesSearch = useCallback((job: SavedRecipe, query: string): boolean => {
     if (!query) return true;
     const r = job.recipe!;
     const needle = query.toLowerCase();
@@ -258,16 +286,40 @@ export function useSavedCatalog({
     ) || false;
   }, []);
 
+  const recResult = useMemo(() => {
+    return getRecommendedShelf<SavedRecipe>(completedJobs, {
+      now: new Date(),
+      recentMap,
+      limit: SHELF_SIZE,
+    });
+  }, [completedJobs, recentMap]);
+
+  const recommendedJobIds = useMemo(() => {
+    return new Set((recResult?.allRecipes ?? []).map(j => j.recipeId));
+  }, [recResult]);
+
   /** Applies the search query plus an arbitrary facet set (unsorted). */
-  const applyFilters = useCallback((facets: CatalogFilterState, query: string): Job[] => {
+  const applyFilters = useCallback((facets: CatalogFilterState, query: string): SavedRecipe[] => {
     return completedJobs.filter(job => {
       if (!matchesSearch(job, query)) return false;
 
       if (facets.favoritesOnly && job.isFavorite !== true) return false;
 
+      if (facets.recommendedOnly && !recommendedJobIds.has(job.recipeId)) return false;
+
       if (facets.maxTime > 0) {
         const total = getTotalTime(job.recipe);
         if (total <= 0 || total > facets.maxTime) return false;
+      }
+
+      if (facets.minHealthScore && facets.minHealthScore > 0) {
+        const score = job.recipe?.healthScore ?? 0;
+        if (score < facets.minHealthScore) return false;
+      }
+
+      if (facets.categories && facets.categories.length > 0) {
+        const recipeCategory = job.recipe?.category;
+        if (!recipeCategory || !facets.categories.includes(recipeCategory as RecipeCategory)) return false;
       }
 
       if (facets.collectionIds.length > 0) {
@@ -282,7 +334,7 @@ export function useSavedCatalog({
 
       return true;
     });
-  }, [completedJobs, matchesSearch]);
+  }, [completedJobs, matchesSearch, recommendedJobIds]);
 
   // Filter jobs: search AND every active facet, then sort
   const filteredJobs = useMemo(
@@ -307,19 +359,32 @@ export function useSavedCatalog({
       const total = getTotalTime(j.recipe);
       return total > 0 && total <= 30;
     });
-    const opened = completedJobs.filter(j => recentMap[j.id]);
+    const opened = completedJobs.filter(j => recentMap[j.recipeId]);
+
+    const recommended = recResult && recResult.recipes.length >= 2
+      ? {
+        items: recResult.recipes,
+        allJobs: recResult.allRecipes,
+        allJobIds: recResult.allRecipes.map(j => j.recipeId),
+        total: recResult.totalCount,
+        themeId: recResult.themeId,
+        title: t(recResult.titleKey as any) || recResult.defaultTitle,
+        badgeEmoji: recResult.badgeEmoji,
+      }
+      : null;
 
     return {
+      recommended,
       recent: { items: sortJobs(opened, 'recent').slice(0, SHELF_SIZE), total: opened.length },
       favorites: { items: sortJobs(favorites, 'newest').slice(0, SHELF_SIZE), total: favorites.length },
       quick: { items: sortJobs(quick, 'time').slice(0, SHELF_SIZE), total: quick.length },
-      newest: { items: sortJobs(completedJobs, 'newest').slice(0, SHELF_SIZE), total: completedJobs.length }
+      newest: { items: sortJobs(completedJobs, 'newest').slice(0, SHELF_VERTICAL_SIZE), total: completedJobs.length }
     };
-  }, [completedJobs, recentMap, sortJobs]);
+  }, [completedJobs, recentMap, recResult, sortJobs, t]);
 
-  /** jobId list per collection, used for the collection tiles' cover mosaic. */
+  /** recipeId list per collection, used for the collection tiles' cover mosaic. */
   const jobsByCollection = useMemo(() => {
-    const map: Record<string, Job[]> = {};
+    const map: Record<string, SavedRecipe[]> = {};
     // Newest first so a collection's cover reflects what was added last.
     sortJobs(completedJobs, 'newest').forEach(job => {
       (job.collectionIds ?? []).forEach(id => {
@@ -327,6 +392,38 @@ export function useSavedCatalog({
       });
     });
     return map;
+  }, [completedJobs, sortJobs]);
+
+  /** recipeId list per flag/label, used for label counts on CookbookHome. */
+  const jobsByFlag = useMemo(() => {
+    const map: Record<string, SavedRecipe[]> = {};
+    sortJobs(completedJobs, 'newest').forEach(job => {
+      (job.flags ?? []).forEach(flag => {
+        (map[flag] ||= []).push(job);
+      });
+    });
+    return map;
+  }, [completedJobs, sortJobs]);
+
+  /** recipeId list per category. */
+  const jobsByCategory = useMemo(() => {
+    const map: Partial<Record<RecipeCategory, SavedRecipe[]>> = {};
+    sortJobs(completedJobs, 'newest').forEach(job => {
+      if (job.recipe?.category) {
+        (map[job.recipe.category] ||= []).push(job);
+      }
+    });
+    return map;
+  }, [completedJobs, sortJobs]);
+
+  /** All unique categories present in the user's completed recipes, sorted from MAIN_COURSE to OTHER. */
+  const availableCategories = useMemo(() => {
+    const present = new Set(Object.keys(jobsByCategory) as RecipeCategory[]);
+    return RECIPE_CATEGORIES.filter(cat => present.has(cat));
+  }, [jobsByCategory]);
+
+  const favoriteJobs = useMemo(() => {
+    return sortJobs(completedJobs.filter(j => j.isFavorite), 'newest');
   }, [completedJobs, sortJobs]);
 
 
@@ -353,13 +450,13 @@ export function useSavedCatalog({
     }, 600);
   };
 
-  const handlePointerUp = (e: React.PointerEvent, job: Job) => {
+  const handlePointerUp = (e: React.PointerEvent, job: SavedRecipe) => {
     if (isInteractiveTarget(e.target as HTMLElement)) {
       return;
     }
-    if (longPressTimeout.current[job.id]) {
-      clearTimeout(longPressTimeout.current[job.id]);
-      delete longPressTimeout.current[job.id];
+    if (longPressTimeout.current[job.recipeId]) {
+      clearTimeout(longPressTimeout.current[job.recipeId]);
+      delete longPressTimeout.current[job.recipeId];
     }
     const pressDuration = Date.now() - pressStartTime.current;
     if (pressDuration >= 600) {
@@ -375,7 +472,7 @@ export function useSavedCatalog({
     }
   };
 
-  const bindLongPress = (jobId: string, job: Job) => {
+  const bindLongPress = (jobId: string, job: SavedRecipe) => {
     return {
       onPointerDown: (e: React.PointerEvent) => handlePointerDown(e, jobId),
       onPointerUp: (e: React.PointerEvent) => handlePointerUp(e, job),
@@ -384,7 +481,7 @@ export function useSavedCatalog({
     };
   };
 
-  const handleCardClick = (e: React.MouseEvent, job: Job) => {
+  const handleCardClick = (e: React.MouseEvent, job: SavedRecipe) => {
     if (wasLongPressed.current) {
       wasLongPressed.current = false;
       return;
@@ -395,13 +492,13 @@ export function useSavedCatalog({
     if (isSelectMode) {
       setSelectedIds(prev => {
         const next = new Set(prev);
-        if (next.has(job.id)) {
-          next.delete(job.id);
+        if (next.has(job.recipeId)) {
+          next.delete(job.recipeId);
           if (next.size === 0) {
             setIsSelectMode(false);
           }
         } else {
-          next.add(job.id);
+          next.add(job.recipeId);
         }
         return next;
       });
@@ -413,7 +510,7 @@ export function useSavedCatalog({
   };
 
   // Direct add all ingredients of a recipe to shopping list
-  const handleDirectAddToShoppingList = (e: React.MouseEvent, job: Job) => {
+  const handleDirectAddToShoppingList = async (e: React.MouseEvent, job: SavedRecipe) => {
     e.stopPropagation();
     const r = job.recipe!;
     if (!onAddIngredients) return;
@@ -422,31 +519,30 @@ export function useSavedCatalog({
     r.ingredients.forEach((group) => {
       group.items.forEach((ing) => {
         itemsToAdd.push({
-          name: ing.name,
-          amount: ing.amount,
+          ...ing,
           unit: ing.unit || '',
-          notes: ing.notes,
-          category: group.name
+          category: group.name || ing.category,
         });
       });
     });
 
     if (itemsToAdd.length === 0) return;
 
-    onAddIngredients(itemsToAdd, job.id, r.title);
+    const success = await onAddIngredients(itemsToAdd, job.recipeId, r.title);
+    if (success === false) return;
 
     // Checkmark success animation trigger
-    setAddedRecipeIds(prev => ({ ...prev, [job.id]: true }));
+    setAddedRecipeIds(prev => ({ ...prev, [job.recipeId]: true }));
     setTimeout(() => {
-      setAddedRecipeIds(prev => ({ ...prev, [job.id]: false }));
+      setAddedRecipeIds(prev => ({ ...prev, [job.recipeId]: false }));
     }, 2000);
   };
 
   // Bulk add to shopping list in Multi-Select mode.
   // Returns the selected jobs for the caller to show the per-recipe
   // ShoppingConfirmSheet sequentially — no direct add happens here.
-  const getBulkShoppingJobs = (): Job[] => {
-    return completedJobs.filter(j => selectedIds.has(j.id) && j.recipe);
+  const getBulkShoppingJobs = (): SavedRecipe[] => {
+    return completedJobs.filter(j => selectedIds.has(j.recipeId) && j.recipe);
   };
 
 
@@ -465,7 +561,7 @@ export function useSavedCatalog({
 
     const deletePromises = Array.from(selectedIds).map(async (id) => {
       try {
-        const job = completedJobs.find(j => j.id === id);
+        const job = completedJobs.find(j => j.recipeId === id);
         if (job?.recipe) {
           const r = job.recipe;
           const imagesToDelete = r.imageUrls && r.imageUrls.length > 0
@@ -479,7 +575,7 @@ export function useSavedCatalog({
 
         const token = getAccessToken ? await getAccessToken() : null;
         if (!token) return;
-        await fetch(apiUrl(`/api/jobs/${id}`), {
+        await fetch(apiUrl(`/api/recipes/${id}`), {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -499,10 +595,23 @@ export function useSavedCatalog({
     }
   };
 
-  // Toggle favorite status via PATCH /api/jobs/:id/favorite
-  const toggleFavorite = async (job: Job) => {
-    const nextVal = !job.isFavorite;
-    setOptimisticFavorites(prev => ({ ...prev, [job.id]: nextVal }));
+  // Bulk toggle favorites in Multi-Select mode
+  const handleBulkToggleFavorite = async () => {
+    const selectedJobs = completedJobs.filter(j => selectedIds.has(j.recipeId));
+    if (selectedJobs.length === 0) return;
+
+    const allFavorites = selectedJobs.every(j => j.isFavorite);
+    const nextVal = !allFavorites;
+
+    // Apply optimistic updates
+    const updates: Record<string, boolean> = {};
+    for (const j of selectedJobs) {
+      updates[j.recipeId] = nextVal;
+    }
+    setOptimisticFavorites(prev => ({ ...prev, ...updates }));
+
+    setIsSelectMode(false);
+    setSelectedIds(new Set());
 
     try {
       const token = getAccessToken ? await getAccessToken() : null;
@@ -513,7 +622,44 @@ export function useSavedCatalog({
         'Authorization': `Bearer ${token}`
       };
 
-      const response = await fetch(apiUrl(`/api/jobs/${job.id}/favorite`), {
+      await Promise.all(
+        selectedJobs.map(job =>
+          fetch(apiUrl(`/api/recipes/${job.recipeId}/favorite`), {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify({ isFavorite: nextVal })
+          })
+        )
+      );
+
+      if (fetchHistory) {
+        fetchHistory();
+      }
+    } catch (err) {
+      console.error('Error bulk updating favorites:', err);
+      const rollback: Record<string, boolean> = {};
+      for (const j of selectedJobs) {
+        rollback[j.recipeId] = j.isFavorite ?? false;
+      }
+      setOptimisticFavorites(prev => ({ ...prev, ...rollback }));
+    }
+  };
+
+  // Toggle favorite status via PATCH /api/recipes/:id/favorite
+  const toggleFavorite = async (job: SavedRecipe) => {
+    const nextVal = !job.isFavorite;
+    setOptimisticFavorites(prev => ({ ...prev, [job.recipeId]: nextVal }));
+
+    try {
+      const token = getAccessToken ? await getAccessToken() : null;
+      if (!token) return;
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      };
+
+      const response = await fetch(apiUrl(`/api/recipes/${job.recipeId}/favorite`), {
         method: 'PATCH',
         headers,
         body: JSON.stringify({ isFavorite: nextVal })
@@ -524,18 +670,18 @@ export function useSavedCatalog({
       }
     } catch (err) {
       console.error('Error toggling favorite:', err);
-      setOptimisticFavorites(prev => ({ ...prev, [job.id]: job.isFavorite ?? false }));
+      setOptimisticFavorites(prev => ({ ...prev, [job.recipeId]: job.isFavorite ?? false }));
     }
   };
 
-  // Toggle custom flag/tag via PATCH /api/jobs/:id/flags
-  const toggleFlag = async (job: Job, flagName: string) => {
+  // Toggle custom flag/tag via PATCH /api/recipes/:id/flags
+  const toggleFlag = async (job: SavedRecipe, flagName: string) => {
     const currentFlags = job.flags ?? [];
     const nextFlags = currentFlags.includes(flagName)
       ? currentFlags.filter(f => f !== flagName)
       : [...currentFlags, flagName];
 
-    setOptimisticFlags(prev => ({ ...prev, [job.id]: nextFlags }));
+    setOptimisticFlags(prev => ({ ...prev, [job.recipeId]: nextFlags }));
 
     try {
       const token = getAccessToken ? await getAccessToken() : null;
@@ -546,7 +692,7 @@ export function useSavedCatalog({
         'Authorization': `Bearer ${token}`
       };
 
-      const response = await fetch(apiUrl(`/api/jobs/${job.id}/flags`), {
+      const response = await fetch(apiUrl(`/api/recipes/${job.recipeId}/flags`), {
         method: 'PATCH',
         headers,
         body: JSON.stringify({ flags: nextFlags })
@@ -560,15 +706,15 @@ export function useSavedCatalog({
       return { success: true };
     } catch (err: any) {
       console.error('Error updating flag:', err);
-      setOptimisticFlags(prev => ({ ...prev, [job.id]: currentFlags }));
+      setOptimisticFlags(prev => ({ ...prev, [job.recipeId]: currentFlags }));
       return { success: false, error: err.message };
     }
   };
 
-  // Set custom flags/tags list directly via PATCH /api/jobs/:id/flags
-  const setRecipeFlags = async (job: Job, nextFlags: string[]) => {
+  // Set custom flags/tags list directly via PATCH /api/recipes/:id/flags
+  const setRecipeFlags = async (job: SavedRecipe, nextFlags: string[]) => {
     const currentFlags = job.flags ?? [];
-    setOptimisticFlags(prev => ({ ...prev, [job.id]: nextFlags }));
+    setOptimisticFlags(prev => ({ ...prev, [job.recipeId]: nextFlags }));
 
     try {
       const token = getAccessToken ? await getAccessToken() : null;
@@ -579,7 +725,7 @@ export function useSavedCatalog({
         'Authorization': `Bearer ${token}`
       };
 
-      const response = await fetch(apiUrl(`/api/jobs/${job.id}/flags`), {
+      const response = await fetch(apiUrl(`/api/recipes/${job.recipeId}/flags`), {
         method: 'PATCH',
         headers,
         body: JSON.stringify({ flags: nextFlags })
@@ -593,18 +739,18 @@ export function useSavedCatalog({
       return { success: true };
     } catch (err: any) {
       console.error('Error updating flags:', err);
-      setOptimisticFlags(prev => ({ ...prev, [job.id]: currentFlags }));
+      setOptimisticFlags(prev => ({ ...prev, [job.recipeId]: currentFlags }));
       return { success: false, error: err.message };
     }
   };
 
 
-  // Assign collections via PATCH /api/jobs/:id/collections
-  const assignCollections = async (jobId: string, collectionIds: string[]) => {
-    const job = completedJobs.find(j => j.id === jobId);
+  // Assign collections via PATCH /api/recipes/:id/collections
+  const assignCollections = async (recipeId: string, collectionIds: string[]) => {
+    const job = completedJobs.find(j => j.recipeId === recipeId);
     const currentCollectionIds = job?.collectionIds ?? [];
 
-    setOptimisticCollections(prev => ({ ...prev, [jobId]: collectionIds }));
+    setOptimisticCollections(prev => ({ ...prev, [recipeId]: collectionIds }));
 
     try {
       const token = getAccessToken ? await getAccessToken() : null;
@@ -615,7 +761,7 @@ export function useSavedCatalog({
         'Authorization': `Bearer ${token}`
       };
 
-      const response = await fetch(apiUrl(`/api/jobs/${jobId}/collections`), {
+      const response = await fetch(apiUrl(`/api/recipes/${recipeId}/collections`), {
         method: 'PATCH',
         headers,
         body: JSON.stringify({ collectionIds })
@@ -629,7 +775,7 @@ export function useSavedCatalog({
       return { success: true };
     } catch (err: any) {
       console.error('Error updating collections:', err);
-      setOptimisticCollections(prev => ({ ...prev, [jobId]: currentCollectionIds }));
+      setOptimisticCollections(prev => ({ ...prev, [recipeId]: currentCollectionIds }));
       return { success: false, error: err.message };
     }
   };
@@ -661,6 +807,7 @@ export function useSavedCatalog({
     handleDirectAddToShoppingList,
     getBulkShoppingJobs,
     handleBulkDelete,
+    handleBulkToggleFavorite,
     sortBy,
     setSortBy,
     allFlags,
@@ -671,6 +818,10 @@ export function useSavedCatalog({
     // Shelves + recency
     shelves,
     jobsByCollection,
+    jobsByFlag,
+    jobsByCategory,
+    availableCategories,
+    favoriteJobs,
     recentMap,
     markOpened
   };

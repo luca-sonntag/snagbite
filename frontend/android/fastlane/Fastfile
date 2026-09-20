@@ -52,4 +52,15 @@ platform :android do
   lane :alpha do
     upload_aab("alpha")
   end
+
+  desc "Upload store metadata, descriptions and graphics to Google Play"
+  lane :metadata do
+    upload_to_play_store(
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_screenshots: true,
+      metadata_path: "metadata/android"
+    )
+    UI.success("Uploaded store metadata to Google Play.")
+  end
 end

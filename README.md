@@ -89,9 +89,11 @@ Full setup (self-hosted Supabase on Railway, per-PR previews, user provisioning)
 
 From `frontend/`:
 ```bash
-npm run cap:sync     # build web assets + sync into the Android project
-npm run cap:run      # build, sync, and run on a device/emulator
-npm run cap:live     # live-reload against the Vite dev server
+npm run cap:sync         # build web assets + sync into the Android project
+npm run cap:run          # build, sync, and run on a device/emulator
+npm run cap:run:local    # static build in APK (no live-reload) pointing to local backend
+npm run cap:live         # wireless/USB live-reload (local frontend + local backend)
+npm run cap:live:cloud   # live-reload pointing to Railway cloud dev backend
 ```
 
 Release + Play Store upload are automated via the PowerShell scripts in `frontend/scripts/`

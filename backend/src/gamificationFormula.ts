@@ -19,8 +19,9 @@ export interface AwardContext {
   priorCookCount: number;
   /** 1-based index of this cook among today's cooks (for the daily soft-cap). */
   cookIndexToday: number;
-  /** The user's streak length *after* this cook (for the streak multiplier). */
-  streakDays: number;
+  /** The user's streak length in weeks *after* this cook (for the streak multiplier). */
+  streakDays?: number;
+  streakWeeks?: number;
   /** Whether a finished-dish photo is attached. */
   hasPhoto: boolean;
   /** Reserved — applied once recipes carry a cuisine signal. */
@@ -45,11 +46,11 @@ export function softcapFactor(indexToday: number, sc: DailySoftcap): number {
   return sc.tailFactor;
 }
 
-/** Highest matching streak-tier multiplier for a given streak length. */
-export function streakMultiplier(days: number, tiers: StreakTier[]): number {
+/** Highest matching streak-tier multiplier for a given streak length (in weeks/units). */
+export function streakMultiplier(streakUnits: number, tiers: StreakTier[]): number {
   let mult = 1;
   for (const t of [...tiers].sort((a, b) => a.minDays - b.minDays)) {
-    if (days >= t.minDays) mult = t.mult;
+    if (streakUnits >= t.minDays) mult = t.mult;
   }
   return mult;
 }
@@ -69,6 +70,17 @@ export function levelForXp(xp: number, thresholds: number[]): number {
 
 /** Compute the XP/coins award for one cook. Pure — same inputs, same output. */
 export function computeAward(config: GamificationConfig, ctx: AwardContext): AwardResult {
+  if (!ctx.hasPhoto) {
+    return {
+      xp: 0,
+      coins: 0,
+      reasons: ['unverified_no_photo'],
+      verified: false,
+      leaderboardEligible: false,
+      trustScore: 0,
+    };
+  }
+
   const reasons: string[] = [];
   const tier = ctx.difficultyTier ?? '1';
   const base = config.baseXp;
@@ -90,17 +102,14 @@ export function computeAward(config: GamificationConfig, ctx: AwardContext): Awa
     reasons.push(`novelty_cuisine_+${config.noveltyCuisineBonus}`);
   }
 
-  // Note: a finished-dish photo is now mandatory (verified before a cook is
-  // accepted), so there is no photo *bonus* — every cook already has one.
-  // The photoBonusPct config key was removed; see docs/OBSOLETE.md.
-
   // Daily soft-cap.
   const sc = softcapFactor(ctx.cookIndexToday, config.dailySoftcap);
   if (sc !== 1) reasons.push(`softcap_x${sc}`);
   xp *= sc;
 
   // Streak multiplier — rewards consistency, applied to the whole cook.
-  const sm = streakMultiplier(ctx.streakDays, config.streakTiers);
+  const streak = ctx.streakWeeks ?? ctx.streakDays ?? 0;
+  const sm = streakMultiplier(streak, config.streakTiers);
   if (sm !== 1) reasons.push(`streak_x${sm}`);
   xp *= sm;
 
@@ -111,8 +120,30 @@ export function computeAward(config: GamificationConfig, ctx: AwardContext): Awa
     xp: finalXp,
     coins,
     reasons,
-    verified: ctx.hasPhoto,
-    leaderboardEligible: ctx.hasPhoto,
-    trustScore: ctx.hasPhoto ? 1.0 : 0.5,
+    verified: true,
+    leaderboardEligible: true,
+    trustScore: 1.0,
   };
+}
+
+/** Returns YYYY-MM-DD string in UTC. */
+export function utcDateStr(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+/** Adds days to a YYYY-MM-DD date string and returns the new YYYY-MM-DD in UTC. */
+export function addDaysStr(dateStr: string, days: number): string {
+  const d = new Date(`${dateStr}T00:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return utcDateStr(d);
+}
+
+/** Returns Monday (YYYY-MM-DD) in UTC for a given ISO date string or Date. */
+export function utcWeekStartStr(d: Date | string): string {
+  const date = typeof d === 'string' ? new Date(`${d.slice(0, 10)}T00:00:00.000Z`) : new Date(d);
+  const day = date.getUTCDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
+  const diffToMonday = (day + 6) % 7;
+  const monday = new Date(date);
+  monday.setUTCDate(date.getUTCDate() - diffToMonday);
+  return utcDateStr(monday);
 }

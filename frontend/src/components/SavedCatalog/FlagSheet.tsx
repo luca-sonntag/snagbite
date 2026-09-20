@@ -1,15 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button, Drawer } from '@heroui/react';
 import { Tag, X } from 'lucide-react';
-import type { Job } from '../../types';
+import type { SavedRecipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
+import { useToast } from '../../context/ToastContext';
+import { useModalOverlay } from '../../context/OverlayStackContext';
+import { hapticLight, hapticMedium, hapticHeavy } from '../../utils/haptics';
 
 interface FlagSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  job: Job | null;
+  job: SavedRecipe | null;
   allExistingFlags: string[];
-  onSave: (job: Job, flags: string[]) => Promise<void>;
+  onSave: (job: SavedRecipe, flags: string[]) => Promise<void>;
 }
 
 export const FlagSheet: React.FC<FlagSheetProps> = ({
@@ -20,6 +23,8 @@ export const FlagSheet: React.FC<FlagSheetProps> = ({
   onSave
 }) => {
   const { t, language } = useI18n();
+  const toast = useToast();
+  useModalOverlay(isOpen, onClose);
   const [tags, setTags] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -43,6 +48,7 @@ export const FlagSheet: React.FC<FlagSheetProps> = ({
   const handleAddTag = (tagToAdd: string) => {
     const cleaned = tagToAdd.trim();
     if (!cleaned) return;
+    hapticLight();
     if (!tags.includes(cleaned)) {
       setTags(prev => [...prev, cleaned]);
     }
@@ -50,6 +56,7 @@ export const FlagSheet: React.FC<FlagSheetProps> = ({
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
+    hapticHeavy();
     setTags(prev => prev.filter(t => t !== tagToRemove));
   };
 
@@ -63,6 +70,8 @@ export const FlagSheet: React.FC<FlagSheetProps> = ({
         finalTags.push(remaining);
       }
       await onSave(job, finalTags);
+      hapticMedium();
+      toast.success(t('toast.flagsSaved'));
       onClose();
     } catch (err) {
       console.error('Failed to save flags:', err);
@@ -81,32 +90,45 @@ export const FlagSheet: React.FC<FlagSheetProps> = ({
       <Drawer>
         <Drawer.Backdrop isOpen={isOpen} onOpenChange={(open) => { if (!open) onClose(); }} className="!z-[100]">
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))]">
+            <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
               <Drawer.Handle />
 
               {/* Header */}
-              <Drawer.Header className="pb-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-amber-500/10 dark:bg-amber-500/20 border-none flex items-center justify-center">
-                    <Tag className="w-4.5 h-4.5 text-amber-600 dark:text-amber-400" />
+              <Drawer.Header className="pb-3 mb-1">
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-full bg-amber-500/10 dark:bg-amber-500/20 border-none flex items-center justify-center">
+                      <Tag className="w-4.5 h-4.5 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white">
+                      {t('catalog.flagsTitle') || 'Labels / Tags'}
+                    </Drawer.Heading>
                   </div>
-                  <Drawer.Heading className="text-base font-bold">
-                    {t('catalog.flagsTitle') || 'Labels / Tags'}
-                  </Drawer.Heading>
+                  <button
+                    type="button"
+                    className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer"
+                    onClick={() => {
+                      hapticLight();
+                      onClose();
+                    }}
+                    aria-label="Close"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
               </Drawer.Header>
 
               {/* Body */}
-              <Drawer.Body className="overflow-y-auto py-4 flex-1 flex flex-col gap-4">
+              <Drawer.Body className="overflow-y-auto py-2 flex-1 flex flex-col gap-4">
                 {/* Unified Tag Input Box */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1">
+                  <label className="text-xs font-medium text-gray-500 dark:text-gray-400 px-1">
                     {t('catalog.flagsTitle') || 'Labels / Tags'}
                   </label>
                   
                   <div
                     onClick={handleContainerClick}
-                    className="flex flex-wrap items-center gap-1.5 p-3 bg-gray-100 dark:bg-gray-800 border-none rounded-2xl focus-within:ring-2 focus-within:ring-emerald-500/30 transition-all cursor-text min-h-[56px] shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                    className="flex flex-wrap items-center gap-1.5 p-3 bg-gray-100 dark:bg-gray-800 border-none rounded-2xl focus-within:ring-2 focus-within:ring-emerald-500/30 transition-all cursor-text min-h-[56px]"
                   >
                     {/* Render active tags */}
                     {tags.map(tag => (
@@ -151,7 +173,7 @@ export const FlagSheet: React.FC<FlagSheetProps> = ({
                 {/* Suggestions List */}
                 {suggestions.length > 0 && (
                   <div className="flex flex-col gap-1.5 mt-2">
-                    <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1">
+                    <label className="text-xs font-medium text-gray-500 dark:text-gray-400 px-1">
                       {language === 'de' ? 'Häufige Labels' : 'Suggested Labels'}
                     </label>
                     <div className="flex flex-wrap gap-1.5 py-1">
@@ -174,14 +196,14 @@ export const FlagSheet: React.FC<FlagSheetProps> = ({
               <Drawer.Footer className="pt-3 flex gap-2">
                 <Button
                   onPress={onClose}
-                  className="flex-1 text-sm h-11 border-none bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl font-semibold active:scale-95 transition-all"
+                  className="flex-1 text-sm h-12 border-none bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-2xl font-bold active:scale-95 transition-all cursor-pointer"
                 >
                   {t('dialog.cancelDefault') || 'Abbrechen'}
                 </Button>
                 <Button
                   onPress={handleSave}
                   isDisabled={isSaving}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-sm h-11 font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-none active:scale-95 transition-all"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-sm h-12 font-bold rounded-2xl flex items-center justify-center gap-1.5 shadow-none border-none active:scale-95 transition-all cursor-pointer"
                 >
                   {isSaving ? (language === 'de' ? 'Speichern...' : 'Saving...') : (t('recipe.save') || 'Speichern')}
                 </Button>

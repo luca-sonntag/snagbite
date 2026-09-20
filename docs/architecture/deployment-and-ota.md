@@ -2,12 +2,18 @@
 
 ## 1. Native Build & Release-Pipeline (Google Play Store)
 
-### Gradle & Dev-Port-Forwarding
-* **Automatisches Live-Reload Port-Forwarding:** In `frontend/android/app/build.gradle` führt die Task `reversePorts` vor jedem Build (`preBuild.dependsOn reversePorts`) automatisch `adb reverse tcp:5173 tcp:5173` aus. Dies stellt sicher, dass der Android Emulator/das Testgerät im Live-Reload-Modus stets Verbindung zum Vite-Dev-Server auf dem Host hat.
+### Capacitor Live-Reload (WLAN & USB)
+* **Live-Reload (Empfohlen):** `npm run cap:live` führt `frontend/scripts/cap-live-remote.ps1` aus. Das Skript ermittelt blitzschnell die lokale LAN-IP des Entwickler-PCs (`Get-NetRoute`), startet automatisch das **lokale Backend** (Port 3000) und den **Vite-Dev-Server** (Port 5173 auf `0.0.0.0`), prüft via ADB die installierte APK auf dem Smartphone, setzt `server.url = http://<LAN_IP>:5173` in `capacitor.config.json` und schließt alle gestarteten Hintergrundprozesse sowie Config-Modifikationen beim Beenden (`Ctrl+C`) sauber wieder ab.
+* **Optionen:**
+  * `npm run cap:live`: Standardmodus mit lokalem Frontend & lokalem Backend (Live-Reload via Vite).
+  * `npm run cap:live:cloud`: Live-Reload verknüpft mit dem Railway Cloud Dev Backend (`-Mode development`).
+  * `npm run cap:run:local`: Statische Web-Assets fest in die APK kompiliert (kein Live-Reload) mit automatischer Anbindung an das lokale Backend (`-Static`).
+  * `.\scripts\cap-live-remote.ps1 -Connect <phone-ip>:5555 -Launch`: Verbindet ADB kabellos und startet die App direkt auf dem Smartphone.
+* **Automatisches Rollback & Process-Cleanup:** Beim Beenden des Live-Reload-Skripts (`Ctrl+C`) werden eventuell im Hintergrund gestartete Backend-Instanzen beendet und `capacitor.config.json` automatisch auf den Ursprungszustand zurückgesetzt, um versehentliches Einchecken oder Blockieren von Release-Builds (`release.ps1`) zu verhindern.
 
 ### Splash-Screen-Hang Diagnosen & Schutz
-* **Fehlender Vite-Dev-Server (`cap:live`-Builds):** Live-Reload-APKs rendern Inhalte zur Laufzeit vom Vite-Dev-Server (`SplashScreen.launchAutoHide: false`). Läuft der Vite-Dev-Server nicht (`localhost:5173`), bleibt die App unendlich auf dem Splash-Screen hängen. **Fix:** `cd frontend && npm run dev`. Statische Release-APKs (`frontend/dist/`) sind davon unbetroffen.
-* **JS-Runtime-Fehler im React-Mount:** React-Hydrationsfehler (z.B. `<p>` mit verschachteltem `<div>` aus Popover) können das Render unterbrechen. **Schutz:** `MainActivity.java` setzt einen 3-Sekunden-Safety-Timeout, der den Splash via `Capacitor.Plugins.SplashScreen.hide()` zwangsweise ausblendet.
+* **Fehlender Vite-Dev-Server (`cap:live`-Builds):** Live-Reload-APKs rendern Inhalte zur Laufzeit vom Vite-Dev-Server (`SplashScreen.launchAutoHide: false`). Läuft der Vite-Dev-Server nicht, bleibt die App auf dem Splash-Screen hängen. `cap-live-remote.ps1` startet den Vite-Server automatisch oder nutzt eine bestehende Instanz. Statische Release-APKs (`frontend/dist/`) sind davon unbetroffen.
+* **JS-Runtime-Fehler im React-Mount:** React-Hydrationsfehler (z.B. `<p>` mit verschachteltem `<div>` aus Popover) können das Render unterbrechen. **Schutz:** `MainActivity.java` setzt einen 12-Sekunden-Safety-Timeout, der den Splash via `Capacitor.Plugins.SplashScreen.hide()` im echten Fehlerfall zwangsweise ausblendet, ohne normale Kaltstarts vorzeitig abzuschneiden.
 
 ### Auto-Versioning & Fastlane in Docker
 * **Signing:** Keystore-Credentials liegen in der gitignorten `keystore.properties`-Datei.
@@ -17,6 +23,14 @@
   * `frontend/scripts/deploy-playstore.ps1`: Baut und lädt die `.aab` via Fastlane in Docker (`ruby:3.3-slim`) auf den gewählten Play Store Track (`internal`, `alpha`, `beta`, `production`).
   * `deploy.ps1` (Root): Orchestriert Backend-Deploy (Git Merge `develop` -> `master` + Tagging für Railway) und Play Store App-Release nacheinander oder parallel.
 
+### AdMob Konfiguration & Native Android Setup
+* **`AndroidManifest.xml`:** Konfiguriert die Google Mobile Ads App-ID via `<meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-..." />` sowie `android:screenOrientation="portrait"` zur Fixierung des Portrait-Modus (Landscape & Display-Rotation deaktiviert).
+* **Umgebungsvariablen (`frontend/.env.production`):**
+  * `VITE_ADMOB_BANNER_ID`: Live Ad-Unit-ID für Standard- & MREC-Banner (fällt bei fehlender Angabe auf Googles öffentliche Test-Ad-Unit zurück).
+  * `VITE_ADMOB_REWARDED_ID`: Live Ad-Unit-ID für Rewarded Video Ads.
+  * `VITE_ADMOB_TEST_DEVICES`: Kommagetrennte Liste registrierter Test-Device-IDs, um versehentliche Eigen-Impressionen während des Debuggings zu verhindern.
+* **WebView Overscroll Fix (`MainActivity.java`):** Das standardmäßige Android 12+ Stretch-Overscroll-Verhalten der WebView wurde deaktiviert (`setOverScrollMode(View.OVER_SCROLL_NEVER)`), um unruhige Verschiebungen fixierter nativer AdMob-Banner bei Scroll-Gesten zu verhindern.
+
 ---
 
 ## 2. Self-Hosted OTA Live Updates (Capgo)
@@ -24,7 +38,7 @@
 Web-Assets der nativen App können Over-The-Air (OTA) aktualisiert werden, ohne ein neues Play-Store-Release zu erzwingen (gilt **nur** für den Web-Layer; native Plugin-Änderungen erfordern ein APK/AAB-Release).
 
 * **Plugin:** `@capgo/capacitor-updater` im **Manual-Mode** (`autoUpdate: false` in `capacitor.config.ts`, `resetWhenUpdate: true`, `appReadyTimeout: 10000`).
-* **Kanäle:** `production` + `alpha` (spiegeln Play-Tracks). Kanalwahl: `localStorage['snagbite.otaChannel']` -> sonst `alpha` bei `tier === 'alpha'` -> sonst `production`.
+* **Kanäle:** `production`, `alpha` + `internal` (spiegeln Play-Tracks). `production` und `alpha` zielen auf `snagbite-prod`, `internal` zielt auf `snagbite-dev` & Dev-Backend. Kanalwahl: `localStorage['snagbite.otaChannel']` -> sonst `alpha` bei `tier === 'alpha'` -> sonst `production`.
 
 ### Supabase Storage & Datenbank
 * **Bucket `app-bundles` (public):** Speichert Zips unter `{channel}/{version}.zip`.
@@ -35,7 +49,7 @@ Web-Assets der nativen App können Over-The-Air (OTA) aktualisiert werden, ohne 
 * **Endpoint `POST /api/app-updates/check` (`backend/src/appUpdates.ts`):** Vor auth-gated Router gemountet. Erhält `{ channel, versionCode, currentBundleVersion }` und antwortet mit Update-Metadaten oder `{ update: false }`.
 * **Client Updater (`frontend/src/utils/otaUpdater.ts`):** Inert auf Web/Dev. Beim Boot sofort `CapacitorUpdater.notifyAppReady()` (Anti-Brick-Contract: verhindert Revert zum vorherigen Bundle). Lädt bei Update das Zip herunter (`download`) und setzt `next({id})` für die Anwendung beim nächsten Relaunch.
 * **Zentrale Git-Utilities (`frontend/scripts/git-utils.ps1`):** Bündelt wiederverwendbare Git-Hilfsfunktionen (`Assert-GitClean`, `Invoke-GitMasterMergeAndTag`, `Cap-StaleAppBundles`). Bei jedem nativeren Play Store Build (`release.ps1` / `deploy-playstore.ps1`) deckelt `Cap-StaleAppBundles` automatisch alte, nach oben offene OTA-Bundles in Supabase (`max_version_code = newVersionCode - 1`), damit neu installierte native App-Releases nicht auf ältere OTA-Assets zurückgesetzt werden.
-* **Deploy-Skript (`frontend/scripts/deploy-ota.ps1` / `npm run deploy:ota`):** Baut Frontend (`npm run build`), ermittelt nächste Bundle-Version (`{VERSION_NAME}-ota.{n}`), packt Zip per `tar.exe`, berechnet SHA256-Checksum, lädt ins Storage hoch, aktiviert die Row in Supabase, mergt `develop` -> `master` und erstellt/pusht automatisch ein Git Tag (`v{VERSION_NAME}-ota.{n}`).
+* **Deploy-Skript (`frontend/scripts/deploy-ota.ps1` / `npm run deploy:ota`):** Baut Frontend (`npm run build` für Prod/Alpha bzw. `npm run build:dev` für Internal), ermittelt nächste Bundle-Version (`{VERSION_NAME}-ota.{n}`), packt Zip per `tar.exe`, berechnet SHA256-Checksum, lädt ins Storage hoch, aktiviert die Row in Supabase, mergt bei Prod/Alpha `develop` -> `master` (bei `internal` nur Git Tag auf aktuellem Branch) und erstellt/pusht automatisch ein Git Tag (`v{VERSION_NAME}-ota.{n}`).
 
 ### Rollback-Ebenen
 1. **Server-Rollback:** `active`-Flags flippen via Admin-PATCH (`/api/admin/app-bundles/:id`) oder Supabase Dashboard.

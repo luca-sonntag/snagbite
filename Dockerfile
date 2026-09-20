@@ -8,14 +8,19 @@ COPY package*.json ./
 COPY backend/package*.json backend/
 COPY frontend/package*.json frontend/
 COPY healthcheck/package*.json healthcheck/
+COPY website/package*.json website/
+COPY shared/package*.json shared/
 
 # Install dependencies for the workspaces
 RUN YOUTUBE_DL_SKIP_PYTHON_CHECK=1 npm install
 
-# Build backend
+# Copy shared workspace and build shared & backend
+COPY shared/ shared/
 COPY backend/tsconfig.json backend/
 COPY backend/src/ backend/src/
+RUN npm run build -w shared
 RUN npm run build -w backend
+RUN npm run build:off -w backend
 RUN npm prune --omit=dev --workspace=backend
 
 # ── Production stage: minimal runtime ──────────────────────────────────────
@@ -25,8 +30,13 @@ WORKDIR /app
 
 # Copy production dependencies and built artifacts
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/shared ./shared
 COPY --from=builder /app/backend/package.json ./backend/package.json
 COPY --from=builder /app/backend/dist ./backend/dist
+COPY --from=builder /app/backend/src/data/off_de.sqlite ./backend/dist/data/off_de.sqlite
+
+# Copy public static assets (category icons, ingredient-icons.zip)
+COPY backend/public ./backend/public
 
 # Install runtime dependencies (ffmpeg/ffprobe for frame extraction, python3 for yt-dlp, ttf-dejavu for text-drawing fonts)
 RUN apk add --no-cache ffmpeg python3 ttf-dejavu

@@ -17,4 +17,17 @@ temp-downloads/
 *.afdesign*
 frontend/releases/
 *firebase-adminsdk*.json
-docs/FEATURE_IDEAS.md
+# graphify knowledge graph (locally generated, rebuild with: graphify extract . --code-only)
+graphify-out/
+# Ingredient icons: single zip archive in git, unpacked at runtime
+backend/generated-ingredient-images/
+backend/public/ingredient-icons/*
+!backend/public/ingredient-icons/.gitkeep
+!backend/public/ingredient-icons.zip
+backend/public/ingredient-icons-backup/
+# SQLite food databases (built during docker build or local build)
+*.sqlite
+backend/src/data/*.sqlite
+backend/dist/data/*.sqlite
+supabase/.temp/
+

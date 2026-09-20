@@ -1,28 +1,23 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
-import type { Job, ProgressData } from '../types';
-import { type ErrorParams, parseSerializedError } from '../errorCodes';
+﻿import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import type { ExtractionJob } from '../types';
+import { parseSerializedError } from '../errorCodes';
 import { apiUrl } from '../api';
 import { useAuth } from './AuthContext';
 import { useI18n } from '../context/I18nContext';
-import { pullAndCacheFrames } from '../utils/recipeFrames';
-import { sendNativeNotification } from '../native';
+import { useToast } from './ToastContext';
+import { sendRecipeReadyNotification } from '../native';
+import { handleClientFrameRequest } from '../utils/videoFrames';
+import {
+  type ExtractionMode,
+  type ExtractionJobEntry,
+  loadPersisted,
+  persist,
+  isTerminal,
+  POLL_INTERVAL_MS,
+  COMPLETED_AUTO_DISMISS_MS,
+} from './extractionJobsStorage';
 
-export type ExtractionMode = 'link' | 'photo';
-
-/** One tracked background extraction (premium multi-job flow). */
-export interface ExtractionJobEntry {
-  id: string;
-  /** Human-readable source shown on the card (the URL, or a "Photos" label). */
-  sourceLabel: string;
-  mode: ExtractionMode;
-  status: Job['status'];
-  progress: ProgressData | null;
-  /** Recipe title, filled once the job completes. */
-  title?: string | null;
-  error?: string | null;
-  errorCode?: string | null;
-  errorParams?: ErrorParams | null;
-}
+export type { ExtractionMode, ExtractionJobEntry };
 
 interface ExtractionJobsContextValue {
   jobs: ExtractionJobEntry[];
@@ -42,68 +37,13 @@ export function useExtractionJobs(): ExtractionJobsContextValue {
 
 /** Fired on window when a background extraction completes, so App can refresh history. */
 export const EXTRACTION_COMPLETE_EVENT = 'app:extraction-complete';
-/** Fired on window when the user taps a completed card, so App can open the recipe. */
+/** Fired on window when a recipe should be opened in the catalog view. */
 export const OPEN_RECIPE_EVENT = 'app:open-recipe';
-
-const STORAGE_KEY = 'kb_extraction_jobs';
-const POLL_INTERVAL_MS = 2000;
-/**
- * A finished (completed) card auto-dismisses this long after it completes, so the
- * Extract tab doesn't fill up with old cards — the recipe is already in the
- * cookbook and a notification fired. Failed cards stay until dismissed manually.
- */
-const COMPLETED_AUTO_DISMISS_MS = 25000;
-
-type PersistedJob = Pick<ExtractionJobEntry, 'id' | 'sourceLabel' | 'mode' | 'status' | 'title' | 'error' | 'errorCode'>;
-
-function isTerminal(status: Job['status']): boolean {
-  return status === 'completed' || status === 'failed';
-}
-
-function loadPersisted(): ExtractionJobEntry[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as PersistedJob[];
-    if (!Array.isArray(parsed)) return [];
-    // Never restore finished cards — they'd just clutter the tab on next launch.
-    return parsed.filter(p => !isTerminal(p.status ?? 'pending')).map(p => ({
-      id: p.id,
-      sourceLabel: p.sourceLabel,
-      mode: p.mode,
-      status: p.status ?? 'pending',
-      progress: null,
-      title: p.title ?? null,
-      error: p.error ?? null,
-      errorCode: p.errorCode ?? null,
-      errorParams: null,
-    }));
-  } catch {
-    return [];
-  }
-}
-
-function persist(jobs: ExtractionJobEntry[]): void {
-  try {
-    // Only running jobs survive a reload; finished/failed cards are session-scoped.
-    const slim: PersistedJob[] = jobs.filter(j => !isTerminal(j.status)).map(j => ({
-      id: j.id,
-      sourceLabel: j.sourceLabel,
-      mode: j.mode,
-      status: j.status,
-      title: j.title ?? null,
-      error: j.error ?? null,
-      errorCode: j.errorCode ?? null,
-    }));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(slim));
-  } catch {
-    /* ignore quota/serialization errors */
-  }
-}
 
 export function ExtractionJobsProvider({ children }: { children: React.ReactNode }) {
   const { getAccessToken } = useAuth();
   const { t } = useI18n();
+  const toast = useToast();
 
   const [jobs, setJobs] = useState<ExtractionJobEntry[]>(() => loadPersisted());
 
@@ -112,136 +52,237 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
   const jobsRef = useRef<ExtractionJobEntry[]>(jobs);
   jobsRef.current = jobs;
 
-  // Guards so a job is only finalized (frames pulled, notification fired,
+  // Guards so a job is only finalized (notification fired,
   // completion event dispatched) exactly once — even across re-render/StrictMode.
-  const finalizedRef = useRef<Set<string>>(new Set(jobs.filter(j => isTerminal(j.status)).map(j => j.id)));
+  const finalizedRef = useRef<Set<string>>(new Set(jobs.filter((j) => isTerminal(j.status)).map((j) => j.id)));
   // Prevents overlapping polls of the same job within a slow tick.
   const inFlightRef = useRef<Set<string>>(new Set());
+  // Tracks jobs where client frame capture has already been kicked off.
+  const capturedFramesJobsRef = useRef<Set<string>>(new Set());
   // Pending auto-dismiss timers for completed cards, keyed by job id.
   const dismissTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const setJobsPersist = useCallback((updater: (prev: ExtractionJobEntry[]) => ExtractionJobEntry[]) => {
-    setJobs(prev => {
+    setJobs((prev) => {
       const next = updater(prev);
       persist(next);
       return next;
     });
   }, []);
 
-  const addJob = useCallback((jobId: string, meta: { sourceLabel: string; mode: ExtractionMode }) => {
-    setJobsPersist(prev => {
-      if (prev.some(j => j.id === jobId)) return prev;
-      const entry: ExtractionJobEntry = {
-        id: jobId,
-        sourceLabel: meta.sourceLabel,
-        mode: meta.mode,
-        status: 'pending',
-        progress: null,
-        title: null,
-        error: null,
-        errorCode: null,
-        errorParams: null,
-      };
-      return [...prev, entry];
-    });
-  }, [setJobsPersist]);
+  const pollJobRef = useRef<((id: string) => Promise<void>) | null>(null);
 
-  const dismissJob = useCallback((id: string) => {
-    const timer = dismissTimersRef.current.get(id);
-    if (timer) { clearTimeout(timer); dismissTimersRef.current.delete(id); }
-    finalizedRef.current.delete(id);
-    inFlightRef.current.delete(id);
-    setJobsPersist(prev => prev.filter(j => j.id !== id));
-  }, [setJobsPersist]);
-
-  const finalizeCompletion = useCallback(async (job: Job, token: string) => {
-    // Pull the transient frames into the local cache before the recipe is shown —
-    // they are deleted server-side once fetched.
-    await pullAndCacheFrames(job.id, token);
-
-    const recipeTitle = job.recipe?.title || t('recipe.recipe') || 'Recipe';
-    const notifTitle = t('notification.recipeReady.title');
-    const notifBody = t('notification.recipeReady.body', { title: recipeTitle });
-    // recipeId = job.id so a notification tap routes to the recipe (App's
-    // registerNotificationTap → app:navigate-to-timer-step handler).
-    sendNativeNotification(notifTitle, notifBody, job.id, undefined, Math.floor(Date.now() / 1000));
-
-    setJobsPersist(prev => prev.map(j =>
-      j.id === job.id
-        ? { ...j, status: 'completed', progress: null, title: job.recipe?.title ?? j.title }
-        : j
-    ));
-
-    // Auto-dismiss the finished card after a short grace period so the tab stays
-    // clean. Tapping it (or a manual dismiss) cancels this via dismissJob.
-    const existing = dismissTimersRef.current.get(job.id);
-    if (existing) clearTimeout(existing);
-    const timer = setTimeout(() => {
-      dismissTimersRef.current.delete(job.id);
-      setJobsPersist(prev => prev.filter(j => j.id !== job.id));
-    }, COMPLETED_AUTO_DISMISS_MS);
-    dismissTimersRef.current.set(job.id, timer);
-
-    window.dispatchEvent(new CustomEvent(EXTRACTION_COMPLETE_EVENT, { detail: { jobId: job.id } }));
-  }, [setJobsPersist, t]);
-
-  const pollJob = useCallback(async (id: string) => {
-    if (inFlightRef.current.has(id)) return;
-    inFlightRef.current.add(id);
-    try {
-      const token = await getAccessToken();
-      if (!token) return;
-
-      const response = await fetch(apiUrl(`/api/jobs/${id}`), {
-        headers: { 'Authorization': `Bearer ${token}` },
+  const addJob = useCallback(
+    (jobId: string, meta: { sourceLabel: string; mode: ExtractionMode }) => {
+      if (!jobId || typeof jobId !== 'string' || jobId === 'undefined') return;
+      setJobsPersist((prev) => {
+        if (prev.some((j) => j.id === jobId)) return prev;
+        const currentlyActive = prev.filter((j) => !isTerminal(j.status));
+        const isMulti = currentlyActive.length > 0;
+        const entry: ExtractionJobEntry = {
+          id: jobId,
+          sourceLabel: meta.sourceLabel,
+          mode: meta.mode,
+          status: 'pending',
+          progress: null,
+          title: null,
+          error: null,
+          errorCode: null,
+          errorParams: null,
+          hadMultipleConcurrent: isMulti,
+        };
+        const next = isMulti
+          ? prev.map((j) => (!isTerminal(j.status) ? { ...j, hadMultipleConcurrent: true } : j)).concat(entry)
+          : [...prev, entry];
+        jobsRef.current = next;
+        return next;
       });
-      let data: any;
-      try {
-        data = await response.json();
-      } catch {
-        return;
-      }
-      if (!response.ok || !data.success || !data.job) return;
+      // Eagerly poll immediately on enqueue without waiting for ticker
+      setTimeout(() => {
+        void pollJobRef.current?.(jobId);
+      }, 20);
+    },
+    [setJobsPersist]
+  );
 
-      const job: Job = data.job;
-
-      if (job.status === 'completed') {
-        if (finalizedRef.current.has(id)) return;
-        finalizedRef.current.add(id);
-        await finalizeCompletion(job, token);
-      } else if (job.status === 'failed') {
-        if (finalizedRef.current.has(id)) return;
-        finalizedRef.current.add(id);
-        const envelope = job.error ? parseSerializedError(job.error) : null;
-        setJobsPersist(prev => prev.map(j =>
-          j.id === id
-            ? {
-                ...j,
-                status: 'failed',
-                progress: null,
-                error: job.error ?? 'form.validation.failedExtraction',
-                errorCode: envelope?.code ?? null,
-                errorParams: envelope?.params ?? null,
-              }
-            : j
-        ));
-      } else {
-        setJobsPersist(prev => prev.map(j =>
-          j.id === id ? { ...j, status: job.status, progress: job.progress ?? null } : j
-        ));
+  const dismissJob = useCallback(
+    (id: string) => {
+      const timer = dismissTimersRef.current.get(id);
+      if (timer) {
+        clearTimeout(timer);
+        dismissTimersRef.current.delete(id);
       }
-    } catch (err) {
-      console.warn(`Failed to poll extraction job ${id}:`, err);
-    } finally {
       inFlightRef.current.delete(id);
-    }
-  }, [getAccessToken, finalizeCompletion, setJobsPersist]);
+      capturedFramesJobsRef.current.delete(id);
+      setJobsPersist((prev) => {
+        const next = prev.filter((j) => j.id !== id);
+        jobsRef.current = next;
+        return next;
+      });
+    },
+    [setJobsPersist]
+  );
+
+  const finalizeCompletion = useCallback(
+    async (job: ExtractionJob) => {
+      const recipeTitle = job.title?.trim();
+      const notifTitle = t('notification.recipeReady.title');
+      const notifBody = recipeTitle
+        ? t('notification.recipeReady.body', { title: recipeTitle })
+        : t('notification.recipeReady.bodyFallback');
+      // The tap routes to the produced recipe, not to the task that produced it
+      void sendRecipeReadyNotification(notifTitle, notifBody, job.recipeId ?? undefined);
+
+      const jobEntry = jobsRef.current.find((j) => j.id === job.id);
+      const otherActive = jobsRef.current.filter((j) => j.id !== job.id && !isTerminal(j.status));
+      const isSingleExtraction = !jobEntry?.hadMultipleConcurrent && otherActive.length === 0;
+
+      if (isSingleExtraction && job.recipeId) {
+        // Auto-open recipe when only a single recipe is extracted
+        window.dispatchEvent(
+          new CustomEvent(OPEN_RECIPE_EVENT, { detail: { recipeId: job.recipeId, jobId: job.id } })
+        );
+        dismissJob(job.id);
+      } else {
+        // Multiple extractions: keep in list as completed card and display toast with action
+        toast.success(t('toast.recipeReadyTitle'), {
+          description: recipeTitle || undefined,
+          action: job.recipeId
+            ? {
+                label: t('toast.viewRecipe'),
+                onClick: () => {
+                  window.dispatchEvent(
+                    new CustomEvent(OPEN_RECIPE_EVENT, { detail: { recipeId: job.recipeId, jobId: job.id } })
+                  );
+                  dismissJob(job.id);
+                },
+              }
+            : undefined,
+        });
+
+        setJobsPersist((prev) =>
+          prev.map((j) =>
+            j.id === job.id
+              ? {
+                  ...j,
+                  status: 'completed',
+                  progress: null,
+                  recipeId: job.recipeId ?? null,
+                  title: recipeTitle ?? j.title ?? null,
+                }
+              : j
+          )
+        );
+
+        // Auto-dismiss the finished card after a short grace period so the tab stays clean.
+        const existing = dismissTimersRef.current.get(job.id);
+        if (existing) clearTimeout(existing);
+        const timer = setTimeout(() => {
+          dismissTimersRef.current.delete(job.id);
+          setJobsPersist((prev) => prev.filter((j) => j.id !== job.id));
+        }, COMPLETED_AUTO_DISMISS_MS);
+        dismissTimersRef.current.set(job.id, timer);
+      }
+
+      window.dispatchEvent(new CustomEvent(EXTRACTION_COMPLETE_EVENT, { detail: { recipeId: job.recipeId } }));
+    },
+    [dismissJob, setJobsPersist, t, toast]
+  );
+
+  const pollJob = useCallback(
+    async (id: string) => {
+      if (!id || typeof id !== 'string' || id === 'undefined') return;
+      if (inFlightRef.current.has(id)) return;
+      inFlightRef.current.add(id);
+      try {
+        const token = await getAccessToken();
+        if (!token) return;
+
+        const response = await fetch(apiUrl(`/api/jobs/${id}`), {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        let data: any;
+        try {
+          data = await response.json();
+        } catch {
+          if (response.status === 404) {
+            dismissJob(id);
+          }
+          return;
+        }
+
+        if (response.status === 404 || data?.code === 'JOB_NOT_FOUND') {
+          dismissJob(id);
+          return;
+        }
+
+        if (!response.ok || !data.success || !data.job) return;
+
+        const job: ExtractionJob = data.job;
+
+        if (job.status === 'completed') {
+          if (finalizedRef.current.has(id)) return;
+          finalizedRef.current.add(id);
+          await finalizeCompletion(job);
+        } else if (job.status === 'failed') {
+          if (finalizedRef.current.has(id)) return;
+          finalizedRef.current.add(id);
+          const envelope = job.error ? parseSerializedError(job.error) : null;
+          toast.danger(t('toast.recipeFailedTitle'));
+          setJobsPersist((prev) =>
+            prev.map((j) =>
+              j.id === id
+                ? {
+                    ...j,
+                    status: 'failed',
+                    progress: null,
+                    error: job.error ?? 'form.validation.failedExtraction',
+                    errorCode: envelope?.code ?? null,
+                    errorParams: envelope?.params ?? null,
+                  }
+                : j
+            )
+          );
+        } else if (job.status === 'awaiting_frames') {
+          if (!capturedFramesJobsRef.current.has(id)) {
+            capturedFramesJobsRef.current.add(id);
+            handleClientFrameRequest(job, getAccessToken)
+              .then(() => {
+                // Eagerly poll immediately after frames were submitted
+                setTimeout(() => {
+                  void pollJobRef.current?.(id);
+                }, 50);
+              })
+              .catch((err) => {
+                console.warn('[ExtractionJobsContext] Frame handler failed:', err);
+              });
+          }
+          setJobsPersist((prev) =>
+            prev.map((j) => (j.id === id ? { ...j, status: job.status, progress: job.progress ?? null } : j))
+          );
+        } else {
+          setJobsPersist((prev) =>
+            prev.map((j) => (j.id === id ? { ...j, status: job.status, progress: job.progress ?? null } : j))
+          );
+        }
+      } catch (err) {
+        console.warn(`Failed to poll extraction job ${id}:`, err);
+      } finally {
+        inFlightRef.current.delete(id);
+      }
+    },
+    [getAccessToken, finalizeCompletion, setJobsPersist, dismissJob, t, toast]
+  );
+
+  pollJobRef.current = pollJob;
 
   // Single shared ticker polling every non-terminal tracked job.
   useEffect(() => {
     const interval = setInterval(() => {
-      const active = jobsRef.current.filter(j => !isTerminal(j.status));
-      active.forEach(j => { void pollJob(j.id); });
+      const active = jobsRef.current.filter((j) => !isTerminal(j.status));
+      active.forEach((j) => {
+        void pollJob(j.id);
+      });
     }, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [pollJob]);
@@ -255,7 +296,7 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
     };
   }, []);
 
-  const activeCount = jobs.filter(j => !isTerminal(j.status)).length;
+  const activeCount = jobs.filter((j) => !isTerminal(j.status)).length;
 
   return (
     <ExtractionJobsContext.Provider value={{ jobs, activeCount, addJob, dismissJob }}>

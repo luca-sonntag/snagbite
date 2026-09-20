@@ -1,17 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, Drawer } from '@heroui/react';
-import { Check, Salad } from 'lucide-react';
+import { Salad } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
-import type { Ingredient, Recipe } from '../../types';
+import { usePantry } from '../../context/PantryContext';
+import { useModalOverlay } from '../../context/OverlayStackContext';
+import { hapticLight, hapticNotification } from '../../utils/haptics';
+import { formatQuantity } from '../../utils/formatQuantity';
+import type { Ingredient, Recipe, MealPlanRecipeSummary } from '../../types';
+import { findPantryStockMatch } from '../ShoppingList/shoppingItemUtils';
+import ShoppingConfirmItem, { type MergedShoppingSheetItem } from './ShoppingConfirmItem';
+import ServingsStepper from '../ServingsStepper';
 
 interface ShoppingConfirmSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  recipe: Recipe;
+  recipe?: Recipe | MealPlanRecipeSummary;
   sortedIngredients: Array<{ group: { name: string; items: Ingredient[] }; originalIdx: number }>;
-  scaleFactor: number;
-  formatAmount: (amount: number | undefined, unit: string | undefined) => string;
-  onConfirm: (selectedIngredients: Ingredient[]) => void;
+  scaleFactor?: number;
+  formatAmount?: (amount: number | undefined, unit: string | undefined) => string;
+  onConfirm: (selectedIngredients: Ingredient[]) => Promise<void> | void;
   /** Optional label shown in the header when the sheet is used in bulk mode */
   recipeLabel?: string;
 }
@@ -21,60 +28,130 @@ export default function ShoppingConfirmSheet({
   onClose,
   recipe,
   sortedIngredients,
-  scaleFactor,
-  formatAmount,
+  scaleFactor = 1,
   onConfirm,
   recipeLabel,
 }: ShoppingConfirmSheetProps) {
-  const { t, translateCategory } = useI18n();
+  const { t, language } = useI18n();
+  const { pantryItems } = usePantry();
+  useModalOverlay(isOpen, onClose);
+
+  const baseServings = Math.max(1, Number(recipe?.servings) || 2);
+  const initialServings = Math.max(1, Math.round(baseServings * (scaleFactor || 1)));
+  const [servings, setServings] = useState<number>(initialServings);
   const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
 
-  // Initialize selection when drawer opens
+  useEffect(() => {
+    if (isOpen) {
+      setServings(initialServings);
+    }
+  }, [isOpen, initialServings]);
+
+  const activeScaleFactor = servings / baseServings;
+
+  // Merge ingredients that share a parent in the same recipe across all groups
+  const allItems = useMemo(() => {
+    const allIngredientsInRecipe = sortedIngredients.flatMap((g) => g.group.items);
+    const childMap = new Map<string, Ingredient[]>();
+    const childrenSet = new Set<Ingredient>();
+
+    for (const { group } of sortedIngredients) {
+      for (const ing of group.items) {
+        if (ing.parentIngredient?.baseName || ing.parentIngredient?.name) {
+          const parentBase = (ing.parentIngredient.baseName || '').toLowerCase().trim();
+          const parentName = (ing.parentIngredient.name || '').toLowerCase().trim();
+
+          const parentInRecipe = allIngredientsInRecipe.find(
+            (other) =>
+              other !== ing &&
+              ((other.baseName && other.baseName.toLowerCase().trim() === parentBase) ||
+                other.name.toLowerCase().trim() === parentName)
+          );
+
+          if (parentInRecipe) {
+            childrenSet.add(ing);
+            const parentKey = `${parentInRecipe.name}-${parentInRecipe.baseName || ''}`;
+            const list = childMap.get(parentKey) || [];
+            list.push(ing);
+            childMap.set(parentKey, list);
+          }
+        }
+      }
+    }
+
+    const items: MergedShoppingSheetItem[] = [];
+    sortedIngredients.forEach(({ group, originalIdx }) => {
+      group.items.forEach((ing, idx) => {
+        if (childrenSet.has(ing)) return;
+
+        const parentKey = `${ing.name}-${ing.baseName || ''}`;
+        const children = childMap.get(parentKey) || [];
+
+        items.push({
+          id: `${ing.name}-${originalIdx}-${idx}`,
+          primaryIngredient: ing,
+          childIngredients: children,
+          groupCategory: group.name || ing.category,
+          originalGroupIdx: originalIdx,
+        });
+      });
+    });
+
+    return items;
+  }, [sortedIngredients]);
+
+  // Initialize selection when drawer opens or portions change, taking pantry stock & staple status into account
   useEffect(() => {
     if (isOpen) {
       const initial: Record<string, boolean> = {};
-      sortedIngredients.forEach(({ group, originalIdx }) => {
-        group.items.forEach((ing, idx) => {
-          const uniqueId = `${ing.name}-${originalIdx}-${idx}`;
-          // Voreinstellung: Normale Zutaten ausgewählt (true), Vorratszutaten abgewählt (false)
-          initial[uniqueId] = !ing.isStaple;
-        });
+      allItems.forEach((item) => {
+        const requiredAmt = (item.primaryIngredient.amount || 0) * activeScaleFactor;
+        const stockMatch = findPantryStockMatch(
+          item.primaryIngredient,
+          pantryItems,
+          requiredAmt,
+          item.primaryIngredient.unit
+        );
+        const inStockAndSufficient = stockMatch ? !stockMatch.isPartial : false;
+        initial[item.id] = !inStockAndSufficient && !item.primaryIngredient.isStaple;
       });
       setSelectedIds(initial);
     }
-  }, [isOpen, sortedIngredients]);
+  }, [isOpen, allItems, pantryItems, activeScaleFactor]);
 
   const toggleItem = (id: string) => {
+    hapticLight();
     setSelectedIds((prev) => ({
       ...prev,
       [id]: !prev[id],
     }));
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
+    hapticNotification('success');
     const itemsToAdd: Ingredient[] = [];
-    sortedIngredients.forEach(({ group, originalIdx }) => {
-      group.items.forEach((ing, idx) => {
-        const uniqueId = `${ing.name}-${originalIdx}-${idx}`;
-        if (selectedIds[uniqueId]) {
-          const baseAmount = ing.amount || 0;
-          const scaledAmount = baseAmount * scaleFactor;
-          itemsToAdd.push({
-            name: ing.name,
-            amount: scaledAmount,
-            unit: ing.unit || '',
-            notes: ing.notes,
-            modifier: ing.modifier,
-            category: group.name,
-          });
-        }
-      });
+    allItems.forEach((item) => {
+      if (selectedIds[item.id]) {
+        const ing = item.primaryIngredient;
+        const baseAmount = ing.amount || 0;
+        const scaledAmount = baseAmount * activeScaleFactor;
+        itemsToAdd.push({
+          ...ing,
+          amount: scaledAmount,
+          unit: ing.unit || '',
+          category: item.groupCategory || ing.category,
+        });
+      }
     });
-    onConfirm(itemsToAdd);
+    await onConfirm(itemsToAdd);
     onClose();
   };
 
-  // Count how many are selected
+  const scaledFormatAmount = (amount: number | undefined, unit: string | undefined) => {
+    if (!amount) return '';
+    return formatQuantity(amount * activeScaleFactor, unit);
+  };
+
   const selectedCount = Object.values(selectedIds).filter(Boolean).length;
 
   return (
@@ -82,25 +159,25 @@ export default function ShoppingConfirmSheet({
       <Drawer>
         <Drawer.Backdrop isOpen={isOpen} onOpenChange={(open) => { if (!open) onClose(); }} className="!z-[100]">
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))]">
+            <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
               <Drawer.Handle />
 
               {/* Header */}
-              <Drawer.Header className="border-b border-black/5 dark:border-white/5 pb-3">
+              <Drawer.Header className="pb-2 mb-1">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center shrink-0">
                     <Salad className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  <div>
-                    <Drawer.Heading className="text-base font-bold">
+                  <div className="min-w-0">
+                    <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white truncate">
                       {t('recipe.shoppingConfirmTitle')}
                     </Drawer.Heading>
                     {recipeLabel ? (
-                      <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5 truncate max-w-[220px]">
+                      <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5 truncate max-w-[240px] sm:max-w-[320px]">
                         {recipeLabel}
                       </p>
                     ) : (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 font-normal mt-0.5">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-normal mt-0.5 truncate">
                         {t('recipe.shoppingConfirmSubtitle')}
                       </p>
                     )}
@@ -108,74 +185,84 @@ export default function ShoppingConfirmSheet({
                 </div>
               </Drawer.Header>
 
-              {/* Body */}
-              <Drawer.Body className="overflow-y-auto py-4 flex-1 flex flex-col gap-4">
-                <div className="flex flex-col gap-4">
-                  {sortedIngredients.map(({ group, originalIdx }, sortedIdx) => {
-                    // Check if any items in this group are displayed
-                    if (group.items.length === 0) return null;
+              {/* Dedicated Servings Stepper Row under Header */}
+              <div className="flex items-center justify-between px-1.5 py-1 select-none">
+                <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                  {t('mealPlanner.servings') || 'Portionen'}
+                </span>
+                <ServingsStepper
+                  servings={servings}
+                  onDecrease={() => setServings((s) => Math.max(1, s - 1))}
+                  onIncrease={() => setServings((s) => s + 1)}
+                  size="sm"
+                  showIcon={false}
+                  ariaLabel={t('mealPlanner.servings')}
+                />
+              </div>
 
+              {/* Selection Count & Quick Toggle Bar */}
+              <div className="flex items-center justify-between px-1.5 pt-1 pb-2 select-none">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                  {language === 'en'
+                    ? `${selectedCount} of ${allItems.length} selected`
+                    : `${selectedCount} von ${allItems.length} ausgewählt`}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    hapticLight();
+                    const allSelected = selectedCount === allItems.length;
+                    const next: Record<string, boolean> = {};
+                    allItems.forEach((it) => {
+                      next[it.id] = !allSelected;
+                    });
+                    setSelectedIds(next);
+                  }}
+                  className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer border-none bg-transparent py-0.5"
+                >
+                  {selectedCount === allItems.length
+                    ? (language === 'en' ? 'Deselect all' : 'Keine')
+                    : (language === 'en' ? 'Select all' : 'Alle auswählen')}
+                </button>
+              </div>
+
+              {/* Body: persistent visible scrollbar and flat clean ingredient list */}
+              <Drawer.Body className="overflow-y-scroll pt-1 pb-1 pr-1 flex-1 [scrollbar-width:thin] [scrollbar-color:rgba(156,163,175,0.4)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
+                <div className="flex flex-col gap-1.5">
+                  {allItems.map((item) => {
+                    const requiredAmt = (item.primaryIngredient.amount || 0) * activeScaleFactor;
+                    const pantryStockMatch = findPantryStockMatch(
+                      item.primaryIngredient,
+                      pantryItems,
+                      requiredAmt,
+                      item.primaryIngredient.unit
+                    );
                     return (
-                      <div key={sortedIdx} className="flex flex-col gap-1.5">
-                        {recipe.ingredients.length > 1 && (
-                          <h4 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-2 border-l-2 border-gray-300 dark:border-gray-700 flex items-center gap-1.5 mt-2">
-                            <span>{translateCategory(group.name)}</span>
-                          </h4>
-                        )}
-                        <div className="flex flex-col gap-1">
-                          {group.items.map((ing, idx) => {
-                            const scaledAmount = formatAmount(ing.amount, ing.unit);
-                            const amountStr = scaledAmount ? `${scaledAmount} ` : '';
-                            const unitStr = ing.unit ? `${ing.unit} ` : '';
-                            const name = ing.name;
-                            const uniqueId = `${name}-${originalIdx}-${idx}`;
-                            const isChecked = !!selectedIds[uniqueId];
-
-                            return (
-                              <div
-                                key={uniqueId}
-                                onClick={() => toggleItem(uniqueId)}
-                                className="flex items-center gap-3.5 py-2 px-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                              >
-                                <div className={`w-5.5 h-5.5 rounded-md border flex items-center justify-center flex-shrink-0 transition-all ${
-                                  isChecked ? 'bg-emerald-500 border-emerald-500' : 'border-black/20 dark:border-white/20'
-                                }`}>
-                                  {isChecked && <Check className="w-3.5 h-3.5 text-white" />}
-                                </div>
-                                <div className={`flex-1 text-sm select-none transition-all flex flex-wrap items-center gap-1.5 ${
-                                  isChecked ? 'text-gray-800 dark:text-gray-200' : 'text-gray-400 dark:text-gray-500'
-                                }`}>
-                                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
-                                    {amountStr}{unitStr}
-                                  </span>
-                                  <span>{name}</span>
-                                  {ing.isStaple && (
-                                    <span className="inline-flex items-center ml-1.5 text-[9px] font-bold text-gray-400 dark:text-gray-500 bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded-full uppercase tracking-wider select-none align-middle whitespace-nowrap no-underline">
-                                      {t('recipe.staplePillLabel')}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
+                      <ShoppingConfirmItem
+                        key={item.id}
+                        item={item}
+                        isChecked={!!selectedIds[item.id]}
+                        onToggle={() => toggleItem(item.id)}
+                        formatAmount={scaledFormatAmount}
+                        groupCategory={item.groupCategory}
+                        pantryStockMatch={pantryStockMatch}
+                      />
                     );
                   })}
                 </div>
               </Drawer.Body>
 
               {/* Footer */}
-              <Drawer.Footer className="border-t border-black/5 dark:border-white/5 pt-3 flex gap-2">
+              <Drawer.Footer className="pt-1.5 flex gap-2">
                 <Button
                   variant="tertiary"
                   onPress={onClose}
-                  className="w-full text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                  className="w-full h-12 rounded-2xl font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-none active:scale-95 transition-all cursor-pointer"
                 >
                   {t('recipe.shoppingConfirmCancel')}
                 </Button>
                 <Button
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md transition-all h-12 rounded-xl"
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-none border-none transition-all h-12 rounded-2xl active:scale-95 cursor-pointer"
                   onPress={handleConfirm}
                   isDisabled={selectedCount === 0}
                 >

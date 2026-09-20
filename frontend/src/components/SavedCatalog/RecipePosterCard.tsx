@@ -1,14 +1,19 @@
-import React from 'react';
-import { Clock, Check } from 'lucide-react';
-import type { Job } from '../../types';
+import type { MouseEvent } from 'react';
+import { Clock, Check, Star, Layers } from 'lucide-react';
+import type { SavedRecipe, Recipe } from '../../types';
 import CachedImage from '../CachedImage';
-import { detectPlatform, PlatformIcon, PLATFORM_ICON_COLOR } from './PlatformIcon';
+import { hapticLight } from '../../utils/haptics';
+import { getRecipeCalories, formatCalories } from '../../utils/formatNutrition';
+import { HealthScoreLetterBadge } from '../RecipeDetails/HealthScoreBadge';
+import { useI18n } from '../../context/I18nContext';
 
 interface RecipePosterCardProps {
-  job: Job;
+  /** Provide either a full SavedRecipe job or a raw Recipe */
+  job?: SavedRecipe;
+  recipe?: Recipe;
   /** Pre-formatted total time, e.g. "35 Min." — null hides the badge. */
   totalTime: string | null;
-  onClick: (e: React.MouseEvent) => void;
+  onClick: (e: MouseEvent) => void;
   /**
    * `grid` fills its column (2-up catalog grid), `shelf` is a fixed-width
    * card for the horizontally scrolling rows on the cookbook home.
@@ -17,73 +22,139 @@ interface RecipePosterCardProps {
   isSelected?: boolean;
   isSelectMode?: boolean;
   bindLongPress?: any;
+  /** Explicitly marks recipe as already saved (e.g. for public discovery shelf) */
+  isSaved?: boolean;
 }
 
 /**
- * Compact recipe poster: image, title, total time. Deliberately omits the
- * description and tag pills that the old card carried — those belong in the
- * detail view, and dropping them roughly triples how many recipes fit on a
- * screen. Delete moved to the multi-select bar / detail view.
+ * Compact recipe poster: clean food photo, title and unified duration/calories meta below.
  */
 export default function RecipePosterCard({
   job,
+  recipe,
   totalTime,
   onClick,
   variant = 'grid',
   isSelected = false,
   isSelectMode = false,
   bindLongPress,
+  isSaved,
 }: RecipePosterCardProps) {
-  const r = job.recipe!;
-  const platform = detectPlatform(job.url);
-  const iconColor = PLATFORM_ICON_COLOR[platform];
+  const { t } = useI18n();
+  const r = recipe ?? job?.recipe;
+  if (!r) return null;
+
   const isShelf = variant === 'shelf';
+  const remixCount = job?.remixCount ?? r.remixCount ?? 0;
+  const isFavorite = job?.isFavorite ?? false;
+  const showSavedBadge = isSaved !== undefined ? isSaved : false;
+  const calories = getRecipeCalories(r);
+  const caloriesFormatted = formatCalories(calories);
+  const healthScoreNum = typeof r.healthScore === 'number' ? r.healthScore : null;
 
   return (
-    <div
-      className={`rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] ${isShelf ? 'w-[9.5rem] shrink-0' : 'w-full'
-        } ${isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''}`}
-      onClick={onClick}
-      {...(bindLongPress ?? {})}
-    >
-      {/* Cover */}
-      <div className="relative w-full aspect-[4/3] bg-black/5 dark:bg-white/5 overflow-hidden">
-        <CachedImage
-          src={r.imageUrl}
-          emoji={r.emoji}
-          alt={r.title}
-          className="w-full h-full object-cover object-center pointer-events-none select-none"
-        />
-
-        {/* Select-mode checkbox */}
-        {isSelectMode && (
-          <div
-            className={`absolute top-2 left-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all border ${isSelected
-              ? 'bg-emerald-500 border-emerald-500 text-white shadow-md'
-              : 'bg-black/40 backdrop-blur-sm border-white/30 text-white'
-              }`}
-          >
-            {isSelected && <Check className="w-4 h-4 text-white stroke-[3px]" />}
-          </div>
-        )}
-      </div>
-
-      {/* Meta */}
-      <div className="flex flex-col gap-1 px-3 py-2.5 flex-1">
-        <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2">
-          {r.title}
-        </h4>
-        {/* Bottom row: total time (left) and source platform icon (right, no background) */}
-        <div className="mt-auto flex items-center justify-between gap-2">
-          {totalTime ? (
-            <span className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
-              <Clock className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-              {totalTime}
-            </span>
-          ) : (
-            <span />
+    <div className={`relative isolate ${isShelf ? 'w-40 shrink-0' : 'w-full'} h-full flex flex-col`}>
+      {/* Real Stacked Card Deck Effect (clean flat minimal) */}
+      {remixCount > 0 && (
+        <>
+          {remixCount > 1 && (
+            <div className="absolute -top-2 inset-x-3.5 h-full rounded-2xl bg-gray-100 dark:bg-gray-800 border-none shadow-[0_1px_3px_rgba(0,0,0,0.02)] -z-20 pointer-events-none transition-transform" />
           )}
-          <PlatformIcon platform={platform} className={`w-4 h-4 shrink-0 ${iconColor}`} />
+          <div className="absolute -top-1 inset-x-2 h-full rounded-2xl bg-gray-50 dark:bg-gray-800/80 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] -z-10 pointer-events-none transition-transform" />
+        </>
+      )}
+
+      <div
+        className={`w-full h-full rounded-2xl overflow-hidden cursor-pointer active:scale-[0.96] transition-transform duration-150 ease-out select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 border-none ${
+          isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
+        }`}
+        onClick={(e) => {
+          hapticLight();
+          onClick(e);
+        }}
+        {...(bindLongPress ?? {})}
+      >
+        {/* Cover - 100% clean pristine photo presentation */}
+        <div className="relative w-full aspect-[4/3] bg-black/5 dark:bg-white/5 overflow-hidden shrink-0">
+          <CachedImage
+            src={r.imageUrl}
+            emoji={r.emoji}
+            alt={r.title}
+            className="w-full h-full object-cover object-center pointer-events-none select-none"
+          />
+
+          {/* Select-mode checkbox */}
+          {isSelectMode && (
+            <div
+              className={`absolute top-2 left-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all border-none ${
+                isSelected
+                  ? 'bg-emerald-500 text-white shadow-md'
+                  : 'bg-black/40 backdrop-blur-sm text-white shadow-xs'
+              }`}
+            >
+              {isSelected && <Check className="w-4 h-4 text-white stroke-[3px]" />}
+            </div>
+          )}
+
+          {/* Remix badge (Glassmorphic Emerald) */}
+          {remixCount > 0 && (
+            <div
+              className={`absolute ${isSelectMode ? 'bottom-2 right-2' : 'top-2 left-2'} z-10 px-2 py-1 rounded-xl bg-emerald-600/75 dark:bg-emerald-600/65 backdrop-blur-md flex items-center gap-1.5 text-white shadow-md border-none`}
+              title={`${remixCount} Remix(es)`}
+            >
+              <Layers className="w-3.5 h-3.5 text-emerald-100 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]" />
+              <span className="text-[11px] font-bold tracking-tight text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
+                {remixCount}
+              </span>
+            </div>
+          )}
+
+          {/* Badges in top right: Saved in cookbook OR Favorite star */}
+          {showSavedBadge ? (
+            <div className="absolute top-2 right-2 z-10 px-2 py-0.5 rounded-full bg-emerald-600/90 backdrop-blur-md text-[10px] font-bold text-white flex items-center gap-1 shadow-xs">
+              <Check className="w-3 h-3" />
+              <span>{t('catalog.publicDiscovery.savedAction')}</span>
+            </div>
+          ) : isFavorite ? (
+            <div className="absolute top-2 right-2 z-10 w-7 h-7 rounded-xl bg-amber-500/30 dark:bg-amber-500/30 flex items-center justify-center shadow-lg">
+              <Star className="w-4 h-4 fill-amber-500 text-amber-500 drop-shadow-[0_2px_5px_rgba(0,0,0,0.65)]" />
+            </div>
+          ) : null}
+        </div>
+
+        {/* Meta: Title & coupled punchy info pills */}
+        <div className="flex flex-col p-2.5 sm:p-3 flex-1 justify-between gap-1.5">
+          <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2">
+            {r.title}
+          </h4>
+          {(totalTime || caloriesFormatted || (r.servings && r.servings > 0) || (r.healthScore !== undefined && r.healthScore !== null)) && (
+            <div className="flex items-center justify-between gap-1.5 w-full text-[11px] font-medium mt-auto pt-1 select-none">
+              {/* Links: Dauer (grauer Pill) */}
+              {totalTime ? (
+                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
+                  <Clock className="w-2.5 h-2.5 text-gray-500 dark:text-gray-400 shrink-0" />
+                  <span>{totalTime}</span>
+                </span>
+              ) : (
+                <span />
+              )}
+
+              {/* Rechts: Kalorien kleben links am Health Score Badge */}
+              <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+                {caloriesFormatted ? (
+                   <span className="whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium text-[11px]">
+                     {caloriesFormatted}
+                   </span>
+                 ) : r.servings && r.servings > 0 ? (
+                   <span className="whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium text-[11px]">
+                     {r.servings} Port.
+                   </span>
+                 ) : null}
+
+                <HealthScoreLetterBadge score={healthScoreNum} size="sm" />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

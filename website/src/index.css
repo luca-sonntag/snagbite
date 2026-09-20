@@ -62,6 +62,13 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: var(--color-gray-950);
+    color: #f3f4f6;
+  }
+}
+
 html.dark body {
   background-color: var(--color-gray-950);
   color: #f3f4f6;

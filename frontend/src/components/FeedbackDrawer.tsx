@@ -3,9 +3,11 @@ import { Button, Drawer } from '@heroui/react';
 import { Bug, Lightbulb, MessageSquare, ImagePlus, X } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
-import { useDialog } from '../context/DialogContext';
+import { useToast } from '../context/ToastContext';
 import { useFeedback } from '../hooks/useFeedback';
 import { collectFeedbackContext, compressScreenshot } from '../utils/feedbackContext';
+import { useModalOverlay } from '../context/OverlayStackContext';
+import { hapticLight, hapticMedium, hapticHeavy, hapticNotification } from '../utils/haptics';
 
 interface FeedbackDrawerProps {
   isOpen: boolean;
@@ -19,8 +21,10 @@ const MAX_SCREENSHOTS = 6;
 export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose }) => {
   const { t, language } = useI18n();
   const { user } = useAuth();
-  const dialog = useDialog();
+  const toast = useToast();
   const { submitFeedback } = useFeedback();
+
+  useModalOverlay(isOpen, onClose);
 
   const [type, setType] = useState<FeedbackType>('bug');
   const [message, setMessage] = useState('');
@@ -41,7 +45,10 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
     }
   }, [isOpen]);
 
-  const handlePickScreenshot = () => fileInputRef.current?.click();
+  const handlePickScreenshot = () => {
+    hapticLight();
+    fileInputRef.current?.click();
+  };
 
   const handleScreenshotChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
@@ -60,6 +67,7 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
         files.slice(0, remainingSlots).map((file) => compressScreenshot(file)),
       );
       setScreenshots((prev) => [...prev, ...compressed]);
+      hapticLight();
       setError(files.length > remainingSlots
         ? (t('feedback.screenshotLimit') || `You can attach up to ${MAX_SCREENSHOTS} images.`)
         : null);
@@ -70,6 +78,7 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
   };
 
   const removeScreenshot = (index: number) => {
+    hapticHeavy();
     setScreenshots((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -87,18 +96,17 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
       });
 
       if (result.success) {
-        // Close the drawer first so the success dialog (rendered above it) is
-        // interactive — the drawer's focus trap would otherwise block it.
+        hapticMedium();
         onClose();
-        await dialog.alert({
-          title: t('feedback.successTitle') || 'Thank you!',
-          message: t('feedback.success') || 'Thanks for your feedback!',
-          status: 'success',
+        toast.success(t('toast.feedbackSuccessTitle'), {
+          description: t('toast.feedbackSuccessDesc'),
         });
       } else {
+        hapticNotification('error');
         setError(result.error || t('feedback.error') || 'Could not send feedback.');
       }
     } catch (err) {
+      hapticNotification('error');
       console.error('Failed to submit feedback:', err);
       setError(t('feedback.error') || 'Could not send feedback.');
     } finally {
@@ -116,23 +124,36 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
       <Drawer>
         <Drawer.Backdrop isOpen={isOpen} onOpenChange={(open) => { if (!open) onClose(); }} className="!z-[100]">
           <Drawer.Content placement="bottom" className="!z-[100]">
-            <Drawer.Dialog className="relative !bg-white dark:!bg-gray-900 max-h-[85vh] flex flex-col pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))]">
+            <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
               <Drawer.Handle />
 
               {/* Header */}
-              <Drawer.Header className="pb-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center">
-                    <MessageSquare className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
+              <Drawer.Header className="pb-3 mb-1">
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center">
+                      <MessageSquare className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white">
+                      {t('feedback.title') || 'Report a bug / Feedback'}
+                    </Drawer.Heading>
                   </div>
-                  <Drawer.Heading className="text-base font-bold">
-                    {t('feedback.title') || 'Report a bug / Feedback'}
-                  </Drawer.Heading>
+                  <button
+                    type="button"
+                    className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer"
+                    onClick={() => {
+                      hapticLight();
+                      onClose();
+                    }}
+                    aria-label="Close"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
               </Drawer.Header>
 
               {/* Body */}
-              <Drawer.Body className="overflow-y-auto py-4 flex-1 flex flex-col gap-4">
+              <Drawer.Body className="overflow-y-auto py-2 flex-1 flex flex-col gap-4">
                 {/* Type toggle */}
                 <div className="grid grid-cols-2 gap-2">
                   {typeOptions.map((opt) => {
@@ -141,8 +162,11 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
                       <button
                         key={opt.value}
                         type="button"
-                        onClick={() => setType(opt.value)}
-                        className={`flex items-center justify-center gap-2 h-11 rounded-2xl border-none text-sm font-semibold transition-all active:scale-95 cursor-pointer ${
+                        onClick={() => {
+                          hapticLight();
+                          setType(opt.value);
+                        }}
+                        className={`flex items-center justify-center gap-2 h-11 min-h-[44px] rounded-2xl border-none text-sm font-semibold transition-all active:scale-95 cursor-pointer ${
                           active
                             ? 'bg-emerald-600 text-white shadow-none'
                             : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
@@ -197,7 +221,7 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
                             type="button"
                             onClick={() => removeScreenshot(index)}
                             aria-label={t('feedback.removeScreenshot') || 'Remove screenshot'}
-                            className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-gray-900 dark:bg-gray-700 text-white flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer border-none"
+                            className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-gray-900 dark:bg-gray-700 text-white flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer border-none"
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -210,7 +234,7 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
                     <button
                       type="button"
                       onClick={handlePickScreenshot}
-                      className="flex items-center justify-center gap-2 h-12 rounded-2xl border-none bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all active:scale-[0.99] cursor-pointer"
+                      className="flex items-center justify-center gap-2 h-12 min-h-[48px] rounded-2xl border-none bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all active:scale-[0.99] cursor-pointer"
                     >
                       <ImagePlus className="w-4 h-4" />
                       {screenshots.length === 0
@@ -235,14 +259,14 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
               <Drawer.Footer className="pt-3 flex gap-2">
                 <Button
                   onPress={onClose}
-                  className="flex-1 text-sm h-11 border-none bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl font-semibold active:scale-95 transition-all"
+                  className="flex-1 text-sm h-12 border-none bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-2xl font-bold active:scale-95 transition-all cursor-pointer"
                 >
                   {t('feedback.cancel') || t('dialog.cancelDefault') || 'Cancel'}
                 </Button>
                 <Button
                   onPress={handleSubmit}
                   isDisabled={isSaving || !message.trim()}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-sm h-11 font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-none active:scale-95 transition-all disabled:opacity-50"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-sm h-12 font-bold rounded-2xl flex items-center justify-center gap-1.5 shadow-none border-none active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
                 >
                   {isSaving
                     ? (t('feedback.submitting') || 'Sending...')

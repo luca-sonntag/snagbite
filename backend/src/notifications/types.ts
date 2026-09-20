@@ -1,4 +1,4 @@
-import type { Job } from '../types.js';
+import type { SavedRecipe } from '../types.js';
 
 /** The five user-facing opt-in groups shown as toggles in Settings. */
 export type NotificationCategory =
@@ -69,8 +69,8 @@ export interface Candidate {
   type: NotificationType;
   category: NotificationCategory;
   score: number;
-  /** Target recipe/job the tap should open; null for reactivation-style nudges. */
-  jobId: string | null;
+  /** Target recipe the tap should open; null for reactivation-style nudges. */
+  recipeId: string | null;
   slots: Record<string, unknown>;
 }
 
@@ -85,16 +85,16 @@ export interface NotificationContext {
   localWeekday: number;
   season: Season;
   holidays: HolidayEvent[];
-  /** Completed saved recipes (jobs with a recipe), newest first. */
-  jobs: Job[];
-  /** Collections keyed by id -> { name, jobIds }. */
-  collections: Map<string, { name: string; jobIds: string[] }>;
+  /** The user's cookbook, newest first. */
+  recipes: SavedRecipe[];
+  /** Collections keyed by id -> { name, recipeIds }. */
+  collections: Map<string, { name: string; recipeIds: string[] }>;
   /** Opted-in groups. */
   categories: Set<NotificationCategory>;
   /** Notification types sent to this user recently (anti-repeat). */
   recentTypes: Set<string>;
-  /** Job ids notified about recently (anti-repeat). */
-  recentJobIds: Set<string>;
+  /** Recipe ids notified about recently (anti-repeat). */
+  recentRecipeIds: Set<string>;
   /** Days since the user's most recent extraction (Infinity if none). */
   daysSinceLastSave: number;
 }

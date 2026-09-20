@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 import androidx.core.graphics.Insets;
@@ -14,8 +15,8 @@ import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
     // Safety net: if React never mounts (e.g. JS hydration error) we still hide
-    // the splash after 3s so the user isn't trapped. See AGENTS.md "Splash-Hang".
-    private static final long SPLASH_SAFETY_TIMEOUT_MS = 3000L;
+    // the splash after 12s so the user isn't trapped. See AGENTS.md "Splash-Hang".
+    private static final long SPLASH_SAFETY_TIMEOUT_MS = 12000L;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final Runnable splashSafetyTimeout = new Runnable() {
         @Override
@@ -39,6 +40,32 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
         mainHandler.postDelayed(splashSafetyTimeout, SPLASH_SAFETY_TIMEOUT_MS);
         bridgeSafeAreaInsets();
+        disableWebViewOverScroll();
+        allowMixedContentInDebug();
+    }
+
+    /**
+     * In debug builds, allow the WebView (served over https://localhost) to
+     * make cleartext HTTP requests to a local development backend (e.g.
+     * http://192.168.x.x:3000 or http://localhost:3000) without being blocked
+     * by Chromium's mixed-content policy.
+     */
+    private void allowMixedContentInDebug() {
+        try {
+            if (getBridge() != null && getBridge().getWebView() != null) {
+                if ((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                    getBridge().getWebView().getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+                }
+            }
+        } catch (Throwable ignored) { }
+    }
+
+    private void disableWebViewOverScroll() {
+        try {
+            if (getBridge() != null && getBridge().getWebView() != null) {
+                getBridge().getWebView().setOverScrollMode(android.view.View.OVER_SCROLL_NEVER);
+            }
+        } catch (Throwable ignored) { }
     }
 
     /**

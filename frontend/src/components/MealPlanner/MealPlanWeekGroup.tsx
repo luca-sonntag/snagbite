@@ -1,0 +1,130 @@
+import React from 'react';
+import { Plus } from 'lucide-react';
+import type { MealPlanEntry } from '../../types';
+import type { AgendaWeekGroup } from './mealPlannerUtils';
+import { formatWeekRange, getCalendarWeek, formatDateIso, addDays } from './mealPlannerUtils';
+import { MealPlanDaySection } from './MealPlanDaySection';
+import { useI18n } from '../../context/I18nContext';
+
+export interface MealPlanWeekGroupProps {
+  weekGroup: AgendaWeekGroup;
+  weekIndex: number;
+  prevWeek: AgendaWeekGroup | null;
+  mealPlans: MealPlanEntry[];
+  todayStr: string;
+  selectedDate: string | null;
+  highlightedDate: string | null;
+  onSelectDay?: (dateStr: string) => void;
+  onExpandWeek: (weekKey: string) => void;
+  onSelectRecipe: (recipeId: string) => void;
+  onOpenCookMode?: (recipeId: string) => void;
+  onAddRecipeForDate: (dateStr: string) => void;
+  onUpdateServings: (id: string, servings: number) => void;
+  onToggleCooked: (entry: MealPlanEntry) => void;
+  onCookTodayAndPull?: (entry: MealPlanEntry) => void;
+  onDeleteEntry: (id: string) => void;
+  onMoveToTomorrow?: (entry: MealPlanEntry) => void;
+  onMoveToToday?: (entry: MealPlanEntry) => void;
+  onAddToShoppingList?: (entry: MealPlanEntry) => void;
+}
+
+export const MealPlanWeekGroup = React.memo<MealPlanWeekGroupProps>(({
+  weekGroup,
+  weekIndex,
+  prevWeek,
+  mealPlans,
+  todayStr,
+  selectedDate,
+  highlightedDate,
+  onSelectDay,
+  onExpandWeek,
+  onSelectRecipe,
+  onOpenCookMode,
+  onAddRecipeForDate,
+  onUpdateServings,
+  onToggleCooked,
+  onCookTodayAndPull,
+  onDeleteEntry,
+  onMoveToTomorrow,
+  onMoveToToday,
+  onAddToShoppingList,
+}) => {
+  const { t, language } = useI18n();
+
+  const hasSkippedWeeksBefore =
+    prevWeek &&
+    weekGroup.weekStart.getTime() - prevWeek.weekStart.getTime() > 7 * 24 * 60 * 60 * 1000;
+  const nextMissingMonday = prevWeek ? addDays(prevWeek.weekStart, 7) : null;
+  const isMissingWeekPast = nextMissingMonday
+    ? formatDateIso(addDays(nextMissingMonday, 6)) < todayStr
+    : true;
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      {/* Skipped week in-between reload button (only for current/future gaps) */}
+      {hasSkippedWeeksBefore && nextMissingMonday && !isMissingWeekPast && (
+        <div className="pt-1 pb-1 flex justify-center">
+          <button
+            onClick={() => onExpandWeek(formatDateIso(nextMissingMonday))}
+            className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-2xl bg-gray-100/90 dark:bg-gray-800/80 hover:bg-gray-200/90 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-150 active:scale-[0.98] cursor-pointer border-none shadow-2xs touch-manipulation"
+          >
+            <Plus className="w-4 h-4 text-gray-400 dark:text-gray-500 stroke-[2.25]" />
+            <span>
+              {t('mealPlanner.expandWeek', {
+                range: formatWeekRange(nextMissingMonday, addDays(nextMissingMonday, 6), language),
+              }) || `Woche planen (${formatWeekRange(nextMissingMonday, addDays(nextMissingMonday, 6), language)})`}
+            </span>
+          </button>
+        </div>
+      )}
+
+      {/* Week Header with comfortable spacing */}
+      <div
+        id={`week-header-${weekGroup.weekKey}`}
+        className={`w-full flex items-center gap-2.5 px-1.5 pb-0.5 select-none ${
+          weekIndex > 0 ? 'pt-3.5' : 'pt-1'
+        }`}
+        aria-hidden="true"
+      >
+        <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+          {language === 'en' ? `CW ${getCalendarWeek(weekGroup.weekStart)}` : `KW ${getCalendarWeek(weekGroup.weekStart)}`}
+        </span>
+        <span className="text-[10px] text-gray-300 dark:text-gray-600 font-bold">·</span>
+        <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+          {formatWeekRange(weekGroup.weekStart, weekGroup.weekEnd, language)}
+        </span>
+      </div>
+
+      {weekGroup.dates.map((dateStr) => {
+        const isToday = dateStr === todayStr;
+        const isPast = dateStr < todayStr;
+        const dayEntries = mealPlans.filter((p) => p.planDate === dateStr);
+        const isHighlighted = highlightedDate === dateStr || selectedDate === dateStr;
+
+        return (
+          <MealPlanDaySection
+            key={dateStr}
+            dateStr={dateStr}
+            entries={dayEntries}
+            isToday={isToday}
+            isPast={isPast}
+            isHighlighted={isHighlighted}
+            onSelectDay={onSelectDay}
+            onSelectRecipe={onSelectRecipe}
+            onOpenCookMode={onOpenCookMode}
+            onAddRecipeForDate={onAddRecipeForDate}
+            onUpdateServings={onUpdateServings}
+            onToggleCooked={onToggleCooked}
+            onCookTodayAndPull={onCookTodayAndPull}
+            onDeleteEntry={onDeleteEntry}
+            onMoveToTomorrow={onMoveToTomorrow}
+            onMoveToToday={onMoveToToday}
+            onAddToShoppingList={onAddToShoppingList}
+          />
+        );
+      })}
+    </div>
+  );
+});
+
+export default MealPlanWeekGroup;

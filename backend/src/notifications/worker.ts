@@ -1,6 +1,7 @@
 import { config } from '../config.js';
+import type { SavedRecipe } from '../types.js';
 import {
-  getAllJobs,
+  getLibrary,
   listCollections,
   getActivePushTokens,
   getRecentNotifications,
@@ -76,19 +77,27 @@ function resolveLanguage(user: NotificationUser): string {
   return lang.startsWith('en') ? 'en' : 'de';
 }
 
+/** Candidate plus the cookbook it was picked from (so we can resolve its cover). */
+interface CandidateChoice {
+  candidate: Candidate;
+  recipes: SavedRecipe[];
+}
+
 /** Assemble the per-user context and pick the best notification candidate. */
 async function chooseForUser(
   user: NotificationUser,
   now: Date,
   local: LocalParts,
-): Promise<Candidate | null> {
-  const jobs = await getAllJobs(user.id);
+): Promise<CandidateChoice | null> {
+  const recipes = await getLibrary(user.id);
   const collectionsList = await listCollections(user.id).catch(() => []);
 
-  const collections = new Map<string, { name: string; jobIds: string[] }>();
+  const collections = new Map<string, { name: string; recipeIds: string[] }>();
   for (const col of collectionsList) {
-    const jobIds = jobs.filter((j) => (j.collectionIds ?? []).includes(col.id)).map((j) => j.id);
-    collections.set(col.id, { name: col.name, jobIds });
+    const recipeIds = recipes
+      .filter((entry) => (entry.collectionIds ?? []).includes(col.id))
+      .map((entry) => entry.recipeId);
+    collections.set(col.id, { name: col.name, recipeIds });
   }
 
   // Anti-repeat state from the last 30 days.
@@ -96,9 +105,9 @@ async function chooseForUser(
   const recentTypes = new Set(
     recent.filter((r) => now.getTime() - new Date(r.sentAt).getTime() <= 14 * 86400_000).map((r) => r.type),
   );
-  const recentJobIds = new Set(recent.map((r) => r.jobId).filter((id): id is string => !!id));
+  const recentRecipeIds = new Set(recent.map((r) => r.recipeId).filter((id): id is string => !!id));
 
-  const newestSave = jobs[0] ? new Date(jobs[0].createdAt).getTime() : null;
+  const newestSave = recipes[0] ? new Date(recipes[0].addedAt).getTime() : null;
   const daysSinceLastSave = newestSave === null
     ? Infinity
     : Math.floor((now.getTime() - newestSave) / 86400_000);
@@ -110,15 +119,29 @@ async function chooseForUser(
     localWeekday: local.weekday,
     season: getSeason(now),
     holidays: getActiveHolidays(now),
-    jobs,
+    recipes,
     collections,
     categories: resolveCategories(user),
     recentTypes,
-    recentJobIds,
+    recentRecipeIds,
     daysSinceLastSave,
   };
 
-  return pickBestCandidate(ctx);
+  const candidate = pickBestCandidate(ctx);
+  return candidate ? { candidate, recipes } : null;
+}
+
+/**
+ * The AI-generated cover of the recipe a notification points at, when there is
+ * one. Used as the notification image; null when no AI cover is available.
+ */
+function resolveCoverImageUrl(candidate: Candidate, recipes: SavedRecipe[]): string | null {
+  if (!candidate.recipeId) return null;
+  const entry = recipes.find((r) => r.recipeId === candidate.recipeId);
+  const recipe = entry?.recipe;
+  if (!recipe?.isAiCover) return null;
+  const url = recipe.imageUrl?.trim();
+  return url && /^https?:\/\//i.test(url) ? url : null;
 }
 
 /** Deliver the chosen notification to every active device; prune dead tokens. */
@@ -148,7 +171,7 @@ async function deliver(userId: string, candidate: Candidate, copy: FcmMessage): 
 /** Build the FCM data payload used for tap routing on the device. */
 function tapData(candidate: Candidate): Record<string, string> {
   const data: Record<string, string> = { type: candidate.type };
-  if (candidate.jobId) data.jobId = candidate.jobId;
+  if (candidate.recipeId) data.recipeId = candidate.recipeId;
   if (candidate.type === 'remix_nudge' && candidate.slots.remixIdea) {
     data.remixIdea = String(candidate.slots.remixIdea);
   }
@@ -187,23 +210,21 @@ async function processUser(user: NotificationUser, now: Date, force = false): Pr
       if (tokens.length === 0) return `User ${user.id}: No registered push tokens found in DB.`;
     }
 
-    const candidate = await chooseForUser(user, now, local);
-    if (!candidate) return `User ${user.id}: No candidate notification type matched (needs saved recipes or history).`;
+    const choice = await chooseForUser(user, now, local);
+    if (!choice) return `User ${user.id}: No candidate notification type matched (needs saved recipes or history).`;
+    const { candidate, recipes } = choice;
 
     const copy = await generateNotificationCopy(candidate, resolveLanguage(user));
     if (!copy) return `User ${user.id}: AI copy generation returned null.`;
 
-    const baseUrl = (config.PUBLIC_BACKEND_URL || config.HEALTHCHECK_BACKEND_URL || 'http://localhost:3000').replace(/\/$/, '');
-    const themeParam = encodeURIComponent(copy.theme || 'emerald');
-    const emojiParam = encodeURIComponent(copy.emoji || '🥪');
-    const iconUrl = `${baseUrl}/api/push-icon?theme=${themeParam}&emoji=${emojiParam}`;
-
     const dataPayload = tapData(candidate);
-    dataPayload.iconUrl = iconUrl;
+
+    const coverUrl = resolveCoverImageUrl(candidate, recipes);
 
     const message: FcmMessage = {
       title: copy.title,
       body: copy.body,
+      ...(coverUrl ? { imageUrl: coverUrl } : {}),
       data: dataPayload,
     };
     const delivered = await deliver(user.id, candidate, message);
@@ -213,7 +234,7 @@ async function processUser(user: NotificationUser, now: Date, force = false): Pr
       userId: user.id,
       category: candidate.category,
       type: candidate.type,
-      jobId: candidate.jobId,
+      recipeId: candidate.recipeId,
       title: copy.title,
     });
 

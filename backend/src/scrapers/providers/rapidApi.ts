@@ -1,8 +1,8 @@
 import { config } from '../../config.js';
+import { withRetry } from '../../retry.js';
 import type { ScrapingResult } from '../index.js';
-import { normalizeDurationToSeconds } from '../index.js';
 import { fetchMetadata } from '../youtubeDescription.js';
-import type { SocialScrapeContext, SocialScrapeProvider } from './types.js';
+import { normalizeDurationToSeconds, type SocialScrapeContext, type SocialScrapeProvider } from './types.js';
 
 /**
  * Primary provider: the "Social Download All In One" RapidAPI.
@@ -36,9 +36,65 @@ interface RapidResponse {
   duration?: number;
   medias?: RapidMedia[];
   error?: boolean | string;
+  message?: string;
+  detail?: string;
   owner?: {
     username?: string;
   } | null;
+}
+
+class FatalApiError extends Error {
+  isFatal = true;
+}
+
+function extractErrorMessage(data: RapidResponse): string {
+  if (typeof data.error === 'string' && data.error.trim()) return data.error.trim();
+  if (typeof data.message === 'string' && data.message.trim()) return data.message.trim();
+  if (typeof data.detail === 'string' && data.detail.trim()) return data.detail.trim();
+  return 'unknown';
+}
+
+async function fetchRapidApiAutolink(url: string, key: string, host: string): Promise<RapidResponse> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20_000);
+
+  let res: Response;
+  try {
+    res = await fetch(`https://${host}/v1/social/autolink`, {
+      method: 'POST',
+      headers: { 'x-rapidapi-key': key, 'x-rapidapi-host': host, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+
+  if (res.status === 401 || res.status === 403) {
+    const text = await res.text().catch(() => '');
+    throw new FatalApiError(`RapidAPI authentication failed (HTTP ${res.status}): ${text.slice(0, 100)}`);
+  }
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    const preview = text.slice(0, 100).replace(/\s+/g, ' ').trim();
+    throw new Error(`RapidAPI HTTP ${res.status}${preview ? `: ${preview}` : ''}`);
+  }
+
+  let data: RapidResponse;
+  try {
+    data = (await res.json()) as RapidResponse;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new Error(`RapidAPI returned invalid JSON: ${message}`);
+  }
+
+  if (data.error) {
+    const msg = extractErrorMessage(data);
+    throw new Error(`RapidAPI error: ${msg}`);
+  }
+
+  return data;
 }
 
 /** Max video resolution we bother downloading (keeps file size + Gemini cost down). */
@@ -115,24 +171,22 @@ export const rapidApiProvider: SocialScrapeProvider = {
   async scrape(url: string, ctx: SocialScrapeContext): Promise<ScrapingResult> {
     const key = config.RAPIDAPI_KEY!;
     const host = config.RAPIDAPI_SOCIAL_HOST;
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30_000);
 
-    let data: RapidResponse;
-    try {
-      const res = await fetch(`https://${host}/v1/social/autolink`, {
-        method: 'POST',
-        headers: { 'x-rapidapi-key': key, 'x-rapidapi-host': host, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
-        signal: controller.signal,
-      });
-      if (!res.ok) throw new Error(`RapidAPI HTTP ${res.status}`);
-      data = (await res.json()) as RapidResponse;
-    } finally {
-      clearTimeout(timeout);
-    }
-
-    if (data.error) throw new Error(`RapidAPI error: ${typeof data.error === 'string' ? data.error : 'unknown'}`);
+    const data = await withRetry(
+      () => fetchRapidApiAutolink(url, key, host),
+      {
+        maxAttempts: 3,
+        baseDelayMs: 1200,
+        jitter: true,
+        isRetryable: (err) => !(err instanceof FatalApiError),
+        onRetry: (attempt, delayMs, err) => {
+          const msg = err instanceof Error ? err.message : String(err);
+          console.warn(
+            `[rapidapi-all-in-one] Attempt ${attempt}/3 failed for ${url} (${msg}). Retrying in ${Math.round(delayMs)}ms...`
+          );
+        },
+      }
+    );
 
     const medias = Array.isArray(data.medias) ? data.medias : [];
     const video = pickVideo(medias);

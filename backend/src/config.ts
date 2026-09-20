@@ -2,29 +2,37 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { existsSync } from 'fs';
 
-// Load .env file
+// Load .env file from project root or backend folder
 dotenv.config();
+dotenv.config({ path: path.resolve('backend', '.env') });
 
 export interface Config {
   PORT: number;
-  APIFY_TOKEN: string;
   /** RapidAPI key for the "Social Download All In One" API (primary social scraper). Optional — falls back to the Apify chain when unset. */
   RAPIDAPI_KEY?: string;
   /** RapidAPI host for the social downloader. */
   RAPIDAPI_SOCIAL_HOST: string;
-  /** Actor id (`owner/name` or id) of the first-party social downloader (apify-actor repo). Optional final-fallback provider. */
-  APIFY_SOCIAL_ACTOR_ID?: string;
   GEMINI_API_KEY: string;
   SUPABASE_URL: string;
   SUPABASE_PUBLISHABLE_KEY: string;
   SUPABASE_SECRET_KEY: string;
   GEMINI_MODEL: string;
+  /** Model used by the tool-using ingredient resolver. */
+  GEMINI_RERANKER_MODEL: string;
+  /** Kill switch for the tool-using resolver. When off, unmatched ingredients keep the LLM estimate. */
+  INGREDIENT_RESOLVER_ENABLED: boolean;
+  /** Max tool-calling turns the resolver may spend on one ingredient. */
+  INGREDIENT_RESOLVER_MAX_TURNS: number;
+  /** Resolver calls in flight across the whole process. Guards the provider rate limit. */
+  INGREDIENT_RESOLVER_CONCURRENCY: number;
   GEMINI_TEMPERATURE: number;
   RECIPE_LANGUAGE: string;
   PREFERRED_TEMPERATURE_UNIT: string;
   PREFERRED_UNIT_SYSTEM: string;
   WORKER_CONCURRENCY: number;
   WORKER_LEASE_TIMEOUT_MINUTES: number;
+  /** Timeout (minutes) before a job stuck in awaiting_frames reverts to pending to run caption-only. */
+  CLIENT_FRAMES_TIMEOUT_MINUTES: number;
   /** Reject videos longer than this (seconds) before downloading; 0 disables the check. */
   MAX_VIDEO_DURATION_SECONDS: number;
   ROLE: 'web' | 'worker' | 'both';
@@ -70,6 +78,13 @@ export interface Config {
   NOTIFICATION_DEFAULT_TZ: string;
   /** When true, the worker generates + logs but never actually sends to FCM (local testing). */
   NOTIFICATION_DRY_RUN: boolean;
+  // ── FLUX.1 AI Cover Generation (fal.ai) ──
+  /** Master toggle to generate AI cover images for recipes during extraction/remix. Default true. */
+  GENERATE_RECIPE_COVERS: boolean;
+  /** fal.ai API key (format: 'Key ...' or raw key). */
+  FAL_KEY?: string;
+  /** BGBuster API key for background removal on ingredient icons. */
+  BGBUSTER_API_KEY?: string;
 }
 
 // Validation helper
@@ -83,21 +98,26 @@ const getEnv = (key: string, defaultValue?: string): string => {
 
 export const config: Config = {
   PORT: parseInt(getEnv('PORT', '3000'), 10),
-  APIFY_TOKEN: getEnv('APIFY_TOKEN'),
   RAPIDAPI_KEY: process.env.RAPIDAPI_KEY,
   RAPIDAPI_SOCIAL_HOST: getEnv('RAPIDAPI_SOCIAL_HOST', 'social-download-all-in-one.p.rapidapi.com'),
-  APIFY_SOCIAL_ACTOR_ID: process.env.APIFY_SOCIAL_ACTOR_ID,
   GEMINI_API_KEY: getEnv('GEMINI_API_KEY'),
   SUPABASE_URL: getEnv('SUPABASE_URL'),
   SUPABASE_PUBLISHABLE_KEY: getEnv('SUPABASE_PUBLISHABLE_KEY'),
   SUPABASE_SECRET_KEY: getEnv('SUPABASE_SECRET_KEY'),
-  GEMINI_MODEL: getEnv('GEMINI_MODEL', 'gemini-1.5-flash'),
+  GEMINI_MODEL: getEnv('GEMINI_MODEL', 'gemini-3.1-flash-lite'),
+  // Defaults to the same generation as GEMINI_MODEL: a stale default here silently
+  // ran ingredient matching on a two-generation-old model whenever the env var was unset.
+  GEMINI_RERANKER_MODEL: getEnv('GEMINI_RERANKER_MODEL', 'gemini-3.1-flash-lite'),
+  INGREDIENT_RESOLVER_ENABLED: getEnv('INGREDIENT_RESOLVER_ENABLED', 'true') === 'true',
+  INGREDIENT_RESOLVER_MAX_TURNS: parseInt(getEnv('INGREDIENT_RESOLVER_MAX_TURNS', '5'), 10),
+  INGREDIENT_RESOLVER_CONCURRENCY: parseInt(getEnv('INGREDIENT_RESOLVER_CONCURRENCY', '6'), 10),
   GEMINI_TEMPERATURE: parseFloat(getEnv('GEMINI_TEMPERATURE', '0')),
   RECIPE_LANGUAGE: getEnv('RECIPE_LANGUAGE', 'German'),
   PREFERRED_TEMPERATURE_UNIT: getEnv('PREFERRED_TEMPERATURE_UNIT', 'Celsius'),
   PREFERRED_UNIT_SYSTEM: getEnv('PREFERRED_UNIT_SYSTEM', 'metric'),
   WORKER_CONCURRENCY: parseInt(getEnv('WORKER_CONCURRENCY', '3'), 10),
   WORKER_LEASE_TIMEOUT_MINUTES: parseInt(getEnv('WORKER_LEASE_TIMEOUT_MINUTES', '10'), 10),
+  CLIENT_FRAMES_TIMEOUT_MINUTES: parseInt(getEnv('CLIENT_FRAMES_TIMEOUT_MINUTES', '5'), 10),
   MAX_VIDEO_DURATION_SECONDS: parseInt(getEnv('MAX_VIDEO_DURATION_SECONDS', '90'), 10),
   ROLE: getEnv('ROLE', 'both') as 'web' | 'worker' | 'both',
   MAX_JOBS_PER_USER: parseInt(getEnv('MAX_JOBS_PER_USER', '3'), 10),
@@ -105,8 +125,8 @@ export const config: Config = {
   PREMIUM_MAX_CONCURRENT_EXTRACTIONS: parseInt(getEnv('PREMIUM_MAX_CONCURRENT_EXTRACTIONS', '3'), 10),
   EXTRACTION_LIMIT_WINDOW_DAYS: parseInt(getEnv('EXTRACTION_LIMIT_WINDOW_DAYS', '1'), 10),
   FREE_MAX_EXTRACTIONS_PER_WINDOW: parseInt(getEnv('FREE_MAX_EXTRACTIONS_PER_WINDOW', '3'), 10),
-  PREMIUM_MAX_EXTRACTIONS_PER_WINDOW: parseInt(getEnv('PREMIUM_MAX_EXTRACTIONS_PER_WINDOW', '50'), 10),
-  FREE_MAX_SAVED_RECIPES: parseInt(getEnv('FREE_MAX_SAVED_RECIPES', '5'), 10),
+  PREMIUM_MAX_EXTRACTIONS_PER_WINDOW: parseInt(getEnv('PREMIUM_MAX_EXTRACTIONS_PER_WINDOW', '30'), 10),
+  FREE_MAX_SAVED_RECIPES: parseInt(getEnv('FREE_MAX_SAVED_RECIPES', '10'), 10),
   ALPHA_ACTIVE: getEnv('ALPHA_ACTIVE', 'false') === 'true',
   ALPHA_MAX_EXTRACTIONS_PER_WINDOW: parseInt(getEnv('ALPHA_MAX_EXTRACTIONS_PER_WINDOW', '10'), 10),
   ALPHA_MAX_SAVED_RECIPES: parseInt(getEnv('ALPHA_MAX_SAVED_RECIPES', '20'), 10),
@@ -129,6 +149,9 @@ export const config: Config = {
   NOTIFICATION_MAX_PER_WEEK: parseInt(getEnv('NOTIFICATION_MAX_PER_WEEK', '3'), 10),
   NOTIFICATION_DEFAULT_TZ: getEnv('NOTIFICATION_DEFAULT_TZ', 'Europe/Vienna'),
   NOTIFICATION_DRY_RUN: getEnv('NOTIFICATION_DRY_RUN', 'false') === 'true',
+  GENERATE_RECIPE_COVERS: getEnv('GENERATE_RECIPE_COVERS', 'true') === 'true',
+  FAL_KEY: process.env.FAL_KEY || process.env.FLUX_API_KEY,
+  BGBUSTER_API_KEY: process.env.BGBUSTER_API_KEY,
 };
 
 /**

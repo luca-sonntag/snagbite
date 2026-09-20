@@ -24,7 +24,8 @@ Commit early, commit often. Every change you make must be bundled into small, lo
 
 4. **Stage selectively.** Use `git add <specific files>` — never `git add -A` or `git add .` blindly. Only stage files directly related to the current logical change.
 5. **Verify before committing.** Run `git diff --cached --stat` to review what's about to be committed. If the diff spans unrelated topics, split it into multiple commits.
-6. **Push after meaningful milestones.** Push commits to the remote after completing a group of related changes or at natural stopping points.
+6. **No unauthorized push / remote actions.** Never push commits or perform actions on `origin` / remotes unless the user explicitly requests or allows it. Commit locally and leave remote actions to the user unless instructed otherwise.
+7. **Local branches only for rebase/merge.** When asked to `rebase` or `merge`, always operate strictly on local branches (e.g., local `main`, local feature branches), never on `origin` or remote-tracking branches.
 
 ## Workflow Example
 

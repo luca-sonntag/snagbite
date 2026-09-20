@@ -1,13 +1,21 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import type { Recipe, Job, ProgressData } from '../types';
+import type { Recipe, ExtractionJob, ProgressData, LimitStatus } from '../types';
 import { type ErrorParams, parseSerializedError } from '../errorCodes';
 import { useI18n } from '../context/I18nContext';
 import { apiUrl } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { compressRecipePhotos } from '../utils/imageCompression';
-import { pullAndCacheFrames } from '../utils/recipeFrames';
+
 import { useExtractionJobs, type ExtractionMode } from '../context/ExtractionJobsContext';
-import { sendNativeNotification, requestNativeNotificationPermission, isNative, registerAppStateListener } from '../native';
+import {
+  sendNativeNotification,
+  sendRecipeReadyNotification,
+  requestNativeNotificationPermission,
+  isNative,
+  registerAppStateListener,
+  EXTRACTION_INTERRUPTED_NOTIFICATION_ID,
+} from '../native';
+import { handleClientFrameRequest } from '../utils/videoFrames';
 
 // Tracks the currently in-flight extraction job across reloads/restarts, so a
 // still-running job can be resumed instead of the user re-submitting the same
@@ -23,12 +31,12 @@ export const MAX_IMPORT_PHOTOS = 5;
  */
 const MAX_PHOTOS_TOTAL_CHARS = 8_000_000;
 
-export function useRecipeExtraction(getAccessToken: () => Promise<string | null>, onExtractionSuccess: (jobId: string) => void) {
+export function useRecipeExtraction(getAccessToken: () => Promise<string | null>, onExtractionSuccess: (recipeId: string) => void) {
   const { t } = useI18n();
   const { user, refreshSession, isPremium } = useAuth();
   const { addJob } = useExtractionJobs();
   const [isPending, setIsPending] = useState(false);
-  const [jobStatus, setJobStatus] = useState<Job['status'] | null>(null);
+  const [jobStatus, setJobStatus] = useState<ExtractionJob['status'] | null>(null);
   const [jobError, setJobError] = useState<string | null>(null);
   const [jobErrorCode, setJobErrorCode] = useState<string | null>(null);
   const [jobErrorParams, setJobErrorParams] = useState<ErrorParams | null>(null);
@@ -40,7 +48,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
   // re-submit the same photos without the form having to hand them around.
   const [photos, setPhotos] = useState<File[]>([]);
   const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
-  const [limitStatus, setLimitStatus] = useState<{ limit: number; used: number; remaining: number; windowDays: number; tier: 'free' | 'alpha' | 'premium'; savedRecipes: number; maxSavedRecipes: number; cookbookFull: boolean; maxConcurrent: number; activeCount: number } | null>(null);
+  const [limitStatus, setLimitStatus] = useState<LimitStatus | null>(null);
 
   const fetchLimitStatus = useCallback(async () => {
     try {
@@ -66,7 +74,8 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           maxSavedRecipes: data.maxSavedRecipes ?? -1,
           cookbookFull: data.cookbookFull ?? false,
           maxConcurrent: data.maxConcurrent ?? 1,
-          activeCount: data.activeCount ?? 0
+          activeCount: data.activeCount ?? 0,
+          rewardedAdBonusCredits: data.rewardedAdBonusCredits ?? 3,
         });
 
         // Auto-refresh auth session on tier mismatch (e.g. after alpha auto-assignment)
@@ -97,7 +106,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       const urlObj = new URL(urlWithProtocol);
       const hostname = urlObj.hostname.toLowerCase();
       const isYouTube = hostname === 'youtube.com' || hostname.endsWith('.youtube.com') || hostname === 'youtu.be';
-      
+
       if (isYouTube) {
         const isShort = urlObj.pathname.startsWith('/shorts/');
         if (!isShort) {
@@ -117,12 +126,15 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
   const activePollingJobIdRef = useRef<string | null>(null);
   const activePollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const frameProcessingJobIdRef = useRef<string | null>(null);
+
   const stopActivePolling = useCallback(() => {
     if (activePollingIntervalRef.current) {
       clearInterval(activePollingIntervalRef.current);
       activePollingIntervalRef.current = null;
     }
     activePollingJobIdRef.current = null;
+    frameProcessingJobIdRef.current = null;
   }, []);
 
   const pollingStartTimeRef = useRef<number>(0);
@@ -147,7 +159,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
         notifBody,
         undefined,
         undefined,
-        Math.floor(Date.now() / 1000),
+        EXTRACTION_INTERRUPTED_NOTIFICATION_ID,
         { route: 'extract', action: 'interrupted' }
       );
     }
@@ -155,20 +167,21 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     try {
       const token = await getAccessToken();
       if (token) {
-        fetch(apiUrl(`/api/jobs/${jobId}`), {
-          method: 'DELETE',
+        await fetch(apiUrl(`/api/jobs/${jobId}/cancel`), {
+          method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`
           },
           keepalive: true
-        }).catch(err => console.warn('Failed to send DELETE for backgrounded job:', err));
+        }).catch(err => console.warn('Failed to cancel backgrounded job:', err));
+        fetchLimitStatus();
       }
     } catch (err) {
       console.warn('Error executing cancelActiveFreeJob:', err);
     }
-  }, [getAccessToken, stopActivePolling, t]);
+  }, [getAccessToken, stopActivePolling, t, fetchLimitStatus]);
 
-  const runSimulatedProgress = useCallback(async (jobId: string, token: string, targetDurationMs: number = 10000) => {
+  const runSimulatedProgress = useCallback(async (jobId: string, recipeId: string, targetDurationMs: number = 10000) => {
     setIsPending(true);
     setJobStatus('processing');
 
@@ -181,20 +194,20 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
 
     for (const step of steps) {
       if (activePollingJobIdRef.current !== jobId) return;
-      setProgress({ isProgress: true, percent: step.percent, stage: step.stage });
+      setProgress({ percent: step.percent, stage: step.stage });
       await new Promise(res => setTimeout(res, step.delayMs));
     }
 
     if (activePollingJobIdRef.current !== jobId) return;
 
-    await pullAndCacheFrames(jobId, token);
+
     setProgress(null);
     setIsPending(false);
     setUrl('');
     setPhotos([]);
     localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
     activePollingJobIdRef.current = null;
-    onExtractionSuccess(jobId);
+    onExtractionSuccess(recipeId);
   }, [onExtractionSuccess]);
 
   const startPolling = useCallback((id: string) => {
@@ -249,26 +262,26 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           if (!isPremium && remainingMs > 2000) {
             stopActivePolling();
             activePollingJobIdRef.current = job.id;
-            await runSimulatedProgress(job.id, token, remainingMs);
+            await runSimulatedProgress(job.id, job.recipeId, remainingMs);
             return;
           }
 
           stopActivePolling();
-          await pullAndCacheFrames(job.id, token);
+
           setProgress(null);
           setIsPending(false);
           setUrl('');
           setPhotos([]);
           localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
-          
-          if (document.visibilityState !== 'visible') {
-            const recipeTitle = job.recipe?.title || t('recipe.recipe') || 'Recipe';
-            const notifTitle = t('notification.recipeReady.title');
-            const notifBody = t('notification.recipeReady.body', { title: recipeTitle });
-            sendNativeNotification(notifTitle, notifBody, job.id, undefined, Math.floor(Date.now() / 1000));
-          }
 
-          onExtractionSuccess(job.id);
+          const recipeTitle = job.title?.trim();
+          const notifTitle = t('notification.recipeReady.title');
+          const notifBody = recipeTitle
+            ? t('notification.recipeReady.body', { title: recipeTitle })
+            : t('notification.recipeReady.bodyFallback');
+          void sendRecipeReadyNotification(notifTitle, notifBody, job.recipeId);
+
+          onExtractionSuccess(job.recipeId);
         } else if (job.status === 'failed') {
           stopActivePolling();
           const envelope = job.error ? parseSerializedError(job.error) : null;
@@ -278,6 +291,14 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           setProgress(null);
           setIsPending(false);
           localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
+        } else if (job.status === 'awaiting_frames') {
+          setProgress(job.progress || { percent: 30, stage: 'awaiting_frames' });
+          if (frameProcessingJobIdRef.current !== job.id) {
+            frameProcessingJobIdRef.current = job.id;
+            handleClientFrameRequest(job, getAccessToken).catch((err) =>
+              console.warn('[useRecipeExtraction] Keyframe capture failed:', err),
+            );
+          }
         } else {
           setProgress(job.progress || null);
         }
@@ -289,7 +310,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
         setIsPending(false);
         localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
       }
-    }, 2000);
+    }, 600);
 
     activePollingIntervalRef.current = interval;
   }, [getAccessToken, isPremium, onExtractionSuccess, runSimulatedProgress, stopActivePolling, t]);
@@ -367,8 +388,19 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       }
 
       if (isPremium) {
+        if (data.status === 'completed' && data.recipeId) {
+          // Already extracted / cached: directly open recipe without creating a dummy background job
+          setUrl('');
+          setPhotos([]);
+          setJobStatus(null);
+          fetchLimitStatus();
+          onExtractionSuccess(data.recipeId);
+          return;
+        }
         // Background flow: track the job in the shared store and free the form.
-        addJob(data.jobId, { sourceLabel: meta.sourceLabel, mode: meta.mode });
+        if (data.jobId) {
+          addJob(data.jobId, { sourceLabel: meta.sourceLabel, mode: meta.mode });
+        }
         setUrl('');
         setPhotos([]);
         setJobStatus(null);
@@ -377,8 +409,12 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
         fetchLimitStatus();
         if (data.status === 'completed') {
           stopActivePolling();
-          activePollingJobIdRef.current = data.jobId;
-          runSimulatedProgress(data.jobId, token, 10000);
+          activePollingJobIdRef.current = data.jobId ?? null;
+          if (data.recipeId) {
+            onExtractionSuccess(data.recipeId);
+          } else {
+            runSimulatedProgress(data.jobId ?? '', data.recipeId, 10000);
+          }
         } else {
           setJobStatus(data.status);
           localStorage.setItem(PENDING_JOB_STORAGE_KEY, data.jobId);
@@ -393,7 +429,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       setJobErrorParams(typed?.params ?? null);
       setIsPending(false);
     }
-  }, [getAccessToken, startPolling, fetchLimitStatus, isPremium, addJob, runSimulatedProgress, stopActivePolling]);
+  }, [getAccessToken, startPolling, fetchLimitStatus, isPremium, addJob, runSimulatedProgress, stopActivePolling, onExtractionSuccess]);
 
   const triggerExtraction = useCallback(async (targetUrl: string) => {
     const cleanUrl = targetUrl.trim();
@@ -459,6 +495,8 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         handleBackground();
+      } else if (document.visibilityState === 'visible') {
+        fetchLimitStatus();
       }
     };
 
@@ -467,6 +505,8 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     const cleanupAppState = registerAppStateListener((isActive) => {
       if (!isActive) {
         handleBackground();
+      } else {
+        fetchLimitStatus();
       }
     });
 
@@ -474,11 +514,33 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       cleanupAppState();
     };
-  }, [isPremium, cancelActiveFreeJob]);
+  }, [isPremium, cancelActiveFreeJob, fetchLimitStatus]);
 
+
+  const claimRewardedCredit = useCallback(async (): Promise<boolean> => {
+    try {
+      const token = await getAccessToken();
+      if (!token) return false;
+
+      const res = await fetch(apiUrl('/api/me/rewarded-ad-claimed'), {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!res.ok) return false;
+      await fetchLimitStatus();
+      return true;
+    } catch (err) {
+      console.error('Failed to claim rewarded ad credit:', err);
+      return false;
+    }
+  }, [getAccessToken, fetchLimitStatus]);
 
   return {
-    isPending,
+    isPending: isPending || false,
     jobStatus,
     jobError,
     jobErrorCode,
@@ -497,6 +559,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     isUploadingPhotos,
     triggerPhotoExtraction,
     limitStatus,
-    fetchLimitStatus
+    fetchLimitStatus,
+    claimRewardedCredit
   };
 }

@@ -45,22 +45,37 @@ Railway-Build-Variablen bzw. in `frontend/.env.development.local` (git-ignored v
 
 ### 1. DB-Schema anwenden
 
-`backend/supabase_schema.sql` enthält **nicht** die Kern-Tabelle `public.jobs` (nur `ALTER`s darauf
-plus `collections`, `recipe_collections`, `feedback`, `global_settings`). Deshalb liegt das
-`jobs`-DDL + die `claim_next_job`-RPC jetzt (aus `backend/src/db.ts` rekonstruiert) in
-**`backend/db/schema.sql`**.
+`backend/supabase_schema.sql` enthält **nicht** die Kerntabellen (nur `ALTER`s darauf plus
+`collections`, `recipe_collections`, `feedback`, `global_settings`, Gamification, Social).
+Das DDL für `recipes` / `jobs` / `user_recipes` samt Indizes, RLS und den RPCs
+(`claim_next_job`, `complete_job`) liegt in **`backend/db/schema.sql`**.
 
-Reihenfolge (via Supabase-Studio SQL-Editor oder `psql` gegen die Dev-Postgres):
-1. `backend/db/schema.sql` — `jobs`-Tabelle, Indizes, RLS-Policies, `claim_next_job`-RPC.
-2. `backend/supabase_schema.sql` — ergänzt `is_favorite`/`flags`/`media_bytes`, plus
-   collections/recipe_collections/feedback/global_settings/Buckets/partial-unique-index (idempotent).
+**Frische Datenbank** (via Supabase-Studio SQL-Editor oder `psql`):
+1. `backend/db/schema.sql` — `recipes`/`jobs`/`user_recipes`, Indizes, RLS-Policies, RPCs.
+2. `backend/supabase_schema.sql` — collections/recipe_collections/feedback/global_settings/
+   Buckets/Gamification/Social (idempotent).
+
+**Bestehende Datenbank aus der Zeit vor der jobs/recipes-Auftrennung** — hier zählt die
+Reihenfolge, weil die Indizes in `schema.sql` Spalten referenzieren, die die alte
+`jobs`-Tabelle nicht hat:
+1. `backend/db/migrations/001_split_jobs_recipes.sql` — **einmalig**, nicht idempotent.
+   Parkt die alte Tabelle als `jobs_legacy`, legt die drei neuen an, migriert die Daten
+   und hängt `recipe_collections`/`cook_events`/`notification_log` um.
+2. `backend/db/migrations/001_verify.sql` — read-only, prüft die Migration gegen
+   `jobs_legacy`. Erst weitermachen, wenn alles stimmt.
+3. `backend/db/schema.sql` — legt Indizes, RLS und die RPCs an (die `CREATE TABLE`s
+   sind danach No-Ops).
+4. `backend/supabase_schema.sql` — wie oben.
+
+`jobs_legacy` bleibt als Rollback stehen und wird erst eine Release später gedroppt.
 
 ### 2. Dev-Supabase self-hosted auf Railway
 
 - Neues Railway-**Dev-Environment** (getrennt von Prod) anlegen.
 - Supabase über das **offizielle Supabase-Railway-Template** deployen (Postgres, GoTrue, PostgREST,
   Storage, Kong).
-- Schema einspielen: zuerst `backend/db/schema.sql`, dann `backend/supabase_schema.sql`.
+- Schema einspielen: zuerst `backend/db/schema.sql`, dann `backend/supabase_schema.sql`
+  (frische DB — sonst die Migrations-Reihenfolge aus Schritt 1 oben).
 
 ### 3. Dev-Backend auf Railway
 

@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 
-export type AppTab = 'extract' | 'history' | 'shopping-list' | 'progress' | 'settings' | 'admin';
+export type AppTab = 'extract' | 'history' | 'meal-planner' | 'shopping-list' | 'progress' | 'settings' | 'admin' | 'invite';
 
 export interface ParsedRoute {
   /** The active bottom-nav tab */
   tab: AppTab;
   /** Sub-path segment — e.g. jobId for '/#/history/:jobId' or 'recipe' for '/#/extract/recipe' */
   subPath: string | null;
+  /** Query parameters */
+  query?: Record<string, string>;
 }
 
 // ---------------------------------------------------------------------------
@@ -15,24 +17,38 @@ export interface ParsedRoute {
 
 function parseHash(hash: string): ParsedRoute {
   // Strip leading '#' and optional leading '/'
-  const path = hash.replace(/^#\/?/, '');
-  const [segment, ...rest] = path.split('/');
+  const raw = hash.replace(/^#\/?/, '');
+  const [pathOnly, queryStr] = raw.split('?');
+  const [segment, ...rest] = (pathOnly || '').split('/');
   const subPath = rest.length > 0 ? rest.join('/') : null;
+
+  const query: Record<string, string> = {};
+  if (queryStr) {
+    const sp = new URLSearchParams(queryStr);
+    sp.forEach((val, key) => {
+      query[key] = val;
+    });
+  }
 
   switch (segment) {
     case 'extract':
-      return { tab: 'extract', subPath };
+      return { tab: 'extract', subPath, query };
+    case 'meal-planner':
+      return { tab: 'meal-planner', subPath, query };
     case 'shopping-list':
-      return { tab: 'shopping-list', subPath };
+      return { tab: 'shopping-list', subPath, query };
     case 'progress':
-      return { tab: 'progress', subPath };
+      return { tab: 'progress', subPath, query };
+    case 'invite':
+      // Deep link #/invite/<code> — App redirects to the progress/friends tab.
+      return { tab: 'invite', subPath, query };
     case 'settings':
-      return { tab: 'settings', subPath };
+      return { tab: 'settings', subPath, query };
     case 'admin':
-      return { tab: 'admin', subPath };
+      return { tab: 'admin', subPath, query };
     case 'history':
     default:
-      return { tab: 'history', subPath };
+      return { tab: 'history', subPath, query };
   }
 }
 
@@ -47,13 +63,17 @@ function buildHash(tab: AppTab, subPath?: string | null): string {
 
 export function useHashRouter() {
   const [route, setRoute] = useState<ParsedRoute>(() => {
-    // Initialise from current URL hash; default to history tab
+    // Initialise from current URL hash; fallback to pathname if hash is missing (e.g. direct web navigation)
     const hash = window.location.hash;
-    if (!hash || hash === '#' || hash === '#/') {
-      // Default tab on first visit
-      return { tab: 'history', subPath: null };
+    if (hash && hash !== '#' && hash !== '#/') {
+      return parseHash(hash);
     }
-    return parseHash(hash);
+    const pathname = window.location.pathname;
+    if (pathname && pathname !== '/' && !pathname.endsWith('.html')) {
+      return parseHash(pathname);
+    }
+    // Default tab on first visit
+    return { tab: 'history', subPath: null };
   });
 
   // Sync URL → state on external hash changes (browser back/forward)
@@ -98,6 +118,7 @@ export function useHashRouter() {
   return {
     tab: route.tab,
     subPath: route.subPath,
+    query: route.query ?? {},
     navigate,
     replace,
   };

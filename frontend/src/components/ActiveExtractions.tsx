@@ -1,4 +1,4 @@
-import { Loader2, CheckCircle2, AlertCircle, ChefHat, X, ChevronRight } from 'lucide-react';
+import { Loader2, CheckCircle2, AlertCircle, X, ChevronRight } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { resolveErrorCode } from '../i18n';
 import { useExtractionJobs, OPEN_RECIPE_EVENT } from '../context/ExtractionJobsContext';
@@ -8,11 +8,17 @@ const STAGE_KEY: Record<ProgressStage, string> = {
   queued: 'activeExtractions.stages.queued',
   scraping: 'activeExtractions.stages.scraping',
   downloading_media: 'activeExtractions.stages.downloading_media',
+  awaiting_frames: 'activeExtractions.stages.awaiting_frames',
   extracting_frames: 'activeExtractions.stages.extracting_frames',
   reading_photos: 'activeExtractions.stages.reading_photos',
   extracting_recipe: 'activeExtractions.stages.extracting_recipe',
+  generating_cover: 'activeExtractions.stages.generating_cover',
   finalizing: 'activeExtractions.stages.finalizing',
 };
+
+interface ActiveExtractionsProps {
+  excludeId?: string;
+}
 
 /**
  * Lists the current user's in-flight and just-finished background extractions.
@@ -20,21 +26,46 @@ const STAGE_KEY: Record<ProgressStage, string> = {
  * survives tab switches). Premium users can run several at once; a finished
  * card is tapped to open its recipe — nothing auto-navigates.
  */
-export default function ActiveExtractions() {
+function formatSourceLabel(rawLabel: string): string {
+  if (!rawLabel) return 'Rezept';
+  if (rawLabel.startsWith('photo://')) return 'Foto-Rezept';
+  try {
+    if (rawLabel.startsWith('http://') || rawLabel.startsWith('https://')) {
+      const url = new URL(rawLabel);
+      if (url.hostname.includes('instagram.com')) return 'Instagram Reel';
+      if (url.hostname.includes('tiktok.com')) return 'TikTok Video';
+      if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) return 'YouTube Shorts';
+      if (url.hostname.includes('facebook.com')) return 'Facebook Video';
+      return url.hostname.replace('www.', '');
+    }
+  } catch {
+    // fallback
+  }
+  return rawLabel;
+}
+
+export default function ActiveExtractions({ excludeId }: ActiveExtractionsProps = {}) {
   const { t, language } = useI18n();
   const { jobs, dismissJob } = useExtractionJobs();
 
-  if (jobs.length === 0) return null;
+  const visibleJobs = excludeId ? jobs.filter(j => j.id !== excludeId) : jobs;
+  if (visibleJobs.length === 0) return null;
 
-  const anyRunning = jobs.some(j => j.status !== 'completed' && j.status !== 'failed');
+  const anyRunning = visibleJobs.some(j => j.status !== 'completed' && j.status !== 'failed');
+  const onlyFailed = visibleJobs.every(j => j.status === 'failed');
+  const sectionTitle = anyRunning
+    ? t('activeExtractions.title')
+    : onlyFailed
+      ? t('activeExtractions.titleFailed')
+      : t('activeExtractions.titleDone');
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2.5">
       <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-1">
-        {anyRunning ? t('activeExtractions.title') : t('activeExtractions.titleDone')}
+        {sectionTitle}
       </span>
 
-      {jobs.map(job => {
+      {visibleJobs.map(job => {
         const isDone = job.status === 'completed';
         const isFailed = job.status === 'failed';
         const isRunning = !isDone && !isFailed;
@@ -42,9 +73,11 @@ export default function ActiveExtractions() {
         const stageLabel = job.progress?.stage
           ? t(STAGE_KEY[job.progress.stage])
           : t('activeExtractions.statusRunning');
+        const displayLabel = formatSourceLabel(job.sourceLabel);
 
         const open = () => {
-          window.dispatchEvent(new CustomEvent(OPEN_RECIPE_EVENT, { detail: { jobId: job.id } }));
+          const targetRecipeId = job.recipeId || job.id;
+          window.dispatchEvent(new CustomEvent(OPEN_RECIPE_EVENT, { detail: { recipeId: targetRecipeId, jobId: job.id } }));
           dismissJob(job.id);
         };
 
@@ -52,46 +85,52 @@ export default function ActiveExtractions() {
           <div
             key={job.id}
             onClick={isDone ? open : undefined}
-            className={`relative flex items-center gap-3 px-4 py-3.5 rounded-2xl overflow-hidden transition-all ${
+            className={`relative flex items-center gap-3.5 px-4 py-3.5 rounded-3xl overflow-hidden transition-all border-none ${
               isDone
                 ? 'cursor-pointer active:scale-[0.99] bg-emerald-500/10 dark:bg-emerald-500/15'
                 : isFailed
-                  ? 'bg-rose-500/5 dark:bg-rose-500/10'
-                  : 'bg-black/5 dark:bg-white/5'
+                  ? 'bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)]'
+                  : 'bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)]'
             }`}
           >
             {/* Progress track (running only) */}
             {isRunning && percent !== null && (
               <div
-                className="absolute inset-0 bg-emerald-500/10 origin-left transition-transform duration-500"
+                className="absolute inset-0 bg-emerald-500/5 dark:bg-emerald-500/10 origin-left transition-transform duration-500"
                 style={{ transform: `scaleX(${Math.max(0, Math.min(1, percent / 100))})` }}
               />
             )}
 
-            <div className={`relative shrink-0 w-9 h-9 rounded-xl flex items-center justify-center ${
+            <div className={`relative shrink-0 w-9 h-9 rounded-2xl overflow-hidden flex items-center justify-center ${
               isDone
                 ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
                 : isFailed
-                  ? 'bg-rose-500/15 text-rose-500 dark:text-rose-400'
-                  : 'bg-black/5 dark:bg-white/10 text-gray-500 dark:text-gray-300'
+                  ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                  : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
             }`}>
-              {isDone ? (
+              {job.progress?.preview?.thumbnailUrl ? (
+                <img
+                  src={job.progress.preview.thumbnailUrl}
+                  alt="Thumb"
+                  className="w-full h-full object-cover object-center"
+                />
+              ) : isDone ? (
                 <CheckCircle2 className="w-5 h-5" />
               ) : isFailed ? (
                 <AlertCircle className="w-5 h-5" />
               ) : (
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <Loader2 className="w-5 h-5 animate-spin text-emerald-600 dark:text-emerald-400" />
               )}
             </div>
 
             <div className="relative min-w-0 flex-1">
-              <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+              <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
                 {isDone
-                  ? (job.title || t('activeExtractions.ready'))
-                  : job.sourceLabel}
+                  ? (job.title || job.progress?.preview?.title || t('activeExtractions.ready'))
+                  : (job.progress?.preview?.title || displayLabel)}
               </p>
-              <p className={`text-[11px] leading-snug ${
-                isFailed ? 'text-rose-600 dark:text-rose-400 whitespace-normal break-words font-medium' : 'text-gray-500 dark:text-gray-400 truncate'
+              <p className={`text-xs leading-relaxed ${
+                isFailed ? 'text-gray-500 dark:text-gray-400 whitespace-normal break-words font-normal mt-0.5' : 'text-gray-500 dark:text-gray-400 truncate font-medium'
               }`}>
                 {isDone
                   ? t('activeExtractions.tapToOpen')
@@ -107,14 +146,16 @@ export default function ActiveExtractions() {
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); dismissJob(job.id); }}
-                className="relative shrink-0 w-8 h-8 rounded-full bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-300 flex items-center justify-center transition-colors cursor-pointer outline-none border-none"
+                className="relative shrink-0 w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex items-center justify-center transition-colors cursor-pointer outline-none border-none self-start mt-0.5"
                 aria-label={t('activeExtractions.dismiss')}
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
-            ) : (
-              <ChefHat className="relative shrink-0 w-4 h-4 text-gray-300 dark:text-gray-600" />
-            )}
+            ) : percent !== null ? (
+              <span className="relative shrink-0 text-xs font-semibold text-gray-400 dark:text-gray-500 tabular-nums">
+                {Math.round(percent)}%
+              </span>
+            ) : null}
           </div>
         );
       })}

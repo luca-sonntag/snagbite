@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Bell, Check, X } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
+import { useModalOverlay } from '../context/OverlayStackContext';
 import { enablePushNotifications } from '../push';
 import { isNative } from '../native';
 
@@ -11,9 +12,11 @@ const ALL_CATEGORY_IDS = ['seasonal', 'reminders', 'timing', 'taste', 'motivatio
 
 interface NotificationPromptProps {
   savedCount: number;
+  forceShow?: boolean;
+  onForceClose?: () => void;
 }
 
-export default function NotificationPrompt({ savedCount }: NotificationPromptProps) {
+export default function NotificationPrompt({ savedCount, forceShow, onForceClose }: NotificationPromptProps) {
   const { t } = useI18n();
   const { user, updateUserMetadata, getAccessToken } = useAuth();
   const [busy, setBusy] = useState(false);
@@ -30,11 +33,23 @@ export default function NotificationPrompt({ savedCount }: NotificationPromptPro
   const isDismissedInMeta = user?.user_metadata?.notification_prompt_dismissed === true;
 
   const shouldShow =
-    !!user &&
-    savedCount >= 1 &&
-    !isEnabled &&
-    !isDismissedInMeta &&
-    !dismissedLocally;
+    forceShow ??
+    (!!user &&
+      savedCount >= 1 &&
+      !isEnabled &&
+      !isDismissedInMeta &&
+      !dismissedLocally);
+
+  const handleDismiss = () => {
+    if (forceShow) {
+      onForceClose?.();
+      return;
+    }
+    localStorage.setItem(PROMPT_DISMISSED_AT_KEY, Date.now().toString());
+    setDismissedLocally(true);
+  };
+
+  useModalOverlay(shouldShow, handleDismiss);
 
   useEffect(() => {
     if (!shouldShow) return;
@@ -51,13 +66,12 @@ export default function NotificationPrompt({ savedCount }: NotificationPromptPro
 
   if (!shouldShow) return null;
 
-  const handleDismiss = () => {
-    localStorage.setItem(PROMPT_DISMISSED_AT_KEY, Date.now().toString());
-    setDismissedLocally(true);
-  };
-
   const handleEnable = async () => {
     if (busy) return;
+    if (forceShow && !user) {
+      onForceClose?.();
+      return;
+    }
     setBusy(true);
     try {
       const granted = await enablePushNotifications(getAccessToken);
@@ -82,6 +96,7 @@ export default function NotificationPrompt({ savedCount }: NotificationPromptPro
       });
       localStorage.removeItem(PROMPT_DISMISSED_AT_KEY);
       setDismissedLocally(true);
+      if (forceShow) onForceClose?.();
     } catch (err) {
       console.warn('Failed to enable notifications from prompt:', err);
     } finally {
@@ -91,7 +106,7 @@ export default function NotificationPrompt({ savedCount }: NotificationPromptPro
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200 touch-none">
-      <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-7 pt-8 shadow-2xl relative overflow-hidden flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
+      <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border-none p-7 pt-8 shadow-2xl relative overflow-hidden flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
         {/* Dismiss X button */}
         <button
           type="button"

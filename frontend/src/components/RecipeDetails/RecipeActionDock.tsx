@@ -1,10 +1,11 @@
-import { ShoppingCart, ShoppingBag, Play, MessageCircle } from 'lucide-react';
+import { ShoppingCart, ShoppingBag, Play, MessageCircle, Calendar } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
-import FloatingActionBar, { FloatingDivider } from '../FloatingActionBar';
-import PremiumCrownBadge from '../PremiumCrownBadge';
+import FloatingActionBar from '../FloatingActionBar';
+import ProBadge from '../ProBadge';
 import CookedButton from '../CookedButton';
 import { useHideOnScroll } from '../../hooks/useHideOnScroll';
+import { hapticLight, hapticMedium } from '../../utils/haptics';
 
 interface RecipeActionDockProps {
   totalStepsCount: number;
@@ -14,6 +15,7 @@ interface RecipeActionDockProps {
   recipeId?: string;
   recipeTitle?: string;
   onRemixClick?: () => void;
+  onPlanClick?: () => void;
 }
 
 export default function RecipeActionDock({
@@ -23,7 +25,8 @@ export default function RecipeActionDock({
   onStartCooking,
   recipeId,
   recipeTitle,
-  onRemixClick
+  onRemixClick,
+  onPlanClick,
 }: RecipeActionDockProps) {
   const { t } = useI18n();
   const { isPremium } = useAuth();
@@ -32,75 +35,111 @@ export default function RecipeActionDock({
 
   const showStart = totalStepsCount > 0;
   const showRemix = !!recipeId && !!onRemixClick;
+  const showPlan = !!recipeId && !!onPlanClick;
   const showShopping = !!onAddToCart;
   const showCooked = !!recipeId;
 
-  const showRemixDivider = showRemix && (showStart || showShopping);
-  const showShoppingDivider = showShopping && (showStart || showRemix);
-  const showCookedDivider = showCooked && (showStart || showRemix || showShopping);
+  const itemBase =
+    'relative flex flex-col items-center justify-center gap-1 min-w-[3.75rem] px-2.5 py-2 rounded-2xl ' +
+    'transition-all active:scale-[0.96] cursor-pointer outline-none border-none group select-none';
+  const itemPrimary =
+    `${itemBase} text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm shadow-emerald-600/20 mr-1`;
+  const itemNeutral =
+    `${itemBase} text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 ` +
+    'hover:bg-black/[0.04] dark:hover:bg-white/[0.06]';
+  const itemLabel = 'text-[11px] font-semibold leading-tight whitespace-nowrap';
 
   return (
     <FloatingActionBar className="bottom-[calc(7rem_+_var(--safe-area-inset-bottom))]" isHidden={isHidden}>
       {/* Start Cooking Button */}
       {showStart && (
         <button
-          onClick={onStartCooking}
-          className="relative p-3 text-white bg-emerald-600 hover:bg-emerald-500 active:scale-90 transition-all cursor-pointer flex items-center justify-center rounded-full shadow-md outline-none border-none group"
+          onClick={() => {
+            hapticMedium();
+            onStartCooking();
+          }}
+          className={itemPrimary}
           title={t('recipe.startCooking')}
           aria-label={t('recipe.startCooking')}
         >
-          <Play className="w-5.5 h-5.5 fill-white" />
-          {!isPremium && <PremiumCrownBadge />}
+          <Play className="w-5 h-5 fill-white ml-0.5" />
+          <span className={itemLabel}>
+            {t('recipe.dockCook')}
+          </span>
+          {!isPremium && <ProBadge variant="corner" hasShadow />}
+        </button>
+      )}
+
+      {/* Plan Button */}
+      {showPlan && (
+        <button
+          onClick={() => {
+            hapticLight();
+            onPlanClick?.();
+          }}
+          className={itemNeutral}
+          title={t('recipe.dockPlan')}
+          aria-label={t('recipe.dockPlan')}
+        >
+          <Calendar className="w-5 h-5" />
+          <span className={itemLabel}>
+            {t('recipe.dockPlan')}
+          </span>
         </button>
       )}
 
       {/* Remix Button */}
       {showRemix && (
-        <>
-          <FloatingDivider show={showRemixDivider} />
-          <button
-            onClick={onRemixClick}
-            className="relative p-3 text-gray-700 dark:text-gray-300 hover:text-emerald-500 dark:hover:text-emerald-400 active:scale-90 transition-all cursor-pointer flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 outline-none border-none group"
-            title="Recipe Remix"
-          >
-            <MessageCircle className="w-5.5 h-5.5 group-hover:animate-pulse" />
-            {!isPremium && <PremiumCrownBadge />}
-          </button>
-        </>
+        <button
+          onClick={() => {
+            hapticLight();
+            onRemixClick?.();
+          }}
+          className={itemNeutral}
+          title={t('recipe.dockChat')}
+          aria-label={t('recipe.dockChat')}
+        >
+          <MessageCircle className="w-5 h-5" />
+          <span className={itemLabel}>
+            {t('recipe.dockChat')}
+          </span>
+          {!isPremium && <ProBadge variant="corner" hasShadow />}
+        </button>
       )}
 
       {/* Add to Shopping List Button */}
       {showShopping && (
-        <>
-          <FloatingDivider show={showShoppingDivider} />
-          <button
-            onClick={onAddToCart}
-            className={`relative p-3 active:scale-90 transition-all cursor-pointer flex items-center justify-center rounded-full outline-none border-none ${
-              isAdded
-                ? 'text-emerald-500 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30'
-                : 'text-gray-700 dark:text-gray-300 hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-black/5 dark:hover:bg-white/5'
-            }`}
-            aria-label="Add to shopping list"
-          >
-            {isAdded
-              ? <ShoppingBag className="w-5.5 h-5.5" />
-              : <ShoppingCart className="w-5.5 h-5.5" />
-            }
-          </button>
-        </>
+        <button
+          onClick={() => {
+            hapticLight();
+            onAddToCart?.();
+          }}
+          className={
+            isAdded
+              ? `${itemBase} text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/15`
+              : itemNeutral
+          }
+          title={t('recipe.dockList')}
+          aria-label={t('recipe.dockList')}
+        >
+          {isAdded
+            ? <ShoppingBag className="w-5 h-5" />
+            : <ShoppingCart className="w-5 h-5" />
+          }
+          <span className={itemLabel}>
+            {t('recipe.dockList')}
+          </span>
+        </button>
       )}
 
       {/* Cooked / Photo Verification Button */}
       {showCooked && (
-        <>
-          <FloatingDivider show={showCookedDivider} />
-          <CookedButton
-            jobId={recipeId}
-            recipeTitle={recipeTitle}
-            variant="dock"
-          />
-        </>
+        <CookedButton
+          recipeId={recipeId}
+          recipeTitle={recipeTitle}
+          variant="dock"
+        />
       )}
     </FloatingActionBar>
   );
-}
+}

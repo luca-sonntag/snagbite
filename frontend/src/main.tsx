@@ -3,12 +3,16 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { DialogProvider } from './context/DialogContext.tsx'
+import { OverlayStackProvider } from './context/OverlayStackContext.tsx'
 import { I18nProvider } from './context/I18nContext.tsx'
 import { AuthProvider } from './context/AuthContext.tsx'
 import { TimerProvider } from './context/TimerContext.tsx'
 import { GamificationProvider } from './context/GamificationContext.tsx'
+import { ToastProvider } from './context/ToastContext.tsx'
 import { ExtractionJobsProvider } from './context/ExtractionJobsContext.tsx'
 import ErrorBoundary from './components/ErrorBoundary.tsx'
+import { SocialProvider } from './context/SocialContext.tsx'
+import { PantryProvider } from './context/PantryContext.tsx'
 import { initNativeUi } from './native'
 import { installConsoleBuffer } from './utils/consoleBuffer'
 import { initOtaUpdates } from './utils/otaUpdater'
@@ -26,17 +30,25 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>
       <I18nProvider>
-        <DialogProvider>
-          <TimerProvider>
-            <GamificationProvider>
-              <ExtractionJobsProvider>
-                <ErrorBoundary>
-                  <App />
-                </ErrorBoundary>
-              </ExtractionJobsProvider>
-            </GamificationProvider>
-          </TimerProvider>
-        </DialogProvider>
+        <OverlayStackProvider>
+          <ToastProvider>
+            <DialogProvider>
+              <TimerProvider>
+                <GamificationProvider>
+                  <ExtractionJobsProvider>
+                    <SocialProvider>
+                      <PantryProvider>
+                        <ErrorBoundary>
+                          <App />
+                        </ErrorBoundary>
+                      </PantryProvider>
+                    </SocialProvider>
+                  </ExtractionJobsProvider>
+                </GamificationProvider>
+              </TimerProvider>
+            </DialogProvider>
+          </ToastProvider>
+        </OverlayStackProvider>
       </I18nProvider>
     </AuthProvider>
   </StrictMode>,

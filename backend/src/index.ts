@@ -6,8 +6,9 @@ import { config } from './config.js';
 import { startQueue, stopQueue } from './queue.js';
 import { apiRouter } from './routes.js';
 import { appUpdatesRouter } from './appUpdates.js';
+import { ingredientImageRouter } from './ingredientImageRoutes.js';
 import { checkDbHealth } from './db.js';
-import { generateIconPNG } from './bannerGenerator.js';
+import { ensureIngredientIconsExtracted } from './ingredientIconPacker.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const isWorker = config.ROLE === 'worker' || config.ROLE === 'both';
@@ -15,6 +16,9 @@ const isWeb = config.ROLE === 'web' || config.ROLE === 'both';
 
 async function bootstrap() {
   try {
+    // Ensure packaged ingredient icons are extracted if running from fresh container/clone
+    await ensureIngredientIconsExtracted();
+
     if (isWorker) {
       startQueue();
       console.log(`Worker started (ROLE=${config.ROLE}, concurrency=${config.WORKER_CONCURRENCY})`);
@@ -38,7 +42,7 @@ async function bootstrap() {
     app.set('trust proxy', 1);
 
     app.use(helmet({
-      crossOriginResourcePolicy: { policy: 'cross-origin' }, // für /api/image proxy
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
       contentSecurityPolicy: isProduction ? {
         directives: {
           ...helmet.contentSecurityPolicy.getDefaultDirectives(),
@@ -62,7 +66,16 @@ async function bootstrap() {
       origin: (origin, callback) => {
         // Non-browser clients (curl, server-to-server) send no Origin header.
         if (!origin || nativeOrigins.includes(origin)) return callback(null, true);
-        if (!isProduction) return callback(null, origin === 'http://localhost:5173');
+        if (!isProduction) {
+          if (
+            origin.startsWith('http://localhost') ||
+            origin.startsWith('https://localhost') ||
+            origin.startsWith('http://127.0.0.1') ||
+            /^https?:\/\/(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(origin)
+          ) {
+            return callback(null, true);
+          }
+        }
         // Production: allow the configured web origin(s); if none set, allow all.
         if (configuredOrigins.length === 0 || configuredOrigins.includes(origin)) {
           return callback(null, true);
@@ -89,72 +102,27 @@ async function bootstrap() {
       // NOTE: req.path is relative to the '/api' mount point here (e.g.
       // '/image', '/jobs/123'), since the limiter is mounted at '/api'.
       skip: (req) => {
-        if (req.path.startsWith('/image')) return true;
-        if (req.method === 'GET' && /^\/jobs(\/|$)/.test(req.path)) return true;
+        if (req.path.startsWith('/image') || req.path.startsWith('/ingredient-icons')) return true;
+        // Job polling and cookbook reads are both high-frequency and cheap.
+        if (req.method === 'GET' && /^\/(jobs|recipes|public)(\/|$)/.test(req.path)) return true;
         return false;
       },
     });
     app.use('/api', apiLimiter);
 
-    // Photo imports carry up to 5 base64 JPEGs and need a larger budget than the
+    // Photo imports and client video frames carry base64 JPEGs and need a larger budget than the
     // global 1 MB default. Mounted *before* the global parser: body-parser marks
     // the body as read, so the 1 MB limit never applies to this path.
     app.use('/api/extract-recipe/photos', express.json({ limit: '12mb' }));
+    app.use('/api/extract-recipe/frames', express.json({ limit: '10mb' }));
     app.use(express.json({ limit: '1mb' }));
-
-    // Image proxy to bypass Instagram CORP blocks (before apiRouter to skip API key check)
-    app.get('/api/image', async (req, res) => {
-      const imageUrl = req.query.url as string;
-      if (!imageUrl) {
-        res.status(400).send('Missing url parameter');
-        return;
-      }
-      try {
-        const response = await fetch(imageUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8'
-          }
-        });
-        if (!response.ok) throw new Error('Failed to fetch image');
-        const contentType = response.headers.get('content-type') || '';
-        if (!contentType.startsWith('image/')) {
-          res.status(415).send('URL did not return an image');
-          return;
-        }
-        res.set('Content-Type', contentType);
-        res.set('Cache-Control', 'public, max-age=31536000');
-        res.set('Access-Control-Allow-Origin', '*');
-        res.set('Cross-Origin-Resource-Policy', 'cross-origin');
-        const buffer = await response.arrayBuffer();
-        res.send(Buffer.from(buffer));
-      } catch {
-        res.status(500).send('Error proxying image');
-      }
-    });
-
-    // Dynamic PNG icon generator for FCM push notifications (square gradient + emoji)
-    app.get('/api/push-icon', async (req, res) => {
-      try {
-        const theme = (req.query.theme as string) || 'emerald';
-        const emoji = (req.query.emoji as string) || '🥪';
-
-        const pngBuffer = await generateIconPNG({ theme, emoji });
-
-        res.setHeader('Content-Type', 'image/png');
-        res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-        res.send(pngBuffer);
-      } catch (err: any) {
-        console.error('Error generating push icon:', err?.message ?? err);
-        res.status(500).send('Error generating icon image');
-      }
-    });
 
     // OTA update checks are public (before apiRouter to skip the auth gate —
     // the app may check before a session exists). Covered by apiLimiter above.
     app.use('/api/app-updates', appUpdatesRouter);
+
+    // Development ingredient image viewer & generator
+    app.use(ingredientImageRouter);
 
     app.use('/api', apiRouter);
 
@@ -171,7 +139,13 @@ async function bootstrap() {
 
     // API-only server: the frontend ships as the native Capacitor app, not from here.
     app.get('*', (req, res, next) => {
-      if (req.path.startsWith('/api') || req.path.startsWith('/health') || req.path.startsWith('/proxy')) {
+      if (
+        req.path.startsWith('/api') ||
+        req.path.startsWith('/health') ||
+        req.path.startsWith('/proxy') ||
+        req.path.startsWith('/dev') ||
+        req.path.startsWith('/ingredients-viewer')
+      ) {
         return next();
       }
       res.status(404).json({ error: 'API only server. Frontend is not deployed on this instance.' });

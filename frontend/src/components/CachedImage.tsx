@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChefHat } from 'lucide-react';
 import { useCachedImage } from '../hooks/useCachedImage';
 
@@ -10,20 +10,27 @@ interface CachedImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement
 
 /**
  * Drop-in replacement for <img> that automatically compresses and caches
- * images in IndexedDB on the client side.
+ * images in IndexedDB on the client side with a visible skeleton shimmer while loading.
  */
-export default function CachedImage({ src: originalUrl, fallbackComponent, emoji, className, alt, ...props }: CachedImageProps) {
+export default function CachedImage({
+  src: originalUrl,
+  fallbackComponent,
+  emoji,
+  className = '',
+  alt,
+  ...props
+}: CachedImageProps) {
   const { src, isLoading } = useCachedImage(originalUrl);
-  const [hasError, setHasError] = React.useState(false);
+  const [hasError, setHasError] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setHasError(false);
   }, [src]);
 
   if (isLoading && !src) {
     return (
-      <div className={`flex items-center justify-center bg-black/5 dark:bg-white/5 animate-pulse ${className}`}>
-        <div className="w-5 h-5 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
+      <div className={`relative overflow-hidden bg-gray-200/90 dark:bg-gray-800/90 animate-pulse flex items-center justify-center ${className}`}>
+        <div className="w-full h-full bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer-sweep pointer-events-none" />
       </div>
     );
   }

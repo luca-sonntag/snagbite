@@ -108,10 +108,10 @@ export function useCollections() {
     }
   };
 
-  const updateRecipeCollections = async (jobId: string, collectionIds: string[]) => {
+  const updateRecipeCollections = async (recipeId: string, collectionIds: string[]) => {
     try {
       const headers = await getHeaders();
-      const response = await fetch(apiUrl(`/api/jobs/${jobId}/collections`), {
+      const response = await fetch(apiUrl(`/api/recipes/${recipeId}/collections`), {
         method: 'PATCH',
         headers,
         body: JSON.stringify({ collectionIds }),

@@ -1,8 +1,12 @@
-import { ArrowLeft, Crown, Clock, Users, Flame } from 'lucide-react';
+import { ArrowLeft, Clock, Users, Flame, Info, List, ChefHat } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
+import { hapticSelection, hapticLight } from '../../utils/haptics';
+import CachedImage from '../CachedImage';
 
 interface RecipeStickyBarProps {
   recipeTitle: string;
+  imageUrl?: string | null;
+  emoji?: string | null;
   isCollapsed: boolean;
   onBack?: () => void;
   activeSection: 'ingredients' | 'instructions' | 'details';
@@ -12,7 +16,6 @@ interface RecipeStickyBarProps {
   totalTimeLabel: string | null;
   servings: number;
   calories: number | null;
-  isPremium: boolean;
 }
 
 /**
@@ -24,6 +27,8 @@ interface RecipeStickyBarProps {
  */
 export default function RecipeStickyBar({
   recipeTitle,
+  imageUrl,
+  emoji,
   isCollapsed,
   onBack,
   activeSection,
@@ -31,36 +36,58 @@ export default function RecipeStickyBar({
   totalTimeLabel,
   servings,
   calories,
-  isPremium,
 }: RecipeStickyBarProps) {
   const { t } = useI18n();
 
   const sections = [
-    { id: 'details' as const, label: 'Details' },
-    { id: 'ingredients' as const, label: t('recipe.tabIngredients') },
-    { id: 'instructions' as const, label: t('recipe.tabInstructions') },
+    { id: 'details' as const, label: 'Details', icon: Info },
+    { id: 'ingredients' as const, label: t('recipe.tabIngredients'), icon: List },
+    { id: 'instructions' as const, label: t('recipe.tabInstructions'), icon: ChefHat },
   ];
 
+  const handleTabClick = (sectionId: 'ingredients' | 'instructions' | 'details') => {
+    hapticSelection();
+    onSectionClick(sectionId);
+  };
+
   return (
-    <div id="recipe-sticky-bar" className="sticky top-[var(--app-sticky-top)] z-30 -mx-4 px-4 bg-[#f9fafb]/90 dark:bg-gray-950/90 backdrop-blur-md">
+    <div
+      id="recipe-sticky-bar"
+      className={`sticky top-[var(--app-sticky-top)] z-30 -mx-4 px-4 bg-[#f8fafc]/95 dark:bg-gray-950/95 backdrop-blur-md transition-all duration-200 border-none ${
+        isCollapsed
+          ? 'shadow-[0_2px_10px_rgba(0,0,0,0.03)] pb-0.5 before:content-[\'\'] before:absolute before:bottom-full before:inset-x-0 before:h-12 before:bg-[#f8fafc] dark:before:bg-gray-950 before:pointer-events-none'
+          : ''
+      }`}
+    >
       {/* Collapsed title row — only present once the hero has scrolled away. */}
       <div
-        className={`flex items-center gap-2 overflow-hidden motion-safe:transition-all motion-safe:duration-200 ${
-          isCollapsed ? 'max-h-14 opacity-100 pt-2' : 'max-h-0 opacity-0 pointer-events-none'
+        className={`flex items-center gap-2.5 overflow-hidden motion-safe:transition-all motion-safe:duration-200 ${
+          isCollapsed ? 'max-h-16 opacity-100 pt-2 pb-1.5' : 'max-h-0 opacity-0 pointer-events-none py-0'
         }`}
         aria-hidden={!isCollapsed}
       >
         {onBack && (
           <button
             type="button"
-            onClick={onBack}
+            onClick={() => {
+              hapticLight();
+              onBack();
+            }}
             tabIndex={isCollapsed ? 0 : -1}
             aria-label={t('recipe.back')}
-            className="w-9 h-9 flex-shrink-0 rounded-full flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all cursor-pointer outline-none border-none bg-transparent"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] flex-shrink-0 rounded-full flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all cursor-pointer outline-none border-none bg-transparent"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-5 h-5" />
           </button>
         )}
+        <div className="w-10 h-10 flex-shrink-0 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-none shadow-xs flex items-center justify-center">
+          <CachedImage
+            src={imageUrl}
+            emoji={emoji}
+            alt={recipeTitle}
+            className="w-full h-full object-cover"
+          />
+        </div>
         <div className="min-w-0 flex-1 flex flex-col justify-center">
           <span className="text-sm font-bold text-gray-900 dark:text-white truncate leading-tight">
             {recipeTitle}
@@ -79,46 +106,35 @@ export default function RecipeStickyBar({
             {calories !== null && (
               <span className="flex items-center gap-1">
                 <Flame className="w-3 h-3 text-emerald-500 flex-shrink-0" />
-                {isPremium ? (
-                  `${calories} kcal`
-                ) : (
-                  <>
-                    <span>kcal</span>
-                    <Crown className="w-2.5 h-2.5 text-amber-500 fill-amber-500" />
-                  </>
-                )}
+                <span>{calories} kcal</span>
               </span>
             )}
           </div>
         </div>
       </div>
 
-      {/* Navigation tabs */}
-      <nav className="flex w-full mt-1.5" aria-label="Recipe Navigation">
+      {/* Segmented Tab Control */}
+      <div className="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl gap-1 border-none shadow-none mt-2 mb-2">
         {sections.map((section) => {
           const isActive = activeSection === section.id;
+          const Icon = section.icon;
           return (
             <button
               key={section.id}
               type="button"
-              onClick={() => onSectionClick(section.id)}
-              className={`flex-1 text-center py-3 text-sm font-semibold transition-all relative cursor-pointer outline-none border-none select-none ${
+              onClick={() => handleTabClick(section.id)}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all duration-200 min-h-[42px] cursor-pointer border-none outline-none ${
                 isActive
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-bold shadow-[0_2px_6px_rgba(0,0,0,0.06)]'
+                  : 'bg-transparent text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium'
               }`}
             >
-              <span>{section.label}</span>
-              {/* Smooth sliding scale underline */}
-              <span
-                className={`absolute bottom-0 inset-x-0 h-0.5 bg-emerald-600 dark:bg-emerald-500 transition-all duration-200 origin-center ${
-                  isActive ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'
-                }`}
-              />
+              <Icon className="w-4 h-4 shrink-0" />
+              <span className="truncate">{section.label}</span>
             </button>
           );
         })}
-      </nav>
+      </div>
     </div>
   );
 }
