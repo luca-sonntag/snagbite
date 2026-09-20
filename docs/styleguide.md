@@ -21,7 +21,8 @@
   * **Sekundärer Text:** `#a1a1aa` (`--color-gray-400`)
 
 ### Akzentfarben
-* **Primary Accent (Smaragdgrün):** `emerald-600` (Light) / `emerald-500` (Dark)
+* **Primary Accent & Brand-Farbe (Pure Emerald):** `#10b981` (`emerald-500`) / `emerald-600` (Light)
+  * **Brand-Logo & App-Icons:** Flat Pure Emerald (`#10b981`) ohne Gradienten für maximale Klarheit und Clean Flat Ästhetik.
   * Soft Badges & Highlights: `bg-emerald-500/10 text-emerald-600 dark:text-emerald-400`
   * Action Buttons: `bg-emerald-600 hover:bg-emerald-500 text-white`
   * Aktive Nav-Indikatoren: `h-1 w-5 rounded-full bg-emerald-600`
