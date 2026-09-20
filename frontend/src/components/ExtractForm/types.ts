@@ -67,6 +67,7 @@ export interface ExtractActionCardsProps {
   onOpenPhotoSheet: () => void;
   photosCount?: number;
   disabled?: boolean;
+  linkDisabled?: boolean;
 }
 
 export interface ExtractQuotaBadgeProps {
@@ -87,6 +88,7 @@ export interface UrlExtractSheetProps {
   canPaste: boolean;
   onPaste: () => void;
   submitDisabled: boolean;
+  isWaitlistMode?: boolean;
   handleFormSubmit: (e: React.FormEvent, overrideUrl?: string) => void;
 }
 

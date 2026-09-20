@@ -19,6 +19,7 @@ export const UrlExtractSheet: React.FC<UrlExtractSheetProps> = ({
   canPaste,
   onPaste,
   submitDisabled,
+  isWaitlistMode = false,
   handleFormSubmit,
 }) => {
   const { t } = useI18n();
@@ -79,6 +80,7 @@ export const UrlExtractSheet: React.FC<UrlExtractSheetProps> = ({
                   isPending={isPending}
                   isUploadingPhotos={false}
                   submitDisabled={submitDisabled}
+                  isWaitlistMode={isWaitlistMode}
                 />
               </form>
             </Drawer.Body>
