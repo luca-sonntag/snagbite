@@ -50,12 +50,6 @@
 - **Google Play Store Go-Live & Release-Vorbereitung:**
   - Verbindliche Abarbeitung aller Store-Voraussetzungen (Restore Purchases Button, AdMob `app-ads.txt`, Data Safety, Reviewer-Account, Closed Testing) gemäß der [**Google Play Store Go-Live Checklist**](go-live-checklist.md).
 
-- **Extraktions-Warteliste & Job-Historie auf der „NEU“-Seite (Fail-Safe Queue):**
-  - **Schutz vor Link-Verlust:** Schlägt eine Extraktion temporär fehl (Netzwerkabbruch, API-Timeout, Instagram-Glitch), darf der Video-Link niemals verloren gehen – der Nutzer hat im Social-Media-Feed meist schon weitergescrollt.
-  - **Job-Historie & Retry:** Auf der „Neu“-Seite eine kompakte Liste der letzten Extraktions-Jobs und fehlgeschlagenen Links anzeigen (inkl. 1-Klick-Retry und Link kopieren/öffnen).
-  - **Vormerken bei aufgebrauchtem Kontingent:** Wenn das tägliche Extraktions-Limit erreicht ist, können Links trotzdem geteilt und in eine Warteliste abgelegt werden („Für später vormerken“).
-  - **Smart Resume beim nächsten App-Start:** Sobald neues Kontingent vorhanden ist oder die App neu geöffnet wird, weist ein dezentes Overlay/Bottom-Sheet darauf hin: *„Du hast 1 Rezept in der Warteliste. Jetzt analysieren?“* (Nutzer behält volle Kontrolle, kein automatischer ungewollter Credit-Verbrauch).
-
 - **Smarte Push-Benachrichtigungen: Hero-Zutaten statt Basis-Zutaten (Ingredient Spotlight Filter):**
   - **Problem & Feedback:** Aktuell fragt der Benachrichtigungs-Generator (`ingredient_spotlight`, siehe [push-notifications.md](push-notifications.md)) unpassend nach absoluten Grundnahrungsmitteln, Fetten oder Gewürzen (z. B. *„Lust auf Butter? Du hast x Rezepte mit Butter, Lust auf [Rezept]?“*). Niemand hat isoliert Lust auf „Butter“, „Salz“, „Pfeffer“, „Speiseöl“ oder „Zwiebeln“.
   - **Ausschluss von Basis- & Würz-Kategorien (Anti-Fragile):** Filterung im Kandidaten-Generator (`genIngredientSpotlight` in `backend/src/notifications/candidates.ts`) anhand strukturierter Kategorien (z. B. Ignorieren von `SPICES_SEASONINGS`, `OILS_VINEGARS`, `BAKING_COOKING`) sowie einer zentralen Ausschlussliste für geschmacksneutrale Küchenbasics (Salz, Pfeffer, Butter, Öl, Wasser, Zucker, Mehl, Speisestärke, Zwiebel, Knoblauch).
@@ -64,6 +58,10 @@
 
 ## Findings (Behoben ✅)
 
+- [x] Extraktions-Warteliste & Fail-Safe Queue auf der „NEU“-Seite:
+  - Schutz vor Link-Verlust: Fehlgeschlagene/abgebrochene Extraktionen werden persistent in der Fail-Safe Queue gesichert (`FailedJobCard.tsx`, 1-Klick-Retry, Link kopieren/öffnen, in Warteliste verschieben).
+  - Vormerken bei aufgebrauchtem Kontingent: Geteilte Links via Android Share Target / Intent landen bei Limit-Überschreitung automatisch in der Warteliste mit Toast-Feedback; manuelles Vormerken via `UrlExtractSheet` und `Bookmark`-Submit-Button (`ExtractionQueueContext.tsx`).
+  - Smart Resume beim nächsten App-Start: Sobald wieder Kontingent frei ist, weist das dezente Bottom-Sheet `SmartResumeSheet.tsx` auf vorgemerkte Rezepte hin (volle Nutzerkontrolle, kein automatischer Credit-Verbrauch).
 - [x] Paywall-Compliance & Feature-Update: Restore-Purchases-Button (`Purchases.restorePurchases()`), Verlinkung von AGB und Datenschutzerklärung, Bereinigung von UTF-8 Encoding-Glitches und saubere Klarstellung der echten Premium-Vorteile (`frontend/src/components/PremiumModal/`)
 - [x] Response bei Rezept kochen ohne Foto: Sofortiges Toast-Feedback bei 0 XP / Duplikat und Ladezustand (`CookedModal.tsx`, `GamificationContext.tsx`)
 - [x] Transparente & sympathische Overlay-Message vor erster Werbung (Free-Tier): Warmherziges Pre-Ad Transparenz-Sheet (`PreAdTransparencySheet.tsx`) vor der allerersten Werbeeinblendung via `useAppAds.ts` & `AppOverlays.tsx`
