@@ -133,8 +133,7 @@ async function chooseForUser(
 
 /**
  * The AI-generated cover of the recipe a notification points at, when there is
- * one. Used as the notification image; callers fall back to the generated
- * gradient/emoji icon when this returns null.
+ * one. Used as the notification image; null when no AI cover is available.
  */
 function resolveCoverImageUrl(candidate: Candidate, recipes: SavedRecipe[]): string | null {
   if (!candidate.recipeId) return null;
@@ -218,15 +217,7 @@ async function processUser(user: NotificationUser, now: Date, force = false): Pr
     const copy = await generateNotificationCopy(candidate, resolveLanguage(user));
     if (!copy) return `User ${user.id}: AI copy generation returned null.`;
 
-    const baseUrl = (config.PUBLIC_BACKEND_URL || config.HEALTHCHECK_BACKEND_URL || 'http://localhost:3000').replace(/\/$/, '');
-    const themeParam = encodeURIComponent(copy.theme || 'emerald');
-    const emojiParam = encodeURIComponent(copy.emoji || '🥪');
-    const iconUrl = `${baseUrl}/api/push-icon?theme=${themeParam}&emoji=${emojiParam}`;
-
     const dataPayload = tapData(candidate);
-    // The gradient/emoji icon is always sent as the fallback the device renders
-    // when there is no AI cover (or fetching it fails).
-    dataPayload.iconUrl = iconUrl;
 
     const coverUrl = resolveCoverImageUrl(candidate, recipes);
 
