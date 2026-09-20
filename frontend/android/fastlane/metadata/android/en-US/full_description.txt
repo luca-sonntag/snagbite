@@ -1,0 +1,40 @@
+Say goodbye to messy screenshots, lost bookmarks, and forgotten recipe videos! Snagbite is your intelligent, all-in-one kitchen assistant for your entire cooking journey: From video inspiration on social media to meal planning, smart grocery shopping, and hands-free cooking in the kitchen.
+
+🎬 1. INSTANT AI IMPORT FROM VIDEOS & PHOTOS
+• Social Media Import: Share recipe reels or videos directly from Instagram Reels, TikTok, or YouTube Shorts to Snagbite with a single tap.
+• Smart AI Parsing: Powered by Google Gemini, Snagbite extracts ingredients, exact amounts, instructions, and cooking times in seconds.
+• Cookbook & Handwritten Card Scan: Snap a photo of a cookbook page or your grandmother's recipe card — Snagbite digitizes and structures it automatically.
+• Food Blog & Web Import: Import recipes directly from websites and culinary blogs with one click.
+
+📖 2. YOUR DIGITAL COOKBOOK – ORGANIZED YOUR WAY
+• All Recipes in One Place: Keep your personal recipe collection organized, easy to read, and searchable offline at any time.
+• Custom Collections & Tags: Group your favorite meals into folders ("Quick Weeknight Dinners", "High Protein", "Summer BBQ") and filter by custom tags.
+• Dynamic Servings Scaler: Adjust portion sizes with one tap — ingredient quantities recalculate accurately in real time.
+• Nutrition & Healthy Score: Transparent nutritional breakdowns for calories, protein, carbs, fat, and fiber, accompanied by an evidence-based Healthy Score.
+
+📅 3. STRESS-FREE WEEKLY MEAL PLANNER
+• Visual Meal Planning: Plan your breakfasts, lunches, and dinners for the week ahead from Monday to Sunday.
+• End Decision Fatigue: Never wonder "What should I cook tonight?" again.
+• Seamless Sync: Transfer planned meals straight to your shopping list with a single tap.
+
+🛒 4. SMART GROCERY LIST & PANTRY
+• Supermarket Aisles Sorting: Ingredients are automatically categorized (Produce, Dairy, Spices, Bakery, etc.) for quick and efficient grocery runs.
+• One-Tap Recipe Transfer: Add all ingredients from one or multiple recipes directly to your shopping list.
+• Built-In Pantry: Keep track of ingredients you already have at home to reduce food waste and avoid duplicate purchases.
+
+👨‍🍳 5. FOCUS COOKING MODE WITH TIMERS
+• Large Step-by-Step View: Distraction-free cooking with large, readable text designed for easy viewing from a distance.
+• Screen Stays Awake: No more unlocking your phone with wet or messy hands — the screen stays on while you cook.
+• Parallel In-App Timers: Cooking and baking times mentioned in instructions are detected automatically and can be launched with a single tap.
+• Ingredient Quantities on Hand: Check required amounts without leaving your active cooking step.
+
+🏆 6. COOK, EARN XP & BUILD HABITS
+• Cooking Streaks: Keep your weekly cooking streak going and build lasting culinary habits.
+• XP & Achievement Badges: Earn experience points for every dish you prepare and unlock motivating kitchen milestones.
+
+🔒 FAIR, TRANSPARENT & PRIVACY-FIRST
+• Core features are free to use.
+• Complete Data Control: Strict compliance with European GDPR privacy standards.
+• Snagbite Pro: Optional subscription for unlimited extractions, Recipe Copilot AI assistant, and an ad-free experience.
+
+Download Snagbite today and turn your favorite food videos into your own smart, personalized cookbook!
