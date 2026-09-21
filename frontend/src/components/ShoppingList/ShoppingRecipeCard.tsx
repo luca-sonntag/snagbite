@@ -71,9 +71,11 @@ export default function ShoppingRecipeCard({
             onRemove();
           }}
           aria-label={t('shopping.removeRecipeConfirmTitle')}
-          className="absolute top-1.5 right-1.5 w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-black/45 hover:bg-red-600 active:scale-90 text-white/90 hover:text-white flex items-center justify-center backdrop-blur-md transition-all opacity-80 hover:opacity-100 z-10 cursor-pointer shadow-sm border-none"
+          className="absolute top-0 right-0 w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center border-none bg-transparent cursor-pointer touch-manipulation z-10"
         >
-          <X className="w-3.5 h-3.5 stroke-[2.5]" />
+          <span className="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-black/45 hover:bg-red-600 active:scale-90 text-white/90 hover:text-white flex items-center justify-center backdrop-blur-md transition-all shadow-sm">
+            <X className="w-3.5 h-3.5 stroke-[2.5]" />
+          </span>
         </button>
 
         {/* Subtle mini progress bar pinned at image bottom */}
