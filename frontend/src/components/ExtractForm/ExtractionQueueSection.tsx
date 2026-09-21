@@ -50,7 +50,7 @@ export const ExtractionQueueSection: React.FC<ExtractionQueueSectionProps> = ({
                 hapticLight();
                 clearFailedJobs();
               }}
-              className="text-xs font-semibold text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 border-none bg-transparent cursor-pointer"
+              className="min-h-[44px] min-w-[44px] -mr-2 px-2.5 py-2 inline-flex items-center justify-center text-xs font-semibold text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 active:scale-95 transition-all border-none bg-transparent cursor-pointer touch-manipulation"
             >
               {t('queue.btnClearAll')}
             </button>
@@ -89,7 +89,7 @@ export const ExtractionQueueSection: React.FC<ExtractionQueueSectionProps> = ({
                 hapticLight();
                 clearWaitlist();
               }}
-              className="text-xs font-semibold text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 border-none bg-transparent cursor-pointer"
+              className="min-h-[44px] min-w-[44px] -mr-2 px-2.5 py-2 inline-flex items-center justify-center text-xs font-semibold text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 active:scale-95 transition-all border-none bg-transparent cursor-pointer touch-manipulation"
             >
               {t('queue.btnClearAll')}
             </button>

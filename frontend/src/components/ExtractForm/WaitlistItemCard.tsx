@@ -77,22 +77,22 @@ export const WaitlistItemCard: React.FC<WaitlistItemCardProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-0.5 shrink-0">
           <button
             type="button"
             onClick={handleCopy}
             title={t('queue.btnCopyLink')}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all border-none bg-transparent cursor-pointer"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all border-none bg-transparent cursor-pointer touch-manipulation"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
           </button>
           <button
             type="button"
             onClick={handleOpen}
             title={t('queue.btnOpenLink')}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all border-none bg-transparent cursor-pointer"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all border-none bg-transparent cursor-pointer touch-manipulation"
           >
-            <ExternalLink className="w-3.5 h-3.5" />
+            <ExternalLink className="w-4 h-4" />
           </button>
           <button
             type="button"
@@ -101,9 +101,9 @@ export const WaitlistItemCard: React.FC<WaitlistItemCardProps> = ({
               onRemove(item.id);
             }}
             title={t('common.delete') || 'Löschen'}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 active:scale-90 transition-all border-none bg-transparent cursor-pointer"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 active:scale-90 transition-all border-none bg-transparent cursor-pointer touch-manipulation"
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            <Trash2 className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -111,13 +111,13 @@ export const WaitlistItemCard: React.FC<WaitlistItemCardProps> = ({
       <button
         type="button"
         onClick={handleAnalyze}
-        className={`w-full py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all border-none active:scale-[0.98] cursor-pointer ${
+        className={`w-full min-h-[44px] py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all border-none active:scale-[0.98] cursor-pointer touch-manipulation ${
           canAnalyze
             ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
             : 'bg-emerald-600/15 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-600/25'
         }`}
       >
-        <Play className="w-3 h-3 fill-current" />
+        <Play className="w-3.5 h-3.5 fill-current" />
         <span>{t('queue.btnAnalyzeNow')}</span>
       </button>
     </div>

@@ -112,10 +112,10 @@ export const SmartResumeSheet: React.FC<SmartResumeSheetProps> = ({
                 <button
                   type="button"
                   onClick={handleDismiss}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 border-none cursor-pointer transition-all shrink-0"
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 border-none cursor-pointer transition-all shrink-0 -mr-2 -mt-1 touch-manipulation"
                   aria-label="Close"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
             </Drawer.Header>
@@ -142,7 +142,7 @@ export const SmartResumeSheet: React.FC<SmartResumeSheetProps> = ({
                 <button
                   type="button"
                   onClick={handleStartAnalysis}
-                  className="w-full h-12 py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-bold text-sm border-none shadow-none flex items-center justify-center gap-2 cursor-pointer transition-all"
+                  className="w-full h-12 py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-bold text-sm border-none shadow-none flex items-center justify-center gap-2 cursor-pointer transition-all touch-manipulation"
                 >
                   <Play className="w-4 h-4 fill-current" />
                   <span>{t('queue.smartResume.analyzeNow')}</span>
@@ -152,16 +152,16 @@ export const SmartResumeSheet: React.FC<SmartResumeSheetProps> = ({
                   <button
                     type="button"
                     onClick={handleViewWaitlist}
-                    className="flex-1 h-10 py-2 px-3 rounded-xl bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold text-xs active:scale-[0.98] border-none cursor-pointer flex items-center justify-center gap-1.5 transition-all"
+                    className="flex-1 min-h-[44px] h-11 py-2.5 px-3.5 rounded-xl bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold text-xs active:scale-[0.98] border-none cursor-pointer flex items-center justify-center gap-2 transition-all touch-manipulation"
                   >
-                    <Clock className="w-3.5 h-3.5" />
+                    <Clock className="w-4 h-4" />
                     <span>{t('queue.smartResume.manageWaitlist')}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={handleDismiss}
-                    className="h-10 px-4 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 font-medium text-xs border-none bg-transparent active:scale-95 cursor-pointer transition-all"
+                    className="min-h-[44px] h-11 px-4 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 font-medium text-xs border-none bg-transparent active:scale-95 cursor-pointer transition-all flex items-center justify-center touch-manipulation"
                   >
                     {t('queue.smartResume.later')}
                   </button>
