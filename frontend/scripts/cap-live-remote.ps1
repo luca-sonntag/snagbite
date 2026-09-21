@@ -153,6 +153,11 @@ function Set-CapacitorLiveConfig {
         }
         $config.server | Add-Member -NotePropertyName "url" -NotePropertyValue $Url -Force
         $config.server | Add-Member -NotePropertyName "cleartext" -NotePropertyValue $true -Force
+        $config.server | Add-Member -NotePropertyName "androidScheme" -NotePropertyValue "http" -Force
+        if (-not $config.android) {
+            $config | Add-Member -NotePropertyName "android" -NotePropertyValue (New-Object PSObject) -Force
+        }
+        $config.android | Add-Member -NotePropertyName "allowMixedContent" -NotePropertyValue $true -Force
 
         $updatedJson = $config | ConvertTo-Json -Depth 10
         Set-Content -Path $assetsConfigFile -Value $updatedJson -Encoding utf8
@@ -173,8 +178,11 @@ function Remove-CapacitorLiveConfig {
             $config = $rawJson | ConvertFrom-Json
             if ($config.server) {
                 $config.PSObject.Properties.Remove('server')
-                Set-Content -Path $assetsConfigFile -Value ($config | ConvertTo-Json -Depth 10) -Encoding utf8
             }
+            if ($config.android) {
+                $config.PSObject.Properties.Remove('android')
+            }
+            Set-Content -Path $assetsConfigFile -Value ($config | ConvertTo-Json -Depth 10) -Encoding utf8
         } catch {}
     }
 }
@@ -194,6 +202,11 @@ function Set-CapacitorStaticConfig {
             $config.server.PSObject.Properties.Remove('url')
         }
         $config.server | Add-Member -NotePropertyName "cleartext" -NotePropertyValue $true -Force
+        $config.server | Add-Member -NotePropertyName "androidScheme" -NotePropertyValue "http" -Force
+        if (-not $config.android) {
+            $config | Add-Member -NotePropertyName "android" -NotePropertyValue (New-Object PSObject) -Force
+        }
+        $config.android | Add-Member -NotePropertyName "allowMixedContent" -NotePropertyValue $true -Force
 
         $updatedJson = $config | ConvertTo-Json -Depth 10
         Set-Content -Path $assetsConfigFile -Value $updatedJson -Encoding utf8
