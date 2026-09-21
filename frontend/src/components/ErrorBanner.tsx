@@ -56,7 +56,7 @@ export default function ErrorBanner({
           type="button"
           isDisabled={isPending}
           onClick={onRetry}
-          className="h-9 text-xs rounded-2xl font-bold border-none text-gray-800 dark:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 active:scale-95 transition-all shadow-none flex items-center justify-center gap-1.5 cursor-pointer w-fit px-4 ml-auto sm:ml-0"
+          className="min-h-[44px] h-11 text-xs rounded-2xl font-bold border-none text-gray-800 dark:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 active:scale-95 transition-all shadow-none flex items-center justify-center gap-2 cursor-pointer w-fit px-4 ml-auto sm:ml-0 touch-manipulation"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           <span>{t('error.retry')}</span>
