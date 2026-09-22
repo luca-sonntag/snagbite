@@ -985,6 +985,8 @@ export const uiTranslations = {
         sheetTitle: 'Warteliste & Aufgaben',
         tabWaitlist: 'Warteliste',
         tabFailed: 'Fehlgeschlagen',
+        failedBadgeOne: '1 Fehler',
+        failedBadgeMultiple: '{count} Fehler',
       },
       toast: {
         addedToWaitlist: 'Rezept für später vorgemerkt',
@@ -2498,6 +2500,8 @@ export const uiTranslations = {
         sheetTitle: 'Waitlist & Tasks',
         tabWaitlist: 'Waitlist',
         tabFailed: 'Failed',
+        failedBadgeOne: '1 failed',
+        failedBadgeMultiple: '{count} failed',
       },
       toast: {
         addedToWaitlist: 'Recipe saved to waitlist',
