@@ -126,9 +126,6 @@ export interface UseExtractFormProps {
 export interface ExtractionQueueDockProps {
   failedJobsCount: number;
   waitlistCount: number;
-  canAnalyze: boolean;
-  onQuickStartWaitlist: () => void;
-  onQuickRetryFailed: () => void;
   onOpenSheet: (tab?: 'waitlist' | 'failed') => void;
 }
 
