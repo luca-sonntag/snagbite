@@ -258,27 +258,27 @@ Für schnelles Testen, Gestalten und Inspizieren selten auftretender Dialoge, Sh
 
 ---
 
-## 11. 📋 Extraktions-Warteliste, Fail-Safe Queue & Smart Resume
+## 11. 📋 Einheitliche Extraktions-Warteliste, Fail-Safe Queue & Smart Resume
 
-* **Architektur (`ExtractionQueueContext.tsx`):**
-  * Hält zwei getrennte Zustände:
-    1. `waitlist`: Vom Nutzer oder per Auto-Queue (bei Kontingent-Erschöpfung) vorgemerkte Rezept-Links (`ExtractionWaitlistItem`).
-    2. `failedJobs`: Bei Netzwerk-, Scraper- oder API-Fehlern abgebrochene Extraktionen (`FailedExtractionJob`), inklusive serialisiertem Fehlercode, Parametern und Timestamp.
-  * **Zero-Migration User-Scoped Persistenz:** Speichert beide Listen unter `kb_extraction_waitlist_${userId}` und `kb_extraction_failed_${userId}` im Browser/WebView `localStorage`. Vollständig offlinefähig, sofort verfügbar und strikt zwischen verschiedenen Benutzerkonten isoliert.
+* **Konsolidierte Wartelisten-Architektur (`ExtractionQueueContext.tsx`):**
+  * Hält einen einheitlichen Datenstrom `items: QueueItem[]` mit `status: 'waiting' | 'failed'`:
+    1. `status === 'waiting'`: Regulär vom Nutzer oder per Auto-Queue (bei Kontingent-Erschöpfung) vorgemerkte Rezept-Links.
+    2. `status === 'failed'`: Bei Netzwerk-, Scraper- oder API-Fehlern abgebrochene Extraktionen mit serialisiertem Fehlercode, Parametern und Timestamp.
+  * **User-Scoped Auto-Migration:** Migriert beim ersten Aufruf alte LocalStorage-Schlüssel (`kb_extraction_waitlist_${userId}` und `kb_extraction_failed_${userId}`) automatisch in den neuen einheitlichen Schlüssel `kb_extraction_queue_${userId}` und räumt Altdaten auf.
 * **Fail-Safe Queue (Schutz vor Link-Verlust):**
   * Verhindert Datenverlust bei Social-Media-Links (Instagram Reels, TikTok, Shorts), da Nutzer im Feed meist weiterscrollen.
-  * Fehlgeschlagene Extraktionen (sowohl synchrone Aufrufe in `useRecipeExtraction` als auch asynchrone Worker-Jobs in `ExtractionJobsContext`) werden automatisch in `failedJobs` erfasst.
-  * **Interaktive Fail-Safe-Karten (`FailedJobCard.tsx`):** Bietet 1-Klick-Retry, Link in Zwischenablage kopieren, Öffnen des Original-Posts im Browser/App sowie Verschieben in die Warteliste für später.
+  * Fehlgeschlagene Extraktionen (sowohl synchrone Aufrufe in `useRecipeExtraction` als auch asynchrone Worker-Jobs in `ExtractionJobsContext`) werden automatisch mit Fehlerursache in die Warteliste eingereiht.
+  * **Konsolidierte Kachel (`WaitlistItemCard.tsx`):** Bietet 1-Klick-Wiederholung, Link in Zwischenablage kopieren, Öffnen des Original-Posts im Browser/App sowie Löschen. Fehlgeschlagene Einträge zeigen die lokalisierte Fehlerursache und Akzentuierung. (`FailedJobCard.tsx` ist als `@deprecated` eingestuft).
 * **Vormerken bei aufgebrauchtem Tageskontingent:**
   * **Auto-Queue bei Share-Target / Android Intent (`useAppNativeListeners.ts`):** Wird ein Social-Media-Link geteilt, während das Kontingent verbraucht ist (`limitStatus.remaining <= 0`), wird der Link ohne Blockade direkt in die Warteliste gelegt und der Nutzer per Toast informiert.
   * **Manuelles Vormerken (`UrlExtractSheet.tsx` & `ExtractSubmitButton.tsx`):** Der URL-Eingabebereich bleibt klickbar und schaltet bei aufgebrauchtem Kontingent nahtlos auf den Bookmark-Modus um (*„Auf Warteliste setzen"*).
 * **Smart Resume beim App-Start (`SmartResumeSheet.tsx`):**
-  * Wird die App neu geöffnet und das Tageskontingent ist wieder verfügbar (`limitStatus.remaining > 0`), prüft die App, ob Elemente in der Warteliste existieren.
+  * Wird die App neu geöffnet und das Tageskontingent ist wieder verfügbar (`limitStatus.remaining > 0`), prüft die App, ob wartende Elemente existieren (`status === 'waiting'`).
   * Öffnet nach initialem Sync ein dezent gestaltetes HeroUI Drawer Bottom-Sheet mit Rezept-Domain-Badge, relativer Zeitangabe und CTA zur direkten Extraktion (*„Jetzt analysieren"*).
   * **Volle Nutzerkontrolle:** Keine automatischen, ungewollten Extraktionen und kein unbedachter Credit-Abzug. Der Nutzer entscheidet proaktiv.
 * **UI-Integration auf der „NEU“-Seite (`ExtractionQueueDock.tsx` & `ExtractionQueueSheet.tsx`):**
-  * **Kompakter Queue-Dock (`ExtractionQueueDock.tsx`):** Schlanker, aufgeräumter Balken (~50px) direkt auf der „NEU“-Seite. Ein Klick auf die Leiste öffnet direkt das Drawer Bottom-Sheet zum gewünschten Tab (Warteliste oder Fehlgeschlagen), ohne die Hauptseite mit Karten oder redundanten Buttons zu überfrachten.
-  * **Queue Management Bottom-Sheet (`ExtractionQueueSheet.tsx`):** HeroUI Drawer Bottom-Sheet zum vollständigen Verwalten der Warteliste und Fehlerjobs mit segmentiertem Tab-Switcher, „Alle leeren“-Button und Touch-optimierten Einzelkarten (`WaitlistItemCard.tsx`, `FailedJobCard.tsx`).
+  * **Ultra-kompakter Single-Row-Dock (`ExtractionQueueDock.tsx`):** Genau ein einziger schlanker Balken (~48px) direkt auf der „NEU“-Seite. Zeigt die Gesamtzahl der Rezepte und bei vorliegenden Fehlern einen unaufdringlichen Amber-Fehlerbadge. Ein Fingertipp öffnet direkt das Drawer Bottom-Sheet.
+  * **Tab-freies Queue Management Bottom-Sheet (`ExtractionQueueSheet.tsx`):** HeroUI Drawer Bottom-Sheet zum vollständigen Verwalten der Warteliste als durchgängiger, chronologischer Stream ohne fragmentierte Tabs, mit „Alle leeren“-Button und Touch-optimierten Einzelkarten (`WaitlistItemCard.tsx`).
 * **Self-Healing bei blockierten Jobs (`ErrorBanner.tsx` & `ExtractionJobsContext.tsx`):**
   * **Notfall-Freigabe im Fehlerbanner:** Falls der Fehler `ACTIVE_JOB_EXISTS` auftritt, bietet das `ErrorBanner` einen direkten 1-Tap CTA *„Laufende Importe freigeben & Fortfahren“*. Dieser bricht hängende Server-Jobs via `POST /api/me/active-jobs/cancel` ab, synchronisiert das Limit und wiederholt die Extraktion sofort nahtlos.
   * **Automatischer Server-Job-Sync (`useExtractionJobsPoller.ts`):** Beim App-Start oder Login gleicht das Frontend aktive Jobs mit `GET /api/me/active-jobs` ab, sodass auch session-übergreifende Hintergrund-Jobs in `ActiveExtractions` visualisiert und abgebrochen werden können.

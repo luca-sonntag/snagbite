@@ -6,7 +6,23 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
-### 2026-09-21: Entfernung des redundanten Duplikats `companyInfo.ts` zugunsten von `legal.ts`
+### 2026-09-23: Konsolidierung der getrennten Warteliste & Fehlerliste in eine einheitliche Warteliste (`QueueItem`)
+
+* **Ersetzter Code / Veraltete Struktur:**
+  - Getrennte LocalStorage-Schlüssel `kb_extraction_waitlist_${userId}` und `kb_extraction_failed_${userId}`.
+  - Getrennte Datenmodelle `WaitlistItem` und `FailedExtractionEntry`.
+  - Tab-basierte Drawer-Komponente `ExtractionQueueSheet.tsx` mit Segmented-Control-Switcher.
+  - Doppelte Dock-Balken in `ExtractionQueueDock.tsx` (einzelner Amber-Balken für Fehler + einzelner Emerald-Balken für Warteliste).
+  - Redundante Komponente `FailedJobCard.tsx` (inklusive Hilfsfunktion `moveFailedToWaitlist`), die im Wesentlichen dieselbe Funktionalität wie `WaitlistItemCard.tsx` bereitstellte.
+* **Ersetzt durch:**
+  - **Einheitliches Queue-Modell ([`ExtractionQueueContext.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/context/ExtractionQueueContext.tsx)):** Alle Elemente (sowohl neu geparkte Links als auch fehlgeschlagene Extraktionen mit Fehlerursache) leben in einem einzigen Datenstrom `QueueItem` mit `status: 'waiting' | 'failed'`.
+  - **Automatische User-Scoped Migration:** Vorhandene Altdaten aus `kb_extraction_waitlist` und `kb_extraction_failed` werden beim ersten Start nahtlos in den neuen Schlüssel `kb_extraction_queue_${userId}` überführt und die Altschlüssel rückstandslos bereinigt.
+  - **Ultra-kompakter Single-Row-Dock ([`ExtractionQueueDock.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ExtractForm/ExtractionQueueDock.tsx)):** Genau eine schlanke Dock-Zeile (~48px), die die Gesamtzahl der gespeicherten Rezepte anzeigt und bei vorliegenden Fehlern einen dezenten Amber-Fehlerbadge einblendet.
+  - **Tab-freies Management Bottom-Sheet ([`ExtractionQueueSheet.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ExtractForm/ExtractionQueueSheet.tsx)):** Ein durchgängiger, chronologischer Stream ohne verwirrende Unter-Tabs.
+  - **Konsolidierte Kachel ([`WaitlistItemCard.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ExtractForm/WaitlistItemCard.tsx)):** Behandelt sowohl reguläre Wartelisteneinträge als auch Fehlgeschlagene direkt mit passendem Icon, Fehlertext, Wiederholen-/Starten-Button sowie Copy/Open/Delete-Aktionen. `FailedJobCard.tsx` wurde als `@deprecated` markiert und leitet direkt an `WaitlistItemCard` weiter.
+* **Betroffene Dateien:** `frontend/src/context/ExtractionQueueContext.tsx`, `frontend/src/components/ExtractForm/ExtractionQueueDock.tsx`, `frontend/src/components/ExtractForm/ExtractionQueueSheet.tsx`, `frontend/src/components/ExtractForm/ExtractionQueueSection.tsx`, `frontend/src/components/ExtractForm/WaitlistItemCard.tsx`, `frontend/src/components/ExtractForm/FailedJobCard.tsx`, `frontend/src/components/ExtractForm/types.ts`, `frontend/src/i18n.ts`, `docs/architecture/frontend.md`, `docs/OBSOLETE.md`.
+
+---
 
 * **Ersetzter Code / Veraltete Struktur:**
   - `website/src/companyInfo.ts`: Ein verwaistes, redundantes Duplikat der Stammdaten-Datei `website/src/legal.ts`, das ungenutzt im Repository verblieb und Gefahr lief, inhaltlich zu divergieren.
