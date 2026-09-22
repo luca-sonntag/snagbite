@@ -277,6 +277,6 @@ Für schnelles Testen, Gestalten und Inspizieren selten auftretender Dialoge, Sh
   * Öffnet nach initialem Sync ein dezent gestaltetes HeroUI Drawer Bottom-Sheet mit Rezept-Domain-Badge, relativer Zeitangabe und CTA zur direkten Extraktion (*„Jetzt analysieren"*).
   * **Volle Nutzerkontrolle:** Keine automatischen, ungewollten Extraktionen und kein unbedachter Credit-Abzug. Der Nutzer entscheidet proaktiv.
 * **UI-Integration auf der „NEU“-Seite (`ExtractionQueueDock.tsx` & `ExtractionQueueSheet.tsx`):**
-  * **Kompakter Queue-Dock (`ExtractionQueueDock.tsx`):** Schlanker Balken (~50px) direkt auf der „NEU“-Seite mit 1-Tap Quick-Actions (Sofort-Start des nächsten Wartelisten-Rezepts per Play-Button; Sofort-Retry des letzten Fehlers), der die Hauptseite niemals mit endlos wachsenden Karten überfrachtet.
+  * **Kompakter Queue-Dock (`ExtractionQueueDock.tsx`):** Schlanker, aufgeräumter Balken (~50px) direkt auf der „NEU“-Seite. Ein Klick auf die Leiste öffnet direkt das Drawer Bottom-Sheet zum gewünschten Tab (Warteliste oder Fehlgeschlagen), ohne die Hauptseite mit Karten oder redundanten Buttons zu überfrachten.
   * **Queue Management Bottom-Sheet (`ExtractionQueueSheet.tsx`):** HeroUI Drawer Bottom-Sheet zum vollständigen Verwalten der Warteliste und Fehlerjobs mit segmentiertem Tab-Switcher, „Alle leeren“-Button und Touch-optimierten Einzelkarten (`WaitlistItemCard.tsx`, `FailedJobCard.tsx`).
 
