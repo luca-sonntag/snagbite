@@ -15,6 +15,12 @@
 * **Abbrechen ≠ Löschen:** `POST /api/jobs/:id/cancel` bricht eine laufende Extraktion ab, `DELETE /api/recipes/:id` entfernt ein Rezept aus dem Kochbuch. Beides war früher derselbe Aufruf — genau die Vermischung, die den Soft-Delete erzwungen hat.
 * **Eindeutige Identifikation:** Normalisiert Rezepte bei Abfragen und versieht sie mit einer eindeutigen `id` (entspricht der `jobId`), um Kollisionen zwischen Rezepten mit gleichem Titel zu unterbinden.
 * **Caching-Deaktivierung:** Setzt explizit `Cache-Control` Header (`no-store, no-cache, must-revalidate, proxy-revalidate`) für dynamic endpoints (`/api/jobs/:id`), um zu verhindern, dass Browser veraltete/gecachte Job-Zustände ausliefern.
+* **Queue-Resilienz & Stale-Job Self-Healing (`backend/src/db/jobsCleanup.ts`):**
+  * **Beendigung des `awaiting_frames`-Loops:** `sweepStaleAwaitingFrames` setzt Jobs, die länger als `CLIENT_FRAMES_TIMEOUT_MINUTES` (5 Min.) ohne Client-Keyframes in `awaiting_frames` verharren, verbindlich auf `status: 'failed'` mit dem Fehlercode `EXTRACTION_TIMEOUT`. Dadurch wird der frühere Teufelskreis (Sweep ➔ `pending` ➔ Re-Park ➔ `awaiting_frames`), der Nutzerkonten dauerhaft sperrte, vollständig unterbunden.
+  * **Proaktive Bereinigung (`cleanStaleJobsForUser`):** Vor jedem Concurrency-Check (`enforceExtractionQuota` in `extractionRoutes.ts` und in `GET /api/extractions/limit`) werden verwaiste Jobs des Nutzers automatisch bereinigt, bevor der Concurrency-Fehler `ACTIVE_JOB_EXISTS` geworfen werden kann.
+  * **Active-Jobs & Notfall-Freigabe API:**
+    * `GET /api/me/active-jobs`: Ermöglicht dem Frontend das serverseitige Synchronisieren aller tatsächlich aktiven Jobs des Nutzers.
+    * `POST /api/me/active-jobs/cancel`: Bricht alle aktiven Jobs des authentifizierten Nutzers in einer einzigen atomaren Operation ab und gibt dessen Extraktions-Slot sofort frei.
 
 ### Admin-Bereich & RLS-Bypass
 Exponiert administrative API-Routen unter `/api/admin/*`, die über die Middleware `requireAdmin` abgesichert sind. Diese Middleware prüft, ob die E-Mail des authentifizierten Nutzers in der kommagetrennten Liste `ADMIN_EMAILS` (in `.env` konfiguriert) enthalten ist.

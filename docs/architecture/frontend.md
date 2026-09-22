@@ -279,4 +279,7 @@ Für schnelles Testen, Gestalten und Inspizieren selten auftretender Dialoge, Sh
 * **UI-Integration auf der „NEU“-Seite (`ExtractionQueueDock.tsx` & `ExtractionQueueSheet.tsx`):**
   * **Kompakter Queue-Dock (`ExtractionQueueDock.tsx`):** Schlanker, aufgeräumter Balken (~50px) direkt auf der „NEU“-Seite. Ein Klick auf die Leiste öffnet direkt das Drawer Bottom-Sheet zum gewünschten Tab (Warteliste oder Fehlgeschlagen), ohne die Hauptseite mit Karten oder redundanten Buttons zu überfrachten.
   * **Queue Management Bottom-Sheet (`ExtractionQueueSheet.tsx`):** HeroUI Drawer Bottom-Sheet zum vollständigen Verwalten der Warteliste und Fehlerjobs mit segmentiertem Tab-Switcher, „Alle leeren“-Button und Touch-optimierten Einzelkarten (`WaitlistItemCard.tsx`, `FailedJobCard.tsx`).
+* **Self-Healing bei blockierten Jobs (`ErrorBanner.tsx` & `ExtractionJobsContext.tsx`):**
+  * **Notfall-Freigabe im Fehlerbanner:** Falls der Fehler `ACTIVE_JOB_EXISTS` auftritt, bietet das `ErrorBanner` einen direkten 1-Tap CTA *„Laufende Importe freigeben & Fortfahren“*. Dieser bricht hängende Server-Jobs via `POST /api/me/active-jobs/cancel` ab, synchronisiert das Limit und wiederholt die Extraktion sofort nahtlos.
+  * **Automatischer Server-Job-Sync (`useExtractionJobsPoller.ts`):** Beim App-Start oder Login gleicht das Frontend aktive Jobs mit `GET /api/me/active-jobs` ab, sodass auch session-übergreifende Hintergrund-Jobs in `ActiveExtractions` visualisiert und abgebrochen werden können.
 
