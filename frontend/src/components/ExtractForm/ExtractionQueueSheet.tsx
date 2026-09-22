@@ -1,58 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Drawer } from '@heroui/react';
-import { X, Bookmark, AlertCircle, Trash2 } from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useExtractionQueue } from '../../context/ExtractionQueueContext';
 import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight } from '../../utils/haptics';
 import WaitlistItemCard from './WaitlistItemCard';
-import FailedJobCard from './FailedJobCard';
 import type { ExtractionQueueSheetProps } from './types';
 
 export const ExtractionQueueSheet: React.FC<ExtractionQueueSheetProps> = ({
   isOpen,
   onClose,
-  initialTab = 'waitlist',
   canAnalyze,
   onAnalyze,
 }) => {
   const { t } = useI18n();
-  const {
-    waitlist,
-    failedJobs,
-    removeFromWaitlist,
-    clearWaitlist,
-    removeFailedJob,
-    clearFailedJobs,
-    moveFailedToWaitlist,
-  } = useExtractionQueue();
-
-  const [activeTab, setActiveTab] = useState<'waitlist' | 'failed'>(initialTab);
+  const { items, removeFromQueue, clearQueue } = useExtractionQueue();
 
   useModalOverlay(isOpen, onClose);
 
-  useEffect(() => {
-    if (isOpen) {
-      if (initialTab === 'failed' && failedJobs.length > 0) {
-        setActiveTab('failed');
-      } else if (waitlist.length > 0) {
-        setActiveTab('waitlist');
-      } else if (failedJobs.length > 0) {
-        setActiveTab('failed');
-      }
-    }
-  }, [isOpen, initialTab, waitlist.length, failedJobs.length]);
-
   if (!isOpen) return null;
-
-  const currentTab =
-    activeTab === 'failed' && failedJobs.length === 0 && waitlist.length > 0
-      ? 'waitlist'
-      : activeTab === 'waitlist' && waitlist.length === 0 && failedJobs.length > 0
-        ? 'failed'
-        : activeTab;
-
-  const showTabs = waitlist.length > 0 && failedJobs.length > 0;
 
   return (
     <Drawer>
@@ -74,7 +41,9 @@ export const ExtractionQueueSheet: React.FC<ExtractionQueueSheetProps> = ({
                     {t('queue.dock.sheetTitle')}
                   </Drawer.Heading>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    {currentTab === 'failed' ? t('queue.failedNotice') : t('queue.waitlistDesc')}
+                    {items.length === 1
+                      ? t('queue.dock.waitlistOne')
+                      : t('queue.dock.waitlistMultiple', { count: items.length })}
                   </p>
                 </div>
 
@@ -91,110 +60,46 @@ export const ExtractionQueueSheet: React.FC<ExtractionQueueSheetProps> = ({
                 </button>
               </div>
 
-              {/* Segmented Tab Switcher */}
-              {showTabs && (
-                <div className="flex items-center gap-1.5 p-1 bg-gray-200/80 dark:bg-gray-800/80 rounded-2xl mt-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      hapticLight();
-                      setActiveTab('waitlist');
-                    }}
-                    className={`flex-1 min-h-[44px] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all border-none cursor-pointer touch-manipulation ${
-                      currentTab === 'waitlist'
-                        ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-xs'
-                        : 'bg-transparent text-gray-500 dark:text-gray-400'
-                    }`}
-                  >
-                    <Bookmark className="w-3.5 h-3.5" />
-                    <span>{t('queue.dock.tabWaitlist')}</span>
-                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
-                      {waitlist.length}
-                    </span>
-                  </button>
+              {/* Sub-bar with count & clear all */}
+              {items.length > 0 && (
+                <div className="flex items-center justify-between px-1 pt-3 pb-1">
+                  <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    {items.length === 1
+                      ? t('queue.dock.waitlistOne')
+                      : t('queue.dock.waitlistMultiple', { count: items.length })}
+                  </span>
 
                   <button
                     type="button"
                     onClick={() => {
                       hapticLight();
-                      setActiveTab('failed');
+                      clearQueue();
                     }}
-                    className={`flex-1 min-h-[44px] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all border-none cursor-pointer touch-manipulation ${
-                      currentTab === 'failed'
-                        ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-xs'
-                        : 'bg-transparent text-gray-500 dark:text-gray-400'
-                    }`}
+                    className="min-h-[44px] px-2.5 py-1 text-xs font-semibold text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 inline-flex items-center gap-1 border-none bg-transparent cursor-pointer touch-manipulation"
                   >
-                    <AlertCircle className="w-3.5 h-3.5" />
-                    <span>{t('queue.dock.tabFailed')}</span>
-                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/15 text-amber-700 dark:text-amber-400">
-                      {failedJobs.length}
-                    </span>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>{t('queue.btnClearAll')}</span>
                   </button>
                 </div>
               )}
-
-              {/* Sub-bar with count & clear all */}
-              <div className="flex items-center justify-between px-1 pt-3 pb-1">
-                <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  {currentTab === 'failed'
-                    ? `${failedJobs.length} ${t('queue.dock.tabFailed')}`
-                    : `${waitlist.length} ${t('queue.dock.tabWaitlist')}`}
-                </span>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    hapticLight();
-                    if (currentTab === 'failed') {
-                      clearFailedJobs();
-                    } else {
-                      clearWaitlist();
-                    }
-                  }}
-                  className="min-h-[44px] px-2.5 py-1 text-xs font-semibold text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 inline-flex items-center gap-1 border-none bg-transparent cursor-pointer touch-manipulation"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>{t('queue.btnClearAll')}</span>
-                </button>
-              </div>
             </Drawer.Header>
 
             <Drawer.Body className="overflow-y-auto py-1 flex flex-col gap-2.5">
-              {currentTab === 'waitlist' ? (
-                waitlist.length === 0 ? (
-                  <div className="py-8 text-center text-xs text-gray-400 dark:text-gray-500">
-                    {t('queue.waitlistEmpty')}
-                  </div>
-                ) : (
-                  waitlist.map((item) => (
-                    <WaitlistItemCard
-                      key={item.id}
-                      item={item}
-                      canAnalyze={canAnalyze}
-                      onAnalyze={(url) => {
-                        onClose();
-                        onAnalyze(url);
-                      }}
-                      onRemove={removeFromWaitlist}
-                    />
-                  ))
-                )
-              ) : failedJobs.length === 0 ? (
+              {items.length === 0 ? (
                 <div className="py-8 text-center text-xs text-gray-400 dark:text-gray-500">
-                  {t('queue.failedNotice')}
+                  {t('queue.waitlistEmpty')}
                 </div>
               ) : (
-                failedJobs.map((job) => (
-                  <FailedJobCard
-                    key={job.id}
-                    entry={job}
-                    onRetry={(url) => {
+                items.map((item) => (
+                  <WaitlistItemCard
+                    key={item.id}
+                    item={item}
+                    canAnalyze={canAnalyze}
+                    onAnalyze={(url) => {
                       onClose();
                       onAnalyze(url);
                     }}
-                    onDismiss={removeFailedJob}
-                    onMoveToWaitlist={moveFailedToWaitlist}
+                    onRemove={removeFromQueue}
                   />
                 ))
               )}

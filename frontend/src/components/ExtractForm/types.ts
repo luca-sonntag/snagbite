@@ -124,15 +124,17 @@ export interface UseExtractFormProps {
 }
 
 export interface ExtractionQueueDockProps {
-  failedJobsCount: number;
-  waitlistCount: number;
+  itemsCount?: number;
+  failedCount?: number;
   onOpenSheet: (tab?: 'waitlist' | 'failed') => void;
+  failedJobsCount?: number;
+  waitlistCount?: number;
 }
 
 export interface ExtractionQueueSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  initialTab?: 'waitlist' | 'failed';
   canAnalyze: boolean;
   onAnalyze: (url: string) => void;
+  initialTab?: 'waitlist' | 'failed';
 }

@@ -12,31 +12,24 @@ export const ExtractionQueueSection: React.FC<ExtractionQueueSectionProps> = ({
   canAnalyze,
   onAnalyze,
 }) => {
-  const { waitlist, failedJobs } = useExtractionQueue();
+  const { items, failedCount } = useExtractionQueue();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [sheetTab, setSheetTab] = useState<'waitlist' | 'failed'>('waitlist');
 
-  if (waitlist.length === 0 && failedJobs.length === 0) {
+  if (items.length === 0) {
     return null;
   }
-
-  const handleOpenSheet = (tab: 'waitlist' | 'failed' = 'waitlist') => {
-    setSheetTab(tab);
-    setIsSheetOpen(true);
-  };
 
   return (
     <>
       <ExtractionQueueDock
-        failedJobsCount={failedJobs.length}
-        waitlistCount={waitlist.length}
-        onOpenSheet={handleOpenSheet}
+        itemsCount={items.length}
+        failedCount={failedCount}
+        onOpenSheet={() => setIsSheetOpen(true)}
       />
 
       <ExtractionQueueSheet
         isOpen={isSheetOpen}
         onClose={() => setIsSheetOpen(false)}
-        initialTab={sheetTab}
         canAnalyze={canAnalyze}
         onAnalyze={onAnalyze}
       />
