@@ -122,3 +122,20 @@ export interface UseExtractFormProps {
   setIsPremiumModalOpen: (open: boolean) => void;
   onAutoSubmit?: (url: string) => void;
 }
+
+export interface ExtractionQueueDockProps {
+  failedJobsCount: number;
+  waitlistCount: number;
+  canAnalyze: boolean;
+  onQuickStartWaitlist: () => void;
+  onQuickRetryFailed: () => void;
+  onOpenSheet: (tab?: 'waitlist' | 'failed') => void;
+}
+
+export interface ExtractionQueueSheetProps {
+  isOpen: boolean;
+  onClose: () => void;
+  initialTab?: 'waitlist' | 'failed';
+  canAnalyze: boolean;
+  onAnalyze: (url: string) => void;
+}
