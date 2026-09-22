@@ -1,6 +1,11 @@
+import { useState } from 'react';
 import { Button } from '@heroui/react';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle, RefreshCw, RotateCcw } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
+import { apiUrl } from '../api';
+import { hapticMedium } from '../utils/haptics';
 import { resolveErrorCode } from '../i18n';
 import { isRetryableError } from '../errorCodes';
 import type { ErrorParams } from '../errorCodes';
@@ -15,6 +20,7 @@ interface ErrorBannerProps {
   /** Re-runs the failed import. The caller decides what "again" means per input
    *  channel — resubmitting the URL, or re-uploading the selected photos. */
   onRetry: () => void;
+  onClearActiveJobs?: () => Promise<void> | void;
 }
 
 export default function ErrorBanner({
@@ -23,9 +29,13 @@ export default function ErrorBanner({
   jobError,
   jobErrorCode,
   jobErrorParams,
-  onRetry
+  onRetry,
+  onClearActiveJobs,
 }: ErrorBannerProps) {
   const { t, language } = useI18n();
+  const { getAccessToken } = useAuth();
+  const toast = useToast();
+  const [isClearing, setIsClearing] = useState(false);
 
   if (isPending || jobStatus !== 'failed') return null;
 
@@ -33,6 +43,28 @@ export default function ErrorBanner({
     return null;
   }
 
+  const handleClearActiveAndRetry = async () => {
+    setIsClearing(true);
+    try {
+      const token = await getAccessToken();
+      if (token) {
+        await fetch(apiUrl('/api/me/active-jobs/cancel'), {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        hapticMedium();
+        toast.success(t('error.toastCancelSuccess'));
+        await onClearActiveJobs?.();
+        onRetry();
+      }
+    } catch (err) {
+      console.warn('Failed to clear active jobs:', err);
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
+  const isActiveJobError = jobErrorCode === 'ACTIVE_JOB_EXISTS';
   const canRetry = isRetryableError(jobErrorCode, jobError);
 
   return (
@@ -51,17 +83,31 @@ export default function ErrorBanner({
         </div>
       </div>
 
-      {canRetry && (
-        <Button
-          type="button"
-          isDisabled={isPending}
-          onClick={onRetry}
-          className="min-h-[44px] h-11 text-xs rounded-2xl font-bold border-none text-gray-800 dark:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 active:scale-95 transition-all shadow-none flex items-center justify-center gap-2 cursor-pointer w-fit px-4 ml-auto sm:ml-0 touch-manipulation"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          <span>{t('error.retry')}</span>
-        </Button>
-      )}
+      <div className="flex items-center gap-2 ml-auto sm:ml-0">
+        {isActiveJobError ? (
+          <Button
+            type="button"
+            isDisabled={isPending || isClearing}
+            onClick={handleClearActiveAndRetry}
+            className="min-h-[44px] h-11 text-xs rounded-2xl font-bold border-none text-amber-950 dark:text-amber-100 bg-amber-500/15 hover:bg-amber-500/25 active:scale-95 transition-all shadow-none flex items-center justify-center gap-2 cursor-pointer w-fit px-4 touch-manipulation"
+          >
+            <RotateCcw className={`w-3.5 h-3.5 ${isClearing ? 'animate-spin' : ''}`} />
+            <span>{t('error.btnCancelActive')}</span>
+          </Button>
+        ) : (
+          canRetry && (
+            <Button
+              type="button"
+              isDisabled={isPending}
+              onClick={onRetry}
+              className="min-h-[44px] h-11 text-xs rounded-2xl font-bold border-none text-gray-800 dark:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 active:scale-95 transition-all shadow-none flex items-center justify-center gap-2 cursor-pointer w-fit px-4 touch-manipulation"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>{t('error.retry')}</span>
+            </Button>
+          )
+        )}
+      </div>
     </div>
   );
 }

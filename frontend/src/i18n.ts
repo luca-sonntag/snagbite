@@ -849,6 +849,8 @@ export const uiTranslations = {
       title: 'Rezept-Erstellung fehlgeschlagen',
       default: 'Beim Analysieren des Links ist ein unbekannter Fehler aufgetreten.',
       retry: 'Wiederholen',
+      btnCancelActive: 'Laufende Importe freigeben & Fortfahren',
+      toastCancelSuccess: 'Laufende Importe wurden abgebrochen und freigegeben.',
       generic: 'Beim Erstellen des Rezepts ist ein Fehler aufgetreten. Bitte versuche es erneut.',
       codes: {
         MISSING_FIELD: '{field} fehlt. Bitte überprüfe deine Eingabe.',
@@ -893,6 +895,7 @@ export const uiTranslations = {
         TOO_MANY_FRAMES: 'Es wurden zu viele Video-Frames übermittelt.',
         FRAMES_TOO_LARGE: 'Die Bilddaten der Video-Frames sind zu groß.',
         FRAMES_NOT_EXPECTED: 'Für diesen Vorgang werden aktuell keine Video-Frames erwartet.',
+        EXTRACTION_TIMEOUT: 'Die Rezept-Erstellung hat das Zeitlimit überschritten. Bitte versuche es noch einmal.',
         UNRELATED_REMIX_REQUEST: 'Ungültige Anfrage: Die KI hat keine Rezeptänderung im eingegebenen Text erkannt.',
         REVENUECAT_FAILED: 'Der Abo-Status konnte nicht abgerufen werden. Bitte versuche es später erneut.',
         PROFILE_UPDATE_FAILED: 'Dein Profil konnte nicht aktualisiert werden. Bitte versuche es später erneut.',
@@ -2359,6 +2362,8 @@ export const uiTranslations = {
       title: 'Failed to create recipe',
       default: 'An unknown error occurred while analyzing the link.',
       retry: 'Retry',
+      btnCancelActive: 'Clear active imports & Continue',
+      toastCancelSuccess: 'Running imports were cancelled and cleared.',
       generic: 'Something went wrong while creating the recipe. Please try again.',
       codes: {
         MISSING_FIELD: '{field} is missing. Please check your input.',
@@ -2403,6 +2408,7 @@ export const uiTranslations = {
         TOO_MANY_FRAMES: 'Too many video frames submitted.',
         FRAMES_TOO_LARGE: 'The video frame images are too large.',
         FRAMES_NOT_EXPECTED: 'Video frames are not currently expected for this job.',
+        EXTRACTION_TIMEOUT: 'Recipe extraction timed out. Please try again.',
         UNRELATED_REMIX_REQUEST: 'Invalid request: the AI did not recognize any recipe modification in the text.',
         REVENUECAT_FAILED: 'Could not fetch your subscription status. Please try again later.',
         PROFILE_UPDATE_FAILED: 'Could not update your profile. Please try again later.',

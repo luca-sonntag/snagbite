@@ -470,6 +470,9 @@ export default function App() {
                 onRetry={() =>
                   extractMode === 'photo' ? triggerPhotoExtraction() : triggerExtraction(url)
                 }
+                onClearActiveJobs={async () => {
+                  await fetchLimitStatus();
+                }}
               />
             </div>
           ) : (
@@ -514,6 +517,9 @@ export default function App() {
                       onRetry={() =>
                         extractMode === 'photo' ? triggerPhotoExtraction() : triggerExtraction(url)
                       }
+                      onClearActiveJobs={async () => {
+                        await fetchLimitStatus();
+                      }}
                     />
                   </div>
                 ) : null
