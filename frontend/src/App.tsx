@@ -470,6 +470,9 @@ export default function App() {
                 onRetry={() =>
                   extractMode === 'photo' ? triggerPhotoExtraction() : triggerExtraction(url)
                 }
+                onClearActiveJobs={async () => {
+                  await fetchLimitStatus();
+                }}
               />
             </div>
           ) : (
@@ -514,6 +517,9 @@ export default function App() {
                       onRetry={() =>
                         extractMode === 'photo' ? triggerPhotoExtraction() : triggerExtraction(url)
                       }
+                      onClearActiveJobs={async () => {
+                        await fetchLimitStatus();
+                      }}
                     />
                   </div>
                 ) : null
@@ -660,6 +666,13 @@ export default function App() {
         }}
         showAlphaWelcome={showAlphaWelcome}
         onCompleteAlphaWelcome={completeAlphaWelcome}
+        limitStatus={limitStatus}
+        onAnalyzeUrl={(queueUrl) => {
+          navigate('extract');
+          setUrl(queueUrl);
+          triggerExtraction(queueUrl);
+        }}
+        onNavigateExtract={() => navigate('extract')}
       />
 
       <AppBottomNav

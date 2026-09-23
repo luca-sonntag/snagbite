@@ -67,6 +67,7 @@ export interface ExtractActionCardsProps {
   onOpenPhotoSheet: () => void;
   photosCount?: number;
   disabled?: boolean;
+  linkDisabled?: boolean;
 }
 
 export interface ExtractQuotaBadgeProps {
@@ -87,6 +88,7 @@ export interface UrlExtractSheetProps {
   canPaste: boolean;
   onPaste: () => void;
   submitDisabled: boolean;
+  isWaitlistMode?: boolean;
   handleFormSubmit: (e: React.FormEvent, overrideUrl?: string) => void;
 }
 
@@ -119,4 +121,20 @@ export interface UseExtractFormProps {
   atConcurrencyLimit: boolean;
   setIsPremiumModalOpen: (open: boolean) => void;
   onAutoSubmit?: (url: string) => void;
+}
+
+export interface ExtractionQueueDockProps {
+  itemsCount?: number;
+  failedCount?: number;
+  onOpenSheet: (tab?: 'waitlist' | 'failed') => void;
+  failedJobsCount?: number;
+  waitlistCount?: number;
+}
+
+export interface ExtractionQueueSheetProps {
+  isOpen: boolean;
+  onClose: () => void;
+  canAnalyze: boolean;
+  onAnalyze: (url: string) => void;
+  initialTab?: 'waitlist' | 'failed';
 }

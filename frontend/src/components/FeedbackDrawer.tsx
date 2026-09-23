@@ -221,9 +221,11 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ isOpen, onClose 
                             type="button"
                             onClick={() => removeScreenshot(index)}
                             aria-label={t('feedback.removeScreenshot') || 'Remove screenshot'}
-                            className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-gray-900 dark:bg-gray-700 text-white flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer border-none"
+                            className="absolute -top-3 -right-3 w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center border-none bg-transparent cursor-pointer touch-manipulation z-10"
                           >
-                            <X className="w-4 h-4" />
+                            <span className="w-8 h-8 rounded-full bg-gray-900 dark:bg-gray-700 text-white flex items-center justify-center shadow-md active:scale-90 transition-transform">
+                              <X className="w-4 h-4" />
+                            </span>
                           </button>
                         </div>
                       ))}

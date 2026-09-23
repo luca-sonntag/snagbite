@@ -63,10 +63,12 @@ export const PhotoExtractGrid: React.FC<PhotoExtractGridProps> = ({
                   hapticHeavy();
                   onRemovePhoto(index);
                 }}
-                className="absolute top-1.5 right-1.5 w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-black/65 text-white flex items-center justify-center backdrop-blur-sm active:scale-90 transition-transform cursor-pointer border-none"
+                className="absolute top-0 right-0 w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center border-none bg-transparent cursor-pointer touch-manipulation z-10"
                 aria-label={t('form.photo.remove')}
               >
-                <X className="w-3.5 h-3.5" />
+                <span className="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-black/65 text-white flex items-center justify-center backdrop-blur-sm active:scale-90 transition-transform">
+                  <X className="w-3.5 h-3.5" />
+                </span>
               </button>
             </div>
           ))}

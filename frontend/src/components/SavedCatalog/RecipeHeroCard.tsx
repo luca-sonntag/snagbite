@@ -124,19 +124,21 @@ export default function RecipeHeroCard({
                 hapticMedium();
                 onSaveCommunity?.(e, r);
               }}
-              className={`pointer-events-auto w-8 h-8 rounded-full backdrop-blur-md flex items-center justify-center shadow-md transition-all active:scale-90 border-none cursor-pointer ${
-                isSaved
-                  ? 'bg-emerald-500/90 text-white'
-                  : 'bg-black/50 text-white hover:bg-black/70'
-              }`}
+              className="pointer-events-auto w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center border-none bg-transparent cursor-pointer touch-manipulation"
               title={isSaved ? t('catalog.magazine.alreadySaved') : t('catalog.magazine.saveToCookbook')}
               aria-label={isSaved ? t('catalog.magazine.alreadySaved') : t('catalog.magazine.saveToCookbook')}
             >
-              {isSaved ? (
-                <Check className="w-4 h-4 text-white" />
-              ) : (
-                <BookmarkPlus className="w-4 h-4 text-indigo-200" />
-              )}
+              <span className={`w-8 h-8 rounded-full backdrop-blur-md flex items-center justify-center shadow-md transition-all active:scale-90 ${
+                isSaved
+                  ? 'bg-emerald-500/90 text-white'
+                  : 'bg-black/50 text-white hover:bg-black/70'
+              }`}>
+                {isSaved ? (
+                  <Check className="w-4 h-4 text-white" />
+                ) : (
+                  <BookmarkPlus className="w-4 h-4 text-indigo-200" />
+                )}
+              </span>
             </button>
           ) : job?.isFavorite ? (
             <div className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-amber-400 shadow-md">

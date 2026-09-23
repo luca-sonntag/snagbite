@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { useExtractionJobs } from '../../context/ExtractionJobsContext';
+import { useExtractionQueue } from '../../context/ExtractionQueueContext';
 import { PageHeader } from '../PageHeader';
 import PremiumModal from '../PremiumModal';
 import PremiumHint from '../PremiumHint';
@@ -12,6 +14,7 @@ import { useExtractForm } from './useExtractForm';
 import ExtractActionCards from './ExtractActionCards';
 import ExtractQuotaBadge from './ExtractQuotaBadge';
 import ExtractRewardedAdButton from './ExtractRewardedAdButton';
+import ExtractionQueueSection from './ExtractionQueueSection';
 import UrlExtractSheet from './UrlExtractSheet';
 import PhotoExtractSheet from './PhotoExtractSheet';
 import ExtractDemoRecipes from './ExtractDemoRecipes';
@@ -43,7 +46,9 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
 }) => {
   const { t } = useI18n();
   const { user, isPremium } = useAuth();
+  const toast = useToast();
   const { activeCount: liveActiveCount } = useExtractionJobs();
+  const { addToWaitlist, removeFromQueue } = useExtractionQueue();
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isLinkSheetOpen, setIsLinkSheetOpen] = useState(initialOpenSheet === 'link');
   const [isPhotoSheetOpen, setIsPhotoSheetOpen] = useState(initialOpenSheet === 'photo');
@@ -135,6 +140,20 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
       e.preventDefault();
       return;
     }
+    const targetUrl = (overrideUrl || url).trim();
+    if (mode === 'link' && extractionLimitReached) {
+      e.preventDefault();
+      if (!targetUrl || !validateUrl(targetUrl)) return;
+      const added = addToWaitlist(targetUrl, 'manual');
+      if (added) {
+        toast.success(t('queue.toast.addedToWaitlist'));
+      } else {
+        toast.info(t('queue.toast.alreadyInWaitlist'));
+      }
+      setUrl('');
+      setIsLinkSheetOpen(false);
+      return;
+    }
     if (blockedByLimit) {
       e.preventDefault();
       setIsPremiumModalOpen(true);
@@ -195,6 +214,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
             }}
             photosCount={photos.length}
             disabled={isPending || submitDisabled}
+            linkDisabled={isPending || atConcurrencyLimit}
           />
 
           {/* Kochbuch voll / Limit Status unter den Import-Karten */}
@@ -235,6 +255,21 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
             />
           )}
 
+          {/* Warteliste & Fail-Safe Queue */}
+          <ExtractionQueueSection
+            canAnalyze={!isPending}
+            onAnalyze={(queueUrl) => {
+              if (blockedByLimit) {
+                setIsPremiumModalOpen(true);
+                return;
+              }
+              removeFromQueue(queueUrl);
+              setMode('link');
+              setUrl(queueUrl);
+              handleFormSubmit({ preventDefault: () => {} } as React.FormEvent, queueUrl);
+            }}
+          />
+
           {/* Inspiration / Demo Recipes */}
           <ExtractDemoRecipes onDemoClick={handleDemoClick} savedRecipeIds={savedRecipeIds} />
 
@@ -253,6 +288,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
             canPaste={canPaste}
             onPaste={handlePaste}
             submitDisabled={submitDisabled}
+            isWaitlistMode={extractionLimitReached}
             handleFormSubmit={handleSheetSubmit}
           />
 

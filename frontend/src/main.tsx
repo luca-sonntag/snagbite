@@ -10,6 +10,7 @@ import { TimerProvider } from './context/TimerContext.tsx'
 import { GamificationProvider } from './context/GamificationContext.tsx'
 import { ToastProvider } from './context/ToastContext.tsx'
 import { ExtractionJobsProvider } from './context/ExtractionJobsContext.tsx'
+import { ExtractionQueueProvider } from './context/ExtractionQueueContext.tsx'
 import ErrorBoundary from './components/ErrorBoundary.tsx'
 import { SocialProvider } from './context/SocialContext.tsx'
 import { PantryProvider } from './context/PantryContext.tsx'
@@ -35,15 +36,17 @@ createRoot(document.getElementById('root')!).render(
             <DialogProvider>
               <TimerProvider>
                 <GamificationProvider>
-                  <ExtractionJobsProvider>
-                    <SocialProvider>
-                      <PantryProvider>
-                        <ErrorBoundary>
-                          <App />
-                        </ErrorBoundary>
-                      </PantryProvider>
-                    </SocialProvider>
-                  </ExtractionJobsProvider>
+                  <ExtractionQueueProvider>
+                    <ExtractionJobsProvider>
+                      <SocialProvider>
+                        <PantryProvider>
+                          <ErrorBoundary>
+                            <App />
+                          </ErrorBoundary>
+                        </PantryProvider>
+                      </SocialProvider>
+                    </ExtractionJobsProvider>
+                  </ExtractionQueueProvider>
                 </GamificationProvider>
               </TimerProvider>
             </DialogProvider>
