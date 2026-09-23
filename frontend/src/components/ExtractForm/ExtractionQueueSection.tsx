@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useExtractionQueue } from '../../context/ExtractionQueueContext';
 import { ExtractionQueueDock } from './ExtractionQueueDock';
 import { ExtractionQueueSheet } from './ExtractionQueueSheet';
@@ -12,24 +12,25 @@ export const ExtractionQueueSection: React.FC<ExtractionQueueSectionProps> = ({
   canAnalyze,
   onAnalyze,
 }) => {
-  const { items, failedCount } = useExtractionQueue();
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { items, failedCount, isQueueSheetOpen, openQueueSheet, closeQueueSheet } = useExtractionQueue();
 
-  if (items.length === 0) {
+  if (items.length === 0 && !isQueueSheetOpen) {
     return null;
   }
 
   return (
     <>
-      <ExtractionQueueDock
-        itemsCount={items.length}
-        failedCount={failedCount}
-        onOpenSheet={() => setIsSheetOpen(true)}
-      />
+      {items.length > 0 && (
+        <ExtractionQueueDock
+          itemsCount={items.length}
+          failedCount={failedCount}
+          onOpenSheet={openQueueSheet}
+        />
+      )}
 
       <ExtractionQueueSheet
-        isOpen={isSheetOpen}
-        onClose={() => setIsSheetOpen(false)}
+        isOpen={isQueueSheetOpen}
+        onClose={closeQueueSheet}
         canAnalyze={canAnalyze}
         onAnalyze={onAnalyze}
       />

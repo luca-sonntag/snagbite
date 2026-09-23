@@ -39,7 +39,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
   const toast = useToast();
   const { user, refreshSession, isPremium } = useAuth();
   const { addJob } = useExtractionJobs();
-  const { addFailedJob, removeFromWaitlist, removeFailedJob, addToQueue } = useExtractionQueue();
+  const { addFailedJob, removeFromWaitlist, removeFailedJob, addToQueue, openQueueSheet } = useExtractionQueue();
   const currentExtractUrlRef = useRef<string>('');
   const [isPending, setIsPending] = useState(false);
   const [jobStatus, setJobStatus] = useState<ExtractionJob['status'] | null>(null);
@@ -498,7 +498,17 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       if (typed?.code === 'RATE_LIMIT_EXCEEDED') {
         if (meta.mode === 'link' && currentExtractUrlRef.current) {
           addToQueue(currentExtractUrlRef.current);
-          toast.info(t('queue.toast.addedToWaitlistQuota'));
+          toast.info(t('queue.toast.addedToWaitlistQuota'), {
+            action: {
+              label: t('queue.toast.viewWaitlist'),
+              onClick: () => {
+                if (window.location.hash !== '#/extract') {
+                  window.location.hash = '#/extract';
+                }
+                openQueueSheet();
+              },
+            },
+          });
         }
       } else if (meta.mode === 'link' && currentExtractUrlRef.current) {
         addFailedJob({
@@ -519,7 +529,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       }
       setIsPending(false);
     }
-  }, [getAccessToken, startPolling, fetchLimitStatus, isPremium, addJob, runSimulatedProgress, stopActivePolling, onExtractionSuccess, addToQueue, toast, t, language, addFailedJob]);
+  }, [getAccessToken, startPolling, fetchLimitStatus, isPremium, addJob, runSimulatedProgress, stopActivePolling, onExtractionSuccess, addToQueue, toast, t, language, addFailedJob, openQueueSheet]);
 
   const triggerExtraction = useCallback(async (targetUrl: string) => {
     const cleanUrl = targetUrl.trim();

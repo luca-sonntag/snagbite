@@ -47,7 +47,7 @@ export function useAppNativeListeners({
   const { handleBack: handleOverlayBack } = useOverlayStack();
   const toast = useToast();
   const { t } = useI18n();
-  const { addToWaitlist } = useExtractionQueue();
+  const { addToWaitlist, openQueueSheet } = useExtractionQueue();
   const lastBackPressRef = useRef<number>(0);
 
   // Android hardware back-button & edge swipe-back gesture
@@ -254,7 +254,10 @@ export function useAppNativeListeners({
           toast.info(t('queue.toast.addedToWaitlistQuota'), {
             action: {
               label: t('queue.toast.viewWaitlist'),
-              onClick: () => replace('extract'),
+              onClick: () => {
+                replace('extract');
+                openQueueSheet();
+              },
             },
           });
         }
@@ -262,7 +265,7 @@ export function useAppNativeListeners({
         replace(activeView);
       }
     }
-  }, [authLoading, user, replace, setUrl, triggerExtraction, activeView, limitStatus, addToWaitlist, t, toast]);
+  }, [authLoading, user, replace, setUrl, triggerExtraction, activeView, limitStatus, addToWaitlist, t, toast, openQueueSheet]);
 
   // Native share intent
   useEffect(() => {
@@ -280,12 +283,15 @@ export function useAppNativeListeners({
         toast.info(t('queue.toast.addedToWaitlistQuota'), {
           action: {
             label: t('queue.toast.viewWaitlist'),
-            onClick: () => replace('extract'),
+            onClick: () => {
+              replace('extract');
+              openQueueSheet();
+            },
           },
         });
       }
     });
-  }, [authLoading, user, replace, setUrl, triggerExtraction, limitStatus, addToWaitlist, t, toast]);
+  }, [authLoading, user, replace, setUrl, triggerExtraction, limitStatus, addToWaitlist, t, toast, openQueueSheet]);
 
   // Dev mode re-extraction trigger
   useEffect(() => {
