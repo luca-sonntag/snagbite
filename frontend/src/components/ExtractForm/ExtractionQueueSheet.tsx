@@ -47,41 +47,34 @@ export const ExtractionQueueSheet: React.FC<ExtractionQueueSheetProps> = ({
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    hapticLight();
-                    onClose();
-                  }}
-                  className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 border-none cursor-pointer transition-all -mr-2 -mt-1 touch-manipulation"
-                  aria-label="Close"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Sub-bar with count & clear all */}
-              {items.length > 0 && (
-                <div className="flex items-center justify-between px-1 pt-3 pb-1">
-                  <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {items.length === 1
-                      ? t('queue.dock.waitlistOne')
-                      : t('queue.dock.waitlistMultiple', { count: items.length })}
-                  </span>
+                <div className="flex items-center gap-1 -mr-2 -mt-1">
+                  {items.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        hapticLight();
+                        clearQueue();
+                      }}
+                      className="min-h-[44px] px-2.5 py-1 text-xs font-semibold text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 inline-flex items-center gap-1 border-none bg-transparent cursor-pointer touch-manipulation"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>{t('queue.btnClearAll')}</span>
+                    </button>
+                  )}
 
                   <button
                     type="button"
                     onClick={() => {
                       hapticLight();
-                      clearQueue();
+                      onClose();
                     }}
-                    className="min-h-[44px] px-2.5 py-1 text-xs font-semibold text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 inline-flex items-center gap-1 border-none bg-transparent cursor-pointer touch-manipulation"
+                    className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 border-none cursor-pointer transition-all touch-manipulation"
+                    aria-label="Close"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>{t('queue.btnClearAll')}</span>
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
-              )}
+              </div>
             </Drawer.Header>
 
             <Drawer.Body className="overflow-y-auto py-1 flex flex-col gap-2.5">
