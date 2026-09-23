@@ -4,7 +4,7 @@ import { useI18n } from '../../context/I18nContext';
 import { useToast } from '../../context/ToastContext';
 import { resolveErrorCode } from '../../i18n';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
-import { getSourceChannel, getUrlIdentifier } from '../../utils/sourceLabel';
+import { getSourceChannel } from '../../utils/sourceLabel';
 import type { QueueItem } from '../../context/ExtractionQueueContext';
 
 interface WaitlistItemCardProps {
@@ -40,7 +40,6 @@ export const WaitlistItemCard: React.FC<WaitlistItemCardProps> = ({
 
   const isFailed = item.status === 'failed';
   const channel = getSourceChannel(item.url);
-  const urlIdentifier = getUrlIdentifier(item.url);
 
   const localizedError = isFailed
     ? resolveErrorCode(item.errorCode, item.errorParams ?? undefined, item.error, language) ||
@@ -91,16 +90,9 @@ export const WaitlistItemCard: React.FC<WaitlistItemCardProps> = ({
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
-                {item.sourceLabel}
-              </p>
-              {urlIdentifier && (
-                <span className="text-[10px] font-mono font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded-md truncate max-w-[120px]">
-                  {urlIdentifier}
-                </span>
-              )}
-            </div>
+            <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
+              {item.sourceLabel}
+            </p>
             {isFailed ? (
               <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-0.5 leading-snug line-clamp-2">
                 {localizedError}
