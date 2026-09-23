@@ -37,7 +37,16 @@
   - Alle Zutat-Mappings, Normalisierungen (`baseName`) und zugeordneten Icons im Backend und Frontend überprüfen und berichtigen.
   - Inkonsistente oder fehlerhafte Zuordnungen bereinigen, damit jede Zutat verlässlich ihr passendes SVG/Icon und die richtige Supermarktkategorie erhält.
 
-- **New User Experience (NUX) überarbeiten & aktualisieren:**
+- **New User Experience (NUX) & Kontextuelle Screen-Touren (Spotlight Guides):**
+  - **Problem & Bedarf:** Viele Features und Interaktionsmöglichkeiten sind für Erstnutzer nicht sofort ersichtlich. Eine starre, lange Gesamttour durch die ganze App schreckt jedoch ab und überfordert Nutzer.
+  - **Konzept (Screen-by-Screen Just-in-Time Tour):**
+    - Keine globale Endlos-Tour, sondern kontextuell: Wenn ein Nutzer einen Screen/eine Maske (z. B. Kochmodus, Rezept-Detail, Wochenplaner, Vorrat, Einkaufsliste) das **erste Mal betritt**, werden relevante UI-Elemente gezielt visuell hervorgehoben (Spotlight / Backdrop-Cutout) und mit kurzen Tooltips erklärt.
+    - Jeder Screen hat seinen eigenen Tour-Zustand (gespeichert in `localStorage` oder User-Settings), sodass er nur 1x pro Maske getriggert wird.
+    - Jederzeit überspringbar („Verstanden“ / „Überspringen“) sowie bei Bedarf über die Einstellungen / Hilfe erneut startbar.
+  - **Mögliche Libraries / Pakete:**
+    - `driver.js` (leichtgewichtig, vanilla/framework-agnostisch, hervorragendes Spotlight/Backdrop-Cutout, kein schwerer React-Wrapper-Overhead).
+    - `react-joyride` (etablierter React-Standard für Guided Tours, gut anpassbar, aber größer).
+    - `shepherd.js` oder eine schlanke Eigenbau-Lösung über Floating UI / Popover API.
   - Onboarding- und Einführungserlebnis für neue Nutzer überarbeiten, modernisieren und aktualisieren.
   - Empty States (z. B. leeres Kochbuch, Wochenplaner, Einkaufsliste, Vorrat) auffrischen und Nutzer intuitiv zur ersten Aktion führen.
 
