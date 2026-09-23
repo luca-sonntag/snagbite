@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import type { ExtractionJob } from '../types';
 import { parseSerializedError } from '../errorCodes';
+import { resolveErrorCode, type SupportedLanguage } from '../i18n';
 import { apiUrl } from '../api';
 import { sendRecipeReadyNotification } from '../native';
 import { handleClientFrameRequest } from '../utils/videoFrames';
@@ -19,9 +20,10 @@ interface UseExtractionJobsPollerProps {
   setJobsPersist: (updater: (prev: ExtractionJobEntry[]) => ExtractionJobEntry[]) => void;
   getAccessToken: () => Promise<string | null>;
   t: (key: string, params?: Record<string, string | number>) => string;
+  language: SupportedLanguage;
   toast: {
     success: (msg: string, opts?: { description?: string; action?: { label: string; onClick: () => void } }) => void;
-    danger: (msg: string) => void;
+    danger: (msg: string, opts?: { description?: string; action?: { label: string; onClick: () => void } }) => void;
   };
   addFailedJob: (entry: {
     sourceUrl: string;
@@ -40,6 +42,7 @@ export function useExtractionJobsPoller({
   setJobsPersist,
   getAccessToken,
   t,
+  language,
   toast,
   addFailedJob,
   removeFromWaitlist,
@@ -160,9 +163,8 @@ export function useExtractionJobsPoller({
           if (finalizedRef.current.has(id)) return;
           finalizedRef.current.add(id);
           const envelope = job.error ? parseSerializedError(job.error) : null;
-          toast.danger(t('toast.recipeFailedTitle'));
-
           const jobEntry = jobsRef.current.find((j) => j.id === id);
+
           if (jobEntry && jobEntry.mode === 'link') {
             addFailedJob({
               sourceUrl: jobEntry.sourceLabel,
@@ -170,6 +172,17 @@ export function useExtractionJobsPoller({
               error: job.error ?? 'form.validation.failedExtraction',
               errorCode: envelope?.code ?? null,
               errorParams: (envelope?.params as Record<string, string | number>) ?? null,
+            });
+          } else {
+            const localizedError =
+              resolveErrorCode(
+                envelope?.code,
+                envelope?.params as Record<string, string | number> | undefined,
+                job.error ?? 'form.validation.failedExtraction',
+                language
+              ) || t('error.default');
+            toast.danger(t('toast.recipeFailedTitle'), {
+              description: localizedError,
             });
           }
 
@@ -214,7 +227,7 @@ export function useExtractionJobsPoller({
         inFlightRef.current.delete(id);
       }
     },
-    [getAccessToken, finalizeCompletion, setJobsPersist, dismissJob, t, toast, addFailedJob]
+    [getAccessToken, finalizeCompletion, setJobsPersist, dismissJob, t, language, toast, addFailedJob]
   );
 
   pollJobRef.current = pollJob;

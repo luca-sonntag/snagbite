@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
+import { useI18n } from './I18nContext';
+import { useToast } from './ToastContext';
+import { resolveErrorCode } from '../i18n';
 import { formatSourceLabel } from '../utils/sourceLabel';
 import type { ErrorParams } from '../errorCodes';
 
@@ -34,6 +37,7 @@ export interface ExtractionQueueContextValue {
     error?: string | null;
     errorCode?: string | null;
     errorParams?: ErrorParams | null;
+    silentToast?: boolean;
   }) => void;
   retryItem: (idOrUrl: string) => boolean;
 
@@ -171,6 +175,8 @@ function loadQueueWithMigration(userId?: string | null): QueueItem[] {
 export const ExtractionQueueProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const userId = user?.id ?? null;
+  const { t, language } = useI18n();
+  const toast = useToast();
 
   const [items, setItems] = useState<QueueItem[]>(() => loadQueueWithMigration(userId));
 
@@ -277,9 +283,29 @@ export const ExtractionQueueProvider: React.FC<{ children: React.ReactNode }> = 
       error?: string | null;
       errorCode?: string | null;
       errorParams?: ErrorParams | null;
+      silentToast?: boolean;
     }) => {
       const cleanUrl = entry.sourceUrl.trim();
       if (!cleanUrl) return;
+
+      if (!entry.silentToast) {
+        const localizedError =
+          resolveErrorCode(entry.errorCode, entry.errorParams ?? undefined, entry.error, language) ||
+          t('error.default');
+
+        toast.danger(t('toast.recipeFailedTitle'), {
+          description: localizedError,
+          duration: 4500,
+          action: {
+            label: t('queue.toast.viewWaitlist'),
+            onClick: () => {
+              if (window.location.hash !== '#/extract') {
+                window.location.hash = '#/extract';
+              }
+            },
+          },
+        });
+      }
 
       setItems((prev) => {
         const lower = cleanUrl.toLowerCase();
@@ -306,7 +332,7 @@ export const ExtractionQueueProvider: React.FC<{ children: React.ReactNode }> = 
         return updated;
       });
     },
-    [userId]
+    [userId, language, t, toast]
   );
 
   // Backward compatibility getters & methods

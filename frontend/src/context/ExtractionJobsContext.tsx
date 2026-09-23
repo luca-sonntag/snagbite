@@ -37,7 +37,7 @@ export function useExtractionJobs(): ExtractionJobsContextValue {
 
 export function ExtractionJobsProvider({ children }: { children: React.ReactNode }) {
   const { getAccessToken } = useAuth();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const toast = useToast();
   const { addFailedJob, removeFromWaitlist, removeFailedJob } = useExtractionQueue();
 
@@ -64,6 +64,7 @@ export function ExtractionJobsProvider({ children }: { children: React.ReactNode
     setJobsPersist,
     getAccessToken,
     t,
+    language,
     toast,
     addFailedJob,
     removeFromWaitlist,

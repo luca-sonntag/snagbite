@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import type { Recipe, ExtractionJob, ProgressData, LimitStatus } from '../types';
 import { type ErrorParams, parseSerializedError } from '../errorCodes';
 import { useI18n } from '../context/I18nContext';
+import { useToast } from '../context/ToastContext';
+import { resolveErrorCode, resolveJobError } from '../i18n';
 import { apiUrl } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { compressRecipePhotos } from '../utils/imageCompression';
@@ -33,10 +35,11 @@ export const MAX_IMPORT_PHOTOS = 5;
 const MAX_PHOTOS_TOTAL_CHARS = 8_000_000;
 
 export function useRecipeExtraction(getAccessToken: () => Promise<string | null>, onExtractionSuccess: (recipeId: string) => void) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
+  const toast = useToast();
   const { user, refreshSession, isPremium } = useAuth();
   const { addJob } = useExtractionJobs();
-  const { addFailedJob, removeFromWaitlist, removeFailedJob } = useExtractionQueue();
+  const { addFailedJob, removeFromWaitlist, removeFailedJob, addToQueue } = useExtractionQueue();
   const currentExtractUrlRef = useRef<string>('');
   const [isPending, setIsPending] = useState(false);
   const [jobStatus, setJobStatus] = useState<ExtractionJob['status'] | null>(null);
@@ -313,6 +316,14 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
               errorCode: envelope?.code ?? null,
               errorParams: envelope?.params ?? null,
             });
+          } else {
+            const localizedError =
+              resolveErrorCode(envelope?.code, envelope?.params, job.error || 'form.validation.failedExtraction', language) ||
+              t('error.default');
+            toast.danger(t('toast.recipeFailedTitle'), {
+              description: localizedError,
+              duration: 4500,
+            });
           }
           setProgress(null);
           setIsPending(false);
@@ -338,6 +349,14 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
             mode: 'link',
             error: err instanceof Error ? err.message : 'form.validation.lostConnection',
           });
+        } else {
+          const localizedError =
+            resolveJobError(err instanceof Error ? err.message : 'form.validation.lostConnection', language) ||
+            t('error.default');
+          toast.danger(t('toast.recipeFailedTitle'), {
+            description: localizedError,
+            duration: 4500,
+          });
         }
         setProgress(null);
         setIsPending(false);
@@ -346,7 +365,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     }, 600);
 
     activePollingIntervalRef.current = interval;
-  }, [getAccessToken, isPremium, onExtractionSuccess, runSimulatedProgress, stopActivePolling, t]);
+  }, [getAccessToken, isPremium, onExtractionSuccess, runSimulatedProgress, stopActivePolling, t, language, toast, addFailedJob]);
 
   /**
    * Shared submit path for both input channels: posts a job-creating request and
@@ -476,7 +495,12 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       setJobError(err instanceof Error ? err.message : 'form.validation.submissionError');
       setJobErrorCode(typed?.code ?? null);
       setJobErrorParams(typed?.params ?? null);
-      if (meta.mode === 'link' && currentExtractUrlRef.current) {
+      if (typed?.code === 'RATE_LIMIT_EXCEEDED') {
+        if (meta.mode === 'link' && currentExtractUrlRef.current) {
+          addToQueue(currentExtractUrlRef.current);
+          toast.info(t('queue.toast.addedToWaitlistQuota'));
+        }
+      } else if (meta.mode === 'link' && currentExtractUrlRef.current) {
         addFailedJob({
           sourceUrl: currentExtractUrlRef.current,
           mode: 'link',
@@ -484,10 +508,18 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           errorCode: typed?.code ?? null,
           errorParams: typed?.params ?? null,
         });
+      } else {
+        const localizedError =
+          resolveErrorCode(typed?.code, typed?.params, err instanceof Error ? err.message : 'form.validation.submissionError', language) ||
+          t('error.default');
+        toast.danger(t('toast.recipeFailedTitle'), {
+          description: localizedError,
+          duration: 4500,
+        });
       }
       setIsPending(false);
     }
-  }, [getAccessToken, startPolling, fetchLimitStatus, isPremium, addJob, runSimulatedProgress, stopActivePolling, onExtractionSuccess]);
+  }, [getAccessToken, startPolling, fetchLimitStatus, isPremium, addJob, runSimulatedProgress, stopActivePolling, onExtractionSuccess, addToQueue, toast, t, language, addFailedJob]);
 
   const triggerExtraction = useCallback(async (targetUrl: string) => {
     const cleanUrl = targetUrl.trim();
