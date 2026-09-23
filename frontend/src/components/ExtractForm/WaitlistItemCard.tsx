@@ -134,21 +134,19 @@ export const WaitlistItemCard: React.FC<WaitlistItemCardProps> = ({
             <Trash2 className="w-4 h-4" />
           </button>
 
-          {/* Primary Analyze / Retry Icon Button */}
+          {/* Primary Analyze / Retry Icon Button (Transparent) */}
           <button
             type="button"
             onClick={handleAction}
             disabled={!canAnalyze}
             title={isFailed ? t('queue.btnRetry') : t('queue.btnAnalyzeNow')}
             aria-label={isFailed ? t('queue.btnRetry') : t('queue.btnAnalyzeNow')}
-            className={`w-9 h-9 min-w-[36px] min-h-[36px] rounded-xl flex items-center justify-center transition-all border-none active:scale-90 cursor-pointer touch-manipulation ml-0.5 ${
-              isFailed
-                ? canAnalyze
-                  ? 'bg-amber-500 hover:bg-amber-400 text-white shadow-sm shadow-amber-500/25'
-                  : 'bg-amber-500/20 text-amber-300 opacity-50 cursor-not-allowed'
-                : canAnalyze
-                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm shadow-emerald-600/25'
-                  : 'bg-emerald-600/20 text-emerald-300 opacity-50 cursor-not-allowed'
+            className={`w-8.5 h-8.5 min-w-[34px] min-h-[34px] rounded-xl flex items-center justify-center transition-all border-none bg-transparent active:scale-90 touch-manipulation ml-0.5 ${
+              !canAnalyze
+                ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed opacity-40'
+                : isFailed
+                  ? 'text-amber-500 hover:text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 cursor-pointer'
+                  : 'text-emerald-600 hover:text-emerald-500 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 cursor-pointer'
             }`}
           >
             {isFailed ? (

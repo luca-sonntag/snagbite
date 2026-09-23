@@ -48,7 +48,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
   const { user, isPremium } = useAuth();
   const toast = useToast();
   const { activeCount: liveActiveCount } = useExtractionJobs();
-  const { addToWaitlist } = useExtractionQueue();
+  const { addToWaitlist, removeFromQueue } = useExtractionQueue();
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isLinkSheetOpen, setIsLinkSheetOpen] = useState(initialOpenSheet === 'link');
   const [isPhotoSheetOpen, setIsPhotoSheetOpen] = useState(initialOpenSheet === 'photo');
@@ -257,8 +257,13 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
 
           {/* Warteliste & Fail-Safe Queue */}
           <ExtractionQueueSection
-            canAnalyze={!submitDisabled && !isPending}
+            canAnalyze={!isPending}
             onAnalyze={(queueUrl) => {
+              if (blockedByLimit) {
+                setIsPremiumModalOpen(true);
+                return;
+              }
+              removeFromQueue(queueUrl);
               setMode('link');
               setUrl(queueUrl);
               handleFormSubmit({ preventDefault: () => {} } as React.FormEvent, queueUrl);
