@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Check, Info, AlertTriangle, AlertCircle } from 'lucide-react';
+import { Check, Info, AlertTriangle, AlertCircle, ChevronRight } from 'lucide-react';
 import type { ToastItemData, ToastType } from './types';
 
 interface ToastItemProps {
@@ -51,9 +51,8 @@ export default function ToastItem({ toast, onDismiss }: ToastItemProps) {
       case 'info':
         return 'bg-blue-600 text-white shadow-[0_8px_30px_rgba(37,99,235,0.4)]';
       case 'warning':
-        return 'bg-amber-500 text-white shadow-[0_8px_30px_rgba(245,158,11,0.4)]';
       case 'danger':
-        return 'bg-rose-600 text-white shadow-[0_8px_30px_rgba(225,29,72,0.4)]';
+        return 'bg-amber-500 text-white shadow-[0_8px_30px_rgba(245,158,11,0.4)]';
     }
   };
 
@@ -76,7 +75,7 @@ export default function ToastItem({ toast, onDismiss }: ToastItemProps) {
         transform: dragOffsetY !== 0 ? `translateY(${dragOffsetY}px)` : undefined,
         opacity: dragOffsetY !== 0 ? Math.max(0, 1 - Math.abs(dragOffsetY) / 80) : undefined,
       }}
-      className={`pointer-events-auto w-4/5 max-w-md ${getTypeStyles(
+      className={`pointer-events-auto w-[92vw] max-w-md ${getTypeStyles(
         toast.type
       )} rounded-2xl md:rounded-3xl border-none px-4 py-3 flex items-center gap-3 transition-transform duration-100 cursor-pointer select-none active:scale-[0.98] ${animationClass}`}
       role="status"
@@ -100,9 +99,7 @@ export default function ToastItem({ toast, onDismiss }: ToastItemProps) {
       </div>
 
       {toast.action && (
-        <span className="text-[11px] font-bold text-white bg-white/20 px-2.5 py-1 rounded-xl shrink-0 backdrop-blur-xs">
-          {toast.action.label}
-        </span>
+        <ChevronRight className="w-5 h-5 text-white/80 shrink-0 ml-1" />
       )}
     </div>
   );
