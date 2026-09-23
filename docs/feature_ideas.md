@@ -56,6 +56,14 @@
   - **Fokus auf echte Charakter-/Hero-Zutaten:** Benachrichtigungen ausschließlich für geschmacksprägende Hauptzutaten triggern, auf die man tatsächlich Appetit entwickeln kann (z. B. Avocado, Lachs, Kürbis, Burrata, Erdbeeren, Spargel, Pilze, Garnelen, Pasta, Süßkartoffel).
   - **Prompt-Optimierung für Gemini (`generateNotificationCopy`):** Den LLM-Prompt in `backend/src/gemini.ts` schärfen, sodass niemals plumpe Vorlagen wie *„Lust auf [Zutat]?“* generiert werden, sondern der kulinarische Kontext sympathisch, abwechslungsreich und appetitlich formuliert wird (z. B. *„Pasta-Lust? Du hast ein leckeres Rezept gespeichert...“*).
 
+- **Mehrteilige Rezepte / Sub-Rezepte & Komponenten (Brot, Sauce, Salat, Dressing, Topping etc.):**
+  - **Problem:** Viele Gerichte bestehen aus logisch getrennten Komponenten (z. B. Burger = Buns/Brot, Patties, Sauce, Beilagensalat). Aktuell werden Zutaten und Zubereitungsschritte oft in einer einzigen linearen Liste vermischt, was beim Kochen und Vorbereiten unübersichtlich ist.
+  - **Strukturierte Extraktion (KI & Schema):** Gemini soll bei der Extraktion erkennen, ob ein Rezept aus distinkten Sub-Rezepten bzw. Komponenten besteht, und diese strukturiert abbilden (z. B. Komponentengruppen für Zutaten mit Gruppen-Header und schrittweise Zuordnung der Zubereitung).
+  - **UX & Zubereitungs-Flow:**
+    - Zutatenliste: Visuelle Gruppierung nach Komponenten (z. B. *„Für das Brot“*, *„Für die Sauce“*, *„Für den Salat“*).
+    - Kochmodus & Schritte: Klare Komponenten-Abschnitte oder Badges an den Schritten, damit man Komponenten parallel oder im Vorfeld (Mise en Place) zubereiten kann.
+    - Einkaufsliste & Vorrat: Saubere Aggregation ohne Duplikat-Verwirrung bei komponentenübergreifenden Zutaten.
+
 ## Findings (Behoben ✅)
 
 - [x] Extraktions-Warteliste & Fail-Safe Queue auf der „NEU“-Seite:
