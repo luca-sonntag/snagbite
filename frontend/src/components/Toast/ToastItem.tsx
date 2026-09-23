@@ -78,12 +78,12 @@ export default function ToastItem({ toast, onDismiss }: ToastItemProps) {
       }}
       className={`pointer-events-auto w-4/5 max-w-md ${getTypeStyles(
         toast.type
-      )} rounded-2xl md:rounded-3xl border-none p-3.5 flex items-center gap-3 transition-transform duration-100 cursor-pointer select-none active:scale-[0.98] ${animationClass}`}
+      )} rounded-2xl md:rounded-3xl border-none px-4 py-3 flex items-center gap-3 transition-transform duration-100 cursor-pointer select-none active:scale-[0.98] ${animationClass}`}
       role="status"
       aria-live="polite"
     >
-      {/* Icon Medallion */}
-      <div className="w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white/20 text-white backdrop-blur-xs">
+      {/* Icon */}
+      <div className="flex items-center justify-center shrink-0 text-white">
         {getIcon(toast.type)}
       </div>
 
