@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Play, Copy, ExternalLink, Trash2, Check, Globe, RefreshCw, AlertCircle } from 'lucide-react';
+import { Play, Copy, ExternalLink, Trash2, Check, RefreshCw } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useToast } from '../../context/ToastContext';
 import { resolveErrorCode } from '../../i18n';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
-import { getSourceChannel } from '../../utils/sourceLabel';
 import type { QueueItem } from '../../context/ExtractionQueueContext';
 
 interface WaitlistItemCardProps {
@@ -39,7 +38,6 @@ export const WaitlistItemCard: React.FC<WaitlistItemCardProps> = ({
   const [copied, setCopied] = useState(false);
 
   const isFailed = item.status === 'failed';
-  const channel = getSourceChannel(item.url);
 
   const localizedError = isFailed
     ? resolveErrorCode(item.errorCode, item.errorParams ?? undefined, item.error, language) ||
@@ -71,38 +69,21 @@ export const WaitlistItemCard: React.FC<WaitlistItemCardProps> = ({
   };
 
   return (
-    <div className="p-3 bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border-none transition-all">
+    <div className="p-3 pl-3.5 bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border-none transition-all">
       <div className="flex items-center justify-between gap-2 min-w-0">
-        <div className="flex items-center gap-2.5 min-w-0 flex-1">
-          <div
-            className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-              isFailed
-                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                : 'bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-            }`}
-          >
-            {isFailed ? (
-              <AlertCircle className="w-4 h-4" />
-            ) : channel === 'web' ? (
-              <Globe className="w-4 h-4" />
-            ) : (
-              <Play className="w-4 h-4 fill-current ml-0.5" />
-            )}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
-              {item.sourceLabel}
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
+            {item.sourceLabel}
+          </p>
+          {isFailed ? (
+            <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-0.5 leading-snug line-clamp-2">
+              {localizedError}
             </p>
-            {isFailed ? (
-              <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-0.5 leading-snug line-clamp-2">
-                {localizedError}
-              </p>
-            ) : (
-              <p className="text-[11px] text-gray-400 dark:text-gray-500 truncate mt-0.5">
-                {formatRelativeTime(item.addedAt, t)}
-              </p>
-            )}
-          </div>
+          ) : (
+            <p className="text-[11px] text-gray-400 dark:text-gray-500 truncate mt-0.5">
+              {formatRelativeTime(item.addedAt, t)}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-0.5 shrink-0 -mr-1">
