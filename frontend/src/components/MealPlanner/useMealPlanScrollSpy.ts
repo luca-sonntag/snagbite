@@ -60,20 +60,17 @@ export function useMealPlanScrollSpy({
           onWeekChangeRef.current(targetMonday);
         }
 
-        // Calculate sticky header & available viewport area
+        // Calculate sticky header bottom & available viewport area
         const stickyHeader = document.getElementById('meal-planner-sticky-header');
-        const headerHeight = stickyHeader ? stickyHeader.getBoundingClientRect().height : 180;
+        const headerBottom = stickyHeader ? stickyHeader.getBoundingClientRect().bottom : 180;
         const bottomNavOffset = 64;
-        const availableHeight = Math.max(200, window.innerHeight - headerHeight - bottomNavOffset);
+        const availableHeight = Math.max(200, window.innerHeight - headerBottom - bottomNavOffset);
 
-        // Keep KW week header visible when scrolling to the beginning of a week
+        // Keep KW week header visible only when scrolling explicitly to the Monday of a week
         const weekHeader = document.getElementById(`week-header-${targetMondayIso}`);
         let scrollTargetElement: HTMLElement = element;
-        if (weekHeader) {
-          const isFirstInWeek = element.parentElement?.querySelector('[data-date]') === element;
-          if (isFirstInWeek || targetDateStr === targetMondayIso) {
-            scrollTargetElement = weekHeader;
-          }
+        if (weekHeader && targetDateStr === targetMondayIso) {
+          scrollTargetElement = weekHeader;
         }
 
         const elementRect = scrollTargetElement.getBoundingClientRect();
@@ -81,12 +78,12 @@ export function useMealPlanScrollSpy({
 
         let targetY: number;
         if (align === 'center' && elementRect.height < availableHeight) {
-          const targetCenterInViewport = headerHeight + availableHeight / 2;
+          const targetCenterInViewport = headerBottom + availableHeight / 2;
           const elementCenterInDoc = currentScrollY + elementRect.top + elementRect.height / 2;
           targetY = elementCenterInDoc - targetCenterInViewport;
         } else {
-          // Align directly below the sticky calendar header
-          targetY = currentScrollY + elementRect.top - (headerHeight + 6);
+          // Align directly below the sticky calendar header with a small visual cushion
+          targetY = currentScrollY + elementRect.top - (headerBottom + 8);
         }
 
         window.scrollTo({
@@ -115,8 +112,8 @@ export function useMealPlanScrollSpy({
         if (isProgrammaticScrollRef.current) return;
 
         const stickyHeader = document.getElementById('meal-planner-sticky-header');
-        const headerHeight = stickyHeader ? stickyHeader.getBoundingClientRect().height : 180;
-        const scanLine = headerHeight + 40;
+        const headerBottom = stickyHeader ? stickyHeader.getBoundingClientRect().bottom : 180;
+        const scanLine = headerBottom + 40;
 
         let activeDateStr: string | null = null;
 

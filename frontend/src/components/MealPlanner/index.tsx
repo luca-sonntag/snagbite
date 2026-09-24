@@ -132,8 +132,10 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     if (!hasInitialScrolledRef.current && !isLoading && agendaDates.includes(todayStr)) {
       hasInitialScrolledRef.current = true;
       const timer = setTimeout(() => {
-        scrollToDate(todayStr, 'auto', 'start');
-      }, 60);
+        requestAnimationFrame(() => {
+          scrollToDate(todayStr, 'auto', 'start');
+        });
+      }, 80);
       return () => clearTimeout(timer);
     }
   }, [isActive, todayStr, scrollToDate, agendaDates, isLoading, setSelectedDate, goToToday]);
