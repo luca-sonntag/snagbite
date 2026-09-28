@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from '@heroui/react';
-import { Flame, Coins, Utensils, Trophy, Lock, Sparkles, X, Camera, Check, ChefHat, UtensilsCrossed, Crown, Award } from 'lucide-react';
+import { Flame, Coins, Utensils, Trophy, Lock, Sparkles, X, Check, ChefHat, UtensilsCrossed, Crown } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useGamification } from '../../context/GamificationContext';
 import { progressPct, xpToNextLevel } from '../../utils/levels';
@@ -175,9 +175,8 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
       {/* 2. "Deine Koch-Galerie" (Food Photo Feed) */}
       <div className="rounded-3xl bg-white dark:bg-gray-900 p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <Camera className="h-4.5 w-4.5 text-emerald-500" />
-            <span>{t('app.gamification.galleryTitle')}</span>
+          <h2 className="text-base font-bold text-gray-900 dark:text-white">
+            {t('app.gamification.galleryTitle')}
           </h2>
           {recentPhotos.length > 0 && (
             <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
@@ -226,9 +225,8 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
       {/* 3. Badges Grid (Flat & Clean) */}
       <div className="rounded-3xl bg-white dark:bg-gray-900 p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <Award className="h-4.5 w-4.5 text-emerald-500" />
-            <span>{t('app.gamification.badgesTitle')}</span>
+          <h2 className="text-base font-bold text-gray-900 dark:text-white">
+            {t('app.gamification.badgesTitle')}
           </h2>
           <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
             {earnedMap.size} / {ALL_BADGE_KEYS.length}
