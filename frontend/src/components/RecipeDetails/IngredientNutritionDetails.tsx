@@ -4,6 +4,7 @@ import { ShieldCheck, Sparkles, X } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { hapticLight } from '../../utils/haptics';
 import { formatQuantity } from '../../utils/formatQuantity';
+import { cleanMatchedIngredientName } from '../../utils/formatNutrition';
 import type { Ingredient } from '../../types';
 import IngredientIcon from '../IngredientIcon';
 
@@ -262,9 +263,9 @@ export const IngredientNutritionDetails: FC<IngredientNutritionDetailsProps> = (
             <span className="text-xs font-bold text-emerald-900 dark:text-emerald-200 tracking-tight block">
               {t('recipe.ingredientNutritionVerifiedBadge')}
             </span>
-            {ingredient.matchedName && (
+            {cleanMatchedIngredientName(ingredient.matchedName) && (
               <span className="text-[11.5px] text-emerald-700/80 dark:text-emerald-300/80 truncate block font-normal mt-0.5">
-                {ingredient.matchedName}
+                {cleanMatchedIngredientName(ingredient.matchedName)}
               </span>
             )}
           </div>

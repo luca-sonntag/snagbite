@@ -46,3 +46,12 @@ export function formatCalories(calories: number | null | undefined): string | nu
   if (!calories || calories <= 0) return null;
   return `${calories.toLocaleString('de-DE')} kcal`;
 }
+
+/**
+ * Strips brand names / store suffixes in brackets (e.g. "Tomatenmark [Aldi, ...]" -> "Tomatenmark").
+ */
+export function cleanMatchedIngredientName(name?: string | null): string {
+  if (!name) return '';
+  const cleaned = name.replace(/\s*\[.*?\]/g, '').trim();
+  return cleaned || name.trim();
+}

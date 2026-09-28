@@ -4,6 +4,7 @@ import type { Ingredient } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { getCategoryTheme } from '../../i18n';
 import { getParentIngredient } from '../../utils/ingredientTaxonomy';
+import { cleanMatchedIngredientName } from '../../utils/formatNutrition';
 import IngredientIcon from '../IngredientIcon';
 import { hapticLight } from '../../utils/haptics';
 
@@ -138,7 +139,7 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
             type="button"
             onClick={handleNutritionClick}
             className="min-h-[28px] px-2 py-0.5 rounded-full inline-flex items-center gap-1 text-[11px] font-semibold shrink-0 border-none transition-all active:scale-95 cursor-pointer select-none bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/15 text-gray-600 dark:text-gray-300"
-            title={ingredient.matchedName ? t('recipe.verifiedIngredientTooltip', { name: ingredient.matchedName }) : undefined}
+            title={ingredient.matchedName ? t('recipe.verifiedIngredientTooltip', { name: cleanMatchedIngredientName(ingredient.matchedName) }) : undefined}
             aria-label={t('recipe.nutritionTitle')}
           >
             <span className="tabular-nums">{Math.round(ingredient.calories! * scaleFactor)} kcal</span>
