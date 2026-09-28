@@ -1,5 +1,5 @@
 import type { MouseEvent } from 'react';
-import { Clock, Star } from 'lucide-react';
+import { Clock, Star, Check } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
@@ -15,6 +15,10 @@ interface RecipeBentoSectionProps {
   formatTotalTime: (recipe: any) => string | null;
   onOpenRecipe: (e: MouseEvent, job: SavedRecipe) => void;
   onSeeAll?: () => void;
+  isSelectMode?: boolean;
+  selectedIds?: Set<string>;
+  bindLongPress?: (id: string, job: SavedRecipe) => any;
+  isCommunityJob?: (job: SavedRecipe) => boolean;
 }
 
 /**
@@ -28,6 +32,10 @@ export default function RecipeBentoSection({
   formatTotalTime,
   onOpenRecipe,
   onSeeAll,
+  isSelectMode = false,
+  selectedIds,
+  bindLongPress,
+  isCommunityJob,
 }: RecipeBentoSectionProps) {
   const { t } = useI18n();
 
@@ -38,6 +46,8 @@ export default function RecipeBentoSection({
   const mainRecipe = mainJob.recipe;
   if (!mainRecipe) return null;
 
+  const isMainCommunity = isCommunityJob ? isCommunityJob(mainJob) : false;
+  const isMainSelected = !isMainCommunity && selectedIds?.has(mainJob.recipeId);
   const mainScore = typeof mainRecipe.healthScore === 'number' ? mainRecipe.healthScore : null;
   const mainScoreColor = mainScore !== null ? getHealthScoreColor(mainScore) : null;
   const mainScoreLetter = mainScore !== null ? getHealthScoreLetter(mainScore) : null;
@@ -74,7 +84,10 @@ export default function RecipeBentoSection({
             hapticLight();
             onOpenRecipe(e, mainJob);
           }}
-          className="group relative w-full h-full min-h-[220px] sm:min-h-[250px] rounded-2xl overflow-hidden bg-gray-900 shadow-[0_2px_12px_rgba(0,0,0,0.06)] border-none cursor-pointer active:scale-[0.98] transition-all select-none"
+          className={`group relative w-full h-full min-h-[220px] sm:min-h-[250px] rounded-2xl overflow-hidden bg-gray-900 shadow-[0_2px_12px_rgba(0,0,0,0.06)] border-none cursor-pointer active:scale-[0.98] transition-all select-none ${
+            isMainSelected ? 'ring-2 ring-emerald-500' : ''
+          }`}
+          {...((!isMainCommunity && bindLongPress) ? bindLongPress(mainJob.recipeId, mainJob) : {})}
         >
           <CachedImage
             src={mainRecipe.imageUrl}
@@ -84,6 +97,19 @@ export default function RecipeBentoSection({
           />
           {/* Scrim overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none" />
+
+          {/* Select-mode checkbox */}
+          {isSelectMode && !isMainCommunity && (
+            <div
+              className={`absolute top-2 left-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all border-none ${
+                isMainSelected
+                  ? 'bg-emerald-500 text-white shadow-md'
+                  : 'bg-black/40 backdrop-blur-sm text-white shadow-xs'
+              }`}
+            >
+              {isMainSelected && <Check className="w-4 h-4 text-white stroke-[3px]" />}
+            </div>
+          )}
 
           {/* Top Badges */}
           <div className="absolute top-2 right-2 pointer-events-none">
@@ -136,14 +162,22 @@ export default function RecipeBentoSection({
         {/* Right: Two Stacked Compact Cards */}
         {sideJobs.length > 0 && (
           <div className="flex flex-col gap-2.5 sm:gap-3 justify-between h-full">
-            {sideJobs.map((job) => (
-              <RecipeCompactCard
-                key={job.recipeId}
-                job={job}
-                totalTime={job.recipe ? formatTotalTime(job.recipe) : null}
-                onClick={(e) => onOpenRecipe(e, job)}
-              />
-            ))}
+            {sideJobs.map((job) => {
+              const isSideCommunity = isCommunityJob ? isCommunityJob(job) : false;
+              const isSideSelected = !isSideCommunity && selectedIds?.has(job.recipeId);
+              return (
+                <RecipeCompactCard
+                  key={job.recipeId}
+                  job={job}
+                  totalTime={job.recipe ? formatTotalTime(job.recipe) : null}
+                  isSelected={isSideSelected}
+                  isSelectMode={isSelectMode}
+                  bindLongPress={(!isSideCommunity && bindLongPress) ? bindLongPress(job.recipeId, job) : undefined}
+                  isCommunity={isSideCommunity}
+                  onClick={(e) => onOpenRecipe(e, job)}
+                />
+              );
+            })}
           </div>
         )}
       </div>

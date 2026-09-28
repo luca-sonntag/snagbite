@@ -1,5 +1,5 @@
 import type { MouseEvent } from 'react';
-import { Clock, Star } from 'lucide-react';
+import { Clock, Star, Check } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
@@ -10,6 +10,10 @@ interface RecipeCompactCardProps {
   job: SavedRecipe;
   totalTime: string | null;
   onClick: (e: MouseEvent) => void;
+  isSelected?: boolean;
+  isSelectMode?: boolean;
+  bindLongPress?: any;
+  isCommunity?: boolean;
 }
 
 /**
@@ -21,6 +25,10 @@ export default function RecipeCompactCard({
   job,
   totalTime,
   onClick,
+  isSelected = false,
+  isSelectMode = false,
+  bindLongPress,
+  isCommunity = false,
 }: RecipeCompactCardProps) {
   const r = job.recipe;
   if (!r) return null;
@@ -35,7 +43,10 @@ export default function RecipeCompactCard({
         hapticLight();
         onClick(e);
       }}
-      className="group relative flex-1 min-w-0 flex items-stretch rounded-2xl bg-white dark:bg-gray-900/90 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border-none cursor-pointer active:scale-[0.98] hover:shadow-md transition-all duration-150 select-none overflow-hidden"
+      className={`group relative flex-1 min-w-0 flex items-stretch rounded-2xl bg-white dark:bg-gray-900/90 shadow-[0_2px_12px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 border-none cursor-pointer active:scale-[0.98] hover:shadow-md transition-all duration-150 select-none overflow-hidden ${
+        isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
+      }`}
+      {...(!isCommunity ? (bindLongPress ?? {}) : {})}
     >
       {/* Thumbnail: Full card height presentation */}
       <div className="relative w-22 sm:w-26 shrink-0 overflow-hidden bg-black/5 dark:bg-white/5 self-stretch">
@@ -45,6 +56,19 @@ export default function RecipeCompactCard({
           alt={r.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
         />
+
+        {/* Select-mode checkbox */}
+        {isSelectMode && !isCommunity && (
+          <div
+            className={`absolute top-1.5 left-1.5 z-10 w-6 h-6 rounded-full flex items-center justify-center transition-all border-none ${
+              isSelected
+                ? 'bg-emerald-500 text-white shadow-md'
+                : 'bg-black/40 backdrop-blur-sm text-white shadow-xs'
+            }`}
+          >
+            {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3px]" />}
+          </div>
+        )}
 
         {/* Subtle dark gradient scrim at the bottom for duration contrast */}
         {totalTime && (
@@ -60,7 +84,11 @@ export default function RecipeCompactCard({
         )}
 
         {job.isFavorite && (
-          <div className="absolute top-1.5 left-1.5 w-5 h-5 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center text-amber-400 pointer-events-none">
+          <div
+            className={`absolute top-1.5 ${
+              isSelectMode && !isCommunity ? 'right-1.5' : 'left-1.5'
+            } w-5 h-5 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center text-amber-400 pointer-events-none transition-all`}
+          >
             <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
           </div>
         )}
