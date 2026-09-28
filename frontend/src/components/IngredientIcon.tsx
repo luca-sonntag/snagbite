@@ -14,7 +14,7 @@ export interface IngredientIconProps {
 
 const SIZE_MAP = {
   sm: 'w-8 h-8 min-w-[32px] min-h-[32px] max-w-[32px] max-h-[32px] aspect-square rounded-full',
-  grid: 'w-10.5 h-10.5 min-w-[42px] min-h-[42px] max-w-[42px] max-h-[42px] aspect-square rounded-full',
+  grid: 'w-10 h-10 min-w-[40px] min-h-[40px] max-w-[40px] max-h-[40px] aspect-square rounded-full',
   md: 'w-11 h-11 min-w-[44px] min-h-[44px] max-w-[44px] max-h-[44px] aspect-square rounded-full',
   lg: 'w-14 h-14 min-w-[56px] min-h-[56px] max-w-[56px] max-h-[56px] aspect-square rounded-full',
 };

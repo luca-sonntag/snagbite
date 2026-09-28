@@ -81,41 +81,29 @@ export default function RecipeIngredients({
           </div>
 
           <div className="flex items-center gap-2 sm:gap-2.5">
-            {/* View Mode Toggle Pill (Grid default / List) */}
-            <div className="flex items-center bg-black/[0.04] dark:bg-white/[0.06] p-0.5 rounded-xl">
-              <button
-                type="button"
-                onClick={() => handleViewModeChange('grid')}
-                className={`w-7.5 h-7.5 min-w-[30px] min-h-[30px] rounded-lg flex items-center justify-center transition-all cursor-pointer border-none ${
-                  viewMode === 'grid'
-                    ? 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 shadow-xs'
-                    : 'bg-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-                }`}
-                title={t('recipe.viewGrid')}
-                aria-label={t('recipe.viewGrid')}
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleViewModeChange('list')}
-                className={`w-7.5 h-7.5 min-w-[30px] min-h-[30px] rounded-lg flex items-center justify-center transition-all cursor-pointer border-none ${
-                  viewMode === 'list'
-                    ? 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 shadow-xs'
-                    : 'bg-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-                }`}
-                title={t('recipe.viewList')}
-                aria-label={t('recipe.viewList')}
-              >
-                <List className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
             <RecipeServingsStepper
               servings={servings}
               onDecreaseServings={onDecreaseServings}
               onIncreaseServings={onIncreaseServings}
             />
+
+            {/* Single View Mode Toggle Button (right of stepper) */}
+            <Button
+              isIconOnly
+              variant="tertiary"
+              className="w-11 h-11 sm:w-12 sm:h-12 min-w-[44px] min-h-[44px] rounded-2xl bg-black/[0.04] dark:bg-white/[0.06] border-0 text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 active:scale-95 transition-all shrink-0 cursor-pointer flex items-center justify-center"
+              onPress={() => {
+                hapticLight();
+                handleViewModeChange(viewMode === 'grid' ? 'list' : 'grid');
+              }}
+              aria-label={viewMode === 'grid' ? t('recipe.viewList') : t('recipe.viewGrid')}
+            >
+              {viewMode === 'grid' ? (
+                <List className="w-4 h-4" />
+              ) : (
+                <LayoutGrid className="w-4 h-4" />
+              )}
+            </Button>
           </div>
         </div>
 
