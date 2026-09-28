@@ -169,39 +169,45 @@ export default function RecipeIngredients({
           </div>
         )}
 
-        {/* 1.4 Integrated Shopping List Button Footer */}
+        {/* 1.4 Integrated Shopping List Button Footer (Full-bleed card footer) */}
         {onAddIngredients && (
-          <div className="px-4.5 py-3.5 sm:px-6 bg-white dark:bg-gray-900">
-            <Button
-              className={`w-full h-12 min-h-[48px] rounded-2xl font-bold transition-all flex items-center justify-between px-4 sm:px-5 text-sm active:scale-[0.98] border-none shadow-none cursor-pointer group ${
-                isAdded
-                  ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
-                  : 'bg-gray-100 hover:bg-gray-200/80 dark:bg-gray-800 dark:hover:bg-gray-750 text-gray-800 dark:text-gray-200'
-              }`}
-              onPress={() => {
-                hapticLight();
-                onAddIngredients();
-              }}
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                {isAdded ? (
-                  <Check className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                ) : (
-                  <ShoppingCart className="w-4.5 h-4.5 text-gray-500 dark:text-gray-400 shrink-0" />
-                )}
-                <span className="truncate">
-                  {isAdded ? t('recipe.addedToShopping') : t('recipe.addToShopping')}
-                </span>
-              </div>
-              <ChevronRight
-                className={`w-4.5 h-4.5 shrink-0 group-hover:translate-x-0.5 transition-transform ${
+          <button
+            type="button"
+            onClick={() => {
+              hapticLight();
+              onAddIngredients();
+            }}
+            aria-label={isAdded ? t('recipe.addedToShopping') : t('recipe.addToShopping')}
+            className={`w-full px-4.5 py-3.5 sm:px-6 min-h-[50px] flex items-center justify-between gap-3 transition-colors cursor-pointer group select-none border-none text-left focus:outline-none ${
+              isAdded
+                ? 'bg-emerald-500/10 hover:bg-emerald-500/15 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/20'
+                : 'bg-gray-100/75 hover:bg-gray-200/60 active:bg-gray-200/90 dark:bg-gray-800/40 dark:hover:bg-gray-800/70 dark:active:bg-gray-800/90'
+            }`}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              {isAdded ? (
+                <Check className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              ) : (
+                <ShoppingCart className="w-4.5 h-4.5 text-gray-500 dark:text-gray-400 shrink-0" />
+              )}
+              <span
+                className={`truncate text-sm font-semibold ${
                   isAdded
-                    ? 'text-emerald-600/70 dark:text-emerald-400/70'
-                    : 'text-gray-400 dark:text-gray-500'
+                    ? 'text-emerald-700 dark:text-emerald-300'
+                    : 'text-gray-800 dark:text-gray-200'
                 }`}
-              />
-            </Button>
-          </div>
+              >
+                {isAdded ? t('recipe.addedToShopping') : t('recipe.addToShopping')}
+              </span>
+            </div>
+            <ChevronRight
+              className={`w-4.5 h-4.5 shrink-0 group-hover:translate-x-0.5 transition-transform ${
+                isAdded
+                  ? 'text-emerald-600/70 dark:text-emerald-400/70'
+                  : 'text-gray-400 dark:text-gray-500'
+              }`}
+            />
+          </button>
         )}
       </div>
 
