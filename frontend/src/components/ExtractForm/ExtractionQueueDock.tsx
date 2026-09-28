@@ -32,14 +32,14 @@ export const ExtractionQueueDock: React.FC<ExtractionQueueDockProps> = ({
       >
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <div
-            className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+            className={`w-8 h-8 flex items-center justify-center shrink-0 transition-colors ${
               actualFailed > 0
-                ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
-                : 'bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                ? 'text-amber-600 dark:text-amber-400'
+                : 'rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
             }`}
           >
             {actualFailed > 0 ? (
-              <AlertCircle className="w-4 h-4" />
+              <AlertCircle className="w-5 h-5" />
             ) : (
               <Bookmark className="w-4 h-4" />
             )}
