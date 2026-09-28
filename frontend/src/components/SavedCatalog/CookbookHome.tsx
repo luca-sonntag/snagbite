@@ -101,6 +101,7 @@ export default function CookbookHome({
 
   const handleOpenSlide = (e: MouseEvent, slide: HeroSlideItem) => {
     if (slide.isCommunity) {
+      if (isSelectMode) return;
       if (slide.recipe.id && savedRecipeIds?.has(slide.recipe.id)) {
         window.location.hash = `/recipe/${slide.recipe.id}`;
       } else {
@@ -112,11 +113,17 @@ export default function CookbookHome({
   };
 
   const handleOpenBentoRecipe = (e: MouseEvent, job: SavedRecipe) => {
-    if (job.recipe?.id && !savedRecipeIds?.has(job.recipe.id) && !items?.some((j) => j.recipeId === job.recipeId)) {
-      setSelectedPreviewRecipe(job.recipe);
-    } else {
-      onOpenRecipe(e, job);
+    const isComm = !items?.some((j) => j.recipeId === job.recipeId);
+    if (isComm) {
+      if (isSelectMode) return;
+      if (job.recipe?.id && !savedRecipeIds?.has(job.recipe.id)) {
+        setSelectedPreviewRecipe(job.recipe);
+      } else {
+        onOpenRecipe(e, job);
+      }
+      return;
     }
+    onOpenRecipe(e, job);
   };
 
   const handleSaveCommunityFromHero = async (_e: MouseEvent, recipe: Recipe) => {
@@ -181,6 +188,9 @@ export default function CookbookHome({
           slides={heroSlides}
           onOpenSlide={handleOpenSlide}
           onSaveCommunity={handleSaveCommunityFromHero}
+          isSelectMode={isSelectMode}
+          selectedIds={selectedIds}
+          bindLongPress={bindLongPress}
         />
       )}
 
@@ -193,6 +203,10 @@ export default function CookbookHome({
           formatTotalTime={formatTotalTime}
           onOpenRecipe={handleOpenBentoRecipe}
           onSeeAll={() => onOpenList({ kind: 'quick' })}
+          isSelectMode={isSelectMode}
+          selectedIds={selectedIds}
+          bindLongPress={bindLongPress}
+          isCommunityJob={(job) => !items?.some((j) => j.recipeId === job.recipeId)}
         />
       )}
 
@@ -211,6 +225,9 @@ export default function CookbookHome({
           job={rediscoveredRecipe}
           totalTime={rediscoveredRecipe.recipe ? formatTotalTime(rediscoveredRecipe.recipe) : null}
           onOpenRecipe={onOpenRecipe}
+          isSelected={selectedIds?.has(rediscoveredRecipe.recipeId)}
+          isSelectMode={isSelectMode}
+          bindLongPress={bindLongPress ? bindLongPress(rediscoveredRecipe.recipeId, rediscoveredRecipe) : undefined}
         />
       )}
 
