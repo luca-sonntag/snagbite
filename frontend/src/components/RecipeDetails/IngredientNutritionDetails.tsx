@@ -257,8 +257,10 @@ export const IngredientNutritionDetails: FC<IngredientNutritionDetailsProps> = (
 
       {/* 5. Verification Status */}
       {ingredient.isVerified ? (
-        <div className="flex items-center gap-2.5 py-1">
-          <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+        <div className="flex items-center gap-3 py-1">
+          <div className="w-9 h-9 rounded-xl bg-emerald-500/15 dark:bg-emerald-500/25 flex items-center justify-center shrink-0">
+            <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+          </div>
           <div className="min-w-0 flex-1">
             <span className="text-xs font-bold text-emerald-900 dark:text-emerald-200 tracking-tight block">
               {t('recipe.ingredientNutritionVerifiedBadge')}
@@ -271,8 +273,10 @@ export const IngredientNutritionDetails: FC<IngredientNutritionDetailsProps> = (
           </div>
         </div>
       ) : (
-        <div className="flex items-center gap-2.5 py-1">
-          <Sparkles className="w-4.5 h-4.5 text-gray-400 dark:text-gray-500 shrink-0" />
+        <div className="flex items-center gap-3 py-1">
+          <div className="w-9 h-9 rounded-xl bg-gray-200/60 dark:bg-gray-700/60 flex items-center justify-center shrink-0">
+            <Sparkles className="w-4.5 h-4.5 text-gray-400 dark:text-gray-500" />
+          </div>
           <span className="text-xs text-gray-600 dark:text-gray-300 font-medium leading-snug">
             {t('recipe.ingredientNutritionEstimatedBadge')}
           </span>
