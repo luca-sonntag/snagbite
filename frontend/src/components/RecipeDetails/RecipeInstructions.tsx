@@ -1,5 +1,5 @@
 import { Button } from '@heroui/react';
-import { Play, Check, Utensils, ListChecks, Sparkles } from 'lucide-react';
+import { Play, Check, Sparkles } from 'lucide-react';
 import type { Recipe } from '../../types';
 import RecipeInstructionText from '../RecipeInstructionText';
 import { useI18n } from '../../context/I18nContext';
@@ -36,12 +36,8 @@ export default function RecipeInstructions({
   const steps = recipe.instructions ?? [];
   const hasStarted = completedStepsCount > 0;
 
-  // One shared left column across progress, equipment and steps, so the three
-  // blocks read down a single edge instead of each starting somewhere else.
+  // Rail column styling for steps timeline
   const railColumn = 'w-9 flex-shrink-0 flex flex-col items-center';
-  const medallion =
-    'w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 flex items-center justify-center flex-shrink-0';
-  const medallionIcon = 'w-4 h-4 text-emerald-600 dark:text-emerald-400';
   const blockLabel =
     'text-xs font-medium text-gray-500 dark:text-gray-400';
 
@@ -51,32 +47,26 @@ export default function RecipeInstructions({
       <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
         {/* 1. Cooking Progress & Start Button */}
         <div className="px-5 py-5 sm:px-6 flex flex-col gap-4">
-          <div className="flex items-start gap-4">
-            <div className={medallion}>
-              <ListChecks className={medallionIcon} />
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-between items-baseline gap-2">
+              <span className={blockLabel}>{t('recipe.cookingProgress')}</span>
+              <span className={`text-xs font-bold tabular-nums ${
+                hasStarted
+                  ? 'text-emerald-600 dark:text-emerald-400'
+                  : 'text-gray-400 dark:text-gray-500'
+              }`}>
+                {t('recipe.progressSteps', {
+                  completed: completedStepsCount,
+                  total: totalStepsCount,
+                  percent: Math.round(progressPercent)
+                })}
+              </span>
             </div>
-
-            <div className="flex-1 min-w-0 flex flex-col gap-2">
-              <div className="flex justify-between items-baseline gap-2">
-                <span className={blockLabel}>{t('recipe.cookingProgress')}</span>
-                <span className={`text-xs font-bold tabular-nums ${
-                  hasStarted
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : 'text-gray-400 dark:text-gray-500'
-                }`}>
-                  {t('recipe.progressSteps', {
-                    completed: completedStepsCount,
-                    total: totalStepsCount,
-                    percent: Math.round(progressPercent)
-                  })}
-                </span>
-              </div>
-              <div className="w-full bg-black/[0.07] dark:bg-white/10 h-1.5 rounded-full overflow-hidden">
-                <div
-                  className="bg-emerald-500 h-full rounded-full transition-all duration-500 ease-out"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
+            <div className="w-full bg-black/[0.07] dark:bg-white/10 h-1.5 rounded-full overflow-hidden">
+              <div
+                className="bg-emerald-500 h-full rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${progressPercent}%` }}
+              />
             </div>
           </div>
 
@@ -95,27 +85,20 @@ export default function RecipeInstructions({
 
         {/* 2. Required Equipment */}
         {recipe.equipment && recipe.equipment.length > 0 && (
-          <div className="px-5 py-4.5 sm:px-6">
-            <div className="flex items-start gap-4">
-              <div className={medallion}>
-                <Utensils className={medallionIcon} />
-              </div>
-              <div className="flex-1 min-w-0 pt-1">
-                <span className={`${blockLabel} mb-2 block`}>
-                  {t('recipe.requiredEquipment')}
-                </span>
-                <ul className="flex flex-wrap gap-1.5">
-                  {recipe.equipment.map((item, idx) => (
-                    <li
-                      key={idx}
-                      className="py-1 px-3 bg-black/[0.04] dark:bg-white/[0.06] rounded-xl text-xs font-medium text-gray-600 dark:text-gray-300 select-none border-none"
-                    >
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+          <div className="px-5 py-4.5 sm:px-6 flex flex-col gap-2">
+            <span className={blockLabel}>
+              {t('recipe.requiredEquipment')}
+            </span>
+            <ul className="flex flex-wrap gap-1.5">
+              {recipe.equipment.map((item, idx) => (
+                <li
+                  key={idx}
+                  className="py-1 px-3 bg-black/[0.04] dark:bg-white/[0.06] rounded-xl text-xs font-medium text-gray-600 dark:text-gray-300 select-none border-none"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
