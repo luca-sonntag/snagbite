@@ -169,34 +169,26 @@ export default function RecipeIngredients({
           </div>
         )}
 
-        {/* 1.4 Integrated Shopping List Button Footer (Full-bleed card footer) */}
+        {/* 1.4 Integrated Shopping List Button Footer */}
         {onAddIngredients && (
-          <button
-            type="button"
-            onClick={() => {
+          <Button
+            className={`w-full min-h-[50px] h-auto px-4.5 py-3.5 sm:px-6 rounded-none font-bold transition-colors flex items-center justify-between text-sm border-none shadow-none cursor-pointer group bg-white hover:bg-gray-50/90 active:bg-gray-100/70 dark:bg-gray-900 dark:hover:bg-gray-850 dark:active:bg-gray-800 ${
+              isAdded
+                ? 'text-emerald-700 dark:text-emerald-300'
+                : 'text-gray-900 dark:text-white'
+            }`}
+            onPress={() => {
               hapticLight();
               onAddIngredients();
             }}
-            aria-label={isAdded ? t('recipe.addedToShopping') : t('recipe.addToShopping')}
-            className={`w-full px-4.5 py-3.5 sm:px-6 min-h-[50px] flex items-center justify-between gap-3 transition-colors cursor-pointer group select-none border-none text-left focus:outline-none ${
-              isAdded
-                ? 'bg-emerald-500/10 hover:bg-emerald-500/15 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/20'
-                : 'bg-gray-100/75 hover:bg-gray-200/60 active:bg-gray-200/90 dark:bg-gray-800/40 dark:hover:bg-gray-800/70 dark:active:bg-gray-800/90'
-            }`}
           >
-            <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex items-center gap-3 min-w-0">
               {isAdded ? (
                 <Check className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
               ) : (
-                <ShoppingCart className="w-4.5 h-4.5 text-gray-500 dark:text-gray-400 shrink-0" />
+                <ShoppingCart className="w-4.5 h-4.5 text-gray-600 dark:text-gray-400 shrink-0" />
               )}
-              <span
-                className={`truncate text-sm font-semibold ${
-                  isAdded
-                    ? 'text-emerald-700 dark:text-emerald-300'
-                    : 'text-gray-800 dark:text-gray-200'
-                }`}
-              >
+              <span className="truncate">
                 {isAdded ? t('recipe.addedToShopping') : t('recipe.addToShopping')}
               </span>
             </div>
@@ -207,7 +199,7 @@ export default function RecipeIngredients({
                   : 'text-gray-400 dark:text-gray-500'
               }`}
             />
-          </button>
+          </Button>
         )}
       </div>
 
