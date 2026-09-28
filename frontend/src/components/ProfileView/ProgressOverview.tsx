@@ -371,7 +371,7 @@ function BadgeDetailModal({
         </Button>
 
         {/* Badge Icon */}
-        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-4xl shadow-inner">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center text-5xl">
           <span className={!isEarned ? 'grayscale opacity-75' : ''}>
             {badgeEmoji(badgeKey)}
           </span>
