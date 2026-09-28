@@ -172,10 +172,10 @@ export default function RecipeIngredients({
         {/* 1.4 Integrated Shopping List Button Footer */}
         {onAddIngredients && (
           <Button
-            className={`w-full min-h-[56px] h-auto px-5 py-4 sm:px-6 sm:py-4.5 rounded-none font-medium transition-colors flex items-center justify-between text-sm border-none shadow-none cursor-pointer group bg-white hover:bg-gray-50/90 active:bg-gray-100/70 dark:bg-gray-900 dark:hover:bg-gray-850 dark:active:bg-gray-800 ${
+            className={`w-full min-h-[56px] h-auto px-5 py-4 sm:px-6 sm:py-4.5 rounded-none font-semibold transition-colors flex items-center justify-between text-sm border-none shadow-none cursor-pointer group bg-white hover:bg-gray-50/90 active:bg-gray-100/70 dark:bg-gray-900 dark:hover:bg-gray-850 dark:active:bg-gray-800 ${
               isAdded
                 ? 'text-emerald-600 dark:text-emerald-400'
-                : 'text-gray-700 dark:text-gray-200'
+                : 'text-gray-800 dark:text-gray-100'
             }`}
             onPress={() => {
               hapticLight();
@@ -184,16 +184,16 @@ export default function RecipeIngredients({
           >
             <div className="flex items-center gap-3.5 min-w-0">
               {isAdded ? (
-                <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 stroke-[1.75]" />
+                <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
               ) : (
-                <ShoppingCart className="w-5 h-5 text-gray-500 dark:text-gray-400 shrink-0 stroke-[1.75]" />
+                <ShoppingCart className="w-5 h-5 text-gray-500 dark:text-gray-400 shrink-0" />
               )}
-              <span className="truncate text-sm font-medium">
+              <span className="truncate text-sm font-semibold">
                 {isAdded ? t('recipe.addedToShopping') : t('recipe.addToShopping')}
               </span>
             </div>
             <ChevronRight
-              className={`w-4.5 h-4.5 shrink-0 stroke-[1.75] group-hover:translate-x-0.5 transition-transform ${
+              className={`w-4.5 h-4.5 shrink-0 group-hover:translate-x-0.5 transition-transform ${
                 isAdded
                   ? 'text-emerald-600/70 dark:text-emerald-400/70'
                   : 'text-gray-400 dark:text-gray-500'
