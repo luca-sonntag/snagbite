@@ -172,7 +172,7 @@ export default function RecipeIngredients({
         {/* 1.4 Integrated Shopping List Button Footer */}
         {onAddIngredients && (
           <Button
-            className={`w-full min-h-[56px] h-auto px-5 py-4 sm:px-6 sm:py-4.5 rounded-none font-semibold transition-colors flex items-center justify-between text-sm border-none shadow-none cursor-pointer group bg-white hover:bg-gray-50/90 active:bg-gray-100/70 dark:bg-gray-900 dark:hover:bg-gray-850 dark:active:bg-gray-800 ${
+            className={`w-full min-h-[64px] h-auto pl-6.5 pr-5 py-5 sm:pl-7.5 sm:pr-6 sm:py-5.5 rounded-none font-semibold transition-colors flex items-center justify-between text-sm border-none shadow-none cursor-pointer group bg-white hover:bg-gray-50/90 active:bg-gray-100/70 dark:bg-gray-900 dark:hover:bg-gray-850 dark:active:bg-gray-800 ${
               isAdded
                 ? 'text-emerald-600 dark:text-emerald-400'
                 : 'text-gray-800 dark:text-gray-100'
