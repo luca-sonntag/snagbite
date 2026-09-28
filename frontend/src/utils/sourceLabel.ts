@@ -32,3 +32,5 @@ export function getSourceChannel(sourceUrl: string): SourceChannel {
   if (lower.includes('facebook.com')) return 'facebook';
   return 'web';
 }
+
+export { formatAuthorHandle, normalizeAuthorName } from '@cookbook/shared';

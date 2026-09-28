@@ -2,6 +2,7 @@ import React from 'react';
 import { Camera, Globe, BookOpen } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { InstagramIcon } from '../ShareMockups';
+import { formatAuthorHandle } from '../../utils/sourceLabel';
 import type { PlatformType } from './types';
 import type { RecipePreviewData } from '../../types';
 
@@ -69,9 +70,9 @@ export default function RecipeCoverPreview({
           <span>{platformBadge.label}</span>
         </div>
 
-        {preview?.authorHandle && (
+        {formatAuthorHandle(preview?.authorHandle) && (
           <div className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white/90 text-[11px] font-medium shadow-sm max-w-[130px] truncate">
-            @{preview.authorHandle.replace(/^@/, '')}
+            {formatAuthorHandle(preview?.authorHandle)}
           </div>
         )}
       </div>

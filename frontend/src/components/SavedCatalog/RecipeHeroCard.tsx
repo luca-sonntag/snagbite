@@ -6,6 +6,7 @@ import { hapticLight, hapticMedium } from '../../utils/haptics';
 import { useI18n } from '../../context/I18nContext';
 import { getRecipeCalories } from '../../utils/formatNutrition';
 import { getHealthScoreLetter, getHealthScoreColor } from '../RecipeDetails/HealthScoreBadge';
+import { formatAuthorHandle } from '../../utils/sourceLabel';
 
 export type HeroBadgeVariant = 'amber' | 'emerald' | 'indigo' | 'blue' | 'rose' | 'teal';
 
@@ -230,9 +231,9 @@ export default function RecipeHeroCard({
 
           {/* Bottom Bar: Author Handle & Cook CTA - Snug directly under title */}
           <div className="flex items-center justify-between gap-2 mt-0.5">
-            {r.sourceHandle ? (
+            {formatAuthorHandle(r.sourceHandle) ? (
               <p className="text-[10.5px] text-gray-300/85 font-medium truncate leading-none">
-                {`@${r.sourceHandle.replace(/^@/, '')}`}
+                {formatAuthorHandle(r.sourceHandle)}
               </p>
             ) : (
               <span />

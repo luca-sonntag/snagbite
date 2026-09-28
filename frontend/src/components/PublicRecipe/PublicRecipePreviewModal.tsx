@@ -11,6 +11,7 @@ import { useModalOverlay } from '../../context/OverlayStackContext';
 import RecipeInfoSection from '../RecipeDetails/RecipeInfoSection';
 import PreviewHeroHeader from './PreviewHeroHeader';
 import PreviewIngredientsCard from './PreviewIngredientsCard';
+import { formatAuthorHandle } from '../../utils/sourceLabel';
 
 export interface PublicRecipePreviewModalProps {
   isOpen: boolean;
@@ -152,9 +153,9 @@ export const PublicRecipePreviewModal: React.FC<PublicRecipePreviewModalProps> =
           <div className="p-4 sm:p-5 flex flex-col gap-4">
             {/* Title & Metadata */}
             <div className="flex flex-col gap-1.5">
-              {recipe.sourceHandle && (
+              {formatAuthorHandle(recipe.sourceHandle) && (
                 <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 select-none leading-none">
-                  {recipe.sourceHandle}
+                  {formatAuthorHandle(recipe.sourceHandle)}
                 </div>
               )}
               <h2
