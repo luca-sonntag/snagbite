@@ -68,7 +68,7 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
     <li
       key={uniqueId}
       onClick={handleClick}
-      className={`group relative flex items-center p-1.5 sm:p-2 rounded-xl transition-all duration-150 select-none bg-transparent hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:bg-black/[0.04] dark:active:bg-white/[0.05] active:scale-[0.98] min-h-[46px] ${
+      className={`group relative flex items-center p-2 sm:p-2.5 rounded-2xl transition-all duration-150 select-none bg-transparent hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:bg-black/[0.04] dark:active:bg-white/[0.05] active:scale-[0.98] min-h-[52px] ${
         isClickable ? 'cursor-pointer' : ''
       }`}
       title={
@@ -77,21 +77,21 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
           : name
       }
     >
-      {/* Category color bar / rectangle */}
+      {/* Category color bar / rectangle - slightly more delicate */}
       <span
-        className={`w-1.5 h-6 rounded-full ${theme.barClass} shrink-0 opacity-85 mr-1 sm:mr-1.5`}
+        className={`w-1 h-4.5 rounded-full ${theme.barClass} shrink-0 opacity-85 mr-1.5`}
         title={categoryName || ingredient.category || undefined}
       />
 
-      {/* Ingredient Icon with tighter spacing */}
+      {/* Ingredient Icon */}
       <IngredientIcon
         baseName={ingredient.baseName}
         canonicalId={ingredient.canonicalId}
         category={categoryName || ingredient.category}
         name={name}
         synonyms={ingredient.synonyms}
-        size="sm"
-        className="mr-1.5 sm:mr-2"
+        size="md"
+        className="mr-2"
       />
 
       {/* Ingredient details */}
@@ -108,7 +108,7 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
             {name}
           </span>
           {ingredient.modifier && (
-            <span className="text-[10.5px] text-gray-400 dark:text-gray-500 font-normal truncate hidden sm:inline">
+            <span className="text-[11px] text-gray-400 dark:text-gray-500 font-normal truncate hidden sm:inline">
               ({ingredient.modifier.replace(/^\((.+)\)$/, '$1').trim()})
             </span>
           )}
@@ -116,8 +116,8 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
 
         {/* Amount in light gray (no kcal in card view) */}
         {displayAmount && (
-          <div className="text-[11px] font-normal mt-0.5 truncate">
-            <span className="font-medium text-gray-500 dark:text-gray-400 tabular-nums truncate text-[11px]">
+          <div className="text-xs font-normal mt-0.5 truncate">
+            <span className="font-medium text-gray-500 dark:text-gray-400 tabular-nums truncate text-xs">
               {displayAmount}
             </span>
           </div>
