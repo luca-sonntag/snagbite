@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
  */
 export function useShoppingSticky(isActive: boolean = true) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [collapseSentinel, setCollapseSentinel] = useState<HTMLDivElement | null>(null);
+  const [, setCollapseSentinel] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!isActive) return;
