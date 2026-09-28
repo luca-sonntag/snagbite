@@ -142,8 +142,7 @@ export default function SettingsView() {
             </span>
             <div className="flex items-center gap-2 mt-1.5">
               {user?.app_metadata?.tier === 'alpha' ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 uppercase tracking-wider border-none">
-                  <Sparkles className="w-3 h-3 text-amber-500 fill-amber-500 animate-pulse" />
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 uppercase tracking-wider border-none">
                   {t('app.settings.alphaActive') || 'Alpha Access'}
                 </span>
               ) : isRealPremium ? (
