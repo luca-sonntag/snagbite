@@ -109,7 +109,7 @@ export default function RecipeIngredients({
 
         {/* 1.2 Ingredients Display (Grid 2-column or List) */}
         {viewMode === 'grid' ? (
-          <ul className="grid grid-cols-2 gap-x-1.5 sm:gap-x-3 gap-y-1.5 px-2 py-2.5 sm:px-3.5 sm:py-3.5 list-none m-0">
+          <ul className="grid grid-cols-2 gap-x-1.5 sm:gap-x-3 gap-y-1.5 px-2 pt-2 pb-3.5 sm:px-3.5 sm:pt-2.5 sm:pb-4.5 list-none m-0">
             {sortedIngredients.flatMap(({ group, originalIdx }) =>
               group.items.map((ing, idx) => (
                 <IngredientItemGrid
@@ -172,28 +172,28 @@ export default function RecipeIngredients({
         {/* 1.4 Integrated Shopping List Button Footer */}
         {onAddIngredients && (
           <Button
-            className={`w-full min-h-[50px] h-auto px-4.5 py-3.5 sm:px-6 rounded-none font-bold transition-colors flex items-center justify-between text-sm border-none shadow-none cursor-pointer group bg-white hover:bg-gray-50/90 active:bg-gray-100/70 dark:bg-gray-900 dark:hover:bg-gray-850 dark:active:bg-gray-800 ${
+            className={`w-full min-h-[56px] h-auto px-5 py-4 sm:px-6 sm:py-4.5 rounded-none font-medium transition-colors flex items-center justify-between text-sm border-none shadow-none cursor-pointer group bg-white hover:bg-gray-50/90 active:bg-gray-100/70 dark:bg-gray-900 dark:hover:bg-gray-850 dark:active:bg-gray-800 ${
               isAdded
-                ? 'text-emerald-700 dark:text-emerald-300'
-                : 'text-gray-900 dark:text-white'
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-gray-700 dark:text-gray-200'
             }`}
             onPress={() => {
               hapticLight();
               onAddIngredients();
             }}
           >
-            <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center gap-3.5 min-w-0">
               {isAdded ? (
-                <Check className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 stroke-[1.75]" />
               ) : (
-                <ShoppingCart className="w-4.5 h-4.5 text-gray-600 dark:text-gray-400 shrink-0" />
+                <ShoppingCart className="w-5 h-5 text-gray-500 dark:text-gray-400 shrink-0 stroke-[1.75]" />
               )}
-              <span className="truncate">
+              <span className="truncate text-sm font-medium">
                 {isAdded ? t('recipe.addedToShopping') : t('recipe.addToShopping')}
               </span>
             </div>
             <ChevronRight
-              className={`w-4.5 h-4.5 shrink-0 group-hover:translate-x-0.5 transition-transform ${
+              className={`w-4.5 h-4.5 shrink-0 stroke-[1.75] group-hover:translate-x-0.5 transition-transform ${
                 isAdded
                   ? 'text-emerald-600/70 dark:text-emerald-400/70'
                   : 'text-gray-400 dark:text-gray-500'
