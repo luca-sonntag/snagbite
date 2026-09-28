@@ -31,6 +31,9 @@ export interface RecipeHeroCardProps {
   isVital?: boolean;
   onSaveCommunity?: (e: MouseEvent, recipe: Recipe) => void;
   onOpenRecipe: (e: MouseEvent, recipe: Recipe, job?: SavedRecipe) => void;
+  isSelected?: boolean;
+  isSelectMode?: boolean;
+  bindLongPress?: any;
 }
 
 /**
@@ -51,6 +54,9 @@ export default function RecipeHeroCard({
   isVital = false,
   onSaveCommunity,
   onOpenRecipe,
+  isSelected = false,
+  isSelectMode = false,
+  bindLongPress,
 }: RecipeHeroCardProps) {
   const { t } = useI18n();
   const r = recipe || job?.recipe;
@@ -71,7 +77,10 @@ export default function RecipeHeroCard({
         hapticLight();
         onOpenRecipe(e, r, job);
       }}
-      className="relative group rounded-3xl overflow-hidden bg-gray-900 shadow-[0_8px_30px_rgba(0,0,0,0.12)] border-none select-none cursor-pointer active:scale-[0.98] transition-transform duration-200"
+      className={`relative group rounded-3xl overflow-hidden bg-gray-900 shadow-[0_8px_30px_rgba(0,0,0,0.12)] border-none select-none cursor-pointer active:scale-[0.98] transition-transform duration-200 ${
+        isSelected ? 'ring-2 ring-emerald-500' : ''
+      }`}
+      {...(!isCommunity ? (bindLongPress ?? {}) : {})}
     >
       <div className="relative aspect-[4/3] sm:aspect-[16/10] w-full overflow-hidden">
         <CachedImage
@@ -85,35 +94,49 @@ export default function RecipeHeroCard({
 
         {/* Top Badges */}
         <div className="absolute top-2.5 inset-x-2.5 sm:top-3 sm:inset-x-3 flex items-center justify-between pointer-events-none">
-          {hasMultipleThemeRecipes ? (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                hapticLight();
-                onOpenTheme?.(e);
-              }}
-              className={`pointer-events-auto px-2.5 py-1 rounded-full ${
-                BADGE_VARIANT_STYLES[badgeVariant] ?? BADGE_VARIANT_STYLES.amber
-              } backdrop-blur-md text-[10.5px] sm:text-[11px] font-bold shadow-md flex items-center gap-1.5 tracking-tight active:scale-95 transition-transform border-none cursor-pointer select-none`}
-              aria-label={`${badgeText || t('catalog.magazine.heroHighlight')} - ${t('catalog.magazine.heroThemeRecipesCount', { count: themeRecipeCount ?? 0 })}`}
-            >
-              <span>{badgeText || t('catalog.magazine.heroHighlight')}</span>
-              <span className="opacity-60 font-normal">•</span>
-              <span className="font-semibold text-white/95">
-                {t('catalog.magazine.heroThemeRecipesCount', { count: themeRecipeCount ?? 0 })}
+          <div className="flex items-center gap-2 pointer-events-auto">
+            {isSelectMode && !isCommunity && (
+              <div
+                className={`w-7 h-7 rounded-full flex items-center justify-center transition-all border-none shrink-0 ${
+                  isSelected
+                    ? 'bg-emerald-500 text-white shadow-md'
+                    : 'bg-black/40 backdrop-blur-sm text-white shadow-xs'
+                }`}
+              >
+                {isSelected && <Check className="w-4 h-4 text-white stroke-[3px]" />}
+              </div>
+            )}
+            {hasMultipleThemeRecipes ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  if (isSelectMode) return;
+                  e.stopPropagation();
+                  hapticLight();
+                  onOpenTheme?.(e);
+                }}
+                className={`px-2.5 py-1 rounded-full ${
+                  BADGE_VARIANT_STYLES[badgeVariant] ?? BADGE_VARIANT_STYLES.amber
+                } backdrop-blur-md text-[10.5px] sm:text-[11px] font-bold shadow-md flex items-center gap-1.5 tracking-tight active:scale-95 transition-transform border-none cursor-pointer select-none`}
+                aria-label={`${badgeText || t('catalog.magazine.heroHighlight')} - ${t('catalog.magazine.heroThemeRecipesCount', { count: themeRecipeCount ?? 0 })}`}
+              >
+                <span>{badgeText || t('catalog.magazine.heroHighlight')}</span>
+                <span className="opacity-60 font-normal">•</span>
+                <span className="font-semibold text-white/95">
+                  {t('catalog.magazine.heroThemeRecipesCount', { count: themeRecipeCount ?? 0 })}
+                </span>
+                <ChevronRight className="w-3 h-3 stroke-[2.5] text-white/85 shrink-0" />
+              </button>
+            ) : (
+              <span
+                className={`px-2 py-0.5 rounded-full ${
+                  BADGE_VARIANT_STYLES[badgeVariant] ?? BADGE_VARIANT_STYLES.amber
+                } backdrop-blur-md text-[10px] sm:text-[10.5px] font-bold shadow-sm flex items-center tracking-tight`}
+              >
+                {badgeText || t('catalog.magazine.heroHighlight')}
               </span>
-              <ChevronRight className="w-3 h-3 stroke-[2.5] text-white/85 shrink-0" />
-            </button>
-          ) : (
-            <span
-              className={`px-2 py-0.5 rounded-full ${
-                BADGE_VARIANT_STYLES[badgeVariant] ?? BADGE_VARIANT_STYLES.amber
-              } backdrop-blur-md text-[10px] sm:text-[10.5px] font-bold shadow-sm flex items-center tracking-tight`}
-            >
-              {badgeText || t('catalog.magazine.heroHighlight')}
-            </span>
-          )}
+            )}
+          </div>
 
           {/* Right Action: Bookmark/Save for Community or Favorite Star for own */}
           {isCommunity ? (
