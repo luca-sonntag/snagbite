@@ -121,7 +121,7 @@ export default function RecipeIngredients({
 
         {/* 1.2 Ingredients Display (Grid 2-column or List) */}
         {viewMode === 'grid' ? (
-          <ul className="grid grid-cols-2 gap-2 sm:gap-2.5 p-3 sm:p-4.5 list-none m-0">
+          <ul className="grid grid-cols-2 gap-x-2.5 sm:gap-x-4 gap-y-1 p-3 sm:p-4.5 list-none m-0">
             {sortedIngredients.flatMap(({ group, originalIdx }) =>
               group.items.map((ing, idx) => (
                 <IngredientItemGrid

@@ -26,7 +26,6 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
   originalIdx,
   itemIdx,
   isPremium = false,
-  scaleFactor = 1,
   formatAmount,
   onSelectNutrition,
   onOpenProFeature,
@@ -69,7 +68,7 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
     <li
       key={uniqueId}
       onClick={handleClick}
-      className={`group relative flex items-center gap-2 sm:gap-2.5 p-2 sm:p-2.5 rounded-2xl transition-all duration-150 select-none bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] active:bg-black/[0.06] dark:active:bg-white/[0.07] active:scale-[0.98] min-h-[52px] ${
+      className={`group relative flex items-center p-1.5 sm:p-2 rounded-xl transition-all duration-150 select-none bg-transparent hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:bg-black/[0.04] dark:active:bg-white/[0.05] active:scale-[0.98] min-h-[46px] ${
         isClickable ? 'cursor-pointer' : ''
       }`}
       title={
@@ -80,18 +79,19 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
     >
       {/* Category color bar / rectangle */}
       <span
-        className={`w-1.5 h-6 rounded-full ${theme.barClass} shrink-0 opacity-85`}
+        className={`w-1.5 h-6 rounded-full ${theme.barClass} shrink-0 opacity-85 mr-1 sm:mr-1.5`}
         title={categoryName || ingredient.category || undefined}
       />
 
-      {/* Ingredient Icon */}
+      {/* Ingredient Icon with tighter spacing */}
       <IngredientIcon
         baseName={ingredient.baseName}
         canonicalId={ingredient.canonicalId}
         category={categoryName || ingredient.category}
         name={name}
         synonyms={ingredient.synonyms}
-        size="md"
+        size="sm"
+        className="mr-1.5 sm:mr-2"
       />
 
       {/* Ingredient details */}
@@ -114,24 +114,18 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
           )}
         </div>
 
-        {/* Amount & calories */}
-        <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 font-normal mt-0.5 truncate">
-          {displayAmount && (
-            <span className="font-bold text-emerald-600 dark:text-emerald-400 tabular-nums truncate text-xs">
+        {/* Amount in light gray (no kcal in card view) */}
+        {displayAmount && (
+          <div className="text-xs font-normal mt-0.5 truncate">
+            <span className="font-medium text-gray-500 dark:text-gray-400 tabular-nums truncate text-xs sm:text-[13px]">
               {displayAmount}
             </span>
-          )}
-          {hasCalories && (
-            <span className="text-[10.5px] sm:text-[11px] text-gray-400 dark:text-gray-500 tabular-nums truncate">
-              {displayAmount ? '· ' : ''}
-              {Math.round(ingredient.calories! * scaleFactor)} kcal
-            </span>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Chevron indicator */}
-      <div className="shrink-0 flex items-center text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 group-hover:translate-x-0.5 transition-all">
+      <div className="shrink-0 ml-1 flex items-center text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 group-hover:translate-x-0.5 transition-all">
         <ChevronRight className="w-3.5 h-3.5" />
       </div>
     </li>
