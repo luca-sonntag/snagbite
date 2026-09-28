@@ -607,7 +607,7 @@ export const uiTranslations = {
         badgeDetail: {
           statusLocked: 'Noch gesperrt',
           statusUnlocked: 'Freigeschaltet',
-          reward: 'Belohnung: +{xp} XP',
+          reward: '+{xp} XP',
           progressLabel: '{current} von {total} erreicht',
           unlockedOn: 'Freigeschaltet am {date}',
         },
@@ -2123,7 +2123,7 @@ export const uiTranslations = {
         badgeDetail: {
           statusLocked: 'Locked',
           statusUnlocked: 'Unlocked',
-          reward: 'Reward: +{xp} XP',
+          reward: '+{xp} XP',
           progressLabel: '{current} of {total} completed',
           unlockedOn: 'Unlocked on {date}',
         },

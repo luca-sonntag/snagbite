@@ -420,8 +420,7 @@ function BadgeDetailModal({
         )}
 
         {/* Reward info */}
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-4 py-1.5 text-xs font-extrabold text-amber-600 dark:text-amber-400">
-          <Sparkles className="w-4 h-4 text-amber-500" />
+        <div className="inline-flex items-center rounded-full bg-amber-500/10 px-4 py-1.5 text-xs font-extrabold text-amber-600 dark:text-amber-400">
           <span>{t('app.gamification.badgeDetail.reward', { xp: xpReward })}</span>
         </div>
       </div>
