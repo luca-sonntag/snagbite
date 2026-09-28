@@ -31,7 +31,7 @@ export const ShoppingTabsCard: React.FC<ShoppingTabsCardProps> = ({
   onClearAll,
   isCollapsed = false,
 }) => {
-  const showProgress = activeTab === 'shopping' && totalCount > 0 && !isCollapsed;
+  const showProgress = activeTab === 'shopping' && totalCount > 0;
 
   return (
     <div className="bg-white dark:bg-gray-900 p-2 sm:p-2.5 rounded-3xl border-none shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col transition-all duration-200">
@@ -50,6 +50,7 @@ export const ShoppingTabsCard: React.FC<ShoppingTabsCardProps> = ({
             progress={progress}
             onClearChecked={onClearChecked}
             onClearAll={onClearAll}
+            isCollapsed={isCollapsed}
           />
         </div>
       )}

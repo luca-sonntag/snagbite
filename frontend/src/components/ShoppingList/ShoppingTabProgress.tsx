@@ -1,6 +1,7 @@
 import React from 'react';
 import { CheckCheck, Trash2 } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
+import { hapticLight } from '../../utils/haptics';
 
 interface ShoppingTabProgressProps {
   checkedCount: number;
@@ -8,6 +9,7 @@ interface ShoppingTabProgressProps {
   progress: number;
   onClearChecked: () => void;
   onClearAll: () => void;
+  isCollapsed?: boolean;
 }
 
 export const ShoppingTabProgress: React.FC<ShoppingTabProgressProps> = ({
@@ -16,13 +18,64 @@ export const ShoppingTabProgress: React.FC<ShoppingTabProgressProps> = ({
   progress,
   onClearChecked,
   onClearAll,
+  isCollapsed = false,
 }) => {
   const { t } = useI18n();
 
   if (totalCount === 0) return null;
 
+  if (isCollapsed) {
+    return (
+      <div className="flex items-center justify-between gap-3 pt-2.5 mt-0.5 border-t border-gray-100/80 dark:border-gray-800/80 transition-all duration-200">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          <span className="text-xs font-bold text-gray-900 dark:text-white shrink-0 tabular-nums">
+            {checkedCount}/{totalCount}
+          </span>
+          <div className="h-2 flex-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-300 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <span className="text-[11px] text-gray-500 dark:text-gray-400 font-semibold tabular-nums shrink-0">
+            {Math.round(progress)}%
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          {checkedCount > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                hapticLight();
+                onClearChecked();
+              }}
+              aria-label={t('shopping.clearChecked')}
+              title={t('shopping.clearChecked')}
+              className="w-8 h-8 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none"
+            >
+              <CheckCheck className="w-4 h-4" />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              hapticLight();
+              onClearAll();
+            }}
+            aria-label={t('shopping.clearAll')}
+            title={t('shopping.clearAll')}
+            className="w-8 h-8 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-3 pt-3.5 border-t border-gray-100/80 dark:border-gray-800/80">
+    <div className="flex flex-col gap-3 pt-3.5 border-t border-gray-100/80 dark:border-gray-800/80 transition-all duration-200">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="min-w-0">
           <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-snug">
@@ -37,7 +90,10 @@ export const ShoppingTabProgress: React.FC<ShoppingTabProgressProps> = ({
           {checkedCount > 0 && (
             <button
               type="button"
-              onClick={onClearChecked}
+              onClick={() => {
+                hapticLight();
+                onClearChecked();
+              }}
               aria-label={t('shopping.clearChecked')}
               title={t('shopping.clearChecked')}
               className="h-9 px-3 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-95 transition-all text-xs font-semibold flex items-center gap-1.5 cursor-pointer border-none"
@@ -48,7 +104,10 @@ export const ShoppingTabProgress: React.FC<ShoppingTabProgressProps> = ({
           )}
           <button
             type="button"
-            onClick={onClearAll}
+            onClick={() => {
+              hapticLight();
+              onClearAll();
+            }}
             aria-label={t('shopping.clearAll')}
             title={t('shopping.clearAll')}
             className="w-9 h-9 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none"
@@ -61,7 +120,7 @@ export const ShoppingTabProgress: React.FC<ShoppingTabProgressProps> = ({
       {/* Smooth Gradient Progress Bar */}
       <div className="h-2 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden p-0.5">
         <div
-          className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500 ease-out"
+          className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-300 ease-out"
           style={{ width: `${progress}%` }}
         />
       </div>
