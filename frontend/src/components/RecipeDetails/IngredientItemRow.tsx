@@ -17,6 +17,7 @@ interface IngredientItemRowProps {
   scaleFactor?: number;
   formatAmount: (amount: number | undefined, unit: string | undefined) => string;
   onSelectNutrition?: (ingredient: Ingredient, category: string) => void;
+  onOpenProFeature?: () => void;
   hideNutrition?: boolean;
 }
 
@@ -29,6 +30,7 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
   scaleFactor = 1,
   formatAmount,
   onSelectNutrition,
+  onOpenProFeature,
   hideNutrition = false,
 }) => {
   const { t } = useI18n();
@@ -52,25 +54,29 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
   const showParentBadge = parent && parent.name.toLowerCase().trim() !== name.toLowerCase().trim();
   const hasCalories = !hideNutrition && ingredient.calories !== undefined && ingredient.calories !== null;
   const canOpenNutrition = isPremium && hasCalories;
+  const isClickable = canOpenNutrition || (!isPremium && hasCalories);
 
   const handleNutritionClick = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (!canOpenNutrition) return;
-
-    hapticLight();
-    onSelectNutrition?.(ingredient, categoryName);
+    if (canOpenNutrition) {
+      hapticLight();
+      onSelectNutrition?.(ingredient, categoryName);
+    } else if (!isPremium && hasCalories) {
+      hapticLight();
+      onOpenProFeature?.();
+    }
   };
 
   return (
     <li
       key={uniqueId}
       onClick={() => {
-        if (canOpenNutrition) {
+        if (isClickable) {
           handleNutritionClick();
         }
       }}
       className={`group flex items-center justify-between gap-3 px-4.5 py-3 sm:px-6 transition-colors hover:bg-black/[0.015] dark:hover:bg-white/[0.02] active:bg-black/[0.03] dark:active:bg-white/[0.04] select-none ${
-        canOpenNutrition ? 'cursor-pointer' : ''
+        isClickable ? 'cursor-pointer' : ''
       }`}
     >
       <div className="flex items-center gap-3 flex-1 min-w-0">

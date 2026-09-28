@@ -1113,6 +1113,8 @@ export const uiTranslations = {
       servingsCount: '{count} Portionen',
       decreaseServings: 'Portionen verringern',
       increaseServings: 'Portionen erhöhen',
+      viewGrid: 'Rasteransicht (2-spaltig)',
+      viewList: 'Listenansicht',
 
       preview: {
         title: 'Rezept-Vorschau',
@@ -2629,6 +2631,8 @@ export const uiTranslations = {
       servingsCount: '{count} servings',
       decreaseServings: 'Decrease servings',
       increaseServings: 'Increase servings',
+      viewGrid: 'Grid view (2-column)',
+      viewList: 'List view',
 
       preview: {
         title: 'Recipe Preview',

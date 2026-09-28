@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@heroui/react';
-import { Check, ShoppingCart, ChevronRight } from 'lucide-react';
+import { Check, ShoppingCart, ChevronRight, LayoutGrid, List } from 'lucide-react';
 import ProBadge from '../ProBadge';
 import type { Ingredient, Recipe } from '../../types';
 import type { SortedIngredientGroup } from './types';
@@ -9,6 +9,7 @@ import { hapticLight } from '../../utils/haptics';
 import IngredientNutritionSheet from './IngredientNutritionSheet';
 import RecipeServingsStepper from './RecipeServingsStepper';
 import IngredientItemRow from './IngredientItemRow';
+import IngredientItemGrid from './IngredientItemGrid';
 import AlternativeIngredientsList from './AlternativeIngredientsList';
 import PremiumModal from '../PremiumModal';
 import ProFeatureSheet from '../ProFeatureSheet';
@@ -39,6 +40,24 @@ export default function RecipeIngredients({
   onIncreaseServings,
 }: RecipeIngredientsProps) {
   const { t } = useI18n();
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    try {
+      return (localStorage.getItem('recipe_ingredients_view') as 'grid' | 'list') || 'grid';
+    } catch {
+      return 'grid';
+    }
+  });
+
+  const handleViewModeChange = (mode: 'grid' | 'list') => {
+    hapticLight();
+    setViewMode(mode);
+    try {
+      localStorage.setItem('recipe_ingredients_view', mode);
+    } catch {
+      // ignore
+    }
+  };
+
   const [selectedNutrition, setSelectedNutrition] = useState<{ ingredient: Ingredient; category: string } | null>(null);
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isProFeatureSheetOpen, setIsProFeatureSheetOpen] = useState(false);
@@ -51,7 +70,7 @@ export default function RecipeIngredients({
       {/* 1. Unified Cohesive Recipe Card (Servings + Ingredients + Pro Hint + Shopping CTA) */}
       <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
         {/* 1.1 Servings Header */}
-        <div className="px-4.5 py-3.5 sm:px-6 flex items-center justify-between gap-4">
+        <div className="px-4.5 py-3.5 sm:px-6 flex items-center justify-between gap-3">
           <div className="flex flex-col">
             <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
               {t('recipe.serves')}
@@ -60,31 +79,86 @@ export default function RecipeIngredients({
               {t('recipe.servingsCount', { count: servings })}
             </span>
           </div>
-          <RecipeServingsStepper
-            servings={servings}
-            onDecreaseServings={onDecreaseServings}
-            onIncreaseServings={onIncreaseServings}
-          />
+
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            {/* View Mode Toggle Pill (Grid default / List) */}
+            <div className="flex items-center bg-black/[0.04] dark:bg-white/[0.06] p-0.5 rounded-xl">
+              <button
+                type="button"
+                onClick={() => handleViewModeChange('grid')}
+                className={`w-7.5 h-7.5 min-w-[30px] min-h-[30px] rounded-lg flex items-center justify-center transition-all cursor-pointer border-none ${
+                  viewMode === 'grid'
+                    ? 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 shadow-xs'
+                    : 'bg-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                }`}
+                title={t('recipe.viewGrid')}
+                aria-label={t('recipe.viewGrid')}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleViewModeChange('list')}
+                className={`w-7.5 h-7.5 min-w-[30px] min-h-[30px] rounded-lg flex items-center justify-center transition-all cursor-pointer border-none ${
+                  viewMode === 'list'
+                    ? 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 shadow-xs'
+                    : 'bg-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                }`}
+                title={t('recipe.viewList')}
+                aria-label={t('recipe.viewList')}
+              >
+                <List className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <RecipeServingsStepper
+              servings={servings}
+              onDecreaseServings={onDecreaseServings}
+              onIncreaseServings={onIncreaseServings}
+            />
+          </div>
         </div>
 
-        {/* 1.2 Pure Ingredients List */}
-        <ul className="flex flex-col divide-y divide-gray-100/60 dark:divide-gray-800/50 list-none p-0 m-0">
-          {sortedIngredients.flatMap(({ group, originalIdx }) =>
-            group.items.map((ing, idx) => (
-              <IngredientItemRow
-                key={`${ing.name}-${originalIdx}-${idx}`}
-                ingredient={ing}
-                categoryName={group.name}
-                originalIdx={originalIdx}
-                itemIdx={idx}
-                isPremium={isPremium}
-                scaleFactor={scaleFactor}
-                formatAmount={formatAmount}
-                onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
-              />
-            ))
-          )}
-        </ul>
+        {/* 1.2 Ingredients Display (Grid 2-column or List) */}
+        {viewMode === 'grid' ? (
+          <ul className="grid grid-cols-2 gap-2 sm:gap-2.5 p-3 sm:p-4.5 list-none m-0">
+            {sortedIngredients.flatMap(({ group, originalIdx }) =>
+              group.items.map((ing, idx) => (
+                <IngredientItemGrid
+                  key={`${ing.name}-${originalIdx}-${idx}`}
+                  ingredient={ing}
+                  categoryName={group.name}
+                  originalIdx={originalIdx}
+                  itemIdx={idx}
+                  isPremium={isPremium}
+                  scaleFactor={scaleFactor}
+                  formatAmount={formatAmount}
+                  onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
+                  onOpenProFeature={() => setIsProFeatureSheetOpen(true)}
+                />
+              ))
+            )}
+          </ul>
+        ) : (
+          <ul className="flex flex-col divide-y divide-gray-100/60 dark:divide-gray-800/50 list-none p-0 m-0">
+            {sortedIngredients.flatMap(({ group, originalIdx }) =>
+              group.items.map((ing, idx) => (
+                <IngredientItemRow
+                  key={`${ing.name}-${originalIdx}-${idx}`}
+                  ingredient={ing}
+                  categoryName={group.name}
+                  originalIdx={originalIdx}
+                  itemIdx={idx}
+                  isPremium={isPremium}
+                  scaleFactor={scaleFactor}
+                  formatAmount={formatAmount}
+                  onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
+                  onOpenProFeature={() => setIsProFeatureSheetOpen(true)}
+                />
+              ))
+            )}
+          </ul>
+        )}
 
         {/* 1.3 PRO hint for ingredient nutrition */}
         {!isPremium && hasAnyNutrition && (
