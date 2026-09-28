@@ -68,7 +68,7 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
     <li
       key={uniqueId}
       onClick={handleClick}
-      className={`group relative flex items-center py-1 px-1 sm:px-1.5 rounded-xl transition-all duration-150 select-none bg-transparent hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:bg-black/[0.04] dark:active:bg-white/[0.05] active:scale-[0.98] min-h-[48px] ${
+      className={`group relative flex items-center py-2 px-1 sm:px-1.5 rounded-xl transition-all duration-150 select-none bg-transparent hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:bg-black/[0.04] dark:active:bg-white/[0.05] active:scale-[0.98] min-h-[58px] sm:min-h-[60px] ${
         isClickable ? 'cursor-pointer' : ''
       }`}
       title={
@@ -79,7 +79,7 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
     >
       {/* Category color bar / rectangle - delicate accent */}
       <span
-        className={`w-1 h-4 rounded-full ${theme.barClass} shrink-0 opacity-85 mr-1`}
+        className={`w-1 h-5 rounded-full ${theme.barClass} shrink-0 opacity-85 mr-1`}
         title={categoryName || ingredient.category || undefined}
       />
 
@@ -103,12 +103,12 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
         )}
 
         {/* Name and optional brand/modifier */}
-        <div className="flex items-baseline gap-1 min-w-0 text-xs sm:text-sm font-semibold text-gray-900 dark:text-white leading-tight">
+        <div className="flex items-baseline gap-1 min-w-0 text-sm font-semibold text-gray-900 dark:text-white leading-tight">
           <span className="truncate" title={name}>
             {name}
           </span>
           {ingredient.modifier && (
-            <span className="text-[11px] text-gray-400 dark:text-gray-500 font-normal truncate hidden sm:inline">
+            <span className="text-xs text-gray-400 dark:text-gray-500 font-normal truncate hidden sm:inline">
               ({ingredient.modifier.replace(/^\((.+)\)$/, '$1').trim()})
             </span>
           )}
