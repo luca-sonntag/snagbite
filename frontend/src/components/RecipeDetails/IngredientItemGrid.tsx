@@ -116,8 +116,8 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
 
         {/* Amount in light gray (no kcal in card view) */}
         {displayAmount && (
-          <div className="text-xs font-normal mt-0.5 truncate">
-            <span className="font-medium text-gray-500 dark:text-gray-400 tabular-nums truncate text-xs sm:text-[13px]">
+          <div className="text-[11px] font-normal mt-0.5 truncate">
+            <span className="font-medium text-gray-500 dark:text-gray-400 tabular-nums truncate text-[11px]">
               {displayAmount}
             </span>
           </div>
