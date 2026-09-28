@@ -57,6 +57,7 @@ export const ShoppingStickyHeader: React.FC<ShoppingStickyHeaderProps> = ({
         progress={progress}
         onClearChecked={onClearChecked}
         onClearAll={onClearAll}
+        isCollapsed={isCollapsed}
       />
 
       {/* 2. Collapsed Compact Progress Strip (smooth animated transition just like RecipeDetails) */}
