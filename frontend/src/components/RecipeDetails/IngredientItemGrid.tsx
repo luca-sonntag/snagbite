@@ -68,7 +68,7 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
     <li
       key={uniqueId}
       onClick={handleClick}
-      className={`group relative flex items-center p-2 sm:p-2.5 rounded-2xl transition-all duration-150 select-none bg-transparent hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:bg-black/[0.04] dark:active:bg-white/[0.05] active:scale-[0.98] min-h-[52px] ${
+      className={`group relative flex items-center py-1 px-1 sm:px-1.5 rounded-xl transition-all duration-150 select-none bg-transparent hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:bg-black/[0.04] dark:active:bg-white/[0.05] active:scale-[0.98] min-h-[48px] ${
         isClickable ? 'cursor-pointer' : ''
       }`}
       title={
@@ -77,9 +77,9 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
           : name
       }
     >
-      {/* Category color bar / rectangle - slightly more delicate */}
+      {/* Category color bar / rectangle - delicate accent */}
       <span
-        className={`w-1 h-4.5 rounded-full ${theme.barClass} shrink-0 opacity-85 mr-1.5`}
+        className={`w-1 h-4 rounded-full ${theme.barClass} shrink-0 opacity-85 mr-1`}
         title={categoryName || ingredient.category || undefined}
       />
 
@@ -90,8 +90,8 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
         category={categoryName || ingredient.category}
         name={name}
         synonyms={ingredient.synonyms}
-        size="md"
-        className="mr-2"
+        size="grid"
+        className="mr-1.5"
       />
 
       {/* Ingredient details */}
