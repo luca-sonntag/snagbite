@@ -103,7 +103,7 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
         )}
 
         {/* Name and optional brand/modifier */}
-        <div className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 break-words" title={name}>
+        <div className="text-[14px] font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 break-words" title={name}>
           <span>{name}</span>
           {ingredient.modifier && (
             <span className="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 font-normal ml-1">
