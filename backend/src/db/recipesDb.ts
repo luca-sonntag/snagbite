@@ -3,6 +3,7 @@ import type {
   SavedRecipe,
   UserRecipeSource,
 } from '../types.js';
+import { formatAuthorHandle } from '@cookbook/shared';
 import {
   getClient,
   wrapError,
@@ -26,7 +27,7 @@ export function rowToRecipe(row: RecipeRow): Recipe {
     visibility: row.visibility as Recipe['visibility'],
     origin: row.origin as Recipe['origin'],
     sourceUrl: row.source_url,
-    sourceHandle: row.source_handle,
+    sourceHandle: formatAuthorHandle(row.source_handle),
     parentRecipeId: row.parent_recipe_id,
     remixPrompt: row.remix_prompt,
     title: row.title,
@@ -90,7 +91,7 @@ export function recipeToRow(recipe: Recipe): Record<string, unknown> {
   return {
     visibility: recipe.visibility ?? 'private',
     source_url: recipe.sourceUrl ?? null,
-    source_handle: recipe.sourceHandle ?? null,
+    source_handle: formatAuthorHandle(recipe.sourceHandle) ?? null,
     parent_recipe_id: recipe.parentRecipeId ?? null,
     remix_prompt: recipe.remixPrompt ?? null,
     title: recipe.title,

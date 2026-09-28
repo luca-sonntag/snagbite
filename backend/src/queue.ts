@@ -12,6 +12,7 @@ import { generateRecipeCoverImage } from './imageGenerator.js';
 import { pruneOldGeminiLogs } from './logger.js';
 import { photoUploadIdFromUrl, downloadImportPhotos, deleteImportPhotos, sweepOldPhotoImports } from './photoImport.js';
 import type { Job, LlmUsage, ProgressStage, GeminiUsageInfo, RecipePreviewData, Recipe } from './types.js';
+import { formatAuthorHandle } from '@cookbook/shared';
 import { config } from './config.js';
 import { AppError, serializeJobError } from './errors.js';
 import { notificationTick } from './notifications/worker.js';
@@ -31,7 +32,7 @@ function buildRecipePreview(recipe: Recipe, fallbackThumbnail?: string, authorHa
   const allItems = (recipe.ingredients || []).flatMap((g) => g.items || []);
   return {
     thumbnailUrl: fallbackThumbnail,
-    authorHandle: authorHandle || undefined,
+    authorHandle: formatAuthorHandle(authorHandle) || undefined,
     title: recipe.title,
     servings: recipe.servings,
     totalTimeMinutes: (recipe.prepTime || 0) + (recipe.cookTime || 0) || undefined,
@@ -540,7 +541,7 @@ async function processJob(job: Job): Promise<void> {
       },
     });
 
-    recipe.sourceHandle = scrapeResult.authorHandle || null;
+    recipe.sourceHandle = formatAuthorHandle(scrapeResult.authorHandle);
     recipe.sourceUrl = url;
     // Social media recipe extractions are public by default (remixes and photo imports stay private)
     recipe.visibility = 'public';
