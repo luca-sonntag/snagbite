@@ -77,6 +77,8 @@ shoppingListRoutes.post('/shopping-list', async (req: Request, res: Response): P
       canonicalId: typeof canonicalId === 'string' ? canonicalId : undefined,
       notes: typeof notes === 'string' ? notes.trim() : undefined,
       inPantryWarning,
+      typicalPackageAmount: typeof req.body.typicalPackageAmount === 'number' ? req.body.typicalPackageAmount : undefined,
+      typicalPackageUnit: typeof req.body.typicalPackageUnit === 'string' ? req.body.typicalPackageUnit.trim() : undefined,
     });
 
     res.status(201).json({ success: true, item });
@@ -131,6 +133,8 @@ shoppingListRoutes.post('/shopping-list/batch', async (req: Request, res: Respon
         canonicalId: typeof raw.canonicalId === 'string' ? raw.canonicalId : undefined,
         notes: typeof raw.notes === 'string' ? raw.notes.trim() : undefined,
         inPantryWarning,
+        typicalPackageAmount: typeof raw.typicalPackageAmount === 'number' ? raw.typicalPackageAmount : undefined,
+        typicalPackageUnit: typeof raw.typicalPackageUnit === 'string' ? raw.typicalPackageUnit.trim() : undefined,
       };
     });
 

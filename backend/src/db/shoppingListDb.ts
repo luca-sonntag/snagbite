@@ -34,19 +34,16 @@ export function rowToShoppingListItem(row: ShoppingListRow): ShoppingListItem {
   };
 }
 
-export async function listShoppingList(userId: string): Promise<ShoppingListItem[]> {
-  const { data, error } = await getClient()
-    .from('shopping_list')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: true });
+export async function enrichShoppingListItem(
+  item: ShoppingListItem,
+  fallbackDto?: CreateShoppingListItemDto
+): Promise<ShoppingListItem> {
+  if (fallbackDto?.typicalPackageAmount && Number(fallbackDto.typicalPackageAmount) > 0) {
+    item.typicalPackageAmount = Number(fallbackDto.typicalPackageAmount);
+    item.typicalPackageUnit = fallbackDto.typicalPackageUnit || undefined;
+  }
 
-  if (error) throw wrapError('listShoppingList', error);
-  const rows = (data as unknown as ShoppingListRow[] || []);
-
-  const items: ShoppingListItem[] = [];
-  for (const row of rows) {
-    const item = rowToShoppingListItem(row);
+  if (!item.typicalPackageAmount) {
     const keys = buildMappingKeys(item.baseName, item.name, undefined, item.parentIngredient);
     if (keys.length > 0) {
       try {
@@ -59,10 +56,31 @@ export async function listShoppingList(userId: string): Promise<ShoppingListItem
         // Non-fatal
       }
     }
-    items.push(item);
   }
 
-  return items;
+  return item;
+}
+
+export async function enrichShoppingListItems(
+  items: ShoppingListItem[],
+  fallbackDtos?: CreateShoppingListItemDto[]
+): Promise<ShoppingListItem[]> {
+  return Promise.all(
+    items.map((item, idx) => enrichShoppingListItem(item, fallbackDtos ? fallbackDtos[idx] : undefined))
+  );
+}
+
+export async function listShoppingList(userId: string): Promise<ShoppingListItem[]> {
+  const { data, error } = await getClient()
+    .from('shopping_list')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: true });
+
+  if (error) throw wrapError('listShoppingList', error);
+  const rows = (data as unknown as ShoppingListRow[] || []);
+  const rawItems = rows.map(rowToShoppingListItem);
+  return enrichShoppingListItems(rawItems);
 }
 
 export async function createShoppingListItem(
@@ -92,7 +110,8 @@ export async function createShoppingListItem(
     .single();
 
   if (error) throw wrapError('createShoppingListItem', error);
-  return rowToShoppingListItem(data as unknown as ShoppingListRow);
+  const rawItem = rowToShoppingListItem(data as unknown as ShoppingListRow);
+  return enrichShoppingListItem(rawItem, dto);
 }
 
 export async function batchAddShoppingListItems(
@@ -125,7 +144,8 @@ export async function batchAddShoppingListItems(
     .select('*');
 
   if (error) throw wrapError('batchAddShoppingListItems', error);
-  return (data as unknown as ShoppingListRow[] || []).map(rowToShoppingListItem);
+  const rawItems = (data as unknown as ShoppingListRow[] || []).map(rowToShoppingListItem);
+  return enrichShoppingListItems(rawItems, items);
 }
 
 export async function updateShoppingListItem(
@@ -163,7 +183,8 @@ export async function updateShoppingListItem(
     throw wrapError('updateShoppingListItem', error);
   }
 
-  return rowToShoppingListItem(data as unknown as ShoppingListRow);
+  const rawItem = rowToShoppingListItem(data as unknown as ShoppingListRow);
+  return enrichShoppingListItem(rawItem);
 }
 
 /**
@@ -207,7 +228,8 @@ export async function toggleShoppingListItem(
     }
   }
 
-  return rowToShoppingListItem(data as unknown as ShoppingListRow);
+  const rawItem = rowToShoppingListItem(data as unknown as ShoppingListRow);
+  return enrichShoppingListItem(rawItem);
 }
 
 export async function batchToggleShoppingListItems(
@@ -246,7 +268,8 @@ export async function batchToggleShoppingListItems(
     }
   }
 
-  return (data as unknown as ShoppingListRow[] || []).map(rowToShoppingListItem);
+  const rawItems = (data as unknown as ShoppingListRow[] || []).map(rowToShoppingListItem);
+  return enrichShoppingListItems(rawItems);
 }
 
 export async function deleteShoppingListItem(id: string, userId: string): Promise<void> {
