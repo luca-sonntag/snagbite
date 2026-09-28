@@ -24,18 +24,13 @@ export const ShoppingProgressCard: React.FC<ShoppingProgressCardProps> = ({
   return (
     <div className="bg-white dark:bg-gray-900 p-4 sm:p-5 rounded-3xl border-none shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-3 min-w-0">
-          <span className="w-11 h-11 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-xs">
-            <CheckCheck className="w-5 h-5" />
-          </span>
-          <div className="min-w-0">
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-snug">
-              {t('shopping.progressSubtitle', { checked: checkedCount, total: totalCount })}
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-medium">
-              {Math.round(progress)}% {t('shopping.done')}
-            </p>
-          </div>
+        <div className="min-w-0">
+          <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-snug">
+            {t('shopping.progressSubtitle', { checked: checkedCount, total: totalCount })}
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-medium">
+            {Math.round(progress)}% {t('shopping.done')}
+          </p>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
