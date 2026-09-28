@@ -2,7 +2,7 @@ import React from 'react';
 import { CheckCheck, Trash2 } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 
-interface ShoppingProgressCardProps {
+interface ShoppingTabProgressProps {
   checkedCount: number;
   totalCount: number;
   progress: number;
@@ -10,7 +10,7 @@ interface ShoppingProgressCardProps {
   onClearAll: () => void;
 }
 
-export const ShoppingProgressCard: React.FC<ShoppingProgressCardProps> = ({
+export const ShoppingTabProgress: React.FC<ShoppingTabProgressProps> = ({
   checkedCount,
   totalCount,
   progress,
@@ -22,7 +22,7 @@ export const ShoppingProgressCard: React.FC<ShoppingProgressCardProps> = ({
   if (totalCount === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-gray-900 p-4 sm:p-5 rounded-3xl border-none shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col gap-3">
+    <div className="flex flex-col gap-3 pt-3.5 border-t border-gray-100/80 dark:border-gray-800/80">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="min-w-0">
           <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-snug">
@@ -69,4 +69,4 @@ export const ShoppingProgressCard: React.FC<ShoppingProgressCardProps> = ({
   );
 };
 
-export default ShoppingProgressCard;
+export default ShoppingTabProgress;

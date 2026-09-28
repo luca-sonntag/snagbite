@@ -6,6 +6,18 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-28: Verschmelzung von Segmented Tabs und Progress-Karte in der Einkaufsliste (`ShoppingTabsCard`)
+
+* **Ersetzter Code / Veraltete Struktur:**
+  - Getrennte `ShoppingProgressCard.tsx`-Komponente, die als separate Kachel unterhalb des Segmented Tab Switchers gerendert wurde.
+  - Doppelte UI-Hierarchie mit getrennten Karten-Wrappern für Tabs und Fortschrittsbalken.
+* **Ersetzt durch:**
+  - **Einheitliche Karte ([`ShoppingTabsCard.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ShoppingList/ShoppingTabsCard.tsx)):** Verschmilzt die Segmented Tabs (`ShoppingSegmentedTabs.tsx`) und den Fortschrittsbereich (`ShoppingTabProgress.tsx`) in einen einzigen, eleganten Karten-Container.
+  - Saubere Modularisierung nach Clean-Code-Regeln (jeweils < 85 Zeilen).
+* **Betroffene Dateien:** `frontend/src/components/ShoppingList/ShoppingTabsCard.tsx`, `frontend/src/components/ShoppingList/ShoppingSegmentedTabs.tsx`, `frontend/src/components/ShoppingList/ShoppingTabProgress.tsx`, `frontend/src/components/ShoppingList/ShoppingStickyHeader.tsx`, `frontend/src/components/ShoppingList/ShoppingListView.tsx`, `frontend/src/components/ShoppingList/ShoppingProgressCard.tsx` (gelöscht), `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-23: Konsolidierung der getrennten Warteliste & Fehlerliste in eine einheitliche Warteliste (`QueueItem`)
 
 * **Ersetzter Code / Veraltete Struktur:**
