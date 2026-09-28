@@ -40,8 +40,8 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
    * **Format B (Bento-Grid, `RecipeBentoSection.tsx`):** 3:4 Portrait-Highlight links + 2 gestapelte Kompakt-Karten (`RecipeCompactCard.tsx`) rechts für schnelle Gerichte (≤ 25 Min.).
    * **Format C (Wiederentdeckte Schätze, `RecipeShowcaseCard.tsx`):** Horizontaler Banner für ältere (≥ 14 Tage), unprobierte Rezept-Perlen mit Datumsstempel und Nährwert-Meta.
    * **Format D (Alle deine Rezepte, `AllRecipesShelf.tsx`):** Vertikale chronologische Timeline-Bibliothek (Heute, Gestern, Diese Woche, Letzte Woche, Monat/Jahr) im 2-Spalten-Grid mit zentrierten Haarlinien-Headern und Vollkatalog-Button.
-   * **Kuratorischer Hook (`useCookbookMagazine.ts`):** Berechnet die redaktionellen Slots deterministisch und strikt ohne sprachabhängige String-Heuristiken.
-2. **Listen-Ebene (`#/history/list...`, `SavedCatalog/index.tsx`):** Vollständige, filter-/sortierbare Liste mit `CatalogFilters.tsx` als Sticky-Header, `FilterSheet` (inklusive Healthy-Score-Sortierung) und wahlweise 2-Spalten-Poster-Grid (`viewMode: 'card'`) oder dichten Zeilen (`viewMode: 'compact'`). Nur hier existieren Multi-Select und `BulkActionBar`.
+   * **Multi-Select & Bulk-Aktionen:** Sowohl auf der Kochbuch-Home (`CookbookHome.tsx`) als auch auf der Listen-Ebene verfügbar. Im Selektionsmodus (`isSelectMode`) können eigene Rezepte über Hero-Cards (Format A), Bento-Cards (Format B), Wiederentdeckt-Cards (Format C) und Timeline-Poster-Cards (Format D) hinweg ausgewählt und per `BulkActionBar` gemeinsam verwaltet werden (Einkaufsliste, Favoriten, Sammlungen, Löschen). Community-Rezepte bleiben davon strikt ausgenommen.
+2. **Listen-Ebene (`#/history/list...`, `SavedCatalog/index.tsx`):** Vollständige, filter-/sortierbare Liste mit `CatalogFilters.tsx` als Sticky-Header, `FilterSheet` (inklusive Healthy-Score-Sortierung) und wahlweise 2-Spalten-Poster-Grid (`viewMode: 'card'`) oder dichten Zeilen (`viewMode: 'compact'`).
 3. **Detailansicht (`#/history/<jobId>`):** `RecipeDetails`.
 
 ### Katalog-Features
