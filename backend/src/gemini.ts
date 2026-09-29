@@ -198,7 +198,7 @@ const recipeSchema = {
           },
           description: {
             type: FunctionDeclarationSchemaType.STRING,
-            description: 'The concise, direct description of the instruction step (avoid conversational filler words and redundant details). Keep sentences short, clear, and action-oriented. Whenever an ingredient from the ingredients list is mentioned, tag it inline using [word in text](ing:baseName) (where baseName is the English baseName). Whenever a cooking duration/time span is mentioned, tag it inline using [time text](timer:duration_in_seconds). For example: "Das [Ei](ing:egg) mit dem [Parmesan](ing:parmesan) verrühren. Danach ca. [15 Minuten](timer:900) kochen lassen."',
+            description: 'The concise, direct description of the instruction step (avoid conversational filler words and redundant details). Keep sentences short, clear, and action-oriented. Whenever an ingredient from the ingredients list is mentioned, tag it inline using [word in text](ing:baseName) (where baseName is the English baseName). Whenever a cooking duration/time span is mentioned, tag it inline using [time text](timer:duration_in_seconds). For example: "Das [Ei](ing:egg) mit dem [Parmesan](ing:parmesan) verrühren. Danach ca. [15 Minuten](timer:900) kochen lassen." NEVER tag temperatures (e.g. "180 °C", "200 Grad Umluft", "375°F") as a timer.',
           },
           parallelPrepHint: {
             type: FunctionDeclarationSchemaType.STRING,
@@ -603,6 +603,7 @@ Key Constraints:
    - "Ca. [15 Minuten](timer:900) garen."
    - "Für [1,5 Stunden](timer:5400) köcheln lassen."
    - "Etwa [45 Sekunden](timer:45) anbraten."
+   - CRITICAL: NEVER tag oven temperatures or heat settings (e.g. "180 °C", "200 Grad Umluft", "375°F") as timers! Timers are exclusively for elapsed cooking/baking durations.
 18. ${FOOD_PHOTOGRAPHY_PROMPT_INSTRUCTION}
 19. Alternative English BaseName Synonyms (synonyms): For every ingredient, you MUST populate the "synonyms" array with 1 to 3 alternative common English singular culinary names or regional English equivalents (e.g. for "strained tomato": ["passata", "tomato puree", "sieved tomato"]; for "spring onion": ["scallion", "green onion", "salad onion"]; for "eggplant": ["aubergine"]; for "zucchini": ["courgette"]; for "chickpea": ["garbanzo bean", "garbanzo"]; for "rolled oat": ["oat flake", "oats"]; for "cream cheese": ["double cream cheese", "soft cheese"]; for "quark": ["curd", "curd cheese"]; for "arugula": ["rocket"]; for "bell pepper": ["sweet pepper", "capsicum"]). Follow the exact same English singular lowercase formatting rules as baseName. Output an empty array [] ONLY if there are genuinely no alternative names.
 20. Standalone Grocery Product vs. Custom Mixture (isGenericGrocery): For every ingredient, you MUST set "isGenericGrocery" to true if it is a standard, widely available commercial grocery product sold standalone in supermarkets (e.g. "Frischkäse", "Butter", "Edamame", "Hähnchenbrust", "Haferflocken", "Tomatenmark", "Paprikapulver", "Gouda"). Set it to false for homemade mixtures, compound sauces, marinades, or special recipe-specific blends (e.g. "secret sauce", "homemade herb butter", "onion bacon topping", "sweet chili dip", "secret exotic fantasy sauce").
