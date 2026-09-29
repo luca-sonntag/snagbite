@@ -727,3 +727,46 @@ html.dark .tint-premium {
     color-mix(in srgb, #f43f5e 22%, transparent) 100%
   );
 }
+
+/* ── Unified gray pill for recipe steps (ingredients, temperature, equipment) ──
+   Uses em sizing so it scales proportionally between list view (text-sm)
+   and fullscreen cooking mode (text-[22px..28px]). */
+.recipe-step-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  padding: 0.12em 0.45em;
+  border-radius: 0.45em;
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #374151; /* text-gray-700 */
+  font-weight: 500;
+  line-height: normal;
+  vertical-align: middle;
+  border: none;
+  user-select: none;
+  text-decoration: none;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+html.dark .recipe-step-pill {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #d1d5db; /* text-gray-300 */
+}
+
+.recipe-step-pill.cursor-pointer:hover {
+  background-color: rgba(0, 0, 0, 0.09);
+}
+
+html.dark .recipe-step-pill.cursor-pointer:hover {
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+.recipe-step-pill.cursor-pointer:active {
+  transform: scale(0.97);
+}
+
+.recipe-step-pill:focus-visible {
+  outline: 2px solid rgba(16, 185, 129, 0.5);
+  outline-offset: 1px;
+}
+

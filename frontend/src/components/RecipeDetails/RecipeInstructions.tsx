@@ -93,7 +93,7 @@ export default function RecipeInstructions({
               {recipe.equipment.map((item, idx) => (
                 <li
                   key={idx}
-                  className="py-1 px-3 bg-black/[0.04] dark:bg-white/[0.06] rounded-xl text-xs font-medium text-gray-600 dark:text-gray-300 select-none border-none"
+                  className="recipe-step-pill select-none text-xs"
                 >
                   {item}
                 </li>

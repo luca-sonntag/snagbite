@@ -39,7 +39,7 @@ export const InstructionIngredientPopover: React.FC<InstructionIngredientPopover
     <span onClick={(e) => e.stopPropagation()} className="inline">
       <Popover>
         <Popover.Trigger>
-          <span className="font-medium text-gray-900 dark:text-gray-100 underline decoration-gray-300 dark:decoration-gray-700 underline-offset-4 hover:text-emerald-600 dark:hover:text-emerald-400 hover:decoration-emerald-500/50 cursor-pointer transition-colors outline-none">
+          <span className="recipe-step-pill cursor-pointer outline-none">
             {displayText}
           </span>
         </Popover.Trigger>

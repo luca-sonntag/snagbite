@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Clock } from 'lucide-react';
+import { Clock, Thermometer } from 'lucide-react';
 import type { Recipe } from '../types';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
@@ -9,10 +9,8 @@ import InstructionIngredientPopover from './InstructionIngredientPopover';
 
 interface RecipeInstructionTextProps {
   /**
-   * `list` is the step list on the detail page, where a dozen coloured words
-   * across five steps read as noise — there, only tappable things (ingredients,
-   * timers) carry a hue. `focused` is the cooking mode: one step filling the
-   * screen, where temperature and equipment are worth spotting at a glance.
+   * `list` is the step list on the detail page; `focused` is the fullscreen
+   * cooking mode. Pills use proportional em units to scale across both.
    */
   variant?: 'list' | 'focused';
   text: string;
@@ -21,22 +19,22 @@ interface RecipeInstructionTextProps {
   stepNum?: number;
 }
 
-/**
- * Equipment and temperature are both context rather than something to act on,
- * so they share one quiet chip — defined once so the two cannot drift apart.
- * Colour stays reserved for the tappable things: ingredients and timers.
- */
-const getChipClass = (variant: 'list' | 'focused' = 'list') =>
-  variant === 'focused'
-    ? 'bg-black/[0.05] dark:bg-white/[0.08] rounded-xl px-2.5 py-1 text-gray-700 dark:text-gray-300 font-medium inline'
-    : 'bg-black/[0.06] dark:bg-white/[0.09] rounded px-1.5 py-[1.5px] text-gray-700 dark:text-gray-300 font-medium inline';
+const RANGE_SEPARATOR = `(?:–|—|-|bis|to|a|al|et|and|or|ve)`;
+const OVEN_MODE_PATTERN = `(?:\\s+(?:Umluft|Ober-[/\\s]?Unterhitze|Heißluft|Unterhitze|Oberhitze|Grill(?:funktion)?|fan(?:\\s*forced)?|convection))?`;
+const TEMP_PATTERN = `\\b\\d+(?:[.,]\\d+)?(?:\\s*${RANGE_SEPARATOR}\\s*\\d+(?:[.,]\\d+)?)?\\s*(?:Fahrenheit|Celsius|stopniach|degrees|stopnie|stopnia|degree|grados|degrés|graden|derece|stopni|grado|degré|graus|gradi|grau|Grad|°[CF]?)(?![a-zA-Z0-9])${OVEN_MODE_PATTERN}`;
+
+const isTemperatureText = (str: string): boolean => {
+  if (!str) return false;
+  return new RegExp(`^${TEMP_PATTERN}$`, 'i').test(str.trim()) ||
+    /°[CF]?|\b(?:grad|celsius|fahrenheit)\b/i.test(str);
+};
 
 export default function RecipeInstructionText({
   text,
   recipe,
   formatAmount,
   stepNum,
-  variant = 'list',
+  variant: _variant = 'list',
 }: RecipeInstructionTextProps) {
   const { t } = useI18n();
   const { isPremium } = useAuth();
@@ -67,9 +65,7 @@ export default function RecipeInstructionText({
   const renderedContent = useMemo(() => {
     if (!text) return text;
 
-    const rangeSeparator = `(?:–|—|-|bis|to|a|al|et|and|or|ve)`;
-    const tempPattern = `\\b\\d+(?:[.,]\\d+)?(?:\\s*${rangeSeparator}\\s*\\d+(?:[.,]\\d+)?)?\\s*(?:Fahrenheit|Celsius|stopniach|degrees|stopnie|stopnia|degree|grados|degrés|graden|derece|stopni|grado|degré|graus|gradi|grau|Grad|°[CF]?)(?![a-zA-Z0-9])`;
-    const inlineTagPattern = `\\[[^\\]]+\\]\\((?:ing|timer):[^)]+\\)`;
+    const inlineTagPattern = `\\[[^\\]]+\\]\\((?:ing|timer|temp):[^)]+\\)`;
 
     // Legacy terms building for equipment or untagged legacy recipes
     const legacyTerms: {
@@ -79,7 +75,7 @@ export default function RecipeInstructionText({
       info: string;
     }[] = [];
 
-    const hasInlineTags = /\[[^\]]+\]\((?:ing|timer):[^)]+\)/.test(text);
+    const hasInlineTags = /\[[^\]]+\]\((?:ing|timer|temp):[^)]+\)/.test(text);
 
     if (!hasInlineTags) {
       allIngredients.forEach(ing => {
@@ -126,7 +122,7 @@ export default function RecipeInstructionText({
       return esc;
     });
 
-    const patterns = [inlineTagPattern, tempPattern, ...escapedLegacyTerms].filter(Boolean);
+    const patterns = [inlineTagPattern, TEMP_PATTERN, ...escapedLegacyTerms].filter(Boolean);
     const regex = new RegExp(`(${patterns.join('|')})`, 'gi');
 
     const parts = text.split(regex);
@@ -157,6 +153,20 @@ export default function RecipeInstructionText({
           const inlineTimerMatch = part.match(/^\[([^\]]+)\]\(timer:(\d+)\)$/);
           if (inlineTimerMatch) {
             const timeText = inlineTimerMatch[1];
+
+            // If a temperature was erroneously tagged as a timer by AI, render as temperature pill
+            if (isTemperatureText(timeText)) {
+              return (
+                <span
+                  key={index}
+                  className="recipe-step-pill cursor-default select-none"
+                >
+                  <Thermometer className="w-[1.1em] h-[1.1em] shrink-0 text-gray-500 dark:text-gray-400" />
+                  <span>{timeText}</span>
+                </span>
+              );
+            }
+
             const seconds = parseInt(inlineTimerMatch[2], 10);
             const canTimer = seconds >= 15;
 
@@ -171,30 +181,45 @@ export default function RecipeInstructionText({
                   }
                   setTimerSheet({ isOpen: true, seconds, label: text });
                 } : undefined}
-                className={`inline-flex items-center gap-0.5 align-middle font-semibold transition-all select-none ${
+                className={`inline-flex items-center gap-1 align-middle font-semibold transition-all select-none ${
                   canTimer
                     ? 'text-blue-600 dark:text-blue-500 cursor-pointer hover:underline decoration-blue-500/30 underline-offset-4 active:scale-95'
                     : 'text-gray-500 dark:text-gray-400 cursor-default'
                 }`}
                 title={canTimer ? 'Timer starten / Start timer' : undefined}
               >
-                <Clock className={`w-4 h-4 shrink-0 ${
+                <Clock className={`w-[1.1em] h-[1.1em] shrink-0 ${
                   canTimer ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
                 }`} />
-                {timeText}
+                <span>{timeText}</span>
+              </span>
+            );
+          }
+
+          // 1c. Inline Temperature Tag: [temp text](temp:...)
+          const inlineTempMatch = part.match(/^\[([^\]]+)\]\(temp:[^)]*\)$/);
+          if (inlineTempMatch) {
+            return (
+              <span
+                key={index}
+                className="recipe-step-pill cursor-default select-none"
+              >
+                <Thermometer className="w-[1.1em] h-[1.1em] shrink-0 text-gray-500 dark:text-gray-400" />
+                <span>{inlineTempMatch[1]}</span>
               </span>
             );
           }
 
           // 2. Temperature match
-          const isTemp = new RegExp(`^${tempPattern}$`, 'i').test(part);
+          const isTemp = new RegExp(`^${TEMP_PATTERN}$`, 'i').test(part);
           if (isTemp) {
             return (
               <span
                 key={index}
-                className={`${getChipClass(variant)} cursor-default select-none`}
+                className="recipe-step-pill cursor-default select-none"
               >
-                {part}
+                <Thermometer className="w-[1.1em] h-[1.1em] shrink-0 text-gray-500 dark:text-gray-400" />
+                <span>{part}</span>
               </span>
             );
           }
@@ -207,7 +232,7 @@ export default function RecipeInstructionText({
               return (
                 <span
                   key={index}
-                  className={`${getChipClass(variant)} cursor-default select-none`}
+                  className="recipe-step-pill cursor-default select-none"
                 >
                   {part}
                 </span>
@@ -228,7 +253,7 @@ export default function RecipeInstructionText({
         })}
       </>
     );
-  }, [text, recipe.equipment, allIngredients, formatAmount, t, isPremium, variant]);
+  }, [text, recipe.equipment, allIngredients, formatAmount, t, isPremium]);
 
   return (
     <>
