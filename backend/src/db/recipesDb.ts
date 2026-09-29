@@ -70,8 +70,8 @@ export function rowToRecipe(row: RecipeRow): Recipe {
     (!recipe.healthScore ||
       !recipe.healthScoreBreakdown ||
       (recipe.healthScoreBreakdown.metrics?.vegetableGramsPerServing === 0 &&
-        recipe.ingredients.some((g) =>
-          g.items?.some((i) => isVegetableOrFruitCategory(i.category || g.name))
+        recipe.ingredients.some((i) =>
+          isVegetableOrFruitCategory(i.category)
         )))
   ) {
     const computed = computeRecipeHealthScore(recipe);

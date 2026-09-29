@@ -113,6 +113,30 @@ const ingredientItemSchemaProperties = {
     type: FunctionDeclarationSchemaType.INTEGER,
     description: 'Estimated average shelf life in days when stored properly as standard unopened packaged retail supermarket goods (e.g. 4-5 for packaged raw minced meat/beef/poultry under modified atmosphere; 3-4 for packaged fresh fish/salmon; 14-21 for unopened dairy/yogurt/eggs/cheese; 7-10 for fresh produce/vegetables/potatoes; 180-365 for dry pantry staples, canned goods, fried onions/Röstzwiebeln, croutons, pasta, rice, oil, spices). Always assume standard unopened supermarket retail goods and never estimate 1 day for meat.',
   },
+  category: {
+    type: FunctionDeclarationSchemaType.STRING,
+    description: 'The uppercase category key for the supermarket department (e.g. VEGETABLES for fresh vegetables/salads/mushrooms/fresh herbs, FRUITS for fresh/dried fruit/berries/lemon juice, DAIRY_EGGS for milk/cheese/yogurt/cream/butter/eggs/egg whites/tofu/plant milk, MEAT_POULTRY for meat/chicken/sausage/vegan meat, SEAFOOD for fish/shrimp, GRAINS_PASTA for pasta/rice/noodles/dough/bread/oats/potatoes/legumes, OILS_CONDIMENTS for cooking oils/vinegar/dressings/sauces/pesto, SPICES_HERBS for salt/pepper/dried spices, NUTS_SEEDS for nuts/seeds/avocado, SWEETS_SNACKS for sweets/chocolate/cookies/ice cream/chips, BEVERAGES for drinks/juices/coffee/tea/water/alcohol, PANTRY_BAKING for flour/cocoa powder/baking powder/yeast/sugar/sweetener/protein powder, PREPARED_DISHES for ready-made meals, or OTHER).',
+    enum: [
+      'VEGETABLES',
+      'FRUITS',
+      'DAIRY_EGGS',
+      'MEAT_POULTRY',
+      'SEAFOOD',
+      'GRAINS_PASTA',
+      'OILS_CONDIMENTS',
+      'SPICES_HERBS',
+      'NUTS_SEEDS',
+      'SWEETS_SNACKS',
+      'BEVERAGES',
+      'PANTRY_BAKING',
+      'PREPARED_DISHES',
+      'OTHER',
+    ],
+  },
+  section: {
+    type: FunctionDeclarationSchemaType.STRING,
+    description: 'Optional culinary section if the recipe explicitly groups ingredients (e.g. "Für den Teig", "Für die Sauce", "Für das Topping"). Leave empty/null if no culinary sections exist.',
+  },
 };
 
 // Define response schema for Gemini Structured Outputs
@@ -149,41 +173,11 @@ const recipeSchema = {
     },
     ingredients: {
       type: FunctionDeclarationSchemaType.ARRAY,
-      description: 'List of ingredient groups categorized by supermarket department.',
+      description: 'Chronological list of all ingredients in the recipe.',
       items: {
         type: FunctionDeclarationSchemaType.OBJECT,
-        properties: {
-          name: {
-            type: FunctionDeclarationSchemaType.STRING,
-            description: 'The uppercase category key for the supermarket department (e.g. VEGETABLES for fresh vegetables/salads/mushrooms/fresh herbs, FRUITS for fresh/dried fruit/berries/lemon juice, DAIRY_EGGS for milk/cheese/yogurt/cream/butter/eggs/egg whites/tofu/plant milk, MEAT_POULTRY for meat/chicken/sausage/vegan meat, SEAFOOD for fish/shrimp, GRAINS_PASTA for pasta/rice/noodles/dough/bread/oats/potatoes/legumes, OILS_CONDIMENTS for cooking oils/vinegar/dressings/sauces/pesto, SPICES_HERBS for salt/pepper/dried spices, NUTS_SEEDS for nuts/seeds/avocado, SWEETS_SNACKS for sweets/chocolate/cookies/ice cream/chips, BEVERAGES for drinks/juices/coffee/tea/water/alcohol, PANTRY_BAKING for flour/cocoa powder/baking powder/yeast/sugar/sweetener/protein powder, PREPARED_DISHES for ready-made meals, or OTHER).',
-            enum: [
-              'VEGETABLES',
-              'FRUITS',
-              'DAIRY_EGGS',
-              'MEAT_POULTRY',
-              'SEAFOOD',
-              'GRAINS_PASTA',
-              'OILS_CONDIMENTS',
-              'SPICES_HERBS',
-              'NUTS_SEEDS',
-              'SWEETS_SNACKS',
-              'BEVERAGES',
-              'PANTRY_BAKING',
-              'PREPARED_DISHES',
-              'OTHER'
-            ]
-          },
-          items: {
-            type: FunctionDeclarationSchemaType.ARRAY,
-            description: 'Individual ingredients in this category.',
-            items: {
-              type: FunctionDeclarationSchemaType.OBJECT,
-              properties: ingredientItemSchemaProperties,
-              required: ['name', 'baseName', 'synonyms', 'isGenericGrocery', 'amount', 'unit', 'gramsPerUnit', 'calories', 'protein', 'carbs', 'fat'],
-            },
-          },
-        },
-        required: ['name', 'items'],
+        properties: ingredientItemSchemaProperties,
+        required: ['name', 'baseName', 'synonyms', 'isGenericGrocery', 'amount', 'unit', 'gramsPerUnit', 'category', 'calories', 'protein', 'carbs', 'fat'],
       },
     },
     instructions: {
@@ -660,12 +654,8 @@ ${caption.trim() ? `\nDescription/Caption:\n"""\n${caption}\n"""` : ''}${htmlCon
 
     // Remove any hallucinated replacedOriginal fields during initial extractions
     if (recipe.ingredients) {
-      recipe.ingredients.forEach(cat => {
-        if (cat.items) {
-          cat.items.forEach(ing => {
-            delete ing.replacedOriginal;
-          });
-        }
+      recipe.ingredients.forEach(ing => {
+        delete ing.replacedOriginal;
       });
     }
 
@@ -1071,7 +1061,7 @@ Title: ${recipe.title}${recipe.description ? `\nDescription: ${recipe.descriptio
 Servings: ${recipe.servings}
 ${recipe.healthScore !== undefined && recipe.healthScore !== null ? `Health Score: ${recipe.healthScore}/100${recipe.healthScoreBreakdown?.grade ? ` (Grade: ${recipe.healthScoreBreakdown.grade})` : ''}\n` : ''}${recipe.healthScoreBreakdown?.highlights?.length ? `Health Highlights: ${recipe.healthScoreBreakdown.highlights.join(', ')}\n` : ''}${recipe.healthScoreBreakdown?.cautions?.length ? `Health Improvement Opportunities: ${recipe.healthScoreBreakdown.cautions.join(', ')}\n` : ''}
 Ingredients:
-${recipe.ingredients.map(g => `- ${g.name}:\n${g.items.map(i => `  * ${i.amount ? i.amount + ' ' : ''}${i.unit ? i.unit + ' ' : ''}${i.name}${i.modifier ? ` (${i.modifier})` : ''}`).join('\n')}`).join('\n')}
+${recipe.ingredients.map(i => `- ${i.amount ? i.amount + ' ' : ''}${i.unit ? i.unit + ' ' : ''}${i.name}${i.modifier ? ` (${i.modifier})` : ''}${i.category ? ` [${i.category}]` : ''}${i.section ? ` (für ${i.section})` : ''}`).join('\n')}
 
 Instructions:
 ${recipe.instructions.map(step => `${step.step}. ${step.description}`).join('\n')}${recipe.tips && recipe.tips.length > 0 ? `\n\nTips:\n${recipe.tips.map(t => `- ${t}`).join('\n')}` : ''}
@@ -1525,10 +1515,7 @@ ${JSON.stringify({
   healthScore: recipe.healthScore ?? undefined,
   healthScoreGrade: recipe.healthScoreBreakdown?.grade ?? undefined,
   healthCautions: recipe.healthScoreBreakdown?.cautions ?? undefined,
-  ingredients: recipe.ingredients?.map(g => ({
-    category: g.name,
-    items: g.items?.map(i => `${i.amount ? i.amount + ' ' : ''}${i.unit ? i.unit + ' ' : ''}${i.name}${i.modifier ? ` (${i.modifier})` : ''}`.trim())
-  })),
+  ingredients: recipe.ingredients?.map(i => `${i.amount ? i.amount + ' ' : ''}${i.unit ? i.unit + ' ' : ''}${i.name}${i.modifier ? ` (${i.modifier})` : ''}`.trim()),
   instructions: recipe.instructions?.map(s => `${s.step}. ${s.description}`),
   prepTime: recipe.prepTime,
   cookTime: recipe.cookTime,
@@ -1757,7 +1744,7 @@ export async function verifyCookedDishPhoto(
     });
 
     const ingredientsSummary = recipe.ingredients
-      ? recipe.ingredients.flatMap((g) => g.items.map((i) => i.name)).slice(0, 15).join(', ')
+      ? recipe.ingredients.map((i) => i.name).slice(0, 15).join(', ')
       : '';
 
     const prompt = `You are a strict food photo authenticity and recipe evaluator.

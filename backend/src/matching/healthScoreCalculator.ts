@@ -186,26 +186,23 @@ export function computeRecipeHealthScore(recipe: Recipe): {
   let novaWeight = 0;
 
   if (recipe.ingredients) {
-    for (const group of recipe.ingredients) {
-      const groupCategory = (group.name || '').toUpperCase().trim();
-      for (const item of group.items || []) {
-        const itemCategory = (item.category || groupCategory).toUpperCase().trim();
-        const grams = calculateWeightGrams(item.amount, item.unit, null, item.gramsPerUnit);
-        totalDishWeightGrams += grams;
+    for (const item of recipe.ingredients) {
+      const itemCategory = (item.category || '').toUpperCase().trim();
+      const grams = calculateWeightGrams(item.amount, item.unit, null, item.gramsPerUnit);
+      totalDishWeightGrams += grams;
 
-        if (isVegetableOrFruitCategory(itemCategory)) {
-          totalVegWeightGrams += grams;
-        }
+      if (isVegetableOrFruitCategory(itemCategory)) {
+        totalVegWeightGrams += grams;
+      }
 
-        if (isPlantCategory(itemCategory)) {
-          const key = (item.baseName || item.name || '').toLowerCase().trim();
-          if (key) distinctPlants.add(key);
-        }
+      if (isPlantCategory(itemCategory)) {
+        const key = (item.baseName || item.name || '').toLowerCase().trim();
+        if (key) distinctPlants.add(key);
+      }
 
-        if (item.novaGroup !== undefined && item.novaGroup !== null && grams > 0) {
-          novaSum += item.novaGroup * grams;
-          novaWeight += grams;
-        }
+      if (item.novaGroup !== undefined && item.novaGroup !== null && grams > 0) {
+        novaSum += item.novaGroup * grams;
+        novaWeight += grams;
       }
     }
   }

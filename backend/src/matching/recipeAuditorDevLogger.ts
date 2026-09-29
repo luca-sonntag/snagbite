@@ -94,16 +94,14 @@ export function logExtractionDevSummary(
     servings: recipe.servings,
     prepTime: recipe.prepTime,
     cookTime: recipe.cookTime,
-    ingredients: (recipe.ingredients || []).map((group) => ({
-      group: group.name,
-      items: (group.items || []).map((item) => ({
-        name: item.name,
-        amount: item.amount,
-        unit: item.unit,
-        baseName: item.baseName,
-        category: item.category,
-        synonyms: item.synonyms,
-      })),
+    ingredients: (recipe.ingredients || []).map((item) => ({
+      name: item.name,
+      amount: item.amount,
+      unit: item.unit,
+      baseName: item.baseName,
+      category: item.category,
+      section: item.section,
+      synonyms: item.synonyms,
     })),
     instructions: (recipe.instructions || []).map((step) => ({
       step: step.step,

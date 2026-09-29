@@ -10,7 +10,7 @@ import {
   type RemovedIngredient, type StepCorrection, type AddedStep,
 } from './recipeAuditorSchema.js';
 import { recordAuditLog } from './recipeAuditorDevLogger.js';
-import { placeIngredientInGroup, normalizeToCategoryKey } from './categoryGroups.js';
+import { normalizeToCategoryKey } from './categoryGroups.js';
 export type { RecipeAuditPatch, RecipeAuditResult, IngredientCorrection, AddedIngredient, RemovedIngredient, StepCorrection, AddedStep };
 
 export async function auditRecipe(recipe: Recipe): Promise<RecipeAuditResult> {
@@ -67,57 +67,43 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
   const norm = (s?: string) => (s || '').toLowerCase().replace(/[,;:./\\()\-–—_!?'"`„“"»«[\]]/g, ' ').replace(/\s+/g, ' ').trim();
   const result: Recipe = {
     ...recipe,
-    ingredients: (recipe.ingredients || []).map((g) => ({ ...g, items: (g.items || []).map((i) => ({ ...i })) })),
+    ingredients: (recipe.ingredients || []).map((i) => ({ ...i })),
     instructions: (recipe.instructions || []).map((s) => ({ ...s })),
   };
 
   // 1. Remove ingredients
   if (patch.removedIngredients?.length) {
     const removeNorms = new Set(patch.removedIngredients.map((r) => norm(r.name)));
-    result.ingredients = result.ingredients
-      .map((g) => ({ ...g, items: g.items.filter((i) => !removeNorms.has(norm(i.name))) }))
-      .filter((g) => g.items.length > 0);
+    result.ingredients = result.ingredients.filter((i) => !removeNorms.has(norm(i.name)));
   }
 
-  // 2. Correct ingredients & relocate across category groups
+  // 2. Correct ingredients
   if (patch.ingredientCorrections?.length) {
     for (const corr of patch.ingredientCorrections) {
       const corrOrigNorm = norm(corr.originalName);
-      for (const group of result.ingredients) {
-        const itemIdx = group.items.findIndex((i) => norm(i.name) === corrOrigNorm);
-        if (itemIdx === -1) continue;
+      const itemIdx = result.ingredients.findIndex((i) => norm(i.name) === corrOrigNorm);
+      if (itemIdx === -1) continue;
 
-        const oldItem = group.items[itemIdx];
-        const targetCategory = corr.correctedCategory
-          ? normalizeToCategoryKey(corr.correctedCategory)
-          : (oldItem.category ? normalizeToCategoryKey(oldItem.category) : normalizeToCategoryKey(group.name));
+      const oldItem = result.ingredients[itemIdx];
+      const targetCategory = corr.correctedCategory
+        ? normalizeToCategoryKey(corr.correctedCategory)
+        : (oldItem.category ? normalizeToCategoryKey(oldItem.category) : 'OTHER');
 
-        const updatedItem = {
-          ...oldItem,
-          ...(corr.correctedName ? { name: corr.correctedName.trim() } : {}),
-          ...(corr.correctedBaseName ? { baseName: corr.correctedBaseName.trim() } : {}),
-          category: targetCategory,
-          ...(corr.correctedSynonyms ? { synonyms: corr.correctedSynonyms.map((s) => s.trim()).filter(Boolean) } : {}),
-        };
-
-        const currentGroupCat = normalizeToCategoryKey(group.name);
-        if (targetCategory !== currentGroupCat && group.name.toLowerCase() !== 'zutaten') {
-          group.items.splice(itemIdx, 1);
-          placeIngredientInGroup(result.ingredients, updatedItem, targetCategory);
-        } else {
-          group.items[itemIdx] = updatedItem;
-        }
-        break;
-      }
+      result.ingredients[itemIdx] = {
+        ...oldItem,
+        ...(corr.correctedName ? { name: corr.correctedName.trim() } : {}),
+        ...(corr.correctedBaseName ? { baseName: corr.correctedBaseName.trim() } : {}),
+        category: targetCategory,
+        ...(corr.correctedSynonyms ? { synonyms: corr.correctedSynonyms.map((s) => s.trim()).filter(Boolean) } : {}),
+      };
     }
-    result.ingredients = result.ingredients.filter((g) => g.items.length > 0);
   }
 
   // 3. Add ingredients
   if (patch.addedIngredients?.length) {
     for (const added of patch.addedIngredients) {
       const cat = normalizeToCategoryKey(added.category);
-      placeIngredientInGroup(result.ingredients, {
+      result.ingredients.push({
         name: added.name.trim(),
         amount: added.amount ?? 1,
         unit: added.unit?.trim() ?? 'Stück',
@@ -125,7 +111,7 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
         category: cat,
         synonyms: (added.synonyms ?? []).map((s) => s.trim()).filter(Boolean),
         isGenericGrocery: true,
-      }, cat);
+      });
     }
   }
 
@@ -169,7 +155,7 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
 
   // 7. Align inline tags for corrected baseNames
   if (patch.ingredientCorrections?.length) {
-    const origIngredients = (recipe.ingredients || []).flatMap((g) => g.items || []);
+    const origIngredients = recipe.ingredients || [];
     for (const corr of patch.ingredientCorrections) {
       if (!corr.correctedBaseName) continue;
       const corrOrigNorm = norm(corr.originalName);

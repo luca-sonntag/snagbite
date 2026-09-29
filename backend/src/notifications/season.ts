@@ -85,11 +85,9 @@ export function getActiveHolidays(date: Date): HolidayEvent[] {
 export function recipeHaystack(recipe: Recipe): string {
   const parts: string[] = [recipe.title || ''];
   if (recipe.tags) parts.push(...recipe.tags);
-  for (const group of recipe.ingredients || []) {
-    for (const item of group.items || []) {
-      if (item.baseName) parts.push(item.baseName);
-      if (item.name) parts.push(item.name);
-    }
+  for (const item of recipe.ingredients || []) {
+    if (item.baseName) parts.push(item.baseName);
+    if (item.name) parts.push(item.name);
   }
   return parts.join(' ').toLowerCase();
 }

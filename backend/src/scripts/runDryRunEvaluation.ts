@@ -286,9 +286,8 @@ async function run() {
         const flatIngredients: EvalIngredientReport[] = [];
         let verifiedCount = 0;
 
-        for (const group of recipe.ingredients || []) {
-          for (const ing of group.items || []) {
-            const isVer = !!ing.isVerified;
+        for (const ing of recipe.ingredients || []) {
+          const isVer = !!ing.isVerified;
 
             if (isVer) {
               verifiedCount++;
@@ -322,7 +321,6 @@ async function run() {
               fat: ing.fat,
             });
           }
-        }
 
         const totalIngs = flatIngredients.length;
         const matchRate = totalIngs > 0 ? Math.round((verifiedCount / totalIngs) * 100) : 0;

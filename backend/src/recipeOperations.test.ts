@@ -13,28 +13,18 @@ const mockBaseRecipe: Recipe = {
   equipment: ['Backofen'],
   ingredients: [
     {
-      name: 'DAIRY_EGGS',
-      items: [
-        {
-          name: 'Burrata',
-          baseName: 'burrata',
-          amount: 1,
-          unit: 'St�ck',
-          category: 'DAIRY_EGGS',
-        },
-      ],
+      name: 'Burrata',
+      baseName: 'burrata',
+      amount: 1,
+      unit: 'Stück',
+      category: 'DAIRY_EGGS',
     },
     {
-      name: 'MEAT_POULTRY',
-      items: [
-        {
-          name: 'Bacon',
-          baseName: 'bacon',
-          amount: 100,
-          unit: 'g',
-          category: 'MEAT_POULTRY',
-        },
-      ],
+      name: 'Bacon',
+      baseName: 'bacon',
+      amount: 100,
+      unit: 'g',
+      category: 'MEAT_POULTRY',
     },
   ],
   instructions: [
@@ -61,17 +51,18 @@ describe('applyRecipeOperations', () => {
       },
     ];
 
-    const result = applyRecipeOperations(mockBaseRecipe, ops);
-    assert.notStrictEqual(result, mockBaseRecipe);
+    const remixed = applyRecipeOperations(mockBaseRecipe, ops);
     assert.strictEqual(JSON.stringify(mockBaseRecipe), originalJson);
-    assert.strictEqual(result.parentRecipeId, 'recipe-123');
-    assert.strictEqual(result.origin, 'remix');
+    assert.notStrictEqual(remixed, mockBaseRecipe);
+    assert.strictEqual(remixed.origin, 'remix');
+    assert.strictEqual(remixed.parentRecipeId, 'recipe-123');
+    assert.strictEqual(remixed.parentRecipeTitle, 'BBQ Burrata Brot');
   });
 
-  it('correctly replaces ingredient and marks replacedOriginal', () => {
+  it('correctly replaces an ingredient (e.g. Burrata -> Mozzarella)', () => {
     const ops: RecipeOperation[] = [
       {
-        id: 'op-replace',
+        id: 'op-replace-burrata',
         type: 'REPLACE_INGREDIENT',
         summary: 'Burrata durch Mozzarella ersetzen',
         targetIngredientName: 'Burrata',
@@ -86,11 +77,10 @@ describe('applyRecipeOperations', () => {
     ];
 
     const remixed = applyRecipeOperations(mockBaseRecipe, ops);
-    const dairyGroup = remixed.ingredients.find((g) => g.name === 'DAIRY_EGGS');
-    assert.ok(dairyGroup);
-    assert.strictEqual(dairyGroup.items.length, 1);
-    assert.strictEqual(dairyGroup.items[0].name, 'Mozzarella fettarm');
-    assert.strictEqual(dairyGroup.items[0].replacedOriginal, 'Burrata');
+    const mozz = remixed.ingredients.find((i) => i.name === 'Mozzarella fettarm');
+    assert.ok(mozz);
+    assert.strictEqual(remixed.ingredients.length, 2);
+    assert.strictEqual(mozz.replacedOriginal, 'Burrata');
   });
 
   it('correctly adds new ingredients and instruction steps (e.g. Beilage)', () => {
@@ -98,21 +88,21 @@ describe('applyRecipeOperations', () => {
       {
         id: 'op-add-salad',
         type: 'ADD_INGREDIENTS',
-        summary: 'Tomaten-Gurken-Salat als Beilage hinzuf�gen',
-        groupName: 'VEGETABLES',
+        summary: 'Tomaten-Gurken-Salat als Beilage hinzufügen',
+        groupName: 'Beilage',
         newIngredients: [
           {
             name: 'Tomate',
             baseName: 'tomato',
             amount: 2,
-            unit: 'St�ck',
+            unit: 'Stück',
             category: 'VEGETABLES',
           },
           {
             name: 'Gurke',
             baseName: 'cucumber',
             amount: 0.5,
-            unit: 'St�ck',
+            unit: 'Stück',
             category: 'VEGETABLES',
           },
         ],
@@ -120,7 +110,7 @@ describe('applyRecipeOperations', () => {
       {
         id: 'op-add-step',
         type: 'ADD_INSTRUCTION_STEP',
-        summary: 'Salat-Zubereitungsschritt anf�gen',
+        summary: 'Salat-Zubereitungsschritt anfügen',
         newSteps: [
           {
             description: 'Tomate und Gurke klein schneiden, anrichten und zum Brot servieren.',
@@ -130,11 +120,12 @@ describe('applyRecipeOperations', () => {
     ];
 
     const remixed = applyRecipeOperations(mockBaseRecipe, ops);
-    const vegGroup = remixed.ingredients.find((g) => g.name === 'VEGETABLES');
-    assert.ok(vegGroup);
-    assert.strictEqual(vegGroup.items.length, 2);
-    assert.strictEqual(vegGroup.items[0].name, 'Tomate');
-    assert.strictEqual(vegGroup.items[1].name, 'Gurke');
+    const tomato = remixed.ingredients.find((i) => i.name === 'Tomate');
+    const cucumber = remixed.ingredients.find((i) => i.name === 'Gurke');
+    assert.ok(tomato);
+    assert.ok(cucumber);
+    assert.strictEqual(tomato.section, 'Beilage');
+    assert.strictEqual(remixed.ingredients.length, 4);
 
     assert.strictEqual(remixed.instructions.length, 3);
     assert.strictEqual(remixed.instructions[2].step, 3);
@@ -157,12 +148,11 @@ describe('applyRecipeOperations', () => {
     const remixed = applyRecipeOperations(mockBaseRecipe, ops);
     assert.strictEqual(remixed.servings, 4);
 
-    const bacon = remixed.ingredients
-      .find((g) => g.name === 'MEAT_POULTRY')
-      ?.items.find((i) => i.name === 'Bacon');
+    const bacon = remixed.ingredients.find((i) => i.name === 'Bacon');
     assert.ok(bacon);
     assert.strictEqual(bacon.amount, 200); // 100g * 2 = 200g
   });
+
   it('correctly replaces ingredient, leaves title unchanged without UPDATE_TITLE, and sets title when UPDATE_TITLE is provided', () => {
     const appleRecipe: Recipe = {
       id: 'apple-recipe',
@@ -174,16 +164,11 @@ describe('applyRecipeOperations', () => {
       equipment: [],
       ingredients: [
         {
-          name: 'PRODUCE',
-          items: [
-            {
-              name: 'Äpfel (Boskoop)',
-              baseName: 'apfel',
-              amount: 2,
-              unit: 'Stück',
-              category: 'PRODUCE',
-            },
-          ],
+          name: 'Äpfel (Boskoop)',
+          baseName: 'apfel',
+          amount: 2,
+          unit: 'Stück',
+          category: 'PRODUCE',
         },
       ],
       instructions: [
@@ -213,7 +198,7 @@ describe('applyRecipeOperations', () => {
     // 1. Without UPDATE_TITLE, title remains unchanged
     const remixedNoTitle = applyRecipeOperations(appleRecipe, replaceOpOnly);
     assert.strictEqual(remixedNoTitle.title, 'Apfel-Zimt Spekulatius Tiramisu');
-    assert.strictEqual(remixedNoTitle.ingredients[0].items[0].name, 'Birnen (Abate Fetel)');
+    assert.strictEqual(remixedNoTitle.ingredients[0].name, 'Birnen (Abate Fetel)');
 
     // 2. With separate UPDATE_TITLE operation directly supplied by AI
     const opsWithTitle: RecipeOperation[] = [

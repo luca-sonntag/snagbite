@@ -24,30 +24,20 @@ async function main() {
     equipment: ['Backofen', 'Backblech'],
     ingredients: [
       {
-        name: 'DAIRY_EGGS',
-        items: [
-          {
-            name: 'Mozzarella (gerieben)',
-            amount: 150,
-            unit: 'g',
-            baseName: 'cheese', // Flaw: collapsed variety
-            category: 'DAIRY',
-            synonyms: ['grated cheese'],
-          },
-        ],
+        name: 'Mozzarella (gerieben)',
+        amount: 150,
+        unit: 'g',
+        baseName: 'cheese', // Flaw: collapsed variety
+        category: 'DAIRY_EGGS',
+        synonyms: ['grated cheese'],
       },
       {
-        name: 'SPICES_SEASONINGS',
-        items: [
-          {
-            name: 'Pfeffer',
-            amount: 0.5,
-            unit: 'TL',
-            baseName: 'pepper', // Flaw: ambiguous spice
-            category: 'FRUITS_VEGETABLES', // Flaw: wrong category
-            synonyms: [],
-          },
-        ],
+        name: 'Pfeffer',
+        amount: 0.5,
+        unit: 'TL',
+        baseName: 'pepper', // Flaw: ambiguous spice
+        category: 'VEGETABLES', // Flaw: wrong category
+        synonyms: [],
       },
     ],
     instructions: [
@@ -64,7 +54,7 @@ async function main() {
 
   console.log('📋 Input Recipe:');
   console.log(`- Title: "${sampleRecipe.title}"`);
-  console.log(`- Ingredients: ${sampleRecipe.ingredients.flatMap(g => g.items).map(i => `${i.name} (baseName: "${i.baseName}", cat: ${i.category})`).join(', ')}`);
+  console.log(`- Ingredients: ${sampleRecipe.ingredients.map(i => `${i.name} (baseName: "${i.baseName}", cat: ${i.category})`).join(', ')}`);
   console.log(`- Instructions:`);
   sampleRecipe.instructions.forEach(s => console.log(`  ${s.step}. ${s.description}`));
 
@@ -80,11 +70,8 @@ async function main() {
 
   console.log('✨ Patched Recipe Result:');
   console.log(`- Patched Ingredients:`);
-  for (const group of patchedRecipe.ingredients) {
-    console.log(`  [${group.name}]:`);
-    for (const item of group.items) {
-      console.log(`    • ${item.name} -> baseName: "${item.baseName}", category: "${item.category}"`);
-    }
+  for (const item of patchedRecipe.ingredients) {
+    console.log(`    • ${item.name} -> baseName: "${item.baseName}", category: "${item.category}"`);
   }
   console.log(`- Patched Instructions:`);
   for (const step of patchedRecipe.instructions) {

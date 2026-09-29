@@ -29,7 +29,7 @@ let cleanupInterval: NodeJS.Timeout | null = null;
 let notificationInterval: NodeJS.Timeout | null = null;
 
 function buildRecipePreview(recipe: Recipe, fallbackThumbnail?: string, authorHandle?: string | null): RecipePreviewData {
-  const allItems = (recipe.ingredients || []).flatMap((g) => g.items || []);
+  const allItems = recipe.ingredients || [];
   return {
     thumbnailUrl: fallbackThumbnail,
     authorHandle: formatAuthorHandle(authorHandle) || undefined,

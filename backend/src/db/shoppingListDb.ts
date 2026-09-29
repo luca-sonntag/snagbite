@@ -371,27 +371,25 @@ async function autoTransferToPantry(userId: string, item: ShoppingListRow): Prom
 
         if (recData?.ingredients && Array.isArray(recData.ingredients)) {
           const keySet = new Set(keys);
-          for (const group of recData.ingredients as any[]) {
-            if (!group?.items || !Array.isArray(group.items)) continue;
-            for (const ing of group.items) {
-              const ingKeys = buildMappingKeys(ing.baseName, ing.name, ing.synonyms, ing.parentIngredient);
-              const isMatch = ingKeys.some((k) => keySet.has(k));
-              if (isMatch) {
-                if (ing.typicalPackageAmount && Number(ing.typicalPackageAmount) > 0) {
-                  const pkgAmt = Number(ing.typicalPackageAmount);
-                  const pkgUnit = ing.typicalPackageUnit || packageUnit;
-                  if (pkgUnit.toLowerCase() === item.unit.toLowerCase()) {
-                    packageAmount = Math.max(packageAmount, pkgAmt);
-                  } else {
-                    packageAmount = pkgAmt;
-                  }
-                  packageUnit = pkgUnit;
+          for (const ing of recData.ingredients as any[]) {
+            if (!ing || !ing.name) continue;
+            const ingKeys = buildMappingKeys(ing.baseName, ing.name, ing.synonyms, ing.parentIngredient);
+            const isMatch = ingKeys.some((k) => keySet.has(k));
+            if (isMatch) {
+              if (ing.typicalPackageAmount && Number(ing.typicalPackageAmount) > 0) {
+                const pkgAmt = Number(ing.typicalPackageAmount);
+                const pkgUnit = ing.typicalPackageUnit || packageUnit;
+                if (pkgUnit.toLowerCase() === item.unit.toLowerCase()) {
+                  packageAmount = Math.max(packageAmount, pkgAmt);
+                } else {
+                  packageAmount = pkgAmt;
                 }
-                if (ing.shelfLifeDays) {
-                  shelfLifeDays = ing.shelfLifeDays;
-                }
-                break;
+                packageUnit = pkgUnit;
               }
+              if (ing.shelfLifeDays) {
+                shelfLifeDays = ing.shelfLifeDays;
+              }
+              break;
             }
           }
         }

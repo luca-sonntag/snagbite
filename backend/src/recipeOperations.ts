@@ -2,7 +2,6 @@ import type {
   Recipe,
   RecipeOperation,
   Ingredient,
-  IngredientGroup,
   InstructionStep,
 } from './types.js';
 
@@ -40,35 +39,19 @@ export function applyRecipeOperations(baseRecipe: Recipe, operations: RecipeOper
     switch (op.type) {
       case 'REPLACE_INGREDIENT': {
         if (!op.newIngredient || !op.targetIngredientName) break;
-        let replaced = false;
 
         const newIng: Ingredient = {
           ...op.newIngredient,
           replacedOriginal: op.targetIngredientName,
         };
 
-        for (const group of recipe.ingredients) {
-          const idx = group.items.findIndex((item) =>
-            matchesIngredientName(item, op.targetIngredientName!)
-          );
-          if (idx !== -1) {
-            group.items[idx] = newIng;
-            replaced = true;
-            break;
-          }
-        }
-
-        // If target was not found in existing groups, add as new ingredient
-        if (!replaced) {
-          const targetCategory = newIng.category || 'OTHER';
-          let targetGroup = recipe.ingredients.find(
-            (g) => g.name.toUpperCase() === targetCategory.toUpperCase()
-          );
-          if (!targetGroup) {
-            targetGroup = { name: targetCategory, items: [] };
-            recipe.ingredients.push(targetGroup);
-          }
-          targetGroup.items.push(newIng);
+        const idx = recipe.ingredients.findIndex((item) =>
+          matchesIngredientName(item, op.targetIngredientName!)
+        );
+        if (idx !== -1) {
+          recipe.ingredients[idx] = newIng;
+        } else {
+          recipe.ingredients.push(newIng);
         }
         break;
       }
@@ -78,22 +61,14 @@ export function applyRecipeOperations(baseRecipe: Recipe, operations: RecipeOper
         if (toAdd.length === 0) break;
 
         for (const newIng of toAdd) {
-          const targetCategory = op.groupName || newIng.category || 'OTHER';
-          let targetGroup = recipe.ingredients.find(
-            (g) => g.name.toUpperCase() === targetCategory.toUpperCase()
-          );
-
-          if (!targetGroup) {
-            targetGroup = { name: targetCategory, items: [] };
-            recipe.ingredients.push(targetGroup);
-          }
-
-          // Avoid duplicate exact ingredient additions
-          const exists = targetGroup.items.some(
+          const exists = recipe.ingredients.some(
             (i) => i.name.trim().toLowerCase() === newIng.name.trim().toLowerCase()
           );
           if (!exists) {
-            targetGroup.items.push({ ...newIng });
+            recipe.ingredients.push({
+              ...newIng,
+              ...(op.groupName ? { section: op.groupName } : {}),
+            });
           }
         }
         break;
@@ -102,12 +77,7 @@ export function applyRecipeOperations(baseRecipe: Recipe, operations: RecipeOper
       case 'REMOVE_INGREDIENT': {
         if (!op.removeIngredientName) break;
         const target = op.removeIngredientName;
-
-        for (const group of recipe.ingredients) {
-          group.items = group.items.filter((item) => !matchesIngredientName(item, target));
-        }
-        // Remove empty groups
-        recipe.ingredients = recipe.ingredients.filter((g) => g.items.length > 0);
+        recipe.ingredients = recipe.ingredients.filter((item) => !matchesIngredientName(item, target));
         break;
       }
 
@@ -116,12 +86,10 @@ export function applyRecipeOperations(baseRecipe: Recipe, operations: RecipeOper
         const scaleFactor = op.newServings / recipe.servings;
         recipe.servings = op.newServings;
 
-        for (const group of recipe.ingredients) {
-          for (const item of group.items) {
-            if (typeof item.amount === 'number' && item.amount > 0) {
-              const scaled = item.amount * scaleFactor;
-              item.amount = Math.round(scaled * 100) / 100;
-            }
+        for (const item of recipe.ingredients) {
+          if (typeof item.amount === 'number' && item.amount > 0) {
+            const scaled = item.amount * scaleFactor;
+            item.amount = Math.round(scaled * 100) / 100;
           }
         }
         break;
