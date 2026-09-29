@@ -45,6 +45,7 @@ export interface RecipeHeaderProps {
 
 export type RecipeSectionId = 'ingredients' | 'instructions' | 'details';
 
+/** @deprecated Use flat Ingredient[] instead */
 export interface SortedIngredientGroup {
   group: {
     name: string;
@@ -55,5 +56,5 @@ export interface SortedIngredientGroup {
 
 export interface SelectedNutritionTarget {
   ingredient: Ingredient;
-  category: string;
+  category?: string;
 }

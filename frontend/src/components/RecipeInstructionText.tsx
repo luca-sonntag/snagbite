@@ -52,12 +52,10 @@ export default function RecipeInstructionText({
   // Flat list of ingredients
   const allIngredients = useMemo(() => {
     return recipe.ingredients
-      ? recipe.ingredients.flatMap(g =>
-          g.items.map(item => ({
-            ...item,
-            category: item.category || g.name,
-          }))
-        )
+      ? recipe.ingredients.map(item => ({
+          ...item,
+          category: item.category || 'OTHER',
+        }))
       : [];
   }, [recipe.ingredients]);
 

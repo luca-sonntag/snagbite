@@ -4,7 +4,7 @@ import type { BulkShoppingItem } from './types';
 import { useToast } from '../../context/ToastContext';
 import { useI18n } from '../../context/I18nContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
-import { formatDateIso, sortIngredientGroupsByCategory } from './mealPlannerUtils';
+import { formatDateIso, sortIngredientsByCategory } from './mealPlannerUtils';
 
 interface UseMealPlanBulkShoppingOptions {
   mealPlans: MealPlanEntry[];
@@ -32,7 +32,7 @@ function createBulkShoppingItem(
     targetServings: servings,
     baseServings,
     scaleFactor: servings / baseServings,
-    sortedIngredients: sortIngredientGroupsByCategory(recipe.ingredients),
+    sortedIngredients: sortIngredientsByCategory(recipe.ingredients),
     recipeLabel: labelSuffix ? `${recipe.title} ${labelSuffix}` : recipe.title,
   };
 }

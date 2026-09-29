@@ -3,7 +3,6 @@ import { Button } from '@heroui/react';
 import { Check, ShoppingCart, ChevronRight, LayoutGrid, List } from 'lucide-react';
 import ProBadge from '../ProBadge';
 import type { Ingredient, Recipe } from '../../types';
-import type { SortedIngredientGroup } from './types';
 import { useI18n } from '../../context/I18nContext';
 import { hapticLight } from '../../utils/haptics';
 import IngredientNutritionSheet from './IngredientNutritionSheet';
@@ -16,7 +15,7 @@ import ProFeatureSheet from '../ProFeatureSheet';
 
 interface RecipeIngredientsProps {
   recipe: Recipe;
-  sortedIngredients: SortedIngredientGroup[];
+  sortedIngredients: Ingredient[];
   isPremium: boolean;
   scaleFactor: number;
   formatAmount: (amount: number | undefined, unit: string | undefined) => string;
@@ -58,11 +57,11 @@ export default function RecipeIngredients({
     }
   };
 
-  const [selectedNutrition, setSelectedNutrition] = useState<{ ingredient: Ingredient; category: string } | null>(null);
+  const [selectedNutrition, setSelectedNutrition] = useState<{ ingredient: Ingredient; category?: string } | null>(null);
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isProFeatureSheetOpen, setIsProFeatureSheetOpen] = useState(false);
-  const hasAnyNutrition = sortedIngredients.some(({ group }) =>
-    group.items.some((ing) => ing.calories !== undefined && ing.calories !== null)
+  const hasAnyNutrition = sortedIngredients.some((ing) =>
+    ing.calories !== undefined && ing.calories !== null
   );
 
   return (
@@ -110,41 +109,37 @@ export default function RecipeIngredients({
         {/* 1.2 Ingredients Display (Grid 2-column or List) */}
         {viewMode === 'grid' ? (
           <ul className="grid grid-cols-2 gap-x-1.5 sm:gap-x-3 gap-y-1.5 px-2 pt-2 pb-3.5 sm:px-3.5 sm:pt-2.5 sm:pb-4.5 list-none m-0">
-            {sortedIngredients.flatMap(({ group, originalIdx }) =>
-              group.items.map((ing, idx) => (
-                <IngredientItemGrid
-                  key={`${ing.name}-${originalIdx}-${idx}`}
-                  ingredient={ing}
-                  categoryName={group.name}
-                  originalIdx={originalIdx}
-                  itemIdx={idx}
-                  isPremium={isPremium}
-                  scaleFactor={scaleFactor}
-                  formatAmount={formatAmount}
-                  onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
-                  onOpenProFeature={() => setIsProFeatureSheetOpen(true)}
-                />
-              ))
-            )}
+            {sortedIngredients.map((ing, idx) => (
+              <IngredientItemGrid
+                key={`${ing.name}-${idx}`}
+                ingredient={ing}
+                categoryName={ing.category}
+                originalIdx={idx}
+                itemIdx={idx}
+                isPremium={isPremium}
+                scaleFactor={scaleFactor}
+                formatAmount={formatAmount}
+                onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
+                onOpenProFeature={() => setIsProFeatureSheetOpen(true)}
+              />
+            ))}
           </ul>
         ) : (
           <ul className="flex flex-col divide-y divide-gray-100/60 dark:divide-gray-800/50 list-none p-0 m-0">
-            {sortedIngredients.flatMap(({ group, originalIdx }) =>
-              group.items.map((ing, idx) => (
-                <IngredientItemRow
-                  key={`${ing.name}-${originalIdx}-${idx}`}
-                  ingredient={ing}
-                  categoryName={group.name}
-                  originalIdx={originalIdx}
-                  itemIdx={idx}
-                  isPremium={isPremium}
-                  scaleFactor={scaleFactor}
-                  formatAmount={formatAmount}
-                  onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
-                  onOpenProFeature={() => setIsProFeatureSheetOpen(true)}
-                />
-              ))
-            )}
+            {sortedIngredients.map((ing, idx) => (
+              <IngredientItemRow
+                key={`${ing.name}-${idx}`}
+                ingredient={ing}
+                categoryName={ing.category}
+                originalIdx={idx}
+                itemIdx={idx}
+                isPremium={isPremium}
+                scaleFactor={scaleFactor}
+                formatAmount={formatAmount}
+                onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
+                onOpenProFeature={() => setIsProFeatureSheetOpen(true)}
+              />
+            ))}
           </ul>
         )}
 

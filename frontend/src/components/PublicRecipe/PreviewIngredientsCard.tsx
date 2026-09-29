@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
 import type { Recipe } from '../../types';
-import type { SortedIngredientGroup } from '../RecipeDetails/types';
 import { useI18n } from '../../context/I18nContext';
-import { categoryOrder, legacyCategoryMap } from '../../i18n';
+import { sortIngredientsByCategory } from '../MealPlanner/mealPlannerUtils';
 import IngredientItemRow from '../RecipeDetails/IngredientItemRow';
 
 export interface PreviewIngredientsCardProps {
@@ -20,21 +19,8 @@ export const PreviewIngredientsCard: React.FC<PreviewIngredientsCardProps> = ({
 }) => {
   const { t } = useI18n();
 
-  const sortedIngredients: SortedIngredientGroup[] = useMemo(() => {
-    if (!recipe.ingredients) return [];
-    const mapped = recipe.ingredients.map((group, originalIdx) => ({ group, originalIdx }));
-    return mapped.sort((a, b) => {
-      const getCategoryIndex = (name: string) => {
-        const cleanName = name.trim().toUpperCase();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const idx = categoryOrder.indexOf(cleanName as any);
-        if (idx !== -1) return idx;
-        const enumKey = legacyCategoryMap[name.trim().toLowerCase()];
-        if (enumKey) return categoryOrder.indexOf(enumKey);
-        return 999;
-      };
-      return getCategoryIndex(a.group.name) - getCategoryIndex(b.group.name);
-    });
+  const sortedIngredients = useMemo(() => {
+    return sortIngredientsByCategory(recipe.ingredients);
   }, [recipe.ingredients]);
 
   if (!recipe.ingredients || recipe.ingredients.length === 0) {
@@ -57,20 +43,18 @@ export const PreviewIngredientsCard: React.FC<PreviewIngredientsCardProps> = ({
 
       {/* 2. Ingredients List */}
       <ul className="flex flex-col divide-y divide-gray-100/60 dark:divide-gray-800/50 list-none p-0 m-0">
-        {sortedIngredients.flatMap(({ group, originalIdx }) =>
-          group.items.map((ing, idx) => (
-            <IngredientItemRow
-              key={`${ing.name}-${originalIdx}-${idx}`}
-              ingredient={ing}
-              categoryName={group.name}
-              originalIdx={originalIdx}
-              itemIdx={idx}
-              scaleFactor={scaleFactor}
-              formatAmount={formatAmount}
-              hideNutrition={true}
-            />
-          ))
-        )}
+        {sortedIngredients.map((ing, idx) => (
+          <IngredientItemRow
+            key={`${ing.name}-${idx}`}
+            ingredient={ing}
+            categoryName={ing.category}
+            originalIdx={idx}
+            itemIdx={idx}
+            scaleFactor={scaleFactor}
+            formatAmount={formatAmount}
+            hideNutrition={true}
+          />
+        ))}
       </ul>
     </div>
   );

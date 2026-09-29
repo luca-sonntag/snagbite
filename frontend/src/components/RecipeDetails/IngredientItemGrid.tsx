@@ -9,13 +9,13 @@ import { hapticLight } from '../../utils/haptics';
 
 export interface IngredientItemGridProps {
   ingredient: Ingredient;
-  categoryName: string;
+  categoryName?: string;
   originalIdx: number;
   itemIdx: number;
   isPremium?: boolean;
   scaleFactor?: number;
   formatAmount: (amount: number | undefined, unit: string | undefined) => string;
-  onSelectNutrition?: (ingredient: Ingredient, category: string) => void;
+  onSelectNutrition?: (ingredient: Ingredient, category?: string) => void;
   onOpenProFeature?: () => void;
   hideNutrition?: boolean;
 }
@@ -55,7 +55,7 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
     if (e) e.stopPropagation();
     if (canOpenNutrition) {
       hapticLight();
-      onSelectNutrition?.(ingredient, categoryName);
+      onSelectNutrition?.(ingredient, categoryName || ingredient.category || '');
     } else if (!isPremium && hasCalories) {
       hapticLight();
       onOpenProFeature?.();

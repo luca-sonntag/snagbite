@@ -15,7 +15,7 @@ interface ShoppingConfirmSheetProps {
   isOpen: boolean;
   onClose: () => void;
   recipe?: Recipe | MealPlanRecipeSummary;
-  sortedIngredients: Array<{ group: { name: string; items: Ingredient[] }; originalIdx: number }>;
+  sortedIngredients: Ingredient[];
   scaleFactor?: number;
   formatAmount?: (amount: number | undefined, unit: string | undefined) => string;
   onConfirm: (selectedIngredients: Ingredient[]) => Promise<void> | void;
@@ -49,51 +49,46 @@ export default function ShoppingConfirmSheet({
 
   const activeScaleFactor = servings / baseServings;
 
-  // Merge ingredients that share a parent in the same recipe across all groups
+  // Merge ingredients that share a parent in the same recipe
   const allItems = useMemo(() => {
-    const allIngredientsInRecipe = sortedIngredients.flatMap((g) => g.group.items);
     const childMap = new Map<string, Ingredient[]>();
     const childrenSet = new Set<Ingredient>();
 
-    for (const { group } of sortedIngredients) {
-      for (const ing of group.items) {
-        if (ing.parentIngredient?.baseName || ing.parentIngredient?.name) {
-          const parentBase = (ing.parentIngredient.baseName || '').toLowerCase().trim();
-          const parentName = (ing.parentIngredient.name || '').toLowerCase().trim();
+    for (const ing of sortedIngredients) {
+      if (ing.parentIngredient?.baseName || ing.parentIngredient?.name) {
+        const parentBase = (ing.parentIngredient.baseName || '').toLowerCase().trim();
+        const parentName = (ing.parentIngredient.name || '').toLowerCase().trim();
 
-          const parentInRecipe = allIngredientsInRecipe.find(
-            (other) =>
-              other !== ing &&
-              ((other.baseName && other.baseName.toLowerCase().trim() === parentBase) ||
-                other.name.toLowerCase().trim() === parentName)
-          );
+        const parentInRecipe = sortedIngredients.find(
+          (other) =>
+            other !== ing &&
+            ((other.baseName && other.baseName.toLowerCase().trim() === parentBase) ||
+              other.name.toLowerCase().trim() === parentName)
+        );
 
-          if (parentInRecipe) {
-            childrenSet.add(ing);
-            const parentKey = `${parentInRecipe.name}-${parentInRecipe.baseName || ''}`;
-            const list = childMap.get(parentKey) || [];
-            list.push(ing);
-            childMap.set(parentKey, list);
-          }
+        if (parentInRecipe) {
+          childrenSet.add(ing);
+          const parentKey = `${parentInRecipe.name}-${parentInRecipe.baseName || ''}`;
+          const list = childMap.get(parentKey) || [];
+          list.push(ing);
+          childMap.set(parentKey, list);
         }
       }
     }
 
     const items: MergedShoppingSheetItem[] = [];
-    sortedIngredients.forEach(({ group, originalIdx }) => {
-      group.items.forEach((ing, idx) => {
-        if (childrenSet.has(ing)) return;
+    sortedIngredients.forEach((ing, idx) => {
+      if (childrenSet.has(ing)) return;
 
-        const parentKey = `${ing.name}-${ing.baseName || ''}`;
-        const children = childMap.get(parentKey) || [];
+      const parentKey = `${ing.name}-${ing.baseName || ''}`;
+      const children = childMap.get(parentKey) || [];
 
-        items.push({
-          id: `${ing.name}-${originalIdx}-${idx}`,
-          primaryIngredient: ing,
-          childIngredients: children,
-          groupCategory: group.name || ing.category,
-          originalGroupIdx: originalIdx,
-        });
+      items.push({
+        id: `${ing.name}-${idx}`,
+        primaryIngredient: ing,
+        childIngredients: children,
+        groupCategory: ing.category,
+        originalGroupIdx: idx,
       });
     });
 
