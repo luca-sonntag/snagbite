@@ -93,7 +93,7 @@ export default function RecipeInstructions({
               {recipe.equipment.map((item, idx) => (
                 <li
                   key={idx}
-                  className="recipe-step-pill select-none text-xs"
+                  className="recipe-step-pill text-sm select-none"
                 >
                   {item}
                 </li>
