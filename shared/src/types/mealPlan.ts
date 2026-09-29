@@ -1,4 +1,4 @@
-import type { IngredientGroup } from './recipes.js';
+import type { Ingredient } from './recipes.js';
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
@@ -15,7 +15,7 @@ export interface MealPlanRecipeSummary {
   protein?: number | null;
   carbs?: number | null;
   fat?: number | null;
-  ingredients?: IngredientGroup[];
+  ingredients?: Ingredient[];
 }
 
 export interface MealPlanEntry {

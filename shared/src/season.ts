@@ -153,11 +153,9 @@ export function recipeHaystack(recipe: SharedRecipe): string {
   const parts: string[] = [recipe.title || ''];
   if (recipe.description) parts.push(recipe.description);
   if (recipe.tags) parts.push(...recipe.tags);
-  for (const group of recipe.ingredients || []) {
-    for (const item of group.items || []) {
-      if (item.baseName) parts.push(item.baseName);
-      if (item.name) parts.push(item.name);
-    }
+  for (const item of recipe.ingredients || []) {
+    if (item.baseName) parts.push(item.baseName);
+    if (item.name) parts.push(item.name);
   }
   return parts.join(' ').toLowerCase();
 }

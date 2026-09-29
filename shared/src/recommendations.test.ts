@@ -22,12 +22,7 @@ function makeRecipe(
       prepTime,
       cookTime,
       tags,
-      ingredients: [
-        {
-          name: 'Zutaten',
-          items: ingredients.map((name) => ({ name, baseName: name })),
-        },
-      ],
+      ingredients: ingredients.map((name) => ({ name, baseName: name })),
     },
   };
 }
