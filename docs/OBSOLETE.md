@@ -6,7 +6,21 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
-### 2026-09-29: Einheitliches Pill-Styling für Zutaten, Temperatur & Küchengeräte in Rezept-Schritten (`.recipe-step-pill`)
+### 2026-09-30: Verschachteltes Zutatengruppen-Modell (`IngredientGroup[]`) durch flaches `Ingredient[]`-Array abgelöst
+
+* **Ersetzter Code / Veraltete Datenstruktur:**
+  - Verschachteltes Datenmodell `ingredients: IngredientGroup[]` mit `{ name: string, items: Ingredient[] }` im geteilten Typ (`Recipe.ingredients`), Gemini-Ausgabe-Schema und Datenbank-JSON.
+  - Doppelte Schleifen (`for (const g of recipe.ingredients) { for (const i of g.items) { ... } }`) und komplexe Gruppen-Erzeugungs-/Gruppen-Bereinigungslogik im gesamten Backend (`recipeOperations.ts`, `ingredientMatcher.ts`, `healthScoreCalculator.ts`, `recipeAuditor.ts`, `pantryDb.ts`, `shoppingListDb.ts`).
+  - Verschachtelte UI-Verarbeitung mit `.flatMap(({ group, originalIdx }) => group.items.map(...))` in Frontend-Komponenten (`RecipeIngredients.tsx`, `ShoppingConfirmSheet.tsx`, `PreviewIngredientsCard.tsx`, `copyRecipeToClipboard.ts`).
+  - Hilfsfunktionen `placeIngredientInGroup` in `categoryGroups.ts` sowie `SortedIngredientGroup`-Typen in `RecipeDetails/types.ts`.
+* **Ersetzt durch:**
+  - **Flaches Datenmodell ([`shared/src/types/recipes.ts`](file:///c:/Users/lucas/source/repos/cookbook/shared/src/types/recipes.ts)):** `Recipe.ingredients: Ingredient[]`. Jede Zutat trägt direkt ihre `category?: string` (Supermarktkategorie) sowie optional eine `section?: string` (z. B. "Für die Soße", "Für den Teig"). `IngredientGroup` verbleibt lediglich als `@deprecated`-Typ-Alias.
+  - **Schlanke Operations-Engine ([`backend/src/recipeOperations.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/recipeOperations.ts)):** Direkte Array-Methoden (`findIndex`, `splice`, `filter`, `map`) ohne 60+ Zeilen Boilerplate für das Erstellen oder Löschen leerer Gruppen.
+  - **Präzises Gemini-Schema ([`backend/src/gemini.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/gemini.ts)):** LLM liefert Zutaten direkt als flache Liste mit strukturiertem `category`-Enum und `section`-String.
+  - **Flache UI-Render-Pipelines:** `RecipeIngredients.tsx`, `ShoppingConfirmSheet.tsx`, `CookingMode` und `MealPlanner` mappen Zutaten direkt ohne künstliche Zwischengruppen.
+* **Betroffene Dateien:** `shared/src/types/recipes.ts`, `backend/src/gemini.ts`, `backend/src/recipeOperations.ts`, `backend/src/matching/recipeAuditor.ts`, `backend/src/matching/ingredientMatcher.ts`, `backend/src/matching/healthScoreCalculator.ts`, `backend/src/queue.ts`, `backend/src/db/pantryDb.ts`, `backend/src/db/shoppingListDb.ts`, `frontend/src/components/RecipeDetails/RecipeIngredients.tsx`, `frontend/src/components/RecipeDetails/ShoppingConfirmSheet.tsx`, `frontend/src/components/RecipeDetails/useRecipeDetails.ts`, `frontend/src/components/MealPlanner/mealPlannerUtils.ts`, `frontend/src/components/MealPlanner/useMealPlanBulkShopping.ts`, `docs/OBSOLETE.md`.
+
+---
 
 * **Ersetzter Code / Veraltete Struktur:**
   - Lokale Hilfsfunktion `getChipClass` in `RecipeInstructionText.tsx`.
