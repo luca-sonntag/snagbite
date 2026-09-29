@@ -6,6 +6,20 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-29: Einheitliches Pill-Styling für Zutaten, Temperatur & Küchengeräte in Rezept-Schritten (`.recipe-step-pill`)
+
+* **Ersetzter Code / Veraltete Struktur:**
+  - Lokale Hilfsfunktion `getChipClass` in `RecipeInstructionText.tsx`.
+  - Disparates Styling zwischen Zutaten (Unterstreichung via `underline decoration-gray-300`), Küchengeräten (graue Pill) und Temperatur (Text ohne Pill).
+  - Fehlerhafte Uhr-Icon-Darstellung (`<Clock />`) bei Temperatur-Angaben in Rezept-Schritten, wenn KI-Modelle diese fälschlicherweise als `(timer:...)` getaggt hatten.
+* **Ersetzt durch:**
+  - **Einheitliche CSS-Klasse ([`frontend/src/index.css`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/index.css)):** `.recipe-step-pill` mit relativen `em`-Einheiten für Padding, Radius und Gap. Skaliert automatisch nahtlos zwischen Schritt-Liste (`text-sm`) und Fullscreen-Cooking-Mode (`text-[22px..28px]`).
+  - **Einheitliche Komponenten-Nutzung:** Zutaten-Trigger in [`InstructionIngredientPopover.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/InstructionIngredientPopover.tsx), Küchengeräte und Temperatur in [`RecipeInstructionText.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeInstructionText.tsx) und Equipment-Liste in [`RecipeInstructions.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/RecipeInstructions.tsx) nutzen dieselbe Klasse.
+  - **Thermometer-Icon & Defensive Erkennung:** Temperatur erhält ein dediziertes `<Thermometer />`-Icon. In `RecipeInstructionText.tsx` und `ingredientMatch.ts` werden versehentlich als Timer getaggte Temperaturen defensiv abgefangen und als Temperatur-Pills gerendert. In `backend/src/gemini.ts` wird die KI explizit angewiesen, Temperaturen niemals als Timer zu taggen.
+* **Betroffene Dateien:** `frontend/src/index.css`, `frontend/src/components/RecipeInstructionText.tsx`, `frontend/src/components/InstructionIngredientPopover.tsx`, `frontend/src/components/RecipeDetails/RecipeInstructions.tsx`, `frontend/src/utils/ingredientMatch.ts`, `backend/src/gemini.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-28: Verschmelzung von Segmented Tabs und Progress-Karte in der Einkaufsliste (`ShoppingTabsCard`)
 
 * **Ersetzter Code / Veraltete Struktur:**
