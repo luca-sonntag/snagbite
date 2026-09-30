@@ -13,14 +13,15 @@ export interface GenerateCoverResult {
   usage?: FluxUsageInfo | null;
 }
 
-const STORAGE_BUCKET = 'recipe-covers';
+export const RECIPE_COVERS_BUCKET = 'recipe-covers';
+const STORAGE_BUCKET = RECIPE_COVERS_BUCKET;
 
 /**
  * Ensures the public storage bucket for recipe covers exists.
  * Runs lazily once on first upload attempt.
  */
 let bucketEnsured = false;
-async function ensureBucketExists(): Promise<void> {
+export async function ensureCoverBucketExists(): Promise<void> {
   if (bucketEnsured) return;
   try {
     const { data: buckets } = await getClient().storage.listBuckets();
@@ -29,10 +30,13 @@ async function ensureBucketExists(): Promise<void> {
       await getClient().storage.createBucket(STORAGE_BUCKET, { public: true });
     }
     bucketEnsured = true;
-  } catch (err: any) {
+  } catch {
     // If listing/creating fails (e.g. lack of permissions or already created in migration), continue
     bucketEnsured = true;
   }
+}
+async function ensureBucketExists(): Promise<void> {
+  return ensureCoverBucketExists();
 }
 
 const FAL_FLUX_ENDPOINT = 'https://fal.run/fal-ai/flux-1/schnell';
@@ -41,7 +45,7 @@ const FAL_FLUX_ENDPOINT = 'https://fal.run/fal-ai/flux-1/schnell';
  * Calls FLUX.1 [schnell] via fal.ai to generate a 4:3 food photography cover image for a recipe.
  * Docs: https://fal.ai/models/fal-ai/flux-1/schnell/llms.txt
  */
-async function fetchFluxImageBuffer(prompt: string): Promise<Buffer> {
+export async function fetchFluxImageBuffer(prompt: string): Promise<Buffer> {
   const apiKey = config.FAL_KEY;
   if (!apiKey) {
     throw new Error('FAL_KEY (or FLUX_API_KEY) is not configured');
