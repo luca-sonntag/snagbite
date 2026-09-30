@@ -55,6 +55,8 @@ Alle Änderungen liegen als versionierte, chronologische SQL-Dateien vor.
   * `npm run db:repair -- --status applied <version>`: Markiert eine Migration manuell als angewendet.
   * `npm run db:backup:prod`: Sichert alle Tabellen der Production-DB per Service-Key in eine lokale JSON-Datei (Free-Tier-kompatibel).
   * `npm run db:backup:dev`: Sichert alle Tabellen der Dev-DB per Service-Key in eine lokale JSON-Datei.
+  * `npm run db:restore:prod -- [--confirm]`: Stellt Tabellen aus dem neuesten Production-Backup wieder her (Dry-Run ohne `--confirm`).
+  * `npm run db:restore:dev -- [--confirm]`: Stellt Tabellen aus dem neuesten Dev-Backup wieder her (Dry-Run ohne `--confirm`).
 
 * **Frische Datenbank (Dev oder Test):**
   Einfach alle Migrationen von Anfang an durchlaufen lassen:
