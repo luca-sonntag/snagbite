@@ -34,11 +34,13 @@ const PAGE_SIZE = 200;
 const DIVERGENCE_THRESHOLD = 0.1;
 
 function hasIngredients(recipe: any): recipe is Recipe {
-  return !!(
-    recipe &&
-    typeof recipe === 'object' &&
-    Array.isArray(recipe.ingredients) &&
-    recipe.ingredients.some((g: any) => Array.isArray(g?.items) && g.items.length > 0)
+  if (!recipe || typeof recipe !== 'object' || !Array.isArray(recipe.ingredients) || recipe.ingredients.length === 0) {
+    return false;
+  }
+  return recipe.ingredients.some(
+    (item: any) =>
+      (typeof item?.name === 'string' && item.name.trim().length > 0) ||
+      (Array.isArray(item?.items) && item.items.length > 0)
   );
 }
 
