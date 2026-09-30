@@ -34,29 +34,26 @@ if (!supabaseUrl || !supabaseKey) {
 
 const client = createClient(supabaseUrl, supabaseKey);
 
-// Candidate tables to export if they exist
-const CANDIDATE_TABLES = [
-  'jobs',
-  'jobs_legacy',
-  'recipes',
-  'user_recipes',
-  'collections',
-  'recipe_collections',
-  'cook_events',
-  'point_ledger',
-  'user_stats',
-  'user_badges',
-  'profiles',
-  'friendships',
-  'pantry_items',
-  'shopping_list',
-  'meal_plans',
-  'ingredient_mappings',
-  'global_settings',
-  'feedback',
-  'user_push_tokens',
-  'notification_log',
-];
+/**
+ * Dynamically discovers all tables exposed in the public schema via PostgREST OpenAPI spec.
+ */
+async function discoverPublicTables(url: string, key: string): Promise<string[]> {
+  const endpoint = `${url.replace(/\/+$/, '')}/rest/v1/`;
+  const response = await fetch(endpoint, {
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to introspect database schema: HTTP ${response.status} ${response.statusText}`);
+  }
+
+  const spec = (await response.json()) as { definitions?: Record<string, unknown> };
+  const tables = Object.keys(spec.definitions || {});
+  return tables.sort();
+}
 
 async function fetchAllRows(tableName: string): Promise<unknown[] | null> {
   let allRows: unknown[] = [];
@@ -97,15 +94,19 @@ async function run(): Promise<void> {
   console.log(`Timestamp:   ${timestamp}`);
   console.log(`============================================================\n`);
 
+  console.log(`Discovering public tables via schema API...`);
+  const tables = await discoverPublicTables(supabaseUrl, supabaseKey);
+  console.log(`Found ${tables.length} table(s): ${tables.join(', ')}\n`);
+
   const backupData: Record<string, unknown[]> = {};
   const stats: Record<string, number> = {};
 
-  for (const table of CANDIDATE_TABLES) {
+  for (const table of tables) {
     process.stdout.write(`Exporting ${table.padEnd(22)}... `);
     const rows = await fetchAllRows(table);
 
     if (rows === null) {
-      console.log('(table does not exist in schema)');
+      console.log('(failed to read or table inaccessible)');
     } else {
       backupData[table] = rows;
       stats[table] = rows.length;
