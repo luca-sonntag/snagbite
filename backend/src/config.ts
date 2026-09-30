@@ -5,6 +5,11 @@ import { existsSync } from 'fs';
 // Load .env file from project root or backend folder
 dotenv.config();
 dotenv.config({ path: path.resolve('backend', '.env') });
+if (existsSync(path.resolve('backend', '.env.local'))) {
+  dotenv.config({ path: path.resolve('backend', '.env.local'), override: true });
+} else if (existsSync('.env.local')) {
+  dotenv.config({ path: path.resolve('.env.local'), override: true });
+}
 
 export interface Config {
   PORT: number;
