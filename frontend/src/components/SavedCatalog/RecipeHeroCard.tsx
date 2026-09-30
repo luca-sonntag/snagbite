@@ -78,12 +78,12 @@ export default function RecipeHeroCard({
         hapticLight();
         onOpenRecipe(e, r, job);
       }}
-      className={`relative group rounded-3xl overflow-hidden bg-gray-900 shadow-[0_8px_30px_rgba(0,0,0,0.12)] border-none select-none cursor-pointer active:scale-[0.98] transition-transform duration-200 ${
+      className={`relative group rounded-3xl overflow-hidden bg-white dark:bg-gray-900 shadow-[0_4px_20px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 border-none select-none cursor-pointer active:scale-[0.98] transition-transform duration-200 ${
         isSelected ? 'ring-2 ring-emerald-500' : ''
       }`}
       {...(!isCommunity ? (bindLongPress ?? {}) : {})}
     >
-      <div className="relative aspect-[4/3] sm:aspect-[16/10] w-full overflow-hidden">
+      <div className="relative aspect-[4/3] sm:aspect-[16/10] w-full overflow-hidden bg-black/5 dark:bg-white/5">
         <CachedImage
           src={r.imageUrl}
           emoji={r.emoji}
@@ -91,7 +91,7 @@ export default function RecipeHeroCard({
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none select-none"
         />
         {/* Soft Ambient Scrim */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 via-45% to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 via-45% to-transparent dark:from-gray-950 dark:via-gray-950/70 dark:via-45% dark:to-transparent pointer-events-none" />
 
         {/* Top Badges */}
         <div className="absolute top-2.5 inset-x-2.5 sm:top-3 sm:inset-x-3 flex items-center justify-between pointer-events-none">
@@ -101,7 +101,7 @@ export default function RecipeHeroCard({
                 className={`w-7 h-7 rounded-full flex items-center justify-center transition-all border-none shrink-0 ${
                   isSelected
                     ? 'bg-emerald-500 text-white shadow-md'
-                    : 'bg-black/40 backdrop-blur-sm text-white shadow-xs'
+                    : 'bg-white/80 dark:bg-black/40 backdrop-blur-sm text-gray-700 dark:text-white shadow-xs'
                 }`}
               >
                 {isSelected && <Check className="w-4 h-4 text-white stroke-[3px]" />}
@@ -155,26 +155,26 @@ export default function RecipeHeroCard({
               <span className={`w-8 h-8 rounded-full backdrop-blur-md flex items-center justify-center shadow-md transition-all active:scale-90 ${
                 isSaved
                   ? 'bg-emerald-500/90 text-white'
-                  : 'bg-black/50 text-white hover:bg-black/70'
+                  : 'bg-white/80 dark:bg-black/50 text-gray-700 dark:text-indigo-200 hover:bg-white dark:hover:bg-black/70'
               }`}>
                 {isSaved ? (
                   <Check className="w-4 h-4 text-white" />
                 ) : (
-                  <BookmarkPlus className="w-4 h-4 text-indigo-200" />
+                  <BookmarkPlus className="w-4 h-4 text-indigo-600 dark:text-indigo-200" />
                 )}
               </span>
             </button>
           ) : job?.isFavorite ? (
-            <div className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-amber-400 shadow-md">
-              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+            <div className="w-8 h-8 rounded-full bg-white/80 dark:bg-black/40 backdrop-blur-md flex items-center justify-center text-amber-500 shadow-sm">
+              <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
             </div>
           ) : null}
         </div>
 
         {/* Bottom Content Container */}
-        <div className="absolute bottom-3 inset-x-3 text-white flex flex-col">
+        <div className="absolute bottom-3 inset-x-3 flex flex-col">
           {/* Punchy Info Pills - Crisp, compact & high legibility */}
-          <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold text-white/90 flex-wrap drop-shadow-xs mb-1.5">
+          <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold text-gray-700 dark:text-white/90 flex-wrap mb-1.5">
             {totalTime && (
               <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/90 text-white font-bold text-[10px] shadow-xs shrink-0">
                 <Clock className="w-2.5 h-2.5 text-white shrink-0" />
@@ -185,9 +185,9 @@ export default function RecipeHeroCard({
             {/* Calories vor Health Score direkt nebeneinander */}
             {(calories !== undefined && calories !== null) || (score !== null && scoreLetter && scoreColors) ? (
               <div className="flex items-center gap-1 shrink-0">
-                {totalTime && <span className="text-white/30 text-[9px] mr-0.5">•</span>}
+                {totalTime && <span className="text-gray-400 dark:text-white/30 text-[9px] mr-0.5">•</span>}
                 {calories !== undefined && calories !== null && (
-                  <span className="text-white/90 font-medium">
+                  <span className="text-gray-600 dark:text-white/90 font-medium">
                     {Math.round(calories)} kcal
                   </span>
                 )}
@@ -205,9 +205,9 @@ export default function RecipeHeroCard({
             {isVital && protein && protein > 0 && (
               <div className="flex items-center gap-1 shrink-0">
                 {(totalTime || calories !== undefined || score !== null) && (
-                  <span className="text-white/30 text-[9px]">•</span>
+                  <span className="text-gray-400 dark:text-white/30 text-[9px]">•</span>
                 )}
-                <span className="text-white/90 font-medium">
+                <span className="text-gray-600 dark:text-white/90 font-medium">
                   {Math.round(protein)}g Protein
                 </span>
               </div>
@@ -215,9 +215,9 @@ export default function RecipeHeroCard({
             {isVital && vegGrams && vegGrams > 0 && (
               <div className="flex items-center gap-1 shrink-0">
                 {(totalTime || calories !== undefined || score !== null || (protein && protein > 0)) && (
-                  <span className="text-white/30 text-[9px]">•</span>
+                  <span className="text-gray-400 dark:text-white/30 text-[9px]">•</span>
                 )}
-                <span className="text-white/90 font-medium">
+                <span className="text-gray-600 dark:text-white/90 font-medium">
                   {t('catalog.magazine.vegGrams', { grams: Math.round(vegGrams) })}
                 </span>
               </div>
@@ -225,20 +225,20 @@ export default function RecipeHeroCard({
           </div>
 
           {/* Title - 100% full width, up to 2 lines without horizontal crunch */}
-          <h3 className="text-base sm:text-lg font-bold text-white tracking-tight leading-tight line-clamp-2 font-heading drop-shadow-xs">
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white tracking-tight leading-tight line-clamp-2 font-heading">
             {r.title}
           </h3>
 
           {/* Bottom Bar: Author Handle & Cook CTA - Snug directly under title */}
           <div className="flex items-center justify-between gap-2 mt-0.5">
             {formatAuthorHandle(r.sourceHandle) ? (
-              <p className="text-[10.5px] text-gray-300/85 font-medium truncate leading-none">
+              <p className="text-[10.5px] text-gray-500 dark:text-gray-300/85 font-medium truncate leading-none">
                 {formatAuthorHandle(r.sourceHandle)}
               </p>
             ) : (
               <span />
             )}
-            <span className="shrink-0 px-2.5 py-1 rounded-xl bg-white text-gray-950 font-bold text-xs group-hover:bg-gray-100 active:scale-95 transition-all shadow-md">
+            <span className="shrink-0 px-2.5 py-1 rounded-xl bg-gray-900 text-white hover:bg-gray-800 dark:bg-white dark:text-gray-950 dark:hover:bg-gray-100 font-bold text-xs group-hover:bg-emerald-600 group-hover:text-white dark:group-hover:bg-emerald-500 dark:group-hover:text-white active:scale-95 transition-all shadow-md">
               {t('catalog.magazine.heroCookNow')}
             </span>
           </div>
