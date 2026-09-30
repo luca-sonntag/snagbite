@@ -69,6 +69,9 @@ Alle Änderungen liegen als versionierte, chronologische SQL-Dateien vor.
 
   # 2. Alle nachfolgenden Migrationen (Split, Frames, Mappings, Meal Plans, Pantry, Nutrition) transaktional ausführen:
   npx supabase db push --db-url "$PROD_DATABASE_URL"
+
+  # 3. Falls die Datenbank über PostgREST/Service-Key statt CLI migriert wird:
+  npm run migrate:flatten-ingredients -w backend
   ```
   `jobs_legacy` bleibt als Rollback in der DB erhalten. Verification-Queries können mit `backend/db/migrations/001_verify.sql` gegen `jobs_legacy` ausgeführt werden.
 
@@ -123,8 +126,8 @@ EOF
 
 # 2. Dev-Server (auto-login als Test-User)
 npm run dev -w frontend
-```
-uild wie in Prod servieren
+# 3. Production-artiger Build wie in Prod servieren
+```bash
 npm run build:dev -w frontend
 npm run serve:dev -w frontend   # http://localhost:4173
 ```
