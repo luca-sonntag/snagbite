@@ -145,6 +145,16 @@ function Undo-Transaction {
     Write-Host "==============================================" -ForegroundColor Red
     Write-Host ""
 
+    # Abort any in-progress rebase or merge and clean lock files
+    Run-Git -Arguments @("rebase", "--abort") -IgnoreError
+    Run-Git -Arguments @("merge", "--abort") -IgnoreError
+    if (Test-Path ".git/HEAD.lock") {
+        Remove-Item -Path ".git/HEAD.lock" -Force -ErrorAction SilentlyContinue
+    }
+    if (Test-Path ".git/index.lock") {
+        Remove-Item -Path ".git/index.lock" -Force -ErrorAction SilentlyContinue
+    }
+
     # Restore version.properties if modified on disk
     if (Test-Path "frontend/android/version.properties") {
         Write-Host "Restoring version.properties..." -ForegroundColor Yellow
@@ -263,7 +273,11 @@ if (-not $runBackend -and -not $runApp) {
     }
 }
 
+$oldGraphifySkip = $env:GRAPHIFY_SKIP_HOOK
 try {
+    # Suppress background graphify hooks to avoid Windows file locks on .git/HEAD
+    $env:GRAPHIFY_SKIP_HOOK = "1"
+
     # Setup initial git tracking state
     Initialize-GitState
 
@@ -308,4 +322,7 @@ catch {
     Undo-Transaction
     Write-Error "Deployment failed: $_"
     exit 1
+}
+finally {
+    $env:GRAPHIFY_SKIP_HOOK = $oldGraphifySkip
 }
