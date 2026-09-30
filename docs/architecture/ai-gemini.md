@@ -100,6 +100,12 @@ Cover-Generierung (FLUX.1 [schnell])              Kanonische Zutaten-Auflösung 
    • Ephemere Dateien (Audio, Video, Frames) und transienter `recipe-photos` Storage werden gelöscht.
 ```
 
+* **Public Recipe Cover Backfill (`backfillPublicRecipeCovers.ts`):**
+  * **NPM-Befehle:** `npm run covers:backfill:prod` (Production DB) & `npm run covers:backfill:dev` (Dev DB).
+  * **Automatisierte Prompt-Generierung:** Für Rezepte ohne `image_prompt` erzeugt `generateFoodPhotographyPrompt` via Gemini form- und gefäßtreue englische Prompts nach `FOOD_PHOTOGRAPHY_PROMPT_INSTRUCTION`.
+  * **Inferenz & Upload:** FLUX.1 [schnell] generiert über fal.ai das 4:3 Food-Cover, lädt es in Supabase Storage (`recipe-covers/${userId}/${recipeId}.jpg`) hoch und aktualisiert `recipes.image_url`, `recipes.image_urls`, `recipes.image_prompt` und `recipes.is_ai_cover = true`.
+  * **CLI-Flags:** `--dry-run` (Vorschau ohne fal.ai-Calls/Kosten), `--limit <N>`, `--force` (bereits bestehende Cover überschreiben), `--id <recipeId>`, `--delay <ms>`.
+
 ---
 
 ## 4. Kanonische Zutaten-Auflösung & Open Food Facts Resolver
