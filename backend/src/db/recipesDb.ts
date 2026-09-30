@@ -15,6 +15,20 @@ import {
 import { getCollectionMembership } from './collectionsDb.js';
 import { computeRecipeHealthScore, isVegetableOrFruitCategory } from '../matching/healthScoreCalculator.js';
 
+function normalizeRawIngredients(raw: unknown): Recipe['ingredients'] {
+  if (!Array.isArray(raw)) return [];
+  if (raw.length > 0 && raw[0] && typeof raw[0] === 'object' && Array.isArray((raw[0] as any).items)) {
+    return (raw as Array<{ name?: string; items?: any[] }>).flatMap((group) => {
+      const section =
+        group.name && !/^(ingredients|zutaten|hauptzutaten|default|allgemein)$/i.test(group.name.trim())
+          ? group.name.trim()
+          : undefined;
+      return (group.items || []).map((item) => (section ? { ...item, section } : item));
+    });
+  }
+  return raw as Recipe['ingredients'];
+}
+
 export function rowToRecipe(row: RecipeRow): Recipe {
   const nutritionalValues =
     row.nutritional_values && typeof row.nutritional_values === 'object'
@@ -46,7 +60,7 @@ export function rowToRecipe(row: RecipeRow): Recipe {
     imagePrompt: row.image_prompt,
     isAiCover: row.is_ai_cover,
     transcript: row.transcript,
-    ingredients: (row.ingredients as Recipe['ingredients']) ?? [],
+    ingredients: normalizeRawIngredients(row.ingredients),
     instructions: (row.instructions as Recipe['instructions']) ?? [],
     alternativeIngredients:
       (row.alternative_ingredients as Recipe['alternativeIngredients']) ?? undefined,
