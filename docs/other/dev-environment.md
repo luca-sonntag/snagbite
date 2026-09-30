@@ -57,6 +57,9 @@ Alle Änderungen liegen als versionierte, chronologische SQL-Dateien vor.
   * `npm run db:backup:dev`: Sichert alle Tabellen der Dev-DB per Service-Key in eine lokale JSON-Datei.
   * `npm run db:restore:prod -- [--confirm]`: Stellt Tabellen aus dem neuesten Production-Backup wieder her (Dry-Run ohne `--confirm`).
   * `npm run db:restore:dev -- [--confirm]`: Stellt Tabellen aus dem neuesten Dev-Backup wieder her (Dry-Run ohne `--confirm`).
+  * `npm run use:prod`: Schaltet die lokale Entwicklungsumgebung auf die Production-Datenbank um (`.env.local`).
+  * `npm run use:dev`: Schaltet die lokale Entwicklungsumgebung zurück auf die Dev-Datenbank (entfernt `.env.local`).
+  * `npm run use:status`: Zeigt an, mit welcher Datenbank die lokale Entwicklungsumgebung aktuell verbunden ist.
 
 * **Frische Datenbank (Dev oder Test):**
   Einfach alle Migrationen von Anfang an durchlaufen lassen:

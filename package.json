@@ -35,7 +35,10 @@
     "db:restore:prod": "npm run db:restore -w backend -- --prod",
     "db:restore:dev": "npm run db:restore -w backend -- --dev",
     "recompute-nutrition:prod": "npm run recompute-nutrition:prod -w backend --",
-    "recompute-nutrition:dev": "npm run recompute-nutrition:dev -w backend --"
+    "recompute-nutrition:dev": "npm run recompute-nutrition:dev -w backend --",
+    "use:prod": "node scripts/switchEnv.js prod",
+    "use:dev": "node scripts/switchEnv.js dev",
+    "use:status": "node scripts/switchEnv.js status"
   },
   "devDependencies": {
     "concurrently": "^10.0.3"
