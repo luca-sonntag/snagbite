@@ -102,7 +102,7 @@ export async function generateFoodPhotographyPrompt(recipe: RecipeForPrompt): Pr
         },
         required: ['imagePrompt'],
       },
-    },
+    } as unknown as Record<string, unknown>,
   });
 
   const prompt = `You are an expert culinary food photographer and AI prompt engineer for FLUX.1 [schnell].
