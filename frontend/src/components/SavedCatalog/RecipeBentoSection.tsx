@@ -84,19 +84,21 @@ export default function RecipeBentoSection({
             hapticLight();
             onOpenRecipe(e, mainJob);
           }}
-          className={`group relative w-full h-full min-h-[220px] sm:min-h-[250px] rounded-2xl overflow-hidden bg-gray-900 shadow-[0_2px_12px_rgba(0,0,0,0.06)] border-none cursor-pointer active:scale-[0.98] transition-all select-none ${
+          className={`group relative w-full h-full min-h-[220px] sm:min-h-[250px] rounded-2xl overflow-hidden bg-white dark:bg-gray-900 shadow-[0_2px_12px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 border-none cursor-pointer active:scale-[0.98] transition-all select-none ${
             isMainSelected ? 'ring-2 ring-emerald-500' : ''
           }`}
           {...((!isMainCommunity && bindLongPress) ? bindLongPress(mainJob.recipeId, mainJob) : {})}
         >
-          <CachedImage
-            src={mainRecipe.imageUrl}
-            emoji={mainRecipe.emoji}
-            alt={mainRecipe.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none select-none"
-          />
+          <div className="absolute inset-0 bg-black/5 dark:bg-white/5 overflow-hidden">
+            <CachedImage
+              src={mainRecipe.imageUrl}
+              emoji={mainRecipe.emoji}
+              alt={mainRecipe.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none select-none"
+            />
+          </div>
           {/* Scrim overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 via-45% to-transparent dark:from-gray-950 dark:via-gray-950/70 dark:via-45% dark:to-transparent pointer-events-none" />
 
           {/* Select-mode checkbox */}
           {isSelectMode && !isMainCommunity && (
@@ -104,7 +106,7 @@ export default function RecipeBentoSection({
               className={`absolute top-2 left-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all border-none ${
                 isMainSelected
                   ? 'bg-emerald-500 text-white shadow-md'
-                  : 'bg-black/40 backdrop-blur-sm text-white shadow-xs'
+                  : 'bg-white/80 dark:bg-black/40 backdrop-blur-sm text-gray-700 dark:text-white shadow-xs'
               }`}
             >
               {isMainSelected && <Check className="w-4 h-4 text-white stroke-[3px]" />}
@@ -114,16 +116,16 @@ export default function RecipeBentoSection({
           {/* Top Badges */}
           <div className="absolute top-2 right-2 pointer-events-none">
             {mainJob.isFavorite && (
-              <div className="w-6 h-6 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center text-amber-400">
-                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              <div className="w-6 h-6 rounded-full bg-white/80 dark:bg-black/40 backdrop-blur-xs flex items-center justify-center text-amber-500 shadow-xs">
+                <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
               </div>
             )}
           </div>
 
-          {/* Bottom Meta: Inhalt gleicht Hero Card (Dauer, kcal, Health Score ohne Wrapping, darunter Titel ohne Autor) */}
-          <div className="absolute bottom-2.5 inset-x-2.5 text-white flex flex-col gap-1 pointer-events-none">
+          {/* Bottom Meta */}
+          <div className="absolute bottom-2.5 inset-x-2.5 flex flex-col gap-1 pointer-events-none">
             {/* 1. Meta-Zeile: Nur Dauer, kcal, Health Score (kein Wrapping) */}
-            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-white/90 whitespace-nowrap overflow-hidden drop-shadow-xs">
+            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-700 dark:text-white/90 whitespace-nowrap overflow-hidden">
               {mainTime && (
                 <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/90 text-white font-bold text-[10px] shadow-xs shrink-0">
                   <Clock className="w-2.5 h-2.5 text-white shrink-0" />
@@ -134,9 +136,9 @@ export default function RecipeBentoSection({
               {/* Calories vor Health Score direkt nebeneinander */}
               {(mainCalories !== null && mainCalories !== undefined) || (mainScore !== null && mainScoreLetter && mainScoreColor) ? (
                 <div className="flex items-center gap-1 shrink-0">
-                  {mainTime && <span className="text-white/30 text-[9px] mr-0.5">•</span>}
+                  {mainTime && <span className="text-gray-400 dark:text-white/30 text-[9px] mr-0.5">•</span>}
                   {mainCalories !== null && mainCalories !== undefined && (
-                    <span className="text-white/90 font-medium">
+                    <span className="text-gray-600 dark:text-white/90 font-medium">
                       {Math.round(mainCalories)} kcal
                     </span>
                   )}
@@ -153,7 +155,7 @@ export default function RecipeBentoSection({
             </div>
 
             {/* 2. Titel direkt unter der Dauer-Zeile (kein Autor) */}
-            <h4 className="font-bold text-xs sm:text-sm leading-tight text-white line-clamp-2 drop-shadow-xs pt-0.5 font-heading">
+            <h4 className="font-bold text-xs sm:text-sm leading-tight text-gray-900 dark:text-white line-clamp-2 pt-0.5 font-heading">
               {mainRecipe.title}
             </h4>
           </div>
