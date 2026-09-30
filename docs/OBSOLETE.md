@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-09-30: Fragmentierte DDL-Dateien durch offizielles Supabase CLI Migrations-System abgelöst
+
+* **Ersetzter Code / Veraltete Struktur:**
+  - Manuelle, ungetrackte SQL-Dateien im Verzeichnis `backend/db/migrations/` (`001_split_jobs_recipes.sql` bis `011_consolidate_nutritional_values_and_health_score.sql`).
+  - Zersplitterung der DDL über `backend/db/schema.sql`, `backend/supabase_schema.sql` und `migrations/` mit zirkulären Abhängigkeiten (z. B. Basistabelle `ingredient_mappings` fehlte in `migrations/`, Social-Tabellen fehlten in `migrations/`).
+  - Manuelles Ausführen von SQL-Blöcken im Supabase Dashboard ohne State-Tracking oder Prüfsummen.
+* **Ersetzt durch:**
+  - **Supabase CLI Migrations ([`supabase/migrations/`](file:///c:/Users/lucas/source/repos/cookbook/supabase/migrations/)):** 14 versionierte, chronologische und in sich geschlossene Migrationen von der Baseline `v1.1.9` (`20260807000000_baseline_v1_1_9.sql`) bis zu den neuesten Nährwert- und Planer-Features.
+  - **Autoritatives State-Tracking in Postgres:** Status und Checksums werden in `supabase_migrations.schema_migrations` persistiert (`npm run db:status`, `npm run db:push`, `npm run db:repair`).
+* **Betroffene Dateien:** `supabase/config.toml`, `supabase/migrations/*`, `package.json`, `docs/architecture/backend-and-database.md`, `docs/other/dev-environment.md`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-30: Verschachteltes Zutatengruppen-Modell (`IngredientGroup[]`) durch flaches `Ingredient[]`-Array abgelöst
 
 * **Ersetzter Code / Veraltete Datenstruktur:**
