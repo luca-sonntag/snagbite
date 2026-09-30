@@ -79,21 +79,22 @@
 
 #### Format A: Curated Hero Spotlight (`RecipeHeroCard` & `RecipeHeroCarousel`)
 * **Proportionen & Raster:** 4:3 Magazin-Format auf Mobile (`aspect-[4/3] sm:aspect-[16/10]`), Snap-Scroll mit peeking (`w-[86%] sm:w-[89%] md:w-[92%]`) zur natürlichen Andeutung des nächsten Slides.
-* **Foto & Gradient-Scrim:** Randlose Vollbildfotografie mit weichem Bottom-Gradient `bg-gradient-to-t from-black/95 via-black/30 via-45% to-transparent`.
-* **Header-Badges:** Farbige Thema-Pill (`HeroBadgeVariant`) mit Rezeptanzahl und Pfeil (`ChevronRight`) zum interaktiven Öffnen des `HeroThemeSheet`s. Rechts: Bookmark/Save-Icon bzw. Favoriten-Stern.
+* **Karten-Container:** `bg-white dark:bg-gray-900 shadow-[0_4px_20px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 rounded-3xl border-none`.
+* **Foto & Gradient-Scrim:** Bild-Container mit `bg-black/5 dark:bg-white/5` und harmonischem Bottom-Gradient `bg-gradient-to-t from-white via-white/80 via-45% to-transparent dark:from-gray-950 dark:via-gray-950/70 dark:via-45% dark:to-transparent`.
+* **Header-Badges:** Farbige Thema-Pill (`HeroBadgeVariant`) mit Rezeptanzahl und Pfeil (`ChevronRight`) zum interaktiven Öffnen des `HeroThemeSheet`s. Rechts: Bookmark/Save-Icon bzw. Favoriten-Stern (`bg-white/80 dark:bg-black/40 text-amber-500`).
 * **Metazeile:**
   * Dauer-Pill links: `px-1.5 py-0.5 rounded bg-emerald-500/90 text-white font-bold text-[10px]` mit Clock-Icon.
-  * Kalorien & Health-Score direkt daneben: `text-white/90 font-medium {calories} kcal` + Buchstabe im farbigen Kreis.
-  * Vital-Metriken (Protein & Gemüsegewicht) werden ausschließlich auf Vital-Karten eingeblendet.
+  * Kalorien & Health-Score direkt daneben: `text-gray-600 dark:text-white/90 font-medium {calories} kcal` + Buchstabe im farbigen Kreis.
+  * Vital-Metriken (Protein & Gemüsegewicht) werden ausschließlich auf Vital-Karten eingeblendet (`text-gray-600 dark:text-white/90`).
 * **Titel & Footer:**
-  * Titel: 100% Breite, zweizeilig (`line-clamp-2`, `font-heading text-base sm:text-lg font-bold text-white`).
-  * Untere Zeile: Creator-Handle links (`text-[10.5px] text-gray-300/85 font-medium truncate`), weißer „Jetzt kochen“-CTA rechts (`px-2.5 py-1 rounded-xl bg-white text-gray-950 font-bold text-xs shadow-md active:scale-95`).
+  * Titel: 100% Breite, zweizeilig (`line-clamp-2`, `font-heading text-base sm:text-lg font-bold text-gray-900 dark:text-white`).
+  * Untere Zeile: Creator-Handle links (`text-[10.5px] text-gray-500 dark:text-gray-300/85 font-medium truncate`), „Jetzt kochen“-CTA rechts (`px-2.5 py-1 rounded-xl bg-gray-900 text-white hover:bg-gray-800 dark:bg-white dark:text-gray-950 dark:hover:bg-gray-100 font-bold text-xs shadow-md active:scale-95`).
 
 #### Format B: Asymmetrisches Bento-Grid (`RecipeBentoSection` & `RecipeCompactCard`)
 * **Layout:** 2-Spalten-Grid (`grid grid-cols-2 gap-2.5 sm:gap-3 items-stretch`).
-* **Linke Karte (3:4 Portrait):** `min-h-[220px] sm:min-h-[250px] rounded-2xl` mit Foto, Gradient-Scrim, Dauer-Pill, Kalorien und Health-Score ohne Wrapping, darunter Titel. Streckt sich dynamisch auf die Höhe der rechten Spalte.
+* **Linke Karte (3:4 Portrait):** `min-h-[220px] sm:min-h-[250px] rounded-2xl bg-white dark:bg-gray-900 shadow-[0_2px_12px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10` mit `bg-black/5 dark:bg-white/5` Bildcontainer, Gradient-Scrim (`from-white via-white/80 dark:from-gray-950 dark:via-gray-950/70`), Dauer-Pill, Kalorien (`text-gray-600 dark:text-white/90`) und Health-Score ohne Wrapping, darunter Titel (`text-gray-900 dark:text-white`). Streckt sich dynamisch auf die Höhe der rechten Spalte.
 * **Rechte Karten (2× Gestapelte `RecipeCompactCard`):**
-  * `flex-1 rounded-2xl bg-white dark:bg-gray-900/90 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border-none overflow-hidden`.
+  * `flex-1 rounded-2xl bg-white dark:bg-gray-900/90 shadow-[0_2px_12px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 border-none overflow-hidden`.
   * **Thumbnail:** Durchgehende Vollhöhe links (`w-22 sm:w-26`), dezenter Bottom-Scrim mit neutralgrauer Zeit-Pill (`px-1.5 py-0.5 rounded-md bg-black/55 backdrop-blur-xs text-white text-[9.5px] font-semibold`).
   * **Inhalt rechts:** Bis zu 3 Zeilen Titel (`line-clamp-3`), Kalorien links unten, Health-Score-Buchstabe (`w-4 h-4 rounded-full`) rechts unten.
 
