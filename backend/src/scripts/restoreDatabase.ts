@@ -34,33 +34,85 @@ if (!supabaseUrl || !supabaseKey) {
 
 const client = createClient(supabaseUrl, supabaseKey);
 
-// Topological ordering to respect foreign key constraints during restore
-const TABLE_DEPENDENCY_ORDER = [
-  'global_settings',
-  'gemini_logs',
-  'feedback',
-  'push_tokens',
-  'app_bundles',
-  'food_items',
-  'profiles',
-  'friendships',
-  'jobs',
-  'jobs_legacy',
-  'recipes',
-  'user_recipes',
-  'collections',
-  'recipe_collections',
-  'cook_events',
-  'point_ledger',
-  'user_stats',
-  'user_badges',
-  'ingredient_mappings',
-  'pantry_items',
-  'shopping_list',
-  'meal_plans',
-  'meal_plan_entries',
-  'notification_log',
-];
+interface OpenApiProperty {
+  description?: string;
+  [key: string]: unknown;
+}
+
+interface OpenApiDefinition {
+  properties?: Record<string, OpenApiProperty>;
+  [key: string]: unknown;
+}
+
+/**
+ * Dynamically computes topological dependency order of tables by inspecting foreign key metadata
+ * from PostgREST OpenAPI schema endpoint (<fk table='...' column='...'/> tags).
+ */
+async function computeTopologicalOrder(
+  url: string,
+  key: string,
+  targetTables: string[]
+): Promise<string[]> {
+  const endpoint = `${url.replace(/\/+$/, '')}/rest/v1/`;
+  let definitions: Record<string, OpenApiDefinition> = {};
+
+  try {
+    const res = await fetch(endpoint, {
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+      },
+    });
+    if (res.ok) {
+      const spec = (await res.json()) as { definitions?: Record<string, OpenApiDefinition> };
+      definitions = spec.definitions || {};
+    }
+  } catch (err) {
+    console.warn('⚠️ Could not fetch OpenAPI schema for FK topological sort:', err);
+    return targetTables;
+  }
+
+  // Build dependency map: table -> Set of tables it depends on
+  const dependencies = new Map<string, Set<string>>();
+  for (const t of targetTables) {
+    dependencies.set(t, new Set());
+    const props = definitions[t]?.properties || {};
+    for (const [, colDef] of Object.entries(props)) {
+      const desc = colDef?.description || '';
+      const match = desc.match(/<fk table='([^']+)'/);
+      if (match) {
+        const refTable = match[1];
+        if (refTable !== t && targetTables.includes(refTable)) {
+          dependencies.get(t)!.add(refTable);
+        }
+      }
+    }
+  }
+
+  // Topological sort (DFS with cycle prevention)
+  const sorted: string[] = [];
+  const visited = new Set<string>();
+
+  function visit(node: string, path = new Set<string>()) {
+    if (visited.has(node)) return;
+    if (path.has(node)) {
+      return; // Cycle broken
+    }
+    path.add(node);
+    for (const dep of dependencies.get(node) || []) {
+      visit(dep, path);
+    }
+    path.delete(node);
+    visited.add(node);
+    sorted.push(node);
+  }
+
+  for (const t of targetTables) {
+    visit(t);
+  }
+
+  return sorted;
+}
 
 function getSpecifiedOrLatestBackup(): string | null {
   const fileArgIndex = process.argv.indexOf('--file');
@@ -145,11 +197,9 @@ async function run(): Promise<void> {
   console.log(`Backup metadata: created on ${backup.metadata.timestamp} for ${backup.metadata.target} (${backup.metadata.host})`);
   console.log(`Found ${backupTables.length} tables in backup file.\n`);
 
-  // Order tables by dependency order, append any remaining unknown tables at the end
-  const sortedTables = [
-    ...TABLE_DEPENDENCY_ORDER.filter(t => backupTables.includes(t)),
-    ...backupTables.filter(t => !TABLE_DEPENDENCY_ORDER.includes(t)),
-  ];
+  console.log(`Computing foreign key dependency graph via schema API...`);
+  const sortedTables = await computeTopologicalOrder(supabaseUrl, supabaseKey, backupTables);
+  console.log(`Resolved dependency order (${sortedTables.length} tables):\n  ${sortedTables.join(' -> ')}\n`);
 
   let totalRestored = 0;
   let totalErrors = 0;
