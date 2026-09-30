@@ -25,6 +25,7 @@
     "mappings:backfill": "tsx src/scripts/backfillIngredientMappings.ts",
     "mappings:consolidate": "tsx src/scripts/consolidateMappingsToCanonical.ts",
     "migrate:flatten-ingredients": "tsx src/scripts/migrateFlattenIngredients.ts",
+    "db:backup": "tsx src/scripts/backupDatabase.ts",
     "icons": "tsx src/scripts/auditIngredientPipeline.ts",
     "audit:ingredients": "tsx src/scripts/auditIngredientPipeline.ts",
     "audit:test": "tsx src/scripts/testRecipeAuditor.ts",

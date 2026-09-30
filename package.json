@@ -29,7 +29,9 @@
     "db:push": "supabase db push",
     "db:status": "supabase migration list",
     "db:new": "supabase migration new",
-    "db:repair": "supabase migration repair"
+    "db:repair": "supabase migration repair",
+    "db:backup:prod": "npm run db:backup -w backend -- --prod",
+    "db:backup:dev": "npm run db:backup -w backend -- --dev"
   },
   "devDependencies": {
     "concurrently": "^10.0.3"

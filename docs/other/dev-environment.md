@@ -53,6 +53,8 @@ Alle Änderungen liegen als versionierte, chronologische SQL-Dateien vor.
   * `npm run db:push`: Wendet alle ausstehenden Migrationen auf die konfigurierte Datenbank an.
   * `npm run db:new <name>`: Erstellt eine neue leere Migrationsdatei mit aktuellem Zeitstempel.
   * `npm run db:repair -- --status applied <version>`: Markiert eine Migration manuell als angewendet.
+  * `npm run db:backup:prod`: Sichert alle Tabellen der Production-DB per Service-Key in eine lokale JSON-Datei (Free-Tier-kompatibel).
+  * `npm run db:backup:dev`: Sichert alle Tabellen der Dev-DB per Service-Key in eine lokale JSON-Datei.
 
 * **Frische Datenbank (Dev oder Test):**
   Einfach alle Migrationen von Anfang an durchlaufen lassen:
