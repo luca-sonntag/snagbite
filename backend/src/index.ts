@@ -133,6 +133,7 @@ async function bootstrap() {
         uptime: process.uptime(),
         nodeEnv: process.env.NODE_ENV || 'development',
         dbConnected: dbHealthy,
+        supabaseHost: new URL(config.SUPABASE_URL).host,
         role: config.ROLE,
       });
     });
