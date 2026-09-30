@@ -25,7 +25,22 @@
     "icons:unpack": "npm run icons:unpack -w backend",
     "cap:live": "npm run cap:live -w frontend",
     "cap:live:cloud": "npm run cap:live:cloud -w frontend",
-    "cap:run:local": "npm run cap:run:local -w frontend"
+    "cap:run:local": "npm run cap:run:local -w frontend",
+    "db:push": "supabase db push",
+    "db:status": "supabase migration list",
+    "db:new": "supabase migration new",
+    "db:repair": "supabase migration repair",
+    "db:backup:prod": "npm run db:backup -w backend -- --prod",
+    "db:backup:dev": "npm run db:backup -w backend -- --dev",
+    "db:restore:prod": "npm run db:restore -w backend -- --prod",
+    "db:restore:dev": "npm run db:restore -w backend -- --dev",
+    "recompute-nutrition:prod": "npm run recompute-nutrition:prod -w backend --",
+    "recompute-nutrition:dev": "npm run recompute-nutrition:dev -w backend --",
+    "covers:backfill:prod": "npm run covers:backfill:prod -w backend --",
+    "covers:backfill:dev": "npm run covers:backfill:dev -w backend --",
+    "use:prod": "node scripts/switchEnv.js prod",
+    "use:dev": "node scripts/switchEnv.js dev",
+    "use:status": "node scripts/switchEnv.js status"
   },
   "devDependencies": {
     "concurrently": "^10.0.3"

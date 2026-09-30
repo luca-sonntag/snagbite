@@ -111,6 +111,8 @@ export function useShoppingList() {
           const returnedItems = (data.items ?? []).map((item: ShoppingListItem, idx: number) => ({
             ...item,
             synonyms: item.synonyms ?? newItems[idx]?.synonyms,
+            typicalPackageAmount: item.typicalPackageAmount ?? newItems[idx]?.typicalPackageAmount,
+            typicalPackageUnit: item.typicalPackageUnit ?? newItems[idx]?.typicalPackageUnit,
           }));
           setShoppingList((prev) => [...prev.filter((i) => i.recipeId !== recipeId), ...returnedItems]);
           return true;

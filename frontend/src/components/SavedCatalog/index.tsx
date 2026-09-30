@@ -10,7 +10,8 @@ import { useBackHandler } from '../../context/OverlayStackContext';
 import { useSavedCatalog, EMPTY_FILTERS } from '../../hooks/useSavedCatalog';
 import { useAuth } from '../../context/AuthContext';
 import { useCollections } from '../../hooks/useCollections';
-import { categoryOrder, legacyCategoryMap, getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
+import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
+import { sortIngredientsByCategory } from '../MealPlanner/mealPlannerUtils';
 import { apiUrl } from '../../api';
 import PremiumModal from '../PremiumModal';
 import PremiumHint from '../PremiumHint';
@@ -773,17 +774,7 @@ export default function SavedCatalog({
       {/* Bulk shopping confirm — shown one-by-one for each selected recipe */}
       {currentBulkShoppingJob?.recipe && (() => {
         const recipe = currentBulkShoppingJob.recipe!;
-        const mapped = recipe.ingredients.map((group, originalIdx) => ({ group, originalIdx }));
-        const sortedIngredients = mapped.sort((a, b) => {
-          const rank = (name: string) => {
-            const up = name.trim().toUpperCase();
-            const direct = categoryOrder.indexOf(up as any);
-            if (direct !== -1) return direct;
-            const key = legacyCategoryMap[name.trim().toLowerCase()];
-            return key ? categoryOrder.indexOf(key) : 999;
-          };
-          return rank(a.group.name) - rank(b.group.name);
-        });
+        const sortedIngredients = sortIngredientsByCategory(recipe.ingredients);
         const formatAmount = (amount: number | undefined, _unit: string | undefined) => {
           if (!amount) return '';
           const r = Math.round(amount * 10) / 10;

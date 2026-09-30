@@ -2,11 +2,14 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import type { Recipe, ExtractionJob, ProgressData, LimitStatus } from '../types';
 import { type ErrorParams, parseSerializedError } from '../errorCodes';
 import { useI18n } from '../context/I18nContext';
+import { useToast } from '../context/ToastContext';
+import { resolveErrorCode, resolveJobError } from '../i18n';
 import { apiUrl } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { compressRecipePhotos } from '../utils/imageCompression';
 
 import { useExtractionJobs, type ExtractionMode } from '../context/ExtractionJobsContext';
+import { useExtractionQueue } from '../context/ExtractionQueueContext';
 import {
   sendNativeNotification,
   sendRecipeReadyNotification,
@@ -32,9 +35,12 @@ export const MAX_IMPORT_PHOTOS = 5;
 const MAX_PHOTOS_TOTAL_CHARS = 8_000_000;
 
 export function useRecipeExtraction(getAccessToken: () => Promise<string | null>, onExtractionSuccess: (recipeId: string) => void) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
+  const toast = useToast();
   const { user, refreshSession, isPremium } = useAuth();
   const { addJob } = useExtractionJobs();
+  const { addFailedJob, removeFromWaitlist, removeFailedJob, addToQueue, openQueueSheet } = useExtractionQueue();
+  const currentExtractUrlRef = useRef<string>('');
   const [isPending, setIsPending] = useState(false);
   const [jobStatus, setJobStatus] = useState<ExtractionJob['status'] | null>(null);
   const [jobError, setJobError] = useState<string | null>(null);
@@ -149,6 +155,14 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     setJobStatus('failed');
     setJobError('form.validation.backgroundCancelled');
     setProgress(null);
+
+    if (currentExtractUrlRef.current) {
+      addFailedJob({
+        sourceUrl: currentExtractUrlRef.current,
+        mode: 'link',
+        error: 'form.validation.backgroundCancelled',
+      });
+    }
 
     // Fire local notification to inform the user that extraction was interrupted due to backgrounding
     if (document.visibilityState !== 'visible') {
@@ -274,6 +288,12 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           setPhotos([]);
           localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
 
+          if (currentExtractUrlRef.current) {
+            removeFromWaitlist(currentExtractUrlRef.current);
+            removeFailedJob(currentExtractUrlRef.current);
+            currentExtractUrlRef.current = '';
+          }
+
           const recipeTitle = job.title?.trim();
           const notifTitle = t('notification.recipeReady.title');
           const notifBody = recipeTitle
@@ -288,6 +308,23 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           setJobError(job.error || 'form.validation.failedExtraction');
           setJobErrorCode(envelope?.code ?? null);
           setJobErrorParams(envelope?.params ?? null);
+          if (currentExtractUrlRef.current) {
+            addFailedJob({
+              sourceUrl: currentExtractUrlRef.current,
+              mode: 'link',
+              error: job.error || 'form.validation.failedExtraction',
+              errorCode: envelope?.code ?? null,
+              errorParams: envelope?.params ?? null,
+            });
+          } else {
+            const localizedError =
+              resolveErrorCode(envelope?.code, envelope?.params, job.error || 'form.validation.failedExtraction', language) ||
+              t('error.default');
+            toast.danger(t('toast.recipeFailedTitle'), {
+              description: localizedError,
+              duration: 4500,
+            });
+          }
           setProgress(null);
           setIsPending(false);
           localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
@@ -306,6 +343,21 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
         stopActivePolling();
         setJobStatus('failed');
         setJobError(err instanceof Error ? err.message : 'form.validation.lostConnection');
+        if (currentExtractUrlRef.current) {
+          addFailedJob({
+            sourceUrl: currentExtractUrlRef.current,
+            mode: 'link',
+            error: err instanceof Error ? err.message : 'form.validation.lostConnection',
+          });
+        } else {
+          const localizedError =
+            resolveJobError(err instanceof Error ? err.message : 'form.validation.lostConnection', language) ||
+            t('error.default');
+          toast.danger(t('toast.recipeFailedTitle'), {
+            description: localizedError,
+            duration: 4500,
+          });
+        }
         setProgress(null);
         setIsPending(false);
         localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
@@ -313,7 +365,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     }, 600);
 
     activePollingIntervalRef.current = interval;
-  }, [getAccessToken, isPremium, onExtractionSuccess, runSimulatedProgress, stopActivePolling, t]);
+  }, [getAccessToken, isPremium, onExtractionSuccess, runSimulatedProgress, stopActivePolling, t, language, toast, addFailedJob]);
 
   /**
    * Shared submit path for both input channels: posts a job-creating request and
@@ -349,6 +401,10 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     setJobErrorParams(null);
     setRecipe(null);
     setProgress(null);
+
+    if (meta.mode === 'link') {
+      currentExtractUrlRef.current = meta.sourceLabel;
+    }
 
     try {
       const token = await getAccessToken();
@@ -390,6 +446,10 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       if (isPremium) {
         if (data.status === 'completed' && data.recipeId) {
           // Already extracted / cached: directly open recipe without creating a dummy background job
+          if (meta.mode === 'link') {
+            removeFromWaitlist(meta.sourceLabel);
+            removeFailedJob(meta.sourceLabel);
+          }
           setUrl('');
           setPhotos([]);
           setJobStatus(null);
@@ -400,6 +460,10 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
         // Background flow: track the job in the shared store and free the form.
         if (data.jobId) {
           addJob(data.jobId, { sourceLabel: meta.sourceLabel, mode: meta.mode });
+          if (meta.mode === 'link') {
+            removeFromWaitlist(meta.sourceLabel);
+            removeFailedJob(meta.sourceLabel);
+          }
         }
         setUrl('');
         setPhotos([]);
@@ -411,6 +475,10 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           stopActivePolling();
           activePollingJobIdRef.current = data.jobId ?? null;
           if (data.recipeId) {
+            if (meta.mode === 'link') {
+              removeFromWaitlist(meta.sourceLabel);
+              removeFailedJob(meta.sourceLabel);
+            }
             onExtractionSuccess(data.recipeId);
           } else {
             runSimulatedProgress(data.jobId ?? '', data.recipeId, 10000);
@@ -427,9 +495,41 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       setJobError(err instanceof Error ? err.message : 'form.validation.submissionError');
       setJobErrorCode(typed?.code ?? null);
       setJobErrorParams(typed?.params ?? null);
+      if (typed?.code === 'RATE_LIMIT_EXCEEDED') {
+        if (meta.mode === 'link' && currentExtractUrlRef.current) {
+          addToQueue(currentExtractUrlRef.current);
+          toast.info(t('queue.toast.addedToWaitlistQuota'), {
+            action: {
+              label: t('queue.toast.viewWaitlist'),
+              onClick: () => {
+                if (window.location.hash !== '#/extract') {
+                  window.location.hash = '#/extract';
+                }
+                openQueueSheet();
+              },
+            },
+          });
+        }
+      } else if (meta.mode === 'link' && currentExtractUrlRef.current) {
+        addFailedJob({
+          sourceUrl: currentExtractUrlRef.current,
+          mode: 'link',
+          error: err instanceof Error ? err.message : 'form.validation.submissionError',
+          errorCode: typed?.code ?? null,
+          errorParams: typed?.params ?? null,
+        });
+      } else {
+        const localizedError =
+          resolveErrorCode(typed?.code, typed?.params, err instanceof Error ? err.message : 'form.validation.submissionError', language) ||
+          t('error.default');
+        toast.danger(t('toast.recipeFailedTitle'), {
+          description: localizedError,
+          duration: 4500,
+        });
+      }
       setIsPending(false);
     }
-  }, [getAccessToken, startPolling, fetchLimitStatus, isPremium, addJob, runSimulatedProgress, stopActivePolling, onExtractionSuccess]);
+  }, [getAccessToken, startPolling, fetchLimitStatus, isPremium, addJob, runSimulatedProgress, stopActivePolling, onExtractionSuccess, addToQueue, toast, t, language, addFailedJob, openQueueSheet]);
 
   const triggerExtraction = useCallback(async (targetUrl: string) => {
     const cleanUrl = targetUrl.trim();

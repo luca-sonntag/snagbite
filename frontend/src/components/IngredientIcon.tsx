@@ -8,18 +8,20 @@ export interface IngredientIconProps {
   category?: string;
   name?: string;
   synonyms?: string[] | null;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'grid';
   className?: string;
 }
 
 const SIZE_MAP = {
   sm: 'w-8 h-8 min-w-[32px] min-h-[32px] max-w-[32px] max-h-[32px] aspect-square rounded-full',
+  grid: 'w-10 h-10 min-w-[40px] min-h-[40px] max-w-[40px] max-h-[40px] aspect-square rounded-full',
   md: 'w-11 h-11 min-w-[44px] min-h-[44px] max-w-[44px] max-h-[44px] aspect-square rounded-full',
   lg: 'w-14 h-14 min-w-[56px] min-h-[56px] max-w-[56px] max-h-[56px] aspect-square rounded-full',
 };
 
 const ICON_SIZE_MAP = {
   sm: 'w-full h-full p-0.5',
+  grid: 'w-full h-full p-0',
   md: 'w-full h-full p-0.5',
   lg: 'w-full h-full p-1',
 };

@@ -31,11 +31,9 @@ function totalMinutes(recipe: Recipe): number {
 
 function flatBaseNames(recipe: Recipe): string[] {
   const names: string[] = [];
-  for (const group of recipe.ingredients || []) {
-    for (const item of group.items || []) {
-      const n = (item.baseName || item.name || '').trim().toLowerCase();
-      if (n) names.push(n);
-    }
+  for (const item of recipe.ingredients || []) {
+    const n = (item.baseName || item.name || '').trim().toLowerCase();
+    if (n) names.push(n);
   }
   return names;
 }

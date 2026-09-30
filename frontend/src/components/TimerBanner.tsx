@@ -100,10 +100,10 @@ export default function TimerBanner() {
                     removeTimer(timer.id);
                   }
                 }}
-                className="relative shrink-0 w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-white/20 hover:bg-white/35 text-white flex items-center justify-center transition-colors cursor-pointer outline-none border-none"
+                className="relative shrink-0 w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-white/20 hover:bg-white/35 active:scale-90 text-white flex items-center justify-center transition-all cursor-pointer outline-none border-none touch-manipulation"
                 aria-label={isFinished ? t('timer.dismiss') : 'Cancel timer'}
               >
-                <X className="w-4 h-4" />
+                <X className="w-4.5 h-4.5" />
               </button>
             </div>
           );

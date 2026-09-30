@@ -14,8 +14,11 @@ export interface SharedIngredientItem {
   amount?: number | string | null;
   unit?: string | null;
   baseName?: string | null;
+  category?: string | null;
+  section?: string | null;
 }
 
+/** @deprecated Use flat SharedIngredientItem[] */
 export interface SharedIngredientGroup {
   name?: string | null;
   items: SharedIngredientItem[];
@@ -31,7 +34,7 @@ export interface SharedRecipe {
   tags?: string[];
   emoji?: string | null;
   imageUrl?: string | null;
-  ingredients?: SharedIngredientGroup[];
+  ingredients?: SharedIngredientItem[];
 }
 
 export interface SharedSavedRecipe {

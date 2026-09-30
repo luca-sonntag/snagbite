@@ -1,5 +1,6 @@
 import yt from 'youtube-dl-exec';
 import { getYtdlpCookieOptions } from '../config.js';
+import { formatAuthorHandle } from '@cookbook/shared';
 
 const youtubedl: any = (yt as any).default || yt;
 
@@ -31,9 +32,8 @@ export async function fetchMetadata(url: string): Promise<YtdlpMetadata> {
       ...getYtdlpCookieOptions(),
     });
     const description = (meta?.description ?? meta?.title ?? '').toString().trim() || null;
-    let authorHandle = (meta?.uploader_id ?? meta?.uploader ?? meta?.channel ?? '').toString().trim();
-    if (authorHandle && !authorHandle.startsWith('@')) authorHandle = `@${authorHandle}`;
-    return { description, authorHandle: authorHandle || null };
+    const authorHandle = formatAuthorHandle(meta?.uploader_id ?? meta?.uploader ?? meta?.channel);
+    return { description, authorHandle };
   } catch (err: any) {
     console.warn(`[meta] yt-dlp metadata fetch failed for ${url}: ${err?.message ?? err}`);
     return { description: null, authorHandle: null };

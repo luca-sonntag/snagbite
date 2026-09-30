@@ -4,18 +4,20 @@ import type { Ingredient } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { getCategoryTheme } from '../../i18n';
 import { getParentIngredient } from '../../utils/ingredientTaxonomy';
+import { cleanMatchedIngredientName } from '../../utils/formatNutrition';
 import IngredientIcon from '../IngredientIcon';
 import { hapticLight } from '../../utils/haptics';
 
 interface IngredientItemRowProps {
   ingredient: Ingredient;
-  categoryName: string;
+  categoryName?: string;
   originalIdx: number;
   itemIdx: number;
   isPremium?: boolean;
   scaleFactor?: number;
   formatAmount: (amount: number | undefined, unit: string | undefined) => string;
-  onSelectNutrition?: (ingredient: Ingredient, category: string) => void;
+  onSelectNutrition?: (ingredient: Ingredient, category?: string) => void;
+  onOpenProFeature?: () => void;
   hideNutrition?: boolean;
 }
 
@@ -28,6 +30,7 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
   scaleFactor = 1,
   formatAmount,
   onSelectNutrition,
+  onOpenProFeature,
   hideNutrition = false,
 }) => {
   const { t } = useI18n();
@@ -51,25 +54,29 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
   const showParentBadge = parent && parent.name.toLowerCase().trim() !== name.toLowerCase().trim();
   const hasCalories = !hideNutrition && ingredient.calories !== undefined && ingredient.calories !== null;
   const canOpenNutrition = isPremium && hasCalories;
+  const isClickable = canOpenNutrition || (!isPremium && hasCalories);
 
   const handleNutritionClick = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (!canOpenNutrition) return;
-
-    hapticLight();
-    onSelectNutrition?.(ingredient, categoryName);
+    if (canOpenNutrition) {
+      hapticLight();
+      onSelectNutrition?.(ingredient, categoryName || ingredient.category || '');
+    } else if (!isPremium && hasCalories) {
+      hapticLight();
+      onOpenProFeature?.();
+    }
   };
 
   return (
     <li
       key={uniqueId}
       onClick={() => {
-        if (canOpenNutrition) {
+        if (isClickable) {
           handleNutritionClick();
         }
       }}
       className={`group flex items-center justify-between gap-3 px-4.5 py-3 sm:px-6 transition-colors hover:bg-black/[0.015] dark:hover:bg-white/[0.02] active:bg-black/[0.03] dark:active:bg-white/[0.04] select-none ${
-        canOpenNutrition ? 'cursor-pointer' : ''
+        isClickable ? 'cursor-pointer' : ''
       }`}
     >
       <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -138,7 +145,7 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
             type="button"
             onClick={handleNutritionClick}
             className="min-h-[28px] px-2 py-0.5 rounded-full inline-flex items-center gap-1 text-[11px] font-semibold shrink-0 border-none transition-all active:scale-95 cursor-pointer select-none bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/15 text-gray-600 dark:text-gray-300"
-            title={ingredient.matchedName ? t('recipe.verifiedIngredientTooltip', { name: ingredient.matchedName }) : undefined}
+            title={ingredient.matchedName ? t('recipe.verifiedIngredientTooltip', { name: cleanMatchedIngredientName(ingredient.matchedName) }) : undefined}
             aria-label={t('recipe.nutritionTitle')}
           >
             <span className="tabular-nums">{Math.round(ingredient.calories! * scaleFactor)} kcal</span>

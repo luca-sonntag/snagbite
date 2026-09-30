@@ -281,8 +281,8 @@ export function useSavedCatalog({
     if ((r.description || '').toLowerCase().includes(needle)) return true;
     if (getRecipeTags(r).some((tag: string) => tag.toLowerCase().includes(needle))) return true;
     if (job.flags?.some(flag => flag.toLowerCase().includes(needle))) return true;
-    return r.ingredients?.some(group =>
-      group.items?.some(ing => ing.name.toLowerCase().includes(needle))
+    return r.ingredients?.some(ing =>
+      ing.name.toLowerCase().includes(needle)
     ) || false;
   }, []);
 
@@ -515,16 +515,11 @@ export function useSavedCatalog({
     const r = job.recipe!;
     if (!onAddIngredients) return;
 
-    const itemsToAdd: Ingredient[] = [];
-    r.ingredients.forEach((group) => {
-      group.items.forEach((ing) => {
-        itemsToAdd.push({
-          ...ing,
-          unit: ing.unit || '',
-          category: group.name || ing.category,
-        });
-      });
-    });
+    const itemsToAdd: Ingredient[] = (r.ingredients || []).map((ing) => ({
+      ...ing,
+      unit: ing.unit || '',
+      category: ing.category,
+    }));
 
     if (itemsToAdd.length === 0) return;
 

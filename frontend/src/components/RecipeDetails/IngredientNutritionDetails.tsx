@@ -1,9 +1,10 @@
 import type { FC } from 'react';
 import { Button } from '@heroui/react';
-import { Flame, ShieldCheck, Sparkles, X } from 'lucide-react';
+import { ShieldCheck, Sparkles, X } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { hapticLight } from '../../utils/haptics';
 import { formatQuantity } from '../../utils/formatQuantity';
+import { cleanMatchedIngredientName } from '../../utils/formatNutrition';
 import type { Ingredient } from '../../types';
 import IngredientIcon from '../IngredientIcon';
 
@@ -116,21 +117,16 @@ export const IngredientNutritionDetails: FC<IngredientNutritionDetailsProps> = (
       )}
 
       {/* 2. Calories Hero Banner */}
-      <div className="bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent dark:from-emerald-500/15 dark:to-transparent rounded-3xl p-4 sm:p-5 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 shrink-0">
-            <Flame className="w-5.5 h-5.5" />
-          </div>
-          <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-              {t('recipe.calories')}
+      <div className="flex items-center justify-between gap-3 py-1">
+        <div>
+          <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+            {t('recipe.calories')}
+          </span>
+          <div className="flex items-baseline gap-1">
+            <span className="text-2.5xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight tabular-nums">
+              {scaledCalories}
             </span>
-            <div className="flex items-baseline gap-1">
-              <span className="text-2.5xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight tabular-nums">
-                {scaledCalories}
-              </span>
-              <span className="text-xs font-normal text-gray-500 dark:text-gray-400">kcal</span>
-            </div>
+            <span className="text-xs font-normal text-gray-500 dark:text-gray-400">kcal</span>
           </div>
         </div>
 
@@ -259,9 +255,9 @@ export const IngredientNutritionDetails: FC<IngredientNutritionDetailsProps> = (
         </div>
       </div>
 
-      {/* 5. Verification Status Pill */}
+      {/* 5. Verification Status */}
       {ingredient.isVerified ? (
-        <div className="bg-emerald-500/[0.08] dark:bg-emerald-500/10 text-emerald-900 dark:text-emerald-100 rounded-2xl p-3.5 flex items-center gap-3 border-none shadow-[0_2px_6px_rgba(0,0,0,0.02)]">
+        <div className="flex items-center gap-3 py-1">
           <div className="w-9 h-9 rounded-xl bg-emerald-500/15 dark:bg-emerald-500/25 flex items-center justify-center shrink-0">
             <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
           </div>
@@ -269,15 +265,15 @@ export const IngredientNutritionDetails: FC<IngredientNutritionDetailsProps> = (
             <span className="text-xs font-bold text-emerald-900 dark:text-emerald-200 tracking-tight block">
               {t('recipe.ingredientNutritionVerifiedBadge')}
             </span>
-            {ingredient.matchedName && (
+            {cleanMatchedIngredientName(ingredient.matchedName) && (
               <span className="text-[11.5px] text-emerald-700/80 dark:text-emerald-300/80 truncate block font-normal mt-0.5">
-                {ingredient.matchedName}
+                {cleanMatchedIngredientName(ingredient.matchedName)}
               </span>
             )}
           </div>
         </div>
       ) : (
-        <div className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-2xl p-3.5 flex items-center gap-3 border-none shadow-[0_2px_6px_rgba(0,0,0,0.02)]">
+        <div className="flex items-center gap-3 py-1">
           <div className="w-9 h-9 rounded-xl bg-gray-200/60 dark:bg-gray-700/60 flex items-center justify-center shrink-0">
             <Sparkles className="w-4.5 h-4.5 text-gray-400 dark:text-gray-500" />
           </div>

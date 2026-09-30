@@ -25,6 +25,8 @@ Neben reinen Video-Reels unterstützt die Extraction Queue auch Instagram-/TikTo
 ### Benutzername/Handle-Extraktion & Link-Fallback
 Um fehlerhafte, unbrauchbare Creator-Profillinks zu vermeiden (wenn Scraper nur den Anzeigenamen wie "Ashley Markle" statt des technischen Usernames zurückgeben), extrahiert das Backend bevorzugt den technischen Usernamen aus dem Feld `owner.username` des Scraper-Ergebnisses (fällt bei Fehlen auf `author` zurück). Im Frontend validiert die Profil-Link-Generierung den extrahierten Handle über eine Regex (keine Leerzeichen, etc.). Falls der Handle ungültig bzw. ein reiner Anzeigename ist, wird statt eines defekten Profil-Links direkt die `reelUrl` (das Originalvideo) verlinkt, wo der Benutzer den Creator leicht finden kann.
 
+* **Unicode-Normalisierung (NFKC):** Da viele Social-Media-Creator in ihrem Profilnamen stilisierte Unicode-Schriftarten (Mathematical Bold wie „𝐍𝐞𝐫𝐦𝐢𝐧 𝐊𝐚𝐩𝐢𝐬𝐢𝐳“, Script, Fraktur oder Fullwidth) verwenden, normalisieren Backend und Frontend Handle- und Autorennangaben zentral über `formatAuthorHandle()` / `normalizeAuthorName()` (`@cookbook/shared`) via Unicode-NFKC-Dekomposition und -Komposition zuverlässig zurück in lesbare Standard-Typografie.
+
 ---
 
 ## 2. Foto-Import (Kochbuch-Seiten & Rezeptkarten)

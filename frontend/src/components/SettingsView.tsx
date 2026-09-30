@@ -142,8 +142,7 @@ export default function SettingsView() {
             </span>
             <div className="flex items-center gap-2 mt-1.5">
               {user?.app_metadata?.tier === 'alpha' ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 uppercase tracking-wider border-none">
-                  <Sparkles className="w-3 h-3 text-amber-500 fill-amber-500 animate-pulse" />
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 uppercase tracking-wider border-none">
                   {t('app.settings.alphaActive') || 'Alpha Access'}
                 </span>
               ) : isRealPremium ? (
@@ -187,9 +186,7 @@ export default function SettingsView() {
           {/* Language Option */}
           <div className="p-4 flex items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-2.5 border-b border-black/5 dark:border-white/5">
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-xl shrink-0">
-                <Globe className="w-5 h-5" />
-              </div>
+              <Globe className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" />
               <div className="min-w-0">
                 <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">
                   {t('app.settings.language') || 'Language'}
@@ -225,9 +222,7 @@ export default function SettingsView() {
           {/* Temperature Unit Option */}
           <div className="p-4 flex items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-2.5 border-b border-black/5 dark:border-white/5">
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-xl shrink-0">
-                <Thermometer className="w-5 h-5" />
-              </div>
+              <Thermometer className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" />
               <div className="min-w-0">
                 <div className="font-semibold text-gray-900 dark:text-white text-sm flex items-center min-w-0">
                   <span className="truncate">{t('app.settings.tempUnit') || 'Temperature Unit'}</span>
@@ -270,9 +265,7 @@ export default function SettingsView() {
           {SHOW_UNIT_SYSTEM_SETTING && (
             <div className="p-4 flex items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-2.5 border-b border-black/5 dark:border-white/5">
               <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-xl shrink-0">
-                  <Scale className="w-5 h-5" />
-                </div>
+                <Scale className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" />
                 <div className="min-w-0">
                   <div className="font-semibold text-gray-900 dark:text-white text-sm flex items-center min-w-0">
                     <span className="truncate">{t('app.settings.unitSystem') || 'Unit System'}</span>
@@ -311,9 +304,11 @@ export default function SettingsView() {
           {/* Theme Option */}
           <div className="p-4 flex items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-2.5 border-b border-black/5 dark:border-white/5 last:border-b-0">
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-xl shrink-0">
-                {theme === 'dark' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-              </div>
+              {theme === 'dark' ? (
+                <Moon className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" />
+              ) : (
+                <Sun className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" />
+              )}
               <div className="min-w-0">
                 <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">
                   {t('app.settings.theme') || 'Appearance'}
@@ -377,9 +372,7 @@ export default function SettingsView() {
               className="w-full p-4 flex items-center justify-between hover:bg-black/5 dark:hover:bg-white/5 transition-all active:scale-[0.99] text-left cursor-pointer group"
             >
               <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-xl group-hover:scale-105 transition-transform shrink-0">
-                  <Shield className="w-5 h-5" />
-                </div>
+                <Shield className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0 group-hover:scale-105 transition-transform" />
                 <div>
                   <p className="font-semibold text-gray-900 dark:text-white text-sm flex items-center gap-1.5">
                     <span>{language === 'de' ? 'Admin-Bereich' : 'Admin Panel'}</span>
@@ -409,9 +402,7 @@ export default function SettingsView() {
             className="w-full p-4 flex items-center justify-between border-b border-black/5 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 transition-all active:scale-[0.99] text-left cursor-pointer group"
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-xl group-hover:scale-105 transition-transform">
-                <HelpCircle className="w-5 h-5" />
-              </div>
+              <HelpCircle className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0 group-hover:scale-105 transition-transform" />
               <div>
                 <p className="font-semibold text-gray-950 dark:text-white text-sm">
                   {t('onboarding.replayLabel')}
@@ -426,9 +417,7 @@ export default function SettingsView() {
             className="w-full p-4 flex items-center justify-between hover:bg-black/5 dark:hover:bg-white/5 transition-all active:scale-[0.99] text-left cursor-pointer group"
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-xl group-hover:scale-105 transition-transform">
-                <MessageSquare className="w-5 h-5" />
-              </div>
+              <MessageSquare className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0 group-hover:scale-105 transition-transform" />
               <div>
                 <p className="font-semibold text-gray-950 dark:text-white text-sm">
                   {t('feedback.rowLabel') || 'Report a bug / Feedback'}
@@ -462,9 +451,7 @@ export default function SettingsView() {
               }`}
             >
               <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-xl group-hover:scale-105 transition-transform shrink-0">
-                  <Icon className="w-5 h-5" />
-                </div>
+                <Icon className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0 group-hover:scale-105 transition-transform" />
                 <div>
                   <p className="font-semibold text-gray-950 dark:text-white text-sm">
                     {label}
@@ -494,9 +481,7 @@ export default function SettingsView() {
               className="w-full p-4 flex items-center justify-between border-b border-black/5 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 transition-all active:scale-[0.99] text-left cursor-pointer group"
             >
               <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-xl group-hover:scale-105 transition-transform shrink-0">
-                  <LogOut className="w-5 h-5" />
-                </div>
+                <LogOut className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0 group-hover:scale-105 transition-transform" />
                 <div>
                   <p className="font-semibold text-gray-950 dark:text-white text-sm">
                     {t('auth.signOut') || 'Sign Out'}
@@ -514,9 +499,7 @@ export default function SettingsView() {
             className="w-full p-4 flex items-center justify-between hover:bg-rose-500/5 dark:hover:bg-rose-500/10 transition-all active:scale-[0.99] text-left cursor-pointer group disabled:opacity-50 disabled:pointer-events-none"
           >
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div className="p-2 bg-rose-500/10 text-rose-500 dark:bg-rose-500/20 dark:text-rose-400 rounded-xl group-hover:scale-105 transition-transform shrink-0">
-                <UserMinus className="w-5 h-5" />
-              </div>
+              <UserMinus className="w-5 h-5 text-rose-500 dark:text-rose-400 shrink-0 group-hover:scale-105 transition-transform" />
               <div>
                 <p className="font-semibold text-rose-600 dark:text-rose-400 text-sm">
                   {t('app.settings.deleteAccount') || 'Delete Account'}

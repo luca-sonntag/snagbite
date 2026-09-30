@@ -236,11 +236,8 @@ export async function enrichRecipeWithCanonicalIngredients(
   const flatItems: Array<{ ing: Ingredient; groupName?: string; id: string }> = [];
   let itemCounter = 0;
 
-  for (const group of recipe.ingredients) {
-    if (!group.items) continue;
-    for (const ing of group.items) {
-      flatItems.push({ ing, groupName: group.name, id: `item_${itemCounter++}` });
-    }
+  for (const ing of recipe.ingredients) {
+    flatItems.push({ ing, groupName: ing.category, id: `item_${itemCounter++}` });
   }
 
   if (flatItems.length === 0) return {};

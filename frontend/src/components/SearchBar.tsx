@@ -64,7 +64,7 @@ export const SearchBar = React.memo<SearchBarProps>(({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder ?? t('catalog.searchPlaceholder') ?? 'Name, Zutaten, Tags'}
-          className="w-full bg-white dark:bg-gray-800 border-none rounded-2xl pl-10 pr-10 py-2.5 text-base sm:text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-emerald-400/40 focus:outline-none transition-all shadow-[0_4px_16px_rgba(0,0,0,0.06)] min-h-[44px]"
+          className="w-full bg-white dark:bg-gray-800 border-none rounded-2xl pl-10 pr-12 py-2.5 text-base sm:text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-emerald-400/40 focus:outline-none transition-all shadow-[0_4px_16px_rgba(0,0,0,0.06)] min-h-[44px]"
         />
         <Search className="w-4.5 h-4.5 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
 
@@ -76,10 +76,10 @@ export const SearchBar = React.memo<SearchBarProps>(({
               onChange('');
               ref.current?.focus();
             }}
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all flex items-center justify-center cursor-pointer border-none bg-transparent touch-manipulation"
+            className="absolute right-0.5 top-1/2 -translate-y-1/2 w-11 h-11 min-w-[44px] min-h-[44px] rounded-full text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all flex items-center justify-center cursor-pointer border-none bg-transparent touch-manipulation"
             aria-label={t('catalog.clearSearch') ?? 'Clear search'}
           >
-            <X className="w-4 h-4 stroke-[2.5]" />
+            <X className="w-4.5 h-4.5 stroke-[2.5]" />
           </button>
         )}
       </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeftRight, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import type { AlternativeIngredient } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 
@@ -14,21 +14,14 @@ export const AlternativeIngredientsList: React.FC<AlternativeIngredientsListProp
 
   if (!alternativeIngredients || alternativeIngredients.length === 0) return null;
 
-  const medallion =
-    'w-9 h-9 rounded-full bg-emerald-500/5 flex items-center justify-center flex-shrink-0';
-  const medallionIcon = 'w-[18px] h-[18px] text-emerald-600 dark:text-emerald-400';
-
   return (
     <div className="flex flex-col gap-4 mt-2">
       {/* Section Header (OUTSIDE card) */}
-      <div className="flex items-center gap-3">
-        <div className={medallion}>
-          <ArrowLeftRight className={medallionIcon} />
-        </div>
+      <div className="flex items-center justify-between gap-3">
         <h3 className="text-base font-bold text-gray-900 dark:text-white">
           {t('recipe.alternativeIngredients')}
         </h3>
-        <span className="ml-auto text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 rounded-full px-2.5 py-1 tabular-nums select-none">
+        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 rounded-full px-2.5 py-1 tabular-nums select-none">
           {alternativeIngredients.length}
         </span>
       </div>

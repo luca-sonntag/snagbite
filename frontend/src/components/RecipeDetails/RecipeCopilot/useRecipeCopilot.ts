@@ -5,7 +5,7 @@ import { useToast } from '../../../context/ToastContext';
 import { useTimerManager } from '../../../hooks/useTimerManager';
 import { useShoppingList } from '../../../hooks/useShoppingList';
 import { apiUrl } from '../../../api';
-import type { Recipe, Ingredient } from '../../../types';
+import type { Recipe } from '../../../types';
 import type { Chip, PendingChange, CopilotMessage, UseRecipeCopilotProps } from './types';
 import { parseSuggestions } from './CopilotChatList';
 
@@ -287,19 +287,13 @@ export function useRecipeCopilot({
       if (data.toolCalled === 'add_missing_ingredients_to_shopping_list' && data.toolArgs?.ingredients) {
         const items: string[] = data.toolArgs.ingredients;
         items.forEach((name) => {
-          let foundIng: Ingredient | null = null;
-          for (const group of recipe.ingredients) {
-            const match = group.items.find(
-              (i) =>
-                i.name.toLowerCase().includes(name.toLowerCase()) ||
-                name.toLowerCase().includes(i.name.toLowerCase()) ||
-                (i.baseName && i.baseName.toLowerCase().includes(name.toLowerCase()))
-            );
-            if (match) {
-              foundIng = match;
-              break;
-            }
-          }
+          const lower = name.toLowerCase();
+          const foundIng = (recipe.ingredients || []).find(
+            (i) =>
+              i.name.toLowerCase().includes(lower) ||
+              lower.includes(i.name.toLowerCase()) ||
+              (i.baseName && i.baseName.toLowerCase().includes(lower))
+          );
 
           if (foundIng) {
             addCustomItem(

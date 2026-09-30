@@ -362,16 +362,16 @@ export default function CollectionSheet({
                                 )}
                               </div>
                             </div>
-                            <div className="flex items-center gap-2 shrink-0">
+                            <div className="flex items-center gap-1 shrink-0">
                               <button
                                 type="button"
-                                className="w-8 h-8 rounded-xl text-gray-400 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 shrink-0 flex items-center justify-center border-none transition-all cursor-pointer"
+                                className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl text-gray-400 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 shrink-0 flex items-center justify-center border-none transition-all cursor-pointer touch-manipulation"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleEditOpen(col);
                                 }}
                               >
-                                <Edit2 className="w-3.5 h-3.5" />
+                                <Edit2 className="w-4 h-4" />
                               </button>
                               <div className={`w-6 h-6 rounded-xl border-none flex items-center justify-center shrink-0 transition-all ${
                                 isChecked ? 'bg-emerald-500 text-white'
@@ -416,20 +416,20 @@ export default function CollectionSheet({
                               {col.name}
                             </span>
                           </div>
-                          <div className="flex items-center gap-1 shrink-0">
+                          <div className="flex items-center gap-0.5 shrink-0">
                             <button
                               type="button"
-                              className="w-8 h-8 rounded-xl text-gray-400 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 shrink-0 flex items-center justify-center border-none transition-all cursor-pointer"
+                              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl text-gray-400 hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5 shrink-0 flex items-center justify-center border-none transition-all cursor-pointer touch-manipulation"
                               onClick={() => handleEditOpen(col)}
                             >
-                              <Edit2 className="w-3.5 h-3.5" />
+                              <Edit2 className="w-4 h-4" />
                             </button>
                             <button
                               type="button"
-                              className="w-8 h-8 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-500/10 shrink-0 flex items-center justify-center border-none transition-all cursor-pointer"
+                              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-500/10 shrink-0 flex items-center justify-center border-none transition-all cursor-pointer touch-manipulation"
                               onClick={() => handleDirectDelete(col)}
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </div>

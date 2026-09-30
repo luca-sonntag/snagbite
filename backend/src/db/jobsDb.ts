@@ -269,29 +269,12 @@ export async function reclaimExpiredJobs(timeoutMinutes: number): Promise<void> 
   }
 }
 
-export async function sweepStaleAwaitingFrames(timeoutMinutes: number): Promise<void> {
-  const cutoff = new Date(Date.now() - timeoutMinutes * 60 * 1000).toISOString();
-
-  const { error, count } = await getClient()
-    .from('jobs')
-    .update(
-      {
-        status: 'pending',
-        locked_at: null,
-        locked_by: null,
-        updated_at: new Date().toISOString(),
-      },
-      { count: 'exact' }
-    )
-    .eq('status', 'awaiting_frames')
-    .lt('updated_at', cutoff);
-
-  if (error) {
-    console.error('Failed to sweep stale awaiting_frames jobs:', error.message);
-  } else if (count && count > 0) {
-    console.log(`Swept ${count} stale awaiting_frames job(s) back to pending.`);
-  }
-}
+export {
+  sweepStaleAwaitingFrames,
+  cleanStaleJobsForUser,
+  getActiveJobsForUser,
+  cancelAllActiveJobsForUser,
+} from './jobsCleanup.js';
 
 export async function countActiveJobsForUser(userId: string): Promise<number> {
   const { count, error } = await getClient()

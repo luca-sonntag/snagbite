@@ -6,7 +6,76 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
-### 2026-09-21: Entfernung des redundanten Duplikats `companyInfo.ts` zugunsten von `legal.ts`
+### 2026-09-30: Fragmentierte DDL-Dateien durch offizielles Supabase CLI Migrations-System abgelöst
+
+* **Ersetzter Code / Veraltete Struktur:**
+  - Manuelle, ungetrackte SQL-Dateien im Verzeichnis `backend/db/migrations/` (`001_split_jobs_recipes.sql` bis `011_consolidate_nutritional_values_and_health_score.sql`).
+  - Zersplitterung der DDL über `backend/db/schema.sql`, `backend/supabase_schema.sql` und `migrations/` mit zirkulären Abhängigkeiten (z. B. Basistabelle `ingredient_mappings` fehlte in `migrations/`, Social-Tabellen fehlten in `migrations/`).
+  - Manuelles Ausführen von SQL-Blöcken im Supabase Dashboard ohne State-Tracking oder Prüfsummen.
+* **Ersetzt durch:**
+  - **Supabase CLI Migrations ([`supabase/migrations/`](file:///c:/Users/lucas/source/repos/cookbook/supabase/migrations/)):** 14 versionierte, chronologische und in sich geschlossene Migrationen von der Baseline `v1.1.9` (`20260807000000_baseline_v1_1_9.sql`) bis zu den neuesten Nährwert- und Planer-Features.
+  - **Autoritatives State-Tracking in Postgres:** Status und Checksums werden in `supabase_migrations.schema_migrations` persistiert (`npm run db:status`, `npm run db:push`, `npm run db:repair`).
+* **Betroffene Dateien:** `supabase/config.toml`, `supabase/migrations/*`, `package.json`, `docs/architecture/backend-and-database.md`, `docs/other/dev-environment.md`, `docs/OBSOLETE.md`.
+
+---
+
+### 2026-09-30: Verschachteltes Zutatengruppen-Modell (`IngredientGroup[]`) durch flaches `Ingredient[]`-Array abgelöst
+
+* **Ersetzter Code / Veraltete Datenstruktur:**
+  - Verschachteltes Datenmodell `ingredients: IngredientGroup[]` mit `{ name: string, items: Ingredient[] }` im geteilten Typ (`Recipe.ingredients`), Gemini-Ausgabe-Schema und Datenbank-JSON.
+  - Doppelte Schleifen (`for (const g of recipe.ingredients) { for (const i of g.items) { ... } }`) und komplexe Gruppen-Erzeugungs-/Gruppen-Bereinigungslogik im gesamten Backend (`recipeOperations.ts`, `ingredientMatcher.ts`, `healthScoreCalculator.ts`, `recipeAuditor.ts`, `pantryDb.ts`, `shoppingListDb.ts`).
+  - Verschachtelte UI-Verarbeitung mit `.flatMap(({ group, originalIdx }) => group.items.map(...))` in Frontend-Komponenten (`RecipeIngredients.tsx`, `ShoppingConfirmSheet.tsx`, `PreviewIngredientsCard.tsx`, `copyRecipeToClipboard.ts`).
+  - Hilfsfunktionen `placeIngredientInGroup` in `categoryGroups.ts` sowie `SortedIngredientGroup`-Typen in `RecipeDetails/types.ts`.
+* **Ersetzt durch:**
+  - **Flaches Datenmodell ([`shared/src/types/recipes.ts`](file:///c:/Users/lucas/source/repos/cookbook/shared/src/types/recipes.ts)):** `Recipe.ingredients: Ingredient[]`. Jede Zutat trägt direkt ihre `category?: string` (Supermarktkategorie) sowie optional eine `section?: string` (z. B. "Für die Soße", "Für den Teig"). `IngredientGroup` verbleibt lediglich als `@deprecated`-Typ-Alias.
+  - **Schlanke Operations-Engine ([`backend/src/recipeOperations.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/recipeOperations.ts)):** Direkte Array-Methoden (`findIndex`, `splice`, `filter`, `map`) ohne 60+ Zeilen Boilerplate für das Erstellen oder Löschen leerer Gruppen.
+  - **Präzises Gemini-Schema ([`backend/src/gemini.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/gemini.ts)):** LLM liefert Zutaten direkt als flache Liste mit strukturiertem `category`-Enum und `section`-String.
+  - **Flache UI-Render-Pipelines:** `RecipeIngredients.tsx`, `ShoppingConfirmSheet.tsx`, `CookingMode` und `MealPlanner` mappen Zutaten direkt ohne künstliche Zwischengruppen.
+* **Betroffene Dateien:** `shared/src/types/recipes.ts`, `backend/src/gemini.ts`, `backend/src/recipeOperations.ts`, `backend/src/matching/recipeAuditor.ts`, `backend/src/matching/ingredientMatcher.ts`, `backend/src/matching/healthScoreCalculator.ts`, `backend/src/queue.ts`, `backend/src/db/pantryDb.ts`, `backend/src/db/shoppingListDb.ts`, `frontend/src/components/RecipeDetails/RecipeIngredients.tsx`, `frontend/src/components/RecipeDetails/ShoppingConfirmSheet.tsx`, `frontend/src/components/RecipeDetails/useRecipeDetails.ts`, `frontend/src/components/MealPlanner/mealPlannerUtils.ts`, `frontend/src/components/MealPlanner/useMealPlanBulkShopping.ts`, `docs/OBSOLETE.md`.
+
+---
+
+* **Ersetzter Code / Veraltete Struktur:**
+  - Lokale Hilfsfunktion `getChipClass` in `RecipeInstructionText.tsx`.
+  - Disparates Styling zwischen Zutaten (Unterstreichung via `underline decoration-gray-300`), Küchengeräten (graue Pill) und Temperatur (Text ohne Pill).
+  - Fehlerhafte Uhr-Icon-Darstellung (`<Clock />`) bei Temperatur-Angaben in Rezept-Schritten, wenn KI-Modelle diese fälschlicherweise als `(timer:...)` getaggt hatten.
+* **Ersetzt durch:**
+  - **Einheitliche CSS-Klasse ([`frontend/src/index.css`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/index.css)):** `.recipe-step-pill` mit relativen `em`-Einheiten für Padding, Radius und Gap. Skaliert automatisch nahtlos zwischen Schritt-Liste (`text-sm`) und Fullscreen-Cooking-Mode (`text-[22px..28px]`).
+  - **Einheitliche Komponenten-Nutzung:** Zutaten-Trigger in [`InstructionIngredientPopover.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/InstructionIngredientPopover.tsx), Küchengeräte und Temperatur in [`RecipeInstructionText.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeInstructionText.tsx) und Equipment-Liste in [`RecipeInstructions.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/RecipeInstructions.tsx) nutzen dieselbe Klasse.
+  - **Thermometer-Icon & Defensive Erkennung:** Temperatur erhält ein dediziertes `<Thermometer />`-Icon. In `RecipeInstructionText.tsx` und `ingredientMatch.ts` werden versehentlich als Timer getaggte Temperaturen defensiv abgefangen und als Temperatur-Pills gerendert. In `backend/src/gemini.ts` wird die KI explizit angewiesen, Temperaturen niemals als Timer zu taggen.
+* **Betroffene Dateien:** `frontend/src/index.css`, `frontend/src/components/RecipeInstructionText.tsx`, `frontend/src/components/InstructionIngredientPopover.tsx`, `frontend/src/components/RecipeDetails/RecipeInstructions.tsx`, `frontend/src/utils/ingredientMatch.ts`, `backend/src/gemini.ts`, `docs/OBSOLETE.md`.
+
+---
+
+### 2026-09-28: Verschmelzung von Segmented Tabs und Progress-Karte in der Einkaufsliste (`ShoppingTabsCard`)
+
+* **Ersetzter Code / Veraltete Struktur:**
+  - Getrennte `ShoppingProgressCard.tsx`-Komponente, die als separate Kachel unterhalb des Segmented Tab Switchers gerendert wurde.
+  - Doppelte UI-Hierarchie mit getrennten Karten-Wrappern für Tabs und Fortschrittsbalken.
+* **Ersetzt durch:**
+  - **Einheitliche Karte ([`ShoppingTabsCard.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ShoppingList/ShoppingTabsCard.tsx)):** Verschmilzt die Segmented Tabs (`ShoppingSegmentedTabs.tsx`) und den Fortschrittsbereich (`ShoppingTabProgress.tsx`) in einen einzigen, eleganten Karten-Container.
+  - Saubere Modularisierung nach Clean-Code-Regeln (jeweils < 85 Zeilen).
+* **Betroffene Dateien:** `frontend/src/components/ShoppingList/ShoppingTabsCard.tsx`, `frontend/src/components/ShoppingList/ShoppingSegmentedTabs.tsx`, `frontend/src/components/ShoppingList/ShoppingTabProgress.tsx`, `frontend/src/components/ShoppingList/ShoppingStickyHeader.tsx`, `frontend/src/components/ShoppingList/ShoppingListView.tsx`, `frontend/src/components/ShoppingList/ShoppingProgressCard.tsx` (gelöscht), `docs/OBSOLETE.md`.
+
+---
+
+### 2026-09-23: Konsolidierung der getrennten Warteliste & Fehlerliste in eine einheitliche Warteliste (`QueueItem`)
+
+* **Ersetzter Code / Veraltete Struktur:**
+  - Getrennte LocalStorage-Schlüssel `kb_extraction_waitlist_${userId}` und `kb_extraction_failed_${userId}`.
+  - Getrennte Datenmodelle `WaitlistItem` und `FailedExtractionEntry`.
+  - Tab-basierte Drawer-Komponente `ExtractionQueueSheet.tsx` mit Segmented-Control-Switcher.
+  - Doppelte Dock-Balken in `ExtractionQueueDock.tsx` (einzelner Amber-Balken für Fehler + einzelner Emerald-Balken für Warteliste).
+  - Redundante Komponente `FailedJobCard.tsx` (inklusive Hilfsfunktion `moveFailedToWaitlist`), die im Wesentlichen dieselbe Funktionalität wie `WaitlistItemCard.tsx` bereitstellte.
+* **Ersetzt durch:**
+  - **Einheitliches Queue-Modell ([`ExtractionQueueContext.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/context/ExtractionQueueContext.tsx)):** Alle Elemente (sowohl neu geparkte Links als auch fehlgeschlagene Extraktionen mit Fehlerursache) leben in einem einzigen Datenstrom `QueueItem` mit `status: 'waiting' | 'failed'`.
+  - **Automatische User-Scoped Migration:** Vorhandene Altdaten aus `kb_extraction_waitlist` und `kb_extraction_failed` werden beim ersten Start nahtlos in den neuen Schlüssel `kb_extraction_queue_${userId}` überführt und die Altschlüssel rückstandslos bereinigt.
+  - **Ultra-kompakter Single-Row-Dock ([`ExtractionQueueDock.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ExtractForm/ExtractionQueueDock.tsx)):** Genau eine schlanke Dock-Zeile (~48px), die die Gesamtzahl der gespeicherten Rezepte anzeigt und bei vorliegenden Fehlern einen dezenten Amber-Fehlerbadge einblendet.
+  - **Tab-freies Management Bottom-Sheet ([`ExtractionQueueSheet.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ExtractForm/ExtractionQueueSheet.tsx)):** Ein durchgängiger, chronologischer Stream ohne verwirrende Unter-Tabs.
+  - **Konsolidierte Kachel ([`WaitlistItemCard.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ExtractForm/WaitlistItemCard.tsx)):** Behandelt sowohl reguläre Wartelisteneinträge als auch Fehlgeschlagene direkt mit passendem Icon, Fehlertext, Wiederholen-/Starten-Button sowie Copy/Open/Delete-Aktionen. `FailedJobCard.tsx` wurde als `@deprecated` markiert und leitet direkt an `WaitlistItemCard` weiter.
+* **Betroffene Dateien:** `frontend/src/context/ExtractionQueueContext.tsx`, `frontend/src/components/ExtractForm/ExtractionQueueDock.tsx`, `frontend/src/components/ExtractForm/ExtractionQueueSheet.tsx`, `frontend/src/components/ExtractForm/ExtractionQueueSection.tsx`, `frontend/src/components/ExtractForm/WaitlistItemCard.tsx`, `frontend/src/components/ExtractForm/FailedJobCard.tsx`, `frontend/src/components/ExtractForm/types.ts`, `frontend/src/i18n.ts`, `docs/architecture/frontend.md`, `docs/OBSOLETE.md`.
+
+---
 
 * **Ersetzter Code / Veraltete Struktur:**
   - `website/src/companyInfo.ts`: Ein verwaistes, redundantes Duplikat der Stammdaten-Datei `website/src/legal.ts`, das ungenutzt im Repository verblieb und Gefahr lief, inhaltlich zu divergieren.

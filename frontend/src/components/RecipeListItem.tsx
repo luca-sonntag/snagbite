@@ -7,6 +7,7 @@ import { hapticLight } from '../utils/haptics';
 import { getTotalTime } from '../hooks/useSavedCatalog';
 import { getRecipeCalories, formatCalories } from '../utils/formatNutrition';
 import { HealthScoreLetterBadge } from './RecipeDetails/HealthScoreBadge';
+import { formatAuthorHandle } from '../utils/sourceLabel';
 
 export interface RecipeListItemProps {
   job?: SavedRecipe;
@@ -95,7 +96,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
 
   const firstTag = recipeTags?.[0] ?? getFirstRecipeTag(r);
   const sourceHandle = 'sourceHandle' in r && typeof r.sourceHandle === 'string' ? r.sourceHandle : null;
-  const handleText = sourceHandle ? `@${sourceHandle.replace(/^@/, '')}` : null;
+  const handleText = formatAuthorHandle(sourceHandle);
   const defaultSubtitle = handleText ?? firstTag;
   const renderedSubtitle = subtitle !== undefined ? subtitle : defaultSubtitle;
 

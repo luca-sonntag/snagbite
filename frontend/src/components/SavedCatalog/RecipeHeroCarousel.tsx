@@ -30,6 +30,9 @@ interface RecipeHeroCarouselProps {
   slides: HeroSlideItem[];
   onOpenSlide: (e: MouseEvent, slide: HeroSlideItem) => void;
   onSaveCommunity?: (e: MouseEvent, recipe: Recipe) => void;
+  isSelectMode?: boolean;
+  selectedIds?: Set<string>;
+  bindLongPress?: (id: string, job: SavedRecipe) => any;
 }
 
 /**
@@ -40,6 +43,9 @@ export default function RecipeHeroCarousel({
   slides,
   onOpenSlide,
   onSaveCommunity,
+  isSelectMode = false,
+  selectedIds,
+  bindLongPress,
 }: RecipeHeroCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -96,29 +102,37 @@ export default function RecipeHeroCarousel({
         onScroll={handleScroll}
         className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-none no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 scroll-pl-4 sm:scroll-pl-0 scroll-smooth"
       >
-        {slides.map((slide, idx) => (
-          <div
-            key={slide.id || idx}
-            className={`${
-              slides.length > 1 ? 'w-[86%] sm:w-[89%] md:w-[92%]' : 'w-full'
-            } shrink-0 snap-start`}
-          >
-            <RecipeHeroCard
-              job={slide.job}
-              recipe={slide.recipe}
-              totalTime={slide.totalTime}
-              badgeText={slide.badgeText}
-              badgeVariant={slide.badgeVariant}
-              themeRecipeCount={slide.themeRecipeCount}
-              onOpenTheme={slide.onOpenTheme}
-              isCommunity={slide.isCommunity}
-              isSaved={slide.isSaved}
-              isVital={slide.isVital}
-              onSaveCommunity={onSaveCommunity}
-              onOpenRecipe={(e) => onOpenSlide(e, slide)}
-            />
-          </div>
-        ))}
+        {slides.map((slide, idx) => {
+          const isSlideCommunity = slide.isCommunity;
+          const isSelected = !isSlideCommunity && slide.job ? selectedIds?.has(slide.job.recipeId) : false;
+          const slideLongPress = (!isSlideCommunity && slide.job && bindLongPress) ? bindLongPress(slide.job.recipeId, slide.job) : undefined;
+          return (
+            <div
+              key={slide.id || idx}
+              className={`${
+                slides.length > 1 ? 'w-[86%] sm:w-[89%] md:w-[92%]' : 'w-full'
+              } shrink-0 snap-start`}
+            >
+              <RecipeHeroCard
+                job={slide.job}
+                recipe={slide.recipe}
+                totalTime={slide.totalTime}
+                badgeText={slide.badgeText}
+                badgeVariant={slide.badgeVariant}
+                themeRecipeCount={slide.themeRecipeCount}
+                onOpenTheme={slide.onOpenTheme}
+                isCommunity={slide.isCommunity}
+                isSaved={slide.isSaved}
+                isVital={slide.isVital}
+                onSaveCommunity={onSaveCommunity}
+                onOpenRecipe={(e) => onOpenSlide(e, slide)}
+                isSelected={isSelected}
+                isSelectMode={isSelectMode}
+                bindLongPress={slideLongPress}
+              />
+            </div>
+          );
+        })}
       </div>
 
       {/* Modern Subtle Pagination Dots (only when multiple slides exist) */}

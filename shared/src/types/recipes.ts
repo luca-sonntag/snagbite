@@ -18,6 +18,7 @@ export interface Ingredient {
   modifier?: string;
   brand?: string;
   category?: string;
+  section?: string;
   calories?: number | null;
   protein?: number | null;
   carbs?: number | null;
@@ -37,6 +38,7 @@ export interface Ingredient {
   shelfLifeDays?: number | null;
 }
 
+/** @deprecated Recipes use flat Ingredient[] array with category and optional section. */
 export interface IngredientGroup {
   name: string;
   items: Ingredient[];
@@ -171,7 +173,7 @@ export interface Recipe {
   prepTime: number | null;
   cookTime: number | null;
   servings: number;
-  ingredients: IngredientGroup[];
+  ingredients: Ingredient[];
   instructions: InstructionStep[];
   equipment: string[];
   nutritionalValues?: NutritionalValues;

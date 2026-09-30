@@ -4,10 +4,10 @@ import {
   getMonday,
   formatDateIso,
   addDays,
-  scaleIngredientGroups,
+  scaleIngredients,
   formatShoppingAmount,
   formatUpcomingDateSeparator,
-  sortIngredientGroupsByCategory,
+  sortIngredientsByCategory,
   formatDateHuman,
   buildWeekDaysInfo,
   buildAgendaDates,
@@ -61,28 +61,23 @@ describe('mealPlannerUtils', () => {
     });
   });
 
-  describe('scaleIngredientGroups', () => {
+  describe('scaleIngredients', () => {
     it('scales amounts proportionally according to servings ratio', () => {
-      const groups = [
-        {
-          name: 'Sauce',
-          items: [
-            { name: 'Tomaten', amount: 200, unit: 'g' },
-            { name: 'Knoblauch', amount: 2, unit: 'Zehen' },
-          ],
-        },
+      const ingredients = [
+        { name: 'Tomaten', amount: 200, unit: 'g' },
+        { name: 'Knoblauch', amount: 2, unit: 'Zehen' },
       ];
 
       // Base 2 servings -> Target 4 servings (2x)
-      const scaled = scaleIngredientGroups(groups, 4, 2);
+      const scaled = scaleIngredients(ingredients, 4, 2);
       assert.equal(scaled.length, 2);
       assert.equal(scaled[0].amount, 400);
       assert.equal(scaled[1].amount, 4);
     });
 
-    it('returns empty array when groups are undefined or empty', () => {
-      assert.deepEqual(scaleIngredientGroups(undefined, 4, 2), []);
-      assert.deepEqual(scaleIngredientGroups([], 4, 2), []);
+    it('returns empty array when ingredients are undefined or empty', () => {
+      assert.deepEqual(scaleIngredients(undefined, 4, 2), []);
+      assert.deepEqual(scaleIngredients([], 4, 2), []);
     });
   });
 
@@ -110,15 +105,15 @@ describe('mealPlannerUtils', () => {
     });
   });
 
-  describe('sortIngredientGroupsByCategory', () => {
-    it('sorts groups by category order', () => {
-      const groups = [
-        { name: 'PANTRY_BAKING', items: [] },
-        { name: 'VEGETABLES', items: [] },
+  describe('sortIngredientsByCategory', () => {
+    it('sorts ingredients by category order', () => {
+      const items = [
+        { name: 'Mehl', category: 'PANTRY_BAKING' },
+        { name: 'Tomate', category: 'VEGETABLES' },
       ];
-      const sorted = sortIngredientGroupsByCategory(groups);
-      assert.equal(sorted[0].group.name, 'VEGETABLES');
-      assert.equal(sorted[1].group.name, 'PANTRY_BAKING');
+      const sorted = sortIngredientsByCategory(items);
+      assert.equal(sorted[0].name, 'Tomate');
+      assert.equal(sorted[1].name, 'Mehl');
     });
   });
 
@@ -202,7 +197,7 @@ describe('mealPlannerUtils', () => {
       assert.ok(dates.includes('2026-09-25'));
       // Should be sorted chronologically
       assert.equal(dates[0], '2026-09-01');
-      assert.equal(dates[dates.length - 1], '2026-09-25');
+      assert.equal(dates[dates.length - 1], '2026-09-27');
 
       // Extended (extendedWeeks = 1): also includes next week from today onwards (2026-09-21..2026-09-27)
       const extendedDates = buildAgendaDates(wednesday, mealPlans, 1);

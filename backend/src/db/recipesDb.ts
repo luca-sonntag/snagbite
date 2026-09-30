@@ -3,6 +3,7 @@ import type {
   SavedRecipe,
   UserRecipeSource,
 } from '../types.js';
+import { formatAuthorHandle } from '@cookbook/shared';
 import {
   getClient,
   wrapError,
@@ -13,6 +14,20 @@ import {
 } from './client.js';
 import { getCollectionMembership } from './collectionsDb.js';
 import { computeRecipeHealthScore, isVegetableOrFruitCategory } from '../matching/healthScoreCalculator.js';
+
+function normalizeRawIngredients(raw: unknown): Recipe['ingredients'] {
+  if (!Array.isArray(raw)) return [];
+  if (raw.length > 0 && raw[0] && typeof raw[0] === 'object' && Array.isArray((raw[0] as any).items)) {
+    return (raw as Array<{ name?: string; items?: any[] }>).flatMap((group) => {
+      const section =
+        group.name && !/^(ingredients|zutaten|hauptzutaten|default|allgemein)$/i.test(group.name.trim())
+          ? group.name.trim()
+          : undefined;
+      return (group.items || []).map((item) => (section ? { ...item, section } : item));
+    });
+  }
+  return raw as Recipe['ingredients'];
+}
 
 export function rowToRecipe(row: RecipeRow): Recipe {
   const nutritionalValues =
@@ -26,7 +41,7 @@ export function rowToRecipe(row: RecipeRow): Recipe {
     visibility: row.visibility as Recipe['visibility'],
     origin: row.origin as Recipe['origin'],
     sourceUrl: row.source_url,
-    sourceHandle: row.source_handle,
+    sourceHandle: formatAuthorHandle(row.source_handle),
     parentRecipeId: row.parent_recipe_id,
     remixPrompt: row.remix_prompt,
     title: row.title,
@@ -45,7 +60,7 @@ export function rowToRecipe(row: RecipeRow): Recipe {
     imagePrompt: row.image_prompt,
     isAiCover: row.is_ai_cover,
     transcript: row.transcript,
-    ingredients: (row.ingredients as Recipe['ingredients']) ?? [],
+    ingredients: normalizeRawIngredients(row.ingredients),
     instructions: (row.instructions as Recipe['instructions']) ?? [],
     alternativeIngredients:
       (row.alternative_ingredients as Recipe['alternativeIngredients']) ?? undefined,
@@ -69,8 +84,8 @@ export function rowToRecipe(row: RecipeRow): Recipe {
     (!recipe.healthScore ||
       !recipe.healthScoreBreakdown ||
       (recipe.healthScoreBreakdown.metrics?.vegetableGramsPerServing === 0 &&
-        recipe.ingredients.some((g) =>
-          g.items?.some((i) => isVegetableOrFruitCategory(i.category || g.name))
+        recipe.ingredients.some((i) =>
+          isVegetableOrFruitCategory(i.category)
         )))
   ) {
     const computed = computeRecipeHealthScore(recipe);
@@ -90,7 +105,7 @@ export function recipeToRow(recipe: Recipe): Record<string, unknown> {
   return {
     visibility: recipe.visibility ?? 'private',
     source_url: recipe.sourceUrl ?? null,
-    source_handle: recipe.sourceHandle ?? null,
+    source_handle: formatAuthorHandle(recipe.sourceHandle) ?? null,
     parent_recipe_id: recipe.parentRecipeId ?? null,
     remix_prompt: recipe.remixPrompt ?? null,
     title: recipe.title,

@@ -9,6 +9,7 @@ import {
 import { registerPushTapHandler, enablePushNotifications } from '../push';
 import { parseSharedUrl } from '../utils/shareUrl';
 import { EXTRACTION_COMPLETE_EVENT, OPEN_RECIPE_EVENT } from '../context/ExtractionJobsContext';
+import { useExtractionQueue } from '../context/ExtractionQueueContext';
 import { useOverlayStack } from '../context/OverlayStackContext';
 import { useToast } from '../context/ToastContext';
 import { useI18n } from '../context/I18nContext';
@@ -46,6 +47,7 @@ export function useAppNativeListeners({
   const { handleBack: handleOverlayBack } = useOverlayStack();
   const toast = useToast();
   const { t } = useI18n();
+  const { addToWaitlist, openQueueSheet } = useExtractionQueue();
   const lastBackPressRef = useRef<number>(0);
 
   // Android hardware back-button & edge swipe-back gesture
@@ -247,12 +249,23 @@ export function useAppNativeListeners({
           (limitStatus.cookbookFull || (limitStatus.limit >= 0 && limitStatus.remaining <= 0));
         if (!isBlocked) {
           triggerExtraction(extractedUrl);
+        } else {
+          addToWaitlist(extractedUrl, 'share');
+          toast.info(t('queue.toast.addedToWaitlistQuota'), {
+            action: {
+              label: t('queue.toast.viewWaitlist'),
+              onClick: () => {
+                replace('extract');
+                openQueueSheet();
+              },
+            },
+          });
         }
       } else {
         replace(activeView);
       }
     }
-  }, [authLoading, user, replace, setUrl, triggerExtraction, activeView, limitStatus]);
+  }, [authLoading, user, replace, setUrl, triggerExtraction, activeView, limitStatus, addToWaitlist, t, toast, openQueueSheet]);
 
   // Native share intent
   useEffect(() => {
@@ -265,9 +278,20 @@ export function useAppNativeListeners({
         (limitStatus.cookbookFull || (limitStatus.limit >= 0 && limitStatus.remaining <= 0));
       if (!isBlocked) {
         triggerExtraction(sharedUrl);
+      } else {
+        addToWaitlist(sharedUrl, 'share');
+        toast.info(t('queue.toast.addedToWaitlistQuota'), {
+          action: {
+            label: t('queue.toast.viewWaitlist'),
+            onClick: () => {
+              replace('extract');
+              openQueueSheet();
+            },
+          },
+        });
       }
     });
-  }, [authLoading, user, replace, setUrl, triggerExtraction, limitStatus]);
+  }, [authLoading, user, replace, setUrl, triggerExtraction, limitStatus, addToWaitlist, t, toast, openQueueSheet]);
 
   // Dev mode re-extraction trigger
   useEffect(() => {

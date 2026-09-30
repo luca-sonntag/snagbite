@@ -5,7 +5,7 @@
 
 const INLINE_ING_REGEX = /\[([^\]]+)\]\(ing:([^)]+)\)/g;
 const INLINE_TIMER_REGEX = /\[([^\]]+)\]\(timer:(\d+)\)/g;
-const ALL_INLINE_TAGS_REGEX = /\[([^\]]+)\]\((?:ing|timer):[^)]+\)/g;
+const ALL_INLINE_TAGS_REGEX = /\[([^\]]+)\]\((?:ing|timer|temp):[^)]+\)/g;
 
 export interface InlineIngredientMatch {
   wordInText: string;
@@ -46,8 +46,13 @@ export function extractInlineTimerTags(text: string): InlineTimerMatch[] {
   let match: RegExpExecArray | null;
 
   while ((match = regex.exec(text)) !== null) {
+    const timeText = match[1];
+    // Filter out accidental temperature tags
+    if (/°[CF]?|\b(?:grad|celsius|fahrenheit|umluft|oberhitze|unterhitze)\b/i.test(timeText)) {
+      continue;
+    }
     matches.push({
-      timeText: match[1],
+      timeText,
       seconds: parseInt(match[2], 10),
     });
   }

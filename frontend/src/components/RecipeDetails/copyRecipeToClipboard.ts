@@ -1,5 +1,4 @@
 import type { Ingredient, Recipe } from '../../types';
-import type { SortedIngredientGroup } from './types';
 import { stripInlineIngredientTags } from '../../utils/ingredientMatch';
 
 /**
@@ -23,11 +22,11 @@ const escapeHtml = (value: string) =>
 
 interface BuildClipboardParams {
   recipe: Recipe;
-  sortedIngredients: SortedIngredientGroup[];
+  sortedIngredients: Ingredient[];
   servings: number;
   formatAmount: (amount: number | undefined, unit: string | undefined) => string;
   formatTimeValue: (time: string | number | null | undefined) => string;
-  translateCategory: (name: string) => string;
+  translateCategory?: (name: string) => string;
   t: (key: string, params?: Record<string, string | number>) => string;
 }
 
@@ -42,10 +41,8 @@ export async function copyRecipeToClipboard({
   servings,
   formatAmount,
   formatTimeValue,
-  translateCategory,
   t,
 }: BuildClipboardParams): Promise<void> {
-  const hasGroups = recipe.ingredients.length > 1;
   const metaLine = `${t('recipe.prep')}: ${formatTimeValue(recipe.prepTime)} · ${t('recipe.cook')}: ${formatTimeValue(recipe.cookTime)} · ${t('recipe.serves')}: ${servings}`;
 
   // --- Plain text ---
@@ -53,12 +50,15 @@ export async function copyRecipeToClipboard({
   if (recipe.description) text += `${stripInlineIngredientTags(recipe.description)}\n\n`;
   text += `${metaLine}\n\n`;
   text += `${t('recipe.tabIngredients')}\n`;
-  sortedIngredients.forEach(({ group }) => {
-    if (hasGroups) text += `${translateCategory(group.name)}\n`;
-    group.items.forEach((ing) => { text += `• ${formatIngredientLine(ing, formatAmount)}\n`; });
-    if (hasGroups) text += `\n`;
+  let currentSection = '';
+  sortedIngredients.forEach((ing) => {
+    if (ing.section && ing.section !== currentSection) {
+      currentSection = ing.section;
+      text += `${currentSection}\n`;
+    }
+    text += `• ${formatIngredientLine(ing, formatAmount)}\n`;
   });
-  if (!hasGroups) text += `\n`;
+  text += `\n`;
   text += `${t('recipe.tabInstructions')}\n`;
   recipe.instructions.forEach((step) => { text += `${step.step}. ${stripInlineIngredientTags(step.description)}\n`; });
   text += `\n`;
@@ -78,12 +78,11 @@ export async function copyRecipeToClipboard({
   if (recipe.description) html += `<p>${escapeHtml(stripInlineIngredientTags(recipe.description))}</p>`;
   html += `<p><strong>${escapeHtml(t('recipe.prep'))}:</strong> ${escapeHtml(formatTimeValue(recipe.prepTime))} · <strong>${escapeHtml(t('recipe.cook'))}:</strong> ${escapeHtml(formatTimeValue(recipe.cookTime))} · <strong>${escapeHtml(t('recipe.serves'))}:</strong> ${servings}</p>`;
   html += `<h2>${escapeHtml(t('recipe.tabIngredients'))}</h2>`;
-  sortedIngredients.forEach(({ group }) => {
-    if (hasGroups) html += `<h3>${escapeHtml(translateCategory(group.name))}</h3>`;
-    html += `<ul>`;
-    group.items.forEach((ing) => { html += `<li>${escapeHtml(formatIngredientLine(ing, formatAmount))}</li>`; });
-    html += `</ul>`;
+  html += `<ul>`;
+  sortedIngredients.forEach((ing) => {
+    html += `<li>${escapeHtml(formatIngredientLine(ing, formatAmount))}</li>`;
   });
+  html += `</ul>`;
   html += `<h2>${escapeHtml(t('recipe.tabInstructions'))}</h2><ol>`;
   recipe.instructions.forEach((step) => { html += `<li>${escapeHtml(stripInlineIngredientTags(step.description))}</li>`; });
   html += `</ol>`;

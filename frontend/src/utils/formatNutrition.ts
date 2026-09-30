@@ -22,12 +22,9 @@ export function getRecipeCalories(recipe?: Recipe | MealPlanRecipeSummary | null
   // If calories are not present at the top level, derive from ingredients if present
   if (r.ingredients && r.ingredients.length > 0) {
     let totalCalories = 0;
-    for (const group of r.ingredients) {
-      if (!group.items) continue;
-      for (const ing of group.items) {
-        if (ing.calories && ing.calories > 0) {
-          totalCalories += ing.calories;
-        }
+    for (const ing of r.ingredients) {
+      if (ing.calories && ing.calories > 0) {
+        totalCalories += ing.calories;
       }
     }
     const baseServings = Math.max(1, r.servings || 1);
@@ -45,4 +42,13 @@ export function getRecipeCalories(recipe?: Recipe | MealPlanRecipeSummary | null
 export function formatCalories(calories: number | null | undefined): string | null {
   if (!calories || calories <= 0) return null;
   return `${calories.toLocaleString('de-DE')} kcal`;
+}
+
+/**
+ * Strips brand names / store suffixes in brackets (e.g. "Tomatenmark [Aldi, ...]" -> "Tomatenmark").
+ */
+export function cleanMatchedIngredientName(name?: string | null): string {
+  if (!name) return '';
+  const cleaned = name.replace(/\s*\[.*?\]/g, '').trim();
+  return cleaned || name.trim();
 }

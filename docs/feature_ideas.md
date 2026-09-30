@@ -37,7 +37,16 @@
   - Alle Zutat-Mappings, Normalisierungen (`baseName`) und zugeordneten Icons im Backend und Frontend überprüfen und berichtigen.
   - Inkonsistente oder fehlerhafte Zuordnungen bereinigen, damit jede Zutat verlässlich ihr passendes SVG/Icon und die richtige Supermarktkategorie erhält.
 
-- **New User Experience (NUX) überarbeiten & aktualisieren:**
+- **New User Experience (NUX) & Kontextuelle Screen-Touren (Spotlight Guides):**
+  - **Problem & Bedarf:** Viele Features und Interaktionsmöglichkeiten sind für Erstnutzer nicht sofort ersichtlich. Eine starre, lange Gesamttour durch die ganze App schreckt jedoch ab und überfordert Nutzer.
+  - **Konzept (Screen-by-Screen Just-in-Time Tour):**
+    - Keine globale Endlos-Tour, sondern kontextuell: Wenn ein Nutzer einen Screen/eine Maske (z. B. Kochmodus, Rezept-Detail, Wochenplaner, Vorrat, Einkaufsliste) das **erste Mal betritt**, werden relevante UI-Elemente gezielt visuell hervorgehoben (Spotlight / Backdrop-Cutout) und mit kurzen Tooltips erklärt.
+    - Jeder Screen hat seinen eigenen Tour-Zustand (gespeichert in `localStorage` oder User-Settings), sodass er nur 1x pro Maske getriggert wird.
+    - Jederzeit überspringbar („Verstanden“ / „Überspringen“) sowie bei Bedarf über die Einstellungen / Hilfe erneut startbar.
+  - **Mögliche Libraries / Pakete:**
+    - `driver.js` (leichtgewichtig, vanilla/framework-agnostisch, hervorragendes Spotlight/Backdrop-Cutout, kein schwerer React-Wrapper-Overhead).
+    - `react-joyride` (etablierter React-Standard für Guided Tours, gut anpassbar, aber größer).
+    - `shepherd.js` oder eine schlanke Eigenbau-Lösung über Floating UI / Popover API.
   - Onboarding- und Einführungserlebnis für neue Nutzer überarbeiten, modernisieren und aktualisieren.
   - Empty States (z. B. leeres Kochbuch, Wochenplaner, Einkaufsliste, Vorrat) auffrischen und Nutzer intuitiv zur ersten Aktion führen.
 
@@ -50,20 +59,26 @@
 - **Google Play Store Go-Live & Release-Vorbereitung:**
   - Verbindliche Abarbeitung aller Store-Voraussetzungen (Restore Purchases Button, AdMob `app-ads.txt`, Data Safety, Reviewer-Account, Closed Testing) gemäß der [**Google Play Store Go-Live Checklist**](go-live-checklist.md).
 
-- **Extraktions-Warteliste & Job-Historie auf der „NEU“-Seite (Fail-Safe Queue):**
-  - **Schutz vor Link-Verlust:** Schlägt eine Extraktion temporär fehl (Netzwerkabbruch, API-Timeout, Instagram-Glitch), darf der Video-Link niemals verloren gehen – der Nutzer hat im Social-Media-Feed meist schon weitergescrollt.
-  - **Job-Historie & Retry:** Auf der „Neu“-Seite eine kompakte Liste der letzten Extraktions-Jobs und fehlgeschlagenen Links anzeigen (inkl. 1-Klick-Retry und Link kopieren/öffnen).
-  - **Vormerken bei aufgebrauchtem Kontingent:** Wenn das tägliche Extraktions-Limit erreicht ist, können Links trotzdem geteilt und in eine Warteliste abgelegt werden („Für später vormerken“).
-  - **Smart Resume beim nächsten App-Start:** Sobald neues Kontingent vorhanden ist oder die App neu geöffnet wird, weist ein dezentes Overlay/Bottom-Sheet darauf hin: *„Du hast 1 Rezept in der Warteliste. Jetzt analysieren?“* (Nutzer behält volle Kontrolle, kein automatischer ungewollter Credit-Verbrauch).
-
 - **Smarte Push-Benachrichtigungen: Hero-Zutaten statt Basis-Zutaten (Ingredient Spotlight Filter):**
   - **Problem & Feedback:** Aktuell fragt der Benachrichtigungs-Generator (`ingredient_spotlight`, siehe [push-notifications.md](push-notifications.md)) unpassend nach absoluten Grundnahrungsmitteln, Fetten oder Gewürzen (z. B. *„Lust auf Butter? Du hast x Rezepte mit Butter, Lust auf [Rezept]?“*). Niemand hat isoliert Lust auf „Butter“, „Salz“, „Pfeffer“, „Speiseöl“ oder „Zwiebeln“.
   - **Ausschluss von Basis- & Würz-Kategorien (Anti-Fragile):** Filterung im Kandidaten-Generator (`genIngredientSpotlight` in `backend/src/notifications/candidates.ts`) anhand strukturierter Kategorien (z. B. Ignorieren von `SPICES_SEASONINGS`, `OILS_VINEGARS`, `BAKING_COOKING`) sowie einer zentralen Ausschlussliste für geschmacksneutrale Küchenbasics (Salz, Pfeffer, Butter, Öl, Wasser, Zucker, Mehl, Speisestärke, Zwiebel, Knoblauch).
   - **Fokus auf echte Charakter-/Hero-Zutaten:** Benachrichtigungen ausschließlich für geschmacksprägende Hauptzutaten triggern, auf die man tatsächlich Appetit entwickeln kann (z. B. Avocado, Lachs, Kürbis, Burrata, Erdbeeren, Spargel, Pilze, Garnelen, Pasta, Süßkartoffel).
   - **Prompt-Optimierung für Gemini (`generateNotificationCopy`):** Den LLM-Prompt in `backend/src/gemini.ts` schärfen, sodass niemals plumpe Vorlagen wie *„Lust auf [Zutat]?“* generiert werden, sondern der kulinarische Kontext sympathisch, abwechslungsreich und appetitlich formuliert wird (z. B. *„Pasta-Lust? Du hast ein leckeres Rezept gespeichert...“*).
 
+- **Mehrteilige Rezepte / Sub-Rezepte & Komponenten (Brot, Sauce, Salat, Dressing, Topping etc.):**
+  - **Problem:** Viele Gerichte bestehen aus logisch getrennten Komponenten (z. B. Burger = Buns/Brot, Patties, Sauce, Beilagensalat). Aktuell werden Zutaten und Zubereitungsschritte oft in einer einzigen linearen Liste vermischt, was beim Kochen und Vorbereiten unübersichtlich ist.
+  - **Strukturierte Extraktion (KI & Schema):** Gemini soll bei der Extraktion erkennen, ob ein Rezept aus distinkten Sub-Rezepten bzw. Komponenten besteht, und diese strukturiert abbilden (z. B. Komponentengruppen für Zutaten mit Gruppen-Header und schrittweise Zuordnung der Zubereitung).
+  - **UX & Zubereitungs-Flow:**
+    - Zutatenliste: Visuelle Gruppierung nach Komponenten (z. B. *„Für das Brot“*, *„Für die Sauce“*, *„Für den Salat“*).
+    - Kochmodus & Schritte: Klare Komponenten-Abschnitte oder Badges an den Schritten, damit man Komponenten parallel oder im Vorfeld (Mise en Place) zubereiten kann.
+    - Einkaufsliste & Vorrat: Saubere Aggregation ohne Duplikat-Verwirrung bei komponentenübergreifenden Zutaten.
+
 ## Findings (Behoben ✅)
 
+- [x] Extraktions-Warteliste & Fail-Safe Queue auf der „NEU“-Seite:
+  - Schutz vor Link-Verlust: Fehlgeschlagene/abgebrochene Extraktionen werden persistent in der Fail-Safe Queue gesichert (`FailedJobCard.tsx`, 1-Klick-Retry, Link kopieren/öffnen, in Warteliste verschieben).
+  - Vormerken bei aufgebrauchtem Kontingent: Geteilte Links via Android Share Target / Intent landen bei Limit-Überschreitung automatisch in der Warteliste mit Toast-Feedback; manuelles Vormerken via `UrlExtractSheet` und `Bookmark`-Submit-Button (`ExtractionQueueContext.tsx`).
+  - Smart Resume beim nächsten App-Start: Sobald wieder Kontingent frei ist, weist das dezente Bottom-Sheet `SmartResumeSheet.tsx` auf vorgemerkte Rezepte hin (volle Nutzerkontrolle, kein automatischer Credit-Verbrauch).
 - [x] Paywall-Compliance & Feature-Update: Restore-Purchases-Button (`Purchases.restorePurchases()`), Verlinkung von AGB und Datenschutzerklärung, Bereinigung von UTF-8 Encoding-Glitches und saubere Klarstellung der echten Premium-Vorteile (`frontend/src/components/PremiumModal/`)
 - [x] Response bei Rezept kochen ohne Foto: Sofortiges Toast-Feedback bei 0 XP / Duplikat und Ladezustand (`CookedModal.tsx`, `GamificationContext.tsx`)
 - [x] Transparente & sympathische Overlay-Message vor erster Werbung (Free-Tier): Warmherziges Pre-Ad Transparenz-Sheet (`PreAdTransparencySheet.tsx`) vor der allerersten Werbeeinblendung via `useAppAds.ts` & `AppOverlays.tsx`

@@ -72,9 +72,7 @@ export default function RecipeNutrition({
   const carbsPct = totalMacroKcal > 0 ? Math.round((carbsKcal / totalMacroKcal) * 100) : 0;
   const fatPct = totalMacroKcal > 0 ? Math.max(0, 100 - proteinPct - carbsPct) : 0;
 
-  const iconBadge =
-    'w-9 h-9 rounded-full bg-emerald-500/5 flex items-center justify-center flex-shrink-0';
-  const iconClass = 'w-[18px] h-[18px] text-emerald-600 dark:text-emerald-400';
+  const iconClass = 'w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0';
   const statLabel =
     'text-xs font-medium text-gray-500 dark:text-gray-400';
 
@@ -100,10 +98,7 @@ export default function RecipeNutrition({
       >
         <div className="flex flex-col gap-2.5">
           <div className="flex items-center gap-3">
-            {/* Green Circle Badge matching Clock / Utensils / Users */}
-            <div className={iconBadge}>
-              <Flame className={iconClass} />
-            </div>
+            <Flame className={iconClass} />
 
             <div className="flex-1 min-w-0">
               {/* Top Header Row: NÄHRWERTE (PRO PORTION) label */}

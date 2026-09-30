@@ -43,31 +43,44 @@ Railway-Build-Variablen bzw. in `frontend/.env.development.local` (git-ignored v
 
 ## Einmalige Einrichtung (Dashboards)
 
-### 1. DB-Schema anwenden
+### 1. DB-Schema anwenden (Supabase CLI Migrations)
 
-`backend/supabase_schema.sql` enthält **nicht** die Kerntabellen (nur `ALTER`s darauf plus
-`collections`, `recipe_collections`, `feedback`, `global_settings`, Gamification, Social).
-Das DDL für `recipes` / `jobs` / `user_recipes` samt Indizes, RLS und den RPCs
-(`claim_next_job`, `complete_job`) liegt in **`backend/db/schema.sql`**.
+Das Projekt nutzt ab Release 1.1.9 das offizielle **Supabase CLI Migrationssystem** (`supabase/migrations/`).
+Alle Änderungen liegen als versionierte, chronologische SQL-Dateien vor.
 
-**Frische Datenbank** (via Supabase-Studio SQL-Editor oder `psql`):
-1. `backend/db/schema.sql` — `recipes`/`jobs`/`user_recipes`, Indizes, RLS-Policies, RPCs.
-2. `backend/supabase_schema.sql` — collections/recipe_collections/feedback/global_settings/
-   Buckets/Gamification/Social (idempotent).
+* **Befehle (`package.json`):**
+  * `npm run db:status`: Zeigt den Status lokaler vs. angewendeter Migrationen an.
+  * `npm run db:push`: Wendet alle ausstehenden Migrationen auf die konfigurierte Datenbank an.
+  * `npm run db:new <name>`: Erstellt eine neue leere Migrationsdatei mit aktuellem Zeitstempel.
+  * `npm run db:repair -- --status applied <version>`: Markiert eine Migration manuell als angewendet.
+  * `npm run db:backup:prod`: Sichert alle Tabellen der Production-DB per Service-Key in eine lokale JSON-Datei (Free-Tier-kompatibel).
+  * `npm run db:backup:dev`: Sichert alle Tabellen der Dev-DB per Service-Key in eine lokale JSON-Datei.
+  * `npm run db:restore:prod -- [--confirm]`: Stellt Tabellen aus dem neuesten Production-Backup wieder her (Dry-Run ohne `--confirm`).
+  * `npm run db:restore:dev -- [--confirm]`: Stellt Tabellen aus dem neuesten Dev-Backup wieder her (Dry-Run ohne `--confirm`).
+  * `npm run use:prod`: Schaltet die lokale Entwicklungsumgebung auf die Production-Datenbank um (`.env.local`).
+  * `npm run use:dev`: Schaltet die lokale Entwicklungsumgebung zurück auf die Dev-Datenbank (entfernt `.env.local`).
+  * `npm run use:status`: Zeigt an, mit welcher Datenbank die lokale Entwicklungsumgebung aktuell verbunden ist.
 
-**Bestehende Datenbank aus der Zeit vor der jobs/recipes-Auftrennung** — hier zählt die
-Reihenfolge, weil die Indizes in `schema.sql` Spalten referenzieren, die die alte
-`jobs`-Tabelle nicht hat:
-1. `backend/db/migrations/001_split_jobs_recipes.sql` — **einmalig**, nicht idempotent.
-   Parkt die alte Tabelle als `jobs_legacy`, legt die drei neuen an, migriert die Daten
-   und hängt `recipe_collections`/`cook_events`/`notification_log` um.
-2. `backend/db/migrations/001_verify.sql` — read-only, prüft die Migration gegen
-   `jobs_legacy`. Erst weitermachen, wenn alles stimmt.
-3. `backend/db/schema.sql` — legt Indizes, RLS und die RPCs an (die `CREATE TABLE`s
-   sind danach No-Ops).
-4. `backend/supabase_schema.sql` — wie oben.
+* **Frische Datenbank (Dev oder Test):**
+  Einfach alle Migrationen von Anfang an durchlaufen lassen:
+  ```powershell
+  npx supabase db push --db-url "$DATABASE_URL"
+  ```
+  *(Durchläuft automatisch `20260807000000_baseline_v1_1_9.sql` bis zur aktuellsten Migration).*
 
-`jobs_legacy` bleibt als Rollback stehen und wird erst eine Release später gedroppt.
+* **Bestehende Produktions-Datenbank (Stand Release v1.1.9):**
+  Da der Stand `v1.1.9` in Production bereits existiert, wird die Baseline zuerst als `applied` markiert und anschließend das Delta gepusht:
+  ```powershell
+  # 1. Baseline als bereits ausgeführt registrieren:
+  npx supabase migration repair --status applied 20260807000000 --db-url "$PROD_DATABASE_URL"
+
+  # 2. Alle nachfolgenden Migrationen (Split, Frames, Mappings, Meal Plans, Pantry, Nutrition) transaktional ausführen:
+  npx supabase db push --db-url "$PROD_DATABASE_URL"
+
+  # 3. Falls die Datenbank über PostgREST/Service-Key statt CLI migriert wird:
+  npm run migrate:flatten-ingredients -w backend
+  ```
+  `jobs_legacy` bleibt als Rollback in der DB erhalten. Verification-Queries können mit `backend/db/migrations/001_verify.sql` gegen `jobs_legacy` ausgeführt werden.
 
 ### 2. Dev-Supabase self-hosted auf Railway
 
@@ -120,8 +133,8 @@ EOF
 
 # 2. Dev-Server (auto-login als Test-User)
 npm run dev -w frontend
-```
-uild wie in Prod servieren
+# 3. Production-artiger Build wie in Prod servieren
+```bash
 npm run build:dev -w frontend
 npm run serve:dev -w frontend   # http://localhost:4173
 ```

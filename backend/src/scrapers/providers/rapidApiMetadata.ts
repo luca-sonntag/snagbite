@@ -2,6 +2,7 @@ import { config } from '../../config.js';
 import { withRetry } from '../../retry.js';
 import type { ScrapingResult } from '../index.js';
 import { fetchMetadata } from '../youtubeDescription.js';
+import { formatAuthorHandle } from '@cookbook/shared';
 import { normalizeDurationToSeconds, type SocialScrapeContext, type SocialScrapeProvider } from './types.js';
 
 /**
@@ -174,8 +175,7 @@ export const rapidApiMetadataProvider: SocialScrapeProvider = {
     const video = hasVideo ? pickVideo(medias) : null;
 
     let caption = (data.title ?? '').toString();
-    let authorHandle = (data.owner?.username ?? data.author ?? '').toString();
-    if (authorHandle && !authorHandle.startsWith('@')) authorHandle = `@${authorHandle}`;
+    let authorHandle = formatAuthorHandle(data.owner?.username ?? data.author) ?? '';
 
     // RapidAPI's caption is the full post text for IG/TikTok, but only the *title* for
     // YouTube and a stub ("- Facebook Reel") for Facebook; its author is often generic.
@@ -183,7 +183,7 @@ export const rapidApiMetadataProvider: SocialScrapeProvider = {
     if (ctx.platform === 'youtube' || caption.length < 40 || isGenericAuthor(authorHandle)) {
       const meta = await fetchMetadata(url);
       if (meta.description && meta.description.length > caption.length) caption = meta.description;
-      if (meta.authorHandle && isGenericAuthor(authorHandle)) authorHandle = meta.authorHandle;
+      if (meta.authorHandle && isGenericAuthor(authorHandle)) authorHandle = formatAuthorHandle(meta.authorHandle) ?? '';
     }
 
     const headers = { 'User-Agent': BROWSER_UA };
@@ -191,7 +191,7 @@ export const rapidApiMetadataProvider: SocialScrapeProvider = {
     return {
       caption,
       imageUrl: (data.thumbnail ?? '').toString(),
-      authorHandle: authorHandle || undefined,
+      authorHandle: formatAuthorHandle(authorHandle) || undefined,
       durationSeconds: normalizeDurationToSeconds(data.duration),
       media: carouselImages.length > 0
         ? {

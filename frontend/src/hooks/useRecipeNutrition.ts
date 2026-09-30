@@ -32,21 +32,19 @@ export function useRecipeNutrition(recipe: Recipe) {
     let hasIngredientEstimates = false;
 
     if (recipe.ingredients) {
-      for (const group of recipe.ingredients) {
-        for (const ing of group.items) {
-          const calories = ing.calories || 0;
-          const protein = ing.protein || 0;
-          const carbs = ing.carbs || 0;
-          const fat = ing.fat || 0;
+      for (const ing of recipe.ingredients) {
+        const calories = ing.calories || 0;
+        const protein = ing.protein || 0;
+        const carbs = ing.carbs || 0;
+        const fat = ing.fat || 0;
 
-          if (calories > 0 || protein > 0 || carbs > 0 || fat > 0) {
-            hasIngredientEstimates = true;
-            totalCalories += calories;
-            totalProtein += protein;
-            totalCarbs += carbs;
-            totalFat += fat;
-            if (ing.isVerified) matchedCalories += calories;
-          }
+        if (calories > 0 || protein > 0 || carbs > 0 || fat > 0) {
+          hasIngredientEstimates = true;
+          totalCalories += calories;
+          totalProtein += protein;
+          totalCarbs += carbs;
+          totalFat += fat;
+          if (ing.isVerified) matchedCalories += calories;
         }
       }
     }

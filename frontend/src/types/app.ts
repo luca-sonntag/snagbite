@@ -34,6 +34,9 @@ export interface AppOverlaysProps {
   showPreAdNotice?: boolean;
   setShowPreAdNotice?: (open: boolean) => void;
   onConfirmPreAdNotice?: () => void;
+  limitStatus?: LimitStatus | null;
+  onAnalyzeUrl?: (url: string) => void;
+  onNavigateExtract?: () => void;
 }
 
 export interface UseAppAdsProps {

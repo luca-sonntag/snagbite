@@ -1,5 +1,5 @@
 import { useMemo, type MouseEvent } from 'react';
-import { Clock, Star } from 'lucide-react';
+import { Clock, Star, Check } from 'lucide-react';
 import type { SavedRecipe } from '../../types';
 import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
@@ -11,6 +11,9 @@ interface RecipeShowcaseCardProps {
   job: SavedRecipe;
   totalTime: string | null;
   onOpenRecipe: (e: MouseEvent, job: SavedRecipe) => void;
+  isSelected?: boolean;
+  isSelectMode?: boolean;
+  bindLongPress?: any;
 }
 
 /**
@@ -22,6 +25,9 @@ export default function RecipeShowcaseCard({
   job,
   totalTime,
   onOpenRecipe,
+  isSelected = false,
+  isSelectMode = false,
+  bindLongPress,
 }: RecipeShowcaseCardProps) {
   const { t, language } = useI18n();
   const r = job.recipe;
@@ -61,7 +67,10 @@ export default function RecipeShowcaseCard({
           hapticLight();
           onOpenRecipe(e, job);
         }}
-        className="group relative rounded-2xl overflow-hidden bg-white dark:bg-gray-900 shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 border-none flex items-stretch cursor-pointer active:scale-[0.98] hover:shadow-md transition-all duration-150 select-none"
+        className={`group relative rounded-2xl overflow-hidden bg-white dark:bg-gray-900 shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 border-none flex items-stretch cursor-pointer active:scale-[0.98] hover:shadow-md transition-all duration-150 select-none ${
+          isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
+        }`}
+        {...(bindLongPress ?? {})}
       >
         {/* Full Height Left Cover Image */}
         <div className="relative w-28 sm:w-36 shrink-0 overflow-hidden bg-black/5 dark:bg-white/5 self-stretch">
@@ -71,8 +80,26 @@ export default function RecipeShowcaseCard({
             alt={r.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
           />
+
+          {/* Select-mode checkbox */}
+          {isSelectMode && (
+            <div
+              className={`absolute top-2 left-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all border-none ${
+                isSelected
+                  ? 'bg-emerald-500 text-white shadow-md'
+                  : 'bg-black/40 backdrop-blur-sm text-white shadow-xs'
+              }`}
+            >
+              {isSelected && <Check className="w-4 h-4 text-white stroke-[3px]" />}
+            </div>
+          )}
+
           {job.isFavorite && (
-            <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center text-amber-400 pointer-events-none">
+            <div
+              className={`absolute top-2 ${
+                isSelectMode ? 'right-2' : 'left-2'
+              } w-6 h-6 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center text-amber-400 pointer-events-none transition-all`}
+            >
               <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
             </div>
           )}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { PlusCircle, BookOpen, Calendar, ShoppingCart, User } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
-import { hapticSelection } from '../utils/haptics';
+import { hapticLight } from '../utils/haptics';
 import { preloadChunk } from '../utils/chunkPreloader';
 import type { AppBottomNavProps } from '../types/app';
 
@@ -27,12 +27,12 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
     (isPending && !isPremium) ||
     isPremiumModalOpen;
 
-  const bottomBarClasses = `fixed bottom-0 inset-x-0 z-40 transition-all duration-300 ease-in-out px-3 pb-[calc(0.75rem_+_var(--safe-area-inset-bottom))] ${
+  const bottomBarClasses = `fixed bottom-0 inset-x-0 z-40 transition-all duration-300 ease-in-out px-3 pb-[calc(1rem_+_var(--safe-area-inset-bottom))] ${
     isBottomBarHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
   }`;
 
   const navButtonBase =
-    'flex-1 flex flex-col items-center justify-center min-h-[46px] py-1 relative transition-all duration-200 cursor-pointer border-none bg-transparent select-none active:scale-95';
+    'flex-1 flex flex-col items-center justify-center min-h-[48px] py-1.5 relative transition-all duration-200 cursor-pointer border-none bg-transparent select-none active:scale-95';
   const iconWrapperBase = 'relative flex items-center justify-center w-6 h-6 shrink-0';
   const iconBase = 'w-5 h-5 shrink-0';
   const labelBase = 'text-[10px] sm:text-[11px] tracking-tight sm:tracking-wide leading-tight mt-1 text-center truncate max-w-full';
@@ -40,11 +40,11 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
   return (
     <div className={bottomBarClasses}>
       <div className="bg-white/85 dark:bg-gray-900/85 backdrop-blur-md border-none shadow-[0_8px_30px_-4px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)] w-full max-w-md mx-auto flex flex-col rounded-3xl overflow-hidden">
-        <div className="w-full flex justify-around items-center py-2 px-3">
+        <div className="w-full flex justify-around items-center py-2.5 px-3">
           {/* 1. Extract / New Recipe Tab */}
           <button
             onClick={() => {
-              hapticSelection();
+              hapticLight();
               onNavigate('extract');
             }}
             className={`${navButtonBase} ${
@@ -67,7 +67,7 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
           {/* 2. Recipes / History Tab */}
           <button
             onClick={() => {
-              hapticSelection();
+              hapticLight();
               if (activeView === 'history') {
                 onNavigate('history');
               } else {
@@ -90,7 +90,7 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
           {/* 3. Meal Planner Tab */}
           <button
             onClick={() => {
-              hapticSelection();
+              hapticLight();
               onNavigate('meal-planner');
             }}
             onPointerDown={() => preloadChunk('planner')}
@@ -115,7 +115,7 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
           {/* 4. Shopping List Tab */}
           <button
             onClick={() => {
-              hapticSelection();
+              hapticLight();
               onNavigate('shopping-list');
             }}
             onPointerDown={() => preloadChunk('shopping')}
@@ -140,7 +140,7 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
           {/* 5. Profile & Gamification Tab */}
           <button
             onClick={() => {
-              hapticSelection();
+              hapticLight();
               onNavigate('progress');
             }}
             onPointerDown={() => preloadChunk('profile')}

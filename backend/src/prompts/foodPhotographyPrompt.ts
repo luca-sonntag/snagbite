@@ -64,3 +64,68 @@ Do NOT just write "meat", "beef", "chicken", or "kebab". Describe the exact phys
 6. FORMAT & LENGTH:
 - Comma-separated keyword phrases strictly in ENGLISH, 35 to 60 words total.
 - Template: "[Dish Form & Vessel, e.g. German Döner Kebab sandwich in toasted triangular flatbread pocket with waffle grill marks], [protein cut & preparation, e.g. filled with thinly shaved crispy roasted meat strips], [vegetables & toppings, e.g. thinly sliced red onion rings, shredded lettuce], [sauce texture & color, e.g. slathered with thick creamy herb yogurt sauce flecked with chopped dill], [serving vessel e.g. served on a round ceramic plate], soft natural window daylight, 35mm food photography, shallow depth of field".`;
+
+export interface RecipeForPrompt {
+  title: string;
+  description?: string | null;
+  category?: string | null;
+  ingredients?: unknown;
+  instructions?: unknown;
+}
+
+/**
+ * Generates an authentic food photography prompt for FLUX.1 [schnell]
+ * conforming to strict form-factor, vessel geometry, and anti-hallucination rules.
+ */
+export async function generateFoodPhotographyPrompt(recipe: RecipeForPrompt): Promise<string> {
+  const { GoogleGenerativeAI, FunctionDeclarationSchemaType } = await import('@google/generative-ai');
+  const { config } = await import('../config.js');
+
+  const apiKey = config.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY is not configured');
+  }
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({
+    model: config.GEMINI_MODEL || 'gemini-2.5-flash',
+    generationConfig: {
+      temperature: 0.2,
+      responseMimeType: 'application/json',
+      responseSchema: {
+        type: FunctionDeclarationSchemaType.OBJECT,
+        properties: {
+          imagePrompt: {
+            type: FunctionDeclarationSchemaType.STRING,
+            description: FOOD_PHOTOGRAPHY_SCHEMA_DESCRIPTION,
+          },
+        },
+        required: ['imagePrompt'],
+      },
+    },
+  });
+
+  const prompt = `You are an expert culinary food photographer and AI prompt engineer for FLUX.1 [schnell].
+Given the following recipe, generate an ultra-compact, keyword-dense English food photography prompt strictly following these rules:
+
+${FOOD_PHOTOGRAPHY_PROMPT_INSTRUCTION}
+
+Recipe Details:
+${JSON.stringify({
+  title: recipe.title,
+  description: recipe.description,
+  category: recipe.category,
+  ingredients: recipe.ingredients,
+  instructions: recipe.instructions,
+}, null, 2)}
+`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+  const parsed = JSON.parse(text);
+  if (!parsed.imagePrompt || typeof parsed.imagePrompt !== 'string') {
+    throw new Error('Gemini failed to return a valid imagePrompt string');
+  }
+  return parsed.imagePrompt.trim();
+}
+

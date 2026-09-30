@@ -124,8 +124,6 @@ export default function ShoppingList(props: ShoppingListProps) {
       {activeTab === 'shopping' ? (
         <ShoppingListView
           {...props}
-          onClearAll={handleClearAll}
-          onClearChecked={handleClearChecked}
           setCollapseSentinel={setCollapseSentinel}
         />
       ) : (

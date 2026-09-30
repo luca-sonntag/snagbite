@@ -173,10 +173,8 @@ export async function deductRecipeIngredientsFromPantry(
 
   let consumedCount = 0;
 
-  for (const group of recipe.ingredients) {
-    if (!group.items) continue;
-    for (const ing of group.items) {
-      const ingKeys = new Set(buildMappingKeys(ing.baseName, ing.name, ing.synonyms, ing.parentIngredient));
+  for (const ing of recipe.ingredients) {
+    const ingKeys = new Set(buildMappingKeys(ing.baseName, ing.name, ing.synonyms, ing.parentIngredient));
 
       const match = pantryItems.find((p) => {
         if (p.amount <= 0) return false;
@@ -203,7 +201,6 @@ export async function deductRecipeIngredientsFromPantry(
         consumedCount++;
       }
     }
-  }
 
   return { consumedCount };
 }
@@ -281,7 +278,7 @@ export async function getPantryRecipeSuggestions(
   const suggestions: PantrySuggestion[] = [];
 
   for (const [recipeId, { recipe, isPublic }] of candidates.entries()) {
-    const flatIngredients = (recipe.ingredients || []).flatMap((g) => g.items || []);
+    const flatIngredients = recipe.ingredients || [];
     if (flatIngredients.length === 0) continue;
 
     const matching: string[] = [];

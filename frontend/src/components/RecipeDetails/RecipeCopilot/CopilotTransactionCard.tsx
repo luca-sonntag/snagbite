@@ -112,11 +112,11 @@ export const CopilotTransactionCard: React.FC<CopilotTransactionCardProps> = ({
                   onRemoveChange(change.id);
                 }}
                 disabled={isPending}
-                className="flex-shrink-0 w-7 h-7 min-w-[28px] min-h-[28px] rounded-lg text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all outline-none border-none flex items-center justify-center cursor-pointer disabled:opacity-40"
+                className="flex-shrink-0 w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all outline-none border-none flex items-center justify-center cursor-pointer disabled:opacity-40 -mr-2 touch-manipulation"
                 aria-label={t('copilot.changesDeleteAria')}
                 title={t('copilot.changesDeleteAria')}
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           );

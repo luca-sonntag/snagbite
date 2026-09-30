@@ -1,9 +1,7 @@
-import { useState } from 'react';
-import { Check, ChevronDown, Package } from 'lucide-react';
+import { Check, Package } from 'lucide-react';
 import type { AggregatedShoppingItem } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import ShoppingListItem from './ShoppingListItem';
-import { hapticLight } from '../../utils/haptics';
 
 interface ShoppingCheckedDrawerProps {
   items: AggregatedShoppingItem[];
@@ -15,8 +13,8 @@ interface ShoppingCheckedDrawerProps {
 }
 
 /**
- * Collapsible "Erledigt" container holding completed items.
- * Defaulted to collapsed to keep the primary view focused on open items.
+ * Container holding completed items in the shopping list.
+ * Always visible so completed ingredients cannot be collapsed.
  */
 export default function ShoppingCheckedDrawer({
   items,
@@ -27,21 +25,12 @@ export default function ShoppingCheckedDrawer({
   collapsingKeys
 }: ShoppingCheckedDrawerProps) {
   const { t } = useI18n();
-  const [isExpanded, setIsExpanded] = useState(false);
 
   if (items.length === 0) return null;
 
   return (
     <div className="rounded-2xl md:rounded-3xl bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none overflow-hidden transition-all">
-      <button
-        type="button"
-        onClick={() => {
-          hapticLight();
-          setIsExpanded((prev) => !prev);
-        }}
-        aria-expanded={isExpanded}
-        className="flex items-center justify-between gap-2.5 w-full px-4 py-3 text-left select-none hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors cursor-pointer outline-none border-none bg-transparent min-h-[48px]"
-      >
+      <div className="flex items-center justify-between gap-2.5 w-full px-4 py-3 select-none min-h-[48px]">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <span className="w-6 h-6 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
             <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 stroke-[2.5]" />
@@ -50,20 +39,16 @@ export default function ShoppingCheckedDrawer({
             {t('shopping.doneCount', { count: items.length })}
           </span>
         </div>
-        <div className="flex items-center flex-shrink-0 text-gray-400 dark:text-gray-500">
-          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+      </div>
+
+      <div className="px-2 pb-2.5 pt-0.5 flex flex-col gap-1">
+        {/* Subtle Clean Flat Pantry Transfer Hint Banner */}
+        <div className="flex items-center gap-2 px-3 py-2 text-[11px] text-gray-600 dark:text-gray-300 bg-black/[0.03] dark:bg-white/[0.05] rounded-xl border-none font-medium">
+          <Package className="w-3.5 h-3.5 shrink-0 text-gray-400 dark:text-gray-500 stroke-[2.2] opacity-80" />
+          <span>{t('shopping.notInPantryYetHint')}</span>
         </div>
-      </button>
 
-      {isExpanded && (
-        <div className="px-2 pb-2.5 pt-0.5 animate-fade-in flex flex-col gap-1">
-          {/* Subtle Clean Flat Pantry Transfer Hint Banner */}
-          <div className="flex items-center gap-2 px-3 py-2 text-[11px] text-gray-600 dark:text-gray-300 bg-black/[0.03] dark:bg-white/[0.05] rounded-xl border-none font-medium">
-            <Package className="w-3.5 h-3.5 shrink-0 text-gray-400 dark:text-gray-500 stroke-[2.2] opacity-80" />
-            <span>{t('shopping.notInPantryYetHint')}</span>
-          </div>
-
-          <ul className="flex flex-col gap-0.5 divide-y divide-black/[0.03] dark:divide-white/[0.03]">
+        <ul className="flex flex-col gap-0.5 divide-y divide-black/[0.03] dark:divide-white/[0.03]">
           {items.map((item) => {
             const displayKey = `checked-${getItemKey(item)}`;
             return (
@@ -78,9 +63,8 @@ export default function ShoppingCheckedDrawer({
               />
             );
           })}
-          </ul>
-        </div>
-      )}
+        </ul>
+      </div>
     </div>
   );
 }

@@ -42,8 +42,8 @@ export default function ShoppingCheckedItem({
             title={item.category || undefined}
           />
 
-          <span className="w-5 h-5 rounded-md bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 transition-colors">
-            <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+          <span className="w-6 h-6 rounded-lg bg-emerald-500 text-white shadow-xs flex items-center justify-center flex-shrink-0 transition-colors">
+            <Check className="w-3.5 h-3.5 stroke-[3px]" />
           </span>
 
           <IngredientIcon

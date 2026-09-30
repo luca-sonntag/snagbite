@@ -13,30 +13,25 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
     equipment: ['Topf', 'Pfanne'],
     ingredients: [
       {
-        name: 'Hauptzutaten',
-        items: [
-          {
-            name: 'Mozzarella (gerieben)',
-            baseName: 'cheese', // Collapsed umbrella term
-            category: 'DAIRY',
-            amount: 150,
-            unit: 'g',
-          },
-          {
-            name: 'Pfeffer',
-            baseName: 'pepper', // Ambiguous pepper
-            category: 'PRODUCE', // Wrong supermarket category
-            amount: 0.5,
-            unit: 'TL',
-          },
-          {
-            name: 'Petersilie',
-            baseName: 'parsley',
-            category: 'PRODUCE',
-            amount: 1,
-            unit: 'Bund',
-          },
-        ],
+        name: 'Mozzarella (gerieben)',
+        baseName: 'cheese', // Collapsed umbrella term
+        category: 'DAIRY',
+        amount: 150,
+        unit: 'g',
+      },
+      {
+        name: 'Pfeffer',
+        baseName: 'pepper', // Ambiguous pepper
+        category: 'PRODUCE', // Wrong supermarket category
+        amount: 0.5,
+        unit: 'TL',
+      },
+      {
+        name: 'Petersilie',
+        baseName: 'parsley',
+        category: 'PRODUCE',
+        amount: 1,
+        unit: 'Bund',
       },
     ],
     instructions: [
@@ -87,17 +82,13 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
 
     const patched = applyRecipeAuditPatch(baseRecipe, patch);
 
-    const dairyGroup = patched.ingredients.find((g) => g.name === 'DAIRY_EGGS');
-    assert.ok(dairyGroup, 'DAIRY_EGGS category group should be created and populated');
-    const mozz = dairyGroup.items.find((i) => i.name === 'Mozzarella (gerieben)');
+    const mozz = patched.ingredients.find((i) => i.name === 'Mozzarella (gerieben)');
     assert.ok(mozz);
     assert.equal(mozz.baseName, 'mozzarella');
     assert.equal(mozz.category, 'DAIRY_EGGS');
     assert.deepEqual(mozz.synonyms, ['fresh mozzarella', 'shredded mozzarella']);
 
-    const spiceGroup = patched.ingredients.find((g) => g.name === 'SPICES_HERBS');
-    assert.ok(spiceGroup, 'SPICES_HERBS category group should be created and populated');
-    const pepper = spiceGroup.items.find((i) => i.name === 'Pfeffer');
+    const pepper = patched.ingredients.find((i) => i.name === 'Pfeffer');
     assert.ok(pepper);
     assert.equal(pepper.baseName, 'black pepper');
     assert.equal(pepper.category, 'SPICES_HERBS');
@@ -130,16 +121,13 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
       servings: 2,
       equipment: [],
       ingredients: [
-        {
-          name: 'DAIRY_EGGS',
-          items: [{ name: 'Käse', baseName: 'cheese', category: 'DAIRY_EGGS', amount: 80, unit: 'g', modifier: 'light' }],
-        },
+        { name: 'Käse', baseName: 'cheese', category: 'DAIRY_EGGS', amount: 80, unit: 'g', modifier: 'light' },
       ],
       instructions: [{ step: 1, description: 'Den [Käse](ing:cheese) darüber streuen.' }],
     };
 
     const patched = applyRecipeAuditPatch(recipeWithRawCheese, patch);
-    const item = patched.ingredients[0].items[0];
+    const item = patched.ingredients[0];
     assert.equal(item.name, 'Gratinkäse');
     assert.equal(item.baseName, 'shredded cheese');
     assert.equal(patched.instructions[0].description, 'Den [Käse](ing:shredded cheese) darüber streuen.');
@@ -154,13 +142,8 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
       servings: 1,
       equipment: ['Topf', 'Reibe'],
       ingredients: [
-        {
-          name: 'DAIRY',
-          items: [
-            { name: 'Mozzarella', baseName: 'cheese', category: 'DAIRY', amount: 100, unit: 'g' },
-            { name: 'Parmesan', baseName: 'cheese', category: 'DAIRY', amount: 30, unit: 'g' },
-          ],
-        },
+        { name: 'Mozzarella', baseName: 'cheese', category: 'DAIRY', amount: 100, unit: 'g' },
+        { name: 'Parmesan', baseName: 'cheese', category: 'DAIRY', amount: 30, unit: 'g' },
       ],
       instructions: [
         {
@@ -181,8 +164,8 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
     };
 
     const patched = applyRecipeAuditPatch(multiCheeseRecipe, patch);
-    const mozz = patched.ingredients[0].items.find((i) => i.name === 'Mozzarella');
-    const parm = patched.ingredients[0].items.find((i) => i.name === 'Parmesan');
+    const mozz = patched.ingredients.find((i) => i.name === 'Mozzarella');
+    const parm = patched.ingredients.find((i) => i.name === 'Parmesan');
 
     assert.equal(mozz?.baseName, 'mozzarella');
     assert.equal(parm?.baseName, 'cheese');
@@ -202,7 +185,7 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
       cookTime: 20,
       servings: 2,
       equipment: ['Backblech'],
-      ingredients: [{ name: 'Gemüse', items: [{ name: 'Karotte', baseName: 'carrot', category: 'PRODUCE', amount: 2, unit: 'Stück' }] }],
+      ingredients: [{ name: 'Karotte', baseName: 'carrot', category: 'PRODUCE', amount: 2, unit: 'Stück' }],
       instructions: [
         { step: 1, description: 'Karotten schneiden.' },
         { step: 2, description: 'Im Ofen backen.' },
@@ -259,13 +242,8 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
       servings: 1,
       equipment: [],
       ingredients: [
-        {
-          name: 'Zutaten',
-          items: [
-            { name: 'Mozzarella, gerieben', baseName: 'cheese', category: 'DAIRY', amount: 100, unit: 'g' },
-            { name: 'Frische Petersilie (gehackt)', baseName: 'parsley', category: 'PRODUCE', amount: 1, unit: 'EL' },
-          ],
-        },
+        { name: 'Mozzarella, gerieben', baseName: 'cheese', category: 'DAIRY', amount: 100, unit: 'g' },
+        { name: 'Frische Petersilie (gehackt)', baseName: 'parsley', category: 'PRODUCE', amount: 1, unit: 'EL' },
       ],
       instructions: [
         { step: 1, description: 'Den [Mozzarella](ing:cheese) darüberstreuen.' },
@@ -289,10 +267,10 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
     };
 
     const patched = applyRecipeAuditPatch(punctRecipe, patch);
-    const mozz = patched.ingredients[0].items.find((i) => i.name === 'Mozzarella, gerieben');
+    const mozz = patched.ingredients.find((i) => i.name === 'Mozzarella, gerieben');
     assert.ok(mozz);
     assert.equal(mozz.baseName, 'mozzarella');
-    assert.equal(patched.ingredients[0].items.some((i) => i.name.includes('Petersilie')), false);
+    assert.equal(patched.ingredients.some((i) => i.name.includes('Petersilie')), false);
     assert.equal(patched.instructions[0].description, 'Den [Mozzarella](ing:mozzarella) darüberstreuen.');
   });
 
@@ -319,7 +297,7 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
 
     const patched = applyRecipeAuditPatch(emptyRecipe, patch);
     assert.equal(patched.ingredients.length, 1);
-    assert.equal(patched.ingredients[0].items[0].name, 'Wasser');
+    assert.equal(patched.ingredients[0].name, 'Wasser');
     assert.equal(patched.instructions.length, 1);
     assert.equal(patched.instructions[0].step, 1);
     assert.equal(patched.instructions[0].description, 'Wasser trinken.');
@@ -334,8 +312,8 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
       servings: 1,
       equipment: ['Schüssel'],
       ingredients: [
-        { name: 'PRODUCE', items: [{ name: 'Tomate', baseName: 'tomato', category: 'PRODUCE', amount: 2, unit: 'Stück' }] },
-        { name: 'SPICES_SEASONINGS', items: [{ name: 'Salz', baseName: 'salt', category: 'SPICES_SEASONINGS', amount: 1, unit: 'Prise' }] },
+        { name: 'Tomate', baseName: 'tomato', category: 'PRODUCE', amount: 2, unit: 'Stück' },
+        { name: 'Salz', baseName: 'salt', category: 'SPICES_SEASONINGS', amount: 1, unit: 'Prise' },
       ],
       instructions: [{ step: 1, description: 'Alles mischen.' }],
     };
@@ -362,11 +340,16 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
     };
 
     const patched = applyRecipeAuditPatch(categorizedRecipe, patch);
-    const produceGroup = patched.ingredients.find((g) => g.name === 'PRODUCE');
-    const spiceGroup = patched.ingredients.find((g) => g.name === 'SPICES_SEASONINGS');
+    const produceItem = patched.ingredients.find((i) => i.name === 'Gurke');
+    const spiceItem = patched.ingredients.find((i) => i.name === 'Schwarzer Pfeffer');
 
-    assert.ok(produceGroup?.items.some((i) => i.name === 'Gurke' && i.baseName === 'cucumber'));
-    assert.ok(spiceGroup?.items.some((i) => i.name === 'Schwarzer Pfeffer' && i.baseName === 'black pepper'));
+    assert.ok(produceItem);
+    assert.equal(produceItem.baseName, 'cucumber');
+    assert.equal(produceItem.category, 'VEGETABLES');
+
+    assert.ok(spiceItem);
+    assert.equal(spiceItem.baseName, 'black pepper');
+    assert.equal(spiceItem.category, 'SPICES_HERBS');
   });
 
   test('adds and removes ingredients and steps with sequential renumbering (1..N)', () => {
@@ -408,11 +391,10 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
     const patched = applyRecipeAuditPatch(baseRecipe, patch);
 
     // Verify ingredient removal and addition
-    const allIngredients = patched.ingredients.flatMap((g) => g.items);
-    const parsley = allIngredients.find((i) => i.name === 'Petersilie');
+    const parsley = patched.ingredients.find((i) => i.name === 'Petersilie');
     assert.equal(parsley, undefined);
 
-    const oil = allIngredients.find((i) => i.name === 'Olivenöl');
+    const oil = patched.ingredients.find((i) => i.name === 'Olivenöl');
     assert.ok(oil);
     assert.equal(oil.baseName, 'olive oil');
     assert.equal(oil.amount, 2);
@@ -464,7 +446,7 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
     const auditedRecipe = applyRecipeAuditPatch(baseRecipe, patch);
     await enrichRecipeWithCanonicalIngredients(auditedRecipe);
 
-    const flatItems = auditedRecipe.ingredients.flatMap((g) => g.items);
+    const flatItems = auditedRecipe.ingredients;
     const mozz = flatItems.find((i) => i.name === 'Mozzarella (gerieben)');
     assert.ok(mozz);
     assert.equal(mozz.baseName, 'mozzarella');
@@ -528,13 +510,8 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
       servings: 1,
       equipment: [],
       ingredients: [
-        {
-          name: 'Zutaten',
-          items: [
-            { name: 'Bio-Mozzarella / Büffelmozzarella', baseName: 'cheese', category: 'DAIRY', amount: 125, unit: 'g' },
-            { name: '„Edelsüß“ Paprikapulver - mild', baseName: 'pepper', category: 'PRODUCE', amount: 1, unit: 'TL' },
-          ],
-        },
+        { name: 'Bio-Mozzarella / Büffelmozzarella', baseName: 'cheese', category: 'DAIRY', amount: 125, unit: 'g' },
+        { name: '„Edelsüß“ Paprikapulver - mild', baseName: 'pepper', category: 'PRODUCE', amount: 1, unit: 'TL' },
       ],
       instructions: [
         { step: 1, description: 'Den [Bio-Mozzarella / Büffelmozzarella](ing:cheese) mit [Paprikapulver](ing:pepper) würzen.' },
@@ -559,8 +536,8 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
     };
 
     const patched = applyRecipeAuditPatch(complexPunctRecipe, patch);
-    const mozz = patched.ingredients[0].items[0];
-    const pap = patched.ingredients[0].items[1];
+    const mozz = patched.ingredients[0];
+    const pap = patched.ingredients[1];
 
     assert.equal(mozz.baseName, 'mozzarella');
     assert.equal(pap.baseName, 'paprika powder');
@@ -571,7 +548,7 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
     );
   });
 
-  test('relocates ingredient across category groups and normalizes categories into canonical keys', () => {
+  test('updates ingredient category and normalizes categories into canonical keys', () => {
     const miscategorizedRecipe: Recipe = {
       title: 'Hackbällchen Nudel Pfanne',
       description: 'Schnelle Pfanne',
@@ -580,18 +557,8 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
       cookTime: 15,
       equipment: ['Pfanne'],
       ingredients: [
-        {
-          name: 'OILS_CONDIMENTS',
-          items: [
-            { name: 'Mais', baseName: 'corn', category: 'OILS_CONDIMENTS', amount: 150, unit: 'g' },
-          ],
-        },
-        {
-          name: 'PANTRY_BAKING',
-          items: [
-            { name: 'Sahne Protein', baseName: 'protein powder', category: 'PANTRY_BAKING', amount: 30, unit: 'g' },
-          ],
-        },
+        { name: 'Mais', baseName: 'corn', category: 'OILS_CONDIMENTS', amount: 150, unit: 'g' },
+        { name: 'Sahne Protein', baseName: 'protein powder', category: 'PANTRY_BAKING', amount: 30, unit: 'g' },
       ],
       instructions: [{ step: 1, description: 'Alles anbraten.' }],
     };
@@ -613,21 +580,13 @@ describe('recipeAuditor: applyRecipeAuditPatch', () => {
 
     const patched = applyRecipeAuditPatch(miscategorizedRecipe, patch);
 
-    // OILS_CONDIMENTS was left empty by Mais moving out, so it must be pruned
-    const oilsGroup = patched.ingredients.find((g) => g.name === 'OILS_CONDIMENTS');
-    assert.equal(oilsGroup, undefined, 'Empty OILS_CONDIMENTS group should be pruned');
-
-    // Mais must now be in VEGETABLES group
-    const vegGroup = patched.ingredients.find((g) => g.name === 'VEGETABLES');
-    assert.ok(vegGroup, 'VEGETABLES group should be created and contain Mais');
-    const corn = vegGroup.items.find((i) => i.name === 'Mais');
+    // Mais must now have VEGETABLES category
+    const corn = patched.ingredients.find((i) => i.name === 'Mais');
     assert.ok(corn);
     assert.equal(corn.category, 'VEGETABLES');
 
     // Sahne Protein must be normalized to canonical PANTRY_BAKING
-    const pantryGroup = patched.ingredients.find((g) => g.name === 'PANTRY_BAKING');
-    assert.ok(pantryGroup);
-    const protein = pantryGroup.items.find((i) => i.name === 'Sahne Protein');
+    const protein = patched.ingredients.find((i) => i.name === 'Sahne Protein');
     assert.ok(protein);
     assert.equal(protein.category, 'PANTRY_BAKING');
   });

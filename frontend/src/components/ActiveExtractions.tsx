@@ -146,10 +146,12 @@ export default function ActiveExtractions({ excludeId }: ActiveExtractionsProps 
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); dismissJob(job.id); }}
-                className="relative shrink-0 w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex items-center justify-center transition-colors cursor-pointer outline-none border-none self-start mt-0.5"
+                className="relative shrink-0 w-11 h-11 min-w-[44px] min-h-[44px] -mr-2 -mt-1 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex items-center justify-center transition-colors cursor-pointer outline-none border-none self-start touch-manipulation"
                 aria-label={t('activeExtractions.dismiss')}
               >
-                <X className="w-3.5 h-3.5" />
+                <span className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center">
+                  <X className="w-3.5 h-3.5" />
+                </span>
               </button>
             ) : percent !== null ? (
               <span className="relative shrink-0 text-xs font-semibold text-gray-400 dark:text-gray-500 tabular-nums">

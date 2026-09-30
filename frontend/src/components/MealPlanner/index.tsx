@@ -132,8 +132,10 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     if (!hasInitialScrolledRef.current && !isLoading && agendaDates.includes(todayStr)) {
       hasInitialScrolledRef.current = true;
       const timer = setTimeout(() => {
-        scrollToDate(todayStr, 'auto', 'start');
-      }, 60);
+        requestAnimationFrame(() => {
+          scrollToDate(todayStr, 'auto', 'start');
+        });
+      }, 80);
       return () => clearTimeout(timer);
     }
   }, [isActive, todayStr, scrollToDate, agendaDates, isLoading, setSelectedDate, goToToday]);
@@ -143,7 +145,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
       {/* Sticky Calendar Top Container */}
       <div
         id="meal-planner-sticky-header"
-        className="sticky top-0 bg-gray-50/95 dark:bg-gray-950/95 backdrop-blur-md z-20 -mt-4 pt-3 sm:pt-3.5 pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 flex flex-col gap-2"
+        className="sticky top-[var(--app-sticky-top,0px)] bg-gray-50/95 dark:bg-gray-950/95 backdrop-blur-md z-20 pt-2 pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 flex flex-col gap-2"
       >
         {/* Header with title & bulk shopping action */}
         <MealPlannerHeader

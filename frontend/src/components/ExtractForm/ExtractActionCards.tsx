@@ -34,21 +34,24 @@ export const ExtractActionCards: React.FC<ExtractActionCardsProps> = ({
   onOpenPhotoSheet,
   photosCount = 0,
   disabled = false,
+  linkDisabled,
 }) => {
   const { t } = useI18n();
+
+  const isLinkDisabled = linkDisabled ?? disabled;
 
   return (
     <div className="flex flex-col gap-3 w-full">
       {/* Action Card 1: Video & Link */}
       <button
         type="button"
-        disabled={disabled}
+        disabled={isLinkDisabled}
         onClick={() => {
           hapticLight();
           onOpenLinkSheet();
         }}
         className={`w-full p-4 sm:p-5 rounded-3xl bg-white dark:bg-gray-900 border-none shadow-[0_2px_8px_rgba(0,0,0,0.03),0_1px_2px_rgba(0,0,0,0.02)] transition-all flex items-center justify-between gap-4 text-left outline-none select-none ${
-          disabled
+          isLinkDisabled
             ? 'opacity-50 cursor-not-allowed shadow-none'
             : 'hover:bg-gray-50 dark:hover:bg-gray-800/50 active:scale-[0.99] cursor-pointer group'
         }`}

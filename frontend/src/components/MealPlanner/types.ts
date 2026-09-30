@@ -50,7 +50,7 @@ export interface BulkShoppingItem {
   targetServings: number;
   baseServings: number;
   scaleFactor: number;
-  sortedIngredients: Array<{ group: { name: string; items: Ingredient[] }; originalIdx: number }>;
+  sortedIngredients: Ingredient[];
   recipeLabel: string;
 }
 

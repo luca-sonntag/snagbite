@@ -22,31 +22,28 @@ export function getProdClient(): SupabaseClient {
 export function extractIngredients(recipe: Recipe): ResolverInput[] {
   if (!recipe.ingredients || !Array.isArray(recipe.ingredients)) return [];
   const inputs: ResolverInput[] = [];
-  for (const group of recipe.ingredients) {
-    if (!group?.items || !Array.isArray(group.items)) continue;
-    for (const ing of group.items) {
-      if (!ing || !ing.name) continue;
-      inputs.push({
-        name: ing.name,
-        baseName: ing.baseName,
-        brand: ing.brand,
-        modifier: ing.modifier,
-        category: ing.category || group.name,
-        synonyms: ing.synonyms,
-        isGenericGrocery: ing.isGenericGrocery,
-        parentIngredient: ing.parentIngredient,
-        typicalPackageAmount: ing.typicalPackageAmount,
-        typicalPackageUnit: ing.typicalPackageUnit,
-        shelfLifeDays: ing.shelfLifeDays,
-        calories: ing.calories,
-        protein: ing.protein,
-        carbs: ing.carbs,
-        fat: ing.fat,
-        amount: ing.amount,
-        unit: ing.unit,
-        gramsPerUnit: ing.gramsPerUnit,
-      });
-    }
+  for (const ing of recipe.ingredients) {
+    if (!ing || !ing.name) continue;
+    inputs.push({
+      name: ing.name,
+      baseName: ing.baseName,
+      brand: ing.brand,
+      modifier: ing.modifier,
+      category: ing.category,
+      synonyms: ing.synonyms,
+      isGenericGrocery: ing.isGenericGrocery,
+      parentIngredient: ing.parentIngredient,
+      typicalPackageAmount: ing.typicalPackageAmount,
+      typicalPackageUnit: ing.typicalPackageUnit,
+      shelfLifeDays: ing.shelfLifeDays,
+      calories: ing.calories,
+      protein: ing.protein,
+      carbs: ing.carbs,
+      fat: ing.fat,
+      amount: ing.amount,
+      unit: ing.unit,
+      gramsPerUnit: ing.gramsPerUnit,
+    });
   }
   return inputs;
 }

@@ -1,4 +1,4 @@
-import type { Ingredient, IngredientGroup, MealPlanEntry } from '../../types';
+import type { Ingredient, MealPlanEntry } from '../../types';
 import type { WeekDayInfo } from './types';
 import { categoryOrder, legacyCategoryMap } from '../../i18n';
 
@@ -24,25 +24,21 @@ export function addDays(date: Date, days: number): Date {
   return result;
 }
 
-export function scaleIngredientGroups(
-  ingredients: IngredientGroup[] | undefined,
+export function scaleIngredients(
+  ingredients: Ingredient[] | undefined,
   targetServings: number,
   baseServings: number,
 ): Ingredient[] {
   if (!ingredients || ingredients.length === 0) return [];
   const scaleFactor = (targetServings || baseServings) / (baseServings || 2);
-  const scaled: Ingredient[] = [];
-
-  for (const group of ingredients) {
-    for (const item of group.items) {
-      scaled.push({
-        ...item,
-        amount: (item.amount || 0) * scaleFactor,
-      });
-    }
-  }
-  return scaled;
+  return ingredients.map((item) => ({
+    ...item,
+    amount: (item.amount || 0) * scaleFactor,
+  }));
 }
+
+/** @deprecated Use scaleIngredients */
+export const scaleIngredientGroups = scaleIngredients;
 
 /**
  * Formats a date string (YYYY-MM-DD) into a user-friendly separator label.
@@ -86,24 +82,28 @@ export function formatUpcomingDateSeparator(
 }
 
 /**
- * Sorts ingredient groups by category order
+ * Sorts ingredients by category order
  */
-export function sortIngredientGroupsByCategory(
-  ingredients: IngredientGroup[] | undefined,
-): Array<{ group: IngredientGroup; originalIdx: number }> {
+export function sortIngredientsByCategory(
+  ingredients: Ingredient[] | undefined,
+): Ingredient[] {
   if (!ingredients) return [];
-  const mapped = ingredients.map((group, originalIdx) => ({ group, originalIdx }));
-  return mapped.sort((a, b) => {
-    const rank = (name: string) => {
+  return [...ingredients].sort((a, b) => {
+    const rank = (name?: string) => {
+      if (!name) return 999;
       const up = name.trim().toUpperCase();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const direct = categoryOrder.indexOf(up as any);
       if (direct !== -1) return direct;
       const key = legacyCategoryMap[name.trim().toLowerCase()];
       return key ? categoryOrder.indexOf(key) : 999;
     };
-    return rank(a.group.name) - rank(b.group.name);
+    return rank(a.category) - rank(b.category);
   });
 }
+
+/** @deprecated Use sortIngredientsByCategory */
+export const sortIngredientGroupsByCategory = sortIngredientsByCategory;
 
 export function formatShoppingAmount(amount: number | undefined): string {
   if (!amount) return '';

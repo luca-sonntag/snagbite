@@ -9,6 +9,7 @@ import FullscreenImageModal from './FullscreenImageModal';
 import { getCachedImage } from '../utils/imageStore';
 import { isPhotoImportUrl } from '../utils/photoImport';
 import { hapticLight } from '../utils/haptics';
+import { formatAuthorHandle } from '../utils/sourceLabel';
 import { PlatformIcon, detectPlatform, PLATFORM_ICON_COLOR } from './SavedCatalog/PlatformIcon';
 
 export interface RecipeImageGalleryProps {
@@ -77,11 +78,8 @@ export default function RecipeImageGallery({
     handleImageClick,
   } = useImageGallery(images);
 
-  const formattedHandle = recipe.sourceHandle
-    ? `@${recipe.sourceHandle.replace(/^@/, '')}`
-    : isPhotoImportUrl(reelUrl)
-      ? '@Foto-Import'
-      : null;
+  const formattedHandle = formatAuthorHandle(recipe.sourceHandle)
+    ?? (isPhotoImportUrl(reelUrl) ? '@Foto-Import' : null);
 
   const platform = detectPlatform(reelUrl);
 

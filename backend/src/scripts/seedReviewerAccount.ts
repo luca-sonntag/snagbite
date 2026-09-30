@@ -40,15 +40,10 @@ interface IngredientItem {
   category?: string;
 }
 
-interface IngredientGroup {
-  name?: string;
-  items?: IngredientItem[];
-}
-
 interface RecipeSummary {
   id: string;
   title: string;
-  ingredients?: Array<IngredientGroup | IngredientItem>;
+  ingredients?: IngredientItem[];
 }
 
 async function getOrCreateReviewerUser(): Promise<string> {
@@ -188,18 +183,13 @@ async function seedShoppingList(userId: string, savedRecipes: RecipeSummary[]) {
   const candidateItems: Array<{ name: string; amount?: number; unit?: string }> = [];
   for (const r of savedRecipes) {
     if (Array.isArray(r.ingredients)) {
-      for (const entry of r.ingredients) {
-        const items = Array.isArray((entry as IngredientGroup)?.items)
-          ? (entry as IngredientGroup).items!
-          : [(entry as IngredientItem)];
-        for (const ing of items) {
-          if (ing?.name && typeof ing.name === 'string') {
-            candidateItems.push({
-              name: ing.name,
-              amount: typeof ing.amount === 'number' ? ing.amount : undefined,
-              unit: typeof ing.unit === 'string' ? ing.unit : undefined,
-            });
-          }
+      for (const ing of r.ingredients) {
+        if (ing?.name && typeof ing.name === 'string') {
+          candidateItems.push({
+            name: ing.name,
+            amount: typeof ing.amount === 'number' ? ing.amount : undefined,
+            unit: typeof ing.unit === 'string' ? ing.unit : undefined,
+          });
         }
       }
     }

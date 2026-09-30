@@ -134,7 +134,7 @@ export function useCookbookMagazine({
           id: `hero-2-comm-${vitalCandidate.id}`,
           recipe: vitalCandidate,
           totalTime: formatTotalTime(vitalCandidate),
-          badgeText: t('catalog.magazine.heroVitalBadge'),
+          badgeText: t('catalog.magazine.heroVitalBadgeCommunity'),
           badgeVariant: 'emerald',
           isCommunity: true,
           isSaved: savedRecipeIds?.has(vitalCandidate.id) || false,

@@ -12,6 +12,10 @@ export function getClient(): SupabaseClient {
   return _client;
 }
 
+export function setClient(client: SupabaseClient): void {
+  _client = client;
+}
+
 export const PGRST_NO_ROWS = 'PGRST116';
 
 export function isNoRowsError(err: PostgrestError): boolean {

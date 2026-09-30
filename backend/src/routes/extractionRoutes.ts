@@ -8,6 +8,9 @@ import {
   findExtractedRecipeIdByUrl,
   findActiveJobByUrl,
   countActiveJobsForUser,
+  cleanStaleJobsForUser,
+  getActiveJobsForUser,
+  cancelAllActiveJobsForUser,
   countLibraryEntries,
   getExtractionsForUserInTimeframe,
   updateJob,
@@ -49,6 +52,10 @@ async function enforceExtractionQuota(req: Request): Promise<void> {
   }
 
   const premium = isPremiumUser(user);
+
+  await cleanStaleJobsForUser(userId).catch((err) =>
+    console.warn(`[extraction] Failed to clean stale jobs for user ${userId}:`, err)
+  );
 
   const concurrencyLimit = await resolveConcurrencyLimit(user);
   const activeCount = await countActiveJobsForUser(userId);
@@ -373,8 +380,50 @@ extractionRoutes.post('/jobs/:id/cancel', async (req: Request, res: Response): P
   }
 });
 
+extractionRoutes.get('/me/active-jobs', async (req: Request, res: Response): Promise<void> => {
+  try {
+    await cleanStaleJobsForUser(req.userId!).catch((err) =>
+      console.warn(`[active-jobs] Failed to clean stale jobs:`, err)
+    );
+    const jobs = await getActiveJobsForUser(req.userId!);
+    res.status(200).json({
+      success: true,
+      jobs: jobs.map((j) => ({
+        id: j.id,
+        status: j.status,
+        kind: j.kind,
+        sourceUrl: j.sourceUrl,
+        progress: j.progress,
+        createdAt: j.createdAt,
+        updatedAt: j.updatedAt,
+      })),
+    });
+  } catch (error: unknown) {
+    if (!(error instanceof AppError)) console.error('Error fetching active jobs:', error);
+    sendAppError(res, error);
+  }
+});
+
+extractionRoutes.post('/me/active-jobs/cancel', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const count = await cancelAllActiveJobsForUser(req.userId!);
+    res.status(200).json({
+      success: true,
+      cancelledCount: count,
+      message: `${count} active job(s) cancelled.`,
+    });
+  } catch (error: unknown) {
+    if (!(error instanceof AppError)) console.error('Error cancelling active jobs:', error);
+    sendAppError(res, error);
+  }
+});
+
 extractionRoutes.get('/extractions/limit', async (req: Request, res: Response): Promise<void> => {
   try {
+    await cleanStaleJobsForUser(req.userId!).catch((err) =>
+      console.warn(`[limit] Failed to clean stale jobs:`, err)
+    );
+
     let limit = await getFreeMaxExtractions();
     let tier: 'free' | 'alpha' | 'premium' = 'free';
     let user = null;

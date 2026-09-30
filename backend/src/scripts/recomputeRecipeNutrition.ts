@@ -24,27 +24,52 @@
  *   npx tsx src/scripts/recomputeRecipeNutrition.ts
  *   DRY_RUN=1 npx tsx src/scripts/recomputeRecipeNutrition.ts
  */
-import { getClient, rowToRecipe, recipeToRow } from '../db.js';
+import fs from 'fs';
+import path from 'path';
+import dotenv from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
+import { getClient, setClient, rowToRecipe, recipeToRow } from '../db.js';
 import { enrichRecipeWithCanonicalIngredients } from '../matching/ingredientMatcher.js';
 import type { Recipe } from '../types.js';
 
-const DRY_RUN = process.env.DRY_RUN === '1' || process.env.DRY_RUN === 'true';
+const isProd = process.argv.includes('--prod');
+const DRY_RUN = process.argv.includes('--dry-run') || process.env.DRY_RUN === '1' || process.env.DRY_RUN === 'true';
+
+if (isProd) {
+  const prodEnvPath = path.resolve(process.cwd(), '.env.production');
+  const fallbackProdPath = path.resolve(process.cwd(), 'backend', '.env.production');
+  const targetEnvFile = fs.existsSync(prodEnvPath) ? prodEnvPath : fallbackProdPath;
+  if (fs.existsSync(targetEnvFile)) {
+    const envConfig = dotenv.parse(fs.readFileSync(targetEnvFile, 'utf8'));
+    if (envConfig.SUPABASE_URL && envConfig.SUPABASE_SECRET_KEY) {
+      setClient(createClient(envConfig.SUPABASE_URL, envConfig.SUPABASE_SECRET_KEY));
+    }
+  }
+}
+
 const PAGE_SIZE = 200;
 /** Relative gap above which a pre-existing total is treated as genuinely source-stated. */
 const DIVERGENCE_THRESHOLD = 0.1;
 
 function hasIngredients(recipe: any): recipe is Recipe {
-  return !!(
-    recipe &&
-    typeof recipe === 'object' &&
-    Array.isArray(recipe.ingredients) &&
-    recipe.ingredients.some((g: any) => Array.isArray(g?.items) && g.items.length > 0)
+  if (!recipe || typeof recipe !== 'object' || !Array.isArray(recipe.ingredients) || recipe.ingredients.length === 0) {
+    return false;
+  }
+  return recipe.ingredients.some(
+    (item: any) =>
+      (typeof item?.name === 'string' && item.name.trim().length > 0) ||
+      (Array.isArray(item?.items) && item.items.length > 0)
   );
 }
 
 async function main(): Promise<void> {
-  console.log(`Recomputing recipe nutrition from Open Food Facts${DRY_RUN ? ' (DRY RUN)' : ''}...`);
   const client = getClient();
+  const host = (client as any)?.supabaseUrl ? new URL((client as any).supabaseUrl).host : 'default';
+  console.log(`============================================================`);
+  console.log(`Recompute Recipe Nutrition from Open Food Facts`);
+  console.log(`Target:      ${isProd ? 'PRODUCTION' : 'DEVELOPMENT'} (${host})`);
+  console.log(`Mode:        ${DRY_RUN ? 'DRY-RUN (no database writes)' : 'LIVE EXECUTION'}`);
+  console.log(`============================================================\n`);
 
   let from = 0;
   let scanned = 0;

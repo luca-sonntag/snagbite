@@ -44,12 +44,10 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
       result = [...result].sort((a, b) => {
         const getMatchCount = (r: typeof a.recipe) => {
           let count = 0;
-          r.ingredients?.forEach((g) => {
-            g.items?.forEach((i) => {
-              const name = (i.name || '').toLowerCase().trim();
-              const base = (i.baseName || '').toLowerCase().trim();
-              if (pantryNames.has(name) || (base && pantryNames.has(base))) count++;
-            });
+          r.ingredients?.forEach((i) => {
+            const name = (i.name || '').toLowerCase().trim();
+            const base = (i.baseName || '').toLowerCase().trim();
+            if (pantryNames.has(name) || (base && pantryNames.has(base))) count++;
           });
           return count;
         };

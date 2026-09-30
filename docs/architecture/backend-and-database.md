@@ -4,6 +4,7 @@
 
 * **Technologie:** Express.js, TypeScript (ausgeführt über `tsx` / Direct-Node execution), Node.js 22+ (erforderlich für `@supabase/supabase-js` native WebSockets).
 * **Datenbank:** Supabase Postgres (`backend/src/db.ts`) mit Row-Level Security (RLS) über `@supabase/supabase-js`. Alle benutzerbezogenen Queries filtern mit `.eq('user_id', userId)`, um mandantenfähige Isolation zu gewährleisten. Interne Queue-Operationen (`getNextPendingJob`, `updateJob`) arbeiten ohne User-Scoping.
+* **Migrations-System:** Offizielles Supabase CLI Migrations-System (`supabase/migrations/`) mit autoritativem Versionstracking in `supabase_migrations.schema_migrations`. Ermöglicht transaktionale, lineare Schema-Updates (`npm run db:push`, `npm run db:status`, `npm run db:repair`) von der Baseline `v1.1.9` bis zu den neuesten Features.
 * **Authentifizierung:** Supabase Auth JWT-Verifikation (`backend/src/auth.ts`). Die Middleware `requireAuth` validiert den `Authorization: Bearer <token>` Header, extrahiert die User-ID via `auth.getUser(token)` und reicht sie als `req.userId` an alle Route-Handler weiter. Unterstützt sowohl E-Mail/Passwort- als auch Google OAuth-Authentifizierung nahtlos.
 * **RLS-Policies:** Die `jobs`-Tabelle ist mit vier RLS-Policies abgesichert: `SELECT`/`INSERT`/`UPDATE`/`DELETE` – alle an `auth.uid() = user_id` gebunden. Der `user_id`-Fremdschlüssel referenziert `auth.users.id`.
 * **Funktion:** Das Backend dient als asynchroner Job-Orchestrator, verwaltet Jobs und lädt Audiodateien temporär herunter.
@@ -15,6 +16,12 @@
 * **Abbrechen ≠ Löschen:** `POST /api/jobs/:id/cancel` bricht eine laufende Extraktion ab, `DELETE /api/recipes/:id` entfernt ein Rezept aus dem Kochbuch. Beides war früher derselbe Aufruf — genau die Vermischung, die den Soft-Delete erzwungen hat.
 * **Eindeutige Identifikation:** Normalisiert Rezepte bei Abfragen und versieht sie mit einer eindeutigen `id` (entspricht der `jobId`), um Kollisionen zwischen Rezepten mit gleichem Titel zu unterbinden.
 * **Caching-Deaktivierung:** Setzt explizit `Cache-Control` Header (`no-store, no-cache, must-revalidate, proxy-revalidate`) für dynamic endpoints (`/api/jobs/:id`), um zu verhindern, dass Browser veraltete/gecachte Job-Zustände ausliefern.
+* **Queue-Resilienz & Stale-Job Self-Healing (`backend/src/db/jobsCleanup.ts`):**
+  * **Beendigung des `awaiting_frames`-Loops:** `sweepStaleAwaitingFrames` setzt Jobs, die länger als `CLIENT_FRAMES_TIMEOUT_MINUTES` (5 Min.) ohne Client-Keyframes in `awaiting_frames` verharren, verbindlich auf `status: 'failed'` mit dem Fehlercode `EXTRACTION_TIMEOUT`. Dadurch wird der frühere Teufelskreis (Sweep ➔ `pending` ➔ Re-Park ➔ `awaiting_frames`), der Nutzerkonten dauerhaft sperrte, vollständig unterbunden.
+  * **Proaktive Bereinigung (`cleanStaleJobsForUser`):** Vor jedem Concurrency-Check (`enforceExtractionQuota` in `extractionRoutes.ts` und in `GET /api/extractions/limit`) werden verwaiste Jobs des Nutzers automatisch bereinigt, bevor der Concurrency-Fehler `ACTIVE_JOB_EXISTS` geworfen werden kann.
+  * **Active-Jobs & Notfall-Freigabe API:**
+    * `GET /api/me/active-jobs`: Ermöglicht dem Frontend das serverseitige Synchronisieren aller tatsächlich aktiven Jobs des Nutzers.
+    * `POST /api/me/active-jobs/cancel`: Bricht alle aktiven Jobs des authentifizierten Nutzers in einer einzigen atomaren Operation ab und gibt dessen Extraktions-Slot sofort frei.
 
 ### Admin-Bereich & RLS-Bypass
 Exponiert administrative API-Routen unter `/api/admin/*`, die über die Middleware `requireAdmin` abgesichert sind. Diese Middleware prüft, ob die E-Mail des authentifizierten Nutzers in der kommagetrennten Liste `ADMIN_EMAILS` (in `.env` konfiguriert) enthalten ist.

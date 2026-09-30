@@ -139,14 +139,9 @@ describe('Ingredient Matcher & Normalizer (Open Food Facts + Hybrid Search)', ()
         cookTime: 0,
         servings: 2,
         ingredients: [
-          {
-            name: 'Zutaten',
-            items: [
-              { name: 'Magerquark', baseName: 'quark', amount: 200, unit: 'g', category: 'DAIRY', synonyms: ['curd', 'curd cheese'] },
-              { name: 'Haferflocken', baseName: 'rolled oats', amount: 100, unit: 'g', category: 'GRAINS_PASTA', synonyms: ['oat flake', 'oats'] },
-              { name: 'Geheimpulver999XYZ', amount: 10, unit: 'g', calories: 40, protein: 5, carbs: 2, fat: 1 },
-            ],
-          },
+          { name: 'Magerquark', baseName: 'quark', amount: 200, unit: 'g', category: 'DAIRY', synonyms: ['curd', 'curd cheese'] },
+          { name: 'Haferflocken', baseName: 'rolled oats', amount: 100, unit: 'g', category: 'GRAINS_PASTA', synonyms: ['oat flake', 'oats'] },
+          { name: 'Geheimpulver999XYZ', amount: 10, unit: 'g', calories: 40, protein: 5, carbs: 2, fat: 1 },
         ],
         instructions: [{ step: 1, description: 'Mixen' }],
         equipment: ['Schüssel'],
@@ -154,7 +149,7 @@ describe('Ingredient Matcher & Normalizer (Open Food Facts + Hybrid Search)', ()
 
       await enrichRecipeWithCanonicalIngredients(recipe);
 
-      const items = recipe.ingredients[0].items;
+      const items = recipe.ingredients;
       assert.equal(items[0].isVerified, true);
       assert.ok(items[0].canonicalId);
       assert.ok((items[0].calories ?? 0) > 100);
@@ -180,12 +175,7 @@ describe('Ingredient Matcher & Normalizer (Open Food Facts + Hybrid Search)', ()
         cookTime: 10,
         servings: 2,
         ingredients: [
-          {
-            name: 'Zutaten',
-            items: [
-              { name: 'Kartoffeln', baseName: 'potatoes', amount: 400, unit: 'g', category: 'FRUITS_VEGETABLES' },
-            ],
-          },
+          { name: 'Kartoffeln', baseName: 'potatoes', amount: 400, unit: 'g', category: 'FRUITS_VEGETABLES' },
         ],
         instructions: [{ step: 1, description: 'Kochen' }],
         equipment: ['Topf'],
@@ -207,77 +197,72 @@ describe('Ingredient Matcher & Normalizer (Open Food Facts + Hybrid Search)', ()
         cookTime: 15,
         servings: 2,
         ingredients: [
+          // 1. Fat-reduced brand cheese (Eat Lean: ~180 kcal, 3.6g fat per 120g) -> MUST NOT map to Gouda 48% (455 kcal)!
           {
-            name: 'Pantry',
-            items: [
-              // 1. Fat-reduced brand cheese (Eat Lean: ~180 kcal, 3.6g fat per 120g) -> MUST NOT map to Gouda 48% (455 kcal)!
-              {
-                name: 'Käse',
-                brand: 'Eat Lean',
-                modifier: 'fettreduziert',
-                amount: 6,
-                unit: 'Scheiben',
-                gramsPerUnit: 20,
-                calories: 180,
-                protein: 36,
-                carbs: 0,
-                fat: 3.6,
-                category: 'DAIRY',
-              },
-              // 2. Zero sugar ketchup (10 kcal per 6 TL) -> MUST NOT map to full-sugar Tomatenketchup (98 kcal/100g)!
-              {
-                name: 'Zero Ketchup',
-                modifier: 'zuckerfrei',
-                amount: 6,
-                unit: 'TL',
-                gramsPerUnit: 5,
-                calories: 10,
-                protein: 0,
-                carbs: 2,
-                fat: 0,
-                category: 'SPICES_OILS',
-              },
-              // 3. Light balance salad cream (Miracle Whip: 100 kcal / 90g) -> MUST NOT map to 81% full-fat Mayo (675 kcal)!
-              {
-                name: 'Salatcreme',
-                brand: 'Miracle Whip',
-                modifier: 'fettreduziert',
-                amount: 6,
-                unit: 'EL',
-                gramsPerUnit: 15,
-                calories: 100,
-                protein: 1,
-                carbs: 5,
-                fat: 9,
-                category: 'SPICES_OILS',
-              },
-              // 4. Standard cooking oil (2 ml = 18 kcal) -> SHOULD map to Rapsöl/Speiseöl (18 kcal)!
-              {
-                name: 'Öl',
-                baseName: 'cooking oil',
-                amount: 2,
-                unit: 'ml',
-                gramsPerUnit: 1,
-                calories: 18,
-                protein: 0,
-                carbs: 0,
-                fat: 2,
-                category: 'SPICES_OILS',
-              },
-              // 5. Standard chicken breast (420 g = 458 kcal) -> SHOULD map to Hähnchen Brustfilet!
-              {
-                name: 'Hähnchenfilet',
-                baseName: 'chicken breast',
-                amount: 420,
-                unit: 'g',
-                gramsPerUnit: 1,
-                calories: 458,
-                protein: 98,
-                carbs: 0,
-                fat: 8,
-                category: 'MEAT_FISH',
-              },
-            ],
+            name: 'Käse',
+            brand: 'Eat Lean',
+            modifier: 'fettreduziert',
+            amount: 6,
+            unit: 'Scheiben',
+            gramsPerUnit: 20,
+            calories: 180,
+            protein: 36,
+            carbs: 0,
+            fat: 3.6,
+            category: 'DAIRY',
+          },
+          // 2. Zero sugar ketchup (10 kcal per 6 TL) -> MUST NOT map to full-sugar Tomatenketchup (98 kcal/100g)!
+          {
+            name: 'Zero Ketchup',
+            modifier: 'zuckerfrei',
+            amount: 6,
+            unit: 'TL',
+            gramsPerUnit: 5,
+            calories: 10,
+            protein: 0,
+            carbs: 2,
+            fat: 0,
+            category: 'SPICES_OILS',
+          },
+          // 3. Light balance salad cream (Miracle Whip: 100 kcal / 90g) -> MUST NOT map to 81% full-fat Mayo (675 kcal)!
+          {
+            name: 'Salatcreme',
+            brand: 'Miracle Whip',
+            modifier: 'fettreduziert',
+            amount: 6,
+            unit: 'EL',
+            gramsPerUnit: 15,
+            calories: 100,
+            protein: 1,
+            carbs: 5,
+            fat: 9,
+            category: 'SPICES_OILS',
+          },
+          // 4. Standard cooking oil (2 ml = 18 kcal) -> SHOULD map to Rapsöl/Speiseöl (18 kcal)!
+          {
+            name: 'Öl',
+            baseName: 'cooking oil',
+            amount: 2,
+            unit: 'ml',
+            gramsPerUnit: 1,
+            calories: 18,
+            protein: 0,
+            carbs: 0,
+            fat: 2,
+            category: 'SPICES_OILS',
+          },
+          // 5. Standard chicken breast (420 g = 458 kcal) -> SHOULD map to Hähnchen Brustfilet!
+          {
+            name: 'Hähnchenfilet',
+            baseName: 'chicken breast',
+            amount: 420,
+            unit: 'g',
+            gramsPerUnit: 1,
+            calories: 458,
+            protein: 98,
+            carbs: 0,
+            fat: 8,
+            category: 'MEAT_FISH',
           },
         ],
         instructions: [{ step: 1, description: 'Braten' }],
@@ -286,7 +271,7 @@ describe('Ingredient Matcher & Normalizer (Open Food Facts + Hybrid Search)', ()
 
       await enrichRecipeWithCanonicalIngredients(recipe);
 
-      const items = recipe.ingredients[0].items;
+      const items = recipe.ingredients;
 
       // Eat Lean Cheese: calories remain accurate (~180-210 kcal)
       assert.ok((items[0].calories ?? 0) > 100 && (items[0].calories ?? 0) <= 220);

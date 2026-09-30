@@ -1,10 +1,9 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import type { Recipe, Ingredient } from '../../types';
-import type { SortedIngredientGroup } from './types';
+import { sortIngredientsByCategory } from '../MealPlanner/mealPlannerUtils';
 import { useRecipeScaling } from '../../hooks/useRecipeScaling';
 import { useRecipeProgress } from '../../hooks/useRecipeProgress';
 import { useRecipeNutrition } from '../../hooks/useRecipeNutrition';
-import { categoryOrder, legacyCategoryMap } from '../../i18n';
 import { useI18n } from '../../context/I18nContext';
 import { useToast } from '../../context/ToastContext';
 import { useTimerManager } from '../../hooks/useTimerManager';
@@ -193,21 +192,8 @@ export function useRecipeDetails({ recipe, onAddIngredients, onNavigateToShoppin
   }, []);
 
   // --- Sorted ingredients ---
-  const sortedIngredients: SortedIngredientGroup[] = useMemo(() => {
-    if (!recipe.ingredients) return [];
-    const mapped = recipe.ingredients.map((group, originalIdx) => ({ group, originalIdx }));
-    return mapped.sort((a, b) => {
-      const getCategoryIndex = (name: string) => {
-        const cleanName = name.trim().toUpperCase();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let idx = categoryOrder.indexOf(cleanName as any);
-        if (idx !== -1) return idx;
-        const enumKey = legacyCategoryMap[name.trim().toLowerCase()];
-        if (enumKey) return categoryOrder.indexOf(enumKey);
-        return 999;
-      };
-      return getCategoryIndex(a.group.name) - getCategoryIndex(b.group.name);
-    });
+  const sortedIngredients: Ingredient[] = useMemo(() => {
+    return sortIngredientsByCategory(recipe.ingredients);
   }, [recipe.ingredients]);
 
   // --- Shopping list handlers ---
