@@ -89,6 +89,11 @@ Diese Checkliste fasst alle zwingenden rechtlichen, technischen, monetären und 
 - [x] **Hardware Back-Button:**
   - [x] Zurück-Gesten auf Subscreens (Rezept-Details, Katalog-Filter, Modals, Drawer) schließen das Overlay statt die App.
   - [x] Doppel-Tap auf Root-Screen zum Beenden der App funktioniert zuverlässig.
+- [ ] **Google Play In-App Updates (`@capawesome/capacitor-app-update`):**
+  - [x] Sofortige Update-Erzwingung (`performImmediateUpdate`) bei App-Start & Resume in `nativeAppUpdater.ts` integriert.
+  - [x] Manueller Update-Check-Button in `SettingsView.tsx` mit lokalisiertem Feedback bereitgestellt.
+  - [x] Fallback auf Store-Weiterleitung (`openAppStore()`) bei nicht erlaubtem Immediate Update implementiert.
+  - [ ] Update-Flow auf echtem Android-Gerät über Internal App Sharing oder Closed Testing Track verifiziert.
 
 ---
 
