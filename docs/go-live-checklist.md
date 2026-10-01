@@ -57,10 +57,10 @@ Diese Checkliste fasst alle zwingenden rechtlichen, technischen, monetären und 
     - `yearly` (z. B. 29,99 € / Jahr, inkl. 3 Tage Testphase / Free Trial)
   - [ ] Google Cloud Service Account für Google Play Android Developer API eingerichtet und mit RevenueCat verbunden.
   - [ ] RevenueCat Offerings und Packages (`default` Offering mit `MONTHLY` und `ANNUAL`) gemappt.
-- [ ] **Paywall Compliance & Features (`PremiumModal.tsx`):**
-  - [ ] **„Käufe wiederherstellen“ (Restore Purchases):** Sichtbarer Button vorhanden, der `Purchases.restorePurchases()` aufruft.
-  - [ ] **Rechtstexte:** Direkte Links zu AGB *und* Datenschutzerklärung.
-  - [ ] **Abo-Transparenz:** Klarer Hinweis auf automatische Verlängerung, Kündigungsfrist und Verwaltung über Google Play.
+- [x] **Paywall Compliance & Features (`PremiumModal.tsx`):**
+  - [x] **„Käufe wiederherstellen“ (Restore Purchases):** Sichtbarer Button vorhanden, der `Purchases.restorePurchases()` aufruft.
+  - [x] **Rechtstexte:** Direkte Links zu AGB *und* Datenschutzerklärung.
+  - [x] **Abo-Transparenz:** Klarer Hinweis auf automatische Verlängerung, Kündigungsfrist und Verwaltung über Google Play.
 - [ ] **End-to-End Lizenztest:**
   - [ ] Eigene E-Mail in der Play Console als *Lizenzprüfer (License Tester)* registriert.
   - [ ] Test-Abo auf echtem Android-Gerät abgeschlossen (ohne echte Abbuchung).
