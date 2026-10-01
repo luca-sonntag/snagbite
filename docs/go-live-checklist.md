@@ -77,10 +77,10 @@ Diese Checkliste fasst alle zwingenden rechtlichen, technischen, monetären und 
   - [ ] `frontend/android/version.properties` auf finale Startversion gesetzt (z. B. `VERSION_NAME=1.0.0`, `VERSION_CODE=1`).
 - [ ] **Netzwerksicherheit (`AndroidManifest.xml`):**
   - [x] `network_security_config.xml` angelegt und in `AndroidManifest.xml` referenziert (keine Cleartext-Warnungen mehr im Pre-Launch Report).
-  - [ ] `VITE_API_BASE_URL` in `frontend/.env.production` zeigt auf die Live-HTTPS-Domain des Backends.
+  - [x] `VITE_API_BASE_URL` in `frontend/.env.production` zeigt auf die Live-HTTPS-Domain des Backends (`https://cookbook-production-8769.up.railway.app`).
 - [ ] **Digital Asset Links (`assetlinks.json`):**
   - [ ] Datei unter `https://snagbite.app/.well-known/assetlinks.json` deployed.
-  - [ ] SHA256-Fingerprint des Play Store App-Signing-Zertifikats eingetragen.
+  - [x] SHA256-Fingerprint des Play Store App-Signing-Zertifikats in `website/public/.well-known/assetlinks.json` eingetragen.
   - [ ] Deep Linking via `https://snagbite.app/invite/*` verifiziert (`android:autoVerify="true"` öffnet direkt die App).
 - [ ] **App-Icons & Splash Screen:**
   - [x] Adaptives App-Icon (`res/mipmap-anydpi-v26/ic_launcher.xml`) für Android 8–15 vorhanden.
