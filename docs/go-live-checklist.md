@@ -32,7 +32,7 @@ Diese Checkliste fasst alle zwingenden rechtlichen, technischen, monetären und 
     - Passwort: `[Gewähltes Passwort]`
     - Anleitung: *„Auf 'Bereits ein Konto? Mit E-Mail anmelden' tippen und diese Zugangsdaten eingeben.“*
   - [x] Reviewer-Login in der App (`EmailLoginForm.tsx`) und Seed-Script (`npm run seed:reviewer` in `backend/`) implementiert.
-  - [ ] Seed-Script gegen Supabase Production ausgeführt, damit der Reviewer-Account mit 8 Rezepten, Sammlungen, Vorrat und Premium vorbefüllt ist.
+  - [x] Seed-Script gegen Supabase Production ausgeführt, damit der Reviewer-Account mit 8 Rezepten, Sammlungen, Vorrat und Premium vorbefüllt ist.
 - [ ] **IARC-Altersfreigabe & Zielgruppe:**
   - [ ] Fragebogen zur Inhaltseinstufung (IARC) ausgefüllt (Einstufung: PEGI 3 / USK 0).
   - [ ] Zielgruppe festgelegt (Erwachsene / ab 13 Jahre, keine gezielte Ausrichtung auf Kinder).
