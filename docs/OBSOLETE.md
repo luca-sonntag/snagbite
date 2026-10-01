@@ -6,6 +6,16 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-01: Kategorie-Icons als Fallback für Zutaten-Icons entfernt
+
+* **Ersetzter Code / Veraltete Logik:**
+  - Kategorie-Icons (`getCategoryIconUrl()`, `categoryIconFiles`) als Fallback und Lade-Overlay in [`IngredientIcon.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/IngredientIcon.tsx), wenn kein spezifisches Zutaten-Icon existiert oder ein Fehler auftrat (`!iconUrl || hasError`).
+* **Ersetzt durch:**
+  - **Reines Icon-Rendering ohne Kategorie-Fallback ([`IngredientIcon.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/IngredientIcon.tsx)):** Wenn kein spezifisches Icon für eine Zutat vorhanden ist (`!iconUrl`) oder das Laden fehlschlägt (`hasError`), rendert die Komponente `null` (kein Icon). Es wird kein generisches Kategorie-Ersatz-Icon mehr eingeblendet.
+* **Betroffene Dateien:** `frontend/src/components/IngredientIcon.tsx`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-01: Reorganisation und Archivierung von Backend-Skripten
 
 * **Ersetzter Code / Veraltete Struktur:**
