@@ -156,5 +156,6 @@ export function createDevToolsApi(): DevToolsApi {
     close,
     help,
     list: help,
+    checkAppUpdate: () => import('../../utils/nativeAppUpdater').then((m) => m.checkAndApplyNativeUpdate({ manual: true })),
   };
 }

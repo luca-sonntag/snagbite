@@ -116,3 +116,9 @@ export function initNativeAppUpdates(): void {
     void checkAndApplyNativeUpdate();
   }, BOOT_CHECK_DELAY_MS);
 }
+
+// Dev helper exposed on window for quick console testing
+if (typeof window !== 'undefined' && (import.meta.env.DEV || localStorage.getItem('snagbite_dev_tools') === 'true')) {
+  (window as unknown as { checkNativeAppUpdate?: () => Promise<NativeUpdateResult> }).checkNativeAppUpdate = () =>
+    checkAndApplyNativeUpdate({ manual: true });
+}
