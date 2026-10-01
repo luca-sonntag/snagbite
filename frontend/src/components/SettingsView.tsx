@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Select, ListBox, Popover } from '@heroui/react';
-import { LogOut, Globe, Moon, Sun, Thermometer, Scale, Info, UserMinus, Sparkles, ChevronRight, HelpCircle, MessageSquare, Shield, ScrollText, Building2, ExternalLink } from 'lucide-react';
+import { LogOut, Globe, Moon, Sun, Thermometer, Scale, Info, UserMinus, Sparkles, ChevronRight, HelpCircle, MessageSquare, Shield, ScrollText, Building2, ExternalLink, RefreshCw } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { hapticLight, hapticMedium, hapticHeavy } from '../utils/haptics';
+import { isNative } from '../native';
 
 import { useTheme } from '../hooks/useTheme';
 import { useDialog } from '../context/DialogContext';
@@ -12,6 +14,7 @@ import ProBadge from './ProBadge';
 import { FeedbackDrawer } from './FeedbackDrawer';
 import { APP_VERSION_LABEL } from '../version';
 import { getActiveOtaVersion } from '../utils/otaUpdater';
+import { checkAndApplyNativeUpdate } from '../utils/nativeAppUpdater';
 import { LEGAL_URLS } from '../legal';
 import PremiumUpgradeCard from './PremiumUpgradeCard';
 import NotificationSettings from './NotificationSettings';
@@ -51,13 +54,32 @@ export default function SettingsView() {
   const { t, language, setLanguage } = useI18n();
   const { signOut, user, autoSignedIn, updateUserMetadata, deleteAccount, isAdmin } = useAuth();
   const dialog = useDialog();
+  const toast = useToast();
   const [theme, setTheme] = useTheme();
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   // Version of the running OTA web bundle, null on stock (builtin) installs.
   const [otaVersion, setOtaVersion] = useState<string | null>(null);
+
+  const handleCheckForUpdates = async () => {
+    hapticLight();
+    setIsCheckingUpdate(true);
+    try {
+      const result = await checkAndApplyNativeUpdate({ manual: true });
+      if (result.status === 'up-to-date') {
+        toast.info(t('app.settings.upToDate') || 'Snagbite ist auf dem neuesten Stand.');
+      } else if (result.status === 'error') {
+        toast.danger(t('app.settings.updateCheckFailed') || 'Update-Prüfung fehlgeschlagen.');
+      }
+    } catch {
+      toast.danger(t('app.settings.updateCheckFailed') || 'Update-Prüfung fehlgeschlagen.');
+    } finally {
+      setIsCheckingUpdate(false);
+    }
+  };
 
   useEffect(() => {
     getActiveOtaVersion().then(setOtaVersion).catch(() => {});
@@ -511,10 +533,26 @@ export default function SettingsView() {
         </div>
       </div>
 
-      <div className="flex justify-center mt-4 mb-8">
+      <div className="flex flex-col items-center gap-2 mt-4 mb-8">
         <p className="text-xs text-gray-400 dark:text-gray-600 font-medium">
           Snagbite {APP_VERSION_LABEL}{otaVersion ? ` · ota ${otaVersion}` : ''}
         </p>
+
+        {isNative() && (
+          <button
+            type="button"
+            onClick={handleCheckForUpdates}
+            disabled={isCheckingUpdate}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isCheckingUpdate ? 'animate-spin' : ''}`} />
+            <span>
+              {isCheckingUpdate
+                ? t('app.settings.checkingUpdates') || 'Prüfe auf Updates...'
+                : t('app.settings.checkForUpdates') || 'Auf Updates prüfen'}
+            </span>
+          </button>
+        )}
       </div>
 
       {/* Premium Modal */}
