@@ -86,9 +86,9 @@ Diese Checkliste fasst alle zwingenden rechtlichen, technischen, monetären und 
   - [x] Adaptives App-Icon (`res/mipmap-anydpi-v26/ic_launcher.xml`) für Android 8–15 vorhanden.
   - [x] Monochromes App-Icon für Android 13+ Themed Icons (`<monochrome>`-Tag) vorhanden.
   - [ ] Splash Screen (`res/drawable/splash.png` und Hintergrundfarbe `#064e3b`) schließt flüssig ohne Hänger ab.
-- [ ] **Hardware Back-Button:**
-  - [ ] Zurück-Gesten auf Subscreens (Rezept-Details, Katalog-Filter, Modals, Drawer) schließen das Overlay statt die App.
-  - [ ] Doppel-Tap auf Root-Screen zum Beenden der App funktioniert zuverlässig.
+- [x] **Hardware Back-Button:**
+  - [x] Zurück-Gesten auf Subscreens (Rezept-Details, Katalog-Filter, Modals, Drawer) schließen das Overlay statt die App.
+  - [x] Doppel-Tap auf Root-Screen zum Beenden der App funktioniert zuverlässig.
 
 ---
 
