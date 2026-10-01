@@ -6,6 +6,25 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-01: Reorganisation und Archivierung von Backend-Skripten
+
+* **Ersetzter Code / Veraltete Struktur:**
+  - 28 unstrukturierte Skriptdateien flach im Stammverzeichnis `backend/src/scripts/`.
+  - Veraltete Einmal-Migrations- und temporäre Testskripte (`migrateFlattenIngredients.ts`, `runDryRunEvaluation.ts`, `auditIngredientPipeline.ts`, `testRecipeAuditor.ts`, `sanitizeIngredientMappings.ts`, `straightenAllMappings.ts`, `analyzeOFFCategories.ts`, `testRecipesAgainstOFF.ts`).
+  - Überladene `backend/package.json` mit über 35 redundant gewachsenen Skripteinträgen.
+* **Ersetzt durch:**
+  - **Thematische Unterordner in [`backend/src/scripts/`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/scripts/):**
+    - `seed/` (`seedDev.ts`, `seedReviewerAccount.ts`)
+    - `db/` (`backupDatabase.ts`, `restoreDatabase.ts`, `purgeHostedFrames.ts`)
+    - `backfill/` (`backfillIngredientMappings.ts`, `backfillPublicRecipeCovers.ts`, `backfillRecipeSource.ts`, `recomputeRecipeNutrition.ts`, `buildOpenFoodFactsIndex.ts`, `consolidateMappingsToCanonical.ts`)
+    - `icons/` (`generateIngredientImage.ts`, `generateMissingIngredientIcons.ts`, `generateCategoryIcons.ts`, `zipIngredientIcons.ts`, `cleanAllGermanIcons.ts`, `sliceCategoryIcons.mjs`)
+    - `archive/` (Historische Einmal-Skripte und Alt-Tests sauber archiviert)
+  - **Zentrales Skript-Environment:** [`scriptEnv.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/scripts/scriptEnv.ts) für einheitliches `--prod`/`--dev` Handling.
+  - **Entschlackte `backend/package.json`:** Konsistente Benennung nach Domänen (`seed:*`, `db:*`, `backfill:*`, `icons:*`) mit sauberen Abwärtskompatibilitäts-Aliassen.
+* **Betroffene Dateien:** `backend/package.json`, `backend/src/scripts/*`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-09-30: Fragmentierte DDL-Dateien durch offizielles Supabase CLI Migrations-System abgelöst
 
 * **Ersetzter Code / Veraltete Struktur:**
