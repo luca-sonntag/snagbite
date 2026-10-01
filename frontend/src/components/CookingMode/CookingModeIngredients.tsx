@@ -61,7 +61,7 @@ export const CookingModeIngredients: React.FC<CookingModeIngredientsProps> = ({
             return (
               <li
                 key={`${ing.name}-${i}`}
-                className="flex items-center gap-2.5 sm:gap-3 py-1 px-1 rounded-xl transition-colors min-w-0"
+                className="flex items-center gap-2.5 sm:gap-3 py-1 px-1 min-h-[52px] rounded-xl transition-colors min-w-0"
               >
                 <IngredientIcon
                   baseName={ing.baseName}
@@ -70,6 +70,7 @@ export const CookingModeIngredients: React.FC<CookingModeIngredientsProps> = ({
                   name={ing.name}
                   synonyms={ing.synonyms}
                   size="md"
+                  emptySpacingClass="w-2.5 sm:w-3"
                 />
                 <div className="flex-1 min-w-0 flex flex-col justify-center leading-snug">
                   {ing.replacedOriginal && (
