@@ -171,3 +171,69 @@ flowchart TD
   * **Verschwendungs-Reduzierung (`getPantryRecipeSuggestions`):** Bewertet und sortiert gespeicherte und öffentliche Rezepte anhand der Übereinstimmung mit bald ablaufenden Vorratszutaten (`expires_at <= NOW() + 3 Tage`).
   * **Community-Rezept-Freigabe:** URL-extrahierte Rezepte sind standardmäßig `visibility = 'public'` (öffentlich), während Foto- und Remix-Rezepte privat bleiben. Benutzer können die Sichtbarkeit jederzeit über `PATCH /api/recipes/:id/visibility` anpassen.
 
+---
+
+## 7. 🛡️ Abwärtskompatibilität, Schema-Evolution & Migrations-Protokoll
+
+Seit dem Produktiv-Rollout (Play Store Alpha/Production & Web PWA) befindet sich das Projekt in der **Post-Launch-Phase**. Schema-Änderungen und API-Anpassungen unterliegen strikten Regeln zum Schutz von Altdaten und älteren installierten App-Clients.
+
+### 🗄️ 1. Verbindlicher Migrations-Workflow (Supabase CLI)
+
+Jede Änderung an der Postgres-Datenbank (Tabellen, Spalten, Indizes, Enums, RLS, Trigger, RPC-Funktionen) **MUSS** über eine transaktionale SQL-Datei in `supabase/migrations/` abgebildet werden:
+
+```powershell
+# 1. Neue Migration mit sprechendem Namen anlegen
+npm run db:new <feature_name>
+# Generiert: supabase/migrations/<timestamp>_<feature_name>.sql
+
+# 2. Migrations-Status gegen verbundene DB prüfen
+npm run db:status
+
+# 3. Migration lokal oder auf Dev anwenden
+npm run db:push
+
+# 4. Im Notfall History reparieren (wenn remote und lokal synchronisiert werden müssen)
+npm run db:repair
+```
+
+* **Kein unversioniertes DDL:** Niemals Tabellen oder Spalten ad-hoc im Supabase-Dashboard anlegen oder modifizieren.
+* **Idempotenz:** SQL-Statements müssen mit defensiven Guard-Klauseln versehen sein (`ADD COLUMN IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ON CONFLICT DO NOTHING`).
+
+### 🔄 2. Das Expand-and-Contract Muster (Additive Schemas)
+
+Datenbank-Schemas werden **ausschließlich additiv** weiterentwickelt. Destruktive Befehle (`DROP COLUMN`, `RENAME COLUMN`, `ALTER COLUMN ... NOT NULL` ohne Default) sind auf aktiven Tabellen verboten:
+
+```mermaid
+flowchart LR
+    A["Phase 1: Expand<br/>Neue Spalte hinzufügen (nullable/default).<br/>Backend unterstützt Alt + Neu."] --> B["Phase 2: Migrate<br/>Idempotenter Daten-Backfill.<br/>Clients nutzen primär neues Schema."]
+    B --> C["Phase 3: Contract<br/>(Monate später)<br/>Alte Spalte nach Client-Rollout deprecaten/entfernen."]
+```
+
+1. **Neue Spalten:** Müssen immer `NULL`-able sein oder einen sicheren `DEFAULT`-Wert besitzen:
+   ```sql
+   -- ✅ KORREKT (abwärtskompatibel):
+   ALTER TABLE public.recipes ADD COLUMN IF NOT EXISTS health_score INTEGER DEFAULT 0;
+
+   -- ❌ VERBOTEN (bricht existierende Inserts/Jobs ab):
+   ALTER TABLE public.recipes ADD COLUMN health_score INTEGER NOT NULL;
+   ```
+2. **Spalten umbenennen / restrukturieren:**
+   - **Phase 1 (Expand):** Neue Spalte anlegen. Backend schreibt in beide Spalten bzw. liest das neue Feld mit Fallback auf das alte.
+   - **Phase 2 (Migrate):** Bestehende Datensätze per SQL-Backfill (`UPDATE recipes SET new_col = old_col WHERE new_col IS NULL;`) migrieren.
+   - **Phase 3 (Contract):** Erst wenn alle mobilen Clients im Umlauf die neue Version installiert haben, wird die alte Spalte aus dem Code und später aus der DB entfernt.
+
+### 📱 3. Schutz mobiler Clients & API-Kompatibilität
+
+* **Verzögerte App-Updates:** Nutzer auf Android aktualisieren Apps unregelmäßig. Die Backend-API muss alte App-Builds (z. B. v1.1.9) monatelang fehlerfrei unterstützen.
+* **Additive JSON-Responses:** Vorhandene Properties in REST-Antworten (`GET /api/recipes`, `GET /api/jobs/:id`) dürfen weder umbenannt noch im Datentyp verändert oder entfernt werden. Neue Daten werden als zusätzliche Keys angehängt.
+* **Optionale Request-Payloads:** Neue Body- oder Query-Parameter müssen optional sein. Wenn eine ältere App einen Parameter nicht mitsendet, greift der serverseitige Standardwert.
+
+### 🧱 4. Defensives Handling von JSONB-Altdaten
+
+Bestehende Rezepte in der Datenbank behalten ihre historische JSONB-Struktur (`ingredients`, `instructions`, `nutritional_values`). Code und UI dürfen niemals von der Existenz neuer verschachtelter Felder ausgehen:
+
+* **Optional Chaining & Nullish Coalescing:** Immer `item?.nestedField ?? fallback` nutzen.
+* **Strukturierte Typ-Guards:** Bei heterogenen Bestandsdaten (z. B. flache Zutat vs. verschachtelte Zutat) Type-Guards oder Normalisierungs-Helper verwenden (`normalizeIngredientItem()`).
+* **Backfill-Skripte:** Bei Schema-Erweiterungen (wie z. B. `is_ai_cover` oder `flatten_recipe_ingredients`) immer ein begleitendes, idempotentes Batch-Skript unter `backend/src/scripts/` anlegen (`npm run backfill:...`), das Altdaten in Batches von 50–100 Zeilen migriert.
+
+

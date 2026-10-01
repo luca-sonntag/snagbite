@@ -12,7 +12,7 @@
 >
 > **📝 Doku & OBSOLETE.md aktuell halten:** Nach JEDER relevanten Code-Änderung (neues Feature, Architekturänderung, neue Komponente, etc.) musst du prüfen, ob die Dokumentation angepasst werden muss. Wenn durch Refactorings oder neue Ansätze alter Code, Heuristiken oder Hilfsfunktionen obsolet werden, musst du diese im Dokument [`docs/OBSOLETE.md`](file:///c:/Users/lucas/source/repos/cookbook/docs/OBSOLETE.md) festhalten.
 >
-> **⚠️ Abwärtskompatibilität (Breaking Changes Guard):** Wenn eine geplante Änderung möglicherweise **nicht abwärtskompatibel** ist (z. B. Breaking API/Schema-Changes zwischen Frontend und Backend, Datenbank-Inkompatibilitäten oder kaputte Altdaten), darfst du diese NIEMALS eigenmächtig umsetzen. Du musst den Benutzer im `implementation_plan.md` explizit und auffällig (mit `[!WARNING]` / `[!CAUTION]`) darauf hinweisen, das Risiko genau erklären und erst nach ausdrücklicher Rückfrage und Bestätigung durch den Benutzer fortfahren bzw. den Plan anpassen.
+> **⚠️ Abwärtskompatibilität & DB-Migrationen (Breaking Changes Guard):** Da die App im Play Store und im Web live ist, haben Abwärtskompatibilität und saubere Datenmigrationen oberste Priorität. Jede Schema-Änderung **MUSS** zwingend als Supabase-Migration (`supabase/migrations/`) via `npm run db:new <name>` angelegt werden (niemals unversioniertes DDL). Neue Tabellenspalten müssen `NULL`-able sein oder einen sicheren `DEFAULT`-Wert besitzen (Expand-and-Contract Muster). Niemals aktive Spalten löschen oder umbenennen. API-Responses müssen rückwärtskompatibel zu älteren im Umlauf befindlichen Android-Builds bleiben. Altdaten in JSONB defensiv mit Optional Chaining (`?.`) und Nullish Coalescing (`??`) behandeln. Sollte eine Änderung potenziell nicht abwärtskompatibel sein, darfst du diese NIEMALS eigenmächtig umsetzen — weise im `implementation_plan.md` mit `[!WARNING]` / `[!CAUTION]` darauf hin und hole vorab ausdrückliche Bestätigung ein. Siehe Regel [`.agents/rules/backward-compatibility.md`](file:///c:/Users/lucas/source/repos/cookbook/.agents/rules/backward-compatibility.md).
 >
 > **🚫 Keine sprach- oder inhalts-spezifischen String-Heuristiken (Anti-Fragility):** Schreibe NIEMALS sprachabhängige Keyword- oder Substring-Prüfungen (z. B. `if (name.includes('käse') || name.includes('hähnchen'))`) in UI-, Rendering-, Business- oder Normalisierungs-Logik, um Kategorien, Icons oder Eigenschaften zu erraten. Löse solche Anforderungen IMMER über sauberen Datenfluss (Prop-Passing aus Elternelementen wie `group.name`), strukturierte Enums, zentrale typisierte Taxonomie-Lookups oder Upstream-Datenanreicherung.
 
@@ -20,6 +20,7 @@
 
 ## 🧼 Code-Standards & Design-System (Global)
 
+* 🛡️ [**Abwärtskompatibilität & DB-Migrationen**](file:///c:/Users/lucas/source/repos/cookbook/docs/backward-compatibility.md): Verbindliche Regeln für Non-Breaking Schema-Evolution, Expand-and-Contract, idempotente Supabase-Migrationen & Mobile-App-Schutz (Agent-Regel: [`.agents/rules/backward-compatibility.md`](file:///c:/Users/lucas/source/repos/cookbook/.agents/rules/backward-compatibility.md)).
 * 🧼 [**TypeScript & React Clean Code Guidelines**](file:///c:/Users/lucas/source/repos/cookbook/docs/clean-code.md): Verbindliche Regeln zu Dateigrößen (**max. 150–200 Zeilen, Hard Limit 300**), Modularisierung, Custom Hooks, Subkomponenten-Extraktion & 0x `any`.
 * 🎨 [**UI & Design Styleguide**](file:///c:/Users/lucas/source/repos/cookbook/docs/styleguide.md): Vorgaben zu Clean Flat Style, Farbpalette, Typografie, Radien & rahmenlosen Oberflächen (`border-none`).
 * 📱 [**Mobile UX & Native App Feeling Guidelines**](file:///c:/Users/lucas/source/repos/cookbook/docs/mobile-ux-rules.md): Verbindliche Richtlinien für Touch-Targets (≥ 44×44px), Haptics, Gesten, Empty States, Transitions & selektierte Zustände.
@@ -42,6 +43,7 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
    * Rolling Timeframe Rate Limiting & Subscription Tiers (`free`, `premium`, `alpha`)
    * Rewarded Video Ad Credits (`app_metadata.bonus_credits`, `POST /api/me/rewarded-ad-claimed`, Quota-Verrechnung)
    * Health Check & Push Monitoring (`healthcheck/`, ntfy.sh / Telegram)
+   * Abwärtskompatibilität, Schema-Evolution & Migrations-Protokoll (Expand-and-Contract, Safe DB Operations)
 
 3. 🤖 [**KI-Layer (Google Gemini Integration)**](file:///c:/Users/lucas/source/repos/cookbook/docs/architecture/ai-gemini.md)
    * `@google/generative-ai` SDK, Structured JSON Schemas, Kategorisierung & Mengennormalisierung
