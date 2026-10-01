@@ -38,6 +38,9 @@
     "recompute-nutrition:dev": "npm run recompute-nutrition:dev -w backend --",
     "covers:backfill:prod": "npm run covers:backfill:prod -w backend --",
     "covers:backfill:dev": "npm run covers:backfill:dev -w backend --",
+    "seed:reviewer": "npm run seed:reviewer -w backend",
+    "seed:reviewer:prod": "npm run seed:reviewer:prod -w backend",
+    "seed:reviewer:dev": "npm run seed:reviewer:dev -w backend",
     "use:prod": "node scripts/switchEnv.js prod",
     "use:dev": "node scripts/switchEnv.js dev",
     "use:status": "node scripts/switchEnv.js status"

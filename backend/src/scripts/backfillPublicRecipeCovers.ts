@@ -9,19 +9,17 @@
  *   npx tsx src/scripts/backfillPublicRecipeCovers.ts --prod --force
  *   npx tsx src/scripts/backfillPublicRecipeCovers.ts --prod --id <recipeId>
  */
-import fs from 'fs';
-import path from 'path';
-import dotenv from 'dotenv';
-import { createClient } from '@supabase/supabase-js';
 import { config } from '../config.js';
-import { getClient, setClient } from '../db.js';
+import { getClient } from '../db.js';
 import { generateRecipeCoverImage, ensureCoverBucketExists } from '../imageGenerator.js';
 import { generateFoodPhotographyPrompt } from '../prompts/foodPhotographyPrompt.js';
 import type { RecipeRow } from '../db/types/core.js';
+import { initScriptEnv, loadEnvFile } from './scriptEnv.js';
 
-// CLI flags
-const isProd = process.argv.includes('--prod');
-const isDev = process.argv.includes('--dev');
+// Setup target environment
+const scriptEnv = initScriptEnv();
+const isProd = scriptEnv.isProd;
+const isDev = scriptEnv.isDev;
 const isDryRun = process.argv.includes('--dry-run') || process.env.DRY_RUN === '1';
 const isForce = process.argv.includes('--force');
 
@@ -34,34 +32,10 @@ const singleId = idIdx !== -1 ? process.argv[idIdx + 1] : null;
 const delayIdx = process.argv.indexOf('--delay');
 const delayMs = delayIdx !== -1 ? parseInt(process.argv[delayIdx + 1], 10) : 1000;
 
-// Setup target environment
-const backendDir = path.resolve(import.meta.dirname, '..', '..');
-
-if (isProd) {
-  const prodEnvFile = path.resolve(backendDir, '.env.production');
-  if (fs.existsSync(prodEnvFile)) {
-    const prodEnv = dotenv.parse(fs.readFileSync(prodEnvFile, 'utf8'));
-    if (prodEnv.SUPABASE_URL && prodEnv.SUPABASE_SECRET_KEY) {
-      setClient(createClient(prodEnv.SUPABASE_URL, prodEnv.SUPABASE_SECRET_KEY));
-    }
-  }
-} else if (isDev) {
-  const devEnvFile = path.resolve(backendDir, '.env');
-  if (fs.existsSync(devEnvFile)) {
-    const devEnv = dotenv.parse(fs.readFileSync(devEnvFile, 'utf8'));
-    if (devEnv.SUPABASE_URL && devEnv.SUPABASE_SECRET_KEY) {
-      setClient(createClient(devEnv.SUPABASE_URL, devEnv.SUPABASE_SECRET_KEY));
-    }
-  }
-}
-
 // Ensure FAL_KEY is present
 if (!config.FAL_KEY) {
-  const baseEnvFile = path.resolve(backendDir, '.env');
-  if (fs.existsSync(baseEnvFile)) {
-    const baseEnv = dotenv.parse(fs.readFileSync(baseEnvFile, 'utf8'));
-    if (baseEnv.FAL_KEY) config.FAL_KEY = baseEnv.FAL_KEY;
-  }
+  const baseEnv = loadEnvFile('.env');
+  if (baseEnv.FAL_KEY) config.FAL_KEY = baseEnv.FAL_KEY;
 }
 
 // Force cover generation flag in config

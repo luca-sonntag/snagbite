@@ -14,24 +14,13 @@
  * Usage:
  *   cd backend && npx tsx src/scripts/seedReviewerAccount.ts
  */
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
+import { initScriptEnv } from './scriptEnv.js';
 
-dotenv.config();
+const scriptEnv = initScriptEnv();
+const supabase = scriptEnv.client;
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
 const REVIEWER_EMAIL = (process.env.REVIEWER_EMAIL || 'reviewer@snagbite.app').trim().toLowerCase();
 const REVIEWER_PASSWORD = process.env.REVIEWER_PASSWORD || 'SnagbiteReviewer2026!';
-
-if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) {
-  console.error('Missing SUPABASE_URL or SUPABASE_SECRET_KEY.');
-  process.exit(1);
-}
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
 
 interface IngredientItem {
   name: string;
@@ -235,7 +224,8 @@ async function seedGamification(userId: string) {
 }
 
 async function main() {
-  console.log('--- Snagbite Reviewer Seed ---');
+  console.log(`--- Snagbite Reviewer Seed [Target: ${scriptEnv.target.toUpperCase()}] ---`);
+  console.log(`Target URL: ${scriptEnv.supabaseUrl}`);
   const userId = await getOrCreateReviewerUser();
   console.log(`Reviewer user ID: ${userId}`);
 
