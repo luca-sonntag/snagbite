@@ -1,13 +1,13 @@
 import path from 'path';
-import { getClient } from '../db.js';
+import { getClient } from '../../db.js';
 import {
   generateIngredientIcon,
   findExistingIngredientImage,
   getIngredientImagesDir,
   getGenerationCostsSummary,
-} from '../ingredientImageService.js';
-import { packIngredientIcons } from '../ingredientIconPacker.js';
-import type { CanonicalIngredient } from '../data/canonicalIngredients.js';
+} from '../../ingredientImageService.js';
+import { packIngredientIcons } from '../../ingredientIconPacker.js';
+import type { CanonicalIngredient } from '../../data/canonicalIngredients.js';
 
 interface CliOptions {
   concurrency: number;

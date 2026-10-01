@@ -1,4 +1,4 @@
-import { getClient } from '../db/client.js';
+import { getClient } from '../../db/client.js';
 
 async function main() {
   const client = getClient();

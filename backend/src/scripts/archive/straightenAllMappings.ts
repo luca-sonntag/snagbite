@@ -9,7 +9,7 @@
  *   npx tsx src/scripts/straightenAllMappings.ts [--dry-run]
  */
 
-import { getClient } from '../db.js';
+import { getClient } from '../../db.js';
 
 interface TranslationRule {
   germanKey: string;

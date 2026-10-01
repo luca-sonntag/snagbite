@@ -1,8 +1,8 @@
 import { type SupabaseClient } from '@supabase/supabase-js';
-import { rowToRecipe, type RecipeRow } from '../db.js';
-import type { ResolverInput } from '../matching/ingredientResolver.js';
-import type { Recipe } from '../types.js';
-import { initScriptEnv } from './scriptEnv.js';
+import { rowToRecipe, type RecipeRow } from '../../db.js';
+import type { ResolverInput } from '../../matching/ingredientResolver.js';
+import type { Recipe } from '../../types.js';
+import { initScriptEnv } from '../scriptEnv.js';
 
 export function getProdClient(): SupabaseClient {
   return initScriptEnv({ target: 'prod', autoSetDbClient: false }).client;

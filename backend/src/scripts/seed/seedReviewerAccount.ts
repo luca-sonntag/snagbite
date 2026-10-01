@@ -14,7 +14,7 @@
  * Usage:
  *   cd backend && npx tsx src/scripts/seedReviewerAccount.ts
  */
-import { initScriptEnv } from './scriptEnv.js';
+import { initScriptEnv } from '../scriptEnv.js';
 
 const scriptEnv = initScriptEnv();
 const supabase = scriptEnv.client;
@@ -53,7 +53,7 @@ async function getOrCreateReviewerUser(): Promise<string> {
   for (let page = 1; page <= 20; page++) {
     const { data, error: listErr } = await supabase.auth.admin.listUsers({ page, perPage: 200 });
     if (listErr) throw new Error(`Failed to list users: ${listErr.message}`);
-    const match = data.users.find((u) => u.email?.toLowerCase() === REVIEWER_EMAIL);
+    const match = data.users.find((u: { email?: string }) => u.email?.toLowerCase() === REVIEWER_EMAIL);
     if (match) {
       const { error: updateErr } = await supabase.auth.admin.updateUserById(match.id, {
         password: REVIEWER_PASSWORD,
@@ -97,9 +97,9 @@ async function seedRecipes(userId: string, targetCount = 8): Promise<RecipeSumma
     throw new Error(`Failed to check existing user recipes: ${userRecErr.message}`);
   }
 
-  const existingIds = new Set((existingUserRecipes || []).map((r) => r.recipe_id));
-  const available = (publicRecipes as RecipeSummary[]).filter((r) => !existingIds.has(r.id));
-  const alreadySaved = (publicRecipes as RecipeSummary[]).filter((r) => existingIds.has(r.id));
+  const existingIds = new Set((existingUserRecipes || []).map((r: { recipe_id: string }) => r.recipe_id));
+  const available = (publicRecipes as RecipeSummary[]).filter((r: RecipeSummary) => !existingIds.has(r.id));
+  const alreadySaved = (publicRecipes as RecipeSummary[]).filter((r: RecipeSummary) => existingIds.has(r.id));
 
   const needed = Math.max(0, targetCount - (existingUserRecipes?.length || 0));
   if (needed === 0) {
@@ -109,7 +109,7 @@ async function seedRecipes(userId: string, targetCount = 8): Promise<RecipeSumma
       .from('user_recipes')
       .select('recipes(id, title, ingredients)')
       .eq('user_id', userId);
-    return ((userSaved || []).map((ur) => ur.recipes).filter(Boolean) as unknown as RecipeSummary[]);
+    return ((userSaved || []).map((ur: { recipes?: unknown }) => ur.recipes).filter(Boolean) as unknown as RecipeSummary[]);
   }
 
   // 3. Pick random public recipes from available pool

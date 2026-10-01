@@ -20,7 +20,7 @@
  *   npx tsx src/scripts/purgeHostedFrames.ts
  *   DRY_RUN=1 npx tsx src/scripts/purgeHostedFrames.ts
  */
-import { getClient } from '../db.js';
+import { getClient } from '../../db.js';
 
 const DRY_RUN = process.env.DRY_RUN === '1' || process.env.DRY_RUN === 'true';
 const FRAMES_MARKER = '/recipe-frames/';

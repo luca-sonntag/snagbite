@@ -10,8 +10,8 @@
  *   npx tsx src/scripts/migrateFlattenIngredients.ts [--dry-run] [--prod|--dev]
  */
 
-import { getClient } from '../db.js';
-import { initScriptEnv } from './scriptEnv.js';
+import { getClient } from '../../db.js';
+import { initScriptEnv } from '../scriptEnv.js';
 
 interface RawIngredientItem {
   id?: string;

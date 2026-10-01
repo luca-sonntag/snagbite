@@ -10,7 +10,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { initScriptEnv } from './scriptEnv.js';
+import { initScriptEnv } from '../scriptEnv.js';
 
 const scriptEnv = initScriptEnv();
 const isProd = scriptEnv.isProd;

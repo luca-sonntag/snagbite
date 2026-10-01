@@ -24,10 +24,10 @@
  *   npx tsx src/scripts/recomputeRecipeNutrition.ts
  *   DRY_RUN=1 npx tsx src/scripts/recomputeRecipeNutrition.ts
  */
-import { getClient, rowToRecipe, recipeToRow } from '../db.js';
-import { enrichRecipeWithCanonicalIngredients } from '../matching/ingredientMatcher.js';
-import type { Recipe } from '../types.js';
-import { initScriptEnv } from './scriptEnv.js';
+import { getClient, rowToRecipe, recipeToRow } from '../../db.js';
+import { enrichRecipeWithCanonicalIngredients } from '../../matching/ingredientMatcher.js';
+import type { Recipe } from '../../types.js';
+import { initScriptEnv } from '../scriptEnv.js';
 
 const scriptEnv = initScriptEnv();
 const isProd = scriptEnv.isProd;

@@ -9,12 +9,12 @@
  *   npx tsx src/scripts/backfillPublicRecipeCovers.ts --prod --force
  *   npx tsx src/scripts/backfillPublicRecipeCovers.ts --prod --id <recipeId>
  */
-import { config } from '../config.js';
-import { getClient } from '../db.js';
-import { generateRecipeCoverImage, ensureCoverBucketExists } from '../imageGenerator.js';
-import { generateFoodPhotographyPrompt } from '../prompts/foodPhotographyPrompt.js';
-import type { RecipeRow } from '../db/types/core.js';
-import { initScriptEnv, loadEnvFile } from './scriptEnv.js';
+import { config } from '../../config.js';
+import { getClient } from '../../db.js';
+import { generateRecipeCoverImage, ensureCoverBucketExists } from '../../imageGenerator.js';
+import { generateFoodPhotographyPrompt } from '../../prompts/foodPhotographyPrompt.js';
+import type { RecipeRow } from '../../db/types/core.js';
+import { initScriptEnv, loadEnvFile } from '../scriptEnv.js';
 
 // Setup target environment
 const scriptEnv = initScriptEnv();
