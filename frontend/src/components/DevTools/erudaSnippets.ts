@@ -30,6 +30,7 @@ export function registerErudaSnippets(eruda: unknown): void {
     snippets.add('Confirm Dialog (Warning)', () => window.dev?.show('confirm', { title: 'Rezept löschen?', message: 'Möchtest du das Rezept wirklich löschen?', status: 'danger' }), 'Show confirmation dialog');
     snippets.add('Toast: Success', () => window.dev?.show('toast', { type: 'success', message: 'Rezept erfolgreich gespeichert!' }), 'Trigger in-app success toast');
     snippets.add('OTA Update Banner', () => window.dev?.show('ota', { version: '2.5.0-dev' }), 'Show OTA live update top banner');
+    snippets.add('Check Play Store Update', () => { void import('../../utils/nativeAppUpdater').then((m) => m.checkAndApplyNativeUpdate({ manual: true })); }, 'Trigger Google Play in-app update check');
     snippets.add('Close Active Overlay', () => window.dev?.close(), 'Dismiss currently open dev overlay');
   } catch (err) {
     console.warn('[DevTools] Failed to register Eruda snippets:', err);

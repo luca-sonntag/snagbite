@@ -50,6 +50,7 @@
     "@capacitor/share": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.1",
     "@capacitor/status-bar": "^8.0.2",
+    "@capawesome/capacitor-app-update": "^8.0.5",
     "@capgo/capacitor-social-login": "^8.3.33",
     "@capgo/capacitor-updater": "^8.51.2",
     "@cookbook/shared": "*",

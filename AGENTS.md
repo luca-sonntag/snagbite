@@ -69,6 +69,7 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
 5. 🚀 [**Deployment, Play Store & OTA Updates**](file:///c:/Users/lucas/source/repos/cookbook/docs/architecture/deployment-and-ota.md)
    * Play Store Build Pipeline (Fastlane in Docker, `version.properties`, `release.ps1`, `deploy-playstore.ps1`)
    * Self-Hosted Capgo OTA Live Updates (`@capgo/capacitor-updater`, Supabase `app_bundles`, Rollback-Strategien)
+   * Google Play In-App Updates (`@capawesome/capacitor-app-update`, `nativeAppUpdater.ts`, Immediate Forced Updates, Resume & Settings-Check)
    * Gradle `reversePorts` Task, AdMob App-ID Setup & Splash Screen Hang Diagnosen
    * [🏁 Google Play Store Go-Live Checklist](file:///c:/Users/lucas/source/repos/cookbook/docs/go-live-checklist.md) (Compliance, AdMob, Billing & Quality Gate)
 

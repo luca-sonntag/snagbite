@@ -58,7 +58,22 @@ Web-Assets der nativen App können Over-The-Air (OTA) aktualisiert werden, ohne 
 
 ---
 
-## 3. Containerized Server Deployment (Railway & Docker)
+## 3. Google Play In-App Updates (@capawesome/capacitor-app-update)
+
+Während Capgo OTA ausschließlich Web-Assets (HTML/JS/CSS) aktualisiert, steuert `@capawesome/capacitor-app-update` native Binärupdates über den Google Play Store (für neue native Capacitor-Plugins, Android-Permissions oder Core-Upgrades).
+
+* **Plugin:** `@capawesome/capacitor-app-update` (Android-only, no-op auf Web/iOS).
+* **Service:** `frontend/src/utils/nativeAppUpdater.ts`
+* **Flow & Erzwingung:**
+  1. **Boot-Check:** Verzögerter Check (~4 Sekunden nach App-Start) via `AppUpdate.getAppUpdateInfo()`.
+  2. **Erzwungenes Immediate Update:** Wenn `updateAvailability === UPDATE_AVAILABLE` und `immediateUpdateAllowed === true`, ruft die App `AppUpdate.performImmediateUpdate()` auf. Google Play blendet einen modalen Vollbilddialog ein und sperrt die Nutzung der alten Version bis zum Abschluss von Download und Neustart.
+  3. **Fallback:** Falls `immediateUpdateAllowed === false`, leitet `AppUpdate.openAppStore()` direkt auf die Snagbite-Storeseite im Google Play Store weiter.
+  4. **Resume-Sicherheit:** Registriert einen `resume`-Listener auf `App`. Befindet sich ein Update bereits in Bearbeitung (`updateAvailability === UPDATE_IN_PROGRESS`), wird der Dialog sofort ohne Cooldown erneut angezeigt. Reguläre Checks auf `resume` sind auf einen 15-Minuten-Cooldown gedrosselt.
+  5. **Manueller Check:** In `SettingsView.tsx` können Nutzer auf Android via „Auf Updates prüfen“ den Status abfragen (`checkAndApplyNativeUpdate({ manual: true })`) mit direktem Feedback via Toast.
+
+---
+
+## 4. Containerized Server Deployment (Railway & Docker)
 
 * **Multi-Stage Dockerfile:** Multi-stage Build (`node:22-alpine`). Installiert systemseitig `ffmpeg`, `python3` (für yt-dlp) und `ttf-dejavu`.
 * **Stateless Deployment:** Backend und Frontend-Assets statisch gebündelt.
