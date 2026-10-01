@@ -31,7 +31,7 @@ export const PantryItemCard: React.FC<PantryItemCardProps> = ({ item, onEdit, on
 
   return (
     <li className="list-none rounded-xl hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-      <div className="flex items-center justify-between gap-2 py-2 px-2 min-h-[44px]">
+      <div className="flex items-center justify-between gap-2 py-2 px-2 min-h-[58px]">
         {/* Left side: Icon + Name & Amount */}
         <div
           onClick={() => {
@@ -46,6 +46,7 @@ export const PantryItemCard: React.FC<PantryItemCardProps> = ({ item, onEdit, on
             category={item.category}
             name={item.name}
             size="md"
+            reserveSpace
           />
 
           <div className="flex-1 min-w-0 flex flex-col justify-center">

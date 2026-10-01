@@ -27,7 +27,7 @@ export default function ShoppingCheckedItem({
 
   return (
     <li className={`rounded-xl hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors group ${animationClass}`}>
-      <div className="flex items-center justify-between gap-2 py-1.5 px-2 min-h-[42px]">
+      <div className="flex items-center justify-between gap-2 py-1.5 px-2 min-h-[56px]">
         <button
           type="button"
           onClick={() => {
@@ -54,6 +54,7 @@ export default function ShoppingCheckedItem({
             synonyms={item.synonyms}
             size="md"
             className="opacity-40 grayscale"
+            reserveSpace
           />
 
           <div className="flex-1 min-w-0 flex flex-col justify-center">
