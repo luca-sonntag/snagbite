@@ -10,6 +10,16 @@ export interface IngredientIconProps {
   synonyms?: string[] | null;
   size?: 'sm' | 'md' | 'lg' | 'grid';
   className?: string;
+  /**
+   * When true, preserves full icon slot dimensions as an invisible layout spacer
+   * when no icon exists or loading fails. Prevents misalignment and jumps in lists.
+   */
+  reserveSpace?: boolean;
+  /**
+   * Optional Tailwind width class applied when no icon exists and reserveSpace is false,
+   * providing breathing room so text doesn't stick to adjacent elements.
+   */
+  emptySpacingClass?: string;
 }
 
 const SIZE_MAP = {
@@ -33,6 +43,8 @@ export const IngredientIcon: React.FC<IngredientIconProps> = ({
   synonyms,
   size = 'md',
   className = '',
+  reserveSpace = false,
+  emptySpacingClass = '',
 }) => {
   const iconUrl = getIngredientIconUrl(baseName, canonicalId, synonyms);
   const [hasError, setHasError] = useState(false);
@@ -46,6 +58,22 @@ export const IngredientIcon: React.FC<IngredientIconProps> = ({
   }
 
   if (!iconUrl || hasError) {
+    if (reserveSpace) {
+      return (
+        <div
+          className={`${SIZE_MAP[size]} shrink-0 ${className}`}
+          aria-hidden="true"
+        />
+      );
+    }
+    if (emptySpacingClass) {
+      return (
+        <div
+          className={`${emptySpacingClass} shrink-0`}
+          aria-hidden="true"
+        />
+      );
+    }
     return null;
   }
 
