@@ -106,4 +106,5 @@ app/src/main/assets/public
 # Generated Config files
 app/src/main/assets/capacitor.config.json
 app/src/main/assets/capacitor.plugins.json
+app/src/main/assets/*.live-backup
 app/src/main/res/xml/config.xml
