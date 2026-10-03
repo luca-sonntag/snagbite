@@ -1,5 +1,4 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { ApifyClient } from 'apify-client';
 import dotenv from 'dotenv';
 
 // Load environment variables
@@ -9,7 +8,6 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || '';
 const RAPIDAPI_SOCIAL_HOST = process.env.RAPIDAPI_SOCIAL_HOST || 'social-download-all-in-one.p.rapidapi.com';
-const APIFY_TOKEN = process.env.APIFY_TOKEN || '';
 const HEALTHCHECK_BACKEND_URL = process.env.HEALTHCHECK_BACKEND_URL || '';
 const HEALTHCHECK_WEBSITE_URL = process.env.HEALTHCHECK_WEBSITE_URL || '';
 const NTFY_TOPIC = process.env.NTFY_TOPIC || '';
@@ -127,14 +125,6 @@ async function run() {
         if (res.status >= 500) {
           throw new Error(`Service degraded (HTTP ${res.status})`);
         }
-      },
-    },
-    {
-      name: 'apify',
-      isEnabled: !!APIFY_TOKEN && APIFY_TOKEN !== 'your_apify_api_token',
-      run: async () => {
-        const client = new ApifyClient({ token: APIFY_TOKEN });
-        await client.actors().list({ limit: 1 });
       },
     },
     {
