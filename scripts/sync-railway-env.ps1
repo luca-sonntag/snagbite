@@ -17,10 +17,10 @@
     Switch for targeting development.
 
 .PARAMETER RailwayEnv
-    Optional Railway environment name override (defaults to 'production' for prod, 'dev' for dev).
+    Optional Railway environment name override.
 
 .PARAMETER Service
-    Optional Railway service name (e.g. 'backend').
+    Optional Railway service name (defaults to 'backend').
 
 .PARAMETER SkipDeploys
     Skip triggering deployments when variables are set.
@@ -60,6 +60,34 @@ function Get-TargetEnvironment {
     if ($Dev) { return 'dev' }
     if ($Environment -in @('dev', 'development')) { return 'dev' }
     return 'prod'
+}
+
+function Resolve-RailwayEnvironment {
+    param(
+        [string]$Target,
+        [string]$ExplicitEnv
+    )
+    if ($ExplicitEnv) { return $ExplicitEnv }
+
+    try {
+        $envJson = & railway environment list --json 2>$null
+        if ($LASTEXITCODE -eq 0 -and $envJson) {
+            $parsed = $envJson | ConvertFrom-Json
+            $envNames = @($parsed.environments | ForEach-Object { $_.name })
+            if ($Target -eq 'prod') {
+                $match = $envNames | Where-Object { $_ -match '^(production|prod)$' } | Select-Object -First 1
+                if ($match) { return $match }
+            } else {
+                $match = $envNames | Where-Object { $_ -match '^(development|dev)$' } | Select-Object -First 1
+                if ($match) { return $match }
+            }
+        }
+    } catch {
+        # Fallback if Railway query fails
+    }
+
+    if ($Target -eq 'prod') { return 'production' }
+    return 'development'
 }
 
 function Import-EnvFile {
@@ -121,13 +149,8 @@ function Format-MaskedValue {
 
 # --- Main Flow ---
 $target = Get-TargetEnvironment
-$targetRailwayEnv = if ($RailwayEnv) {
-    $RailwayEnv
-} elseif ($target -eq 'prod') {
-    'production'
-} else {
-    'dev'
-}
+$targetService = if ($Service) { $Service } else { 'backend' }
+$targetRailwayEnv = Resolve-RailwayEnvironment -Target $target -ExplicitEnv $RailwayEnv
 
 $backendDir = Join-Path $PSScriptRoot '..\backend'
 $backendDir = [System.IO.Path]::GetFullPath($backendDir)
@@ -142,7 +165,8 @@ if (-not (Test-Path $baseEnvPath)) {
 Write-Host ""
 Write-Host "+--------------------------------------------------------+" -ForegroundColor Cyan
 Write-Host "|  Sync Environment Variables to Railway                 |" -ForegroundColor Cyan
-Write-Host "|  Target: $($target.ToUpper().PadRight(46))|" -ForegroundColor Cyan
+Write-Host "|  Target: $($target.ToUpper().PadRight(20)) Service: $($targetService.PadRight(18))|" -ForegroundColor Cyan
+Write-Host "|  Railway Environment: $($targetRailwayEnv.PadRight(33))|" -ForegroundColor Cyan
 Write-Host "+--------------------------------------------------------+" -ForegroundColor Cyan
 Write-Host ""
 
@@ -229,28 +253,48 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-# 6. Execute railway variable set
-Write-Host "Setting $($envMap.Count) variables on Railway (environment: $targetRailwayEnv)..." -ForegroundColor Cyan
-
-$cliArgs = @("variable", "set")
-if ($Service) {
-    $cliArgs += @("-s", $Service)
-}
-if ($targetRailwayEnv) {
-    $cliArgs += @("-e", $targetRailwayEnv)
-}
-if ($SkipDeploys) {
-    $cliArgs += "--skip-deploys"
-}
+# 6. Separate complex values (JSON, quotes, newlines) for stdin transmission
+$complexVars = [ordered]@{}
+$standardVars = [ordered]@{}
 
 foreach ($k in $envMap.Keys) {
-    $cliArgs += "$k=$($envMap[$k])"
+    $val = $envMap[$k]
+    if ($val -match '[\r\n"{}]') {
+        $complexVars[$k] = $val
+    } else {
+        $standardVars[$k] = $val
+    }
 }
 
-& railway @cliArgs
-if ($LASTEXITCODE -ne 0) {
-    throw "Failed to set variables on Railway (exit code $LASTEXITCODE)"
+# 7. Execute railway variable set
+Write-Host "Setting $($envMap.Count) variables on Railway (Service: $targetService, Environment: $targetRailwayEnv)..." -ForegroundColor Cyan
+
+# Set complex variables via stdin to avoid Windows CLI quote escaping issues
+foreach ($k in $complexVars.Keys) {
+    Write-Host "Setting $k via stdin..." -ForegroundColor DarkCyan
+    $val = $complexVars[$k]
+    $val | & railway variable set $k --stdin -s $targetService -e $targetRailwayEnv --skip-deploys
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to set $k via stdin on Railway (exit code $LASTEXITCODE)"
+    }
+}
+
+# Set remaining standard variables in batch
+if ($standardVars.Count -gt 0) {
+    $cliArgs = @("variable", "set", "-s", $targetService, "-e", $targetRailwayEnv)
+    if ($SkipDeploys) {
+        $cliArgs += "--skip-deploys"
+    }
+
+    foreach ($k in $standardVars.Keys) {
+        $cliArgs += "$k=$($standardVars[$k])"
+    }
+
+    & railway @cliArgs
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to set standard variables on Railway (exit code $LASTEXITCODE)"
+    }
 }
 
 Write-Host ""
-Write-Host "Successfully synchronized $($envMap.Count) environment variables to Railway ($targetRailwayEnv)!" -ForegroundColor Green
+Write-Host "Successfully synchronized $($envMap.Count) environment variables to Railway ($targetService / $targetRailwayEnv)!" -ForegroundColor Green
