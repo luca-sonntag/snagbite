@@ -50,7 +50,11 @@
 
     "use:prod": "node scripts/switchEnv.js prod",
     "use:dev": "node scripts/switchEnv.js dev",
-    "use:status": "node scripts/switchEnv.js status"
+    "use:status": "node scripts/switchEnv.js status",
+
+    "railway:env:prod": "powershell -ExecutionPolicy Bypass -File scripts/sync-railway-env.ps1 -Prod",
+    "railway:env:dev": "powershell -ExecutionPolicy Bypass -File scripts/sync-railway-env.ps1 -Dev",
+    "railway:env:dry": "powershell -ExecutionPolicy Bypass -File scripts/sync-railway-env.ps1 -Prod -DryRun"
   },
   "devDependencies": {
     "concurrently": "^10.0.3"

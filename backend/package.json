@@ -54,7 +54,10 @@
     "build:off": "npm run backfill:off-index",
     "purge-hosted-frames": "npm run db:purge-frames",
     "generate:ingredient-image": "npm run icons:generate",
-    "icons:generate-missing": "npm run icons:missing"
+    "icons:generate-missing": "npm run icons:missing",
+    "railway:env:prod": "powershell -ExecutionPolicy Bypass -File ../scripts/sync-railway-env.ps1 -Prod",
+    "railway:env:dev": "powershell -ExecutionPolicy Bypass -File ../scripts/sync-railway-env.ps1 -Dev",
+    "railway:env:dry": "powershell -ExecutionPolicy Bypass -File ../scripts/sync-railway-env.ps1 -Prod -DryRun"
   },
   "dependencies": {
     "@bgbuster/sdk": "^0.0.2",
