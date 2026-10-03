@@ -77,3 +77,4 @@ Während Capgo OTA ausschließlich Web-Assets (HTML/JS/CSS) aktualisiert, steuer
 
 * **Multi-Stage Dockerfile:** Multi-stage Build (`node:22-alpine`). Installiert systemseitig `ffmpeg`, `python3` (für yt-dlp) und `ttf-dejavu`.
 * **Stateless Deployment:** Backend und Frontend-Assets statisch gebündelt.
+* **Environment Variables Sync (`scripts/sync-railway-env.ps1`):** Synchronisation via `npm run railway:env:prod` (kombiniert `backend/.env` und `backend/.env.production`) bzw. `npm run railway:env:dev` via Railway CLI.

@@ -113,6 +113,12 @@ Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()` (
 * **Stateless Scaling (Web vs. Worker):** Gesteuert über Umgebungsvariable `ROLE` (`web` | `worker` | `both`).
   * `web`: Serviert API und Frontend-Assets.
   * `worker`: Führt die asynchrone Queue-Schleife aus (`claimNextJob`, Frame-Extraktion, Gemini-Upload).
+* **Environment Variables Sync (`scripts/sync-railway-env.ps1`):**
+  * CLI-Tool zur Synchronisation lokaler Env-Variablen mit Railway (`railway variable set`).
+  * `npm run railway:env:prod`: Synchronisiert Production-Variablen (`backend/.env` als Basis gemergt mit `backend/.env.production` Overrides).
+  * `npm run railway:env:dev`: Synchronisiert Development-Variablen (`backend/.env`).
+  * `npm run railway:env:dry`: Dry-Run-Vorschau aller Variablen mit Farbcodierung der Quellen und Maskierung von Secrets.
+  * Inlined lokale JSON-Dateien (z. B. `FCM_SERVICE_ACCOUNT_JSON`) automatisch als minifiziertes JSON für den Railway-Container.
 
 ---
 
