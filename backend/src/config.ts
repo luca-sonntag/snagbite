@@ -62,7 +62,6 @@ export interface Config {
   ADMIN_EMAILS: string;
   HEALTHCHECK_WEBSITE_URL?: string;
   HEALTHCHECK_BACKEND_URL?: string;
-  PUBLIC_BACKEND_URL?: string;
   NTFY_TOPIC?: string;
   TELEGRAM_BOT_TOKEN?: string;
   TELEGRAM_CHAT_ID?: string;
@@ -143,7 +142,6 @@ export const config: Config = {
   ADMIN_EMAILS: getEnv('ADMIN_EMAILS', ''),
   HEALTHCHECK_WEBSITE_URL: process.env.HEALTHCHECK_WEBSITE_URL,
   HEALTHCHECK_BACKEND_URL: process.env.HEALTHCHECK_BACKEND_URL,
-  PUBLIC_BACKEND_URL: process.env.PUBLIC_BACKEND_URL || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : undefined),
   NTFY_TOPIC: process.env.NTFY_TOPIC,
   TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
   TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID,
