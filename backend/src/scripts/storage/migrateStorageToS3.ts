@@ -13,6 +13,7 @@ import type { StorageBucket } from '../../storage/s3Client.js';
 
 const scriptEnv = initScriptEnv();
 const isDryRun = process.argv.includes('--dry-run');
+const skipRewrite = process.argv.includes('--skip-url-rewrite');
 const client = scriptEnv.client;
 
 const {
@@ -153,7 +154,15 @@ async function main(): Promise<void> {
     totalFiles += count;
   }
 
-  const { scanned, updated } = await rewriteRecipeImageUrls();
+  let scanned = 0;
+  let updated = 0;
+  if (!skipRewrite) {
+    const res = await rewriteRecipeImageUrls();
+    scanned = res.scanned;
+    updated = res.updated;
+  } else {
+    console.log('\n⏭️ Skipping recipe image URL rewrite (--skip-url-rewrite passed).');
+  }
 
   console.log('\n============================================================');
   console.log('✅ Migration Summary:');
