@@ -5,6 +5,12 @@ import type {
 } from '../types.js';
 import { DEFAULT_GAMIFICATION_CONFIG } from '../types.js';
 import { getClient, wrapError } from './client.js';
+import {
+  ensureBucketExists,
+  uploadFile,
+  getSignedUrl,
+  getPublicUrl,
+} from '../storage/s3Client.js';
 import type {
   UserStatsRow,
   InsertCookEventArgs,
@@ -22,6 +28,18 @@ export type {
   CookHistory,
   LedgerRow,
 };
+
+async function resolveCookPhotoUrl(photoPath: string | null | undefined): Promise<string | null> {
+  if (!photoPath) return null;
+  if (photoPath.startsWith('http') || photoPath.startsWith('data:')) {
+    return photoPath;
+  }
+  try {
+    return await getSignedUrl('cook-photos', photoPath, 7 * 24 * 3600);
+  } catch {
+    return getPublicUrl('cook-photos', photoPath);
+  }
+}
 
 
 function rowToUserStats(row: UserStatsRow): UserStats {
@@ -202,22 +220,7 @@ export async function getCookHistoryForRecipe(
         timer_elapsed: boolean;
       }>
     ).map(async (row): Promise<CookHistoryItem> => {
-      let photoUrl: string | null = null;
-      const photoPath = row.photo_path;
-      if (photoPath && !photoPath.startsWith('http') && !photoPath.startsWith('data:')) {
-        try {
-          const { data: signedData } = await getClient()
-            .storage.from('cook-photos')
-            .createSignedUrl(photoPath, 60 * 60 * 24 * 7);
-          photoUrl =
-            signedData?.signedUrl ??
-            getClient().storage.from('cook-photos').getPublicUrl(photoPath).data.publicUrl;
-        } catch {
-          photoUrl = getClient().storage.from('cook-photos').getPublicUrl(photoPath).data.publicUrl;
-        }
-      } else if (photoPath) {
-        photoUrl = photoPath;
-      }
+      const photoUrl = await resolveCookPhotoUrl(row.photo_path);
       return {
         id: row.id,
         cookedAt: row.cooked_at,
@@ -269,27 +272,12 @@ export async function getRecentCookPhotos(
 
   return Promise.all(
     rows.map(async (row) => {
-      const photoPath = row.photo_path;
-      let photoUrl = photoPath;
-      if (photoPath && !photoPath.startsWith('http') && !photoPath.startsWith('data:')) {
-        try {
-          const { data: signedData } = await getClient()
-            .storage.from('cook-photos')
-            .createSignedUrl(photoPath, 60 * 60 * 24 * 7);
-          if (signedData?.signedUrl) {
-            photoUrl = signedData.signedUrl;
-          } else {
-            photoUrl = getClient().storage.from('cook-photos').getPublicUrl(photoPath).data.publicUrl;
-          }
-        } catch {
-          photoUrl = getClient().storage.from('cook-photos').getPublicUrl(photoPath).data.publicUrl;
-        }
-      }
+      const photoUrl = await resolveCookPhotoUrl(row.photo_path);
       return {
         id: row.id,
         jobId: row.recipe_id || '',
         recipeId: row.recipe_id,
-        photoUrl,
+        photoUrl: photoUrl || '',
         cookedAt: row.cooked_at,
         recipeTitle: row.recipes?.title || 'Gekochtes Gericht',
       };
@@ -418,9 +406,7 @@ export async function uploadCookPhoto(
   const clean = base64.replace(/^data:image\/\w+;base64,/, '');
   const buffer = Buffer.from(clean, 'base64');
   const storagePath = `${userId}/${cookId}.jpg`;
-  const { error } = await getClient()
-    .storage.from('cook-photos')
-    .upload(storagePath, buffer, { contentType: 'image/jpeg', upsert: true });
-  if (error) throw wrapError('Failed to upload cook photo', error as unknown as import('@supabase/supabase-js').PostgrestError);
+  await ensureBucketExists('cook-photos');
+  await uploadFile('cook-photos', storagePath, buffer, 'image/jpeg');
   return storagePath;
 }
