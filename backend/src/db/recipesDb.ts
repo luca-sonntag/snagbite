@@ -254,3 +254,13 @@ export async function setFlags(
     .set({ flags, updatedAt: new Date() })
     .where(and(eq(userRecipes.recipeId, recipeId), eq(userRecipes.userId, userId)));
 }
+
+export async function setRecipeVisibility(
+  id: string,
+  visibility: 'public' | 'private' | 'unlisted'
+): Promise<void> {
+  await db
+    .update(recipes)
+    .set({ visibility, updatedAt: new Date() })
+    .where(eq(recipes.id, id));
+}

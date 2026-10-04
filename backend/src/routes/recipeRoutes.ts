@@ -16,7 +16,7 @@ import {
   uploadCookPhoto,
   markMealPlansCookedForRecipe,
   consumePantryForRecipe,
-  getClient,
+  setRecipeVisibility,
   getUserRecipeRemixes,
 } from '../db.js';
 import { AppError, sendAppError } from '../errors.js';
@@ -515,17 +515,9 @@ recipeRoutes.patch('/recipes/:id/visibility', async (req: Request, res: Response
       throw new AppError('INVALID_FIELD', { params: { field: 'visibility' } });
     }
 
-    const recipe = await assertRecipeAccess(req.userId!, id);
+    await assertRecipeAccess(req.userId!, id);
 
-    const { error } = await getClient()
-      .from('recipes')
-      .update({
-        visibility,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', id);
-
-    if (error) throw error;
+    await setRecipeVisibility(id, visibility);
 
     res.status(200).json({ success: true, visibility, message: 'Recipe visibility updated.' });
   } catch (error: unknown) {
