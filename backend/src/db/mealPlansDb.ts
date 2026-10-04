@@ -6,63 +6,48 @@ import type {
   Ingredient,
   NutritionalValues,
 } from '@cookbook/shared';
-import { getClient, wrapError, isNoRowsError, num } from './client.js';
-import type { MealPlanRow } from './types/mealPlans.js';
+import { num } from './client.js';
+import { db } from './drizzle.js';
+import { mealPlans } from './schema/mealPlans.js';
+import { recipes } from './schema/recipes.js';
+import { cookEvents } from './schema/gamification.js';
+import { eq, and, gte, lte, asc, inArray } from 'drizzle-orm';
 
-const MEAL_PLAN_SELECT_FIELDS = `
-  id,
-  user_id,
-  recipe_id,
-  plan_date,
-  meal_type,
-  servings,
-  is_cooked,
-  notes,
-  created_at,
-  updated_at,
-  recipes (
-    id,
-    title,
-    image_url,
-    emoji,
-    health_score,
-    prep_time,
-    cook_time,
-    servings,
-    nutritional_values,
-    ingredients
-  )
-`;
+export function rowToMealPlanEntry(row: any): MealPlanEntry {
+  const mp = row.mealPlan ?? row;
+  const rec = row.recipe ?? row.recipes;
+  const rawNv = rec?.nutritionalValues ?? rec?.nutritional_values;
+  const nv = (rawNv as NutritionalValues | undefined) ?? null;
 
-export function rowToMealPlanEntry(row: MealPlanRow): MealPlanEntry {
-  const recipeData = row.recipes;
-  const nv = (recipeData?.nutritional_values as NutritionalValues | undefined) ?? null;
+  const rawCreatedAt = mp.createdAt ?? mp.created_at;
+  const rawUpdatedAt = mp.updatedAt ?? mp.updated_at;
+
   return {
-    id: row.id,
-    userId: row.user_id,
-    recipeId: row.recipe_id,
-    planDate: row.plan_date,
-    mealType: row.meal_type as MealType,
-    servings: num(row.servings) ?? 2,
-    isCooked: row.is_cooked,
-    notes: row.notes,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    recipe: recipeData
+    id: mp.id,
+    userId: mp.userId ?? mp.user_id,
+    recipeId: mp.recipeId ?? mp.recipe_id,
+    planDate: mp.planDate ?? mp.plan_date,
+    mealType: (mp.mealType ?? mp.meal_type) as MealType,
+    servings: num(mp.servings) ?? 2,
+    isCooked: Boolean(mp.isCooked ?? mp.is_cooked),
+    notes: mp.notes ?? null,
+    createdAt: rawCreatedAt instanceof Date ? rawCreatedAt.toISOString() : String(rawCreatedAt),
+    updatedAt: rawUpdatedAt instanceof Date ? rawUpdatedAt.toISOString() : String(rawUpdatedAt),
+    recipe: rec
       ? {
-          id: recipeData.id,
-          title: recipeData.title,
-          imageUrl: recipeData.image_url,
-          emoji: recipeData.emoji,
-          healthScore: num(recipeData.health_score),
-          prepTime: recipeData.prep_time,
-          cookTime: recipeData.cook_time,
-          servings: num(recipeData.servings) ?? 2,
+          id: rec.id,
+          title: rec.title,
+          imageUrl: rec.imageUrl ?? rec.image_url,
+          emoji: rec.emoji,
+          healthScore: num(rec.healthScore ?? rec.health_score),
+          prepTime: rec.prepTime ?? rec.prep_time,
+          cookTime: rec.cookTime ?? rec.cook_time,
+          servings: num(rec.servings) ?? 2,
           calories: num(nv?.calories),
           protein: num(nv?.protein),
           carbs: num(nv?.carbs),
           fat: num(nv?.fat),
-          ingredients: (recipeData.ingredients as Ingredient[]) ?? [],
+          ingredients: (rec.ingredients as Ingredient[]) ?? [],
         }
       : undefined,
   };
@@ -73,62 +58,64 @@ export async function listMealPlans(
   startDate?: string,
   endDate?: string,
 ): Promise<MealPlanEntry[]> {
-  let query = getClient()
-    .from('meal_plans')
-    .select(MEAL_PLAN_SELECT_FIELDS)
-    .eq('user_id', userId)
-    .order('plan_date', { ascending: true })
-    .order('created_at', { ascending: true });
-
+  const conditions = [eq(mealPlans.userId, userId)];
   if (startDate) {
-    query = query.gte('plan_date', startDate);
+    conditions.push(gte(mealPlans.planDate, startDate));
   }
   if (endDate) {
-    query = query.lte('plan_date', endDate);
+    conditions.push(lte(mealPlans.planDate, endDate));
   }
 
-  const { data, error } = await query;
-  if (error) throw wrapError('listMealPlans', error);
+  const rows = await db
+    .select({
+      mealPlan: mealPlans,
+      recipe: recipes,
+    })
+    .from(mealPlans)
+    .leftJoin(recipes, eq(mealPlans.recipeId, recipes.id))
+    .where(and(...conditions))
+    .orderBy(asc(mealPlans.planDate), asc(mealPlans.createdAt));
 
-  const rows = (data as unknown as MealPlanRow[]) || [];
   if (rows.length === 0) return [];
 
   // Cross-reference with cook_events to catch any cooks on matching plan dates
   try {
-    let cookQuery = getClient()
-      .from('cook_events')
-      .select('recipe_id, cooked_at')
-      .eq('user_id', userId);
-
+    const cookConditions = [eq(cookEvents.userId, userId)];
     if (startDate) {
-      const bufferStart = new Date(new Date(startDate).getTime() - 24 * 60 * 60 * 1000).toISOString();
-      cookQuery = cookQuery.gte('cooked_at', bufferStart);
+      const bufferStart = new Date(new Date(startDate).getTime() - 24 * 60 * 60 * 1000);
+      cookConditions.push(gte(cookEvents.cookedAt, bufferStart));
     }
     if (endDate) {
-      const bufferEnd = new Date(new Date(endDate).getTime() + 48 * 60 * 60 * 1000).toISOString();
-      cookQuery = cookQuery.lte('cooked_at', bufferEnd);
+      const bufferEnd = new Date(new Date(endDate).getTime() + 48 * 60 * 60 * 1000);
+      cookConditions.push(lte(cookEvents.cookedAt, bufferEnd));
     }
 
-    const { data: cookEvents } = await cookQuery;
+    const matchedCookEvents = await db
+      .select({
+        recipeId: cookEvents.recipeId,
+        cookedAt: cookEvents.cookedAt,
+      })
+      .from(cookEvents)
+      .where(and(...cookConditions));
 
-    if (cookEvents && cookEvents.length > 0) {
+    if (matchedCookEvents.length > 0) {
       const pendingIdsToUpdate: string[] = [];
 
       for (const row of rows) {
-        if (!row.is_cooked) {
-          const hasMatchingCook = cookEvents.some((ce: { recipe_id: string; cooked_at: string }) => {
-            if (ce.recipe_id !== row.recipe_id) return false;
-            const cookDateIso = ce.cooked_at.split('T')[0];
-            if (cookDateIso === row.plan_date) return true;
+        if (!row.mealPlan.isCooked) {
+          const hasMatchingCook = matchedCookEvents.some((ce) => {
+            if (ce.recipeId !== row.mealPlan.recipeId) return false;
+            const cookDateIso = (ce.cookedAt instanceof Date ? ce.cookedAt.toISOString() : String(ce.cookedAt)).split('T')[0];
+            if (cookDateIso === row.mealPlan.planDate) return true;
             const diffDays = Math.abs(
-              (new Date(cookDateIso).getTime() - new Date(row.plan_date).getTime()) / (1000 * 60 * 60 * 24),
+              (new Date(cookDateIso).getTime() - new Date(row.mealPlan.planDate).getTime()) / (1000 * 60 * 60 * 24),
             );
             return diffDays <= 1;
           });
 
           if (hasMatchingCook) {
-            row.is_cooked = true;
-            pendingIdsToUpdate.push(row.id);
+            row.mealPlan.isCooked = true;
+            pendingIdsToUpdate.push(row.mealPlan.id);
           }
         }
       }
@@ -136,10 +123,10 @@ export async function listMealPlans(
       if (pendingIdsToUpdate.length > 0) {
         void (async () => {
           try {
-            await getClient()
-              .from('meal_plans')
-              .update({ is_cooked: true, updated_at: new Date().toISOString() })
-              .in('id', pendingIdsToUpdate);
+            await db
+              .update(mealPlans)
+              .set({ isCooked: true, updatedAt: new Date() })
+              .where(inArray(mealPlans.id, pendingIdsToUpdate));
           } catch (err: unknown) {
             console.warn('Failed to background-persist meal plan cooked status:', err);
           }
@@ -159,40 +146,46 @@ export async function createMealPlan(
 ): Promise<MealPlanEntry> {
   let initialIsCooked = false;
   try {
-    const bufferStart = new Date(new Date(dto.planDate).getTime() - 24 * 60 * 60 * 1000).toISOString();
-    const bufferEnd = new Date(new Date(dto.planDate).getTime() + 48 * 60 * 60 * 1000).toISOString();
-    const { data: existingCook } = await getClient()
-      .from('cook_events')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('recipe_id', dto.recipeId)
-      .gte('cooked_at', bufferStart)
-      .lte('cooked_at', bufferEnd)
+    const bufferStart = new Date(new Date(dto.planDate).getTime() - 24 * 60 * 60 * 1000);
+    const bufferEnd = new Date(new Date(dto.planDate).getTime() + 48 * 60 * 60 * 1000);
+    const [existingCook] = await db
+      .select({ id: cookEvents.id })
+      .from(cookEvents)
+      .where(and(
+        eq(cookEvents.userId, userId),
+        eq(cookEvents.recipeId, dto.recipeId),
+        gte(cookEvents.cookedAt, bufferStart),
+        lte(cookEvents.cookedAt, bufferEnd)
+      ))
       .limit(1);
 
-    if (existingCook && existingCook.length > 0) {
+    if (existingCook) {
       initialIsCooked = true;
     }
   } catch (err) {
     console.warn('Failed to check existing cook_events on createMealPlan:', err);
   }
 
-  const { data, error } = await getClient()
-    .from('meal_plans')
-    .insert({
-      user_id: userId,
-      recipe_id: dto.recipeId,
-      plan_date: dto.planDate,
-      meal_type: dto.mealType,
-      servings: dto.servings ?? 2,
-      is_cooked: initialIsCooked,
+  const [inserted] = await db
+    .insert(mealPlans)
+    .values({
+      userId,
+      recipeId: dto.recipeId,
+      planDate: dto.planDate,
+      mealType: dto.mealType,
+      servings: String(dto.servings ?? 2),
+      isCooked: initialIsCooked,
       notes: dto.notes ?? null,
     })
-    .select(MEAL_PLAN_SELECT_FIELDS)
-    .single();
+    .returning();
 
-  if (error) throw wrapError('createMealPlan', error);
-  return rowToMealPlanEntry(data as unknown as MealPlanRow);
+  const [recipe] = await db
+    .select()
+    .from(recipes)
+    .where(eq(recipes.id, dto.recipeId))
+    .limit(1);
+
+  return rowToMealPlanEntry({ mealPlan: inserted, recipe: recipe ?? null });
 }
 
 export async function updateMealPlan(
@@ -201,41 +194,38 @@ export async function updateMealPlan(
   dto: UpdateMealPlanDto,
 ): Promise<MealPlanEntry> {
   const updates: Record<string, unknown> = {
-    updated_at: new Date().toISOString(),
+    updatedAt: new Date(),
   };
 
-  if (dto.planDate !== undefined) updates.plan_date = dto.planDate;
-  if (dto.mealType !== undefined) updates.meal_type = dto.mealType;
-  if (dto.servings !== undefined) updates.servings = dto.servings;
-  if (dto.isCooked !== undefined) updates.is_cooked = dto.isCooked;
+  if (dto.planDate !== undefined) updates.planDate = dto.planDate;
+  if (dto.mealType !== undefined) updates.mealType = dto.mealType;
+  if (dto.servings !== undefined) updates.servings = String(dto.servings);
+  if (dto.isCooked !== undefined) updates.isCooked = dto.isCooked;
   if (dto.notes !== undefined) updates.notes = dto.notes;
 
-  const { data, error } = await getClient()
-    .from('meal_plans')
-    .update(updates)
-    .eq('id', id)
-    .eq('user_id', userId)
-    .select(MEAL_PLAN_SELECT_FIELDS)
-    .single();
+  const [updated] = await db
+    .update(mealPlans)
+    .set(updates)
+    .where(and(eq(mealPlans.id, id), eq(mealPlans.userId, userId)))
+    .returning();
 
-  if (error) {
-    if (isNoRowsError(error)) {
-      throw new Error(`Meal plan entry not found or unauthorized: ${id}`);
-    }
-    throw wrapError('updateMealPlan', error);
+  if (!updated) {
+    throw new Error(`Meal plan entry not found or unauthorized: ${id}`);
   }
 
-  return rowToMealPlanEntry(data as unknown as MealPlanRow);
+  const [recipe] = await db
+    .select()
+    .from(recipes)
+    .where(eq(recipes.id, updated.recipeId))
+    .limit(1);
+
+  return rowToMealPlanEntry({ mealPlan: updated, recipe: recipe ?? null });
 }
 
 export async function deleteMealPlan(id: string, userId: string): Promise<void> {
-  const { error } = await getClient()
-    .from('meal_plans')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', userId);
-
-  if (error) throw wrapError('deleteMealPlan', error);
+  await db
+    .delete(mealPlans)
+    .where(and(eq(mealPlans.id, id), eq(mealPlans.userId, userId)));
 }
 
 export async function markMealPlansCookedForRecipe(
@@ -250,20 +240,19 @@ export async function markMealPlansCookedForRecipe(
 
   const candidateDates = dateStr ? [dateStr] : [yesterday, utcToday, tomorrow];
 
-  const { data, error } = await getClient()
-    .from('meal_plans')
-    .update({
-      is_cooked: true,
-      updated_at: new Date().toISOString(),
+  const rows = await db
+    .update(mealPlans)
+    .set({
+      isCooked: true,
+      updatedAt: new Date(),
     })
-    .eq('user_id', userId)
-    .eq('recipe_id', recipeId)
-    .in('plan_date', candidateDates)
-    .eq('is_cooked', false)
-    .select('id');
+    .where(and(
+      eq(mealPlans.userId, userId),
+      eq(mealPlans.recipeId, recipeId),
+      inArray(mealPlans.planDate, candidateDates),
+      eq(mealPlans.isCooked, false)
+    ))
+    .returning({ id: mealPlans.id });
 
-  if (error) throw wrapError('markMealPlansCookedForRecipe', error);
-  return (data as Array<{ id: string }> | null)?.length ?? 0;
+  return rows.length;
 }
-
-
