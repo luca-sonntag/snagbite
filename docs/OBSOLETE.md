@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-04: Ablösung von Supabase Storage durch S3-kompatiblen Object Storage (Railway Tigris / MinIO)
+
+* **Ersetzter Code / Veraltete Logik:**
+  - Supabase Storage Client (`getClient().storage.from(...)`) in `imageGenerator.ts`, `photoImport.ts`, `gamificationDb.ts`, `adminDb.ts` und `appUpdates.ts`.
+  - Toter Bucket `recipe-frames` (wurde bereits durch clientseitiges Caching in IndexedDB überflüssig).
+* **Ersetzt durch:**
+  - **Zentraler S3-Storage-Client ([`backend/src/storage/s3Client.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/storage/s3Client.ts)):** Nutzt `@aws-sdk/client-s3` und `@aws-sdk/s3-request-presigner` für alle Datei-Operationen (`uploadFile`, `downloadFile`, `deleteFiles`, `listFiles`, `listFolders`, `getPublicUrl`, `getSignedUrl`).
+  - **5 aktive Buckets:** `recipe-covers`, `app-bundles`, `feedback-screenshots`, `recipe-photos`, `cook-photos`.
+  - **Automatisches Migrationsskript ([`backend/src/scripts/storage/migrateStorageToS3.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/scripts/storage/migrateStorageToS3.ts)):** Überträgt Dateien aus alten Supabase-Buckets nach S3 und aktualisiert Bild-URLs in der Datenbank (`npm run storage:migrate:dev` / `npm run storage:migrate:prod`).
+* **Betroffene Dateien:** `backend/src/storage/s3Client.ts`, `backend/src/imageGenerator.ts`, `backend/src/photoImport.ts`, `backend/src/db/gamificationDb.ts`, `backend/src/db/adminDb.ts`, `backend/src/appUpdates.ts`, `backend/src/scripts/storage/migrateStorageToS3.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-01: Kategorie-Icons als Fallback für Zutaten-Icons entfernt
 
 * **Ersetzter Code / Veraltete Logik:**
