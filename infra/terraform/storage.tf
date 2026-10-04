@@ -1,7 +1,26 @@
-# S3-compatible Object Storage Service
 resource "railway_service" "storage" {
-  project_id = railway_project.main.id
-  name       = "storage"
+  project_id   = local.project_id
+  name         = "storage"
+  source_image = "minio/minio:latest"
+
+  volume = {
+    name       = "storage-data"
+    mount_path = "/data"
+  }
+}
+
+resource "railway_variable" "storage_root_user" {
+  environment_id = local.environment_id
+  service_id     = railway_service.storage.id
+  name           = "MINIO_ROOT_USER"
+  value          = "snagbite_admin"
+}
+
+resource "railway_variable" "storage_root_password" {
+  environment_id = local.environment_id
+  service_id     = railway_service.storage.id
+  name           = "MINIO_ROOT_PASSWORD"
+  value          = "snagbite_storage_secret_2026"
 }
 
 # The 5 active buckets managed in Snagbite:
@@ -11,7 +30,7 @@ resource "railway_service" "storage" {
 # - recipe-photos (private, backend-only)
 # - cook-photos (private, backend-only)
 resource "railway_variable" "storage_active_buckets" {
-  environment_id = railway_environment.env.id
+  environment_id = local.environment_id
   service_id     = railway_service.storage.id
   name           = "ACTIVE_BUCKETS"
   value          = "recipe-covers,app-bundles,feedback-screenshots,recipe-photos,cook-photos"

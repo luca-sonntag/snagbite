@@ -5,6 +5,18 @@ variable "railway_token" {
   default     = null
 }
 
+variable "project_id" {
+  description = "Existing Railway project ID"
+  type        = string
+  default     = "eaefc4e6-e615-478c-b265-016e9f0062c7"
+}
+
+variable "environment_id" {
+  description = "Existing Railway environment ID"
+  type        = string
+  default     = null
+}
+
 variable "project_name" {
   description = "Name of the Railway project"
   type        = string
@@ -15,6 +27,12 @@ variable "environment_name" {
   description = "Railway environment name (production or development)"
   type        = string
   default     = "production"
+}
+
+variable "backend_service_id" {
+  description = "Existing Backend service ID"
+  type        = string
+  default     = null
 }
 
 variable "github_repo" {
