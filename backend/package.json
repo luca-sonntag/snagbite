@@ -25,6 +25,9 @@
     "db:restore:prod": "tsx src/scripts/db/restoreDatabase.ts --prod",
     "db:restore:dev": "tsx src/scripts/db/restoreDatabase.ts --dev",
     "db:purge-frames": "tsx src/scripts/db/purgeHostedFrames.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
     "backfill:covers": "tsx src/scripts/backfill/backfillPublicRecipeCovers.ts",
     "backfill:covers:prod": "tsx src/scripts/backfill/backfillPublicRecipeCovers.ts --prod",
     "backfill:covers:dev": "tsx src/scripts/backfill/backfillPublicRecipeCovers.ts --dev",
@@ -68,6 +71,7 @@
     "cheerio": "^1.2.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.45.3",
     "express": "^4.19.2",
     "express-rate-limit": "^8.5.2",
     "ffmpeg-static": "^5.3.0",
@@ -76,6 +80,7 @@
     "helmet": "^8.2.0",
     "jose": "^6.2.3",
     "minisearch": "^7.2.0",
+    "pg": "^8.23.1",
     "sharp": "^0.32.6",
     "youtube-dl-exec": "^3.1.8"
   },
@@ -86,7 +91,9 @@
     "@types/express": "^4.17.21",
     "@types/fluent-ffmpeg": "^2.1.28",
     "@types/node": "^20.14.2",
+    "@types/pg": "^8.23.1",
     "cross-env": "^10.1.0",
+    "drizzle-kit": "^0.31.11",
     "tsx": "^4.15.2",
     "typescript": "^5.4.5"
   }
