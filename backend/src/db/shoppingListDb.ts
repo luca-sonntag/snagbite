@@ -2,83 +2,30 @@ import {
   type ShoppingListItem,
   type CreateShoppingListItemDto,
   type UpdateShoppingListItemDto,
-  type ParentIngredientInfo,
-  getDefaultShelfLifeDays,
 } from '@cookbook/shared';
-import { getClient, wrapError, isNoRowsError, num } from './client.js';
-import type { ShoppingListRow } from './types/shoppingList.js';
-import { createPantryItem } from './pantryDb.js';
-import { buildMappingKeys } from '../matching/baseNameCanonical.js';
-import { lookupMapping } from '../matching/mappingStore.js';
+import { db } from './drizzle.js';
+import { shoppingList } from './schema/pantryAndShopping.js';
+import { eq, and, inArray, asc } from 'drizzle-orm';
+import {
+  rowToShoppingListItem,
+  enrichShoppingListItem,
+  enrichShoppingListItems,
+  autoTransferToPantry,
+} from './shoppingListEnricher.js';
 
-export function rowToShoppingListItem(row: ShoppingListRow): ShoppingListItem {
-  return {
-    id: row.id,
-    userId: row.user_id,
-    name: row.name,
-    baseName: row.base_name ?? undefined,
-    parentIngredient: (row.parent_ingredient as ParentIngredientInfo) ?? undefined,
-    modifier: row.modifier ?? undefined,
-    brand: row.brand ?? undefined,
-    amount: num(row.amount) ?? 0,
-    unit: row.unit,
-    recipeId: row.recipe_id ?? undefined,
-    recipeTitle: row.recipe_title ?? undefined,
-    checked: row.checked,
-    category: row.category ?? undefined,
-    canonicalId: row.canonical_id ?? null,
-    notes: row.notes ?? undefined,
-    inPantryWarning: row.in_pantry_warning ?? false,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
-}
-
-export async function enrichShoppingListItem(
-  item: ShoppingListItem,
-  fallbackDto?: CreateShoppingListItemDto
-): Promise<ShoppingListItem> {
-  if (fallbackDto?.typicalPackageAmount && Number(fallbackDto.typicalPackageAmount) > 0) {
-    item.typicalPackageAmount = Number(fallbackDto.typicalPackageAmount);
-    item.typicalPackageUnit = fallbackDto.typicalPackageUnit || undefined;
-  }
-
-  if (!item.typicalPackageAmount) {
-    const keys = buildMappingKeys(item.baseName, item.name, undefined, item.parentIngredient);
-    if (keys.length > 0) {
-      try {
-        const mapping = await lookupMapping(keys, item.category || '');
-        if (mapping?.typicalPackageAmount && Number(mapping.typicalPackageAmount) > 0) {
-          item.typicalPackageAmount = Number(mapping.typicalPackageAmount);
-          item.typicalPackageUnit = mapping.typicalPackageUnit || undefined;
-        }
-      } catch {
-        // Non-fatal
-      }
-    }
-  }
-
-  return item;
-}
-
-export async function enrichShoppingListItems(
-  items: ShoppingListItem[],
-  fallbackDtos?: CreateShoppingListItemDto[]
-): Promise<ShoppingListItem[]> {
-  return Promise.all(
-    items.map((item, idx) => enrichShoppingListItem(item, fallbackDtos ? fallbackDtos[idx] : undefined))
-  );
-}
+export {
+  rowToShoppingListItem,
+  enrichShoppingListItem,
+  enrichShoppingListItems,
+};
 
 export async function listShoppingList(userId: string): Promise<ShoppingListItem[]> {
-  const { data, error } = await getClient()
-    .from('shopping_list')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: true });
+  const rows = await db
+    .select()
+    .from(shoppingList)
+    .where(eq(shoppingList.userId, userId))
+    .orderBy(asc(shoppingList.createdAt));
 
-  if (error) throw wrapError('listShoppingList', error);
-  const rows = (data as unknown as ShoppingListRow[] || []);
   const rawItems = rows.map(rowToShoppingListItem);
   return enrichShoppingListItems(rawItems);
 }
@@ -87,30 +34,28 @@ export async function createShoppingListItem(
   userId: string,
   dto: CreateShoppingListItemDto
 ): Promise<ShoppingListItem> {
-  const { data, error } = await getClient()
-    .from('shopping_list')
-    .insert({
-      user_id: userId,
+  const [inserted] = await db
+    .insert(shoppingList)
+    .values({
+      userId,
       name: dto.name,
-      base_name: dto.baseName ?? null,
-      parent_ingredient: dto.parentIngredient ?? null,
+      baseName: dto.baseName ?? null,
+      parentIngredient: dto.parentIngredient ?? null,
       modifier: dto.modifier ?? null,
       brand: dto.brand ?? null,
-      amount: Math.max(0, dto.amount || 0),
+      amount: String(Math.max(0, dto.amount || 0)),
       unit: dto.unit,
-      recipe_id: dto.recipeId ?? null,
-      recipe_title: dto.recipeTitle ?? null,
+      recipeId: dto.recipeId ?? null,
+      recipeTitle: dto.recipeTitle ?? null,
       checked: dto.checked ?? false,
       category: dto.category ?? null,
-      canonical_id: dto.canonicalId ?? null,
+      canonicalId: dto.canonicalId ?? null,
       notes: dto.notes ?? null,
-      in_pantry_warning: dto.inPantryWarning ?? false,
+      inPantryWarning: dto.inPantryWarning ?? false,
     })
-    .select('*')
-    .single();
+    .returning();
 
-  if (error) throw wrapError('createShoppingListItem', error);
-  const rawItem = rowToShoppingListItem(data as unknown as ShoppingListRow);
+  const rawItem = rowToShoppingListItem(inserted);
   return enrichShoppingListItem(rawItem, dto);
 }
 
@@ -120,31 +65,30 @@ export async function batchAddShoppingListItems(
 ): Promise<ShoppingListItem[]> {
   if (items.length === 0) return [];
 
-  const rows = items.map((dto) => ({
-    user_id: userId,
+  const values = items.map((dto) => ({
+    userId,
     name: dto.name,
-    base_name: dto.baseName ?? null,
-    parent_ingredient: dto.parentIngredient ?? null,
+    baseName: dto.baseName ?? null,
+    parentIngredient: dto.parentIngredient ?? null,
     modifier: dto.modifier ?? null,
     brand: dto.brand ?? null,
-    amount: Math.max(0, dto.amount || 0),
+    amount: String(Math.max(0, dto.amount || 0)),
     unit: dto.unit,
-    recipe_id: dto.recipeId ?? null,
-    recipe_title: dto.recipeTitle ?? null,
+    recipeId: dto.recipeId ?? null,
+    recipeTitle: dto.recipeTitle ?? null,
     checked: dto.checked ?? false,
     category: dto.category ?? null,
-    canonical_id: dto.canonicalId ?? null,
+    canonicalId: dto.canonicalId ?? null,
     notes: dto.notes ?? null,
-    in_pantry_warning: dto.inPantryWarning ?? false,
+    inPantryWarning: dto.inPantryWarning ?? false,
   }));
 
-  const { data, error } = await getClient()
-    .from('shopping_list')
-    .insert(rows)
-    .select('*');
+  const inserted = await db
+    .insert(shoppingList)
+    .values(values)
+    .returning();
 
-  if (error) throw wrapError('batchAddShoppingListItems', error);
-  const rawItems = (data as unknown as ShoppingListRow[] || []).map(rowToShoppingListItem);
+  const rawItems = inserted.map(rowToShoppingListItem);
   return enrichShoppingListItems(rawItems, items);
 }
 
@@ -154,72 +98,57 @@ export async function updateShoppingListItem(
   dto: UpdateShoppingListItemDto
 ): Promise<ShoppingListItem> {
   const updates: Record<string, unknown> = {
-    updated_at: new Date().toISOString(),
+    updatedAt: new Date(),
   };
 
   if (dto.name !== undefined) updates.name = dto.name;
-  if (dto.baseName !== undefined) updates.base_name = dto.baseName;
-  if (dto.amount !== undefined) updates.amount = Math.max(0, dto.amount);
+  if (dto.baseName !== undefined) updates.baseName = dto.baseName;
+  if (dto.amount !== undefined) updates.amount = String(Math.max(0, dto.amount));
   if (dto.unit !== undefined) updates.unit = dto.unit;
   if (dto.checked !== undefined) updates.checked = dto.checked;
   if (dto.notes !== undefined) updates.notes = dto.notes;
   if (dto.modifier !== undefined) updates.modifier = dto.modifier;
   if (dto.brand !== undefined) updates.brand = dto.brand;
   if (dto.category !== undefined) updates.category = dto.category;
-  if (dto.inPantryWarning !== undefined) updates.in_pantry_warning = dto.inPantryWarning;
+  if (dto.inPantryWarning !== undefined) updates.inPantryWarning = dto.inPantryWarning;
 
-  const { data, error } = await getClient()
-    .from('shopping_list')
-    .update(updates)
-    .eq('id', id)
-    .eq('user_id', userId)
-    .select('*')
-    .single();
+  const [updated] = await db
+    .update(shoppingList)
+    .set(updates)
+    .where(and(eq(shoppingList.id, id), eq(shoppingList.userId, userId)))
+    .returning();
 
-  if (error) {
-    if (isNoRowsError(error)) {
-      throw new Error(`Shopping list item not found or unauthorized: ${id}`);
-    }
-    throw wrapError('updateShoppingListItem', error);
+  if (!updated) {
+    throw new Error(`Shopping list item not found or unauthorized: ${id}`);
   }
 
-  const rawItem = rowToShoppingListItem(data as unknown as ShoppingListRow);
+  const rawItem = rowToShoppingListItem(updated);
   return enrichShoppingListItem(rawItem);
 }
 
-/**
- * Toggle checked status and optionally auto-transfer checked item into user's pantry.
- */
 export async function toggleShoppingListItem(
   id: string,
   userId: string,
   checked: boolean,
   autoAddToPantry = true
 ): Promise<ShoppingListItem> {
-  const { data: existingRow, error: fetchErr } = await getClient()
-    .from('shopping_list')
-    .select('*')
-    .eq('id', id)
-    .eq('user_id', userId)
-    .single();
+  const [current] = await db
+    .select()
+    .from(shoppingList)
+    .where(and(eq(shoppingList.id, id), eq(shoppingList.userId, userId)))
+    .limit(1);
 
-  if (fetchErr) throw wrapError('toggleShoppingListItem.fetch', fetchErr);
-  const current = existingRow as unknown as ShoppingListRow;
+  if (!current) throw new Error(`Shopping list item not found: ${id}`);
 
-  const { data, error } = await getClient()
-    .from('shopping_list')
-    .update({
+  const [updated] = await db
+    .update(shoppingList)
+    .set({
       checked,
-      updated_at: new Date().toISOString(),
+      updatedAt: new Date(),
     })
-    .eq('id', id)
-    .eq('user_id', userId)
-    .select('*')
-    .single();
+    .where(and(eq(shoppingList.id, id), eq(shoppingList.userId, userId)))
+    .returning();
 
-  if (error) throw wrapError('toggleShoppingListItem.update', error);
-
-  // Auto-transfer to pantry when checked
   if (checked && !current.checked && autoAddToPantry) {
     try {
       await autoTransferToPantry(userId, current);
@@ -228,7 +157,7 @@ export async function toggleShoppingListItem(
     }
   }
 
-  const rawItem = rowToShoppingListItem(data as unknown as ShoppingListRow);
+  const rawItem = rowToShoppingListItem(updated);
   return enrichShoppingListItem(rawItem);
 }
 
@@ -240,26 +169,22 @@ export async function batchToggleShoppingListItems(
 ): Promise<ShoppingListItem[]> {
   if (ids.length === 0) return [];
 
-  const { data: currentRows } = await getClient()
-    .from('shopping_list')
-    .select('*')
-    .eq('user_id', userId)
-    .in('id', ids);
+  const currentRows = await db
+    .select()
+    .from(shoppingList)
+    .where(and(eq(shoppingList.userId, userId), inArray(shoppingList.id, ids)));
 
-  const { data, error } = await getClient()
-    .from('shopping_list')
-    .update({
+  const updatedRows = await db
+    .update(shoppingList)
+    .set({
       checked,
-      updated_at: new Date().toISOString(),
+      updatedAt: new Date(),
     })
-    .eq('user_id', userId)
-    .in('id', ids)
-    .select('*');
+    .where(and(eq(shoppingList.userId, userId), inArray(shoppingList.id, ids)))
+    .returning();
 
-  if (error) throw wrapError('batchToggleShoppingListItems', error);
-
-  if (checked && autoAddToPantry && currentRows) {
-    for (const row of currentRows as unknown as ShoppingListRow[]) {
+  if (checked && autoAddToPantry && currentRows.length > 0) {
+    for (const row of currentRows) {
       if (!row.checked) {
         await autoTransferToPantry(userId, row).catch((err) =>
           console.warn('Failed auto-transfer on batch toggle:', err)
@@ -268,29 +193,21 @@ export async function batchToggleShoppingListItems(
     }
   }
 
-  const rawItems = (data as unknown as ShoppingListRow[] || []).map(rowToShoppingListItem);
+  const rawItems = updatedRows.map(rowToShoppingListItem);
   return enrichShoppingListItems(rawItems);
 }
 
 export async function deleteShoppingListItem(id: string, userId: string): Promise<void> {
-  const { error } = await getClient()
-    .from('shopping_list')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', userId);
-
-  if (error) throw wrapError('deleteShoppingListItem', error);
+  await db
+    .delete(shoppingList)
+    .where(and(eq(shoppingList.id, id), eq(shoppingList.userId, userId)));
 }
 
 export async function deleteShoppingListItems(userId: string, ids: string[]): Promise<void> {
   if (ids.length === 0) return;
-  const { error } = await getClient()
-    .from('shopping_list')
-    .delete()
-    .eq('user_id', userId)
-    .in('id', ids);
-
-  if (error) throw wrapError('deleteShoppingListItems', error);
+  await db
+    .delete(shoppingList)
+    .where(and(eq(shoppingList.userId, userId), inArray(shoppingList.id, ids)));
 }
 
 export async function clearShoppingList(
@@ -299,113 +216,30 @@ export async function clearShoppingList(
   transferToPantry = false
 ): Promise<void> {
   if (transferToPantry && onlyChecked) {
-    const { data: checkedRows } = await getClient()
-      .from('shopping_list')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('checked', true);
+    const checkedRows = await db
+      .select()
+      .from(shoppingList)
+      .where(and(eq(shoppingList.userId, userId), eq(shoppingList.checked, true)));
 
-    if (checkedRows && checkedRows.length > 0) {
-      for (const row of checkedRows as unknown as ShoppingListRow[]) {
-        await autoTransferToPantry(userId, row).catch((err) =>
-          console.warn('Failed to transfer shopping item to pantry on finish:', err)
-        );
-      }
+    for (const row of checkedRows) {
+      await autoTransferToPantry(userId, row).catch((err) =>
+        console.warn('Failed to transfer shopping item to pantry on finish:', err)
+      );
     }
   }
 
-  let query = getClient().from('shopping_list').delete().eq('user_id', userId);
+  const conditions = [eq(shoppingList.userId, userId)];
   if (onlyChecked) {
-    query = query.eq('checked', true);
+    conditions.push(eq(shoppingList.checked, true));
   }
-  const { error } = await query;
-  if (error) throw wrapError('clearShoppingList', error);
+
+  await db
+    .delete(shoppingList)
+    .where(and(...conditions));
 }
 
 export async function removeRecipeFromShoppingList(userId: string, recipeId: string): Promise<void> {
-  const { error } = await getClient()
-    .from('shopping_list')
-    .delete()
-    .eq('user_id', userId)
-    .eq('recipe_id', recipeId);
-
-  if (error) throw wrapError('removeRecipeFromShoppingList', error);
-}
-
-async function autoTransferToPantry(userId: string, item: ShoppingListRow): Promise<void> {
-  const parent = item.parent_ingredient as { name?: string; baseName?: string; unit?: string } | null;
-  const pantryName = parent?.name || item.name;
-  const pantryBaseName = parent?.baseName || item.base_name;
-
-  let packageAmount = num(item.amount) || 1;
-  let packageUnit = parent?.unit || item.unit;
-  let shelfLifeDays = getDefaultShelfLifeDays(item.category, pantryBaseName || pantryName);
-
-  // 1. Check canonical ingredient mappings using alias discovery (e.g. Gewürzgurken <-> pickle)
-  const keys = buildMappingKeys(pantryBaseName ?? undefined, pantryName, undefined, parent);
-  if (keys.length > 0) {
-    const mapping = await lookupMapping(keys, item.category || '');
-    if (mapping) {
-      if (mapping.typicalPackageAmount && Number(mapping.typicalPackageAmount) > 0) {
-        const pkgAmt = Number(mapping.typicalPackageAmount);
-        const pkgUnit = mapping.typicalPackageUnit || packageUnit;
-        if (pkgUnit.toLowerCase() === item.unit.toLowerCase()) {
-          packageAmount = Math.max(packageAmount, pkgAmt);
-        } else {
-          packageAmount = pkgAmt;
-        }
-        packageUnit = pkgUnit;
-      }
-      if (mapping.shelfLifeDays) {
-        shelfLifeDays = mapping.shelfLifeDays;
-      }
-    } else if (item.recipe_id) {
-      // 2. Fallback: check linked recipe ingredients
-      try {
-        const { data: recData } = await getClient()
-          .from('recipes')
-          .select('ingredients')
-          .eq('id', item.recipe_id)
-          .limit(1)
-          .maybeSingle();
-
-        if (recData?.ingredients && Array.isArray(recData.ingredients)) {
-          const keySet = new Set(keys);
-          for (const ing of recData.ingredients as any[]) {
-            if (!ing || !ing.name) continue;
-            const ingKeys = buildMappingKeys(ing.baseName, ing.name, ing.synonyms, ing.parentIngredient);
-            const isMatch = ingKeys.some((k) => keySet.has(k));
-            if (isMatch) {
-              if (ing.typicalPackageAmount && Number(ing.typicalPackageAmount) > 0) {
-                const pkgAmt = Number(ing.typicalPackageAmount);
-                const pkgUnit = ing.typicalPackageUnit || packageUnit;
-                if (pkgUnit.toLowerCase() === item.unit.toLowerCase()) {
-                  packageAmount = Math.max(packageAmount, pkgAmt);
-                } else {
-                  packageAmount = pkgAmt;
-                }
-                packageUnit = pkgUnit;
-              }
-              if (ing.shelfLifeDays) {
-                shelfLifeDays = ing.shelfLifeDays;
-              }
-              break;
-            }
-          }
-        }
-      } catch {
-        // Non-fatal fallback
-      }
-    }
-  }
-
-  await createPantryItem(userId, {
-    name: pantryName,
-    baseName: pantryBaseName ?? undefined,
-    category: item.category ?? undefined,
-    amount: packageAmount,
-    unit: packageUnit,
-    canonicalId: item.canonical_id ?? undefined,
-    shelfLifeDays,
-  });
+  await db
+    .delete(shoppingList)
+    .where(and(eq(shoppingList.userId, userId), eq(shoppingList.recipeId, recipeId)));
 }
