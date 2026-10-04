@@ -14,7 +14,7 @@ import { canonicalizeBaseName } from '../../matching/baseNameCanonical.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DB_PATH = path.resolve(__dirname, '../data/off_de.sqlite');
+const DB_PATH = path.resolve(__dirname, '../../data/off_de.sqlite');
 
 interface OFFHit {
   code: string;

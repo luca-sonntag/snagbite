@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DATA_DIR = path.resolve(__dirname, '../data');
+const DATA_DIR = path.resolve(__dirname, '../../data');
 const DB_PATH = path.join(DATA_DIR, 'off_de.sqlite');
 
 const DUMP_URL = 'https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.csv.gz';
