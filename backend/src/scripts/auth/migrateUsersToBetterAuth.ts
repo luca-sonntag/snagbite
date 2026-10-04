@@ -18,7 +18,7 @@ import { hashPassword } from 'better-auth/crypto';
 import { initScriptEnv } from '../scriptEnv.js';
 import { db, getDbPool } from '../../db/drizzle.js';
 import { user as userTable, account as accountTable } from '../../db/schema/auth.js';
-import { eq, or } from 'drizzle-orm';
+import { eq, or, and } from 'drizzle-orm';
 
 const scriptEnv = initScriptEnv();
 const supabase = scriptEnv.client;
@@ -161,13 +161,18 @@ async function main() {
       const [existingEmailAccount] = await db
         .select()
         .from(accountTable)
-        .where(eq(accountTable.userId, u.id))
+        .where(
+          and(
+            eq(accountTable.userId, u.id),
+            eq(accountTable.providerId, 'credential')
+          )
+        )
         .limit(1);
 
       if (!existingEmailAccount) {
         await db.insert(accountTable).values({
           id: randomUUID(),
-          accountId: email,
+          accountId: u.id,
           providerId: 'credential',
           userId: u.id,
           password: hashedPassword,
@@ -176,6 +181,12 @@ async function main() {
         });
         accountsCreated++;
         console.log(`   🔑 Linked email/password account.`);
+      } else if (existingEmailAccount.accountId !== u.id) {
+        await db
+          .update(accountTable)
+          .set({ accountId: u.id })
+          .where(eq(accountTable.id, existingEmailAccount.id));
+        console.log(`   🔑 Fixed credential accountId to userId.`);
       }
     }
   }
