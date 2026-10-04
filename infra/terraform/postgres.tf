@@ -7,6 +7,10 @@ resource "railway_service" "postgres" {
     name       = "postgres-data"
     mount_path = "/var/lib/postgresql/data"
   }
+
+  lifecycle {
+    ignore_changes = [volume]
+  }
 }
 
 resource "railway_variable" "postgres_user" {

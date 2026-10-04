@@ -7,6 +7,10 @@ resource "railway_service" "storage" {
     name       = "storage-data"
     mount_path = "/data"
   }
+
+  lifecycle {
+    ignore_changes = [volume]
+  }
 }
 
 resource "railway_variable" "storage_root_user" {
