@@ -314,7 +314,7 @@ recipeRoutes.post('/recipes/:id/chat', async (req: Request, res: Response): Prom
       | undefined;
 
     if (user?.user_metadata) {
-      const meta = user.user_metadata;
+      const meta = user.user_metadata as Record<string, string | undefined>;
       const languageMap: Record<string, string> = {
         de: 'German',
         en: 'English',
@@ -323,17 +323,17 @@ recipeRoutes.post('/recipes/:id/chat', async (req: Request, res: Response): Prom
       };
 
       let recipeLanguage: string | undefined;
-      if (meta.language) {
+      if (typeof meta.language === 'string') {
         recipeLanguage = languageMap[meta.language.toLowerCase()];
       }
-      if (!recipeLanguage && meta.recipe_language) {
+      if (!recipeLanguage && typeof meta.recipe_language === 'string') {
         recipeLanguage = languageMap[meta.recipe_language.toLowerCase()] || meta.recipe_language;
       }
 
       userPrefs = {
         recipeLanguage,
-        preferredTemperatureUnit: meta.preferred_temperature_unit,
-        preferredUnitSystem: meta.preferred_unit_system,
+        preferredTemperatureUnit: typeof meta.preferred_temperature_unit === 'string' ? meta.preferred_temperature_unit : undefined,
+        preferredUnitSystem: typeof meta.preferred_unit_system === 'string' ? meta.preferred_unit_system : undefined,
       };
     }
 

@@ -1,6 +1,5 @@
 import { Router, Request, Response } from 'express';
 import {
-  getClient,
   getAllGlobalSettings,
   updateGlobalSettings,
   getAllFeedback,
@@ -12,6 +11,7 @@ import {
 } from '../db.js';
 import { db } from '../db/drizzle.js';
 import { jobs } from '../db/schema/jobs.js';
+import { user as userTable } from '../db/schema/auth.js';
 import { config } from '../config.js';
 import { requireAdmin } from '../auth.js';
 import { getLlmMetrics } from '../adminMetrics.js';
@@ -192,19 +192,17 @@ adminRoutes.get(
       let newUsers = 0;
       const emailById = new Map<string, string | null>();
       try {
-        const { data, error } = await getClient().auth.admin.listUsers({ perPage: 1000 });
-        if (!error && data?.users) {
-          userCount = data.users.length;
-          newUsers = since
-            ? data.users.filter((u) => u.created_at && new Date(u.created_at) >= since).length
-            : userCount;
-          for (const u of data.users) {
-            emailById.set(u.id, u.email ?? null);
-          }
+        const allUsers = await db.select().from(userTable);
+        userCount = allUsers.length;
+        newUsers = since
+          ? allUsers.filter((u) => u.createdAt && u.createdAt >= since).length
+          : userCount;
+        for (const u of allUsers) {
+          emailById.set(u.id, u.email ?? null);
         }
       } catch (err: unknown) {
         const errMsg = err instanceof Error ? err.message : String(err);
-        console.error('Error fetching users from Supabase Admin:', errMsg);
+        console.error('Error fetching users from DB:', errMsg);
       }
 
       const jobsMetrics = await getJobMetrics(since, windowDays);
@@ -248,11 +246,7 @@ adminRoutes.get(
   requireAdmin,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { data, error } = await getClient().auth.admin.listUsers({ perPage: 1000 });
-      if (error) {
-        throw error;
-      }
-
+      const allUsers = await db.select().from(userTable);
       const jobRows = await db.select({ userId: jobs.userId }).from(jobs);
 
       const countsByUser: Record<string, number> = {};
@@ -262,17 +256,14 @@ adminRoutes.get(
         }
       });
 
-      const users = (data?.users || []).map((user) => ({
-        id: user.id,
-        email: user.email,
-        created_at: user.created_at,
-        last_sign_in_at: user.last_sign_in_at,
-        tier: user.app_metadata?.tier || 'free',
-        custom_limit:
-          user.app_metadata?.custom_extraction_limit ??
-          user.app_metadata?.max_extractions_per_window ??
-          null,
-        extractions_count: countsByUser[user.id] || 0,
+      const users = allUsers.map((u) => ({
+        id: u.id,
+        email: u.email,
+        created_at: u.createdAt.toISOString(),
+        last_sign_in_at: u.updatedAt.toISOString(),
+        tier: u.tier || 'free',
+        custom_limit: u.customExtractionLimit ?? null,
+        extractions_count: countsByUser[u.id] || 0,
       }));
 
       res.json({ success: true, users });

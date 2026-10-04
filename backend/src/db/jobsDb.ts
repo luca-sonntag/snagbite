@@ -114,6 +114,17 @@ export async function updateJob(id: string, updates: Partial<Job>): Promise<void
     .where(eq(jobs.id, id));
 }
 
+export async function releaseJobLock(id: string): Promise<void> {
+  await db
+    .update(jobs)
+    .set({
+      lockedAt: null,
+      lockedBy: null,
+      updatedAt: new Date(),
+    })
+    .where(eq(jobs.id, id));
+}
+
 export async function updateJobProgress(
   id: string,
   status: JobStatus,

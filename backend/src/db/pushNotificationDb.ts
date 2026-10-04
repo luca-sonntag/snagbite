@@ -1,7 +1,7 @@
 import { db } from './drizzle.js';
 import { pushTokens, notificationLog } from './schema/system.js';
 import { eq, and, desc, gte } from 'drizzle-orm';
-import { getClient } from './client.js';
+import { user as userTable } from './schema/auth.js';
 import type { NotificationLogEntry, NotificationLogRow, NotificationUser } from './types.js';
 
 export async function upsertPushToken(
@@ -97,20 +97,16 @@ export async function getRecentNotifications(
 }
 
 export async function listNotificationUsers(): Promise<NotificationUser[]> {
-  const client = getClient();
-  const result: NotificationUser[] = [];
-  const perPage = 1000;
-  for (let page = 1; ; page++) {
-    const { data, error } = await client.auth.admin.listUsers({ page, perPage });
-    if (error) throw new Error(`Failed to list users for notifications: ${error.message}`);
-    const users = data?.users ?? [];
-    for (const user of users) {
-      const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
-      if (meta.notifications_enabled === true) {
-        result.push({ id: user.id, metadata: meta });
-      }
-    }
-    if (users.length < perPage) break;
-  }
-  return result;
+  const rows = await db
+    .select({
+      id: userTable.id,
+      notificationsEnabled: userTable.notificationsEnabled,
+    })
+    .from(userTable)
+    .where(eq(userTable.notificationsEnabled, true));
+
+  return rows.map((r) => ({
+    id: r.id,
+    metadata: { notifications_enabled: true },
+  }));
 }

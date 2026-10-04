@@ -9,6 +9,8 @@ import { appUpdatesRouter } from './appUpdates.js';
 import { ingredientImageRouter } from './ingredientImageRoutes.js';
 import { checkDbHealth } from './db.js';
 import { ensureIngredientIconsExtracted } from './ingredientIconPacker.js';
+import { toNodeHandler } from 'better-auth/node';
+import { auth } from './auth/betterAuth.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const isWorker = config.ROLE === 'worker' || config.ROLE === 'both';
@@ -123,6 +125,9 @@ async function bootstrap() {
 
     // Development ingredient image viewer & generator
     app.use(ingredientImageRouter);
+
+    // Better-Auth authentication endpoints
+    app.all('/api/auth*', toNodeHandler(auth));
 
     app.use('/api', apiRouter);
 
