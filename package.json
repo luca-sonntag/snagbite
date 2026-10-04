@@ -50,7 +50,6 @@
 
     "use:prod": "node scripts/switchEnv.js prod",
     "use:prod:backend": "node scripts/switchEnv.js prod --backend",
-    "use:backend:prod": "node scripts/switchEnv.js prod --backend",
     "use:dev": "node scripts/switchEnv.js dev",
     "use:status": "node scripts/switchEnv.js status",
 
