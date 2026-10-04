@@ -9,16 +9,17 @@
  *   npx tsx src/scripts/storage/migrateStorageToS3.ts --prod --dry-run
  */
 import { initScriptEnv } from '../scriptEnv.js';
-import {
-  ensureBucketExists,
-  uploadFile,
-  getPublicUrl,
-  type StorageBucket,
-} from '../../storage/s3Client.js';
+import type { StorageBucket } from '../../storage/s3Client.js';
 
 const scriptEnv = initScriptEnv();
 const isDryRun = process.argv.includes('--dry-run');
 const client = scriptEnv.client;
+
+const {
+  ensureBucketExists,
+  uploadFile,
+  getPublicUrl,
+} = await import('../../storage/s3Client.js');
 
 const BUCKETS_TO_MIGRATE: Array<{ bucket: StorageBucket; contentType: string }> = [
   { bucket: 'recipe-covers', contentType: 'image/jpeg' },
@@ -54,7 +55,9 @@ async function listAllSupabaseFiles(bucket: string, prefix = ''): Promise<string
  */
 async function migrateBucket(bucket: StorageBucket, defaultContentType: string): Promise<number> {
   console.log(`\n📦 Checking bucket: ${bucket}...`);
-  await ensureBucketExists(bucket);
+  if (!isDryRun) {
+    await ensureBucketExists(bucket);
+  }
 
   const files = await listAllSupabaseFiles(bucket);
   console.log(`Found ${files.length} file(s) in Supabase bucket '${bucket}'.`);
