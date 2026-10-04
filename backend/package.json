@@ -14,12 +14,10 @@
     "start": "cross-env NODE_ENV=production node dist/index.js",
     "preview": "node dist/index.js",
     "test": "node --import tsx --test src/**/*.test.ts",
-
     "seed:dev": "tsx src/scripts/seed/seedDev.ts",
     "seed:reviewer": "tsx src/scripts/seed/seedReviewerAccount.ts",
     "seed:reviewer:prod": "tsx src/scripts/seed/seedReviewerAccount.ts --prod",
     "seed:reviewer:dev": "tsx src/scripts/seed/seedReviewerAccount.ts --dev",
-
     "db:backup": "tsx src/scripts/db/backupDatabase.ts",
     "db:backup:prod": "tsx src/scripts/db/backupDatabase.ts --prod",
     "db:backup:dev": "tsx src/scripts/db/backupDatabase.ts --dev",
@@ -27,7 +25,6 @@
     "db:restore:prod": "tsx src/scripts/db/restoreDatabase.ts --prod",
     "db:restore:dev": "tsx src/scripts/db/restoreDatabase.ts --dev",
     "db:purge-frames": "tsx src/scripts/db/purgeHostedFrames.ts",
-
     "backfill:covers": "tsx src/scripts/backfill/backfillPublicRecipeCovers.ts",
     "backfill:covers:prod": "tsx src/scripts/backfill/backfillPublicRecipeCovers.ts --prod",
     "backfill:covers:dev": "tsx src/scripts/backfill/backfillPublicRecipeCovers.ts --dev",
@@ -37,12 +34,10 @@
     "backfill:mappings": "tsx src/scripts/backfill/backfillIngredientMappings.ts",
     "backfill:consolidate": "tsx src/scripts/backfill/consolidateMappingsToCanonical.ts",
     "backfill:off-index": "tsx src/scripts/backfill/buildOpenFoodFactsIndex.ts",
-
     "icons:generate": "tsx src/scripts/icons/generateIngredientImage.ts",
     "icons:missing": "tsx src/scripts/icons/generateMissingIngredientIcons.ts",
     "icons:zip": "tsx src/scripts/icons/zipIngredientIcons.ts",
     "icons:unpack": "tsx src/scripts/icons/zipIngredientIcons.ts --unpack",
-
     "covers:backfill": "npm run backfill:covers",
     "covers:backfill:prod": "npm run backfill:covers:prod",
     "covers:backfill:dev": "npm run backfill:covers:dev",
@@ -60,6 +55,8 @@
     "railway:env:dry": "powershell -ExecutionPolicy Bypass -File ../scripts/sync-railway-env.ps1 -Prod -DryRun"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1146.0",
+    "@aws-sdk/s3-request-presigner": "^3.1146.0",
     "@bgbuster/sdk": "^0.0.2",
     "@cookbook/shared": "*",
     "@google/generative-ai": "^0.11.0",
