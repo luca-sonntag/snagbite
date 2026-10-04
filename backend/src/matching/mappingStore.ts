@@ -3,7 +3,9 @@
  * Canonical 1-row-per-food model with English mapping_key, German mapping_key_de, and aliases.
  */
 
-import { getClient } from '../db.js';
+import { db, getDbPool } from '../db/drizzle.js';
+import { ingredientMappings } from '../db/schema/ingredients.js';
+import { eq, and, or, inArray, sql } from 'drizzle-orm';
 import { CATEGORY_GROUPS, getMajorCategoryGroup, areCategoriesCompatible } from './categoryGroups.js';
 
 export { CATEGORY_GROUPS, getMajorCategoryGroup, areCategoriesCompatible };
@@ -41,42 +43,29 @@ export interface StoreMappingParams {
   category: string;
 }
 
-interface MappingRow {
-  mapping_key: string;
-  mapping_key_de?: string | null;
-  aliases?: string[] | null;
-  category: string | null;
-  product_code?: string | null;
-  resolution: string;
-  estimated_nutrients: unknown;
-  typical_package_amount?: number | string | null;
-  typical_package_unit?: string | null;
-  shelf_life_days?: number | null;
-  source: string;
-  confidence: number | string | null;
-  model: string | null;
-  reasoning: string | null;
-}
-
 const cache = new Map<string, IngredientMapping | null>();
 const CACHE_MAX_ENTRIES = 5000;
 const pendingHits = new Set<string>();
 const cacheId = (key: string, cat: string) => `${key.toLowerCase().trim()} ${cat.toUpperCase().trim()}`;
 
-function rowToMapping(row: MappingRow): IngredientMapping {
+function rowToMapping(row: any): IngredientMapping {
   const conf = row.confidence == null ? null : Number(row.confidence);
-  const pkg = row.typical_package_amount != null ? Number(row.typical_package_amount) : null;
+  const pkg = (row.typicalPackageAmount ?? row.typical_package_amount) != null
+    ? Number(row.typicalPackageAmount ?? row.typical_package_amount)
+    : null;
   return {
-    mappingKey: row.mapping_key,
-    mappingKeyDe: row.mapping_key_de ?? null,
+    mappingKey: row.mappingKey ?? row.mapping_key,
+    mappingKeyDe: (row.mappingKeyDe ?? row.mapping_key_de) ?? null,
     aliases: Array.isArray(row.aliases) ? row.aliases : [],
     category: row.category ?? '',
-    productCode: row.product_code ?? null,
-    resolution: row.resolution === 'no_match' ? 'no_match' : 'matched',
-    estimatedNutrients: (row.estimated_nutrients as EstimatedNutrients | null) ?? null,
+    productCode: (row.productCode ?? row.product_code) ?? null,
+    resolution: (row.resolution === 'no_match' ? 'no_match' : 'matched') as MappingResolution,
+    estimatedNutrients: ((row.estimatedNutrients ?? row.estimated_nutrients) as EstimatedNutrients | null) ?? null,
     typicalPackageAmount: Number.isFinite(pkg as number) ? (pkg as number) : null,
-    typicalPackageUnit: row.typical_package_unit ?? null,
-    shelfLifeDays: typeof row.shelf_life_days === 'number' ? row.shelf_life_days : null,
+    typicalPackageUnit: (row.typicalPackageUnit ?? row.typical_package_unit) ?? null,
+    shelfLifeDays: typeof (row.shelfLifeDays ?? row.shelf_life_days) === 'number'
+      ? (row.shelfLifeDays ?? row.shelf_life_days)
+      : null,
     source: (['static', 'agent', 'human'].includes(row.source) ? row.source : 'agent') as MappingSource,
     confidence: Number.isFinite(conf as number) ? (conf as number) : null,
     model: row.model,
@@ -132,21 +121,16 @@ export async function lookupMapping(keys: string[], category: string): Promise<I
 
   if (unknown.length === 0) return null;
 
-  let rows: MappingRow[] = [];
+  let rows: (typeof ingredientMappings.$inferSelect)[] = [];
   try {
-    const unknownList = unknown.map((k) => `"${k}"`).join(',');
-    const { data, error } = await getClient()
-      .from('ingredient_mappings')
-      .select('*')
-      .or(`mapping_key.in.(${unknownList}),mapping_key_de.in.(${unknownList}),aliases.ov.{${unknown.join(',')}}`);
-
-    if (error) {
-      const fallback = await getClient().from('ingredient_mappings').select('*').in('mapping_key', unknown);
-      if (fallback.error) throw new Error(fallback.error.message);
-      rows = (fallback.data ?? []) as MappingRow[];
-    } else {
-      rows = (data ?? []) as MappingRow[];
-    }
+    rows = await db
+      .select()
+      .from(ingredientMappings)
+      .where(or(
+        inArray(ingredientMappings.mappingKey, unknown),
+        inArray(ingredientMappings.mappingKeyDe, unknown),
+        sql`${ingredientMappings.aliases} && ${unknown}::text[]`
+      ));
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     console.warn('[mappingStore] lookup failed, falling through to resolver:', msg);
@@ -207,14 +191,16 @@ export async function storeMapping(
 
   if (mapping.source !== 'human') {
     try {
-      const { data, error } = await getClient()
-        .from('ingredient_mappings')
-        .select('mapping_key')
-        .eq('mapping_key', cleanKey)
-        .eq('category', cat)
-        .eq('source', 'human');
-      if (error) throw new Error(error.message);
-      if (data && data.length > 0) return;
+      const [existingHuman] = await db
+        .select({ mappingKey: ingredientMappings.mappingKey })
+        .from(ingredientMappings)
+        .where(and(
+          eq(ingredientMappings.mappingKey, cleanKey),
+          eq(ingredientMappings.category, cat),
+          eq(ingredientMappings.source, 'human')
+        ))
+        .limit(1);
+      if (existingHuman) return;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       console.warn('[mappingStore] human-row check failed, skipping write:', msg);
@@ -222,32 +208,44 @@ export async function storeMapping(
     }
   }
 
-  const rowData: Record<string, unknown> = {
-    mapping_key: cleanKey,
-    mapping_key_de: cleanKeyDe || null,
-    aliases: cleanAliases,
-    category: cat,
-    product_code: mapping.productCode ?? null,
-    resolution: mapping.resolution,
-    estimated_nutrients: mapping.estimatedNutrients,
-    typical_package_amount: mapping.typicalPackageAmount ?? null,
-    typical_package_unit: mapping.typicalPackageUnit ?? null,
-    shelf_life_days: mapping.shelfLifeDays ?? null,
-    source: mapping.source,
-    confidence: mapping.confidence,
-    model: mapping.model,
-    reasoning: mapping.reasoning,
-    updated_at: new Date().toISOString(),
-  };
-
   try {
-    const { error } = await getClient().from('ingredient_mappings').upsert([rowData], { onConflict: 'mapping_key,category' });
-    if (error) {
-      delete rowData.mapping_key_de;
-      delete rowData.aliases;
-      const fallback = await getClient().from('ingredient_mappings').upsert([rowData], { onConflict: 'mapping_key,category' });
-      if (fallback.error) throw new Error(fallback.error.message);
-    }
+    await db
+      .insert(ingredientMappings)
+      .values({
+        mappingKey: cleanKey,
+        mappingKeyDe: cleanKeyDe || null,
+        aliases: cleanAliases,
+        category: cat,
+        productCode: mapping.productCode ?? null,
+        resolution: mapping.resolution,
+        estimatedNutrients: mapping.estimatedNutrients,
+        typicalPackageAmount: mapping.typicalPackageAmount !== undefined && mapping.typicalPackageAmount !== null ? String(mapping.typicalPackageAmount) : null,
+        typicalPackageUnit: mapping.typicalPackageUnit ?? null,
+        shelfLifeDays: mapping.shelfLifeDays ?? null,
+        source: mapping.source,
+        confidence: mapping.confidence !== undefined && mapping.confidence !== null ? String(mapping.confidence) : null,
+        model: mapping.model,
+        reasoning: mapping.reasoning,
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [ingredientMappings.mappingKey, ingredientMappings.category],
+        set: {
+          mappingKeyDe: cleanKeyDe || null,
+          aliases: cleanAliases,
+          productCode: mapping.productCode ?? null,
+          resolution: mapping.resolution,
+          estimatedNutrients: mapping.estimatedNutrients,
+          typicalPackageAmount: mapping.typicalPackageAmount !== undefined && mapping.typicalPackageAmount !== null ? String(mapping.typicalPackageAmount) : null,
+          typicalPackageUnit: mapping.typicalPackageUnit ?? null,
+          shelfLifeDays: mapping.shelfLifeDays ?? null,
+          source: mapping.source,
+          confidence: mapping.confidence !== undefined && mapping.confidence !== null ? String(mapping.confidence) : null,
+          model: mapping.model,
+          reasoning: mapping.reasoning,
+          updatedAt: new Date(),
+        },
+      });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     console.warn('[mappingStore] upsert failed, continuing without storing:', msg);
@@ -277,8 +275,7 @@ export async function flushHitCounts(): Promise<void> {
   const keys = Array.from(pendingHits);
   pendingHits.clear();
   try {
-    const { error } = await getClient().rpc('bump_ingredient_mapping_hits', { keys });
-    if (error) throw new Error(error.message);
+    await getDbPool().query('SELECT bump_ingredient_mapping_hits($1::text[])', [keys]);
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     for (const key of keys) pendingHits.add(key);
