@@ -74,15 +74,24 @@ export function initScriptEnv(options?: {
   const isDev = target === 'dev';
 
   const backendDir = getBackendDir();
-  const envFileName = isProd ? '.env.production' : '.env';
-  const envPath = path.resolve(backendDir, envFileName);
+  const envFileName = isProd ? '.env.production' : '.env.development';
+  let envPath = path.resolve(backendDir, envFileName);
+  if (!fs.existsSync(envPath) && !isProd) {
+    envPath = path.resolve(backendDir, '.env');
+  }
 
   if (!fs.existsSync(envPath)) {
     console.error(`❌ [scriptEnv] Environment file not found: ${envPath}`);
     process.exit(1);
   }
 
-  const parsed = dotenv.parse(fs.readFileSync(envPath, 'utf8'));
+  // Load base .env first (shared defaults)
+  const baseEnvPath = path.resolve(backendDir, '.env');
+  const baseParsed = fs.existsSync(baseEnvPath)
+    ? dotenv.parse(fs.readFileSync(baseEnvPath, 'utf8'))
+    : {};
+  const targetParsed = dotenv.parse(fs.readFileSync(envPath, 'utf8'));
+  const parsed = { ...baseParsed, ...targetParsed };
 
   for (const [key, val] of Object.entries(parsed)) {
     if (val !== undefined && val !== null) {

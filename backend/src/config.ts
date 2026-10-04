@@ -4,9 +4,19 @@ import { existsSync } from 'fs';
 
 const backendDir = path.resolve(import.meta.dirname, '..');
 
-// Load .env file from project root or backend folder
-dotenv.config();
+// 1. Base .env (shared defaults across environments)
 dotenv.config({ path: path.resolve(backendDir, '.env') });
+dotenv.config();
+
+// 2. Mode-specific environment file (.env.production if NODE_ENV === 'production', else .env.development)
+const isProd = process.env.NODE_ENV === 'production';
+const modeEnvName = isProd ? '.env.production' : '.env.development';
+const modeEnvPath = path.resolve(backendDir, modeEnvName);
+if (existsSync(modeEnvPath)) {
+  dotenv.config({ path: modeEnvPath, override: true });
+}
+
+// 3. Local override (.env.local has highest local precedence, e.g. written by npm run use:prod)
 if (existsSync(path.resolve(backendDir, '.env.local'))) {
   dotenv.config({ path: path.resolve(backendDir, '.env.local'), override: true });
 } else if (existsSync('.env.local')) {

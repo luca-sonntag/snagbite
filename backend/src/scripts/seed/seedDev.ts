@@ -14,13 +14,11 @@
  * Usage:
  *   cd backend && SEED_TEST_USER_PASSWORD=... npm run seed:dev
  */
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
+import { initScriptEnv } from '../scriptEnv.js';
 
-dotenv.config();
-
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
+const scriptEnv = initScriptEnv({ target: 'dev' });
+const SUPABASE_URL = scriptEnv.supabaseUrl;
+const SUPABASE_SECRET_KEY = scriptEnv.supabaseSecretKey;
 const TEST_USER_EMAIL = process.env.SEED_TEST_USER_EMAIL || 'test@dev.snagbite.local';
 const TEST_USER_PASSWORD = process.env.SEED_TEST_USER_PASSWORD;
 
@@ -39,9 +37,7 @@ if (/\bprod\b|production/i.test(SUPABASE_URL)) {
   process.exit(1);
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
+const supabase = scriptEnv.client;
 
 async function getOrCreateTestUser(): Promise<string> {
   const { data: created, error } = await supabase.auth.admin.createUser({
