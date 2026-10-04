@@ -1,5 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { getClient, wrapError, isNoRowsError } from './client.js';
+import {
+  ensureBucketExists,
+  uploadFile,
+  getSignedUrl,
+} from '../storage/s3Client.js';
 import type {
   FeedbackInput,
   FeedbackRow,
@@ -36,16 +41,12 @@ export async function createFeedback(
       const buffer = Buffer.from(base64, 'base64');
       const storagePath = `${userId}/${id}/${index}.jpg`;
 
-      const { error: uploadError } = await getClient()
-        .storage.from('feedback-screenshots')
-        .upload(storagePath, buffer, { contentType: 'image/jpeg', upsert: true });
-      if (uploadError) throw new Error(uploadError.message);
+      await ensureBucketExists('feedback-screenshots');
+      await uploadFile('feedback-screenshots', storagePath, buffer, 'image/jpeg');
 
-      const { data, error: urlError } = await getClient()
-        .storage.from('feedback-screenshots')
-        .createSignedUrl(storagePath, 10 * 365 * 24 * 3600);
-      if (urlError || !data) throw new Error(urlError?.message || 'No signed URL');
-      screenshotUrls.push(data.signedUrl);
+      // SigV4 allows max 7 days presigned URL
+      const signedUrl = await getSignedUrl('feedback-screenshots', storagePath, 7 * 24 * 3600);
+      screenshotUrls.push(signedUrl);
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : String(err);
       console.error(`Failed to upload feedback screenshot ${index}:`, errMsg);
@@ -77,7 +78,25 @@ export async function getAllFeedback(): Promise<FeedbackRow[]> {
     .order('created_at', { ascending: false });
 
   if (error) throw wrapError('Failed to fetch all feedback', error);
-  return (data || []) as FeedbackRow[];
+  const rows = (data || []) as FeedbackRow[];
+
+  // Refresh screenshot URLs with fresh 7-day presigned URLs for admin viewing
+  return Promise.all(
+    rows.map(async (row) => {
+      if (!row.screenshot_urls || row.screenshot_urls.length === 0) return row;
+      const freshUrls = await Promise.all(
+        row.screenshot_urls.map(async (url, idx) => {
+          const storagePath = `${row.user_id}/${row.id}/${idx}.jpg`;
+          try {
+            return await getSignedUrl('feedback-screenshots', storagePath, 7 * 24 * 3600);
+          } catch {
+            return url;
+          }
+        })
+      );
+      return { ...row, screenshot_urls: freshUrls };
+    })
+  );
 }
 
 export async function getJobMetrics(
