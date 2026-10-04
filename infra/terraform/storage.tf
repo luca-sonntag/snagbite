@@ -4,7 +4,7 @@ resource "railway_service" "storage" {
   source_image = "minio/minio:latest"
 
   volume = {
-    name       = "storage-data"
+    name       = "minio-data"
     mount_path = "/data"
   }
 
