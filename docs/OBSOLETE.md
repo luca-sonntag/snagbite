@@ -6,6 +6,20 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-04: Entfernung des Terraform-Layers zugunsten Railway-nativer Services & Environments
+
+* **Ersetzter Code / Veraltete Logik:**
+  - Experimentelles Terraform-Setup unter `infra/terraform/` und npm-Befehle `infra:plan` / `infra:apply`.
+  - Versuch, Postgres und S3-Storage als rohe Docker-Container (`postgres:16-alpine`, `minio/minio:latest`) mit Persistent Volumes über den Community-Provider zu verwalten.
+* **Ersetzt durch:**
+  - **Railway Native Architecture:**
+    - Offizielles Railway PostgreSQL Plugin (1-Klick Setup, integriertes Connection-Pooling, automatische Backups).
+    - Railway Tigris S3 Bucket (Zero-Maintenance, nativer S3-Endpunkt, keine MinIO-Containerwartung).
+    - Railway Native Environments (`development` und `production` via Railway Dashboard/CLI statt separater Terraform Statefiles).
+* **Betroffene Dateien:** `infra/` (gelöscht), `package.json`, `.gitignore`, `AGENTS.md`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-04: Ablösung von Supabase Storage durch S3-kompatiblen Object Storage (Railway Tigris / MinIO)
 
 * **Ersetzter Code / Veraltete Logik:**

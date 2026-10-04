@@ -56,11 +56,6 @@
     "railway:env:prod": "powershell -ExecutionPolicy Bypass -File scripts/sync-railway-env.ps1 -Prod",
     "railway:env:dev": "powershell -ExecutionPolicy Bypass -File scripts/sync-railway-env.ps1 -Dev",
     "railway:env:dry": "powershell -ExecutionPolicy Bypass -File scripts/sync-railway-env.ps1 -Prod -DryRun",
-    "infra:plan": "powershell -ExecutionPolicy Bypass -File infra/scripts/infra-plan.ps1 -Env prod",
-    "infra:plan:prod": "powershell -ExecutionPolicy Bypass -File infra/scripts/infra-plan.ps1 -Env prod",
-    "infra:plan:dev": "powershell -ExecutionPolicy Bypass -File infra/scripts/infra-plan.ps1 -Env dev",
-    "infra:apply:prod": "powershell -ExecutionPolicy Bypass -File infra/scripts/infra-apply.ps1 -Env prod",
-    "infra:apply:dev": "powershell -ExecutionPolicy Bypass -File infra/scripts/infra-apply.ps1 -Env dev",
     "storage:migrate:prod": "npm run storage:migrate:prod -w backend",
     "storage:migrate:dev": "npm run storage:migrate:dev -w backend",
     "storage:migrate:dry": "npm run storage:migrate:dry -w backend"

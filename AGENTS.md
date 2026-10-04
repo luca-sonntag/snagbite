@@ -87,10 +87,10 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
    * Detaillierte Kostenaufstellung aller LLM-Calls (Gemini 3.1/2.5 Flash-Lite & FLUX.1 [schnell] Cover)
    * Reale AdMob-Monetarisierungsmodelle (Rewarded Video Arbitrage, App-Open Interstitial & MREC)
 
-9. 🏗️ **Infrastructure as Code (Terraform & Railway)**
-   * Deklarative Bereitstellung aller Services (`infra/terraform/`): PostgreSQL, Tigris S3, Backend-Web, Worker & Healthcheck
-   * Multi-Environment (`production` und `development`) via `infra:plan` / `infra:apply` Scripts
-   * Secrets-Management: Dynamische Railway-Referenzen `${{Service.VAR}}` + App-Secrets-Sync via `scripts/sync-railway-env.ps1`
+9. 🏗️ **Railway Native Cloud-Infrastruktur**
+   * Services auf Railway: PostgreSQL Plugin, Tigris S3 Storage, Backend-Web, Worker & Healthcheck
+   * Multi-Environment (`production` und `development`) via Railway Native Environments
+   * Secrets-Management: Dynamische Railway-Referenzen `${{Postgres.DATABASE_URL}}` + App-Secrets-Sync via `scripts/sync-railway-env.ps1`
 
 ---
 

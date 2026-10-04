@@ -1,5 +1,0 @@
-project_id         = "eaefc4e6-e615-478c-b265-016e9f0062c7"
-environment_name   = "development"
-environment_id     = "ae8ef60f-4cae-4b49-9385-087eb9c24b8c"
-backend_service_id = "9c722e19-1616-4eb5-a36d-e8aa9301d50c"
-branch_name        = "develop"
