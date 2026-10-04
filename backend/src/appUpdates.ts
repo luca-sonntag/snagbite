@@ -1,13 +1,13 @@
 import { Router, Request, Response } from 'express';
-import { config } from './config.js';
 import { getActiveAppBundle } from './db.js';
+import { getPublicUrl } from './storage/s3Client.js';
 
 /**
  * Public router for OTA (over-the-air) web-bundle update checks, used by the
  * Capacitor app's @capgo/capacitor-updater integration (frontend
  * src/utils/otaUpdater.ts). Mounted BEFORE the auth-gated apiRouter in
  * index.ts because the app checks for updates before a session may exist.
- * Bundles themselves are served from the public Supabase `app-bundles` bucket.
+ * Bundles themselves are served from the public S3 `app-bundles` bucket.
  */
 export const appUpdatesRouter = Router();
 
@@ -60,7 +60,7 @@ appUpdatesRouter.post('/check', async (req: Request, res: Response): Promise<voi
       success: true,
       update: true,
       version: bundle.version,
-      url: `${config.SUPABASE_URL}/storage/v1/object/public/app-bundles/${bundle.storage_path}`,
+      url: getPublicUrl('app-bundles', bundle.storage_path),
       checksum: bundle.checksum,
       minVersionCode: bundle.min_version_code,
     });
