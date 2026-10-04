@@ -16,7 +16,10 @@
 * **Abbrechen ≠ Löschen:** `POST /api/jobs/:id/cancel` bricht eine laufende Extraktion ab, `DELETE /api/recipes/:id` entfernt ein Rezept aus dem Kochbuch. Beides war früher derselbe Aufruf — genau die Vermischung, die den Soft-Delete erzwungen hat.
 * **Eindeutige Identifikation:** Normalisiert Rezepte bei Abfragen und versieht sie mit einer eindeutigen `id` (entspricht der `jobId`), um Kollisionen zwischen Rezepten mit gleichem Titel zu unterbinden.
 * **Caching-Deaktivierung:** Setzt explizit `Cache-Control` Header (`no-store, no-cache, must-revalidate, proxy-revalidate`) für dynamic endpoints (`/api/jobs/:id`), um zu verhindern, dass Browser veraltete/gecachte Job-Zustände ausliefern.
-* **Queue-Resilienz & Stale-Job Self-Healing (`backend/src/db/jobsCleanup.ts`):**
+* **Queue-Resilienz & Stale-Job Self-Healing (`backend/src/db/jobsCleanup.ts` & `backend/src/queue.ts`):**
+  * **Adaptives Backoff & Log-Ingestion-Schutz:** Bei aktiver Extraktion oder laufenden Jobs pollt der Worker alle 2 Sekunden (`MIN_POLL_INTERVAL_MS = 2000`). Im Leerlauf greift ein dynamisches Backoff bis auf 30 Sekunden (`MAX_POLL_INTERVAL_MS = 30000`), wodurch unnötige Supabase API-Gateway- und Postgres-Logs um >90% reduziert werden.
+  * **Zero-Latency Event-Wakeup:** Sobald ein Job eingereicht wird (`triggerWorkerTick()` in `extractionRoutes.ts` / `recipeRoutes.ts`) oder ein Job abschließt, wird das Intervall sofort auf 2s zurückgesetzt und der nächste Tick unverzüglich angestoßen.
+  * **Entzerrte Wartungs-Sweeps:** `reclaimExpiredJobs` und `sweepStaleAwaitingFrames` laufen in einem 3-Minuten-Intervall (`MAINTENANCE_INTERVAL_MS`), was passend zu den 5- bzw. 10-Minuten-Timeouts zehntausende periodische DB-Hits einspart.
   * **Beendigung des `awaiting_frames`-Loops:** `sweepStaleAwaitingFrames` setzt Jobs, die länger als `CLIENT_FRAMES_TIMEOUT_MINUTES` (5 Min.) ohne Client-Keyframes in `awaiting_frames` verharren, verbindlich auf `status: 'failed'` mit dem Fehlercode `EXTRACTION_TIMEOUT`. Dadurch wird der frühere Teufelskreis (Sweep ➔ `pending` ➔ Re-Park ➔ `awaiting_frames`), der Nutzerkonten dauerhaft sperrte, vollständig unterbunden.
   * **Proaktive Bereinigung (`cleanStaleJobsForUser`):** Vor jedem Concurrency-Check (`enforceExtractionQuota` in `extractionRoutes.ts` und in `GET /api/extractions/limit`) werden verwaiste Jobs des Nutzers automatisch bereinigt, bevor der Concurrency-Fehler `ACTIVE_JOB_EXISTS` geworfen werden kann.
   * **Active-Jobs & Notfall-Freigabe API:**
@@ -41,7 +44,8 @@ Exponiert administrative API-Routen unter `/api/admin/*`, die über die Middlewa
 * **Body-Limit:** `express.json({ limit: '1mb' })` schützt vor Memory-Exhaustion durch große Payloads (Foto-Import nutzt pfad-spezifischen 12MB Parser davor).
 
 ### Health-Check (`/health`)
-Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()` (HEAD-Request auf `jobs`-Tabelle). Antwortet `200 OK` bei gesunder DB, `503 Service Unavailable` bei Problemen. Liefert `uptime`, `nodeEnv` und `dbConnected`-Status.
+Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()`. Antwortet `200 OK` bei gesunder DB, `503 Service Unavailable` bei Problemen. Liefert `uptime`, `nodeEnv` und `dbConnected`-Status.
+* **In-Memory Caching (30s TTL):** Das Abfrageergebnis wird für 30 Sekunden im Speicher gecacht (`DB_HEALTH_CACHE_TTL_MS`), damit externe Uptime-Monitore und Healthchecks Supabase nicht im Sekundentakt mit Polling-Abfragen belasten.
 
 ### Statische Assets & Zutat-Icons Distribution (`/api/ingredient-icons/*` & `/api/category-icons/*`)
 * **Icons-Katalog:** Das Backend liefert über 760 KI-generierte Zutat-Icons (`.webp`) und 20 Kategorie-Icons aus (`backend/src/ingredientImageRoutes.ts`).
