@@ -31,3 +31,11 @@ backend/dist/data/*.sqlite
 supabase/.temp/
 backups/
 backend/backups/
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars.json
+*secret*.tfvars
+*.auto.tfvars
