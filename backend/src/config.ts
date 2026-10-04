@@ -101,6 +101,14 @@ export interface Config {
   FAL_KEY?: string;
   /** BGBuster API key for background removal on ingredient icons. */
   BGBUSTER_API_KEY?: string;
+  // ── S3 / Tigris Object Storage ──
+  S3_ENDPOINT?: string;
+  S3_REGION: string;
+  S3_ACCESS_KEY_ID?: string;
+  S3_SECRET_ACCESS_KEY?: string;
+  S3_PUBLIC_URL?: string;
+  S3_PUBLIC_DOMAIN?: string;
+  S3_FORCE_PATH_STYLE: boolean;
 }
 
 // Validation helper
@@ -167,6 +175,13 @@ export const config: Config = {
   GENERATE_RECIPE_COVERS: getEnv('GENERATE_RECIPE_COVERS', 'true') === 'true',
   FAL_KEY: process.env.FAL_KEY || process.env.FLUX_API_KEY,
   BGBUSTER_API_KEY: process.env.BGBUSTER_API_KEY,
+  S3_ENDPOINT: process.env.S3_ENDPOINT || process.env.AWS_ENDPOINT_URL_S3,
+  S3_REGION: getEnv('S3_REGION', 'auto'),
+  S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID,
+  S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY,
+  S3_PUBLIC_URL: process.env.S3_PUBLIC_URL,
+  S3_PUBLIC_DOMAIN: process.env.S3_PUBLIC_DOMAIN,
+  S3_FORCE_PATH_STYLE: getEnv('S3_FORCE_PATH_STYLE', 'true') === 'true',
 };
 
 /**
