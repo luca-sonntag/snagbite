@@ -1,3 +1,8 @@
+import {
+  to = railway_service.storage
+  id = "5e90aa0f-b72f-441c-9a06-01fab85580bb"
+}
+
 resource "railway_service" "storage" {
   project_id   = local.project_id
   name         = "storage"
