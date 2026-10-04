@@ -28,6 +28,7 @@
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
+    "db:functions": "tsx src/scripts/db/deployFunctions.ts",
     "backfill:covers": "tsx src/scripts/backfill/backfillPublicRecipeCovers.ts",
     "backfill:covers:prod": "tsx src/scripts/backfill/backfillPublicRecipeCovers.ts --prod",
     "backfill:covers:dev": "tsx src/scripts/backfill/backfillPublicRecipeCovers.ts --dev",

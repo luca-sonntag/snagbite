@@ -28,6 +28,7 @@
     "db:push": "npm run db:push -w backend",
     "db:generate": "npm run db:generate -w backend",
     "db:studio": "npm run db:studio -w backend",
+    "db:functions": "npm run db:functions -w backend",
     "db:supabase:push": "supabase db push",
     "db:status": "supabase migration list",
     "db:new": "supabase migration new",
