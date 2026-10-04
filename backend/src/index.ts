@@ -11,6 +11,7 @@ import { checkDbHealth } from './db.js';
 import { ensureIngredientIconsExtracted } from './ingredientIconPacker.js';
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from './auth/betterAuth.js';
+import { storageRouter } from './routes/storageRoutes.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const isWorker = config.ROLE === 'worker' || config.ROLE === 'both';
@@ -104,7 +105,7 @@ async function bootstrap() {
       // NOTE: req.path is relative to the '/api' mount point here (e.g.
       // '/image', '/jobs/123'), since the limiter is mounted at '/api'.
       skip: (req) => {
-        if (req.path.startsWith('/image') || req.path.startsWith('/ingredient-icons')) return true;
+        if (req.path.startsWith('/image') || req.path.startsWith('/ingredient-icons') || req.path.startsWith('/storage')) return true;
         // Job polling and cookbook reads are both high-frequency and cheap.
         if (req.method === 'GET' && /^\/(jobs|recipes|public)(\/|$)/.test(req.path)) return true;
         return false;
@@ -118,6 +119,9 @@ async function bootstrap() {
     app.use('/api/extract-recipe/photos', express.json({ limit: '12mb' }));
     app.use('/api/extract-recipe/frames', express.json({ limit: '10mb' }));
     app.use(express.json({ limit: '1mb' }));
+
+    // Storage streaming endpoints for private Tigris S3 assets (public, immutable caching)
+    app.use(storageRouter);
 
     // OTA update checks are public (before apiRouter to skip the auth gate —
     // the app may check before a session exists). Covered by apiLimiter above.

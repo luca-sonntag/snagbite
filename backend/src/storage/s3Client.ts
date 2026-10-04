@@ -1,12 +1,7 @@
 import {
-  S3Client,
-  PutObjectCommand,
-  GetObjectCommand,
-  DeleteObjectCommand,
-  DeleteObjectsCommand,
-  ListObjectsV2Command,
-  HeadBucketCommand,
-  CreateBucketCommand,
+  S3Client, PutObjectCommand, GetObjectCommand,
+  DeleteObjectCommand, DeleteObjectsCommand, ListObjectsV2Command,
+  HeadBucketCommand, CreateBucketCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl as getAwsSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { config } from '../config.js';
@@ -45,13 +40,9 @@ export function isS3Configured(): boolean {
 export function getS3Client(): S3Client {
   if (s3Instance) return s3Instance;
 
-  const credentials =
-    config.S3_ACCESS_KEY_ID && config.S3_SECRET_ACCESS_KEY
-      ? {
-          accessKeyId: config.S3_ACCESS_KEY_ID,
-          secretAccessKey: config.S3_SECRET_ACCESS_KEY,
-        }
-      : undefined;
+  const credentials = (config.S3_ACCESS_KEY_ID && config.S3_SECRET_ACCESS_KEY)
+    ? { accessKeyId: config.S3_ACCESS_KEY_ID, secretAccessKey: config.S3_SECRET_ACCESS_KEY }
+    : undefined;
 
   s3Instance = new S3Client({
     endpoint: config.S3_ENDPOINT,
@@ -68,7 +59,7 @@ export function getS3Client(): S3Client {
  * If config.S3_BUCKET_NAME is configured (Single-Bucket mode, standard for Tigris),
  * the logical bucket name is treated as a top-level folder prefix.
  */
-function resolveTarget(bucket: StorageBucket, key = ''): { s3Bucket: string; s3Key: string } {
+export function resolveTarget(bucket: StorageBucket, key = ''): { s3Bucket: string; s3Key: string } {
   const cleanKey = key.replace(/^\/+/, '');
   if (config.S3_BUCKET_NAME) {
     const cleanBucket = bucket.replace(/^\/+|\/+$/g, '');
@@ -265,20 +256,26 @@ export async function listFolders(
  * Returns the public URL for an object.
  */
 export function getPublicUrl(bucket: StorageBucket, key: string): string {
-  const { s3Bucket, s3Key } = resolveTarget(bucket, key);
+  const cleanKey = key.replace(/^\/+/, '');
+  const cleanBucket = bucket.replace(/^\/+|\/+$/g, '');
 
+  if (config.STORAGE_STREAMING_URL) {
+    return `${config.STORAGE_STREAMING_URL.replace(/\/+$/, '')}/storage/${cleanBucket}/${cleanKey}`;
+  }
+  if (config.APP_URL) {
+    return `${config.APP_URL.replace(/\/+$/, '')}/storage/${cleanBucket}/${cleanKey}`;
+  }
   if (config.S3_PUBLIC_DOMAIN) {
     const domain = config.S3_PUBLIC_DOMAIN.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    const { s3Bucket, s3Key } = resolveTarget(bucket, key);
     return `https://${domain}/${s3Bucket}/${s3Key}`;
   }
-
   if (config.S3_PUBLIC_URL) {
     const baseUrl = config.S3_PUBLIC_URL.replace(/\/+$/, '');
+    const { s3Bucket, s3Key } = resolveTarget(bucket, key);
     return `${baseUrl}/${s3Bucket}/${s3Key}`;
   }
-
-  const endpoint = (config.S3_ENDPOINT || 'http://localhost:9000').replace(/\/+$/, '');
-  return `${endpoint}/${s3Bucket}/${s3Key}`;
+  return `/storage/${cleanBucket}/${cleanKey}`;
 }
 
 /**

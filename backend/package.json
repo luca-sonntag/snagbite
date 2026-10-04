@@ -37,6 +37,7 @@
     "auth:migrate:dev": "tsx src/scripts/auth/migrateUsersToBetterAuth.ts --dev",
     "auth:migrate:prod": "tsx src/scripts/auth/migrateUsersToBetterAuth.ts --prod",
     "auth:migrate:dry": "tsx src/scripts/auth/migrateUsersToBetterAuth.ts --dev --dry-run",
+    "storage:rewrite-urls": "tsx src/scripts/storage/rewriteRecipeCoverUrls.ts",
     "backfill:covers": "tsx src/scripts/backfill/backfillPublicRecipeCovers.ts",
     "backfill:covers:prod": "tsx src/scripts/backfill/backfillPublicRecipeCovers.ts --prod",
     "backfill:covers:dev": "tsx src/scripts/backfill/backfillPublicRecipeCovers.ts --dev",

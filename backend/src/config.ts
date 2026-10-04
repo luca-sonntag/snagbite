@@ -111,6 +111,8 @@ export interface Config {
   S3_PUBLIC_DOMAIN?: string;
   S3_FORCE_PATH_STYLE: boolean;
   DATABASE_URL?: string;
+  APP_URL?: string;
+  STORAGE_STREAMING_URL?: string;
 }
 
 // Validation helper
@@ -186,6 +188,8 @@ export const config: Config = {
   S3_PUBLIC_DOMAIN: process.env.S3_PUBLIC_DOMAIN,
   S3_FORCE_PATH_STYLE: getEnv('S3_FORCE_PATH_STYLE', 'true') === 'true',
   DATABASE_URL: process.env.DATABASE_URL,
+  APP_URL: process.env.APP_URL,
+  STORAGE_STREAMING_URL: process.env.STORAGE_STREAMING_URL,
 };
 
 /**
