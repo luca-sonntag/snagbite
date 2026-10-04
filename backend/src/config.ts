@@ -106,6 +106,7 @@ export interface Config {
   S3_REGION: string;
   S3_ACCESS_KEY_ID?: string;
   S3_SECRET_ACCESS_KEY?: string;
+  S3_BUCKET_NAME?: string;
   S3_PUBLIC_URL?: string;
   S3_PUBLIC_DOMAIN?: string;
   S3_FORCE_PATH_STYLE: boolean;
@@ -179,6 +180,7 @@ export const config: Config = {
   S3_REGION: getEnv('S3_REGION', 'auto'),
   S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID,
   S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY,
+  S3_BUCKET_NAME: process.env.S3_BUCKET_NAME || process.env.BUCKET_NAME,
   S3_PUBLIC_URL: process.env.S3_PUBLIC_URL,
   S3_PUBLIC_DOMAIN: process.env.S3_PUBLIC_DOMAIN,
   S3_FORCE_PATH_STYLE: getEnv('S3_FORCE_PATH_STYLE', 'true') === 'true',

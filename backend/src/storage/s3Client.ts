@@ -64,23 +64,45 @@ export function getS3Client(): S3Client {
 }
 
 /**
+ * Resolves the effective S3 bucket and object key.
+ * If config.S3_BUCKET_NAME is configured (Single-Bucket mode, standard for Tigris),
+ * the logical bucket name is treated as a top-level folder prefix.
+ */
+function resolveTarget(bucket: StorageBucket, key = ''): { s3Bucket: string; s3Key: string } {
+  const cleanKey = key.replace(/^\/+/, '');
+  if (config.S3_BUCKET_NAME) {
+    const cleanBucket = bucket.replace(/^\/+|\/+$/g, '');
+    const combinedKey = cleanKey ? `${cleanBucket}/${cleanKey}` : cleanBucket;
+    return {
+      s3Bucket: config.S3_BUCKET_NAME,
+      s3Key: combinedKey,
+    };
+  }
+  return {
+    s3Bucket: bucket,
+    s3Key: cleanKey,
+  };
+}
+
+/**
  * Ensures a bucket exists on the S3 provider. Cached per process lifetime.
  */
 export async function ensureBucketExists(bucket: StorageBucket): Promise<void> {
-  if (ensuredBuckets.has(bucket)) return;
+  const { s3Bucket } = resolveTarget(bucket);
+  if (ensuredBuckets.has(s3Bucket)) return;
 
   const client = getS3Client();
   try {
-    await client.send(new HeadBucketCommand({ Bucket: bucket }));
-    ensuredBuckets.add(bucket);
+    await client.send(new HeadBucketCommand({ Bucket: s3Bucket }));
+    ensuredBuckets.add(s3Bucket);
   } catch (error: unknown) {
     // If not found, attempt creation
     try {
-      await client.send(new CreateBucketCommand({ Bucket: bucket }));
-      ensuredBuckets.add(bucket);
+      await client.send(new CreateBucketCommand({ Bucket: s3Bucket }));
+      ensuredBuckets.add(s3Bucket);
     } catch {
       // Bucket may exist or provider lacks permissions; proceed safely
-      ensuredBuckets.add(bucket);
+      ensuredBuckets.add(s3Bucket);
     }
   }
 }
@@ -95,12 +117,12 @@ export async function uploadFile(
   contentType = 'application/octet-stream'
 ): Promise<void> {
   const client = getS3Client();
-  const normalizedKey = key.replace(/^\/+/, '');
+  const { s3Bucket, s3Key } = resolveTarget(bucket, key);
 
   await client.send(
     new PutObjectCommand({
-      Bucket: bucket,
-      Key: normalizedKey,
+      Bucket: s3Bucket,
+      Key: s3Key,
       Body: body,
       ContentType: contentType,
     })
@@ -115,17 +137,17 @@ export async function downloadFile(
   key: string
 ): Promise<Buffer> {
   const client = getS3Client();
-  const normalizedKey = key.replace(/^\/+/, '');
+  const { s3Bucket, s3Key } = resolveTarget(bucket, key);
 
   const response = await client.send(
     new GetObjectCommand({
-      Bucket: bucket,
-      Key: normalizedKey,
+      Bucket: s3Bucket,
+      Key: s3Key,
     })
   );
 
   if (!response.Body) {
-    throw new Error(`Empty response body for ${bucket}/${normalizedKey}`);
+    throw new Error(`Empty response body for ${s3Bucket}/${s3Key}`);
   }
 
   const byteArray = await response.Body.transformToByteArray();
@@ -141,12 +163,13 @@ export async function deleteFiles(
 ): Promise<void> {
   if (keys.length === 0) return;
   const client = getS3Client();
-  const normalized = keys.map((k) => k.replace(/^\/+/, ''));
+  const { s3Bucket } = resolveTarget(bucket);
+  const normalized = keys.map((k) => resolveTarget(bucket, k).s3Key);
 
   if (normalized.length === 1) {
     await client.send(
       new DeleteObjectCommand({
-        Bucket: bucket,
+        Bucket: s3Bucket,
         Key: normalized[0],
       })
     );
@@ -155,7 +178,7 @@ export async function deleteFiles(
 
   await client.send(
     new DeleteObjectsCommand({
-      Bucket: bucket,
+      Bucket: s3Bucket,
       Delete: {
         Objects: normalized.map((Key) => ({ Key })),
         Quiet: true,
@@ -172,19 +195,26 @@ export async function listFiles(
   prefix = ''
 ): Promise<StorageFileItem[]> {
   const client = getS3Client();
-  const normalizedPrefix = prefix ? prefix.replace(/^\/+/, '') : undefined;
+  const { s3Bucket, s3Key } = resolveTarget(bucket, prefix);
+  const effectivePrefix = config.S3_BUCKET_NAME
+    ? (s3Key.endsWith('/') ? s3Key : `${s3Key}/`)
+    : (prefix ? prefix.replace(/^\/+/, '') : undefined);
 
   const response = await client.send(
     new ListObjectsV2Command({
-      Bucket: bucket,
-      Prefix: normalizedPrefix,
+      Bucket: s3Bucket,
+      Prefix: effectivePrefix,
     })
   );
 
   if (!response.Contents) return [];
+  const stripPrefix = config.S3_BUCKET_NAME ? `${bucket.replace(/^\/+|\/+$/g, '')}/` : '';
 
   return response.Contents.map((item) => {
-    const key = item.Key ?? '';
+    const rawKey = item.Key ?? '';
+    const key = stripPrefix && rawKey.startsWith(stripPrefix)
+      ? rawKey.slice(stripPrefix.length)
+      : rawKey;
     const name = key.includes('/') ? key.substring(key.lastIndexOf('/') + 1) : key;
     return {
       key,
@@ -203,24 +233,30 @@ export async function listFolders(
   prefix = ''
 ): Promise<string[]> {
   const client = getS3Client();
-  let normalizedPrefix = prefix ? prefix.replace(/^\/+/, '') : '';
+  const { s3Bucket, s3Key } = resolveTarget(bucket, prefix);
+  let normalizedPrefix = config.S3_BUCKET_NAME
+    ? (s3Key.endsWith('/') ? s3Key : `${s3Key}/`)
+    : (prefix ? prefix.replace(/^\/+/, '') : '');
+
   if (normalizedPrefix && !normalizedPrefix.endsWith('/')) {
     normalizedPrefix += '/';
   }
 
   const response = await client.send(
     new ListObjectsV2Command({
-      Bucket: bucket,
+      Bucket: s3Bucket,
       Prefix: normalizedPrefix || undefined,
       Delimiter: '/',
     })
   );
 
   if (!response.CommonPrefixes) return [];
+  const stripPrefix = config.S3_BUCKET_NAME ? `${bucket.replace(/^\/+|\/+$/g, '')}/` : '';
 
   return response.CommonPrefixes.map((p) => {
     const raw = p.Prefix ?? '';
-    const withoutPrefix = normalizedPrefix ? raw.replace(normalizedPrefix, '') : raw;
+    const relative = stripPrefix && raw.startsWith(stripPrefix) ? raw.slice(stripPrefix.length) : raw;
+    const withoutPrefix = prefix ? relative.replace(new RegExp(`^${prefix.replace(/^\/+/, '')}/?`), '') : relative;
     return withoutPrefix.replace(/\/$/, '');
   }).filter(Boolean);
 }
@@ -229,20 +265,20 @@ export async function listFolders(
  * Returns the public URL for an object.
  */
 export function getPublicUrl(bucket: StorageBucket, key: string): string {
-  const cleanKey = key.replace(/^\/+/, '');
+  const { s3Bucket, s3Key } = resolveTarget(bucket, key);
 
   if (config.S3_PUBLIC_DOMAIN) {
     const domain = config.S3_PUBLIC_DOMAIN.replace(/^https?:\/\//, '').replace(/\/+$/, '');
-    return `https://${domain}/${bucket}/${cleanKey}`;
+    return `https://${domain}/${s3Bucket}/${s3Key}`;
   }
 
   if (config.S3_PUBLIC_URL) {
     const baseUrl = config.S3_PUBLIC_URL.replace(/\/+$/, '');
-    return `${baseUrl}/${bucket}/${cleanKey}`;
+    return `${baseUrl}/${s3Bucket}/${s3Key}`;
   }
 
   const endpoint = (config.S3_ENDPOINT || 'http://localhost:9000').replace(/\/+$/, '');
-  return `${endpoint}/${bucket}/${cleanKey}`;
+  return `${endpoint}/${s3Bucket}/${s3Key}`;
 }
 
 /**
@@ -254,11 +290,11 @@ export async function getSignedUrl(
   expiresInSeconds = 3600
 ): Promise<string> {
   const client = getS3Client();
-  const normalizedKey = key.replace(/^\/+/, '');
+  const { s3Bucket, s3Key } = resolveTarget(bucket, key);
 
   const command = new GetObjectCommand({
-    Bucket: bucket,
-    Key: normalizedKey,
+    Bucket: s3Bucket,
+    Key: s3Key,
   });
 
   return getAwsSignedUrl(client, command, { expiresIn: expiresInSeconds });
