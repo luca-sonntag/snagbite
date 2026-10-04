@@ -6,14 +6,10 @@ import type {
   ProgressData,
   LlmUsage,
 } from '../types.js';
-import {
-  getClient,
-  wrapError,
-  isNoRowsError,
-  PG_UNIQUE_VIOLATION,
-  JobRow,
-} from './client.js';
-import { recipeToRow } from './recipesDb.js';
+import { db, getDbPool } from './drizzle.js';
+import { jobs } from './schema/jobs.js';
+import { eq, and, inArray, lt, ne, gte, asc, desc, count } from 'drizzle-orm';
+import { recipeToRow } from './recipesMappers.js';
 
 export function normalizeUrl(urlStr: string): string {
   let clean = urlStr.replace(/^(https?:\/\/)?(www\.)?/i, '');
@@ -22,66 +18,68 @@ export function normalizeUrl(urlStr: string): string {
   return clean.toLowerCase();
 }
 
-export function rowToJob(row: JobRow): Job {
+export function rowToJob(row: any): Job {
+  const rawCreatedAt = row.createdAt ?? row.created_at;
+  const rawUpdatedAt = row.updatedAt ?? row.updated_at;
   return {
     id: row.id,
-    userId: row.user_id,
-    kind: row.kind as JobKind,
-    status: row.status as JobStatus,
-    sourceUrl: row.source_url,
-    sourceUrlNormalized: row.source_url_normalized,
+    userId: row.userId ?? row.user_id,
+    kind: (row.kind ?? 'url') as JobKind,
+    status: (row.status ?? 'pending') as JobStatus,
+    sourceUrl: row.sourceUrl ?? row.source_url,
+    sourceUrlNormalized: row.sourceUrlNormalized ?? row.source_url_normalized,
     error: row.error,
     progress: (row.progress as ProgressData) ?? null,
-    clientFrames: (row.client_frames as Job['clientFrames']) ?? null,
-    scrapeMeta: (row.scrape_meta as Record<string, unknown>) ?? null,
-    recipeId: row.recipe_id,
-    parentRecipeId: row.parent_recipe_id,
-    remixPrompt: row.remix_prompt,
-    llmUsage: (row.llm_usage as LlmUsage) ?? null,
-    mediaBytes: row.media_bytes ?? 0,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    clientFrames: (row.clientFrames ?? row.client_frames) as Job['clientFrames'] ?? null,
+    scrapeMeta: (row.scrapeMeta ?? row.scrape_meta) as Record<string, unknown> ?? null,
+    recipeId: row.recipeId ?? row.recipe_id,
+    parentRecipeId: row.parentRecipeId ?? row.parent_recipe_id,
+    remixPrompt: row.remixPrompt ?? row.remix_prompt,
+    llmUsage: (row.llmUsage ?? row.llm_usage) as LlmUsage ?? null,
+    mediaBytes: row.mediaBytes ?? row.media_bytes ?? 0,
+    createdAt: rawCreatedAt instanceof Date ? rawCreatedAt.toISOString() : (rawCreatedAt ?? new Date().toISOString()),
+    updatedAt: rawUpdatedAt instanceof Date ? rawUpdatedAt.toISOString() : (rawUpdatedAt ?? new Date().toISOString()),
   };
 }
 
-export function jobToRow(updates: Partial<Job>): Partial<JobRow> {
-  const row: Partial<JobRow> = {};
+export function jobToRow(updates: Partial<Job>): Record<string, unknown> {
+  const row: Record<string, unknown> = {};
   if (updates.status !== undefined) row.status = updates.status;
   if (updates.error !== undefined) row.error = updates.error;
   if (updates.progress !== undefined) row.progress = updates.progress;
-  if (updates.clientFrames !== undefined) row.client_frames = updates.clientFrames;
-  if (updates.scrapeMeta !== undefined) row.scrape_meta = updates.scrapeMeta;
-  if (updates.recipeId !== undefined) row.recipe_id = updates.recipeId;
-  if (updates.llmUsage !== undefined) row.llm_usage = updates.llmUsage;
-  if (updates.mediaBytes !== undefined) row.media_bytes = updates.mediaBytes;
-  if (updates.updatedAt !== undefined) row.updated_at = updates.updatedAt;
+  if (updates.clientFrames !== undefined) row.clientFrames = updates.clientFrames;
+  if (updates.scrapeMeta !== undefined) row.scrapeMeta = updates.scrapeMeta;
+  if (updates.recipeId !== undefined) row.recipeId = updates.recipeId;
+  if (updates.llmUsage !== undefined) row.llmUsage = updates.llmUsage;
+  if (updates.mediaBytes !== undefined) row.mediaBytes = updates.mediaBytes;
+  if (updates.updatedAt !== undefined) row.updatedAt = new Date(updates.updatedAt);
   return row;
 }
 
 export const ACTIVE_STATUSES = ['pending', 'scraping', 'processing', 'awaiting_frames'] as const;
 
 export async function createJob(url: string, userId: string, kind: JobKind = 'url'): Promise<Job> {
-  const { data, error } = await getClient()
-    .from('jobs')
-    .insert({
-      user_id: userId,
-      kind,
-      status: 'pending',
-      source_url: url,
-      source_url_normalized: normalizeUrl(url),
-    })
-    .select()
-    .returns<JobRow>()
-    .single();
+  const normalized = normalizeUrl(url);
+  try {
+    const [inserted] = await db
+      .insert(jobs)
+      .values({
+        userId,
+        kind,
+        status: 'pending',
+        sourceUrl: url,
+        sourceUrlNormalized: normalized,
+      })
+      .returning();
 
-  if (error) {
-    if (error.code === PG_UNIQUE_VIOLATION) {
+    return rowToJob(inserted);
+  } catch (error: any) {
+    if (error?.code === '23505') {
       const existing = await findActiveJobByUrl(url, userId);
       if (existing) return existing;
     }
-    throw wrapError('Failed to create job', error);
+    throw error;
   }
-  return rowToJob(data);
 }
 
 export async function createRemixJob(
@@ -90,33 +88,30 @@ export async function createRemixJob(
   prompt: string,
   userId: string
 ): Promise<Job> {
-  const { data, error } = await getClient()
-    .from('jobs')
-    .insert({
-      user_id: userId,
+  const [inserted] = await db
+    .insert(jobs)
+    .values({
+      userId,
       kind: 'remix',
       status: 'pending',
-      source_url: url,
-      source_url_normalized: normalizeUrl(url),
-      parent_recipe_id: parentRecipeId,
-      remix_prompt: prompt,
+      sourceUrl: url,
+      sourceUrlNormalized: normalizeUrl(url),
+      parentRecipeId,
+      remixPrompt: prompt,
     })
-    .select()
-    .returns<JobRow>()
-    .single();
+    .returning();
 
-  if (error) throw wrapError('Failed to create remix job', error);
-  return rowToJob(data);
+  return rowToJob(inserted);
 }
 
 export async function updateJob(id: string, updates: Partial<Job>): Promise<void> {
-  const now = new Date().toISOString();
-  const { error } = await getClient()
-    .from('jobs')
-    .update({ ...jobToRow(updates), updated_at: now })
-    .eq('id', id);
-
-  if (error) throw wrapError(`Failed to update job ${id}`, error);
+  await db
+    .update(jobs)
+    .set({
+      ...jobToRow(updates),
+      updatedAt: new Date(),
+    })
+    .where(eq(jobs.id, id));
 }
 
 export async function updateJobProgress(
@@ -132,48 +127,42 @@ export async function completeJob(
   recipe: Recipe,
   llmUsage?: LlmUsage | null
 ): Promise<string> {
-  const { data, error } = await getClient().rpc('complete_job', {
-    p_job_id: jobId,
-    p_recipe: recipeToRow(recipe),
-    p_llm_usage: llmUsage ?? null,
-  });
-
-  if (error) throw wrapError(`Failed to complete job ${jobId}`, error);
-  return data as string;
+  const { rows } = await getDbPool().query(
+    'SELECT complete_job($1, $2::jsonb, $3::jsonb) AS recipe_id',
+    [jobId, JSON.stringify(recipeToRow(recipe)), llmUsage ? JSON.stringify(llmUsage) : null]
+  );
+  return rows[0]?.recipe_id as string;
 }
 
 export async function getJob(id: string, userId?: string): Promise<Job | null> {
-  let query = getClient().from('jobs').select().eq('id', id);
-
+  const conditions = [eq(jobs.id, id)];
   if (userId) {
-    query = query.eq('user_id', userId);
+    conditions.push(eq(jobs.userId, userId));
   }
 
-  const { data, error } = await query.returns<JobRow>().single();
+  const [row] = await db
+    .select()
+    .from(jobs)
+    .where(and(...conditions))
+    .limit(1);
 
-  if (error) {
-    if (isNoRowsError(error)) return null;
-    throw wrapError(`Failed to get job ${id}`, error);
-  }
-  return rowToJob(data);
+  if (!row) return null;
+  return rowToJob(row);
 }
 
 export async function claimNextJob(workerId: string): Promise<Job | null> {
-  const { data, error } = await getClient().rpc('claim_next_job', { worker_id: workerId });
-
-  if (error) throw wrapError('Failed to claim next job', error);
-  const rows = data as JobRow[] | null;
+  const { rows } = await getDbPool().query('SELECT * FROM claim_next_job($1)', [workerId]);
   if (!rows || rows.length === 0) return null;
 
   const job = rowToJob(rows[0]);
-
   if (rows[0].client_frames) {
-    const { error: updateErr } = await getClient()
-      .from('jobs')
-      .update({ client_frames: null })
-      .eq('id', job.id);
-    if (updateErr) {
-      console.warn(`[Job ${job.id}] Failed to null client_frames in DB: ${updateErr.message}`);
+    try {
+      await db
+        .update(jobs)
+        .set({ clientFrames: null })
+        .where(eq(jobs.id, job.id));
+    } catch (err: any) {
+      console.warn(`[Job ${job.id}] Failed to null client_frames in DB: ${err.message}`);
     }
   }
 
@@ -181,91 +170,97 @@ export async function claimNextJob(workerId: string): Promise<Job | null> {
 }
 
 export async function findActiveJobByUrl(url: string, userId: string): Promise<Job | null> {
-  const { data, error } = await getClient()
-    .from('jobs')
+  const [row] = await db
     .select()
-    .in('status', ACTIVE_STATUSES as unknown as string[])
-    .eq('user_id', userId)
-    .eq('source_url_normalized', normalizeUrl(url))
-    .returns<JobRow[]>()
+    .from(jobs)
+    .where(and(
+      inArray(jobs.status, ACTIVE_STATUSES as unknown as string[]),
+      eq(jobs.userId, userId),
+      eq(jobs.sourceUrlNormalized, normalizeUrl(url))
+    ))
     .limit(1);
 
-  if (error) throw wrapError('Failed to search active jobs by URL', error);
-  return data.length > 0 ? rowToJob(data[0]) : null;
+  return row ? rowToJob(row) : null;
 }
 
 export async function findExtractedRecipeIdByUrl(
   url: string,
   userId: string
 ): Promise<string | null> {
-  const { data, error } = await getClient()
-    .from('jobs')
-    .select('recipe_id')
-    .eq('status', 'completed')
-    .eq('user_id', userId)
-    .eq('source_url_normalized', normalizeUrl(url))
-    .not('recipe_id', 'is', null)
-    .order('created_at', { ascending: false })
-    .returns<{ recipe_id: string }[]>()
+  const [row] = await db
+    .select({ recipeId: jobs.recipeId })
+    .from(jobs)
+    .where(and(
+      eq(jobs.status, 'completed'),
+      eq(jobs.userId, userId),
+      eq(jobs.sourceUrlNormalized, normalizeUrl(url))
+    ))
+    .orderBy(desc(jobs.createdAt))
     .limit(1);
 
-  if (error) throw wrapError('Failed to search completed jobs by URL', error);
-  return data.length > 0 ? data[0].recipe_id : null;
+  return row?.recipeId ?? null;
 }
 
 export async function cancelJob(id: string, userId: string): Promise<boolean> {
-  const { data, error } = await getClient()
-    .from('jobs')
-    .update({ status: 'cancelled', progress: null, updated_at: new Date().toISOString() })
-    .eq('id', id)
-    .eq('user_id', userId)
-    .in('status', ACTIVE_STATUSES as unknown as string[])
-    .select('id');
+  const deleted = await db
+    .update(jobs)
+    .set({
+      status: 'cancelled',
+      progress: null,
+      updatedAt: new Date(),
+    })
+    .where(and(
+      eq(jobs.id, id),
+      eq(jobs.userId, userId),
+      inArray(jobs.status, ACTIVE_STATUSES as unknown as string[])
+    ))
+    .returning({ id: jobs.id });
 
-  if (error) throw wrapError(`Failed to cancel job ${id}`, error);
-  return (data?.length ?? 0) > 0;
+  return deleted.length > 0;
 }
 
 export async function isJobCancelled(id: string): Promise<boolean> {
-  const { data, error } = await getClient().from('jobs').select('status').eq('id', id).single();
+  const [row] = await db
+    .select({ status: jobs.status })
+    .from(jobs)
+    .where(eq(jobs.id, id))
+    .limit(1);
 
-  if (error) {
-    if (isNoRowsError(error)) return true;
-    throw wrapError(`Failed to read job status ${id}`, error);
-  }
-  return (data as { status: string }).status === 'cancelled';
+  return !row || row.status === 'cancelled';
 }
 
 export async function heartbeatJob(id: string): Promise<void> {
-  const { error } = await getClient()
-    .from('jobs')
-    .update({ locked_at: new Date().toISOString(), updated_at: new Date().toISOString() })
-    .eq('id', id);
-
-  if (error) console.warn(`Heartbeat failed for job ${id}: ${error.message}`);
+  try {
+    await db
+      .update(jobs)
+      .set({
+        lockedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(jobs.id, id));
+  } catch (err: any) {
+    console.warn(`Heartbeat failed for job ${id}: ${err.message}`);
+  }
 }
 
 export async function reclaimExpiredJobs(timeoutMinutes: number): Promise<void> {
-  const cutoff = new Date(Date.now() - timeoutMinutes * 60 * 1000).toISOString();
+  const cutoff = new Date(Date.now() - timeoutMinutes * 60 * 1000);
+  const rows = await db
+    .update(jobs)
+    .set({
+      status: 'pending',
+      lockedAt: null,
+      lockedBy: null,
+      updatedAt: new Date(),
+    })
+    .where(and(
+      inArray(jobs.status, ['scraping', 'processing']),
+      lt(jobs.lockedAt, cutoff)
+    ))
+    .returning({ id: jobs.id });
 
-  const { error, count } = await getClient()
-    .from('jobs')
-    .update(
-      {
-        status: 'pending',
-        locked_at: null,
-        locked_by: null,
-        updated_at: new Date().toISOString(),
-      },
-      { count: 'exact' }
-    )
-    .in('status', ['scraping', 'processing'])
-    .lt('locked_at', cutoff);
-
-  if (error) {
-    console.error('Failed to reclaim expired jobs:', error.message);
-  } else if (count && count > 0) {
-    console.log(`Reclaimed ${count} expired job(s) back to pending.`);
+  if (rows.length > 0) {
+    console.log(`Reclaimed ${rows.length} expired job(s) back to pending.`);
   }
 }
 
@@ -277,32 +272,33 @@ export {
 } from './jobsCleanup.js';
 
 export async function countActiveJobsForUser(userId: string): Promise<number> {
-  const { count, error } = await getClient()
-    .from('jobs')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .in('status', ACTIVE_STATUSES as unknown as string[]);
+  const [row] = await db
+    .select({ count: count() })
+    .from(jobs)
+    .where(and(
+      eq(jobs.userId, userId),
+      inArray(jobs.status, ACTIVE_STATUSES as unknown as string[])
+    ));
 
-  if (error) throw wrapError('Failed to count active jobs', error);
-  return count ?? 0;
+  return Number(row?.count ?? 0);
 }
 
 export async function getExtractionsForUserInTimeframe(
   userId: string,
   days: number
 ): Promise<Job[]> {
-  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
-  const { data, error } = await getClient()
-    .from('jobs')
+  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const rows = await db
     .select()
-    .eq('user_id', userId)
-    .neq('kind', 'remix')
-    .neq('status', 'failed')
-    .neq('status', 'cancelled')
-    .gte('created_at', cutoff)
-    .order('created_at', { ascending: true })
-    .returns<JobRow[]>();
+    .from(jobs)
+    .where(and(
+      eq(jobs.userId, userId),
+      ne(jobs.kind, 'remix'),
+      ne(jobs.status, 'failed'),
+      ne(jobs.status, 'cancelled'),
+      gte(jobs.createdAt, cutoff)
+    ))
+    .orderBy(asc(jobs.createdAt));
 
-  if (error) throw wrapError('Failed to get extractions in timeframe', error);
-  return data.map(rowToJob);
+  return rows.map(rowToJob);
 }
