@@ -1,28 +1,25 @@
 import { randomUUID } from 'node:crypto';
 import type { Collection } from '../types.js';
-import { getClient, wrapError } from './client.js';
-import type { CollectionRow } from './types.js';
-
+import { db } from './drizzle.js';
+import { collections, recipeCollections } from './schema/collections.js';
+import { userRecipes } from './schema/recipes.js';
+import { eq, and, asc } from 'drizzle-orm';
 
 export async function listCollections(userId: string): Promise<Collection[]> {
-  const { data, error } = await getClient()
-    .from('collections')
+  const rows = await db
     .select()
-    .eq('user_id', userId)
-    .order('position', { ascending: true })
-    .order('created_at', { ascending: true })
-    .returns<CollectionRow[]>();
+    .from(collections)
+    .where(eq(collections.userId, userId))
+    .orderBy(asc(collections.position), asc(collections.createdAt));
 
-  if (error) throw wrapError('Failed to list collections', error);
-
-  return (data || []).map((row) => ({
+  return rows.map((row) => ({
     id: row.id,
-    userId: row.user_id,
+    userId: row.userId,
     name: row.name,
-    emoji: row.emoji,
+    emoji: row.emoji ?? undefined,
     position: row.position,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt),
+    updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : String(row.updatedAt),
   }));
 }
 
@@ -30,35 +27,28 @@ export async function createCollection(
   userId: string,
   col: Partial<Collection>
 ): Promise<Collection> {
-  const now = new Date().toISOString();
   const id = col.id || randomUUID();
   const position = col.position ?? 0;
 
-  const { data, error } = await getClient()
-    .from('collections')
-    .insert({
+  const [row] = await db
+    .insert(collections)
+    .values({
       id,
-      user_id: userId,
+      userId,
       name: col.name!,
       emoji: col.emoji || null,
       position,
-      created_at: now,
-      updated_at: now,
     })
-    .select()
-    .single<CollectionRow>();
+    .returning();
 
-  if (error) throw wrapError('Failed to create collection', error);
-
-  const row = data!;
   return {
     id: row.id,
-    userId: row.user_id,
+    userId: row.userId,
     name: row.name,
-    emoji: row.emoji,
+    emoji: row.emoji ?? undefined,
     position: row.position,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt),
+    updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : String(row.updatedAt),
   };
 }
 
@@ -67,67 +57,56 @@ export async function updateCollection(
   userId: string,
   col: Partial<Collection>
 ): Promise<Collection> {
-  const now = new Date().toISOString();
-  const updates: Record<string, unknown> = { updated_at: now };
+  const updates: Record<string, unknown> = { updatedAt: new Date() };
   if (col.name !== undefined) updates.name = col.name;
   if (col.emoji !== undefined) updates.emoji = col.emoji;
   if (col.position !== undefined) updates.position = col.position;
 
-  const { data, error } = await getClient()
-    .from('collections')
-    .update(updates)
-    .eq('id', id)
-    .eq('user_id', userId)
-    .select()
-    .single<CollectionRow>();
+  const [row] = await db
+    .update(collections)
+    .set(updates)
+    .where(and(eq(collections.id, id), eq(collections.userId, userId)))
+    .returning();
 
-  if (error) throw wrapError(`Failed to update collection ${id}`, error);
+  if (!row) throw new Error(`Failed to update collection ${id}: not found`);
 
-  const row = data!;
   return {
     id: row.id,
-    userId: row.user_id,
+    userId: row.userId,
     name: row.name,
-    emoji: row.emoji,
+    emoji: row.emoji ?? undefined,
     position: row.position,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt),
+    updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : String(row.updatedAt),
   };
 }
 
-
 export async function deleteCollection(id: string, userId: string): Promise<boolean> {
-  const { error, count } = await getClient()
-    .from('collections')
-    .delete({ count: 'exact' })
-    .eq('id', id)
-    .eq('user_id', userId);
+  const deleted = await db
+    .delete(collections)
+    .where(and(eq(collections.id, id), eq(collections.userId, userId)))
+    .returning({ id: collections.id });
 
-  if (error) throw wrapError(`Failed to delete collection ${id}`, error);
-  return (count ?? 0) > 0;
+  return deleted.length > 0;
 }
 
 export async function getCollectionMembership(
   userId: string
 ): Promise<Record<string, string[]>> {
-  const { data, error } = await getClient()
-    .from('recipe_collections')
-    .select('collection_id, user_recipes!inner(recipe_id)')
-    .eq('user_id', userId);
-
-  if (error) throw wrapError('Failed to get collection membership', error);
+  const rows = await db
+    .select({
+      collectionId: recipeCollections.collectionId,
+      recipeId: userRecipes.recipeId,
+    })
+    .from(recipeCollections)
+    .innerJoin(userRecipes, eq(recipeCollections.userRecipeId, userRecipes.id))
+    .where(eq(recipeCollections.userId, userId));
 
   const mapping: Record<string, string[]> = {};
-  const rows = (data ?? []) as unknown as Array<{
-    collection_id: string;
-    user_recipes?: { recipe_id?: string } | null;
-  }>;
-
   for (const row of rows) {
-    const recipeId = row.user_recipes?.recipe_id;
-    if (!recipeId) continue;
-    mapping[recipeId] ??= [];
-    mapping[recipeId].push(row.collection_id);
+    if (!row.recipeId) continue;
+    mapping[row.recipeId] ??= [];
+    mapping[row.recipeId].push(row.collectionId);
   }
   return mapping;
 }
@@ -137,34 +116,29 @@ export async function setRecipeCollections(
   userId: string,
   collectionIds: string[]
 ): Promise<void> {
-  const { data: entry, error: lookupError } = await getClient()
-    .from('user_recipes')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('recipe_id', recipeId)
-    .single();
+  const [entry] = await db
+    .select({ id: userRecipes.id })
+    .from(userRecipes)
+    .where(and(eq(userRecipes.userId, userId), eq(userRecipes.recipeId, recipeId)))
+    .limit(1);
 
-  if (lookupError) throw wrapError('Failed to resolve library entry for collections', lookupError);
-  const entryId = (entry as { id: string }).id;
+  if (!entry) throw new Error(`Failed to resolve library entry for collections: recipe ${recipeId}`);
+  const entryId = entry.id;
 
-  const { error: deleteError } = await getClient()
-    .from('recipe_collections')
-    .delete()
-    .eq('user_recipe_id', entryId)
-    .eq('user_id', userId);
-
-  if (deleteError) throw wrapError('Failed to clear old recipe collections', deleteError);
+  await db
+    .delete(recipeCollections)
+    .where(and(
+      eq(recipeCollections.userRecipeId, entryId),
+      eq(recipeCollections.userId, userId)
+    ));
 
   if (collectionIds.length > 0) {
-    const inserts = collectionIds.map((cid) => ({
-      collection_id: cid,
-      user_recipe_id: entryId,
-      user_id: userId,
-    }));
-    const { error: insertError } = await getClient()
-      .from('recipe_collections')
-      .insert(inserts);
-
-    if (insertError) throw wrapError('Failed to save new recipe collections', insertError);
+    await db
+      .insert(recipeCollections)
+      .values(collectionIds.map((cid) => ({
+        collectionId: cid,
+        userRecipeId: entryId,
+        userId,
+      })));
   }
 }
