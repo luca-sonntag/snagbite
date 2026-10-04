@@ -16,7 +16,10 @@
 * **Abbrechen ≠ Löschen:** `POST /api/jobs/:id/cancel` bricht eine laufende Extraktion ab, `DELETE /api/recipes/:id` entfernt ein Rezept aus dem Kochbuch. Beides war früher derselbe Aufruf — genau die Vermischung, die den Soft-Delete erzwungen hat.
 * **Eindeutige Identifikation:** Normalisiert Rezepte bei Abfragen und versieht sie mit einer eindeutigen `id` (entspricht der `jobId`), um Kollisionen zwischen Rezepten mit gleichem Titel zu unterbinden.
 * **Caching-Deaktivierung:** Setzt explizit `Cache-Control` Header (`no-store, no-cache, must-revalidate, proxy-revalidate`) für dynamic endpoints (`/api/jobs/:id`), um zu verhindern, dass Browser veraltete/gecachte Job-Zustände ausliefern.
-* **Queue-Resilienz & Stale-Job Self-Healing (`backend/src/db/jobsCleanup.ts`):**
+* **Queue-Resilienz & Stale-Job Self-Healing (`backend/src/db/jobsCleanup.ts` & `backend/src/queue.ts`):**
+  * **Adaptives Backoff & Log-Ingestion-Schutz:** Bei aktiver Extraktion oder laufenden Jobs pollt der Worker alle 2 Sekunden (`MIN_POLL_INTERVAL_MS = 2000`). Im Leerlauf greift ein dynamisches Backoff bis auf 30 Sekunden (`MAX_POLL_INTERVAL_MS = 30000`), wodurch unnötige Supabase API-Gateway- und Postgres-Logs um >90% reduziert werden.
+  * **Zero-Latency Event-Wakeup:** Sobald ein Job eingereicht wird (`triggerWorkerTick()` in `extractionRoutes.ts` / `recipeRoutes.ts`) oder ein Job abschließt, wird das Intervall sofort auf 2s zurückgesetzt und der nächste Tick unverzüglich angestoßen.
+  * **Entzerrte Wartungs-Sweeps:** `reclaimExpiredJobs` und `sweepStaleAwaitingFrames` laufen in einem 3-Minuten-Intervall (`MAINTENANCE_INTERVAL_MS`), was passend zu den 5- bzw. 10-Minuten-Timeouts zehntausende periodische DB-Hits einspart.
   * **Beendigung des `awaiting_frames`-Loops:** `sweepStaleAwaitingFrames` setzt Jobs, die länger als `CLIENT_FRAMES_TIMEOUT_MINUTES` (5 Min.) ohne Client-Keyframes in `awaiting_frames` verharren, verbindlich auf `status: 'failed'` mit dem Fehlercode `EXTRACTION_TIMEOUT`. Dadurch wird der frühere Teufelskreis (Sweep ➔ `pending` ➔ Re-Park ➔ `awaiting_frames`), der Nutzerkonten dauerhaft sperrte, vollständig unterbunden.
   * **Proaktive Bereinigung (`cleanStaleJobsForUser`):** Vor jedem Concurrency-Check (`enforceExtractionQuota` in `extractionRoutes.ts` und in `GET /api/extractions/limit`) werden verwaiste Jobs des Nutzers automatisch bereinigt, bevor der Concurrency-Fehler `ACTIVE_JOB_EXISTS` geworfen werden kann.
   * **Active-Jobs & Notfall-Freigabe API:**
@@ -41,7 +44,8 @@ Exponiert administrative API-Routen unter `/api/admin/*`, die über die Middlewa
 * **Body-Limit:** `express.json({ limit: '1mb' })` schützt vor Memory-Exhaustion durch große Payloads (Foto-Import nutzt pfad-spezifischen 12MB Parser davor).
 
 ### Health-Check (`/health`)
-Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()` (HEAD-Request auf `jobs`-Tabelle). Antwortet `200 OK` bei gesunder DB, `503 Service Unavailable` bei Problemen. Liefert `uptime`, `nodeEnv` und `dbConnected`-Status.
+Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()`. Antwortet `200 OK` bei gesunder DB, `503 Service Unavailable` bei Problemen. Liefert `uptime`, `nodeEnv` und `dbConnected`-Status.
+* **In-Memory Caching (30s TTL):** Das Abfrageergebnis wird für 30 Sekunden im Speicher gecacht (`DB_HEALTH_CACHE_TTL_MS`), damit externe Uptime-Monitore und Healthchecks Supabase nicht im Sekundentakt mit Polling-Abfragen belasten.
 
 ### Statische Assets & Zutat-Icons Distribution (`/api/ingredient-icons/*` & `/api/category-icons/*`)
 * **Icons-Katalog:** Das Backend liefert über 760 KI-generierte Zutat-Icons (`.webp`) und 20 Kategorie-Icons aus (`backend/src/ingredientImageRoutes.ts`).
@@ -113,6 +117,12 @@ Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()` (
 * **Stateless Scaling (Web vs. Worker):** Gesteuert über Umgebungsvariable `ROLE` (`web` | `worker` | `both`).
   * `web`: Serviert API und Frontend-Assets.
   * `worker`: Führt die asynchrone Queue-Schleife aus (`claimNextJob`, Frame-Extraktion, Gemini-Upload).
+* **Environment Variables Sync (`scripts/sync-railway-env.ps1`):**
+  * CLI-Tool zur Synchronisation lokaler Env-Variablen mit Railway (`railway variable set`).
+  * `npm run railway:env:prod`: Synchronisiert Production-Variablen (`backend/.env` als Basis gemergt mit `backend/.env.production` Overrides).
+  * `npm run railway:env:dev`: Synchronisiert Development-Variablen (`backend/.env`).
+  * `npm run railway:env:dry`: Dry-Run-Vorschau aller Variablen mit Farbcodierung der Quellen und Maskierung von Secrets.
+  * Inlined lokale JSON-Dateien (z. B. `FCM_SERVICE_ACCOUNT_JSON`) automatisch als minifiziertes JSON für den Railway-Container.
 
 ---
 
@@ -170,4 +180,70 @@ flowchart TD
   * **Floor at Zero:** Beim Kochen eines Rezepts (`POST /api/recipes/:id/cooked`) werden benötigte Zutatensmengen automatisch vom Vorrat abgezogen, unter Einheitenumrechnung (`g` ↔ `kg`, `ml` ↔ `l`). Vorratsmengen werden bei 0 gefloort und fallen niemals ins Negative.
   * **Verschwendungs-Reduzierung (`getPantryRecipeSuggestions`):** Bewertet und sortiert gespeicherte und öffentliche Rezepte anhand der Übereinstimmung mit bald ablaufenden Vorratszutaten (`expires_at <= NOW() + 3 Tage`).
   * **Community-Rezept-Freigabe:** URL-extrahierte Rezepte sind standardmäßig `visibility = 'public'` (öffentlich), während Foto- und Remix-Rezepte privat bleiben. Benutzer können die Sichtbarkeit jederzeit über `PATCH /api/recipes/:id/visibility` anpassen.
+
+---
+
+## 7. 🛡️ Abwärtskompatibilität, Schema-Evolution & Migrations-Protokoll
+
+Seit dem Produktiv-Rollout (Play Store Alpha/Production & Web PWA) befindet sich das Projekt in der **Post-Launch-Phase**. Schema-Änderungen und API-Anpassungen unterliegen strikten Regeln zum Schutz von Altdaten und älteren installierten App-Clients.
+
+### 🗄️ 1. Verbindlicher Migrations-Workflow (Supabase CLI)
+
+Jede Änderung an der Postgres-Datenbank (Tabellen, Spalten, Indizes, Enums, RLS, Trigger, RPC-Funktionen) **MUSS** über eine transaktionale SQL-Datei in `supabase/migrations/` abgebildet werden:
+
+```powershell
+# 1. Neue Migration mit sprechendem Namen anlegen
+npm run db:new <feature_name>
+# Generiert: supabase/migrations/<timestamp>_<feature_name>.sql
+
+# 2. Migrations-Status gegen verbundene DB prüfen
+npm run db:status
+
+# 3. Migration lokal oder auf Dev anwenden
+npm run db:push
+
+# 4. Im Notfall History reparieren (wenn remote und lokal synchronisiert werden müssen)
+npm run db:repair
+```
+
+* **Kein unversioniertes DDL:** Niemals Tabellen oder Spalten ad-hoc im Supabase-Dashboard anlegen oder modifizieren.
+* **Idempotenz:** SQL-Statements müssen mit defensiven Guard-Klauseln versehen sein (`ADD COLUMN IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ON CONFLICT DO NOTHING`).
+
+### 🔄 2. Das Expand-and-Contract Muster (Additive Schemas)
+
+Datenbank-Schemas werden **ausschließlich additiv** weiterentwickelt. Destruktive Befehle (`DROP COLUMN`, `RENAME COLUMN`, `ALTER COLUMN ... NOT NULL` ohne Default) sind auf aktiven Tabellen verboten:
+
+```mermaid
+flowchart LR
+    A["Phase 1: Expand<br/>Neue Spalte hinzufügen (nullable/default).<br/>Backend unterstützt Alt + Neu."] --> B["Phase 2: Migrate<br/>Idempotenter Daten-Backfill.<br/>Clients nutzen primär neues Schema."]
+    B --> C["Phase 3: Contract<br/>(Monate später)<br/>Alte Spalte nach Client-Rollout deprecaten/entfernen."]
+```
+
+1. **Neue Spalten:** Müssen immer `NULL`-able sein oder einen sicheren `DEFAULT`-Wert besitzen:
+   ```sql
+   -- ✅ KORREKT (abwärtskompatibel):
+   ALTER TABLE public.recipes ADD COLUMN IF NOT EXISTS health_score INTEGER DEFAULT 0;
+
+   -- ❌ VERBOTEN (bricht existierende Inserts/Jobs ab):
+   ALTER TABLE public.recipes ADD COLUMN health_score INTEGER NOT NULL;
+   ```
+2. **Spalten umbenennen / restrukturieren:**
+   - **Phase 1 (Expand):** Neue Spalte anlegen. Backend schreibt in beide Spalten bzw. liest das neue Feld mit Fallback auf das alte.
+   - **Phase 2 (Migrate):** Bestehende Datensätze per SQL-Backfill (`UPDATE recipes SET new_col = old_col WHERE new_col IS NULL;`) migrieren.
+   - **Phase 3 (Contract):** Erst wenn alle mobilen Clients im Umlauf die neue Version installiert haben, wird die alte Spalte aus dem Code und später aus der DB entfernt.
+
+### 📱 3. Schutz mobiler Clients & API-Kompatibilität
+
+* **Verzögerte App-Updates:** Nutzer auf Android aktualisieren Apps unregelmäßig. Die Backend-API muss alte App-Builds (z. B. v1.1.9) monatelang fehlerfrei unterstützen.
+* **Additive JSON-Responses:** Vorhandene Properties in REST-Antworten (`GET /api/recipes`, `GET /api/jobs/:id`) dürfen weder umbenannt noch im Datentyp verändert oder entfernt werden. Neue Daten werden als zusätzliche Keys angehängt.
+* **Optionale Request-Payloads:** Neue Body- oder Query-Parameter müssen optional sein. Wenn eine ältere App einen Parameter nicht mitsendet, greift der serverseitige Standardwert.
+
+### 🧱 4. Defensives Handling von JSONB-Altdaten
+
+Bestehende Rezepte in der Datenbank behalten ihre historische JSONB-Struktur (`ingredients`, `instructions`, `nutritional_values`). Code und UI dürfen niemals von der Existenz neuer verschachtelter Felder ausgehen:
+
+* **Optional Chaining & Nullish Coalescing:** Immer `item?.nestedField ?? fallback` nutzen.
+* **Strukturierte Typ-Guards:** Bei heterogenen Bestandsdaten (z. B. flache Zutat vs. verschachtelte Zutat) Type-Guards oder Normalisierungs-Helper verwenden (`normalizeIngredientItem()`).
+* **Backfill-Skripte:** Bei Schema-Erweiterungen (wie z. B. `is_ai_cover` oder `flatten_recipe_ingredients`) immer ein begleitendes, idempotentes Batch-Skript unter `backend/src/scripts/` anlegen (`npm run backfill:...`), das Altdaten in Batches von 50–100 Zeilen migriert.
+
 

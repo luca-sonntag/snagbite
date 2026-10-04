@@ -16,14 +16,14 @@
  *   npm run mappings:backfill -- --ingredients="Hüttenkäse, Leinsamen, Mandelmilch, Backpulver"
  */
 
-import { getClient } from '../db.js';
-import { resolveAndRemember } from '../matching/ingredientMatcher.js';
-import { mapWithConcurrency, type ResolverInput } from '../matching/ingredientResolver.js';
-import { flushHitCounts } from '../matching/mappingStore.js';
+import { getClient } from '../../db.js';
+import { resolveAndRemember } from '../../matching/ingredientMatcher.js';
+import { mapWithConcurrency, type ResolverInput } from '../../matching/ingredientResolver.js';
+import { flushHitCounts } from '../../matching/mappingStore.js';
 import {
   generateIngredientsWithAi,
   parseManualIngredientList,
-} from '../matching/aiIngredientGenerator.js';
+} from '../../matching/aiIngredientGenerator.js';
 import {
   getProdClient,
   extractIngredients,

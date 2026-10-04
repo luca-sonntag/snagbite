@@ -1,4 +1,4 @@
-import { packIngredientIcons, ensureIngredientIconsExtracted, getIngredientZipPath, getIngredientImagesDir } from '../ingredientIconPacker.js';
+import { packIngredientIcons, ensureIngredientIconsExtracted, getIngredientZipPath, getIngredientImagesDir } from '../../ingredientIconPacker.js';
 
 async function main() {
   const args = process.argv.slice(2);

@@ -1,15 +1,25 @@
 import React, { useState } from 'react';
 import { getIngredientIconUrl } from '../utils/ingredientIcon';
-import { getCategoryIconUrl } from '../i18n';
 
 export interface IngredientIconProps {
   baseName?: string | null;
   canonicalId?: string | null;
+  /** @deprecated Category fallback is no longer used for ingredient icons */
   category?: string;
   name?: string;
   synonyms?: string[] | null;
   size?: 'sm' | 'md' | 'lg' | 'grid';
   className?: string;
+  /**
+   * When true, preserves full icon slot dimensions as an invisible layout spacer
+   * when no icon exists or loading fails. Prevents misalignment and jumps in lists.
+   */
+  reserveSpace?: boolean;
+  /**
+   * Optional Tailwind width class applied when no icon exists and reserveSpace is false,
+   * providing breathing room so text doesn't stick to adjacent elements.
+   */
+  emptySpacingClass?: string;
 }
 
 const SIZE_MAP = {
@@ -29,45 +39,49 @@ const ICON_SIZE_MAP = {
 export const IngredientIcon: React.FC<IngredientIconProps> = ({
   baseName,
   canonicalId,
-  category = '',
   name = '',
   synonyms,
   size = 'md',
   className = '',
+  reserveSpace = false,
+  emptySpacingClass = '',
 }) => {
+  const iconUrl = getIngredientIconUrl(baseName, canonicalId, synonyms);
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const iconUrl = getIngredientIconUrl(baseName, canonicalId, synonyms);
-  const categoryIconUrl = getCategoryIconUrl(category);
+  const [prevUrl, setPrevUrl] = useState<string | null>(iconUrl);
+
+  if (prevUrl !== iconUrl) {
+    setPrevUrl(iconUrl);
+    setHasError(false);
+    setIsLoaded(false);
+  }
+
+  if (!iconUrl || hasError) {
+    if (reserveSpace) {
+      return (
+        <div
+          className={`${SIZE_MAP[size]} shrink-0 ${className}`}
+          aria-hidden="true"
+        />
+      );
+    }
+    if (emptySpacingClass) {
+      return (
+        <div
+          className={`${emptySpacingClass} shrink-0`}
+          aria-hidden="true"
+        />
+      );
+    }
+    return null;
+  }
 
   // Clean flat circular container
   const containerClasses = `${SIZE_MAP[size]} flex items-center justify-center overflow-hidden shrink-0 relative select-none rounded-full bg-transparent ${className}`;
 
-  if (!iconUrl || hasError) {
-    return (
-      <div className={containerClasses} title={category || name}>
-        <img
-          src={categoryIconUrl}
-          alt={category || name || 'Kategorie'}
-          loading="lazy"
-          className={`${ICON_SIZE_MAP[size]} object-contain`}
-        />
-      </div>
-    );
-  }
-
   return (
     <div className={containerClasses} title={name}>
-      {/* Category icon placeholder until specific image is fully loaded */}
-      {!isLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <img
-            src={categoryIconUrl}
-            alt={category || name || 'Kategorie'}
-            className={`${ICON_SIZE_MAP[size]} object-contain opacity-40`}
-          />
-        </div>
-      )}
       <img
         src={iconUrl}
         alt={name || 'Zutat'}

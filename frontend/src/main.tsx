@@ -17,6 +17,7 @@ import { PantryProvider } from './context/PantryContext.tsx'
 import { initNativeUi } from './native'
 import { installConsoleBuffer } from './utils/consoleBuffer'
 import { initOtaUpdates } from './utils/otaUpdater'
+import { initNativeAppUpdates } from './utils/nativeAppUpdater'
 
 // Capture recent console output app-wide so it can be attached to bug reports.
 installConsoleBuffer()
@@ -26,6 +27,9 @@ initNativeUi()
 
 // Confirm the running OTA bundle and check for new ones (no-op on web/dev).
 initOtaUpdates()
+
+// Check for and enforce Google Play Store app updates (no-op on web/dev).
+initNativeAppUpdates()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

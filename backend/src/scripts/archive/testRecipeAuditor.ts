@@ -1,6 +1,6 @@
-import { config } from '../config.js';
-import { auditRecipe, applyRecipeAuditPatch } from '../matching/recipeAuditor.js';
-import type { Recipe } from '../types.js';
+import { config } from '../../config.js';
+import { auditRecipe, applyRecipeAuditPatch } from '../../matching/recipeAuditor.js';
+import type { Recipe } from '../../types.js';
 
 async function main() {
   console.log('🧪 [testRecipeAuditor] Starting recipe auditor live diagnostic test...\n');

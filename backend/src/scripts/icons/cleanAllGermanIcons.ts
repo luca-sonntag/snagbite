@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { packIngredientIcons, getIngredientImagesDir } from '../ingredientIconPacker.js';
+import { packIngredientIcons, getIngredientImagesDir } from '../../ingredientIconPacker.js';
 
 const FULL_GERMAN_TRANSLATIONS: Record<string, string> = {
   'aprikosensauce_von_frischen_fruechten': 'apricot_sauce_fresh',

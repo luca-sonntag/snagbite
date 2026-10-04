@@ -1,12 +1,12 @@
 import path from 'path';
-import type { CanonicalIngredient } from '../data/canonicalIngredients.js';
-import { openFoodFactsAccess } from '../matching/openFoodFactsIndex.js';
+import type { CanonicalIngredient } from '../../data/canonicalIngredients.js';
+import { openFoodFactsAccess } from '../../matching/openFoodFactsIndex.js';
 import {
   generateIngredientIcon,
   findExistingIngredientImage,
   buildIngredientPrompt,
   getIngredientImagesDir,
-} from '../ingredientImageService.js';
+} from '../../ingredientImageService.js';
 
 interface CliOptions {
   id?: string;

@@ -4,9 +4,19 @@ import { existsSync } from 'fs';
 
 const backendDir = path.resolve(import.meta.dirname, '..');
 
-// Load .env file from project root or backend folder
-dotenv.config();
+// 1. Base .env (shared defaults across environments)
 dotenv.config({ path: path.resolve(backendDir, '.env') });
+dotenv.config();
+
+// 2. Mode-specific environment file (.env.production if NODE_ENV === 'production', else .env.development)
+const isProd = process.env.NODE_ENV === 'production';
+const modeEnvName = isProd ? '.env.production' : '.env.development';
+const modeEnvPath = path.resolve(backendDir, modeEnvName);
+if (existsSync(modeEnvPath)) {
+  dotenv.config({ path: modeEnvPath, override: true });
+}
+
+// 3. Local override (.env.local has highest local precedence, e.g. written by npm run use:prod)
 if (existsSync(path.resolve(backendDir, '.env.local'))) {
   dotenv.config({ path: path.resolve(backendDir, '.env.local'), override: true });
 } else if (existsSync('.env.local')) {
@@ -62,7 +72,6 @@ export interface Config {
   ADMIN_EMAILS: string;
   HEALTHCHECK_WEBSITE_URL?: string;
   HEALTHCHECK_BACKEND_URL?: string;
-  PUBLIC_BACKEND_URL?: string;
   NTFY_TOPIC?: string;
   TELEGRAM_BOT_TOKEN?: string;
   TELEGRAM_CHAT_ID?: string;
@@ -143,7 +152,6 @@ export const config: Config = {
   ADMIN_EMAILS: getEnv('ADMIN_EMAILS', ''),
   HEALTHCHECK_WEBSITE_URL: process.env.HEALTHCHECK_WEBSITE_URL,
   HEALTHCHECK_BACKEND_URL: process.env.HEALTHCHECK_BACKEND_URL,
-  PUBLIC_BACKEND_URL: process.env.PUBLIC_BACKEND_URL || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : undefined),
   NTFY_TOPIC: process.env.NTFY_TOPIC,
   TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
   TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID,

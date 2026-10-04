@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
-import { fetchFluxImageBuffer } from '../ingredientImageService.js';
+import { fetchFluxImageBuffer } from '../../ingredientImageService.js';
 
 interface CategoryIconDefinition {
   id: string;

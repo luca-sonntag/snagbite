@@ -8,31 +8,16 @@
  *   npx tsx src/scripts/restoreDatabase.ts --prod [--file path/to/backup.json] [--confirm]
  */
 
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
+import { initScriptEnv } from '../scriptEnv.js';
 
-const isProd = process.argv.includes('--prod');
+const scriptEnv = initScriptEnv();
+const isProd = scriptEnv.isProd;
 const isConfirmed = process.argv.includes('--confirm');
-const envFile = isProd ? '.env.production' : '.env';
-const envPath = path.resolve(process.cwd(), envFile);
-
-if (!fs.existsSync(envPath)) {
-  console.error(`❌ Environment file not found: ${envFile}`);
-  process.exit(1);
-}
-
-const envConfig = dotenv.parse(fs.readFileSync(envPath, 'utf8'));
-const supabaseUrl = envConfig.SUPABASE_URL;
-const supabaseKey = envConfig.SUPABASE_SECRET_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-  console.error(`❌ SUPABASE_URL or SUPABASE_SECRET_KEY missing in ${envFile}`);
-  process.exit(1);
-}
-
-const client = createClient(supabaseUrl, supabaseKey);
+const supabaseUrl = scriptEnv.supabaseUrl;
+const supabaseKey = scriptEnv.supabaseSecretKey;
+const client = scriptEnv.client;
 
 interface OpenApiProperty {
   description?: string;

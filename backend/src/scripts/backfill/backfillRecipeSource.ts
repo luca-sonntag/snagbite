@@ -1,22 +1,11 @@
-import fs from 'fs';
-import path from 'path';
-import dotenv from 'dotenv';
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { rowToRecipe, type RecipeRow } from '../db.js';
-import type { ResolverInput } from '../matching/ingredientResolver.js';
-import type { Recipe } from '../types.js';
+import { type SupabaseClient } from '@supabase/supabase-js';
+import { rowToRecipe, type RecipeRow } from '../../db.js';
+import type { ResolverInput } from '../../matching/ingredientResolver.js';
+import type { Recipe } from '../../types.js';
+import { initScriptEnv } from '../scriptEnv.js';
 
 export function getProdClient(): SupabaseClient {
-  const prodPath = fs.existsSync(path.resolve('.env.production'))
-    ? path.resolve('.env.production')
-    : path.resolve('backend', '.env.production');
-  const env = dotenv.config({ path: prodPath }).parsed || {};
-  const url = env.SUPABASE_URL || process.env.PROD_SUPABASE_URL;
-  const key = env.SUPABASE_SECRET_KEY || process.env.PROD_SUPABASE_SECRET_KEY;
-  if (!url || !key) {
-    throw new Error(`PROD credentials missing in ${prodPath}`);
-  }
-  return createClient(url, key);
+  return initScriptEnv({ target: 'prod', autoSetDbClient: false }).client;
 }
 
 export function extractIngredients(recipe: Recipe): ResolverInput[] {

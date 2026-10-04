@@ -9,8 +9,8 @@
  *   npx tsx src/scripts/consolidateMappingsToCanonical.ts [--dry-run]
  */
 
-import { getClient } from '../db.js';
-import { canonicalizeBaseName } from '../matching/baseNameCanonical.js';
+import { getClient } from '../../db.js';
+import { canonicalizeBaseName } from '../../matching/baseNameCanonical.js';
 
 interface RawMappingRow {
   id: string;

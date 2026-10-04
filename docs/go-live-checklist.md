@@ -32,7 +32,7 @@ Diese Checkliste fasst alle zwingenden rechtlichen, technischen, monetären und 
     - Passwort: `[Gewähltes Passwort]`
     - Anleitung: *„Auf 'Bereits ein Konto? Mit E-Mail anmelden' tippen und diese Zugangsdaten eingeben.“*
   - [x] Reviewer-Login in der App (`EmailLoginForm.tsx`) und Seed-Script (`npm run seed:reviewer` in `backend/`) implementiert.
-  - [ ] Seed-Script gegen Supabase Production ausgeführt, damit der Reviewer-Account mit 8 Rezepten, Sammlungen, Vorrat und Premium vorbefüllt ist.
+  - [x] Seed-Script gegen Supabase Production ausgeführt, damit der Reviewer-Account mit 8 Rezepten, Sammlungen, Vorrat und Premium vorbefüllt ist.
 - [ ] **IARC-Altersfreigabe & Zielgruppe:**
   - [ ] Fragebogen zur Inhaltseinstufung (IARC) ausgefüllt (Einstufung: PEGI 3 / USK 0).
   - [ ] Zielgruppe festgelegt (Erwachsene / ab 13 Jahre, keine gezielte Ausrichtung auf Kinder).
@@ -57,10 +57,10 @@ Diese Checkliste fasst alle zwingenden rechtlichen, technischen, monetären und 
     - `yearly` (z. B. 29,99 € / Jahr, inkl. 3 Tage Testphase / Free Trial)
   - [ ] Google Cloud Service Account für Google Play Android Developer API eingerichtet und mit RevenueCat verbunden.
   - [ ] RevenueCat Offerings und Packages (`default` Offering mit `MONTHLY` und `ANNUAL`) gemappt.
-- [ ] **Paywall Compliance & Features (`PremiumModal.tsx`):**
-  - [ ] **„Käufe wiederherstellen“ (Restore Purchases):** Sichtbarer Button vorhanden, der `Purchases.restorePurchases()` aufruft.
-  - [ ] **Rechtstexte:** Direkte Links zu AGB *und* Datenschutzerklärung.
-  - [ ] **Abo-Transparenz:** Klarer Hinweis auf automatische Verlängerung, Kündigungsfrist und Verwaltung über Google Play.
+- [x] **Paywall Compliance & Features (`PremiumModal.tsx`):**
+  - [x] **„Käufe wiederherstellen“ (Restore Purchases):** Sichtbarer Button vorhanden, der `Purchases.restorePurchases()` aufruft.
+  - [x] **Rechtstexte:** Direkte Links zu AGB *und* Datenschutzerklärung.
+  - [x] **Abo-Transparenz:** Klarer Hinweis auf automatische Verlängerung, Kündigungsfrist und Verwaltung über Google Play.
 - [ ] **End-to-End Lizenztest:**
   - [ ] Eigene E-Mail in der Play Console als *Lizenzprüfer (License Tester)* registriert.
   - [ ] Test-Abo auf echtem Android-Gerät abgeschlossen (ohne echte Abbuchung).
@@ -77,18 +77,23 @@ Diese Checkliste fasst alle zwingenden rechtlichen, technischen, monetären und 
   - [ ] `frontend/android/version.properties` auf finale Startversion gesetzt (z. B. `VERSION_NAME=1.0.0`, `VERSION_CODE=1`).
 - [ ] **Netzwerksicherheit (`AndroidManifest.xml`):**
   - [x] `network_security_config.xml` angelegt und in `AndroidManifest.xml` referenziert (keine Cleartext-Warnungen mehr im Pre-Launch Report).
-  - [ ] `VITE_API_BASE_URL` in `frontend/.env.production` zeigt auf die Live-HTTPS-Domain des Backends.
+  - [x] `VITE_API_BASE_URL` in `frontend/.env.production` zeigt auf die Live-HTTPS-Domain des Backends (`https://cookbook-production-8769.up.railway.app`).
 - [ ] **Digital Asset Links (`assetlinks.json`):**
   - [ ] Datei unter `https://snagbite.app/.well-known/assetlinks.json` deployed.
-  - [ ] SHA256-Fingerprint des Play Store App-Signing-Zertifikats eingetragen.
+  - [x] SHA256-Fingerprint des Play Store App-Signing-Zertifikats in `website/public/.well-known/assetlinks.json` eingetragen.
   - [ ] Deep Linking via `https://snagbite.app/invite/*` verifiziert (`android:autoVerify="true"` öffnet direkt die App).
 - [ ] **App-Icons & Splash Screen:**
   - [x] Adaptives App-Icon (`res/mipmap-anydpi-v26/ic_launcher.xml`) für Android 8–15 vorhanden.
   - [x] Monochromes App-Icon für Android 13+ Themed Icons (`<monochrome>`-Tag) vorhanden.
   - [ ] Splash Screen (`res/drawable/splash.png` und Hintergrundfarbe `#064e3b`) schließt flüssig ohne Hänger ab.
-- [ ] **Hardware Back-Button:**
-  - [ ] Zurück-Gesten auf Subscreens (Rezept-Details, Katalog-Filter, Modals, Drawer) schließen das Overlay statt die App.
-  - [ ] Doppel-Tap auf Root-Screen zum Beenden der App funktioniert zuverlässig.
+- [x] **Hardware Back-Button:**
+  - [x] Zurück-Gesten auf Subscreens (Rezept-Details, Katalog-Filter, Modals, Drawer) schließen das Overlay statt die App.
+  - [x] Doppel-Tap auf Root-Screen zum Beenden der App funktioniert zuverlässig.
+- [ ] **Google Play In-App Updates (`@capawesome/capacitor-app-update`):**
+  - [x] Sofortige Update-Erzwingung (`performImmediateUpdate`) bei App-Start & Resume in `nativeAppUpdater.ts` integriert.
+  - [x] Manueller Update-Check-Button in `SettingsView.tsx` mit lokalisiertem Feedback bereitgestellt.
+  - [x] Fallback auf Store-Weiterleitung (`openAppStore()`) bei nicht erlaubtem Immediate Update implementiert.
+  - [ ] Update-Flow auf echtem Android-Gerät über Internal App Sharing oder Closed Testing Track verifiziert.
 
 ---
 

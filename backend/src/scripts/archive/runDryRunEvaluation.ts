@@ -1,11 +1,11 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { getClient } from '../db.js';
-import { getScraperForUrl } from '../scrapers/index.js';
-import { extractRecipe } from '../gemini.js';
-import { enrichRecipeWithCanonicalIngredients } from '../matching/ingredientMatcher.js';
-import { config } from '../config.js';
-import type { Recipe } from '../types.js';
+import { getClient } from '../../db.js';
+import { getScraperForUrl } from '../../scrapers/index.js';
+import { extractRecipe } from '../../gemini.js';
+import { enrichRecipeWithCanonicalIngredients } from '../../matching/ingredientMatcher.js';
+import { config } from '../../config.js';
+import type { Recipe } from '../../types.js';
 
 interface EvalIngredientReport {
   rawName: string;

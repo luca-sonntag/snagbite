@@ -92,6 +92,7 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
         synonyms={ingredient.synonyms}
         size="grid"
         className="mr-1.5"
+        emptySpacingClass="w-1.5"
       />
 
       {/* Ingredient details */}

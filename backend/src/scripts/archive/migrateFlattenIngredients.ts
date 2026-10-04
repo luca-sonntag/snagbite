@@ -7,10 +7,11 @@
  *   [ Ingredient (with optional section: "Sauce"), ... ]
  *
  * Usage:
- *   npx tsx src/scripts/migrateFlattenIngredients.ts [--dry-run]
+ *   npx tsx src/scripts/migrateFlattenIngredients.ts [--dry-run] [--prod|--dev]
  */
 
-import { getClient } from '../db.js';
+import { getClient } from '../../db.js';
+import { initScriptEnv } from '../scriptEnv.js';
 
 interface RawIngredientItem {
   id?: string;
@@ -75,9 +76,11 @@ export function flattenIngredients(groups: RawIngredientGroup[]): RawIngredientI
 }
 
 async function run(): Promise<void> {
+  const scriptEnv = initScriptEnv();
   const isDryRun = process.argv.includes('--dry-run');
   console.log(`============================================================`);
   console.log(`Data Migration: Flatten Recipe Ingredients`);
+  console.log(`Target: ${scriptEnv.target.toUpperCase()} (${scriptEnv.supabaseUrl})`);
   console.log(`Mode: ${isDryRun ? 'DRY-RUN (no database writes)' : 'LIVE EXECUTION'}`);
   console.log(`============================================================\n`);
 

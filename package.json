@@ -15,32 +15,47 @@
     "build": "npm run build -w shared && npm run build -w frontend && npm run build -w backend",
     "start": "npm run start -w backend",
     "preview": "npm run preview -w backend",
+
     "deploy": "powershell -ExecutionPolicy Bypass -File deploy.ps1",
     "deploy:all:internal": "powershell -ExecutionPolicy Bypass -File deploy.ps1 -All -Bump patch -Track internal",
     "deploy:all:alpha": "powershell -ExecutionPolicy Bypass -File deploy.ps1 -All -Bump patch -Track alpha",
     "healthcheck": "npm run start --prefix healthcheck",
-    "generate:ingredient-image": "npm run generate:ingredient-image -w backend --",
-    "generate:basename-icons": "npm run generate:basename-icons -w backend --",
-    "icons:zip": "npm run icons:zip -w backend",
-    "icons:unpack": "npm run icons:unpack -w backend",
+
     "cap:live": "npm run cap:live -w frontend",
     "cap:live:cloud": "npm run cap:live:cloud -w frontend",
     "cap:run:local": "npm run cap:run:local -w frontend",
+
     "db:push": "supabase db push",
     "db:status": "supabase migration list",
     "db:new": "supabase migration new",
     "db:repair": "supabase migration repair",
+
     "db:backup:prod": "npm run db:backup -w backend -- --prod",
     "db:backup:dev": "npm run db:backup -w backend -- --dev",
     "db:restore:prod": "npm run db:restore -w backend -- --prod",
     "db:restore:dev": "npm run db:restore -w backend -- --dev",
+
+    "seed:reviewer": "npm run seed:reviewer -w backend",
+    "seed:reviewer:prod": "npm run seed:reviewer:prod -w backend",
+    "seed:reviewer:dev": "npm run seed:reviewer:dev -w backend",
+
     "recompute-nutrition:prod": "npm run recompute-nutrition:prod -w backend --",
     "recompute-nutrition:dev": "npm run recompute-nutrition:dev -w backend --",
     "covers:backfill:prod": "npm run covers:backfill:prod -w backend --",
     "covers:backfill:dev": "npm run covers:backfill:dev -w backend --",
+    "generate:ingredient-image": "npm run generate:ingredient-image -w backend --",
+    "generate:basename-icons": "npm run generate:basename-icons -w backend --",
+    "icons:zip": "npm run icons:zip -w backend",
+    "icons:unpack": "npm run icons:unpack -w backend",
+
     "use:prod": "node scripts/switchEnv.js prod",
+    "use:prod:backend": "node scripts/switchEnv.js prod --backend",
     "use:dev": "node scripts/switchEnv.js dev",
-    "use:status": "node scripts/switchEnv.js status"
+    "use:status": "node scripts/switchEnv.js status",
+
+    "railway:env:prod": "powershell -ExecutionPolicy Bypass -File scripts/sync-railway-env.ps1 -Prod",
+    "railway:env:dev": "powershell -ExecutionPolicy Bypass -File scripts/sync-railway-env.ps1 -Dev",
+    "railway:env:dry": "powershell -ExecutionPolicy Bypass -File scripts/sync-railway-env.ps1 -Prod -DryRun"
   },
   "devDependencies": {
     "concurrently": "^10.0.3"

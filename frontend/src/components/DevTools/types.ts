@@ -106,6 +106,7 @@ export interface DevToolsApi {
   close: () => void;
   help: () => void;
   list: () => void;
+  checkAppUpdate?: () => Promise<unknown>;
 }
 
 declare global {

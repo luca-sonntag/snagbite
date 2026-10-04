@@ -9,8 +9,8 @@ import { DatabaseSync } from 'node:sqlite';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
-import { getClient } from '../db/client.js';
-import { canonicalizeBaseName } from '../matching/baseNameCanonical.js';
+import { getClient } from '../../db/client.js';
+import { canonicalizeBaseName } from '../../matching/baseNameCanonical.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

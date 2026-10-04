@@ -14,24 +14,13 @@
  * Usage:
  *   cd backend && npx tsx src/scripts/seedReviewerAccount.ts
  */
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
+import { initScriptEnv } from '../scriptEnv.js';
 
-dotenv.config();
+const scriptEnv = initScriptEnv();
+const supabase = scriptEnv.client;
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
 const REVIEWER_EMAIL = (process.env.REVIEWER_EMAIL || 'reviewer@snagbite.app').trim().toLowerCase();
 const REVIEWER_PASSWORD = process.env.REVIEWER_PASSWORD || 'SnagbiteReviewer2026!';
-
-if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) {
-  console.error('Missing SUPABASE_URL or SUPABASE_SECRET_KEY.');
-  process.exit(1);
-}
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
 
 interface IngredientItem {
   name: string;
@@ -64,7 +53,7 @@ async function getOrCreateReviewerUser(): Promise<string> {
   for (let page = 1; page <= 20; page++) {
     const { data, error: listErr } = await supabase.auth.admin.listUsers({ page, perPage: 200 });
     if (listErr) throw new Error(`Failed to list users: ${listErr.message}`);
-    const match = data.users.find((u) => u.email?.toLowerCase() === REVIEWER_EMAIL);
+    const match = data.users.find((u: { email?: string }) => u.email?.toLowerCase() === REVIEWER_EMAIL);
     if (match) {
       const { error: updateErr } = await supabase.auth.admin.updateUserById(match.id, {
         password: REVIEWER_PASSWORD,
@@ -108,9 +97,9 @@ async function seedRecipes(userId: string, targetCount = 8): Promise<RecipeSumma
     throw new Error(`Failed to check existing user recipes: ${userRecErr.message}`);
   }
 
-  const existingIds = new Set((existingUserRecipes || []).map((r) => r.recipe_id));
-  const available = (publicRecipes as RecipeSummary[]).filter((r) => !existingIds.has(r.id));
-  const alreadySaved = (publicRecipes as RecipeSummary[]).filter((r) => existingIds.has(r.id));
+  const existingIds = new Set((existingUserRecipes || []).map((r: { recipe_id: string }) => r.recipe_id));
+  const available = (publicRecipes as RecipeSummary[]).filter((r: RecipeSummary) => !existingIds.has(r.id));
+  const alreadySaved = (publicRecipes as RecipeSummary[]).filter((r: RecipeSummary) => existingIds.has(r.id));
 
   const needed = Math.max(0, targetCount - (existingUserRecipes?.length || 0));
   if (needed === 0) {
@@ -120,7 +109,7 @@ async function seedRecipes(userId: string, targetCount = 8): Promise<RecipeSumma
       .from('user_recipes')
       .select('recipes(id, title, ingredients)')
       .eq('user_id', userId);
-    return ((userSaved || []).map((ur) => ur.recipes).filter(Boolean) as unknown as RecipeSummary[]);
+    return ((userSaved || []).map((ur: { recipes?: unknown }) => ur.recipes).filter(Boolean) as unknown as RecipeSummary[]);
   }
 
   // 3. Pick random public recipes from available pool
@@ -235,7 +224,8 @@ async function seedGamification(userId: string) {
 }
 
 async function main() {
-  console.log('--- Snagbite Reviewer Seed ---');
+  console.log(`--- Snagbite Reviewer Seed [Target: ${scriptEnv.target.toUpperCase()}] ---`);
+  console.log(`Target URL: ${scriptEnv.supabaseUrl}`);
   const userId = await getOrCreateReviewerUser();
   console.log(`Reviewer user ID: ${userId}`);
 

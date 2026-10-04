@@ -24,28 +24,14 @@
  *   npx tsx src/scripts/recomputeRecipeNutrition.ts
  *   DRY_RUN=1 npx tsx src/scripts/recomputeRecipeNutrition.ts
  */
-import fs from 'fs';
-import path from 'path';
-import dotenv from 'dotenv';
-import { createClient } from '@supabase/supabase-js';
-import { getClient, setClient, rowToRecipe, recipeToRow } from '../db.js';
-import { enrichRecipeWithCanonicalIngredients } from '../matching/ingredientMatcher.js';
-import type { Recipe } from '../types.js';
+import { getClient, rowToRecipe, recipeToRow } from '../../db.js';
+import { enrichRecipeWithCanonicalIngredients } from '../../matching/ingredientMatcher.js';
+import type { Recipe } from '../../types.js';
+import { initScriptEnv } from '../scriptEnv.js';
 
-const isProd = process.argv.includes('--prod');
+const scriptEnv = initScriptEnv();
+const isProd = scriptEnv.isProd;
 const DRY_RUN = process.argv.includes('--dry-run') || process.env.DRY_RUN === '1' || process.env.DRY_RUN === 'true';
-
-if (isProd) {
-  const prodEnvPath = path.resolve(process.cwd(), '.env.production');
-  const fallbackProdPath = path.resolve(process.cwd(), 'backend', '.env.production');
-  const targetEnvFile = fs.existsSync(prodEnvPath) ? prodEnvPath : fallbackProdPath;
-  if (fs.existsSync(targetEnvFile)) {
-    const envConfig = dotenv.parse(fs.readFileSync(targetEnvFile, 'utf8'));
-    if (envConfig.SUPABASE_URL && envConfig.SUPABASE_SECRET_KEY) {
-      setClient(createClient(envConfig.SUPABASE_URL, envConfig.SUPABASE_SECRET_KEY));
-    }
-  }
-}
 
 const PAGE_SIZE = 200;
 /** Relative gap above which a pre-existing total is treated as genuinely source-stated. */

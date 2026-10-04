@@ -707,6 +707,11 @@ export const uiTranslations = {
         alphaActive: 'Alpha-Zugriff',
         alphaActiveDesc: 'Du bist Alpha-Tester! Du hast kostenlosen Zugriff auf alle PRO-Features während der Alpha. Tageslimits gelten weiterhin.',
         premiumCardDesc: 'Schalte unbegrenzte Rezept-Analysen, Recipe Copilot und smarte Nährwert-Insights frei.',
+        checkForUpdates: 'Auf Updates prüfen',
+        checkingUpdates: 'Prüfe auf Updates...',
+        upToDate: 'Snagbite ist auf dem neuesten Stand.',
+        updateCheckFailed: 'Update-Prüfung fehlgeschlagen.',
+        updateAvailable: 'Neues Update im Play Store verfügbar.',
         legal: {
           section: 'Rechtliches',
           privacy: 'Datenschutzerklärung',
@@ -2225,6 +2230,11 @@ export const uiTranslations = {
         alphaActive: 'Alpha Access',
         alphaActiveDesc: 'You are an alpha tester! You have free access to all PRO features during the alpha. Daily limits apply.',
         premiumCardDesc: 'Unlock unlimited recipe analysis, Recipe Copilot, and deep nutrition insights.',
+        checkForUpdates: 'Check for updates',
+        checkingUpdates: 'Checking for updates...',
+        upToDate: 'Snagbite is up to date.',
+        updateCheckFailed: 'Update check failed.',
+        updateAvailable: 'New update available on Play Store.',
         legal: {
           section: 'Legal',
           privacy: 'Privacy Policy',

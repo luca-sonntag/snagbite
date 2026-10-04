@@ -22,11 +22,20 @@ import { isDevEnvironment, logExtractionDevSummary } from './matching/recipeAudi
 
 const workerId = randomUUID();
 let activeJobs = 0;
-let workerInterval: NodeJS.Timeout | null = null;
+let isWorkerRunning = false;
+let isTicking = false;
+let pendingTrigger = false;
+let workerTimer: NodeJS.Timeout | null = null;
 let reclaimInterval: NodeJS.Timeout | null = null;
 let sweepInterval: NodeJS.Timeout | null = null;
 let cleanupInterval: NodeJS.Timeout | null = null;
 let notificationInterval: NodeJS.Timeout | null = null;
+
+const MIN_POLL_INTERVAL_MS = 2_000;
+const MAX_POLL_INTERVAL_MS = 30_000;
+const BACKOFF_MULTIPLIER = 1.5;
+const MAINTENANCE_INTERVAL_MS = 3 * 60_000; // 3 minutes
+let currentPollDelayMs = MIN_POLL_INTERVAL_MS;
 
 function buildRecipePreview(recipe: Recipe, fallbackThumbnail?: string, authorHandle?: string | null): RecipePreviewData {
   const allItems = recipe.ingredients || [];
@@ -597,8 +606,10 @@ async function processJob(job: Job): Promise<void> {
 
 /**
  * Worker loop that claims and dispatches jobs up to WORKER_CONCURRENCY in parallel.
+ * Returns true if at least one job was claimed.
  */
-async function workerTick(): Promise<void> {
+async function workerTick(): Promise<boolean> {
+  let jobsClaimed = 0;
   while (activeJobs < config.WORKER_CONCURRENCY) {
     let job;
     try {
@@ -609,23 +620,76 @@ async function workerTick(): Promise<void> {
     }
     if (!job) break;
 
+    jobsClaimed++;
     activeJobs++;
     processJob(job).finally(() => {
       activeJobs--;
+      triggerWorkerTick();
     });
+  }
+  return jobsClaimed > 0;
+}
+
+function scheduleNextTick(delayMs: number): void {
+  if (!isWorkerRunning) return;
+  if (workerTimer) {
+    clearTimeout(workerTimer);
+    workerTimer = null;
+  }
+  workerTimer = setTimeout(() => {
+    void runWorkerCycle();
+  }, delayMs);
+}
+
+async function runWorkerCycle(): Promise<void> {
+  if (!isWorkerRunning) return;
+  if (isTicking) {
+    pendingTrigger = true;
+    return;
+  }
+  isTicking = true;
+  if (workerTimer) {
+    clearTimeout(workerTimer);
+    workerTimer = null;
+  }
+
+  try {
+    const hasJobs = await workerTick();
+    if (hasJobs || activeJobs > 0) {
+      currentPollDelayMs = MIN_POLL_INTERVAL_MS;
+    } else {
+      currentPollDelayMs = Math.min(
+        MAX_POLL_INTERVAL_MS,
+        Math.round(currentPollDelayMs * BACKOFF_MULTIPLIER)
+      );
+    }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn('[Queue] Error in worker cycle:', msg);
+  } finally {
+    isTicking = false;
+    if (pendingTrigger) {
+      pendingTrigger = false;
+      currentPollDelayMs = MIN_POLL_INTERVAL_MS;
+      scheduleNextTick(0);
+    } else {
+      scheduleNextTick(currentPollDelayMs);
+    }
   }
 }
 
 /**
  * Triggers an immediate worker tick to claim pending jobs without waiting for the polling interval.
+ * Resets backoff delay so new jobs start with zero latency.
  */
 export function triggerWorkerTick(): void {
-  setImmediate(() => {
-    workerTick().catch((err: unknown) => {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.warn('[Queue] Error in triggered worker tick:', msg);
-    });
-  });
+  currentPollDelayMs = MIN_POLL_INTERVAL_MS;
+  if (!isWorkerRunning) return;
+  if (isTicking) {
+    pendingTrigger = true;
+    return;
+  }
+  scheduleNextTick(0);
 }
 
 async function cleanupOldRunDirs(days: number): Promise<void> {
@@ -671,18 +735,21 @@ async function cleanupOldRunDirs(days: number): Promise<void> {
 /**
  * Starts the background job queue loop.
  */
-export function startQueue(pollIntervalMs = 2000): void {
-  if (workerInterval) return;
+export function startQueue(pollIntervalMs = MIN_POLL_INTERVAL_MS): void {
+  if (isWorkerRunning) return;
+  isWorkerRunning = true;
   console.log('Background job queue worker started.');
 
-  workerInterval = setInterval(workerTick, pollIntervalMs);
+  currentPollDelayMs = pollIntervalMs;
+  scheduleNextTick(0);
+
   reclaimInterval = setInterval(
     () => reclaimExpiredJobs(config.WORKER_LEASE_TIMEOUT_MINUTES).catch(console.error),
-    60_000
+    MAINTENANCE_INTERVAL_MS
   );
   sweepInterval = setInterval(
     () => sweepStaleAwaitingFrames(config.CLIENT_FRAMES_TIMEOUT_MINUTES).catch(console.error),
-    60_000
+    MAINTENANCE_INTERVAL_MS
   );
 
   // Run cleanup once at startup, then every 12 hours.
@@ -719,7 +786,8 @@ export function startQueue(pollIntervalMs = 2000): void {
  * Stops the background job queue loop.
  */
 export function stopQueue(): void {
-  if (workerInterval) { clearInterval(workerInterval); workerInterval = null; }
+  isWorkerRunning = false;
+  if (workerTimer) { clearTimeout(workerTimer); workerTimer = null; }
   if (reclaimInterval) { clearInterval(reclaimInterval); reclaimInterval = null; }
   if (sweepInterval) { clearInterval(sweepInterval); sweepInterval = null; }
   if (cleanupInterval) { clearInterval(cleanupInterval); cleanupInterval = null; }

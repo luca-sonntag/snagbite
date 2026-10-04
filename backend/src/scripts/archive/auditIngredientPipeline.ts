@@ -1,18 +1,18 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { getClient } from '../db.js';
-import { packIngredientIcons, getIngredientImagesDir } from '../ingredientIconPacker.js';
-import { isMappingConfirmed, isIconConfirmed } from '../audit/auditManifest.js';
-import { findExistingIngredientImage } from '../ingredientImageService.js';
+import { getClient } from '../../db.js';
+import { packIngredientIcons, getIngredientImagesDir } from '../../ingredientIconPacker.js';
+import { isMappingConfirmed, isIconConfirmed } from '../../audit/auditManifest.js';
+import { findExistingIngredientImage } from '../../ingredientImageService.js';
 import {
   loadDailyBudget,
   isBudgetExhausted,
   getDailyBudgetStatus,
   DEFAULT_DAILY_BUDGET_USD,
-} from '../audit/budgetTracker.js';
-import { auditSingleMapping } from '../audit/mappingAuditor.js';
-import { auditSingleIcon, AbortPipelineError } from '../audit/iconAuditor.js';
-import type { PipelineCliOptions } from '../audit/types.js';
+} from '../../audit/budgetTracker.js';
+import { auditSingleMapping } from '../../audit/mappingAuditor.js';
+import { auditSingleIcon, AbortPipelineError } from '../../audit/iconAuditor.js';
+import type { PipelineCliOptions } from '../../audit/types.js';
 
 function parseCliArgs(): PipelineCliOptions {
   const args = process.argv.slice(2);
