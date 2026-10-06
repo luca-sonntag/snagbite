@@ -12,6 +12,23 @@ const GOOGLE_CLIENT_ID =
 
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
 
+const configuredOrigins = (process.env.CORS_ORIGIN || '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+const trustedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
+  'capacitor://localhost',
+  'http://localhost',
+  'https://localhost',
+  ...(process.env.APP_URL ? [process.env.APP_URL] : []),
+  ...configuredOrigins,
+];
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: 'pg',
@@ -25,6 +42,7 @@ export const auth = betterAuth({
   }),
   baseURL: process.env.APP_URL || 'http://localhost:3000',
   basePath: '/api/auth',
+  trustedOrigins,
   secret:
     process.env.BETTER_AUTH_SECRET ||
     process.env.JWT_SECRET ||
@@ -39,10 +57,14 @@ export const auth = betterAuth({
     autoSignIn: true,
   },
   socialProviders: {
-    google: {
-      clientId: GOOGLE_CLIENT_ID,
-      clientSecret: GOOGLE_CLIENT_SECRET,
-    },
+    ...(GOOGLE_CLIENT_SECRET
+      ? {
+          google: {
+            clientId: GOOGLE_CLIENT_ID,
+            clientSecret: GOOGLE_CLIENT_SECRET,
+          },
+        }
+      : {}),
   },
   user: {
     additionalFields: {
