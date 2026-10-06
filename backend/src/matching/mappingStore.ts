@@ -5,7 +5,7 @@
 
 import { db, getDbPool } from '../db/drizzle.js';
 import { ingredientMappings } from '../db/schema/ingredients.js';
-import { eq, and, or, inArray, sql } from 'drizzle-orm';
+import { eq, and, or, inArray, arrayOverlaps, sql } from 'drizzle-orm';
 import { CATEGORY_GROUPS, getMajorCategoryGroup, areCategoriesCompatible } from './categoryGroups.js';
 
 export { CATEGORY_GROUPS, getMajorCategoryGroup, areCategoriesCompatible };
@@ -129,7 +129,7 @@ export async function lookupMapping(keys: string[], category: string): Promise<I
       .where(or(
         inArray(ingredientMappings.mappingKey, unknown),
         inArray(ingredientMappings.mappingKeyDe, unknown),
-        sql`${ingredientMappings.aliases} && ${unknown}::text[]`
+        arrayOverlaps(ingredientMappings.aliases, unknown)
       ));
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
