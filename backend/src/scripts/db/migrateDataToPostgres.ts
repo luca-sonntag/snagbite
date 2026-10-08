@@ -16,7 +16,11 @@ const scriptEnv = initScriptEnv();
 const isDryRun = process.argv.includes('--dry-run');
 const supabaseClient = scriptEnv.client;
 
-const connectionString = process.env.DATABASE_URL;
+const connectionString = (
+  process.env.DATABASE_URL?.includes('.railway.internal')
+    ? (process.env.DATABASE_PUBLIC_URL || process.env.DATABASE_URL)
+    : (process.env.DATABASE_PUBLIC_URL || process.env.DATABASE_URL)
+);
 if (!connectionString) {
   console.error('❌ DATABASE_URL is not set.');
   process.exit(1);
