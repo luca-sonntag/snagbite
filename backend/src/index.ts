@@ -50,8 +50,8 @@ async function bootstrap() {
         directives: {
           ...helmet.contentSecurityPolicy.getDefaultDirectives(),
           "script-src": ["'self'", "'sha256-gRea1ud4dovMrn/WaGWbyWZ3C28Ahr9nd40nKPz0IO8='"],
-          "connect-src": ["'self'", "https://*.supabase.co", "wss://*.supabase.co"],
-          "img-src": ["'self'", "data:", "blob:", "https://*.supabase.co"],
+          "connect-src": ["'self'", "https://*.storageapi.dev", "https://*.railway.app"],
+          "img-src": ["'self'", "data:", "blob:", "https://*.storageapi.dev", "https://*.railway.app"],
         }
       } : false,
     }));
@@ -142,7 +142,6 @@ async function bootstrap() {
         uptime: process.uptime(),
         nodeEnv: process.env.NODE_ENV || 'development',
         dbConnected: dbHealthy,
-        supabaseHost: new URL(config.SUPABASE_URL).host,
         role: config.ROLE,
       });
     });

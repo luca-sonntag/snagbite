@@ -8,6 +8,9 @@ export type { JobRow, RecipeRow, UserRecipeRow };
 let _client: SupabaseClient | null = null;
 
 export function getClient(): SupabaseClient {
+  if (!config.SUPABASE_URL || !config.SUPABASE_SECRET_KEY) {
+    throw new Error('Supabase client is deprecated and SUPABASE_URL / SUPABASE_SECRET_KEY are not configured.');
+  }
   _client ??= createClient(config.SUPABASE_URL, config.SUPABASE_SECRET_KEY);
   return _client;
 }
