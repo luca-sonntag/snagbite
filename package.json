@@ -37,10 +37,6 @@
     "auth:migrate:dev": "npm run auth:migrate:dev -w backend",
     "auth:migrate:prod": "npm run auth:migrate:prod -w backend",
     "auth:migrate:dry": "npm run auth:migrate:dry -w backend",
-    "db:supabase:push": "supabase db push",
-    "db:status": "supabase migration list",
-    "db:new": "supabase migration new",
-    "db:repair": "supabase migration repair",
 
     "db:backup:prod": "npm run db:backup -w backend -- --prod",
     "db:backup:dev": "npm run db:backup -w backend -- --dev",
