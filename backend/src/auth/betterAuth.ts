@@ -25,6 +25,8 @@ const trustedOrigins = [
   'capacitor://localhost',
   'http://localhost',
   'https://localhost',
+  'https://snagbite.app',
+  'https://www.snagbite.app',
   ...(process.env.APP_URL ? [process.env.APP_URL] : []),
   ...configuredOrigins,
 ];
