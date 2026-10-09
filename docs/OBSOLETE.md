@@ -6,7 +6,21 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
-### 2026-10-04: Entfernung des Terraform-Layers zugunsten Railway-nativer Services & Environments
+### 2026-10-09: Vollständige Entfernung von Supabase (PostgreSQL, Storage, Auth & CLI)
+
+* **Ersetzter Code / Veraltete Logik:**
+  - Supabase PostgreSQL Hosting, PostgREST und Supabase CLI (`supabase/` Ordner mit 15 SQL-Migrationen, `config.toml`, `npm run db:supabase:*`).
+  - `@supabase/supabase-js` in `website/` (`AdminPage.tsx`, altes `website/src/supabase.ts`) und veraltete Referenzen in der Datenschutzerklärung.
+  - Supabase Storage & PostgREST in OTA-Deployment-Skripten (`frontend/scripts/deploy-ota.ps1`, `git-utils.ps1`, `release.ps1`).
+  - Veraltete Pflicht-Umgebungsvariablen `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` in `backend/src/config.ts`, sowie `supabaseHost` in `/health` und Supabase-Domains in Helmet CSP.
+* **Ersetzt durch:**
+  - **Railway Native PostgreSQL & Drizzle ORM:** Alle 21 Tabellen, Indizes und RPCs laufen direkt auf Managed PostgreSQL via Drizzle ORM (`drizzle-kit push`, `db:push:prod`).
+  - **Railway Tigris S3 Storage:** Alle Medien (`recipe-covers`, `cook-photos`, `feedback-screenshots`, `app-bundles`) laufen über Tigris S3 via AWS SDK v3 und private HTTP-Streaming-Endpunkte.
+  - **Better-Auth:** Authentifizierung (Google OAuth, Passwörter, Sessions, Bearer Tokens) läuft autark über Better-Auth und Drizzle im Backend; Admin-Login in `website/` nutzt `better-auth/react`.
+  - **Natives OTA-Management:** Neues CLI-Tool [`backend/src/scripts/deploy/otaBundleManager.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/scripts/deploy/otaBundleManager.ts) für Bundle-Upload nach Tigris S3, Registrierung und Capping in Postgres.
+* **Betroffene Dateien:** `supabase/` (vollständig entfernt), `website/`, `frontend/scripts/`, `backend/src/config.ts`, `backend/src/index.ts`, `backend/src/db/appBundlesDb.ts`, `package.json`, `scripts/switchEnv.js`.
+
+---
 
 * **Ersetzter Code / Veraltete Logik:**
   - Experimentelles Terraform-Setup unter `infra/terraform/` und npm-Befehle `infra:plan` / `infra:apply`.

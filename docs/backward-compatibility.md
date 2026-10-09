@@ -14,36 +14,33 @@
 
 ---
 
-## 🗄️ 2. Supabase Migrations-Workflow (Verbindlich)
+## 🗄️ 2. Drizzle ORM Schema- & Migrations-Workflow (Verbindlich)
 
-Jede Änderung an der Postgres-Datenbank (Tabellen, Spalten, Indizes, Enums, RLS-Policies, Trigger, RPC-Funktionen) **MUSS** über eine transaktionale SQL-Datei im Ordner `supabase/migrations/` versioniert werden.
+Jede Änderung an der Postgres-Datenbank (Tabellen, Spalten, Indizes, Enums) **MUSS** über das typsichere Drizzle-Schema in `backend/src/db/schema/` erfolgen.
 
 ### Workflow-Befehle (Root `package.json`)
 
 ```powershell
-# 1. Neue Migration mit sprechendem Namen anlegen
-npm run db:new <feature_name>
-# Erzeugt: supabase/migrations/<timestamp>_<feature_name>.sql
+# 1. Schema-Änderung in backend/src/db/schema/*.ts durchführen
 
-# 2. Migrations-Status prüfen (Differenz zwischen lokal und DB)
-npm run db:status
-
-# 3. Migration lokal oder auf Dev-DB anwenden
+# 2. Schema synchronisieren (Dev-DB):
 npm run db:push
 
-# 4. History reparieren (Synchronisation nach Remote-Reverts)
-npm run db:repair
+# 3. Schema auf Produktion anwenden (Railway Prod):
+npm run db:push:prod
+
+# 4. Optional: Migration-SQL generieren
+npm run db:generate
+
+# 5. Drizzle Studio zur visuellen Dateninspektion starten
+npm run db:studio
 ```
 
-### Regeln für Migrationsdateien (`.sql`)
+### Regeln für Schema-Änderungen
 
-* **Niemals unversioniertes DDL:** Führe niemals DDL-Befehle (`ALTER TABLE`, `CREATE TABLE`) direkt und undokumentiert im Supabase-Dashboard aus.
-* **Idempotenz:** Verwende defensive Klauseln, damit Migrationen wiederholbar sind:
-  * `CREATE TABLE IF NOT EXISTS ...`
-  * `ALTER TABLE ... ADD COLUMN IF NOT EXISTS ...`
-  * `CREATE INDEX IF NOT EXISTS ...`
-  * `INSERT INTO ... ON CONFLICT (key) DO NOTHING;`
-* **Transaktionalität:** Vermeide destructive Operationen in einem einzigen Block mit Datenmigrationen.
+* **Niemals unversioniertes DDL:** Führe niemals DDL-Befehle (`ALTER TABLE`, `CREATE TABLE`) direkt und undokumentiert im Dashboard aus.
+* **Idempotenz & Sicherheit:** Neue Spalten immer mit `.default()` oder nullable anlegen.
+* **Transaktionalität:** Vermeide destruktive Eingriffe auf produktiven Daten.
 
 ---
 
