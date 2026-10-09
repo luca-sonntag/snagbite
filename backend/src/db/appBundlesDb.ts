@@ -1,6 +1,6 @@
 import { db } from './drizzle.js';
 import { appBundles } from './schema/system.js';
-import { eq, and, desc, lte, or, gte, isNull } from 'drizzle-orm';
+import { eq, and, desc, lte, lt, or, gte, isNull } from 'drizzle-orm';
 import type { AppBundleRow } from './types.js';
 
 function toAppBundleRow(r: typeof appBundles.$inferSelect): AppBundleRow {
@@ -74,4 +74,55 @@ export async function setAppBundleActive(id: string, active: boolean): Promise<A
 
   if (!updated) throw new Error(`Failed to set app bundle ${id} active=${active}`);
   return toAppBundleRow(updated);
+}
+
+export async function createAppBundle(data: {
+  channel: 'production' | 'alpha' | 'internal';
+  version: string;
+  storagePath: string;
+  checksum: string;
+  minVersionCode: number;
+  maxVersionCode?: number | null;
+  active?: boolean;
+  notes?: string;
+}): Promise<AppBundleRow> {
+  if (data.active) {
+    await db
+      .update(appBundles)
+      .set({ active: false })
+      .where(and(
+        eq(appBundles.channel, data.channel),
+        eq(appBundles.active, true)
+      ));
+  }
+
+  const [row] = await db
+    .insert(appBundles)
+    .values({
+      channel: data.channel,
+      version: data.version,
+      storagePath: data.storagePath,
+      checksum: data.checksum,
+      minVersionCode: data.minVersionCode,
+      maxVersionCode: data.maxVersionCode ?? null,
+      active: data.active ?? false,
+      notes: data.notes ?? null,
+    })
+    .returning();
+
+  return toAppBundleRow(row);
+}
+
+export async function capOpenEndedAppBundles(newVersionCode: number): Promise<number> {
+  const cappedMaxCode = newVersionCode - 1;
+  const result = await db
+    .update(appBundles)
+    .set({ maxVersionCode: cappedMaxCode })
+    .where(and(
+      lt(appBundles.minVersionCode, newVersionCode),
+      isNull(appBundles.maxVersionCode)
+    ))
+    .returning({ id: appBundles.id });
+
+  return result.length;
 }

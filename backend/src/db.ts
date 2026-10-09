@@ -11,3 +11,4 @@ export * from './db/mealPlansDb.js';
 export * from './db/pantryDb.js';
 export * from './db/shoppingListDb.js';
 export * from './db/publicRecipesDb.js';
+export * from './db/appBundlesDb.js';
