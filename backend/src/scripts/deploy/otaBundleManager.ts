@@ -9,6 +9,10 @@
  *   npx tsx src/scripts/deploy/otaBundleManager.ts --prod rollback --channel=alpha
  *   npx tsx src/scripts/deploy/otaBundleManager.ts --prod cap --version-code=110
  */
+if (process.argv.includes('--prod') || process.argv.includes('--source=prod')) {
+  process.env.NODE_ENV = 'production';
+}
+
 import fs from 'fs';
 import { initScriptEnv } from '../scriptEnv.js';
 

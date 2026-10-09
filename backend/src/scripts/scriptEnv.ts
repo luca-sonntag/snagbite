@@ -1,9 +1,12 @@
+if (process.argv.includes('--prod') || process.argv.includes('--source=prod')) {
+  process.env.NODE_ENV = 'production';
+}
+
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { setClient } from '../db.js';
 
 export type ScriptTarget = 'prod' | 'dev';
 
@@ -112,7 +115,7 @@ export function initScriptEnv(options?: {
     });
 
     if (options?.autoSetDbClient !== false) {
-      setClient(client);
+      import('../db.js').then(({ setClient }) => setClient(client)).catch(() => {});
     }
   }
 
