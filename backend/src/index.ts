@@ -9,6 +9,9 @@ import { appUpdatesRouter } from './appUpdates.js';
 import { ingredientImageRouter } from './ingredientImageRoutes.js';
 import { checkDbHealth } from './db.js';
 import { ensureIngredientIconsExtracted } from './ingredientIconPacker.js';
+import { toNodeHandler } from 'better-auth/node';
+import { auth } from './auth/betterAuth.js';
+import { storageRouter } from './routes/storageRoutes.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const isWorker = config.ROLE === 'worker' || config.ROLE === 'both';
@@ -47,8 +50,8 @@ async function bootstrap() {
         directives: {
           ...helmet.contentSecurityPolicy.getDefaultDirectives(),
           "script-src": ["'self'", "'sha256-gRea1ud4dovMrn/WaGWbyWZ3C28Ahr9nd40nKPz0IO8='"],
-          "connect-src": ["'self'", "https://*.supabase.co", "wss://*.supabase.co"],
-          "img-src": ["'self'", "data:", "blob:", "https://*.supabase.co"],
+          "connect-src": ["'self'", "https://*.storageapi.dev", "https://*.railway.app"],
+          "img-src": ["'self'", "data:", "blob:", "https://*.storageapi.dev", "https://*.railway.app"],
         }
       } : false,
     }));
@@ -102,7 +105,7 @@ async function bootstrap() {
       // NOTE: req.path is relative to the '/api' mount point here (e.g.
       // '/image', '/jobs/123'), since the limiter is mounted at '/api'.
       skip: (req) => {
-        if (req.path.startsWith('/image') || req.path.startsWith('/ingredient-icons')) return true;
+        if (req.path.startsWith('/image') || req.path.startsWith('/ingredient-icons') || req.path.startsWith('/storage')) return true;
         // Job polling and cookbook reads are both high-frequency and cheap.
         if (req.method === 'GET' && /^\/(jobs|recipes|public)(\/|$)/.test(req.path)) return true;
         return false;
@@ -117,12 +120,18 @@ async function bootstrap() {
     app.use('/api/extract-recipe/frames', express.json({ limit: '10mb' }));
     app.use(express.json({ limit: '1mb' }));
 
+    // Storage streaming endpoints for private Tigris S3 assets (public, immutable caching)
+    app.use(storageRouter);
+
     // OTA update checks are public (before apiRouter to skip the auth gate —
     // the app may check before a session exists). Covered by apiLimiter above.
     app.use('/api/app-updates', appUpdatesRouter);
 
     // Development ingredient image viewer & generator
     app.use(ingredientImageRouter);
+
+    // Better-Auth authentication endpoints
+    app.all('/api/auth*', toNodeHandler(auth));
 
     app.use('/api', apiRouter);
 
@@ -133,7 +142,6 @@ async function bootstrap() {
         uptime: process.uptime(),
         nodeEnv: process.env.NODE_ENV || 'development',
         dbConnected: dbHealthy,
-        supabaseHost: new URL(config.SUPABASE_URL).host,
         role: config.ROLE,
       });
     });

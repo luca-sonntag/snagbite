@@ -12,7 +12,7 @@
 >
 > **📝 Doku & OBSOLETE.md aktuell halten:** Nach JEDER relevanten Code-Änderung (neues Feature, Architekturänderung, neue Komponente, etc.) musst du prüfen, ob die Dokumentation angepasst werden muss. Wenn durch Refactorings oder neue Ansätze alter Code, Heuristiken oder Hilfsfunktionen obsolet werden, musst du diese im Dokument [`docs/OBSOLETE.md`](file:///c:/Users/lucas/source/repos/cookbook/docs/OBSOLETE.md) festhalten.
 >
-> **⚠️ Abwärtskompatibilität & DB-Migrationen (Breaking Changes Guard):** Da die App im Play Store und im Web live ist, haben Abwärtskompatibilität und saubere Datenmigrationen oberste Priorität. Jede Schema-Änderung **MUSS** zwingend als Supabase-Migration (`supabase/migrations/`) via `npm run db:new <name>` angelegt werden (niemals unversioniertes DDL). Neue Tabellenspalten müssen `NULL`-able sein oder einen sicheren `DEFAULT`-Wert besitzen (Expand-and-Contract Muster). Niemals aktive Spalten löschen oder umbenennen. API-Responses müssen rückwärtskompatibel zu älteren im Umlauf befindlichen Android-Builds bleiben. Altdaten in JSONB defensiv mit Optional Chaining (`?.`) und Nullish Coalescing (`??`) behandeln. Sollte eine Änderung potenziell nicht abwärtskompatibel sein, darfst du diese NIEMALS eigenmächtig umsetzen — weise im `implementation_plan.md` mit `[!WARNING]` / `[!CAUTION]` darauf hin und hole vorab ausdrückliche Bestätigung ein. Siehe Regel [`.agents/rules/backward-compatibility.md`](file:///c:/Users/lucas/source/repos/cookbook/.agents/rules/backward-compatibility.md).
+> **⚠️ Abwärtskompatibilität & DB-Migrationen (Breaking Changes Guard):** Da die App im Play Store und im Web live ist, haben Abwärtskompatibilität und saubere Datenmigrationen oberste Priorität. Jede Schema-Änderung **MUSS** zwingend über das Drizzle-Schema (`backend/src/db/schema/`) via `npm run db:push:prod` deployed werden (niemals unversioniertes DDL). Neue Tabellenspalten müssen `NULL`-able sein oder einen sicheren `DEFAULT`-Wert besitzen (Expand-and-Contract Muster). Niemals aktive Spalten löschen oder umbenennen. API-Responses müssen rückwärtskompatibel zu älteren im Umlauf befindlichen Android-Builds bleiben. Altdaten in JSONB defensiv mit Optional Chaining (`?.`) und Nullish Coalescing (`??`) behandeln. Sollte eine Änderung potenziell nicht abwärtskompatibel sein, darfst du diese NIEMALS eigenmächtig umsetzen — weise im `implementation_plan.md` mit `[!WARNING]` / `[!CAUTION]` darauf hin und hole vorab ausdrückliche Bestätigung ein. Siehe Regel [`.agents/rules/backward-compatibility.md`](file:///c:/Users/lucas/source/repos/cookbook/.agents/rules/backward-compatibility.md).
 >
 > **🚫 Keine sprach- oder inhalts-spezifischen String-Heuristiken (Anti-Fragility):** Schreibe NIEMALS sprachabhängige Keyword- oder Substring-Prüfungen (z. B. `if (name.includes('käse') || name.includes('hähnchen'))`) in UI-, Rendering-, Business- oder Normalisierungs-Logik, um Kategorien, Icons oder Eigenschaften zu erraten. Löse solche Anforderungen IMMER über sauberen Datenfluss (Prop-Passing aus Elternelementen wie `group.name`), strukturierte Enums, zentrale typisierte Taxonomie-Lookups oder Upstream-Datenanreicherung.
 
@@ -20,7 +20,7 @@
 
 ## 🧼 Code-Standards & Design-System (Global)
 
-* 🛡️ [**Abwärtskompatibilität & DB-Migrationen**](file:///c:/Users/lucas/source/repos/cookbook/docs/backward-compatibility.md): Verbindliche Regeln für Non-Breaking Schema-Evolution, Expand-and-Contract, idempotente Supabase-Migrationen & Mobile-App-Schutz (Agent-Regel: [`.agents/rules/backward-compatibility.md`](file:///c:/Users/lucas/source/repos/cookbook/.agents/rules/backward-compatibility.md)).
+* 🛡️ [**Abwärtskompatibilität & DB-Migrationen**](file:///c:/Users/lucas/source/repos/cookbook/docs/backward-compatibility.md): Verbindliche Regeln für Non-Breaking Schema-Evolution, Expand-and-Contract, idempotente Drizzle-Migrationen & Mobile-App-Schutz (Agent-Regel: [`.agents/rules/backward-compatibility.md`](file:///c:/Users/lucas/source/repos/cookbook/.agents/rules/backward-compatibility.md)).
 * 🧼 [**TypeScript & React Clean Code Guidelines**](file:///c:/Users/lucas/source/repos/cookbook/docs/clean-code.md): Verbindliche Regeln zu Dateigrößen (**max. 150–200 Zeilen, Hard Limit 300**), Modularisierung, Custom Hooks, Subkomponenten-Extraktion & 0x `any`.
 * 🎨 [**UI & Design Styleguide**](file:///c:/Users/lucas/source/repos/cookbook/docs/styleguide.md): Vorgaben zu Clean Flat Style, Farbpalette, Typografie, Radien & rahmenlosen Oberflächen (`border-none`).
 * 📱 [**Mobile UX & Native App Feeling Guidelines**](file:///c:/Users/lucas/source/repos/cookbook/docs/mobile-ux-rules.md): Verbindliche Richtlinien für Touch-Targets (≥ 44×44px), Haptics, Gesten, Empty States, Transitions & selektierte Zustände.
@@ -34,10 +34,10 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
 1. 📸 [**Scraping-Layer & Import-Kanäle**](file:///c:/Users/lucas/source/repos/cookbook/docs/architecture/scraping-and-imports.md)
    * RapidAPI Metadata Provider (Metadata & Image Carousel Only, ToS/Copyright-sicher)
    * Bilderkarussell-Posts (Multi-Image Slides) & Handle-Extraktion
-   * Foto-Import (Rezeptkarten/Kochbuchseiten OCR, `photo://` synthetische URLs, Supabase `recipe-photos` Storage Hand-off)
+   * Foto-Import (Rezeptkarten/Kochbuchseiten OCR, `photo://` synthetische URLs, S3 `recipe-photos` Storage Hand-off)
 
 2. ⚙️ [**Backend & Datenbank**](file:///c:/Users/lucas/source/repos/cookbook/docs/architecture/backend-and-database.md)
-   * Express.js API, Node 22+ & Supabase Postgres (RLS-Policies & Auth JWTs)
+   * Express.js API, Node 22+ & Railway Managed Postgres (Drizzle ORM & Better-Auth)
    * Admin-Bereich (`/api/admin/*`), RLS-Bypass, Metriken & Failed Jobs Drilldown
    * Security Hardening (Helmet, Rate Limits, CORS) & Health Check (`/health`)
    * Rolling Timeframe Rate Limiting & Subscription Tiers (`free`, `premium`, `alpha`)
@@ -68,7 +68,7 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
 
 5. 🚀 [**Deployment, Play Store & OTA Updates**](file:///c:/Users/lucas/source/repos/cookbook/docs/architecture/deployment-and-ota.md)
    * Play Store Build Pipeline (Fastlane in Docker, `version.properties`, `release.ps1`, `deploy-playstore.ps1`)
-   * Self-Hosted Capgo OTA Live Updates (`@capgo/capacitor-updater`, Supabase `app_bundles`, Rollback-Strategien)
+   * Self-Hosted Capgo OTA Live Updates (`@capgo/capacitor-updater`, Tigris S3 `app-bundles`, Drizzle DB, Rollback-Strategien)
    * Google Play In-App Updates (`@capawesome/capacitor-app-update`, `nativeAppUpdater.ts`, Immediate Forced Updates, Resume & Settings-Check)
    * Gradle `reversePorts` Task, AdMob App-ID Setup & Splash Screen Hang Diagnosen
    * [🏁 Google Play Store Go-Live Checklist](file:///c:/Users/lucas/source/repos/cookbook/docs/go-live-checklist.md) (Compliance, AdMob, Billing & Quality Gate)
@@ -87,6 +87,11 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
    * Detaillierte Kostenaufstellung aller LLM-Calls (Gemini 3.1/2.5 Flash-Lite & FLUX.1 [schnell] Cover)
    * Reale AdMob-Monetarisierungsmodelle (Rewarded Video Arbitrage, App-Open Interstitial & MREC)
 
+9. 🏗️ **Railway Native Cloud-Infrastruktur**
+   * Services auf Railway: PostgreSQL Plugin, Tigris S3 Storage, Backend-Web, Worker & Healthcheck
+   * Multi-Environment (`production` und `development`) via Railway Native Environments
+   * Secrets-Management: Dynamische Railway-Referenzen `${{Postgres.DATABASE_URL}}` + App-Secrets-Sync via `scripts/sync-railway-env.ps1`
+
 ---
 
 ## 🏗️ System- & Workflow-Kurzübersicht
@@ -94,7 +99,7 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
 Dieses Projekt analysiert Rezept-Reels (Instagram, TikTok, YouTube Shorts, Websites) sowie abfotografierte Kochbuchseiten via Google Gemini Vision, strukturiert diese in ein präzises JSON-Schema und stellt sie in einem modernen React PWA Dashboard zur Verfügung.
 
 1. **Eingabe:** Share Target / Link-Eingabe oder Foto-Upload (`POST /api/extract-recipe/photos`).
-2. **Auth & Jobs:** Supabase JWT Auth Middleware `requireAuth`, Erstellung von `pending`-Jobs in der Postgres-`jobs`-Tabelle (reiner Task; der Inhalt landet über `complete_job()` in `recipes`, der Kochbuch-Eintrag in `user_recipes`).
+2. **Auth & Jobs:** Better-Auth Session Middleware `requireAuth`, Erstellung von `pending`-Jobs in der Postgres-`jobs`-Tabelle (reiner Task; der Inhalt landet über `complete_job()` in `recipes`, der Kochbuch-Eintrag in `user_recipes`).
 3. **Queue & Processing:** Worker claimt Job atomar (`claim_next_job`), führt Scraping/Downloader oder Photo-Fetch durch, baut Video-Grid und ruft Gemini Multimodal API auf.
 4. **Structured Recipe Output:** Gemini liefert standardisierte Zutaten, Supermarktkategorien, Nährwerte per Portion und Schritte.
 5. **Dashboard & PWA:** Interaktive Checklisten, Portionsrechner, In-App Timers, 3-Ebenen-Katalog mit Sammlungen/Labels, Einkaufsliste, Offline-Bildercache & Recipe Copilot Chat.

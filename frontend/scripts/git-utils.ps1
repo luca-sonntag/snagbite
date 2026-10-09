@@ -23,41 +23,13 @@ function Cap-StaleAppBundles {
     )
 
     $repoRoot = Get-GitRepoRoot
-    $backendProdEnv = Join-Path $repoRoot 'backend\.env.production'
-    $backendDevEnv  = Join-Path $repoRoot 'backend\.env'
-
-    $supabaseUrl = if ($env:SUPABASE_URL) { $env:SUPABASE_URL } `
-                   elseif (Test-Path $backendProdEnv) { Read-DotEnvValue $backendProdEnv 'SUPABASE_URL' } `
-                   else { Read-DotEnvValue $backendDevEnv 'SUPABASE_URL' }
-
-    $serviceKey  = if ($env:SUPABASE_SECRET_KEY) { $env:SUPABASE_SECRET_KEY } `
-                   elseif (Test-Path $backendProdEnv) { Read-DotEnvValue $backendProdEnv 'SUPABASE_SECRET_KEY' } `
-                   else { Read-DotEnvValue $backendDevEnv 'SUPABASE_SECRET_KEY' }
-
-    if (-not $supabaseUrl -or -not $serviceKey) {
-        Write-Host "  [OTA-Guard] Skipping DB bundle capping (SUPABASE_URL / SUPABASE_SECRET_KEY not set)." -ForegroundColor DarkGray
-        return
-    }
-
-    $supabaseUrl = $supabaseUrl.TrimEnd('/')
-    $restHeaders = @{
-        'apikey'        = $serviceKey
-        'Authorization' = "Bearer $serviceKey"
-        'Content-Type'  = 'application/json'
-        'Prefer'        = 'return=representation'
-    }
-
-    $cappedMaxCode = $NewVersionCode - 1
     try {
         Write-Host "  [OTA-Guard] Checking for stale open-ended OTA bundles (min_version_code < $NewVersionCode)..." -ForegroundColor Yellow
-        $patchUri = "$supabaseUrl/rest/v1/app_bundles?min_version_code=lt.$NewVersionCode&max_version_code=is.null"
-        $patched = Invoke-RestMethod -Method Patch -Headers $restHeaders `
-            -Uri $patchUri `
-            -Body (@{ max_version_code = $cappedMaxCode } | ConvertTo-Json)
-
-        $count = if ($patched -is [array]) { $patched.Count } elseif ($patched) { 1 } else { 0 }
-        if ($count -gt 0) {
-            Write-Host "  [OTA-Guard] Capped $count stale open-ended OTA bundle(s) with max_version_code = $cappedMaxCode." -ForegroundColor Green
+        $resultRaw = & npx tsx "$repoRoot\backend\src\scripts\deploy\otaBundleManager.ts" --prod cap "--version-code=$NewVersionCode"
+        $res = $resultRaw | ConvertFrom-Json
+        if ($res.capped -gt 0) {
+            $cappedMaxCode = $NewVersionCode - 1
+            Write-Host "  [OTA-Guard] Capped $($res.capped) stale open-ended OTA bundle(s) with max_version_code = $cappedMaxCode." -ForegroundColor Green
         } else {
             Write-Host "  [OTA-Guard] No open-ended stale OTA bundles found for native versionCode $NewVersionCode." -ForegroundColor Green
         }

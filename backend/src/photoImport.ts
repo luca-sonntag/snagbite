@@ -1,6 +1,14 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { getClient } from './db.js';
+import {
+  ensureBucketExists,
+  uploadFile,
+  downloadFile,
+  deleteFiles,
+  listFiles,
+  listFolders,
+  type StorageBucket,
+} from './storage/s3Client.js';
 
 /**
  * Photo import: the user's own photos of a physical recipe source (cookbook
@@ -19,7 +27,7 @@ import { getClient } from './db.js';
  * backstop for imports whose job never ran.
  */
 
-const BUCKET = 'recipe-photos';
+const BUCKET: StorageBucket = 'recipe-photos';
 
 export const PHOTO_URL_PREFIX = 'photo://';
 
@@ -54,13 +62,9 @@ export async function uploadImportPhoto(
   index: number,
   buffer: Buffer,
 ): Promise<void> {
+  await ensureBucketExists(BUCKET);
   const storagePath = `${folderFor(userId, uploadId)}/${index}.jpg`;
-
-  const { error } = await getClient().storage
-    .from(BUCKET)
-    .upload(storagePath, buffer, { contentType: 'image/jpeg', upsert: true });
-
-  if (error) throw new Error(`Failed to upload import photo: ${error.message}`);
+  await uploadFile(BUCKET, storagePath, buffer, 'image/jpeg');
 }
 
 /**
@@ -74,8 +78,8 @@ export async function downloadImportPhotos(
   runDir: string,
 ): Promise<{ paths: string[]; bytes: number }> {
   const folder = folderFor(userId, uploadId);
-  const { data: files, error } = await getClient().storage.from(BUCKET).list(folder);
-  if (error || !files || files.length === 0) return { paths: [], bytes: 0 };
+  const files = await listFiles(BUCKET, folder);
+  if (!files || files.length === 0) return { paths: [], bytes: 0 };
 
   const ordered = files
     .map(file => ({ file, index: parseInt(file.name.replace(/\.jpg$/i, ''), 10) }))
@@ -86,14 +90,7 @@ export async function downloadImportPhotos(
   let bytes = 0;
 
   for (const { file, index } of ordered) {
-    const { data: blob, error: dlError } = await getClient().storage
-      .from(BUCKET)
-      .download(`${folder}/${file.name}`);
-    // A missing slide would silently truncate the recipe, so fail loudly here
-    // instead of extracting from half the pages.
-    if (dlError || !blob) throw new Error(`Failed to download import photo ${index}: ${dlError?.message ?? 'no data'}`);
-
-    const buffer = Buffer.from(await blob.arrayBuffer());
+    const buffer = await downloadFile(BUCKET, file.key);
     const localPath = path.join(runDir, `photo_${index}.jpg`);
     await fs.writeFile(localPath, buffer);
     paths.push(localPath);
@@ -106,10 +103,9 @@ export async function downloadImportPhotos(
 /** Removes all stored photos of an import. */
 export async function deleteImportPhotos(userId: string, uploadId: string): Promise<void> {
   const folder = folderFor(userId, uploadId);
-  const { data, error } = await getClient().storage.from(BUCKET).list(folder);
-  if (error || !data || data.length === 0) return;
-  const paths = data.map(f => `${folder}/${f.name}`);
-  await getClient().storage.from(BUCKET).remove(paths);
+  const files = await listFiles(BUCKET, folder);
+  if (!files || files.length === 0) return;
+  await deleteFiles(BUCKET, files.map(f => f.key));
 }
 
 /**
@@ -119,32 +115,27 @@ export async function deleteImportPhotos(userId: string, uploadId: string): Prom
  */
 export async function sweepOldPhotoImports(maxAgeHours = 24): Promise<number> {
   const cutoff = Date.now() - maxAgeHours * 3600 * 1000;
-  const { data: userFolders, error } = await getClient().storage.from(BUCKET).list('', { limit: 1000 });
-  if (error || !userFolders || userFolders.length === 0) return 0;
+  const userFolders = await listFolders(BUCKET, '');
+  if (!userFolders || userFolders.length === 0) return 0;
 
   let removed = 0;
   for (const userFolder of userFolders) {
-    if (!userFolder.name) continue;
-    const { data: uploadFolders, error: uploadsError } = await getClient().storage
-      .from(BUCKET)
-      .list(userFolder.name, { limit: 1000 });
-    if (uploadsError || !uploadFolders || uploadFolders.length === 0) continue;
+    const uploadFolders = await listFolders(BUCKET, userFolder);
+    if (!uploadFolders || uploadFolders.length === 0) continue;
 
     for (const uploadFolder of uploadFolders) {
-      if (!uploadFolder.name) continue;
-      const folder = `${userFolder.name}/${uploadFolder.name}`;
-      const { data: files, error: filesError } = await getClient().storage.from(BUCKET).list(folder);
-      if (filesError || !files || files.length === 0) continue;
+      const folder = `${userFolder}/${uploadFolder}`;
+      const files = await listFiles(BUCKET, folder);
+      if (!files || files.length === 0) continue;
 
       const allExpired = files.every(f => {
-        const ts = f.created_at ? new Date(f.created_at).getTime() : 0;
+        const ts = f.lastModified ? f.lastModified.getTime() : 0;
         return ts > 0 && ts < cutoff;
       });
       if (!allExpired) continue;
 
-      const paths = files.map(f => `${folder}/${f.name}`);
-      const { error: removeError } = await getClient().storage.from(BUCKET).remove(paths);
-      if (!removeError) removed += paths.length;
+      await deleteFiles(BUCKET, files.map(f => f.key));
+      removed += files.length;
     }
   }
   return removed;

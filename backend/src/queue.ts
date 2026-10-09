@@ -1,9 +1,12 @@
 import fs from 'fs/promises';
 import path from 'path';
 import {
-  claimNextJob, updateJob, updateJobProgress, completeJob, getRecipe, getClient,
+  claimNextJob, updateJob, updateJobProgress, completeJob, getRecipe, releaseJobLock,
   reclaimExpiredJobs, sweepStaleAwaitingFrames, heartbeatJob, getMaxVideoDurationSeconds, isJobCancelled,
 } from './db.js';
+import { db } from './db/drizzle.js';
+import { user as userTable } from './db/schema/auth.js';
+import { eq } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { getScraperForUrl, type ScrapingResult } from './scrapers/index.js';
 import { downloadMedia } from './scrapers/download.js';
@@ -80,36 +83,23 @@ async function processJob(job: Job): Promise<void> {
 
     if (job.userId) {
       try {
-        console.log(`[Job ${jobId}] Fetching user metadata for user ${job.userId}...`);
-        const { data: { user }, error: authError } = await getClient().auth.admin.getUserById(job.userId);
-        if (authError) {
-          console.warn(`[Job ${jobId}] Failed to fetch user metadata: ${authError.message}`);
-        } else if (user?.user_metadata) {
-          const meta = user.user_metadata;
-          const languageMap: Record<string, string> = {
-            'de': 'German',
-            'en': 'English',
-            'german': 'German',
-            'english': 'English'
-          };
+        const [userRow] = await db
+          .select()
+          .from(userTable)
+          .where(eq(userTable.id, job.userId))
+          .limit(1);
 
-          let recipeLanguage: string | undefined;
-          if (meta.language) {
-            recipeLanguage = languageMap[meta.language.toLowerCase()];
-          }
-          if (!recipeLanguage && meta.recipe_language) {
-            recipeLanguage = languageMap[meta.recipe_language.toLowerCase()] || meta.recipe_language;
-          }
-
+        if (userRow) {
           userPrefs = {
-            recipeLanguage,
-            preferredTemperatureUnit: meta.preferred_temperature_unit,
-            preferredUnitSystem: meta.preferred_unit_system,
+            recipeLanguage: config.RECIPE_LANGUAGE,
+            preferredTemperatureUnit: config.PREFERRED_TEMPERATURE_UNIT,
+            preferredUnitSystem: config.PREFERRED_UNIT_SYSTEM,
           };
           console.log(`[Job ${jobId}] Loaded user preferences:`, userPrefs);
         }
-      } catch (err: any) {
-        console.warn(`[Job ${jobId}] Error retrieving user metadata: ${err.message}`);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.warn(`[Job ${jobId}] Error retrieving user metadata: ${msg}`);
       }
     }
 
@@ -351,10 +341,7 @@ async function processJob(job: Job): Promise<void> {
         progress: { percent: 30, stage: 'awaiting_frames' },
       });
       // Release worker lease so heartbeat stops and status is awaiting_frames
-      await getClient()
-        .from('jobs')
-        .update({ locked_at: null, locked_by: null })
-        .eq('id', jobId);
+      await releaseJobLock(jobId);
       return;
     }
 

@@ -93,11 +93,14 @@ export function initScriptEnv(options?: {
   const targetParsed = dotenv.parse(fs.readFileSync(envPath, 'utf8'));
   const parsed = { ...baseParsed, ...targetParsed };
 
+  process.env.NODE_ENV = isProd ? 'production' : 'development';
+
   for (const [key, val] of Object.entries(parsed)) {
     if (val !== undefined && val !== null) {
       process.env[key] = val;
     }
   }
+  process.env.NODE_ENV = isProd ? 'production' : 'development';
 
   const supabaseUrl = parsed.SUPABASE_URL || process.env.SUPABASE_URL;
   const supabaseSecretKey = parsed.SUPABASE_SECRET_KEY || process.env.SUPABASE_SECRET_KEY;
