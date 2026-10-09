@@ -1,3 +1,7 @@
+import { initScriptEnv } from '../scriptEnv.js';
+
+const scriptEnv = initScriptEnv();
+
 import { db, getDbPool } from '../../db/drizzle.js';
 import { recipes } from '../../db/schema/recipes.js';
 import { sql } from 'drizzle-orm';
