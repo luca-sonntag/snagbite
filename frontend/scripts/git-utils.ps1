@@ -162,10 +162,13 @@ function Invoke-GitMasterMergeAndTag {
         Write-Host "Pulling latest master from remote..." -ForegroundColor Yellow
         Run-Git -Arguments @("pull", "--no-rebase", "origin", "master")
 
-        # 4. Merge current branch (e.g. develop) into master
-        $sourceBranch = if ($originalBranch -ne "master") { $originalBranch } else { "develop" }
-        Write-Host "Merging $sourceBranch into master (--no-ff)..." -ForegroundColor Yellow
-        Run-Git -Arguments @("merge", $sourceBranch, "--no-ff", "--no-edit")
+        # 4. Merge current branch into master if not already on master
+        if ($originalBranch -ne "master") {
+            Write-Host "Merging $originalBranch into master (--no-ff)..." -ForegroundColor Yellow
+            Run-Git -Arguments @("merge", $originalBranch, "--no-ff", "--no-edit")
+        } else {
+            Write-Host "Already on master branch; no branch merge needed." -ForegroundColor Green
+        }
 
         # 5. Handle Tag (re-tag if exists)
         $tagExists = (Get-GitOutput -Arguments @("tag", "-l", $TagName))

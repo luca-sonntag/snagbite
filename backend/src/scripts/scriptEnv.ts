@@ -13,10 +13,10 @@ export interface ScriptEnvConfig {
   target: ScriptTarget;
   envFile: string;
   envPath: string;
-  supabaseUrl: string;
-  supabaseSecretKey: string;
+  supabaseUrl?: string;
+  supabaseSecretKey?: string;
   env: Record<string, string>;
-  client: SupabaseClient;
+  client?: SupabaseClient;
 }
 
 /**
@@ -105,17 +105,15 @@ export function initScriptEnv(options?: {
   const supabaseUrl = parsed.SUPABASE_URL || process.env.SUPABASE_URL;
   const supabaseSecretKey = parsed.SUPABASE_SECRET_KEY || process.env.SUPABASE_SECRET_KEY;
 
-  if (!supabaseUrl || !supabaseSecretKey) {
-    console.error(`❌ [scriptEnv] SUPABASE_URL or SUPABASE_SECRET_KEY missing in ${envFileName}`);
-    process.exit(1);
-  }
+  let client: SupabaseClient | undefined;
+  if (supabaseUrl && supabaseSecretKey) {
+    client = createClient(supabaseUrl, supabaseSecretKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
 
-  const client = createClient(supabaseUrl, supabaseSecretKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-
-  if (options?.autoSetDbClient !== false) {
-    setClient(client);
+    if (options?.autoSetDbClient !== false) {
+      setClient(client);
+    }
   }
 
   return {
