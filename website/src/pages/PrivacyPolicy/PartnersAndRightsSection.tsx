@@ -16,11 +16,11 @@ export const PartnersAndRightsSection: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-gray-600 dark:text-gray-400">
           <div className="p-4 rounded-xl glass-panel flex flex-col justify-between gap-2">
             <div>
-              <strong className="text-gray-900 dark:text-white block">Supabase Inc. (USA / EU-Hosting)</strong>
-              <p className="mt-1 leading-relaxed">Hosting der relationalen PostgreSQL-Datenbank, Benutzer-Authentifizierung und verschlüsselter Objektspeicher.</p>
+              <strong className="text-gray-900 dark:text-white block">Railway Corp. &amp; Tigris Data (USA / EU)</strong>
+              <p className="mt-1 leading-relaxed">Hosting der relationalen PostgreSQL-Datenbank, Backend-Infrastruktur sowie verschlüsselter S3-Objektspeicher.</p>
             </div>
-            <a href="https://supabase.com/privacy" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:underline inline-flex items-center gap-1 mt-1">
-              Datenschutz Supabase <ExternalLink className="w-3 h-3" />
+            <a href="https://railway.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:underline inline-flex items-center gap-1 mt-1">
+              Datenschutz Railway <ExternalLink className="w-3 h-3" />
             </a>
           </div>
 
