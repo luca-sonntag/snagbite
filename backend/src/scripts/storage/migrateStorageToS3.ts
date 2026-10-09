@@ -21,6 +21,7 @@ const {
   uploadFile,
   getPublicUrl,
 } = await import('../../storage/s3Client.js');
+const { config } = await import('../../config.js');
 
 const BUCKETS_TO_MIGRATE: Array<{ bucket: StorageBucket; contentType: string }> = [
   { bucket: 'recipe-covers', contentType: 'image/jpeg' },
@@ -145,6 +146,7 @@ async function rewriteRecipeImageUrls(): Promise<{ scanned: number; updated: num
 async function main(): Promise<void> {
   console.log('============================================================');
   console.log(`🚀 Supabase Storage -> S3 / Tigris Migration (${scriptEnv.target.toUpperCase()})`);
+  console.log(`Target S3 Bucket: ${config.S3_BUCKET_NAME}`);
   console.log(`Dry Run: ${isDryRun ? 'YES (no changes)' : 'NO'}`);
   console.log('============================================================');
 
