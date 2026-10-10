@@ -142,7 +142,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
         )}
 
         <CachedImage
-          src={r.imageUrl}
+          src={r.imageUrl || ('imageUrls' in r ? r.imageUrls?.[0] : undefined)}
           emoji={r.emoji}
           alt={r.title}
           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"

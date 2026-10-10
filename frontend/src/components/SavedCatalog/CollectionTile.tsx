@@ -45,7 +45,7 @@ export default function CollectionTile({
           <div className="w-full h-full bg-gradient-to-br from-emerald-500/10 via-transparent to-indigo-500/10" />
         ) : displayJobs.length === 1 ? (
           <CachedImage
-            src={displayJobs[0].recipe?.imageUrl}
+            src={displayJobs[0].recipe?.imageUrl || displayJobs[0].recipe?.imageUrls?.[0]}
             emoji={displayJobs[0].recipe?.emoji}
             alt={displayJobs[0].recipe?.title}
             className="w-full h-full object-cover object-center pointer-events-none select-none group-hover:scale-105 transition-transform duration-300"
@@ -55,7 +55,7 @@ export default function CollectionTile({
             {displayJobs.map((job) => (
               <div key={job.recipeId} className="relative w-full h-full overflow-hidden">
                 <CachedImage
-                  src={job.recipe?.imageUrl}
+                  src={job.recipe?.imageUrl || job.recipe?.imageUrls?.[0]}
                   emoji={job.recipe?.emoji}
                   alt={job.recipe?.title}
                   className="w-full h-full object-cover object-center pointer-events-none select-none group-hover:scale-105 transition-transform duration-300"

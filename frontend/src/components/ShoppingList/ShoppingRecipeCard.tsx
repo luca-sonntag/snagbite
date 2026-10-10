@@ -49,7 +49,7 @@ export default function ShoppingRecipeCard({
       {/* Cover Image Container */}
       <div className="relative w-full aspect-[16/10] rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none">
         <CachedImage
-          src={job?.recipe?.imageUrl}
+          src={job?.recipe?.imageUrl || job?.recipe?.imageUrls?.[0]}
           emoji={job?.recipe?.emoji}
           alt={title}
           className="w-full h-full object-cover object-center pointer-events-none select-none group-hover:scale-105 transition-transform duration-300"

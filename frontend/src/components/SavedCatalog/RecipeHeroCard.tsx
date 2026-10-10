@@ -64,8 +64,9 @@ export default function RecipeHeroCard({
   const r = recipe || job?.recipe;
   if (!r) return null;
 
-  const { src: imageSrc } = useCachedImage(r.imageUrl);
-  const hasImage = Boolean(imageSrc);
+  const coverUrl = r.imageUrl || r.imageUrls?.[0];
+  const { src: imageSrc } = useCachedImage(coverUrl);
+  const hasImage = Boolean(imageSrc || coverUrl);
 
   const score = r.healthScore ?? null;
   const scoreLetter = score !== null ? getHealthScoreLetter(score) : null;
@@ -91,7 +92,7 @@ export default function RecipeHeroCard({
     >
       <div className={`relative aspect-[4/3] sm:aspect-[16/10] w-full overflow-hidden ${hasImage ? '' : 'bg-black/5 dark:bg-white/5'}`}>
         <CachedImage
-          src={r.imageUrl}
+          src={coverUrl}
           emoji={r.emoji}
           alt={r.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none select-none"
