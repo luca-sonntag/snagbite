@@ -222,11 +222,11 @@ Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird
 
 ## 9. 🍳 In-Place Rezept-Extraktion & Nicht schließbares Ad Bottom Sheet (`RecipeDetails/` & `ExtractionAdSheet.tsx`)
 
-* **In-Place Progressive Skeleton Extraction ([`RecipeSkeletonView.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/RecipeSkeletonView.tsx)):**
-  - Statt einer getrennten Animationsseite navigiert die App beim Start der Extraktion (sowohl URL- als auch Foto-Import) direkt in die Rezept-Detailansicht.
-  - Fehlende Rezeptdaten werden durch modulare, taktile Shimmer-Skeletons für Header-Cover (4:3), Titel, Metadaten-Badges, Zutaten-Liste und Zubereitungsschritte dargestellt.
+* **In-Place Progressive Skeleton Extraction ([`RecipeDetails/`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/index.tsx)):**
+  - Statt einer getrennten Animationsseite oder eines unmountenden Skeleton-Views verbleibt die App beim Start der Extraktion direkt in der vollwertigen Rezept-Detailansicht.
+  - Die Subkomponenten (`RecipeHeader`, `RecipeImageGallery`, `RecipeInfoSection`, `RecipeIngredients`, `RecipeInstructions`) unterstützen das `isExtracting`-Prop nativ und rendern Shimmer-Skeletons für fehlende Felder im identischen DOM-Baum.
   - Sobald Teildaten via Server-Sent Events (`GET /api/jobs/:id/events`, Preview-Envelope) eintreffen, werden diese live und unterbrechungsfrei in die Rezeptansicht gemergt.
-  - Nach Abschluss der Extraktion wird das fertige Rezept reaktiv aktiviert, alle Aktions-Docks, Portionsskalierer und Checklisten werden freigegeben.
+  - Nach Abschluss der Extraktion wird das fertige Rezept in-place ohne Routenwechsel oder Tab-Sprung aktiviert; alle Aktions-Docks, Portionsskalierer und Checklisten werden nahtlos freigegeben.
 
 * **Nicht schließbares Ad Bottom Sheet für Free-User ([`ExtractionAdSheet.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ExtractionAdSheet.tsx)):**
   - Für Free-Tier-Nutzer öffnet sich während der aktiven Extraktion ein modales, nicht schließbares HeroUI `Drawer` am unteren Bildschirmrand (`isDismissable={false}`, kein Schließen-Button, kein Drag-Handle).

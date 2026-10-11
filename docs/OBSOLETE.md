@@ -6,16 +6,18 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
-### 2026-10-11: Separate `ExtractionAnimation`-Page abgelöst durch In-Place `RecipeDetails` Skeleton-Extraktion & `ExtractionAdSheet`
+### 2026-10-11: Separate `ExtractionAnimation`-Page & `RecipeSkeletonView` abgelöst durch In-Place `RecipeDetails` Skeleton-Extraktion & `ExtractionAdSheet`
 
 * **Ersetzter Code / Veraltete Logik:**
   - Eigenständige Extraktions-Animations-Page `frontend/src/components/ExtractionAnimation/` mit `ProgressiveRecipeCard.tsx`, `useProgressiveRecipe.ts`, `ExtractionProgressBar.tsx`, `IngredientsStream.tsx`, `RecipeCoverPreview.tsx`, `RecipePillTags.tsx` und dem Root-Wrapper `ExtractionAnimation.tsx`.
-  - Inline-Rendering des Fortschritts- und MREC-Slots in `ExtractForm/index.tsx` und `latestRunning`-Rendering in `App.tsx`.
+  - Frühere Zwischenlösung mit Early Return `RecipeSkeletonView.tsx`, die zu Layout-Sprüngen und Unmounts beim Abschluss führte.
+  - Tab-Sprung zu `'history'` (`navigate('history', recipeId)`) bei Fertigstellung, welcher die Ansicht flackern ließ.
 * **Ersetzt durch:**
-  - **In-Place Progressive Skeleton Extraction ([`RecipeSkeletonView.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/RecipeSkeletonView.tsx)):** Die App wechselt beim Start der Extraktion (sowohl Link als auch Foto) sofort direkt in die Rezept-Detailansicht (`RecipeDetails`). Fehlende Rezeptdaten werden elegant durch animierte Shimmer-Skeletons dargestellt und bei Eintreffen von Server-Sent Events (SSE) Preview-Daten schrittweise materialisiert.
+  - **Direkte In-Place Skeleton-Integration in `RecipeDetails`:** Die echten Subkomponenten (`RecipeHeader`, `RecipeImageGallery`, `RecipeInfoSection`, `RecipeIngredients`, `RecipeInstructions`) unterstützen das `isExtracting`-Prop direkt und rendern Shimmer-Skeletons für fehlende Felder im identischen DOM-Baum.
+  - **Nahtlose In-Place Fertigstellung ohne Routenwechsel:** Nach Abschluss des Jobs holt `useRecipeExtraction` das Rezept via `/api/recipes/:id` und setzt es in-place in den bestehenden `recipe`-State. Es findet kein Routenwechsel oder Tab-Sprung statt; Skeletons morphen nahtlos in die echten Rezeptdaten.
   - **Nicht schließbares Ad Bottom Sheet ([`ExtractionAdSheet.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ExtractionAdSheet.tsx)):** Free-Nutzer sehen während der aktiven Extraktion ein modales, nicht schließbares HeroUI `Drawer` mit dem MREC 300×250 Banner (`isDismissable={false}`, kein Schließen-Button oder Drag-Handle), das sich bei erfolgreichem Abschluss oder Fehler automatisch schließt.
-  - **Premium-Flow:** Premium-Nutzer springen ebenfalls direkt in `RecipeDetails` (mit Skeletons, ohne Werbung), behalten aber volle Navigation dank Hintergrundverarbeitung.
-* **Betroffene Dateien:** `frontend/src/components/ExtractionAnimation/` (vollständig entfernt), `frontend/src/components/ExtractionAdSheet.tsx`, `frontend/src/components/RecipeDetails/RecipeSkeletonView.tsx`, `frontend/src/components/RecipeDetails/index.tsx`, `frontend/src/components/RecipeDetails/types.ts`, `frontend/src/hooks/useRecipeExtraction.ts`, `frontend/src/components/ExtractForm/index.tsx`, `frontend/src/App.tsx`, `docs/OBSOLETE.md`, `docs/architecture/frontend.md`.
+  - **Premium-Flow:** Premium-Nutzer bleiben ebenfalls direkt in `RecipeDetails` (mit Skeletons, ohne Werbung), behalten aber volle Navigation dank Hintergrundverarbeitung.
+* **Betroffene Dateien:** `frontend/src/components/ExtractionAnimation/` (vollständig entfernt), `frontend/src/components/RecipeDetails/RecipeSkeletonView.tsx` (vollständig entfernt), `frontend/src/components/ExtractionAdSheet.tsx`, `frontend/src/components/RecipeDetails/index.tsx`, `frontend/src/components/RecipeDetails/types.ts`, `frontend/src/hooks/useRecipeExtraction.ts`, `frontend/src/components/ExtractForm/index.tsx`, `frontend/src/App.tsx`, `docs/OBSOLETE.md`, `docs/architecture/frontend.md`.
 
 ---
 
