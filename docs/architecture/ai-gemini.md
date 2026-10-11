@@ -64,8 +64,10 @@ Im gesamten Backend gibt es **8 aktive Gemini-Funktionen** (sowie Offline-/Admin
 4. MULTIMODALER GEMINI CALL (`extractRecipe` / `remixRecipe`)
    Gemini verarbeitet Audio + Grid (oder Fotos) + Caption in EINEM Call.
    Strikte Schematisierung (`responseSchema: recipeSchema`):
-   • 22 Prompt-Constraints (Anti-Halluzination, Mengennormalisierung,
-     Makros pro Zutat, Inline-Ingredient- & Timer-Tags `[Tag](ing:...)`)
+   • Native `systemInstruction` Trennung (`recipeExtractionPrompt.ts`):
+     Alle 23 Extraktions-Regeln (Anti-Halluzination, Mengennormalisierung, Makros pro Zutat,
+     Inline-Ingredient- & Timer-Tags `[Tag](ing:...)`) sind als persistente System-Instruktion
+     im Modell hinterlegt, während `contentParts` nur noch Nutzdaten (Audio, Frames, Caption/HTML) führt.
    • Formgetreue Food Photography Prompts (`foodPhotographyPrompt.ts`):
      Formfaktor-Taxonomie (Pockets/Sandwiches, Wraps, Casseroles/Backformen, Tellergerichte),
      Protein-Morphologie, Kräutersoßen-Integration und Anti-Halluzinations-Filter.
