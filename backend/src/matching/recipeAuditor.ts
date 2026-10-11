@@ -15,7 +15,7 @@ export type { RecipeAuditPatch, RecipeAuditResult, IngredientCorrection, AddedIn
 
 export async function auditRecipe(recipe: Recipe): Promise<RecipeAuditResult> {
   if (!config.GEMINI_API_KEY || config.GEMINI_API_KEY === 'your_gemini_api_key_here') return { patch: null };
-  const modelName = 'gemini-2.5-flash-lite';
+  const modelName = config.GEMINI_MODEL;
   const startTime = Date.now();
   try {
     const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
