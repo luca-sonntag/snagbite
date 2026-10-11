@@ -1,4 +1,8 @@
 import { config } from './config.js';
+import { db } from './db/drizzle.js';
+import { recipes as recipesTable } from './db/schema/recipes.js';
+import { jobs as jobsTable } from './db/schema/jobs.js';
+import { eq } from 'drizzle-orm';
 import {
   ensureBucketExists,
   uploadFile,
@@ -123,5 +127,72 @@ export async function generateRecipeCoverImage(opts: GenerateCoverOptions): Prom
   } catch (error: any) {
     console.warn(`[imageGenerator] Cover image generation failed for job ${jobId} (elapsed: ${Date.now() - startTime}ms): ${error?.message || error}`);
     return { imageUrl: null, usage: null };
+  }
+}
+
+export interface AsyncCoverOptions {
+  prompt: string;
+  jobId: string;
+  userId?: string | null;
+  recipeId: string;
+  fallbackImageUrls?: string[];
+}
+
+/**
+ * Executes FLUX.1 cover generation asynchronously in the background.
+ * Updates the recipe with the AI cover and records the FLUX usage in the job
+ * without blocking recipe extraction or user delivery.
+ */
+export async function triggerAsyncCoverGeneration(opts: AsyncCoverOptions): Promise<void> {
+  const { prompt, jobId, userId, recipeId, fallbackImageUrls = [] } = opts;
+
+  if (!config.GENERATE_RECIPE_COVERS || !prompt || prompt.trim() === '') {
+    return;
+  }
+
+  try {
+    console.log(`[imageGenerator] Starting background FLUX cover generation for recipe ${recipeId} (job ${jobId})...`);
+    const coverResult = await generateRecipeCoverImage({ prompt, jobId, userId });
+    const aiCoverUrl = coverResult?.imageUrl;
+
+    if (aiCoverUrl) {
+      const remainingUrls = fallbackImageUrls.filter((u) => u && u !== aiCoverUrl);
+      await db
+        .update(recipesTable)
+        .set({
+          imageUrl: aiCoverUrl,
+          imageUrls: [aiCoverUrl, ...remainingUrls],
+          isAiCover: true,
+          updatedAt: new Date(),
+        })
+        .where(eq(recipesTable.id, recipeId));
+
+      console.log(`[imageGenerator] Attached AI cover to recipe ${recipeId}: ${aiCoverUrl}`);
+
+      if (coverResult.usage) {
+        try {
+          const [jobRow] = await db
+            .select({ llmUsage: jobsTable.llmUsage })
+            .from(jobsTable)
+            .where(eq(jobsTable.id, jobId))
+            .limit(1);
+
+          const currentUsage = (jobRow?.llmUsage as Record<string, unknown>) || {};
+          await db
+            .update(jobsTable)
+            .set({
+              llmUsage: { ...currentUsage, flux: coverResult.usage },
+              updatedAt: new Date(),
+            })
+            .where(eq(jobsTable.id, jobId));
+        } catch (usageErr: unknown) {
+          const msg = usageErr instanceof Error ? usageErr.message : String(usageErr);
+          console.warn(`[imageGenerator] Failed to record flux usage in job ${jobId}: ${msg}`);
+        }
+      }
+    }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn(`[imageGenerator] Background cover generation failed non-fatal for recipe ${recipeId}: ${msg}`);
   }
 }
