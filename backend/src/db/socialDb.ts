@@ -1,16 +1,18 @@
 import type { Profile, UserStats } from '../types.js';
-import { getClient, wrapError, PG_UNIQUE_VIOLATION } from './client.js';
+import { db, getDbPool } from './drizzle.js';
+import { profiles, friendships } from './schema/social.js';
+import { userStats } from './schema/gamification.js';
+import { eq, or, and, inArray, desc } from 'drizzle-orm';
 import type { ProfileRow, FriendshipRow, RawUserStatsRow } from './types.js';
 
 export type { ProfileRow, FriendshipRow, RawUserStatsRow };
 
-
-export function rowToProfile(row: ProfileRow): Profile {
+export function rowToProfile(row: any): Profile {
   return {
-    userId: row.user_id,
-    displayName: row.display_name,
-    avatarUrl: row.avatar_url,
-    friendCode: row.friend_code,
+    userId: row.userId ?? row.user_id,
+    displayName: row.displayName ?? row.display_name,
+    avatarUrl: row.avatarUrl ?? row.avatar_url,
+    friendCode: row.friendCode ?? row.friend_code,
   };
 }
 
@@ -25,13 +27,13 @@ function generateFriendCode(len = 6): string {
 }
 
 export async function getProfile(userId: string): Promise<Profile | null> {
-  const { data, error } = await getClient()
-    .from('profiles')
-    .select('*')
-    .eq('user_id', userId)
-    .maybeSingle();
-  if (error) throw wrapError(`Failed to get profile for ${userId}`, error);
-  return data ? rowToProfile(data as ProfileRow) : null;
+  const [row] = await db
+    .select()
+    .from(profiles)
+    .where(eq(profiles.userId, userId))
+    .limit(1);
+
+  return row ? rowToProfile(row) : null;
 }
 
 export async function ensureProfile(
@@ -45,92 +47,104 @@ export async function ensureProfile(
     const friendCode = generateFriendCode(6);
     const displayName = (seed.displayName || '').trim().slice(0, 40) || `Chef #${friendCode}`;
 
-    const { data, error } = await getClient()
-      .from('profiles')
-      .insert({
-        user_id: userId,
-        display_name: displayName,
-        avatar_url: seed.avatarUrl ?? null,
-        friend_code: friendCode,
-      })
-      .select('*')
-      .single();
+    try {
+      const [inserted] = await db
+        .insert(profiles)
+        .values({
+          userId,
+          displayName,
+          avatarUrl: seed.avatarUrl ?? null,
+          friendCode,
+        })
+        .returning();
 
-    if (!error && data) return rowToProfile(data as ProfileRow);
-
-    if (error && error.code === PG_UNIQUE_VIOLATION) {
-      const now = await getProfile(userId);
-      if (now) return now;
-      continue;
+      return rowToProfile(inserted);
+    } catch (err: any) {
+      if (err?.code === '23505') {
+        const now = await getProfile(userId);
+        if (now) return now;
+        continue;
+      }
+      throw err;
     }
-    if (error) throw wrapError('Failed to create profile', error);
   }
   throw new Error('Failed to allocate a unique friend code after several attempts');
 }
 
 export async function updateDisplayName(userId: string, name: string): Promise<Profile> {
-  const { data, error } = await getClient()
-    .from('profiles')
-    .update({ display_name: name, updated_at: new Date().toISOString() })
-    .eq('user_id', userId)
-    .select('*')
-    .maybeSingle();
+  const [row] = await db
+    .update(profiles)
+    .set({ displayName: name, updatedAt: new Date() })
+    .where(eq(profiles.userId, userId))
+    .returning();
 
-  if (error) throw wrapError('Failed to update display name', error);
-  if (!data) throw new Error('Profile not found: no profile row');
-  return rowToProfile(data as ProfileRow);
+  if (!row) throw new Error(`Profile not found for user ${userId}`);
+  return rowToProfile(row);
 }
 
 export async function findProfileByFriendCode(code: string): Promise<Profile | null> {
-  const { data, error } = await getClient()
-    .from('profiles')
-    .select('*')
-    .eq('friend_code', code.toUpperCase())
-    .maybeSingle();
-  if (error) throw wrapError('Failed to look up friend code', error);
-  return data ? rowToProfile(data as ProfileRow) : null;
+  const [row] = await db
+    .select()
+    .from(profiles)
+    .where(eq(profiles.friendCode, code.toUpperCase()))
+    .limit(1);
+
+  return row ? rowToProfile(row) : null;
 }
 
 export async function getProfilesByIds(ids: string[]): Promise<Map<string, Profile>> {
   const map = new Map<string, Profile>();
   if (ids.length === 0) return map;
-  const { data, error } = await getClient().from('profiles').select('*').in('user_id', ids);
-  if (error) throw wrapError('Failed to batch-fetch profiles', error);
-  for (const row of (data || []) as ProfileRow[]) map.set(row.user_id, rowToProfile(row));
+
+  const rows = await db
+    .select()
+    .from(profiles)
+    .where(inArray(profiles.userId, ids));
+
+  for (const row of rows) {
+    map.set(row.userId, rowToProfile(row));
+  }
   return map;
 }
-
-
 
 export async function getAcceptedFriends(
   userId: string
 ): Promise<{ friendId: string; friendshipId: string }[]> {
-  const { data, error } = await getClient()
-    .from('friendships')
-    .select('id, requester_id, addressee_id')
-    .eq('status', 'accepted')
-    .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
-  if (error) throw wrapError('Failed to fetch friends', error);
-  return ((data || []) as Array<{ id: string; requester_id: string; addressee_id: string }>).map(
-    (r) => ({
-      friendshipId: r.id,
-      friendId: r.requester_id === userId ? r.addressee_id : r.requester_id,
+  const rows = await db
+    .select({
+      id: friendships.id,
+      requesterId: friendships.requesterId,
+      addresseeId: friendships.addresseeId,
     })
-  );
+    .from(friendships)
+    .where(and(
+      eq(friendships.status, 'accepted'),
+      or(eq(friendships.requesterId, userId), eq(friendships.addresseeId, userId))
+    ));
+
+  return rows.map((r) => ({
+    friendshipId: r.id,
+    friendId: r.requesterId === userId ? r.addresseeId : r.requesterId,
+  }));
 }
 
 export async function getIncomingRequests(
   userId: string
 ): Promise<{ friendshipId: string; requesterId: string }[]> {
-  const { data, error } = await getClient()
-    .from('friendships')
-    .select('id, requester_id')
-    .eq('addressee_id', userId)
-    .eq('status', 'pending');
-  if (error) throw wrapError('Failed to fetch friend requests', error);
-  return ((data || []) as Array<{ id: string; requester_id: string }>).map((r) => ({
+  const rows = await db
+    .select({
+      id: friendships.id,
+      requesterId: friendships.requesterId,
+    })
+    .from(friendships)
+    .where(and(
+      eq(friendships.addresseeId, userId),
+      eq(friendships.status, 'pending')
+    ));
+
+  return rows.map((r) => ({
     friendshipId: r.id,
-    requesterId: r.requester_id,
+    requesterId: r.requesterId,
   }));
 }
 
@@ -138,24 +152,44 @@ export async function findFriendshipBetween(
   a: string,
   b: string
 ): Promise<FriendshipRow | null> {
-  const { data, error } = await getClient()
-    .from('friendships')
-    .select('*')
-    .or(`and(requester_id.eq.${a},addressee_id.eq.${b}),and(requester_id.eq.${b},addressee_id.eq.${a})`);
-  if (error) throw wrapError('Failed to look up friendship', error);
-  const rows = (data || []) as FriendshipRow[];
+  const rows = await db
+    .select()
+    .from(friendships)
+    .where(or(
+      and(eq(friendships.requesterId, a), eq(friendships.addresseeId, b)),
+      and(eq(friendships.requesterId, b), eq(friendships.addresseeId, a))
+    ));
+
   if (rows.length === 0) return null;
-  return rows.find((r) => r.status === 'accepted') ?? rows[0];
+  const accepted = rows.find((r) => r.status === 'accepted');
+  const target = accepted ?? rows[0];
+
+  return {
+    id: target.id,
+    requester_id: target.requesterId,
+    addressee_id: target.addresseeId,
+    status: target.status as 'pending' | 'accepted',
+    created_at: target.createdAt instanceof Date ? target.createdAt.toISOString() : String(target.createdAt),
+    responded_at: target.respondedAt ? (target.respondedAt instanceof Date ? target.respondedAt.toISOString() : String(target.respondedAt)) : null,
+  };
 }
 
 export async function getFriendshipById(id: string): Promise<FriendshipRow | null> {
-  const { data, error } = await getClient()
-    .from('friendships')
-    .select('*')
-    .eq('id', id)
-    .maybeSingle();
-  if (error) throw wrapError('Failed to get friendship', error);
-  return (data as FriendshipRow) ?? null;
+  const [row] = await db
+    .select()
+    .from(friendships)
+    .where(eq(friendships.id, id))
+    .limit(1);
+
+  if (!row) return null;
+  return {
+    id: row.id,
+    requester_id: row.requesterId,
+    addressee_id: row.addresseeId,
+    status: row.status as 'pending' | 'accepted',
+    created_at: row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt),
+    responded_at: row.respondedAt ? (row.respondedAt instanceof Date ? row.respondedAt.toISOString() : String(row.respondedAt)) : null,
+  };
 }
 
 export async function createFriendship(
@@ -163,55 +197,63 @@ export async function createFriendship(
   addresseeId: string,
   status: 'pending' | 'accepted'
 ): Promise<FriendshipRow> {
-  const { data, error } = await getClient()
-    .from('friendships')
-    .insert({
-      requester_id: requesterId,
-      addressee_id: addresseeId,
+  const [row] = await db
+    .insert(friendships)
+    .values({
+      requesterId,
+      addresseeId,
       status,
-      responded_at: status === 'accepted' ? new Date().toISOString() : null,
+      respondedAt: status === 'accepted' ? new Date() : null,
     })
-    .select('*')
-    .single();
-  if (error) throw wrapError('Failed to create friendship', error);
-  return data as FriendshipRow;
+    .returning();
+
+  return {
+    id: row.id,
+    requester_id: row.requesterId,
+    addressee_id: row.addresseeId,
+    status: row.status as 'pending' | 'accepted',
+    created_at: row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt),
+    responded_at: row.respondedAt ? (row.respondedAt instanceof Date ? row.respondedAt.toISOString() : String(row.respondedAt)) : null,
+  };
 }
 
 export async function acceptFriendship(id: string): Promise<void> {
-  const { error } = await getClient()
-    .from('friendships')
-    .update({ status: 'accepted', responded_at: new Date().toISOString() })
-    .eq('id', id);
-  if (error) throw wrapError('Failed to accept friendship', error);
+  await db
+    .update(friendships)
+    .set({ status: 'accepted', respondedAt: new Date() })
+    .where(eq(friendships.id, id));
 }
 
 export async function deleteFriendship(id: string): Promise<void> {
-  const { error } = await getClient().from('friendships').delete().eq('id', id);
-  if (error) throw wrapError('Failed to delete friendship', error);
+  await db
+    .delete(friendships)
+    .where(eq(friendships.id, id));
 }
 
-
-
-function parseUserStatsRow(row: RawUserStatsRow): UserStats {
+function parseUserStats(row: any): UserStats {
   return {
-    userId: row.user_id,
+    userId: row.userId ?? row.user_id,
     xp: Number(row.xp),
     level: row.level,
     coins: Number(row.coins),
-    currentStreak: row.current_streak,
-    longestStreak: row.longest_streak,
-    lastCookDate: row.last_cook_date,
-    totalCooks: row.total_cooks,
+    currentStreak: row.currentStreak ?? row.current_streak,
+    longestStreak: row.longestStreak ?? row.longest_streak,
+    lastCookDate: row.lastCookDate ?? row.last_cook_date,
+    totalCooks: row.totalCooks ?? row.total_cooks,
   };
 }
 
 export async function getUserStatsForIds(ids: string[]): Promise<Map<string, UserStats>> {
   const map = new Map<string, UserStats>();
   if (ids.length === 0) return map;
-  const { data, error } = await getClient().from('user_stats').select('*').in('user_id', ids);
-  if (error) throw wrapError('Failed to batch-fetch user_stats', error);
-  for (const row of (data || []) as RawUserStatsRow[]) {
-    map.set(row.user_id, parseUserStatsRow(row));
+
+  const rows = await db
+    .select()
+    .from(userStats)
+    .where(inArray(userStats.userId, ids));
+
+  for (const row of rows) {
+    map.set(row.userId, parseUserStats(row));
   }
   return map;
 }
@@ -222,46 +264,57 @@ export async function getWeeklyXp(
 ): Promise<Map<string, number>> {
   const map = new Map<string, number>();
   if (userIds.length === 0) return map;
-  const { data, error } = await getClient().rpc('weekly_xp_for_users', {
-    uids: userIds,
-    since: sinceIso,
-  });
-  if (error) throw wrapError('Failed to fetch weekly xp', error);
-  for (const row of (data || []) as { user_id: string; xp: number }[]) {
+
+  const { rows } = await getDbPool().query(
+    'SELECT * FROM weekly_xp_for_users($1::uuid[], $2::timestamptz)',
+    [userIds, sinceIso]
+  );
+
+  for (const row of rows as Array<{ user_id: string; xp: number }>) {
     map.set(row.user_id, Number(row.xp));
   }
   return map;
 }
 
 export async function getAllFriendshipsForUser(userId: string): Promise<FriendshipRow[]> {
-  const { data, error } = await getClient()
-    .from('friendships')
-    .select('*')
-    .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
-  if (error) throw wrapError('Failed to fetch friendships for user', error);
-  return (data || []) as FriendshipRow[];
+  const rows = await db
+    .select()
+    .from(friendships)
+    .where(or(
+      eq(friendships.requesterId, userId),
+      eq(friendships.addresseeId, userId)
+    ));
+
+  return rows.map((r) => ({
+    id: r.id,
+    requester_id: r.requesterId,
+    addressee_id: r.addresseeId,
+    status: r.status as 'pending' | 'accepted',
+    created_at: r.createdAt instanceof Date ? r.createdAt.toISOString() : String(r.createdAt),
+    responded_at: r.respondedAt ? (r.respondedAt instanceof Date ? r.respondedAt.toISOString() : String(r.respondedAt)) : null,
+  }));
 }
 
 export async function getGlobalAllTimeStats(limit = 50): Promise<UserStats[]> {
-  const { data, error } = await getClient()
-    .from('user_stats')
-    .select('*')
-    .order('xp', { ascending: false })
+  const rows = await db
+    .select()
+    .from(userStats)
+    .orderBy(desc(userStats.xp))
     .limit(limit);
-  if (error) throw wrapError('Failed to fetch global all-time stats', error);
-  return ((data || []) as RawUserStatsRow[]).map(parseUserStatsRow);
+
+  return rows.map(parseUserStats);
 }
 
 export async function getGlobalWeeklyXp(
   sinceIso: string,
   limit = 50
 ): Promise<{ userId: string; xp: number }[]> {
-  const { data, error } = await getClient().rpc('global_weekly_xp', {
-    since: sinceIso,
-    limit_count: limit,
-  });
-  if (error) throw wrapError('Failed to fetch global weekly xp', error);
-  return ((data || []) as Array<{ user_id: string; xp: number }>).map((row) => ({
+  const { rows } = await getDbPool().query(
+    'SELECT * FROM global_weekly_xp($1::timestamptz, $2::integer)',
+    [sinceIso, limit]
+  );
+
+  return (rows as Array<{ user_id: string; xp: number }>).map((row) => ({
     userId: row.user_id,
     xp: Number(row.xp),
   }));

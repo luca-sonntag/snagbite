@@ -4,7 +4,17 @@ import type {
   UserStats,
 } from '../types.js';
 import { DEFAULT_GAMIFICATION_CONFIG } from '../types.js';
-import { getClient, wrapError } from './client.js';
+import { db } from './drizzle.js';
+import { cookEvents, pointLedger, userStats } from './schema/gamification.js';
+import { globalSettings } from './schema/system.js';
+import { recipes } from './schema/recipes.js';
+import { eq, and, desc, gte, count, isNotNull, ne } from 'drizzle-orm';
+import {
+  ensureBucketExists,
+  uploadFile,
+  getSignedUrl,
+  getPublicUrl,
+} from '../storage/s3Client.js';
 import type {
   UserStatsRow,
   InsertCookEventArgs,
@@ -23,17 +33,38 @@ export type {
   LedgerRow,
 };
 
+export {
+  getUserBadges,
+  getUserBadgesDetailed,
+  awardBadges,
+  getDistinctCookedRecipeCount,
+  getTimerCookCount,
+  getWeekendCookCount,
+  getMaxCooksForSameRecipe,
+} from './badgesDb.js';
 
-function rowToUserStats(row: UserStatsRow): UserStats {
+async function resolveCookPhotoUrl(photoPath: string | null | undefined): Promise<string | null> {
+  if (!photoPath) return null;
+  if (photoPath.startsWith('http') || photoPath.startsWith('data:')) {
+    return photoPath;
+  }
+  try {
+    return await getSignedUrl('cook-photos', photoPath, 7 * 24 * 3600);
+  } catch {
+    return getPublicUrl('cook-photos', photoPath);
+  }
+}
+
+function rowToUserStats(row: any): UserStats {
   return {
-    userId: row.user_id,
+    userId: row.userId ?? row.user_id,
     xp: Number(row.xp),
     level: row.level,
     coins: Number(row.coins),
-    currentStreak: row.current_streak,
-    longestStreak: row.longest_streak,
-    lastCookDate: row.last_cook_date,
-    totalCooks: row.total_cooks,
+    currentStreak: row.currentStreak ?? row.current_streak,
+    longestStreak: row.longestStreak ?? row.longest_streak,
+    lastCookDate: row.lastCookDate ?? row.last_cook_date,
+    totalCooks: row.totalCooks ?? row.total_cooks,
   };
 }
 
@@ -59,16 +90,16 @@ export async function getGamificationConfig(): Promise<GamificationConfig> {
   }
 
   try {
-    const { data, error } = await getClient()
-      .from('global_settings')
-      .select('value')
-      .eq('key', 'gamification_config')
-      .maybeSingle();
+    const [row] = await db
+      .select({ value: globalSettings.value })
+      .from(globalSettings)
+      .where(eq(globalSettings.key, 'gamification_config'))
+      .limit(1);
 
-    if (!error && data?.value) {
+    if (row?.value) {
       const parsed = {
         ...DEFAULT_GAMIFICATION_CONFIG,
-        ...JSON.parse(String(data.value)),
+        ...JSON.parse(String(row.value)),
       } as GamificationConfig;
       gamificationConfigCache = { value: parsed, timestamp: now };
       return parsed;
@@ -81,14 +112,13 @@ export async function getGamificationConfig(): Promise<GamificationConfig> {
 }
 
 export async function getUserStats(userId: string): Promise<UserStats> {
-  const { data, error } = await getClient()
-    .from('user_stats')
-    .select('*')
-    .eq('user_id', userId)
-    .maybeSingle();
+  const [row] = await db
+    .select()
+    .from(userStats)
+    .where(eq(userStats.userId, userId))
+    .limit(1);
 
-  if (error) throw wrapError(`Failed to get user_stats for ${userId}`, error);
-  return data ? rowToUserStats(data as UserStatsRow) : emptyUserStats(userId);
+  return row ? rowToUserStats(row) : emptyUserStats(userId);
 }
 
 export async function getCookCountForRecipe(
@@ -96,144 +126,109 @@ export async function getCookCountForRecipe(
   recipeId: string,
   windowDays?: number
 ): Promise<number> {
-  let query = getClient()
-    .from('cook_events')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .eq('recipe_id', recipeId);
+  const conditions = [eq(cookEvents.userId, userId), eq(cookEvents.recipeId, recipeId)];
 
   if (windowDays && windowDays > 0) {
-    const since = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000).toISOString();
-    query = query.gte('cooked_at', since);
+    const since = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000);
+    conditions.push(gte(cookEvents.cookedAt, since));
   }
 
-  const { count, error } = await query;
-  if (error) throw wrapError('Failed to count cook events for recipe', error);
-  return count ?? 0;
+  const [row] = await db
+    .select({ count: count() })
+    .from(cookEvents)
+    .where(and(...conditions));
+
+  return Number(row?.count ?? 0);
 }
 
 export async function getCookCountSince(userId: string, sinceIso: string): Promise<number> {
-  const { count, error } = await getClient()
-    .from('cook_events')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .gte('cooked_at', sinceIso);
+  const [row] = await db
+    .select({ count: count() })
+    .from(cookEvents)
+    .where(and(eq(cookEvents.userId, userId), gte(cookEvents.cookedAt, new Date(sinceIso))));
 
-  if (error) throw wrapError('Failed to count recent cook events', error);
-  return count ?? 0;
+  return Number(row?.count ?? 0);
 }
 
 export async function getLastCookEvent(
   userId: string
 ): Promise<{ recipeId: string | null; cookedAt: string } | null> {
-  const { data, error } = await getClient()
-    .from('cook_events')
-    .select('recipe_id, cooked_at')
-    .eq('user_id', userId)
-    .order('cooked_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const [row] = await db
+    .select({ recipeId: cookEvents.recipeId, cookedAt: cookEvents.cookedAt })
+    .from(cookEvents)
+    .where(eq(cookEvents.userId, userId))
+    .orderBy(desc(cookEvents.cookedAt))
+    .limit(1);
 
-  if (error) throw wrapError('Failed to fetch last cook event', error);
-  if (!data) return null;
-  const row = data as { recipe_id: string | null; cooked_at: string };
-  return { recipeId: row.recipe_id, cookedAt: row.cooked_at };
+  if (!row) return null;
+  return {
+    recipeId: row.recipeId,
+    cookedAt: row.cookedAt instanceof Date ? row.cookedAt.toISOString() : String(row.cookedAt),
+  };
 }
-
-
 
 export async function insertCookEvent(args: InsertCookEventArgs): Promise<string> {
-  const { data, error } = await getClient()
-    .from('cook_events')
-    .insert({
-      user_id: args.userId,
-      recipe_id: args.recipeId,
-      xp_awarded: args.xp,
-      coins_awarded: args.coins,
-      has_photo: args.hasPhoto,
-      photo_path: args.photoPath,
+  const [row] = await db
+    .insert(cookEvents)
+    .values({
+      userId: args.userId,
+      recipeId: args.recipeId,
+      xpAwarded: args.xp,
+      coinsAwarded: args.coins,
+      hasPhoto: args.hasPhoto,
+      photoPath: args.photoPath,
       verified: args.verified,
-      leaderboard_eligible: args.leaderboardEligible,
-      trust_score: args.trustScore,
-      via_cooking_mode: args.viaCookingMode,
-      timer_elapsed: args.timerElapsed,
+      leaderboardEligible: args.leaderboardEligible,
+      trustScore: args.trustScore !== undefined && args.trustScore !== null ? String(args.trustScore) : '0',
+      viaCookingMode: args.viaCookingMode,
+      timerElapsed: args.timerElapsed,
     })
-    .select('id')
-    .single();
+    .returning({ id: cookEvents.id });
 
-  if (error) throw wrapError('Failed to insert cook event', error);
-  return (data as { id: string }).id;
+  return row.id;
 }
-
-
 
 export async function getCookHistoryForRecipe(
   userId: string,
   recipeId: string,
   limit = 20
 ): Promise<CookHistory> {
-  const { data, error, count } = await getClient()
-    .from('cook_events')
-    .select(
-      'id, cooked_at, xp_awarded, coins_awarded, has_photo, photo_path, verified, via_cooking_mode, timer_elapsed',
-      { count: 'exact' }
-    )
-    .eq('user_id', userId)
-    .eq('recipe_id', recipeId)
-    .order('cooked_at', { ascending: false })
-    .limit(limit);
+  const [countRes] = await db
+    .select({ count: count() })
+    .from(cookEvents)
+    .where(and(eq(cookEvents.userId, userId), eq(cookEvents.recipeId, recipeId)));
 
-  if (error) throw wrapError('Failed to fetch cook history for recipe', error);
-  if (!data || data.length === 0) {
+  const total = Number(countRes?.count ?? 0);
+  if (total === 0) {
     return { count: 0, firstCookedAt: null, lastCookedAt: null, items: [] };
   }
 
+  const rows = await db
+    .select()
+    .from(cookEvents)
+    .where(and(eq(cookEvents.userId, userId), eq(cookEvents.recipeId, recipeId)))
+    .orderBy(desc(cookEvents.cookedAt))
+    .limit(limit);
+
   const items = await Promise.all(
-    (
-      data as Array<{
-        id: string;
-        cooked_at: string;
-        xp_awarded?: number;
-        coins_awarded?: number;
-        has_photo: boolean;
-        photo_path?: string | null;
-        verified?: boolean;
-        via_cooking_mode: boolean;
-        timer_elapsed: boolean;
-      }>
-    ).map(async (row): Promise<CookHistoryItem> => {
-      let photoUrl: string | null = null;
-      const photoPath = row.photo_path;
-      if (photoPath && !photoPath.startsWith('http') && !photoPath.startsWith('data:')) {
-        try {
-          const { data: signedData } = await getClient()
-            .storage.from('cook-photos')
-            .createSignedUrl(photoPath, 60 * 60 * 24 * 7);
-          photoUrl =
-            signedData?.signedUrl ??
-            getClient().storage.from('cook-photos').getPublicUrl(photoPath).data.publicUrl;
-        } catch {
-          photoUrl = getClient().storage.from('cook-photos').getPublicUrl(photoPath).data.publicUrl;
-        }
-      } else if (photoPath) {
-        photoUrl = photoPath;
-      }
+    rows.map(async (row): Promise<CookHistoryItem> => {
+      const photoUrl = await resolveCookPhotoUrl(row.photoPath);
       return {
         id: row.id,
-        cookedAt: row.cooked_at,
-        xpAwarded: row.xp_awarded ?? 0,
-        coinsAwarded: row.coins_awarded ?? 0,
-        hasPhoto: row.has_photo,
+        cookedAt: row.cookedAt instanceof Date ? row.cookedAt.toISOString() : String(row.cookedAt),
+        xpAwarded: row.xpAwarded,
+        coinsAwarded: row.coinsAwarded,
+        hasPhoto: row.hasPhoto,
         photoUrl,
-        verified: row.verified ?? false,
-        viaCookingMode: row.via_cooking_mode,
-        timerElapsed: row.timer_elapsed,
+        verified: row.verified,
+        viaCookingMode: row.viaCookingMode,
+        timerElapsed: row.timerElapsed,
       };
     })
   );
 
   return {
-    count: count ?? data.length,
+    count: total,
     firstCookedAt: items[items.length - 1]?.cookedAt ?? null,
     lastCookedAt: items[0]?.cookedAt ?? null,
     items,
@@ -244,60 +239,38 @@ export async function getRecentCookPhotos(
   userId: string,
   limit = 10
 ): Promise<CookPhotoItem[]> {
-  const { data, error } = await getClient()
-    .from('cook_events')
-    .select('id, recipe_id, photo_path, cooked_at, recipes(title)')
-    .eq('user_id', userId)
-    .not('photo_path', 'is', null)
-    .neq('photo_path', '')
-    .order('cooked_at', { ascending: false })
+  const rows = await db
+    .select({
+      id: cookEvents.id,
+      recipeId: cookEvents.recipeId,
+      photoPath: cookEvents.photoPath,
+      cookedAt: cookEvents.cookedAt,
+      recipeTitle: recipes.title,
+    })
+    .from(cookEvents)
+    .leftJoin(recipes, eq(cookEvents.recipeId, recipes.id))
+    .where(and(
+      eq(cookEvents.userId, userId),
+      isNotNull(cookEvents.photoPath),
+      ne(cookEvents.photoPath, '')
+    ))
+    .orderBy(desc(cookEvents.cookedAt))
     .limit(limit);
-
-  if (error) {
-    console.error('[getRecentCookPhotos] Query error:', error);
-    return [];
-  }
-  if (!data || data.length === 0) return [];
-
-  const rows = data as unknown as Array<{
-    id: string;
-    recipe_id: string | null;
-    photo_path: string;
-    cooked_at: string;
-    recipes?: { title?: string } | null;
-  }>;
 
   return Promise.all(
     rows.map(async (row) => {
-      const photoPath = row.photo_path;
-      let photoUrl = photoPath;
-      if (photoPath && !photoPath.startsWith('http') && !photoPath.startsWith('data:')) {
-        try {
-          const { data: signedData } = await getClient()
-            .storage.from('cook-photos')
-            .createSignedUrl(photoPath, 60 * 60 * 24 * 7);
-          if (signedData?.signedUrl) {
-            photoUrl = signedData.signedUrl;
-          } else {
-            photoUrl = getClient().storage.from('cook-photos').getPublicUrl(photoPath).data.publicUrl;
-          }
-        } catch {
-          photoUrl = getClient().storage.from('cook-photos').getPublicUrl(photoPath).data.publicUrl;
-        }
-      }
+      const photoUrl = await resolveCookPhotoUrl(row.photoPath);
       return {
         id: row.id,
-        jobId: row.recipe_id || '',
-        recipeId: row.recipe_id,
-        photoUrl,
-        cookedAt: row.cooked_at,
-        recipeTitle: row.recipes?.title || 'Gekochtes Gericht',
+        jobId: row.recipeId || '',
+        recipeId: row.recipeId,
+        photoUrl: photoUrl || '',
+        cookedAt: row.cookedAt instanceof Date ? row.cookedAt.toISOString() : String(row.cookedAt),
+        recipeTitle: row.recipeTitle || 'Gekochtes Gericht',
       };
     })
   );
 }
-
-
 
 export async function insertLedgerRows(
   userId: string,
@@ -307,107 +280,42 @@ export async function insertLedgerRows(
   if (rows.length === 0) return;
   const payload = rows.map((r) => ({
     id: randomUUID(),
-    user_id: userId,
-    cook_event_id: cookEventId,
-    delta_xp: r.deltaXp,
-    delta_coins: r.deltaCoins,
+    userId,
+    cookEventId,
+    deltaXp: r.deltaXp,
+    deltaCoins: r.deltaCoins,
     reason: r.reason,
   }));
-  const { error } = await getClient().from('point_ledger').insert(payload);
-  if (error) throw wrapError('Failed to insert ledger rows', error);
+  await db.insert(pointLedger).values(payload);
 }
 
 export async function upsertUserStats(stats: UserStats): Promise<void> {
-  const { error } = await getClient().from('user_stats').upsert({
-    user_id: stats.userId,
-    xp: stats.xp,
-    level: stats.level,
-    coins: stats.coins,
-    current_streak: stats.currentStreak,
-    longest_streak: stats.longestStreak,
-    last_cook_date: stats.lastCookDate,
-    total_cooks: stats.totalCooks,
-    updated_at: new Date().toISOString(),
-  });
-  if (error) throw wrapError('Failed to upsert user_stats', error);
-}
-
-export async function getUserBadges(userId: string): Promise<string[]> {
-  const { data, error } = await getClient()
-    .from('user_badges')
-    .select('badge_key')
-    .eq('user_id', userId);
-  if (error) throw wrapError('Failed to fetch user badges', error);
-  return (data || []).map((r: { badge_key: string }) => r.badge_key);
-}
-
-export async function getUserBadgesDetailed(
-  userId: string
-): Promise<{ key: string; earnedAt: string }[]> {
-  const { data, error } = await getClient()
-    .from('user_badges')
-    .select('badge_key, earned_at')
-    .eq('user_id', userId)
-    .order('earned_at', { ascending: true });
-  if (error) throw wrapError('Failed to fetch detailed user badges', error);
-  return (data || []).map((r: { badge_key: string; earned_at: string }) => ({
-    key: r.badge_key,
-    earnedAt: r.earned_at,
-  }));
-}
-
-export async function awardBadges(userId: string, badgeKeys: string[]): Promise<void> {
-  if (badgeKeys.length === 0) return;
-  const rows = badgeKeys.map((k) => ({ user_id: userId, badge_key: k }));
-  const { error } = await getClient()
-    .from('user_badges')
-    .upsert(rows, { onConflict: 'user_id,badge_key', ignoreDuplicates: true });
-  if (error) throw wrapError('Failed to award badges', error);
-}
-
-export async function getDistinctCookedRecipeCount(userId: string): Promise<number> {
-  const { data, error } = await getClient()
-    .from('cook_events')
-    .select('recipe_id')
-    .eq('user_id', userId);
-  if (error) throw wrapError('Failed to count distinct cooked recipes', error);
-  const set = new Set((data || []).map((r: { recipe_id?: string | null }) => r.recipe_id).filter(Boolean));
-  return set.size;
-}
-
-export async function getTimerCookCount(userId: string): Promise<number> {
-  const { data, error } = await getClient()
-    .from('cook_events')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('timer_elapsed', true);
-  if (error) throw wrapError('Failed to count timer cooks', error);
-  return (data || []).length;
-}
-
-export async function getWeekendCookCount(userId: string): Promise<number> {
-  const { data, error } = await getClient()
-    .from('cook_events')
-    .select('cooked_at')
-    .eq('user_id', userId);
-  if (error) throw wrapError('Failed to count weekend cooks', error);
-  return (data || []).filter((r: { cooked_at: string }) => {
-    const day = new Date(r.cooked_at).getUTCDay();
-    return day === 0 || day === 6;
-  }).length;
-}
-
-export async function getMaxCooksForSameRecipe(userId: string): Promise<number> {
-  const { data, error } = await getClient()
-    .from('cook_events')
-    .select('recipe_id')
-    .eq('user_id', userId);
-  if (error) throw wrapError('Failed to count same-recipe cooks', error);
-  const counts = new Map<string, number>();
-  for (const r of (data || []) as Array<{ recipe_id?: string | null }>) {
-    if (r.recipe_id) counts.set(r.recipe_id, (counts.get(r.recipe_id) ?? 0) + 1);
-  }
-  return counts.size === 0 ? 0 : Math.max(...counts.values());
+  await db
+    .insert(userStats)
+    .values({
+      userId: stats.userId,
+      xp: stats.xp,
+      level: stats.level,
+      coins: stats.coins,
+      currentStreak: stats.currentStreak,
+      longestStreak: stats.longestStreak,
+      lastCookDate: stats.lastCookDate,
+      totalCooks: stats.totalCooks,
+      updatedAt: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: userStats.userId,
+      set: {
+        xp: stats.xp,
+        level: stats.level,
+        coins: stats.coins,
+        currentStreak: stats.currentStreak,
+        longestStreak: stats.longestStreak,
+        lastCookDate: stats.lastCookDate,
+        totalCooks: stats.totalCooks,
+        updatedAt: new Date(),
+      },
+    });
 }
 
 export async function uploadCookPhoto(
@@ -418,9 +326,7 @@ export async function uploadCookPhoto(
   const clean = base64.replace(/^data:image\/\w+;base64,/, '');
   const buffer = Buffer.from(clean, 'base64');
   const storagePath = `${userId}/${cookId}.jpg`;
-  const { error } = await getClient()
-    .storage.from('cook-photos')
-    .upload(storagePath, buffer, { contentType: 'image/jpeg', upsert: true });
-  if (error) throw wrapError('Failed to upload cook photo', error as unknown as import('@supabase/supabase-js').PostgrestError);
+  await ensureBucketExists('cook-photos');
+  await uploadFile('cook-photos', storagePath, buffer, 'image/jpeg');
   return storagePath;
 }

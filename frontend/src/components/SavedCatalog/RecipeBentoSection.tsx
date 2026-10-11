@@ -47,8 +47,9 @@ export default function RecipeBentoSection({
   const mainRecipe = mainJob.recipe;
   if (!mainRecipe) return null;
 
-  const { src: mainImageSrc } = useCachedImage(mainRecipe.imageUrl);
-  const hasMainImage = Boolean(mainImageSrc);
+  const mainCoverUrl = mainRecipe.imageUrl || mainRecipe.imageUrls?.[0];
+  const { src: mainImageSrc } = useCachedImage(mainCoverUrl);
+  const hasMainImage = Boolean(mainImageSrc || mainCoverUrl);
 
   const isMainCommunity = isCommunityJob ? isCommunityJob(mainJob) : false;
   const isMainSelected = !isMainCommunity && selectedIds?.has(mainJob.recipeId);
@@ -97,7 +98,7 @@ export default function RecipeBentoSection({
         >
           <div className={`absolute inset-0 overflow-hidden ${hasMainImage ? '' : 'bg-black/5 dark:bg-white/5'}`}>
             <CachedImage
-              src={mainRecipe.imageUrl}
+              src={mainCoverUrl}
               emoji={mainRecipe.emoji}
               alt={mainRecipe.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none select-none"

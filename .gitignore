@@ -31,3 +31,4 @@ backend/dist/data/*.sqlite
 supabase/.temp/
 backups/
 backend/backups/
+

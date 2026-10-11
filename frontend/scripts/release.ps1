@@ -48,19 +48,11 @@ function Read-DotEnvValue {
 
 # -- 0. Frontend env guards -------------------------------------------
 # `npm run build` (production mode) reads .env.production, then .env for any
-# variable .env.production doesn't define. The backend verifies JWTs against
-# snagbite-prod, so an AAB built against any other Supabase project gets 401
-# on every authenticated endpoint (shipped broken as v1.1.6).
+# variable .env.production doesn't define. Production builds must pin the production backend API.
 $prodEnvPath = "$frontendDir\.env.production"
-$supabaseEnvPath = "$frontendDir\.env"
-if (Read-DotEnvValue $prodEnvPath 'VITE_SUPABASE_URL') { $supabaseEnvPath = $prodEnvPath }
-$frontendSupabaseUrl = Read-DotEnvValue $supabaseEnvPath 'VITE_SUPABASE_URL'
-if (-not $frontendSupabaseUrl) {
-    Write-Error "VITE_SUPABASE_URL is missing/empty in $supabaseEnvPath. Production builds must pin the snagbite-prod Supabase project in .env.production."
-    exit 1
-}
-if ($frontendSupabaseUrl -match 'nmphuwywxirervquvgoa') {
-    Write-Error "VITE_SUPABASE_URL in $supabaseEnvPath points to the DEV Supabase project (snagbite-dev) - its tokens are rejected by the production backend. Pin the snagbite-prod URL in .env.production."
+$frontendApiUrl = Read-DotEnvValue $prodEnvPath 'VITE_API_BASE_URL'
+if (-not $frontendApiUrl) {
+    Write-Error "VITE_API_BASE_URL is missing/empty in $prodEnvPath. Production builds must pin the production backend URL."
     exit 1
 }
 foreach ($envFile in @($prodEnvPath, "$frontendDir\.env")) {

@@ -1,7 +1,7 @@
 import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { App } from '@capacitor/app';
 import { isNative } from '../native';
-import { supabase } from '../supabase';
+import { authClient } from '../auth';
 import { apiUrl } from '../api';
 import { APP_VERSION, APP_BUILD } from '../version';
 
@@ -9,7 +9,7 @@ import { APP_VERSION, APP_BUILD } from '../version';
  * OTA (over-the-air) web-bundle updates via @capgo/capacitor-updater in
  * self-hosted manual mode: the backend's public /api/app-updates/check
  * endpoint decides whether a newer bundle exists, the zip is downloaded
- * silently from Supabase Storage and staged via next() — it becomes active on
+ * silently from Tigris S3 Storage and staged via next() — it becomes active on
  * the next background/relaunch, never mid-session. Missing notifyAppReady()
  * within appReadyTimeout auto-reverts a broken bundle (see capacitor.config.ts).
  *
@@ -58,8 +58,9 @@ async function resolveChannel(): Promise<'production' | 'alpha' | 'internal'> {
   }
 
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user?.app_metadata?.tier === 'alpha') return 'alpha';
+    const res = await authClient.getSession();
+    const tier = (res?.data?.user as any)?.tier ?? (res?.data?.user as any)?.app_metadata?.tier;
+    if (tier === 'alpha') return 'alpha';
   } catch {
     // No session yet — default to production.
   }

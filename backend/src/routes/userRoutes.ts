@@ -1,6 +1,5 @@
 import { Router, Request, Response } from 'express';
 import {
-  getClient,
   getExtractionsForUserInTimeframe,
   deletePushTokensForUser,
   upsertPushToken,
@@ -9,6 +8,9 @@ import {
   isAlphaActive,
   getRewardedAdBonusCredits,
 } from '../db.js';
+import { db } from '../db/drizzle.js';
+import { user as userTable } from '../db/schema/auth.js';
+import { eq } from 'drizzle-orm';
 import { config } from '../config.js';
 import { AppError, sendAppError } from '../errors.js';
 import { fetchAndSyncUser, resolveUserRateLimit } from './authUtils.js';
@@ -26,15 +28,14 @@ userRoutes.post('/me/rewarded-ad-claimed', async (req: Request, res: Response): 
       typeof currentMeta.bonus_credits === 'number' ? currentMeta.bonus_credits : 0;
     const newCredits = currentCredits + bonusPerAd;
 
-    const { error } = await getClient().auth.admin.updateUserById(userId, {
-      app_metadata: {
-        ...currentMeta,
-        bonus_credits: newCredits,
-      },
-    });
-
-    if (error) {
-      console.error(`Failed to grant bonus credit for user ${userId}:`, error.message);
+    try {
+      await db
+        .update(userTable)
+        .set({ bonusCredits: newCredits, updatedAt: new Date() })
+        .where(eq(userTable.id, userId));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`Failed to grant bonus credit for user ${userId}:`, msg);
       throw new AppError('INTERNAL_ERROR', { message: 'Failed to update bonus credits' });
     }
 
@@ -79,10 +80,10 @@ userRoutes.post('/billing/sync', async (req: Request, res: Response): Promise<vo
       if (clientTier === 'premium' || clientTier === 'free') {
         const alphaActive = await isAlphaActive();
         const finalTier = clientTier === 'free' && alphaActive ? 'alpha' : clientTier;
-        const { error } = await getClient().auth.admin.updateUserById(userId, {
-          app_metadata: { tier: finalTier },
-        });
-        if (error) throw error;
+        await db
+          .update(userTable)
+          .set({ tier: finalTier, updatedAt: new Date() })
+          .where(eq(userTable.id, userId));
         res.status(200).json({ success: true, tier: finalTier, fallback: true });
         return;
       }
@@ -125,12 +126,14 @@ userRoutes.post('/billing/sync', async (req: Request, res: Response): Promise<vo
     const alphaActive = await isAlphaActive();
     const newTier = isPremium ? 'premium' : alphaActive ? 'alpha' : 'free';
 
-    const { error } = await getClient().auth.admin.updateUserById(userId, {
-      app_metadata: { tier: newTier },
-    });
-
-    if (error) {
-      console.error('Failed to update Supabase user tier:', error.message);
+    try {
+      await db
+        .update(userTable)
+        .set({ tier: newTier, updatedAt: new Date() })
+        .where(eq(userTable.id, userId));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('Failed to update user tier:', msg);
       throw new AppError('PROFILE_UPDATE_FAILED', { message: 'Failed to update user profile.' });
     }
 
@@ -152,11 +155,15 @@ userRoutes.delete('/users/me', async (req: Request, res: Response): Promise<void
       console.warn('Failed to delete push tokens on account deletion:', err?.message ?? err)
     );
 
-    const { error } = await getClient().auth.admin.deleteUser(userId);
-    if (error) {
-      console.error('Supabase admin deleteUser error:', error);
+    try {
+      await db
+        .delete(userTable)
+        .where(eq(userTable.id, userId));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('deleteUser error:', msg);
       throw new AppError('ACCOUNT_DELETE_FAILED', {
-        message: `Failed to delete user account: ${error.message}`,
+        message: `Failed to delete user account: ${msg}`,
       });
     }
 

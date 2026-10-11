@@ -58,7 +58,7 @@
     "@heroui/react": "^3.2.1",
     "@heroui/styles": "^3.2.1",
     "@revenuecat/purchases-capacitor": "^13.2.1",
-    "@supabase/supabase-js": "^2.108.2",
+    "better-auth": "^1.7.7",
     "lucide-react": "^1.21.0",
     "mp4box": "^2.4.1",
     "react": "^19.2.6",

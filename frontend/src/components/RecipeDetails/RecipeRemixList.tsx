@@ -91,7 +91,7 @@ export default function RecipeRemixList({
             >
               <div className="w-13 h-13 rounded-xl overflow-hidden bg-black/5 dark:bg-white/5 shrink-0">
                 <CachedImage
-                  src={remix.imageUrl}
+                  src={remix.imageUrl || remix.imageUrls?.[0]}
                   emoji={remix.emoji}
                   alt={remix.title}
                   className="w-full h-full object-cover pointer-events-none group-hover:scale-105 transition-transform duration-300"

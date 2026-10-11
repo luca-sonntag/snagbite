@@ -1,5 +1,5 @@
 import { Capacitor } from '@capacitor/core';
-import type { User } from '@supabase/supabase-js';
+import type { AuthUser } from '../auth';
 import { isNative } from '../native';
 import { APP_VERSION, APP_BUILD } from '../version';
 import { getRecentLogs, type LogEntry } from './consoleBuffer';
@@ -21,7 +21,7 @@ export interface FeedbackContext {
 }
 
 /** Gather diagnostic context to attach to a bug report / feedback submission. */
-export function collectFeedbackContext(user: User | null, language: string): FeedbackContext {
+export function collectFeedbackContext(user: AuthUser | null, language: string): FeedbackContext {
   return {
     appVersion: APP_VERSION,
     appBuild: APP_BUILD,

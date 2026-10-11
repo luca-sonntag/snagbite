@@ -1,9 +1,10 @@
 import { config } from '../config.js';
-import { getClient, wrapError } from './client.js';
+import { db } from './drizzle.js';
+import { globalSettings } from './schema/system.js';
+import { eq, asc } from 'drizzle-orm';
 import type { GlobalSetting } from './types.js';
 
 export type { GlobalSetting };
-
 
 const settingsCache: Record<string, { value: unknown; timestamp: number }> = {};
 
@@ -16,14 +17,14 @@ export async function getGlobalSetting<T>(key: string, defaultValue: T): Promise
   }
 
   try {
-    const { data, error } = await getClient()
-      .from('global_settings')
-      .select('value')
-      .eq('key', key)
-      .maybeSingle();
+    const [row] = await db
+      .select({ value: globalSettings.value })
+      .from(globalSettings)
+      .where(eq(globalSettings.key, key))
+      .limit(1);
 
-    if (!error && data) {
-      let val: unknown = data.value;
+    if (row) {
+      let val: unknown = row.value;
       if (typeof defaultValue === 'boolean') {
         val = val === true || val === 'true';
       } else if (typeof defaultValue === 'number') {
@@ -85,27 +86,39 @@ export async function getRewardedAdBonusCredits(): Promise<number> {
 }
 
 export async function getAllGlobalSettings(): Promise<GlobalSetting[]> {
-  const { data, error } = await getClient()
-    .from('global_settings')
-    .select('*')
-    .order('key', { ascending: true });
+  const rows = await db
+    .select()
+    .from(globalSettings)
+    .orderBy(asc(globalSettings.key));
 
-  if (error) throw wrapError('Failed to fetch global settings', error);
-  return data || [];
+  return rows.map((r) => ({
+    key: r.key,
+    value: r.value,
+    description: r.description ?? null,
+    updated_at: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : String(r.updatedAt),
+  }));
 }
 
 export async function updateGlobalSettings(settings: Record<string, string>): Promise<void> {
-  const rows = Object.entries(settings).map(([key, value]) => ({
-    key,
-    value: String(value),
-    updated_at: new Date().toISOString(),
-  }));
+  const entries = Object.entries(settings);
+  if (entries.length === 0) return;
 
-  const { error } = await getClient()
-    .from('global_settings')
-    .upsert(rows);
-
-  if (error) throw wrapError('Failed to update global settings', error);
+  for (const [key, value] of entries) {
+    await db
+      .insert(globalSettings)
+      .values({
+        key,
+        value: String(value),
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: globalSettings.key,
+        set: {
+          value: String(value),
+          updatedAt: new Date(),
+        },
+      });
+  }
 
   for (const key of Object.keys(settings)) {
     delete settingsCache[key];

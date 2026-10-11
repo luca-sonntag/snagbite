@@ -30,9 +30,9 @@ export interface Config {
   /** RapidAPI host for the social downloader. */
   RAPIDAPI_SOCIAL_HOST: string;
   GEMINI_API_KEY: string;
-  SUPABASE_URL: string;
-  SUPABASE_PUBLISHABLE_KEY: string;
-  SUPABASE_SECRET_KEY: string;
+  SUPABASE_URL?: string;
+  SUPABASE_PUBLISHABLE_KEY?: string;
+  SUPABASE_SECRET_KEY?: string;
   GEMINI_MODEL: string;
   /** Model used by the tool-using ingredient resolver. */
   GEMINI_RERANKER_MODEL: string;
@@ -101,6 +101,18 @@ export interface Config {
   FAL_KEY?: string;
   /** BGBuster API key for background removal on ingredient icons. */
   BGBUSTER_API_KEY?: string;
+  // ── S3 / Tigris Object Storage ──
+  S3_ENDPOINT?: string;
+  S3_REGION: string;
+  S3_ACCESS_KEY_ID?: string;
+  S3_SECRET_ACCESS_KEY?: string;
+  S3_BUCKET_NAME?: string;
+  S3_PUBLIC_URL?: string;
+  S3_PUBLIC_DOMAIN?: string;
+  S3_FORCE_PATH_STYLE: boolean;
+  DATABASE_URL?: string;
+  APP_URL?: string;
+  STORAGE_STREAMING_URL?: string;
 }
 
 // Validation helper
@@ -117,9 +129,9 @@ export const config: Config = {
   RAPIDAPI_KEY: process.env.RAPIDAPI_KEY,
   RAPIDAPI_SOCIAL_HOST: getEnv('RAPIDAPI_SOCIAL_HOST', 'social-download-all-in-one.p.rapidapi.com'),
   GEMINI_API_KEY: getEnv('GEMINI_API_KEY'),
-  SUPABASE_URL: getEnv('SUPABASE_URL'),
-  SUPABASE_PUBLISHABLE_KEY: getEnv('SUPABASE_PUBLISHABLE_KEY'),
-  SUPABASE_SECRET_KEY: getEnv('SUPABASE_SECRET_KEY'),
+  SUPABASE_URL: process.env.SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY: process.env.SUPABASE_PUBLISHABLE_KEY,
+  SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
   GEMINI_MODEL: getEnv('GEMINI_MODEL', 'gemini-3.1-flash-lite'),
   // Defaults to the same generation as GEMINI_MODEL: a stale default here silently
   // ran ingredient matching on a two-generation-old model whenever the env var was unset.
@@ -167,6 +179,17 @@ export const config: Config = {
   GENERATE_RECIPE_COVERS: getEnv('GENERATE_RECIPE_COVERS', 'true') === 'true',
   FAL_KEY: process.env.FAL_KEY || process.env.FLUX_API_KEY,
   BGBUSTER_API_KEY: process.env.BGBUSTER_API_KEY,
+  S3_ENDPOINT: process.env.S3_ENDPOINT || process.env.AWS_ENDPOINT_URL_S3,
+  S3_REGION: getEnv('S3_REGION', 'auto'),
+  S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID,
+  S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY,
+  S3_BUCKET_NAME: process.env.S3_BUCKET_NAME || process.env.BUCKET_NAME,
+  S3_PUBLIC_URL: process.env.S3_PUBLIC_URL,
+  S3_PUBLIC_DOMAIN: process.env.S3_PUBLIC_DOMAIN,
+  S3_FORCE_PATH_STYLE: getEnv('S3_FORCE_PATH_STYLE', 'true') === 'true',
+  DATABASE_URL: process.env.DATABASE_URL,
+  APP_URL: process.env.APP_URL,
+  STORAGE_STREAMING_URL: process.env.STORAGE_STREAMING_URL,
 };
 
 /**

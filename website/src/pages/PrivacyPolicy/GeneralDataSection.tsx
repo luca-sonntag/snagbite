@@ -37,7 +37,7 @@ export const GeneralDataSection: React.FC = () => {
               Für die Nutzung der App ist ein Benutzerkonto erforderlich. Dabei verarbeiten wir:
             </p>
             <ul className="list-disc pl-5 text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <li>E-Mail-Adresse und Passwort (ausschließlich verschlüsselt bzw. gehasht über Supabase Auth gespeichert)</li>
+              <li>E-Mail-Adresse und Passwort (ausschließlich kryptografisch gehasht über unsere geschützte Authentifizierungsinfrastruktur gespeichert)</li>
               <li>Bei Registrierung/Login über Google OAuth: Anzeigename, Profilbild und Google-Benutzer-ID</li>
               <li>Eindeutige interne Benutzer-ID (UUID), Registrierungs- und Anmeldezeitpunkte</li>
             </ul>

@@ -1,6 +1,8 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { getClient } from './db.js';
+import { db } from './db/drizzle.js';
+import { geminiLogs } from './db/schema/system.js';
+import { lt } from 'drizzle-orm';
 
 // ---------------------------------------------------------------------------
 // Pricing table (Google AI Studio / Gemini API, approximate as of June 2026)
@@ -214,41 +216,37 @@ export async function writeGeminiLog(entry: GeminiLogEntry): Promise<void> {
  */
 export async function pruneOldGeminiLogs(days: number): Promise<void> {
   try {
-    const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
-    const { error, count } = await getClient()
-      .from('gemini_logs')
-      .delete({ count: 'exact' })
-      .lt('created_at', cutoff);
-    if (error) throw new Error(error.message);
-    if (count && count > 0) {
-      console.log(`[Cleanup] Deleted ${count} gemini_logs row(s) older than ${days} days.`);
+    const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    const rows = await db
+      .delete(geminiLogs)
+      .where(lt(geminiLogs.createdAt, cutoff))
+      .returning({ id: geminiLogs.id });
+    if (rows.length > 0) {
+      console.log(`[Cleanup] Deleted ${rows.length} gemini_logs row(s) older than ${days} days.`);
     }
   } catch (err: any) {
     console.error('[Cleanup] Error pruning gemini_logs:', err.message);
   }
 }
 
-/** Insert a log entry as a row into the Supabase `gemini_logs` table. */
+/** Insert a log entry as a row into the database `gemini_logs` table. */
 async function writeGeminiLogToDb(entry: GeminiLogEntry): Promise<void> {
   try {
-    const { error } = await getClient()
-      .from('gemini_logs')
-      .insert({
-        created_at:      entry.timestamp,
-        request_type:    entry.requestType,
-        model:           entry.model,
-        duration_ms:     entry.durationMs,
-        success:         entry.success,
-        error_msg:       entry.error ?? null,
-        input_data:      entry.input ?? null,
-        token_prompt:    entry.tokenUsage?.promptTokens ?? null,
-        token_candidate: entry.tokenUsage?.candidateTokens ?? null,
-        token_total:     entry.tokenUsage?.totalTokens ?? null,
-        cost_input_usd:  entry.costEstimate?.inputCostUsd ?? null,
-        cost_output_usd: entry.costEstimate?.outputCostUsd ?? null,
-        cost_total_usd:  entry.costEstimate?.totalCostUsd ?? null,
-      });
-    if (error) throw new Error(error.message);
+    await db.insert(geminiLogs).values({
+      createdAt: new Date(entry.timestamp),
+      requestType: entry.requestType,
+      model: entry.model,
+      durationMs: entry.durationMs,
+      success: entry.success,
+      errorMsg: entry.error ?? null,
+      inputData: entry.input ?? null,
+      tokenPrompt: entry.tokenUsage?.promptTokens ?? null,
+      tokenCandidate: entry.tokenUsage?.candidateTokens ?? null,
+      tokenTotal: entry.tokenUsage?.totalTokens ?? null,
+      costInputUsd: entry.costEstimate?.inputCostUsd !== undefined ? String(entry.costEstimate.inputCostUsd) : null,
+      costOutputUsd: entry.costEstimate?.outputCostUsd !== undefined ? String(entry.costEstimate.outputCostUsd) : null,
+      costTotalUsd: entry.costEstimate?.totalCostUsd !== undefined ? String(entry.costEstimate.totalCostUsd) : null,
+    });
   } catch (err: any) {
     // Never let logging failures crash the main flow.
     console.error('[GeminiLogger] Failed to write log to DB:', err.message);

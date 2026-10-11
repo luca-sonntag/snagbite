@@ -6,6 +6,47 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-09: Vollständige Entfernung von Supabase (PostgreSQL, Storage, Auth & CLI)
+
+* **Ersetzter Code / Veraltete Logik:**
+  - Supabase PostgreSQL Hosting, PostgREST und Supabase CLI (`supabase/` Ordner mit 15 SQL-Migrationen, `config.toml`, `npm run db:supabase:*`).
+  - `@supabase/supabase-js` in `website/` (`AdminPage.tsx`, altes `website/src/supabase.ts`) und veraltete Referenzen in der Datenschutzerklärung.
+  - Supabase Storage & PostgREST in OTA-Deployment-Skripten (`frontend/scripts/deploy-ota.ps1`, `git-utils.ps1`, `release.ps1`).
+  - Veraltete Pflicht-Umgebungsvariablen `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` in `backend/src/config.ts`, sowie `supabaseHost` in `/health` und Supabase-Domains in Helmet CSP.
+* **Ersetzt durch:**
+  - **Railway Native PostgreSQL & Drizzle ORM:** Alle 21 Tabellen, Indizes und RPCs laufen direkt auf Managed PostgreSQL via Drizzle ORM (`drizzle-kit push`, `db:push:prod`).
+  - **Railway Tigris S3 Storage:** Alle Medien (`recipe-covers`, `cook-photos`, `feedback-screenshots`, `app-bundles`) laufen über Tigris S3 via AWS SDK v3 und private HTTP-Streaming-Endpunkte.
+  - **Better-Auth:** Authentifizierung (Google OAuth, Passwörter, Sessions, Bearer Tokens) läuft autark über Better-Auth und Drizzle im Backend; Admin-Login in `website/` nutzt `better-auth/react`.
+  - **Natives OTA-Management:** Neues CLI-Tool [`backend/src/scripts/deploy/otaBundleManager.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/scripts/deploy/otaBundleManager.ts) für Bundle-Upload nach Tigris S3, Registrierung und Capping in Postgres.
+* **Betroffene Dateien:** `supabase/` (vollständig entfernt), `website/`, `frontend/scripts/`, `backend/src/config.ts`, `backend/src/index.ts`, `backend/src/db/appBundlesDb.ts`, `package.json`, `scripts/switchEnv.js`.
+
+---
+
+* **Ersetzter Code / Veraltete Logik:**
+  - Experimentelles Terraform-Setup unter `infra/terraform/` und npm-Befehle `infra:plan` / `infra:apply`.
+  - Versuch, Postgres und S3-Storage als rohe Docker-Container (`postgres:16-alpine`, `minio/minio:latest`) mit Persistent Volumes über den Community-Provider zu verwalten.
+* **Ersetzt durch:**
+  - **Railway Native Architecture:**
+    - Offizielles Railway PostgreSQL Plugin (1-Klick Setup, integriertes Connection-Pooling, automatische Backups).
+    - Railway Tigris S3 Bucket (Zero-Maintenance, nativer S3-Endpunkt, keine MinIO-Containerwartung).
+    - Railway Native Environments (`development` und `production` via Railway Dashboard/CLI statt separater Terraform Statefiles).
+* **Betroffene Dateien:** `infra/` (gelöscht), `package.json`, `.gitignore`, `AGENTS.md`, `docs/OBSOLETE.md`.
+
+---
+
+### 2026-10-04: Ablösung von Supabase Storage durch S3-kompatiblen Object Storage (Railway Tigris / MinIO)
+
+* **Ersetzter Code / Veraltete Logik:**
+  - Supabase Storage Client (`getClient().storage.from(...)`) in `imageGenerator.ts`, `photoImport.ts`, `gamificationDb.ts`, `adminDb.ts` und `appUpdates.ts`.
+  - Toter Bucket `recipe-frames` (wurde bereits durch clientseitiges Caching in IndexedDB überflüssig).
+* **Ersetzt durch:**
+  - **Zentraler S3-Storage-Client ([`backend/src/storage/s3Client.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/storage/s3Client.ts)):** Nutzt `@aws-sdk/client-s3` und `@aws-sdk/s3-request-presigner` für alle Datei-Operationen (`uploadFile`, `downloadFile`, `deleteFiles`, `listFiles`, `listFolders`, `getPublicUrl`, `getSignedUrl`).
+  - **5 aktive Buckets:** `recipe-covers`, `app-bundles`, `feedback-screenshots`, `recipe-photos`, `cook-photos`.
+  - **Automatisches Migrationsskript ([`backend/src/scripts/storage/migrateStorageToS3.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/scripts/storage/migrateStorageToS3.ts)):** Überträgt Dateien aus alten Supabase-Buckets nach S3 und aktualisiert Bild-URLs in der Datenbank (`npm run storage:migrate:dev` / `npm run storage:migrate:prod`).
+* **Betroffene Dateien:** `backend/src/storage/s3Client.ts`, `backend/src/imageGenerator.ts`, `backend/src/photoImport.ts`, `backend/src/db/gamificationDb.ts`, `backend/src/db/adminDb.ts`, `backend/src/appUpdates.ts`, `backend/src/scripts/storage/migrateStorageToS3.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-01: Kategorie-Icons als Fallback für Zutaten-Icons entfernt
 
 * **Ersetzter Code / Veraltete Logik:**

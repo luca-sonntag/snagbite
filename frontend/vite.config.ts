@@ -37,6 +37,10 @@ export default defineConfig({
         target: 'http://127.0.0.1:3000',
         changeOrigin: true
       },
+      '/storage': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true
+      },
     }
   },
   resolve: {
@@ -54,7 +58,6 @@ export default defineConfig({
         manualChunks(id: string) {
           if (id.includes('/src/i18n')) return 'i18n';
           if (id.includes('node_modules')) {
-            if (id.includes('@supabase')) return 'supabase';
             return 'vendor';
           }
         },

@@ -77,7 +77,7 @@ export default function RecipePosterCard({
         {/* Cover - 100% clean pristine photo presentation */}
         <div className="relative w-full aspect-[4/3] bg-black/5 dark:bg-white/5 overflow-hidden shrink-0">
           <CachedImage
-            src={r.imageUrl}
+            src={r.imageUrl || r.imageUrls?.[0]}
             emoji={r.emoji}
             alt={r.title}
             className="w-full h-full object-cover object-center pointer-events-none select-none"

@@ -51,7 +51,7 @@ export default function RecipeCompactCard({
       {/* Thumbnail: Full card height presentation */}
       <div className="relative w-22 sm:w-26 shrink-0 overflow-hidden bg-black/5 dark:bg-white/5 self-stretch">
         <CachedImage
-          src={r.imageUrl}
+          src={r.imageUrl || r.imageUrls?.[0]}
           emoji={r.emoji}
           alt={r.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"

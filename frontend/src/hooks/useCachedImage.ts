@@ -3,6 +3,7 @@ import { getCachedImage, setCachedImage, getMemoryCachedImage } from '../utils/i
 import { compressImage, PREVIEW_PROFILE } from '../utils/imageCompression';
 import { CapacitorHttp } from '@capacitor/core';
 import { isNative } from '../native';
+import { apiUrl } from '../api';
 
 /**
  * Helper to fetch an image via the backend proxy, draw it onto a canvas,
@@ -10,11 +11,12 @@ import { isNative } from '../native';
  */
 async function compressAndConvertToBase64(url: string): Promise<string> {
   let blob: Blob;
+  const fetchUrl = url.startsWith('/') ? apiUrl(url) : url;
 
   if (isNative()) {
     // On native apps, use CapacitorHttp to bypass CORS when downloading third-party CDN images directly.
     const response = await CapacitorHttp.get({
-      url,
+      url: fetchUrl,
       responseType: 'blob',
     });
     
@@ -30,7 +32,7 @@ async function compressAndConvertToBase64(url: string): Promise<string> {
     blob = await fetchResponse.blob();
   } else {
     // On Web, use standard fetch (will fail if the image server strictly enforces CORS)
-    const response = await fetch(url);
+    const response = await fetch(fetchUrl);
     if (!response.ok) {
       throw new Error(`Failed to fetch image via web fetch: ${response.statusText}`);
     }

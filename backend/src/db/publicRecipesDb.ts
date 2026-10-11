@@ -1,24 +1,26 @@
 import type { Recipe } from '@cookbook/shared';
-import { getClient, wrapError, RecipeRow } from './client.js';
-import { rowToRecipe } from './recipesDb.js';
+import { db } from './drizzle.js';
+import { recipes, userRecipes } from './schema/recipes.js';
+import { eq, and, desc, asc } from 'drizzle-orm';
+import { rowToRecipe } from './recipesMappers.js';
 
 /**
  * Deterministically picks 2 recipes out of the available pool based on day seed.
  */
-export function getDailyRotatedRecipes(recipes: Recipe[], date: Date = new Date(), count = 2): Recipe[] {
-  if (recipes.length <= count) {
-    return recipes;
+export function getDailyRotatedRecipes(recipeList: Recipe[], date: Date = new Date(), count = 2): Recipe[] {
+  if (recipeList.length <= count) {
+    return recipeList;
   }
 
   // Calculate day number since Unix Epoch (UTC calendar day)
   const dayNumber = Math.floor(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) / 86400000);
   
   // Deterministic offset
-  const startIndex = Math.abs(dayNumber) % recipes.length;
+  const startIndex = Math.abs(dayNumber) % recipeList.length;
   const selected: Recipe[] = [];
 
   for (let i = 0; i < count; i++) {
-    selected.push(recipes[(startIndex + i) % recipes.length]);
+    selected.push(recipeList[(startIndex + i) % recipeList.length]);
   }
 
   return selected;
@@ -29,18 +31,14 @@ export function getDailyRotatedRecipes(recipes: Recipe[], date: Date = new Date(
  * If more than 2 exist, rotates 2 daily based on current date.
  */
 export async function getPublicDemoRecipes(date: Date = new Date()): Promise<Recipe[]> {
-  const { data, error } = await getClient()
-    .from('recipes')
-    .select('*')
-    .eq('visibility', 'public')
-    .eq('is_demo', true)
-    .order('created_at', { ascending: true })
-    .returns<RecipeRow[]>();
+  const rows = await db
+    .select()
+    .from(recipes)
+    .where(and(eq(recipes.visibility, 'public'), eq(recipes.isDemo, true)))
+    .orderBy(asc(recipes.createdAt));
 
-  if (error) throw wrapError('Failed to get public demo recipes', error);
-  const recipes = (data || []).map(rowToRecipe);
-
-  return getDailyRotatedRecipes(recipes, date, 2);
+  const list = rows.map(rowToRecipe);
+  return getDailyRotatedRecipes(list, date, 2);
 }
 
 /**
@@ -51,47 +49,44 @@ export async function getPublicDemoRecipes(date: Date = new Date()): Promise<Rec
  */
 export async function getPublicRecipeRecommendations(userId: string, limit = 6): Promise<Recipe[]> {
   // 1. Fetch user's saved recipe IDs and categories/tags
-  const { data: userRecipes, error: userError } = await getClient()
-    .from('user_recipes')
-    .select('recipe_id, is_favorite, recipes(*)')
-    .eq('user_id', userId);
-
-  if (userError) throw wrapError('Failed to fetch user recipes for recommendations', userError);
+  const userRecipeRows = await db
+    .select({
+      recipeId: userRecipes.recipeId,
+      isFavorite: userRecipes.isFavorite,
+      category: recipes.category,
+      tags: recipes.tags,
+    })
+    .from(userRecipes)
+    .innerJoin(recipes, eq(userRecipes.recipeId, recipes.id))
+    .where(eq(userRecipes.userId, userId));
 
   const savedRecipeIds = new Set<string>();
   const categoryFreq = new Map<string, number>();
   const tagFreq = new Map<string, number>();
 
-  if (userRecipes && userRecipes.length > 0) {
-    for (const ur of userRecipes as unknown as Array<{ recipe_id: string; is_favorite: boolean; recipes: RecipeRow | null }>) {
-      savedRecipeIds.add(ur.recipe_id);
-      if (ur.recipes) {
-        const weight = ur.is_favorite ? 3 : 1;
-        if (ur.recipes.category) {
-          categoryFreq.set(ur.recipes.category, (categoryFreq.get(ur.recipes.category) ?? 0) + weight);
-        }
-        if (Array.isArray(ur.recipes.tags)) {
-          for (const t of ur.recipes.tags) {
-            const clean = t.trim().toLowerCase();
-            if (clean) tagFreq.set(clean, (tagFreq.get(clean) ?? 0) + weight);
-          }
-        }
+  for (const ur of userRecipeRows) {
+    savedRecipeIds.add(ur.recipeId);
+    const weight = ur.isFavorite ? 3 : 1;
+    if (ur.category) {
+      categoryFreq.set(ur.category, (categoryFreq.get(ur.category) ?? 0) + weight);
+    }
+    if (Array.isArray(ur.tags)) {
+      for (const t of ur.tags) {
+        const clean = t.trim().toLowerCase();
+        if (clean) tagFreq.set(clean, (tagFreq.get(clean) ?? 0) + weight);
       }
     }
   }
 
   // 2. Query candidates from public recipes
-  const { data: publicRows, error: pubError } = await getClient()
-    .from('recipes')
-    .select('*')
-    .eq('visibility', 'public')
-    .order('created_at', { ascending: false })
-    .limit(60)
-    .returns<RecipeRow[]>();
+  const publicRows = await db
+    .select()
+    .from(recipes)
+    .where(eq(recipes.visibility, 'public'))
+    .orderBy(desc(recipes.createdAt))
+    .limit(60);
 
-  if (pubError) throw wrapError('Failed to fetch public recipes for recommendations', pubError);
-
-  const candidates = (publicRows || [])
+  const candidates = publicRows
     .filter((row) => !savedRecipeIds.has(row.id))
     .map(rowToRecipe);
 

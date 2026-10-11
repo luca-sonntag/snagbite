@@ -19,7 +19,7 @@ param(
     [switch]$Dev,
 
     [string]$RailwayEnv,
-    [string]$Service,
+    [string[]]$Service,
     [switch]$SkipDeploys,
     [switch]$DryRun,
     [switch]$Force,
@@ -84,7 +84,11 @@ function Format-MaskedValue {
 
 # --- Main Flow ---
 $target = Get-TargetEnvironment
-$targetService = if ($Service) { $Service } else { 'backend' }
+$targetServices = if ($Service) {
+    @($Service | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+} else {
+    @('backend')
+}
 $targetRailwayEnv = Resolve-RailwayEnvironment -Target $target -ExplicitEnv $RailwayEnv
 
 $backendDir = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\backend'))
@@ -98,14 +102,6 @@ if (-not (Test-Path $baseEnvPath)) { throw "Base .env file not found at $baseEnv
 if (-not (Get-Command railway -ErrorAction SilentlyContinue)) {
     throw "Railway CLI is not installed. Install with 'npm i -g @railway/cli'"
 }
-
-Write-Host ""
-Write-Host "+--------------------------------------------------------+" -ForegroundColor Cyan
-Write-Host "|  Sync Environment Variables to Railway                 |" -ForegroundColor Cyan
-Write-Host "|  Target: $($target.ToUpper().PadRight(20)) Service: $($targetService.PadRight(18))|" -ForegroundColor Cyan
-Write-Host "|  Railway Environment: $($targetRailwayEnv.PadRight(33))|" -ForegroundColor Cyan
-Write-Host "+--------------------------------------------------------+" -ForegroundColor Cyan
-Write-Host ""
 
 $envMap = [ordered]@{}
 $sourceMap = @{}
@@ -151,18 +147,27 @@ if ($envMap.Contains('FCM_SERVICE_ACCOUNT_JSON')) {
     }
 }
 
-# 4. Fetch existing Railway variables
-Write-Host "Fetching current variables from Railway ($targetService / $targetRailwayEnv)..." -ForegroundColor Gray
-$existingMap = [ordered]@{}
-$existingJson = & railway variable list -s $targetService -e $targetRailwayEnv --json 2>$null
-if ($LASTEXITCODE -ne 0 -or -not $existingJson) {
-    throw "Failed to fetch variables from Railway. Please ensure you are logged in ('railway whoami') and linked ('railway link')."
-}
+foreach ($targetService in $targetServices) {
+    Write-Host ""
+    Write-Host "+--------------------------------------------------------+" -ForegroundColor Cyan
+    Write-Host "|  Sync Environment Variables to Railway                 |" -ForegroundColor Cyan
+    Write-Host "|  Target: $($target.ToUpper().PadRight(20)) Service: $($targetService.PadRight(18))|" -ForegroundColor Cyan
+    Write-Host "|  Railway Environment: $($targetRailwayEnv.PadRight(33))|" -ForegroundColor Cyan
+    Write-Host "+--------------------------------------------------------+" -ForegroundColor Cyan
+    Write-Host ""
 
-$parsedExisting = $existingJson | ConvertFrom-Json
-foreach ($prop in $parsedExisting.PSObject.Properties) {
-    $existingMap[$prop.Name] = [string]$prop.Value
-}
+    # 4. Fetch existing Railway variables
+    Write-Host "Fetching current variables from Railway ($targetService / $targetRailwayEnv)..." -ForegroundColor Gray
+    $existingMap = [ordered]@{}
+    $existingJson = & railway variable list -s $targetService -e $targetRailwayEnv --json 2>$null
+    if ($LASTEXITCODE -ne 0 -or -not $existingJson) {
+        throw "Failed to fetch variables from Railway ($targetService / $targetRailwayEnv). Please ensure you are logged in ('railway whoami') and linked ('railway link')."
+    }
+
+    $parsedExisting = $existingJson | ConvertFrom-Json
+    foreach ($prop in $parsedExisting.PSObject.Properties) {
+        $existingMap[$prop.Name] = [string]$prop.Value
+    }
 
 # 5. Diff calculation
 $varsToAdd = [ordered]@{}
@@ -236,69 +241,73 @@ Write-Host "Summary: $($varsToAdd.Count) to add, $($varsToUpdate.Count) to updat
 Write-Host "===================================================================" -ForegroundColor White
 Write-Host ""
 
-if (-not $hasChanges) {
-    Write-Host "Everything is already in sync with Railway! No action needed." -ForegroundColor Green
-    exit 0
-}
-
-if ($DryRun) {
-    Write-Host "[DRY RUN] No changes were made to Railway." -ForegroundColor Yellow
-    exit 0
-}
-
-# 7. Ask for confirmation
-$confirmed = $Force -or $Yes
-if (-not $confirmed) {
-    $promptMsg = "Do you want to apply these changes to Railway ($targetService / $targetRailwayEnv)? [y/N]"
-    $userResponse = Read-Host -Prompt $promptMsg
-    if ($userResponse -notmatch '^(y|yes)$') {
-        Write-Host "Sync aborted by user. No changes were made to Railway." -ForegroundColor DarkYellow
-        exit 0
+    if (-not $hasChanges) {
+        Write-Host "Service $targetService is already in sync with Railway ($targetRailwayEnv)! No action needed." -ForegroundColor Green
+        continue
     }
-}
 
-# 8. Delete obsolete variables
-if ($varsToDelete.Count -gt 0) {
-    Write-Host "Pruning $($varsToDelete.Count) obsolete variables from Railway..." -ForegroundColor Yellow
-    foreach ($k in $varsToDelete) {
-        Write-Host "  Deleting $k..." -ForegroundColor DarkYellow
-        & railway variable delete $k -s $targetService -e $targetRailwayEnv --json | Out-Null
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "  Warning: Failed to delete $k from Railway (exit code $LASTEXITCODE)" -ForegroundColor Yellow
+    if ($DryRun) {
+        Write-Host "[DRY RUN] No changes were made to Railway ($targetService)." -ForegroundColor Yellow
+        continue
+    }
+
+    # 7. Ask for confirmation
+    $confirmed = $Force -or $Yes
+    if (-not $confirmed) {
+        $promptMsg = "Do you want to apply these changes to Railway ($targetService / $targetRailwayEnv)? [y/N]"
+        $userResponse = Read-Host -Prompt $promptMsg
+        if ($userResponse -notmatch '^(y|yes)$') {
+            Write-Host "Sync aborted for $targetService. No changes were made." -ForegroundColor DarkYellow
+            continue
         }
     }
-}
 
-# 9. Separate changed/added into standard vs complex (multi-line / JSON)
-$varsToSet = [ordered]@{}
-foreach ($k in $varsToAdd.Keys) { $varsToSet[$k] = $varsToAdd[$k] }
-foreach ($k in $varsToUpdate.Keys) { $varsToSet[$k] = $varsToUpdate[$k].NewValue }
+    # 8. Delete obsolete variables
+    if ($varsToDelete.Count -gt 0) {
+        Write-Host "Pruning $($varsToDelete.Count) obsolete variables from Railway ($targetService)..." -ForegroundColor Yellow
+        foreach ($k in $varsToDelete) {
+            Write-Host "  Deleting $k..." -ForegroundColor DarkYellow
+            & railway variable delete $k -s $targetService -e $targetRailwayEnv --json | Out-Null
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "  Warning: Failed to delete $k from Railway (exit code $LASTEXITCODE)" -ForegroundColor Yellow
+            }
+        }
+    }
 
-$complexVars = [ordered]@{}
-$standardVars = [ordered]@{}
-foreach ($k in $varsToSet.Keys) {
-    $val = $varsToSet[$k]
-    if ($val -match '[\r\n"{}]') { $complexVars[$k] = $val } else { $standardVars[$k] = $val }
-}
+    # 9. Separate changed/added into standard vs complex (multi-line / JSON)
+    $varsToSet = [ordered]@{}
+    foreach ($k in $varsToAdd.Keys) { $varsToSet[$k] = $varsToAdd[$k] }
+    foreach ($k in $varsToUpdate.Keys) { $varsToSet[$k] = $varsToUpdate[$k].NewValue }
 
-Write-Host "Applying $($varsToSet.Count) variable changes to Railway ($targetService / $targetRailwayEnv)..." -ForegroundColor Cyan
+    $complexVars = [ordered]@{}
+    $standardVars = [ordered]@{}
+    foreach ($k in $varsToSet.Keys) {
+        $val = $varsToSet[$k]
+        if ($val -match '[\r\n"{}]') { $complexVars[$k] = $val } else { $standardVars[$k] = $val }
+    }
 
-# Stdin set for complex variables
-foreach ($k in $complexVars.Keys) {
-    Write-Host "Setting $k via stdin..." -ForegroundColor DarkCyan
-    $complexVars[$k] | & railway variable set $k --stdin -s $targetService -e $targetRailwayEnv --skip-deploys
-    if ($LASTEXITCODE -ne 0) { throw "Failed to set $k via stdin on Railway" }
-}
+    Write-Host "Applying $($varsToSet.Count) variable changes to Railway ($targetService / $targetRailwayEnv)..." -ForegroundColor Cyan
 
-# Batch set for standard variables
-if ($standardVars.Count -gt 0) {
-    $cliArgs = @("variable", "set", "-s", $targetService, "-e", $targetRailwayEnv)
-    if ($SkipDeploys) { $cliArgs += "--skip-deploys" }
-    foreach ($k in $standardVars.Keys) { $cliArgs += "$k=$($standardVars[$k])" }
-    & railway @cliArgs
-    if ($LASTEXITCODE -ne 0) { throw "Failed to set standard variables on Railway (exit code $LASTEXITCODE)" }
+    # Stdin set for complex variables
+    foreach ($k in $complexVars.Keys) {
+        Write-Host "Setting $k via stdin..." -ForegroundColor DarkCyan
+        $complexVars[$k] | & railway variable set $k --stdin -s $targetService -e $targetRailwayEnv --skip-deploys
+        if ($LASTEXITCODE -ne 0) { throw "Failed to set $k via stdin on Railway" }
+    }
+
+    # Batch set for standard variables
+    if ($standardVars.Count -gt 0) {
+        $cliArgs = @("variable", "set", "-s", $targetService, "-e", $targetRailwayEnv)
+        if ($SkipDeploys) { $cliArgs += "--skip-deploys" }
+        foreach ($k in $standardVars.Keys) { $cliArgs += "$k=$($standardVars[$k])" }
+        & railway @cliArgs
+        if ($LASTEXITCODE -ne 0) { throw "Failed to set standard variables on Railway (exit code $LASTEXITCODE)" }
+    }
+
+    Write-Host ""
+    Write-Host "Successfully applied changes on Railway ($targetService / $targetRailwayEnv)!" -ForegroundColor Green
+    Write-Host "Added: $($varsToAdd.Count), Updated: $($varsToUpdate.Count), Deleted: $($varsToDelete.Count)" -ForegroundColor Green
 }
 
 Write-Host ""
-Write-Host "Successfully applied changes on Railway ($targetService / $targetRailwayEnv)!" -ForegroundColor Green
-Write-Host "Added: $($varsToAdd.Count), Updated: $($varsToUpdate.Count), Deleted: $($varsToDelete.Count)" -ForegroundColor Green
+Write-Host "All specified services processed successfully." -ForegroundColor Cyan

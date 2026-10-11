@@ -1,26 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
-import { createRemoteJWKSet, jwtVerify } from 'jose';
+import { fromNodeHeaders } from 'better-auth/node';
+import { auth } from './auth/betterAuth.js';
 import { config } from './config.js';
 
-// Extend Express Request to carry the authenticated user's ID
+// Extend Express Request to carry authenticated user details
 declare global {
   namespace Express {
     interface Request {
       userId?: string;
       userEmail?: string;
+      userTier?: string;
     }
   }
 }
 
-// JWKS fetched once and cached by jose (auto-refreshed on key rotation)
-const JWKS = createRemoteJWKSet(
-  new URL(`${config.SUPABASE_URL}/auth/v1/.well-known/jwks.json`)
-);
-
 /**
- * Middleware that verifies the Supabase JWT locally via JWKS.
- * No network round-trip to Supabase Auth per request.
- * Attaches `req.userId` and `req.userEmail` on success.
+ * Middleware that verifies the Better-Auth session (Bearer token or cookie).
+ * Attaches `req.userId`, `req.userEmail`, and `req.userTier` on success.
  */
 export async function requireAuth(
   req: Request,
@@ -28,28 +24,31 @@ export async function requireAuth(
   next: NextFunction,
 ): Promise<void> {
   const header = req.header('Authorization');
-  if (!header?.startsWith('Bearer ')) {
+  const hasCookie = Boolean(req.headers.cookie);
+
+  if (!header?.startsWith('Bearer ') && !hasCookie) {
     res.status(401).json({ success: false, error: 'Unauthorized: Missing or malformed Authorization header.' });
     return;
   }
 
-  const token = header.slice(7);
-
   try {
-    const { payload } = await jwtVerify(token, JWKS, {
-      audience: 'authenticated',
+    const sessionData = await auth.api.getSession({
+      headers: fromNodeHeaders(req.headers),
     });
 
-    if (!payload.sub) {
-      res.status(401).json({ success: false, error: 'Unauthorized: Token missing subject.' });
+    if (!sessionData?.session?.userId) {
+      res.status(401).json({ success: false, error: 'Unauthorized: Invalid or expired session.' });
       return;
     }
 
-    req.userId = payload.sub;
-    req.userEmail = payload.email as string | undefined;
+    req.userId = sessionData.session.userId;
+    req.userEmail = sessionData.user.email;
+    req.userTier = (sessionData.user as { tier?: string }).tier ?? 'free';
     next();
-  } catch {
-    res.status(401).json({ success: false, error: 'Unauthorized: Invalid or expired token.' });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[requireAuth] session validation error:', msg);
+    res.status(401).json({ success: false, error: 'Unauthorized: Invalid or expired session.' });
   }
 }
 
@@ -74,7 +73,7 @@ export function requireAdmin(
   }
 
   const adminEmails = config.ADMIN_EMAILS.split(',')
-    .map(e => e.trim().toLowerCase())
+    .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
 
   if (!adminEmails.includes(email.toLowerCase())) {

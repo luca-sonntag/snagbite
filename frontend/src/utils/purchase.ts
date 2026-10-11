@@ -1,7 +1,7 @@
 import { Purchases, LOG_LEVEL } from '@revenuecat/purchases-capacitor';
 import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
-import { supabase } from '../supabase';
+import { authClient, getStoredToken } from '../auth';
 import { apiUrl } from '../api';
 
 const REVENUECAT_ANDROID_API_KEY = import.meta.env.VITE_REVENUECAT_ANDROID_API_KEY as string | undefined;
@@ -140,26 +140,22 @@ function registerResumeListener(): void {
 
 async function syncBillingStatus(isPremium: boolean): Promise<void> {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
+    const res = await authClient.getSession();
+    const token = res.data?.session?.token ?? getStoredToken();
+    if (!token) return;
 
     const response = await fetch(apiUrl('/api/billing/sync'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({ tier: isPremium ? 'premium' : 'free' }),
     });
 
     if (response.ok) {
-      // Refresh local session to obtain the updated JWT containing the app_metadata.tier
-      const { error } = await supabase.auth.refreshSession();
-      if (error) {
-        console.warn('Failed to refresh local Supabase session:', error.message);
-      } else {
-        console.log('[RevenueCat] Billing status synced successfully with backend. Tier:', isPremium ? 'premium' : 'free');
-      }
+      await authClient.getSession();
+      console.log('[RevenueCat] Billing status synced successfully with backend. Tier:', isPremium ? 'premium' : 'free');
     } else {
       console.error('[RevenueCat] Failed to sync billing status with backend:', await response.text());
     }
@@ -189,7 +185,8 @@ async function fetchSubscriptionOfferings(): Promise<any[]> {
   }
 
   // Ensure initialized
-  const { data: { user } } = await supabase.auth.getUser();
+  const sessionRes = await authClient.getSession();
+  const user = sessionRes?.data?.user;
   if (!user) return [];
   await initBilling(user.id);
 
@@ -234,7 +231,8 @@ export async function getSubscriptionOfferings(forceRefresh = false): Promise<an
 
 export async function buyPremium(packageId?: string): Promise<boolean> {
   // Get current user to ensure we are logged in
-  const { data: { user } } = await supabase.auth.getUser();
+  const sessionRes = await authClient.getSession();
+  const user = sessionRes?.data?.user;
   if (!user) {
     throw new Error('User must be logged in to purchase Premium.');
   }
@@ -317,7 +315,8 @@ export async function restorePurchases(): Promise<boolean> {
     return false;
   }
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const sessionRes = await authClient.getSession();
+  const user = sessionRes?.data?.user;
   if (!user) {
     throw new Error('User must be logged in to restore purchases.');
   }

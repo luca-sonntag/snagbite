@@ -25,10 +25,18 @@
     "cap:live:cloud": "npm run cap:live:cloud -w frontend",
     "cap:run:local": "npm run cap:run:local -w frontend",
 
-    "db:push": "supabase db push",
-    "db:status": "supabase migration list",
-    "db:new": "supabase migration new",
-    "db:repair": "supabase migration repair",
+    "db:push": "npm run db:push -w backend",
+    "db:generate": "npm run db:generate -w backend",
+    "db:studio": "npm run db:studio -w backend",
+    "db:functions": "npm run db:functions -w backend",
+    "db:migrate-data": "npm run db:migrate-data -w backend",
+    "db:migrate-data:dev": "npm run db:migrate-data:dev -w backend",
+    "db:migrate-data:prod": "npm run db:migrate-data:prod -w backend",
+    "db:migrate-data:dry": "npm run db:migrate-data:dry -w backend",
+    "auth:migrate": "npm run auth:migrate -w backend",
+    "auth:migrate:dev": "npm run auth:migrate:dev -w backend",
+    "auth:migrate:prod": "npm run auth:migrate:prod -w backend",
+    "auth:migrate:dry": "npm run auth:migrate:dry -w backend",
 
     "db:backup:prod": "npm run db:backup -w backend -- --prod",
     "db:backup:dev": "npm run db:backup -w backend -- --dev",
@@ -55,7 +63,10 @@
 
     "railway:env:prod": "powershell -ExecutionPolicy Bypass -File scripts/sync-railway-env.ps1 -Prod",
     "railway:env:dev": "powershell -ExecutionPolicy Bypass -File scripts/sync-railway-env.ps1 -Dev",
-    "railway:env:dry": "powershell -ExecutionPolicy Bypass -File scripts/sync-railway-env.ps1 -Prod -DryRun"
+    "railway:env:dry": "powershell -ExecutionPolicy Bypass -File scripts/sync-railway-env.ps1 -Prod -DryRun",
+    "storage:migrate:prod": "npm run storage:migrate:prod -w backend",
+    "storage:migrate:dev": "npm run storage:migrate:dev -w backend",
+    "storage:migrate:dry": "npm run storage:migrate:dry -w backend"
   },
   "devDependencies": {
     "concurrently": "^10.0.3"

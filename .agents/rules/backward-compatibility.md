@@ -9,16 +9,16 @@ description: Verbindliche Regeln für Abwärtskompatibilität, Non-Breaking Sche
 
 ---
 
-## 1. 🗄️ Supabase Datenbank-Migrationen (Absolute Pflicht)
+## 1. 🗄️ Drizzle ORM Schema-Evolution & Datenbank-Migrationen (Absolute Pflicht)
 
-1. **Jede Schema-Änderung erfordert eine Migration:**
-   - Jede Modifikation an Tabellen, Spalten, Indizes, Enums, RLS-Policies oder Postgres-Funktionen/RPCs **MUSS** über eine neue Migration in `supabase/migrations/YYYYMMDDHHMMSS_<name>.sql` erfolgen.
-   - Niemals manuelle DDL-Befehle im Supabase-Dashboard oder ungetrackte SQL-Snippets verwenden.
-   - Neue Migrationen werden mit `npm run db:new <name>` (bzw. `npx supabase migration new <name>`) angelegt.
+1. **Jede Schema-Änderung erfolgt über Drizzle:**
+   - Jede Modifikation an Tabellen, Spalten, Indizes oder Enums **MUSS** über das typsichere Schema in `backend/src/db/schema/` erfolgen.
+   - Synchronisation mit `npm run db:push` (Dev) und `npm run db:push:prod` (Railway Production).
+   - Niemals manuelle DDL-Befehle direkt in Produktionsdatenbanken ohne Drizzle Schema-Sync ausführen.
 
 2. **Idempotenz & Ausfallsicherheit:**
-   - Nutze defensive SQL-Klauseln: `IF NOT EXISTS`, `IF EXISTS`, `ADD COLUMN IF NOT EXISTS`, `ON CONFLICT DO NOTHING`.
-   - Migrationen müssen transaktionssicher und sowohl lokal als auch in Production (`npm run db:push`) fehlerfrei wiederholbar sein.
+   - Neue Spalten müssen immer `NULL`-able sein oder einen sicheren `.default()`-Wert besitzen.
+   - Schema-Updates müssen sowohl lokal als auch in Production (`npm run db:push:prod`) fehlerfrei wiederholbar sein.
 
 ---
 

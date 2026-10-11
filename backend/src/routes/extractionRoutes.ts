@@ -19,8 +19,10 @@ import {
   getFreeMaxSavedRecipes,
   getRewardedAdBonusCredits,
   addToLibrary,
-  getClient,
 } from '../db.js';
+import { db } from '../db/drizzle.js';
+import { user as userTable } from '../db/schema/auth.js';
+import { eq } from 'drizzle-orm';
 import { config } from '../config.js';
 import { AppError, sendAppError } from '../errors.js';
 import { MAX_IMPORT_PHOTOS, deleteImportPhotos, photoJobUrl, uploadImportPhoto } from '../photoImport.js';
@@ -84,18 +86,17 @@ async function enforceExtractionQuota(req: Request): Promise<void> {
           : 0;
       if (bonusCredits > 0 && user) {
         const newCredits = bonusCredits - 1;
-        const { error } = await getClient().auth.admin.updateUserById(userId, {
-          app_metadata: {
-            ...(user.app_metadata || {}),
-            bonus_credits: newCredits,
-          },
-        });
-        if (error) {
-          console.error(`Failed to consume bonus credit for user ${userId}:`, error.message);
-        } else {
+        try {
+          await db
+            .update(userTable)
+            .set({ bonusCredits: newCredits, updatedAt: new Date() })
+            .where(eq(userTable.id, userId));
           console.log(
             `[RewardedAd] Consumed 1 bonus credit for user ${userId}. Remaining bonus_credits=${newCredits}`
           );
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err);
+          console.error(`Failed to consume bonus credit for user ${userId}:`, msg);
         }
       } else {
         const oldestJob = extractions[0];

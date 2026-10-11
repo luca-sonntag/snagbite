@@ -1,5 +1,10 @@
 import { config } from './config.js';
-import { getClient } from './db.js';
+import {
+  ensureBucketExists,
+  uploadFile,
+  getPublicUrl,
+  type StorageBucket,
+} from './storage/s3Client.js';
 import type { FluxUsageInfo } from './types.js';
 
 export interface GenerateCoverOptions {
@@ -13,30 +18,11 @@ export interface GenerateCoverResult {
   usage?: FluxUsageInfo | null;
 }
 
-export const RECIPE_COVERS_BUCKET = 'recipe-covers';
+export const RECIPE_COVERS_BUCKET: StorageBucket = 'recipe-covers';
 const STORAGE_BUCKET = RECIPE_COVERS_BUCKET;
 
-/**
- * Ensures the public storage bucket for recipe covers exists.
- * Runs lazily once on first upload attempt.
- */
-let bucketEnsured = false;
 export async function ensureCoverBucketExists(): Promise<void> {
-  if (bucketEnsured) return;
-  try {
-    const { data: buckets } = await getClient().storage.listBuckets();
-    const found = buckets?.some((b) => b.name === STORAGE_BUCKET || b.id === STORAGE_BUCKET);
-    if (!found) {
-      await getClient().storage.createBucket(STORAGE_BUCKET, { public: true });
-    }
-    bucketEnsured = true;
-  } catch {
-    // If listing/creating fails (e.g. lack of permissions or already created in migration), continue
-    bucketEnsured = true;
-  }
-}
-async function ensureBucketExists(): Promise<void> {
-  return ensureCoverBucketExists();
+  await ensureBucketExists(STORAGE_BUCKET);
 }
 
 const FAL_FLUX_ENDPOINT = 'https://fal.run/fal-ai/flux-1/schnell';
@@ -110,7 +96,7 @@ export async function generateRecipeCoverImage(opts: GenerateCoverOptions): Prom
 
   const startTime = Date.now();
   try {
-    await ensureBucketExists();
+    await ensureBucketExists(STORAGE_BUCKET);
 
     const imageBuffer = await fetchFluxImageBuffer(prompt.trim());
     const durationMs = Date.now() - startTime;
@@ -120,23 +106,8 @@ export async function generateRecipeCoverImage(opts: GenerateCoverOptions): Prom
 
     console.log(`[imageGenerator] Uploading ${imageBuffer.length} bytes to ${STORAGE_BUCKET}/${storagePath}...`);
 
-    const { error: uploadError } = await getClient()
-      .storage.from(STORAGE_BUCKET)
-      .upload(storagePath, imageBuffer, {
-        contentType: 'image/jpeg',
-        upsert: true,
-      });
-
-    if (uploadError) {
-      throw new Error(`Failed to upload generated cover to Supabase Storage: ${uploadError.message}`);
-    }
-
-    const { data } = getClient().storage.from(STORAGE_BUCKET).getPublicUrl(storagePath);
-    const publicUrl = data?.publicUrl;
-
-    if (!publicUrl) {
-      throw new Error('Supabase Storage did not return a valid public URL for recipe cover.');
-    }
+    await uploadFile(STORAGE_BUCKET, storagePath, imageBuffer, 'image/jpeg');
+    const publicUrl = getPublicUrl(STORAGE_BUCKET, storagePath);
 
     const usage: FluxUsageInfo = {
       model: 'flux-1-schnell',

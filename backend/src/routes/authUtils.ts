@@ -1,6 +1,7 @@
-import type { User } from '@supabase/supabase-js';
+import { db } from '../db/drizzle.js';
+import { user as userTable } from '../db/schema/auth.js';
+import { eq } from 'drizzle-orm';
 import {
-  getClient,
   isAlphaActive,
   getPremiumMaxExtractions,
   getAlphaMaxExtractions,
@@ -9,54 +10,68 @@ import {
   getFreeMaxConcurrentExtractions,
 } from '../db.js';
 
+export interface AuthUserShape {
+  id: string;
+  email?: string;
+  app_metadata?: {
+    tier?: string;
+    bonus_credits?: number;
+    custom_extraction_limit?: number;
+    max_extractions_per_window?: number;
+    [key: string]: unknown;
+  };
+  user_metadata?: Record<string, unknown>;
+}
+
 export const SUPPORTED_URL_REGEX = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/i;
 export const MAX_PHOTOS_TOTAL_CHARS = 9_000_000;
 
-export async function fetchAndSyncUser(userId: string): Promise<User> {
-  const { data, error } = await getClient().auth.admin.getUserById(userId);
-  if (error || !data?.user) {
-    throw error || new Error('User not found');
+export async function fetchAndSyncUser(userId: string): Promise<AuthUserShape> {
+  const [row] = await db
+    .select()
+    .from(userTable)
+    .where(eq(userTable.id, userId))
+    .limit(1);
+
+  if (!row) {
+    throw new Error(`User not found: ${userId}`);
   }
 
-  let user = data.user;
-  const currentTier = user.app_metadata?.tier;
+  let currentTier = row.tier || 'free';
   const alphaActive = await isAlphaActive();
 
   if (alphaActive && currentTier !== 'premium' && currentTier !== 'alpha') {
-    try {
-      console.log(`Auto-assigning alpha tier to user ${userId} (current: ${currentTier})`);
-      const { data: updatedData, error: updateError } = await getClient().auth.admin.updateUserById(userId, {
-        app_metadata: { ...user.app_metadata, tier: 'alpha' },
-      });
-      if (updateError) {
-        console.error(`Failed to auto-assign alpha tier to user ${userId}:`, updateError.message);
-      } else if (updatedData?.user) {
-        user = updatedData.user;
-      }
-    } catch (err) {
-      console.error(`Error auto-assigning alpha tier to user ${userId}:`, err);
-    }
+    currentTier = 'alpha';
+    await db
+      .update(userTable)
+      .set({ tier: 'alpha', updatedAt: new Date() })
+      .where(eq(userTable.id, userId));
   } else if (!alphaActive && currentTier === 'alpha') {
-    try {
-      console.log(`Auto-reverting user ${userId} from alpha to free tier because alpha is inactive`);
-      const { data: updatedData, error: updateError } = await getClient().auth.admin.updateUserById(userId, {
-        app_metadata: { ...user.app_metadata, tier: 'free' },
-      });
-      if (updateError) {
-        console.error(`Failed to auto-revert alpha tier for user ${userId}:`, updateError.message);
-      } else if (updatedData?.user) {
-        user = updatedData.user;
-      }
-    } catch (err) {
-      console.error(`Error auto-reverting alpha tier for user ${userId}:`, err);
-    }
+    currentTier = 'free';
+    await db
+      .update(userTable)
+      .set({ tier: 'free', updatedAt: new Date() })
+      .where(eq(userTable.id, userId));
   }
 
-  return user;
+  return {
+    id: row.id,
+    email: row.email,
+    app_metadata: {
+      tier: currentTier,
+      bonus_credits: row.bonusCredits ?? 0,
+      custom_extraction_limit: row.customExtractionLimit ?? undefined,
+    },
+    user_metadata: {
+      notifications_enabled: row.notificationsEnabled ?? false,
+      name: row.name,
+      avatar_url: row.image,
+    },
+  };
 }
 
 export async function resolveUserRateLimit(
-  user: User | { app_metadata?: Record<string, unknown> } | null | undefined
+  user: AuthUserShape | { app_metadata?: Record<string, unknown> } | null | undefined
 ): Promise<number> {
   const meta = (user?.app_metadata || {}) as Record<string, unknown>;
 
@@ -84,7 +99,7 @@ export async function resolveUserRateLimit(
 }
 
 export function isPremiumUser(
-  user: User | { app_metadata?: Record<string, unknown> } | null | undefined
+  user: AuthUserShape | { app_metadata?: Record<string, unknown> } | null | undefined
 ): boolean {
   const meta = (user?.app_metadata || {}) as Record<string, unknown>;
   return (
@@ -95,9 +110,8 @@ export function isPremiumUser(
   );
 }
 
-
 export async function resolveConcurrencyLimit(
-  user: User | { app_metadata?: Record<string, unknown> } | null | undefined
+  user: AuthUserShape | { app_metadata?: Record<string, unknown> } | null | undefined
 ): Promise<number> {
   const meta = (user?.app_metadata || {}) as Record<string, unknown>;
   const premiumLike =
@@ -109,4 +123,3 @@ export async function resolveConcurrencyLimit(
     ? await getPremiumMaxConcurrentExtractions()
     : await getFreeMaxConcurrentExtractions();
 }
-
