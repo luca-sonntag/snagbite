@@ -62,6 +62,11 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
 * **Kompression (`useCachedImage.ts`):** HTML5 Canvas `drawImage()` + `toBlob('image/jpeg', 0.75)` mit max. 400px Kantenlänge (~15–40 KB pro Bild).
 * **CORS Proxy:** Bilder werden über den `/api/image`-Proxy geladen.
 * **Cache-Invalidierung:** Bei Rezept-Löschung werden IndexedDB-Einträge automatisch entfernt.
+* **Asynchrone FLUX.1 Cover-Aktualisierung in Echtzeit (`useRecipeCoverSync.ts`):**
+  * Beim sofortigen Öffnen des Rezepts nach der Extraktion wird das Video-Thumbnail **nicht** als temporäres Cover angezeigt (`isCoverGenerating: true`, `imageUrl: null`).
+  * `RecipeImageGallery` rendert stattdessen ein elegantes Shimmer-Banner mit dem Badge *„KI-Cover wird generiert…“*.
+  * Der Custom Hook `useRecipeCoverSync` verbindet sich via SSE (`GET /api/recipes/:id/events`) und HTTP-Polling-Fallback (1,5s Intervall).
+  * Sobald das Backend die FLUX.1-Generierung beendet und in S3/Postgres persistiert hat, wird das Event `cover_ready` gesendet. Der lokale State und die History-Listen werden via `updateRecipeCover` atomar aktualisiert – das HD-Cover erscheint ohne Seitenneuladen.
 
 ---
 
