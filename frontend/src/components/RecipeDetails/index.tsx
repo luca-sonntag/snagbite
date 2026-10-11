@@ -3,6 +3,7 @@ import { useRecipeDetails } from './useRecipeDetails';
 import { useRecipeCoverSync } from '../../hooks/useRecipeCoverSync';
 
 import RecipeHeader from './RecipeHeader';
+import RecipeSkeletonView from './RecipeSkeletonView';
 import RecipeInfoSection from './RecipeInfoSection';
 import RecipeStickyBar from './RecipeStickyBar';
 import RecipeIngredients from './RecipeIngredients';
@@ -20,25 +21,12 @@ import AddToMealPlanSheet from '../MealPlanner/AddToMealPlanSheet';
 import { useI18n } from '../../context/I18nContext';
 
 export default function RecipeDetails({
-  recipe,
-  onAddIngredients,
-  onDelete,
-  reelUrl,
-  createdAt,
-  onBack,
-  onNavigateToShoppingList,
-  onRemixSuccess,
-  onReplaceCurrent,
-  isParentAvailable,
-  onNavigateToRecipe,
-  parentRecipeTitle,
-  onAssignCollections,
-  onManageFlags,
-  flags,
-  isFavorite = false,
-  onToggleFavorite,
-  getAccessToken,
-  onCoverUpdated,
+  recipe, isExtracting = false, progress,
+  onAddIngredients, onDelete, reelUrl, createdAt, onBack,
+  onNavigateToShoppingList, onRemixSuccess, onReplaceCurrent,
+  isParentAvailable, onNavigateToRecipe, parentRecipeTitle,
+  onAssignCollections, onManageFlags, flags,
+  isFavorite = false, onToggleFavorite, getAccessToken, onCoverUpdated,
 }: RecipeDetailsProps) {
   const { t } = useI18n();
 
@@ -51,16 +39,11 @@ export default function RecipeDetails({
 
   const {
     isPremium,
-    isPremiumModalOpen,
-    setIsPremiumModalOpen,
-    activeProFeature,
-    setActiveProFeature,
-    servings,
-    setServings,
-    scaleFactor,
-    formatAmount,
-    checkedSteps,
-    toggleStep, handleToggleStep,
+    isPremiumModalOpen, setIsPremiumModalOpen,
+    activeProFeature, setActiveProFeature,
+    servings, setServings,
+    scaleFactor, formatAmount,
+    checkedSteps, toggleStep, handleToggleStep,
     activeStepNum, totalStepsCount, completedStepsCount, progressPercent,
     activeSection, isHeaderCollapsed, setCollapseSentinel, scrollToSection,
     nutritionalValues, sourceNutritionalValues, isAiEstimated, isVerified, hasNutritionInfo,
@@ -77,6 +60,17 @@ export default function RecipeDetails({
     handleAddAndNavigateToShoppingList, handleConfirmShoppingListSelection,
     copyRecipe, cookRefreshKey, cookHistory,
   } = useRecipeDetails({ recipe, onAddIngredients, onNavigateToShoppingList });
+
+  if (isExtracting) {
+    return (
+      <RecipeSkeletonView
+        recipe={recipe}
+        progress={progress}
+        canGoBack={isPremium}
+        onBack={onBack}
+      />
+    );
+  }
 
   return (
     <article className="flex flex-col">
