@@ -22,8 +22,8 @@ export interface ExtractFormProps {
   isPending: boolean;
   handleFormSubmit: (e: React.FormEvent, overrideUrl?: string) => void;
   limitStatus?: LimitStatus | null;
-  jobStatus: ExtractionJob['status'] | null;
-  progress: ProgressData | null;
+  jobStatus?: ExtractionJob['status'] | null;
+  progress?: ProgressData | null;
   errorBanner?: React.ReactNode;
   mode: ExtractMode;
   setMode: (mode: ExtractMode) => void;

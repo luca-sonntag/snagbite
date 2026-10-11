@@ -8,8 +8,6 @@ import { PageHeader } from '../PageHeader';
 import PremiumModal from '../PremiumModal';
 import PremiumHint from '../PremiumHint';
 import PremiumUpgradeCard from '../PremiumUpgradeCard';
-import ExtractionAnimation from '../ExtractionAnimation';
-import ExtractionAdCard from '../ExtractionAdCard';
 import { useExtractForm } from './useExtractForm';
 import ExtractActionCards from './ExtractActionCards';
 import ExtractQuotaBadge from './ExtractQuotaBadge';
@@ -22,7 +20,6 @@ import ExtractHelpAccordions from './ExtractHelpAccordions';
 import type { ExtractFormProps } from './types';
 
 export const ExtractForm: React.FC<ExtractFormProps> = ({
-  isActive = true,
   url,
   setUrl,
   urlError,
@@ -31,8 +28,6 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
   isPending,
   handleFormSubmit,
   limitStatus,
-  jobStatus,
-  progress,
   errorBanner,
   mode,
   setMode,
@@ -180,28 +175,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
 
       {errorBanner}
 
-      {/* Extraction Animation (active job) */}
-      {isPending ? (
-        <div className="flex flex-col w-full flex-1 justify-between gap-3 min-h-0">
-          <div className="flex-1 flex items-center justify-center min-h-0 py-1">
-            <ExtractionAnimation
-              url={url}
-              isPending={isPending}
-              jobStatus={jobStatus}
-              progress={progress}
-              variant={mode === 'photo' ? 'photo' : 'link'}
-              photoPreviewUrl={mode === 'photo' ? photoPreviews[0] : undefined}
-              compact={!isRealPremium}
-            />
-          </div>
-          {!isRealPremium && (
-            <div className="shrink-0 w-full pb-1">
-              <ExtractionAdCard isActive={isActive} />
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-4 w-full">
+      <div className="flex flex-col gap-4 w-full">
           {/* Main Action Cards (Clean Flat Premium) */}
           <ExtractActionCards
             onOpenLinkSheet={() => {
@@ -312,7 +286,6 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
           {/* Premium Modal */}
           <PremiumModal isOpen={isPremiumModalOpen} onOpenChange={setIsPremiumModalOpen} />
         </div>
-      )}
     </div>
   );
 };

@@ -3,7 +3,7 @@ import type { SavedRecipe } from './types';
 import { hideSplashScreen } from './native';
 import ExtractForm, { type ExtractMode } from './components/ExtractForm';
 import ActiveExtractions from './components/ActiveExtractions';
-import ExtractionAnimation from './components/ExtractionAnimation';
+import ExtractionAdSheet from './components/ExtractionAdSheet';
 import ErrorBanner from './components/ErrorBanner';
 import { isCatalogListRoute } from './components/SavedCatalog/catalogRoutes';
 import AuthForm from './components/AuthForm';
@@ -197,8 +197,6 @@ export default function App() {
 
   const [extractMode, setExtractMode] = useState<ExtractMode>('link');
   const { jobs: extractionJobs } = useExtractionJobs();
-  const runningExtractions = extractionJobs.filter((j) => j.status !== 'completed' && j.status !== 'failed');
-  const latestRunning = runningExtractions.length ? runningExtractions[runningExtractions.length - 1] : null;
   const isViewingRecipe = !!selectedJob || (activeView === 'extract' && !!recipe);
 
   const lastHistorySubPathRef = useRef<string | null>(null);
@@ -245,7 +243,7 @@ export default function App() {
     showOnboarding,
   });
 
-  useMobileNavigationBack(activeView === 'extract' && !!recipe, () => {
+  useMobileNavigationBack(activeView === 'extract' && !!recipe && (!isPending || isPremium), () => {
     setRecipe(null);
     setUrl('');
     navigate('extract');
@@ -393,8 +391,10 @@ export default function App() {
           {recipe ? (
             <Suspense fallback={<ViewFallback />}>
               <RecipeDetails
-                key={recipe.id || recipe.title}
+                key={recipe.id || recipe.title || 'in-flight-extract'}
                 recipe={recipe}
+                isExtracting={isPending}
+                progress={progress}
                 onAddIngredients={addRecipeIngredients}
                 reelUrl={url}
                 onBack={() => {
@@ -453,31 +453,6 @@ export default function App() {
                 onCoverUpdated={updateRecipeCover}
               />
             </Suspense>
-          ) : latestRunning ? (
-            <div className="flex flex-col gap-6">
-              <ExtractionAnimation
-                key={latestRunning.id}
-                url={latestRunning.sourceLabel}
-                isPending
-                jobStatus={latestRunning.status}
-                progress={latestRunning.progress}
-                variant={latestRunning.mode === 'photo' ? 'photo' : 'link'}
-              />
-              <ActiveExtractions excludeId={latestRunning.id} />
-              <ErrorBanner
-                isPending={false}
-                jobStatus={jobStatus}
-                jobError={jobError}
-                jobErrorCode={jobErrorCode}
-                jobErrorParams={jobErrorParams}
-                onRetry={() =>
-                  extractMode === 'photo' ? triggerPhotoExtraction() : triggerExtraction(url)
-                }
-                onClearActiveJobs={async () => {
-                  await fetchLimitStatus();
-                }}
-              />
-            </div>
           ) : (
             <ExtractForm
               isActive={activeView === 'extract' && !recipe}
@@ -678,6 +653,8 @@ export default function App() {
         }}
         onNavigateExtract={() => navigate('extract')}
       />
+
+      <ExtractionAdSheet isOpen={isPending && !isPremium} />
 
       <AppBottomNav
         activeView={activeView}

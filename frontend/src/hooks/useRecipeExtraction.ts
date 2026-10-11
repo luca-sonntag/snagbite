@@ -221,6 +221,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
 
 
     setProgress(null);
+    setRecipe(null);
     setIsPending(false);
     setUrl('');
     setPhotos([]);
@@ -248,6 +249,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
 
         setProgress(null);
         setIsPending(false);
+        setRecipe(null);
         setUrl('');
         setPhotos([]);
         localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
@@ -272,6 +274,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
         setJobError(job.error || 'form.validation.failedExtraction');
         setJobErrorCode(envelope?.code ?? null);
         setJobErrorParams(envelope?.params ?? null);
+        setRecipe(null);
         if (currentExtractUrlRef.current) {
           addFailedJob({
             sourceUrl: currentExtractUrlRef.current,
@@ -302,6 +305,20 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
         }
       } else {
         setProgress(job.progress || null);
+        if (job.progress?.preview) {
+          setRecipe((prev) => {
+            if (!prev) return prev;
+            const p = job.progress.preview;
+            return {
+              ...prev,
+              title: p.title || prev.title,
+              imageUrl: p.thumbnailUrl || p.coverUrl || prev.imageUrl,
+              sourceHandle: p.authorHandle || prev.sourceHandle,
+              servings: p.servings || prev.servings,
+              category: p.category || prev.category,
+            };
+          });
+        }
       }
     },
     [
@@ -386,6 +403,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
               });
             }
             setProgress(null);
+            setRecipe(null);
             setIsPending(false);
             localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
           }
@@ -453,16 +471,27 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       requestNativeNotificationPermission().catch(err => console.warn('Failed to request notifications permission:', err));
     }
 
-    // Only the free/foreground flow blocks the form with the full-screen animation.
-    if (!isPremium) {
-      setIsPending(true);
-      setJobStatus('pending');
-    }
+    // Both free and premium flows immediately show RecipeDetails with skeleton animations
+    setIsPending(true);
+    setJobStatus('pending');
     setJobError(null);
     setJobErrorCode(null);
     setJobErrorParams(null);
-    setRecipe(null);
     setProgress(null);
+
+    const inFlightRecipe: Recipe = {
+      id: '',
+      title: '',
+      description: '',
+      ingredients: [],
+      instructions: [],
+      equipment: [],
+      servings: 2,
+      prepTime: null,
+      cookTime: null,
+      sourceUrl: meta.mode === 'link' ? meta.sourceLabel : undefined,
+    };
+    setRecipe(inFlightRecipe);
 
     if (meta.mode === 'link') {
       currentExtractUrlRef.current = meta.sourceLabel;
@@ -515,21 +544,24 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           setUrl('');
           setPhotos([]);
           setJobStatus(null);
+          setIsPending(false);
+          setRecipe(null);
           fetchLimitStatus();
           onExtractionSuccess(data.recipeId);
           return;
         }
-        // Background flow: track the job in the shared store and free the form.
+        // Background-capable flow: track the job in shared store and connect live polling
         if (data.jobId) {
           addJob(data.jobId, { sourceLabel: meta.sourceLabel, mode: meta.mode });
           if (meta.mode === 'link') {
             removeFromWaitlist(meta.sourceLabel);
             removeFailedJob(meta.sourceLabel);
           }
+          startPolling(data.jobId);
         }
         setUrl('');
         setPhotos([]);
-        setJobStatus(null);
+        setJobStatus(data.status ?? 'pending');
         fetchLimitStatus();
       } else {
         fetchLimitStatus();
@@ -541,6 +573,8 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
               removeFromWaitlist(meta.sourceLabel);
               removeFailedJob(meta.sourceLabel);
             }
+            setIsPending(false);
+            setRecipe(null);
             onExtractionSuccess(data.recipeId);
           } else {
             runSimulatedProgress(data.jobId ?? '', data.recipeId, 10000);
@@ -553,6 +587,9 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       }
     } catch (err: unknown) {
       const typed = err as (Error & { code?: string; params?: ErrorParams }) | undefined;
+      setRecipe(null);
+      setIsPending(false);
+      setProgress(null);
       setJobStatus('failed');
       setJobError(err instanceof Error ? err.message : 'form.validation.submissionError');
       setJobErrorCode(typed?.code ?? null);
