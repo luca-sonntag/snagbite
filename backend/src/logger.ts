@@ -82,6 +82,10 @@ const PRICING: Record<string, ModelPricing> = {
   },
 
   // ── Gemini 3.5 family ────────────────────────────────────────────────────
+  'gemini-3.5-flash-lite': {
+    inputShort: 0.30,   inputLong:  0.30,
+    outputShort: 2.50,  outputLong:  2.50,
+  },
   'gemini-3.5-flash': {
     inputShort: 1.50,   inputLong:  1.50,
     outputShort: 9.00,  outputLong:  9.00,
@@ -115,14 +119,14 @@ export interface CostEstimate {
 
 /**
  * Compute an approximate cost for a Gemini request given token usage and model name.
- * Falls back to gemini-1.5-flash pricing if the model is unknown.
+ * Falls back to gemini-3.1-flash-lite pricing if the model is unknown.
  */
 export function estimateCost(model: string, usage: TokenUsage): CostEstimate {
   // Normalise model name: strip version suffixes like "-latest", "-preview-*"
   const normalisedModel = model.replace(/-latest$/, '').replace(/-preview.*$/, '');
   const pricing = PRICING[normalisedModel];
   const pricingKnown = !!pricing;
-  const p = pricing ?? PRICING['gemini-1.5-flash'];
+  const p = pricing ?? PRICING['gemini-3.1-flash-lite'] ?? PRICING['gemini-1.5-flash'];
 
   const tier = usage.promptTokens > LONG_CONTEXT_THRESHOLD ? 'long' : 'short';
   const inputRate  = tier === 'long' ? p.inputLong  : p.inputShort;
