@@ -36,6 +36,7 @@ import {
 } from './authUtils.js';
 import { handleVideoProxy } from './videoProxy.js';
 import { triggerWorkerTick } from '../queue.js';
+import { subscribeJobEvents } from '../jobEvents.js';
 
 export const extractionRoutes = Router();
 
@@ -362,6 +363,113 @@ extractionRoutes.get('/jobs/:id', async (req: Request, res: Response): Promise<v
     if (!(error instanceof AppError)) console.error('Error fetching job details:', error);
     sendAppError(res, error);
   }
+});
+
+extractionRoutes.get('/jobs/:id/events', async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  if (!id) {
+    res.status(400).json({ success: false, error: 'Missing job id' });
+    return;
+  }
+
+  const job = await getJob(id, req.userId!);
+  if (!job) {
+    res.status(404).json({ success: false, error: 'Job not found' });
+    return;
+  }
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    Connection: 'keep-alive',
+    'X-Accel-Buffering': 'no',
+  });
+
+  const sendEvent = (event: string, data: unknown) => {
+    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  };
+
+  const buildMediaRequest = (scrapeMeta: unknown) => {
+    if (!scrapeMeta) return undefined;
+    const meta = scrapeMeta as Record<string, unknown>;
+    const media = meta.media as { kind?: string; videoUrl?: string } | undefined;
+    if (media?.kind === 'client' && media?.videoUrl) {
+      return {
+        videoUrl: media.videoUrl,
+        thumbnailUrl: typeof meta.imageUrl === 'string' ? meta.imageUrl : undefined,
+        durationSeconds: typeof meta.durationSeconds === 'number' ? meta.durationSeconds : undefined,
+      };
+    }
+    return undefined;
+  };
+
+  let recipeTitle: string | null = null;
+  if (job.recipeId) {
+    const titles = await getRecipeTitles([job.recipeId]);
+    recipeTitle = titles.get(job.recipeId) ?? null;
+  }
+
+  sendEvent('job', {
+    id: job.id,
+    kind: job.kind,
+    sourceUrl: job.sourceUrl,
+    status: job.status,
+    error: job.error,
+    progress: job.progress,
+    mediaRequest: job.status === 'awaiting_frames' ? buildMediaRequest(job.scrapeMeta) : undefined,
+    recipeId: job.recipeId,
+    title: recipeTitle,
+    parentRecipeId: job.parentRecipeId,
+    remixPrompt: job.remixPrompt,
+    createdAt: job.createdAt,
+    updatedAt: job.updatedAt,
+  });
+
+  if (job.status === 'completed' || job.status === 'failed' || job.status === 'cancelled') {
+    res.end();
+    return;
+  }
+
+  let isClosed = false;
+  const pingInterval = setInterval(() => {
+    if (!isClosed) {
+      res.write(': ping\n\n');
+    }
+  }, 15000);
+
+  const unsubscribe = subscribeJobEvents(id, async (payload) => {
+    if (isClosed) return;
+
+    let title = payload.title;
+    if (!title && payload.recipeId) {
+      const titles = await getRecipeTitles([payload.recipeId]);
+      title = titles.get(payload.recipeId) ?? null;
+    }
+
+    sendEvent('job', {
+      id: payload.jobId,
+      status: payload.status,
+      progress: payload.progress,
+      recipeId: payload.recipeId,
+      title,
+      error: payload.error,
+      mediaRequest: payload.mediaRequest,
+    });
+
+    if (payload.status === 'completed' || payload.status === 'failed' || payload.status === 'cancelled') {
+      cleanup();
+      res.end();
+    }
+  });
+
+  const cleanup = () => {
+    if (isClosed) return;
+    isClosed = true;
+    clearInterval(pingInterval);
+    unsubscribe();
+  };
+
+  req.on('close', cleanup);
 });
 
 extractionRoutes.post('/jobs/:id/cancel', async (req: Request, res: Response): Promise<void> => {

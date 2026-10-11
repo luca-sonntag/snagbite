@@ -82,7 +82,7 @@ async function callGeminiFastClassifier(caption: string): Promise<boolean> {
           required: ['isCompleteRecipe'],
         },
         temperature: 0.0,
-      },
+      } as Record<string, unknown>,
     });
 
     const res = await model.generateContent({
