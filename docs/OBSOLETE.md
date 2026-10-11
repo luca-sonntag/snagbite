@@ -6,6 +6,18 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-11: Blockierende FLUX-Cover-Generierung, erzwungener Video-Download & starres HTTP-Polling abgelöst
+
+* **Ersetzter Code / Veraltete Logik:**
+  - Blockierende Ausführung von FLUX.1 Cover-Generierung (`generateRecipeCoverImage`) vor Job-Abschluss in `queue.ts` (verursachte 4–6 Sekunden unnötige Wartezeit für den Nutzer).
+  - Erzwungener Video-Download und WebCodecs Keyframe-Capture (`awaiting_frames`) auch dann, wenn der Creator bereits alle Zutaten und Schritte im Text/Caption des Instagram Reels aufgeschrieben hat (verursachte 10–15 Sekunden unnötige Wartezeit).
+  - Ausschließliches HTTP-Polling im 600ms-Intervall als primärer Kommunikationskanal für Extraktionsfortschritt in `useRecipeExtraction.ts`.
+* **Ersetzt durch:**
+  - **Asynchrone FLUX.1 Cover-Generierung ([`triggerAsyncCoverGeneration`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/imageGenerator.ts)):** Rezept wird sofort mit dem Scraper-Thumbnail oder Eltern-Cover in der Datenbank persistiert und an den Nutzer übergeben. Das KI-Cover wird non-blocking im Hintergrund generiert und gepatcht (-4 bis 6 Sekunden).
+  - **JEV Fast-Track Caption Pre-flight ([`checkCaptionCompleteness`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/scrapers/jevCaptionGuard.ts)):** Semantischer Pre-flight Check via TypeSafe JEV-1.13 Decisions API (~250ms, Fail-Safe Fallback auf Gemini Flash-Lite), der bei vollständigen Textangaben das clientseitige Video-Streaming komplett überspringt (-10 bis 15 Sekunden).
+  - **Server-Sent Events (SSE) Stream ([`GET /api/jobs/:id/events`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/routes/extractionRoutes.ts)):** Sub-30ms Echtzeit-Event-Streaming für Jobstatus und Keyframe-Requests, mit nahtlosem Fallback auf 600ms HTTP-Polling bei Netzwerkunterbrechungen.
+* **Betroffene Dateien:** `backend/src/imageGenerator.ts`, `backend/src/queue.ts`, `backend/src/config.ts`, `backend/src/scrapers/jevCaptionGuard.ts`, `backend/src/jobEvents.ts`, `backend/src/auth.ts`, `backend/src/db/jobsDb.ts`, `backend/src/routes/extractionRoutes.ts`, `frontend/src/hooks/useRecipeExtraction.ts`, `docs/architecture/scraping-and-imports.md`, `docs/OBSOLETE.md`.
+
 ### 2026-10-12: Hardcodierte Gemini-Modellstrings und veraltete `gemini-2.5-flash-lite`-Fallbacks
 
 * **Ersetzter Code / Veraltete Logik:**
