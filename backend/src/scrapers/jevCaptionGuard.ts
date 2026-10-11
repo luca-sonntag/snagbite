@@ -2,6 +2,13 @@ import { GoogleGenerativeAI, FunctionDeclarationSchemaType } from '@google/gener
 import { config } from '../config.js';
 
 interface JevDecisionResponse {
+  answers?: {
+    isCompleteRecipe?: {
+      type?: string;
+      noul?: number;
+      decision?: boolean;
+    };
+  };
   decision?: boolean;
   result?: boolean;
   value?: boolean;
@@ -10,13 +17,19 @@ interface JevDecisionResponse {
 }
 
 /**
- * Calls the OpenRouter Decisions API or TypeSafe Decisions API with typesafe/jev-1.13.
+ * Calls the TypeSafe System-1 API (or OpenRouter System-1 API) with JEV.
  * Returns true if JEV confirms complete recipe ingredients and instructions exist.
  */
 async function callJevDecision(caption: string, apiKey: string, isTypeSafeEndpoint: boolean): Promise<boolean | null> {
   const endpoint = isTypeSafeEndpoint
-    ? 'https://api.typesafe.ai/v1/decisions'
-    : 'https://openrouter.ai/api/alpha/decisions';
+    ? 'https://api.typesafe.ai/v1/systemone'
+    : 'https://openrouter.ai/api/v1/systemone';
+
+  // TypeSafe native models use 'jev-latest', OpenRouter uses 'typesafe/jev-1.13'
+  let model = config.JEV_MODEL || (isTypeSafeEndpoint ? 'jev-latest' : 'typesafe/jev-1.13');
+  if (isTypeSafeEndpoint && model.startsWith('typesafe/')) {
+    model = 'jev-latest';
+  }
 
   try {
     const res = await fetch(endpoint, {
@@ -28,11 +41,15 @@ async function callJevDecision(caption: string, apiKey: string, isTypeSafeEndpoi
         'X-Title': 'Snagbite Recipe Extractor',
       },
       body: JSON.stringify({
-        model: config.JEV_MODEL || 'typesafe/jev-1.13',
-        input: caption.slice(0, 4000),
-        question:
-          'Does this text contain both the complete ingredients with quantities AND the preparation steps or instructions for cooking the dish, such that no video is needed to cook it?',
-        response_format: { type: 'noul' },
+        model,
+        state: caption.slice(0, 4000),
+        questions: {
+          isCompleteRecipe: {
+            type: 'noul',
+            instructions:
+              'Does this text contain both the complete ingredients with quantities AND the preparation steps or instructions for cooking the dish, such that no video is needed to cook it?',
+          },
+        },
       }),
       signal: AbortSignal.timeout(1500),
     });
@@ -44,6 +61,14 @@ async function callJevDecision(caption: string, apiKey: string, isTypeSafeEndpoi
     }
 
     const data = (await res.json()) as JevDecisionResponse;
+    const noulProb = data.answers?.isCompleteRecipe?.noul;
+    if (typeof noulProb === 'number') {
+      // Majority probability threshold (>= 0.50 indicates complete recipe)
+      return noulProb >= 0.5;
+    }
+    if (typeof data.answers?.isCompleteRecipe?.decision === 'boolean') {
+      return data.answers.isCompleteRecipe.decision;
+    }
     if (typeof data.decision === 'boolean') return data.decision;
     if (typeof data.result === 'boolean') return data.result;
     if (typeof data.value === 'boolean') return data.value;
