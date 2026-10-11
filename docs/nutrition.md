@@ -87,6 +87,13 @@ Manche Content Creator geben in der Caption oder im Video explizite Nährwerte a
 ### B. Gemini Vision / Zutatensummierung (`nutritionalValues`)
 Gemini analysiert alle extrahierten Zutaten und schätzt die Nährwerte basierend auf Standard-Lebensmitteldatenbanken.
 
+### C. Kochmedien & unvollständig verzehrte Flüssigkeiten (`consumedAmount`)
+Wenn Zutaten in großen Mengen als Gar-, Einlege- oder Frittierbad dienen (z. B. $500\,\text{ml}$ Frittieröl, Ausbackfett, abgetropfte Marinaden, Kochsud):
+* **Einkaufs- & Rezeptmenge (`amount`):** Behält die volle für die Zubereitung nötige Menge (z. B. $500\,\text{ml}$ Öl), damit Einkaufsliste und Zubereitungsschritte stimmen.
+* **Tatsächliche Verzehrmenge (`consumedAmount`):** Bildet die reale physiologische Aufnahme ab (z. B. ca. $10\text{–}15\,\%$ Fettaufnahme bzw. ca. $10\text{–}20\,\text{ml}$ pro Portion bei Frittieröl).
+* **Nährwert- & Health-Score-Berechnung:** Berechnet Makros, Kalorien und das Tellergewicht über `consumedAmount ?? amount`, um absurde Kalorienmengen (wie $+4.420\,\text{kcal}$ durch 500 ml Frittieröl) physiologisch präzise zu korrigieren.
+* **Transparenz:** Im UI der Zutaten-Nährwertdetails ([`IngredientNutritionDetails`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/IngredientNutritionDetails.tsx)) wird ein dezenter Hinweis angezeigt (*"Davon verzehrt: ca. X ml"*).
+
 ### ⚖️ Plausibilitätsprüfung & Divergenz-Hinweis
 Weichen die berechneten Nährwerte um mehr als $10\,\%$ von den Angaben des Creators ab:
 $$\left| \frac{\text{kcal}_{\text{source}} - \text{kcal}_{\text{computed}}}{\text{kcal}_{\text{computed}}} \right| \ge 0,10$$
@@ -133,5 +140,7 @@ Der **Healthy Score** bewertet Gerichte ganzheitlich nach wissenschaftlich fundi
 | `HealthScoreSheet` | [`frontend/src/components/RecipeDetails/HealthScoreSheet.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/HealthScoreSheet.tsx) | HeroUI Drawer mit den 4 Säulen, Metriken (Gemüse, Fiber, Zucker, NOVA) und Highlights. |
 | `healthScoreCalculator` | [`backend/src/matching/healthScoreCalculator.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/matching/healthScoreCalculator.ts) | Deterministische 4-Säulen-Berechnungsengine für den Health Score. |
 | `MacroDistribution` | [`frontend/src/components/RecipeDetails/MacroDistribution.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/MacroDistribution.tsx) | Progress-Balken, Energieverteilung, Prozentberechnung und Legende. |
-| `Types` | [`shared/src/types/recipes.ts`](file:///c:/Users/lucas/source/repos/cookbook/shared/src/types/recipes.ts) | Typdefinitionen für `NutritionalValues`, `HealthScoreBreakdown`, `HealthScoreGrade`. |
+| `IngredientNutritionDetails` | [`frontend/src/components/RecipeDetails/IngredientNutritionDetails.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/IngredientNutritionDetails.tsx) | Detailansicht für Einzelzutaten-Nährwerte inkl. Verzehrmengen-Badge (`consumedAmount`). |
+| `IngredientMacroCard` | [`frontend/src/components/RecipeDetails/IngredientMacroCard.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/IngredientMacroCard.tsx) | Wiederverwendbare Makro-Karte (Protein, Kohlenhydrate, Fett) mit Farb-Gradienten und Einheiten. |
+| `Types` | [`shared/src/types/recipes.ts`](file:///c:/Users/lucas/source/repos/cookbook/shared/src/types/recipes.ts) | Typdefinitionen für `Ingredient`, `NutritionalValues`, `HealthScoreBreakdown`, `HealthScoreGrade`. |
 

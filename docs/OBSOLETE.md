@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-11: Pauschale 100%-Berechnung von Koch- und Frittierfetten
+
+* **Ersetzter Code / Veraltete Logik:**
+  - Nährwertberechnung in `nutritionCalculator.ts` und `ingredientMatcher.ts` berechnete Nährwerte für alle Zutaten ausschließlich auf Basis des Brutto-Zutatengewichts (`amount`).
+  - Bei Gar- und Frittierflüssigkeiten (z. B. 500 ml Frittieröl) führte dies dazu, dass 500 ml Öl voll als verzehrtes Fett (+4.420 kcal und 500g Fett) in die Rezept-Nährwerte und das Tellergewicht des Health Scores eingerechnet wurden.
+* **Ersetzt durch:**
+  - **Optionales `consumedAmount`-Feld im `Ingredient`-Modell:** Trennt die Einkaufs- und Zubereitungsmenge (`amount: 500 ml`) von der tatsächlich physiologisch verzehrten Menge (`consumedAmount: 30 ml`).
+  - **Deterministische Berechnung via `getEffectiveConsumptionAmount`:** `nutritionCalculator.ts` und `healthScoreCalculator.ts` berechnen Nährwerte und Tellergewichte über `consumedAmount ?? amount`.
+  - **Transparenter UI-Hinweis in `IngredientNutritionDetails.tsx`:** Zeigt dem Nutzer in den Nährwertdetails an: *"Davon verzehrt: ca. X ml (Kochmedium / Frittieren)"*.
+* **Betroffene Dateien:** `shared/src/types/recipes.ts`, `backend/src/gemini.ts`, `backend/src/matching/nutritionCalculator.ts`, `backend/src/matching/healthScoreCalculator.ts`, `backend/src/matching/ingredientMatcher.ts`, `backend/src/matching/ingredientResolver.ts`, `frontend/src/components/RecipeDetails/IngredientNutritionDetails.tsx`, `frontend/src/i18n.ts`, `docs/nutrition.md`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-09: Vollständige Entfernung von Supabase (PostgreSQL, Storage, Auth & CLI)
 
 * **Ersetzter Code / Veraltete Logik:**
