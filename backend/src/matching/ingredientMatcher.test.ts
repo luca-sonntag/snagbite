@@ -11,7 +11,7 @@ import {
   applyCanonicalMatchToIngredient,
   openFoodFactsAccess,
 } from './ingredientMatcher.js';
-import type { Recipe } from '../types.js';
+import type { Recipe, Ingredient } from '../types.js';
 
 describe('Ingredient Matcher & Normalizer (Open Food Facts + Hybrid Search)', () => {
   describe('toEnglishSingular', () => {
@@ -388,7 +388,7 @@ describe('Ingredient Matcher & Normalizer (Open Food Facts + Hybrid Search)', ()
         nutrients_per_100g: { calories: 884, protein: 0, carbs: 0, fat: 100 },
       } as any;
 
-      const ingredient = {
+      const ingredient: Ingredient = {
         name: 'Sonnenblumenöl zum Frittieren',
         amount: 500,
         consumedAmount: 30,
