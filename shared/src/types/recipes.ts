@@ -12,6 +12,7 @@ export interface Ingredient {
   parentIngredient?: ParentIngredientInfo;
   replacedOriginal?: string;
   amount: number;
+  consumedAmount?: number | null;
   unit: string;
   gramsPerUnit?: number | null;
   notes?: string;
