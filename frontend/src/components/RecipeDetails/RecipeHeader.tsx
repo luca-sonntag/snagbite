@@ -33,6 +33,7 @@ export default function RecipeHeader({
   cookRefreshKey = 0,
   onRemixClick,
   totalTimeLabel,
+  isAwaitingCover,
 }: RecipeHeaderProps) {
   const { t, language } = useI18n();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -69,6 +70,7 @@ export default function RecipeHeader({
         reelUrl={reelUrl}
         onBack={onBack}
         topRightActions={topRightActions}
+        isAwaitingCover={isAwaitingCover}
       />
 
       {/* Recipe details body below cover (Sheet-Overlap with inverted curve on canvas) */}

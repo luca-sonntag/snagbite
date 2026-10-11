@@ -19,6 +19,8 @@ export interface RecipeDetailsProps {
   flags?: string[];
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
+  getAccessToken?: () => Promise<string | null>;
+  onCoverUpdated?: (recipeId: string, imageUrl: string, isAiCover: boolean) => void;
 }
 
 export interface RecipeHeaderProps {
@@ -41,6 +43,7 @@ export interface RecipeHeaderProps {
   cookRefreshKey?: number;
   onRemixClick?: () => void;
   totalTimeLabel?: string | null;
+  isAwaitingCover?: boolean;
 }
 
 export type RecipeSectionId = 'ingredients' | 'instructions' | 'details';

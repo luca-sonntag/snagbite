@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@heroui/react';
-import { ArrowLeft, Camera, ChefHat } from 'lucide-react';
+import { ArrowLeft, Camera, ChefHat, Sparkles } from 'lucide-react';
 import type { Recipe } from '../types';
 import { useImageGallery } from '../hooks/useImageGallery';
 import { useI18n } from '../context/I18nContext';
@@ -17,6 +17,7 @@ export interface RecipeImageGalleryProps {
   reelUrl?: string;
   onBack?: () => void;
   topRightActions?: React.ReactNode;
+  isAwaitingCover?: boolean;
 }
 
 export default function RecipeImageGallery({
@@ -24,6 +25,7 @@ export default function RecipeImageGallery({
   reelUrl,
   onBack,
   topRightActions,
+  isAwaitingCover = false,
 }: RecipeImageGalleryProps) {
   const { t } = useI18n();
   const [activeSlide, setActiveSlide] = useState(0);
@@ -225,13 +227,23 @@ export default function RecipeImageGallery({
       ) : (
         <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950">
           {overlayHeader}
-          <div className="w-full aspect-[4/3] sm:aspect-[16/10] bg-gradient-to-br from-emerald-950 via-gray-900 to-indigo-950 flex items-center justify-center">
+          <div className="w-full aspect-[4/3] sm:aspect-[16/10] bg-gradient-to-br from-emerald-950 via-gray-900 to-indigo-950 flex flex-col items-center justify-center relative overflow-hidden">
+            {/* Ambient animated shimmer for pending AI cover */}
+            {isAwaitingCover && (
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse pointer-events-none" />
+            )}
             {recipe.emoji ? (
-              <span className="text-6xl select-none" role="img" aria-label="recipe emoji">
+              <span className="text-6xl select-none relative z-10" role="img" aria-label="recipe emoji">
                 {recipe.emoji}
               </span>
             ) : (
-              <ChefHat className="w-16 h-16 text-emerald-400/25 animate-pulse" />
+              <ChefHat className="w-16 h-16 text-emerald-400/25 animate-pulse relative z-10" />
+            )}
+            {isAwaitingCover && (
+              <div className="mt-3 relative z-10 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-300 text-xs font-medium backdrop-blur-md animate-pulse">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{t('recipe.generatingCover')}</span>
+              </div>
             )}
           </div>
         </div>

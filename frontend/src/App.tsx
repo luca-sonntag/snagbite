@@ -98,6 +98,7 @@ export default function App() {
     handleDeleteJob,
     extraRecipes,
     registerExtraRecipe,
+    updateRecipeCover,
   } = useAppHistory({
     user,
     authLoading,
@@ -448,6 +449,8 @@ export default function App() {
                     console.error('[App] Failed to load recipe:', err);
                   }
                 }}
+                getAccessToken={getAccessToken}
+                onCoverUpdated={updateRecipeCover}
               />
             </Suspense>
           ) : latestRunning ? (
@@ -540,6 +543,7 @@ export default function App() {
               onAddIngredients={addRecipeIngredients}
               fetchHistory={fetchHistory}
               getAccessToken={getAccessToken}
+              onUpdateRecipeCover={updateRecipeCover}
               onNavigateToShoppingList={() => {
                 navigate('shopping-list');
               }}

@@ -1,5 +1,6 @@
 import type { RecipeDetailsProps } from './types';
 import { useRecipeDetails } from './useRecipeDetails';
+import { useRecipeCoverSync } from '../../hooks/useRecipeCoverSync';
 
 import RecipeHeader from './RecipeHeader';
 import RecipeInfoSection from './RecipeInfoSection';
@@ -36,8 +37,17 @@ export default function RecipeDetails({
   flags,
   isFavorite = false,
   onToggleFavorite,
+  getAccessToken,
+  onCoverUpdated,
 }: RecipeDetailsProps) {
   const { t } = useI18n();
+
+  const fallbackGetToken = async () => null;
+  const { isAwaitingCover } = useRecipeCoverSync({
+    recipe,
+    getAccessToken: getAccessToken || fallbackGetToken,
+    onCoverUpdated,
+  });
 
   const {
     isPremium,
@@ -91,6 +101,7 @@ export default function RecipeDetails({
         cookRefreshKey={cookRefreshKey}
         onRemixClick={() => openCopilot(true)}
         totalTimeLabel={totalTimeLabel}
+        isAwaitingCover={isAwaitingCover}
       />
 
       {/* Sentinel for the sticky bar's collapsed title row */}
