@@ -3,6 +3,7 @@ import { db } from './db/drizzle.js';
 import { recipes as recipesTable } from './db/schema/recipes.js';
 import { jobs as jobsTable } from './db/schema/jobs.js';
 import { eq } from 'drizzle-orm';
+import { emitRecipeEvent } from './jobEvents.js';
 import {
   ensureBucketExists,
   uploadFile,
@@ -169,6 +170,14 @@ export async function triggerAsyncCoverGeneration(opts: AsyncCoverOptions): Prom
 
       console.log(`[imageGenerator] Attached AI cover to recipe ${recipeId}: ${aiCoverUrl}`);
 
+      emitRecipeEvent({
+        recipeId,
+        type: 'cover_ready',
+        imageUrl: aiCoverUrl,
+        imageUrls: [aiCoverUrl, ...remainingUrls],
+        isAiCover: true,
+      });
+
       if (coverResult.usage) {
         try {
           const [jobRow] = await db
@@ -190,8 +199,17 @@ export async function triggerAsyncCoverGeneration(opts: AsyncCoverOptions): Prom
           console.warn(`[imageGenerator] Failed to record flux usage in job ${jobId}: ${msg}`);
         }
       }
+    } else {
+      emitRecipeEvent({
+        recipeId,
+        type: 'cover_failed',
+      });
     }
   } catch (err: unknown) {
+    emitRecipeEvent({
+      recipeId,
+      type: 'cover_failed',
+    });
     const msg = err instanceof Error ? err.message : String(err);
     console.warn(`[imageGenerator] Background cover generation failed non-fatal for recipe ${recipeId}: ${msg}`);
   }

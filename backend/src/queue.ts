@@ -151,8 +151,17 @@ async function processJob(job: Job): Promise<void> {
       const resolverResult = await enrichRecipeWithCanonicalIngredients(recipe);
       const resolverUsage = resolverResult?.usage;
 
-      recipe.imageUrl = parentRecipe.imageUrl;
-      recipe.imageUrls = parentRecipe.imageUrls;
+      const willGenerateCover = Boolean(recipe.imagePrompt && config.GENERATE_RECIPE_COVERS);
+      if (willGenerateCover) {
+        recipe.imageUrl = null;
+        recipe.imageUrls = [];
+        recipe.isAiCover = false;
+        recipe.isCoverGenerating = true;
+      } else {
+        recipe.imageUrl = parentRecipe.imageUrl;
+        recipe.imageUrls = parentRecipe.imageUrls;
+        recipe.isCoverGenerating = false;
+      }
 
       await updateJobProgress(jobId, 'processing', {
         percent: 95,
@@ -247,9 +256,11 @@ async function processJob(job: Job): Promise<void> {
       const resolverResult = await enrichRecipeWithCanonicalIngredients(recipe);
       const resolverUsage = resolverResult?.usage;
 
+      const willGenerateCover = Boolean(recipe.imagePrompt && config.GENERATE_RECIPE_COVERS);
       recipe.imageUrl = null;
       recipe.imageUrls = [];
       recipe.isAiCover = false;
+      recipe.isCoverGenerating = willGenerateCover;
 
       await updateJobProgress(jobId, 'processing', {
         percent: 95,
@@ -527,9 +538,19 @@ async function processJob(job: Job): Promise<void> {
     const resolverResult = await enrichRecipeWithCanonicalIngredients(recipe);
     const resolverUsage = resolverResult?.usage;
 
-    recipe.imageUrl = baseImageUrls[0] || null;
-    recipe.imageUrls = baseImageUrls;
-    recipe.isAiCover = false;
+    const willGenerateCover = Boolean(recipe.imagePrompt && config.GENERATE_RECIPE_COVERS);
+
+    if (willGenerateCover) {
+      recipe.imageUrl = null;
+      recipe.imageUrls = [];
+      recipe.isAiCover = false;
+      recipe.isCoverGenerating = true;
+    } else {
+      recipe.imageUrl = baseImageUrls[0] || null;
+      recipe.imageUrls = baseImageUrls;
+      recipe.isAiCover = false;
+      recipe.isCoverGenerating = false;
+    }
 
     await updateJobProgress(jobId, 'processing', {
       percent: 95,

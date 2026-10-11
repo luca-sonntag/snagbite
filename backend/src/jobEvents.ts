@@ -40,3 +40,34 @@ export function subscribeJobEvents(
     jobEventsEmitter.off(eventName, listener);
   };
 }
+
+export interface RecipeEventPayload {
+  recipeId: string;
+  type: 'cover_ready' | 'cover_failed';
+  imageUrl?: string | null;
+  imageUrls?: string[];
+  isAiCover?: boolean;
+}
+
+/**
+ * Emits a real-time event for a specific recipe (e.g. background AI cover completion).
+ */
+export function emitRecipeEvent(payload: RecipeEventPayload): void {
+  jobEventsEmitter.emit(`recipe:${payload.recipeId}`, payload);
+}
+
+/**
+ * Subscribes to real-time events for a specific recipe.
+ * Returns an unsubscribe callback.
+ */
+export function subscribeRecipeEvents(
+  recipeId: string,
+  listener: (payload: RecipeEventPayload) => void
+): () => void {
+  const eventName = `recipe:${recipeId}`;
+  jobEventsEmitter.on(eventName, listener);
+  return () => {
+    jobEventsEmitter.off(eventName, listener);
+  };
+}
+
