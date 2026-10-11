@@ -10,6 +10,7 @@ import { eq } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { getScraperForUrl, type ScrapingResult } from './scrapers/index.js';
 import { downloadMedia } from './scrapers/download.js';
+import { checkCaptionCompleteness } from './scrapers/jevCaptionGuard.js';
 import { extractRecipe, remixRecipe, type ClientFramesInput } from './gemini.js';
 import { triggerAsyncCoverGeneration } from './imageGenerator.js';
 import { pruneOldGeminiLogs } from './logger.js';
@@ -311,18 +312,30 @@ async function processJob(job: Job): Promise<void> {
       });
     }
 
+    let didFastTrackCaption = false;
     // 2c. Client-media streaming: if media is client-delegated and we don't have client_frames yet,
-    // park the job in 'awaiting_frames' so the client can capture and POST keyframes.
+    // evaluate whether the caption already contains complete ingredients and instructions (Fast-Track).
     if (scrapeResult.media.kind === 'client' && !job.clientFrames) {
-      console.log(`[Job ${jobId}] Media kind is 'client' — parking job in 'awaiting_frames' for client keyframe capture.`);
-      await updateJob(jobId, {
-        scrapeMeta: scrapeResult,
-        status: 'awaiting_frames',
-        progress: { percent: 30, stage: 'awaiting_frames' },
-      });
-      // Release worker lease so heartbeat stops and status is awaiting_frames
-      await releaseJobLock(jobId);
-      return;
+      if (scrapeResult.caption && scrapeResult.caption.trim().length >= 80) {
+        console.log(`[Job ${jobId}] Evaluating caption completeness for fast-track...`);
+        const isComplete = await checkCaptionCompleteness(scrapeResult.caption);
+        if (isComplete) {
+          console.log(`[Job ${jobId}] Caption fast-track approved: full recipe detected in text, skipping client video download!`);
+          didFastTrackCaption = true;
+        }
+      }
+
+      if (!didFastTrackCaption) {
+        console.log(`[Job ${jobId}] Media kind is 'client' — parking job in 'awaiting_frames' for client keyframe capture.`);
+        await updateJob(jobId, {
+          scrapeMeta: scrapeResult,
+          status: 'awaiting_frames',
+          progress: { percent: 30, stage: 'awaiting_frames' },
+        });
+        // Release worker lease so heartbeat stops and status is awaiting_frames
+        await releaseJobLock(jobId);
+        return;
+      }
     }
 
     // Decode ephemeral client frames if present and composite into a single in-memory grid
@@ -438,20 +451,49 @@ async function processJob(job: Job): Promise<void> {
     console.log(`[Job ${jobId}] Extracting recipe via Gemini...`);
     await updateJobProgress(jobId, 'processing', { percent: 65, stage: 'extracting_recipe', preview: initialPreview });
 
-    const { recipe: rawRecipe, usage: geminiUsage } = await extractRecipe(
-      audioFilePath || undefined,
-      mimeType,
-      scrapeResult.caption,
-      // Carousels send every slide at full resolution instead of the downscaled grid —
-      // the recipe is usually written as text on the images and must stay readable.
-      isCarousel ? undefined : gridImagePath,
-      runDir,
-      userPrefs,
-      scrapeResult.htmlContent,
-      isCarousel ? downloaded.imageFilePaths : undefined,
-      clientFramesInput ? 'client_frames' : 'carousel',
-      clientFramesInput
-    );
+    let rawRecipe: Recipe;
+    let geminiUsage: GeminiUsageInfo | undefined;
+    try {
+      const extractionResult = await extractRecipe(
+        audioFilePath || undefined,
+        mimeType,
+        scrapeResult.caption,
+        // Carousels send every slide at full resolution instead of the downscaled grid —
+        // the recipe is usually written as text on the images and must stay readable.
+        isCarousel ? undefined : gridImagePath,
+        runDir,
+        userPrefs,
+        scrapeResult.htmlContent,
+        isCarousel ? downloaded.imageFilePaths : undefined,
+        clientFramesInput ? 'client_frames' : 'carousel',
+        clientFramesInput
+      );
+      rawRecipe = extractionResult.recipe;
+      geminiUsage = extractionResult.usage;
+    } catch (extractErr: unknown) {
+      if (didFastTrackCaption && extractErr instanceof AppError && extractErr.code === 'NOT_A_RECIPE') {
+        console.log(`[Job ${jobId}] Fast-track caption was not a recipe according to Gemini. Falling back to awaiting_frames for video capture...`);
+        await updateJob(jobId, {
+          scrapeMeta: scrapeResult,
+          status: 'awaiting_frames',
+          progress: { percent: 30, stage: 'awaiting_frames' },
+        });
+        await releaseJobLock(jobId);
+        return;
+      }
+      throw extractErr;
+    }
+
+    if (didFastTrackCaption && rawRecipe.hasIncompleteSourceInfo) {
+      console.log(`[Job ${jobId}] Fast-track caption has incomplete source info. Reverting to awaiting_frames for video capture...`);
+      await updateJob(jobId, {
+        scrapeMeta: scrapeResult,
+        status: 'awaiting_frames',
+        progress: { percent: 30, stage: 'awaiting_frames' },
+      });
+      await releaseJobLock(jobId);
+      return;
+    }
 
     console.log(`[Job ${jobId}] Recipe extracted: "${rawRecipe.title}"`);
     if (isDevEnvironment()) {

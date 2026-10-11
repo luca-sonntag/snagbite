@@ -101,6 +101,15 @@ export interface Config {
   FAL_KEY?: string;
   /** BGBuster API key for background removal on ingredient icons. */
   BGBUSTER_API_KEY?: string;
+  // ── JEV Fast-Track Caption Guard ──
+  /** OpenRouter API key for JEV-1.13 decisions or general fallback. */
+  OPENROUTER_API_KEY?: string;
+  /** Direct TypeSafe API key for JEV-1.13 decisions. */
+  TYPESAFE_API_KEY?: string;
+  /** Master toggle for JEV/fast-track caption evaluation. Default true. */
+  JEV_ENABLED: boolean;
+  /** Model identifier for JEV decision evaluations (e.g. 'typesafe/jev-1.13'). */
+  JEV_MODEL: string;
   // ── S3 / Tigris Object Storage ──
   S3_ENDPOINT?: string;
   S3_REGION: string;
@@ -181,6 +190,10 @@ export const config: Config = {
   GENERATE_RECIPE_COVERS: getEnv('GENERATE_RECIPE_COVERS', 'true') === 'true',
   FAL_KEY: process.env.FAL_KEY || process.env.FLUX_API_KEY,
   BGBUSTER_API_KEY: process.env.BGBUSTER_API_KEY,
+  OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+  TYPESAFE_API_KEY: process.env.TYPESAFE_API_KEY,
+  JEV_ENABLED: getEnv('JEV_ENABLED', 'true') === 'true',
+  JEV_MODEL: getEnv('JEV_MODEL', 'typesafe/jev-1.13'),
   S3_ENDPOINT: process.env.S3_ENDPOINT || process.env.AWS_ENDPOINT_URL_S3,
   S3_REGION: getEnv('S3_REGION', 'auto'),
   S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID,
