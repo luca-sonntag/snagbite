@@ -210,4 +210,33 @@ describe('healthScoreCalculator', () => {
       'Should highlight high protein content'
     );
   });
+
+  it('uses consumedAmount instead of total cooking volume for dish weight and metrics with frying oil', () => {
+    const recipeWithConsumed: Recipe = {
+      title: 'Knusprige Pommes',
+      description: 'Selbstgemachte Pommes frites aus der Fritteuse',
+      servings: 2,
+      ingredients: [
+        { name: 'Kartoffeln', amount: 500, unit: 'g', gramsPerUnit: 1, novaGroup: 1, category: 'VEGETABLES' },
+        { name: 'Sonnenblumenöl zum Frittieren', amount: 500, consumedAmount: 30, unit: 'ml', gramsPerUnit: 1, novaGroup: 2, category: 'OILS_CONDIMENTS' },
+      ],
+      nutritionalValues: {
+        calories: 300,
+        protein: 5,
+        carbs: 40,
+        fat: 15,
+        sugar: 2,
+        fiber: 4,
+      },
+      prepTime: null,
+      cookTime: null,
+      instructions: [],
+      equipment: [],
+    };
+
+    const { breakdown } = computeRecipeHealthScore(recipeWithConsumed);
+    // Total dish weight should be 500g potatoes + 30g consumed oil = 530g, NOT 1000g!
+    // Caloric density = (300 kcal * 2 servings) / 530g * 100 = ~113 kcal/100g
+    assert.equal(breakdown.metrics.caloriesPer100g, 113);
+  });
 });

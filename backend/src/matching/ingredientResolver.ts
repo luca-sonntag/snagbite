@@ -47,6 +47,7 @@ export interface ResolverInput {
   carbs?: number | null;
   fat?: number | null;
   amount?: number;
+  consumedAmount?: number | null;
   unit?: string;
   gramsPerUnit?: number | null;
 }

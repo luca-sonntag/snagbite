@@ -69,6 +69,21 @@ export function calculateWeightGrams(
 }
 
 /**
+ * Resolves the effective consumption quantity of an ingredient.
+ * Falls back to `amount` when `consumedAmount` is not specified or non-positive.
+ */
+export function getEffectiveConsumptionAmount(ingredient: Ingredient): number {
+  if (
+    ingredient.consumedAmount !== undefined &&
+    ingredient.consumedAmount !== null &&
+    ingredient.consumedAmount > 0
+  ) {
+    return ingredient.consumedAmount;
+  }
+  return ingredient.amount;
+}
+
+/**
  * Generic nutritional plausibility check comparing estimated ingredient macros
  * against canonical food entry values per 100g.
  *
@@ -83,7 +98,8 @@ export function isNutritionallyPlausible(
   if (ingredient.calories === undefined || ingredient.calories === null) return true;
   if (!ingredient.amount || ingredient.amount <= 0) return true;
 
-  const weightGrams = calculateWeightGrams(ingredient.amount, ingredient.unit, null, ingredient.gramsPerUnit);
+  const effectiveAmount = getEffectiveConsumptionAmount(ingredient);
+  const weightGrams = calculateWeightGrams(effectiveAmount, ingredient.unit, null, ingredient.gramsPerUnit);
   if (weightGrams <= 0) return true;
 
   const estKcalPer100g = (ingredient.calories / weightGrams) * 100;
@@ -153,6 +169,8 @@ export function applyCanonicalMatchToIngredient(
     effectiveMatch = null;
   }
 
+  const effectiveAmount = getEffectiveConsumptionAmount(ingredient);
+
   if (!effectiveMatch) {
     // Remixes echo the parent's match fields back from the model — drop them so an
     // unmatched ingredient never carries a stale canonical reference next to
@@ -165,7 +183,7 @@ export function applyCanonicalMatchToIngredient(
     // number at all. It never overwrites the model's own per-quantity values,
     // which were computed with the recipe in view.
     if (cachedEstimate && !((ingredient.calories ?? 0) > 0)) {
-      const grams = calculateWeightGrams(ingredient.amount, ingredient.unit, null, ingredient.gramsPerUnit);
+      const grams = calculateWeightGrams(effectiveAmount, ingredient.unit, null, ingredient.gramsPerUnit);
       const factor = grams / 100;
       ingredient.calories = Math.round(cachedEstimate.calories * factor);
       ingredient.protein = Math.round(cachedEstimate.protein * factor * 10) / 10;
@@ -173,7 +191,7 @@ export function applyCanonicalMatchToIngredient(
       ingredient.fat = Math.round(cachedEstimate.fat * factor * 10) / 10;
     }
 
-    const grams = calculateWeightGrams(ingredient.amount, ingredient.unit, null, ingredient.gramsPerUnit);
+    const grams = calculateWeightGrams(effectiveAmount, ingredient.unit, null, ingredient.gramsPerUnit);
     return {
       matched: false,
       calories: ingredient.calories ?? 0,
@@ -187,12 +205,13 @@ export function applyCanonicalMatchToIngredient(
     };
   }
 
-  const weightGrams = calculateWeightGrams(ingredient.amount, ingredient.unit, effectiveMatch, ingredient.gramsPerUnit);
+  const weightGrams = calculateWeightGrams(effectiveAmount, ingredient.unit, effectiveMatch, ingredient.gramsPerUnit);
   const factor = weightGrams / 100;
 
   // Populate gramsPerUnit on ingredient if missing
   if ((!ingredient.gramsPerUnit || ingredient.gramsPerUnit <= 0) && ingredient.amount > 0) {
-    ingredient.gramsPerUnit = Math.round((weightGrams / ingredient.amount) * 10) / 10;
+    const fullGrams = calculateWeightGrams(ingredient.amount, ingredient.unit, effectiveMatch, null);
+    ingredient.gramsPerUnit = Math.round((fullGrams / ingredient.amount) * 10) / 10;
   }
 
   const cal = Math.round(effectiveMatch.nutrients_per_100g.calories * factor);
