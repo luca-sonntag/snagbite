@@ -4,7 +4,7 @@
 
 * **SDK:** `@google/generative-ai` SDK (`backend/src/gemini.ts`).
 * **Standard-Modelle:**
-  * `config.GEMINI_MODEL`: Standardmäßig `gemini-3.1-flash-lite` (Fallback/Alternative: `gemini-2.5-flash-lite`).
+  * `config.GEMINI_MODEL`: Standardmäßig `gemini-3.1-flash-lite` (garantierter non-undefined Default in `config.ts`; `gemini-2.5-flash-lite` wurde von Google abgeschaltet).
   * `config.GEMINI_RERANKER_MODEL`: Standardmäßig `gemini-3.1-flash-lite` (genutzt für Open Food Facts Reranking & Resolver).
 * **Bildgenerierung (Cover):** FLUX.1 [schnell] via fal.ai API (Direct-Inference, 4 Steps, $0.0035 / Bild).
 * **Kontext & Multimodalität:** Native Verarbeitung von Audio (File API Upload), Video-Frames / 4x4-Grid (`inlineData`) und Text in einem einzigen API-Aufruf mit bis zu 1.000.000 Tokens Kontextfenster.

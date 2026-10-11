@@ -6,6 +6,20 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-12: Hardcodierte Gemini-Modellstrings und veraltete `gemini-2.5-flash-lite`-Fallbacks
+
+* **Ersetzter Code / Veraltete Logik:**
+  - Hardcodiertes `const modelName = 'gemini-2.5-flash-lite'` in `backend/src/matching/recipeAuditor.ts`.
+  - Harte Fallbacks auf alte Modelle (`|| 'gemini-2.5-flash'`, `|| 'gemini-2.5-flash-lite'`, `|| 'gemini-3.1-flash-lite'`) in `recipeAuditorDevLogger.ts`, `ingredientImageService.ts`, `visionReviewer.ts`, `aiIngredientGenerator.ts`, `ingredientMatcher.ts` und `foodPhotographyPrompt.ts`.
+  - `gemini-2.5-flash-lite` wurde serverseitig von Google mit HTTP 404 abgeschaltet (*"This model is no longer available to new users..."*).
+* **Ersetzt durch:**
+  - **Zentraler, garantierter `config.GEMINI_MODEL`-Zugriff:** `backend/src/config.ts` garantiert einen validen, nicht-leeren String (Default `gemini-3.1-flash-lite`), der niemals `undefined` oder leer sein kann.
+  - Alle Services und Audit-Komponenten referenzieren ausschließlich `config.GEMINI_MODEL`.
+  - Token-Pricing für `gemini-3.5-flash-lite` wurde in `backend/src/logger.ts` ergänzt und der Default-Fallback in `estimateCost` modernisiert.
+* **Betroffene Dateien:** `backend/src/config.ts`, `backend/src/matching/recipeAuditor.ts`, `backend/src/matching/recipeAuditorDevLogger.ts`, `backend/src/ingredientImageService.ts`, `backend/src/audit/visionReviewer.ts`, `backend/src/matching/aiIngredientGenerator.ts`, `backend/src/matching/ingredientMatcher.ts`, `backend/src/prompts/foodPhotographyPrompt.ts`, `backend/src/logger.ts`, `docs/architecture/ai-gemini.md`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-11: Pauschale 100%-Berechnung von Koch- und Frittierfetten
 
 * **Ersetzter Code / Veraltete Logik:**

@@ -28,7 +28,7 @@ describe('mappingStore canonical 1-row lookup', () => {
         shelfLifeDays: 14,
         source: 'agent',
         confidence: 0.95,
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.1-flash-lite',
         reasoning: 'Standard Karotte',
       }
     );
@@ -79,7 +79,7 @@ describe('mappingStore canonical 1-row lookup', () => {
         shelfLifeDays: 7,
         source: 'agent',
         confidence: 0.9,
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.1-flash-lite',
         reasoning: 'Paprika Gemüse',
       }
     );
@@ -101,7 +101,7 @@ describe('mappingStore canonical 1-row lookup', () => {
         shelfLifeDays: 365,
         source: 'agent',
         confidence: 0.95,
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.1-flash-lite',
         reasoning: 'Schwarzer Pfeffer Gewürz',
       }
     );
