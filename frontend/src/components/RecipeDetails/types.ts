@@ -46,6 +46,7 @@ export interface RecipeHeaderProps {
   onRemixClick?: () => void;
   totalTimeLabel?: string | null;
   isAwaitingCover?: boolean;
+  isExtracting?: boolean;
 }
 
 export type RecipeSectionId = 'ingredients' | 'instructions' | 'details';

@@ -3,7 +3,6 @@ import { useRecipeDetails } from './useRecipeDetails';
 import { useRecipeCoverSync } from '../../hooks/useRecipeCoverSync';
 
 import RecipeHeader from './RecipeHeader';
-import RecipeSkeletonView from './RecipeSkeletonView';
 import RecipeInfoSection from './RecipeInfoSection';
 import RecipeStickyBar from './RecipeStickyBar';
 import RecipeIngredients from './RecipeIngredients';
@@ -21,7 +20,7 @@ import AddToMealPlanSheet from '../MealPlanner/AddToMealPlanSheet';
 import { useI18n } from '../../context/I18nContext';
 
 export default function RecipeDetails({
-  recipe, isExtracting = false, progress,
+  recipe, isExtracting = false,
   onAddIngredients, onDelete, reelUrl, createdAt, onBack,
   onNavigateToShoppingList, onRemixSuccess, onReplaceCurrent,
   isParentAvailable, onNavigateToRecipe, parentRecipeTitle,
@@ -61,17 +60,6 @@ export default function RecipeDetails({
     copyRecipe, cookRefreshKey, cookHistory,
   } = useRecipeDetails({ recipe, onAddIngredients, onNavigateToShoppingList });
 
-  if (isExtracting) {
-    return (
-      <RecipeSkeletonView
-        recipe={recipe}
-        progress={progress}
-        canGoBack={isPremium}
-        onBack={onBack}
-      />
-    );
-  }
-
   return (
     <article className="flex flex-col">
       {/* Recipe Title & Gallery */}
@@ -79,7 +67,7 @@ export default function RecipeDetails({
         recipe={recipe}
         reelUrl={reelUrl}
         createdAt={createdAt}
-        onBack={onBack}
+        onBack={(!isExtracting || isPremium) ? onBack : undefined}
         onNavigateToShoppingList={onAddIngredients ? handleAddAndNavigateToShoppingList : onNavigateToShoppingList}
         onDelete={onDelete}
         onCopyRecipe={copyRecipe}
@@ -96,24 +84,27 @@ export default function RecipeDetails({
         onRemixClick={() => openCopilot(true)}
         totalTimeLabel={totalTimeLabel}
         isAwaitingCover={isAwaitingCover}
+        isExtracting={isExtracting}
       />
 
       {/* Sentinel for the sticky bar's collapsed title row */}
       <div ref={setCollapseSentinel} aria-hidden="true" className="h-px mb-4" />
 
       {/* Smart Sticky Sub-navigation */}
-      <RecipeStickyBar
-        recipeTitle={recipe.title}
-        imageUrl={recipe.imageUrl || recipe.imageUrls?.[0]}
-        emoji={recipe.emoji}
-        isCollapsed={isHeaderCollapsed}
-        onBack={onBack}
-        activeSection={activeSection}
-        onSectionClick={scrollToSection}
-        totalTimeLabel={totalTimeLabel}
-        servings={servings}
-        calories={hasNutritionInfo ? metaCalories : null}
-      />
+      {!isExtracting && (
+        <RecipeStickyBar
+          recipeTitle={recipe.title}
+          imageUrl={recipe.imageUrl || recipe.imageUrls?.[0]}
+          emoji={recipe.emoji}
+          isCollapsed={isHeaderCollapsed}
+          onBack={onBack}
+          activeSection={activeSection}
+          onSectionClick={scrollToSection}
+          totalTimeLabel={totalTimeLabel}
+          servings={servings}
+          calories={hasNutritionInfo ? metaCalories : null}
+        />
+      )}
 
       {/* Single scrollable layout containing all sections with ample bottom padding for action dock */}
       <div className="flex flex-col gap-6 mt-4 pb-40">
@@ -134,6 +125,7 @@ export default function RecipeDetails({
             onToggleTotalNutrition={handleToggleTotalNutrition}
             getNutritionDisplayValue={getNutritionDisplayValue}
             onOpenCopilot={(prompt) => openCopilot(false, prompt)}
+            isExtracting={isExtracting}
           />
         </section>
 
@@ -145,11 +137,12 @@ export default function RecipeDetails({
             isPremium={isPremium}
             scaleFactor={scaleFactor}
             formatAmount={formatAmount}
-            onAddIngredients={onAddIngredients ? handleAddToShoppingList : undefined}
+            onAddIngredients={!isExtracting && onAddIngredients ? handleAddToShoppingList : undefined}
             isAdded={isAdded}
             servings={servings}
             onDecreaseServings={() => setServings(s => Math.max(1, s - 1))}
             onIncreaseServings={() => setServings(s => s + 1)}
+            isExtracting={isExtracting}
           />
         </section>
 
@@ -165,18 +158,19 @@ export default function RecipeDetails({
             progressPercent={progressPercent}
             onStartCooking={handleStartCooking}
             formatAmount={formatAmount}
+            isExtracting={isExtracting}
           />
         </section>
 
         {/* "I cooked this" — gamification CTA card */}
-        {recipe.id && (
+        {!isExtracting && recipe.id && (
           <div className="mt-4 mb-2">
             <CookedButton recipeId={recipe.id} recipeTitle={recipe.title} variant="card" />
           </div>
         )}
 
         {/* Cook history timeline */}
-        {recipe.id && (
+        {!isExtracting && recipe.id && (
           <div id="cook-history" className="mt-2 mb-2 scroll-mt-24">
             <CookHistoryTimeline history={cookHistory} />
           </div>
@@ -188,7 +182,7 @@ export default function RecipeDetails({
       </div>
 
       {/* Unified Floating Action Dock */}
-      {!isCookingMode && (totalStepsCount > 0 || onAddIngredients || onNavigateToShoppingList) && (
+      {!isExtracting && !isCookingMode && (totalStepsCount > 0 || onAddIngredients || onNavigateToShoppingList) && (
         <RecipeActionDock
           totalStepsCount={totalStepsCount}
           onAddToCart={onAddIngredients ? handleAddToShoppingList : undefined}

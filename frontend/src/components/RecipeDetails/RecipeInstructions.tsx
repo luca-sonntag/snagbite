@@ -17,6 +17,7 @@ interface RecipeInstructionsProps {
   progressPercent: number;
   onStartCooking: () => void;
   formatAmount: (amount: number | undefined, unit: string | undefined) => string;
+  isExtracting?: boolean;
 }
 
 export default function RecipeInstructions({
@@ -28,7 +29,8 @@ export default function RecipeInstructions({
   totalStepsCount,
   progressPercent,
   onStartCooking,
-  formatAmount
+  formatAmount,
+  isExtracting = false,
 }: RecipeInstructionsProps) {
   const { t } = useI18n();
   const { isPremium } = useAuth();
@@ -46,7 +48,8 @@ export default function RecipeInstructions({
       {/* Main Cohesive Card Group (Progress + Equipment + Steps) */}
       <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
         {/* 1. Cooking Progress & Start Button */}
-        <div className="px-5 py-5 sm:px-6 flex flex-col gap-4">
+        {!isExtracting && totalStepsCount > 0 && (
+          <div className="px-5 py-5 sm:px-6 flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <div className="flex justify-between items-baseline gap-2">
               <span className={blockLabel}>{t('recipe.cookingProgress')}</span>
@@ -82,6 +85,7 @@ export default function RecipeInstructions({
             {!isPremium && <ProBadge variant="corner" />}
           </Button>
         </div>
+        )}
 
         {/* 2. Required Equipment */}
         {recipe.equipment && recipe.equipment.length > 0 && (
@@ -102,9 +106,25 @@ export default function RecipeInstructions({
           </div>
         )}
 
-        {/* 3. Steps as a timeline — the rail turns emerald behind each finished
-            step, so progress is legible from the left edge alone. */}
-        {steps.length > 0 && (
+        {/* 3. Steps as a timeline */}
+        {steps.length === 0 && isExtracting ? (
+          <div className="p-5 sm:p-6 flex flex-col gap-3">
+            {[1, 2, 3].map((step) => (
+              <div
+                key={`step-skel-${step}`}
+                className="p-4 bg-gray-50/80 dark:bg-gray-800/50 rounded-2xl flex gap-3 animate-pulse"
+              >
+                <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0">
+                  {step}
+                </div>
+                <div className="flex-1 flex flex-col gap-2 pt-1">
+                  <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded-md" />
+                  <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded-md" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : steps.length > 0 ? (
           <div>
             {steps.map((step, idx) => {
               const isChecked = !!checkedSteps[step.step];
@@ -186,7 +206,7 @@ export default function RecipeInstructions({
               );
             })}
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Tips Section */}

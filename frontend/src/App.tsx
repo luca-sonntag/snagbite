@@ -193,7 +193,7 @@ export default function App() {
     limitStatus,
     fetchLimitStatus,
     claimRewardedCredit,
-  } = useRecipeExtraction(getAccessToken, handleExtractionSuccess);
+  } = useRecipeExtraction(getAccessToken, handleExtractionSuccess, fetchHistory);
 
   const [extractMode, setExtractMode] = useState<ExtractMode>('link');
   const { jobs: extractionJobs } = useExtractionJobs();
@@ -384,14 +384,14 @@ export default function App() {
           aria-hidden={activeView !== 'extract' || undefined}
           className={
             activeView === 'extract'
-              ? `flex-1 flex flex-col min-h-0 ${isPending ? 'justify-center my-auto' : ''}`
+              ? 'flex-1 flex flex-col min-h-0'
               : ''
           }
         >
           {recipe ? (
             <Suspense fallback={<ViewFallback />}>
               <RecipeDetails
-                key={recipe.id || recipe.title || 'in-flight-extract'}
+                key="extract-recipe-view"
                 recipe={recipe}
                 isExtracting={isPending}
                 progress={progress}

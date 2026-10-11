@@ -24,6 +24,7 @@ interface RecipeIngredientsProps {
   servings: number;
   onDecreaseServings: () => void;
   onIncreaseServings: () => void;
+  isExtracting?: boolean;
 }
 
 export default function RecipeIngredients({
@@ -37,6 +38,7 @@ export default function RecipeIngredients({
   servings,
   onDecreaseServings,
   onIncreaseServings,
+  isExtracting = false,
 }: RecipeIngredientsProps) {
   const { t } = useI18n();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
@@ -107,7 +109,20 @@ export default function RecipeIngredients({
         </div>
 
         {/* 1.2 Ingredients Display (Grid 2-column or List) */}
-        {viewMode === 'grid' ? (
+        {sortedIngredients.length === 0 && isExtracting ? (
+          <div className="p-4 sm:p-5 flex flex-col gap-2.5">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div
+                key={`ing-skel-${i}`}
+                className="flex items-center gap-3 p-3 bg-gray-50/80 dark:bg-gray-800/50 rounded-2xl animate-pulse"
+              >
+                <div className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-700 shrink-0" />
+                <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded-md shrink-0" />
+                <div className="h-4 w-36 bg-gray-200 dark:bg-gray-700 rounded-md" />
+              </div>
+            ))}
+          </div>
+        ) : viewMode === 'grid' ? (
           <ul className="grid grid-cols-2 gap-x-1.5 sm:gap-x-3 gap-y-1.5 px-2 pt-2 pb-3.5 sm:px-3.5 sm:pt-2.5 sm:pb-4.5 list-none m-0">
             {sortedIngredients.map((ing, idx) => (
               <IngredientItemGrid

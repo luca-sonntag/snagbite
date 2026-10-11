@@ -34,7 +34,11 @@ export const MAX_IMPORT_PHOTOS = 5;
  */
 const MAX_PHOTOS_TOTAL_CHARS = 8_000_000;
 
-export function useRecipeExtraction(getAccessToken: () => Promise<string | null>, onExtractionSuccess: (recipeId: string) => void) {
+export function useRecipeExtraction(
+  getAccessToken: () => Promise<string | null>,
+  onExtractionSuccess: (recipeId: string) => void,
+  onHistoryRefresh?: () => void
+) {
   const { t, language } = useI18n();
   const toast = useToast();
   const { user, refreshSession, isPremium } = useAuth();
@@ -200,6 +204,25 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     }
   }, [getAccessToken, stopActivePolling, t, fetchLimitStatus]);
 
+  const fetchCompletedRecipe = useCallback(async (recipeId: string): Promise<Recipe | null> => {
+    try {
+      const token = await getAccessToken();
+      if (!token) return null;
+      const res = await fetch(apiUrl(`/api/recipes/${recipeId}`), {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.recipe) {
+          return data.recipe;
+        }
+      }
+    } catch (err) {
+      console.warn('[useRecipeExtraction] Failed to fetch completed recipe:', err);
+    }
+    return null;
+  }, [getAccessToken]);
+
   const runSimulatedProgress = useCallback(async (jobId: string, recipeId: string, targetDurationMs: number = 10000) => {
     setIsPending(true);
     setJobStatus('processing');
@@ -219,16 +242,24 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
 
     if (activePollingJobIdRef.current !== jobId) return;
 
+    const completedRecipe = await fetchCompletedRecipe(recipeId);
+    if (completedRecipe) {
+      setRecipe(completedRecipe);
+      setIsPending(false);
+      setProgress(null);
+      onHistoryRefresh?.();
+    } else {
+      setProgress(null);
+      setRecipe(null);
+      setIsPending(false);
+      onExtractionSuccess(recipeId);
+    }
 
-    setProgress(null);
-    setRecipe(null);
-    setIsPending(false);
     setUrl('');
     setPhotos([]);
     localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
     activePollingJobIdRef.current = null;
-    onExtractionSuccess(recipeId);
-  }, [onExtractionSuccess]);
+  }, [fetchCompletedRecipe, onHistoryRefresh, onExtractionSuccess]);
 
   const handleJobUpdate = useCallback(
     async (job: any) => {
@@ -247,9 +278,19 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
 
         stopActivePolling();
 
-        setProgress(null);
-        setIsPending(false);
-        setRecipe(null);
+        const completedRecipe = await fetchCompletedRecipe(job.recipeId);
+        if (completedRecipe) {
+          setRecipe(completedRecipe);
+          setIsPending(false);
+          setProgress(null);
+          onHistoryRefresh?.();
+        } else {
+          setProgress(null);
+          setRecipe(null);
+          setIsPending(false);
+          onExtractionSuccess(job.recipeId);
+        }
+
         setUrl('');
         setPhotos([]);
         localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
@@ -260,14 +301,12 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           currentExtractUrlRef.current = '';
         }
 
-        const recipeTitle = job.title?.trim();
+        const recipeTitle = job.title?.trim() || completedRecipe?.title;
         const notifTitle = t('notification.recipeReady.title');
         const notifBody = recipeTitle
           ? t('notification.recipeReady.body', { title: recipeTitle })
           : t('notification.recipeReady.bodyFallback');
         void sendRecipeReadyNotification(notifTitle, notifBody, job.recipeId);
-
-        onExtractionSuccess(job.recipeId);
       } else if (job.status === 'failed') {
         stopActivePolling();
         const envelope = job.error ? parseSerializedError(job.error) : null;
@@ -325,6 +364,8 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       isPremium,
       stopActivePolling,
       runSimulatedProgress,
+      fetchCompletedRecipe,
+      onHistoryRefresh,
       t,
       onExtractionSuccess,
       removeFromWaitlist,
@@ -544,10 +585,18 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           setUrl('');
           setPhotos([]);
           setJobStatus(null);
-          setIsPending(false);
-          setRecipe(null);
           fetchLimitStatus();
-          onExtractionSuccess(data.recipeId);
+          const completedRecipe = data.recipe ?? (await fetchCompletedRecipe(data.recipeId));
+          if (completedRecipe) {
+            setRecipe(completedRecipe);
+            setIsPending(false);
+            setProgress(null);
+            onHistoryRefresh?.();
+          } else {
+            setIsPending(false);
+            setRecipe(null);
+            onExtractionSuccess(data.recipeId);
+          }
           return;
         }
         // Background-capable flow: track the job in shared store and connect live polling
@@ -573,9 +622,17 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
               removeFromWaitlist(meta.sourceLabel);
               removeFailedJob(meta.sourceLabel);
             }
-            setIsPending(false);
-            setRecipe(null);
-            onExtractionSuccess(data.recipeId);
+            const completedRecipe = data.recipe ?? (await fetchCompletedRecipe(data.recipeId));
+            if (completedRecipe) {
+              setRecipe(completedRecipe);
+              setIsPending(false);
+              setProgress(null);
+              onHistoryRefresh?.();
+            } else {
+              setIsPending(false);
+              setRecipe(null);
+              onExtractionSuccess(data.recipeId);
+            }
           } else {
             runSimulatedProgress(data.jobId ?? '', data.recipeId, 10000);
           }
@@ -628,7 +685,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       }
       setIsPending(false);
     }
-  }, [getAccessToken, startPolling, fetchLimitStatus, isPremium, addJob, runSimulatedProgress, stopActivePolling, onExtractionSuccess, addToQueue, toast, t, language, addFailedJob, openQueueSheet]);
+  }, [getAccessToken, startPolling, fetchLimitStatus, isPremium, addJob, runSimulatedProgress, fetchCompletedRecipe, onHistoryRefresh, stopActivePolling, onExtractionSuccess, addToQueue, toast, t, language, addFailedJob, openQueueSheet]);
 
   const triggerExtraction = useCallback(async (targetUrl: string) => {
     const cleanUrl = targetUrl.trim();

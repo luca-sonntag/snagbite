@@ -21,6 +21,7 @@ interface RecipeInfoSectionProps {
   onToggleTotalNutrition: (isTotal: boolean) => void;
   getNutritionDisplayValue: (val: string | number | null | undefined, unit?: string, isTotal?: boolean, includeUnit?: boolean) => string;
   onOpenCopilot?: (initialPrompt?: string) => void;
+  isExtracting?: boolean;
 }
 
 /**
@@ -43,6 +44,7 @@ export default function RecipeInfoSection({
   onToggleTotalNutrition,
   getNutritionDisplayValue,
   onOpenCopilot,
+  isExtracting = false,
 }: RecipeInfoSectionProps) {
   const { t } = useI18n();
 
@@ -57,23 +59,35 @@ export default function RecipeInfoSection({
         <div className="flex flex-col items-center gap-1.5 py-4 px-2 text-center">
           <Clock className={iconClass} />
           <span className={statLabel}>{t('recipe.prep')}</span>
-          <span className={statValue}>{formatTimeValue(prepTime)}</span>
+          {isExtracting && (prepTime === null || prepTime === undefined) ? (
+            <span className="h-4 w-12 bg-gray-200 dark:bg-gray-800 rounded-md animate-pulse" />
+          ) : (
+            <span className={statValue}>{formatTimeValue(prepTime)}</span>
+          )}
         </div>
 
         {/* Cook time */}
         <div className="flex flex-col items-center gap-1.5 py-4 px-2 text-center">
           <Utensils className={iconClass} />
           <span className={statLabel}>{t('recipe.cook')}</span>
-          <span className={statValue}>{formatTimeValue(cookTime)}</span>
+          {isExtracting && (cookTime === null || cookTime === undefined) ? (
+            <span className="h-4 w-12 bg-gray-200 dark:bg-gray-800 rounded-md animate-pulse" />
+          ) : (
+            <span className={statValue}>{formatTimeValue(cookTime)}</span>
+          )}
         </div>
 
         {/* Servings */}
         <div className="flex flex-col items-center gap-1.5 py-4 px-2 text-center">
           <Users className={iconClass} />
           <span className={statLabel}>{t('recipe.serves')}</span>
-          <span className={`${statValue} flex items-center gap-0.5`}>
-            <span>{servings}</span>
-          </span>
+          {isExtracting && !servings ? (
+            <span className="h-4 w-8 bg-gray-200 dark:bg-gray-800 rounded-md animate-pulse" />
+          ) : (
+            <span className={`${statValue} flex items-center gap-0.5`}>
+              <span>{servings}</span>
+            </span>
+          )}
         </div>
       </div>
 
