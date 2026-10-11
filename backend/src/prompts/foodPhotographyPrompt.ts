@@ -88,7 +88,7 @@ export async function generateFoodPhotographyPrompt(recipe: RecipeForPrompt): Pr
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
-    model: config.GEMINI_MODEL || 'gemini-2.5-flash',
+    model: config.GEMINI_MODEL,
     generationConfig: {
       temperature: 0.2,
       responseMimeType: 'application/json',

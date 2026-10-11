@@ -374,7 +374,7 @@ export async function enrichRecipeWithCanonicalIngredients(
       usage: {
         model: modelUsed,
         tokenUsage,
-        costEstimate: estimateCost(modelUsed || 'gemini-2.5-flash', tokenUsage),
+        costEstimate: estimateCost(modelUsed || config.GEMINI_MODEL, tokenUsage),
         durationMs: totalDurationMs,
       },
     };

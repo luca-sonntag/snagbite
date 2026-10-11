@@ -283,7 +283,7 @@ export interface GeminiVisualDescriptionResult {
  */
 export async function describeIngredientVisuallyWithGemini(item: CanonicalIngredient): Promise<GeminiVisualDescriptionResult> {
   const client = getGeminiClient();
-  const modelName = config.GEMINI_MODEL || 'gemini-3.1-flash-lite';
+  const modelName = config.GEMINI_MODEL;
   const fallbackTags = getFallbackCategoryTags(item.category, cleanIngredientName(item.name_en || item.name_de), item.name_de);
 
   const defaultCost: GeminiCostDetails = {
@@ -391,7 +391,7 @@ export async function buildIngredientPrompt(
     useGemini?: boolean;
   } = {}
 ): Promise<PromptBuildResult> {
-  const modelName = config.GEMINI_MODEL || 'gemini-3.1-flash-lite';
+  const modelName = config.GEMINI_MODEL;
   const defaultCost: GeminiCostDetails = {
     model: modelName,
     promptTokens: 0,

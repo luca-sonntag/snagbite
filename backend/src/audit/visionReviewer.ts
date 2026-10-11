@@ -66,7 +66,7 @@ export async function reviewIconWithGeminiVision(
       .toBuffer();
 
     const model = client.getGenerativeModel({
-      model: config.GEMINI_MODEL || 'gemini-3.1-flash-lite',
+      model: config.GEMINI_MODEL,
       generationConfig: {
         temperature: 0.2,
         maxOutputTokens: 400,
