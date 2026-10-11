@@ -124,6 +124,8 @@ const getEnv = (key: string, defaultValue?: string): string => {
   return value;
 };
 
+export const DEFAULT_GEMINI_MODEL = 'gemini-3.1-flash-lite';
+
 export const config: Config = {
   PORT: parseInt(getEnv('PORT', '3000'), 10),
   RAPIDAPI_KEY: process.env.RAPIDAPI_KEY,
@@ -132,10 +134,10 @@ export const config: Config = {
   SUPABASE_URL: process.env.SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY: process.env.SUPABASE_PUBLISHABLE_KEY,
   SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
-  GEMINI_MODEL: getEnv('GEMINI_MODEL', 'gemini-3.1-flash-lite'),
+  GEMINI_MODEL: process.env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL,
   // Defaults to the same generation as GEMINI_MODEL: a stale default here silently
   // ran ingredient matching on a two-generation-old model whenever the env var was unset.
-  GEMINI_RERANKER_MODEL: getEnv('GEMINI_RERANKER_MODEL', 'gemini-3.1-flash-lite'),
+  GEMINI_RERANKER_MODEL: process.env.GEMINI_RERANKER_MODEL?.trim() || process.env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL,
   INGREDIENT_RESOLVER_ENABLED: getEnv('INGREDIENT_RESOLVER_ENABLED', 'true') === 'true',
   INGREDIENT_RESOLVER_MAX_TURNS: parseInt(getEnv('INGREDIENT_RESOLVER_MAX_TURNS', '5'), 10),
   INGREDIENT_RESOLVER_CONCURRENCY: parseInt(getEnv('INGREDIENT_RESOLVER_CONCURRENCY', '6'), 10),
