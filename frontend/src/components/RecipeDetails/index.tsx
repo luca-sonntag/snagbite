@@ -91,20 +91,18 @@ export default function RecipeDetails({
       <div ref={setCollapseSentinel} aria-hidden="true" className="h-px mb-4" />
 
       {/* Smart Sticky Sub-navigation */}
-      {!isExtracting && (
-        <RecipeStickyBar
-          recipeTitle={recipe.title}
-          imageUrl={recipe.imageUrl || recipe.imageUrls?.[0]}
-          emoji={recipe.emoji}
-          isCollapsed={isHeaderCollapsed}
-          onBack={onBack}
-          activeSection={activeSection}
-          onSectionClick={scrollToSection}
-          totalTimeLabel={totalTimeLabel}
-          servings={servings}
-          calories={hasNutritionInfo ? metaCalories : null}
-        />
-      )}
+      <RecipeStickyBar
+        recipeTitle={recipe.title}
+        imageUrl={recipe.imageUrl || recipe.imageUrls?.[0]}
+        emoji={recipe.emoji}
+        isCollapsed={isHeaderCollapsed}
+        onBack={onBack}
+        activeSection={activeSection}
+        onSectionClick={scrollToSection}
+        totalTimeLabel={totalTimeLabel}
+        servings={servings}
+        calories={hasNutritionInfo ? metaCalories : null}
+      />
 
       {/* Single scrollable layout containing all sections with ample bottom padding for action dock */}
       <div className="flex flex-col gap-6 mt-4 pb-40">
@@ -164,14 +162,14 @@ export default function RecipeDetails({
 
         {/* "I cooked this" — gamification CTA card */}
         {!isExtracting && recipe.id && (
-          <div className="mt-4 mb-2">
+          <div className="mt-4 mb-2 animate-fade-in transition-all duration-500">
             <CookedButton recipeId={recipe.id} recipeTitle={recipe.title} variant="card" />
           </div>
         )}
 
         {/* Cook history timeline */}
         {!isExtracting && recipe.id && (
-          <div id="cook-history" className="mt-2 mb-2 scroll-mt-24">
+          <div id="cook-history" className="mt-2 mb-2 scroll-mt-24 animate-fade-in transition-all duration-500">
             <CookHistoryTimeline history={cookHistory} />
           </div>
         )}

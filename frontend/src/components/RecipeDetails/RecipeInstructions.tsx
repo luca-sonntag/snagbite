@@ -48,48 +48,66 @@ export default function RecipeInstructions({
       {/* Main Cohesive Card Group (Progress + Equipment + Steps) */}
       <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
         {/* 1. Cooking Progress & Start Button */}
-        {!isExtracting && totalStepsCount > 0 && (
+        {(isExtracting || totalStepsCount > 0) && (
           <div className="px-5 py-5 sm:px-6 flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <div className="flex justify-between items-baseline gap-2">
-              <span className={blockLabel}>{t('recipe.cookingProgress')}</span>
-              <span className={`text-xs font-bold tabular-nums ${
-                hasStarted
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-gray-400 dark:text-gray-500'
-              }`}>
-                {t('recipe.progressSteps', {
-                  completed: completedStepsCount,
-                  total: totalStepsCount,
-                  percent: Math.round(progressPercent)
-                })}
-              </span>
-            </div>
-            <div className="w-full bg-black/[0.07] dark:bg-white/10 h-1.5 rounded-full overflow-hidden">
-              <div
-                className="bg-emerald-500 h-full rounded-full transition-all duration-500 ease-out"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-          </div>
+            {!isExtracting && totalStepsCount > 0 ? (
+              <div className="flex flex-col gap-4 animate-fade-in">
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between items-baseline gap-2">
+                    <span className={blockLabel}>{t('recipe.cookingProgress')}</span>
+                    <span className={`text-xs font-bold tabular-nums ${
+                      hasStarted
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-gray-400 dark:text-gray-500'
+                    }`}>
+                      {t('recipe.progressSteps', {
+                        completed: completedStepsCount,
+                        total: totalStepsCount,
+                        percent: Math.round(progressPercent)
+                      })}
+                    </span>
+                  </div>
+                  <div className="w-full bg-black/[0.07] dark:bg-white/10 h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className="bg-emerald-500 h-full rounded-full transition-all duration-500 ease-out"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                </div>
 
-          <Button
-            className="relative w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-12 min-h-[48px] px-5 rounded-2xl shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer border-none"
-            onPress={() => {
-              hapticMedium();
-              onStartCooking();
-            }}
-          >
-            <Play className="w-4.5 h-4.5 fill-white ml-0.5" />
-            <span>{t('recipe.startCooking')}</span>
-            {!isPremium && <ProBadge variant="corner" />}
-          </Button>
-        </div>
+                <Button
+                  className="relative w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-12 min-h-[48px] px-5 rounded-2xl shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer border-none"
+                  onPress={() => {
+                    hapticMedium();
+                    onStartCooking();
+                  }}
+                >
+                  <Play className="w-4.5 h-4.5 fill-white ml-0.5" />
+                  <span>{t('recipe.startCooking')}</span>
+                  {!isPremium && <ProBadge variant="corner" />}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4 animate-pulse">
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between items-baseline">
+                    <div className="h-3 w-28 bg-gray-200/90 dark:bg-gray-800/90 rounded-md" />
+                    <div className="h-3 w-16 bg-gray-200/90 dark:bg-gray-800/90 rounded-md" />
+                  </div>
+                  <div className="w-full bg-gray-200/90 dark:bg-gray-800/90 h-1.5 rounded-full" />
+                </div>
+                <div className="w-full h-12 rounded-2xl bg-gray-200/80 dark:bg-gray-800/80 flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-gray-300 dark:bg-gray-700" />
+                  <div className="h-4 w-28 rounded-md bg-gray-300 dark:bg-gray-700" />
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
         {/* 2. Required Equipment */}
         {recipe.equipment && recipe.equipment.length > 0 && (
-          <div className="px-5 py-4.5 sm:px-6 flex flex-col gap-2">
+          <div className="px-5 py-4.5 sm:px-6 flex flex-col gap-2 animate-fade-in">
             <span className={blockLabel}>
               {t('recipe.requiredEquipment')}
             </span>
@@ -125,7 +143,7 @@ export default function RecipeInstructions({
             ))}
           </div>
         ) : steps.length > 0 ? (
-          <div>
+          <div className="animate-fade-in">
             {steps.map((step, idx) => {
               const isChecked = !!checkedSteps[step.step];
               const isActive = step.step === activeStepNum;
@@ -211,7 +229,7 @@ export default function RecipeInstructions({
 
       {/* Tips Section */}
       {recipe.tips && recipe.tips.length > 0 && (
-        <div className="flex flex-col gap-4 mt-2">
+        <div className="flex flex-col gap-4 mt-2 animate-fade-in">
           {/* Section Header (OUTSIDE card) */}
           <div className="flex items-center justify-between gap-3">
             <h3 className="text-base font-bold text-gray-900 dark:text-white">

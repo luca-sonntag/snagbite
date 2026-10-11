@@ -46,21 +46,23 @@ export default function RecipeHeader({
   const healthLetter = healthScoreNum !== null ? getHealthScoreLetter(healthScoreNum) : null;
 
   const topRightActions = isExtracting ? null : (
-    <RecipeHeaderActions
-      isFavorite={isFavorite}
-      onToggleFavorite={onToggleFavorite}
-      isMenuOpen={isMenuOpen}
-      setIsMenuOpen={setIsMenuOpen}
-      onAssignCollections={onAssignCollections}
-      onManageFlags={onManageFlags}
-      onCopyRecipe={onCopyRecipe}
-      isCopied={isCopied}
-      onNavigateToShoppingList={onNavigateToShoppingList}
-      onDelete={onDelete}
-      reelUrl={reelUrl}
-      sourceUrl={recipe.sourceUrl}
-      createdAt={createdAt}
-    />
+    <div className="animate-fade-in">
+      <RecipeHeaderActions
+        isFavorite={isFavorite}
+        onToggleFavorite={onToggleFavorite}
+        isMenuOpen={isMenuOpen}
+        setIsMenuOpen={setIsMenuOpen}
+        onAssignCollections={onAssignCollections}
+        onManageFlags={onManageFlags}
+        onCopyRecipe={onCopyRecipe}
+        isCopied={isCopied}
+        onNavigateToShoppingList={onNavigateToShoppingList}
+        onDelete={onDelete}
+        reelUrl={reelUrl}
+        sourceUrl={recipe.sourceUrl}
+        createdAt={createdAt}
+      />
+    </div>
   );
 
   return (
@@ -80,7 +82,7 @@ export default function RecipeHeader({
 
         {/* Editorial Quick-Facts Lead-in: Category · Total Time · Servings · Health Score · Flags */}
         {(recipe.category || totalTimeLabel || (recipe.servings && recipe.servings > 0) || (healthColor && healthLetter) || (flags && flags.length > 0) || (history && history.count > 0)) ? (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 animate-fade-in">
             {recipe.category && (
               <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold text-xs select-none border-none">
                 <span>{getRecipeCategoryLabel(recipe.category, language)}</span>
@@ -153,10 +155,11 @@ export default function RecipeHeader({
             )}
           </div>
         ) : isExtracting ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="h-6 w-20 rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse" />
-            <div className="h-6 w-16 rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse" />
-            <div className="h-6 w-16 rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse" />
+          <div className="flex flex-wrap items-center gap-2 animate-pulse">
+            <div className="h-7 w-24 rounded-full bg-gray-200/90 dark:bg-gray-800/90" />
+            <div className="h-7 w-20 rounded-full bg-gray-200/90 dark:bg-gray-800/90" />
+            <div className="h-7 w-20 rounded-full bg-gray-200/90 dark:bg-gray-800/90" />
+            <div className="w-7 h-7 rounded-full bg-gray-200/90 dark:bg-gray-800/90" />
           </div>
         ) : null}
 
