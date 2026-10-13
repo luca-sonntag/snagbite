@@ -49,6 +49,13 @@ export interface InstructionStep {
   step: number;
   description: string;
   parallelPrepHint?: string;
+  section?: string;
+}
+
+export interface RecipeComponentSection {
+  name: string;
+  ingredients: Ingredient[];
+  steps: InstructionStep[];
 }
 
 export interface AlternativeIngredient {
@@ -153,8 +160,8 @@ export interface RecipeOperation {
   newIngredients?: Ingredient[];
   removeIngredientName?: string;
   newServings?: number;
-  stepUpdates?: Array<{ step: number; description: string; parallelPrepHint?: string }>;
-  newSteps?: Array<{ description: string; parallelPrepHint?: string }>;
+  stepUpdates?: Array<{ step: number; description: string; parallelPrepHint?: string; section?: string }>;
+  newSteps?: Array<{ description: string; parallelPrepHint?: string; section?: string }>;
   newTitle?: string;
 }
 
