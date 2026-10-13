@@ -23,6 +23,10 @@ export async function requireAuth(
   res: Response,
   next: NextFunction,
 ): Promise<void> {
+  if (!req.header('Authorization') && req.query.token && typeof req.query.token === 'string') {
+    req.headers.authorization = `Bearer ${req.query.token}`;
+  }
+
   const header = req.header('Authorization');
   const hasCookie = Boolean(req.headers.cookie);
 

@@ -16,6 +16,7 @@ interface RecipeStickyBarProps {
   totalTimeLabel: string | null;
   servings: number;
   calories: number | null;
+  isExtracting?: boolean;
 }
 
 /**
@@ -36,6 +37,7 @@ export default function RecipeStickyBar({
   totalTimeLabel,
   servings,
   calories,
+  isExtracting = false,
 }: RecipeStickyBarProps) {
   const { t } = useI18n();
 
@@ -99,10 +101,12 @@ export default function RecipeStickyBar({
                 {totalTimeLabel}
               </span>
             )}
-            <span className="flex items-center gap-1">
-              <Users className="w-3 h-3 text-emerald-500 flex-shrink-0" />
-              {t('recipe.servingsCount', { count: servings })}
-            </span>
+            {!isExtracting && (
+              <span className="flex items-center gap-1">
+                <Users className="w-3 h-3 text-emerald-500 flex-shrink-0" />
+                {t('recipe.servingsCount', { count: servings })}
+              </span>
+            )}
             {calories !== null && (
               <span className="flex items-center gap-1">
                 <Flame className="w-3 h-3 text-emerald-500 flex-shrink-0" />

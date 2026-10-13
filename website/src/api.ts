@@ -7,7 +7,7 @@ let rawBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? '').trim();
 if (rawBaseUrl && !rawBaseUrl.startsWith('http://') && !rawBaseUrl.startsWith('https://') && !rawBaseUrl.startsWith('/')) {
   rawBaseUrl = `https://${rawBaseUrl}`;
 }
-const API_BASE_URL = rawBaseUrl.replace(/\/$/, '');
+export const API_BASE_URL = rawBaseUrl.replace(/\/$/, '');
 
 export function apiUrl(path: string): string {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;

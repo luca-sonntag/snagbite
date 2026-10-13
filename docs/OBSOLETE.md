@@ -23,6 +23,32 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ---
 
+### 2026-10-11: Separate `ExtractionAnimation`-Page & `RecipeSkeletonView` abgelöst durch In-Place `RecipeDetails` Skeleton-Extraktion & `ExtractionAdSheet`
+
+* **Ersetzter Code / Veraltete Logik:**
+  - Eigenständige Extraktions-Animations-Page `frontend/src/components/ExtractionAnimation/` mit `ProgressiveRecipeCard.tsx`, `useProgressiveRecipe.ts`, `ExtractionProgressBar.tsx`, `IngredientsStream.tsx`, `RecipeCoverPreview.tsx`, `RecipePillTags.tsx` und dem Root-Wrapper `ExtractionAnimation.tsx`.
+  - Frühere Zwischenlösung mit Early Return `RecipeSkeletonView.tsx`, die zu Layout-Sprüngen und Unmounts beim Abschluss führte.
+  - Tab-Sprung zu `'history'` (`navigate('history', recipeId)`) bei Fertigstellung, welcher die Ansicht flackern ließ.
+* **Ersetzt durch:**
+  - **Direkte In-Place Skeleton-Integration in `RecipeDetails`:** Die echten Subkomponenten (`RecipeHeader`, `RecipeImageGallery`, `RecipeInfoSection`, `RecipeIngredients`, `RecipeInstructions`) unterstützen das `isExtracting`-Prop direkt und rendern Shimmer-Skeletons für fehlende Felder im identischen DOM-Baum.
+  - **Nahtlose In-Place Fertigstellung ohne Routenwechsel:** Nach Abschluss des Jobs holt `useRecipeExtraction` das Rezept via `/api/recipes/:id` und setzt es in-place in den bestehenden `recipe`-State. Es findet kein Routenwechsel oder Tab-Sprung statt; Skeletons morphen nahtlos in die echten Rezeptdaten.
+  - **Nicht schließbares Ad Bottom Sheet ([`ExtractionAdSheet.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ExtractionAdSheet.tsx)):** Free-Nutzer sehen während der aktiven Extraktion ein modales, nicht schließbares HeroUI `Drawer` mit dem MREC 300×250 Banner (`isDismissable={false}`, kein Schließen-Button oder Drag-Handle), das sich bei erfolgreichem Abschluss oder Fehler automatisch schließt.
+  - **Premium-Flow:** Premium-Nutzer bleiben ebenfalls direkt in `RecipeDetails` (mit Skeletons, ohne Werbung), behalten aber volle Navigation dank Hintergrundverarbeitung.
+* **Betroffene Dateien:** `frontend/src/components/ExtractionAnimation/` (vollständig entfernt), `frontend/src/components/RecipeDetails/RecipeSkeletonView.tsx` (vollständig entfernt), `frontend/src/components/ExtractionAdSheet.tsx`, `frontend/src/components/RecipeDetails/index.tsx`, `frontend/src/components/RecipeDetails/types.ts`, `frontend/src/hooks/useRecipeExtraction.ts`, `frontend/src/components/ExtractForm/index.tsx`, `frontend/src/App.tsx`, `docs/OBSOLETE.md`, `docs/architecture/frontend.md`.
+
+---
+
+### 2026-10-11: Blockierende FLUX-Cover-Generierung, erzwungener Video-Download & starres HTTP-Polling abgelöst
+
+* **Ersetzter Code / Veraltete Logik:**
+  - Blockierende Ausführung von FLUX.1 Cover-Generierung (`generateRecipeCoverImage`) vor Job-Abschluss in `queue.ts` (verursachte 4–6 Sekunden unnötige Wartezeit für den Nutzer).
+  - Erzwungener Video-Download und WebCodecs Keyframe-Capture (`awaiting_frames`) auch dann, wenn der Creator bereits alle Zutaten und Schritte im Text/Caption des Instagram Reels aufgeschrieben hat (verursachte 10–15 Sekunden unnötige Wartezeit).
+  - Ausschließliches HTTP-Polling im 600ms-Intervall als primärer Kommunikationskanal für Extraktionsfortschritt in `useRecipeExtraction.ts`.
+* **Ersetzt durch:**
+  - **Asynchrone FLUX.1 Cover-Generierung ([`triggerAsyncCoverGeneration`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/imageGenerator.ts)):** Rezept wird sofort mit dem Scraper-Thumbnail oder Eltern-Cover in der Datenbank persistiert und an den Nutzer übergeben. Das KI-Cover wird non-blocking im Hintergrund generiert und gepatcht (-4 bis 6 Sekunden).
+  - **JEV Fast-Track Caption Pre-flight ([`checkCaptionCompleteness`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/scrapers/jevCaptionGuard.ts)):** Semantischer Pre-flight Check via TypeSafe JEV-1.13 Decisions API (~250ms, Fail-Safe Fallback auf Gemini Flash-Lite), der bei vollständigen Textangaben das clientseitige Video-Streaming komplett überspringt (-10 bis 15 Sekunden).
+  - **Server-Sent Events (SSE) Stream ([`GET /api/jobs/:id/events`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/routes/extractionRoutes.ts)):** Sub-30ms Echtzeit-Event-Streaming für Jobstatus und Keyframe-Requests, mit nahtlosem Fallback auf 600ms HTTP-Polling bei Netzwerkunterbrechungen.
+* **Betroffene Dateien:** `backend/src/imageGenerator.ts`, `backend/src/queue.ts`, `backend/src/config.ts`, `backend/src/scrapers/jevCaptionGuard.ts`, `backend/src/jobEvents.ts`, `backend/src/auth.ts`, `backend/src/db/jobsDb.ts`, `backend/src/routes/extractionRoutes.ts`, `frontend/src/hooks/useRecipeExtraction.ts`, `docs/architecture/scraping-and-imports.md`, `docs/OBSOLETE.md`.
 ### 2026-10-12: Hardcodierte Gemini-Modellstrings und veraltete `gemini-2.5-flash-lite`-Fallbacks
 
 * **Ersetzter Code / Veraltete Logik:**

@@ -28,6 +28,7 @@ import { recordCook } from '../gamification.js';
 import type { Recipe, RecipeOperation } from '../types.js';
 import { fetchAndSyncUser, isPremiumUser, MAX_PHOTOS_TOTAL_CHARS } from './authUtils.js';
 import { triggerWorkerTick } from '../queue.js';
+import { subscribeRecipeEvents } from '../jobEvents.js';
 
 export const recipeRoutes = Router();
 
@@ -71,6 +72,72 @@ recipeRoutes.get('/recipes/:id', async (req: Request, res: Response): Promise<vo
     res.status(200).json({ success: true, ...saved });
   } catch (error: unknown) {
     if (!(error instanceof AppError)) console.error('Error fetching recipe:', error);
+    sendAppError(res, error);
+  }
+});
+
+recipeRoutes.get('/recipes/:id/events', async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  if (!id) {
+    res.status(400).json({ success: false, error: 'Missing recipe id' });
+    return;
+  }
+
+  try {
+    const recipe = await assertRecipeAccess(req.userId!, id);
+
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    });
+
+    const sendEvent = (event: string, data: unknown) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+
+    if (recipe.imageUrl && recipe.isAiCover) {
+      sendEvent('recipe', {
+        recipeId: recipe.id,
+        type: 'cover_ready',
+        imageUrl: recipe.imageUrl,
+        imageUrls: recipe.imageUrls,
+        isAiCover: true,
+      });
+      res.end();
+      return;
+    }
+
+    let isClosed = false;
+    const cleanup = () => {
+      if (isClosed) return;
+      isClosed = true;
+      clearInterval(pingInterval);
+      clearTimeout(timeoutHandle);
+      unsubscribe();
+    };
+
+    const unsubscribe = subscribeRecipeEvents(id, (payload) => {
+      sendEvent('recipe', payload);
+      cleanup();
+      res.end();
+    });
+
+    const pingInterval = setInterval(() => {
+      if (!isClosed) {
+        res.write(': ping\n\n');
+      }
+    }, 15000);
+
+    const timeoutHandle = setTimeout(() => {
+      cleanup();
+      res.end();
+    }, 35000);
+
+    req.on('close', cleanup);
+  } catch (error: unknown) {
+    if (!(error instanceof AppError)) console.error('Error establishing recipe events stream:', error);
     sendAppError(res, error);
   }
 });

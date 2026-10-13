@@ -21,6 +21,7 @@ interface RecipeInfoSectionProps {
   onToggleTotalNutrition: (isTotal: boolean) => void;
   getNutritionDisplayValue: (val: string | number | null | undefined, unit?: string, isTotal?: boolean, includeUnit?: boolean) => string;
   onOpenCopilot?: (initialPrompt?: string) => void;
+  isExtracting?: boolean;
 }
 
 /**
@@ -43,6 +44,7 @@ export default function RecipeInfoSection({
   onToggleTotalNutrition,
   getNutritionDisplayValue,
   onOpenCopilot,
+  isExtracting = false,
 }: RecipeInfoSectionProps) {
   const { t } = useI18n();
 
@@ -57,42 +59,71 @@ export default function RecipeInfoSection({
         <div className="flex flex-col items-center gap-1.5 py-4 px-2 text-center">
           <Clock className={iconClass} />
           <span className={statLabel}>{t('recipe.prep')}</span>
-          <span className={statValue}>{formatTimeValue(prepTime)}</span>
+          {isExtracting && (prepTime === null || prepTime === undefined) ? (
+            <span className="h-5 w-12 bg-gray-200/90 dark:bg-gray-800/90 rounded-lg animate-pulse" />
+          ) : (
+            <span className={`${statValue} animate-fade-in`}>{formatTimeValue(prepTime)}</span>
+          )}
         </div>
 
         {/* Cook time */}
         <div className="flex flex-col items-center gap-1.5 py-4 px-2 text-center">
           <Utensils className={iconClass} />
           <span className={statLabel}>{t('recipe.cook')}</span>
-          <span className={statValue}>{formatTimeValue(cookTime)}</span>
+          {isExtracting && (cookTime === null || cookTime === undefined) ? (
+            <span className="h-5 w-12 bg-gray-200/90 dark:bg-gray-800/90 rounded-lg animate-pulse" />
+          ) : (
+            <span className={`${statValue} animate-fade-in`}>{formatTimeValue(cookTime)}</span>
+          )}
         </div>
 
         {/* Servings */}
         <div className="flex flex-col items-center gap-1.5 py-4 px-2 text-center">
           <Users className={iconClass} />
           <span className={statLabel}>{t('recipe.serves')}</span>
-          <span className={`${statValue} flex items-center gap-0.5`}>
-            <span>{servings}</span>
-          </span>
+          {isExtracting ? (
+            <span className="h-5 w-8 bg-gray-200/90 dark:bg-gray-800/90 rounded-lg animate-pulse" />
+          ) : (
+            <span className={`${statValue} animate-fade-in flex items-center gap-0.5`}>
+              <span>{servings}</span>
+            </span>
+          )}
         </div>
       </div>
 
       {/* Calorie headline + macro distribution */}
-      {nutritionalValues && (
-        <div className="border-t border-gray-100/70 dark:border-gray-800/60">
-          <RecipeNutrition
-            variant="summary"
-            nutritionalValues={nutritionalValues}
-            sourceNutritionalValues={sourceNutritionalValues}
-            healthScore={healthScore}
-            healthScoreBreakdown={healthScoreBreakdown}
-            isAiEstimated={isAiEstimated}
-            isVerified={isVerified}
-            showTotalNutrition={showTotalNutrition}
-            onToggleTotalNutrition={onToggleTotalNutrition}
-            getNutritionDisplayValue={getNutritionDisplayValue}
-            onOpenCopilot={onOpenCopilot}
-          />
+      {(nutritionalValues || isExtracting) && (
+        <div className="border-t border-gray-100/70 dark:border-gray-800/60 transition-all duration-500">
+          {nutritionalValues ? (
+            <div className="animate-fade-in">
+              <RecipeNutrition
+                variant="summary"
+                nutritionalValues={nutritionalValues}
+                sourceNutritionalValues={sourceNutritionalValues}
+                healthScore={healthScore}
+                healthScoreBreakdown={healthScoreBreakdown}
+                isAiEstimated={isAiEstimated}
+                isVerified={isVerified}
+                showTotalNutrition={showTotalNutrition}
+                onToggleTotalNutrition={onToggleTotalNutrition}
+                getNutritionDisplayValue={getNutritionDisplayValue}
+                onOpenCopilot={onOpenCopilot}
+              />
+            </div>
+          ) : (
+            <div className="p-4 sm:p-5 flex flex-col gap-3 animate-pulse">
+              <div className="flex items-center justify-between">
+                <div className="h-5 w-28 bg-gray-200/90 dark:bg-gray-800/90 rounded-lg" />
+                <div className="h-5 w-16 bg-gray-200/90 dark:bg-gray-800/90 rounded-lg" />
+              </div>
+              <div className="h-2.5 w-full bg-gray-200/90 dark:bg-gray-800/90 rounded-full mt-1" />
+              <div className="flex justify-between items-center pt-1">
+                <div className="h-3 w-16 bg-gray-200/90 dark:bg-gray-800/90 rounded-md" />
+                <div className="h-3 w-16 bg-gray-200/90 dark:bg-gray-800/90 rounded-md" />
+                <div className="h-3 w-16 bg-gray-200/90 dark:bg-gray-800/90 rounded-md" />
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

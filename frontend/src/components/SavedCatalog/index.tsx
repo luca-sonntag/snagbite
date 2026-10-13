@@ -63,6 +63,7 @@ interface SavedCatalogProps {
     maxConcurrent?: number;
     activeCount?: number;
   } | null;
+  onUpdateRecipeCover?: (recipeId: string, imageUrl: string, isAiCover: boolean) => void;
 }
 
 export default function SavedCatalog({
@@ -82,7 +83,8 @@ export default function SavedCatalog({
   onRecipeSaved,
   catalogSubPath = null,
   onNavigateCatalog,
-  limitStatus
+  limitStatus,
+  onUpdateRecipeCover,
 }: SavedCatalogProps) {
   const { t, language } = useI18n();
   const toast = useToast();
@@ -534,6 +536,8 @@ export default function SavedCatalog({
             onManageFlags={() => handleManageFlagsClick(selectedJobResolved)}
             isFavorite={selectedJobResolved.isFavorite}
             onToggleFavorite={() => toggleFavorite(selectedJobResolved)}
+            getAccessToken={getAccessToken}
+            onCoverUpdated={onUpdateRecipeCover}
           />
         )}
 

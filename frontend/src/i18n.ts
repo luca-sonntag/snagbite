@@ -1101,6 +1101,7 @@ export const uiTranslations = {
     },
     recipe: {
       recipe: 'Rezept',
+      generatingCover: 'KI-Cover wird generiert…',
       copyRecipe: 'Rezept kopieren',
       copied: 'Kopiert!',
       delete: 'Rezept löschen',
@@ -2625,6 +2626,7 @@ export const uiTranslations = {
     },
     recipe: {
       recipe: 'Recipe',
+      generatingCover: 'Generating AI cover…',
       copyRecipe: 'Copy Recipe',
       copied: 'Copied!',
       delete: 'Delete Recipe',

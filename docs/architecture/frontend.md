@@ -62,6 +62,11 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
 * **Kompression (`useCachedImage.ts`):** HTML5 Canvas `drawImage()` + `toBlob('image/jpeg', 0.75)` mit max. 400px Kantenlänge (~15–40 KB pro Bild).
 * **CORS Proxy:** Bilder werden über den `/api/image`-Proxy geladen.
 * **Cache-Invalidierung:** Bei Rezept-Löschung werden IndexedDB-Einträge automatisch entfernt.
+* **Asynchrone FLUX.1 Cover-Aktualisierung in Echtzeit (`useRecipeCoverSync.ts`):**
+  * Beim sofortigen Öffnen des Rezepts nach der Extraktion wird das Video-Thumbnail **nicht** als temporäres Cover angezeigt (`isCoverGenerating: true`, `imageUrl: null`).
+  * `RecipeImageGallery` rendert stattdessen den standardmäßigen Bild-Skeleton-Loader mit Shimmer-Sweep (`animate-pulse` + `animate-shimmer-sweep`).
+  * Der Custom Hook `useRecipeCoverSync` verbindet sich via SSE (`GET /api/recipes/:id/events`) und HTTP-Polling-Fallback (1,5s Intervall).
+  * Sobald das Backend die FLUX.1-Generierung beendet und in S3/Postgres persistiert hat, wird das Event `cover_ready` gesendet. Der lokale State und die History-Listen werden via `updateRecipeCover` atomar aktualisiert – das HD-Cover erscheint ohne Seitenneuladen.
 
 ---
 
@@ -215,15 +220,20 @@ Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird
 
 ---
 
-## 9. 🍳 Lebendige Rezept-Blaupause: Progressiver Extraktions-Screen (`ExtractionAnimation/`)
+## 9. 🍳 In-Place Rezept-Extraktion & Nicht schließbares Ad Bottom Sheet (`RecipeDetails/` & `ExtractionAdSheet.tsx`)
 
-* **Live Materializing Recipe Card:** Statt eines statischen Ladebalkens baut sich die Rezeptkarte Schritt für Schritt synchron mit den Extraktions-Meilensteinen auf:
-  1. **Phase 1 (Blaupause):** Plattform-Badge (Instagram, TikTok, YouTube Shorts, Foto-Scan), animierter Laser-Scanner (`animate-scanning-beam`), Skeletons für Titel und Meta-Badges. Bei Foto-Imports wird das Originalfoto sofort ab Millisekunde 0 eingeblendet.
-  2. **Phase 2 (Entdeckung):** Post-Thumbnail & Creator-Handle klinken sich ein.
-  3. **Phase 3 (Rezept-Materialisierung):** Rezepttitel blendet ein, Meta-Pills (Zeit, Portionen, Kategorie) ploppen mit taktilem Micro-Bounce auf (`animate-scale-pop`, `hapticLight()`), Zutaten-Chips materialisieren sich mit Mengen und Zähler-Badge.
-  4. **Phase 4 (Cover & Finalisierung):** Generiertes KI-Food-Cover schärft sich ein, Schritt-Zähler bestätigt die Strukturierung.
-* **Architektur:** Modularisiert in Subkomponenten (`RecipeCoverPreview.tsx`, `RecipePillTags.tsx`, `IngredientsStream.tsx`, `ExtractionProgressBar.tsx`, `ProgressiveRecipeCard.tsx`, `useProgressiveRecipe.ts`) unter 150 Zeilen.
-* **AdMob-Harmonisierung:** Im Free-Tier wechselt die Karte automatisch in den `compact`-Modus, sodass sie harmonisch über dem MREC-Ad-Banner Platz findet.
+* **In-Place Progressive Skeleton Extraction ([`RecipeDetails/`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/index.tsx)):**
+  - Statt einer getrennten Animationsseite oder eines unmountenden Skeleton-Views verbleibt die App beim Start der Extraktion direkt in der vollwertigen Rezept-Detailansicht.
+  - Die Subkomponenten (`RecipeHeader`, `RecipeImageGallery`, `RecipeInfoSection`, `RecipeIngredients`, `RecipeInstructions`) unterstützen das `isExtracting`-Prop nativ und rendern Shimmer-Skeletons für fehlende Felder im identischen DOM-Baum.
+  - Sobald Teildaten via Server-Sent Events (`GET /api/jobs/:id/events`, Preview-Envelope) eintreffen, werden diese live und unterbrechungsfrei in die Rezeptansicht gemergt.
+  - Nach Abschluss der Extraktion wird das fertige Rezept in-place ohne Routenwechsel oder Tab-Sprung aktiviert; alle Aktions-Docks, Portionsskalierer und Checklisten werden nahtlos freigegeben.
+
+* **Nicht schließbares Ad Bottom Sheet für Free-User ([`ExtractionAdSheet.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ExtractionAdSheet.tsx)):**
+  - Für Free-Tier-Nutzer öffnet sich während der aktiven Extraktion ein modales, nicht schließbares HeroUI `Drawer` am unteren Bildschirmrand (`isDismissable={false}`, kein Schließen-Button, kein Drag-Handle).
+  - Enthält zentriert ausschließlich den MREC 300×250 Werbeslot (`ExtractionAdCard.tsx`), dessen Layout dynamisch gemessen wird.
+  - Der Zurück-Button in `RecipeDetails` ist für Free-User während der Extraktion deaktiviert.
+  - Schließt sich bei erfolgreichem Abschluss automatisch (oder leitet bei Fehlschlag/Rate-Limit sauber zurück zum Formular).
+  - Premium-Nutzer sehen kein Werbe-Sheet und können dank Hintergrund-Queueing jederzeit frei navigieren.
 
 ---
 

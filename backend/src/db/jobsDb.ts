@@ -10,6 +10,7 @@ import { db, getDbPool } from './drizzle.js';
 import { jobs } from './schema/jobs.js';
 import { eq, and, inArray, lt, ne, gte, asc, desc, count } from 'drizzle-orm';
 import { recipeToRow } from './recipesMappers.js';
+import { emitJobEvent } from '../jobEvents.js';
 
 export function normalizeUrl(urlStr: string): string {
   let clean = urlStr.replace(/^(https?:\/\/)?(www\.)?/i, '');
@@ -105,13 +106,38 @@ export async function createRemixJob(
 }
 
 export async function updateJob(id: string, updates: Partial<Job>): Promise<void> {
-  await db
+  const [updated] = await db
     .update(jobs)
     .set({
       ...jobToRow(updates),
       updatedAt: new Date(),
     })
-    .where(eq(jobs.id, id));
+    .where(eq(jobs.id, id))
+    .returning();
+
+  if (updated) {
+    let mediaRequest: { videoUrl: string; thumbnailUrl?: string; durationSeconds?: number } | undefined;
+    if (updated.status === 'awaiting_frames' && updated.scrapeMeta) {
+      const meta = updated.scrapeMeta as Record<string, unknown>;
+      const media = meta.media as { kind?: string; videoUrl?: string } | undefined;
+      if (media?.kind === 'client' && media?.videoUrl) {
+        mediaRequest = {
+          videoUrl: media.videoUrl,
+          thumbnailUrl: typeof meta.imageUrl === 'string' ? meta.imageUrl : undefined,
+          durationSeconds: typeof meta.durationSeconds === 'number' ? meta.durationSeconds : undefined,
+        };
+      }
+    }
+
+    emitJobEvent({
+      jobId: id,
+      status: updated.status as JobStatus,
+      progress: (updated.progress as ProgressData | null) ?? null,
+      recipeId: updated.recipeId,
+      error: updated.error,
+      mediaRequest,
+    });
+  }
 }
 
 export async function releaseJobLock(id: string): Promise<void> {
@@ -142,7 +168,15 @@ export async function completeJob(
     'SELECT complete_job($1, $2::jsonb, $3::jsonb) AS recipe_id',
     [jobId, JSON.stringify(recipeToRow(recipe)), llmUsage ? JSON.stringify(llmUsage) : null]
   );
-  return rows[0]?.recipe_id as string;
+  const recipeId = rows[0]?.recipe_id as string;
+  emitJobEvent({
+    jobId,
+    status: 'completed',
+    recipeId,
+    title: recipe.title,
+    progress: { percent: 100, stage: 'finalizing' },
+  });
+  return recipeId;
 }
 
 export async function getJob(id: string, userId?: string): Promise<Job | null> {
@@ -226,6 +260,14 @@ export async function cancelJob(id: string, userId: string): Promise<boolean> {
       inArray(jobs.status, ACTIVE_STATUSES as unknown as string[])
     ))
     .returning({ id: jobs.id });
+
+  if (deleted.length > 0) {
+    emitJobEvent({
+      jobId: id,
+      status: 'cancelled',
+      progress: null,
+    });
+  }
 
   return deleted.length > 0;
 }

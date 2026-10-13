@@ -192,6 +192,7 @@ export interface Recipe {
   imageUrls?: string[];
   imagePrompt?: string | null;
   isAiCover?: boolean;
+  isCoverGenerating?: boolean;
   tags?: string[];
   sourceHandle?: string | null;
   remixPrompt?: string | null;

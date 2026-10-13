@@ -30,6 +30,43 @@ export function useAppHistory({
     setExtraRecipes((prev) => ({ ...prev, [recipeId]: saved }));
   }, []);
 
+  const updateRecipeCover = useCallback((recipeId: string, imageUrl: string, isAiCover = true) => {
+    setHistory((prev) =>
+      prev.map((item) => {
+        if (item.recipeId === recipeId || item.recipe?.id === recipeId) {
+          return {
+            ...item,
+            recipe: {
+              ...item.recipe,
+              imageUrl,
+              imageUrls: [imageUrl, ...(item.recipe.imageUrls || []).filter((u) => u !== imageUrl)],
+              isAiCover,
+              isCoverGenerating: false,
+            },
+          };
+        }
+        return item;
+      })
+    );
+    setExtraRecipes((prev) => {
+      const existing = prev[recipeId];
+      if (!existing) return prev;
+      return {
+        ...prev,
+        [recipeId]: {
+          ...existing,
+          recipe: {
+            ...existing.recipe,
+            imageUrl,
+            imageUrls: [imageUrl, ...(existing.recipe.imageUrls || []).filter((u) => u !== imageUrl)],
+            isAiCover,
+            isCoverGenerating: false,
+          },
+        },
+      };
+    });
+  }, []);
+
   const fetchHistory = useCallback(async () => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
@@ -205,5 +242,6 @@ export function useAppHistory({
     fetchHistory,
     handleExtractionSuccess,
     handleDeleteJob,
+    updateRecipeCover,
   };
 }
