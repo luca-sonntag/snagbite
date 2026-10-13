@@ -24,9 +24,16 @@ export function useRecipeCoverSync({
   );
 
   const [isGenerating, setIsGenerating] = useState(isAwaiting);
+  const [lastRecipeKey, setLastRecipeKey] = useState(() => `${recipe.id || ''}:${isAwaiting}`);
   const activeEventSourceRef = useRef<EventSource | null>(null);
   const activePollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isFinishedRef = useRef(false);
+
+  const currentRecipeKey = `${recipe.id || ''}:${isAwaiting}`;
+  if (currentRecipeKey !== lastRecipeKey) {
+    setLastRecipeKey(currentRecipeKey);
+    setIsGenerating(isAwaiting);
+  }
 
   useEffect(() => {
     if (!isAwaiting || !recipe.id) {

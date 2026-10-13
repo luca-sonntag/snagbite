@@ -61,6 +61,7 @@ async function compressAndConvertToBase64(url: string): Promise<string> {
  * even when the component is re-mounted or the tab is switched.
  */
 export function useCachedImage(originalUrl: string | null | undefined) {
+  const [currentUrl, setCurrentUrl] = useState(originalUrl);
   // Synchronous lazy initializer: if the image is already in the L1 memory
   // cache (imageStore module-level Map), set src immediately — no async, no flash.
   const [src, setSrc] = useState<string | null>(() => {
@@ -73,6 +74,15 @@ export function useCachedImage(originalUrl: string | null | undefined) {
     return getMemoryCachedImage(originalUrl) === null;
   });
   const [error, setError] = useState<Error | null>(null);
+
+  // Synchronously adjust state when originalUrl prop changes to prevent stale render gap
+  if (originalUrl !== currentUrl) {
+    setCurrentUrl(originalUrl);
+    const memorySrc = originalUrl ? getMemoryCachedImage(originalUrl) : null;
+    setSrc(memorySrc);
+    setIsLoading(originalUrl ? memorySrc === null : false);
+    setError(null);
+  }
 
   useEffect(() => {
     if (!originalUrl) {

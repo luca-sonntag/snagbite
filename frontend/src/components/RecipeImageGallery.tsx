@@ -32,23 +32,32 @@ export default function RecipeImageGallery({
   const { t } = useI18n();
   const [activeSlide, setActiveSlide] = useState(0);
 
-  // Derive initial list (excluding local: URLs since they need to be verified asynchronously)
-  const initialImages = (recipe.imageUrls && recipe.imageUrls.length > 0
+  // Derive list of raw URLs declared on the recipe
+  const rawUrls = (recipe.imageUrls && recipe.imageUrls.length > 0
     ? recipe.imageUrls
     : (recipe.imageUrl ? [recipe.imageUrl] : [])
-  ).filter((url) => !url.startsWith('local:'));
+  );
 
-  const [availableImages, setAvailableImages] = useState<string[]>(initialImages);
+  const hasLocal = rawUrls.some((url) => url.startsWith('local:'));
+  const nonLocalUrls = rawUrls.filter((url) => !url.startsWith('local:'));
+
+  const [localVerified, setLocalVerified] = useState<{ key: string; urls: string[] }>({
+    key: rawUrls.join('|'),
+    urls: nonLocalUrls,
+  });
+
+  const currentKey = rawUrls.join('|');
+  const availableImages = hasLocal
+    ? (localVerified.key === currentKey ? localVerified.urls : nonLocalUrls)
+    : rawUrls;
 
   useEffect(() => {
+    if (!hasLocal) return;
+
     let isMounted = true;
     async function checkLocalImages() {
-      const urls = recipe.imageUrls && recipe.imageUrls.length > 0
-        ? recipe.imageUrls
-        : (recipe.imageUrl ? [recipe.imageUrl] : []);
-
       const checks = await Promise.all(
-        urls.map(async (url) => {
+        rawUrls.map(async (url) => {
           if (url.startsWith('local:')) {
             const cached = await getCachedImage(url);
             return cached ? url : null;
@@ -59,14 +68,24 @@ export default function RecipeImageGallery({
 
       const valid = checks.filter((url): url is string => url !== null);
       if (isMounted) {
-        setAvailableImages(valid);
+        setLocalVerified({ key: currentKey, urls: valid });
       }
     }
     checkLocalImages();
     return () => {
       isMounted = false;
     };
-  }, [recipe.imageUrls, recipe.imageUrl]);
+  }, [currentKey, hasLocal]);
+
+  // True if a cover is expected (generating, extracting, or has prompt/URLs)
+  const hasExpectedCover = Boolean(
+    isAwaitingCover ||
+    isExtracting ||
+    recipe.isCoverGenerating ||
+    Boolean(recipe.imagePrompt) ||
+    Boolean(recipe.imageUrl) ||
+    (recipe.imageUrls && recipe.imageUrls.length > 0)
+  );
 
   const images = availableImages;
 
@@ -235,7 +254,7 @@ export default function RecipeImageGallery({
             onClick={() => setFullscreenIndex(0)}
           />
         </div>
-      ) : (isAwaitingCover || isExtracting) ? (
+      ) : hasExpectedCover ? (
         <div className="-mx-4 -mt-4 mb-0 relative group select-none bg-gray-950">
           {overlayHeader}
           <div className="w-full aspect-[4/3] sm:aspect-[16/10] relative overflow-hidden bg-gray-200/90 dark:bg-gray-800/90 animate-pulse flex items-center justify-center">
