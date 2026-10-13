@@ -29,6 +29,7 @@ export function rowToJob(row: any): Job {
     status: (row.status ?? 'pending') as JobStatus,
     sourceUrl: row.sourceUrl ?? row.source_url,
     sourceUrlNormalized: row.sourceUrlNormalized ?? row.source_url_normalized,
+    language: row.language ?? 'de',
     error: row.error,
     progress: (row.progress as ProgressData) ?? null,
     clientFrames: (row.clientFrames ?? row.client_frames) as Job['clientFrames'] ?? null,
@@ -47,6 +48,7 @@ export function jobToRow(updates: Partial<Job>): Record<string, unknown> {
   const row: Record<string, unknown> = {};
   if (updates.status !== undefined) row.status = updates.status;
   if (updates.error !== undefined) row.error = updates.error;
+  if (updates.language !== undefined) row.language = updates.language;
   if (updates.progress !== undefined) row.progress = updates.progress;
   if (updates.clientFrames !== undefined) row.clientFrames = updates.clientFrames;
   if (updates.scrapeMeta !== undefined) row.scrapeMeta = updates.scrapeMeta;
@@ -59,7 +61,12 @@ export function jobToRow(updates: Partial<Job>): Record<string, unknown> {
 
 export const ACTIVE_STATUSES = ['pending', 'scraping', 'processing', 'awaiting_frames'] as const;
 
-export async function createJob(url: string, userId: string, kind: JobKind = 'url'): Promise<Job> {
+export async function createJob(
+  url: string,
+  userId: string,
+  kind: JobKind = 'url',
+  language: string = 'de'
+): Promise<Job> {
   const normalized = normalizeUrl(url);
   try {
     const [inserted] = await db
@@ -70,6 +77,7 @@ export async function createJob(url: string, userId: string, kind: JobKind = 'ur
         status: 'pending',
         sourceUrl: url,
         sourceUrlNormalized: normalized,
+        language,
       })
       .returning();
 

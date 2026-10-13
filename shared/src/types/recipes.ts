@@ -165,6 +165,8 @@ export interface Recipe {
   visibility?: RecipeVisibility;
   origin?: RecipeOrigin;
   sourceUrl?: string | null;
+  sourceUrlNormalized?: string | null;
+  language?: string;
   parentRecipeId?: string | null;
   remixCount?: number;
   title: string;

@@ -21,6 +21,8 @@ export const recipes = pgTable(
     visibility: text('visibility').notNull().default('private'),
     origin: text('origin').notNull().default('url'),
     sourceUrl: text('source_url'),
+    sourceUrlNormalized: text('source_url_normalized'),
+    language: text('language').notNull().default('de'),
     sourceHandle: text('source_handle'),
     parentRecipeId: uuid('parent_recipe_id').references((): AnyPgColumn => recipes.id, {
       onDelete: 'set null',
@@ -61,6 +63,7 @@ export const recipes = pgTable(
     index('recipes_parent_idx').on(table.parentRecipeId),
     index('recipes_category_idx').on(table.category),
     index('recipes_health_score_idx').on(table.healthScore),
+    index('recipes_source_normalized_lang_idx').on(table.sourceUrlNormalized, table.language),
   ]
 );
 
