@@ -46,6 +46,7 @@
 }
 
 @import "@heroui/styles";
+@import "./styles/spotlightTour.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
