@@ -14,6 +14,7 @@ import { ExtractionQueueProvider } from './context/ExtractionQueueContext.tsx'
 import ErrorBoundary from './components/ErrorBoundary.tsx'
 import { SocialProvider } from './context/SocialContext.tsx'
 import { PantryProvider } from './context/PantryContext.tsx'
+import { SpotlightTourProvider } from './context/SpotlightTourContext.tsx'
 import { initNativeUi } from './native'
 import { installConsoleBuffer } from './utils/consoleBuffer'
 import { initOtaUpdates } from './utils/otaUpdater'
@@ -44,9 +45,11 @@ createRoot(document.getElementById('root')!).render(
                     <ExtractionJobsProvider>
                       <SocialProvider>
                         <PantryProvider>
-                          <ErrorBoundary>
-                            <App />
-                          </ErrorBoundary>
+                          <SpotlightTourProvider>
+                            <ErrorBoundary>
+                              <App />
+                            </ErrorBoundary>
+                          </SpotlightTourProvider>
                         </PantryProvider>
                       </SocialProvider>
                     </ExtractionJobsProvider>
