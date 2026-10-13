@@ -10,9 +10,8 @@ import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
 import { getTotalTime } from '../../hooks/useSavedCatalog';
 import { formatDateHuman } from './mealPlannerUtils';
-import { usePantry } from '../../context/PantryContext';
 
-type FilterType = 'all' | 'pantry' | 'quick' | 'favorites';
+type FilterType = 'all' | 'quick' | 'favorites';
 
 export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
   isOpen,
@@ -23,37 +22,13 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
 }) => {
   useModalOverlay(isOpen, onClose);
   const { t, language } = useI18n();
-  const { pantryItems } = usePantry();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
 
   const filteredHistory = useMemo(() => {
     let result = history;
 
-    if (activeFilter === 'pantry') {
-      const pantryNames = new Set(
-        pantryItems
-          .filter((p) => p.amount > 0)
-          .flatMap((p) => [
-            (p.name || '').toLowerCase().trim(),
-            (p.baseName || '').toLowerCase().trim(),
-          ])
-          .filter(Boolean)
-      );
-
-      result = [...result].sort((a, b) => {
-        const getMatchCount = (r: typeof a.recipe) => {
-          let count = 0;
-          r.ingredients?.forEach((i) => {
-            const name = (i.name || '').toLowerCase().trim();
-            const base = (i.baseName || '').toLowerCase().trim();
-            if (pantryNames.has(name) || (base && pantryNames.has(base))) count++;
-          });
-          return count;
-        };
-        return getMatchCount(b.recipe) - getMatchCount(a.recipe);
-      });
-    } else if (activeFilter === 'quick') {
+    if (activeFilter === 'quick') {
       result = result.filter(
         (h) => getTotalTime(h.recipe) > 0 && getTotalTime(h.recipe) <= 25,
       );
@@ -74,7 +49,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
     }
 
     return result;
-  }, [history, searchQuery, activeFilter, pantryItems]);
+  }, [history, searchQuery, activeFilter]);
 
   const handleSelect = (saved: SavedRecipe) => {
     hapticMedium();
@@ -143,20 +118,6 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                   }`}
                 >
                   {t('mealPlanner.pickerFilterAll')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    hapticLight();
-                    setActiveFilter('pantry');
-                  }}
-                  className={`min-h-[40px] sm:min-h-[44px] px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold shrink-0 transition-all duration-150 cursor-pointer border-none touch-manipulation flex items-center gap-1.5 ${
-                    activeFilter === 'pantry'
-                      ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/25 scale-[1.02]'
-                      : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.97] shadow-2xs'
-                  }`}
-                >
-                  <span>{t('shopping.tabPantry')}</span>
                 </button>
                 <button
                   type="button"
