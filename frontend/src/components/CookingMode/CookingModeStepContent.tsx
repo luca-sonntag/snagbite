@@ -82,7 +82,7 @@ export const CookingModeStepContent: React.FC<CookingModeStepContentProps> = ({
           className={getStepSlideClass(slideDirection)}
         >
           {/* Step Description - Warm, readable editorial typography with generous line-spacing and breathing room */}
-          <div className="px-2.5 py-3.5 sm:px-4 sm:py-4.5 flex flex-col text-left">
+          <div id="tour-cooking-step" className="px-2.5 py-3.5 sm:px-4 sm:py-4.5 flex flex-col text-left">
             <div className="text-[22px] sm:text-[26px] md:text-[28px] font-semibold text-gray-800 dark:text-gray-100 tracking-normal leading-[1.8] sm:leading-[1.85] md:leading-[1.9]">
               <RecipeInstructionText
                 variant="focused"
