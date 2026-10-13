@@ -198,7 +198,7 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
     });
     if (!confirmed) return;
 
-    clearChecked(true);
+    clearChecked(false);
     toast.success(t('shopping.transferredToPantryToast', { count }));
   };
 

@@ -20,7 +20,28 @@ interface PantryContextState {
 
 const PantryContext = createContext<PantryContextState | undefined>(undefined);
 
+// Feature toggle: Keep false while pantry is deactivated in UI
+const ENABLE_PANTRY = false;
+
+const DORMANT_PANTRY_STATE: PantryContextState = {
+  pantryItems: [],
+  loading: false,
+  refreshPantry: async () => {},
+  addPantryItem: async () => null,
+  updatePantryItem: async () => null,
+  deletePantryItem: async () => false,
+  getSuggestions: async () => [],
+};
+
 export function PantryProvider({ children }: { children: React.ReactNode }) {
+  if (!ENABLE_PANTRY) {
+    return (
+      <PantryContext.Provider value={DORMANT_PANTRY_STATE}>
+        {children}
+      </PantryContext.Provider>
+    );
+  }
+
   const { session, getAccessToken } = useAuth();
   const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
   const [loading, setLoading] = useState(false);

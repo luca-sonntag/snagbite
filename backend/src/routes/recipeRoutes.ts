@@ -492,12 +492,12 @@ recipeRoutes.post('/recipes/:id/cooked', async (req: Request, res: Response): Pr
       console.warn('Failed to auto-mark meal plan entry as cooked:', mealPlanErr);
     }
 
-    // Automatically deduct consumed ingredients from user's pantry
-    try {
-      await consumePantryForRecipe(req.userId!, recipe);
-    } catch (pantryErr) {
-      console.warn('Failed to auto-consume ingredients from pantry:', pantryErr);
-    }
+    // Automatically deduct consumed ingredients from user's pantry (paused while pantry feature is dormant)
+    // try {
+    //   await consumePantryForRecipe(req.userId!, recipe);
+    // } catch (pantryErr) {
+    //   console.warn('Failed to auto-consume ingredients from pantry:', pantryErr);
+    // }
 
     res.status(200).json({ success: true, ...result });
   } catch (error: unknown) {
