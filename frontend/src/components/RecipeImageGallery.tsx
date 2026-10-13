@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Spinner } from '@heroui/react';
+import { Button } from '@heroui/react';
 import { ArrowLeft, Camera, ChefHat } from 'lucide-react';
 import type { Recipe } from '../types';
 import { useImageGallery } from '../hooks/useImageGallery';
@@ -116,15 +116,6 @@ export default function RecipeImageGallery({
 
       {/* Soft Ambient Scrim for high contrast (Hero style from bottom) */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 via-40% to-transparent pointer-events-none z-10" />
-
-      {/* Centered Loading Spinner during Extraction */}
-      {isExtracting && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[15] animate-fade-in">
-          <div className="p-3.5 rounded-full bg-black/40 backdrop-blur-md shadow-lg border border-white/10 flex items-center justify-center">
-            <Spinner size="lg" color="current" className="text-white" />
-          </div>
-        </div>
-      )}
 
       {/* Bottom Content: Meta row, Title & Creator handle */}
       <div className="absolute bottom-[38px] inset-x-4 sm:bottom-10 sm:inset-x-5 z-20 flex flex-col text-white pointer-events-none">

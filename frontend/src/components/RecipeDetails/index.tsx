@@ -9,6 +9,7 @@ import RecipeIngredients from './RecipeIngredients';
 import RecipeInstructions from './RecipeInstructions';
 import RecipeActionDock from './RecipeActionDock';
 import ExtractionLoadingCard from './ExtractionLoadingCard';
+import ExtractionFloatingLogo from './ExtractionFloatingLogo';
 import CookingMode from '../CookingMode';
 import CookedButton from '../CookedButton';
 import CookedModal from '../CookedModal';
@@ -63,6 +64,8 @@ export default function RecipeDetails({
 
   return (
     <article className="flex flex-col">
+      <ExtractionFloatingLogo isVisible={isExtracting} />
+
       {/* Recipe Title & Gallery */}
       <RecipeHeader
         recipe={recipe}
