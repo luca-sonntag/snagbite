@@ -102,6 +102,7 @@ export default function RecipeDetails({
         totalTimeLabel={totalTimeLabel}
         servings={servings}
         calories={hasNutritionInfo ? metaCalories : null}
+        isExtracting={isExtracting}
       />
 
       {/* Single scrollable layout containing all sections with ample bottom padding for action dock */}

@@ -527,7 +527,7 @@ export function useRecipeExtraction(
       ingredients: [],
       instructions: [],
       equipment: [],
-      servings: 2,
+      servings: 0,
       prepTime: null,
       cookTime: null,
       sourceUrl: meta.mode === 'link' ? meta.sourceLabel : undefined,

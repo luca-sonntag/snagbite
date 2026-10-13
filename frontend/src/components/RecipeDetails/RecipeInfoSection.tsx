@@ -81,7 +81,7 @@ export default function RecipeInfoSection({
         <div className="flex flex-col items-center gap-1.5 py-4 px-2 text-center">
           <Users className={iconClass} />
           <span className={statLabel}>{t('recipe.serves')}</span>
-          {isExtracting && !servings ? (
+          {isExtracting ? (
             <span className="h-5 w-8 bg-gray-200/90 dark:bg-gray-800/90 rounded-lg animate-pulse" />
           ) : (
             <span className={`${statValue} animate-fade-in flex items-center gap-0.5`}>

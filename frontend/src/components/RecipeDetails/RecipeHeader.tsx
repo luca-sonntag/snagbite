@@ -81,7 +81,7 @@ export default function RecipeHeader({
       <div className="relative -mt-6 -mx-4 rounded-t-3xl sm:rounded-t-[2rem] bg-[#f8fafc] dark:bg-gray-950 px-4 pt-5 pb-2 shadow-[0_-4px_12px_-3px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_12px_-3px_rgba(0,0,0,0.25)] flex flex-col gap-3 z-20">
 
         {/* Editorial Quick-Facts Lead-in: Category · Total Time · Servings · Health Score · Flags */}
-        {(recipe.category || totalTimeLabel || (recipe.servings && recipe.servings > 0) || (healthColor && healthLetter) || (flags && flags.length > 0) || (history && history.count > 0)) ? (
+        {!isExtracting && (recipe.category || totalTimeLabel || (recipe.servings && recipe.servings > 0) || (healthColor && healthLetter) || (flags && flags.length > 0) || (history && history.count > 0)) ? (
           <div className="flex flex-wrap items-center gap-2 animate-fade-in">
             {recipe.category && (
               <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold text-xs select-none border-none">
@@ -153,13 +153,6 @@ export default function RecipeHeader({
                 )}
               </button>
             )}
-          </div>
-        ) : isExtracting ? (
-          <div className="flex flex-wrap items-center gap-2 animate-pulse">
-            <div className="h-7 w-24 rounded-full bg-gray-200/90 dark:bg-gray-800/90" />
-            <div className="h-7 w-20 rounded-full bg-gray-200/90 dark:bg-gray-800/90" />
-            <div className="h-7 w-20 rounded-full bg-gray-200/90 dark:bg-gray-800/90" />
-            <div className="w-7 h-7 rounded-full bg-gray-200/90 dark:bg-gray-800/90" />
           </div>
         ) : null}
 
