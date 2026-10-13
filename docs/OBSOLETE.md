@@ -6,6 +6,17 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-14: Reiner `/extract-recipe/frames`-Endpunktname & singulärer Keyframe-Payload
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Ausschließlicher Endpunkt `POST /api/extract-recipe/frames`, der historisch nur Video-Keyframes entgegennahm.
+  * Fehlende Sprach-Transkription im Client-Media-Streaming-Modus: Gesprochene Zutaten und Mengenangaben aus Video-Reels ohne Text-Overlay konnten nicht akustisch erfasst werden.
+* **Ersetzt durch:**
+  * **Kanonischer Endpunkt `POST /api/extract-recipe/client-payload`:** Umfasst nun ganzheitlich sowohl das komprimierte 4x4-Keyframe-Grid als auch ein optionales Whisper-Sprachtranskript (`transcript`).
+  * **Volle Abwärtskompatibilität:** Der alte Endpunkt `POST /api/extract-recipe/frames` bleibt im Backend als vollfunktionsfähiger Alias bestehen, sodass im Umlauf befindliche ältere mobile Android-Builds ohne Unterbrechung weiterarbeiten.
+  * **Sichere Cloudflare-Edge-Transkription:** Der Client lädt den Video-Stream nur noch einmal in den RAM, decodiert Keyframes und fordert parallel über ein 60s-HMAC-Einweg-Ticket (`x-snagbite-ticket`) via Cloudflare Edge Worker eine Whisper-Transkription (`whisper-large-v3-turbo`) an.
+* **Betroffene Dateien:** `backend/src/routes/extractionRoutes.ts`, `backend/src/index.ts`, `backend/src/types/jobs.ts`, `backend/src/queue.ts`, `backend/src/gemini.ts`, `backend/src/prompts/recipeExtractionPrompt.ts`, `frontend/src/utils/videoFrames.ts`, `frontend/src/utils/whisperClient.ts`, `cloudflare-workers/whisper-proxy/`, `docs/architecture/scraping-and-imports.md`, `docs/OBSOLETE.md`.
+
 ### 2026-10-14: Starres 6-Slide Onboarding abgelöst durch schlanken 3-Slide WelcomeGuide & kontextuelle Just-in-Time Spotlight Guides
 
 * **Ersetzter Code / Veraltete Logik:**
