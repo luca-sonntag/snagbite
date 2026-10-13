@@ -1,4 +1,4 @@
-import { Check, Package } from 'lucide-react';
+import { Check } from 'lucide-react';
 import type { AggregatedShoppingItem } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import ShoppingListItem from './ShoppingListItem';
@@ -42,12 +42,6 @@ export default function ShoppingCheckedDrawer({
       </div>
 
       <div className="px-2 pb-2.5 pt-0.5 flex flex-col gap-1">
-        {/* Subtle Clean Flat Pantry Transfer Hint Banner */}
-        <div className="flex items-center gap-2 px-3 py-2 text-[11px] text-gray-600 dark:text-gray-300 bg-black/[0.03] dark:bg-white/[0.05] rounded-xl border-none font-medium">
-          <Package className="w-3.5 h-3.5 shrink-0 text-gray-400 dark:text-gray-500 stroke-[2.2] opacity-80" />
-          <span>{t('shopping.notInPantryYetHint')}</span>
-        </div>
-
         <ul className="flex flex-col gap-0.5 divide-y divide-black/[0.03] dark:divide-white/[0.03]">
           {items.map((item) => {
             const displayKey = `checked-${getItemKey(item)}`;

@@ -10,6 +10,7 @@ interface ShoppingTabProgressProps {
   onClearChecked: () => void;
   onClearAll: () => void;
   isCollapsed?: boolean;
+  hasTabsAbove?: boolean;
 }
 
 export const ShoppingTabProgress: React.FC<ShoppingTabProgressProps> = ({
@@ -19,6 +20,7 @@ export const ShoppingTabProgress: React.FC<ShoppingTabProgressProps> = ({
   onClearChecked,
   onClearAll,
   isCollapsed = false,
+  hasTabsAbove = false,
 }) => {
   const { t } = useI18n();
 
@@ -26,7 +28,11 @@ export const ShoppingTabProgress: React.FC<ShoppingTabProgressProps> = ({
 
   if (isCollapsed) {
     return (
-      <div className="flex items-center justify-between gap-3 pt-2.5 mt-0.5 border-t border-gray-100/80 dark:border-gray-800/80 transition-all duration-200">
+      <div
+        className={`flex items-center justify-between gap-3 transition-all duration-200 ${
+          hasTabsAbove ? 'pt-2.5 mt-0.5 border-t border-gray-100/80 dark:border-gray-800/80' : 'py-1'
+        }`}
+      >
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <span className="text-xs font-bold text-gray-900 dark:text-white shrink-0 tabular-nums">
             {checkedCount}/{totalCount}
@@ -75,7 +81,11 @@ export const ShoppingTabProgress: React.FC<ShoppingTabProgressProps> = ({
   }
 
   return (
-    <div className="flex flex-col gap-3 pt-3.5 border-t border-gray-100/80 dark:border-gray-800/80 transition-all duration-200">
+    <div
+      className={`flex flex-col gap-3 transition-all duration-200 ${
+        hasTabsAbove ? 'pt-3.5 border-t border-gray-100/80 dark:border-gray-800/80' : 'py-1'
+      }`}
+    >
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="min-w-0">
           <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-snug">

@@ -19,6 +19,9 @@ interface ShoppingTabsCardProps {
  * Unified Card merging the Segmented Tab switcher and the Shopping Progress indicators.
  * Everything lives in a single clean flat card container.
  */
+// Feature toggle: Set to true when pantry UI is reactivated
+const SHOW_PANTRY_TAB = false;
+
 export const ShoppingTabsCard: React.FC<ShoppingTabsCardProps> = ({
   activeTab,
   onTabChange,
@@ -31,19 +34,23 @@ export const ShoppingTabsCard: React.FC<ShoppingTabsCardProps> = ({
   onClearAll,
   isCollapsed = false,
 }) => {
-  const showProgress = activeTab === 'shopping' && totalCount > 0;
+  if (!SHOW_PANTRY_TAB && totalCount === 0) {
+    return null;
+  }
 
   return (
     <div className="bg-white dark:bg-gray-900 p-2 sm:p-2.5 rounded-3xl border-none shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col transition-all duration-200">
-      <ShoppingSegmentedTabs
-        activeTab={activeTab}
-        onTabChange={onTabChange}
-        shoppingTotal={shoppingTotal}
-        pantryActiveCount={pantryActiveCount}
-      />
+      {SHOW_PANTRY_TAB && (
+        <ShoppingSegmentedTabs
+          activeTab={activeTab}
+          onTabChange={onTabChange}
+          shoppingTotal={shoppingTotal}
+          pantryActiveCount={pantryActiveCount}
+        />
+      )}
 
-      {showProgress && (
-        <div className="px-1.5 pb-1">
+      {totalCount > 0 && (
+        <div className={SHOW_PANTRY_TAB ? 'px-1.5 pb-1' : 'px-1 py-0.5'}>
           <ShoppingTabProgress
             checkedCount={checkedCount}
             totalCount={totalCount}
@@ -51,6 +58,7 @@ export const ShoppingTabsCard: React.FC<ShoppingTabsCardProps> = ({
             onClearChecked={onClearChecked}
             onClearAll={onClearAll}
             isCollapsed={isCollapsed}
+            hasTabsAbove={SHOW_PANTRY_TAB}
           />
         </div>
       )}
