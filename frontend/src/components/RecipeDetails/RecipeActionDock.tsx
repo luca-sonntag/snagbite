@@ -54,6 +54,7 @@ export default function RecipeActionDock({
       {/* Start Cooking Button */}
       {showStart && (
         <button
+          id="tour-recipe-cook-btn"
           onClick={() => {
             hapticMedium();
             onStartCooking();
@@ -91,6 +92,7 @@ export default function RecipeActionDock({
       {/* Remix Button */}
       {showRemix && (
         <button
+          id="tour-recipe-copilot"
           onClick={() => {
             hapticLight();
             onRemixClick?.();

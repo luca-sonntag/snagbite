@@ -69,7 +69,7 @@ export default function RecipeIngredients({
   return (
     <div className="flex flex-col gap-4 pb-4">
       {/* 1. Unified Cohesive Recipe Card (Servings + Ingredients + Pro Hint + Shopping CTA) */}
-      <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
+      <div id="tour-recipe-ingredients" className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
         {/* 1.1 Servings Header */}
         {isExtracting ? (
           <div className="px-4.5 py-3.5 sm:px-6 flex items-center justify-between gap-3 animate-pulse">
