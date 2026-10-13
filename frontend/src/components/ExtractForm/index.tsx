@@ -17,9 +17,11 @@ import UrlExtractSheet from './UrlExtractSheet';
 import PhotoExtractSheet from './PhotoExtractSheet';
 import ExtractDemoRecipes from './ExtractDemoRecipes';
 import ExtractHelpAccordions from './ExtractHelpAccordions';
+import { useSpotlightTour } from '../../hooks/useSpotlightTour';
 import type { ExtractFormProps } from './types';
 
 export const ExtractForm: React.FC<ExtractFormProps> = ({
+  isActive = true,
   url,
   setUrl,
   urlError,
@@ -47,6 +49,11 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isLinkSheetOpen, setIsLinkSheetOpen] = useState(initialOpenSheet === 'link');
   const [isPhotoSheetOpen, setIsPhotoSheetOpen] = useState(initialOpenSheet === 'photo');
+
+  useSpotlightTour('extract', {
+    enabled: isActive && !isPending && !isLinkSheetOpen && !isPhotoSheetOpen,
+    delayMs: 600,
+  });
 
   React.useEffect(() => {
     if (initialOpenSheet === 'photo') {

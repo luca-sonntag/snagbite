@@ -44,6 +44,7 @@ export const ExtractActionCards: React.FC<ExtractActionCardsProps> = ({
     <div className="flex flex-col gap-3 w-full">
       {/* Action Card 1: Video & Link */}
       <button
+        id="tour-extract-link"
         type="button"
         disabled={isLinkDisabled}
         onClick={() => {
@@ -84,6 +85,7 @@ export const ExtractActionCards: React.FC<ExtractActionCardsProps> = ({
 
       {/* Action Card 2: Foto-Scanner */}
       <button
+        id="tour-extract-photo"
         type="button"
         disabled={disabled}
         onClick={() => {

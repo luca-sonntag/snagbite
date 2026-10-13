@@ -47,6 +47,7 @@ export const ExtractHelpAccordions: React.FC = () => {
     <>
       {/* Share Directly Accordion */}
       <Accordion
+        id="tour-extract-share"
         variant="surface"
         className="w-full bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden"
         defaultExpandedKeys={[]}
