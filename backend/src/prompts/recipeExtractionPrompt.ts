@@ -126,7 +126,12 @@ ${BASE_NAME_INSTRUCTION_PROMPT}
       * Keep "amount" as the full quantity needed to prepare the dish (e.g. 500 ml oil) so the shopping list and cooking steps are accurate.
       * Set "consumedAmount" to the realistic amount actually absorbed into or clinging to the food (e.g. for deep-frying oil: calculate realistic oil uptake of ~10-15% of the food weight or approx. 10-20 ml per serving, so e.g. 20-30 ml for the entire dish; for discarded marinades: approx. 20-40 ml absorbed).
       * Calculate the ingredient's estimated calories, protein, carbs, and fat based on "consumedAmount", NOT the full 500 ml!
-    - For all regular ingredients where the entire quantity is eaten (e.g. normal cooking with 1-2 EL oil, baking, dressing, stir-fries), leave "consumedAmount" null/omitted.`;
+    - For all regular ingredients where the entire quantity is eaten (e.g. normal cooking with 1-2 EL oil, baking, dressing, stir-fries), leave "consumedAmount" null/omitted.
+24. Multi-Component Dishes & Sub-Recipe Grouping (section):
+    - Identify distinct culinary sub-recipes/components: If the dish consists of distinct culinary sub-parts prepared separately (e.g., burger buns/dough, patties, special sauce, toppings; cake batter/base, cream filling, frosting; salad base, dressing, croutons; tacos with filling, salsa, marinade), you MUST populate the "section" field on ingredients AND on instructions.
+    - Synchronized naming: Use identical, concise component names across ingredients and instruction steps (e.g. if ingredients use "Sauce", instruction steps for that sauce MUST use "Sauce"). For final assembly, plating, or serving steps, use "Anrichten" (or "Zusammenbau" / "Assembly").
+    - Naming format: Short, clean culinary terms in the target language (e.g. "Brot", "Sauce", "Patties", "Dressing", "Salat", "Topping", "Marinade", "Glasur", "Teig", "Füllung", "Anrichten"). NEVER use long conversational filler sentences like "Hier sind die Zutaten für die Sauce" or generic terms like "Zutaten" or "Allgemein".
+    - Single-component dishes: If the dish is a simple, unified recipe cooked in a single stream or single pot without distinct sub-recipes (e.g. simple tomato soup, scrambled eggs, smoothie, single-pan stir fry, porridge), leave "section" null or omitted on all ingredients and instruction steps. NEVER invent artificial sections for simple dishes.`;
 }
 
 /**

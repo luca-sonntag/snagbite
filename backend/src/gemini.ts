@@ -150,7 +150,7 @@ const ingredientItemSchemaProperties = {
   },
   section: {
     type: FunctionDeclarationSchemaType.STRING,
-    description: 'Optional culinary section if the recipe explicitly groups ingredients (e.g. "Für den Teig", "Für die Sauce", "Für das Topping"). Leave empty/null if no culinary sections exist.',
+    description: 'Optional culinary section/component name if the recipe groups ingredients into sub-recipes (e.g. "Buns", "Sauce", "Patties", "Dressing", "Salat", "Topping"). Must match the section names used in instructions. Leave empty/null for simple single-component recipes.',
   },
 };
 
@@ -212,6 +212,10 @@ const recipeSchema = {
           parallelPrepHint: {
             type: FunctionDeclarationSchemaType.STRING,
             description: 'Optional chef tip for parallel preparation ONLY during explicit passive waiting times of >= 5 minutes (e.g., while baking in oven, simmering, or chilling). Advises what upcoming steps the user can already prepare in advance (e.g., "Tipp: Während das Hähnchen 20 Min. im Ofen backt: Schon die Burger Buns aufschneiden und die Sauce anrühren."). CRITICAL: NEVER populate this for active hands-on steps (chopping, mixing, assembling, plating), and NEVER output generic phrases like "prepare for next step". Omit if there is no passive waiting time >= 5 min.',
+          },
+          section: {
+            type: FunctionDeclarationSchemaType.STRING,
+            description: 'Optional culinary section/component name that this step belongs to (e.g. "Buns", "Sauce", "Patties", "Anrichten"). Must match the section names used in ingredients. Omit or null for simple single-component dishes.',
           },
         },
         required: ['step', 'description'],
