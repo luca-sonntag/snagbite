@@ -13,10 +13,21 @@ import { recipeToRow } from './recipesMappers.js';
 import { emitJobEvent } from '../jobEvents.js';
 
 export function normalizeUrl(urlStr: string): string {
-  let clean = urlStr.replace(/^(https?:\/\/)?(www\.)?/i, '');
+  if (!urlStr || typeof urlStr !== 'string') return '';
+  let clean = urlStr.trim().replace(/^[{("'\s]+|[})"'\s]+$/g, '');
+  clean = clean.replace(/^(https?:\/\/)?(www\.)?/i, '');
   clean = clean.split('?')[0];
+  clean = clean.split('#')[0];
   clean = clean.endsWith('/') ? clean.slice(0, -1) : clean;
-  return clean.toLowerCase();
+  clean = clean.toLowerCase();
+
+  // Harmonize Instagram paths (/p/{id} and /reels/{id} -> /reel/{id})
+  clean = clean.replace(/^instagram\.com\/(?:p|reels)\//, 'instagram.com/reel/');
+
+  // Harmonize YouTube Shorts (youtu.be/{id} -> youtube.com/shorts/{id})
+  clean = clean.replace(/^youtu\.be\//, 'youtube.com/shorts/');
+
+  return clean;
 }
 
 export function rowToJob(row: any): Job {

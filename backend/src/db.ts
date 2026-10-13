@@ -3,6 +3,7 @@ export * from './db/client.js';
 export * from './db/settingsDb.js';
 export * from './db/jobsDb.js';
 export * from './db/recipesDb.js';
+export * from './db/recipesReuseDb.js';
 export * from './db/collectionsDb.js';
 export * from './db/gamificationDb.js';
 export * from './db/socialDb.js';
