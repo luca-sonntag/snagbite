@@ -37,6 +37,7 @@ import {
 import { handleVideoProxy } from './videoProxy.js';
 import { triggerWorkerTick } from '../queue.js';
 import { subscribeJobEvents } from '../jobEvents.js';
+import { createWhisperTicket } from '../utils/whisperTicket.js';
 
 export const extractionRoutes = Router();
 
@@ -246,9 +247,9 @@ extractionRoutes.post('/extract-recipe/photos', async (req: Request, res: Respon
   }
 });
 
-extractionRoutes.post('/extract-recipe/frames', async (req: Request, res: Response): Promise<void> => {
+async function handleClientPayload(req: Request, res: Response): Promise<void> {
   try {
-    const { jobId, thumbnailBase64, gridBase64, framesBase64 } = req.body;
+    const { jobId, thumbnailBase64, gridBase64, framesBase64, transcript } = req.body;
 
     if (!jobId || typeof jobId !== 'string') {
       throw new AppError('MISSING_FIELD', { params: { field: 'jobId' } });
@@ -272,14 +273,17 @@ extractionRoutes.post('/extract-recipe/frames', async (req: Request, res: Respon
 
     const thumbStr = typeof thumbnailBase64 === 'string' ? thumbnailBase64 : '';
     const gridStr = typeof gridBase64 === 'string' ? gridBase64 : '';
+    const transcriptStr = typeof transcript === 'string' ? transcript.trim().slice(0, 30000) : '';
+
     const totalChars =
       thumbStr.length +
       gridStr.length +
+      transcriptStr.length +
       frames.reduce((acc: number, f: unknown) => acc + (typeof f === 'string' ? f.length : 0), 0);
 
     if (totalChars > MAX_FRAMES_TOTAL_CHARS) {
       throw new AppError('FRAMES_TOO_LARGE', {
-        message: `Combined frame payload of ${totalChars} chars exceeds limit.`,
+        message: `Combined payload of ${totalChars} chars exceeds limit.`,
       });
     }
 
@@ -290,6 +294,7 @@ extractionRoutes.post('/extract-recipe/frames', async (req: Request, res: Respon
         framesBase64: frames.filter(
           (f: unknown): f is string => typeof f === 'string' && f.trim().length > 0
         ),
+        transcript: transcriptStr || undefined,
       },
       status: 'pending',
       progress: { percent: 35, stage: 'queued' },
@@ -300,13 +305,17 @@ extractionRoutes.post('/extract-recipe/frames', async (req: Request, res: Respon
       success: true,
       jobId: job.id,
       status: 'pending',
-      message: 'Video keyframes received and job queued for extraction.',
+      message: 'Client media payload received and job queued for extraction.',
     });
   } catch (error: unknown) {
-    if (!(error instanceof AppError)) console.error('Error receiving client frames:', error);
+    if (!(error instanceof AppError)) console.error('Error receiving client payload:', error);
     sendAppError(res, error);
   }
-});
+}
+
+// Support both the new canonical client-payload endpoint and legacy frames endpoint
+extractionRoutes.post('/extract-recipe/client-payload', handleClientPayload);
+extractionRoutes.post('/extract-recipe/frames', handleClientPayload);
 
 extractionRoutes.get('/jobs/:id', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -322,7 +331,13 @@ extractionRoutes.get('/jobs/:id', async (req: Request, res: Response): Promise<v
       throw new AppError('JOB_NOT_FOUND');
     }
 
-    let mediaRequest: { videoUrl: string; thumbnailUrl?: string; durationSeconds?: number } | undefined;
+    let mediaRequest: {
+      videoUrl: string;
+      thumbnailUrl?: string;
+      durationSeconds?: number;
+      whisperTicket?: string;
+      whisperEndpoint?: string;
+    } | undefined;
     if (job.status === 'awaiting_frames' && job.scrapeMeta) {
       const meta = job.scrapeMeta as Record<string, unknown>;
       const media = meta.media as { kind?: string; videoUrl?: string } | undefined;
@@ -331,6 +346,8 @@ extractionRoutes.get('/jobs/:id', async (req: Request, res: Response): Promise<v
           videoUrl: media.videoUrl,
           thumbnailUrl: typeof meta.imageUrl === 'string' ? meta.imageUrl : undefined,
           durationSeconds: typeof meta.durationSeconds === 'number' ? meta.durationSeconds : undefined,
+          whisperTicket: createWhisperTicket({ jobId: job.id, userId: req.userId! }),
+          whisperEndpoint: config.CLOUDFLARE_WHISPER_ENDPOINT || undefined,
         };
       }
     }
