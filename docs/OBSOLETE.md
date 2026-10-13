@@ -6,6 +6,23 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-14: Deaktivierung & Entkopplung des Vorrat-Features (Pantry Dormant Mode)
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Direkte Einblendung des Vorrat-Tabs (`tabPantry`), Vorrats-Zähler und der [`PantryView`](file:///C:/Users/lucas/source/repos/cookbook/frontend/src/components/Pantry/PantryView.tsx) in der Einkaufsliste ([`ShoppingList/index.tsx`](file:///C:/Users/lucas/source/repos/cookbook/frontend/src/components/ShoppingList/index.tsx)).
+  * Automatischer Vorrats-Abgleich und Hintergrund-Requests (`GET /api/pantry`, `GET /api/pantry/suggestions`) im [`PantryContext`](file:///C:/Users/lucas/source/repos/cookbook/frontend/src/context/PantryContext.tsx) bei Session-Start oder Cook-Events.
+  * Automatischer Transfer abgehakter Einkaufsartikel in den Vorrat (`transferToPantry = true`) beim Klick auf "Einkauf abschließen".
+  * Dialog *"Einkauf in Vorrat übernehmen?"*, Toast *"✓ Zutaten in den Vorrat übernommen"* sowie die Vorrats-Hinweise in [`ShoppingAllDoneState.tsx`](file:///C:/Users/lucas/source/repos/cookbook/frontend/src/components/ShoppingList/ShoppingAllDoneState.tsx) und [`ShoppingCheckedDrawer.tsx`](file:///C:/Users/lucas/source/repos/cookbook/frontend/src/components/ShoppingList/ShoppingCheckedDrawer.tsx).
+  * Filter-Chip `'pantry'` ("Vorrat") im Rezept-Picker des Wochenplaners ([`RecipePickerModal.tsx`](file:///C:/Users/lucas/source/repos/cookbook/frontend/src/components/MealPlanner/RecipePickerModal.tsx)).
+  * Automatische Vorrats-Abbuchung beim Kochen im Backend ([`backend/src/routes/recipeRoutes.ts`](file:///C:/Users/lucas/source/repos/cookbook/backend/src/routes/recipeRoutes.ts)).
+* **Ersetzt durch:**
+  * **Reversibler Dormant-Mode (`ENABLE_PANTRY = false`):** Die Komponenten (`PantryView`, `PantryAddModal`, `PantrySuggestionsModal`, `PantryItemCard`) und DB-Tabellen (`pantry_items`) bleiben vollständig im Codebase erhalten, werden jedoch im UI unsichtbar geschaltet und tätigen keine Netzwerkaufrufe.
+  * **Schlanke Einkaufsliste:** Zeigt direkt die Fortschrittsanzeige ohne überflüssigen 1-Tab-Switcher; Abschluss-Dialog fragt neutral nach dem Leeren der erledigten Artikel; `transferToPantry` steht standardmäßig auf `false`.
+  * **Bereinigte Zähler:** `shoppingListCount` im App-Shell zählt nur noch die tatsächlich zu kaufenden Artikel ohne `inPantry`-Verdopplung.
+* **Betroffene Dateien:** `frontend/src/context/PantryContext.tsx`, `frontend/src/hooks/useShoppingList.ts`, `frontend/src/components/ShoppingList/index.tsx`, `frontend/src/components/ShoppingList/ShoppingTabsCard.tsx`, `frontend/src/components/ShoppingList/ShoppingStickyHeader.tsx`, `frontend/src/components/ShoppingList/ShoppingTabProgress.tsx`, `frontend/src/components/ShoppingList/ShoppingAllDoneState.tsx`, `frontend/src/components/ShoppingList/ShoppingCheckedDrawer.tsx`, `frontend/src/components/ShoppingList/ShoppingListView.tsx`, `frontend/src/components/MealPlanner/RecipePickerModal.tsx`, `frontend/src/App.tsx`, `frontend/src/i18n.ts`, `backend/src/routes/recipeRoutes.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-12: Hardcodierte Gemini-Modellstrings und veraltete `gemini-2.5-flash-lite`-Fallbacks
 
 * **Ersetzter Code / Veraltete Logik:**
