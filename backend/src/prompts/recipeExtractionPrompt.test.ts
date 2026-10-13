@@ -60,6 +60,19 @@ test('recipeExtractionPrompt: buildRecipeExtractionUserPrompt', async (t) => {
 
     assert.ok(!prompt.includes('Description/Caption:'));
     assert.ok(!prompt.includes('Website Content:'));
+    assert.ok(!prompt.includes('Spoken Voiceover Transcript'));
     assert.ok(prompt.includes('Task: Analyze the attached source content'));
   });
+
+  await t.test('incorporates spoken voiceover transcript when provided', () => {
+    const prompt = buildRecipeExtractionUserPrompt({
+      caption: 'Quick reel caption',
+      transcript: 'Nehmt 200g Mehl und 2 Eier, verquirlt das Ganze gut.',
+    });
+
+    assert.ok(prompt.includes('Spoken Voiceover Transcript (from Video Audio):'));
+    assert.ok(prompt.includes('Nehmt 200g Mehl und 2 Eier'));
+    assert.ok(prompt.includes('Quick reel caption'));
+  });
 });
+

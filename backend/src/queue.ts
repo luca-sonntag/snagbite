@@ -387,7 +387,11 @@ async function processJob(job: Job): Promise<void> {
         console.log(`[Job ${jobId}] [DEV] Saved grid image to ${devGridPath}`);
       }
 
-      clientFramesInput = { thumbnail: thumbBuf, gridBuffer: clientGridBuffer };
+      clientFramesInput = {
+        thumbnail: thumbBuf,
+        gridBuffer: clientGridBuffer,
+        transcript: job.clientFrames.transcript,
+      };
     }
 
     // 3. Mark job as processing

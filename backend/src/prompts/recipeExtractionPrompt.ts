@@ -137,11 +137,16 @@ export function buildRecipeExtractionUserPrompt(params: {
   caption?: string;
   htmlContent?: string;
   visualContextClause?: string;
+  transcript?: string;
 }): string {
   const sections: string[] = [];
 
   if (params.visualContextClause?.trim()) {
     sections.push(`Attached Source Media:\nThe request includes audio/video/image attachments${params.visualContextClause}.`);
+  }
+
+  if (params.transcript?.trim()) {
+    sections.push(`Spoken Voiceover Transcript (from Video Audio):\n"""\n${params.transcript.trim()}\n"""`);
   }
 
   if (params.caption?.trim()) {

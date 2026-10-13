@@ -381,6 +381,7 @@ export interface ClientFramesInput {
   thumbnail?: Buffer;
   frames?: Buffer[];
   gridBuffer?: Buffer;
+  transcript?: string;
 }
 
 export interface ExtractRecipeResult {
@@ -526,6 +527,7 @@ export async function extractRecipe(
       caption,
       htmlContent,
       visualContextClause,
+      transcript: clientFrames?.transcript,
     });
 
     contentParts.push(userPrompt);
