@@ -9,13 +9,10 @@ import {
   Check,
   ChevronRight,
   ArrowLeft,
-  Folder,
-  Star,
-  Tag,
 } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useModalOverlay } from '../context/OverlayStackContext';
-import { ShareStep2Mockup, ShareStep3Mockup } from './ShareMockups';
+import { ShareStep2Mockup } from './ShareMockups';
 import { hapticLight, hapticSelection, hapticMedium } from '../utils/haptics';
 
 interface WelcomeGuideProps {
@@ -25,65 +22,20 @@ interface WelcomeGuideProps {
 
 // ── Per-slide illustrations (purely decorative, no real data) ───────────────
 
-const WelcomeArt = () => (
-  <div className="relative">
-    <div className="absolute inset-0 rounded-[2rem] bg-emerald-500/25 blur-2xl" />
-    <div className="relative w-28 h-28 rounded-[2rem] bg-white dark:bg-gray-900 border-none flex items-center justify-center shadow-xl">
-      <img src="/icon-512.png" alt="" className="w-16 h-16 object-contain rounded-2xl" />
-    </div>
-    <div className="absolute -top-2 -right-2 w-9 h-9 rounded-full bg-amber-400 flex items-center justify-center shadow-lg shadow-amber-500/30">
-      <Sparkles className="w-5 h-5 text-white fill-white" />
-    </div>
-  </div>
-);
-
-const ImportArt = () => (
-  <div className="flex items-center justify-center gap-3">
-    <ShareStep2Mockup />
-    <ShareStep3Mockup />
-  </div>
-);
-
-const CookbookArt = () => (
-  <div className="grid grid-cols-2 gap-3 w-60">
-    {[0, 1].map((i) => (
-      <div
-        key={i}
-        className="rounded-2xl bg-white dark:bg-gray-900 border-none shadow-sm overflow-hidden"
-      >
-        <div className="h-20 bg-gradient-to-br from-emerald-500/25 to-teal-500/10 flex items-center justify-center">
-          <ChefHat className="w-7 h-7 text-emerald-500/50" />
-        </div>
-        <div className="p-2.5 flex flex-col gap-1.5">
-          <div className="h-2 w-3/4 rounded bg-black/10 dark:bg-white/10" />
-          <div className="h-1.5 w-1/2 rounded bg-black/5 dark:bg-white/5" />
-        </div>
+const ExtractHeroArt = () => (
+  <div className="flex items-center justify-center gap-3.5">
+    <div className="relative">
+      <div className="absolute inset-0 rounded-[2rem] bg-emerald-500/25 blur-2xl" />
+      <div className="relative w-24 h-24 rounded-[2rem] bg-white dark:bg-gray-900 border-none flex items-center justify-center shadow-xl">
+        <img src="/icon-512.png" alt="" className="w-14 h-14 object-contain rounded-2xl" />
       </div>
-    ))}
+      <div className="absolute -top-1.5 -right-1.5 w-8 h-8 rounded-full bg-amber-400 flex items-center justify-center shadow-lg shadow-amber-500/30">
+        <Sparkles className="w-4 h-4 text-white fill-white" />
+      </div>
+    </div>
+    <ShareStep2Mockup />
   </div>
 );
-
-const OrganizeArt = () => {
-  const chips = [
-    { icon: Folder, label: 'w-14', tint: 'bg-emerald-500/15 text-emerald-500' },
-    { icon: Star, label: 'w-10', tint: 'bg-amber-500/15 text-amber-500' },
-    { icon: Tag, label: 'w-12', tint: 'bg-teal-500/15 text-teal-500' },
-    { icon: Folder, label: 'w-9', tint: 'bg-purple-500/15 text-purple-500' },
-  ];
-  return (
-    <div className="w-60 flex flex-wrap justify-center gap-2.5">
-      {chips.map(({ icon: Icon, label, tint }, i) => (
-        <div
-          key={i}
-          className={`flex items-center gap-2 px-3.5 py-2.5 rounded-full border-none shadow-sm ${tint}`}
-        >
-          <Icon className="w-4 h-4 shrink-0" strokeWidth={2} />
-          <div className={`h-2 rounded bg-current opacity-40 ${label}`} />
-        </div>
-      ))}
-    </div>
-  );
-};
 
 const ShoppingArt = () => (
   <div className="w-60 rounded-2xl bg-white dark:bg-gray-900 border-none shadow-sm p-3.5 flex flex-col gap-3">
@@ -95,9 +47,7 @@ const ShoppingArt = () => (
       <div key={i} className="flex items-center gap-2.5">
         <div
           className={`w-4 h-4 rounded-md border-none flex items-center justify-center shrink-0 ${
-            checked
-              ? 'bg-emerald-500'
-              : 'bg-black/10 dark:bg-white/15'
+            checked ? 'bg-emerald-500' : 'bg-black/10 dark:bg-white/15'
           }`}
         >
           {checked && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
@@ -136,10 +86,7 @@ const CookingArt = () => {
 };
 
 const SLIDES = [
-  { key: 'welcome', Art: WelcomeArt },
-  { key: 'import', Art: ImportArt },
-  { key: 'cookbook', Art: CookbookArt },
-  { key: 'organize', Art: OrganizeArt },
+  { key: 'import', Art: ExtractHeroArt },
   { key: 'shopping', Art: ShoppingArt },
   { key: 'cooking', Art: CookingArt },
 ] as const;
@@ -151,15 +98,16 @@ export default function WelcomeGuide({ onClose }: WelcomeGuideProps) {
 
   const isLast = index === SLIDES.length - 1;
 
-  // Swipe/keyboard advance stops at the last slide; only the CTA button closes.
   const advance = useCallback(() => {
     hapticSelection();
     setIndex((i) => Math.min(i + 1, SLIDES.length - 1));
   }, []);
+
   const back = useCallback(() => {
     hapticSelection();
     setIndex((i) => Math.max(i - 1, 0));
   }, []);
+
   const handleNext = useCallback(() => {
     if (isLast) {
       hapticMedium();
@@ -177,7 +125,6 @@ export default function WelcomeGuide({ onClose }: WelcomeGuideProps) {
     }
   });
 
-  // Scroll-lock + keyboard controls (mirrors PremiumModal's overlay behavior).
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     const onKey = (e: KeyboardEvent) => {
