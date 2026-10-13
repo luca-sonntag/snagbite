@@ -29,6 +29,8 @@ create table if not exists public.recipes (
   origin                 text not null default 'url'
                            check (origin in ('url', 'photo', 'remix')),
   source_url             text,                       -- NULL for origin='photo'
+  source_url_normalized  text,
+  language               text not null default 'de',
   source_handle          text,                       -- e.g. the Instagram creator
   parent_recipe_id       uuid references public.recipes(id) on delete set null,
   remix_prompt           text,
@@ -89,6 +91,9 @@ create index if not exists recipes_category_idx     on public.recipes (category)
   where category is not null;
 create index if not exists recipes_health_score_idx on public.recipes (health_score desc)
   where health_score is not null;
+create index if not exists recipes_source_normalized_lang_idx
+  on public.recipes (source_url_normalized, language)
+  where source_url_normalized is not null;
 
 -- ── jobs: the extraction task ───────────────────────────────────────────────
 -- One row per extraction attempt. Job rows are NEVER deleted: they are the
@@ -106,6 +111,7 @@ create table if not exists public.jobs (
                                             'awaiting_frames', 'completed', 'failed', 'cancelled')),
   source_url            text not null,               -- 'photo://<uploadId>' when kind='photo'
   source_url_normalized text,
+  language              text not null default 'de',
   -- Remix INPUT: which recipe this job remixes, and with what instruction.
   parent_recipe_id      uuid references public.recipes(id) on delete set null,
   remix_prompt          text,
@@ -281,6 +287,7 @@ begin
   -- NOT NULL columns are backstopped here rather than relying on the caller.
   v_recipe.title       := coalesce(nullif(v_recipe.title, ''), 'Rezept');
   v_recipe.visibility  := coalesce(v_recipe.visibility, case when v_kind = 'url' then 'public' else 'private' end);
+  v_recipe.language    := coalesce(v_recipe.language, 'de');
   v_recipe.is_recipe   := coalesce(v_recipe.is_recipe, true);
   v_recipe.tags        := coalesce(v_recipe.tags, '{}');
   v_recipe.equipment   := coalesce(v_recipe.equipment, '{}');

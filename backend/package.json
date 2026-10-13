@@ -35,6 +35,8 @@
     "db:migrate-data:dev": "tsx src/scripts/db/migrateDataToPostgres.ts --dev",
     "db:migrate-data:prod": "tsx src/scripts/db/migrateDataToPostgres.ts --prod",
     "db:migrate-data:dry": "tsx src/scripts/db/migrateDataToPostgres.ts --dev --dry-run",
+    "db:backfill-recipe-urls": "tsx src/scripts/db/backfillRecipeSourceUrlNormalized.ts --dev",
+    "db:backfill-recipe-urls:prod": "tsx src/scripts/db/backfillRecipeSourceUrlNormalized.ts --prod",
     "auth:migrate": "tsx src/scripts/auth/migrateUsersToBetterAuth.ts --dev",
     "auth:migrate:dev": "tsx src/scripts/auth/migrateUsersToBetterAuth.ts --dev",
     "auth:migrate:prod": "tsx src/scripts/auth/migrateUsersToBetterAuth.ts --prod",
