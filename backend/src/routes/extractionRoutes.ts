@@ -19,6 +19,9 @@ import {
   getFreeMaxSavedRecipes,
   getRewardedAdBonusCredits,
   addToLibrary,
+  isInLibrary,
+  findReusableRecipe,
+  normalizeUrl,
 } from '../db.js';
 import { db } from '../db/drizzle.js';
 import { user as userTable } from '../db/schema/auth.js';
@@ -45,6 +48,35 @@ extractionRoutes.get('/extract-recipe/proxy-video', handleVideoProxy);
 const MAX_CLIENT_FRAMES = 24;
 const MAX_FRAMES_TOTAL_CHARS = 12 * 1024 * 1024;
 
+export function resolveTargetLanguage(bodyLang?: unknown, headerLang?: string): string {
+  if (typeof bodyLang === 'string' && bodyLang.trim()) {
+    return bodyLang.trim().toLowerCase().startsWith('en') ? 'en' : 'de';
+  }
+  if (typeof headerLang === 'string' && headerLang.trim().toLowerCase().startsWith('en')) {
+    return 'en';
+  }
+  return 'de';
+}
+
+export async function assertCookbookCapacity(userId: string): Promise<void> {
+  let user = null;
+  try {
+    user = await fetchAndSyncUser(userId);
+  } catch (err) {
+    console.warn(`Failed to fetch user metadata for cookbook capacity check:`, err);
+  }
+
+  const premium = isPremiumUser(user);
+  if (!premium) {
+    const savedCount = await countLibraryEntries(userId);
+    const isAlpha = user?.app_metadata?.tier === 'alpha';
+    const limit = isAlpha ? await getAlphaMaxSavedRecipes() : await getFreeMaxSavedRecipes();
+    if (limit >= 0 && savedCount >= limit) {
+      throw new AppError('COOKBOOK_FULL', { params: { count: savedCount, limit } });
+    }
+  }
+}
+
 async function enforceExtractionQuota(req: Request): Promise<void> {
   const userId = req.userId!;
   let user = null;
@@ -53,8 +85,6 @@ async function enforceExtractionQuota(req: Request): Promise<void> {
   } catch (err) {
     console.warn(`Failed to fetch user metadata for gating checks:`, err);
   }
-
-  const premium = isPremiumUser(user);
 
   await cleanStaleJobsForUser(userId).catch((err) =>
     console.warn(`[extraction] Failed to clean stale jobs for user ${userId}:`, err)
@@ -66,14 +96,7 @@ async function enforceExtractionQuota(req: Request): Promise<void> {
     throw new AppError('ACTIVE_JOB_EXISTS', { params: { count: activeCount } });
   }
 
-  if (!premium) {
-    const savedCount = await countLibraryEntries(userId);
-    const isAlpha = user?.app_metadata?.tier === 'alpha';
-    const limit = isAlpha ? await getAlphaMaxSavedRecipes() : await getFreeMaxSavedRecipes();
-    if (limit >= 0 && savedCount >= limit) {
-      throw new AppError('COOKBOOK_FULL', { params: { count: savedCount, limit } });
-    }
-  }
+  await assertCookbookCapacity(userId);
 
   const limit = user ? await resolveUserRateLimit(user) : await getFreeMaxExtractions();
 
@@ -120,7 +143,7 @@ async function enforceExtractionQuota(req: Request): Promise<void> {
 
 extractionRoutes.post('/extract-recipe', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { url } = req.body;
+    const { url, language: bodyLanguage, force } = req.body;
 
     if (!url || typeof url !== 'string') {
       throw new AppError('MISSING_FIELD', { params: { field: 'url' } });
@@ -149,16 +172,26 @@ extractionRoutes.post('/extract-recipe', async (req: Request, res: Response): Pr
       throw new AppError('INVALID_URL', { message: 'URL failed to parse.' });
     }
 
-    if (process.env.NODE_ENV === 'production') {
-      const existingRecipeId = await findExtractedRecipeIdByUrl(cleanUrl, req.userId!);
-      if (existingRecipeId) {
-        await addToLibrary(req.userId!, existingRecipeId, 'extraction');
+    const normalizedUrl = normalizeUrl(cleanUrl);
+    const targetLanguage = resolveTargetLanguage(bodyLanguage, req.header('accept-language'));
+
+    // Cross-user instant recipe reuse: check if recipe already exists in target language (unless force re-extraction)
+    if (!force) {
+      const reusableRecipe = await findReusableRecipe(normalizedUrl, targetLanguage);
+      if (reusableRecipe) {
+        const alreadyInCookbook = await isInLibrary(req.userId!, reusableRecipe.id!);
+        if (!alreadyInCookbook) {
+          await assertCookbookCapacity(req.userId!);
+          await addToLibrary(req.userId!, reusableRecipe.id!, 'extraction');
+        }
+
         res.status(200).json({
           success: true,
-          recipeId: existingRecipeId,
+          recipeId: reusableRecipe.id,
+          recipe: reusableRecipe,
           status: 'completed',
           isCached: true,
-          message: 'Recipe already extracted successfully.',
+          message: 'Recipe reused from existing extraction.',
         });
         return;
       }
@@ -177,7 +210,7 @@ extractionRoutes.post('/extract-recipe', async (req: Request, res: Response): Pr
 
     await enforceExtractionQuota(req);
 
-    const job = await createJob(cleanUrl, req.userId!);
+    const job = await createJob(cleanUrl, req.userId!, 'url', targetLanguage);
     triggerWorkerTick();
 
     res.status(202).json({

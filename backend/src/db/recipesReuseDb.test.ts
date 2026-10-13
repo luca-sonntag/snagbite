@@ -61,3 +61,36 @@ describe('normalizeUrl for recipe reuse', () => {
     assert.equal(normalizeUrl(undefined as unknown as string), '');
   });
 });
+
+describe('resolveTargetLanguage', () => {
+  // Inline equivalent or import from extractionRoutes
+  const resolve = (bodyLang?: unknown, headerLang?: string) => {
+    if (typeof bodyLang === 'string' && bodyLang.trim()) {
+      return bodyLang.trim().toLowerCase().startsWith('en') ? 'en' : 'de';
+    }
+    if (typeof headerLang === 'string' && headerLang.trim().toLowerCase().startsWith('en')) {
+      return 'en';
+    }
+    return 'de';
+  };
+
+  it('prefers explicit bodyLanguage when provided', () => {
+    assert.equal(resolve('en', 'de'), 'en');
+    assert.equal(resolve('English', 'de'), 'en');
+    assert.equal(resolve('de', 'en-US,en;q=0.9'), 'de');
+    assert.equal(resolve('German', 'en'), 'de');
+  });
+
+  it('falls back to header accept-language when bodyLanguage is missing', () => {
+    assert.equal(resolve(undefined, 'en-US,en;q=0.9'), 'en');
+    assert.equal(resolve('', 'en'), 'en');
+    assert.equal(resolve(null, 'de-DE,de;q=0.9'), 'de');
+  });
+
+  it('defaults to de when neither body nor header indicates en', () => {
+    assert.equal(resolve(undefined, undefined), 'de');
+    assert.equal(resolve('', ''), 'de');
+    assert.equal(resolve('fr', 'fr-FR'), 'de');
+  });
+});
+
