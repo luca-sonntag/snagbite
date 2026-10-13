@@ -224,7 +224,7 @@ export function useShoppingList() {
     }
   };
 
-  const clearChecked = async (transferToPantry = true) => {
+  const clearChecked = async (transferToPantry = false) => {
     setShoppingList((prev) => prev.filter((item) => !item.checked));
     const token = await getAccessToken();
     if (token) {
