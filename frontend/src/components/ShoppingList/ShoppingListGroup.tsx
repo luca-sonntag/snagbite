@@ -38,7 +38,7 @@ export default function ShoppingListGroup({
   if (groupedCategories.length === 0) return null;
 
   return (
-    <div className="rounded-2xl md:rounded-3xl bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none p-3 sm:p-4 transition-all flex flex-col gap-0">
+    <div id="tour-shopping-groups" className="rounded-2xl md:rounded-3xl bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none p-3 sm:p-4 transition-all flex flex-col gap-0">
       {groupedCategories.map((group, index) => {
         const isGroupCollapsing = collapsingKeys.has(`group-${group.category}`);
         const theme = getCategoryTheme(group.category);
@@ -75,11 +75,12 @@ export default function ShoppingListGroup({
               </button>
             </div>
             <ul className="flex flex-col gap-0.5">
-              {group.items.map((item) => {
+              {group.items.map((item, itemIdx) => {
                 const displayKey = `unchecked-${getItemKey(item)}`;
                 const pantryStockMatch = findPantryStockMatch(item, pantryItems);
+                const isFirstEverItem = index === 0 && itemIdx === 0;
 
-                return (
+                const itemElement = (
                   <ShoppingListItem
                     key={displayKey}
                     item={item}
@@ -92,6 +93,16 @@ export default function ShoppingListGroup({
                     formatItemAmount={formatItemAmount}
                   />
                 );
+
+                if (isFirstEverItem) {
+                  return (
+                    <div key={displayKey} id="tour-shopping-item">
+                      {itemElement}
+                    </div>
+                  );
+                }
+
+                return itemElement;
               })}
             </ul>
           </div>
