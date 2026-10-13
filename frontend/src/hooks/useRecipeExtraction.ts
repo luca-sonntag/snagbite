@@ -578,6 +578,12 @@ export function useRecipeExtraction(
       if (isPremium) {
         if (data.status === 'completed' && data.recipeId) {
           // Already extracted / cached: directly open recipe without creating a dummy background job
+          if (data.isCached) {
+            toast.success(t('toast.recipeReusedTitle'), {
+              description: t('toast.recipeReusedDesc'),
+              duration: 3500,
+            });
+          }
           if (meta.mode === 'link') {
             removeFromWaitlist(meta.sourceLabel);
             removeFailedJob(meta.sourceLabel);
@@ -618,6 +624,12 @@ export function useRecipeExtraction(
           stopActivePolling();
           activePollingJobIdRef.current = data.jobId ?? null;
           if (data.recipeId) {
+            if (data.isCached) {
+              toast.success(t('toast.recipeReusedTitle'), {
+                description: t('toast.recipeReusedDesc'),
+                duration: 3500,
+              });
+            }
             if (meta.mode === 'link') {
               removeFromWaitlist(meta.sourceLabel);
               removeFailedJob(meta.sourceLabel);
@@ -687,15 +699,15 @@ export function useRecipeExtraction(
     }
   }, [getAccessToken, startPolling, fetchLimitStatus, isPremium, addJob, runSimulatedProgress, fetchCompletedRecipe, onHistoryRefresh, stopActivePolling, onExtractionSuccess, addToQueue, toast, t, language, addFailedJob, openQueueSheet]);
 
-  const triggerExtraction = useCallback(async (targetUrl: string) => {
+  const triggerExtraction = useCallback(async (targetUrl: string, force = false) => {
     const cleanUrl = targetUrl.trim();
     if (!validateUrl(cleanUrl)) return;
 
-    await submitExtraction('/api/extract-recipe', async () => ({ url: cleanUrl }), {
+    await submitExtraction('/api/extract-recipe', async () => ({ url: cleanUrl, language, force }), {
       mode: 'link',
       sourceLabel: cleanUrl,
     });
-  }, [submitExtraction, validateUrl]);
+  }, [submitExtraction, validateUrl, language]);
 
   /**
    * Submits the currently selected photos of a physical recipe source. They are
