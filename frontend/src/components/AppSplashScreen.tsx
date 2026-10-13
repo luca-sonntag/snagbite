@@ -73,17 +73,12 @@ export default function AppSplashScreen({ isReady, onFinished }: AppSplashScreen
 
       {/* Main Logo Container with Gentle Breathing */}
       <div className="relative z-10 flex flex-col items-center">
-        <div className="relative w-22 h-22 rounded-3xl bg-white dark:bg-gray-900 p-4 shadow-[0_12px_36px_rgba(16,185,129,0.22)] animate-logo-breathe overflow-hidden flex items-center justify-center">
+        <div className="relative w-22 h-22 animate-logo-breathe flex items-center justify-center">
           <img
-            src="/logo-login.png"
+            src="/icon-512.png"
             alt="Snagbite"
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain drop-shadow-[0_12px_28px_rgba(16,185,129,0.25)]"
           />
-
-          {/* Diagonal Recipe Shimmer Sweep */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
-            <div className="w-full h-full bg-gradient-to-r from-transparent via-white/40 dark:via-white/20 to-transparent animate-shimmer-sweep" />
-          </div>
         </div>
 
         {/* App Title */}
