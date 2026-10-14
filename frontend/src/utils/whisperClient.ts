@@ -1,3 +1,5 @@
+import { extractAudioWavBlob } from './audioExtractor';
+
 /**
  * Client module for requesting audio transcription from Cloudflare Edge Whisper proxy
  * using ephemeral HMAC tickets.
@@ -13,7 +15,9 @@ export interface TranscribeAudioParams {
 }
 
 /**
- * Transcribes audio from an in-memory video or audio buffer using the Cloudflare Edge Worker.
+ * Transcribes audio from an in-memory video buffer using the Cloudflare Edge Worker.
+ * Attempts client-side audio extraction to a lightweight 16 kHz mono WAV (saving ~90-95% bandwidth).
+ * Falls back safely to sending the raw video container if audio extraction fails.
  * Safe and fail-soft: Never throws, logs warnings, and returns undefined if the request fails or times out.
  */
 export async function transcribeVideoAudio(params: TranscribeAudioParams): Promise<string | undefined> {
@@ -32,11 +36,28 @@ export async function transcribeVideoAudio(params: TranscribeAudioParams): Promi
 
   try {
     const formData = new FormData();
-    const blob = new Blob([videoBuffer], { type: 'video/mp4' });
-    formData.append('file', blob, 'video.mp4');
+
+    // Extract lightweight 16 kHz mono audio WAV (~90-95% smaller payload)
+    let uploadBlob: Blob;
+    let uploadFilename: string;
+
+    const wavBlob = await extractAudioWavBlob(videoBuffer);
+    if (wavBlob) {
+      console.log(
+        `[whisperClient] Extracted 16kHz mono audio (${(wavBlob.size / 1024).toFixed(1)} KB) from video stream.`
+      );
+      uploadBlob = wavBlob;
+      uploadFilename = 'audio.wav';
+    } else {
+      console.log('[whisperClient] Audio extraction unavailable, falling back to raw video container.');
+      uploadBlob = new Blob([videoBuffer], { type: 'video/mp4' });
+      uploadFilename = 'video.mp4';
+    }
+
+    formData.append('file', uploadBlob, uploadFilename);
     formData.append('model', 'whisper-large-v3-turbo');
 
-    console.log(`[whisperClient] Requesting transcription from ${whisperEndpoint}...`);
+    console.log(`[whisperClient] Requesting transcription from ${whisperEndpoint} (${uploadFilename})...`);
 
     const response = await fetch(whisperEndpoint, {
       method: 'POST',
