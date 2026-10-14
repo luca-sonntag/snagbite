@@ -612,6 +612,7 @@ export const uiTranslations = {
         preparingCookbook: 'Dein Kochbuch wird angerichtet…',
         loadingRecipes: 'Rezepte werden geladen…',
         gettingReady: 'Gleich geht’s an den Herd…',
+        updatingApp: 'App-Update wird installiert…',
       },
       nav: {
         newRecipe: 'Neu',
@@ -2237,6 +2238,7 @@ export const uiTranslations = {
         preparingCookbook: 'Setting your table…',
         loadingRecipes: 'Loading your recipes…',
         gettingReady: 'Getting ready to cook…',
+        updatingApp: 'Installing app update…',
       },
       nav: {
         newRecipe: 'New',
