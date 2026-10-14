@@ -14,6 +14,7 @@ const defaultTourState: TourState = {
   recipeDetails: false,
   cookingMode: false,
   shoppingList: false,
+  mealPlanner: false,
 };
 
 function loadStoredTourState(): TourState {

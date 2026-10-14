@@ -555,6 +555,20 @@ export const uiTranslations = {
           desc: 'Ergänze beliebige Alltagsartikel wie Spülmittel, Milch oder Snacks in Sekundenschnelle per Tastatur.',
         },
       },
+      mealPlanner: {
+        days: {
+          title: 'Wochentage & Kalender',
+          desc: 'Wechsle flexibel zwischen den Tagen oder springe mit der Wochennavigation in die nächste Woche.',
+        },
+        daySection: {
+          title: 'Mahlzeiten einplanen',
+          desc: 'Tippe auf einen Tag, um deine Lieblingsrezepte aus dem Kochbuch oder saisonale Empfehlungen hinzuzufügen.',
+        },
+        bulkShop: {
+          title: 'Smarter Wocheneinkauf',
+          desc: 'Sobald Rezepte geplant sind, überträgt dieser Button alle Zutaten der Woche automatisch gebündelt in die Einkaufsliste.',
+        },
+      },
     },
     alphaWelcome: {
       badge: 'Alpha-Test',
@@ -2164,6 +2178,20 @@ export const uiTranslations = {
         quickAdd: {
           title: 'Add custom items',
           desc: 'Quickly type and add any household items like dish soap, milk, or snacks.',
+        },
+      },
+      mealPlanner: {
+        days: {
+          title: 'Weekdays & calendar',
+          desc: 'Switch between days easily or jump to upcoming weeks using the week navigator.',
+        },
+        daySection: {
+          title: 'Plan your meals',
+          desc: 'Tap any day to schedule favorite recipes from your cookbook or discover seasonal ideas.',
+        },
+        bulkShop: {
+          title: 'Smart weekly shopping',
+          desc: 'Once recipes are planned, this button transfers all needed ingredients into your shopping list with a single tap.',
         },
       },
     },

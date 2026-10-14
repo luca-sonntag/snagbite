@@ -137,4 +137,27 @@ export const TOUR_DEFINITIONS: Record<ScreenTourId, TourStepConfig[]> = {
       align: 'center',
     },
   ],
+  mealPlanner: [
+    {
+      elementSelector: '#tour-planner-days',
+      titleKey: 'tour.mealPlanner.days.title',
+      descKey: 'tour.mealPlanner.days.desc',
+      side: 'bottom',
+      align: 'center',
+    },
+    {
+      elementSelector: '#tour-planner-day-section',
+      titleKey: 'tour.mealPlanner.daySection.title',
+      descKey: 'tour.mealPlanner.daySection.desc',
+      side: 'bottom',
+      align: 'center',
+    },
+    {
+      elementSelector: '#tour-planner-bulk-shop',
+      titleKey: 'tour.mealPlanner.bulkShop.title',
+      descKey: 'tour.mealPlanner.bulkShop.desc',
+      side: 'bottom',
+      align: 'end',
+    },
+  ],
 };

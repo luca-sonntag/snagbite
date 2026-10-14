@@ -3,7 +3,8 @@ export type ScreenTourId =
   | 'catalog'
   | 'recipeDetails'
   | 'cookingMode'
-  | 'shoppingList';
+  | 'shoppingList'
+  | 'mealPlanner';
 
 export interface TourStepConfig {
   /** Target element selector (e.g. '#tour-extract-link') */

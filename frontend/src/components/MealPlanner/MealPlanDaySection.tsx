@@ -61,6 +61,7 @@ export const MealPlanDaySection = React.memo<MealPlanDaySectionProps>(({
     >
       {/* Date Header: Clean Gray / Active Emerald Card */}
       <button
+        id={isToday || isHighlighted ? 'tour-planner-day-section' : undefined}
         onClick={handleDayCardClick}
         aria-label={isPast ? formattedDate : (t('mealPlanner.addRecipe') || 'Rezept hinzufügen')}
         className={`group w-full min-h-[44px] px-3.5 py-2.5 flex items-center justify-between select-none border-none touch-manipulation transition-all duration-200 cursor-pointer ${
