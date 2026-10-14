@@ -57,6 +57,9 @@ const ALIAS_MAP: Record<string, DevOverlayName> = {
   ota: 'ota',
   otabanner: 'ota',
   update: 'ota',
+  extractionad: 'extractionAd',
+  adsheet: 'extractionAd',
+  adoverlay: 'extractionAd',
 };
 
 const OVERLAY_CATALOG: Array<{
@@ -67,6 +70,7 @@ const OVERLAY_CATALOG: Array<{
 }> = [
   { name: 'onboarding', aliases: 'guide, welcome', description: 'First-launch onboarding tutorial', example: "dev.show('onboarding')" },
   { name: 'adNotice', aliases: 'preAd, adTransparency', description: 'Pre-ad transparency explanation sheet', example: "dev.show('adNotice')" },
+  { name: 'extractionAd', aliases: 'adSheet, adOverlay', description: 'Extraction MREC ad overlay', example: "dev.show('extractionAd')" },
   { name: 'premium', aliases: 'pro, paywall', description: 'Premium membership & pricing modal', example: "dev.show('premium')" },
   { name: 'alphaWelcome', aliases: 'alpha', description: 'Alpha tester welcome overlay', example: "dev.show('alphaWelcome')" },
   { name: 'reward', aliases: 'rewardOverlay, xp', description: 'Cook reward overlay (XP, level-up, badges)', example: "dev.show('reward', { levelUp: true })" },
@@ -127,6 +131,7 @@ export function createDevToolsApi(): DevToolsApi {
     showFn('toast', payload);
   };
   showFn.ota = (opts?: DevOtaOptions) => showFn('ota', opts);
+  showFn.extractionAd = () => showFn('extractionAd');
 
   const close = () => {
     console.log('%c[DevTools] Closing active dev overlay', 'color: #10b981; font-weight: bold;');

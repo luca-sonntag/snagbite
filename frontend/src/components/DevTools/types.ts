@@ -15,7 +15,8 @@ export type DevOverlayName =
   | 'alert'
   | 'confirm'
   | 'toast'
-  | 'ota';
+  | 'ota'
+  | 'extractionAd';
 
 export interface DevRewardOptions {
   xp?: number;
@@ -99,6 +100,7 @@ export interface DevShowFunction {
   confirm: (opts?: DevConfirmOptions) => void;
   toast: (opts?: DevToastOptions | string) => void;
   ota: (opts?: DevOtaOptions) => void;
+  extractionAd: () => void;
 }
 
 export interface DevToolsApi {
