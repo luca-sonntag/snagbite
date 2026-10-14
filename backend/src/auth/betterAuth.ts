@@ -74,6 +74,7 @@ export const auth = betterAuth({
       bonusCredits: { type: 'number', defaultValue: 0, input: false },
       customExtractionLimit: { type: 'number', required: false, input: false },
       notificationsEnabled: { type: 'boolean', defaultValue: false, input: true },
+      metadata: { type: 'json', required: false, defaultValue: {}, input: false },
     },
   },
   plugins: [
