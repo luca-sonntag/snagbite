@@ -562,7 +562,7 @@ export const uiTranslations = {
         },
         daySection: {
           title: 'Mahlzeiten einplanen',
-          desc: 'Tippe auf einen Tag, um deine Lieblingsrezepte aus dem Kochbuch oder saisonale Empfehlungen hinzuzufügen.',
+          desc: 'Tippe auf einen Tag, um Rezepte aus deinem Kochbuch oder Favoriten für deine Woche einzuplanen.',
         },
         bulkShop: {
           title: 'Smarter Wocheneinkauf',
@@ -2187,7 +2187,7 @@ export const uiTranslations = {
         },
         daySection: {
           title: 'Plan your meals',
-          desc: 'Tap any day to schedule favorite recipes from your cookbook or discover seasonal ideas.',
+          desc: 'Tap any day to schedule recipes from your cookbook or pick favorites for your week.',
         },
         bulkShop: {
           title: 'Smart weekly shopping',
