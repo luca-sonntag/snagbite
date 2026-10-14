@@ -228,12 +228,13 @@ Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird
   - Sobald Teildaten via Server-Sent Events (`GET /api/jobs/:id/events`, Preview-Envelope) eintreffen, werden diese live und unterbrechungsfrei in die Rezeptansicht gemergt.
   - Nach Abschluss der Extraktion wird das fertige Rezept in-place ohne Routenwechsel oder Tab-Sprung aktiviert; alle Aktions-Docks, Portionsskalierer und Checklisten werden nahtlos freigegeben.
 
-* **Nicht schließbares Ad Bottom Sheet für Free-User ([`ExtractionAdSheet.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ExtractionAdSheet.tsx)):**
-  - Für Free-Tier-Nutzer öffnet sich während der aktiven Extraktion ein modales, nicht schließbares HeroUI `Drawer` am unteren Bildschirmrand (`isDismissable={false}`, kein Schließen-Button, kein Drag-Handle).
-  - Enthält zentriert ausschließlich den MREC 300×250 Werbeslot (`ExtractionAdCard.tsx`), dessen Layout dynamisch gemessen wird.
+* **Nicht schließbares Ad Overlay für Free-User ([`ExtractionAdSheet.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ExtractionAdSheet.tsx)):**
+  - Für Free-Tier-Nutzer öffnet sich während der aktiven Extraktion ein modales, nicht schließbares Card-Overlay (analog zu `CookedModal.tsx`, `rounded-3xl shadow-2xl`, ohne Schließen-Button).
+  - **Kein Hintergrund-Blur:** Der Hintergrund wird dezent abgedunkelt (`bg-black/60`), bleibt jedoch gestochen scharf ohne `backdrop-blur`, damit der Nutzer den Live-Fortschritt der Extraktion und das pulsierende Snagbite-Icon im Hintergrund jederzeit verfolgen kann.
+  - Enthält zentriert ausschließlich den MREC 300×250 Werbeslot (`ExtractionAdCard.tsx`), dessen Layout dynamisch gemessen und an AdMob übergeben wird.
   - Der Zurück-Button in `RecipeDetails` ist für Free-User während der Extraktion deaktiviert.
   - Schließt sich bei erfolgreichem Abschluss automatisch (oder leitet bei Fehlschlag/Rate-Limit sauber zurück zum Formular).
-  - Premium-Nutzer sehen kein Werbe-Sheet und können dank Hintergrund-Queueing jederzeit frei navigieren.
+  - Premium-Nutzer sehen kein Werbe-Overlay und können dank Hintergrund-Queueing jederzeit frei navigieren.
 
 ---
 
