@@ -68,12 +68,19 @@ export const CookingModeStepContent: React.FC<CookingModeStepContentProps> = ({
             </div>
           )}
 
-          {/* Step Counter */}
-          {totalSteps > 0 && (
-            <span className="text-xs font-bold text-gray-500 dark:text-gray-400 tabular-nums shrink-0 select-none">
-              {currentStep.step} / {totalSteps}
-            </span>
-          )}
+          {/* Step Counter and Component Pill */}
+          <div className="flex items-center gap-1.5 shrink-0 select-none">
+            {currentStep.section && (
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 max-w-[130px] truncate">
+                {currentStep.section}
+              </span>
+            )}
+            {totalSteps > 0 && (
+              <span className="text-xs font-bold text-gray-500 dark:text-gray-400 tabular-nums">
+                {currentStep.step} / {totalSteps}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Step Dynamic Content with Directional Slide Transition */}
