@@ -41,6 +41,7 @@ import { useAppHistory } from './hooks/useAppHistory';
 import { useAppAds } from './hooks/useAppAds';
 import { useAppNativeListeners } from './hooks/useAppNativeListeners';
 import { useMealPlanBadge } from './hooks/useMealPlanBadge';
+import { useAppUpdates } from './hooks/useAppUpdates';
 import { preloadSecondaryChunks } from './utils/chunkPreloader';
 
 function ViewFallback() {
@@ -318,6 +319,7 @@ export default function App() {
 
   const [splashFinished, setSplashFinished] = useState(false);
   const [emergencyReady, setEmergencyReady] = useState(false);
+  const { isUpdating, updateMessage } = useAppUpdates();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -326,7 +328,7 @@ export default function App() {
     return () => clearTimeout(timer);
   }, []);
 
-  const isAppReady = !authLoading && (!user || historyLoaded || emergencyReady);
+  const isAppReady = !authLoading && (!user || historyLoaded || emergencyReady) && !isUpdating;
 
   useEffect(() => {
     preloadSecondaryChunks();
@@ -342,9 +344,10 @@ export default function App() {
 
   return (
     <>
-      {!splashFinished && (
+      {(!splashFinished || isUpdating) && (
         <AppSplashScreen
           isReady={isAppReady}
+          message={isUpdating ? updateMessage : undefined}
           onFinished={() => setSplashFinished(true)}
         />
       )}
