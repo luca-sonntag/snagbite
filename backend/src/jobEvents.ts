@@ -12,6 +12,8 @@ export interface JobEventPayload {
     videoUrl: string;
     thumbnailUrl?: string;
     durationSeconds?: number;
+    whisperTicket?: string;
+    whisperEndpoint?: string;
   };
 }
 

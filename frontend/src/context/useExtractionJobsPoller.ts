@@ -68,53 +68,42 @@ export function useExtractionJobsPoller({
 
       void sendRecipeReadyNotification(notifTitle, notifBody, job.recipeId ?? undefined);
 
-      const jobEntry = jobsRef.current.find((j) => j.id === job.id);
-      const otherActive = jobsRef.current.filter((j) => j.id !== job.id && !isTerminal(j.status));
-      const isSingleExtraction = !jobEntry?.hadMultipleConcurrent && otherActive.length === 0;
+      toast.success(t('toast.recipeReadyTitle'), {
+        description: recipeTitle || undefined,
+        action: job.recipeId
+          ? {
+              label: t('toast.viewRecipe'),
+              onClick: () => {
+                window.dispatchEvent(
+                  new CustomEvent(OPEN_RECIPE_EVENT, { detail: { recipeId: job.recipeId, jobId: job.id } })
+                );
+                dismissJob(job.id);
+              },
+            }
+          : undefined,
+      });
 
-      if (isSingleExtraction && job.recipeId) {
-        window.dispatchEvent(
-          new CustomEvent(OPEN_RECIPE_EVENT, { detail: { recipeId: job.recipeId, jobId: job.id } })
-        );
-        dismissJob(job.id);
-      } else {
-        toast.success(t('toast.recipeReadyTitle'), {
-          description: recipeTitle || undefined,
-          action: job.recipeId
+      setJobsPersist((prev) =>
+        prev.map((j) =>
+          j.id === job.id
             ? {
-                label: t('toast.viewRecipe'),
-                onClick: () => {
-                  window.dispatchEvent(
-                    new CustomEvent(OPEN_RECIPE_EVENT, { detail: { recipeId: job.recipeId, jobId: job.id } })
-                  );
-                  dismissJob(job.id);
-                },
+                ...j,
+                status: 'completed',
+                progress: null,
+                recipeId: job.recipeId ?? null,
+                title: recipeTitle ?? j.title ?? null,
               }
-            : undefined,
-        });
+            : j
+        )
+      );
 
-        setJobsPersist((prev) =>
-          prev.map((j) =>
-            j.id === job.id
-              ? {
-                  ...j,
-                  status: 'completed',
-                  progress: null,
-                  recipeId: job.recipeId ?? null,
-                  title: recipeTitle ?? j.title ?? null,
-                }
-              : j
-          )
-        );
-
-        const existing = dismissTimersRef.current.get(job.id);
-        if (existing) clearTimeout(existing);
-        const timer = setTimeout(() => {
-          dismissTimersRef.current.delete(job.id);
-          setJobsPersist((prev) => prev.filter((j) => j.id !== job.id));
-        }, COMPLETED_AUTO_DISMISS_MS);
-        dismissTimersRef.current.set(job.id, timer);
-      }
+      const existing = dismissTimersRef.current.get(job.id);
+      if (existing) clearTimeout(existing);
+      const timer = setTimeout(() => {
+        dismissTimersRef.current.delete(job.id);
+        setJobsPersist((prev) => prev.filter((j) => j.id !== job.id));
+      }, COMPLETED_AUTO_DISMISS_MS);
+      dismissTimersRef.current.set(job.id, timer);
 
       if (job.sourceUrl) {
         removeFromWaitlist(job.sourceUrl);

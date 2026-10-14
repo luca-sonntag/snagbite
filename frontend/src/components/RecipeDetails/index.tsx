@@ -33,35 +33,34 @@ export default function RecipeDetails({
   const { t } = useI18n();
 
   const fallbackGetToken = async () => null;
-  const { isAwaitingCover } = useRecipeCoverSync({
+  const { isAwaitingCover, coverUrl } = useRecipeCoverSync({
     recipe,
     getAccessToken: getAccessToken || fallbackGetToken,
     onCoverUpdated,
   });
 
+  const effectiveRecipe = coverUrl && coverUrl !== recipe.imageUrl ? {
+    ...recipe,
+    imageUrl: coverUrl,
+    imageUrls: [coverUrl, ...(recipe.imageUrls || []).filter((u) => u !== coverUrl)],
+    isAiCover: true,
+    isCoverGenerating: false,
+  } : recipe;
+
   const {
-    isPremium,
-    isPremiumModalOpen, setIsPremiumModalOpen,
-    activeProFeature, setActiveProFeature,
-    servings, setServings,
-    scaleFactor, formatAmount,
-    checkedSteps, toggleStep, handleToggleStep,
-    activeStepNum, totalStepsCount, completedStepsCount, progressPercent,
-    activeSection, isHeaderCollapsed, setCollapseSentinel, scrollToSection,
-    nutritionalValues, sourceNutritionalValues, isAiEstimated, isVerified, hasNutritionInfo,
-    showTotalNutrition, handleToggleTotalNutrition,
-    formatTimeValue, getNutritionDisplayValue, totalTimeLabel, metaCalories,
-    sortedIngredients, isCopied,
+    isPremium, isPremiumModalOpen, setIsPremiumModalOpen, activeProFeature, setActiveProFeature,
+    servings, setServings, scaleFactor, formatAmount, checkedSteps, toggleStep, handleToggleStep,
+    activeStepNum, totalStepsCount, completedStepsCount, progressPercent, activeSection,
+    isHeaderCollapsed, setCollapseSentinel, scrollToSection, nutritionalValues, sourceNutritionalValues,
+    isAiEstimated, isVerified, hasNutritionInfo, showTotalNutrition, handleToggleTotalNutrition,
+    formatTimeValue, getNutritionDisplayValue, totalTimeLabel, metaCalories, sortedIngredients, isCopied,
     isCopilotOpen, setIsCopilotOpen, isCopilotForceNewRemix, setIsCopilotForceNewRemix,
-    copilotInitialPrompt, setCopilotInitialPrompt, openCopilot,
-    isCookingMode, setIsCookingMode, initialStepOverride, setInitialStepOverride,
-    isCookedModalOpen, setIsCookedModalOpen,
-    isAdded, isShoppingConfirmOpen, setIsShoppingConfirmOpen,
-    isAddToPlanOpen, setIsAddToPlanOpen,
-    handleStartCooking, handleAddToShoppingList,
-    handleAddAndNavigateToShoppingList, handleConfirmShoppingListSelection,
-    copyRecipe, cookRefreshKey, cookHistory,
-  } = useRecipeDetails({ recipe, onAddIngredients, onNavigateToShoppingList });
+    copilotInitialPrompt, setCopilotInitialPrompt, openCopilot, isCookingMode, setIsCookingMode,
+    initialStepOverride, setInitialStepOverride, isCookedModalOpen, setIsCookedModalOpen,
+    isAdded, isShoppingConfirmOpen, setIsShoppingConfirmOpen, isAddToPlanOpen, setIsAddToPlanOpen,
+    handleStartCooking, handleAddToShoppingList, handleAddAndNavigateToShoppingList,
+    handleConfirmShoppingListSelection, copyRecipe, cookRefreshKey, cookHistory,
+  } = useRecipeDetails({ recipe: effectiveRecipe, onAddIngredients, onNavigateToShoppingList });
 
   useSpotlightTour('recipeDetails', {
     enabled: !isExtracting && !isCookingMode && !isCopilotOpen,
@@ -74,7 +73,7 @@ export default function RecipeDetails({
 
       {/* Recipe Title & Gallery */}
       <RecipeHeader
-        recipe={recipe}
+        recipe={effectiveRecipe}
         reelUrl={reelUrl}
         createdAt={createdAt}
         onBack={(!isExtracting || isPremium) ? onBack : undefined}
@@ -108,9 +107,9 @@ export default function RecipeDetails({
 
           {/* Smart Sticky Sub-navigation */}
           <RecipeStickyBar
-            recipeTitle={recipe.title}
-            imageUrl={recipe.imageUrl || recipe.imageUrls?.[0]}
-            emoji={recipe.emoji}
+            recipeTitle={effectiveRecipe.title}
+            imageUrl={effectiveRecipe.imageUrl || effectiveRecipe.imageUrls?.[0]}
+            emoji={effectiveRecipe.emoji}
             isCollapsed={isHeaderCollapsed}
             onBack={onBack}
             activeSection={activeSection}

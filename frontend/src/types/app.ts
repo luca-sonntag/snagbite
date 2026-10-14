@@ -77,7 +77,7 @@ export interface UseAppNativeListenersProps {
   pendingNavigation: { recipeId: string } | null;
   history: SavedRecipe[];
   fetchHistory: () => void;
-  handleExtractionSuccess: (recipeId: string) => void;
+  handleExtractionSuccess: (recipeId: string, preloadedRecipe?: Recipe) => void;
   replayOnboarding: () => void;
   limitStatus: LimitStatus | null;
   triggerExtraction: (url: string) => void;

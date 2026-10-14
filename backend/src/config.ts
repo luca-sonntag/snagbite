@@ -72,6 +72,7 @@ export interface Config {
   ADMIN_EMAILS: string;
   HEALTHCHECK_WEBSITE_URL?: string;
   HEALTHCHECK_BACKEND_URL?: string;
+  HEALTHCHECK_WHISPER_URL?: string;
   NTFY_TOPIC?: string;
   TELEGRAM_BOT_TOKEN?: string;
   TELEGRAM_CHAT_ID?: string;
@@ -122,6 +123,10 @@ export interface Config {
   DATABASE_URL?: string;
   APP_URL?: string;
   STORAGE_STREAMING_URL?: string;
+  /** Secret key used to sign and verify ephemeral HMAC tickets for Cloudflare Whisper transcription. */
+  WHISPER_HMAC_SECRET: string;
+  /** Cloudflare Edge endpoint for Whisper audio transcription (e.g. https://whisper.snagbite.app/transcribe). */
+  CLOUDFLARE_WHISPER_ENDPOINT?: string;
 }
 
 // Validation helper
@@ -175,6 +180,7 @@ export const config: Config = {
   ADMIN_EMAILS: getEnv('ADMIN_EMAILS', ''),
   HEALTHCHECK_WEBSITE_URL: process.env.HEALTHCHECK_WEBSITE_URL,
   HEALTHCHECK_BACKEND_URL: process.env.HEALTHCHECK_BACKEND_URL,
+  HEALTHCHECK_WHISPER_URL: process.env.HEALTHCHECK_WHISPER_URL,
   NTFY_TOPIC: process.env.NTFY_TOPIC,
   TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
   TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID,
@@ -205,6 +211,9 @@ export const config: Config = {
   DATABASE_URL: process.env.DATABASE_URL,
   APP_URL: process.env.APP_URL,
   STORAGE_STREAMING_URL: process.env.STORAGE_STREAMING_URL,
+  WHISPER_HMAC_SECRET: getEnv('WHISPER_HMAC_SECRET', 'dev-whisper-hmac-secret-change-in-production'),
+  CLOUDFLARE_WHISPER_ENDPOINT:
+    process.env.CLOUDFLARE_WHISPER_ENDPOINT || 'https://snagbite-whisper-proxy.snagbite.workers.dev',
 };
 
 /**

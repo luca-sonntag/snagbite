@@ -450,7 +450,21 @@ export default function App() {
                   }
                 }}
                 getAccessToken={getAccessToken}
-                onCoverUpdated={updateRecipeCover}
+                onCoverUpdated={(recipeId, imageUrl, isAiCover) => {
+                  updateRecipeCover(recipeId, imageUrl, isAiCover);
+                  setRecipe((prev) => {
+                    if (prev && (prev.id === recipeId || !prev.id)) {
+                      return {
+                        ...prev,
+                        imageUrl,
+                        imageUrls: [imageUrl, ...(prev.imageUrls || []).filter((u) => u !== imageUrl)],
+                        isAiCover,
+                        isCoverGenerating: false,
+                      };
+                    }
+                    return prev;
+                  });
+                }}
               />
             </Suspense>
           ) : (

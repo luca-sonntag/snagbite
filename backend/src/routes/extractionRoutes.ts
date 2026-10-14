@@ -37,6 +37,7 @@ import {
 import { handleVideoProxy } from './videoProxy.js';
 import { triggerWorkerTick } from '../queue.js';
 import { subscribeJobEvents } from '../jobEvents.js';
+import { createWhisperTicket } from '../utils/whisperTicket.js';
 
 export const extractionRoutes = Router();
 
@@ -246,9 +247,18 @@ extractionRoutes.post('/extract-recipe/photos', async (req: Request, res: Respon
   }
 });
 
-extractionRoutes.post('/extract-recipe/frames', async (req: Request, res: Response): Promise<void> => {
+async function handleClientPayload(req: Request, res: Response): Promise<void> {
   try {
-    const { jobId, thumbnailBase64, gridBase64, framesBase64 } = req.body;
+    const {
+      jobId,
+      thumbnailBase64,
+      gridBase64,
+      framesBase64,
+      transcript,
+      whisperModel,
+      videoDurationSeconds,
+      videoSizeBytes,
+    } = req.body;
 
     if (!jobId || typeof jobId !== 'string') {
       throw new AppError('MISSING_FIELD', { params: { field: 'jobId' } });
@@ -272,16 +282,27 @@ extractionRoutes.post('/extract-recipe/frames', async (req: Request, res: Respon
 
     const thumbStr = typeof thumbnailBase64 === 'string' ? thumbnailBase64 : '';
     const gridStr = typeof gridBase64 === 'string' ? gridBase64 : '';
+    const transcriptStr = typeof transcript === 'string' ? transcript.trim().slice(0, 30000) : '';
+    const modelStr = typeof whisperModel === 'string' && whisperModel.trim() ? whisperModel.trim() : undefined;
+
     const totalChars =
       thumbStr.length +
       gridStr.length +
+      transcriptStr.length +
       frames.reduce((acc: number, f: unknown) => acc + (typeof f === 'string' ? f.length : 0), 0);
 
     if (totalChars > MAX_FRAMES_TOTAL_CHARS) {
       throw new AppError('FRAMES_TOO_LARGE', {
-        message: `Combined frame payload of ${totalChars} chars exceeds limit.`,
+        message: `Combined payload of ${totalChars} chars exceeds limit.`,
       });
     }
+
+    const sizeBytes =
+      typeof videoSizeBytes === 'number' && videoSizeBytes > 0 ? Math.round(videoSizeBytes) : undefined;
+    const durationSec =
+      typeof videoDurationSeconds === 'number' && videoDurationSeconds > 0
+        ? Number(videoDurationSeconds.toFixed(2))
+        : undefined;
 
     await updateJob(job.id, {
       clientFrames: {
@@ -290,7 +311,12 @@ extractionRoutes.post('/extract-recipe/frames', async (req: Request, res: Respon
         framesBase64: frames.filter(
           (f: unknown): f is string => typeof f === 'string' && f.trim().length > 0
         ),
+        transcript: transcriptStr || undefined,
+        whisperModel: modelStr,
+        videoDurationSeconds: durationSec,
+        videoSizeBytes: sizeBytes,
       },
+      mediaBytes: sizeBytes,
       status: 'pending',
       progress: { percent: 35, stage: 'queued' },
     });
@@ -300,13 +326,33 @@ extractionRoutes.post('/extract-recipe/frames', async (req: Request, res: Respon
       success: true,
       jobId: job.id,
       status: 'pending',
-      message: 'Video keyframes received and job queued for extraction.',
+      message: 'Client media payload received and job queued for extraction.',
     });
   } catch (error: unknown) {
-    if (!(error instanceof AppError)) console.error('Error receiving client frames:', error);
+    if (!(error instanceof AppError)) console.error('Error receiving client payload:', error);
     sendAppError(res, error);
   }
-});
+}
+
+// Support both the new canonical client-payload endpoint and legacy frames endpoint
+extractionRoutes.post('/extract-recipe/client-payload', handleClientPayload);
+extractionRoutes.post('/extract-recipe/frames', handleClientPayload);
+
+function extractMediaRequest(job: { id: string; status: string; scrapeMeta?: unknown }, userId: string) {
+  if (job.status !== 'awaiting_frames' || !job.scrapeMeta) return undefined;
+  const meta = job.scrapeMeta as Record<string, unknown>;
+  const media = meta.media as { kind?: string; videoUrl?: string } | undefined;
+  if (media?.kind === 'client' && media?.videoUrl) {
+    return {
+      videoUrl: media.videoUrl,
+      thumbnailUrl: typeof meta.imageUrl === 'string' ? meta.imageUrl : undefined,
+      durationSeconds: typeof meta.durationSeconds === 'number' ? meta.durationSeconds : undefined,
+      whisperTicket: createWhisperTicket({ jobId: job.id, userId }),
+      whisperEndpoint: config.CLOUDFLARE_WHISPER_ENDPOINT || undefined,
+    };
+  }
+  return undefined;
+}
 
 extractionRoutes.get('/jobs/:id', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -322,18 +368,7 @@ extractionRoutes.get('/jobs/:id', async (req: Request, res: Response): Promise<v
       throw new AppError('JOB_NOT_FOUND');
     }
 
-    let mediaRequest: { videoUrl: string; thumbnailUrl?: string; durationSeconds?: number } | undefined;
-    if (job.status === 'awaiting_frames' && job.scrapeMeta) {
-      const meta = job.scrapeMeta as Record<string, unknown>;
-      const media = meta.media as { kind?: string; videoUrl?: string } | undefined;
-      if (media?.kind === 'client' && media?.videoUrl) {
-        mediaRequest = {
-          videoUrl: media.videoUrl,
-          thumbnailUrl: typeof meta.imageUrl === 'string' ? meta.imageUrl : undefined,
-          durationSeconds: typeof meta.durationSeconds === 'number' ? meta.durationSeconds : undefined,
-        };
-      }
-    }
+    const mediaRequest = extractMediaRequest(job, req.userId!);
 
     let recipeTitle: string | null = null;
     if (job.recipeId) {
@@ -389,20 +424,6 @@ extractionRoutes.get('/jobs/:id/events', async (req: Request, res: Response): Pr
     res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
   };
 
-  const buildMediaRequest = (scrapeMeta: unknown) => {
-    if (!scrapeMeta) return undefined;
-    const meta = scrapeMeta as Record<string, unknown>;
-    const media = meta.media as { kind?: string; videoUrl?: string } | undefined;
-    if (media?.kind === 'client' && media?.videoUrl) {
-      return {
-        videoUrl: media.videoUrl,
-        thumbnailUrl: typeof meta.imageUrl === 'string' ? meta.imageUrl : undefined,
-        durationSeconds: typeof meta.durationSeconds === 'number' ? meta.durationSeconds : undefined,
-      };
-    }
-    return undefined;
-  };
-
   let recipeTitle: string | null = null;
   if (job.recipeId) {
     const titles = await getRecipeTitles([job.recipeId]);
@@ -416,7 +437,7 @@ extractionRoutes.get('/jobs/:id/events', async (req: Request, res: Response): Pr
     status: job.status,
     error: job.error,
     progress: job.progress,
-    mediaRequest: job.status === 'awaiting_frames' ? buildMediaRequest(job.scrapeMeta) : undefined,
+    mediaRequest: extractMediaRequest(job, req.userId!),
     recipeId: job.recipeId,
     title: recipeTitle,
     parentRecipeId: job.parentRecipeId,
@@ -446,6 +467,19 @@ extractionRoutes.get('/jobs/:id/events', async (req: Request, res: Response): Pr
       title = titles.get(payload.recipeId) ?? null;
     }
 
+    const mediaRequest = payload.mediaRequest
+      ? {
+          ...payload.mediaRequest,
+          whisperTicket:
+            payload.mediaRequest.whisperTicket ||
+            createWhisperTicket({ jobId: payload.jobId, userId: req.userId! }),
+          whisperEndpoint:
+            payload.mediaRequest.whisperEndpoint ||
+            config.CLOUDFLARE_WHISPER_ENDPOINT ||
+            undefined,
+        }
+      : undefined;
+
     sendEvent('job', {
       id: payload.jobId,
       status: payload.status,
@@ -453,7 +487,7 @@ extractionRoutes.get('/jobs/:id/events', async (req: Request, res: Response): Pr
       recipeId: payload.recipeId,
       title,
       error: payload.error,
-      mediaRequest: payload.mediaRequest,
+      mediaRequest,
     });
 
     if (payload.status === 'completed' || payload.status === 'failed' || payload.status === 'cancelled') {

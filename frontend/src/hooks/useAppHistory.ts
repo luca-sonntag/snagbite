@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import type { SavedRecipe } from '../types';
+import type { Recipe, SavedRecipe } from '../types';
 import { apiUrl } from '../api';
 import { deleteCachedImage } from '../utils/imageStore';
 import { useDialog } from '../context/DialogContext';
@@ -92,8 +92,23 @@ export function useAppHistory({
   }, [getAccessToken]);
 
   const handleExtractionSuccess = useCallback(
-    (recipeId: string) => {
+    (recipeId: string, preloadedRecipe?: Recipe) => {
       newlyExtractedJobIdRef.current = recipeId;
+      if (preloadedRecipe) {
+        setExtraRecipes((prev) => ({
+          ...prev,
+          [recipeId]: {
+            recipeId,
+            recipe: preloadedRecipe,
+            source: 'extraction',
+            addedAt: preloadedRecipe.createdAt || new Date().toISOString(),
+            updatedAt: preloadedRecipe.updatedAt || new Date().toISOString(),
+            isFavorite: false,
+            flags: [],
+            collectionIds: [],
+          },
+        }));
+      }
       navigate('history', recipeId);
       fetchHistory();
     },

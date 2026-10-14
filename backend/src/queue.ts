@@ -12,10 +12,10 @@ import { getScraperForUrl, type ScrapingResult } from './scrapers/index.js';
 import { downloadMedia } from './scrapers/download.js';
 import { checkCaptionCompleteness } from './scrapers/jevCaptionGuard.js';
 import { extractRecipe, remixRecipe, type ClientFramesInput } from './gemini.js';
-import { triggerAsyncCoverGeneration } from './imageGenerator.js';
-import { pruneOldGeminiLogs } from './logger.js';
+import { generateRecipeCoverImage, triggerAsyncCoverGeneration } from './imageGenerator.js';
+import { pruneOldGeminiLogs, writeGeminiLog } from './logger.js';
 import { photoUploadIdFromUrl, downloadImportPhotos, deleteImportPhotos, sweepOldPhotoImports } from './photoImport.js';
-import type { Job, LlmUsage, ProgressStage, GeminiUsageInfo, RecipePreviewData, Recipe } from './types.js';
+import { calculateWhisperCost, type Job, type LlmUsage, type ProgressStage, type GeminiUsageInfo, type RecipePreviewData, type Recipe } from './types.js';
 import { formatAuthorHandle } from '@cookbook/shared';
 import { config } from './config.js';
 import { AppError, serializeJobError } from './errors.js';
@@ -387,7 +387,14 @@ async function processJob(job: Job): Promise<void> {
         console.log(`[Job ${jobId}] [DEV] Saved grid image to ${devGridPath}`);
       }
 
-      clientFramesInput = { thumbnail: thumbBuf, gridBuffer: clientGridBuffer };
+      clientFramesInput = {
+        thumbnail: thumbBuf,
+        gridBuffer: clientGridBuffer,
+        transcript: job.clientFrames.transcript,
+        whisperModel: job.clientFrames.whisperModel,
+        videoDurationSeconds: job.clientFrames.videoDurationSeconds,
+        videoSizeBytes: job.clientFrames.videoSizeBytes,
+      };
     }
 
     // 3. Mark job as processing
@@ -410,10 +417,10 @@ async function processJob(job: Job): Promise<void> {
     console.log(`[Job ${jobId}] Downloads complete (media: ${(downloaded.mediaBytes / (1024 * 1024)).toFixed(2)} MB).`);
 
     // Persist the total downloaded media size (audio + video) so admin metrics
-    // can aggregate total downloaded MB over a time window. A failure here must
-    // not abort recipe extraction, so we swallow errors.
-    if (downloaded.mediaBytes > 0) {
-      await updateJob(jobId, { mediaBytes: downloaded.mediaBytes }).catch((err) =>
+    // can aggregate total downloaded MB over a time window. Supports both server-side download and client-payload.
+    const totalMediaBytes = downloaded.mediaBytes > 0 ? downloaded.mediaBytes : (job.clientFrames?.videoSizeBytes ?? 0);
+    if (totalMediaBytes > 0 && (!job.mediaBytes || job.mediaBytes === 0)) {
+      await updateJob(jobId, { mediaBytes: totalMediaBytes }).catch((err) =>
         console.warn(`[Job ${jobId}] Failed to persist media_bytes: ${err.message}`),
       );
     }
@@ -570,6 +577,48 @@ async function processJob(job: Job): Promise<void> {
     if (geminiUsage) llmUsage.gemini = geminiUsage;
     if (auditUsage) llmUsage.recipeAuditor = auditUsage;
     if (resolverUsage) llmUsage.ingredientResolver = resolverUsage;
+
+    // Calculate Whisper cost if transcript and whisperModel are present
+    const transcriptText = clientFramesInput?.transcript?.trim();
+    const whisperModel = clientFramesInput?.whisperModel?.trim();
+    if (transcriptText && whisperModel) {
+      const duration =
+        clientFramesInput?.videoDurationSeconds ||
+        scrapeResult.durationSeconds ||
+        0;
+
+      if (duration > 0) {
+        const costUsd = calculateWhisperCost(whisperModel, duration);
+        llmUsage.whisper = {
+          model: whisperModel,
+          durationSeconds: Number(duration.toFixed(2)),
+          costUsd,
+          costFormatted: `$${costUsd.toFixed(5)}`,
+        };
+        console.log(
+          `[Job ${jobId}] Whisper (${whisperModel}) cost: $${costUsd.toFixed(5)} for ${duration.toFixed(1)}s audio.`
+        );
+
+        // Also record in persistent gemini_logs for unified LLM cost aggregation
+        await writeGeminiLog({
+          timestamp: new Date().toISOString(),
+          requestType: 'transcribe_audio',
+          model: whisperModel,
+          durationMs: Math.round(duration * 1000),
+          success: true,
+          input: { durationSeconds: duration, chars: transcriptText.length },
+          costEstimate: {
+            inputCostUsd: costUsd,
+            outputCostUsd: 0,
+            totalCostUsd: costUsd,
+            totalCostFormatted: `$${costUsd.toFixed(5)}`,
+          },
+        }).catch((err: unknown) => {
+          const msg = err instanceof Error ? err.message : String(err);
+          console.warn(`[Job ${jobId}] Failed to record Whisper log entry:`, msg);
+        });
+      }
+    }
 
     if (await isJobCancelled(jobId)) {
       console.log(`[Job ${jobId}] Job was cancelled by user, aborting completion.`);

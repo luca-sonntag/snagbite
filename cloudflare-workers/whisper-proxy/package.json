@@ -1,0 +1,14 @@
+{
+  "name": "snagbite-whisper-proxy",
+  "version": "1.0.0",
+  "description": "Cloudflare Edge Worker for secure, keyless Whisper transcription via AI Gateway",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240405.0",
+    "wrangler": "^4.151.0"
+  }
+}

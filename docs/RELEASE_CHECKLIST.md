@@ -31,12 +31,30 @@
 
 ### 🔐 2. Umgebungsvariablen & Secrets (Railway & Frontend)
 
-- [x] Keine neuen Secrets oder Environment-Variablen für den aktuellen Stand auf `develop` erforderlich.
-  - *(Falls neue Variablen hinzukommen: `backend/.env.production` pflegen und `npm run railway:env:prod` ausführen).*
+- [ ] **`WHISPER_HMAC_SECRET` auf Railway setzen (`backend` & `worker` Services):**
+  - **Zweck:** Geheimer Schlüssel zum Signieren der flüchtigen HMAC-SHA256 Tickets (`whisperTicket`). Ohne diesen Key kann der Client keine autorisierten Transkriptionen beim Cloudflare Edge Proxy anfordern.
+  - **Ausführung:** In `backend/.env.production` eintragen und via `npm run railway:env:prod` synchronisieren (oder direkt im Railway Dashboard).
+- [ ] **`CLOUDFLARE_WHISPER_ENDPOINT` auf Railway setzen:**
+  - **Wert:** `https://snagbite-whisper-proxy.snagbite.workers.dev`
+  - **Zweck:** URL des Edge Workers, die dem Client für die Audio-Transkription übergeben wird.
+- [ ] **`HEALTHCHECK_WHISPER_URL` im Railway `healthcheck`-Service (Optional):**
+  - *(Optional, da im Code bereits ein Default auf `https://snagbite-whisper-proxy.snagbite.workers.dev` hinterlegt ist).*
 
 ---
 
-### 📦 3. Dependencies & Pakete
+### ☁️ 3. Externe Dienste: Cloudflare Worker (`snagbite-whisper-proxy`)
+
+- [ ] **Cloudflare Worker Secrets prüfen:**
+  - Sicherstellen, dass im Cloudflare Worker `snagbite-whisper-proxy` folgende Secrets hinterlegt sind:
+    - `CLOUDFLARE_ACCOUNT_ID`
+    - `CF_AIG_TOKEN`
+    - `WHISPER_HMAC_SECRET` *(muss exakt mit Railway übereinstimmen!)*
+    - `GROQ_API_KEY` *(falls nicht direkt im Cloudflare AI Gateway gespeichert)*
+  - *(Hinweis: Der Worker mit Nonce-Protection und `/health`-Endpunkt ist bereits auf Cloudflare deployed).*
+
+---
+
+### 📦 4. Dependencies & Pakete
 
 - [x] **`driver.js` Frontend-Dependency:**
   - In `frontend/package.json` hinzugefügt für die NUX Spotlight Tours.
@@ -44,7 +62,7 @@
 
 ---
 
-### 📱 4. Deployment-Strategie & Mobile App
+### 📱 5. Deployment-Strategie & Mobile App
 
 - [ ] **Release-Kanal bestimmen:**
   - **Option A (Nur Web/OTA – Empfohlen falls keine nativen Plugin-Änderungen):**
@@ -60,13 +78,21 @@
 
 ---
 
-### 🧪 5. Pre-Release Smoke Tests (Staging / Dev & Prod)
+### 🧪 6. Pre-Release Smoke Tests (Staging / Dev & Prod)
 
 - [ ] **Spotlight Tours verifizieren:**
   - In den Einstellungen unter *Hilfe & Feedback* auf *„Screen-Touren & Tipps zurücksetzen“* tippen.
   - Bildschirme aufrufen (`/` Extrakt, `history` Katalog, `recipeDetails`, `cookingMode`, `shoppingList`, `mealPlanner`) und prüfen, ob die Touren zentriert und ohne Layout-Fehler angezeigt werden.
 - [ ] **Metadata Sync testen:**
   - Prüfen, ob `PATCH /api/me/metadata` den Status `tourDismissed` dauerhaft im Backend speichert, sodass Touren nach Abschluss nicht erneut aufpoppen.
+- [ ] **Whisper-Proxy Healthcheck verifizieren:**
+  - `curl https://snagbite-whisper-proxy.snagbite.workers.dev/health` muss HTTP 200 `{ status: "ok", upstream: "groq" }` liefern.
+- [ ] **Single-Use Ticket Replay-Schutz testen:**
+  - Nach einem ersten erfolgreichen Aufruf muss derselbe Ticket-Header beim zweiten Versuch mit HTTP 401 `TICKET_ALREADY_USED` abgewiesen werden.
+- [ ] **End-to-End Client-Payload & Kosten-Aggregation prüfen:**
+  - Video-Reel mit Tonspur extrahieren.
+  - Prüfen, ob der Client `videoDurationSeconds`, `videoSizeBytes` und `whisperModel` an `/api/extract-recipe/client-payload` sendet.
+  - Sicherstellen, dass im Backend `jobs.media_bytes` gespeichert wird und in `llmUsage.whisper` sowie `gemini_logs` (`requestType: 'transcribe_audio'`) die dynamischen Groq-Whisper-Kosten verbucht werden (ohne hardcodiertes Modell).
 
 ---
 
