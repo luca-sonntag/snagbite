@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Capacitor } from '@capacitor/core';
-import { apiUrl } from '../api';
 import { TEST_LOGIN_ENABLED, TEST_USER_EMAIL, TEST_USER_PASSWORD } from '../env';
 import { ONBOARDING_KEY } from '../hooks/useOnboarding';
 import {
@@ -19,6 +18,7 @@ import {
   signInWithNativeGoogle,
   signOutNativeGoogle,
 } from './authNative';
+import { patchUserMetadata, deleteUserAccount } from './authAccountOps';
 import { useTrialInfo } from './useTrialInfo';
 import { useAdminCheck } from './useAdminCheck';
 import { AuthContext, useAuth, type AuthState } from './authContextTypes';
@@ -219,42 +219,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return session?.token ?? getStoredToken();
   }, [session]);
 
-  const updateUserMetadata = useCallback(async (metadata: Record<string, any>) => {
-    try {
-      const res = await (authClient.updateUser as any)({
-        ...metadata,
-        notificationsEnabled: metadata.notifications_enabled ?? metadata.notificationsEnabled,
-      });
-      if (res.error) return { error: res.error.message || 'Update failed' };
-      if (res.data) {
-        setUser((prev) => (prev ? normalizeUser({ ...prev, ...res.data }) : null));
-      }
-      return {};
-    } catch (err: any) {
-      return { error: err.message || 'Update failed' };
-    }
-  }, []);
-
-  const deleteAccount = useCallback(async () => {
-    try {
+  const updateUserMetadata = useCallback(
+    async (metadata: Record<string, any>) => {
       const token = await getAccessToken();
       if (!token) return { error: 'Not authenticated' };
 
-      const response = await fetch(apiUrl('/api/users/me'), {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      const result = await patchUserMetadata(token, metadata);
+      if (result.error) return { error: result.error };
 
-      if (!response.ok) {
-        const data = await response.json();
-        return { error: data.error || 'Failed to delete account' };
+      if (result.metadata) {
+        setUser((prev) => {
+          if (!prev) return null;
+          const merged = { ...(prev.user_metadata || {}), ...result.metadata };
+          return normalizeUser({
+            ...prev,
+            user_metadata: merged,
+            metadata: merged,
+            notificationsEnabled: result.notificationsEnabled ?? prev.notificationsEnabled,
+          });
+        });
       }
 
-      await signOut();
       return {};
-    } catch (e) {
-      return { error: e instanceof Error ? e.message : 'Unknown error' };
-    }
+    },
+    [getAccessToken]
+  );
+
+  const deleteAccount = useCallback(async () => {
+    const token = await getAccessToken();
+    if (!token) return { error: 'Not authenticated' };
+
+    const result = await deleteUserAccount(token);
+    if (result.error) return { error: result.error };
+
+    await signOut();
+    return {};
   }, [getAccessToken, signOut]);
 
   return (
