@@ -36,7 +36,7 @@ const MAX_PHOTOS_TOTAL_CHARS = 8_000_000;
 
 export function useRecipeExtraction(
   getAccessToken: () => Promise<string | null>,
-  onExtractionSuccess: (recipeId: string) => void,
+  onExtractionSuccess: (recipeId: string, preloadedRecipe?: Recipe) => void,
   onHistoryRefresh?: () => void
 ) {
   const { t, language } = useI18n();
@@ -249,17 +249,11 @@ export function useRecipeExtraction(
     if (activePollingJobIdRef.current !== jobId) return;
 
     const completedRecipe = await fetchCompletedRecipe(recipeId);
-    if (completedRecipe) {
-      setRecipe(completedRecipe);
-      setIsPending(false);
-      setProgress(null);
-      onHistoryRefresh?.();
-    } else {
-      setProgress(null);
-      setRecipe(null);
-      setIsPending(false);
-      onExtractionSuccess(recipeId);
-    }
+    setProgress(null);
+    setRecipe(null);
+    setIsPending(false);
+    onHistoryRefresh?.();
+    onExtractionSuccess(recipeId, completedRecipe ?? undefined);
 
     setUrl('');
     setPhotos([]);
@@ -287,17 +281,11 @@ export function useRecipeExtraction(
         stopActivePolling();
 
         const completedRecipe = await fetchCompletedRecipe(targetRecipeId);
-        if (completedRecipe) {
-          setRecipe(completedRecipe);
-          setIsPending(false);
-          setProgress(null);
-          onHistoryRefresh?.();
-        } else {
-          setProgress(null);
-          setRecipe(null);
-          setIsPending(false);
-          onExtractionSuccess(targetRecipeId);
-        }
+        setProgress(null);
+        setRecipe(null);
+        setIsPending(false);
+        onHistoryRefresh?.();
+        onExtractionSuccess(targetRecipeId, completedRecipe ?? undefined);
 
         setUrl('');
         setPhotos([]);
@@ -595,16 +583,11 @@ export function useRecipeExtraction(
           setJobStatus(null);
           fetchLimitStatus();
           const completedRecipe = data.recipe ?? (await fetchCompletedRecipe(data.recipeId));
-          if (completedRecipe) {
-            setRecipe(completedRecipe);
-            setIsPending(false);
-            setProgress(null);
-            onHistoryRefresh?.();
-          } else {
-            setIsPending(false);
-            setRecipe(null);
-            onExtractionSuccess(data.recipeId);
-          }
+          setIsPending(false);
+          setRecipe(null);
+          setProgress(null);
+          onHistoryRefresh?.();
+          onExtractionSuccess(data.recipeId, completedRecipe ?? undefined);
           return;
         }
         // Background-capable flow: track the job in shared store and connect live polling
@@ -631,16 +614,11 @@ export function useRecipeExtraction(
               removeFailedJob(meta.sourceLabel);
             }
             const completedRecipe = data.recipe ?? (await fetchCompletedRecipe(data.recipeId));
-            if (completedRecipe) {
-              setRecipe(completedRecipe);
-              setIsPending(false);
-              setProgress(null);
-              onHistoryRefresh?.();
-            } else {
-              setIsPending(false);
-              setRecipe(null);
-              onExtractionSuccess(data.recipeId);
-            }
+            setIsPending(false);
+            setRecipe(null);
+            setProgress(null);
+            onHistoryRefresh?.();
+            onExtractionSuccess(data.recipeId, completedRecipe ?? undefined);
           } else {
             runSimulatedProgress(data.jobId ?? '', data.recipeId, 10000);
           }

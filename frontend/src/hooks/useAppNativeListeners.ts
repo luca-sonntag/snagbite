@@ -217,11 +217,7 @@ export function useAppNativeListeners({
     const onOpen = (e: Event) => {
       const detail = (e as CustomEvent<{ jobId?: string; recipeId?: string }>).detail;
       const targetId = detail?.recipeId || detail?.jobId;
-      if (!targetId) return;
-      if (activeView === 'extract' && recipe && (recipe.id === targetId || !recipe.id)) {
-        return;
-      }
-      handleExtractionSuccess(targetId);
+      if (targetId) handleExtractionSuccess(targetId);
     };
     window.addEventListener(EXTRACTION_COMPLETE_EVENT, onComplete);
     window.addEventListener(OPEN_RECIPE_EVENT, onOpen);
@@ -229,7 +225,7 @@ export function useAppNativeListeners({
       window.removeEventListener(EXTRACTION_COMPLETE_EVENT, onComplete);
       window.removeEventListener(OPEN_RECIPE_EVENT, onOpen);
     };
-  }, [fetchHistory, handleExtractionSuccess, activeView, recipe]);
+  }, [fetchHistory, handleExtractionSuccess]);
 
   // Web Share Target Interceptor
   useEffect(() => {
