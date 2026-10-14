@@ -382,6 +382,9 @@ export interface ClientFramesInput {
   frames?: Buffer[];
   gridBuffer?: Buffer;
   transcript?: string;
+  whisperModel?: string;
+  videoDurationSeconds?: number;
+  videoSizeBytes?: number;
 }
 
 export interface ExtractRecipeResult {

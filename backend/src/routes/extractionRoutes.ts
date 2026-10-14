@@ -249,7 +249,16 @@ extractionRoutes.post('/extract-recipe/photos', async (req: Request, res: Respon
 
 async function handleClientPayload(req: Request, res: Response): Promise<void> {
   try {
-    const { jobId, thumbnailBase64, gridBase64, framesBase64, transcript } = req.body;
+    const {
+      jobId,
+      thumbnailBase64,
+      gridBase64,
+      framesBase64,
+      transcript,
+      whisperModel,
+      videoDurationSeconds,
+      videoSizeBytes,
+    } = req.body;
 
     if (!jobId || typeof jobId !== 'string') {
       throw new AppError('MISSING_FIELD', { params: { field: 'jobId' } });
@@ -274,6 +283,7 @@ async function handleClientPayload(req: Request, res: Response): Promise<void> {
     const thumbStr = typeof thumbnailBase64 === 'string' ? thumbnailBase64 : '';
     const gridStr = typeof gridBase64 === 'string' ? gridBase64 : '';
     const transcriptStr = typeof transcript === 'string' ? transcript.trim().slice(0, 30000) : '';
+    const modelStr = typeof whisperModel === 'string' && whisperModel.trim() ? whisperModel.trim() : undefined;
 
     const totalChars =
       thumbStr.length +
@@ -287,6 +297,13 @@ async function handleClientPayload(req: Request, res: Response): Promise<void> {
       });
     }
 
+    const sizeBytes =
+      typeof videoSizeBytes === 'number' && videoSizeBytes > 0 ? Math.round(videoSizeBytes) : undefined;
+    const durationSec =
+      typeof videoDurationSeconds === 'number' && videoDurationSeconds > 0
+        ? Number(videoDurationSeconds.toFixed(2))
+        : undefined;
+
     await updateJob(job.id, {
       clientFrames: {
         thumbnailBase64: thumbStr || undefined,
@@ -295,7 +312,11 @@ async function handleClientPayload(req: Request, res: Response): Promise<void> {
           (f: unknown): f is string => typeof f === 'string' && f.trim().length > 0
         ),
         transcript: transcriptStr || undefined,
+        whisperModel: modelStr,
+        videoDurationSeconds: durationSec,
+        videoSizeBytes: sizeBytes,
       },
+      mediaBytes: sizeBytes,
       status: 'pending',
       progress: { percent: 35, stage: 'queued' },
     });
