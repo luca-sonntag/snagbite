@@ -26,6 +26,7 @@
     "cap:run:local": "npm run cap:run:local -w frontend",
 
     "db:push": "npm run db:push -w backend",
+    "db:push:prod": "npm run db:push:prod -w backend",
     "db:generate": "npm run db:generate -w backend",
     "db:studio": "npm run db:studio -w backend",
     "db:functions": "npm run db:functions -w backend",
