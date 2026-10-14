@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import type { ScreenTourId, TourState, SpotlightTourContextValue } from '../types/tour';
-import { TOUR_DEFINITIONS } from '../utils/tourDefinitions';
+import { TOUR_DEFINITIONS, isTourElementVisible } from '../utils/tourDefinitions';
 import { useI18n } from './I18nContext';
 import { useAuth } from './AuthContext';
 import { useModalOverlay } from './OverlayStackContext';
@@ -72,10 +72,11 @@ export const SpotlightTourProvider: React.FC<{ children: React.ReactNode }> = ({
       const stepConfigs = TOUR_DEFINITIONS[id];
       if (!stepConfigs || stepConfigs.length === 0) return;
 
-      // Filter steps to those currently present in DOM
-      const availableSteps = stepConfigs.filter(
-        (cfg) => !!document.querySelector(cfg.elementSelector)
-      );
+      // Filter steps to those currently present in DOM and actually visible
+      const availableSteps = stepConfigs.filter((cfg) => {
+        const el = document.querySelector(cfg.elementSelector);
+        return isTourElementVisible(el);
+      });
       if (availableSteps.length === 0) return;
 
       try {

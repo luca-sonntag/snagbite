@@ -19,6 +19,7 @@ interface IngredientItemRowProps {
   onSelectNutrition?: (ingredient: Ingredient, category?: string) => void;
   onOpenProFeature?: () => void;
   hideNutrition?: boolean;
+  id?: string;
 }
 
 export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
@@ -32,6 +33,7 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
   onSelectNutrition,
   onOpenProFeature,
   hideNutrition = false,
+  id,
 }) => {
   const { t } = useI18n();
   const theme = getCategoryTheme(categoryName || ingredient.category || '');
@@ -69,6 +71,7 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
 
   return (
     <li
+      id={id}
       key={uniqueId}
       onClick={() => {
         if (isClickable) {

@@ -113,6 +113,7 @@ export function useHashRouter() {
     window.history.replaceState(null, '', cleanBasePath + newHash);
     setRoute(parseHash(newHash));
     window.scrollTo({ top: 0, behavior: 'instant' });
+    window.dispatchEvent(new Event('hashchange'));
   }, []);
 
   return {

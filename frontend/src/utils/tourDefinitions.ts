@@ -1,5 +1,19 @@
 import type { ScreenTourId, TourStepConfig } from '../types/tour';
 
+/**
+ * Checks whether a DOM element is currently visible to the user and not hidden
+ * inside inactive tabs (e.g. [hidden], .hidden) or with zero dimensions.
+ */
+export function isTourElementVisible(el: Element | null): boolean {
+  if (!el) return false;
+  if (el.closest('[hidden]') || el.closest('.hidden')) return false;
+  if (typeof (el as HTMLElement).checkVisibility === 'function') {
+    return (el as HTMLElement).checkVisibility({ checkOpacity: false, checkVisibilityCSS: true });
+  }
+  const rect = el.getBoundingClientRect();
+  return rect.width > 0 && rect.height > 0;
+}
+
 export const TOUR_DEFINITIONS: Record<ScreenTourId, TourStepConfig[]> = {
   extract: [
     {

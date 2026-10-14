@@ -122,73 +122,73 @@ export default function RecipeIngredients({
         )}
 
         {/* 1.2 Ingredients Display (Grid 2-column or List) */}
-        <div id="tour-recipe-ingredients">
-          {sortedIngredients.length === 0 && isExtracting ? (
-            viewMode === 'grid' ? (
-              <ul className="grid grid-cols-2 gap-x-1.5 sm:gap-x-3 gap-y-1.5 px-2 pt-2 pb-3.5 sm:px-3.5 sm:pt-2.5 sm:pb-4.5 list-none m-0">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <li
-                    key={`ing-skel-grid-${i}`}
-                    className="p-3 bg-gray-50/80 dark:bg-gray-800/50 rounded-2xl animate-pulse flex flex-col gap-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-700 shrink-0" />
-                      <div className="h-3.5 w-14 bg-gray-200 dark:bg-gray-700 rounded-md" />
-                    </div>
-                    <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded-md" />
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="p-4 sm:p-5 flex flex-col gap-2.5">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div
-                    key={`ing-skel-${i}`}
-                    className="flex items-center gap-3 p-3 bg-gray-50/80 dark:bg-gray-800/50 rounded-2xl animate-pulse"
-                  >
+        {sortedIngredients.length === 0 && isExtracting ? (
+          viewMode === 'grid' ? (
+            <ul className="grid grid-cols-2 gap-x-1.5 sm:gap-x-3 gap-y-1.5 px-2 pt-2 pb-3.5 sm:px-3.5 sm:pt-2.5 sm:pb-4.5 list-none m-0">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <li
+                  key={`ing-skel-grid-${i}`}
+                  className="p-3 bg-gray-50/80 dark:bg-gray-800/50 rounded-2xl animate-pulse flex flex-col gap-2"
+                >
+                  <div className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-700 shrink-0" />
-                    <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded-md shrink-0" />
-                    <div className="h-4 w-36 bg-gray-200 dark:bg-gray-700 rounded-md" />
+                    <div className="h-3.5 w-14 bg-gray-200 dark:bg-gray-700 rounded-md" />
                   </div>
-                ))}
-              </div>
-            )
-          ) : viewMode === 'grid' ? (
-            <ul className="grid grid-cols-2 gap-x-1.5 sm:gap-x-3 gap-y-1.5 px-2 pt-2 pb-3.5 sm:px-3.5 sm:pt-2.5 sm:pb-4.5 list-none m-0 animate-fade-in">
-              {sortedIngredients.map((ing, idx) => (
-                <IngredientItemGrid
-                  key={`${ing.name}-${idx}`}
-                  ingredient={ing}
-                  categoryName={ing.category}
-                  originalIdx={idx}
-                  itemIdx={idx}
-                  isPremium={isPremium}
-                  scaleFactor={scaleFactor}
-                  formatAmount={formatAmount}
-                  onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
-                  onOpenProFeature={() => setIsProFeatureSheetOpen(true)}
-                />
+                  <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded-md" />
+                </li>
               ))}
             </ul>
           ) : (
-            <ul className="flex flex-col divide-y divide-gray-100/60 dark:divide-gray-800/50 list-none p-0 m-0 animate-fade-in">
-              {sortedIngredients.map((ing, idx) => (
-                <IngredientItemRow
-                  key={`${ing.name}-${idx}`}
-                  ingredient={ing}
-                  categoryName={ing.category}
-                  originalIdx={idx}
-                  itemIdx={idx}
-                  isPremium={isPremium}
-                  scaleFactor={scaleFactor}
-                  formatAmount={formatAmount}
-                  onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
-                  onOpenProFeature={() => setIsProFeatureSheetOpen(true)}
-                />
+            <div className="p-4 sm:p-5 flex flex-col gap-2.5">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={`ing-skel-${i}`}
+                  className="flex items-center gap-3 p-3 bg-gray-50/80 dark:bg-gray-800/50 rounded-2xl animate-pulse"
+                >
+                  <div className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-700 shrink-0" />
+                  <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded-md shrink-0" />
+                  <div className="h-4 w-36 bg-gray-200 dark:bg-gray-700 rounded-md" />
+                </div>
               ))}
-            </ul>
-          )}
-        </div>
+            </div>
+          )
+        ) : viewMode === 'grid' ? (
+          <ul className="grid grid-cols-2 gap-x-1.5 sm:gap-x-3 gap-y-1.5 px-2 pt-2 pb-3.5 sm:px-3.5 sm:pt-2.5 sm:pb-4.5 list-none m-0 animate-fade-in">
+            {sortedIngredients.map((ing, idx) => (
+              <IngredientItemGrid
+                key={`${ing.name}-${idx}`}
+                id={idx === 0 ? 'tour-recipe-ingredients' : undefined}
+                ingredient={ing}
+                categoryName={ing.category}
+                originalIdx={idx}
+                itemIdx={idx}
+                isPremium={isPremium}
+                scaleFactor={scaleFactor}
+                formatAmount={formatAmount}
+                onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
+                onOpenProFeature={() => setIsProFeatureSheetOpen(true)}
+              />
+            ))}
+          </ul>
+        ) : (
+          <ul className="flex flex-col divide-y divide-gray-100/60 dark:divide-gray-800/50 list-none p-0 m-0 animate-fade-in">
+            {sortedIngredients.map((ing, idx) => (
+              <IngredientItemRow
+                key={`${ing.name}-${idx}`}
+                id={idx === 0 ? 'tour-recipe-ingredients' : undefined}
+                ingredient={ing}
+                categoryName={ing.category}
+                originalIdx={idx}
+                itemIdx={idx}
+                isPremium={isPremium}
+                scaleFactor={scaleFactor}
+                formatAmount={formatAmount}
+                onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
+                onOpenProFeature={() => setIsProFeatureSheetOpen(true)}
+              />
+            ))}
+          </ul>
+        )}
 
         {/* 1.3 PRO hint for ingredient nutrition */}
         {!isPremium && hasAnyNutrition && (
