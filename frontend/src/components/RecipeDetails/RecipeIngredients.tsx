@@ -1,17 +1,17 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@heroui/react';
-import { Check, ShoppingCart, ChevronRight, LayoutGrid, List } from 'lucide-react';
+import { Check, ShoppingCart, ChevronRight } from 'lucide-react';
 import ProBadge from '../ProBadge';
 import type { Ingredient, Recipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { hapticLight } from '../../utils/haptics';
 import IngredientNutritionSheet from './IngredientNutritionSheet';
-import RecipeServingsStepper from './RecipeServingsStepper';
-import IngredientItemRow from './IngredientItemRow';
-import IngredientItemGrid from './IngredientItemGrid';
+import RecipeIngredientsHeader from './RecipeIngredientsHeader';
+import IngredientGroupSection from './IngredientGroupSection';
 import AlternativeIngredientsList from './AlternativeIngredientsList';
 import PremiumModal from '../PremiumModal';
 import ProFeatureSheet from '../ProFeatureSheet';
+import { hasRecipeComponents, groupIngredientsByComponent } from '../../utils/recipeComponents';
 
 interface RecipeIngredientsProps {
   recipe: Recipe;
@@ -59,6 +59,27 @@ export default function RecipeIngredients({
     }
   };
 
+  const hasComponents = useMemo(() => hasRecipeComponents(recipe), [recipe]);
+  const componentGroups = useMemo(() => groupIngredientsByComponent(recipe.ingredients), [recipe.ingredients]);
+
+  const [groupingMode, setGroupingMode] = useState<'components' | 'category'>(() => {
+    try {
+      return (localStorage.getItem('recipe_ingredients_grouping') as 'components' | 'category') || 'components';
+    } catch {
+      return 'components';
+    }
+  });
+
+  const handleGroupingModeChange = (mode: 'components' | 'category') => {
+    hapticLight();
+    setGroupingMode(mode);
+    try {
+      localStorage.setItem('recipe_ingredients_grouping', mode);
+    } catch {
+      // ignore
+    }
+  };
+
   const [selectedNutrition, setSelectedNutrition] = useState<{ ingredient: Ingredient; category?: string } | null>(null);
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isProFeatureSheetOpen, setIsProFeatureSheetOpen] = useState(false);
@@ -70,58 +91,20 @@ export default function RecipeIngredients({
     <div className="flex flex-col gap-4 pb-4">
       {/* 1. Unified Cohesive Recipe Card (Servings + Ingredients + Pro Hint + Shopping CTA) */}
       <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
-        {/* 1.1 Servings Header */}
-        {isExtracting ? (
-          <div className="px-4.5 py-3.5 sm:px-6 flex items-center justify-between gap-3 animate-pulse">
-            <div className="flex flex-col gap-1.5">
-              <div className="h-3 w-16 bg-gray-200/90 dark:bg-gray-800/90 rounded-md" />
-              <div className="h-4.5 w-24 bg-gray-200/90 dark:bg-gray-800/90 rounded-md" />
-            </div>
-            <div className="flex items-center gap-2 sm:gap-2.5">
-              <div className="h-10 w-28 bg-gray-200/90 dark:bg-gray-800/90 rounded-2xl" />
-              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gray-200/90 dark:bg-gray-800/90" />
-            </div>
-          </div>
-        ) : (
-          <div id="tour-recipe-servings" className="px-4.5 py-3.5 sm:px-6 flex items-center justify-between gap-3 animate-fade-in">
-            <div className="flex flex-col">
-              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                {t('recipe.serves')}
-              </span>
-              <span className="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
-                {t('recipe.servingsCount', { count: servings })}
-              </span>
-            </div>
+        {/* 1.1 Servings Header & View / Grouping Toggles */}
+        <RecipeIngredientsHeader
+          isExtracting={isExtracting}
+          servings={servings}
+          onDecreaseServings={onDecreaseServings}
+          onIncreaseServings={onIncreaseServings}
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+          hasComponents={hasComponents}
+          groupingMode={groupingMode}
+          onGroupingModeChange={handleGroupingModeChange}
+        />
 
-            <div className="flex items-center gap-2 sm:gap-2.5">
-              <RecipeServingsStepper
-                servings={servings}
-                onDecreaseServings={onDecreaseServings}
-                onIncreaseServings={onIncreaseServings}
-              />
-
-              {/* Single View Mode Toggle Button (right of stepper) */}
-              <Button
-                isIconOnly
-                variant="tertiary"
-                className="w-11 h-11 sm:w-12 sm:h-12 min-w-[44px] min-h-[44px] rounded-2xl bg-black/[0.04] dark:bg-white/[0.06] border-0 text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 active:scale-95 transition-all shrink-0 cursor-pointer flex items-center justify-center"
-                onPress={() => {
-                  hapticLight();
-                  handleViewModeChange(viewMode === 'grid' ? 'list' : 'grid');
-                }}
-                aria-label={viewMode === 'grid' ? t('recipe.viewList') : t('recipe.viewGrid')}
-              >
-                {viewMode === 'grid' ? (
-                  <List className="w-4 h-4" />
-                ) : (
-                  <LayoutGrid className="w-4 h-4" />
-                )}
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* 1.2 Ingredients Display (Grid 2-column or List) */}
+        {/* 1.2 Ingredients Display */}
         {sortedIngredients.length === 0 && isExtracting ? (
           viewMode === 'grid' ? (
             <ul className="grid grid-cols-2 gap-x-1.5 sm:gap-x-3 gap-y-1.5 px-2 pt-2 pb-3.5 sm:px-3.5 sm:pt-2.5 sm:pb-4.5 list-none m-0">
@@ -152,42 +135,46 @@ export default function RecipeIngredients({
               ))}
             </div>
           )
-        ) : viewMode === 'grid' ? (
-          <ul className="grid grid-cols-2 gap-x-1.5 sm:gap-x-3 gap-y-1.5 px-2 pt-2 pb-3.5 sm:px-3.5 sm:pt-2.5 sm:pb-4.5 list-none m-0 animate-fade-in">
-            {sortedIngredients.map((ing, idx) => (
-              <IngredientItemGrid
-                key={`${ing.name}-${idx}`}
-                id={idx === 0 ? 'tour-recipe-ingredients' : undefined}
-                ingredient={ing}
-                categoryName={ing.category}
-                originalIdx={idx}
-                itemIdx={idx}
-                isPremium={isPremium}
-                scaleFactor={scaleFactor}
-                formatAmount={formatAmount}
-                onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
-                onOpenProFeature={() => setIsProFeatureSheetOpen(true)}
-              />
-            ))}
-          </ul>
+        ) : hasComponents && groupingMode === 'components' ? (
+          <div className="divide-y divide-gray-100/60 dark:divide-gray-800/40">
+            {componentGroups.map((group, gIdx) => {
+              const title = group.sectionName
+                ? group.sectionName.toLowerCase().startsWith('für ') || group.sectionName.toLowerCase().startsWith('for ')
+                  ? group.sectionName
+                  : t('recipe.componentFor', { name: group.sectionName })
+                : t('recipe.componentOther');
+              const offset = componentGroups
+                .slice(0, gIdx)
+                .reduce((acc, curr) => acc + curr.items.length, 0);
+
+              return (
+                <IngredientGroupSection
+                  key={group.sectionName || `group-${gIdx}`}
+                  title={title}
+                  count={group.items.length}
+                  ingredients={group.items}
+                  viewMode={viewMode}
+                  isPremium={isPremium}
+                  scaleFactor={scaleFactor}
+                  formatAmount={formatAmount}
+                  onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
+                  onOpenProFeature={() => setIsProFeatureSheetOpen(true)}
+                  itemOffset={offset}
+                />
+              );
+            })}
+          </div>
         ) : (
-          <ul className="flex flex-col divide-y divide-gray-100/60 dark:divide-gray-800/50 list-none p-0 m-0 animate-fade-in">
-            {sortedIngredients.map((ing, idx) => (
-              <IngredientItemRow
-                key={`${ing.name}-${idx}`}
-                id={idx === 0 ? 'tour-recipe-ingredients' : undefined}
-                ingredient={ing}
-                categoryName={ing.category}
-                originalIdx={idx}
-                itemIdx={idx}
-                isPremium={isPremium}
-                scaleFactor={scaleFactor}
-                formatAmount={formatAmount}
-                onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
-                onOpenProFeature={() => setIsProFeatureSheetOpen(true)}
-              />
-            ))}
-          </ul>
+          <IngredientGroupSection
+            ingredients={sortedIngredients}
+            viewMode={viewMode}
+            isPremium={isPremium}
+            scaleFactor={scaleFactor}
+            formatAmount={formatAmount}
+            onSelectNutrition={(item, cat) => setSelectedNutrition({ ingredient: item, category: cat })}
+            onOpenProFeature={() => setIsProFeatureSheetOpen(true)}
+          />
+        )}
         )}
 
         {/* 1.3 PRO hint for ingredient nutrition */}
