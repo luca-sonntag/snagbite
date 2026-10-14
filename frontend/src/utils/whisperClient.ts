@@ -72,7 +72,8 @@ export async function transcribeVideoAudio(params: TranscribeAudioParams): Promi
     });
 
     if (!response.ok) {
-      console.warn(`[whisperClient] Edge transcription returned HTTP ${response.status}`);
+      const errBody = await response.text().catch(() => '');
+      console.warn(`[whisperClient] Edge transcription returned HTTP ${response.status}: ${errBody}`);
       return undefined;
     }
 
