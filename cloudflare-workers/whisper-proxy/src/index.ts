@@ -3,6 +3,7 @@ export interface Env {
   GATEWAY_ID: string;
   CF_AIG_TOKEN: string;
   WHISPER_HMAC_SECRET: string;
+  GROQ_API_KEY?: string;
 }
 
 interface WhisperTicketPayload {
@@ -26,6 +27,23 @@ function jsonResponse(data: unknown, status = 200): Response {
       ...CORS_HEADERS,
     },
   });
+}
+
+function base64UrlToBytes(base64url: string): Uint8Array {
+  const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+function base64UrlToString(base64url: string): string {
+  const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+  return atob(padded);
 }
 
 /**
@@ -53,11 +71,7 @@ async function verifyTicket(ticket: string | null, secret: string): Promise<{ va
       ['verify']
     );
 
-    // Convert base64url signature back to raw binary
-    const binarySig = Uint8Array.from(
-      atob(signature.replace(/-/g, '+').replace(/_/g, '/')),
-      (c) => c.charCodeAt(0)
-    );
+    const binarySig = base64UrlToBytes(signature);
 
     const isSigValid = await crypto.subtle.verify(
       'HMAC',
@@ -67,19 +81,23 @@ async function verifyTicket(ticket: string | null, secret: string): Promise<{ va
     );
 
     if (!isSigValid) {
+      console.warn('[whisper-proxy] Ticket signature verification failed.');
       return { valid: false, error: 'Invalid HMAC signature' };
     }
 
-    const payloadJson = atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/'));
+    const payloadJson = base64UrlToString(payloadBase64);
     const payload = JSON.parse(payloadJson) as WhisperTicketPayload;
 
     if (typeof payload.exp !== 'number' || payload.exp < Date.now()) {
+      console.warn(`[whisper-proxy] Ticket expired: exp=${payload.exp}, now=${Date.now()}`);
       return { valid: false, error: 'Ticket expired' };
     }
 
+    console.log(`[whisper-proxy] Valid ticket verified for job: ${payload.jobId}`);
     return { valid: true };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[whisper-proxy] Ticket verification error: ${msg}`);
     return { valid: false, error: `Ticket verification failed: ${msg}` };
   }
 }
@@ -103,7 +121,7 @@ export default {
 
     const gatewayUrl = `https://gateway.ai.cloudflare.com/v1/${env.CLOUDFLARE_ACCOUNT_ID}/${env.GATEWAY_ID}/groq/audio/transcriptions`;
 
-    // Forward the multipart/form-data stream to Cloudflare AI Gateway with the secret CF token
+    // Forward the payload with explicit Content-Length (ArrayBuffer) to avoid chunked transfer hangs
     const headers = new Headers();
     const contentType = request.headers.get('content-type');
     if (contentType) {
@@ -111,23 +129,47 @@ export default {
     }
     headers.set('cf-aig-authorization', `Bearer ${env.CF_AIG_TOKEN}`);
 
-    try {
-      const upstreamResponse = await fetch(gatewayUrl, {
-        method: 'POST',
-        headers,
-        body: request.body,
-      });
+    if (env.GROQ_API_KEY) {
+      headers.set('Authorization', `Bearer ${env.GROQ_API_KEY}`);
+    } else if (request.headers.has('Authorization')) {
+      headers.set('Authorization', request.headers.get('Authorization')!);
+    }
 
-      const responseBody = await upstreamResponse.text();
-      return new Response(responseBody, {
-        status: upstreamResponse.status,
-        headers: {
-          'Content-Type': upstreamResponse.headers.get('content-type') || 'application/json',
-          ...CORS_HEADERS,
-        },
-      });
+    try {
+      const bodyBuffer = await request.arrayBuffer();
+      console.log(`[whisper-proxy] Forwarding ${bodyBuffer.byteLength} bytes to AI Gateway: ${gatewayUrl}`);
+
+      const upstreamController = new AbortController();
+      const upstreamTimeout = setTimeout(() => upstreamController.abort(), 25000);
+
+      try {
+        const upstreamResponse = await fetch(gatewayUrl, {
+          method: 'POST',
+          headers,
+          body: bodyBuffer,
+          signal: upstreamController.signal,
+        });
+
+        const responseBody = await upstreamResponse.text();
+        console.log(`[whisper-proxy] AI Gateway responded with HTTP ${upstreamResponse.status}`);
+
+        if (!upstreamResponse.ok) {
+          console.warn(`[whisper-proxy] Upstream error body: ${responseBody.slice(0, 300)}`);
+        }
+
+        return new Response(responseBody, {
+          status: upstreamResponse.status,
+          headers: {
+            'Content-Type': upstreamResponse.headers.get('content-type') || 'application/json',
+            ...CORS_HEADERS,
+          },
+        });
+      } finally {
+        clearTimeout(upstreamTimeout);
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
+      console.error(`[whisper-proxy] Upstream error: ${msg}`);
       return jsonResponse({ error: 'UPSTREAM_GATEWAY_ERROR', message: msg }, 502);
     }
   },
