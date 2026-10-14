@@ -14,7 +14,7 @@ import PremiumModal from './PremiumModal';
 import ProBadge from './ProBadge';
 import { FeedbackDrawer } from './FeedbackDrawer';
 import { APP_VERSION_LABEL } from '../version';
-import { getActiveOtaVersion } from '../utils/otaUpdater';
+import { getActiveOtaVersion, checkAndApplyOtaUpdate } from '../utils/otaUpdater';
 import { checkAndApplyNativeUpdate } from '../utils/nativeAppUpdater';
 import { LEGAL_URLS } from '../legal';
 import PremiumUpgradeCard from './PremiumUpgradeCard';
@@ -70,10 +70,24 @@ export default function SettingsView() {
     hapticLight();
     setIsCheckingUpdate(true);
     try {
-      const result = await checkAndApplyNativeUpdate({ manual: true });
-      if (result.status === 'up-to-date') {
+      // 1. Check Google Play Store native update first
+      const nativeResult = await checkAndApplyNativeUpdate({ manual: true });
+      if (nativeResult.status === 'update-started' || nativeResult.status === 'store-opened') {
+        return;
+      }
+
+      // 2. Check Capgo OTA web bundle update
+      const otaResult = await checkAndApplyOtaUpdate({ manual: true });
+      if (otaResult.status === 'updated' || otaResult.status === 'updating') {
+        return;
+      }
+
+      if (
+        (otaResult.status === 'up-to-date' || otaResult.status === 'unsupported') &&
+        (nativeResult.status === 'up-to-date' || nativeResult.status === 'unsupported')
+      ) {
         toast.info(t('app.settings.upToDate') || 'Snagbite ist auf dem neuesten Stand.');
-      } else if (result.status === 'error') {
+      } else if (otaResult.status === 'error' || nativeResult.status === 'error') {
         toast.danger(t('app.settings.updateCheckFailed') || 'Update-Prüfung fehlgeschlagen.');
       }
     } catch {
