@@ -11,6 +11,8 @@ import { jobs } from './schema/jobs.js';
 import { eq, and, inArray, lt, ne, gte, asc, desc, count } from 'drizzle-orm';
 import { recipeToRow } from './recipesMappers.js';
 import { emitJobEvent } from '../jobEvents.js';
+import { config } from '../config.js';
+import { createWhisperTicket } from '../utils/whisperTicket.js';
 
 export function normalizeUrl(urlStr: string): string {
   let clean = urlStr.replace(/^(https?:\/\/)?(www\.)?/i, '');
@@ -116,7 +118,13 @@ export async function updateJob(id: string, updates: Partial<Job>): Promise<void
     .returning();
 
   if (updated) {
-    let mediaRequest: { videoUrl: string; thumbnailUrl?: string; durationSeconds?: number } | undefined;
+    let mediaRequest: {
+      videoUrl: string;
+      thumbnailUrl?: string;
+      durationSeconds?: number;
+      whisperTicket?: string;
+      whisperEndpoint?: string;
+    } | undefined;
     if (updated.status === 'awaiting_frames' && updated.scrapeMeta) {
       const meta = updated.scrapeMeta as Record<string, unknown>;
       const media = meta.media as { kind?: string; videoUrl?: string } | undefined;
@@ -125,6 +133,8 @@ export async function updateJob(id: string, updates: Partial<Job>): Promise<void
           videoUrl: media.videoUrl,
           thumbnailUrl: typeof meta.imageUrl === 'string' ? meta.imageUrl : undefined,
           durationSeconds: typeof meta.durationSeconds === 'number' ? meta.durationSeconds : undefined,
+          whisperTicket: createWhisperTicket({ jobId: updated.id, userId: updated.userId }),
+          whisperEndpoint: config.CLOUDFLARE_WHISPER_ENDPOINT || undefined,
         };
       }
     }

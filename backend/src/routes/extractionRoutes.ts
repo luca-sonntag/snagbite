@@ -338,6 +338,22 @@ async function handleClientPayload(req: Request, res: Response): Promise<void> {
 extractionRoutes.post('/extract-recipe/client-payload', handleClientPayload);
 extractionRoutes.post('/extract-recipe/frames', handleClientPayload);
 
+function extractMediaRequest(job: { id: string; status: string; scrapeMeta?: unknown }, userId: string) {
+  if (job.status !== 'awaiting_frames' || !job.scrapeMeta) return undefined;
+  const meta = job.scrapeMeta as Record<string, unknown>;
+  const media = meta.media as { kind?: string; videoUrl?: string } | undefined;
+  if (media?.kind === 'client' && media?.videoUrl) {
+    return {
+      videoUrl: media.videoUrl,
+      thumbnailUrl: typeof meta.imageUrl === 'string' ? meta.imageUrl : undefined,
+      durationSeconds: typeof meta.durationSeconds === 'number' ? meta.durationSeconds : undefined,
+      whisperTicket: createWhisperTicket({ jobId: job.id, userId }),
+      whisperEndpoint: config.CLOUDFLARE_WHISPER_ENDPOINT || undefined,
+    };
+  }
+  return undefined;
+}
+
 extractionRoutes.get('/jobs/:id', async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
@@ -352,26 +368,7 @@ extractionRoutes.get('/jobs/:id', async (req: Request, res: Response): Promise<v
       throw new AppError('JOB_NOT_FOUND');
     }
 
-    let mediaRequest: {
-      videoUrl: string;
-      thumbnailUrl?: string;
-      durationSeconds?: number;
-      whisperTicket?: string;
-      whisperEndpoint?: string;
-    } | undefined;
-    if (job.status === 'awaiting_frames' && job.scrapeMeta) {
-      const meta = job.scrapeMeta as Record<string, unknown>;
-      const media = meta.media as { kind?: string; videoUrl?: string } | undefined;
-      if (media?.kind === 'client' && media?.videoUrl) {
-        mediaRequest = {
-          videoUrl: media.videoUrl,
-          thumbnailUrl: typeof meta.imageUrl === 'string' ? meta.imageUrl : undefined,
-          durationSeconds: typeof meta.durationSeconds === 'number' ? meta.durationSeconds : undefined,
-          whisperTicket: createWhisperTicket({ jobId: job.id, userId: req.userId! }),
-          whisperEndpoint: config.CLOUDFLARE_WHISPER_ENDPOINT || undefined,
-        };
-      }
-    }
+    const mediaRequest = extractMediaRequest(job, req.userId!);
 
     let recipeTitle: string | null = null;
     if (job.recipeId) {
@@ -427,20 +424,6 @@ extractionRoutes.get('/jobs/:id/events', async (req: Request, res: Response): Pr
     res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
   };
 
-  const buildMediaRequest = (scrapeMeta: unknown) => {
-    if (!scrapeMeta) return undefined;
-    const meta = scrapeMeta as Record<string, unknown>;
-    const media = meta.media as { kind?: string; videoUrl?: string } | undefined;
-    if (media?.kind === 'client' && media?.videoUrl) {
-      return {
-        videoUrl: media.videoUrl,
-        thumbnailUrl: typeof meta.imageUrl === 'string' ? meta.imageUrl : undefined,
-        durationSeconds: typeof meta.durationSeconds === 'number' ? meta.durationSeconds : undefined,
-      };
-    }
-    return undefined;
-  };
-
   let recipeTitle: string | null = null;
   if (job.recipeId) {
     const titles = await getRecipeTitles([job.recipeId]);
@@ -454,7 +437,7 @@ extractionRoutes.get('/jobs/:id/events', async (req: Request, res: Response): Pr
     status: job.status,
     error: job.error,
     progress: job.progress,
-    mediaRequest: job.status === 'awaiting_frames' ? buildMediaRequest(job.scrapeMeta) : undefined,
+    mediaRequest: extractMediaRequest(job, req.userId!),
     recipeId: job.recipeId,
     title: recipeTitle,
     parentRecipeId: job.parentRecipeId,
@@ -484,6 +467,19 @@ extractionRoutes.get('/jobs/:id/events', async (req: Request, res: Response): Pr
       title = titles.get(payload.recipeId) ?? null;
     }
 
+    const mediaRequest = payload.mediaRequest
+      ? {
+          ...payload.mediaRequest,
+          whisperTicket:
+            payload.mediaRequest.whisperTicket ||
+            createWhisperTicket({ jobId: payload.jobId, userId: req.userId! }),
+          whisperEndpoint:
+            payload.mediaRequest.whisperEndpoint ||
+            config.CLOUDFLARE_WHISPER_ENDPOINT ||
+            undefined,
+        }
+      : undefined;
+
     sendEvent('job', {
       id: payload.jobId,
       status: payload.status,
@@ -491,7 +487,7 @@ extractionRoutes.get('/jobs/:id/events', async (req: Request, res: Response): Pr
       recipeId: payload.recipeId,
       title,
       error: payload.error,
-      mediaRequest: payload.mediaRequest,
+      mediaRequest,
     });
 
     if (payload.status === 'completed' || payload.status === 'failed' || payload.status === 'cancelled') {

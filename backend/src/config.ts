@@ -212,7 +212,8 @@ export const config: Config = {
   APP_URL: process.env.APP_URL,
   STORAGE_STREAMING_URL: process.env.STORAGE_STREAMING_URL,
   WHISPER_HMAC_SECRET: getEnv('WHISPER_HMAC_SECRET', 'dev-whisper-hmac-secret-change-in-production'),
-  CLOUDFLARE_WHISPER_ENDPOINT: process.env.CLOUDFLARE_WHISPER_ENDPOINT,
+  CLOUDFLARE_WHISPER_ENDPOINT:
+    process.env.CLOUDFLARE_WHISPER_ENDPOINT || 'https://snagbite-whisper-proxy.snagbite.workers.dev',
 };
 
 /**
