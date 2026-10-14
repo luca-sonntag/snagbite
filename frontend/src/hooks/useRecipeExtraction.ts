@@ -205,20 +205,26 @@ export function useRecipeExtraction(
   }, [getAccessToken, stopActivePolling, t, fetchLimitStatus]);
 
   const fetchCompletedRecipe = useCallback(async (recipeId: string): Promise<Recipe | null> => {
-    try {
-      const token = await getAccessToken();
-      if (!token) return null;
-      const res = await fetch(apiUrl(`/api/recipes/${recipeId}`), {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && data.recipe) {
-          return data.recipe;
+    if (!recipeId) return null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const token = await getAccessToken();
+        if (!token) return null;
+        const res = await fetch(apiUrl(`/api/recipes/${recipeId}`), {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.recipe) {
+            return data.recipe;
+          }
         }
+      } catch (err) {
+        console.warn(`[useRecipeExtraction] Attempt ${attempt}/3 to fetch completed recipe failed:`, err);
       }
-    } catch (err) {
-      console.warn('[useRecipeExtraction] Failed to fetch completed recipe:', err);
+      if (attempt < 3) {
+        await new Promise((r) => setTimeout(r, 250));
+      }
     }
     return null;
   }, [getAccessToken]);
@@ -268,17 +274,19 @@ export function useRecipeExtraction(
       if (job.status === 'completed') {
         const elapsed = Date.now() - pollingStartTimeRef.current;
         const remainingMs = 10000 - elapsed;
+        const targetJobId = job.id || job.jobId;
+        const targetRecipeId = job.recipeId || job.recipe?.id;
 
         if (!isPremium && remainingMs > 2000) {
           stopActivePolling();
-          activePollingJobIdRef.current = job.id;
-          await runSimulatedProgress(job.id, job.recipeId, remainingMs);
+          activePollingJobIdRef.current = targetJobId;
+          await runSimulatedProgress(targetJobId, targetRecipeId, remainingMs);
           return;
         }
 
         stopActivePolling();
 
-        const completedRecipe = await fetchCompletedRecipe(job.recipeId);
+        const completedRecipe = await fetchCompletedRecipe(targetRecipeId);
         if (completedRecipe) {
           setRecipe(completedRecipe);
           setIsPending(false);
@@ -288,7 +296,7 @@ export function useRecipeExtraction(
           setProgress(null);
           setRecipe(null);
           setIsPending(false);
-          onExtractionSuccess(job.recipeId);
+          onExtractionSuccess(targetRecipeId);
         }
 
         setUrl('');
