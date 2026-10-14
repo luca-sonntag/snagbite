@@ -1,3 +1,4 @@
+import { Card, Button } from '@heroui/react';
 import { ShoppingCart, BookOpen, Plus } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { hapticMedium, hapticLight } from '../../utils/haptics';

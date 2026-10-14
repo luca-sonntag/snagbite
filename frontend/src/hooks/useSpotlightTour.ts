@@ -20,7 +20,7 @@ export function useSpotlightTour(
 
   const isCompleted = isTourCompleted(screenId);
   const isTourActive = activeTourId === screenId;
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!enabled || !autoStart || isCompleted || activeTourId !== null) {
