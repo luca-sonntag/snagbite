@@ -484,11 +484,11 @@ export const uiTranslations = {
       extract: {
         link: {
           title: 'Rezept-Link einfügen',
-          desc: 'Füge einen Link aus Instagram, TikTok, YouTube oder von Koch-Websites ein. Unsere KI analysiert das Video und erstellt ein sauberes Rezept.',
+          desc: 'Füge einen Link aus Instagram, TikTok, YouTube oder von Koch-Websites ein. Unsere KI analysiert das Video oder die Webseite und erstellt ein sauberes Rezept.',
         },
         photo: {
           title: 'Fotos & Screenshots scannen',
-          desc: 'Egal ob Screenshot aus Instagram/Pinterest, abfotografierte Kochbuchseite oder handschriftliche Rezeptkarte: Einfach hochladen – Snagbite liest Zutaten und Zubereitung automatisch aus.',
+          desc: 'Egal ob Screenshot aus Social Media oder Kochblogs, abfotografierte Kochbuchseite oder handschriftliche Rezeptkarte: Einfach hochladen – Snagbite liest Zutaten und Zubereitung automatisch aus.',
         },
         share: {
           title: 'Direkt aus anderen Apps teilen',
@@ -2095,11 +2095,11 @@ export const uiTranslations = {
       extract: {
         link: {
           title: 'Paste recipe link',
-          desc: 'Paste a link from Instagram, TikTok, YouTube or recipe websites. Our AI analyzes the video and creates a clean recipe.',
+          desc: 'Paste a link from Instagram, TikTok, YouTube or recipe websites. Our AI analyzes the video or webpage and creates a clean recipe.',
         },
         photo: {
           title: 'Scan photos & screenshots',
-          desc: 'Whether it is a screenshot from Instagram/Pinterest, a cookbook page or handwritten recipe notes: Simply upload – Snagbite extracts ingredients and steps automatically.',
+          desc: 'Whether it is a screenshot from social media or food blogs, a cookbook page or handwritten recipe notes: Simply upload – Snagbite extracts ingredients and steps automatically.',
         },
         share: {
           title: 'Share directly from apps',

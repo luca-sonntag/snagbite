@@ -5,6 +5,7 @@ import FloatingActionBar from '../FloatingActionBar';
 import ProBadge from '../ProBadge';
 import CookedButton from '../CookedButton';
 import { useHideOnScroll } from '../../hooks/useHideOnScroll';
+import { useSpotlightTourContext } from '../../context/SpotlightTourContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
 
 interface RecipeActionDockProps {
@@ -30,8 +31,9 @@ export default function RecipeActionDock({
 }: RecipeActionDockProps) {
   const { t } = useI18n();
   const { isPremium } = useAuth();
+  const { activeTourId } = useSpotlightTourContext();
 
-  const isHidden = useHideOnScroll();
+  const isHidden = useHideOnScroll({ enabled: !activeTourId });
 
   const showStart = totalStepsCount > 0;
   const showRemix = !!recipeId && !!onRemixClick;
@@ -54,7 +56,6 @@ export default function RecipeActionDock({
       {/* Start Cooking Button */}
       {showStart && (
         <button
-          id="tour-recipe-cook-btn"
           onClick={() => {
             hapticMedium();
             onStartCooking();

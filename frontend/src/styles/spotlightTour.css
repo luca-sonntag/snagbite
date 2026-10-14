@@ -148,3 +148,9 @@
 .driver-overlay {
   background-color: rgba(0, 0, 0, 0.65) !important;
 }
+
+/* Ensure active element is elevated above backdrop */
+.driver-active-element {
+  position: relative !important;
+  z-index: 1000000001 !important;
+}
