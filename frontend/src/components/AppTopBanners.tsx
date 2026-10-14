@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import TimerBanner from './TimerBanner';
-import OtaUpdateBanner from './OtaUpdateBanner';
 import type { AppTopBannersProps } from '../types/app';
 
 export const AppTopBanners: React.FC<AppTopBannersProps> = () => {
@@ -31,9 +30,6 @@ export const AppTopBanners: React.FC<AppTopBannersProps> = () => {
 
       {/* Active Cooking Timers Banner */}
       <TimerBanner />
-
-      {/* Instant OTA Update Consent Banner */}
-      <OtaUpdateBanner />
     </div>
   );
 };
