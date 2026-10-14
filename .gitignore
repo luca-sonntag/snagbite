@@ -11,7 +11,9 @@ database.json
 logs/
 public/recipe-images/
 temp-downloads/
-.agents
+.agents/*
+!.agents/rules/
+!.agents/skills/
 .claude/
 *.afdesign*
 frontend/releases/
