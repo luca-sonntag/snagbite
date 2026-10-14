@@ -43,14 +43,13 @@ export const PantrySuggestionsModal: React.FC<PantrySuggestionsModalProps> = ({
 
   return (
     <div onClick={(e) => e.stopPropagation()}>
-      <Drawer>
-        <Drawer.Backdrop
-          isOpen={isOpen}
-          onOpenChange={(open) => {
-            if (!open) onClose();
-          }}
-          className="!z-[100]"
-        >
+      <Drawer.Backdrop
+        isOpen={isOpen}
+        onOpenChange={(open) => {
+          if (!open) onClose();
+        }}
+        className="!z-[100]"
+      >
           <Drawer.Content placement="bottom" className="!z-[100]">
             <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 max-h-[85vh] flex flex-col p-4 sm:p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom,0px))] rounded-t-3xl border-none shadow-2xl overflow-hidden w-full max-w-lg mx-auto">
               <Drawer.Handle />
@@ -204,7 +203,6 @@ export const PantrySuggestionsModal: React.FC<PantrySuggestionsModalProps> = ({
             </Drawer.Dialog>
           </Drawer.Content>
         </Drawer.Backdrop>
-      </Drawer>
     </div>
   );
 };
