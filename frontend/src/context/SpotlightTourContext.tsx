@@ -103,6 +103,8 @@ export const SpotlightTourProvider: React.FC<{ children: React.ReactNode }> = ({
           duration: 300,
           stageRadius: 20,
           stagePadding: 8,
+          popoverOffset: 12,
+          overlayOpacity: 0.45,
           allowClose: true,
           nextBtnText: t('tour.btn.next'),
           prevBtnText: t('tour.btn.prev'),

@@ -146,5 +146,14 @@
 
 /* Stage cutout overlay */
 .driver-overlay {
-  background-color: rgba(0, 0, 0, 0.65) !important;
+  background-color: transparent !important;
 }
+
+.driver-overlay path {
+  opacity: 0.45 !important;
+}
+
+.dark .driver-overlay path {
+  opacity: 0.55 !important;
+}
+
