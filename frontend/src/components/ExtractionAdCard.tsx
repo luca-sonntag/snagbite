@@ -31,6 +31,7 @@ interface ExtractionAdCardProps {
   hidden?: boolean;
   variant?: 'mrec' | 'banner';
   embedded?: boolean;
+  bare?: boolean;
   onStatusChange?: (status: 'pending' | 'loaded' | 'failed') => void;
 }
 
@@ -39,6 +40,7 @@ export default function ExtractionAdCard({
   hidden = false,
   variant = 'mrec',
   embedded = false,
+  bare = false,
   onStatusChange,
 }: ExtractionAdCardProps) {
   const { t } = useI18n();
@@ -207,6 +209,27 @@ export default function ExtractionAdCard({
           ref={slotRef}
           className="w-full max-w-[320px] mx-auto flex flex-col items-center justify-center rounded-xl bg-gray-100/80 dark:bg-gray-800/50 transition-all"
           style={{ minHeight: slotHeight }}
+        >
+          {status === 'pending' && (
+            <Spinner size="sm" color="success" />
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (bare) {
+    return (
+      <div className="w-full flex flex-col items-center justify-center">
+        <div className="w-full flex items-center justify-start mb-2 px-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+            {t('ads.label')}
+          </span>
+        </div>
+        {/* Reserved slot the native AdMob banner overlays (or web ad container box). */}
+        <div
+          ref={slotRef}
+          className="w-[300px] h-[250px] mx-auto flex flex-col items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800/60 transition-all overflow-hidden"
         >
           {status === 'pending' && (
             <Spinner size="sm" color="success" />
