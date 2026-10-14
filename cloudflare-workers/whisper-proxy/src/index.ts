@@ -115,6 +115,62 @@ export default {
       return new Response(null, { status: 204, headers: CORS_HEADERS });
     }
 
+    const url = new URL(request.url);
+
+    // Health check endpoint for external monitoring (healthcheck cron / uptime probes)
+    if (request.method === 'GET' && (url.pathname === '/health' || url.pathname === '/')) {
+      const gatewayUrl = `https://gateway.ai.cloudflare.com/v1/${env.CLOUDFLARE_ACCOUNT_ID}/${env.GATEWAY_ID}/groq/models`;
+      const headers = new Headers();
+      headers.set('cf-aig-authorization', `Bearer ${env.CF_AIG_TOKEN}`);
+      if (env.GROQ_API_KEY) {
+        headers.set('Authorization', `Bearer ${env.GROQ_API_KEY}`);
+      }
+
+      try {
+        const upstreamResponse = await fetch(gatewayUrl, {
+          method: 'GET',
+          headers,
+          signal: AbortSignal.timeout(8000),
+        });
+
+        if (!upstreamResponse.ok) {
+          const body = await upstreamResponse.text().catch(() => '');
+          console.warn(`[whisper-proxy] Healthcheck upstream failed (${upstreamResponse.status}): ${body.slice(0, 200)}`);
+          return jsonResponse(
+            {
+              status: 'degraded',
+              service: 'whisper-proxy',
+              upstream: 'groq',
+              upstreamStatus: upstreamResponse.status,
+              error: body.slice(0, 300) || `Upstream returned HTTP ${upstreamResponse.status}`,
+            },
+            502
+          );
+        }
+
+        return jsonResponse(
+          {
+            status: 'ok',
+            service: 'whisper-proxy',
+            upstream: 'groq',
+            timestamp: new Date().toISOString(),
+          },
+          200
+        );
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error(`[whisper-proxy] Healthcheck error: ${msg}`);
+        return jsonResponse(
+          {
+            status: 'down',
+            service: 'whisper-proxy',
+            error: msg,
+          },
+          503
+        );
+      }
+    }
+
     if (request.method !== 'POST') {
       return jsonResponse({ error: 'METHOD_NOT_ALLOWED', message: 'Only POST is supported.' }, 405);
     }
