@@ -57,15 +57,16 @@
   - **Fokus auf echte Charakter-/Hero-Zutaten:** Benachrichtigungen ausschließlich für geschmacksprägende Hauptzutaten triggern, auf die man tatsächlich Appetit entwickeln kann (z. B. Avocado, Lachs, Kürbis, Burrata, Erdbeeren, Spargel, Pilze, Garnelen, Pasta, Süßkartoffel).
   - **Prompt-Optimierung für Gemini (`generateNotificationCopy`):** Den LLM-Prompt in `backend/src/gemini.ts` schärfen, sodass niemals plumpe Vorlagen wie *„Lust auf [Zutat]?“* generiert werden, sondern der kulinarische Kontext sympathisch, abwechslungsreich und appetitlich formuliert wird (z. B. *„Pasta-Lust? Du hast ein leckeres Rezept gespeichert...“*).
 
-- **Mehrteilige Rezepte / Sub-Rezepte & Komponenten (Brot, Sauce, Salat, Dressing, Topping etc.):**
-  - **Problem:** Viele Gerichte bestehen aus logisch getrennten Komponenten (z. B. Burger = Buns/Brot, Patties, Sauce, Beilagensalat). Aktuell werden Zutaten und Zubereitungsschritte oft in einer einzigen linearen Liste vermischt, was beim Kochen und Vorbereiten unübersichtlich ist.
-  - **Strukturierte Extraktion (KI & Schema):** Gemini soll bei der Extraktion erkennen, ob ein Rezept aus distinkten Sub-Rezepten bzw. Komponenten besteht, und diese strukturiert abbilden (z. B. Komponentengruppen für Zutaten mit Gruppen-Header und schrittweise Zuordnung der Zubereitung).
-  - **UX & Zubereitungs-Flow:**
-    - Zutatenliste: Visuelle Gruppierung nach Komponenten (z. B. *„Für das Brot“*, *„Für die Sauce“*, *„Für den Salat“*).
-    - Kochmodus & Schritte: Klare Komponenten-Abschnitte oder Badges an den Schritten, damit man Komponenten parallel oder im Vorfeld (Mise en Place) zubereiten kann.
-    - Einkaufsliste & Vorrat: Saubere Aggregation ohne Duplikat-Verwirrung bei komponentenübergreifenden Zutaten.
-
 ## Findings (Behoben ✅)
+
+- [x] Mehrteilige Rezepte / Sub-Rezepte & Komponenten (Brot, Sauce, Salat, Dressing, Topping etc.):
+  - Strukturierte Extraktion via Gemini Regel 24 (`ingredients[].section`, `instructions[].section`).
+  - 2nd-Stage Auditor Sanitization & Mapping (`recipeAuditor.ts`, `recipeAuditorSchema.ts`).
+  - Non-breaking JSONB Datenmodell in `@cookbook/shared` (`InstructionStep.section?: string`, `Ingredient.section?: string`).
+  - UI Rezept-Details: Umschalten zwischen Komponenten-Ansicht und Supermarkt-Kategorien via Segmented Control (`RecipeIngredientsHeader.tsx`, `IngredientGroupSection.tsx`).
+  - Zubereitung & Kochmodus: Komponenten-Dividers im linearen Timeline-Verlauf (`InstructionSectionDivider.tsx`) und Komponenten-Badge im Kochmodus (`CookingModeStepContent.tsx`).
+  - Einkaufsliste: Konsolidierung doppelter Zutaten über Komponenten hinweg (`consolidateIngredientsForShopping`) mit Aufschlüsselungs-Pills (`ShoppingConfirmItem.tsx`, `ShoppingConfirmSheet.tsx`).
+  - Export: Formatierung nach Komponenten in Plain-Text und semantischem HTML (`copyRecipeToClipboard.ts`).
 
 - [x] Extraktions-Warteliste & Fail-Safe Queue auf der „NEU“-Seite:
   - Schutz vor Link-Verlust: Fehlgeschlagene/abgebrochene Extraktionen werden persistent in der Fail-Safe Queue gesichert (`FailedJobCard.tsx`, 1-Klick-Retry, Link kopieren/öffnen, in Warteliste verschieben).
