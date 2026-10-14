@@ -6,12 +6,20 @@ import { extractAudioWavBlob } from './audioExtractor';
  */
 
 export const WHISPER_CLIENT_TIMEOUT_MS = 30000;
+export const DEFAULT_WHISPER_MODEL = 'whisper-large-v3-turbo';
 
 export interface TranscribeAudioParams {
   videoBuffer: ArrayBuffer;
   whisperEndpoint?: string;
   whisperTicket?: string;
+  model?: string;
   signal?: AbortSignal;
+}
+
+export interface TranscribeAudioResult {
+  transcript?: string;
+  durationSeconds?: number;
+  model?: string;
 }
 
 /**
@@ -20,11 +28,11 @@ export interface TranscribeAudioParams {
  * Falls back safely to sending the raw video container if audio extraction fails.
  * Safe and fail-soft: Never throws, logs warnings, and returns undefined if the request fails or times out.
  */
-export async function transcribeVideoAudio(params: TranscribeAudioParams): Promise<string | undefined> {
-  const { videoBuffer, whisperEndpoint, whisperTicket, signal } = params;
+export async function transcribeVideoAudio(params: TranscribeAudioParams): Promise<TranscribeAudioResult> {
+  const { videoBuffer, whisperEndpoint, whisperTicket, model = DEFAULT_WHISPER_MODEL, signal } = params;
 
   if (!whisperEndpoint || !whisperTicket || videoBuffer.byteLength === 0) {
-    return undefined;
+    return {};
   }
 
   const controller = new AbortController();
@@ -37,6 +45,8 @@ export async function transcribeVideoAudio(params: TranscribeAudioParams): Promi
     signal.addEventListener('abort', () => controller.abort(signal.reason), { once: true });
   }
 
+  let measuredDuration: number | undefined;
+
   try {
     const formData = new FormData();
 
@@ -44,12 +54,13 @@ export async function transcribeVideoAudio(params: TranscribeAudioParams): Promi
     let uploadBlob: Blob;
     let uploadFilename: string;
 
-    const wavBlob = await extractAudioWavBlob(videoBuffer);
-    if (wavBlob) {
+    const audioResult = await extractAudioWavBlob(videoBuffer);
+    if (audioResult) {
+      measuredDuration = audioResult.durationSeconds;
       console.log(
-        `[whisperClient] Extracted 16kHz mono audio (${(wavBlob.size / 1024).toFixed(1)} KB) from video stream.`
+        `[whisperClient] Extracted 16kHz mono audio (${(audioResult.blob.size / 1024).toFixed(1)} KB, ${measuredDuration}s) from video stream.`
       );
-      uploadBlob = wavBlob;
+      uploadBlob = audioResult.blob;
       uploadFilename = 'audio.wav';
     } else {
       console.log('[whisperClient] Audio extraction unavailable, falling back to raw video container.');
@@ -58,9 +69,9 @@ export async function transcribeVideoAudio(params: TranscribeAudioParams): Promi
     }
 
     formData.append('file', uploadBlob, uploadFilename);
-    formData.append('model', 'whisper-large-v3-turbo');
+    formData.append('model', model);
 
-    console.log(`[whisperClient] Requesting transcription from ${whisperEndpoint} (${uploadFilename})...`);
+    console.log(`[whisperClient] Requesting transcription from ${whisperEndpoint} (${uploadFilename}, ${model})...`);
 
     const response = await fetch(whisperEndpoint, {
       method: 'POST',
@@ -74,18 +85,20 @@ export async function transcribeVideoAudio(params: TranscribeAudioParams): Promi
     if (!response.ok) {
       const errBody = await response.text().catch(() => '');
       console.warn(`[whisperClient] Edge transcription returned HTTP ${response.status}: ${errBody}`);
-      return undefined;
+      return { durationSeconds: measuredDuration, model };
     }
 
     const data = (await response.json()) as { text?: string; transcript?: string };
     const text = (data.text || data.transcript || '').trim();
 
     if (text) {
-      console.log(`[whisperClient] Transcription received (${text.length} chars).`);
-      return text;
+      console.log(
+        `[whisperClient] Transcription received (${text.length} chars, duration: ${measuredDuration !== undefined ? `${measuredDuration}s` : 'unknown'}, model: ${model}).`
+      );
+      return { transcript: text, durationSeconds: measuredDuration, model };
     }
 
-    return undefined;
+    return { durationSeconds: measuredDuration, model };
   } catch (err: unknown) {
     if (controller.signal.aborted) {
       const reason = controller.signal.reason;
@@ -95,7 +108,7 @@ export async function transcribeVideoAudio(params: TranscribeAudioParams): Promi
       const msg = err instanceof Error ? err.message : String(err);
       console.warn(`[whisperClient] Whisper transcription non-fatal failure: ${msg}`);
     }
-    return undefined;
+    return { durationSeconds: measuredDuration, model };
   } finally {
     clearTimeout(timeoutId);
   }

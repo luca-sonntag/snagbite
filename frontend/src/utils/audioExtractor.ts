@@ -6,14 +6,20 @@
 
 const DEFAULT_TARGET_SAMPLE_RATE = 16000;
 
+export interface ExtractedAudioResult {
+  blob: Blob;
+  durationSeconds: number;
+}
+
 /**
  * Extracts and resamples the audio track from a video ArrayBuffer into a 16 kHz mono WAV Blob.
+ * Also returns the measured duration of the audio track in seconds.
  * Returns null if the video has no audio track, is silent, or if decoding fails.
  */
 export async function extractAudioWavBlob(
   videoBuffer: ArrayBuffer,
   targetSampleRate = DEFAULT_TARGET_SAMPLE_RATE
-): Promise<Blob | null> {
+): Promise<ExtractedAudioResult | null> {
   if (!videoBuffer || videoBuffer.byteLength === 0) {
     return null;
   }
@@ -41,9 +47,12 @@ export async function extractAudioWavBlob(
       return null;
     }
 
+    const durationSeconds = Number(decodedBuffer.duration.toFixed(2));
+
     // Resample to targetSampleRate (16 kHz) if needed
     const finalBuffer = await resampleAudioBuffer(decodedBuffer, targetSampleRate);
-    return audioBufferToWavBlob(finalBuffer);
+    const blob = audioBufferToWavBlob(finalBuffer);
+    return { blob, durationSeconds };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     console.warn(`[audioExtractor] Failed to decode audio track from video: ${msg}`);

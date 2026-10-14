@@ -5,7 +5,7 @@ import type { ExtractionJob } from '../types';
 import { setCachedImage } from './imageStore';
 import { extractKeyframesWebCodecs, calculateKeyframeTimestamps, FRAME_COUNT } from './videoDecoder';
 import { compositeKeyframesToGridCanvas } from './gridCanvas';
-import { transcribeVideoAudio } from './whisperClient';
+import { transcribeVideoAudio, DEFAULT_WHISPER_MODEL } from './whisperClient';
 
 export { calculateKeyframeTimestamps, FRAME_COUNT };
 
@@ -211,8 +211,10 @@ export async function handleClientFrameRequest(
       return;
     }
 
+    const videoSizeBytes = videoBuffer.byteLength;
+
     // Execute keyframe decoding and Whisper transcription in parallel
-    const [framesBase64, transcript] = await Promise.all([
+    const [framesBase64, whisperResult] = await Promise.all([
       extractKeyframesWebCodecs(videoBuffer, mediaRequest.durationSeconds),
       transcribeVideoAudio({
         videoBuffer,
@@ -221,11 +223,14 @@ export async function handleClientFrameRequest(
       }),
     ]);
 
+    const transcript = whisperResult?.transcript;
+    const measuredDuration = whisperResult?.durationSeconds ?? mediaRequest.durationSeconds;
+
     // Composite keyframes directly in browser to a single lightweight 4x4 grid JPEG (~200 KB)
     const gridBase64 = framesBase64.length > 0 ? await compositeKeyframesToGridCanvas(framesBase64) : null;
 
     console.log(
-      `[videoFrames] Submitting client payload for job ${job.id}: ${gridBase64 ? '4x4 grid' : `${framesBase64.length} frames`}${transcript ? ', with transcript' : ''}...`
+      `[videoFrames] Submitting client payload for job ${job.id}: ${gridBase64 ? '4x4 grid' : `${framesBase64.length} frames`}${transcript ? ', with transcript' : ''} (${(videoSizeBytes / (1024 * 1024)).toFixed(2)} MB${measuredDuration ? `, ${measuredDuration}s` : ''})...`
     );
 
     const payloadBody = JSON.stringify({
@@ -233,6 +238,9 @@ export async function handleClientFrameRequest(
       gridBase64: gridBase64 ?? undefined,
       framesBase64: gridBase64 ? undefined : framesBase64,
       transcript: transcript ?? undefined,
+      whisperModel: transcript ? (whisperResult?.model || DEFAULT_WHISPER_MODEL) : undefined,
+      videoDurationSeconds: typeof measuredDuration === 'number' && measuredDuration > 0 ? Number(measuredDuration.toFixed(2)) : undefined,
+      videoSizeBytes: typeof videoSizeBytes === 'number' && videoSizeBytes > 0 ? videoSizeBytes : undefined,
     });
 
     // Submit payload to canonical /client-payload endpoint with fallback to legacy /frames
