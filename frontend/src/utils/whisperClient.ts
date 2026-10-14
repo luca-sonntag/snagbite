@@ -5,7 +5,7 @@ import { extractAudioWavBlob } from './audioExtractor';
  * using ephemeral HMAC tickets.
  */
 
-export const WHISPER_CLIENT_TIMEOUT_MS = 10000;
+export const WHISPER_CLIENT_TIMEOUT_MS = 30000;
 
 export interface TranscribeAudioParams {
   videoBuffer: ArrayBuffer;
@@ -28,10 +28,13 @@ export async function transcribeVideoAudio(params: TranscribeAudioParams): Promi
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), WHISPER_CLIENT_TIMEOUT_MS);
+  const timeoutId = setTimeout(
+    () => controller.abort(new Error(`Whisper request timed out after ${WHISPER_CLIENT_TIMEOUT_MS / 1000}s`)),
+    WHISPER_CLIENT_TIMEOUT_MS
+  );
 
   if (signal) {
-    signal.addEventListener('abort', () => controller.abort(), { once: true });
+    signal.addEventListener('abort', () => controller.abort(signal.reason), { once: true });
   }
 
   try {
@@ -83,8 +86,14 @@ export async function transcribeVideoAudio(params: TranscribeAudioParams): Promi
 
     return undefined;
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.warn(`[whisperClient] Whisper transcription non-fatal failure: ${msg}`);
+    if (controller.signal.aborted) {
+      const reason = controller.signal.reason;
+      const abortMsg = reason instanceof Error ? reason.message : String(reason);
+      console.warn(`[whisperClient] Whisper transcription aborted/timed out: ${abortMsg}`);
+    } else {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[whisperClient] Whisper transcription non-fatal failure: ${msg}`);
+    }
     return undefined;
   } finally {
     clearTimeout(timeoutId);
