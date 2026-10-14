@@ -505,8 +505,8 @@ export const uiTranslations = {
           desc: "Organisiere deine Gerichte in farbigen Ordnern mit Emojis – z. B. 'Schnelle Feierabendküche' oder 'Meal Prep'.",
         },
         firstCard: {
-          title: 'Rezept öffnen & Aktionen',
-          desc: 'Tippe auf ein Rezept für Details, oder halte es gedrückt, um mehrere Rezepte gleichzeitig zu verschieben oder zu teilen.',
+          title: 'Empfehlungen & Aktionen',
+          desc: 'Wische durch dynamische Empfehlungen und Tages-Highlights. Tippe auf ein Gericht für alle Details oder halte es gedrückt, um mehrere Rezepte für Sammlungen oder die Einkaufsliste auszuwählen.',
         },
       },
       recipeDetails: {
@@ -2116,8 +2116,8 @@ export const uiTranslations = {
           desc: "Organize dishes in colored folders with emojis – e.g. 'Quick dinners' or 'Meal prep'.",
         },
         firstCard: {
-          title: 'Open recipe & actions',
-          desc: 'Tap a recipe for details, or long-press to move, categorize, or share multiple recipes at once.',
+          title: 'Recommendations & actions',
+          desc: 'Swipe through dynamic recommendations and daily spotlights. Tap a recipe for full details, or long-press to select multiple dishes for collections or your shopping list.',
         },
       },
       recipeDetails: {
