@@ -50,14 +50,13 @@ export default function HealthScoreSheet({
 
   return (
     <div onClick={(e) => e.stopPropagation()}>
-      <Drawer>
-        <Drawer.Backdrop
-          isOpen={isOpen}
-          onOpenChange={(open) => {
-            if (!open) onClose();
-          }}
-          className="!z-[100]"
-        >
+      <Drawer.Backdrop
+        isOpen={isOpen}
+        onOpenChange={(open) => {
+          if (!open) onClose();
+        }}
+        className="!z-[100]"
+      >
           <Drawer.Content placement="bottom" className="!z-[100]">
             <Drawer.Dialog className="relative !bg-[#f8fafc] dark:!bg-gray-950 max-h-[85vh] flex flex-col !p-0 rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)] overflow-hidden w-full max-w-lg mx-auto">
               <Drawer.Handle />
@@ -140,7 +139,6 @@ export default function HealthScoreSheet({
             </Drawer.Dialog>
           </Drawer.Content>
         </Drawer.Backdrop>
-      </Drawer>
     </div>
   );
 }
