@@ -18,11 +18,12 @@ export const MealPlannerHeader: React.FC<MealPlannerHeaderProps> = ({
     onShopWeek();
   };
 
-  const shopAction = plannedTotalCount > 0 ? (
+  const shopAction = (
     <button
+      id="tour-planner-bulk-shop"
       onClick={handleShop}
-      disabled={isAddingToShopping}
-      className={`flex items-center justify-center gap-1.5 min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-2xl active:scale-[0.93] transition-all duration-150 disabled:opacity-50 cursor-pointer border-none shadow-xs ${
+      disabled={plannedTotalCount === 0 || isAddingToShopping}
+      className={`flex items-center justify-center gap-1.5 min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-2xl active:scale-[0.93] transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer border-none shadow-xs ${
         isShopAdded
           ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold'
           : 'bg-emerald-500/10 hover:bg-emerald-500/15 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
@@ -39,7 +40,7 @@ export const MealPlannerHeader: React.FC<MealPlannerHeaderProps> = ({
       )}
       <span className="text-xs font-bold">{t('mealPlanner.shopWeek')}</span>
     </button>
-  ) : undefined;
+  );
 
   return (
     <PageHeader

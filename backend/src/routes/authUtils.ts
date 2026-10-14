@@ -54,6 +54,8 @@ export async function fetchAndSyncUser(userId: string): Promise<AuthUserShape> {
       .where(eq(userTable.id, userId));
   }
 
+  const metadata = (row.metadata || {}) as Record<string, unknown>;
+
   return {
     id: row.id,
     email: row.email,
@@ -63,6 +65,7 @@ export async function fetchAndSyncUser(userId: string): Promise<AuthUserShape> {
       custom_extraction_limit: row.customExtractionLimit ?? undefined,
     },
     user_metadata: {
+      ...metadata,
       notifications_enabled: row.notificationsEnabled ?? false,
       name: row.name,
       avatar_url: row.image,

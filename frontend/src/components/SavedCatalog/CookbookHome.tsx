@@ -158,7 +158,7 @@ export default function CookbookHome({
 
       {/* 2. Clean Flat Squircle Collection Hub (only when user has saved recipes) */}
       {totalRecipes > 0 && (
-        <section className="space-y-3">
+        <section id="tour-catalog-collections" className="space-y-3">
           <CollectionStoryHub
             totalRecipes={totalRecipes}
             allRecipesThumbnail={firstRecipeThumbnail}
@@ -184,14 +184,16 @@ export default function CookbookHome({
 
       {/* 3. COVER STORY Part 1: Modern 3-Slide Hero Carousel */}
       {heroSlides.length > 0 && (
-        <RecipeHeroCarousel
-          slides={heroSlides}
-          onOpenSlide={handleOpenSlide}
-          onSaveCommunity={handleSaveCommunityFromHero}
-          isSelectMode={isSelectMode}
-          selectedIds={selectedIds}
-          bindLongPress={bindLongPress}
-        />
+        <div id="tour-catalog-first-card">
+          <RecipeHeroCarousel
+            slides={heroSlides}
+            onOpenSlide={handleOpenSlide}
+            onSaveCommunity={handleSaveCommunityFromHero}
+            isSelectMode={isSelectMode}
+            selectedIds={selectedIds}
+            bindLongPress={bindLongPress}
+          />
+        </div>
       )}
 
       {/* 4. COVER STORY Part 2: Bento Grid for Fast & Nutrient-Dense Dishes (only when at least 3 recipes are available) */}

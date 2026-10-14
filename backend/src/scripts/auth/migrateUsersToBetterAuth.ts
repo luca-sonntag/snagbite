@@ -102,6 +102,7 @@ async function main() {
           bonusCredits,
           customExtractionLimit: customLimit ? Number(customLimit) : null,
           notificationsEnabled,
+          metadata: (u.user_metadata || {}) as Record<string, unknown>,
           updatedAt,
         })
         .where(eq(userTable.id, existingUser.id));
@@ -118,6 +119,7 @@ async function main() {
         bonusCredits,
         customExtractionLimit: customLimit ? Number(customLimit) : null,
         notificationsEnabled,
+        metadata: (u.user_metadata || {}) as Record<string, unknown>,
         createdAt,
         updatedAt,
       });

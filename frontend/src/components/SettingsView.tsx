@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Select, ListBox, Popover } from '@heroui/react';
-import { LogOut, Globe, Moon, Sun, Thermometer, Scale, Info, UserMinus, Sparkles, ChevronRight, HelpCircle, MessageSquare, Shield, ScrollText, Building2, ExternalLink, RefreshCw } from 'lucide-react';
+import { LogOut, Globe, Moon, Sun, Thermometer, Scale, Info, UserMinus, Sparkles, ChevronRight, HelpCircle, MessageSquare, Shield, ScrollText, Building2, ExternalLink, RefreshCw, Compass } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { useSpotlightTourContext } from '../context/SpotlightTourContext';
 import { hapticLight, hapticMedium, hapticHeavy } from '../utils/haptics';
 import { isNative } from '../native';
 
@@ -55,6 +56,7 @@ export default function SettingsView() {
   const { signOut, user, autoSignedIn, updateUserMetadata, deleteAccount, isAdmin } = useAuth();
   const dialog = useDialog();
   const toast = useToast();
+  const { resetAllTours } = useSpotlightTourContext();
   const [theme, setTheme] = useTheme();
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -428,6 +430,25 @@ export default function SettingsView() {
               <div>
                 <p className="font-semibold text-gray-950 dark:text-white text-sm">
                   {t('onboarding.replayLabel')}
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 shrink-0 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
+          </button>
+
+          <button
+            onClick={() => {
+              hapticMedium();
+              resetAllTours();
+              toast.success(t('tour.resetSuccess'));
+            }}
+            className="w-full p-4 flex items-center justify-between border-b border-black/5 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 transition-all active:scale-[0.99] text-left cursor-pointer group"
+          >
+            <div className="flex items-center gap-3">
+              <Compass className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0 group-hover:scale-105 transition-transform" />
+              <div>
+                <p className="font-semibold text-gray-950 dark:text-white text-sm">
+                  {t('tour.resetLabel')}
                 </p>
               </div>
             </div>

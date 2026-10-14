@@ -9,7 +9,7 @@ export const WeekDayPicker: React.FC<WeekDayPickerProps> = ({
   onSelectDate,
 }) => {
   return (
-    <div className="w-full grid grid-cols-7 gap-1 pt-1 pb-1">
+    <div id="tour-planner-days" className="w-full grid grid-cols-7 gap-1 pt-1 pb-1">
       {days.map((day) => {
         const isSelected = selectedDate !== null && day.dateStr === selectedDate;
         const isAllCooked =

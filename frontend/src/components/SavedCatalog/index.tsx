@@ -17,6 +17,7 @@ import PremiumModal from '../PremiumModal';
 import PremiumHint from '../PremiumHint';
 import CollectionSheet from './CollectionSheet';
 import { FlagSheet } from './FlagSheet';
+import { useSpotlightTour } from '../../hooks/useSpotlightTour';
 
 import RecipePosterCard from './RecipePosterCard';
 import RecipeListItem from './RecipeListItem';
@@ -113,6 +114,11 @@ export default function SavedCatalog({
   useEffect(() => {
     prevIsListLevelRef.current = isListLevel;
   }, [isListLevel]);
+
+  useSpotlightTour('catalog', {
+    enabled: historyLoaded && (history?.length ?? 0) > 0 && !selectedJob && !isListLevel,
+    delayMs: 600,
+  });
 
   // Swipe-back / mobile back out of the detail view returns to whichever level
   // the recipe was opened from — the list route, or `null` for the cookbook

@@ -53,7 +53,10 @@ export default function ShoppingListGroup({
             }`}
           >
             {/* Category Header */}
-            <div className="flex items-center justify-between gap-2 px-2 pt-1 pb-0.5">
+            <div
+              id={index === 0 ? 'tour-shopping-groups' : undefined}
+              className="flex items-center justify-between gap-2 px-2 pt-1 pb-0.5"
+            >
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className={`w-1 h-3.5 rounded-full ${theme.barClass} shrink-0`} />
                 <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 truncate">
@@ -75,11 +78,12 @@ export default function ShoppingListGroup({
               </button>
             </div>
             <ul className="flex flex-col gap-0.5">
-              {group.items.map((item) => {
+              {group.items.map((item, itemIdx) => {
                 const displayKey = `unchecked-${getItemKey(item)}`;
                 const pantryStockMatch = findPantryStockMatch(item, pantryItems);
+                const isFirstEverItem = index === 0 && itemIdx === 0;
 
-                return (
+                const itemElement = (
                   <ShoppingListItem
                     key={displayKey}
                     item={item}
@@ -92,6 +96,16 @@ export default function ShoppingListGroup({
                     formatItemAmount={formatItemAmount}
                   />
                 );
+
+                if (isFirstEverItem) {
+                  return (
+                    <div key={displayKey} id="tour-shopping-item">
+                      {itemElement}
+                    </div>
+                  );
+                }
+
+                return itemElement;
               })}
             </ul>
           </div>

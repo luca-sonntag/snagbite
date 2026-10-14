@@ -20,6 +20,7 @@ import ProFeatureSheet from '../ProFeatureSheet';
 import ShoppingConfirmSheet from './ShoppingConfirmSheet';
 import AddToMealPlanSheet from '../MealPlanner/AddToMealPlanSheet';
 import { useI18n } from '../../context/I18nContext';
+import { useSpotlightTour } from '../../hooks/useSpotlightTour';
 
 export default function RecipeDetails({
   recipe, isExtracting = false,
@@ -61,6 +62,11 @@ export default function RecipeDetails({
     handleAddAndNavigateToShoppingList, handleConfirmShoppingListSelection,
     copyRecipe, cookRefreshKey, cookHistory,
   } = useRecipeDetails({ recipe, onAddIngredients, onNavigateToShoppingList });
+
+  useSpotlightTour('recipeDetails', {
+    enabled: !isExtracting && !isCookingMode && !isCopilotOpen,
+    delayMs: 600,
+  });
 
   return (
     <article className="flex flex-col">

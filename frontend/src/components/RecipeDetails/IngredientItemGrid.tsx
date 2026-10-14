@@ -18,6 +18,7 @@ export interface IngredientItemGridProps {
   onSelectNutrition?: (ingredient: Ingredient, category?: string) => void;
   onOpenProFeature?: () => void;
   hideNutrition?: boolean;
+  id?: string;
 }
 
 export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
@@ -30,6 +31,7 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
   onSelectNutrition,
   onOpenProFeature,
   hideNutrition = false,
+  id,
 }) => {
   const { t } = useI18n();
   const theme = getCategoryTheme(categoryName || ingredient.category || '');
@@ -66,6 +68,7 @@ export const IngredientItemGrid: React.FC<IngredientItemGridProps> = ({
 
   return (
     <li
+      id={id}
       key={uniqueId}
       onClick={handleClick}
       className={`group relative flex items-center py-1.5 px-1 sm:px-1.5 rounded-xl transition-all duration-150 select-none bg-transparent hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:bg-black/[0.04] dark:active:bg-white/[0.05] active:scale-[0.98] min-h-[52px] sm:min-h-[54px] ${

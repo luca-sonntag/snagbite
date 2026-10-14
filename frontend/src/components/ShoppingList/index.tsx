@@ -6,6 +6,7 @@ import { PageHeader } from '../PageHeader';
 import { ShoppingListView } from './ShoppingListView';
 import { ShoppingStickyHeader } from './ShoppingStickyHeader';
 import { useShoppingSticky } from './useShoppingSticky';
+import { useSpotlightTour } from '../../hooks/useSpotlightTour';
 
 interface ActiveShoppingRecipe {
   recipeId: string;
@@ -50,6 +51,11 @@ export default function ShoppingList(props: ShoppingListProps) {
   const shoppingTotal = toBuyItems.length + inPantryWarningCount;
   const totalCount = toBuyItems.length + checkedCount;
   const progress = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0;
+
+  useSpotlightTour('shoppingList', {
+    enabled: (props.isActive ?? true) && totalCount > 0,
+    delayMs: 600,
+  });
 
   const handleClearAll = async () => {
     const confirmed = await dialog.confirm({

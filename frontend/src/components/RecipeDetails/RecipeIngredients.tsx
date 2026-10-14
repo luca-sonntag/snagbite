@@ -83,7 +83,7 @@ export default function RecipeIngredients({
             </div>
           </div>
         ) : (
-          <div className="px-4.5 py-3.5 sm:px-6 flex items-center justify-between gap-3 animate-fade-in">
+          <div id="tour-recipe-servings" className="px-4.5 py-3.5 sm:px-6 flex items-center justify-between gap-3 animate-fade-in">
             <div className="flex flex-col">
               <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
                 {t('recipe.serves')}
@@ -157,6 +157,7 @@ export default function RecipeIngredients({
             {sortedIngredients.map((ing, idx) => (
               <IngredientItemGrid
                 key={`${ing.name}-${idx}`}
+                id={idx === 0 ? 'tour-recipe-ingredients' : undefined}
                 ingredient={ing}
                 categoryName={ing.category}
                 originalIdx={idx}
@@ -174,6 +175,7 @@ export default function RecipeIngredients({
             {sortedIngredients.map((ing, idx) => (
               <IngredientItemRow
                 key={`${ing.name}-${idx}`}
+                id={idx === 0 ? 'tour-recipe-ingredients' : undefined}
                 ingredient={ing}
                 categoryName={ing.category}
                 originalIdx={idx}

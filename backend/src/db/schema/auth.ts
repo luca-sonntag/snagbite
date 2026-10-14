@@ -1,10 +1,11 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   pgTable,
   text,
   timestamp,
   boolean,
   integer,
+  jsonb,
   index,
 } from "drizzle-orm/pg-core";
 
@@ -23,6 +24,7 @@ export const user = pgTable("user", {
   bonusCredits: integer("bonus_credits").default(0),
   customExtractionLimit: integer("custom_extraction_limit"),
   notificationsEnabled: boolean("notifications_enabled").default(false),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>().default(sql`'{}'::jsonb`),
 });
 
 export const session = pgTable(

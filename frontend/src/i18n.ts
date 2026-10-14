@@ -451,7 +451,7 @@ export const uiTranslations = {
         },
         import: {
           title: 'Importieren & Teilen',
-          desc: 'Füge einen Link ein oder teile ein Reel direkt aus Instagram, TikTok, YouTube oder Facebook an Snagbite. Wir erstellen das komplette Rezept für dich.',
+          desc: 'Füge einen Link ein, lade Screenshots & Kochbuchfotos hoch oder teile ein Reel direkt aus Instagram an Snagbite.',
         },
         cookbook: {
           title: 'Dein Kochbuch',
@@ -468,6 +468,105 @@ export const uiTranslations = {
         cooking: {
           title: 'Kochen wie ein Profi',
           desc: 'Schritt-für-Schritt-Kochmodus, integrierte Timer und ein KI-Copilot, der Fragen beantwortet und Rezepte anpasst.',
+        },
+      },
+    },
+    tour: {
+      btn: {
+        next: 'Weiter',
+        prev: 'Zurück',
+        done: 'Verstanden',
+        skip: 'Überspringen',
+      },
+      progress: '{{current}} von {{total}}',
+      resetLabel: 'Screen-Touren & Tipps zurücksetzen',
+      resetSuccess: 'Alle Screen-Touren wurden zurückgesetzt',
+      extract: {
+        link: {
+          title: 'Rezept-Link einfügen',
+          desc: 'Füge einen Link aus Instagram, TikTok, YouTube oder von Koch-Websites ein. Unsere KI analysiert das Video oder die Webseite und erstellt ein sauberes Rezept.',
+        },
+        photo: {
+          title: 'Fotos & Screenshots scannen',
+          desc: 'Egal ob Screenshot aus Social Media oder Kochblogs, abfotografierte Kochbuchseite oder handschriftliche Rezeptkarte: Einfach hochladen – Snagbite liest Zutaten und Zubereitung automatisch aus.',
+        },
+        share: {
+          title: 'Direkt aus anderen Apps teilen',
+          desc: "Du musst die App nicht manuell öffnen: Tippe im Instagram Reel oder TikTok einfach auf 'Teilen' und wähle Snagbite.",
+        },
+      },
+      catalog: {
+        filter: {
+          title: 'Blitzschnell finden',
+          desc: 'Suche nach Rezeptnamen, bestimmten Zutaten oder filtere nach Zubereitungszeit, Favoriten und Kategorien.',
+        },
+        collections: {
+          title: 'Eigene Sammlungen',
+          desc: "Organisiere deine Gerichte in farbigen Ordnern mit Emojis – z. B. 'Schnelle Feierabendküche' oder 'Meal Prep'.",
+        },
+        firstCard: {
+          title: 'Empfehlungen & Aktionen',
+          desc: 'Wische durch dynamische Empfehlungen und Tages-Highlights. Tippe auf ein Gericht für alle Details oder halte es gedrückt, um mehrere Rezepte für Sammlungen oder die Einkaufsliste auszuwählen.',
+        },
+      },
+      recipeDetails: {
+        servings: {
+          title: 'Portionen flexibel anpassen',
+          desc: 'Koche für mehr Gäste: Alle Zutatenmengen rechnen sich automatisch und exakt auf deine Wunschportionen um.',
+        },
+        ingredients: {
+          title: 'Zutaten antippen',
+          desc: 'Tippe auf eine Zutat, um Nährwerte, Alternativen oder Portionsgrößen einzusehen.',
+        },
+        cookBtn: {
+          title: 'Kochmodus am Herd',
+          desc: 'Startet die vollflächige Kochansicht: Große Schrift, Display bleibt aktiv und integrierte Timer für entspanntes Kochen.',
+        },
+        copilot: {
+          title: 'Dein KI-Küchenhelfer',
+          desc: 'Keine Sahne im Haus? Frag den Copilot einfach im Chat nach passendem Ersatz oder Zubereitungstricks.',
+        },
+      },
+      cookingMode: {
+        step: {
+          title: 'Schritt für Schritt abhaken',
+          desc: 'Groß und auch aus 1 Meter Entfernung lesbar. Ein Tipp auf die Karte hakt den Schritt ab und springt zum nächsten.',
+        },
+        timers: {
+          title: 'Integrierte Koch-Timer',
+          desc: 'Kochzeiten im Text werden automatisch erkannt. Ein Klick startet den Timer – du wirst benachrichtigt, auch wenn das Handy gesperrt ist.',
+        },
+        ingredients: {
+          title: 'Zutaten immer im Blick',
+          desc: 'Blende jederzeit die Zutaten und Mengenangaben ein, die genau für diesen Schritt benötigt werden.',
+        },
+      },
+      shoppingList: {
+        groups: {
+          title: 'Supermarkt-Sortierung',
+          desc: 'Kein Zickzack-Laufen: Zutaten sind automatisch nach Supermarkt-Gängen (Obst & Gemüse, Kühlregal etc.) sortiert.',
+        },
+        item: {
+          title: 'Mit einem Tipp erledigen',
+          desc: 'Artikel antippen hakt sie ab und schiebt sie ins Erledigt-Fach am Ende der Liste.',
+        },
+        quickAdd: {
+          title: 'Eigene Artikel ergänzen',
+          desc: 'Ergänze beliebige Alltagsartikel wie Spülmittel, Milch oder Snacks in Sekundenschnelle per Tastatur.',
+        },
+      },
+      mealPlanner: {
+        days: {
+          title: 'Wochentage & Kalender',
+          desc: 'Wechsle flexibel zwischen den Tagen oder springe mit der Wochennavigation in die nächste Woche.',
+        },
+        daySection: {
+          title: 'Mahlzeiten einplanen',
+          desc: 'Tippe auf einen Tag, um Rezepte aus deinem Kochbuch oder Favoriten für deine Woche einzuplanen.',
+        },
+        bulkShop: {
+          title: 'Smarter Wocheneinkauf',
+          desc: 'Sobald Rezepte geplant sind, überträgt dieser Button alle Zutaten der Woche automatisch gebündelt in die Einkaufsliste.',
         },
       },
     },
@@ -1504,6 +1603,7 @@ export const uiTranslations = {
         title: 'Deine Einkaufsliste ist leer',
         desc: 'Füge Zutaten aus deinen Rezepten mit 1 Klick hinzu oder ergänze eigene Artikel – automatisch nach Supermarkt-Kategorien sortiert.',
         cta: 'Rezepte entdecken',
+        addCustom: 'Eigenen Artikel hinzufügen',
       },
       emptyState: {
         welcomeTitle: 'Deine Einkaufsliste ist leer',
@@ -1976,7 +2076,7 @@ export const uiTranslations = {
         },
         import: {
           title: 'Import & Share',
-          desc: 'Paste a link or share a reel straight from Instagram, TikTok, YouTube or Facebook to Snagbite. We extract the full recipe for you.',
+          desc: 'Paste a link, upload screenshots & cookbook photos, or share a reel straight from Instagram to Snagbite.',
         },
         cookbook: {
           title: 'Your Cookbook',
@@ -1993,6 +2093,105 @@ export const uiTranslations = {
         cooking: {
           title: 'Cook Like a Pro',
           desc: 'Step-by-step cooking mode, built-in timers and an AI copilot that answers questions and adapts recipes.',
+        },
+      },
+    },
+    tour: {
+      btn: {
+        next: 'Next',
+        prev: 'Back',
+        done: 'Got it',
+        skip: 'Skip',
+      },
+      progress: '{{current}} of {{total}}',
+      resetLabel: 'Reset screen tours & tips',
+      resetSuccess: 'All screen tours have been reset',
+      extract: {
+        link: {
+          title: 'Paste recipe link',
+          desc: 'Paste a link from Instagram, TikTok, YouTube or recipe websites. Our AI analyzes the video or webpage and creates a clean recipe.',
+        },
+        photo: {
+          title: 'Scan photos & screenshots',
+          desc: 'Whether it is a screenshot from social media or food blogs, a cookbook page or handwritten recipe notes: Simply upload – Snagbite extracts ingredients and steps automatically.',
+        },
+        share: {
+          title: 'Share directly from apps',
+          desc: "No need to open the app manually: Simply tap 'Share' on Instagram Reel or TikTok and select Snagbite.",
+        },
+      },
+      catalog: {
+        filter: {
+          title: 'Find in a flash',
+          desc: 'Search by recipe name, ingredients, or filter by cooking time, favorites, and categories.',
+        },
+        collections: {
+          title: 'Your collections',
+          desc: "Organize dishes in colored folders with emojis – e.g. 'Quick dinners' or 'Meal prep'.",
+        },
+        firstCard: {
+          title: 'Recommendations & actions',
+          desc: 'Swipe through dynamic recommendations and daily spotlights. Tap a recipe for full details, or long-press to select multiple dishes for collections or your shopping list.',
+        },
+      },
+      recipeDetails: {
+        servings: {
+          title: 'Scale servings easily',
+          desc: 'Cooking for guests? All ingredient amounts recalculate automatically and precisely.',
+        },
+        ingredients: {
+          title: 'Interactive ingredients',
+          desc: 'Tap any ingredient to view nutrition values, substitutes, or portion insights.',
+        },
+        cookBtn: {
+          title: 'Cooking mode at the stove',
+          desc: 'Full-screen cooking view with large text, wake-lock to keep your display on, and built-in timers.',
+        },
+        copilot: {
+          title: 'Your AI kitchen assistant',
+          desc: 'Missing an ingredient? Ask Copilot in chat for perfect substitutes or cooking tricks.',
+        },
+      },
+      cookingMode: {
+        step: {
+          title: 'Check off step by step',
+          desc: 'Large and readable from a distance. Tapping checks off the step and advances to the next.',
+        },
+        timers: {
+          title: 'Built-in cooking timers',
+          desc: 'Cooking times are detected automatically. One tap starts the timer – notifications work even when your phone is locked.',
+        },
+        ingredients: {
+          title: 'Ingredients at a glance',
+          desc: 'Peek at ingredients and exact measurements needed for the active step at any time.',
+        },
+      },
+      shoppingList: {
+        groups: {
+          title: 'Supermarket aisle sorting',
+          desc: 'No zigzagging through aisles: Ingredients are automatically grouped by grocery departments.',
+        },
+        item: {
+          title: 'Check off with one tap',
+          desc: 'Tapping an item checks it off and moves it down to completed.',
+        },
+        quickAdd: {
+          title: 'Add custom items',
+          desc: 'Quickly type and add any household items like dish soap, milk, or snacks.',
+        },
+      },
+      mealPlanner: {
+        days: {
+          title: 'Weekdays & calendar',
+          desc: 'Switch between days easily or jump to upcoming weeks using the week navigator.',
+        },
+        daySection: {
+          title: 'Plan your meals',
+          desc: 'Tap any day to schedule recipes from your cookbook or pick favorites for your week.',
+        },
+        bulkShop: {
+          title: 'Smart weekly shopping',
+          desc: 'Once recipes are planned, this button transfers all needed ingredients into your shopping list with a single tap.',
         },
       },
     },
@@ -3028,6 +3227,7 @@ export const uiTranslations = {
         title: 'Your shopping list is empty',
         desc: 'Add ingredients from your saved recipes with 1 tap or add custom items – automatically sorted by supermarket aisle.',
         cta: 'Discover recipes',
+        addCustom: 'Add custom item',
       },
       emptyState: {
         welcomeTitle: 'Your shopping list is empty',

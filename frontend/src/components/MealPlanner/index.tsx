@@ -13,6 +13,7 @@ import { MealPlanShoppingSheets } from './MealPlanShoppingSheets';
 import { RecipePickerModal } from './RecipePickerModal';
 import CookedModal from '../CookedModal';
 import { useI18n } from '../../context/I18nContext';
+import { useSpotlightTour } from '../../hooks/useSpotlightTour';
 import { formatDateIso, addDays, formatWeekRange } from './mealPlannerUtils';
 
 export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
@@ -139,6 +140,11 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
       return () => clearTimeout(timer);
     }
   }, [isActive, todayStr, scrollToDate, agendaDates, isLoading, setSelectedDate, goToToday]);
+
+  useSpotlightTour('mealPlanner', {
+    enabled: isActive && !isLoading && !pickerSlot && !cookedModalTarget,
+    delayMs: 600,
+  });
 
   return (
     <div className="w-full flex flex-col gap-3 pb-24">

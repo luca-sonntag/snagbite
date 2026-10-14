@@ -6,6 +6,19 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-14: Starres 6-Slide Onboarding abgelöst durch schlanken 3-Slide WelcomeGuide & kontextuelle Just-in-Time Spotlight Guides
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Starres, überfrachtetes 6-Slide Onboarding in [`WelcomeGuide.tsx`](file:///C:/Users/lucas/source/repos/cookbook/frontend/src/components/WelcomeGuide.tsx) mit 360+ Zeilen Code, redundanten Beschreibungen und fehlender Erwähnung von Screenshot-Imports.
+  * Fehlende Nutzerführung bei der Erstnutzung von Detail-Funktionen (z. B. Portionsanpassung, Kochmodus-Timer, Sammlungsfilterung, Schnelleingabe in der Einkaufsliste).
+* **Ersetzt durch:**
+  * **Fokussierter 3-Slide WelcomeGuide ([`WelcomeGuide.tsx`](file:///C:/Users/lucas/source/repos/cookbook/frontend/src/components/WelcomeGuide.tsx)):** Auf 147 Zeilen gekürzt (Clean-Code-konform), vermittelt in 3 ansprechenden Hero-Cards die Kernversprechen: Reel/Link/Foto/Screenshot-Import, Kochen & Timer sowie Kochbuch & Einkaufsliste.
+  * **Kontextuelle Spotlight Guides ([`SpotlightTourContext.tsx`](file:///C:/Users/lucas/source/repos/cookbook/frontend/src/context/SpotlightTourContext.tsx)):** Leichtgewichtige Driver.js-Integration (0 KB Initial-Bundle-Impact durch Dynamic Import) für 6 Kern-Screens (`extract`, `catalog`, `recipeDetails`, `cookingMode`, `shoppingList`, `mealPlanner`).
+  * **Overlay & Back-Button Integration:** Nahtlos mit `OverlayStackContext` gekoppelt; Hardware-Backbutton schließt Tour sauber; "Screen-Touren & Tipps zurücksetzen" in den Einstellungen.
+* **Betroffene Dateien:** `frontend/src/components/WelcomeGuide.tsx`, `frontend/src/types/tour.ts`, `frontend/src/utils/tourDefinitions.ts`, `frontend/src/context/SpotlightTourContext.tsx`, `frontend/src/hooks/useSpotlightTour.ts`, `frontend/src/styles/spotlightTour.css`, `frontend/src/components/ExtractForm/index.tsx`, `frontend/src/components/SavedCatalog/index.tsx`, `frontend/src/components/RecipeDetails/index.tsx`, `frontend/src/components/CookingMode/index.tsx`, `frontend/src/components/ShoppingList/index.tsx`, `frontend/src/components/MealPlanner/index.tsx`, `frontend/src/components/SettingsView.tsx`, `docs/OBSOLETE.md`, `docs/feature_ideas.md`.
+
+---
+
 ### 2026-10-14: Deaktivierung & Entkopplung des Vorrat-Features (Pantry Dormant Mode)
 
 * **Ersetzter Code / Veraltete Logik:**

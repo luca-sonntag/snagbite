@@ -11,7 +11,7 @@
 
 ### History, ID-Vergabe & Verwaltung
 * Bietet Helper-Funktionen (`getAllJobs(userId)` und `deleteJob(id, userId)`) zur persistenten Abfrage und Bereinigung von Extraktionen – stets benutzerbezogen.
-* Stellt REST-Endpunkte bereit: `GET /api/recipes` (das Kochbuch des authentifizierten Users), `GET/PATCH/DELETE /api/recipes/:recipeId` (lesen, Inhalt aktualisieren z. B. bei Basis-Portionsänderungen, aus dem Kochbuch entfernen) und `DELETE /api/users/me` (löscht das Benutzerkonto über die Supabase Admin API).
+* Stellt REST-Endpunkte bereit: `GET /api/recipes` (das Kochbuch des authentifizierten Users), `GET/PATCH/DELETE /api/recipes/:recipeId` (lesen, Inhalt aktualisieren z. B. bei Basis-Portionsänderungen, aus dem Kochbuch entfernen), `DELETE /api/users/me` (löscht das Benutzerkonto) sowie `GET/PATCH /api/users/me/metadata` (atomares Abfragen und partielles Mergen von User-Metadaten wie Tour-Status, Onboarding, Sprache und Einstellungen).
 * **`recipeId` ist die einzige client-seitige ID** für alles, was ein Rezept betrifft (`/favorite`, `/flags`, `/collections`, `/cooked`, `/cook-history`, `/chat*`, `/remix`); die `user_recipes`-Zeile wird serverseitig über `(user_id, recipe_id)` aufgelöst. `GET /api/jobs/:id` bleibt ausschließlich Polling-Kanal und liefert `recipeId`, sobald der Job fertig ist.
 * **Abbrechen ≠ Löschen:** `POST /api/jobs/:id/cancel` bricht eine laufende Extraktion ab, `DELETE /api/recipes/:id` entfernt ein Rezept aus dem Kochbuch. Beides war früher derselbe Aufruf — genau die Vermischung, die den Soft-Delete erzwungen hat.
 * **Eindeutige Identifikation:** Normalisiert Rezepte bei Abfragen und versieht sie mit einer eindeutigen `id` (entspricht der `jobId`), um Kollisionen zwischen Rezepten mit gleichem Titel zu unterbinden.

@@ -53,7 +53,7 @@ export const CookingModeHeader: React.FC<CookingModeHeaderProps> = ({
 
       {/* Right: Quick action controls in unified calm styling */}
       <div className="flex items-center gap-1.5">
-        <div className="relative">
+        <div id="tour-cooking-timers" className="relative">
           <Button
             isIconOnly
             variant="ghost"

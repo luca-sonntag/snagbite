@@ -16,6 +16,7 @@ import TimerConfirmSheet from '../TimerConfirmSheet';
 import RecipeCopilot from '../RecipeDetails/RecipeCopilot';
 import PremiumModal from '../PremiumModal';
 import CookedModal from '../CookedModal';
+import { useSpotlightTour } from '../../hooks/useSpotlightTour';
 
 export default function CookingMode({
   recipe,
@@ -38,6 +39,11 @@ export default function CookingMode({
     isOpen: false,
     seconds: 0,
     label: '',
+  });
+
+  useSpotlightTour('cookingMode', {
+    enabled: !isCopilotOpen && !timerSheet.isOpen && !isCookedModalOpen,
+    delayMs: 600,
   });
 
   // Calculate initial step index based on first uncompleted step or override

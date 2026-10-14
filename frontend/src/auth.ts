@@ -35,6 +35,7 @@ export const authClient = createAuthClient({
         bonusCredits: number;
         customExtractionLimit?: number;
         notificationsEnabled: boolean;
+        metadata?: Record<string, unknown>;
       };
     }>(),
   ],
@@ -62,6 +63,7 @@ export interface AuthUser {
   tier?: string;
   bonusCredits?: number;
   notificationsEnabled?: boolean;
+  metadata?: Record<string, any>;
   user_metadata?: {
     name?: string;
     notifications_enabled?: boolean;
@@ -82,6 +84,7 @@ export interface AuthSession {
 
 export function normalizeUser(rawUser: any): AuthUser {
   const tier = rawUser.tier || rawUser.app_metadata?.tier || 'free';
+  const meta = (rawUser.metadata || rawUser.user_metadata || {}) as Record<string, any>;
   return {
     ...rawUser,
     id: rawUser.id,
@@ -90,14 +93,16 @@ export function normalizeUser(rawUser: any): AuthUser {
     image: rawUser.image,
     tier,
     bonusCredits: rawUser.bonusCredits ?? 0,
-    notificationsEnabled: rawUser.notificationsEnabled ?? false,
+    notificationsEnabled: rawUser.notificationsEnabled ?? meta.notifications_enabled ?? false,
+    metadata: meta,
     app_metadata: {
       tier,
       ...(rawUser.app_metadata || {}),
     },
     user_metadata: {
+      ...meta,
       name: rawUser.name,
-      notifications_enabled: rawUser.notificationsEnabled,
+      notifications_enabled: rawUser.notificationsEnabled ?? meta.notifications_enabled ?? false,
       ...(rawUser.user_metadata || {}),
     },
   };
