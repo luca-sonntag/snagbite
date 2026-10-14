@@ -46,10 +46,17 @@ function base64UrlToString(base64url: string): string {
   return atob(padded);
 }
 
+interface VerifyTicketResult {
+  valid: boolean;
+  payload?: WhisperTicketPayload;
+  signature?: string;
+  error?: string;
+}
+
 /**
  * Validates the ephemeral HMAC-SHA256 ticket using native Web Crypto API.
  */
-async function verifyTicket(ticket: string | null, secret: string): Promise<{ valid: boolean; error?: string }> {
+async function verifyTicket(ticket: string | null, secret: string): Promise<VerifyTicketResult> {
   if (!ticket || typeof ticket !== 'string') {
     return { valid: false, error: 'Missing x-snagbite-ticket header' };
   }
@@ -94,7 +101,7 @@ async function verifyTicket(ticket: string | null, secret: string): Promise<{ va
     }
 
     console.log(`[whisper-proxy] Valid ticket verified for job: ${payload.jobId}`);
-    return { valid: true };
+    return { valid: true, payload, signature };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error(`[whisper-proxy] Ticket verification error: ${msg}`);
@@ -103,7 +110,7 @@ async function verifyTicket(ticket: string | null, secret: string): Promise<{ va
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: CORS_HEADERS });
     }
@@ -115,9 +122,33 @@ export default {
     const ticketHeader = request.headers.get('x-snagbite-ticket');
     const authCheck = await verifyTicket(ticketHeader, env.WHISPER_HMAC_SECRET);
 
-    if (!authCheck.valid) {
+    if (!authCheck.valid || !authCheck.payload || !authCheck.signature) {
       return jsonResponse({ error: 'UNAUTHORIZED', message: authCheck.error }, 401);
     }
+
+    // Single-use nonce protection via Edge Cache API (Weg 1)
+    const cache = caches.default;
+    const nonceKey = new Request(`https://snagbite-ticket-nonce.local/${authCheck.signature}`, {
+      method: 'GET',
+    });
+
+    const alreadyConsumed = await cache.match(nonceKey);
+    if (alreadyConsumed) {
+      console.warn(`[whisper-proxy] Rejected replayed ticket for job: ${authCheck.payload.jobId}`);
+      return jsonResponse(
+        { error: 'TICKET_ALREADY_USED', message: 'This single-use ticket has already been consumed.' },
+        401
+      );
+    }
+
+    // Mark ticket as consumed in Edge cache for the remainder of its lifetime
+    const remainingSeconds = Math.max(10, Math.ceil((authCheck.payload.exp - Date.now()) / 1000));
+    const nonceResponse = new Response('consumed', {
+      headers: {
+        'Cache-Control': `public, max-age=${remainingSeconds}`,
+      },
+    });
+    ctx.waitUntil(cache.put(nonceKey, nonceResponse));
 
     const gatewayUrl = `https://gateway.ai.cloudflare.com/v1/${env.CLOUDFLARE_ACCOUNT_ID}/${env.GATEWAY_ID}/groq/audio/transcriptions`;
 
