@@ -15,15 +15,13 @@ export default function RecipeServingsStepper({
   const { t } = useI18n();
 
   return (
-    <div id="tour-recipe-servings">
-      <ServingsStepper
-        servings={servings}
-        onDecrease={onDecreaseServings}
-        onIncrease={onIncreaseServings}
-        size="md"
-        showIcon={false}
-        ariaLabel={t('recipe.serves')}
-      />
-    </div>
+    <ServingsStepper
+      servings={servings}
+      onDecrease={onDecreaseServings}
+      onIncrease={onIncreaseServings}
+      size="md"
+      showIcon={false}
+      ariaLabel={t('recipe.serves')}
+    />
   );
 }

@@ -107,8 +107,11 @@ export const SpotlightTourProvider: React.FC<{ children: React.ReactNode }> = ({
           prevBtnText: t('tour.btn.prev'),
           doneBtnText: t('tour.btn.done'),
           progressText,
-          onHighlightStarted: () => {
+          onHighlightStarted: (element) => {
             hapticLight();
+            if (element && !element.closest('.fixed')) {
+              element.scrollIntoView({ behavior: 'auto', block: 'center' });
+            }
           },
           onDestroyed: () => {
             markTourCompleted(id);
