@@ -39,7 +39,7 @@
 
 - ~~**New User Experience (NUX) & Kontextuelle Screen-Touren (Spotlight Guides):**~~ *(Umgesetzt)*
   - Schlankes 3-Slide Onboarding (`WelcomeGuide`) für den ersten App-Start (inkl. Screenshot-Import & Video-Reels).
-  - Just-in-Time Screen-by-Screen Spotlight Guides via `driver.js` für 5 Kern-Screens: `extract` (Import-Quellen), `catalog` (Sammlungen & Filter), `recipeDetails` (Portionen, Zutaten, Kochmodus, Copilot), `cookingMode` (Schritte, Timer, Zutaten) und `shoppingList` (Kategorien, Abhaken, Schnelleingabe).
+  - Just-in-Time Screen-by-Screen Spotlight Guides via `driver.js` für 6 Kern-Screens: `extract` (Import-Quellen), `catalog` (Sammlungen & Filter), `recipeDetails` (Portionen, Zutaten, Kochmodus, Copilot), `cookingMode` (Schritte, Timer, Zutaten), `shoppingList` (Kategorien, Abhaken, Schnelleingabe) und `mealPlanner` (Wochentage, Mahlzeiten planen, Wocheneinkauf).
   - Clean-Flat-Styling (`stageRadius: 20`, Backdrop-Cutout, Dark-Mode-Support, border-none).
   - Hardware-Backbutton-Trapping via `OverlayStackContext` und "Screen-Touren & Tipps zurücksetzen" in den Einstellungen.
 
