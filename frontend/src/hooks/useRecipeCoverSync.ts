@@ -24,15 +24,19 @@ export function useRecipeCoverSync({
   );
 
   const [isGenerating, setIsGenerating] = useState(isAwaiting);
-  const [lastRecipeKey, setLastRecipeKey] = useState(() => `${recipe.id || ''}:${isAwaiting}`);
+  const [coverUrl, setCoverUrl] = useState<string | null>(() => recipe.imageUrl || null);
+  const [lastRecipeKey, setLastRecipeKey] = useState(() => `${recipe.id || ''}:${isAwaiting}:${recipe.imageUrl || ''}`);
   const activeEventSourceRef = useRef<EventSource | null>(null);
   const activePollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isFinishedRef = useRef(false);
 
-  const currentRecipeKey = `${recipe.id || ''}:${isAwaiting}`;
+  const currentRecipeKey = `${recipe.id || ''}:${isAwaiting}:${recipe.imageUrl || ''}`;
   if (currentRecipeKey !== lastRecipeKey) {
     setLastRecipeKey(currentRecipeKey);
     setIsGenerating(isAwaiting);
+    if (recipe.imageUrl) {
+      setCoverUrl(recipe.imageUrl);
+    }
   }
 
   useEffect(() => {
@@ -56,12 +60,13 @@ export function useRecipeCoverSync({
       }
     };
 
-    const handleSuccess = (coverUrl: string) => {
+    const handleSuccess = (newCoverUrl: string) => {
       if (isFinishedRef.current) return;
       isFinishedRef.current = true;
+      setCoverUrl(newCoverUrl);
       setIsGenerating(false);
       cleanup();
-      onCoverUpdated?.(recipeId, coverUrl, true);
+      onCoverUpdated?.(recipeId, newCoverUrl, true);
     };
 
     const startHttpPollingFallback = () => {
@@ -73,9 +78,9 @@ export function useRecipeCoverSync({
             headers: token ? { Authorization: `Bearer ${token}` } : {},
           });
           if (res.ok) {
-            const data = (await res.json()) as { saved?: { recipe?: Recipe } };
-            const updated = data.saved?.recipe;
-            if (updated?.imageUrl && updated?.isAiCover) {
+            const data = (await res.json()) as { recipe?: Recipe; saved?: { recipe?: Recipe } };
+            const updated = data.recipe ?? data.saved?.recipe;
+            if (updated?.imageUrl && (updated.isAiCover || updated.imageUrl.length > 0)) {
               handleSuccess(updated.imageUrl);
             }
           }
@@ -96,7 +101,7 @@ export function useRecipeCoverSync({
         const es = new EventSource(sseUrl, { withCredentials: true });
         activeEventSourceRef.current = es;
 
-        es.addEventListener('recipe', (e: MessageEvent) => {
+        const onEvent = (e: MessageEvent) => {
           try {
             const data = JSON.parse(e.data) as {
               type?: string;
@@ -111,12 +116,22 @@ export function useRecipeCoverSync({
           } catch {
             // ignore parse error
           }
-        });
+        };
+
+        es.addEventListener('recipe', onEvent);
+        es.onmessage = onEvent;
 
         es.onerror = () => {
           cleanup();
           startHttpPollingFallback();
         };
+
+        // Also initiate HTTP polling after 2s if SSE hasn't resolved yet (failsafe)
+        setTimeout(() => {
+          if (!isFinishedRef.current) {
+            startHttpPollingFallback();
+          }
+        }, 2000);
       } catch {
         startHttpPollingFallback();
       }
@@ -136,5 +151,5 @@ export function useRecipeCoverSync({
     };
   }, [recipe.id, isAwaiting, getAccessToken, onCoverUpdated]);
 
-  return { isAwaitingCover: isGenerating };
+  return { isAwaitingCover: isGenerating, coverUrl };
 }

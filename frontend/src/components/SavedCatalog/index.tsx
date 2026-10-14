@@ -543,7 +543,21 @@ export default function SavedCatalog({
             isFavorite={selectedJobResolved.isFavorite}
             onToggleFavorite={() => toggleFavorite(selectedJobResolved)}
             getAccessToken={getAccessToken}
-            onCoverUpdated={onUpdateRecipeCover}
+            onCoverUpdated={(recipeId, imageUrl, isAiCover) => {
+              onUpdateRecipeCover?.(recipeId, imageUrl, isAiCover);
+              if (selectedJob && (selectedJob.recipeId === recipeId || selectedJob.recipe?.id === recipeId) && selectedJob.recipe) {
+                setSelectedJob({
+                  ...selectedJob,
+                  recipe: {
+                    ...selectedJob.recipe,
+                    imageUrl,
+                    imageUrls: [imageUrl, ...(selectedJob.recipe.imageUrls || []).filter((u: string) => u !== imageUrl)],
+                    isAiCover,
+                    isCoverGenerating: false,
+                  },
+                });
+              }
+            }}
           />
         )}
 
