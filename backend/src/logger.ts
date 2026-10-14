@@ -112,9 +112,9 @@ export interface CostEstimate {
   /** Human-readable string, e.g. "$0.0042" */
   totalCostFormatted: string;
   /** Pricing tier used ("short" | "long") */
-  pricingTier: 'short' | 'long';
+  pricingTier?: 'short' | 'long';
   /** Whether the model was found in the pricing table */
-  pricingKnown: boolean;
+  pricingKnown?: boolean;
 }
 
 /**
@@ -157,7 +157,8 @@ export type GeminiRequestType =
   | 'notification_copy'
   | 'verify_cook_photo'
   | 'resolve_ingredient'
-  | 'audit_recipe';
+  | 'audit_recipe'
+  | 'transcribe_audio';
 
 export interface GeminiLogEntry {
   /** ISO timestamp of when the request was initiated */
