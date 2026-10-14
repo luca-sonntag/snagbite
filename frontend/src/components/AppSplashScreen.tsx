@@ -6,13 +6,15 @@ interface AppSplashScreenProps {
   isReady: boolean;
   /** Callback fired when the exit fade-out transition has completely finished */
   onFinished?: () => void;
+  /** Optional custom message shown instead of rotating quotes (e.g. while updating) */
+  message?: string;
 }
 
 const MIN_DISPLAY_TIME_MS = 1600;
 const EXIT_TRANSITION_MS = 320;
 const QUOTE_ROTATION_INTERVAL_MS = 1100;
 
-export default function AppSplashScreen({ isReady, onFinished }: AppSplashScreenProps) {
+export default function AppSplashScreen({ isReady, onFinished, message }: AppSplashScreenProps) {
   const { t } = useI18n();
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
@@ -35,11 +37,12 @@ export default function AppSplashScreen({ isReady, onFinished }: AppSplashScreen
 
   // Rotate microcopy every interval
   useEffect(() => {
+    if (message) return;
     const quoteTimer = setInterval(() => {
       setQuoteIndex((prev) => (prev + 1) % messages.length);
     }, QUOTE_ROTATION_INTERVAL_MS);
     return () => clearTimeout(quoteTimer);
-  }, [messages.length]);
+  }, [messages.length, message]);
 
   // Trigger smooth exit transition once ready and min time elapsed
   useEffect(() => {
@@ -93,14 +96,20 @@ export default function AppSplashScreen({ isReady, onFinished }: AppSplashScreen
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-tine-bounce-3" />
         </div>
 
-        {/* Rotating Microcopy */}
+        {/* Rotating Microcopy or Custom Status Message */}
         <div className="h-6 mt-3 flex items-center justify-center">
-          <p
-            key={quoteIndex}
-            className="text-xs font-semibold text-gray-500 dark:text-gray-400 animate-fade-in text-center px-4"
-          >
-            {messages[quoteIndex]}
-          </p>
+          {message ? (
+            <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 animate-pulse text-center px-4">
+              {message}
+            </p>
+          ) : (
+            <p
+              key={quoteIndex}
+              className="text-xs font-semibold text-gray-500 dark:text-gray-400 animate-fade-in text-center px-4"
+            >
+              {messages[quoteIndex]}
+            </p>
+          )}
         </div>
       </div>
     </div>
