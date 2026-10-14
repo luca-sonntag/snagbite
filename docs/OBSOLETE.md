@@ -6,6 +6,21 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-15: Manueller OTA-Update-Prompt (`OtaUpdateBanner`) abgelöst durch automatische Updates mit App Loading Screen & direktem Play Store Update
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Manuelles Consent-Banner [`OtaUpdateBanner.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/OtaUpdateBanner.tsx) in [`AppTopBanners.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/AppTopBanners.tsx) mit Button *"Jetzt neu laden"* und *"Später"*.
+  * Künstliche 4- bzw. 5-Sekunden-Verzögerungen (`BOOT_CHECK_DELAY_MS = 4000` in `nativeAppUpdater.ts`, `INITIAL_CHECK_DELAY_MS = 5000` in `otaUpdater.ts`) beim Kaltstart, die dazu führten, dass Update-Checks erst nach Verlassen des Splash-Screens im laufenden Betrieb triggerten.
+  * Manuelles Staging von OTA-Bundles via `CapacitorUpdater.next()`, das auf Nutzerklick oder Relaunch wartete.
+* **Ersetzt durch:**
+  * **Vollautomatische OTA-Ausführung mit Loading-Screen:** Sobald ein OTA-Bundle verfügbar ist, schaltet [`otaUpdater.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/utils/otaUpdater.ts) den Loading-Status aktiv (`isOtaUpdating()`, `OTA_STATUS_EVENT`), lädt das Zip herunter und wendet es via `CapacitorUpdater.set()` sofort an. Währenddessen zeigt [`AppSplashScreen.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/AppSplashScreen.tsx) die Ladeanimation mit *"App-Update wird installiert…"*.
+  * **Automatisches, ungedrosseltes Play Store Update:** [`nativeAppUpdater.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/utils/nativeAppUpdater.ts) prüft Updates direkt beim App-Start und bei jedem `resume` ohne künstliche Verzögerung und triggert `performImmediateUpdate()` sofort, geschützt durch einen 3s-Timeout-Guard gegen blockierende Google-Play-Dienste.
+  * **Zentraler Update-Koordinator ([`useAppUpdates.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/hooks/useAppUpdates.ts)):** Priorisiert native Play Store Updates vor OTA-Web-Bundles, steuert den `AppSplashScreen`-Lebenszyklus und synchronisiert App-Resume-Events.
+  * **Ganzheitliche Update-Prüfung in Einstellungen:** "Auf Updates prüfen" in [`SettingsView.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SettingsView.tsx) prüft nativ und OTA sequenziell und wendet gefundene OTA-Updates direkt via Loading Screen an.
+* **Betroffene Dateien:** `frontend/src/components/OtaUpdateBanner.tsx` (gelöscht), `frontend/src/components/AppTopBanners.tsx`, `frontend/src/utils/otaUpdater.ts`, `frontend/src/utils/nativeAppUpdater.ts`, `frontend/src/hooks/useAppUpdates.ts`, `frontend/src/components/AppSplashScreen.tsx`, `frontend/src/App.tsx`, `frontend/src/components/SettingsView.tsx`, `frontend/src/i18n.ts`, `docs/architecture/deployment-and-ota.md`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-14: Reiner `/extract-recipe/frames`-Endpunktname & singulärer Keyframe-Payload
 
 * **Ersetzter Code / Veraltete Logik:**

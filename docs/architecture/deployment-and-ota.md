@@ -47,7 +47,8 @@ Web-Assets der nativen App können Over-The-Air (OTA) aktualisiert werden, ohne 
 
 ### Backend & Client Workflow
 * **Endpoint `POST /api/app-updates/check` (`backend/src/appUpdates.ts`):** Vor auth-gated Router gemountet. Erhält `{ channel, versionCode, currentBundleVersion }` und antwortet mit Update-Metadaten oder `{ update: false }`.
-* **Client Updater (`frontend/src/utils/otaUpdater.ts`):** Inert auf Web/Dev. Beim Boot sofort `CapacitorUpdater.notifyAppReady()` (Anti-Brick-Contract: verhindert Revert zum vorherigen Bundle). Lädt bei Update das Zip herunter (`download`) und setzt `next({id})` für die Anwendung beim nächsten Relaunch.
+* **Client Updater (`frontend/src/utils/otaUpdater.ts` & `frontend/src/hooks/useAppUpdates.ts`):** Inert auf Web/Dev. Beim Boot sofort `CapacitorUpdater.notifyAppReady()` (Anti-Brick-Contract: verhindert Revert zum vorherigen Bundle).
+* **Vollautomatischer Ablauf ohne Prompt:** Sobald ein neues Bundle vorliegt, schaltet der Client `isUpdating` aktiv, zeigt den Snagbite Loading Screen (`AppSplashScreen` mit *"App-Update wird installiert…"*) und wendet das Bundle nach Download direkt via `CapacitorUpdater.set({ id })` an (sofortiger Reload in das neue Bundle). Es gibt keinen manuellen Zustimmungs-Banner mehr.
 * **Zentrale Git-Utilities (`frontend/scripts/git-utils.ps1`):** Bündelt wiederverwendbare Git-Hilfsfunktionen (`Assert-GitClean`, `Invoke-GitMasterMergeAndTag`, `Cap-StaleAppBundles`). Bei jedem nativeren Play Store Build (`release.ps1` / `deploy-playstore.ps1`) deckelt `Cap-StaleAppBundles` automatisch alte, nach oben offene OTA-Bundles in Supabase (`max_version_code = newVersionCode - 1`), damit neu installierte native App-Releases nicht auf ältere OTA-Assets zurückgesetzt werden.
 * **Deploy-Skript (`frontend/scripts/deploy-ota.ps1` / `npm run deploy:ota`):** Baut Frontend (`npm run build` für Prod/Alpha bzw. `npm run build:dev` für Internal), ermittelt nächste Bundle-Version (`{VERSION_NAME}-ota.{n}`), packt Zip per `tar.exe`, berechnet SHA256-Checksum, lädt ins Storage hoch, aktiviert die Row in Supabase, mergt bei Prod/Alpha `develop` -> `master` (bei `internal` nur Git Tag auf aktuellem Branch) und erstellt/pusht automatisch ein Git Tag (`v{VERSION_NAME}-ota.{n}`).
 
@@ -65,11 +66,11 @@ Während Capgo OTA ausschließlich Web-Assets (HTML/JS/CSS) aktualisiert, steuer
 * **Plugin:** `@capawesome/capacitor-app-update` (Android-only, no-op auf Web/iOS).
 * **Service:** `frontend/src/utils/nativeAppUpdater.ts`
 * **Flow & Erzwingung:**
-  1. **Boot-Check:** Verzögerter Check (~4 Sekunden nach App-Start) via `AppUpdate.getAppUpdateInfo()`.
-  2. **Erzwungenes Immediate Update:** Wenn `updateAvailability === UPDATE_AVAILABLE` und `immediateUpdateAllowed === true`, ruft die App `AppUpdate.performImmediateUpdate()` auf. Google Play blendet einen modalen Vollbilddialog ein und sperrt die Nutzung der alten Version bis zum Abschluss von Download und Neustart.
+  1. **Sofortiger Boot- & Resume-Check:** Unmittelbar beim App-Start (geschützt durch 3s-Timeout-Guard) sowie auf `resume` prüft `AppUpdate.getAppUpdateInfo()`.
+  2. **Erzwungenes Immediate Update:** Wenn `updateAvailability === UPDATE_AVAILABLE` und `immediateUpdateAllowed === true`, ruft die App `AppUpdate.performImmediateUpdate()` automatisch auf. Google Play blendet einen modalen Vollbilddialog ein und sperrt die Nutzung der alten Version bis zum Abschluss von Download und Neustart.
   3. **Fallback:** Falls `immediateUpdateAllowed === false`, leitet `AppUpdate.openAppStore()` direkt auf die Snagbite-Storeseite im Google Play Store weiter.
   4. **Resume-Sicherheit:** Registriert einen `resume`-Listener auf `App`. Befindet sich ein Update bereits in Bearbeitung (`updateAvailability === UPDATE_IN_PROGRESS`), wird der Dialog sofort ohne Cooldown erneut angezeigt. Reguläre Checks auf `resume` sind auf einen 15-Minuten-Cooldown gedrosselt.
-  5. **Manueller Check:** In `SettingsView.tsx` können Nutzer auf Android via „Auf Updates prüfen“ den Status abfragen (`checkAndApplyNativeUpdate({ manual: true })`) mit direktem Feedback via Toast.
+  5. **Manueller Check:** In `SettingsView.tsx` können Nutzer via „Auf Updates prüfen“ den Status abfragen: Zuerst wird der Play Store geprüft, anschließend OTA. Gefundene OTA-Updates werden nahtlos unter Einblendung des Ladebildschirms installiert.
 
 ---
 
