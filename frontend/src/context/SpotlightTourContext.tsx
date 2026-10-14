@@ -91,6 +91,11 @@ export const SpotlightTourProvider: React.FC<{ children: React.ReactNode }> = ({
           },
         }));
 
+        const rawProgress = t('tour.progress');
+        const progressText = rawProgress
+          .replace(/(?<!\{)\{current\}(?!\})/g, '{{current}}')
+          .replace(/(?<!\{)\{total\}(?!\})/g, '{{total}}');
+
         const d = driver({
           showProgress: true,
           animate: true,
@@ -101,7 +106,7 @@ export const SpotlightTourProvider: React.FC<{ children: React.ReactNode }> = ({
           nextBtnText: t('tour.btn.next'),
           prevBtnText: t('tour.btn.prev'),
           doneBtnText: t('tour.btn.done'),
-          progressText: t('tour.progress'),
+          progressText,
           onHighlightStarted: () => {
             hapticLight();
           },

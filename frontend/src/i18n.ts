@@ -478,7 +478,7 @@ export const uiTranslations = {
         done: 'Verstanden',
         skip: 'Überspringen',
       },
-      progress: '{current} von {total}',
+      progress: '{{current}} von {{total}}',
       resetLabel: 'Screen-Touren & Tipps zurücksetzen',
       resetSuccess: 'Alle Screen-Touren wurden zurückgesetzt',
       extract: {
@@ -2089,7 +2089,7 @@ export const uiTranslations = {
         done: 'Got it',
         skip: 'Skip',
       },
-      progress: '{current} of {total}',
+      progress: '{{current}} of {{total}}',
       resetLabel: 'Reset screen tours & tips',
       resetSuccess: 'All screen tours have been reset',
       extract: {
