@@ -215,6 +215,7 @@ export default {
       headers.set('content-type', contentType);
     }
     headers.set('cf-aig-authorization', `Bearer ${env.CF_AIG_TOKEN}`);
+    headers.set('cf-aig-collect-log-payload', 'false');
 
     if (env.GROQ_API_KEY) {
       headers.set('Authorization', `Bearer ${env.GROQ_API_KEY}`);
