@@ -84,10 +84,16 @@ if ($candidateKeys.Count -gt 0) {
     $hasAuth = $true
 } else {
     # Check if active CLI session exists
-    $cliCheck = (& npx --yes firebase-tools projects:list 2>&1) | Out-String
-    if ($LASTEXITCODE -eq 0) {
-        $hasAuth = $true
-        Write-Host "  Using active Firebase CLI login." -ForegroundColor Green
+    $oldEap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $null = (& npx --yes firebase-tools projects:list 2>&1)
+        if ($LASTEXITCODE -eq 0) {
+            $hasAuth = $true
+            Write-Host "  Using active Firebase CLI login." -ForegroundColor Green
+        }
+    } finally {
+        $ErrorActionPreference = $oldEap
     }
 }
 
@@ -152,9 +158,17 @@ try {
         "--release-notes", $Notes
     )
 
-    & npx --yes @cliArgs
-    if ($LASTEXITCODE -ne 0) {
-        throw "firebase-tools appdistribution:distribute exited with code $LASTEXITCODE"
+    $oldEap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        & npx --yes @cliArgs
+        $uploadExit = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $oldEap
+    }
+
+    if ($uploadExit -ne 0) {
+        throw "firebase-tools appdistribution:distribute exited with code $uploadExit"
     }
 
     # --- 5. Commit version bump locally on success -----------------------
