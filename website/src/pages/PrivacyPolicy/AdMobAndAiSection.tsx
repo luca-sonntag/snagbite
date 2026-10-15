@@ -87,7 +87,7 @@ export const AdMobAndAiSection: React.FC = () => {
             Soweit bereitgestellte Inhalte gesprochene Anweisungen enthalten, wird die Sprache durch spezialisierte Inferenzmodelle automatisiert in Text übertragen. Die Verarbeitung erfolgt rein flüchtig zur Erstellung der Kochanleitung.
           </p>
           <p className="leading-relaxed">
-            <strong>Keine Speicherung &amp; kein Modelltraining:</strong> Sämtliche temporären Rohdaten werden unmittelbar nach der Texterfassung verworfen (Zero Data Retention) und weder dauerhaft gespeichert noch zum Trainieren von KI-Modellen verwendet.
+            <strong>Keine Speicherung &amp; kein Modelltraining:</strong> Sämtliche temporären Rohdaten werden unmittelbar nach der Texterfassung verworfen (Zero Data Retention) und zu keinem Zeitpunkt gespeichert oder zum Trainieren von KI-Modellen verwendet.
           </p>
         </div>
 

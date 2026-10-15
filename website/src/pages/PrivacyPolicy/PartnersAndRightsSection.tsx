@@ -67,7 +67,7 @@ export const PartnersAndRightsSection: React.FC = () => {
           <div className="p-4 rounded-xl glass-panel flex flex-col justify-between gap-2">
             <div>
               <strong className="text-gray-900 dark:text-white block">Groq Inc. (USA)</strong>
-              <p className="mt-1 leading-relaxed">Transiente KI-Inferenz und Spracherkennungsdienste (Speech-to-Text). Rein flüchtige Verarbeitung zur Texterstellung ohne dauerhafte Speicherung und ohne Modelltraining (Zero Data Retention).</p>
+              <p className="mt-1 leading-relaxed">Transiente KI-Inferenz und Spracherkennungsdienste (Speech-to-Text). Rein flüchtige Verarbeitung zur Texterstellung ohne Speicherung und ohne Modelltraining (Zero Data Retention).</p>
             </div>
             <a href="https://groq.com/privacy-policy/" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:underline inline-flex items-center gap-1 mt-1">
               Datenschutz Groq <ExternalLink className="w-3 h-3" />
@@ -107,7 +107,7 @@ export const PartnersAndRightsSection: React.FC = () => {
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">8. Speicherdauer der Daten</h2>
         <ul className="list-disc pl-5 text-xs text-gray-600 dark:text-gray-400 space-y-2 leading-relaxed">
           <li><strong>Konto-, Rezept- und Profilinhalte:</strong> Werden für die Dauer deines aktiven Benutzerkontos gespeichert und bei Kontolöschung unwiderruflich entfernt.</li>
-          <li><strong>Flüchtige Verarbeitungsdaten (Sprache &amp; Medien):</strong> Temporäre Medien- und Sprachdaten zur Rezeptanalyse werden nicht dauerhaft gespeichert. Nach Abschluss der Textextraktion werden diese flüchtigen Rohdaten unverzüglich verworfen. In deinem Benutzerkonto verbleibt ausschließlich das erstellte Textrezept.</li>
+          <li><strong>Keine Speicherung von Rohmedien:</strong> Unsere Server empfangen und speichern zu keinem Zeitpunkt Video- oder Audiodateien verlinkter Medien. In deinem Benutzerkonto verbleibt ausschließlich das strukturierte Textrezept.</li>
           <li><strong>Hochgeladene Rezeptfotos:</strong> Werden nach der Texterkennung unverzüglich, spätestens jedoch nach 24 Stunden, vollständig vom Server gelöscht.</li>
           <li><strong>Kochbeweis-Fotos:</strong> Werden privat gespeichert, solange das zugehörige Koch-Event in deiner Historie existiert oder bis du deinen Account löschst.</li>
           <li><strong>KI-Coverbilder:</strong> Bleiben gespeichert, solange das zugehörige Rezept in der Datenbank existiert.</li>

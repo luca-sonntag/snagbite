@@ -54,7 +54,7 @@ export const GeneralDataSection: React.FC = () => {
             <ul className="list-disc pl-5 text-xs text-gray-600 dark:text-gray-400 space-y-1">
               <li><strong>Verarbeitung öffentlich zugänglicher Inhalte:</strong> Zur Erfassung von Zutaten und Zubereitungsschritten werden die öffentlich zugänglichen Inhalte der verlinkten Seite aufgerufen und automatisiert ausgewertet.</li>
               <li><strong>Flüchtige Sprach- und Textanalyse:</strong> Enthaltene Sprach- und Textinformationen werden flüchtig analysiert, um handlungsrelevante Kochanweisungen und Mengenangaben in Textform zu erfassen.</li>
-              <li><strong>Keine dauerhafte Medienspeicherung:</strong> Rohmedien werden zu keinem Zeitpunkt dauerhaft auf unseren Servern gespeichert. Nach Abschluss der Textanalyse verbleibt ausschließlich das strukturierte Textrezept in deinem persönlichen Kochbuch.</li>
+              <li><strong>Keine Speicherung von Rohmedien:</strong> Unsere Server empfangen und speichern zu keinem Zeitpunkt Rohmaterial (weder Video- noch Audiodateien) der verlinkten Medien. In deinem persönlichen Kochbuch verbleibt ausschließlich das strukturierte Textrezept.</li>
             </ul>
           </div>
 
