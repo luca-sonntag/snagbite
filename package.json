@@ -17,6 +17,8 @@
     "preview": "npm run preview -w backend",
 
     "deploy": "powershell -ExecutionPolicy Bypass -File deploy.ps1",
+    "deploy:firebase": "npm run deploy:firebase -w frontend",
+    "deploy:firebase:patch": "npm run deploy:firebase:patch -w frontend",
     "deploy:all:internal": "powershell -ExecutionPolicy Bypass -File deploy.ps1 -All -Bump patch -Track internal",
     "deploy:all:alpha": "powershell -ExecutionPolicy Bypass -File deploy.ps1 -All -Bump patch -Track alpha",
     "healthcheck": "npm run start --prefix healthcheck",
