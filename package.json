@@ -17,6 +17,7 @@
     "preview": "npm run preview -w backend",
 
     "deploy": "powershell -ExecutionPolicy Bypass -File deploy.ps1",
+    "firebase:login": "npx --yes firebase-tools login",
     "deploy:firebase": "npm run deploy:firebase -w frontend",
     "deploy:firebase:patch": "npm run deploy:firebase:patch -w frontend",
     "deploy:all:internal": "powershell -ExecutionPolicy Bypass -File deploy.ps1 -All -Bump patch -Track internal",
