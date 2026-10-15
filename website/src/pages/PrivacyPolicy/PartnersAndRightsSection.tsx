@@ -66,6 +66,26 @@ export const PartnersAndRightsSection: React.FC = () => {
 
           <div className="p-4 rounded-xl glass-panel flex flex-col justify-between gap-2">
             <div>
+              <strong className="text-gray-900 dark:text-white block">Groq Inc. (USA)</strong>
+              <p className="mt-1 leading-relaxed">Transiente Speech-to-Text-Transkription (Whisper AI) aus Video-Audiospuren. Rein flüchtige Inferenz ohne Speicherung und ohne Modelltraining (Zero Retention).</p>
+            </div>
+            <a href="https://groq.com/privacy-policy/" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:underline inline-flex items-center gap-1 mt-1">
+              Datenschutz Groq <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+
+          <div className="p-4 rounded-xl glass-panel flex flex-col justify-between gap-2">
+            <div>
+              <strong className="text-gray-900 dark:text-white block">Cloudflare Inc. (USA / EU)</strong>
+              <p className="mt-1 leading-relaxed">Bereitstellung von Edge-Worker-Proxies zur sicheren und flüchtigen Weiterleitung von Transkriptionsanfragen ohne persistente Zwischenspeicherung.</p>
+            </div>
+            <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:underline inline-flex items-center gap-1 mt-1">
+              Datenschutz Cloudflare <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+
+          <div className="p-4 rounded-xl glass-panel flex flex-col justify-between gap-2">
+            <div>
               <strong className="text-gray-900 dark:text-white block">Open Food Facts (Lokale Datenbank)</strong>
               <p className="mt-1 leading-relaxed">Die Zutatennormalisierung erfolgt über einen lokalen SQLite-Index auf unserem Backend-Server. Es werden keine Nutzerdaten übertragen.</p>
             </div>
@@ -79,7 +99,7 @@ export const PartnersAndRightsSection: React.FC = () => {
       <section id="drittlaender" className="scroll-mt-24 border-b border-gray-150 dark:border-gray-800 pb-8 flex flex-col gap-3">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">7. Übermittlung in Drittländer</h2>
         <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-          Einige unserer Dienstleister (z.&nbsp;B. Google, Supabase, fal.ai, RevenueCat) verarbeiten Daten in den USA oder anderen Drittländern außerhalb der EU. Eine Übermittlung erfolgt ausschließlich auf Basis geeigneter Garantien im Sinne der Art. 44 ff. DSGVO – namentlich dem <strong>EU-U.S. Data Privacy Framework (DPF)</strong> sowie den <strong>Standardvertragsklauseln (SCCs)</strong> der Europäischen Kommission.
+          Einige unserer Dienstleister (z.&nbsp;B. Google, Groq, Cloudflare, Railway, fal.ai, RevenueCat) verarbeiten Daten in den USA oder anderen Drittländern außerhalb der EU. Eine Übermittlung erfolgt ausschließlich auf Basis geeigneter Garantien im Sinne der Art. 44 ff. DSGVO – namentlich dem <strong>EU-U.S. Data Privacy Framework (DPF)</strong> sowie den <strong>Standardvertragsklauseln (SCCs)</strong> der Europäischen Kommission.
         </p>
       </section>
 
@@ -87,6 +107,7 @@ export const PartnersAndRightsSection: React.FC = () => {
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">8. Speicherdauer der Daten</h2>
         <ul className="list-disc pl-5 text-xs text-gray-600 dark:text-gray-400 space-y-2 leading-relaxed">
           <li><strong>Konto-, Rezept- und Profilinhalte:</strong> Werden für die Dauer deines aktiven Benutzerkontos gespeichert und bei Kontolöschung unwiderruflich entfernt.</li>
+          <li><strong>Audiodaten &amp; Sprachaufnahmen:</strong> Aus Videos extrahierte Tonspuren werden weder auf deinem Endgerät noch auf unseren Servern dauerhaft gespeichert. Die Daten werden rein flüchtig zur Erstellung des Textrezepts verarbeitet und sofort nach Abschluss der Transkription verworfen. In der Rezeptdatenbank verbleibt ausschließlich das strukturierte Textrezept.</li>
           <li><strong>Hochgeladene Rezeptfotos:</strong> Werden nach der Texterkennung unverzüglich, spätestens jedoch nach 24 Stunden, vollständig vom Server gelöscht.</li>
           <li><strong>Kochbeweis-Fotos:</strong> Werden privat gespeichert, solange das zugehörige Koch-Event in deiner Historie existiert oder bis du deinen Account löschst.</li>
           <li><strong>KI-Coverbilder:</strong> Bleiben gespeichert, solange das zugehörige Rezept in der Datenbank existiert.</li>

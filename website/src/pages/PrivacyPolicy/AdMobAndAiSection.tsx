@@ -72,10 +72,22 @@ export const AdMobAndAiSection: React.FC = () => {
         <div>
           <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white flex items-center gap-2">
             <Award className="w-5 h-5 text-emerald-500" />
-            5. KI-Verarbeitung, Healthy Score &amp; illustrative Symbolbilder
+            5. KI-Verarbeitung, Audio-Transkription &amp; Healthy Score
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-            Snagbite nutzt modernste multimodale KI-Systeme (insbesondere Google Gemini sowie fal.ai FLUX.1) zur Strukturierung von Rezepten, zur Generierung von Coverbildern und zur interaktiven Kochassistenz.
+            Snagbite nutzt spezialisierte KI-Systeme (Google Gemini, Groq / Whisper sowie fal.ai FLUX.1) zur Spracherkennung, Rezeptstrukturierung, Coverbild-Generierung und interaktiven Kochassistenz.
+          </p>
+        </div>
+
+        <div className="p-4 rounded-xl glass-panel text-xs text-gray-600 dark:text-gray-400 space-y-2">
+          <strong className="text-gray-900 dark:text-white block">
+            Audio-Transkription (Whisper via Groq Inc. &amp; Cloudflare Worker):
+          </strong>
+          <p className="leading-relaxed">
+            Bei der Extraktion von Videorezepten wird die Tonspur des Videos zur Erkennung gesprochener Zutaten und Arbeitsschritte an den Hochgeschwindigkeits-Inferenzdienst Groq Inc. (Whisper-Modell) übermittelt. Die Übertragung erfolgt verschlüsselt über einen flüchtigen Reverse-Proxy von Cloudflare Inc.
+          </p>
+          <p className="leading-relaxed">
+            <strong>Keine Speicherung &amp; kein KI-Training:</strong> Die Audiodaten werden rein flüchtig im Arbeitsspeicher verarbeitet und nach der Transkription sofort verworfen (Zero Data Retention). Die übermittelten Audiofragmente werden von den Anbietern weder dauerhaft gespeichert noch zum Trainieren von Sprach- oder KI-Modellen verwendet.
           </p>
         </div>
 

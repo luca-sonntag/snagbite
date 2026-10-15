@@ -46,14 +46,15 @@ export const GeneralDataSection: React.FC = () => {
           <div className="p-5 rounded-2xl glass-panel flex flex-col gap-2">
             <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <Video className="w-4 h-4 text-teal-500" />
-              b) Social-Media-Links &amp; clientseitiger Videoabruf (Privatkopie)
+              b) Social-Media-Links, Videoabruf &amp; Audio-Transkription
             </h3>
             <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-              Wenn du öffentlich zugängliche Rezept-Links (z.&nbsp;B. von Instagram, TikTok, YouTube Shorts, Facebook oder Websites) in Snagbite teilst oder einfügst:
+              Wenn du öffentlich zugängliche Rezept-Links (z.&nbsp;B. von Instagram, TikTok, YouTube Shorts, Facebook oder Websites) in Snagbite teilst oder einfügst, beauftragst du die App mit der automatisierten Extraktion des Rezepts:
             </p>
             <ul className="list-disc pl-5 text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <li><strong>Direkter Medienabruf:</strong> Dein Endgerät ruft die öffentlich zugänglichen Mediendaten direkt von den Servern der jeweiligen Plattform ab. Dabei wird deine IP-Adresse an den jeweiligen Anbieter (Meta, ByteDance, Google) übertragen und es kann mobiles Datenvolumen deines Tarifs anfallen.</li>
-              <li><strong>Keine dauerhafte Speicherung:</strong> Das Video wird lediglich flüchtig zur Rezept-Erstellung verarbeitet und <strong>nicht dauerhaft</strong> auf deinem Gerät oder unseren Servern gespeichert.</li>
+              <li><strong>Direkter Medienabruf (Nutzer-Endgerät):</strong> Dein Endgerät ruft die öffentlich zugänglichen Mediendaten direkt von den Servern der jeweiligen Plattform ab. Dabei wird deine IP-Adresse an den jeweiligen Plattformbetreiber (Meta, ByteDance, Google) übertragen und es kann mobiles Datenvolumen deines Tarifs anfallen.</li>
+              <li><strong>Clientseitige Audioextraktion &amp; Speech-to-Text:</strong> Um gesprochene Kochanweisungen und Mengenangaben aus dem Video zu erfassen, dekodiert dein Endgerät flüchtig im Arbeitsspeicher (Web Audio API) die Tonspur. Diese Audiodaten werden über einen gesicherten, flüchtigen Proxy-Tunnel (Cloudflare Worker) an spezialisierte KI-Transkriptionsdienste (Groq / Whisper) zur Umwandlung in Text übermittelt.</li>
+              <li><strong>Keine dauerhafte Speicherung von Bild- oder Tondaten:</strong> Weder die Video- noch die Audiodaten werden dauerhaft auf deinem Endgerät oder auf unseren Backend-Servern gespeichert. Nach erfolgreicher Transkription bzw. Frame-Analyse werden die Rohdaten unmittelbar verworfen. Auf unseren Servern wird ausschließlich das strukturierte Textrezept gespeichert.</li>
             </ul>
           </div>
 
