@@ -79,3 +79,31 @@ Während Capgo OTA ausschließlich Web-Assets (HTML/JS/CSS) aktualisiert, steuer
 * **Multi-Stage Dockerfile:** Multi-stage Build (`node:22-alpine`). Installiert systemseitig `ffmpeg`, `python3` (für yt-dlp) und `ttf-dejavu`.
 * **Stateless Deployment:** Backend und Frontend-Assets statisch gebündelt.
 * **Environment Variables Sync (`scripts/sync-railway-env.ps1`):** Synchronisation via `npm run railway:env:prod` (kombiniert `backend/.env` und `backend/.env.production`) bzw. `npm run railway:env:dev` via Railway CLI.
+
+---
+
+## 5. Firebase App Distribution (Tester & Pre-Release Builds)
+
+Für schnelle Testrunden mit internen und externen Testern (Freunde, Familie, Beta-Community) werden Vorabversionen direkt über **Firebase App Distribution** verteilt – unabhängig von Google Play Store Review-Zeiten.
+
+* **Firebase-Projekt:** `snagbite-c6c33`
+* **App-ID (Android):** `1:453029629442:android:442396361a782e1196a11b` (Package: `at.snagbite.app`)
+* **Artefakt:** Signierte `.apk` (erzeugt via `release.ps1 -Artifact apk` mit `assembleRelease`). Das APK kann von Testern direkt über den mobilen Browser oder die *Firebase App Tester*-App ohne Google-Play-Bindung installiert werden.
+* **Tooling:** Distribution via `npx --yes firebase-tools appdistribution:distribute` (kein lokales Ruby/Docker erforderlich).
+
+### Befehle
+* `npm run deploy:firebase`: Baut aktuelle Version als signierte APK und lädt sie für die Tester-Gruppe `all-testers` hoch.
+* `npm run deploy:firebase:patch`: Erhöht `versionCode` & Patch-`versionName`, baut APK und lädt sie hoch.
+* `.\deploy.ps1 -Firebase`: Startet den Flow über den Root-Orchestrator (auch über interaktives Menü Option 4).
+* `.\frontend\scripts\deploy-firebase.ps1 -Notes "Fix for Recipe Timer" -Group all-testers`: Manueller Aufruf mit individuellen Release Notes.
+
+### Authentifizierung (Headless / CI / Lokal)
+1. **Service Account Key (Empfohlen):**
+   * Im Google Cloud IAM ein Dienstkonto mit der Rolle **Firebase App Distribution-Administrator** erstellen.
+   * JSON-Schlüssel als `frontend/android/fastlane/firebase-key.json` ablegen (wird durch `.gitignore` automatisch ignoriert).
+2. **Alternativ:** Umgebungsvariable `GOOGLE_APPLICATION_CREDENTIALS` oder `FIREBASE_TOKEN` (via `npx firebase login:ci`) setzen, oder interaktiv im Browser via `npx firebase login` einloggen.
+
+### Tester-Einladung ("all-testers")
+* In der Firebase Console unter **Release & Monitor -> App Distribution -> Tester & Gruppen**:
+  * Gruppe `all-testers` erstellen.
+  * Einen **öffentlichen Einladungslink (Invite Link)** generieren und mit den Testern teilen. Tester klicken den Link am Handy an, registrieren sich mit ihrer E-Mail und erhalten sofort Download-Zugriff sowie automatische Benachrichtigungen bei neuen Builds.
