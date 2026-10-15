@@ -50,7 +50,9 @@
     - `CF_AIG_TOKEN`
     - `WHISPER_HMAC_SECRET` *(muss exakt mit Railway übereinstimmen!)*
     - `GROQ_API_KEY` *(falls nicht direkt im Cloudflare AI Gateway gespeichert)*
-  - *(Hinweis: Der Worker mit Nonce-Protection und `/health`-Endpunkt ist bereits auf Cloudflare deployed).*
+- [ ] **Cloudflare Worker Update deployen (`npm run deploy --prefix cloudflare-workers/whisper-proxy`):**
+  - **Zweck:** Neuer Header `cf-aig-collect-log-payload: false` (Commit `8d12b9f4`), um Payload-Logging im Cloudflare AI Gateway zu deaktivieren.
+  - *(Hinweis: Vor dem Release mit `npm run deploy --prefix cloudflare-workers/whisper-proxy` deployen).*
 
 ---
 
