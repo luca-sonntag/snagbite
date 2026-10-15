@@ -67,7 +67,7 @@ export const PartnersAndRightsSection: React.FC = () => {
           <div className="p-4 rounded-xl glass-panel flex flex-col justify-between gap-2">
             <div>
               <strong className="text-gray-900 dark:text-white block">Groq Inc. (USA)</strong>
-              <p className="mt-1 leading-relaxed">Transiente KI-Inferenz und Spracherkennungsdienste (Speech-to-Text). Rein flüchtige Verarbeitung zur Texterstellung ohne Speicherung und ohne Modelltraining (Zero Data Retention).</p>
+              <p className="mt-1 leading-relaxed">Bereitstellung von KI-Inferenz und Spracherkennungsdiensten (Speech-to-Text). Rein flüchtige Verarbeitung zur Texterstellung ohne dauerhafte Speicherung und ohne Modelltraining.</p>
             </div>
             <a href="https://groq.com/privacy-policy/" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:underline inline-flex items-center gap-1 mt-1">
               Datenschutz Groq <ExternalLink className="w-3 h-3" />
