@@ -153,10 +153,14 @@ try {
         "firebase-tools",
         "appdistribution:distribute",
         $apk.FullName,
-        "--app", $AppId,
-        "--groups", $Group,
-        "--release-notes", $Notes
+        "--app", $AppId
     )
+    if ($Group) {
+        $cliArgs += @("--groups", $Group)
+    }
+    if ($Notes) {
+        $cliArgs += @("--release-notes", $Notes)
+    }
 
     $oldEap = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
@@ -168,7 +172,8 @@ try {
     }
 
     if ($uploadExit -ne 0) {
-        throw "firebase-tools appdistribution:distribute exited with code $uploadExit"
+        throw "firebase-tools appdistribution:distribute exited with code $uploadExit.`n" +
+              "Hinweis: Falls der Fehler 'Requested entity was not found' auftritt, stelle sicher, dass die Tester-Gruppe '$Group' in der Firebase Console (https://console.firebase.google.com/project/snagbite-c6c33/appdistribution) unter 'Tester & Gruppen' angelegt wurde."
     }
 
     # --- 5. Commit version bump locally on success -----------------------
