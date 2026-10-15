@@ -51,7 +51,7 @@ export const AdMobAndAiSection: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-gray-600 dark:text-gray-300">
           <div className="p-4 rounded-xl glass-panel">
             <strong className="text-gray-900 dark:text-white block mb-1">Vertragserfüllung (Art. 6 Abs. 1 lit. b DSGVO)</strong>
-            Bereitstellung des Benutzerkontos, Extraktion und Verwaltung von Rezepten, Wochenplaner, Einkaufslisten, Vorratskammer, Gamification sowie Abwicklung von Premium-Abonnements.
+            Bereitstellung des Benutzerkontos, Digitalisierung und Verwaltung von Rezepten, Wochenplaner, Einkaufslisten, Vorratskammer, Gamification sowie Abwicklung von Premium-Abonnements.
           </div>
           <div className="p-4 rounded-xl glass-panel">
             <strong className="text-gray-900 dark:text-white block mb-1">Einwilligung (Art. 6 Abs. 1 lit. a DSGVO)</strong>
@@ -72,22 +72,22 @@ export const AdMobAndAiSection: React.FC = () => {
         <div>
           <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white flex items-center gap-2">
             <Award className="w-5 h-5 text-emerald-500" />
-            5. KI-Verarbeitung, Audio-Transkription &amp; Healthy Score
+            5. KI-Inferenz, Spracherkennung &amp; Healthy Score
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-            Snagbite nutzt spezialisierte KI-Systeme (Google Gemini, Groq / Whisper sowie fal.ai FLUX.1) zur Spracherkennung, Rezeptstrukturierung, Coverbild-Generierung und interaktiven Kochassistenz.
+            Snagbite nutzt spezialisierte KI-Systeme und Inferenzdienste (u.&nbsp;a. Google Gemini, Groq sowie fal.ai) zur automatisierten Rezeptstrukturierung, Spracherkennung, Symbolbild-Darstellung und interaktiven Kochassistenz.
           </p>
         </div>
 
         <div className="p-4 rounded-xl glass-panel text-xs text-gray-600 dark:text-gray-400 space-y-2">
           <strong className="text-gray-900 dark:text-white block">
-            Audio-Transkription (Whisper via Groq Inc. &amp; Cloudflare Worker):
+            Automatisierte Spracherkennung (Speech-to-Text):
           </strong>
           <p className="leading-relaxed">
-            Bei der Extraktion von Videorezepten wird die Tonspur des Videos zur Erkennung gesprochener Zutaten und Arbeitsschritte an den Hochgeschwindigkeits-Inferenzdienst Groq Inc. (Whisper-Modell) übermittelt. Die Übertragung erfolgt verschlüsselt über einen flüchtigen Reverse-Proxy von Cloudflare Inc.
+            Soweit bereitgestellte Inhalte gesprochene Anweisungen enthalten, wird die Sprache durch spezialisierte Inferenzmodelle automatisiert in Text übertragen. Die Verarbeitung erfolgt rein flüchtig zur Erstellung der Kochanleitung.
           </p>
           <p className="leading-relaxed">
-            <strong>Keine Speicherung &amp; kein KI-Training:</strong> Die Audiodaten werden rein flüchtig im Arbeitsspeicher verarbeitet und nach der Transkription sofort verworfen (Zero Data Retention). Die übermittelten Audiofragmente werden von den Anbietern weder dauerhaft gespeichert noch zum Trainieren von Sprach- oder KI-Modellen verwendet.
+            <strong>Keine Speicherung &amp; kein Modelltraining:</strong> Sämtliche temporären Rohdaten werden unmittelbar nach der Texterfassung verworfen (Zero Data Retention) und weder dauerhaft gespeichert noch zum Trainieren von KI-Modellen verwendet.
           </p>
         </div>
 

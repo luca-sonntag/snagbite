@@ -57,7 +57,7 @@ export const PartnersAndRightsSection: React.FC = () => {
           <div className="p-4 rounded-xl glass-panel flex flex-col justify-between gap-2">
             <div>
               <strong className="text-gray-900 dark:text-white block">RapidAPI / RapiData LLC (USA)</strong>
-              <p className="mt-1 leading-relaxed">Beschaffung von öffentlich zugänglichen Beitragsmetadaten und CDN-Links zum vom Nutzer geteilten Social-Media-Beitrag.</p>
+              <p className="mt-1 leading-relaxed">Bereitstellung von Schnittstellendiensten (API-Konnektivität) zur standardisierten Abfrage öffentlich zugänglicher Webseiten-Informationen.</p>
             </div>
             <a href="https://rapidapi.com/privacy/" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:underline inline-flex items-center gap-1 mt-1">
               Datenschutz RapidAPI <ExternalLink className="w-3 h-3" />
@@ -67,7 +67,7 @@ export const PartnersAndRightsSection: React.FC = () => {
           <div className="p-4 rounded-xl glass-panel flex flex-col justify-between gap-2">
             <div>
               <strong className="text-gray-900 dark:text-white block">Groq Inc. (USA)</strong>
-              <p className="mt-1 leading-relaxed">Transiente Speech-to-Text-Transkription (Whisper AI) aus Video-Audiospuren. Rein flüchtige Inferenz ohne Speicherung und ohne Modelltraining (Zero Retention).</p>
+              <p className="mt-1 leading-relaxed">Transiente KI-Inferenz und Spracherkennungsdienste (Speech-to-Text). Rein flüchtige Verarbeitung zur Texterstellung ohne dauerhafte Speicherung und ohne Modelltraining (Zero Data Retention).</p>
             </div>
             <a href="https://groq.com/privacy-policy/" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:underline inline-flex items-center gap-1 mt-1">
               Datenschutz Groq <ExternalLink className="w-3 h-3" />
@@ -77,7 +77,7 @@ export const PartnersAndRightsSection: React.FC = () => {
           <div className="p-4 rounded-xl glass-panel flex flex-col justify-between gap-2">
             <div>
               <strong className="text-gray-900 dark:text-white block">Cloudflare Inc. (USA / EU)</strong>
-              <p className="mt-1 leading-relaxed">Bereitstellung von Edge-Worker-Proxies zur sicheren und flüchtigen Weiterleitung von Transkriptionsanfragen ohne persistente Zwischenspeicherung.</p>
+              <p className="mt-1 leading-relaxed">Content-Delivery-Network (CDN), Routing, DDoS-Schutz sowie verschlüsselte Netzwerk- und Sicherheitsinfrastruktur.</p>
             </div>
             <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:underline inline-flex items-center gap-1 mt-1">
               Datenschutz Cloudflare <ExternalLink className="w-3 h-3" />
@@ -107,7 +107,7 @@ export const PartnersAndRightsSection: React.FC = () => {
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">8. Speicherdauer der Daten</h2>
         <ul className="list-disc pl-5 text-xs text-gray-600 dark:text-gray-400 space-y-2 leading-relaxed">
           <li><strong>Konto-, Rezept- und Profilinhalte:</strong> Werden für die Dauer deines aktiven Benutzerkontos gespeichert und bei Kontolöschung unwiderruflich entfernt.</li>
-          <li><strong>Audiodaten &amp; Sprachaufnahmen:</strong> Aus Videos extrahierte Tonspuren werden weder auf deinem Endgerät noch auf unseren Servern dauerhaft gespeichert. Die Daten werden rein flüchtig zur Erstellung des Textrezepts verarbeitet und sofort nach Abschluss der Transkription verworfen. In der Rezeptdatenbank verbleibt ausschließlich das strukturierte Textrezept.</li>
+          <li><strong>Flüchtige Verarbeitungsdaten (Sprache &amp; Medien):</strong> Temporäre Medien- und Sprachdaten zur Rezeptanalyse werden nicht dauerhaft gespeichert. Nach Abschluss der Textextraktion werden diese flüchtigen Rohdaten unverzüglich verworfen. In deinem Benutzerkonto verbleibt ausschließlich das erstellte Textrezept.</li>
           <li><strong>Hochgeladene Rezeptfotos:</strong> Werden nach der Texterkennung unverzüglich, spätestens jedoch nach 24 Stunden, vollständig vom Server gelöscht.</li>
           <li><strong>Kochbeweis-Fotos:</strong> Werden privat gespeichert, solange das zugehörige Koch-Event in deiner Historie existiert oder bis du deinen Account löschst.</li>
           <li><strong>KI-Coverbilder:</strong> Bleiben gespeichert, solange das zugehörige Rezept in der Datenbank existiert.</li>
@@ -141,7 +141,7 @@ export const PartnersAndRightsSection: React.FC = () => {
           10. Community-Rezepte &amp; Sichtbarkeit
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-          Aus öffentlich zugänglichen Internet-Links erstellte Rezepte stehen der Community als öffentlich einsehbare Rezepte zur Verfügung, um Vorrats- und Rezeptideen zu teilen. Dies geschieht strikt pseudonym – ohne deinen Namen oder deine E-Mail-Adresse offenzulegen. Eigene Foto-Scans und persönliche Rezepte bleiben stets privat. Du kannst die Sichtbarkeit deiner Rezepte jederzeit in den Rezept-Einstellungen anpassen.
+          Öffentlich gekennzeichnete oder geteilte Rezepte können anderen registrierten Nutzern der Snagbite-Community zur Inspiration zur Verfügung stehen. Dies geschieht stets pseudonymisiert – ohne deinen Klarnamen oder deine E-Mail-Adresse offenzulegen. Persönliche Notizen und privat markierte Rezepte bleiben stets geschützt. Die Sichtbarkeit deiner Rezepte kannst du jederzeit in den Rezept-Einstellungen anpassen.
         </p>
       </section>
 

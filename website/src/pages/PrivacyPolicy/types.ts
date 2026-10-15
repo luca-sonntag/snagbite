@@ -8,7 +8,7 @@ export const PRIVACY_SECTIONS: PrivacySectionItem[] = [
   { id: 'daten', title: '2. Datenkategorien & Abläufe' },
   { id: 'admob', title: '3. Werbung & AdMob' },
   { id: 'zwecke', title: '4. Zwecke & Rechtsgrundlagen' },
-  { id: 'ki', title: '5. KI, Audio & Healthy Score' },
+  { id: 'ki', title: '5. KI-Inferenz & Healthy Score' },
   { id: 'empfaenger', title: '6. Empfänger & Dienstleister' },
   { id: 'drittlaender', title: '7. Drittland-Übermittlung' },
   { id: 'dauer', title: '8. Speicherdauer & Storage' },
