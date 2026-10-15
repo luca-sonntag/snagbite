@@ -15,16 +15,21 @@
     Version bump type: 'none' (default), 'patch', 'minor', 'major'
     Only affects versionName. versionCode always increments by 1.
 
+.PARAMETER Artifact
+    Target build artifact: 'aab' (default for Play Store), 'apk' (for Firebase / Direct Install), or 'both'.
+
 .EXAMPLE
-    .\release.ps1                # Just increment versionCode
-    .\release.ps1 -Bump patch    # 1.0.0 -> 1.0.1 + versionCode++
-    .\release.ps1 -Bump minor    # 1.0.1 -> 1.1.0 + versionCode++
-    .\release.ps1 -Bump major    # 1.1.0 -> 2.0.0 + versionCode++
+    .\release.ps1                # Just increment versionCode, build AAB
+    .\release.ps1 -Bump patch    # 1.0.0 -> 1.0.1 + versionCode++, build AAB
+    .\release.ps1 -Artifact apk  # Build signed APK for Firebase testers
+    .\release.ps1 -Artifact both # Build both signed AAB and APK
 #>
 
 param(
     [ValidateSet('none', 'patch', 'minor', 'major')]
-    [string]$Bump = 'none'
+    [string]$Bump = 'none',
+    [ValidateSet('aab', 'apk', 'both')]
+    [string]$Artifact = 'aab'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -126,8 +131,8 @@ try {
 }
 Write-Host "  Capacitor sync complete." -ForegroundColor Green
 
-# -- 7. Build AAB -----------------------------------------------------
-Write-Host "[3/4] Building release AAB..." -ForegroundColor Yellow
+# -- 7. Build Native Artifact(s) --------------------------------------
+Write-Host "[3/4] Building release artifact(s) ($Artifact)..." -ForegroundColor Yellow
 Push-Location $androidDir
 try {
     # Check for active live-reload server configuration
@@ -144,34 +149,53 @@ try {
     & .\gradlew.bat clean
     if ($LASTEXITCODE -ne 0) { throw "Gradle clean failed" }
 
-    & .\gradlew.bat bundleRelease
-    if ($LASTEXITCODE -ne 0) { throw "Gradle bundleRelease failed" }
+    if ($Artifact -in @('aab', 'both')) {
+        Write-Host "  Building signed AAB..." -ForegroundColor Yellow
+        & .\gradlew.bat bundleRelease
+        if ($LASTEXITCODE -ne 0) { throw "Gradle bundleRelease failed" }
+    }
+    if ($Artifact -in @('apk', 'both')) {
+        Write-Host "  Building signed APK..." -ForegroundColor Yellow
+        & .\gradlew.bat assembleRelease
+        if ($LASTEXITCODE -ne 0) { throw "Gradle assembleRelease failed" }
+    }
 } finally {
     Pop-Location
 }
-Write-Host "  AAB build complete." -ForegroundColor Green
+Write-Host "  Build complete." -ForegroundColor Green
 
-# -- 8. Copy AAB to releases/ folder ----------------------------------
-Write-Host "[4/4] Copying AAB to releases/..." -ForegroundColor Yellow
-$aabSource = "$androidDir\app\build\outputs\bundle\release\app-release.aab"
+# -- 8. Copy artifact(s) to releases/ folder --------------------------
+Write-Host "[4/4] Copying artifact(s) to releases/..." -ForegroundColor Yellow
 $releasesDir = "$frontendDir\releases"
 if (-not (Test-Path $releasesDir)) {
     New-Item -ItemType Directory -Path $releasesDir | Out-Null
 }
 
 $timestamp = Get-Date -Format "yyyy-MM-dd_HHmmss"
-$aabDest = "$releasesDir\snagbite-v${newName}-vc${newCode}-${timestamp}.aab"
-Copy-Item $aabSource $aabDest
+
+if ($Artifact -in @('aab', 'both')) {
+    $aabSource = "$androidDir\app\build\outputs\bundle\release\app-release.aab"
+    $aabDest = "$releasesDir\snagbite-v${newName}-vc${newCode}-${timestamp}.aab"
+    Copy-Item $aabSource $aabDest
+}
+
+if ($Artifact -in @('apk', 'both')) {
+    $apkSource = "$androidDir\app\build\outputs\apk\release\app-release.apk"
+    $apkDest = "$releasesDir\snagbite-v${newName}-vc${newCode}-${timestamp}.apk"
+    Copy-Item $apkSource $apkDest
+}
 
 # -- 9. Cap open-ended stale OTA bundles in DB ----------------------
 Write-Host "[5/5] Capping stale OTA bundles in DB..." -ForegroundColor Yellow
 Cap-StaleAppBundles -NewVersionCode $newCode
 
 Write-Host ""
-Write-Host "  [OK] Release AAB ready!" -ForegroundColor Green
-Write-Host "  AAB: $aabDest" -ForegroundColor White
+Write-Host "  [OK] Release artifact(s) ready!" -ForegroundColor Green
+if ($Artifact -in @('aab', 'both')) {
+    Write-Host "  AAB: $aabDest" -ForegroundColor White
+}
+if ($Artifact -in @('apk', 'both')) {
+    Write-Host "  APK: $apkDest" -ForegroundColor White
+}
 Write-Host "  versionName: $newName | versionCode: $newCode" -ForegroundColor White
-Write-Host ""
-Write-Host "  Next: Upload to Google Play Console" -ForegroundColor DarkGray
-Write-Host "  https://play.google.com/console" -ForegroundColor DarkGray
 Write-Host ""
