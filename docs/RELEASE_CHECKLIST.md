@@ -20,14 +20,23 @@
     metadata: jsonb('metadata')
     ```
   - **Grund 2 (Cross-User Recipe Reuse):** In Commit `aa7f9c6a` (`feat(db): add language and source_url_normalized to recipes and jobs schema`) wurden in [`backend/src/db/schema/recipes.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/schema/recipes.ts) (`source_url_normalized`, `language`, Index `recipes_source_normalized_lang_idx`) und [`backend/src/db/schema/jobs.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/schema/jobs.ts) (`language`) neue abwärtskompatible Spalten ergänzt.
+  - **Grund 3 (Recipe Pipeline Version):** Neue Spalte `pipeline_version: integer not null default 0` und Index `recipes_pipeline_version_idx` in [`backend/src/db/schema/recipes.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/schema/recipes.ts) hinzugefügt (`feat/recipe-pipeline-version`). Altdaten erhalten sicher `0`, Neudaten `1`.
   - **Betroffene Endpunkte & Features:**
     - `GET /api/me/metadata` & `PATCH /api/me/metadata` (Persistenz für NUX-Spotlight-Tours, WelcomeGuide-Status & UI-Präferenzen).
     - `POST /api/extract-recipe` (Mandantenübergreifende Rezept-Wiederverwendung in Zielsprache).
+    - Alle Rezept-Extraktionen & Speichervorgänge (`Recipe.pipelineVersion`).
   - **Ausführung:**
     ```powershell
     npm run db:push:prod
     ```
-  - **Verifikation:** In der CLI-Ausgabe sicherstellen, dass Drizzle die neuen Spalten und den Index auf der Production-Datenbank anlegt und keine unvorhergesehenen Tabellenänderungen anstehen.
+  - **Verifikation:** In der CLI-Ausgabe sicherstellen, dass Drizzle die neuen Spalten und Indizes auf der Production-Datenbank anlegt und keine unvorhergesehenen Tabellenänderungen anstehen.
+
+- [ ] **`npm run db:functions:prod` ausführen (complete_job)**
+  - **Grund:** Aktualisiert die Postgres Stored Procedure `complete_job` in [`backend/src/db/functions.sql`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/functions.sql), sodass `v_recipe.pipeline_version := COALESCE(v_recipe.pipeline_version, 1)` atomar beim Einfügen von Jobs abgesichert ist.
+  - **Ausführung:**
+    ```powershell
+    npm run db:functions:prod
+    ```
 
 - [ ] **Rezept-URLs & Sprache einmalig auf Production backfillen (Nach `db:push:prod`)**
   - **Grund:** Befüllt `source_url_normalized` und `language` (`'de'`) für alle bereits bestehenden Rezepte in der Production-DB (Commit `346ef9ed`, [`backend/src/scripts/backfill/backfillRecipeNormalizedUrls.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/scripts/backfill/backfillRecipeNormalizedUrls.ts)).
