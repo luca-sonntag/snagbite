@@ -69,6 +69,7 @@ BEGIN
   v_recipe.instructions := COALESCE(v_recipe.instructions, '[]'::jsonb);
   v_recipe.has_explicit_nutritional_values :=
     COALESCE(v_recipe.has_explicit_nutritional_values, false);
+  v_recipe.pipeline_version := COALESCE(v_recipe.pipeline_version, 1);
 
   INSERT INTO recipes VALUES (v_recipe.*) RETURNING id INTO v_recipe_id;
 

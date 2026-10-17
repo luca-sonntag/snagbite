@@ -55,6 +55,7 @@ export const recipes = pgTable(
     hasIncompleteSourceInfo: boolean('has_incomplete_source_info').notNull().default(false),
     isDemo: boolean('is_demo').notNull().default(false),
     nutritionCoverage: numeric('nutrition_coverage'),
+    pipelineVersion: integer('pipeline_version').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -64,6 +65,7 @@ export const recipes = pgTable(
     index('recipes_category_idx').on(table.category),
     index('recipes_health_score_idx').on(table.healthScore),
     index('recipes_source_normalized_lang_idx').on(table.sourceUrlNormalized, table.language),
+    index('recipes_pipeline_version_idx').on(table.pipelineVersion),
   ]
 );
 

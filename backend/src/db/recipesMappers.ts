@@ -3,7 +3,7 @@ import type {
   SavedRecipe,
   UserRecipeSource,
 } from '../types.js';
-import { formatAuthorHandle } from '@cookbook/shared';
+import { formatAuthorHandle, CURRENT_RECIPE_PIPELINE_VERSION } from '@cookbook/shared';
 import { num } from './client.js';
 import { recipes } from './schema/recipes.js';
 import { computeRecipeHealthScore, isVegetableOrFruitCategory } from '../matching/healthScoreCalculator.js';
@@ -74,6 +74,7 @@ export function rowToRecipe(row: any): Recipe {
     hasIncompleteSourceInfo: Boolean(row.hasIncompleteSourceInfo ?? row.has_incomplete_source_info),
     isDemo: Boolean(row.isDemo ?? row.is_demo),
     nutritionCoverage: num(row.nutritionCoverage ?? row.nutrition_coverage) ?? undefined,
+    pipelineVersion: num(row.pipelineVersion ?? row.pipeline_version) ?? 0,
     createdAt: rawCreatedAt instanceof Date ? rawCreatedAt.toISOString() : (rawCreatedAt ?? new Date().toISOString()),
     updatedAt: rawUpdatedAt instanceof Date ? rawUpdatedAt.toISOString() : (rawUpdatedAt ?? new Date().toISOString()),
   };
@@ -137,6 +138,7 @@ export function recipeToRow(recipe: Recipe): Record<string, unknown> {
     has_incomplete_source_info: recipe.hasIncompleteSourceInfo ?? false,
     is_demo: recipe.isDemo ?? false,
     nutrition_coverage: recipe.nutritionCoverage ?? null,
+    pipeline_version: recipe.pipelineVersion ?? CURRENT_RECIPE_PIPELINE_VERSION,
   };
 }
 
@@ -177,6 +179,7 @@ export function recipeToDrizzle(recipe: Recipe): typeof recipes.$inferInsert {
     hasIncompleteSourceInfo: recipe.hasIncompleteSourceInfo ?? false,
     isDemo: recipe.isDemo ?? false,
     nutritionCoverage: recipe.nutritionCoverage !== undefined && recipe.nutritionCoverage !== null ? String(recipe.nutritionCoverage) : null,
+    pipelineVersion: recipe.pipelineVersion ?? CURRENT_RECIPE_PIPELINE_VERSION,
   };
 }
 
