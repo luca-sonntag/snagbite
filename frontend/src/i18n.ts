@@ -819,6 +819,11 @@ export const uiTranslations = {
           dashboardDesc: 'Öffnet das Admin Dashboard auf der Website',
           devTools: 'Entwickler-Tools',
           devToolsDesc: 'Aktiviert die mobile Dev-Konsole (Eruda) und Overlays',
+          tierToggle: 'Snagbite Pro (Status)',
+          tierToggleDesc: 'Aktueller Tier: {tier}. Schaltet DB-Account zwischen Free und Pro um.',
+          tierSuccessPro: 'Pro-Status erfolgreich aktiviert!',
+          tierSuccessFree: 'Free-Status erfolgreich aktiviert!',
+          tierError: 'Fehler beim Ändern des Account-Status.',
         },
         legal: {
           section: 'Rechtliches',
@@ -2462,6 +2467,11 @@ export const uiTranslations = {
           dashboardDesc: 'Opens the Admin Dashboard on the website',
           devTools: 'Developer Tools',
           devToolsDesc: 'Enables mobile debug console (Eruda) and overlays',
+          tierToggle: 'Snagbite Pro (Status)',
+          tierToggleDesc: 'Current tier: {tier}. Switches DB account between Free and Pro.',
+          tierSuccessPro: 'Pro status successfully activated!',
+          tierSuccessFree: 'Free status successfully activated!',
+          tierError: 'Failed to switch account status.',
         },
         legal: {
           section: 'Legal',
