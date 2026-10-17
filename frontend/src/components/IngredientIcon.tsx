@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getIngredientIconUrl } from '../utils/ingredientIcon';
 
 export interface IngredientIconProps {
@@ -36,6 +36,13 @@ const ICON_SIZE_MAP = {
   lg: 'w-full h-full p-1',
 };
 
+const SPINNER_SIZE_MAP = {
+  sm: 'w-3.5 h-3.5 border-[1.75px]',
+  grid: 'w-4 h-4 border-2',
+  md: 'w-4.5 h-4.5 border-2',
+  lg: 'w-5 h-5 border-2',
+};
+
 export const IngredientIcon: React.FC<IngredientIconProps> = ({
   baseName,
   canonicalId,
@@ -46,16 +53,29 @@ export const IngredientIcon: React.FC<IngredientIconProps> = ({
   reserveSpace = false,
   emptySpacingClass = '',
 }) => {
-  const iconUrl = getIngredientIconUrl(baseName, canonicalId, synonyms);
+  const iconUrl = getIngredientIconUrl(baseName, canonicalId, synonyms, name);
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [showSpinner, setShowSpinner] = useState(false);
   const [prevUrl, setPrevUrl] = useState<string | null>(iconUrl);
 
   if (prevUrl !== iconUrl) {
     setPrevUrl(iconUrl);
     setHasError(false);
     setIsLoaded(false);
+    setShowSpinner(false);
   }
+
+  useEffect(() => {
+    if (isLoaded || hasError || !iconUrl) {
+      setShowSpinner(false);
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setShowSpinner(true);
+    }, 120);
+    return () => window.clearTimeout(timer);
+  }, [iconUrl, isLoaded, hasError]);
 
   if (!iconUrl || hasError) {
     if (reserveSpace) {
@@ -82,14 +102,25 @@ export const IngredientIcon: React.FC<IngredientIconProps> = ({
 
   return (
     <div className={containerClasses} title={name}>
+      {!isLoaded && showSpinner && (
+        <span
+          className="absolute inset-0 flex items-center justify-center rounded-full bg-black/[0.03] dark:bg-white/[0.05] transition-opacity duration-200"
+          aria-label="Icon wird geladen"
+          role="status"
+        >
+          <span
+            className={`${SPINNER_SIZE_MAP[size]} rounded-full border-emerald-500/25 border-t-emerald-500 dark:border-emerald-400/25 dark:border-t-emerald-400 animate-spin`}
+          />
+        </span>
+      )}
       <img
         src={iconUrl}
         alt={name || 'Zutat'}
         loading="lazy"
         onLoad={() => setIsLoaded(true)}
         onError={() => setHasError(true)}
-        className={`${ICON_SIZE_MAP[size]} object-contain relative z-10 transition-opacity duration-200 ${
-          isLoaded ? 'opacity-100' : 'opacity-0'
+        className={`${ICON_SIZE_MAP[size]} object-contain relative z-10 transition-all duration-300 ${
+          isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         }`}
       />
     </div>
