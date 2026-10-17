@@ -6,6 +6,23 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-17: Vollständige Bereinigung und Ausmusterung von Supabase (Migration zu Railway Native PostgreSQL, Better-Auth & Tigris S3)
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Supabase BaaS-Architektur: PostgREST API-Client (`@supabase/supabase-js`, `backend/src/db/client.ts`), GoTrue Auth (`auth.getUser()`, Supabase JWT), und Supabase Storage Buckets (`recipe-covers`, `recipe-photos`, `cook-photos`, `app-bundles`).
+  * Wartungs- und Seed-Skripte mit direktem Supabase SDK Aufruf (`getClient()`, `supabase.auth.admin`).
+  * Obsolet gewordene temporäre Migrationsskripte (`migrateDataToPostgres.ts`, `migrateUsersToBetterAuth.ts`, `migrateStorageToS3.ts`, `rewriteRecipeCoverUrls.ts`, `purgeHostedFrames.ts`, `consolidateMappingsToCanonical.ts`) nach `backend/src/scripts/archive/` archiviert.
+  * Nicht mehr benötigte Umgebungsvariablen in `.env*` und `config.ts`: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`.
+  * Obsoleter Agent-Skill `.agents/skills/supabase-server/` und Lockfile-Eintrag in `skills-lock.json`.
+* **Ersetzt durch:**
+  * **Railway Managed PostgreSQL & Drizzle ORM:** Typsichere relationale Abfragen und DDL über Drizzle Schema (`backend/src/db/schema/`) und `npm run db:push:prod`. Wartungsskripte nutzen jetzt direkt Drizzle ORM (`db.select()`, `db.update()`, `db.insert()`).
+  * **Better-Auth:** Autonomes, datenbankintegriertes Auth-System auf PostgreSQL (`user`, `account`, `session`, `verification` Tabellen). Seed-Skripte (`seedDev.ts`, `seedReviewerAccount.ts`) provisionieren Test- und Reviewer-Accounts direkt via Better-Auth Passwort-Hashing.
+  * **Tigris S3 Object Storage:** S3-kompatibler Storage mit globalem CDN für Recipe Covers, Fotos und Capgo OTA Live-Update Bundles.
+  * **Bereinigte Dependencies:** `@supabase/supabase-js` vollständig aus `backend/package.json` und den Lockfiles entfernt; monolithische Sub-Workspace-Lockfiles bereinigt.
+* **Betroffene Dateien:** `backend/src/config.ts`, `backend/src/db/client.ts`, `backend/src/scripts/scriptEnv.ts`, `backend/src/scripts/backfill/*`, `backend/src/scripts/seed/*`, `backend/src/scripts/db/*`, `backend/src/scripts/archive/*`, `backend/package.json`, `package.json`, `package-lock.json`, `.agents/skills/supabase-server/` (gelöscht), `skills-lock.json`, `.gitignore`, `backend/.env.example`, `frontend/.env.development`, `website/.env.example`, `website/Dockerfile`, `README.md`, `.agents/rules/backward-compatibility.md`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-15: Manueller OTA-Update-Prompt (`OtaUpdateBanner`) abgelöst durch automatische Updates mit App Loading Screen & direktem Play Store Update
 
 * **Ersetzter Code / Veraltete Logik:**
