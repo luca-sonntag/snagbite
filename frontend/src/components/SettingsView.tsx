@@ -19,6 +19,7 @@ import { checkAndApplyNativeUpdate } from '../utils/nativeAppUpdater';
 import { LEGAL_URLS } from '../legal';
 import PremiumUpgradeCard from './PremiumUpgradeCard';
 import NotificationSettings from './NotificationSettings';
+import AdminSettingsSection from './AdminSettingsSection';
 
 // Unit system is not yet ready to be user-configurable; keep the setting UI in place but hidden for now.
 const SHOW_UNIT_SYSTEM_SETTING = false;
@@ -392,41 +393,7 @@ export default function SettingsView() {
       <NotificationSettings />
 
       {/* Section: Admin */}
-      {isAdmin && (() => {
-        const websiteUrl = (import.meta.env.VITE_WEBSITE_URL as string | undefined) || 'http://localhost:5174';
-        const adminPanelUrl = `${websiteUrl.replace(/\/$/, '')}/admin`;
-        return (
-          <div className="flex flex-col gap-2">
-            <h3 className="px-4 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-1">
-              <Shield className="w-3.5 h-3.5 text-emerald-500" />
-              {language === 'de' ? 'Verwaltung' : 'Administration'}
-            </h3>
-
-          <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
-            <a
-              href={adminPanelUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full p-4 flex items-center justify-between hover:bg-black/5 dark:hover:bg-white/5 transition-all active:scale-[0.99] text-left cursor-pointer group"
-            >
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <Shield className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0 group-hover:scale-105 transition-transform" />
-                <div>
-                  <p className="font-semibold text-gray-900 dark:text-white text-sm flex items-center gap-1.5">
-                    <span>{language === 'de' ? 'Admin-Bereich' : 'Admin Panel'}</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-gray-400" />
-                  </p>
-                  <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-medium">
-                    {language === 'de' ? 'Öffnet das Admin Dashboard auf der Website' : 'Opens the Admin Dashboard on the website'}
-                  </p>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 shrink-0 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
-            </a>
-          </div>
-        </div>
-      );
-    })()}
+      <AdminSettingsSection isAdmin={isAdmin} />
 
       {/* Section: Help */}
       <div className="flex flex-col gap-2">
