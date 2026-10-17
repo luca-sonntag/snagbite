@@ -16,8 +16,14 @@
     Devices pick the new bundle up on their next update check (app resume) and
     apply it on the following background/relaunch.
 
+.PARAMETER Env
+    Target backend environment: 'prod' (default) or 'dev'.
+    'dev' uses Railway Dev backend, Dev Tigris S3, and Dev Postgres.
+
 .PARAMETER Channel
-    Target update channel: 'production', 'alpha' or 'internal'. Mandatory.
+    Target update channel: 'production' (default), 'alpha', or 'internal'.
+    By default, both dev and prod register under 'production' so connected apps
+    automatically receive active updates for their environment.
 
 .PARAMETER MinVersionCode
     Oldest native VERSION_CODE this bundle may be served to. Defaults to the
@@ -31,16 +37,17 @@
     previously created one.
 
 .EXAMPLE
-    .\deploy-ota.ps1 -Channel alpha
-    .\deploy-ota.ps1 -Channel production
-    .\deploy-ota.ps1 -Channel production -NoActivate
-    .\deploy-ota.ps1 -Channel production -Rollback
+    .\deploy-ota.ps1
+    .\deploy-ota.ps1 -Env dev
+    .\deploy-ota.ps1 -Env prod -Channel alpha
+    .\deploy-ota.ps1 -Env dev -Rollback
 #>
 
 param(
-    [Parameter(Mandatory = $true)]
+    [ValidateSet('prod', 'dev')]
+    [string]$Env = 'prod',
     [ValidateSet('production', 'alpha', 'internal')]
-    [string]$Channel,
+    [string]$Channel = 'production',
     [int]$MinVersionCode = 0,
     [switch]$NoActivate,
     [switch]$Rollback
@@ -48,11 +55,17 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Backward compatibility: if -Channel internal was specified without -Env, target dev
+if ($PSBoundParameters.ContainsKey('Channel') -and $Channel -eq 'internal' -and -not $PSBoundParameters.ContainsKey('Env')) {
+    $Env = 'dev'
+    $Channel = 'production'
+}
+
 $frontendDir = Split-Path -Parent $PSScriptRoot
 $repoRoot = Split-Path -Parent $frontendDir
 $versionFile = "$frontendDir\android\version.properties"
 $managerScript = "$repoRoot\backend\src\scripts\deploy\otaBundleManager.ts"
-$targetEnv = if ($Channel -eq 'internal') { '--dev' } else { '--prod' }
+$targetEnv = if ($Env -eq 'dev') { '--dev' } else { '--prod' }
 
 . "$PSScriptRoot\git-utils.ps1"
 
@@ -60,7 +73,7 @@ $targetEnv = if ($Channel -eq 'internal') { '--dev' } else { '--prod' }
 
 if ($Rollback) {
     Write-Host ""
-    Write-Host "  Rolling back OTA channel '$Channel'..." -ForegroundColor Yellow
+    Write-Host "  Rolling back OTA bundle ($Env / channel '$Channel')..." -ForegroundColor Yellow
 
     $rollbackRaw = & npx tsx $managerScript $targetEnv rollback "--channel=$Channel"
     $rollbackRes = $rollbackRaw | ConvertFrom-Json
@@ -68,7 +81,7 @@ if ($Rollback) {
     if ($rollbackRes.deactivatedOnly) {
         Write-Host "  Deactivated active bundle - channel now serves no update." -ForegroundColor Yellow
     } else {
-        Write-Host "  [OK] Rolled back '$Channel': $($rollbackRes.deactivated) -> $($rollbackRes.activated)" -ForegroundColor Green
+        Write-Host "  [OK] Rolled back ($Env / '$Channel'): $($rollbackRes.deactivated) -> $($rollbackRes.activated)" -ForegroundColor Green
         Write-Host "  Devices converge on their next update check (app resume)." -ForegroundColor DarkGray
     }
     Write-Host ""
@@ -78,7 +91,7 @@ if ($Rollback) {
 # ── 1. Env guard ─────────────────────────────────────────────────────
 
 Write-Host ""
-Write-Host "[1/7] Checking frontend environment..." -ForegroundColor Yellow
+Write-Host "[1/7] Checking frontend environment ($Env)..." -ForegroundColor Yellow
 
 function Read-DotEnvValue {
     param([string]$Path, [string]$Key)
@@ -91,13 +104,13 @@ function Read-DotEnvValue {
     return $val
 }
 
-if ($Channel -ne 'internal') {
+if ($Env -eq 'prod') {
     $prodEnvPath = "$frontendDir\.env.production"
     $envPath = if (Test-Path $prodEnvPath) { $prodEnvPath } else { "$frontendDir\.env" }
 
     $apiUrl = Read-DotEnvValue $envPath 'VITE_API_BASE_URL'
     if (-not $apiUrl) {
-        Write-Error "VITE_API_BASE_URL is missing/empty in $envPath. Non-internal builds must specify a hosted backend."
+        Write-Error "VITE_API_BASE_URL is missing/empty in $envPath. Production builds must specify a hosted backend."
         exit 1
     }
 
@@ -113,7 +126,18 @@ if ($Channel -ne 'internal') {
             exit 1
         }
     }
-    Write-Host "  VITE_API_BASE_URL OK: $($parsedUri.Scheme)://$($parsedUri.Host)" -ForegroundColor Green
+    Write-Host "  [PROD] VITE_API_BASE_URL OK: $($parsedUri.Scheme)://$($parsedUri.Host)" -ForegroundColor Green
+} else {
+    $devEnvPath = "$frontendDir\.env.development"
+    $envPath = if (Test-Path $devEnvPath) { $devEnvPath } else { "$frontendDir\.env" }
+
+    $apiUrl = Read-DotEnvValue $envPath 'VITE_API_BASE_URL'
+    if (-not $apiUrl) {
+        Write-Error "VITE_API_BASE_URL is missing/empty in $envPath. Development builds must specify a hosted dev backend."
+        exit 1
+    }
+    $parsedUri = [System.Uri]$apiUrl
+    Write-Host "  [DEV] VITE_API_BASE_URL OK: $($parsedUri.Scheme)://$($parsedUri.Host)" -ForegroundColor Green
 }
 
 # ── 2. Read native version ───────────────────────────────────────────
@@ -127,14 +151,14 @@ $versionCode = [int]([regex]::Match($versionContent, 'VERSION_CODE=(\d+)').Group
 $versionName = [regex]::Match($versionContent, 'VERSION_NAME=(.+)').Groups[1].Value.Trim()
 if ($MinVersionCode -le 0) { $MinVersionCode = $versionCode }
 
-Write-Host "  Native version: $versionName ($versionCode) | minVersionCode: $MinVersionCode | channel: $Channel" -ForegroundColor White
+Write-Host "  Native version: $versionName ($versionCode) | minVersionCode: $MinVersionCode | env: $Env | channel: $Channel" -ForegroundColor White
 
 # ── 3. Build frontend ────────────────────────────────────────────────
 
-Write-Host "[2/7] Building frontend..." -ForegroundColor Yellow
+Write-Host "[2/7] Building frontend ($Env)..." -ForegroundColor Yellow
 Push-Location $frontendDir
 try {
-    if ($Channel -eq 'internal') {
+    if ($Env -eq 'dev') {
         npm run build:dev
     } else {
         npm run build
@@ -216,36 +240,26 @@ if ($NoActivate) {
 
 Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
 
-# ── 7. Merge to Master and Tag ───────────────────────────────────────
+# ── 7. Merge to Master and Tag (Prod only) ───────────────────────────
 
-if ($env:SNAGBITE_DEPLOY_ORCHESTRATOR -ne "true") {
-    if ($Channel -ne 'internal') {
-        Write-Host "[6/7] Merging develop to master and pushing Git tag..." -ForegroundColor Yellow
-        Invoke-GitMasterMergeAndTag `
-            -TagName "v$bundleVersion" `
-            -TagMessage "OTA release $bundleVersion ($Channel channel)"
-    } else {
-        Write-Host "[6/7] Pushing Git tag on current branch (skipping master merge for internal)..." -ForegroundColor Yellow
-        $tagExists = (Get-GitOutput -Arguments @("tag", "-l", "v$bundleVersion"))
-        if ($tagExists) {
-            Write-Host "Tag v$bundleVersion already exists. Re-tagging..." -ForegroundColor Yellow
-            Run-Git -Arguments @("tag", "-d", "v$bundleVersion") -IgnoreError
-            Run-Git -Arguments @("push", "origin", "--delete", "v$bundleVersion") -IgnoreError
-        }
-        Run-Git -Arguments @("tag", "-a", "v$bundleVersion", "-m", "OTA internal release $bundleVersion")
-        Run-Git -Arguments @("push", "origin", "v$bundleVersion")
-        Write-Host "  [OK] Successfully pushed tag v$bundleVersion on current branch." -ForegroundColor Green
-    }
+if ($Env -eq 'dev') {
+    Write-Host "[6/7] Skipping remote git operations for dev environment." -ForegroundColor DarkGray
+} elseif ($env:SNAGBITE_DEPLOY_ORCHESTRATOR -ne "true") {
+    Write-Host "[6/7] Merging develop to master and pushing Git tag..." -ForegroundColor Yellow
+    Invoke-GitMasterMergeAndTag `
+        -TagName "v$bundleVersion" `
+        -TagMessage "OTA release $bundleVersion ($Channel channel)"
 }
 
 Write-Host ""
 Write-Host "  [OK] OTA bundle published!" -ForegroundColor Green
-Write-Host "  Channel:  $Channel" -ForegroundColor White
-Write-Host "  Version:  $bundleVersion" -ForegroundColor White
-Write-Host "  Git Tag:  v$bundleVersion" -ForegroundColor White
-Write-Host "  Checksum: $checksum" -ForegroundColor White
-Write-Host "  URL:      $bundleUrl" -ForegroundColor White
+Write-Host "  Environment: $Env" -ForegroundColor White
+Write-Host "  Channel:     $Channel" -ForegroundColor White
+Write-Host "  Version:     $bundleVersion" -ForegroundColor White
+Write-Host "  Checksum:    $checksum" -ForegroundColor White
+Write-Host "  URL:         $bundleUrl" -ForegroundColor White
 Write-Host ""
 Write-Host "  Devices apply it on next resume+relaunch. Rollback:" -ForegroundColor DarkGray
-Write-Host "  .\deploy-ota.ps1 -Channel $Channel -Rollback" -ForegroundColor DarkGray
+Write-Host "  .\deploy-ota.ps1 -Env $Env -Channel $Channel -Rollback" -ForegroundColor DarkGray
 Write-Host ""
+
