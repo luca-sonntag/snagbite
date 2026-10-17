@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, ExternalLink, ChevronRight, Wrench } from 'lucide-react';
+import { Shield, ExternalLink, ChevronRight, Wrench, Sparkles } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
+import { apiUrl } from '../api';
 import { hapticLight } from '../utils/haptics';
 import { isDevToolsFlagEnabled, setDevToolsFlagEnabled, DEV_TOOLS_TOGGLE_EVENT } from '../utils/dev';
 
@@ -44,8 +47,12 @@ function Toggle({
 
 export const AdminSettingsSection: React.FC<AdminSettingsSectionProps> = ({ isAdmin }) => {
   const { t } = useI18n();
+  const { isPremium, user, getAccessToken, refreshSession } = useAuth();
+  const toast = useToast();
+
   const isDevEnv = import.meta.env.DEV;
   const [devToolsEnabled, setDevToolsEnabled] = useState<boolean>(isDevToolsFlagEnabled);
+  const [tierBusy, setTierBusy] = useState(false);
 
   useEffect(() => {
     const handleToggle = () => {
@@ -70,7 +77,40 @@ export const AdminSettingsSection: React.FC<AdminSettingsSectionProps> = ({ isAd
     setDevToolsFlagEnabled(next);
   };
 
+  const handleTierToggle = async () => {
+    if (tierBusy) return;
+    setTierBusy(true);
+    const targetTier = isPremium ? 'free' : 'premium';
+    try {
+      const token = await getAccessToken();
+      const res = await fetch(apiUrl('/api/admin/me/tier'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ tier: targetTier }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to update tier');
+      }
+
+      await refreshSession();
+      toast.success(
+        targetTier === 'premium'
+          ? t('app.settings.admin.tierSuccessPro')
+          : t('app.settings.admin.tierSuccessFree')
+      );
+    } catch {
+      toast.danger(t('app.settings.admin.tierError'));
+    } finally {
+      setTierBusy(false);
+    }
+  };
+
   const isToggleActive = isDevEnv || devToolsEnabled;
+  const currentTierDisplay = user?.tier || (isPremium ? 'premium' : 'free');
 
   return (
     <div className="flex flex-col gap-2">
@@ -120,6 +160,28 @@ export const AdminSettingsSection: React.FC<AdminSettingsSectionProps> = ({ isAd
             disabled={isDevEnv}
             onClick={handleDevToolsToggle}
             label={t('app.settings.admin.devTools')}
+          />
+        </div>
+
+        <div className="border-t border-gray-100 dark:border-gray-800/80 mx-4" />
+
+        <div className="w-full p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0 flex-1 pr-3">
+            <Sparkles className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" />
+            <div>
+              <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                {t('app.settings.admin.tierToggle')}
+              </p>
+              <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-medium">
+                {t('app.settings.admin.tierToggleDesc', { tier: currentTierDisplay })}
+              </p>
+            </div>
+          </div>
+          <Toggle
+            on={isPremium}
+            disabled={tierBusy}
+            onClick={handleTierToggle}
+            label={t('app.settings.admin.tierToggle')}
           />
         </div>
       </div>
