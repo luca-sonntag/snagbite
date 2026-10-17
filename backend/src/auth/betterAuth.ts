@@ -17,11 +17,24 @@ const configuredOrigins = (process.env.CORS_ORIGIN || '')
   .map((o) => o.trim())
   .filter(Boolean);
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const trustedOrigins = [
   'http://localhost:5173',
+  'http://localhost:5174',
   'http://localhost:3000',
   'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
   'http://127.0.0.1:3000',
+  ...(isProduction
+    ? []
+    : [
+        'http://localhost:*',
+        'http://127.0.0.1:*',
+        'https://localhost:*',
+        'http://192.168.*:*',
+        'http://10.*:*',
+      ]),
   'capacitor://localhost',
   'http://localhost',
   'https://localhost',
