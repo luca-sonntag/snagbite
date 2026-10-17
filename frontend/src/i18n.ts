@@ -813,6 +813,13 @@ export const uiTranslations = {
         upToDate: 'Snagbite ist auf dem neuesten Stand.',
         updateCheckFailed: 'Update-Prüfung fehlgeschlagen.',
         updateAvailable: 'Neues Update im Play Store verfügbar.',
+        admin: {
+          section: 'Verwaltung',
+          dashboard: 'Admin-Bereich',
+          dashboardDesc: 'Öffnet das Admin Dashboard auf der Website',
+          devTools: 'Entwickler-Tools',
+          devToolsDesc: 'Aktiviert die mobile Dev-Konsole (Eruda) und Overlays',
+        },
         legal: {
           section: 'Rechtliches',
           privacy: 'Datenschutzerklärung',
@@ -1206,6 +1213,7 @@ export const uiTranslations = {
       copyRecipe: 'Rezept kopieren',
       copied: 'Kopiert!',
       delete: 'Rezept löschen',
+      devReExtract: '[DEV] Neu extrahieren',
       save: 'Speichern',
       visibilityTitle: 'Sichtbarkeit',
       visibilityPublic: 'Öffentlich (Community)',
@@ -2448,6 +2456,13 @@ export const uiTranslations = {
         upToDate: 'Snagbite is up to date.',
         updateCheckFailed: 'Update check failed.',
         updateAvailable: 'New update available on Play Store.',
+        admin: {
+          section: 'Administration',
+          dashboard: 'Admin Panel',
+          dashboardDesc: 'Opens the Admin Dashboard on the website',
+          devTools: 'Developer Tools',
+          devToolsDesc: 'Enables mobile debug console (Eruda) and overlays',
+        },
         legal: {
           section: 'Legal',
           privacy: 'Privacy Policy',
@@ -2841,6 +2856,7 @@ export const uiTranslations = {
       copyRecipe: 'Copy Recipe',
       copied: 'Copied!',
       delete: 'Delete Recipe',
+      devReExtract: '[DEV] Re-extract',
       save: 'Save',
       visibilityTitle: 'Visibility',
       visibilityPublic: 'Public (Community)',
