@@ -20,11 +20,11 @@ fehlende Zutat für alles, was mit Teilen zu tun hat:
 
 | Baustein | Ort | Nutzen fürs Teilen |
 |---|---|---|
-| `profiles` (display_name, avatar, `friend_code`) | `backend/supabase_schema.sql` | Identität ohne E-Mail-Leak |
+| `profiles` (display_name, avatar, `friend_code`) | `backend/src/db/schema/` | Identität ohne E-Mail-Leak |
 | `friendships` (pending → accepted, beidseitig) | dito | Der Empfängerkreis existiert bereits |
 | `GET/POST /api/friends*`, `/api/leaderboard` | `backend/src/routes.ts:1355-1600` | Endpunkt-Muster & Auth stehen |
 | `FriendsView.tsx`, `LeaderboardView.tsx`, `Avatar.tsx` | `frontend/src/components/Social/` | UI-Heimat für alles Soziale |
-| `collections` + `recipe_collections` | `backend/supabase_schema.sql` | Basis für geteilte Sammlungen |
+| `collections` + `recipe_collections` | `backend/src/db/schema/` | Basis für geteilte Sammlungen |
 | KI-Cover im **public** Bucket `recipe-covers` | `imageGenerator.ts` | Direkt verlinkbar, kein Signed-URL-Tanz |
 | `sharp` im Backend | `backend/src/audit/iconGeometry.ts`, `imageGenerator.ts` | Share-Cards serverseitig komponieren (Sharp bereits im Backend) |
 | Deep Links `snagbite://invite/<code>` + Website-Landing | `frontend/src/App.tsx:73`, `website/src/pages/InviteLandingPage.tsx` | Blaupause für `snagbite://r/<token>` |

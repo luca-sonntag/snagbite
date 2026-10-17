@@ -44,9 +44,8 @@ phrasing (the "hybrid" step — Gemini never selects, only writes copy).
   token → send), disables tokens FCM reports as `UNREGISTERED`.
 - `backend/src/gemini.ts` — `generateNotificationCopy()` (logged via `gemini_logs`).
 - Endpoints (`backend/src/routes.ts`): `POST`/`DELETE /api/push/tokens`.
-- Tables (`backend/supabase_schema.sql`): `push_tokens`, `notification_log`
-  (both RLS service-role only).
-- Prefs live in Supabase `user_metadata`: `notifications_enabled`,
+- Tables (`backend/src/db/schema/`): `push_tokens`, `notification_log`.
+- Prefs live in user `metadata`: `notifications_enabled`,
   `notification_categories`, `notification_timezone`.
 
 ## Frontend / native
