@@ -32,7 +32,7 @@ Diese Checkliste fasst alle zwingenden rechtlichen, technischen, monetären und 
     - Passwort: `[Gewähltes Passwort]`
     - Anleitung: *„Auf 'Bereits ein Konto? Mit E-Mail anmelden' tippen und diese Zugangsdaten eingeben.“*
   - [x] Reviewer-Login in der App (`EmailLoginForm.tsx`) und Seed-Script (`npm run seed:reviewer` in `backend/`) implementiert.
-  - [x] Seed-Script gegen Supabase Production ausgeführt, damit der Reviewer-Account mit 8 Rezepten, Sammlungen, Vorrat und Premium vorbefüllt ist.
+  - [x] Seed-Script gegen Railway Production ausgeführt, damit der Reviewer-Account mit 8 Rezepten, Sammlungen, Vorrat und Premium vorbefüllt ist.
 - [ ] **IARC-Altersfreigabe & Zielgruppe:**
   - [ ] Fragebogen zur Inhaltseinstufung (IARC) ausgefüllt (Einstufung: PEGI 3 / USK 0).
   - [ ] Zielgruppe festgelegt (Erwachsene / ab 13 Jahre, keine gezielte Ausrichtung auf Kinder).
@@ -97,12 +97,11 @@ Diese Checkliste fasst alle zwingenden rechtlichen, technischen, monetären und 
 
 ---
 
-## ⚙️ 4. Backend, Cloud & Datenbank (Supabase / Railway)
+## ⚙️ 4. Backend, Cloud & Datenbank (Railway PostgreSQL & S3)
 
-- [ ] **Produktions-Datenbank & RLS:**
-  - [ ] Alle SQL-Migrationen (`backend/db/migrations/`) in Supabase Production ausgeführt.
-  - [ ] Row Level Security (RLS) auf allen Tabellen aktiviert (`recipes`, `user_recipes`, `jobs`, `cook_events`, `pantry_items`, `shopping_list_items`).
-  - [ ] Supabase Storage Buckets (`recipe-photos`, `cook-photos`, `app-bundles`) mit strikten Upload-Policies versehen.
+- [ ] **Produktions-Datenbank:**
+  - [ ] Alle Drizzle-Migrationen (`npm run db:push:prod`) in Railway Production ausgeführt.
+  - [ ] Tigris S3 Storage Buckets (`recipe-photos`, `cook-photos`, `app-bundles`) eingerichtet.
 - [ ] **API-Limits & Quota-Schutz:**
   - [ ] Rolling-Timeframe Rate-Limiter im Backend aktiv (Free-Tier Limitierung).
   - [ ] Google Gemini API: Budget-Alerts und Quota-Limits in der Google Cloud Console aktiviert, um unkontrollierte Kosten bei Spitzenlast zu verhindern.
@@ -116,7 +115,7 @@ Diese Checkliste fasst alle zwingenden rechtlichen, technischen, monetären und 
 ## 🚀 5. Self-Hosted OTA Live Updates (Capgo)
 
 - [ ] **Storage & Schema:**
-  - [ ] Supabase Bucket `app-bundles` ist public und erreichbar.
+  - [ ] S3 Bucket `app-bundles` ist public und erreichbar.
   - [ ] Tabelle `app_bundles` besitzt den partiellen Unique-Index für maximal ein aktives Bundle pro Kanal.
 - [ ] **Initiales Bundle:**
   - [ ] Erstes Production-Bundle via `npm run deploy:ota` hochgeladen.

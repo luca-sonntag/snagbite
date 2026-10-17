@@ -22,7 +22,7 @@ Dieser Leitfaden enthält alle verbindlichen Antworten für das **Formular zur D
 #### 1. E-Mail-Adresse
 * **Erhoben?** Ja
 * **Weitergegeben?** Nein
-* **Verarbeitung:** Nur für Authentifizierung (Supabase Auth).
+* **Verarbeitung:** Nur für Authentifizierung (Better-Auth).
 * **Zwecke:**
   * App-Funktionalität (Kontoerstellung, Login, Synchronisierung)
   * Kontoverwaltung
@@ -31,7 +31,7 @@ Dieser Leitfaden enthält alle verbindlichen Antworten für das **Formular zur D
 #### 2. Benutzer-IDs (User IDs)
 * **Erhoben?** Ja
 * **Weitergegeben?** Nein
-* **Verarbeitung:** Eindeutige Supabase `auth.uid()` zur Zuordnung von Rezepten, Sammlungen und Einkaufslisten.
+* **Verarbeitung:** Eindeutige User-ID (`user.id`) zur Zuordnung von Rezepten, Sammlungen und Einkaufslisten.
 * **Zwecke:** App-Funktionalität, Kontoverwaltung.
 
 ---
