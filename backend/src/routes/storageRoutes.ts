@@ -10,6 +10,7 @@ const ALLOWED_BUCKETS = new Set<string>([
   'cook-photos',
   'app-bundles',
   'feedback-screenshots',
+  'ingredient-icons',
 ]);
 
 async function handleStream(req: Request, res: Response): Promise<void> {

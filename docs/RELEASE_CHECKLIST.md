@@ -39,6 +39,14 @@
   - **Zweck:** URL des Edge Workers, die dem Client für die Audio-Transkription übergeben wird.
 - [ ] **`HEALTHCHECK_WHISPER_URL` im Railway `healthcheck`-Service (Optional):**
   - *(Optional, da im Code bereits ein Default auf `https://snagbite-whisper-proxy.snagbite.workers.dev` hinterlegt ist).*
+- [ ] **`FAL_KEY` & `BGBUSTER_API_KEY` auf Railway prüfen (`backend` & `worker` Services):**
+  - **Zweck:** Erforderlich für die On-Demand-Generierung und automatische Hintergrund-Freistellung neuer Zutaten-Icons (`ingredientOnDemandService.ts`).
+- [ ] **Bestehende Zutaten-Icons einmalig nach Production S3 synchronisieren (`npm run icons:sync:s3:prod`):**
+  - **Grund:** Lädt alle Basis-Icons aus `ingredient-icons.zip` in den Tigris S3-Bucket `ingredient-icons` hoch, der als persistenter L2-Master-Speicher für bestehende und on-demand generierte Icons dient.
+  - **Ausführung:**
+    ```powershell
+    npm run icons:sync:s3:prod
+    ```
 
 ---
 

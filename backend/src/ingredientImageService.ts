@@ -6,6 +6,13 @@ import { config } from './config.js';
 import type { CanonicalIngredient } from './data/canonicalIngredients.js';
 import { openFoodFactsAccess } from './matching/openFoodFactsIndex.js';
 import { canonicalizeBaseName, toEnglishSingular } from './matching/baseNameCanonical.js';
+import { removeBackgroundWithBgbuster } from './audit/bgbusterService.js';
+import {
+  analyzeIconGeometry,
+  autoZoomAndPadIcon,
+  centerAndScaleTransparentIcon,
+} from './audit/iconGeometry.js';
+import { uploadIngredientIconToS3 } from './storage/ingredientIconStorage.js';
 
 const FAL_FLUX_ENDPOINT = 'https://fal.run/fal-ai/flux-1/schnell';
 const FLUX_COST_PER_IMAGE_USD = 0.0035; // fal.ai flux-1/schnell square_hd standard rate
@@ -607,9 +614,11 @@ export interface GenerateIconResult {
   prompt: string;
   durationMs: number;
   sizeKb: number;
+  uploadedToS3?: boolean;
   costs: {
     gemini: GeminiCostDetails;
     flux: FluxCostDetails;
+    bgbusterCostUsd?: number;
     totalCostUsd: number;
   };
 }
@@ -621,6 +630,8 @@ export async function generateIngredientIcon(
     promptOverride?: string;
     steps?: number;
     useGemini?: boolean;
+    transparent?: boolean;
+    uploadToS3?: boolean;
   } = {}
 ): Promise<GenerateIconResult> {
   const outDir = options.outDir || getIngredientImagesDir();
@@ -643,12 +654,31 @@ export async function generateIngredientIcon(
   const filePath = path.join(outDir, canonicalFilename);
 
   const rawJpegBuffer = await fetchFluxImageBuffer(prompt, size, steps);
-  const webpBuffer = await sharp(rawJpegBuffer)
+  let finalWebpBuffer = await sharp(rawJpegBuffer)
     .resize(512, 512, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 1 } })
     .webp({ quality: 90, effort: 6 })
     .toBuffer();
 
-  fs.writeFileSync(filePath, webpBuffer);
+  let bgbusterCostUsd = 0;
+  if (options.transparent !== false) {
+    const bgRes = await removeBackgroundWithBgbuster(finalWebpBuffer);
+    if (bgRes) {
+      bgbusterCostUsd = bgRes.costUsd;
+      finalWebpBuffer = await centerAndScaleTransparentIcon(bgRes.buffer);
+    } else {
+      const geometry = await analyzeIconGeometry(finalWebpBuffer);
+      if (geometry.isTooSmall) {
+        finalWebpBuffer = await autoZoomAndPadIcon(finalWebpBuffer, 0.2);
+      }
+    }
+  }
+
+  fs.writeFileSync(filePath, finalWebpBuffer);
+
+  let uploadedToS3 = false;
+  if (options.uploadToS3 !== false) {
+    uploadedToS3 = await uploadIngredientIconToS3(canonicalFilename, finalWebpBuffer);
+  }
 
   const durationMs = Date.now() - startTime;
   const stats = fs.statSync(filePath);
@@ -661,7 +691,7 @@ export async function generateIngredientIcon(
     costUsd: FLUX_COST_PER_IMAGE_USD,
   };
 
-  const totalCostUsd = Number((geminiCost.costUsd + fluxCost.costUsd).toFixed(6));
+  const totalCostUsd = Number((geminiCost.costUsd + fluxCost.costUsd + bgbusterCostUsd).toFixed(6));
 
   const costEntry: GenerationCostEntry = {
     timestamp: new Date().toISOString(),
@@ -687,9 +717,11 @@ export async function generateIngredientIcon(
     prompt,
     durationMs,
     sizeKb,
+    uploadedToS3,
     costs: {
       gemini: geminiCost,
       flux: fluxCost,
+      bgbusterCostUsd,
       totalCostUsd,
     },
   };
