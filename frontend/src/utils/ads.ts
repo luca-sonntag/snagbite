@@ -428,6 +428,8 @@ export async function showRewardedAd(): Promise<boolean> {
   }
 
   await initAds();
+  markPreAdNoticeSeen();
+  markFirstExtractionCompleted();
   if (!canRequestAds) {
     console.warn('[AdMob] cannot request ads (consent declined)');
     return false;
@@ -468,6 +470,9 @@ const APP_OPEN_FIRST_LAUNCH_KEY = 'snagbite:appOpenAd:firstLaunchSeen';
 /** Key set when user has acknowledged the pre-ad transparency notice. */
 export const PRE_AD_NOTICE_SEEN_KEY = 'has_seen_pre_ad_notice';
 
+/** Key set once the user has completed their very first recipe extraction (grace period). */
+export const FIRST_EXTRACTION_GRACE_KEY = 'snagbite:ads:firstExtractionGraceUsed';
+
 /** Event dispatched to request displaying the pre-ad transparency sheet. */
 export const SHOW_PRE_AD_NOTICE_EVENT = 'app:show-pre-ad-notice';
 
@@ -484,6 +489,22 @@ export function hasSeenPreAdNotice(): boolean {
 export function markPreAdNoticeSeen(): void {
   try {
     localStorage.setItem(PRE_AD_NOTICE_SEEN_KEY, 'true');
+  } catch {}
+}
+
+/** Check whether the user has already used their first-extraction ad-free grace period. */
+export function hasCompletedFirstExtraction(): boolean {
+  try {
+    return localStorage.getItem(FIRST_EXTRACTION_GRACE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+/** Mark the first-extraction grace period as completed so subsequent extractions show ads. */
+export function markFirstExtractionCompleted(): void {
+  try {
+    localStorage.setItem(FIRST_EXTRACTION_GRACE_KEY, 'true');
   } catch {}
 }
 
@@ -604,11 +625,8 @@ export async function maybeShowAppOpenAd(): Promise<boolean> {
   // active, skip the app-open ad entirely.
   if (bannerShown || isBannerCurrentlyHidden) return false;
 
-  await initAds();
-  if (!canRequestAds) return false;
-
-  // First-launch exclusion: the first time we'd ever be eligible, record it and
-  // skip — so a brand-new user is never greeted by a full-screen ad.
+  // First-launch exclusion & cadence check MUST run before initAds() so that
+  // cold starts where no ad is shown never trigger the Google UMP consent dialog.
   try {
     if (!localStorage.getItem(APP_OPEN_FIRST_LAUNCH_KEY)) {
       localStorage.setItem(APP_OPEN_FIRST_LAUNCH_KEY, String(Date.now()));
@@ -635,6 +653,9 @@ export async function maybeShowAppOpenAd(): Promise<boolean> {
     // localStorage unavailable — fail closed (don't risk an uncapped ad).
     return false;
   }
+
+  await initAds();
+  if (!canRequestAds) return false;
 
   appOpenInFlight = true;
 
