@@ -12,6 +12,7 @@ export type StorageBucket =
   | 'feedback-screenshots'
   | 'recipe-photos'
   | 'cook-photos'
+  | 'ingredient-icons'
   | (string & {});
 
 export interface StorageFileItem {
@@ -179,7 +180,7 @@ export async function deleteFiles(
 }
 
 /**
- * Lists files in an S3 bucket matching an optional prefix.
+ * Lists all files in an S3 bucket matching an optional prefix (supports >1000 keys via pagination).
  */
 export async function listFiles(
   bucket: StorageBucket,
@@ -191,29 +192,39 @@ export async function listFiles(
     ? (s3Key.endsWith('/') ? s3Key : `${s3Key}/`)
     : (prefix ? prefix.replace(/^\/+/, '') : undefined);
 
-  const response = await client.send(
-    new ListObjectsV2Command({
-      Bucket: s3Bucket,
-      Prefix: effectivePrefix,
-    })
-  );
-
-  if (!response.Contents) return [];
   const stripPrefix = config.S3_BUCKET_NAME ? `${bucket.replace(/^\/+|\/+$/g, '')}/` : '';
+  const items: StorageFileItem[] = [];
+  let continuationToken: string | undefined;
 
-  return response.Contents.map((item) => {
-    const rawKey = item.Key ?? '';
-    const key = stripPrefix && rawKey.startsWith(stripPrefix)
-      ? rawKey.slice(stripPrefix.length)
-      : rawKey;
-    const name = key.includes('/') ? key.substring(key.lastIndexOf('/') + 1) : key;
-    return {
-      key,
-      name,
-      size: item.Size,
-      lastModified: item.LastModified,
-    };
-  });
+  do {
+    const response = await client.send(
+      new ListObjectsV2Command({
+        Bucket: s3Bucket,
+        Prefix: effectivePrefix,
+        ContinuationToken: continuationToken,
+      })
+    );
+
+    if (response.Contents) {
+      for (const item of response.Contents) {
+        const rawKey = item.Key ?? '';
+        const key = stripPrefix && rawKey.startsWith(stripPrefix)
+          ? rawKey.slice(stripPrefix.length)
+          : rawKey;
+        const name = key.includes('/') ? key.substring(key.lastIndexOf('/') + 1) : key;
+        items.push({
+          key,
+          name,
+          size: item.Size,
+          lastModified: item.LastModified,
+        });
+      }
+    }
+
+    continuationToken = response.IsTruncated ? response.NextContinuationToken : undefined;
+  } while (continuationToken);
+
+  return items;
 }
 
 /**
