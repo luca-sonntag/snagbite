@@ -59,6 +59,9 @@
     "generate:basename-icons": "npm run generate:basename-icons -w backend --",
     "icons:zip": "npm run icons:zip -w backend",
     "icons:unpack": "npm run icons:unpack -w backend",
+    "icons:sync:s3": "npm run icons:sync:s3 -w backend --",
+    "icons:sync:s3:dev": "npm run icons:sync:s3:dev -w backend --",
+    "icons:sync:s3:prod": "npm run icons:sync:s3:prod -w backend --",
 
     "use:prod": "node scripts/switchEnv.js prod",
     "use:prod:backend": "node scripts/switchEnv.js prod --backend",
