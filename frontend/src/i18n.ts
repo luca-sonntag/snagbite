@@ -479,6 +479,7 @@ export const uiTranslations = {
         skip: 'Überspringen',
       },
       progress: '{{current}} von {{total}}',
+      proHint: '✨ Enthalten in Snagbite Pro',
       resetLabel: 'Screen-Touren & Tipps zurücksetzen',
       resetSuccess: 'Alle Screen-Touren wurden zurückgesetzt',
       extract: {
@@ -2105,6 +2106,7 @@ export const uiTranslations = {
         skip: 'Skip',
       },
       progress: '{{current}} of {{total}}',
+      proHint: '✨ Included in Snagbite Pro',
       resetLabel: 'Reset screen tours & tips',
       resetSuccess: 'All screen tours have been reset',
       extract: {

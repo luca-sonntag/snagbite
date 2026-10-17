@@ -17,6 +17,8 @@ export interface TourStepConfig {
   side?: 'top' | 'bottom' | 'left' | 'right';
   /** Preferred popover alignment along side axis */
   align?: 'start' | 'center' | 'end';
+  /** Whether this step highlights a Snagbite Pro feature */
+  isPro?: boolean;
 }
 
 export type TourState = Record<ScreenTourId, boolean>;

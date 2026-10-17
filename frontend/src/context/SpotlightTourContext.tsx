@@ -32,7 +32,7 @@ const SpotlightTourContext = createContext<SpotlightTourContextValue | null>(nul
 
 export const SpotlightTourProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { t } = useI18n();
-  const { updateUserMetadata } = useAuth();
+  const { updateUserMetadata, isPremium } = useAuth();
   const [tourState, setTourState] = useState<TourState>(loadStoredTourState);
   const [activeTourId, setActiveTourId] = useState<ScreenTourId | null>(null);
   const driverRef = useRef<{ destroy: () => void } | null>(null);
@@ -90,6 +90,19 @@ export const SpotlightTourProvider: React.FC<{ children: React.ReactNode }> = ({
             description: t(cfg.descKey),
             side: cfg.side ?? 'bottom',
             align: cfg.align ?? 'center',
+            onPopoverRender: (popover: { title: HTMLElement; description: HTMLElement }) => {
+              if (!isPremium && cfg.isPro) {
+                const badge = document.createElement('span');
+                badge.className = 'driver-popover-pro-badge';
+                badge.textContent = 'PRO';
+                popover.title.appendChild(badge);
+
+                const hint = document.createElement('div');
+                hint.className = 'driver-popover-pro-hint';
+                hint.textContent = t('tour.proHint');
+                popover.description.appendChild(hint);
+              }
+            },
           },
         }));
 
@@ -132,7 +145,7 @@ export const SpotlightTourProvider: React.FC<{ children: React.ReactNode }> = ({
         console.warn('Failed to launch tour:', err);
       }
     },
-    [t, markTourCompleted]
+    [t, markTourCompleted, isPremium]
   );
 
   const resetAllTours = useCallback(() => {

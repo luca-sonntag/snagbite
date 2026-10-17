@@ -52,6 +52,7 @@ export const TOUR_DEFINITIONS: Record<ScreenTourId, TourStepConfig[]> = {
       descKey: 'tour.catalog.collections.desc',
       side: 'bottom',
       align: 'center',
+      isPro: true,
     },
     {
       elementSelector: '#tour-catalog-first-card',
@@ -75,6 +76,7 @@ export const TOUR_DEFINITIONS: Record<ScreenTourId, TourStepConfig[]> = {
       descKey: 'tour.recipeDetails.ingredients.desc',
       side: 'bottom',
       align: 'center',
+      isPro: true,
     },
     {
       elementSelector: '#tour-recipe-cook-btn',
@@ -82,6 +84,7 @@ export const TOUR_DEFINITIONS: Record<ScreenTourId, TourStepConfig[]> = {
       descKey: 'tour.recipeDetails.cookBtn.desc',
       side: 'top',
       align: 'center',
+      isPro: true,
     },
     {
       elementSelector: '#tour-recipe-copilot',
@@ -89,6 +92,7 @@ export const TOUR_DEFINITIONS: Record<ScreenTourId, TourStepConfig[]> = {
       descKey: 'tour.recipeDetails.copilot.desc',
       side: 'top',
       align: 'center',
+      isPro: true,
     },
   ],
   cookingMode: [
