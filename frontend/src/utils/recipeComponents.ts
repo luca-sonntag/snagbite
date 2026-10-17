@@ -1,27 +1,7 @@
 import type { Ingredient, InstructionStep, Recipe } from '../types';
+import { sanitizeSectionName } from '@cookbook/shared';
 
-const GENERIC_SECTIONS = new Set([
-  'zutaten',
-  'hauptzutaten',
-  'ingredients',
-  'main',
-  'general',
-  'basis',
-  'default',
-  'allgemein',
-]);
-
-/**
- * Normalizes a section name: trims whitespace and returns undefined if empty or generic.
- */
-export function sanitizeSectionName(section?: string | null): string | undefined {
-  if (!section || typeof section !== 'string') return undefined;
-  const trimmed = section.trim();
-  if (trimmed.length === 0 || GENERIC_SECTIONS.has(trimmed.toLowerCase())) {
-    return undefined;
-  }
-  return trimmed;
-}
+export { sanitizeSectionName };
 
 /**
  * Checks if a recipe contains at least 2 distinct culinary components across ingredients or instructions.
@@ -33,7 +13,7 @@ export function hasRecipeComponents(
   const sections = new Set<string>();
 
   for (const ing of recipe.ingredients ?? []) {
-    const s = sanitizeSectionName(ing.section);
+    const s = sanitizeSectionName(ing.section, ing.category);
     if (s) sections.add(s.toLowerCase());
   }
 
@@ -63,7 +43,7 @@ export function groupIngredientsByComponent(
   const groupMap = new Map<string, IngredientComponentGroup>();
 
   for (const ing of ingredients) {
-    const rawSection = sanitizeSectionName(ing.section) ?? '';
+    const rawSection = sanitizeSectionName(ing.section, ing.category) ?? '';
     let group = groupMap.get(rawSection);
     if (!group) {
       group = { sectionName: rawSection, items: [] };
@@ -130,7 +110,7 @@ export function consolidateIngredientsForShopping(
     const identityKey = `${(ing.baseName || ing.name).toLowerCase().trim()}|${(ing.unit || '').toLowerCase().trim()}`;
 
     const existing = map.get(identityKey);
-    const sectionName = sanitizeSectionName(ing.section);
+    const sectionName = sanitizeSectionName(ing.section, ing.category);
 
     if (existing) {
       existing.amount = (existing.amount || 0) + (ing.amount || 0);

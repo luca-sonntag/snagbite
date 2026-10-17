@@ -12,26 +12,7 @@ import {
 import { recordAuditLog } from './recipeAuditorDevLogger.js';
 import { normalizeToCategoryKey } from './categoryGroups.js';
 export type { RecipeAuditPatch, RecipeAuditResult, IngredientCorrection, AddedIngredient, RemovedIngredient, StepCorrection, AddedStep };
-
-const GENERIC_SECTIONS = new Set([
-  'zutaten',
-  'hauptzutaten',
-  'ingredients',
-  'main',
-  'general',
-  'basis',
-  'default',
-  'allgemein',
-]);
-
-export function sanitizeSectionName(section?: string | null): string | undefined {
-  if (!section || typeof section !== 'string') return undefined;
-  const trimmed = section.trim();
-  if (trimmed.length === 0 || GENERIC_SECTIONS.has(trimmed.toLowerCase())) {
-    return undefined;
-  }
-  return trimmed;
-}
+import { sanitizeSectionName } from '@cookbook/shared';
 
 export async function auditRecipe(recipe: Recipe): Promise<RecipeAuditResult> {
   if (!config.GEMINI_API_KEY || config.GEMINI_API_KEY === 'your_gemini_api_key_here') return { patch: null };
@@ -222,7 +203,7 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
 
   result.ingredients = result.ingredients.map((ing) => ({
     ...ing,
-    section: sanitizeSectionName(ing.section),
+    section: sanitizeSectionName(ing.section, ing.category),
   }));
 
   result.instructions = result.instructions.map((s, idx) => ({

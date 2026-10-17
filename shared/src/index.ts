@@ -4,3 +4,4 @@ export * from './recommendations.js';
 export * from './shelfLife.js';
 export * from './units.js';
 export * from './author.js';
+export * from './recipeComponents.js';

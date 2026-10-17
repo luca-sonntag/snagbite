@@ -3,7 +3,11 @@ import type {
   SavedRecipe,
   UserRecipeSource,
 } from '../types.js';
-import { formatAuthorHandle, CURRENT_RECIPE_PIPELINE_VERSION } from '@cookbook/shared';
+import {
+  formatAuthorHandle,
+  CURRENT_RECIPE_PIPELINE_VERSION,
+  sanitizeSectionName,
+} from '@cookbook/shared';
 import { num } from './client.js';
 import { recipes } from './schema/recipes.js';
 import { computeRecipeHealthScore, isVegetableOrFruitCategory } from '../matching/healthScoreCalculator.js';
@@ -13,14 +17,21 @@ export function normalizeRawIngredients(raw: unknown): Recipe['ingredients'] {
   if (!Array.isArray(raw)) return [];
   if (raw.length > 0 && raw[0] && typeof raw[0] === 'object' && Array.isArray((raw[0] as any).items)) {
     return (raw as Array<{ name?: string; items?: any[] }>).flatMap((group) => {
-      const section =
-        group.name && !/^(ingredients|zutaten|hauptzutaten|default|allgemein)$/i.test(group.name.trim())
-          ? group.name.trim()
-          : undefined;
-      return (group.items || []).map((item) => (section ? { ...item, section } : item));
+      const section = sanitizeSectionName(group.name);
+      return (group.items || []).map((item) => {
+        const itemSection = sanitizeSectionName(item.section, item.category) ?? section;
+        return itemSection ? { ...item, section: itemSection } : { ...item, section: undefined };
+      });
     });
   }
-  return raw as Recipe['ingredients'];
+  return (raw as any[]).map((item) => {
+    if (!item || typeof item !== 'object') return item;
+    const cleanSection = sanitizeSectionName(item.section, item.category);
+    if (cleanSection !== item.section) {
+      return { ...item, section: cleanSection };
+    }
+    return item;
+  });
 }
 
 export function rowToRecipe(row: any): Recipe {
@@ -61,7 +72,12 @@ export function rowToRecipe(row: any): Recipe {
     isAiCover: row.isAiCover ?? row.is_ai_cover ?? false,
     transcript: row.transcript,
     ingredients: normalizeRawIngredients(row.ingredients),
-    instructions: (row.instructions as Recipe['instructions']) ?? [],
+    instructions: Array.isArray(row.instructions)
+      ? (row.instructions as Recipe['instructions']).map((s) => ({
+          ...s,
+          section: sanitizeSectionName(s?.section),
+        }))
+      : [],
     alternativeIngredients:
       ((row.alternativeIngredients ?? row.alternative_ingredients) as Recipe['alternativeIngredients']) ?? undefined,
     ...(nutritionalValues ? { nutritionalValues } : {}),

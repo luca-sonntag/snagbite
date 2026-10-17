@@ -45,6 +45,17 @@
     npm run db:backfill-recipe-urls:prod -- --apply
     ```
 
+- [ ] **Alte Supermarkt-Kategorie-Sektionen auf Production bereinigen (`npm run backfill:sections:prod -w backend`):**
+  - **Grund:** Historische Rezepte enthielten in `ingredients[].section` noch Bezeichnungen von Supermarkt-Abteilungen (z. B. `VEGETABLES`, `DAIRY_EGGS`, `Obst & Gemüse`) aus früheren Gruppierungs-Strukturen, wodurch das neue Mehrteilige-Rezepte-Feature fälschlicherweise Abteilungen als kulinarische Komponenten („FÜR VEGETABLES“) anzeigte.
+  - **Ausführung:**
+    ```powershell
+    npm run backfill:sections:prod -w backend
+    ```
+  - **Dry-Run zur Vorabprüfung:**
+    ```powershell
+    npm run backfill:sections:prod -w backend -- --dry-run
+    ```
+
 ---
 
 ### 🔐 2. Umgebungsvariablen & Secrets (Railway & Frontend)
