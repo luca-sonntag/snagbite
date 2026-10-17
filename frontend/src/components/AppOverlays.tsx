@@ -6,7 +6,7 @@ const AlphaWelcome = lazy(() => import('./AlphaWelcome'));
 const PreAdTransparencySheet = lazy(() => import('./Ads/PreAdTransparencySheet'));
 import SmartResumeSheet from './ExtractForm/SmartResumeSheet';
 import { DevTools } from './DevTools';
-import { SHOW_PRE_AD_NOTICE_EVENT, markPreAdNoticeSeen } from '../utils/ads';
+import { SHOW_PRE_AD_NOTICE_EVENT, markPreAdNoticeSeen, initAds } from '../utils/ads';
 import { useModalOverlay } from '../context/OverlayStackContext';
 import type { AppOverlaysProps } from '../types/app';
 
@@ -72,6 +72,7 @@ export const AppOverlays: React.FC<AppOverlaysProps> = ({
     markPreAdNoticeSeen();
     setPreAdNoticeOpen(false);
     onConfirmPreAdNotice?.();
+    void initAds();
     if (pendingAdActionRef.current) {
       const action = pendingAdActionRef.current;
       pendingAdActionRef.current = null;
@@ -80,12 +81,16 @@ export const AppOverlays: React.FC<AppOverlaysProps> = ({
   };
 
   const handleClosePreAdNotice = () => {
+    if (pendingAdActionRef.current) {
+      handleConfirmPreAdNotice();
+      return;
+    }
     setPreAdNoticeOpen(false);
-    pendingAdActionRef.current = null;
   };
 
   const handleOpenPremiumFromPreAd = () => {
-    handleClosePreAdNotice();
+    pendingAdActionRef.current = null;
+    setPreAdNoticeOpen(false);
     setIsPremiumModalOpen(true);
   };
 

@@ -587,7 +587,7 @@ export const uiTranslations = {
     preAdNotice: {
       badge: 'Snagbite bleibt kostenlos',
       title: 'Transparenz ist uns wichtig',
-      description: 'KI-Videoanalysen, Cloud-Server und Datenhaltung verursachen laufende Rechenkosten. Damit Snagbite für alle kostenlos bleiben kann, zeigen wir gelegentlich dezente Werbung.',
+      description: 'KI-Videoanalysen, Cloud-Server und Datenhaltung verursachen laufende Rechenkosten. Damit Snagbite für dich kostenlos bleibt, zeigen wir gelegentlich relevante Werbung – im nächsten Schritt kannst du dies kurz bestätigen.',
       features: {
         ai: {
           title: 'Echte KI-Power',
@@ -2222,7 +2222,7 @@ export const uiTranslations = {
     preAdNotice: {
       badge: 'Snagbite stays free',
       title: 'Transparency matters to us',
-      description: 'AI video analysis, cloud servers, and data storage cause ongoing compute costs. To keep Snagbite free for everyone, we occasionally display unobtrusive ads.',
+      description: 'AI video analysis, cloud servers, and data storage cause ongoing compute costs. To keep Snagbite free for you, we occasionally display relevant ads — in the next step, you can quickly confirm this.',
       features: {
         ai: {
           title: 'Real AI Compute',

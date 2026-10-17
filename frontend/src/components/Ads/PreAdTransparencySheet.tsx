@@ -26,14 +26,20 @@ export const PreAdTransparencySheet: React.FC<PreAdTransparencySheetProps> = ({
   const handleConfirm = () => {
     hapticMedium();
     markPreAdNoticeSeen();
-    onConfirm?.();
-    onClose();
+    if (onConfirm) {
+      onConfirm();
+    } else {
+      onClose();
+    }
   };
 
   const handleOpenPremium = () => {
     hapticLight();
-    onClose();
-    onOpenPremium?.();
+    if (onOpenPremium) {
+      onOpenPremium();
+    } else {
+      onClose();
+    }
   };
 
   const handleClose = () => {
