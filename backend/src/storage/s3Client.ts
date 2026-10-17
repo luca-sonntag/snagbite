@@ -13,6 +13,7 @@ export type StorageBucket =
   | 'recipe-photos'
   | 'cook-photos'
   | 'ingredient-icons'
+  | 'datasets'
   | (string & {});
 
 export interface StorageFileItem {

@@ -16,7 +16,7 @@ import type { CatalogueAccess } from './ingredientResolver.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-function resolveDBPath(): string {
+export function resolveDBPath(): string {
   const candidates = [
     path.resolve(__dirname, '../data/off_de.sqlite'),
     path.resolve(__dirname, '../../src/data/off_de.sqlite'),
@@ -119,7 +119,7 @@ function getDB(): DatabaseSync | null {
   if (dbInstance) return dbInstance;
   const dbPath = resolveDBPath();
   if (!fs.existsSync(dbPath)) {
-    console.warn(`[OpenFoodFacts] Database not found at ${dbPath}. Run 'npm run build:off' to generate.`);
+    console.warn(`[OpenFoodFacts] Database not found at ${dbPath}. Run 'npm run off:sync:s3' or 'npm run build:off' to generate.`);
     return null;
   }
 
