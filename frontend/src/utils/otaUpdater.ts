@@ -67,7 +67,12 @@ function setUpdating(updating: boolean): void {
 }
 
 function isOtaEnabled(): boolean {
-  return isNative() && !import.meta.env.DEV;
+  if (!isNative()) return false;
+  // If running via Capacitor live-reload dev server (e.g. http://192.168.x.x:5173), skip OTA
+  if (typeof window !== 'undefined' && window.location.protocol === 'http:' && window.location.port !== '') {
+    return false;
+  }
+  return true;
 }
 
 async function resolveChannel(): Promise<'production' | 'alpha' | 'internal'> {

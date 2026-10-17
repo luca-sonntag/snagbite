@@ -35,7 +35,8 @@ param(
     [ValidateSet('aab', 'apk', 'both')]
     [string]$Artifact = 'aab',
     [ValidateSet('prod', 'dev')]
-    [string]$Env = 'prod'
+    [string]$Env = 'prod',
+    [switch]$Clean
 )
 
 $ErrorActionPreference = 'Stop'
@@ -157,10 +158,12 @@ try {
         }
     }
 
-    # Clean intermediate build cache to ensure stale configurations are not packaged
-    Write-Host "  Cleaning Gradle build cache..."
-    & .\gradlew.bat clean
-    if ($LASTEXITCODE -ne 0) { throw "Gradle clean failed" }
+    # Clean intermediate build cache only if explicitly requested (-Clean)
+    if ($Clean) {
+        Write-Host "  Cleaning Gradle build cache (-Clean)..."
+        & .\gradlew.bat clean
+        if ($LASTEXITCODE -ne 0) { throw "Gradle clean failed" }
+    }
 
     if ($Artifact -in @('aab', 'both')) {
         Write-Host "  Building signed AAB..." -ForegroundColor Yellow

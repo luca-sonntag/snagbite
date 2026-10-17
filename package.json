@@ -22,6 +22,8 @@
     "deploy:firebase:patch": "npm run deploy:firebase:patch -w frontend",
     "deploy:firebase:dev": "npm run deploy:firebase:dev -w frontend",
     "deploy:firebase:dev:patch": "npm run deploy:firebase:dev:patch -w frontend",
+    "deploy:ota": "npm run deploy:ota -w frontend",
+    "deploy:ota:dev": "npm run deploy:ota:dev -w frontend",
     "deploy:all:internal": "powershell -ExecutionPolicy Bypass -File deploy.ps1 -All -Bump patch -Track internal",
     "deploy:all:alpha": "powershell -ExecutionPolicy Bypass -File deploy.ps1 -All -Bump patch -Track alpha",
     "healthcheck": "npm run start --prefix healthcheck",

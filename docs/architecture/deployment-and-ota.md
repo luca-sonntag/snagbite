@@ -38,7 +38,11 @@
 Web-Assets der nativen App können Over-The-Air (OTA) aktualisiert werden, ohne ein neues Play-Store-Release zu erzwingen (gilt **nur** für den Web-Layer; native Plugin-Änderungen erfordern ein APK/AAB-Release).
 
 * **Plugin:** `@capgo/capacitor-updater` im **Manual-Mode** (`autoUpdate: false` in `capacitor.config.ts`, `resetWhenUpdate: true`, `appReadyTimeout: 10000`).
-* **Kanäle:** `production`, `alpha` + `internal` (spiegeln Play-Tracks). `production` und `alpha` zielen auf `snagbite-prod`, `internal` zielt auf `snagbite-dev` & Dev-Backend. Kanalwahl: `localStorage['snagbite.otaChannel']` -> sonst `alpha` bei `tier === 'alpha'` -> sonst `production`.
+* **Environments & Kanäle:** Die Auslieferung wird primär über das Ziel-Environment gesteuert:
+  * **Production (`npm run deploy:ota`):** Baut gegen das Production-Backend (`.env.production`), lädt in den Prod-Tigris-Storage hoch und aktiviert das Bundle in der Prod-PostgreSQL-DB.
+  * **Development (`npm run deploy:ota:dev`):** Baut gegen das Railway Dev-Backend (`.env.development` / `build:dev`), lädt in den Dev-Tigris-Storage hoch und aktiviert das Bundle in der Dev-PostgreSQL-DB.
+  * Beide Environments registrieren Bundles standardmäßig unter dem Kanal `production`, sodass Apps automatisch das aktive Bundle für ihre verbundene Umgebung erhalten. Spezifische Kanäle wie `alpha` (`-Channel alpha`) bleiben als Filterstufe unterstützt.
+  * OTA ist auf nativen Geräten aktiv (sowohl in Prod- als auch in Dev-APKs), wird jedoch bei aktiver Capacitor Live-Reload-Entwicklung (`npm run cap:live` auf Port 5173) automatisch pausiert.
 
 ### Tigris S3 Storage & PostgreSQL
 * **Bucket `app-bundles` (public):** Speichert Zips unter `{channel}/{version}.zip`.
@@ -47,10 +51,13 @@ Web-Assets der nativen App können Over-The-Air (OTA) aktualisiert werden, ohne 
 
 ### Backend & Client Workflow
 * **Endpoint `POST /api/app-updates/check` (`backend/src/appUpdates.ts`):** Vor auth-gated Router gemountet. Erhält `{ channel, versionCode, currentBundleVersion }` und antwortet mit Update-Metadaten oder `{ update: false }`.
-* **Client Updater (`frontend/src/utils/otaUpdater.ts` & `frontend/src/hooks/useAppUpdates.ts`):** Inert auf Web/Dev. Beim Boot sofort `CapacitorUpdater.notifyAppReady()` (Anti-Brick-Contract: verhindert Revert zum vorherigen Bundle).
+* **Client Updater (`frontend/src/utils/otaUpdater.ts` & `frontend/src/hooks/useAppUpdates.ts`):** Inert im Web-Browser und bei Live-Reload. Beim Boot sofort `CapacitorUpdater.notifyAppReady()` (Anti-Brick-Contract: verhindert Revert zum vorherigen Bundle).
 * **Vollautomatischer Ablauf ohne Prompt:** Sobald ein neues Bundle vorliegt, schaltet der Client `isUpdating` aktiv, zeigt den Snagbite Loading Screen (`AppSplashScreen` mit *"App-Update wird installiert…"*) und wendet das Bundle nach Download direkt via `CapacitorUpdater.set({ id })` an (sofortiger Reload in das neue Bundle). Es gibt keinen manuellen Zustimmungs-Banner mehr.
 * **Zentrale Git-Utilities (`frontend/scripts/git-utils.ps1`):** Bündelt wiederverwendbare Git-Hilfsfunktionen (`Assert-GitClean`, `Invoke-GitMasterMergeAndTag`, `Cap-StaleAppBundles`). Bei jedem nativeren Play Store Build (`release.ps1` / `deploy-playstore.ps1`) deckelt `Cap-StaleAppBundles` automatisch alte, nach oben offene OTA-Bundles in der Datenbank (`max_version_code = newVersionCode - 1`), damit neu installierte native App-Releases nicht auf ältere OTA-Assets zurückgesetzt werden.
-* **Deploy-Skript (`frontend/scripts/deploy-ota.ps1` / `npm run deploy:ota`):** Baut Frontend (`npm run build` für Prod/Alpha bzw. `npm run build:dev` für Internal), ermittelt nächste Bundle-Version (`{VERSION_NAME}-ota.{n}`), packt Zip per `tar.exe`, berechnet SHA256-Checksum, lädt ins S3-Storage hoch, aktiviert die Row in der Datenbank, mergt bei Prod/Alpha `develop` -> `master` (bei `internal` nur Git Tag auf aktuellem Branch) und erstellt/pusht automatisch ein Git Tag (`v{VERSION_NAME}-ota.{n}`).
+* **Deploy-Skripte:**
+  * `npm run deploy:ota`: Baut Prod-Bundle, lädt ins Prod-S3 hoch, aktiviert in Prod-DB und mergt/taggt Master.
+  * `npm run deploy:ota:dev`: Baut Dev-Bundle, lädt ins Dev-S3 hoch, aktiviert in Dev-DB (ohne Remote-Git-Aktionen).
+  * Rollback jederzeit via `.\frontend\scripts\deploy-ota.ps1 -Env prod|dev -Rollback`.
 
 ### Rollback-Ebenen
 1. **Server-Rollback:** `active`-Flags flippen via Admin-PATCH (`/api/admin/app-bundles/:id`) oder Drizzle Studio.
@@ -98,6 +105,7 @@ Für schnelle Testrunden mit internen und externen Testern (Freunde, Familie, Be
 * `npm run deploy:firebase:dev:patch`: Patch-Bump + Dev-Build + Upload zu Firebase.
 * `.\deploy.ps1 -Firebase [-Env prod|dev]`: Startet den Flow über den Root-Orchestrator (auch über interaktives Menü Optionen 4 & 5).
 * `.\frontend\scripts\deploy-firebase.ps1 -Env dev -Notes "Fix for Recipe Timer" -Group all-testers`: Manueller Aufruf mit individuellen Release Notes.
+* **Build-Beschleunigung (`-Clean`):** Standardmäßig nutzt Gradle inkrementelle Builds und den Build-Cache (`org.gradle.caching=true`). Builds dauern dadurch nur ca. 25–40s statt 3–4 Minuten. Ein vollständiger Cache-Wipe kann bei Bedarf mit dem Switch `-Clean` erzwungen werden (`.\deploy-firebase.ps1 -Clean`).
 
 ### Authentifizierung (Headless / CI / Lokal)
 1. **Service Account Key (Empfohlen):**
