@@ -47,19 +47,22 @@ Exponiert administrative API-Routen unter `/api/admin/*`, die über die Middlewa
 Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()`. Antwortet `200 OK` bei gesunder DB, `503 Service Unavailable` bei Problemen. Liefert `uptime`, `nodeEnv` und `dbConnected`-Status.
 * **In-Memory Caching (30s TTL):** Das Abfrageergebnis wird für 30 Sekunden im Speicher gecacht (`DB_HEALTH_CACHE_TTL_MS`), damit externe Uptime-Monitore und Healthchecks Supabase nicht im Sekundentakt mit Polling-Abfragen belasten.
 
-### Statische Assets & Zutat-Icons Distribution (`/api/ingredient-icons/*` & `/api/category-icons/*`)
-* **Icons-Katalog:** Das Backend liefert über 760 KI-generierte Zutat-Icons (`.webp`) und 20 Kategorie-Icons aus (`backend/src/ingredientImageRoutes.ts`).
+### Statische Assets, Hybrid S3-Cache & On-Demand Zutat-Icons (`/api/ingredient-icons/*` & `/api/category-icons/*`)
+* **Icons-Katalog & Hybrid Storage (`ingredientIconStorage.ts`):** Das Backend nutzt eine zweistufige Speicherarchitektur für Zutat-Icons (`.webp`):
+  * **L1 (Lokaler Disk-Cache im Container):** `backend/public/ingredient-icons/` wird beim Start aus dem Basis-Seed `ingredient-icons.zip` befüllt (`ensureIngredientIconsExtracted()`) und dient als ultraschneller lokaler Cache (< 1 ms).
+  * **L2 (Tigris S3 Bucket `ingredient-icons`):** Persistenter Master-Speicher über Container-Neustarts und zwischen `web`- und `worker`-Instanzen hinweg. Beim Server-Start indiziert `initIngredientIconStorage()` alle in S3 vorhandenen Icons im Speicher (`s3KnownIcons`). Bei einem lokalen Cache-Miss lädt `fetchIconFromS3ToDisk()` das Icon aus S3 nach und legt es lokal im L1-Cache ab.
+* **On-Demand-Generierung (`backend/src/services/ingredientOnDemandService.ts`):**
+  * Existiert ein angefragtes Icon weder lokal noch in S3, prüft `resolveOrGenerateIngredientIcon()`, ob die Zutat in `ingredient_mappings` oder im OpenFoodFacts-Katalog bekannt ist (Schutz vor Missbrauch durch beliebige URLs) und ob das Tagesbudget (`budgetTracker.ts`) nicht überschritten ist.
+  * Gleichzeitige Requests für dieselbe Zutat werden über eine In-Flight-Map dedupliziert (`inFlightGenerations`) und durch ein Concurrency-Semaphore (max. 3 parallel) begrenzt.
+  * `generateIngredientIcon()` führt die vollständige Pipeline aus: **Gemini Visual Prompt ➔ FLUX.1 [schnell] ➔ BGBuster Hintergrund-Freistellung & 20%-Margin-Zentrierung**, speichert das Ergebnis lokal auf Disk und lädt es sofort nach S3 (`ingredient-icons/<slug>.webp`) hoch.
+  * Im Frontend zeigt `IngredientIcon.tsx` nach 120 ms (Anti-Flicker-Delay) einen dezenten Loading-Spinner im Icon-Slot an und blendet das frisch generierte Icon nach Abschluss sanft ein. Zudem stößt `ingredientMatcher.ts` bereits während der Rezept-Extraktion im Hintergrund (`triggerBackgroundIconGeneration`) das Pre-Warming fehlender Icons an.
 * **Spezifitäts-Kaskade & Progressive Enhancement:** Bei generischen Oberbegriffen (z. B. `baseName: "cheese"`) prüft der Icon-Resolver via `req.query.syn` / `synonyms`, ob ein spezifischeres Synonym-Icon existiert (z. B. `["grated cheese"]` ➔ `shredded_cheese.webp`). Vorverpackter Streukäse (Gratinkäse, Reibekäse) wird als eigene Food Identity `shredded cheese` geführt.
-* **Optimierte Git- & Container-Auslieferung:**
-  * Um das Git-Repository nicht mit hunderten einzelnen Binärdateien aufzublähen, werden alle Zutat-Icons in einem einzigen komprimierten Archiv `backend/public/ingredient-icons.zip` (~13 MB) in Git versioniert.
-  * In `.gitignore` sind die entpackten `backend/public/ingredient-icons/*.webp` ignoriert.
-  * **Startup Auto-Extraction (`backend/src/ingredientIconPacker.ts`):** Beim Start des Backends (lokal und auf Railway) prüft `ensureIngredientIconsExtracted()` im `bootstrap()`, ob die Icons entpackt werden müssen (z. B. im frischen Docker-Container oder nach Repo-Clone) und extrahiert diese via `adm-zip` in ~200ms nach `backend/public/ingredient-icons/`. Ein Timestamp-Stamp (`.unpacked_stamp`) verhindert unnötige Extraktionen bei bestehendem Datenstand.
-  * **CLI-Befehle:**
-    * `npm run icons:zip`: Packt alle aktuellen `.webp`-Dateien aus `backend/public/ingredient-icons/` in `ingredient-icons.zip`.
-    * `npm run icons:unpack`: Entpackt das Zip-Archiv manuell (unterstützt `--force`).
-    * `npm run audit:ingredients`: Startet die autonome Audit-Pipeline (unterstützt `--dry-run`, `--interactive` / `-i` / `--debug`, `--limit <N>`, `--budget <USD>`, `--force`, `--key <key>`).
-    * `npm run mappings:backfill`: Befüllt die `ingredient_mappings`-Tabelle (unterstützt `--prod` für Rezepte aus Production, `--ai` / `--ai-prompt` / `--ai-category` / `--count` für synthetische KI-Zutatenlisten, oder `--ingredients="..."` für manuelle Listen).
-    * Der Batch-Generator (`generateBaseNameIngredientIcons.ts`) und die Audit-Pipeline aktualisieren das Zip-Archiv nach Änderungen automatisch.
+* **CLI-Befehle:**
+  * `npm run icons:sync:s3` / `npm run icons:sync:s3:prod`: Synchronisiert lokale `.webp`-Icons mit dem S3-Bucket `ingredient-icons` (unterstützt `--pull` für bidirektionalen Sync und `--dry-run`).
+  * `npm run icons:zip`: Packt alle aktuellen `.webp`-Dateien aus `backend/public/ingredient-icons/` in `ingredient-icons.zip`.
+  * `npm run icons:unpack`: Entpackt das Zip-Archiv manuell (unterstützt `--force`).
+  * `npm run audit:ingredients`: Startet die autonome Audit-Pipeline (unterstützt `--dry-run`, `--interactive` / `-i` / `--debug`, `--limit <N>`, `--budget <USD>`, `--force`, `--key <key>`).
+  * `npm run mappings:backfill`: Befüllt die `ingredient_mappings`-Tabelle.
 
 ### Autonome KI-Audit-Pipeline (`backend/src/audit/`)
 * **Ziel:** Kontinuierliche Validierung von OpenFoodFacts-Nährwert-Mappings und Qualitätsprüfung der 512×512 Zutat-Icons.
