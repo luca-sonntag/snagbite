@@ -96,8 +96,8 @@ export function normalizeUser(rawUser: any): AuthUser {
     notificationsEnabled: rawUser.notificationsEnabled ?? meta.notifications_enabled ?? false,
     metadata: meta,
     app_metadata: {
-      tier,
       ...(rawUser.app_metadata || {}),
+      tier,
     },
     user_metadata: {
       ...meta,
