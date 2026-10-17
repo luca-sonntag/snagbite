@@ -16,6 +16,7 @@ test('recipeExtractionPrompt: buildRecipeExtractionSystemInstruction', async (t)
     assert.ok(instruction.includes('15. Inline Ingredient Tagging:'));
     assert.ok(instruction.includes('17. Inline Timer Tagging:'));
     assert.ok(instruction.includes('23. Cooking Media & Discarded Liquids'));
+    assert.ok(instruction.includes('24. Multi-Component Dishes & Sub-Recipe Grouping (section)'));
     // By default, photo source rules should not be included
     assert.ok(!instruction.includes('Special Handling for Photographed Physical Sources'));
   });

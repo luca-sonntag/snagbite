@@ -65,9 +65,10 @@ Im gesamten Backend gibt es **8 aktive Gemini-Funktionen** (sowie Offline-/Admin
    Gemini verarbeitet Audio + Grid (oder Fotos) + Caption in EINEM Call.
    Strikte Schematisierung (`responseSchema: recipeSchema`):
    • Native `systemInstruction` Trennung (`recipeExtractionPrompt.ts`):
-     Alle 23 Extraktions-Regeln (Anti-Halluzination, Mengennormalisierung, Makros pro Zutat,
+     Alle 24 Extraktions-Regeln (Anti-Halluzination, Mengennormalisierung, Makros pro Zutat,
      Inline-Ingredient- & Timer-Tags `[Tag](ing:...)`) sind als persistente System-Instruktion
      im Modell hinterlegt, während `contentParts` nur noch Nutzdaten (Audio, Frames, Caption/HTML) führt.
+   • Mehrteilige Gerichte & Komponenten (Regel 24): Bei Gerichten aus distinkten Komponenten (z. B. Buns, Patties, Sauce) werden `ingredients[].section` und `instructions[].section` synchron strukturiert.
    • Formgetreue Food Photography Prompts (`foodPhotographyPrompt.ts`):
      Formfaktor-Taxonomie (Pockets/Sandwiches, Wraps, Casseroles/Backformen, Tellergerichte),
      Protein-Morphologie, Kräutersoßen-Integration und Anti-Halluzinations-Filter.
@@ -80,6 +81,7 @@ Im gesamten Backend gibt es **8 aktive Gemini-Funktionen** (sowie Offline-/Admin
    Gemini 2.5 Flash-Lite auditiert das Rezept auf Spezifitätsinvarianz & Disambiguierung:
    • Verhindert Kollaps auf Umbrella-Begriffe (Mozzarella -> mozzarella, nicht cheese)
    • Strikte Gewürz-Disambiguierung (Pfeffer -> black pepper / SPICES_SEASONINGS)
+   • Komponenten- & Sektions-Sanitization: Bereinigt generische Sektionen und mappt `section` auf Zutaten und Schritte.
    • Formfaktor- & Bildprompt-Audit (`correctedImagePrompt`): Gleicht Zubereitungsschritte
      (z. B. Teigtasche falten) mit dem `imagePrompt` ab und korrigiert Diskrepanzen deterministisch.
    • Deterministisches Patching via `applyRecipeAuditPatch()` & 1..N Schritt-Renumbering.

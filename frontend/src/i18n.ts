@@ -1222,6 +1222,12 @@ export const uiTranslations = {
       increaseServings: 'Portionen erhöhen',
       viewGrid: 'Rasteransicht (2-spaltig)',
       viewList: 'Listenansicht',
+      groupByComponents: 'Komponenten',
+      groupByCategory: 'Supermarkt',
+      groupingLabel: 'Aufteilung',
+      componentFor: 'Für {name}',
+      componentOther: 'Basis & Weiteres',
+      componentAssembly: 'Anrichten & Zusammenbau',
 
       preview: {
         title: 'Rezept-Vorschau',
@@ -2851,6 +2857,12 @@ export const uiTranslations = {
       increaseServings: 'Increase servings',
       viewGrid: 'Grid view (2-column)',
       viewList: 'List view',
+      groupByComponents: 'Components',
+      groupByCategory: 'Department',
+      groupingLabel: 'Grouping',
+      componentFor: 'For the {name}',
+      componentOther: 'Base & Other',
+      componentAssembly: 'Assembly & Plating',
 
       preview: {
         title: 'Recipe Preview',

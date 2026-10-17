@@ -21,6 +21,20 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ---
 
+### 2026-10-14: Monolithische Zutatengruppierung & starre lineare Zutatenanzeige für mehrteilige Gerichte
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Monolithischer Header- und Renderblock in `RecipeIngredients.tsx` (über 340 Zeilen), der Servings Stepper, Grid/List-Toggle und Rendering direkt inline handhabte.
+  * Starres, rein abteilungssortiertes Zutaten-Rendering ohne Berücksichtigung kulinarischer Komponenten/Sub-Rezepte (z. B. Burger-Buns, Patties, Sauce wurden durcheinander gewürfelt).
+  * Nicht-aufgeschlüsselte Mehrfachzutaten in der Einkaufsliste bei Rezepten mit separaten Komponenten (z. B. 2x Butter separat in der Liste ohne Hinweis).
+* **Ersetzt durch:**
+  * **Modulare Subkomponenten & Clean Code:** Aufteilung in `RecipeIngredientsHeader.tsx` (Header, Portionen, Segmented Toggles) und `IngredientGroupSection.tsx` (einzelne Abteilung/Komponente mit Grid/List Layout), wodurch `RecipeIngredients.tsx` unter 275 Zeilen bleibt.
+  * **Segmented Control & Komponenten-Toggle:** Bei mehrteiligen Gerichten (`hasRecipeComponents`) schaltet der Nutzer intuitiv zwischen „Nach Komponente“ und „Nach Abteilung“ um; Voreinstellung ist die kulinarische Komponentenansicht.
+  * **Konsolidierung mit Mengen-Aufschlüsselung:** `consolidateIngredientsForShopping` summiert Zutaten über Komponenten hinweg und liefert strukturierte `breakdown`-Informationen (`ShoppingConfirmItem.tsx`).
+* **Betroffene Dateien:** `frontend/src/components/RecipeDetails/RecipeIngredients.tsx`, `frontend/src/components/RecipeDetails/RecipeIngredientsHeader.tsx`, `frontend/src/components/RecipeDetails/IngredientGroupSection.tsx`, `frontend/src/components/RecipeDetails/InstructionSectionDivider.tsx`, `frontend/src/utils/recipeComponents.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-14: Reiner `/extract-recipe/frames`-Endpunktname & singulärer Keyframe-Payload
 
 * **Ersetzter Code / Veraltete Logik:**

@@ -6,6 +6,8 @@ import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import ProBadge from '../ProBadge';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
+import InstructionSectionDivider from './InstructionSectionDivider';
+import { sanitizeSectionName } from '../../utils/recipeComponents';
 
 interface RecipeInstructionsProps {
   recipe: Recipe;
@@ -150,56 +152,68 @@ export default function RecipeInstructions({
               const isActive = step.step === activeStepNum;
               const isFirst = idx === 0;
               const isLast = idx === steps.length - 1;
-              const prevChecked = !isFirst && !!checkedSteps[steps[idx - 1].step];
+              const currentSection = sanitizeSectionName(step.section);
+              const prevSection = idx > 0 ? sanitizeSectionName(steps[idx - 1].section) : undefined;
+              const showSectionDivider = Boolean(currentSection && currentSection !== prevSection);
+              const prevChecked = !isFirst && !showSectionDivider && !!checkedSteps[steps[idx - 1].step];
 
               const railBase = 'w-px shrink-0 transition-colors duration-300';
               const railTone = (done: boolean) =>
                 done ? 'bg-emerald-500/45' : 'bg-black/[0.08] dark:bg-white/10';
 
               return (
-                <div
-                  key={step.step}
-                  onClick={() => {
-                    hapticLight();
-                    toggleStep(step.step);
-                  }}
-                  aria-pressed={isChecked}
-                  className={`flex items-stretch gap-4 px-5 sm:px-6 cursor-pointer transition-all duration-200 active:scale-[0.99] ${
-                    isActive
-                      ? 'bg-emerald-500/[0.08] dark:bg-emerald-500/[0.12]'
-                      : 'hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
-                  }`}
-                >
-                  {/* Marker column: spacer, marker, connector */}
-                  <div className={railColumn}>
-                    <div className={`${railBase} h-4 ${isFirst ? 'invisible' : railTone(prevChecked)}`} />
+                <div key={step.step} className="flex flex-col">
+                  {showSectionDivider && currentSection && (
+                    <InstructionSectionDivider sectionName={currentSection} />
+                  )}
+                  <div
+                    onClick={() => {
+                      hapticLight();
+                      toggleStep(step.step);
+                    }}
+                    aria-pressed={isChecked}
+                    className={`flex items-stretch gap-4 px-5 sm:px-6 cursor-pointer transition-all duration-200 active:scale-[0.99] ${
+                      isActive
+                        ? 'bg-emerald-500/[0.08] dark:bg-emerald-500/[0.12]'
+                        : 'hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
+                    }`}
+                  >
+                    {/* Marker column: spacer, marker, connector */}
+                    <div className={railColumn}>
+                      <div className={`${railBase} h-4 ${isFirst || showSectionDivider ? 'invisible' : railTone(prevChecked)}`} />
 
-                    <div
-                      className={`w-7.5 h-7.5 rounded-full flex items-center justify-center shrink-0 transition-all duration-200 ${
-                        isChecked
-                          ? 'bg-emerald-500 text-white shadow-sm'
-                          : isActive
-                            ? 'bg-emerald-500 text-white font-extrabold shadow-sm ring-4 ring-emerald-500/20 dark:ring-emerald-400/20'
-                            : 'bg-black/[0.05] dark:bg-white/[0.07] text-gray-500 dark:text-gray-400 font-semibold'
-                      }`}
-                    >
-                      {isChecked
-                        ? <Check className="w-4 h-4 stroke-[2.5]" />
-                        : <span className="text-xs font-bold tabular-nums">{step.step}</span>
-                      }
+                      <div
+                        className={`w-7.5 h-7.5 rounded-full flex items-center justify-center shrink-0 transition-all duration-200 ${
+                          isChecked
+                            ? 'bg-emerald-500 text-white shadow-sm'
+                            : isActive
+                              ? 'bg-emerald-500 text-white font-extrabold shadow-sm ring-4 ring-emerald-500/20 dark:ring-emerald-400/20'
+                              : 'bg-black/[0.05] dark:bg-white/[0.07] text-gray-500 dark:text-gray-400 font-semibold'
+                        }`}
+                      >
+                        {isChecked
+                          ? <Check className="w-4 h-4 stroke-[2.5]" />
+                          : <span className="text-xs font-bold tabular-nums">{step.step}</span>
+                        }
+                      </div>
+
+                      <div className={`${railBase} flex-1 ${isLast ? 'invisible' : railTone(isChecked)}`} />
                     </div>
 
-                    <div className={`${railBase} flex-1 ${isLast ? 'invisible' : railTone(isChecked)}`} />
-                  </div>
-
-                  <div className="flex-1 flex flex-col gap-1 min-w-0 py-4">
-                    {/* Ring, tint and label are already three signals; the
-                        pulsing sparkle made the section restless. */}
-                    {isActive && (
-                      <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-0.5">
-                        {t('recipe.currentStep')}
-                      </span>
-                    )}
+                    <div className="flex-1 flex flex-col gap-1 min-w-0 py-4">
+                      {/* Step header / component & currentStep indicator */}
+                      <div className="flex items-center gap-2 mb-0.5">
+                        {isActive && (
+                          <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                            {t('recipe.currentStep')}
+                          </span>
+                        )}
+                        {currentSection && !isActive && (
+                          <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500">
+                            {currentSection}
+                          </span>
+                        )}
+                      </div>
                     {/* Finished steps are struck through but keep their contrast —
                         dimming the row as well made them genuinely hard to reread. */}
                     <span
@@ -222,7 +236,8 @@ export default function RecipeInstructions({
                     )}
                   </div>
                 </div>
-              );
+              </div>
+            );
             })}
           </div>
         ) : null}
