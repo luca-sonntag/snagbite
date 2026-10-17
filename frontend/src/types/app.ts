@@ -46,6 +46,8 @@ export interface UseAppAdsProps {
   isPending: boolean;
   recipe: Recipe | null;
   showOnboarding: boolean;
+  savedRecipesCount?: number;
+  historyLoaded?: boolean;
   onShowPreAdNotice?: (onConfirm?: () => void) => void;
 }
 
