@@ -116,6 +116,13 @@ export interface HealthScoreBreakdown {
 export type RecipeVisibility = 'private' | 'unlisted' | 'public';
 export type RecipeOrigin = 'url' | 'photo' | 'remix';
 
+/**
+ * Current version of the recipe generation and extraction pipeline.
+ * Increment this integer whenever prompts, schemas, audit rules or normalizations change
+ * in a way that affects recipe outputs.
+ */
+export const CURRENT_RECIPE_PIPELINE_VERSION = 1;
+
 export type RecipeCategory =
   | 'MAIN_COURSE'
   | 'DESSERT'
@@ -168,6 +175,7 @@ export interface RecipeOperation {
 export interface Recipe {
   id?: string;
   isRecipe?: boolean;
+  pipelineVersion?: number;
   createdBy?: string | null;
   visibility?: RecipeVisibility;
   origin?: RecipeOrigin;
