@@ -66,6 +66,7 @@ function Import-EnvFile {
             if (($val.StartsWith('"') -and $val.EndsWith('"')) -or ($val.StartsWith("'") -and $val.EndsWith("'"))) {
                 if ($val.Length -ge 2) { $val = $val.Substring(1, $val.Length - 2) }
             }
+            if ([string]::IsNullOrWhiteSpace($val)) { continue }
             $vars[$key] = $val
         }
     }
