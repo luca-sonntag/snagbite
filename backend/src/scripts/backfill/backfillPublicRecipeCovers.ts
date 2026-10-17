@@ -1,25 +1,25 @@
 /**
  * Backfill script: Generates AI food photography cover images for public recipes with FLUX.1 [schnell] via fal.ai
- * and stores them in the public Supabase Storage bucket ('recipe-covers').
+ * and stores them in the Tigris S3 Storage bucket ('recipe-covers').
  *
  * Usage:
- *   npx tsx src/scripts/backfillPublicRecipeCovers.ts --prod
- *   npx tsx src/scripts/backfillPublicRecipeCovers.ts --prod --dry-run
- *   npx tsx src/scripts/backfillPublicRecipeCovers.ts --prod --limit 5
- *   npx tsx src/scripts/backfillPublicRecipeCovers.ts --prod --force
- *   npx tsx src/scripts/backfillPublicRecipeCovers.ts --prod --id <recipeId>
+ *   npx tsx src/scripts/backfill/backfillPublicRecipeCovers.ts --prod
+ *   npx tsx src/scripts/backfill/backfillPublicRecipeCovers.ts --prod --dry-run
+ *   npx tsx src/scripts/backfill/backfillPublicRecipeCovers.ts --prod --limit 5
+ *   npx tsx src/scripts/backfill/backfillPublicRecipeCovers.ts --prod --force
+ *   npx tsx src/scripts/backfill/backfillPublicRecipeCovers.ts --prod --id <recipeId>
  */
 import { config } from '../../config.js';
-import { getClient } from '../../db.js';
+import { db } from '../../db/drizzle.js';
+import { recipes } from '../../db/schema/recipes.js';
+import { eq, and, desc } from 'drizzle-orm';
 import { generateRecipeCoverImage, ensureCoverBucketExists } from '../../imageGenerator.js';
 import { generateFoodPhotographyPrompt } from '../../prompts/foodPhotographyPrompt.js';
-import type { RecipeRow } from '../../db/types/core.js';
 import { initScriptEnv, loadEnvFile } from '../scriptEnv.js';
 
 // Setup target environment
 const scriptEnv = initScriptEnv();
 const isProd = scriptEnv.isProd;
-const isDev = scriptEnv.isDev;
 const isDryRun = process.argv.includes('--dry-run') || process.env.DRY_RUN === '1';
 const isForce = process.argv.includes('--force');
 
@@ -44,14 +44,9 @@ config.GENERATE_RECIPE_COVERS = true;
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function main(): Promise<void> {
-  const client = getClient();
-  const host = (client as unknown as { supabaseUrl?: string })?.supabaseUrl
-    ? new URL((client as unknown as { supabaseUrl: string }).supabaseUrl).host
-    : 'unknown';
-
   console.log('============================================================');
   console.log('🖼️  Backfill AI Recipe Covers for Public Recipes');
-  console.log(`Database Host:    ${host} ${isProd ? '(PRODUCTION)' : ''}`);
+  console.log(`Database Target:  ${isProd ? 'PRODUCTION' : 'DEVELOPMENT'}`);
   console.log(`Dry Run:          ${isDryRun ? 'YES (no images will be generated)' : 'NO'}`);
   console.log(`Force Overwrite:  ${isForce ? 'YES' : 'NO'}`);
   console.log(`Limit:            ${limit ?? 'all'}`);
@@ -66,29 +61,25 @@ async function main(): Promise<void> {
     await ensureCoverBucketExists();
   }
 
-  // 1. Fetch public recipes
-  let query = client
-    .from('recipes')
-    .select('id, title, description, category, ingredients, instructions, image_url, image_urls, image_prompt, is_ai_cover, created_by, visibility')
-    .eq('visibility', 'public')
-    .order('created_at', { ascending: false });
-
+  // 1. Fetch public recipes via Drizzle
+  const conditions = [eq(recipes.visibility, 'public')];
   if (singleId) {
-    query = query.eq('id', singleId);
+    conditions.push(eq(recipes.id, singleId));
   }
 
-  const { data: recipes, error } = await query.returns<RecipeRow[]>();
-  if (error || !recipes) {
-    throw new Error(`Failed to fetch public recipes: ${error?.message}`);
-  }
+  const recipeList = await db
+    .select()
+    .from(recipes)
+    .where(and(...conditions))
+    .orderBy(desc(recipes.createdAt));
 
-  console.log(`📋 Found ${recipes.length} total public recipes in database.`);
+  console.log(`📋 Found ${recipeList.length} total public recipes in database.`);
 
-  const toProcess: RecipeRow[] = [];
+  const toProcess: typeof recipeList = [];
   let alreadyAiCount = 0;
 
-  for (const r of recipes) {
-    if (r.is_ai_cover && !isForce) {
+  for (const r of recipeList) {
+    if (r.isAiCover && !isForce) {
       alreadyAiCount++;
     } else {
       toProcess.push(r);
@@ -118,20 +109,20 @@ async function main(): Promise<void> {
     const recipeStart = Date.now();
     try {
       // 1. Get or generate prompt
-      let prompt = r.image_prompt?.trim();
+      let prompt = r.imagePrompt?.trim();
       if (!prompt) {
         console.log(`   🤖 Generating food photography prompt with Gemini...`);
         prompt = await generateFoodPhotographyPrompt({
           title: r.title,
-          description: r.description,
-          category: r.category,
-          ingredients: r.ingredients,
-          instructions: r.instructions,
+          description: r.description ?? undefined,
+          category: r.category ?? undefined,
+          ingredients: r.ingredients as any,
+          instructions: r.instructions as any,
         });
         console.log(`   ✓ Prompt generated: "${prompt.slice(0, 80)}..."`);
 
         if (!isDryRun) {
-          await client.from('recipes').update({ image_prompt: prompt }).eq('id', r.id);
+          await db.update(recipes).set({ imagePrompt: prompt }).where(eq(recipes.id, r.id));
         }
       } else {
         console.log(`   ℹ️ Using existing prompt: "${prompt.slice(0, 80)}..."`);
@@ -143,12 +134,12 @@ async function main(): Promise<void> {
         continue;
       }
 
-      // 2. Generate cover image via fal.ai & upload to Supabase storage
+      // 2. Generate cover image via fal.ai & upload to Tigris S3 storage
       console.log(`   🎨 Generating FLUX.1 [schnell] cover & uploading to storage...`);
       const result = await generateRecipeCoverImage({
         prompt,
         jobId: r.id,
-        userId: r.created_by,
+        userId: r.createdBy ?? undefined,
       });
 
       if (!result.imageUrl) {
@@ -156,25 +147,21 @@ async function main(): Promise<void> {
       }
 
       // 3. Update database record
-      const cleanedUrls = Array.isArray(r.image_urls)
-        ? r.image_urls.filter((u: string) => typeof u === 'string' && u.length > 0 && !u.startsWith('local:'))
+      const cleanedUrls = Array.isArray(r.imageUrls)
+        ? r.imageUrls.filter((u: string) => typeof u === 'string' && u.length > 0 && !u.startsWith('local:'))
         : [];
       const updatedImageUrls = [result.imageUrl, ...cleanedUrls.filter((u) => u !== result.imageUrl)];
 
-      const { error: updateErr } = await client
-        .from('recipes')
-        .update({
-          image_url: result.imageUrl,
-          image_urls: updatedImageUrls,
-          image_prompt: prompt,
-          is_ai_cover: true,
-          updated_at: new Date().toISOString(),
+      await db
+        .update(recipes)
+        .set({
+          imageUrl: result.imageUrl,
+          imageUrls: updatedImageUrls,
+          imagePrompt: prompt,
+          isAiCover: true,
+          updatedAt: new Date(),
         })
-        .eq('id', r.id);
-
-      if (updateErr) {
-        throw new Error(`Failed to update recipe in DB: ${updateErr.message}`);
-      }
+        .where(eq(recipes.id, r.id));
 
       const elapsed = ((Date.now() - recipeStart) / 1000).toFixed(1);
       console.log(`   ✅ Succeeded in ${elapsed}s: ${result.imageUrl}\n`);

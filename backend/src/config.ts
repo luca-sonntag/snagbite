@@ -30,9 +30,6 @@ export interface Config {
   /** RapidAPI host for the social downloader. */
   RAPIDAPI_SOCIAL_HOST: string;
   GEMINI_API_KEY: string;
-  SUPABASE_URL?: string;
-  SUPABASE_PUBLISHABLE_KEY?: string;
-  SUPABASE_SECRET_KEY?: string;
   GEMINI_MODEL: string;
   /** Model used by the tool-using ingredient resolver. */
   GEMINI_RERANKER_MODEL: string;
@@ -145,9 +142,6 @@ export const config: Config = {
   RAPIDAPI_KEY: process.env.RAPIDAPI_KEY,
   RAPIDAPI_SOCIAL_HOST: getEnv('RAPIDAPI_SOCIAL_HOST', 'social-download-all-in-one.p.rapidapi.com'),
   GEMINI_API_KEY: getEnv('GEMINI_API_KEY'),
-  SUPABASE_URL: process.env.SUPABASE_URL,
-  SUPABASE_PUBLISHABLE_KEY: process.env.SUPABASE_PUBLISHABLE_KEY,
-  SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
   GEMINI_MODEL: process.env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL,
   // Defaults to the same generation as GEMINI_MODEL: a stale default here silently
   // ran ingredient matching on a two-generation-old model whenever the env var was unset.

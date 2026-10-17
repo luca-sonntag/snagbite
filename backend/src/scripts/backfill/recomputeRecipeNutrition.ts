@@ -21,10 +21,13 @@
  *
  * Idempotent. Run with DRY_RUN=1 to preview without writing.
  *
- *   npx tsx src/scripts/recomputeRecipeNutrition.ts
- *   DRY_RUN=1 npx tsx src/scripts/recomputeRecipeNutrition.ts
+ *   npx tsx src/scripts/backfill/recomputeRecipeNutrition.ts
+ *   DRY_RUN=1 npx tsx src/scripts/backfill/recomputeRecipeNutrition.ts
  */
-import { getClient, rowToRecipe, recipeToRow } from '../../db.js';
+import { rowToRecipe, recipeToRow } from '../../db.js';
+import { db } from '../../db/drizzle.js';
+import { recipes } from '../../db/schema/recipes.js';
+import { asc, eq } from 'drizzle-orm';
 import { enrichRecipeWithCanonicalIngredients } from '../../matching/ingredientMatcher.js';
 import type { Recipe } from '../../types.js';
 import { initScriptEnv } from '../scriptEnv.js';
@@ -49,11 +52,9 @@ function hasIngredients(recipe: any): recipe is Recipe {
 }
 
 async function main(): Promise<void> {
-  const client = getClient();
-  const host = (client as any)?.supabaseUrl ? new URL((client as any).supabaseUrl).host : 'default';
   console.log(`============================================================`);
   console.log(`Recompute Recipe Nutrition from Open Food Facts`);
-  console.log(`Target:      ${isProd ? 'PRODUCTION' : 'DEVELOPMENT'} (${host})`);
+  console.log(`Target:      ${isProd ? 'PRODUCTION' : 'DEVELOPMENT'}`);
   console.log(`Mode:        ${DRY_RUN ? 'DRY-RUN (no database writes)' : 'LIVE EXECUTION'}`);
   console.log(`============================================================\n`);
 
@@ -64,23 +65,19 @@ async function main(): Promise<void> {
   let sourceKept = 0;
 
   for (;;) {
-    const { data, error } = await client
-      .from('recipes')
-      .select('*')
-      .order('created_at', { ascending: true })
-      .range(from, from + PAGE_SIZE - 1);
+    const data = await db
+      .select()
+      .from(recipes)
+      .orderBy(asc(recipes.createdAt))
+      .limit(PAGE_SIZE)
+      .offset(from);
 
-    if (error) throw new Error(`Failed to page recipes: ${error.message}`);
     if (!data || data.length === 0) break;
 
     for (const row of data) {
       scanned++;
       const recipe = rowToRecipe(row as any) as any;
 
-      // A recipe without an ingredient list has nothing to derive from — leaving
-      // it untouched is the only safe outcome. (Progress placeholders used to
-      // land here too, back when the recipe column doubled as the progress
-      // channel; they now live in jobs.progress and never reach this table.)
       if (!hasIngredients(recipe)) {
         skipped++;
         continue;
@@ -93,9 +90,6 @@ async function main(): Promise<void> {
 
       const computed = recipe.nutritionalValues?.calories ?? 0;
 
-      // Preserve a plausible source-stated figure, but never invent one: only a
-      // value that clearly disagrees with the computed sum can have come from the
-      // source rather than from an earlier run of this same computation.
       if (previousSource === undefined && typeof previousTotal === 'number' && previousTotal > 0 && computed > 0) {
         const divergence = Math.abs(previousTotal - computed) / computed;
         if (divergence >= DIVERGENCE_THRESHOLD) {
@@ -117,13 +111,10 @@ async function main(): Promise<void> {
         continue;
       }
 
-      const { error: updateError } = await client
-        .from('recipes')
-        .update(recipeToRow(recipe))
-        .eq('id', row.id);
-      if (updateError) {
-        console.error(`Failed to update recipe ${row.id}: ${updateError.message}`);
-      }
+      await db
+        .update(recipes)
+        .set(recipeToRow(recipe))
+        .where(eq(recipes.id, row.id));
     }
 
     if (data.length < PAGE_SIZE) break;
