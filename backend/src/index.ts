@@ -9,6 +9,7 @@ import { appUpdatesRouter } from './appUpdates.js';
 import { ingredientImageRouter } from './ingredientImageRoutes.js';
 import { checkDbHealth } from './db.js';
 import { ensureIngredientIconsExtracted } from './ingredientIconPacker.js';
+import { initIngredientIconStorage } from './storage/ingredientIconStorage.js';
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from './auth/betterAuth.js';
 import { storageRouter } from './routes/storageRoutes.js';
@@ -21,6 +22,7 @@ async function bootstrap() {
   try {
     // Ensure packaged ingredient icons are extracted if running from fresh container/clone
     await ensureIngredientIconsExtracted();
+    void initIngredientIconStorage();
 
     if (isWorker) {
       startQueue();

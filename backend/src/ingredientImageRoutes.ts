@@ -6,11 +6,11 @@ import { openFoodFactsAccess } from './matching/openFoodFactsIndex.js';
 import { packIngredientIcons } from './ingredientIconPacker.js';
 import { renderIngredientViewerHtml } from './views/ingredientStudioHtml.js';
 import {
-  findExistingIngredientImage,
   generateIngredientIcon,
   getIngredientImagesDir,
   getGenerationCostsSummary,
 } from './ingredientImageService.js';
+import { resolveOrGenerateIngredientIcon } from './services/ingredientOnDemandService.js';
 import {
   fetchDevIngredientsList,
 } from './routes/ingredientDevService.js';
@@ -29,7 +29,8 @@ ingredientImageRouter.get('/api/dev/ingredients', async (req: Request, res: Resp
 });
 
 // Public Ingredient Icons Endpoint: GET /api/ingredient-icons/:filenameOrId
-ingredientImageRouter.get(['/api/ingredient-icons/:filename', '/api/dev/ingredients/:id/image'], (req: Request, res: Response) => {
+// Resolves from L1 Local Disk -> L2 S3 Storage -> L3 On-Demand Generation (Gemini + FLUX + BGBuster)
+ingredientImageRouter.get(['/api/ingredient-icons/:filename', '/api/dev/ingredients/:id/image'], async (req: Request, res: Response) => {
   try {
     const rawParam = req.params.filename || req.params.id || '';
     const cleanId = rawParam.replace(/\.webp$/i, '').toLowerCase().trim();
@@ -41,13 +42,16 @@ ingredientImageRouter.get(['/api/ingredient-icons/:filename', '/api/dev/ingredie
         ? (synParam as string[]).map((s: unknown) => String(s).trim()).filter(Boolean)
         : undefined;
 
-    const filename = findExistingIngredientImage(cleanId, undefined, synonyms);
+    const imagesDir = getIngredientImagesDir();
+    const filename = await resolveOrGenerateIngredientIcon(cleanId, synonyms, imagesDir);
     if (!filename) {
+      res.setHeader('Cache-Control', 'no-store');
       return res.status(404).send('Ingredient icon not found');
     }
 
-    const filePath = path.join(getIngredientImagesDir(), filename);
+    const filePath = path.join(imagesDir, filename);
     if (!fs.existsSync(filePath)) {
+      res.setHeader('Cache-Control', 'no-store');
       return res.status(404).send('Ingredient icon file missing');
     }
 
@@ -56,7 +60,7 @@ ingredientImageRouter.get(['/api/ingredient-icons/:filename', '/api/dev/ingredie
     if (hasVersion) {
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     } else {
-      res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=86400');
+      res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
     }
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');

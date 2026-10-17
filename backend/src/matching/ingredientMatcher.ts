@@ -23,6 +23,7 @@ import {
 } from './nutritionCalculator.js';
 import { computeRecipeHealthScore } from './healthScoreCalculator.js';
 import { openFoodFactsAccess } from './openFoodFactsIndex.js';
+import { triggerBackgroundIconGeneration } from '../services/ingredientOnDemandService.js';
 
 // Re-exported so existing callers, routes and unit tests keep importing from ingredientMatcher.
 export {
@@ -149,6 +150,8 @@ export async function resolveAndRemember(
           (effectiveItem ? 'Matched to Open Food Facts product' : 'Extracted from recipe ingredients'),
       }
     );
+
+    triggerBackgroundIconGeneration(mappingKey, input.synonyms);
   }
 
   return { match: effectiveItem, estimate: effectiveItem ? null : estimatedNutrients, usage: resolved?.usage };
