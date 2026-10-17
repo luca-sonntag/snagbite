@@ -10,6 +10,7 @@ import {
   getExtractionsPerUser,
 } from '../db.js';
 import { db } from '../db/drizzle.js';
+import { eq } from 'drizzle-orm';
 import { jobs } from '../db/schema/jobs.js';
 import { user as userTable } from '../db/schema/auth.js';
 import { config } from '../config.js';
@@ -34,6 +35,29 @@ adminRoutes.get('/admin/check', (req: Request, res: Response): void => {
   const isAdmin = adminEmails.includes(email.toLowerCase());
   res.json({ success: true, isAdmin });
 });
+
+adminRoutes.post(
+  '/admin/me/tier',
+  requireAdmin,
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { tier } = req.body ?? {};
+      if (tier !== 'free' && tier !== 'premium') {
+        throw new AppError('INVALID_FIELD', { params: { field: 'tier' } });
+      }
+
+      await db
+        .update(userTable)
+        .set({ tier, updatedAt: new Date() })
+        .where(eq(userTable.id, req.userId!));
+
+      res.json({ success: true, tier });
+    } catch (error: unknown) {
+      if (!(error instanceof AppError)) console.error('Error switching admin tier:', error);
+      sendAppError(res, error);
+    }
+  }
+);
 
 adminRoutes.post(
   '/admin/notifications/trigger',
