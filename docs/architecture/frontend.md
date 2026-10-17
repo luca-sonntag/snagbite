@@ -188,8 +188,10 @@ Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird
 * **`STALE_HIDE_MS` (60s):** Bleibt das Banner länger als 60 Sekunden versteckt (z. B. langes Lesen eines Rezepts), wird es zerstört. Beim nächsten Einblenden wird ein frischer Ad-Request abgesetzt (neue bezahlte Impression statt alter Standbild-Banner).
 * **`RESUME_DELAY_MS` (500ms):** Das Wiedereinblenden nach Schließen von Overlays wird verzögert, bis die CSS-Slide-Up-Animation der Bottom-Bar vollständig abgeschlossen ist.
 
-### DSGVO / UMP Consent Flow & Plugin-Patch
-* **Google UMP SDK:** In `initAds()` wird vor dem ersten Ad-Request `AdMob.requestConsentInfo()` und bei Bedarf `AdMob.showConsentForm()` ausgeführt. Bei Ablehnung oder fehlendem Consent wird `npa: true` (Non-Personalized Ads) angefordert.
+### DSGVO / UMP Consent Flow, First-Recipe Grace Period & Priming (`useAppAds.ts` & `ads.ts`)
+* **Kein Cold-Start Consent-Prompt:** `initAds()` wird **nicht** beim App-Start ausgeführt, damit neue Nutzer beim Onboarding/Login nicht von Popups erschlagen werden.
+* **First-Recipe Grace Period (`snagbite:ads:firstExtractionGraceUsed`):** Die allererste Rezept-Extraktion eines neuen Nutzers (`savedRecipesCount === 0` und Flag noch nicht gesetzt) läuft zu **100 % werbe- und popup-frei** durch (Fokus auf den ersten „Wow-Moment").
+* **Soft-Prompt Priming (`PreAdTransparencySheet.tsx`) ➔ Google UMP Consent:** Erst wenn die **2. Extraktion** startet (oder das erste App-Open-Interstitial beim 3. Start fällig ist), öffnet sich einmalig das sympathische `PreAdTransparencySheet` (*„Snagbite bleibt kostenlos – KI-Analyse kostet Rechenleistung"*). Direkt nach Klick auf *„Alles klar, verstanden!"* wird `initAds()` (`AdMob.requestConsentInfo()` + `AdMob.showConsentForm()`) aufgerufen, sodass der Google-UMP-Consent-Dialog unmittelbar nach dem positiven Commitment des Nutzers erscheint und erst danach das MREC-Banner bzw. Interstitial lädt.
 * **Patched Plugin:** `@capacitor-community/admob` v8.0.0 wurde via `patch-package` angepasst, um echte Java-seitige `hideBanner()` / `resumeBanner()` Methoden auf dem Android UI-Thread ohne Deadlocks und Neuladen bereitzustellen.
 
 ### 🌟 Dynamisches Feature-Spotlight (`ProFeatureSheet/`)
