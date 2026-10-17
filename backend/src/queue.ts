@@ -3,6 +3,7 @@ import path from 'path';
 import {
   claimNextJob, updateJob, updateJobProgress, completeJob, getRecipe, releaseJobLock,
   reclaimExpiredJobs, sweepStaleAwaitingFrames, heartbeatJob, getMaxVideoDurationSeconds, isJobCancelled,
+  normalizeUrl,
 } from './db.js';
 import { db } from './db/drizzle.js';
 import { user as userTable } from './db/schema/auth.js';
@@ -82,6 +83,9 @@ async function processJob(job: Job): Promise<void> {
       preferredUnitSystem?: string;
     } | undefined;
 
+    const targetRecipeLanguage =
+      job.language?.toLowerCase() === 'en' ? 'English' : (config.RECIPE_LANGUAGE || 'German');
+
     if (job.userId) {
       try {
         const [userRow] = await db
@@ -90,18 +94,30 @@ async function processJob(job: Job): Promise<void> {
           .where(eq(userTable.id, job.userId))
           .limit(1);
 
+        userPrefs = {
+          recipeLanguage: targetRecipeLanguage,
+          preferredTemperatureUnit: config.PREFERRED_TEMPERATURE_UNIT,
+          preferredUnitSystem: config.PREFERRED_UNIT_SYSTEM,
+        };
+
         if (userRow) {
-          userPrefs = {
-            recipeLanguage: config.RECIPE_LANGUAGE,
-            preferredTemperatureUnit: config.PREFERRED_TEMPERATURE_UNIT,
-            preferredUnitSystem: config.PREFERRED_UNIT_SYSTEM,
-          };
           console.log(`[Job ${jobId}] Loaded user preferences:`, userPrefs);
         }
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
         console.warn(`[Job ${jobId}] Error retrieving user metadata: ${msg}`);
+        userPrefs = {
+          recipeLanguage: targetRecipeLanguage,
+          preferredTemperatureUnit: config.PREFERRED_TEMPERATURE_UNIT,
+          preferredUnitSystem: config.PREFERRED_UNIT_SYSTEM,
+        };
       }
+    } else {
+      userPrefs = {
+        recipeLanguage: targetRecipeLanguage,
+        preferredTemperatureUnit: config.PREFERRED_TEMPERATURE_UNIT,
+        preferredUnitSystem: config.PREFERRED_UNIT_SYSTEM,
+      };
     }
 
     if (job.kind === 'remix') {
@@ -172,6 +188,7 @@ async function processJob(job: Job): Promise<void> {
         },
       });
 
+      recipe.language = job.language ?? 'de';
       const llmUsage: LlmUsage = {};
       if (geminiUsage) llmUsage.gemini = geminiUsage;
       if (auditUsage) llmUsage.recipeAuditor = auditUsage;
@@ -271,6 +288,7 @@ async function processJob(job: Job): Promise<void> {
         },
       });
 
+      recipe.language = job.language ?? 'de';
       const llmUsage: LlmUsage = {};
       if (geminiUsage) llmUsage.gemini = geminiUsage;
       if (auditUsage) llmUsage.recipeAuditor = auditUsage;
@@ -570,6 +588,8 @@ async function processJob(job: Job): Promise<void> {
 
     recipe.sourceHandle = formatAuthorHandle(scrapeResult.authorHandle);
     recipe.sourceUrl = url;
+    recipe.sourceUrlNormalized = job.sourceUrlNormalized ?? normalizeUrl(url);
+    recipe.language = job.language ?? 'de';
     // Social media recipe extractions are public by default (remixes and photo imports stay private)
     recipe.visibility = 'public';
 

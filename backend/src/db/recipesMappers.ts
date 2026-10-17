@@ -7,6 +7,7 @@ import { formatAuthorHandle } from '@cookbook/shared';
 import { num } from './client.js';
 import { recipes } from './schema/recipes.js';
 import { computeRecipeHealthScore, isVegetableOrFruitCategory } from '../matching/healthScoreCalculator.js';
+import { normalizeUrl } from './jobsDb.js';
 
 export function normalizeRawIngredients(raw: unknown): Recipe['ingredients'] {
   if (!Array.isArray(raw)) return [];
@@ -38,6 +39,8 @@ export function rowToRecipe(row: any): Recipe {
     visibility: (row.visibility ?? 'private') as Recipe['visibility'],
     origin: (row.origin ?? 'url') as Recipe['origin'],
     sourceUrl: row.sourceUrl ?? row.source_url,
+    sourceUrlNormalized: row.sourceUrlNormalized ?? row.source_url_normalized ?? null,
+    language: row.language ?? 'de',
     sourceHandle: formatAuthorHandle(row.sourceHandle ?? row.source_handle),
     parentRecipeId: row.parentRecipeId ?? row.parent_recipe_id,
     remixPrompt: row.remixPrompt ?? row.remix_prompt,
@@ -102,6 +105,8 @@ export function recipeToRow(recipe: Recipe): Record<string, unknown> {
   return {
     visibility: recipe.visibility ?? 'private',
     source_url: recipe.sourceUrl ?? null,
+    source_url_normalized: recipe.sourceUrlNormalized ?? (recipe.sourceUrl ? normalizeUrl(recipe.sourceUrl) : null),
+    language: recipe.language ?? 'de',
     source_handle: formatAuthorHandle(recipe.sourceHandle) ?? null,
     parent_recipe_id: recipe.parentRecipeId ?? null,
     remix_prompt: recipe.remixPrompt ?? null,
@@ -140,6 +145,8 @@ export function recipeToDrizzle(recipe: Recipe): typeof recipes.$inferInsert {
   return {
     visibility: recipe.visibility ?? 'private',
     sourceUrl: recipe.sourceUrl ?? null,
+    sourceUrlNormalized: recipe.sourceUrlNormalized ?? (recipe.sourceUrl ? normalizeUrl(recipe.sourceUrl) : null),
+    language: recipe.language ?? 'de',
     sourceHandle: formatAuthorHandle(recipe.sourceHandle) ?? null,
     parentRecipeId: recipe.parentRecipeId ?? null,
     remixPrompt: recipe.remixPrompt ?? null,

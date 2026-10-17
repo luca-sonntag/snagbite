@@ -15,10 +15,21 @@ import { config } from '../config.js';
 import { createWhisperTicket } from '../utils/whisperTicket.js';
 
 export function normalizeUrl(urlStr: string): string {
-  let clean = urlStr.replace(/^(https?:\/\/)?(www\.)?/i, '');
+  if (!urlStr || typeof urlStr !== 'string') return '';
+  let clean = urlStr.trim().replace(/^[{("'\s]+|[})"'\s]+$/g, '');
+  clean = clean.replace(/^(https?:\/\/)?(www\.)?/i, '');
   clean = clean.split('?')[0];
+  clean = clean.split('#')[0];
   clean = clean.endsWith('/') ? clean.slice(0, -1) : clean;
-  return clean.toLowerCase();
+  clean = clean.toLowerCase();
+
+  // Harmonize Instagram paths (/p/{id} and /reels/{id} -> /reel/{id})
+  clean = clean.replace(/^instagram\.com\/(?:p|reels)\//, 'instagram.com/reel/');
+
+  // Harmonize YouTube Shorts (youtu.be/{id} -> youtube.com/shorts/{id})
+  clean = clean.replace(/^youtu\.be\//, 'youtube.com/shorts/');
+
+  return clean;
 }
 
 export function rowToJob(row: any): Job {
@@ -31,6 +42,7 @@ export function rowToJob(row: any): Job {
     status: (row.status ?? 'pending') as JobStatus,
     sourceUrl: row.sourceUrl ?? row.source_url,
     sourceUrlNormalized: row.sourceUrlNormalized ?? row.source_url_normalized,
+    language: row.language ?? 'de',
     error: row.error,
     progress: (row.progress as ProgressData) ?? null,
     clientFrames: (row.clientFrames ?? row.client_frames) as Job['clientFrames'] ?? null,
@@ -49,6 +61,7 @@ export function jobToRow(updates: Partial<Job>): Record<string, unknown> {
   const row: Record<string, unknown> = {};
   if (updates.status !== undefined) row.status = updates.status;
   if (updates.error !== undefined) row.error = updates.error;
+  if (updates.language !== undefined) row.language = updates.language;
   if (updates.progress !== undefined) row.progress = updates.progress;
   if (updates.clientFrames !== undefined) row.clientFrames = updates.clientFrames;
   if (updates.scrapeMeta !== undefined) row.scrapeMeta = updates.scrapeMeta;
@@ -61,7 +74,12 @@ export function jobToRow(updates: Partial<Job>): Record<string, unknown> {
 
 export const ACTIVE_STATUSES = ['pending', 'scraping', 'processing', 'awaiting_frames'] as const;
 
-export async function createJob(url: string, userId: string, kind: JobKind = 'url'): Promise<Job> {
+export async function createJob(
+  url: string,
+  userId: string,
+  kind: JobKind = 'url',
+  language: string = 'de'
+): Promise<Job> {
   const normalized = normalizeUrl(url);
   try {
     const [inserted] = await db
@@ -72,6 +90,7 @@ export async function createJob(url: string, userId: string, kind: JobKind = 'ur
         status: 'pending',
         sourceUrl: url,
         sourceUrlNormalized: normalized,
+        language,
       })
       .returning();
 

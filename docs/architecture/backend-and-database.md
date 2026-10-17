@@ -95,17 +95,41 @@ Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()`. 
 
 ## 3. Cloud-Infrastruktur (Supabase & Railway)
 
-* **Tabelle `recipes`:** Der Rezept-**Inhalt**, unabhängig davon, wer ihn extrahiert hat. Skalare sind echte Spalten (`title`, `emoji`, `prep_time`, `cook_time`, `servings`, `image_url`, `has_incomplete_source_info`, …), flache Listen `text[]` (`tags`, `equipment`, `tips`, `image_urls`), nur `ingredients`/`instructions`/`alternative_ingredients` bleiben JSONB. Nährwerte liegen als vier Skalare (`calories`, `protein_g`, `carbs_g`, `fat_g`) vor, weil auf ihnen gefiltert und sortiert wird.
+* **Tabelle `recipes`:** Der Rezept-**Inhalt**, unabhängig davon, wer ihn extrahiert hat. Skalare sind echte Spalten (`title`, `emoji`, `prep_time`, `cook_time`, `servings`, `image_url`, `has_incomplete_source_info`, `source_url_normalized`, `language`, …), flache Listen `text[]` (`tags`, `equipment`, `tips`, `image_urls`), nur `ingredients`/`instructions`/`alternative_ingredients` bleiben JSONB. Nährwerte liegen als vier Skalare (`calories`, `protein_g`, `carbs_g`, `fat_g`) vor, weil auf ihnen gefiltert und sortiert wird.
+  * `source_url_normalized` (text, nullable): Bereinigte und kanonische Quell-URL für mandantenübergreifende Deduplizierung.
+  * `language` (text, not null, default `'de'`): Zielsprache des Rezepts (`de` | `en`).
+  * Index `recipes_source_normalized_lang_idx` auf `(source_url_normalized, language)` für O(1) Recipe-Reuse Lookups.
   * `has_incomplete_source_info` (boolean): Kennzeichnet Rezepte, bei denen in der Originalquelle keine vollständigen Rezeptangaben (Zutaten/Mengen/Schritte) existierten und das Rezept visuell aus dem Video rekonstruiert wurde (aktiviert die Hinweiskarte im Frontend).
   * `created_by` ist **nullable**: eine Account-Löschung nullt das Feld, statt zu cascaden — sonst würde sie die Kochbücher anderer Nutzer zerstören.
   * `visibility` (`private` | `unlisted` | `public`) und `origin` (`url` | `photo` | `remix`) sind der Andockpunkt fürs spätere Teilen/Veröffentlichen.
-* **Tabelle `jobs`:** Nur noch der **Extraktions-Task** (`id`, `user_id`, `kind`, `status`, `source_url`, `source_url_normalized`, `progress`, `recipe_id`, `parent_recipe_id`, `remix_prompt`, `error`, `llm_usage`, `media_bytes`, `locked_at`, `locked_by`).
+* **Tabelle `jobs`:** Nur noch der **Extraktions-Task** (`id`, `user_id`, `kind`, `status`, `source_url`, `source_url_normalized`, `language`, `progress`, `recipe_id`, `parent_recipe_id`, `remix_prompt`, `error`, `llm_usage`, `media_bytes`, `locked_at`, `locked_by`).
+  * `language` (text, not null, default `'de'`): Gewünschte Zielsprache der Extraktion.
   * `progress` (JSONB): `{percent, stage, preview?}` während des Laufs. Enthält während `extracting_recipe`, `generating_cover` und `finalizing` strukturierte `RecipePreviewData` (Titel, Zubereitungszeit, Zutaten-Vorschau, Schritt-Anzahl, Cover-URL), sodass das Frontend schon während der Inferenz eine Live-Rezeptkarte vorblenden kann.
   * `llm_usage` (JSONB): Kosten/Tokens **dieses Laufs** (`gemini`, `flux`, `recipeAuditor`, `ingredientResolver`) — bewusst nicht am Rezept, damit ein geteiltes Rezept nicht die Rechnung des Extrahierenden mitträgt.
   * **Job-Zeilen werden nie gelöscht.** Sie sind der Audit-Trail; ein Abbruch ist `status='cancelled'`, kein Soft-Delete. Abgebrochene (`cancelled`) und fehlgeschlagene (`failed`) Jobs belasten das Rate-Limit nicht.
 * **Tabelle `user_recipes`:** Der **Kochbuch-Eintrag** pro User (`user_id`, `recipe_id`, `source_job_id`, `source`, `is_favorite`, `flags`, `added_at`). Wird beim Entfernen eines Rezepts **hart gelöscht** — die Quota hängt an `jobs`, also darf das Kochbuch ehrlich löschen. `source='share'` ist der Andockpunkt fürs Teilen ohne Content-Kopie.
 * **RPC `complete_job(job_id, recipe, llm_usage)`:** Schließt einen Job atomar über alle drei Tabellen ab (Rezept anlegen, Job verknüpfen, ins Kochbuch legen). Ohne die Funktion gäbe es ein Crash-Fenster, in dem ein Nutzer Quota bezahlt hat und kein Rezept bekommt.
-* **Zwei getrennte Quoten:** Der Kochbuch-Cap zählt `user_recipes` (schrumpft beim Löschen), das Rate-Limit zählt `jobs` (schließt `remix`, `failed` und `cancelled` aus — Foto-Importe und erfolgreiche URL-Extraktionen kosten Quota).
+* **Zwei getrennte Quoten & 0-Quota Recipe Reuse:** Der Kochbuch-Cap zählt `user_recipes` (schrumpft beim Löschen), das Rate-Limit zählt `jobs` (schließt `remix`, `failed` und `cancelled` aus — Foto-Importe und erfolgreiche URL-Extraktionen kosten Quota). Bei Wiederverwendung eines bestehenden Rezepts (`findReusableRecipe`) wird **kein Job** erzeugt und **0 Quota** verbraucht — lediglich das Kochbuch-Limit (`COOKBOOK_FULL`) wird geprüft, bevor die Verknüpfung in `user_recipes` angelegt wird.
+
+### Cross-User Rezept-Wiederverwendung & URL-Normalisierung (`backend/src/db/recipesReuseDb.ts`)
+* **Ziel:** Vermeidung redundanter Gemini-LLM-Inferenzkosten, API-Kosten und Wartezeiten für Rezepte, die bereits von einem anderen Nutzer extrahiert wurden.
+* **URL-Harmonisierung (`normalizeUrl` in `jobsDb.ts`):**
+  - Entfernt Query-Parameter, Hashes, Fragmente, Whitespace, eckige Klammern und Trailing Slashes.
+  - Normalisiert Instagram-Pfade: Wandelt `/p/` und `/reels/` in einheitliche `/reel/` URLs um.
+  - Normalisiert YouTube-Shorts: Wandelt `youtu.be/<id>` und `youtube.com/watch?v=<id>` bei Shorts in kanonische `youtube.com/shorts/<id>` URLs um.
+* **Lookup-Kaskade (`findReusableRecipe`):**
+  1. Sucht primär in `recipes` nach übereinstimmendem `source_url_normalized` und `language` (unter Ausschluss von `is_recipe = false`).
+  2. Falls in `recipes` noch kein Match gefunden wurde (z. B. vor vollständigem Backfill), sucht ein Self-Healing-Fallback in abgeschlossenen `jobs` (`status = 'completed'`) und aktualisiert den Rezeptdatensatz asynchron.
+* **Ablauf im API-Endpunkt (`POST /api/extract-recipe`):**
+  1. Extraktions-Anfrage sendet Quell-URL und optional Sprache (`de` | `en`) sowie `force: boolean`.
+  2. Wenn `force !== true` und ein wiederverwendbares Rezept existiert:
+     - Prüft, ob das Rezept bereits im Kochbuch des Nutzers liegt (falls ja: direkt Rückgabe mit `isAlreadyInCookbook: true`).
+     - Prüft Kochbuch-Kapazitätsgrenzen (`assertCookbookCapacity`, Free-User max. 10 Rezepte ➔ `COOKBOOK_FULL`).
+     - Verknüpft das Rezept sofort via `addToLibrary(userId, recipe.id, 'extraction')`.
+     - Gibt HTTP 200 mit `{ status: 'completed', isCached: true, recipe }` zurück — **ohne** Queue-Job, ohne Video-Download und ohne Quota-Abzug.
+  3. Bei Cache-Miss oder `force: true` läuft der reguläre Pfad über `enforceExtractionQuota` und die asynchrone Worker-Queue.
+* **Idempotenter Backfill (`npm run db:backfill-recipe-urls` / `npm run db:backfill-recipe-urls:prod`):**
+  - Aktualisiert historische Datensätze in `recipes` mit normalisierten URLs und Standard-Sprache (`de`).
 * **Tabelle `feedback`:** Speichert In-App Bug-Reports & Feedback (`id`, `user_id`, `type`, `message`, `context`, `screenshot_urls`, `created_at`).
 * **Storage Buckets:**
   * `recipe-covers` (öffentlich): Generierte FLUX.1 Food-Fotografie-Coverbilder (`${userId}/${jobId}.jpg`).

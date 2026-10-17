@@ -45,6 +45,20 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ---
 
+### 2026-10-14: Unbedingte Queue-Extraktion & Quota-Abzug bei identischen URLs abgelöst durch Cross-User Recipe Reuse
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Jede URL-Extraktionsanfrage über `POST /api/extract-recipe` führte unabhängig davon, ob exakt dieses Rezept bereits in derselben Sprache in der Datenbank existierte, bedingungslos zu Quota-Abzug, neuem `jobs`-Eintrag, Scraping, Video-Download und vollem Gemini-Multimodal-Inferenzlauf.
+  * Fehlende `source_url_normalized`- und `language`-Spalten auf `recipes`, wodurch Rezepte nur über historische `jobs` auffindbar waren.
+* **Ersetzt durch:**
+  * **Cross-User Recipe Reuse ([`backend/src/db/recipesReuseDb.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/recipesReuseDb.ts)):** `findReusableRecipe(normalizedUrl, language)` prüft vor der Job-Erstellung, ob das Rezept in der Zielsprache bereits existiert.
+  * **Zero-Quota & Sofort-Übernahme:** Existiert das Rezept, wird es nach Prüfung des Kochbuch-Limits (`COOKBOOK_FULL`) sofort via `addToLibrary()` verknüpft und mit HTTP 200 `{ status: 'completed', isCached: true, recipe }` zurückgegeben — ohne Job-Queue, ohne Wartezeit (für Premium; 5s MREC-Ad-Simulation für Free-User) und mit 0 Quota-Verbrauch.
+  * **Bypass via `force: true`:** Nutzer / Entwickler können mit `force: true` gezielt eine frische Extraktion erzwingen.
+  * **Erweiterte URL-Normalisierung:** Harmonisierung von Instagram-Reel-URLs (`/p/`, `/reels/` -> `/reel/`) und YouTube-Shorts.
+* **Betroffene Dateien:** `backend/src/db/schema/recipes.ts`, `backend/src/db/schema/jobs.ts`, `backend/src/db/recipesReuseDb.ts`, `backend/src/db/jobsDb.ts`, `backend/src/routes/extractionRoutes.ts`, `backend/src/queue.ts`, `frontend/src/hooks/useRecipeExtraction.ts`, `frontend/src/i18n.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-14: Deaktivierung & Entkopplung des Vorrat-Features (Pantry Dormant Mode)
 
 * **Ersetzter Code / Veraltete Logik:**

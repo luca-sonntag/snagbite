@@ -4,9 +4,8 @@
 
 ## Features
 
-- Rezepte manuell ändern und speichern
-
-- rezepte wiederverwenden wenn es in der sprache bereits existiert, bzw. wenn andere  sprache verlangt bestehendes rezept nur von ki übersetzen und dann persistieren
+- [x] **Rezepte wiederverwenden (ohne Übersetzung umgesetzt):** Existiert für eine normalisierte Quell-URL bereits ein Rezept in der gewünschten Sprache (DE/EN), wird dieses sofort ohne erneuten Gemini-Aufruf und ohne Quota-Verbrauch ins Kochbuch übernommen. (Bypassbar mit `force: true`).
+- [ ] **Rezepte übersetzen bei Sprachwechsel:** Wenn für eine URL bereits ein Rezept existiert, aber in einer anderen Sprache verlangt wird, soll das bestehende strukturierte Rezept von der KI übersetzt und persistiert werden (spart Video-Scraping & Frame-Inferenz).
 
 - Für das vorschlagen von rezepten im Vorrat - eventuell hat user keine passenden rezepte, man könnte doch eventuell auf öffentliche rezepte zurückgreifen (aktuell sind alle rezepte in der recipes tabelle auf private visability, wie könnten wir das ausbauen?)
 

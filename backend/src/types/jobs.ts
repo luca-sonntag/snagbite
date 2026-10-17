@@ -25,6 +25,7 @@ export interface Job {
   /** 'photo://<uploadId>' when kind === 'photo'. */
   sourceUrl: string;
   sourceUrlNormalized?: string | null;
+  language?: string;
   error?: string | null;
   progress?: ProgressData | null;
   /** Ephemeral client frames payload received while status was 'awaiting_frames'. Nulled on claim. */

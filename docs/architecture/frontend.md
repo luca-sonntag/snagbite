@@ -234,7 +234,8 @@ Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird
   - Enthält zentriert ausschließlich den MREC 300×250 Werbeslot (`ExtractionAdCard.tsx`), dessen Layout dynamisch gemessen und an AdMob übergeben wird.
   - Der Zurück-Button in `RecipeDetails` ist für Free-User während der Extraktion deaktiviert.
   - Schließt sich bei erfolgreichem Abschluss automatisch (oder leitet bei Fehlschlag/Rate-Limit sauber zurück zum Formular).
-  - Premium-Nutzer sehen kein Werbe-Overlay und können dank Hintergrund-Queueing jederzeit frei navigieren.
+  - **5-Sekunden-Mindestanzeige bei gecachten Rezepten (`CACHED_RECIPE_SIMULATED_AD_DURATION_MS = 5000`):** Wird ein bereits bekanntes Rezept sofort aus dem Backend-Cache geliefert (`status === 'completed'`), durchläuft die App für Free-User einen 5-sekündigen simulierten Extraktionsfortschritt (`runSimulatedProgress` mit progressiver Titel-/Cover-Vorschau ab 75 %), damit das MREC-Banner zuverlässig geladen und als gültige AdMob *Active View* (> 1 Sekunde) gezählt wird.
+  - Premium-Nutzer sehen kein Werbe-Overlay, erhalten gecachte Rezepte verzögerungsfrei in 0 Sekunden und können dank Hintergrund-Queueing jederzeit frei navigieren.
 
 ---
 
