@@ -15,17 +15,26 @@
 ### 🗄️ 1. Datenbank & Schema-Updates (Railway PostgreSQL)
 
 - [ ] **`npm run db:push:prod` ausführen (Zwingend vor Backend-Deploy)**
-  - **Grund:** In Commit `4c5eb9d4` (`feat(backend): add user metadata column and patch endpoint`) wurde in [`backend/src/db/schema/auth.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/schema/auth.ts) die neue JSONB-Spalte `metadata` zur Tabelle `user` hinzugefügt:
+  - **Grund 1 (`user.metadata`):** In Commit `4c5eb9d4` (`feat(backend): add user metadata column and patch endpoint`) wurde in [`backend/src/db/schema/auth.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/schema/auth.ts) die neue JSONB-Spalte `metadata` zur Tabelle `user` hinzugefügt:
     ```ts
     metadata: jsonb('metadata')
     ```
+  - **Grund 2 (Cross-User Recipe Reuse):** In Commit `aa7f9c6a` (`feat(db): add language and source_url_normalized to recipes and jobs schema`) wurden in [`backend/src/db/schema/recipes.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/schema/recipes.ts) (`source_url_normalized`, `language`, Index `recipes_source_normalized_lang_idx`) und [`backend/src/db/schema/jobs.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/schema/jobs.ts) (`language`) neue abwärtskompatible Spalten ergänzt.
   - **Betroffene Endpunkte & Features:**
     - `GET /api/me/metadata` & `PATCH /api/me/metadata` (Persistenz für NUX-Spotlight-Tours, WelcomeGuide-Status & UI-Präferenzen).
+    - `POST /api/extract-recipe` (Mandantenübergreifende Rezept-Wiederverwendung in Zielsprache).
   - **Ausführung:**
     ```powershell
     npm run db:push:prod
     ```
-  - **Verifikation:** In der CLI-Ausgabe sicherstellen, dass Drizzle die neue Spalte `metadata` auf der Production-Datenbank anlegt und keine unvorhergesehenen Tabellenänderungen anstehen.
+  - **Verifikation:** In der CLI-Ausgabe sicherstellen, dass Drizzle die neuen Spalten und den Index auf der Production-Datenbank anlegt und keine unvorhergesehenen Tabellenänderungen anstehen.
+
+- [ ] **Rezept-URLs & Sprache einmalig auf Production backfillen (Nach `db:push:prod`)**
+  - **Grund:** Befüllt `source_url_normalized` und `language` (`'de'`) für alle bereits bestehenden Rezepte in der Production-DB (Commit `346ef9ed`, [`backend/src/scripts/backfill/backfillRecipeNormalizedUrls.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/scripts/backfill/backfillRecipeNormalizedUrls.ts)).
+  - **Ausführung:**
+    ```powershell
+    npm run db:backfill-recipe-urls:prod -- --apply
+    ```
 
 ---
 
