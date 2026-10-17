@@ -11,6 +11,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
+import { useAuth } from '../../context/AuthContext';
 import { hapticLight, hapticNotification } from '../../utils/haptics';
 import { devReExtractRecipe } from '../../utils/dev';
 
@@ -46,6 +47,8 @@ export default function RecipeHeaderActions({
   createdAt,
 }: RecipeHeaderActionsProps) {
   const { t, language } = useI18n();
+  const { isAdmin } = useAuth();
+  const canDevReExtract = (import.meta.env.DEV || isAdmin) && Boolean(reelUrl || sourceUrl);
 
   return (
     <>
@@ -157,7 +160,7 @@ export default function RecipeHeaderActions({
               </button>
             )}
 
-            {import.meta.env.DEV && (reelUrl || sourceUrl) && (
+            {canDevReExtract && (
               <button
                 onClick={() => {
                   hapticNotification('success');
@@ -170,7 +173,7 @@ export default function RecipeHeaderActions({
                 className="flex items-center gap-3 w-full px-4 py-3.5 text-sm font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer outline-none border-none"
               >
                 <RefreshCw className="w-4 h-4 text-amber-500 shrink-0" />
-                <span>[DEV] Neu extrahieren</span>
+                <span>{t('recipe.devReExtract')}</span>
               </button>
             )}
 
