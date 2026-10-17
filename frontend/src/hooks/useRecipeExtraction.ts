@@ -34,6 +34,12 @@ export const MAX_IMPORT_PHOTOS = 5;
  */
 const MAX_PHOTOS_TOTAL_CHARS = 8_000_000;
 
+/**
+ * Duration (ms) to keep the extraction loading screen and MREC ad sheet visible
+ * for Free-tier users when a recipe is instantly served from the database cache.
+ */
+const CACHED_RECIPE_SIMULATED_AD_DURATION_MS = 5000;
+
 export function useRecipeExtraction(
   getAccessToken: () => Promise<string | null>,
   onExtractionSuccess: (recipeId: string) => void,
@@ -189,7 +195,7 @@ export function useRecipeExtraction(
 
     try {
       const token = await getAccessToken();
-      if (token) {
+      if (token && !jobId.startsWith('cached-')) {
         await fetch(apiUrl(`/api/jobs/${jobId}/cancel`), {
           method: 'POST',
           headers: {
@@ -223,7 +229,12 @@ export function useRecipeExtraction(
     return null;
   }, [getAccessToken]);
 
-  const runSimulatedProgress = useCallback(async (jobId: string, recipeId: string, targetDurationMs: number = 10000) => {
+  const runSimulatedProgress = useCallback(async (
+    jobId: string,
+    recipeId: string,
+    targetDurationMs: number = 10000,
+    preloadedRecipe?: Recipe,
+  ) => {
     setIsPending(true);
     setJobStatus('processing');
 
@@ -237,12 +248,29 @@ export function useRecipeExtraction(
     for (const step of steps) {
       if (activePollingJobIdRef.current !== jobId) return;
       setProgress({ percent: step.percent, stage: step.stage });
+      if (step.stage === 'extracting_recipe' && preloadedRecipe) {
+        setRecipe((prev) =>
+          prev
+            ? {
+                ...prev,
+                title: preloadedRecipe.title || prev.title,
+                imageUrl: preloadedRecipe.imageUrl || prev.imageUrl,
+                imageUrls: preloadedRecipe.imageUrls?.length ? preloadedRecipe.imageUrls : prev.imageUrls,
+                emoji: preloadedRecipe.emoji || prev.emoji,
+                prepTime: preloadedRecipe.prepTime ?? prev.prepTime,
+                cookTime: preloadedRecipe.cookTime ?? prev.cookTime,
+                servings: preloadedRecipe.servings || prev.servings,
+                sourceHandle: preloadedRecipe.sourceHandle || prev.sourceHandle,
+              }
+            : prev,
+        );
+      }
       await new Promise(res => setTimeout(res, step.delayMs));
     }
 
     if (activePollingJobIdRef.current !== jobId) return;
 
-    const completedRecipe = await fetchCompletedRecipe(recipeId);
+    const completedRecipe = preloadedRecipe ?? (await fetchCompletedRecipe(recipeId));
     if (completedRecipe) {
       setRecipe(completedRecipe);
       setIsPending(false);
@@ -622,32 +650,19 @@ export function useRecipeExtraction(
         fetchLimitStatus();
         if (data.status === 'completed') {
           stopActivePolling();
-          activePollingJobIdRef.current = data.jobId ?? null;
-          if (data.recipeId) {
-            if (data.isCached) {
-              toast.success(t('toast.recipeReusedTitle'), {
-                description: t('toast.recipeReusedDesc'),
-                duration: 3500,
-              });
-            }
-            if (meta.mode === 'link') {
-              removeFromWaitlist(meta.sourceLabel);
-              removeFailedJob(meta.sourceLabel);
-            }
-            const completedRecipe = data.recipe ?? (await fetchCompletedRecipe(data.recipeId));
-            if (completedRecipe) {
-              setRecipe(completedRecipe);
-              setIsPending(false);
-              setProgress(null);
-              onHistoryRefresh?.();
-            } else {
-              setIsPending(false);
-              setRecipe(null);
-              onExtractionSuccess(data.recipeId);
-            }
-          } else {
-            runSimulatedProgress(data.jobId ?? '', data.recipeId, 10000);
+          if (meta.mode === 'link') {
+            removeFromWaitlist(meta.sourceLabel);
+            removeFailedJob(meta.sourceLabel);
+            currentExtractUrlRef.current = '';
           }
+          const simulatedJobId = data.jobId ?? `cached-${data.recipeId ?? Date.now()}`;
+          activePollingJobIdRef.current = simulatedJobId;
+          await runSimulatedProgress(
+            simulatedJobId,
+            data.recipeId,
+            CACHED_RECIPE_SIMULATED_AD_DURATION_MS,
+            data.recipe,
+          );
         } else {
           setJobStatus(data.status);
           localStorage.setItem(PENDING_JOB_STORAGE_KEY, data.jobId);
