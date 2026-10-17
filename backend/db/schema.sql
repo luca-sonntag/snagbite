@@ -74,6 +74,7 @@ create table if not exists public.recipes (
   is_demo                         boolean not null default false,
   -- Share (0..1) of the calories backed by an Open Food Facts match rather than an estimate.
   nutrition_coverage              numeric,
+  pipeline_version                integer not null default 0,
 
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -94,6 +95,7 @@ create index if not exists recipes_health_score_idx on public.recipes (health_sc
 create index if not exists recipes_source_normalized_lang_idx
   on public.recipes (source_url_normalized, language)
   where source_url_normalized is not null;
+create index if not exists recipes_pipeline_version_idx on public.recipes (pipeline_version);
 
 -- ── jobs: the extraction task ───────────────────────────────────────────────
 -- One row per extraction attempt. Job rows are NEVER deleted: they are the

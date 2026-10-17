@@ -273,4 +273,17 @@ Bestehende Rezepte in der Datenbank behalten ihre historische JSONB-Struktur (`i
 * **Strukturierte Typ-Guards:** Bei heterogenen Bestandsdaten (z. B. flache Zutat vs. verschachtelte Zutat) Type-Guards oder Normalisierungs-Helper verwenden (`normalizeIngredientItem()`).
 * **Backfill-Skripte:** Bei Schema-Erweiterungen (wie z. B. `is_ai_cover` oder `flatten_recipe_ingredients`) immer ein begleitendes, idempotentes Batch-Skript unter `backend/src/scripts/` anlegen (`npm run backfill:...`), das Altdaten in Batches von 50–100 Zeilen migriert.
 
+### 🏷️ 5. Rezept-Pipeline-Versionierung (`recipes.pipeline_version`)
+
+Zur Nachvollziehbarkeit des Erstellungsstandes und für zukünftige selektive Neu-Generierungen älterer Rezepte besitzt die Tabelle `recipes` eine dedizierte Versionierungsspalte:
+
+* **Spalte:** `pipeline_version: integer not null default 0`
+* **Index:** `recipes_pipeline_version_idx` auf `pipeline_version`
+* **Altdaten vs. Neudaten:**
+  * Altdaten (vor Einführung der Versionierung) besitzen standardmäßig `pipeline_version = 0`.
+  * Neue Rezepte (URL-Extraktion, Foto-Scan, Remixes) werden mit der aktuellen Konstante `CURRENT_RECIPE_PIPELINE_VERSION` (Start bei `1`) gestempelt.
+  * Manuelle Nutzer-Bearbeitungen via `updateRecipe` (`PUT /api/recipes/:id`) überschreiben eine bestehende Version nicht.
+* **Governance (Agenten-Regel):** Jede Modifikation an Prompts, Schemas, Recipe-Audit, Normalisierung oder OFF-Matching, die das Rezept-JSON beeinflussen könnte, verpflichtet zur Inkrementierung von `CURRENT_RECIPE_PIPELINE_VERSION` in `@cookbook/shared` (`shared/src/types/recipes.ts`). Siehe Regel [`.agents/rules/recipe-pipeline-version.md`](file:///c:/Users/lucas/source/repos/cookbook/.agents/rules/recipe-pipeline-version.md).
+
+
 
