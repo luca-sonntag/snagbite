@@ -1,7 +1,6 @@
 import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { App } from '@capacitor/app';
 import { isNative } from '../native';
-import { authClient } from '../auth';
 import { apiUrl } from '../api';
 import { APP_VERSION, APP_BUILD } from '../version';
 
@@ -81,15 +80,6 @@ async function resolveChannel(): Promise<'production' | 'alpha' | 'internal'> {
     if (override === 'production' || override === 'alpha' || override === 'internal') return override;
   } catch {
     // localStorage unavailable
-  }
-
-  try {
-    const res = await authClient.getSession();
-    const userData = res?.data?.user as { tier?: string; app_metadata?: { tier?: string } } | undefined;
-    const tier = userData?.tier ?? userData?.app_metadata?.tier;
-    if (tier === 'alpha') return 'alpha';
-  } catch {
-    // No session yet
   }
 
   return 'production';
