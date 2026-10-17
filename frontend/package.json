@@ -34,6 +34,8 @@
     "firebase:login": "npx --yes firebase-tools login",
     "deploy:firebase": "powershell -ExecutionPolicy Bypass -File scripts/deploy-firebase.ps1",
     "deploy:firebase:patch": "powershell -ExecutionPolicy Bypass -File scripts/deploy-firebase.ps1 -Bump patch",
+    "deploy:firebase:dev": "powershell -ExecutionPolicy Bypass -File scripts/deploy-firebase.ps1 -Env dev",
+    "deploy:firebase:dev:patch": "powershell -ExecutionPolicy Bypass -File scripts/deploy-firebase.ps1 -Env dev -Bump patch",
     "deploy:firebase:upload": "powershell -ExecutionPolicy Bypass -File scripts/deploy-firebase.ps1 -SkipBuild",
     "deploy:ota": "powershell -ExecutionPolicy Bypass -File scripts/deploy-ota.ps1 -Channel production",
     "deploy:ota:alpha": "powershell -ExecutionPolicy Bypass -File scripts/deploy-ota.ps1 -Channel alpha",

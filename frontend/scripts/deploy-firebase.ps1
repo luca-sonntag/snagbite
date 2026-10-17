@@ -31,8 +31,12 @@
 .PARAMETER SkipBuild
     Skip building a new APK and distribute the newest existing .apk in releases/.
 
+.PARAMETER Env
+    Target backend environment: 'prod' (default) or 'dev' (Railway Dev backend & DB).
+
 .EXAMPLE
     .\deploy-firebase.ps1
+    .\deploy-firebase.ps1 -Env dev
     .\deploy-firebase.ps1 -Bump patch -Notes "Fix for timer and recipe copilot"
     .\deploy-firebase.ps1 -SkipBuild -Notes "Retrying upload"
 #>
@@ -40,6 +44,8 @@
 param(
     [ValidateSet('none', 'patch', 'minor', 'major')]
     [string]$Bump = 'none',
+    [ValidateSet('prod', 'dev')]
+    [string]$Env = 'prod',
     [string]$Group = 'all-testers',
     [string]$Notes,
     [string]$KeyFile,
@@ -118,8 +124,8 @@ if (-not $hasAuth) {
 $buildRan = $false
 try {
     if (-not $SkipBuild) {
-        Write-Host "[1/3] Building signed APK (release.ps1 -Artifact apk)..." -ForegroundColor Yellow
-        & (Join-Path $PSScriptRoot 'release.ps1') -Bump $Bump -Artifact apk
+        Write-Host "[1/3] Building signed APK (release.ps1 -Artifact apk -Env $Env)..." -ForegroundColor Yellow
+        & (Join-Path $PSScriptRoot 'release.ps1') -Bump $Bump -Artifact apk -Env $Env
         if ($LASTEXITCODE -ne 0) { throw "release.ps1 failed" }
         $buildRan = $true
     } else {
@@ -129,8 +135,13 @@ try {
     # --- 2. Locate newest APK --------------------------------------------
     Write-Host "[2/3] Locating newest .apk..." -ForegroundColor Yellow
     if (-not (Test-Path $releasesDir)) { throw "Releases folder not found: $releasesDir" }
-    $apk = Get-ChildItem -Path (Join-Path $releasesDir '*.apk') |
+    $apkPattern = if ($SkipBuild -and $Env -eq 'dev') { '*-dev-*.apk' } else { '*.apk' }
+    $apk = Get-ChildItem -Path (Join-Path $releasesDir $apkPattern) -ErrorAction SilentlyContinue |
         Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    if (-not $apk -and $apkPattern -ne '*.apk') {
+        $apk = Get-ChildItem -Path (Join-Path $releasesDir '*.apk') |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    }
     if (-not $apk) {
         throw "No .apk found in $releasesDir. Build one first (omit -SkipBuild or run release.ps1 -Artifact apk)."
     }
@@ -140,9 +151,12 @@ try {
     $versionContent = Get-Content $versionFile -Raw
     $versionName = [regex]::Match($versionContent, 'VERSION_NAME=(.+)').Groups[1].Value.Trim()
     $versionCode = [regex]::Match($versionContent, 'VERSION_CODE=(\d+)').Groups[1].Value.Trim()
+    $envTag = if ($Env -eq 'dev') { '[DEV]' } else { '[PROD]' }
 
     if (-not $Notes) {
-        $Notes = "Release v$versionName ($versionCode) - $(Get-Date -Format 'dd.MM.yyyy HH:mm')"
+        $Notes = "$envTag Release v$versionName ($versionCode) - $(Get-Date -Format 'dd.MM.yyyy HH:mm')"
+    } elseif ($Notes -notmatch '^\[(DEV|PROD)\]') {
+        $Notes = "$envTag $Notes"
     }
     Write-Host "  Release Notes: $Notes" -ForegroundColor DarkGray
 
