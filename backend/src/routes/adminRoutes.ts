@@ -46,9 +46,21 @@ adminRoutes.post(
         throw new AppError('INVALID_FIELD', { params: { field: 'tier' } });
       }
 
+      const [currentUser] = await db
+        .select({ metadata: userTable.metadata })
+        .from(userTable)
+        .where(eq(userTable.id, req.userId!))
+        .limit(1);
+
+      const metadata = { ...((currentUser?.metadata || {}) as Record<string, unknown>) };
+      delete metadata.tier;
+      if (metadata.app_metadata && typeof metadata.app_metadata === 'object') {
+        delete (metadata.app_metadata as Record<string, unknown>).tier;
+      }
+
       await db
         .update(userTable)
-        .set({ tier, updatedAt: new Date() })
+        .set({ tier, metadata, updatedAt: new Date() })
         .where(eq(userTable.id, req.userId!));
 
       res.json({ success: true, tier });
