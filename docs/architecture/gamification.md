@@ -8,7 +8,7 @@ für Social/Shop/AI-Verifizierung.
 ## 1. Leitprinzipien
 
 * **2-Wege-Erfassung & Foto-Verifizierung:**
-  * **Mit Foto (+XP & Belohnungen):** Ein Foto des fertigen Gerichts (`photoBase64`) wird via Gemini Vision (`verifyCookedDishPhoto`) validiert und in Supabase `cook-photos` abgelegt. Bei Erfolg winken volle XP, Coins, Badges, Levelaufstiege und Leaderboard-Berechtigung (`verified: true`).
+  * **Mit Foto (+XP & Belohnungen):** Ein Foto des fertigen Gerichts (`photoBase64`) wird via Gemini Vision (`verifyCookedDishPhoto`) validiert und in S3 `cook-photos` abgelegt. Bei Erfolg winken volle XP, Coins, Badges, Levelaufstiege und Leaderboard-Berechtigung (`verified: true`).
   * **Ohne Foto (0 XP, rein organisatorisch):** Nutzer können Mahlzeiten auch ohne Foto als gekocht erfassen (z. B. im Wochenplaner oder Rezept). Dabei werden 0 XP und 0 Coins gutgeschrieben (`verified: false`), aber der Kochvorgang wird in `cook_events` und im Wochenplaner als erledigt vermerkt.
 * **Anti-Grind über Diminishing Returns**, nicht über Misstrauen: Wiederholungen
   desselben Rezepts fallen schnell ab, plus ein Tages-Softcap.
@@ -16,7 +16,7 @@ für Social/Shop/AI-Verifizierung.
   vergeben; das Frontend rechnet nichts an.
 * **Config statt Redeploy.** Die Formel liegt als JSON-Zeile in `global_settings`.
 
-## 2. Datenmodell (`backend/supabase_schema.sql`)
+## 2. Datenmodell (Drizzle Schema / PostgreSQL)
 
 Alles additiv, RLS aktiv (`SELECT`-own als Defense-in-Depth; Writes nur service-role):
 
@@ -77,7 +77,7 @@ Coin-Shop (`coins` akkumulieren bereits), Foto-KI-/Peer-Verifizierung (hebt
 Aufbau auf dem Gamification-Fundament (`point_ledger` trägt die wöchentliche,
 `user_stats.xp` die Allzeit-Wertung). Additiv, server-autoritativ.
 
-**Datenmodell** (`backend/supabase_schema.sql`):
+**Datenmodell** (Drizzle Schema / PostgreSQL):
 * **`profiles`** — `user_id`, selbstgewählter `display_name`, `avatar_url`
   (optional, aus Google-`user_metadata`), eindeutiger `friend_code`. Anzeigename/
   Avatar sind `SELECT`-bar für alle Authenticated (Freundssicht); die E-Mail wird

@@ -1,7 +1,7 @@
 # 🛡️ Abwärtskompatibilität, Schema-Evolution & Datenbank-Migrationen
 
 > **Status:** Verbindliche Richtlinie für alle Entwicklungen, KI-Assistenten und Releases ab Version 1.1.10.
-> **Kontext:** Die Snagbite-App ist auf Google Play (Alpha/Production) und im Web live. In der Supabase-Produktionsdatenbank existieren echte Nutzerdaten, Sammlungen und hunderte Rezepte. Native Apps im Umlauf aktualisieren sich verzögert.
+> **Kontext:** Die Snagbite-App ist auf Google Play (Alpha/Production) und im Web live. In der Produktionsdatenbank existieren echte Nutzerdaten, Sammlungen und hunderte Rezepte. Native Apps im Umlauf aktualisieren sich verzögert.
 
 ---
 
@@ -89,7 +89,7 @@ Native Mobil-Apps verhalten sich fundamental anders als reine Web-Apps:
 
 ## 🧱 5. Defensives Handling von Legacy- & JSONB-Daten
 
-In Supabase Postgres speichern wir Rezept-Bestandteile (`ingredients`, `instructions`, `nutritional_values`) in JSONB-Spalten. Altrezepte enthalten neu konzipierte Felder nicht.
+In Postgres speichern wir Rezept-Bestandteile (`ingredients`, `instructions`, `nutritional_values`) in JSONB-Spalten. Altrezepte enthalten neu konzipierte Felder nicht.
 
 ### Regeln für Frontend & Backend TypeScript Code
 
@@ -115,7 +115,7 @@ In Supabase Postgres speichern wir Rezept-Bestandteile (`ingredients`, `instruct
 
 Vor jedem Commit oder PR, der Datenbank, API oder Datenmodelle betrifft:
 
-- [ ] Wurde für jede DB-Änderung eine Migration mit `npm run db:new` erstellt?
+- [ ] Wurde für jede DB-Änderung das Drizzle-Schema (`backend/src/db/schema/`) angepasst?
 - [ ] Sind alle neuen Spalten `NULL`-able oder besitzen einen sicheren `DEFAULT`-Wert?
 - [ ] Wurde keine aktive Spalte gelöscht oder umbenannt?
 - [ ] Wurden alle API-Response-Änderungen rein additiv vorgenommen?

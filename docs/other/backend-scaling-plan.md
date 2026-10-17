@@ -130,6 +130,6 @@ Pro abgeschlossener Phase: atomic commit(s) mit Conventional-Commits-Nachricht u
 2. **Parallelität**: `WORKER_CONCURRENCY=4`, 20 Jobs einreihen → in Logs laufen bis zu 4 `[Job …]` gleichzeitig; Gesamtzeit ≈ 1/4 der seriellen.
 3. **Reclaim**: Worker mitten im Job hart killen → Job wird nach Lease-Timeout automatisch wieder `pending` und von anderer Instanz übernommen (nicht global auf failed gesetzt).
 4. **Storage**: Job auf Instanz A, Bild-URL von Instanz B abrufbar (Cross-Instanz).
-5. **Auth**: `/api/jobs/:id` unter Last (Polling) → keine Supabase-Auth-Calls mehr (lokale Verifikation), Latenz stabil.
+5. **Auth**: `/api/jobs/:id` unter Last (Polling) → keine externen Auth-Calls mehr (effiziente Session-Verifikation), Latenz stabil.
 6. **Rate-Limit**: 2 Web-Instanzen → Limit greift global (nicht 2×100).
 7. **Lasttest**: `k6`/`autocannon` gegen `/api/extract-recipe` + Poll-Loop, hunderte virtuelle Nutzer; Queue-Tiefe & p95-Latenz beobachten.

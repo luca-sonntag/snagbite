@@ -1,13 +1,12 @@
-# ⚙️ Backend & Datenbank (Node.js & Supabase Postgres)
+# ⚙️ Backend & Datenbank (Node.js & Railway PostgreSQL)
 
 ## 1. Processing- & Database-Layer
 
-* **Technologie:** Express.js, TypeScript (ausgeführt über `tsx` / Direct-Node execution), Node.js 22+ (erforderlich für `@supabase/supabase-js` native WebSockets).
-* **Datenbank:** Supabase Postgres (`backend/src/db.ts`) mit Row-Level Security (RLS) über `@supabase/supabase-js`. Alle benutzerbezogenen Queries filtern mit `.eq('user_id', userId)`, um mandantenfähige Isolation zu gewährleisten. Interne Queue-Operationen (`getNextPendingJob`, `updateJob`) arbeiten ohne User-Scoping.
-* **Migrations-System:** Offizielles Supabase CLI Migrations-System (`supabase/migrations/`) mit autoritativem Versionstracking in `supabase_migrations.schema_migrations`. Ermöglicht transaktionale, lineare Schema-Updates (`npm run db:push`, `npm run db:status`, `npm run db:repair`) von der Baseline `v1.1.9` bis zu den neuesten Features.
-* **Authentifizierung:** Supabase Auth JWT-Verifikation (`backend/src/auth.ts`). Die Middleware `requireAuth` validiert den `Authorization: Bearer <token>` Header, extrahiert die User-ID via `auth.getUser(token)` und reicht sie als `req.userId` an alle Route-Handler weiter. Unterstützt sowohl E-Mail/Passwort- als auch Google OAuth-Authentifizierung nahtlos.
-* **RLS-Policies:** Die `jobs`-Tabelle ist mit vier RLS-Policies abgesichert: `SELECT`/`INSERT`/`UPDATE`/`DELETE` – alle an `auth.uid() = user_id` gebunden. Der `user_id`-Fremdschlüssel referenziert `auth.users.id`.
-* **Funktion:** Das Backend dient als asynchroner Job-Orchestrator, verwaltet Jobs und lädt Audiodateien temporär herunter.
+* **Technologie:** Express.js, TypeScript (ausgeführt über `tsx` / Direct-Node execution), Node.js 22+.
+* **Datenbank:** Railway Managed PostgreSQL via Drizzle ORM (`backend/src/db/schema/`). Alle benutzerbezogenen Queries filtern mit `eq(table.userId, userId)`, um mandantenfähige Isolation zu gewährleisten. Interne Queue-Operationen (`claimNextJob`, `updateJob`) arbeiten ohne User-Scoping.
+* **Migrations-System:** Drizzle ORM mit typsicherem Schema (`backend/src/db/schema/`). Ermöglicht relationale, lineare Schema-Updates (`npm run db:push` für Dev, `npm run db:push:prod` für Railway Production, `npm run db:studio` für GUI).
+* **Authentifizierung:** Better-Auth (`backend/src/auth.ts`, `backend/src/authInstance.ts`). Die Middleware `requireAuth` validiert Sessions, extrahiert die User-ID via Session-Cookie/Header und reicht sie als `req.userId` an alle Route-Handler weiter. Unterstützt E-Mail/Passwort, Google OAuth und Gast-/Reviewer-Sessions nahtlos.
+* **Funktion:** Das Backend dient als asynchroner Job-Orchestrator, verwaltet Jobs und lädt Mediendaten temporär herunter.
 
 ### History, ID-Vergabe & Verwaltung
 * Bietet Helper-Funktionen (`getAllJobs(userId)` und `deleteJob(id, userId)`) zur persistenten Abfrage und Bereinigung von Extraktionen – stets benutzerbezogen.
@@ -17,7 +16,7 @@
 * **Eindeutige Identifikation:** Normalisiert Rezepte bei Abfragen und versieht sie mit einer eindeutigen `id` (entspricht der `jobId`), um Kollisionen zwischen Rezepten mit gleichem Titel zu unterbinden.
 * **Caching-Deaktivierung:** Setzt explizit `Cache-Control` Header (`no-store, no-cache, must-revalidate, proxy-revalidate`) für dynamic endpoints (`/api/jobs/:id`), um zu verhindern, dass Browser veraltete/gecachte Job-Zustände ausliefern.
 * **Queue-Resilienz & Stale-Job Self-Healing (`backend/src/db/jobsCleanup.ts` & `backend/src/queue.ts`):**
-  * **Adaptives Backoff & Log-Ingestion-Schutz:** Bei aktiver Extraktion oder laufenden Jobs pollt der Worker alle 2 Sekunden (`MIN_POLL_INTERVAL_MS = 2000`). Im Leerlauf greift ein dynamisches Backoff bis auf 30 Sekunden (`MAX_POLL_INTERVAL_MS = 30000`), wodurch unnötige Supabase API-Gateway- und Postgres-Logs um >90% reduziert werden.
+  * **Adaptives Backoff & Log-Ingestion-Schutz:** Bei aktiver Extraktion oder laufenden Jobs pollt der Worker alle 2 Sekunden (`MIN_POLL_INTERVAL_MS = 2000`). Im Leerlauf greift ein dynamisches Backoff bis auf 30 Sekunden (`MAX_POLL_INTERVAL_MS = 30000`), wodurch unnötige Postgres-Logs um >90% reduziert werden.
   * **Zero-Latency Event-Wakeup:** Sobald ein Job eingereicht wird (`triggerWorkerTick()` in `extractionRoutes.ts` / `recipeRoutes.ts`) oder ein Job abschließt, wird das Intervall sofort auf 2s zurückgesetzt und der nächste Tick unverzüglich angestoßen.
   * **Entzerrte Wartungs-Sweeps:** `reclaimExpiredJobs` und `sweepStaleAwaitingFrames` laufen in einem 3-Minuten-Intervall (`MAINTENANCE_INTERVAL_MS`), was passend zu den 5- bzw. 10-Minuten-Timeouts zehntausende periodische DB-Hits einspart.
   * **Beendigung des `awaiting_frames`-Loops:** `sweepStaleAwaitingFrames` setzt Jobs, die länger als `CLIENT_FRAMES_TIMEOUT_MINUTES` (5 Min.) ohne Client-Keyframes in `awaiting_frames` verharren, verbindlich auf `status: 'failed'` mit dem Fehlercode `EXTRACTION_TIMEOUT`. Dadurch wird der frühere Teufelskreis (Sweep ➔ `pending` ➔ Re-Park ➔ `awaiting_frames`), der Nutzerkonten dauerhaft sperrte, vollständig unterbunden.
@@ -44,8 +43,8 @@ Exponiert administrative API-Routen unter `/api/admin/*`, die über die Middlewa
 * **Body-Limit:** `express.json({ limit: '1mb' })` schützt vor Memory-Exhaustion durch große Payloads (Foto-Import nutzt pfad-spezifischen 12MB Parser davor).
 
 ### Health-Check (`/health`)
-Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()`. Antwortet `200 OK` bei gesunder DB, `503 Service Unavailable` bei Problemen. Liefert `uptime`, `nodeEnv` und `dbConnected`-Status.
-* **In-Memory Caching (30s TTL):** Das Abfrageergebnis wird für 30 Sekunden im Speicher gecacht (`DB_HEALTH_CACHE_TTL_MS`), damit externe Uptime-Monitore und Healthchecks Supabase nicht im Sekundentakt mit Polling-Abfragen belasten.
+Erweiterter Endpunkt prüft PostgreSQL-Datenbankverbindung via `checkDbHealth()`. Antwortet `200 OK` bei gesunder DB, `503 Service Unavailable` bei Problemen. Liefert `uptime`, `nodeEnv` und `dbConnected`-Status.
+* **In-Memory Caching (30s TTL):** Das Abfrageergebnis wird für 30 Sekunden im Speicher gecacht (`DB_HEALTH_CACHE_TTL_MS`), damit externe Uptime-Monitore und Healthchecks die Datenbank nicht im Sekundentakt mit Polling-Abfragen belasten.
 
 ### Statische Assets, Hybrid S3-Cache & On-Demand Zutat-Icons (`/api/ingredient-icons/*` & `/api/category-icons/*`)
 * **Icons-Katalog & Hybrid Storage (`ingredientIconStorage.ts`):** Das Backend nutzt eine zweistufige Speicherarchitektur für Zutat-Icons (`.webp`):
@@ -67,7 +66,7 @@ Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()`. 
 ### Autonome KI-Audit-Pipeline (`backend/src/audit/`)
 * **Ziel:** Kontinuierliche Validierung von OpenFoodFacts-Nährwert-Mappings und Qualitätsprüfung der 512×512 Zutat-Icons.
 * **Ablauf pro Zutat:**
-  1. **Mapping-Plausibilität & OFF-Recherche (`mappingAuditor.ts`):** Prüft Name, Kategorie und Nährwerte. Bei `no_match` oder unplausiblen Zuordnungen führt Gemini eine erweiterte Suche mit Synonymen und Übersetzungen im lokalen SQLite OpenFoodFacts-Index durch und aktualisiert das Mapping in Supabase.
+  1. **Mapping-Plausibilität & OFF-Recherche (`mappingAuditor.ts`):** Prüft Name, Kategorie und Nährwerte. Bei `no_match` oder unplausiblen Zuordnungen führt Gemini eine erweiterte Suche mit Synonymen und Übersetzungen im lokalen SQLite OpenFoodFacts-Index durch und aktualisiert das Mapping in der Datenbank.
   2. **Icon-Geometrie & Auto-Zoom (`iconGeometry.ts`):** Pixel-Bounding-Box-Analyse gegen weißen Hintergrund. Bei zu kleinen Motiven (> 25% Randabstand) skaliert Sharp das Motiv verlustfrei auf exakt 20% Randabstand (**$0 API-Kosten**). Bei Rand-Clipping (< 8% Rand) wird das Icon mit Flux-1 neu generiert.
   3. **Multimodal Vision Check (`iconAuditor.ts`):** Gemini Flash Lite Vision validiert das gerenderte Motiv auf Isoliertheit und Korrektheit.
 * **Lokale Manifeste & Caching (`auditManifest.ts`):** Bestätigte Mappings (`mappings_manifest.json`) und Icons (`icons_manifest.json`) werden lokal gecached, sodass Aliasse und Folgeläufe $0 zusätzliche Kosten verursachen.
@@ -82,18 +81,18 @@ Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()`. 
   * `FREE_MAX_EXTRACTIONS_PER_WINDOW` (Default: `3`): Maximale Anzahl an Extraktionen für Free-User.
   * `PREMIUM_MAX_EXTRACTIONS_PER_WINDOW` (Default: `50`): Maximale Anzahl an Extraktionen für Premium-User.
 * **Subscription Tiers:** Standardmäßig im `free` Tier. Sobald Premium gekauft wird, wird das Tier in `app_metadata.tier` auf `premium` gesetzt. Im Alpha-Modus werden Nutzer automatisch in `alpha` eingestuft.
-* **Benutzerbezogene Overrides:** In Supabase Auth `app_metadata` gesteuert (`custom_extraction_limit` bzw. `max_extractions_per_window`, z. B. `-1` für unbegrenzt).
+* **Benutzerbezogene Overrides:** In `app_metadata` gesteuert (`custom_extraction_limit` bzw. `max_extractions_per_window`, z. B. `-1` für unbegrenzt).
 * **Rewarded Video Ad Bonus-Credits (`app_metadata.bonus_credits`):**
   * Nutzer können durch das Ansehen von Rewarded Video Ads verzehrbare Extraktions-Credits sammeln.
   * **Konfigurierbarkeit (`global_settings.rewarded_ad_bonus_credits`):** Die Anzahl der gutgeschriebenen Credits pro Video (Standard: 3) ist zentral in der Postgres-Tabelle `global_settings` hinterlegt und über die Admin-API (`/api/admin/settings`) steuerbar.
-  * **Claim-Endpunkt (`POST /api/me/rewarded-ad-claimed`):** Inkrementiert `app_metadata.bonus_credits` in Supabase Auth (`updateUserById`) atomar um den in `global_settings` definierten Wert.
+  * **Claim-Endpunkt (`POST /api/me/rewarded-ad-claimed`):** Inkrementiert `app_metadata.bonus_credits` in den User-Metadaten atomar um den in `global_settings` definierten Wert.
   * **Verfügbarkeits-Berechnung (`GET /api/extractions/limit`):** Addiert Bonus-Credits auf verbleibende Basis-Extraktionen (`remaining = baseRemaining + bonusCredits`) und liefert `rewardedAdBonusCredits` an den Client.
   * **Quota-Verbrauch (`enforceExtractionQuota` in `routes.ts`):** Wenn das zeitfensterbasierte Limit erreicht ist, aber `bonus_credits > 0` vorliegt, wird 1 Bonus-Credit abgebucht (`bonus_credits - 1`), anstatt die Extraktion mit `RATE_LIMIT_EXCEEDED` (429) zu blockieren.
 * **Nutzererfahrung:** Bei Erreichen des Limits berechnet das Backend die verbleibende Wartezeit minutengenau. Das Frontend übersetzt dies dynamisch und zeigt die genaue Restdauer an.
 
 ---
 
-## 3. Cloud-Infrastruktur (Supabase & Railway)
+## 3. Cloud-Infrastruktur (Railway & Tigris S3)
 
 * **Tabelle `recipes`:** Der Rezept-**Inhalt**, unabhängig davon, wer ihn extrahiert hat. Skalare sind echte Spalten (`title`, `emoji`, `prep_time`, `cook_time`, `servings`, `image_url`, `has_incomplete_source_info`, `source_url_normalized`, `language`, …), flache Listen `text[]` (`tags`, `equipment`, `tips`, `image_urls`), nur `ingredients`/`instructions`/`alternative_ingredients` bleiben JSONB. Nährwerte liegen als vier Skalare (`calories`, `protein_g`, `carbs_g`, `fat_g`) vor, weil auf ihnen gefiltert und sortiert wird.
   * `source_url_normalized` (text, nullable): Bereinigte und kanonische Quell-URL für mandantenübergreifende Deduplizierung.
@@ -137,7 +136,7 @@ Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()`. 
   * `feedback-screenshots` (privat): Screenshots für Bug-Reports (`${userId}/${feedbackId}/${index}.jpg`, 10-Jahres Signed URL).
   * `recipe-photos` (privat, service-role only): Transienter Foto-Import (`${userId}/${uploadId}/${index}.jpg`).
   * `cook-photos` (privat, service-role only): Fotos von gekochten Gerichten für Gamification.
-* **Authentifizierung:** Token-Verifikation erfolgt **lokal** im Backend via JWKS (JSON Web Key Set) über `${config.SUPABASE_URL}/auth/v1/.well-known/jwks.json` mithilfe der `jose`-Bibliothek (kein DB-Roundtrip pro Request).
+* **Authentifizierung:** Better-Auth Session-Validierung erfolgt server-side über `authInstance.api.getSession` gegen die relationale `session`-Tabelle in PostgreSQL.
 
 ### Railway (Anwendungs-Hosting)
 * Hostet die containerisierte Anwendung stateless.
@@ -197,7 +196,7 @@ flowchart TD
 
 * **Datenmodell (`backend/db/migrations/006_pantry_and_shopping_list.sql`):**
   * `public.pantry_items`: Speichert Benutzervorräte mit `user_id`, `name`, `base_name`, `category`, `amount`, `unit`, `notes`, `shelf_life_days`, `expires_at`, `created_at`, `updated_at`.
-  * `public.shopping_list`: Persistiert Einkaufslisten-Einträge in Supabase mit `user_id`, `recipe_id`, `name`, `base_name`, `amount`, `unit`, `checked`, `category`, `in_pantry_warning`.
+  * `public.shopping_list`: Persistiert Einkaufslisten-Einträge mit `user_id`, `recipe_id`, `name`, `base_name`, `amount`, `unit`, `checked`, `category`, `in_pantry_warning`.
   * `ingredient_mappings`: Erweitert um `typical_package_amount`, `typical_package_unit`, `shelf_life_days`.
   * RLS Policies: Benutzer sehen und editieren strikt nur ihre eigenen Vorrats- und Einkaufslisten-Einträge.
 * **REST-Endpunkte:**
@@ -214,27 +213,28 @@ flowchart TD
 
 Seit dem Produktiv-Rollout (Play Store Alpha/Production & Web PWA) befindet sich das Projekt in der **Post-Launch-Phase**. Schema-Änderungen und API-Anpassungen unterliegen strikten Regeln zum Schutz von Altdaten und älteren installierten App-Clients.
 
-### 🗄️ 1. Verbindlicher Migrations-Workflow (Supabase CLI)
+### 🗄️ 1. Verbindlicher Migrations-Workflow (Drizzle ORM)
 
-Jede Änderung an der Postgres-Datenbank (Tabellen, Spalten, Indizes, Enums, RLS, Trigger, RPC-Funktionen) **MUSS** über eine transaktionale SQL-Datei in `supabase/migrations/` abgebildet werden:
+Jede Änderung an der Postgres-Datenbank (Tabellen, Spalten, Indizes, Enums) **MUSS** über das typsichere Schema in `backend/src/db/schema/` abgebildet werden:
 
 ```powershell
-# 1. Neue Migration mit sprechendem Namen anlegen
-npm run db:new <feature_name>
-# Generiert: supabase/migrations/<timestamp>_<feature_name>.sql
+# 1. Schema-Änderung in backend/src/db/schema/*.ts durchführen
 
-# 2. Migrations-Status gegen verbundene DB prüfen
-npm run db:status
-
-# 3. Migration lokal oder auf Dev anwenden
+# 2. Schema synchronisieren (Dev-DB):
 npm run db:push
 
-# 4. Im Notfall History reparieren (wenn remote und lokal synchronisiert werden müssen)
-npm run db:repair
+# 3. Schema auf Produktion anwenden (Railway Prod):
+npm run db:push:prod
+
+# 4. Optional: Migration-SQL generieren
+npm run db:generate
+
+# 5. Drizzle Studio zur visuellen Dateninspektion starten
+npm run db:studio
 ```
 
-* **Kein unversioniertes DDL:** Niemals Tabellen oder Spalten ad-hoc im Supabase-Dashboard anlegen oder modifizieren.
-* **Idempotenz:** SQL-Statements müssen mit defensiven Guard-Klauseln versehen sein (`ADD COLUMN IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ON CONFLICT DO NOTHING`).
+* **Kein unversioniertes DDL:** Niemals Tabellen oder Spalten ad-hoc im Dashboard anlegen oder modifizieren.
+* **Idempotenz:** Schema-Updates müssen sicher wiederholbar sein. Neue Spalten immer mit `.default()` oder nullable anlegen.
 
 ### 🔄 2. Das Expand-and-Contract Muster (Additive Schemas)
 

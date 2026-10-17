@@ -10,10 +10,10 @@
   * **Startup-Gate (nur Auth, nicht Sync):** Der blockierende Vollbild-Spinner hängt **nur an `authLoading`**, nicht mehr an `initialSyncDone`. Der Splash wird ausgeblendet, sobald Auth aufgelöst ist, und die App rendert sofort — der initiale `fetchLimitStatus()`-Netzwerkcall läuft im Hintergrund weiter. Vorher blockierte `!initialSyncDone` die ganze App bis der Call zurückkam (Splash → Spinner, beide je einige Sekunden). `limitStatus` ist überall nullable (die Kontingent-Zeile erscheint einfach nach, sobald die Daten da sind), daher ist das gefahrlos.
   * **`--app-sticky-top` (Sticky-Offset):** Die Sticky-Kopfregion (Safe-Area-Filler + `TimerBanner`) misst ihre Höhe per `ResizeObserver` und schreibt die Höhe als globale CSS-Variable `--app-sticky-top` auf `document.documentElement`. Views nutzen `sticky top-[var(--app-sticky-top)]`.
   * **`RecipeDetails` Single-Page Scroll-Layout & `RecipeStickyBar`**: Rezept-Detailansicht als einzelne, fließende Scroll-Seite ohne Tabs (Details `RecipeInfoSection`, Zutaten `RecipeIngredients`, Zubereitung `RecipeInstructions`). `RecipeStickyBar` heftet sich an `top-[var(--app-sticky-top)]` und markiert dynamisch per Scroll-Spy die gerade sichtbare Sektion. Kategorie-Überschriften in den Zutaten verwenden harmonische vertikale Farb-Pills (`w-1 h-3.5 rounded-full`, passend zur Taxonomie aus `i18n.ts`).
-  * **Basis-Portionen anpassen (`AdjustServingsSheet.tsx`)**: Klick auf die Portionen-Zeile in `RecipeInfoSection` (gekennzeichnet durch Chevron-Right Icon) öffnet das `AdjustServingsSheet`. Erlaubt das Umverteilen der Basis-Portionen mit mathematisch exakter Live-Neuberechnung aller Nährwerte pro Portion (Kalorien & Makros) und persistiert die Änderungen atomar in Supabase (`PATCH /api/recipes/:id`).
+  * **Basis-Portionen anpassen (`AdjustServingsSheet.tsx`)**: Klick auf die Portionen-Zeile in `RecipeInfoSection` (gekennzeichnet durch Chevron-Right Icon) öffnet das `AdjustServingsSheet`. Erlaubt das Umverteilen der Basis-Portionen mit mathematisch exakter Live-Neuberechnung aller Nährwerte pro Portion (Kalorien & Makros) und persistiert die Änderungen atomar in der Datenbank (`PATCH /api/recipes/:id`).
 
 ### Zentralisierte Kontexte (`frontend/src/context/`)
-* **`AuthContext.tsx`:** Verwaltet Supabase Auth Session (`signIn`, `signUp`, `signInWithGoogle`, `signOut`, `getAccessToken`, `isPremium`).
+* **`AuthContext.tsx`:** Verwaltet Better-Auth Session (`signIn`, `signUp`, `signInWithGoogle`, `signOut`, `isPremium`).
 * **`DialogContext.tsx`:** Stellt globalen Dialog-Service (`useDialog()`) bereit, um native Browser-Dialoge durch moderne HeroUI-Dialoge zu ersetzen.
 * **`ToastContext.tsx`:** Globales Toast-Benachrichtigungssystem (`useToast()`), das rahmenlose Benachrichtigungen im Clean Flat Style elastisch von oben hineingleiten lässt (`top-toast` via `ToastContainer` & `ToastItem`), Safe Areas (`--safe-area-inset-top`) beachtet und Swipe-Up Gesten unterstützt.
 * **`I18nContext.tsx`:** Verwaltet Internationalisierung (Deutsch/Englisch) mit `localStorage`-Persistenz und Browsersprachen-Erkennung.
@@ -57,7 +57,7 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
 
 ## 3. 🖼️ Clientseitiges Image-Caching
 
-* **100% Client-seitig:** Keine Bilddaten werden auf dem Server oder Supabase gespeichert. Original-URLs verbleiben als Metadaten im Rezept-JSON.
+* **100% Client-seitig:** Keine Bilddaten werden auf dem Server gespeichert. Original-URLs verbleiben als Metadaten im Rezept-JSON.
 * **IndexedDB Store (`frontend/src/utils/imageStore.ts`):** Datenbank `recipe-image-cache` v1, Object Store `images`.
 * **Kompression (`useCachedImage.ts`):** HTML5 Canvas `drawImage()` + `toBlob('image/jpeg', 0.75)` mit max. 400px Kantenlänge (~15–40 KB pro Bild).
 * **CORS Proxy:** Bilder werden über den `/api/image`-Proxy geladen.
@@ -137,7 +137,7 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
 * **`FeedbackDrawer.tsx`:** Bug/Idee-Toggle, Textarea (max. 4000 Zeichen), Multi-Screenshot-Anhang (max. 6 Bilder).
 * **Kontext-Erfassung (`feedbackContext.ts`):** Hängt App-Version, Plattform, UserAgent, Route, UserId, Tier und Konsolen-Logs an.
 * **Console-Ring-Buffer (`consoleBuffer.ts`):** Hält die letzten ~50 Konsolen-Einträge im Speicher.
-* **Backend (`POST /api/feedback`):** Lädt Screenshots in privaten Supabase Bucket `feedback-screenshots` (10-Jahres Signed URLs) und speichert Report in `feedback`-Tabelle.
+* **Backend (`POST /api/feedback`):** Lädt Screenshots in privaten S3 Bucket `feedback-screenshots` (10-Jahres Signed URLs) und speichert Report in `feedback`-Tabelle.
 
 ---
 
@@ -172,7 +172,7 @@ Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird
   1. Bereitet das AdMob Rewarded Video Ad vor (`prepareRewardVideoAd`) und zeigt es an (`showRewardVideoAd`).
   2. Lauscht auf `RewardAdPluginEvents.Rewarded` und `Dismissed`.
   3. Nach erfolgreichem Reward ruft der Client `claimRewardedCredit()` auf (`POST /api/me/rewarded-ad-claimed`).
-  4. Backend erhöht `app_metadata.bonus_credits` in Supabase Auth um `+1`.
+  4. Backend erhöht `app_metadata.bonus_credits` in den User-Metadaten um `+1`.
   5. Die Rezept-Extraktion wird direkt und ohne weiteren Benutzerklick gestartet.
 * **Web-Dev-Simulation:** Im Browser-Entwicklungsmodus wird eine 2-Sekunden-Verzögerung simuliert und `true` zurückgegeben.
 

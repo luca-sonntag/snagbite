@@ -40,7 +40,7 @@ Web-Assets der nativen App können Over-The-Air (OTA) aktualisiert werden, ohne 
 * **Plugin:** `@capgo/capacitor-updater` im **Manual-Mode** (`autoUpdate: false` in `capacitor.config.ts`, `resetWhenUpdate: true`, `appReadyTimeout: 10000`).
 * **Kanäle:** `production`, `alpha` + `internal` (spiegeln Play-Tracks). `production` und `alpha` zielen auf `snagbite-prod`, `internal` zielt auf `snagbite-dev` & Dev-Backend. Kanalwahl: `localStorage['snagbite.otaChannel']` -> sonst `alpha` bei `tier === 'alpha'` -> sonst `production`.
 
-### Supabase Storage & Datenbank
+### Tigris S3 Storage & PostgreSQL
 * **Bucket `app-bundles` (public):** Speichert Zips unter `{channel}/{version}.zip`.
 * **Tabelle `app_bundles`:** `channel`, `version` (`{VERSION_NAME}-ota.{n}`), `storage_path`, `checksum` (sha256 hex), `min_version_code`, `max_version_code`, `active`, `notes`.
 * Ein partieller Unique-Index erzwingt **max. ein aktives Bundle pro Kanal**. `min_version_code` / `max_version_code` verhindern Inkompatibilitäten mit nativen Shells.
@@ -49,11 +49,11 @@ Web-Assets der nativen App können Over-The-Air (OTA) aktualisiert werden, ohne 
 * **Endpoint `POST /api/app-updates/check` (`backend/src/appUpdates.ts`):** Vor auth-gated Router gemountet. Erhält `{ channel, versionCode, currentBundleVersion }` und antwortet mit Update-Metadaten oder `{ update: false }`.
 * **Client Updater (`frontend/src/utils/otaUpdater.ts` & `frontend/src/hooks/useAppUpdates.ts`):** Inert auf Web/Dev. Beim Boot sofort `CapacitorUpdater.notifyAppReady()` (Anti-Brick-Contract: verhindert Revert zum vorherigen Bundle).
 * **Vollautomatischer Ablauf ohne Prompt:** Sobald ein neues Bundle vorliegt, schaltet der Client `isUpdating` aktiv, zeigt den Snagbite Loading Screen (`AppSplashScreen` mit *"App-Update wird installiert…"*) und wendet das Bundle nach Download direkt via `CapacitorUpdater.set({ id })` an (sofortiger Reload in das neue Bundle). Es gibt keinen manuellen Zustimmungs-Banner mehr.
-* **Zentrale Git-Utilities (`frontend/scripts/git-utils.ps1`):** Bündelt wiederverwendbare Git-Hilfsfunktionen (`Assert-GitClean`, `Invoke-GitMasterMergeAndTag`, `Cap-StaleAppBundles`). Bei jedem nativeren Play Store Build (`release.ps1` / `deploy-playstore.ps1`) deckelt `Cap-StaleAppBundles` automatisch alte, nach oben offene OTA-Bundles in Supabase (`max_version_code = newVersionCode - 1`), damit neu installierte native App-Releases nicht auf ältere OTA-Assets zurückgesetzt werden.
-* **Deploy-Skript (`frontend/scripts/deploy-ota.ps1` / `npm run deploy:ota`):** Baut Frontend (`npm run build` für Prod/Alpha bzw. `npm run build:dev` für Internal), ermittelt nächste Bundle-Version (`{VERSION_NAME}-ota.{n}`), packt Zip per `tar.exe`, berechnet SHA256-Checksum, lädt ins Storage hoch, aktiviert die Row in Supabase, mergt bei Prod/Alpha `develop` -> `master` (bei `internal` nur Git Tag auf aktuellem Branch) und erstellt/pusht automatisch ein Git Tag (`v{VERSION_NAME}-ota.{n}`).
+* **Zentrale Git-Utilities (`frontend/scripts/git-utils.ps1`):** Bündelt wiederverwendbare Git-Hilfsfunktionen (`Assert-GitClean`, `Invoke-GitMasterMergeAndTag`, `Cap-StaleAppBundles`). Bei jedem nativeren Play Store Build (`release.ps1` / `deploy-playstore.ps1`) deckelt `Cap-StaleAppBundles` automatisch alte, nach oben offene OTA-Bundles in der Datenbank (`max_version_code = newVersionCode - 1`), damit neu installierte native App-Releases nicht auf ältere OTA-Assets zurückgesetzt werden.
+* **Deploy-Skript (`frontend/scripts/deploy-ota.ps1` / `npm run deploy:ota`):** Baut Frontend (`npm run build` für Prod/Alpha bzw. `npm run build:dev` für Internal), ermittelt nächste Bundle-Version (`{VERSION_NAME}-ota.{n}`), packt Zip per `tar.exe`, berechnet SHA256-Checksum, lädt ins S3-Storage hoch, aktiviert die Row in der Datenbank, mergt bei Prod/Alpha `develop` -> `master` (bei `internal` nur Git Tag auf aktuellem Branch) und erstellt/pusht automatisch ein Git Tag (`v{VERSION_NAME}-ota.{n}`).
 
 ### Rollback-Ebenen
-1. **Server-Rollback:** `active`-Flags flippen via Admin-PATCH (`/api/admin/app-bundles/:id`) oder Supabase Dashboard.
+1. **Server-Rollback:** `active`-Flags flippen via Admin-PATCH (`/api/admin/app-bundles/:id`) oder Drizzle Studio.
 2. **Device Auto-Revert:** Fehlendes `notifyAppReady()` innerhalb 10 Sekunden veranlasst das Plugin zum automatischen Fallback auf das vorherige funktionierende Bundle.
 3. **Play-Store-Release Reset & OTA-Guard:** `resetWhenUpdate: true` löscht alle gecachten OTA-Bundles auf dem Gerät bei jedem Play-Store-App-Update. `Cap-StaleAppBundles` verhindert, dass neuere Native-Shells alte ungepinnte OTA-Bundles vom Server anfordern.
 
