@@ -83,7 +83,7 @@ export async function fetchFluxImageBuffer(prompt: string): Promise<Buffer> {
 
 /**
  * Generates an AI food photography cover image with FLUX.1 [schnell] for a recipe,
- * stores it in Supabase Storage, and returns the public image URL and usage.
+ * stores it in S3 / Tigris Storage, and returns the public image URL and usage.
  * Returns null imageUrl if generation is disabled, prompt is empty, or generation fails.
  */
 export async function generateRecipeCoverImage(opts: GenerateCoverOptions): Promise<GenerateCoverResult> {

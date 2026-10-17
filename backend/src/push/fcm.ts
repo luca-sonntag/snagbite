@@ -8,7 +8,7 @@ import { config } from '../config.js';
  * We deliberately avoid the heavy `firebase-admin` SDK: the only thing we need
  * is to mint an OAuth2 access token from the service account (a signed JWT
  * exchanged at Google's token endpoint) and POST a message to the v1 send
- * endpoint. `jose` (already a backend dependency for Supabase JWT verification)
+ * endpoint. `jose` (already a backend dependency)
  * signs the assertion, so no new dependency is required.
  */
 

@@ -190,7 +190,7 @@ export interface GeminiLogEntry {
 /**
  * Persist a single Gemini request/response log.
  *
- * Primary sink is the Supabase `gemini_logs` table so metrics survive Railway's
+ * Primary sink is the PostgreSQL `gemini_logs` table so metrics survive Railway's
  * ephemeral filesystem (containers are wiped on every deploy). When `logDir` is
  * set, the full entry is *additionally* written as a JSON file into that
  * per-run debug directory (`logs/{userId}/run-...`) for deep debugging — those

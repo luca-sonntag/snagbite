@@ -8,7 +8,7 @@ const config: CapacitorConfig = {
   plugins: {
     CapacitorUpdater: {
       // Self-hosted manual mode: src/utils/otaUpdater.ts checks our backend,
-      // downloads from Supabase Storage and stages bundles itself.
+      // downloads from S3 Storage and stages bundles itself.
       autoUpdate: false,
       // Wipe device OTA bundles whenever a native (Play Store) update installs,
       // so a fresh shell never boots stale web assets.

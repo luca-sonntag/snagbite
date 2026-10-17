@@ -23,7 +23,7 @@ Alle Befehle werden aus dem Ordner `backend` (oder aus dem Repository-Root mit `
 | [`testRecipesAgainstOFF.ts`](#12-testrecipesagainstoffts) | *npx tsx* | Prüft Rezepte aus der DB gegen den lokalen OFF-Index (Trefferquote) |
 | [`analyzeOFFCategories.ts`](#13-analyzeoffcategoriests) | *npx tsx* | Analysiert Kategorie-Häufigkeiten im DACH-Stream von Open Food Facts |
 | [`recomputeRecipeNutrition.ts`](#14-recomputerecipenutritionts) | `npm run recompute-nutrition` | Berechnet Nährwerte aller Rezepte aus OFF-Zutaten neu |
-| [`purgeHostedFrames.ts`](#15-purgehostedframests) | `npm run purge-hosted-frames` | Bereinigt gehostete Video-Frames aus Supabase Storage |
+| [`purgeHostedFrames.ts`](#15-purgehostedframests) | *(archiviert)* | Bereinigt veraltete Video-Frames aus S3 Storage |
 | [`seedDev.ts`](#16-seeddevts) | `npm run seed:dev` | Erstellt/Aktualisiert Test-User in der DEV-Datenbank für Auto-Login |
 | [`runDryRunEvaluation.ts`](#17-rundryrunevaluationts) | `npm run eval:dry-run` | End-to-End Evaluation: Scraping + Gemini Extraktion + OFF Matching |
 | [`backfillRecipeSource.ts`](#18-backfillrecipesourcets) | *(Modul)* | Hilfsmodul für Rezept-Abfragen aus DEV und PROD |
@@ -121,7 +121,7 @@ Disambiguierungsskript für anatomische Körperteile und vage Zutaten (z. B. Umb
 
 * **Direkt:** `npx tsx src/scripts/straightenAllMappings.ts [FLAGS]`
 * **Flags & Optionen:**
-  * `--dry-run`: Zeigt geplante Umbenennungen und Merges an, ohne in Supabase zu schreiben.
+  * `--dry-run`: Zeigt geplante Umbenennungen und Merges an, ohne in die Datenbank zu schreiben.
 * **Beispiele:**
   ```bash
   npx tsx src/scripts/straightenAllMappings.ts --dry-run
@@ -320,29 +320,29 @@ Berechnet für alle Rezepte in der Datenbank die Nährwerte (Kalorien, Protein, 
 ---
 
 ### 15. `purgeHostedFrames.ts`
-Bereinigt veraltete Video-Frames aus dem Supabase Storage Bucket `recipe-frames`. Schreibt Bild-URLs in Rezepten auf lokale Geräte-Referenzen (`local:{recipeId}:{index}`) um und löscht die gehosteten Frame-Dateien.
+*(Archiviert in `src/scripts/archive/purgeHostedFrames.ts`)*
+Bereinigt veraltete Video-Frames aus dem S3 Storage Bucket `recipe-frames`. Schreibt Bild-URLs in Rezepten auf lokale Geräte-Referenzen (`local:{recipeId}:{index}`) um und löscht die gehosteten Frame-Dateien.
 
-* **npm-Shortcut:** `npm run purge-hosted-frames`
-* **Direkt:** `npx tsx src/scripts/purgeHostedFrames.ts`
+* **Direkt:** `npx tsx src/scripts/archive/purgeHostedFrames.ts`
 * **Umgebungsvariablen:**
   * `DRY_RUN=1`: Zeigt an, welche Rezepte und Storage-Dateien bereinigt würden, ohne zu löschen.
 * **Beispiele:**
   ```bash
-  DRY_RUN=1 npm run purge-hosted-frames
-  npm run purge-hosted-frames
+  DRY_RUN=1 npx tsx src/scripts/archive/purgeHostedFrames.ts
+  npx tsx src/scripts/archive/purgeHostedFrames.ts
   ```
 
 ---
 
 ### 16. `seedDev.ts`
-Legt einen Testbenutzer in der lokalen/DEV Supabase-Instanz an oder aktualisiert dessen Passwort, damit sich das Frontend im Entwicklungsmodus ohne manuelle Registrierung einloggen kann.
+Legt einen Testbenutzer in der lokalen/DEV-Datenbank via Better-Auth an oder aktualisiert dessen Passwort, damit sich das Frontend im Entwicklungsmodus ohne manuelle Registrierung einloggen kann.
 
 * **npm-Shortcut:** `npm run seed:dev`
-* **Direkt:** `npx tsx src/scripts/seedDev.ts`
+* **Direkt:** `npx tsx src/scripts/seed/seedDev.ts`
 * **Umgebungsvariablen:**
   * `SEED_TEST_USER_PASSWORD`: *(Erforderlich)* Das Passwort für den Testbenutzer.
   * `SEED_TEST_USER_EMAIL`: E-Mail-Adresse (Default: `test@dev.snagbite.local`).
-* **Sicherheitsmechanismus:** Verweigert die Ausführung, wenn `SUPABASE_URL` auf eine Produktions-URL hinweist.
+* **Sicherheitsmechanismus:** Verweigert die Ausführung bei Produktions-Datenbanken (`DATABASE_URL` enthält prod).
 * **Beispiel:**
   ```bash
   SEED_TEST_USER_PASSWORD="MeinSicheresPasswort123!" npm run seed:dev

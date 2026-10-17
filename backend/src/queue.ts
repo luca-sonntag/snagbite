@@ -76,7 +76,7 @@ async function processJob(job: Job): Promise<void> {
   const heartbeat = setInterval(() => heartbeatJob(jobId), 30_000);
 
   try {
-    // Fetch user preferences from Supabase Auth admin API if userId is present
+    // Fetch user preferences from database if userId is present
     let userPrefs: {
       recipeLanguage?: string;
       preferredTemperatureUnit?: string;

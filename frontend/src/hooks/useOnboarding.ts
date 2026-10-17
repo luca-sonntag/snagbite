@@ -10,7 +10,7 @@ export const ONBOARDING_KEY = 'snagbite_onboarding_v1_seen';
  * First-launch onboarding gate.
  *
  * `localStorage` is the authoritative, offline-first flag (like `useTheme`).
- * On completion we also best-effort mirror the flag into the user's Supabase
+ * On completion we also best-effort mirror the flag into the user's
  * `user_metadata`, so the guide doesn't reappear after an app reinstall or on
  * a second device where localStorage is empty — that case is suppressed by
  * deriving `shouldShow` from the metadata during render (no effect needed).
