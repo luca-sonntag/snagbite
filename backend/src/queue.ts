@@ -17,7 +17,7 @@ import { generateRecipeCoverImage, triggerAsyncCoverGeneration } from './imageGe
 import { pruneOldGeminiLogs, writeGeminiLog } from './logger.js';
 import { photoUploadIdFromUrl, downloadImportPhotos, deleteImportPhotos, sweepOldPhotoImports } from './photoImport.js';
 import { calculateWhisperCost, type Job, type LlmUsage, type ProgressStage, type GeminiUsageInfo, type RecipePreviewData, type Recipe } from './types.js';
-import { formatAuthorHandle } from '@cookbook/shared';
+import { formatAuthorHandle, CURRENT_RECIPE_PIPELINE_VERSION } from '@cookbook/shared';
 import { config } from './config.js';
 import { AppError, serializeJobError } from './errors.js';
 import { notificationTick } from './notifications/worker.js';
@@ -189,6 +189,8 @@ async function processJob(job: Job): Promise<void> {
       });
 
       recipe.language = job.language ?? 'de';
+      recipe.pipelineVersion = CURRENT_RECIPE_PIPELINE_VERSION;
+
       const llmUsage: LlmUsage = {};
       if (geminiUsage) llmUsage.gemini = geminiUsage;
       if (auditUsage) llmUsage.recipeAuditor = auditUsage;
@@ -289,6 +291,8 @@ async function processJob(job: Job): Promise<void> {
       });
 
       recipe.language = job.language ?? 'de';
+      recipe.pipelineVersion = CURRENT_RECIPE_PIPELINE_VERSION;
+
       const llmUsage: LlmUsage = {};
       if (geminiUsage) llmUsage.gemini = geminiUsage;
       if (auditUsage) llmUsage.recipeAuditor = auditUsage;
@@ -592,6 +596,7 @@ async function processJob(job: Job): Promise<void> {
     recipe.language = job.language ?? 'de';
     // Social media recipe extractions are public by default (remixes and photo imports stay private)
     recipe.visibility = 'public';
+    recipe.pipelineVersion = CURRENT_RECIPE_PIPELINE_VERSION;
 
     const llmUsage: LlmUsage = {};
     if (geminiUsage) llmUsage.gemini = geminiUsage;

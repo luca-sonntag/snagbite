@@ -26,6 +26,7 @@ import { enrichRecipeWithCanonicalIngredients } from '../matching/ingredientMatc
 import { applyRecipeOperations } from '../recipeOperations.js';
 import { recordCook } from '../gamification.js';
 import type { Recipe, RecipeOperation } from '../types.js';
+import { CURRENT_RECIPE_PIPELINE_VERSION } from '@cookbook/shared';
 import { fetchAndSyncUser, isPremiumUser, MAX_PHOTOS_TOTAL_CHARS } from './authUtils.js';
 import { triggerWorkerTick } from '../queue.js';
 import { subscribeRecipeEvents } from '../jobEvents.js';
@@ -317,6 +318,7 @@ recipeRoutes.post('/recipes/:id/chat/confirm', async (req: Request, res: Respons
       req.userId!,
       {
         ...remixedRecipe,
+        pipelineVersion: CURRENT_RECIPE_PIPELINE_VERSION,
         sourceUrl: currentRecipe.sourceUrl,
         sourceHandle: currentRecipe.sourceHandle,
         parentRecipeId: id,
@@ -432,6 +434,7 @@ recipeRoutes.post('/recipes/:id/chat', async (req: Request, res: Response): Prom
         req.userId!,
         {
           ...result.newRecipe,
+          pipelineVersion: CURRENT_RECIPE_PIPELINE_VERSION,
           sourceUrl: recipe.sourceUrl,
           sourceHandle: recipe.sourceHandle,
           parentRecipeId: id,
