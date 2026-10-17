@@ -122,6 +122,7 @@ if (-not $hasAuth) {
 
 # --- 1. Build signed APK (unless skipped) -----------------------------
 $buildRan = $false
+$uploadSucceeded = $false
 try {
     if (-not $SkipBuild) {
         Write-Host "[1/3] Building signed APK (release.ps1 -Artifact apk -Env $Env)..." -ForegroundColor Yellow
@@ -189,14 +190,14 @@ try {
         throw "firebase-tools appdistribution:distribute exited with code $uploadExit.`n" +
               "Hinweis: Falls der Fehler 'Requested entity was not found' auftritt, stelle sicher, dass die Tester-Gruppe '$Group' in der Firebase Console (https://console.firebase.google.com/project/snagbite-c6c33/appdistribution) unter 'Tester & Gruppen' angelegt wurde."
     }
+    $uploadSucceeded = $true
 
     # --- 5. Commit version bump locally on success -----------------------
     if ($buildRan) {
-        $versionFileRel = "frontend/android/version.properties"
-        $diff = Get-GitOutput -Arguments @("diff", "--name-only", $versionFileRel)
+        $diff = Get-GitOutput -Arguments @("diff", "--name-only", $versionFile)
         if ($diff) {
             Write-Host "Committing version bump locally on current branch..." -ForegroundColor Yellow
-            Run-Git -Arguments @("add", $versionFileRel)
+            Run-Git -Arguments @("add", $versionFile)
             Run-Git -Arguments @("commit", "-m", "chore(version): bump app version to $versionName ($versionCode) for firebase distribution")
         }
     }
@@ -208,9 +209,9 @@ try {
 }
 catch {
     # If the upload failed and we bumped the version during this run, restore version.properties
-    if ($buildRan) {
+    if ($buildRan -and -not $uploadSucceeded) {
         Write-Host "Reverting uncommitted version bump after failed upload..." -ForegroundColor Yellow
-        Run-Git -Arguments @("checkout", "frontend/android/version.properties") -IgnoreError
+        Run-Git -Arguments @("checkout", $versionFile) -IgnoreError
     }
     throw $_
 }
