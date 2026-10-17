@@ -7,6 +7,7 @@ const PreAdTransparencySheet = lazy(() => import('./Ads/PreAdTransparencySheet')
 import SmartResumeSheet from './ExtractForm/SmartResumeSheet';
 import { DevTools } from './DevTools';
 import { SHOW_PRE_AD_NOTICE_EVENT, markPreAdNoticeSeen } from '../utils/ads';
+import { useModalOverlay } from '../context/OverlayStackContext';
 import type { AppOverlaysProps } from '../types/app';
 
 export const AppOverlays: React.FC<AppOverlaysProps> = ({
@@ -23,6 +24,14 @@ export const AppOverlays: React.FC<AppOverlaysProps> = ({
   onAnalyzeUrl,
   onNavigateExtract,
 }) => {
+  // Immediately register onboarding / alpha welcome on the overlay stack even while
+  // their lazy chunks are still loading inside <Suspense>, preventing background
+  // spotlight tours from firing before the portal mounts.
+  useModalOverlay(
+    Boolean(showOnboarding || showAlphaWelcome),
+    showOnboarding ? onCompleteOnboarding : onCompleteAlphaWelcome
+  );
+
   // Mount the (lazy) premium modal only once it's first opened, then keep it
   // mounted so its close transition still runs.
   const [premiumModalLoaded, setPremiumModalLoaded] = useState(false);

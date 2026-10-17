@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import type { ScreenTourId } from '../types/tour';
 import { useSpotlightTourContext } from '../context/SpotlightTourContext';
+import { useOverlayStack } from '../context/OverlayStackContext';
+import { useAuth } from '../context/AuthContext';
 import { TOUR_DEFINITIONS, isTourElementVisible } from '../utils/tourDefinitions';
 
 interface UseSpotlightTourOptions {
@@ -18,13 +20,19 @@ export function useSpotlightTour(
 ) {
   const { autoStart = true, delayMs = 500, enabled = true } = options;
   const { isTourCompleted, startTour, activeTourId } = useSpotlightTourContext();
+  const { overlayCount } = useOverlayStack();
+  const { loading: authLoading } = useAuth();
 
   const isCompleted = isTourCompleted(screenId);
   const isTourActive = activeTourId === screenId;
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // CookingMode itself registers 1 overlay on OverlayStackContext; all other screens expect 0.
+  const expectedMaxOverlays = screenId === 'cookingMode' ? 1 : 0;
+  const isBlockedByOverlay = authLoading || overlayCount > expectedMaxOverlays;
+
   useEffect(() => {
-    if (!enabled || !autoStart || isCompleted || activeTourId !== null) {
+    if (!enabled || !autoStart || isCompleted || activeTourId !== null || isBlockedByOverlay) {
       return;
     }
 
@@ -33,6 +41,9 @@ export function useSpotlightTour(
         clearTimeout(timerRef.current);
       }
       timerRef.current = setTimeout(() => {
+        if (screenId !== 'cookingMode' && document.querySelector('[role="dialog"][aria-modal="true"]')) {
+          return;
+        }
         const firstStep = TOUR_DEFINITIONS[screenId]?.[0];
         const targetEl = firstStep ? document.querySelector(firstStep.elementSelector) : null;
         if (!isTourElementVisible(targetEl)) {
@@ -53,7 +64,16 @@ export function useSpotlightTour(
       }
       window.removeEventListener('hashchange', tryStart);
     };
-  }, [screenId, enabled, autoStart, isCompleted, activeTourId, delayMs, startTour]);
+  }, [
+    screenId,
+    enabled,
+    autoStart,
+    isCompleted,
+    activeTourId,
+    isBlockedByOverlay,
+    delayMs,
+    startTour,
+  ]);
 
   return {
     isCompleted,

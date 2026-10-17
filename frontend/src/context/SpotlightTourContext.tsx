@@ -3,7 +3,7 @@ import type { ScreenTourId, TourState, SpotlightTourContextValue } from '../type
 import { TOUR_DEFINITIONS, isTourElementVisible } from '../utils/tourDefinitions';
 import { useI18n } from './I18nContext';
 import { useAuth } from './AuthContext';
-import { useModalOverlay } from './OverlayStackContext';
+import { useModalOverlay, useOverlayStack } from './OverlayStackContext';
 import { hapticLight } from '../utils/haptics';
 
 const STORAGE_KEY = 'snagbite_tour_state_v1';
@@ -33,9 +33,11 @@ const SpotlightTourContext = createContext<SpotlightTourContextValue | null>(nul
 export const SpotlightTourProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { t } = useI18n();
   const { updateUserMetadata, isPremium } = useAuth();
+  const { overlayCount } = useOverlayStack();
   const [tourState, setTourState] = useState<TourState>(loadStoredTourState);
   const [activeTourId, setActiveTourId] = useState<ScreenTourId | null>(null);
   const driverRef = useRef<{ destroy: () => void } | null>(null);
+  const abortedByOverlayRef = useRef(false);
 
   const isTourCompleted = useCallback(
     (id: ScreenTourId): boolean => !!tourState[id],
@@ -67,6 +69,18 @@ export const SpotlightTourProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Trap Android hardware back button while a tour is active
   useModalOverlay(!!activeTourId, stopActiveTour);
+
+  // If a higher-priority overlay (e.g. AlphaWelcome, WelcomeGuide, SmartResumeSheet)
+  // opens while a tour is already running, dismiss the tour WITHOUT marking it completed
+  // so it will re-trigger cleanly once the overlay is closed.
+  useEffect(() => {
+    if (!activeTourId) return;
+    const expectedWithTour = activeTourId === 'cookingMode' ? 2 : 1;
+    if (overlayCount > expectedWithTour) {
+      abortedByOverlayRef.current = true;
+      stopActiveTour();
+    }
+  }, [activeTourId, overlayCount, stopActiveTour]);
 
   const startTour = useCallback(
     async (id: ScreenTourId) => {
@@ -111,6 +125,8 @@ export const SpotlightTourProvider: React.FC<{ children: React.ReactNode }> = ({
           .replace(/(?<!\{)\{current\}(?!\})/g, '{{current}}')
           .replace(/(?<!\{)\{total\}(?!\})/g, '{{total}}');
 
+        abortedByOverlayRef.current = false;
+
         const d = driver({
           showProgress: true,
           animate: true,
@@ -131,7 +147,10 @@ export const SpotlightTourProvider: React.FC<{ children: React.ReactNode }> = ({
             }
           },
           onDestroyed: () => {
-            markTourCompleted(id);
+            if (!abortedByOverlayRef.current) {
+              markTourCompleted(id);
+            }
+            abortedByOverlayRef.current = false;
             setActiveTourId(null);
             driverRef.current = null;
           },
