@@ -19,6 +19,12 @@ test('sanitizeSectionName', async (t) => {
     assert.equal(sanitizeSectionName('Main'), undefined);
   });
 
+  await t.test('strips section when identical to ingredient category', () => {
+    assert.equal(sanitizeSectionName('VEGETABLES', 'VEGETABLES'), undefined);
+    assert.equal(sanitizeSectionName('dairy_eggs', 'DAIRY_EGGS'), undefined);
+    assert.equal(sanitizeSectionName('Meat Poultry', 'meat_poultry'), undefined);
+  });
+
   await t.test('preserves culinary component sections', () => {
     assert.equal(sanitizeSectionName('Für das Brot'), 'Für das Brot');
     assert.equal(sanitizeSectionName('  Sauce  '), 'Sauce');
@@ -38,6 +44,21 @@ test('hasRecipeComponents', async (t) => {
       ],
     };
     assert.equal(hasRecipeComponents(single), false);
+  });
+
+  await t.test('returns false for legacy recipes where section was supermarket category', () => {
+    const legacyCategoryRecipe: Pick<Recipe, 'ingredients' | 'instructions'> = {
+      ingredients: [
+        { name: 'Zwiebel', amount: 1, unit: 'Stück', section: 'VEGETABLES', category: 'VEGETABLES' },
+        { name: 'Knoblauch', amount: 2, unit: 'Zehen', section: 'VEGETABLES', category: 'VEGETABLES' },
+        { name: 'Ei', amount: 2, unit: 'Stück', section: 'DAIRY_EGGS', category: 'DAIRY_EGGS' },
+        { name: 'Hähnchenbrust', amount: 400, unit: 'g', section: 'MEAT_POULTRY', category: 'MEAT_POULTRY' },
+      ],
+      instructions: [
+        { step: 1, description: 'Fleisch anbraten' },
+      ],
+    };
+    assert.equal(hasRecipeComponents(legacyCategoryRecipe), false);
   });
 
   await t.test('returns true when >= 2 distinct components exist', () => {
