@@ -32,7 +32,6 @@ backend/public/ingredient-icons-backup/
 *.sqlite
 backend/src/data/*.sqlite
 backend/dist/data/*.sqlite
-supabase/.temp/
 backups/
 backend/backups/
 
