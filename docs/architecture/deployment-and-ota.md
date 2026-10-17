@@ -92,10 +92,12 @@ Für schnelle Testrunden mit internen und externen Testern (Freunde, Familie, Be
 * **Tooling:** Distribution via `npx --yes firebase-tools appdistribution:distribute` (kein lokales Ruby/Docker erforderlich).
 
 ### Befehle
-* `npm run deploy:firebase`: Baut aktuelle Version als signierte APK und lädt sie für die Tester-Gruppe `all-testers` hoch.
-* `npm run deploy:firebase:patch`: Erhöht `versionCode` & Patch-`versionName`, baut APK und lädt sie hoch.
-* `.\deploy.ps1 -Firebase`: Startet den Flow über den Root-Orchestrator (auch über interaktives Menü Option 4).
-* `.\frontend\scripts\deploy-firebase.ps1 -Notes "Fix for Recipe Timer" -Group all-testers`: Manueller Aufruf mit individuellen Release Notes.
+* `npm run deploy:firebase`: Baut aktuelle Version als signierte APK gegen das **Production**-Backend (`.env.production`) und lädt sie für die Tester-Gruppe `all-testers` hoch.
+* `npm run deploy:firebase:patch`: Erhöht `versionCode` & Patch-`versionName`, baut APK (Prod) und lädt sie hoch.
+* `npm run deploy:firebase:dev`: Baut aktuelle Version als signierte APK gegen das **Development**-Backend & Dev-DB (`.env.development` / `npm run build:dev`, Dateiname `*-dev-*`, Release-Notes mit `[DEV]`-Präfix) und lädt sie hoch.
+* `npm run deploy:firebase:dev:patch`: Patch-Bump + Dev-Build + Upload zu Firebase.
+* `.\deploy.ps1 -Firebase [-Env prod|dev]`: Startet den Flow über den Root-Orchestrator (auch über interaktives Menü Optionen 4 & 5).
+* `.\frontend\scripts\deploy-firebase.ps1 -Env dev -Notes "Fix for Recipe Timer" -Group all-testers`: Manueller Aufruf mit individuellen Release Notes.
 
 ### Authentifizierung (Headless / CI / Lokal)
 1. **Service Account Key (Empfohlen):**
