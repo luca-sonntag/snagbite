@@ -65,6 +65,14 @@
     ```powershell
     npm run icons:sync:s3:prod
     ```
+- [ ] **Open Food Facts SQLite-Dump nach Tigris S3 hochladen (`npm run off:sync:s3:prod -w backend`):**
+  - **Grund:** Das Backend lädt den ~78 MB SQLite-Index (`off_de.sqlite`) für Open Food Facts zur drastischen Verkürzung der Build-Zeiten als ~28 MB Gzip-Archiv (`datasets/off_de.sqlite.gz`) zur Laufzeit aus Tigris S3, anstatt bei jedem Railway-Build 5 GB Rohdaten herunterzuladen.
+  - **Dringlichkeit:** Zwingend vor oder zeitgleich mit dem ersten Backend-Deploy mit dem neuen Dockerfile.
+  - **Ausführung:**
+    ```powershell
+    npm run off:sync:s3:prod -w backend
+    ```
+  - **Verifikation:** CLI-Ausgabe bestätigt erfolgreichen Upload nach `datasets/off_de.sqlite.gz`.
 
 ---
 
