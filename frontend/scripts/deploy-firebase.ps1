@@ -50,7 +50,8 @@ param(
     [string]$Notes,
     [string]$KeyFile,
     [string]$AppId = '1:453029629442:android:442396361a782e1196a11b',
-    [switch]$SkipBuild
+    [switch]$SkipBuild,
+    [switch]$Clean
 )
 
 $ErrorActionPreference = 'Stop'
@@ -126,7 +127,7 @@ $uploadSucceeded = $false
 try {
     if (-not $SkipBuild) {
         Write-Host "[1/3] Building signed APK (release.ps1 -Artifact apk -Env $Env)..." -ForegroundColor Yellow
-        & (Join-Path $PSScriptRoot 'release.ps1') -Bump $Bump -Artifact apk -Env $Env
+        & (Join-Path $PSScriptRoot 'release.ps1') -Bump $Bump -Artifact apk -Env $Env -Clean:$Clean
         if ($LASTEXITCODE -ne 0) { throw "release.ps1 failed" }
         $buildRan = $true
     } else {
