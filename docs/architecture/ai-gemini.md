@@ -43,7 +43,7 @@ Im gesamten Backend gibt es **8 aktive Gemini-Funktionen** (sowie Offline-/Admin
                  │
                  ▼
 2. JOB-CREATION & QUEUE
-   Job wird in Supabase `jobs` angelegt (`status: pending`, `kind: 'url' | 'photo' | 'remix'`).
+   Job wird in der Tabelle `jobs` angelegt (`status: pending`, `kind: 'url' | 'photo' | 'remix'`).
    `triggerWorkerTick()` weckt den asynchronen Worker sofort ohne Polling-Latenz auf.
    Worker claimt Job atomar via Postgres RPC `claim_next_job` (Worker-Lease & Heartbeat).
                  │
@@ -56,7 +56,7 @@ Im gesamten Backend gibt es **8 aktive Gemini-Funktionen** (sowie Offline-/Admin
    │      einzelnen 4x4-Grid (1024×1024 JPEG, ~200 KB) und sendet es via `POST /api/extract-recipe/frames`.
    │   4. Worker claimt Job erneut, lädt Audio herunter und lädt es via Google AI File API (`files.uploadFile`) hoch.
    ├── Foto-Import:
-   │   Download der transienten Seiten aus Supabase Bucket `recipe-photos` in vollen Auflösungen.
+   │   Download der transienten Seiten aus S3 Bucket `recipe-photos` in vollen Auflösungen.
    └── Image-Carousel / Slideshow:
        Download der Einzel-Slides in voller Auflösung (Fallback-Grid).
                  │
@@ -93,7 +93,7 @@ Im gesamten Backend gibt es **8 aktive Gemini-Funktionen** (sowie Offline-/Admin
 Cover-Generierung (FLUX.1 [schnell])              Kanonische Zutaten-Auflösung (OpenFoodFacts)
 • Prompt: `recipe.imagePrompt`                    • `enrichRecipeWithCanonicalIngredients`
 • Inferenz: fal.ai Direct API ($0.0035)           • DB-Lookup `ingredient_mappings` (0$ / Cache-Hit)
-• Upload nach Supabase `recipe-covers` Bucket     • Bei Miss: SQLite FTS5 Suche + Tool-Resolver
+• Upload nach Tigris S3 `recipe-covers` Bucket     • Bei Miss: SQLite FTS5 Suche + Tool-Resolver
 • Gilt für ALLE Jobs (URL, Photo, Remix)          • Exakte Makro- & Kalorienberechnung pro Portion
    └───────────────────────────────────┬───────────────────────────────────┘
                                        ▼
@@ -107,7 +107,7 @@ Cover-Generierung (FLUX.1 [schnell])              Kanonische Zutaten-Auflösung 
 * **Public Recipe Cover Backfill (`backfillPublicRecipeCovers.ts`):**
   * **NPM-Befehle:** `npm run covers:backfill:prod` (Production DB) & `npm run covers:backfill:dev` (Dev DB).
   * **Automatisierte Prompt-Generierung:** Für Rezepte ohne `image_prompt` erzeugt `generateFoodPhotographyPrompt` via Gemini form- und gefäßtreue englische Prompts nach `FOOD_PHOTOGRAPHY_PROMPT_INSTRUCTION`.
-  * **Inferenz & Upload:** FLUX.1 [schnell] generiert über fal.ai das 4:3 Food-Cover, lädt es in Supabase Storage (`recipe-covers/${userId}/${recipeId}.jpg`) hoch und aktualisiert `recipes.image_url`, `recipes.image_urls`, `recipes.image_prompt` und `recipes.is_ai_cover = true`.
+  * **Inferenz & Upload:** FLUX.1 [schnell] generiert über fal.ai das 4:3 Food-Cover, lädt es in Tigris S3 Storage (`recipe-covers/${userId}/${recipeId}.jpg`) hoch und aktualisiert `recipes.image_url`, `recipes.image_urls`, `recipes.image_prompt` und `recipes.is_ai_cover = true`.
   * **CLI-Flags:** `--dry-run` (Vorschau ohne fal.ai-Calls/Kosten), `--limit <N>`, `--force` (bereits bestehende Cover überschreiben), `--id <recipeId>`, `--delay <ms>`.
 
 ---
@@ -197,7 +197,7 @@ Bei einem regulären Video- oder Foto-Import fallen folgende KI-Kosten an:
 
 ## 9. Persistentes Monitoring (`gemini_logs` DB-Tabelle)
 
-* **Logging-Funktion:** `writeGeminiLog()` in `backend/src/logger.ts` schreibt jeden Aufruf asynchron (`fire-and-forget`) in die Supabase-Tabelle `gemini_logs`.
+* **Logging-Funktion:** `writeGeminiLog()` in `backend/src/logger.ts` schreibt jeden Aufruf asynchron (`fire-and-forget`) in die PostgreSQL-Tabelle `gemini_logs`.
 * **Felder:** `request_type`, `model`, `duration_ms`, `success`, `error_message`, `token_prompt`, `token_candidate`, `token_total`, `cost_usd`, `cost_formatted`.
 * **Admin-Metriken:** `GET /api/admin/metrics?range=30d` aggregiert die Inferenzkosten in Echtzeit.
 * **Auto-Pruning:** Ein täglicher Cron-Job löscht Log-Einträge älter als 90 Tage (`pruneOldGeminiLogs(90)`).
