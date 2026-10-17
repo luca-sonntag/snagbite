@@ -2,6 +2,7 @@ import { AppUpdate, AppUpdateAvailability } from '@capawesome/capacitor-app-upda
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { isNative } from '../native';
+import { isDevToolsFlagEnabled } from './dev';
 
 /**
  * Google Play Store In-App Updates utility for Android.
@@ -121,7 +122,7 @@ export function initNativeAppUpdates(): void {
 }
 
 // Dev helper exposed on window for quick console testing
-if (typeof window !== 'undefined' && (import.meta.env.DEV || localStorage.getItem('snagbite_dev_tools') === 'true')) {
+if (typeof window !== 'undefined' && (import.meta.env.DEV || isDevToolsFlagEnabled())) {
   (window as unknown as { checkNativeAppUpdate?: () => Promise<NativeUpdateResult> }).checkNativeAppUpdate = () =>
     checkAndApplyNativeUpdate({ manual: true });
 }
