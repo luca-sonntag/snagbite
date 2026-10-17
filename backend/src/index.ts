@@ -10,6 +10,7 @@ import { ingredientImageRouter } from './ingredientImageRoutes.js';
 import { checkDbHealth } from './db.js';
 import { ensureIngredientIconsExtracted } from './ingredientIconPacker.js';
 import { initIngredientIconStorage } from './storage/ingredientIconStorage.js';
+import { ensureOpenFoodFactsDatabase } from './matching/openFoodFactsSync.js';
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from './auth/betterAuth.js';
 import { storageRouter } from './routes/storageRoutes.js';
@@ -20,9 +21,10 @@ const isWeb = config.ROLE === 'web' || config.ROLE === 'both';
 
 async function bootstrap() {
   try {
-    // Ensure packaged ingredient icons are extracted if running from fresh container/clone
+    // Ensure packaged ingredient icons and Open Food Facts catalog are ready
     await ensureIngredientIconsExtracted();
     void initIngredientIconStorage();
+    await ensureOpenFoodFactsDatabase();
 
     if (isWorker) {
       startQueue();

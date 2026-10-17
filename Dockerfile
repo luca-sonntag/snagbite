@@ -20,7 +20,6 @@ COPY backend/tsconfig.json backend/
 COPY backend/src/ backend/src/
 RUN npm run build -w shared
 RUN npm run build -w backend
-RUN npm run build:off -w backend
 RUN npm prune --omit=dev --workspace=backend
 
 # ── Production stage: minimal runtime ──────────────────────────────────────
@@ -33,7 +32,6 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/shared ./shared
 COPY --from=builder /app/backend/package.json ./backend/package.json
 COPY --from=builder /app/backend/dist ./backend/dist
-COPY --from=builder /app/backend/src/data/off_de.sqlite ./backend/dist/data/off_de.sqlite
 
 # Copy public static assets (category icons, ingredient-icons.zip)
 COPY backend/public ./backend/public
