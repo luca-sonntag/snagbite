@@ -76,7 +76,7 @@ export const AdminSettingsSection: React.FC<AdminSettingsSectionProps> = ({ isAd
     <div className="flex flex-col gap-2">
       <h3 className="px-4 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-1">
         <Shield className="w-3.5 h-3.5 text-emerald-500" />
-        {t('settings.admin.section')}
+        {t('app.settings.admin.section')}
       </h3>
 
       <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
@@ -90,11 +90,11 @@ export const AdminSettingsSection: React.FC<AdminSettingsSectionProps> = ({ isAd
             <Shield className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0 group-hover:scale-105 transition-transform" />
             <div>
               <p className="font-semibold text-gray-900 dark:text-white text-sm flex items-center gap-1.5">
-                <span>{t('settings.admin.dashboard')}</span>
+                <span>{t('app.settings.admin.dashboard')}</span>
                 <ExternalLink className="w-3.5 h-3.5 text-gray-400" />
               </p>
               <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-medium">
-                {t('settings.admin.dashboardDesc')}
+                {t('app.settings.admin.dashboardDesc')}
               </p>
             </div>
           </div>
@@ -108,10 +108,10 @@ export const AdminSettingsSection: React.FC<AdminSettingsSectionProps> = ({ isAd
             <Wrench className="w-5 h-5 text-amber-500 dark:text-amber-400 shrink-0" />
             <div>
               <p className="font-semibold text-gray-900 dark:text-white text-sm">
-                {t('settings.admin.devTools')}
+                {t('app.settings.admin.devTools')}
               </p>
               <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-medium">
-                {t('settings.admin.devToolsDesc')}
+                {t('app.settings.admin.devToolsDesc')}
               </p>
             </div>
           </div>
@@ -119,7 +119,7 @@ export const AdminSettingsSection: React.FC<AdminSettingsSectionProps> = ({ isAd
             on={isToggleActive}
             disabled={isDevEnv}
             onClick={handleDevToolsToggle}
-            label={t('settings.admin.devTools')}
+            label={t('app.settings.admin.devTools')}
           />
         </div>
       </div>
