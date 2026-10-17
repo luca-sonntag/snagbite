@@ -175,7 +175,6 @@ export default function RecipeIngredients({
             onOpenProFeature={() => setIsProFeatureSheetOpen(true)}
           />
         )}
-        )}
 
         {/* 1.3 PRO hint for ingredient nutrition */}
         {!isPremium && hasAnyNutrition && (
