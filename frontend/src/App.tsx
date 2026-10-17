@@ -234,14 +234,16 @@ export default function App() {
     isPremium,
   });
 
-  // Handle billing & interstitial ads
-  useAppAds({
+  // Handle billing, extraction ad gating & interstitial ads
+  const { showExtractionAd } = useAppAds({
     user,
     authLoading,
     isPremium,
     isPending,
     recipe,
     showOnboarding,
+    savedRecipesCount: history.length,
+    historyLoaded,
   });
 
   useMobileNavigationBack(activeView === 'extract' && !!recipe && (!isPending || isPremium), () => {
@@ -671,7 +673,7 @@ export default function App() {
         onNavigateExtract={() => navigate('extract')}
       />
 
-      <ExtractionAdSheet isOpen={isPending && !isPremium} />
+      <ExtractionAdSheet isOpen={showExtractionAd} />
 
       <AppBottomNav
         activeView={activeView}
