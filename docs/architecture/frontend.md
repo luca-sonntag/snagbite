@@ -52,6 +52,7 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
 * **Zuletzt geöffnet (`utils/recentRecipes.ts`):** Clientseitiges Recency-Tracking in `localStorage` (`recipe_recent_opened`).
 * **Sammlungen (`useCollections.ts`, `CollectionSheet.tsx`):** Benannte Rezept-Gruppen mit 2×2 Mosaik-Cover.
 * **Freitext-Labels/Flags (`FlagSheet.tsx`):** Eigene Tags pro Rezept (`job.flags`).
+* **Scroll-Positionserhaltung (`useCatalogScrollRestoration.ts`):** Beim Öffnen eines Rezepts aus dem Kochbuch (sowohl Home als auch Listen-Ebene) und anschließendem Zurücknavigieren wird die exakte Scroll-Position der jeweiligen Ansicht nahtlos wiederhergestellt. Die Katalog-Ebene bleibt im DOM über `hidden` gemountet und der Hash-Router unterbindet den automatischen Scroll-Reset auf 0 bei dieser Rücknavigation.
 
 ---
 
