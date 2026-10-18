@@ -6,6 +6,21 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-18: Vollständige Entfernung der Sammlungs-Emojis (Frontend, Backend, DB & Shared)
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Emoji-Auswahlgitter (`EMOJIS`, `selectedEmoji`, `t('catalog.collectionEmoji')`) beim Erstellen und Bearbeiten von Sammlungen in [`CollectionSheet.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CollectionSheet.tsx).
+  * Veraltetes Emoji-Rendering (`{col.emoji && <span className="text-xl">{col.emoji}</span>}`) in den Listenansichten des `CollectionSheet`.
+  * Fallback-Auslesen von `collectionEmoji(id)` und Anzeige von Sammlungs-Emojis in aktiven Filter-Chips in [`CatalogFilters.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CatalogFilters.tsx).
+  * Veraltete Formulierung in Onboarding- und Tour-Texten in [`i18n.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/i18n.ts) („mit Emoji & Farbe anlegen“, „in farbigen Ordnern mit Emojis“).
+  * `emoji: text('emoji')` Spalte in Tabelle `collections` im Drizzle Schema ([`backend/src/db/schema/collections.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/schema/collections.ts)), DB-Typen ([`backend/src/db/types/collections.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/types/collections.ts)), DB-Queries ([`backend/src/db/collectionsDb.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/collectionsDb.ts)), API-Routen ([`backend/src/routes/collectionRoutes.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/routes/collectionRoutes.ts)) sowie Frontend-Hook ([`frontend/src/hooks/useCollections.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/hooks/useCollections.ts)) und Shared Interface `Collection` ([`shared/src/types/cookbook.ts`](file:///c:/Users/lucas/source/repos/cookbook/shared/src/types/cookbook.ts)).
+* **Ersetzt durch:**
+  * **Clean Flat Style & Lucide Folder Icon:** Einheitliche, visuell ruhige Darstellung mit einem dezenten Smaragdgrün-Folder-Badge (`<Folder className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />`) in `CollectionSheet` und `CatalogFilters`.
+  * **Schlankere Typen & Endpunkte:** `Collection` enthält nur noch `id`, `userId`, `name`, `position`, `createdAt`, `updatedAt`. Alle Endpunkte (`GET/POST/PATCH /api/collections`) operieren ohne Emoji-Feld.
+* **Betroffene Dateien:** `frontend/src/components/SavedCatalog/CollectionSheet.tsx`, `frontend/src/components/SavedCatalog/CatalogFilters.tsx`, `frontend/src/hooks/useCollections.ts`, `frontend/src/i18n.ts`, `backend/src/db/schema/collections.ts`, `backend/src/db/types/collections.ts`, `backend/src/db/collectionsDb.ts`, `backend/src/routes/collectionRoutes.ts`, `shared/src/types/cookbook.ts`, `docs/RELEASE_CHECKLIST.md`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-17: Vollständige Bereinigung und Ausmusterung von Supabase (Migration zu Railway Native PostgreSQL, Better-Auth & Tigris S3)
 
 * **Ersetzter Code / Veraltete Logik:**
