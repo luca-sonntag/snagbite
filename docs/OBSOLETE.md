@@ -6,6 +6,20 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-18: Ausmusterung der Emoji-Auswahl bei Sammlungen (Clean Flat UI & Zero Emojis)
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Emoji-Auswahlgitter (`EMOJIS`, `selectedEmoji`, `t('catalog.collectionEmoji')`) beim Erstellen und Bearbeiten von Sammlungen in [`CollectionSheet.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CollectionSheet.tsx).
+  * Veraltetes Emoji-Rendering (`{col.emoji && <span className="text-xl">{col.emoji}</span>}`) in den Listenansichten des `CollectionSheet`.
+  * Fallback-Auslesen von `collectionEmoji(id)` und Anzeige von Sammlungs-Emojis in aktiven Filter-Chips in [`CatalogFilters.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CatalogFilters.tsx).
+  * Veraltete Formulierung in Onboarding- und Tour-Texten in [`i18n.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/i18n.ts) („mit Emoji & Farbe anlegen“, „in farbigen Ordnern mit Emojis“).
+* **Ersetzt durch:**
+  * **Clean Flat Style & Lucide Folder Icon:** Einheitliche, visuell ruhige Darstellung mit einem dezenten Smaragdgrün-Folder-Badge (`<Folder className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />`) in `CollectionSheet` und `CatalogFilters`.
+  * **Schlankere Formulare:** Der Sammlungs-Dialog konzentriert sich rein auf den Namen der Sammlung. Die Datenbank- und API-Felder `emoji?: string | null` bleiben zur Wahrung der Abwärtskompatibilität mit älteren nativen App-Versionen im Umlauf defensiv erhalten.
+* **Betroffene Dateien:** `frontend/src/components/SavedCatalog/CollectionSheet.tsx`, `frontend/src/components/SavedCatalog/CatalogFilters.tsx`, `frontend/src/i18n.ts`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-17: Vollständige Bereinigung und Ausmusterung von Supabase (Migration zu Railway Native PostgreSQL, Better-Auth & Tigris S3)
 
 * **Ersetzter Code / Veraltete Logik:**
