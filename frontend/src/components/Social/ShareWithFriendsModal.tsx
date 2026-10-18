@@ -69,7 +69,10 @@ export default function ShareWithFriendsModal({
   const handleShareCode = async () => {
     if (!profile) return;
     hapticLight();
-    const url = `${window.location.origin}/invite/${profile.friendCode}`;
+    const websiteBase = import.meta.env.VITE_WEBSITE_URL
+      ? String(import.meta.env.VITE_WEBSITE_URL).replace(/\/+$/, '')
+      : 'https://snagbite.app';
+    const url = `${websiteBase}/invite/${profile.friendCode}`;
     const text = t('app.social.friends.inviteText', { code: profile.friendCode }) + '\n' + url;
     try {
       const { Share } = await import('@capacitor/share');

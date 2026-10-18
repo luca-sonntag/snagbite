@@ -5,6 +5,7 @@ import {
   groupIngredientsByComponent,
   groupInstructionsByComponent,
 } from './recipeComponents';
+import { prepareShareableImage } from './shareImageHelper';
 import type { Recipe, Ingredient } from '../types';
 
 export interface BuildShareTextOptions {
@@ -92,9 +93,12 @@ export function buildRecipeShareText({
   }
 
   // 7. Snagbite App Promo & Personal Invite Link
+  const websiteBase = import.meta.env.VITE_WEBSITE_URL
+    ? String(import.meta.env.VITE_WEBSITE_URL).replace(/\/+$/, '')
+    : 'https://snagbite.app';
   const inviteUrl = friendCode
-    ? `${window.location.origin}/invite/${friendCode}`
-    : 'https://snagbite.at';
+    ? `${websiteBase}/invite/${friendCode}`
+    : 'https://snagbite.app';
   parts.push(
     `✨ ${t('app.social.share.promoTagline') || 'Automatisch strukturiert mit Snagbite – der KI-Rezept-App für Instagram & TikTok Reels'}:\n👉 ${inviteUrl}`
   );
@@ -107,16 +111,23 @@ export async function shareRecipeExternally(params: BuildShareTextOptions): Prom
   const title = params.recipe.title;
   const imageUrl = params.recipe.imageUrl || params.recipe.imageUrls?.[0];
 
+  const preparedImage = await prepareShareableImage(imageUrl, title);
+
   // 1. Try Capacitor native share first
   try {
     const can = await Share.canShare();
     if (can.value) {
-      await Share.share({
+      const shareOptions: any = {
         title,
         text,
-        url: (imageUrl && /^https?:\/\//i.test(imageUrl)) ? imageUrl : undefined,
         dialogTitle: title,
-      });
+      };
+
+      if (preparedImage?.fileUri) {
+        shareOptions.files = [preparedImage.fileUri];
+      }
+
+      await Share.share(shareOptions);
       return 'shared';
     }
   } catch (err: any) {
@@ -124,15 +135,35 @@ export async function shareRecipeExternally(params: BuildShareTextOptions): Prom
     if (msg.includes('canceled') || msg.includes('dismissed') || msg.includes('cancel')) {
       return 'dismissed';
     }
+    // Fallback: If sharing with files failed, try text-only native share
+    if (preparedImage?.fileUri) {
+      try {
+        await Share.share({ title, text, dialogTitle: title });
+        return 'shared';
+      } catch (fallbackErr: any) {
+        const fallbackMsg = (fallbackErr?.message || '').toLowerCase();
+        if (fallbackMsg.includes('canceled') || fallbackMsg.includes('dismissed') || fallbackMsg.includes('cancel')) {
+          return 'dismissed';
+        }
+      }
+    }
   }
 
   // 2. Web Share API fallback
   if (typeof navigator !== 'undefined' && navigator.share) {
     try {
+      if (preparedImage?.webFile && navigator.canShare && navigator.canShare({ files: [preparedImage.webFile] })) {
+        await navigator.share({
+          title,
+          text,
+          files: [preparedImage.webFile],
+        });
+        return 'shared';
+      }
+
       await navigator.share({
         title,
         text,
-        url: (imageUrl && /^https?:\/\//i.test(imageUrl)) ? imageUrl : undefined,
       });
       return 'shared';
     } catch (err: any) {
