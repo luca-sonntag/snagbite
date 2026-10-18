@@ -99,7 +99,7 @@ export default function FeedEventCard({
       </div>
 
       {/* Hero Cooked Dish Photo — Soft Rounded Corners */}
-      <div className="px-2.5 sm:px-3">
+      <div className="sm:px-3">
         <div className="relative aspect-4/3 sm:aspect-16/10 w-full rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-2xs">
           <img
             src={item.photoUrl}
