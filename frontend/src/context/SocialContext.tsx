@@ -1,9 +1,16 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { apiUrl } from '../api';
 import { useAuth } from './AuthContext';
-import type { Profile, FriendSummary, FriendRequest, LeaderboardEntry, LeaderboardWindow, LeaderboardScope } from '../types';
+import type {
+  Profile,
+  FriendSummary,
+  FriendRequest,
+  LeaderboardEntry,
+  LeaderboardWindow,
+  LeaderboardScope,
+  SharedRecipeItem,
+} from '../types';
 
-/** Error carrying the backend error `code` so the UI can localize it. */
 export class SocialError extends Error {
   code: string;
   constructor(code: string) {
@@ -16,17 +23,22 @@ interface SocialState {
   profile: Profile | null;
   friends: FriendSummary[];
   incomingRequests: FriendRequest[];
+  sharedRecipes: SharedRecipeItem[];
+  unreadSharesCount: number;
   loading: boolean;
   refreshProfile: () => Promise<void>;
   refreshFriends: () => Promise<void>;
+  refreshShares: () => Promise<void>;
   updateDisplayName: (name: string) => Promise<void>;
-  /** Send a friend request by code. Returns 'pending' or 'accepted'. Throws SocialError. */
   sendRequest: (code: string) => Promise<'pending' | 'accepted'>;
-  /** Send a friend request directly by user ID (from global leaderboard). */
   sendRequestByUserId: (targetUserId: string) => Promise<'pending' | 'accepted'>;
   respondRequest: (friendshipId: string, accept: boolean) => Promise<void>;
   removeFriend: (friendshipId: string) => Promise<void>;
   fetchLeaderboard: (window: LeaderboardWindow, scope?: LeaderboardScope) => Promise<LeaderboardEntry[]>;
+  shareRecipeWithFriends: (recipeId: string, friendUserIds: string[], message?: string) => Promise<void>;
+  saveFriendRecipe: (recipeId: string) => Promise<void>;
+  dismissSharedRecipe: (shareId: string) => Promise<void>;
+  markSharesSeen: () => Promise<void>;
 }
 
 const SocialContext = createContext<SocialState | undefined>(undefined);
@@ -36,6 +48,8 @@ export function SocialProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [friends, setFriends] = useState<FriendSummary[]>([]);
   const [incomingRequests, setIncomingRequests] = useState<FriendRequest[]>([]);
+  const [sharedRecipes, setSharedRecipes] = useState<SharedRecipeItem[]>([]);
+  const [unreadSharesCount, setUnreadSharesCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const authedFetch = useCallback(
@@ -82,17 +96,29 @@ export function SocialProvider({ children }: { children: React.ReactNode }) {
     }
   }, [authedFetch]);
 
-  // Load profile and friends once a session exists so friend code and request badges are ready.
+  const refreshShares = useCallback(async () => {
+    try {
+      const data = await authedFetch('/api/friends/shares');
+      setSharedRecipes(data.shares ?? []);
+      setUnreadSharesCount(data.unreadCount ?? 0);
+    } catch (err) {
+      console.warn('[Social] Failed to load shares:', err);
+    }
+  }, [authedFetch]);
+
   useEffect(() => {
     if (session) {
       refreshProfile();
       refreshFriends();
+      refreshShares();
     } else {
       setProfile(null);
       setFriends([]);
       setIncomingRequests([]);
+      setSharedRecipes([]);
+      setUnreadSharesCount(0);
     }
-  }, [session, refreshProfile, refreshFriends]);
+  }, [session, refreshProfile, refreshFriends, refreshShares]);
 
   const updateDisplayName = useCallback(
     async (name: string) => {
@@ -156,21 +182,63 @@ export function SocialProvider({ children }: { children: React.ReactNode }) {
     [authedFetch],
   );
 
+  const shareRecipeWithFriends = useCallback(
+    async (recipeId: string, friendUserIds: string[], message?: string) => {
+      await authedFetch(`/api/recipes/${recipeId}/share`, {
+        method: 'POST',
+        body: JSON.stringify({ friendUserIds, message }),
+      });
+    },
+    [authedFetch],
+  );
+
+  const saveFriendRecipe = useCallback(
+    async (recipeId: string) => {
+      await authedFetch(`/api/friends/recipes/${recipeId}/save`, { method: 'POST' });
+      setSharedRecipes((prev) =>
+        prev.map((s) => (s.recipe.id === recipeId ? { ...s, isRecipeSaved: true, status: 'saved' } : s)),
+      );
+      window.dispatchEvent(new CustomEvent('cookbook:recipe-saved', { detail: { recipeId } }));
+    },
+    [authedFetch],
+  );
+
+  const dismissSharedRecipe = useCallback(
+    async (shareId: string) => {
+      await authedFetch(`/api/friends/shares/${shareId}`, { method: 'DELETE' });
+      setSharedRecipes((prev) => prev.filter((s) => s.shareId !== shareId));
+    },
+    [authedFetch],
+  );
+
+  const markSharesSeen = useCallback(async () => {
+    if (unreadSharesCount === 0) return;
+    setUnreadSharesCount(0);
+    await authedFetch('/api/friends/shares/mark-seen', { method: 'POST' }).catch(() => {});
+  }, [authedFetch, unreadSharesCount]);
+
   return (
     <SocialContext.Provider
       value={{
         profile,
         friends,
         incomingRequests,
+        sharedRecipes,
+        unreadSharesCount,
         loading,
         refreshProfile,
         refreshFriends,
+        refreshShares,
         updateDisplayName,
         sendRequest,
         sendRequestByUserId,
         respondRequest,
         removeFriend,
         fetchLeaderboard,
+        shareRecipeWithFriends,
+        saveFriendRecipe,
+        dismissSharedRecipe,
+        markSharesSeen,
       }}
     >
       {children}
