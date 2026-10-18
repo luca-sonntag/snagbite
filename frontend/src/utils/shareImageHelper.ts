@@ -14,6 +14,13 @@ function sanitizeName(title: string): string {
   return title.replace(/[^a-zA-Z0-9äöüÄÖÜß]/g, '_').replace(/_+/g, '_').slice(0, 30) || 'rezept';
 }
 
+function normalizeFetchUrl(url: string): string {
+  if (url.startsWith('/')) return apiUrl(url);
+  const match = url.match(/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?(\/storage\/.*)/);
+  if (match) return apiUrl(match[1]);
+  return url;
+}
+
 /**
  * Prepares a shareable image file from a recipe's cover image.
  * Uses cached base64 from imageStore when available, or fetches via CapacitorHttp/fetch.
@@ -35,7 +42,7 @@ export async function prepareShareableImage(
 
     // 2. If not cached, fetch via CapacitorHttp (native) or web fetch
     if (!base64 && !imageUrl.startsWith('local:')) {
-      const fetchUrl = imageUrl.startsWith('/') ? apiUrl(imageUrl) : imageUrl;
+      const fetchUrl = normalizeFetchUrl(imageUrl);
       if (isNative()) {
         const resp = await CapacitorHttp.get({
           url: fetchUrl,

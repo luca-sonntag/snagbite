@@ -66,8 +66,17 @@ export function rowToRecipe(row: any): Recipe {
     tags: row.tags ?? [],
     equipment: row.equipment ?? [],
     tips: row.tips ?? [],
-    imageUrl: row.imageUrl ?? row.image_url,
-    imageUrls: row.imageUrls ?? row.image_urls ?? [],
+    imageUrl: (() => {
+      const u = row.imageUrl ?? row.image_url;
+      if (!u) return u;
+      const match = u.match(/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?(\/storage\/.*)/);
+      return match ? match[1] : u;
+    })(),
+    imageUrls: ((row.imageUrls ?? row.image_urls ?? []) as string[]).map((u) => {
+      if (!u) return u;
+      const match = u.match(/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?(\/storage\/.*)/);
+      return match ? match[1] : u;
+    }),
     imagePrompt: row.imagePrompt ?? row.image_prompt,
     isAiCover: row.isAiCover ?? row.is_ai_cover ?? false,
     transcript: row.transcript,

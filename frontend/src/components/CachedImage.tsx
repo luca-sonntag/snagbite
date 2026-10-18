@@ -20,15 +20,15 @@ export default function CachedImage({
   alt,
   ...props
 }: CachedImageProps) {
-  const { src, isLoading } = useCachedImage(originalUrl);
+  const { src, isLoading, error } = useCachedImage(originalUrl);
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     setHasError(false);
   }, [src]);
 
-  // Only show fallback/emoji if no URL was provided or an explicit loading error occurred
-  if (!originalUrl || hasError) {
+  // Only show fallback/emoji if no URL was provided, an explicit loading error occurred, or fetching failed
+  if (!originalUrl || hasError || (error && !isLoading && !src)) {
     return fallbackComponent ? (
       <>{fallbackComponent}</>
     ) : (

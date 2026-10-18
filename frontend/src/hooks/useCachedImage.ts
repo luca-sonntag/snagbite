@@ -5,13 +5,20 @@ import { CapacitorHttp } from '@capacitor/core';
 import { isNative } from '../native';
 import { apiUrl } from '../api';
 
+function normalizeFetchUrl(url: string): string {
+  if (url.startsWith('/')) return apiUrl(url);
+  const match = url.match(/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?(\/storage\/.*)/);
+  if (match) return apiUrl(match[1]);
+  return url;
+}
+
 /**
  * Helper to fetch an image via the backend proxy, draw it onto a canvas,
  * resize it to max 800px (preserving aspect ratio), and compress it to a JPEG Base64 string.
  */
 async function compressAndConvertToBase64(url: string): Promise<string> {
   let blob: Blob;
-  const fetchUrl = url.startsWith('/') ? apiUrl(url) : url;
+  const fetchUrl = normalizeFetchUrl(url);
 
   if (isNative()) {
     // On native apps, use CapacitorHttp to bypass CORS when downloading third-party CDN images directly.
