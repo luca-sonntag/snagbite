@@ -29,6 +29,8 @@
 Exponiert administrative API-Routen unter `/api/admin/*`, die über die Middleware `requireAdmin` abgesichert sind. Diese Middleware prüft, ob die E-Mail des authentifizierten Nutzers in der kommagetrennten Liste `ADMIN_EMAILS` (in `.env` konfiguriert) enthalten ist.
 * **Endpunkte:**
   * `GET /api/admin/check`: Prüft Admin-Status.
+  * `POST /api/admin/me/tier`: Schaltet den Account-Tier des eingeloggten Admins zwischen `free` und `premium` um.
+  * `POST /api/admin/me/reset-settings`: Setzt die zusätzlichen Einstellungen in der `user`-Tabelle für den eingeloggten Admin zurück (`metadata: '{}'`, `notificationsEnabled: false`, `customExtractionLimit: null`) und löscht Push-Tokens.
   * `GET /api/admin/settings` & `PATCH /api/admin/settings`: Liefert und aktualisiert Werte in `global_settings` (invalidiert den internen Cache).
   * `POST /api/admin/notifications/trigger`: Führt manuell einen Durchlauf des Push-Notification Workers für Tests aus und liefert detaillierte Ausführungsprotokolle.
   * `GET /api/admin/feedback`: Ruft alle In-App Bug-Reports und Feedback chronologisch ab.

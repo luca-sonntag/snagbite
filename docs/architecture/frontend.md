@@ -271,7 +271,8 @@ Für schnelles Testen, Gestalten und Inspizieren selten auftretender Dialoge, Sh
   * Automatische Anbindung an den `OverlayStackContext` (Android Hardware-Back-Button und Scroll-Lock).
 * **Admin- & Production-Freischaltung (`useDevToolsActive`, `AdminSettingsSection`):**
   * In lokaler Entwicklung (`import.meta.env.DEV`) sind Eruda und `window.dev` standardmäßig aktiv.
-  * In Production (`NODE_ENV === 'production'`, z. B. auf echten Mobilgeräten) können autorisierte Administratoren (`config.ADMIN_EMAILS`) die Entwickler-Tools über einen Toggle in den **Einstellungen** (`AdminSettingsSection.tsx`) aktivieren (`localStorage['snagbite_dev_tools']`).
+  * In Production (`NODE_ENV === 'production'`, z. B. auf echten Mobilgeräten) können autorisierte Administratoren (`config.ADMIN_EMAILS`) die Entwickler-Tools über einen Toggle in den **Einstellungen** (`AdminSettingsSection.tsx`, `useAdminSettings.ts`) aktivieren (`localStorage['snagbite_dev_tools']`).
+  * Zudem können Admins über die Option *„Browserdaten & Einstellungen löschen“* sämtliche lokalen Browserdaten (`localStorage`, `sessionStorage`, IndexedDB-Bildercache, Cache-Storage, Cookies, Service Worker) bereinigen und alle zusätzlichen Benutzereinstellungen in der `user`-Tabelle der Datenbank (`metadata`, `notificationsEnabled`, `customExtractionLimit`) via `POST /api/admin/me/reset-settings` zurücksetzen.
   * Zudem steht Admins auch in Production der Menüeintrag *„[DEV] Neu extrahieren“* im Rezept-Detailmenü (`RecipeHeaderActions.tsx`) zur Verfügung, um Rezepte direkt mit der aktuellen Prompt- und Normalisierungs-Pipeline erneut durch Gemini zu analysieren.
 
 ---
