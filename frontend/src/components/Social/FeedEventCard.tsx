@@ -2,8 +2,9 @@ import { useState, useCallback } from 'react';
 import { Button } from '@heroui/react';
 import { Bookmark, BookmarkCheck, ExternalLink } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
-import { hapticLight, hapticMedium } from '../../utils/haptics';
+import { hapticLight, hapticMedium, hapticSelection } from '../../utils/haptics';
 import Avatar from './Avatar';
+import { formatSmartDate, formatReactorsSummary } from './socialFormatters';
 import type { FriendFeedItem, FeedReactionEmoji, Recipe } from '../../types';
 
 interface FeedEventCardProps {
@@ -13,30 +14,24 @@ interface FeedEventCardProps {
   onSaveRecipe: (recipeId: string) => Promise<void>;
 }
 
-function formatRelativeTime(dateIso: string, t: (k: string, p?: any) => string): string {
-  const d = new Date(dateIso);
-  const now = Date.now();
-  const diffSec = Math.floor((now - d.getTime()) / 1000);
-
-  if (diffSec < 60) return t('app.social.feed.cookedJustNow');
-  const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return t('app.social.feed.minutesAgo', { count: diffMin });
-  const diffHours = Math.floor(diffMin / 60);
-  if (diffHours < 24) return t('app.social.feed.hoursAgo', { count: diffHours });
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays <= 7) return t('app.social.feed.daysAgo', { count: diffDays });
-  return d.toLocaleDateString();
-}
-
 export default function FeedEventCard({
   item,
   onReact,
   onOpenRecipe,
   onSaveRecipe,
 }: FeedEventCardProps) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const [saving, setSaving] = useState(false);
+  const [bouncingEmoji, setBouncingEmoji] = useState<string | null>(null);
+
   const recipeCoverUrl = item.recipe.imageUrl || item.recipe.imageUrls?.[0];
+  const totalTime = (item.recipe.prepTime || 0) + (item.recipe.cookTime || 0) || item.recipe.prepTime;
+  const rawCalories = item.recipe.nutritionalValues?.calories ?? item.recipe.sourceNutritionalValues?.calories;
+  const calories = rawCalories ? Math.round(Number(rawCalories)) : null;
+
+  const metaParts: string[] = [];
+  if (totalTime) metaParts.push(`${totalTime} Min.`);
+  if (calories && calories > 0) metaParts.push(`${calories} kcal`);
 
   const handleSave = useCallback(async () => {
     if (!item.recipe?.id || item.isRecipeSaved || saving) return;
@@ -49,10 +44,17 @@ export default function FeedEventCard({
     }
   }, [item.isRecipeSaved, item.recipe?.id, onSaveRecipe, saving]);
 
+  const handleReactionClick = (emoji: FeedReactionEmoji) => {
+    hapticSelection();
+    setBouncingEmoji(emoji);
+    setTimeout(() => setBouncingEmoji((prev) => (prev === emoji ? null : prev)), 350);
+    onReact(item.cookEventId, emoji);
+  };
+
   return (
-    <article className="flex flex-col gap-3 rounded-3xl bg-white dark:bg-gray-900 p-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border-none">
+    <article className="overflow-hidden rounded-3xl bg-white dark:bg-gray-900 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border-none flex flex-col">
       {/* Header: Author & Time */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="px-4 pt-3.5 pb-2.5 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <Avatar name={item.user.displayName} avatarUrl={item.user.avatarUrl} size={42} />
           <div className="min-w-0">
@@ -64,15 +66,15 @@ export default function FeedEventCard({
                 {t('app.gamification.level', { level: item.user.level })}
               </span>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              {formatRelativeTime(item.cookedAt, t)}
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-medium">
+              {formatSmartDate(item.cookedAt, language)}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Hero Cooked Dish Photo */}
-      <div className="relative aspect-4/3 sm:aspect-16/10 w-full rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-2xs">
+      {/* Hero Cooked Dish Photo — Immersive Edge-to-Edge */}
+      <div className="relative aspect-4/3 sm:aspect-16/10 w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
         <img
           src={item.photoUrl}
           alt={item.recipe.title}
@@ -89,7 +91,7 @@ export default function FeedEventCard({
               onOpenRecipe(item.recipe);
             }}
             aria-label={item.recipe.title}
-            className="absolute top-3 right-3 z-10 w-[88px] h-[88px] sm:w-[96px] sm:h-[96px] rounded-full ring-[2.5px] ring-white/95 dark:ring-gray-900/95 shadow-lg overflow-hidden bg-gray-100 dark:bg-gray-800 p-0 border-none cursor-pointer active:scale-95 transition-transform"
+            className="absolute top-3.5 right-3.5 z-10 w-[88px] h-[88px] sm:w-[96px] sm:h-[96px] rounded-full ring-[2.5px] ring-white/95 dark:ring-gray-900/95 shadow-xl overflow-hidden bg-gray-100 dark:bg-gray-800 p-0 border-none cursor-pointer active:scale-95 transition-transform"
           >
             <img
               src={recipeCoverUrl}
@@ -106,14 +108,14 @@ export default function FeedEventCard({
               onOpenRecipe(item.recipe);
             }}
             aria-label={item.recipe.title}
-            className="absolute top-3 right-3 z-10 w-[88px] h-[88px] sm:w-[96px] sm:h-[96px] rounded-full ring-[2.5px] ring-white/95 dark:ring-gray-900/95 shadow-lg overflow-hidden bg-white/90 dark:bg-gray-800/90 backdrop-blur-md p-0 border-none cursor-pointer active:scale-95 transition-transform flex items-center justify-center text-3xl"
+            className="absolute top-3.5 right-3.5 z-10 w-[88px] h-[88px] sm:w-[96px] sm:h-[96px] rounded-full ring-[2.5px] ring-white/95 dark:ring-gray-900/95 shadow-xl overflow-hidden bg-white/90 dark:bg-gray-800/90 backdrop-blur-md p-0 border-none cursor-pointer active:scale-95 transition-transform flex items-center justify-center text-3xl"
           >
             <span>{item.recipe.emoji}</span>
           </button>
         ) : null}
 
         {/* Integrated Recipe Scrim Dock at bottom */}
-        <div className="absolute inset-x-0 bottom-0 p-3.5 pt-10 bg-gradient-to-t from-black/85 via-black/40 via-55% to-transparent flex items-end justify-between gap-3">
+        <div className="absolute inset-x-0 bottom-0 p-4 pt-12 bg-gradient-to-t from-black/90 via-black/45 via-50% to-transparent flex items-end justify-between gap-3">
           <div
             className="min-w-0 flex-1 cursor-pointer select-none"
             onClick={() => {
@@ -124,10 +126,15 @@ export default function FeedEventCard({
             <h3 className="font-heading font-bold text-white text-sm sm:text-base line-clamp-1 leading-snug drop-shadow-sm">
               {item.recipe.title}
             </h3>
-            {item.recipe.prepTime && (
-              <span className="text-[11px] font-medium text-white/80">
-                {item.recipe.prepTime} Min.
-              </span>
+            {metaParts.length > 0 && (
+              <p className="text-[11px] sm:text-xs font-semibold text-white/90 drop-shadow-xs mt-0.5 flex items-center gap-1.5">
+                {metaParts.map((part, idx) => (
+                  <span key={idx} className="flex items-center gap-1.5">
+                    {idx > 0 && <span className="opacity-60 text-[9px]">·</span>}
+                    <span>{part}</span>
+                  </span>
+                ))}
+              </p>
             )}
           </div>
 
@@ -140,7 +147,7 @@ export default function FeedEventCard({
                 onOpenRecipe(item.recipe);
               }}
               aria-label={t('app.social.feed.viewRecipe')}
-              className="h-9 w-9 min-w-[36px] rounded-xl bg-white/95 hover:bg-white text-gray-950 border-none cursor-pointer active:scale-95 transition-all shadow-sm flex items-center justify-center"
+              className="h-9 w-9 min-w-[36px] rounded-xl bg-white/95 hover:bg-white text-gray-950 border-none cursor-pointer active:scale-95 transition-all shadow-sm flex items-center justify-center backdrop-blur-md"
             >
               <ExternalLink className="w-4 h-4 text-gray-950" />
             </Button>
@@ -167,26 +174,55 @@ export default function FeedEventCard({
         </div>
       </div>
 
-      {/* Tactile Emoji Reaction Pills */}
-      <div className="flex items-center gap-2 pt-0.5">
-        {item.reactions.map((r) => {
-          const isReacted = r.reactedByMe;
-          return (
-            <button
-              key={r.emoji}
-              type="button"
-              onClick={() => onReact(item.cookEventId, r.emoji)}
-              className={`min-h-[40px] px-3.5 py-1.5 rounded-full text-xs font-bold border-none transition-all duration-150 cursor-pointer flex items-center gap-1.5 select-none active:scale-90 ${
-                isReacted
-                  ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 shadow-2xs font-black'
-                  : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold'
-              }`}
-            >
-              <span className="text-sm leading-none">{r.emoji}</span>
-              {r.count > 0 && <span>{r.count}</span>}
-            </button>
-          );
-        })}
+      {/* Social Footer: Emoji Reactions & Friend Avatars */}
+      <div className="px-4 py-3 flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2">
+          {item.reactions.map((r) => {
+            const isReacted = r.reactedByMe;
+            const isBouncing = bouncingEmoji === r.emoji;
+            return (
+              <button
+                key={r.emoji}
+                type="button"
+                onClick={() => handleReactionClick(r.emoji)}
+                className={`min-h-[38px] px-3.5 py-1.5 rounded-full text-xs font-bold border-none transition-all duration-150 cursor-pointer flex items-center gap-1.5 select-none active:scale-90 ${
+                  isReacted
+                    ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 shadow-2xs font-black'
+                    : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold'
+                }`}
+              >
+                <span
+                  className={`text-sm leading-none transition-transform duration-200 inline-block ${
+                    isBouncing ? 'scale-140 -translate-y-0.5' : ''
+                  }`}
+                >
+                  {r.emoji}
+                </span>
+                {r.count > 0 && <span>{r.count}</span>}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Reactor Friends Mini-Avatars */}
+        {item.recentReactors && item.recentReactors.length > 0 && (
+          <div className="flex items-center gap-1.5 min-w-0">
+            <div className="flex -space-x-1.5 overflow-hidden shrink-0">
+              {item.recentReactors.slice(0, 3).map((reactor, i) => (
+                <div
+                  key={reactor.userId + i}
+                  className="inline-block ring-2 ring-white dark:ring-gray-900 rounded-full"
+                  title={reactor.displayName}
+                >
+                  <Avatar name={reactor.displayName} avatarUrl={reactor.avatarUrl} size={22} />
+                </div>
+              ))}
+            </div>
+            <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 truncate max-w-[120px] sm:max-w-[180px]">
+              {formatReactorsSummary(item.recentReactors, language)}
+            </span>
+          </div>
+        )}
       </div>
     </article>
   );
