@@ -70,71 +70,73 @@ export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSel
 
   return (
     <div className="flex flex-col gap-6 pb-12">
-      {/* Header */}
-      <PageHeader
-        title={section === 'settings' ? (t('app.social.sections.settings') || 'Einstellungen') : t('app.gamification.tabTitle')}
-        subtitle={section === 'settings' ? t('app.settings.subtitle') : t('app.gamification.subtitle')}
-        action={
-          section === 'settings' ? (
-            <button
-              type="button"
-              onClick={() => {
-                hapticLight();
-                setSection('overview');
-              }}
-              aria-label={t('recipe.back') || 'Zurück'}
-              className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-2xl flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 active:scale-95 transition-all cursor-pointer border-none outline-none shadow-2xs"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                hapticSelection();
-                setSection('settings');
-              }}
-              aria-label={t('app.social.sections.settings') || 'Einstellungen'}
-              className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-2xl flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 active:scale-95 transition-all cursor-pointer border-none outline-none shadow-2xs"
-            >
-              <Settings className="w-5 h-5" />
-            </button>
-          )
-        }
-      />
-
-      {section !== 'settings' && (
-        <div className="flex rounded-2xl bg-gray-100 p-1 dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] mx-2 gap-1">
-          {tabs.map((tab) => {
-            const isActive = section === tab.key;
-            const Icon = tab.icon;
-            return (
-              <Button
-                key={tab.key}
-                onPress={() => {
-                  hapticSelection();
-                  setSection(tab.key);
+      {/* Sticky Header & Tabs Container */}
+      <div className="sticky top-[var(--app-sticky-top,0px)] z-30 -mx-4 px-4 pt-1 pb-3 bg-gray-50/95 dark:bg-gray-950/95 backdrop-blur-md flex flex-col gap-3 border-none">
+        <PageHeader
+          title={section === 'settings' ? (t('app.social.sections.settings') || 'Einstellungen') : t('app.gamification.tabTitle')}
+          subtitle={section === 'settings' ? t('app.settings.subtitle') : t('app.gamification.subtitle')}
+          action={
+            section === 'settings' ? (
+              <button
+                type="button"
+                onClick={() => {
+                  hapticLight();
+                  setSection('overview');
                 }}
-                className={`relative flex-1 rounded-xl py-2 px-3 min-h-[44px] text-xs sm:text-sm font-semibold border-none transition-all duration-200 cursor-pointer ${
-                  isActive
-                    ? 'bg-white text-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] dark:bg-gray-800 dark:text-white font-bold'
-                    : 'bg-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white font-medium'
-                }`}
+                aria-label={t('recipe.back') || 'Zurück'}
+                className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-2xl flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 active:scale-95 transition-all cursor-pointer border-none outline-none shadow-2xs"
               >
-                <span className="flex items-center justify-center gap-1.5 sm:gap-2">
-                  <Icon className="w-4 h-4 shrink-0" />
-                  <span className="truncate">{tab.label}</span>
-                  {tab.key === 'friends' && friendsBadgeCount > 0 && (
-                    <span className="flex h-4 min-w-[16px] items-center justify-center text-center leading-none rounded-full bg-rose-500 px-1 text-[10px] font-black text-white shadow-xs shrink-0">
-                      {friendsBadgeCount}
-                    </span>
-                  )}
-                </span>
-              </Button>
-            );
-          })}
-        </div>
-      )}
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  hapticSelection();
+                  setSection('settings');
+                }}
+                aria-label={t('app.social.sections.settings') || 'Einstellungen'}
+                className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-2xl flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 active:scale-95 transition-all cursor-pointer border-none outline-none shadow-2xs"
+              >
+                <Settings className="w-5 h-5" />
+              </button>
+            )
+          }
+        />
+
+        {section !== 'settings' && (
+          <div className="flex rounded-2xl bg-gray-100 p-1 dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] gap-1">
+            {tabs.map((tab) => {
+              const isActive = section === tab.key;
+              const Icon = tab.icon;
+              return (
+                <Button
+                  key={tab.key}
+                  onPress={() => {
+                    hapticSelection();
+                    setSection(tab.key);
+                  }}
+                  className={`relative flex-1 rounded-xl py-2 px-3 min-h-[44px] text-xs sm:text-sm font-semibold border-none transition-all duration-200 cursor-pointer ${
+                    isActive
+                      ? 'bg-white text-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] dark:bg-gray-800 dark:text-white font-bold'
+                      : 'bg-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white font-medium'
+                  }`}
+                >
+                  <span className="flex items-center justify-center gap-1.5 sm:gap-2">
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <span className="truncate">{tab.label}</span>
+                    {tab.key === 'friends' && friendsBadgeCount > 0 && (
+                      <span className="flex h-4 min-w-[16px] items-center justify-center text-center leading-none rounded-full bg-rose-500 px-1 text-[10px] font-black text-white shadow-xs shrink-0">
+                        {friendsBadgeCount}
+                      </span>
+                    )}
+                  </span>
+                </Button>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {section === 'overview' && <ProgressOverview onSelectRecipe={onSelectRecipe} />}
       {section === 'feed' && (
