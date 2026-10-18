@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button, Spinner } from '@heroui/react';
-import { Users, Camera, UtensilsCrossed, Share2, UserPlus, RefreshCw } from 'lucide-react';
+import { Users, Camera, UtensilsCrossed, Share2, UserPlus } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useSocial } from '../../context/SocialContext';
 import { useSocialFeed } from '../../hooks/useSocialFeed';
@@ -20,7 +20,7 @@ export default function FriendsFeedView({
 }: FriendsFeedViewProps) {
   const { t } = useI18n();
   const { friends, profile } = useSocial();
-  const { items, loading, refreshing, reload, toggleReaction, saveRecipe } = useSocialFeed();
+  const { items, loading, toggleReaction, saveRecipe } = useSocialFeed();
   const [previewRecipe, setPreviewRecipe] = useState<Recipe | null>(null);
 
   const handleShareCode = async () => {
@@ -133,25 +133,6 @@ export default function FriendsFeedView({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Feed subheader with refresh */}
-      <div className="flex items-center justify-between px-1">
-        <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-          {t('app.social.sections.feed') || 'Feed'}
-        </span>
-        <button
-          type="button"
-          onClick={() => {
-            hapticLight();
-            void reload();
-          }}
-          disabled={refreshing}
-          aria-label={t('common.refresh') || 'Aktualisieren'}
-          className="p-1.5 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors border-none bg-transparent cursor-pointer active:scale-90"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-emerald-500' : ''}`} />
-        </button>
-      </div>
-
       {/* Feed list */}
       <div className="flex flex-col gap-5">
         {items.map((item) => (
