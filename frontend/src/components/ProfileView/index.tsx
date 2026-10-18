@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@heroui/react';
-import { Trophy, User, Users, Settings, ArrowLeft } from 'lucide-react';
+import { Trophy, User, Users, Settings, ArrowLeft, Flame } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { PageHeader } from '../PageHeader';
 import ProgressOverview from './ProgressOverview';
 import LeaderboardView from '../Social/LeaderboardView';
 import FriendsView from '../Social/FriendsView';
+import FriendsFeedView from '../Social/FriendsFeedView';
 import { hapticSelection, hapticLight } from '../../utils/haptics';
 import { useMobileNavigationBack } from '../../hooks/useMobileNavigationBack';
 import { useSocial } from '../../context/SocialContext';
 import SettingsView from '../SettingsView';
 
-export type ProfileSection = 'overview' | 'leaderboard' | 'friends' | 'settings';
+export type ProfileSection = 'overview' | 'feed' | 'leaderboard' | 'friends' | 'settings';
 
 interface ProfileViewProps {
   /** Friend code from an invite link (#/invite/<code>) to prefill in Friends. */
@@ -24,15 +25,15 @@ interface ProfileViewProps {
 
 /**
  * The "Profil & Fortschritt" tab container. A segmented control switches between the
- * personal overview, the friends-and-me leaderboard, and friends list.
+ * personal overview, friend feed, leaderboard, and friends list.
  * App settings are accessible via the gear button in the header.
  */
 export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSelectRecipe, defaultSection = 'overview' }: ProfileViewProps) {
   const { t } = useI18n();
-  const { incomingRequests, refreshFriends } = useSocial();
+  const { incomingRequests, unreadSharesCount, refreshFriends, refreshShares, markSharesSeen } = useSocial();
   const [section, setSection] = useState<ProfileSection>(defaultSection);
 
-  const incomingCount = incomingRequests.length;
+  const friendsBadgeCount = incomingRequests.length + unreadSharesCount;
 
   // Sync section if defaultSection changes from parent navigation
   useEffect(() => {
@@ -45,7 +46,15 @@ export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSel
   // Refresh friends and incoming requests when Profile tab is opened
   useEffect(() => {
     refreshFriends();
-  }, [refreshFriends]);
+    refreshShares();
+  }, [refreshFriends, refreshShares]);
+
+  // Mark shares as seen when entering friends section
+  useEffect(() => {
+    if (section === 'friends' && unreadSharesCount > 0) {
+      markSharesSeen();
+    }
+  }, [section, unreadSharesCount, markSharesSeen]);
 
   // An incoming invite link jumps straight to the Friends section.
   useEffect(() => {
@@ -54,6 +63,7 @@ export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSel
 
   const tabs = [
     { key: 'overview' as const, label: t('app.social.sections.overview'), icon: User },
+    { key: 'feed' as const, label: t('app.social.sections.feed') || 'Feed', icon: Flame },
     { key: 'leaderboard' as const, label: t('app.social.sections.leaderboard'), icon: Trophy },
     { key: 'friends' as const, label: t('app.social.sections.friends'), icon: Users },
   ];
@@ -114,9 +124,9 @@ export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSel
                 <span className="flex items-center justify-center gap-1.5 sm:gap-2">
                   <Icon className="w-4 h-4 shrink-0" />
                   <span className="truncate">{tab.label}</span>
-                  {tab.key === 'friends' && incomingCount > 0 && (
+                  {tab.key === 'friends' && friendsBadgeCount > 0 && (
                     <span className="flex h-4 min-w-[16px] items-center justify-center text-center leading-none rounded-full bg-rose-500 px-1 text-[10px] font-black text-white shadow-xs shrink-0">
-                      {incomingCount}
+                      {friendsBadgeCount}
                     </span>
                   )}
                 </span>
@@ -127,6 +137,14 @@ export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSel
       )}
 
       {section === 'overview' && <ProgressOverview onSelectRecipe={onSelectRecipe} />}
+      {section === 'feed' && (
+        <FriendsFeedView
+          onGoToFriends={() => setSection('friends')}
+          onGoToCookbook={() => {
+            window.location.hash = '#/history';
+          }}
+        />
+      )}
       {section === 'leaderboard' && <LeaderboardView />}
       {section === 'friends' && (
         <FriendsView pendingInviteCode={pendingInviteCode} onInviteConsumed={onInviteConsumed} />
