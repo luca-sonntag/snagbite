@@ -16,7 +16,6 @@ export async function listCollections(userId: string): Promise<Collection[]> {
     id: row.id,
     userId: row.userId,
     name: row.name,
-    emoji: row.emoji ?? undefined,
     position: row.position,
     createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt),
     updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : String(row.updatedAt),
@@ -36,7 +35,6 @@ export async function createCollection(
       id,
       userId,
       name: col.name!,
-      emoji: col.emoji || null,
       position,
     })
     .returning();
@@ -45,7 +43,6 @@ export async function createCollection(
     id: row.id,
     userId: row.userId,
     name: row.name,
-    emoji: row.emoji ?? undefined,
     position: row.position,
     createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt),
     updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : String(row.updatedAt),
@@ -59,7 +56,6 @@ export async function updateCollection(
 ): Promise<Collection> {
   const updates: Record<string, unknown> = { updatedAt: new Date() };
   if (col.name !== undefined) updates.name = col.name;
-  if (col.emoji !== undefined) updates.emoji = col.emoji;
   if (col.position !== undefined) updates.position = col.position;
 
   const [row] = await db
@@ -74,7 +70,6 @@ export async function updateCollection(
     id: row.id,
     userId: row.userId,
     name: row.name,
-    emoji: row.emoji ?? undefined,
     position: row.position,
     createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt),
     updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : String(row.updatedAt),
