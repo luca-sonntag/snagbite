@@ -284,6 +284,7 @@ export default function RecipeDetails({
           isOpen={isShareModalOpen}
           onClose={() => setIsShareModalOpen(false)}
           recipe={recipe}
+          reelUrl={reelUrl}
         />
       )}
     </article>

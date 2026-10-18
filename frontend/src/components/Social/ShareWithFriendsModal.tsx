@@ -1,11 +1,12 @@
 import { useState, useCallback } from 'react';
 import { Button } from '@heroui/react';
-import { X, Send, Check, Users, Share2 } from 'lucide-react';
+import { X, Send, Check, Users, Share2, ExternalLink } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useSocial } from '../../context/SocialContext';
 import { useToast } from '../../context/ToastContext';
 import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight, hapticNotification, hapticSelection } from '../../utils/haptics';
+import { shareRecipeExternally } from '../../utils/shareRecipeExternally';
 import Avatar from './Avatar';
 import type { Recipe } from '../../types';
 
@@ -13,12 +14,14 @@ interface ShareWithFriendsModalProps {
   isOpen: boolean;
   onClose: () => void;
   recipe: Recipe;
+  reelUrl?: string;
 }
 
 export default function ShareWithFriendsModal({
   isOpen,
   onClose,
   recipe,
+  reelUrl,
 }: ShareWithFriendsModalProps) {
   const { t } = useI18n();
   const toast = useToast();
@@ -26,8 +29,32 @@ export default function ShareWithFriendsModal({
   const [selectedFriendIds, setSelectedFriendIds] = useState<Set<string>>(new Set());
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [sharingExternally, setSharingExternally] = useState(false);
 
   useModalOverlay(isOpen, onClose);
+
+  const handleExternalShare = async () => {
+    hapticLight();
+    setSharingExternally(true);
+    try {
+      const result = await shareRecipeExternally({
+        recipe,
+        reelUrl,
+        friendCode: profile?.friendCode,
+        t,
+      });
+      if (result === 'copied') {
+        hapticNotification('success');
+        toast.success(t('app.social.share.externalShareCopied'));
+      } else if (result === 'shared') {
+        hapticNotification('success');
+      }
+    } catch (err) {
+      console.warn('External share error:', err);
+    } finally {
+      setSharingExternally(false);
+    }
+  };
 
   const toggleFriend = useCallback((friendId: string) => {
     hapticSelection();
@@ -103,6 +130,40 @@ export default function ShareWithFriendsModal({
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-4 py-2 flex flex-col gap-4">
+          {/* 1. External Share Action Card */}
+          <button
+            type="button"
+            onClick={handleExternalShare}
+            disabled={sharingExternally}
+            className="w-full p-3.5 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-teal-500/10 to-emerald-500/5 dark:from-emerald-500/20 dark:via-teal-500/15 dark:to-emerald-500/10 border border-emerald-500/20 flex items-center justify-between gap-3 cursor-pointer active:scale-[0.98] transition-all group select-none shadow-2xs text-left"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm shadow-emerald-600/30 group-hover:scale-105 transition-transform">
+                <Share2 className="w-5 h-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="font-bold text-sm text-gray-900 dark:text-white block leading-snug">
+                  {t('app.social.share.externalTitle')}
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 block truncate mt-0.5">
+                  {t('app.social.share.externalSubtitle')}
+                </span>
+              </div>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 shadow-2xs group-hover:translate-x-0.5 transition-transform">
+              <ExternalLink className="w-4 h-4" />
+            </div>
+          </button>
+
+          {/* Section Divider */}
+          <div className="relative flex items-center py-0.5">
+            <div className="flex-grow border-t border-gray-100 dark:border-gray-800" />
+            <span className="flex-shrink mx-3 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+              {t('app.social.share.orWithFriends')}
+            </span>
+            <div className="flex-grow border-t border-gray-100 dark:border-gray-800" />
+          </div>
+
           {friends.length === 0 ? (
             <div className="flex flex-col items-center text-center p-6 rounded-2xl bg-gray-50 dark:bg-gray-800/50 gap-3">
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600">
