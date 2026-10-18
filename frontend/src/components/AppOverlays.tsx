@@ -37,6 +37,7 @@ export const AppOverlays: React.FC<AppOverlaysProps> = ({
   const [premiumModalLoaded, setPremiumModalLoaded] = useState(false);
   const [internalShowPreAdNotice, setInternalShowPreAdNotice] = useState(false);
   const pendingAdActionRef = useRef<(() => void) | null>(null);
+  const pendingAdCancelRef = useRef<(() => void) | null>(null);
 
   const isPreAdNoticeOpen = externalShowPreAdNotice ?? internalShowPreAdNotice;
 
@@ -57,8 +58,9 @@ export const AppOverlays: React.FC<AppOverlaysProps> = ({
   // Listen for pre-ad transparency notice events triggered across the app
   useEffect(() => {
     const handleShowNotice = (e: Event) => {
-      const customEvent = e as CustomEvent<{ onConfirm?: () => void }>;
+      const customEvent = e as CustomEvent<{ onConfirm?: () => void; onCancel?: () => void }>;
       pendingAdActionRef.current = customEvent.detail?.onConfirm ?? null;
+      pendingAdCancelRef.current = customEvent.detail?.onCancel ?? null;
       setPreAdNoticeOpen(true);
     };
 
@@ -68,21 +70,20 @@ export const AppOverlays: React.FC<AppOverlaysProps> = ({
     };
   }, []);
 
-  const handleConfirmPreAdNotice = () => {
+  const handleConfirmPreAdNotice = async () => {
     markPreAdNoticeSeen();
     setPreAdNoticeOpen(false);
     onConfirmPreAdNotice?.();
-    void initAds();
-    if (pendingAdActionRef.current) {
-      const action = pendingAdActionRef.current;
-      pendingAdActionRef.current = null;
-      action();
-    }
+    pendingAdCancelRef.current = null;
+    const action = pendingAdActionRef.current;
+    pendingAdActionRef.current = null;
+    await initAds();
+    action?.();
   };
 
   const handleClosePreAdNotice = () => {
     if (pendingAdActionRef.current) {
-      handleConfirmPreAdNotice();
+      void handleConfirmPreAdNotice();
       return;
     }
     setPreAdNoticeOpen(false);
@@ -90,7 +91,10 @@ export const AppOverlays: React.FC<AppOverlaysProps> = ({
 
   const handleOpenPremiumFromPreAd = () => {
     pendingAdActionRef.current = null;
+    const cancel = pendingAdCancelRef.current;
+    pendingAdCancelRef.current = null;
     setPreAdNoticeOpen(false);
+    cancel?.();
     setIsPremiumModalOpen(true);
   };
 

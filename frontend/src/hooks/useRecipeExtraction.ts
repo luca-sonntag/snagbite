@@ -19,6 +19,7 @@ import {
   EXTRACTION_INTERRUPTED_NOTIFICATION_ID,
 } from '../native';
 import { handleClientFrameRequest } from '../utils/videoFrames';
+import { awaitPreAdConsentIfNeeded } from '../utils/ads';
 
 // Tracks the currently in-flight extraction job across reloads/restarts, so a
 // still-running job can be resumed instead of the user re-submitting the same
@@ -531,6 +532,12 @@ export function useRecipeExtraction(
     buildBody: () => Promise<unknown>,
     meta: { mode: ExtractionMode; sourceLabel: string },
   ) => {
+    if (!isPremium) {
+      const alreadyHasRecipes = (limitStatus?.savedRecipes ?? 0) > 0;
+      const shouldProceed = await awaitPreAdConsentIfNeeded(alreadyHasRecipes);
+      if (!shouldProceed) return;
+    }
+
     // Proactively request local notification permissions on native startup of extraction
     if (isNative()) {
       requestNativeNotificationPermission().catch(err => console.warn('Failed to request notifications permission:', err));
@@ -703,7 +710,7 @@ export function useRecipeExtraction(
       }
       setIsPending(false);
     }
-  }, [getAccessToken, startPolling, fetchLimitStatus, isPremium, addJob, runSimulatedProgress, fetchCompletedRecipe, onHistoryRefresh, stopActivePolling, onExtractionSuccess, addToQueue, toast, t, language, addFailedJob, openQueueSheet]);
+  }, [getAccessToken, startPolling, fetchLimitStatus, isPremium, limitStatus?.savedRecipes, addJob, runSimulatedProgress, fetchCompletedRecipe, onHistoryRefresh, stopActivePolling, onExtractionSuccess, addToQueue, toast, t, language, addFailedJob, openQueueSheet]);
 
   const triggerExtraction = useCallback(async (targetUrl: string, force = false) => {
     const cleanUrl = targetUrl.trim();

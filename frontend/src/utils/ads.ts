@@ -508,11 +508,40 @@ export function markFirstExtractionCompleted(): void {
   } catch {}
 }
 
-/** Trigger the pre-ad transparency notice sheet, with an optional callback when confirmed. */
-export function triggerPreAdNotice(onConfirm?: () => void): void {
+/** Trigger the pre-ad transparency notice sheet, with optional callbacks for confirm vs cancel (Pro upgrade). */
+export function triggerPreAdNotice(onConfirm?: () => void, onCancel?: () => void): void {
   window.dispatchEvent(
-    new CustomEvent(SHOW_PRE_AD_NOTICE_EVENT, { detail: { onConfirm } })
+    new CustomEvent(SHOW_PRE_AD_NOTICE_EVENT, { detail: { onConfirm, onCancel } })
   );
+}
+
+/**
+ * Ensures the Pre-Ad Transparency Sheet and the Google AdMob UMP Consent dialog
+ * are fully resolved BEFORE a 2nd+ extraction starts, so the extraction does not
+ * run in the background while the user is reading the dialogs.
+ *
+ * Returns `false` if the user chose "Go Premium" in the sheet (aborting extraction).
+ */
+export async function awaitPreAdConsentIfNeeded(alreadyHasRecipes: boolean): Promise<boolean> {
+  const isFirstExtraction = !hasCompletedFirstExtraction() && !alreadyHasRecipes;
+  if (isFirstExtraction) {
+    return true;
+  }
+
+  markFirstExtractionCompleted();
+
+  if (!hasSeenPreAdNotice()) {
+    const confirmed = await new Promise<boolean>((resolve) => {
+      triggerPreAdNotice(
+        () => resolve(true),
+        () => resolve(false)
+      );
+    });
+    if (!confirmed) return false;
+  }
+
+  await initAds();
+  return true;
 }
 
 /**
