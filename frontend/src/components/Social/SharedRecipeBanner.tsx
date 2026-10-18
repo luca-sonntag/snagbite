@@ -96,7 +96,7 @@ export default function SharedRecipeBanner({ onSelectRecipe }: SharedRecipeBanne
 
   return createPortal(
     <>
-      <div className="fixed inset-x-0 top-0 z-[120] pointer-events-none flex justify-center p-3 sm:p-4 pt-[calc(var(--safe-area-inset-top,0px)+0.75rem)]">
+      <div className="fixed inset-x-0 top-0 z-[120] pointer-events-none flex justify-center p-3 sm:p-4 pt-[calc(var(--app-sticky-top,var(--safe-area-inset-top,0px))+1.5rem)] sm:pt-[calc(var(--app-sticky-top,var(--safe-area-inset-top,0px))+1.75rem)]">
         <div
           role="button"
           tabIndex={0}

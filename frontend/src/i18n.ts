@@ -788,7 +788,7 @@ export const uiTranslations = {
           view: 'Vorschau',
           save: 'Speichern',
           dismiss: 'Ausblenden',
-          from: 'Von {name}',
+          from: 'Von {name} empfohlen',
           savedSuccess: 'Rezept ins Kochbuch gespeichert!',
         },
         leaderboard: {
@@ -2481,7 +2481,7 @@ export const uiTranslations = {
           view: 'Preview',
           save: 'Save',
           dismiss: 'Dismiss',
-          from: 'From {name}',
+          from: 'Recommended by {name}',
           savedSuccess: 'Recipe saved to cookbook!',
         },
         leaderboard: {
