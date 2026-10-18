@@ -532,10 +532,13 @@ export function useRecipeExtraction(
     buildBody: () => Promise<unknown>,
     meta: { mode: ExtractionMode; sourceLabel: string },
   ) => {
-    if (!isPremium) {
+    let effectiveIsPremium = isPremium;
+    if (!effectiveIsPremium) {
       const alreadyHasRecipes = (limitStatus?.savedRecipes ?? 0) > 0;
-      const shouldProceed = await awaitPreAdConsentIfNeeded(alreadyHasRecipes);
-      if (!shouldProceed) return;
+      const { upgradedToPremium } = await awaitPreAdConsentIfNeeded(alreadyHasRecipes);
+      if (upgradedToPremium) {
+        effectiveIsPremium = true;
+      }
     }
 
     // Proactively request local notification permissions on native startup of extraction
@@ -606,7 +609,7 @@ export function useRecipeExtraction(
         });
       }
 
-      if (isPremium) {
+      if (effectiveIsPremium) {
         if (data.status === 'completed' && data.recipeId) {
           // Already extracted / cached: directly open recipe without creating a dummy background job
           if (data.isCached) {

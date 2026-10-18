@@ -508,10 +508,10 @@ export function markFirstExtractionCompleted(): void {
   } catch {}
 }
 
-/** Trigger the pre-ad transparency notice sheet, with optional callbacks for confirm vs cancel (Pro upgrade). */
-export function triggerPreAdNotice(onConfirm?: () => void, onCancel?: () => void): void {
+/** Trigger the pre-ad transparency notice sheet, with optional callback (receives `true` if user upgraded to Pro). */
+export function triggerPreAdNotice(onConfirm?: (upgradedToPremium?: boolean) => void): void {
   window.dispatchEvent(
-    new CustomEvent(SHOW_PRE_AD_NOTICE_EVENT, { detail: { onConfirm, onCancel } })
+    new CustomEvent(SHOW_PRE_AD_NOTICE_EVENT, { detail: { onConfirm } })
   );
 }
 
@@ -520,28 +520,32 @@ export function triggerPreAdNotice(onConfirm?: () => void, onCancel?: () => void
  * are fully resolved BEFORE a 2nd+ extraction starts, so the extraction does not
  * run in the background while the user is reading the dialogs.
  *
- * Returns `false` if the user chose "Go Premium" in the sheet (aborting extraction).
+ * If the user taps "Go Premium" inside the sheet:
+ * - If they purchase Pro, resolves `{ upgradedToPremium: true }` without showing AdMob consent.
+ * - If they close the PremiumModal without purchasing, `PreAdTransparencySheet` re-opens,
+ *   then shows AdMob consent on confirm, and resolves `{ upgradedToPremium: false }`.
  */
-export async function awaitPreAdConsentIfNeeded(alreadyHasRecipes: boolean): Promise<boolean> {
+export async function awaitPreAdConsentIfNeeded(
+  alreadyHasRecipes: boolean,
+): Promise<{ upgradedToPremium: boolean }> {
   const isFirstExtraction = !hasCompletedFirstExtraction() && !alreadyHasRecipes;
   if (isFirstExtraction) {
-    return true;
+    return { upgradedToPremium: false };
   }
 
   markFirstExtractionCompleted();
 
   if (!hasSeenPreAdNotice()) {
-    const confirmed = await new Promise<boolean>((resolve) => {
-      triggerPreAdNotice(
-        () => resolve(true),
-        () => resolve(false)
-      );
+    const upgradedToPremium = await new Promise<boolean>((resolve) => {
+      triggerPreAdNotice((upgraded) => resolve(Boolean(upgraded)));
     });
-    if (!confirmed) return false;
+    if (upgradedToPremium) {
+      return { upgradedToPremium: true };
+    }
   }
 
   await initAds();
-  return true;
+  return { upgradedToPremium: false };
 }
 
 /**
