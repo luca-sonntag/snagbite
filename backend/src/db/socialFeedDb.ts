@@ -15,6 +15,7 @@ import type {
   SharedRecipeItem,
   FeedReactionSummary,
   FeedReactionEmoji,
+  FeedReactor,
 } from '@cookbook/shared';
 
 const REACTION_EMOJIS: FeedReactionEmoji[] = ['🔥', '❤️', '😋'];
@@ -52,8 +53,7 @@ export async function getFriendsCookFeed(
   const distinctUserIds = [...new Set(events.map((e) => e.event.userId))];
   const distinctRecipeIds = [...new Set(events.map((e) => e.recipe.id))];
 
-  const [profilesMap, statsRows, savedRows, reactionsRows] = await Promise.all([
-    getProfilesByIds(distinctUserIds),
+  const [statsRows, savedRows, reactionsRows] = await Promise.all([
     db
       .select({ userId: userStats.userId, level: userStats.level })
       .from(userStats)
@@ -67,6 +67,10 @@ export async function getFriendsCookFeed(
       .from(cookEventReactions)
       .where(inArray(cookEventReactions.cookEventId, eventIds)),
   ]);
+
+  const reactorUserIds = reactionsRows.map((r) => r.userId);
+  const allUserIds = [...new Set([...distinctUserIds, ...reactorUserIds])];
+  const profilesMap = await getProfilesByIds(allUserIds);
 
   const levelMap = new Map(statsRows.map((s) => [s.userId, s.level]));
   const savedRecipeSet = new Set(savedRows.map((s) => s.recipeId));
@@ -97,6 +101,23 @@ export async function getFriendsCookFeed(
       };
     });
 
+    const seenReactors = new Set<string>();
+    const recentReactors: FeedReactor[] = [];
+    for (const r of userReactions) {
+      if (!seenReactors.has(r.userId)) {
+        seenReactors.add(r.userId);
+        const p = profilesMap.get(r.userId);
+        if (p) {
+          recentReactors.push({
+            userId: r.userId,
+            displayName: p.displayName,
+            avatarUrl: p.avatarUrl,
+            emoji: r.emoji as FeedReactionEmoji,
+          });
+        }
+      }
+    }
+
     items.push({
       cookEventId: event.id,
       cookedAt: event.cookedAt.toISOString(),
@@ -116,6 +137,7 @@ export async function getFriendsCookFeed(
       recipe: recipe as any,
       isRecipeSaved: savedRecipeSet.has(recipe.id),
       reactions: reactionSummaries,
+      recentReactors,
     });
   }
 

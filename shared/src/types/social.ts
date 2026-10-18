@@ -46,6 +46,13 @@ export interface FeedReactionSummary {
   reactedByMe: boolean;
 }
 
+export interface FeedReactor {
+  userId: string;
+  displayName: string;
+  avatarUrl: string | null;
+  emoji: FeedReactionEmoji;
+}
+
 export interface FriendFeedItem {
   cookEventId: string;
   cookedAt: string;
@@ -65,6 +72,7 @@ export interface FriendFeedItem {
   recipe: import('./recipes.js').Recipe;
   isRecipeSaved: boolean;
   reactions: FeedReactionSummary[];
+  recentReactors?: FeedReactor[];
 }
 
 export interface SharedRecipeItem {
