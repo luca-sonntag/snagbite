@@ -106,6 +106,9 @@
 
 ### 📦 4. Dependencies & Pakete
 
+- [ ] **`@capacitor/filesystem` Android Plugin & Dependency:**
+  - In `frontend/package.json` hinzugefügt (`@capacitor/filesystem@^8.1.5`), um Rezept-Coverbilder in den nativen Cache (`Directory.Cache`) zu schreiben, damit sie beim Teilen (WhatsApp, Telegram, Signal etc.) als vollwertiger Bild-Anhang (`Share.share({ files: [...] })`) mit Rezepttext als Caption übergeben werden können.
+  - **Nativer Play Store Build erforderlich:** Um die native Bild-Übergabe auf Android zu aktivieren, ist ein nativer Google Play Build (`deploy.ps1 -All -Bump patch`) zwingend erforderlich (`cap sync android` aktualisiert `capacitor.build.gradle`). Bis zum Installieren des neuen APKs fängt die App ein Fehlen des Plugins defensiv ab und fällt nahtlos auf die reine Text-Teilen-Variante zurück.
 - [x] **`driver.js` Frontend-Dependency:**
   - In `frontend/package.json` hinzugefügt für die NUX Spotlight Tours.
   - Wird per Vite dynamisch (`import('driver.js')`) in das Frontend-Bundle kompiliert. Kein nativer Build zwingend erforderlich; läuft vollständig über Web-Assets.
