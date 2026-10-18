@@ -27,6 +27,7 @@ import CookbookHome from './CookbookHome';
 import BulkActionBar from './BulkActionBar';
 import CatalogLoadingState from './CatalogLoadingState';
 import { buildListRoute, isCatalogListRoute, parseListRoute, getBaseFiltersForPreset, type CatalogPreset } from './catalogRoutes';
+import { useCatalogScrollRestoration } from './useCatalogScrollRestoration';
 
 interface SavedCatalogProps {
   history: SavedRecipe[];
@@ -201,6 +202,20 @@ export default function SavedCatalog({
   const selectedJobResolved = selectedJob
     ? (completedJobs.find(j => j.recipeId === selectedJob.recipeId) ?? selectedJob)
     : null;
+
+  const isViewingRecipe = Boolean(selectedJobResolved);
+  const { recordCurrentScroll } = useCatalogScrollRestoration({
+    catalogSubPath,
+    isViewingRecipe,
+  });
+
+  const onCardClick = useCallback(
+    (e: React.MouseEvent, job: SavedRecipe) => {
+      recordCurrentScroll();
+      handleCardClick(e, job);
+    },
+    [recordCurrentScroll, handleCardClick]
+  );
   const [isCollectionSheetOpen, setIsCollectionSheetOpen] = useState(false);
   const [collectionSheetJob, setCollectionSheetJob] = useState<SavedRecipe | undefined>(undefined);
   const [collectionSheetBulkJobs, setCollectionSheetBulkJobs] = useState<SavedRecipe[]>([]);
@@ -461,128 +476,106 @@ export default function SavedCatalog({
   // ---------------------------------------------------------------------------
   // Level 3: recipe detail
   // ---------------------------------------------------------------------------
-  if (selectedJobResolved) {
-    return (
-      <div className="flex flex-col gap-4">
-        {selectedJobResolved.recipe && (
-          <RecipeDetails
-            key={selectedJobResolved.recipeId}
-            recipe={selectedJobResolved.recipe}
-            onAddIngredients={onAddIngredients}
-            onDelete={async () => {
-              const parentRecipeId = selectedJobResolved.recipe?.parentRecipeId;
-              await handleDeleteJob({ stopPropagation: () => { } } as any, selectedJobResolved.recipeId);
-              if (parentRecipeId) {
-                const parentJob = history.find((j) => j.recipeId === parentRecipeId);
-                if (parentJob) {
-                  setSelectedJob(parentJob);
-                  return;
-                }
-              }
-              navigateCatalog(listRouteBeforeDetailRef.current);
-            }}
-            reelUrl={selectedJobResolved.recipe.sourceUrl ?? ''}
-            createdAt={selectedJobResolved.addedAt}
-            onBack={() => navigateCatalog(listRouteBeforeDetailRef.current)}
-            flags={selectedJobResolved.flags}
-            onNavigateToShoppingList={onNavigateToShoppingList}
-            shoppingListCount={shoppingListCount}
-            onRemixSuccess={onRemixSuccess}
-            onReplaceCurrent={() => {
-              fetchHistory?.();
-            }}
-            isParentAvailable={selectedJobResolved.recipe?.parentRecipeId ? history.some(j => j.recipeId === selectedJobResolved.recipe?.parentRecipeId) : false}
-            parentRecipeTitle={selectedJobResolved.recipe?.parentRecipeTitle || (selectedJobResolved.recipe?.parentRecipeId ? history.find(j => j.recipeId === selectedJobResolved.recipe?.parentRecipeId)?.recipe?.title : null)}
-            onNavigateToRecipe={async (recipeId, remixRecipe) => {
-              const parentJob = history.find(j => j.recipeId === recipeId);
+  const recipeDetailView = selectedJobResolved && (
+    <div className="flex flex-col gap-4">
+      {selectedJobResolved.recipe && (
+        <RecipeDetails
+          key={selectedJobResolved.recipeId}
+          recipe={selectedJobResolved.recipe}
+          onAddIngredients={onAddIngredients}
+          onDelete={async () => {
+            const parentRecipeId = selectedJobResolved.recipe?.parentRecipeId;
+            await handleDeleteJob({ stopPropagation: () => { } } as any, selectedJobResolved.recipeId);
+            if (parentRecipeId) {
+              const parentJob = history.find((j) => j.recipeId === parentRecipeId);
               if (parentJob) {
                 setSelectedJob(parentJob);
                 return;
               }
-              if (remixRecipe) {
-                setSelectedJob({
-                  recipeId,
-                  recipe: remixRecipe,
-                  source: 'remix',
-                  addedAt: remixRecipe.createdAt || new Date().toISOString(),
-                  updatedAt: remixRecipe.updatedAt || new Date().toISOString(),
-                  isFavorite: false,
-                  flags: [],
-                  collectionIds: [],
+            }
+            navigateCatalog(listRouteBeforeDetailRef.current);
+          }}
+          reelUrl={selectedJobResolved.recipe.sourceUrl ?? ''}
+          createdAt={selectedJobResolved.addedAt}
+          onBack={() => navigateCatalog(listRouteBeforeDetailRef.current)}
+          flags={selectedJobResolved.flags}
+          onNavigateToShoppingList={onNavigateToShoppingList}
+          shoppingListCount={shoppingListCount}
+          onRemixSuccess={onRemixSuccess}
+          onReplaceCurrent={() => {
+            fetchHistory?.();
+          }}
+          isParentAvailable={selectedJobResolved.recipe?.parentRecipeId ? history.some(j => j.recipeId === selectedJobResolved.recipe?.parentRecipeId) : false}
+          parentRecipeTitle={selectedJobResolved.recipe?.parentRecipeTitle || (selectedJobResolved.recipe?.parentRecipeId ? history.find(j => j.recipeId === selectedJobResolved.recipe?.parentRecipeId)?.recipe?.title : null)}
+          onNavigateToRecipe={async (recipeId, remixRecipe) => {
+            const parentJob = history.find(j => j.recipeId === recipeId);
+            if (parentJob) {
+              setSelectedJob(parentJob);
+              return;
+            }
+            if (remixRecipe) {
+              setSelectedJob({
+                recipeId,
+                recipe: remixRecipe,
+                source: 'remix',
+                addedAt: remixRecipe.createdAt || new Date().toISOString(),
+                updatedAt: remixRecipe.updatedAt || new Date().toISOString(),
+                isFavorite: false,
+                flags: [],
+                collectionIds: [],
+              });
+              return;
+            }
+            try {
+              const token = await getAccessToken?.();
+              if (token) {
+                const res = await fetch(apiUrl(`/api/recipes/${recipeId}`), {
+                  headers: { Authorization: `Bearer ${token}` }
                 });
-                return;
-              }
-              try {
-                const token = await getAccessToken?.();
-                if (token) {
-                  const res = await fetch(apiUrl(`/api/recipes/${recipeId}`), {
-                    headers: { Authorization: `Bearer ${token}` }
-                  });
-                  if (res.ok) {
-                    const data = await res.json();
-                    if (data.success && data.recipe) {
-                      setSelectedJob({
-                        recipeId: data.recipeId || recipeId,
-                        recipe: data.recipe,
-                        source: (data.source as any) || 'remix',
-                        addedAt: data.addedAt || new Date().toISOString(),
-                        updatedAt: data.updatedAt || new Date().toISOString(),
-                        isFavorite: data.isFavorite ?? false,
-                        flags: data.flags ?? [],
-                        collectionIds: data.collectionIds ?? [],
-                      });
-                    }
+                if (res.ok) {
+                  const data = await res.json();
+                  if (data.success && data.recipe) {
+                    setSelectedJob({
+                      recipeId: data.recipeId || recipeId,
+                      recipe: data.recipe,
+                      source: (data.source as any) || 'remix',
+                      addedAt: data.addedAt || new Date().toISOString(),
+                      updatedAt: data.updatedAt || new Date().toISOString(),
+                      isFavorite: data.isFavorite ?? false,
+                      flags: data.flags ?? [],
+                      collectionIds: data.collectionIds ?? [],
+                    });
                   }
                 }
-              } catch (err) {
-                console.error('[SavedCatalog] Failed to load recipe by id:', err);
               }
-            }}
-            onAssignCollections={() => handleAssignCollectionsClick(selectedJobResolved)}
-            onManageFlags={() => handleManageFlagsClick(selectedJobResolved)}
-            isFavorite={selectedJobResolved.isFavorite}
-            onToggleFavorite={() => toggleFavorite(selectedJobResolved)}
-            getAccessToken={getAccessToken}
-            onCoverUpdated={(recipeId, imageUrl, isAiCover) => {
-              onUpdateRecipeCover?.(recipeId, imageUrl, isAiCover);
-              if (selectedJob && (selectedJob.recipeId === recipeId || selectedJob.recipe?.id === recipeId) && selectedJob.recipe) {
-                setSelectedJob({
-                  ...selectedJob,
-                  recipe: {
-                    ...selectedJob.recipe,
-                    imageUrl,
-                    imageUrls: [imageUrl, ...(selectedJob.recipe.imageUrls || []).filter((u: string) => u !== imageUrl)],
-                    isAiCover,
-                    isCoverGenerating: false,
-                  },
-                });
-              }
-            }}
-          />
-        )}
-
-        <CollectionSheet
-          isOpen={isCollectionSheetOpen}
-          onClose={() => setIsCollectionSheetOpen(false)}
-          job={collectionSheetJob}
-          selectedJobs={collectionSheetBulkJobs}
-          initialMode={!collectionSheetJob && collectionSheetBulkJobs.length === 0 ? 'manage' : 'assign'}
-          onAssign={assignCollections}
-          onUpdated={() => refreshCollections()}
-        />
-        <FlagSheet
-          isOpen={isFlagSheetOpen}
-          onClose={() => setIsFlagSheetOpen(false)}
-          job={flagSheetJob}
-          allExistingFlags={allExistingFlags}
-          onSave={async (j, flags) => {
-            await setRecipeFlags(j, flags);
+            } catch (err) {
+              console.error('[SavedCatalog] Failed to load recipe by id:', err);
+            }
+          }}
+          onAssignCollections={() => handleAssignCollectionsClick(selectedJobResolved)}
+          onManageFlags={() => handleManageFlagsClick(selectedJobResolved)}
+          isFavorite={selectedJobResolved.isFavorite}
+          onToggleFavorite={() => toggleFavorite(selectedJobResolved)}
+          getAccessToken={getAccessToken}
+          onCoverUpdated={(recipeId, imageUrl, isAiCover) => {
+            onUpdateRecipeCover?.(recipeId, imageUrl, isAiCover);
+            if (selectedJob && (selectedJob.recipeId === recipeId || selectedJob.recipe?.id === recipeId) && selectedJob.recipe) {
+              setSelectedJob({
+                ...selectedJob,
+                recipe: {
+                  ...selectedJob.recipe,
+                  imageUrl,
+                  imageUrls: [imageUrl, ...(selectedJob.recipe.imageUrls || []).filter((u: string) => u !== imageUrl)],
+                  isAiCover,
+                  isCoverGenerating: false,
+                },
+              });
+            }
           }}
         />
-        <PremiumModal isOpen={isPremiumModalOpen} onOpenChange={setIsPremiumModalOpen} />
-      </div>
-    );
-  }
+      )}
+    </div>
+  );
 
   // ---------------------------------------------------------------------------
   // Empty / loading
@@ -625,7 +618,8 @@ export default function SavedCatalog({
   // Level 1 & 2: Unified Layout
   // ---------------------------------------------------------------------------
   return (
-    <div className="flex flex-col gap-2">
+    <>
+      <div hidden={isViewingRecipe} className="flex flex-col gap-2">
       {isListLevel && (
         <CatalogFilters
           title={listTitle}
@@ -669,7 +663,7 @@ export default function SavedCatalog({
           allFlags={allFlags}
           formatTotalTime={formatTotalTime}
           onOpenList={openList}
-          onOpenRecipe={(e, job) => handleCardClick(e, job)}
+          onOpenRecipe={(e, job) => onCardClick(e, job)}
           onAddCollection={handleAddCollectionClick}
           onManageCollections={handleAddCollectionClick}
           isSelectMode={isSelectMode}
@@ -724,7 +718,7 @@ export default function SavedCatalog({
               isSelected={selectedIds.has(job.recipeId)}
               isSelectMode={isSelectMode}
               bindLongPress={bindLongPress(job.recipeId, job)}
-              onClick={(e) => handleCardClick(e, job)}
+              onClick={(e) => onCardClick(e, job)}
             />
           ))}
         </div>
@@ -739,7 +733,7 @@ export default function SavedCatalog({
               totalTime={formatTotalTime(job.recipe!)}
               recipeTags={getRecipeTags(job.recipe!)}
               bindLongPress={bindLongPress(job.recipeId, job)}
-              onClick={(e) => handleCardClick(e, job)}
+              onClick={(e) => onCardClick(e, job)}
               showRemix={true}
             />
           ))}
@@ -792,6 +786,9 @@ export default function SavedCatalog({
           }
         }}
       />
+      </div>
+
+      {recipeDetailView}
 
       {sheets}
 
@@ -822,6 +819,6 @@ export default function SavedCatalog({
           />
         );
       })()}
-    </div>
+    </>
   );
 }
