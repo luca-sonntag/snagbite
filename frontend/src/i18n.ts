@@ -459,7 +459,7 @@ export const uiTranslations = {
         },
         organize: {
           title: 'Ordnen & Filtern',
-          desc: 'Lege eigene Sammlungen mit Emoji & Farbe an, markiere Favoriten und vergib Labels. Filtere dein Kochbuch mit einem Tipp nach Sammlung, Favorit, Kochzeit oder Label.',
+          desc: 'Lege eigene Sammlungen an, markiere Favoriten und vergib Labels. Filtere dein Kochbuch mit einem Tipp nach Sammlung, Favorit, Kochzeit oder Label.',
         },
         shopping: {
           title: 'Smarte Einkaufsliste',
@@ -503,7 +503,7 @@ export const uiTranslations = {
         },
         collections: {
           title: 'Eigene Sammlungen',
-          desc: "Organisiere deine Gerichte in farbigen Ordnern mit Emojis – z. B. 'Schnelle Feierabendküche' oder 'Meal Prep'.",
+          desc: "Organisiere deine Gerichte in eigenen Sammlungen – z. B. 'Schnelle Feierabendküche' oder 'Meal Prep'.",
         },
         firstCard: {
           title: 'Empfehlungen & Aktionen',
@@ -1626,7 +1626,6 @@ export const uiTranslations = {
       editCollection: 'Sammlung bearbeiten',
       deleteCollection: 'Sammlung löschen',
       collectionName: 'Name der Sammlung',
-      collectionEmoji: 'Symbol / Emoji',
       collectionPlaceholder: 'z.B. Sonntagsbrunch',
       collectionNameRequired: 'Name der Sammlung ist erforderlich',
       flagsTitle: 'Labels / Tags',
@@ -2152,7 +2151,7 @@ export const uiTranslations = {
         },
         organize: {
           title: 'Organize & Filter',
-          desc: 'Create your own collections with emoji & color, mark favorites and add labels. Filter your cookbook with one tap by collection, favorite, cook time or label.',
+          desc: 'Create your own collections, mark favorites and add labels. Filter your cookbook with one tap by collection, favorite, cook time or label.',
         },
         shopping: {
           title: 'Smart Shopping List',
@@ -2196,7 +2195,7 @@ export const uiTranslations = {
         },
         collections: {
           title: 'Your collections',
-          desc: "Organize dishes in colored folders with emojis – e.g. 'Quick dinners' or 'Meal prep'.",
+          desc: "Organize dishes in custom collections – e.g. 'Quick dinners' or 'Meal prep'.",
         },
         firstCard: {
           title: 'Recommendations & actions',
@@ -3318,7 +3317,6 @@ export const uiTranslations = {
       editCollection: 'Edit Collection',
       deleteCollection: 'Delete Collection',
       collectionName: 'Collection Name',
-      collectionEmoji: 'Icon / Emoji',
       collectionPlaceholder: 'e.g. Sunday Brunch',
       collectionNameRequired: 'Collection name is required',
       flagsTitle: 'Labels & Flags',
