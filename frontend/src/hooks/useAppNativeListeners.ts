@@ -309,11 +309,11 @@ export function useAppNativeListeners({
   // Dev mode re-extraction trigger
   useEffect(() => {
     const handleDevReExtract = (e: Event) => {
-      const customEvent = e as CustomEvent<{ url: string }>;
+      const customEvent = e as CustomEvent<{ url: string; force?: boolean }>;
       if (customEvent.detail?.url) {
         replace('extract');
         setUrl(customEvent.detail.url);
-        triggerExtraction(customEvent.detail.url);
+        triggerExtraction(customEvent.detail.url, customEvent.detail.force ?? true);
       }
     };
     window.addEventListener('app:dev-re-extract', handleDevReExtract);

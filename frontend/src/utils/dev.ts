@@ -69,8 +69,8 @@ export function useDevToolsActive(isAdmin: boolean): boolean {
  * Triggers a full recipe re-extraction with Gemini in development mode.
  * Dispatches an event that switches to the extraction view and executes the job.
  */
-export function devReExtractRecipe(url: string): void {
+export function devReExtractRecipe(url: string, force = true): void {
   if (!url || typeof window === 'undefined') return;
-  console.info('[DEV] Triggering re-extraction for URL:', url);
-  window.dispatchEvent(new CustomEvent('app:dev-re-extract', { detail: { url } }));
+  console.info('[DEV] Triggering re-extraction for URL:', url, 'force:', force);
+  window.dispatchEvent(new CustomEvent('app:dev-re-extract', { detail: { url, force } }));
 }

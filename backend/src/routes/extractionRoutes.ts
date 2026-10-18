@@ -87,6 +87,14 @@ async function enforceExtractionQuota(req: Request): Promise<void> {
     console.warn(`Failed to fetch user metadata for gating checks:`, err);
   }
 
+  const adminEmails = config.ADMIN_EMAILS.split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  const emailToCheck = req.userEmail || user?.email;
+  if (emailToCheck && adminEmails.includes(emailToCheck.toLowerCase())) {
+    return;
+  }
+
   await cleanStaleJobsForUser(userId).catch((err) =>
     console.warn(`[extraction] Failed to clean stale jobs for user ${userId}:`, err)
   );
@@ -175,9 +183,10 @@ extractionRoutes.post('/extract-recipe', async (req: Request, res: Response): Pr
 
     const normalizedUrl = normalizeUrl(cleanUrl);
     const targetLanguage = resolveTargetLanguage(bodyLanguage, req.header('accept-language'));
+    const isForce = force === true || force === 'true';
 
     // Cross-user instant recipe reuse: check if recipe already exists in target language (unless force re-extraction)
-    if (!force) {
+    if (!isForce) {
       const reusableRecipe = await findReusableRecipe(normalizedUrl, targetLanguage);
       if (reusableRecipe) {
         const alreadyInCookbook = await isInLibrary(req.userId!, reusableRecipe.id!);

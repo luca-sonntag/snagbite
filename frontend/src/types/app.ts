@@ -83,7 +83,7 @@ export interface UseAppNativeListenersProps {
   handleExtractionSuccess: (recipeId: string, preloadedRecipe?: Recipe) => void;
   replayOnboarding: () => void;
   limitStatus: LimitStatus | null;
-  triggerExtraction: (url: string) => void;
+  triggerExtraction: (url: string, force?: boolean) => void;
   isPending: boolean;
   isPremium: boolean;
 }
