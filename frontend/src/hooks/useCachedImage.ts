@@ -31,14 +31,35 @@ async function compressAndConvertToBase64(url: string): Promise<string> {
     const fetchResponse = await fetch(`data:image/jpeg;base64,${base64Data}`);
     blob = await fetchResponse.blob();
   } else {
-    // On Web, use standard fetch (will fail if the image server strictly enforces CORS)
-    const response = await fetch(fetchUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch image via web fetch: ${response.statusText}`);
+    // On Web, try standard fetch first. If blocked by CORS or 403 (common on Instagram/TikTok CDNs),
+    // fall back to the backend streaming proxy which forwards proper Referer and User-Agent headers.
+    let response: Response | null = null;
+    const isExternal = fetchUrl.startsWith('http://') || fetchUrl.startsWith('https://');
+
+    if (!isExternal) {
+      response = await fetch(fetchUrl);
+    } else {
+      try {
+        response = await fetch(fetchUrl);
+        if (!response.ok) {
+          response = null;
+        }
+      } catch {
+        response = null;
+      }
+
+      if (!response) {
+        const proxyUrl = apiUrl(`/api/extract-recipe/proxy-video?url=${encodeURIComponent(url)}`);
+        response = await fetch(proxyUrl);
+      }
+    }
+
+    if (!response || !response.ok) {
+      throw new Error(`Failed to fetch image via web fetch: ${response?.statusText ?? 'Network error'}`);
     }
 
     const contentType = response.headers.get('content-type') ?? '';
-    if (!contentType.startsWith('image/')) {
+    if (contentType && !contentType.startsWith('image/') && !contentType.startsWith('application/octet-stream')) {
       throw new Error(`URL did not return an image (got ${contentType})`);
     }
 
