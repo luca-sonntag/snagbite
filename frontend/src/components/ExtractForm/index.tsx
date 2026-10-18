@@ -116,7 +116,6 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
     },
   });
 
-
   const handleDemoClick = async (demoUrl: string, recipe?: import('../../types').Recipe) => {
     if (isPending || atConcurrencyLimit) return;
     if (recipe && recipe.id && onSavePublicRecipe) {
@@ -200,16 +199,16 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
 
           {/* Kochbuch voll / Limit Status unter den Import-Karten */}
           {cookbookFull ? (
-            <div className="flex justify-center -mt-1">
-              <PremiumHint
-                variant="inline"
-                onClick={() => setIsPremiumModalOpen(true)}
-                label={t('premium.hint.catalogFull', {
-                  count: limitStatus?.savedRecipes ?? 0,
-                  limit: limitStatus?.maxSavedRecipes ?? 100,
-                })}
-              />
-            </div>
+            <PremiumHint
+              variant="banner"
+              className="-mt-1"
+              onClick={() => setIsPremiumModalOpen(true)}
+              label={t('premium.hint.catalogFull', {
+                count: limitStatus?.savedRecipes ?? 0,
+                limit: limitStatus?.maxSavedRecipes ?? 100,
+              })}
+              cta={t('premium.hint.upgrade')}
+            />
           ) : extractionLimitReached ? (
             <div className="flex flex-col gap-2.5 -mt-1">
               <PremiumHint
