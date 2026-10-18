@@ -139,6 +139,15 @@ export function useSocialFeed() {
     loadInitial();
   }, [loadInitial]);
 
+  // Live reload on friend cook events or explicit refresh signals
+  useEffect(() => {
+    const handleFeedRefresh = () => {
+      void reload();
+    };
+    window.addEventListener('feed:refresh', handleFeedRefresh);
+    return () => window.removeEventListener('feed:refresh', handleFeedRefresh);
+  }, [reload]);
+
   return {
     items,
     loading,

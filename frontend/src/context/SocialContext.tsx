@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { apiUrl } from '../api';
 import { useAuth } from './AuthContext';
+import { useSocialLiveSync } from '../hooks/useSocialLiveSync';
 import type {
   Profile,
   FriendSummary,
@@ -122,6 +123,9 @@ export function SocialProvider({ children }: { children: React.ReactNode }) {
       setUnreadSharesCount(0);
     }
   }, [session, refreshProfile, refreshFriends, refreshShares]);
+
+  // Live-sync for push notifications & app resume
+  useSocialLiveSync({ session, refreshShares, refreshFriends });
 
   const updateDisplayName = useCallback(
     async (name: string) => {

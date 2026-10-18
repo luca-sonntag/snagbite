@@ -16,13 +16,21 @@ const PUSH_CHANNEL_ID = 'ai-suggestions';
 let currentToken: string | null = null;
 let listenersBound = false;
 
-/** What a tapped push carries in its data payload (set by the backend worker). */
-export interface PushTapPayload {
+export const PUSH_RECEIVED_EVENT = 'app:push-received';
+
+/** What a delivered push notification carries in its data payload. */
+export interface PushReceivedPayload {
   type?: string;
   jobId?: string;
+  recipeId?: string;
   route?: string;
+  section?: string;
   remixIdea?: string;
+  [key: string]: unknown;
 }
+
+/** What a tapped push carries in its data payload (set by the backend worker). */
+export interface PushTapPayload extends PushReceivedPayload {}
 
 async function ensureSuggestionsChannel(): Promise<void> {
   if (Capacitor.getPlatform() !== 'android') return;
@@ -161,6 +169,9 @@ export function registerPushTapHandler(onTap: (payload: PushTapPayload) => void)
 
   const receivedHandle = PushNotifications.addListener('pushNotificationReceived', (notification) => {
     console.log('[push] Received foreground push notification:', notification);
+    const notificationObj = (notification ?? {}) as any;
+    const data = (notificationObj.data ?? notificationObj.extra ?? notification ?? {}) as PushReceivedPayload;
+    window.dispatchEvent(new CustomEvent(PUSH_RECEIVED_EVENT, { detail: data }));
   });
 
   return () => {
