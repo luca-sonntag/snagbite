@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { isCatalogListRoute } from '../components/SavedCatalog/catalogRoutes';
 
 export type AppTab = 'extract' | 'history' | 'meal-planner' | 'shopping-list' | 'progress' | 'settings' | 'admin' | 'invite';
 
@@ -76,10 +77,30 @@ export function useHashRouter() {
     return { tab: 'history', subPath: null };
   });
 
+  const prevRouteRef = useRef<ParsedRoute>(route);
+
   // Sync URL → state on external hash changes (browser back/forward)
   useEffect(() => {
     const onHashChange = () => {
-      setRoute(parseHash(window.location.hash));
+      const nextRoute = parseHash(window.location.hash);
+      const prevRoute = prevRouteRef.current;
+      prevRouteRef.current = nextRoute;
+
+      setRoute(nextRoute);
+
+      const isPrevRecipeInCookbook =
+        prevRoute.tab === 'history' &&
+        Boolean(prevRoute.subPath && !isCatalogListRoute(prevRoute.subPath));
+      const isNextCookbookListOrHome =
+        nextRoute.tab === 'history' &&
+        (!nextRoute.subPath || isCatalogListRoute(nextRoute.subPath));
+
+      if (isPrevRecipeInCookbook && isNextCookbookListOrHome) {
+        // Returning to cookbook from recipe: do not reset scroll to top!
+        // SavedCatalog will restore the exact scroll position.
+        return;
+      }
+
       window.scrollTo({ top: 0, behavior: 'instant' });
     };
     window.addEventListener('hashchange', onHashChange);
