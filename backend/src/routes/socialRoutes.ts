@@ -25,11 +25,13 @@ import { user as userTable } from '../db/schema/auth.js';
 import { eq } from 'drizzle-orm';
 import { AppError, sendAppError } from '../errors.js';
 import { leaderboardRoutes } from './leaderboardRoutes.js';
+import { socialFeedRoutes } from './socialFeedRoutes.js';
 import { notifyFriendRequest, notifyFriendAccepted } from '../push/socialNotifications.js';
 import type { Profile, FriendSummary, FriendRequest } from '../types.js';
 
 export const socialRoutes = Router();
 socialRoutes.use(leaderboardRoutes);
+socialRoutes.use(socialFeedRoutes);
 
 const MAX_DISPLAY_NAME_LEN = 40;
 
