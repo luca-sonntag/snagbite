@@ -4,13 +4,12 @@ import CachedImage from '../CachedImage';
 import { hapticLight } from '../../utils/haptics';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
-import { useSocial } from '../../context/SocialContext';
 import { getRecipeCalories } from '../../utils/formatNutrition';
 import { getHealthScoreLetter, getHealthScoreColor } from '../RecipeDetails/HealthScoreBadge';
 import { useCachedImage } from '../../hooks/useCachedImage';
 import HeroTopBadges, { type HeroBadgeVariant } from './HeroTopBadges';
 import HeroInfoPills from './HeroInfoPills';
-import { resolveOwnAccountName, resolveHeroAuthorHandle } from './heroAuthorUtils';
+import { resolveHeroAuthorHandle } from './heroAuthorUtils';
 
 export type { HeroBadgeVariant };
 
@@ -56,7 +55,6 @@ export default function RecipeHeroCard({
 }: RecipeHeroCardProps) {
   const { t } = useI18n();
   const { user } = useAuth();
-  const { profile } = useSocial();
 
   const r = recipe || job?.recipe;
   if (!r) return null;
@@ -74,14 +72,14 @@ export default function RecipeHeroCard({
 
   const hasMultipleThemeRecipes = Boolean(themeRecipeCount && themeRecipeCount >= 2 && onOpenTheme);
 
-  const ownAccountName = resolveOwnAccountName(user, profile);
+  const byYouLabel = t('catalog.magazine.heroAuthorByYou') || 'Von dir';
   const authorHandle = resolveHeroAuthorHandle({
     sourceHandle: r.sourceHandle,
     createdBy: r.createdBy,
     isCommunity,
     jobSource: job?.source,
     currentUserId: user?.id,
-    accountName: ownAccountName,
+    byYouLabel,
   });
 
   return (

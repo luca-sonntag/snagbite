@@ -7,39 +7,15 @@ export interface ResolveHeroAuthorOptions {
   isCommunity?: boolean;
   jobSource?: UserRecipeSource | null;
   currentUserId?: string | null;
-  accountName?: string | null;
+  byYouLabel?: string | null;
 }
 
 /**
- * Resolves the user's account name from authentication and social profile states.
- * Favors a customized social display name or real name over placeholder patterns.
- */
-export function resolveOwnAccountName(
-  user?: { name?: string | null; email?: string | null } | null,
-  profile?: { displayName?: string | null } | null,
-): string | null {
-  if (profile?.displayName && !profile.displayName.startsWith('Chef #')) {
-    const trimmed = profile.displayName.trim();
-    if (trimmed.length > 0) return trimmed;
-  }
-  if (user?.name && user.name.trim().length > 0) {
-    return user.name.trim();
-  }
-  if (user?.email && user.email.includes('@')) {
-    const localPart = user.email.split('@')[0].trim();
-    if (localPart.length > 0) return localPart;
-  }
-  if (profile?.displayName && profile.displayName.trim().length > 0) {
-    return profile.displayName.trim();
-  }
-  return null;
-}
-
-/**
- * Resolves the author handle for display on hero cards.
- * If the recipe already has an author/creator handle, that is returned.
- * If there is no author and the recipe belongs to the current user (own recipe),
- * the user's own account name is formatted as the author handle.
+ * Resolves the author handle or attribution label for display on hero cards.
+ * - If the recipe already has an author/creator handle, that formatted handle (e.g. "@chef_john") is returned.
+ * - If there is no author and the recipe belongs to the current user (own recipe),
+ *   the localized "by you" label (e.g. "Von dir" / "By you") is returned.
+ * - For community recipes or recipes shared by others without an author, returns null.
  */
 export function resolveHeroAuthorHandle(opts: ResolveHeroAuthorOptions): string | null {
   const explicitHandle = formatAuthorHandle(opts.sourceHandle);
@@ -60,8 +36,8 @@ export function resolveHeroAuthorHandle(opts: ResolveHeroAuthorOptions): string 
         ? opts.jobSource !== 'share'
         : true;
 
-  if (isOwnRecipe && opts.accountName) {
-    return formatAuthorHandle(opts.accountName);
+  if (isOwnRecipe) {
+    return opts.byYouLabel?.trim() || 'Von dir';
   }
 
   return null;
