@@ -26,8 +26,6 @@ interface CollectionSheetProps {
   onAssign?: (jobId: string, collectionIds: string[]) => Promise<any>;
 }
 
-const EMOJIS = ['🥦', '🍕', '🍝', '🥩', '🍰', '🥐', '🥑', '🌮', '🍣', '🍩', '🍳', '🥗', '☕', '🍷'];
-
 export default function CollectionSheet({
   isOpen,
   onClose,
@@ -56,7 +54,6 @@ export default function CollectionSheet({
 
   // Form states
   const [name, setName] = useState('');
-  const [selectedEmoji, setSelectedEmoji] = useState('');
 
   // Memberships state for checkboxes (single-recipe mode or shared-intersection for bulk mode)
   const [membershipIds, setMembershipIds] = useState<string[]>([]);
@@ -112,7 +109,6 @@ export default function CollectionSheet({
       setBulkInitialMap({});
       setFormError(null);
       setName('');
-      setSelectedEmoji('');
       setEditingCollection(null);
       setPendingDelete(null);
       setIsDeleting(false);
@@ -130,7 +126,6 @@ export default function CollectionSheet({
   const handleCreateOpen = () => {
     hapticLight();
     setName('');
-    setSelectedEmoji('');
     setFormError(null);
     setMode('create');
   };
@@ -139,7 +134,6 @@ export default function CollectionSheet({
     hapticLight();
     setEditingCollection(col);
     setName(col.name);
-    setSelectedEmoji(col.emoji || '');
     setFormError(null);
     setMode('edit');
   };
@@ -151,7 +145,7 @@ export default function CollectionSheet({
     }
 
     if (mode === 'create') {
-      const res = await createCollection(name, selectedEmoji || null);
+      const res = await createCollection(name);
       if (res.success) {
         hapticMedium();
         toast.success(t('toast.collectionCreated', { name }));
@@ -163,7 +157,6 @@ export default function CollectionSheet({
     } else if (mode === 'edit' && editingCollection) {
       const res = await updateCollection(editingCollection.id, {
         name,
-        emoji: selectedEmoji || null
       });
       if (res.success) {
         hapticMedium();
@@ -347,7 +340,9 @@ export default function CollectionSheet({
                             }`}
                           >
                             <div className="flex items-center gap-3 min-w-0 flex-1">
-                              {col.emoji && <span className="text-xl">{col.emoji}</span>}
+                              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center shrink-0">
+                                <Folder className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                              </div>
                               <div className="flex flex-col min-w-0">
                                 <span className="font-semibold text-sm text-gray-900 dark:text-white truncate">
                                   {col.name}
@@ -410,7 +405,9 @@ export default function CollectionSheet({
                           className="p-3.5 rounded-2xl border-none bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all flex items-center justify-between select-none"
                         >
                           <div className="flex items-center gap-3 min-w-0 flex-1">
-                            {col.emoji && <span className="text-xl">{col.emoji}</span>}
+                            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center shrink-0">
+                              <Folder className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                            </div>
                             <span className="font-semibold text-sm text-gray-900 dark:text-white truncate">
                               {col.name}
                             </span>
@@ -459,41 +456,6 @@ export default function CollectionSheet({
                         placeholder={t('catalog.collectionPlaceholder') || 'z.B. Sonntagsbrunch'}
                         className="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-2xl px-4 py-3 text-base text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-emerald-500/30 focus:outline-none transition-all"
                       />
-                    </div>
-
-                    {/* Emoji Select Grid */}
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-medium text-gray-500 dark:text-gray-400 px-1">
-                        {t('catalog.collectionEmoji') || 'Symbol / Emoji'}
-                      </label>
-                      <div className="flex flex-wrap gap-2 py-1.5">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedEmoji('')}
-                          className={`w-11 h-11 text-lg flex items-center justify-center rounded-2xl transition-all active:scale-90 border-none cursor-pointer ${
-                            !selectedEmoji
-                              ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold'
-                              : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-400 dark:text-gray-500'
-                          }`}
-                          title={t('dialog.cancelDefault') || 'Keins'}
-                        >
-                          ∅
-                        </button>
-                        {EMOJIS.map(emoji => (
-                          <button
-                            key={emoji}
-                            type="button"
-                            onClick={() => setSelectedEmoji(emoji)}
-                            className={`w-11 h-11 text-xl flex items-center justify-center rounded-2xl transition-all active:scale-90 border-none cursor-pointer ${
-                              selectedEmoji === emoji
-                                ? 'bg-emerald-500 text-white shadow-sm'
-                                : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
-                            }`}
-                          >
-                            {emoji}
-                          </button>
-                        ))}
-                      </div>
                     </div>
                   </div>
                 )}
