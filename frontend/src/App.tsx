@@ -60,10 +60,10 @@ export default function App() {
   const toast = useToast();
   const { language } = useI18n();
   const { snapshot: gamificationSnapshot } = useGamification();
-  const { incomingRequests } = useSocial();
+  const { incomingRequests, unreadSharesCount } = useSocial();
   const { outstandingCount: outstandingMealPlansCount } = useMealPlanBadge({ user, authLoading, getAccessToken });
   const userLevel = gamificationSnapshot?.stats?.level ?? null;
-  const incomingRequestsCount = incomingRequests.length;
+  const incomingRequestsCount = incomingRequests.length + unreadSharesCount;
 
   const { tab: activeView, subPath, query, navigate, replace } = useHashRouter();
 
@@ -647,7 +647,17 @@ export default function App() {
                 onSelectRecipe={(recipeId) => {
                   navigate('history', recipeId);
                 }}
-                defaultSection={activeView === 'settings' ? 'settings' : 'overview'}
+                defaultSection={
+                  activeView === 'settings'
+                    ? 'settings'
+                    : subPath === 'feed' || query?.tab === 'feed'
+                    ? 'feed'
+                    : subPath === 'friends' || query?.tab === 'friends'
+                    ? 'friends'
+                    : subPath === 'leaderboard' || query?.tab === 'leaderboard'
+                    ? 'leaderboard'
+                    : 'overview'
+                }
               />
             </Suspense>
           )}

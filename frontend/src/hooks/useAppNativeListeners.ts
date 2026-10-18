@@ -184,6 +184,15 @@ export function useAppNativeListeners({
   useEffect(() => {
     return registerPushTapHandler((payload) => {
       const targetJobId = payload.jobId || ('recipeId' in payload ? (payload as { recipeId?: string }).recipeId : undefined);
+      if (payload.route === 'progress') {
+        const section = (payload as { section?: string }).section;
+        if (section) {
+          navigate('progress', section);
+        } else {
+          navigate('progress');
+        }
+        return;
+      }
       if (targetJobId) {
         navigate('history', targetJobId);
       } else if (payload.route === 'extract') {
