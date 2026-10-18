@@ -24,7 +24,7 @@ import { useI18n } from '../../context/I18nContext';
 import { useSpotlightTour } from '../../hooks/useSpotlightTour';
 
 export default function RecipeDetails({
-  recipe, isExtracting = false,
+  recipe, isExtracting = false, progress,
   onAddIngredients, onDelete, reelUrl, createdAt, onBack,
   onNavigateToShoppingList, onRemixSuccess, onReplaceCurrent,
   isParentAvailable, onNavigateToRecipe, parentRecipeTitle,
@@ -72,7 +72,7 @@ export default function RecipeDetails({
 
   return (
     <article className="flex flex-col">
-      <ExtractionFloatingLogo isVisible={isExtracting} />
+      <ExtractionFloatingLogo isVisible={isExtracting} progress={progress} />
 
       {/* Recipe Title & Gallery */}
       <RecipeHeader
