@@ -785,6 +785,7 @@ export const uiTranslations = {
         },
         shares: {
           recommendedTitle: 'Von Freunden empfohlen',
+          recommendedSubtitle: 'Direkt von deinen Freunden mit dir geteilt',
           view: 'Vorschau',
           save: 'Speichern',
           dismiss: 'Ausblenden',
@@ -2478,6 +2479,7 @@ export const uiTranslations = {
         },
         shares: {
           recommendedTitle: 'Recommended by friends',
+          recommendedSubtitle: 'Shared directly with you by friends',
           view: 'Preview',
           save: 'Save',
           dismiss: 'Dismiss',
