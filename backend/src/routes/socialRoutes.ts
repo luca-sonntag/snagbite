@@ -25,6 +25,7 @@ import { user as userTable } from '../db/schema/auth.js';
 import { eq } from 'drizzle-orm';
 import { AppError, sendAppError } from '../errors.js';
 import { leaderboardRoutes } from './leaderboardRoutes.js';
+import { notifyFriendRequest, notifyFriendAccepted } from '../push/socialNotifications.js';
 import type { Profile, FriendSummary, FriendRequest } from '../types.js';
 
 export const socialRoutes = Router();
@@ -181,6 +182,7 @@ socialRoutes.post('/friends/request', async (req: Request, res: Response): Promi
     if (existing?.status === 'pending') {
       if (existing.addressee_id === req.userId!) {
         await acceptFriendship(existing.id);
+        void notifyFriendAccepted(req.userId!, existing.requester_id);
         res.status(200).json({ success: true, status: 'accepted' });
         return;
       }
@@ -188,6 +190,7 @@ socialRoutes.post('/friends/request', async (req: Request, res: Response): Promi
     }
 
     await createFriendship(req.userId!, target.userId, 'pending');
+    void notifyFriendRequest(req.userId!, target.userId);
     res.status(200).json({ success: true, status: 'pending' });
   } catch (error: unknown) {
     if (!(error instanceof AppError)) console.error('Error sending friend request:', error);
@@ -205,8 +208,12 @@ socialRoutes.post('/friends/:id/respond', async (req: Request, res: Response): P
       throw new AppError('FRIENDSHIP_NOT_FOUND');
     }
 
-    if (accept) await acceptFriendship(id);
-    else await deleteFriendship(id);
+    if (accept) {
+      await acceptFriendship(id);
+      void notifyFriendAccepted(req.userId!, friendship.requester_id);
+    } else {
+      await deleteFriendship(id);
+    }
 
     res.status(200).json({ success: true, status: accept ? 'accepted' : 'declined' });
   } catch (error: unknown) {

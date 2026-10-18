@@ -30,6 +30,7 @@ import { CURRENT_RECIPE_PIPELINE_VERSION } from '@cookbook/shared';
 import { fetchAndSyncUser, isPremiumUser, MAX_PHOTOS_TOTAL_CHARS } from './authUtils.js';
 import { triggerWorkerTick } from '../queue.js';
 import { subscribeRecipeEvents } from '../jobEvents.js';
+import { notifyFriendsOfCook } from '../push/socialNotifications.js';
 
 export const recipeRoutes = Router();
 
@@ -554,6 +555,10 @@ recipeRoutes.post('/recipes/:id/cooked', async (req: Request, res: Response): Pr
       viaCookingMode: !!viaCookingMode,
       timerElapsed: !!timerElapsed,
     });
+
+    if (hasPhoto && photoPath && !result.duplicate) {
+      void notifyFriendsOfCook(req.userId!, { id, title: recipe.title }, photoPath);
+    }
 
     // Automatically synchronize today's meal plan entry for this recipe if planned
     try {
