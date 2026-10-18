@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Button } from '@heroui/react';
-import { Bookmark, BookmarkCheck, ExternalLink, X } from 'lucide-react';
+import { ExternalLink, X } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useSocial } from '../../context/SocialContext';
 import { useToast } from '../../context/ToastContext';
@@ -14,19 +14,15 @@ export default function SharedRecipesSection() {
   const toast = useToast();
   const { sharedRecipes, saveFriendRecipe, dismissSharedRecipe } = useSocial();
   const [previewRecipe, setPreviewRecipe] = useState<Recipe | null>(null);
-  const [savingId, setSavingId] = useState<string | null>(null);
 
   const handleSave = useCallback(
     async (recipeId: string) => {
       hapticMedium();
-      setSavingId(recipeId);
       try {
         await saveFriendRecipe(recipeId);
         toast.success(t('app.social.shares.savedSuccess'));
       } catch {
         toast.danger(t('app.social.friends.genericError'));
-      } finally {
-        setSavingId(null);
       }
     },
     [saveFriendRecipe, t, toast],
@@ -59,13 +55,21 @@ export default function SharedRecipesSection() {
 
       <div className="flex flex-col gap-2">
         {sharedRecipes.map((item) => {
-          const isSaved = item.isRecipeSaved;
-          const isSaving = savingId === item.recipe.id;
-
           return (
             <div
               key={item.shareId}
-              className="flex items-center gap-3 p-3 rounded-2xl bg-white dark:bg-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.03)] border-none"
+              role="button"
+              tabIndex={0}
+              onClick={() => {
+                hapticLight();
+                setPreviewRecipe(item.recipe);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setPreviewRecipe(item.recipe);
+                }
+              }}
+              className="flex items-center gap-3 p-3 rounded-2xl bg-white dark:bg-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.03)] border-none cursor-pointer active:scale-[0.99] transition-all select-none"
             >
               {/* Recipe Thumbnail */}
               <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0">
@@ -103,7 +107,7 @@ export default function SharedRecipesSection() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                 <Button
                   isIconOnly
                   size="sm"
@@ -115,25 +119,6 @@ export default function SharedRecipesSection() {
                   className="w-8 h-8 min-w-0 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-none active:scale-95 transition-all"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
-                </Button>
-
-                <Button
-                  isIconOnly
-                  size="sm"
-                  onPress={() => item.recipe.id && handleSave(item.recipe.id)}
-                  isDisabled={isSaved || isSaving}
-                  aria-label={t('app.social.shares.save')}
-                  className={`w-8 h-8 min-w-0 rounded-xl border-none active:scale-95 transition-all ${
-                    isSaved
-                      ? 'bg-emerald-500/15 text-emerald-600'
-                      : 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                  }`}
-                >
-                  {isSaved ? (
-                    <BookmarkCheck className="w-3.5 h-3.5" />
-                  ) : (
-                    <Bookmark className="w-3.5 h-3.5" />
-                  )}
                 </Button>
 
                 <Button
