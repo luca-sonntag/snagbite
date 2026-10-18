@@ -27,7 +27,7 @@ interface SocialState {
   unreadSharesCount: number;
   loading: boolean;
   refreshProfile: () => Promise<void>;
-  refreshFriends: () => Promise<void>;
+  refreshFriends: (opts?: { silent?: boolean }) => Promise<void>;
   refreshShares: () => Promise<void>;
   updateDisplayName: (name: string) => Promise<void>;
   sendRequest: (code: string) => Promise<'pending' | 'accepted'>;
@@ -80,21 +80,24 @@ export function SocialProvider({ children }: { children: React.ReactNode }) {
     }
   }, [authedFetch]);
 
-  const refreshFriends = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [f, r] = await Promise.all([
-        authedFetch('/api/friends'),
-        authedFetch('/api/friends/requests'),
-      ]);
-      setFriends(f.friends ?? []);
-      setIncomingRequests(r.requests ?? []);
-    } catch (err) {
-      console.warn('[Social] Failed to load friends:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [authedFetch]);
+  const refreshFriends = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      if (!opts?.silent) setLoading(true);
+      try {
+        const [f, r] = await Promise.all([
+          authedFetch('/api/friends'),
+          authedFetch('/api/friends/requests'),
+        ]);
+        setFriends(f.friends ?? []);
+        setIncomingRequests(r.requests ?? []);
+      } catch (err) {
+        console.warn('[Social] Failed to load friends:', err);
+      } finally {
+        if (!opts?.silent) setLoading(false);
+      }
+    },
+    [authedFetch],
+  );
 
   const refreshShares = useCallback(async () => {
     try {

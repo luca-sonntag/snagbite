@@ -26,8 +26,12 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
   useEffect(() => {
     refreshFriends();
     refreshShares();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const interval = setInterval(() => {
+      void refreshFriends({ silent: true });
+      void refreshShares();
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [refreshFriends, refreshShares]);
 
   const localizeError = (code: string) => {
     const key = `error.codes.${code}`;
