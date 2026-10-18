@@ -9,7 +9,11 @@ import { PublicRecipePreviewModal } from '../PublicRecipe/PublicRecipePreviewMod
 import Avatar from './Avatar';
 import type { Recipe } from '../../types';
 
-export default function SharedRecipesSection() {
+interface SharedRecipesSectionProps {
+  onRecipeSaved?: (recipeId: string) => void;
+}
+
+export default function SharedRecipesSection({ onRecipeSaved }: SharedRecipesSectionProps = {}) {
   const { t } = useI18n();
   const toast = useToast();
   const { sharedRecipes, saveFriendRecipe, dismissSharedRecipe } = useSocial();
@@ -20,12 +24,13 @@ export default function SharedRecipesSection() {
       hapticMedium();
       try {
         await saveFriendRecipe(recipeId);
+        onRecipeSaved?.(recipeId);
         toast.success(t('app.social.shares.savedSuccess'));
       } catch {
         toast.danger(t('app.social.friends.genericError'));
       }
     },
-    [saveFriendRecipe, t, toast],
+    [saveFriendRecipe, onRecipeSaved, t, toast],
   );
 
   const handleDismiss = useCallback(

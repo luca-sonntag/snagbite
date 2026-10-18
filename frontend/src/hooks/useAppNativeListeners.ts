@@ -234,9 +234,11 @@ export function useAppNativeListeners({
     };
     window.addEventListener(EXTRACTION_COMPLETE_EVENT, onComplete);
     window.addEventListener(OPEN_RECIPE_EVENT, onOpen);
+    window.addEventListener('cookbook:recipe-saved', onComplete);
     return () => {
       window.removeEventListener(EXTRACTION_COMPLETE_EVENT, onComplete);
       window.removeEventListener(OPEN_RECIPE_EVENT, onOpen);
+      window.removeEventListener('cookbook:recipe-saved', onComplete);
     };
   }, [fetchHistory, handleExtractionSuccess]);
 

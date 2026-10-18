@@ -54,7 +54,7 @@ export default function ExtractionFloatingLogo({ isVisible, progress }: Extracti
           aria-valuemin={0}
           aria-valuemax={100}
           aria-label="Fortschritt der Rezept-Extraktion"
-          className="mt-4 w-36 h-2 rounded-full overflow-hidden bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-white/60 dark:border-white/10 shadow-[0_8px_24px_rgba(16,185,129,0.22),0_2px_10px_rgba(0,0,0,0.08)] p-[1px] flex items-center"
+          className="mt-4 w-36 h-2.5 rounded-full overflow-hidden bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-white/60 dark:border-white/10 shadow-[0_8px_24px_rgba(16,185,129,0.22),0_2px_10px_rgba(0,0,0,0.08)] p-[1px] flex items-center"
         >
           <div
             className="h-full bg-emerald-500 rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(16,185,129,0.6)]"

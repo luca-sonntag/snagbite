@@ -11,6 +11,7 @@ import PublicRecipeRecommendationsShelf from './PublicRecipeRecommendationsShelf
 import PublicRecipePreviewModal from '../PublicRecipe/PublicRecipePreviewModal';
 import HeroThemeSheet from './HeroThemeSheet';
 import CookbookQuickStartBanner from './CookbookQuickStartBanner';
+import SharedRecipesSection from '../Social/SharedRecipesSection';
 import { useAuth } from '../../context/AuthContext';
 import { useI18n } from '../../context/I18nContext';
 import { fetchPublicRecipeRecommendations, savePublicRecipeToCookbook } from '../../api/publicRecipesApi';
@@ -195,6 +196,9 @@ export default function CookbookHome({
           />
         </div>
       )}
+
+      {/* Recommended by Friends (Shared Recipes) */}
+      <SharedRecipesSection onRecipeSaved={onRecipeSaved} />
 
       {/* 4. COVER STORY Part 2: Bento Grid for Fast & Nutrient-Dense Dishes (only when at least 3 recipes are available) */}
       {bentoRecipes.length >= 3 && (
