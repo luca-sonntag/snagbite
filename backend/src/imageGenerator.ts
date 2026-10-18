@@ -4,6 +4,7 @@ import { recipes as recipesTable } from './db/schema/recipes.js';
 import { jobs as jobsTable } from './db/schema/jobs.js';
 import { eq } from 'drizzle-orm';
 import { emitRecipeEvent } from './jobEvents.js';
+import { sanitizeStorageUrl } from './db/recipesMappers.js';
 import {
   ensureBucketExists,
   uploadFile,
@@ -154,10 +155,13 @@ export async function triggerAsyncCoverGeneration(opts: AsyncCoverOptions): Prom
   try {
     console.log(`[imageGenerator] Starting background FLUX cover generation for recipe ${recipeId} (job ${jobId})...`);
     const coverResult = await generateRecipeCoverImage({ prompt, jobId, userId });
-    const aiCoverUrl = coverResult?.imageUrl;
+    const aiCoverUrl = sanitizeStorageUrl(coverResult?.imageUrl);
 
     if (aiCoverUrl) {
-      const remainingUrls = fallbackImageUrls.filter((u) => u && u !== aiCoverUrl);
+      const remainingUrls = fallbackImageUrls
+        .map((u) => sanitizeStorageUrl(u))
+        .filter((u): u is string => Boolean(u) && u !== aiCoverUrl);
+
       await db
         .update(recipesTable)
         .set({

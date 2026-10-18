@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { rowToRecipe, recipeToRow, recipeToDrizzle } from './recipesMappers.js';
+import { rowToRecipe, recipeToRow, recipeToDrizzle, sanitizeStorageUrl } from './recipesMappers.js';
 import { CURRENT_RECIPE_PIPELINE_VERSION, type Recipe } from '@cookbook/shared';
 
 describe('Recipe pipeline version mapping and defaults', () => {
@@ -130,5 +130,70 @@ describe('Recipe pipeline version mapping and defaults', () => {
     }
 
     assert.equal('pipelineVersion' in patch, false, 'pipelineVersion must not be present in update patch when undefined');
+  });
+});
+
+describe('Recipe storage URL sanitization', () => {
+  it('strips localhost and 127.0.0.1 from storage URLs', () => {
+    assert.equal(
+      sanitizeStorageUrl('http://localhost:3000/storage/recipe-covers/user1/job1.jpg'),
+      '/storage/recipe-covers/user1/job1.jpg'
+    );
+    assert.equal(
+      sanitizeStorageUrl('http://127.0.0.1:3000/storage/recipe-photos/photo1.jpg'),
+      '/storage/recipe-photos/photo1.jpg'
+    );
+  });
+
+  it('strips absolute remote server origin from storage URLs to keep them origin-independent', () => {
+    assert.equal(
+      sanitizeStorageUrl('https://cookbook-development.up.railway.app/storage/recipe-covers/user1/job1.jpg'),
+      '/storage/recipe-covers/user1/job1.jpg'
+    );
+  });
+
+  it('preserves external CDN URLs and relative paths', () => {
+    assert.equal(
+      sanitizeStorageUrl('https://instagram.fhan5-8.fna.fbcdn.net/cover.jpg'),
+      'https://instagram.fhan5-8.fna.fbcdn.net/cover.jpg'
+    );
+    assert.equal(
+      sanitizeStorageUrl('/storage/recipe-covers/user1/job1.jpg'),
+      '/storage/recipe-covers/user1/job1.jpg'
+    );
+    assert.equal(sanitizeStorageUrl(null), null);
+    assert.equal(sanitizeStorageUrl(undefined), undefined);
+  });
+
+  it('recipeToRow and recipeToDrizzle sanitize imageUrl and imageUrls', () => {
+    const raw: Recipe = {
+      title: 'Burger',
+      description: 'Juicy burger',
+      servings: 1,
+      prepTime: 5,
+      cookTime: 5,
+      ingredients: [],
+      instructions: [],
+      equipment: [],
+      imageUrl: 'http://localhost:3000/storage/recipe-covers/u/j.jpg',
+      imageUrls: [
+        'http://localhost:3000/storage/recipe-covers/u/j.jpg',
+        'https://instagram.com/p.jpg',
+      ],
+    };
+
+    const row = recipeToRow(raw);
+    assert.equal(row.image_url, '/storage/recipe-covers/u/j.jpg');
+    assert.deepEqual(row.image_urls, [
+      '/storage/recipe-covers/u/j.jpg',
+      'https://instagram.com/p.jpg',
+    ]);
+
+    const drizzle = recipeToDrizzle(raw);
+    assert.equal(drizzle.imageUrl, '/storage/recipe-covers/u/j.jpg');
+    assert.deepEqual(drizzle.imageUrls, [
+      '/storage/recipe-covers/u/j.jpg',
+      'https://instagram.com/p.jpg',
+    ]);
   });
 });

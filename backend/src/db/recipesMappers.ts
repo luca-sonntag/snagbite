@@ -13,6 +13,15 @@ import { recipes } from './schema/recipes.js';
 import { computeRecipeHealthScore, isVegetableOrFruitCategory } from '../matching/healthScoreCalculator.js';
 import { normalizeUrl } from './jobsDb.js';
 
+export function sanitizeStorageUrl(url: string | null | undefined): string | null | undefined {
+  if (!url) return url;
+  const match = url.match(/^https?:\/\/[^\/]+(\/storage\/(?:recipe-covers|cook-photos|recipe-photos|feedback-screenshots)\/.*)/);
+  if (match) return match[1];
+  const localhostMatch = url.match(/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?(\/storage\/.*)/);
+  if (localhostMatch) return localhostMatch[1];
+  return url;
+}
+
 export function normalizeRawIngredients(raw: unknown): Recipe['ingredients'] {
   if (!Array.isArray(raw)) return [];
   if (raw.length > 0 && raw[0] && typeof raw[0] === 'object' && Array.isArray((raw[0] as any).items)) {
@@ -66,17 +75,10 @@ export function rowToRecipe(row: any): Recipe {
     tags: row.tags ?? [],
     equipment: row.equipment ?? [],
     tips: row.tips ?? [],
-    imageUrl: (() => {
-      const u = row.imageUrl ?? row.image_url;
-      if (!u) return u;
-      const match = u.match(/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?(\/storage\/.*)/);
-      return match ? match[1] : u;
-    })(),
-    imageUrls: ((row.imageUrls ?? row.image_urls ?? []) as string[]).map((u) => {
-      if (!u) return u;
-      const match = u.match(/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?(\/storage\/.*)/);
-      return match ? match[1] : u;
-    }),
+    imageUrl: sanitizeStorageUrl(row.imageUrl ?? row.image_url) ?? null,
+    imageUrls: ((row.imageUrls ?? row.image_urls ?? []) as string[])
+      .map((u) => sanitizeStorageUrl(u))
+      .filter((u): u is string => Boolean(u)),
     imagePrompt: row.imagePrompt ?? row.image_prompt,
     isAiCover: row.isAiCover ?? row.is_ai_cover ?? false,
     transcript: row.transcript,
@@ -147,8 +149,8 @@ export function recipeToRow(recipe: Recipe): Record<string, unknown> {
     tags: recipe.tags ?? [],
     equipment: recipe.equipment ?? [],
     tips: recipe.tips ?? [],
-    image_url: recipe.imageUrl ?? null,
-    image_urls: recipe.imageUrls ?? [],
+    image_url: sanitizeStorageUrl(recipe.imageUrl) ?? null,
+    image_urls: (recipe.imageUrls ?? []).map((u) => sanitizeStorageUrl(u)).filter((u): u is string => Boolean(u)),
     image_prompt: recipe.imagePrompt ?? null,
     is_ai_cover: recipe.isAiCover ?? false,
     transcript: recipe.transcript ?? null,
@@ -188,8 +190,8 @@ export function recipeToDrizzle(recipe: Recipe): typeof recipes.$inferInsert {
     tags: recipe.tags ?? [],
     equipment: recipe.equipment ?? [],
     tips: recipe.tips ?? [],
-    imageUrl: recipe.imageUrl ?? null,
-    imageUrls: recipe.imageUrls ?? [],
+    imageUrl: sanitizeStorageUrl(recipe.imageUrl) ?? null,
+    imageUrls: (recipe.imageUrls ?? []).map((u) => sanitizeStorageUrl(u)).filter((u): u is string => Boolean(u)),
     imagePrompt: recipe.imagePrompt ?? null,
     isAiCover: recipe.isAiCover ?? false,
     transcript: recipe.transcript ?? null,

@@ -271,11 +271,14 @@ export function getPublicUrl(bucket: StorageBucket, key: string): string {
   const cleanKey = key.replace(/^\/+/, '');
   const cleanBucket = bucket.replace(/^\/+|\/+$/g, '');
 
-  if (config.STORAGE_STREAMING_URL) {
-    return `${config.STORAGE_STREAMING_URL.replace(/\/+$/, '')}/storage/${cleanBucket}/${cleanKey}`;
-  }
-  if (config.APP_URL) {
-    return `${config.APP_URL.replace(/\/+$/, '')}/storage/${cleanBucket}/${cleanKey}`;
+  // For app-bundles, an absolute URL is required by the Capgo OTA updater plugin.
+  if (bucket === 'app-bundles') {
+    if (config.STORAGE_STREAMING_URL) {
+      return `${config.STORAGE_STREAMING_URL.replace(/\/+$/, '')}/storage/${cleanBucket}/${cleanKey}`;
+    }
+    if (config.APP_URL) {
+      return `${config.APP_URL.replace(/\/+$/, '')}/storage/${cleanBucket}/${cleanKey}`;
+    }
   }
   if (config.S3_PUBLIC_DOMAIN) {
     const domain = config.S3_PUBLIC_DOMAIN.replace(/^https?:\/\//, '').replace(/\/+$/, '');
