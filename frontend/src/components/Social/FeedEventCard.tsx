@@ -80,7 +80,7 @@ export default function FeedEventCard({
           className="w-full h-full object-cover"
         />
 
-        {/* Original Recipe Cover Thumbnail (PiP top right) */}
+        {/* Original Recipe Cover Thumbnail (PiP top right, 2x size) */}
         {recipeCoverUrl ? (
           <button
             type="button"
@@ -89,7 +89,7 @@ export default function FeedEventCard({
               onOpenRecipe(item.recipe);
             }}
             aria-label={item.recipe.title}
-            className="absolute top-3 right-3 z-10 w-11 h-11 sm:w-12 sm:h-12 rounded-full ring-2 ring-white/95 dark:ring-gray-900/95 shadow-md overflow-hidden bg-gray-100 dark:bg-gray-800 p-0 border-none cursor-pointer active:scale-95 transition-transform"
+            className="absolute top-3 right-3 z-10 w-[88px] h-[88px] sm:w-[96px] sm:h-[96px] rounded-full ring-[2.5px] ring-white/95 dark:ring-gray-900/95 shadow-lg overflow-hidden bg-gray-100 dark:bg-gray-800 p-0 border-none cursor-pointer active:scale-95 transition-transform"
           >
             <img
               src={recipeCoverUrl}
@@ -106,7 +106,7 @@ export default function FeedEventCard({
               onOpenRecipe(item.recipe);
             }}
             aria-label={item.recipe.title}
-            className="absolute top-3 right-3 z-10 w-11 h-11 sm:w-12 sm:h-12 rounded-full ring-2 ring-white/95 dark:ring-gray-900/95 shadow-md overflow-hidden bg-white/90 dark:bg-gray-800/90 backdrop-blur-md p-0 border-none cursor-pointer active:scale-95 transition-transform flex items-center justify-center text-xl"
+            className="absolute top-3 right-3 z-10 w-[88px] h-[88px] sm:w-[96px] sm:h-[96px] rounded-full ring-[2.5px] ring-white/95 dark:ring-gray-900/95 shadow-lg overflow-hidden bg-white/90 dark:bg-gray-800/90 backdrop-blur-md p-0 border-none cursor-pointer active:scale-95 transition-transform flex items-center justify-center text-3xl"
           >
             <span>{item.recipe.emoji}</span>
           </button>
