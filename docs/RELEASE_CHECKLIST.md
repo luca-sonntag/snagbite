@@ -21,10 +21,12 @@
     ```
   - **Grund 2 (Cross-User Recipe Reuse):** In Commit `aa7f9c6a` (`feat(db): add language and source_url_normalized to recipes and jobs schema`) wurden in [`backend/src/db/schema/recipes.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/schema/recipes.ts) (`source_url_normalized`, `language`, Index `recipes_source_normalized_lang_idx`) und [`backend/src/db/schema/jobs.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/schema/jobs.ts) (`language`) neue abwärtskompatible Spalten ergänzt.
   - **Grund 3 (Recipe Pipeline Version):** Neue Spalte `pipeline_version: integer not null default 0` und Index `recipes_pipeline_version_idx` in [`backend/src/db/schema/recipes.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/schema/recipes.ts) hinzugefügt (`feat/recipe-pipeline-version`). Altdaten erhalten sicher `0`, Neudaten `1`.
+  - **Grund 4 (Freunde-System Erweiterung):** Neue additive Tabellen `recipe_shares` und `cook_event_reactions` in [`backend/src/db/schema/social.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/schema/social.ts) für In-App Rezept-Sharing und den Freunde-Koch-Feed.
   - **Betroffene Endpunkte & Features:**
     - `GET /api/me/metadata` & `PATCH /api/me/metadata` (Persistenz für NUX-Spotlight-Tours, WelcomeGuide-Status & UI-Präferenzen).
     - `POST /api/extract-recipe` (Mandantenübergreifende Rezept-Wiederverwendung in Zielsprache).
     - Alle Rezept-Extraktionen & Speichervorgänge (`Recipe.pipelineVersion`).
+    - Freunde-Feed & Rezept-Sharing (`/api/friends/feed`, `/api/recipes/:id/share`, `/api/friends/shares`).
   - **Ausführung:**
     ```powershell
     npm run db:push:prod
