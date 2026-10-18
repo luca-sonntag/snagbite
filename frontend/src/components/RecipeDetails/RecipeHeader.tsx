@@ -27,6 +27,7 @@ export default function RecipeHeader({
   parentRecipeTitle,
   onAssignCollections,
   onManageFlags,
+  onShareWithFriends,
   flags,
   isFavorite = false,
   onToggleFavorite,
@@ -54,6 +55,7 @@ export default function RecipeHeader({
         setIsMenuOpen={setIsMenuOpen}
         onAssignCollections={onAssignCollections}
         onManageFlags={onManageFlags}
+        onShareWithFriends={onShareWithFriends}
         onCopyRecipe={onCopyRecipe}
         isCopied={isCopied}
         onNavigateToShoppingList={onNavigateToShoppingList}

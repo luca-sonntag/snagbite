@@ -1,7 +1,7 @@
+import { useState } from 'react';
 import type { RecipeDetailsProps } from './types';
 import { useRecipeDetails } from './useRecipeDetails';
 import { useRecipeCoverSync } from '../../hooks/useRecipeCoverSync';
-
 import RecipeHeader from './RecipeHeader';
 import RecipeInfoSection from './RecipeInfoSection';
 import RecipeStickyBar from './RecipeStickyBar';
@@ -19,6 +19,7 @@ import PremiumModal from '../PremiumModal';
 import ProFeatureSheet from '../ProFeatureSheet';
 import ShoppingConfirmSheet from './ShoppingConfirmSheet';
 import AddToMealPlanSheet from '../MealPlanner/AddToMealPlanSheet';
+import ShareWithFriendsModal from '../Social/ShareWithFriendsModal';
 import { useI18n } from '../../context/I18nContext';
 import { useSpotlightTour } from '../../hooks/useSpotlightTour';
 
@@ -62,6 +63,8 @@ export default function RecipeDetails({
     handleConfirmShoppingListSelection, copyRecipe, cookRefreshKey, cookHistory,
   } = useRecipeDetails({ recipe: effectiveRecipe, onAddIngredients, onNavigateToShoppingList });
 
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
   useSpotlightTour('recipeDetails', {
     enabled: !isExtracting && !isCookingMode && !isCopilotOpen,
     delayMs: 600,
@@ -73,27 +76,17 @@ export default function RecipeDetails({
 
       {/* Recipe Title & Gallery */}
       <RecipeHeader
-        recipe={effectiveRecipe}
-        reelUrl={reelUrl}
-        createdAt={createdAt}
+        recipe={effectiveRecipe} reelUrl={reelUrl} createdAt={createdAt}
         onBack={(!isExtracting || isPremium) ? onBack : undefined}
         onNavigateToShoppingList={onAddIngredients ? handleAddAndNavigateToShoppingList : onNavigateToShoppingList}
-        onDelete={onDelete}
-        onCopyRecipe={copyRecipe}
-        isCopied={isCopied}
-        isParentAvailable={isParentAvailable}
-        onNavigateToRecipe={onNavigateToRecipe}
-        parentRecipeTitle={parentRecipeTitle}
-        onAssignCollections={onAssignCollections}
-        onManageFlags={onManageFlags}
-        flags={flags}
-        isFavorite={isFavorite}
-        onToggleFavorite={onToggleFavorite}
-        cookRefreshKey={cookRefreshKey}
-        onRemixClick={() => openCopilot(true)}
-        totalTimeLabel={totalTimeLabel}
-        isAwaitingCover={isAwaitingCover}
-        isExtracting={isExtracting}
+        onDelete={onDelete} onCopyRecipe={copyRecipe} isCopied={isCopied}
+        isParentAvailable={isParentAvailable} onNavigateToRecipe={onNavigateToRecipe}
+        parentRecipeTitle={parentRecipeTitle} onAssignCollections={onAssignCollections}
+        onManageFlags={onManageFlags} flags={flags} isFavorite={isFavorite}
+        onShareWithFriends={recipe.id ? () => setIsShareModalOpen(true) : undefined}
+        onToggleFavorite={onToggleFavorite} cookRefreshKey={cookRefreshKey}
+        onRemixClick={() => openCopilot(true)} totalTimeLabel={totalTimeLabel}
+        isAwaitingCover={isAwaitingCover} isExtracting={isExtracting}
       />
 
       {isExtracting ? (
@@ -215,10 +208,7 @@ export default function RecipeDetails({
       {isCookingMode && (
         <CookingMode
           recipe={recipe}
-          onClose={() => {
-            setIsCookingMode(false);
-            setInitialStepOverride(undefined);
-          }}
+          onClose={() => { setIsCookingMode(false); setInitialStepOverride(undefined); }}
           checkedSteps={checkedSteps}
           toggleStep={toggleStep}
           formatAmount={formatAmount}
@@ -250,17 +240,11 @@ export default function RecipeDetails({
         isOpen={!!activeProFeature}
         featureId={activeProFeature}
         onClose={() => setActiveProFeature(null)}
-        onUpgrade={() => {
-          setActiveProFeature(null);
-          setIsPremiumModalOpen(true);
-        }}
+        onUpgrade={() => { setActiveProFeature(null); setIsPremiumModalOpen(true); }}
       />
 
       {/* Premium Upgrade Modal */}
-      <PremiumModal
-        isOpen={isPremiumModalOpen}
-        onOpenChange={setIsPremiumModalOpen}
-      />
+      <PremiumModal isOpen={isPremiumModalOpen} onOpenChange={setIsPremiumModalOpen} />
 
       {/* Shopping Confirm Drawer */}
       <ShoppingConfirmSheet
@@ -293,6 +277,16 @@ export default function RecipeDetails({
           recipeTitle={recipe.title}
         />
       )}
+
+      {/* Share with Friends Modal */}
+      {recipe.id && (
+        <ShareWithFriendsModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          recipe={recipe}
+        />
+      )}
     </article>
   );
 }
+

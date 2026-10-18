@@ -9,6 +9,7 @@ import {
   Tag,
   Star,
   RefreshCw,
+  Share2,
 } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
@@ -22,6 +23,7 @@ interface RecipeHeaderActionsProps {
   setIsMenuOpen: (open: boolean) => void;
   onAssignCollections?: () => void;
   onManageFlags?: () => void;
+  onShareWithFriends?: () => void;
   onCopyRecipe: () => void;
   isCopied: boolean;
   onNavigateToShoppingList?: () => void;
@@ -38,6 +40,7 @@ export default function RecipeHeaderActions({
   setIsMenuOpen,
   onAssignCollections,
   onManageFlags,
+  onShareWithFriends,
   onCopyRecipe,
   isCopied,
   onNavigateToShoppingList,
@@ -108,6 +111,20 @@ export default function RecipeHeaderActions({
               >
                 <Tag className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
                 <span>{t('catalog.manageRecipeFlagsTitle') || 'Labels verwalten'}</span>
+              </button>
+            )}
+
+            {onShareWithFriends && (
+              <button
+                onClick={() => {
+                  hapticLight();
+                  setIsMenuOpen(false);
+                  onShareWithFriends();
+                }}
+                className="flex items-center gap-3 w-full px-4 py-3.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] rounded-xl text-left transition-all cursor-pointer outline-none border-none"
+              >
+                <Share2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span>{t('app.social.share.shareWithFriends') || 'Mit Freunden teilen'}</span>
               </button>
             )}
 

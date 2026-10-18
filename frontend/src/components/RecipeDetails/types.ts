@@ -39,6 +39,7 @@ export interface RecipeHeaderProps {
   parentRecipeTitle?: string | null;
   onAssignCollections?: () => void;
   onManageFlags?: () => void;
+  onShareWithFriends?: () => void;
   flags?: string[];
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
