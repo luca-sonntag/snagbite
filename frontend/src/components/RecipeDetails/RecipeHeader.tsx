@@ -47,7 +47,7 @@ export default function RecipeHeader({
   const healthLetter = healthScoreNum !== null ? getHealthScoreLetter(healthScoreNum) : null;
 
   const topRightActions = isExtracting ? null : (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in flex items-center gap-2">
       <RecipeHeaderActions
         isFavorite={isFavorite}
         onToggleFavorite={onToggleFavorite}
