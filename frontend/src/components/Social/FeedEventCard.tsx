@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Button } from '@heroui/react';
-import { Bookmark, BookmarkCheck, ExternalLink, Sparkles } from 'lucide-react';
+import { Bookmark, BookmarkCheck, ExternalLink } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
 import Avatar from './Avatar';
@@ -36,6 +36,7 @@ export default function FeedEventCard({
 }: FeedEventCardProps) {
   const { t } = useI18n();
   const [saving, setSaving] = useState(false);
+  const recipeCoverUrl = item.recipe.imageUrl || item.recipe.imageUrls?.[0];
 
   const handleSave = useCallback(async () => {
     if (!item.recipe?.id || item.isRecipeSaved || saving) return;
@@ -68,13 +69,6 @@ export default function FeedEventCard({
             </p>
           </div>
         </div>
-
-        {item.xpAwarded > 0 && (
-          <div className="flex items-center gap-1 text-xs font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/15 px-2.5 py-1 rounded-full shrink-0">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>+{item.xpAwarded} XP</span>
-          </div>
-        )}
       </div>
 
       {/* Hero Cooked Dish Photo */}
@@ -86,9 +80,47 @@ export default function FeedEventCard({
           className="w-full h-full object-cover"
         />
 
+        {/* Original Recipe Cover Thumbnail (PiP top right) */}
+        {recipeCoverUrl ? (
+          <button
+            type="button"
+            onClick={() => {
+              hapticLight();
+              onOpenRecipe(item.recipe);
+            }}
+            aria-label={item.recipe.title}
+            className="absolute top-3 right-3 z-10 w-11 h-11 sm:w-12 sm:h-12 rounded-full ring-2 ring-white/95 dark:ring-gray-900/95 shadow-md overflow-hidden bg-gray-100 dark:bg-gray-800 p-0 border-none cursor-pointer active:scale-95 transition-transform"
+          >
+            <img
+              src={recipeCoverUrl}
+              alt={item.recipe.title}
+              loading="lazy"
+              className="w-full h-full object-cover"
+            />
+          </button>
+        ) : item.recipe.emoji ? (
+          <button
+            type="button"
+            onClick={() => {
+              hapticLight();
+              onOpenRecipe(item.recipe);
+            }}
+            aria-label={item.recipe.title}
+            className="absolute top-3 right-3 z-10 w-11 h-11 sm:w-12 sm:h-12 rounded-full ring-2 ring-white/95 dark:ring-gray-900/95 shadow-md overflow-hidden bg-white/90 dark:bg-gray-800/90 backdrop-blur-md p-0 border-none cursor-pointer active:scale-95 transition-transform flex items-center justify-center text-xl"
+          >
+            <span>{item.recipe.emoji}</span>
+          </button>
+        ) : null}
+
         {/* Integrated Recipe Scrim Dock at bottom */}
         <div className="absolute inset-x-0 bottom-0 p-3.5 pt-10 bg-gradient-to-t from-black/85 via-black/40 via-55% to-transparent flex items-end justify-between gap-3">
-          <div className="min-w-0 flex-1">
+          <div
+            className="min-w-0 flex-1 cursor-pointer select-none"
+            onClick={() => {
+              hapticLight();
+              onOpenRecipe(item.recipe);
+            }}
+          >
             <h3 className="font-heading font-bold text-white text-sm sm:text-base line-clamp-1 leading-snug drop-shadow-sm">
               {item.recipe.title}
             </h3>
@@ -102,14 +134,15 @@ export default function FeedEventCard({
           <div className="flex items-center gap-2 shrink-0">
             <Button
               size="sm"
+              isIconOnly
               onPress={() => {
                 hapticLight();
                 onOpenRecipe(item.recipe);
               }}
-              className="h-9 px-3 rounded-xl bg-white/95 hover:bg-white text-gray-950 font-bold text-xs border-none cursor-pointer active:scale-95 transition-all shadow-sm flex items-center gap-1.5"
+              aria-label={t('app.social.feed.viewRecipe')}
+              className="h-9 w-9 min-w-[36px] rounded-xl bg-white/95 hover:bg-white text-gray-950 border-none cursor-pointer active:scale-95 transition-all shadow-sm flex items-center justify-center"
             >
-              <ExternalLink className="w-3.5 h-3.5 text-gray-950" />
-              <span>{t('app.social.feed.viewRecipe')}</span>
+              <ExternalLink className="w-4 h-4 text-gray-950" />
             </Button>
 
             <Button
