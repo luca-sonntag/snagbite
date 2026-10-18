@@ -98,7 +98,7 @@ async function bootstrap() {
     // limiting to the load balancer or replace with a shared store (Redis).
     const apiLimiter = rateLimit({
       windowMs: 15 * 60 * 1000,
-      max: 500,
+      max: 1000,
       standardHeaders: true,
       legacyHeaders: false,
       message: { success: false, error: 'Too many requests, please try again later.' },
