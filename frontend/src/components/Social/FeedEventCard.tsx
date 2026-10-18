@@ -53,23 +53,27 @@ export default function FeedEventCard({
     onReact(item.cookEventId, emoji);
   };
 
-  const getReactorAvatar = (emoji: FeedReactionEmoji, reactedByMe: boolean) => {
-    if (reactedByMe) {
-      return {
-        displayName: profile?.displayName || 'Ich',
-        avatarUrl: profile?.avatarUrl || null,
-      };
+  const getReactorAvatars = (emoji: FeedReactionEmoji, reactedByMe: boolean) => {
+    const list: { key: string; displayName: string; avatarUrl: string | null }[] = [];
+    if (reactedByMe && profile) {
+      list.push({
+        key: `me-${profile.userId || 'self'}`,
+        displayName: profile.displayName || 'Ich',
+        avatarUrl: profile.avatarUrl || null,
+      });
     }
-    const other = (item.recentReactors || []).find(
-      (u) => u.emoji === emoji && u.userId !== profile?.userId,
-    );
-    if (other) {
-      return {
-        displayName: other.displayName,
-        avatarUrl: other.avatarUrl,
-      };
+    for (const r of item.recentReactors || []) {
+      if (r.emoji === emoji && r.userId !== profile?.userId) {
+        if (!list.some((existing) => existing.key === r.userId)) {
+          list.push({
+            key: r.userId,
+            displayName: r.displayName,
+            avatarUrl: r.avatarUrl,
+          });
+        }
+      }
     }
-    return null;
+    return list.slice(0, 3);
   };
 
   return (
@@ -79,12 +83,12 @@ export default function FeedEventCard({
         <div className="flex items-center gap-3 min-w-0">
           <Avatar name={item.user.displayName} avatarUrl={item.user.avatarUrl} size={42} />
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 min-w-0">
               <span className="font-heading font-bold text-gray-900 dark:text-white text-sm truncate">
                 {item.user.displayName}
               </span>
-              <span className="shrink-0 text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                {t('app.gamification.level', { level: item.user.level })}
+              <span className="shrink-0 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                · {t('app.gamification.level', { level: item.user.level })}
               </span>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-medium">
@@ -202,7 +206,7 @@ export default function FeedEventCard({
         {item.reactions.map((r) => {
           const isReacted = r.reactedByMe;
           const isBouncing = bouncingEmoji === r.emoji;
-          const reactorAvatar = getReactorAvatar(r.emoji, isReacted);
+          const reactorAvatars = getReactorAvatars(r.emoji, isReacted);
 
           return (
             <button
@@ -224,14 +228,22 @@ export default function FeedEventCard({
               </span>
               {r.count > 0 && <span>{r.count}</span>}
 
-              {/* Reacted user icon in top right corner of the reaction button */}
-              {reactorAvatar && (
-                <span className="absolute -top-1 -right-1 z-10 ring-2 ring-white dark:ring-gray-900 rounded-full shadow-2xs pointer-events-none transition-all duration-200">
-                  <Avatar
-                    name={reactorAvatar.displayName}
-                    avatarUrl={reactorAvatar.avatarUrl}
-                    size={16}
-                  />
+              {/* Overlapping reactor avatars (max 3) in top right corner */}
+              {reactorAvatars.length > 0 && (
+                <span className="absolute -top-1.5 -right-2 z-10 flex items-center -space-x-1.5 pointer-events-none transition-all duration-200">
+                  {reactorAvatars.map((u, idx) => (
+                    <span
+                      key={u.key}
+                      className="rounded-full ring-2 ring-white dark:ring-gray-900 shadow-2xs overflow-hidden inline-flex"
+                      style={{ zIndex: 3 - idx }}
+                    >
+                      <Avatar
+                        name={u.displayName}
+                        avatarUrl={u.avatarUrl}
+                        size={16}
+                      />
+                    </span>
+                  ))}
                 </span>
               )}
             </button>
