@@ -1,24 +1,18 @@
 import type { MouseEvent } from 'react';
-import { Star, Clock, BookmarkPlus, Check, ChevronRight } from 'lucide-react';
 import type { SavedRecipe, Recipe } from '../../types';
 import CachedImage from '../CachedImage';
-import { hapticLight, hapticMedium } from '../../utils/haptics';
+import { hapticLight } from '../../utils/haptics';
 import { useI18n } from '../../context/I18nContext';
+import { useAuth } from '../../context/AuthContext';
+import { useSocial } from '../../context/SocialContext';
 import { getRecipeCalories } from '../../utils/formatNutrition';
 import { getHealthScoreLetter, getHealthScoreColor } from '../RecipeDetails/HealthScoreBadge';
-import { formatAuthorHandle } from '../../utils/sourceLabel';
 import { useCachedImage } from '../../hooks/useCachedImage';
+import HeroTopBadges, { type HeroBadgeVariant } from './HeroTopBadges';
+import HeroInfoPills from './HeroInfoPills';
+import { resolveOwnAccountName, resolveHeroAuthorHandle } from './heroAuthorUtils';
 
-export type HeroBadgeVariant = 'amber' | 'emerald' | 'indigo' | 'blue' | 'rose' | 'teal';
-
-const BADGE_VARIANT_STYLES: Record<HeroBadgeVariant, string> = {
-  amber: 'bg-amber-500/90 text-white shadow-amber-500/20',
-  emerald: 'bg-emerald-600/90 text-white shadow-emerald-600/20',
-  indigo: 'bg-indigo-600/90 text-white shadow-indigo-600/20',
-  blue: 'bg-blue-600/90 text-white shadow-blue-600/20',
-  teal: 'bg-teal-600/90 text-white shadow-teal-600/20',
-  rose: 'bg-rose-500/90 text-white shadow-rose-500/20',
-};
+export type { HeroBadgeVariant };
 
 export interface RecipeHeroCardProps {
   job?: SavedRecipe;
@@ -41,7 +35,7 @@ export interface RecipeHeroCardProps {
 /**
  * Cinematic 16:10 Hero Card for the cookbook magazine feed.
  * Highlights the daily spotlight recipe with appetizing edge-to-edge photography,
- * subtle gradient scrim, quiet luxury typography and integrated health score badge.
+ * subtle gradient scrim, quiet luxury typography, author handle, and health score badge.
  */
 export default function RecipeHeroCard({
   job,
@@ -61,6 +55,9 @@ export default function RecipeHeroCard({
   bindLongPress,
 }: RecipeHeroCardProps) {
   const { t } = useI18n();
+  const { user } = useAuth();
+  const { profile } = useSocial();
+
   const r = recipe || job?.recipe;
   if (!r) return null;
 
@@ -76,6 +73,16 @@ export default function RecipeHeroCard({
   const protein = r.nutritionalValues?.protein;
 
   const hasMultipleThemeRecipes = Boolean(themeRecipeCount && themeRecipeCount >= 2 && onOpenTheme);
+
+  const ownAccountName = resolveOwnAccountName(user, profile);
+  const authorHandle = resolveHeroAuthorHandle({
+    sourceHandle: r.sourceHandle,
+    createdBy: r.createdBy,
+    isCommunity,
+    jobSource: job?.source,
+    currentUserId: user?.id,
+    accountName: ownAccountName,
+  });
 
   return (
     <article
@@ -107,153 +114,36 @@ export default function RecipeHeroCard({
         />
 
         {/* Top Badges */}
-        <div className="absolute top-2.5 inset-x-2.5 sm:top-3 sm:inset-x-3 flex items-center justify-between pointer-events-none">
-          <div className="flex items-center gap-2 pointer-events-auto">
-            {isSelectMode && !isCommunity && (
-              <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center transition-all border-none shrink-0 ${
-                  isSelected
-                    ? 'bg-emerald-500 text-white shadow-md'
-                    : hasImage
-                    ? 'bg-black/40 backdrop-blur-sm text-white shadow-xs'
-                    : 'bg-white/80 dark:bg-black/40 backdrop-blur-sm text-gray-700 dark:text-white shadow-xs'
-                }`}
-              >
-                {isSelected && <Check className="w-4 h-4 text-white stroke-[3px]" />}
-              </div>
-            )}
-            {hasMultipleThemeRecipes ? (
-              <button
-                type="button"
-                onClick={(e) => {
-                  if (isSelectMode) return;
-                  e.stopPropagation();
-                  hapticLight();
-                  onOpenTheme?.(e);
-                }}
-                className={`px-2.5 py-1 rounded-full ${
-                  BADGE_VARIANT_STYLES[badgeVariant] ?? BADGE_VARIANT_STYLES.amber
-                } backdrop-blur-md text-[10.5px] sm:text-[11px] font-bold shadow-md flex items-center gap-1.5 tracking-tight active:scale-95 transition-transform border-none cursor-pointer select-none`}
-                aria-label={`${badgeText || t('catalog.magazine.heroHighlight')} - ${t('catalog.magazine.heroThemeRecipesCount', { count: themeRecipeCount ?? 0 })}`}
-              >
-                <span>{badgeText || t('catalog.magazine.heroHighlight')}</span>
-                <span className="opacity-60 font-normal">•</span>
-                <span className="font-semibold text-white/95">
-                  {t('catalog.magazine.heroThemeRecipesCount', { count: themeRecipeCount ?? 0 })}
-                </span>
-                <ChevronRight className="w-3 h-3 stroke-[2.5] text-white/85 shrink-0" />
-              </button>
-            ) : (
-              <span
-                className={`px-2 py-0.5 rounded-full ${
-                  BADGE_VARIANT_STYLES[badgeVariant] ?? BADGE_VARIANT_STYLES.amber
-                } backdrop-blur-md text-[10px] sm:text-[10.5px] font-bold shadow-sm flex items-center tracking-tight`}
-              >
-                {badgeText || t('catalog.magazine.heroHighlight')}
-              </span>
-            )}
-          </div>
-
-          {/* Right Action: Bookmark/Save for Community or Favorite Star for own */}
-          {isCommunity ? (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                hapticMedium();
-                onSaveCommunity?.(e, r);
-              }}
-              className="pointer-events-auto w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center border-none bg-transparent cursor-pointer touch-manipulation"
-              title={isSaved ? t('catalog.magazine.alreadySaved') : t('catalog.magazine.saveToCookbook')}
-              aria-label={isSaved ? t('catalog.magazine.alreadySaved') : t('catalog.magazine.saveToCookbook')}
-            >
-              <span
-                className={`w-8 h-8 rounded-full backdrop-blur-md flex items-center justify-center shadow-md transition-all active:scale-90 ${
-                  isSaved
-                    ? 'bg-emerald-500/90 text-white'
-                    : hasImage
-                    ? 'bg-black/50 text-white hover:bg-black/70'
-                    : 'bg-white/80 dark:bg-black/50 text-gray-700 dark:text-indigo-200 hover:bg-white dark:hover:bg-black/70'
-                }`}
-              >
-                {isSaved ? (
-                  <Check className="w-4 h-4 text-white" />
-                ) : (
-                  <BookmarkPlus className={`w-4 h-4 ${hasImage ? 'text-indigo-200' : 'text-indigo-600 dark:text-indigo-200'}`} />
-                )}
-              </span>
-            </button>
-          ) : job?.isFavorite ? (
-            <div
-              className={`w-8 h-8 rounded-full backdrop-blur-md flex items-center justify-center shadow-md ${
-                hasImage ? 'bg-black/40 text-amber-400' : 'bg-white/80 dark:bg-black/40 text-amber-500 shadow-sm'
-              }`}
-            >
-              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-            </div>
-          ) : null}
-        </div>
+        <HeroTopBadges
+          isSelectMode={isSelectMode}
+          isCommunity={isCommunity}
+          isSelected={isSelected}
+          hasImage={hasImage}
+          hasMultipleThemeRecipes={hasMultipleThemeRecipes}
+          badgeVariant={badgeVariant}
+          badgeText={badgeText}
+          themeRecipeCount={themeRecipeCount}
+          onOpenTheme={onOpenTheme}
+          isSaved={isSaved}
+          onSaveCommunity={onSaveCommunity}
+          recipe={r}
+          isFavorite={job?.isFavorite}
+        />
 
         {/* Bottom Content Container */}
         <div className={`absolute bottom-3 inset-x-3 flex flex-col ${hasImage ? 'text-white' : ''}`}>
-          {/* Punchy Info Pills - Crisp, compact & high legibility */}
-          <div
-            className={`flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold flex-wrap mb-1.5 ${
-              hasImage ? 'text-white/90 drop-shadow-xs' : 'text-gray-700 dark:text-white/90'
-            }`}
-          >
-            {totalTime && (
-              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/90 text-white font-bold text-[10px] shadow-xs shrink-0">
-                <Clock className="w-2.5 h-2.5 text-white shrink-0" />
-                <span>{totalTime}</span>
-              </span>
-            )}
-
-            {/* Calories vor Health Score direkt nebeneinander */}
-            {(calories !== undefined && calories !== null) || (score !== null && scoreLetter && scoreColors) ? (
-              <div className="flex items-center gap-1 shrink-0">
-                {totalTime && (
-                  <span className={`text-[9px] mr-0.5 ${hasImage ? 'text-white/30' : 'text-gray-400 dark:text-white/30'}`}>
-                    •
-                  </span>
-                )}
-                {calories !== undefined && calories !== null && (
-                  <span className={`font-medium ${hasImage ? 'text-white/90' : 'text-gray-600 dark:text-white/90'}`}>
-                    {Math.round(calories)} kcal
-                  </span>
-                )}
-                {score !== null && scoreLetter && scoreColors && (
-                  <span
-                    className={`w-3.5 h-3.5 rounded-full ${scoreColors.pillBg} text-white font-black text-[9px] flex items-center justify-center leading-none shadow-md shrink-0 select-none`}
-                    title={`Health Score: ${scoreLetter} (${score}/100)`}
-                  >
-                    {scoreLetter}
-                  </span>
-                )}
-              </div>
-            ) : null}
-
-            {isVital && protein && protein > 0 && (
-              <div className="flex items-center gap-1 shrink-0">
-                {(totalTime || calories !== undefined || score !== null) && (
-                  <span className={`text-[9px] ${hasImage ? 'text-white/30' : 'text-gray-400 dark:text-white/30'}`}>•</span>
-                )}
-                <span className={`font-medium ${hasImage ? 'text-white/90' : 'text-gray-600 dark:text-white/90'}`}>
-                  {Math.round(protein)}g Protein
-                </span>
-              </div>
-            )}
-            {isVital && vegGrams && vegGrams > 0 && (
-              <div className="flex items-center gap-1 shrink-0">
-                {(totalTime || calories !== undefined || score !== null || (protein && protein > 0)) && (
-                  <span className={`text-[9px] ${hasImage ? 'text-white/30' : 'text-gray-400 dark:text-white/30'}`}>•</span>
-                )}
-                <span className={`font-medium ${hasImage ? 'text-white/90' : 'text-gray-600 dark:text-white/90'}`}>
-                  {t('catalog.magazine.vegGrams', { grams: Math.round(vegGrams) })}
-                </span>
-              </div>
-            )}
-          </div>
+          {/* Punchy Info Pills */}
+          <HeroInfoPills
+            totalTime={totalTime}
+            calories={calories}
+            score={score}
+            scoreLetter={scoreLetter}
+            scoreColors={scoreColors}
+            isVital={isVital}
+            protein={protein}
+            vegGrams={vegGrams}
+            hasImage={hasImage}
+          />
 
           {/* Title - 100% full width, up to 2 lines without horizontal crunch */}
           <h3
@@ -266,13 +156,13 @@ export default function RecipeHeroCard({
 
           {/* Bottom Bar: Author Handle & Cook CTA - Snug directly under title */}
           <div className="flex items-center justify-between gap-2 mt-0.5">
-            {formatAuthorHandle(r.sourceHandle) ? (
+            {authorHandle ? (
               <p
                 className={`text-[10.5px] font-medium truncate leading-none ${
                   hasImage ? 'text-gray-300/85' : 'text-gray-500 dark:text-gray-300/85'
                 }`}
               >
-                {formatAuthorHandle(r.sourceHandle)}
+                {authorHandle}
               </p>
             ) : (
               <span />
