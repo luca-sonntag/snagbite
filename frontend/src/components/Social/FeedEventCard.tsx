@@ -87,8 +87,9 @@ export default function FeedEventCard({
               <span className="font-heading font-bold text-gray-900 dark:text-white text-sm truncate">
                 {item.user.displayName}
               </span>
+              <span className="shrink-0 text-gray-400 dark:text-gray-500 text-[10px]">·</span>
               <span className="shrink-0 text-xs font-semibold text-gray-500 dark:text-gray-400">
-                · {t('app.gamification.level', { level: item.user.level })}
+                {t('app.gamification.level', { level: item.user.level })}
               </span>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-medium">
@@ -235,7 +236,7 @@ export default function FeedEventCard({
                     <span
                       key={u.key}
                       className="rounded-full ring-2 ring-white dark:ring-gray-900 shadow-2xs overflow-hidden inline-flex"
-                      style={{ zIndex: 3 - idx }}
+                      style={{ zIndex: idx + 1 }}
                     >
                       <Avatar
                         name={u.displayName}

@@ -81,8 +81,13 @@ export default function FriendsListSection() {
                   <span className="truncate font-bold text-gray-900 dark:text-white text-base">
                     {f.displayName}
                   </span>
+                  <span className="shrink-0 text-gray-400 dark:text-gray-500 text-[10px]">·</span>
                   <span className="shrink-0 text-xs font-semibold text-gray-500 dark:text-gray-400">
-                    · {t('app.gamification.level', { level: f.level })} · {rankTitle}
+                    {t('app.gamification.level', { level: f.level })}
+                  </span>
+                  <span className="shrink-0 text-gray-400 dark:text-gray-500 text-[10px]">·</span>
+                  <span className="shrink-0 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                    {rankTitle}
                   </span>
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500 dark:text-gray-400 font-medium">
