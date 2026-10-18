@@ -366,7 +366,12 @@ export default function App() {
 
       {user && (
         <div className="min-h-screen flex flex-col items-center transition-colors duration-300">
-          <AppTopBanners activeView={activeView} isPending={isPending} recipe={recipe} />
+          <AppTopBanners
+            activeView={activeView}
+            isPending={isPending}
+            recipe={recipe}
+            onSelectRecipe={(recipeId) => navigate('history', recipeId)}
+          />
 
       <main
         className={`w-full max-w-md mx-auto px-4 mt-1 flex-1 flex flex-col gap-6 ${

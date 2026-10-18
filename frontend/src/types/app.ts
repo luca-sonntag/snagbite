@@ -22,6 +22,7 @@ export interface AppTopBannersProps {
   activeView: AppTab;
   isPending: boolean;
   recipe: Recipe | null;
+  onSelectRecipe?: (recipeId: string) => void;
 }
 
 export interface AppOverlaysProps {
