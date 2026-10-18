@@ -8,9 +8,10 @@ import {
   getJobMetrics,
   getFailedJobs,
   getExtractionsPerUser,
+  deletePushTokensForUser,
 } from '../db.js';
 import { db } from '../db/drizzle.js';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { jobs } from '../db/schema/jobs.js';
 import { user as userTable } from '../db/schema/auth.js';
 import { config } from '../config.js';
@@ -66,6 +67,35 @@ adminRoutes.post(
       res.json({ success: true, tier });
     } catch (error: unknown) {
       if (!(error instanceof AppError)) console.error('Error switching admin tier:', error);
+      sendAppError(res, error);
+    }
+  }
+);
+
+adminRoutes.post(
+  '/admin/me/reset-settings',
+  requireAdmin,
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = req.userId!;
+
+      await db
+        .update(userTable)
+        .set({
+          metadata: sql`'{}'::jsonb`,
+          notificationsEnabled: false,
+          customExtractionLimit: null,
+          updatedAt: new Date(),
+        })
+        .where(eq(userTable.id, userId));
+
+      await deletePushTokensForUser(userId).catch((err) => {
+        console.warn(`[admin/me/reset-settings] Failed to delete push tokens for ${userId}:`, err);
+      });
+
+      res.json({ success: true, message: 'Settings reset successfully' });
+    } catch (error: unknown) {
+      if (!(error instanceof AppError)) console.error('Error resetting admin user settings:', error);
       sendAppError(res, error);
     }
   }
