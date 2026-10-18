@@ -10,6 +10,7 @@ import {
 import { eq, and, desc, inArray, lt, or } from 'drizzle-orm';
 import { getAcceptedFriends, getProfilesByIds } from './socialDb.js';
 import { resolveCookPhotoUrl } from './gamificationDb.js';
+import { rowToRecipe } from './recipesMappers.js';
 import type {
   FriendFeedItem,
   SharedRecipeItem,
@@ -134,7 +135,7 @@ export async function getFriendsCookFeed(
         level: levelMap.get(event.userId) ?? 1,
         isMe: event.userId === userId,
       },
-      recipe: recipe as any,
+      recipe: rowToRecipe(recipe),
       isRecipeSaved: savedRecipeSet.has(recipe.id),
       reactions: reactionSummaries,
       recentReactors,
@@ -284,7 +285,7 @@ export async function getReceivedRecipeShares(
         displayName: senderProfile?.displayName || 'Ein Koch-Freund',
         avatarUrl: senderProfile?.avatarUrl || null,
       },
-      recipe: recipe as any,
+      recipe: rowToRecipe(recipe),
       isRecipeSaved: savedSet.has(recipe.id),
     };
   });

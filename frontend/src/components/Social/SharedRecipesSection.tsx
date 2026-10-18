@@ -7,6 +7,7 @@ import { useToast } from '../../context/ToastContext';
 import { hapticLight, hapticMedium } from '../../utils/haptics';
 import { PublicRecipePreviewModal } from '../PublicRecipe/PublicRecipePreviewModal';
 import Avatar from './Avatar';
+import CachedImage from '../CachedImage';
 import type { Recipe } from '../../types';
 
 interface SharedRecipesSectionProps {
@@ -81,17 +82,12 @@ export default function SharedRecipesSection({ onRecipeSaved }: SharedRecipesSec
             >
               {/* Recipe Thumbnail */}
               <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0">
-                {item.recipe.imageUrl ? (
-                  <img
-                    src={item.recipe.imageUrl}
-                    alt={item.recipe.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-xl">
-                    {item.recipe.emoji || '🍽️'}
-                  </div>
-                )}
+                <CachedImage
+                  src={item.recipe.imageUrl || item.recipe.imageUrls?.[0]}
+                  alt={item.recipe.title}
+                  emoji={item.recipe.emoji}
+                  className="w-full h-full object-cover"
+                />
               </div>
 
               {/* Recipe & Sender Info */}

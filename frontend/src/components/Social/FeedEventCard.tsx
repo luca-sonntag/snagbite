@@ -5,6 +5,7 @@ import { useI18n } from '../../context/I18nContext';
 import { useSocial } from '../../context/SocialContext';
 import { hapticLight, hapticMedium, hapticSelection } from '../../utils/haptics';
 import Avatar from './Avatar';
+import CachedImage from '../CachedImage';
 import { formatSmartDate } from './socialFormatters';
 import type { FriendFeedItem, FeedReactionEmoji, Recipe } from '../../types';
 
@@ -102,10 +103,9 @@ export default function FeedEventCard({
       {/* Hero Cooked Dish Photo — Soft Rounded Corners */}
       <div className="sm:px-3">
         <div className="relative aspect-4/3 sm:aspect-16/10 w-full rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-2xs">
-          <img
+          <CachedImage
             src={item.photoUrl}
             alt={item.recipe.title}
-            loading="lazy"
             className="w-full h-full object-cover"
           />
 
@@ -120,10 +120,10 @@ export default function FeedEventCard({
               aria-label={item.recipe.title}
               className="absolute top-3 right-3 z-10 w-[88px] h-[88px] sm:w-[96px] sm:h-[96px] rounded-full ring-[2.5px] ring-white/95 dark:ring-gray-900/95 shadow-xl overflow-hidden bg-gray-100 dark:bg-gray-800 p-0 border-none cursor-pointer active:scale-95 transition-transform"
             >
-              <img
+              <CachedImage
                 src={recipeCoverUrl}
                 alt={item.recipe.title}
-                loading="lazy"
+                emoji={item.recipe.emoji}
                 className="w-full h-full object-cover"
               />
             </button>

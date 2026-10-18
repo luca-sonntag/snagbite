@@ -6,6 +6,7 @@ import { useSocial } from '../../context/SocialContext';
 import { PublicRecipePreviewModal } from '../PublicRecipe/PublicRecipePreviewModal';
 import { hapticLight } from '../../utils/haptics';
 import Avatar from './Avatar';
+import CachedImage from '../CachedImage';
 import type { Recipe } from '../../types';
 
 interface SharedRecipeBannerProps {
@@ -108,17 +109,12 @@ export default function SharedRecipeBanner({ onSelectRecipe }: SharedRecipeBanne
         >
           {/* Recipe Thumbnail */}
           <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 shadow-2xs">
-            {recipeImg ? (
-              <img
-                src={recipeImg}
-                alt={currentShare.recipe.title}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-xl">
-                {currentShare.recipe.emoji || '🍽️'}
-              </div>
-            )}
+            <CachedImage
+              src={recipeImg}
+              alt={currentShare.recipe.title}
+              emoji={currentShare.recipe.emoji}
+              className="w-full h-full object-cover"
+            />
           </div>
 
           {/* Recipe & Sender Info */}
