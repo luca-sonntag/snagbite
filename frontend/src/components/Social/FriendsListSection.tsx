@@ -77,12 +77,12 @@ export default function FriendsListSection() {
             >
               <Avatar name={f.displayName} avatarUrl={f.avatarUrl} size={44} />
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="truncate font-bold text-gray-900 dark:text-white text-base">
                     {f.displayName}
                   </span>
-                  <span className="shrink-0 text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/15 px-2 py-0.5 rounded-full">
-                    {t('app.gamification.level', { level: f.level })} · {rankTitle}
+                  <span className="shrink-0 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                    · {t('app.gamification.level', { level: f.level })} · {rankTitle}
                   </span>
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500 dark:text-gray-400 font-medium">
