@@ -5,8 +5,14 @@ import { useI18n } from '../../context/I18nContext';
 import { useToast } from '../../context/ToastContext';
 import { useSocial, SocialError } from '../../context/SocialContext';
 import Avatar from './Avatar';
+import FriendAddInput from './FriendAddInput';
 
-export default function FriendsProfileCard() {
+interface FriendsProfileCardProps {
+  pendingInviteCode?: string | null;
+  onInviteConsumed?: () => void;
+}
+
+export default function FriendsProfileCard({ pendingInviteCode, onInviteConsumed }: FriendsProfileCardProps) {
   const { t } = useI18n();
   const toast = useToast();
   const { profile, updateDisplayName } = useSocial();
@@ -168,6 +174,15 @@ export default function FriendsProfileCard() {
           <Share2 className="h-5 w-5" />
         </Button>
       </div>
+
+      {/* Divider */}
+      <div className="my-5 border-t border-gray-100 dark:border-gray-800" />
+
+      {/* Add friend by code */}
+      <FriendAddInput
+        pendingInviteCode={pendingInviteCode}
+        onInviteConsumed={onInviteConsumed}
+      />
     </div>
   );
 }
