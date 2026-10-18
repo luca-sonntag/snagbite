@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useSocial } from '../../context/SocialContext';
@@ -93,9 +94,9 @@ export default function SharedRecipeBanner({ onSelectRecipe }: SharedRecipeBanne
 
   const recipeImg = currentShare.recipe.imageUrl || currentShare.recipe.imageUrls?.[0];
 
-  return (
+  return createPortal(
     <>
-      <div className="w-full max-w-md mx-auto px-4 pt-2 pb-1 pointer-events-auto">
+      <div className="fixed inset-x-0 top-0 z-[120] pointer-events-none flex justify-center p-3 sm:p-4 pt-[calc(var(--safe-area-inset-top,0px)+0.75rem)]">
         <div
           role="button"
           tabIndex={0}
@@ -103,7 +104,7 @@ export default function SharedRecipeBanner({ onSelectRecipe }: SharedRecipeBanne
           onKeyDown={(e) => e.key === 'Enter' && handleCardClick()}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
-          className="relative flex items-center gap-3 p-2.5 sm:p-3 rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] border-none cursor-pointer active:scale-[0.99] transition-all animate-in fade-in slide-in-from-top-3 duration-200 select-none"
+          className="w-full max-w-md pointer-events-auto relative flex items-center gap-3 p-2.5 sm:p-3 rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-[0_12px_40px_rgba(0,0,0,0.18)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.55)] border border-black/5 dark:border-white/10 cursor-pointer active:scale-[0.99] transition-all animate-in fade-in slide-in-from-top-4 duration-200 select-none"
         >
           {/* Recipe Thumbnail */}
           <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 shadow-2xs">
@@ -174,6 +175,7 @@ export default function SharedRecipeBanner({ onSelectRecipe }: SharedRecipeBanne
           }}
         />
       )}
-    </>
+    </>,
+    document.body,
   );
 }
