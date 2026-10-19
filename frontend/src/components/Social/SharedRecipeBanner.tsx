@@ -64,7 +64,7 @@ export default function SharedRecipeBanner({ onSelectRecipe }: SharedRecipeBanne
           onTouchEnd={handleTouchEnd}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
-          className={`w-full max-w-md pointer-events-auto relative flex flex-col p-2.5 sm:p-3 rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-[0_12px_40px_rgba(0,0,0,0.18)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.55)] border border-black/5 dark:border-white/10 cursor-pointer active:scale-[0.99] select-none overflow-hidden transition-all ${
+          className={`w-full max-w-md pointer-events-auto relative flex flex-col p-2.5 sm:p-3 pb-3 sm:pb-3.5 rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-[0_12px_40px_rgba(0,0,0,0.18)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.55)] border border-black/5 dark:border-white/10 cursor-pointer active:scale-[0.99] select-none overflow-hidden transition-all ${
             isVisible
               ? 'translate-y-0 opacity-100 scale-100 duration-400 ease-out'
               : `-translate-y-12 opacity-0 scale-95 pointer-events-none ${isExiting ? 'duration-300 ease-in' : 'duration-0'}`
@@ -120,10 +120,10 @@ export default function SharedRecipeBanner({ onSelectRecipe }: SharedRecipeBanne
             </button>
           </div>
 
-          {/* Auto-dismiss subtle bottom progress indicator */}
-          <div className="absolute bottom-0 inset-x-0 h-0.5 bg-black/5 dark:bg-white/5 overflow-hidden">
+          {/* Auto-dismiss bottom progress indicator */}
+          <div className="absolute bottom-0 inset-x-0 h-1 bg-black/5 dark:bg-white/10 overflow-hidden">
             <div
-              className={`h-full bg-emerald-500/70 dark:bg-emerald-400/70 ${
+              className={`h-full bg-emerald-500 dark:bg-emerald-400 ${
                 isVisible && !isPaused
                   ? 'w-0 transition-[width] duration-[4500ms] ease-linear'
                   : 'w-full'
