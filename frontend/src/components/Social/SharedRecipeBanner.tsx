@@ -5,7 +5,7 @@ import { PublicRecipePreviewModal } from '../PublicRecipe/PublicRecipePreviewMod
 import { hapticLight } from '../../utils/haptics';
 import Avatar from './Avatar';
 import CachedImage from '../CachedImage';
-import { useSharedRecipeToast } from './useSharedRecipeToast';
+import { useSharedRecipeToast, AUTO_DISMISS_MS } from './useSharedRecipeToast';
 
 interface SharedRecipeBannerProps {
   onSelectRecipe?: (recipeId: string) => void;
@@ -125,9 +125,12 @@ export default function SharedRecipeBanner({ onSelectRecipe }: SharedRecipeBanne
             <div
               className={`h-full bg-emerald-500 dark:bg-emerald-400 ${
                 isVisible && !isPaused
-                  ? 'w-0 transition-[width] duration-[4500ms] ease-linear'
+                  ? 'w-0 transition-[width] ease-linear'
                   : 'w-full'
               }`}
+              style={{
+                transitionDuration: isVisible && !isPaused ? `${AUTO_DISMISS_MS}ms` : '0ms',
+              }}
             />
           </div>
         </div>

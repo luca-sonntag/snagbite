@@ -5,7 +5,7 @@ import { hapticLight } from '../../utils/haptics';
 import type { Recipe, SharedRecipeItem } from '../../types';
 
 const STORAGE_KEY = 'snagbite:dismissed_share_banners';
-const AUTO_DISMISS_MS = 4500;
+export const AUTO_DISMISS_MS = 10000;
 const ENTER_DELAY_MS = 600;
 const EXIT_DURATION_MS = 320;
 
