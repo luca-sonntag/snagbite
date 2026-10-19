@@ -1,0 +1,8 @@
+Welcome to Snagbite! 🎉
+In this official release:
+• Smart AI Recipe Import: Turn Instagram Reels, TikToks, YouTube Shorts & cookbook photos into structured recipes in seconds.
+• Automatic nutrition breakdown & smart serving scaler.
+• Interactive cooking mode with step-by-step guidance & built-in timers.
+• Smart grocery shopping list sorted by supermarket aisle.
+• Meal planner for effortless weekly meal prep.
+• New: Share recipes with friends & interactive quick-start screen tours!
