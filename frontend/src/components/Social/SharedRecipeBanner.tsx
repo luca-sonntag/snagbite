@@ -123,12 +123,9 @@ export default function SharedRecipeBanner({ onSelectRecipe }: SharedRecipeBanne
           {/* Auto-dismiss bottom progress indicator */}
           <div className="absolute bottom-0 inset-x-0 h-1 bg-black/5 dark:bg-white/10 overflow-hidden">
             <div
-              className={`h-full bg-emerald-500 dark:bg-emerald-400 ${
-                isVisible && !isPaused
-                  ? 'w-0 transition-[width] ease-linear'
-                  : 'w-full'
-              }`}
+              className="h-full bg-emerald-500 dark:bg-emerald-400 transition-[width] ease-linear"
               style={{
+                width: bannerPhase === 'waiting' ? '100%' : '0%',
                 transitionDuration: isVisible && !isPaused ? `${AUTO_DISMISS_MS}ms` : '0ms',
               }}
             />
