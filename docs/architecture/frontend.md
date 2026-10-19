@@ -10,10 +10,10 @@
   * **Startup-Gate (nur Auth, nicht Sync):** Der blockierende Vollbild-Spinner hängt **nur an `authLoading`**, nicht mehr an `initialSyncDone`. Der Splash wird ausgeblendet, sobald Auth aufgelöst ist, und die App rendert sofort — der initiale `fetchLimitStatus()`-Netzwerkcall läuft im Hintergrund weiter. Vorher blockierte `!initialSyncDone` die ganze App bis der Call zurückkam (Splash → Spinner, beide je einige Sekunden). `limitStatus` ist überall nullable (die Kontingent-Zeile erscheint einfach nach, sobald die Daten da sind), daher ist das gefahrlos.
   * **`--app-sticky-top` (Sticky-Offset):** Die Sticky-Kopfregion (Safe-Area-Filler + `TimerBanner`) misst ihre Höhe per `ResizeObserver` und schreibt die Höhe als globale CSS-Variable `--app-sticky-top` auf `document.documentElement`. Views nutzen `sticky top-[var(--app-sticky-top)]`.
   * **`RecipeDetails` Single-Page Scroll-Layout & `RecipeStickyBar`**: Rezept-Detailansicht als einzelne, fließende Scroll-Seite ohne Tabs (Details `RecipeInfoSection`, Zutaten `RecipeIngredients`, Zubereitung `RecipeInstructions`). `RecipeStickyBar` heftet sich an `top-[var(--app-sticky-top)]` und markiert dynamisch per Scroll-Spy die gerade sichtbare Sektion. Kategorie-Überschriften in den Zutaten verwenden harmonische vertikale Farb-Pills (`w-1 h-3.5 rounded-full`, passend zur Taxonomie aus `i18n.ts`).
-  * **Basis-Portionen anpassen (`AdjustServingsSheet.tsx`)**: Klick auf die Portionen-Zeile in `RecipeInfoSection` (gekennzeichnet durch Chevron-Right Icon) öffnet das `AdjustServingsSheet`. Erlaubt das Umverteilen der Basis-Portionen mit mathematisch exakter Live-Neuberechnung aller Nährwerte pro Portion (Kalorien & Makros) und persistiert die Änderungen atomar in Supabase (`PATCH /api/recipes/:id`).
+  * **Basis-Portionen anpassen (`AdjustServingsSheet.tsx`)**: Klick auf die Portionen-Zeile in `RecipeInfoSection` (gekennzeichnet durch Chevron-Right Icon) öffnet das `AdjustServingsSheet`. Erlaubt das Umverteilen der Basis-Portionen mit mathematisch exakter Live-Neuberechnung aller Nährwerte pro Portion (Kalorien & Makros) und persistiert die Änderungen atomar in der Datenbank (`PATCH /api/recipes/:id`).
 
 ### Zentralisierte Kontexte (`frontend/src/context/`)
-* **`AuthContext.tsx`:** Verwaltet Supabase Auth Session (`signIn`, `signUp`, `signInWithGoogle`, `signOut`, `getAccessToken`, `isPremium`).
+* **`AuthContext.tsx`:** Verwaltet Better-Auth Session (`signIn`, `signUp`, `signInWithGoogle`, `signOut`, `isPremium`).
 * **`DialogContext.tsx`:** Stellt globalen Dialog-Service (`useDialog()`) bereit, um native Browser-Dialoge durch moderne HeroUI-Dialoge zu ersetzen.
 * **`ToastContext.tsx`:** Globales Toast-Benachrichtigungssystem (`useToast()`), das rahmenlose Benachrichtigungen im Clean Flat Style elastisch von oben hineingleiten lässt (`top-toast` via `ToastContainer` & `ToastItem`), Safe Areas (`--safe-area-inset-top`) beachtet und Swipe-Up Gesten unterstützt.
 * **`I18nContext.tsx`:** Verwaltet Internationalisierung (Deutsch/Englisch) mit `localStorage`-Persistenz und Browsersprachen-Erkennung.
@@ -52,16 +52,22 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
 * **Zuletzt geöffnet (`utils/recentRecipes.ts`):** Clientseitiges Recency-Tracking in `localStorage` (`recipe_recent_opened`).
 * **Sammlungen (`useCollections.ts`, `CollectionSheet.tsx`):** Benannte Rezept-Gruppen mit 2×2 Mosaik-Cover.
 * **Freitext-Labels/Flags (`FlagSheet.tsx`):** Eigene Tags pro Rezept (`job.flags`).
+* **Scroll-Positionserhaltung (`useCatalogScrollRestoration.ts`):** Beim Öffnen eines Rezepts aus dem Kochbuch (sowohl Home als auch Listen-Ebene) und anschließendem Zurücknavigieren wird die exakte Scroll-Position der jeweiligen Ansicht nahtlos wiederhergestellt. Die Katalog-Ebene bleibt im DOM über `hidden` gemountet und der Hash-Router unterbindet den automatischen Scroll-Reset auf 0 bei dieser Rücknavigation.
 
 ---
 
 ## 3. 🖼️ Clientseitiges Image-Caching
 
-* **100% Client-seitig:** Keine Bilddaten werden auf dem Server oder Supabase gespeichert. Original-URLs verbleiben als Metadaten im Rezept-JSON.
+* **100% Client-seitig:** Keine Bilddaten werden auf dem Server gespeichert. Original-URLs verbleiben als Metadaten im Rezept-JSON.
 * **IndexedDB Store (`frontend/src/utils/imageStore.ts`):** Datenbank `recipe-image-cache` v1, Object Store `images`.
 * **Kompression (`useCachedImage.ts`):** HTML5 Canvas `drawImage()` + `toBlob('image/jpeg', 0.75)` mit max. 400px Kantenlänge (~15–40 KB pro Bild).
 * **CORS Proxy:** Bilder werden über den `/api/image`-Proxy geladen.
 * **Cache-Invalidierung:** Bei Rezept-Löschung werden IndexedDB-Einträge automatisch entfernt.
+* **Asynchrone FLUX.1 Cover-Aktualisierung in Echtzeit (`useRecipeCoverSync.ts`):**
+  * Beim sofortigen Öffnen des Rezepts nach der Extraktion wird das Video-Thumbnail **nicht** als temporäres Cover angezeigt (`isCoverGenerating: true`, `imageUrl: null`).
+  * `RecipeImageGallery` rendert stattdessen den standardmäßigen Bild-Skeleton-Loader mit Shimmer-Sweep (`animate-pulse` + `animate-shimmer-sweep`).
+  * Der Custom Hook `useRecipeCoverSync` verbindet sich via SSE (`GET /api/recipes/:id/events`) und HTTP-Polling-Fallback (1,5s Intervall).
+  * Sobald das Backend die FLUX.1-Generierung beendet und in S3/Postgres persistiert hat, wird das Event `cover_ready` gesendet. Der lokale State und die History-Listen werden via `updateRecipeCover` atomar aktualisiert – das HD-Cover erscheint ohne Seitenneuladen.
 
 ---
 
@@ -132,7 +138,7 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
 * **`FeedbackDrawer.tsx`:** Bug/Idee-Toggle, Textarea (max. 4000 Zeichen), Multi-Screenshot-Anhang (max. 6 Bilder).
 * **Kontext-Erfassung (`feedbackContext.ts`):** Hängt App-Version, Plattform, UserAgent, Route, UserId, Tier und Konsolen-Logs an.
 * **Console-Ring-Buffer (`consoleBuffer.ts`):** Hält die letzten ~50 Konsolen-Einträge im Speicher.
-* **Backend (`POST /api/feedback`):** Lädt Screenshots in privaten Supabase Bucket `feedback-screenshots` (10-Jahres Signed URLs) und speichert Report in `feedback`-Tabelle.
+* **Backend (`POST /api/feedback`):** Lädt Screenshots in privaten S3 Bucket `feedback-screenshots` (10-Jahres Signed URLs) und speichert Report in `feedback`-Tabelle.
 
 ---
 
@@ -167,7 +173,7 @@ Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird
   1. Bereitet das AdMob Rewarded Video Ad vor (`prepareRewardVideoAd`) und zeigt es an (`showRewardVideoAd`).
   2. Lauscht auf `RewardAdPluginEvents.Rewarded` und `Dismissed`.
   3. Nach erfolgreichem Reward ruft der Client `claimRewardedCredit()` auf (`POST /api/me/rewarded-ad-claimed`).
-  4. Backend erhöht `app_metadata.bonus_credits` in Supabase Auth um `+1`.
+  4. Backend erhöht `app_metadata.bonus_credits` in den User-Metadaten um `+1`.
   5. Die Rezept-Extraktion wird direkt und ohne weiteren Benutzerklick gestartet.
 * **Web-Dev-Simulation:** Im Browser-Entwicklungsmodus wird eine 2-Sekunden-Verzögerung simuliert und `true` zurückgegeben.
 
@@ -183,8 +189,10 @@ Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird
 * **`STALE_HIDE_MS` (60s):** Bleibt das Banner länger als 60 Sekunden versteckt (z. B. langes Lesen eines Rezepts), wird es zerstört. Beim nächsten Einblenden wird ein frischer Ad-Request abgesetzt (neue bezahlte Impression statt alter Standbild-Banner).
 * **`RESUME_DELAY_MS` (500ms):** Das Wiedereinblenden nach Schließen von Overlays wird verzögert, bis die CSS-Slide-Up-Animation der Bottom-Bar vollständig abgeschlossen ist.
 
-### DSGVO / UMP Consent Flow & Plugin-Patch
-* **Google UMP SDK:** In `initAds()` wird vor dem ersten Ad-Request `AdMob.requestConsentInfo()` und bei Bedarf `AdMob.showConsentForm()` ausgeführt. Bei Ablehnung oder fehlendem Consent wird `npa: true` (Non-Personalized Ads) angefordert.
+### DSGVO / UMP Consent Flow, First-Recipe Grace Period & Priming (`useAppAds.ts` & `ads.ts`)
+* **Kein Cold-Start Consent-Prompt:** `initAds()` wird **nicht** beim App-Start ausgeführt, damit neue Nutzer beim Onboarding/Login nicht von Popups erschlagen werden.
+* **First-Recipe Grace Period (`snagbite:ads:firstExtractionGraceUsed`):** Die allererste Rezept-Extraktion eines neuen Nutzers (`savedRecipesCount === 0` und Flag noch nicht gesetzt) läuft zu **100 % werbe- und popup-frei** durch (Fokus auf den ersten „Wow-Moment").
+* **Soft-Prompt Priming (`PreAdTransparencySheet.tsx`) ➔ Google UMP Consent:** Erst wenn die **2. Extraktion** startet (oder das erste App-Open-Interstitial beim 3. Start fällig ist), öffnet sich einmalig das sympathische `PreAdTransparencySheet` (*„Snagbite bleibt kostenlos – KI-Analyse kostet Rechenleistung"*). Direkt nach Klick auf *„Alles klar, verstanden!"* wird `initAds()` (`AdMob.requestConsentInfo()` + `AdMob.showConsentForm()`) aufgerufen, sodass der Google-UMP-Consent-Dialog unmittelbar nach dem positiven Commitment des Nutzers erscheint und erst danach das MREC-Banner bzw. Interstitial lädt.
 * **Patched Plugin:** `@capacitor-community/admob` v8.0.0 wurde via `patch-package` angepasst, um echte Java-seitige `hideBanner()` / `resumeBanner()` Methoden auf dem Android UI-Thread ohne Deadlocks und Neuladen bereitzustellen.
 
 ### 🌟 Dynamisches Feature-Spotlight (`ProFeatureSheet/`)
@@ -215,15 +223,22 @@ Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird
 
 ---
 
-## 9. 🍳 Lebendige Rezept-Blaupause: Progressiver Extraktions-Screen (`ExtractionAnimation/`)
+## 9. 🍳 In-Place Rezept-Extraktion & Nicht schließbares Ad Bottom Sheet (`RecipeDetails/` & `ExtractionAdSheet.tsx`)
 
-* **Live Materializing Recipe Card:** Statt eines statischen Ladebalkens baut sich die Rezeptkarte Schritt für Schritt synchron mit den Extraktions-Meilensteinen auf:
-  1. **Phase 1 (Blaupause):** Plattform-Badge (Instagram, TikTok, YouTube Shorts, Foto-Scan), animierter Laser-Scanner (`animate-scanning-beam`), Skeletons für Titel und Meta-Badges. Bei Foto-Imports wird das Originalfoto sofort ab Millisekunde 0 eingeblendet.
-  2. **Phase 2 (Entdeckung):** Post-Thumbnail & Creator-Handle klinken sich ein.
-  3. **Phase 3 (Rezept-Materialisierung):** Rezepttitel blendet ein, Meta-Pills (Zeit, Portionen, Kategorie) ploppen mit taktilem Micro-Bounce auf (`animate-scale-pop`, `hapticLight()`), Zutaten-Chips materialisieren sich mit Mengen und Zähler-Badge.
-  4. **Phase 4 (Cover & Finalisierung):** Generiertes KI-Food-Cover schärft sich ein, Schritt-Zähler bestätigt die Strukturierung.
-* **Architektur:** Modularisiert in Subkomponenten (`RecipeCoverPreview.tsx`, `RecipePillTags.tsx`, `IngredientsStream.tsx`, `ExtractionProgressBar.tsx`, `ProgressiveRecipeCard.tsx`, `useProgressiveRecipe.ts`) unter 150 Zeilen.
-* **AdMob-Harmonisierung:** Im Free-Tier wechselt die Karte automatisch in den `compact`-Modus, sodass sie harmonisch über dem MREC-Ad-Banner Platz findet.
+* **In-Place Progressive Skeleton Extraction ([`RecipeDetails/`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/RecipeDetails/index.tsx)):**
+  - Statt einer getrennten Animationsseite oder eines unmountenden Skeleton-Views verbleibt die App beim Start der Extraktion direkt in der vollwertigen Rezept-Detailansicht.
+  - Die Subkomponenten (`RecipeHeader`, `RecipeImageGallery`, `RecipeInfoSection`, `RecipeIngredients`, `RecipeInstructions`) unterstützen das `isExtracting`-Prop nativ und rendern Shimmer-Skeletons für fehlende Felder im identischen DOM-Baum.
+  - Sobald Teildaten via Server-Sent Events (`GET /api/jobs/:id/events`, Preview-Envelope) eintreffen, werden diese live und unterbrechungsfrei in die Rezeptansicht gemergt.
+  - Nach Abschluss der Extraktion wird das fertige Rezept in-place ohne Routenwechsel oder Tab-Sprung aktiviert; alle Aktions-Docks, Portionsskalierer und Checklisten werden nahtlos freigegeben.
+
+* **Nicht schließbares Ad Overlay für Free-User ([`ExtractionAdSheet.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ExtractionAdSheet.tsx)):**
+  - Für Free-Tier-Nutzer öffnet sich während der aktiven Extraktion ein modales, nicht schließbares Card-Overlay (analog zu `CookedModal.tsx`, `rounded-3xl shadow-2xl`, ohne Schließen-Button).
+  - **Kein Hintergrund-Blur:** Der Hintergrund wird dezent abgedunkelt (`bg-black/60`), bleibt jedoch gestochen scharf ohne `backdrop-blur`, damit der Nutzer den Live-Fortschritt der Extraktion und das pulsierende Snagbite-Icon im Hintergrund jederzeit verfolgen kann.
+  - Enthält zentriert ausschließlich den MREC 300×250 Werbeslot (`ExtractionAdCard.tsx`), dessen Layout dynamisch gemessen und an AdMob übergeben wird.
+  - Der Zurück-Button in `RecipeDetails` ist für Free-User während der Extraktion deaktiviert.
+  - Schließt sich bei erfolgreichem Abschluss automatisch (oder leitet bei Fehlschlag/Rate-Limit sauber zurück zum Formular).
+  - **5-Sekunden-Mindestanzeige bei gecachten Rezepten (`CACHED_RECIPE_SIMULATED_AD_DURATION_MS = 5000`):** Wird ein bereits bekanntes Rezept sofort aus dem Backend-Cache geliefert (`status === 'completed'`), durchläuft die App für Free-User einen 5-sekündigen simulierten Extraktionsfortschritt (`runSimulatedProgress` mit progressiver Titel-/Cover-Vorschau ab 75 %), damit das MREC-Banner zuverlässig geladen und als gültige AdMob *Active View* (> 1 Sekunde) gezählt wird.
+  - Premium-Nutzer sehen kein Werbe-Overlay, erhalten gecachte Rezepte verzögerungsfrei in 0 Sekunden und können dank Hintergrund-Queueing jederzeit frei navigieren.
 
 ---
 
@@ -255,6 +270,11 @@ Für schnelles Testen, Gestalten und Inspizieren selten auftretender Dialoge, Sh
 * **Lazy-Loaded Dev Host (`DevOverlayHost.tsx`):**
   * Alle dev-getriggerten Overlays werden via `React.lazy()` und `Suspense` dynamisch nachgeladen, wodurch der reguläre Bundle-Overhead im Dev-Modus 0 KB beträgt.
   * Automatische Anbindung an den `OverlayStackContext` (Android Hardware-Back-Button und Scroll-Lock).
+* **Admin- & Production-Freischaltung (`useDevToolsActive`, `AdminSettingsSection`):**
+  * In lokaler Entwicklung (`import.meta.env.DEV`) sind Eruda und `window.dev` standardmäßig aktiv.
+  * In Production (`NODE_ENV === 'production'`, z. B. auf echten Mobilgeräten) können autorisierte Administratoren (`config.ADMIN_EMAILS`) die Entwickler-Tools über einen Toggle in den **Einstellungen** (`AdminSettingsSection.tsx`, `useAdminSettings.ts`) aktivieren (`localStorage['snagbite_dev_tools']`).
+  * Zudem können Admins über die Option *„Browserdaten & Einstellungen löschen“* sämtliche lokalen Browserdaten (`localStorage`, `sessionStorage`, IndexedDB-Bildercache, Cache-Storage, Cookies, Service Worker) bereinigen und alle zusätzlichen Benutzereinstellungen in der `user`-Tabelle der Datenbank (`metadata`, `notificationsEnabled`, `customExtractionLimit`) via `POST /api/admin/me/reset-settings` zurücksetzen.
+  * Zudem steht Admins auch in Production der Menüeintrag *„[DEV] Neu extrahieren“* im Rezept-Detailmenü (`RecipeHeaderActions.tsx`) zur Verfügung, um Rezepte direkt mit der aktuellen Prompt- und Normalisierungs-Pipeline erneut durch Gemini zu analysieren.
 
 ---
 

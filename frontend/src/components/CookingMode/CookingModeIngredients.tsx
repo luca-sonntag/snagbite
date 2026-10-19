@@ -20,7 +20,7 @@ export const CookingModeIngredients: React.FC<CookingModeIngredientsProps> = ({
   const count = ingredients?.length ?? 0;
 
   return (
-    <div className={`w-full flex flex-col text-left ${className}`}>
+    <div id="tour-cooking-ingredients-btn" className={`w-full flex flex-col text-left ${className}`}>
       {/* Section Header inside cohesive card */}
       <div className="flex items-center justify-between gap-2 mb-3 shrink-0">
         <h3 className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">

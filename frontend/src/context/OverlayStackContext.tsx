@@ -39,6 +39,8 @@ interface OverlayStackContextValue {
   handleBack: () => boolean;
   /** Reactive boolean: true when any overlay is currently open. */
   isAnyOverlayOpen: boolean;
+  /** Reactive count of currently open overlays on the stack. */
+  overlayCount: number;
   /** Register a custom back-action handler with an optional priority. */
   registerBackHandler: (handler: () => boolean, priority?: number) => () => void;
 }
@@ -54,6 +56,7 @@ const fallbackOverlayStack: OverlayStackContextValue = {
   updateOverlay: () => {},
   handleBack: () => false,
   isAnyOverlayOpen: false,
+  overlayCount: 0,
   registerBackHandler: () => () => {},
 };
 
@@ -130,7 +133,8 @@ export function useBackHandler(
 export function OverlayStackProvider({ children }: { children: React.ReactNode }) {
   const overlaysRef = useRef<OverlayItem[]>([]);
   const customHandlersRef = useRef<CustomBackHandler[]>([]);
-  const [isAnyOverlayOpen, setIsAnyOverlayOpen] = useState(false);
+  const [overlayCount, setOverlayCount] = useState(0);
+  const isAnyOverlayOpen = overlayCount > 0;
 
   // Global scroll lock: locks documentElement and body whenever any overlay is open
   useBodyScrollLock(isAnyOverlayOpen);
@@ -138,8 +142,8 @@ export function OverlayStackProvider({ children }: { children: React.ReactNode }
   const pushOverlay = useCallback((onClose?: () => void) => {
     const id = `overlay_${++nextOverlayId}`;
     overlaysRef.current.push({ id, onClose });
+    setOverlayCount(overlaysRef.current.length);
     if (overlaysRef.current.length === 1) {
-      setIsAnyOverlayOpen(true);
       void hideAdBanner();
     }
     return id;
@@ -151,8 +155,8 @@ export function OverlayStackProvider({ children }: { children: React.ReactNode }
     } else {
       overlaysRef.current.pop();
     }
+    setOverlayCount(overlaysRef.current.length);
     if (overlaysRef.current.length === 0) {
-      setIsAnyOverlayOpen(false);
       void resumeAdBanner();
 
       // Unconditionally clear scroll lock styles immediately
@@ -233,6 +237,7 @@ export function OverlayStackProvider({ children }: { children: React.ReactNode }
         updateOverlay,
         handleBack,
         isAnyOverlayOpen,
+        overlayCount,
         registerBackHandler,
       }}
     >

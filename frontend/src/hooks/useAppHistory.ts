@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import type { SavedRecipe } from '../types';
+import type { Recipe, SavedRecipe } from '../types';
 import { apiUrl } from '../api';
 import { deleteCachedImage } from '../utils/imageStore';
 import { useDialog } from '../context/DialogContext';
@@ -30,6 +30,43 @@ export function useAppHistory({
     setExtraRecipes((prev) => ({ ...prev, [recipeId]: saved }));
   }, []);
 
+  const updateRecipeCover = useCallback((recipeId: string, imageUrl: string, isAiCover = true) => {
+    setHistory((prev) =>
+      prev.map((item) => {
+        if (item.recipeId === recipeId || item.recipe?.id === recipeId) {
+          return {
+            ...item,
+            recipe: {
+              ...item.recipe,
+              imageUrl,
+              imageUrls: [imageUrl, ...(item.recipe.imageUrls || []).filter((u) => u !== imageUrl)],
+              isAiCover,
+              isCoverGenerating: false,
+            },
+          };
+        }
+        return item;
+      })
+    );
+    setExtraRecipes((prev) => {
+      const existing = prev[recipeId];
+      if (!existing) return prev;
+      return {
+        ...prev,
+        [recipeId]: {
+          ...existing,
+          recipe: {
+            ...existing.recipe,
+            imageUrl,
+            imageUrls: [imageUrl, ...(existing.recipe.imageUrls || []).filter((u) => u !== imageUrl)],
+            isAiCover,
+            isCoverGenerating: false,
+          },
+        },
+      };
+    });
+  }, []);
+
   const fetchHistory = useCallback(async () => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
@@ -55,8 +92,23 @@ export function useAppHistory({
   }, [getAccessToken]);
 
   const handleExtractionSuccess = useCallback(
-    (recipeId: string) => {
+    (recipeId: string, preloadedRecipe?: Recipe) => {
       newlyExtractedJobIdRef.current = recipeId;
+      if (preloadedRecipe) {
+        setExtraRecipes((prev) => ({
+          ...prev,
+          [recipeId]: {
+            recipeId,
+            recipe: preloadedRecipe,
+            source: 'extraction',
+            addedAt: preloadedRecipe.createdAt || new Date().toISOString(),
+            updatedAt: preloadedRecipe.updatedAt || new Date().toISOString(),
+            isFavorite: false,
+            flags: [],
+            collectionIds: [],
+          },
+        }));
+      }
       navigate('history', recipeId);
       fetchHistory();
     },
@@ -205,5 +257,6 @@ export function useAppHistory({
     fetchHistory,
     handleExtractionSuccess,
     handleDeleteJob,
+    updateRecipeCover,
   };
 }

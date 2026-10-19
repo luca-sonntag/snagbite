@@ -15,7 +15,6 @@ export const collections = pgTable(
     id: uuid('id').primaryKey().defaultRandom(),
     userId: uuid('user_id').notNull(),
     name: text('name').notNull(),
-    emoji: text('emoji'),
     position: integer('position').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),

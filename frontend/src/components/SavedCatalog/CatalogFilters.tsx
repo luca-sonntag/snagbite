@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@heroui/react';
-import { List, LayoutGrid, CheckSquare, ArrowLeft, Star, Tag, X, Clock } from 'lucide-react';
+import { List, LayoutGrid, CheckSquare, ArrowLeft, Star, Tag, X, Clock, Folder } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { PageHeader } from '../PageHeader';
 import type { Collection, RecipeCategory } from '../../types';
@@ -81,7 +81,6 @@ export default function CatalogFilters({
   }, [autoFocusSearch]);
 
   const collectionName = (id: string) => collections.find(c => c.id === id)?.name ?? id;
-  const collectionEmoji = (id: string) => collections.find(c => c.id === id)?.emoji ?? null;
 
   // When removing a filter chip or changing search in a specific context
   // (collection, favorites, quick, flag), navigate to general list view.
@@ -281,7 +280,7 @@ export default function CatalogFilters({
             <ActiveChip
               key={id}
               onRemove={() => removeCollection(id)}
-              icon={collectionEmoji(id) ? <span className="text-base leading-none">{collectionEmoji(id)}</span> : undefined}
+              icon={<Folder className="w-3.5 h-3.5" />}
               label={collectionName(id)}
             />
           ))}

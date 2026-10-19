@@ -18,6 +18,7 @@ const ProFeatureSheet = lazy(() => import('../ProFeatureSheet/ProFeatureSheet'))
 const CookedModal = lazy(() => import('../CookedModal'));
 const NotificationPrompt = lazy(() => import('../NotificationPrompt'));
 const TimerConfirmSheet = lazy(() => import('../TimerConfirmSheet'));
+const ExtractionAdSheet = lazy(() => import('../ExtractionAdSheet'));
 
 interface DevOverlayHostProps {
   activeOverlay: ActiveDevOverlay | null;
@@ -89,6 +90,13 @@ export const DevOverlayHost: React.FC<DevOverlayHostProps> = ({ activeOverlay, o
           label={((activeOverlay.options as DevTimerOptions)?.label) ?? 'Zwiebeln glasig dünsten'}
           recipeId={(activeOverlay.options as DevTimerOptions)?.recipeId}
           stepNum={(activeOverlay.options as DevTimerOptions)?.stepNum}
+          onClose={onClose}
+        />
+      )}
+
+      {activeOverlay.name === 'extractionAd' && (
+        <ExtractionAdSheet
+          isOpen={true}
           onClose={onClose}
         />
       )}

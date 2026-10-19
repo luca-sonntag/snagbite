@@ -4,9 +4,8 @@
 
 ## Features
 
-- Rezepte manuell ändern und speichern
-
-- rezepte wiederverwenden wenn es in der sprache bereits existiert, bzw. wenn andere  sprache verlangt bestehendes rezept nur von ki übersetzen und dann persistieren
+- [x] **Rezepte wiederverwenden (ohne Übersetzung umgesetzt):** Existiert für eine normalisierte Quell-URL bereits ein Rezept in der gewünschten Sprache (DE/EN), wird dieses sofort ohne erneuten Gemini-Aufruf und ohne Quota-Verbrauch ins Kochbuch übernommen. (Bypassbar mit `force: true`).
+- [ ] **Rezepte übersetzen bei Sprachwechsel:** Wenn für eine URL bereits ein Rezept existiert, aber in einer anderen Sprache verlangt wird, soll das bestehende strukturierte Rezept von der KI übersetzt und persistiert werden (spart Video-Scraping & Frame-Inferenz).
 
 - Für das vorschlagen von rezepten im Vorrat - eventuell hat user keine passenden rezepte, man könnte doch eventuell auf öffentliche rezepte zurückgreifen (aktuell sind alle rezepte in der recipes tabelle auf private visability, wie könnten wir das ausbauen?)
 
@@ -37,18 +36,11 @@
   - Alle Zutat-Mappings, Normalisierungen (`baseName`) und zugeordneten Icons im Backend und Frontend überprüfen und berichtigen.
   - Inkonsistente oder fehlerhafte Zuordnungen bereinigen, damit jede Zutat verlässlich ihr passendes SVG/Icon und die richtige Supermarktkategorie erhält.
 
-- **New User Experience (NUX) & Kontextuelle Screen-Touren (Spotlight Guides):**
-  - **Problem & Bedarf:** Viele Features und Interaktionsmöglichkeiten sind für Erstnutzer nicht sofort ersichtlich. Eine starre, lange Gesamttour durch die ganze App schreckt jedoch ab und überfordert Nutzer.
-  - **Konzept (Screen-by-Screen Just-in-Time Tour):**
-    - Keine globale Endlos-Tour, sondern kontextuell: Wenn ein Nutzer einen Screen/eine Maske (z. B. Kochmodus, Rezept-Detail, Wochenplaner, Vorrat, Einkaufsliste) das **erste Mal betritt**, werden relevante UI-Elemente gezielt visuell hervorgehoben (Spotlight / Backdrop-Cutout) und mit kurzen Tooltips erklärt.
-    - Jeder Screen hat seinen eigenen Tour-Zustand (gespeichert in `localStorage` oder User-Settings), sodass er nur 1x pro Maske getriggert wird.
-    - Jederzeit überspringbar („Verstanden“ / „Überspringen“) sowie bei Bedarf über die Einstellungen / Hilfe erneut startbar.
-  - **Mögliche Libraries / Pakete:**
-    - `driver.js` (leichtgewichtig, vanilla/framework-agnostisch, hervorragendes Spotlight/Backdrop-Cutout, kein schwerer React-Wrapper-Overhead).
-    - `react-joyride` (etablierter React-Standard für Guided Tours, gut anpassbar, aber größer).
-    - `shepherd.js` oder eine schlanke Eigenbau-Lösung über Floating UI / Popover API.
-  - Onboarding- und Einführungserlebnis für neue Nutzer überarbeiten, modernisieren und aktualisieren.
-  - Empty States (z. B. leeres Kochbuch, Wochenplaner, Einkaufsliste, Vorrat) auffrischen und Nutzer intuitiv zur ersten Aktion führen.
+- ~~**New User Experience (NUX) & Kontextuelle Screen-Touren (Spotlight Guides):**~~ *(Umgesetzt)*
+  - Schlankes 3-Slide Onboarding (`WelcomeGuide`) für den ersten App-Start (inkl. Screenshot-Import & Video-Reels).
+  - Just-in-Time Screen-by-Screen Spotlight Guides via `driver.js` für 6 Kern-Screens: `extract` (Import-Quellen), `catalog` (Sammlungen & Filter), `recipeDetails` (Portionen, Zutaten, Kochmodus, Copilot), `cookingMode` (Schritte, Timer, Zutaten), `shoppingList` (Kategorien, Abhaken, Schnelleingabe) und `mealPlanner` (Wochentage, Mahlzeiten planen, Wocheneinkauf).
+  - Clean-Flat-Styling (`stageRadius: 20`, Backdrop-Cutout, Dark-Mode-Support, border-none).
+  - Hardware-Backbutton-Trapping via `OverlayStackContext` und "Screen-Touren & Tipps zurücksetzen" in den Einstellungen.
 
 - **Vorrat-Feature: Workflow, UI & UX komplett überdenken:**
   - Den gesamten Ablauf rund um den Vorrat (Pantry) grundlegend hinterfragen und neu konzipieren: Nutzerführung, Pflegeaufwand und echter Alltagsmehrwert.
@@ -65,15 +57,16 @@
   - **Fokus auf echte Charakter-/Hero-Zutaten:** Benachrichtigungen ausschließlich für geschmacksprägende Hauptzutaten triggern, auf die man tatsächlich Appetit entwickeln kann (z. B. Avocado, Lachs, Kürbis, Burrata, Erdbeeren, Spargel, Pilze, Garnelen, Pasta, Süßkartoffel).
   - **Prompt-Optimierung für Gemini (`generateNotificationCopy`):** Den LLM-Prompt in `backend/src/gemini.ts` schärfen, sodass niemals plumpe Vorlagen wie *„Lust auf [Zutat]?“* generiert werden, sondern der kulinarische Kontext sympathisch, abwechslungsreich und appetitlich formuliert wird (z. B. *„Pasta-Lust? Du hast ein leckeres Rezept gespeichert...“*).
 
-- **Mehrteilige Rezepte / Sub-Rezepte & Komponenten (Brot, Sauce, Salat, Dressing, Topping etc.):**
-  - **Problem:** Viele Gerichte bestehen aus logisch getrennten Komponenten (z. B. Burger = Buns/Brot, Patties, Sauce, Beilagensalat). Aktuell werden Zutaten und Zubereitungsschritte oft in einer einzigen linearen Liste vermischt, was beim Kochen und Vorbereiten unübersichtlich ist.
-  - **Strukturierte Extraktion (KI & Schema):** Gemini soll bei der Extraktion erkennen, ob ein Rezept aus distinkten Sub-Rezepten bzw. Komponenten besteht, und diese strukturiert abbilden (z. B. Komponentengruppen für Zutaten mit Gruppen-Header und schrittweise Zuordnung der Zubereitung).
-  - **UX & Zubereitungs-Flow:**
-    - Zutatenliste: Visuelle Gruppierung nach Komponenten (z. B. *„Für das Brot“*, *„Für die Sauce“*, *„Für den Salat“*).
-    - Kochmodus & Schritte: Klare Komponenten-Abschnitte oder Badges an den Schritten, damit man Komponenten parallel oder im Vorfeld (Mise en Place) zubereiten kann.
-    - Einkaufsliste & Vorrat: Saubere Aggregation ohne Duplikat-Verwirrung bei komponentenübergreifenden Zutaten.
-
 ## Findings (Behoben ✅)
+
+- [x] Mehrteilige Rezepte / Sub-Rezepte & Komponenten (Brot, Sauce, Salat, Dressing, Topping etc.):
+  - Strukturierte Extraktion via Gemini Regel 24 (`ingredients[].section`, `instructions[].section`).
+  - 2nd-Stage Auditor Sanitization & Mapping (`recipeAuditor.ts`, `recipeAuditorSchema.ts`).
+  - Non-breaking JSONB Datenmodell in `@cookbook/shared` (`InstructionStep.section?: string`, `Ingredient.section?: string`).
+  - UI Rezept-Details: Umschalten zwischen Komponenten-Ansicht und Supermarkt-Kategorien via Segmented Control (`RecipeIngredientsHeader.tsx`, `IngredientGroupSection.tsx`).
+  - Zubereitung & Kochmodus: Komponenten-Dividers im linearen Timeline-Verlauf (`InstructionSectionDivider.tsx`) und Komponenten-Badge im Kochmodus (`CookingModeStepContent.tsx`).
+  - Einkaufsliste: Konsolidierung doppelter Zutaten über Komponenten hinweg (`consolidateIngredientsForShopping`) mit Aufschlüsselungs-Pills (`ShoppingConfirmItem.tsx`, `ShoppingConfirmSheet.tsx`).
+  - Export: Formatierung nach Komponenten in Plain-Text und semantischem HTML (`copyRecipeToClipboard.ts`).
 
 - [x] Extraktions-Warteliste & Fail-Safe Queue auf der „NEU“-Seite:
   - Schutz vor Link-Verlust: Fehlgeschlagene/abgebrochene Extraktionen werden persistent in der Fail-Safe Queue gesichert (`FailedJobCard.tsx`, 1-Klick-Retry, Link kopieren/öffnen, in Warteliste verschieben).

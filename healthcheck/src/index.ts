@@ -10,6 +10,11 @@ const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || '';
 const RAPIDAPI_SOCIAL_HOST = process.env.RAPIDAPI_SOCIAL_HOST || 'social-download-all-in-one.p.rapidapi.com';
 const HEALTHCHECK_BACKEND_URL = process.env.HEALTHCHECK_BACKEND_URL || '';
 const HEALTHCHECK_WEBSITE_URL = process.env.HEALTHCHECK_WEBSITE_URL || '';
+const HEALTHCHECK_WHISPER_URL =
+  process.env.HEALTHCHECK_WHISPER_URL ||
+  process.env.CLOUDFLARE_WHISPER_ENDPOINT ||
+  'https://snagbite-whisper-proxy.snagbite.workers.dev';
+const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
 const NTFY_TOPIC = process.env.NTFY_TOPIC || '';
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
@@ -18,7 +23,7 @@ const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
  * Sends a notification via ntfy.sh and/or Telegram Bot when configured.
  */
 async function sendNotification(message: string, isDown: boolean, serviceName: string) {
-  const promises: Promise<any>[] = [];
+  const promises: Promise<unknown>[] = [];
 
   // 1. ntfy.sh notification
   if (NTFY_TOPIC) {
@@ -80,7 +85,7 @@ async function run() {
   console.log('[healthcheck] Starting health checks...');
 
   const now = new Date().toISOString();
-  const results: any[] = [];
+  const results: Record<string, unknown>[] = [];
 
   const checks = [
     {
@@ -89,7 +94,7 @@ async function run() {
       run: async () => {
         const res = await fetch(HEALTHCHECK_BACKEND_URL, { signal: AbortSignal.timeout(10000) });
         if (!res.ok) throw new Error(`HTTP Status ${res.status} (URL: ${HEALTHCHECK_BACKEND_URL})`);
-        const data = (await res.json()) as any;
+        const data = (await res.json().catch(() => ({}))) as { status?: string; dbConnected?: boolean };
         if (data.status !== 'OK' && !data.dbConnected) {
           throw new Error(`Degraded status: ${data.status || 'unknown'} (URL: ${HEALTHCHECK_BACKEND_URL})`);
         }
@@ -138,6 +143,45 @@ async function run() {
         if (!text) throw new Error('Empty response received');
       },
     },
+    {
+      name: 'whisper-proxy',
+      isEnabled: !!HEALTHCHECK_WHISPER_URL && HEALTHCHECK_WHISPER_URL !== 'false' && HEALTHCHECK_WHISPER_URL !== 'none',
+      run: async () => {
+        const base = HEALTHCHECK_WHISPER_URL.replace(/\/+$/, '');
+        const healthUrl = `${base}/health`;
+        const res = await fetch(healthUrl, { signal: AbortSignal.timeout(10000) });
+        if (!res.ok) {
+          const errBody = await res.text().catch(() => '');
+          throw new Error(`HTTP Status ${res.status} (URL: ${healthUrl}): ${errBody.slice(0, 300)}`);
+        }
+        const data = (await res.json().catch(() => ({}))) as {
+          status?: string;
+          upstreamStatus?: number;
+          error?: string;
+        };
+        if (data.status !== 'ok') {
+          throw new Error(
+            `Degraded status: ${data.status || 'unknown'}${data.error ? ` - ${data.error}` : ''}`
+          );
+        }
+      },
+    },
+    {
+      name: 'groq',
+      isEnabled: !!GROQ_API_KEY,
+      run: async () => {
+        const res = await fetch('https://api.groq.com/openai/v1/models', {
+          headers: {
+            Authorization: `Bearer ${GROQ_API_KEY}`,
+          },
+          signal: AbortSignal.timeout(10000),
+        });
+        if (!res.ok) {
+          const errBody = await res.text().catch(() => '');
+          throw new Error(`HTTP Status ${res.status} (Groq API): ${errBody.slice(0, 300)}`);
+        }
+      },
+    },
   ];
 
   for (const check of checks) {
@@ -149,9 +193,9 @@ async function run() {
     try {
       await check.run();
       console.log(`[healthcheck] Service "${check.name}" is UP`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       status = 'down';
-      errorMsg = err?.message || String(err);
+      errorMsg = err instanceof Error ? err.message : String(err);
       console.warn(`[healthcheck] Service "${check.name}" is DOWN: ${errorMsg}`);
 
       const alertMessage = `Service "${check.name}" went down. Error: ${errorMsg}`;
@@ -168,10 +212,14 @@ async function run() {
 
   console.log('[healthcheck] Standalone health checks completed.');
   console.table(results);
-  process.exit(0);
+
+  const hasDownService = results.some((r) => r.Status === 'DOWN');
+  if (hasDownService) {
+    process.exitCode = 1;
+  }
 }
 
 run().catch((err) => {
   console.error('[healthcheck] Critical failure in health check service:', err);
-  process.exit(1);
+  process.exitCode = 1;
 });

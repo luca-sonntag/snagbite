@@ -19,6 +19,7 @@ import {
   EXTRACTION_INTERRUPTED_NOTIFICATION_ID,
 } from '../native';
 import { handleClientFrameRequest } from '../utils/videoFrames';
+import { awaitPreAdConsentIfNeeded } from '../utils/ads';
 
 // Tracks the currently in-flight extraction job across reloads/restarts, so a
 // still-running job can be resumed instead of the user re-submitting the same
@@ -34,7 +35,17 @@ export const MAX_IMPORT_PHOTOS = 5;
  */
 const MAX_PHOTOS_TOTAL_CHARS = 8_000_000;
 
-export function useRecipeExtraction(getAccessToken: () => Promise<string | null>, onExtractionSuccess: (recipeId: string) => void) {
+/**
+ * Duration (ms) to keep the extraction loading screen and MREC ad sheet visible
+ * for Free-tier users when a recipe is instantly served from the database cache.
+ */
+const CACHED_RECIPE_SIMULATED_AD_DURATION_MS = 5000;
+
+export function useRecipeExtraction(
+  getAccessToken: () => Promise<string | null>,
+  onExtractionSuccess: (recipeId: string, preloadedRecipe?: Recipe) => void,
+  onHistoryRefresh?: () => void
+) {
   const { t, language } = useI18n();
   const toast = useToast();
   const { user, refreshSession, isPremium } = useAuth();
@@ -131,6 +142,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
 
   const activePollingJobIdRef = useRef<string | null>(null);
   const activePollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const activeEventSourceRef = useRef<EventSource | null>(null);
 
   const frameProcessingJobIdRef = useRef<string | null>(null);
 
@@ -138,6 +150,10 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     if (activePollingIntervalRef.current) {
       clearInterval(activePollingIntervalRef.current);
       activePollingIntervalRef.current = null;
+    }
+    if (activeEventSourceRef.current) {
+      activeEventSourceRef.current.close();
+      activeEventSourceRef.current = null;
     }
     activePollingJobIdRef.current = null;
     frameProcessingJobIdRef.current = null;
@@ -180,7 +196,7 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
 
     try {
       const token = await getAccessToken();
-      if (token) {
+      if (token && !jobId.startsWith('cached-')) {
         await fetch(apiUrl(`/api/jobs/${jobId}/cancel`), {
           method: 'POST',
           headers: {
@@ -195,7 +211,37 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     }
   }, [getAccessToken, stopActivePolling, t, fetchLimitStatus]);
 
-  const runSimulatedProgress = useCallback(async (jobId: string, recipeId: string, targetDurationMs: number = 10000) => {
+  const fetchCompletedRecipe = useCallback(async (recipeId: string): Promise<Recipe | null> => {
+    if (!recipeId) return null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const token = await getAccessToken();
+        if (!token) return null;
+        const res = await fetch(apiUrl(`/api/recipes/${recipeId}`), {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.recipe) {
+            return data.recipe;
+          }
+        }
+      } catch (err) {
+        console.warn(`[useRecipeExtraction] Attempt ${attempt}/3 to fetch completed recipe failed:`, err);
+      }
+      if (attempt < 3) {
+        await new Promise((r) => setTimeout(r, 250));
+      }
+    }
+    return null;
+  }, [getAccessToken]);
+
+  const runSimulatedProgress = useCallback(async (
+    jobId: string,
+    recipeId: string,
+    targetDurationMs: number = 10000,
+    preloadedRecipe?: Recipe,
+  ) => {
     setIsPending(true);
     setJobStatus('processing');
 
@@ -209,149 +255,101 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     for (const step of steps) {
       if (activePollingJobIdRef.current !== jobId) return;
       setProgress({ percent: step.percent, stage: step.stage });
+      if (step.stage === 'extracting_recipe' && preloadedRecipe) {
+        setRecipe((prev) =>
+          prev
+            ? {
+                ...prev,
+                title: preloadedRecipe.title || prev.title,
+                imageUrl: preloadedRecipe.imageUrl || prev.imageUrl,
+                imageUrls: preloadedRecipe.imageUrls?.length ? preloadedRecipe.imageUrls : prev.imageUrls,
+                emoji: preloadedRecipe.emoji || prev.emoji,
+                prepTime: preloadedRecipe.prepTime ?? prev.prepTime,
+                cookTime: preloadedRecipe.cookTime ?? prev.cookTime,
+                servings: preloadedRecipe.servings || prev.servings,
+                sourceHandle: preloadedRecipe.sourceHandle || prev.sourceHandle,
+              }
+            : prev,
+        );
+      }
       await new Promise(res => setTimeout(res, step.delayMs));
     }
 
     if (activePollingJobIdRef.current !== jobId) return;
 
-
+    const completedRecipe = preloadedRecipe ?? (await fetchCompletedRecipe(recipeId));
     setProgress(null);
+    setRecipe(null);
     setIsPending(false);
+    onHistoryRefresh?.();
+    onExtractionSuccess(recipeId, completedRecipe ?? undefined);
+
     setUrl('');
     setPhotos([]);
     localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
     activePollingJobIdRef.current = null;
-    onExtractionSuccess(recipeId);
-  }, [onExtractionSuccess]);
+  }, [fetchCompletedRecipe, onHistoryRefresh, onExtractionSuccess]);
 
-  const startPolling = useCallback((id: string) => {
-    stopActivePolling();
-    activePollingJobIdRef.current = id;
-    pollingStartTimeRef.current = Date.now();
+  const handleJobUpdate = useCallback(
+    async (job: any) => {
+      setJobStatus(job.status);
 
-    const interval = setInterval(async () => {
-      try {
-        const token = await getAccessToken();
-        if (!token) {
+      if (job.status === 'completed') {
+        const elapsed = Date.now() - pollingStartTimeRef.current;
+        const remainingMs = 10000 - elapsed;
+        const targetJobId = job.id || job.jobId;
+        const targetRecipeId = job.recipeId || job.recipe?.id;
+
+        if (!isPremium && remainingMs > 2000) {
           stopActivePolling();
-          setJobStatus('failed');
-          setJobError('form.validation.unauthorized');
-          setIsPending(false);
-          localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
-          return;
-        }
-        const response = await fetch(apiUrl(`/api/jobs/${id}`), {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        let data: any;
-        try {
-          data = await response.json();
-        } catch {
-          stopActivePolling();
-          setJobStatus('failed');
-          setJobError(response.status === 429 ? 'too many requests' : 'form.validation.serverError');
-          setIsPending(false);
-          localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
+          activePollingJobIdRef.current = targetJobId;
+          await runSimulatedProgress(targetJobId, targetRecipeId, remainingMs);
           return;
         }
 
-        if (!response.ok || !data.success) {
-          stopActivePolling();
-          setJobStatus('failed');
-          setJobError(data.error || 'form.validation.failedCheck');
-          setIsPending(false);
-          localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
-          return;
-        }
-
-        const job = data.job;
-        setJobStatus(job.status);
-
-        if (job.status === 'completed') {
-          const elapsed = Date.now() - pollingStartTimeRef.current;
-          const remainingMs = 10000 - elapsed;
-
-          if (!isPremium && remainingMs > 2000) {
-            stopActivePolling();
-            activePollingJobIdRef.current = job.id;
-            await runSimulatedProgress(job.id, job.recipeId, remainingMs);
-            return;
-          }
-
-          stopActivePolling();
-
-          setProgress(null);
-          setIsPending(false);
-          setUrl('');
-          setPhotos([]);
-          localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
-
-          if (currentExtractUrlRef.current) {
-            removeFromWaitlist(currentExtractUrlRef.current);
-            removeFailedJob(currentExtractUrlRef.current);
-            currentExtractUrlRef.current = '';
-          }
-
-          const recipeTitle = job.title?.trim();
-          const notifTitle = t('notification.recipeReady.title');
-          const notifBody = recipeTitle
-            ? t('notification.recipeReady.body', { title: recipeTitle })
-            : t('notification.recipeReady.bodyFallback');
-          void sendRecipeReadyNotification(notifTitle, notifBody, job.recipeId);
-
-          onExtractionSuccess(job.recipeId);
-        } else if (job.status === 'failed') {
-          stopActivePolling();
-          const envelope = job.error ? parseSerializedError(job.error) : null;
-          setJobError(job.error || 'form.validation.failedExtraction');
-          setJobErrorCode(envelope?.code ?? null);
-          setJobErrorParams(envelope?.params ?? null);
-          if (currentExtractUrlRef.current) {
-            addFailedJob({
-              sourceUrl: currentExtractUrlRef.current,
-              mode: 'link',
-              error: job.error || 'form.validation.failedExtraction',
-              errorCode: envelope?.code ?? null,
-              errorParams: envelope?.params ?? null,
-            });
-          } else {
-            const localizedError =
-              resolveErrorCode(envelope?.code, envelope?.params, job.error || 'form.validation.failedExtraction', language) ||
-              t('error.default');
-            toast.danger(t('toast.recipeFailedTitle'), {
-              description: localizedError,
-              duration: 4500,
-            });
-          }
-          setProgress(null);
-          setIsPending(false);
-          localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
-        } else if (job.status === 'awaiting_frames') {
-          setProgress(job.progress || { percent: 30, stage: 'awaiting_frames' });
-          if (frameProcessingJobIdRef.current !== job.id) {
-            frameProcessingJobIdRef.current = job.id;
-            handleClientFrameRequest(job, getAccessToken).catch((err) =>
-              console.warn('[useRecipeExtraction] Keyframe capture failed:', err),
-            );
-          }
-        } else {
-          setProgress(job.progress || null);
-        }
-      } catch (err: unknown) {
         stopActivePolling();
-        setJobStatus('failed');
-        setJobError(err instanceof Error ? err.message : 'form.validation.lostConnection');
+
+        const completedRecipe = await fetchCompletedRecipe(targetRecipeId);
+        setProgress(null);
+        setRecipe(null);
+        setIsPending(false);
+        onHistoryRefresh?.();
+        onExtractionSuccess(targetRecipeId, completedRecipe ?? undefined);
+
+        setUrl('');
+        setPhotos([]);
+        localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
+
+        if (currentExtractUrlRef.current) {
+          removeFromWaitlist(currentExtractUrlRef.current);
+          removeFailedJob(currentExtractUrlRef.current);
+          currentExtractUrlRef.current = '';
+        }
+
+        const recipeTitle = job.title?.trim() || completedRecipe?.title;
+        const notifTitle = t('notification.recipeReady.title');
+        const notifBody = recipeTitle
+          ? t('notification.recipeReady.body', { title: recipeTitle })
+          : t('notification.recipeReady.bodyFallback');
+        void sendRecipeReadyNotification(notifTitle, notifBody, job.recipeId);
+      } else if (job.status === 'failed') {
+        stopActivePolling();
+        const envelope = job.error ? parseSerializedError(job.error) : null;
+        setJobError(job.error || 'form.validation.failedExtraction');
+        setJobErrorCode(envelope?.code ?? null);
+        setJobErrorParams(envelope?.params ?? null);
+        setRecipe(null);
         if (currentExtractUrlRef.current) {
           addFailedJob({
             sourceUrl: currentExtractUrlRef.current,
             mode: 'link',
-            error: err instanceof Error ? err.message : 'form.validation.lostConnection',
+            error: job.error || 'form.validation.failedExtraction',
+            errorCode: envelope?.code ?? null,
+            errorParams: envelope?.params ?? null,
           });
         } else {
           const localizedError =
-            resolveJobError(err instanceof Error ? err.message : 'form.validation.lostConnection', language) ||
+            resolveErrorCode(envelope?.code, envelope?.params, job.error || 'form.validation.failedExtraction', language) ||
             t('error.default');
           toast.danger(t('toast.recipeFailedTitle'), {
             description: localizedError,
@@ -361,11 +359,159 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
         setProgress(null);
         setIsPending(false);
         localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
+      } else if (job.status === 'awaiting_frames') {
+        setProgress(job.progress || { percent: 30, stage: 'awaiting_frames' });
+        if (frameProcessingJobIdRef.current !== job.id) {
+          frameProcessingJobIdRef.current = job.id;
+          handleClientFrameRequest(job, getAccessToken).catch((err) =>
+            console.warn('[useRecipeExtraction] Keyframe capture failed:', err),
+          );
+        }
+      } else {
+        setProgress(job.progress || null);
+        if (job.progress?.preview) {
+          setRecipe((prev) => {
+            if (!prev) return prev;
+            const p = job.progress.preview;
+            return {
+              ...prev,
+              title: p.title || prev.title,
+              imageUrl: p.thumbnailUrl || p.coverUrl || prev.imageUrl,
+              sourceHandle: p.authorHandle || prev.sourceHandle,
+              servings: p.servings || prev.servings,
+              category: p.category || prev.category,
+            };
+          });
+        }
       }
-    }, 600);
+    },
+    [
+      isPremium,
+      stopActivePolling,
+      runSimulatedProgress,
+      fetchCompletedRecipe,
+      onHistoryRefresh,
+      t,
+      onExtractionSuccess,
+      removeFromWaitlist,
+      removeFailedJob,
+      addFailedJob,
+      language,
+      toast,
+      getAccessToken,
+    ]
+  );
 
-    activePollingIntervalRef.current = interval;
-  }, [getAccessToken, isPremium, onExtractionSuccess, runSimulatedProgress, stopActivePolling, t, language, toast, addFailedJob]);
+  const startPolling = useCallback(
+    (id: string) => {
+      stopActivePolling();
+      activePollingJobIdRef.current = id;
+      pollingStartTimeRef.current = Date.now();
+
+      const startHttpPollingFallback = () => {
+        if (activePollingIntervalRef.current || activePollingJobIdRef.current !== id) return;
+
+        const interval = setInterval(async () => {
+          try {
+            const token = await getAccessToken();
+            if (!token) {
+              stopActivePolling();
+              setJobStatus('failed');
+              setJobError('form.validation.unauthorized');
+              setIsPending(false);
+              localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
+              return;
+            }
+            const response = await fetch(apiUrl(`/api/jobs/${id}`), {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            let data: any;
+            try {
+              data = await response.json();
+            } catch {
+              stopActivePolling();
+              setJobStatus('failed');
+              setJobError(response.status === 429 ? 'too many requests' : 'form.validation.serverError');
+              setIsPending(false);
+              localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
+              return;
+            }
+
+            if (!response.ok || !data.success) {
+              stopActivePolling();
+              setJobStatus('failed');
+              setJobError(data.error || 'form.validation.failedCheck');
+              setIsPending(false);
+              localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
+              return;
+            }
+
+            await handleJobUpdate(data.job);
+          } catch (err: unknown) {
+            stopActivePolling();
+            setJobStatus('failed');
+            setJobError(err instanceof Error ? err.message : 'form.validation.lostConnection');
+            if (currentExtractUrlRef.current) {
+              addFailedJob({
+                sourceUrl: currentExtractUrlRef.current,
+                mode: 'link',
+                error: err instanceof Error ? err.message : 'form.validation.lostConnection',
+              });
+            } else {
+              const localizedError =
+                resolveJobError(err instanceof Error ? err.message : 'form.validation.lostConnection', language) ||
+                t('error.default');
+              toast.danger(t('toast.recipeFailedTitle'), {
+                description: localizedError,
+                duration: 4500,
+              });
+            }
+            setProgress(null);
+            setRecipe(null);
+            setIsPending(false);
+            localStorage.removeItem(PENDING_JOB_STORAGE_KEY);
+          }
+        }, 600);
+
+        activePollingIntervalRef.current = interval;
+      };
+
+      // Connect via Server-Sent Events for instant sub-30ms job progress streaming
+      void (async () => {
+        try {
+          const token = await getAccessToken();
+          const sseUrl = token
+            ? apiUrl(`/api/jobs/${id}/events?token=${encodeURIComponent(token)}`)
+            : apiUrl(`/api/jobs/${id}/events`);
+
+          const eventSource = new EventSource(sseUrl, { withCredentials: true });
+          activeEventSourceRef.current = eventSource;
+
+          eventSource.addEventListener('job', (e: MessageEvent) => {
+            try {
+              const job = JSON.parse(e.data);
+              void handleJobUpdate(job);
+            } catch (parseErr) {
+              console.warn('[useRecipeExtraction] SSE JSON parse error:', parseErr);
+            }
+          });
+
+          eventSource.onerror = () => {
+            if (activeEventSourceRef.current) {
+              activeEventSourceRef.current.close();
+              activeEventSourceRef.current = null;
+            }
+            startHttpPollingFallback();
+          };
+        } catch {
+          startHttpPollingFallback();
+        }
+      })();
+    },
+    [stopActivePolling, getAccessToken, handleJobUpdate, language, t, toast, addFailedJob]
+  );
 
   /**
    * Shared submit path for both input channels: posts a job-creating request and
@@ -386,21 +532,41 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
     buildBody: () => Promise<unknown>,
     meta: { mode: ExtractionMode; sourceLabel: string },
   ) => {
+    let effectiveIsPremium = isPremium;
+    if (!effectiveIsPremium) {
+      const alreadyHasRecipes = (limitStatus?.savedRecipes ?? 0) > 0;
+      const { upgradedToPremium } = await awaitPreAdConsentIfNeeded(alreadyHasRecipes);
+      if (upgradedToPremium) {
+        effectiveIsPremium = true;
+      }
+    }
+
     // Proactively request local notification permissions on native startup of extraction
     if (isNative()) {
       requestNativeNotificationPermission().catch(err => console.warn('Failed to request notifications permission:', err));
     }
 
-    // Only the free/foreground flow blocks the form with the full-screen animation.
-    if (!isPremium) {
-      setIsPending(true);
-      setJobStatus('pending');
-    }
+    // Both free and premium flows immediately show RecipeDetails with skeleton animations
+    setIsPending(true);
+    setJobStatus('pending');
     setJobError(null);
     setJobErrorCode(null);
     setJobErrorParams(null);
-    setRecipe(null);
     setProgress(null);
+
+    const inFlightRecipe: Recipe = {
+      id: '',
+      title: '',
+      description: '',
+      ingredients: [],
+      instructions: [],
+      equipment: [],
+      servings: 0,
+      prepTime: null,
+      cookTime: null,
+      sourceUrl: meta.mode === 'link' ? meta.sourceLabel : undefined,
+    };
+    setRecipe(inFlightRecipe);
 
     if (meta.mode === 'link') {
       currentExtractUrlRef.current = meta.sourceLabel;
@@ -443,9 +609,15 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
         });
       }
 
-      if (isPremium) {
+      if (effectiveIsPremium) {
         if (data.status === 'completed' && data.recipeId) {
           // Already extracted / cached: directly open recipe without creating a dummy background job
+          if (data.isCached) {
+            toast.success(t('toast.recipeReusedTitle'), {
+              description: t('toast.recipeReusedDesc'),
+              duration: 3500,
+            });
+          }
           if (meta.mode === 'link') {
             removeFromWaitlist(meta.sourceLabel);
             removeFailedJob(meta.sourceLabel);
@@ -454,35 +626,44 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
           setPhotos([]);
           setJobStatus(null);
           fetchLimitStatus();
-          onExtractionSuccess(data.recipeId);
+          const completedRecipe = data.recipe ?? (await fetchCompletedRecipe(data.recipeId));
+          setIsPending(false);
+          setRecipe(null);
+          setProgress(null);
+          onHistoryRefresh?.();
+          onExtractionSuccess(data.recipeId, completedRecipe ?? undefined);
           return;
         }
-        // Background flow: track the job in the shared store and free the form.
+        // Background-capable flow: track the job in shared store and connect live polling
         if (data.jobId) {
           addJob(data.jobId, { sourceLabel: meta.sourceLabel, mode: meta.mode });
           if (meta.mode === 'link') {
             removeFromWaitlist(meta.sourceLabel);
             removeFailedJob(meta.sourceLabel);
           }
+          startPolling(data.jobId);
         }
         setUrl('');
         setPhotos([]);
-        setJobStatus(null);
+        setJobStatus(data.status ?? 'pending');
         fetchLimitStatus();
       } else {
         fetchLimitStatus();
         if (data.status === 'completed') {
           stopActivePolling();
-          activePollingJobIdRef.current = data.jobId ?? null;
-          if (data.recipeId) {
-            if (meta.mode === 'link') {
-              removeFromWaitlist(meta.sourceLabel);
-              removeFailedJob(meta.sourceLabel);
-            }
-            onExtractionSuccess(data.recipeId);
-          } else {
-            runSimulatedProgress(data.jobId ?? '', data.recipeId, 10000);
+          if (meta.mode === 'link') {
+            removeFromWaitlist(meta.sourceLabel);
+            removeFailedJob(meta.sourceLabel);
+            currentExtractUrlRef.current = '';
           }
+          const simulatedJobId = data.jobId ?? `cached-${data.recipeId ?? Date.now()}`;
+          activePollingJobIdRef.current = simulatedJobId;
+          await runSimulatedProgress(
+            simulatedJobId,
+            data.recipeId,
+            CACHED_RECIPE_SIMULATED_AD_DURATION_MS,
+            data.recipe,
+          );
         } else {
           setJobStatus(data.status);
           localStorage.setItem(PENDING_JOB_STORAGE_KEY, data.jobId);
@@ -491,6 +672,9 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       }
     } catch (err: unknown) {
       const typed = err as (Error & { code?: string; params?: ErrorParams }) | undefined;
+      setRecipe(null);
+      setIsPending(false);
+      setProgress(null);
       setJobStatus('failed');
       setJobError(err instanceof Error ? err.message : 'form.validation.submissionError');
       setJobErrorCode(typed?.code ?? null);
@@ -529,17 +713,17 @@ export function useRecipeExtraction(getAccessToken: () => Promise<string | null>
       }
       setIsPending(false);
     }
-  }, [getAccessToken, startPolling, fetchLimitStatus, isPremium, addJob, runSimulatedProgress, stopActivePolling, onExtractionSuccess, addToQueue, toast, t, language, addFailedJob, openQueueSheet]);
+  }, [getAccessToken, startPolling, fetchLimitStatus, isPremium, limitStatus?.savedRecipes, addJob, runSimulatedProgress, fetchCompletedRecipe, onHistoryRefresh, stopActivePolling, onExtractionSuccess, addToQueue, toast, t, language, addFailedJob, openQueueSheet]);
 
-  const triggerExtraction = useCallback(async (targetUrl: string) => {
+  const triggerExtraction = useCallback(async (targetUrl: string, force = false) => {
     const cleanUrl = targetUrl.trim();
     if (!validateUrl(cleanUrl)) return;
 
-    await submitExtraction('/api/extract-recipe', async () => ({ url: cleanUrl }), {
+    await submitExtraction('/api/extract-recipe', async () => ({ url: cleanUrl, language, force }), {
       mode: 'link',
       sourceLabel: cleanUrl,
     });
-  }, [submitExtraction, validateUrl]);
+  }, [submitExtraction, validateUrl, language]);
 
   /**
    * Submits the currently selected photos of a physical recipe source. They are

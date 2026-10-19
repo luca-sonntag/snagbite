@@ -10,12 +10,26 @@ import { db, getDbPool } from './drizzle.js';
 import { jobs } from './schema/jobs.js';
 import { eq, and, inArray, lt, ne, gte, asc, desc, count } from 'drizzle-orm';
 import { recipeToRow } from './recipesMappers.js';
+import { emitJobEvent } from '../jobEvents.js';
+import { config } from '../config.js';
+import { createWhisperTicket } from '../utils/whisperTicket.js';
 
 export function normalizeUrl(urlStr: string): string {
-  let clean = urlStr.replace(/^(https?:\/\/)?(www\.)?/i, '');
+  if (!urlStr || typeof urlStr !== 'string') return '';
+  let clean = urlStr.trim().replace(/^[{("'\s]+|[})"'\s]+$/g, '');
+  clean = clean.replace(/^(https?:\/\/)?(www\.)?/i, '');
   clean = clean.split('?')[0];
+  clean = clean.split('#')[0];
   clean = clean.endsWith('/') ? clean.slice(0, -1) : clean;
-  return clean.toLowerCase();
+  clean = clean.toLowerCase();
+
+  // Harmonize Instagram paths (/p/{id} and /reels/{id} -> /reel/{id})
+  clean = clean.replace(/^instagram\.com\/(?:p|reels)\//, 'instagram.com/reel/');
+
+  // Harmonize YouTube Shorts (youtu.be/{id} -> youtube.com/shorts/{id})
+  clean = clean.replace(/^youtu\.be\//, 'youtube.com/shorts/');
+
+  return clean;
 }
 
 export function rowToJob(row: any): Job {
@@ -28,6 +42,7 @@ export function rowToJob(row: any): Job {
     status: (row.status ?? 'pending') as JobStatus,
     sourceUrl: row.sourceUrl ?? row.source_url,
     sourceUrlNormalized: row.sourceUrlNormalized ?? row.source_url_normalized,
+    language: row.language ?? 'de',
     error: row.error,
     progress: (row.progress as ProgressData) ?? null,
     clientFrames: (row.clientFrames ?? row.client_frames) as Job['clientFrames'] ?? null,
@@ -46,6 +61,7 @@ export function jobToRow(updates: Partial<Job>): Record<string, unknown> {
   const row: Record<string, unknown> = {};
   if (updates.status !== undefined) row.status = updates.status;
   if (updates.error !== undefined) row.error = updates.error;
+  if (updates.language !== undefined) row.language = updates.language;
   if (updates.progress !== undefined) row.progress = updates.progress;
   if (updates.clientFrames !== undefined) row.clientFrames = updates.clientFrames;
   if (updates.scrapeMeta !== undefined) row.scrapeMeta = updates.scrapeMeta;
@@ -58,7 +74,12 @@ export function jobToRow(updates: Partial<Job>): Record<string, unknown> {
 
 export const ACTIVE_STATUSES = ['pending', 'scraping', 'processing', 'awaiting_frames'] as const;
 
-export async function createJob(url: string, userId: string, kind: JobKind = 'url'): Promise<Job> {
+export async function createJob(
+  url: string,
+  userId: string,
+  kind: JobKind = 'url',
+  language: string = 'de'
+): Promise<Job> {
   const normalized = normalizeUrl(url);
   try {
     const [inserted] = await db
@@ -69,6 +90,7 @@ export async function createJob(url: string, userId: string, kind: JobKind = 'ur
         status: 'pending',
         sourceUrl: url,
         sourceUrlNormalized: normalized,
+        language,
       })
       .returning();
 
@@ -105,13 +127,46 @@ export async function createRemixJob(
 }
 
 export async function updateJob(id: string, updates: Partial<Job>): Promise<void> {
-  await db
+  const [updated] = await db
     .update(jobs)
     .set({
       ...jobToRow(updates),
       updatedAt: new Date(),
     })
-    .where(eq(jobs.id, id));
+    .where(eq(jobs.id, id))
+    .returning();
+
+  if (updated) {
+    let mediaRequest: {
+      videoUrl: string;
+      thumbnailUrl?: string;
+      durationSeconds?: number;
+      whisperTicket?: string;
+      whisperEndpoint?: string;
+    } | undefined;
+    if (updated.status === 'awaiting_frames' && updated.scrapeMeta) {
+      const meta = updated.scrapeMeta as Record<string, unknown>;
+      const media = meta.media as { kind?: string; videoUrl?: string } | undefined;
+      if (media?.kind === 'client' && media?.videoUrl) {
+        mediaRequest = {
+          videoUrl: media.videoUrl,
+          thumbnailUrl: typeof meta.imageUrl === 'string' ? meta.imageUrl : undefined,
+          durationSeconds: typeof meta.durationSeconds === 'number' ? meta.durationSeconds : undefined,
+          whisperTicket: createWhisperTicket({ jobId: updated.id, userId: updated.userId }),
+          whisperEndpoint: config.CLOUDFLARE_WHISPER_ENDPOINT || undefined,
+        };
+      }
+    }
+
+    emitJobEvent({
+      jobId: id,
+      status: updated.status as JobStatus,
+      progress: (updated.progress as ProgressData | null) ?? null,
+      recipeId: updated.recipeId,
+      error: updated.error,
+      mediaRequest,
+    });
+  }
 }
 
 export async function releaseJobLock(id: string): Promise<void> {
@@ -142,7 +197,15 @@ export async function completeJob(
     'SELECT complete_job($1, $2::jsonb, $3::jsonb) AS recipe_id',
     [jobId, JSON.stringify(recipeToRow(recipe)), llmUsage ? JSON.stringify(llmUsage) : null]
   );
-  return rows[0]?.recipe_id as string;
+  const recipeId = rows[0]?.recipe_id as string;
+  emitJobEvent({
+    jobId,
+    status: 'completed',
+    recipeId,
+    title: recipe.title,
+    progress: { percent: 100, stage: 'finalizing' },
+  });
+  return recipeId;
 }
 
 export async function getJob(id: string, userId?: string): Promise<Job | null> {
@@ -226,6 +289,14 @@ export async function cancelJob(id: string, userId: string): Promise<boolean> {
       inArray(jobs.status, ACTIVE_STATUSES as unknown as string[])
     ))
     .returning({ id: jobs.id });
+
+  if (deleted.length > 0) {
+    emitJobEvent({
+      jobId: id,
+      status: 'cancelled',
+      progress: null,
+    });
+  }
 
   return deleted.length > 0;
 }

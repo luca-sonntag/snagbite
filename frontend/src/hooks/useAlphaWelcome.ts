@@ -10,7 +10,7 @@ export const ALPHA_WELCOME_KEY = 'snagbite_alpha_welcome_v1_seen';
  *
  * Only fires when the logged-in user's tier is `alpha`. `localStorage` is the
  * authoritative, offline-first flag; on completion we also best-effort mirror
- * it into the user's Supabase `user_metadata`, so the overlay doesn't reappear
+ * it into the user's `user_metadata`, so the overlay doesn't reappear
  * after a reinstall or on a second device (that case is suppressed by deriving
  * `shouldShow` from the metadata during render).
  */

@@ -1,13 +1,17 @@
 import { Card, Button } from '@heroui/react';
-import { ShoppingCart, BookOpen } from 'lucide-react';
+import { ShoppingCart, BookOpen, Plus } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
-import { hapticMedium } from '../../utils/haptics';
+import { hapticMedium, hapticLight } from '../../utils/haptics';
 
 interface ShoppingEmptyStateProps {
   onNavigateToRecipes?: () => void;
+  onAddCustomItem?: () => void;
 }
 
-export default function ShoppingEmptyState({ onNavigateToRecipes }: ShoppingEmptyStateProps = {}) {
+export default function ShoppingEmptyState({
+  onNavigateToRecipes,
+  onAddCustomItem,
+}: ShoppingEmptyStateProps = {}) {
   const { t } = useI18n();
 
   const handleNavigateToRecipes = () => {
@@ -41,14 +45,30 @@ export default function ShoppingEmptyState({ onNavigateToRecipes }: ShoppingEmpt
           </p>
         </div>
 
-        {/* Primary Call-to-Action Button */}
-        <Button
-          onPress={handleNavigateToRecipes}
-          className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 h-12 min-h-[48px] px-6 rounded-2xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/35 transition-all flex items-center gap-2 border-none active:scale-95 duration-150 cursor-pointer"
-        >
-          <BookOpen className="w-4 h-4 stroke-[2]" />
-          <span>{t('shopping.empty.cta')}</span>
-        </Button>
+        {/* Call-to-Action Buttons (Primary & Secondary) */}
+        <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full justify-center">
+          <Button
+            onPress={handleNavigateToRecipes}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 h-12 min-h-[48px] px-6 rounded-2xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/35 transition-all flex items-center justify-center gap-2 border-none active:scale-95 duration-150 cursor-pointer w-full sm:w-auto"
+          >
+            <BookOpen className="w-4 h-4 stroke-[2]" />
+            <span>{t('shopping.empty.cta')}</span>
+          </Button>
+
+          {onAddCustomItem && (
+            <Button
+              onPress={() => {
+                hapticLight();
+                onAddCustomItem();
+              }}
+              variant="tertiary"
+              className="bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] text-gray-800 dark:text-gray-200 font-semibold py-3 h-12 min-h-[48px] px-5 rounded-2xl transition-all flex items-center justify-center gap-2 border-none active:scale-95 duration-150 cursor-pointer w-full sm:w-auto"
+            >
+              <Plus className="w-4 h-4" />
+              <span>{t('shopping.empty.addCustom')}</span>
+            </Button>
+          )}
+        </div>
       </Card>
     </div>
   );

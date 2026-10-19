@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Select, ListBox, Popover } from '@heroui/react';
-import { LogOut, Globe, Moon, Sun, Thermometer, Scale, Info, UserMinus, Sparkles, ChevronRight, HelpCircle, MessageSquare, Shield, ScrollText, Building2, ExternalLink, RefreshCw } from 'lucide-react';
+import { LogOut, Globe, Moon, Sun, Thermometer, Scale, Info, UserMinus, Sparkles, ChevronRight, HelpCircle, MessageSquare, Shield, ScrollText, Building2, ExternalLink, RefreshCw, Compass } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { useSpotlightTourContext } from '../context/SpotlightTourContext';
 import { hapticLight, hapticMedium, hapticHeavy } from '../utils/haptics';
 import { isNative } from '../native';
 
@@ -13,11 +14,12 @@ import PremiumModal from './PremiumModal';
 import ProBadge from './ProBadge';
 import { FeedbackDrawer } from './FeedbackDrawer';
 import { APP_VERSION_LABEL } from '../version';
-import { getActiveOtaVersion } from '../utils/otaUpdater';
+import { getActiveOtaVersion, checkAndApplyOtaUpdate } from '../utils/otaUpdater';
 import { checkAndApplyNativeUpdate } from '../utils/nativeAppUpdater';
 import { LEGAL_URLS } from '../legal';
 import PremiumUpgradeCard from './PremiumUpgradeCard';
 import NotificationSettings from './NotificationSettings';
+import AdminSettingsSection from './AdminSettingsSection';
 
 // Unit system is not yet ready to be user-configurable; keep the setting UI in place but hidden for now.
 const SHOW_UNIT_SYSTEM_SETTING = false;
@@ -55,6 +57,7 @@ export default function SettingsView() {
   const { signOut, user, autoSignedIn, updateUserMetadata, deleteAccount, isAdmin } = useAuth();
   const dialog = useDialog();
   const toast = useToast();
+  const { resetAllTours } = useSpotlightTourContext();
   const [theme, setTheme] = useTheme();
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -68,10 +71,24 @@ export default function SettingsView() {
     hapticLight();
     setIsCheckingUpdate(true);
     try {
-      const result = await checkAndApplyNativeUpdate({ manual: true });
-      if (result.status === 'up-to-date') {
+      // 1. Check Google Play Store native update first
+      const nativeResult = await checkAndApplyNativeUpdate({ manual: true });
+      if (nativeResult.status === 'update-started' || nativeResult.status === 'store-opened') {
+        return;
+      }
+
+      // 2. Check Capgo OTA web bundle update
+      const otaResult = await checkAndApplyOtaUpdate({ manual: true });
+      if (otaResult.status === 'updated' || otaResult.status === 'updating') {
+        return;
+      }
+
+      if (
+        (otaResult.status === 'up-to-date' || otaResult.status === 'unsupported') &&
+        (nativeResult.status === 'up-to-date' || nativeResult.status === 'unsupported')
+      ) {
         toast.info(t('app.settings.upToDate') || 'Snagbite ist auf dem neuesten Stand.');
-      } else if (result.status === 'error') {
+      } else if (otaResult.status === 'error' || nativeResult.status === 'error') {
         toast.danger(t('app.settings.updateCheckFailed') || 'Update-Prüfung fehlgeschlagen.');
       }
     } catch {
@@ -376,41 +393,7 @@ export default function SettingsView() {
       <NotificationSettings />
 
       {/* Section: Admin */}
-      {isAdmin && (() => {
-        const websiteUrl = (import.meta.env.VITE_WEBSITE_URL as string | undefined) || 'http://localhost:5174';
-        const adminPanelUrl = `${websiteUrl.replace(/\/$/, '')}/admin`;
-        return (
-          <div className="flex flex-col gap-2">
-            <h3 className="px-4 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-1">
-              <Shield className="w-3.5 h-3.5 text-emerald-500" />
-              {language === 'de' ? 'Verwaltung' : 'Administration'}
-            </h3>
-
-          <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
-            <a
-              href={adminPanelUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full p-4 flex items-center justify-between hover:bg-black/5 dark:hover:bg-white/5 transition-all active:scale-[0.99] text-left cursor-pointer group"
-            >
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <Shield className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0 group-hover:scale-105 transition-transform" />
-                <div>
-                  <p className="font-semibold text-gray-900 dark:text-white text-sm flex items-center gap-1.5">
-                    <span>{language === 'de' ? 'Admin-Bereich' : 'Admin Panel'}</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-gray-400" />
-                  </p>
-                  <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-medium">
-                    {language === 'de' ? 'Öffnet das Admin Dashboard auf der Website' : 'Opens the Admin Dashboard on the website'}
-                  </p>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 shrink-0 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
-            </a>
-          </div>
-        </div>
-      );
-    })()}
+      <AdminSettingsSection isAdmin={isAdmin} />
 
       {/* Section: Help */}
       <div className="flex flex-col gap-2">
@@ -428,6 +411,25 @@ export default function SettingsView() {
               <div>
                 <p className="font-semibold text-gray-950 dark:text-white text-sm">
                   {t('onboarding.replayLabel')}
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 shrink-0 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
+          </button>
+
+          <button
+            onClick={() => {
+              hapticMedium();
+              resetAllTours();
+              toast.success(t('tour.resetSuccess'));
+            }}
+            className="w-full p-4 flex items-center justify-between border-b border-black/5 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 transition-all active:scale-[0.99] text-left cursor-pointer group"
+          >
+            <div className="flex items-center gap-3">
+              <Compass className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0 group-hover:scale-105 transition-transform" />
+              <div>
+                <p className="font-semibold text-gray-950 dark:text-white text-sm">
+                  {t('tour.resetLabel')}
                 </p>
               </div>
             </div>

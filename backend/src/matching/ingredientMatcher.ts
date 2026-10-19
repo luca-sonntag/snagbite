@@ -23,6 +23,7 @@ import {
 } from './nutritionCalculator.js';
 import { computeRecipeHealthScore } from './healthScoreCalculator.js';
 import { openFoodFactsAccess } from './openFoodFactsIndex.js';
+import { triggerBackgroundIconGeneration } from '../services/ingredientOnDemandService.js';
 
 // Re-exported so existing callers, routes and unit tests keep importing from ingredientMatcher.
 export {
@@ -92,7 +93,13 @@ export async function resolveAndRemember(
     input.amount &&
     input.amount > 0
   ) {
-    const weightGrams = calculateWeightGrams(input.amount, input.unit || 'g', null, input.gramsPerUnit);
+    const effectiveAmount =
+      input.consumedAmount !== undefined &&
+      input.consumedAmount !== null &&
+      input.consumedAmount > 0
+        ? input.consumedAmount
+        : input.amount;
+    const weightGrams = calculateWeightGrams(effectiveAmount, input.unit || 'g', null, input.gramsPerUnit);
     if (weightGrams > 0) {
       const factor = 100 / weightGrams;
       estimatedNutrients = {
@@ -143,6 +150,8 @@ export async function resolveAndRemember(
           (effectiveItem ? 'Matched to Open Food Facts product' : 'Extracted from recipe ingredients'),
       }
     );
+
+    triggerBackgroundIconGeneration(mappingKey, input.synonyms);
   }
 
   return { match: effectiveItem, estimate: effectiveItem ? null : estimatedNutrients, usage: resolved?.usage };
@@ -199,9 +208,16 @@ export async function matchAndEnrichIngredient(
     ingredient
   );
 
-  let grams = calculateWeightGrams(ingredient.amount, ingredient.unit, match, ingredient.gramsPerUnit);
-  if (grams === 0 && ingredient.amount > 0) {
-    grams = ingredient.amount;
+  const effectiveAmount =
+    ingredient.consumedAmount !== undefined &&
+    ingredient.consumedAmount !== null &&
+    ingredient.consumedAmount > 0
+      ? ingredient.consumedAmount
+      : ingredient.amount;
+
+  let grams = calculateWeightGrams(effectiveAmount, ingredient.unit, match, ingredient.gramsPerUnit);
+  if (grams === 0 && effectiveAmount > 0) {
+    grams = effectiveAmount;
   }
 
   if (match) {
@@ -264,6 +280,7 @@ export async function enrichRecipeWithCanonicalIngredients(
       carbs: ing.carbs,
       fat: ing.fat,
       amount: ing.amount,
+      consumedAmount: ing.consumedAmount,
       unit: ing.unit,
       gramsPerUnit: ing.gramsPerUnit,
     },
@@ -360,7 +377,7 @@ export async function enrichRecipeWithCanonicalIngredients(
       usage: {
         model: modelUsed,
         tokenUsage,
-        costEstimate: estimateCost(modelUsed || 'gemini-2.5-flash', tokenUsage),
+        costEstimate: estimateCost(modelUsed || config.GEMINI_MODEL, tokenUsage),
         durationMs: totalDurationMs,
       },
     };

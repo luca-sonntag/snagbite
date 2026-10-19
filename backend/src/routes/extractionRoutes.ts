@@ -19,6 +19,9 @@ import {
   getFreeMaxSavedRecipes,
   getRewardedAdBonusCredits,
   addToLibrary,
+  isInLibrary,
+  findReusableRecipe,
+  normalizeUrl,
 } from '../db.js';
 import { db } from '../db/drizzle.js';
 import { user as userTable } from '../db/schema/auth.js';
@@ -36,6 +39,8 @@ import {
 } from './authUtils.js';
 import { handleVideoProxy } from './videoProxy.js';
 import { triggerWorkerTick } from '../queue.js';
+import { subscribeJobEvents } from '../jobEvents.js';
+import { createWhisperTicket } from '../utils/whisperTicket.js';
 
 export const extractionRoutes = Router();
 
@@ -43,6 +48,35 @@ extractionRoutes.get('/extract-recipe/proxy-video', handleVideoProxy);
 
 const MAX_CLIENT_FRAMES = 24;
 const MAX_FRAMES_TOTAL_CHARS = 12 * 1024 * 1024;
+
+export function resolveTargetLanguage(bodyLang?: unknown, headerLang?: string): string {
+  if (typeof bodyLang === 'string' && bodyLang.trim()) {
+    return bodyLang.trim().toLowerCase().startsWith('en') ? 'en' : 'de';
+  }
+  if (typeof headerLang === 'string' && headerLang.trim().toLowerCase().startsWith('en')) {
+    return 'en';
+  }
+  return 'de';
+}
+
+export async function assertCookbookCapacity(userId: string): Promise<void> {
+  let user = null;
+  try {
+    user = await fetchAndSyncUser(userId);
+  } catch (err) {
+    console.warn(`Failed to fetch user metadata for cookbook capacity check:`, err);
+  }
+
+  const premium = isPremiumUser(user);
+  if (!premium) {
+    const savedCount = await countLibraryEntries(userId);
+    const isAlpha = user?.app_metadata?.tier === 'alpha';
+    const limit = isAlpha ? await getAlphaMaxSavedRecipes() : await getFreeMaxSavedRecipes();
+    if (limit >= 0 && savedCount >= limit) {
+      throw new AppError('COOKBOOK_FULL', { params: { count: savedCount, limit } });
+    }
+  }
+}
 
 async function enforceExtractionQuota(req: Request): Promise<void> {
   const userId = req.userId!;
@@ -53,7 +87,13 @@ async function enforceExtractionQuota(req: Request): Promise<void> {
     console.warn(`Failed to fetch user metadata for gating checks:`, err);
   }
 
-  const premium = isPremiumUser(user);
+  const adminEmails = config.ADMIN_EMAILS.split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  const emailToCheck = req.userEmail || user?.email;
+  if (emailToCheck && adminEmails.includes(emailToCheck.toLowerCase())) {
+    return;
+  }
 
   await cleanStaleJobsForUser(userId).catch((err) =>
     console.warn(`[extraction] Failed to clean stale jobs for user ${userId}:`, err)
@@ -65,14 +105,7 @@ async function enforceExtractionQuota(req: Request): Promise<void> {
     throw new AppError('ACTIVE_JOB_EXISTS', { params: { count: activeCount } });
   }
 
-  if (!premium) {
-    const savedCount = await countLibraryEntries(userId);
-    const isAlpha = user?.app_metadata?.tier === 'alpha';
-    const limit = isAlpha ? await getAlphaMaxSavedRecipes() : await getFreeMaxSavedRecipes();
-    if (limit >= 0 && savedCount >= limit) {
-      throw new AppError('COOKBOOK_FULL', { params: { count: savedCount, limit } });
-    }
-  }
+  await assertCookbookCapacity(userId);
 
   const limit = user ? await resolveUserRateLimit(user) : await getFreeMaxExtractions();
 
@@ -119,7 +152,7 @@ async function enforceExtractionQuota(req: Request): Promise<void> {
 
 extractionRoutes.post('/extract-recipe', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { url } = req.body;
+    const { url, language: bodyLanguage, force } = req.body;
 
     if (!url || typeof url !== 'string') {
       throw new AppError('MISSING_FIELD', { params: { field: 'url' } });
@@ -148,16 +181,27 @@ extractionRoutes.post('/extract-recipe', async (req: Request, res: Response): Pr
       throw new AppError('INVALID_URL', { message: 'URL failed to parse.' });
     }
 
-    if (process.env.NODE_ENV === 'production') {
-      const existingRecipeId = await findExtractedRecipeIdByUrl(cleanUrl, req.userId!);
-      if (existingRecipeId) {
-        await addToLibrary(req.userId!, existingRecipeId, 'extraction');
+    const normalizedUrl = normalizeUrl(cleanUrl);
+    const targetLanguage = resolveTargetLanguage(bodyLanguage, req.header('accept-language'));
+    const isForce = force === true || force === 'true';
+
+    // Cross-user instant recipe reuse: check if recipe already exists in target language (unless force re-extraction)
+    if (!isForce) {
+      const reusableRecipe = await findReusableRecipe(normalizedUrl, targetLanguage);
+      if (reusableRecipe) {
+        const alreadyInCookbook = await isInLibrary(req.userId!, reusableRecipe.id!);
+        if (!alreadyInCookbook) {
+          await assertCookbookCapacity(req.userId!);
+          await addToLibrary(req.userId!, reusableRecipe.id!, 'extraction');
+        }
+
         res.status(200).json({
           success: true,
-          recipeId: existingRecipeId,
+          recipeId: reusableRecipe.id,
+          recipe: reusableRecipe,
           status: 'completed',
           isCached: true,
-          message: 'Recipe already extracted successfully.',
+          message: 'Recipe reused from existing extraction.',
         });
         return;
       }
@@ -176,7 +220,7 @@ extractionRoutes.post('/extract-recipe', async (req: Request, res: Response): Pr
 
     await enforceExtractionQuota(req);
 
-    const job = await createJob(cleanUrl, req.userId!);
+    const job = await createJob(cleanUrl, req.userId!, 'url', targetLanguage);
     triggerWorkerTick();
 
     res.status(202).json({
@@ -245,9 +289,18 @@ extractionRoutes.post('/extract-recipe/photos', async (req: Request, res: Respon
   }
 });
 
-extractionRoutes.post('/extract-recipe/frames', async (req: Request, res: Response): Promise<void> => {
+async function handleClientPayload(req: Request, res: Response): Promise<void> {
   try {
-    const { jobId, thumbnailBase64, gridBase64, framesBase64 } = req.body;
+    const {
+      jobId,
+      thumbnailBase64,
+      gridBase64,
+      framesBase64,
+      transcript,
+      whisperModel,
+      videoDurationSeconds,
+      videoSizeBytes,
+    } = req.body;
 
     if (!jobId || typeof jobId !== 'string') {
       throw new AppError('MISSING_FIELD', { params: { field: 'jobId' } });
@@ -271,16 +324,27 @@ extractionRoutes.post('/extract-recipe/frames', async (req: Request, res: Respon
 
     const thumbStr = typeof thumbnailBase64 === 'string' ? thumbnailBase64 : '';
     const gridStr = typeof gridBase64 === 'string' ? gridBase64 : '';
+    const transcriptStr = typeof transcript === 'string' ? transcript.trim().slice(0, 30000) : '';
+    const modelStr = typeof whisperModel === 'string' && whisperModel.trim() ? whisperModel.trim() : undefined;
+
     const totalChars =
       thumbStr.length +
       gridStr.length +
+      transcriptStr.length +
       frames.reduce((acc: number, f: unknown) => acc + (typeof f === 'string' ? f.length : 0), 0);
 
     if (totalChars > MAX_FRAMES_TOTAL_CHARS) {
       throw new AppError('FRAMES_TOO_LARGE', {
-        message: `Combined frame payload of ${totalChars} chars exceeds limit.`,
+        message: `Combined payload of ${totalChars} chars exceeds limit.`,
       });
     }
+
+    const sizeBytes =
+      typeof videoSizeBytes === 'number' && videoSizeBytes > 0 ? Math.round(videoSizeBytes) : undefined;
+    const durationSec =
+      typeof videoDurationSeconds === 'number' && videoDurationSeconds > 0
+        ? Number(videoDurationSeconds.toFixed(2))
+        : undefined;
 
     await updateJob(job.id, {
       clientFrames: {
@@ -289,7 +353,12 @@ extractionRoutes.post('/extract-recipe/frames', async (req: Request, res: Respon
         framesBase64: frames.filter(
           (f: unknown): f is string => typeof f === 'string' && f.trim().length > 0
         ),
+        transcript: transcriptStr || undefined,
+        whisperModel: modelStr,
+        videoDurationSeconds: durationSec,
+        videoSizeBytes: sizeBytes,
       },
+      mediaBytes: sizeBytes,
       status: 'pending',
       progress: { percent: 35, stage: 'queued' },
     });
@@ -299,13 +368,33 @@ extractionRoutes.post('/extract-recipe/frames', async (req: Request, res: Respon
       success: true,
       jobId: job.id,
       status: 'pending',
-      message: 'Video keyframes received and job queued for extraction.',
+      message: 'Client media payload received and job queued for extraction.',
     });
   } catch (error: unknown) {
-    if (!(error instanceof AppError)) console.error('Error receiving client frames:', error);
+    if (!(error instanceof AppError)) console.error('Error receiving client payload:', error);
     sendAppError(res, error);
   }
-});
+}
+
+// Support both the new canonical client-payload endpoint and legacy frames endpoint
+extractionRoutes.post('/extract-recipe/client-payload', handleClientPayload);
+extractionRoutes.post('/extract-recipe/frames', handleClientPayload);
+
+function extractMediaRequest(job: { id: string; status: string; scrapeMeta?: unknown }, userId: string) {
+  if (job.status !== 'awaiting_frames' || !job.scrapeMeta) return undefined;
+  const meta = job.scrapeMeta as Record<string, unknown>;
+  const media = meta.media as { kind?: string; videoUrl?: string } | undefined;
+  if (media?.kind === 'client' && media?.videoUrl) {
+    return {
+      videoUrl: media.videoUrl,
+      thumbnailUrl: typeof meta.imageUrl === 'string' ? meta.imageUrl : undefined,
+      durationSeconds: typeof meta.durationSeconds === 'number' ? meta.durationSeconds : undefined,
+      whisperTicket: createWhisperTicket({ jobId: job.id, userId }),
+      whisperEndpoint: config.CLOUDFLARE_WHISPER_ENDPOINT || undefined,
+    };
+  }
+  return undefined;
+}
 
 extractionRoutes.get('/jobs/:id', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -321,18 +410,7 @@ extractionRoutes.get('/jobs/:id', async (req: Request, res: Response): Promise<v
       throw new AppError('JOB_NOT_FOUND');
     }
 
-    let mediaRequest: { videoUrl: string; thumbnailUrl?: string; durationSeconds?: number } | undefined;
-    if (job.status === 'awaiting_frames' && job.scrapeMeta) {
-      const meta = job.scrapeMeta as Record<string, unknown>;
-      const media = meta.media as { kind?: string; videoUrl?: string } | undefined;
-      if (media?.kind === 'client' && media?.videoUrl) {
-        mediaRequest = {
-          videoUrl: media.videoUrl,
-          thumbnailUrl: typeof meta.imageUrl === 'string' ? meta.imageUrl : undefined,
-          durationSeconds: typeof meta.durationSeconds === 'number' ? meta.durationSeconds : undefined,
-        };
-      }
-    }
+    const mediaRequest = extractMediaRequest(job, req.userId!);
 
     let recipeTitle: string | null = null;
     if (job.recipeId) {
@@ -362,6 +440,112 @@ extractionRoutes.get('/jobs/:id', async (req: Request, res: Response): Promise<v
     if (!(error instanceof AppError)) console.error('Error fetching job details:', error);
     sendAppError(res, error);
   }
+});
+
+extractionRoutes.get('/jobs/:id/events', async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  if (!id) {
+    res.status(400).json({ success: false, error: 'Missing job id' });
+    return;
+  }
+
+  const job = await getJob(id, req.userId!);
+  if (!job) {
+    res.status(404).json({ success: false, error: 'Job not found' });
+    return;
+  }
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    Connection: 'keep-alive',
+    'X-Accel-Buffering': 'no',
+  });
+
+  const sendEvent = (event: string, data: unknown) => {
+    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  };
+
+  let recipeTitle: string | null = null;
+  if (job.recipeId) {
+    const titles = await getRecipeTitles([job.recipeId]);
+    recipeTitle = titles.get(job.recipeId) ?? null;
+  }
+
+  sendEvent('job', {
+    id: job.id,
+    kind: job.kind,
+    sourceUrl: job.sourceUrl,
+    status: job.status,
+    error: job.error,
+    progress: job.progress,
+    mediaRequest: extractMediaRequest(job, req.userId!),
+    recipeId: job.recipeId,
+    title: recipeTitle,
+    parentRecipeId: job.parentRecipeId,
+    remixPrompt: job.remixPrompt,
+    createdAt: job.createdAt,
+    updatedAt: job.updatedAt,
+  });
+
+  if (job.status === 'completed' || job.status === 'failed' || job.status === 'cancelled') {
+    res.end();
+    return;
+  }
+
+  let isClosed = false;
+  const pingInterval = setInterval(() => {
+    if (!isClosed) {
+      res.write(': ping\n\n');
+    }
+  }, 15000);
+
+  const unsubscribe = subscribeJobEvents(id, async (payload) => {
+    if (isClosed) return;
+
+    let title = payload.title;
+    if (!title && payload.recipeId) {
+      const titles = await getRecipeTitles([payload.recipeId]);
+      title = titles.get(payload.recipeId) ?? null;
+    }
+
+    const mediaRequest = payload.mediaRequest
+      ? {
+          ...payload.mediaRequest,
+          whisperTicket:
+            payload.mediaRequest.whisperTicket ||
+            createWhisperTicket({ jobId: payload.jobId, userId: req.userId! }),
+          whisperEndpoint:
+            payload.mediaRequest.whisperEndpoint ||
+            config.CLOUDFLARE_WHISPER_ENDPOINT ||
+            undefined,
+        }
+      : undefined;
+
+    sendEvent('job', {
+      id: payload.jobId,
+      status: payload.status,
+      progress: payload.progress,
+      recipeId: payload.recipeId,
+      title,
+      error: payload.error,
+      mediaRequest,
+    });
+
+    if (payload.status === 'completed' || payload.status === 'failed' || payload.status === 'cancelled') {
+      cleanup();
+      res.end();
+    }
+  });
+
+  const cleanup = () => {
+    if (isClosed) return;
+    isClosed = true;
+    clearInterval(pingInterval);
+    unsubscribe();
+  };
+
+  req.on('close', cleanup);
 });
 
 extractionRoutes.post('/jobs/:id/cancel', async (req: Request, res: Response): Promise<void> => {

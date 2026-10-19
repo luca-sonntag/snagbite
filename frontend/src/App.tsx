@@ -3,7 +3,7 @@ import type { SavedRecipe } from './types';
 import { hideSplashScreen } from './native';
 import ExtractForm, { type ExtractMode } from './components/ExtractForm';
 import ActiveExtractions from './components/ActiveExtractions';
-import ExtractionAnimation from './components/ExtractionAnimation';
+import ExtractionAdSheet from './components/ExtractionAdSheet';
 import ErrorBanner from './components/ErrorBanner';
 import { isCatalogListRoute } from './components/SavedCatalog/catalogRoutes';
 import AuthForm from './components/AuthForm';
@@ -41,6 +41,7 @@ import { useAppHistory } from './hooks/useAppHistory';
 import { useAppAds } from './hooks/useAppAds';
 import { useAppNativeListeners } from './hooks/useAppNativeListeners';
 import { useMealPlanBadge } from './hooks/useMealPlanBadge';
+import { useAppUpdates } from './hooks/useAppUpdates';
 import { preloadSecondaryChunks } from './utils/chunkPreloader';
 
 function ViewFallback() {
@@ -59,10 +60,10 @@ export default function App() {
   const toast = useToast();
   const { language } = useI18n();
   const { snapshot: gamificationSnapshot } = useGamification();
-  const { incomingRequests } = useSocial();
+  const { incomingRequests, unreadSharesCount } = useSocial();
   const { outstandingCount: outstandingMealPlansCount } = useMealPlanBadge({ user, authLoading, getAccessToken });
   const userLevel = gamificationSnapshot?.stats?.level ?? null;
-  const incomingRequestsCount = incomingRequests.length;
+  const incomingRequestsCount = incomingRequests.length + unreadSharesCount;
 
   const { tab: activeView, subPath, query, navigate, replace } = useHashRouter();
 
@@ -98,6 +99,7 @@ export default function App() {
     handleDeleteJob,
     extraRecipes,
     registerExtraRecipe,
+    updateRecipeCover,
   } = useAppHistory({
     user,
     authLoading,
@@ -192,12 +194,10 @@ export default function App() {
     limitStatus,
     fetchLimitStatus,
     claimRewardedCredit,
-  } = useRecipeExtraction(getAccessToken, handleExtractionSuccess);
+  } = useRecipeExtraction(getAccessToken, handleExtractionSuccess, fetchHistory);
 
   const [extractMode, setExtractMode] = useState<ExtractMode>('link');
   const { jobs: extractionJobs } = useExtractionJobs();
-  const runningExtractions = extractionJobs.filter((j) => j.status !== 'completed' && j.status !== 'failed');
-  const latestRunning = runningExtractions.length ? runningExtractions[runningExtractions.length - 1] : null;
   const isViewingRecipe = !!selectedJob || (activeView === 'extract' && !!recipe);
 
   const lastHistorySubPathRef = useRef<string | null>(null);
@@ -234,17 +234,19 @@ export default function App() {
     isPremium,
   });
 
-  // Handle billing & interstitial ads
-  useAppAds({
+  // Handle billing, extraction ad gating & interstitial ads
+  const { showExtractionAd } = useAppAds({
     user,
     authLoading,
     isPremium,
     isPending,
     recipe,
     showOnboarding,
+    savedRecipesCount: history.length,
+    historyLoaded,
   });
 
-  useMobileNavigationBack(activeView === 'extract' && !!recipe, () => {
+  useMobileNavigationBack(activeView === 'extract' && !!recipe && (!isPending || isPremium), () => {
     setRecipe(null);
     setUrl('');
     navigate('extract');
@@ -319,6 +321,7 @@ export default function App() {
 
   const [splashFinished, setSplashFinished] = useState(false);
   const [emergencyReady, setEmergencyReady] = useState(false);
+  const { isUpdating, updateMessage } = useAppUpdates();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -327,7 +330,7 @@ export default function App() {
     return () => clearTimeout(timer);
   }, []);
 
-  const isAppReady = !authLoading && (!user || historyLoaded || emergencyReady);
+  const isAppReady = !authLoading && (!user || historyLoaded || emergencyReady) && !isUpdating;
 
   useEffect(() => {
     preloadSecondaryChunks();
@@ -343,9 +346,10 @@ export default function App() {
 
   return (
     <>
-      {!splashFinished && (
+      {(!splashFinished || isUpdating) && (
         <AppSplashScreen
           isReady={isAppReady}
+          message={isUpdating ? updateMessage : undefined}
           onFinished={() => setSplashFinished(true)}
         />
       )}
@@ -362,7 +366,12 @@ export default function App() {
 
       {user && (
         <div className="min-h-screen flex flex-col items-center transition-colors duration-300">
-          <AppTopBanners activeView={activeView} isPending={isPending} recipe={recipe} />
+          <AppTopBanners
+            activeView={activeView}
+            isPending={isPending}
+            recipe={recipe}
+            onSelectRecipe={(recipeId) => navigate('history', recipeId)}
+          />
 
       <main
         className={`w-full max-w-md mx-auto px-4 mt-1 flex-1 flex flex-col gap-6 ${
@@ -385,15 +394,17 @@ export default function App() {
           aria-hidden={activeView !== 'extract' || undefined}
           className={
             activeView === 'extract'
-              ? `flex-1 flex flex-col min-h-0 ${isPending ? 'justify-center my-auto' : ''}`
+              ? 'flex-1 flex flex-col min-h-0'
               : ''
           }
         >
           {recipe ? (
             <Suspense fallback={<ViewFallback />}>
               <RecipeDetails
-                key={recipe.id || recipe.title}
+                key="extract-recipe-view"
                 recipe={recipe}
+                isExtracting={isPending}
+                progress={progress}
                 onAddIngredients={addRecipeIngredients}
                 reelUrl={url}
                 onBack={() => {
@@ -402,7 +413,7 @@ export default function App() {
                   navigate('extract');
                 }}
                 onNavigateToShoppingList={() => navigate('shopping-list')}
-                shoppingListCount={aggregatedList.toBuy.length + aggregatedList.inPantry.length}
+                shoppingListCount={aggregatedList.toBuy.length}
                 onRemixSuccess={(newRecipe) => setRecipe(newRecipe)}
                 onReplaceCurrent={(newRecipe) => {
                   setRecipe(newRecipe);
@@ -448,33 +459,24 @@ export default function App() {
                     console.error('[App] Failed to load recipe:', err);
                   }
                 }}
-              />
-            </Suspense>
-          ) : latestRunning ? (
-            <div className="flex flex-col gap-6">
-              <ExtractionAnimation
-                key={latestRunning.id}
-                url={latestRunning.sourceLabel}
-                isPending
-                jobStatus={latestRunning.status}
-                progress={latestRunning.progress}
-                variant={latestRunning.mode === 'photo' ? 'photo' : 'link'}
-              />
-              <ActiveExtractions excludeId={latestRunning.id} />
-              <ErrorBanner
-                isPending={false}
-                jobStatus={jobStatus}
-                jobError={jobError}
-                jobErrorCode={jobErrorCode}
-                jobErrorParams={jobErrorParams}
-                onRetry={() =>
-                  extractMode === 'photo' ? triggerPhotoExtraction() : triggerExtraction(url)
-                }
-                onClearActiveJobs={async () => {
-                  await fetchLimitStatus();
+                getAccessToken={getAccessToken}
+                onCoverUpdated={(recipeId, imageUrl, isAiCover) => {
+                  updateRecipeCover(recipeId, imageUrl, isAiCover);
+                  setRecipe((prev) => {
+                    if (prev && (prev.id === recipeId || !prev.id)) {
+                      return {
+                        ...prev,
+                        imageUrl,
+                        imageUrls: [imageUrl, ...(prev.imageUrls || []).filter((u) => u !== imageUrl)],
+                        isAiCover,
+                        isCoverGenerating: false,
+                      };
+                    }
+                    return prev;
+                  });
                 }}
               />
-            </div>
+            </Suspense>
           ) : (
             <ExtractForm
               isActive={activeView === 'extract' && !recipe}
@@ -540,10 +542,11 @@ export default function App() {
               onAddIngredients={addRecipeIngredients}
               fetchHistory={fetchHistory}
               getAccessToken={getAccessToken}
+              onUpdateRecipeCover={updateRecipeCover}
               onNavigateToShoppingList={() => {
                 navigate('shopping-list');
               }}
-              shoppingListCount={aggregatedList.toBuy.length + aggregatedList.inPantry.length}
+              shoppingListCount={aggregatedList.toBuy.length}
               onRemixSuccess={async (newRecipe, newJobId) => {
                 if (newRecipe && newJobId) {
                   registerExtraRecipe(newJobId, {
@@ -649,7 +652,17 @@ export default function App() {
                 onSelectRecipe={(recipeId) => {
                   navigate('history', recipeId);
                 }}
-                defaultSection={activeView === 'settings' ? 'settings' : 'overview'}
+                defaultSection={
+                  activeView === 'settings'
+                    ? 'settings'
+                    : subPath === 'feed' || query?.tab === 'feed'
+                    ? 'feed'
+                    : subPath === 'friends' || query?.tab === 'friends'
+                    ? 'friends'
+                    : subPath === 'leaderboard' || query?.tab === 'leaderboard'
+                    ? 'leaderboard'
+                    : 'overview'
+                }
               />
             </Suspense>
           )}
@@ -675,6 +688,8 @@ export default function App() {
         onNavigateExtract={() => navigate('extract')}
       />
 
+      <ExtractionAdSheet isOpen={showExtractionAd} />
+
       <AppBottomNav
         activeView={activeView}
         isPending={isPending}
@@ -682,7 +697,7 @@ export default function App() {
         isCatalogSelectMode={isCatalogSelectMode}
         isCatalogSheetOpen={isCatalogSheetOpen}
         isPremiumModalOpen={isPremiumModalOpen}
-        uncheckedShoppingItemsCount={aggregatedList.toBuy.length + aggregatedList.inPantry.length}
+        uncheckedShoppingItemsCount={aggregatedList.toBuy.length}
         incomingRequestsCount={incomingRequestsCount}
         userLevel={userLevel}
         outstandingMealPlansCount={outstandingMealPlansCount}

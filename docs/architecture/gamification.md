@@ -8,7 +8,7 @@ für Social/Shop/AI-Verifizierung.
 ## 1. Leitprinzipien
 
 * **2-Wege-Erfassung & Foto-Verifizierung:**
-  * **Mit Foto (+XP & Belohnungen):** Ein Foto des fertigen Gerichts (`photoBase64`) wird via Gemini Vision (`verifyCookedDishPhoto`) validiert und in Supabase `cook-photos` abgelegt. Bei Erfolg winken volle XP, Coins, Badges, Levelaufstiege und Leaderboard-Berechtigung (`verified: true`).
+  * **Mit Foto (+XP & Belohnungen):** Ein Foto des fertigen Gerichts (`photoBase64`) wird via Gemini Vision (`verifyCookedDishPhoto`) validiert und in S3 `cook-photos` abgelegt. Bei Erfolg winken volle XP, Coins, Badges, Levelaufstiege und Leaderboard-Berechtigung (`verified: true`).
   * **Ohne Foto (0 XP, rein organisatorisch):** Nutzer können Mahlzeiten auch ohne Foto als gekocht erfassen (z. B. im Wochenplaner oder Rezept). Dabei werden 0 XP und 0 Coins gutgeschrieben (`verified: false`), aber der Kochvorgang wird in `cook_events` und im Wochenplaner als erledigt vermerkt.
 * **Anti-Grind über Diminishing Returns**, nicht über Misstrauen: Wiederholungen
   desselben Rezepts fallen schnell ab, plus ein Tages-Softcap.
@@ -16,7 +16,7 @@ für Social/Shop/AI-Verifizierung.
   vergeben; das Frontend rechnet nichts an.
 * **Config statt Redeploy.** Die Formel liegt als JSON-Zeile in `global_settings`.
 
-## 2. Datenmodell (`backend/supabase_schema.sql`)
+## 2. Datenmodell (Drizzle Schema / PostgreSQL)
 
 Alles additiv, RLS aktiv (`SELECT`-own als Defense-in-Depth; Writes nur service-role):
 
@@ -77,13 +77,15 @@ Coin-Shop (`coins` akkumulieren bereits), Foto-KI-/Peer-Verifizierung (hebt
 Aufbau auf dem Gamification-Fundament (`point_ledger` trägt die wöchentliche,
 `user_stats.xp` die Allzeit-Wertung). Additiv, server-autoritativ.
 
-**Datenmodell** (`backend/supabase_schema.sql`):
+**Datenmodell** (Drizzle Schema / PostgreSQL):
 * **`profiles`** — `user_id`, selbstgewählter `display_name`, `avatar_url`
   (optional, aus Google-`user_metadata`), eindeutiger `friend_code`. Anzeigename/
   Avatar sind `SELECT`-bar für alle Authenticated (Freundssicht); die E-Mail wird
   **nie** an Freunde ausgeliefert.
 * **`friendships`** — mutual (`pending`/`accepted`), eine Zeile pro (requester,
   addressee)-Paar; „meine Freunde" prüft beide Richtungen.
+* **`recipe_shares`** — In-App Rezept-Sharing zwischen Freunden (`sender_id`, `recipient_id`, `recipe_id`, `note`, `seen_at`, `dismissed_at`).
+* **`cook_event_reactions`** — Emoji-Reaktionen (`🔥`, `❤️`, `😋`) auf verifizierte Koch-Events von Freunden im Feed (`user_id`, `cook_event_id`, `emoji`).
 * **RPC `weekly_xp_for_users(uids, since)`** — `SUM(delta_xp)` aus `point_ledger` für das Zeitfenster (z.B. Monatsanfang) im Freundeskreis.
 * **RPC `global_weekly_xp(since, limit_count)`** — `SUM(delta_xp)` aus `point_ledger` über alle Nutzer sortiert nach XP für das globale Monats-Leaderboard.
 
@@ -97,11 +99,26 @@ Aufbau auf dem Gamification-Fundament (`point_ledger` trägt die wöchentliche,
 * `POST /api/friends/:id/respond` — Anfragen annehmen/ablehnen.
 * `DELETE /api/friends/:id` — Freund entfernen oder offene Anfrage abbrechen.
 * `GET /api/leaderboard?window=monthly|all&scope=friends|global` — Rangliste mit Scope (Freunde oder alle Nutzer) und Zeitfenster (diesen Monat oder Gesamt). Liefert Einträge inklusive berechnetem Beziehungsstatus (`friendshipStatus: 'none' | 'pending_sent' | 'pending_received' | 'friends' | 'self'`).
+* `GET /api/friends/feed?limit=30` — Social-Feed der letzten 30 Tage mit verifizierten Gerichten von Freunden (inkl. aggregierter Emoji-Reaktionen und eigenem Reaktionsstatus).
+* `POST /api/friends/feed/:cookEventId/reactions` — Toggle von Reaktionen (`🔥`, `❤️`, `😋`).
+* `POST /api/recipes/:id/share` — Teilt ein Rezept aus dem eigenen Kochbuch mit Freunden inkl. optionaler persönlicher Notiz.
+* `GET /api/friends/shares` — Liste der mit dem Nutzer geteilten Rezepte inkl. Badge-Status (`unreadSharesCount`).
+* `POST /api/friends/shares/:id/seen` & `POST /api/friends/shares/:id/dismiss` — Geteilte Rezepte als gesehen bzw. verworfen markieren.
+* `POST /api/friends/recipes/:recipeId/save` — Übernimmt ein geteiltes Freundesrezept mit 1 Klick ins eigene Kochbuch (`source: 'share'`).
 
-**Frontend:** `SocialContext` (profile/friends/requests + Methoden `sendRequest`, `sendRequestByUserId`, `respondRequest`, `fetchLeaderboard`) neben dem Gamification-Provider.
-* **Segmented-Nav:** **Übersicht | Rangliste | Freunde** im Fortschritt-Tab.
-* **LeaderboardView:** Bietet Umschalter zwischen **Freunde** und **Global** sowie **Diesen Monat** und **Gesamt**. In der globalen Ansicht kann direkt pro Zeile eine Freundschaftsanfrage gesendet (`+ Freund`), eine offene Anfrage angenommen (`Annehmen`) oder der Status (`Angefragt`, `Freunde ✓`) eingesehen werden.
-* **FriendsView:** Profilkarte + teilbarer Freundescode, per-Code hinzufügen, Anfragen, Liste, `Social/Avatar`.
+**Echtzeit Push-Benachrichtigungen (`backend/src/push/socialNotifications.ts`):**
+* **Freundschaftsanfrage:** Sendet FCM-Push (`type: 'friend_request'`), springt beim Antippen direkt in den Tab *Freunde*.
+* **Anfrage angenommen:** Benachrichtigt den Anfragenden (`type: 'friend_accepted'`).
+* **Rezept geteilt:** Informiert ausgewählte Freunde über das geteilte Rezept mit Vorschaubild und Notiz (`type: 'recipe_shared'`).
+* **Freund hat gekocht:** Sobald ein Freund ein Gericht mit Foto kocht und verifizieren lässt, erhalten Freunde eine Push-Meldung mit Bild (`type: 'friend_cooked'`), die direkt in den *Feed* führt.
+
+**Frontend:** `SocialContext` (profile/friends/requests, sharedRecipes, unreadSharesCount + Methoden `shareRecipeWithFriends`, `saveFriendRecipe`, `dismissSharedRecipe`, `markSharesSeen`) neben dem Gamification-Provider.
+* **Segmented-Nav:** **Übersicht | Feed | Rangliste | Freunde** im Fortschritt-Tab.
+* **FriendsFeedView & FeedEventCard:** Moderner, taktiler Feed im Culinary-Magazin-Stil ohne überladene Boxen. Großes Foto mit dunklem Glas-Verlauf am unteren Rand, Avatar des Kochs, relatives Alter („vor 2 Std.“), Auszeichnungs-Badge, taktile Reaktions-Pills (`🔥`, `❤️`, `😋`) mit Animation und 1-Klick Vorschau/Speichern.
+* **ShareWithFriendsModal:** Mehrfachauswahl von Freunden mit Checkboxen, optionaler Notiz („Schau mal, das müssen wir kochen!“) und Einladungs-Teilen.
+* **SharedRecipesSection:** Sektion oberhalb der Freundesliste für eingegangene Rezept-Empfehlungen mit Direkt-Speichern ins eigene Kochbuch.
+* **LeaderboardView:** Bietet Umschalter zwischen **Freunde** und **Global** sowie **Diesen Monat** und **Gesamt**.
+* **FriendsView:** Modularisiert in Subkomponenten (`FriendsProfileCard`, `SharedRecipesSection`, `FriendsListSection`) mit Clean-Code Zeilenlimits.
 * **Deep Linking & App Links:** Android App Links via `/.well-known/assetlinks.json` und Custom Schemes (`snagbite://`, `at.snagbite.app://`).
 * **Web Landingpage:** `website` unter `/invite/:code` öffnet die native App per Intent / Custom Scheme.
 

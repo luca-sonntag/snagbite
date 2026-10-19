@@ -12,10 +12,11 @@ import {
 import { recordAuditLog } from './recipeAuditorDevLogger.js';
 import { normalizeToCategoryKey } from './categoryGroups.js';
 export type { RecipeAuditPatch, RecipeAuditResult, IngredientCorrection, AddedIngredient, RemovedIngredient, StepCorrection, AddedStep };
+import { sanitizeSectionName } from '@cookbook/shared';
 
 export async function auditRecipe(recipe: Recipe): Promise<RecipeAuditResult> {
   if (!config.GEMINI_API_KEY || config.GEMINI_API_KEY === 'your_gemini_api_key_here') return { patch: null };
-  const modelName = 'gemini-2.5-flash-lite';
+  const modelName = config.GEMINI_MODEL;
   const startTime = Date.now();
   try {
     const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
@@ -111,6 +112,7 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
         category: cat,
         synonyms: (added.synonyms ?? []).map((s) => s.trim()).filter(Boolean),
         isGenericGrocery: true,
+        ...(added.section ? { section: added.section.trim() } : {}),
       });
     }
   }
@@ -123,10 +125,13 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
 
   // 5. Correct steps
   if (patch.stepCorrections?.length) {
-    const stepMap = new Map(patch.stepCorrections.map((sc) => [sc.stepNumber, sc.correctedDescription]));
+    const stepMap = new Map(patch.stepCorrections.map((sc) => [sc.stepNumber, sc]));
     for (const s of result.instructions) {
       const updated = stepMap.get(s.step);
-      if (updated) s.description = updated;
+      if (updated) {
+        if (updated.correctedDescription) s.description = updated.correctedDescription;
+        if (updated.correctedSection !== undefined) s.section = updated.correctedSection;
+      }
     }
   }
 
@@ -135,7 +140,11 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
     let zeroOffset = 0;
     const lastInsertedIndices = new Map<number, number>();
     for (const added of patch.addedSteps) {
-      const newStep = { step: 0, description: added.description };
+      const newStep = {
+        step: 0,
+        description: added.description,
+        ...(added.section ? { section: added.section.trim() } : {}),
+      };
       if (added.insertAfterStep === 0) {
         result.instructions.splice(zeroOffset++, 0, newStep);
       } else if (added.insertAfterStep !== undefined && added.insertAfterStep > 0) {
@@ -192,6 +201,15 @@ export function applyRecipeAuditPatch(recipe: Recipe, patch: RecipeAuditPatch | 
     result.imagePrompt = patch.correctedImagePrompt.trim();
   }
 
-  result.instructions = result.instructions.map((s, idx) => ({ ...s, step: idx + 1 }));
+  result.ingredients = result.ingredients.map((ing) => ({
+    ...ing,
+    section: sanitizeSectionName(ing.section, ing.category),
+  }));
+
+  result.instructions = result.instructions.map((s, idx) => ({
+    ...s,
+    step: idx + 1,
+    section: sanitizeSectionName(s.section),
+  }));
   return result;
 }

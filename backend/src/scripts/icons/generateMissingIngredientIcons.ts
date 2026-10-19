@@ -1,5 +1,7 @@
 import path from 'path';
-import { getClient } from '../../db.js';
+import { db } from '../../db/drizzle.js';
+import { ingredientMappings } from '../../db/schema/ingredients.js';
+import { desc } from 'drizzle-orm';
 import {
   generateIngredientIcon,
   findExistingIngredientImage,
@@ -58,15 +60,16 @@ async function main() {
   console.log(`--------------------------------------------------`);
 
   // 1. Query all mappings from database
-  console.log(`📡 Frage ingredient_mappings aus Supabase ab...`);
-  const { data: mappings, error } = await getClient()
-    .from('ingredient_mappings')
-    .select('mapping_key, category, reasoning, product_code')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw new Error(`Fehler beim Laden von ingredient_mappings: ${error.message}`);
-  }
+  console.log(`📡 Frage ingredient_mappings aus Datenbank ab...`);
+  const mappings = await db
+    .select({
+      mapping_key: ingredientMappings.mappingKey,
+      category: ingredientMappings.category,
+      reasoning: ingredientMappings.reasoning,
+      product_code: ingredientMappings.productCode,
+    })
+    .from(ingredientMappings)
+    .orderBy(desc(ingredientMappings.createdAt));
 
   if (!mappings || mappings.length === 0) {
     console.log(`ℹ️  Keine Einträge in ingredient_mappings gefunden.`);

@@ -198,7 +198,7 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
     });
     if (!confirmed) return;
 
-    clearChecked(true);
+    clearChecked(false);
     toast.success(t('shopping.transferredToPantryToast', { count }));
   };
 
@@ -252,7 +252,7 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
       />
 
       {totalCount === 0 ? (
-        <ShoppingEmptyState />
+        <ShoppingEmptyState onAddCustomItem={() => setShowAddForm(true)} />
       ) : (
         <div className="flex flex-col gap-3 pb-36">
           {activeRecipes.length > 0 && onSelectRecipe && (
@@ -300,6 +300,7 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
 
       {/* Floating Add FAB */}
       <button
+        id="tour-shopping-quick-add"
         type="button"
         onClick={() => setShowAddForm((p) => !p)}
         aria-label={t('shopping.addTitle')}

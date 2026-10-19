@@ -1,6 +1,6 @@
 ---
 trigger: always_on
-description: Verbindliche Regeln für Abwärtskompatibilität, Non-Breaking Schema Evolution und Supabase DB Migrationen.
+description: Verbindliche Regeln für Abwärtskompatibilität, Non-Breaking Schema Evolution und Drizzle DB Migrationen.
 ---
 
 # 🛡️ Abwärtskompatibilität & Datenbank-Migrations-Regeln

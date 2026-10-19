@@ -45,6 +45,9 @@ param(
     [switch]$Backend,
     [switch]$App,
     [switch]$All,
+    [switch]$Firebase,
+    [ValidateSet('prod', 'dev')]
+    [string]$Env = 'prod',
     [ValidateSet('internal', 'alpha', 'beta', 'production')]
     [string]$Track = 'production',
     [ValidateSet('none', 'patch', 'minor', 'major')]
@@ -247,6 +250,16 @@ function Merge-AndDeployBackend {
 
 # --- Main Entry Point ---
 
+# Handle Firebase distribution flow
+if ($Firebase) {
+    $fbParams = @{ Env = $Env }
+    if ($Bump -ne 'none') { $fbParams["Bump"] = $Bump }
+    if ($SkipBuild) { $fbParams["SkipBuild"] = $true }
+    if ($KeyFile) { $fbParams["KeyFile"] = $KeyFile }
+    & "$PSScriptRoot/frontend/scripts/deploy-firebase.ps1" @fbParams
+    exit $LASTEXITCODE
+}
+
 # Determine flow based on parameters
 $runBackend = $Backend -or $All
 $runApp = $App -or $All
@@ -260,15 +273,33 @@ if (-not $runBackend -and -not $runApp) {
     Write-Host "1) Deploy Backend (Merge develop to master, tag, and push)"
     Write-Host "2) Release App (Build & upload to Google Play Console)"
     Write-Host "3) Deploy Both (Backend & App)"
-    Write-Host "4) Exit"
+    Write-Host "4) Distribute to Firebase Testers (PROD Backend & DB)"
+    Write-Host "5) Distribute to Firebase Testers (DEV Backend & DB)"
+    Write-Host "6) Exit"
     Write-Host ""
     
-    $choice = Read-Host "Select an option [1-4]"
+    $choice = Read-Host "Select an option [1-6]"
     switch ($choice) {
         "1" { $runBackend = $true }
         "2" { $runApp = $true }
         "3" { $runBackend = $true; $runApp = $true }
-        "4" { Write-Host "Exiting."; exit 0 }
+        "4" {
+            $fbParams = @{ Env = 'prod' }
+            if ($Bump -ne 'none') { $fbParams["Bump"] = $Bump }
+            if ($SkipBuild) { $fbParams["SkipBuild"] = $true }
+            if ($KeyFile) { $fbParams["KeyFile"] = $KeyFile }
+            & "$PSScriptRoot/frontend/scripts/deploy-firebase.ps1" @fbParams
+            exit $LASTEXITCODE
+        }
+        "5" {
+            $fbParams = @{ Env = 'dev' }
+            if ($Bump -ne 'none') { $fbParams["Bump"] = $Bump }
+            if ($SkipBuild) { $fbParams["SkipBuild"] = $true }
+            if ($KeyFile) { $fbParams["KeyFile"] = $KeyFile }
+            & "$PSScriptRoot/frontend/scripts/deploy-firebase.ps1" @fbParams
+            exit $LASTEXITCODE
+        }
+        "6" { Write-Host "Exiting."; exit 0 }
         default { Write-Warning "Invalid choice. Exiting."; exit 1 }
     }
 }

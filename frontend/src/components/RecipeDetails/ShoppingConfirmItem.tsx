@@ -10,6 +10,7 @@ export interface MergedShoppingSheetItem {
   childIngredients: Ingredient[];
   groupCategory?: string;
   originalGroupIdx: number;
+  breakdown?: Array<{ section?: string; amount: number }>;
 }
 
 interface ShoppingConfirmItemProps {
@@ -121,6 +122,28 @@ export default function ShoppingConfirmItem({
                   <span>{t('recipe.staplePillLabel')}</span>
                 </span>
               ) : null}
+            </div>
+          )}
+
+          {/* Component breakdown if ingredient appears in multiple components */}
+          {item.breakdown && item.breakdown.length > 1 && (
+            <div className="flex items-center flex-wrap gap-x-2 gap-y-0.5 mt-1">
+              {item.breakdown.map((b, bIdx) => {
+                const bAmt = formatAmount(b.amount, ing.unit);
+                const sectionLabel = b.section || t('recipe.componentOther');
+                return (
+                  <span
+                    key={bIdx}
+                    className={`text-[10px] font-medium transition-colors ${
+                      isChecked
+                        ? 'text-gray-500 dark:text-gray-400'
+                        : 'text-gray-400/80 dark:text-gray-500/80'
+                    }`}
+                  >
+                    {sectionLabel}: {bAmt}
+                  </span>
+                );
+              })}
             </div>
           )}
 

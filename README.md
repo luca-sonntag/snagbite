@@ -20,7 +20,7 @@ This is an npm-workspaces monorepo:
 ## 🛠️ How extraction works
 
 1. **Submit** — the app sends a Reel URL to `POST /api/extract-recipe`; the backend creates a
-   `pending` job in Supabase and returns a `jobId`.
+   `pending` job in PostgreSQL and returns a `jobId`.
 2. **Scrape** — a background worker resolves the video through a provider chain
    (RapidAPI → local `yt-dlp` → first-party Apify actor as fallback).
 3. **Frames** — the downloaded media is processed with **ffmpeg** to extract representative frames.
@@ -28,8 +28,8 @@ This is an npm-workspaces monorepo:
    the structured recipe.
 5. **Poll** — the client polls `GET /api/jobs/:id` for status changes and the final recipe.
 
-Data (jobs, recipes, collections, favorites, users) is stored in **Supabase Postgres** with RLS;
-auth is verified via Supabase JWKS (`jose`); premium entitlements sync via **RevenueCat**.
+Data (jobs, recipes, collections, favorites, users) is stored in **PostgreSQL** via Drizzle ORM;
+auth is handled via **Better-Auth**; premium entitlements sync via **RevenueCat**; covers and bundles are stored in **Tigris S3**.
 
 The backend can run as `ROLE=web`, `ROLE=worker`, or `ROLE=both` (see `backend/.env.example`).
 
@@ -38,9 +38,9 @@ The backend can run as `ROLE=web`, `ROLE=worker`, or `ROLE=both` (see `backend/.
 ## 🚀 Getting Started
 
 ### Prerequisites
-* Node.js v20+
+* Node.js v22+
 * `ffmpeg` + `python3` available locally (for frame extraction / `yt-dlp`) — the Docker image installs these automatically.
-* Accounts/keys: RapidAPI, Google Gemini, Supabase, (optional) Apify, RevenueCat.
+* Accounts/keys: RapidAPI, Google Gemini, PostgreSQL, S3/Tigris, (optional) Apify, RevenueCat.
 
 ### Install
 ```bash
@@ -50,11 +50,10 @@ npm install
 ### Configure environment
 ```bash
 # Backend
-cp backend/.env.example backend/.env   # fill in RapidAPI / Gemini / Supabase / RevenueCat keys
+cp backend/.env.example backend/.env   # fill in DATABASE_URL / Gemini / Better-Auth keys
 
 # Frontend (Vite)
-#   VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY,
-#   VITE_REVENUECAT_ANDROID_API_KEY, VITE_API_BASE_URL
+#   VITE_API_BASE_URL, VITE_REVENUECAT_ANDROID_API_KEY
 ```
 
 ### Run in development
@@ -69,19 +68,19 @@ The Vite dev server proxies `/api` to the backend on `localhost:3000`.
 ## 🧪 Dev / mobile-preview environment
 
 For the *develop-on-the-go → test on your phone → merge* loop, the frontend can be built as a
-static web preview against a shared **dev backend + dev Supabase**, and a
+static web preview against a shared **dev backend + Railway dev PostgreSQL**, and a
 **test-user auto-login** (`VITE_TEST_LOGIN=true`) skips the login screen so the authenticated UI
 renders in a mobile browser. Quick local run:
 
 ```bash
-# fill frontend/.env.development.local with the dev Supabase + test-user creds (git-ignored)
+# fill frontend/.env.development.local with the dev API URL + test-user creds (git-ignored)
 npm run dev -w frontend        # auto-logs-in as the test user
 # provision the test user once (from backend/):
 SEED_TEST_USER_PASSWORD=… npm run seed:dev -w backend
 ```
 
-Full setup (self-hosted Supabase on Railway, per-PR previews, user provisioning) is documented in
-[`docs/dev-environment.md`](./docs/dev-environment.md).
+Full setup (Railway environment, per-PR previews, user provisioning) is documented in
+[`docs/other/dev-environment.md`](./docs/other/dev-environment.md).
 
 ---
 

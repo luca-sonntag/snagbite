@@ -1,0 +1,8 @@
+Willkommen bei Snagbite! 🎉
+In diesem ersten offiziellen Release:
+• KI-Rezept-Import: Verwandle Instagram Reels, TikToks, YouTube Shorts & Kochbuch-Fotos sekundenschnell in strukturierte Rezepte.
+• Automatische Nährwerte & Portionsrechner für jede Mahlzeit.
+• Interaktiver Kochmodus mit integrierten Timern.
+• Smarte Einkaufsliste – sortiert nach Supermarkt-Kategorien.
+• Wochenplaner für stressfreies Kochen im Voraus.
+• Neu: Rezepte mit Freunden teilen & interaktive Touren für den perfekten Einstieg!

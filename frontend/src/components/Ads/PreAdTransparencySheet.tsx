@@ -26,14 +26,20 @@ export const PreAdTransparencySheet: React.FC<PreAdTransparencySheetProps> = ({
   const handleConfirm = () => {
     hapticMedium();
     markPreAdNoticeSeen();
-    onConfirm?.();
-    onClose();
+    if (onConfirm) {
+      onConfirm();
+    } else {
+      onClose();
+    }
   };
 
   const handleOpenPremium = () => {
     hapticLight();
-    onClose();
-    onOpenPremium?.();
+    if (onOpenPremium) {
+      onOpenPremium();
+    } else {
+      onClose();
+    }
   };
 
   const handleClose = () => {
@@ -42,14 +48,13 @@ export const PreAdTransparencySheet: React.FC<PreAdTransparencySheetProps> = ({
   };
 
   return (
-    <Drawer>
-      <Drawer.Backdrop
-        isOpen={isOpen}
-        onOpenChange={(open) => {
-          if (!open) handleClose();
-        }}
-        className="!z-[110]"
-      >
+    <Drawer.Backdrop
+      isOpen={isOpen}
+      onOpenChange={(open) => {
+        if (!open) handleClose();
+      }}
+      className="!z-[110]"
+    >
         <Drawer.Content placement="bottom" className="!z-[110]">
           <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 max-h-[85vh] flex flex-col p-6 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
             <Drawer.Handle />
@@ -149,7 +154,6 @@ export const PreAdTransparencySheet: React.FC<PreAdTransparencySheetProps> = ({
           </Drawer.Dialog>
         </Drawer.Content>
       </Drawer.Backdrop>
-    </Drawer>
   );
 };
 

@@ -12,6 +12,7 @@ export interface Ingredient {
   parentIngredient?: ParentIngredientInfo;
   replacedOriginal?: string;
   amount: number;
+  consumedAmount?: number | null;
   unit: string;
   gramsPerUnit?: number | null;
   notes?: string;
@@ -48,6 +49,13 @@ export interface InstructionStep {
   step: number;
   description: string;
   parallelPrepHint?: string;
+  section?: string;
+}
+
+export interface RecipeComponentSection {
+  name: string;
+  ingredients: Ingredient[];
+  steps: InstructionStep[];
 }
 
 export interface AlternativeIngredient {
@@ -108,6 +116,13 @@ export interface HealthScoreBreakdown {
 export type RecipeVisibility = 'private' | 'unlisted' | 'public';
 export type RecipeOrigin = 'url' | 'photo' | 'remix';
 
+/**
+ * Current version of the recipe generation and extraction pipeline.
+ * Increment this integer whenever prompts, schemas, audit rules or normalizations change
+ * in a way that affects recipe outputs.
+ */
+export const CURRENT_RECIPE_PIPELINE_VERSION = 2;
+
 export type RecipeCategory =
   | 'MAIN_COURSE'
   | 'DESSERT'
@@ -152,18 +167,21 @@ export interface RecipeOperation {
   newIngredients?: Ingredient[];
   removeIngredientName?: string;
   newServings?: number;
-  stepUpdates?: Array<{ step: number; description: string; parallelPrepHint?: string }>;
-  newSteps?: Array<{ description: string; parallelPrepHint?: string }>;
+  stepUpdates?: Array<{ step: number; description: string; parallelPrepHint?: string; section?: string }>;
+  newSteps?: Array<{ description: string; parallelPrepHint?: string; section?: string }>;
   newTitle?: string;
 }
 
 export interface Recipe {
   id?: string;
   isRecipe?: boolean;
+  pipelineVersion?: number;
   createdBy?: string | null;
   visibility?: RecipeVisibility;
   origin?: RecipeOrigin;
   sourceUrl?: string | null;
+  sourceUrlNormalized?: string | null;
+  language?: string;
   parentRecipeId?: string | null;
   remixCount?: number;
   title: string;
@@ -191,6 +209,7 @@ export interface Recipe {
   imageUrls?: string[];
   imagePrompt?: string | null;
   isAiCover?: boolean;
+  isCoverGenerating?: boolean;
   tags?: string[];
   sourceHandle?: string | null;
   remixPrompt?: string | null;

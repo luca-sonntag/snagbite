@@ -1,75 +1,106 @@
 /**
- * Provision/verify a test user in a DEV Supabase project so the frontend preview
- * can auto-sign-in without manual registration.
+ * Provision/verify a test user in the DEV PostgreSQL database for Better-Auth
+ * so the frontend preview can auto-sign-in without manual registration.
  *
- * SAFETY: run this ONLY against a dev/self-hosted Supabase — never production.
- * It creates its own service-role client from env (it does not import the app
- * config, so Gemini/Apify keys are not required).
+ * SAFETY: run this ONLY against the DEV database — never production.
  *
  * Required env (e.g. in backend/.env or the shell):
- *   SUPABASE_URL, SUPABASE_SECRET_KEY   — dev project + service-role key
- *   SEED_TEST_USER_EMAIL                — test user email (default test@dev.snagbite.local)
- *   SEED_TEST_USER_PASSWORD             — test user password (required)
+ *   DATABASE_URL
+ *   SEED_TEST_USER_EMAIL    — test user email (default test@dev.snagbite.local)
+ *   SEED_TEST_USER_PASSWORD — test user password (default snagbite-dev-test-2026)
  *
  * Usage:
- *   cd backend && SEED_TEST_USER_PASSWORD=... npm run seed:dev
+ *   cd backend && npm run seed:dev
  */
+import { randomUUID } from 'node:crypto';
+import { hashPassword } from 'better-auth/crypto';
+import { db } from '../../db/drizzle.js';
+import { user as userTable, account as accountTable } from '../../db/schema/auth.js';
+import { eq, or } from 'drizzle-orm';
 import { initScriptEnv } from '../scriptEnv.js';
 
-const scriptEnv = initScriptEnv({ target: 'dev' });
-const SUPABASE_URL = scriptEnv.supabaseUrl;
-const SUPABASE_SECRET_KEY = scriptEnv.supabaseSecretKey;
-const TEST_USER_EMAIL = process.env.SEED_TEST_USER_EMAIL || 'test@dev.snagbite.local';
-const TEST_USER_PASSWORD = process.env.SEED_TEST_USER_PASSWORD;
+initScriptEnv({ target: 'dev' });
 
-if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) {
-  console.error('Missing SUPABASE_URL or SUPABASE_SECRET_KEY. Point them at your DEV project.');
-  process.exit(1);
-}
-if (!TEST_USER_PASSWORD) {
-  console.error('Missing SEED_TEST_USER_PASSWORD. Set a password for the seeded test user.');
-  process.exit(1);
-}
-
-// Refuse to run against anything that looks like the production host, as a guard.
-if (/\bprod\b|production/i.test(SUPABASE_URL)) {
-  console.error(`Refusing to seed: SUPABASE_URL "${SUPABASE_URL}" looks like production.`);
-  process.exit(1);
-}
-
-const supabase = scriptEnv.client;
+const TEST_USER_EMAIL = (process.env.SEED_TEST_USER_EMAIL || 'test@dev.snagbite.local').trim().toLowerCase();
+const TEST_USER_PASSWORD = process.env.SEED_TEST_USER_PASSWORD || 'snagbite-dev-test-2026';
 
 async function getOrCreateTestUser(): Promise<string> {
-  const { data: created, error } = await supabase.auth.admin.createUser({
+  const hashedPassword = await hashPassword(TEST_USER_PASSWORD);
+
+  const [existingUser] = await db
+    .select()
+    .from(userTable)
+    .where(eq(userTable.email, TEST_USER_EMAIL))
+    .limit(1);
+
+  if (existingUser) {
+    console.log(`Test user ${TEST_USER_EMAIL} exists, updating credentials...`);
+    const [existingAccount] = await db
+      .select()
+      .from(accountTable)
+      .where(
+        or(
+          eq(accountTable.userId, existingUser.id),
+          eq(accountTable.accountId, TEST_USER_EMAIL)
+        )
+      )
+      .limit(1);
+
+    if (existingAccount) {
+      await db
+        .update(accountTable)
+        .set({
+          password: hashedPassword,
+          updatedAt: new Date(),
+        })
+        .where(eq(accountTable.id, existingAccount.id));
+    } else {
+      await db.insert(accountTable).values({
+        id: randomUUID(),
+        accountId: TEST_USER_EMAIL,
+        providerId: 'credential',
+        userId: existingUser.id,
+        password: hashedPassword,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+
+    await db
+      .update(userTable)
+      .set({
+        emailVerified: true,
+        updatedAt: new Date(),
+      })
+      .where(eq(userTable.id, existingUser.id));
+
+    return existingUser.id;
+  }
+
+  const userId = randomUUID();
+  console.log(`Creating test user ${TEST_USER_EMAIL} with id ${userId}...`);
+
+  await db.insert(userTable).values({
+    id: userId,
+    name: 'Dev Test User',
     email: TEST_USER_EMAIL,
-    password: TEST_USER_PASSWORD,
-    email_confirm: true,
+    emailVerified: true,
+    tier: 'alpha',
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
-  if (!error && created.user) {
-    console.log(`Created test user ${TEST_USER_EMAIL}`);
-    return created.user.id;
-  }
+  await db.insert(accountTable).values({
+    id: randomUUID(),
+    accountId: TEST_USER_EMAIL,
+    providerId: 'credential',
+    userId,
+    password: hashedPassword,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
 
-  // Already exists → find its id via the admin list and update password/confirm email.
-  console.log(`Test user ${TEST_USER_EMAIL} already exists, updating password…`);
-  let page = 1;
-  // Paginate defensively in case the dev project has many users.
-  for (; page <= 20; page++) {
-    const { data, error: listErr } = await supabase.auth.admin.listUsers({ page, perPage: 200 });
-    if (listErr) throw new Error(`Failed to list users: ${listErr.message}`);
-    const match = data.users.find(u => u.email?.toLowerCase() === TEST_USER_EMAIL.toLowerCase());
-    if (match) {
-      const { error: updateErr } = await supabase.auth.admin.updateUserById(match.id, {
-        password: TEST_USER_PASSWORD,
-        email_confirm: true,
-      });
-      if (updateErr) throw new Error(`Failed to update user password: ${updateErr.message}`);
-      return match.id;
-    }
-    if (data.users.length < 200) break;
-  }
-  throw new Error(`Could not create or find test user ${TEST_USER_EMAIL} (createUser error: ${error?.message})`);
+  return userId;
 }
 
 async function main() {
@@ -85,4 +116,3 @@ main().catch(err => {
   console.error('Seed failed:', err instanceof Error ? err.message : err);
   process.exit(1);
 });
-

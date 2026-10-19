@@ -71,6 +71,33 @@ userRoutes.post('/billing/sync', async (req: Request, res: Response): Promise<vo
       throw new AppError('UNAUTHORIZED');
     }
 
+    const adminEmails = config.ADMIN_EMAILS.split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    const userEmail = req.userEmail;
+    let isAdminUser = Boolean(userEmail && adminEmails.includes(userEmail.toLowerCase()));
+
+    if (!isAdminUser && userId) {
+      const [u] = await db
+        .select({ email: userTable.email })
+        .from(userTable)
+        .where(eq(userTable.id, userId))
+        .limit(1);
+      if (u?.email && adminEmails.includes(u.email.toLowerCase())) {
+        isAdminUser = true;
+      }
+    }
+
+    if (isAdminUser) {
+      const [currentUser] = await db
+        .select({ tier: userTable.tier })
+        .from(userTable)
+        .where(eq(userTable.id, userId))
+        .limit(1);
+      res.status(200).json({ success: true, tier: currentUser?.tier || 'free', adminBypass: true });
+      return;
+    }
+
     const secretKey = config.REVENUECAT_SECRET_KEY;
     if (!secretKey) {
       console.warn(

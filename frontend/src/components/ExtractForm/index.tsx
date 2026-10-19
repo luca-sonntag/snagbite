@@ -8,8 +8,6 @@ import { PageHeader } from '../PageHeader';
 import PremiumModal from '../PremiumModal';
 import PremiumHint from '../PremiumHint';
 import PremiumUpgradeCard from '../PremiumUpgradeCard';
-import ExtractionAnimation from '../ExtractionAnimation';
-import ExtractionAdCard from '../ExtractionAdCard';
 import { useExtractForm } from './useExtractForm';
 import ExtractActionCards from './ExtractActionCards';
 import ExtractQuotaBadge from './ExtractQuotaBadge';
@@ -19,6 +17,7 @@ import UrlExtractSheet from './UrlExtractSheet';
 import PhotoExtractSheet from './PhotoExtractSheet';
 import ExtractDemoRecipes from './ExtractDemoRecipes';
 import ExtractHelpAccordions from './ExtractHelpAccordions';
+import { useSpotlightTour } from '../../hooks/useSpotlightTour';
 import type { ExtractFormProps } from './types';
 
 export const ExtractForm: React.FC<ExtractFormProps> = ({
@@ -31,8 +30,6 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
   isPending,
   handleFormSubmit,
   limitStatus,
-  jobStatus,
-  progress,
   errorBanner,
   mode,
   setMode,
@@ -52,6 +49,11 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isLinkSheetOpen, setIsLinkSheetOpen] = useState(initialOpenSheet === 'link');
   const [isPhotoSheetOpen, setIsPhotoSheetOpen] = useState(initialOpenSheet === 'photo');
+
+  useSpotlightTour('extract', {
+    enabled: isActive && !isPending && !isLinkSheetOpen && !isPhotoSheetOpen,
+    delayMs: 600,
+  });
 
   React.useEffect(() => {
     if (initialOpenSheet === 'photo') {
@@ -113,7 +115,6 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
       handleSheetSubmit({ preventDefault: () => {} } as React.FormEvent, pastedUrl);
     },
   });
-
 
   const handleDemoClick = async (demoUrl: string, recipe?: import('../../types').Recipe) => {
     if (isPending || atConcurrencyLimit) return;
@@ -180,28 +181,7 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
 
       {errorBanner}
 
-      {/* Extraction Animation (active job) */}
-      {isPending ? (
-        <div className="flex flex-col w-full flex-1 justify-between gap-3 min-h-0">
-          <div className="flex-1 flex items-center justify-center min-h-0 py-1">
-            <ExtractionAnimation
-              url={url}
-              isPending={isPending}
-              jobStatus={jobStatus}
-              progress={progress}
-              variant={mode === 'photo' ? 'photo' : 'link'}
-              photoPreviewUrl={mode === 'photo' ? photoPreviews[0] : undefined}
-              compact={!isRealPremium}
-            />
-          </div>
-          {!isRealPremium && (
-            <div className="shrink-0 w-full pb-1">
-              <ExtractionAdCard isActive={isActive} />
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-4 w-full">
+      <div className="flex flex-col gap-4 w-full">
           {/* Main Action Cards (Clean Flat Premium) */}
           <ExtractActionCards
             onOpenLinkSheet={() => {
@@ -219,16 +199,16 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
 
           {/* Kochbuch voll / Limit Status unter den Import-Karten */}
           {cookbookFull ? (
-            <div className="flex justify-center -mt-1">
-              <PremiumHint
-                variant="inline"
-                onClick={() => setIsPremiumModalOpen(true)}
-                label={t('premium.hint.catalogFull', {
-                  count: limitStatus?.savedRecipes ?? 0,
-                  limit: limitStatus?.maxSavedRecipes ?? 100,
-                })}
-              />
-            </div>
+            <PremiumHint
+              variant="banner"
+              className="-mt-1"
+              onClick={() => setIsPremiumModalOpen(true)}
+              label={t('premium.hint.catalogFull', {
+                count: limitStatus?.savedRecipes ?? 0,
+                limit: limitStatus?.maxSavedRecipes ?? 100,
+              })}
+              cta={t('premium.hint.upgrade')}
+            />
           ) : extractionLimitReached ? (
             <div className="flex flex-col gap-2.5 -mt-1">
               <PremiumHint
@@ -312,7 +292,6 @@ export const ExtractForm: React.FC<ExtractFormProps> = ({
           {/* Premium Modal */}
           <PremiumModal isOpen={isPremiumModalOpen} onOpenChange={setIsPremiumModalOpen} />
         </div>
-      )}
     </div>
   );
 };

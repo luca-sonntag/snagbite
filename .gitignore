@@ -11,11 +11,15 @@ database.json
 logs/
 public/recipe-images/
 temp-downloads/
-.agents
+.agents/*
+!.agents/rules/
+!.agents/skills/
 .claude/
 *.afdesign*
 frontend/releases/
 *firebase-adminsdk*.json
+*firebase-key*.json
+fastlane/*firebase*.json
 # graphify knowledge graph (locally generated, rebuild with: graphify extract . --code-only)
 graphify-out/
 # Ingredient icons: single zip archive in git, unpacked at runtime
@@ -28,7 +32,6 @@ backend/public/ingredient-icons-backup/
 *.sqlite
 backend/src/data/*.sqlite
 backend/dist/data/*.sqlite
-supabase/.temp/
 backups/
 backend/backups/
 

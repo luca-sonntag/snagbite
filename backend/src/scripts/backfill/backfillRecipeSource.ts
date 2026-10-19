@@ -1,11 +1,26 @@
-import { type SupabaseClient } from '@supabase/supabase-js';
-import { rowToRecipe, type RecipeRow } from '../../db.js';
+import pg from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { asc } from 'drizzle-orm';
+import { db } from '../../db/drizzle.js';
+import * as schema from '../../db/schema/index.js';
+import { recipes } from '../../db/schema/recipes.js';
+import { rowToRecipe } from '../../db.js';
 import type { ResolverInput } from '../../matching/ingredientResolver.js';
 import type { Recipe } from '../../types.js';
-import { initScriptEnv } from '../scriptEnv.js';
+import { loadEnvFile } from '../scriptEnv.js';
 
-export function getProdClient(): SupabaseClient {
-  return initScriptEnv({ target: 'prod', autoSetDbClient: false }).client;
+let prodDb: ReturnType<typeof drizzle<typeof schema>> | null = null;
+
+export function getProdDb(): ReturnType<typeof drizzle<typeof schema>> {
+  if (prodDb) return prodDb;
+  const prodEnv = loadEnvFile('.env.production');
+  const connectionString = prodEnv.DATABASE_URL || process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error('DATABASE_URL not found in .env.production or environment');
+  }
+  const pool = new pg.Pool({ connectionString, max: 5 });
+  prodDb = drizzle(pool, { schema });
+  return prodDb;
 }
 
 export function extractIngredients(recipe: Recipe): ResolverInput[] {
@@ -39,40 +54,16 @@ export function extractIngredients(recipe: Recipe): ResolverInput[] {
 
 export async function fetchRecipesBatch(
   source: 'dev' | 'prod',
-  client: SupabaseClient,
   offset: number,
   limit: number
 ): Promise<Recipe[]> {
-  if (source === 'prod') {
-    const { data, error } = await client
-      .from('jobs')
-      .select('id, recipe, created_at')
-      .eq('status', 'completed')
-      .not('recipe', 'is', null)
-      .order('created_at', { ascending: true })
-      .range(offset, offset + limit - 1);
+  const targetDb = source === 'prod' ? getProdDb() : db;
+  const rows = await targetDb
+    .select()
+    .from(recipes)
+    .orderBy(asc(recipes.createdAt))
+    .limit(limit)
+    .offset(offset);
 
-    if (error) throw new Error(`Failed to fetch PROD jobs at offset ${offset}: ${error.message}`);
-    return (data || [])
-      .filter((r) => r.recipe && typeof r.recipe === 'object' && Array.isArray(r.recipe.ingredients))
-      .map(
-        (r) =>
-          ({
-            id: r.id,
-            title: r.recipe.title || 'Untitled',
-            ingredients: r.recipe.ingredients || [],
-            instructions: r.recipe.instructions || [],
-            servings: r.recipe.servings ?? 1,
-          } as Recipe)
-      );
-  }
-
-  const { data, error } = await client
-    .from('recipes')
-    .select('*')
-    .order('created_at', { ascending: true })
-    .range(offset, offset + limit - 1);
-
-  if (error) throw new Error(`Failed to fetch DEV recipes at offset ${offset}: ${error.message}`);
-  return (data || []).map((row) => rowToRecipe(row as RecipeRow));
+  return (rows || []).map((row) => rowToRecipe(row as any));
 }

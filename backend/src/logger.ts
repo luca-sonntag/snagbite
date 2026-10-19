@@ -82,6 +82,10 @@ const PRICING: Record<string, ModelPricing> = {
   },
 
   // ── Gemini 3.5 family ────────────────────────────────────────────────────
+  'gemini-3.5-flash-lite': {
+    inputShort: 0.30,   inputLong:  0.30,
+    outputShort: 2.50,  outputLong:  2.50,
+  },
   'gemini-3.5-flash': {
     inputShort: 1.50,   inputLong:  1.50,
     outputShort: 9.00,  outputLong:  9.00,
@@ -108,21 +112,21 @@ export interface CostEstimate {
   /** Human-readable string, e.g. "$0.0042" */
   totalCostFormatted: string;
   /** Pricing tier used ("short" | "long") */
-  pricingTier: 'short' | 'long';
+  pricingTier?: 'short' | 'long';
   /** Whether the model was found in the pricing table */
-  pricingKnown: boolean;
+  pricingKnown?: boolean;
 }
 
 /**
  * Compute an approximate cost for a Gemini request given token usage and model name.
- * Falls back to gemini-1.5-flash pricing if the model is unknown.
+ * Falls back to gemini-3.1-flash-lite pricing if the model is unknown.
  */
 export function estimateCost(model: string, usage: TokenUsage): CostEstimate {
   // Normalise model name: strip version suffixes like "-latest", "-preview-*"
   const normalisedModel = model.replace(/-latest$/, '').replace(/-preview.*$/, '');
   const pricing = PRICING[normalisedModel];
   const pricingKnown = !!pricing;
-  const p = pricing ?? PRICING['gemini-1.5-flash'];
+  const p = pricing ?? PRICING['gemini-3.1-flash-lite'] ?? PRICING['gemini-1.5-flash'];
 
   const tier = usage.promptTokens > LONG_CONTEXT_THRESHOLD ? 'long' : 'short';
   const inputRate  = tier === 'long' ? p.inputLong  : p.inputShort;
@@ -153,7 +157,8 @@ export type GeminiRequestType =
   | 'notification_copy'
   | 'verify_cook_photo'
   | 'resolve_ingredient'
-  | 'audit_recipe';
+  | 'audit_recipe'
+  | 'transcribe_audio';
 
 export interface GeminiLogEntry {
   /** ISO timestamp of when the request was initiated */
@@ -185,7 +190,7 @@ export interface GeminiLogEntry {
 /**
  * Persist a single Gemini request/response log.
  *
- * Primary sink is the Supabase `gemini_logs` table so metrics survive Railway's
+ * Primary sink is the PostgreSQL `gemini_logs` table so metrics survive Railway's
  * ephemeral filesystem (containers are wiped on every deploy). When `logDir` is
  * set, the full entry is *additionally* written as a JSON file into that
  * per-run debug directory (`logs/{userId}/run-...`) for deep debugging — those

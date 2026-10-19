@@ -38,21 +38,29 @@
 Web-Assets der nativen App können Over-The-Air (OTA) aktualisiert werden, ohne ein neues Play-Store-Release zu erzwingen (gilt **nur** für den Web-Layer; native Plugin-Änderungen erfordern ein APK/AAB-Release).
 
 * **Plugin:** `@capgo/capacitor-updater` im **Manual-Mode** (`autoUpdate: false` in `capacitor.config.ts`, `resetWhenUpdate: true`, `appReadyTimeout: 10000`).
-* **Kanäle:** `production`, `alpha` + `internal` (spiegeln Play-Tracks). `production` und `alpha` zielen auf `snagbite-prod`, `internal` zielt auf `snagbite-dev` & Dev-Backend. Kanalwahl: `localStorage['snagbite.otaChannel']` -> sonst `alpha` bei `tier === 'alpha'` -> sonst `production`.
+* **Environments & Kanäle:** Die Auslieferung wird primär über das Ziel-Environment gesteuert:
+  * **Production (`npm run deploy:ota`):** Baut gegen das Production-Backend (`.env.production`), lädt in den Prod-Tigris-Storage hoch und aktiviert das Bundle in der Prod-PostgreSQL-DB.
+  * **Development (`npm run deploy:ota:dev`):** Baut gegen das Railway Dev-Backend (`.env.development` / `build:dev`), lädt in den Dev-Tigris-Storage hoch und aktiviert das Bundle in der Dev-PostgreSQL-DB.
+  * Beide Environments registrieren Bundles standardmäßig unter dem Kanal `production`, sodass Apps automatisch das aktive Bundle für ihre verbundene Umgebung erhalten. Spezifische Kanäle wie `alpha` (`-Channel alpha`) bleiben als Filterstufe unterstützt.
+  * OTA ist auf nativen Geräten aktiv (sowohl in Prod- als auch in Dev-APKs), wird jedoch bei aktiver Capacitor Live-Reload-Entwicklung (`npm run cap:live` auf Port 5173) automatisch pausiert.
 
-### Supabase Storage & Datenbank
+### Tigris S3 Storage & PostgreSQL
 * **Bucket `app-bundles` (public):** Speichert Zips unter `{channel}/{version}.zip`.
 * **Tabelle `app_bundles`:** `channel`, `version` (`{VERSION_NAME}-ota.{n}`), `storage_path`, `checksum` (sha256 hex), `min_version_code`, `max_version_code`, `active`, `notes`.
 * Ein partieller Unique-Index erzwingt **max. ein aktives Bundle pro Kanal**. `min_version_code` / `max_version_code` verhindern Inkompatibilitäten mit nativen Shells.
 
 ### Backend & Client Workflow
 * **Endpoint `POST /api/app-updates/check` (`backend/src/appUpdates.ts`):** Vor auth-gated Router gemountet. Erhält `{ channel, versionCode, currentBundleVersion }` und antwortet mit Update-Metadaten oder `{ update: false }`.
-* **Client Updater (`frontend/src/utils/otaUpdater.ts`):** Inert auf Web/Dev. Beim Boot sofort `CapacitorUpdater.notifyAppReady()` (Anti-Brick-Contract: verhindert Revert zum vorherigen Bundle). Lädt bei Update das Zip herunter (`download`) und setzt `next({id})` für die Anwendung beim nächsten Relaunch.
-* **Zentrale Git-Utilities (`frontend/scripts/git-utils.ps1`):** Bündelt wiederverwendbare Git-Hilfsfunktionen (`Assert-GitClean`, `Invoke-GitMasterMergeAndTag`, `Cap-StaleAppBundles`). Bei jedem nativeren Play Store Build (`release.ps1` / `deploy-playstore.ps1`) deckelt `Cap-StaleAppBundles` automatisch alte, nach oben offene OTA-Bundles in Supabase (`max_version_code = newVersionCode - 1`), damit neu installierte native App-Releases nicht auf ältere OTA-Assets zurückgesetzt werden.
-* **Deploy-Skript (`frontend/scripts/deploy-ota.ps1` / `npm run deploy:ota`):** Baut Frontend (`npm run build` für Prod/Alpha bzw. `npm run build:dev` für Internal), ermittelt nächste Bundle-Version (`{VERSION_NAME}-ota.{n}`), packt Zip per `tar.exe`, berechnet SHA256-Checksum, lädt ins Storage hoch, aktiviert die Row in Supabase, mergt bei Prod/Alpha `develop` -> `master` (bei `internal` nur Git Tag auf aktuellem Branch) und erstellt/pusht automatisch ein Git Tag (`v{VERSION_NAME}-ota.{n}`).
+* **Client Updater (`frontend/src/utils/otaUpdater.ts` & `frontend/src/hooks/useAppUpdates.ts`):** Inert im Web-Browser und bei Live-Reload. Beim Boot sofort `CapacitorUpdater.notifyAppReady()` (Anti-Brick-Contract: verhindert Revert zum vorherigen Bundle).
+* **Vollautomatischer Ablauf ohne Prompt:** Sobald ein neues Bundle vorliegt, schaltet der Client `isUpdating` aktiv, zeigt den Snagbite Loading Screen (`AppSplashScreen` mit *"App-Update wird installiert…"*) und wendet das Bundle nach Download direkt via `CapacitorUpdater.set({ id })` an (sofortiger Reload in das neue Bundle). Es gibt keinen manuellen Zustimmungs-Banner mehr.
+* **Zentrale Git-Utilities (`frontend/scripts/git-utils.ps1`):** Bündelt wiederverwendbare Git-Hilfsfunktionen (`Assert-GitClean`, `Invoke-GitMasterMergeAndTag`, `Cap-StaleAppBundles`). Bei jedem nativeren Play Store Build (`release.ps1` / `deploy-playstore.ps1`) deckelt `Cap-StaleAppBundles` automatisch alte, nach oben offene OTA-Bundles in der Datenbank (`max_version_code = newVersionCode - 1`), damit neu installierte native App-Releases nicht auf ältere OTA-Assets zurückgesetzt werden.
+* **Deploy-Skripte:**
+  * `npm run deploy:ota`: Baut Prod-Bundle, lädt ins Prod-S3 hoch, aktiviert in Prod-DB und mergt/taggt Master.
+  * `npm run deploy:ota:dev`: Baut Dev-Bundle, lädt ins Dev-S3 hoch, aktiviert in Dev-DB (ohne Remote-Git-Aktionen).
+  * Rollback jederzeit via `.\frontend\scripts\deploy-ota.ps1 -Env prod|dev -Rollback`.
 
 ### Rollback-Ebenen
-1. **Server-Rollback:** `active`-Flags flippen via Admin-PATCH (`/api/admin/app-bundles/:id`) oder Supabase Dashboard.
+1. **Server-Rollback:** `active`-Flags flippen via Admin-PATCH (`/api/admin/app-bundles/:id`) oder Drizzle Studio.
 2. **Device Auto-Revert:** Fehlendes `notifyAppReady()` innerhalb 10 Sekunden veranlasst das Plugin zum automatischen Fallback auf das vorherige funktionierende Bundle.
 3. **Play-Store-Release Reset & OTA-Guard:** `resetWhenUpdate: true` löscht alle gecachten OTA-Bundles auf dem Gerät bei jedem Play-Store-App-Update. `Cap-StaleAppBundles` verhindert, dass neuere Native-Shells alte ungepinnte OTA-Bundles vom Server anfordern.
 
@@ -65,11 +73,11 @@ Während Capgo OTA ausschließlich Web-Assets (HTML/JS/CSS) aktualisiert, steuer
 * **Plugin:** `@capawesome/capacitor-app-update` (Android-only, no-op auf Web/iOS).
 * **Service:** `frontend/src/utils/nativeAppUpdater.ts`
 * **Flow & Erzwingung:**
-  1. **Boot-Check:** Verzögerter Check (~4 Sekunden nach App-Start) via `AppUpdate.getAppUpdateInfo()`.
-  2. **Erzwungenes Immediate Update:** Wenn `updateAvailability === UPDATE_AVAILABLE` und `immediateUpdateAllowed === true`, ruft die App `AppUpdate.performImmediateUpdate()` auf. Google Play blendet einen modalen Vollbilddialog ein und sperrt die Nutzung der alten Version bis zum Abschluss von Download und Neustart.
+  1. **Sofortiger Boot- & Resume-Check:** Unmittelbar beim App-Start (geschützt durch 3s-Timeout-Guard) sowie auf `resume` prüft `AppUpdate.getAppUpdateInfo()`.
+  2. **Erzwungenes Immediate Update:** Wenn `updateAvailability === UPDATE_AVAILABLE` und `immediateUpdateAllowed === true`, ruft die App `AppUpdate.performImmediateUpdate()` automatisch auf. Google Play blendet einen modalen Vollbilddialog ein und sperrt die Nutzung der alten Version bis zum Abschluss von Download und Neustart.
   3. **Fallback:** Falls `immediateUpdateAllowed === false`, leitet `AppUpdate.openAppStore()` direkt auf die Snagbite-Storeseite im Google Play Store weiter.
   4. **Resume-Sicherheit:** Registriert einen `resume`-Listener auf `App`. Befindet sich ein Update bereits in Bearbeitung (`updateAvailability === UPDATE_IN_PROGRESS`), wird der Dialog sofort ohne Cooldown erneut angezeigt. Reguläre Checks auf `resume` sind auf einen 15-Minuten-Cooldown gedrosselt.
-  5. **Manueller Check:** In `SettingsView.tsx` können Nutzer auf Android via „Auf Updates prüfen“ den Status abfragen (`checkAndApplyNativeUpdate({ manual: true })`) mit direktem Feedback via Toast.
+  5. **Manueller Check:** In `SettingsView.tsx` können Nutzer via „Auf Updates prüfen“ den Status abfragen: Zuerst wird der Play Store geprüft, anschließend OTA. Gefundene OTA-Updates werden nahtlos unter Einblendung des Ladebildschirms installiert.
 
 ---
 
@@ -78,3 +86,34 @@ Während Capgo OTA ausschließlich Web-Assets (HTML/JS/CSS) aktualisiert, steuer
 * **Multi-Stage Dockerfile:** Multi-stage Build (`node:22-alpine`). Installiert systemseitig `ffmpeg`, `python3` (für yt-dlp) und `ttf-dejavu`.
 * **Stateless Deployment:** Backend und Frontend-Assets statisch gebündelt.
 * **Environment Variables Sync (`scripts/sync-railway-env.ps1`):** Synchronisation via `npm run railway:env:prod` (kombiniert `backend/.env` und `backend/.env.production`) bzw. `npm run railway:env:dev` via Railway CLI.
+
+---
+
+## 5. Firebase App Distribution (Tester & Pre-Release Builds)
+
+Für schnelle Testrunden mit internen und externen Testern (Freunde, Familie, Beta-Community) werden Vorabversionen direkt über **Firebase App Distribution** verteilt – unabhängig von Google Play Store Review-Zeiten.
+
+* **Firebase-Projekt:** `snagbite-c6c33`
+* **App-ID (Android):** `1:453029629442:android:442396361a782e1196a11b` (Package: `at.snagbite.app`)
+* **Artefakt:** Signierte `.apk` (erzeugt via `release.ps1 -Artifact apk` mit `assembleRelease`). Das APK kann von Testern direkt über den mobilen Browser oder die *Firebase App Tester*-App ohne Google-Play-Bindung installiert werden.
+* **Tooling:** Distribution via `npx --yes firebase-tools appdistribution:distribute` (kein lokales Ruby/Docker erforderlich).
+
+### Befehle
+* `npm run deploy:firebase`: Baut aktuelle Version als signierte APK gegen das **Production**-Backend (`.env.production`) und lädt sie für die Tester-Gruppe `all-testers` hoch.
+* `npm run deploy:firebase:patch`: Erhöht `versionCode` & Patch-`versionName`, baut APK (Prod) und lädt sie hoch.
+* `npm run deploy:firebase:dev`: Baut aktuelle Version als signierte APK gegen das **Development**-Backend & Dev-DB (`.env.development` / `npm run build:dev`, Dateiname `*-dev-*`, Release-Notes mit `[DEV]`-Präfix) und lädt sie hoch.
+* `npm run deploy:firebase:dev:patch`: Patch-Bump + Dev-Build + Upload zu Firebase.
+* `.\deploy.ps1 -Firebase [-Env prod|dev]`: Startet den Flow über den Root-Orchestrator (auch über interaktives Menü Optionen 4 & 5).
+* `.\frontend\scripts\deploy-firebase.ps1 -Env dev -Notes "Fix for Recipe Timer" -Group all-testers`: Manueller Aufruf mit individuellen Release Notes.
+* **Build-Beschleunigung (`-Clean`):** Standardmäßig nutzt Gradle inkrementelle Builds und den Build-Cache (`org.gradle.caching=true`). Builds dauern dadurch nur ca. 25–40s statt 3–4 Minuten. Ein vollständiger Cache-Wipe kann bei Bedarf mit dem Switch `-Clean` erzwungen werden (`.\deploy-firebase.ps1 -Clean`).
+
+### Authentifizierung (Headless / CI / Lokal)
+1. **Service Account Key (Empfohlen):**
+   * Im Google Cloud IAM ein Dienstkonto mit der Rolle **Firebase App Distribution-Administrator** erstellen.
+   * JSON-Schlüssel als `frontend/android/fastlane/firebase-key.json` ablegen (wird durch `.gitignore` automatisch ignoriert).
+2. **Alternativ:** Umgebungsvariable `GOOGLE_APPLICATION_CREDENTIALS` oder `FIREBASE_TOKEN` (via `npx firebase login:ci`) setzen, oder interaktiv im Browser via `npx firebase login` einloggen.
+
+### Tester-Einladung ("all-testers")
+* In der Firebase Console unter **Release & Monitor -> App Distribution -> Tester & Gruppen**:
+  * Gruppe `all-testers` erstellen.
+  * Einen **öffentlichen Einladungslink (Invite Link)** generieren und mit den Testern teilen. Tester klicken den Link am Handy an, registrieren sich mit ihrer E-Mail und erhalten sofort Download-Zugriff sowie automatische Benachrichtigungen bei neuen Builds.

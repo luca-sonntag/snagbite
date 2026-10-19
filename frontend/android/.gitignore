@@ -84,6 +84,12 @@ fastlane/readme.md
 fastlane/play-store-key.json
 fastlane/*-play-store-key.json
 
+# Firebase service-account key — NEVER commit
+fastlane/firebase-key.json
+fastlane/*firebase*.json
+firebase-key.json
+*-firebase-key.json
+
 # Version control
 vcs.xml
 

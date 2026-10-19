@@ -26,8 +26,11 @@ import { enrichRecipeWithCanonicalIngredients } from '../matching/ingredientMatc
 import { applyRecipeOperations } from '../recipeOperations.js';
 import { recordCook } from '../gamification.js';
 import type { Recipe, RecipeOperation } from '../types.js';
+import { CURRENT_RECIPE_PIPELINE_VERSION } from '@cookbook/shared';
 import { fetchAndSyncUser, isPremiumUser, MAX_PHOTOS_TOTAL_CHARS } from './authUtils.js';
 import { triggerWorkerTick } from '../queue.js';
+import { subscribeRecipeEvents } from '../jobEvents.js';
+import { notifyFriendsOfCook } from '../push/socialNotifications.js';
 
 export const recipeRoutes = Router();
 
@@ -71,6 +74,72 @@ recipeRoutes.get('/recipes/:id', async (req: Request, res: Response): Promise<vo
     res.status(200).json({ success: true, ...saved });
   } catch (error: unknown) {
     if (!(error instanceof AppError)) console.error('Error fetching recipe:', error);
+    sendAppError(res, error);
+  }
+});
+
+recipeRoutes.get('/recipes/:id/events', async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  if (!id) {
+    res.status(400).json({ success: false, error: 'Missing recipe id' });
+    return;
+  }
+
+  try {
+    const recipe = await assertRecipeAccess(req.userId!, id);
+
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    });
+
+    const sendEvent = (event: string, data: unknown) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+
+    if (recipe.imageUrl && recipe.isAiCover) {
+      sendEvent('recipe', {
+        recipeId: recipe.id,
+        type: 'cover_ready',
+        imageUrl: recipe.imageUrl,
+        imageUrls: recipe.imageUrls,
+        isAiCover: true,
+      });
+      res.end();
+      return;
+    }
+
+    let isClosed = false;
+    const cleanup = () => {
+      if (isClosed) return;
+      isClosed = true;
+      clearInterval(pingInterval);
+      clearTimeout(timeoutHandle);
+      unsubscribe();
+    };
+
+    const unsubscribe = subscribeRecipeEvents(id, (payload) => {
+      sendEvent('recipe', payload);
+      cleanup();
+      res.end();
+    });
+
+    const pingInterval = setInterval(() => {
+      if (!isClosed) {
+        res.write(': ping\n\n');
+      }
+    }, 15000);
+
+    const timeoutHandle = setTimeout(() => {
+      cleanup();
+      res.end();
+    }, 35000);
+
+    req.on('close', cleanup);
+  } catch (error: unknown) {
+    if (!(error instanceof AppError)) console.error('Error establishing recipe events stream:', error);
     sendAppError(res, error);
   }
 });
@@ -250,6 +319,7 @@ recipeRoutes.post('/recipes/:id/chat/confirm', async (req: Request, res: Respons
       req.userId!,
       {
         ...remixedRecipe,
+        pipelineVersion: CURRENT_RECIPE_PIPELINE_VERSION,
         sourceUrl: currentRecipe.sourceUrl,
         sourceHandle: currentRecipe.sourceHandle,
         parentRecipeId: id,
@@ -365,6 +435,7 @@ recipeRoutes.post('/recipes/:id/chat', async (req: Request, res: Response): Prom
         req.userId!,
         {
           ...result.newRecipe,
+          pipelineVersion: CURRENT_RECIPE_PIPELINE_VERSION,
           sourceUrl: recipe.sourceUrl,
           sourceHandle: recipe.sourceHandle,
           parentRecipeId: id,
@@ -485,6 +556,10 @@ recipeRoutes.post('/recipes/:id/cooked', async (req: Request, res: Response): Pr
       timerElapsed: !!timerElapsed,
     });
 
+    if (hasPhoto && photoPath && !result.duplicate) {
+      void notifyFriendsOfCook(req.userId!, { id, title: recipe.title }, photoPath);
+    }
+
     // Automatically synchronize today's meal plan entry for this recipe if planned
     try {
       await markMealPlansCookedForRecipe(req.userId!, id);
@@ -492,12 +567,12 @@ recipeRoutes.post('/recipes/:id/cooked', async (req: Request, res: Response): Pr
       console.warn('Failed to auto-mark meal plan entry as cooked:', mealPlanErr);
     }
 
-    // Automatically deduct consumed ingredients from user's pantry
-    try {
-      await consumePantryForRecipe(req.userId!, recipe);
-    } catch (pantryErr) {
-      console.warn('Failed to auto-consume ingredients from pantry:', pantryErr);
-    }
+    // Automatically deduct consumed ingredients from user's pantry (paused while pantry feature is dormant)
+    // try {
+    //   await consumePantryForRecipe(req.userId!, recipe);
+    // } catch (pantryErr) {
+    //   console.warn('Failed to auto-consume ingredients from pantry:', pantryErr);
+    // }
 
     res.status(200).json({ success: true, ...result });
   } catch (error: unknown) {

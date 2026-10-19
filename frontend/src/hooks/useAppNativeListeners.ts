@@ -184,6 +184,19 @@ export function useAppNativeListeners({
   useEffect(() => {
     return registerPushTapHandler((payload) => {
       const targetJobId = payload.jobId || ('recipeId' in payload ? (payload as { recipeId?: string }).recipeId : undefined);
+      if (payload.type === 'recipe_shared') {
+        navigate('history');
+        return;
+      }
+      if (payload.route === 'progress') {
+        const section = (payload as { section?: string }).section;
+        if (section) {
+          navigate('progress', section);
+        } else {
+          navigate('progress');
+        }
+        return;
+      }
       if (targetJobId) {
         navigate('history', targetJobId);
       } else if (payload.route === 'extract') {
@@ -221,9 +234,11 @@ export function useAppNativeListeners({
     };
     window.addEventListener(EXTRACTION_COMPLETE_EVENT, onComplete);
     window.addEventListener(OPEN_RECIPE_EVENT, onOpen);
+    window.addEventListener('cookbook:recipe-saved', onComplete);
     return () => {
       window.removeEventListener(EXTRACTION_COMPLETE_EVENT, onComplete);
       window.removeEventListener(OPEN_RECIPE_EVENT, onOpen);
+      window.removeEventListener('cookbook:recipe-saved', onComplete);
     };
   }, [fetchHistory, handleExtractionSuccess]);
 
@@ -296,11 +311,11 @@ export function useAppNativeListeners({
   // Dev mode re-extraction trigger
   useEffect(() => {
     const handleDevReExtract = (e: Event) => {
-      const customEvent = e as CustomEvent<{ url: string }>;
+      const customEvent = e as CustomEvent<{ url: string; force?: boolean }>;
       if (customEvent.detail?.url) {
         replace('extract');
         setUrl(customEvent.detail.url);
-        triggerExtraction(customEvent.detail.url);
+        triggerExtraction(customEvent.detail.url, customEvent.detail.force ?? true);
       }
     };
     window.addEventListener('app:dev-re-extract', handleDevReExtract);

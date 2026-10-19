@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI, FunctionDeclarationSchemaType } from '@google/generative-ai';
+import { config } from '../config.js';
 import { canonicalizeBaseName } from './baseNameCanonical.js';
 import type { ResolverInput } from './ingredientResolver.js';
 import {
@@ -140,14 +141,14 @@ async function generateSingleBatch(params: {
 export async function generateIngredientsWithAi(
   options: AiIngredientGenOptions = {}
 ): Promise<ResolverInput[]> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = config.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error('GEMINI_API_KEY environment variable is missing.');
   }
 
   const client = new GoogleGenerativeAI(apiKey);
   const targetCount = Math.max(1, options.count ?? 50);
-  const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+  const modelName = config.GEMINI_MODEL;
   const BATCH_SIZE = 45;
 
   const existingArray = options.existingKeys ? Array.from(options.existingKeys) : [];

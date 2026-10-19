@@ -7,6 +7,7 @@ import { formatQuantity } from '../../utils/formatQuantity';
 import { cleanMatchedIngredientName } from '../../utils/formatNutrition';
 import type { Ingredient } from '../../types';
 import IngredientIcon from '../IngredientIcon';
+import IngredientMacroCard from './IngredientMacroCard';
 
 export interface IngredientNutritionDetailsProps {
   ingredient: Ingredient;
@@ -32,7 +33,6 @@ export const IngredientNutritionDetails: FC<IngredientNutritionDetailsProps> = (
   const { t } = useI18n();
 
   const safeAmount = ingredient.amount ?? 0;
-  const scaledAmount = Math.round(safeAmount * scaleFactor * 10) / 10;
   const formattedAmount = safeAmount > 0 ? formatQuantity(safeAmount * scaleFactor, ingredient.unit) : '';
   const displayAmount = formattedAmount
     ? (ingredient.unit ? `${formattedAmount} ${ingredient.unit}` : formattedAmount)
@@ -60,13 +60,23 @@ export const IngredientNutritionDetails: FC<IngredientNutritionDetailsProps> = (
   const carbsPct = totalMacroKcal > 0 ? Math.round((carbsKcal / totalMacroKcal) * 100) : 0;
   const fatPct = totalMacroKcal > 0 ? Math.max(0, 100 - proteinPct - carbsPct) : 0;
 
+  // Check if ingredient has a separate consumed amount (cooking medium / deep-frying oil)
+  const hasConsumedDifference =
+    ingredient.consumedAmount !== undefined &&
+    ingredient.consumedAmount !== null &&
+    ingredient.consumedAmount > 0 &&
+    ingredient.consumedAmount < safeAmount;
+
+  const effectiveNutrientAmount = hasConsumedDifference ? ingredient.consumedAmount! : safeAmount;
+  const scaledNutrientAmount = Math.round(effectiveNutrientAmount * scaleFactor * 10) / 10;
+
   // Estimated per 100g calories if gram weight is determinable
   let per100gKcal: number | null = null;
   const unitLower = (ingredient.unit || '').toLowerCase().trim();
-  if (['g', 'gramm', 'grams', 'ml'].includes(unitLower) && scaledAmount > 0) {
-    per100gKcal = Math.round((scaledCalories / scaledAmount) * 100);
+  if (['g', 'gramm', 'grams', 'ml'].includes(unitLower) && scaledNutrientAmount > 0) {
+    per100gKcal = Math.round((scaledCalories / scaledNutrientAmount) * 100);
   } else if (ingredient.gramsPerUnit && ingredient.gramsPerUnit > 0) {
-    const totalGrams = scaledAmount * ingredient.gramsPerUnit;
+    const totalGrams = scaledNutrientAmount * ingredient.gramsPerUnit;
     if (totalGrams > 0) {
       per100gKcal = Math.round((scaledCalories / totalGrams) * 100);
     }
@@ -98,6 +108,16 @@ export const IngredientNutritionDetails: FC<IngredientNutritionDetailsProps> = (
                 {ingredient.modifier && ` (${ingredient.modifier})`}
                 {scaleFactor !== 1 && ` · ×${scaleFactor}`}
               </p>
+              {hasConsumedDifference && (
+                <div className="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                  <span>
+                    {t('recipe.ingredientNutritionConsumedHint', {
+                      amount: formatQuantity(ingredient.consumedAmount! * scaleFactor, ingredient.unit),
+                      unit: ingredient.unit,
+                    })}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
           {showCloseAction && (
@@ -191,68 +211,30 @@ export const IngredientNutritionDetails: FC<IngredientNutritionDetailsProps> = (
 
       {/* 4. 3 Macro Cards */}
       <div className="grid grid-cols-3 gap-2.5">
-        {/* Protein */}
-        <div className="bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent dark:from-blue-500/15 dark:to-transparent rounded-2xl p-3 flex flex-col justify-between text-left">
-          <div className="flex items-center gap-1.5 mb-1">
-            <span className="w-1.5 h-1.5 rounded-[2.5px] bg-blue-500 shrink-0" />
-            <span className="text-[10.5px] font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-300 truncate">
-              {t('recipe.ingredientNutritionProtein')}
-            </span>
-          </div>
-          <div>
-            <span className="text-lg font-bold text-gray-900 dark:text-white tracking-tight block tabular-nums">
-              {scaledProtein} <span className="text-xs font-normal text-gray-500 dark:text-gray-400">g</span>
-            </span>
-            <div className="flex items-center justify-between text-[10.5px] text-gray-400 dark:text-gray-500 font-normal mt-0.5">
-              <span>{proteinPct}%</span>
-              {isMultiServing && (
-                <span className="tabular-nums opacity-90">≈{perServingProtein}g/P.</span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Carbs */}
-        <div className="bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent dark:from-amber-500/15 dark:to-transparent rounded-2xl p-3 flex flex-col justify-between text-left">
-          <div className="flex items-center gap-1.5 mb-1">
-            <span className="w-1.5 h-1.5 rounded-[2.5px] bg-amber-500 shrink-0" />
-            <span className="text-[10.5px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300 truncate">
-              {t('recipe.ingredientNutritionCarbs')}
-            </span>
-          </div>
-          <div>
-            <span className="text-lg font-bold text-gray-900 dark:text-white tracking-tight block tabular-nums">
-              {scaledCarbs} <span className="text-xs font-normal text-gray-500 dark:text-gray-400">g</span>
-            </span>
-            <div className="flex items-center justify-between text-[10.5px] text-gray-400 dark:text-gray-500 font-normal mt-0.5">
-              <span>{carbsPct}%</span>
-              {isMultiServing && (
-                <span className="tabular-nums opacity-90">≈{perServingCarbs}g/P.</span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Fat */}
-        <div className="bg-gradient-to-br from-rose-500/10 via-rose-500/5 to-transparent dark:from-rose-500/15 dark:to-transparent rounded-2xl p-3 flex flex-col justify-between text-left">
-          <div className="flex items-center gap-1.5 mb-1">
-            <span className="w-1.5 h-1.5 rounded-[2.5px] bg-rose-500 shrink-0" />
-            <span className="text-[10.5px] font-semibold uppercase tracking-wider text-rose-700 dark:text-rose-300 truncate">
-              {t('recipe.ingredientNutritionFat')}
-            </span>
-          </div>
-          <div>
-            <span className="text-lg font-bold text-gray-900 dark:text-white tracking-tight block tabular-nums">
-              {scaledFat} <span className="text-xs font-normal text-gray-500 dark:text-gray-400">g</span>
-            </span>
-            <div className="flex items-center justify-between text-[10.5px] text-gray-400 dark:text-gray-500 font-normal mt-0.5">
-              <span>{fatPct}%</span>
-              {isMultiServing && (
-                <span className="tabular-nums opacity-90">≈{perServingFat}g/P.</span>
-              )}
-            </div>
-          </div>
-        </div>
+        <IngredientMacroCard
+          label={t('recipe.ingredientNutritionProtein')}
+          color="blue"
+          grams={scaledProtein}
+          pct={proteinPct}
+          isMultiServing={isMultiServing}
+          perServingGrams={perServingProtein}
+        />
+        <IngredientMacroCard
+          label={t('recipe.ingredientNutritionCarbs')}
+          color="amber"
+          grams={scaledCarbs}
+          pct={carbsPct}
+          isMultiServing={isMultiServing}
+          perServingGrams={perServingCarbs}
+        />
+        <IngredientMacroCard
+          label={t('recipe.ingredientNutritionFat')}
+          color="rose"
+          grams={scaledFat}
+          pct={fatPct}
+          isMultiServing={isMultiServing}
+          perServingGrams={perServingFat}
+        />
       </div>
 
       {/* 5. Verification Status */}

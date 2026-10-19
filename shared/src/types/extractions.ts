@@ -39,6 +39,8 @@ export interface MediaRequest {
   videoUrl?: string;
   thumbnailUrl?: string;
   durationSeconds?: number;
+  whisperTicket?: string;
+  whisperEndpoint?: string;
   kind?: 'audio' | 'video' | 'keyframes';
   status?: 'pending' | 'downloading' | 'ready' | 'failed';
   url?: string;

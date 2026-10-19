@@ -38,7 +38,11 @@ export default function AuthForm() {
       <div className="w-full max-w-sm flex flex-col items-center gap-4 text-center relative z-10">
         {/* Logo */}
         <div className="w-20 h-20 mb-2">
-          <img src="/logo-login.png" className="w-full h-full object-contain" alt="SnagBite Logo" />
+          <img
+            src="/icon-512.png"
+            className="w-full h-full object-contain drop-shadow-[0_12px_28px_rgba(16,185,129,0.25)]"
+            alt="Snagbite"
+          />
         </div>
 
         <div className="space-y-1.5 mb-2">

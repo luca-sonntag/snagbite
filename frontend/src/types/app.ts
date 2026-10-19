@@ -22,6 +22,7 @@ export interface AppTopBannersProps {
   activeView: AppTab;
   isPending: boolean;
   recipe: Recipe | null;
+  onSelectRecipe?: (recipeId: string) => void;
 }
 
 export interface AppOverlaysProps {
@@ -46,6 +47,8 @@ export interface UseAppAdsProps {
   isPending: boolean;
   recipe: Recipe | null;
   showOnboarding: boolean;
+  savedRecipesCount?: number;
+  historyLoaded?: boolean;
   onShowPreAdNotice?: (onConfirm?: () => void) => void;
 }
 
@@ -77,10 +80,10 @@ export interface UseAppNativeListenersProps {
   pendingNavigation: { recipeId: string } | null;
   history: SavedRecipe[];
   fetchHistory: () => void;
-  handleExtractionSuccess: (recipeId: string) => void;
+  handleExtractionSuccess: (recipeId: string, preloadedRecipe?: Recipe) => void;
   replayOnboarding: () => void;
   limitStatus: LimitStatus | null;
-  triggerExtraction: (url: string) => void;
+  triggerExtraction: (url: string, force?: boolean) => void;
   isPending: boolean;
   isPremium: boolean;
 }

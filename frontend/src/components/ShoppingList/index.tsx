@@ -1,14 +1,12 @@
-import { useState } from 'react';
 import type { AggregatedShoppingItem, ShoppingListItem, SavedRecipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
-import { usePantry } from '../../context/PantryContext';
 import { useDialog } from '../../context/DialogContext';
 import { useToast } from '../../context/ToastContext';
 import { PageHeader } from '../PageHeader';
 import { ShoppingListView } from './ShoppingListView';
-import { PantryView } from '../Pantry/PantryView';
 import { ShoppingStickyHeader } from './ShoppingStickyHeader';
 import { useShoppingSticky } from './useShoppingSticky';
+import { useSpotlightTour } from '../../hooks/useSpotlightTour';
 
 interface ActiveShoppingRecipe {
   recipeId: string;
@@ -43,10 +41,8 @@ interface ShoppingListProps {
 
 export default function ShoppingList(props: ShoppingListProps) {
   const { t } = useI18n();
-  const { pantryItems } = usePantry();
   const dialog = useDialog();
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState<'shopping' | 'pantry'>('shopping');
   const { isCollapsed, setCollapseSentinel } = useShoppingSticky(props.isActive ?? true);
 
   const toBuyItems = props.aggregatedList.toBuy || props.aggregatedList.unchecked || [];
@@ -55,7 +51,11 @@ export default function ShoppingList(props: ShoppingListProps) {
   const shoppingTotal = toBuyItems.length + inPantryWarningCount;
   const totalCount = toBuyItems.length + checkedCount;
   const progress = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0;
-  const pantryActiveCount = pantryItems.filter((i) => i.amount > 0).length;
+
+  useSpotlightTour('shoppingList', {
+    enabled: (props.isActive ?? true) && totalCount > 0,
+    delayMs: 600,
+  });
 
   const handleClearAll = async () => {
     const confirmed = await dialog.confirm({
@@ -94,7 +94,7 @@ export default function ShoppingList(props: ShoppingListProps) {
     });
     if (!confirmed) return;
 
-    props.clearChecked(true);
+    props.clearChecked(false);
     toast.success(t('shopping.transferredToPantryToast', { count }));
   };
 
@@ -102,16 +102,16 @@ export default function ShoppingList(props: ShoppingListProps) {
     <div className="flex flex-col gap-4">
       {/* Top Page Header with Title */}
       <PageHeader
-        title={activeTab === 'shopping' ? t('shopping.title') : t('pantry.title')}
-        subtitle={activeTab === 'shopping' ? t('shopping.subtitle') : t('pantry.subtitle')}
+        title={t('shopping.title')}
+        subtitle={t('shopping.subtitle')}
       />
 
-      {/* Sticky Header with Tabs & Progress */}
+      {/* Sticky Header with Progress */}
       <ShoppingStickyHeader
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
+        activeTab="shopping"
+        onTabChange={() => {}}
         shoppingTotal={shoppingTotal}
-        pantryActiveCount={pantryActiveCount}
+        pantryActiveCount={0}
         isCollapsed={isCollapsed}
         checkedCount={checkedCount}
         totalCount={totalCount}
@@ -120,15 +120,11 @@ export default function ShoppingList(props: ShoppingListProps) {
         onClearAll={handleClearAll}
       />
 
-      {/* Main Tab Content */}
-      {activeTab === 'shopping' ? (
-        <ShoppingListView
-          {...props}
-          setCollapseSentinel={setCollapseSentinel}
-        />
-      ) : (
-        <PantryView onSelectRecipe={props.onSelectRecipe} />
-      )}
+      {/* Main Content */}
+      <ShoppingListView
+        {...props}
+        setCollapseSentinel={setCollapseSentinel}
+      />
     </div>
   );
 }

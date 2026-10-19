@@ -1,23 +1,31 @@
 /**
- * Provision and seed a dedicated Google Play Reviewer / Demo account in Supabase.
+ * Provision and seed a dedicated Google Play Reviewer / Demo account in PostgreSQL (Better-Auth).
  *
  * This script ensures the account exists, sets its tier to "premium" (so reviewers
  * can test all features without in-app purchase roadblocks), and populates realistic
  * sample recipes, shopping list items, pantry items, and gamification stats.
  *
  * Required env:
- *   SUPABASE_URL, SUPABASE_SECRET_KEY
+ *   DATABASE_URL
  * Optional env:
  *   REVIEWER_EMAIL    (default: reviewer@snagbite.app)
  *   REVIEWER_PASSWORD (default: SnagbiteReviewer2026!)
  *
  * Usage:
- *   cd backend && npx tsx src/scripts/seedReviewerAccount.ts
+ *   cd backend && npm run seed:reviewer
+ *   cd backend && npm run seed:reviewer:prod
  */
+import { randomUUID } from 'node:crypto';
+import { hashPassword } from 'better-auth/crypto';
+import { eq, or, and, desc } from 'drizzle-orm';
+import { db } from '../../db/drizzle.js';
+import { user as userTable, account as accountTable } from '../../db/schema/auth.js';
+import { recipes, userRecipes } from '../../db/schema/recipes.js';
+import { pantryItems, shoppingList } from '../../db/schema/pantryAndShopping.js';
+import { userStats, userBadges } from '../../db/schema/gamification.js';
 import { initScriptEnv } from '../scriptEnv.js';
 
 const scriptEnv = initScriptEnv();
-const supabase = scriptEnv.client;
 
 const REVIEWER_EMAIL = (process.env.REVIEWER_EMAIL || 'reviewer@snagbite.app').trim().toLowerCase();
 const REVIEWER_PASSWORD = process.env.REVIEWER_PASSWORD || 'SnagbiteReviewer2026!';
@@ -36,51 +44,105 @@ interface RecipeSummary {
 }
 
 async function getOrCreateReviewerUser(): Promise<string> {
-  const { data: created, error } = await supabase.auth.admin.createUser({
+  const hashedPassword = await hashPassword(REVIEWER_PASSWORD);
+
+  const [existingUser] = await db
+    .select()
+    .from(userTable)
+    .where(eq(userTable.email, REVIEWER_EMAIL))
+    .limit(1);
+
+  if (existingUser) {
+    console.log(`[Seed] Reviewer user ${REVIEWER_EMAIL} already exists, updating credentials & tier...`);
+    const [existingAccount] = await db
+      .select()
+      .from(accountTable)
+      .where(
+        or(
+          eq(accountTable.userId, existingUser.id),
+          eq(accountTable.accountId, REVIEWER_EMAIL)
+        )
+      )
+      .limit(1);
+
+    if (existingAccount) {
+      await db
+        .update(accountTable)
+        .set({
+          password: hashedPassword,
+          updatedAt: new Date(),
+        })
+        .where(eq(accountTable.id, existingAccount.id));
+    } else {
+      await db.insert(accountTable).values({
+        id: randomUUID(),
+        accountId: REVIEWER_EMAIL,
+        providerId: 'credential',
+        userId: existingUser.id,
+        password: hashedPassword,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+
+    await db
+      .update(userTable)
+      .set({
+        emailVerified: true,
+        tier: 'premium',
+        metadata: {
+          preferred_temperature_unit: 'Celsius',
+          preferred_unit_system: 'metric',
+        },
+        updatedAt: new Date(),
+      })
+      .where(eq(userTable.id, existingUser.id));
+
+    return existingUser.id;
+  }
+
+  const userId = randomUUID();
+  console.log(`[Seed] Creating reviewer user ${REVIEWER_EMAIL} with id ${userId}...`);
+
+  await db.insert(userTable).values({
+    id: userId,
+    name: 'Play Store Reviewer',
     email: REVIEWER_EMAIL,
-    password: REVIEWER_PASSWORD,
-    email_confirm: true,
-    app_metadata: { tier: 'premium' },
-    user_metadata: { preferred_temperature_unit: 'Celsius', preferred_unit_system: 'metric' },
+    emailVerified: true,
+    tier: 'premium',
+    metadata: {
+      preferred_temperature_unit: 'Celsius',
+      preferred_unit_system: 'metric',
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
-  if (!error && created.user) {
-    console.log(`[Seed] Created reviewer user ${REVIEWER_EMAIL}`);
-    return created.user.id;
-  }
+  await db.insert(accountTable).values({
+    id: randomUUID(),
+    accountId: REVIEWER_EMAIL,
+    providerId: 'credential',
+    userId,
+    password: hashedPassword,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
 
-  console.log(`[Seed] Reviewer user ${REVIEWER_EMAIL} already exists, updating credentials & tier...`);
-  for (let page = 1; page <= 20; page++) {
-    const { data, error: listErr } = await supabase.auth.admin.listUsers({ page, perPage: 200 });
-    if (listErr) throw new Error(`Failed to list users: ${listErr.message}`);
-    const match = data.users.find((u: { email?: string }) => u.email?.toLowerCase() === REVIEWER_EMAIL);
-    if (match) {
-      const { error: updateErr } = await supabase.auth.admin.updateUserById(match.id, {
-        password: REVIEWER_PASSWORD,
-        email_confirm: true,
-        app_metadata: { ...match.app_metadata, tier: 'premium' },
-      });
-      if (updateErr) throw new Error(`Failed to update reviewer password: ${updateErr.message}`);
-      return match.id;
-    }
-    if (data.users.length < 200) break;
-  }
-  throw new Error(`Could not create or find reviewer user ${REVIEWER_EMAIL}`);
+  return userId;
 }
 
 async function seedRecipes(userId: string, targetCount = 8): Promise<RecipeSummary[]> {
   // 1. Fetch public recipes available in database
-  const { data: publicRecipes, error: fetchErr } = await supabase
-    .from('recipes')
-    .select('id, title, ingredients')
-    .eq('visibility', 'public')
-    .eq('is_recipe', true)
-    .order('created_at', { ascending: false })
+  const publicRecipes = await db
+    .select({
+      id: recipes.id,
+      title: recipes.title,
+      ingredients: recipes.ingredients,
+    })
+    .from(recipes)
+    .where(and(eq(recipes.visibility, 'public'), eq(recipes.isRecipe, true)))
+    .orderBy(desc(recipes.createdAt))
     .limit(50);
-
-  if (fetchErr) {
-    throw new Error(`Failed to fetch public recipes: ${fetchErr.message}`);
-  }
 
   if (!publicRecipes || publicRecipes.length === 0) {
     console.warn('[Seed] No public recipes found in database to link for reviewer.');
@@ -88,28 +150,19 @@ async function seedRecipes(userId: string, targetCount = 8): Promise<RecipeSumma
   }
 
   // 2. Fetch recipes currently in the reviewer's library
-  const { data: existingUserRecipes, error: userRecErr } = await supabase
-    .from('user_recipes')
-    .select('recipe_id')
-    .eq('user_id', userId);
+  const existingUserRecipes = await db
+    .select({ recipeId: userRecipes.recipeId })
+    .from(userRecipes)
+    .where(eq(userRecipes.userId, userId));
 
-  if (userRecErr) {
-    throw new Error(`Failed to check existing user recipes: ${userRecErr.message}`);
-  }
-
-  const existingIds = new Set((existingUserRecipes || []).map((r: { recipe_id: string }) => r.recipe_id));
-  const available = (publicRecipes as RecipeSummary[]).filter((r: RecipeSummary) => !existingIds.has(r.id));
-  const alreadySaved = (publicRecipes as RecipeSummary[]).filter((r: RecipeSummary) => existingIds.has(r.id));
+  const existingIds = new Set((existingUserRecipes || []).map((r) => r.recipeId));
+  const available = (publicRecipes as RecipeSummary[]).filter((r) => !existingIds.has(r.id));
+  const alreadySaved = (publicRecipes as RecipeSummary[]).filter((r) => existingIds.has(r.id));
 
   const needed = Math.max(0, targetCount - (existingUserRecipes?.length || 0));
   if (needed === 0) {
     console.log(`[Seed] Reviewer already has ${existingUserRecipes?.length} recipes in cookbook.`);
-    if (alreadySaved.length > 0) return alreadySaved;
-    const { data: userSaved } = await supabase
-      .from('user_recipes')
-      .select('recipes(id, title, ingredients)')
-      .eq('user_id', userId);
-    return ((userSaved || []).map((ur: { recipes?: unknown }) => ur.recipes).filter(Boolean) as unknown as RecipeSummary[]);
+    return alreadySaved;
   }
 
   // 3. Pick random public recipes from available pool
@@ -118,18 +171,17 @@ async function seedRecipes(userId: string, targetCount = 8): Promise<RecipeSumma
 
   console.log(`[Seed] Adding ${selected.length} random public recipes to reviewer cookbook...`);
   for (const r of selected) {
-    const { error: insertErr } = await supabase.from('user_recipes').insert({
-      user_id: userId,
-      recipe_id: r.id,
-      source: 'share',
-      is_favorite: Math.random() > 0.4,
-      flags: ['reviewer_seed'],
-    });
-
-    if (insertErr) {
-      console.warn(`[Seed] Could not link recipe "${r.title}": ${insertErr.message}`);
-    } else {
+    try {
+      await db.insert(userRecipes).values({
+        userId,
+        recipeId: r.id,
+        source: 'share',
+        isFavorite: Math.random() > 0.4,
+        flags: ['reviewer_seed'],
+      });
       console.log(`   + Linked "${r.title}" (${r.id})`);
+    } catch (insertErr: any) {
+      console.warn(`[Seed] Could not link recipe "${r.title}": ${insertErr?.message || insertErr}`);
     }
   }
 
@@ -138,20 +190,24 @@ async function seedRecipes(userId: string, targetCount = 8): Promise<RecipeSumma
 
 async function seedPantry(userId: string) {
   const samplePantry = [
-    { name: 'Olivenöl extra vergine', amount: 500, unit: 'ml', category: 'Oils, Sauces & Vinegar' },
-    { name: 'Basmatireis', amount: 1000, unit: 'g', category: 'Grains, Pasta & Bread' },
-    { name: 'Dinkelmehl Type 630', amount: 800, unit: 'g', category: 'Baking & Pantry' },
-    { name: 'Bio-Eier', amount: 6, unit: 'Stück', category: 'Dairy & Eggs' },
-    { name: 'Sojasauce Kikkoman', amount: 250, unit: 'ml', category: 'Oils, Sauces & Vinegar' },
-    { name: 'Chiasamen', amount: 200, unit: 'g', category: 'Nuts & Seeds' },
+    { name: 'Olivenöl extra vergine', amount: '500', unit: 'ml', category: 'Oils, Sauces & Vinegar' },
+    { name: 'Basmatireis', amount: '1000', unit: 'g', category: 'Grains, Pasta & Bread' },
+    { name: 'Dinkelmehl Type 630', amount: '800', unit: 'g', category: 'Baking & Pantry' },
+    { name: 'Bio-Eier', amount: '6', unit: 'Stück', category: 'Dairy & Eggs' },
+    { name: 'Sojasauce Kikkoman', amount: '250', unit: 'ml', category: 'Oils, Sauces & Vinegar' },
+    { name: 'Chiasamen', amount: '200', unit: 'g', category: 'Nuts & Seeds' },
   ];
 
-  const { data: existing } = await supabase.from('pantry_items').select('id').eq('user_id', userId);
+  const existing = await db
+    .select({ id: pantryItems.id })
+    .from(pantryItems)
+    .where(eq(pantryItems.userId, userId));
+
   if (!existing || existing.length === 0) {
     console.log('[Seed] Populating pantry items...');
     for (const item of samplePantry) {
-      await supabase.from('pantry_items').insert({
-        user_id: userId,
+      await db.insert(pantryItems).values({
+        userId,
         name: item.name,
         amount: item.amount,
         unit: item.unit,
@@ -162,13 +218,16 @@ async function seedPantry(userId: string) {
 }
 
 async function seedShoppingList(userId: string, savedRecipes: RecipeSummary[]) {
-  const { data: existing } = await supabase.from('shopping_list').select('id').eq('user_id', userId);
+  const existing = await db
+    .select({ id: shoppingList.id })
+    .from(shoppingList)
+    .where(eq(shoppingList.userId, userId));
+
   if (existing && existing.length > 0) {
     console.log(`[Seed] Reviewer already has ${existing.length} shopping list items.`);
     return;
   }
 
-  // Extract authentic ingredients from the reviewer's saved recipes
   const candidateItems: Array<{ name: string; amount?: number; unit?: string }> = [];
   for (const r of savedRecipes) {
     if (Array.isArray(r.ingredients)) {
@@ -196,10 +255,10 @@ async function seedShoppingList(userId: string, savedRecipes: RecipeSummary[]) {
   console.log(`[Seed] Populating ${itemsToInsert.length} shopping list items from saved recipes...`);
   for (let i = 0; i < itemsToInsert.length; i++) {
     const item = itemsToInsert[i];
-    await supabase.from('shopping_list').insert({
-      user_id: userId,
+    await db.insert(shoppingList).values({
+      userId,
       name: item.name,
-      amount: item.amount ?? null,
+      amount: item.amount != null ? String(item.amount) : null,
       unit: item.unit ?? null,
       checked: i === 0,
     });
@@ -207,25 +266,40 @@ async function seedShoppingList(userId: string, savedRecipes: RecipeSummary[]) {
 }
 
 async function seedGamification(userId: string) {
-  const { data: stats } = await supabase.from('user_stats').select('user_id').eq('user_id', userId).maybeSingle();
+  const [stats] = await db
+    .select({ userId: userStats.userId })
+    .from(userStats)
+    .where(eq(userStats.userId, userId))
+    .limit(1);
+
   if (!stats) {
     console.log('[Seed] Setting up gamification user_stats (Level 4, 380 XP)...');
-    await supabase.from('user_stats').insert({
-      user_id: userId,
+    await db.insert(userStats).values({
+      userId,
       xp: 380,
       level: 4,
-      total_cooks: 7,
-      current_streak: 3,
-      longest_streak: 3,
-      last_cook_date: new Date().toISOString(),
-      badges: ['first_cook', 'first_photo', 'timer_first', 'distinct_5'],
+      coins: 50,
+      totalCooks: 7,
+      currentStreak: 3,
+      longestStreak: 3,
+      lastCookDate: new Date().toISOString().split('T')[0],
     });
+
+    const badges = ['first_cook', 'first_photo', 'timer_first', 'distinct_5'];
+    for (const badgeKey of badges) {
+      await db
+        .insert(userBadges)
+        .values({
+          userId,
+          badgeKey,
+        })
+        .onConflictDoNothing();
+    }
   }
 }
 
 async function main() {
   console.log(`--- Snagbite Reviewer Seed [Target: ${scriptEnv.target.toUpperCase()}] ---`);
-  console.log(`Target URL: ${scriptEnv.supabaseUrl}`);
   const userId = await getOrCreateReviewerUser();
   console.log(`Reviewer user ID: ${userId}`);
 

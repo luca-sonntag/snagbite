@@ -1,94 +1,68 @@
 /**
- * Database Backup Script (API-based, no pg_dump or Docker required)
+ * Database Backup Script (Native PostgreSQL, no pg_dump or Docker required)
  *
  * Exports all data from public tables into a timestamped JSON file.
- * Works on any Supabase plan (including Free) using the service role key.
+ * Connects directly to the PostgreSQL database (Railway) via pg Pool.
  *
  * Usage:
- *   npx tsx src/scripts/backupDatabase.ts --prod
- *   npx tsx src/scripts/backupDatabase.ts --dev
+ *   npx tsx src/scripts/db/backupDatabase.ts --prod
+ *   npx tsx src/scripts/db/backupDatabase.ts --dev
  */
 
 import fs from 'fs';
 import path from 'path';
+import { getDbPool } from '../../db/drizzle.js';
 import { initScriptEnv } from '../scriptEnv.js';
 
 const scriptEnv = initScriptEnv();
 const isProd = scriptEnv.isProd;
-const supabaseUrl = scriptEnv.supabaseUrl;
-const supabaseKey = scriptEnv.supabaseSecretKey;
-const client = scriptEnv.client;
 
-/**
- * Dynamically discovers all tables exposed in the public schema via PostgREST OpenAPI spec.
- */
-async function discoverPublicTables(url: string, key: string): Promise<string[]> {
-  const endpoint = `${url.replace(/\/+$/, '')}/rest/v1/`;
-  const response = await fetch(endpoint, {
-    headers: {
-      apikey: key,
-      Authorization: `Bearer ${key}`,
-    },
-  });
+async function discoverPublicTables(pool: ReturnType<typeof getDbPool>): Promise<string[]> {
+  const result = await pool.query<{ table_name: string }>(`
+    SELECT table_name 
+    FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+      AND table_type = 'BASE TABLE'
+      AND table_name NOT LIKE 'pg_%'
+    ORDER BY table_name;
+  `);
 
-  if (!response.ok) {
-    throw new Error(`Failed to introspect database schema: HTTP ${response.status} ${response.statusText}`);
-  }
-
-  const spec = (await response.json()) as { definitions?: Record<string, unknown> };
-  const tables = Object.keys(spec.definitions || {});
-  return tables.sort();
+  return result.rows.map((r) => r.table_name);
 }
 
-async function fetchAllRows(tableName: string): Promise<unknown[] | null> {
-  let allRows: unknown[] = [];
-  let from = 0;
-  const pageSize = 1000;
-
-  for (;;) {
-    const { data, error } = await client
-      .from(tableName)
-      .select('*')
-      .range(from, from + pageSize - 1);
-
-    if (error) {
-      // Table doesn't exist yet in this schema version
-      if (error.code === '42P01' || error.message.includes('does not exist')) {
-        return null;
-      }
-      console.warn(`  ⚠️ Warning fetching ${tableName}: ${error.message}`);
-      return null;
-    }
-
-    if (!data || data.length === 0) break;
-    allRows = allRows.concat(data);
-
-    if (data.length < pageSize) break;
-    from += pageSize;
+async function fetchAllRows(pool: ReturnType<typeof getDbPool>, tableName: string): Promise<unknown[] | null> {
+  try {
+    // Sanitized table name identifier
+    const safeName = tableName.replace(/[^a-zA-Z0-9_]/g, '');
+    const result = await pool.query(`SELECT * FROM "${safeName}"`);
+    return result.rows;
+  } catch (err: any) {
+    console.warn(`  ⚠️ Warning fetching ${tableName}: ${err?.message || err}`);
+    return null;
   }
-
-  return allRows;
 }
 
 async function run(): Promise<void> {
-  const host = new URL(supabaseUrl).host;
+  const pool = getDbPool();
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const targetName = isProd ? 'prod' : 'dev';
+
   console.log(`============================================================`);
-  console.log(`Supabase Database Backup`);
-  console.log(`Target:      ${isProd ? 'PRODUCTION' : 'DEVELOPMENT'} (${host})`);
+  console.log(`PostgreSQL Database Backup`);
+  console.log(`Target:      ${isProd ? 'PRODUCTION' : 'DEVELOPMENT'}`);
   console.log(`Timestamp:   ${timestamp}`);
   console.log(`============================================================\n`);
 
-  console.log(`Discovering public tables via schema API...`);
-  const tables = await discoverPublicTables(supabaseUrl, supabaseKey);
+  console.log(`Discovering public tables via information_schema...`);
+  const tables = await discoverPublicTables(pool);
   console.log(`Found ${tables.length} table(s): ${tables.join(', ')}\n`);
 
   const backupData: Record<string, unknown[]> = {};
   const stats: Record<string, number> = {};
 
   for (const table of tables) {
-    process.stdout.write(`Exporting ${table.padEnd(22)}... `);
-    const rows = await fetchAllRows(table);
+    process.stdout.write(`Exporting ${table.padEnd(25)}... `);
+    const rows = await fetchAllRows(pool, table);
 
     if (rows === null) {
       console.log('(failed to read or table inaccessible)');
@@ -104,8 +78,7 @@ async function run(): Promise<void> {
     fs.mkdirSync(outDir, { recursive: true });
   }
 
-  const targetName = isProd ? 'prod' : 'dev';
-  const outFileName = `backup_${targetName}_${host.split('.')[0]}_${timestamp}.json`;
+  const outFileName = `backup_${targetName}_${timestamp}.json`;
   const outPath = path.join(outDir, outFileName);
 
   fs.writeFileSync(
@@ -114,8 +87,6 @@ async function run(): Promise<void> {
       {
         metadata: {
           target: isProd ? 'production' : 'development',
-          supabaseUrl,
-          host,
           timestamp,
           stats,
         },
@@ -133,20 +104,12 @@ async function run(): Promise<void> {
   console.log(`File: ${outPath} (${fileSizeMb} MB)`);
   console.log(`Summary:`);
   for (const [t, count] of Object.entries(stats)) {
-    console.log(`  - ${t.padEnd(20)}: ${count} rows`);
+    console.log(`  - ${t.padEnd(25)}: ${count} rows`);
   }
   console.log(`============================================================`);
 }
 
-// Direct execution check
-const isDirectExecution =
-  process.argv[1] &&
-  (process.argv[1].endsWith('backupDatabase.ts') ||
-    process.argv[1].endsWith('backupDatabase.js'));
-
-if (isDirectExecution) {
-  run().catch(err => {
-    console.error('Fatal backup error:', err);
-    process.exit(1);
-  });
-}
+run().catch((err) => {
+  console.error('Fatal backup error:', err);
+  process.exit(1);
+});

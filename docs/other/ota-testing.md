@@ -15,11 +15,11 @@ background/relaunch — never mid-session.
 
 | What | How |
 |---|---|
-| Supabase | `snagbite-dev` project (bucket `app-bundles` + table `app_bundles` already exist) |
-| Backend | `cd backend && npm run dev` (port 3000), `.env` pointing at snagbite-dev |
+| Database & Storage | `snagbite-dev` (bucket `app-bundles` in S3 + table `app_bundles` in PostgreSQL) |
+| Backend | `cd backend && npm run dev` (port 3000), `.env` pointing at dev database |
 | Device | Android emulator; app built with `VITE_API_BASE_URL=http://10.0.2.2:3000` in `frontend/.env`, installed via `npm run cap:run` (NOT `cap:live` — OTA is inert in dev/live-reload builds) |
 | Logs | `chrome://inspect` → inspect the WebView → filter console on `[OTA]`. All OTA lines are prefixed and also land in the feedback consoleBuffer |
-| Admin JWT | Run the web app locally (`npm run dev`), log in as a user listed in `ADMIN_EMAILS`, and copy `access_token` from the `sb-…-auth-token` localStorage entry (DevTools → Application → Local Storage) |
+| Admin Auth | Run the web app locally (`npm run dev`), log in as a user listed in `ADMIN_EMAILS` |
 
 > **Throttle caveat for all device tests:** update checks run ~5 s after app
 > start and on resume, but are throttled to one per 15 minutes. The throttle
@@ -102,7 +102,7 @@ Clean up: `delete from app_bundles where checksum in ('deadbeef','cafebabe');`
   script **aborts** with the loopback error before building.
   (For emulator E2E use `http://10.0.2.2:3000` — not loopback, passes.)
 - [ ] With `VITE_TEST_LOGIN=true` set: script aborts.
-- [ ] Without `SUPABASE_URL`/`SUPABASE_SECRET_KEY` in env or `backend/.env`: aborts.
+- [ ] Without `DATABASE_URL` in env or `backend/.env`: aborts.
 
 ### 2.2 Happy path + zip layout
 
@@ -186,8 +186,8 @@ tar.exe -a -cf broken.zip -C dist *
 Get-FileHash broken.zip -Algorithm SHA256   # note lowercase hex
 ```
 
-Upload `broken.zip` to `app-bundles/alpha/1.1.5-ota.99.zip` via the Supabase
-dashboard, insert the row via SQL (`active=true` after deactivating the current
+Upload `broken.zip` to `app-bundles/alpha/1.1.5-ota.99.zip` via Tigris S3 / S3 client,
+insert the row via SQL (`active=true` after deactivating the current
 one, `checksum` = the hash, `min_version_code=22`).
 
 - [ ] Device downloads and stages it; after relaunch the app is broken/blank …

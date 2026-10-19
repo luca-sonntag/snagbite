@@ -6,7 +6,9 @@ const AlphaWelcome = lazy(() => import('./AlphaWelcome'));
 const PreAdTransparencySheet = lazy(() => import('./Ads/PreAdTransparencySheet'));
 import SmartResumeSheet from './ExtractForm/SmartResumeSheet';
 import { DevTools } from './DevTools';
-import { SHOW_PRE_AD_NOTICE_EVENT, markPreAdNoticeSeen } from '../utils/ads';
+import { SHOW_PRE_AD_NOTICE_EVENT, markPreAdNoticeSeen, initAds } from '../utils/ads';
+import { useAuth } from '../context/AuthContext';
+import { useModalOverlay } from '../context/OverlayStackContext';
 import type { AppOverlaysProps } from '../types/app';
 
 export const AppOverlays: React.FC<AppOverlaysProps> = ({
@@ -23,11 +25,22 @@ export const AppOverlays: React.FC<AppOverlaysProps> = ({
   onAnalyzeUrl,
   onNavigateExtract,
 }) => {
+  const { isPremium } = useAuth();
+
+  // Immediately register onboarding / alpha welcome on the overlay stack even while
+  // their lazy chunks are still loading inside <Suspense>, preventing background
+  // spotlight tours from firing before the portal mounts.
+  useModalOverlay(
+    Boolean(showOnboarding || showAlphaWelcome),
+    showOnboarding ? onCompleteOnboarding : onCompleteAlphaWelcome
+  );
+
   // Mount the (lazy) premium modal only once it's first opened, then keep it
   // mounted so its close transition still runs.
   const [premiumModalLoaded, setPremiumModalLoaded] = useState(false);
   const [internalShowPreAdNotice, setInternalShowPreAdNotice] = useState(false);
-  const pendingAdActionRef = useRef<(() => void) | null>(null);
+  const pendingAdActionRef = useRef<((upgradedToPremium?: boolean) => void) | null>(null);
+  const openedPremiumFromPreAdRef = useRef(false);
 
   const isPreAdNoticeOpen = externalShowPreAdNotice ?? internalShowPreAdNotice;
 
@@ -45,10 +58,29 @@ export const AppOverlays: React.FC<AppOverlaysProps> = ({
     }
   }, [isPremiumModalOpen]);
 
+  // When PremiumModal closes after being opened from PreAdTransparencySheet:
+  // - If Pro was purchased: skip AdMob consent and immediately resume the pending action (extraction starts ad-free).
+  // - If closed without purchase: re-open PreAdTransparencySheet so user can confirm -> AdMob consent -> extraction.
+  useEffect(() => {
+    if (!openedPremiumFromPreAdRef.current) return;
+    if (isPremiumModalOpen) return;
+
+    openedPremiumFromPreAdRef.current = false;
+
+    if (isPremium) {
+      markPreAdNoticeSeen();
+      const action = pendingAdActionRef.current;
+      pendingAdActionRef.current = null;
+      action?.(true);
+    } else {
+      setPreAdNoticeOpen(true);
+    }
+  }, [isPremiumModalOpen, isPremium]);
+
   // Listen for pre-ad transparency notice events triggered across the app
   useEffect(() => {
     const handleShowNotice = (e: Event) => {
-      const customEvent = e as CustomEvent<{ onConfirm?: () => void }>;
+      const customEvent = e as CustomEvent<{ onConfirm?: (upgradedToPremium?: boolean) => void }>;
       pendingAdActionRef.current = customEvent.detail?.onConfirm ?? null;
       setPreAdNoticeOpen(true);
     };
@@ -59,24 +91,27 @@ export const AppOverlays: React.FC<AppOverlaysProps> = ({
     };
   }, []);
 
-  const handleConfirmPreAdNotice = () => {
+  const handleConfirmPreAdNotice = async () => {
     markPreAdNoticeSeen();
     setPreAdNoticeOpen(false);
     onConfirmPreAdNotice?.();
-    if (pendingAdActionRef.current) {
-      const action = pendingAdActionRef.current;
-      pendingAdActionRef.current = null;
-      action();
-    }
+    const action = pendingAdActionRef.current;
+    pendingAdActionRef.current = null;
+    await initAds();
+    action?.(false);
   };
 
   const handleClosePreAdNotice = () => {
+    if (pendingAdActionRef.current) {
+      void handleConfirmPreAdNotice();
+      return;
+    }
     setPreAdNoticeOpen(false);
-    pendingAdActionRef.current = null;
   };
 
   const handleOpenPremiumFromPreAd = () => {
-    handleClosePreAdNotice();
+    openedPremiumFromPreAdRef.current = true;
+    setPreAdNoticeOpen(false);
     setIsPremiumModalOpen(true);
   };
 

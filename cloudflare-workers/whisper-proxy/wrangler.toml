@@ -1,0 +1,11 @@
+name = "snagbite-whisper-proxy"
+main = "src/index.ts"
+compatibility_date = "2024-04-01"
+
+[vars]
+GATEWAY_ID = "snagbite-whisper"
+
+# Secrets to be set via:
+# npx wrangler secret put CLOUDFLARE_ACCOUNT_ID
+# npx wrangler secret put CF_AIG_TOKEN
+# npx wrangler secret put WHISPER_HMAC_SECRET

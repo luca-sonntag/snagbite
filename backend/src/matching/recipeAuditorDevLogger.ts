@@ -1,3 +1,4 @@
+import { config } from '../config.js';
 import type { Recipe, GeminiUsageInfo } from '../types.js';
 import type { RecipeAuditPatch } from './recipeAuditorSchema.js';
 import { writeGeminiLog, type TokenUsage, type CostEstimate } from '../logger.js';
@@ -19,7 +20,7 @@ export async function recordAuditLog(
   rawOutput?: string,
   error?: string
 ): Promise<void> {
-  const model = usage?.model || 'gemini-2.5-flash-lite';
+  const model = usage?.model || config.GEMINI_MODEL;
   const durationMs = usage?.durationMs || 0;
 
   await writeGeminiLog({

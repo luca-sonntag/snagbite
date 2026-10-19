@@ -451,7 +451,7 @@ export const uiTranslations = {
         },
         import: {
           title: 'Importieren & Teilen',
-          desc: 'Füge einen Link ein oder teile ein Reel direkt aus Instagram, TikTok, YouTube oder Facebook an Snagbite. Wir erstellen das komplette Rezept für dich.',
+          desc: 'Füge einen Link ein, lade Screenshots & Kochbuchfotos hoch oder teile ein Reel direkt aus Instagram an Snagbite.',
         },
         cookbook: {
           title: 'Dein Kochbuch',
@@ -459,7 +459,7 @@ export const uiTranslations = {
         },
         organize: {
           title: 'Ordnen & Filtern',
-          desc: 'Lege eigene Sammlungen mit Emoji & Farbe an, markiere Favoriten und vergib Labels. Filtere dein Kochbuch mit einem Tipp nach Sammlung, Favorit, Kochzeit oder Label.',
+          desc: 'Lege eigene Sammlungen an, markiere Favoriten und vergib Labels. Filtere dein Kochbuch mit einem Tipp nach Sammlung, Favorit, Kochzeit oder Label.',
         },
         shopping: {
           title: 'Smarte Einkaufsliste',
@@ -468,6 +468,106 @@ export const uiTranslations = {
         cooking: {
           title: 'Kochen wie ein Profi',
           desc: 'Schritt-für-Schritt-Kochmodus, integrierte Timer und ein KI-Copilot, der Fragen beantwortet und Rezepte anpasst.',
+        },
+      },
+    },
+    tour: {
+      btn: {
+        next: 'Weiter',
+        prev: 'Zurück',
+        done: 'Verstanden',
+        skip: 'Überspringen',
+      },
+      progress: '{{current}} von {{total}}',
+      proHint: '✨ Enthalten in Snagbite Pro',
+      resetLabel: 'Screen-Touren & Tipps zurücksetzen',
+      resetSuccess: 'Alle Screen-Touren wurden zurückgesetzt',
+      extract: {
+        link: {
+          title: 'Rezept-Link einfügen',
+          desc: 'Füge einen Link aus Instagram, TikTok, YouTube oder von Koch-Websites ein. Unsere KI analysiert das Video oder die Webseite und erstellt ein sauberes Rezept.',
+        },
+        photo: {
+          title: 'Fotos & Screenshots scannen',
+          desc: 'Egal ob Screenshot aus Social Media oder Kochblogs, abfotografierte Kochbuchseite oder handschriftliche Rezeptkarte: Einfach hochladen – Snagbite liest Zutaten und Zubereitung automatisch aus.',
+        },
+        share: {
+          title: 'Direkt aus anderen Apps teilen',
+          desc: "Du musst die App nicht manuell öffnen: Tippe im Instagram Reel oder TikTok einfach auf 'Teilen' und wähle Snagbite.",
+        },
+      },
+      catalog: {
+        filter: {
+          title: 'Blitzschnell finden',
+          desc: 'Suche nach Rezeptnamen, bestimmten Zutaten oder filtere nach Zubereitungszeit, Favoriten und Kategorien.',
+        },
+        collections: {
+          title: 'Eigene Sammlungen',
+          desc: "Organisiere deine Gerichte in eigenen Sammlungen – z. B. 'Schnelle Feierabendküche' oder 'Meal Prep'.",
+        },
+        firstCard: {
+          title: 'Empfehlungen & Aktionen',
+          desc: 'Wische durch dynamische Empfehlungen und Tages-Highlights. Tippe auf ein Gericht für alle Details oder halte es gedrückt, um mehrere Rezepte für Sammlungen oder die Einkaufsliste auszuwählen.',
+        },
+      },
+      recipeDetails: {
+        servings: {
+          title: 'Portionen flexibel anpassen',
+          desc: 'Koche für mehr Gäste: Alle Zutatenmengen rechnen sich automatisch und exakt auf deine Wunschportionen um.',
+        },
+        ingredients: {
+          title: 'Zutaten antippen',
+          desc: 'Tippe auf eine Zutat, um Nährwerte, Alternativen oder Portionsgrößen einzusehen.',
+        },
+        cookBtn: {
+          title: 'Kochmodus am Herd',
+          desc: 'Startet die vollflächige Kochansicht: Große Schrift, Display bleibt aktiv und integrierte Timer für entspanntes Kochen.',
+        },
+        copilot: {
+          title: 'Dein KI-Küchenhelfer',
+          desc: 'Keine Sahne im Haus? Frag den Copilot einfach im Chat nach passendem Ersatz oder Zubereitungstricks.',
+        },
+      },
+      cookingMode: {
+        step: {
+          title: 'Schritt für Schritt abhaken',
+          desc: 'Groß und auch aus 1 Meter Entfernung lesbar. Ein Tipp auf die Karte hakt den Schritt ab und springt zum nächsten.',
+        },
+        timers: {
+          title: 'Integrierte Koch-Timer',
+          desc: 'Kochzeiten im Text werden automatisch erkannt. Ein Klick startet den Timer – du wirst benachrichtigt, auch wenn das Handy gesperrt ist.',
+        },
+        ingredients: {
+          title: 'Zutaten immer im Blick',
+          desc: 'Blende jederzeit die Zutaten und Mengenangaben ein, die genau für diesen Schritt benötigt werden.',
+        },
+      },
+      shoppingList: {
+        groups: {
+          title: 'Supermarkt-Sortierung',
+          desc: 'Kein Zickzack-Laufen: Zutaten sind automatisch nach Supermarkt-Gängen (Obst & Gemüse, Kühlregal etc.) sortiert.',
+        },
+        item: {
+          title: 'Mit einem Tipp erledigen',
+          desc: 'Artikel antippen hakt sie ab und schiebt sie ins Erledigt-Fach am Ende der Liste.',
+        },
+        quickAdd: {
+          title: 'Eigene Artikel ergänzen',
+          desc: 'Ergänze beliebige Alltagsartikel wie Spülmittel, Milch oder Snacks in Sekundenschnelle per Tastatur.',
+        },
+      },
+      mealPlanner: {
+        days: {
+          title: 'Wochentage & Kalender',
+          desc: 'Wechsle flexibel zwischen den Tagen oder springe mit der Wochennavigation in die nächste Woche.',
+        },
+        daySection: {
+          title: 'Mahlzeiten einplanen',
+          desc: 'Tippe auf einen Tag, um Rezepte aus deinem Kochbuch oder Favoriten für deine Woche einzuplanen.',
+        },
+        bulkShop: {
+          title: 'Smarter Wocheneinkauf',
+          desc: 'Sobald Rezepte geplant sind, überträgt dieser Button alle Zutaten der Woche automatisch gebündelt in die Einkaufsliste.',
         },
       },
     },
@@ -487,7 +587,7 @@ export const uiTranslations = {
     preAdNotice: {
       badge: 'Snagbite bleibt kostenlos',
       title: 'Transparenz ist uns wichtig',
-      description: 'KI-Videoanalysen, Cloud-Server und Datenhaltung verursachen laufende Rechenkosten. Damit Snagbite für alle kostenlos bleiben kann, zeigen wir gelegentlich dezente Werbung.',
+      description: 'KI-Videoanalysen, Cloud-Server und Datenhaltung verursachen laufende Rechenkosten. Damit Snagbite für dich kostenlos bleibt, zeigen wir gelegentlich relevante Werbung – im nächsten Schritt kannst du dies kurz bestätigen.',
       features: {
         ai: {
           title: 'Echte KI-Power',
@@ -513,6 +613,7 @@ export const uiTranslations = {
         preparingCookbook: 'Dein Kochbuch wird angerichtet…',
         loadingRecipes: 'Rezepte werden geladen…',
         gettingReady: 'Gleich geht’s an den Herd…',
+        updatingApp: 'App-Update wird installiert…',
       },
       nav: {
         newRecipe: 'Neu',
@@ -651,7 +752,52 @@ export const uiTranslations = {
         },
       },
       social: {
-        sections: { overview: 'Übersicht', leaderboard: 'Rangliste', friends: 'Freunde', settings: 'Einstellungen' },
+        sections: { overview: 'Übersicht', feed: 'Feed', leaderboard: 'Rangliste', friends: 'Freunde', settings: 'Einstellungen' },
+        feed: {
+          title: 'Freunde-Feed',
+          emptyNoFriendsTitle: 'Kochen macht zusammen mehr Spaß',
+          emptyNoFriendsSubtitle: 'Verbinde dich mit Freunden, um hier ihre gekochten Gerichte zu sehen und Rezepte auszutauschen.',
+          shareCodeAction: 'Freundescode teilen',
+          addFriendsAction: 'Freunde finden',
+          emptyNoCooksTitle: 'Mach den Anfang!',
+          emptyNoCooksSubtitle: 'Deine Freunde haben noch kein Gericht mit Foto geteilt. Koche ein Rezept und halte dein Ergebnis fest!',
+          cookFirstAction: 'Zum Kochbuch',
+          viewRecipe: 'Rezept ansehen',
+          saveRecipe: 'Merken',
+          saved: 'Gespeichert',
+          cookedJustNow: 'Gerade eben',
+          cookedToday: 'Heute',
+          cookedYesterday: 'Gestern',
+          hoursAgo: 'vor {count} Std.',
+          minutesAgo: 'vor {count} Min.',
+          daysAgo: 'vor {count} Tagen',
+        },
+        share: {
+          shareWithFriends: 'Mit Freunden teilen',
+          title: 'Rezept teilen',
+          subtitle: 'Wähle Freunde aus, die dieses Rezept sehen sollen',
+          notePlaceholder: 'Persönliche Notiz hinzufügen (optional)...',
+          sendButton: 'An Freunde senden',
+          sentSuccess: 'Rezept erfolgreich geteilt!',
+          externalTitle: 'Über WhatsApp & andere Apps teilen',
+          externalSubtitle: 'Rezept als Text, Bild & Video-Link verschicken',
+          orWithFriends: 'Oder mit Snagbite-Freunden',
+          originalVideo: 'Original-Video',
+          promoTagline: 'Automatisch strukturiert mit Snagbite – der KI-Rezept-App für Instagram & TikTok Reels',
+          externalShareCopied: 'Rezept als Text in die Zwischenablage kopiert!',
+          emptyTitle: 'Noch keine Freunde',
+          emptySubtitle: 'Teile deinen Einladungslink, um Rezepte direkt in der App zu verschicken.',
+          manageFriends: 'Freunde verwalten',
+        },
+        shares: {
+          recommendedTitle: 'Von Freunden empfohlen',
+          recommendedSubtitle: 'Direkt von deinen Freunden mit dir geteilt',
+          view: 'Vorschau',
+          save: 'Speichern',
+          dismiss: 'Ausblenden',
+          from: 'Von {name} empfohlen',
+          savedSuccess: 'Rezept ins Kochbuch gespeichert!',
+        },
         leaderboard: {
           monthly: 'Diesen Monat',
           weekly: 'Diese Woche',
@@ -712,6 +858,25 @@ export const uiTranslations = {
         upToDate: 'Snagbite ist auf dem neuesten Stand.',
         updateCheckFailed: 'Update-Prüfung fehlgeschlagen.',
         updateAvailable: 'Neues Update im Play Store verfügbar.',
+        admin: {
+          section: 'Verwaltung',
+          dashboard: 'Admin-Bereich',
+          dashboardDesc: 'Öffnet das Admin Dashboard auf der Website',
+          devTools: 'Entwickler-Tools',
+          devToolsDesc: 'Aktiviert die mobile Dev-Konsole (Eruda) und Overlays',
+          tierToggle: 'Snagbite Pro (Status)',
+          tierToggleDesc: 'Aktueller Tier: {tier}. Schaltet DB-Account zwischen Free und Pro um.',
+          tierSuccessPro: 'Pro-Status erfolgreich aktiviert!',
+          tierSuccessFree: 'Free-Status erfolgreich aktiviert!',
+          tierError: 'Fehler beim Ändern des Account-Status.',
+          clearData: 'Browserdaten & Einstellungen löschen',
+          clearDataDesc: 'Löscht lokale Browserdaten (Storage, Caches) und setzt User-Einstellungen in der DB zurück',
+          clearDataConfirmTitle: 'Browserdaten & Einstellungen löschen?',
+          clearDataConfirmMessage: 'Möchtest du wirklich alle lokalen Browserdaten (LocalStorage, Caches, IndexedDB) löschen und alle zusätzlichen Einstellungen deines Users in der Datenbank zurücksetzen? Die App wird danach neu geladen.',
+          clearDataConfirmButton: 'Löschen & Zurücksetzen',
+          clearDataSuccess: 'Browserdaten und Einstellungen wurden gelöscht. App wird neu geladen...',
+          clearDataError: 'Fehler beim Zurücksetzen der Einstellungen.',
+        },
         legal: {
           section: 'Rechtliches',
           privacy: 'Datenschutzerklärung',
@@ -1101,9 +1266,11 @@ export const uiTranslations = {
     },
     recipe: {
       recipe: 'Rezept',
+      generatingCover: 'KI-Cover wird generiert…',
       copyRecipe: 'Rezept kopieren',
       copied: 'Kopiert!',
       delete: 'Rezept löschen',
+      devReExtract: '[DEV] Neu extrahieren',
       save: 'Speichern',
       visibilityTitle: 'Sichtbarkeit',
       visibilityPublic: 'Öffentlich (Community)',
@@ -1120,6 +1287,12 @@ export const uiTranslations = {
       increaseServings: 'Portionen erhöhen',
       viewGrid: 'Rasteransicht (2-spaltig)',
       viewList: 'Listenansicht',
+      groupByComponents: 'Komponenten',
+      groupByCategory: 'Supermarkt',
+      groupingLabel: 'Aufteilung',
+      componentFor: 'Für {name}',
+      componentOther: 'Basis & Weiteres',
+      componentAssembly: 'Anrichten & Zusammenbau',
 
       preview: {
         title: 'Rezept-Vorschau',
@@ -1162,6 +1335,7 @@ export const uiTranslations = {
       ingredientNutritionCarbs: 'Kohlenhydrate',
       ingredientNutritionFat: 'Fett',
       ingredientNutritionPer100g: 'Entspricht ca. {kcal} kcal pro 100g',
+      ingredientNutritionConsumedHint: 'Davon verzehrt: ca. {amount} {unit} (Kochmedium / Frittieren)',
       ingredientNutritionClose: 'Fertig',
       ingredientNutritionVerifiedBadge: 'Verifizierte Zutat (Produktdatenbank)',
       ingredientNutritionEstimatedBadge: 'KI-Nährwertschätzung',
@@ -1218,7 +1392,7 @@ export const uiTranslations = {
       alreadyAddedTitle: 'Bereits hinzugefügt',
       alreadyAddedMessage: 'Alle Zutaten dieses Rezepts sind bereits abgehakt!',
       shoppingConfirmTitle: 'Zutaten auswählen',
-      shoppingConfirmSubtitle: 'Grundzutaten & vorhandener Vorrat sind standardmäßig abgewählt.',
+      shoppingConfirmSubtitle: 'Grundzutaten sind standardmäßig abgewählt.',
       shoppingConfirmAddOne: '1 Zutat hinzufügen',
       shoppingConfirmAddMany: '{count} Zutaten hinzufügen',
       shoppingConfirmCancel: 'Abbrechen',
@@ -1433,6 +1607,7 @@ export const uiTranslations = {
         saveToCookbook: 'In Kochbuch speichern',
         alreadySaved: 'Bereits im Kochbuch',
         heroCookNow: 'Jetzt kochen',
+        heroAuthorByYou: 'Von dir',
         scoreBadge: 'Score {score} • {letter}',
         bentoTitle: 'Blitz-Gerichte & Nährstoff-Champions',
         bentoSubtitle: 'In unter 25 Minuten auf dem Tisch',
@@ -1459,7 +1634,6 @@ export const uiTranslations = {
       editCollection: 'Sammlung bearbeiten',
       deleteCollection: 'Sammlung löschen',
       collectionName: 'Name der Sammlung',
-      collectionEmoji: 'Symbol / Emoji',
       collectionPlaceholder: 'z.B. Sonntagsbrunch',
       collectionNameRequired: 'Name der Sammlung ist erforderlich',
       flagsTitle: 'Labels / Tags',
@@ -1502,6 +1676,7 @@ export const uiTranslations = {
         title: 'Deine Einkaufsliste ist leer',
         desc: 'Füge Zutaten aus deinen Rezepten mit 1 Klick hinzu oder ergänze eigene Artikel – automatisch nach Supermarkt-Kategorien sortiert.',
         cta: 'Rezepte entdecken',
+        addCustom: 'Eigenen Artikel hinzufügen',
       },
       emptyState: {
         welcomeTitle: 'Deine Einkaufsliste ist leer',
@@ -1544,10 +1719,10 @@ export const uiTranslations = {
       allDoneTitle: 'Alles erledigt!',
       allDoneDesc: 'Du hast alle Zutaten beisammen. Viel Spaß beim Kochen & Genießen!',
       finishShopping: 'Einkauf abschließen',
-      finishShoppingConfirmTitle: 'Einkauf in Vorrat übernehmen?',
-      finishShoppingConfirmMessage: 'Möchtest du alle {count} erledigten Artikel direkt in deinen Vorrat einbuchen und von der Liste entfernen?',
-      finishShoppingConfirmBtn: 'In Vorrat übernehmen',
-      transferredToPantryToast: '✓ {count} Zutaten in den Vorrat übernommen!',
+      finishShoppingConfirmTitle: 'Einkauf abschließen?',
+      finishShoppingConfirmMessage: 'Möchtest du alle {count} erledigten Artikel von der Einkaufsliste entfernen?',
+      finishShoppingConfirmBtn: 'Abschließen',
+      transferredToPantryToast: '✓ {count} erledigte Artikel entfernt!',
       notInPantryYetHint: 'Noch nicht im Vorrat · Werden beim Abschluss automatisch übertragen',
       allDonePantryHint: 'Werden beim Abschluss automatisch in deinen Vorrat gebucht',
       restoreItem: 'Wieder aufnehmen',
@@ -1622,6 +1797,8 @@ export const uiTranslations = {
       viewRecipe: 'Ansehen',
       recipeCopied: 'Rezept in Zwischenablage kopiert',
       recipeReadyTitle: 'Rezept erfolgreich importiert',
+      recipeReusedTitle: 'Rezept sofort gefunden! ⚡',
+      recipeReusedDesc: 'Blitzschnell aus dem Rezept-Archiv geladen.',
       recipeFailedTitle: 'Import fehlgeschlagen',
       clearedCheckedItems: '{count} erledigte Zutaten entfernt',
       clearedAllItems: 'Einkaufsliste geleert',
@@ -1974,7 +2151,7 @@ export const uiTranslations = {
         },
         import: {
           title: 'Import & Share',
-          desc: 'Paste a link or share a reel straight from Instagram, TikTok, YouTube or Facebook to Snagbite. We extract the full recipe for you.',
+          desc: 'Paste a link, upload screenshots & cookbook photos, or share a reel straight from Instagram to Snagbite.',
         },
         cookbook: {
           title: 'Your Cookbook',
@@ -1982,7 +2159,7 @@ export const uiTranslations = {
         },
         organize: {
           title: 'Organize & Filter',
-          desc: 'Create your own collections with emoji & color, mark favorites and add labels. Filter your cookbook with one tap by collection, favorite, cook time or label.',
+          desc: 'Create your own collections, mark favorites and add labels. Filter your cookbook with one tap by collection, favorite, cook time or label.',
         },
         shopping: {
           title: 'Smart Shopping List',
@@ -1991,6 +2168,106 @@ export const uiTranslations = {
         cooking: {
           title: 'Cook Like a Pro',
           desc: 'Step-by-step cooking mode, built-in timers and an AI copilot that answers questions and adapts recipes.',
+        },
+      },
+    },
+    tour: {
+      btn: {
+        next: 'Next',
+        prev: 'Back',
+        done: 'Got it',
+        skip: 'Skip',
+      },
+      progress: '{{current}} of {{total}}',
+      proHint: '✨ Included in Snagbite Pro',
+      resetLabel: 'Reset screen tours & tips',
+      resetSuccess: 'All screen tours have been reset',
+      extract: {
+        link: {
+          title: 'Paste recipe link',
+          desc: 'Paste a link from Instagram, TikTok, YouTube or recipe websites. Our AI analyzes the video or webpage and creates a clean recipe.',
+        },
+        photo: {
+          title: 'Scan photos & screenshots',
+          desc: 'Whether it is a screenshot from social media or food blogs, a cookbook page or handwritten recipe notes: Simply upload – Snagbite extracts ingredients and steps automatically.',
+        },
+        share: {
+          title: 'Share directly from apps',
+          desc: "No need to open the app manually: Simply tap 'Share' on Instagram Reel or TikTok and select Snagbite.",
+        },
+      },
+      catalog: {
+        filter: {
+          title: 'Find in a flash',
+          desc: 'Search by recipe name, ingredients, or filter by cooking time, favorites, and categories.',
+        },
+        collections: {
+          title: 'Your collections',
+          desc: "Organize dishes in custom collections – e.g. 'Quick dinners' or 'Meal prep'.",
+        },
+        firstCard: {
+          title: 'Recommendations & actions',
+          desc: 'Swipe through dynamic recommendations and daily spotlights. Tap a recipe for full details, or long-press to select multiple dishes for collections or your shopping list.',
+        },
+      },
+      recipeDetails: {
+        servings: {
+          title: 'Scale servings easily',
+          desc: 'Cooking for guests? All ingredient amounts recalculate automatically and precisely.',
+        },
+        ingredients: {
+          title: 'Interactive ingredients',
+          desc: 'Tap any ingredient to view nutrition values, substitutes, or portion insights.',
+        },
+        cookBtn: {
+          title: 'Cooking mode at the stove',
+          desc: 'Full-screen cooking view with large text, wake-lock to keep your display on, and built-in timers.',
+        },
+        copilot: {
+          title: 'Your AI kitchen assistant',
+          desc: 'Missing an ingredient? Ask Copilot in chat for perfect substitutes or cooking tricks.',
+        },
+      },
+      cookingMode: {
+        step: {
+          title: 'Check off step by step',
+          desc: 'Large and readable from a distance. Tapping checks off the step and advances to the next.',
+        },
+        timers: {
+          title: 'Built-in cooking timers',
+          desc: 'Cooking times are detected automatically. One tap starts the timer – notifications work even when your phone is locked.',
+        },
+        ingredients: {
+          title: 'Ingredients at a glance',
+          desc: 'Peek at ingredients and exact measurements needed for the active step at any time.',
+        },
+      },
+      shoppingList: {
+        groups: {
+          title: 'Supermarket aisle sorting',
+          desc: 'No zigzagging through aisles: Ingredients are automatically grouped by grocery departments.',
+        },
+        item: {
+          title: 'Check off with one tap',
+          desc: 'Tapping an item checks it off and moves it down to completed.',
+        },
+        quickAdd: {
+          title: 'Add custom items',
+          desc: 'Quickly type and add any household items like dish soap, milk, or snacks.',
+        },
+      },
+      mealPlanner: {
+        days: {
+          title: 'Weekdays & calendar',
+          desc: 'Switch between days easily or jump to upcoming weeks using the week navigator.',
+        },
+        daySection: {
+          title: 'Plan your meals',
+          desc: 'Tap any day to schedule recipes from your cookbook or pick favorites for your week.',
+        },
+        bulkShop: {
+          title: 'Smart weekly shopping',
+          desc: 'Once recipes are planned, this button transfers all needed ingredients into your shopping list with a single tap.',
         },
       },
     },
@@ -2010,7 +2287,7 @@ export const uiTranslations = {
     preAdNotice: {
       badge: 'Snagbite stays free',
       title: 'Transparency matters to us',
-      description: 'AI video analysis, cloud servers, and data storage cause ongoing compute costs. To keep Snagbite free for everyone, we occasionally display unobtrusive ads.',
+      description: 'AI video analysis, cloud servers, and data storage cause ongoing compute costs. To keep Snagbite free for you, we occasionally display relevant ads — in the next step, you can quickly confirm this.',
       features: {
         ai: {
           title: 'Real AI Compute',
@@ -2036,6 +2313,7 @@ export const uiTranslations = {
         preparingCookbook: 'Setting your table…',
         loadingRecipes: 'Loading your recipes…',
         gettingReady: 'Getting ready to cook…',
+        updatingApp: 'Installing app update…',
       },
       nav: {
         newRecipe: 'New',
@@ -2174,7 +2452,52 @@ export const uiTranslations = {
         },
       },
       social: {
-        sections: { overview: 'Overview', leaderboard: 'Leaderboard', friends: 'Friends', settings: 'Settings' },
+        sections: { overview: 'Overview', feed: 'Feed', leaderboard: 'Leaderboard', friends: 'Friends', settings: 'Settings' },
+        feed: {
+          title: 'Friends Feed',
+          emptyNoFriendsTitle: 'Cooking is better with friends',
+          emptyNoFriendsSubtitle: 'Connect with friends to see what they cook and exchange your favorite recipes.',
+          shareCodeAction: 'Share friend code',
+          addFriendsAction: 'Find friends',
+          emptyNoCooksTitle: 'Make the first move!',
+          emptyNoCooksSubtitle: 'None of your friends have shared a cooked dish with photo yet. Cook a recipe and show your result!',
+          cookFirstAction: 'Explore cookbook',
+          viewRecipe: 'View recipe',
+          saveRecipe: 'Save',
+          saved: 'Saved',
+          cookedJustNow: 'Just now',
+          cookedToday: 'Today',
+          cookedYesterday: 'Yesterday',
+          hoursAgo: '{count}h ago',
+          minutesAgo: '{count}m ago',
+          daysAgo: '{count}d ago',
+        },
+        share: {
+          shareWithFriends: 'Share with friends',
+          title: 'Share recipe',
+          subtitle: 'Choose friends who should see this recipe',
+          notePlaceholder: 'Add a personal note (optional)...',
+          sendButton: 'Send to friends',
+          sentSuccess: 'Recipe shared successfully!',
+          externalTitle: 'Share via WhatsApp & other apps',
+          externalSubtitle: 'Send recipe as text, image & video link',
+          orWithFriends: 'Or with Snagbite friends',
+          originalVideo: 'Original Video',
+          promoTagline: 'Automatically structured with Snagbite – the AI recipe app for reels & cooking videos',
+          externalShareCopied: 'Recipe copied to clipboard as text!',
+          emptyTitle: 'No friends yet',
+          emptySubtitle: 'Share your invite link to exchange recipes directly in the app.',
+          manageFriends: 'Manage friends',
+        },
+        shares: {
+          recommendedTitle: 'Recommended by friends',
+          recommendedSubtitle: 'Shared directly with you by friends',
+          view: 'Preview',
+          save: 'Save',
+          dismiss: 'Dismiss',
+          from: 'Recommended by {name}',
+          savedSuccess: 'Recipe saved to cookbook!',
+        },
         leaderboard: {
           monthly: 'This month',
           weekly: 'This week',
@@ -2235,6 +2558,25 @@ export const uiTranslations = {
         upToDate: 'Snagbite is up to date.',
         updateCheckFailed: 'Update check failed.',
         updateAvailable: 'New update available on Play Store.',
+        admin: {
+          section: 'Administration',
+          dashboard: 'Admin Panel',
+          dashboardDesc: 'Opens the Admin Dashboard on the website',
+          devTools: 'Developer Tools',
+          devToolsDesc: 'Enables mobile debug console (Eruda) and overlays',
+          tierToggle: 'Snagbite Pro (Status)',
+          tierToggleDesc: 'Current tier: {tier}. Switches DB account between Free and Pro.',
+          tierSuccessPro: 'Pro status successfully activated!',
+          tierSuccessFree: 'Free status successfully activated!',
+          tierError: 'Failed to switch account status.',
+          clearData: 'Clear browser data & settings',
+          clearDataDesc: 'Clears local browser data (storage, caches) and resets user settings in the DB',
+          clearDataConfirmTitle: 'Clear browser data & settings?',
+          clearDataConfirmMessage: 'Are you sure you want to clear all local browser data (LocalStorage, Caches, IndexedDB) and reset all additional user settings in the database? The app will reload afterwards.',
+          clearDataConfirmButton: 'Clear & Reset',
+          clearDataSuccess: 'Browser data and settings cleared. Reloading app...',
+          clearDataError: 'Failed to reset settings.',
+        },
         legal: {
           section: 'Legal',
           privacy: 'Privacy Policy',
@@ -2624,9 +2966,11 @@ export const uiTranslations = {
     },
     recipe: {
       recipe: 'Recipe',
+      generatingCover: 'Generating AI cover…',
       copyRecipe: 'Copy Recipe',
       copied: 'Copied!',
       delete: 'Delete Recipe',
+      devReExtract: '[DEV] Re-extract',
       save: 'Save',
       visibilityTitle: 'Visibility',
       visibilityPublic: 'Public (Community)',
@@ -2643,6 +2987,12 @@ export const uiTranslations = {
       increaseServings: 'Increase servings',
       viewGrid: 'Grid view (2-column)',
       viewList: 'List view',
+      groupByComponents: 'Components',
+      groupByCategory: 'Department',
+      groupingLabel: 'Grouping',
+      componentFor: 'For the {name}',
+      componentOther: 'Base & Other',
+      componentAssembly: 'Assembly & Plating',
 
       preview: {
         title: 'Recipe Preview',
@@ -2685,6 +3035,7 @@ export const uiTranslations = {
       ingredientNutritionCarbs: 'Carbohydrates',
       ingredientNutritionFat: 'Fat',
       ingredientNutritionPer100g: 'Approx. {kcal} kcal per 100g',
+      ingredientNutritionConsumedHint: 'Consumed in dish: approx. {amount} {unit} (cooking medium / frying)',
       ingredientNutritionClose: 'Done',
       ingredientNutritionVerifiedBadge: 'Verified Ingredient (Product Database)',
       ingredientNutritionEstimatedBadge: 'AI Nutrition Estimate',
@@ -2740,7 +3091,7 @@ export const uiTranslations = {
       alreadyAddedTitle: 'Already Added',
       alreadyAddedMessage: 'All ingredients of this recipe are already checked!',
       shoppingConfirmTitle: 'Select Ingredients',
-      shoppingConfirmSubtitle: 'Basics and pantry stock are deselected by default.',
+      shoppingConfirmSubtitle: 'Basics are deselected by default.',
       shoppingConfirmAddOne: 'Add 1 ingredient',
       shoppingConfirmAddMany: 'Add {count} ingredients',
       shoppingConfirmCancel: 'Cancel',
@@ -2955,6 +3306,7 @@ export const uiTranslations = {
         saveToCookbook: 'Save to cookbook',
         alreadySaved: 'Already saved',
         heroCookNow: 'Cook now',
+        heroAuthorByYou: 'By you',
         scoreBadge: 'Score {score} • {letter}',
         bentoTitle: 'Quick Dishes & Nutrient Champions',
         bentoSubtitle: 'On the table in under 25 minutes',
@@ -2981,7 +3333,6 @@ export const uiTranslations = {
       editCollection: 'Edit Collection',
       deleteCollection: 'Delete Collection',
       collectionName: 'Collection Name',
-      collectionEmoji: 'Icon / Emoji',
       collectionPlaceholder: 'e.g. Sunday Brunch',
       collectionNameRequired: 'Collection name is required',
       flagsTitle: 'Labels & Flags',
@@ -3024,6 +3375,7 @@ export const uiTranslations = {
         title: 'Your shopping list is empty',
         desc: 'Add ingredients from your saved recipes with 1 tap or add custom items – automatically sorted by supermarket aisle.',
         cta: 'Discover recipes',
+        addCustom: 'Add custom item',
       },
       emptyState: {
         welcomeTitle: 'Your shopping list is empty',
@@ -3066,10 +3418,10 @@ export const uiTranslations = {
       allDoneTitle: 'All done!',
       allDoneDesc: 'You got all the ingredients. Enjoy cooking your meal!',
       finishShopping: 'Finish shopping',
-      finishShoppingConfirmTitle: 'Add groceries to pantry?',
-      finishShoppingConfirmMessage: 'Do you want to add all {count} completed items directly to your pantry and clear them from the list?',
-      finishShoppingConfirmBtn: 'Add to pantry',
-      transferredToPantryToast: '✓ {count} items added to pantry!',
+      finishShoppingConfirmTitle: 'Finish shopping?',
+      finishShoppingConfirmMessage: 'Do you want to remove all {count} completed items from the shopping list?',
+      finishShoppingConfirmBtn: 'Finish',
+      transferredToPantryToast: '✓ {count} completed items cleared!',
       notInPantryYetHint: 'Not in pantry yet · Will be automatically added upon finishing',
       allDonePantryHint: 'Will be automatically added to your pantry upon finishing',
       restoreItem: 'Restore item',
@@ -3144,6 +3496,8 @@ export const uiTranslations = {
       viewRecipe: 'View',
       recipeCopied: 'Recipe copied to clipboard',
       recipeReadyTitle: 'Recipe successfully imported',
+      recipeReusedTitle: 'Recipe found instantly! ⚡',
+      recipeReusedDesc: 'Loaded directly from the recipe archive.',
       recipeFailedTitle: 'Import failed',
       clearedCheckedItems: 'Removed {count} completed items',
       clearedAllItems: 'Shopping list cleared',

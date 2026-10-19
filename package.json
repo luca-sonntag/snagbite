@@ -17,6 +17,13 @@
     "preview": "npm run preview -w backend",
 
     "deploy": "powershell -ExecutionPolicy Bypass -File deploy.ps1",
+    "firebase:login": "npx --yes firebase-tools login",
+    "deploy:firebase": "npm run deploy:firebase -w frontend",
+    "deploy:firebase:patch": "npm run deploy:firebase:patch -w frontend",
+    "deploy:firebase:dev": "npm run deploy:firebase:dev -w frontend",
+    "deploy:firebase:dev:patch": "npm run deploy:firebase:dev:patch -w frontend",
+    "deploy:ota": "npm run deploy:ota -w frontend",
+    "deploy:ota:dev": "npm run deploy:ota:dev -w frontend",
     "deploy:all:internal": "powershell -ExecutionPolicy Bypass -File deploy.ps1 -All -Bump patch -Track internal",
     "deploy:all:alpha": "powershell -ExecutionPolicy Bypass -File deploy.ps1 -All -Bump patch -Track alpha",
     "healthcheck": "npm run start --prefix healthcheck",
@@ -26,17 +33,10 @@
     "cap:run:local": "npm run cap:run:local -w frontend",
 
     "db:push": "npm run db:push -w backend",
+    "db:push:prod": "npm run db:push:prod -w backend",
     "db:generate": "npm run db:generate -w backend",
     "db:studio": "npm run db:studio -w backend",
     "db:functions": "npm run db:functions -w backend",
-    "db:migrate-data": "npm run db:migrate-data -w backend",
-    "db:migrate-data:dev": "npm run db:migrate-data:dev -w backend",
-    "db:migrate-data:prod": "npm run db:migrate-data:prod -w backend",
-    "db:migrate-data:dry": "npm run db:migrate-data:dry -w backend",
-    "auth:migrate": "npm run auth:migrate -w backend",
-    "auth:migrate:dev": "npm run auth:migrate:dev -w backend",
-    "auth:migrate:prod": "npm run auth:migrate:prod -w backend",
-    "auth:migrate:dry": "npm run auth:migrate:dry -w backend",
 
     "db:backup:prod": "npm run db:backup -w backend -- --prod",
     "db:backup:dev": "npm run db:backup -w backend -- --dev",
@@ -55,6 +55,9 @@
     "generate:basename-icons": "npm run generate:basename-icons -w backend --",
     "icons:zip": "npm run icons:zip -w backend",
     "icons:unpack": "npm run icons:unpack -w backend",
+    "icons:sync:s3": "npm run icons:sync:s3 -w backend --",
+    "icons:sync:s3:dev": "npm run icons:sync:s3:dev -w backend --",
+    "icons:sync:s3:prod": "npm run icons:sync:s3:prod -w backend --",
 
     "use:prod": "node scripts/switchEnv.js prod",
     "use:prod:backend": "node scripts/switchEnv.js prod --backend",
@@ -63,10 +66,7 @@
 
     "railway:env:prod": "powershell -ExecutionPolicy Bypass -File scripts/sync-railway-env.ps1 -Prod",
     "railway:env:dev": "powershell -ExecutionPolicy Bypass -File scripts/sync-railway-env.ps1 -Dev",
-    "railway:env:dry": "powershell -ExecutionPolicy Bypass -File scripts/sync-railway-env.ps1 -Prod -DryRun",
-    "storage:migrate:prod": "npm run storage:migrate:prod -w backend",
-    "storage:migrate:dev": "npm run storage:migrate:dev -w backend",
-    "storage:migrate:dry": "npm run storage:migrate:dry -w backend"
+    "railway:env:dry": "powershell -ExecutionPolicy Bypass -File scripts/sync-railway-env.ps1 -Prod -DryRun"
   },
   "devDependencies": {
     "concurrently": "^10.0.3"

@@ -10,6 +10,7 @@ import type { Ingredient, Recipe, MealPlanRecipeSummary } from '../../types';
 import { findPantryStockMatch } from '../ShoppingList/shoppingItemUtils';
 import ShoppingConfirmItem, { type MergedShoppingSheetItem } from './ShoppingConfirmItem';
 import ServingsStepper from '../ServingsStepper';
+import { consolidateIngredientsForShopping } from '../../utils/recipeComponents';
 
 interface ShoppingConfirmSheetProps {
   isOpen: boolean;
@@ -49,17 +50,18 @@ export default function ShoppingConfirmSheet({
 
   const activeScaleFactor = servings / baseServings;
 
-  // Merge ingredients that share a parent in the same recipe
+  // Merge ingredients that share a parent in the same recipe and consolidate across components
   const allItems = useMemo(() => {
+    const consolidated = consolidateIngredientsForShopping(sortedIngredients);
     const childMap = new Map<string, Ingredient[]>();
     const childrenSet = new Set<Ingredient>();
 
-    for (const ing of sortedIngredients) {
+    for (const ing of consolidated) {
       if (ing.parentIngredient?.baseName || ing.parentIngredient?.name) {
         const parentBase = (ing.parentIngredient.baseName || '').toLowerCase().trim();
         const parentName = (ing.parentIngredient.name || '').toLowerCase().trim();
 
-        const parentInRecipe = sortedIngredients.find(
+        const parentInRecipe = consolidated.find(
           (other) =>
             other !== ing &&
             ((other.baseName && other.baseName.toLowerCase().trim() === parentBase) ||
@@ -77,7 +79,7 @@ export default function ShoppingConfirmSheet({
     }
 
     const items: MergedShoppingSheetItem[] = [];
-    sortedIngredients.forEach((ing, idx) => {
+    consolidated.forEach((ing, idx) => {
       if (childrenSet.has(ing)) return;
 
       const parentKey = `${ing.name}-${ing.baseName || ''}`;
@@ -89,6 +91,7 @@ export default function ShoppingConfirmSheet({
         childIngredients: children,
         groupCategory: ing.category,
         originalGroupIdx: idx,
+        breakdown: ing.breakdown,
       });
     });
 
@@ -151,8 +154,7 @@ export default function ShoppingConfirmSheet({
 
   return (
     <div onClick={(e) => e.stopPropagation()}>
-      <Drawer>
-        <Drawer.Backdrop isOpen={isOpen} onOpenChange={(open) => { if (!open) onClose(); }} className="!z-[100]">
+      <Drawer.Backdrop isOpen={isOpen} onOpenChange={(open) => { if (!open) onClose(); }} className="!z-[100]">
           <Drawer.Content placement="bottom" className="!z-[100]">
             <Drawer.Dialog className="relative !bg-gray-50 dark:!bg-gray-950 max-h-[85vh] flex flex-col p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
               <Drawer.Handle />
@@ -269,7 +271,6 @@ export default function ShoppingConfirmSheet({
             </Drawer.Dialog>
           </Drawer.Content>
         </Drawer.Backdrop>
-      </Drawer>
     </div>
   );
 }

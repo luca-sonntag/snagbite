@@ -6,7 +6,6 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 export type ScriptTarget = 'prod' | 'dev';
 
@@ -16,10 +15,8 @@ export interface ScriptEnvConfig {
   target: ScriptTarget;
   envFile: string;
   envPath: string;
-  supabaseUrl?: string;
-  supabaseSecretKey?: string;
+  databaseUrl?: string;
   env: Record<string, string>;
-  client?: SupabaseClient;
 }
 
 /**
@@ -61,9 +58,7 @@ export function getScriptTarget(args: string[] = process.argv): ScriptTarget {
  * Initializes the script environment:
  * 1. Determines target ('prod' or 'dev') from process.argv.
  * 2. Loads the corresponding .env (.env for dev, .env.production for prod).
- * 3. Injects values into process.env for downstream usage.
- * 4. Creates a Supabase service-role client.
- * 5. Calls setClient() so any backend db imports use the correct target database.
+ * 3. Injects values into process.env for downstream usage (including DATABASE_URL for Drizzle).
  */
 export function initScriptEnv(options?: {
   target?: ScriptTarget;
@@ -105,19 +100,7 @@ export function initScriptEnv(options?: {
   }
   process.env.NODE_ENV = isProd ? 'production' : 'development';
 
-  const supabaseUrl = parsed.SUPABASE_URL || process.env.SUPABASE_URL;
-  const supabaseSecretKey = parsed.SUPABASE_SECRET_KEY || process.env.SUPABASE_SECRET_KEY;
-
-  let client: SupabaseClient | undefined;
-  if (supabaseUrl && supabaseSecretKey) {
-    client = createClient(supabaseUrl, supabaseSecretKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    });
-
-    if (options?.autoSetDbClient !== false) {
-      import('../db.js').then(({ setClient }) => setClient(client)).catch(() => {});
-    }
-  }
+  const databaseUrl = parsed.DATABASE_URL || process.env.DATABASE_URL;
 
   return {
     isProd,
@@ -125,9 +108,7 @@ export function initScriptEnv(options?: {
     target,
     envFile: envFileName,
     envPath,
-    supabaseUrl,
-    supabaseSecretKey,
+    databaseUrl,
     env: parsed,
-    client,
   };
 }

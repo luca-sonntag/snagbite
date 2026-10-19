@@ -3,23 +3,44 @@ import type {
   SavedRecipe,
   UserRecipeSource,
 } from '../types.js';
-import { formatAuthorHandle } from '@cookbook/shared';
+import {
+  formatAuthorHandle,
+  CURRENT_RECIPE_PIPELINE_VERSION,
+  sanitizeSectionName,
+} from '@cookbook/shared';
 import { num } from './client.js';
 import { recipes } from './schema/recipes.js';
 import { computeRecipeHealthScore, isVegetableOrFruitCategory } from '../matching/healthScoreCalculator.js';
+import { normalizeUrl } from './jobsDb.js';
+
+export function sanitizeStorageUrl(url: string | null | undefined): string | null | undefined {
+  if (!url) return url;
+  const match = url.match(/^https?:\/\/[^\/]+(\/storage\/(?:recipe-covers|cook-photos|recipe-photos|feedback-screenshots)\/.*)/);
+  if (match) return match[1];
+  const localhostMatch = url.match(/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?(\/storage\/.*)/);
+  if (localhostMatch) return localhostMatch[1];
+  return url;
+}
 
 export function normalizeRawIngredients(raw: unknown): Recipe['ingredients'] {
   if (!Array.isArray(raw)) return [];
   if (raw.length > 0 && raw[0] && typeof raw[0] === 'object' && Array.isArray((raw[0] as any).items)) {
     return (raw as Array<{ name?: string; items?: any[] }>).flatMap((group) => {
-      const section =
-        group.name && !/^(ingredients|zutaten|hauptzutaten|default|allgemein)$/i.test(group.name.trim())
-          ? group.name.trim()
-          : undefined;
-      return (group.items || []).map((item) => (section ? { ...item, section } : item));
+      const section = sanitizeSectionName(group.name);
+      return (group.items || []).map((item) => {
+        const itemSection = sanitizeSectionName(item.section, item.category) ?? section;
+        return itemSection ? { ...item, section: itemSection } : { ...item, section: undefined };
+      });
     });
   }
-  return raw as Recipe['ingredients'];
+  return (raw as any[]).map((item) => {
+    if (!item || typeof item !== 'object') return item;
+    const cleanSection = sanitizeSectionName(item.section, item.category);
+    if (cleanSection !== item.section) {
+      return { ...item, section: cleanSection };
+    }
+    return item;
+  });
 }
 
 export function rowToRecipe(row: any): Recipe {
@@ -38,6 +59,8 @@ export function rowToRecipe(row: any): Recipe {
     visibility: (row.visibility ?? 'private') as Recipe['visibility'],
     origin: (row.origin ?? 'url') as Recipe['origin'],
     sourceUrl: row.sourceUrl ?? row.source_url,
+    sourceUrlNormalized: row.sourceUrlNormalized ?? row.source_url_normalized ?? null,
+    language: row.language ?? 'de',
     sourceHandle: formatAuthorHandle(row.sourceHandle ?? row.source_handle),
     parentRecipeId: row.parentRecipeId ?? row.parent_recipe_id,
     remixPrompt: row.remixPrompt ?? row.remix_prompt,
@@ -52,13 +75,20 @@ export function rowToRecipe(row: any): Recipe {
     tags: row.tags ?? [],
     equipment: row.equipment ?? [],
     tips: row.tips ?? [],
-    imageUrl: row.imageUrl ?? row.image_url,
-    imageUrls: row.imageUrls ?? row.image_urls ?? [],
+    imageUrl: sanitizeStorageUrl(row.imageUrl ?? row.image_url) ?? null,
+    imageUrls: ((row.imageUrls ?? row.image_urls ?? []) as string[])
+      .map((u) => sanitizeStorageUrl(u))
+      .filter((u): u is string => Boolean(u)),
     imagePrompt: row.imagePrompt ?? row.image_prompt,
     isAiCover: row.isAiCover ?? row.is_ai_cover ?? false,
     transcript: row.transcript,
     ingredients: normalizeRawIngredients(row.ingredients),
-    instructions: (row.instructions as Recipe['instructions']) ?? [],
+    instructions: Array.isArray(row.instructions)
+      ? (row.instructions as Recipe['instructions']).map((s) => ({
+          ...s,
+          section: sanitizeSectionName(s?.section),
+        }))
+      : [],
     alternativeIngredients:
       ((row.alternativeIngredients ?? row.alternative_ingredients) as Recipe['alternativeIngredients']) ?? undefined,
     ...(nutritionalValues ? { nutritionalValues } : {}),
@@ -71,6 +101,7 @@ export function rowToRecipe(row: any): Recipe {
     hasIncompleteSourceInfo: Boolean(row.hasIncompleteSourceInfo ?? row.has_incomplete_source_info),
     isDemo: Boolean(row.isDemo ?? row.is_demo),
     nutritionCoverage: num(row.nutritionCoverage ?? row.nutrition_coverage) ?? undefined,
+    pipelineVersion: num(row.pipelineVersion ?? row.pipeline_version) ?? 0,
     createdAt: rawCreatedAt instanceof Date ? rawCreatedAt.toISOString() : (rawCreatedAt ?? new Date().toISOString()),
     updatedAt: rawUpdatedAt instanceof Date ? rawUpdatedAt.toISOString() : (rawUpdatedAt ?? new Date().toISOString()),
   };
@@ -102,6 +133,8 @@ export function recipeToRow(recipe: Recipe): Record<string, unknown> {
   return {
     visibility: recipe.visibility ?? 'private',
     source_url: recipe.sourceUrl ?? null,
+    source_url_normalized: recipe.sourceUrlNormalized ?? (recipe.sourceUrl ? normalizeUrl(recipe.sourceUrl) : null),
+    language: recipe.language ?? 'de',
     source_handle: formatAuthorHandle(recipe.sourceHandle) ?? null,
     parent_recipe_id: recipe.parentRecipeId ?? null,
     remix_prompt: recipe.remixPrompt ?? null,
@@ -116,8 +149,8 @@ export function recipeToRow(recipe: Recipe): Record<string, unknown> {
     tags: recipe.tags ?? [],
     equipment: recipe.equipment ?? [],
     tips: recipe.tips ?? [],
-    image_url: recipe.imageUrl ?? null,
-    image_urls: recipe.imageUrls ?? [],
+    image_url: sanitizeStorageUrl(recipe.imageUrl) ?? null,
+    image_urls: (recipe.imageUrls ?? []).map((u) => sanitizeStorageUrl(u)).filter((u): u is string => Boolean(u)),
     image_prompt: recipe.imagePrompt ?? null,
     is_ai_cover: recipe.isAiCover ?? false,
     transcript: recipe.transcript ?? null,
@@ -132,6 +165,7 @@ export function recipeToRow(recipe: Recipe): Record<string, unknown> {
     has_incomplete_source_info: recipe.hasIncompleteSourceInfo ?? false,
     is_demo: recipe.isDemo ?? false,
     nutrition_coverage: recipe.nutritionCoverage ?? null,
+    pipeline_version: recipe.pipelineVersion ?? CURRENT_RECIPE_PIPELINE_VERSION,
   };
 }
 
@@ -140,6 +174,8 @@ export function recipeToDrizzle(recipe: Recipe): typeof recipes.$inferInsert {
   return {
     visibility: recipe.visibility ?? 'private',
     sourceUrl: recipe.sourceUrl ?? null,
+    sourceUrlNormalized: recipe.sourceUrlNormalized ?? (recipe.sourceUrl ? normalizeUrl(recipe.sourceUrl) : null),
+    language: recipe.language ?? 'de',
     sourceHandle: formatAuthorHandle(recipe.sourceHandle) ?? null,
     parentRecipeId: recipe.parentRecipeId ?? null,
     remixPrompt: recipe.remixPrompt ?? null,
@@ -154,8 +190,8 @@ export function recipeToDrizzle(recipe: Recipe): typeof recipes.$inferInsert {
     tags: recipe.tags ?? [],
     equipment: recipe.equipment ?? [],
     tips: recipe.tips ?? [],
-    imageUrl: recipe.imageUrl ?? null,
-    imageUrls: recipe.imageUrls ?? [],
+    imageUrl: sanitizeStorageUrl(recipe.imageUrl) ?? null,
+    imageUrls: (recipe.imageUrls ?? []).map((u) => sanitizeStorageUrl(u)).filter((u): u is string => Boolean(u)),
     imagePrompt: recipe.imagePrompt ?? null,
     isAiCover: recipe.isAiCover ?? false,
     transcript: recipe.transcript ?? null,
@@ -170,6 +206,7 @@ export function recipeToDrizzle(recipe: Recipe): typeof recipes.$inferInsert {
     hasIncompleteSourceInfo: recipe.hasIncompleteSourceInfo ?? false,
     isDemo: recipe.isDemo ?? false,
     nutritionCoverage: recipe.nutritionCoverage !== undefined && recipe.nutritionCoverage !== null ? String(recipe.nutritionCoverage) : null,
+    pipelineVersion: recipe.pipelineVersion ?? CURRENT_RECIPE_PIPELINE_VERSION,
   };
 }
 

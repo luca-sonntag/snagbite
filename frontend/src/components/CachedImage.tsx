@@ -20,22 +20,15 @@ export default function CachedImage({
   alt,
   ...props
 }: CachedImageProps) {
-  const { src, isLoading } = useCachedImage(originalUrl);
+  const { src, isLoading, error } = useCachedImage(originalUrl);
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     setHasError(false);
   }, [src]);
 
-  if (isLoading && !src) {
-    return (
-      <div className={`relative overflow-hidden bg-gray-200/90 dark:bg-gray-800/90 animate-pulse flex items-center justify-center ${className}`}>
-        <div className="w-full h-full bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer-sweep pointer-events-none" />
-      </div>
-    );
-  }
-
-  if (!src || hasError) {
+  // Only show fallback/emoji if no URL was provided, an explicit loading error occurred, or fetching failed
+  if (!originalUrl || hasError || (error && !isLoading && !src)) {
     return fallbackComponent ? (
       <>{fallbackComponent}</>
     ) : (
@@ -47,6 +40,15 @@ export default function CachedImage({
         ) : (
           <ChefHat className="w-8 h-8 text-emerald-500/30 dark:text-emerald-400/25" />
         )}
+      </div>
+    );
+  }
+
+  // A URL was provided: while the image is fetching, compressing, or resolving, show the shimmer skeleton
+  if (!src || isLoading) {
+    return (
+      <div className={`relative overflow-hidden bg-gray-200/90 dark:bg-gray-800/90 animate-pulse flex items-center justify-center ${className}`}>
+        <div className="w-full h-full bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer-sweep pointer-events-none" />
       </div>
     );
   }

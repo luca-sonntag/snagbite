@@ -30,9 +30,6 @@ export interface Config {
   /** RapidAPI host for the social downloader. */
   RAPIDAPI_SOCIAL_HOST: string;
   GEMINI_API_KEY: string;
-  SUPABASE_URL?: string;
-  SUPABASE_PUBLISHABLE_KEY?: string;
-  SUPABASE_SECRET_KEY?: string;
   GEMINI_MODEL: string;
   /** Model used by the tool-using ingredient resolver. */
   GEMINI_RERANKER_MODEL: string;
@@ -72,6 +69,7 @@ export interface Config {
   ADMIN_EMAILS: string;
   HEALTHCHECK_WEBSITE_URL?: string;
   HEALTHCHECK_BACKEND_URL?: string;
+  HEALTHCHECK_WHISPER_URL?: string;
   NTFY_TOPIC?: string;
   TELEGRAM_BOT_TOKEN?: string;
   TELEGRAM_CHAT_ID?: string;
@@ -101,6 +99,15 @@ export interface Config {
   FAL_KEY?: string;
   /** BGBuster API key for background removal on ingredient icons. */
   BGBUSTER_API_KEY?: string;
+  // ── JEV Fast-Track Caption Guard ──
+  /** OpenRouter API key for JEV-1.13 decisions or general fallback. */
+  OPENROUTER_API_KEY?: string;
+  /** Direct TypeSafe API key for JEV-1.13 decisions. */
+  TYPESAFE_API_KEY?: string;
+  /** Master toggle for JEV/fast-track caption evaluation. Default true. */
+  JEV_ENABLED: boolean;
+  /** Model identifier for JEV decision evaluations (e.g. 'typesafe/jev-1.13'). */
+  JEV_MODEL: string;
   // ── S3 / Tigris Object Storage ──
   S3_ENDPOINT?: string;
   S3_REGION: string;
@@ -113,6 +120,10 @@ export interface Config {
   DATABASE_URL?: string;
   APP_URL?: string;
   STORAGE_STREAMING_URL?: string;
+  /** Secret key used to sign and verify ephemeral HMAC tickets for Cloudflare Whisper transcription. */
+  WHISPER_HMAC_SECRET: string;
+  /** Cloudflare Edge endpoint for Whisper audio transcription (e.g. https://whisper.snagbite.app/transcribe). */
+  CLOUDFLARE_WHISPER_ENDPOINT?: string;
 }
 
 // Validation helper
@@ -124,18 +135,17 @@ const getEnv = (key: string, defaultValue?: string): string => {
   return value;
 };
 
+export const DEFAULT_GEMINI_MODEL = 'gemini-3.1-flash-lite';
+
 export const config: Config = {
   PORT: parseInt(getEnv('PORT', '3000'), 10),
   RAPIDAPI_KEY: process.env.RAPIDAPI_KEY,
   RAPIDAPI_SOCIAL_HOST: getEnv('RAPIDAPI_SOCIAL_HOST', 'social-download-all-in-one.p.rapidapi.com'),
   GEMINI_API_KEY: getEnv('GEMINI_API_KEY'),
-  SUPABASE_URL: process.env.SUPABASE_URL,
-  SUPABASE_PUBLISHABLE_KEY: process.env.SUPABASE_PUBLISHABLE_KEY,
-  SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
-  GEMINI_MODEL: getEnv('GEMINI_MODEL', 'gemini-3.1-flash-lite'),
+  GEMINI_MODEL: process.env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL,
   // Defaults to the same generation as GEMINI_MODEL: a stale default here silently
   // ran ingredient matching on a two-generation-old model whenever the env var was unset.
-  GEMINI_RERANKER_MODEL: getEnv('GEMINI_RERANKER_MODEL', 'gemini-3.1-flash-lite'),
+  GEMINI_RERANKER_MODEL: process.env.GEMINI_RERANKER_MODEL?.trim() || process.env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL,
   INGREDIENT_RESOLVER_ENABLED: getEnv('INGREDIENT_RESOLVER_ENABLED', 'true') === 'true',
   INGREDIENT_RESOLVER_MAX_TURNS: parseInt(getEnv('INGREDIENT_RESOLVER_MAX_TURNS', '5'), 10),
   INGREDIENT_RESOLVER_CONCURRENCY: parseInt(getEnv('INGREDIENT_RESOLVER_CONCURRENCY', '6'), 10),
@@ -164,6 +174,7 @@ export const config: Config = {
   ADMIN_EMAILS: getEnv('ADMIN_EMAILS', ''),
   HEALTHCHECK_WEBSITE_URL: process.env.HEALTHCHECK_WEBSITE_URL,
   HEALTHCHECK_BACKEND_URL: process.env.HEALTHCHECK_BACKEND_URL,
+  HEALTHCHECK_WHISPER_URL: process.env.HEALTHCHECK_WHISPER_URL,
   NTFY_TOPIC: process.env.NTFY_TOPIC,
   TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
   TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID,
@@ -179,6 +190,10 @@ export const config: Config = {
   GENERATE_RECIPE_COVERS: getEnv('GENERATE_RECIPE_COVERS', 'true') === 'true',
   FAL_KEY: process.env.FAL_KEY || process.env.FLUX_API_KEY,
   BGBUSTER_API_KEY: process.env.BGBUSTER_API_KEY,
+  OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+  TYPESAFE_API_KEY: process.env.TYPESAFE_API_KEY,
+  JEV_ENABLED: getEnv('JEV_ENABLED', 'true') === 'true',
+  JEV_MODEL: getEnv('JEV_MODEL', 'typesafe/jev-1.13'),
   S3_ENDPOINT: process.env.S3_ENDPOINT || process.env.AWS_ENDPOINT_URL_S3,
   S3_REGION: getEnv('S3_REGION', 'auto'),
   S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID,
@@ -190,6 +205,9 @@ export const config: Config = {
   DATABASE_URL: process.env.DATABASE_URL,
   APP_URL: process.env.APP_URL,
   STORAGE_STREAMING_URL: process.env.STORAGE_STREAMING_URL,
+  WHISPER_HMAC_SECRET: getEnv('WHISPER_HMAC_SECRET', 'dev-whisper-hmac-secret-change-in-production'),
+  CLOUDFLARE_WHISPER_ENDPOINT:
+    process.env.CLOUDFLARE_WHISPER_ENDPOINT || 'https://snagbite-whisper-proxy.snagbite.workers.dev',
 };
 
 /**

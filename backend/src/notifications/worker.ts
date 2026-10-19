@@ -276,7 +276,7 @@ export async function notificationTick(options: { force?: boolean } = {}): Promi
     const users = await listNotificationUsers();
     result.usersScanned = users.length;
     if (users.length === 0) {
-      result.logs.push('No users with notifications_enabled === true found in Supabase Auth user_metadata.');
+      result.logs.push('No users with notifications_enabled === true found in user metadata.');
     }
     for (const user of users) {
       const log = await processUser(user, now, options.force);

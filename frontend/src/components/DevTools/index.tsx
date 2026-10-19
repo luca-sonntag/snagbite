@@ -3,11 +3,12 @@ import { createDevToolsApi } from './devController';
 import { useDevOverlays } from './useDevOverlays';
 import { DevOverlayHost } from './DevOverlayHost';
 import { registerErudaSnippets } from './erudaSnippets';
+import { useAuth } from '../../context/AuthContext';
+import { useDevToolsActive } from '../../utils/dev';
 
 export const DevTools: React.FC = () => {
-  const isDevMode =
-    import.meta.env.DEV ||
-    (typeof window !== 'undefined' && localStorage.getItem('snagbite_dev_tools') === 'true');
+  const { isAdmin } = useAuth();
+  const isDevMode = useDevToolsActive(isAdmin);
 
   const devApi = useMemo(() => (isDevMode ? createDevToolsApi() : null), [isDevMode]);
   const { activeOverlay, closeDevOverlay } = useDevOverlays();

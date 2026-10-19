@@ -2,6 +2,7 @@ import { AppUpdate, AppUpdateAvailability } from '@capawesome/capacitor-app-upda
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { isNative } from '../native';
+import { isDevToolsFlagEnabled } from './dev';
 
 /**
  * Google Play Store In-App Updates utility for Android.
@@ -10,7 +11,7 @@ import { isNative } from '../native';
  */
 
 const CHECK_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
-const BOOT_CHECK_DELAY_MS = 4000;
+const CHECK_TIMEOUT_MS = 3000;
 
 let initialized = false;
 let checkInFlight = false;
@@ -51,7 +52,12 @@ export async function checkAndApplyNativeUpdate(options?: { manual?: boolean }):
   lastCheckAt = Date.now();
 
   try {
-    const info = await AppUpdate.getAppUpdateInfo();
+    const info = await Promise.race([
+      AppUpdate.getAppUpdateInfo(),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Play Store update check timeout')), CHECK_TIMEOUT_MS)
+      ),
+    ]);
     const currentVersionName = info.currentVersionName;
     const currentVersionCode = info.currentVersionCode;
     const availableVersionName = info.availableVersionName;
@@ -111,14 +117,12 @@ export function initNativeAppUpdates(): void {
     void checkAndApplyNativeUpdate();
   });
 
-  // Delayed check after cold boot
-  setTimeout(() => {
-    void checkAndApplyNativeUpdate();
-  }, BOOT_CHECK_DELAY_MS);
+  // Immediate check on startup without artificial delay
+  void checkAndApplyNativeUpdate();
 }
 
 // Dev helper exposed on window for quick console testing
-if (typeof window !== 'undefined' && (import.meta.env.DEV || localStorage.getItem('snagbite_dev_tools') === 'true')) {
+if (typeof window !== 'undefined' && (import.meta.env.DEV || isDevToolsFlagEnabled())) {
   (window as unknown as { checkNativeAppUpdate?: () => Promise<NativeUpdateResult> }).checkNativeAppUpdate = () =>
     checkAndApplyNativeUpdate({ manual: true });
 }

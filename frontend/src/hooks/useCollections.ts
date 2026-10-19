@@ -49,13 +49,13 @@ export function useCollections() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, user?.id]);
 
-  const createCollection = async (name: string, emoji?: string | null, position?: number) => {
+  const createCollection = async (name: string, position?: number) => {
     try {
       const headers = await getHeaders();
       const response = await fetch(apiUrl('/api/collections'), {
         method: 'POST',
         headers,
-        body: JSON.stringify({ name, emoji, position }),
+        body: JSON.stringify({ name, position }),
       });
       const data = await response.json();
       if (response.ok && data.success) {

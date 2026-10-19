@@ -1,8 +1,13 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { APP_OPEN_RESUME_MIN_BG_MS } from '../env';
 import { registerAppStateListener, clearRecipeReadyNotification } from '../native';
+import {
+  hasCompletedFirstExtraction,
+  markFirstExtractionCompleted,
+  hasSeenPreAdNotice,
+  triggerPreAdNotice,
+} from '../utils/ads';
 import type { UseAppAdsProps } from '../types/app';
-
 
 export function useAppAds({
   user,
@@ -11,22 +16,85 @@ export function useAppAds({
   isPending,
   recipe,
   showOnboarding,
+  savedRecipesCount = 0,
+  historyLoaded = false,
   onShowPreAdNotice,
 }: UseAppAdsProps) {
+  const [showExtractionAd, setShowExtractionAd] = useState(false);
+  const wasPendingRef = useRef(false);
+  const isGraceExtractionRef = useRef(false);
   const appOpenAttemptedRef = useRef(false);
   const appBackgroundedAtRef = useRef<number | null>(null);
   const appOpenBlockedRef = useRef(true);
   appOpenBlockedRef.current = isPremium || isPending || !!recipe || showOnboarding;
 
+  // Mark first-extraction grace period as used for existing users who already have saved recipes
+  useEffect(() => {
+    if (historyLoaded && savedRecipesCount > 0 && !isPending) {
+      markFirstExtractionCompleted();
+    }
+  }, [historyLoaded, savedRecipesCount, isPending]);
+
+  // Gate foreground extraction ads:
+  // 1st ever extraction -> 100% ad-free & consent-free grace period (Wow-Moment first)
+  // 2nd+ extraction -> PreAdTransparencySheet priming (if not seen) -> UMP Consent -> MREC Ad
+  useEffect(() => {
+    if (!isPending || isPremium) {
+      if (wasPendingRef.current && !isPending) {
+        markFirstExtractionCompleted();
+        isGraceExtractionRef.current = false;
+      }
+      wasPendingRef.current = isPending;
+      setShowExtractionAd(false);
+      return;
+    }
+
+    if (!wasPendingRef.current) {
+      wasPendingRef.current = true;
+      const alreadyCompletedFirst = hasCompletedFirstExtraction() || savedRecipesCount > 0;
+
+      if (!alreadyCompletedFirst) {
+        isGraceExtractionRef.current = true;
+        setShowExtractionAd(false);
+        return;
+      }
+
+      isGraceExtractionRef.current = false;
+    }
+
+    if (isGraceExtractionRef.current) {
+      setShowExtractionAd(false);
+      return;
+    }
+
+    if (!hasSeenPreAdNotice()) {
+      setShowExtractionAd(false);
+      const proceedWithExtractionAd = () => {
+        if (wasPendingRef.current && !isGraceExtractionRef.current) {
+          setShowExtractionAd(true);
+        }
+      };
+
+      if (onShowPreAdNotice) {
+        onShowPreAdNotice(proceedWithExtractionAd);
+      } else {
+        triggerPreAdNotice(proceedWithExtractionAd);
+      }
+      return;
+    }
+
+    setShowExtractionAd(true);
+  }, [isPending, isPremium, savedRecipesCount, onShowPreAdNotice]);
+
   const executeAppOpenFlow = () => {
     if (appOpenBlockedRef.current) return;
 
     import('../utils/ads')
-      .then(({ maybeShowAppOpenAd, appOpenAdWouldShow, hasSeenPreAdNotice, triggerPreAdNotice }) => {
+      .then(({ maybeShowAppOpenAd, appOpenAdWouldShow }) => {
         if (appOpenBlockedRef.current) return;
 
         // Free-tier gating: If user hasn't seen the pre-ad transparency notice yet,
-        // show the notice before ever showing an app-open ad.
+        // show the notice before ever initializing AdMob / showing an app-open ad.
         if (!isPremium && !hasSeenPreAdNotice()) {
           if (appOpenAdWouldShow()) {
             const proceedWithAd = () => {
@@ -48,23 +116,16 @@ export function useAppAds({
       .catch((err) => console.error('Failed to load ads module:', err));
   };
 
-  // Initialize Billing and Ads once user is resolved
+  // Initialize RevenueCat billing once user is resolved.
+  // AdMob initialization (+ EU UMP consent) is intentionally deferred until the first ad is due.
   useEffect(() => {
     if (authLoading || !user) return;
 
-    // Initialize RevenueCat billing for the logged-in user
     import('../utils/purchase')
       .then(({ initBilling }) => {
         initBilling(user.id);
       })
       .catch((err) => console.error('Failed to load billing module:', err));
-
-    // Initialize AdMob (+ EU consent)
-    import('../utils/ads')
-      .then(({ initAds }) => {
-        initAds();
-      })
-      .catch((err) => console.error('Failed to load ads module:', err));
   }, [authLoading, user]);
 
   // App-Open ad: a full-screen interstitial shown ONCE on a neutral cold start
@@ -76,7 +137,11 @@ export function useAppAds({
 
     import('../utils/ads')
       .then(({ appOpenAdWouldShow, preloadAppOpenAd }) => {
-        if (appOpenAdWouldShow()) preloadAppOpenAd();
+        // Only preload upfront if the user has already confirmed the pre-ad notice,
+        // so preloading never triggers UMP consent before our priming sheet.
+        if (appOpenAdWouldShow() && hasSeenPreAdNotice()) {
+          preloadAppOpenAd();
+        }
       })
       .catch(() => {});
 
@@ -103,7 +168,9 @@ export function useAppAds({
 
       import('../utils/ads')
         .then(({ appOpenAdWouldShow, preloadAppOpenAd }) => {
-          if (appOpenAdWouldShow()) preloadAppOpenAd();
+          if (appOpenAdWouldShow() && hasSeenPreAdNotice()) {
+            preloadAppOpenAd();
+          }
         })
         .catch(() => {});
 
@@ -118,4 +185,6 @@ export function useAppAds({
       cleanup();
     };
   }, [isPremium]);
+
+  return { showExtractionAd };
 }

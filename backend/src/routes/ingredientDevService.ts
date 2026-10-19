@@ -11,6 +11,7 @@ import {
   getIngredientSlug,
   getGenerationCostsSummary,
 } from '../ingredientImageService.js';
+import { findIngredientImageInS3Index } from '../storage/ingredientIconStorage.js';
 
 export function getFileMtimeMs(filename: string | null): number {
   if (!filename) return 0;
@@ -73,13 +74,16 @@ export async function fetchDevIngredientsList(query: Record<string, unknown>) {
     // Postgres offline in dev mode fallback
   }
 
-  const missingInDbCount = dbMappings.filter(m => !findExistingIngredientImage(m.mapping_key)).length;
+  const resolveExistingIcon = (key: string): string | null =>
+    findExistingIngredientImage(key) || findIngredientImageInS3Index(key);
+
+  const missingInDbCount = dbMappings.filter(m => !resolveExistingIcon(m.mapping_key)).length;
   let items: DevIngredientItem[] = [];
 
   if (source === 'mappings' || source === 'missing') {
     for (const m of dbMappings) {
       const key = m.mapping_key.toLowerCase().trim();
-      const filename = findExistingIngredientImage(key);
+      const filename = resolveExistingIcon(key);
       const hasImage = !!filename;
       if (source === 'missing' && hasImage) continue;
 
@@ -105,7 +109,7 @@ export async function fetchDevIngredientsList(query: Record<string, unknown>) {
 
     for (const prod of offResults) {
       const slug = getIngredientSlug(prod);
-      const filename = findExistingIngredientImage(prod.id) || (slug ? findExistingIngredientImage(slug) : null);
+      const filename = resolveExistingIcon(prod.id) || (slug ? resolveExistingIcon(slug) : null);
       const hasImage = !!filename;
       const v = getFileMtimeMs(filename);
 

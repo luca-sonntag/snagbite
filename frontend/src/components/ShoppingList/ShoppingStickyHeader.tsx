@@ -31,6 +31,10 @@ export const ShoppingStickyHeader: React.FC<ShoppingStickyHeaderProps> = ({
   onClearChecked,
   onClearAll,
 }) => {
+  if (totalCount === 0) {
+    return null;
+  }
+
   return (
     <div
       id="shopping-sticky-header"

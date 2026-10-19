@@ -54,7 +54,7 @@ export default function CookbookGreetingHeader({
   const { greetingText, subtitleText } = useCookbookGreeting();
 
   return (
-    <header className="flex flex-col gap-2 pt-2 pb-0.5 select-none">
+    <header id="tour-catalog-search-filter" className="flex flex-col gap-2 pt-2 pb-0.5 select-none">
       <div className="flex items-start justify-between gap-2">
         {/* Left: Contextual Greeting (No Emojis) */}
         <div className="flex flex-col min-w-0">

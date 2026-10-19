@@ -12,7 +12,7 @@ Dieses Dokument bietet eine vollständige betriebswirtschaftliche Analyse des Pr
 * **Extrem hohe Rohertragsmarge:** Eine vollständige Rezept-Extraktion (multimodaler Gemini-3.1-Flash-Lite-Call + FLUX.1 [schnell] HD-Coverbild + Zutatennormalisierung) kostet **ca. 0,0078 $ (0,78 Cent)**. Mit Gemini 2.5 Flash-Lite sinkt dies sogar auf **0,0049 $ (0,49 Cent)**.
 * **Der „Jahresabo-Cashflow-Booster“:** Ein Kunde, der das Jahresabo für 29,99 € abschließt, spült sofort **ca. 23,14 $ Netto-Cash** in die Kasse. Seine variablen KI-Kosten über ein ganzes Jahr intensiver Nutzung (25 Rezepte/Monat = 300 Rezepte/Jahr) betragen lediglich **ca. 2,52 $ / Jahr**. **Ein einziger Jahresabonnent finanziert seine eigenen KI-Inferenzkosten für über 9 Jahre im Voraus!**
 * **Der „Rewarded-Ad-Arbitrage“-Effekt:** Wenn ein Free-Nutzer sein tägliches Limit (3 Extraktionen) erreicht hat und ein Rewarded Video Ad ansieht, generiert dieser View in DACH/Tier-1 durchschnittlich **0,018 $ bis 0,025 $**. Die durch den Bonus-Credit verursachte Extraktion kostet jedoch nur **0,0078 $**. **Jede werbefinanzierte Extraktion ist ab Tag 1 netto profitabel (+0,010 $ bis +0,017 $ Reingewinn pro Ad-Watch).**
-* **Niedrige Fixkosten:** Dank Supabase, Railway und Google Cloud liegen die monatlichen Fixkosten in der Startphase bei unter 10–35 $ / Monat. Der Break-Even-Punkt wird bereits bei **unter 12 zahlenden Abonnenten** erreicht.
+* **Niedrige Fixkosten:** Dank Railway (PostgreSQL & Tigris S3 Storage) und Google Cloud liegen die monatlichen Fixkosten in der Startphase bei unter 10–35 $ / Monat. Der Break-Even-Punkt wird bereits bei **unter 12 zahlenden Abonnenten** erreicht.
 
 ---
 
@@ -34,7 +34,7 @@ Dieses Dokument bietet eine vollständige betriebswirtschaftliche Analyse des Pr
 
 ---
 
-### B. Exakte Server- & Infrastrukturkosten: Railway & Supabase (Tiers, Quoten & reale Abrechnung)
+### B. Exakte Server- & Infrastrukturkosten: Railway Native PostgreSQL & Tigris S3 Storage
 
 #### 1. Railway (Node.js API-Server & Extraktions-Worker)
 Railway rechnet sekundengenau nach verbrauchten Hardwareressourcen ab. Die monatliche Grundgebühr der Pläne fungiert als vollwertiges Nutzungsguthaben:
@@ -53,42 +53,30 @@ Railway rechnet sekundengenau nach verbrauchten Hardwareressourcen ab. Die monat
 
 ---
 
-#### 2. Supabase (Postgres-Datenbank, Auth, Realtime & Storage)
-* **Free Plan (0,00 $ / Monat) – Der „Zero-Cost“-Start:**
-  * **50.000 MAU (Auth) inklusive!**
-  * **500 MB Datenbankgröße inklusive:** Reicht für **ca. 30.000 bis 50.000 Rezepte** (komprimiertes JSONB).
-  * **1 GB File Storage inklusive:** Bei ~80 KB pro FLUX.1 Cover-JPEG reicht 1 GB für **ca. 12.500 Cover-Bilder**!
-  * **5 GB Egress inklusive.**
-  * **Wichtig – Warum das „7-Tage-Pausieren“ bei uns NIEMALS greift:**
-    * Supabase pausiert inaktive Free-Projekte nur, wenn 7 Tage lang keine Datenbank-Abfragen eingehen.
-    * Unser Railway-Backend führt jedoch den Queue-Worker (`queue.ts`) aus, der `claim_next_job` und Heartbeat-Queries **alle 2 Sekunden 24/7** an Postgres sendet. Zusätzlich generieren aktive Nutzer tägliche Zugriffe.
-    * **Technisches Ergebnis:** Die Datenbank ist permanent aktiv und wird von Supabase **niemals schlafen gelegt**.
-    * **Strategischer Hebel:** Du kannst das Projekt von Tag 1 an bis zu ca. **3.000–5.000 Nutzern bzw. 12.500 Rezepten für 0,00 $ / Monat Datenbankkosten** betreiben!
-* **Pro Plan (25,00 $ / Monat pro Organisation) – Nahtloser Wechsel bei Scale:**
-  * Notwendig erst, wenn File Storage (> 1 GB bzw. > 12.500 Coverbilder) oder Datenbankgröße (> 500 MB) überschritten werden.
-  * **100.000 MAU inklusive!**
-  * **8 GB Datenbank & 100 GB File Storage** (für >1 Mio. Rezepte und Coverbilder).
-  * **250 GB Egress & $10 Compute-Credit.**
-  * Tägliche automatisierte Backups (7 Tage Historie).
-* **Compute-Add-ons (erst bei massiver Concurrency ab >50k Nutzern):**
-  * *Micro (inklusive):* 2 vCPU Shared, 1 GB RAM $\rightarrow$ **0,00 $ Aufpreis** (reicht bis 50.000 MAU).
-  * *Small (ab 50.000 MAU):* 2 vCPU Dedicated, 2 GB RAM $\rightarrow$ **+15,00 $ / Monat**.
-  * *Medium (ab 100.000 MAU):* 2 vCPU Dedicated, 4 GB RAM $\rightarrow$ **+60,00 $ / Monat**.
+#### 2. Railway Managed PostgreSQL & Tigris S3 Storage (Better-Auth)
+* **Railway Managed PostgreSQL Plugin:**
+  * Direkte Postgres-Instanz innerhalb des gleichen Railway-Private-Networks (Latenz <1 ms, keine Third-Party-Ratelimits oder Connection-Pooler-Limits).
+  * Verwaltet via Drizzle ORM (`npm run db:push:prod`).
+  * Better-Auth speichert Auth-User, Accounts und Sessions direkt in Postgres (keine Drittanbieter-Auth-Kosten pro MAU).
+  * Kosten: Abrechnung nach RAM/Disk-Nutzung (ca. 2–5 $ / Monat in der Basisphase).
+* **Tigris S3 Object Storage (Railway integriert):**
+  * S3-kompatibler Object Storage mit globalem CDN für Recipe Covers (`recipe-covers`), User Photos (`recipe-photos`, `cook-photos`) und OTA Bundles (`app-bundles`).
+  * 0 $ Egress-Gebühren innerhalb des Railway/Fly-Ökosystems, Speicher ab ca. 0,015 $ / GB / Monat.
+* **Vorteile gegenüber Third-Party BaaS:**
+  * Keine separaten Auth-Tiers, kein 7-Tage-Sleep, 100%ige Datenhoheit, blitzschnelle Drizzle-Migrationen.
 
 ---
 
 #### 3. Konkrete Zuordnungs-Matrix: Welche Tiers zahlen wir bei welcher Nutzerzahl?
 
-*(Unter Ausnutzung des Supabase Free Tiers in der Bootstrap-Phase bis zum Erreichen der 1-GB-Storage-Grenze):*
-
-| MAU (Aktive Nutzer) | Railway Tier & Konfiguration | Railway Kosten / M. | Supabase Tier & Instanz | Supabase Kosten / M. | RapidAPI Scraper | Entwickler-Accounts (Play Store / Apple) | **Gesamte Server- & Basiskosten / Monat** |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **100** | **Hobby Plan** (0,2 vCPU, 512 MB) | **5,00 $** | **Free Plan** *(aktiv gehalten durch Worker)* | **0,00 $** | 0,00 $ *(Free)* | ~ 8,25 $ | **~ 13,25 $ / Monat** |
-| **1.000** | **Hobby Plan** (0,3 vCPU, 768 MB) | **7,00 $** | **Free Plan** *(unter 12.500 Covers)* | **0,00 $** | 10,00 $ *(Starter)* | ~ 8,25 $ | **~ 25,25 $ / Monat** |
-| **5.000** | **Pro Plan** (0,5 vCPU, 1 GB RAM) | **20,00 $** | **Pro Plan** *(Storage-Upgrade auf 100 GB)*| **25,00 $** | 30,00 $ *(Pro)* | ~ 8,25 $ | **~ 83,25 $ / Monat** |
-| **10.000** | **Pro Plan** (1 vCPU, 1,5 GB RAM) | **30,00 $** | **Pro Plan** (Micro Compute, 8 GB DB) | **25,00 $** | 50,00 $ *(Pro Plus)* | ~ 8,25 $ | **~ 113,25 $ / Monat** |
-| **50.000** | **Pro Plan** (2 Replicas, je 1 vCPU, 2 GB) | **65,00 $** | **Pro Plan + Small Compute** (+15 $) | **40,00 $** | 100,00 $ *(Ultra)* | ~ 8,25 $ | **~ 213,25 $ / Monat** |
-| **100.000** | **Pro Plan** (3 Replicas, 4 vCPU, 4 GB) | **120,00 $** | **Pro Plan + Medium Compute** (+60 $) | **85,00 $** | 150,00 $ *(Mega)* | ~ 8,25 $ | **~ 363,25 $ / Monat** |
+| MAU (Aktive Nutzer) | Railway Web & Worker | Railway PostgreSQL & Tigris S3 | RapidAPI Scraper | Entwickler-Accounts (Play Store / Apple) | **Gesamte Server- & Basiskosten / Monat** |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **100** | **5,00 $** (Hobby) | **5,00 $** | 0,00 $ *(Free)* | ~ 8,25 $ | **~ 18,25 $ / Monat** |
+| **1.000** | **7,00 $** (Hobby) | **7,00 $** | 10,00 $ *(Starter)* | ~ 8,25 $ | **~ 32,25 $ / Monat** |
+| **5.000** | **20,00 $** (Pro) | **15,00 $** | 30,00 $ *(Pro)* | ~ 8,25 $ | **~ 73,25 $ / Monat** |
+| **10.000** | **30,00 $** (Pro) | **25,00 $** | 50,00 $ *(Pro Plus)* | ~ 8,25 $ | **~ 113,25 $ / Monat** |
+| **50.000** | **65,00 $** (Pro Multi) | **45,00 $** | 100,00 $ *(Ultra)* | ~ 8,25 $ | **~ 218,25 $ / Monat** |
+| **100.000** | **120,00 $** (Pro Scale) | **80,00 $** | 150,00 $ *(Mega)* | ~ 8,25 $ | **~ 358,25 $ / Monat** |
 
 ---
 
@@ -176,15 +164,15 @@ Angenommene Basis-Verteilung der aktiven Nutzer (MAU):
 
 ### A. Basis-Szenario: 8 % Premium-Conversion (35% Monats- / 65% Jahresabo)
 
-| MAU (Aktive Nutzer) | Brutto-Einnahmen (AdMob + Abos) | Store-Gebühren (15%) | Netto-Umsatz | Variable KI-Kosten (Gemini + FLUX) | Fixkosten (Railway + Supabase + Scraper) | **Monatlicher Reingewinn (Net Profit)** | **Netto-Marge** |
+| MAU (Aktive Nutzer) | Brutto-Einnahmen (AdMob + Abos) | Store-Gebühren (15%) | Netto-Umsatz | Variable KI-Kosten (Gemini + FLUX) | Fixkosten (Railway + DB/S3 + Scraper) | **Monatlicher Reingewinn (Net Profit)** | **Netto-Marge** |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **100** | 35,20 $ | 3,80 $ | 31,40 $ | 6,40 $ | **13,25 $** *(Supabase Free Tier)* | **+ 11,75 $** *(Sofort profitabel!)*| **37,4 %** |
-| **500** | 176,00 $ | 19,00 $ | 157,00 $ | 32,00 $ | **20,00 $** *(Supabase Free Tier)* | **+ 105,00 $** | **66,9 %** |
-| **1.000** | 352,00 $ | 38,00 $ | 314,00 $ | 64,00 $ | **25,25 $** *(Supabase Free Tier)* | **+ 224,75 $** | **71,6 %** |
-| **5.000** | 1.760,00 $ | 190,00 $ | 1.570,00 $ | 320,00 $ | **83,25 $** *(Upgrade Pro DB)* | **+ 1.166,75 $** | **74,3 %** |
+| **100** | 35,20 $ | 3,80 $ | 31,40 $ | 6,40 $ | **18,25 $** | **+ 6,75 $** *(Sofort profitabel!)*| **21,5 %** |
+| **500** | 176,00 $ | 19,00 $ | 157,00 $ | 32,00 $ | **25,00 $** | **+ 100,00 $** | **63,7 %** |
+| **1.000** | 352,00 $ | 38,00 $ | 314,00 $ | 64,00 $ | **32,25 $** | **+ 217,75 $** | **69,3 %** |
+| **5.000** | 1.760,00 $ | 190,00 $ | 1.570,00 $ | 320,00 $ | **73,25 $** | **+ 1.176,75 $** | **75,0 %** |
 | **10.000** | 3.520,00 $ | 380,00 $ | 3.140,00 $ | 640,00 $ | **113,25 $** | **+ 2.386,75 $** | **76,0 %** |
-| **50.000** | 17.600,00 $ | 1.900,00 $ | 15.700,00 $ | 3.200,00 $ | **213,25 $** | **+ 12.286,75 $** | **78,3 %** |
-| **100.000** | 35.200,00 $ | 3.800,00 $ | 31.400,00 $ | 6.400,00 $ | **363,25 $** | **+ 24.636,75 $** | **78,5 %** |
+| **50.000** | 17.600,00 $ | 1.900,00 $ | 15.700,00 $ | 3.200,00 $ | **218,25 $** | **+ 12.281,75 $** | **78,2 %** |
+| **100.000** | 35.200,00 $ | 3.800,00 $ | 31.400,00 $ | 6.400,00 $ | **358,25 $** | **+ 24.641,75 $** | **78,5 %** |
 
 ---
 
@@ -192,13 +180,13 @@ Angenommene Basis-Verteilung der aktiven Nutzer (MAU):
 
 Durch das attraktive Jahresangebot (**„29,99 € statt 59,88 € – nur 2,50 € / Monat“**) und In-App Trial-Aktionen steigt die Conversion-Rate im Food-Bereich typischerweise auf **12 %**:
 
-| MAU (Aktive Nutzer) | Netto-Umsatz / Monat | Variable KI-Kosten | Fixkosten (Railway + Supabase) | **Monatlicher Reingewinn (Net Profit)** | **Netto-Marge** |
+| MAU (Aktive Nutzer) | Netto-Umsatz / Monat | Variable KI-Kosten | Fixkosten (Railway + DB/S3) | **Monatlicher Reingewinn (Net Profit)** | **Netto-Marge** |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **1.000 Nutzer** | ~ 410,00 $ | ~ 74,00 $ | ~ 25,25 $ *(Supabase Free)* | **~ 310,75 $ / Monat** | **75,8 %** |
-| **5.000 Nutzer** | ~ 2.050,00 $ | ~ 370,00 $ | ~ 83,25 $ *(Upgrade Pro)* | **~ 1.596,75 $ / Monat** | **77,9 %** |
+| **1.000 Nutzer** | ~ 410,00 $ | ~ 74,00 $ | ~ 32,25 $ | **~ 303,75 $ / Monat** | **74,1 %** |
+| **5.000 Nutzer** | ~ 2.050,00 $ | ~ 370,00 $ | ~ 73,25 $ | **~ 1.606,75 $ / Monat** | **78,4 %** |
 | **10.000 Nutzer** | ~ 4.100,00 $ | ~ 740,00 $ | ~ 113,25 $ | **~ 3.246,75 $ / Monat** | **79,2 %** |
-| **50.000 Nutzer** | ~ 20.500,00 $ | ~ 3.700,00 $ | ~ 213,25 $ | **~ 16.586,75 $ / Monat** | **80,9 %** |
-| **100.000 Nutzer** | ~ 41.000,00 $ | ~ 7.400,00 $ | ~ 363,25 $ | **~ 33.236,75 $ / Monat** | **81,1 %** |
+| **50.000 Nutzer** | ~ 20.500,00 $ | ~ 3.700,00 $ | ~ 218,25 $ | **~ 16.581,75 $ / Monat** | **80,9 %** |
+| **100.000 Nutzer** | ~ 41.000,00 $ | ~ 7.400,00 $ | ~ 358,25 $ | **~ 33.241,75 $ / Monat** | **81,1 %** |
 
 ---
 

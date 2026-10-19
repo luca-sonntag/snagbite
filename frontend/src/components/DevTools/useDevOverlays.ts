@@ -10,7 +10,7 @@ import { subscribeDevOverlay, emitDevOverlay } from './devController';
 import { useDialog } from '../../context/DialogContext';
 import { useToast } from '../../context/ToastContext';
 import { triggerPreAdNotice } from '../../utils/ads';
-import { OTA_READY_EVENT } from '../../utils/otaUpdater';
+import { OTA_READY_EVENT, OTA_STATUS_EVENT } from '../../utils/otaUpdater';
 
 export function useDevOverlays() {
   const [activeOverlay, setActiveOverlay] = useState<ActiveDevOverlay | null>(null);
@@ -91,6 +91,18 @@ export function useDevOverlays() {
             detail: { bundleId, version },
           })
         );
+        window.dispatchEvent(
+          new CustomEvent(OTA_STATUS_EVENT, {
+            detail: { isUpdating: true },
+          })
+        );
+        setTimeout(() => {
+          window.dispatchEvent(
+            new CustomEvent(OTA_STATUS_EVENT, {
+              detail: { isUpdating: false },
+            })
+          );
+        }, 3000);
         setActiveOverlay(null);
         return;
       }

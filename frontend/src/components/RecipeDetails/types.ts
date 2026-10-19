@@ -1,7 +1,9 @@
-import type { Recipe, Ingredient } from '../../types';
+import type { Recipe, Ingredient, ProgressData } from '../../types';
 
 export interface RecipeDetailsProps {
   recipe: Recipe;
+  isExtracting?: boolean;
+  progress?: ProgressData | null;
   onAddIngredients?: (ingredients: Ingredient[], recipeId: string, recipeTitle: string) => Promise<boolean> | boolean | void;
   onDelete?: () => void;
   reelUrl?: string;
@@ -19,6 +21,8 @@ export interface RecipeDetailsProps {
   flags?: string[];
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
+  getAccessToken?: () => Promise<string | null>;
+  onCoverUpdated?: (recipeId: string, imageUrl: string, isAiCover: boolean) => void;
 }
 
 export interface RecipeHeaderProps {
@@ -35,12 +39,15 @@ export interface RecipeHeaderProps {
   parentRecipeTitle?: string | null;
   onAssignCollections?: () => void;
   onManageFlags?: () => void;
+  onShareWithFriends?: () => void;
   flags?: string[];
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
   cookRefreshKey?: number;
   onRemixClick?: () => void;
   totalTimeLabel?: string | null;
+  isAwaitingCover?: boolean;
+  isExtracting?: boolean;
 }
 
 export type RecipeSectionId = 'ingredients' | 'instructions' | 'details';

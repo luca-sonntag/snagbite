@@ -19,7 +19,6 @@ export interface Collection {
   id: string;
   userId: string;
   name: string;
-  emoji?: string | null;
   position: number;
   createdAt: string;
   updatedAt: string;

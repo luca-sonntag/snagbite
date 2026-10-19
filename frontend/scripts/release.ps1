@@ -15,16 +15,28 @@
     Version bump type: 'none' (default), 'patch', 'minor', 'major'
     Only affects versionName. versionCode always increments by 1.
 
+.PARAMETER Artifact
+    Target build artifact: 'aab' (default for Play Store), 'apk' (for Firebase / Direct Install), or 'both'.
+
+.PARAMETER Env
+    Target backend environment: 'prod' (default, uses .env.production) or 'dev' (uses .env.development -> Railway Dev backend & DB).
+
 .EXAMPLE
-    .\release.ps1                # Just increment versionCode
-    .\release.ps1 -Bump patch    # 1.0.0 -> 1.0.1 + versionCode++
-    .\release.ps1 -Bump minor    # 1.0.1 -> 1.1.0 + versionCode++
-    .\release.ps1 -Bump major    # 1.1.0 -> 2.0.0 + versionCode++
+    .\release.ps1                        # Just increment versionCode, build AAB
+    .\release.ps1 -Bump patch            # 1.0.0 -> 1.0.1 + versionCode++, build AAB
+    .\release.ps1 -Artifact apk          # Build signed APK for Firebase testers (prod)
+    .\release.ps1 -Artifact apk -Env dev # Build signed APK connected to Dev Backend & DB
+    .\release.ps1 -Artifact both         # Build both signed AAB and APK
 #>
 
 param(
     [ValidateSet('none', 'patch', 'minor', 'major')]
-    [string]$Bump = 'none'
+    [string]$Bump = 'none',
+    [ValidateSet('aab', 'apk', 'both')]
+    [string]$Artifact = 'aab',
+    [ValidateSet('prod', 'dev')]
+    [string]$Env = 'prod',
+    [switch]$Clean
 )
 
 $ErrorActionPreference = 'Stop'
@@ -47,18 +59,18 @@ function Read-DotEnvValue {
 }
 
 # -- 0. Frontend env guards -------------------------------------------
-# `npm run build` (production mode) reads .env.production, then .env for any
-# variable .env.production doesn't define. Production builds must pin the production backend API.
-$prodEnvPath = "$frontendDir\.env.production"
-$frontendApiUrl = Read-DotEnvValue $prodEnvPath 'VITE_API_BASE_URL'
+$targetEnvPath = if ($Env -eq 'dev') { "$frontendDir\.env.development" } else { "$frontendDir\.env.production" }
+$frontendApiUrl = Read-DotEnvValue $targetEnvPath 'VITE_API_BASE_URL'
 if (-not $frontendApiUrl) {
-    Write-Error "VITE_API_BASE_URL is missing/empty in $prodEnvPath. Production builds must pin the production backend URL."
+    Write-Error "VITE_API_BASE_URL is missing/empty in $targetEnvPath."
     exit 1
 }
-foreach ($envFile in @($prodEnvPath, "$frontendDir\.env")) {
-    if ((Read-DotEnvValue $envFile 'VITE_TEST_LOGIN') -eq 'true') {
-        Write-Error "VITE_TEST_LOGIN=true is set in $envFile - refusing to build a test-login release."
-        exit 1
+if ($Env -eq 'prod') {
+    foreach ($envFile in @($targetEnvPath, "$frontendDir\.env")) {
+        if ((Read-DotEnvValue $envFile 'VITE_TEST_LOGIN') -eq 'true') {
+            Write-Error "VITE_TEST_LOGIN=true is set in $envFile - refusing to build a test-login release."
+            exit 1
+        }
     }
 }
 
@@ -105,12 +117,19 @@ Write-Host "  +------------------------------------------+" -ForegroundColor Cya
 Write-Host ""
 
 # -- 5. Build frontend ------------------------------------------------
-Write-Host "[1/4] Building frontend..." -ForegroundColor Yellow
+Write-Host "[1/4] Building frontend ($Env -> $frontendApiUrl)..." -ForegroundColor Yellow
 Push-Location $frontendDir
+$prevViteApiUrl = $env:VITE_API_BASE_URL
+$env:VITE_API_BASE_URL = $frontendApiUrl
 try {
-    npm run build
+    if ($Env -eq 'dev') {
+        npm run build:dev
+    } else {
+        npm run build
+    }
     if ($LASTEXITCODE -ne 0) { throw "Frontend build failed" }
 } finally {
+    $env:VITE_API_BASE_URL = $prevViteApiUrl
     Pop-Location
 }
 Write-Host "  Frontend build complete." -ForegroundColor Green
@@ -126,8 +145,8 @@ try {
 }
 Write-Host "  Capacitor sync complete." -ForegroundColor Green
 
-# -- 7. Build AAB -----------------------------------------------------
-Write-Host "[3/4] Building release AAB..." -ForegroundColor Yellow
+# -- 7. Build Native Artifact(s) --------------------------------------
+Write-Host "[3/4] Building release artifact(s) ($Artifact)..." -ForegroundColor Yellow
 Push-Location $androidDir
 try {
     # Check for active live-reload server configuration
@@ -139,39 +158,61 @@ try {
         }
     }
 
-    # Clean intermediate build cache to ensure stale configurations are not packaged
-    Write-Host "  Cleaning Gradle build cache..."
-    & .\gradlew.bat clean
-    if ($LASTEXITCODE -ne 0) { throw "Gradle clean failed" }
+    # Clean intermediate build cache only if explicitly requested (-Clean)
+    if ($Clean) {
+        Write-Host "  Cleaning Gradle build cache (-Clean)..."
+        & .\gradlew.bat clean
+        if ($LASTEXITCODE -ne 0) { throw "Gradle clean failed" }
+    }
 
-    & .\gradlew.bat bundleRelease
-    if ($LASTEXITCODE -ne 0) { throw "Gradle bundleRelease failed" }
+    if ($Artifact -in @('aab', 'both')) {
+        Write-Host "  Building signed AAB..." -ForegroundColor Yellow
+        & .\gradlew.bat bundleRelease
+        if ($LASTEXITCODE -ne 0) { throw "Gradle bundleRelease failed" }
+    }
+    if ($Artifact -in @('apk', 'both')) {
+        Write-Host "  Building signed APK..." -ForegroundColor Yellow
+        & .\gradlew.bat assembleRelease
+        if ($LASTEXITCODE -ne 0) { throw "Gradle assembleRelease failed" }
+    }
 } finally {
     Pop-Location
 }
-Write-Host "  AAB build complete." -ForegroundColor Green
+Write-Host "  Build complete." -ForegroundColor Green
 
-# -- 8. Copy AAB to releases/ folder ----------------------------------
-Write-Host "[4/4] Copying AAB to releases/..." -ForegroundColor Yellow
-$aabSource = "$androidDir\app\build\outputs\bundle\release\app-release.aab"
+# -- 8. Copy artifact(s) to releases/ folder --------------------------
+Write-Host "[4/4] Copying artifact(s) to releases/..." -ForegroundColor Yellow
 $releasesDir = "$frontendDir\releases"
 if (-not (Test-Path $releasesDir)) {
     New-Item -ItemType Directory -Path $releasesDir | Out-Null
 }
 
 $timestamp = Get-Date -Format "yyyy-MM-dd_HHmmss"
-$aabDest = "$releasesDir\snagbite-v${newName}-vc${newCode}-${timestamp}.aab"
-Copy-Item $aabSource $aabDest
+$envSuffix = if ($Env -eq 'dev') { '-dev' } else { '' }
+
+if ($Artifact -in @('aab', 'both')) {
+    $aabSource = "$androidDir\app\build\outputs\bundle\release\app-release.aab"
+    $aabDest = "$releasesDir\snagbite-v${newName}${envSuffix}-vc${newCode}-${timestamp}.aab"
+    Copy-Item $aabSource $aabDest
+}
+
+if ($Artifact -in @('apk', 'both')) {
+    $apkSource = "$androidDir\app\build\outputs\apk\release\app-release.apk"
+    $apkDest = "$releasesDir\snagbite-v${newName}${envSuffix}-vc${newCode}-${timestamp}.apk"
+    Copy-Item $apkSource $apkDest
+}
 
 # -- 9. Cap open-ended stale OTA bundles in DB ----------------------
-Write-Host "[5/5] Capping stale OTA bundles in DB..." -ForegroundColor Yellow
-Cap-StaleAppBundles -NewVersionCode $newCode
+Write-Host "[5/5] Capping stale OTA bundles in DB ($Env)..." -ForegroundColor Yellow
+Cap-StaleAppBundles -NewVersionCode $newCode -Env $Env
 
 Write-Host ""
-Write-Host "  [OK] Release AAB ready!" -ForegroundColor Green
-Write-Host "  AAB: $aabDest" -ForegroundColor White
+Write-Host "  [OK] Release artifact(s) ready!" -ForegroundColor Green
+if ($Artifact -in @('aab', 'both')) {
+    Write-Host "  AAB: $aabDest" -ForegroundColor White
+}
+if ($Artifact -in @('apk', 'both')) {
+    Write-Host "  APK: $apkDest" -ForegroundColor White
+}
 Write-Host "  versionName: $newName | versionCode: $newCode" -ForegroundColor White
-Write-Host ""
-Write-Host "  Next: Upload to Google Play Console" -ForegroundColor DarkGray
-Write-Host "  https://play.google.com/console" -ForegroundColor DarkGray
 Write-Host ""

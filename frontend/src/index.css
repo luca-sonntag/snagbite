@@ -46,6 +46,7 @@
 }
 
 @import "@heroui/styles";
+@import "./styles/spotlightTour.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -237,6 +238,36 @@ html.dark body {
 
 .animate-shimmer-sweep {
   animation: shimmer-sweep 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Extraction Floating Logo Animations */
+@keyframes extraction-breathe {
+  0%, 100% {
+    transform: scale(0.94);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+.animate-extraction-breathe {
+  animation: extraction-breathe 2.6s ease-in-out infinite;
+}
+
+@keyframes spin-dynamic {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(190deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-dynamic {
+  animation: spin-dynamic 2.8s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
 }
 
 @keyframes tine-bounce {

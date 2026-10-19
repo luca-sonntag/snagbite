@@ -5,13 +5,20 @@ import { CapacitorHttp } from '@capacitor/core';
 import { isNative } from '../native';
 import { apiUrl } from '../api';
 
+function normalizeFetchUrl(url: string): string {
+  if (url.startsWith('/')) return apiUrl(url);
+  const match = url.match(/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?(\/storage\/.*)/);
+  if (match) return apiUrl(match[1]);
+  return url;
+}
+
 /**
  * Helper to fetch an image via the backend proxy, draw it onto a canvas,
  * resize it to max 800px (preserving aspect ratio), and compress it to a JPEG Base64 string.
  */
 async function compressAndConvertToBase64(url: string): Promise<string> {
   let blob: Blob;
-  const fetchUrl = url.startsWith('/') ? apiUrl(url) : url;
+  const fetchUrl = normalizeFetchUrl(url);
 
   if (isNative()) {
     // On native apps, use CapacitorHttp to bypass CORS when downloading third-party CDN images directly.
@@ -31,14 +38,35 @@ async function compressAndConvertToBase64(url: string): Promise<string> {
     const fetchResponse = await fetch(`data:image/jpeg;base64,${base64Data}`);
     blob = await fetchResponse.blob();
   } else {
-    // On Web, use standard fetch (will fail if the image server strictly enforces CORS)
-    const response = await fetch(fetchUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch image via web fetch: ${response.statusText}`);
+    // On Web, try standard fetch first. If blocked by CORS or 403 (common on Instagram/TikTok CDNs),
+    // fall back to the backend streaming proxy which forwards proper Referer and User-Agent headers.
+    let response: Response | null = null;
+    const isExternal = fetchUrl.startsWith('http://') || fetchUrl.startsWith('https://');
+
+    if (!isExternal) {
+      response = await fetch(fetchUrl);
+    } else {
+      try {
+        response = await fetch(fetchUrl);
+        if (!response.ok) {
+          response = null;
+        }
+      } catch {
+        response = null;
+      }
+
+      if (!response) {
+        const proxyUrl = apiUrl(`/api/extract-recipe/proxy-video?url=${encodeURIComponent(url)}`);
+        response = await fetch(proxyUrl);
+      }
+    }
+
+    if (!response || !response.ok) {
+      throw new Error(`Failed to fetch image via web fetch: ${response?.statusText ?? 'Network error'}`);
     }
 
     const contentType = response.headers.get('content-type') ?? '';
-    if (!contentType.startsWith('image/')) {
+    if (contentType && !contentType.startsWith('image/') && !contentType.startsWith('application/octet-stream')) {
       throw new Error(`URL did not return an image (got ${contentType})`);
     }
 
@@ -61,6 +89,7 @@ async function compressAndConvertToBase64(url: string): Promise<string> {
  * even when the component is re-mounted or the tab is switched.
  */
 export function useCachedImage(originalUrl: string | null | undefined) {
+  const [currentUrl, setCurrentUrl] = useState(originalUrl);
   // Synchronous lazy initializer: if the image is already in the L1 memory
   // cache (imageStore module-level Map), set src immediately — no async, no flash.
   const [src, setSrc] = useState<string | null>(() => {
@@ -73,6 +102,15 @@ export function useCachedImage(originalUrl: string | null | undefined) {
     return getMemoryCachedImage(originalUrl) === null;
   });
   const [error, setError] = useState<Error | null>(null);
+
+  // Synchronously adjust state when originalUrl prop changes to prevent stale render gap
+  if (originalUrl !== currentUrl) {
+    setCurrentUrl(originalUrl);
+    const memorySrc = originalUrl ? getMemoryCachedImage(originalUrl) : null;
+    setSrc(memorySrc);
+    setIsLoading(originalUrl ? memorySrc === null : false);
+    setError(null);
+  }
 
   useEffect(() => {
     if (!originalUrl) {

@@ -18,6 +18,7 @@ export const jobs = pgTable(
     status: text('status').notNull().default('pending'),
     sourceUrl: text('source_url').notNull(),
     sourceUrlNormalized: text('source_url_normalized'),
+    language: text('language').notNull().default('de'),
     parentRecipeId: uuid('parent_recipe_id').references(() => recipes.id, {
       onDelete: 'set null',
     }),

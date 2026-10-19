@@ -1,12 +1,15 @@
+import { useState } from 'react';
 import type { RecipeDetailsProps } from './types';
 import { useRecipeDetails } from './useRecipeDetails';
-
+import { useRecipeCoverSync } from '../../hooks/useRecipeCoverSync';
 import RecipeHeader from './RecipeHeader';
 import RecipeInfoSection from './RecipeInfoSection';
 import RecipeStickyBar from './RecipeStickyBar';
 import RecipeIngredients from './RecipeIngredients';
 import RecipeInstructions from './RecipeInstructions';
 import RecipeActionDock from './RecipeActionDock';
+import ExtractionLoadingCard from './ExtractionLoadingCard';
+import ExtractionFloatingLogo from './ExtractionFloatingLogo';
 import CookingMode from '../CookingMode';
 import CookedButton from '../CookedButton';
 import CookedModal from '../CookedModal';
@@ -16,174 +19,179 @@ import PremiumModal from '../PremiumModal';
 import ProFeatureSheet from '../ProFeatureSheet';
 import ShoppingConfirmSheet from './ShoppingConfirmSheet';
 import AddToMealPlanSheet from '../MealPlanner/AddToMealPlanSheet';
+import ShareWithFriendsModal from '../Social/ShareWithFriendsModal';
 import { useI18n } from '../../context/I18nContext';
+import { useSpotlightTour } from '../../hooks/useSpotlightTour';
 
 export default function RecipeDetails({
-  recipe,
-  onAddIngredients,
-  onDelete,
-  reelUrl,
-  createdAt,
-  onBack,
-  onNavigateToShoppingList,
-  onRemixSuccess,
-  onReplaceCurrent,
-  isParentAvailable,
-  onNavigateToRecipe,
-  parentRecipeTitle,
-  onAssignCollections,
-  onManageFlags,
-  flags,
-  isFavorite = false,
-  onToggleFavorite,
+  recipe, isExtracting = false, progress,
+  onAddIngredients, onDelete, reelUrl, createdAt, onBack,
+  onNavigateToShoppingList, onRemixSuccess, onReplaceCurrent,
+  isParentAvailable, onNavigateToRecipe, parentRecipeTitle,
+  onAssignCollections, onManageFlags, flags,
+  isFavorite = false, onToggleFavorite, getAccessToken, onCoverUpdated,
 }: RecipeDetailsProps) {
   const { t } = useI18n();
 
+  const fallbackGetToken = async () => null;
+  const { isAwaitingCover, coverUrl } = useRecipeCoverSync({
+    recipe,
+    getAccessToken: getAccessToken || fallbackGetToken,
+    onCoverUpdated,
+  });
+
+  const effectiveRecipe = coverUrl && coverUrl !== recipe.imageUrl ? {
+    ...recipe,
+    imageUrl: coverUrl,
+    imageUrls: [coverUrl, ...(recipe.imageUrls || []).filter((u) => u !== coverUrl)],
+    isAiCover: true,
+    isCoverGenerating: false,
+  } : recipe;
+
   const {
-    isPremium,
-    isPremiumModalOpen,
-    setIsPremiumModalOpen,
-    activeProFeature,
-    setActiveProFeature,
-    servings,
-    setServings,
-    scaleFactor,
-    formatAmount,
-    checkedSteps,
-    toggleStep, handleToggleStep,
-    activeStepNum, totalStepsCount, completedStepsCount, progressPercent,
-    activeSection, isHeaderCollapsed, setCollapseSentinel, scrollToSection,
-    nutritionalValues, sourceNutritionalValues, isAiEstimated, isVerified, hasNutritionInfo,
-    showTotalNutrition, handleToggleTotalNutrition,
-    formatTimeValue, getNutritionDisplayValue, totalTimeLabel, metaCalories,
-    sortedIngredients, isCopied,
+    isPremium, isPremiumModalOpen, setIsPremiumModalOpen, activeProFeature, setActiveProFeature,
+    servings, setServings, scaleFactor, formatAmount, checkedSteps, toggleStep, handleToggleStep,
+    activeStepNum, totalStepsCount, completedStepsCount, progressPercent, activeSection,
+    isHeaderCollapsed, setCollapseSentinel, scrollToSection, nutritionalValues, sourceNutritionalValues,
+    isAiEstimated, isVerified, hasNutritionInfo, showTotalNutrition, handleToggleTotalNutrition,
+    formatTimeValue, getNutritionDisplayValue, totalTimeLabel, metaCalories, sortedIngredients, isCopied,
     isCopilotOpen, setIsCopilotOpen, isCopilotForceNewRemix, setIsCopilotForceNewRemix,
-    copilotInitialPrompt, setCopilotInitialPrompt, openCopilot,
-    isCookingMode, setIsCookingMode, initialStepOverride, setInitialStepOverride,
-    isCookedModalOpen, setIsCookedModalOpen,
-    isAdded, isShoppingConfirmOpen, setIsShoppingConfirmOpen,
-    isAddToPlanOpen, setIsAddToPlanOpen,
-    handleStartCooking, handleAddToShoppingList,
-    handleAddAndNavigateToShoppingList, handleConfirmShoppingListSelection,
-    copyRecipe, cookRefreshKey, cookHistory,
-  } = useRecipeDetails({ recipe, onAddIngredients, onNavigateToShoppingList });
+    copilotInitialPrompt, setCopilotInitialPrompt, openCopilot, isCookingMode, setIsCookingMode,
+    initialStepOverride, setInitialStepOverride, isCookedModalOpen, setIsCookedModalOpen,
+    isAdded, isShoppingConfirmOpen, setIsShoppingConfirmOpen, isAddToPlanOpen, setIsAddToPlanOpen,
+    handleStartCooking, handleAddToShoppingList, handleAddAndNavigateToShoppingList,
+    handleConfirmShoppingListSelection, copyRecipe, cookRefreshKey, cookHistory,
+  } = useRecipeDetails({ recipe: effectiveRecipe, onAddIngredients, onNavigateToShoppingList });
+
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
+  useSpotlightTour('recipeDetails', {
+    enabled: !isExtracting && !isCookingMode && !isCopilotOpen,
+    delayMs: 600,
+  });
 
   return (
     <article className="flex flex-col">
+      <ExtractionFloatingLogo isVisible={isExtracting} progress={progress} />
+
       {/* Recipe Title & Gallery */}
       <RecipeHeader
-        recipe={recipe}
-        reelUrl={reelUrl}
-        createdAt={createdAt}
-        onBack={onBack}
+        recipe={effectiveRecipe} reelUrl={reelUrl} createdAt={createdAt}
+        onBack={(!isExtracting || isPremium) ? onBack : undefined}
         onNavigateToShoppingList={onAddIngredients ? handleAddAndNavigateToShoppingList : onNavigateToShoppingList}
-        onDelete={onDelete}
-        onCopyRecipe={copyRecipe}
-        isCopied={isCopied}
-        isParentAvailable={isParentAvailable}
-        onNavigateToRecipe={onNavigateToRecipe}
-        parentRecipeTitle={parentRecipeTitle}
-        onAssignCollections={onAssignCollections}
-        onManageFlags={onManageFlags}
-        flags={flags}
-        isFavorite={isFavorite}
-        onToggleFavorite={onToggleFavorite}
-        cookRefreshKey={cookRefreshKey}
-        onRemixClick={() => openCopilot(true)}
-        totalTimeLabel={totalTimeLabel}
+        onDelete={onDelete} onCopyRecipe={copyRecipe} isCopied={isCopied}
+        isParentAvailable={isParentAvailable} onNavigateToRecipe={onNavigateToRecipe}
+        parentRecipeTitle={parentRecipeTitle} onAssignCollections={onAssignCollections}
+        onManageFlags={onManageFlags} flags={flags} isFavorite={isFavorite}
+        onShareWithFriends={recipe.id ? () => setIsShareModalOpen(true) : undefined}
+        onToggleFavorite={onToggleFavorite} cookRefreshKey={cookRefreshKey}
+        onRemixClick={() => openCopilot(true)} totalTimeLabel={totalTimeLabel}
+        isAwaitingCover={isAwaitingCover} isExtracting={isExtracting}
       />
 
-      {/* Sentinel for the sticky bar's collapsed title row */}
-      <div ref={setCollapseSentinel} aria-hidden="true" className="h-px mb-4" />
+      {isExtracting ? (
+        <div className="flex flex-col gap-6 mt-4 pb-40 animate-fade-in">
+          <ExtractionLoadingCard />
+        </div>
+      ) : (
+        <>
+          {/* Sentinel for the sticky bar's collapsed title row */}
+          <div ref={setCollapseSentinel} aria-hidden="true" className="h-px mb-4" />
 
-      {/* Smart Sticky Sub-navigation */}
-      <RecipeStickyBar
-        recipeTitle={recipe.title}
-        imageUrl={recipe.imageUrl || recipe.imageUrls?.[0]}
-        emoji={recipe.emoji}
-        isCollapsed={isHeaderCollapsed}
-        onBack={onBack}
-        activeSection={activeSection}
-        onSectionClick={scrollToSection}
-        totalTimeLabel={totalTimeLabel}
-        servings={servings}
-        calories={hasNutritionInfo ? metaCalories : null}
-      />
-
-      {/* Single scrollable layout containing all sections with ample bottom padding for action dock */}
-      <div className="flex flex-col gap-6 mt-4 pb-40">
-        {/* Info & Nutrition Details section */}
-        <section id="details" style={{ scrollMarginTop: 'calc(var(--app-sticky-top) + 60px)' }}>
-          <RecipeInfoSection
-            prepTime={recipe.prepTime}
-            cookTime={recipe.cookTime}
-            formatTimeValue={formatTimeValue}
+          {/* Smart Sticky Sub-navigation */}
+          <RecipeStickyBar
+            recipeTitle={effectiveRecipe.title}
+            imageUrl={effectiveRecipe.imageUrl || effectiveRecipe.imageUrls?.[0]}
+            emoji={effectiveRecipe.emoji}
+            isCollapsed={isHeaderCollapsed}
+            onBack={onBack}
+            activeSection={activeSection}
+            onSectionClick={scrollToSection}
+            totalTimeLabel={totalTimeLabel}
             servings={servings}
-            nutritionalValues={hasNutritionInfo ? nutritionalValues : null}
-            sourceNutritionalValues={sourceNutritionalValues}
-            healthScore={recipe.healthScore}
-            healthScoreBreakdown={recipe.healthScoreBreakdown}
-            isAiEstimated={isAiEstimated}
-            isVerified={isVerified}
-            showTotalNutrition={showTotalNutrition}
-            onToggleTotalNutrition={handleToggleTotalNutrition}
-            getNutritionDisplayValue={getNutritionDisplayValue}
-            onOpenCopilot={(prompt) => openCopilot(false, prompt)}
+            calories={hasNutritionInfo ? metaCalories : null}
+            isExtracting={false}
           />
-        </section>
 
-        {/* Ingredients section */}
-        <section id="ingredients" style={{ scrollMarginTop: 'calc(var(--app-sticky-top) + 60px)' }}>
-          <RecipeIngredients
-            recipe={recipe}
-            sortedIngredients={sortedIngredients}
-            isPremium={isPremium}
-            scaleFactor={scaleFactor}
-            formatAmount={formatAmount}
-            onAddIngredients={onAddIngredients ? handleAddToShoppingList : undefined}
-            isAdded={isAdded}
-            servings={servings}
-            onDecreaseServings={() => setServings(s => Math.max(1, s - 1))}
-            onIncreaseServings={() => setServings(s => s + 1)}
-          />
-        </section>
+          {/* Single scrollable layout containing all sections with ample bottom padding for action dock */}
+          <div className="flex flex-col gap-6 mt-4 pb-40">
+            {/* Info & Nutrition Details section */}
+            <section id="details" style={{ scrollMarginTop: 'calc(var(--app-sticky-top) + 60px)' }}>
+              <RecipeInfoSection
+                prepTime={recipe.prepTime}
+                cookTime={recipe.cookTime}
+                formatTimeValue={formatTimeValue}
+                servings={servings}
+                nutritionalValues={hasNutritionInfo ? nutritionalValues : null}
+                sourceNutritionalValues={sourceNutritionalValues}
+                healthScore={recipe.healthScore}
+                healthScoreBreakdown={recipe.healthScoreBreakdown}
+                isAiEstimated={isAiEstimated}
+                isVerified={isVerified}
+                showTotalNutrition={showTotalNutrition}
+                onToggleTotalNutrition={handleToggleTotalNutrition}
+                getNutritionDisplayValue={getNutritionDisplayValue}
+                onOpenCopilot={(prompt) => openCopilot(false, prompt)}
+                isExtracting={false}
+              />
+            </section>
 
-        {/* Instructions section */}
-        <section id="instructions" style={{ scrollMarginTop: 'calc(var(--app-sticky-top) + 60px)' }}>
-          <RecipeInstructions
-            recipe={recipe}
-            checkedSteps={checkedSteps}
-            toggleStep={handleToggleStep}
-            activeStepNum={activeStepNum}
-            completedStepsCount={completedStepsCount}
-            totalStepsCount={totalStepsCount}
-            progressPercent={progressPercent}
-            onStartCooking={handleStartCooking}
-            formatAmount={formatAmount}
-          />
-        </section>
+            {/* Ingredients section */}
+            <section id="ingredients" style={{ scrollMarginTop: 'calc(var(--app-sticky-top) + 60px)' }}>
+              <RecipeIngredients
+                recipe={recipe}
+                sortedIngredients={sortedIngredients}
+                isPremium={isPremium}
+                scaleFactor={scaleFactor}
+                formatAmount={formatAmount}
+                onAddIngredients={onAddIngredients ? handleAddToShoppingList : undefined}
+                isAdded={isAdded}
+                servings={servings}
+                onDecreaseServings={() => setServings(s => Math.max(1, s - 1))}
+                onIncreaseServings={() => setServings(s => s + 1)}
+                isExtracting={false}
+              />
+            </section>
 
-        {/* "I cooked this" — gamification CTA card */}
-        {recipe.id && (
-          <div className="mt-4 mb-2">
-            <CookedButton recipeId={recipe.id} recipeTitle={recipe.title} variant="card" />
+            {/* Instructions section */}
+            <section id="instructions" style={{ scrollMarginTop: 'calc(var(--app-sticky-top) + 60px)' }}>
+              <RecipeInstructions
+                recipe={recipe}
+                checkedSteps={checkedSteps}
+                toggleStep={handleToggleStep}
+                activeStepNum={activeStepNum}
+                completedStepsCount={completedStepsCount}
+                totalStepsCount={totalStepsCount}
+                progressPercent={progressPercent}
+                onStartCooking={handleStartCooking}
+                formatAmount={formatAmount}
+                isExtracting={false}
+              />
+            </section>
+
+            {/* "I cooked this" — gamification CTA card */}
+            {recipe.id && (
+              <div className="mt-4 mb-2 animate-fade-in transition-all duration-500">
+                <CookedButton recipeId={recipe.id} recipeTitle={recipe.title} variant="card" />
+              </div>
+            )}
+
+            {/* Cook history timeline */}
+            {recipe.id && (
+              <div id="cook-history" className="mt-2 mb-2 scroll-mt-24 animate-fade-in transition-all duration-500">
+                <CookHistoryTimeline history={cookHistory} />
+              </div>
+            )}
+
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center leading-normal select-none mt-2">
+              {t('recipe.aiGeneratedDisclaimer')}
+            </p>
           </div>
-        )}
-
-        {/* Cook history timeline */}
-        {recipe.id && (
-          <div id="cook-history" className="mt-2 mb-2 scroll-mt-24">
-            <CookHistoryTimeline history={cookHistory} />
-          </div>
-        )}
-
-        <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center leading-normal select-none mt-2">
-          {t('recipe.aiGeneratedDisclaimer')}
-        </p>
-      </div>
+        </>
+      )}
 
       {/* Unified Floating Action Dock */}
-      {!isCookingMode && (totalStepsCount > 0 || onAddIngredients || onNavigateToShoppingList) && (
+      {!isExtracting && !isCookingMode && (totalStepsCount > 0 || onAddIngredients || onNavigateToShoppingList) && (
         <RecipeActionDock
           totalStepsCount={totalStepsCount}
           onAddToCart={onAddIngredients ? handleAddToShoppingList : undefined}
@@ -200,10 +208,7 @@ export default function RecipeDetails({
       {isCookingMode && (
         <CookingMode
           recipe={recipe}
-          onClose={() => {
-            setIsCookingMode(false);
-            setInitialStepOverride(undefined);
-          }}
+          onClose={() => { setIsCookingMode(false); setInitialStepOverride(undefined); }}
           checkedSteps={checkedSteps}
           toggleStep={toggleStep}
           formatAmount={formatAmount}
@@ -235,17 +240,11 @@ export default function RecipeDetails({
         isOpen={!!activeProFeature}
         featureId={activeProFeature}
         onClose={() => setActiveProFeature(null)}
-        onUpgrade={() => {
-          setActiveProFeature(null);
-          setIsPremiumModalOpen(true);
-        }}
+        onUpgrade={() => { setActiveProFeature(null); setIsPremiumModalOpen(true); }}
       />
 
       {/* Premium Upgrade Modal */}
-      <PremiumModal
-        isOpen={isPremiumModalOpen}
-        onOpenChange={setIsPremiumModalOpen}
-      />
+      <PremiumModal isOpen={isPremiumModalOpen} onOpenChange={setIsPremiumModalOpen} />
 
       {/* Shopping Confirm Drawer */}
       <ShoppingConfirmSheet
@@ -278,6 +277,17 @@ export default function RecipeDetails({
           recipeTitle={recipe.title}
         />
       )}
+
+      {/* Share with Friends Modal */}
+      {recipe.id && (
+        <ShareWithFriendsModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          recipe={recipe}
+          reelUrl={reelUrl}
+        />
+      )}
     </article>
   );
 }
+

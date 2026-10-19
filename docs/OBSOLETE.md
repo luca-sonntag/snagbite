@@ -6,6 +6,175 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-18: Vollständige Entfernung der Sammlungs-Emojis (Frontend, Backend, DB & Shared)
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Emoji-Auswahlgitter (`EMOJIS`, `selectedEmoji`, `t('catalog.collectionEmoji')`) beim Erstellen und Bearbeiten von Sammlungen in [`CollectionSheet.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CollectionSheet.tsx).
+  * Veraltetes Emoji-Rendering (`{col.emoji && <span className="text-xl">{col.emoji}</span>}`) in den Listenansichten des `CollectionSheet`.
+  * Fallback-Auslesen von `collectionEmoji(id)` und Anzeige von Sammlungs-Emojis in aktiven Filter-Chips in [`CatalogFilters.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CatalogFilters.tsx).
+  * Veraltete Formulierung in Onboarding- und Tour-Texten in [`i18n.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/i18n.ts) („mit Emoji & Farbe anlegen“, „in farbigen Ordnern mit Emojis“).
+  * `emoji: text('emoji')` Spalte in Tabelle `collections` im Drizzle Schema ([`backend/src/db/schema/collections.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/schema/collections.ts)), DB-Typen ([`backend/src/db/types/collections.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/types/collections.ts)), DB-Queries ([`backend/src/db/collectionsDb.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/collectionsDb.ts)), API-Routen ([`backend/src/routes/collectionRoutes.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/routes/collectionRoutes.ts)) sowie Frontend-Hook ([`frontend/src/hooks/useCollections.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/hooks/useCollections.ts)) und Shared Interface `Collection` ([`shared/src/types/cookbook.ts`](file:///c:/Users/lucas/source/repos/cookbook/shared/src/types/cookbook.ts)).
+* **Ersetzt durch:**
+  * **Clean Flat Style & Lucide Folder Icon:** Einheitliche, visuell ruhige Darstellung mit einem dezenten Smaragdgrün-Folder-Badge (`<Folder className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />`) in `CollectionSheet` und `CatalogFilters`.
+  * **Schlankere Typen & Endpunkte:** `Collection` enthält nur noch `id`, `userId`, `name`, `position`, `createdAt`, `updatedAt`. Alle Endpunkte (`GET/POST/PATCH /api/collections`) operieren ohne Emoji-Feld.
+* **Betroffene Dateien:** `frontend/src/components/SavedCatalog/CollectionSheet.tsx`, `frontend/src/components/SavedCatalog/CatalogFilters.tsx`, `frontend/src/hooks/useCollections.ts`, `frontend/src/i18n.ts`, `backend/src/db/schema/collections.ts`, `backend/src/db/types/collections.ts`, `backend/src/db/collectionsDb.ts`, `backend/src/routes/collectionRoutes.ts`, `shared/src/types/cookbook.ts`, `docs/RELEASE_CHECKLIST.md`, `docs/OBSOLETE.md`.
+
+---
+
+### 2026-10-17: Vollständige Bereinigung und Ausmusterung von Supabase (Migration zu Railway Native PostgreSQL, Better-Auth & Tigris S3)
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Supabase BaaS-Architektur: PostgREST API-Client (`@supabase/supabase-js`, `backend/src/db/client.ts`), GoTrue Auth (`auth.getUser()`, Supabase JWT), und Supabase Storage Buckets (`recipe-covers`, `recipe-photos`, `cook-photos`, `app-bundles`).
+  * Wartungs- und Seed-Skripte mit direktem Supabase SDK Aufruf (`getClient()`, `supabase.auth.admin`).
+  * Obsolet gewordene temporäre Migrationsskripte (`migrateDataToPostgres.ts`, `migrateUsersToBetterAuth.ts`, `migrateStorageToS3.ts`, `rewriteRecipeCoverUrls.ts`, `purgeHostedFrames.ts`, `consolidateMappingsToCanonical.ts`) nach `backend/src/scripts/archive/` archiviert.
+  * Nicht mehr benötigte Umgebungsvariablen in `.env*` und `config.ts`: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`.
+  * Obsoleter Agent-Skill `.agents/skills/supabase-server/` und Lockfile-Eintrag in `skills-lock.json`.
+* **Ersetzt durch:**
+  * **Railway Managed PostgreSQL & Drizzle ORM:** Typsichere relationale Abfragen und DDL über Drizzle Schema (`backend/src/db/schema/`) und `npm run db:push:prod`. Wartungsskripte nutzen jetzt direkt Drizzle ORM (`db.select()`, `db.update()`, `db.insert()`).
+  * **Better-Auth:** Autonomes, datenbankintegriertes Auth-System auf PostgreSQL (`user`, `account`, `session`, `verification` Tabellen). Seed-Skripte (`seedDev.ts`, `seedReviewerAccount.ts`) provisionieren Test- und Reviewer-Accounts direkt via Better-Auth Passwort-Hashing.
+  * **Tigris S3 Object Storage:** S3-kompatibler Storage mit globalem CDN für Recipe Covers, Fotos und Capgo OTA Live-Update Bundles.
+  * **Bereinigte Dependencies:** `@supabase/supabase-js` vollständig aus `backend/package.json` und den Lockfiles entfernt; monolithische Sub-Workspace-Lockfiles bereinigt.
+* **Betroffene Dateien:** `backend/src/config.ts`, `backend/src/db/client.ts`, `backend/src/scripts/scriptEnv.ts`, `backend/src/scripts/backfill/*`, `backend/src/scripts/seed/*`, `backend/src/scripts/db/*`, `backend/src/scripts/archive/*`, `backend/package.json`, `package.json`, `package-lock.json`, `.agents/skills/supabase-server/` (gelöscht), `skills-lock.json`, `.gitignore`, `backend/.env.example`, `frontend/.env.development`, `website/.env.example`, `website/Dockerfile`, `README.md`, `.agents/rules/backward-compatibility.md`, `docs/OBSOLETE.md`.
+
+---
+
+### 2026-10-15: Manueller OTA-Update-Prompt (`OtaUpdateBanner`) abgelöst durch automatische Updates mit App Loading Screen & direktem Play Store Update
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Manuelles Consent-Banner [`OtaUpdateBanner.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/OtaUpdateBanner.tsx) in [`AppTopBanners.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/AppTopBanners.tsx) mit Button *"Jetzt neu laden"* und *"Später"*.
+  * Künstliche 4- bzw. 5-Sekunden-Verzögerungen (`BOOT_CHECK_DELAY_MS = 4000` in `nativeAppUpdater.ts`, `INITIAL_CHECK_DELAY_MS = 5000` in `otaUpdater.ts`) beim Kaltstart, die dazu führten, dass Update-Checks erst nach Verlassen des Splash-Screens im laufenden Betrieb triggerten.
+  * Manuelles Staging von OTA-Bundles via `CapacitorUpdater.next()`, das auf Nutzerklick oder Relaunch wartete.
+* **Ersetzt durch:**
+  * **Vollautomatische OTA-Ausführung mit Loading-Screen:** Sobald ein OTA-Bundle verfügbar ist, schaltet [`otaUpdater.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/utils/otaUpdater.ts) den Loading-Status aktiv (`isOtaUpdating()`, `OTA_STATUS_EVENT`), lädt das Zip herunter und wendet es via `CapacitorUpdater.set()` sofort an. Währenddessen zeigt [`AppSplashScreen.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/AppSplashScreen.tsx) die Ladeanimation mit *"App-Update wird installiert…"*.
+  * **Automatisches, ungedrosseltes Play Store Update:** [`nativeAppUpdater.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/utils/nativeAppUpdater.ts) prüft Updates direkt beim App-Start und bei jedem `resume` ohne künstliche Verzögerung und triggert `performImmediateUpdate()` sofort, geschützt durch einen 3s-Timeout-Guard gegen blockierende Google-Play-Dienste.
+  * **Zentraler Update-Koordinator ([`useAppUpdates.ts`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/hooks/useAppUpdates.ts)):** Priorisiert native Play Store Updates vor OTA-Web-Bundles, steuert den `AppSplashScreen`-Lebenszyklus und synchronisiert App-Resume-Events.
+  * **Ganzheitliche Update-Prüfung in Einstellungen:** "Auf Updates prüfen" in [`SettingsView.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SettingsView.tsx) prüft nativ und OTA sequenziell und wendet gefundene OTA-Updates direkt via Loading Screen an.
+* **Betroffene Dateien:** `frontend/src/components/OtaUpdateBanner.tsx` (gelöscht), `frontend/src/components/AppTopBanners.tsx`, `frontend/src/utils/otaUpdater.ts`, `frontend/src/utils/nativeAppUpdater.ts`, `frontend/src/hooks/useAppUpdates.ts`, `frontend/src/components/AppSplashScreen.tsx`, `frontend/src/App.tsx`, `frontend/src/components/SettingsView.tsx`, `frontend/src/i18n.ts`, `docs/architecture/deployment-and-ota.md`, `docs/OBSOLETE.md`.
+
+---
+
+### 2026-10-14: Monolithische Zutatengruppierung & starre lineare Zutatenanzeige für mehrteilige Gerichte
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Monolithischer Header- und Renderblock in `RecipeIngredients.tsx` (über 340 Zeilen), der Servings Stepper, Grid/List-Toggle und Rendering direkt inline handhabte.
+  * Starres, rein abteilungssortiertes Zutaten-Rendering ohne Berücksichtigung kulinarischer Komponenten/Sub-Rezepte (z. B. Burger-Buns, Patties, Sauce wurden durcheinander gewürfelt).
+  * Nicht-aufgeschlüsselte Mehrfachzutaten in der Einkaufsliste bei Rezepten mit separaten Komponenten (z. B. 2x Butter separat in der Liste ohne Hinweis).
+* **Ersetzt durch:**
+  * **Modulare Subkomponenten & Clean Code:** Aufteilung in `RecipeIngredientsHeader.tsx` (Header, Portionen, Segmented Toggles) und `IngredientGroupSection.tsx` (einzelne Abteilung/Komponente mit Grid/List Layout), wodurch `RecipeIngredients.tsx` unter 275 Zeilen bleibt.
+  * **Segmented Control & Komponenten-Toggle:** Bei mehrteiligen Gerichten (`hasRecipeComponents`) schaltet der Nutzer intuitiv zwischen „Nach Komponente“ und „Nach Abteilung“ um; Voreinstellung ist die kulinarische Komponentenansicht.
+  * **Konsolidierung mit Mengen-Aufschlüsselung:** `consolidateIngredientsForShopping` summiert Zutaten über Komponenten hinweg und liefert strukturierte `breakdown`-Informationen (`ShoppingConfirmItem.tsx`).
+* **Betroffene Dateien:** `frontend/src/components/RecipeDetails/RecipeIngredients.tsx`, `frontend/src/components/RecipeDetails/RecipeIngredientsHeader.tsx`, `frontend/src/components/RecipeDetails/IngredientGroupSection.tsx`, `frontend/src/components/RecipeDetails/InstructionSectionDivider.tsx`, `frontend/src/utils/recipeComponents.ts`, `docs/OBSOLETE.md`.
+
+---
+
+### 2026-10-14: Reiner `/extract-recipe/frames`-Endpunktname & singulärer Keyframe-Payload
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Ausschließlicher Endpunkt `POST /api/extract-recipe/frames`, der historisch nur Video-Keyframes entgegennahm.
+  * Fehlende Sprach-Transkription im Client-Media-Streaming-Modus: Gesprochene Zutaten und Mengenangaben aus Video-Reels ohne Text-Overlay konnten nicht akustisch erfasst werden.
+* **Ersetzt durch:**
+  * **Kanonischer Endpunkt `POST /api/extract-recipe/client-payload`:** Umfasst nun ganzheitlich sowohl das komprimierte 4x4-Keyframe-Grid als auch ein optionales Whisper-Sprachtranskript (`transcript`).
+  * **Volle Abwärtskompatibilität:** Der alte Endpunkt `POST /api/extract-recipe/frames` bleibt im Backend als vollfunktionsfähiger Alias bestehen, sodass im Umlauf befindliche ältere mobile Android-Builds ohne Unterbrechung weiterarbeiten.
+  * **Sichere Cloudflare-Edge-Transkription:** Der Client lädt den Video-Stream nur noch einmal in den RAM, decodiert Keyframes und fordert parallel über ein 60s-HMAC-Einweg-Ticket (`x-snagbite-ticket`) via Cloudflare Edge Worker eine Whisper-Transkription (`whisper-large-v3-turbo`) an.
+* **Betroffene Dateien:** `backend/src/routes/extractionRoutes.ts`, `backend/src/index.ts`, `backend/src/types/jobs.ts`, `backend/src/queue.ts`, `backend/src/gemini.ts`, `backend/src/prompts/recipeExtractionPrompt.ts`, `frontend/src/utils/videoFrames.ts`, `frontend/src/utils/whisperClient.ts`, `cloudflare-workers/whisper-proxy/`, `docs/architecture/scraping-and-imports.md`, `docs/OBSOLETE.md`.
+
+### 2026-10-14: Starres 6-Slide Onboarding abgelöst durch schlanken 3-Slide WelcomeGuide & kontextuelle Just-in-Time Spotlight Guides
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Starres, überfrachtetes 6-Slide Onboarding in [`WelcomeGuide.tsx`](file:///C:/Users/lucas/source/repos/cookbook/frontend/src/components/WelcomeGuide.tsx) mit 360+ Zeilen Code, redundanten Beschreibungen und fehlender Erwähnung von Screenshot-Imports.
+  * Fehlende Nutzerführung bei der Erstnutzung von Detail-Funktionen (z. B. Portionsanpassung, Kochmodus-Timer, Sammlungsfilterung, Schnelleingabe in der Einkaufsliste).
+* **Ersetzt durch:**
+  * **Fokussierter 3-Slide WelcomeGuide ([`WelcomeGuide.tsx`](file:///C:/Users/lucas/source/repos/cookbook/frontend/src/components/WelcomeGuide.tsx)):** Auf 147 Zeilen gekürzt (Clean-Code-konform), vermittelt in 3 ansprechenden Hero-Cards die Kernversprechen: Reel/Link/Foto/Screenshot-Import, Kochen & Timer sowie Kochbuch & Einkaufsliste.
+  * **Kontextuelle Spotlight Guides ([`SpotlightTourContext.tsx`](file:///C:/Users/lucas/source/repos/cookbook/frontend/src/context/SpotlightTourContext.tsx)):** Leichtgewichtige Driver.js-Integration (0 KB Initial-Bundle-Impact durch Dynamic Import) für 6 Kern-Screens (`extract`, `catalog`, `recipeDetails`, `cookingMode`, `shoppingList`, `mealPlanner`).
+  * **Overlay & Back-Button Integration:** Nahtlos mit `OverlayStackContext` gekoppelt; Hardware-Backbutton schließt Tour sauber; "Screen-Touren & Tipps zurücksetzen" in den Einstellungen.
+* **Betroffene Dateien:** `frontend/src/components/WelcomeGuide.tsx`, `frontend/src/types/tour.ts`, `frontend/src/utils/tourDefinitions.ts`, `frontend/src/context/SpotlightTourContext.tsx`, `frontend/src/hooks/useSpotlightTour.ts`, `frontend/src/styles/spotlightTour.css`, `frontend/src/components/ExtractForm/index.tsx`, `frontend/src/components/SavedCatalog/index.tsx`, `frontend/src/components/RecipeDetails/index.tsx`, `frontend/src/components/CookingMode/index.tsx`, `frontend/src/components/ShoppingList/index.tsx`, `frontend/src/components/MealPlanner/index.tsx`, `frontend/src/components/SettingsView.tsx`, `docs/OBSOLETE.md`, `docs/feature_ideas.md`.
+
+---
+
+### 2026-10-14: Unbedingte Queue-Extraktion & Quota-Abzug bei identischen URLs abgelöst durch Cross-User Recipe Reuse
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Jede URL-Extraktionsanfrage über `POST /api/extract-recipe` führte unabhängig davon, ob exakt dieses Rezept bereits in derselben Sprache in der Datenbank existierte, bedingungslos zu Quota-Abzug, neuem `jobs`-Eintrag, Scraping, Video-Download und vollem Gemini-Multimodal-Inferenzlauf.
+  * Fehlende `source_url_normalized`- und `language`-Spalten auf `recipes`, wodurch Rezepte nur über historische `jobs` auffindbar waren.
+* **Ersetzt durch:**
+  * **Cross-User Recipe Reuse ([`backend/src/db/recipesReuseDb.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/recipesReuseDb.ts)):** `findReusableRecipe(normalizedUrl, language)` prüft vor der Job-Erstellung, ob das Rezept in der Zielsprache bereits existiert.
+  * **Zero-Quota & Sofort-Übernahme:** Existiert das Rezept, wird es nach Prüfung des Kochbuch-Limits (`COOKBOOK_FULL`) sofort via `addToLibrary()` verknüpft und mit HTTP 200 `{ status: 'completed', isCached: true, recipe }` zurückgegeben — ohne Job-Queue, ohne Wartezeit (für Premium; 5s MREC-Ad-Simulation für Free-User) und mit 0 Quota-Verbrauch.
+  * **Bypass via `force: true`:** Nutzer / Entwickler können mit `force: true` gezielt eine frische Extraktion erzwingen.
+  * **Erweiterte URL-Normalisierung:** Harmonisierung von Instagram-Reel-URLs (`/p/`, `/reels/` -> `/reel/`) und YouTube-Shorts.
+* **Betroffene Dateien:** `backend/src/db/schema/recipes.ts`, `backend/src/db/schema/jobs.ts`, `backend/src/db/recipesReuseDb.ts`, `backend/src/db/jobsDb.ts`, `backend/src/routes/extractionRoutes.ts`, `backend/src/queue.ts`, `frontend/src/hooks/useRecipeExtraction.ts`, `frontend/src/i18n.ts`, `docs/OBSOLETE.md`.
+
+---
+
+### 2026-10-14: Deaktivierung & Entkopplung des Vorrat-Features (Pantry Dormant Mode)
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Direkte Einblendung des Vorrat-Tabs (`tabPantry`), Vorrats-Zähler und der [`PantryView`](file:///C:/Users/lucas/source/repos/cookbook/frontend/src/components/Pantry/PantryView.tsx) in der Einkaufsliste ([`ShoppingList/index.tsx`](file:///C:/Users/lucas/source/repos/cookbook/frontend/src/components/ShoppingList/index.tsx)).
+  * Automatischer Vorrats-Abgleich und Hintergrund-Requests (`GET /api/pantry`, `GET /api/pantry/suggestions`) im [`PantryContext`](file:///C:/Users/lucas/source/repos/cookbook/frontend/src/context/PantryContext.tsx) bei Session-Start oder Cook-Events.
+  * Automatischer Transfer abgehakter Einkaufsartikel in den Vorrat (`transferToPantry = true`) beim Klick auf "Einkauf abschließen".
+  * Dialog *"Einkauf in Vorrat übernehmen?"*, Toast *"✓ Zutaten in den Vorrat übernommen"* sowie die Vorrats-Hinweise in [`ShoppingAllDoneState.tsx`](file:///C:/Users/lucas/source/repos/cookbook/frontend/src/components/ShoppingList/ShoppingAllDoneState.tsx) und [`ShoppingCheckedDrawer.tsx`](file:///C:/Users/lucas/source/repos/cookbook/frontend/src/components/ShoppingList/ShoppingCheckedDrawer.tsx).
+  * Filter-Chip `'pantry'` ("Vorrat") im Rezept-Picker des Wochenplaners ([`RecipePickerModal.tsx`](file:///C:/Users/lucas/source/repos/cookbook/frontend/src/components/MealPlanner/RecipePickerModal.tsx)).
+  * Automatische Vorrats-Abbuchung beim Kochen im Backend ([`backend/src/routes/recipeRoutes.ts`](file:///C:/Users/lucas/source/repos/cookbook/backend/src/routes/recipeRoutes.ts)).
+* **Ersetzt durch:**
+  * **Reversibler Dormant-Mode (`ENABLE_PANTRY = false`):** Die Komponenten (`PantryView`, `PantryAddModal`, `PantrySuggestionsModal`, `PantryItemCard`) und DB-Tabellen (`pantry_items`) bleiben vollständig im Codebase erhalten, werden jedoch im UI unsichtbar geschaltet und tätigen keine Netzwerkaufrufe.
+  * **Schlanke Einkaufsliste:** Zeigt direkt die Fortschrittsanzeige ohne überflüssigen 1-Tab-Switcher; Abschluss-Dialog fragt neutral nach dem Leeren der erledigten Artikel; `transferToPantry` steht standardmäßig auf `false`.
+  * **Bereinigte Zähler:** `shoppingListCount` im App-Shell zählt nur noch die tatsächlich zu kaufenden Artikel ohne `inPantry`-Verdopplung.
+* **Betroffene Dateien:** `frontend/src/context/PantryContext.tsx`, `frontend/src/hooks/useShoppingList.ts`, `frontend/src/components/ShoppingList/index.tsx`, `frontend/src/components/ShoppingList/ShoppingTabsCard.tsx`, `frontend/src/components/ShoppingList/ShoppingStickyHeader.tsx`, `frontend/src/components/ShoppingList/ShoppingTabProgress.tsx`, `frontend/src/components/ShoppingList/ShoppingAllDoneState.tsx`, `frontend/src/components/ShoppingList/ShoppingCheckedDrawer.tsx`, `frontend/src/components/ShoppingList/ShoppingListView.tsx`, `frontend/src/components/MealPlanner/RecipePickerModal.tsx`, `frontend/src/App.tsx`, `frontend/src/i18n.ts`, `backend/src/routes/recipeRoutes.ts`, `docs/OBSOLETE.md`.
+
+---
+
+### 2026-10-11: Separate `ExtractionAnimation`-Page & `RecipeSkeletonView` abgelöst durch In-Place `RecipeDetails` Skeleton-Extraktion & `ExtractionAdSheet`
+
+* **Ersetzter Code / Veraltete Logik:**
+  - Eigenständige Extraktions-Animations-Page `frontend/src/components/ExtractionAnimation/` mit `ProgressiveRecipeCard.tsx`, `useProgressiveRecipe.ts`, `ExtractionProgressBar.tsx`, `IngredientsStream.tsx`, `RecipeCoverPreview.tsx`, `RecipePillTags.tsx` und dem Root-Wrapper `ExtractionAnimation.tsx`.
+  - Frühere Zwischenlösung mit Early Return `RecipeSkeletonView.tsx`, die zu Layout-Sprüngen und Unmounts beim Abschluss führte.
+  - Tab-Sprung zu `'history'` (`navigate('history', recipeId)`) bei Fertigstellung, welcher die Ansicht flackern ließ.
+* **Ersetzt durch:**
+  - **Direkte In-Place Skeleton-Integration in `RecipeDetails`:** Die echten Subkomponenten (`RecipeHeader`, `RecipeImageGallery`, `RecipeInfoSection`, `RecipeIngredients`, `RecipeInstructions`) unterstützen das `isExtracting`-Prop direkt und rendern Shimmer-Skeletons für fehlende Felder im identischen DOM-Baum.
+  - **Nahtlose In-Place Fertigstellung ohne Routenwechsel:** Nach Abschluss des Jobs holt `useRecipeExtraction` das Rezept via `/api/recipes/:id` und setzt es in-place in den bestehenden `recipe`-State. Es findet kein Routenwechsel oder Tab-Sprung statt; Skeletons morphen nahtlos in die echten Rezeptdaten.
+  - **Nicht schließbares Ad Bottom Sheet ([`ExtractionAdSheet.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/ExtractionAdSheet.tsx)):** Free-Nutzer sehen während der aktiven Extraktion ein modales, nicht schließbares HeroUI `Drawer` mit dem MREC 300×250 Banner (`isDismissable={false}`, kein Schließen-Button oder Drag-Handle), das sich bei erfolgreichem Abschluss oder Fehler automatisch schließt.
+  - **Premium-Flow:** Premium-Nutzer bleiben ebenfalls direkt in `RecipeDetails` (mit Skeletons, ohne Werbung), behalten aber volle Navigation dank Hintergrundverarbeitung.
+* **Betroffene Dateien:** `frontend/src/components/ExtractionAnimation/` (vollständig entfernt), `frontend/src/components/RecipeDetails/RecipeSkeletonView.tsx` (vollständig entfernt), `frontend/src/components/ExtractionAdSheet.tsx`, `frontend/src/components/RecipeDetails/index.tsx`, `frontend/src/components/RecipeDetails/types.ts`, `frontend/src/hooks/useRecipeExtraction.ts`, `frontend/src/components/ExtractForm/index.tsx`, `frontend/src/App.tsx`, `docs/OBSOLETE.md`, `docs/architecture/frontend.md`.
+
+---
+
+### 2026-10-11: Blockierende FLUX-Cover-Generierung, erzwungener Video-Download & starres HTTP-Polling abgelöst
+
+* **Ersetzter Code / Veraltete Logik:**
+  - Blockierende Ausführung von FLUX.1 Cover-Generierung (`generateRecipeCoverImage`) vor Job-Abschluss in `queue.ts` (verursachte 4–6 Sekunden unnötige Wartezeit für den Nutzer).
+  - Erzwungener Video-Download und WebCodecs Keyframe-Capture (`awaiting_frames`) auch dann, wenn der Creator bereits alle Zutaten und Schritte im Text/Caption des Instagram Reels aufgeschrieben hat (verursachte 10–15 Sekunden unnötige Wartezeit).
+  - Ausschließliches HTTP-Polling im 600ms-Intervall als primärer Kommunikationskanal für Extraktionsfortschritt in `useRecipeExtraction.ts`.
+* **Ersetzt durch:**
+  - **Asynchrone FLUX.1 Cover-Generierung ([`triggerAsyncCoverGeneration`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/imageGenerator.ts)):** Rezept wird sofort mit dem Scraper-Thumbnail oder Eltern-Cover in der Datenbank persistiert und an den Nutzer übergeben. Das KI-Cover wird non-blocking im Hintergrund generiert und gepatcht (-4 bis 6 Sekunden).
+  - **JEV Fast-Track Caption Pre-flight ([`checkCaptionCompleteness`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/scrapers/jevCaptionGuard.ts)):** Semantischer Pre-flight Check via TypeSafe JEV-1.13 Decisions API (~250ms, Fail-Safe Fallback auf Gemini Flash-Lite), der bei vollständigen Textangaben das clientseitige Video-Streaming komplett überspringt (-10 bis 15 Sekunden).
+  - **Server-Sent Events (SSE) Stream ([`GET /api/jobs/:id/events`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/routes/extractionRoutes.ts)):** Sub-30ms Echtzeit-Event-Streaming für Jobstatus und Keyframe-Requests, mit nahtlosem Fallback auf 600ms HTTP-Polling bei Netzwerkunterbrechungen.
+* **Betroffene Dateien:** `backend/src/imageGenerator.ts`, `backend/src/queue.ts`, `backend/src/config.ts`, `backend/src/scrapers/jevCaptionGuard.ts`, `backend/src/jobEvents.ts`, `backend/src/auth.ts`, `backend/src/db/jobsDb.ts`, `backend/src/routes/extractionRoutes.ts`, `frontend/src/hooks/useRecipeExtraction.ts`, `docs/architecture/scraping-and-imports.md`, `docs/OBSOLETE.md`.
+### 2026-10-12: Hardcodierte Gemini-Modellstrings und veraltete `gemini-2.5-flash-lite`-Fallbacks
+
+* **Ersetzter Code / Veraltete Logik:**
+  - Hardcodiertes `const modelName = 'gemini-2.5-flash-lite'` in `backend/src/matching/recipeAuditor.ts`.
+  - Harte Fallbacks auf alte Modelle (`|| 'gemini-2.5-flash'`, `|| 'gemini-2.5-flash-lite'`, `|| 'gemini-3.1-flash-lite'`) in `recipeAuditorDevLogger.ts`, `ingredientImageService.ts`, `visionReviewer.ts`, `aiIngredientGenerator.ts`, `ingredientMatcher.ts` und `foodPhotographyPrompt.ts`.
+  - `gemini-2.5-flash-lite` wurde serverseitig von Google mit HTTP 404 abgeschaltet (*"This model is no longer available to new users..."*).
+* **Ersetzt durch:**
+  - **Zentraler, garantierter `config.GEMINI_MODEL`-Zugriff:** `backend/src/config.ts` garantiert einen validen, nicht-leeren String (Default `gemini-3.1-flash-lite`), der niemals `undefined` oder leer sein kann.
+  - Alle Services und Audit-Komponenten referenzieren ausschließlich `config.GEMINI_MODEL`.
+  - Token-Pricing für `gemini-3.5-flash-lite` wurde in `backend/src/logger.ts` ergänzt und der Default-Fallback in `estimateCost` modernisiert.
+* **Betroffene Dateien:** `backend/src/config.ts`, `backend/src/matching/recipeAuditor.ts`, `backend/src/matching/recipeAuditorDevLogger.ts`, `backend/src/ingredientImageService.ts`, `backend/src/audit/visionReviewer.ts`, `backend/src/matching/aiIngredientGenerator.ts`, `backend/src/matching/ingredientMatcher.ts`, `backend/src/prompts/foodPhotographyPrompt.ts`, `backend/src/logger.ts`, `docs/architecture/ai-gemini.md`, `docs/OBSOLETE.md`.
+
+---
+
+### 2026-10-11: Pauschale 100%-Berechnung von Koch- und Frittierfetten
+
+* **Ersetzter Code / Veraltete Logik:**
+  - Nährwertberechnung in `nutritionCalculator.ts` und `ingredientMatcher.ts` berechnete Nährwerte für alle Zutaten ausschließlich auf Basis des Brutto-Zutatengewichts (`amount`).
+  - Bei Gar- und Frittierflüssigkeiten (z. B. 500 ml Frittieröl) führte dies dazu, dass 500 ml Öl voll als verzehrtes Fett (+4.420 kcal und 500g Fett) in die Rezept-Nährwerte und das Tellergewicht des Health Scores eingerechnet wurden.
+* **Ersetzt durch:**
+  - **Optionales `consumedAmount`-Feld im `Ingredient`-Modell:** Trennt die Einkaufs- und Zubereitungsmenge (`amount: 500 ml`) von der tatsächlich physiologisch verzehrten Menge (`consumedAmount: 30 ml`).
+  - **Deterministische Berechnung via `getEffectiveConsumptionAmount`:** `nutritionCalculator.ts` und `healthScoreCalculator.ts` berechnen Nährwerte und Tellergewichte über `consumedAmount ?? amount`.
+  - **Transparenter UI-Hinweis in `IngredientNutritionDetails.tsx`:** Zeigt dem Nutzer in den Nährwertdetails an: *"Davon verzehrt: ca. X ml (Kochmedium / Frittieren)"*.
+* **Betroffene Dateien:** `shared/src/types/recipes.ts`, `backend/src/gemini.ts`, `backend/src/matching/nutritionCalculator.ts`, `backend/src/matching/healthScoreCalculator.ts`, `backend/src/matching/ingredientMatcher.ts`, `backend/src/matching/ingredientResolver.ts`, `frontend/src/components/RecipeDetails/IngredientNutritionDetails.tsx`, `frontend/src/i18n.ts`, `docs/nutrition.md`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-09: Vollständige Entfernung von Supabase (PostgreSQL, Storage, Auth & CLI)
 
 * **Ersetzter Code / Veraltete Logik:**

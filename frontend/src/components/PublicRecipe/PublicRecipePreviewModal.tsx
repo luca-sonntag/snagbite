@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, Check, Loader2, ExternalLink } from 'lucide-react';
+import { Plus, Loader2, ExternalLink } from 'lucide-react';
 import type { Recipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { useRecipeScaling } from '../../hooks/useRecipeScaling';
@@ -227,7 +227,6 @@ export const PublicRecipePreviewModal: React.FC<PublicRecipePreviewModalProps> =
               </>
             ) : isSaved ? (
               <>
-                <Check className="w-4 h-4 text-emerald-500 shrink-0 stroke-[2.5]" />
                 <span>{t('recipe.preview.alreadySavedAction')}</span>
                 <ExternalLink className="w-3.5 h-3.5 opacity-60 ml-0.5" />
               </>

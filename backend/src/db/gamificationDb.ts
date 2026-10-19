@@ -43,7 +43,7 @@ export {
   getMaxCooksForSameRecipe,
 } from './badgesDb.js';
 
-async function resolveCookPhotoUrl(photoPath: string | null | undefined): Promise<string | null> {
+export async function resolveCookPhotoUrl(photoPath: string | null | undefined): Promise<string | null> {
   if (!photoPath) return null;
   if (photoPath.startsWith('http') || photoPath.startsWith('data:')) {
     return photoPath;

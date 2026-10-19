@@ -9,6 +9,7 @@ import {
   getPremiumMaxConcurrentExtractions,
   getFreeMaxConcurrentExtractions,
 } from '../db.js';
+import { config } from '../config.js';
 
 export interface AuthUserShape {
   id: string;
@@ -40,19 +41,28 @@ export async function fetchAndSyncUser(userId: string): Promise<AuthUserShape> {
   let currentTier = row.tier || 'free';
   const alphaActive = await isAlphaActive();
 
-  if (alphaActive && currentTier !== 'premium' && currentTier !== 'alpha') {
-    currentTier = 'alpha';
-    await db
-      .update(userTable)
-      .set({ tier: 'alpha', updatedAt: new Date() })
-      .where(eq(userTable.id, userId));
-  } else if (!alphaActive && currentTier === 'alpha') {
-    currentTier = 'free';
-    await db
-      .update(userTable)
-      .set({ tier: 'free', updatedAt: new Date() })
-      .where(eq(userTable.id, userId));
+  const adminEmails = config.ADMIN_EMAILS.split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  const isAdminUser = Boolean(row.email && adminEmails.includes(row.email.toLowerCase()));
+
+  if (!isAdminUser) {
+    if (alphaActive && currentTier !== 'premium' && currentTier !== 'alpha') {
+      currentTier = 'alpha';
+      await db
+        .update(userTable)
+        .set({ tier: 'alpha', updatedAt: new Date() })
+        .where(eq(userTable.id, userId));
+    } else if (!alphaActive && currentTier === 'alpha') {
+      currentTier = 'free';
+      await db
+        .update(userTable)
+        .set({ tier: 'free', updatedAt: new Date() })
+        .where(eq(userTable.id, userId));
+    }
   }
+
+  const metadata = (row.metadata || {}) as Record<string, unknown>;
 
   return {
     id: row.id,
@@ -63,6 +73,7 @@ export async function fetchAndSyncUser(userId: string): Promise<AuthUserShape> {
       custom_extraction_limit: row.customExtractionLimit ?? undefined,
     },
     user_metadata: {
+      ...metadata,
       notifications_enabled: row.notificationsEnabled ?? false,
       name: row.name,
       avatar_url: row.image,

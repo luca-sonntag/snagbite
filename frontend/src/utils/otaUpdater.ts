@@ -1,7 +1,6 @@
 import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { App } from '@capacitor/app';
 import { isNative } from '../native';
-import { authClient } from '../auth';
 import { apiUrl } from '../api';
 import { APP_VERSION, APP_BUILD } from '../version';
 
@@ -9,26 +8,21 @@ import { APP_VERSION, APP_BUILD } from '../version';
  * OTA (over-the-air) web-bundle updates via @capgo/capacitor-updater in
  * self-hosted manual mode: the backend's public /api/app-updates/check
  * endpoint decides whether a newer bundle exists, the zip is downloaded
- * silently from Tigris S3 Storage and staged via next() — it becomes active on
- * the next background/relaunch, never mid-session. Missing notifyAppReady()
- * within appReadyTimeout auto-reverts a broken bundle (see capacitor.config.ts).
+ * and applied immediately with an app loading screen displayed during download.
  *
- * OTA only ever ships web assets; native plugins/versioning stay untouched.
+ * Missing notifyAppReady() within appReadyTimeout auto-reverts a broken bundle.
  * Everything here is inert on web and in dev (live-reload) builds.
  */
 
-/** localStorage override for the update channel (debugging/E2E): 'production' | 'alpha' | 'internal'. */
 const CHANNEL_OVERRIDE_KEY = 'snagbite.otaChannel';
-
-/** Minimum time between update checks. */
 const CHECK_INTERVAL_MS = 15 * 60 * 1000;
-
-/** Delay of the deferred first check after boot. */
-const INITIAL_CHECK_DELAY_MS = 5 * 1000;
+const CHECK_TIMEOUT_MS = 3500;
+const DOWNLOAD_TIMEOUT_MS = 25000;
 
 let initialized = false;
 let checkInFlight = false;
 let lastCheckAt = 0;
+let isUpdatingState = false;
 
 interface CheckResponse {
   success: boolean;
@@ -39,54 +33,84 @@ interface CheckResponse {
   minVersionCode?: number;
 }
 
-function isOtaEnabled(): boolean {
-  return isNative() && !import.meta.env.DEV;
+export interface OtaUpdateResult {
+  status: 'up-to-date' | 'updated' | 'updating' | 'error' | 'unsupported';
+  version?: string;
+  error?: string;
 }
 
-/**
- * Resolve the update channel: explicit localStorage override first (device
- * debugging), else 'alpha' for alpha-tier users, else 'production'. The tier
- * may not be loaded on the very first check after a cold start — that
- * self-heals on the next resume check.
- */
+export const OTA_STATUS_EVENT = 'snagbite:ota-update-status';
+export const OTA_READY_EVENT = 'snagbite:ota-update-ready';
+
+export type OtaStatusListener = (isUpdating: boolean) => void;
+const statusListeners = new Set<OtaStatusListener>();
+
+export function isOtaUpdating(): boolean {
+  return isUpdatingState;
+}
+
+export function onOtaStatusChange(listener: OtaStatusListener): () => void {
+  statusListeners.add(listener);
+  return () => {
+    statusListeners.delete(listener);
+  };
+}
+
+function setUpdating(updating: boolean): void {
+  if (isUpdatingState === updating) return;
+  isUpdatingState = updating;
+  statusListeners.forEach((fn) => fn(updating));
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(OTA_STATUS_EVENT, { detail: { isUpdating: updating } }));
+  }
+}
+
+function isOtaEnabled(): boolean {
+  if (!isNative()) return false;
+  // If running via Capacitor live-reload dev server (e.g. http://192.168.x.x:5173), skip OTA
+  if (typeof window !== 'undefined' && window.location.protocol === 'http:' && window.location.port !== '') {
+    return false;
+  }
+  return true;
+}
+
 async function resolveChannel(): Promise<'production' | 'alpha' | 'internal'> {
   try {
     const override = localStorage.getItem(CHANNEL_OVERRIDE_KEY);
     if (override === 'production' || override === 'alpha' || override === 'internal') return override;
   } catch {
-    // localStorage unavailable — fall through to tier detection.
-  }
-
-  try {
-    const res = await authClient.getSession();
-    const tier = (res?.data?.user as any)?.tier ?? (res?.data?.user as any)?.app_metadata?.tier;
-    if (tier === 'alpha') return 'alpha';
-  } catch {
-    // No session yet — default to production.
+    // localStorage unavailable
   }
 
   return 'production';
 }
 
 /**
- * Check the backend for a newer web bundle and silently download + stage it.
- * Throttled and guarded against concurrent runs; all failures are soft (the
- * app just stays on its current bundle until the next check).
+ * Check the backend for a newer web bundle and apply it automatically.
+ * While downloading and applying, setUpdating(true) notifies the UI to show the loading screen.
  */
-async function checkForUpdate(): Promise<void> {
-  if (!isOtaEnabled()) return;
-  if (checkInFlight) return;
-  if (Date.now() - lastCheckAt < CHECK_INTERVAL_MS) return;
+export async function checkAndApplyOtaUpdate(options?: { manual?: boolean }): Promise<OtaUpdateResult> {
+  const isManual = options?.manual === true;
+
+  if (!isOtaEnabled()) {
+    return { status: 'unsupported' };
+  }
+
+  if (checkInFlight) {
+    return { status: 'updating' };
+  }
+
+  if (!isManual && Date.now() - lastCheckAt < CHECK_INTERVAL_MS) {
+    return { status: 'up-to-date' };
+  }
 
   checkInFlight = true;
   lastCheckAt = Date.now();
 
   try {
     const channel = await resolveChannel();
-    // 'builtin' on stock installs, otherwise the running OTA bundle version.
     const { bundle: currentBundle } = await CapacitorUpdater.current();
 
-    // Fetch the true native app build number (versionCode) from Capacitor
     let nativeVersionCode = Number(APP_BUILD);
     try {
       const appInfo = await App.getInfo();
@@ -98,32 +122,42 @@ async function checkForUpdate(): Promise<void> {
       // Fallback to static APP_BUILD
     }
 
-    const response = await fetch(apiUrl('/api/app-updates/check'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        channel,
-        versionCode: nativeVersionCode,
-        currentBundleVersion: currentBundle.version,
-        appVersion: APP_VERSION,
-      }),
-    });
+    const abortController = new AbortController();
+    const abortTimeout = setTimeout(() => abortController.abort(), CHECK_TIMEOUT_MS);
+
+    let response: Response;
+    try {
+      response = await fetch(apiUrl('/api/app-updates/check'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel,
+          versionCode: nativeVersionCode,
+          currentBundleVersion: currentBundle.version,
+          appVersion: APP_VERSION,
+        }),
+        signal: abortController.signal,
+      });
+    } finally {
+      clearTimeout(abortTimeout);
+    }
 
     if (!response.ok) {
       console.warn(`[OTA] Update check failed with HTTP ${response.status}`);
-      return;
+      return { status: 'error', error: `HTTP ${response.status}` };
     }
 
     const result = (await response.json()) as CheckResponse;
     if (!result.success || !result.update || !result.version || !result.url) {
       console.log(`[OTA] Up to date (channel=${channel}, bundle=${currentBundle.version})`);
-      return;
+      return { status: 'up-to-date' };
     }
 
     console.log(`[OTA] Update available: ${result.version} (channel=${channel}, current=${currentBundle.version})`);
 
-    // Reuse an already-downloaded bundle if present (e.g. staged earlier but
-    // not yet applied), skipping ones that previously failed.
+    // Signal UI to show loading screen
+    setUpdating(true);
+
     let bundleId: string | undefined;
     try {
       const { bundles } = await CapacitorUpdater.list();
@@ -139,62 +173,37 @@ async function checkForUpdate(): Promise<void> {
     }
 
     if (!bundleId) {
-      console.log(`[OTA] Downloading ${result.url}`);
-      const downloaded = await CapacitorUpdater.download({
+      console.log(`[OTA] Downloading ${result.url}...`);
+      const downloadPromise = CapacitorUpdater.download({
         url: result.url,
         version: result.version,
         checksum: result.checksum,
       });
+
+      const downloaded = await Promise.race([
+        downloadPromise,
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('OTA bundle download timed out')), DOWNLOAD_TIMEOUT_MS)
+        ),
+      ]);
       bundleId = downloaded.id;
     }
 
-    await CapacitorUpdater.next({ id: bundleId });
-    console.log(`[OTA] Bundle ${result.version} staged — ready for instant or next relaunch`);
-
-    pendingUpdate = { version: result.version, bundleId };
-    window.dispatchEvent(new CustomEvent(OTA_READY_EVENT, { detail: pendingUpdate }));
-  } catch (err) {
-    console.error('[OTA] Update check failed:', err);
+    console.log(`[OTA] Applying bundle ${bundleId} immediately...`);
+    await CapacitorUpdater.set({ id: bundleId });
+    return { status: 'updated', version: result.version };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.warn('[OTA] Update check or apply failed:', message);
+    setUpdating(false);
+    return { status: 'error', error: message };
   } finally {
     checkInFlight = false;
   }
 }
 
-export interface OtaReadyInfo {
-  version: string;
-  bundleId: string;
-}
-
-export const OTA_READY_EVENT = 'snagbite:ota-update-ready';
-let pendingUpdate: OtaReadyInfo | null = null;
-
-export function getPendingOtaUpdate(): OtaReadyInfo | null {
-  return pendingUpdate;
-}
-
-export async function applyOtaUpdateImmediately(bundleId?: string): Promise<void> {
-  if (!isOtaEnabled()) return;
-  try {
-    const targetId = bundleId || pendingUpdate?.bundleId;
-    if (targetId) {
-      console.log(`[OTA] Applying bundle ${targetId} immediately via set()...`);
-      await CapacitorUpdater.set({ id: targetId });
-    } else {
-      console.log('[OTA] Reloading app immediately...');
-      await CapacitorUpdater.reload();
-    }
-  } catch (err) {
-    console.warn('[OTA] Immediate set failed, falling back to reload():', err);
-    try {
-      await CapacitorUpdater.reload();
-    } catch {}
-  }
-}
-
 /**
- * Version of the currently running OTA bundle, or null when running the
- * builtin (Play Store) web assets. Used by SettingsView for on-device
- * confirmation that an OTA update landed.
+ * Version of the currently running OTA bundle, or null on stock (Play Store) installs.
  */
 export async function getActiveOtaVersion(): Promise<string | null> {
   if (!isOtaEnabled()) return null;
@@ -207,29 +216,18 @@ export async function getActiveOtaVersion(): Promise<string | null> {
 }
 
 /**
- * Initialize OTA updates: confirm the current bundle is healthy
- * (notifyAppReady), then check for updates ~5s after boot and on every app
- * resume (throttled). No-op on web and in dev builds.
- *
- * Owns its own resume listener on purpose — the RevenueCat one in purchase.ts
- * is only registered after billing init, which needs a signed-in user.
+ * Initialize OTA updates: confirm the current bundle is healthy (notifyAppReady),
+ * and register resume listener for throttled checks.
  */
 export function initOtaUpdates(): void {
   if (!isOtaEnabled() || initialized) return;
   initialized = true;
 
-  // Anti-brick contract: signal within appReadyTimeout that this bundle boots,
-  // otherwise the plugin rolls back to the previous bundle and deletes this
-  // one. Must fire regardless of how the rest of the init goes.
   CapacitorUpdater.notifyAppReady()
     .then(() => console.log('[OTA] notifyAppReady confirmed'))
     .catch((err) => console.warn('[OTA] notifyAppReady failed:', err));
 
   App.addListener('resume', () => {
-    void checkForUpdate();
+    void checkAndApplyOtaUpdate();
   });
-
-  setTimeout(() => {
-    void checkForUpdate();
-  }, INITIAL_CHECK_DELAY_MS);
 }

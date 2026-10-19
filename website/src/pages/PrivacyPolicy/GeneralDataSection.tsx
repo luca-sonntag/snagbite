@@ -46,24 +46,25 @@ export const GeneralDataSection: React.FC = () => {
           <div className="p-5 rounded-2xl glass-panel flex flex-col gap-2">
             <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <Video className="w-4 h-4 text-teal-500" />
-              b) Social-Media-Links &amp; clientseitiger Videoabruf (Privatkopie)
+              b) Rezepterstellung aus Web- und Medieninhalten
             </h3>
             <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-              Wenn du öffentlich zugängliche Rezept-Links (z.&nbsp;B. von Instagram, TikTok, YouTube Shorts, Facebook oder Websites) in Snagbite teilst oder einfügst:
+              Wenn du öffentlich zugängliche Links oder Webinhalte in Snagbite bereitstellst, beauftragst du die App mit der automatisierten Digitalisierung des Rezepts:
             </p>
             <ul className="list-disc pl-5 text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <li><strong>Direkter Medienabruf:</strong> Dein Endgerät ruft die öffentlich zugänglichen Mediendaten direkt von den Servern der jeweiligen Plattform ab. Dabei wird deine IP-Adresse an den jeweiligen Anbieter (Meta, ByteDance, Google) übertragen und es kann mobiles Datenvolumen deines Tarifs anfallen.</li>
-              <li><strong>Keine dauerhafte Speicherung:</strong> Das Video wird lediglich flüchtig zur Rezept-Erstellung verarbeitet und <strong>nicht dauerhaft</strong> auf deinem Gerät oder unseren Servern gespeichert.</li>
+              <li><strong>Verarbeitung öffentlich zugänglicher Inhalte:</strong> Zur Erfassung von Zutaten und Zubereitungsschritten werden die öffentlich zugänglichen Inhalte der verlinkten Seite aufgerufen und automatisiert ausgewertet.</li>
+              <li><strong>Flüchtige Sprach- und Textanalyse:</strong> Enthaltene Sprach- und Textinformationen werden flüchtig analysiert, um handlungsrelevante Kochanweisungen und Mengenangaben in Textform zu erfassen.</li>
+              <li><strong>Keine Speicherung von Rohmedien:</strong> Unsere Server empfangen und speichern zu keinem Zeitpunkt Rohmaterial (weder Video- noch Audiodateien) der verlinkten Medien. In deinem persönlichen Kochbuch verbleibt ausschließlich das strukturierte Textrezept.</li>
             </ul>
           </div>
 
           <div className="p-5 rounded-2xl glass-panel flex flex-col gap-2">
             <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <Camera className="w-4 h-4 text-emerald-500" />
-              c) Foto-Import (Kochbuch-Scan &amp; Rezeptkarten per OCR)
+              c) Rezeptfoto-Import &amp; optische Texterkennung (OCR)
             </h3>
             <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-              Du kannst eigene Fotos von physischen Rezepten (Buchseiten, Zeitschriftenartikel, handgeschriebene Notizen) über die Kamera oder Bildauswahl hochladen. Diese Fotos werden verschlüsselt an unsere Server übermittelt und per Texterkennung analysiert. Nach erfolgreicher Rezept-Erstellung (spätestens nach 24 Stunden) werden die Originaldateien vollständig von unseren Servern gelöscht.
+              Du kannst Fotos von Rezeptnotizen oder Rezeptkarten zur Texterkennung hochladen. Diese Bilder werden verschlüsselt übertragen und automatisiert per OCR analysiert. Nach erfolgreicher Texterfassung (spätestens nach 24 Stunden) werden die Bilddateien vollständig von unseren Servern gelöscht.
             </p>
           </div>
 
@@ -88,7 +89,7 @@ export const GeneralDataSection: React.FC = () => {
               e) Vorrat, Wochenplaner, Einkaufsliste &amp; Recipe Copilot
             </h3>
             <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-              In deinem geschützten Account speichern wir deine Vorratsbestände, Wochenpläne und Einkaufslisten. Eingaben im KI-Chat (Recipe Copilot zur Rezeptanpassung, Zutatenersetzung oder Mengenumrechnung) werden als Prompts an das KI-Modell Google Gemini übermittelt.
+              In deinem geschützten Account speichern wir deine Vorratsbestände, Wochenpläne und Einkaufslisten. Eingaben im interaktiven Kochassistenten (Recipe Copilot zur Rezeptanpassung oder Zutatensubstitution) werden als Eingabetexte verschlüsselt an spezialisierte KI-Modelle zur Textverarbeitung übermittelt.
             </p>
           </div>
         </div>

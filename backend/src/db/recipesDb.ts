@@ -35,10 +35,15 @@ export async function getRecipe(id: string): Promise<Recipe | null> {
 }
 
 export async function updateRecipe(id: string, recipe: Recipe): Promise<Recipe> {
+  const patch = recipeToDrizzle(recipe);
+  if (recipe.pipelineVersion === undefined) {
+    delete (patch as { pipelineVersion?: number }).pipelineVersion;
+  }
+
   const [updated] = await db
     .update(recipes)
     .set({
-      ...recipeToDrizzle(recipe),
+      ...patch,
       updatedAt: new Date(),
     })
     .where(eq(recipes.id, id))

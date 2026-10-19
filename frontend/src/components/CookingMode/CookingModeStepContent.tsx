@@ -68,12 +68,19 @@ export const CookingModeStepContent: React.FC<CookingModeStepContentProps> = ({
             </div>
           )}
 
-          {/* Step Counter */}
-          {totalSteps > 0 && (
-            <span className="text-xs font-bold text-gray-500 dark:text-gray-400 tabular-nums shrink-0 select-none">
-              {currentStep.step} / {totalSteps}
-            </span>
-          )}
+          {/* Step Counter and Component Pill */}
+          <div className="flex items-center gap-1.5 shrink-0 select-none">
+            {currentStep.section && (
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 max-w-[130px] truncate">
+                {currentStep.section}
+              </span>
+            )}
+            {totalSteps > 0 && (
+              <span className="text-xs font-bold text-gray-500 dark:text-gray-400 tabular-nums">
+                {currentStep.step} / {totalSteps}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Step Dynamic Content with Directional Slide Transition */}
@@ -82,7 +89,7 @@ export const CookingModeStepContent: React.FC<CookingModeStepContentProps> = ({
           className={getStepSlideClass(slideDirection)}
         >
           {/* Step Description - Warm, readable editorial typography with generous line-spacing and breathing room */}
-          <div className="px-2.5 py-3.5 sm:px-4 sm:py-4.5 flex flex-col text-left">
+          <div id="tour-cooking-step" className="px-2.5 py-3.5 sm:px-4 sm:py-4.5 flex flex-col text-left">
             <div className="text-[22px] sm:text-[26px] md:text-[28px] font-semibold text-gray-800 dark:text-gray-100 tracking-normal leading-[1.8] sm:leading-[1.85] md:leading-[1.9]">
               <RecipeInstructionText
                 variant="focused"

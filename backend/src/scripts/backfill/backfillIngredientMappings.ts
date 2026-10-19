@@ -16,7 +16,8 @@
  *   npm run mappings:backfill -- --ingredients="Hüttenkäse, Leinsamen, Mandelmilch, Backpulver"
  */
 
-import { getClient } from '../../db.js';
+import { db } from '../../db/drizzle.js';
+import { ingredientMappings } from '../../db/schema/ingredients.js';
 import { resolveAndRemember } from '../../matching/ingredientMatcher.js';
 import { mapWithConcurrency, type ResolverInput } from '../../matching/ingredientResolver.js';
 import { flushHitCounts } from '../../matching/mappingStore.js';
@@ -25,7 +26,6 @@ import {
   parseManualIngredientList,
 } from '../../matching/aiIngredientGenerator.js';
 import {
-  getProdClient,
   extractIngredients,
   fetchRecipesBatch,
 } from './backfillRecipeSource.js';
@@ -142,9 +142,14 @@ async function resolveInputs(
 }
 
 async function runAiOrManualBackfill(options: CliOptions, metrics: BackfillMetrics): Promise<void> {
-  const { data: existingRows } = await getClient()
-    .from('ingredient_mappings')
-    .select('mapping_key, mapping_key_de, aliases, category');
+  const existingRows = await db
+    .select({
+      mapping_key: ingredientMappings.mappingKey,
+      mapping_key_de: ingredientMappings.mappingKeyDe,
+      aliases: ingredientMappings.aliases,
+      category: ingredientMappings.category,
+    })
+    .from(ingredientMappings);
   const existingKeys = new Set<string>();
   const existingByCategory: Record<string, string[]> = {};
   for (const r of existingRows || []) {
@@ -193,14 +198,13 @@ async function runAiOrManualBackfill(options: CliOptions, metrics: BackfillMetri
 
 async function runRecipeBackfill(options: CliOptions, metrics: BackfillMetrics): Promise<void> {
   const source = options.source === 'prod' ? 'prod' : 'dev';
-  const readClient = source === 'prod' ? getProdClient() : getClient();
   const PAGE_SIZE = 100;
   let currentOffset = options.offset;
   let remainingLimit = options.all ? Number.MAX_SAFE_INTEGER : options.limit;
 
   while (remainingLimit > 0) {
     const fetchCount = Math.min(PAGE_SIZE, remainingLimit);
-    const recipes = await fetchRecipesBatch(source, readClient, currentOffset, fetchCount);
+    const recipes = await fetchRecipesBatch(source, currentOffset, fetchCount);
 
     if (recipes.length === 0) {
       console.log('No more recipes found.');
@@ -254,11 +258,11 @@ async function main(): Promise<void> {
 
   if (options.clear) {
     console.log('🗑️  Clearing all existing mappings in DEV database...');
-    const { error: delError } = await getClient().from('ingredient_mappings').delete().neq('mapping_key', '__dummy__');
-    if (delError) {
-      console.error('❌ Failed to clear mappings:', delError.message);
-    } else {
+    try {
+      await db.delete(ingredientMappings);
       console.log('✅ Mapping table cleared.\n');
+    } catch (delError: any) {
+      console.error('❌ Failed to clear mappings:', delError?.message || delError);
     }
   }
 

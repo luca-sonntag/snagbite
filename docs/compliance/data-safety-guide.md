@@ -9,7 +9,7 @@ Dieser Leitfaden enthält alle verbindlichen Antworten für das **Formular zur D
 | Frage in der Google Play Console | Antwort | Begründung / Kontext |
 |---|---|---|
 | **Erhebt oder teilt Ihre App einen der erforderlichen Nutzertyp-Daten?** | **Ja** | E-Mail, Werbe-ID und In-App-Aktivitäten werden verarbeitet. |
-| **Werden alle vom Nutzer erhobenen Daten bei der Übertragung verschlüsselt?** | **Ja** | Alle Netzwerkaufrufe (Frontend, Backend, Supabase, AdMob, RevenueCat) erfolgen ausnahmslos über HTTPS/TLS 1.3 (Art. 32 DSGVO). |
+| **Werden alle vom Nutzer erhobenen Daten bei der Übertragung verschlüsselt?** | **Ja** | Alle Netzwerkaufrufe (Frontend, Backend, Railway, AdMob, RevenueCat) erfolgen ausnahmslos über HTTPS/TLS 1.3 (Art. 32 DSGVO). |
 | **Bietet Ihre App Nutzern die Möglichkeit, ihr Konto und ihre Daten zu löschen?** | **Ja** | Direkt in der App unter *Einstellungen > Konto-Aktionen > Account & Daten löschen* und öffentlich unter `https://snagbite.app/delete-data`. |
 | **Können Nutzer die Löschung ihrer Daten anfordern, ohne die App neu zu installieren?** | **Ja** | Über das Webformular / Support-Kontakt auf `https://snagbite.app/delete-data`. |
 
@@ -22,7 +22,7 @@ Dieser Leitfaden enthält alle verbindlichen Antworten für das **Formular zur D
 #### 1. E-Mail-Adresse
 * **Erhoben?** Ja
 * **Weitergegeben?** Nein
-* **Verarbeitung:** Nur für Authentifizierung (Supabase Auth).
+* **Verarbeitung:** Nur für Authentifizierung (Better-Auth).
 * **Zwecke:**
   * App-Funktionalität (Kontoerstellung, Login, Synchronisierung)
   * Kontoverwaltung
@@ -31,7 +31,7 @@ Dieser Leitfaden enthält alle verbindlichen Antworten für das **Formular zur D
 #### 2. Benutzer-IDs (User IDs)
 * **Erhoben?** Ja
 * **Weitergegeben?** Nein
-* **Verarbeitung:** Eindeutige Supabase `auth.uid()` zur Zuordnung von Rezepten, Sammlungen und Einkaufslisten.
+* **Verarbeitung:** Eindeutige User-ID (`user.id`) zur Zuordnung von Rezepten, Sammlungen und Einkaufslisten.
 * **Zwecke:** App-Funktionalität, Kontoverwaltung.
 
 ---

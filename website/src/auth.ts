@@ -1,7 +1,17 @@
 import { createAuthClient } from 'better-auth/react';
-import { apiUrl } from './api';
+import { API_BASE_URL } from './api';
 
-const baseURL = apiUrl('');
+function getAuthBaseUrl(): string {
+  if (API_BASE_URL && (API_BASE_URL.startsWith('http://') || API_BASE_URL.startsWith('https://'))) {
+    return API_BASE_URL;
+  }
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return API_BASE_URL ? `${window.location.origin}${API_BASE_URL}` : window.location.origin;
+  }
+  return 'http://localhost:3000';
+}
+
+const baseURL = getAuthBaseUrl();
 
 export const AUTH_TOKEN_KEY = 'snagbite.website.admin.token';
 

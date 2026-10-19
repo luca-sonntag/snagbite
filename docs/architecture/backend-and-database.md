@@ -1,23 +1,22 @@
-# ⚙️ Backend & Datenbank (Node.js & Supabase Postgres)
+# ⚙️ Backend & Datenbank (Node.js & Railway PostgreSQL)
 
 ## 1. Processing- & Database-Layer
 
-* **Technologie:** Express.js, TypeScript (ausgeführt über `tsx` / Direct-Node execution), Node.js 22+ (erforderlich für `@supabase/supabase-js` native WebSockets).
-* **Datenbank:** Supabase Postgres (`backend/src/db.ts`) mit Row-Level Security (RLS) über `@supabase/supabase-js`. Alle benutzerbezogenen Queries filtern mit `.eq('user_id', userId)`, um mandantenfähige Isolation zu gewährleisten. Interne Queue-Operationen (`getNextPendingJob`, `updateJob`) arbeiten ohne User-Scoping.
-* **Migrations-System:** Offizielles Supabase CLI Migrations-System (`supabase/migrations/`) mit autoritativem Versionstracking in `supabase_migrations.schema_migrations`. Ermöglicht transaktionale, lineare Schema-Updates (`npm run db:push`, `npm run db:status`, `npm run db:repair`) von der Baseline `v1.1.9` bis zu den neuesten Features.
-* **Authentifizierung:** Supabase Auth JWT-Verifikation (`backend/src/auth.ts`). Die Middleware `requireAuth` validiert den `Authorization: Bearer <token>` Header, extrahiert die User-ID via `auth.getUser(token)` und reicht sie als `req.userId` an alle Route-Handler weiter. Unterstützt sowohl E-Mail/Passwort- als auch Google OAuth-Authentifizierung nahtlos.
-* **RLS-Policies:** Die `jobs`-Tabelle ist mit vier RLS-Policies abgesichert: `SELECT`/`INSERT`/`UPDATE`/`DELETE` – alle an `auth.uid() = user_id` gebunden. Der `user_id`-Fremdschlüssel referenziert `auth.users.id`.
-* **Funktion:** Das Backend dient als asynchroner Job-Orchestrator, verwaltet Jobs und lädt Audiodateien temporär herunter.
+* **Technologie:** Express.js, TypeScript (ausgeführt über `tsx` / Direct-Node execution), Node.js 22+.
+* **Datenbank:** Railway Managed PostgreSQL via Drizzle ORM (`backend/src/db/schema/`). Alle benutzerbezogenen Queries filtern mit `eq(table.userId, userId)`, um mandantenfähige Isolation zu gewährleisten. Interne Queue-Operationen (`claimNextJob`, `updateJob`) arbeiten ohne User-Scoping.
+* **Migrations-System:** Drizzle ORM mit typsicherem Schema (`backend/src/db/schema/`). Ermöglicht relationale, lineare Schema-Updates (`npm run db:push` für Dev, `npm run db:push:prod` für Railway Production, `npm run db:studio` für GUI).
+* **Authentifizierung:** Better-Auth (`backend/src/auth.ts`, `backend/src/authInstance.ts`). Die Middleware `requireAuth` validiert Sessions, extrahiert die User-ID via Session-Cookie/Header und reicht sie als `req.userId` an alle Route-Handler weiter. Unterstützt E-Mail/Passwort, Google OAuth und Gast-/Reviewer-Sessions nahtlos.
+* **Funktion:** Das Backend dient als asynchroner Job-Orchestrator, verwaltet Jobs und lädt Mediendaten temporär herunter.
 
 ### History, ID-Vergabe & Verwaltung
 * Bietet Helper-Funktionen (`getAllJobs(userId)` und `deleteJob(id, userId)`) zur persistenten Abfrage und Bereinigung von Extraktionen – stets benutzerbezogen.
-* Stellt REST-Endpunkte bereit: `GET /api/recipes` (das Kochbuch des authentifizierten Users), `GET/PATCH/DELETE /api/recipes/:recipeId` (lesen, Inhalt aktualisieren z. B. bei Basis-Portionsänderungen, aus dem Kochbuch entfernen) und `DELETE /api/users/me` (löscht das Benutzerkonto über die Supabase Admin API).
+* Stellt REST-Endpunkte bereit: `GET /api/recipes` (das Kochbuch des authentifizierten Users), `GET/PATCH/DELETE /api/recipes/:recipeId` (lesen, Inhalt aktualisieren z. B. bei Basis-Portionsänderungen, aus dem Kochbuch entfernen), `DELETE /api/users/me` (löscht das Benutzerkonto) sowie `GET/PATCH /api/users/me/metadata` (atomares Abfragen und partielles Mergen von User-Metadaten wie Tour-Status, Onboarding, Sprache und Einstellungen).
 * **`recipeId` ist die einzige client-seitige ID** für alles, was ein Rezept betrifft (`/favorite`, `/flags`, `/collections`, `/cooked`, `/cook-history`, `/chat*`, `/remix`); die `user_recipes`-Zeile wird serverseitig über `(user_id, recipe_id)` aufgelöst. `GET /api/jobs/:id` bleibt ausschließlich Polling-Kanal und liefert `recipeId`, sobald der Job fertig ist.
 * **Abbrechen ≠ Löschen:** `POST /api/jobs/:id/cancel` bricht eine laufende Extraktion ab, `DELETE /api/recipes/:id` entfernt ein Rezept aus dem Kochbuch. Beides war früher derselbe Aufruf — genau die Vermischung, die den Soft-Delete erzwungen hat.
 * **Eindeutige Identifikation:** Normalisiert Rezepte bei Abfragen und versieht sie mit einer eindeutigen `id` (entspricht der `jobId`), um Kollisionen zwischen Rezepten mit gleichem Titel zu unterbinden.
 * **Caching-Deaktivierung:** Setzt explizit `Cache-Control` Header (`no-store, no-cache, must-revalidate, proxy-revalidate`) für dynamic endpoints (`/api/jobs/:id`), um zu verhindern, dass Browser veraltete/gecachte Job-Zustände ausliefern.
 * **Queue-Resilienz & Stale-Job Self-Healing (`backend/src/db/jobsCleanup.ts` & `backend/src/queue.ts`):**
-  * **Adaptives Backoff & Log-Ingestion-Schutz:** Bei aktiver Extraktion oder laufenden Jobs pollt der Worker alle 2 Sekunden (`MIN_POLL_INTERVAL_MS = 2000`). Im Leerlauf greift ein dynamisches Backoff bis auf 30 Sekunden (`MAX_POLL_INTERVAL_MS = 30000`), wodurch unnötige Supabase API-Gateway- und Postgres-Logs um >90% reduziert werden.
+  * **Adaptives Backoff & Log-Ingestion-Schutz:** Bei aktiver Extraktion oder laufenden Jobs pollt der Worker alle 2 Sekunden (`MIN_POLL_INTERVAL_MS = 2000`). Im Leerlauf greift ein dynamisches Backoff bis auf 30 Sekunden (`MAX_POLL_INTERVAL_MS = 30000`), wodurch unnötige Postgres-Logs um >90% reduziert werden.
   * **Zero-Latency Event-Wakeup:** Sobald ein Job eingereicht wird (`triggerWorkerTick()` in `extractionRoutes.ts` / `recipeRoutes.ts`) oder ein Job abschließt, wird das Intervall sofort auf 2s zurückgesetzt und der nächste Tick unverzüglich angestoßen.
   * **Entzerrte Wartungs-Sweeps:** `reclaimExpiredJobs` und `sweepStaleAwaitingFrames` laufen in einem 3-Minuten-Intervall (`MAINTENANCE_INTERVAL_MS`), was passend zu den 5- bzw. 10-Minuten-Timeouts zehntausende periodische DB-Hits einspart.
   * **Beendigung des `awaiting_frames`-Loops:** `sweepStaleAwaitingFrames` setzt Jobs, die länger als `CLIENT_FRAMES_TIMEOUT_MINUTES` (5 Min.) ohne Client-Keyframes in `awaiting_frames` verharren, verbindlich auf `status: 'failed'` mit dem Fehlercode `EXTRACTION_TIMEOUT`. Dadurch wird der frühere Teufelskreis (Sweep ➔ `pending` ➔ Re-Park ➔ `awaiting_frames`), der Nutzerkonten dauerhaft sperrte, vollständig unterbunden.
@@ -30,6 +29,8 @@
 Exponiert administrative API-Routen unter `/api/admin/*`, die über die Middleware `requireAdmin` abgesichert sind. Diese Middleware prüft, ob die E-Mail des authentifizierten Nutzers in der kommagetrennten Liste `ADMIN_EMAILS` (in `.env` konfiguriert) enthalten ist.
 * **Endpunkte:**
   * `GET /api/admin/check`: Prüft Admin-Status.
+  * `POST /api/admin/me/tier`: Schaltet den Account-Tier des eingeloggten Admins zwischen `free` und `premium` um.
+  * `POST /api/admin/me/reset-settings`: Setzt die zusätzlichen Einstellungen in der `user`-Tabelle für den eingeloggten Admin zurück (`metadata: '{}'`, `notificationsEnabled: false`, `customExtractionLimit: null`) und löscht Push-Tokens.
   * `GET /api/admin/settings` & `PATCH /api/admin/settings`: Liefert und aktualisiert Werte in `global_settings` (invalidiert den internen Cache).
   * `POST /api/admin/notifications/trigger`: Führt manuell einen Durchlauf des Push-Notification Workers für Tests aus und liefert detaillierte Ausführungsprotokolle.
   * `GET /api/admin/feedback`: Ruft alle In-App Bug-Reports und Feedback chronologisch ab.
@@ -44,27 +45,30 @@ Exponiert administrative API-Routen unter `/api/admin/*`, die über die Middlewa
 * **Body-Limit:** `express.json({ limit: '1mb' })` schützt vor Memory-Exhaustion durch große Payloads (Foto-Import nutzt pfad-spezifischen 12MB Parser davor).
 
 ### Health-Check (`/health`)
-Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()`. Antwortet `200 OK` bei gesunder DB, `503 Service Unavailable` bei Problemen. Liefert `uptime`, `nodeEnv` und `dbConnected`-Status.
-* **In-Memory Caching (30s TTL):** Das Abfrageergebnis wird für 30 Sekunden im Speicher gecacht (`DB_HEALTH_CACHE_TTL_MS`), damit externe Uptime-Monitore und Healthchecks Supabase nicht im Sekundentakt mit Polling-Abfragen belasten.
+Erweiterter Endpunkt prüft PostgreSQL-Datenbankverbindung via `checkDbHealth()`. Antwortet `200 OK` bei gesunder DB, `503 Service Unavailable` bei Problemen. Liefert `uptime`, `nodeEnv` und `dbConnected`-Status.
+* **In-Memory Caching (30s TTL):** Das Abfrageergebnis wird für 30 Sekunden im Speicher gecacht (`DB_HEALTH_CACHE_TTL_MS`), damit externe Uptime-Monitore und Healthchecks die Datenbank nicht im Sekundentakt mit Polling-Abfragen belasten.
 
-### Statische Assets & Zutat-Icons Distribution (`/api/ingredient-icons/*` & `/api/category-icons/*`)
-* **Icons-Katalog:** Das Backend liefert über 760 KI-generierte Zutat-Icons (`.webp`) und 20 Kategorie-Icons aus (`backend/src/ingredientImageRoutes.ts`).
+### Statische Assets, Hybrid S3-Cache & On-Demand Zutat-Icons (`/api/ingredient-icons/*` & `/api/category-icons/*`)
+* **Icons-Katalog & Hybrid Storage (`ingredientIconStorage.ts`):** Das Backend nutzt eine zweistufige Speicherarchitektur für Zutat-Icons (`.webp`):
+  * **L1 (Lokaler Disk-Cache im Container):** `backend/public/ingredient-icons/` wird beim Start aus dem Basis-Seed `ingredient-icons.zip` befüllt (`ensureIngredientIconsExtracted()`) und dient als ultraschneller lokaler Cache (< 1 ms).
+  * **L2 (Tigris S3 Bucket `ingredient-icons`):** Persistenter Master-Speicher über Container-Neustarts und zwischen `web`- und `worker`-Instanzen hinweg. Beim Server-Start indiziert `initIngredientIconStorage()` alle in S3 vorhandenen Icons im Speicher (`s3KnownIcons`). Bei einem lokalen Cache-Miss lädt `fetchIconFromS3ToDisk()` das Icon aus S3 nach und legt es lokal im L1-Cache ab.
+* **On-Demand-Generierung (`backend/src/services/ingredientOnDemandService.ts`):**
+  * Existiert ein angefragtes Icon weder lokal noch in S3, prüft `resolveOrGenerateIngredientIcon()`, ob die Zutat in `ingredient_mappings` oder im OpenFoodFacts-Katalog bekannt ist (Schutz vor Missbrauch durch beliebige URLs) und ob das Tagesbudget (`budgetTracker.ts`) nicht überschritten ist.
+  * Gleichzeitige Requests für dieselbe Zutat werden über eine In-Flight-Map dedupliziert (`inFlightGenerations`) und durch ein Concurrency-Semaphore (max. 3 parallel) begrenzt.
+  * `generateIngredientIcon()` führt die vollständige Pipeline aus: **Gemini Visual Prompt ➔ FLUX.1 [schnell] ➔ BGBuster Hintergrund-Freistellung & 20%-Margin-Zentrierung**, speichert das Ergebnis lokal auf Disk und lädt es sofort nach S3 (`ingredient-icons/<slug>.webp`) hoch.
+  * Im Frontend zeigt `IngredientIcon.tsx` nach 120 ms (Anti-Flicker-Delay) einen dezenten Loading-Spinner im Icon-Slot an und blendet das frisch generierte Icon nach Abschluss sanft ein. Zudem stößt `ingredientMatcher.ts` bereits während der Rezept-Extraktion im Hintergrund (`triggerBackgroundIconGeneration`) das Pre-Warming fehlender Icons an.
 * **Spezifitäts-Kaskade & Progressive Enhancement:** Bei generischen Oberbegriffen (z. B. `baseName: "cheese"`) prüft der Icon-Resolver via `req.query.syn` / `synonyms`, ob ein spezifischeres Synonym-Icon existiert (z. B. `["grated cheese"]` ➔ `shredded_cheese.webp`). Vorverpackter Streukäse (Gratinkäse, Reibekäse) wird als eigene Food Identity `shredded cheese` geführt.
-* **Optimierte Git- & Container-Auslieferung:**
-  * Um das Git-Repository nicht mit hunderten einzelnen Binärdateien aufzublähen, werden alle Zutat-Icons in einem einzigen komprimierten Archiv `backend/public/ingredient-icons.zip` (~13 MB) in Git versioniert.
-  * In `.gitignore` sind die entpackten `backend/public/ingredient-icons/*.webp` ignoriert.
-  * **Startup Auto-Extraction (`backend/src/ingredientIconPacker.ts`):** Beim Start des Backends (lokal und auf Railway) prüft `ensureIngredientIconsExtracted()` im `bootstrap()`, ob die Icons entpackt werden müssen (z. B. im frischen Docker-Container oder nach Repo-Clone) und extrahiert diese via `adm-zip` in ~200ms nach `backend/public/ingredient-icons/`. Ein Timestamp-Stamp (`.unpacked_stamp`) verhindert unnötige Extraktionen bei bestehendem Datenstand.
-  * **CLI-Befehle:**
-    * `npm run icons:zip`: Packt alle aktuellen `.webp`-Dateien aus `backend/public/ingredient-icons/` in `ingredient-icons.zip`.
-    * `npm run icons:unpack`: Entpackt das Zip-Archiv manuell (unterstützt `--force`).
-    * `npm run audit:ingredients`: Startet die autonome Audit-Pipeline (unterstützt `--dry-run`, `--interactive` / `-i` / `--debug`, `--limit <N>`, `--budget <USD>`, `--force`, `--key <key>`).
-    * `npm run mappings:backfill`: Befüllt die `ingredient_mappings`-Tabelle (unterstützt `--prod` für Rezepte aus Production, `--ai` / `--ai-prompt` / `--ai-category` / `--count` für synthetische KI-Zutatenlisten, oder `--ingredients="..."` für manuelle Listen).
-    * Der Batch-Generator (`generateBaseNameIngredientIcons.ts`) und die Audit-Pipeline aktualisieren das Zip-Archiv nach Änderungen automatisch.
+* **CLI-Befehle:**
+  * `npm run icons:sync:s3` / `npm run icons:sync:s3:prod`: Synchronisiert lokale `.webp`-Icons mit dem S3-Bucket `ingredient-icons` (unterstützt `--pull` für bidirektionalen Sync und `--dry-run`).
+  * `npm run icons:zip`: Packt alle aktuellen `.webp`-Dateien aus `backend/public/ingredient-icons/` in `ingredient-icons.zip`.
+  * `npm run icons:unpack`: Entpackt das Zip-Archiv manuell (unterstützt `--force`).
+  * `npm run audit:ingredients`: Startet die autonome Audit-Pipeline (unterstützt `--dry-run`, `--interactive` / `-i` / `--debug`, `--limit <N>`, `--budget <USD>`, `--force`, `--key <key>`).
+  * `npm run mappings:backfill`: Befüllt die `ingredient_mappings`-Tabelle.
 
 ### Autonome KI-Audit-Pipeline (`backend/src/audit/`)
 * **Ziel:** Kontinuierliche Validierung von OpenFoodFacts-Nährwert-Mappings und Qualitätsprüfung der 512×512 Zutat-Icons.
 * **Ablauf pro Zutat:**
-  1. **Mapping-Plausibilität & OFF-Recherche (`mappingAuditor.ts`):** Prüft Name, Kategorie und Nährwerte. Bei `no_match` oder unplausiblen Zuordnungen führt Gemini eine erweiterte Suche mit Synonymen und Übersetzungen im lokalen SQLite OpenFoodFacts-Index durch und aktualisiert das Mapping in Supabase.
+  1. **Mapping-Plausibilität & OFF-Recherche (`mappingAuditor.ts`):** Prüft Name, Kategorie und Nährwerte. Bei `no_match` oder unplausiblen Zuordnungen führt Gemini eine erweiterte Suche mit Synonymen und Übersetzungen im lokalen SQLite OpenFoodFacts-Index durch und aktualisiert das Mapping in der Datenbank.
   2. **Icon-Geometrie & Auto-Zoom (`iconGeometry.ts`):** Pixel-Bounding-Box-Analyse gegen weißen Hintergrund. Bei zu kleinen Motiven (> 25% Randabstand) skaliert Sharp das Motiv verlustfrei auf exakt 20% Randabstand (**$0 API-Kosten**). Bei Rand-Clipping (< 8% Rand) wird das Icon mit Flux-1 neu generiert.
   3. **Multimodal Vision Check (`iconAuditor.ts`):** Gemini Flash Lite Vision validiert das gerenderte Motiv auf Isoliertheit und Korrektheit.
 * **Lokale Manifeste & Caching (`auditManifest.ts`):** Bestätigte Mappings (`mappings_manifest.json`) und Icons (`icons_manifest.json`) werden lokal gecached, sodass Aliasse und Folgeläufe $0 zusätzliche Kosten verursachen.
@@ -79,30 +83,54 @@ Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()`. 
   * `FREE_MAX_EXTRACTIONS_PER_WINDOW` (Default: `3`): Maximale Anzahl an Extraktionen für Free-User.
   * `PREMIUM_MAX_EXTRACTIONS_PER_WINDOW` (Default: `50`): Maximale Anzahl an Extraktionen für Premium-User.
 * **Subscription Tiers:** Standardmäßig im `free` Tier. Sobald Premium gekauft wird, wird das Tier in `app_metadata.tier` auf `premium` gesetzt. Im Alpha-Modus werden Nutzer automatisch in `alpha` eingestuft.
-* **Benutzerbezogene Overrides:** In Supabase Auth `app_metadata` gesteuert (`custom_extraction_limit` bzw. `max_extractions_per_window`, z. B. `-1` für unbegrenzt).
+* **Benutzerbezogene Overrides:** In `app_metadata` gesteuert (`custom_extraction_limit` bzw. `max_extractions_per_window`, z. B. `-1` für unbegrenzt).
 * **Rewarded Video Ad Bonus-Credits (`app_metadata.bonus_credits`):**
   * Nutzer können durch das Ansehen von Rewarded Video Ads verzehrbare Extraktions-Credits sammeln.
   * **Konfigurierbarkeit (`global_settings.rewarded_ad_bonus_credits`):** Die Anzahl der gutgeschriebenen Credits pro Video (Standard: 3) ist zentral in der Postgres-Tabelle `global_settings` hinterlegt und über die Admin-API (`/api/admin/settings`) steuerbar.
-  * **Claim-Endpunkt (`POST /api/me/rewarded-ad-claimed`):** Inkrementiert `app_metadata.bonus_credits` in Supabase Auth (`updateUserById`) atomar um den in `global_settings` definierten Wert.
+  * **Claim-Endpunkt (`POST /api/me/rewarded-ad-claimed`):** Inkrementiert `app_metadata.bonus_credits` in den User-Metadaten atomar um den in `global_settings` definierten Wert.
   * **Verfügbarkeits-Berechnung (`GET /api/extractions/limit`):** Addiert Bonus-Credits auf verbleibende Basis-Extraktionen (`remaining = baseRemaining + bonusCredits`) und liefert `rewardedAdBonusCredits` an den Client.
   * **Quota-Verbrauch (`enforceExtractionQuota` in `routes.ts`):** Wenn das zeitfensterbasierte Limit erreicht ist, aber `bonus_credits > 0` vorliegt, wird 1 Bonus-Credit abgebucht (`bonus_credits - 1`), anstatt die Extraktion mit `RATE_LIMIT_EXCEEDED` (429) zu blockieren.
 * **Nutzererfahrung:** Bei Erreichen des Limits berechnet das Backend die verbleibende Wartezeit minutengenau. Das Frontend übersetzt dies dynamisch und zeigt die genaue Restdauer an.
 
 ---
 
-## 3. Cloud-Infrastruktur (Supabase & Railway)
+## 3. Cloud-Infrastruktur (Railway & Tigris S3)
 
-* **Tabelle `recipes`:** Der Rezept-**Inhalt**, unabhängig davon, wer ihn extrahiert hat. Skalare sind echte Spalten (`title`, `emoji`, `prep_time`, `cook_time`, `servings`, `image_url`, `has_incomplete_source_info`, …), flache Listen `text[]` (`tags`, `equipment`, `tips`, `image_urls`), nur `ingredients`/`instructions`/`alternative_ingredients` bleiben JSONB. Nährwerte liegen als vier Skalare (`calories`, `protein_g`, `carbs_g`, `fat_g`) vor, weil auf ihnen gefiltert und sortiert wird.
+* **Tabelle `recipes`:** Der Rezept-**Inhalt**, unabhängig davon, wer ihn extrahiert hat. Skalare sind echte Spalten (`title`, `emoji`, `prep_time`, `cook_time`, `servings`, `image_url`, `has_incomplete_source_info`, `source_url_normalized`, `language`, …), flache Listen `text[]` (`tags`, `equipment`, `tips`, `image_urls`), nur `ingredients`/`instructions`/`alternative_ingredients` bleiben JSONB. Nährwerte liegen als vier Skalare (`calories`, `protein_g`, `carbs_g`, `fat_g`) vor, weil auf ihnen gefiltert und sortiert wird.
+  * `source_url_normalized` (text, nullable): Bereinigte und kanonische Quell-URL für mandantenübergreifende Deduplizierung.
+  * `language` (text, not null, default `'de'`): Zielsprache des Rezepts (`de` | `en`).
+  * Index `recipes_source_normalized_lang_idx` auf `(source_url_normalized, language)` für O(1) Recipe-Reuse Lookups.
   * `has_incomplete_source_info` (boolean): Kennzeichnet Rezepte, bei denen in der Originalquelle keine vollständigen Rezeptangaben (Zutaten/Mengen/Schritte) existierten und das Rezept visuell aus dem Video rekonstruiert wurde (aktiviert die Hinweiskarte im Frontend).
   * `created_by` ist **nullable**: eine Account-Löschung nullt das Feld, statt zu cascaden — sonst würde sie die Kochbücher anderer Nutzer zerstören.
   * `visibility` (`private` | `unlisted` | `public`) und `origin` (`url` | `photo` | `remix`) sind der Andockpunkt fürs spätere Teilen/Veröffentlichen.
-* **Tabelle `jobs`:** Nur noch der **Extraktions-Task** (`id`, `user_id`, `kind`, `status`, `source_url`, `source_url_normalized`, `progress`, `recipe_id`, `parent_recipe_id`, `remix_prompt`, `error`, `llm_usage`, `media_bytes`, `locked_at`, `locked_by`).
+* **Tabelle `jobs`:** Nur noch der **Extraktions-Task** (`id`, `user_id`, `kind`, `status`, `source_url`, `source_url_normalized`, `language`, `progress`, `recipe_id`, `parent_recipe_id`, `remix_prompt`, `error`, `llm_usage`, `media_bytes`, `locked_at`, `locked_by`).
+  * `language` (text, not null, default `'de'`): Gewünschte Zielsprache der Extraktion.
   * `progress` (JSONB): `{percent, stage, preview?}` während des Laufs. Enthält während `extracting_recipe`, `generating_cover` und `finalizing` strukturierte `RecipePreviewData` (Titel, Zubereitungszeit, Zutaten-Vorschau, Schritt-Anzahl, Cover-URL), sodass das Frontend schon während der Inferenz eine Live-Rezeptkarte vorblenden kann.
   * `llm_usage` (JSONB): Kosten/Tokens **dieses Laufs** (`gemini`, `flux`, `recipeAuditor`, `ingredientResolver`) — bewusst nicht am Rezept, damit ein geteiltes Rezept nicht die Rechnung des Extrahierenden mitträgt.
   * **Job-Zeilen werden nie gelöscht.** Sie sind der Audit-Trail; ein Abbruch ist `status='cancelled'`, kein Soft-Delete. Abgebrochene (`cancelled`) und fehlgeschlagene (`failed`) Jobs belasten das Rate-Limit nicht.
 * **Tabelle `user_recipes`:** Der **Kochbuch-Eintrag** pro User (`user_id`, `recipe_id`, `source_job_id`, `source`, `is_favorite`, `flags`, `added_at`). Wird beim Entfernen eines Rezepts **hart gelöscht** — die Quota hängt an `jobs`, also darf das Kochbuch ehrlich löschen. `source='share'` ist der Andockpunkt fürs Teilen ohne Content-Kopie.
 * **RPC `complete_job(job_id, recipe, llm_usage)`:** Schließt einen Job atomar über alle drei Tabellen ab (Rezept anlegen, Job verknüpfen, ins Kochbuch legen). Ohne die Funktion gäbe es ein Crash-Fenster, in dem ein Nutzer Quota bezahlt hat und kein Rezept bekommt.
-* **Zwei getrennte Quoten:** Der Kochbuch-Cap zählt `user_recipes` (schrumpft beim Löschen), das Rate-Limit zählt `jobs` (schließt `remix`, `failed` und `cancelled` aus — Foto-Importe und erfolgreiche URL-Extraktionen kosten Quota).
+* **Zwei getrennte Quoten & 0-Quota Recipe Reuse:** Der Kochbuch-Cap zählt `user_recipes` (schrumpft beim Löschen), das Rate-Limit zählt `jobs` (schließt `remix`, `failed` und `cancelled` aus — Foto-Importe und erfolgreiche URL-Extraktionen kosten Quota). Bei Wiederverwendung eines bestehenden Rezepts (`findReusableRecipe`) wird **kein Job** erzeugt und **0 Quota** verbraucht — lediglich das Kochbuch-Limit (`COOKBOOK_FULL`) wird geprüft, bevor die Verknüpfung in `user_recipes` angelegt wird.
+
+### Cross-User Rezept-Wiederverwendung & URL-Normalisierung (`backend/src/db/recipesReuseDb.ts`)
+* **Ziel:** Vermeidung redundanter Gemini-LLM-Inferenzkosten, API-Kosten und Wartezeiten für Rezepte, die bereits von einem anderen Nutzer extrahiert wurden.
+* **URL-Harmonisierung (`normalizeUrl` in `jobsDb.ts`):**
+  - Entfernt Query-Parameter, Hashes, Fragmente, Whitespace, eckige Klammern und Trailing Slashes.
+  - Normalisiert Instagram-Pfade: Wandelt `/p/` und `/reels/` in einheitliche `/reel/` URLs um.
+  - Normalisiert YouTube-Shorts: Wandelt `youtu.be/<id>` und `youtube.com/watch?v=<id>` bei Shorts in kanonische `youtube.com/shorts/<id>` URLs um.
+* **Lookup-Kaskade (`findReusableRecipe`):**
+  1. Sucht primär in `recipes` nach übereinstimmendem `source_url_normalized` und `language` (unter Ausschluss von `is_recipe = false`).
+  2. Falls in `recipes` noch kein Match gefunden wurde (z. B. vor vollständigem Backfill), sucht ein Self-Healing-Fallback in abgeschlossenen `jobs` (`status = 'completed'`) und aktualisiert den Rezeptdatensatz asynchron.
+* **Ablauf im API-Endpunkt (`POST /api/extract-recipe`):**
+  1. Extraktions-Anfrage sendet Quell-URL und optional Sprache (`de` | `en`) sowie `force: boolean`.
+  2. Wenn `force !== true` und ein wiederverwendbares Rezept existiert:
+     - Prüft, ob das Rezept bereits im Kochbuch des Nutzers liegt (falls ja: direkt Rückgabe mit `isAlreadyInCookbook: true`).
+     - Prüft Kochbuch-Kapazitätsgrenzen (`assertCookbookCapacity`, Free-User max. 10 Rezepte ➔ `COOKBOOK_FULL`).
+     - Verknüpft das Rezept sofort via `addToLibrary(userId, recipe.id, 'extraction')`.
+     - Gibt HTTP 200 mit `{ status: 'completed', isCached: true, recipe }` zurück — **ohne** Queue-Job, ohne Video-Download und ohne Quota-Abzug.
+  3. Bei Cache-Miss oder `force: true` läuft der reguläre Pfad über `enforceExtractionQuota` und die asynchrone Worker-Queue.
+* **Idempotenter Backfill (`npm run db:backfill-recipe-urls` / `npm run db:backfill-recipe-urls:prod`):**
+  - Aktualisiert historische Datensätze in `recipes` mit normalisierten URLs und Standard-Sprache (`de`).
 * **Tabelle `feedback`:** Speichert In-App Bug-Reports & Feedback (`id`, `user_id`, `type`, `message`, `context`, `screenshot_urls`, `created_at`).
 * **Storage Buckets:**
   * `recipe-covers` (öffentlich): Generierte FLUX.1 Food-Fotografie-Coverbilder (`${userId}/${jobId}.jpg`).
@@ -110,7 +138,7 @@ Erweiterter Endpunkt prüft Supabase-Datenbankverbindung via `checkDbHealth()`. 
   * `feedback-screenshots` (privat): Screenshots für Bug-Reports (`${userId}/${feedbackId}/${index}.jpg`, 10-Jahres Signed URL).
   * `recipe-photos` (privat, service-role only): Transienter Foto-Import (`${userId}/${uploadId}/${index}.jpg`).
   * `cook-photos` (privat, service-role only): Fotos von gekochten Gerichten für Gamification.
-* **Authentifizierung:** Token-Verifikation erfolgt **lokal** im Backend via JWKS (JSON Web Key Set) über `${config.SUPABASE_URL}/auth/v1/.well-known/jwks.json` mithilfe der `jose`-Bibliothek (kein DB-Roundtrip pro Request).
+* **Authentifizierung:** Better-Auth Session-Validierung erfolgt server-side über `authInstance.api.getSession` gegen die relationale `session`-Tabelle in PostgreSQL.
 
 ### Railway (Anwendungs-Hosting)
 * Hostet die containerisierte Anwendung stateless.
@@ -170,7 +198,7 @@ flowchart TD
 
 * **Datenmodell (`backend/db/migrations/006_pantry_and_shopping_list.sql`):**
   * `public.pantry_items`: Speichert Benutzervorräte mit `user_id`, `name`, `base_name`, `category`, `amount`, `unit`, `notes`, `shelf_life_days`, `expires_at`, `created_at`, `updated_at`.
-  * `public.shopping_list`: Persistiert Einkaufslisten-Einträge in Supabase mit `user_id`, `recipe_id`, `name`, `base_name`, `amount`, `unit`, `checked`, `category`, `in_pantry_warning`.
+  * `public.shopping_list`: Persistiert Einkaufslisten-Einträge mit `user_id`, `recipe_id`, `name`, `base_name`, `amount`, `unit`, `checked`, `category`, `in_pantry_warning`.
   * `ingredient_mappings`: Erweitert um `typical_package_amount`, `typical_package_unit`, `shelf_life_days`.
   * RLS Policies: Benutzer sehen und editieren strikt nur ihre eigenen Vorrats- und Einkaufslisten-Einträge.
 * **REST-Endpunkte:**
@@ -187,27 +215,28 @@ flowchart TD
 
 Seit dem Produktiv-Rollout (Play Store Alpha/Production & Web PWA) befindet sich das Projekt in der **Post-Launch-Phase**. Schema-Änderungen und API-Anpassungen unterliegen strikten Regeln zum Schutz von Altdaten und älteren installierten App-Clients.
 
-### 🗄️ 1. Verbindlicher Migrations-Workflow (Supabase CLI)
+### 🗄️ 1. Verbindlicher Migrations-Workflow (Drizzle ORM)
 
-Jede Änderung an der Postgres-Datenbank (Tabellen, Spalten, Indizes, Enums, RLS, Trigger, RPC-Funktionen) **MUSS** über eine transaktionale SQL-Datei in `supabase/migrations/` abgebildet werden:
+Jede Änderung an der Postgres-Datenbank (Tabellen, Spalten, Indizes, Enums) **MUSS** über das typsichere Schema in `backend/src/db/schema/` abgebildet werden:
 
 ```powershell
-# 1. Neue Migration mit sprechendem Namen anlegen
-npm run db:new <feature_name>
-# Generiert: supabase/migrations/<timestamp>_<feature_name>.sql
+# 1. Schema-Änderung in backend/src/db/schema/*.ts durchführen
 
-# 2. Migrations-Status gegen verbundene DB prüfen
-npm run db:status
-
-# 3. Migration lokal oder auf Dev anwenden
+# 2. Schema synchronisieren (Dev-DB):
 npm run db:push
 
-# 4. Im Notfall History reparieren (wenn remote und lokal synchronisiert werden müssen)
-npm run db:repair
+# 3. Schema auf Produktion anwenden (Railway Prod):
+npm run db:push:prod
+
+# 4. Optional: Migration-SQL generieren
+npm run db:generate
+
+# 5. Drizzle Studio zur visuellen Dateninspektion starten
+npm run db:studio
 ```
 
-* **Kein unversioniertes DDL:** Niemals Tabellen oder Spalten ad-hoc im Supabase-Dashboard anlegen oder modifizieren.
-* **Idempotenz:** SQL-Statements müssen mit defensiven Guard-Klauseln versehen sein (`ADD COLUMN IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ON CONFLICT DO NOTHING`).
+* **Kein unversioniertes DDL:** Niemals Tabellen oder Spalten ad-hoc im Dashboard anlegen oder modifizieren.
+* **Idempotenz:** Schema-Updates müssen sicher wiederholbar sein. Neue Spalten immer mit `.default()` oder nullable anlegen.
 
 ### 🔄 2. Das Expand-and-Contract Muster (Additive Schemas)
 
@@ -245,5 +274,18 @@ Bestehende Rezepte in der Datenbank behalten ihre historische JSONB-Struktur (`i
 * **Optional Chaining & Nullish Coalescing:** Immer `item?.nestedField ?? fallback` nutzen.
 * **Strukturierte Typ-Guards:** Bei heterogenen Bestandsdaten (z. B. flache Zutat vs. verschachtelte Zutat) Type-Guards oder Normalisierungs-Helper verwenden (`normalizeIngredientItem()`).
 * **Backfill-Skripte:** Bei Schema-Erweiterungen (wie z. B. `is_ai_cover` oder `flatten_recipe_ingredients`) immer ein begleitendes, idempotentes Batch-Skript unter `backend/src/scripts/` anlegen (`npm run backfill:...`), das Altdaten in Batches von 50–100 Zeilen migriert.
+
+### 🏷️ 5. Rezept-Pipeline-Versionierung (`recipes.pipeline_version`)
+
+Zur Nachvollziehbarkeit des Erstellungsstandes und für zukünftige selektive Neu-Generierungen älterer Rezepte besitzt die Tabelle `recipes` eine dedizierte Versionierungsspalte:
+
+* **Spalte:** `pipeline_version: integer not null default 0`
+* **Index:** `recipes_pipeline_version_idx` auf `pipeline_version`
+* **Altdaten vs. Neudaten:**
+  * Altdaten (vor Einführung der Versionierung) besitzen standardmäßig `pipeline_version = 0`.
+  * Neue Rezepte (URL-Extraktion, Foto-Scan, Remixes) werden mit der aktuellen Konstante `CURRENT_RECIPE_PIPELINE_VERSION` (Start bei `1`) gestempelt.
+  * Manuelle Nutzer-Bearbeitungen via `updateRecipe` (`PUT /api/recipes/:id`) überschreiben eine bestehende Version nicht.
+* **Governance (Agenten-Regel):** Jede Modifikation an Prompts, Schemas, Recipe-Audit, Normalisierung oder OFF-Matching, die das Rezept-JSON beeinflussen könnte, verpflichtet zur Inkrementierung von `CURRENT_RECIPE_PIPELINE_VERSION` in `@cookbook/shared` (`shared/src/types/recipes.ts`). Siehe Regel [`.agents/rules/recipe-pipeline-version.md`](file:///c:/Users/lucas/source/repos/cookbook/.agents/rules/recipe-pipeline-version.md).
+
 
 

@@ -1,5 +1,10 @@
 import type { Ingredient, Recipe } from '../../types';
 import { stripInlineIngredientTags } from '../../utils/ingredientMatch';
+import {
+  hasRecipeComponents,
+  groupIngredientsByComponent,
+  groupInstructionsByComponent,
+} from '../../utils/recipeComponents';
 
 /**
  * Build a human-readable ingredient line, e.g. "200 g Mehl (gesiebt) (Bio)"
@@ -44,24 +49,49 @@ export async function copyRecipeToClipboard({
   t,
 }: BuildClipboardParams): Promise<void> {
   const metaLine = `${t('recipe.prep')}: ${formatTimeValue(recipe.prepTime)} · ${t('recipe.cook')}: ${formatTimeValue(recipe.cookTime)} · ${t('recipe.serves')}: ${servings}`;
+  const isMultiComponent = hasRecipeComponents(recipe);
 
   // --- Plain text ---
   let text = `${recipe.title}\n\n`;
   if (recipe.description) text += `${stripInlineIngredientTags(recipe.description)}\n\n`;
   text += `${metaLine}\n\n`;
   text += `${t('recipe.tabIngredients')}\n`;
-  let currentSection = '';
-  sortedIngredients.forEach((ing) => {
-    if (ing.section && ing.section !== currentSection) {
-      currentSection = ing.section;
-      text += `${currentSection}\n`;
-    }
-    text += `• ${formatIngredientLine(ing, formatAmount)}\n`;
-  });
+
+  if (isMultiComponent) {
+    const ingredientGroups = groupIngredientsByComponent(sortedIngredients);
+    ingredientGroups.forEach((group) => {
+      if (group.sectionName) {
+        text += `\n${group.sectionName}:\n`;
+      }
+      group.items.forEach((ing) => {
+        text += `• ${formatIngredientLine(ing, formatAmount)}\n`;
+      });
+    });
+  } else {
+    sortedIngredients.forEach((ing) => {
+      text += `• ${formatIngredientLine(ing, formatAmount)}\n`;
+    });
+  }
   text += `\n`;
+
   text += `${t('recipe.tabInstructions')}\n`;
-  recipe.instructions.forEach((step) => { text += `${step.step}. ${stripInlineIngredientTags(step.description)}\n`; });
+  if (isMultiComponent) {
+    const instructionGroups = groupInstructionsByComponent(recipe.instructions);
+    instructionGroups.forEach((group) => {
+      if (group.sectionName) {
+        text += `\n${group.sectionName}:\n`;
+      }
+      group.steps.forEach((step) => {
+        text += `${step.step}. ${stripInlineIngredientTags(step.description)}\n`;
+      });
+    });
+  } else {
+    recipe.instructions.forEach((step) => {
+      text += `${step.step}. ${stripInlineIngredientTags(step.description)}\n`;
+    });
+  }
   text += `\n`;
+
   if (recipe.equipment && recipe.equipment.length > 0) {
     text += `${t('recipe.requiredEquipment')}\n`;
     recipe.equipment.forEach((item) => { text += `• ${stripInlineIngredientTags(item)}\n`; });
@@ -78,14 +108,47 @@ export async function copyRecipeToClipboard({
   if (recipe.description) html += `<p>${escapeHtml(stripInlineIngredientTags(recipe.description))}</p>`;
   html += `<p><strong>${escapeHtml(t('recipe.prep'))}:</strong> ${escapeHtml(formatTimeValue(recipe.prepTime))} · <strong>${escapeHtml(t('recipe.cook'))}:</strong> ${escapeHtml(formatTimeValue(recipe.cookTime))} · <strong>${escapeHtml(t('recipe.serves'))}:</strong> ${servings}</p>`;
   html += `<h2>${escapeHtml(t('recipe.tabIngredients'))}</h2>`;
-  html += `<ul>`;
-  sortedIngredients.forEach((ing) => {
-    html += `<li>${escapeHtml(formatIngredientLine(ing, formatAmount))}</li>`;
-  });
-  html += `</ul>`;
-  html += `<h2>${escapeHtml(t('recipe.tabInstructions'))}</h2><ol>`;
-  recipe.instructions.forEach((step) => { html += `<li>${escapeHtml(stripInlineIngredientTags(step.description))}</li>`; });
-  html += `</ol>`;
+
+  if (isMultiComponent) {
+    const ingredientGroups = groupIngredientsByComponent(sortedIngredients);
+    ingredientGroups.forEach((group) => {
+      if (group.sectionName) {
+        html += `<h3>${escapeHtml(group.sectionName)}</h3>`;
+      }
+      html += `<ul>`;
+      group.items.forEach((ing) => {
+        html += `<li>${escapeHtml(formatIngredientLine(ing, formatAmount))}</li>`;
+      });
+      html += `</ul>`;
+    });
+  } else {
+    html += `<ul>`;
+    sortedIngredients.forEach((ing) => {
+      html += `<li>${escapeHtml(formatIngredientLine(ing, formatAmount))}</li>`;
+    });
+    html += `</ul>`;
+  }
+
+  html += `<h2>${escapeHtml(t('recipe.tabInstructions'))}</h2>`;
+  if (isMultiComponent) {
+    const instructionGroups = groupInstructionsByComponent(recipe.instructions);
+    instructionGroups.forEach((group) => {
+      if (group.sectionName) {
+        html += `<h3>${escapeHtml(group.sectionName)}</h3>`;
+      }
+      html += `<ol start="${group.steps[0]?.step ?? 1}">`;
+      group.steps.forEach((step) => {
+        html += `<li>${escapeHtml(stripInlineIngredientTags(step.description))}</li>`;
+      });
+      html += `</ol>`;
+    });
+  } else {
+    html += `<ol>`;
+    recipe.instructions.forEach((step) => {
+      html += `<li>${escapeHtml(stripInlineIngredientTags(step.description))}</li>`;
+    });
+    html += `</ol>`;
+  }
   if (recipe.equipment && recipe.equipment.length > 0) {
     html += `<h2>${escapeHtml(t('recipe.requiredEquipment'))}</h2><ul>`;
     recipe.equipment.forEach((item) => { html += `<li>${escapeHtml(stripInlineIngredientTags(item))}</li>`; });

@@ -188,7 +188,13 @@ export function computeRecipeHealthScore(recipe: Recipe): {
   if (recipe.ingredients) {
     for (const item of recipe.ingredients) {
       const itemCategory = (item.category || '').toUpperCase().trim();
-      const grams = calculateWeightGrams(item.amount, item.unit, null, item.gramsPerUnit);
+      const effectiveAmount =
+        item.consumedAmount !== undefined &&
+        item.consumedAmount !== null &&
+        item.consumedAmount > 0
+          ? item.consumedAmount
+          : item.amount;
+      const grams = calculateWeightGrams(effectiveAmount, item.unit, null, item.gramsPerUnit);
       totalDishWeightGrams += grams;
 
       if (isVegetableOrFruitCategory(itemCategory)) {

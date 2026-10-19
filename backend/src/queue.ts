@@ -3,6 +3,7 @@ import path from 'path';
 import {
   claimNextJob, updateJob, updateJobProgress, completeJob, getRecipe, releaseJobLock,
   reclaimExpiredJobs, sweepStaleAwaitingFrames, heartbeatJob, getMaxVideoDurationSeconds, isJobCancelled,
+  normalizeUrl,
 } from './db.js';
 import { db } from './db/drizzle.js';
 import { user as userTable } from './db/schema/auth.js';
@@ -10,12 +11,13 @@ import { eq } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { getScraperForUrl, type ScrapingResult } from './scrapers/index.js';
 import { downloadMedia } from './scrapers/download.js';
+import { checkCaptionCompleteness } from './scrapers/jevCaptionGuard.js';
 import { extractRecipe, remixRecipe, type ClientFramesInput } from './gemini.js';
-import { generateRecipeCoverImage } from './imageGenerator.js';
-import { pruneOldGeminiLogs } from './logger.js';
+import { generateRecipeCoverImage, triggerAsyncCoverGeneration } from './imageGenerator.js';
+import { pruneOldGeminiLogs, writeGeminiLog } from './logger.js';
 import { photoUploadIdFromUrl, downloadImportPhotos, deleteImportPhotos, sweepOldPhotoImports } from './photoImport.js';
-import type { Job, LlmUsage, ProgressStage, GeminiUsageInfo, RecipePreviewData, Recipe } from './types.js';
-import { formatAuthorHandle } from '@cookbook/shared';
+import { calculateWhisperCost, type Job, type LlmUsage, type ProgressStage, type GeminiUsageInfo, type RecipePreviewData, type Recipe } from './types.js';
+import { formatAuthorHandle, CURRENT_RECIPE_PIPELINE_VERSION } from '@cookbook/shared';
 import { config } from './config.js';
 import { AppError, serializeJobError } from './errors.js';
 import { notificationTick } from './notifications/worker.js';
@@ -74,12 +76,15 @@ async function processJob(job: Job): Promise<void> {
   const heartbeat = setInterval(() => heartbeatJob(jobId), 30_000);
 
   try {
-    // Fetch user preferences from Supabase Auth admin API if userId is present
+    // Fetch user preferences from database if userId is present
     let userPrefs: {
       recipeLanguage?: string;
       preferredTemperatureUnit?: string;
       preferredUnitSystem?: string;
     } | undefined;
+
+    const targetRecipeLanguage =
+      job.language?.toLowerCase() === 'en' ? 'English' : (config.RECIPE_LANGUAGE || 'German');
 
     if (job.userId) {
       try {
@@ -89,18 +94,30 @@ async function processJob(job: Job): Promise<void> {
           .where(eq(userTable.id, job.userId))
           .limit(1);
 
+        userPrefs = {
+          recipeLanguage: targetRecipeLanguage,
+          preferredTemperatureUnit: config.PREFERRED_TEMPERATURE_UNIT,
+          preferredUnitSystem: config.PREFERRED_UNIT_SYSTEM,
+        };
+
         if (userRow) {
-          userPrefs = {
-            recipeLanguage: config.RECIPE_LANGUAGE,
-            preferredTemperatureUnit: config.PREFERRED_TEMPERATURE_UNIT,
-            preferredUnitSystem: config.PREFERRED_UNIT_SYSTEM,
-          };
           console.log(`[Job ${jobId}] Loaded user preferences:`, userPrefs);
         }
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
         console.warn(`[Job ${jobId}] Error retrieving user metadata: ${msg}`);
+        userPrefs = {
+          recipeLanguage: targetRecipeLanguage,
+          preferredTemperatureUnit: config.PREFERRED_TEMPERATURE_UNIT,
+          preferredUnitSystem: config.PREFERRED_UNIT_SYSTEM,
+        };
       }
+    } else {
+      userPrefs = {
+        recipeLanguage: targetRecipeLanguage,
+        preferredTemperatureUnit: config.PREFERRED_TEMPERATURE_UNIT,
+        preferredUnitSystem: config.PREFERRED_UNIT_SYSTEM,
+      };
     }
 
     if (job.kind === 'remix') {
@@ -145,31 +162,21 @@ async function processJob(job: Job): Promise<void> {
 
       const remixPreview = buildRecipePreview(recipe, parentRecipe.imageUrl || undefined, parentRecipe.sourceHandle);
 
-      // Generate AI cover image and normalize ingredients in parallel
-      await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover', preview: remixPreview });
-      const coverPromise = recipe.imagePrompt
-        ? generateRecipeCoverImage({
-            prompt: recipe.imagePrompt,
-            jobId,
-            userId: job.userId,
-          })
-        : Promise.resolve({ imageUrl: null, usage: null });
-
-      const resolverPromise = enrichRecipeWithCanonicalIngredients(recipe);
-
-      const [coverResult, resolverResult] = await Promise.all([coverPromise, resolverPromise]);
-
-      const aiCoverUrl = coverResult?.imageUrl;
-      const fluxUsage = coverResult?.usage;
+      // Normalize ingredients in parallel without blocking on cover generation
+      await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'finalizing', preview: remixPreview });
+      const resolverResult = await enrichRecipeWithCanonicalIngredients(recipe);
       const resolverUsage = resolverResult?.usage;
 
-      if (aiCoverUrl) {
-        recipe.imageUrl = aiCoverUrl;
-        recipe.imageUrls = [aiCoverUrl, ...(parentRecipe.imageUrls || [])];
-        recipe.isAiCover = true;
+      const willGenerateCover = Boolean(recipe.imagePrompt && config.GENERATE_RECIPE_COVERS);
+      if (willGenerateCover) {
+        recipe.imageUrl = null;
+        recipe.imageUrls = [];
+        recipe.isAiCover = false;
+        recipe.isCoverGenerating = true;
       } else {
         recipe.imageUrl = parentRecipe.imageUrl;
         recipe.imageUrls = parentRecipe.imageUrls;
+        recipe.isCoverGenerating = false;
       }
 
       await updateJobProgress(jobId, 'processing', {
@@ -181,13 +188,25 @@ async function processJob(job: Job): Promise<void> {
         },
       });
 
+      recipe.language = job.language ?? 'de';
+      recipe.pipelineVersion = CURRENT_RECIPE_PIPELINE_VERSION;
+
       const llmUsage: LlmUsage = {};
       if (geminiUsage) llmUsage.gemini = geminiUsage;
       if (auditUsage) llmUsage.recipeAuditor = auditUsage;
-      if (fluxUsage) llmUsage.flux = fluxUsage;
       if (resolverUsage) llmUsage.ingredientResolver = resolverUsage;
 
-      await completeJob(jobId, recipe, Object.keys(llmUsage).length > 0 ? llmUsage : null);
+      const recipeId = await completeJob(jobId, recipe, Object.keys(llmUsage).length > 0 ? llmUsage : null);
+
+      if (recipe.imagePrompt && config.GENERATE_RECIPE_COVERS) {
+        void triggerAsyncCoverGeneration({
+          prompt: recipe.imagePrompt,
+          jobId,
+          userId: job.userId,
+          recipeId,
+          fallbackImageUrls: parentRecipe.imageUrls || [],
+        });
+      }
       return;
     }
 
@@ -251,50 +270,45 @@ async function processJob(job: Job): Promise<void> {
 
       const photoPreview = buildRecipePreview(recipe);
 
-      // Generate photorealistic AI cover image and normalize ingredients in parallel
-      await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover', preview: photoPreview });
-      const coverPromise = recipe.imagePrompt
-        ? generateRecipeCoverImage({
-            prompt: recipe.imagePrompt,
-            jobId,
-            userId: photoUserId,
-          })
-        : Promise.resolve({ imageUrl: null, usage: null });
-
-      const resolverPromise = enrichRecipeWithCanonicalIngredients(recipe);
-
-      const [coverResult, resolverResult] = await Promise.all([coverPromise, resolverPromise]);
-
-      const aiCoverUrl = coverResult?.imageUrl;
-      const fluxUsage = coverResult?.usage;
+      // Normalize ingredients via OpenFoodFacts without blocking on cover generation
+      await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'finalizing', preview: photoPreview });
+      const resolverResult = await enrichRecipeWithCanonicalIngredients(recipe);
       const resolverUsage = resolverResult?.usage;
 
-      if (aiCoverUrl) {
-        recipe.imageUrl = aiCoverUrl;
-        recipe.imageUrls = [aiCoverUrl];
-        recipe.isAiCover = true;
-      } else {
-        recipe.imageUrl = null;
-        recipe.imageUrls = [];
-        recipe.isAiCover = false;
-      }
+      const willGenerateCover = Boolean(recipe.imagePrompt && config.GENERATE_RECIPE_COVERS);
+      recipe.imageUrl = null;
+      recipe.imageUrls = [];
+      recipe.isAiCover = false;
+      recipe.isCoverGenerating = willGenerateCover;
 
       await updateJobProgress(jobId, 'processing', {
         percent: 95,
         stage: 'finalizing',
         preview: {
           ...photoPreview,
-          coverUrl: recipe.imageUrl || undefined,
+          coverUrl: undefined,
         },
       });
+
+      recipe.language = job.language ?? 'de';
+      recipe.pipelineVersion = CURRENT_RECIPE_PIPELINE_VERSION;
 
       const llmUsage: LlmUsage = {};
       if (geminiUsage) llmUsage.gemini = geminiUsage;
       if (auditUsage) llmUsage.recipeAuditor = auditUsage;
-      if (fluxUsage) llmUsage.flux = fluxUsage;
       if (resolverUsage) llmUsage.ingredientResolver = resolverUsage;
 
-      await completeJob(jobId, recipe, Object.keys(llmUsage).length > 0 ? llmUsage : null);
+      const recipeId = await completeJob(jobId, recipe, Object.keys(llmUsage).length > 0 ? llmUsage : null);
+
+      if (recipe.imagePrompt && config.GENERATE_RECIPE_COVERS) {
+        void triggerAsyncCoverGeneration({
+          prompt: recipe.imagePrompt,
+          jobId,
+          userId: photoUserId,
+          recipeId,
+          fallbackImageUrls: [],
+        });
+      }
       return;
     }
 
@@ -331,18 +345,30 @@ async function processJob(job: Job): Promise<void> {
       });
     }
 
+    let didFastTrackCaption = false;
     // 2c. Client-media streaming: if media is client-delegated and we don't have client_frames yet,
-    // park the job in 'awaiting_frames' so the client can capture and POST keyframes.
+    // evaluate whether the caption already contains complete ingredients and instructions (Fast-Track).
     if (scrapeResult.media.kind === 'client' && !job.clientFrames) {
-      console.log(`[Job ${jobId}] Media kind is 'client' — parking job in 'awaiting_frames' for client keyframe capture.`);
-      await updateJob(jobId, {
-        scrapeMeta: scrapeResult,
-        status: 'awaiting_frames',
-        progress: { percent: 30, stage: 'awaiting_frames' },
-      });
-      // Release worker lease so heartbeat stops and status is awaiting_frames
-      await releaseJobLock(jobId);
-      return;
+      if (scrapeResult.caption && scrapeResult.caption.trim().length >= 80) {
+        console.log(`[Job ${jobId}] Evaluating caption completeness for fast-track...`);
+        const isComplete = await checkCaptionCompleteness(scrapeResult.caption);
+        if (isComplete) {
+          console.log(`[Job ${jobId}] Caption fast-track approved: full recipe detected in text, skipping client video download!`);
+          didFastTrackCaption = true;
+        }
+      }
+
+      if (!didFastTrackCaption) {
+        console.log(`[Job ${jobId}] Media kind is 'client' — parking job in 'awaiting_frames' for client keyframe capture.`);
+        await updateJob(jobId, {
+          scrapeMeta: scrapeResult,
+          status: 'awaiting_frames',
+          progress: { percent: 30, stage: 'awaiting_frames' },
+        });
+        // Release worker lease so heartbeat stops and status is awaiting_frames
+        await releaseJobLock(jobId);
+        return;
+      }
     }
 
     // Decode ephemeral client frames if present and composite into a single in-memory grid
@@ -383,7 +409,14 @@ async function processJob(job: Job): Promise<void> {
         console.log(`[Job ${jobId}] [DEV] Saved grid image to ${devGridPath}`);
       }
 
-      clientFramesInput = { thumbnail: thumbBuf, gridBuffer: clientGridBuffer };
+      clientFramesInput = {
+        thumbnail: thumbBuf,
+        gridBuffer: clientGridBuffer,
+        transcript: job.clientFrames.transcript,
+        whisperModel: job.clientFrames.whisperModel,
+        videoDurationSeconds: job.clientFrames.videoDurationSeconds,
+        videoSizeBytes: job.clientFrames.videoSizeBytes,
+      };
     }
 
     // 3. Mark job as processing
@@ -406,10 +439,10 @@ async function processJob(job: Job): Promise<void> {
     console.log(`[Job ${jobId}] Downloads complete (media: ${(downloaded.mediaBytes / (1024 * 1024)).toFixed(2)} MB).`);
 
     // Persist the total downloaded media size (audio + video) so admin metrics
-    // can aggregate total downloaded MB over a time window. A failure here must
-    // not abort recipe extraction, so we swallow errors.
-    if (downloaded.mediaBytes > 0) {
-      await updateJob(jobId, { mediaBytes: downloaded.mediaBytes }).catch((err) =>
+    // can aggregate total downloaded MB over a time window. Supports both server-side download and client-payload.
+    const totalMediaBytes = downloaded.mediaBytes > 0 ? downloaded.mediaBytes : (job.clientFrames?.videoSizeBytes ?? 0);
+    if (totalMediaBytes > 0 && (!job.mediaBytes || job.mediaBytes === 0)) {
+      await updateJob(jobId, { mediaBytes: totalMediaBytes }).catch((err) =>
         console.warn(`[Job ${jobId}] Failed to persist media_bytes: ${err.message}`),
       );
     }
@@ -458,20 +491,49 @@ async function processJob(job: Job): Promise<void> {
     console.log(`[Job ${jobId}] Extracting recipe via Gemini...`);
     await updateJobProgress(jobId, 'processing', { percent: 65, stage: 'extracting_recipe', preview: initialPreview });
 
-    const { recipe: rawRecipe, usage: geminiUsage } = await extractRecipe(
-      audioFilePath || undefined,
-      mimeType,
-      scrapeResult.caption,
-      // Carousels send every slide at full resolution instead of the downscaled grid —
-      // the recipe is usually written as text on the images and must stay readable.
-      isCarousel ? undefined : gridImagePath,
-      runDir,
-      userPrefs,
-      scrapeResult.htmlContent,
-      isCarousel ? downloaded.imageFilePaths : undefined,
-      clientFramesInput ? 'client_frames' : 'carousel',
-      clientFramesInput
-    );
+    let rawRecipe: Recipe;
+    let geminiUsage: GeminiUsageInfo | undefined;
+    try {
+      const extractionResult = await extractRecipe(
+        audioFilePath || undefined,
+        mimeType,
+        scrapeResult.caption,
+        // Carousels send every slide at full resolution instead of the downscaled grid —
+        // the recipe is usually written as text on the images and must stay readable.
+        isCarousel ? undefined : gridImagePath,
+        runDir,
+        userPrefs,
+        scrapeResult.htmlContent,
+        isCarousel ? downloaded.imageFilePaths : undefined,
+        clientFramesInput ? 'client_frames' : 'carousel',
+        clientFramesInput
+      );
+      rawRecipe = extractionResult.recipe;
+      geminiUsage = extractionResult.usage;
+    } catch (extractErr: unknown) {
+      if (didFastTrackCaption && extractErr instanceof AppError && extractErr.code === 'NOT_A_RECIPE') {
+        console.log(`[Job ${jobId}] Fast-track caption was not a recipe according to Gemini. Falling back to awaiting_frames for video capture...`);
+        await updateJob(jobId, {
+          scrapeMeta: scrapeResult,
+          status: 'awaiting_frames',
+          progress: { percent: 30, stage: 'awaiting_frames' },
+        });
+        await releaseJobLock(jobId);
+        return;
+      }
+      throw extractErr;
+    }
+
+    if (didFastTrackCaption && rawRecipe.hasIncompleteSourceInfo) {
+      console.log(`[Job ${jobId}] Fast-track caption has incomplete source info. Reverting to awaiting_frames for video capture...`);
+      await updateJob(jobId, {
+        scrapeMeta: scrapeResult,
+        status: 'awaiting_frames',
+        progress: { percent: 30, stage: 'awaiting_frames' },
+      });
+      await releaseJobLock(jobId);
+      return;
+    }
 
     console.log(`[Job ${jobId}] Recipe extracted: "${rawRecipe.title}"`);
     if (isDevEnvironment()) {
@@ -500,32 +562,23 @@ async function processJob(job: Job): Promise<void> {
 
     const recipePreview = buildRecipePreview(recipe, baseImageUrls[0] || initialPreview.thumbnailUrl, scrapeResult.authorHandle);
 
-    // 6b. Generate AI food photography cover image and normalize ingredients in parallel
-    await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'generating_cover', preview: recipePreview });
-    const coverPromise = recipe.imagePrompt
-      ? generateRecipeCoverImage({
-          prompt: recipe.imagePrompt,
-          jobId,
-          userId: job.userId,
-        })
-      : Promise.resolve({ imageUrl: null, usage: null });
-
-    const resolverPromise = enrichRecipeWithCanonicalIngredients(recipe);
-
-    const [coverResult, resolverResult] = await Promise.all([coverPromise, resolverPromise]);
-
-    const aiCoverUrl = coverResult?.imageUrl;
-    const fluxUsage = coverResult?.usage;
+    // 6b. Normalize ingredients via OpenFoodFacts without blocking on AI cover generation
+    await updateJobProgress(jobId, 'processing', { percent: 85, stage: 'finalizing', preview: recipePreview });
+    const resolverResult = await enrichRecipeWithCanonicalIngredients(recipe);
     const resolverUsage = resolverResult?.usage;
 
-    if (aiCoverUrl) {
-      recipe.imageUrl = aiCoverUrl;
-      recipe.imageUrls = [aiCoverUrl, ...baseImageUrls];
-      recipe.isAiCover = true;
+    const willGenerateCover = Boolean(recipe.imagePrompt && config.GENERATE_RECIPE_COVERS);
+
+    if (willGenerateCover) {
+      recipe.imageUrl = null;
+      recipe.imageUrls = [];
+      recipe.isAiCover = false;
+      recipe.isCoverGenerating = true;
     } else {
       recipe.imageUrl = baseImageUrls[0] || null;
       recipe.imageUrls = baseImageUrls;
       recipe.isAiCover = false;
+      recipe.isCoverGenerating = false;
     }
 
     await updateJobProgress(jobId, 'processing', {
@@ -539,14 +592,58 @@ async function processJob(job: Job): Promise<void> {
 
     recipe.sourceHandle = formatAuthorHandle(scrapeResult.authorHandle);
     recipe.sourceUrl = url;
+    recipe.sourceUrlNormalized = job.sourceUrlNormalized ?? normalizeUrl(url);
+    recipe.language = job.language ?? 'de';
     // Social media recipe extractions are public by default (remixes and photo imports stay private)
     recipe.visibility = 'public';
+    recipe.pipelineVersion = CURRENT_RECIPE_PIPELINE_VERSION;
 
     const llmUsage: LlmUsage = {};
     if (geminiUsage) llmUsage.gemini = geminiUsage;
     if (auditUsage) llmUsage.recipeAuditor = auditUsage;
-    if (fluxUsage) llmUsage.flux = fluxUsage;
     if (resolverUsage) llmUsage.ingredientResolver = resolverUsage;
+
+    // Calculate Whisper cost if transcript and whisperModel are present
+    const transcriptText = clientFramesInput?.transcript?.trim();
+    const whisperModel = clientFramesInput?.whisperModel?.trim();
+    if (transcriptText && whisperModel) {
+      const duration =
+        clientFramesInput?.videoDurationSeconds ||
+        scrapeResult.durationSeconds ||
+        0;
+
+      if (duration > 0) {
+        const costUsd = calculateWhisperCost(whisperModel, duration);
+        llmUsage.whisper = {
+          model: whisperModel,
+          durationSeconds: Number(duration.toFixed(2)),
+          costUsd,
+          costFormatted: `$${costUsd.toFixed(5)}`,
+        };
+        console.log(
+          `[Job ${jobId}] Whisper (${whisperModel}) cost: $${costUsd.toFixed(5)} for ${duration.toFixed(1)}s audio.`
+        );
+
+        // Also record in persistent gemini_logs for unified LLM cost aggregation
+        await writeGeminiLog({
+          timestamp: new Date().toISOString(),
+          requestType: 'transcribe_audio',
+          model: whisperModel,
+          durationMs: Math.round(duration * 1000),
+          success: true,
+          input: { durationSeconds: duration, chars: transcriptText.length },
+          costEstimate: {
+            inputCostUsd: costUsd,
+            outputCostUsd: 0,
+            totalCostUsd: costUsd,
+            totalCostFormatted: `$${costUsd.toFixed(5)}`,
+          },
+        }).catch((err: unknown) => {
+          const msg = err instanceof Error ? err.message : String(err);
+          console.warn(`[Job ${jobId}] Failed to record Whisper log entry:`, msg);
+        });
+      }
+    }
 
     if (await isJobCancelled(jobId)) {
       console.log(`[Job ${jobId}] Job was cancelled by user, aborting completion.`);
@@ -556,7 +653,17 @@ async function processJob(job: Job): Promise<void> {
     // 7. Persist the recipe, link the job to it and add it to the cookbook —
     // atomically, so a crash can never leave a completed job without a recipe
     // or a recipe in nobody's cookbook.
-    await completeJob(jobId, recipe, Object.keys(llmUsage).length > 0 ? llmUsage : null);
+    const recipeId = await completeJob(jobId, recipe, Object.keys(llmUsage).length > 0 ? llmUsage : null);
+
+    if (recipe.imagePrompt && config.GENERATE_RECIPE_COVERS) {
+      void triggerAsyncCoverGeneration({
+        prompt: recipe.imagePrompt,
+        jobId,
+        userId: job.userId,
+        recipeId,
+        fallbackImageUrls: baseImageUrls,
+      });
+    }
   } catch (error: any) {
     if (await isJobCancelled(jobId)) {
       console.log(`[Job ${jobId}] Job was cancelled by user, keeping cancelled status.`);

@@ -428,6 +428,8 @@ export async function showRewardedAd(): Promise<boolean> {
   }
 
   await initAds();
+  markPreAdNoticeSeen();
+  markFirstExtractionCompleted();
   if (!canRequestAds) {
     console.warn('[AdMob] cannot request ads (consent declined)');
     return false;
@@ -468,6 +470,9 @@ const APP_OPEN_FIRST_LAUNCH_KEY = 'snagbite:appOpenAd:firstLaunchSeen';
 /** Key set when user has acknowledged the pre-ad transparency notice. */
 export const PRE_AD_NOTICE_SEEN_KEY = 'has_seen_pre_ad_notice';
 
+/** Key set once the user has completed their very first recipe extraction (grace period). */
+export const FIRST_EXTRACTION_GRACE_KEY = 'snagbite:ads:firstExtractionGraceUsed';
+
 /** Event dispatched to request displaying the pre-ad transparency sheet. */
 export const SHOW_PRE_AD_NOTICE_EVENT = 'app:show-pre-ad-notice';
 
@@ -487,11 +492,60 @@ export function markPreAdNoticeSeen(): void {
   } catch {}
 }
 
-/** Trigger the pre-ad transparency notice sheet, with an optional callback when confirmed. */
-export function triggerPreAdNotice(onConfirm?: () => void): void {
+/** Check whether the user has already used their first-extraction ad-free grace period. */
+export function hasCompletedFirstExtraction(): boolean {
+  try {
+    return localStorage.getItem(FIRST_EXTRACTION_GRACE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+/** Mark the first-extraction grace period as completed so subsequent extractions show ads. */
+export function markFirstExtractionCompleted(): void {
+  try {
+    localStorage.setItem(FIRST_EXTRACTION_GRACE_KEY, 'true');
+  } catch {}
+}
+
+/** Trigger the pre-ad transparency notice sheet, with optional callback (receives `true` if user upgraded to Pro). */
+export function triggerPreAdNotice(onConfirm?: (upgradedToPremium?: boolean) => void): void {
   window.dispatchEvent(
     new CustomEvent(SHOW_PRE_AD_NOTICE_EVENT, { detail: { onConfirm } })
   );
+}
+
+/**
+ * Ensures the Pre-Ad Transparency Sheet and the Google AdMob UMP Consent dialog
+ * are fully resolved BEFORE a 2nd+ extraction starts, so the extraction does not
+ * run in the background while the user is reading the dialogs.
+ *
+ * If the user taps "Go Premium" inside the sheet:
+ * - If they purchase Pro, resolves `{ upgradedToPremium: true }` without showing AdMob consent.
+ * - If they close the PremiumModal without purchasing, `PreAdTransparencySheet` re-opens,
+ *   then shows AdMob consent on confirm, and resolves `{ upgradedToPremium: false }`.
+ */
+export async function awaitPreAdConsentIfNeeded(
+  alreadyHasRecipes: boolean,
+): Promise<{ upgradedToPremium: boolean }> {
+  const isFirstExtraction = !hasCompletedFirstExtraction() && !alreadyHasRecipes;
+  if (isFirstExtraction) {
+    return { upgradedToPremium: false };
+  }
+
+  markFirstExtractionCompleted();
+
+  if (!hasSeenPreAdNotice()) {
+    const upgradedToPremium = await new Promise<boolean>((resolve) => {
+      triggerPreAdNotice((upgraded) => resolve(Boolean(upgraded)));
+    });
+    if (upgradedToPremium) {
+      return { upgradedToPremium: true };
+    }
+  }
+
+  await initAds();
+  return { upgradedToPremium: false };
 }
 
 /**
@@ -604,11 +658,8 @@ export async function maybeShowAppOpenAd(): Promise<boolean> {
   // active, skip the app-open ad entirely.
   if (bannerShown || isBannerCurrentlyHidden) return false;
 
-  await initAds();
-  if (!canRequestAds) return false;
-
-  // First-launch exclusion: the first time we'd ever be eligible, record it and
-  // skip — so a brand-new user is never greeted by a full-screen ad.
+  // First-launch exclusion & cadence check MUST run before initAds() so that
+  // cold starts where no ad is shown never trigger the Google UMP consent dialog.
   try {
     if (!localStorage.getItem(APP_OPEN_FIRST_LAUNCH_KEY)) {
       localStorage.setItem(APP_OPEN_FIRST_LAUNCH_KEY, String(Date.now()));
@@ -635,6 +686,9 @@ export async function maybeShowAppOpenAd(): Promise<boolean> {
     // localStorage unavailable — fail closed (don't risk an uncapped ad).
     return false;
   }
+
+  await initAds();
+  if (!canRequestAds) return false;
 
   appOpenInFlight = true;
 

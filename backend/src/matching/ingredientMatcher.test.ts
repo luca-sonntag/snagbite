@@ -8,9 +8,10 @@ import {
   enrichRecipeWithCanonicalIngredients,
   toEnglishSingular,
   isNutritionallyPlausible,
+  applyCanonicalMatchToIngredient,
   openFoodFactsAccess,
 } from './ingredientMatcher.js';
-import type { Recipe } from '../types.js';
+import type { Recipe, Ingredient } from '../types.js';
 
 describe('Ingredient Matcher & Normalizer (Open Food Facts + Hybrid Search)', () => {
   describe('toEnglishSingular', () => {
@@ -358,6 +359,50 @@ describe('Ingredient Matcher & Normalizer (Open Food Facts + Hybrid Search)', ()
         ),
         true
       );
+
+      // 5. Deep-frying oil with consumedAmount: 265 kcal for 500ml oil with consumedAmount: 30ml (~883 kcal/100g) vs oil (884 kcal) -> MUST PASS
+      const oilCandidate = {
+        id: '4000405001111',
+        product_code: '4000405001111',
+        name_de: 'Sonnenblumenöl',
+        category: 'OILS_CONDIMENTS',
+        nutrients_per_100g: { calories: 884, protein: 0, carbs: 0, fat: 100 },
+      } as any;
+
+      assert.equal(
+        isNutritionallyPlausible(
+          { name: 'Sonnenblumenöl', amount: 500, consumedAmount: 30, unit: 'ml', calories: 265, fat: 30 },
+          oilCandidate
+        ),
+        true
+      );
+    });
+  });
+
+  describe('applyCanonicalMatchToIngredient with consumedAmount', () => {
+    test('calculates macros from consumedAmount rather than total cooking volume for frying oil', () => {
+      const oilMatch = {
+        id: '4000405001111',
+        name_de: 'Sonnenblumenöl',
+        category: 'OILS_CONDIMENTS',
+        nutrients_per_100g: { calories: 884, protein: 0, carbs: 0, fat: 100 },
+      } as any;
+
+      const ingredient: Ingredient = {
+        name: 'Sonnenblumenöl zum Frittieren',
+        amount: 500,
+        consumedAmount: 30,
+        unit: 'ml',
+      };
+
+      const result = applyCanonicalMatchToIngredient(ingredient, oilMatch);
+      assert.equal(result.matched, true);
+      // 30ml * 8.84 kcal = 265 kcal (NOT 500ml * 8.84 = 4420 kcal!)
+      assert.equal(result.calories, 265);
+      assert.equal(result.fat, 30);
+      assert.equal(result.weightGrams, 30);
+      assert.equal(ingredient.calories, 265);
+      assert.equal(ingredient.fat, 30);
     });
   });
 

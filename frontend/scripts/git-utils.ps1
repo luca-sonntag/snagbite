@@ -19,13 +19,16 @@ function Read-DotEnvValue {
 function Cap-StaleAppBundles {
     param(
         [Parameter(Mandatory = $true)]
-        [int]$NewVersionCode
+        [int]$NewVersionCode,
+        [ValidateSet('prod', 'dev')]
+        [string]$Env = 'prod'
     )
 
     $repoRoot = Get-GitRepoRoot
+    $envFlag = if ($Env -eq 'dev') { '--dev' } else { '--prod' }
     try {
-        Write-Host "  [OTA-Guard] Checking for stale open-ended OTA bundles (min_version_code < $NewVersionCode)..." -ForegroundColor Yellow
-        $resultRaw = & npx tsx "$repoRoot\backend\src\scripts\deploy\otaBundleManager.ts" --prod cap "--version-code=$NewVersionCode"
+        Write-Host "  [OTA-Guard] Checking for stale open-ended OTA bundles ($envFlag, min_version_code < $NewVersionCode)..." -ForegroundColor Yellow
+        $resultRaw = & npx tsx "$repoRoot\backend\src\scripts\deploy\otaBundleManager.ts" $envFlag cap "--version-code=$NewVersionCode"
         $res = $resultRaw | ConvertFrom-Json
         if ($res.capped -gt 0) {
             $cappedMaxCode = $NewVersionCode - 1

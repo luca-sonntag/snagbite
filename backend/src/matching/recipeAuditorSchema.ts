@@ -18,6 +18,7 @@ export interface AddedIngredient {
   baseName: string;
   category: string;
   synonyms?: string[];
+  section?: string;
   reason: string;
 }
 
@@ -29,12 +30,14 @@ export interface RemovedIngredient {
 export interface StepCorrection {
   stepNumber: number;
   correctedDescription: string;
+  correctedSection?: string;
   reason: string;
 }
 
 export interface AddedStep {
   insertAfterStep?: number;
   description: string;
+  section?: string;
   reason: string;
 }
 
