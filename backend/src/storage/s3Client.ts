@@ -51,6 +51,8 @@ export function getS3Client(): S3Client {
     region: config.S3_REGION || 'auto',
     forcePathStyle: config.S3_FORCE_PATH_STYLE,
     credentials,
+    requestChecksumCalculation: 'WHEN_REQUIRED',
+    responseChecksumValidation: 'WHEN_REQUIRED',
   });
 
   return s3Instance;
