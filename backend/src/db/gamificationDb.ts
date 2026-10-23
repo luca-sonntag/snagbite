@@ -12,7 +12,6 @@ import { eq, and, desc, gte, count, isNotNull, ne } from 'drizzle-orm';
 import {
   ensureBucketExists,
   uploadFile,
-  getSignedUrl,
   getPublicUrl,
 } from '../storage/s3Client.js';
 import type {
@@ -48,11 +47,7 @@ export async function resolveCookPhotoUrl(photoPath: string | null | undefined):
   if (photoPath.startsWith('http') || photoPath.startsWith('data:')) {
     return photoPath;
   }
-  try {
-    return await getSignedUrl('cook-photos', photoPath, 7 * 24 * 3600);
-  } catch {
-    return getPublicUrl('cook-photos', photoPath);
-  }
+  return getPublicUrl('cook-photos', photoPath);
 }
 
 function rowToUserStats(row: any): UserStats {

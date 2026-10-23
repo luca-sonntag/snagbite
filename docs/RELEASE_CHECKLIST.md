@@ -16,7 +16,10 @@
 *Keine offenen DB-Aufgaben.*
 
 ### 🔐 2. Umgebungsvariablen & Secrets (Railway & Frontend)
-*Keine offenen Secrets.*
+- [ ] **Tigris S3 Endpoint & Credentials auf Railway prüfen:**
+  - `S3_ENDPOINT` muss auf `https://t3.storage.dev` zeigen (nicht `storageapi.dev`).
+  - Im Railway Dashboard prüfen, ob `S3_ACCESS_KEY_ID` und `S3_SECRET_ACCESS_KEY` im Backend-Service mit den aktiven Keys des Tigris-Storage-Plugins übereinstimmen. Alternativ können sie entfernt werden, damit das Backend automatisch auf die nativen Plugin-Variablen `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` und `BUCKET_NAME` zurückgreift.
+  - Commits: `068b6859`, `5fde45c8`, `bff0f4dd`.
 
 ### ☁️ 3. Externe Dienste & Cloudflare
 *Keine offenen Tasks.*

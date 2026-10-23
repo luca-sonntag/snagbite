@@ -12,7 +12,7 @@ COPY website/package*.json website/
 COPY shared/package*.json shared/
 
 # Install dependencies for the workspaces
-RUN YOUTUBE_DL_SKIP_PYTHON_CHECK=1 npm install
+RUN npm install
 
 # Copy shared workspace and build shared & backend
 COPY shared/ shared/
@@ -36,8 +36,8 @@ COPY --from=builder /app/backend/dist ./backend/dist
 # Copy public static assets (category icons, ingredient-icons.zip)
 COPY backend/public ./backend/public
 
-# Install runtime dependencies (ffmpeg/ffprobe for frame extraction, python3 for yt-dlp, ttf-dejavu for text-drawing fonts)
-RUN apk add --no-cache ffmpeg python3 ttf-dejavu
+# Install runtime dependencies (ffmpeg/ffprobe for frame extraction, ttf-dejavu for text-drawing fonts)
+RUN apk add --no-cache ffmpeg ttf-dejavu
 
 # Create directories for runtime artifacts
 RUN mkdir -p logs

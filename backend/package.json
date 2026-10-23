@@ -89,8 +89,7 @@
     "jose": "^6.2.3",
     "minisearch": "^7.2.0",
     "pg": "^8.23.1",
-    "sharp": "^0.32.6",
-    "youtube-dl-exec": "^3.1.8"
+    "sharp": "^0.32.6"
   },
   "devDependencies": {
     "@types/adm-zip": "^0.5.8",

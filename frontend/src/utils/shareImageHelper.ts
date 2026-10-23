@@ -16,7 +16,7 @@ function sanitizeName(title: string): string {
 
 function normalizeFetchUrl(url: string): string {
   if (url.startsWith('/')) return apiUrl(url);
-  const match = url.match(/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?(\/storage\/.*)/);
+  const match = url.match(/^https?:\/\/[^\/]+(\/storage\/.*)/);
   if (match) return apiUrl(match[1]);
   return url;
 }

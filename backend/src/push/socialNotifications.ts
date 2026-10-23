@@ -9,6 +9,7 @@ import { resolveCookPhotoUrl } from '../db/gamificationDb.js';
 import { db } from '../db/drizzle.js';
 import { user as userTable } from '../db/schema/auth.js';
 import { inArray } from 'drizzle-orm';
+import { config } from '../config.js';
 
 async function getUserLanguages(userIds: string[]): Promise<Map<string, string>> {
   const result = new Map<string, string>();
@@ -155,6 +156,11 @@ export async function notifyFriendsOfCook(
       getUserLanguages(friendIds),
     ]);
     const cookName = profiles.get(cookUserId)?.displayName || 'Ein Freund';
+    const absolutePhotoUrl = photoUrl
+      ? (photoUrl.startsWith('/') && config.APP_URL
+          ? config.APP_URL.replace(/\/+$/, '') + photoUrl
+          : photoUrl)
+      : null;
 
     for (const friendId of friendIds) {
       const isEn = langs.get(friendId) === 'en';
@@ -163,7 +169,7 @@ export async function notifyFriendsOfCook(
         body: isEn
           ? `${cookName} cooked "${recipe.title}". Check out the photo in your feed!`
           : `${cookName} hat „${recipe.title}“ gekocht. Schau dir das Foto im Feed an!`,
-        ...(photoUrl && /^https?:\/\//i.test(photoUrl) ? { imageUrl: photoUrl } : {}),
+        ...(absolutePhotoUrl && /^https?:\/\//i.test(absolutePhotoUrl) ? { imageUrl: absolutePhotoUrl } : {}),
         data: { type: 'friend_cooked', route: 'progress', section: 'feed', recipeId: recipe.id },
       };
       await deliverSocialPush(friendId, message, 'friend_cooked', recipe.id);
