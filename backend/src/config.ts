@@ -63,8 +63,6 @@ export interface Config {
   ALPHA_ACTIVE: boolean;
   ALPHA_MAX_EXTRACTIONS_PER_WINDOW: number;
   ALPHA_MAX_SAVED_RECIPES: number;
-  YTDLP_COOKIES_FILE?: string;
-  YTDLP_COOKIES_FROM_BROWSER?: string;
   REVENUECAT_SECRET_KEY?: string;
   ADMIN_EMAILS: string;
   HEALTHCHECK_WEBSITE_URL?: string;
@@ -168,8 +166,6 @@ export const config: Config = {
   ALPHA_ACTIVE: getEnv('ALPHA_ACTIVE', 'false') === 'true',
   ALPHA_MAX_EXTRACTIONS_PER_WINDOW: parseInt(getEnv('ALPHA_MAX_EXTRACTIONS_PER_WINDOW', '10'), 10),
   ALPHA_MAX_SAVED_RECIPES: parseInt(getEnv('ALPHA_MAX_SAVED_RECIPES', '20'), 10),
-  YTDLP_COOKIES_FILE: process.env.YTDLP_COOKIES_FILE,
-  YTDLP_COOKIES_FROM_BROWSER: process.env.YTDLP_COOKIES_FROM_BROWSER,
   REVENUECAT_SECRET_KEY: process.env.REVENUECAT_SECRET_KEY,
   ADMIN_EMAILS: getEnv('ADMIN_EMAILS', ''),
   HEALTHCHECK_WEBSITE_URL: process.env.HEALTHCHECK_WEBSITE_URL,
@@ -210,28 +206,4 @@ export const config: Config = {
     process.env.CLOUDFLARE_WHISPER_ENDPOINT || 'https://snagbite-whisper-proxy.snagbite.workers.dev',
 };
 
-/**
- * Returns options for yt-dlp to handle authentication cookies if configured.
- * Automatically detects a 'cookies.txt' file in the workspace root if it exists
- * and no explicit configuration is provided.
- */
-export function getYtdlpCookieOptions(): Record<string, string> {
-  const opts: Record<string, string> = {};
-
-  if (config.YTDLP_COOKIES_FILE) {
-    opts.cookiefile = path.resolve(config.YTDLP_COOKIES_FILE);
-  } else {
-    // Default fallback to cookies.txt in root directory
-    const defaultCookies = path.resolve('cookies.txt');
-    if (existsSync(defaultCookies)) {
-      opts.cookiefile = defaultCookies;
-    }
-  }
-
-  if (config.YTDLP_COOKIES_FROM_BROWSER) {
-    opts.cookiesFromBrowser = config.YTDLP_COOKIES_FROM_BROWSER;
-  }
-
-  return opts;
-}
 

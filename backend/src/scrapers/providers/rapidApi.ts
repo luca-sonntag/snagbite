@@ -1,7 +1,6 @@
 import { config } from '../../config.js';
 import { withRetry } from '../../retry.js';
 import type { ScrapingResult } from '../index.js';
-import { fetchMetadata } from '../youtubeDescription.js';
 import { formatAuthorHandle } from '@cookbook/shared';
 import { normalizeDurationToSeconds, type SocialScrapeContext, type SocialScrapeProvider } from './types.js';
 
@@ -202,14 +201,7 @@ export const rapidApiProvider: SocialScrapeProvider = {
     let caption = (data.title ?? '').toString();
     let authorHandle = formatAuthorHandle(data.owner?.username ?? data.author) ?? '';
 
-    // RapidAPI's caption is the full post text for IG/TikTok, but only the *title* for
-    // YouTube and a stub ("- Facebook Reel") for Facebook; its author is often generic.
-    // Enrich from local yt-dlp metadata (~2s, no proxy) when weak — best-effort.
-    if (ctx.platform === 'youtube' || caption.length < 40 || isGenericAuthor(authorHandle)) {
-      const meta = await fetchMetadata(url);
-      if (meta.description && meta.description.length > caption.length) caption = meta.description;
-      if (meta.authorHandle && isGenericAuthor(authorHandle)) authorHandle = formatAuthorHandle(meta.authorHandle) ?? '';
-    }
+    if (isGenericAuthor(authorHandle)) authorHandle = '';
 
     // CDN links served fine cross-network with just a UA in testing.
     const headers = { 'User-Agent': BROWSER_UA };

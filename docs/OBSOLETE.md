@@ -6,6 +6,21 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-24: Vollständige Entfernung von `youtube-dl-exec` / `yt-dlp` und Python aus Backend und Docker-Build
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Lokale Metadaten-Extraktion via `youtube-dl-exec` (`backend/src/scrapers/youtubeDescription.ts` mit `fetchMetadata()`).
+  * Fallback-Anreicherung von YouTube- und Facebook-Reel-Beschreibungen in [`rapidApi.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/scrapers/providers/rapidApi.ts) und [`rapidApiMetadata.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/scrapers/providers/rapidApiMetadata.ts).
+  * Cookie-Konfiguration für yt-dlp (`YTDLP_COOKIES_FILE`, `YTDLP_COOKIES_FROM_BROWSER`, `getYtdlpCookieOptions()`) in [`backend/src/config.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/config.ts) und `backend/.env.example`.
+  * Python- und yt-dlp-Build-Workarounds im Root-[`Dockerfile`](file:///c:/Users/lucas/source/repos/cookbook/Dockerfile) (`YOUTUBE_DL_SKIP_PYTHON_CHECK=1`, `YOUTUBE_DL_SKIP_DOWNLOAD=true`, `python3`, `yt-dlp` System-Pakete).
+  * Dependency `"youtube-dl-exec": "^3.1.8"` in `backend/package.json`.
+* **Ersetzt durch:**
+  * **Ausschließliche RapidAPI-Metadaten & Video-Extraktion:** RapidAPI liefert direkt alle notwendigen Metadaten (Titel, Caption, Thumbnail, Medien-URLs) ohne lokale Python- oder yt-dlp-Binaries.
+  * **Schlankeres & zuverlässiges Docker-Image:** Dockerfile baut rein über Node.js (`RUN npm install`) und benötigt zur Laufzeit nur noch `ffmpeg` und `ttf-dejavu` ohne Python/yt-dlp. Keine GitHub-API-Rate-Limits mehr beim Build.
+* **Betroffene Dateien:** `backend/src/scrapers/youtubeDescription.ts` (gelöscht), `backend/src/scrapers/providers/rapidApi.ts`, `backend/src/scrapers/providers/rapidApiMetadata.ts`, `backend/src/config.ts`, `backend/.env.example`, `backend/package.json`, `package-lock.json`, `Dockerfile`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-18: Vollständige Entfernung der Sammlungs-Emojis (Frontend, Backend, DB & Shared)
 
 * **Ersetzter Code / Veraltete Logik:**
