@@ -12,7 +12,7 @@ COPY website/package*.json website/
 COPY shared/package*.json shared/
 
 # Install dependencies for the workspaces
-RUN YOUTUBE_DL_SKIP_PYTHON_CHECK=1 npm install
+RUN YOUTUBE_DL_SKIP_PYTHON_CHECK=1 YOUTUBE_DL_SKIP_DOWNLOAD=true npm install
 
 # Copy shared workspace and build shared & backend
 COPY shared/ shared/
@@ -37,7 +37,7 @@ COPY --from=builder /app/backend/dist ./backend/dist
 COPY backend/public ./backend/public
 
 # Install runtime dependencies (ffmpeg/ffprobe for frame extraction, python3 for yt-dlp, ttf-dejavu for text-drawing fonts)
-RUN apk add --no-cache ffmpeg python3 ttf-dejavu
+RUN apk add --no-cache ffmpeg python3 yt-dlp ttf-dejavu
 
 # Create directories for runtime artifacts
 RUN mkdir -p logs
@@ -45,5 +45,7 @@ RUN mkdir -p logs
 EXPOSE 3000
 
 ENV NODE_ENV=production
+ENV YOUTUBE_DL_DIR=/usr/bin
+ENV YOUTUBE_DL_FILENAME=yt-dlp
 
 CMD ["node", "backend/dist/index.js"]
