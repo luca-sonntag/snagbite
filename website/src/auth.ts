@@ -38,6 +38,7 @@ export function setStoredToken(token: string | null): void {
 export const authClient = createAuthClient({
   baseURL,
   fetchOptions: {
+    credentials: 'include',
     onRequest(context) {
       const token = getStoredToken();
       if (token) {

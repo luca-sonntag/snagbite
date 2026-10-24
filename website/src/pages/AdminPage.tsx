@@ -36,6 +36,14 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlError = params.get('error');
+    const urlErrorDesc = params.get('error_description');
+    if (urlError) {
+      setAuthError(urlErrorDesc ? `${urlError}: ${urlErrorDesc}` : `Authentication failed (${urlError}).`);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     async function loadSession() {
       try {
         const res = await authClient.getSession();
@@ -65,6 +73,7 @@ export default function AdminPage() {
       await authClient.signIn.social({
         provider: 'google',
         callbackURL: `${window.location.origin}/admin`,
+        errorCallbackURL: `${window.location.origin}/admin`,
       });
     } catch (err: any) {
       setAuthError(err?.message || 'Failed to initiate Google sign-in.');

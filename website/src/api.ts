@@ -4,7 +4,12 @@
 // stay relative (e.g. "/api/admin/check") and use Vite proxy or domain routing.
 // Set VITE_API_BASE_URL in .env if the backend is hosted on a separate domain.
 let rawBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? '').trim();
-if (rawBaseUrl && !rawBaseUrl.startsWith('http://') && !rawBaseUrl.startsWith('https://') && !rawBaseUrl.startsWith('/')) {
+if (
+  typeof window !== 'undefined' &&
+  (window.location.hostname === 'snagbite.app' || window.location.hostname === 'www.snagbite.app')
+) {
+  rawBaseUrl = 'https://server.snagbite.app';
+} else if (rawBaseUrl && !rawBaseUrl.startsWith('http://') && !rawBaseUrl.startsWith('https://') && !rawBaseUrl.startsWith('/')) {
   rawBaseUrl = `https://${rawBaseUrl}`;
 }
 export const API_BASE_URL = rawBaseUrl.replace(/\/$/, '');
