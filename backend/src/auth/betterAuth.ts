@@ -18,6 +18,8 @@ const configuredOrigins = (process.env.CORS_ORIGIN || '')
   .filter(Boolean);
 
 const isProduction = process.env.NODE_ENV === 'production';
+const appUrl = process.env.APP_URL || 'http://localhost:3000';
+const isSnagbiteDomain = appUrl.includes('snagbite.app');
 
 const trustedOrigins = [
   'http://localhost:5173',
@@ -40,6 +42,7 @@ const trustedOrigins = [
   'https://localhost',
   'https://snagbite.app',
   'https://www.snagbite.app',
+  'https://server.snagbite.app',
   ...(process.env.APP_URL ? [process.env.APP_URL] : []),
   ...configuredOrigins,
 ];
@@ -55,17 +58,28 @@ export const auth = betterAuth({
       verification: schema.verification,
     },
   }),
-  baseURL: process.env.APP_URL || 'http://localhost:3000',
+  baseURL: appUrl,
   basePath: '/api/auth',
   trustedOrigins,
   secret:
     process.env.BETTER_AUTH_SECRET ||
     process.env.JWT_SECRET ||
     'snagbite-better-auth-secret-change-in-prod-12345678',
+  account: {
+    skipStateCookieCheck: true,
+  },
   advanced: {
     database: {
       generateId: () => randomUUID(),
     },
+    ...(isSnagbiteDomain
+      ? {
+          crossSubDomainCookies: {
+            enabled: true,
+            domain: 'snagbite.app',
+          },
+        }
+      : {}),
   },
   emailAndPassword: {
     enabled: true,

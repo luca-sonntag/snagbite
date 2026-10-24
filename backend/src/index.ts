@@ -60,10 +60,16 @@ async function bootstrap() {
       } : false,
     }));
 
-    // Origins used by the native (Capacitor) app's webview. These are always
-    // allowed so the Android/iOS builds can reach the API regardless of the
-    // configured web origin.
-    const nativeOrigins = ['http://localhost', 'https://localhost', 'capacitor://localhost'];
+    // Origins used by the native (Capacitor) app's webview and the official website.
+    // These are always allowed so the Android/iOS builds and snagbite.app can reach
+    // the API regardless of CORS_ORIGIN.
+    const defaultAllowedOrigins = [
+      'http://localhost',
+      'https://localhost',
+      'capacitor://localhost',
+      'https://snagbite.app',
+      'https://www.snagbite.app',
+    ];
     const configuredOrigins = (process.env.CORS_ORIGIN || '')
       .split(',')
       .map((o) => o.trim())
@@ -72,7 +78,7 @@ async function bootstrap() {
     app.use(cors({
       origin: (origin, callback) => {
         // Non-browser clients (curl, server-to-server) send no Origin header.
-        if (!origin || nativeOrigins.includes(origin)) return callback(null, true);
+        if (!origin || defaultAllowedOrigins.includes(origin)) return callback(null, true);
         if (!isProduction) {
           if (
             origin.startsWith('http://localhost') ||
@@ -91,6 +97,7 @@ async function bootstrap() {
       },
       methods: ['GET', 'POST', 'DELETE', 'PATCH', 'PUT'],
       allowedHeaders: ['Content-Type', 'Authorization'],
+      exposedHeaders: ['set-auth-token'],
       credentials: true,
     }));
 
