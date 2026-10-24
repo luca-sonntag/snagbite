@@ -75,7 +75,10 @@ if ($Rollback) {
     Write-Host ""
     Write-Host "  Rolling back OTA bundle ($Env / channel '$Channel')..." -ForegroundColor Yellow
 
-    $rollbackRaw = & npx tsx $managerScript $targetEnv rollback "--channel=$Channel"
+    $rollbackRaw = & npx tsx $managerScript $targetEnv rollback "--channel=$Channel" 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to rollback bundle (exit code $LASTEXITCODE): $rollbackRaw"
+    }
     $rollbackRes = $rollbackRaw | ConvertFrom-Json
 
     if ($rollbackRes.deactivatedOnly) {
@@ -172,8 +175,26 @@ Write-Host "  Frontend build complete." -ForegroundColor Green
 # ── 4. Next bundle version from DB: {VERSION_NAME}-ota.{n} ───────────
 
 Write-Host "[3/7] Deriving next bundle version..." -ForegroundColor Yellow
-$bundlesRaw = & npx tsx $managerScript $targetEnv list "--channel=$Channel"
-$existing = $bundlesRaw | ConvertFrom-Json
+$bundlesRaw = $null
+$existing = $null
+$retries = 3
+
+for ($attempt = 1; $attempt -le $retries; $attempt++) {
+    $bundlesRaw = & npx tsx $managerScript $targetEnv list "--channel=$Channel" 2>&1
+    if ($LASTEXITCODE -eq 0) {
+        $existing = if ([string]::IsNullOrWhiteSpace($bundlesRaw)) { @() } else { @($bundlesRaw | ConvertFrom-Json) }
+        break
+    }
+    if ($attempt -lt $retries) {
+        Write-Host "  Database connection failed (attempt $attempt/$retries). Retrying in 2s..." -ForegroundColor DarkYellow
+        Start-Sleep -Seconds 2
+    }
+}
+
+if ($LASTEXITCODE -ne 0 -or $null -eq $existing) {
+    throw "Failed to fetch existing app bundles from database ($bundlesRaw). Aborting deploy to prevent duplicate version collisions."
+}
+
 
 $maxCounter = 0
 foreach ($row in @($existing)) {
@@ -223,7 +244,10 @@ $cmdArgs = @(
 )
 if ($noActivateArg) { $cmdArgs += $noActivateArg }
 
-$publishRaw = & npx tsx $managerScript @cmdArgs
+$publishRaw = & npx tsx $managerScript @cmdArgs 2>&1
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to publish bundle (exit code $LASTEXITCODE): $publishRaw"
+}
 $publishRes = $publishRaw | ConvertFrom-Json
 
 if (-not $publishRes.success) {

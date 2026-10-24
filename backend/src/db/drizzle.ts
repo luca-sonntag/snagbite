@@ -20,7 +20,7 @@ export function getDbPool(): pg.Pool {
     connectionString,
     max: 20,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
+    connectionTimeoutMillis: Number(process.env.DB_CONNECTION_TIMEOUT_MS) || 15000,
   });
 
   return pool;
