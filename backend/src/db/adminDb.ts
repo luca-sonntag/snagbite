@@ -7,6 +7,7 @@ import {
   uploadFile,
   getSignedUrl,
 } from '../storage/s3Client.js';
+import { parseErrorCode } from './adminAnalyticsHelpers.js';
 import type {
   FeedbackInput,
   FeedbackRow,
@@ -44,6 +45,9 @@ export {
   listNotificationUsers,
 } from './pushNotificationDb.js';
 
+export { getGrowthAndRetentionAnalytics } from './adminGrowthAnalyticsDb.js';
+export { getPipelineAndCatalogAnalytics } from './adminPipelineAnalyticsDb.js';
+
 export async function createFeedback(
   userId: string,
   input: FeedbackInput
@@ -61,7 +65,6 @@ export async function createFeedback(
       await ensureBucketExists('feedback-screenshots');
       await uploadFile('feedback-screenshots', storagePath, buffer, 'image/jpeg');
 
-      // SigV4 allows max 7 days presigned URL
       const signedUrl = await getSignedUrl('feedback-screenshots', storagePath, 7 * 24 * 3600);
       screenshotUrls.push(signedUrl);
     } catch (err: unknown) {
@@ -90,7 +93,6 @@ export async function getAllFeedback(): Promise<FeedbackRow[]> {
     .from(feedback)
     .orderBy(desc(feedback.createdAt));
 
-  // Refresh screenshot URLs with fresh 7-day presigned URLs for admin viewing
   return Promise.all(
     rows.map(async (row): Promise<FeedbackRow> => {
       let freshUrls = row.screenshotUrls ?? [];
@@ -142,7 +144,7 @@ export async function getJobMetrics(
     .from(jobs)
     .where(and(...conditions));
 
-  let total = allJobs.length;
+  const total = allJobs.length;
   let completed = 0;
   let failed = 0;
   let pending = 0;
@@ -240,6 +242,7 @@ export async function getFailedJobs(
     id: row.id,
     url: row.sourceUrl ?? '',
     error: row.error,
+    errorCode: parseErrorCode(row.error),
     userId: row.userId,
     createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt),
     updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : String(row.updatedAt),

@@ -32,6 +32,7 @@ export interface FailedJobDetails {
   id: string;
   url: string;
   error: string | null;
+  errorCode?: string;
   userId: string;
   createdAt: string;
   updatedAt: string;
