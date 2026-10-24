@@ -193,6 +193,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await authClient.signIn.social({
         provider: 'google',
         callbackURL: window.location.origin,
+        errorCallbackURL: window.location.origin,
       });
       return {};
     } catch (err: any) {

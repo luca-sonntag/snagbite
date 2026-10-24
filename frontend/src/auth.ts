@@ -40,6 +40,7 @@ export const authClient = createAuthClient({
     }>(),
   ],
   fetchOptions: {
+    credentials: 'include',
     onRequest(context) {
       const token = getStoredToken();
       if (token) {

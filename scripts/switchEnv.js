@@ -46,7 +46,7 @@ function getProdEnv() {
 
 function getProdBackendUrl() {
   const prodFrontend = parseEnv(path.join(rootDir, 'frontend', '.env.production'));
-  return prodFrontend.VITE_API_BASE_URL || 'https://cookbook-production-8769.up.railway.app';
+  return prodFrontend.VITE_API_BASE_URL || 'https://server.snagbite.app';
 }
 
 function getDbHost(url) {
