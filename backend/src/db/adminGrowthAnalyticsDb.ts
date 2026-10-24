@@ -11,54 +11,18 @@ import {
   notificationLog,
 } from './schema/index.js';
 import { gte } from 'drizzle-orm';
+import type {
+  GrowthAndRetentionAnalytics,
+  CohortRetentionRow,
+} from './adminAnalyticsTypes.js';
 
-export interface TierDistributionMetrics {
-  totalUsers: number;
-  freeCount: number;
-  premiumCount: number;
-  alphaCount: number;
-  freePct: number;
-  premiumPct: number;
-  alphaPct: number;
-  usersWithBonusCredits: number;
-  totalBonusCredits: number;
-  customLimitUsers: number;
-}
-
-export interface ActiveUserMetrics {
-  dau: number;
-  wau: number;
-  mau: number;
-  stickinessPct: number;
-}
-
-export interface CohortRetentionRow {
-  cohortWeekStart: string;
-  cohortLabel: string;
-  size: number;
-  d1Pct: number | null;
-  d7Pct: number | null;
-  d14Pct: number | null;
-  d30Pct: number | null;
-}
-
-export interface NotificationAnalyticsMetrics {
-  totalUsers: number;
-  notificationsEnabledUsers: number;
-  activePushUsers: number;
-  optInRatePct: number;
-  activeTokens: number;
-  disabledTokens: number;
-  deliveredInRange: number;
-  byCategory: { category: string; count: number }[];
-}
-
-export interface GrowthAndRetentionAnalytics {
-  tiers: TierDistributionMetrics;
-  activeUsers: ActiveUserMetrics;
-  cohorts: CohortRetentionRow[];
-  notifications: NotificationAnalyticsMetrics;
-}
+export type {
+  TierDistributionMetrics,
+  ActiveUserMetrics,
+  CohortRetentionRow,
+  NotificationAnalyticsMetrics,
+  GrowthAndRetentionAnalytics,
+} from './adminAnalyticsTypes.js';
 
 function getMondayUtc(d: Date): Date {
   const copy = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
@@ -237,7 +201,6 @@ export async function getGrowthAndRetentionAnalytics(
     const size = cohortUsers.length;
     const calcBucketPct = (daysThreshold: number): number | null => {
       if (size === 0) return null;
-      // Only evaluate users whose registration is at least `daysThreshold` days in the past
       const eligible = cohortUsers.filter(
         (u) => nowMs - u.createdAt.getTime() >= daysThreshold * DAY_MS,
       );
@@ -309,12 +272,7 @@ export async function getGrowthAndRetentionAnalytics(
       totalBonusCredits,
       customLimitUsers,
     },
-    activeUsers: {
-      dau,
-      wau,
-      mau,
-      stickinessPct,
-    },
+    activeUsers: { dau, wau, mau, stickinessPct },
     cohorts,
     notifications: {
       totalUsers,
