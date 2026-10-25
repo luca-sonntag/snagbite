@@ -135,13 +135,13 @@ export default function CookedModal({
       <div
         role="dialog"
         aria-modal="true"
-        className="relative w-full max-w-md rounded-3xl bg-white dark:bg-gray-900 p-6 text-gray-900 dark:text-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+        className="relative w-full max-w-md rounded-3xl bg-gray-50 dark:bg-gray-950 p-6 text-gray-900 dark:text-white shadow-2xl overflow-hidden border border-black/5 dark:border-white/5 animate-in zoom-in-95 duration-200"
       >
         {/* Close Button */}
         <button
           onClick={handleResetAndClose}
           disabled={isVerifying}
-          className="absolute top-4 right-4 w-10 h-10 min-w-[44px] min-h-[44px] text-gray-400 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 flex items-center justify-center transition-all cursor-pointer border-none disabled:opacity-40"
+          className="absolute top-4 right-4 w-10 h-10 min-w-[44px] min-h-[44px] text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-full bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.10] flex items-center justify-center transition-all cursor-pointer border-none disabled:opacity-40"
         >
           <X className="w-5 h-5" />
         </button>
@@ -152,7 +152,7 @@ export default function CookedModal({
             <Camera className="w-5 h-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100 leading-snug">
+            <h3 className="text-lg font-serif font-bold tracking-tight text-gray-900 dark:text-gray-100 leading-snug">
               {t('app.gamification.modalTitle')}
             </h3>
             {recipeTitle && (
