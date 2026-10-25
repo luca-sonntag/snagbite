@@ -104,14 +104,14 @@ export function RecentRecipesTable({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="text-[11px] font-semibold text-gray-400 border-b border-black/5">
-                <th className="pb-2.5 pr-2">{isDe ? 'Datum' : 'Date'}</th>
-                <th className="pb-2.5 px-2">{isDe ? 'Rezept & Titel' : 'Recipe & Title'}</th>
-                <th className="pb-2.5 px-2">{isDe ? 'Plattform' : 'Platform'}</th>
-                <th className="pb-2.5 px-2">Creator</th>
-                <th className="pb-2.5 px-2">{isDe ? 'Extrahierender User' : 'Extractor User'}</th>
-                <th className="pb-2.5 px-2 text-center">{isDe ? 'Im Kochbuch' : 'In Library'}</th>
-                <th className="pb-2.5 pl-2 text-right">{isDe ? 'Aktion' : 'Action'}</th>
+              <tr className="text-[11px] font-semibold text-gray-400 border-b border-black/5 flex items-center justify-between gap-2 pb-2.5">
+                <th className="w-24 shrink-0 font-semibold">{isDe ? 'Datum' : 'Date'}</th>
+                <th className="flex-1 min-w-[180px] pr-2 font-semibold">{isDe ? 'Rezept & Titel' : 'Recipe & Title'}</th>
+                <th className="w-24 shrink-0 px-2 font-semibold">{isDe ? 'Plattform' : 'Platform'}</th>
+                <th className="w-28 shrink-0 px-2 font-semibold">Creator</th>
+                <th className="w-44 shrink-0 px-2 font-semibold">{isDe ? 'Extrahierender User' : 'Extractor User'}</th>
+                <th className="w-20 shrink-0 px-1 text-center font-semibold">{isDe ? 'Im Kochbuch' : 'In Library'}</th>
+                <th className="w-24 shrink-0 pl-2 text-right font-semibold">{isDe ? 'Aktion' : 'Action'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5">
