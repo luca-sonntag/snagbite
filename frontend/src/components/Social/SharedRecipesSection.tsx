@@ -78,7 +78,7 @@ export default function SharedRecipesSection({ onRecipeSaved }: SharedRecipesSec
                   setPreviewRecipe(item.recipe);
                 }
               }}
-              className="flex items-center gap-3 p-3 rounded-2xl bg-white dark:bg-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.03)] border-none cursor-pointer active:scale-[0.99] transition-all select-none"
+              className="flex items-center gap-3 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] border-none cursor-pointer active:scale-[0.99] transition-all select-none"
             >
               {/* Recipe Thumbnail */}
               <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0">
