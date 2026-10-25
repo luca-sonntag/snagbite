@@ -11,6 +11,7 @@ import {
   Bookmark,
 } from 'lucide-react';
 import type { RecentExtractedRecipeItem, SourcePlatformKey } from './types';
+import { RecipeThumbnail } from './RecipeThumbnail';
 
 interface RecentRecipesTableProps {
   isDe: boolean;
@@ -134,16 +135,11 @@ export function RecentRecipesTable({
                         {/* 2. Cover Thumbnail & Title */}
                         <div className="flex-1 min-w-[180px] flex items-center gap-3 pr-2">
                           <div className="w-10 h-10 rounded-xl bg-gray-100 overflow-hidden shrink-0 flex items-center justify-center shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-                            {recipe.imageUrl ? (
-                              <img
-                                src={recipe.imageUrl}
-                                alt={recipe.title}
-                                className="w-full h-full object-cover"
-                                loading="lazy"
-                              />
-                            ) : (
-                              <span className="text-base select-none">{recipe.emoji || '🍽️'}</span>
-                            )}
+                            <RecipeThumbnail
+                              imageUrl={recipe.imageUrl}
+                              title={recipe.title}
+                              emoji={recipe.emoji}
+                            />
                           </div>
                           <div className="flex flex-col min-w-0">
                             <span className="font-bold text-gray-900 truncate text-xs leading-snug group-hover:text-emerald-700 transition-colors">
