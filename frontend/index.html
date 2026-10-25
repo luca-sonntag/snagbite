@@ -9,16 +9,16 @@
       if (theme === 'dark') {
         document.documentElement.classList.add('dark');
         document.documentElement.setAttribute('data-theme', 'dark');
-        document.documentElement.style.setProperty('--app-bg', '#09090b');
+        document.documentElement.style.setProperty('--app-bg', '#0c0b0a');
         document.documentElement.style.setProperty('--app-text', '#ffffff');
-        document.documentElement.style.setProperty('--app-subtext', '#a1a1aa');
-        document.documentElement.style.setProperty('--app-card-bg', '#121215');
+        document.documentElement.style.setProperty('--app-subtext', '#a8a29e');
+        document.documentElement.style.setProperty('--app-card-bg', '#141311');
       } else {
         document.documentElement.classList.remove('dark');
         document.documentElement.setAttribute('data-theme', 'light');
-        document.documentElement.style.setProperty('--app-bg', '#f8fafc');
-        document.documentElement.style.setProperty('--app-text', '#111827');
-        document.documentElement.style.setProperty('--app-subtext', '#6b7280');
+        document.documentElement.style.setProperty('--app-bg', '#faf8f5');
+        document.documentElement.style.setProperty('--app-text', '#1c1917');
+        document.documentElement.style.setProperty('--app-subtext', '#78716c');
         document.documentElement.style.setProperty('--app-card-bg', '#ffffff');
       }
     })();
@@ -28,7 +28,7 @@
       box-sizing: border-box;
     }
     body {
-      background-color: var(--app-bg, #f8fafc);
+      background-color: var(--app-bg, #faf8f5);
       margin: 0;
       padding: 0;
     }
@@ -54,7 +54,7 @@
 
 <body>
   <div id="root">
-    <div style="position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background-color:var(--app-bg,#f8fafc);user-select:none;font-family:'Outfit',system-ui,sans-serif;">
+    <div style="position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background-color:var(--app-bg,#faf8f5);user-select:none;font-family:'Outfit',system-ui,sans-serif;">
       <div style="position:absolute;width:288px;height:288px;background:rgba(16,185,129,0.15);filter:blur(48px);border-radius:9999px;pointer-events:none;animation:inline-glow 2.4s ease-in-out infinite;"></div>
       <div style="position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;">
         <div style="width:88px;height:88px;display:flex;align-items:center;justify-content:center;animation:inline-breathe 2.4s ease-in-out infinite;">
