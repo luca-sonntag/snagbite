@@ -90,8 +90,8 @@ export default function AuthCoverCarousel({ collapsed = false }: AuthCoverCarous
       aria-hidden="true"
       className={`w-full transition-all duration-300 ease-out select-none ${
         collapsed
-          ? 'max-h-0 opacity-0 scale-95 pointer-events-none overflow-hidden mb-0'
-          : 'max-h-72 opacity-100 scale-100 mb-2'
+          ? 'max-h-0 opacity-0 scale-95 pointer-events-none overflow-hidden my-0'
+          : 'max-h-72 opacity-100 scale-100 my-1'
       }`}
     >
       <div
@@ -153,12 +153,12 @@ export default function AuthCoverCarousel({ collapsed = false }: AuthCoverCarous
                 <CachedImage
                   src={item.imageUrl}
                   emoji={item.emoji}
-                  alt={item.title}
+                  alt=""
                   className="w-full h-full object-cover object-center pointer-events-none select-none"
                 />
 
                 {/* Dark gradient scrim */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 via-45% to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 via-45% to-transparent pointer-events-none" />
 
                 {/* Subtle dimming overlay for side cards */}
                 <div
@@ -166,17 +166,6 @@ export default function AuthCoverCarousel({ collapsed = false }: AuthCoverCarous
                     isCenter ? 'opacity-0' : 'opacity-100'
                   }`}
                 />
-
-                {/* Recipe title inside bottom scrim on active center card */}
-                <div
-                  className={`absolute inset-x-0 bottom-0 p-3.5 text-left transition-all duration-500 pointer-events-none ${
-                    isCenter ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1.5'
-                  }`}
-                >
-                  <p className="font-heading text-xs sm:text-[13px] font-bold text-white leading-snug line-clamp-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)]">
-                    {item.title}
-                  </p>
-                </div>
               </div>
             );
           })

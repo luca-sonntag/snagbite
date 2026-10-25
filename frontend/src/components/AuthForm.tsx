@@ -37,11 +37,8 @@ export default function AuthForm() {
       <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-80 h-80 bg-teal-500/10 dark:bg-teal-500/5 blur-3xl rounded-full pointer-events-none" />
 
       <div className="w-full max-w-sm flex flex-col items-center gap-3.5 text-center relative z-10">
-        {/* Auto-advancing Recipe Cover Carousel */}
-        <AuthCoverCarousel collapsed={showEmailLogin} />
-
         {/* Brand Header */}
-        <div className="flex flex-col items-center gap-1.5 mb-1">
+        <div className="flex flex-col items-center gap-1.5">
           <div className="inline-flex items-center gap-2.5">
             <img
               src="/icon-512.png"
@@ -56,6 +53,9 @@ export default function AuthForm() {
             {t('auth.signInTitle')}
           </p>
         </div>
+
+        {/* Auto-advancing Recipe Cover Carousel directly above the Login button */}
+        <AuthCoverCarousel collapsed={showEmailLogin} />
 
         <div className="w-full py-1.5">
           {showEmailLogin ? (
