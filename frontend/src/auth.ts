@@ -1,5 +1,6 @@
 import { createAuthClient } from 'better-auth/react';
 import { inferAdditionalFields } from 'better-auth/client/plugins';
+import { Capacitor } from '@capacitor/core';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '');
 const baseURL = API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
@@ -42,12 +43,20 @@ export const authClient = createAuthClient({
   fetchOptions: {
     credentials: 'include',
     onRequest(context) {
-      const token = getStoredToken();
-      if (token) {
-        context.headers.set('authorization', `Bearer ${token}`);
+      // In native Capacitor apps, cookies are not automatically sent cross-origin from the WebView,
+      // so we attach the stored Bearer token.
+      // In web/PWA mode, Better-Auth relies purely on HttpOnly session cookies, avoiding deadlocks with stale tokens.
+      if (Capacitor.isNativePlatform()) {
+        const token = getStoredToken();
+        if (token) {
+          context.headers.set('authorization', `Bearer ${token}`);
+        }
       }
     },
     onResponse(context) {
+      if (context.response.status === 401) {
+        setStoredToken(null);
+      }
       const setAuthToken = context.response.headers.get('set-auth-token');
       if (setAuthToken) {
         setStoredToken(setAuthToken);
