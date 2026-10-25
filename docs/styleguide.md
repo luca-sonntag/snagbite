@@ -6,11 +6,12 @@
 
 ## 1. 🌈 Farbpalette & Design Tokens
 
-### App-Canvas & Oberflächen
-* **Light Mode (Warm Culinary Paper Palette):**
-  * **App-Canvas (Hintergrund):** `#faf8f5` (`gray-50` / `slate-50`, definiert in `index.css` & `index.html`) — Warmes Alabaster-/Kochbuch-Papierweiß, das aufstrebende weiße Karten (`#ffffff`) ohne störende Ränder plastisch und appetitlich hervortreten lässt.
-  * **Karten & Oberflächen:** `#ffffff` (`bg-white`)
-  * **Subtile Kontur- & Pill-Flächen:** `bg-black/5` / `bg-gray-100` (`#f3f1ed`, Warm Linen)
+### App-Canvas & Oberflächen (Open Cookbook Page UI)
+* **Light Mode (Warm Culinary Paper Palette — Cardless Layout):**
+  * **App-Canvas (Hintergrund):** `#faf8f5` (`gray-50` / `slate-50`, definiert in `index.css` & `index.html`) — Warmes Alabaster-/Kochbuch-Papierweiß. Inhalte (Zutaten, Schritte, Einkaufsliste, Rezept-Metadaten) sitzen **kartenlos über die volle Seitenbreite direkt auf der Papier-Leinwand**, getrennt durch feine Haarlinien (`divide-black/[0.06]`).
+  * **Schwebende Leisten & Glass-Panels (`.glass-panel`):** Warmes Creme-Glas `rgba(247, 244, 237, 0.92)` (`#f7f4ed/92`) mit `backdrop-blur`.
+  * **Aktive Segmented-Control-Tabs & Fokus-Inputs:** Warmes Papierweiß `#fdfbf7` statt kaltem Reinweiß (`#ffffff`).
+  * **Subtile Gruppierungen, Listen-Zeilen & Pill-Flächen:** `bg-black/[0.03]` bis `bg-black/[0.04]` (Warm Linen). Kein hartes `bg-white` für Seitenblöcke.
 * **Dark Mode (Warm Espresso-Onyx Palette):**
   * **App-Canvas (Hintergrund):** `#0c0b0a` (`bg-gray-950` / `--color-gray-950`) — Tiefes, warmes Espresso-Onyx-Schwarz.
   * **Oberflächen Ebene 1 (Container):** `#141311` (`bg-gray-900` / `--color-gray-900`)
@@ -96,21 +97,19 @@
 * **Layout:** 2-Spalten-Grid (`grid grid-cols-2 gap-2.5 sm:gap-3 items-stretch`).
 * **Linke Karte (3:4 Portrait):** `min-h-[220px] sm:min-h-[250px] rounded-2xl` mit Foto, dunklem Gradient-Scrim, Dauer-Pill, Kalorien und Health-Score ohne Wrapping, darunter Titel in weißer Schrift. Wenn kein Bild geladen ist, schaltet die Karte auf die helle Basis (`bg-white dark:bg-gray-900 ring-1 ring-black/5 dark:ring-white/10`) mit Bildcontainer `bg-black/5 dark:bg-white/5` und dunkler Schrift um, analog zu den rechten Kompaktkarten.
 * **Rechte Karten (2× Gestapelte `RecipeCompactCard`):**
-  * `flex-1 rounded-2xl bg-white dark:bg-gray-900/90 shadow-[0_2px_12px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 border-none overflow-hidden`.
+  * `flex-1 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border-none overflow-hidden` (ohne weiße Kartenbox oder Schatten).
   * **Thumbnail:** Durchgehende Vollhöhe links (`w-22 sm:w-26`), dezenter Bottom-Scrim mit neutralgrauer Zeit-Pill (`px-1.5 py-0.5 rounded-md bg-black/55 backdrop-blur-xs text-white text-[9.5px] font-semibold`).
   * **Inhalt rechts:** Bis zu 3 Zeilen Titel (`line-clamp-3`), Kalorien links unten, Health-Score-Buchstabe (`w-4 h-4 rounded-full`) rechts unten.
 
 #### Format C: Wiederentdeckte Schätze (`RecipeShowcaseCard`)
-* **Format:** Breiter horizontaler Banner für Gerichte mit Verweildauer ≥ 14 Tage.
+* **Format:** Breiter horizontaler Banner (`bg-black/[0.03] dark:bg-white/[0.04]`) für Gerichte mit Verweildauer ≥ 14 Tage.
 * **Aufbau:** Linkes Cover (`w-28 sm:w-36`), Amber-Datumsstempel oben (*„Gespeichert am 12. Aug.“*), zweizeiliger Titel, Dauer links unten, Kalorien & Health-Score rechts unten.
 
 #### Format D: Vertikale Timeline-Bibliothek (`AllRecipesShelf`)
 * **Layout:** Chronologische Abschnitte (*Heute*, *Gestern*, *Diese Woche*, *Letzte Woche*, *Monat/Jahr*) im 2-Spalten-Grid (`grid grid-cols-2 gap-3 sm:gap-4`).
-* **Poster-Karte (`RecipePosterCard`):**
-  * 4:3 Clean Photo Cover mit `ring-1 ring-black/5 dark:ring-white/10`.
-  * Dauer-Pill links: `bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] rounded-md`.
-  * Kalorien & Health-Score rechts: Kleben direkt aneinander.
-  * Remix-Stack-Effekt bei variierten Rezepten mit real geschichteten Schatten.
+* **Poster-Eintrag (`RecipePosterCard` — Photo-First Cardless):**
+  * Nur das **4:3 Foto-Cover** trägt `rounded-2xl overflow-hidden shadow-[0_4px_14px_rgba(0,0,0,0.06)] ring-1 ring-black/5 dark:ring-white/10`.
+  * **Kein weißer Kasten darunter:** Titel, Dauer-Pill (`bg-black/[0.04] dark:bg-white/[0.06]`) sowie Kalorien & Health-Score sitzen mit `pt-2 px-0.5` direkt auf der warmen Papier-Leinwand unter dem Bild.
 
 ### 3.3 Touch Targets, Buttons & Interaktive Elemente
 * **Touch-Target-Standard: Mindestens 44×44px** (`min-w-[44px] min-h-[44px]`) für alle klickbaren Icons und Buttons auf Mobilgeräten.
