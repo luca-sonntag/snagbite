@@ -45,13 +45,13 @@ export default function ExtractionAdSheet({ isOpen, onClose }: ExtractionAdSheet
         role="dialog"
         aria-modal="true"
         aria-label={t('ads.label')}
-        className="relative w-full max-w-sm rounded-3xl bg-white dark:bg-gray-900 px-3.5 py-4 sm:p-5 text-gray-900 dark:text-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col items-center justify-center border-none"
+        className="relative w-full max-w-sm rounded-3xl bg-gray-50 dark:bg-gray-950 px-3.5 py-4 sm:p-5 text-gray-900 dark:text-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col items-center justify-center border border-black/5 dark:border-white/5"
       >
         {onClose && (
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center justify-center transition-all border-none active:scale-95 cursor-pointer z-10"
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/[0.04] dark:bg-white/[0.06] text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center justify-center transition-all border-none active:scale-95 cursor-pointer z-10"
             aria-label={t('common.close') || 'Schließen'}
           >
             <X className="w-4 h-4" />

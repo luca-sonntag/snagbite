@@ -156,13 +156,13 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
         className="!z-[200]"
       >
         <Modal.Container placement="center" className="!z-[200] p-4">
-          <Modal.Dialog className="relative w-full max-w-sm rounded-3xl border-none p-6 shadow-[0_10px_40px_rgba(0,0,0,0.15)] bg-white dark:bg-gray-900 flex flex-col gap-4">
+          <Modal.Dialog className="relative w-full max-w-sm rounded-3xl border border-black/5 dark:border-white/5 p-6 shadow-[0_10px_40px_rgba(0,0,0,0.15)] bg-gray-50 dark:bg-gray-950 flex flex-col gap-4">
             {/* Close Button for Alert */}
             {state.type === 'alert' && (
               <button 
                 type="button"
                 onClick={() => handleClose(false)}
-                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center justify-center transition-all border-none active:scale-95 cursor-pointer"
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/[0.04] dark:bg-white/[0.06] text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center justify-center transition-all border-none active:scale-95 cursor-pointer"
                 aria-label={t('dialog.closeAria')}
               >
                 <X className="w-4 h-4" />
@@ -175,7 +175,7 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
                 {getIcon()}
               </div>
               <div className="flex-1 min-w-0 pt-0.5">
-                <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">
+                <h3 className="text-base font-serif font-bold text-gray-900 dark:text-white leading-tight">
                   {state.title}
                 </h3>
               </div>
@@ -192,7 +192,7 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
                 <Button 
                   variant="tertiary"
                   onPress={() => handleClose(false)}
-                  className="rounded-2xl font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-none active:scale-95 transition-all px-4 py-2.5 h-11 cursor-pointer"
+                  className="rounded-2xl font-bold bg-black/[0.03] hover:bg-black/[0.06] dark:bg-white/[0.04] dark:hover:bg-white/[0.08] border border-black/5 dark:border-white/10 text-gray-700 dark:text-gray-200 active:scale-95 transition-all px-4 py-2.5 h-11 cursor-pointer"
                 >
                   {state.cancelLabel}
                 </Button>

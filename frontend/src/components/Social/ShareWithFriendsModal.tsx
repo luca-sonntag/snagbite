@@ -110,11 +110,11 @@ export default function ShareWithFriendsModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-xs transition-opacity duration-200">
-      <div className="w-full sm:max-w-md max-h-[90vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white dark:bg-gray-900 shadow-2xl border-none overflow-hidden animate-in slide-in-from-bottom-6 duration-200">
+      <div className="w-full sm:max-w-md max-h-[90vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-gray-50 dark:bg-gray-950 shadow-2xl border border-black/5 dark:border-white/5 overflow-hidden animate-in slide-in-from-bottom-6 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between p-4 pb-3 border-none">
           <div className="min-w-0 flex-1">
-            <h2 className="font-heading font-extrabold text-gray-900 dark:text-white text-base">
+            <h2 className="font-serif font-bold text-gray-900 dark:text-white text-base">
               {t('app.social.share.title')}
             </h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
@@ -125,7 +125,7 @@ export default function ShareWithFriendsModal({
             type="button"
             onClick={onClose}
             aria-label="Schließen"
-            className="w-9 h-9 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white border-none cursor-pointer active:scale-95 transition-all"
+            className="w-9 h-9 rounded-full flex items-center justify-center bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.10] text-gray-400 hover:text-gray-900 dark:hover:text-white border-none cursor-pointer active:scale-95 transition-all"
           >
             <X className="w-4 h-4" />
           </button>
@@ -153,22 +153,22 @@ export default function ShareWithFriendsModal({
                 </span>
               </div>
             </div>
-            <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 shadow-2xs group-hover:translate-x-0.5 transition-transform">
+            <div className="w-8 h-8 rounded-full bg-black/[0.04] dark:bg-white/[0.06] flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 shadow-2xs group-hover:translate-x-0.5 transition-transform">
               <ExternalLink className="w-4 h-4" />
             </div>
           </button>
 
           {/* Section Divider */}
           <div className="relative flex items-center py-0.5">
-            <div className="flex-grow border-t border-gray-100 dark:border-gray-800" />
+            <div className="flex-grow border-t border-black/5 dark:border-white/5" />
             <span className="flex-shrink mx-3 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
               {t('app.social.share.orWithFriends')}
             </span>
-            <div className="flex-grow border-t border-gray-100 dark:border-gray-800" />
+            <div className="flex-grow border-t border-black/5 dark:border-white/5" />
           </div>
 
           {friends.length === 0 ? (
-            <div className="flex flex-col items-center text-center p-6 rounded-2xl bg-gray-50 dark:bg-gray-800/50 gap-3">
+            <div className="flex flex-col items-center text-center p-6 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 gap-3">
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600">
                 <Users className="w-6 h-6" />
               </div>
@@ -207,7 +207,7 @@ export default function ShareWithFriendsModal({
                         className={`flex items-center gap-3 p-2.5 rounded-2xl border-none transition-all cursor-pointer text-left select-none active:scale-[0.98] ${
                           isSelected
                             ? 'bg-emerald-500/10 dark:bg-emerald-500/15'
-                            : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/60 dark:hover:bg-gray-800'
+                            : 'bg-black/[0.02] hover:bg-black/[0.05] dark:bg-white/[0.03] dark:hover:bg-white/[0.06] border border-black/5 dark:border-white/5'
                         }`}
                       >
                         <Avatar name={f.displayName} avatarUrl={f.avatarUrl} size={36} />
@@ -223,7 +223,7 @@ export default function ShareWithFriendsModal({
                           className={`w-6 h-6 rounded-full flex items-center justify-center border-none transition-all ${
                             isSelected
                               ? 'bg-emerald-600 text-white shadow-2xs'
-                              : 'bg-gray-200 dark:bg-gray-700 text-transparent'
+                              : 'bg-black/10 dark:bg-white/10 text-transparent'
                           }`}
                         >
                           <Check className="w-3.5 h-3.5" />
@@ -241,7 +241,7 @@ export default function ShareWithFriendsModal({
                   value={note}
                   onChange={(e) => setNote(e.target.value.slice(0, 140))}
                   placeholder={t('app.social.share.notePlaceholder')}
-                  className="w-full h-11 px-3.5 rounded-xl border-none bg-gray-100 dark:bg-gray-800 text-sm font-medium text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                  className="w-full h-11 px-3.5 rounded-xl border border-black/5 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.05] text-sm font-medium text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
                 />
               </div>
             </>

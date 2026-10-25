@@ -357,7 +357,7 @@ function BadgeDetailModal({
 
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6 transition-opacity animate-in fade-in duration-200">
-      <div className="relative w-full max-w-sm rounded-3xl bg-white dark:bg-gray-900 p-6 text-gray-900 dark:text-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 text-center space-y-4">
+      <div className="relative w-full max-w-sm rounded-3xl bg-gray-50 dark:bg-gray-950 p-6 text-gray-900 dark:text-white shadow-2xl overflow-hidden border border-black/5 dark:border-white/5 animate-in zoom-in-95 duration-200 text-center space-y-4">
         <Button
           onPress={() => {
             hapticLight();
@@ -365,7 +365,7 @@ function BadgeDetailModal({
           }}
           isIconOnly
           aria-label={t('dialog.cancelDefault') || 'Schließen'}
-          className="absolute top-4 right-4 h-10 w-10 min-w-[44px] min-h-[44px] p-0 text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors border-none"
+          className="absolute top-4 right-4 h-10 w-10 min-w-[44px] min-h-[44px] p-0 text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-full bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.10] transition-colors border-none"
         >
           <X className="w-5 h-5" />
         </Button>
@@ -399,12 +399,12 @@ function BadgeDetailModal({
 
         {/* Progress or Earned Date */}
         {!isEarned && progress && (
-          <div className="rounded-2xl bg-gray-100 dark:bg-white/5 p-3.5 space-y-2">
+          <div className="rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/5 dark:border-white/10 p-3.5 space-y-2">
             <div className="flex justify-between text-xs font-semibold text-gray-600 dark:text-gray-300">
               <span>{t('app.gamification.badgeDetail.progressLabel', { current: progress.current, total: progress.total })}</span>
               <span>{Math.round((progress.current / progress.total) * 100)}%</span>
             </div>
-            <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/10">
               <div
                 className="h-full rounded-full bg-emerald-500 transition-[width] duration-500"
                 style={{ width: `${(progress.current / progress.total) * 100}%` }}

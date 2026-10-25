@@ -514,7 +514,7 @@ export default function CollectionSheet({
                   within the drawer's modal interaction scope and is clickable. */}
               {pendingDelete && (
                 <div className="absolute inset-0 z-10 flex items-end justify-center rounded-[inherit] bg-black/40 backdrop-blur-[2px] p-4">
-                  <div className="w-full rounded-3xl border-none bg-white dark:bg-gray-900 shadow-[0_10px_40px_rgba(0,0,0,0.15)] p-5 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="w-full rounded-3xl border border-black/5 dark:border-white/5 bg-gray-50 dark:bg-gray-950 shadow-[0_10px_40px_rgba(0,0,0,0.15)] p-5 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
                     <div className="flex gap-3.5 items-start">
                       <div className="w-11 h-11 rounded-2xl border-none flex-shrink-0 flex items-center justify-center bg-rose-500/10">
                         <Trash2 className="w-5 h-5 text-rose-500" />
@@ -533,7 +533,7 @@ export default function CollectionSheet({
                     <div className="flex gap-2.5 w-full">
                       <Button
                         variant="tertiary"
-                        className="flex-1 h-12 rounded-2xl text-sm font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-none active:scale-95 transition-all cursor-pointer"
+                        className="flex-1 h-12 rounded-2xl text-sm font-bold bg-black/[0.03] hover:bg-black/[0.06] dark:bg-white/[0.04] dark:hover:bg-white/[0.08] border border-black/5 dark:border-white/10 text-gray-700 dark:text-gray-200 active:scale-95 transition-all cursor-pointer"
                         onPress={() => setPendingDelete(null)}
                         isDisabled={isDeleting}
                       >
