@@ -28,7 +28,7 @@ export const ExtractionQueueDock: React.FC<ExtractionQueueDockProps> = ({
           hapticLight();
           onOpenSheet();
         }}
-        className="w-full min-h-[48px] p-2.5 px-3.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] text-gray-900 dark:text-white flex items-center justify-between gap-3 border-none active:scale-[0.99] transition-all cursor-pointer touch-manipulation group text-left"
+        className="w-full min-h-[48px] py-3 px-1 bg-transparent text-gray-900 dark:text-white flex items-center justify-between gap-3 border-b border-black/[0.06] dark:border-white/[0.08] active:scale-[0.99] transition-all cursor-pointer touch-manipulation group text-left"
       >
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <div

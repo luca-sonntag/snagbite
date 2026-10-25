@@ -41,8 +41,8 @@ export const ExtractActionCards: React.FC<ExtractActionCardsProps> = ({
   const isLinkDisabled = linkDisabled ?? disabled;
 
   return (
-    <div className="flex flex-col gap-3 w-full">
-      {/* Action Card 1: Video & Link */}
+    <div className="flex flex-col divide-y divide-black/[0.06] dark:divide-white/[0.08] border-y border-black/[0.06] dark:border-white/[0.08] w-full">
+      {/* Action Row 1: Video & Link */}
       <button
         id="tour-extract-link"
         type="button"
@@ -51,10 +51,10 @@ export const ExtractActionCards: React.FC<ExtractActionCardsProps> = ({
           hapticLight();
           onOpenLinkSheet();
         }}
-        className={`w-full p-4 sm:p-5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border-none transition-all flex items-center justify-between gap-4 text-left outline-none select-none ${
+        className={`w-full py-4 px-1 bg-transparent border-none transition-all flex items-center justify-between gap-4 text-left outline-none select-none ${
           isLinkDisabled
             ? 'opacity-50 cursor-not-allowed'
-            : 'hover:bg-black/[0.05] dark:hover:bg-white/[0.07] active:scale-[0.99] cursor-pointer group'
+            : 'active:scale-[0.99] cursor-pointer group'
         }`}
       >
         <div className="flex items-center gap-3.5 min-w-0 flex-1">
@@ -63,7 +63,7 @@ export const ExtractActionCards: React.FC<ExtractActionCardsProps> = ({
           </div>
 
           <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight">
+            <span className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
               {t('form.actionCards.linkTitle')}
             </span>
             <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-snug">
@@ -80,10 +80,10 @@ export const ExtractActionCards: React.FC<ExtractActionCardsProps> = ({
           </div>
         </div>
 
-        <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+        <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500 shrink-0 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
       </button>
 
-      {/* Action Card 2: Foto-Scanner */}
+      {/* Action Row 2: Foto-Scanner */}
       <button
         id="tour-extract-photo"
         type="button"
@@ -92,10 +92,10 @@ export const ExtractActionCards: React.FC<ExtractActionCardsProps> = ({
           hapticLight();
           onOpenPhotoSheet();
         }}
-        className={`w-full p-4 sm:p-5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border-none transition-all flex items-center justify-between gap-4 text-left outline-none select-none ${
+        className={`w-full py-4 px-1 bg-transparent border-none transition-all flex items-center justify-between gap-4 text-left outline-none select-none ${
           disabled
             ? 'opacity-50 cursor-not-allowed'
-            : 'hover:bg-black/[0.05] dark:hover:bg-white/[0.07] active:scale-[0.99] cursor-pointer group'
+            : 'active:scale-[0.99] cursor-pointer group'
         }`}
       >
         <div className="flex items-center gap-3.5 min-w-0 flex-1">
@@ -104,7 +104,7 @@ export const ExtractActionCards: React.FC<ExtractActionCardsProps> = ({
           </div>
 
           <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight">
+            <span className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
               {t('form.actionCards.photoTitle')}
             </span>
             <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-snug">
@@ -119,7 +119,7 @@ export const ExtractActionCards: React.FC<ExtractActionCardsProps> = ({
               {photosCount}
             </span>
           )}
-          <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" />
+          <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
         </div>
       </button>
     </div>

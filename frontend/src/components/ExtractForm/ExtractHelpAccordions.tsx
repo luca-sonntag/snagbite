@@ -44,19 +44,19 @@ export const ExtractHelpAccordions: React.FC = () => {
   const { t } = useI18n();
 
   return (
-    <>
+    <div className="flex flex-col divide-y divide-black/[0.06] dark:divide-white/[0.08] border-t border-black/[0.06] dark:border-white/[0.08] w-full">
       {/* Share Directly Accordion */}
       <Accordion
         id="tour-extract-share"
         variant="surface"
-        className="w-full bg-black/[0.03] dark:bg-white/[0.04] rounded-3xl border-none shadow-none overflow-hidden"
+        className="w-full !bg-transparent rounded-none border-none shadow-none overflow-hidden"
         defaultExpandedKeys={[]}
       >
-        <Accordion.Item className="border-none" id="share">
+        <Accordion.Item className="border-none !bg-transparent" id="share">
           <Accordion.Heading>
             <Accordion.Trigger
               onClick={() => hapticLight()}
-              className="px-4 py-4 flex items-center justify-between text-gray-900 dark:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors"
+              className="px-1 py-4 flex items-center justify-between text-gray-900 dark:text-white transition-colors"
             >
               <span className="flex items-center gap-2.5 text-sm font-bold">
                 <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -81,12 +81,12 @@ export const ExtractHelpAccordions: React.FC = () => {
             </Accordion.Trigger>
           </Accordion.Heading>
           <Accordion.Panel>
-            <Accordion.Body className="px-5 pb-5 pt-1 text-xs text-gray-600 dark:text-gray-400 flex flex-col gap-4 border-none">
+            <Accordion.Body className="px-1 pb-5 pt-1 text-xs text-gray-600 dark:text-gray-400 flex flex-col gap-4 border-none">
               <p className="leading-relaxed">{t('form.helpShareDesc')}</p>
 
-              {/* Visual Step-by-Step Guide */}
-              <div className="flex flex-col gap-2.5">
-                <div className="flex gap-3.5 p-3.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border-none items-center justify-between">
+              {/* Visual Step-by-Step Guide (Open Editorial Layout) */}
+              <div className="flex flex-col divide-y divide-black/[0.06] dark:divide-white/[0.08]">
+                <div className="flex gap-4 py-3.5 items-center justify-between">
                   <div className="flex-1 flex flex-col gap-1">
                     <h4 className="font-bold text-gray-900 dark:text-white text-xs">
                       {t('form.helpShareStep1Title')}
@@ -98,7 +98,7 @@ export const ExtractHelpAccordions: React.FC = () => {
                   <ShareStep1Mockup />
                 </div>
 
-                <div className="flex gap-3.5 p-3.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border-none items-center justify-between">
+                <div className="flex gap-4 py-3.5 items-center justify-between">
                   <div className="flex-1 flex flex-col gap-1">
                     <h4 className="font-bold text-gray-900 dark:text-white text-xs">
                       {t('form.helpShareStep2Title')}
@@ -110,7 +110,7 @@ export const ExtractHelpAccordions: React.FC = () => {
                   <ShareStep2Mockup />
                 </div>
 
-                <div className="flex gap-3.5 p-3.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border-none items-center justify-between">
+                <div className="flex gap-4 py-3.5 items-center justify-between">
                   <div className="flex-1 flex flex-col gap-1">
                     <h4 className="font-bold text-gray-900 dark:text-white text-xs">
                       {t('form.helpShareStep3Title')}
@@ -134,13 +134,13 @@ export const ExtractHelpAccordions: React.FC = () => {
       {/* Help / Instructions Accordion */}
       <Accordion
         variant="surface"
-        className="w-full bg-black/[0.03] dark:bg-white/[0.04] rounded-3xl border-none shadow-none overflow-hidden"
+        className="w-full !bg-transparent rounded-none border-none shadow-none overflow-hidden"
       >
-        <Accordion.Item className="border-none">
+        <Accordion.Item className="border-none !bg-transparent">
           <Accordion.Heading>
             <Accordion.Trigger
               onClick={() => hapticLight()}
-              className="px-4 py-4 flex items-center justify-between text-gray-900 dark:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors"
+              className="px-1 py-4 flex items-center justify-between text-gray-900 dark:text-white transition-colors"
             >
               <span className="flex items-center gap-2.5 text-sm font-bold">
                 <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -152,9 +152,9 @@ export const ExtractHelpAccordions: React.FC = () => {
             </Accordion.Trigger>
           </Accordion.Heading>
           <Accordion.Panel>
-            <Accordion.Body className="px-5 pb-5 pt-1 text-xs text-gray-600 dark:text-gray-400 flex flex-col gap-3.5 border-none">
+            <Accordion.Body className="px-1 pb-5 pt-1 text-xs text-gray-600 dark:text-gray-400 flex flex-col gap-3.5 border-none">
               <div className="flex gap-3 items-start">
-                <div className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 shrink-0">
+                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
                   <InstagramIcon className="w-3.5 h-3.5" />
                 </div>
                 <div>
@@ -165,7 +165,7 @@ export const ExtractHelpAccordions: React.FC = () => {
                 </div>
               </div>
               <div className="flex gap-3 items-start">
-                <div className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 shrink-0">
+                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
                   <TikTokIcon className="w-3.5 h-3.5" />
                 </div>
                 <div>
@@ -176,7 +176,7 @@ export const ExtractHelpAccordions: React.FC = () => {
                 </div>
               </div>
               <div className="flex gap-3 items-start">
-                <div className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 shrink-0">
+                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
                   <YoutubeIcon className="w-3.5 h-3.5" />
                 </div>
                 <div>
@@ -187,7 +187,7 @@ export const ExtractHelpAccordions: React.FC = () => {
                 </div>
               </div>
               <div className="flex gap-3 items-start">
-                <div className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 shrink-0">
+                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
                   <FacebookIcon className="w-3.5 h-3.5" />
                 </div>
                 <div>
@@ -198,7 +198,7 @@ export const ExtractHelpAccordions: React.FC = () => {
                 </div>
               </div>
               <div className="flex gap-3 items-start">
-                <div className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 shrink-0">
+                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
                   <Globe className="w-3.5 h-3.5" />
                 </div>
                 <div>
@@ -212,7 +212,7 @@ export const ExtractHelpAccordions: React.FC = () => {
           </Accordion.Panel>
         </Accordion.Item>
       </Accordion>
-    </>
+    </div>
   );
 };
 export default ExtractHelpAccordions;
