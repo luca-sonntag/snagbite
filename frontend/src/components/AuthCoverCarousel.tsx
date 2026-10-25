@@ -91,7 +91,7 @@ export default function AuthCoverCarousel({ collapsed = false }: AuthCoverCarous
       className={`w-full transition-all duration-300 ease-out select-none ${
         collapsed
           ? 'max-h-0 opacity-0 scale-95 pointer-events-none overflow-hidden my-0'
-          : 'max-h-72 opacity-100 scale-100 my-1'
+          : 'max-h-60 opacity-100 scale-100 my-1'
       }`}
     >
       <div
@@ -171,25 +171,6 @@ export default function AuthCoverCarousel({ collapsed = false }: AuthCoverCarous
           })
         )}
       </div>
-
-      {/* Subtle pagination indicator dots */}
-      {!loading && rawCovers.length > 1 && (
-        <div className="flex items-center justify-center gap-1.5 mt-2">
-          {rawCovers.map((cover, idx) => {
-            const isCurrentDot = activeIndex % rawCovers.length === idx;
-            return (
-              <span
-                key={cover.id}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  isCurrentDot
-                    ? 'w-4 bg-emerald-500'
-                    : 'w-1.5 bg-gray-300 dark:bg-gray-700'
-                }`}
-              />
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }

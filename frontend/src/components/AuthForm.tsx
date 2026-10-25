@@ -37,25 +37,25 @@ export default function AuthForm() {
       <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-80 h-80 bg-teal-500/10 dark:bg-teal-500/5 blur-3xl rounded-full pointer-events-none" />
 
       <div className="w-full max-w-sm flex flex-col items-center gap-3.5 text-center relative z-10">
-        {/* Brand Header */}
-        <div className="flex flex-col items-center gap-1.5">
-          <div className="inline-flex items-center gap-2.5">
-            <img
-              src="/icon-512.png"
-              className="w-10 h-10 object-contain drop-shadow-[0_6px_16px_rgba(16,185,129,0.25)]"
-              alt="Snagbite"
-            />
-            <h1 className="text-3xl font-black text-emerald-500 dark:text-emerald-400 tracking-tight font-heading">
-              {t('app.title')}
-            </h1>
-          </div>
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400 max-w-[280px]">
-            {t('auth.signInTitle')}
-          </p>
+        {/* Brand Header (+10% scaled logo & wordmark) */}
+        <div className="inline-flex items-center gap-3">
+          <img
+            src="/icon-512.png"
+            className="w-11 h-11 object-contain drop-shadow-[0_6px_16px_rgba(16,185,129,0.25)]"
+            alt="Snagbite"
+          />
+          <h1 className="text-[33px] leading-none font-black text-emerald-500 dark:text-emerald-400 tracking-tight font-heading">
+            {t('app.title')}
+          </h1>
         </div>
 
-        {/* Auto-advancing Recipe Cover Carousel directly above the Login button */}
+        {/* Auto-advancing Recipe Cover Carousel */}
         <AuthCoverCarousel collapsed={showEmailLogin} />
+
+        {/* Sign-in subtitle positioned below the carousel */}
+        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 max-w-[280px]">
+          {t('auth.signInTitle')}
+        </p>
 
         <div className="w-full py-1.5">
           {showEmailLogin ? (
