@@ -47,11 +47,11 @@ export default function RecipeInstructions({
 
   return (
     <div className="flex flex-col gap-4 pb-4">
-      {/* Main Cohesive Card Group (Progress + Equipment + Steps) */}
-      <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
+      {/* Main Open-Canvas Group (Progress + Equipment + Steps) */}
+      <div className="flex flex-col border-none divide-y divide-black/[0.06] dark:divide-white/[0.08]">
         {/* 1. Cooking Progress & Start Button */}
         {(isExtracting || totalStepsCount > 0) && (
-          <div className="px-5 py-5 sm:px-6 flex flex-col gap-4">
+          <div className="px-0.5 py-3 flex flex-col gap-4">
             {!isExtracting && totalStepsCount > 0 ? (
               <div className="flex flex-col gap-4 animate-fade-in">
                 <div className="flex flex-col gap-2">
@@ -110,7 +110,7 @@ export default function RecipeInstructions({
 
         {/* 2. Required Equipment */}
         {recipe.equipment && recipe.equipment.length > 0 && (
-          <div className="px-5 py-4.5 sm:px-6 flex flex-col gap-2 animate-fade-in">
+          <div className="px-0.5 py-4 flex flex-col gap-2 animate-fade-in">
             <span className={blockLabel}>
               {t('recipe.requiredEquipment')}
             </span>
@@ -129,7 +129,7 @@ export default function RecipeInstructions({
 
         {/* 3. Steps as a timeline */}
         {steps.length === 0 && isExtracting ? (
-          <div className="p-5 sm:p-6 flex flex-col gap-3">
+          <div className="py-4 px-0.5 flex flex-col gap-3">
             {[1, 2, 3].map((step) => (
               <div
                 key={`step-skel-${step}`}
@@ -172,7 +172,7 @@ export default function RecipeInstructions({
                       toggleStep(step.step);
                     }}
                     aria-pressed={isChecked}
-                    className={`flex items-stretch gap-4 px-5 sm:px-6 cursor-pointer transition-all duration-200 active:scale-[0.99] ${
+                    className={`flex items-stretch gap-3.5 px-1 rounded-2xl cursor-pointer transition-all duration-200 active:scale-[0.99] ${
                       isActive
                         ? 'bg-emerald-500/[0.08] dark:bg-emerald-500/[0.12]'
                         : 'hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
@@ -256,12 +256,12 @@ export default function RecipeInstructions({
             </span>
           </div>
 
-          {/* Clean Flat Card Container */}
-          <div className="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-2.5">
+          {/* Open Canvas Tip Items */}
+          <div className="flex flex-col gap-2.5">
             {recipe.tips.map((tip, idx) => (
               <div
                 key={idx}
-                className="bg-gray-50/80 dark:bg-gray-800/50 rounded-xl p-3 sm:p-3.5 flex items-start gap-3 transition-all"
+                className="bg-black/[0.03] dark:bg-white/[0.04] rounded-2xl p-3.5 flex items-start gap-3 transition-all"
               >
                 <span className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 text-xs font-bold tabular-nums mt-0.5">
                   {idx + 1}

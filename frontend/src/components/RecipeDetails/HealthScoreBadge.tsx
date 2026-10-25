@@ -54,16 +54,14 @@ export default function HealthScoreBadge({
       }}
       className={`w-full group ${
         fullWidth
-          ? 'px-4.5 sm:px-5 py-3.5 bg-transparent hover:bg-gray-50/60 dark:hover:bg-gray-800/40 active:bg-gray-100/60 dark:active:bg-gray-800/60 rounded-b-3xl'
-          : `rounded-2xl ${isSmall ? 'p-2.5' : 'p-3 sm:p-3.5 min-h-[52px]'} bg-gray-50/90 dark:bg-gray-800/40 hover:bg-gray-100/80 dark:hover:bg-gray-800/70`
+          ? 'px-3.5 py-3 bg-black/[0.03] hover:bg-black/[0.05] active:bg-black/[0.07] dark:bg-white/[0.04] dark:hover:bg-white/[0.06] dark:active:bg-white/[0.08] rounded-2xl'
+          : `rounded-2xl ${isSmall ? 'p-2.5' : 'p-3 sm:p-3.5 min-h-[52px]'} bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.05] dark:hover:bg-white/[0.06]`
       } border-none select-none cursor-pointer active:scale-[0.99] transition-all flex items-center justify-between gap-3 text-left`}
       aria-label={`${t('recipe.healthScoreTitle')}: ${score}/100`}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {/* Apple Health-style circular mini-gauge */}
-        <div className={`relative w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
-          fullWidth ? 'bg-gray-100/70 dark:bg-gray-800' : 'bg-white dark:bg-gray-800 shadow-xs'
-        }`}>
+        <div className="relative w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-white/[0.06]">
           <svg className="w-10 h-10 -rotate-90" viewBox="0 0 40 40">
             <circle
               cx="20"
@@ -108,7 +106,7 @@ export default function HealthScoreBadge({
       {/* Tactile Chevron Target & Status indicator */}
       <div className="flex items-center gap-2 shrink-0">
         {!isPremium && <ProBadge variant="chip" />}
-        <div className="w-7 h-7 rounded-full shadow-xs flex items-center justify-center bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">
+        <div className="w-7 h-7 rounded-full flex items-center justify-center bg-black/[0.04] dark:bg-white/[0.06] text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">
           <ChevronRight className="w-4 h-4" />
         </div>
       </div>

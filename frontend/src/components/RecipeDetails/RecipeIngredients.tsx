@@ -88,9 +88,9 @@ export default function RecipeIngredients({
   );
 
   return (
-    <div className="flex flex-col gap-4 pb-4">
-      {/* 1. Unified Cohesive Recipe Card (Servings + Ingredients + Pro Hint + Shopping CTA) */}
-      <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
+    <div className="flex flex-col gap-4 pb-2">
+      {/* 1. Open-Canvas Ingredients Section (Servings + Ingredients + Pro Hint + Shopping CTA) */}
+      <div className="flex flex-col border-none divide-y divide-black/[0.06] dark:divide-white/[0.08]">
         {/* 1.1 Servings Header & View / Grouping Toggles */}
         <RecipeIngredientsHeader
           isExtracting={isExtracting}
@@ -107,11 +107,11 @@ export default function RecipeIngredients({
         {/* 1.2 Ingredients Display */}
         {sortedIngredients.length === 0 && isExtracting ? (
           viewMode === 'grid' ? (
-            <ul className="grid grid-cols-2 gap-x-1.5 sm:gap-x-3 gap-y-1.5 px-2 pt-2 pb-3.5 sm:px-3.5 sm:pt-2.5 sm:pb-4.5 list-none m-0">
+            <ul className="grid grid-cols-2 gap-x-2 sm:gap-x-3 gap-y-1.5 pt-2 pb-3.5 list-none m-0">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <li
                   key={`ing-skel-grid-${i}`}
-                  className="p-3 bg-gray-50/80 dark:bg-gray-800/50 rounded-2xl animate-pulse flex flex-col gap-2"
+                  className="p-3 bg-black/[0.03] dark:bg-white/[0.04] rounded-2xl animate-pulse flex flex-col gap-2"
                 >
                   <div className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-700 shrink-0" />
@@ -122,11 +122,11 @@ export default function RecipeIngredients({
               ))}
             </ul>
           ) : (
-            <div className="p-4 sm:p-5 flex flex-col gap-2.5">
+            <div className="py-3 flex flex-col gap-2.5">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div
                   key={`ing-skel-${i}`}
-                  className="flex items-center gap-3 p-3 bg-gray-50/80 dark:bg-gray-800/50 rounded-2xl animate-pulse"
+                  className="flex items-center gap-3 p-3 bg-black/[0.03] dark:bg-white/[0.04] rounded-2xl animate-pulse"
                 >
                   <div className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-700 shrink-0" />
                   <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded-md shrink-0" />
@@ -136,7 +136,7 @@ export default function RecipeIngredients({
             </div>
           )
         ) : hasComponents && groupingMode === 'components' ? (
-          <div className="divide-y divide-gray-100/60 dark:divide-gray-800/40">
+          <div className="divide-y divide-black/[0.06] dark:divide-white/[0.08]">
             {componentGroups.map((group, gIdx) => {
               const title = group.sectionName
                 ? group.sectionName.toLowerCase().startsWith('für ') || group.sectionName.toLowerCase().startsWith('for ')
@@ -183,54 +183,56 @@ export default function RecipeIngredients({
               hapticLight();
               setIsProFeatureSheetOpen(true);
             }}
-            className="px-4.5 py-3 sm:px-6 bg-gray-50/60 dark:bg-gray-800/30 flex items-center justify-between gap-3 cursor-pointer group hover:bg-gray-100/60 dark:hover:bg-gray-800/50 transition-colors animate-fade-in"
+            className="px-3.5 py-3 mt-2 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] flex items-center justify-between gap-3 cursor-pointer group hover:bg-black/[0.05] dark:hover:bg-white/[0.06] transition-colors animate-fade-in border-none"
           >
             <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate">
               {t('recipe.ingredientNutritionProHint') || 'Detaillierte Nährwerte & Makros pro Zutat'}
             </span>
             <div className="flex items-center gap-2 shrink-0">
               <ProBadge variant="chip" />
-              <div className="w-7 h-7 rounded-full shadow-xs flex items-center justify-center bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">
+              <div className="w-7 h-7 rounded-full flex items-center justify-center bg-black/[0.04] dark:bg-white/[0.06] text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">
                 <ChevronRight className="w-4 h-4" />
               </div>
             </div>
           </div>
         )}
 
-        {/* 1.4 Integrated Shopping List Button Footer */}
+        {/* 1.4 Full-Width Soft Shopping List Button */}
         {onAddIngredients ? (
-          <Button
-            className={`w-full min-h-[64px] h-auto pl-6.5 pr-5 py-5 sm:pl-7.5 sm:pr-6 sm:py-5.5 rounded-none font-semibold transition-colors flex items-center justify-between text-sm border-none shadow-none cursor-pointer group bg-white hover:bg-gray-50/90 active:bg-gray-100/70 dark:bg-gray-900 dark:hover:bg-gray-850 dark:active:bg-gray-800 animate-fade-in ${
-              isAdded
-                ? 'text-emerald-600 dark:text-emerald-400'
-                : 'text-gray-800 dark:text-gray-100'
-            }`}
-            onPress={() => {
-              hapticLight();
-              onAddIngredients();
-            }}
-          >
-            <div className="flex items-center gap-3.5 min-w-0">
-              {isAdded ? (
-                <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              ) : (
-                <ShoppingCart className="w-5 h-5 text-gray-500 dark:text-gray-400 shrink-0" />
-              )}
-              <span className="truncate text-sm font-semibold">
-                {isAdded ? t('recipe.addedToShopping') : t('recipe.addToShopping')}
-              </span>
-            </div>
-            <ChevronRight
-              className={`w-4.5 h-4.5 shrink-0 group-hover:translate-x-0.5 transition-transform ${
+          <div className="pt-3 border-none">
+            <Button
+              className={`w-full min-h-[54px] h-auto px-4 py-3.5 rounded-2xl font-semibold transition-colors flex items-center justify-between text-sm border-none shadow-none cursor-pointer group bg-black/[0.04] hover:bg-black/[0.07] active:bg-black/[0.1] dark:bg-white/[0.06] dark:hover:bg-white/[0.09] dark:active:bg-white/[0.12] animate-fade-in ${
                 isAdded
-                  ? 'text-emerald-600/70 dark:text-emerald-400/70'
-                  : 'text-gray-400 dark:text-gray-500'
+                  ? 'text-emerald-600 dark:text-emerald-400'
+                  : 'text-gray-800 dark:text-gray-100'
               }`}
-            />
-          </Button>
+              onPress={() => {
+                hapticLight();
+                onAddIngredients();
+              }}
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                {isAdded ? (
+                  <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                ) : (
+                  <ShoppingCart className="w-5 h-5 text-gray-500 dark:text-gray-400 shrink-0" />
+                )}
+                <span className="truncate text-sm font-semibold">
+                  {isAdded ? t('recipe.addedToShopping') : t('recipe.addToShopping')}
+                </span>
+              </div>
+              <ChevronRight
+                className={`w-4.5 h-4.5 shrink-0 group-hover:translate-x-0.5 transition-transform ${
+                  isAdded
+                    ? 'text-emerald-600/70 dark:text-emerald-400/70'
+                    : 'text-gray-400 dark:text-gray-500'
+                }`}
+              />
+            </Button>
+          </div>
         ) : isExtracting ? (
-          <div className="w-full min-h-[64px] pl-6.5 pr-5 py-5 sm:pl-7.5 sm:pr-6 sm:py-5.5 flex items-center justify-between bg-white dark:bg-gray-900 animate-pulse">
-            <div className="flex items-center gap-3.5">
+          <div className="w-full min-h-[54px] px-4 py-3.5 mt-2 rounded-2xl flex items-center justify-between bg-black/[0.03] dark:bg-white/[0.04] animate-pulse border-none">
+            <div className="flex items-center gap-3">
               <div className="w-5 h-5 rounded-md bg-gray-200 dark:bg-gray-800 shrink-0" />
               <div className="h-4 w-36 bg-gray-200 dark:bg-gray-800 rounded-md" />
             </div>

@@ -33,7 +33,7 @@ export default function RecipeIngredientsHeader({
     <>
       {/* Servings & View Mode Header */}
       {isExtracting ? (
-        <div className="px-4.5 py-3.5 sm:px-6 flex items-center justify-between gap-3 animate-pulse">
+        <div className="px-0.5 py-3 flex items-center justify-between gap-3 animate-pulse">
           <div className="flex flex-col gap-1.5">
             <div className="h-3 w-16 bg-gray-200/90 dark:bg-gray-800/90 rounded-md" />
             <div className="h-4.5 w-24 bg-gray-200/90 dark:bg-gray-800/90 rounded-md" />
@@ -44,7 +44,7 @@ export default function RecipeIngredientsHeader({
           </div>
         </div>
       ) : (
-        <div id="tour-recipe-servings" className="px-4.5 py-3.5 sm:px-6 flex items-center justify-between gap-3 animate-fade-in">
+        <div id="tour-recipe-servings" className="px-0.5 py-3 flex items-center justify-between gap-3 animate-fade-in">
           <div className="flex flex-col">
             <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
               {t('recipe.serves')}
@@ -83,17 +83,17 @@ export default function RecipeIngredientsHeader({
 
       {/* Component / Supermarket Grouping Toggle (only when multi-component recipe) */}
       {!isExtracting && hasComponents && (
-        <div className="px-4.5 py-2.5 sm:px-6 bg-black/[0.015] dark:bg-white/[0.02] flex items-center justify-between gap-3 animate-fade-in border-none">
+        <div className="px-0.5 py-2.5 flex items-center justify-between gap-3 animate-fade-in border-none">
           <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
             {t('recipe.groupingLabel')}
           </span>
-          <div className="inline-flex p-0.5 rounded-xl bg-black/[0.05] dark:bg-white/[0.08]">
+          <div className="inline-flex p-0.5 rounded-xl bg-black/[0.045] dark:bg-white/[0.08]">
             <button
               type="button"
               onClick={() => onGroupingModeChange('components')}
               className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer border-none ${
                 groupingMode === 'components'
-                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-xs'
+                  ? 'bg-[#fdfbf7] dark:bg-gray-800 text-gray-900 dark:text-white shadow-xs'
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 bg-transparent'
               }`}
             >
@@ -104,7 +104,7 @@ export default function RecipeIngredientsHeader({
               onClick={() => onGroupingModeChange('category')}
               className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer border-none ${
                 groupingMode === 'category'
-                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-xs'
+                  ? 'bg-[#fdfbf7] dark:bg-gray-800 text-gray-900 dark:text-white shadow-xs'
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 bg-transparent'
               }`}
             >

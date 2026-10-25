@@ -26,12 +26,12 @@ export const AlternativeIngredientsList: React.FC<AlternativeIngredientsListProp
         </span>
       </div>
 
-      {/* Clean Flat Card Container */}
-      <div className="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-2.5">
+      {/* Open-Canvas Alternative Ingredients List */}
+      <div className="flex flex-col gap-2">
         {alternativeIngredients.map((alt, idx) => (
           <div
             key={idx}
-            className="bg-gray-50/80 dark:bg-gray-800/50 rounded-xl p-3.5 transition-all"
+            className="bg-black/[0.03] dark:bg-white/[0.04] rounded-2xl p-3.5 transition-all"
           >
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-medium text-gray-500 dark:text-gray-400 line-through decoration-gray-400/60 bg-gray-200/60 dark:bg-gray-700/50 px-2.5 py-1 rounded-lg">
