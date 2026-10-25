@@ -63,21 +63,7 @@ export const auth = betterAuth({
       verification: schema.verification,
     },
   }),
-  baseURL: isProduction
-    ? appUrl
-    : {
-        allowedHosts: [
-          'localhost:*',
-          '127.0.0.1:*',
-          'localhost:3000',
-          'localhost:5173',
-          'localhost:5174',
-          '127.0.0.1:3000',
-          '127.0.0.1:5173',
-          '127.0.0.1:5174',
-        ],
-        fallback: appUrl,
-      },
+  baseURL: appUrl,
   basePath: '/api/auth',
   trustedOrigins,
   secret:
@@ -88,7 +74,6 @@ export const auth = betterAuth({
     skipStateCookieCheck: true,
   },
   advanced: {
-    trustedProxyHeaders: true,
     database: {
       generateId: () => randomUUID(),
     },
