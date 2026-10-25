@@ -49,14 +49,14 @@ export const ExtractHelpAccordions: React.FC = () => {
       <Accordion
         id="tour-extract-share"
         variant="surface"
-        className="w-full bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden"
+        className="w-full bg-black/[0.03] dark:bg-white/[0.04] rounded-3xl border-none shadow-none overflow-hidden"
         defaultExpandedKeys={[]}
       >
         <Accordion.Item className="border-none" id="share">
           <Accordion.Heading>
             <Accordion.Trigger
               onClick={() => hapticLight()}
-              className="px-5 py-4 flex items-center justify-between text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+              className="px-4 py-4 flex items-center justify-between text-gray-900 dark:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors"
             >
               <span className="flex items-center gap-2.5 text-sm font-bold">
                 <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -86,7 +86,7 @@ export const ExtractHelpAccordions: React.FC = () => {
 
               {/* Visual Step-by-Step Guide */}
               <div className="flex flex-col gap-2.5">
-                <div className="flex gap-3.5 p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-800/60 border-none items-center justify-between">
+                <div className="flex gap-3.5 p-3.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border-none items-center justify-between">
                   <div className="flex-1 flex flex-col gap-1">
                     <h4 className="font-bold text-gray-900 dark:text-white text-xs">
                       {t('form.helpShareStep1Title')}
@@ -98,7 +98,7 @@ export const ExtractHelpAccordions: React.FC = () => {
                   <ShareStep1Mockup />
                 </div>
 
-                <div className="flex gap-3.5 p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-800/60 border-none items-center justify-between">
+                <div className="flex gap-3.5 p-3.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border-none items-center justify-between">
                   <div className="flex-1 flex flex-col gap-1">
                     <h4 className="font-bold text-gray-900 dark:text-white text-xs">
                       {t('form.helpShareStep2Title')}
@@ -110,7 +110,7 @@ export const ExtractHelpAccordions: React.FC = () => {
                   <ShareStep2Mockup />
                 </div>
 
-                <div className="flex gap-3.5 p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-800/60 border-none items-center justify-between">
+                <div className="flex gap-3.5 p-3.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border-none items-center justify-between">
                   <div className="flex-1 flex flex-col gap-1">
                     <h4 className="font-bold text-gray-900 dark:text-white text-xs">
                       {t('form.helpShareStep3Title')}
@@ -134,13 +134,13 @@ export const ExtractHelpAccordions: React.FC = () => {
       {/* Help / Instructions Accordion */}
       <Accordion
         variant="surface"
-        className="w-full bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden"
+        className="w-full bg-black/[0.03] dark:bg-white/[0.04] rounded-3xl border-none shadow-none overflow-hidden"
       >
         <Accordion.Item className="border-none">
           <Accordion.Heading>
             <Accordion.Trigger
               onClick={() => hapticLight()}
-              className="px-5 py-4 flex items-center justify-between text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+              className="px-4 py-4 flex items-center justify-between text-gray-900 dark:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors"
             >
               <span className="flex items-center gap-2.5 text-sm font-bold">
                 <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">

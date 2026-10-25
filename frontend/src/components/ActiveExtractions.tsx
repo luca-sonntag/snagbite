@@ -88,9 +88,7 @@ export default function ActiveExtractions({ excludeId }: ActiveExtractionsProps 
             className={`relative flex items-center gap-3.5 px-4 py-3.5 rounded-3xl overflow-hidden transition-all border-none ${
               isDone
                 ? 'cursor-pointer active:scale-[0.99] bg-emerald-500/10 dark:bg-emerald-500/15'
-                : isFailed
-                  ? 'bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)]'
-                  : 'bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)]'
+                : 'bg-black/[0.03] dark:bg-white/[0.04]'
             }`}
           >
             {/* Progress track (running only) */}
