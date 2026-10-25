@@ -1,5 +1,5 @@
 import { Drawer } from '@heroui/react';
-import { HeartPulse, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight } from '../../utils/haptics';
@@ -64,18 +64,13 @@ export default function HealthScoreSheet({
               {/* Fixed Header Bar with tactile close button */}
               <Drawer.Header className="px-5 pt-3.5 pb-2 shrink-0 border-none">
                 <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-2xl ${colors.badgeBg} flex items-center justify-center shrink-0`}>
-                      <HeartPulse className={`w-5 h-5 ${colors.iconColor}`} />
-                    </div>
-                    <div>
-                      <Drawer.Heading className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-tight tracking-tight">
-                        {t('recipe.healthScoreTitle')}
-                      </Drawer.Heading>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 leading-tight mt-0.5">
-                        DGE, WHO & NOVA Standard
-                      </p>
-                    </div>
+                  <div>
+                    <Drawer.Heading className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-tight tracking-tight">
+                      {t('recipe.healthScoreTitle')}
+                    </Drawer.Heading>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 leading-tight mt-0.5">
+                      DGE, WHO & NOVA Standard
+                    </p>
                   </div>
 
                   <button

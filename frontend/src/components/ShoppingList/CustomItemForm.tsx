@@ -64,21 +64,16 @@ export default function CustomItemForm({ isOpen, addCustomItem, onClose }: Custo
 
               <Drawer.Header className="pb-3 mb-1">
                 <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center flex-shrink-0">
-                      <Plus className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white truncate">
-                        {t('shopping.addTitle')}
-                      </Drawer.Heading>
-                      {lastAddedName && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none animate-fade-in truncate">
-                          <Check className="w-3 h-3 stroke-[3px]" />
-                          <span className="truncate">"{lastAddedName}"</span>
-                        </span>
-                      )}
-                    </div>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white truncate">
+                      {t('shopping.addTitle')}
+                    </Drawer.Heading>
+                    {lastAddedName && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none animate-fade-in truncate">
+                        <Check className="w-3 h-3 stroke-[3px]" />
+                        <span className="truncate">"{lastAddedName}"</span>
+                      </span>
+                    )}
                   </div>
                   <button
                     type="button"
@@ -86,7 +81,7 @@ export default function CustomItemForm({ isOpen, addCustomItem, onClose }: Custo
                       hapticLight();
                       onClose();
                     }}
-                    className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer flex-shrink-0"
+                    className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-black/[0.04] dark:bg-white/[0.06] text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-black/[0.08] dark:hover:bg-white/[0.10] border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer flex-shrink-0"
                     aria-label="Close"
                   >
                     <X className="w-4 h-4" />

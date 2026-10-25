@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button, Drawer } from '@heroui/react';
-import { Salad } from 'lucide-react';
+
 import { useI18n } from '../../context/I18nContext';
 import { usePantry } from '../../context/PantryContext';
 import { useModalOverlay } from '../../context/OverlayStackContext';
@@ -161,24 +161,19 @@ export default function ShoppingConfirmSheet({
 
               {/* Header */}
               <Drawer.Header className="pb-2 mb-1">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center shrink-0">
-                    <Salad className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white truncate">
-                      {t('recipe.shoppingConfirmTitle')}
-                    </Drawer.Heading>
-                    {recipeLabel ? (
-                      <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5 truncate max-w-[240px] sm:max-w-[320px]">
-                        {recipeLabel}
-                      </p>
-                    ) : (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 font-normal mt-0.5 truncate">
-                        {t('recipe.shoppingConfirmSubtitle')}
-                      </p>
-                    )}
-                  </div>
+                <div className="min-w-0">
+                  <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white truncate">
+                    {t('recipe.shoppingConfirmTitle')}
+                  </Drawer.Heading>
+                  {recipeLabel ? (
+                    <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5 truncate max-w-[240px] sm:max-w-[320px]">
+                      {recipeLabel}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-normal mt-0.5 truncate">
+                      {t('recipe.shoppingConfirmSubtitle')}
+                    </p>
+                  )}
                 </div>
               </Drawer.Header>
 
