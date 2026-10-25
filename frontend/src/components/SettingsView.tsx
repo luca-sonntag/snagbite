@@ -162,8 +162,8 @@ export default function SettingsView() {
         </div>
       )}
 
-      {/* Profile Card */}
-      <div className={`p-4 sm:p-5 ${isRealPremium ? 'tint-premium' : 'bg-black/[0.03] dark:bg-white/[0.04]'} border-none rounded-3xl flex flex-col gap-4 relative overflow-hidden`}>
+      {/* Profile Section (Open Editorial) */}
+      <div className={`${isRealPremium ? 'p-4 sm:p-5 tint-premium rounded-3xl' : 'py-3 px-1 border-b border-black/[0.06] dark:border-white/[0.08]'} flex flex-col gap-4 relative overflow-hidden`}>
         <div className="flex items-center gap-4">
           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-lg text-white shadow-none shrink-0 ${
             isRealPremium 
@@ -216,12 +216,12 @@ export default function SettingsView() {
       <PremiumUpgradeCard onUpgradeClick={() => setIsPremiumModalOpen(true)} />
 
       {/* Preferences Section */}
-      <div className="flex flex-col gap-2">
-        <h3 className="px-2 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+      <div className="flex flex-col gap-1">
+        <h3 className="px-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
           {language === 'de' ? 'Einstellungen' : 'Preferences'}
         </h3>
         
-        <div className="bg-black/[0.03] dark:bg-white/[0.04] rounded-3xl border-none overflow-hidden">
+        <div className="border-y border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
           {/* Language Option */}
           <div className="p-4 flex items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-2.5 border-b border-black/5 dark:border-white/5">
             <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -396,12 +396,12 @@ export default function SettingsView() {
       <AdminSettingsSection isAdmin={isAdmin} />
 
       {/* Section: Help */}
-      <div className="flex flex-col gap-2">
-        <h3 className="px-2 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+      <div className="flex flex-col gap-1">
+        <h3 className="px-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
           {language === 'de' ? 'Hilfe' : 'Help'}
         </h3>
 
-        <div className="bg-black/[0.03] dark:bg-white/[0.04] rounded-3xl border-none overflow-hidden">
+        <div className="border-y border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
           <button
             onClick={() => window.dispatchEvent(new Event('app:replay-onboarding'))}
             className="w-full p-4 flex items-center justify-between border-b border-black/5 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 transition-all active:scale-[0.99] text-left cursor-pointer group"
@@ -454,12 +454,12 @@ export default function SettingsView() {
       </div>
 
       {/* Section: Legal (Datenschutz / AGB / Impressum) */}
-      <div className="flex flex-col gap-2">
-        <h3 className="px-2 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+      <div className="flex flex-col gap-1">
+        <h3 className="px-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
           {t('app.settings.legal.section') || 'Rechtliches'}
         </h3>
 
-        <div className="bg-black/[0.03] dark:bg-white/[0.04] rounded-3xl border-none overflow-hidden">
+        <div className="border-y border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
           {[
             { href: LEGAL_URLS.privacy, icon: Shield, label: t('app.settings.legal.privacy') || 'Datenschutzerklärung' },
             { href: LEGAL_URLS.terms, icon: ScrollText, label: t('app.settings.legal.terms') || 'AGB' },
@@ -489,12 +489,12 @@ export default function SettingsView() {
       </div>
 
       {/* Section: Account Actions */}
-      <div className="flex flex-col gap-2">
-        <h3 className="px-2 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+      <div className="flex flex-col gap-1">
+        <h3 className="px-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
           {language === 'de' ? 'Konto-Aktionen' : 'Account Actions'}
         </h3>
         
-        <div className="bg-black/[0.03] dark:bg-white/[0.04] rounded-3xl border-none overflow-hidden">
+        <div className="border-y border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
           {/* Logout Option */}
           {!autoSignedIn && (
             <button

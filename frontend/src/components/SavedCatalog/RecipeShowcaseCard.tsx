@@ -61,19 +61,19 @@ export default function RecipeShowcaseCard({
         </p>
       </div>
 
-      {/* Clean Flat Showcase Card - Harmonized with Poster & Compact Cards */}
+      {/* Photo-First Open Editorial Showcase */}
       <article
         onClick={(e) => {
           hapticLight();
           onOpenRecipe(e, job);
         }}
-        className={`group relative rounded-2xl overflow-hidden bg-black/[0.03] dark:bg-white/[0.04] border-none flex items-stretch cursor-pointer active:scale-[0.98] transition-all duration-150 select-none ${
-          isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
+        className={`group relative flex items-stretch gap-3.5 py-2 border-y border-black/[0.06] dark:border-white/[0.08] cursor-pointer active:scale-[0.98] transition-all duration-150 select-none ${
+          isSelected ? 'rounded-2xl ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10 px-2 border-none' : ''
         }`}
         {...(bindLongPress ?? {})}
       >
-        {/* Full Height Left Cover Image */}
-        <div className="relative w-28 sm:w-36 shrink-0 overflow-hidden bg-black/5 dark:bg-white/5 self-stretch">
+        {/* Left Rounded Cover Image */}
+        <div className="relative w-28 sm:w-36 shrink-0 rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 self-stretch shadow-xs ring-1 ring-black/[0.05] dark:ring-white/[0.08]">
           <CachedImage
             src={r.imageUrl || r.imageUrls?.[0]}
             emoji={r.emoji}
@@ -106,7 +106,7 @@ export default function RecipeShowcaseCard({
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 min-w-0 flex flex-col justify-between p-3 sm:p-3.5 overflow-hidden">
+        <div className="flex-1 min-w-0 flex flex-col justify-between py-1 pr-1 overflow-hidden">
           {/* Top Line: Subtle Saved Date */}
           <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 tracking-tight">
             {t('catalog.magazine.savedOn', { date: formattedDate })}

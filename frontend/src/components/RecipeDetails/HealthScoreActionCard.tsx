@@ -31,7 +31,7 @@ export default function HealthScoreActionCard({
     <button
       type="button"
       onClick={handleClick}
-      className="w-full bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] rounded-2xl p-3.5 sm:p-4 border-none flex items-center justify-between gap-3 text-left active:scale-[0.98] transition-all cursor-pointer select-none group"
+      className="w-full py-3 px-1 bg-transparent border-none flex items-center justify-between gap-3 text-left active:scale-[0.98] transition-all cursor-pointer select-none group"
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">

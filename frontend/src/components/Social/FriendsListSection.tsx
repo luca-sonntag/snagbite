@@ -46,7 +46,7 @@ export default function FriendsListSection() {
       </h2>
 
       {friends.length === 0 ? (
-        <div className="flex flex-col items-center text-center p-6 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border-none gap-3">
+        <div className="flex flex-col items-center text-center py-6 px-4 border-y border-black/[0.06] dark:border-white/[0.08] gap-3">
           <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600">
             <Users className="w-6 h-6" />
           </div>
@@ -65,16 +65,17 @@ export default function FriendsListSection() {
           </Button>
         </div>
       ) : (
-        friends.map((f) => {
-          const rankKey = getCulinaryRankKey(f.level);
-          const rankTitle = t(`app.gamification.ranks.${rankKey}`);
-          const totalCooks = f.totalCooks ?? 0;
+        <div className="divide-y divide-black/[0.06] dark:divide-white/[0.08] border-y border-black/[0.06] dark:border-white/[0.08]">
+          {friends.map((f) => {
+            const rankKey = getCulinaryRankKey(f.level);
+            const rankTitle = t(`app.gamification.ranks.${rankKey}`);
+            const totalCooks = f.totalCooks ?? 0;
 
-          return (
-            <div
-              key={f.friendshipId}
-              className="flex items-center gap-3.5 rounded-2xl border-none bg-black/[0.03] p-3.5 dark:bg-white/[0.04] transition-all"
-            >
+            return (
+              <div
+                key={f.friendshipId}
+                className="flex items-center gap-3.5 py-3.5 px-1 bg-transparent transition-all"
+              >
               <Avatar name={f.displayName} avatarUrl={f.avatarUrl} size={44} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 flex-wrap">
@@ -115,7 +116,8 @@ export default function FriendsListSection() {
               </Button>
             </div>
           );
-        })
+        })}
+        </div>
       )}
     </div>
   );

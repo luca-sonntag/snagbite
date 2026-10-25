@@ -33,7 +33,7 @@ export default function HealthScoreHeroCard({
   const strokeDashoffset = circumference * (1 - Math.min(100, Math.max(0, score)) / 100);
 
   return (
-    <div className="bg-black/[0.03] dark:bg-white/[0.04] rounded-3xl p-4.5 sm:p-5 border-none flex flex-col gap-3.5 select-none">
+    <div className="py-3 px-0.5 border-b border-black/[0.06] dark:border-white/[0.08] flex flex-col gap-3.5 select-none">
       {/* Top row: Gauge left, Grade & Verdict right */}
       <div className="flex items-center gap-4">
         {/* Gauge Hero (Large, Left) */}

@@ -28,7 +28,7 @@ export default function CookHistoryTimeline({ history }: CookHistoryTimelineProp
 
   if (!history || history.count === 0) {
     return (
-      <div className="rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] p-6 text-center border-none space-y-2">
+      <div className="py-6 px-4 text-center border-y border-black/[0.06] dark:border-white/[0.08] space-y-2">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mb-1">
           <UtensilsCrossed className="h-6 w-6 stroke-[1.75]" />
         </div>
@@ -68,7 +68,7 @@ export default function CookHistoryTimeline({ history }: CookHistoryTimelineProp
       </div>
 
       {/* History cards timeline */}
-      <div className="space-y-2">
+      <div className="divide-y divide-black/[0.06] dark:divide-white/[0.08] border-y border-black/[0.06] dark:border-white/[0.08]">
         {history.items.map((item, index) => {
           const attemptNum = history.count - index;
           const exactTime = formatExactDate(item.cookedAt);
@@ -77,7 +77,7 @@ export default function CookHistoryTimeline({ history }: CookHistoryTimelineProp
           return (
             <div
               key={item.id}
-              className="rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] p-2.5 sm:p-3 flex items-center gap-3 border-none transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.06]"
+              className="py-2.5 sm:py-3 px-0.5 flex items-center gap-3 bg-transparent transition-colors"
             >
               {/* Photo thumbnail */}
               {item.photoUrl ? (

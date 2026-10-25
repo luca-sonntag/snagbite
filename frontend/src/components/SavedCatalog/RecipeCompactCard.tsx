@@ -43,13 +43,13 @@ export default function RecipeCompactCard({
         hapticLight();
         onClick(e);
       }}
-      className={`group relative flex-1 min-w-0 flex items-stretch rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border-none cursor-pointer active:scale-[0.98] transition-all duration-150 select-none overflow-hidden ${
-        isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
+      className={`group relative flex-1 min-w-0 flex items-stretch gap-2.5 cursor-pointer active:scale-[0.98] transition-all duration-150 select-none ${
+        isSelected ? 'rounded-2xl ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10 p-1' : ''
       }`}
       {...(!isCommunity ? (bindLongPress ?? {}) : {})}
     >
-      {/* Thumbnail: Full card height presentation */}
-      <div className="relative w-22 sm:w-26 shrink-0 overflow-hidden bg-black/5 dark:bg-white/5 self-stretch">
+      {/* Thumbnail: Photo-First rounded cover */}
+      <div className="relative w-22 sm:w-26 shrink-0 rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 self-stretch shadow-xs ring-1 ring-black/[0.05] dark:ring-white/[0.08]">
         <CachedImage
           src={r.imageUrl || r.imageUrls?.[0]}
           emoji={r.emoji}
@@ -95,7 +95,7 @@ export default function RecipeCompactCard({
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-w-0 flex flex-col justify-between p-2.5 sm:p-3 overflow-hidden">
+      <div className="flex-1 min-w-0 flex flex-col justify-between py-1 pr-1 overflow-hidden">
         {/* Title */}
         <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white leading-tight line-clamp-3 tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors my-auto py-0.5 break-words [overflow-wrap:anywhere]">
           {r.title}

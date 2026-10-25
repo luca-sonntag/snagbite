@@ -120,17 +120,17 @@ export default function LeaderboardView() {
           <Spinner size="md" color="success" />
         </div>
       ) : (
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col divide-y divide-black/[0.06] dark:divide-white/[0.08] border-y border-black/[0.06] dark:border-white/[0.08]">
           {entries.map((e) => {
             const isBusy = !!actionBusyMap[e.userId];
 
             return (
               <div
                 key={e.userId}
-                className={`flex items-center gap-3 rounded-2xl border-none p-3.5 transition-all ${
+                className={`flex items-center gap-3 py-3.5 px-1 transition-all ${
                   e.isMe
-                    ? 'bg-emerald-500/10 dark:bg-emerald-500/15'
-                    : 'bg-black/[0.03] dark:bg-white/[0.04]'
+                    ? 'bg-emerald-500/10 dark:bg-emerald-500/15 rounded-2xl px-3 border-none my-0.5'
+                    : 'bg-transparent'
                 }`}
               >
                 <div className="w-7 text-center text-base font-extrabold text-gray-500 dark:text-gray-400 shrink-0">

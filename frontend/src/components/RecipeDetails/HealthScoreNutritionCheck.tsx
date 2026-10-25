@@ -23,7 +23,7 @@ export default function HealthScoreNutritionCheck({
   if (highlights.length === 0 && cautions.length === 0) return null;
 
   return (
-    <div className="bg-black/[0.03] dark:bg-white/[0.04] p-4 sm:p-5 rounded-3xl border-none flex flex-col gap-3 select-none">
+    <div className="py-3 px-0.5 flex flex-col gap-3 select-none">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">

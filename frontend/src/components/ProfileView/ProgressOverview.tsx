@@ -89,8 +89,8 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
 
   return (
     <div className="flex flex-col gap-6">
-      {/* 1. Hero Level & Culinary Rank (Open Canvas) */}
-      <div className="rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] p-4 sm:p-5 border-none">
+      {/* 1. Hero Level & Culinary Rank (Open Editorial) */}
+      <div className="py-2 px-0.5 border-b border-black/[0.06] dark:border-white/[0.08] pb-5">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm shrink-0">
@@ -247,7 +247,7 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
                 }}
                 className={`flex flex-col items-center justify-center h-[120px] w-full p-2 gap-1 text-center transition-all cursor-pointer outline-none active:scale-95 rounded-2xl border-none ${isEarned
                   ? 'bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-200'
-                  : 'bg-black/[0.03] dark:bg-white/[0.04] opacity-70 hover:opacity-90 text-gray-400'
+                  : 'bg-transparent ring-1 ring-black/[0.06] dark:ring-white/[0.08] opacity-70 hover:opacity-90 text-gray-400'
                   }`}
               >
                 <div className="relative flex items-center justify-center shrink-0">

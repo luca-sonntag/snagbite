@@ -42,14 +42,15 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
 
       {/* 3. Incoming friend requests */}
       {incomingRequests.length > 0 && (
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-2">
           <h2 className="font-heading text-sm font-bold text-gray-900 dark:text-white px-1">
             {t('app.social.friends.requests')}
           </h2>
+          <div className="divide-y divide-black/[0.06] dark:divide-white/[0.08] border-y border-black/[0.06] dark:border-white/[0.08]">
           {incomingRequests.map((r) => (
             <div
               key={r.friendshipId}
-              className="flex items-center gap-3 rounded-2xl border-none bg-black/[0.03] p-3.5 dark:bg-white/[0.04]"
+              className="flex items-center gap-3 py-3 px-1 bg-transparent"
             >
               <Avatar name={r.displayName} avatarUrl={r.avatarUrl} size={36} />
               <span className="min-w-0 flex-1 truncate font-bold text-gray-900 dark:text-white">
@@ -74,6 +75,7 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
               </Button>
             </div>
           ))}
+          </div>
         </div>
       )}
 

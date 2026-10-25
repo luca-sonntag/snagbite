@@ -106,16 +106,16 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
 
   return (
     <div
-      className={`group w-full shrink-0 rounded-2xl flex gap-3 cursor-pointer active:scale-[0.98] transition-all duration-150 select-none border-none touch-manipulation overflow-hidden ${
+      className={`group w-full shrink-0 flex gap-3 cursor-pointer active:scale-[0.98] transition-all duration-150 select-none touch-manipulation overflow-hidden ${
         flushImage
-          ? 'p-0 items-stretch min-h-[82px] sm:min-h-[88px]'
-          : 'p-2.5 sm:p-3 items-center min-h-[76px] sm:min-h-[84px]'
+          ? 'p-0 items-stretch min-h-[82px] sm:min-h-[88px] rounded-2xl border-none'
+          : 'py-2.5 px-1 items-center min-h-[76px] sm:min-h-[84px] border-b border-black/[0.06] dark:border-white/[0.08] last:border-b-0'
       } ${
         isSelected
-          ? 'bg-emerald-500/10 ring-2 ring-emerald-500 shadow-sm'
+          ? 'rounded-2xl px-2.5 bg-emerald-500/10 ring-2 ring-emerald-500 shadow-sm border-none'
           : isCooked
-          ? 'bg-black/[0.02] dark:bg-white/[0.03] opacity-75'
-          : 'bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.05] dark:hover:bg-white/[0.06]'
+          ? 'bg-transparent opacity-70'
+          : 'bg-transparent'
       } ${className}`}
       onClick={(e) => {
         hapticLight();

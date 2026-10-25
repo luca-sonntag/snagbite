@@ -227,8 +227,8 @@ export default function RecipeInstructions({
                     </span>
 
                     {step.parallelPrepHint && !isChecked && (
-                      <div className="mt-2.5 p-3 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] text-gray-800 dark:text-gray-200 flex items-start gap-2.5 text-xs font-medium leading-relaxed">
-                        <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                      <div className="mt-2.5 pl-3 py-1 border-l-2 border-emerald-500/50 text-gray-700 dark:text-gray-300 flex items-start gap-2 text-xs font-medium leading-relaxed">
+                        <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
                           <RecipeInstructionText text={step.parallelPrepHint} recipe={recipe} formatAmount={formatAmount} />
                         </div>
@@ -245,8 +245,8 @@ export default function RecipeInstructions({
 
       {/* Tips Section */}
       {recipe.tips && recipe.tips.length > 0 && (
-        <div className="flex flex-col gap-4 mt-2 animate-fade-in">
-          {/* Section Header (OUTSIDE card) */}
+        <div className="flex flex-col gap-3 mt-2 pt-3 border-t border-black/[0.06] dark:border-white/[0.08] animate-fade-in">
+          {/* Section Header */}
           <div className="flex items-center justify-between gap-3">
             <h3 className="text-base font-bold text-gray-900 dark:text-white">
               {t('recipe.tipsTitle')}
@@ -257,11 +257,11 @@ export default function RecipeInstructions({
           </div>
 
           {/* Open Canvas Tip Items */}
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col divide-y divide-black/[0.06] dark:divide-white/[0.08]">
             {recipe.tips.map((tip, idx) => (
               <div
                 key={idx}
-                className="bg-black/[0.03] dark:bg-white/[0.04] rounded-2xl p-3.5 flex items-start gap-3 transition-all"
+                className="py-3 px-0.5 flex items-start gap-3 transition-all"
               >
                 <span className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 text-xs font-bold tabular-nums mt-0.5">
                   {idx + 1}

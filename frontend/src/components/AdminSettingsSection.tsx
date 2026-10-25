@@ -34,13 +34,13 @@ export const AdminSettingsSection: React.FC<AdminSettingsSectionProps> = ({ isAd
   if (!isAdmin) return null;
 
   return (
-    <div className="flex flex-col gap-2">
-      <h3 className="px-2 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-1">
+    <div className="flex flex-col gap-1">
+      <h3 className="px-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-1">
         <Shield className="w-3.5 h-3.5 text-emerald-500" />
         {t('app.settings.admin.section')}
       </h3>
 
-      <div className="bg-black/[0.03] dark:bg-white/[0.04] rounded-3xl border-none overflow-hidden">
+      <div className="border-y border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
         {/* Link: Admin Dashboard */}
         <a
           href={adminPanelUrl}

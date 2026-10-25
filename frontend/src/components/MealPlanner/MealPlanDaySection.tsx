@@ -58,16 +58,16 @@ export const MealPlanDaySection = React.memo<MealPlanDaySectionProps>(({
         id={isToday || isHighlighted ? 'tour-planner-day-section' : undefined}
         onClick={handleDayCardClick}
         aria-label={isPast ? formattedDate : (t('mealPlanner.addRecipe') || 'Rezept hinzufügen')}
-        className={`group w-full min-h-[44px] px-3 py-2 flex items-center justify-between select-none border-none touch-manipulation transition-all duration-200 cursor-pointer rounded-2xl ${
+        className={`group w-full min-h-[44px] px-1 py-2 flex items-center justify-between select-none touch-manipulation transition-all duration-200 cursor-pointer ${
           isHighlighted
-            ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/25 scale-[1.01]'
+            ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/25 scale-[1.01] rounded-2xl px-3 border-none'
             : isToday
-            ? 'bg-emerald-500/10 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-500/15'
+            ? 'bg-emerald-500/10 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-500/15 rounded-2xl px-3 border-none'
             : hasEntries
-            ? 'bg-transparent px-1 hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
+            ? 'bg-transparent border-none'
             : isPast
-            ? 'bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-gray-500 dark:text-gray-400'
-            : 'bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.05] dark:hover:bg-white/[0.07] text-gray-800 dark:text-gray-200'
+            ? 'bg-transparent border-b border-black/[0.05] dark:border-white/[0.06] text-gray-500 dark:text-gray-400'
+            : 'bg-transparent border-b border-black/[0.06] dark:border-white/[0.08] text-gray-800 dark:text-gray-200'
         } active:scale-[0.98]`}
       >
         <div className="flex items-center gap-2 min-w-0">

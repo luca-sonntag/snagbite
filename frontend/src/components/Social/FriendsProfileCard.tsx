@@ -99,7 +99,7 @@ export default function FriendsProfileCard({ pendingInviteCode, onInviteConsumed
   };
 
   return (
-    <div className="rounded-3xl border-none bg-black/[0.03] p-4 sm:p-5 dark:bg-white/[0.04]">
+    <div className="py-2 px-0.5 border-b border-black/[0.06] dark:border-white/[0.08] pb-5">
       <div className="flex items-center gap-3.5">
         <Avatar name={profile?.displayName ?? '?'} avatarUrl={profile?.avatarUrl} size={48} />
         <div className="min-w-0 flex-1">

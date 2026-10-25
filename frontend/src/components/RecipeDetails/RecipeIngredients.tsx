@@ -183,16 +183,14 @@ export default function RecipeIngredients({
               hapticLight();
               setIsProFeatureSheetOpen(true);
             }}
-            className="px-3.5 py-3 mt-2 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] flex items-center justify-between gap-3 cursor-pointer group hover:bg-black/[0.05] dark:hover:bg-white/[0.06] transition-colors animate-fade-in border-none"
+            className="px-1 py-3 flex items-center justify-between gap-3 cursor-pointer group transition-colors animate-fade-in"
           >
-            <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate">
+            <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
               {t('recipe.ingredientNutritionProHint') || 'Detaillierte Nährwerte & Makros pro Zutat'}
             </span>
             <div className="flex items-center gap-2 shrink-0">
               <ProBadge variant="chip" />
-              <div className="w-7 h-7 rounded-full flex items-center justify-center bg-black/[0.04] dark:bg-white/[0.06] text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">
-                <ChevronRight className="w-4 h-4" />
-              </div>
+              <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" />
             </div>
           </div>
         )}

@@ -25,8 +25,6 @@ export default function HealthScoreBadge({
   score,
   breakdown: _breakdown,
   onClick,
-  size = 'md',
-  fullWidth = false,
   isPremium = false,
 }: HealthScoreBadgeProps) {
   const { t } = useI18n();
@@ -40,7 +38,6 @@ export default function HealthScoreBadge({
     return t('recipe.healthScoreGradeCheatMeal');
   };
 
-  const isSmall = size === 'sm';
   const radius = 17;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - Math.min(100, Math.max(0, score)) / 100);
@@ -52,11 +49,7 @@ export default function HealthScoreBadge({
         hapticLight();
         onClick();
       }}
-      className={`w-full group ${
-        fullWidth
-          ? 'px-3.5 py-3 bg-black/[0.03] hover:bg-black/[0.05] active:bg-black/[0.07] dark:bg-white/[0.04] dark:hover:bg-white/[0.06] dark:active:bg-white/[0.08] rounded-2xl'
-          : `rounded-2xl ${isSmall ? 'p-2.5' : 'p-3 sm:p-3.5 min-h-[52px]'} bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.05] dark:hover:bg-white/[0.06]`
-      } border-none select-none cursor-pointer active:scale-[0.99] transition-all flex items-center justify-between gap-3 text-left`}
+      className={`w-full group py-2.5 px-1 bg-transparent border-none select-none cursor-pointer active:scale-[0.99] transition-all flex items-center justify-between gap-3 text-left`}
       aria-label={`${t('recipe.healthScoreTitle')}: ${score}/100`}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
