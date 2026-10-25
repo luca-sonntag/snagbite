@@ -39,12 +39,6 @@ export const authClient = createAuthClient({
   baseURL,
   fetchOptions: {
     credentials: 'include',
-    onRequest(context) {
-      const token = getStoredToken();
-      if (token) {
-        context.headers.set('authorization', `Bearer ${token}`);
-      }
-    },
     onResponse(context) {
       const setAuthToken = context.response.headers.get('set-auth-token');
       if (setAuthToken) {

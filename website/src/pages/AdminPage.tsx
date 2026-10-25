@@ -21,6 +21,7 @@ export default function AdminPage() {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
+        credentials: 'include',
       });
       if (res.ok) {
         const data = await res.json();
@@ -56,10 +57,12 @@ export default function AdminPage() {
             await checkAdminStatus(token);
           }
         } else {
+          setStoredToken(null);
           setSession(null);
         }
       } catch (err) {
         console.error('Failed to get session:', err);
+        setStoredToken(null);
         setSession(null);
       } finally {
         setLoading(false);
@@ -71,6 +74,7 @@ export default function AdminPage() {
   const handleGoogleSignIn = async () => {
     setAuthError(null);
     setSubmitting(true);
+    setStoredToken(null);
     try {
       const res = await authClient.signIn.social({
         provider: 'google',
@@ -105,8 +109,8 @@ export default function AdminPage() {
   };
 
   const getAccessToken = useCallback(async (): Promise<string | null> => {
-    return getStoredToken();
-  }, []);
+    return session?.token || getStoredToken();
+  }, [session?.token]);
 
   if (loading || (session && checkingAdmin)) {
     return (
