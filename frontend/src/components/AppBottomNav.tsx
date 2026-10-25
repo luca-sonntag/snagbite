@@ -39,7 +39,7 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({
 
   return (
     <div className={bottomBarClasses}>
-      <div className="bg-white/85 dark:bg-gray-900/85 backdrop-blur-md border-none shadow-[0_8px_30px_-4px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)] w-full max-w-md mx-auto flex flex-col rounded-3xl overflow-hidden">
+      <div className="bg-[#f7f4ed]/92 dark:bg-gray-900/90 backdrop-blur-xl border-none ring-1 ring-black/[0.06] dark:ring-white/10 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.10),0_2px_8px_rgba(0,0,0,0.04)] w-full max-w-md mx-auto flex flex-col rounded-3xl overflow-hidden">
         <div className="w-full flex justify-around items-center py-2.5 px-3">
           {/* 1. Extract / New Recipe Tab */}
           <button

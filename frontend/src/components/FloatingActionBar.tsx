@@ -44,7 +44,7 @@ export default function FloatingActionBar({ children, className = '', isHidden =
     <div
       className={`fixed ${defaultBottom} left-1/2 -translate-x-1/2 z-40 max-w-[calc(100vw-2rem)] animate-fade-in-up transition-transform duration-300 ease-in-out ${hiddenClasses} ${className}`}
     >
-      <div className="flex items-center gap-1 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl p-2 rounded-[2rem] border-none shadow-[0_12px_36px_-6px_rgba(0,0,0,0.16),0_4px_16px_rgba(0,0,0,0.08)]">
+      <div className="flex items-center gap-1 bg-[#f7f4ed]/92 dark:bg-gray-900/92 backdrop-blur-xl p-2 rounded-[2rem] border-none ring-1 ring-black/[0.06] dark:ring-white/10 shadow-[0_12px_36px_-6px_rgba(0,0,0,0.14),0_4px_16px_rgba(0,0,0,0.06)]">
         {children}
       </div>
     </div>
