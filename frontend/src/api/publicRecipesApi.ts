@@ -8,6 +8,24 @@ export interface SavePublicRecipeResponse {
   recipeId: string;
 }
 
+export interface PublicShowcaseCover {
+  id: string;
+  title: string;
+  imageUrl: string;
+  emoji?: string | null;
+}
+
+/**
+ * Fetches a random sample of recent AI recipe covers for the login screen carousel.
+ * Does not require authentication.
+ */
+export async function fetchPublicShowcaseCovers(limit = 10): Promise<PublicShowcaseCover[]> {
+  const res = await fetch(apiUrl(`/api/public/showcase-covers?limit=${limit}`));
+  if (!res.ok) throw new Error('Failed to fetch showcase covers: ' + res.statusText);
+  const data = await res.json();
+  return Array.isArray(data.covers) ? data.covers : [];
+}
+
 /**
  * Fetches the daily rotated demo recipes from the backend.
  */
@@ -67,4 +85,3 @@ export async function savePublicRecipeToCookbook(
 
   return res.json();
 }
-

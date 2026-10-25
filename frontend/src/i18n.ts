@@ -994,6 +994,7 @@ export const uiTranslations = {
       },
     },
     auth: {
+      heroHook: 'Aus Reels wird dein Kochbuch',
       signInTitle: 'Melde dich an, um deine Rezepte zu verwalten',
       unexpectedError: 'Ein unerwarteter Fehler ist aufgetreten.',
       signOut: 'Abmelden',
@@ -2694,6 +2695,7 @@ export const uiTranslations = {
       },
     },
     auth: {
+      heroHook: 'Turn Reels into your cookbook',
       signInTitle: 'Sign in to manage your recipes',
       unexpectedError: 'An unexpected error occurred.',
       signOut: 'Sign Out',

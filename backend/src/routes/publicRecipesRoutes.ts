@@ -1,13 +1,39 @@
-﻿import { Router, Request, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import {
   getPublicDemoRecipes,
   getPublicRecipeRecommendations,
+  getPublicShowcaseCovers,
   getRecipe,
   addToLibrary,
   isInLibrary,
   getSavedRecipe,
 } from '../db.js';
 import { AppError, sendAppError } from '../errors.js';
+
+/**
+ * Unauthenticated public routes (mounted before requireAuth).
+ */
+export const publicShowcaseRoutes = Router();
+
+/**
+ * GET /api/public/showcase-covers
+ * Returns a random sample of recent AI recipe covers for the login screen carousel.
+ */
+publicShowcaseRoutes.get('/public/showcase-covers', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const rawLimit = Number(req.query.limit) || 10;
+    const limit = Math.min(Math.max(3, rawLimit), 16);
+    const covers = await getPublicShowcaseCovers(limit, 50);
+    res.set('Cache-Control', 'public, max-age=60');
+    res.status(200).json({
+      success: true,
+      covers,
+    });
+  } catch (error: unknown) {
+    if (!(error instanceof AppError)) console.error('Error fetching public showcase covers:', error);
+    sendAppError(res, error);
+  }
+});
 
 export const publicRecipesRoutes = Router();
 
