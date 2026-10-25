@@ -28,7 +28,7 @@ export default function CookHistoryTimeline({ history }: CookHistoryTimelineProp
 
   if (!history || history.count === 0) {
     return (
-      <div className="rounded-3xl bg-white dark:bg-gray-900 p-6 text-center border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] space-y-2">
+      <div className="rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] p-6 text-center border-none space-y-2">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mb-1">
           <UtensilsCrossed className="h-6 w-6 stroke-[1.75]" />
         </div>
@@ -56,7 +56,7 @@ export default function CookHistoryTimeline({ history }: CookHistoryTimelineProp
   };
 
   return (
-    <div className="rounded-3xl bg-white dark:bg-gray-900 p-4 sm:p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] space-y-2.5">
+    <div className="pt-2 space-y-2.5">
       {/* Clean section header */}
       <div className="flex items-center gap-2 pb-0.5">
         <h4 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">
@@ -77,7 +77,7 @@ export default function CookHistoryTimeline({ history }: CookHistoryTimelineProp
           return (
             <div
               key={item.id}
-              className="rounded-2xl bg-gray-50/60 dark:bg-gray-800/30 p-2.5 sm:p-3 flex items-center gap-3 border-none transition-colors hover:bg-gray-100/60 dark:hover:bg-gray-800/50"
+              className="rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] p-2.5 sm:p-3 flex items-center gap-3 border-none transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.06]"
             >
               {/* Photo thumbnail */}
               {item.photoUrl ? (

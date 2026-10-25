@@ -171,7 +171,7 @@ export const PublicRecipePreviewModal: React.FC<PublicRecipePreviewModalProps> =
               )}
               {recipe.category && (
                 <div className="flex items-center gap-2 pt-1">
-                  <span className="bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 text-xs font-bold px-3 py-1.5 min-h-[34px] rounded-full select-none inline-flex items-center gap-1.5 shadow-[0_1px_4px_rgba(0,0,0,0.04)] border-none">
+                  <span className="bg-black/[0.04] dark:bg-white/[0.06] text-gray-700 dark:text-gray-200 text-xs font-bold px-3 py-1.5 min-h-[34px] rounded-full select-none inline-flex items-center gap-1.5 border-none">
                     <span className="text-base leading-none">
                       {getRecipeCategoryEmoji(recipe.category)}
                     </span>
@@ -207,7 +207,7 @@ export const PublicRecipePreviewModal: React.FC<PublicRecipePreviewModalProps> =
         </div>
 
         {/* Sticky Action Dock */}
-        <div className="shrink-0 p-4 pt-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-black/5 dark:border-white/5">
+        <div className="shrink-0 p-4 pt-3 bg-[#f7f4ed]/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-black/5 dark:border-white/5">
           <button
             type="button"
             onClick={handleActionClick}
