@@ -80,6 +80,11 @@ export default function AdminPage() {
       if (res?.error) {
         setAuthError(res.error.message || 'Failed to initiate Google sign-in.');
         setSubmitting(false);
+        return;
+      }
+      if (res?.data?.url) {
+        window.location.href = res.data.url;
+        return;
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
