@@ -1,8 +1,76 @@
 import type { Recipe } from '@cookbook/shared';
 import { db } from './drizzle.js';
 import { recipes, userRecipes } from './schema/recipes.js';
-import { eq, and, desc, asc } from 'drizzle-orm';
-import { rowToRecipe } from './recipesMappers.js';
+import { eq, and, desc, asc, isNotNull } from 'drizzle-orm';
+import { rowToRecipe, sanitizeStorageUrl } from './recipesMappers.js';
+
+export interface PublicShowcaseCover {
+  id: string;
+  title: string;
+  imageUrl: string;
+  emoji?: string | null;
+}
+
+/**
+ * Deduplicates cover items by imageUrl and returns a random sample of up to `limit` items
+ * using Fisher-Yates shuffle.
+ */
+export function pickRandomShowcaseCovers(
+  pool: PublicShowcaseCover[],
+  limit = 10,
+  randomFn: () => number = Math.random
+): PublicShowcaseCover[] {
+  const seenUrls = new Set<string>();
+  const unique: PublicShowcaseCover[] = [];
+  for (const item of pool) {
+    const cleanUrl = item.imageUrl?.trim();
+    if (!cleanUrl || seenUrls.has(cleanUrl)) continue;
+    seenUrls.add(cleanUrl);
+    unique.push({ ...item, imageUrl: cleanUrl });
+  }
+
+  const copy = [...unique];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(randomFn() * (i + 1));
+    const tmp = copy[i];
+    copy[i] = copy[j];
+    copy[j] = tmp;
+  }
+
+  return copy.slice(0, Math.max(0, limit));
+}
+
+/**
+ * Fetches a random selection of recent recipes with AI-generated cover photos
+ * for the unauthenticated login screen showcase carousel.
+ */
+export async function getPublicShowcaseCovers(limit = 10, poolSize = 50): Promise<PublicShowcaseCover[]> {
+  const rows = await db
+    .select({
+      id: recipes.id,
+      title: recipes.title,
+      imageUrl: recipes.imageUrl,
+      emoji: recipes.emoji,
+    })
+    .from(recipes)
+    .where(and(eq(recipes.isRecipe, true), eq(recipes.isAiCover, true), isNotNull(recipes.imageUrl)))
+    .orderBy(desc(recipes.createdAt))
+    .limit(poolSize);
+
+  const normalizedPool: PublicShowcaseCover[] = [];
+  for (const row of rows) {
+    const sanitized = sanitizeStorageUrl(row.imageUrl);
+    if (!sanitized) continue;
+    normalizedPool.push({
+      id: row.id,
+      title: row.title,
+      imageUrl: sanitized,
+      emoji: row.emoji ?? null,
+    });
+  }
+
+  return pickRandomShowcaseCovers(normalizedPool, limit);
+}
 
 /**
  * Deterministically picks 2 recipes out of the available pool based on day seed.
@@ -14,7 +82,7 @@ export function getDailyRotatedRecipes(recipeList: Recipe[], date: Date = new Da
 
   // Calculate day number since Unix Epoch (UTC calendar day)
   const dayNumber = Math.floor(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) / 86400000);
-  
+
   // Deterministic offset
   const startIndex = Math.abs(dayNumber) % recipeList.length;
   const selected: Recipe[] = [];

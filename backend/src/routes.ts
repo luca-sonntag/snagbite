@@ -10,11 +10,14 @@ import { adminRoutes } from './routes/adminRoutes.js';
 import { mealPlanRoutes } from './routes/mealPlanRoutes.js';
 import { pantryRoutes } from './routes/pantryRoutes.js';
 import { shoppingListRoutes } from './routes/shoppingListRoutes.js';
-import { publicRecipesRoutes } from './routes/publicRecipesRoutes.js';
+import { publicRecipesRoutes, publicShowcaseRoutes } from './routes/publicRecipesRoutes.js';
 
 export const apiRouter = Router();
 
-// Apply auth middleware to all /api routes
+// Public unauthenticated endpoints (e.g. login screen showcase covers)
+apiRouter.use(publicShowcaseRoutes);
+
+// Apply auth middleware to all protected /api routes
 apiRouter.use(requireAuth);
 
 // Mount domain sub-routers

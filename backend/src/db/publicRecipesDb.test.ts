@@ -1,6 +1,6 @@
-﻿import { describe, it } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { getDailyRotatedRecipes } from './publicRecipesDb.js';
+import { getDailyRotatedRecipes, pickRandomShowcaseCovers, type PublicShowcaseCover } from './publicRecipesDb.js';
 import type { Recipe } from '@cookbook/shared';
 
 describe('getDailyRotatedRecipes', () => {
@@ -32,5 +32,28 @@ describe('getDailyRotatedRecipes', () => {
     // Same day should yield identical result
     const result1Repeat = getDailyRotatedRecipes(dummyRecipes, new Date('2026-09-06T23:59:59Z'), 2);
     assert.deepEqual(result1.map(r => r.title), result1Repeat.map(r => r.title));
+  });
+});
+
+describe('pickRandomShowcaseCovers', () => {
+  const samplePool: PublicShowcaseCover[] = [
+    { id: '1', title: 'Pasta Carbonara', imageUrl: '/storage/recipe-covers/1.jpg', emoji: '🍝' },
+    { id: '2', title: 'Duplicate URL', imageUrl: '/storage/recipe-covers/1.jpg', emoji: '🍝' },
+    { id: '3', title: 'Thai Curry', imageUrl: '/storage/recipe-covers/2.jpg', emoji: '🍛' },
+    { id: '4', title: 'Empty URL', imageUrl: '   ', emoji: '🥗' },
+    { id: '5', title: 'Ramen Bowl', imageUrl: '/storage/recipe-covers/3.jpg', emoji: '🍜' },
+    { id: '6', title: 'Tacos', imageUrl: '/storage/recipe-covers/4.jpg', emoji: '🌮' },
+  ];
+
+  it('deduplicates by imageUrl, filters empty URLs, and respects limit', () => {
+    const result = pickRandomShowcaseCovers(samplePool, 3, () => 0.5);
+    assert.equal(result.length, 3);
+    const urls = new Set(result.map((c) => c.imageUrl));
+    assert.equal(urls.size, 3);
+  });
+
+  it('returns all unique covers when pool is smaller than limit', () => {
+    const result = pickRandomShowcaseCovers(samplePool, 10, () => 0.2);
+    assert.equal(result.length, 4);
   });
 });
