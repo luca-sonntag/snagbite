@@ -190,6 +190,42 @@ export interface IngredientCatalogMetrics {
   topIngredients: TopIngredientItem[];
 }
 
+export interface RecipeIngredientSummary {
+  name: string;
+  amount?: string | number | null;
+  unit?: string | null;
+}
+
+export interface RecentExtractedRecipeItem {
+  id: string;
+  title: string;
+  emoji: string | null;
+  imageUrl: string | null;
+  sourceUrl: string | null;
+  sourceHandle: string | null;
+  origin: SourcePlatformKey;
+  platform: SourcePlatformKey;
+  prepTime: number | null;
+  cookTime: number | null;
+  servings: number | null;
+  calories: number | null;
+  proteinG: number | null;
+  carbsG: number | null;
+  fatG: number | null;
+  ingredientsCount: number;
+  instructionsCount: number;
+  ingredients: RecipeIngredientSummary[];
+  instructions: string[];
+  createdAt: string;
+  user: {
+    id: string;
+    email: string | null;
+    name: string | null;
+    tier: string;
+  } | null;
+  savedCount: number;
+}
+
 export interface AdminMetricsData {
   range: MetricsRange;
   users: {
@@ -235,5 +271,6 @@ export interface AdminMetricsData {
     errorRanking: ErrorReasonRankingItem[];
     topCreators: TopCreatorItem[];
     ingredientCatalog: IngredientCatalogMetrics;
+    recentRecipes?: RecentExtractedRecipeItem[];
   };
 }

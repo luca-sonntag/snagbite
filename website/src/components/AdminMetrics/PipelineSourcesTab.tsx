@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Globe, Recycle } from 'lucide-react';
 import type { AdminMetricsData, SourcePlatformKey } from './types';
 import { SpeedAndErrorCards } from './SpeedAndErrorCards';
+import { RecentRecipesTable } from './RecentRecipesTable';
 import { QueueAndFailedJobsCard } from './QueueAndFailedJobsCard';
 
 interface PipelineSourcesTabProps {
@@ -246,7 +247,16 @@ export function PipelineSourcesTab({
         platformBadges={PLATFORM_BADGES}
       />
 
-      {/* Row 4: Queue Status & Failed Jobs + Extractions per User */}
+      {/* Row 4: Recent Extracted Recipes with Extractor User */}
+      <RecentRecipesTable
+        isDe={isDe}
+        recipes={pipeline?.recentRecipes ?? []}
+        rangeLabel={rangeLabel}
+        formatDate={formatDate}
+        platformBadges={PLATFORM_BADGES}
+      />
+
+      {/* Row 5: Queue Status & Failed Jobs + Extractions per User */}
       <QueueAndFailedJobsCard
         isDe={isDe}
         metrics={metrics}
