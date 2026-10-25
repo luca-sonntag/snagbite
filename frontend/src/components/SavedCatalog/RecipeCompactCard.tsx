@@ -43,7 +43,7 @@ export default function RecipeCompactCard({
         hapticLight();
         onClick(e);
       }}
-      className={`group relative flex-1 min-w-0 flex items-stretch rounded-2xl bg-white dark:bg-gray-900/90 shadow-[0_2px_12px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 border-none cursor-pointer active:scale-[0.98] hover:shadow-md transition-all duration-150 select-none overflow-hidden ${
+      className={`group relative flex-1 min-w-0 flex items-stretch rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border-none cursor-pointer active:scale-[0.98] transition-all duration-150 select-none overflow-hidden ${
         isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
       }`}
       {...(!isCommunity ? (bindLongPress ?? {}) : {})}

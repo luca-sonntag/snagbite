@@ -67,7 +67,7 @@ export default function RecipeShowcaseCard({
           hapticLight();
           onOpenRecipe(e, job);
         }}
-        className={`group relative rounded-2xl overflow-hidden bg-white dark:bg-gray-900 shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 border-none flex items-stretch cursor-pointer active:scale-[0.98] hover:shadow-md transition-all duration-150 select-none ${
+        className={`group relative rounded-2xl overflow-hidden bg-black/[0.03] dark:bg-white/[0.04] border-none flex items-stretch cursor-pointer active:scale-[0.98] transition-all duration-150 select-none ${
           isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
         }`}
         {...(bindLongPress ?? {})}
@@ -120,7 +120,7 @@ export default function RecipeShowcaseCard({
           {/* Unified Bottom Meta - Duration left, Calories + Health Score right */}
           <div className="flex items-center justify-between gap-1.5 w-full text-[11px] font-medium mt-auto pt-1 select-none">
             {totalTime ? (
-              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
+              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/[0.04] dark:bg-white/[0.06] text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
                 <Clock className="w-2.5 h-2.5 text-gray-500 dark:text-gray-400 shrink-0" />
                 <span>{totalTime}</span>
               </span>

@@ -114,8 +114,8 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
         isSelected
           ? 'bg-emerald-500/10 ring-2 ring-emerald-500 shadow-sm'
           : isCooked
-          ? 'bg-white dark:bg-gray-900 opacity-75 shadow-2xs'
-          : 'bg-white dark:bg-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-md'
+          ? 'bg-black/[0.02] dark:bg-white/[0.03] opacity-75'
+          : 'bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.05] dark:hover:bg-white/[0.06]'
       } ${className}`}
       onClick={(e) => {
         hapticLight();
@@ -190,7 +190,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
             /* Arrow / Right Action Mode: Meta grouped on left with arrow or custom action on far right */
             <div className="flex items-center gap-2 mt-1 text-[11px] font-medium text-gray-500 dark:text-gray-400 select-none">
               {totalTimeStr && (
-                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
+                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/[0.05] dark:bg-white/[0.07] text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
                   <Clock className="w-2.5 h-2.5 text-gray-500 dark:text-gray-400 shrink-0" />
                   <span>{totalTimeStr}</span>
                 </span>
@@ -218,7 +218,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
               {/* Left Cluster: Time, Favorite Star, Remix Badge */}
               <div className="flex items-center gap-2 min-w-0 overflow-hidden">
                 {totalTimeStr && (
-                  <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
+                  <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/[0.05] dark:bg-white/[0.07] text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
                     <Clock className="w-2.5 h-2.5 text-gray-500 dark:text-gray-400 shrink-0" />
                     <span>{totalTimeStr}</span>
                   </span>
