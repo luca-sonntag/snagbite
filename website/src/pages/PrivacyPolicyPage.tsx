@@ -8,7 +8,7 @@ import { PartnersAndRightsSection } from './PrivacyPolicy/PartnersAndRightsSecti
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 py-8 md:py-12 flex flex-col gap-6">
+    <div className="w-full lg:w-[75%] mx-auto px-4 py-8 md:py-12 flex flex-col gap-6">
       <div>
         <Link
           to="/"

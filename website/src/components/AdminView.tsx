@@ -85,7 +85,7 @@ export default function AdminView({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex flex-col gap-6 font-sans text-gray-900">
+    <div className="w-full lg:w-[75%] mx-auto px-4 sm:px-6 py-6 sm:py-8 flex flex-col gap-6 font-sans text-gray-900">
       {/* Top Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-none">
         <div className="flex items-center gap-3">

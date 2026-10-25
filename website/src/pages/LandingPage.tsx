@@ -66,7 +66,7 @@ const HeroRecipeCard = () => (
 
 export default function LandingPage() {
   return (
-    <div className="w-full max-w-5xl mx-auto px-5 sm:px-6 py-8 sm:py-12 md:py-20 flex flex-col gap-16 md:gap-24 relative overflow-hidden">
+    <div className="w-full lg:w-[75%] mx-auto px-5 sm:px-6 py-8 sm:py-12 md:py-20 flex flex-col gap-16 md:gap-24 relative overflow-hidden">
       
       {/* Ambient background glows */}
       <div className="absolute top-10 left-10 w-72 h-72 bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full blur-3xl -z-10 pointer-events-none animate-pulse-slow"></div>

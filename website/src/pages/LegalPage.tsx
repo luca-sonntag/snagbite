@@ -5,7 +5,7 @@ import { Mail, Phone, MapPin, Building, ShieldAlert } from 'lucide-react';
 
 export default function LegalPage() {
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 py-8 md:py-12 flex flex-col gap-8">
+    <div className="w-full lg:w-[75%] mx-auto px-4 py-8 md:py-12 flex flex-col gap-8">
       <div>
         <Link to="/" className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1">
           ← Zurück zur Startseite

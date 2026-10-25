@@ -25,7 +25,7 @@ export default function App() {
       </main>
 
       <footer className="w-full py-8 bg-transparent mt-auto">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500 dark:text-gray-400">
+        <div className="w-full lg:w-[75%] mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500 dark:text-gray-400">
           <div className="flex items-center gap-2">
             <img src="/icon-192.png" alt="Snagbite Logo" className="w-5 h-5 rounded-md grayscale opacity-70" />
             <p>© {new Date().getFullYear()} Snagbite. Alle Rechte vorbehalten.</p>
