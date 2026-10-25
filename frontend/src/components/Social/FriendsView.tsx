@@ -49,7 +49,7 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
           {incomingRequests.map((r) => (
             <div
               key={r.friendshipId}
-              className="flex items-center gap-3 rounded-2xl border-none bg-white p-3.5 shadow-[0_2px_6px_rgba(0,0,0,0.03)] dark:bg-gray-900"
+              className="flex items-center gap-3 rounded-2xl border-none bg-black/[0.03] p-3.5 dark:bg-white/[0.04]"
             >
               <Avatar name={r.displayName} avatarUrl={r.avatarUrl} size={36} />
               <span className="min-w-0 flex-1 truncate font-bold text-gray-900 dark:text-white">
