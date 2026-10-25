@@ -1,4 +1,4 @@
-import { Card, Button } from '@heroui/react';
+import { Button } from '@heroui/react';
 import { ShoppingCart, BookOpen, Plus } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { hapticMedium, hapticLight } from '../../utils/haptics';
@@ -24,8 +24,8 @@ export default function ShoppingEmptyState({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full pt-4 pb-8 select-none">
-      <Card className="glass-panel p-8 sm:p-10 rounded-3xl border-none flex flex-col items-center text-center gap-6 w-full max-w-md mx-auto shadow-[0_4px_24px_rgba(0,0,0,0.06)] relative overflow-hidden">
+    <div className="flex flex-col items-center justify-center w-full pt-8 pb-8 select-none">
+      <div className="p-6 sm:p-8 flex flex-col items-center text-center gap-6 w-full max-w-md mx-auto relative">
         {/* Subtle Ambient Glows */}
         <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
         <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
@@ -69,7 +69,7 @@ export default function ShoppingEmptyState({
             </Button>
           )}
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

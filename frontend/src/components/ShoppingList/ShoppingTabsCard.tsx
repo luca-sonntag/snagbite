@@ -39,7 +39,7 @@ export const ShoppingTabsCard: React.FC<ShoppingTabsCardProps> = ({
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900 p-2 sm:p-2.5 rounded-3xl border-none shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col transition-all duration-200">
+    <div className="py-1 flex flex-col transition-all duration-200">
       {SHOW_PANTRY_TAB && (
         <ShoppingSegmentedTabs
           activeTab={activeTab}
@@ -50,7 +50,7 @@ export const ShoppingTabsCard: React.FC<ShoppingTabsCardProps> = ({
       )}
 
       {totalCount > 0 && (
-        <div className={SHOW_PANTRY_TAB ? 'px-1.5 pb-1' : 'px-1 py-0.5'}>
+        <div className={SHOW_PANTRY_TAB ? 'px-0.5 pb-1' : 'px-0.5 py-0.5'}>
           <ShoppingTabProgress
             checkedCount={checkedCount}
             totalCount={totalCount}
