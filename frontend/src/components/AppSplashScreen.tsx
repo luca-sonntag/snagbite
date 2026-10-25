@@ -85,7 +85,7 @@ export default function AppSplashScreen({ isReady, onFinished, message }: AppSpl
         </div>
 
         {/* App Title */}
-        <h1 className="mt-5 text-2xl font-black tracking-tight text-gray-900 dark:text-white">
+        <h1 className="mt-5 text-2xl font-black tracking-tight text-gray-900 dark:text-white font-sans">
           {t('app.title')}
         </h1>
 

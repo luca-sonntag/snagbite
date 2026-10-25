@@ -15,7 +15,7 @@ export interface AuthState {
   refreshTrialInfo: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signUp: (email: string, password: string) => Promise<{ error?: string; needsConfirmation?: boolean }>;
-  signInWithGoogle: () => Promise<{ error?: string }>;
+  signInWithGoogle: () => Promise<{ error?: string; cancelled?: boolean; redirecting?: boolean }>;
   signOut: () => Promise<void>;
   getAccessToken: () => Promise<string | null>;
   updateUserMetadata: (metadata: Record<string, any>) => Promise<{ error?: string }>;

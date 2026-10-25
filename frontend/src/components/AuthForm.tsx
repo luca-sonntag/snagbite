@@ -22,10 +22,12 @@ export default function AuthForm() {
       const result = await signInWithGoogle();
       if (result.error) {
         setError(result.error);
+        setSubmitting(false);
+      } else if (!result.redirecting) {
+        setSubmitting(false);
       }
     } catch {
       setError(t('auth.unexpectedError'));
-    } finally {
       setSubmitting(false);
     }
   };
@@ -41,18 +43,18 @@ export default function AuthForm() {
 
       <div className="w-full max-w-sm flex flex-col items-center gap-3.5 text-center relative z-10 my-auto">
         {/* Brand Header (+10% scaled logo & wordmark + App Hook) */}
-        <div className="flex flex-col items-center gap-1.5">
+        <div className="flex flex-col items-center gap-2">
           <div className="inline-flex items-center gap-3">
             <img
               src="/icon-512.png"
               className="w-11 h-11 object-contain drop-shadow-[0_6px_16px_rgba(16,185,129,0.25)]"
               alt="Snagbite"
             />
-            <h1 className="text-[33px] leading-none font-black text-emerald-500 dark:text-emerald-400 tracking-tight font-heading">
+            <h1 className="text-[33px] leading-none font-black text-emerald-500 dark:text-emerald-400 tracking-tight font-sans">
               {t('app.title')}
             </h1>
           </div>
-          <p className="text-base font-bold text-gray-800 dark:text-gray-100 tracking-tight font-heading">
+          <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight font-heading">
             {t('auth.heroHook')}
           </p>
         </div>

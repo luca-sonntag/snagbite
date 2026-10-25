@@ -7,18 +7,18 @@
 ## 1. 🌈 Farbpalette & Design Tokens
 
 ### App-Canvas & Oberflächen
-* **Light Mode:**
-  * **App-Canvas (Hintergrund):** `#f8fafc` (`slate-50`, definiert in `index.css` & `index.html`) — Kühles, klares Canvas-Grau, das aufstrebende weiße Karten (`#ffffff`) ohne störende Ränder plastisch hervortreten lässt.
+* **Light Mode (Warm Culinary Paper Palette):**
+  * **App-Canvas (Hintergrund):** `#faf8f5` (`gray-50` / `slate-50`, definiert in `index.css` & `index.html`) — Warmes Alabaster-/Kochbuch-Papierweiß, das aufstrebende weiße Karten (`#ffffff`) ohne störende Ränder plastisch und appetitlich hervortreten lässt.
   * **Karten & Oberflächen:** `#ffffff` (`bg-white`)
-  * **Subtile Kontur- & Pill-Flächen:** `bg-black/5` / `bg-gray-100`
-* **Dark Mode (Linear Onyx & Carbon Palette):**
-  * **App-Canvas (Hintergrund):** `#09090b` (`bg-gray-950` / `--color-gray-950`) — Tiefes, harmonisches Onyx-Schwarz.
-  * **Oberflächen Ebene 1 (Container):** `#121215` (`bg-gray-900` / `--color-gray-900`)
-  * **Karten & Panels Ebene 2:** `#1c1c21` (`bg-gray-800` / `--color-gray-800`)
-  * **Interaktive Buttons & Pills Ebene 3:** `#2b2b33` (`bg-gray-700` / `--color-gray-700`)
-  * **Subtile Haarlinien & Ringe:** `#3f3f46` (`--color-gray-600` / `ring-white/10`)
-  * **Muted Captions & Inaktive Icons:** `#71717a` (`--color-gray-500`)
-  * **Sekundärer Text:** `#a1a1aa` (`--color-gray-400`)
+  * **Subtile Kontur- & Pill-Flächen:** `bg-black/5` / `bg-gray-100` (`#f3f1ed`, Warm Linen)
+* **Dark Mode (Warm Espresso-Onyx Palette):**
+  * **App-Canvas (Hintergrund):** `#0c0b0a` (`bg-gray-950` / `--color-gray-950`) — Tiefes, warmes Espresso-Onyx-Schwarz.
+  * **Oberflächen Ebene 1 (Container):** `#141311` (`bg-gray-900` / `--color-gray-900`)
+  * **Karten & Panels Ebene 2:** `#201e1c` (`bg-gray-800` / `--color-gray-800`)
+  * **Interaktive Buttons & Pills Ebene 3:** `#302d2a` (`bg-gray-700` / `--color-gray-700`)
+  * **Subtile Haarlinien & Ringe:** `#44403c` (`--color-gray-600` / `ring-white/10`)
+  * **Muted Captions & Inaktive Icons:** `#78716c` (`--color-gray-500`)
+  * **Sekundärer Text:** `#a8a29e` (`--color-gray-400`)
 
 ### Akzentfarben
 * **Primary Accent & Brand-Farbe (Pure Emerald):** `#10b981` (`emerald-500`) / `emerald-600` (Light)
@@ -51,7 +51,9 @@
 
 ## 2. 🔤 Typografie & Redaktionelle Hierarchie
 
-* **Schriftart:** `Outfit` (Self-hosted WOFF2 für 100% DSGVO-Konformität, Fallback `system-ui, -apple-system, sans-serif`). Überschriften nutzen `font-heading` (`Outfit`).
+* **Schriftarten-Paarung (100% DSGVO-konform lokal als WOFF2 in `public/fonts/`):**
+  * **Headlines & Editorial (`--font-heading` / `Fraunces`):** Warme kulinarische Editorial-Serif für Seiten-Header (`h1`, `h2`), Magazin-Aufmacher, den Login-Hook und Rezepttitel (`font-heading`). Die `Snagbite`-Wortmarke neben dem App-Icon bleibt explizit in `font-sans` (`Outfit Black`).
+  * **UI, Body & Zahlen (`--font-sans` / `Outfit`):** Klare geometrische Sans-Serif für Buttons, Mengen, Einheiten, Nährwert-Pills, Timer, Navigation und Fließtexte.
 * **Redaktionelle Headlines & Begrüßung:**
   * **Kontextuelles Eyebrow-Label:** `text-[11px] font-bold tracking-wider uppercase text-emerald-600 dark:text-emerald-400`. Begrüßt zeit- und wochentagsabhängig (z. B. *„SCHÖNEN SONNTAGABEND, TEST“*).
   * **Großer Magazin-Aufmacher:** `text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-tight mt-0.5`. Konkrete situationsbezogene Inspiration (z. B. *„Lust auf einen späten Snack?“*).
