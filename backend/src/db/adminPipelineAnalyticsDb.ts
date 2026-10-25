@@ -17,12 +17,13 @@ import {
   computeSpeedBucket,
   toIconSlug,
 } from './adminAnalyticsHelpers.js';
+import { getRecentExtractedRecipes } from './adminRecentRecipesDb.js';
 
 export async function getPipelineAndCatalogAnalytics(
   since: Date | null = null,
   avgExtractionCostUsd = 0.008,
 ): Promise<PipelineAndCatalogAnalytics> {
-  const [jobRows, recipeRows, userRecipeRows, mappingRows, topMappings] = await Promise.all([
+  const [jobRows, recipeRows, userRecipeRows, mappingRows, topMappings, recentRecipes] = await Promise.all([
     db
       .select({
         kind: jobs.kind,
@@ -75,6 +76,7 @@ export async function getPipelineAndCatalogAnalytics(
       .from(ingredientMappings)
       .orderBy(desc(ingredientMappings.hitCount))
       .limit(20),
+    getRecentExtractedRecipes(since, 50),
   ]);
 
   const pct = (part: number, total: number): number =>
@@ -265,5 +267,6 @@ export async function getPipelineAndCatalogAnalytics(
         iconSlug: toIconSlug(item.mappingKey),
       })),
     },
+    recentRecipes,
   };
 }
