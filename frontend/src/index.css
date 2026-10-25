@@ -99,7 +99,7 @@ body {
 }
 
 /* Editorial serif typography for page headers, magazine greetings, and recipe titles */
-:where(h1, h2),
+:where(h1:not(.font-sans), h2:not(.font-sans)),
 .font-heading {
   font-family: var(--font-heading);
 }
