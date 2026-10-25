@@ -18,8 +18,13 @@ const configuredOrigins = (process.env.CORS_ORIGIN || '')
   .filter(Boolean);
 
 const isProduction = process.env.NODE_ENV === 'production';
-const appUrl = process.env.APP_URL || 'http://localhost:3000';
-const isSnagbiteDomain = appUrl.includes('snagbite.app');
+const rawAppUrl = process.env.APP_URL || 'http://localhost:3000';
+// In local development, never force Better-Auth's baseURL or OAuth callbacks to the live domain
+const appUrl =
+  !isProduction && rawAppUrl.includes('snagbite.app')
+    ? `http://localhost:${process.env.PORT || 3000}`
+    : rawAppUrl;
+const isSnagbiteDomain = isProduction && appUrl.includes('snagbite.app');
 
 const trustedOrigins = [
   'http://localhost:5173',
