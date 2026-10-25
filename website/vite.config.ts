@@ -13,6 +13,10 @@ export default defineConfig({
         target: 'http://127.0.0.1:3000',
         changeOrigin: true,
       },
+      '/storage': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true,
+      },
     },
   },
   preview: {
@@ -20,6 +24,10 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true,
+      },
+      '/storage': {
         target: 'http://127.0.0.1:3000',
         changeOrigin: true,
       },
