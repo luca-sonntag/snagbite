@@ -31,22 +31,30 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-8 bg-gray-50 dark:bg-gray-950 transition-colors duration-300 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-between px-6 pt-8 pb-[max(1.25rem,var(--safe-area-inset-bottom))] bg-gray-50 dark:bg-gray-950 transition-colors duration-300 relative overflow-hidden">
       {/* Premium Ambient Glow Blobs */}
       <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-emerald-500/10 dark:bg-emerald-500/5 blur-3xl rounded-full pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-80 h-80 bg-teal-500/10 dark:bg-teal-500/5 blur-3xl rounded-full pointer-events-none" />
 
-      <div className="w-full max-w-sm flex flex-col items-center gap-3.5 text-center relative z-10">
-        {/* Brand Header (+10% scaled logo & wordmark) */}
-        <div className="inline-flex items-center gap-3">
-          <img
-            src="/icon-512.png"
-            className="w-11 h-11 object-contain drop-shadow-[0_6px_16px_rgba(16,185,129,0.25)]"
-            alt="Snagbite"
-          />
-          <h1 className="text-[33px] leading-none font-black text-emerald-500 dark:text-emerald-400 tracking-tight font-heading">
-            {t('app.title')}
-          </h1>
+      {/* Top spacer to keep main block centered while footer sits at bottom edge */}
+      <div aria-hidden="true" />
+
+      <div className="w-full max-w-sm flex flex-col items-center gap-3.5 text-center relative z-10 my-auto">
+        {/* Brand Header (+10% scaled logo & wordmark + App Hook) */}
+        <div className="flex flex-col items-center gap-1.5">
+          <div className="inline-flex items-center gap-3">
+            <img
+              src="/icon-512.png"
+              className="w-11 h-11 object-contain drop-shadow-[0_6px_16px_rgba(16,185,129,0.25)]"
+              alt="Snagbite"
+            />
+            <h1 className="text-[33px] leading-none font-black text-emerald-500 dark:text-emerald-400 tracking-tight font-heading">
+              {t('app.title')}
+            </h1>
+          </div>
+          <p className="text-base font-bold text-gray-800 dark:text-gray-100 tracking-tight font-heading">
+            {t('auth.heroHook')}
+          </p>
         </div>
 
         {/* Auto-advancing Recipe Cover Carousel */}
@@ -114,31 +122,30 @@ export default function AuthForm() {
             <span className="leading-snug">{error || authError}</span>
           </div>
         )}
-
-        {/* Legal consent notice — shown before any data processing (incl. the
-            silent auto sign-in, which is gated on this having been seen). */}
-        <p className="text-[11px] leading-relaxed text-gray-400 dark:text-gray-500 max-w-[280px]">
-          {t('auth.consentPrefix')}
-          <a
-            href={LEGAL_URLS.terms}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-semibold text-gray-500 dark:text-gray-400 underline underline-offset-2 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-          >
-            {t('auth.consentTermsLink')}
-          </a>
-          {t('auth.consentConjunction')}
-          <a
-            href={LEGAL_URLS.privacy}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-semibold text-gray-500 dark:text-gray-400 underline underline-offset-2 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-          >
-            {t('auth.consentPrivacyLink')}
-          </a>
-          {t('auth.consentSuffix')}
-        </p>
       </div>
+
+      {/* Legal consent notice pinned to the bottom edge of the screen */}
+      <p className="text-[11px] leading-relaxed text-gray-400 dark:text-gray-500 max-w-[280px] text-center relative z-10 pt-4">
+        {t('auth.consentPrefix')}
+        <a
+          href={LEGAL_URLS.terms}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-gray-500 dark:text-gray-400 underline underline-offset-2 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+        >
+          {t('auth.consentTermsLink')}
+        </a>
+        {t('auth.consentConjunction')}
+        <a
+          href={LEGAL_URLS.privacy}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-gray-500 dark:text-gray-400 underline underline-offset-2 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+        >
+          {t('auth.consentPrivacyLink')}
+        </a>
+        {t('auth.consentSuffix')}
+      </p>
     </div>
   );
 }
