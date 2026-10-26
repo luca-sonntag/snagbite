@@ -41,7 +41,7 @@ export default function FriendsListSection() {
 
   return (
     <div className="flex flex-col gap-2.5">
-      <h2 className="font-heading font-bold text-sm text-gray-900 dark:text-white px-1">
+      <h2 className="font-bold text-sm text-gray-900 dark:text-white px-1 font-sans">
         {t('app.social.friends.yourFriends')}
       </h2>
 

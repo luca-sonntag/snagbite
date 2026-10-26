@@ -85,7 +85,7 @@ export default function FeedEventCard({
           <Avatar name={item.user.displayName} avatarUrl={item.user.avatarUrl} size={42} />
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className="font-heading font-bold text-gray-900 dark:text-white text-sm truncate">
+              <span className="font-bold text-gray-900 dark:text-white text-sm truncate font-sans">
                 {item.user.displayName}
               </span>
               <span className="shrink-0 text-gray-400 dark:text-gray-500 text-[10px]">·</span>

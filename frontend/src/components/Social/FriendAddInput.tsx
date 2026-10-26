@@ -62,7 +62,7 @@ export default function FriendAddInput({ pendingInviteCode, onInviteConsumed }: 
 
   return (
     <div>
-      <h2 className="mb-2.5 font-heading text-sm font-bold text-gray-900 dark:text-white">
+      <h2 className="mb-2.5 text-sm font-bold text-gray-900 dark:text-white font-sans">
         {t('app.social.friends.addTitle')}
       </h2>
       <div className="flex items-center gap-2">

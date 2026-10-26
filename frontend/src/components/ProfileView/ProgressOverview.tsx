@@ -97,10 +97,10 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
               {getRankIcon(level)}
             </div>
             <div>
-              <div className="text-xs font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              <div className="text-xs font-bold tracking-tight text-emerald-600 dark:text-emerald-400 font-heading">
                 {rankTitle}
               </div>
-              <h2 className="text-lg font-extrabold text-gray-900 dark:text-white">
+              <h2 className="text-lg font-extrabold text-gray-900 dark:text-white font-sans">
                 {t('app.gamification.level', { level })}
               </h2>
             </div>

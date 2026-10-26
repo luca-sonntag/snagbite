@@ -43,7 +43,7 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
       {/* 3. Incoming friend requests */}
       {incomingRequests.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h2 className="font-heading text-sm font-bold text-gray-900 dark:text-white px-1">
+          <h2 className="text-sm font-bold text-gray-900 dark:text-white px-1 font-sans">
             {t('app.social.friends.requests')}
           </h2>
           <div className="flex flex-col gap-1.5">
