@@ -89,18 +89,18 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
 
   return (
     <div className="flex flex-col gap-6">
-      {/* 1. Hero Level & Culinary Rank Card */}
-      <div className="rounded-3xl bg-white dark:bg-gray-900 p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
+      {/* 1. Hero Level & Culinary Rank (Open Editorial) */}
+      <div className="py-2 px-0.5 pb-2">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm shrink-0">
               {getRankIcon(level)}
             </div>
             <div>
-              <div className="text-xs font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              <div className="text-xs font-bold tracking-tight text-emerald-600 dark:text-emerald-400 font-heading">
                 {rankTitle}
               </div>
-              <h2 className="text-lg font-extrabold text-gray-900 dark:text-white">
+              <h2 className="text-lg font-extrabold text-gray-900 dark:text-white font-sans">
                 {t('app.gamification.level', { level })}
               </h2>
             </div>
@@ -172,10 +172,10 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
         />
       </div>
 
-      {/* 2. "Deine Koch-Galerie" (Food Photo Feed) */}
-      <div className="rounded-3xl bg-white dark:bg-gray-900 p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] space-y-4">
+      {/* 2. "Deine Koch-Galerie" (Food Photo Feed - Open Canvas) */}
+      <div className="space-y-2 pt-1">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-gray-900 dark:text-white">
+          <h2 className="text-xs font-medium text-gray-500 dark:text-gray-400 font-sans px-0.5">
             {t('app.gamification.galleryTitle')}
           </h2>
           {recentPhotos.length > 0 && (
@@ -222,10 +222,10 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
         )}
       </div>
 
-      {/* 3. Badges Grid (Flat & Clean) */}
-      <div className="rounded-3xl bg-white dark:bg-gray-900 p-5 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] space-y-4">
+      {/* 3. Badges Grid (Open Canvas) */}
+      <div className="space-y-2 pt-1">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-gray-900 dark:text-white">
+          <h2 className="text-xs font-medium text-gray-500 dark:text-gray-400 font-sans px-0.5">
             {t('app.gamification.badgesTitle')}
           </h2>
           <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
@@ -247,7 +247,7 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
                 }}
                 className={`flex flex-col items-center justify-center h-[120px] w-full p-2 gap-1 text-center transition-all cursor-pointer outline-none active:scale-95 rounded-2xl border-none ${isEarned
                   ? 'bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-200'
-                  : 'bg-gray-100 dark:bg-white/5 opacity-65 hover:opacity-85 text-gray-400'
+                  : 'bg-transparent ring-1 ring-black/[0.06] dark:ring-white/[0.08] opacity-70 hover:opacity-90 text-gray-400'
                   }`}
               >
                 <div className="relative flex items-center justify-center shrink-0">
@@ -357,7 +357,7 @@ function BadgeDetailModal({
 
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6 transition-opacity animate-in fade-in duration-200">
-      <div className="relative w-full max-w-sm rounded-3xl bg-white dark:bg-gray-900 p-6 text-gray-900 dark:text-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 text-center space-y-4">
+      <div className="relative w-full max-w-sm rounded-3xl bg-gray-50 dark:bg-gray-950 p-6 text-gray-900 dark:text-white shadow-2xl overflow-hidden border border-black/5 dark:border-white/5 animate-in zoom-in-95 duration-200 text-center space-y-4">
         <Button
           onPress={() => {
             hapticLight();
@@ -365,7 +365,7 @@ function BadgeDetailModal({
           }}
           isIconOnly
           aria-label={t('dialog.cancelDefault') || 'Schließen'}
-          className="absolute top-4 right-4 h-10 w-10 min-w-[44px] min-h-[44px] p-0 text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors border-none"
+          className="absolute top-4 right-4 h-10 w-10 min-w-[44px] min-h-[44px] p-0 text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-full bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.10] transition-colors border-none"
         >
           <X className="w-5 h-5" />
         </Button>
@@ -399,12 +399,12 @@ function BadgeDetailModal({
 
         {/* Progress or Earned Date */}
         {!isEarned && progress && (
-          <div className="rounded-2xl bg-gray-100 dark:bg-white/5 p-3.5 space-y-2">
+          <div className="rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/5 dark:border-white/10 p-3.5 space-y-2">
             <div className="flex justify-between text-xs font-semibold text-gray-600 dark:text-gray-300">
               <span>{t('app.gamification.badgeDetail.progressLabel', { current: progress.current, total: progress.total })}</span>
               <span>{Math.round((progress.current / progress.total) * 100)}%</span>
             </div>
-            <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/10">
               <div
                 className="h-full rounded-full bg-emerald-500 transition-[width] duration-500"
                 style={{ width: `${(progress.current / progress.total) * 100}%` }}

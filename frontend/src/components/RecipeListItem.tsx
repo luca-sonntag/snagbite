@@ -106,16 +106,16 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
 
   return (
     <div
-      className={`group w-full shrink-0 rounded-2xl flex gap-3 cursor-pointer active:scale-[0.98] transition-all duration-150 select-none border-none touch-manipulation overflow-hidden ${
+      className={`group w-full shrink-0 flex gap-3 cursor-pointer active:scale-[0.98] transition-all duration-150 select-none touch-manipulation overflow-hidden ${
         flushImage
-          ? 'p-0 items-stretch min-h-[82px] sm:min-h-[88px]'
-          : 'p-2.5 sm:p-3 items-center min-h-[76px] sm:min-h-[84px]'
+          ? 'p-0 items-stretch min-h-[82px] sm:min-h-[88px] rounded-2xl border-none'
+          : 'py-2.5 px-1 items-center min-h-[76px] sm:min-h-[84px] border-b border-black/[0.06] dark:border-white/[0.08] last:border-b-0'
       } ${
         isSelected
-          ? 'bg-emerald-500/10 ring-2 ring-emerald-500 shadow-sm'
+          ? 'rounded-2xl px-2.5 bg-emerald-500/10 ring-2 ring-emerald-500 shadow-sm border-none'
           : isCooked
-          ? 'bg-white dark:bg-gray-900 opacity-75 shadow-2xs'
-          : 'bg-white dark:bg-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-md'
+          ? 'bg-transparent opacity-70'
+          : 'bg-transparent'
       } ${className}`}
       onClick={(e) => {
         hapticLight();
@@ -190,7 +190,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
             /* Arrow / Right Action Mode: Meta grouped on left with arrow or custom action on far right */
             <div className="flex items-center gap-2 mt-1 text-[11px] font-medium text-gray-500 dark:text-gray-400 select-none">
               {totalTimeStr && (
-                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
+                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/[0.05] dark:bg-white/[0.07] text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
                   <Clock className="w-2.5 h-2.5 text-gray-500 dark:text-gray-400 shrink-0" />
                   <span>{totalTimeStr}</span>
                 </span>
@@ -218,7 +218,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
               {/* Left Cluster: Time, Favorite Star, Remix Badge */}
               <div className="flex items-center gap-2 min-w-0 overflow-hidden">
                 {totalTimeStr && (
-                  <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
+                  <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/[0.05] dark:bg-white/[0.07] text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
                     <Clock className="w-2.5 h-2.5 text-gray-500 dark:text-gray-400 shrink-0" />
                     <span>{totalTimeStr}</span>
                   </span>

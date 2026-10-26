@@ -58,15 +58,15 @@ export default function RecipePosterCard({
       {remixCount > 0 && (
         <>
           {remixCount > 1 && (
-            <div className="absolute -top-2 inset-x-3.5 h-full rounded-2xl bg-gray-100 dark:bg-gray-800 border-none shadow-[0_1px_3px_rgba(0,0,0,0.02)] -z-20 pointer-events-none transition-transform" />
+            <div className="absolute -top-2 inset-x-3.5 aspect-[4/3] rounded-2xl bg-black/[0.06] dark:bg-white/[0.08] border-none -z-20 pointer-events-none transition-transform" />
           )}
-          <div className="absolute -top-1 inset-x-2 h-full rounded-2xl bg-gray-50 dark:bg-gray-800/80 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] -z-10 pointer-events-none transition-transform" />
+          <div className="absolute -top-1 inset-x-2 aspect-[4/3] rounded-2xl bg-black/[0.04] dark:bg-white/[0.05] border-none -z-10 pointer-events-none transition-transform" />
         </>
       )}
 
       <div
-        className={`w-full h-full rounded-2xl overflow-hidden cursor-pointer active:scale-[0.96] transition-transform duration-150 ease-out select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 border-none ${
-          isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
+        className={`w-full h-full rounded-2xl cursor-pointer active:scale-[0.96] transition-transform duration-150 ease-out select-none flex flex-col border-none ${
+          isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10 p-1 -m-1' : ''
         }`}
         onClick={(e) => {
           hapticLight();
@@ -75,7 +75,7 @@ export default function RecipePosterCard({
         {...(bindLongPress ?? {})}
       >
         {/* Cover - 100% clean pristine photo presentation */}
-        <div className="relative w-full aspect-[4/3] bg-black/5 dark:bg-white/5 overflow-hidden shrink-0">
+        <div className="relative w-full aspect-[4/3] rounded-2xl bg-black/5 dark:bg-white/5 overflow-hidden shrink-0 shadow-[0_4px_14px_rgba(0,0,0,0.06)] ring-1 ring-black/5 dark:ring-white/10">
           <CachedImage
             src={r.imageUrl || r.imageUrls?.[0]}
             emoji={r.emoji}
@@ -122,16 +122,16 @@ export default function RecipePosterCard({
           ) : null}
         </div>
 
-        {/* Meta: Title & coupled punchy info pills */}
-        <div className="flex flex-col p-2.5 sm:p-3 flex-1 justify-between gap-1.5">
+        {/* Meta: Title & coupled punchy info pills directly on canvas */}
+        <div className="flex flex-col pt-2 px-0.5 flex-1 justify-between gap-1.5">
           <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2">
             {r.title}
           </h4>
           {(totalTime || caloriesFormatted || (r.servings && r.servings > 0) || (r.healthScore !== undefined && r.healthScore !== null)) && (
-            <div className="flex items-center justify-between gap-1.5 w-full text-[11px] font-medium mt-auto pt-1 select-none">
-              {/* Links: Dauer (grauer Pill) */}
+            <div className="flex items-center justify-between gap-1.5 w-full text-[11px] font-medium mt-auto pt-0.5 select-none">
+              {/* Links: Dauer (dezenter Pill) */}
               {totalTime ? (
-                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
+                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/[0.04] dark:bg-white/[0.06] text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
                   <Clock className="w-2.5 h-2.5 text-gray-500 dark:text-gray-400 shrink-0" />
                   <span>{totalTime}</span>
                 </span>

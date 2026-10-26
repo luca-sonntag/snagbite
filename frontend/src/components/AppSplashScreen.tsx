@@ -67,9 +67,10 @@ export default function AppSplashScreen({ isReady, onFinished, message }: AppSpl
     <div
       role="status"
       aria-live="polite"
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-950 select-none transition-all duration-300 ease-out ${
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-950 select-none transition-all duration-300 ease-out font-sans ${
         isExiting ? 'opacity-0 scale-[1.02] pointer-events-none' : 'opacity-100 scale-100'
       }`}
+      style={{ fontFamily: "'Outfit', var(--font-sans), system-ui, sans-serif" }}
     >
       {/* Ambient Emerald Glow Aura */}
       <div className="absolute w-72 h-72 bg-emerald-500/15 dark:bg-emerald-500/10 blur-3xl rounded-full pointer-events-none animate-glow-breathe" />
@@ -85,7 +86,10 @@ export default function AppSplashScreen({ isReady, onFinished, message }: AppSpl
         </div>
 
         {/* App Title */}
-        <h1 className="mt-5 text-2xl font-black tracking-tight text-gray-900 dark:text-white">
+        <h1
+          className="mt-5 text-2xl font-black tracking-tight text-gray-900 dark:text-white font-sans"
+          style={{ fontFamily: "'Outfit', var(--font-sans), system-ui, sans-serif" }}
+        >
           {t('app.title')}
         </h1>
 
@@ -99,13 +103,17 @@ export default function AppSplashScreen({ isReady, onFinished, message }: AppSpl
         {/* Rotating Microcopy or Custom Status Message */}
         <div className="h-6 mt-3 flex items-center justify-center">
           {message ? (
-            <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 animate-pulse text-center px-4">
+            <p
+              className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 animate-pulse text-center px-4"
+              style={{ fontFamily: "'Outfit', var(--font-sans), system-ui, sans-serif" }}
+            >
               {message}
             </p>
           ) : (
             <p
               key={quoteIndex}
               className="text-xs font-semibold text-gray-500 dark:text-gray-400 animate-fade-in text-center px-4"
+              style={{ fontFamily: "'Outfit', var(--font-sans), system-ui, sans-serif" }}
             >
               {messages[quoteIndex]}
             </p>

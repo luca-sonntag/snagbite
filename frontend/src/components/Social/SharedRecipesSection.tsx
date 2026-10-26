@@ -62,7 +62,7 @@ export default function SharedRecipesSection({ onRecipeSaved }: SharedRecipesSec
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1.5">
         {sharedRecipes.map((item) => {
           return (
             <div
@@ -78,7 +78,7 @@ export default function SharedRecipesSection({ onRecipeSaved }: SharedRecipesSec
                   setPreviewRecipe(item.recipe);
                 }
               }}
-              className="flex items-center gap-3 p-3 rounded-2xl bg-white dark:bg-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.03)] border-none cursor-pointer active:scale-[0.99] transition-all select-none"
+              className="flex items-center gap-3 py-3 px-1 bg-transparent cursor-pointer active:scale-[0.99] transition-all select-none"
             >
               {/* Recipe Thumbnail */}
               <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0">

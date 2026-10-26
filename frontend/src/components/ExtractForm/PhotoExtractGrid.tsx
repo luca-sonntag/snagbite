@@ -37,7 +37,7 @@ export const PhotoExtractGrid: React.FC<PhotoExtractGridProps> = ({
       />
 
       {photos.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-6 px-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 text-center border-none">
+        <div className="flex flex-col items-center gap-2 py-5 px-4 text-center border-none">
           <div className="p-2.5 rounded-2xl bg-emerald-500/10">
             <Camera className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
           </div>

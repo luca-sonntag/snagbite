@@ -63,7 +63,7 @@ export default function FriendsFeedView({
   // Case A: No friends connected yet
   if (friends.length === 0 && items.length === 0) {
     return (
-      <div className="flex flex-col items-center text-center p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-900 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none gap-4 mx-1">
+      <div className="flex flex-col items-center text-center py-8 px-4 gap-4">
         <div className="w-16 h-16 rounded-3xl bg-emerald-500/10 dark:bg-emerald-500/15 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-2xs">
           <Users className="w-8 h-8" />
         </div>
@@ -103,7 +103,7 @@ export default function FriendsFeedView({
   // Case B: Has friends, but no photo cook event in feed yet
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center text-center p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-900 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none gap-4 mx-1">
+      <div className="flex flex-col items-center text-center py-8 px-4 gap-4">
         <div className="w-16 h-16 rounded-3xl bg-amber-500/10 dark:bg-amber-500/15 flex items-center justify-center text-amber-500 shadow-2xs">
           <Camera className="w-8 h-8" />
         </div>

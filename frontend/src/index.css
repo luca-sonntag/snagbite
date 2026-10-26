@@ -15,34 +15,55 @@
   src: url('/fonts/outfit-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('/fonts/fraunces-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('/fonts/fraunces-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 @import "tailwindcss";
 
 @theme {
-  /* Linear Onyx & Carbon dark palette - pure harmonic depth */
-  --color-gray-950: #09090b; /* Canvas background */
-  --color-gray-900: #121215; /* Container / Surface Level 1 */
-  --color-gray-850: #16161b;
-  --color-gray-800: #1c1c21; /* Card / Panel Level 2 */
-  --color-gray-750: #23232a;
-  --color-gray-700: #2b2b33; /* Interactive pill / button Level 3 */
-  --color-gray-600: #3f3f46; /* Hairline borders & rings */
-  --color-gray-500: #71717a; /* Muted captions & inactive icons */
-  --color-gray-400: #a1a1aa; /* Secondary body text */
-  --color-gray-300: #d4d4d8;
-  --color-gray-200: #e4e4e7;
-  --color-gray-100: #f4f4f5;
-  --color-gray-50:  #f8fafc;
+  --font-sans: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Fraunces', Georgia, serif;
+  --font-serif: 'Fraunces', Georgia, serif;
 
-  --color-slate-950: #09090b;
-  --color-slate-900: #121215;
-  --color-slate-850: #16161b;
-  --color-slate-800: #1c1c21;
-  --color-slate-700: #2b2b33;
-  --color-slate-600: #3f3f46;
-  --color-slate-500: #71717a;
+  /* Warm Culinary Paper (Light) & Proven Neutral Charcoal (Dark) palette - Apple HIG & Zinc standard */
+  --color-gray-950: #141416; /* Clean neutral dark canvas */
+  --color-gray-900: #1e1e22; /* Elevated container / sheets / nav / modal base */
+  --color-gray-850: #25252b; /* Subtle elevated surfaces */
+  --color-gray-800: #2c2c34; /* Cards / Steppers / Inset wells / Inputs */
+  --color-gray-750: #343440; /* Intermediate hover / active highlight */
+  --color-gray-700: #3f3f4c; /* Interactive pills / active button states */
+  --color-gray-600: #525260; /* Defined hairlines & borders */
+  --color-gray-500: #787888; /* Captions & inactive icons */
+  --color-gray-400: #a1a1aa; /* Secondary body text (zinc-400) */
+  --color-gray-300: #d4d4d8; /* Light gray text / borders (zinc-300) */
+  --color-gray-200: #e7e5e4;
+  --color-gray-100: #f3f1ed; /* Warm Linen subtle surface */
+  --color-gray-50:  #faf8f5; /* Warm Alabaster / Culinary Paper canvas */
+
+  --color-slate-950: #141416;
+  --color-slate-900: #1e1e22;
+  --color-slate-850: #25252b;
+  --color-slate-800: #2c2c34;
+  --color-slate-750: #343440;
+  --color-slate-700: #3f3f4c;
+  --color-slate-600: #525260;
+  --color-slate-500: #787888;
   --color-slate-400: #a1a1aa;
-  --color-slate-50:  #f8fafc;
+  --color-slate-50:  #faf8f5;
 }
 
 @import "@heroui/styles";
@@ -72,10 +93,34 @@
 
 body {
   margin: 0;
-  background-color: #f8fafc; /* Crisp Slate-50 canvas making elevated white cards pop */
-  color: #0f172a; /* Deep slate text for sharp readable contrast */
+  background-color: #faf8f5; /* Warm culinary paper canvas making elevated white cards pop */
+  color: #1c1917; /* Deep warm charcoal text for sharp readable contrast */
   min-height: 100vh;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Editorial serif typography for page headers, magazine greetings, and recipe titles */
+:where(h1:not(.font-sans), h2:not(.font-sans)),
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+/* Bottom sheets, drawer dialogs, and modals always use the clean modern sans-serif font */
+[data-slot*="drawer"],
+[data-slot*="drawer"] :where(h1, h2, h3, h4, h5, h6),
+[data-slot*="drawer"] .font-heading,
+[data-slot*="drawer"] .font-serif,
+[data-slot="drawer-heading"],
+[data-slot*="modal"],
+[data-slot*="modal"] :where(h1, h2, h3, h4, h5, h6),
+[data-slot="modal-heading"],
+.react-aria-Modal,
+.react-aria-Modal :where(h1, h2, h3, h4, h5, h6),
+.react-aria-Dialog,
+.react-aria-Dialog :where(h1, h2, h3, h4, h5, h6),
+.react-aria-Dialog .font-heading,
+.react-aria-Dialog .font-serif {
+  font-family: var(--font-sans);
 }
 
 html.dark body {
@@ -375,18 +420,18 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
 }
 
-/* Glassmorphism utility */
+/* Glassmorphism utility (warm open-canvas surface without stark white box) */
 .glass-panel {
-  background: #ffffff;
+  background: rgba(0, 0, 0, 0.03);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: none;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: none;
+  transition: background-color 0.3s ease;
 }
 
 html.dark .glass-panel {
-  background: var(--color-gray-900);
+  background: rgba(255, 255, 255, 0.04);
   border: none;
   box-shadow: none;
 }

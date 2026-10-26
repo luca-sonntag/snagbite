@@ -40,13 +40,13 @@ export default function FriendsListSection() {
   };
 
   return (
-    <div className="flex flex-col gap-2.5">
-      <h2 className="font-heading font-bold text-sm text-gray-900 dark:text-white px-1">
+    <div>
+      <h2 className="text-xs font-medium text-gray-500 dark:text-gray-400 font-sans px-0.5 mb-2">
         {t('app.social.friends.yourFriends')}
       </h2>
 
       {friends.length === 0 ? (
-        <div className="flex flex-col items-center text-center p-6 rounded-3xl bg-white dark:bg-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.03)] border-none gap-3">
+        <div className="flex flex-col items-center text-center py-6 px-4 gap-3">
           <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600">
             <Users className="w-6 h-6" />
           </div>
@@ -65,16 +65,17 @@ export default function FriendsListSection() {
           </Button>
         </div>
       ) : (
-        friends.map((f) => {
-          const rankKey = getCulinaryRankKey(f.level);
-          const rankTitle = t(`app.gamification.ranks.${rankKey}`);
-          const totalCooks = f.totalCooks ?? 0;
+        <div className="flex flex-col gap-1.5">
+          {friends.map((f) => {
+            const rankKey = getCulinaryRankKey(f.level);
+            const rankTitle = t(`app.gamification.ranks.${rankKey}`);
+            const totalCooks = f.totalCooks ?? 0;
 
-          return (
-            <div
-              key={f.friendshipId}
-              className="flex items-center gap-3.5 rounded-3xl border-none bg-white p-4 shadow-[0_2px_6px_rgba(0,0,0,0.03)] dark:bg-gray-900 transition-all"
-            >
+            return (
+              <div
+                key={f.friendshipId}
+                className="flex items-center gap-3.5 py-3.5 px-1 bg-transparent transition-all"
+              >
               <Avatar name={f.displayName} avatarUrl={f.avatarUrl} size={44} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 flex-wrap">
@@ -115,7 +116,8 @@ export default function FriendsListSection() {
               </Button>
             </div>
           );
-        })
+        })}
+        </div>
       )}
     </div>
   );

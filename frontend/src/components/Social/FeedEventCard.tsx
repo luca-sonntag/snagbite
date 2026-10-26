@@ -78,14 +78,14 @@ export default function FeedEventCard({
   };
 
   return (
-    <article className="overflow-hidden rounded-3xl bg-white dark:bg-gray-900 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border-none flex flex-col">
+    <article className="flex flex-col">
       {/* Header: Author & Time */}
-      <div className="px-4 pt-3.5 pb-2.5 flex items-center justify-between gap-3">
+      <div className="px-1 pt-1 pb-2.5 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <Avatar name={item.user.displayName} avatarUrl={item.user.avatarUrl} size={42} />
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className="font-heading font-bold text-gray-900 dark:text-white text-sm truncate">
+              <span className="font-bold text-gray-900 dark:text-white text-sm truncate font-sans">
                 {item.user.displayName}
               </span>
               <span className="shrink-0 text-gray-400 dark:text-gray-500 text-[10px]">·</span>
@@ -101,8 +101,8 @@ export default function FeedEventCard({
       </div>
 
       {/* Hero Cooked Dish Photo — Soft Rounded Corners */}
-      <div className="sm:px-3">
-        <div className="relative aspect-4/3 sm:aspect-16/10 w-full rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-2xs">
+      <div>
+        <div className="relative aspect-4/3 sm:aspect-16/10 w-full rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 shadow-[0_4px_14px_rgba(0,0,0,0.06)]">
           <CachedImage
             src={item.photoUrl}
             alt={item.recipe.title}
@@ -154,7 +154,7 @@ export default function FeedEventCard({
                 {item.recipe.title}
               </h3>
               {metaParts.length > 0 && (
-                <p className="text-[11px] sm:text-xs font-semibold text-white/90 drop-shadow-xs mt-0.5 flex items-center gap-1.5">
+                <p className="text-[11px] sm:text-xs font-semibold text-white/90 drop-shadow-xs mt-1 flex items-center gap-1.5">
                   {metaParts.map((part, idx) => (
                     <span key={idx} className="flex items-center gap-1.5">
                       {idx > 0 && <span className="opacity-60 text-[9px]">·</span>}
@@ -203,7 +203,7 @@ export default function FeedEventCard({
       </div>
 
       {/* Social Footer: Emoji Reactions with Dynamic Usericon Badges */}
-      <div className="px-4 pt-3 pb-3.5 flex items-center gap-3">
+      <div className="px-1 pt-3 pb-1 flex items-center gap-3">
         {item.reactions.map((r) => {
           const isReacted = r.reactedByMe;
           const isBouncing = bouncingEmoji === r.emoji;
@@ -217,7 +217,7 @@ export default function FeedEventCard({
               className={`relative min-h-[40px] px-4 py-1.5 rounded-full text-xs font-bold border-none transition-all duration-150 cursor-pointer flex items-center gap-1.5 select-none active:scale-90 ${
                 isReacted
                   ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 shadow-2xs font-black'
-                  : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold'
+                  : 'bg-black/[0.04] hover:bg-black/[0.08] dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-gray-600 dark:text-gray-300 font-semibold'
               }`}
             >
               <span

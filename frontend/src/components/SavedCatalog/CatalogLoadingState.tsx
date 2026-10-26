@@ -35,7 +35,7 @@ export default function CatalogLoadingState() {
       <section className="flex flex-col gap-2">
         <div className="flex gap-3 overflow-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
           {/* Main Hero Card */}
-          <div className="w-[86%] sm:w-[89%] md:w-[92%] shrink-0 aspect-[4/3] sm:aspect-[16/10] rounded-3xl bg-white dark:bg-gray-900 shadow-[0_4px_20px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 relative overflow-hidden flex flex-col justify-between p-3.5 sm:p-4 animate-pulse">
+          <div className="w-[86%] sm:w-[89%] md:w-[92%] shrink-0 aspect-[4/3] sm:aspect-[16/10] rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] relative overflow-hidden flex flex-col justify-between p-3.5 sm:p-4 animate-pulse">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/5 dark:via-white/5 to-transparent animate-shimmer-sweep pointer-events-none" />
             {/* Top Badge */}
             <div className="flex items-center justify-between">
@@ -57,7 +57,7 @@ export default function CatalogLoadingState() {
           </div>
 
           {/* Peek of Next Slide */}
-          <div className="w-[14%] shrink-0 aspect-[4/3] sm:aspect-[16/10] rounded-3xl bg-white dark:bg-gray-900 ring-1 ring-black/5 dark:ring-white/10 overflow-hidden animate-pulse" />
+          <div className="w-[14%] shrink-0 aspect-[4/3] sm:aspect-[16/10] rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] overflow-hidden animate-pulse" />
         </div>
 
         {/* Pagination Dots */}
@@ -77,7 +77,7 @@ export default function CatalogLoadingState() {
 
         <div className="grid grid-cols-2 gap-2.5 sm:gap-3 items-stretch">
           {/* Left: 3:4 Portrait Card */}
-          <div className="w-full h-full min-h-[220px] sm:min-h-[250px] rounded-2xl bg-white dark:bg-gray-900 shadow-sm ring-1 ring-black/5 dark:ring-white/10 relative overflow-hidden flex flex-col justify-end p-3 animate-pulse">
+          <div className="w-full h-full min-h-[220px] sm:min-h-[250px] rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] relative overflow-hidden flex flex-col justify-end p-3 animate-pulse">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/5 dark:via-white/5 to-transparent animate-shimmer-sweep pointer-events-none" />
             <div className="space-y-1.5 relative z-10">
               <div className="h-3.5 w-24 rounded bg-black/5 dark:bg-white/10" />
@@ -90,7 +90,7 @@ export default function CatalogLoadingState() {
             {Array.from({ length: 2 }).map((_, i) => (
               <div
                 key={i}
-                className="flex-1 min-h-[105px] rounded-2xl bg-white dark:bg-gray-900 shadow-sm ring-1 ring-black/5 dark:ring-white/10 overflow-hidden flex animate-pulse"
+                className="flex-1 min-h-[105px] rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] overflow-hidden flex animate-pulse"
               >
                 <div className="w-22 sm:w-26 bg-black/5 dark:bg-white/10 shrink-0 self-stretch" />
                 <div className="flex-1 p-2.5 sm:p-3 flex flex-col justify-between min-w-0">
@@ -113,10 +113,10 @@ export default function CatalogLoadingState() {
           {Array.from({ length: 2 }).map((_, i) => (
             <div
               key={i}
-              className="w-full rounded-2xl overflow-hidden bg-white dark:bg-gray-900 shadow-sm ring-1 ring-black/5 dark:ring-white/10 flex flex-col animate-pulse"
+              className="w-full flex flex-col animate-pulse"
             >
-              <div className="w-full aspect-[4/3] bg-black/5 dark:bg-white/10" />
-              <div className="p-2.5 sm:p-3 space-y-2 flex-1 flex flex-col justify-between">
+              <div className="w-full aspect-[4/3] rounded-2xl bg-black/5 dark:bg-white/10" />
+              <div className="pt-2 px-0.5 space-y-2 flex-1 flex flex-col justify-between">
                 <div className="h-4 w-3/4 rounded bg-black/5 dark:bg-white/10" />
                 <div className="h-3 w-1/2 rounded bg-black/5 dark:bg-white/10 mt-auto" />
               </div>

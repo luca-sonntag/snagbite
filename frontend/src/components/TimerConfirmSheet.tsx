@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button, Drawer } from '@heroui/react';
-import { Clock, Minus, Play, Plus, X } from 'lucide-react';
+import { Minus, Play, Plus, X } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useTimerManager } from '../hooks/useTimerManager';
 import { stripInlineIngredientTags } from '../utils/ingredientMatch';
@@ -78,17 +78,12 @@ export default function TimerConfirmSheet({
               {/* Header */}
               <Drawer.Header className="pb-3 mb-1">
                 <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center">
-                      <Clock className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white">
-                      {t('timer.confirmTitle')}
-                    </Drawer.Heading>
-                  </div>
+                  <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white">
+                    {t('timer.confirmTitle')}
+                  </Drawer.Heading>
                   <button
                     type="button"
-                    className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer"
+                    className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-black/[0.04] dark:bg-white/[0.06] text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-black/[0.08] dark:hover:bg-white/[0.10] border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer"
                     onClick={() => {
                       hapticLight();
                       onClose();

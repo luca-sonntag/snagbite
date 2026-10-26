@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState, type ChangeEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { Camera, X, Loader2 } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { resolveErrorCode } from '../i18n';
 import { useGamification } from '../context/GamificationContext';
@@ -135,30 +135,25 @@ export default function CookedModal({
       <div
         role="dialog"
         aria-modal="true"
-        className="relative w-full max-w-md rounded-3xl bg-white dark:bg-gray-900 p-6 text-gray-900 dark:text-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+        className="relative w-full max-w-md rounded-3xl bg-gray-50 dark:bg-gray-950 p-6 text-gray-900 dark:text-white shadow-2xl overflow-hidden border border-black/5 dark:border-white/5 animate-in zoom-in-95 duration-200"
       >
         {/* Close Button */}
         <button
           onClick={handleResetAndClose}
           disabled={isVerifying}
-          className="absolute top-4 right-4 w-10 h-10 min-w-[44px] min-h-[44px] text-gray-400 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 flex items-center justify-center transition-all cursor-pointer border-none disabled:opacity-40"
+          className="absolute top-4 right-4 w-10 h-10 min-w-[44px] min-h-[44px] text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-full bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.10] flex items-center justify-center transition-all cursor-pointer border-none disabled:opacity-40"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header */}
-        <div className="flex items-center gap-3 mb-4 pr-10">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
-            <Camera className="w-5 h-5" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100 leading-snug">
-              {t('app.gamification.modalTitle')}
-            </h3>
-            {recipeTitle && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 font-medium">{recipeTitle}</p>
-            )}
-          </div>
+        <div className="mb-4 pr-10">
+          <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100 leading-snug">
+            {t('app.gamification.modalTitle')}
+          </h3>
+          {recipeTitle && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 font-medium mt-0.5">{recipeTitle}</p>
+          )}
         </div>
 
         {/* Body content based on state */}

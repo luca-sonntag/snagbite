@@ -113,7 +113,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                   className={`min-h-[40px] sm:min-h-[44px] px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold shrink-0 transition-all duration-150 cursor-pointer border-none touch-manipulation ${
                     activeFilter === 'all'
                       ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/25 scale-[1.02]'
-                      : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.97] shadow-2xs'
+                      : 'bg-black/[0.04] dark:bg-white/[0.06] text-gray-700 dark:text-gray-300 hover:bg-black/[0.07] dark:hover:bg-white/[0.1] active:scale-[0.97]'
                   }`}
                 >
                   {t('mealPlanner.pickerFilterAll')}
@@ -127,7 +127,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                   className={`min-h-[40px] sm:min-h-[44px] px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold shrink-0 transition-all duration-150 cursor-pointer border-none touch-manipulation ${
                     activeFilter === 'quick'
                       ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/25 scale-[1.02]'
-                      : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.97] shadow-2xs'
+                      : 'bg-black/[0.04] dark:bg-white/[0.06] text-gray-700 dark:text-gray-300 hover:bg-black/[0.07] dark:hover:bg-white/[0.1] active:scale-[0.97]'
                   }`}
                 >
                   {t('mealPlanner.pickerFilterQuick')}
@@ -141,7 +141,7 @@ export const RecipePickerModal: React.FC<RecipePickerModalProps> = ({
                   className={`min-h-[40px] sm:min-h-[44px] px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold shrink-0 transition-all duration-150 cursor-pointer border-none touch-manipulation ${
                     activeFilter === 'favorites'
                       ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/25 scale-[1.02]'
-                      : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.97] shadow-2xs'
+                      : 'bg-black/[0.04] dark:bg-white/[0.06] text-gray-700 dark:text-gray-300 hover:bg-black/[0.07] dark:hover:bg-white/[0.1] active:scale-[0.97]'
                   }`}
                 >
                   {t('mealPlanner.pickerFilterFavorites')}

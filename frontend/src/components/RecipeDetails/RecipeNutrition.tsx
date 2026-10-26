@@ -94,9 +94,9 @@ export default function RecipeNutrition({
   return (
     <>
       <div
-        className="relative py-3.5 px-4.5 sm:px-5"
+        className="relative pt-4 pb-1 px-0.5"
       >
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
             <Flame className={iconClass} />
 
@@ -211,9 +211,9 @@ export default function RecipeNutrition({
             />
           )}
 
-          {/* Health Score Panel (Full-width across the nutrition box) */}
+          {/* Health Score Panel (Full-width across the nutrition section) */}
           {healthScore !== undefined && healthScore !== null && (
-            <div className="-mx-4.5 sm:-mx-5 -mb-3.5 mt-3 border-t border-gray-100/70 dark:border-gray-800/60 overflow-hidden rounded-b-3xl">
+            <div className="mt-1">
               <HealthScoreBadge
                 score={healthScore}
                 breakdown={healthScoreBreakdown}

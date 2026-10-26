@@ -816,7 +816,7 @@ export const uiTranslations = {
         friends: {
           yourCode: 'Dein Freundescode',
           share: 'Einladung teilen',
-          addTitle: 'Freund hinzufügen',
+          addTitle: 'Freunde hinzufügen',
           addPlaceholder: 'Freundescode',
           add: 'Hinzufügen',
           requests: 'Anfragen',
@@ -994,6 +994,7 @@ export const uiTranslations = {
       },
     },
     auth: {
+      heroHook: 'Aus Reels wird dein Kochbuch',
       signInTitle: 'Melde dich an, um deine Rezepte zu verwalten',
       unexpectedError: 'Ein unerwarteter Fehler ist aufgetreten.',
       signOut: 'Abmelden',
@@ -2516,7 +2517,7 @@ export const uiTranslations = {
         friends: {
           yourCode: 'Your friend code',
           share: 'Share invite',
-          addTitle: 'Add a friend',
+          addTitle: 'Add Friends',
           addPlaceholder: 'Friend code',
           add: 'Add',
           requests: 'Requests',
@@ -2694,6 +2695,7 @@ export const uiTranslations = {
       },
     },
     auth: {
+      heroHook: 'Turn Reels into your cookbook',
       signInTitle: 'Sign in to manage your recipes',
       unexpectedError: 'An unexpected error occurred.',
       signOut: 'Sign Out',

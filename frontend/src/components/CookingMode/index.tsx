@@ -193,7 +193,7 @@ export default function CookingMode({
 
   return (
     <div
-      className="fixed inset-0 z-[90] bg-white dark:bg-gray-950 flex flex-col justify-between p-3 sm:p-6 md:p-8 pt-[calc(0.75rem_+_var(--safe-area-inset-top))] pb-[calc(0.75rem_+_var(--safe-area-inset-bottom))] select-none overflow-hidden"
+      className="fixed inset-0 z-[90] bg-gray-50 dark:bg-gray-950 flex flex-col justify-between p-3 sm:p-6 md:p-8 pt-[calc(0.75rem_+_var(--safe-area-inset-top))] pb-[calc(0.75rem_+_var(--safe-area-inset-bottom))] select-none overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >

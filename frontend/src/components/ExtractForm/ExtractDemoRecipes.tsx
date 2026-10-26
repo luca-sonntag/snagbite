@@ -93,9 +93,9 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({
             <div
               key={recipe.id || idx}
               onClick={() => handleCardClick(recipe)}
-              className="rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all duration-200 ease-out select-none flex flex-col bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none group"
+              className="rounded-2xl cursor-pointer active:scale-[0.98] transition-all duration-200 ease-out select-none flex flex-col border-none group"
             >
-              <div className="relative w-full aspect-[4/3] bg-black/5 dark:bg-white/5 overflow-hidden shrink-0">
+              <div className="relative w-full aspect-[4/3] rounded-2xl bg-black/5 dark:bg-white/5 overflow-hidden shrink-0 shadow-[0_4px_14px_rgba(0,0,0,0.06)] ring-1 ring-black/5 dark:ring-white/10">
                 <CachedImage
                   src={imageUrl}
                   emoji={recipe.emoji}
@@ -109,7 +109,7 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({
                 />
               </div>
 
-              <div className="flex flex-col gap-2.5 p-3 flex-1 justify-between">
+              <div className="flex flex-col gap-2 pt-2 px-0.5 flex-1 justify-between">
                 <div>
                   <h4 className="text-xs font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                     {recipe.title}
@@ -142,7 +142,7 @@ export const ExtractDemoRecipes: React.FC<ExtractDemoRecipesProps> = ({
                   }}
                   className={`w-full min-h-[44px] px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold whitespace-nowrap transition-all duration-200 ease-out active:scale-[0.97] select-none cursor-pointer border-none ${
                     isSaved
-                      ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 shadow-xs'
+                      ? 'bg-black/[0.04] dark:bg-white/[0.06] text-gray-600 dark:text-gray-400 hover:bg-black/[0.07] dark:hover:bg-white/[0.1]'
                       : 'bg-emerald-500/10 hover:bg-emerald-500/15 active:bg-emerald-500/25 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400'
                   }`}
                 >

@@ -55,9 +55,9 @@ export default function RecipeStickyBar({
   return (
     <div
       id="recipe-sticky-bar"
-      className={`sticky top-[var(--app-sticky-top)] z-30 -mx-4 px-4 bg-[#f8fafc]/95 dark:bg-gray-950/95 backdrop-blur-md transition-all duration-200 border-none ${
+      className={`sticky top-[var(--app-sticky-top)] z-30 -mx-4 px-4 bg-gray-50/95 dark:bg-gray-950/95 backdrop-blur-md transition-all duration-200 border-none ${
         isCollapsed
-          ? 'shadow-[0_2px_10px_rgba(0,0,0,0.03)] pb-0.5 before:content-[\'\'] before:absolute before:bottom-full before:inset-x-0 before:h-12 before:bg-[#f8fafc] dark:before:bg-gray-950 before:pointer-events-none'
+          ? 'shadow-[0_2px_10px_rgba(0,0,0,0.03)] pb-0.5 before:content-[\'\'] before:absolute before:bottom-full before:inset-x-0 before:h-12 before:bg-gray-50 dark:before:bg-gray-950 before:pointer-events-none'
           : ''
       }`}
     >
@@ -118,7 +118,7 @@ export default function RecipeStickyBar({
       </div>
 
       {/* Segmented Tab Control */}
-      <div className="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl gap-1 border-none shadow-none mt-2 mb-2">
+      <div className="flex p-1 bg-black/[0.045] dark:bg-white/[0.06] rounded-2xl gap-1 border-none shadow-none mt-2 mb-2">
         {sections.map((section) => {
           const isActive = activeSection === section.id;
           const Icon = section.icon;
@@ -129,7 +129,7 @@ export default function RecipeStickyBar({
               onClick={() => handleTabClick(section.id)}
               className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all duration-200 min-h-[42px] cursor-pointer border-none outline-none ${
                 isActive
-                  ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-bold shadow-[0_2px_6px_rgba(0,0,0,0.06)]'
+                  ? 'bg-[#fdfbf7] dark:bg-gray-800 text-gray-900 dark:text-white font-bold shadow-[0_1px_4px_rgba(0,0,0,0.05)]'
                   : 'bg-transparent text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium'
               }`}
             >

@@ -71,7 +71,7 @@ export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSel
   return (
     <div className="flex flex-col gap-6 pb-12">
       {/* Sticky Header & Tabs Container */}
-      <div className="sticky top-[var(--app-sticky-top,0px)] z-30 -mx-4 px-4 pt-1 pb-3 bg-gray-50/95 dark:bg-gray-950/95 backdrop-blur-md flex flex-col gap-3 border-none">
+      <div className="sticky top-[var(--app-sticky-top,0px)] z-30 -mx-4 px-4 pt-1 pb-3 bg-[#faf8f5]/95 dark:bg-gray-950/95 backdrop-blur-md flex flex-col gap-3 border-none">
         <PageHeader
           title={section === 'settings' ? (t('app.social.sections.settings') || 'Einstellungen') : t('app.gamification.tabTitle')}
           subtitle={section === 'settings' ? t('app.settings.subtitle') : t('app.gamification.subtitle')}
@@ -84,7 +84,7 @@ export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSel
                   setSection('overview');
                 }}
                 aria-label={t('recipe.back') || 'Zurück'}
-                className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-2xl flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 active:scale-95 transition-all cursor-pointer border-none outline-none shadow-2xs"
+                className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-2xl flex items-center justify-center bg-black/[0.04] hover:bg-black/[0.08] dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-gray-600 dark:text-gray-300 active:scale-95 transition-all cursor-pointer border-none outline-none"
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
@@ -96,7 +96,7 @@ export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSel
                   setSection('settings');
                 }}
                 aria-label={t('app.social.sections.settings') || 'Einstellungen'}
-                className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-2xl flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 active:scale-95 transition-all cursor-pointer border-none outline-none shadow-2xs"
+                className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-2xl flex items-center justify-center bg-black/[0.04] hover:bg-black/[0.08] dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-gray-600 dark:text-gray-300 active:scale-95 transition-all cursor-pointer border-none outline-none"
               >
                 <Settings className="w-5 h-5" />
               </button>
@@ -105,7 +105,7 @@ export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSel
         />
 
         {section !== 'settings' && (
-          <div className="flex rounded-2xl bg-gray-100 p-1 dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] gap-1">
+          <div className="flex rounded-2xl bg-black/[0.04] p-1 dark:bg-white/[0.06] gap-1">
             {tabs.map((tab) => {
               const isActive = section === tab.key;
               const Icon = tab.icon;
@@ -118,7 +118,7 @@ export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSel
                   }}
                   className={`relative flex-1 rounded-xl py-2 px-3 min-h-[44px] text-xs sm:text-sm font-semibold border-none transition-all duration-200 cursor-pointer ${
                     isActive
-                      ? 'bg-white text-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] dark:bg-gray-800 dark:text-white font-bold'
+                      ? 'bg-[#fdfbf7] text-gray-900 shadow-xs dark:bg-gray-800 dark:text-white font-bold'
                       : 'bg-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white font-medium'
                   }`}
                 >

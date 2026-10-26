@@ -46,8 +46,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(norm.user);
         return {};
       }
+      setStoredToken(null);
       return { error: 'No active session' };
     } catch (err: any) {
+      setStoredToken(null);
       return { error: err.message || 'Session refresh failed' };
     }
   }, []);
@@ -56,6 +58,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let mounted = true;
 
     async function initAuth() {
+      // Check for OAuth error redirected back in URL
+      const params = new URLSearchParams(window.location.search);
+      const urlError = params.get('error');
+      const urlErrorDesc = params.get('error_description');
+      if (urlError) {
+        setAuthError(urlErrorDesc ? `${urlError}: ${urlErrorDesc}` : `Authentication failed (${urlError}).`);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+
       if (TEST_LOGIN_ENABLED) {
         try {
           const existing = await authClient.getSession();
@@ -108,10 +119,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(silentRes.session.user);
           setAutoSignedIn(true);
           setAuthError(null);
-        } else if (silentRes.error) {
-          setAuthError(silentRes.error);
+        } else {
+          setStoredToken(null);
+          if (silentRes.error) {
+            setAuthError(silentRes.error);
+          }
         }
       } catch (err: any) {
+        setStoredToken(null);
         if (mounted) setAuthError(err.message);
       } finally {
         if (mounted) setLoading(false);
@@ -171,11 +186,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const signInWithGoogle = useCallback(async () => {
+  const signInWithGoogle = useCallback(async (): Promise<{ error?: string; cancelled?: boolean; redirecting?: boolean }> => {
     setAuthError(null);
     if (Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('SocialLogin')) {
       const res = await signInWithNativeGoogle();
-      if (res.cancelled) return {};
+      if (res.cancelled) return { cancelled: true };
       if (res.error) return { error: res.error };
       if (res.session) {
         setSession(res.session);
@@ -189,12 +204,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     localStorage.setItem(LEGAL_CONSENT_KEY, '1');
+    setStoredToken(null);
     try {
-      await authClient.signIn.social({
+      const res = await authClient.signIn.social({
         provider: 'google',
         callbackURL: window.location.origin,
         errorCallbackURL: window.location.origin,
       });
+      if (res?.error) {
+        return { error: res.error.message || 'Google sign-in failed' };
+      }
+      if (res?.data?.url) {
+        window.location.href = res.data.url;
+        return { redirecting: true };
+      }
       return {};
     } catch (err: any) {
       return { error: err.message || 'Google sign-in failed' };

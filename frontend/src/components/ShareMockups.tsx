@@ -23,9 +23,9 @@ export const InstagramIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export const ShareStep1Mockup = () => (
-  <div className="relative w-[132px] h-[104px] shrink-0 mx-auto rounded-2xl bg-gray-100 dark:bg-gray-800/80 p-1.5 flex items-center justify-center overflow-hidden shadow-none select-none">
+  <div className="relative w-[124px] h-[100px] shrink-0 mx-auto p-1 flex items-center justify-center overflow-hidden shadow-none select-none">
     {/* Vertical Phone Screen Mockup representing a Reel */}
-    <div className="w-[56px] h-[90px] rounded-xl bg-white dark:bg-gray-900 relative shadow-[0_2px_6px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col justify-between p-1">
+    <div className="w-[56px] h-[90px] rounded-xl bg-[#fdfbf7] dark:bg-gray-900 ring-1 ring-black/[0.06] dark:ring-white/[0.08] relative shadow-xs overflow-hidden flex flex-col justify-between p-1">
       {/* Video Content representation (light background) */}
       <div className="absolute inset-0 bg-transparent flex items-center justify-center">
         <ChefHat className="w-6 h-6 text-black/10 dark:text-white/10" />
@@ -77,7 +77,7 @@ export const ShareStep1Mockup = () => (
 export const ShareStep2Mockup = () => {
   const { language } = useI18n();
   return (
-    <div className="relative w-[132px] h-[104px] shrink-0 mx-auto rounded-2xl bg-gray-100 dark:bg-gray-800/80 p-2 overflow-hidden flex flex-col justify-end select-none">
+    <div className="relative w-[124px] h-[100px] shrink-0 mx-auto p-1 overflow-hidden flex flex-col justify-end select-none">
       <div className="flex-1 flex flex-col gap-2 opacity-25 px-1 pt-1">
         <div className="h-2 w-full rounded bg-black/20 dark:bg-white/20" />
         <div className="grid grid-cols-4 gap-2">
@@ -90,7 +90,7 @@ export const ShareStep2Mockup = () => {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 rounded-xl p-1.5 shadow-[0_2px_6px_rgba(0,0,0,0.04)] flex items-start gap-1">
+      <div className="bg-[#fdfbf7] dark:bg-gray-900 ring-1 ring-black/[0.06] dark:ring-white/[0.08] rounded-xl p-1.5 shadow-xs flex items-start gap-1">
         <div className="flex-1 min-w-0 flex flex-col items-center gap-1 opacity-40">
           <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
             <svg className="w-3 h-3 text-gray-700 dark:text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
@@ -129,7 +129,7 @@ export const ShareStep2Mockup = () => {
 
 export const ShareStep3Mockup = () => {
   return (
-    <div className="relative w-[132px] h-[104px] shrink-0 mx-auto rounded-2xl bg-gray-100 dark:bg-gray-800/80 p-2 overflow-hidden flex flex-col justify-end select-none">
+    <div className="relative w-[124px] h-[100px] shrink-0 mx-auto p-1 overflow-hidden flex flex-col justify-end select-none">
       {/* Background share options sheet representation */}
       <div className="flex-1 flex flex-col gap-1 opacity-25 px-0.5 pt-0.5">
         <div className="h-2 w-1/3 rounded bg-black/40 dark:bg-white/40" />
@@ -137,7 +137,7 @@ export const ShareStep3Mockup = () => {
         <div className="h-1.5 w-2/3 rounded bg-black/20 dark:bg-white/20" />
       </div>
 
-      <div className="bg-white dark:bg-gray-900 rounded-xl p-1.5 shadow-[0_2px_6px_rgba(0,0,0,0.04)] flex items-center gap-2">
+      <div className="bg-[#fdfbf7] dark:bg-gray-900 ring-1 ring-black/[0.06] dark:ring-white/[0.08] rounded-xl p-1.5 shadow-xs flex items-center gap-2">
         <div className="flex-1 min-w-0 flex flex-col items-center gap-0.5 opacity-40">
           <div className="w-5 h-5 rounded bg-gray-300 dark:bg-gray-700 flex items-center justify-center">
             <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.5-5.739-1.446L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.858.002-2.634-1.02-5.11-2.884-6.974C16.592 1.89 14.12 1.865 11.99 1.865c-5.43 0-9.854 4.417-9.858 9.853-.002 1.773.465 3.5 1.353 5.03L2.43 21.65l5.06-1.33.157.08z"/></svg>

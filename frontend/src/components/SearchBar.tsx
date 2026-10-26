@@ -64,7 +64,7 @@ export const SearchBar = React.memo<SearchBarProps>(({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder ?? t('catalog.searchPlaceholder') ?? 'Name, Zutaten, Tags'}
-          className="w-full bg-white dark:bg-gray-800 border-none rounded-2xl pl-10 pr-12 py-2.5 text-base sm:text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-emerald-400/40 focus:outline-none transition-all shadow-[0_4px_16px_rgba(0,0,0,0.06)] min-h-[44px]"
+          className="w-full bg-black/[0.04] dark:bg-white/[0.06] border-none rounded-2xl pl-10 pr-12 py-2.5 text-base sm:text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:bg-[#fdfbf7] dark:focus:bg-gray-800 focus:ring-2 focus:ring-emerald-400/40 focus:outline-none transition-all min-h-[44px]"
         />
         <Search className="w-4.5 h-4.5 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2]" />
 
@@ -92,10 +92,10 @@ export const SearchBar = React.memo<SearchBarProps>(({
             hapticLight();
             onOpenFilters();
           }}
-          className={`relative h-11 min-w-[44px] px-3.5 rounded-2xl border-none shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex items-center justify-center gap-1.5 text-xs font-semibold active:scale-95 transition-all shrink-0 cursor-pointer touch-manipulation ${
+          className={`relative h-11 min-w-[44px] px-3.5 rounded-2xl border-none flex items-center justify-center gap-1.5 text-xs font-semibold active:scale-95 transition-all shrink-0 cursor-pointer touch-manipulation ${
             activeFilterCount > 0
               ? 'bg-emerald-600 text-white shadow-none'
-              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+              : 'bg-black/[0.04] dark:bg-white/[0.06] text-gray-700 dark:text-gray-200 hover:bg-black/[0.07] dark:hover:bg-white/[0.1]'
           }`}
           aria-label={filterAriaLabel ?? t('catalog.filterTitle') ?? 'Filters'}
         >

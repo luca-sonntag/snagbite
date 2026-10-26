@@ -229,7 +229,7 @@ export default function ExtractionAdCard({
         {/* Reserved slot the native AdMob banner overlays (or web ad container box). */}
         <div
           ref={slotRef}
-          className="w-[300px] h-[250px] mx-auto flex flex-col items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800/60 transition-all overflow-hidden"
+          className="w-[300px] h-[250px] mx-auto flex flex-col items-center justify-center rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/5 dark:border-white/10 transition-all overflow-hidden"
         >
           {status === 'pending' && (
             <Spinner size="sm" color="success" />
@@ -240,7 +240,7 @@ export default function ExtractionAdCard({
   }
 
   return (
-    <div className={`bg-white dark:bg-gray-900 ${variant === 'banner' ? 'p-3' : 'p-5'} rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] w-full transition-all duration-300`}>
+    <div className={`bg-gray-50 dark:bg-gray-950 ${variant === 'banner' ? 'p-3' : 'p-5'} rounded-3xl border border-black/5 dark:border-white/5 shadow-[0_2px_6px_rgba(0,0,0,0.03)] w-full transition-all duration-300`}>
       <div className="flex items-center mb-2">
         <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
           {t('ads.label')}
@@ -249,7 +249,7 @@ export default function ExtractionAdCard({
       {/* Reserved slot the native AdMob banner overlays (or web ad container box). */}
       <div
         ref={slotRef}
-        className="w-[300px] h-[250px] mx-auto flex flex-col items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800/60 transition-all overflow-hidden"
+        className="w-[300px] h-[250px] mx-auto flex flex-col items-center justify-center rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/5 dark:border-white/10 transition-all overflow-hidden"
       >
         {status === 'pending' && (
           <Spinner size="sm" color="success" />

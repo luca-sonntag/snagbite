@@ -38,7 +38,7 @@ export default function ShoppingListGroup({
   if (groupedCategories.length === 0) return null;
 
   return (
-    <div className="rounded-2xl md:rounded-3xl bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none p-3 sm:p-4 transition-all flex flex-col gap-0">
+    <div className="transition-all flex flex-col gap-3">
       {groupedCategories.map((group, index) => {
         const isGroupCollapsing = collapsingKeys.has(`group-${group.category}`);
         const theme = getCategoryTheme(group.category);
@@ -47,7 +47,7 @@ export default function ShoppingListGroup({
           <div
             key={group.category}
             className={`flex flex-col transition-all ${
-              index > 0 ? 'pt-0.5' : ''
+              index > 0 ? 'pt-2 border-t border-black/[0.06] dark:border-white/[0.08]' : ''
             } ${
               isGroupCollapsing ? 'animate-group-collapse' : 'animate-group-expand'
             }`}
@@ -55,7 +55,7 @@ export default function ShoppingListGroup({
             {/* Category Header */}
             <div
               id={index === 0 ? 'tour-shopping-groups' : undefined}
-              className="flex items-center justify-between gap-2 px-2 pt-1 pb-0.5"
+              className="flex items-center justify-between gap-2 px-1 pt-1 pb-0.5"
             >
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className={`w-1 h-3.5 rounded-full ${theme.barClass} shrink-0`} />
