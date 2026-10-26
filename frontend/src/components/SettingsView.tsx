@@ -162,8 +162,8 @@ export default function SettingsView() {
         </div>
       )}
 
-      {/* Profile Card */}
-      <div className={`mx-2 p-5 ${isRealPremium ? 'tint-premium' : 'bg-white dark:bg-gray-900'} border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] rounded-3xl flex flex-col gap-4 relative overflow-hidden`}>
+      {/* Profile Section (Open Editorial) */}
+      <div className={`${isRealPremium ? 'p-4 sm:p-5 tint-premium rounded-3xl' : 'py-3 px-1 border-b border-black/[0.06] dark:border-white/[0.08]'} flex flex-col gap-4 relative overflow-hidden`}>
         <div className="flex items-center gap-4">
           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-lg text-white shadow-none shrink-0 ${
             isRealPremium 
@@ -213,15 +213,15 @@ export default function SettingsView() {
       </div>
 
       {/* Premium Upgrade Promotion (only for free members and alpha testers) */}
-      <PremiumUpgradeCard onUpgradeClick={() => setIsPremiumModalOpen(true)} className="mx-2" />
+      <PremiumUpgradeCard onUpgradeClick={() => setIsPremiumModalOpen(true)} />
 
       {/* Preferences Section */}
-      <div className="flex flex-col gap-2">
-        <h3 className="px-4 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+      <div className="flex flex-col gap-1">
+        <h3 className="px-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
           {language === 'de' ? 'Einstellungen' : 'Preferences'}
         </h3>
         
-        <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
+        <div className="border-t border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
           {/* Language Option */}
           <div className="p-4 flex items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-2.5 border-b border-black/5 dark:border-white/5">
             <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -341,7 +341,7 @@ export default function SettingsView() {
           )}
 
           {/* Theme Option */}
-          <div className="p-4 flex items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-2.5 border-b border-black/5 dark:border-white/5 last:border-b-0">
+          <div className="p-4 flex items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-2.5">
             <div className="flex items-center gap-3 min-w-0 flex-1">
               {theme === 'dark' ? (
                 <Moon className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" />
@@ -362,7 +362,7 @@ export default function SettingsView() {
                 }}
                 className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer max-[400px]:flex-1 ${
                   theme === 'light'
-                    ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
+                    ? 'bg-[#fdfbf7] dark:bg-gray-800 text-gray-900 dark:text-white shadow-xs'
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                 }`}
               >
@@ -376,7 +376,7 @@ export default function SettingsView() {
                 }}
                 className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer max-[400px]:flex-1 ${
                   theme === 'dark'
-                    ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
+                    ? 'bg-[#fdfbf7] dark:bg-gray-800 text-gray-900 dark:text-white shadow-xs'
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                 }`}
               >
@@ -396,12 +396,12 @@ export default function SettingsView() {
       <AdminSettingsSection isAdmin={isAdmin} />
 
       {/* Section: Help */}
-      <div className="flex flex-col gap-2">
-        <h3 className="px-4 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+      <div className="flex flex-col gap-1">
+        <h3 className="px-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
           {language === 'de' ? 'Hilfe' : 'Help'}
         </h3>
 
-        <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
+        <div className="border-t border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
           <button
             onClick={() => window.dispatchEvent(new Event('app:replay-onboarding'))}
             className="w-full p-4 flex items-center justify-between border-b border-black/5 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 transition-all active:scale-[0.99] text-left cursor-pointer group"
@@ -454,12 +454,12 @@ export default function SettingsView() {
       </div>
 
       {/* Section: Legal (Datenschutz / AGB / Impressum) */}
-      <div className="flex flex-col gap-2">
-        <h3 className="px-4 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+      <div className="flex flex-col gap-1">
+        <h3 className="px-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
           {t('app.settings.legal.section') || 'Rechtliches'}
         </h3>
 
-        <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
+        <div className="border-t border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
           {[
             { href: LEGAL_URLS.privacy, icon: Shield, label: t('app.settings.legal.privacy') || 'Datenschutzerklärung' },
             { href: LEGAL_URLS.terms, icon: ScrollText, label: t('app.settings.legal.terms') || 'AGB' },
@@ -489,12 +489,12 @@ export default function SettingsView() {
       </div>
 
       {/* Section: Account Actions */}
-      <div className="flex flex-col gap-2">
-        <h3 className="px-4 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+      <div className="flex flex-col gap-1">
+        <h3 className="px-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
           {language === 'de' ? 'Konto-Aktionen' : 'Account Actions'}
         </h3>
         
-        <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
+        <div className="border-t border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
           {/* Logout Option */}
           {!autoSignedIn && (
             <button

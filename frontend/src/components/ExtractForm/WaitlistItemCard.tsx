@@ -69,7 +69,7 @@ export const WaitlistItemCard: React.FC<WaitlistItemCardProps> = ({
   };
 
   return (
-    <div className="p-3 pl-3.5 bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border-none transition-all">
+    <div className="py-3 px-1 bg-transparent border-b border-black/[0.06] dark:border-white/[0.08] last:border-b-0 transition-all">
       <div className="flex items-center justify-between gap-2 min-w-0">
         <div className="min-w-0 flex-1">
           <p className="text-xs font-bold text-gray-900 dark:text-white truncate">

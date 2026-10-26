@@ -102,7 +102,7 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
   return (
     <div className="space-y-4 pb-36">
       {/* Anti-Food-Waste Suggestion Card */}
-      <div className="bg-white dark:bg-gray-900 p-4 sm:p-5 rounded-3xl border-none shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex items-center justify-between gap-3.5 flex-wrap">
+      <div className="bg-emerald-500/[0.06] dark:bg-emerald-500/10 border border-emerald-500/15 p-4 sm:p-5 rounded-3xl flex items-center justify-between gap-3.5 flex-wrap">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3">
             <span
@@ -156,7 +156,7 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
           className={`text-xs px-4 py-2.5 rounded-2xl font-bold whitespace-nowrap transition-all border-none outline-none cursor-pointer min-h-[40px] active:scale-95 ${
             selectedCategory === 'ALL'
               ? 'bg-emerald-600 text-white shadow-[0_2px_8px_rgba(16,185,129,0.25)]'
-              : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:text-gray-900 dark:hover:text-white'
+              : 'bg-black/[0.03] dark:bg-white/[0.04] text-gray-600 dark:text-gray-400 border border-black/5 dark:border-white/10 hover:text-gray-900 dark:hover:text-white'
           }`}
         >
           Alle ({activeItems.length})
@@ -175,7 +175,7 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
               className={`text-xs px-4 py-2.5 rounded-2xl font-bold whitespace-nowrap transition-all border-none outline-none cursor-pointer min-h-[40px] active:scale-95 ${
                 selectedCategory === cat
                   ? 'bg-emerald-600 text-white shadow-[0_2px_8px_rgba(16,185,129,0.25)]'
-                  : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 shadow-[0_2px_6px_rgba(0,0,0,0.03)] hover:text-gray-900 dark:hover:text-white'
+                  : 'bg-black/[0.03] dark:bg-white/[0.04] text-gray-600 dark:text-gray-400 border border-black/5 dark:border-white/10 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
               {translateCategory(cat, language)} ({count})
@@ -186,8 +186,8 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
 
       {/* Items List */}
       {filteredItems.length === 0 ? (
-        <div className="py-16 text-center bg-white dark:bg-gray-900 rounded-3xl p-6 border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
-          <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-3 text-gray-400 dark:text-gray-500">
+        <div className="py-16 text-center bg-black/[0.02] dark:bg-white/[0.03] rounded-3xl p-6 border border-black/5 dark:border-white/5">
+          <div className="w-16 h-16 rounded-2xl bg-black/[0.04] dark:bg-white/[0.06] flex items-center justify-center mx-auto mb-3 text-gray-400 dark:text-gray-500">
             <PackageOpen className="w-8 h-8" />
           </div>
           <h4 className="font-bold text-gray-900 dark:text-white text-base">{t('pantry.emptyTitle')}</h4>
@@ -209,14 +209,16 @@ export const PantryView: React.FC<PantryViewProps> = ({ onSelectRecipe }) => {
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">
-          {groupedCategories.map((group) => {
+          {groupedCategories.map((group, index) => {
             const theme = getCategoryTheme(group.category);
             const count = group.items.length;
 
             return (
               <div
                 key={group.category}
-                className="flex flex-col p-2.5 rounded-3xl bg-white dark:bg-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.03)] transition-all"
+                className={`flex flex-col transition-all ${
+                  index > 0 ? 'pt-4 border-t border-black/[0.06] dark:border-white/[0.08]' : ''
+                }`}
               >
                 <div className="flex items-center justify-between gap-2 px-2 pt-1 pb-1.5 mb-0.5">
                   <div className="flex flex-col gap-1.5 select-none flex-1 min-w-0 text-left">

@@ -76,12 +76,12 @@ export default function NotificationSettings() {
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <h3 className="px-4 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+    <div className="flex flex-col gap-1">
+      <h3 className="px-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
         {isDe ? 'Benachrichtigungen' : 'Notifications'}
       </h3>
 
-      <div className="bg-white dark:bg-gray-900 rounded-3xl border-none shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden mx-2">
+      <div className="border-t border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
         {/* Master toggle */}
         <div className="p-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">

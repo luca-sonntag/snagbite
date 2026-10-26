@@ -131,7 +131,7 @@ export default function AllRecipesShelf({
             hapticLight();
             setShowAll(true);
           }}
-          className="w-full py-2.5 px-4 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/60 dark:hover:bg-gray-800 text-xs font-bold text-gray-600 dark:text-gray-300 border-none transition-all active:scale-[0.98] cursor-pointer"
+          className="w-full py-2.5 px-4 rounded-xl bg-black/[0.03] hover:bg-black/[0.06] dark:bg-white/[0.04] dark:hover:bg-white/[0.08] text-xs font-bold text-gray-600 dark:text-gray-300 border-none transition-all active:scale-[0.98] cursor-pointer"
         >
           {t('catalog.magazine.timelineShowMore', { count: items.length - INITIAL_LIMIT })}
         </button>
@@ -144,12 +144,12 @@ export default function AllRecipesShelf({
           hapticLight();
           onViewAll();
         }}
-        className="group w-full py-3.5 px-4 rounded-2xl bg-white dark:bg-gray-900 shadow-[0_4px_16px_rgba(0,0,0,0.05),0_1px_3px_rgba(0,0,0,0.03)] ring-1 ring-black/5 dark:ring-white/10 hover:ring-emerald-500/30 dark:hover:ring-emerald-500/30 hover:shadow-md text-gray-900 dark:text-white font-bold text-sm flex items-center justify-between gap-3 transition-all duration-150 active:scale-[0.98] border-none cursor-pointer select-none"
+        className="group w-full py-3.5 px-4 rounded-2xl bg-black/[0.04] hover:bg-black/[0.07] dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-gray-900 dark:text-white font-bold text-sm flex items-center justify-between gap-3 transition-all duration-150 active:scale-[0.98] border-none cursor-pointer select-none"
       >
         <span className="truncate text-left font-bold text-sm tracking-tight text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
           {t('catalog.magazine.allShelfButton', { count: totalCount })}
         </span>
-        <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800/80 flex items-center justify-center shrink-0 text-gray-400 dark:text-gray-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-950/40 group-hover:translate-x-0.5 transition-all">
+        <div className="w-8 h-8 rounded-full bg-black/[0.04] dark:bg-white/[0.06] flex items-center justify-center shrink-0 text-gray-400 dark:text-gray-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:bg-emerald-500/15 group-hover:translate-x-0.5 transition-all">
           <ArrowRight className="w-4 h-4" />
         </div>
       </button>

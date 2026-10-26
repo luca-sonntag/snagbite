@@ -102,7 +102,7 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
       }}
     >
       <div
-        className="bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl w-full max-w-lg p-5 sm:p-6 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)] relative animate-in slide-in-from-bottom duration-250 max-h-[90vh] overflow-y-auto"
+        className="bg-gray-50 dark:bg-gray-950 rounded-t-3xl sm:rounded-3xl w-full max-w-lg p-5 sm:p-6 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] border border-black/5 dark:border-white/5 shadow-[0_-4px_30px_rgba(0,0,0,0.12)] relative animate-in slide-in-from-bottom duration-250 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header without border */}
@@ -114,7 +114,7 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label={t('pantry.cancel')}
-            className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95 transition-all border-none outline-none flex items-center justify-center cursor-pointer"
+            className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-black/[0.04] dark:bg-white/[0.06] text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-black/[0.08] dark:hover:bg-white/[0.10] active:scale-95 transition-all border-none outline-none flex items-center justify-center cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -131,7 +131,7 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
               onChange={(e) => setName(e.target.value)}
               placeholder={t('pantry.namePlaceholder')}
               required
-              className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all"
+              className="w-full px-4 py-3 rounded-xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all"
             />
           </div>
 
@@ -147,7 +147,7 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="1"
                 required
-                className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all"
+                className="w-full px-4 py-3 rounded-xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all"
               />
             </div>
             <div>
@@ -160,7 +160,7 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
                 onChange={(e) => setUnit(e.target.value)}
                 placeholder="g, ml, Stk."
                 required
-                className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all"
+                className="w-full px-4 py-3 rounded-xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all"
               />
             </div>
           </div>
@@ -175,7 +175,7 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
                 className={`text-xs px-3 py-1.5 rounded-xl font-semibold transition-all border-none outline-none cursor-pointer active:scale-95 ${
                   unit === u
                     ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    : 'bg-black/[0.03] hover:bg-black/[0.06] dark:bg-white/[0.04] dark:hover:bg-white/[0.08] text-gray-600 dark:text-gray-300 border border-black/5 dark:border-white/10'
                 }`}
               >
                 {u}
@@ -196,7 +196,7 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
                   setShelfLifeDays(String(getDefaultShelfLifeDays(newCat, name)));
                 }}
                 aria-label={t('pantry.categoryPlaceholder')}
-                className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border-none text-gray-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all cursor-pointer"
+                className="w-full px-4 py-3 rounded-xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 text-gray-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all cursor-pointer"
               >
                 {categoryOrder.map((cat) => (
                   <option key={cat} value={cat}>
@@ -215,7 +215,7 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
                 value={shelfLifeDays}
                 onChange={(e) => setShelfLifeDays(e.target.value)}
                 placeholder="7"
-                className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all"
+                className="w-full px-4 py-3 rounded-xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all"
               />
             </div>
           </div>
@@ -229,7 +229,7 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="z.B. geöffnet im Kühlschrank"
-              className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all"
+              className="w-full px-4 py-3 rounded-xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 text-sm font-medium transition-all"
             />
           </div>
 
@@ -237,7 +237,7 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 h-12 rounded-2xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold text-sm transition-all active:scale-95 border-none outline-none cursor-pointer flex items-center justify-center"
+              className="flex-1 h-12 rounded-2xl bg-black/[0.03] hover:bg-black/[0.06] dark:bg-white/[0.04] dark:hover:bg-white/[0.08] border border-black/5 dark:border-white/10 text-gray-700 dark:text-gray-200 font-bold text-sm transition-all active:scale-95 outline-none cursor-pointer flex items-center justify-center"
             >
               {t('pantry.cancel')}
             </button>

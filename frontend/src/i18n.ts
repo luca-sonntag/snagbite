@@ -816,7 +816,7 @@ export const uiTranslations = {
         friends: {
           yourCode: 'Dein Freundescode',
           share: 'Einladung teilen',
-          addTitle: 'Freund hinzufügen',
+          addTitle: 'Freunde hinzufügen',
           addPlaceholder: 'Freundescode',
           add: 'Hinzufügen',
           requests: 'Anfragen',
@@ -2517,7 +2517,7 @@ export const uiTranslations = {
         friends: {
           yourCode: 'Your friend code',
           share: 'Share invite',
-          addTitle: 'Add a friend',
+          addTitle: 'Add Friends',
           addPlaceholder: 'Friend code',
           add: 'Add',
           requests: 'Requests',

@@ -85,12 +85,10 @@ export default function ActiveExtractions({ excludeId }: ActiveExtractionsProps 
           <div
             key={job.id}
             onClick={isDone ? open : undefined}
-            className={`relative flex items-center gap-3.5 px-4 py-3.5 rounded-3xl overflow-hidden transition-all border-none ${
+            className={`relative flex items-center gap-3.5 px-2 py-3.5 overflow-hidden transition-all ${
               isDone
-                ? 'cursor-pointer active:scale-[0.99] bg-emerald-500/10 dark:bg-emerald-500/15'
-                : isFailed
-                  ? 'bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)]'
-                  : 'bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)]'
+                ? 'cursor-pointer active:scale-[0.99] rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 px-3.5'
+                : 'bg-transparent border-b border-black/[0.06] dark:border-white/[0.08]'
             }`}
           >
             {/* Progress track (running only) */}

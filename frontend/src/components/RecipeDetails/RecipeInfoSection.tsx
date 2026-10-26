@@ -53,10 +53,10 @@ export default function RecipeInfoSection({
   const statValue = 'text-base font-bold text-gray-900 dark:text-white tabular-nums leading-tight';
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden">
-      <div className="grid grid-cols-3 divide-x divide-gray-100/70 dark:divide-gray-800/60">
+    <div className="flex flex-col border-none">
+      <div className="grid grid-cols-3 divide-x divide-black/[0.06] dark:divide-white/[0.08] border-y border-black/[0.06] dark:border-white/[0.08]">
         {/* Prep time */}
-        <div className="flex flex-col items-center gap-1.5 py-4 px-2 text-center">
+        <div className="flex flex-col items-center gap-1.5 py-3.5 px-2 text-center">
           <Clock className={iconClass} />
           <span className={statLabel}>{t('recipe.prep')}</span>
           {isExtracting && (prepTime === null || prepTime === undefined) ? (
@@ -67,7 +67,7 @@ export default function RecipeInfoSection({
         </div>
 
         {/* Cook time */}
-        <div className="flex flex-col items-center gap-1.5 py-4 px-2 text-center">
+        <div className="flex flex-col items-center gap-1.5 py-3.5 px-2 text-center">
           <Utensils className={iconClass} />
           <span className={statLabel}>{t('recipe.cook')}</span>
           {isExtracting && (cookTime === null || cookTime === undefined) ? (
@@ -78,7 +78,7 @@ export default function RecipeInfoSection({
         </div>
 
         {/* Servings */}
-        <div className="flex flex-col items-center gap-1.5 py-4 px-2 text-center">
+        <div className="flex flex-col items-center gap-1.5 py-3.5 px-2 text-center">
           <Users className={iconClass} />
           <span className={statLabel}>{t('recipe.serves')}</span>
           {isExtracting ? (
@@ -93,7 +93,7 @@ export default function RecipeInfoSection({
 
       {/* Calorie headline + macro distribution */}
       {(nutritionalValues || isExtracting) && (
-        <div className="border-t border-gray-100/70 dark:border-gray-800/60 transition-all duration-500">
+        <div className="transition-all duration-500">
           {nutritionalValues ? (
             <div className="animate-fade-in">
               <RecipeNutrition
@@ -111,7 +111,7 @@ export default function RecipeInfoSection({
               />
             </div>
           ) : (
-            <div className="p-4 sm:p-5 flex flex-col gap-3 animate-pulse">
+            <div className="py-4 px-0.5 flex flex-col gap-3 animate-pulse">
               <div className="flex items-center justify-between">
                 <div className="h-5 w-28 bg-gray-200/90 dark:bg-gray-800/90 rounded-lg" />
                 <div className="h-5 w-16 bg-gray-200/90 dark:bg-gray-800/90 rounded-lg" />

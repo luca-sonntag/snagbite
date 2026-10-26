@@ -54,7 +54,7 @@ export default function AuthForm() {
               {t('app.title')}
             </h1>
           </div>
-          <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight font-heading">
+          <p className="text-sm sm:text-base font-medium text-gray-700 dark:text-gray-200 font-sans">
             {t('auth.heroHook')}
           </p>
         </div>

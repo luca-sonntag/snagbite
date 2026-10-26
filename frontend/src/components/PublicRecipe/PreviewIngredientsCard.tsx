@@ -28,9 +28,9 @@ export const PreviewIngredientsCard: React.FC<PreviewIngredientsCardProps> = ({
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none overflow-hidden divide-y divide-gray-100/70 dark:divide-gray-800/60">
+    <div className="border-none overflow-hidden divide-y divide-black/[0.05] dark:divide-white/[0.06]">
       {/* 1. Servings Header (Display only, no stepper in preview) */}
-      <div className="px-4.5 py-3.5 sm:px-6 flex items-center justify-between gap-4">
+      <div className="px-0.5 py-3 flex items-center justify-between gap-4">
         <div className="flex flex-col">
           <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
             {t('recipe.serves')}
@@ -42,7 +42,7 @@ export const PreviewIngredientsCard: React.FC<PreviewIngredientsCardProps> = ({
       </div>
 
       {/* 2. Ingredients List */}
-      <ul className="flex flex-col divide-y divide-gray-100/60 dark:divide-gray-800/50 list-none p-0 m-0">
+      <ul className="flex flex-col divide-y divide-black/[0.05] dark:divide-white/[0.06] list-none p-0 m-0">
         {sortedIngredients.map((ing, idx) => (
           <IngredientItemRow
             key={`${ing.name}-${idx}`}

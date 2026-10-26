@@ -78,7 +78,7 @@ export const IngredientItemRow: React.FC<IngredientItemRowProps> = ({
           handleNutritionClick();
         }
       }}
-      className={`group flex items-center justify-between gap-3 px-4.5 py-3 sm:px-6 min-h-[64px] sm:min-h-[68px] transition-colors hover:bg-black/[0.015] dark:hover:bg-white/[0.02] active:bg-black/[0.03] dark:active:bg-white/[0.04] select-none ${
+      className={`group flex items-center justify-between gap-3 px-1 py-3 min-h-[60px] sm:min-h-[64px] rounded-xl transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02] active:bg-black/[0.04] dark:active:bg-white/[0.04] select-none ${
         isClickable ? 'cursor-pointer' : ''
       }`}
     >

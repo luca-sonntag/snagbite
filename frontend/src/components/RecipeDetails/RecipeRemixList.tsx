@@ -87,7 +87,7 @@ export default function RecipeRemixList({
                   onNavigateToRecipe?.(remix.id, remix);
                 }
               }}
-              className="h-[76px] w-64 shrink-0 p-2.5 rounded-2xl bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/80 active:scale-[0.98] transition-all flex items-center gap-3 text-left border-none shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.2)] cursor-pointer outline-none group"
+              className="h-[76px] w-64 shrink-0 p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] active:scale-[0.98] transition-all flex items-center gap-3 text-left border-none cursor-pointer outline-none group"
             >
               <div className="w-13 h-13 rounded-xl overflow-hidden bg-black/5 dark:bg-white/5 shrink-0">
                 <CachedImage

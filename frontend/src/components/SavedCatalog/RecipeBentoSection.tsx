@@ -185,7 +185,7 @@ export default function RecipeBentoSection({
 
             {/* 2. Titel direkt unter der Dauer-Zeile (kein Autor) */}
             <h4
-              className={`font-bold text-xs sm:text-sm leading-tight line-clamp-2 pt-0.5 font-heading ${
+              className={`font-bold text-xs sm:text-sm leading-tight line-clamp-2 pt-0.5 ${
                 hasMainImage ? 'text-white drop-shadow-xs' : 'text-gray-900 dark:text-white'
               }`}
             >

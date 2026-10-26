@@ -75,7 +75,7 @@ export default function LeaderboardView() {
       {/* Toggles (Scope & Range) */}
       <div className="grid grid-cols-2 gap-2">
         {/* Scope: Friends vs Global */}
-        <div className="flex rounded-2xl bg-gray-100 p-1 dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
+        <div className="flex rounded-2xl bg-black/[0.04] p-1 dark:bg-white/[0.06]">
           {(['friends', 'global'] as LeaderboardScope[]).map((s) => {
             const isActive = scope === s;
             return (
@@ -84,7 +84,7 @@ export default function LeaderboardView() {
                 onPress={() => setScope(s)}
                 className={`flex-1 rounded-xl py-2 h-9 text-xs sm:text-sm font-semibold border-none transition-all duration-200 cursor-pointer ${
                   isActive
-                    ? 'bg-white text-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] dark:bg-gray-800 dark:text-white'
+                    ? 'bg-[#fdfbf7] text-gray-900 shadow-xs dark:bg-gray-800 dark:text-white'
                     : 'bg-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
                 }`}
               >
@@ -95,7 +95,7 @@ export default function LeaderboardView() {
         </div>
 
         {/* Range: Monthly vs All-Time */}
-        <div className="flex rounded-2xl bg-gray-100 p-1 dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
+        <div className="flex rounded-2xl bg-black/[0.04] p-1 dark:bg-white/[0.06]">
           {(['monthly', 'all'] as LeaderboardWindow[]).map((w) => {
             const isActive = range === w;
             return (
@@ -104,7 +104,7 @@ export default function LeaderboardView() {
                 onPress={() => setRange(w)}
                 className={`flex-1 rounded-xl py-2 h-9 text-xs sm:text-sm font-semibold border-none transition-all duration-200 cursor-pointer ${
                   isActive
-                    ? 'bg-white text-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] dark:bg-gray-800 dark:text-white'
+                    ? 'bg-[#fdfbf7] text-gray-900 shadow-xs dark:bg-gray-800 dark:text-white'
                     : 'bg-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
                 }`}
               >
@@ -120,17 +120,17 @@ export default function LeaderboardView() {
           <Spinner size="md" color="success" />
         </div>
       ) : (
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-1">
           {entries.map((e) => {
             const isBusy = !!actionBusyMap[e.userId];
 
             return (
               <div
                 key={e.userId}
-                className={`flex items-center gap-3 rounded-2xl border-none p-3.5 transition-all shadow-[0_2px_6px_rgba(0,0,0,0.03)] ${
+                className={`flex items-center gap-3 py-3.5 px-1 transition-all ${
                   e.isMe
-                    ? 'bg-emerald-500/10 dark:bg-emerald-500/15'
-                    : 'bg-white dark:bg-gray-900'
+                    ? 'bg-emerald-500/10 dark:bg-emerald-500/15 rounded-2xl px-3 border-none my-0.5'
+                    : 'bg-transparent'
                 }`}
               >
                 <div className="w-7 text-center text-base font-extrabold text-gray-500 dark:text-gray-400 shrink-0">

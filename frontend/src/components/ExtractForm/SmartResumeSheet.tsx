@@ -120,8 +120,8 @@ export const SmartResumeSheet: React.FC<SmartResumeSheetProps> = ({
             </Drawer.Header>
 
             <Drawer.Body className="py-2 flex flex-col gap-3">
-              {/* Recipe Preview Card */}
-              <div className="flex items-center gap-3 p-3.5 bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border-none">
+              {/* Recipe Preview Row (Open Editorial Layout) */}
+              <div className="flex items-center gap-3 py-3 px-1 border-y border-black/[0.06] dark:border-white/[0.08]">
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                   {channel === 'web' ? <Globe className="w-5 h-5" /> : <Play className="w-4 h-4 fill-current" />}
                 </div>

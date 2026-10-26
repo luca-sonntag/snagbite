@@ -23,7 +23,7 @@ export default function CookedModalPhotoView({
   return (
     <div className="space-y-4 py-1">
       {/* Image Preview Container */}
-      <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-gray-100 dark:bg-black/40">
+      <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/5 dark:border-white/10">
         <img
           src={photo}
           alt="Uploaded dish preview"
@@ -42,7 +42,7 @@ export default function CookedModalPhotoView({
 
       {/* Rejection Message if AI rejected previous attempt */}
       {rejectionReason && (
-        <div className="rounded-2xl bg-rose-500/5 dark:bg-rose-500/10 p-3.5 flex items-start gap-3 text-rose-700 dark:text-rose-300">
+        <div className="rounded-2xl bg-rose-500/10 dark:bg-rose-500/15 border border-rose-500/20 p-3.5 flex items-start gap-3 text-rose-700 dark:text-rose-300">
           <AlertTriangle className="w-5 h-5 shrink-0 text-rose-500 dark:text-rose-400 mt-0.5" />
           <div className="space-y-1 text-xs">
             <p className="font-semibold text-rose-900 dark:text-rose-200">{t('app.gamification.rejectionTitle')}</p>
@@ -53,7 +53,7 @@ export default function CookedModalPhotoView({
 
       {/* Verifying Status, Retry Button, or Submit Button */}
       {isVerifying ? (
-        <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-500/15 p-4 text-center space-y-2">
+        <div className="rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 p-4 text-center space-y-2">
           <div className="flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-400 font-bold text-sm">
             <Loader2 className="w-4 h-4 animate-spin" />
             <span>{t('app.gamification.verifyingTitle')}</span>
@@ -67,7 +67,7 @@ export default function CookedModalPhotoView({
           <button
             type="button"
             onClick={onClearPhoto}
-            className="w-full min-h-[48px] h-12 flex items-center justify-center gap-2 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 px-4 text-sm font-bold transition-all active:scale-[0.98] cursor-pointer outline-none border-none"
+            className="w-full min-h-[48px] h-12 flex items-center justify-center gap-2 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 px-4 text-sm font-bold transition-all active:scale-[0.98] cursor-pointer outline-none"
           >
             <RotateCcw className="w-4 h-4" />
             <span>{t('app.gamification.retryPhoto')}</span>
@@ -75,7 +75,7 @@ export default function CookedModalPhotoView({
           <button
             type="button"
             onClick={onMarkWithoutPhoto}
-            className="w-full min-h-[44px] flex items-center justify-center gap-2 py-3 px-3.5 rounded-2xl text-xs font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-[0.98] transition-all cursor-pointer border-none whitespace-nowrap"
+            className="w-full min-h-[44px] flex items-center justify-center gap-2 py-3 px-3.5 rounded-2xl text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] border border-black/5 dark:border-white/10 active:scale-[0.98] transition-all cursor-pointer whitespace-nowrap"
           >
             <Check className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
             <span>{t('app.gamification.markWithoutPhoto')}</span>

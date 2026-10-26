@@ -1,6 +1,6 @@
 import React from 'react';
 import { Drawer } from '@heroui/react';
-import { X, Sparkles, AlertCircle, CheckCircle2, ChevronRight, Globe } from 'lucide-react';
+import { X, AlertCircle, CheckCircle2, ChevronRight, Globe } from 'lucide-react';
 import type { PantrySuggestion } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
@@ -57,18 +57,13 @@ export const PantrySuggestionsModal: React.FC<PantrySuggestionsModalProps> = ({
               {/* Header */}
               <Drawer.Header className="pt-1 pb-3 mb-1">
                 <div className="flex items-center justify-between w-full gap-2">
-                  <div className="flex items-center gap-2.5 min-w-0 pr-1">
-                    <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-                      <Sparkles className="w-5 h-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <Drawer.Heading className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">
-                        {t('pantry.suggestionsTitle')}
-                      </Drawer.Heading>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                        {t('pantry.suggestionsSubtitle')}
-                      </p>
-                    </div>
+                  <div className="min-w-0 pr-1">
+                    <Drawer.Heading className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">
+                      {t('pantry.suggestionsTitle')}
+                    </Drawer.Heading>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                      {t('pantry.suggestionsSubtitle')}
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -77,7 +72,7 @@ export const PantrySuggestionsModal: React.FC<PantrySuggestionsModalProps> = ({
                       onClose();
                     }}
                     aria-label={t('pantry.cancel')}
-                    className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95 transition-all border-none outline-none flex items-center justify-center cursor-pointer shrink-0"
+                    className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-black/[0.04] dark:bg-white/[0.06] text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-black/[0.08] dark:hover:bg-white/[0.10] active:scale-95 transition-all border-none outline-none flex items-center justify-center cursor-pointer shrink-0"
                   >
                     <X className="w-5 h-5" />
                   </button>

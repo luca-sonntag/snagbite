@@ -29,8 +29,8 @@ export default function ShoppingCheckedDrawer({
   if (items.length === 0) return null;
 
   return (
-    <div className="rounded-2xl md:rounded-3xl bg-white dark:bg-gray-900 shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none overflow-hidden transition-all">
-      <div className="flex items-center justify-between gap-2.5 w-full px-4 py-3 select-none min-h-[48px]">
+    <div className="pt-3 border-t border-black/[0.06] dark:border-white/[0.08] transition-all">
+      <div className="flex items-center justify-between gap-2.5 w-full px-1 py-2 select-none min-h-[44px]">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <span className="w-6 h-6 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
             <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 stroke-[2.5]" />
@@ -41,7 +41,7 @@ export default function ShoppingCheckedDrawer({
         </div>
       </div>
 
-      <div className="px-2 pb-2.5 pt-0.5 flex flex-col gap-1">
+      <div className="pb-2 pt-0.5 flex flex-col gap-1">
         <ul className="flex flex-col gap-0.5 divide-y divide-black/[0.03] dark:divide-white/[0.03]">
           {items.map((item) => {
             const displayKey = `checked-${getItemKey(item)}`;

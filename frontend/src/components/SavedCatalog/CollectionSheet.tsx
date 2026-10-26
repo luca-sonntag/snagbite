@@ -266,11 +266,7 @@ export default function CollectionSheet({
               {/* Header */}
               <Drawer.Header className="pb-3 mb-1">
                 <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border-none flex items-center justify-center">
-                      <Folder className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white">
+                  <Drawer.Heading className="text-base font-bold text-gray-900 dark:text-white">
                     {mode === 'assign'
                       ? (job
                         ? t('catalog.assignCollectionsTitle') || 'Sammlungen zuweisen'
@@ -283,11 +279,10 @@ export default function CollectionSheet({
                       ? t('catalog.addCollection') || 'Neue Sammlung'
                       : t('catalog.editCollection') || 'Sammlung bearbeiten'}
                   </Drawer.Heading>
-                  </div>
                   {(mode === 'create' || mode === 'edit' || mode === 'manage') && (
                     <button
                       type="button"
-                      className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer"
+                      className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-black/[0.04] dark:bg-white/[0.06] text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-black/[0.08] dark:hover:bg-white/[0.10] border-none flex items-center justify-center active:scale-95 transition-all cursor-pointer"
                       onClick={() => {
                         hapticLight();
                         onClose();
@@ -514,7 +509,7 @@ export default function CollectionSheet({
                   within the drawer's modal interaction scope and is clickable. */}
               {pendingDelete && (
                 <div className="absolute inset-0 z-10 flex items-end justify-center rounded-[inherit] bg-black/40 backdrop-blur-[2px] p-4">
-                  <div className="w-full rounded-3xl border-none bg-white dark:bg-gray-900 shadow-[0_10px_40px_rgba(0,0,0,0.15)] p-5 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="w-full rounded-3xl border border-black/5 dark:border-white/5 bg-gray-50 dark:bg-gray-950 shadow-[0_10px_40px_rgba(0,0,0,0.15)] p-5 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
                     <div className="flex gap-3.5 items-start">
                       <div className="w-11 h-11 rounded-2xl border-none flex-shrink-0 flex items-center justify-center bg-rose-500/10">
                         <Trash2 className="w-5 h-5 text-rose-500" />
@@ -533,7 +528,7 @@ export default function CollectionSheet({
                     <div className="flex gap-2.5 w-full">
                       <Button
                         variant="tertiary"
-                        className="flex-1 h-12 rounded-2xl text-sm font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-none active:scale-95 transition-all cursor-pointer"
+                        className="flex-1 h-12 rounded-2xl text-sm font-bold bg-black/[0.03] hover:bg-black/[0.06] dark:bg-white/[0.04] dark:hover:bg-white/[0.08] border border-black/5 dark:border-white/10 text-gray-700 dark:text-gray-200 active:scale-95 transition-all cursor-pointer"
                         onPress={() => setPendingDelete(null)}
                         isDisabled={isDeleting}
                       >

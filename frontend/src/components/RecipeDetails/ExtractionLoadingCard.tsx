@@ -8,7 +8,7 @@
  */
 export default function ExtractionLoadingCard() {
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-none p-5 sm:p-6 flex flex-col gap-5 animate-pulse">
+    <div className="py-4 px-0.5 flex flex-col gap-5 animate-pulse">
       {/* Header bar placeholder */}
       <div className="flex items-center justify-between">
         <div className="h-5 w-32 bg-gray-200/90 dark:bg-gray-800/90 rounded-xl" />

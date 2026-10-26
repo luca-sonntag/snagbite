@@ -61,19 +61,19 @@ export default function RecipeShowcaseCard({
         </p>
       </div>
 
-      {/* Clean Flat Showcase Card - Harmonized with Poster & Compact Cards */}
+      {/* Photo-First Open Editorial Showcase */}
       <article
         onClick={(e) => {
           hapticLight();
           onOpenRecipe(e, job);
         }}
-        className={`group relative rounded-2xl overflow-hidden bg-white dark:bg-gray-900 shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] ring-1 ring-black/5 dark:ring-white/10 border-none flex items-stretch cursor-pointer active:scale-[0.98] hover:shadow-md transition-all duration-150 select-none ${
-          isSelected ? 'ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10' : ''
+        className={`group relative flex items-stretch gap-3.5 py-1 cursor-pointer active:scale-[0.98] transition-all duration-150 select-none ${
+          isSelected ? 'rounded-2xl ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10 px-2 border-none' : ''
         }`}
         {...(bindLongPress ?? {})}
       >
-        {/* Full Height Left Cover Image */}
-        <div className="relative w-28 sm:w-36 shrink-0 overflow-hidden bg-black/5 dark:bg-white/5 self-stretch">
+        {/* Left Rounded Cover Image */}
+        <div className="relative w-28 sm:w-36 shrink-0 rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5 self-stretch shadow-xs ring-1 ring-black/[0.05] dark:ring-white/[0.08]">
           <CachedImage
             src={r.imageUrl || r.imageUrls?.[0]}
             emoji={r.emoji}
@@ -106,7 +106,7 @@ export default function RecipeShowcaseCard({
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 min-w-0 flex flex-col justify-between p-3 sm:p-3.5 overflow-hidden">
+        <div className="flex-1 min-w-0 flex flex-col justify-between py-1 pr-1 overflow-hidden">
           {/* Top Line: Subtle Saved Date */}
           <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 tracking-tight">
             {t('catalog.magazine.savedOn', { date: formattedDate })}
@@ -120,7 +120,7 @@ export default function RecipeShowcaseCard({
           {/* Unified Bottom Meta - Duration left, Calories + Health Score right */}
           <div className="flex items-center justify-between gap-1.5 w-full text-[11px] font-medium mt-auto pt-1 select-none">
             {totalTime ? (
-              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
+              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/[0.04] dark:bg-white/[0.06] text-gray-700 dark:text-gray-300 font-semibold text-[9.5px] shrink-0">
                 <Clock className="w-2.5 h-2.5 text-gray-500 dark:text-gray-400 shrink-0" />
                 <span>{totalTime}</span>
               </span>

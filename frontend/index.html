@@ -9,10 +9,10 @@
       if (theme === 'dark') {
         document.documentElement.classList.add('dark');
         document.documentElement.setAttribute('data-theme', 'dark');
-        document.documentElement.style.setProperty('--app-bg', '#0c0b0a');
-        document.documentElement.style.setProperty('--app-text', '#ffffff');
-        document.documentElement.style.setProperty('--app-subtext', '#a8a29e');
-        document.documentElement.style.setProperty('--app-card-bg', '#141311');
+        document.documentElement.style.setProperty('--app-bg', '#141416');
+        document.documentElement.style.setProperty('--app-text', '#f4f4f6');
+        document.documentElement.style.setProperty('--app-subtext', '#a1a1aa');
+        document.documentElement.style.setProperty('--app-card-bg', '#1e1e22');
       } else {
         document.documentElement.classList.remove('dark');
         document.documentElement.setAttribute('data-theme', 'light');
@@ -60,7 +60,7 @@
         <div style="width:88px;height:88px;display:flex;align-items:center;justify-content:center;animation:inline-breathe 2.4s ease-in-out infinite;">
           <img src="/icon-512.png" alt="Snagbite" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 12px 28px rgba(16,185,129,0.25));" />
         </div>
-        <div style="margin-top:20px;font-size:24px;font-weight:900;letter-spacing:-0.03em;color:var(--app-text,#111827);">
+        <div style="margin-top:20px;font-size:24px;font-weight:900;letter-spacing:-0.03em;color:var(--app-text,#111827);font-family:'Outfit',system-ui,sans-serif;">
           Snagbite
         </div>
         <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;">
@@ -69,7 +69,7 @@
           <span style="width:8px;height:8px;border-radius:9999px;background-color:#10b981;animation:inline-bounce 1.2s ease-in-out infinite;animation-delay:360ms;"></span>
         </div>
         <div style="height:24px;margin-top:12px;display:flex;align-items:center;justify-content:center;">
-          <p id="preloader-text" style="margin:0;font-size:12px;font-weight:600;color:var(--app-subtext,#6b7280);text-align:center;padding:0 16px;">
+          <p id="preloader-text" style="margin:0;font-size:12px;font-weight:600;color:var(--app-subtext,#6b7280);text-align:center;padding:0 16px;font-family:'Outfit',system-ui,sans-serif;">
             Dein Kochbuch wird angerichtet…
           </p>
         </div>
