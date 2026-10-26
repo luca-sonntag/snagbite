@@ -67,7 +67,7 @@ export default function RecipeShowcaseCard({
           hapticLight();
           onOpenRecipe(e, job);
         }}
-        className={`group relative flex items-stretch gap-3.5 py-2 border-y border-black/[0.06] dark:border-white/[0.08] cursor-pointer active:scale-[0.98] transition-all duration-150 select-none ${
+        className={`group relative flex items-stretch gap-3.5 py-1 cursor-pointer active:scale-[0.98] transition-all duration-150 select-none ${
           isSelected ? 'rounded-2xl ring-2 ring-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10 px-2 border-none' : ''
         }`}
         {...(bindLongPress ?? {})}
