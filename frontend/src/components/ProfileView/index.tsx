@@ -71,7 +71,7 @@ export default function ProfileView({ pendingInviteCode, onInviteConsumed, onSel
   return (
     <div className="flex flex-col gap-6 pb-12">
       {/* Sticky Header & Tabs Container */}
-      <div className="sticky top-[var(--app-sticky-top,0px)] z-30 -mx-4 px-4 pt-1 pb-3 bg-[#faf8f5]/95 dark:bg-[#0c0b0a]/95 backdrop-blur-md flex flex-col gap-3 border-none">
+      <div className="sticky top-[var(--app-sticky-top,0px)] z-30 -mx-4 px-4 pt-1 pb-3 bg-[#faf8f5]/95 dark:bg-gray-950/95 backdrop-blur-md flex flex-col gap-3 border-none">
         <PageHeader
           title={section === 'settings' ? (t('app.social.sections.settings') || 'Einstellungen') : t('app.gamification.tabTitle')}
           subtitle={section === 'settings' ? t('app.settings.subtitle') : t('app.gamification.subtitle')}

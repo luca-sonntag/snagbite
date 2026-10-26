@@ -39,29 +39,30 @@
   --font-heading: 'Fraunces', Georgia, serif;
   --font-serif: 'Fraunces', Georgia, serif;
 
-  /* Warm Culinary Paper & Espresso Onyx palette - harmonic editorial depth */
-  --color-gray-950: #0c0b0a; /* Warm Espresso-Onyx canvas background */
-  --color-gray-900: #141311; /* Container / Surface Level 1 */
-  --color-gray-850: #191816;
-  --color-gray-800: #201e1c; /* Card / Panel Level 2 */
-  --color-gray-750: #282623;
-  --color-gray-700: #302d2a; /* Interactive pill / button Level 3 */
-  --color-gray-600: #44403c; /* Hairline borders & rings */
-  --color-gray-500: #78716c; /* Muted captions & inactive icons */
-  --color-gray-400: #a8a29e; /* Secondary body text */
-  --color-gray-300: #d6d3d1;
+  /* Warm Culinary Paper (Light) & Proven Neutral Charcoal (Dark) palette - Apple HIG & Zinc standard */
+  --color-gray-950: #141416; /* Clean neutral dark canvas */
+  --color-gray-900: #1e1e22; /* Elevated container / sheets / nav / modal base */
+  --color-gray-850: #25252b; /* Subtle elevated surfaces */
+  --color-gray-800: #2c2c34; /* Cards / Steppers / Inset wells / Inputs */
+  --color-gray-750: #343440; /* Intermediate hover / active highlight */
+  --color-gray-700: #3f3f4c; /* Interactive pills / active button states */
+  --color-gray-600: #525260; /* Defined hairlines & borders */
+  --color-gray-500: #787888; /* Captions & inactive icons */
+  --color-gray-400: #a1a1aa; /* Secondary body text (zinc-400) */
+  --color-gray-300: #d4d4d8; /* Light gray text / borders (zinc-300) */
   --color-gray-200: #e7e5e4;
   --color-gray-100: #f3f1ed; /* Warm Linen subtle surface */
   --color-gray-50:  #faf8f5; /* Warm Alabaster / Culinary Paper canvas */
 
-  --color-slate-950: #0c0b0a;
-  --color-slate-900: #141311;
-  --color-slate-850: #191816;
-  --color-slate-800: #201e1c;
-  --color-slate-700: #302d2a;
-  --color-slate-600: #44403c;
-  --color-slate-500: #78716c;
-  --color-slate-400: #a8a29e;
+  --color-slate-950: #141416;
+  --color-slate-900: #1e1e22;
+  --color-slate-850: #25252b;
+  --color-slate-800: #2c2c34;
+  --color-slate-750: #343440;
+  --color-slate-700: #3f3f4c;
+  --color-slate-600: #525260;
+  --color-slate-500: #787888;
+  --color-slate-400: #a1a1aa;
   --color-slate-50:  #faf8f5;
 }
 
