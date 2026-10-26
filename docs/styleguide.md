@@ -53,7 +53,7 @@
 ## 2. 🔤 Typografie & Redaktionelle Hierarchie
 
 * **Schriftarten-Paarung (100% DSGVO-konform lokal als WOFF2 in `public/fonts/`):**
-  * **Headlines & Editorial (`--font-heading` / `Fraunces`):** Warme kulinarische Editorial-Serif für Seiten-Header (`h1`, `h2`), Magazin-Aufmacher, den Login-Hook und Rezepttitel (`font-heading`). Die `Snagbite`-Wortmarke neben dem App-Icon bleibt explizit in `font-sans` (`Outfit Black`).
+  * **Headlines & Editorial (`--font-heading` / `Fraunces`):** Warme kulinarische Editorial-Serif für Seiten-Header (`h1`, `h2`), Magazin-Aufmacher und Rezepttitel (`font-heading`). Die `Snagbite`-Wortmarke sowie der Login-Hero-Hook („Aus Reels wird dein Kochbuch“) bleiben in moderner, klarer Sans-Serif (`Outfit` / `font-sans`).
   * **UI, Body & Zahlen (`--font-sans` / `Outfit`):** Klare geometrische Sans-Serif für Buttons, Mengen, Einheiten, Nährwert-Pills, Timer, Navigation und Fließtexte.
 * **Redaktionelle Headlines & Begrüßung:**
   * **Kontextuelles Eyebrow-Label:** `text-[11px] font-bold tracking-wider uppercase text-emerald-600 dark:text-emerald-400`. Begrüßt zeit- und wochentagsabhängig (z. B. *„SCHÖNEN SONNTAGABEND, TEST“*).
