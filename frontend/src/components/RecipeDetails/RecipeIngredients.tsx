@@ -195,49 +195,48 @@ export default function RecipeIngredients({
           </div>
         )}
 
-        {/* 1.4 Full-Width Soft Shopping List Button */}
-        {onAddIngredients ? (
-          <div className="pt-3 border-none">
-            <Button
-              className={`w-full min-h-[54px] h-auto px-4 py-3.5 rounded-2xl font-semibold transition-colors flex items-center justify-between text-sm border-none shadow-none cursor-pointer group bg-black/[0.04] hover:bg-black/[0.07] active:bg-black/[0.1] dark:bg-white/[0.06] dark:hover:bg-white/[0.09] dark:active:bg-white/[0.12] animate-fade-in ${
-                isAdded
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-gray-800 dark:text-gray-100'
-              }`}
-              onPress={() => {
-                hapticLight();
-                onAddIngredients();
-              }}
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                {isAdded ? (
-                  <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                ) : (
-                  <ShoppingCart className="w-5 h-5 text-gray-500 dark:text-gray-400 shrink-0" />
-                )}
-                <span className="truncate text-sm font-semibold">
-                  {isAdded ? t('recipe.addedToShopping') : t('recipe.addToShopping')}
-                </span>
-              </div>
-              <ChevronRight
-                className={`w-4.5 h-4.5 shrink-0 group-hover:translate-x-0.5 transition-transform ${
-                  isAdded
-                    ? 'text-emerald-600/70 dark:text-emerald-400/70'
-                    : 'text-gray-400 dark:text-gray-500'
-                }`}
-              />
-            </Button>
-          </div>
-        ) : isExtracting ? (
-          <div className="w-full min-h-[54px] px-4 py-3.5 mt-2 rounded-2xl flex items-center justify-between bg-black/[0.03] dark:bg-white/[0.04] animate-pulse border-none">
-            <div className="flex items-center gap-3">
-              <div className="w-5 h-5 rounded-md bg-gray-200 dark:bg-gray-800 shrink-0" />
-              <div className="h-4 w-36 bg-gray-200 dark:bg-gray-800 rounded-md" />
-            </div>
-            <div className="w-4 h-4 rounded-md bg-gray-200 dark:bg-gray-800" />
-          </div>
-        ) : null}
       </div>
+
+      {/* 1.4 Full-Width Soft Shopping List Button */}
+      {onAddIngredients ? (
+        <Button
+          className={`w-full min-h-[54px] h-auto px-4 py-3.5 rounded-2xl font-semibold transition-colors flex items-center justify-between text-sm border-none shadow-none cursor-pointer group bg-black/[0.04] hover:bg-black/[0.07] active:bg-black/[0.1] dark:bg-white/[0.06] dark:hover:bg-white/[0.09] dark:active:bg-white/[0.12] animate-fade-in ${
+            isAdded
+              ? 'text-emerald-600 dark:text-emerald-400'
+              : 'text-gray-800 dark:text-gray-100'
+          }`}
+          onPress={() => {
+            hapticLight();
+            onAddIngredients();
+          }}
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            {isAdded ? (
+              <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            ) : (
+              <ShoppingCart className="w-5 h-5 text-gray-500 dark:text-gray-400 shrink-0" />
+            )}
+            <span className="truncate text-sm font-semibold">
+              {isAdded ? t('recipe.addedToShopping') : t('recipe.addToShopping')}
+            </span>
+          </div>
+          <ChevronRight
+            className={`w-4.5 h-4.5 shrink-0 group-hover:translate-x-0.5 transition-transform ${
+              isAdded
+                ? 'text-emerald-600/70 dark:text-emerald-400/70'
+                : 'text-gray-400 dark:text-gray-500'
+            }`}
+          />
+        </Button>
+      ) : isExtracting ? (
+        <div className="w-full min-h-[54px] px-4 py-3.5 rounded-2xl flex items-center justify-between bg-black/[0.03] dark:bg-white/[0.04] animate-pulse border-none">
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 rounded-md bg-gray-200 dark:bg-gray-800 shrink-0" />
+            <div className="h-4 w-36 bg-gray-200 dark:bg-gray-800 rounded-md" />
+          </div>
+          <div className="w-4 h-4 rounded-md bg-gray-200 dark:bg-gray-800" />
+        </div>
+      ) : null}
 
       {/* Alternative ingredients section */}
       {recipe.alternativeIngredients && recipe.alternativeIngredients.length > 0 && (
