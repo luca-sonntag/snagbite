@@ -24,7 +24,7 @@ export default function InstructionSectionDivider({
     <div
       className={`flex items-stretch ${
         isLarge ? 'gap-2.5 sm:gap-3 px-1' : 'gap-3.5 px-1.5'
-      } py-1 select-none`}
+      } select-none`}
     >
       {/* Timeline Rail Column — unbroken continuous rail extending to outer edges */}
       <div className={railColumn}>

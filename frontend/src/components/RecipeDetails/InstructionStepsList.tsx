@@ -59,8 +59,10 @@ export default function InstructionStepsList({
         const isLast = idx === steps.length - 1;
         const currentSection = sanitizeSectionName(step.section);
         const prevSection = idx > 0 ? sanitizeSectionName(steps[idx - 1].section) : undefined;
+        const nextSection = idx < steps.length - 1 ? sanitizeSectionName(steps[idx + 1].section) : undefined;
         const showSectionDivider = Boolean(currentSection && currentSection !== prevSection);
-        const prevChecked = !isFirst && !showSectionDivider && !!checkedSteps[steps[idx - 1].step];
+        const isBeforeSectionDivider = Boolean(nextSection && nextSection !== currentSection);
+        const prevChecked = !isFirst && !!checkedSteps[steps[idx - 1].step];
 
         return (
           <div
@@ -102,7 +104,7 @@ export default function InstructionStepsList({
               <div className={railColumn}>
                 <div
                   className={`${railBase} ${
-                    showSectionDivider ? 'h-2.5' : (isLarge ? 'h-4' : 'h-4')
+                    showSectionDivider ? 'h-2' : (isLarge ? 'h-4' : 'h-4')
                   } ${isFirst && !showSectionDivider ? 'invisible' : railTone(prevChecked)}`}
                 />
 
@@ -134,9 +136,13 @@ export default function InstructionStepsList({
                     ? isLarge
                       ? 'pt-2 sm:pt-2.5 pb-4 sm:pb-5'
                       : 'pt-1.5 pb-4'
-                    : isLarge
-                      ? 'py-4 sm:py-5'
-                      : 'py-4'
+                    : isBeforeSectionDivider
+                      ? isLarge
+                        ? 'pt-4 sm:pt-5 pb-2.5 sm:pb-3'
+                        : 'pt-4 pb-2.5'
+                      : isLarge
+                        ? 'py-4 sm:py-5'
+                        : 'py-4'
                 }`}
               >
                 <div className="flex items-center gap-2 mb-0.5">
