@@ -40,7 +40,7 @@ export const AdminSettingsSection: React.FC<AdminSettingsSectionProps> = ({ isAd
         {t('app.settings.admin.section')}
       </h3>
 
-      <div className="border-y border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
+      <div className="border-t border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
         {/* Link: Admin Dashboard */}
         <a
           href={adminPanelUrl}

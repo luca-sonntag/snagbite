@@ -221,7 +221,7 @@ export default function SettingsView() {
           {language === 'de' ? 'Einstellungen' : 'Preferences'}
         </h3>
         
-        <div className="border-y border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
+        <div className="border-t border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
           {/* Language Option */}
           <div className="p-4 flex items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-2.5 border-b border-black/5 dark:border-white/5">
             <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -341,7 +341,7 @@ export default function SettingsView() {
           )}
 
           {/* Theme Option */}
-          <div className="p-4 flex items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-2.5 border-b border-black/5 dark:border-white/5 last:border-b-0">
+          <div className="p-4 flex items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-2.5">
             <div className="flex items-center gap-3 min-w-0 flex-1">
               {theme === 'dark' ? (
                 <Moon className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" />
@@ -401,7 +401,7 @@ export default function SettingsView() {
           {language === 'de' ? 'Hilfe' : 'Help'}
         </h3>
 
-        <div className="border-y border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
+        <div className="border-t border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
           <button
             onClick={() => window.dispatchEvent(new Event('app:replay-onboarding'))}
             className="w-full p-4 flex items-center justify-between border-b border-black/5 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 transition-all active:scale-[0.99] text-left cursor-pointer group"
@@ -459,7 +459,7 @@ export default function SettingsView() {
           {t('app.settings.legal.section') || 'Rechtliches'}
         </h3>
 
-        <div className="border-y border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
+        <div className="border-t border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
           {[
             { href: LEGAL_URLS.privacy, icon: Shield, label: t('app.settings.legal.privacy') || 'Datenschutzerklärung' },
             { href: LEGAL_URLS.terms, icon: ScrollText, label: t('app.settings.legal.terms') || 'AGB' },
@@ -494,7 +494,7 @@ export default function SettingsView() {
           {language === 'de' ? 'Konto-Aktionen' : 'Account Actions'}
         </h3>
         
-        <div className="border-y border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
+        <div className="border-t border-black/[0.06] dark:border-white/[0.08] overflow-hidden">
           {/* Logout Option */}
           {!autoSignedIn && (
             <button
