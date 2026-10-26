@@ -90,7 +90,7 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
   return (
     <div className="flex flex-col gap-6">
       {/* 1. Hero Level & Culinary Rank (Open Editorial) */}
-      <div className="py-2 px-0.5 border-b border-black/[0.06] dark:border-white/[0.08] pb-5">
+      <div className="py-2 px-0.5 pb-2">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm shrink-0">
@@ -173,7 +173,7 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
       </div>
 
       {/* 2. "Deine Koch-Galerie" (Food Photo Feed - Open Canvas) */}
-      <div className="space-y-3 pt-2 border-t border-black/[0.06] dark:border-white/[0.08]">
+      <div className="space-y-3 pt-1">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-gray-900 dark:text-white">
             {t('app.gamification.galleryTitle')}
@@ -223,7 +223,7 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
       </div>
 
       {/* 3. Badges Grid (Open Canvas) */}
-      <div className="space-y-3 pt-2 border-t border-black/[0.06] dark:border-white/[0.08]">
+      <div className="space-y-3 pt-1">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-gray-900 dark:text-white">
             {t('app.gamification.badgesTitle')}

@@ -78,7 +78,7 @@ export default function FeedEventCard({
   };
 
   return (
-    <article className="pb-4 border-b border-black/[0.06] dark:border-white/[0.08] last:border-b-0 flex flex-col">
+    <article className="flex flex-col">
       {/* Header: Author & Time */}
       <div className="px-1 pt-1 pb-2.5 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">

@@ -46,7 +46,7 @@ export default function FriendsView({ pendingInviteCode, onInviteConsumed }: Fri
           <h2 className="font-heading text-sm font-bold text-gray-900 dark:text-white px-1">
             {t('app.social.friends.requests')}
           </h2>
-          <div className="divide-y divide-black/[0.06] dark:divide-white/[0.08] border-y border-black/[0.06] dark:border-white/[0.08]">
+          <div className="flex flex-col gap-1.5">
           {incomingRequests.map((r) => (
             <div
               key={r.friendshipId}

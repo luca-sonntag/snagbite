@@ -99,7 +99,7 @@ export default function FriendsProfileCard({ pendingInviteCode, onInviteConsumed
   };
 
   return (
-    <div className="py-2 px-0.5 border-b border-black/[0.06] dark:border-white/[0.08] pb-5">
+    <div className="py-2 px-0.5 pb-2">
       <div className="flex items-center gap-3.5">
         <Avatar name={profile?.displayName ?? '?'} avatarUrl={profile?.avatarUrl} size={48} />
         <div className="min-w-0 flex-1">
@@ -176,7 +176,7 @@ export default function FriendsProfileCard({ pendingInviteCode, onInviteConsumed
       </div>
 
       {/* Divider */}
-      <div className="my-5 border-t border-black/[0.06] dark:border-white/[0.08]" />
+      <div className="mt-4" />
 
       {/* Add friend by code */}
       <FriendAddInput

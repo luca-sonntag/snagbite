@@ -62,7 +62,7 @@ export default function SharedRecipesSection({ onRecipeSaved }: SharedRecipesSec
         </div>
       </div>
 
-      <div className="flex flex-col divide-y divide-black/[0.06] dark:divide-white/[0.08] border-y border-black/[0.06] dark:border-white/[0.08]">
+      <div className="flex flex-col gap-1.5">
         {sharedRecipes.map((item) => {
           return (
             <div

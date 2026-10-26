@@ -46,7 +46,7 @@ export default function FriendsListSection() {
       </h2>
 
       {friends.length === 0 ? (
-        <div className="flex flex-col items-center text-center py-6 px-4 border-y border-black/[0.06] dark:border-white/[0.08] gap-3">
+        <div className="flex flex-col items-center text-center py-6 px-4 gap-3">
           <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600">
             <Users className="w-6 h-6" />
           </div>
@@ -65,7 +65,7 @@ export default function FriendsListSection() {
           </Button>
         </div>
       ) : (
-        <div className="divide-y divide-black/[0.06] dark:divide-white/[0.08] border-y border-black/[0.06] dark:border-white/[0.08]">
+        <div className="flex flex-col gap-1.5">
           {friends.map((f) => {
             const rankKey = getCulinaryRankKey(f.level);
             const rankTitle = t(`app.gamification.ranks.${rankKey}`);
