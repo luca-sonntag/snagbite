@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Recipe } from '../../types';
 import type { RecipeSectionId } from './types';
+
+const SECTIONS: RecipeSectionId[] = ['details', 'ingredients', 'instructions'];
 
 /**
  * Tracks scroll position to update both active navigation section (scroll spy)
@@ -10,6 +12,8 @@ export function useScrollSpy(recipe: Recipe) {
   const [activeSection, setActiveSection] = useState<RecipeSectionId>('details');
   const [collapseSentinel, setCollapseSentinel] = useState<HTMLDivElement | null>(null);
   const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
+  const isClickScrollingRef = useRef(false);
+  const scrollTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,41 +44,76 @@ export function useScrollSpy(recipe: Recipe) {
         }
       }
 
-      // 2. Section scroll spy
-      const sections: RecipeSectionId[] = ['ingredients', 'instructions', 'details'];
-      const offset = stickyTopHeight + 48 + 120;
-      const scrollPosition = window.scrollY + offset;
-      for (const sectionId of sections) {
+      // If user clicked a tab, let the programmatic smooth scroll finish without overriding
+      if (isClickScrollingRef.current) return;
+
+      // 2. Check if near bottom of page -> activate last section
+      const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      if (scrollY + windowHeight >= documentHeight - 60) {
+        setActiveSection(SECTIONS[SECTIONS.length - 1]);
+        return;
+      }
+
+      // 3. Section scroll spy: Find which section is currently active
+      const stickyBar = document.getElementById('recipe-sticky-bar');
+      const barHeight = stickyBar?.offsetHeight ?? 44;
+      const triggerOffset = stickyTopHeight + barHeight + 40;
+
+      let currentSection: RecipeSectionId = 'details';
+      for (const sectionId of SECTIONS) {
         const el = document.getElementById(sectionId);
         if (el) {
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
-          if (scrollPosition >= top && scrollPosition < top + height) {
-            setActiveSection(sectionId);
-            break;
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= triggerOffset) {
+            currentSection = sectionId;
           }
         }
       }
+      setActiveSection(currentSection);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) {
+        window.clearTimeout(scrollTimeoutRef.current);
+      }
+    };
   }, [recipe, collapseSentinel]);
 
   const scrollToSection = useCallback((sectionId: RecipeSectionId) => {
+    // Immediately set active tab
+    setActiveSection(sectionId);
+    isClickScrollingRef.current = true;
+
+    if (scrollTimeoutRef.current) {
+      window.clearTimeout(scrollTimeoutRef.current);
+    }
+    // Re-enable scroll spy after smooth scroll animation completes
+    scrollTimeoutRef.current = window.setTimeout(() => {
+      isClickScrollingRef.current = false;
+    }, 800);
+
     const el = document.getElementById(sectionId);
     if (!el) return;
+
     const stickyTopHeight = parseInt(
       getComputedStyle(document.documentElement).getPropertyValue('--app-sticky-top') || '0',
       10
     );
     const bar = document.getElementById('recipe-sticky-bar');
     const barHeight = bar?.offsetHeight ?? 44;
-    const reserved = Math.max(barHeight, 96);
-    const offset = stickyTopHeight + reserved + 20;
+    const reserved = Math.max(barHeight, 60);
+    const offset = stickyTopHeight + reserved + 16;
     const elementPosition = el.getBoundingClientRect().top + window.scrollY;
-    window.scrollTo({ top: elementPosition - offset, behavior: 'smooth' });
+
+    window.scrollTo({
+      top: Math.max(0, elementPosition - offset),
+      behavior: 'smooth',
+    });
   }, []);
 
   return {
