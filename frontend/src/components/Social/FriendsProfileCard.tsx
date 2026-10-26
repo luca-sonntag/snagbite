@@ -144,14 +144,15 @@ export default function FriendsProfileCard({ pendingInviteCode, onInviteConsumed
               </Button>
             </div>
           )}
-          <div className="mt-0.5 text-xs font-medium text-gray-500 dark:text-gray-400">
-            {t('app.social.friends.yourCode')}
-          </div>
           {errorMsg && <p className="mt-1 text-xs text-rose-500">{errorMsg}</p>}
         </div>
       </div>
 
-      <div className="mt-4 flex items-center gap-2">
+      <div className="mt-5">
+        <h2 className="mb-2.5 text-sm font-bold text-gray-900 dark:text-white font-sans px-0.5">
+          {t('app.social.friends.yourCode')}
+        </h2>
+        <div className="flex items-center gap-2">
         <Button
           onPress={handleCopyCode}
           className="flex flex-1 items-center justify-between rounded-2xl border-2 border-dashed border-emerald-500/40 bg-emerald-500/5 px-4 py-3 h-auto min-h-[52px] text-left transition-all active:scale-[0.98]"
@@ -173,6 +174,7 @@ export default function FriendsProfileCard({ pendingInviteCode, onInviteConsumed
         >
           <Share2 className="h-5 w-5" />
         </Button>
+        </div>
       </div>
 
       {/* Divider */}
