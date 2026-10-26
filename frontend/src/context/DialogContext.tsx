@@ -175,7 +175,7 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
                 {getIcon()}
               </div>
               <div className="flex-1 min-w-0 pt-0.5">
-                <h3 className="text-base font-serif font-bold text-gray-900 dark:text-white leading-tight">
+                <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">
                   {state.title}
                 </h3>
               </div>

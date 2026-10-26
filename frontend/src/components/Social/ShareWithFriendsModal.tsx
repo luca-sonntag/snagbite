@@ -114,7 +114,7 @@ export default function ShareWithFriendsModal({
         {/* Header */}
         <div className="flex items-center justify-between p-4 pb-3 border-none">
           <div className="min-w-0 flex-1">
-            <h2 className="font-serif font-bold text-gray-900 dark:text-white text-base">
+            <h2 className="font-bold text-gray-900 dark:text-white text-base">
               {t('app.social.share.title')}
             </h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">

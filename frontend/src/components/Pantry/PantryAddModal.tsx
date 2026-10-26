@@ -107,7 +107,7 @@ export const PantryAddModal: React.FC<PantryAddModalProps> = ({
       >
         {/* Header without border */}
         <div className="flex items-center justify-between pb-3 mb-2">
-          <h3 className="text-lg sm:text-xl font-serif font-bold text-gray-900 dark:text-white">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
             {initialItem ? t('pantry.editItem') : t('pantry.addItem')}
           </h3>
           <button

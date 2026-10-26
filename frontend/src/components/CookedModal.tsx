@@ -148,7 +148,7 @@ export default function CookedModal({
 
         {/* Header */}
         <div className="mb-4 pr-10">
-          <h3 className="text-lg font-serif font-bold tracking-tight text-gray-900 dark:text-gray-100 leading-snug">
+          <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100 leading-snug">
             {t('app.gamification.modalTitle')}
           </h3>
           {recipeTitle && (

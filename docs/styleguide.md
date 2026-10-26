@@ -53,8 +53,8 @@
 ## 2. 🔤 Typografie & Redaktionelle Hierarchie
 
 * **Schriftarten-Paarung (100% DSGVO-konform lokal als WOFF2 in `public/fonts/`):**
-  * **Headlines & Editorial (`--font-heading` / `Fraunces`):** Warme kulinarische Editorial-Serif für Seiten-Header (`h1`, `h2`), Magazin-Aufmacher und Rezepttitel (`font-heading`). Die `Snagbite`-Wortmarke sowie der Login-Hero-Hook („Aus Reels wird dein Kochbuch“) bleiben in moderner, klarer Sans-Serif (`Outfit` / `font-sans`).
-  * **UI, Body & Zahlen (`--font-sans` / `Outfit`):** Klare geometrische Sans-Serif für Buttons, Mengen, Einheiten, Nährwert-Pills, Timer, Navigation und Fließtexte.
+  * **Headlines & Editorial (`--font-heading` / `Fraunces`):** Warme kulinarische Editorial-Serif für Seiten-Header (`h1`, `h2`), Magazin-Aufmacher und ausgewählte Hero-Titel (`font-heading`). Die `Snagbite`-Wortmarke sowie der Login-Hero-Hook („Aus Reels wird dein Kochbuch“) bleiben in moderner, klarer Sans-Serif (`Outfit` / `font-sans`).
+  * **UI, Body, Bento-Karten & Bottom Sheets (`--font-sans` / `Outfit`):** Klare geometrische Sans-Serif für alle Bottom Sheets, Drawers, Modals, Bento-Grid-Rezepttitel, Buttons, Mengen, Einheiten, Nährwert-Pills, Timer, Navigation und Fließtexte für maximale Ruhe und mobile Lesbarkeit.
 * **Redaktionelle Headlines & Begrüßung:**
   * **Kontextuelles Eyebrow-Label:** `text-[11px] font-bold tracking-wider uppercase text-emerald-600 dark:text-emerald-400`. Begrüßt zeit- und wochentagsabhängig (z. B. *„SCHÖNEN SONNTAGABEND, TEST“*).
   * **Großer Magazin-Aufmacher:** `text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-tight mt-0.5`. Konkrete situationsbezogene Inspiration (z. B. *„Lust auf einen späten Snack?“*).

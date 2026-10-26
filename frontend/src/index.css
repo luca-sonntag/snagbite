@@ -105,6 +105,24 @@ body {
   font-family: var(--font-heading);
 }
 
+/* Bottom sheets, drawer dialogs, and modals always use the clean modern sans-serif font */
+[data-slot*="drawer"],
+[data-slot*="drawer"] :where(h1, h2, h3, h4, h5, h6),
+[data-slot*="drawer"] .font-heading,
+[data-slot*="drawer"] .font-serif,
+[data-slot="drawer-heading"],
+[data-slot*="modal"],
+[data-slot*="modal"] :where(h1, h2, h3, h4, h5, h6),
+[data-slot="modal-heading"],
+.react-aria-Modal,
+.react-aria-Modal :where(h1, h2, h3, h4, h5, h6),
+.react-aria-Dialog,
+.react-aria-Dialog :where(h1, h2, h3, h4, h5, h6),
+.react-aria-Dialog .font-heading,
+.react-aria-Dialog .font-serif {
+  font-family: var(--font-sans);
+}
+
 html.dark body {
   background-color: var(--color-gray-950);
   color: #f3f4f6;
