@@ -173,9 +173,9 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
       </div>
 
       {/* 2. "Deine Koch-Galerie" (Food Photo Feed - Open Canvas) */}
-      <div className="space-y-3 pt-1">
+      <div className="space-y-2 pt-1">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-gray-900 dark:text-white">
+          <h2 className="text-xs font-medium text-gray-500 dark:text-gray-400 font-sans px-0.5">
             {t('app.gamification.galleryTitle')}
           </h2>
           {recentPhotos.length > 0 && (
@@ -223,9 +223,9 @@ export default function ProgressOverview({ onSelectRecipe }: ProgressOverviewPro
       </div>
 
       {/* 3. Badges Grid (Open Canvas) */}
-      <div className="space-y-3 pt-1">
+      <div className="space-y-2 pt-1">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-gray-900 dark:text-white">
+          <h2 className="text-xs font-medium text-gray-500 dark:text-gray-400 font-sans px-0.5">
             {t('app.gamification.badgesTitle')}
           </h2>
           <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
