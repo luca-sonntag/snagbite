@@ -41,7 +41,7 @@ export const ExtractActionCards: React.FC<ExtractActionCardsProps> = ({
   const isLinkDisabled = linkDisabled ?? disabled;
 
   return (
-    <div className="flex flex-col divide-y divide-black/[0.06] dark:divide-white/[0.08] border-y border-black/[0.06] dark:border-white/[0.08] w-full">
+    <div className="flex flex-col divide-y divide-black/[0.06] dark:divide-white/[0.08] border-t border-black/[0.06] dark:border-white/[0.08] w-full">
       {/* Action Row 1: Video & Link */}
       <button
         id="tour-extract-link"
