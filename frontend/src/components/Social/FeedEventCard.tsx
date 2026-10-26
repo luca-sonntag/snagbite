@@ -154,7 +154,7 @@ export default function FeedEventCard({
                 {item.recipe.title}
               </h3>
               {metaParts.length > 0 && (
-                <p className="text-[11px] sm:text-xs font-semibold text-white/90 drop-shadow-xs mt-0.5 flex items-center gap-1.5">
+                <p className="text-[11px] sm:text-xs font-semibold text-white/90 drop-shadow-xs mt-1 flex items-center gap-1.5">
                   {metaParts.map((part, idx) => (
                     <span key={idx} className="flex items-center gap-1.5">
                       {idx > 0 && <span className="opacity-60 text-[9px]">·</span>}

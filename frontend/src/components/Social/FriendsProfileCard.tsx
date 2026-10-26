@@ -149,7 +149,7 @@ export default function FriendsProfileCard({ pendingInviteCode, onInviteConsumed
       </div>
 
       <div className="mt-5">
-        <h2 className="text-xs font-medium text-gray-500 dark:text-gray-400 font-sans mb-1.5 px-0.5">
+        <h2 className="text-xs font-medium text-gray-500 dark:text-gray-400 font-sans mb-2 px-0.5">
           {t('app.social.friends.yourCode')}
         </h2>
         <div className="flex items-center gap-2">
@@ -178,7 +178,7 @@ export default function FriendsProfileCard({ pendingInviteCode, onInviteConsumed
       </div>
 
       {/* Divider */}
-      <div className="mt-4" />
+      <div className="mt-5" />
 
       {/* Add friend by code */}
       <FriendAddInput
