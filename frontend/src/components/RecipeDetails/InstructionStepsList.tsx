@@ -101,9 +101,9 @@ export default function InstructionStepsList({
               {/* Marker column */}
               <div className={railColumn}>
                 <div
-                  className={`${railBase} ${isLarge ? 'h-4' : 'h-4'} ${
-                    isFirst && !showSectionDivider ? 'invisible' : railTone(prevChecked)
-                  }`}
+                  className={`${railBase} ${
+                    showSectionDivider ? 'h-2.5' : (isLarge ? 'h-4' : 'h-4')
+                  } ${isFirst && !showSectionDivider ? 'invisible' : railTone(prevChecked)}`}
                 />
 
                 <div
@@ -128,7 +128,17 @@ export default function InstructionStepsList({
               </div>
 
               {/* Step content */}
-              <div className={`flex-1 flex flex-col gap-1 min-w-0 ${isLarge ? 'py-4 sm:py-5' : 'py-4'}`}>
+              <div
+                className={`flex-1 flex flex-col gap-1 min-w-0 ${
+                  showSectionDivider
+                    ? isLarge
+                      ? 'pt-2 sm:pt-2.5 pb-4 sm:pb-5'
+                      : 'pt-1.5 pb-4'
+                    : isLarge
+                      ? 'py-4 sm:py-5'
+                      : 'py-4'
+                }`}
+              >
                 <div className="flex items-center gap-2 mb-0.5">
                   {isActive && (
                     <span

@@ -22,27 +22,27 @@ export default function InstructionSectionDivider({
 
   return (
     <div
-      className={`flex items-center ${
+      className={`flex items-stretch ${
         isLarge ? 'gap-2.5 sm:gap-3 px-1' : 'gap-3.5 px-1.5'
-      } pt-4 pb-1 select-none`}
+      } py-1 select-none`}
     >
-      {/* Timeline Rail Column — aligned with the steps */}
+      {/* Timeline Rail Column — unbroken continuous rail extending to outer edges */}
       <div className={railColumn}>
-        <div className={`${railBase} h-3 ${isFirst ? 'invisible' : railTone(prevChecked)}`} />
+        <div className={`${railBase} flex-1 min-h-2 ${isFirst ? 'invisible' : railTone(prevChecked)}`} />
 
         <div
           className={`${
             isLarge ? 'w-5.5 h-5.5' : 'w-5 h-5'
-          } rounded-lg bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs`}
+          } rounded-lg bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs my-0.5`}
         >
           <Layers className={isLarge ? 'w-3 h-3' : 'w-2.5 h-2.5'} />
         </div>
 
-        <div className={`${railBase} h-3 ${railTone(prevChecked)}`} />
+        <div className={`${railBase} flex-1 min-h-2 ${railTone(prevChecked)}`} />
       </div>
 
       {/* Content Column: Section Name & Subtle Horizontal Rule */}
-      <div className="flex-1 flex items-center gap-2 min-w-0">
+      <div className="flex-1 flex items-center gap-2 min-w-0 py-1">
         <span
           className={`${
             isLarge ? 'text-xs sm:text-sm' : 'text-[11px]'
