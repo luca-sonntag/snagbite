@@ -75,7 +75,13 @@ export default function InstructionStepsList({
             className="flex flex-col scroll-mt-24"
           >
             {showSectionDivider && currentSection && (
-              <InstructionSectionDivider sectionName={currentSection} />
+              <InstructionSectionDivider
+                sectionName={currentSection}
+                railColumn={railColumn}
+                isLarge={isLarge}
+                isFirst={isFirst}
+                prevChecked={prevChecked}
+              />
             )}
             <div
               onClick={() => {
@@ -96,7 +102,7 @@ export default function InstructionStepsList({
               <div className={railColumn}>
                 <div
                   className={`${railBase} ${isLarge ? 'h-4' : 'h-4'} ${
-                    isFirst || showSectionDivider ? 'invisible' : railTone(prevChecked)
+                    isFirst && !showSectionDivider ? 'invisible' : railTone(prevChecked)
                   }`}
                 />
 
@@ -133,7 +139,7 @@ export default function InstructionStepsList({
                       {t('recipe.currentStep')}
                     </span>
                   )}
-                  {currentSection && !isActive && (
+                  {currentSection && !isActive && !showSectionDivider && (
                     <span
                       className={`${
                         isLarge ? 'text-xs sm:text-sm' : 'text-[11px]'
