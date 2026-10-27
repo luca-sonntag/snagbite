@@ -16,9 +16,9 @@ export const legal = {
   /** Voller Name bzw. Firmenwortlaut des Medieninhabers/Diensteanbieters. */
   operatorName: 'Luca Sonntag',
   /** Straße + Hausnummer der ladungsfähigen Geschäftsanschrift. */
-  street: 'Jahnstraße 15A/8',
+  street: 'Ulrichsbügelgasse 16/2',
   /** PLZ + Ort. */
-  city: 'St. Pölten, 3100',
+  city: '3121 Karlstetten',
   /** Land des Sitzes. */
   country: 'Österreich',
   /** Kontakt-Telefonnummer (optional, aber empfohlen). */
@@ -40,17 +40,17 @@ export const legal = {
    * Zuständige Gewerbebehörde bzw. Hinweis auf die Gewerbeberechtigung
    * (falls ein Gewerbe angemeldet ist, sonst '').
    */
-  tradeAuthority: 'Magistrat der Stadt St. Pölten',
+  tradeAuthority: 'Bezirkshauptmannschaft St. Pölten',
 
   /** Firmensitz/Wohnort für die medienrechtliche Offenlegung (§ 25 MedienG). */
-  mediaOwnerLocation: 'St. Pölten',
+  mediaOwnerLocation: 'Karlstetten',
 
   /** Preise der Premium-Abonnements (Anzeige). */
   priceMonthly: '3,99 €',
   priceYearly: '29,99 €',
 
   /** Datum der letzten Aktualisierung der Rechtstexte. */
-  lastUpdated: '15. Oktober 2026',
+  lastUpdated: '27. Oktober 2026',
 };
 
 /** Formatiert die vollständige Anschrift als einzeiligen String. */
