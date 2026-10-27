@@ -32,7 +32,7 @@ export default function LandingHero() {
 
           <a
             href="#how-it-works"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 font-bold text-sm text-gray-800 dark:text-gray-200 bg-black/[0.04] hover:bg-black/[0.07] dark:bg-white/[0.06] dark:hover:bg-white/[0.1] rounded-2xl h-11 sm:h-13 min-h-[44px] px-5 sm:px-6 border-none active:scale-95 transition-all"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 font-bold text-sm text-gray-800 dark:text-gray-200 bg-[#fdfbf7] hover:bg-white dark:bg-white/[0.08] dark:hover:bg-white/[0.12] ring-1 ring-black/[0.1] dark:ring-white/15 rounded-2xl h-11 sm:h-13 min-h-[44px] px-5 sm:px-6 active:scale-95 transition-all shadow-2xs"
           >
             <span>So funktioniert’s</span>
             <ArrowRight className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />

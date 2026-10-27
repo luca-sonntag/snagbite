@@ -43,9 +43,9 @@ const FAQ_ITEMS = [
 
 export default function LandingFaqSection() {
   return (
-    <>
-      {/* Open-Canvas FAQ Section */}
-      <section className="flex flex-col gap-5 sm:gap-6 max-w-3xl mx-auto w-full">
+    <div className="flex flex-col gap-10 sm:gap-16">
+      {/* Grouped FAQ Card Section */}
+      <section className="flex flex-col gap-4 sm:gap-6 max-w-3xl mx-auto w-full">
         <div className="flex flex-col gap-1">
           <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
             Fragen &amp; Antworten
@@ -55,39 +55,44 @@ export default function LandingFaqSection() {
           </h2>
         </div>
 
-        <Accordion
-          variant="surface"
-          className="w-full bg-transparent flex flex-col divide-y divide-black/[0.06] dark:divide-white/[0.08] border-y border-black/[0.06] dark:border-white/[0.08] p-0"
-        >
-          {FAQ_ITEMS.map((item) => (
-            <Accordion.Item
-              key={item.id}
-              id={item.id}
-              className="border-none bg-transparent rounded-none shadow-none"
-            >
-              <Accordion.Heading>
-                <Accordion.Trigger className="px-1 py-3.5 sm:py-5 min-h-[52px] flex items-center justify-between gap-4 text-left text-gray-900 dark:text-white font-bold text-[15px] sm:text-base hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer">
-                  <span>{item.question}</span>
-                  <Accordion.Indicator className="text-emerald-600 dark:text-emerald-400 shrink-0" />
-                </Accordion.Trigger>
-              </Accordion.Heading>
-              <Accordion.Panel>
-                <Accordion.Body className="px-1 pb-4 sm:pb-5 pt-0 text-[13.5px] sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                  {item.answer}
-                </Accordion.Body>
-              </Accordion.Panel>
-            </Accordion.Item>
-          ))}
-        </Accordion>
+        <div className="rounded-3xl bg-[#fdfbf7] dark:bg-gray-900 ring-1 ring-black/[0.08] dark:ring-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.03)] px-4 sm:px-6">
+          <Accordion
+            variant="surface"
+            className="w-full bg-transparent flex flex-col divide-y divide-black/[0.07] dark:divide-white/[0.08] p-0"
+          >
+            {FAQ_ITEMS.map((item) => (
+              <Accordion.Item
+                key={item.id}
+                id={item.id}
+                className="border-none bg-transparent rounded-none shadow-none"
+              >
+                <Accordion.Heading>
+                  <Accordion.Trigger className="px-1 py-4 sm:py-5 min-h-[52px] flex items-center justify-between gap-4 text-left text-gray-900 dark:text-white font-bold text-[15px] sm:text-base hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer">
+                    <span>{item.question}</span>
+                    <Accordion.Indicator className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  </Accordion.Trigger>
+                </Accordion.Heading>
+                <Accordion.Panel>
+                  <Accordion.Body className="px-1 pb-4 sm:pb-5 pt-0 text-[13.5px] sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                    {item.answer}
+                  </Accordion.Body>
+                </Accordion.Panel>
+              </Accordion.Item>
+            ))}
+          </Accordion>
+        </div>
       </section>
 
-      {/* Warm Editorial Bottom CTA */}
-      <section className="rounded-3xl p-6 sm:p-12 bg-black/[0.03] dark:bg-white/[0.04] border-none flex flex-col md:flex-row items-start md:items-center justify-between gap-5 sm:gap-6">
+      {/* Distinct Editorial Bottom CTA Banner */}
+      <section className="rounded-3xl p-6 sm:p-10 bg-[#18221d] text-white ring-1 ring-black/10 dark:ring-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.08)] flex flex-col md:flex-row items-start md:items-center justify-between gap-5 sm:gap-6">
         <div className="max-w-lg flex flex-col gap-1.5 sm:gap-2">
-          <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white m-0">
+          <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-emerald-400">
+            Kostenlos starten
+          </span>
+          <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-white m-0">
             Bereit für dein nächstes Gericht?
           </h2>
-          <p className="text-[13.5px] sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed m-0">
+          <p className="text-[13.5px] sm:text-base text-gray-300 leading-relaxed m-0">
             Hol dir Snagbite kostenlos im Google Play Store und verwandle deine gespeicherten Videos in ein aufgeräumtes Kochbuch.
           </p>
         </div>
@@ -102,6 +107,6 @@ export default function LandingFaqSection() {
           <span>Im Google Play Store laden</span>
         </a>
       </section>
-    </>
+    </div>
   );
 }

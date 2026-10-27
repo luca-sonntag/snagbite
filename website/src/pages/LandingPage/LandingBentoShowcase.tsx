@@ -19,20 +19,23 @@ const SHOPPING_PREVIEW_GROUPS = [
 
 export default function LandingBentoShowcase() {
   return (
-    <section className="flex flex-col gap-6 sm:gap-8">
-      <div className="max-w-xl">
-        <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white leading-tight mb-1.5 sm:mb-2">
+    <section className="flex flex-col gap-5 sm:gap-8">
+      <div className="max-w-xl flex flex-col gap-1">
+        <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+          Funktionen im Überblick
+        </span>
+        <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white leading-tight m-0">
           Gebaut für den echten Alltag in der Küche
         </h2>
-        <p className="text-xs sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed m-0">
+        <p className="text-xs sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed m-0 pt-0.5">
           Keine überladenen Kacheln, sondern ruhige Werkzeuge, die genau dann helfen, wenn du einkaufst, planst oder am Herd stehst.
         </p>
       </div>
 
-      {/* Asymmetric Magazine Bento Grid */}
+      {/* Asymmetric Magazine Bento Grid with clear surface contrast */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch">
         {/* Left Feature (7 cols): Supermarket Shopping List & Portion Scaling */}
-        <div className="lg:col-span-7 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] p-5 sm:p-8 flex flex-col justify-between gap-5 sm:gap-6 border-none">
+        <div className="lg:col-span-7 rounded-3xl bg-[#fdfbf7] dark:bg-gray-900 p-5 sm:p-8 ring-1 ring-black/[0.08] dark:ring-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.03)] flex flex-col justify-between gap-5 sm:gap-6">
           <div className="flex flex-col gap-1.5 sm:gap-2">
             <span className="text-[11px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400">
               Einkaufsliste &amp; Wochenplaner
@@ -47,8 +50,8 @@ export default function LandingBentoShowcase() {
 
           <div className="flex flex-col gap-2.5 sm:gap-3">
             {/* Mini Week Strip */}
-            <div className="rounded-2xl bg-[#fdfbf7] dark:bg-gray-900 px-3.5 sm:px-4 py-2.5 sm:py-3 ring-1 ring-black/[0.04] dark:ring-white/10 flex items-center justify-between gap-2 text-xs">
-              <span className="font-semibold text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">
+            <div className="rounded-2xl bg-[#f3efe8] dark:bg-gray-800/80 px-3.5 sm:px-4 py-2.5 sm:py-3 ring-1 ring-black/[0.05] dark:ring-white/10 flex items-center justify-between gap-2 text-xs">
+              <span className="font-semibold text-[11px] sm:text-xs text-gray-600 dark:text-gray-300 truncate">
                 Wochenplan Mo–So
               </span>
               <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
@@ -57,8 +60,8 @@ export default function LandingBentoShowcase() {
                     key={day}
                     className={`px-1.5 sm:px-2 py-0.5 rounded-md font-bold text-[10.5px] sm:text-[11px] ${
                       idx < 3
-                        ? 'bg-emerald-500/12 text-emerald-700 dark:text-emerald-400'
-                        : 'bg-black/[0.04] dark:bg-white/[0.06] text-gray-500 dark:text-gray-400'
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-[#fdfbf7] dark:bg-gray-900 text-gray-600 dark:text-gray-400 ring-1 ring-black/[0.05]'
                     }`}
                   >
                     {day}
@@ -68,7 +71,7 @@ export default function LandingBentoShowcase() {
             </div>
 
             {/* Mini UI Preview: 2-Column Supermarket Aisle Grid (Even on Mobile) */}
-            <div className="rounded-2xl bg-[#fdfbf7] dark:bg-gray-900 p-3.5 sm:p-5 ring-1 ring-black/[0.04] dark:ring-white/10 grid grid-cols-2 gap-3.5 sm:gap-5">
+            <div className="rounded-2xl bg-[#f3efe8] dark:bg-gray-800/80 p-3.5 sm:p-5 ring-1 ring-black/[0.05] dark:ring-white/10 grid grid-cols-2 gap-3.5 sm:gap-5">
               {SHOPPING_PREVIEW_GROUPS.map((group) => (
                 <div key={group.name} className="flex flex-col gap-1.5 sm:gap-2 min-w-0">
                   <div className="flex flex-col gap-1">
@@ -77,7 +80,7 @@ export default function LandingBentoShowcase() {
                       {group.name}
                     </span>
                   </div>
-                  <div className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
+                  <div className="divide-y divide-black/[0.07] dark:divide-white/[0.08]">
                     {group.items.map((item) => (
                       <div
                         key={item.name}
@@ -86,7 +89,7 @@ export default function LandingBentoShowcase() {
                         <span className="font-medium text-gray-800 dark:text-gray-200 truncate">
                           {item.name}
                         </span>
-                        <span className="font-bold tabular-nums text-gray-500 dark:text-gray-400 shrink-0 text-[10.5px] sm:text-xs">
+                        <span className="font-bold tabular-nums text-gray-600 dark:text-gray-400 shrink-0 text-[10.5px] sm:text-xs">
                           {item.amount}
                         </span>
                       </div>
@@ -101,7 +104,7 @@ export default function LandingBentoShowcase() {
         {/* Right Stacked Column (5 cols) */}
         <div className="lg:col-span-5 flex flex-col gap-4 sm:gap-5">
           {/* Top Right Card: Nutrition & Healthy Score */}
-          <div className="flex-1 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] p-5 sm:p-7 flex flex-col justify-between gap-4 sm:gap-5 border-none">
+          <div className="flex-1 rounded-3xl bg-[#fdfbf7] dark:bg-gray-900 p-5 sm:p-7 ring-1 ring-black/[0.08] dark:ring-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.03)] flex flex-col justify-between gap-4 sm:gap-5">
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[11px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400">
@@ -138,21 +141,21 @@ export default function LandingBentoShowcase() {
             </div>
 
             {/* Proportional Macro Bar Preview */}
-            <div className="rounded-2xl bg-[#fdfbf7] dark:bg-gray-900 p-3.5 ring-1 ring-black/[0.04] dark:ring-white/10 space-y-2">
+            <div className="rounded-2xl bg-[#f3efe8] dark:bg-gray-800/80 p-3.5 ring-1 ring-black/[0.05] dark:ring-white/10 space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-gray-500 dark:text-gray-400">
+                <span className="font-semibold text-gray-600 dark:text-gray-300">
                   Pro Portion
                 </span>
                 <span className="font-bold text-gray-900 dark:text-white tabular-nums">
                   480 kcal
                 </span>
               </div>
-              <div className="h-2 w-full rounded-full bg-black/[0.06] dark:bg-white/10 flex overflow-hidden">
+              <div className="h-2 w-full rounded-full bg-black/[0.08] dark:bg-white/10 flex overflow-hidden">
                 <div style={{ width: '24%' }} className="bg-emerald-500" />
                 <div style={{ width: '52%' }} className="bg-amber-500" />
                 <div style={{ width: '24%' }} className="bg-rose-500" />
               </div>
-              <div className="flex justify-between text-[11px] text-gray-600 dark:text-gray-300 tabular-nums font-medium">
+              <div className="flex justify-between text-[11px] text-gray-700 dark:text-gray-300 tabular-nums font-semibold">
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />
                   22 g Eiweiß
@@ -170,7 +173,7 @@ export default function LandingBentoShowcase() {
           </div>
 
           {/* Bottom Right Card: Recipe Copilot & Cooking Mode */}
-          <div className="flex-1 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] p-5 sm:p-7 flex flex-col justify-between gap-4 border-none">
+          <div className="flex-1 rounded-3xl bg-[#fdfbf7] dark:bg-gray-900 p-5 sm:p-7 ring-1 ring-black/[0.08] dark:ring-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.03)] flex flex-col justify-between gap-4">
             <div className="flex flex-col gap-1.5">
               <span className="text-[11px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400">
                 Rezept-Copilot &amp; Kochmodus
@@ -183,7 +186,7 @@ export default function LandingBentoShowcase() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-1.5 pt-1">
+            <div className="flex flex-wrap gap-2 pt-1">
               {[
                 'Vegan abwandeln',
                 'High-Protein Variante',
@@ -191,7 +194,7 @@ export default function LandingBentoShowcase() {
               ].map((chip) => (
                 <span
                   key={chip}
-                  className="px-3 py-1.5 rounded-full bg-[#fdfbf7] dark:bg-gray-900 ring-1 ring-black/[0.05] dark:ring-white/10 text-xs font-semibold text-gray-700 dark:text-gray-200"
+                  className="px-3 py-1.5 rounded-full bg-[#f3efe8] dark:bg-gray-800 ring-1 ring-black/[0.06] dark:ring-white/10 text-xs font-semibold text-gray-800 dark:text-gray-200"
                 >
                   {chip}
                 </span>
