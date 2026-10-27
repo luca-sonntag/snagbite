@@ -240,6 +240,7 @@ export default function App() {
     authLoading,
     isPremium,
     isPending,
+    progress,
     recipe,
     showOnboarding,
     savedRecipesCount: history.length,

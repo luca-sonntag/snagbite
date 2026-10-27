@@ -14,6 +14,7 @@ export function useAppAds({
   authLoading,
   isPremium,
   isPending,
+  progress,
   recipe,
   showOnboarding,
   savedRecipesCount = 0,
@@ -22,6 +23,10 @@ export function useAppAds({
 }: UseAppAdsProps) {
   const [showExtractionAd, setShowExtractionAd] = useState(false);
   const wasPendingRef = useRef(false);
+  const isPendingRef = useRef(isPending);
+  isPendingRef.current = isPending;
+  const progressRef = useRef(progress);
+  progressRef.current = progress;
   const isGraceExtractionRef = useRef(false);
   const appOpenAttemptedRef = useRef(false);
   const appBackgroundedAtRef = useRef<number | null>(null);
@@ -35,9 +40,30 @@ export function useAppAds({
     }
   }, [historyLoaded, savedRecipesCount, isPending]);
 
+  // Two-stage extraction ad sequence:
+  // 1. Fullscreen Interstitial shown at the start of extraction.
+  // 2. Seamless handoff to MREC Banner (ExtractionAdSheet) for the remaining extraction time.
+  const runExtractionAdFlow = async () => {
+    try {
+      const { maybeShowExtractionInterstitialAd } = await import('../utils/ads');
+      await maybeShowExtractionInterstitialAd();
+    } catch (err) {
+      console.warn('[useAppAds] extraction interstitial error:', err);
+    }
+
+    if (isPendingRef.current && !isGraceExtractionRef.current) {
+      const currentProgress = progressRef.current;
+      const isAlmostDone =
+        currentProgress?.stage === 'finalizing' || (currentProgress?.percent ?? 0) >= 95;
+      if (!isAlmostDone) {
+        setShowExtractionAd(true);
+      }
+    }
+  };
+
   // Gate foreground extraction ads:
   // 1st ever extraction -> 100% ad-free & consent-free grace period (Wow-Moment first)
-  // 2nd+ extraction -> PreAdTransparencySheet priming (if not seen) -> UMP Consent -> MREC Ad
+  // 2nd+ extraction -> PreAdTransparencySheet priming (if not seen) -> Interstitial -> MREC Ad
   useEffect(() => {
     if (!isPending || isPremium) {
       if (wasPendingRef.current && !isPending) {
@@ -71,19 +97,15 @@ export function useAppAds({
       setShowExtractionAd(false);
       const proceedWithExtractionAd = () => {
         if (wasPendingRef.current && !isGraceExtractionRef.current) {
-          setShowExtractionAd(true);
+          void runExtractionAdFlow();
         }
       };
-
-      if (onShowPreAdNotice) {
-        onShowPreAdNotice(proceedWithExtractionAd);
-      } else {
-        triggerPreAdNotice(proceedWithExtractionAd);
-      }
+      if (onShowPreAdNotice) onShowPreAdNotice(proceedWithExtractionAd);
+      else triggerPreAdNotice(proceedWithExtractionAd);
       return;
     }
 
-    setShowExtractionAd(true);
+    void runExtractionAdFlow();
   }, [isPending, isPremium, savedRecipesCount, onShowPreAdNotice]);
 
   const executeAppOpenFlow = () => {
