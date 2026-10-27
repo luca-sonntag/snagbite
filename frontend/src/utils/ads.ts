@@ -8,7 +8,11 @@ import {
   AdmobConsentStatus,
 } from '@capacitor-community/admob';
 import { isNative } from '../native';
-import { APP_OPEN_MIN_INTERVAL_MS, ADMOB_USE_TEST_ADS } from '../env';
+import {
+  APP_OPEN_MIN_INTERVAL_MS,
+  EXTRACTION_INTERSTITIAL_MIN_INTERVAL_MS,
+  ADMOB_USE_TEST_ADS,
+} from '../env';
 
 /**
  * Google AdMob integration for the freemium extraction ad.
@@ -74,6 +78,27 @@ let canRequestAds = true;
 let personalizedAllowed = true;
 /** Track whether a banner is currently on screen. */
 let bannerShown = false;
+
+/** Track whether any full-screen native ad (interstitial or rewarded) is active. */
+let fullscreenAdActive = false;
+let fullscreenAdDismissedAt = 0;
+const FULLSCREEN_AD_RESUME_GRACE_MS = 1500;
+
+/**
+ * Check whether a full-screen ad is currently visible (or within its native dismissal grace window).
+ * Used to prevent background-cancellation guards from killing active extractions while an AdActivity is shown.
+ */
+export function isFullscreenAdActive(): boolean {
+  if (fullscreenAdActive) return true;
+  return Date.now() - fullscreenAdDismissedAt < FULLSCREEN_AD_RESUME_GRACE_MS;
+}
+
+function setFullscreenAdShowing(active: boolean): void {
+  fullscreenAdActive = active;
+  if (!active) {
+    fullscreenAdDismissedAt = Date.now();
+  }
+}
 
 /**
  * After the banner has been continuously hidden this long, destroy it so the
@@ -365,6 +390,7 @@ async function showRewardVideoAdInternal(): Promise<boolean> {
     let failedHandle: any = null;
 
     const cleanup = () => {
+      setFullscreenAdShowing(false);
       rewardedHandle?.remove?.().catch(() => {});
       dismissedHandle?.remove?.().catch(() => {});
       failedHandle?.remove?.().catch(() => {});
@@ -411,6 +437,7 @@ async function showRewardVideoAdInternal(): Promise<boolean> {
       });
 
       console.log('[AdMob] showing rewarded video ad...');
+      setFullscreenAdShowing(true);
       await AdMob.showRewardVideoAd();
     } catch (err) {
       console.error('[AdMob] error during rewarded video ad flow:', err);
@@ -700,6 +727,7 @@ export async function maybeShowAppOpenAd(): Promise<boolean> {
     const finish = (result: boolean) => {
       if (settled) return;
       settled = true;
+      setFullscreenAdShowing(false);
       dismissedHandle?.remove?.().catch(() => {});
       failedHandle?.remove?.().catch(() => {});
       appOpenInFlight = false;
@@ -731,10 +759,111 @@ export async function maybeShowAppOpenAd(): Promise<boolean> {
       interstitialReady = false; // consume — a shown interstitial can't be reused
 
       console.log('[AdMob] showing app-open interstitial...');
+      setFullscreenAdShowing(true);
       await AdMob.showInterstitial();
     } catch (err) {
       // Includes the no-fill / failed-to-load case (prepareInterstitial rejects).
       console.warn('[AdMob] app-open interstitial flow failed:', err);
+      finish(false);
+    }
+  });
+}
+
+/* -------------------------------------------------------------------------- */
+/* Extraction Interstitial Ad (full-screen interstitial at extraction start)  */
+/* -------------------------------------------------------------------------- */
+
+export const EXTRACTION_INTERSTITIAL_LAST_SHOWN_KEY = 'snagbite:extractionAd:lastShownAt';
+
+/**
+ * Show a full-screen interstitial ad at the start of an eligible recipe extraction.
+ *
+ * Guarantees:
+ * 1. Safe teardown of any active banner before opening the fullscreen activity.
+ * 2. Frequency cap (cooldown of EXTRACTION_INTERSTITIAL_MIN_INTERVAL_MS) to prevent ad-spamming.
+ * 3. Registers fullscreen ad state so the background-cancel listener doesn't kill the running extraction.
+ * 4. Kicks off preloading for the next interstitial as soon as this one dismisses or fails.
+ *
+ * Resolves `true` if an ad was displayed and dismissed, `false` if skipped, failed, or on web.
+ */
+export async function maybeShowExtractionInterstitialAd(): Promise<boolean> {
+  if (!isNative()) return false;
+  if (!APP_OPEN_ENABLED) return false;
+  if (appOpenInFlight || fullscreenAdActive) return false;
+
+  // Check cooldown between extraction interstitials
+  try {
+    const last = Number(localStorage.getItem(EXTRACTION_INTERSTITIAL_LAST_SHOWN_KEY) || 0);
+    if (last && Date.now() - last < EXTRACTION_INTERSTITIAL_MIN_INTERVAL_MS) {
+      console.log('[AdMob] extraction interstitial skipped (cooldown active)');
+      return false;
+    }
+    // Stamp up-front so failed attempts / rapid triggers also respect the cooldown
+    localStorage.setItem(EXTRACTION_INTERSTITIAL_LAST_SHOWN_KEY, String(Date.now()));
+  } catch {
+    return false;
+  }
+
+  await initAds();
+  if (!canRequestAds) return false;
+
+  // If a banner overlay is active, remove it before opening the fullscreen activity
+  if (bannerShown || isBannerCurrentlyHidden) {
+    await removeAdBanner();
+  }
+
+  appOpenInFlight = true;
+
+  return new Promise<boolean>(async (resolve) => {
+    let settled = false;
+    let dismissedHandle: any = null;
+    let failedHandle: any = null;
+
+    const finish = (result: boolean) => {
+      if (settled) return;
+      settled = true;
+      setFullscreenAdShowing(false);
+      dismissedHandle?.remove?.().catch(() => {});
+      failedHandle?.remove?.().catch(() => {});
+      appOpenInFlight = false;
+      // Warm up the next interstitial in the background
+      setTimeout(() => {
+        void preloadAppOpenAd();
+      }, 1000);
+      resolve(result);
+    };
+
+    try {
+      dismissedHandle = await AdMob.addListener(InterstitialAdPluginEvents.Dismissed, () => {
+        console.log('[AdMob] extraction interstitial dismissed');
+        try {
+          localStorage.setItem(EXTRACTION_INTERSTITIAL_LAST_SHOWN_KEY, String(Date.now()));
+        } catch {}
+        finish(true);
+      });
+
+      failedHandle = await AdMob.addListener(InterstitialAdPluginEvents.FailedToShow, (err: unknown) => {
+        console.warn('[AdMob] extraction interstitial failed to show:', err);
+        finish(false);
+      });
+
+      if (interstitialPreparing) await interstitialPreparing;
+      if (!interstitialFresh()) {
+        console.log('[AdMob] preparing extraction interstitial (no warm preload)...');
+        await AdMob.prepareInterstitial({
+          adId: INTERSTITIAL_AD_ID,
+          isTesting: IS_TESTING,
+          npa: !personalizedAllowed,
+        });
+        interstitialPreparedAt = Date.now();
+      }
+      interstitialReady = false;
+
+      console.log('[AdMob] showing extraction interstitial...');
+      setFullscreenAdShowing(true);
+      await AdMob.showInterstitial();
+    } catch (err) {
+      console.warn('[AdMob] extraction interstitial flow failed:', err);
       finish(false);
     }
   });
