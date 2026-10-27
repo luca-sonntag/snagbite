@@ -22,6 +22,7 @@ function getCircularOffset(index: number, activeIndex: number, length: number): 
 
 export default function HeroCoverCarousel() {
   const [rawCovers, setRawCovers] = useState<ShowcaseCover[]>([]);
+  const [failedIds, setFailedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
   const touchStartXRef = useRef<number | null>(null);
@@ -54,21 +55,27 @@ export default function HeroCoverCarousel() {
     };
   }, []);
 
+  // Filter out any images that fail to load so broken cards are never displayed
+  const visibleCovers = useMemo(() => {
+    if (failedIds.size === 0) return rawCovers;
+    return rawCovers.filter((c) => !failedIds.has(c.id));
+  }, [rawCovers, failedIds]);
+
   // Ensure at least 5 virtual slides when >= 2 covers exist so cards never wrap across the visible stage
   const slides = useMemo(() => {
-    if (rawCovers.length === 0) return [];
-    if (rawCovers.length === 1 || rawCovers.length >= 5) {
-      return rawCovers.map((c, idx) => ({ ...c, slideKey: `${c.id}-${idx}` }));
+    if (visibleCovers.length === 0) return [];
+    if (visibleCovers.length === 1 || visibleCovers.length >= 5) {
+      return visibleCovers.map((c, idx) => ({ ...c, slideKey: `${c.id}-${idx}` }));
     }
     const expanded: Array<ShowcaseCover & { slideKey: string }> = [];
     let copyIndex = 0;
     while (expanded.length < 6) {
-      for (const c of rawCovers) {
+      for (const c of visibleCovers) {
         expanded.push({ ...c, slideKey: `${c.id}-${copyIndex++}` });
       }
     }
     return expanded;
-  }, [rawCovers]);
+  }, [visibleCovers]);
 
   useEffect(() => {
     if (slides.length <= 1) return;
@@ -81,12 +88,18 @@ export default function HeroCoverCarousel() {
     return () => window.clearInterval(timer);
   }, [slides.length, activeIndex]);
 
+  // If all covers failed or none returned, gracefully omit carousel
+  if (!loading && slides.length === 0) {
+    return null;
+  }
+
   const handleStep = (delta: number) => {
     if (slides.length <= 1) return;
     setActiveIndex((prev) => (prev + delta + slides.length) % slides.length);
   };
 
-  const activeSlide = slides[activeIndex];
+  const safeActiveIndex = slides.length > 0 ? activeIndex % slides.length : 0;
+  const activeSlide = slides[safeActiveIndex];
 
   return (
     <div className="w-full flex flex-col items-center gap-3 select-none py-4">
@@ -115,7 +128,7 @@ export default function HeroCoverCarousel() {
           </div>
         ) : (
           slides.map((item, idx) => {
-            const offset = getCircularOffset(idx, activeIndex, slides.length);
+            const offset = getCircularOffset(idx, safeActiveIndex, slides.length);
             const isCenter = offset === 0;
             const isLeft = offset === -1;
             const isRight = offset === 1;
@@ -150,6 +163,14 @@ export default function HeroCoverCarousel() {
                 <img
                   src={item.imageUrl}
                   alt={item.title || ''}
+                  onError={() => {
+                    setFailedIds((prev) => {
+                      if (prev.has(item.id)) return prev;
+                      const next = new Set(prev);
+                      next.add(item.id);
+                      return next;
+                    });
+                  }}
                   className="w-full h-full object-cover object-center pointer-events-none select-none"
                 />
 
