@@ -1,10 +1,10 @@
 import { ArrowRight, Download } from 'lucide-react';
 import { PLAY_STORE_URL } from '../../App';
-import HeroRecipeShowcase from './HeroRecipeShowcase';
+import HeroCoverCarousel from './HeroCoverCarousel';
 
 export default function LandingHero() {
   return (
-    <section className="grid grid-cols-1 lg:grid-cols-12 gap-7 sm:gap-10 lg:gap-12 items-center pt-1 sm:pt-6">
+    <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 lg:gap-12 items-center pt-1 sm:pt-6">
       {/* Left Column: Editorial Headline & Actions */}
       <div className="lg:col-span-7 flex flex-col items-start text-left">
         <span className="text-[11px] sm:text-xs font-bold tracking-wider uppercase text-emerald-600 dark:text-emerald-400 mb-2 sm:mb-3">
@@ -40,9 +40,9 @@ export default function LandingHero() {
         </div>
       </div>
 
-      {/* Right Column: Authentic Cookbook Recipe Sheet */}
+      {/* Right Column: Center-Stage Spring Cover Carousel (from App Login) */}
       <div className="lg:col-span-5 w-full">
-        <HeroRecipeShowcase />
+        <HeroCoverCarousel />
       </div>
     </section>
   );
