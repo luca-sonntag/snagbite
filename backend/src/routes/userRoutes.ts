@@ -5,7 +5,6 @@ import {
   upsertPushToken,
   deletePushToken,
   createFeedback,
-  isAlphaActive,
   getRewardedAdBonusCredits,
 } from '../db.js';
 import { db } from '../db/drizzle.js';
@@ -14,6 +13,8 @@ import { eq } from 'drizzle-orm';
 import { config } from '../config.js';
 import { AppError, sendAppError } from '../errors.js';
 import { fetchAndSyncUser, resolveUserRateLimit } from './authUtils.js';
+import { syncUserBilling } from '../services/billingService.js';
+import { emitAlert } from '../alerts/index.js';
 
 export const userRoutes = Router();
 
@@ -71,100 +72,8 @@ userRoutes.post('/billing/sync', async (req: Request, res: Response): Promise<vo
       throw new AppError('UNAUTHORIZED');
     }
 
-    const adminEmails = config.ADMIN_EMAILS.split(',')
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
-    const userEmail = req.userEmail;
-    let isAdminUser = Boolean(userEmail && adminEmails.includes(userEmail.toLowerCase()));
-
-    if (!isAdminUser && userId) {
-      const [u] = await db
-        .select({ email: userTable.email })
-        .from(userTable)
-        .where(eq(userTable.id, userId))
-        .limit(1);
-      if (u?.email && adminEmails.includes(u.email.toLowerCase())) {
-        isAdminUser = true;
-      }
-    }
-
-    if (isAdminUser) {
-      const [currentUser] = await db
-        .select({ tier: userTable.tier })
-        .from(userTable)
-        .where(eq(userTable.id, userId))
-        .limit(1);
-      res.status(200).json({ success: true, tier: currentUser?.tier || 'free', adminBypass: true });
-      return;
-    }
-
-    const secretKey = config.REVENUECAT_SECRET_KEY;
-    if (!secretKey) {
-      console.warn(
-        'REVENUECAT_SECRET_KEY is not configured in backend. Trusting client tier update (fallback mode).'
-      );
-      const clientTier = req.body.tier;
-      if (clientTier === 'premium' || clientTier === 'free') {
-        const alphaActive = await isAlphaActive();
-        const finalTier = clientTier === 'free' && alphaActive ? 'alpha' : clientTier;
-        await db
-          .update(userTable)
-          .set({ tier: finalTier, updatedAt: new Date() })
-          .where(eq(userTable.id, userId));
-        res.status(200).json({ success: true, tier: finalTier, fallback: true });
-        return;
-      }
-      const alphaActive = await isAlphaActive();
-      res.status(200).json({ success: true, tier: alphaActive ? 'alpha' : 'free', fallback: true });
-      return;
-    }
-
-    const response = await fetch(`https://api.revenuecat.com/v1/subscribers/${userId}`, {
-      headers: {
-        Authorization: `Bearer ${secretKey}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('RevenueCat API error:', errorText);
-      throw new AppError('REVENUECAT_FAILED', { message: 'Failed to fetch status from RevenueCat.' });
-    }
-
-    const rcData = (await response.json()) as {
-      subscriber?: {
-        entitlements?: Record<string, { expires_date?: string | null }>;
-      };
-    };
-    const entitlements = rcData.subscriber?.entitlements || {};
-    const premiumEntitlement = entitlements.premium;
-
-    let isPremium = false;
-    if (premiumEntitlement) {
-      const expiresDate = premiumEntitlement.expires_date;
-      if (!expiresDate) {
-        isPremium = true;
-      } else {
-        isPremium = new Date(expiresDate).getTime() > Date.now();
-      }
-    }
-
-    const alphaActive = await isAlphaActive();
-    const newTier = isPremium ? 'premium' : alphaActive ? 'alpha' : 'free';
-
-    try {
-      await db
-        .update(userTable)
-        .set({ tier: newTier, updatedAt: new Date() })
-        .where(eq(userTable.id, userId));
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error('Failed to update user tier:', msg);
-      throw new AppError('PROFILE_UPDATE_FAILED', { message: 'Failed to update user profile.' });
-    }
-
-    res.status(200).json({ success: true, tier: newTier });
+    const result = await syncUserBilling(userId, req.userEmail, req.body.tier);
+    res.status(200).json({ success: true, ...result });
   } catch (error: unknown) {
     if (!(error instanceof AppError)) console.error('Error syncing billing status:', error);
     sendAppError(res, error);
@@ -177,6 +86,12 @@ userRoutes.delete('/users/me', async (req: Request, res: Response): Promise<void
     if (!userId) {
       throw new AppError('UNAUTHORIZED', { message: 'Unauthorized. Missing user ID.' });
     }
+
+    const [u] = await db
+      .select({ createdAt: userTable.createdAt, email: userTable.email })
+      .from(userTable)
+      .where(eq(userTable.id, userId))
+      .limit(1);
 
     await deletePushTokensForUser(userId).catch((err) =>
       console.warn('Failed to delete push tokens on account deletion:', err?.message ?? err)
@@ -193,6 +108,18 @@ userRoutes.delete('/users/me', async (req: Request, res: Response): Promise<void
         message: `Failed to delete user account: ${msg}`,
       });
     }
+
+    const accountAgeDays = u?.createdAt
+      ? Math.max(0, Math.floor((Date.now() - new Date(u.createdAt).getTime()) / (1000 * 60 * 60 * 24)))
+      : null;
+
+    emitAlert({
+      type: 'user.deleted',
+      payload: {
+        accountAgeDays,
+        email: u?.email ?? null,
+      },
+    });
 
     res.status(200).json({
       success: true,
@@ -270,6 +197,15 @@ userRoutes.post('/feedback', async (req: Request, res: Response): Promise<void> 
       message: message.trim(),
       context,
       screenshotsBase64,
+    });
+
+    emitAlert({
+      type: 'feedback.created',
+      payload: {
+        feedbackType,
+        message: message.trim(),
+        screenshotCount: screenshotsBase64?.length ?? 0,
+      },
     });
 
     res.status(201).json({ success: true, id });
