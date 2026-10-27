@@ -45,33 +45,56 @@ export default function LandingBentoShowcase() {
             </p>
           </div>
 
-          {/* Mini UI Preview: Category-grouped Shopping List on Warm Paper */}
-          <div className="rounded-2xl bg-[#fdfbf7] dark:bg-gray-900 p-4 sm:p-5 ring-1 ring-black/[0.04] dark:ring-white/10 grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {SHOPPING_PREVIEW_GROUPS.map((group) => (
-              <div key={group.name} className="flex flex-col gap-2">
-                <div className="flex flex-col gap-1">
-                  <span className={`w-7 h-1 rounded-full ${group.barColor}`} />
-                  <span className="text-xs font-bold text-gray-900 dark:text-white">
-                    {group.name}
+          <div className="flex flex-col gap-3">
+            {/* Mini Week Strip */}
+            <div className="rounded-2xl bg-[#fdfbf7] dark:bg-gray-900 px-4 py-3 ring-1 ring-black/[0.04] dark:ring-white/10 flex items-center justify-between gap-2 text-xs">
+              <span className="font-semibold text-gray-500 dark:text-gray-400">
+                Wochenplan Mo–So
+              </span>
+              <div className="flex items-center gap-1.5">
+                {(['Mo', 'Di', 'Mi', 'Do', 'Fr'] as const).map((day, idx) => (
+                  <span
+                    key={day}
+                    className={`px-2 py-0.5 rounded-md font-bold text-[11px] ${
+                      idx < 3
+                        ? 'bg-emerald-500/12 text-emerald-700 dark:text-emerald-400'
+                        : 'bg-black/[0.04] dark:bg-white/[0.06] text-gray-500 dark:text-gray-400'
+                    }`}
+                  >
+                    {day}
                   </span>
-                </div>
-                <div className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
-                  {group.items.map((item) => (
-                    <div
-                      key={item.name}
-                      className="py-1.5 flex items-baseline justify-between gap-2 text-xs"
-                    >
-                      <span className="font-medium text-gray-800 dark:text-gray-200 truncate">
-                        {item.name}
-                      </span>
-                      <span className="font-bold tabular-nums text-gray-500 dark:text-gray-400 shrink-0">
-                        {item.amount}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                ))}
               </div>
-            ))}
+            </div>
+
+            {/* Mini UI Preview: Category-grouped Shopping List on Warm Paper */}
+            <div className="rounded-2xl bg-[#fdfbf7] dark:bg-gray-900 p-4 sm:p-5 ring-1 ring-black/[0.04] dark:ring-white/10 grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {SHOPPING_PREVIEW_GROUPS.map((group) => (
+                <div key={group.name} className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-1">
+                    <span className={`w-7 h-1 rounded-full ${group.barColor}`} />
+                    <span className="text-xs font-bold text-gray-900 dark:text-white">
+                      {group.name}
+                    </span>
+                  </div>
+                  <div className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
+                    {group.items.map((item) => (
+                      <div
+                        key={item.name}
+                        className="py-1.5 flex items-baseline justify-between gap-2 text-xs"
+                      >
+                        <span className="font-medium text-gray-800 dark:text-gray-200 truncate">
+                          {item.name}
+                        </span>
+                        <span className="font-bold tabular-nums text-gray-500 dark:text-gray-400 shrink-0">
+                          {item.amount}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
