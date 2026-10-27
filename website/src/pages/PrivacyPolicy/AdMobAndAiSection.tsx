@@ -1,53 +1,53 @@
 import React from 'react';
-import { Megaphone, ShieldAlert, Award } from 'lucide-react';
 
 export const AdMobAndAiSection: React.FC = () => {
   return (
     <>
-      <section id="admob" className="scroll-mt-24 border-b border-gray-150 dark:border-gray-800 pb-8 flex flex-col gap-4">
+      <section id="admob" className="scroll-mt-24 border-b border-black/[0.06] dark:border-white/[0.08] pb-8 flex flex-col gap-4">
         <div>
-          <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white flex items-center gap-2">
-            <Megaphone className="w-5 h-5 text-emerald-500" />
+          <h2 className="font-heading text-xl font-bold mb-2 text-gray-900 dark:text-white">
             3. In-App-Werbung, Google AdMob &amp; Google UMP Consent
           </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed m-0">
             Um die kostenfreie Grundversion von Snagbite finanzieren zu können, binden wir In-App-Werbung über <strong>Google AdMob</strong> (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland bzw. Google LLC, 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA) ein.
           </p>
         </div>
 
         <div className="p-5 rounded-2xl glass-panel space-y-3 text-xs text-gray-600 dark:text-gray-400">
-          <p className="font-semibold text-gray-800 dark:text-gray-200">
+          <p className="font-semibold text-gray-800 dark:text-gray-200 m-0">
             Eingesetzte Werbeformate &amp; Verarbeitungszwecke:
           </p>
-          <ul className="list-disc pl-5 space-y-1.5">
+          <ul className="list-disc pl-5 space-y-1.5 m-0">
             <li><strong>Werbebanner:</strong> Kompakte Anzeigenkarten während der Rezept-Erstellung.</li>
             <li><strong>Start-Anzeigen (App-Open):</strong> Gelegentliche Anzeigen beim Starten bzw. Wiederaufrufen der App.</li>
             <li><strong>Belohnungsvideos (Rewarded Ads):</strong> Nutzer der kostenlosen Version können sich freiwillig kurze Werbevideos ansehen, um zusätzliche Extraktions-Credits freizuschalten.</li>
           </ul>
 
-          <p className="font-semibold text-gray-800 dark:text-gray-200 pt-2">
+          <p className="font-semibold text-gray-800 dark:text-gray-200 pt-2 m-0">
             Verarbeitete Daten &amp; Gerätekennungen:
           </p>
-          <p className="leading-relaxed">
+          <p className="leading-relaxed m-0">
             Beim Abruf von Werbeanzeigen verarbeitet Google AdMob pseudonymisierte Gerätekennungen (insbesondere die Google Werbe-ID / GAID auf Android), die gekürzte IP-Adresse, Geräteparameter (Hersteller, Modell, Betriebssystemversion) sowie Nutzungs- und Interaktionsdaten (z.&nbsp;B. Werbeimpressionen und Klicks).
           </p>
 
-          <p className="font-semibold text-gray-800 dark:text-gray-200 pt-2">
+          <p className="font-semibold text-gray-800 dark:text-gray-200 pt-2 m-0">
             Einwilligungsmanagement (Google UMP nach EU-DSGVO / IAB TCF v2.2):
           </p>
-          <p className="leading-relaxed">
+          <p className="leading-relaxed m-0">
             Nutzer im Europäischen Wirtschaftsraum (EWR) und dem Vereinigten Königreich erhalten beim ersten Öffnen der App ein DSGVO-konformes Einwilligungsbanner (Google User Messaging Platform).
             Sofern du der Personalisierung zustimmst, werden Anzeigen auf Basis deiner Interessen ausgeliefert (Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO).
             Lehnst du die Personalisierung ab, werden ausschließlich <strong>nicht-personalisierte Anzeigen</strong> geschaltet, die keine Werbeprofile erstellen (Rechtsgrundlage: berechtigtes Interesse an der werbefinanzierten Bereitstellung des kostenlosen Dienstes, Art. 6 Abs. 1 lit. f DSGVO).
           </p>
-          <p className="text-[11px] text-gray-500 dark:text-gray-400 italic">
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 italic m-0">
             Hinweis für Premium-Abonnenten: Im kostenpflichtigen Abonnement (Snagbite Pro / Premium) ist die gesamte App 100&nbsp;% werbefrei; das AdMob-SDK wird für Abonnenten vollständig deaktiviert.
           </p>
         </div>
       </section>
 
-      <section id="zwecke" className="scroll-mt-24 border-b border-gray-150 dark:border-gray-800 pb-8 flex flex-col gap-4">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">4. Zwecke und Rechtsgrundlagen der Verarbeitung</h2>
+      <section id="zwecke" className="scroll-mt-24 border-b border-black/[0.06] dark:border-white/[0.08] pb-8 flex flex-col gap-4">
+        <h2 className="font-heading text-xl font-bold text-gray-900 dark:text-white m-0">
+          4. Zwecke und Rechtsgrundlagen der Verarbeitung
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-gray-600 dark:text-gray-300">
           <div className="p-4 rounded-xl glass-panel">
             <strong className="text-gray-900 dark:text-white block mb-1">Vertragserfüllung (Art. 6 Abs. 1 lit. b DSGVO)</strong>
@@ -68,13 +68,12 @@ export const AdMobAndAiSection: React.FC = () => {
         </div>
       </section>
 
-      <section id="ki" className="scroll-mt-24 border-b border-gray-150 dark:border-gray-800 pb-8 flex flex-col gap-4">
+      <section id="ki" className="scroll-mt-24 border-b border-black/[0.06] dark:border-white/[0.08] pb-8 flex flex-col gap-4">
         <div>
-          <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white flex items-center gap-2">
-            <Award className="w-5 h-5 text-emerald-500" />
+          <h2 className="font-heading text-xl font-bold mb-2 text-gray-900 dark:text-white">
             5. KI-Inferenz, Spracherkennung &amp; Healthy Score
           </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed m-0">
             Snagbite nutzt spezialisierte KI-Systeme und Inferenzdienste (u.&nbsp;a. Google Gemini, Groq sowie fal.ai) zur automatisierten Rezeptstrukturierung, Spracherkennung, Symbolbild-Darstellung und interaktiven Kochassistenz.
           </p>
         </div>
@@ -83,18 +82,17 @@ export const AdMobAndAiSection: React.FC = () => {
           <strong className="text-gray-900 dark:text-white block">
             Automatisierte Spracherkennung (Speech-to-Text):
           </strong>
-          <p className="leading-relaxed">
+          <p className="leading-relaxed m-0">
             Soweit bereitgestellte Inhalte gesprochene Anweisungen enthalten, wird die Sprache durch spezialisierte Inferenzmodelle automatisiert in Text übertragen. Die Verarbeitung erfolgt rein flüchtig zur Erstellung der Kochanleitung.
           </p>
-          <p className="leading-relaxed">
+          <p className="leading-relaxed m-0">
             <strong>Zweckbindung &amp; kein Modelltraining:</strong> Die Inferenzdaten werden rein zur Texterstellung verarbeitet, nicht für das Training von KI-Modellen verwendet und nach Abschluss der Verarbeitung nicht dauerhaft gespeichert.
           </p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/15 flex flex-col gap-3">
-          <div className="flex items-center gap-2 text-amber-800 dark:text-amber-400 font-bold text-sm">
-            <ShieldAlert className="w-5 h-5 shrink-0" />
-            Wichtiger Haftungsausschluss: Keine medizinische oder Ernährungsberatung!
+        <div className="p-5 rounded-2xl bg-amber-500/[0.06] dark:bg-amber-500/10 border-none flex flex-col gap-2.5">
+          <div className="text-amber-800 dark:text-amber-300 font-bold text-sm">
+            Wichtiger Haftungsausschluss: Keine medizinische oder Ernährungsberatung
           </div>
           <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed m-0">
             <strong>Keine Gewähr für Richtigkeit:</strong> Sämtliche Nährwerte (Kalorien, Eiweiß, Kohlenhydrate, Fett, Ballaststoffe), Portionsangaben, Mengenumrechnungen sowie der <strong>Healthy Score</strong> werden ganz oder teilweise durch künstliche Intelligenz und algorithmische Datenbankabgleiche (u.&nbsp;a. Open Food Facts) geschätzt. Sie können unvollständig, ungenau oder fehlerhaft sein.
