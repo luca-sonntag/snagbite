@@ -59,7 +59,7 @@ export const ExtractHelpAccordions: React.FC = () => {
               className="px-1 py-4 flex items-center justify-between text-gray-900 dark:text-white transition-colors"
             >
               <span className="flex items-center gap-2.5 text-sm font-bold">
-                <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <div className="w-7 h-7 rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-gray-600 dark:text-gray-400 flex items-center justify-center shrink-0">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="w-4 h-4"
@@ -143,7 +143,7 @@ export const ExtractHelpAccordions: React.FC = () => {
               className="px-1 py-4 flex items-center justify-between text-gray-900 dark:text-white transition-colors"
             >
               <span className="flex items-center gap-2.5 text-sm font-bold">
-                <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <div className="w-7 h-7 rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-gray-600 dark:text-gray-400 flex items-center justify-center shrink-0">
                   <HelpCircle className="w-4 h-4" />
                 </div>
                 {t('form.helpTitle')}
@@ -154,8 +154,8 @@ export const ExtractHelpAccordions: React.FC = () => {
           <Accordion.Panel>
             <Accordion.Body className="px-1 pb-5 pt-1 text-xs text-gray-600 dark:text-gray-400 flex flex-col gap-3.5 border-none">
               <div className="flex gap-3 items-start">
-                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-                  <InstagramIcon className="w-3.5 h-3.5" />
+                <div className="w-8 h-8 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                  <InstagramIcon className="w-4 h-4" />
                 </div>
                 <div>
                   <h4 className="font-bold text-gray-900 dark:text-white mb-0.5">Instagram Reel</h4>
@@ -165,8 +165,8 @@ export const ExtractHelpAccordions: React.FC = () => {
                 </div>
               </div>
               <div className="flex gap-3 items-start">
-                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-                  <TikTokIcon className="w-3.5 h-3.5" />
+                <div className="w-8 h-8 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-gray-900 dark:text-white flex items-center justify-center shrink-0">
+                  <TikTokIcon className="w-4 h-4" />
                 </div>
                 <div>
                   <h4 className="font-bold text-gray-900 dark:text-white mb-0.5">TikTok Video</h4>
@@ -176,8 +176,8 @@ export const ExtractHelpAccordions: React.FC = () => {
                 </div>
               </div>
               <div className="flex gap-3 items-start">
-                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-                  <YoutubeIcon className="w-3.5 h-3.5" />
+                <div className="w-8 h-8 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
+                  <YoutubeIcon className="w-4 h-4" />
                 </div>
                 <div>
                   <h4 className="font-bold text-gray-900 dark:text-white mb-0.5">YouTube Shorts</h4>
@@ -187,8 +187,8 @@ export const ExtractHelpAccordions: React.FC = () => {
                 </div>
               </div>
               <div className="flex gap-3 items-start">
-                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-                  <FacebookIcon className="w-3.5 h-3.5" />
+                <div className="w-8 h-8 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                  <FacebookIcon className="w-4 h-4" />
                 </div>
                 <div>
                   <h4 className="font-bold text-gray-900 dark:text-white mb-0.5">Facebook Video</h4>
@@ -198,8 +198,8 @@ export const ExtractHelpAccordions: React.FC = () => {
                 </div>
               </div>
               <div className="flex gap-3 items-start">
-                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-                  <Globe className="w-3.5 h-3.5" />
+                <div className="w-8 h-8 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <Globe className="w-4 h-4" />
                 </div>
                 <div>
                   <h4 className="font-bold text-gray-900 dark:text-white mb-0.5">Recipe Website</h4>

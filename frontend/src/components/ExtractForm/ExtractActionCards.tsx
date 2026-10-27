@@ -99,12 +99,12 @@ export const ExtractActionCards: React.FC<ExtractActionCardsProps> = ({
         }`}
       >
         <div className="flex items-center gap-3.5 min-w-0 flex-1">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
             <Camera className="w-6 h-6" />
           </div>
 
           <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+            <span className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
               {t('form.actionCards.photoTitle')}
             </span>
             <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-snug">
@@ -115,11 +115,11 @@ export const ExtractActionCards: React.FC<ExtractActionCardsProps> = ({
 
         <div className="flex items-center gap-2 shrink-0">
           {photosCount > 0 && (
-            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-600 text-white">
+            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500 text-white">
               {photosCount}
             </span>
           )}
-          <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
+          <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-amber-600 dark:group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
         </div>
       </button>
     </div>
