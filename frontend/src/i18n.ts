@@ -1153,6 +1153,9 @@ export const uiTranslations = {
         tabFailed: 'Fehlgeschlagen',
         failedBadgeOne: '1 Fehler',
         failedBadgeMultiple: '{count} Fehler',
+        open: 'Öffnen',
+        tapToManage: 'Antippen zum Verwalten & Starten',
+        tapToRetry: 'Antippen zum Wiederholen',
       },
       toast: {
         addedToWaitlist: 'Rezept für später vorgemerkt',
@@ -2953,6 +2956,9 @@ export const uiTranslations = {
         tabFailed: 'Failed',
         failedBadgeOne: '1 failed',
         failedBadgeMultiple: '{count} failed',
+        open: 'Open',
+        tapToManage: 'Tap to manage & analyze',
+        tapToRetry: 'Tap to retry failed extractions',
       },
       toast: {
         addedToWaitlist: 'Recipe saved to waitlist',
