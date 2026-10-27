@@ -19,7 +19,9 @@ import { photoUploadIdFromUrl, downloadImportPhotos, deleteImportPhotos, sweepOl
 import { calculateWhisperCost, type Job, type LlmUsage, type ProgressStage, type GeminiUsageInfo, type RecipePreviewData, type Recipe } from './types.js';
 import { formatAuthorHandle, CURRENT_RECIPE_PIPELINE_VERSION } from '@cookbook/shared';
 import { config } from './config.js';
-import { AppError, serializeJobError } from './errors.js';
+import { AppError, isAppError, serializeJobError } from './errors.js';
+import { detectPlatform } from './scrapers/providers/index.js';
+import { emitAlert, type JobSource } from './alerts/index.js';
 import { notificationTick } from './notifications/worker.js';
 import { enrichRecipeWithCanonicalIngredients } from './matching/ingredientMatcher.js';
 import { auditRecipe, applyRecipeAuditPatch } from './matching/recipeAuditor.js';
@@ -41,6 +43,14 @@ const MAX_POLL_INTERVAL_MS = 30_000;
 const BACKOFF_MULTIPLIER = 1.5;
 const MAINTENANCE_INTERVAL_MS = 3 * 60_000; // 3 minutes
 let currentPollDelayMs = MIN_POLL_INTERVAL_MS;
+
+function resolveJobSource(job: Job): JobSource {
+  if (job.kind === 'photo' || job.sourceUrl.startsWith('photo://')) {
+    return 'photo';
+  }
+  const detected = detectPlatform(job.sourceUrl);
+  return detected ?? 'website';
+}
 
 function buildRecipePreview(recipe: Recipe, fallbackThumbnail?: string, authorHandle?: string | null): RecipePreviewData {
   const allItems = recipe.ingredients || [];
@@ -678,6 +688,20 @@ async function processJob(job: Job): Promise<void> {
       status: 'failed',
       error: serializeJobError(error),
       progress: null,
+    });
+
+    const errorCode = isAppError(error) ? error.code : 'EXTRACTION_FAILED';
+    const detail = isAppError(error)
+      ? (error.message !== error.code ? error.message : null)
+      : (error instanceof Error ? error.message : String(error));
+
+    emitAlert({
+      type: 'job.failed',
+      payload: {
+        errorCode,
+        source: resolveJobSource(job),
+        detail,
+      },
     });
   } finally {
     clearInterval(heartbeat);
