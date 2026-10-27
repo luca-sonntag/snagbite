@@ -13,8 +13,6 @@ import { useExtractionQueue } from '../context/ExtractionQueueContext';
 import {
   sendNativeNotification,
   sendRecipeReadyNotification,
-  requestNativeNotificationPermission,
-  isNative,
   registerAppStateListener,
   EXTRACTION_INTERRUPTED_NOTIFICATION_ID,
 } from '../native';
@@ -541,10 +539,6 @@ export function useRecipeExtraction(
       }
     }
 
-    // Proactively request local notification permissions on native startup of extraction
-    if (isNative()) {
-      requestNativeNotificationPermission().catch(err => console.warn('Failed to request notifications permission:', err));
-    }
 
     // Both free and premium flows immediately show RecipeDetails with skeleton animations
     setIsPending(true);
