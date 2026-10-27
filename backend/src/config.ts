@@ -71,6 +71,24 @@ export interface Config {
   NTFY_TOPIC?: string;
   TELEGRAM_BOT_TOKEN?: string;
   TELEGRAM_CHAT_ID?: string;
+  /** Master switch for operator alerts via ntfy (signups, upgrades, feedback …, see src/alerts/). Default off. */
+  ALERTS_ENABLED: boolean;
+  /** ntfy server base URL (public ntfy.sh or self-hosted). */
+  NTFY_SERVER_URL: string;
+  /** Dedicated ntfy topic for operator alerts (separate from the healthcheck NTFY_TOPIC). */
+  NTFY_ALERTS_TOPIC?: string;
+  /** Optional ntfy access token for protected/reserved topics. */
+  NTFY_TOKEN?: string;
+  /** Comma-separated alert event types to mute, e.g. "job.failed,user.deleted". */
+  ALERTS_DISABLED_EVENTS: string;
+  /** Render (masked) e-mails and feedback excerpts in alerts. Default off (data minimisation). */
+  ALERTS_INCLUDE_PII: boolean;
+  /** Optional click target for alerts, e.g. https://snagbite.app/#/admin. */
+  ALERTS_ADMIN_URL?: string;
+  /** Overrides the alert title prefix; default "dev" outside production, none in production. */
+  ALERTS_ENV_LABEL?: string;
+  /** Injected by Railway (e.g. "production" / "development"); used to detect non-prod deployments. */
+  RAILWAY_ENVIRONMENT_NAME?: string;
   // ── Smart AI push notifications ──
   /** Master feature flag for the AI push-notification worker. Default off. */
   NOTIFICATIONS_ENABLED: boolean;
@@ -174,6 +192,15 @@ export const config: Config = {
   NTFY_TOPIC: process.env.NTFY_TOPIC,
   TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
   TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID,
+  ALERTS_ENABLED: getEnv('ALERTS_ENABLED', 'false') === 'true',
+  NTFY_SERVER_URL: getEnv('NTFY_SERVER_URL', 'https://ntfy.sh'),
+  NTFY_ALERTS_TOPIC: process.env.NTFY_ALERTS_TOPIC,
+  NTFY_TOKEN: process.env.NTFY_TOKEN,
+  ALERTS_DISABLED_EVENTS: getEnv('ALERTS_DISABLED_EVENTS', ''),
+  ALERTS_INCLUDE_PII: getEnv('ALERTS_INCLUDE_PII', 'false') === 'true',
+  ALERTS_ADMIN_URL: process.env.ALERTS_ADMIN_URL,
+  ALERTS_ENV_LABEL: process.env.ALERTS_ENV_LABEL,
+  RAILWAY_ENVIRONMENT_NAME: process.env.RAILWAY_ENVIRONMENT_NAME,
   NOTIFICATIONS_ENABLED: getEnv('NOTIFICATIONS_ENABLED', 'false') === 'true',
   FCM_PROJECT_ID: process.env.FCM_PROJECT_ID,
   FCM_SERVICE_ACCOUNT_JSON: process.env.FCM_SERVICE_ACCOUNT_JSON,
