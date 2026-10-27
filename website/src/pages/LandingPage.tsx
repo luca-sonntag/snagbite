@@ -5,7 +5,7 @@ import LandingFaqSection from './LandingPage/LandingFaqSection';
 
 export default function LandingPage() {
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-4 sm:py-12 overflow-x-hidden flex flex-col divide-y divide-black/[0.08] dark:divide-white/[0.1]">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-4 sm:py-12 overflow-x-hidden lg:overflow-x-visible flex flex-col divide-y divide-black/[0.08] dark:divide-white/[0.1]">
       <div className="pb-10 sm:pb-16">
         <LandingHero />
       </div>
