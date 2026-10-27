@@ -13,6 +13,18 @@ const ALLOWED_BUCKETS = new Set<string>([
   'ingredient-icons',
 ]);
 
+const BUFFER_THRESHOLD_BYTES = 10 * 1024 * 1024; // 10 MB
+
+export function clearCacheHeadersOnFailure(res: Response): void {
+  if (res.headersSent) return;
+  res.removeHeader('Cache-Control');
+  res.removeHeader('Content-Type');
+  res.removeHeader('Content-Length');
+  res.removeHeader('ETag');
+  res.removeHeader('Last-Modified');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+}
+
 async function handleStream(req: Request, res: Response): Promise<void> {
   const bucket = req.params.bucket as StorageBucket;
   if (!ALLOWED_BUCKETS.has(bucket)) {
@@ -41,20 +53,48 @@ async function handleStream(req: Request, res: Response): Promise<void> {
       })
     );
 
+    if (!s3Res.Body) {
+      res.status(404).send('File not found');
+      return;
+    }
+
+    const contentLength = s3Res.ContentLength ?? 0;
+    const isLargeFile = bucket === 'app-bundles' || contentLength > BUFFER_THRESHOLD_BYTES;
+
+    // Fast-path: buffer small/medium files (covers, icons, photos) in memory in <10ms to eliminate Tigris connection drops
+    if (!isLargeFile && typeof (s3Res.Body as any).transformToByteArray === 'function') {
+      const byteArray = await (s3Res.Body as any).transformToByteArray();
+      const buffer = Buffer.from(byteArray);
+
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      if (s3Res.ContentType) res.setHeader('Content-Type', s3Res.ContentType);
+      res.setHeader('Content-Length', buffer.length);
+      if (s3Res.ETag) res.setHeader('ETag', s3Res.ETag);
+      if (s3Res.LastModified) res.setHeader('Last-Modified', s3Res.LastModified.toUTCString());
+
+      res.status(200).send(buffer);
+      return;
+    }
+
+    // Streaming path for large files (e.g. app-bundles OTA zips)
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     if (s3Res.ContentType) res.setHeader('Content-Type', s3Res.ContentType);
     if (s3Res.ContentLength) res.setHeader('Content-Length', s3Res.ContentLength);
     if (s3Res.ETag) res.setHeader('ETag', s3Res.ETag);
     if (s3Res.LastModified) res.setHeader('Last-Modified', s3Res.LastModified.toUTCString());
 
-    if (!s3Res.Body) {
-      res.status(404).send('File not found');
-      return;
-    }
-
     const stream = s3Res.Body as Readable;
+
+    res.on('close', () => {
+      if (!res.writableEnded) {
+        stream.destroy();
+      }
+    });
+
     stream.on('error', (err) => {
+      if (res.writableEnded || res.destroyed) return;
       console.error(`[storageRouter] Error streaming ${bucket}/${key}:`, err);
+      clearCacheHeadersOnFailure(res);
       if (!res.headersSent) res.status(500).send('Streaming error');
     });
 
@@ -69,6 +109,7 @@ async function handleStream(req: Request, res: Response): Promise<void> {
       return;
     }
     console.error(`[storageRouter] Error handling ${bucket}/${key}:`, err);
+    clearCacheHeadersOnFailure(res);
     res.status(500).send('Internal Server Error');
   }
 }
