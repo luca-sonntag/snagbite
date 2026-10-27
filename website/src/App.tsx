@@ -18,10 +18,10 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col font-sans transition-colors dark:bg-gray-950 dark:text-gray-100">
       {!isAdminRoute && (
-        <header className="w-full max-w-5xl mx-auto px-5 sm:px-8 pt-6 pb-2 flex items-center justify-between">
+        <header className="w-full max-w-5xl mx-auto px-4 sm:px-8 pt-4 sm:pt-6 pb-2 flex items-center justify-between">
           <Link
             to="/"
-            className="inline-flex items-center gap-2.5 group active:scale-95 transition-transform"
+            className="inline-flex items-center gap-2.5 min-h-[44px] group active:scale-95 transition-transform"
           >
             <img
               src="/icon-192.png"
@@ -37,7 +37,7 @@ export default function App() {
             href={PLAY_STORE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold px-4 py-2.5 min-h-[40px] rounded-full active:scale-95 transition-all"
+            className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold px-4 py-2.5 min-h-[44px] rounded-full active:scale-95 transition-all"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Play Store</span>
@@ -58,17 +58,17 @@ export default function App() {
         </Routes>
       </main>
 
-      <footer className="w-full mt-auto pt-10 pb-8">
-        <div className="w-full max-w-5xl mx-auto px-5 sm:px-8 pt-6 border-t border-black/[0.06] dark:border-white/[0.08] flex flex-col md:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+      <footer className="w-full mt-auto pt-8 sm:pt-10 pb-6 sm:pb-8">
+        <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 pt-5 sm:pt-6 border-t border-black/[0.06] dark:border-white/[0.08] flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
           <div className="flex items-center gap-2.5">
             <img src="/icon-192.png" alt="Snagbite Logo" className="w-5 h-5 rounded-md opacity-85" />
             <p className="m-0">© {new Date().getFullYear()} Snagbite. Alle Rechte vorbehalten.</p>
           </div>
-          <nav className="flex gap-6 flex-wrap justify-center">
-            <Link to="/privacy" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Datenschutzerklärung</Link>
-            <Link to="/legal" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Impressum</Link>
-            <Link to="/terms" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">AGB</Link>
-            <Link to="/delete-data" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Daten löschen</Link>
+          <nav className="flex gap-x-5 gap-y-1 flex-wrap justify-center">
+            <Link to="/privacy" className="min-h-[44px] inline-flex items-center px-1 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Datenschutzerklärung</Link>
+            <Link to="/legal" className="min-h-[44px] inline-flex items-center px-1 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Impressum</Link>
+            <Link to="/terms" className="min-h-[44px] inline-flex items-center px-1 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">AGB</Link>
+            <Link to="/delete-data" className="min-h-[44px] inline-flex items-center px-1 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Daten löschen</Link>
           </nav>
         </div>
       </footer>

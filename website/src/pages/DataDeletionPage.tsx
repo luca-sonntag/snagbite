@@ -9,16 +9,16 @@ const DELETION_STEPS = [
 
 export default function DataDeletionPage() {
   return (
-    <div className="w-full max-w-4xl mx-auto px-5 sm:px-8 py-8 md:py-12 flex flex-col gap-10">
+    <div className="w-full max-w-4xl mx-auto px-4 sm:px-8 py-5 sm:py-8 md:py-12 flex flex-col gap-6 sm:gap-10">
       {/* Editorial Document Header */}
-      <header className="border-b border-black/[0.06] dark:border-white/[0.08] pb-6 flex flex-col gap-2">
-        <span className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
+      <header className="border-b border-black/[0.06] dark:border-white/[0.08] pb-4 sm:pb-6 flex flex-col gap-1.5 sm:gap-2">
+        <span className="text-[11px] sm:text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
           Account-Verwaltung
         </span>
-        <h1 className="font-heading text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight m-0">
+        <h1 className="font-heading text-2xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight m-0">
           Daten löschen
         </h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 m-0">
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 m-0">
           Vollständiges Recht auf Löschung deiner personenbezogenen Daten (Art. 17 DSGVO / Google Play Data Safety).
         </p>
       </header>

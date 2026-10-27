@@ -2,23 +2,23 @@ import { legal } from '../legal';
 
 export default function LegalPage() {
   return (
-    <div className="w-full max-w-4xl mx-auto px-5 sm:px-8 py-8 md:py-12 flex flex-col gap-10">
+    <div className="w-full max-w-4xl mx-auto px-4 sm:px-8 py-5 sm:py-8 md:py-12 flex flex-col gap-6 sm:gap-10">
       {/* Editorial Document Header */}
-      <header className="border-b border-black/[0.06] dark:border-white/[0.08] pb-6 flex flex-col gap-2">
-        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+      <header className="border-b border-black/[0.06] dark:border-white/[0.08] pb-4 sm:pb-6 flex flex-col gap-1.5 sm:gap-2">
+        <span className="text-[11px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
           Rechtliches
         </span>
-        <h1 className="font-heading text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight m-0">
+        <h1 className="font-heading text-2xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight m-0">
           Impressum
         </h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 m-0">
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 m-0">
           Offenlegung gemäß § 5 ECG, § 63 GewO sowie §§ 24 f. MedienG.
         </p>
       </header>
 
       {/* Main Grid for Corporate Details */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="glass-panel rounded-2xl p-6 flex flex-col gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+        <div className="glass-panel rounded-2xl p-5 sm:p-6 flex flex-col gap-2.5 sm:gap-3">
           <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
             Medieninhaber &amp; Betreiber
           </span>
@@ -30,7 +30,7 @@ export default function LegalPage() {
           </div>
         </div>
 
-        <div className="glass-panel rounded-2xl p-6 flex flex-col gap-3">
+        <div className="glass-panel rounded-2xl p-5 sm:p-6 flex flex-col gap-2.5 sm:gap-3">
           <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
             Kontakt
           </span>
@@ -39,7 +39,7 @@ export default function LegalPage() {
               <span className="text-xs text-gray-500 dark:text-gray-400 block">E-Mail</span>
               <a
                 href={`mailto:${legal.email}`}
-                className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+                className="min-h-[36px] inline-flex items-center font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
               >
                 {legal.email}
               </a>
