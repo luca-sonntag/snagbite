@@ -58,7 +58,10 @@ export default function CachedImage({
       src={src}
       alt={alt || ''}
       className={className}
-      onError={() => setHasError(true)}
+      onError={(e) => {
+        setHasError(true);
+        props.onError?.(e);
+      }}
       {...props}
     />
   );
