@@ -1,42 +1,44 @@
 import React from 'react';
 import { legal } from '../../legal';
-import { Smartphone, Video, Camera, Users, Sparkles } from 'lucide-react';
 
 export const GeneralDataSection: React.FC = () => {
   return (
     <>
-      <section id="verantwortlicher" className="scroll-mt-24 border-b border-gray-150 dark:border-gray-800 pb-8">
-        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">1. Verantwortlicher</h2>
-        <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+      <section id="verantwortlicher" className="scroll-mt-24 border-b border-black/[0.06] dark:border-white/[0.08] pb-8">
+        <h2 className="font-heading text-xl font-bold mb-3 text-gray-900 dark:text-white">
+          1. Verantwortlicher
+        </h2>
+        <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed m-0">
           Verantwortlicher im Sinne des Art. 4 Z 7 DSGVO ist:<br />
           <strong className="text-gray-900 dark:text-white">{legal.operatorName}</strong><br />
           {legal.street}<br />
           {legal.city}, {legal.country}<br />
-          E-Mail: <a href={`mailto:${legal.email}`} className="text-emerald-500 hover:underline">{legal.email}</a>
+          E-Mail: <a href={`mailto:${legal.email}`} className="text-emerald-600 dark:text-emerald-400 hover:underline">{legal.email}</a>
         </p>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 mb-0">
           Wir haben keinen Datenschutzbeauftragten bestellt, da hierfür die gesetzlichen Voraussetzungen (Art. 37 DSGVO) nicht vorliegen. Bei Fragen zum Datenschutz wende dich bitte jederzeit an die oben angeführte Kontaktadresse.
         </p>
       </section>
 
-      <section id="daten" className="scroll-mt-24 border-b border-gray-150 dark:border-gray-800 pb-8 flex flex-col gap-6">
+      <section id="daten" className="scroll-mt-24 border-b border-black/[0.06] dark:border-white/[0.08] pb-8 flex flex-col gap-6">
         <div>
-          <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">2. Welche Daten wir verarbeiten &amp; technische Abläufe</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+          <h2 className="font-heading text-xl font-bold mb-2 text-gray-900 dark:text-white">
+            2. Welche Daten wir verarbeiten &amp; technische Abläufe
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed m-0">
             Wir verarbeiten personenbezogene Daten nur insoweit, als dies zur Bereitstellung einer funktionierenden, komfortablen App und zur Erfüllung unserer Verträge erforderlich ist.
           </p>
         </div>
 
         <div className="space-y-4">
           <div className="p-5 rounded-2xl glass-panel flex flex-col gap-2">
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Smartphone className="w-4 h-4 text-emerald-500" />
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white m-0">
               a) Konto- und Registrierungsdaten
             </h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+            <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed m-0">
               Für die Nutzung der App ist ein Benutzerkonto erforderlich. Dabei verarbeiten wir:
             </p>
-            <ul className="list-disc pl-5 text-xs text-gray-600 dark:text-gray-400 space-y-1">
+            <ul className="list-disc pl-5 text-xs text-gray-600 dark:text-gray-400 space-y-1 m-0">
               <li>E-Mail-Adresse und Passwort (ausschließlich kryptografisch gehasht über unsere geschützte Authentifizierungsinfrastruktur gespeichert)</li>
               <li>Bei Registrierung/Login über Google OAuth: Anzeigename, Profilbild und Google-Benutzer-ID</li>
               <li>Eindeutige interne Benutzer-ID (UUID), Registrierungs- und Anmeldezeitpunkte</li>
@@ -44,14 +46,13 @@ export const GeneralDataSection: React.FC = () => {
           </div>
 
           <div className="p-5 rounded-2xl glass-panel flex flex-col gap-2">
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Video className="w-4 h-4 text-teal-500" />
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white m-0">
               b) Rezepterstellung aus Web- und Medieninhalten
             </h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+            <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed m-0">
               Wenn du öffentlich zugängliche Links oder Webinhalte in Snagbite bereitstellst, beauftragst du die App mit der automatisierten Digitalisierung des Rezepts:
             </p>
-            <ul className="list-disc pl-5 text-xs text-gray-600 dark:text-gray-400 space-y-1">
+            <ul className="list-disc pl-5 text-xs text-gray-600 dark:text-gray-400 space-y-1 m-0">
               <li><strong>Verarbeitung öffentlich zugänglicher Inhalte:</strong> Zur Erfassung von Zutaten und Zubereitungsschritten werden die öffentlich zugänglichen Inhalte der verlinkten Seite aufgerufen und automatisiert ausgewertet.</li>
               <li><strong>Flüchtige Sprach- und Textanalyse:</strong> Enthaltene Sprach- und Textinformationen werden flüchtig analysiert, um handlungsrelevante Kochanweisungen und Mengenangaben in Textform zu erfassen.</li>
               <li><strong>Keine Speicherung von Rohmedien:</strong> Unsere Server empfangen und speichern zu keinem Zeitpunkt Rohmaterial (weder Video- noch Audiodateien) der verlinkten Medien. In deinem persönlichen Kochbuch verbleibt ausschließlich das strukturierte Textrezept.</li>
@@ -59,24 +60,22 @@ export const GeneralDataSection: React.FC = () => {
           </div>
 
           <div className="p-5 rounded-2xl glass-panel flex flex-col gap-2">
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Camera className="w-4 h-4 text-emerald-500" />
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white m-0">
               c) Rezeptfoto-Import &amp; optische Texterkennung (OCR)
             </h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+            <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed m-0">
               Du kannst Fotos von Rezeptnotizen oder Rezeptkarten zur Texterkennung hochladen. Diese Bilder werden verschlüsselt übertragen und automatisiert per OCR analysiert. Nach erfolgreicher Texterfassung (spätestens nach 24 Stunden) werden die Bilddateien vollständig von unseren Servern gelöscht.
             </p>
           </div>
 
           <div className="p-5 rounded-2xl glass-panel flex flex-col gap-2">
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Users className="w-4 h-4 text-teal-500" />
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white m-0">
               d) Gamification, Kochbeweise, Social-Profile &amp; Ranglisten
             </h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+            <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed m-0">
               Snagbite bietet interaktive Koch- und Motivations-Funktionen:
             </p>
-            <ul className="list-disc pl-5 text-xs text-gray-600 dark:text-gray-400 space-y-1">
+            <ul className="list-disc pl-5 text-xs text-gray-600 dark:text-gray-400 space-y-1 m-0">
               <li><strong>Koch-Events &amp; Fortschritt:</strong> Erfassung von Kochzeitpunkten, XP-Punkten, Levelaufstiegen, Streaks und freigeschalteten Abzeichen (Badges).</li>
               <li><strong>Kochbeweis-Fotos:</strong> Optional kannst du ein Foto deines fertig gekochten Gerichts hochladen. Dieses wird verschlüsselt gespeichert und durch KI auf optische Übereinstimmung mit dem Rezept geprüft, um XP-Boni freizuschalten.</li>
               <li><strong>Öffentliches Profil &amp; Leaderboards:</strong> Dein selbstgewählter Anzeigename, dein Avatar, dein Freundescode sowie deine Gesamt- und Monats-XP sind für verknüpfte Freunde bzw. im Monats-Leaderboard für angemeldete Nutzer sichtbar. Deine private E-Mail-Adresse wird <strong>unter keinen Umständen</strong> an Freunde oder Dritte übermittelt.</li>
@@ -84,11 +83,10 @@ export const GeneralDataSection: React.FC = () => {
           </div>
 
           <div className="p-5 rounded-2xl glass-panel flex flex-col gap-2">
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-emerald-500" />
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white m-0">
               e) Vorrat, Wochenplaner, Einkaufsliste &amp; Recipe Copilot
             </h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+            <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed m-0">
               In deinem geschützten Account speichern wir deine Vorratsbestände, Wochenpläne und Einkaufslisten. Eingaben im interaktiven Kochassistenten (Recipe Copilot zur Rezeptanpassung oder Zutatensubstitution) werden als Eingabetexte verschlüsselt an spezialisierte KI-Modelle zur Textverarbeitung übermittelt.
             </p>
           </div>

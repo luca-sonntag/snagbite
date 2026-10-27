@@ -6,6 +6,21 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-27: Entfernung veralteter Vite-Boilerplate und AI-Slop-Kartenmuster in `website/` (Editorial Paper Overhaul)
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Ungenutztes Vite-Boilerplate-CSS [`website/src/App.css`](file:///c:/Users/lucas/source/repos/cookbook/website/src/App.css) sowie Demo-Assets (`website/src/assets/hero.png`, `react.svg`, `vite.svg`).
+  * Globale `!important` `clamp()`-Überschreibungen für `h1`, `h2`, `h3`, kühler `#f9fafb`-Hintergrund, hartcodierter `#1a1917`-Scrollbar-Track und umrandetes `.glass-panel` (`border: 1px solid`) in [`website/src/index.css`](file:///c:/Users/lucas/source/repos/cookbook/website/src/index.css).
+  * Generische AI-Slop-Muster auf der Landing Page (`LandingPage.tsx`): verschwommene Hintergrund-Glow-Blobs (`blur-3xl`), Farbverlauf-Text im Hero, dreispaltige nummerierte Schritt-Kacheln (`1 / 2 / 3`), dreispaltige identische Icon-Cards („Warum Snagbite?“) und rein textuelle weiße `HeroRecipeCard`.
+  * Card-in-Card-Verschachtelungen auf [`InviteLandingPage.tsx`](file:///c:/Users/lucas/source/repos/cookbook/website/src/pages/InviteLandingPage.tsx) sowie farbige Pastell-Headerboxen und dekorative Lucide-Icons vor jeder Unterüberschrift in den Rechtstexten (`/privacy`, `/terms`, `/legal`, `/delete-data`).
+* **Ersetzt durch:**
+  * **Synchronisierte Typografie & Warm Culinary Paper Tokens:** Lokale WOFF2-Einbindung von `Fraunces` (`--font-heading`) und `Outfit` (`--font-sans`), warme Papier-Leinwand `#faf8f5` (`--color-gray-50`) und rahmenlose Warm-Linen-Flächen (`bg-black/[0.03]`).
+  * **Modulare Editorial Landing Page (`website/src/pages/LandingPage/`):** Authentisches App-Recipe-Showcase (`HeroRecipeShowcase.tsx`) mit echtem Food-Cover, `480 kcal • A` Health-Score-Badge und tabellarischer Zutatenliste; offener 3-Stationen-Ablauf (`LandingEditorialFlow.tsx`); asymmetrisches kulinarisches Bento-Grid (`LandingBentoShowcase.tsx`) und kartenloses FAQ (`LandingFaqSection.tsx`).
+  * **Ruhiges Editorial-Dokumenten-Layout:** Offene Seitenköpfe mit `Fraunces`-Serifen und feinen Haarlinien (`border-black/[0.06]`) für Einladungs- und Rechtsseiten.
+* **Betroffene Dateien:** `website/public/fonts/fraunces-*.woff2`, `website/src/index.css`, `website/index.html`, `website/src/App.tsx`, `website/src/App.css` (gelöscht), `website/src/assets/*` (gelöscht), `website/src/pages/LandingPage/*`, `website/src/pages/InviteLandingPage.tsx`, `website/src/pages/LegalPage.tsx`, `website/src/pages/DataDeletionPage.tsx`, `website/src/pages/PrivacyPolicyPage.tsx`, `website/src/pages/PrivacyPolicy/*`, `website/src/pages/TermsPage.tsx`, `website/src/pages/Terms/*`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-24: Vollständige Entfernung von `youtube-dl-exec` / `yt-dlp` und Python aus Backend und Docker-Build
 
 * **Ersetzter Code / Veraltete Logik:**
