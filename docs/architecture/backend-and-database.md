@@ -1,4 +1,4 @@
-# ⚙️ Backend & Datenbank (Node.js & Railway PostgreSQL)
+﻿# ⚙️ Backend & Datenbank (Node.js & Railway PostgreSQL)
 
 ## 1. Processing- & Database-Layer
 
@@ -47,6 +47,25 @@ Exponiert administrative API-Routen unter `/api/admin/*`, die über die Middlewa
 ### Health-Check (`/health`)
 Erweiterter Endpunkt prüft PostgreSQL-Datenbankverbindung via `checkDbHealth()`. Antwortet `200 OK` bei gesunder DB, `503 Service Unavailable` bei Problemen. Liefert `uptime`, `nodeEnv` und `dbConnected`-Status.
 * **In-Memory Caching (30s TTL):** Das Abfrageergebnis wird für 30 Sekunden im Speicher gecacht (`DB_HEALTH_CACHE_TTL_MS`), damit externe Uptime-Monitore und Healthchecks die Datenbank nicht im Sekundentakt mit Polling-Abfragen belasten.
+
+### Operator-Alerts (ntfy) für Business-Events (ackend/src/alerts/)
+Für zeitnahes Monitoring betrieblicher Ereignisse existiert ein modulares Alert-System auf Basis von 
+tfy:
+* **Architektur:**
+  * **Fire-and-Forget Dispatcher (dispatcher.ts):** Blockiert weder Requests noch Worker-Jobs, wirft niemals unbehandelte Fehler und bricht nach 5 Sekunden via AbortSignal.timeout ab.
+  * **In-Memory Throttle (	hrottle.ts):** Schützt vor Notification-Fluten (z. B. max. 5 job.failed-Alerts pro Stunde; nachfolgende werden unterdrückt und in der nächsten Nachricht aggregiert).
+  * **DSGVO & Datenminimierung (privacy.ts):** E-Mails werden maskiert (l***@domain.com). Über ALERTS_INCLUDE_PII=false (Standard) werden persönliche Daten aus Benachrichtigungen herausgefiltert.
+  * **Umgebungs-Präfix:** Außerhalb von Production (NODE_ENV !== 'production' oder Railway Dev Environment) wird automatisch ein [dev]-Präfix vor den Titel gesetzt.
+* **Unterstützte Events:**
+  1. user.signed_up: Neuer Benutzer registriert (E-Mail/Passwort, Google OAuth, Google One-Tap via etterAuth.ts Database Hook).
+  2. subscription.changed: Upgrade/Downgrade (via illingService.ts / RevenueCat / Fallback).
+  3. eedback.created: Neuer Bug-Report oder Feature-Wunsch (POST /feedback).
+  4. user.deleted: Account-Löschung (DELETE /users/me).
+  5. job.failed: Fehlgeschlagene Extraktionen im Worker (queue.ts).
+* **Erweiterbarkeit (Neues Event hinzufügen):**
+  1. Payload-Typ in AlertEventMap (ackend/src/alerts/types.ts) deklarieren.
+  2. Formatter in ackend/src/alerts/formatters.ts ergänzen (der TypeScript-Compiler erzwingt die Vollständigkeit).
+  3. emitAlert({ type: '...', payload: { ... } }) an der gewünschten Stelle aufrufen.
 
 ### Statische Assets, Hybrid S3-Cache & On-Demand Zutat-Icons (`/api/ingredient-icons/*` & `/api/category-icons/*`)
 * **Icons-Katalog & Hybrid Storage (`ingredientIconStorage.ts`):** Das Backend nutzt eine zweistufige Speicherarchitektur für Zutat-Icons (`.webp`):

@@ -16,6 +16,12 @@
 *Keine offenen DB-Aufgaben.*
 
 ### 🔐 2. Umgebungsvariablen & Secrets (Railway & Frontend)
+- [ ] **Operator Alerts (ntfy) auf Railway konfigurieren (optional, Master-Switch standardmäßig aus):**
+  - ALERTS_ENABLED: auf 	rue setzen, um Benachrichtigungen zu aktivieren.
+  - NTFY_ALERTS_TOPIC: ein eigenes, geheimes Topic für Admin-Alerts eintragen (z. B. snagbite-admin-alerts-<random-uuid>).
+  - NTFY_TOKEN: optionales Access-Token eintragen, falls ein reserviertes ntfy-Topic genutzt wird.
+  - ALERTS_INCLUDE_PII: optional auf 	rue, falls maskierte E-Mails und Feedback-Auszüge mitgeschickt werden sollen (standardmäßig alse zur DSGVO-Datenminimierung).
+  - Commits: d7a7c58b, ee8cea2f, 7df42e75, a174048, 5323b67e.
 - [ ] **Tigris S3 Endpoint & Credentials auf Railway prüfen:**
   - `S3_ENDPOINT` muss auf `https://t3.storage.dev` zeigen (nicht `storageapi.dev`).
   - Im Railway Dashboard prüfen, ob `S3_ACCESS_KEY_ID` und `S3_SECRET_ACCESS_KEY` im Backend-Service mit den aktiven Keys des Tigris-Storage-Plugins übereinstimmen. Alternativ können sie entfernt werden, damit das Backend automatisch auf die nativen Plugin-Variablen `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` und `BUCKET_NAME` zurückgreift.
