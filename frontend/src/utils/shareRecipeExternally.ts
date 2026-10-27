@@ -6,6 +6,7 @@ import {
   groupInstructionsByComponent,
 } from './recipeComponents';
 import { prepareShareableImage } from './shareImageHelper';
+import { getInviteUrl, getInviteBaseUrl } from './invite';
 import type { Recipe, Ingredient } from '../types';
 
 export interface BuildShareTextOptions {
@@ -93,12 +94,7 @@ export function buildRecipeShareText({
   }
 
   // 7. Snagbite App Promo & Personal Invite Link
-  const websiteBase = import.meta.env.VITE_WEBSITE_URL
-    ? String(import.meta.env.VITE_WEBSITE_URL).replace(/\/+$/, '')
-    : 'https://snagbite.app';
-  const inviteUrl = friendCode
-    ? `${websiteBase}/invite/${friendCode}`
-    : 'https://snagbite.app';
+  const inviteUrl = friendCode ? getInviteUrl(friendCode) : getInviteBaseUrl();
   parts.push(
     `✨ ${t('app.social.share.promoTagline') || 'Automatisch strukturiert mit Snagbite – der KI-Rezept-App für Instagram & TikTok Reels'}:\n👉 ${inviteUrl}`
   );
