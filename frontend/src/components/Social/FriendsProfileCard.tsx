@@ -5,6 +5,7 @@ import { useI18n } from '../../context/I18nContext';
 import { useToast } from '../../context/ToastContext';
 import { useSocial, SocialError } from '../../context/SocialContext';
 import Avatar from './Avatar';
+import { shareInviteCode } from '../../utils/invite';
 import FriendAddInput from './FriendAddInput';
 
 interface FriendsProfileCardProps {
@@ -22,14 +23,6 @@ export default function FriendsProfileCard({ pendingInviteCode, onInviteConsumed
   const [nameDraft, setNameDraft] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const inviteBaseUrl = window.location.origin.includes('localhost')
-    ? 'https://snagbite.app'
-    : window.location.origin;
-
-  const inviteLink = profile ? `${inviteBaseUrl}/invite/${profile.friendCode}` : '';
-  const inviteMessage = profile ? t('app.social.friends.inviteText', { code: profile.friendCode }) : '';
-  const fullInviteText = profile ? `${inviteMessage}\n${inviteLink}` : '';
-
   const handleCopyCode = async () => {
     if (!profile) return;
     try {
@@ -45,39 +38,16 @@ export default function FriendsProfileCard({ pendingInviteCode, onInviteConsumed
 
   const handleShare = async () => {
     if (!profile) return;
-    try {
-      const { Share } = await import('@capacitor/share');
-      const canShare = await Share.canShare();
-      if (canShare.value) {
-        await Share.share({
-          title: 'Snagbite',
-          text: fullInviteText,
-          dialogTitle: t('app.social.friends.share'),
-        });
-        return;
-      }
-    } catch {
-      /* ignore */
-    }
-
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: 'Snagbite', text: fullInviteText });
-        return;
-      }
-    } catch {
-      /* ignore */
-    }
-
-    try {
-      const { Clipboard } = await import('@capacitor/clipboard');
-      await Clipboard.write({ string: fullInviteText });
-      setCopied(true);
-      toast.success(t('toast.inviteCodeCopied'));
-      window.setTimeout(() => setCopied(false), 1500);
-    } catch {
-      /* ignore */
-    }
+    await shareInviteCode({
+      friendCode: profile.friendCode,
+      inviteText: t('app.social.friends.inviteText', { code: profile.friendCode }),
+      dialogTitle: t('app.social.friends.share'),
+      onCopied: () => {
+        setCopied(true);
+        toast.success(t('toast.inviteCodeCopied'));
+        window.setTimeout(() => setCopied(false), 1500);
+      },
+    });
   };
 
   const startEdit = () => {
@@ -153,27 +123,27 @@ export default function FriendsProfileCard({ pendingInviteCode, onInviteConsumed
           {t('app.social.friends.yourCode')}
         </h2>
         <div className="flex items-center gap-2">
-        <Button
-          onPress={handleCopyCode}
-          className="flex flex-1 items-center justify-between rounded-2xl border-2 border-dashed border-emerald-500/40 bg-emerald-500/5 px-4 py-3 h-auto min-h-[52px] text-left transition-all active:scale-[0.98]"
-        >
-          <span className="font-mono text-lg font-extrabold tracking-[0.3em] text-emerald-700 dark:text-emerald-300">
-            {profile?.friendCode ?? '••••••'}
-          </span>
-          {copied ? (
-            <Check className="h-5 w-5 text-emerald-500 shrink-0" />
-          ) : (
-            <Copy className="h-5 w-5 text-emerald-500 shrink-0" />
-          )}
-        </Button>
-        <Button
-          onPress={handleShare}
-          isIconOnly
-          aria-label={t('app.social.friends.share')}
-          className="flex h-13 w-13 items-center justify-center rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none active:scale-95 transition-all shrink-0"
-        >
-          <Share2 className="h-5 w-5" />
-        </Button>
+          <Button
+            onPress={handleCopyCode}
+            className="flex flex-1 items-center justify-between rounded-2xl border-2 border-dashed border-emerald-500/40 bg-emerald-500/5 px-4 py-3 h-auto min-h-[52px] text-left transition-all active:scale-[0.98]"
+          >
+            <span className="font-mono text-lg font-extrabold tracking-[0.3em] text-emerald-700 dark:text-emerald-300">
+              {profile?.friendCode ?? '••••••'}
+            </span>
+            {copied ? (
+              <Check className="h-5 w-5 text-emerald-500 shrink-0" />
+            ) : (
+              <Copy className="h-5 w-5 text-emerald-500 shrink-0" />
+            )}
+          </Button>
+          <Button
+            onPress={handleShare}
+            isIconOnly
+            aria-label={t('app.social.friends.share')}
+            className="flex h-13 w-13 items-center justify-center rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_2px_6px_rgba(0,0,0,0.03)] border-none active:scale-95 transition-all shrink-0"
+          >
+            <Share2 className="h-5 w-5" />
+          </Button>
         </div>
       </div>
 

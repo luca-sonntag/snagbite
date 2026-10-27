@@ -7,6 +7,7 @@ import { useToast } from '../../context/ToastContext';
 import { useModalOverlay } from '../../context/OverlayStackContext';
 import { hapticLight, hapticNotification, hapticSelection } from '../../utils/haptics';
 import { shareRecipeExternally } from '../../utils/shareRecipeExternally';
+import { shareInviteCode } from '../../utils/invite';
 import Avatar from './Avatar';
 import type { Recipe } from '../../types';
 
@@ -68,26 +69,12 @@ export default function ShareWithFriendsModal({
 
   const handleShareCode = async () => {
     if (!profile) return;
-    hapticLight();
-    const websiteBase = import.meta.env.VITE_WEBSITE_URL
-      ? String(import.meta.env.VITE_WEBSITE_URL).replace(/\/+$/, '')
-      : 'https://snagbite.app';
-    const url = `${websiteBase}/invite/${profile.friendCode}`;
-    const text = t('app.social.friends.inviteText', { code: profile.friendCode }) + '\n' + url;
-    try {
-      const { Share } = await import('@capacitor/share');
-      const can = await Share.canShare();
-      if (can.value) {
-        await Share.share({ title: 'Snagbite', text });
-        return;
-      }
-    } catch {
-      /* ignore */
-    }
-    if (navigator.share) {
-      try { await navigator.share({ title: 'Snagbite', text }); return; } catch { /* ignore */ }
-    }
-    try { await navigator.clipboard.writeText(text); toast.success(t('toast.inviteCodeCopied')); } catch { /* ignore */ }
+    await shareInviteCode({
+      friendCode: profile.friendCode,
+      inviteText: t('app.social.friends.inviteText', { code: profile.friendCode }),
+      dialogTitle: t('app.social.friends.share'),
+      onCopied: () => toast.success(t('toast.inviteCodeCopied')),
+    });
   };
 
   const handleSend = async () => {

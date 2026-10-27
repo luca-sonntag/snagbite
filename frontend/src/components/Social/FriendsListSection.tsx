@@ -2,7 +2,8 @@ import { Button } from '@heroui/react';
 import { Trash2, Users, Share2 } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useSocial } from '../../context/SocialContext';
-import { hapticLight } from '../../utils/haptics';
+import { useToast } from '../../context/ToastContext';
+import { shareInviteCode } from '../../utils/invite';
 import Avatar from './Avatar';
 
 function getCulinaryRankKey(level: number): string {
@@ -16,27 +17,17 @@ function getCulinaryRankKey(level: number): string {
 
 export default function FriendsListSection() {
   const { t } = useI18n();
+  const toast = useToast();
   const { friends, profile, removeFriend } = useSocial();
 
   const handleShare = async () => {
     if (!profile) return;
-    hapticLight();
-    const url = `${window.location.origin}/invite/${profile.friendCode}`;
-    const text = t('app.social.friends.inviteText', { code: profile.friendCode }) + '\n' + url;
-    try {
-      const { Share } = await import('@capacitor/share');
-      const can = await Share.canShare();
-      if (can.value) {
-        await Share.share({ title: 'Snagbite', text });
-        return;
-      }
-    } catch {
-      /* ignore */
-    }
-    if (navigator.share) {
-      try { await navigator.share({ title: 'Snagbite', text }); return; } catch { /* ignore */ }
-    }
-    try { await navigator.clipboard.writeText(text); } catch { /* ignore */ }
+    await shareInviteCode({
+      friendCode: profile.friendCode,
+      inviteText: t('app.social.friends.inviteText', { code: profile.friendCode }),
+      dialogTitle: t('app.social.friends.share'),
+      onCopied: () => toast.success(t('toast.inviteCodeCopied')),
+    });
   };
 
   return (
@@ -76,47 +67,47 @@ export default function FriendsListSection() {
                 key={f.friendshipId}
                 className="flex items-center gap-3.5 py-3.5 px-1 bg-transparent transition-all"
               >
-              <Avatar name={f.displayName} avatarUrl={f.avatarUrl} size={44} />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="truncate font-bold text-gray-900 dark:text-white text-base">
-                    {f.displayName}
-                  </span>
-                  <span className="shrink-0 text-gray-400 dark:text-gray-500 text-[10px]">·</span>
-                  <span className="shrink-0 text-xs font-semibold text-gray-500 dark:text-gray-400">
-                    {t('app.gamification.level', { level: f.level })}
-                  </span>
-                  <span className="shrink-0 text-gray-400 dark:text-gray-500 text-[10px]">·</span>
-                  <span className="shrink-0 text-xs font-semibold text-gray-500 dark:text-gray-400">
-                    {rankTitle}
-                  </span>
-                </div>
-                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500 dark:text-gray-400 font-medium">
-                  {f.currentStreak > 0 && (
-                    <span className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
-                      🔥 {f.currentStreak}{' '}
-                      {f.currentStreak === 1
-                        ? t('app.gamification.weekSingle')
-                        : t('app.gamification.weekPlural')}
+                <Avatar name={f.displayName} avatarUrl={f.avatarUrl} size={44} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="truncate font-bold text-gray-900 dark:text-white text-base">
+                      {f.displayName}
                     </span>
-                  )}
-                  <span>
-                    {totalCooks} {totalCooks === 1 ? 'Gericht' : 'Gerichte'}
-                  </span>
-                  {f.xp !== undefined && <span>{f.xp} XP</span>}
+                    <span className="shrink-0 text-gray-400 dark:text-gray-500 text-[10px]">·</span>
+                    <span className="shrink-0 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                      {t('app.gamification.level', { level: f.level })}
+                    </span>
+                    <span className="shrink-0 text-gray-400 dark:text-gray-500 text-[10px]">·</span>
+                    <span className="shrink-0 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                      {rankTitle}
+                    </span>
+                  </div>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500 dark:text-gray-400 font-medium">
+                    {f.currentStreak > 0 && (
+                      <span className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
+                        🔥 {f.currentStreak}{' '}
+                        {f.currentStreak === 1
+                          ? t('app.gamification.weekSingle')
+                          : t('app.gamification.weekPlural')}
+                      </span>
+                    )}
+                    <span>
+                      {totalCooks} {totalCooks === 1 ? 'Gericht' : 'Gerichte'}
+                    </span>
+                    {f.xp !== undefined && <span>{f.xp} XP</span>}
+                  </div>
                 </div>
+                <Button
+                  onPress={() => removeFriend(f.friendshipId)}
+                  isIconOnly
+                  aria-label={t('app.social.friends.remove')}
+                  className="h-9 w-9 min-w-0 p-0 text-gray-400 hover:text-rose-500 bg-transparent hover:bg-rose-500/10 rounded-xl border-none active:scale-95 transition-all shrink-0"
+                >
+                  <Trash2 className="h-4.5 w-4.5" />
+                </Button>
               </div>
-              <Button
-                onPress={() => removeFriend(f.friendshipId)}
-                isIconOnly
-                aria-label={t('app.social.friends.remove')}
-                className="h-9 w-9 min-w-0 p-0 text-gray-400 hover:text-rose-500 bg-transparent hover:bg-rose-500/10 rounded-xl border-none active:scale-95 transition-all shrink-0"
-              >
-                <Trash2 className="h-4.5 w-4.5" />
-              </Button>
-            </div>
-          );
-        })}
+            );
+          })}
         </div>
       )}
     </div>

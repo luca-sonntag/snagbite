@@ -3,10 +3,12 @@ import { Button, Spinner } from '@heroui/react';
 import { Users, Camera, UtensilsCrossed, Share2, UserPlus } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { useSocial } from '../../context/SocialContext';
+import { useToast } from '../../context/ToastContext';
 import { useSocialFeed } from '../../hooks/useSocialFeed';
 import { PublicRecipePreviewModal } from '../PublicRecipe/PublicRecipePreviewModal';
 import FeedEventCard from './FeedEventCard';
-import { hapticLight, hapticSelection } from '../../utils/haptics';
+import { hapticSelection } from '../../utils/haptics';
+import { shareInviteCode } from '../../utils/invite';
 import type { Recipe } from '../../types';
 
 interface FriendsFeedViewProps {
@@ -19,31 +21,19 @@ export default function FriendsFeedView({
   onGoToCookbook,
 }: FriendsFeedViewProps) {
   const { t } = useI18n();
+  const toast = useToast();
   const { friends, profile } = useSocial();
   const { items, loading, toggleReaction, saveRecipe } = useSocialFeed();
   const [previewRecipe, setPreviewRecipe] = useState<Recipe | null>(null);
 
   const handleShareCode = async () => {
     if (!profile) return;
-    hapticLight();
-    const url = `${window.location.origin}/invite/${profile.friendCode}`;
-    const text = t('app.social.friends.inviteText', { code: profile.friendCode }) + '\n' + url;
-    try {
-      const { Share } = await import('@capacitor/share');
-      const can = await Share.canShare();
-      if (can.value) {
-        await Share.share({ title: 'Snagbite', text });
-        return;
-      }
-    } catch {
-      /* ignore */
-    }
-    if (navigator.share) {
-      try { await navigator.share({ title: 'Snagbite', text }); return; } catch { /* ignore */ }
-    }
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch { /* ignore */ }
+    await shareInviteCode({
+      friendCode: profile.friendCode,
+      inviteText: t('app.social.friends.inviteText', { code: profile.friendCode }),
+      dialogTitle: t('app.social.friends.share'),
+      onCopied: () => toast.success(t('toast.inviteCodeCopied')),
+    });
   };
 
   const isSavedInFeed = (recipeId?: string) => {
