@@ -14,6 +14,7 @@
     "start": "cross-env NODE_ENV=production node dist/index.js",
     "preview": "node dist/index.js",
     "test": "node --import tsx --test src/**/*.test.ts",
+    "test:alert": "tsx src/scripts/sendTestAlert.ts",
     "seed:dev": "tsx src/scripts/seed/seedDev.ts",
     "seed:reviewer": "tsx src/scripts/seed/seedReviewerAccount.ts",
     "seed:reviewer:prod": "tsx src/scripts/seed/seedReviewerAccount.ts --prod",
