@@ -23,12 +23,7 @@ export async function scheduleStreakReminder(
     const { LocalNotifications } = await import('@capacitor/local-notifications');
 
     const perm = await LocalNotifications.checkPermissions();
-    let granted = perm.display === 'granted';
-    if (!granted) {
-      const req = await LocalNotifications.requestPermissions();
-      granted = req.display === 'granted';
-    }
-    if (!granted) return;
+    if (perm.display !== 'granted') return;
 
     // Schedule 6 days later at ~18:00 local time (in the next calendar week before expiry).
     const when = new Date();
