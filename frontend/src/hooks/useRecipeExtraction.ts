@@ -19,7 +19,7 @@ import {
   EXTRACTION_INTERRUPTED_NOTIFICATION_ID,
 } from '../native';
 import { handleClientFrameRequest } from '../utils/videoFrames';
-import { awaitPreAdConsentIfNeeded } from '../utils/ads';
+import { awaitPreAdConsentIfNeeded, isFullscreenAdActive } from '../utils/ads';
 
 // Tracks the currently in-flight extraction job across reloads/restarts, so a
 // still-running job can be resumed instead of the user re-submitting the same
@@ -769,6 +769,10 @@ export function useRecipeExtraction(
     if (isPremium) return;
 
     const handleBackground = () => {
+      if (isFullscreenAdActive()) {
+        console.log('[useRecipeExtraction] App state changed while full-screen ad active — keeping extraction alive');
+        return;
+      }
       const pendingId = activePollingJobIdRef.current || localStorage.getItem(PENDING_JOB_STORAGE_KEY);
       if (pendingId) {
         console.log('[useRecipeExtraction] Free user backgrounded during extraction — cancelling job:', pendingId);

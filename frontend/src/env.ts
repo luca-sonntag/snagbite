@@ -47,10 +47,18 @@ export const APP_OPEN_RESUME_MIN_BG_MS = envMs(
 );
 
 /**
+ * Minimum gap between two extraction fullscreen interstitial ads. Default 2 minutes.
+ * Can be overridden via VITE_EXTRACTION_INTERSTITIAL_MIN_INTERVAL_MS (e.g. 5000 for local testing).
+ */
+export const EXTRACTION_INTERSTITIAL_MIN_INTERVAL_MS = envMs(
+  import.meta.env.VITE_EXTRACTION_INTERSTITIAL_MIN_INTERVAL_MS as string | undefined,
+  2 * 60 * 1000,
+);
+
+/**
  * When `true`, forces Google's official public TEST ad unit IDs for all formats
  * (100% fill rate). Set via `VITE_ADMOB_USE_TEST_ADS=true` or `VITE_ADMOB_MODE=test`.
  */
 export const ADMOB_USE_TEST_ADS =
   import.meta.env.VITE_ADMOB_USE_TEST_ADS === 'true' ||
   import.meta.env.VITE_ADMOB_MODE === 'test';
-

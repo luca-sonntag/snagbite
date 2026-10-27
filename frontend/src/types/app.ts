@@ -1,5 +1,5 @@
 import type { MutableRefObject } from 'react';
-import type { Recipe, SavedRecipe, LimitStatus } from '../types';
+import type { Recipe, SavedRecipe, LimitStatus, ProgressData } from '../types';
 import type { AppTab } from '../hooks/useHashRouter';
 
 export interface AppBottomNavProps {
@@ -45,6 +45,7 @@ export interface UseAppAdsProps {
   authLoading: boolean;
   isPremium: boolean;
   isPending: boolean;
+  progress?: ProgressData | null;
   recipe: Recipe | null;
   showOnboarding: boolean;
   savedRecipesCount?: number;
