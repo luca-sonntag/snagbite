@@ -89,7 +89,7 @@ export default function HeroCoverCarousel() {
   const activeSlide = slides[activeIndex];
 
   return (
-    <div className="w-full flex flex-col items-center gap-2.5 select-none overflow-hidden py-2">
+    <div className="w-full flex flex-col items-center gap-3 select-none py-4">
       <div
         aria-hidden="true"
         className="relative w-full h-44 sm:h-56 flex items-center justify-center overflow-visible"
