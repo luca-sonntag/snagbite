@@ -36,11 +36,15 @@ export async function onUserCreated(
   user: { email?: string | null },
   ctx: HookEndpointContext | null,
 ): Promise<void> {
-  const method = resolveSignupMethod(ctx);
-  void countUsers().then((userNumber) =>
-    emitAlert({
-      type: 'user.signed_up',
-      payload: { userNumber, method, email: user.email ?? null },
-    }),
-  );
+  try {
+    const method = resolveSignupMethod(ctx);
+    void countUsers().then((userNumber) =>
+      emitAlert({
+        type: 'user.signed_up',
+        payload: { userNumber, method, email: user?.email ?? null },
+      }),
+    );
+  } catch (error: unknown) {
+    console.warn('[alerts] onUserCreated hook error:', error instanceof Error ? error.message : error);
+  }
 }

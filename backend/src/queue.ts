@@ -45,10 +45,11 @@ const MAINTENANCE_INTERVAL_MS = 3 * 60_000; // 3 minutes
 let currentPollDelayMs = MIN_POLL_INTERVAL_MS;
 
 function resolveJobSource(job: Job): JobSource {
-  if (job.kind === 'photo' || job.sourceUrl.startsWith('photo://')) {
+  const url = job.sourceUrl ?? '';
+  if (job.kind === 'photo' || url.startsWith('photo://')) {
     return 'photo';
   }
-  const detected = detectPlatform(job.sourceUrl);
+  const detected = detectPlatform(url);
   return detected ?? 'website';
 }
 
