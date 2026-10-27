@@ -147,9 +147,17 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
 Das Werbesystem ist nativ über `@capacitor-community/admob` angebunden und wird für Free-User ausgespielt. Auf Non-Native/Web fungieren alle Aufrufe als sichere No-Ops bzw. simulieren Video-Delays im Dev-Modus.
 
 ### Banner-Formate & Platzierung
-* **Extraktions-Fortschrittsbanner (`MEDIUM_RECTANGLE` / MREC 300×250):** Wird in `ExtractForm.tsx` / `ExtractionAnimation.tsx` unterhalb des Fortschritts-Skeletts eingeblendet, während Gemini das Rezept analysiert.
+* **Extraktions-Fortschrittsbanner (`MEDIUM_RECTANGLE` / MREC 300×250):** Wird in `ExtractForm.tsx` / `ExtractionAnimation.tsx` bzw. `ExtractionAdSheet.tsx` unterhalb des Fortschritts-Skeletts eingeblendet, während Gemini das Rezept analysiert (zweite Stufe des Extraktions-Ad-Flows).
 
 > **Hinweis:** Das frühere **Bottom-Dock Banner (`BANNER` 320×50)** oberhalb der Bottom-Navigation wurde entfernt (zu aufdringlich, zu viel Platzverlust). Der native Banner-Kanal wird jetzt ausschließlich vom Extraktions-MREC genutzt.
+
+### Zweistufiger Extraktions-Ad-Flow (Zero Perceived Wait Time)
+* **Konzept:** Anstatt nur ein MREC-Banner anzuzeigen, kombiniert Snagbite bei jeder 2.+ Extraktion eines Free-Users ein **Fullscreen-Interstitial beim Start** mit einem **nahtlosen Handoff zum MREC-Banner** für die Restlaufzeit:
+  1. **Sofortiger Hintergrund-Start:** Sobald der Nutzer „Extrahieren" tippt, startet der Extraktions-Worker im Backend sofort und ohne Verzögerung.
+  2. **Stufe 1 (Fullscreen-Interstitial):** Über `maybeShowExtractionInterstitialAd()` öffnet sich sofort ein vorgeladenes Vollbild-Ad. Da der Nutzer ohnehin auf die Analyse wartet, verliert er durch die 5 Sekunden bis zum `✕`-Button **0 Sekunden gefühlte Lebenszeit**.
+  3. **Stufe 2 (MREC-Banner-Handoff):** Sobald der Nutzer das Interstitial wegklickt (`Dismissed`), prüft `useAppAds.ts`, ob die Extraktion noch aktiv ist und noch nicht in der Finalisierung (`stage === 'finalizing'` / $\ge 95\,\%$) steht. Falls ja, blendet sich für die restlichen 10–20 Sekunden das `ExtractionAdSheet` (MREC-Banner) ein. Ist die Extraktion bereits fertig, öffnet sich das Rezept sofort ohne störendes 1-Sekunden-Banner-Aufblitzen.
+* **Anti-Spam Cooldown (`EXTRACTION_INTERSTITIAL_MIN_INTERVAL_MS = 2 min`):** Verhindert, dass bei schnellen Folge-Extraktionen (z. B. fehlerhafter Link oder Abarbeitung der Queue) im Sekundentakt Vollbild-Ads erscheinen. Während des 2-Minuten-Cooldowns fällt die Extraktion direkt auf Stufe 2 (MREC-Banner) zurück.
+* **Native Android `AdActivity` Focus Protection (`isFullscreenAdActive()`):** Wenn AdMob auf Android ein Vollbild-Ad anzeigt, übernimmt die native `AdActivity` den Fokus, wodurch die Capacitor WebView kurzzeitig `visibilityState === 'hidden'` und `appStateChange: false` meldet. Über `isFullscreenAdActive()` (inkl. 1.500 ms Nachlauf-Puffer für den Activity-Resume) wird in `useRecipeExtraction.ts` sichergestellt, dass laufende Free-Extraktionen im Hintergrund ungestört weiterlaufen und **nicht** versehentlich als unerlaubtes App-Backgrounding abgebrochen werden.
 
 ### App-Open Ad (Full-Screen Interstitial beim Start)
 * **Format:** Da `@capacitor-community/admob` v8 kein dediziertes App-Open-Format hat, wird der „Fullscreen-Banner nach dem Starten" als **Interstitial** (`prepareInterstitial` / `showInterstitial`) umgesetzt (`maybeShowAppOpenAd()` in `ads.ts`).

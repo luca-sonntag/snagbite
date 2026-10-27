@@ -1,17 +1,18 @@
 # 📊 Wirtschaftlichkeits- & Monetarisierungs-Analyse (Unit Economics & P&L)
 
-Dieses Dokument bietet eine vollständige betriebswirtschaftliche Analyse des Projekts **Instagram Reel Rezept-Extraktor**. Es schlüsselt sämtliche variablen KI- und Infrastrukturkosten auf, stellt ihnen die Einnahmen aus Google AdMob (Werbung) und RevenueCat (Premium-Abonnements: **4,99 € / Monat** bzw. **29,99 € / Jahr**) gegenüber und simuliert die Profitabilität bei verschiedenen Nutzerzahlen und Nutzungsgraden.
+Dieses Dokument bietet eine vollständige betriebswirtschaftliche Analyse des Projekts **Instagram Reel Rezept-Extraktor**. Es schlüsselt sämtliche variablen KI- und Infrastrukturkosten auf, stellt ihnen die Einnahmen aus Google AdMob (Werbung) und RevenueCat (Premium-Abonnements: **3,99 € / Monat** bzw. **34,99 € / Jahr**) gegenüber und simuliert die Profitabilität bei verschiedenen Nutzerzahlen und Nutzungsgraden.
 
 ---
 
 ## 1. Executive Summary & Kernaussagen
 
-* **Attraktives Pricing (4,99 € monatlich / 29,99 € jährlich):**
-  * Das Jahresabo für **29,99 €** bricht auf rechnerisch **2,50 € / Monat** herunter (**50 % Rabatt** gegenüber dem Monatsabo) – ein extrem starker psychologischer Kaufanreiz im Consumer-Food-Bereich.
-  * Das Monatsabo für **4,99 €** positioniert die App als vollwertiges Premium-Küchenwerkzeug und liefert nach Store-Cut und MwSt. **ca. 3,85 $ Netto-Erlös pro Monat** pro Abonnent.
+* **Attraktives Pricing (3,99 € monatlich / 34,99 € jährlich):**
+  * Das Jahresabo für **34,99 €** bricht auf rechnerisch **2,92 € / Monat** herunter (**27 % Rabatt** gegenüber dem Monatsabo) – ein extrem starker Kaufanreiz im Consumer-Food-Bereich.
+  * Das Monatsabo für **3,99 €** positioniert die App als vollwertiges Premium-Küchenwerkzeug und liefert nach Store-Cut und MwSt. **ca. 3,06 $ (2,83 €) Netto-Erlös pro Monat** pro Abonnent.
 * **Extrem hohe Rohertragsmarge:** Eine vollständige Rezept-Extraktion (multimodaler Gemini-3.1-Flash-Lite-Call + FLUX.1 [schnell] HD-Coverbild + Zutatennormalisierung) kostet **ca. 0,0078 $ (0,78 Cent)**. Mit Gemini 2.5 Flash-Lite sinkt dies sogar auf **0,0049 $ (0,49 Cent)**.
-* **Der „Jahresabo-Cashflow-Booster“:** Ein Kunde, der das Jahresabo für 29,99 € abschließt, spült sofort **ca. 23,14 $ Netto-Cash** in die Kasse. Seine variablen KI-Kosten über ein ganzes Jahr intensiver Nutzung (25 Rezepte/Monat = 300 Rezepte/Jahr) betragen lediglich **ca. 2,52 $ / Jahr**. **Ein einziger Jahresabonnent finanziert seine eigenen KI-Inferenzkosten für über 9 Jahre im Voraus!**
-* **Der „Rewarded-Ad-Arbitrage“-Effekt:** Wenn ein Free-Nutzer sein tägliches Limit (3 Extraktionen) erreicht hat und ein Rewarded Video Ad ansieht, generiert dieser View in DACH/Tier-1 durchschnittlich **0,018 $ bis 0,025 $**. Die durch den Bonus-Credit verursachte Extraktion kostet jedoch nur **0,0078 $**. **Jede werbefinanzierte Extraktion ist ab Tag 1 netto profitabel (+0,010 $ bis +0,017 $ Reingewinn pro Ad-Watch).**
+* **Der „Jahresabo-Cashflow-Booster“:** Ein Kunde, der das Jahresabo für 34,99 € abschließt, spült sofort **ca. 26,77 $ (24,79 €) Netto-Cash** in die Kasse. Seine variablen KI-Kosten über ein ganzes Jahr intensiver Nutzung (25 Rezepte/Monat = 300 Rezepte/Jahr) betragen lediglich **ca. 2,52 $ / Jahr**. **Ein einziger Jahresabonnent finanziert seine eigenen KI-Inferenzkosten für über 10 Jahre im Voraus!**
+* **Zweistufiger Extraktions-Ad-Flow (Zero Perceived Wait Time):** Jede Free-Extraktion startet sofort im Hintergrund, während ein Fullscreen-Interstitial (Ø 0,0080 $) öffnet und nach dem Schließen ein MREC-Banner (Ø 0,0015 $) die restliche Ladezeit überbrückt. Zusammen generieren sie **~ 0,0095 $** pro Extraktion – **wodurch jede einzelne Gratis-Extraktion ihre eigenen KI-Kosten (0,0078 $ bzw. 0,0049 $) vollkommen selbst finanziert und sofort profitabel ist!**
+* **Der „Rewarded-Ad-Arbitrage“-Effekt:** Wenn ein Free-Nutzer sein Limit erreicht hat und ein Rewarded Video Ad ansieht, generiert dieser View in DACH/Tier-1 durchschnittlich **0,018 $ bis 0,025 $**. Die durch den Bonus-Credit verursachte Extraktion kostet jedoch nur **0,0078 $**. **Jede werbefinanzierte Extraktion ist ab Tag 1 netto profitabel (+0,010 $ bis +0,017 $ Reingewinn pro Ad-Watch).**
 * **Niedrige Fixkosten:** Dank Railway (PostgreSQL & Tigris S3 Storage) und Google Cloud liegen die monatlichen Fixkosten in der Startphase bei unter 10–35 $ / Monat. Der Break-Even-Punkt wird bereits bei **unter 12 zahlenden Abonnenten** erreicht.
 
 ---
@@ -89,26 +90,27 @@ In der DACH-Region (Deutschland, Österreich, Schweiz) sowie Tier-1-Ländern (US
 | Werbeformat | Platzierung in der App | Typischer eCPM (Tier 1) | Erlös pro 1.000 Impressions | Erlös pro Einzel-Impression |
 | :--- | :--- | :--- | :--- | :--- |
 | **Rewarded Video** | Freiwilliger Video-Watch für +1 Extraktions-Credit | **18,00 $ – 25,00 $** | 18,00 $ – 25,00 $ | **~ 0,020 $ (2,0 Cent)** |
-| **App-Open / Interstitial** | Beim App-Start (mit 4h Cooldown via `ads.ts`) | **6,00 $ – 10,00 $** | 6,00 $ – 10,00 $ | **~ 0,008 $ (0,8 Cent)** |
+| **Fullscreen Interstitial** | Start jeder Extraktion (`maybeShowExtractionInterstitialAd`) & App-Start | **6,00 $ – 10,00 $** | 6,00 $ – 10,00 $ | **~ 0,008 $ (0,8 Cent)** |
 | **MREC Banner (300×250)** | Während der Extraktion (`ExtractionAdCard`) & Katalog | **1,00 $ – 2,00 $** | 1,00 $ – 2,00 $ | **~ 0,0015 $ (0,15 Cent)** |
+| **Extraktions-Flow Gesamt** | **Fullscreen-Interstitial + MREC-Banner-Handoff** | – | – | **~ 0,0095 $ (0,95 Cent)** |
 
 ---
 
-### B. In-App-Abonnements via RevenueCat (4,99 € Monat / 29,99 € Jahr)
+### B. In-App-Abonnements via RevenueCat (3,99 € Monat / 34,99 € Jahr)
 
 *Umrechnungskurs: 1,00 € ≈ 1,08 $ | Abzug: 19 % MwSt. (DACH) | Store-Gebühr: 15 % (Google Play & Apple Small Business Program)*
 
 | Abonnement | Brutto-Endpreis (User) | Netto vor Store-Cut | Netto-Auszahlung an uns (nach 15% Store-Cut) | Monatlich heruntergerechnet |
 | :--- | :--- | :--- | :--- | :--- |
-| **Monatsabo** | **4,99 € / Monat** *(~ 5,39 $)* | 4,19 € *(~ 4,53 $)* | **3,56 € (~ 3,85 $)** | **3,85 $ / Monat** |
-| **Jahresabo** | **29,99 € / Jahr** *(~ 32,39 $)* | 25,20 € *(~ 27,22 $)* | **21,42 € (~ 23,14 $)** | **1,93 $ / Monat** *(entspricht 2,50 €/M. für User)* |
+| **Monatsabo** | **3,99 € / Monat** *(~ 4,31 $)* | 3,33 € *(~ 3,60 $)* | **2,83 € (~ 3,06 $)** | **3,06 $ (2,83 €) / Monat** |
+| **Jahresabo** | **34,99 € / Jahr** *(~ 37,79 $)* | 29,16 € *(~ 31,49 $)* | **24,79 € (~ 26,77 $)** | **2,23 $ (2,07 €) / Monat** *(entspricht 2,92 €/M. für User)* |
 
 #### Typischer Abo-Mix (Split):
-* **65 % der Abonnenten wählen das Jahresabo (29,99 €):** Aufgrund der attraktiven Preisersparnis von 50 % gegenüber monatlicher Zahlung.
-* **35 % der Abonnenten wählen das Monatsabo (4,99 €):** Nutzer, die maximale monatliche Flexibilität bevorzugen.
+* **65 % der Abonnenten wählen das Jahresabo (34,99 €):** Aufgrund der Preisersparnis von 27 % gegenüber monatlicher Zahlung.
+* **35 % der Abonnenten wählen das Monatsabo (3,99 €):** Nutzer, die maximale monatliche Flexibilität bevorzugen.
 * **$\rightarrow$ Gewichteter Netto-Erlös pro zahlendem Abonnenten:**  
-  $$0{,}35 \times 3{,}85\,\$ + 0{,}65 \times 1{,}93\,\$ = \mathbf{2{,}60\,\$ \text{ Netto pro Monat}}$$  
-  *(Zusätzlich fließen pro Jahresabonnent sofort 23,14 $ Cash-Upfront in voller Höhe zu!)*
+  $$0{,}35 \times 3{,}06\,\$ + 0{,}65 \times 2{,}23\,\$ = \mathbf{2{,}52\,\$ \text{ Netto pro Monat}}$$  
+  *(Zusätzlich fließen pro Jahresabonnent sofort 26,77 $ (24,79 €) Cash-Upfront in voller Höhe zu!)*
 
 ---
 
