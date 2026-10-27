@@ -5,10 +5,12 @@ import { useAuth } from '../context/AuthContext';
 import { useModalOverlay } from '../context/OverlayStackContext';
 import { enablePushNotifications } from '../push';
 import { isNative } from '../native';
+import { hapticLight, hapticMedium, hapticNotification } from '../utils/haptics';
 
 const PROMPT_DISMISSED_AT_KEY = 'snagbite_notification_prompt_dismissed_at';
 const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
 const ALL_CATEGORY_IDS = ['seasonal', 'reminders', 'timing', 'taste', 'motivation'];
+export const MIN_SAVED_RECIPES_FOR_PROMPT = 2;
 
 interface NotificationPromptProps {
   savedCount: number;
@@ -35,12 +37,13 @@ export default function NotificationPrompt({ savedCount, forceShow, onForceClose
   const shouldShow =
     forceShow ??
     (!!user &&
-      savedCount >= 1 &&
+      savedCount >= MIN_SAVED_RECIPES_FOR_PROMPT &&
       !isEnabled &&
       !isDismissedInMeta &&
       !dismissedLocally);
 
   const handleDismiss = () => {
+    hapticLight();
     if (forceShow) {
       onForceClose?.();
       return;
@@ -68,6 +71,7 @@ export default function NotificationPrompt({ savedCount, forceShow, onForceClose
 
   const handleEnable = async () => {
     if (busy) return;
+    hapticMedium();
     if (forceShow && !user) {
       onForceClose?.();
       return;
@@ -96,6 +100,7 @@ export default function NotificationPrompt({ savedCount, forceShow, onForceClose
       });
       localStorage.removeItem(PROMPT_DISMISSED_AT_KEY);
       setDismissedLocally(true);
+      hapticNotification('success');
       if (forceShow) onForceClose?.();
     } catch (err) {
       console.warn('Failed to enable notifications from prompt:', err);
@@ -111,7 +116,7 @@ export default function NotificationPrompt({ savedCount, forceShow, onForceClose
         <button
           type="button"
           onClick={handleDismiss}
-          className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer"
+          className="absolute top-2.5 right-2.5 w-11 h-11 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer"
           aria-label={t('notification.prompt.dismiss')}
         >
           <X className="w-4 h-4" />
