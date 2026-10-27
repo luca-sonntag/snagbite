@@ -4,6 +4,7 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { bearer, oneTap } from 'better-auth/plugins';
 import { db } from '../db/drizzle.js';
 import * as schema from '../db/schema/index.js';
+import { onUserCreated } from './authEventHooks.js';
 
 const GOOGLE_CLIENT_ID =
   process.env.GOOGLE_WEB_CLIENT_ID ||
@@ -107,6 +108,14 @@ export const auth = betterAuth({
       customExtractionLimit: { type: 'number', required: false, input: false },
       notificationsEnabled: { type: 'boolean', defaultValue: false, input: true },
       metadata: { type: 'json', required: false, defaultValue: {}, input: false },
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        // Operator alert (ntfy) on every new account — email, Google OAuth and One-Tap.
+        after: onUserCreated,
+      },
     },
   },
   plugins: [

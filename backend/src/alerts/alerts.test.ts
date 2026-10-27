@@ -8,6 +8,7 @@ import assert from 'node:assert/strict';
 import { formatAlert } from './formatters.js';
 import { excerpt, maskEmail } from './privacy.js';
 import { createThrottle } from './throttle.js';
+import { resolveSignupMethod } from '../auth/authEventHooks.js';
 
 const noPii = { includePii: false };
 const withPii = { includePii: true, adminUrl: 'https://snagbite.app/#/admin' };
@@ -62,4 +63,12 @@ test('throttle caps per window and reports suppressed count', () => {
   clock = 1500;
   assert.deepEqual(throttle.check('job.failed'), { allowed: true, suppressedSinceLast: 2 });
   assert.deepEqual(throttle.check('user.signed_up'), { allowed: true, suppressedSinceLast: 0 });
+});
+
+test('resolveSignupMethod correctly maps Better-Auth paths', () => {
+  assert.equal(resolveSignupMethod({ path: '/sign-up/email' }), 'email');
+  assert.equal(resolveSignupMethod({ path: '/one-tap/callback' }), 'google-one-tap');
+  assert.equal(resolveSignupMethod({ path: '/callback/google', params: { id: 'google' } }), 'google');
+  assert.equal(resolveSignupMethod({ path: '/callback/apple', params: { id: 'apple' } }), 'oauth');
+  assert.equal(resolveSignupMethod(null), 'unknown');
 });
