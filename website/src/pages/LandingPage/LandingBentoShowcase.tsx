@@ -19,12 +19,12 @@ const SHOPPING_PREVIEW_GROUPS = [
 
 export default function LandingBentoShowcase() {
   return (
-    <section className="flex flex-col gap-8">
+    <section className="flex flex-col gap-6 sm:gap-8">
       <div className="max-w-xl">
-        <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white leading-tight mb-2">
+        <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white leading-tight mb-1.5 sm:mb-2">
           Gebaut für den echten Alltag in der Küche
         </h2>
-        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed m-0">
+        <p className="text-xs sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed m-0">
           Keine überladenen Kacheln, sondern ruhige Werkzeuge, die genau dann helfen, wenn du einkaufst, planst oder am Herd stehst.
         </p>
       </div>
@@ -32,30 +32,30 @@ export default function LandingBentoShowcase() {
       {/* Asymmetric Magazine Bento Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch">
         {/* Left Feature (7 cols): Supermarket Shopping List & Portion Scaling */}
-        <div className="lg:col-span-7 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] p-6 sm:p-8 flex flex-col justify-between gap-6 border-none">
-          <div className="flex flex-col gap-2">
-            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+        <div className="lg:col-span-7 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] p-5 sm:p-8 flex flex-col justify-between gap-5 sm:gap-6 border-none">
+          <div className="flex flex-col gap-1.5 sm:gap-2">
+            <span className="text-[11px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400">
               Einkaufsliste &amp; Wochenplaner
             </span>
             <h3 className="font-heading text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight m-0">
               Automatisch nach Supermarkt-Abteilungen sortiert
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed m-0 max-w-lg">
+            <p className="text-[13.5px] sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed m-0 max-w-lg">
               Übertrage einzelne Rezepte oder deinen gesamten Wochenplan auf einmal in den Einkaufswagen. Gleiche Zutaten über mehrere Gerichte hinweg werden sauber zusammengerechnet.
             </p>
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2.5 sm:gap-3">
             {/* Mini Week Strip */}
-            <div className="rounded-2xl bg-[#fdfbf7] dark:bg-gray-900 px-4 py-3 ring-1 ring-black/[0.04] dark:ring-white/10 flex items-center justify-between gap-2 text-xs">
-              <span className="font-semibold text-gray-500 dark:text-gray-400">
+            <div className="rounded-2xl bg-[#fdfbf7] dark:bg-gray-900 px-3.5 sm:px-4 py-2.5 sm:py-3 ring-1 ring-black/[0.04] dark:ring-white/10 flex items-center justify-between gap-2 text-xs">
+              <span className="font-semibold text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">
                 Wochenplan Mo–So
               </span>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
                 {(['Mo', 'Di', 'Mi', 'Do', 'Fr'] as const).map((day, idx) => (
                   <span
                     key={day}
-                    className={`px-2 py-0.5 rounded-md font-bold text-[11px] ${
+                    className={`px-1.5 sm:px-2 py-0.5 rounded-md font-bold text-[10.5px] sm:text-[11px] ${
                       idx < 3
                         ? 'bg-emerald-500/12 text-emerald-700 dark:text-emerald-400'
                         : 'bg-black/[0.04] dark:bg-white/[0.06] text-gray-500 dark:text-gray-400'
@@ -67,13 +67,13 @@ export default function LandingBentoShowcase() {
               </div>
             </div>
 
-            {/* Mini UI Preview: Category-grouped Shopping List on Warm Paper */}
-            <div className="rounded-2xl bg-[#fdfbf7] dark:bg-gray-900 p-4 sm:p-5 ring-1 ring-black/[0.04] dark:ring-white/10 grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {/* Mini UI Preview: 2-Column Supermarket Aisle Grid (Even on Mobile) */}
+            <div className="rounded-2xl bg-[#fdfbf7] dark:bg-gray-900 p-3.5 sm:p-5 ring-1 ring-black/[0.04] dark:ring-white/10 grid grid-cols-2 gap-3.5 sm:gap-5">
               {SHOPPING_PREVIEW_GROUPS.map((group) => (
-                <div key={group.name} className="flex flex-col gap-2">
+                <div key={group.name} className="flex flex-col gap-1.5 sm:gap-2 min-w-0">
                   <div className="flex flex-col gap-1">
-                    <span className={`w-7 h-1 rounded-full ${group.barColor}`} />
-                    <span className="text-xs font-bold text-gray-900 dark:text-white">
+                    <span className={`w-6 sm:w-7 h-1 rounded-full ${group.barColor}`} />
+                    <span className="text-[11px] sm:text-xs font-bold text-gray-900 dark:text-white truncate">
                       {group.name}
                     </span>
                   </div>
@@ -81,12 +81,12 @@ export default function LandingBentoShowcase() {
                     {group.items.map((item) => (
                       <div
                         key={item.name}
-                        className="py-1.5 flex items-baseline justify-between gap-2 text-xs"
+                        className="py-1.5 flex items-baseline justify-between gap-1.5 text-[11px] sm:text-xs"
                       >
                         <span className="font-medium text-gray-800 dark:text-gray-200 truncate">
                           {item.name}
                         </span>
-                        <span className="font-bold tabular-nums text-gray-500 dark:text-gray-400 shrink-0">
+                        <span className="font-bold tabular-nums text-gray-500 dark:text-gray-400 shrink-0 text-[10.5px] sm:text-xs">
                           {item.amount}
                         </span>
                       </div>
@@ -101,10 +101,10 @@ export default function LandingBentoShowcase() {
         {/* Right Stacked Column (5 cols) */}
         <div className="lg:col-span-5 flex flex-col gap-4 sm:gap-5">
           {/* Top Right Card: Nutrition & Healthy Score */}
-          <div className="flex-1 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] p-6 sm:p-7 flex flex-col justify-between gap-5 border-none">
+          <div className="flex-1 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] p-5 sm:p-7 flex flex-col justify-between gap-4 sm:gap-5 border-none">
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                <span className="text-[11px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400">
                   Nährwerte &amp; Healthy Score
                 </span>
                 <div className="flex items-center gap-1">
@@ -132,7 +132,7 @@ export default function LandingBentoShowcase() {
               <h3 className="font-heading text-lg sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight m-0">
                 Makros auf einen Blick verstehen
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed m-0">
+              <p className="text-[13.5px] sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed m-0">
                 Kalorien, Eiweiß, Kohlenhydrate und Fett werden pro Portion berechnet und mit der offenen Lebensmittel-Datenbank abgeglichen.
               </p>
             </div>
@@ -170,15 +170,15 @@ export default function LandingBentoShowcase() {
           </div>
 
           {/* Bottom Right Card: Recipe Copilot & Cooking Mode */}
-          <div className="flex-1 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] p-6 sm:p-7 flex flex-col justify-between gap-4 border-none">
+          <div className="flex-1 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] p-5 sm:p-7 flex flex-col justify-between gap-4 border-none">
             <div className="flex flex-col gap-1.5">
-              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+              <span className="text-[11px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400">
                 Rezept-Copilot &amp; Kochmodus
               </span>
               <h3 className="font-heading text-lg sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight m-0">
                 Rezepte flexibel an deinen Vorrat anpassen
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed m-0">
+              <p className="text-[13.5px] sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed m-0">
                 Kein Parmesan im Haus oder lieber vegetarisch? Frag den integrierten Rezept-Copiloten nach Alternativen und übernimm die Anpassung direkt ins Rezept.
               </p>
             </div>

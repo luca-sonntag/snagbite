@@ -5,7 +5,7 @@ import LandingFaqSection from './LandingPage/LandingFaqSection';
 
 export default function LandingPage() {
   return (
-    <div className="w-full max-w-5xl mx-auto px-5 sm:px-8 py-8 sm:py-12 flex flex-col gap-16 sm:gap-24">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-4 sm:py-12 flex flex-col gap-12 sm:gap-24">
       <LandingHero />
       <LandingEditorialFlow />
       <LandingBentoShowcase />
