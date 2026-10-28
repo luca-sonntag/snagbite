@@ -121,7 +121,7 @@ export default function RecipePosterCard({
               <Star className="w-4 h-4 fill-amber-500 text-amber-500 drop-shadow-[0_2px_5px_rgba(0,0,0,0.65)]" />
             </div>
           ) : null}
-          <PartnerRecipeBadge source={job?.source} className="absolute bottom-2 left-2" />
+          <PartnerRecipeBadge source={job?.source} className="absolute bottom-2.5 left-2.5" />
         </div>
 
         {/* Meta: Title & coupled punchy info pills directly on canvas */}
