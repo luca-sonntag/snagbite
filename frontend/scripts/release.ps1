@@ -66,7 +66,7 @@ if (-not $frontendApiUrl) {
     exit 1
 }
 if ($Env -eq 'prod') {
-    foreach ($envFile in @($targetEnvPath, "$frontendDir\.env")) {
+    foreach ($envFile in @($targetEnvPath, "$frontendDir\.env.production.local", "$frontendDir\.env.local", "$frontendDir\.env")) {
         if ((Read-DotEnvValue $envFile 'VITE_TEST_LOGIN') -eq 'true') {
             Write-Error "VITE_TEST_LOGIN=true is set in $envFile - refusing to build a test-login release."
             exit 1
@@ -203,8 +203,18 @@ if ($Artifact -in @('apk', 'both')) {
 }
 
 # -- 9. Cap open-ended stale OTA bundles in DB ----------------------
-Write-Host "[5/5] Capping stale OTA bundles in DB ($Env)..." -ForegroundColor Yellow
-Cap-StaleAppBundles -NewVersionCode $newCode -Env $Env
+if ($Artifact -in @('aab', 'both')) {
+    Write-Host "[5/5] Capping stale OTA bundles in DB ($Env)..." -ForegroundColor Yellow
+    Cap-StaleAppBundles -NewVersionCode $newCode -Env $Env
+    if ($Env -eq 'prod') {
+        Cap-StaleAppBundles -NewVersionCode $newCode -Env 'dev'
+    }
+} elseif ($Env -eq 'dev') {
+    Write-Host "[5/5] Capping stale OTA bundles in DB (dev)..." -ForegroundColor Yellow
+    Cap-StaleAppBundles -NewVersionCode $newCode -Env 'dev'
+} else {
+    Write-Host "[5/5] Skipping production OTA bundle capping for APK-only build (vc$newCode not yet on Play Store)." -ForegroundColor DarkGray
+}
 
 Write-Host ""
 Write-Host "  [OK] Release artifact(s) ready!" -ForegroundColor Green
