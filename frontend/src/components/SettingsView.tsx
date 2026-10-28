@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Select, ListBox, Popover } from '@heroui/react';
-import { LogOut, Globe, Moon, Sun, Thermometer, Scale, Info, UserMinus, Sparkles, ChevronRight, HelpCircle, MessageSquare, Shield, ScrollText, Building2, ExternalLink, RefreshCw, Compass } from 'lucide-react';
+import { LogOut, Globe, Moon, Sun, Thermometer, Scale, Info, UserMinus, Sparkles, ChevronRight, HelpCircle, MessageSquare, Shield, ScrollText, Building2, ExternalLink, RefreshCw, Compass, Users } from 'lucide-react';
+import { HouseholdSheet } from './Household';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -54,7 +55,8 @@ const getInitials = (email?: string) => {
 
 export default function SettingsView() {
   const { t, language, setLanguage } = useI18n();
-  const { signOut, user, autoSignedIn, updateUserMetadata, deleteAccount, isAdmin } = useAuth();
+  const { signOut, user, autoSignedIn, updateUserMetadata, deleteAccount, isAdmin, household } = useAuth();
+  const [isHouseholdOpen, setIsHouseholdOpen] = useState(false);
   const dialog = useDialog();
   const toast = useToast();
   const { resetAllTours } = useSpotlightTourContext();
@@ -214,6 +216,32 @@ export default function SettingsView() {
 
       {/* Premium Upgrade Promotion (only for free members and alpha testers) */}
       <PremiumUpgradeCard onUpgradeClick={() => setIsPremiumModalOpen(true)} />
+
+      {/* Household Section */}
+      <div
+        onClick={() => {
+          hapticLight();
+          setIsHouseholdOpen(true);
+        }}
+        className="p-4 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] flex items-center justify-between gap-3 cursor-pointer active:scale-[0.99] transition-transform select-none"
+      >
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className="w-11 h-11 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+            <Users className="w-5 h-5" />
+          </div>
+          <div className="flex flex-col min-w-0 font-sans">
+            <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+              {t('household.modal.title')}
+            </span>
+            <span className="text-sm font-bold text-gray-900 dark:text-white truncate">
+              {household?.status === 'active' || household?.status === 'paused'
+                ? (household.partnerProfile?.displayName || t('household.partnerDefault'))
+                : t('household.banner.subtitle')}
+            </span>
+          </div>
+        </div>
+        <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
+      </div>
 
       {/* Preferences Section */}
       <div className="flex flex-col gap-1">
@@ -562,6 +590,13 @@ export default function SettingsView() {
 
       {/* Feedback / Bug Report */}
       <FeedbackDrawer isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
+
+      {/* Household Sheet */}
+      <HouseholdSheet
+        isOpen={isHouseholdOpen}
+        onOpenChange={setIsHouseholdOpen}
+        onOpenUpgrade={() => setIsPremiumModalOpen(true)}
+      />
     </div>
   );
 }

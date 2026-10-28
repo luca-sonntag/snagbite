@@ -20,6 +20,7 @@ import {
 } from './authNative';
 import { patchUserMetadata, deleteUserAccount } from './authAccountOps';
 import { useTrialInfo } from './useTrialInfo';
+import { useHouseholdInfo } from './useHouseholdInfo';
 import { useAdminCheck } from './useAdminCheck';
 import { AuthContext, useAuth, type AuthState } from './authContextTypes';
 
@@ -33,7 +34,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAdmin = useAdminCheck(session);
   const { hasTrialAvailable, trialDays, trialLoading, refreshTrialInfo } = useTrialInfo(session);
 
-  const isPremium = user?.tier === 'premium' || user?.tier === 'alpha' || user?.app_metadata?.tier === 'premium' || user?.app_metadata?.tier === 'alpha';
+  const { household, refreshHousehold } = useHouseholdInfo(session);
+
+  const isHouseholdPro = Boolean(household?.hasHouseholdPro && !household?.isPauseLocked);
+  const requiresExtractionAds = Boolean(household?.requiresExtractionAds);
+  const isPremium =
+    user?.tier === 'premium' ||
+    user?.tier === 'alpha' ||
+    user?.app_metadata?.tier === 'premium' ||
+    user?.app_metadata?.tier === 'alpha' ||
+    isHouseholdPro;
 
   const refreshSession = useCallback(async (): Promise<{ error?: string }> => {
     try {
@@ -44,6 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const norm = normalizeSession(token, res.data.user, res.data.session.expiresAt);
         setSession(norm);
         setUser(norm.user);
+        void refreshHousehold();
         return {};
       }
       setStoredToken(null);
@@ -76,6 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setStoredToken(norm.token);
             setSession(norm);
             setUser(norm.user);
+        void refreshHousehold();
             setLoading(false);
             return;
           }
@@ -89,6 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setStoredToken(norm.token);
             setSession(norm);
             setUser(norm.user);
+        void refreshHousehold();
           } else if (loginRes.error) {
             setAuthError(loginRes.error.message || 'Test user login failed');
           }
@@ -108,6 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setStoredToken(norm.token);
           setSession(norm);
           setUser(norm.user);
+        void refreshHousehold();
           setLoading(false);
           return;
         }
@@ -149,6 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const norm = normalizeSession(res.data.token, res.data.user);
         setSession(norm);
         setUser(norm.user);
+        void refreshHousehold();
       } else {
         await refreshSession();
       }
@@ -175,6 +190,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const norm = normalizeSession(res.data.token, res.data.user);
         setSession(norm);
         setUser(norm.user);
+        void refreshHousehold();
         localStorage.removeItem(AUTO_SIGNIN_DISABLED_KEY);
         localStorage.setItem(LEGAL_CONSENT_KEY, '1');
         setAutoSignedIn(false);
@@ -290,6 +306,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         authError,
         isPremium,
         isAdmin,
+        household,
+        isHouseholdPro,
+        requiresExtractionAds,
+        refreshHousehold,
         hasTrialAvailable,
         trialDays,
         trialLoading,

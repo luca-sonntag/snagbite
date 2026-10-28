@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { isCatalogListRoute } from '../components/SavedCatalog/catalogRoutes';
 
-export type AppTab = 'extract' | 'history' | 'meal-planner' | 'shopping-list' | 'progress' | 'settings' | 'admin' | 'invite';
+export type AppTab = 'extract' | 'history' | 'meal-planner' | 'shopping-list' | 'progress' | 'settings' | 'admin' | 'invite' | 'household-invite';
 
 export interface ParsedRoute {
   /** The active bottom-nav tab */
@@ -43,6 +43,8 @@ function parseHash(hash: string): ParsedRoute {
     case 'invite':
       // Deep link #/invite/<code> — App redirects to the progress/friends tab.
       return { tab: 'invite', subPath, query };
+    case 'household-invite':
+      return { tab: 'household-invite', subPath, query };
     case 'settings':
       return { tab: 'settings', subPath, query };
     case 'admin':

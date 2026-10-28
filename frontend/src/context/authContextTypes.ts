@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'react';
 import type { AuthUser, AuthSession } from '../auth';
+import type { HouseholdContextData } from '../components/Household/types';
 
 export interface AuthState {
   user: AuthUser | null;
@@ -9,6 +10,10 @@ export interface AuthState {
   authError: string | null;
   isPremium: boolean;
   isAdmin: boolean;
+  household: HouseholdContextData | null;
+  isHouseholdPro: boolean;
+  requiresExtractionAds: boolean;
+  refreshHousehold: () => Promise<void>;
   hasTrialAvailable: boolean;
   trialDays: number;
   trialLoading: boolean;

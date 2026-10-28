@@ -1074,6 +1074,11 @@ export const uiTranslations = {
         REMIX_CONFIRM_FAILED: 'Der Remix konnte nicht bestätigt werden. Bitte versuche es später erneut.',
         CHAT_FAILED: 'Der Chat ist fehlgeschlagen. Bitte versuche es später erneut.',
         ACCOUNT_DELETE_FAILED: 'Dein Konto konnte nicht gelöscht werden. Bitte versuche es später erneut.',
+        HOUSEHOLD_NOT_FOUND: 'Kein aktiver Haushalt gefunden.',
+        HOUSEHOLD_INVITE_INVALID: 'Dieser Einladungscode ist ungültig oder abgelaufen.',
+        ALREADY_IN_HOUSEHOLD: 'Du bist bereits mit einem Haushalt verknüpft. Bitte trenne zuerst den bestehenden Haushalt.',
+        HOUSEHOLD_COOLDOWN: 'Du kannst einem neuen Haushalt erst wieder nach Ablauf der Schutzfrist beitreten.',
+        NUDGE_RATE_LIMITED: 'Du hast deinen Partner heute bereits angestupst.',
         INTERNAL_ERROR: 'Ein interner Serverfehler ist aufgetreten. Bitte versuche es später erneut.',
       },
       premium: {
@@ -2129,6 +2134,83 @@ export const uiTranslations = {
       }
     }
   },
+    household: {
+      partnerDefault: 'Dein Partner',
+      banner: {
+        title: 'Gemeinsamer Haushalt',
+        subtitle: 'Kochbuch, Wochenplaner & Einkaufsliste zu zweit nutzen.',
+        action: 'Partner einladen',
+      },
+      modal: {
+        title: 'Gemeinsamer Haushalt',
+        subtitleActive: 'Mit Partner verbunden',
+        subtitleInvite: 'Zu zweit kochen & planen',
+      },
+      status: {
+        connected: 'Haushaltspartner verbunden',
+      },
+      trial: {
+        activeTitle: '48h Testphase aktiv',
+        activeDesc: 'Ihr nutzt alle Snagbite PRO Features gemeinsam.',
+      },
+      paused: {
+        title: 'Haushalt pausiert',
+        desc: 'Um euer gemeinsames Kochbuch und den Wochenplaner wieder zu synchronisieren, benötigt einer von euch Snagbite PRO.',
+        upgradeAction: 'Snagbite PRO freischalten',
+      },
+      nudge: {
+        button: 'Partner an PRO erinnern',
+        success: '{name} wurde benachrichtigt!',
+        cooldown: 'Du hast deinen Partner heute bereits erinnert.',
+      },
+      unlink: {
+        button: 'Haushalt trennen',
+        confirm: 'Möchtest du den gemeinsamen Haushalt mit {name} wirklich trennen? Beide behalten alle bisher gespeicherten Rezepte.',
+        success: 'Haushalt erfolgreich getrennt.',
+        error: 'Fehler beim Trennen des Haushalts.',
+      },
+      highlights: {
+        title: '1 PRO Abo für 2 Personen',
+        desc: 'Verbindet euch zu einem Haushalt: Ihr teilt euer Kochbuch, Wochenplaner und Einkaufsliste. Wenn einer PRO hat, gilt es für beide!',
+      },
+      invite: {
+        sectionTitle: 'Partner einladen',
+        share: 'Teilen',
+        shareHelp: 'Sende diesen Link oder Code an deinen Partner.',
+        createButton: 'Einladungscode erstellen',
+        createError: 'Fehler beim Erstellen des Codes.',
+        copied: 'Einladungslink kopiert!',
+        copyError: 'Konnte Link nicht kopieren.',
+      },
+      share: {
+        title: 'Snagbite Haushaltseinladung',
+        text: 'Lass uns zusammen kochen! Verbinde dich mit meinem Snagbite-Haushalt:',
+      },
+      join: {
+        sectionTitle: 'Einladungscode eingeben',
+        placeholder: '8-stelliger Code',
+        action: 'Verbinden',
+        success: 'Erfolgreich mit Haushalt verbunden!',
+        error: 'Ungültiger Code oder bereits im Haushalt.',
+      },
+      propose: {
+        action: 'Kochen vorschlagen',
+        tooltip: 'Partner fragen, ob ihr dieses Rezept kochen wollt',
+        success: '{name} hat eine Benachrichtigung erhalten!',
+        cooldown: 'Du hast deinen Partner kürzlich schon nach diesem Gericht gefragt.',
+        error: 'Vorschlag konnte nicht gesendet werden.',
+      },
+      promo: {
+        title: 'Snagbite Haushalt-Modus',
+        subtitle: '1 Abo, 2 Personen – geteiltes Kochbuch & synchronisierte Einkaufsliste.',
+        benefit1: 'Nur 1 Person zahlt für Snagbite PRO',
+        benefit2: 'Automatisch synchronisiertes Kochbuch für beide',
+        benefit3: 'Gemeinsamer Wochenplaner & Einkaufsliste',
+        benefit4: '48 Stunden unverbindliche Testphase',
+        ctaInvite: 'Partner einladen',
+        ctaUpgrade: 'PRO freischalten',
+      },
+    },
   en: {
     ads: {
       label: 'Advertisement',
@@ -2777,6 +2859,11 @@ export const uiTranslations = {
         REMIX_CONFIRM_FAILED: 'Could not confirm the remix. Please try again later.',
         CHAT_FAILED: 'The chat failed. Please try again later.',
         ACCOUNT_DELETE_FAILED: 'Could not delete your account. Please try again later.',
+        HOUSEHOLD_NOT_FOUND: 'No active household found.',
+        HOUSEHOLD_INVITE_INVALID: 'This invite code is invalid or expired.',
+        ALREADY_IN_HOUSEHOLD: 'You are already linked to a household. Please unlink first.',
+        HOUSEHOLD_COOLDOWN: 'You can only join a new household after the cooldown expires.',
+        NUDGE_RATE_LIMITED: 'You have already nudged your partner today.',
         INTERNAL_ERROR: 'An internal server error occurred. Please try again later.',
       },
       premium: {
@@ -3829,7 +3916,85 @@ export const uiTranslations = {
         apply: 'Reload now',
         later: 'Later'
       }
-    }
+    },
+
+    household: {
+      partnerDefault: 'Your partner',
+      banner: {
+        title: 'Shared Household',
+        subtitle: 'Share your cookbook, meal planner & shopping list together.',
+        action: 'Invite partner',
+      },
+      modal: {
+        title: 'Shared Household',
+        subtitleActive: 'Connected with partner',
+        subtitleInvite: 'Cook and plan together',
+      },
+      status: {
+        connected: 'Household partner connected',
+      },
+      trial: {
+        activeTitle: '48h trial active',
+        activeDesc: 'You both enjoy all Snagbite PRO features together.',
+      },
+      paused: {
+        title: 'Household paused',
+        desc: 'To continue syncing your shared cookbook and meal planner, one of you needs Snagbite PRO.',
+        upgradeAction: 'Unlock Snagbite PRO',
+      },
+      nudge: {
+        button: 'Remind partner to get PRO',
+        success: '{name} has been notified!',
+        cooldown: 'You have already nudged your partner today.',
+      },
+      unlink: {
+        button: 'Unlink household',
+        confirm: 'Do you really want to unlink from {name}? Both of you keep all saved recipes.',
+        success: 'Household unlinked successfully.',
+        error: 'Error unlinking household.',
+      },
+      highlights: {
+        title: '1 PRO subscription for 2 people',
+        desc: 'Link your accounts: share your cookbook, meal planner and shopping list. If one has PRO, both get it!',
+      },
+      invite: {
+        sectionTitle: 'Invite partner',
+        share: 'Share',
+        shareHelp: 'Send this link or code to your partner.',
+        createButton: 'Generate invite code',
+        createError: 'Failed to generate code.',
+        copied: 'Invite link copied!',
+        copyError: 'Could not copy link.',
+      },
+      share: {
+        title: 'Snagbite Household Invite',
+        text: "Let's cook together! Join my Snagbite household:",
+      },
+      join: {
+        sectionTitle: 'Enter invite code',
+        placeholder: '8-character code',
+        action: 'Join',
+        success: 'Successfully joined household!',
+        error: 'Invalid code or already linked.',
+      },
+      propose: {
+        action: 'Suggest cooking',
+        tooltip: 'Ask partner if they want to cook this recipe',
+        success: '{name} has received a notification!',
+        cooldown: 'You recently suggested this dish already.',
+        error: 'Could not send suggestion.',
+      },
+      promo: {
+        title: 'Snagbite Household Mode',
+        subtitle: '1 subscription, 2 people – shared cookbook & synchronized shopping list.',
+        benefit1: 'Only 1 person pays for Snagbite PRO',
+        benefit2: 'Automatically synced cookbook for both',
+        benefit3: 'Shared meal planner & grocery list',
+        benefit4: '48-hour free trial included',
+        ctaInvite: 'Invite partner',
+        ctaUpgrade: 'Unlock PRO',
+      },
+    },
   }
 } as const;
 

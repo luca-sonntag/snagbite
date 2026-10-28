@@ -311,3 +311,27 @@ Für schnelles Testen, Gestalten und Inspizieren selten auftretender Dialoge, Sh
   * **Notfall-Freigabe im Fehlerbanner:** Falls der Fehler `ACTIVE_JOB_EXISTS` auftritt, bietet das `ErrorBanner` einen direkten 1-Tap CTA *„Laufende Importe freigeben & Fortfahren“*. Dieser bricht hängende Server-Jobs via `POST /api/me/active-jobs/cancel` ab, synchronisiert das Limit und wiederholt die Extraktion sofort nahtlos.
   * **Automatischer Server-Job-Sync (`useExtractionJobsPoller.ts`):** Beim App-Start oder Login gleicht das Frontend aktive Jobs mit `GET /api/me/active-jobs` ab, sodass auch session-übergreifende Hintergrund-Jobs in `ActiveExtractions` visualisiert und abgebrochen werden können.
 
+---
+
+## 12. 👫 Haushalt-Modus & Partner-Features (`components/Household/`)
+
+Der Haushalt-Modus verbindet zwei Snagbite-Nutzer zu einem gemeinsamen Haushalt:
+
+* **Zentraler State-Flow (`useHouseholdInfo.ts` & `AuthContext`):**
+  * `useHouseholdInfo(session)` fragt `/api/household` ab und liefert den aktuellen Haushaltskontext.
+  * `AuthContext` berechnet daraus `isHouseholdPro = Boolean(household?.hasHouseholdPro && !household?.isPauseLocked)`.
+  * `isPremium` in `AuthContext` ist wahr, wenn entweder der eigene Tier `premium`/`alpha` ist ODER `isHouseholdPro` aktiv ist. Dadurch haben alle PRO-geschützten Bereiche (Ernährung, Kochmodus, Timer, Sammlungen, Einkaufsliste, Wochenplaner) ohne Code-Änderungen sofort vollen Zugriff.
+  * `requiresExtractionAds` trennt die Werbeausspielung sauber ab: Partner B sieht bei Extraktionen Werbebanner (`useAppAds`), während App-Open Ads deaktiviert bleiben.
+* **Visueller Partner-Avatar-Badge (`PartnerRecipeBadge.tsx`):**
+  * Ausschließlich bei Rezepten mit `job?.source === 'household'` wird unten links auf der Cover-Karte (`RecipePosterCard.tsx`) ein dezent gerahmter Avatar-Punkt (`22x22px`) des Partners eingeblendet.
+  * Eigene Rezepte bleiben 100% sauber und unmarkiert.
+* **Koch-Vorschlag / Anstupsen (`ProposeCookButton.tsx`):**
+  * Bei aktiver Haushaltsverknüpfung erscheint im Header jedes Rezepts (`RecipeHeaderActions.tsx`) ein runder 44x44px Utensils-Button *„Wollen wir das kochen?“*.
+  * Ein Fingertipp ruft `POST /api/household/propose-recipe` auf und sendet dem Partner eine Rich-Push-Notification mit Rezepttitel und Bild.
+  * Serverseitig auf 1 Vorschlag pro 2 Minuten pro Gericht gedrosselt.
+* **Haushalts-Verwaltung (`HouseholdSheet.tsx`, `HouseholdActiveCard.tsx`, `HouseholdInviteCard.tsx`):**
+  * Aufrufbar über Einstellungen (`SettingsView.tsx`), In-App Deep-Links (`#/household-invite/<code>`) und Banner.
+  * Bietet 1-Klick-Code-Generierung, natives Teilen (`navigator.share`), Code-Eingabe, Partner-Nudge und Haushalt-Trennungsdialog.
+* **Haushalt-Banner (`HouseholdInviteBanner.tsx`):**
+  * Unaufdringlicher, warmer Einladungs-Banner in Einkaufsliste (`ShoppingList/index.tsx`) und Wochenplaner, der sich bei aktiver Verknüpfung automatisch ausblendet.
+

@@ -49,6 +49,7 @@ export default function RecipeHeader({
   const topRightActions = isExtracting ? null : (
     <div className="animate-fade-in flex items-center gap-2">
       <RecipeHeaderActions
+        recipeId={recipe.id}
         isFavorite={isFavorite}
         onToggleFavorite={onToggleFavorite}
         isMenuOpen={isMenuOpen}
