@@ -73,6 +73,12 @@ export type AppErrorCode =
   | 'REQUEST_EXISTS'
   | 'FRIENDSHIP_NOT_FOUND'
   | 'PROFILE_NAME_INVALID'
+  // ── Household ─────────────────────────────────────────────────────────────
+  | 'HOUSEHOLD_NOT_FOUND'
+  | 'HOUSEHOLD_INVITE_INVALID'
+  | 'ALREADY_IN_HOUSEHOLD'
+  | 'HOUSEHOLD_COOLDOWN'
+  | 'NUDGE_RATE_LIMITED'
   | 'INTERNAL_ERROR';
 
 /** Structured, JSON-serializable values interpolated into the localized message. */
@@ -131,6 +137,11 @@ const DEFAULT_STATUS: Record<AppErrorCode, number> = {
   REQUEST_EXISTS: 409,
   FRIENDSHIP_NOT_FOUND: 404,
   PROFILE_NAME_INVALID: 400,
+  HOUSEHOLD_NOT_FOUND: 404,
+  HOUSEHOLD_INVITE_INVALID: 400,
+  ALREADY_IN_HOUSEHOLD: 409,
+  HOUSEHOLD_COOLDOWN: 429,
+  NUDGE_RATE_LIMITED: 429,
   INTERNAL_ERROR: 500,
 };
 

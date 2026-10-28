@@ -34,4 +34,5 @@ backend/src/data/*.sqlite
 backend/dist/data/*.sqlite
 backups/
 backend/backups/
+backend/data/
 

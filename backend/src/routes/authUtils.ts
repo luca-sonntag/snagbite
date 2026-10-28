@@ -8,6 +8,7 @@ import {
   getFreeMaxExtractions,
   getPremiumMaxConcurrentExtractions,
   getFreeMaxConcurrentExtractions,
+  getHouseholdContext,
 } from '../db.js';
 import { config } from '../config.js';
 
@@ -19,6 +20,8 @@ export interface AuthUserShape {
     bonus_credits?: number;
     custom_extraction_limit?: number;
     max_extractions_per_window?: number;
+    household_pro?: boolean;
+    requires_extraction_ads?: boolean;
     [key: string]: unknown;
   };
   user_metadata?: Record<string, unknown>;
@@ -62,6 +65,10 @@ export async function fetchAndSyncUser(userId: string): Promise<AuthUserShape> {
     }
   }
 
+  const hh = await getHouseholdContext(userId).catch(() => null);
+  const householdPro = Boolean(hh?.hasHouseholdPro && !hh?.isPauseLocked);
+  const requiresExtractionAds = Boolean(hh?.requiresExtractionAds);
+
   const metadata = (row.metadata || {}) as Record<string, unknown>;
 
   return {
@@ -71,6 +78,8 @@ export async function fetchAndSyncUser(userId: string): Promise<AuthUserShape> {
       tier: currentTier,
       bonus_credits: row.bonusCredits ?? 0,
       custom_extraction_limit: row.customExtractionLimit ?? undefined,
+      household_pro: householdPro,
+      requires_extraction_ads: requiresExtractionAds,
     },
     user_metadata: {
       ...metadata,
@@ -99,7 +108,7 @@ export async function resolveUserRateLimit(
     return parseInt(meta.max_extractions_per_window, 10);
   }
 
-  if (meta.tier === 'premium') {
+  if (meta.tier === 'premium' || meta.household_pro === true) {
     return await getPremiumMaxExtractions();
   }
   if (meta.tier === 'alpha') {
@@ -116,6 +125,7 @@ export function isPremiumUser(
   return (
     meta.tier === 'premium' ||
     meta.tier === 'alpha' ||
+    meta.household_pro === true ||
     meta.custom_extraction_limit === -1 ||
     meta.max_extractions_per_window === -1
   );
@@ -128,6 +138,7 @@ export async function resolveConcurrencyLimit(
   const premiumLike =
     meta.tier === 'premium' ||
     meta.tier === 'alpha' ||
+    meta.household_pro === true ||
     meta.custom_extraction_limit === -1 ||
     meta.max_extractions_per_window === -1;
   return premiumLike

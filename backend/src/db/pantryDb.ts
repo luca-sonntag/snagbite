@@ -8,8 +8,9 @@ import {
 import { num } from './client.js';
 import { db } from './drizzle.js';
 import { pantryItems } from './schema/pantryAndShopping.js';
-import { eq, and, asc, desc } from 'drizzle-orm';
+import { eq, and, asc, desc, inArray } from 'drizzle-orm';
 import { buildMappingKeys } from '../matching/baseNameCanonical.js';
+import { getHouseholdUserIds } from './householdDb.js';
 
 export {
   deductRecipeIngredientsFromPantry,
@@ -40,10 +41,11 @@ export function rowToPantryItem(row: any): PantryItem {
 }
 
 export async function listPantryItems(userId: string): Promise<PantryItem[]> {
+  const userIds = await getHouseholdUserIds(userId);
   const rows = await db
     .select()
     .from(pantryItems)
-    .where(eq(pantryItems.userId, userId))
+    .where(inArray(pantryItems.userId, userIds))
     .orderBy(asc(pantryItems.expiresAt), desc(pantryItems.addedAt));
 
   return rows.map(rowToPantryItem);
@@ -112,6 +114,7 @@ export async function updatePantryItem(
   userId: string,
   dto: UpdatePantryItemDto
 ): Promise<PantryItem> {
+  const userIds = await getHouseholdUserIds(userId);
   const updates: Record<string, unknown> = {
     updatedAt: new Date(),
   };
@@ -129,7 +132,7 @@ export async function updatePantryItem(
   const [updated] = await db
     .update(pantryItems)
     .set(updates)
-    .where(and(eq(pantryItems.id, id), eq(pantryItems.userId, userId)))
+    .where(and(eq(pantryItems.id, id), inArray(pantryItems.userId, userIds)))
     .returning();
 
   if (!updated) {
@@ -140,9 +143,10 @@ export async function updatePantryItem(
 }
 
 export async function deletePantryItem(id: string, userId: string): Promise<boolean> {
+  const userIds = await getHouseholdUserIds(userId);
   const deleted = await db
     .delete(pantryItems)
-    .where(and(eq(pantryItems.id, id), eq(pantryItems.userId, userId)))
+    .where(and(eq(pantryItems.id, id), inArray(pantryItems.userId, userIds)))
     .returning({ id: pantryItems.id });
 
   return deleted.length > 0;
