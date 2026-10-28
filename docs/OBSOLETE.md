@@ -6,6 +6,16 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-28: Angleichung der Überschrift „Von Freunden empfohlen“ & Entfernung des Subtitles
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Serif-Überschrift (`font-heading text-base font-bold`) und Beschreibungstext (`<p className="text-xs text-gray-500 ...">Direkt von deinen Freunden mit dir geteilt</p>`) in [`SharedRecipesSection.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/Social/SharedRecipesSection.tsx).
+* **Ersetzt durch:**
+  * **Konsistentes Typografie-Muster:** Einheitliche, subtile Sub-Headlines (`text-xs font-medium text-gray-500 dark:text-gray-400 font-sans px-0.5 mb-2`) identisch zu allen anderen Sektionen im Freunde- und Profilbereich („Dein Freundescode“, „Freunde hinzufügen“, „Deine Freunde“).
+  * **Entfernung redundanter Unterzeile:** Der beschreibende Text wurde entfernt, wodurch die Liste bündig und visuell aufgeräumt abschließt.
+* **Betroffene Dateien:** `frontend/src/components/Social/SharedRecipesSection.tsx`, `docs/OBSOLETE.md`.
+
+---
 ### 2026-10-27: Entfernung veralteter Vite-Boilerplate und AI-Slop-Kartenmuster in `website/` (Editorial Paper Overhaul)
 
 * **Ersetzter Code / Veraltete Logik:**
