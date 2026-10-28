@@ -74,6 +74,23 @@ function isOtaEnabled(): boolean {
   return true;
 }
 
+function parseSemverTuple(version: string): [number, number, number] | null {
+  const match = /^v?(\d+)\.(\d+)\.(\d+)/.exec(version.trim());
+  if (!match) return null;
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
+function isBundleOlderThanApp(bundleVersion: string, appVersion: string): boolean {
+  const bundleTuple = parseSemverTuple(bundleVersion);
+  const appTuple = parseSemverTuple(appVersion);
+  if (!bundleTuple || !appTuple) return false;
+  for (let i = 0; i < 3; i++) {
+    if (bundleTuple[i] < appTuple[i]) return true;
+    if (bundleTuple[i] > appTuple[i]) return false;
+  }
+  return false;
+}
+
 async function resolveChannel(): Promise<'production' | 'alpha' | 'internal'> {
   try {
     const override = localStorage.getItem(CHANNEL_OVERRIDE_KEY);
@@ -112,14 +129,18 @@ export async function checkAndApplyOtaUpdate(options?: { manual?: boolean }): Pr
     const { bundle: currentBundle } = await CapacitorUpdater.current();
 
     let nativeVersionCode = Number(APP_BUILD);
+    let nativeAppVersion = APP_VERSION;
     try {
       const appInfo = await App.getInfo();
       const parsed = Number(appInfo.build);
       if (!isNaN(parsed) && parsed > 0) {
         nativeVersionCode = parsed;
       }
+      if (appInfo.version) {
+        nativeAppVersion = appInfo.version;
+      }
     } catch {
-      // Fallback to static APP_BUILD
+      // Fallback to static APP_BUILD / APP_VERSION
     }
 
     const abortController = new AbortController();
@@ -134,7 +155,7 @@ export async function checkAndApplyOtaUpdate(options?: { manual?: boolean }): Pr
           channel,
           versionCode: nativeVersionCode,
           currentBundleVersion: currentBundle.version,
-          appVersion: APP_VERSION,
+          appVersion: nativeAppVersion,
         }),
         signal: abortController.signal,
       });
@@ -150,6 +171,13 @@ export async function checkAndApplyOtaUpdate(options?: { manual?: boolean }): Pr
     const result = (await response.json()) as CheckResponse;
     if (!result.success || !result.update || !result.version || !result.url) {
       console.log(`[OTA] Up to date (channel=${channel}, bundle=${currentBundle.version})`);
+      return { status: 'up-to-date' };
+    }
+
+    if (isBundleOlderThanApp(result.version, nativeAppVersion)) {
+      console.warn(
+        `[OTA] Refusing cross-release downgrade from native ${nativeAppVersion} to ${result.version}`
+      );
       return { status: 'up-to-date' };
     }
 
