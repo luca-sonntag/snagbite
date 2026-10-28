@@ -2132,8 +2132,7 @@ export const uiTranslations = {
         apply: 'Jetzt neu laden',
         later: 'Später'
       }
-    }
-  },
+    },
     household: {
       partnerDefault: 'Dein Partner',
       banner: {
@@ -2211,6 +2210,7 @@ export const uiTranslations = {
         ctaUpgrade: 'PRO freischalten',
       },
     },
+  },
   en: {
     ads: {
       label: 'Advertisement',
