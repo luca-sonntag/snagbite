@@ -5,3 +5,4 @@ export { default as ProposeCookButton } from './ProposeCookButton';
 export { default as HouseholdInviteBanner } from './HouseholdInviteBanner';
 export { default as HouseholdSheet } from './HouseholdSheet';
 export { default as HouseholdPromoModal } from './HouseholdPromoModal';
+export { default as HouseholdCooldownBanner } from './HouseholdCooldownBanner';

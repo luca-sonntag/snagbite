@@ -1078,6 +1078,7 @@ export const uiTranslations = {
         HOUSEHOLD_INVITE_INVALID: 'Dieser Einladungscode ist ungültig oder abgelaufen.',
         ALREADY_IN_HOUSEHOLD: 'Du bist bereits mit einem Haushalt verknüpft. Bitte trenne zuerst den bestehenden Haushalt.',
         HOUSEHOLD_COOLDOWN: 'Du kannst einem neuen Haushalt erst wieder nach Ablauf der Schutzfrist beitreten.',
+        HOUSEHOLD_COOLDOWN_DATE: 'Du kannst einem neuen Haushalt erst wieder ab dem {date} beitreten.',
         NUDGE_RATE_LIMITED: 'Du hast deinen Partner heute bereits angestupst.',
         INTERNAL_ERROR: 'Ein interner Serverfehler ist aufgetreten. Bitte versuche es später erneut.',
       },
@@ -2148,6 +2149,10 @@ export const uiTranslations = {
       status: {
         connected: 'Haushaltspartner verbunden',
       },
+      cooldown: {
+        title: 'Haushalts-Wechselsperre aktiv',
+        desc: 'Nach dem Trennen eines Haushalts kannst du erst ab dem {date} einen neuen Haushalt erstellen oder einem beitreten.',
+      },
       trial: {
         activeTitle: '48h Testphase aktiv',
         activeDesc: 'Ihr nutzt alle Snagbite PRO Features gemeinsam.',
@@ -2863,6 +2868,7 @@ export const uiTranslations = {
         HOUSEHOLD_INVITE_INVALID: 'This invite code is invalid or expired.',
         ALREADY_IN_HOUSEHOLD: 'You are already linked to a household. Please unlink first.',
         HOUSEHOLD_COOLDOWN: 'You can only join a new household after the cooldown expires.',
+        HOUSEHOLD_COOLDOWN_DATE: 'You can create or join a new household starting {date}.',
         NUDGE_RATE_LIMITED: 'You have already nudged your partner today.',
         INTERNAL_ERROR: 'An internal server error occurred. Please try again later.',
       },
@@ -3933,6 +3939,10 @@ export const uiTranslations = {
       status: {
         connected: 'Household partner connected',
       },
+      cooldown: {
+        title: 'Household cooldown active',
+        desc: 'After unlinking, you can create or join a new household starting {date}.',
+      },
       trial: {
         activeTitle: '48h trial active',
         activeDesc: 'You both enjoy all Snagbite PRO features together.',
@@ -4389,6 +4399,27 @@ export function messageForCode(
       return getTranslation('error.codes.TOO_MANY_SCREENSHOTS', lang, { max: p.max ?? 6 });
     case 'ACTIVE_JOB_EXISTS':
       return getTranslation('error.codes.ACTIVE_JOB_EXISTS', lang, { count: p.count ?? 1 });
+    case 'HOUSEHOLD_COOLDOWN': {
+      const untilStr = typeof p.until === 'string' ? p.until : null;
+      let dateText = '';
+      if (untilStr) {
+        try {
+          const d = new Date(untilStr);
+          if (!isNaN(d.getTime())) {
+            dateText = d.toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-US', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            });
+          }
+        } catch {
+          // fallback
+        }
+      }
+      return dateText
+        ? getTranslation('error.codes.HOUSEHOLD_COOLDOWN_DATE', lang, { date: dateText })
+        : getTranslation('error.codes.HOUSEHOLD_COOLDOWN', lang);
+    }
     case 'PHOTO_NOT_MATCHING':
       return getTranslation('app.gamification.rejectionReason', lang);
     default:
