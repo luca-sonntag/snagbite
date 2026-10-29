@@ -15,7 +15,7 @@
 ### 🗄️ 1. Datenbank & Schema-Updates (Railway PostgreSQL)
 - [ ] **Tabelle `households` in Production bereitstellen:**
   - **Befehl:** `npm run db:push:prod` im `backend/`-Verzeichnis ausführen.
-  * **Grund:** Neue Tabelle `households` für den Household-Modus (1:1 Partner-Verknüpfung, 48h-Trial, Cooldowns & Partner-Anstupsen).
+  * **Grund:** Neue Tabelle `households` für den Household-Modus (1:1 Partner-Verknüpfung, 7-Tage-Trial, Cooldowns & Partner-Anstupsen).
   * **Dringlichkeit:** Zwingend vor oder zeitgleich mit dem Backend-Deploy.
 
 ### 🔐 2. Umgebungsvariablen & Secrets (Railway & Frontend)

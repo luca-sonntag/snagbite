@@ -2157,7 +2157,7 @@ export const uiTranslations = {
         desc: 'Nach dem Trennen eines Haushalts kannst du erst ab dem {date} einen neuen Haushalt erstellen oder einem beitreten.',
       },
       trial: {
-        activeTitle: '48h Testphase aktiv',
+        activeTitle: '7 Tage Testphase aktiv',
         activeDesc: 'Ihr nutzt alle Snagbite PRO Features gemeinsam.',
       },
       paused: {
@@ -2178,7 +2178,8 @@ export const uiTranslations = {
       },
       highlights: {
         title: '1 PRO Abo für 2 Personen',
-        desc: 'Verbindet euch zu einem Haushalt: Ihr teilt euer Kochbuch, Wochenplaner und Einkaufsliste. Wenn einer PRO hat, gilt es für beide!',
+        trialBadge: '7 Tage kostenlos',
+        desc: 'Verbindet euch zu einem Haushalt: Ihr teilt euer Kochbuch, Wochenplaner und Einkaufsliste. 7 Tage kostenlos testen – danach reicht 1 PRO Abo für beide!',
         bullet1: 'Geteiltes Kochbuch für beide',
         bullet2: 'Wochenplaner & Einkaufsliste synchronisiert',
         bullet3: '1 PRO Abo reicht für 2 Personen',
@@ -2219,7 +2220,7 @@ export const uiTranslations = {
         benefit1: 'Nur 1 Person zahlt für Snagbite PRO',
         benefit2: 'Automatisch synchronisiertes Kochbuch für beide',
         benefit3: 'Gemeinsamer Wochenplaner & Einkaufsliste',
-        benefit4: '48 Stunden unverbindliche Testphase',
+        benefit4: '7 Tage unverbindliche Testphase',
         ctaInvite: 'Partner einladen',
         ctaUpgrade: 'PRO freischalten',
       },
@@ -3956,7 +3957,7 @@ export const uiTranslations = {
         desc: 'After unlinking, you can create or join a new household starting {date}.',
       },
       trial: {
-        activeTitle: '48h trial active',
+        activeTitle: '7-day trial active',
         activeDesc: 'You both enjoy all Snagbite PRO features together.',
       },
       paused: {
@@ -3977,7 +3978,8 @@ export const uiTranslations = {
       },
       highlights: {
         title: '1 PRO subscription for 2 people',
-        desc: 'Link your accounts: share your cookbook, meal planner and shopping list. If one has PRO, both get it!',
+        trialBadge: '7 days free trial',
+        desc: 'Link your accounts: share your cookbook, meal planner and shopping list. Try 7 days free – after that, 1 PRO subscription covers both!',
         bullet1: 'Shared cookbook for both partners',
         bullet2: 'Synced meal planner & grocery list',
         bullet3: '1 PRO subscription covers 2 people',
@@ -4018,7 +4020,7 @@ export const uiTranslations = {
         benefit1: 'Only 1 person pays for Snagbite PRO',
         benefit2: 'Automatically synced cookbook for both',
         benefit3: 'Shared meal planner & grocery list',
-        benefit4: '48-hour free trial included',
+        benefit4: '7-day free trial included',
         ctaInvite: 'Invite partner',
         ctaUpgrade: 'Unlock PRO',
       },

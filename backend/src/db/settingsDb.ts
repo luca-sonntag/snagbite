@@ -90,7 +90,7 @@ export async function isHouseholdEnabled(): Promise<boolean> {
 }
 
 export async function getHouseholdTrialHours(): Promise<number> {
-  return getGlobalSetting('household_trial_hours', 48);
+  return getGlobalSetting('household_trial_hours', 168);
 }
 
 export async function getHouseholdPartnerExtractionAds(): Promise<boolean> {
