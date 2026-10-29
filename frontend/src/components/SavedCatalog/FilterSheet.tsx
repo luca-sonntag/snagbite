@@ -13,6 +13,7 @@ import {
   type CatalogSort
 } from '../../hooks/useSavedCatalog';
 import { useModalOverlay } from '../../context/OverlayStackContext';
+import { useHousehold } from '../Household';
 
 interface FilterSheetProps {
   isOpen: boolean;
@@ -61,6 +62,9 @@ export default function FilterSheet({
 }: FilterSheetProps) {
   const { t, language } = useI18n();
   useModalOverlay(isOpen, onClose);
+  const { status: householdStatus, partnerProfile } = useHousehold();
+  const isConnected = householdStatus === 'active' || householdStatus === 'paused';
+  const partnerName = partnerProfile?.displayName || t('household.partnerDefault');
   const [draft, setDraft] = useState<CatalogFilterState>(filters);
   const [draftSort, setDraftSort] = useState<CatalogSort>(sortBy);
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
@@ -143,6 +147,28 @@ export default function FilterSheet({
                       <Star className={`w-3.5 h-3.5 ${draft.favoritesOnly ? 'fill-white stroke-white' : 'text-amber-500 fill-amber-500'}`} />
                       {t('catalog.favoritesFilter')}
                     </button>
+
+                    {isConnected && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          hapticLight();
+                          setDraft(d => ({ ...d, partnerOnly: !d.partnerOnly }));
+                        }}
+                        className={`min-h-[44px] px-3.5 py-2 text-xs rounded-2xl border-none transition-all whitespace-nowrap active:scale-95 cursor-pointer font-semibold flex items-center gap-2 ${chipClass(Boolean(draft.partnerOnly), 'emerald')}`}
+                      >
+                        <div className="w-5 h-5 rounded-full overflow-hidden bg-emerald-700/20 flex items-center justify-center shrink-0 text-[10px] font-bold">
+                          {partnerProfile?.avatarUrl ? (
+                            <img src={partnerProfile.avatarUrl} alt={partnerName} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className={draft.partnerOnly ? 'text-white' : 'text-emerald-700 dark:text-emerald-300'}>
+                              {partnerName.charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+                        <span>{partnerName}</span>
+                      </button>
+                    )}
 
                     {collections.map(col => {
                       const isActive = draft.collectionIds.includes(col.id);
