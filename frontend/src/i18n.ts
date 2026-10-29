@@ -2140,6 +2140,7 @@ export const uiTranslations = {
         title: 'Gemeinsamer Haushalt',
         subtitle: 'Kochbuch, Wochenplaner & Einkaufsliste zu zweit nutzen.',
         action: 'Partner einladen',
+        dismiss: 'Hinweis ausblenden',
       },
       modal: {
         title: 'Gemeinsamer Haushalt',
@@ -3936,6 +3937,7 @@ export const uiTranslations = {
         title: 'Shared Household',
         subtitle: 'Share your cookbook, meal planner & shopping list together.',
         action: 'Invite partner',
+        dismiss: 'Dismiss banner',
       },
       modal: {
         title: 'Shared Household',
