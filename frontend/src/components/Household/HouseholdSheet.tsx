@@ -46,7 +46,7 @@ export default function HouseholdSheet({
             <Drawer.Header className="pt-1 pb-4 px-0 border-none">
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-xs">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
                     <Users className="w-5 h-5 stroke-[2.2]" />
                   </div>
                   <div>

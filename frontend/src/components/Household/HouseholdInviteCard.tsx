@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, ArrowRight, Loader2, KeyRound } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import { useHousehold } from './useHousehold';
 import { useToast } from '../../context/ToastContext';
 import { useI18n } from '../../context/I18nContext';
@@ -86,7 +86,7 @@ export default function HouseholdInviteCard({ onSuccess }: HouseholdInviteCardPr
             onClick={handleCreateInvite}
             className="w-full h-12 min-h-[48px] rounded-2xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-bold text-sm shadow-sm shadow-emerald-600/20 flex items-center justify-center gap-2 border-none cursor-pointer transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {loadingInvite ? <Loader2 className="w-4 h-4 animate-spin" /> : <Users className="w-4 h-4 stroke-[2.2]" />}
+            {loadingInvite && <Loader2 className="w-4 h-4 animate-spin" />}
             <span>{t('household.invite.createButton')}</span>
           </button>
         )}
@@ -107,18 +107,15 @@ export default function HouseholdInviteCard({ onSuccess }: HouseholdInviteCardPr
           {t('household.join.sectionTitle')}
         </span>
         <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <KeyRound className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <input
-              type="text"
-              value={inputCode}
-              disabled={isCooldown}
-              onChange={(e) => setInputCode(e.target.value.toUpperCase())}
-              placeholder={t('household.join.placeholder')}
-              maxLength={12}
-              className="w-full h-12 pl-10 pr-3.5 rounded-2xl bg-black/[0.04] dark:bg-white/[0.06] border-none text-sm font-mono tracking-wider font-bold text-stone-900 dark:text-stone-100 placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 disabled:opacity-40 transition-all"
-            />
-          </div>
+          <input
+            type="text"
+            value={inputCode}
+            disabled={isCooldown}
+            onChange={(e) => setInputCode(e.target.value.toUpperCase())}
+            placeholder={t('household.join.placeholder')}
+            maxLength={12}
+            className="flex-1 h-12 px-4 rounded-2xl bg-black/[0.04] dark:bg-white/[0.06] border-none text-sm font-mono tracking-wider font-bold text-stone-900 dark:text-stone-100 placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 disabled:opacity-40 transition-all"
+          />
           <button
             type="button"
             disabled={!canJoin}
@@ -129,7 +126,7 @@ export default function HouseholdInviteCard({ onSuccess }: HouseholdInviteCardPr
                 : 'bg-black/[0.04] dark:bg-white/[0.06] text-stone-400 cursor-not-allowed opacity-50'
             }`}
           >
-            {loadingJoin ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+            {loadingJoin && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
             <span>{t('household.join.action')}</span>
             <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
           </button>
