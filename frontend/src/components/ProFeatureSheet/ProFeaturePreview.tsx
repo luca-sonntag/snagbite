@@ -7,6 +7,7 @@ import {
   RecipeCopilotPreview,
   CollectionsPreview,
   UnlimitedExtractionsPreview,
+  HouseholdPreview,
 } from './previews';
 
 interface ProFeaturePreviewProps {
@@ -30,6 +31,8 @@ export default function ProFeaturePreview({ featureId }: ProFeaturePreviewProps)
         return <CollectionsPreview />;
       case 'unlimited_extractions':
         return <UnlimitedExtractionsPreview />;
+      case 'household':
+        return <HouseholdPreview />;
       default:
         return null;
     }

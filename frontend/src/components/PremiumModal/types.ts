@@ -8,6 +8,7 @@ export interface PremiumModalProps {
 export type PremiumFeatureId =
   | 'extractions'
   | 'noAds'
+  | 'household'
   | 'healthScore'
   | 'remix'
   | 'cookingMode'

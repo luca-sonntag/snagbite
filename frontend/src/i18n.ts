@@ -469,6 +469,10 @@ export const uiTranslations = {
           title: 'Kochen wie ein Profi',
           desc: 'Schritt-für-Schritt-Kochmodus, integrierte Timer und ein KI-Copilot, der Fragen beantwortet und Rezepte anpasst.',
         },
+        household: {
+          title: 'Zusammen kochen & planen',
+          desc: 'Verbinde dich mit deinem Partner: Teilt euer Kochbuch, Wochenplaner & Einkaufsliste nahtlos zu zweit – 1x PRO reicht für beide!',
+        },
       },
     },
     tour: {
@@ -2001,6 +2005,10 @@ export const uiTranslations = {
             title: 'Sammlungen & Eigene Labels',
             desc: 'Eigene Ordner & benutzerdefinierte Rezept-Tags'
           },
+          household: {
+            title: 'Haushalt & 1 PRO für 2 Personen',
+            desc: 'Geteiltes Kochbuch, synchronisierter Wochenplaner & Einkaufsliste'
+          },
           nutrition: {
             title: 'Healthy Score & Nährwert-Deep-Dive',
             desc: '4-Säulen-Analyse, Makro-Verteilung, Nova-Klassifizierung & Insights'
@@ -2268,6 +2276,10 @@ export const uiTranslations = {
         cooking: {
           title: 'Cook Like a Pro',
           desc: 'Step-by-step cooking mode, built-in timers and an AI copilot that answers questions and adapts recipes.',
+        },
+        household: {
+          title: 'Cook & Plan Together',
+          desc: 'Connect with your partner: Share your cookbook, meal planner & grocery list seamlessly together — 1x PRO covers both!',
         },
       },
     },
@@ -3799,6 +3811,10 @@ export const uiTranslations = {
           collections: {
             title: 'Collections & Custom Labels',
             desc: 'Custom folders & personalized recipe tags'
+          },
+          household: {
+            title: 'Household & 1 PRO for 2 People',
+            desc: 'Shared cookbook, synchronized meal planner & shopping list'
           },
           nutrition: {
             title: 'Healthy Score & Nutrition Deep-Dive',

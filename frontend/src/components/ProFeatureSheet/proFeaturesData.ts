@@ -6,6 +6,7 @@ import {
   Sparkles,
   Infinity as InfinityIcon,
   FolderHeart,
+  Users,
 } from 'lucide-react';
 import type { ProFeatureContent, ProFeatureId } from './types';
 
@@ -95,6 +96,18 @@ export const PRO_FEATURES_DATA: Record<'de' | 'en', Record<ProFeatureId, ProFeat
       screenshotUrl: '/pro-features/collections-labels.png',
       icon: FolderHeart,
     },
+    household: {
+      id: 'household',
+      title: 'Haushalt-Modus (1 PRO für 2)',
+      tagline: 'Gemeinsam kochen, planen & einkaufen',
+      bullets: [
+        'Ein PRO-Abo schaltet alle Features für 2 Personen frei',
+        'Automatisch synchronisiertes Kochbuch für beide Partner',
+        'Gemeinsame Live-Einkaufsliste & Wochenplaner',
+      ],
+      screenshotUrl: '/pro-features/household.png',
+      icon: Users,
+    },
   },
   en: {
     macros: {
@@ -123,12 +136,12 @@ export const PRO_FEATURES_DATA: Record<'de' | 'en', Record<ProFeatureId, ProFeat
     },
     ingredient_nutrition: {
       id: 'ingredient_nutrition',
-      title: 'Ingredient Nutrition',
-      tagline: 'Detailed nutritional breakdown of every ingredient',
+      title: 'Ingredient Nutrition Insights',
+      tagline: 'Detailed nutrition metrics for every single ingredient',
       bullets: [
-        'Calories, macros & fiber for each individual item',
-        'Instantly spot hidden sugars and high-fat ingredients',
-        'Perfect for fine-tuning fitness and dietary goals',
+        'Calories, macros & fiber per single ingredient item',
+        'Quickly uncover hidden sugars and saturated fats',
+        'Tailor recipes accurately to your nutritional goals',
       ],
       screenshotUrl: '/pro-features/ingredient-nutrition.png',
       icon: Scale,
@@ -136,11 +149,11 @@ export const PRO_FEATURES_DATA: Record<'de' | 'en', Record<ProFeatureId, ProFeat
     cooking_mode: {
       id: 'cooking_mode',
       title: 'Focus Cooking Mode & Timers',
-      tagline: 'Stress-free cooking without screen timeouts',
+      tagline: 'Relaxed cooking without screen timeouts',
       bullets: [
-        'Large, distraction-free step-by-step guidance',
-        'Parallel in-app cooking timers with audio alerts',
-        'Always check ingredient portions without leaving the step',
+        'Distraction-free step-by-step reading layout',
+        'Integrated parallel kitchen timers with alarms',
+        'Required ingredient amounts right at each step',
       ],
       screenshotUrl: '/pro-features/cooking-mode.png',
       icon: Play,
@@ -148,11 +161,11 @@ export const PRO_FEATURES_DATA: Record<'de' | 'en', Record<ProFeatureId, ProFeat
     recipe_copilot: {
       id: 'recipe_copilot',
       title: 'Recipe Copilot & AI Remix',
-      tagline: 'Your personal AI chef for every dish',
+      tagline: 'Your personal AI chef for any recipe modification',
       bullets: [
-        'Swap ingredients with 1 tap (vegan, dairy-free, low-carb)',
-        'Optimize recipes for health or add side dishes',
-        'Precise automatic recalculation of steps and nutrition',
+        'Swap ingredients with 1 tap (vegan, dairy-free, etc.)',
+        'Boost recipe health score or add matching sides',
+        'Precise automatic recalculation of instructions',
       ],
       screenshotUrl: '/pro-features/recipe-copilot.png',
       icon: Sparkles,
@@ -180,6 +193,18 @@ export const PRO_FEATURES_DATA: Record<'de' | 'en', Record<ProFeatureId, ProFeat
       ],
       screenshotUrl: '/pro-features/collections-labels.png',
       icon: FolderHeart,
+    },
+    household: {
+      id: 'household',
+      title: 'Household Mode (1 PRO for 2)',
+      tagline: 'Cook, plan & shop together',
+      bullets: [
+        'One PRO subscription unlocks all features for 2 people',
+        'Automatically synced cookbook for both partners',
+        'Shared real-time shopping list & weekly meal planner',
+      ],
+      screenshotUrl: '/pro-features/household.png',
+      icon: Users,
     },
   },
 };
