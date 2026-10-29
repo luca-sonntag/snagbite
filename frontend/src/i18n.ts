@@ -2176,6 +2176,10 @@ export const uiTranslations = {
       highlights: {
         title: '1 PRO Abo für 2 Personen',
         desc: 'Verbindet euch zu einem Haushalt: Ihr teilt euer Kochbuch, Wochenplaner und Einkaufsliste. Wenn einer PRO hat, gilt es für beide!',
+        bullet1: 'Geteiltes Kochbuch für beide',
+        bullet2: 'Wochenplaner & Einkaufsliste synchronisiert',
+        bullet3: '1 PRO Abo reicht für 2 Personen',
+        orDivider: 'Oder Einladungscode eingeben',
       },
       invite: {
         sectionTitle: 'Partner einladen',
@@ -2183,6 +2187,8 @@ export const uiTranslations = {
         shareHelp: 'Sende diesen Link oder Code an deinen Partner.',
         createButton: 'Einladungscode erstellen',
         createError: 'Fehler beim Erstellen des Codes.',
+        copyButton: 'Kopieren',
+        copiedButton: 'Kopiert',
         copied: 'Einladungslink kopiert!',
         copyError: 'Konnte Link nicht kopieren.',
       },
@@ -3966,6 +3972,10 @@ export const uiTranslations = {
       highlights: {
         title: '1 PRO subscription for 2 people',
         desc: 'Link your accounts: share your cookbook, meal planner and shopping list. If one has PRO, both get it!',
+        bullet1: 'Shared cookbook for both partners',
+        bullet2: 'Synced meal planner & grocery list',
+        bullet3: '1 PRO subscription covers 2 people',
+        orDivider: 'Or enter invite code',
       },
       invite: {
         sectionTitle: 'Invite partner',
@@ -3973,6 +3983,8 @@ export const uiTranslations = {
         shareHelp: 'Send this link or code to your partner.',
         createButton: 'Generate invite code',
         createError: 'Failed to generate code.',
+        copyButton: 'Copy',
+        copiedButton: 'Copied',
         copied: 'Invite link copied!',
         copyError: 'Could not copy link.',
       },

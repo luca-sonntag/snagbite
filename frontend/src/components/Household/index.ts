@@ -6,3 +6,5 @@ export { default as HouseholdInviteBanner } from './HouseholdInviteBanner';
 export { default as HouseholdSheet } from './HouseholdSheet';
 export { default as HouseholdPromoModal } from './HouseholdPromoModal';
 export { default as HouseholdCooldownBanner } from './HouseholdCooldownBanner';
+export { default as HouseholdHighlightsCard } from './HouseholdHighlightsCard';
+export { default as HouseholdInviteCodeBox } from './HouseholdInviteCodeBox';

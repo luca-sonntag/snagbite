@@ -73,8 +73,8 @@ export default function HouseholdActiveCard({ onOpenUpgrade, onClose }: Househol
   return (
     <div className="flex flex-col gap-5 text-stone-900 dark:text-stone-100">
       {/* Connected Partner Header */}
-      <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04]">
-        <div className="w-13 h-13 rounded-full bg-emerald-600 ring-2 ring-emerald-500/30 flex items-center justify-center text-white font-bold text-lg overflow-hidden shrink-0">
+      <div className="flex items-center gap-3.5 p-4 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04]">
+        <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-lg overflow-hidden shrink-0 shadow-xs">
           {avatarUrl ? (
             <img src={avatarUrl} alt={partnerName} className="w-full h-full object-cover" />
           ) : (
@@ -84,11 +84,14 @@ export default function HouseholdActiveCard({ onOpenUpgrade, onClose }: Househol
         <div className="flex flex-col min-w-0">
           <div className="flex items-center gap-1.5">
             <span className="font-bold text-base tracking-tight truncate">{partnerName}</span>
-            <Heart className="w-4 h-4 text-rose-500 fill-rose-500 shrink-0" />
+            <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 shrink-0" />
           </div>
-          <span className="text-xs text-stone-500 dark:text-stone-400">
-            {t('household.status.connected')}
-          </span>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+            <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">
+              {t('household.status.connected')}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -115,7 +118,7 @@ export default function HouseholdActiveCard({ onOpenUpgrade, onClose }: Househol
             <button
               type="button"
               onClick={onOpenUpgrade}
-              className="mt-1 h-9 rounded-xl bg-rose-600 text-white font-semibold text-xs flex items-center justify-center gap-1.5 border-none cursor-pointer active:scale-95 transition-all"
+              className="mt-1 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs flex items-center justify-center gap-1.5 border-none cursor-pointer active:scale-95 transition-all shadow-xs"
             >
               <ShieldCheck className="w-4 h-4" />
               <span>{t('household.paused.upgradeAction')}</span>
@@ -125,13 +128,13 @@ export default function HouseholdActiveCard({ onOpenUpgrade, onClose }: Househol
       )}
 
       {/* Action buttons: Nudge and Unlink */}
-      <div className="flex flex-col gap-2.5 pt-2">
+      <div className="flex flex-col gap-2 pt-1">
         {!isPauseLocked && onOpenUpgrade && (
           <button
             type="button"
             disabled={nudgeLoading}
             onClick={handleNudge}
-            className="h-11 rounded-2xl bg-black/[0.04] dark:bg-white/[0.06] text-stone-800 dark:text-stone-200 font-semibold text-xs flex items-center justify-center gap-2 border-none cursor-pointer active:scale-95 transition-all disabled:opacity-50"
+            className="h-11 rounded-2xl bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-stone-800 dark:text-stone-200 font-semibold text-xs flex items-center justify-center gap-2 border-none cursor-pointer active:scale-95 transition-all disabled:opacity-50"
           >
             {nudgeLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bell className="w-4 h-4" />}
             <span>{t('household.nudge.button')}</span>
@@ -142,7 +145,7 @@ export default function HouseholdActiveCard({ onOpenUpgrade, onClose }: Househol
           type="button"
           disabled={unlinkLoading}
           onClick={handleUnlink}
-          className="h-10 rounded-2xl text-rose-600 dark:text-rose-400 font-medium text-xs flex items-center justify-center gap-1.5 opacity-80 hover:opacity-100 border-none bg-transparent cursor-pointer active:scale-95 transition-all disabled:opacity-50"
+          className="h-10 rounded-2xl text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 font-medium text-xs flex items-center justify-center gap-1.5 border-none bg-transparent cursor-pointer active:scale-95 transition-all disabled:opacity-50"
         >
           {unlinkLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UserMinus className="w-3.5 h-3.5" />}
           <span>{t('household.unlink.button')}</span>

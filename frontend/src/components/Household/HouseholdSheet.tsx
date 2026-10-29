@@ -39,21 +39,21 @@ export default function HouseholdSheet({
         className="!z-[100]"
       >
         <Drawer.Content placement="bottom" className="!z-[100]">
-          <Drawer.Dialog className="relative !bg-[#faf8f5] dark:!bg-[#0c0b0a] p-5 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)] max-h-[90vh] overflow-y-auto">
+          <Drawer.Dialog className="relative !bg-[#faf8f5] dark:!bg-[#0c0b0a] p-5 sm:p-6 pb-[calc(1.5rem_+_var(--safe-area-inset-bottom))] rounded-t-3xl border-none shadow-[0_-4px_30px_rgba(0,0,0,0.12)] max-h-[90vh] overflow-y-auto">
             <Drawer.Handle />
 
             {/* Header */}
-            <Drawer.Header className="pb-3 mb-2">
+            <Drawer.Header className="pt-1 pb-4 px-0 border-none">
               <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                    <Users className="w-5 h-5" />
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-xs">
+                    <Users className="w-5 h-5 stroke-[2.2]" />
                   </div>
                   <div>
-                    <Drawer.Heading className="text-base font-bold text-stone-900 dark:text-stone-100">
+                    <Drawer.Heading className="font-heading text-lg font-bold text-stone-900 dark:text-stone-100 leading-tight">
                       {t('household.modal.title')}
                     </Drawer.Heading>
-                    <p className="text-xs text-stone-500 dark:text-stone-400">
+                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5 leading-snug">
                       {isConnected ? t('household.modal.subtitleActive') : t('household.modal.subtitleInvite')}
                     </p>
                   </div>
@@ -73,7 +73,7 @@ export default function HouseholdSheet({
               </div>
             </Drawer.Header>
 
-            <Drawer.Body className="py-2">
+            <Drawer.Body className="px-0 py-1">
               {isConnected ? (
                 <HouseholdActiveCard onOpenUpgrade={onOpenUpgrade} onClose={() => onOpenChange(false)} />
               ) : (
