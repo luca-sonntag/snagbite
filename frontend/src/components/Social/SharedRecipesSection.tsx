@@ -49,18 +49,10 @@ export default function SharedRecipesSection({ onRecipeSaved }: SharedRecipesSec
   if (sharedRecipes.length === 0) return null;
 
   return (
-    <section className="space-y-3">
-      {/* Section Header */}
-      <div className="flex items-center justify-between px-0.5">
-        <div>
-          <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight font-heading">
-            {t('app.social.shares.recommendedTitle')}
-          </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {t('app.social.shares.recommendedSubtitle')}
-          </p>
-        </div>
-      </div>
+    <div>
+      <h2 className="text-xs font-medium text-gray-500 dark:text-gray-400 font-sans px-0.5 mb-2">
+        {t('app.social.shares.recommendedTitle')}
+      </h2>
 
       <div className="flex flex-col gap-1.5">
         {sharedRecipes.map((item) => {
@@ -151,6 +143,6 @@ export default function SharedRecipesSection({ onRecipeSaved }: SharedRecipesSec
           }}
         />
       )}
-    </section>
+    </div>
   );
 }
