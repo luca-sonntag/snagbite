@@ -64,7 +64,7 @@ export default function HouseholdInviteBanner({
         </span>
       </div>
 
-      {/* Content row: Subtitle + Compact CTA */}
+      {/* Content row: Subtitle + Harmonious Amber CTA */}
       <div className="flex items-end justify-between gap-3">
         <p className="text-xs text-stone-600 dark:text-stone-400 leading-snug flex-1">
           {t('household.banner.subtitle')}
@@ -77,7 +77,7 @@ export default function HouseholdInviteBanner({
             hapticLight();
             onOpenHousehold();
           }}
-          className="h-8 px-3 shrink-0 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 border-none shadow-xs shadow-emerald-600/20 active:scale-95 transition-all cursor-pointer"
+          className="h-8 px-3 shrink-0 rounded-xl bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs flex items-center gap-1 border-none shadow-xs shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
         >
           <span>{t('household.banner.action')}</span>
           <ArrowRight className="w-3.5 h-3.5" />
