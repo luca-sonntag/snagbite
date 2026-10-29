@@ -108,6 +108,12 @@ export async function acceptHouseholdInvite(userId: string, codeOrPartnerId: str
     })
     .where(eq(households.id, row.id));
 
+  // Clean up any stale pending invite rows created previously by the user who just joined
+  await db
+    .update(households)
+    .set({ status: 'unlinked', updatedAt: new Date() })
+    .where(and(eq(households.userAId, userId), eq(households.status, 'pending')));
+
   await syncHouseholdCookbooks(row.userAId, userId);
   invalidateHouseholdCache(row.userAId, userId);
 

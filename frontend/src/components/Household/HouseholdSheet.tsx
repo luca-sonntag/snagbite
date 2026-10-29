@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Drawer } from '@heroui/react';
 import { Users, X } from 'lucide-react';
 import { useHousehold } from './useHousehold';
@@ -17,8 +18,14 @@ export default function HouseholdSheet({
   onOpenChange,
   onOpenUpgrade,
 }: HouseholdSheetProps) {
-  const { status } = useHousehold();
+  const { status, refreshHousehold } = useHousehold();
   const { t } = useI18n();
+
+  useEffect(() => {
+    if (isOpen) {
+      refreshHousehold();
+    }
+  }, [isOpen, refreshHousehold]);
 
   const isConnected = status === 'active' || status === 'paused';
 

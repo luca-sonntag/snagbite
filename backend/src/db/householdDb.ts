@@ -1,7 +1,7 @@
 import { db } from './drizzle.js';
 import { households } from './schema/household.js';
 import { user as userTable } from './schema/auth.js';
-import { eq, or, and, desc } from 'drizzle-orm';
+import { eq, and, or, desc } from 'drizzle-orm';
 import { getProfilesByIds } from './socialDb.js';
 import {
   isHouseholdEnabled,
@@ -45,36 +45,86 @@ export async function getHouseholdContext(userId: string): Promise<HouseholdCont
     return empty;
   }
 
-  const [row] = await db
+  // 1. Check for an active household first
+  const [activeRow] = await db
     .select()
     .from(households)
     .where(
       and(
         or(eq(households.userAId, userId), eq(households.userBId, userId)),
-        or(eq(households.status, 'active'), eq(households.status, 'pending'))
+        eq(households.status, 'active')
       )
     )
     .orderBy(desc(households.createdAt))
     .limit(1);
 
-  if (!row) {
-    const [unlinked] = await db
-      .select({ cooldownUntil: households.cooldownUntil })
-      .from(households)
-      .where(
-        and(
-          or(eq(households.userAId, userId), eq(households.userBId, userId)),
-          eq(households.status, 'unlinked')
-        )
-      )
-      .orderBy(desc(households.unlinkedAt))
-      .limit(1);
+  if (activeRow) {
+    const partnerId = activeRow.userAId === userId ? activeRow.userBId! : activeRow.userAId;
+    const [partnerProfiles, partnerUser, selfUser] = await Promise.all([
+      getProfilesByIds([partnerId]),
+      db.select({ tier: userTable.tier }).from(userTable).where(eq(userTable.id, partnerId)).limit(1),
+      db.select({ tier: userTable.tier }).from(userTable).where(eq(userTable.id, userId)).limit(1),
+    ]);
+
+    const pProfile = partnerProfiles.get(partnerId);
+    const partnerProfile: HouseholdPartnerProfile = {
+      userId: partnerId,
+      displayName: pProfile?.displayName || 'Partner',
+      avatarUrl: pProfile?.avatarUrl || null,
+    };
 
     const now = new Date();
-    const cooldownDate = unlinked?.cooldownUntil ? new Date(unlinked.cooldownUntil) : null;
-    const cooldownUntil = cooldownDate && cooldownDate > now ? cooldownDate.toISOString() : null;
+    const trialEndsDate = activeRow.trialEndsAt ? new Date(activeRow.trialEndsAt) : null;
+    const isTrialActive = Boolean(trialEndsDate && trialEndsDate > now);
 
-    const noneContext: HouseholdContext = {
+    const selfTier = selfUser[0]?.tier || 'free';
+    const partnerTier = partnerUser[0]?.tier || 'free';
+    const isSelfPaidPro = selfTier === 'premium' || selfTier === 'alpha';
+    const isPartnerPaidPro = partnerTier === 'premium' || partnerTier === 'alpha';
+
+    const hasHouseholdPro = isSelfPaidPro || isPartnerPaidPro || isTrialActive;
+    const isPauseLocked = !hasHouseholdPro;
+
+    const partnerExtractionAdsConfig = await getHouseholdPartnerExtractionAds();
+    const requiresExtractionAds = partnerExtractionAdsConfig && !isSelfPaidPro;
+
+    const activeContext: HouseholdContext = {
+      householdId: activeRow.id,
+      partnerId,
+      partnerProfile,
+      status: isPauseLocked ? 'paused' : 'active',
+      isTrialActive,
+      trialEndsAt: trialEndsDate ? trialEndsDate.toISOString() : null,
+      hasHouseholdPro,
+      isPauseLocked,
+      requiresExtractionAds,
+      inviteCode: activeRow.inviteCode,
+      cooldownUntil: null,
+    };
+
+    householdCache.set(userId, { context: activeContext, cachedAt: Date.now() });
+    return activeContext;
+  }
+
+  // 2. Check if the user is in an active cooldown from a recently unlinked household
+  const [unlinked] = await db
+    .select({ cooldownUntil: households.cooldownUntil })
+    .from(households)
+    .where(
+      and(
+        or(eq(households.userAId, userId), eq(households.userBId, userId)),
+        eq(households.status, 'unlinked')
+      )
+    )
+    .orderBy(desc(households.unlinkedAt))
+    .limit(1);
+
+  const now = new Date();
+  const cooldownDate = unlinked?.cooldownUntil ? new Date(unlinked.cooldownUntil) : null;
+  const cooldownUntil = cooldownDate && cooldownDate > now ? cooldownDate.toISOString() : null;
+
+  if (cooldownUntil) {
+    const cooldownContext: HouseholdContext = {
       householdId: null,
       partnerId: null,
       partnerProfile: null,
@@ -87,74 +137,57 @@ export async function getHouseholdContext(userId: string): Promise<HouseholdCont
       inviteCode: null,
       cooldownUntil,
     };
-    householdCache.set(userId, { context: noneContext, cachedAt: Date.now() });
-    return noneContext;
+    householdCache.set(userId, { context: cooldownContext, cachedAt: Date.now() });
+    return cooldownContext;
   }
 
-  if (row.status === 'pending') {
-    const isInviter = row.userAId === userId;
+  // 3. Check for a pending invite created by this user (only valid if not in cooldown)
+  const [pendingRow] = await db
+    .select()
+    .from(households)
+    .where(
+      and(
+        eq(households.userAId, userId),
+        eq(households.status, 'pending')
+      )
+    )
+    .orderBy(desc(households.createdAt))
+    .limit(1);
+
+  if (pendingRow) {
     const pendingContext: HouseholdContext = {
-      householdId: row.id,
+      householdId: pendingRow.id,
       partnerId: null,
       partnerProfile: null,
-      status: isInviter ? 'pending' : 'none',
+      status: 'pending',
       isTrialActive: false,
       trialEndsAt: null,
       hasHouseholdPro: false,
       isPauseLocked: false,
       requiresExtractionAds: false,
-      inviteCode: row.inviteCode,
+      inviteCode: pendingRow.inviteCode,
       cooldownUntil: null,
     };
     householdCache.set(userId, { context: pendingContext, cachedAt: Date.now() });
     return pendingContext;
   }
 
-  const partnerId = row.userAId === userId ? row.userBId! : row.userAId;
-  const [partnerProfiles, partnerUser, selfUser] = await Promise.all([
-    getProfilesByIds([partnerId]),
-    db.select({ tier: userTable.tier }).from(userTable).where(eq(userTable.id, partnerId)).limit(1),
-    db.select({ tier: userTable.tier }).from(userTable).where(eq(userTable.id, userId)).limit(1),
-  ]);
-
-  const pProfile = partnerProfiles.get(partnerId);
-  const partnerProfile: HouseholdPartnerProfile = {
-    userId: partnerId,
-    displayName: pProfile?.displayName || 'Partner',
-    avatarUrl: pProfile?.avatarUrl || null,
-  };
-
-  const now = new Date();
-  const trialEndsDate = row.trialEndsAt ? new Date(row.trialEndsAt) : null;
-  const isTrialActive = Boolean(trialEndsDate && trialEndsDate > now);
-
-  const selfTier = selfUser[0]?.tier || 'free';
-  const partnerTier = partnerUser[0]?.tier || 'free';
-  const isSelfPaidPro = selfTier === 'premium' || selfTier === 'alpha';
-  const isPartnerPaidPro = partnerTier === 'premium' || partnerTier === 'alpha';
-
-  const hasHouseholdPro = isSelfPaidPro || isPartnerPaidPro || isTrialActive;
-  const isPauseLocked = !hasHouseholdPro;
-
-  const partnerExtractionAdsConfig = await getHouseholdPartnerExtractionAds();
-  const requiresExtractionAds = partnerExtractionAdsConfig && !isSelfPaidPro;
-
-  const activeContext: HouseholdContext = {
-    householdId: row.id,
-    partnerId,
-    partnerProfile,
-    status: isPauseLocked ? 'paused' : 'active',
-    isTrialActive,
-    trialEndsAt: trialEndsDate ? trialEndsDate.toISOString() : null,
-    hasHouseholdPro,
-    isPauseLocked,
-    requiresExtractionAds,
-    inviteCode: row.inviteCode,
+  // 4. Default clean none state
+  const noneContext: HouseholdContext = {
+    householdId: null,
+    partnerId: null,
+    partnerProfile: null,
+    status: 'none',
+    isTrialActive: false,
+    trialEndsAt: null,
+    hasHouseholdPro: false,
+    isPauseLocked: false,
+    requiresExtractionAds: false,
+    inviteCode: null,
     cooldownUntil: null,
   };
-
-  householdCache.set(userId, { context: activeContext, cachedAt: Date.now() });
-  return activeContext;
+  householdCache.set(userId, { context: noneContext, cachedAt: Date.now() });
+  return noneContext;
 }
 
 export async function getHouseholdUserIds(userId: string): Promise<string[]> {
