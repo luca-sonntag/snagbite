@@ -42,23 +42,34 @@ export default function HouseholdInviteBanner({
         hapticLight();
         onOpenHousehold();
       }}
-      className={`w-full rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 p-4 flex items-center justify-between gap-3 text-stone-900 dark:text-stone-100 select-none cursor-pointer transition-all active:scale-[0.99] ${className}`}
+      className={`relative w-full rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 p-3.5 sm:p-4 flex flex-col gap-2 text-stone-900 dark:text-stone-100 select-none cursor-pointer transition-all active:scale-[0.99] ${className}`}
     >
-      <div className="flex items-center gap-3 min-w-0">
-        <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-          <Users className="w-5 h-5" />
+      {/* Dismiss button top right */}
+      <button
+        type="button"
+        onClick={handleDismiss}
+        className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full flex items-center justify-center text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all border-none cursor-pointer z-10"
+        aria-label={t('household.banner.dismiss')}
+      >
+        <X className="w-3.5 h-3.5" />
+      </button>
+
+      {/* Top row: Icon + Title */}
+      <div className="flex items-center gap-2.5 pr-7">
+        <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+          <Users className="w-4 h-4" />
         </div>
-        <div className="flex flex-col min-w-0">
-          <p className="text-sm font-bold tracking-tight leading-snug">
-            {t('household.banner.title')}
-          </p>
-          <p className="text-xs text-stone-600 dark:text-stone-400 leading-tight truncate">
-            {t('household.banner.subtitle')}
-          </p>
-        </div>
+        <span className="text-sm font-bold tracking-tight">
+          {t('household.banner.title')}
+        </span>
       </div>
 
-      <div className="flex items-center gap-1.5 shrink-0">
+      {/* Content row: Subtitle + Compact CTA */}
+      <div className="flex items-end justify-between gap-3">
+        <p className="text-xs text-stone-600 dark:text-stone-400 leading-snug flex-1">
+          {t('household.banner.subtitle')}
+        </p>
+
         <button
           type="button"
           onClick={(e) => {
@@ -66,19 +77,10 @@ export default function HouseholdInviteBanner({
             hapticLight();
             onOpenHousehold();
           }}
-          className="h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 border-none shadow-xs shadow-emerald-600/20 active:scale-95 transition-all cursor-pointer"
+          className="h-8 px-3 shrink-0 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 border-none shadow-xs shadow-emerald-600/20 active:scale-95 transition-all cursor-pointer"
         >
           <span>{t('household.banner.action')}</span>
           <ArrowRight className="w-3.5 h-3.5" />
-        </button>
-
-        <button
-          type="button"
-          onClick={handleDismiss}
-          className="w-8 h-8 -mr-1 rounded-full flex items-center justify-center text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all border-none cursor-pointer"
-          aria-label={t('household.banner.dismiss')}
-        >
-          <X className="w-4 h-4" />
         </button>
       </div>
     </div>
