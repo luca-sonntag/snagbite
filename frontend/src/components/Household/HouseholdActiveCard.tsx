@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Heart, Bell, UserMinus, ShieldCheck, Clock, Loader2 } from 'lucide-react';
 import { useHousehold } from './useHousehold';
 import { useToast } from '../../context/ToastContext';
+import { useDialog } from '../../context/DialogContext';
 import { useI18n } from '../../context/I18nContext';
 import { hapticLight, hapticNotification } from '../../utils/haptics';
 
@@ -20,6 +21,7 @@ export default function HouseholdActiveCard({ onOpenUpgrade, onClose }: Househol
     unlink,
   } = useHousehold();
   const toast = useToast();
+  const dialog = useDialog();
   const { t } = useI18n();
   const [nudgeLoading, setNudgeLoading] = useState(false);
   const [unlinkLoading, setUnlinkLoading] = useState(false);
@@ -45,9 +47,15 @@ export default function HouseholdActiveCard({ onOpenUpgrade, onClose }: Househol
   };
 
   const handleUnlink = async () => {
-    const confirm = window.confirm(t('household.unlink.confirm', { name: partnerName }));
-    if (!confirm) return;
     hapticNotification('warning');
+    const confirmed = await dialog.confirm({
+      title: t('household.unlink.button'),
+      message: t('household.unlink.confirm', { name: partnerName }),
+      confirmLabel: t('household.unlink.button'),
+      status: 'danger',
+    });
+    if (!confirmed) return;
+
     setUnlinkLoading(true);
     try {
       const res = await unlink();
