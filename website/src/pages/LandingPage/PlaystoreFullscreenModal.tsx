@@ -41,14 +41,16 @@ export default function PlaystoreFullscreenModal({
     >
       {/* Top Bar: Title & Close Button */}
       <div
-        className="w-full max-w-4xl flex items-center justify-between text-white pt-2 sm:pt-4 z-10"
+        className="w-full max-w-4xl flex items-center justify-between text-white pt-2 sm:pt-4 z-20"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col min-w-0 pr-4">
-          <span className="text-xs uppercase tracking-wider text-emerald-400 font-bold">
+          <span className="text-xs uppercase tracking-wider text-emerald-400 font-bold transition-all duration-300">
             {currentItem.title}
           </span>
-          <p className="text-sm text-gray-300 truncate m-0">{currentItem.subtitle}</p>
+          <p className="text-sm text-gray-300 truncate m-0 transition-all duration-300">
+            {currentItem.subtitle}
+          </p>
         </div>
 
         <button
@@ -61,7 +63,7 @@ export default function PlaystoreFullscreenModal({
         </button>
       </div>
 
-      {/* Main Image Stage with Swipe Translation */}
+      {/* Main Track Slider Viewport */}
       <div
         className="relative w-full flex-1 flex items-center justify-center overflow-hidden my-2"
         onClick={(e) => e.stopPropagation()}
@@ -75,24 +77,36 @@ export default function PlaystoreFullscreenModal({
             type="button"
             onClick={onPrev}
             aria-label="Vorheriges Bild"
-            className="hidden sm:flex absolute left-4 z-20 w-12 h-12 min-w-[48px] min-h-[48px] rounded-full bg-black/50 hover:bg-black/75 active:scale-95 text-white items-center justify-center transition-all cursor-pointer border-none shadow-lg"
+            className="hidden sm:flex absolute left-4 z-30 w-12 h-12 min-w-[48px] min-h-[48px] rounded-full bg-black/55 hover:bg-black/80 active:scale-95 text-white items-center justify-center transition-all cursor-pointer border-none shadow-xl"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
         )}
 
-        {/* Scaled & Centered Screenshot (9:16 Aspect Ratio) */}
+        {/* Sliding Strip holding all screenshots */}
         <div
-          className={`h-full max-h-[78vh] sm:max-h-[82vh] aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl transition-transform ${
-            isDragging ? 'duration-0' : 'duration-300 ease-out'
+          className={`flex w-full h-full will-change-transform ${
+            isDragging ? 'transition-none' : 'transition-transform duration-350 ease-[cubic-bezier(0.22,1,0.36,1)]'
           }`}
-          style={{ transform: `translateX(${swipeOffset}px)` }}
+          style={{
+            transform: `translateX(calc(-${activeIndex * 100}% + ${swipeOffset}px))`,
+          }}
         >
-          <img
-            src={currentItem.src}
-            alt={currentItem.alt}
-            className="w-full h-full object-contain pointer-events-none select-none"
-          />
+          {screenshots.map((item, idx) => (
+            <div
+              key={item.id}
+              className="w-full h-full shrink-0 flex items-center justify-center overflow-hidden px-2 sm:px-6"
+            >
+              <div className="h-full max-h-[76vh] sm:max-h-[82vh] aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl bg-gray-950 ring-1 ring-white/10">
+                <img
+                  src={item.src}
+                  alt={item.alt}
+                  loading={Math.abs(idx - activeIndex) <= 1 ? 'eager' : 'lazy'}
+                  className="w-full h-full object-contain pointer-events-none select-none"
+                />
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Right Arrow (Desktop) */}
@@ -101,7 +115,7 @@ export default function PlaystoreFullscreenModal({
             type="button"
             onClick={onNext}
             aria-label="Nächstes Bild"
-            className="hidden sm:flex absolute right-4 z-20 w-12 h-12 min-w-[48px] min-h-[48px] rounded-full bg-black/50 hover:bg-black/75 active:scale-95 text-white items-center justify-center transition-all cursor-pointer border-none shadow-lg"
+            className="hidden sm:flex absolute right-4 z-30 w-12 h-12 min-w-[48px] min-h-[48px] rounded-full bg-black/55 hover:bg-black/80 active:scale-95 text-white items-center justify-center transition-all cursor-pointer border-none shadow-xl"
           >
             <ChevronRight className="w-6 h-6" />
           </button>
@@ -109,7 +123,7 @@ export default function PlaystoreFullscreenModal({
       </div>
 
       {/* Bottom Counter Pill */}
-      <div className="pb-2 sm:pb-4 z-10" onClick={(e) => e.stopPropagation()}>
+      <div className="pb-2 sm:pb-4 z-20" onClick={(e) => e.stopPropagation()}>
         <span className="px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-white text-xs font-semibold tracking-wide">
           {activeIndex + 1} / {screenshots.length}
         </span>
