@@ -26,6 +26,7 @@ Commit early, commit often. Every change you make must be bundled into small, lo
 5. **Verify before committing.** Run `git diff --cached --stat` to review what's about to be committed. If the diff spans unrelated topics, split it into multiple commits.
 6. **No unauthorized push / remote actions.** Never push commits or perform actions on `origin` / remotes unless the user explicitly requests or allows it. Commit locally and leave remote actions to the user unless instructed otherwise.
 7. **Local branches only for rebase/merge.** When asked to `rebase` or `merge`, always operate strictly on local branches (e.g., local `main`, local feature branches), never on `origin` or remote-tracking branches.
+8. **Lean branching & pre-merge rebase (Always rebase before merge).** Lean branching is always the goal: Before merging a feature branch into the target branch (e.g., `develop`), ALWAYS rebase the feature branch onto the latest state of the target branch first (`git rebase <target>`). Only cleanly rebased branches may be merged, and merges must ALWAYS use an explicit merge commit (`git merge --no-ff <branch> -m "Merge branch '<branch>' into <target>"`).
 
 ## Workflow Example
 
