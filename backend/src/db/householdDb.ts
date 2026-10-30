@@ -65,6 +65,7 @@ export async function getHouseholdContext(userId: string): Promise<HouseholdCont
       isTrialActive: false,
       trialEndsAt: null,
       hasHouseholdPro: false,
+      hasPaidPro: false,
       isPauseLocked: false,
       requiresExtractionAds: false,
       inviteCode: null,
@@ -111,7 +112,8 @@ export async function getHouseholdContext(userId: string): Promise<HouseholdCont
     const isSelfPaidPro = selfTier === 'premium';
     const isPartnerPaidPro = partnerTier === 'premium';
 
-    const hasHouseholdPro = isSelfPaidPro || isPartnerPaidPro || isTrialActive;
+    const hasPaidPro = isSelfPaidPro || isPartnerPaidPro;
+    const hasHouseholdPro = hasPaidPro || isTrialActive;
     const isPauseLocked = !hasHouseholdPro;
 
     if (isPauseLocked && trialEndsDate && trialEndsDate <= now && activeRow.userBId) {
@@ -129,6 +131,7 @@ export async function getHouseholdContext(userId: string): Promise<HouseholdCont
       isTrialActive,
       trialEndsAt: trialEndsDate ? trialEndsDate.toISOString() : null,
       hasHouseholdPro,
+      hasPaidPro,
       isPauseLocked,
       requiresExtractionAds,
       inviteCode: activeRow.inviteCode,
@@ -165,6 +168,7 @@ export async function getHouseholdContext(userId: string): Promise<HouseholdCont
       isTrialActive: false,
       trialEndsAt: null,
       hasHouseholdPro: false,
+      hasPaidPro: false,
       isPauseLocked: false,
       requiresExtractionAds: false,
       inviteCode: null,
@@ -196,6 +200,7 @@ export async function getHouseholdContext(userId: string): Promise<HouseholdCont
       isTrialActive: false,
       trialEndsAt: null,
       hasHouseholdPro: false,
+      hasPaidPro: false,
       isPauseLocked: false,
       requiresExtractionAds: false,
       inviteCode: pendingRow.inviteCode,
@@ -214,6 +219,7 @@ export async function getHouseholdContext(userId: string): Promise<HouseholdCont
     isTrialActive: false,
     trialEndsAt: null,
     hasHouseholdPro: false,
+    hasPaidPro: false,
     isPauseLocked: false,
     requiresExtractionAds: false,
     inviteCode: null,
