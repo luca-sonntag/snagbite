@@ -22,14 +22,12 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
     hasSelectedTrial,
     trialDays,
     isPremium,
-    user,
     handleUpgrade,
     handleRestore,
   } = usePremiumModal(isOpen, onOpenChange);
 
   if (!isOpen) return null;
 
-  const isAlphaTier = user?.app_metadata?.tier === 'alpha';
   const isBusy = loading || restoring;
 
   const modal = (
@@ -79,7 +77,6 @@ export default function PremiumModal({ isOpen, onOpenChange }: PremiumModalProps
             success={success}
             errorMsg={errorMsg}
             isPremium={isPremium}
-            isAlphaTier={isAlphaTier}
             isLoadingPackages={isLoadingPackages}
             selectedPackageId={selectedPackageId}
             hasSelectedTrial={hasSelectedTrial}

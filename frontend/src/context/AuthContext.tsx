@@ -40,9 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const requiresExtractionAds = Boolean(household?.requiresExtractionAds);
   const isPremium =
     user?.tier === 'premium' ||
-    user?.tier === 'alpha' ||
     user?.app_metadata?.tier === 'premium' ||
-    user?.app_metadata?.tier === 'alpha' ||
     isHouseholdPro;
 
   const refreshSession = useCallback(async (): Promise<{ error?: string }> => {

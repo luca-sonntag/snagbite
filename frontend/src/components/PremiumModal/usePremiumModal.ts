@@ -8,7 +8,7 @@ import type { SubscriptionPackage } from './types';
 
 export function usePremiumModal(isOpen: boolean, onOpenChange: (open: boolean) => void) {
   const { t } = useI18n();
-  const { isPremium, user } = useAuth();
+  const { isPremium } = useAuth();
   const toast = useToast();
 
   const [loading, setLoading] = useState(false);
@@ -133,7 +133,6 @@ export function usePremiumModal(isOpen: boolean, onOpenChange: (open: boolean) =
     hasSelectedTrial,
     trialDays,
     isPremium,
-    user,
     handleUpgrade,
     handleRestore,
   };

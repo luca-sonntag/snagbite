@@ -182,11 +182,7 @@ export default function SettingsView() {
               {user?.email}
             </span>
             <div className="flex items-center gap-2 mt-1.5">
-              {user?.app_metadata?.tier === 'alpha' ? (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 uppercase tracking-wider border-none">
-                  {t('app.settings.alphaActive') || 'Alpha Access'}
-                </span>
-              ) : isRealPremium ? (
+              {isRealPremium ? (
                 <ProBadge variant="chip" />
               ) : (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-400 uppercase tracking-wider border-none">
@@ -197,14 +193,7 @@ export default function SettingsView() {
           </div>
         </div>
 
-        {user?.app_metadata?.tier === 'alpha' ? (
-          <div className="pt-3.5 border-t border-black/5 dark:border-white/5 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-            <span>
-              {t('app.settings.alphaActiveDesc') || (language === 'de' ? 'Du bist Alpha-Tester! Du hast kostenlosen Zugriff auf alle PRO-Funktionen während der Alpha.' : 'You are an alpha tester! You have free access to all PRO features during the alpha.')}
-            </span>
-          </div>
-        ) : isRealPremium ? (
+        {isRealPremium ? (
           <div className="pt-3.5 border-t border-black/5 dark:border-white/5 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
             <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
             <span>
@@ -214,7 +203,7 @@ export default function SettingsView() {
         ) : null}
       </div>
 
-      {/* Premium Upgrade Promotion (only for free members and alpha testers) */}
+      {/* Premium Upgrade Promotion (only for free members) */}
       <PremiumUpgradeCard onUpgradeClick={() => setIsPremiumModalOpen(true)} />
 
       {/* Household Section */}
