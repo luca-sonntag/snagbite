@@ -16,6 +16,8 @@ export default function HouseholdActiveCard({ onOpenUpgrade, onClose }: Househol
     partnerProfile,
     isTrialActive,
     trialEndsAt,
+    hasHouseholdPro,
+    hasPaidPro,
     isPauseLocked,
     nudgePartner,
     unlink,
@@ -25,6 +27,8 @@ export default function HouseholdActiveCard({ onOpenUpgrade, onClose }: Househol
   const { t } = useI18n();
   const [nudgeLoading, setNudgeLoading] = useState(false);
   const [unlinkLoading, setUnlinkLoading] = useState(false);
+
+  const isProActive = Boolean(hasPaidPro || (hasHouseholdPro && !isTrialActive));
 
   const partnerName = partnerProfile?.displayName || t('household.partnerDefault');
   const avatarUrl = partnerProfile?.avatarUrl;
@@ -96,7 +100,21 @@ export default function HouseholdActiveCard({ onOpenUpgrade, onClose }: Househol
       </div>
 
       {/* Trial / Paused / Active PRO Banner */}
-      {isTrialActive && trialEndsAt && (
+      {isProActive && (
+        <div className="p-3.5 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 flex items-center gap-3">
+          <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+          <div className="flex flex-col text-xs">
+            <span className="font-bold text-emerald-700 dark:text-emerald-400">
+              {t('household.pro.activeTitle')}
+            </span>
+            <span className="text-stone-600 dark:text-stone-400">
+              {t('household.pro.activeDesc')}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {!isProActive && isTrialActive && trialEndsAt && (
         <div className="p-3.5 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 flex items-center gap-3">
           <Clock className="w-5 h-5 text-amber-600 shrink-0" />
           <div className="flex flex-col text-xs">
@@ -129,7 +147,7 @@ export default function HouseholdActiveCard({ onOpenUpgrade, onClose }: Househol
 
       {/* Action buttons: Nudge and Unlink */}
       <div className="flex flex-col gap-2 pt-1">
-        {!isPauseLocked && onOpenUpgrade && (
+        {!isProActive && onOpenUpgrade && (
           <button
             type="button"
             disabled={nudgeLoading}
