@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@heroui/react';
-import { Play, BookOpen } from 'lucide-react';
+import { Play, Maximize } from 'lucide-react';
 import type { Recipe } from '../../types';
 import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
@@ -100,7 +100,7 @@ export default function RecipeInstructions({
                     }}
                     aria-label={t('recipe.readerView')}
                   >
-                    <BookOpen className="w-5 h-5" />
+                    <Maximize className="w-5 h-5" />
                   </Button>
                 </div>
               </div>
