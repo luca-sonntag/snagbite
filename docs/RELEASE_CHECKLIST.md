@@ -27,7 +27,8 @@
   - Commits: d7a7c58b, ee8cea2f, 7df42e75, a174048, 5323b67e.
 - [ ] **Tigris S3 Endpoint & Credentials auf Railway prüfen (Vereinheitlichung auf AWS_*):**
   - Storage-Umgebungsvariablen wurden auf native `AWS_*`-Variablen vereinheitlicht (`AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `BUCKET_NAME`).
-  - `AWS_ENDPOINT_URL_S3` (oder Fallback `S3_ENDPOINT`) muss auf `https://t3.storage.dev` zeigen (nicht `storageapi.dev`).
+  - `AWS_ENDPOINT_URL_S3` muss auf `https://t3.storage.dev` zeigen (nicht `storageapi.dev`).
+  - S3_*-Fallbacks wurden komplett entfernt; alle Storage-Variablen müssen als `AWS_*` bzw. `BUCKET_NAME` vorliegen.
   - Redundante manuelle `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` / `S3_BUCKET_NAME` im Railway Dashboard können entfernt werden, da das Backend nun direkt die nativen Tigris-Plugin-Variablen verwendet.
   - Commits: `068b6859`, `5fde45c8`, `bff0f4dd`.
 
