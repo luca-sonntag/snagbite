@@ -304,11 +304,7 @@ if (-not $runBackend -and -not $runApp) {
     }
 }
 
-$oldGraphifySkip = $env:GRAPHIFY_SKIP_HOOK
 try {
-    # Suppress background graphify hooks to avoid Windows file locks on .git/HEAD
-    $env:GRAPHIFY_SKIP_HOOK = "1"
-
     # Setup initial git tracking state
     Initialize-GitState
 
@@ -353,7 +349,4 @@ catch {
     Undo-Transaction
     Write-Error "Deployment failed: $_"
     exit 1
-}
-finally {
-    $env:GRAPHIFY_SKIP_HOOK = $oldGraphifySkip
 }

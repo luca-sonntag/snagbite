@@ -6,6 +6,18 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-30: Vollständige Entfernung von Graphify und Claude-Artefakten
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Claude Code Anweisungsdatei [`CLAUDE.md`](file:///c:/Users/lucas/source/repos/cookbook/CLAUDE.md) und alter Git-Worktree `.claude/worktrees/` (~31.700 Dateien).
+  * Graphify Wissensgraph-Integration inkl. `.graphifyignore`, `graphify-out/`, `.codex/hooks.json`, `.gitattributes` (`merge=graphify`), `.mcp.json` (`graphify-mcp`) und Git-Hooks (`.git/hooks/post-commit`, `.git/hooks/post-checkout`).
+  * Workaround-Guards gegen Windows File Locks (`$env:GRAPHIFY_SKIP_HOOK`) in [`deploy.ps1`](file:///c:/Users/lucas/source/repos/cookbook/deploy.ps1) und [`frontend/scripts/git-utils.ps1`](file:///c:/Users/lucas/source/repos/cookbook/frontend/scripts/git-utils.ps1).
+* **Ersetzt durch:**
+  * Schlankes Repository ohne Hintergrund-Git-Hooks oder redundante Tool-Konfigurationen. Die Projekt- und Agenten-Richtlinien werden zentral in [`AGENTS.md`](file:///c:/Users/lucas/source/repos/cookbook/AGENTS.md) und `.agents/` gepflegt.
+* **Betroffene Dateien:** `CLAUDE.md` (gelöscht), `.codex/hooks.json` (gelöscht), `.graphifyignore` (gelöscht), `.gitattributes` (gelöscht), `.mcp.json` (gelöscht), `.gitignore`, `deploy.ps1`, `frontend/scripts/git-utils.ps1`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-30: Vollständige Entfernung des Alpha-Tiers und `AlphaWelcome`-Overlays (Post-Alpha Cleanup)
 
 * **Ersetzter Code / Veraltete Logik:**

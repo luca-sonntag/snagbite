@@ -135,12 +135,7 @@ function Invoke-GitMasterMergeAndTag {
 
     $repoRoot = Get-GitRepoRoot
     Push-Location $repoRoot
-    $oldGraphifySkip = $env:GRAPHIFY_SKIP_HOOK
     try {
-        # Temporarily suppress background graphify rebuild hooks during rapid branch switches
-        # to prevent Windows file lock contention on .git/HEAD and .git/HEAD.lock
-        $env:GRAPHIFY_SKIP_HOOK = "1"
-
         $originalBranch = (Get-GitOutput -Arguments @("branch", "--show-current")).ToString().Trim()
         if ([string]::IsNullOrWhiteSpace($originalBranch)) { $originalBranch = "develop" }
 
@@ -198,7 +193,6 @@ function Invoke-GitMasterMergeAndTag {
 
         Write-Host "  [OK] Successfully merged $sourceBranch -> master and pushed tag $TagName." -ForegroundColor Green
     } finally {
-        $env:GRAPHIFY_SKIP_HOOK = $oldGraphifySkip
         Pop-Location
     }
 }
