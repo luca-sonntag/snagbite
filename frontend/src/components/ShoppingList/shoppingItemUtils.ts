@@ -110,6 +110,12 @@ export function getPackageRecommendation(
     return null;
   }
 
+  // Fresh produce single piece guard: If someone needs only 1-2 pieces (e.g. 1 Stück Apfel, 1 Stück Zitrone),
+  // they buy loose fruit from the crate, not a 1 kg bulk bag / sack!
+  if (itemMetric?.type === 'count' && pkgMetric?.type === 'mass' && amount <= 2) {
+    return null;
+  }
+
   let count = 1;
   let totalPkgAmount = pkgAmount;
 

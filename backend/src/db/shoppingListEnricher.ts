@@ -5,6 +5,7 @@ import {
   type PackagingType,
   getDefaultShelfLifeDays,
   isPackageUnitAppropriate,
+  getUnitDimension,
 } from '@cookbook/shared';
 import { num } from './client.js';
 import { db } from './drizzle.js';
@@ -64,9 +65,20 @@ export async function enrichShoppingListItem(
             item.packagingType = (mapping.packagingType as PackagingType) || undefined;
           }
           if (mapping.typicalPackageAmount && Number(mapping.typicalPackageAmount) > 0) {
+            const pkgAmt = Number(mapping.typicalPackageAmount);
             const pkgUnit = mapping.typicalPackageUnit || '';
-            if (!item.unit || isPackageUnitAppropriate(item.unit, pkgUnit)) {
-              item.typicalPackageAmount = Number(mapping.typicalPackageAmount);
+            const cat = (item.category || '').toUpperCase().trim();
+            const isFreshProduce = ['FRUITS', 'VEGETABLES', 'PRODUCE', 'FRUITS_VEGETABLES', 'HERBS', 'OBST', 'GEMÜSE'].includes(cat);
+            const isCount = !item.unit || getUnitDimension(item.unit) === 'count';
+
+            // Guard: Single piece weight of fresh produce (e.g. 100g lemon, 150g banana, 40g garlic)
+            // is the weight of one piece, NOT a supermarket retail package!
+            const isPieceWeightMisidentifiedAsPackage = isFreshProduce && isCount && pkgUnit.toLowerCase() === 'g' && pkgAmt <= 250;
+
+            if (isPieceWeightMisidentifiedAsPackage) {
+              item.packagingType = 'loose';
+            } else if (!item.unit || isPackageUnitAppropriate(item.unit, pkgUnit)) {
+              item.typicalPackageAmount = pkgAmt;
               item.typicalPackageUnit = mapping.typicalPackageUnit || undefined;
             }
           }

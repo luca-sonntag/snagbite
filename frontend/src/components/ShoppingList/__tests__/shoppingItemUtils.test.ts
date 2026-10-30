@@ -16,8 +16,12 @@ describe('shoppingItemUtils - getPackageRecommendation', () => {
     assert.equal(getPackageRecommendation(250, 'ml', 1, 'Stück'), null);
   });
 
-  it('allows valid Stück vs Mass package recommendations (e.g. Apfel)', () => {
-    assert.equal(getPackageRecommendation(1, 'Stück', 1000, 'g'), '1 Pkg. (1000 g)');
+  it('treats 1-2 single pieces as loose produce but recommends bulk bags for larger quantities', () => {
+    // 1 single apple should be bought loose (no 1kg bulk bag recommendation)
+    assert.equal(getPackageRecommendation(1, 'Stück', 1000, 'g'), null);
+    assert.equal(getPackageRecommendation(2, 'Stück', 1000, 'g'), null);
+    // 5 apples (bulk quantity) appropriately recommends a 1kg bag
+    assert.equal(getPackageRecommendation(5, 'Stück', 1000, 'g'), '1 Pkg. (1000 g)');
   });
 
   it('calculates package count for matching mass units (e.g. veganes Skyr)', () => {

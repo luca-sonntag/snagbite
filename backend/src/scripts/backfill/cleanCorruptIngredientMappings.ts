@@ -100,10 +100,25 @@ export async function runCleanMappings(): Promise<{
       }
     }
 
-    // 2. Packaging Type Backfill
+    // 2. Packaging Type Backfill & Single Piece Produce Weight Correction
     let targetPackagingType = row.packagingType as PackagingType | null;
+    let targetPackageAmount = row.typicalPackageAmount;
+    let targetPackageUnit = row.typicalPackageUnit;
     let packagingModified = false;
-    if (!targetPackagingType) {
+
+    // Single produce piece weight correction (e.g. lemon 100g, banana 150g, garlic 40g, onion 100g)
+    const isSingleProduceStaple =
+      FRESH_PRODUCE_CATEGORIES.has(cat) &&
+      FRESH_PRODUCE_TERMS.has((row.mappingKey || '').toLowerCase().trim());
+
+    if (isSingleProduceStaple && pkgUnit === 'g' && Number(row.typicalPackageAmount) <= 250) {
+      console.log(`  🍋 [Row ${row.id}] "${row.mappingKey}": converted single piece weight (${row.typicalPackageAmount}g) to loose produce`);
+      targetPackagingType = 'loose';
+      targetPackageAmount = null;
+      targetPackageUnit = null;
+      packagingModified = true;
+      packagingTypesBackfilled++;
+    } else if (!targetPackagingType) {
       const inferred = inferPackagingType(row.typicalPackageUnit, cat);
       if (inferred) {
         targetPackagingType = inferred;
@@ -119,6 +134,8 @@ export async function runCleanMappings(): Promise<{
         .set({
           aliases: updatedAliases,
           packagingType: targetPackagingType,
+          typicalPackageAmount: targetPackageAmount,
+          typicalPackageUnit: targetPackageUnit,
           updatedAt: new Date(),
         })
         .where(eq(ingredientMappings.id, row.id));
