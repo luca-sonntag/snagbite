@@ -330,6 +330,9 @@ Der Haushalt-Modus verbindet zwei Snagbite-Nutzer zu einem gemeinsamen Haushalt:
 * **Haushalts-Verwaltung (`HouseholdSheet.tsx`, `HouseholdActiveCard.tsx`, `HouseholdInviteCard.tsx`):**
   * Aufrufbar über Einstellungen (`SettingsView.tsx`), In-App Deep-Links (`#/household-invite/<code>`) und Banner.
   * Bietet 1-Klick-Code-Generierung, natives Teilen (`navigator.share`), Code-Eingabe, Partner-Nudge und Haushalt-Trennungsdialog.
-* **Haushalt-Banner (`HouseholdInviteBanner.tsx`):**
-  * Unaufdringlicher, warmer Einladungs-Banner in Einkaufsliste (`ShoppingList/index.tsx`) und Wochenplaner, der sich bei aktiver Verknüpfung automatisch ausblendet.
+* **Haushalt-Banner & Paused-Kommunikation (`HouseholdInviteBanner.tsx`, `HouseholdPausedBanner.tsx`):**
+  * **Pausiert-Badge in den Einstellungen:** In `SettingsView.tsx` wird neben dem Partnernamen ein gut sichtbares Badge `Pausiert` in Rose eingeblendet, sobald die Testphase beendet ist und kein PRO-Abo vorliegt.
+  * **Pausiert-Banner (`HouseholdPausedBanner.tsx`):** Reagiert auf `status === 'paused'` bzw. `isPauseLocked` und wird im Kochbuch (`SavedCatalog/index.tsx`), im Wochenplaner (`MealPlanner/index.tsx`) und in der Einkaufsliste (`ShoppingList/index.tsx`) eingeblendet. Bietet direkte 1-Klick-Aktionen zum Freischalten von PRO oder zum Öffnen des Haushalts-Sheets.
+  * **Korrektur Einladungs-Banner:** `HouseholdInviteBanner.tsx` unterdrückt die Anzeige bei `status === 'paused'`, sodass verbundene, aber pausierte Nutzer niemals fälschlicherweise zum Einladen eines Partners aufgefordert werden.
+  * **Katalog-Titel & Filter-Schutz:** Im pausierten Zustand wechselt der Titel im Kochbuch von „Alle eure Rezepte“ zurück auf „Alle deine Rezepte“ inklusive Hinweises auf ausgeblendete Rezepte; der Partner-Filterchip in `FilterSheet.tsx` wird erst bei aktivem Haushalt wieder angeboten.
 

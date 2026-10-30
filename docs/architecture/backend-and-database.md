@@ -340,6 +340,10 @@ Der Haushalt-Modus ermöglicht es zwei Nutzern, einen 1:1 gemeinsamen Haushalt z
   * Cooldown: 15 Minuten pro Kategorie (`recipe_added`, `meal_planned`, `shopping_added`).
   * Android Slot-Tags: `collapseTag` fasst aufeinanderfolgende Benachrichtigungen auf Systemebene zusammen.
   * Koch-Vorschlag (`cook_proposal`): 2 Minuten Cooldown pro Rezept.
+* **Testphasen-Benachrichtigungen (`householdTrialNotifications.ts`):**
+  * `household_trial_ending`: Sendet 24 Stunden vor Ablauf der Testphase eine Warnung mit Deeplink zu den PRO-Abonnements (max. 1x pro 7 Tage).
+  * `household_trial_expired`: Benachrichtigt beide Partner, sobald die Testphase abgelaufen ist und der Haushalt pausiert wird (max. 1x pro 60 Tage).
+  * Werden periodisch alle 30 Minuten im Worker (`backend/src/queue.ts`) sowie on-demand bei Statusabfrage in `getHouseholdContext` (`backend/src/db/householdDb.ts`) geprüft.
 
 
 
