@@ -29,6 +29,7 @@ export interface IngredientMapping {
   estimatedNutrients: EstimatedNutrients | null;
   typicalPackageAmount?: number | null;
   typicalPackageUnit?: string | null;
+  packagingType?: string | null;
   shelfLifeDays?: number | null;
   source: MappingSource;
   confidence: number | null;
@@ -63,6 +64,7 @@ function rowToMapping(row: any): IngredientMapping {
     estimatedNutrients: ((row.estimatedNutrients ?? row.estimated_nutrients) as EstimatedNutrients | null) ?? null,
     typicalPackageAmount: Number.isFinite(pkg as number) ? (pkg as number) : null,
     typicalPackageUnit: (row.typicalPackageUnit ?? row.typical_package_unit) ?? null,
+    packagingType: (row.packagingType ?? row.packaging_type) ?? null,
     shelfLifeDays: typeof (row.shelfLifeDays ?? row.shelf_life_days) === 'number'
       ? (row.shelfLifeDays ?? row.shelf_life_days)
       : null,
@@ -73,7 +75,18 @@ function rowToMapping(row: any): IngredientMapping {
   };
 }
 
-function remember(id: string, mapping: IngredientMapping | null): void {
+function remember(id: string, mapping: IngredientMapping | null, isAlias: boolean = false): void {
+  if (isAlias && cache.has(id)) {
+    const existing = cache.get(id);
+    if (existing) {
+      const existingId = cacheId(existing.mappingKey, existing.category);
+      const existingIdDe = existing.mappingKeyDe ? cacheId(existing.mappingKeyDe, existing.category) : null;
+      // Do not allow an alias to overwrite a primary/exact key match
+      if (id === existingId || id === existingIdDe) {
+        return;
+      }
+    }
+  }
   if (cache.size >= CACHE_MAX_ENTRIES) {
     const oldest = cache.keys().next().value;
     if (oldest !== undefined) cache.delete(oldest);
@@ -84,13 +97,23 @@ function remember(id: string, mapping: IngredientMapping | null): void {
 function rememberMappingInCache(mapping: IngredientMapping): void {
   const cat = mapping.category.toUpperCase().trim();
   const major = getMajorCategoryGroup(cat);
-  const keys = [mapping.mappingKey, mapping.mappingKeyDe, ...(mapping.aliases || [])].filter(
+  const primaryKeys = [mapping.mappingKey, mapping.mappingKeyDe].filter(
     (k): k is string => Boolean(k && k.length >= 2)
   );
-  for (const k of keys) {
-    remember(cacheId(k, cat), mapping);
+  for (const k of primaryKeys) {
+    remember(cacheId(k, cat), mapping, false);
     if (major && major !== cat) {
-      remember(cacheId(k, major), mapping);
+      remember(cacheId(k, major), mapping, false);
+    }
+  }
+
+  const aliasKeys = (mapping.aliases || []).filter(
+    (k): k is string => Boolean(k && k.length >= 2 && !primaryKeys.includes(k))
+  );
+  for (const k of aliasKeys) {
+    remember(cacheId(k, cat), mapping, true);
+    if (major && major !== cat) {
+      remember(cacheId(k, major), mapping, true);
     }
   }
 }
@@ -221,6 +244,7 @@ export async function storeMapping(
         estimatedNutrients: mapping.estimatedNutrients,
         typicalPackageAmount: mapping.typicalPackageAmount !== undefined && mapping.typicalPackageAmount !== null ? String(mapping.typicalPackageAmount) : null,
         typicalPackageUnit: mapping.typicalPackageUnit ?? null,
+        packagingType: mapping.packagingType ?? null,
         shelfLifeDays: mapping.shelfLifeDays ?? null,
         source: mapping.source,
         confidence: mapping.confidence !== undefined && mapping.confidence !== null ? String(mapping.confidence) : null,
@@ -238,6 +262,7 @@ export async function storeMapping(
           estimatedNutrients: mapping.estimatedNutrients,
           typicalPackageAmount: mapping.typicalPackageAmount !== undefined && mapping.typicalPackageAmount !== null ? String(mapping.typicalPackageAmount) : null,
           typicalPackageUnit: mapping.typicalPackageUnit ?? null,
+          packagingType: mapping.packagingType ?? null,
           shelfLifeDays: mapping.shelfLifeDays ?? null,
           source: mapping.source,
           confidence: mapping.confidence !== undefined && mapping.confidence !== null ? String(mapping.confidence) : null,
@@ -262,6 +287,7 @@ export async function storeMapping(
     estimatedNutrients: mapping.estimatedNutrients ?? null,
     typicalPackageAmount: mapping.typicalPackageAmount ?? null,
     typicalPackageUnit: mapping.typicalPackageUnit ?? null,
+    packagingType: mapping.packagingType ?? null,
     shelfLifeDays: mapping.shelfLifeDays ?? null,
     source: mapping.source,
     confidence: mapping.confidence ?? null,
