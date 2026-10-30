@@ -36,7 +36,6 @@ import { useExtractionJobs } from './context/ExtractionJobsContext';
 import { useMobileNavigationBack } from './hooks/useMobileNavigationBack';
 import { useTimerManager } from './hooks/useTimerManager';
 import { useOnboarding } from './hooks/useOnboarding';
-import { useAlphaWelcome } from './hooks/useAlphaWelcome';
 import { useAppHistory } from './hooks/useAppHistory';
 import { useAppAds } from './hooks/useAppAds';
 import { useAppNativeListeners } from './hooks/useAppNativeListeners';
@@ -93,7 +92,6 @@ export default function App() {
   }, [activeView]);
 
   const { shouldShow: showOnboarding, complete: completeOnboarding, replay: replayOnboarding } = useOnboarding();
-  const { shouldShow: showAlphaWelcome, complete: completeAlphaWelcome } = useAlphaWelcome();
 
   const isCatalogList = activeView === 'history' && isCatalogListRoute(subPath);
 
@@ -685,8 +683,6 @@ export default function App() {
           completeOnboarding();
           navigate('extract');
         }}
-        showAlphaWelcome={showAlphaWelcome}
-        onCompleteAlphaWelcome={completeAlphaWelcome}
         limitStatus={limitStatus}
         onAnalyzeUrl={(queueUrl) => {
           navigate('extract');

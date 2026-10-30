@@ -2,7 +2,6 @@ import React, { lazy, Suspense, useState, useEffect, useRef } from 'react';
 
 const PremiumModal = lazy(() => import('./PremiumModal'));
 const WelcomeGuide = lazy(() => import('./WelcomeGuide'));
-const AlphaWelcome = lazy(() => import('./AlphaWelcome'));
 const PreAdTransparencySheet = lazy(() => import('./Ads/PreAdTransparencySheet'));
 import SmartResumeSheet from './ExtractForm/SmartResumeSheet';
 import { DevTools } from './DevTools';
@@ -16,8 +15,6 @@ export const AppOverlays: React.FC<AppOverlaysProps> = ({
   setIsPremiumModalOpen,
   showOnboarding,
   onCompleteOnboarding,
-  showAlphaWelcome,
-  onCompleteAlphaWelcome,
   showPreAdNotice: externalShowPreAdNotice,
   setShowPreAdNotice: externalSetShowPreAdNotice,
   onConfirmPreAdNotice,
@@ -27,13 +24,10 @@ export const AppOverlays: React.FC<AppOverlaysProps> = ({
 }) => {
   const { isPremium } = useAuth();
 
-  // Immediately register onboarding / alpha welcome on the overlay stack even while
-  // their lazy chunks are still loading inside <Suspense>, preventing background
+  // Immediately register onboarding on the overlay stack even while
+  // its lazy chunk is still loading inside <Suspense>, preventing background
   // spotlight tours from firing before the portal mounts.
-  useModalOverlay(
-    Boolean(showOnboarding || showAlphaWelcome),
-    showOnboarding ? onCompleteOnboarding : onCompleteAlphaWelcome
-  );
+  useModalOverlay(Boolean(showOnboarding), onCompleteOnboarding);
 
   // Mount the (lazy) premium modal only once it's first opened, then keep it
   // mounted so its close transition still runs.
@@ -131,13 +125,6 @@ export const AppOverlays: React.FC<AppOverlaysProps> = ({
         </Suspense>
       )}
 
-      {/* Alpha tester welcome overlay — after onboarding so they don't stack */}
-      {!showOnboarding && showAlphaWelcome && (
-        <Suspense fallback={null}>
-          <AlphaWelcome onClose={onCompleteAlphaWelcome} />
-        </Suspense>
-      )}
-
       {/* Pre-Ad Transparency Sheet for Free-Tier users */}
       {isPreAdNoticeOpen && (
         <Suspense fallback={null}>
@@ -151,7 +138,7 @@ export const AppOverlays: React.FC<AppOverlaysProps> = ({
       )}
 
       {/* Smart Resume Sheet for Queued Recipes */}
-      {!showOnboarding && !showAlphaWelcome && !isPreAdNoticeOpen && onAnalyzeUrl && onNavigateExtract && (
+      {!showOnboarding && !isPreAdNoticeOpen && onAnalyzeUrl && onNavigateExtract && (
         <SmartResumeSheet
           limitStatus={limitStatus}
           onAnalyze={onAnalyzeUrl}

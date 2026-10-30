@@ -30,8 +30,6 @@ export interface AppOverlaysProps {
   setIsPremiumModalOpen: (open: boolean) => void;
   showOnboarding: boolean;
   onCompleteOnboarding: () => void;
-  showAlphaWelcome: boolean;
-  onCompleteAlphaWelcome: () => void;
   showPreAdNotice?: boolean;
   setShowPreAdNotice?: (open: boolean) => void;
   onConfirmPreAdNotice?: () => void;

@@ -70,7 +70,7 @@ export const SpotlightTourProvider: React.FC<{ children: React.ReactNode }> = ({
   // Trap Android hardware back button while a tour is active
   useModalOverlay(!!activeTourId, stopActiveTour);
 
-  // If a higher-priority overlay (e.g. AlphaWelcome, WelcomeGuide, SmartResumeSheet)
+  // If a higher-priority overlay (e.g. WelcomeGuide, SmartResumeSheet)
   // opens while a tour is already running, dismiss the tour WITHOUT marking it completed
   // so it will re-trigger cleanly once the overlay is closed.
   useEffect(() => {
