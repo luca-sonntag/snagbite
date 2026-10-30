@@ -15,6 +15,7 @@ interface ShoppingListGroupProps {
   formatItemAmount: (amount: number, unit: string) => string;
   collapsingKeys: Set<string>;
   checkingKeys?: Set<string>;
+  showPackageRecommendations?: boolean;
 }
 
 /**
@@ -30,7 +31,8 @@ export default function ShoppingListGroup({
   onDelete,
   formatItemAmount,
   collapsingKeys,
-  checkingKeys
+  checkingKeys,
+  showPackageRecommendations = true,
 }: ShoppingListGroupProps) {
   const { t } = useI18n();
   const { pantryItems } = usePantry();
@@ -91,6 +93,7 @@ export default function ShoppingListGroup({
                     isCheckingOff={checkingKeys?.has(displayKey)}
                     isCollapsing={collapsingKeys.has(displayKey)}
                     pantryStockMatch={pantryStockMatch}
+                    showPackageRecommendation={showPackageRecommendations}
                     onClick={() => onItemToggle(item)}
                     onDelete={() => onDelete(item)}
                     formatItemAmount={formatItemAmount}

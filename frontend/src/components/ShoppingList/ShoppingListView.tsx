@@ -41,6 +41,7 @@ interface ShoppingListViewProps {
   clearChecked: (transferToPantry?: boolean) => void;
   restoreItems?: (items: ShoppingListItemType[]) => void;
   setCollapseSentinel?: (el: HTMLDivElement | null) => void;
+  showPackageRecommendations?: boolean;
 }
 
 export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
@@ -57,6 +58,7 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
   deleteItemGroup,
   clearChecked,
   setCollapseSentinel,
+  showPackageRecommendations = true,
 }) => {
   const dialog = useDialog();
   const { t } = useI18n();
@@ -278,6 +280,7 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
               formatItemAmount={formatItemAmount}
               collapsingKeys={collapsingKeys}
               checkingKeys={checkingKeys}
+              showPackageRecommendations={showPackageRecommendations}
             />
           ) : (
             <ShoppingAllDoneState onClear={handleClearChecked} />
