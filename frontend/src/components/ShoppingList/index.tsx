@@ -116,7 +116,9 @@ export default function ShoppingList(props: ShoppingListProps) {
         action={
           <button
             type="button"
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
               hapticLight();
               togglePackageRecommendations();
             }}
@@ -126,16 +128,16 @@ export default function ShoppingList(props: ShoppingListProps) {
                 ? t('shopping.packageRecommendationActive')
                 : t('shopping.packageRecommendationInactive')
             }
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border-none shadow-xs active:scale-95 select-none ${
+            className={`inline-flex items-center gap-2 px-3.5 py-2 min-h-[44px] rounded-xl text-xs font-semibold transition-all cursor-pointer border-none shadow-xs active:scale-95 select-none touch-manipulation ${
               showPackageRecommendations
                 ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 dark:bg-emerald-500/20 hover:bg-emerald-500/25'
                 : 'bg-black/5 text-gray-500 dark:bg-white/10 dark:text-gray-400 hover:bg-black/10 dark:hover:bg-white/15'
             }`}
           >
-            <Package className="w-3.5 h-3.5 shrink-0" />
+            <Package className="w-4 h-4 shrink-0" />
             <span>{t('shopping.packageSizes')}</span>
             <span
-              className={`w-1.5 h-1.5 rounded-full transition-colors shrink-0 ${
+              className={`w-2 h-2 rounded-full transition-colors shrink-0 ${
                 showPackageRecommendations ? 'bg-emerald-500' : 'bg-gray-400 dark:bg-gray-500'
               }`}
             />

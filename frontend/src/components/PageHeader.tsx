@@ -33,7 +33,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           </p>
         )}
       </div>
-      {action && <div className="shrink-0 ml-3 flex items-center gap-2">{action}</div>}
+      {action && <div className="shrink-0 ml-3 flex items-center gap-2 relative z-10">{action}</div>}
     </div>
   );
 };
