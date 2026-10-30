@@ -7,6 +7,7 @@ import {
   isHouseholdEnabled,
   getHouseholdPartnerExtractionAds,
 } from './settingsDb.js';
+import { checkAndNotifySingleHouseholdTrialExpired } from '../push/householdTrialNotifications.js';
 import type { HouseholdContext, HouseholdPartnerProfile } from './householdTypes.js';
 
 export * from './householdTypes.js';
@@ -84,6 +85,10 @@ export async function getHouseholdContext(userId: string): Promise<HouseholdCont
 
     const hasHouseholdPro = isSelfPaidPro || isPartnerPaidPro || isTrialActive;
     const isPauseLocked = !hasHouseholdPro;
+
+    if (isPauseLocked && trialEndsDate && trialEndsDate <= now && activeRow.userBId) {
+      void checkAndNotifySingleHouseholdTrialExpired(activeRow.userAId, activeRow.userBId);
+    }
 
     const partnerExtractionAdsConfig = await getHouseholdPartnerExtractionAds();
     const requiresExtractionAds = partnerExtractionAdsConfig && !isSelfPaidPro;
