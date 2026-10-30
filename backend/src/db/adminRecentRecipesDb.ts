@@ -149,7 +149,7 @@ export async function getRecentExtractedRecipes(
       id: u.id,
       email: u.email ?? null,
       name: u.name ?? null,
-      tier: u.tier || 'free',
+      tier: u.tier === 'premium' ? 'premium' : 'free',
     });
   }
 

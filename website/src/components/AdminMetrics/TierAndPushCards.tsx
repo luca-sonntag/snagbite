@@ -41,27 +41,17 @@ export function TierAndPushCards({
               title={`Premium: ${tiers.premiumPct}%`}
             />
             <div
-              className="bg-amber-500 h-full transition-all"
-              style={{ width: `${tiers.alphaPct}%` }}
-              title={`Alpha: ${tiers.alphaPct}%`}
-            />
-            <div
               className="bg-gray-300 h-full transition-all"
               style={{ width: `${tiers.freePct}%` }}
               title={`Free: ${tiers.freePct}%`}
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-2 text-xs">
+          <div className="grid grid-cols-2 gap-2 text-xs">
             <div className="p-3 rounded-2xl bg-emerald-500/10 flex flex-col gap-0.5">
               <span className="font-semibold text-emerald-700">Premium</span>
               <span className="text-lg font-bold text-emerald-900">{tiers.premiumCount}</span>
               <span className="text-[11px] text-emerald-700 font-mono">{tiers.premiumPct}%</span>
-            </div>
-            <div className="p-3 rounded-2xl bg-amber-500/10 flex flex-col gap-0.5">
-              <span className="font-semibold text-amber-700">Alpha</span>
-              <span className="text-lg font-bold text-amber-900">{tiers.alphaCount}</span>
-              <span className="text-[11px] text-amber-700 font-mono">{tiers.alphaPct}%</span>
             </div>
             <div className="p-3 rounded-2xl bg-gray-100 flex flex-col gap-0.5">
               <span className="font-semibold text-gray-600">Free</span>
