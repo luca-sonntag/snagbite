@@ -6,6 +6,22 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-30: Ablösung fragiler Container-Stringheuristiken durch `PackagingType` & dimensionale Guards
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Raw-Stringheuristiken in `shoppingItemUtils.ts` (`cleanPkgUnit === 'glas' || cleanPkgUnit === 'jar' || cleanPkgUnit === 'dose' ...`).
+  * Ad-hoc `itemMetric?.type === 'count' && pkgMetric?.type === 'volume'` Checks im UI zur Unterdrückung von Mismatches.
+  * Fehlende Validierung im Gemini-Resolver-Tool (`submit_match`), wodurch flüssige Zitronensaft-Flaschen („200 ml“) als Alias für ganze Zitronen („1 Stück“) gelernt werden konnten.
+* **Ersetzt durch:**
+  * **Zentraler Datenvertrag & Enum:** `PackagingType = 'loose' | 'piece' | 'can' | 'jar' | 'bottle' | 'tub' | 'pack' | 'bag' | 'box' | 'bunch'` in `@cookbook/shared` (`recipes.ts`, `cookbook.ts`).
+  * **Physikalische Dimensionen-Matrix:** `isPackageUnitAppropriate()`, `getUnitDimension()` und `areUnitsDimensionallyCompatible()` in `shared/src/units.ts`.
+  * **Loose-Produce Schutz:** Frische Obst-/Gemüse-Artikel erhalten `packagingType = 'loose'` und werden nicht künstlich mit Packungsempfehlungen überladen.
+  * **Zentrales i18n Packaging-Dictionary:** `formatPackagingLabel(type, count, lang)` in `frontend/src/i18n.ts` mit voller Singular/Plural-Lokalisierung (DE/EN) ohne String-Matching im UI.
+  * **Defense-in-Depth:** Inkompatible Gebindeeinheiten werden bereits beim Gemini Tool-Call (`resolverTools.ts`), beim Matcher (`ingredientMatcher.ts`) und im Backend-Enricher (`shoppingListEnricher.ts`) abgewiesen.
+* **Betroffene Dateien:** `shared/src/types/recipes.ts`, `shared/src/types/cookbook.ts`, `shared/src/units.ts`, `backend/src/db/schema/ingredients.ts`, `backend/src/gemini.ts`, `backend/src/matching/resolverTools.ts`, `backend/src/matching/ingredientResolver.ts`, `backend/src/matching/ingredientMatcher.ts`, `backend/src/matching/mappingStore.ts`, `backend/src/db/shoppingListEnricher.ts`, `frontend/src/i18n.ts`, `frontend/src/components/ShoppingList/shoppingItemUtils.ts`, `frontend/src/components/ShoppingList/ShoppingListItem.tsx`, `docs/RELEASE_CHECKLIST.md`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-30: Vollständige Entfernung von Graphify und Claude-Artefakten
 
 * **Ersetzter Code / Veraltete Logik:**

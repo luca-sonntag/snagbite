@@ -17,6 +17,14 @@
   - **Befehl:** `npm run db:push:prod` im `backend/`-Verzeichnis ausführen.
   * **Grund:** Neue Tabelle `households` für den Household-Modus (1:1 Partner-Verknüpfung, 7-Tage-Trial, Cooldowns & Partner-Anstupsen).
   * **Dringlichkeit:** Zwingend vor oder zeitgleich mit dem Backend-Deploy.
+- [ ] **Spalte `packaging_type` in `ingredient_mappings` auf Production ausrollen:**
+  - **Befehl:** `npm run db:push:prod` im `backend/`-Verzeichnis ausführen.
+  * **Grund:** Neue `packaging_type: text('packaging_type')` Spalte auf Tabelle `ingredient_mappings` für strukturierte Gebindetypen (`loose`, `piece`, `can`, `jar`, `bottle`, `tub`, `pack`, `bag`, `box`, `bunch`) statt fragiler String-Heuristiken.
+  * **Dringlichkeit:** Zwingend vor oder zeitgleich mit dem Backend-Deploy.
+- [ ] **Poisoned Aliases & Bogus no_match Einträge auf Production bereinigen:**
+  - **Befehl:** `npm run clean:mappings:prod:apply` im `backend/`-Verzeichnis ausführen.
+  * **Grund:** Entfernt kontaminierte Aliase (z. B. Zitronensaft 200ml mit Alias "zitrone"), löscht ungültige `no_match` Zeilen auf bekannten Grundnahrungsmitteln und befüllt `packaging_type`.
+  * **Dringlichkeit:** Direkt nach `npm run db:push:prod`.
 
 ### 🔐 2. Umgebungsvariablen & Secrets (Railway & Frontend)
 - [ ] **Operator Alerts (ntfy) auf Railway konfigurieren (optional, Master-Switch standardmäßig aus):**
