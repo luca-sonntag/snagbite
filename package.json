@@ -11,7 +11,10 @@
     "shared"
   ],
   "scripts": {
+    "predev": "node scripts/sync-worktree-env.mjs",
     "dev": "concurrently -n \"backend,frontend,website\" -c \"blue,green,magenta\" \"npm run dev -w backend\" \"npm run dev -w frontend\" \"npm run dev -w website\"",
+    "sync:env": "node scripts/sync-worktree-env.mjs --verbose",
+    "sync:env:force": "node scripts/sync-worktree-env.mjs --force --verbose",
     "build": "npm run build -w shared && npm run build -w frontend && npm run build -w backend",
     "start": "npm run start -w backend",
     "preview": "npm run preview -w backend",
