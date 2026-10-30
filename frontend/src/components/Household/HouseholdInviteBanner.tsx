@@ -25,7 +25,7 @@ export default function HouseholdInviteBanner({
   const [dismissed, setDismissed] = useState(isHouseholdBannerDismissed);
 
   // Banner only appears when user does not have an active household connection and hasn't dismissed it
-  if (status === 'active' || dismissed) {
+  if (status === 'active' || status === 'paused' || dismissed) {
     return null;
   }
 

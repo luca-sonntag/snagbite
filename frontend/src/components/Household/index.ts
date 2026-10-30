@@ -3,6 +3,7 @@ export { useHousehold } from './useHousehold';
 export { default as PartnerRecipeBadge } from './PartnerRecipeBadge';
 export { default as ProposeCookButton } from './ProposeCookButton';
 export { default as HouseholdInviteBanner } from './HouseholdInviteBanner';
+export { default as HouseholdPausedBanner } from './HouseholdPausedBanner';
 export { default as HouseholdSheet } from './HouseholdSheet';
 export { default as HouseholdPromoModal } from './HouseholdPromoModal';
 export { default as HouseholdCooldownBanner } from './HouseholdCooldownBanner';
