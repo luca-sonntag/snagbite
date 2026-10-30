@@ -329,7 +329,7 @@ Der Haushalt-Modus verbindet zwei Snagbite-Nutzer zu einem gemeinsamen Haushalt:
   * Serverseitig auf 1 Vorschlag pro 2 Minuten pro Gericht gedrosselt.
 * **Haushalts-Verwaltung (`HouseholdSheet.tsx`, `HouseholdActiveCard.tsx`, `HouseholdInviteCard.tsx`):**
   * Aufrufbar über Einstellungen (`SettingsView.tsx`), In-App Deep-Links (`#/household-invite/<code>`) und Banner.
-  * Bietet 1-Klick-Code-Generierung, natives Teilen (`navigator.share`), Code-Eingabe, Partner-Nudge und Haushalt-Trennungsdialog.
+  * Bietet 1-Klick-Code-Generierung, natives Teilen (`navigator.share`), Code-Eingabe, aktives PRO-Banner, Partner-Nudge (nur sichtbar, wenn kein bezahltes PRO im Haushalt aktiv ist) und Haushalt-Trennungsdialog.
 * **Haushalt-Banner & Paused-Kommunikation (`HouseholdInviteBanner.tsx`, `HouseholdPausedBanner.tsx`):**
   * **Pausiert-Badge in den Einstellungen:** In `SettingsView.tsx` wird neben dem Partnernamen ein gut sichtbares Badge `Pausiert` in Rose eingeblendet, sobald die Testphase beendet ist und kein PRO-Abo vorliegt.
   * **Pausiert-Banner (`HouseholdPausedBanner.tsx`):** Reagiert auf `status === 'paused'` bzw. `isPauseLocked` und wird im Kochbuch (`SavedCatalog/index.tsx`), im Wochenplaner (`MealPlanner/index.tsx`) und in der Einkaufsliste (`ShoppingList/index.tsx`) eingeblendet. Bietet direkte 1-Klick-Aktionen zum Freischalten von PRO oder zum Öffnen des Haushalts-Sheets.
