@@ -2,15 +2,12 @@ import { db } from '../db/drizzle.js';
 import { user as userTable } from '../db/schema/auth.js';
 import { eq } from 'drizzle-orm';
 import {
-  isAlphaActive,
   getPremiumMaxExtractions,
-  getAlphaMaxExtractions,
   getFreeMaxExtractions,
   getPremiumMaxConcurrentExtractions,
   getFreeMaxConcurrentExtractions,
   getHouseholdContext,
 } from '../db.js';
-import { config } from '../config.js';
 
 export interface AuthUserShape {
   id: string;
@@ -42,27 +39,14 @@ export async function fetchAndSyncUser(userId: string): Promise<AuthUserShape> {
   }
 
   let currentTier = row.tier || 'free';
-  const alphaActive = await isAlphaActive();
 
-  const adminEmails = config.ADMIN_EMAILS.split(',')
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-  const isAdminUser = Boolean(row.email && adminEmails.includes(row.email.toLowerCase()));
-
-  if (!isAdminUser) {
-    if (alphaActive && currentTier !== 'premium' && currentTier !== 'alpha') {
-      currentTier = 'alpha';
-      await db
-        .update(userTable)
-        .set({ tier: 'alpha', updatedAt: new Date() })
-        .where(eq(userTable.id, userId));
-    } else if (!alphaActive && currentTier === 'alpha') {
-      currentTier = 'free';
-      await db
-        .update(userTable)
-        .set({ tier: 'free', updatedAt: new Date() })
-        .where(eq(userTable.id, userId));
-    }
+  // Automatically downgrade any legacy alpha users to free tier upon next session/request
+  if (currentTier === 'alpha') {
+    currentTier = 'free';
+    await db
+      .update(userTable)
+      .set({ tier: 'free', updatedAt: new Date() })
+      .where(eq(userTable.id, userId));
   }
 
   const hh = await getHouseholdContext(userId).catch(() => null);
@@ -111,9 +95,6 @@ export async function resolveUserRateLimit(
   if (meta.tier === 'premium' || meta.household_pro === true) {
     return await getPremiumMaxExtractions();
   }
-  if (meta.tier === 'alpha') {
-    return await getAlphaMaxExtractions();
-  }
 
   return await getFreeMaxExtractions();
 }
@@ -124,7 +105,6 @@ export function isPremiumUser(
   const meta = (user?.app_metadata || {}) as Record<string, unknown>;
   return (
     meta.tier === 'premium' ||
-    meta.tier === 'alpha' ||
     meta.household_pro === true ||
     meta.custom_extraction_limit === -1 ||
     meta.max_extractions_per_window === -1
@@ -137,7 +117,6 @@ export async function resolveConcurrencyLimit(
   const meta = (user?.app_metadata || {}) as Record<string, unknown>;
   const premiumLike =
     meta.tier === 'premium' ||
-    meta.tier === 'alpha' ||
     meta.household_pro === true ||
     meta.custom_extraction_limit === -1 ||
     meta.max_extractions_per_window === -1;

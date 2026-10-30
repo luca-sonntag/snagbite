@@ -41,18 +41,6 @@ export async function getGlobalSetting<T>(key: string, defaultValue: T): Promise
   return defaultValue;
 }
 
-export async function isAlphaActive(): Promise<boolean> {
-  return getGlobalSetting('alpha_active', config.ALPHA_ACTIVE);
-}
-
-export async function getAlphaMaxExtractions(): Promise<number> {
-  return getGlobalSetting('alpha_max_extractions_per_window', config.ALPHA_MAX_EXTRACTIONS_PER_WINDOW);
-}
-
-export async function getAlphaMaxSavedRecipes(): Promise<number> {
-  return getGlobalSetting('alpha_max_saved_recipes', config.ALPHA_MAX_SAVED_RECIPES);
-}
-
 export async function getFreeMaxExtractions(): Promise<number> {
   return getGlobalSetting('free_max_extractions_per_window', config.FREE_MAX_EXTRACTIONS_PER_WINDOW);
 }
@@ -119,12 +107,14 @@ export async function getAllGlobalSettings(): Promise<GlobalSetting[]> {
     .from(globalSettings)
     .orderBy(asc(globalSettings.key));
 
-  return rows.map((r) => ({
-    key: r.key,
-    value: r.value,
-    description: r.description ?? null,
-    updated_at: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : String(r.updatedAt),
-  }));
+  return rows
+    .filter((r) => !r.key.startsWith('alpha_'))
+    .map((r) => ({
+      key: r.key,
+      value: r.value,
+      description: r.description ?? null,
+      updated_at: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : String(r.updatedAt),
+    }));
 }
 
 export async function updateGlobalSettings(settings: Record<string, string>): Promise<void> {

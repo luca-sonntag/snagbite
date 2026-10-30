@@ -53,16 +53,13 @@ export interface Config {
   MAX_JOBS_PER_USER: number;
   /** Max extractions a free user may run concurrently (in-flight jobs). Free users cannot extract in the background. */
   FREE_MAX_CONCURRENT_EXTRACTIONS: number;
-  /** Max extractions a premium/alpha user may run concurrently (in-flight jobs) in the background. */
+  /** Max extractions a premium user may run concurrently (in-flight jobs) in the background. */
   PREMIUM_MAX_CONCURRENT_EXTRACTIONS: number;
   EXTRACTION_LIMIT_WINDOW_DAYS: number;
   FREE_MAX_EXTRACTIONS_PER_WINDOW: number;
   PREMIUM_MAX_EXTRACTIONS_PER_WINDOW: number;
   /** Max number of saved recipes (cookbook entries) a free account may keep. Premium is unlimited. */
   FREE_MAX_SAVED_RECIPES: number;
-  ALPHA_ACTIVE: boolean;
-  ALPHA_MAX_EXTRACTIONS_PER_WINDOW: number;
-  ALPHA_MAX_SAVED_RECIPES: number;
   REVENUECAT_SECRET_KEY?: string;
   ADMIN_EMAILS: string;
   HEALTHCHECK_WEBSITE_URL?: string;
@@ -181,9 +178,6 @@ export const config: Config = {
   FREE_MAX_EXTRACTIONS_PER_WINDOW: parseInt(getEnv('FREE_MAX_EXTRACTIONS_PER_WINDOW', '3'), 10),
   PREMIUM_MAX_EXTRACTIONS_PER_WINDOW: parseInt(getEnv('PREMIUM_MAX_EXTRACTIONS_PER_WINDOW', '30'), 10),
   FREE_MAX_SAVED_RECIPES: parseInt(getEnv('FREE_MAX_SAVED_RECIPES', '10'), 10),
-  ALPHA_ACTIVE: getEnv('ALPHA_ACTIVE', 'false') === 'true',
-  ALPHA_MAX_EXTRACTIONS_PER_WINDOW: parseInt(getEnv('ALPHA_MAX_EXTRACTIONS_PER_WINDOW', '10'), 10),
-  ALPHA_MAX_SAVED_RECIPES: parseInt(getEnv('ALPHA_MAX_SAVED_RECIPES', '20'), 10),
   REVENUECAT_SECRET_KEY: process.env.REVENUECAT_SECRET_KEY,
   ADMIN_EMAILS: getEnv('ADMIN_EMAILS', ''),
   HEALTHCHECK_WEBSITE_URL: process.env.HEALTHCHECK_WEBSITE_URL,
@@ -217,14 +211,14 @@ export const config: Config = {
   TYPESAFE_API_KEY: process.env.TYPESAFE_API_KEY,
   JEV_ENABLED: getEnv('JEV_ENABLED', 'true') === 'true',
   JEV_MODEL: getEnv('JEV_MODEL', 'typesafe/jev-1.13'),
-  S3_ENDPOINT: process.env.S3_ENDPOINT || process.env.AWS_ENDPOINT_URL_S3,
-  S3_REGION: getEnv('S3_REGION', 'auto'),
-  S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID,
-  S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY,
-  S3_BUCKET_NAME: process.env.S3_BUCKET_NAME || process.env.BUCKET_NAME,
-  S3_PUBLIC_URL: process.env.S3_PUBLIC_URL,
-  S3_PUBLIC_DOMAIN: process.env.S3_PUBLIC_DOMAIN,
-  S3_FORCE_PATH_STYLE: getEnv('S3_FORCE_PATH_STYLE', 'true') === 'true',
+  S3_ENDPOINT: process.env.AWS_ENDPOINT_URL_S3 || process.env.AWS_ENDPOINT_URL,
+  S3_REGION: getEnv('AWS_REGION', getEnv('AWS_DEFAULT_REGION', 'auto')),
+  S3_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+  S3_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+  S3_BUCKET_NAME: process.env.BUCKET_NAME || process.env.AWS_BUCKET_NAME,
+  S3_PUBLIC_URL: process.env.AWS_PUBLIC_URL,
+  S3_PUBLIC_DOMAIN: process.env.AWS_PUBLIC_DOMAIN,
+  S3_FORCE_PATH_STYLE: getEnv('AWS_S3_FORCE_PATH_STYLE', 'false') === 'true',
   DATABASE_URL: process.env.DATABASE_URL,
   APP_URL: process.env.APP_URL,
   STORAGE_STREAMING_URL: process.env.STORAGE_STREAMING_URL,

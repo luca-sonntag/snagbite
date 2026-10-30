@@ -5,7 +5,6 @@ export type DevOverlayName =
   | 'onboarding'
   | 'adNotice'
   | 'premium'
-  | 'alphaWelcome'
   | 'reward'
   | 'feedback'
   | 'proFeature'
@@ -89,7 +88,6 @@ export interface DevShowFunction {
   onboarding: () => void;
   adNotice: () => void;
   premium: () => void;
-  alphaWelcome: () => void;
   reward: (opts?: DevRewardOptions) => void;
   feedback: () => void;
   proFeature: (featureId?: ProFeatureId) => void;

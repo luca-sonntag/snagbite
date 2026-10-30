@@ -111,7 +111,6 @@ export async function getGrowthAndRetentionAnalytics(
   const totalUsers = users.length;
   let freeCount = 0;
   let premiumCount = 0;
-  let alphaCount = 0;
   let usersWithBonusCredits = 0;
   let totalBonusCredits = 0;
   let customLimitUsers = 0;
@@ -120,7 +119,6 @@ export async function getGrowthAndRetentionAnalytics(
   for (const u of users) {
     const tier = (u.tier || 'free').toLowerCase();
     if (tier === 'premium') premiumCount++;
-    else if (tier === 'alpha') alphaCount++;
     else freeCount++;
 
     const credits = Number(u.bonusCredits ?? 0) || 0;
@@ -264,10 +262,8 @@ export async function getGrowthAndRetentionAnalytics(
       totalUsers,
       freeCount,
       premiumCount,
-      alphaCount,
       freePct: pct(freeCount, totalUsers),
       premiumPct: pct(premiumCount, totalUsers),
-      alphaPct: pct(alphaCount, totalUsers),
       usersWithBonusCredits,
       totalBonusCredits,
       customLimitUsers,

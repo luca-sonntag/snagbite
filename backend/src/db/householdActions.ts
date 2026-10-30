@@ -89,9 +89,7 @@ export async function acceptHouseholdInvite(userId: string, codeOrPartnerId: str
 
   const hasPaidPro =
     inviterUser[0]?.tier === 'premium' ||
-    inviterUser[0]?.tier === 'alpha' ||
-    acceptorUser[0]?.tier === 'premium' ||
-    acceptorUser[0]?.tier === 'alpha';
+    acceptorUser[0]?.tier === 'premium';
 
   const trialHours = await getHouseholdTrialHours();
   const trialStartsAt = new Date();

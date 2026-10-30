@@ -93,7 +93,8 @@ export interface AuthSession {
 }
 
 export function normalizeUser(rawUser: any): AuthUser {
-  const tier = rawUser.tier || rawUser.app_metadata?.tier || 'free';
+  const rawTier = rawUser.tier || rawUser.app_metadata?.tier || 'free';
+  const tier = rawTier === 'premium' ? 'premium' : 'free';
   const meta = (rawUser.metadata || rawUser.user_metadata || {}) as Record<string, any>;
   return {
     ...rawUser,

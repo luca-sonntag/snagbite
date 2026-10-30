@@ -2,7 +2,6 @@ import { eq } from 'drizzle-orm';
 import { emitAlert } from '../alerts/index.js';
 import { config } from '../config.js';
 import { db } from '../db/drizzle.js';
-import { isAlphaActive } from '../db.js';
 import { user as userTable } from '../db/schema/auth.js';
 import { AppError } from '../errors.js';
 
@@ -59,8 +58,7 @@ async function fetchRevenueCatTier(userId: string, secretKey: string): Promise<s
     isPremium = !expiresDate || new Date(expiresDate).getTime() > Date.now();
   }
 
-  const alphaActive = await isAlphaActive();
-  return isPremium ? 'premium' : alphaActive ? 'alpha' : 'free';
+  return isPremium ? 'premium' : 'free';
 }
 
 async function updateUserTier(
@@ -97,7 +95,8 @@ export async function syncUserBilling(
     .where(eq(userTable.id, userId))
     .limit(1);
 
-  const previousTier = currentUser?.tier || 'free';
+  const rawTier = currentUser?.tier || 'free';
+  const previousTier = rawTier === 'alpha' ? 'free' : rawTier;
 
   const isAdmin = await checkAdminBypass(userId, userEmail);
   if (isAdmin) {
@@ -110,13 +109,13 @@ export async function syncUserBilling(
       'REVENUECAT_SECRET_KEY is not configured in backend. Trusting client tier update (fallback mode).'
     );
     if (clientTier === 'premium' || clientTier === 'free') {
-      const alphaActive = await isAlphaActive();
-      const finalTier = clientTier === 'free' && alphaActive ? 'alpha' : clientTier;
-      await updateUserTier(userId, previousTier, finalTier, 'client-fallback');
-      return { tier: finalTier, fallback: true };
+      await updateUserTier(userId, previousTier, clientTier, 'client-fallback');
+      return { tier: clientTier, fallback: true };
     }
-    const alphaActive = await isAlphaActive();
-    return { tier: alphaActive ? 'alpha' : 'free', fallback: true };
+    if (rawTier === 'alpha') {
+      await updateUserTier(userId, 'free', 'free', 'client-fallback');
+    }
+    return { tier: 'free', fallback: true };
   }
 
   const newTier = await fetchRevenueCatTier(userId, secretKey);

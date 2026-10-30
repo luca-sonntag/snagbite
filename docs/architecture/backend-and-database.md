@@ -101,7 +101,7 @@ tfy:
   * `EXTRACTION_LIMIT_WINDOW_DAYS` (Default: `1`): Größe des rollierenden Fensters in Tagen.
   * `FREE_MAX_EXTRACTIONS_PER_WINDOW` (Default: `3`): Maximale Anzahl an Extraktionen für Free-User.
   * `PREMIUM_MAX_EXTRACTIONS_PER_WINDOW` (Default: `50`): Maximale Anzahl an Extraktionen für Premium-User.
-* **Subscription Tiers:** Standardmäßig im `free` Tier. Sobald Premium gekauft wird, wird das Tier in `app_metadata.tier` auf `premium` gesetzt. Im Alpha-Modus werden Nutzer automatisch in `alpha` eingestuft.
+* **Subscription Tiers:** Standardmäßig im `free` Tier. Sobald Premium gekauft wird, wird das Tier in `app_metadata.tier` auf `premium` gesetzt. Alt-Nutzer mit `tier = 'alpha'` aus der Alpha-Phase fallen beim nächsten Session-Sync (`fetchAndSyncUser`) automatisch auf `free` zurück.
 * **Benutzerbezogene Overrides:** In `app_metadata` gesteuert (`custom_extraction_limit` bzw. `max_extractions_per_window`, z. B. `-1` für unbegrenzt).
 * **Rewarded Video Ad Bonus-Credits (`app_metadata.bonus_credits`):**
   * Nutzer können durch das Ansehen von Rewarded Video Ads verzehrbare Extraktions-Credits sammeln.
@@ -330,7 +330,7 @@ Der Haushalt-Modus ermöglicht es zwei Nutzern, einen 1:1 gemeinsamen Haushalt z
 * **Trennungs-Garantie:** Bei Trennung (`unlinkHousehold`) verbleiben alle gespiegelten Rezepte im jeweiligen Nutzer-Kochbuch (`user_recipes`).
 
 ### 3. Monetarisierungs- & Quota-Architektur
-* **1 Abo für beide:** Hat einer der beiden Partner `premium` oder `alpha` (oder läuft die 48h Testphase), gilt für beide `hasHouseholdPro: true`. Beide erhalten unbegrenzte Rezepte, Wochenplaner, Einkaufsliste, Nährwerte und Kochmodus.
+* **1 Abo für beide:** Hat einer der beiden Partner `premium` (oder läuft die 48h Testphase), gilt für beide `hasHouseholdPro: true`. Beide erhalten unbegrenzte Rezepte, Wochenplaner, Einkaufsliste, Nährwerte und Kochmodus.
 * **Werbe-Finanzierung für Partner B:** Der nicht-zahlende Partner hat `requires_extraction_ads: true`. Dadurch werden bei Rezept-Extraktionen Fullscreen-Interstitial- und MREC-Banner ausgespielt, um die LLM-Extraktionskosten zu refinanzieren. App-Open Ads bleiben bei aktiver App deaktiviert.
 * **Copilot Chat-Limit:** Partner B unterliegt einem Tageslimit von 10 Chat-Nachrichten pro Tag (konfigurierbar in `global_settings`).
 

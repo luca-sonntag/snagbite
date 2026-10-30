@@ -95,7 +95,7 @@ export function useRecipeExtraction(
           rewardedAdBonusCredits: data.rewardedAdBonusCredits ?? 3,
         });
 
-        // Auto-refresh auth session on tier mismatch (e.g. after alpha auto-assignment)
+        // Auto-refresh auth session on tier mismatch (e.g. after server-side tier sync)
         if (user && data.tier && user.app_metadata?.tier !== data.tier) {
           console.log(`Tier mismatch detected: local is '${user.app_metadata?.tier}', server is '${data.tier}'. Refreshing session...`);
           refreshSession().catch(err => console.warn('Failed to refresh session on tier change:', err));

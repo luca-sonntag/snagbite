@@ -14,7 +14,6 @@ import {
   countLibraryEntries,
   getExtractionsForUserInTimeframe,
   updateJob,
-  getAlphaMaxSavedRecipes,
   getFreeMaxExtractions,
   getFreeMaxSavedRecipes,
   getRewardedAdBonusCredits,
@@ -70,8 +69,7 @@ export async function assertCookbookCapacity(userId: string): Promise<void> {
   const premium = isPremiumUser(user);
   if (!premium) {
     const savedCount = await countLibraryEntries(userId);
-    const isAlpha = user?.app_metadata?.tier === 'alpha';
-    const limit = isAlpha ? await getAlphaMaxSavedRecipes() : await getFreeMaxSavedRecipes();
+    const limit = await getFreeMaxSavedRecipes();
     if (limit >= 0 && savedCount >= limit) {
       throw new AppError('COOKBOOK_FULL', { params: { count: savedCount, limit } });
     }
@@ -610,7 +608,7 @@ extractionRoutes.get('/extractions/limit', async (req: Request, res: Response): 
     );
 
     let limit = await getFreeMaxExtractions();
-    let tier: 'free' | 'alpha' | 'premium' = 'free';
+    let tier: 'free' | 'premium' = 'free';
     let user = null;
     try {
       user = await fetchAndSyncUser(req.userId!);
@@ -620,22 +618,13 @@ extractionRoutes.get('/extractions/limit', async (req: Request, res: Response): 
 
     if (user) {
       limit = await resolveUserRateLimit(user);
-      tier =
-        user.app_metadata?.tier === 'premium'
-          ? 'premium'
-          : user.app_metadata?.tier === 'alpha'
-            ? 'alpha'
-            : 'free';
+      tier = user.app_metadata?.tier === 'premium' ? 'premium' : 'free';
     }
 
     const windowDays = config.EXTRACTION_LIMIT_WINDOW_DAYS;
     const premium = isPremiumUser(user);
     const savedRecipes = await countLibraryEntries(req.userId!);
-    const maxSavedRecipes = premium
-      ? -1
-      : user?.app_metadata?.tier === 'alpha'
-        ? await getAlphaMaxSavedRecipes()
-        : await getFreeMaxSavedRecipes();
+    const maxSavedRecipes = premium ? -1 : await getFreeMaxSavedRecipes();
     const cookbookFull = maxSavedRecipes >= 0 && savedRecipes >= maxSavedRecipes;
 
     const maxConcurrent = await resolveConcurrencyLimit(user);

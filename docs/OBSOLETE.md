@@ -6,6 +6,21 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-30: Vollständige Entfernung des Alpha-Tiers und `AlphaWelcome`-Overlays (Post-Alpha Cleanup)
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Alpha-Tier-Konfiguration (`ALPHA_ACTIVE`, `ALPHA_MAX_EXTRACTIONS_PER_WINDOW`, `ALPHA_MAX_SAVED_RECIPES`) in [`backend/src/config.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/config.ts) und `backend/.env.example`.
+  * Global-Settings-Helper (`isAlphaActive()`, `getAlphaMaxExtractions()`, `getAlphaMaxSavedRecipes()`) in [`backend/src/db/settingsDb.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/settingsDb.ts).
+  * Automatische Alpha-Zuweisung und Alpha-Limits in [`authUtils.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/routes/authUtils.ts), [`extractionRoutes.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/routes/extractionRoutes.ts), [`billingService.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/services/billingService.ts), [`householdDb.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/householdDb.ts) und [`householdActions.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/householdActions.ts).
+  * `AlphaWelcome.tsx` Vollbild-Overlay und `useAlphaWelcome.ts` Hook im Frontend inkl. `alphaWelcome` DevTools-Overlay und Lokalisierungen (`i18n.ts`).
+  * `alpha`-Sonderbehandlung in `AuthContext.tsx`, `SettingsView.tsx`, `PremiumModal` (`isAlphaTier`) sowie `alphaCount`/`alphaPct` in den Admin-Metriken (`backend/src/db/adminGrowthAnalyticsDb.ts`, `website/src/components/AdminMetrics/`).
+* **Ersetzt durch:**
+  * **Zwei-Stufen-Modell (`free` | `premium`):** Alle Konten laufen regulär im `free`- oder `premium`-Tier (ggf. mit `isHouseholdPro`).
+  * **Nahtloser Fallback für Alt-Nutzer:** Bestehende Datenbank-Einträge mit `tier = 'alpha'` werden beim nächsten Login/Session-Abruf (`fetchAndSyncUser`, `requireAuth`, `normalizeUser`) automatisch und ohne Fehlermeldung auf `free` zurückgestuft.
+* **Betroffene Dateien:** `shared/src/types/extractions.ts`, `backend/src/config.ts`, `backend/.env.example`, `backend/src/db/settingsDb.ts`, `backend/src/auth.ts`, `backend/src/routes/authUtils.ts`, `backend/src/routes/extractionRoutes.ts`, `backend/src/services/billingService.ts`, `backend/src/db/householdDb.ts`, `backend/src/db/householdActions.ts`, `backend/src/db/adminAnalyticsTypes.ts`, `backend/src/db/adminGrowthAnalyticsDb.ts`, `frontend/src/components/AlphaWelcome.tsx` (gelöscht), `frontend/src/hooks/useAlphaWelcome.ts` (gelöscht), `frontend/src/App.tsx`, `frontend/src/components/AppOverlays.tsx`, `frontend/src/auth.ts`, `frontend/src/context/AuthContext.tsx`, `frontend/src/components/SettingsView.tsx`, `frontend/src/components/PremiumModal/*`, `frontend/src/i18n.ts`, `website/src/components/AdminMetrics/*`, `AGENTS.md`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-29: Angleichung der Überschrift „Deine Sammlungen“ an subtilen Label-Stil
 
 * **Ersetzter Code / Veraltete Logik:**
