@@ -122,7 +122,7 @@ export default function ShoppingListItem({
 
           {isCheckingOff ? (
             <span className="w-6 h-6 rounded-lg bg-emerald-500 text-white shadow-xs flex items-center justify-center flex-shrink-0 transition-all duration-200 scale-105">
-              <Check className="w-3.5 h-3.5 stroke-[3px]" />
+              <Check className="w-3.5 h-3.5 stroke-[3px] animate-scale-pop" />
             </span>
           ) : (
             <span className="w-6 h-6 rounded-lg bg-black/5 dark:bg-white/10 group-hover:bg-emerald-500/20 border-none flex items-center justify-center flex-shrink-0 transition-colors" />
@@ -135,14 +135,14 @@ export default function ShoppingListItem({
             name={item.name}
             synonyms={item.synonyms}
             size="md"
-            className={isCheckingOff ? 'opacity-40 grayscale' : ''}
+            className={isCheckingOff ? 'opacity-40 grayscale transition-all duration-200' : 'transition-all duration-200'}
             reserveSpace
           />
 
           <div className="flex-1 min-w-0 flex flex-col justify-center">
             {/* 1. Name oben */}
             <div className="flex items-baseline flex-wrap gap-x-1.5 min-w-0 text-sm font-medium text-gray-900 dark:text-white leading-snug">
-              <span className={`break-words [overflow-wrap:anywhere] ${isCheckingOff ? 'text-gray-400 dark:text-gray-500 line-through' : ''}`}>
+              <span className={`break-words [overflow-wrap:anywhere] transition-all duration-200 ${isCheckingOff ? 'text-gray-400 dark:text-gray-500 line-through' : ''}`}>
                 {item.name}
               </span>
               {extraNote && (

@@ -67,7 +67,7 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
   const toast = useToast();
 
   const [showAddForm, setShowAddForm] = useState(false);
-  const { checkingKeys, collapsingKeys, triggerCollapseAndAction } =
+  const { checkingKeys, setCheckingKeys, collapsingKeys, triggerCollapseAndAction } =
     useShoppingCollapseAnimation();
 
   const getItemKey = getShoppingItemKey;
@@ -90,6 +90,9 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
     const cat = item.category || 'OTHER';
 
     if (!item.checked) {
+      const displayKey = `unchecked-${key}`;
+      if (checkingKeys.has(displayKey) || collapsingKeys.has(displayKey)) return;
+
       const toBuyList = aggregatedList.toBuy || aggregatedList.unchecked || [];
       const openInCat = toBuyList.filter((i) => (i.category || 'OTHER') === cat);
       const isLastOpenInGroup = openInCat.length <= 1;
@@ -97,7 +100,6 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
       if (isLastOpenInGroup) {
         // Last open item in this category: checking it completes the entire category!
         // Smoothly collapse both the item and the whole category aisle.
-        const displayKey = `unchecked-${key}`;
         const keysToCollapse = [displayKey, `group-${cat}`];
         triggerCollapseAndAction(
           keysToCollapse,
@@ -106,12 +108,24 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
         );
       } else {
         // Other items in this aisle remain unchecked.
-        // Stays at its exact position in the category without re-sorting.
-        executeToggle(item, true);
+        // Trigger check-off animation (green checkmark pop + strikethrough), then update state.
+        setCheckingKeys((prev) => new Set(prev).add(displayKey));
+        setTimeout(() => {
+          executeToggle(item, true);
+          requestAnimationFrame(() => {
+            setCheckingKeys((prev) => {
+              const next = new Set(prev);
+              next.delete(displayKey);
+              return next;
+            });
+          });
+        }, 220);
       }
     } else {
       // Unchecking an item
       const displayKey = `checked-${key}`;
+      if (collapsingKeys.has(displayKey)) return;
+
       const isInDrawer = !activeCategorySet.has(cat);
       if (isInDrawer) {
         // Collapses out of the completed drawer and reappears in the active aisle
