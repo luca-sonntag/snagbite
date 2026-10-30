@@ -41,7 +41,7 @@ export default function ShoppingListItem({
   const sourceCount = item.sources?.length ?? 0;
   const hasMultipleSources = sourceCount > 1;
 
-  const animationClass = isCollapsing ? 'animate-item-collapse' : 'animate-item-expand';
+  const animationClass = isCollapsing ? 'animate-item-collapse' : '';
   const extraNote = useMemo(
     () => extractExtraNote(item, formatItemAmount),
     [item, formatItemAmount]
