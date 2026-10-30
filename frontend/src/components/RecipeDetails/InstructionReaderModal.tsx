@@ -49,7 +49,7 @@ export default function InstructionReaderModal({
   if (!isOpen) return null;
 
   const hasStarted = completedStepsCount > 0;
-  const blockLabel = 'text-xs font-semibold text-gray-500 dark:text-gray-400';
+  const blockLabel = 'text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400';
 
   const handleStepToggleAfter = (stepNum: number) => {
     const instructions = recipe.instructions ?? [];
@@ -92,7 +92,7 @@ export default function InstructionReaderModal({
             <div className="flex justify-between items-baseline gap-2">
               <span className={blockLabel}>{t('recipe.cookingProgress')}</span>
               <span
-                className={`text-xs font-bold tabular-nums ${
+                className={`text-xs sm:text-sm font-bold tabular-nums ${
                   hasStarted
                     ? 'text-emerald-600 dark:text-emerald-400'
                     : 'text-gray-400 dark:text-gray-500'
@@ -120,7 +120,7 @@ export default function InstructionReaderModal({
             <span className={blockLabel}>{t('recipe.requiredEquipment')}</span>
             <ul className="flex flex-wrap gap-1.5">
               {recipe.equipment.map((item, idx) => (
-                <li key={idx} className="recipe-step-pill text-sm select-none">
+                <li key={idx} className="recipe-step-pill text-sm sm:text-base select-none">
                   {item}
                 </li>
               ))}
