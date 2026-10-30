@@ -14,6 +14,7 @@ interface ShoppingListItemProps {
   isCheckingOff?: boolean;
   isCollapsing?: boolean;
   showCategoryIndicator?: boolean;
+  showPackageRecommendation?: boolean;
   pantryStockMatch?: PantryStockMatch | null;
   pantryStockStr?: string;
   onClick: () => void;
@@ -27,6 +28,7 @@ export default function ShoppingListItem({
   isCheckingOff = false,
   isCollapsing = false,
   showCategoryIndicator = false,
+  showPackageRecommendation = true,
   pantryStockMatch,
   pantryStockStr,
   onClick,
@@ -46,8 +48,11 @@ export default function ShoppingListItem({
   );
 
   const packageRecommendation = useMemo(
-    () => getPackageRecommendation(item.amount, item.unit, item.typicalPackageAmount, item.typicalPackageUnit),
-    [item.amount, item.unit, item.typicalPackageAmount, item.typicalPackageUnit]
+    () =>
+      showPackageRecommendation
+        ? getPackageRecommendation(item.amount, item.unit, item.typicalPackageAmount, item.typicalPackageUnit)
+        : null,
+    [showPackageRecommendation, item.amount, item.unit, item.typicalPackageAmount, item.typicalPackageUnit]
   );
 
   // Compact, dimmed row used inside the "Erledigt" drawer.
@@ -144,9 +149,9 @@ export default function ShoppingListItem({
               )}
             </div>
 
-            {/* 2. Menge & Packungsgröße & Vorrat */}
+            {/* 2. Menge (Rezeptbedarf primär) & optionale Kaufempfehlung & Vorrat */}
             <div className="flex items-center flex-wrap gap-1.5 mt-0.5">
-              {packageRecommendation ? (
+              {amountStr ? (
                 <>
                   <span
                     className={`text-xs font-semibold tabular-nums leading-normal transition-all duration-200 ${
@@ -155,9 +160,9 @@ export default function ShoppingListItem({
                         : 'text-emerald-600 dark:text-emerald-400'
                     }`}
                   >
-                    {packageRecommendation}
+                    {amountStr}
                   </span>
-                  {amountStr && (
+                  {packageRecommendation && (
                     <span
                       className={`text-[11px] font-medium transition-all duration-200 inline-flex items-center gap-1 ${
                         isCheckingOff
@@ -166,20 +171,20 @@ export default function ShoppingListItem({
                       }`}
                     >
                       <span className="opacity-40 font-normal">·</span>
-                      <span>{t('shopping.recipeNeed', { amount: amountStr })}</span>
+                      <span>{t('shopping.buyRecommendation', { package: packageRecommendation })}</span>
                     </span>
                   )}
                 </>
-              ) : amountStr ? (
-                <div
+              ) : packageRecommendation ? (
+                <span
                   className={`text-xs font-semibold tabular-nums leading-normal transition-all duration-200 ${
                     isCheckingOff
                       ? 'text-gray-400 dark:text-gray-500 font-semibold line-through opacity-70'
                       : 'text-emerald-600 dark:text-emerald-400'
                   }`}
                 >
-                  {amountStr}
-                </div>
+                  {t('shopping.buyRecommendation', { package: packageRecommendation })}
+                </span>
               ) : null}
 
               {stockFormatted && (
