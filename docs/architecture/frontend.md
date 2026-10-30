@@ -123,11 +123,10 @@ Der Rezept-Katalog ist als **Kochbuch mit drei Ebenen** aufgebaut:
 
 ## 6. 💎 Freemium Gating System
 
-* **Tiers:** Free, Alpha, Premium (`user.app_metadata.tier`).
+* **Tiers:** Free, Premium (`user.app_metadata.tier`).
 * **Gating-Punkte:**
-  * **Free:** 3 Extraktionen/Tag, max. 5 gespeicherte Rezepte, max. 1 Rezept auf Einkaufsliste, Nährwerte geblurt, Timer/Kochmodus/Copilot/Sammlungen/Labels gesperrt.
-  * **Alpha:** 10 Extraktionen/Tag, max. 20 gespeicherte Rezepte, alle Features freigeschaltet.
-  * **Premium:** 50 Extraktionen/Tag, unbegrenztes Kochbuch, alle Features freigeschaltet.
+  * **Free:** 3 Extraktionen/Tag, max. 10 gespeicherte Rezepte, max. 1 Rezept auf Einkaufsliste, Nährwerte geblurt, Timer/Kochmodus/Copilot/Sammlungen/Labels gesperrt.
+  * **Premium:** 30 Extraktionen/Tag, unbegrenztes Kochbuch, alle Features freigeschaltet.
 * **Gating-Komponenten:** `PremiumModal.tsx` (Upsell-Dialog), `PremiumHint.tsx` (Dezente amberfarbene PRO-Hinweise), `ProBadge.tsx` (Zentrale PRO-Chip-Komponente für Buttons, Header & Gated Sections), `PremiumUpgradeCard.tsx` (Werbekarte).
 
 ---
@@ -260,7 +259,6 @@ Für schnelles Testen, Gestalten und Inspizieren selten auftretender Dialoge, Sh
     * `dev.show.onboarding()`: Erststart-Guide (`WelcomeGuide.tsx`)
     * `dev.show.adNotice()`: Werbe-Transparenzhinweis (`PreAdTransparencySheet.tsx`)
     * `dev.show.premium()`: Paywall & Mitgliedschafts-Modal (`PremiumModal.tsx`)
-    * `dev.show.alphaWelcome()`: Alpha-Tester-Begrüßung (`AlphaWelcome.tsx`)
     * `dev.show.reward(options?)`: Gamification Koch-Belohnung (`RewardOverlay.tsx`, XP-Bar, Konfetti, Level-Up)
     * `dev.show.feedback()`: In-App Bug-Report-Drawer (`FeedbackDrawer.tsx`)
     * `dev.show.proFeature(id?)`: Feature-Spotlight-Sheet (`ProFeatureSheet.tsx`, z. B. `'recipe_copilot'`, `'macros'`)
@@ -320,7 +318,7 @@ Der Haushalt-Modus verbindet zwei Snagbite-Nutzer zu einem gemeinsamen Haushalt:
 * **Zentraler State-Flow (`useHouseholdInfo.ts` & `AuthContext`):**
   * `useHouseholdInfo(session)` fragt `/api/household` ab und liefert den aktuellen Haushaltskontext.
   * `AuthContext` berechnet daraus `isHouseholdPro = Boolean(household?.hasHouseholdPro && !household?.isPauseLocked)`.
-  * `isPremium` in `AuthContext` ist wahr, wenn entweder der eigene Tier `premium`/`alpha` ist ODER `isHouseholdPro` aktiv ist. Dadurch haben alle PRO-geschützten Bereiche (Ernährung, Kochmodus, Timer, Sammlungen, Einkaufsliste, Wochenplaner) ohne Code-Änderungen sofort vollen Zugriff.
+  * `isPremium` in `AuthContext` ist wahr, wenn entweder der eigene Tier `premium` ist ODER `isHouseholdPro` aktiv ist. Dadurch haben alle PRO-geschützten Bereiche (Ernährung, Kochmodus, Timer, Sammlungen, Einkaufsliste, Wochenplaner) ohne Code-Änderungen sofort vollen Zugriff.
   * `requiresExtractionAds` trennt die Werbeausspielung sauber ab: Partner B sieht bei Extraktionen Werbebanner (`useAppAds`), während App-Open Ads deaktiviert bleiben.
 * **Visueller Partner-Avatar-Badge (`PartnerRecipeBadge.tsx`):**
   * Ausschließlich bei Rezepten mit `job?.source === 'household'` wird unten links auf der Cover-Karte (`RecipePosterCard.tsx`) ein dezent gerahmter Avatar-Punkt (`22x22px`) des Partners eingeblendet.

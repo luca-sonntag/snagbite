@@ -1,4 +1,4 @@
-﻿# 🚀 Projekt: Instagram Reel Rezept-Extraktor (Google Antigravityx)
+# 🚀 Projekt: Instagram Reel Rezept-Extraktor (Google Antigravityx)
 
 > Wenn nur eine Frage gestellt wird, anstworte einfach, anstatt direkt Änderungen vorzunehmen. Ich werde dann sagen, ob ich die Änderung haben möchte oder nicht.
 >
@@ -46,7 +46,7 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
    * Express.js API, Node 22+ & Railway Managed Postgres (Drizzle ORM & Better-Auth)
    * Admin-Bereich (`/api/admin/*`), RLS-Bypass, Metriken & Failed Jobs Drilldown
    * Security Hardening (Helmet, Rate Limits, CORS) & Health Check (`/health`)
-   * Rolling Timeframe Rate Limiting & Subscription Tiers (`free`, `premium`, `alpha`)
+   * Rolling Timeframe Rate Limiting & Subscription Tiers (`free`, `premium`)
    * Rewarded Video Ad Credits (`app_metadata.bonus_credits`, `POST /api/me/rewarded-ad-claimed`, Quota-Verrechnung)
    * Health Check & Push Monitoring (`healthcheck/`, ntfy.sh / Telegram)
    * Operator-Alerts (ackend/src/alerts/, ntfy): Modulare Event-Benachrichtigungen (Signups, Abos, Feedback, Job-Failures)
