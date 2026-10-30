@@ -14,6 +14,23 @@ export const appUpdatesRouter = Router();
 const OTA_CHANNELS = ['production', 'alpha', 'internal'] as const;
 type OtaChannel = (typeof OTA_CHANNELS)[number];
 
+function parseSemverTuple(version: string): [number, number, number] | null {
+  const match = /^v?(\d+)\.(\d+)\.(\d+)/.exec(version.trim());
+  if (!match) return null;
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
+function isBundleOlderThanApp(bundleVersion: string, appVersion: string): boolean {
+  const bundleTuple = parseSemverTuple(bundleVersion);
+  const appTuple = parseSemverTuple(appVersion);
+  if (!bundleTuple || !appTuple) return false;
+  for (let i = 0; i < 3; i++) {
+    if (bundleTuple[i] < appTuple[i]) return true;
+    if (bundleTuple[i] > appTuple[i]) return false;
+  }
+  return false;
+}
+
 /**
  * Endpoint to check whether a newer web bundle is available for a device.
  * POST /api/app-updates/check
@@ -21,7 +38,7 @@ type OtaChannel = (typeof OTA_CHANNELS)[number];
  */
 appUpdatesRouter.post('/check', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { channel, versionCode, currentBundleVersion } = req.body ?? {};
+    const { channel, versionCode, currentBundleVersion, appVersion } = req.body ?? {};
 
     // Strict channel equality — alpha bundles must never leak to production.
     if (typeof channel !== 'string' || !OTA_CHANNELS.includes(channel as OtaChannel)) {
@@ -52,6 +69,11 @@ appUpdatesRouter.post('/check', async (req: Request, res: Response): Promise<voi
     const bundle = await getActiveAppBundle(channel, versionCode);
 
     if (!bundle || bundle.version === currentBundleVersion) {
+      res.status(200).json({ success: true, update: false });
+      return;
+    }
+
+    if (typeof appVersion === 'string' && appVersion.length > 0 && isBundleOlderThanApp(bundle.version, appVersion)) {
       res.status(200).json({ success: true, update: false });
       return;
     }

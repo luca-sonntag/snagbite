@@ -54,7 +54,7 @@ export const ExtractionQueueSheet: React.FC<ExtractionQueueSheetProps> = ({
                         hapticLight();
                         clearQueue();
                       }}
-                      className="min-h-[44px] px-2.5 py-1 text-xs font-semibold text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 inline-flex items-center gap-1 border-none bg-transparent cursor-pointer touch-manipulation"
+                      className="min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-xl text-xs font-semibold text-gray-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 active:scale-95 inline-flex items-center gap-1.5 border-none bg-transparent cursor-pointer touch-manipulation transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>{t('queue.btnClearAll')}</span>
@@ -76,7 +76,7 @@ export const ExtractionQueueSheet: React.FC<ExtractionQueueSheetProps> = ({
               </div>
             </Drawer.Header>
 
-            <Drawer.Body className="overflow-y-auto py-1 flex flex-col gap-2.5">
+            <Drawer.Body className="overflow-y-auto py-2 flex flex-col gap-3 -mx-0.5 px-0.5">
               {items.length === 0 ? (
                 <div className="py-8 text-center text-xs text-gray-400 dark:text-gray-500">
                   {t('queue.waitlistEmpty')}
