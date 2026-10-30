@@ -1,7 +1,15 @@
 import type { AggregatedShoppingItem, PantryItem, ParentIngredientInfo, ShoppingListItem } from '../../types';
 import { normalizeFoodBaseKey, normalizeUnit } from '../../utils/ingredientTaxonomy';
 import { formatQuantity } from '../../utils/formatQuantity';
-import { isPantryStockSufficient, getPantryStockStatus, convertToBaseMetric, type PantryStockStatus } from '@cookbook/shared';
+import {
+  isPantryStockSufficient,
+  getPantryStockStatus,
+  convertToBaseMetric,
+  isPackageUnitAppropriate,
+  type PantryStockStatus,
+  type PackagingType,
+} from '@cookbook/shared';
+import { formatPackagingLabel, type SupportedLanguage } from '../../i18n';
 
 export interface PantryMatchableItem {
   name: string;
@@ -64,32 +72,18 @@ export function findPantryStock(item: PantryMatchableItem, pantryItems: PantryIt
   return match ? match.formattedStock : null;
 }
 
-function getContainerLabel(cleanPkgUnit: string, count: number): string {
-  if (cleanPkgUnit === 'glas' || cleanPkgUnit === 'jar' || cleanPkgUnit === 'gläser' || cleanPkgUnit === 'glaeser') {
-    return count > 1 ? `${count} Gläser` : '1 Glas';
-  }
-  if (cleanPkgUnit === 'dose' || cleanPkgUnit === 'can' || cleanPkgUnit === 'dosen') {
-    return count > 1 ? `${count} Dosen` : '1 Dose';
-  }
-  if (cleanPkgUnit === 'flasche' || cleanPkgUnit === 'bottle' || cleanPkgUnit === 'flaschen') {
-    return count > 1 ? `${count} Flaschen` : '1 Flasche';
-  }
-  if (cleanPkgUnit === 'becher' || cleanPkgUnit === 'cup') {
-    return count > 1 ? `${count} Becher` : '1 Becher';
-  }
-  if (cleanPkgUnit === 'bund' || cleanPkgUnit === 'bunch' || cleanPkgUnit === 'bünde') {
-    return count > 1 ? `${count} Bünde` : '1 Bund';
-  }
-  return count > 1 ? `${count} Pkg.` : '1 Pkg.';
-}
-
 export function getPackageRecommendation(
   amount: number,
   unit: string,
   pkgAmount?: number | null,
-  pkgUnit?: string | null
+  pkgUnit?: string | null,
+  packagingType?: PackagingType | null,
+  lang: SupportedLanguage = 'de'
 ): string | null {
   if (!pkgAmount || pkgAmount <= 0 || amount <= 0) return null;
+  // Loose produce never gets an artificial package recommendation
+  if (packagingType === 'loose') return null;
+
   const cleanUnit = (unit || '').toLowerCase().trim();
   const cleanPkgUnit = (pkgUnit || '').toLowerCase().trim();
 
@@ -98,17 +92,13 @@ export function getPackageRecommendation(
     return null;
   }
 
-  const itemMetric = convertToBaseMetric(amount, cleanUnit);
-  const pkgMetric = convertToBaseMetric(pkgAmount, cleanPkgUnit);
-
-  // Incompatibility filter (Teil 3):
-  // Stück / Count vs. Volume (e.g. 1 Stück Zitrone -> 200 ml Zitronensaft) is an invalid mismatch
-  if (
-    (itemMetric?.type === 'count' && pkgMetric?.type === 'volume') ||
-    (itemMetric?.type === 'volume' && pkgMetric?.type === 'count')
-  ) {
+  // Physical dimension guard from central shared matrix
+  if (cleanPkgUnit && !isPackageUnitAppropriate(cleanUnit, cleanPkgUnit)) {
     return null;
   }
+
+  const itemMetric = convertToBaseMetric(amount, cleanUnit);
+  const pkgMetric = convertToBaseMetric(pkgAmount, cleanPkgUnit);
 
   // Exact match in base metric (e.g. 1000 g vs 1 kg) -> redundant
   if (
@@ -131,7 +121,9 @@ export function getPackageRecommendation(
     totalPkgAmount = count * pkgAmount;
   }
 
-  const containerLabel = getContainerLabel(cleanPkgUnit, count);
+  // Determine structured packaging type without string heuristics
+  const effectivePackagingType: PackagingType = packagingType || 'pack';
+  const containerLabel = formatPackagingLabel(effectivePackagingType, count, lang);
   const pkgUnitStr = pkgUnit ? ` (${totalPkgAmount} ${pkgUnit})` : ` (${totalPkgAmount})`;
   return `${containerLabel}${pkgUnitStr}`;
 }

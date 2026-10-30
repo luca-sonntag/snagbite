@@ -50,9 +50,15 @@ export default function ShoppingListItem({
   const packageRecommendation = useMemo(
     () =>
       showPackageRecommendation
-        ? getPackageRecommendation(item.amount, item.unit, item.typicalPackageAmount, item.typicalPackageUnit)
+        ? getPackageRecommendation(
+            item.amount,
+            item.unit,
+            item.typicalPackageAmount,
+            item.typicalPackageUnit,
+            item.packagingType
+          )
         : null,
-    [showPackageRecommendation, item.amount, item.unit, item.typicalPackageAmount, item.typicalPackageUnit]
+    [showPackageRecommendation, item.amount, item.unit, item.typicalPackageAmount, item.typicalPackageUnit, item.packagingType]
   );
 
   // Compact, dimmed row used inside the "Erledigt" drawer or within an active category.

@@ -4,6 +4,7 @@ import {
   isKnownErrorCode,
   parseSerializedError,
 } from './errorCodes';
+import type { PackagingType } from '@cookbook/shared';
 import { type RecipeCategory, RECIPE_CATEGORIES } from './types';
 export { RECIPE_CATEGORIES };
 
@@ -105,6 +106,46 @@ export const recipeCategoryEmojis: Record<RecipeCategory, string> = {
   BAKING: '🥖',
   OTHER: '🍽️',
 };
+
+export const packagingTranslations: Record<
+  SupportedLanguage,
+  Record<PackagingType, { singular: string; plural: string }>
+> = {
+  de: {
+    piece: { singular: 'Stück', plural: 'Stück' },
+    can: { singular: 'Dose', plural: 'Dosen' },
+    jar: { singular: 'Glas', plural: 'Gläser' },
+    bottle: { singular: 'Flasche', plural: 'Flaschen' },
+    tub: { singular: 'Becher', plural: 'Becher' },
+    pack: { singular: 'Pkg.', plural: 'Pkg.' },
+    bag: { singular: 'Beutel', plural: 'Beutel' },
+    box: { singular: 'Schachtel', plural: 'Schachteln' },
+    bunch: { singular: 'Bund', plural: 'Bünde' },
+    loose: { singular: '', plural: '' },
+  },
+  en: {
+    piece: { singular: 'pc.', plural: 'pcs.' },
+    can: { singular: 'can', plural: 'cans' },
+    jar: { singular: 'jar', plural: 'jars' },
+    bottle: { singular: 'bottle', plural: 'bottles' },
+    tub: { singular: 'tub', plural: 'tubs' },
+    pack: { singular: 'pack', plural: 'packs' },
+    bag: { singular: 'bag', plural: 'bags' },
+    box: { singular: 'box', plural: 'boxes' },
+    bunch: { singular: 'bunch', plural: 'bunches' },
+    loose: { singular: '', plural: '' },
+  },
+};
+
+export function formatPackagingLabel(
+  type: PackagingType,
+  count: number,
+  language: SupportedLanguage = 'de'
+): string {
+  const t = packagingTranslations[language]?.[type] ?? packagingTranslations.de[type] ?? packagingTranslations.de.pack;
+  const label = count > 1 ? t.plural : t.singular;
+  return `${count} ${label}`.trim();
+}
 
 export function getRecipeCategoryLabel(
   category: RecipeCategory | string | undefined | null,
