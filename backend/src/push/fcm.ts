@@ -1,4 +1,5 @@
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
+import { resolve } from 'path';
 import { importPKCS8, SignJWT } from 'jose';
 import { config } from '../config.js';
 
@@ -57,7 +58,18 @@ function getServiceAccount(): ServiceAccount | null {
   }
 
   try {
-    const text = raw.startsWith('{') ? raw : readFileSync(raw, 'utf-8');
+    let text: string;
+    if (raw.startsWith('{')) {
+      text = raw;
+    } else {
+      const candidates = [
+        raw,
+        resolve(process.cwd(), raw),
+        resolve(process.cwd(), 'backend', raw),
+      ];
+      const filePath = candidates.find((p) => existsSync(p)) || raw;
+      text = readFileSync(filePath, 'utf-8');
+    }
     const parsed = JSON.parse(text) as ServiceAccount;
     if (!parsed.client_email || !parsed.private_key) {
       throw new Error('service account missing client_email or private_key');
