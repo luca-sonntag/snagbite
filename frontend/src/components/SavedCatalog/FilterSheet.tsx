@@ -63,7 +63,7 @@ export default function FilterSheet({
   const { t, language } = useI18n();
   useModalOverlay(isOpen, onClose);
   const { status: householdStatus, partnerProfile } = useHousehold();
-  const isConnected = householdStatus === 'active' || householdStatus === 'paused';
+  const isConnected = householdStatus === 'active';
   const partnerName = partnerProfile?.displayName || t('household.partnerDefault');
   const [draft, setDraft] = useState<CatalogFilterState>(filters);
   const [draftSort, setDraftSort] = useState<CatalogSort>(sortBy);
