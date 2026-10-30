@@ -21,6 +21,34 @@ export function invalidateHouseholdCache(userAId: string, userBId?: string | nul
   if (userBId) householdCache.delete(userBId);
 }
 
+export async function invalidateHouseholdForUser(userId: string): Promise<void> {
+  const cached = householdCache.get(userId);
+  householdCache.delete(userId);
+  if (cached?.context.partnerId) {
+    householdCache.delete(cached.context.partnerId);
+  }
+
+  try {
+    const [row] = await db
+      .select({ userAId: households.userAId, userBId: households.userBId })
+      .from(households)
+      .where(
+        and(
+          or(eq(households.userAId, userId), eq(households.userBId, userId)),
+          eq(households.status, 'active')
+        )
+      )
+      .limit(1);
+
+    if (row) {
+      householdCache.delete(row.userAId);
+      if (row.userBId) householdCache.delete(row.userBId);
+    }
+  } catch (err) {
+    console.warn('[householdDb] Error invalidating household for user:', err);
+  }
+}
+
 export async function getHouseholdContext(userId: string): Promise<HouseholdContext> {
   const cached = householdCache.get(userId);
   if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS) {
