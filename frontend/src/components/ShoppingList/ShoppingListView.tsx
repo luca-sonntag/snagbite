@@ -67,14 +67,14 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
   const toast = useToast();
 
   const [showAddForm, setShowAddForm] = useState(false);
-  const { checkingKeys, setCheckingKeys, collapsingKeys, triggerCollapseAndAction } =
+  const { checkingKeys, collapsingKeys, triggerCollapseAndAction } =
     useShoppingCollapseAnimation();
 
   const getItemKey = getShoppingItemKey;
 
   const { activeGroups, activeCategorySet, drawerCheckedItems } = useMemo(
-    () => partitionShoppingCategories(aggregatedList, categoryOrder as readonly string[]),
-    [aggregatedList]
+    () => partitionShoppingCategories(aggregatedList, categoryOrder as readonly string[], shoppingList),
+    [aggregatedList, shoppingList]
   );
 
   const executeToggle = (item: AggregatedShoppingItem, targetChecked: boolean) => {
@@ -106,19 +106,8 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
         );
       } else {
         // Other items in this aisle remain unchecked.
-        // Don't disappear immediately: show brief check animation then toggle inside group without collapsing.
-        const displayKey = `unchecked-${key}`;
-        setCheckingKeys((prev) => new Set(prev).add(displayKey));
-        setTimeout(() => {
-          executeToggle(item, true);
-          requestAnimationFrame(() => {
-            setCheckingKeys((prev) => {
-              const next = new Set(prev);
-              next.delete(displayKey);
-              return next;
-            });
-          });
-        }, 180);
+        // Stays at its exact position in the category without re-sorting.
+        executeToggle(item, true);
       }
     } else {
       // Unchecking an item
@@ -128,7 +117,7 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
         // Collapses out of the completed drawer and reappears in the active aisle
         triggerCollapseAndAction([displayKey], () => executeToggle(item, false));
       } else {
-        // Already inside an active aisle: uncheck immediately
+        // Already inside an active aisle: uncheck immediately in place
         executeToggle(item, false);
       }
     }

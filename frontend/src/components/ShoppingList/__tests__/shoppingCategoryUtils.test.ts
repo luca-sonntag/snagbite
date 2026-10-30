@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { partitionShoppingCategories, getShoppingItemKey } from '../shoppingCategoryUtils';
-import type { AggregatedShoppingItem } from '../../../types';
+import type { AggregatedShoppingItem, ShoppingListItem } from '../../../types';
 
 function createMockItem(
   name: string,
@@ -51,10 +51,17 @@ describe('shoppingCategoryUtils', () => {
     assert.equal(result.drawerCheckedItems.length, 0);
   });
 
-  it('keeps checked items inside the category until the entire category is checked off', () => {
+  it('keeps checked items inside the category at their original stable place without re-sorting', () => {
     const apple = createMockItem('Apfel', 'PRODUCE', true);
     const banana = createMockItem('Banane', 'PRODUCE', false);
     const milk = createMockItem('Milch', 'DAIRY', false);
+
+    // Raw shopping list order: Apfel was first (idx 0), then Banane (idx 1), then Milch (idx 2)
+    const rawList: ShoppingListItem[] = [
+      { id: 'id-Apfel', name: 'Apfel', amount: 100, unit: 'g', checked: true, category: 'PRODUCE' },
+      { id: 'id-Banane', name: 'Banane', amount: 100, unit: 'g', checked: false, category: 'PRODUCE' },
+      { id: 'id-Milch', name: 'Milch', amount: 100, unit: 'g', checked: false, category: 'DAIRY' },
+    ];
 
     // Apple is checked, but banana is still unchecked in PRODUCE
     const result = partitionShoppingCategories(
@@ -62,7 +69,8 @@ describe('shoppingCategoryUtils', () => {
         toBuy: [banana, milk],
         checked: [apple],
       },
-      categoryOrder
+      categoryOrder,
+      rawList
     );
 
     // PRODUCE is still active because Banana is unchecked!
@@ -72,11 +80,12 @@ describe('shoppingCategoryUtils', () => {
     const produceGroup = result.activeGroups.find((g) => g.category === 'PRODUCE')!;
     assert.ok(produceGroup);
     assert.equal(produceGroup.items.length, 2);
-    // Unchecked items are first, checked items are below
-    assert.equal(produceGroup.items[0].name, 'Banane');
-    assert.equal(produceGroup.items[0].checked, false);
-    assert.equal(produceGroup.items[1].name, 'Apfel');
-    assert.equal(produceGroup.items[1].checked, true);
+
+    // Checked item Apfel stays at its original place (index 0), NOT moved to the bottom!
+    assert.equal(produceGroup.items[0].name, 'Apfel');
+    assert.equal(produceGroup.items[0].checked, true);
+    assert.equal(produceGroup.items[1].name, 'Banane');
+    assert.equal(produceGroup.items[1].checked, false);
 
     // Apple should NOT be in the completed drawer yet
     assert.equal(result.drawerCheckedItems.length, 0);
@@ -87,13 +96,20 @@ describe('shoppingCategoryUtils', () => {
     const banana = createMockItem('Banane', 'PRODUCE', true);
     const milk = createMockItem('Milch', 'DAIRY', false);
 
+    const rawList: ShoppingListItem[] = [
+      { id: 'id-Apfel', name: 'Apfel', amount: 100, unit: 'g', checked: true, category: 'PRODUCE' },
+      { id: 'id-Banane', name: 'Banane', amount: 100, unit: 'g', checked: true, category: 'PRODUCE' },
+      { id: 'id-Milch', name: 'Milch', amount: 100, unit: 'g', checked: false, category: 'DAIRY' },
+    ];
+
     // Both items in PRODUCE are now checked!
     const result = partitionShoppingCategories(
       {
         toBuy: [milk],
         checked: [apple, banana],
       },
-      categoryOrder
+      categoryOrder,
+      rawList
     );
 
     // PRODUCE should no longer be an active group
@@ -113,12 +129,18 @@ describe('shoppingCategoryUtils', () => {
     const milk = createMockItem('Milch', 'DAIRY', true);
     const bread = createMockItem('Brot', 'BAKERY', false);
 
+    const rawList: ShoppingListItem[] = [
+      { id: 'id-Milch', name: 'Milch', amount: 100, unit: 'g', checked: true, category: 'DAIRY' },
+      { id: 'id-Brot', name: 'Brot', amount: 100, unit: 'g', checked: false, category: 'BAKERY' },
+    ];
+
     const result = partitionShoppingCategories(
       {
         toBuy: [bread],
         checked: [milk],
       },
-      categoryOrder
+      categoryOrder,
+      rawList
     );
 
     assert.equal(result.activeGroups.length, 1);
@@ -133,12 +155,18 @@ describe('shoppingCategoryUtils', () => {
     const apple = createMockItem('Apfel', 'PRODUCE', false);
     const banana = createMockItem('Banane', 'PRODUCE', true);
 
+    const rawList: ShoppingListItem[] = [
+      { id: 'id-Apfel', name: 'Apfel', amount: 100, unit: 'g', checked: false, category: 'PRODUCE' },
+      { id: 'id-Banane', name: 'Banane', amount: 100, unit: 'g', checked: true, category: 'PRODUCE' },
+    ];
+
     const result = partitionShoppingCategories(
       {
         toBuy: [apple],
         checked: [banana],
       },
-      categoryOrder
+      categoryOrder,
+      rawList
     );
 
     // PRODUCE is active again
@@ -146,6 +174,7 @@ describe('shoppingCategoryUtils', () => {
     assert.equal(result.activeGroups.length, 1);
     assert.equal(result.activeGroups[0].category, 'PRODUCE');
     assert.equal(result.activeGroups[0].items.length, 2);
+    // Apfel stays at index 0, Banane stays at index 1
     assert.equal(result.activeGroups[0].items[0].name, 'Apfel');
     assert.equal(result.activeGroups[0].items[0].checked, false);
     assert.equal(result.activeGroups[0].items[1].name, 'Banane');
