@@ -3,7 +3,7 @@ export interface LimitStatus {
   used: number;
   remaining: number;
   windowDays: number;
-  tier: 'free' | 'alpha' | 'premium';
+  tier: 'free' | 'premium';
   savedRecipes: number;
   maxSavedRecipes: number;
   cookbookFull: boolean;
