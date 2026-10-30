@@ -22,6 +22,7 @@ import { LEGAL_URLS } from '../legal';
 import PremiumUpgradeCard from './PremiumUpgradeCard';
 import NotificationSettings from './NotificationSettings';
 import AdminSettingsSection from './AdminSettingsSection';
+import { SettingsToggle } from './AdminSettingsToggle';
 
 // Unit system is not yet ready to be user-configurable; keep the setting UI in place but hidden for now.
 const SHOW_UNIT_SYSTEM_SETTING = false;
@@ -413,37 +414,23 @@ export default function SettingsView() {
           </div>
 
           {/* Shopping Package Recommendations Option */}
-          <div className="p-4 flex items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-2.5 border-t border-black/5 dark:border-white/5">
-            <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="p-4 flex items-center justify-between gap-3 border-t border-black/5 dark:border-white/5">
+            <div className="flex items-center gap-3 min-w-0 flex-1 pr-3">
               <Package className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" />
-              <div className="min-w-0">
-                <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">
+              <div>
+                <p className="font-semibold text-gray-900 dark:text-white text-sm">
                   {t('app.settings.shoppingPackageRecommendations')}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-medium">
                   {t('app.settings.shoppingPackageRecommendationsDesc')}
                 </p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                hapticLight();
-                togglePackageRecommendations();
-              }}
-              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                showPackageRecommendations ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-700'
-              }`}
-              role="switch"
-              aria-checked={showPackageRecommendations}
-              aria-label={t('app.settings.shoppingPackageRecommendations')}
-            >
-              <span
-                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                  showPackageRecommendations ? 'translate-x-5' : 'translate-x-0'
-                }`}
-              />
-            </button>
+            <SettingsToggle
+              on={showPackageRecommendations}
+              onClick={togglePackageRecommendations}
+              label={t('app.settings.shoppingPackageRecommendations')}
+            />
           </div>
 
         </div>

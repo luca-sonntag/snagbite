@@ -1,14 +1,14 @@
 import React from 'react';
 import { hapticLight } from '../utils/haptics';
 
-interface AdminSettingsToggleProps {
+export interface SettingsToggleProps {
   on: boolean;
   onClick: () => void;
   disabled?: boolean;
   label: string;
 }
 
-export const AdminSettingsToggle: React.FC<AdminSettingsToggleProps> = ({
+export const SettingsToggle: React.FC<SettingsToggleProps> = ({
   on,
   onClick,
   disabled,
@@ -37,4 +37,5 @@ export const AdminSettingsToggle: React.FC<AdminSettingsToggleProps> = ({
   );
 };
 
-export default AdminSettingsToggle;
+export const AdminSettingsToggle = SettingsToggle;
+export default SettingsToggle;
