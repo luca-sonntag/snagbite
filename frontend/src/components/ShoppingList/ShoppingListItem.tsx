@@ -55,7 +55,7 @@ export default function ShoppingListItem({
     [showPackageRecommendation, item.amount, item.unit, item.typicalPackageAmount, item.typicalPackageUnit]
   );
 
-  // Compact, dimmed row used inside the "Erledigt" drawer.
+  // Compact, dimmed row used inside the "Erledigt" drawer or within an active category.
   if (isChecked) {
     return (
       <ShoppingCheckedItem
@@ -63,6 +63,7 @@ export default function ShoppingListItem({
         extraNote={extraNote}
         amountStr={amountStr}
         animationClass={animationClass}
+        showCategoryIndicator={showCategoryIndicator}
         onClick={onClick}
         onDelete={onDelete}
       />

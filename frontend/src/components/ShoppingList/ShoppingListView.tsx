@@ -13,6 +13,8 @@ import ShoppingCheckedDrawer from './ShoppingCheckedDrawer';
 import ShoppingEmptyState from './ShoppingEmptyState';
 import ShoppingAllDoneState from './ShoppingAllDoneState';
 import ShoppingRecipeCarousel from './ShoppingRecipeCarousel';
+import { partitionShoppingCategories, getShoppingItemKey } from './shoppingCategoryUtils';
+import { useShoppingCollapseAnimation } from './useShoppingCollapseAnimation';
 
 interface ActiveShoppingRecipe {
   recipeId: string;
@@ -65,113 +67,88 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
   const toast = useToast();
 
   const [showAddForm, setShowAddForm] = useState(false);
-  const [checkingKeys, setCheckingKeys] = useState<Set<string>>(new Set());
-  const [collapsingKeys, setCollapsingKeys] = useState<Set<string>>(new Set());
+  const { checkingKeys, setCheckingKeys, collapsingKeys, triggerCollapseAndAction } =
+    useShoppingCollapseAnimation();
 
-  const getItemKey = (item: AggregatedShoppingItem) =>
-    `${item.baseName || item.name}|${(item.modifier || '').toLowerCase().trim()}|${item.unit}`.toLowerCase();
+  const getItemKey = getShoppingItemKey;
 
-  const categoryIndex = (cat: string) => {
-    const idx = (categoryOrder as readonly string[]).indexOf(cat.toUpperCase());
-    return idx === -1 ? 999 : idx;
-  };
+  const { activeGroups, activeCategorySet, drawerCheckedItems } = useMemo(
+    () => partitionShoppingCategories(aggregatedList, categoryOrder as readonly string[]),
+    [aggregatedList]
+  );
 
-  const triggerCollapseAndAction = (
-    keysToCollapse: string[],
-    action: () => void,
-    keysToMarkChecking?: string[]
-  ) => {
-    if (keysToMarkChecking && keysToMarkChecking.length > 0) {
-      setCheckingKeys((prev) => {
-        const next = new Set(prev);
-        keysToMarkChecking.forEach((k) => next.add(k));
-        return next;
-      });
-
-      setTimeout(() => {
-        setCollapsingKeys((prev) => {
-          const next = new Set(prev);
-          keysToCollapse.forEach((k) => next.add(k));
-          return next;
-        });
-
-        setTimeout(() => {
-          action();
-          requestAnimationFrame(() => {
-            setCheckingKeys((prev) => {
-              const next = new Set(prev);
-              keysToMarkChecking.forEach((k) => next.delete(k));
-              return next;
-            });
-            setCollapsingKeys((prev) => {
-              const next = new Set(prev);
-              keysToCollapse.forEach((k) => next.delete(k));
-              return next;
-            });
-          });
-        }, 200);
-      }, 280);
+  const executeToggle = (item: AggregatedShoppingItem, targetChecked: boolean) => {
+    if (toggleItemIds && item.itemIds?.length) {
+      toggleItemIds(item.itemIds, targetChecked);
     } else {
-      setCollapsingKeys((prev) => {
-        const next = new Set(prev);
-        keysToCollapse.forEach((k) => next.add(k));
-        return next;
-      });
-      setTimeout(() => {
-        action();
-        requestAnimationFrame(() => {
-          setCollapsingKeys((prev) => {
-            const next = new Set(prev);
-            keysToCollapse.forEach((k) => next.delete(k));
-            return next;
-          });
-        });
-      }, 200);
+      toggleItemGroup(item.baseName || item.name, item.modifier, item.unit, targetChecked);
     }
   };
 
   const handleItemToggle = (item: AggregatedShoppingItem) => {
     const key = getItemKey(item);
-    const displayKey = `${item.checked ? 'checked' : 'unchecked'}-${key}`;
-    const keysToCollapse = [displayKey];
+    const cat = item.category || 'OTHER';
 
-    let keysToMarkChecking: string[] | undefined;
     if (!item.checked) {
-      keysToMarkChecking = [displayKey];
-      const cat = item.category || 'OTHER';
       const toBuyList = aggregatedList.toBuy || aggregatedList.unchecked || [];
       const openInCat = toBuyList.filter((i) => (i.category || 'OTHER') === cat);
-      if (openInCat.length === 1) {
-        keysToCollapse.push(`group-${cat}`);
+      const isLastOpenInGroup = openInCat.length <= 1;
+
+      if (isLastOpenInGroup) {
+        // Last open item in this category: checking it completes the entire category!
+        // Smoothly collapse both the item and the whole category aisle.
+        const displayKey = `unchecked-${key}`;
+        const keysToCollapse = [displayKey, `group-${cat}`];
+        triggerCollapseAndAction(
+          keysToCollapse,
+          () => executeToggle(item, true),
+          [displayKey]
+        );
+      } else {
+        // Other items in this aisle remain unchecked.
+        // Don't disappear immediately: show brief check animation then toggle inside group without collapsing.
+        const displayKey = `unchecked-${key}`;
+        setCheckingKeys((prev) => new Set(prev).add(displayKey));
+        setTimeout(() => {
+          executeToggle(item, true);
+          requestAnimationFrame(() => {
+            setCheckingKeys((prev) => {
+              const next = new Set(prev);
+              next.delete(displayKey);
+              return next;
+            });
+          });
+        }, 180);
+      }
+    } else {
+      // Unchecking an item
+      const displayKey = `checked-${key}`;
+      const isInDrawer = !activeCategorySet.has(cat);
+      if (isInDrawer) {
+        // Collapses out of the completed drawer and reappears in the active aisle
+        triggerCollapseAndAction([displayKey], () => executeToggle(item, false));
+      } else {
+        // Already inside an active aisle: uncheck immediately
+        executeToggle(item, false);
       }
     }
-
-    triggerCollapseAndAction(
-      keysToCollapse,
-      () => {
-        if (toggleItemIds && item.itemIds?.length) {
-          toggleItemIds(item.itemIds, !item.checked);
-        } else {
-          toggleItemGroup(item.baseName || item.name, item.modifier, item.unit, !item.checked);
-        }
-      },
-      keysToMarkChecking
-    );
   };
 
   const handleGroupHeaderClick = (items: AggregatedShoppingItem[]) => {
-    if (items.length === 0) return;
-    const keys = items.map((i) => `unchecked-${getItemKey(i)}`);
-    const keysToCollapse = [...keys, `group-${items[0].category || 'OTHER'}`];
+    const uncheckedItems = items.filter((i) => !i.checked);
+    if (uncheckedItems.length === 0) return;
+    const cat = items[0].category || 'OTHER';
+    const keys = uncheckedItems.map((i) => `unchecked-${getItemKey(i)}`);
+    const keysToCollapse = [...keys, `group-${cat}`];
 
     triggerCollapseAndAction(
       keysToCollapse,
       () => {
         if (toggleItemIds) {
-          const allItemIds = items.flatMap((i) => i.itemIds || []);
+          const allItemIds = uncheckedItems.flatMap((i) => i.itemIds || []);
           toggleItemIds(allItemIds, true);
         } else {
-          items.forEach((i) => toggleItemGroup(i.baseName || i.name, i.modifier, i.unit, true));
+          uncheckedItems.forEach((i) => toggleItemGroup(i.baseName || i.name, i.modifier, i.unit, true));
         }
       },
       keys
@@ -221,25 +198,6 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
   const checkedCount = aggregatedList.checked.length;
   const totalCount = toBuyItems.length + checkedCount;
 
-  // Active aisles to buy
-  const activeGroups = useMemo(() => {
-    const groups: Record<string, AggregatedShoppingItem[]> = {};
-    toBuyItems.forEach((item) => {
-      const cat = item.category || 'OTHER';
-      if (!groups[cat]) groups[cat] = [];
-      groups[cat].push(item);
-    });
-    return Object.keys(groups)
-      .map((category) => ({ category, items: groups[category] }))
-      .sort((a, b) => categoryIndex(a.category) - categoryIndex(b.category));
-  }, [toBuyItems]);
-
-  const checkedSorted = useMemo(() => {
-    return [...aggregatedList.checked].sort(
-      (a, b) => categoryIndex(a.category || 'OTHER') - categoryIndex(b.category || 'OTHER')
-    );
-  }, [aggregatedList.checked]);
-
   return (
     <div className="flex flex-col gap-4 relative">
       {/* Sentinel for sticky header's collapsed progress strip */}
@@ -287,7 +245,7 @@ export const ShoppingListView: React.FC<ShoppingListViewProps> = ({
           )}
 
           <ShoppingCheckedDrawer
-            items={checkedSorted}
+            items={drawerCheckedItems}
             getItemKey={getItemKey}
             onItemToggle={handleItemToggle}
             onDelete={(item) =>

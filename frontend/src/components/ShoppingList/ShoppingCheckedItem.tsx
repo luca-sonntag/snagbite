@@ -10,6 +10,7 @@ interface ShoppingCheckedItemProps {
   extraNote: string | null;
   amountStr: string;
   animationClass: string;
+  showCategoryIndicator?: boolean;
   onClick: () => void;
   onDelete: () => void;
 }
@@ -19,6 +20,7 @@ export default function ShoppingCheckedItem({
   extraNote,
   amountStr,
   animationClass,
+  showCategoryIndicator = false,
   onClick,
   onDelete,
 }: ShoppingCheckedItemProps) {
@@ -37,10 +39,12 @@ export default function ShoppingCheckedItem({
           className="flex items-center gap-3 cursor-pointer flex-1 min-w-0 text-left outline-none border-none bg-transparent"
           aria-label={t('shopping.restoreItem')}
         >
-          <span
-            className={`w-1 h-4 rounded-full ${theme.barClass} shrink-0 opacity-80`}
-            title={item.category || undefined}
-          />
+          {showCategoryIndicator && (
+            <span
+              className={`w-1 h-4 rounded-full ${theme.barClass} shrink-0 opacity-80`}
+              title={item.category || undefined}
+            />
+          )}
 
           <span className="w-6 h-6 rounded-lg bg-emerald-500 text-white shadow-xs flex items-center justify-center flex-shrink-0 transition-colors">
             <Check className="w-3.5 h-3.5 stroke-[3px]" />
