@@ -215,7 +215,7 @@ export const config: Config = {
   S3_REGION: getEnv('AWS_REGION', getEnv('AWS_DEFAULT_REGION', 'auto')),
   S3_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
   S3_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
-  S3_BUCKET_NAME: process.env.BUCKET_NAME || process.env.AWS_BUCKET_NAME,
+  S3_BUCKET_NAME: process.env.BUCKET_NAME || process.env.AWS_S3_BUCKET_NAME || process.env.AWS_BUCKET_NAME,
   S3_PUBLIC_URL: process.env.AWS_PUBLIC_URL,
   S3_PUBLIC_DOMAIN: process.env.AWS_PUBLIC_DOMAIN,
   S3_FORCE_PATH_STYLE: getEnv('AWS_S3_FORCE_PATH_STYLE', 'false') === 'true',
