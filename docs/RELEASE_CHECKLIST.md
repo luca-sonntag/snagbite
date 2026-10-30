@@ -25,9 +25,10 @@
   - NTFY_TOKEN: optionales Access-Token eintragen, falls ein reserviertes ntfy-Topic genutzt wird.
   - ALERTS_INCLUDE_PII: optional auf true, falls maskierte E-Mails und Feedback-Auszüge mitgeschickt werden sollen (standardmäßig false zur DSGVO-Datenminimierung).
   - Commits: d7a7c58b, ee8cea2f, 7df42e75, a174048, 5323b67e.
-- [ ] **Tigris S3 Endpoint & Credentials auf Railway prüfen:**
-  - `S3_ENDPOINT` muss auf `https://t3.storage.dev` zeigen (nicht `storageapi.dev`).
-  - Im Railway Dashboard prüfen, ob `S3_ACCESS_KEY_ID` und `S3_SECRET_ACCESS_KEY` im Backend-Service mit den aktiven Keys des Tigris-Storage-Plugins übereinstimmen. Alternativ können sie entfernt werden, damit das Backend automatisch auf die nativen Plugin-Variablen `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` und `BUCKET_NAME` zurückgreift.
+- [ ] **Tigris S3 Endpoint & Credentials auf Railway prüfen (Vereinheitlichung auf AWS_*):**
+  - Storage-Umgebungsvariablen wurden auf native `AWS_*`-Variablen vereinheitlicht (`AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `BUCKET_NAME`).
+  - `AWS_ENDPOINT_URL_S3` (oder Fallback `S3_ENDPOINT`) muss auf `https://t3.storage.dev` zeigen (nicht `storageapi.dev`).
+  - Redundante manuelle `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` / `S3_BUCKET_NAME` im Railway Dashboard können entfernt werden, da das Backend nun direkt die nativen Tigris-Plugin-Variablen verwendet.
   - Commits: `068b6859`, `5fde45c8`, `bff0f4dd`.
 
 ### ☁️ 3. Externe Dienste & Cloudflare
