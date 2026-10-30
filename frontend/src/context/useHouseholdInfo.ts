@@ -17,6 +17,7 @@ const defaultContext: HouseholdContextData = {
   isTrialActive: false,
   trialEndsAt: null,
   hasHouseholdPro: false,
+  hasPaidPro: false,
   isPauseLocked: false,
   requiresExtractionAds: false,
   inviteCode: null,
@@ -47,14 +48,19 @@ export function useHouseholdInfo(session: AuthSession | null): HouseholdInfoStat
 
       const data = await res.json();
       if (data && data.success) {
+        const hasHouseholdPro = Boolean(data.hasHouseholdPro);
+        const isTrialActive = Boolean(data.isTrialActive);
+        const hasPaidPro = Boolean(data.hasPaidPro ?? (hasHouseholdPro && !isTrialActive));
+
         setHousehold({
           householdId: data.householdId ?? null,
           partnerId: data.partnerId ?? null,
           partnerProfile: data.partnerProfile ?? null,
           status: data.status ?? 'none',
-          isTrialActive: Boolean(data.isTrialActive),
+          isTrialActive,
           trialEndsAt: data.trialEndsAt ?? null,
-          hasHouseholdPro: Boolean(data.hasHouseholdPro),
+          hasHouseholdPro,
+          hasPaidPro,
           isPauseLocked: Boolean(data.isPauseLocked),
           requiresExtractionAds: Boolean(data.requiresExtractionAds),
           inviteCode: data.inviteCode ?? null,
