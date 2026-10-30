@@ -85,7 +85,7 @@ async function getOrCreateTestUser(): Promise<string> {
     name: 'Dev Test User',
     email: TEST_USER_EMAIL,
     emailVerified: true,
-    tier: 'alpha',
+    tier: 'premium',
     createdAt: new Date(),
     updatedAt: new Date(),
   });

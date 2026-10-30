@@ -47,7 +47,8 @@ export async function requireAuth(
 
     req.userId = sessionData.session.userId;
     req.userEmail = sessionData.user.email;
-    req.userTier = (sessionData.user as { tier?: string }).tier ?? 'free';
+    const rawTier = (sessionData.user as { tier?: string }).tier;
+    req.userTier = rawTier === 'premium' ? 'premium' : 'free';
     next();
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);

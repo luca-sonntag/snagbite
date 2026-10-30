@@ -79,8 +79,8 @@ export async function getHouseholdContext(userId: string): Promise<HouseholdCont
 
     const selfTier = selfUser[0]?.tier || 'free';
     const partnerTier = partnerUser[0]?.tier || 'free';
-    const isSelfPaidPro = selfTier === 'premium' || selfTier === 'alpha';
-    const isPartnerPaidPro = partnerTier === 'premium' || partnerTier === 'alpha';
+    const isSelfPaidPro = selfTier === 'premium';
+    const isPartnerPaidPro = partnerTier === 'premium';
 
     const hasHouseholdPro = isSelfPaidPro || isPartnerPaidPro || isTrialActive;
     const isPauseLocked = !hasHouseholdPro;
