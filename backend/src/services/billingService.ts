@@ -4,6 +4,7 @@ import { config } from '../config.js';
 import { db } from '../db/drizzle.js';
 import { user as userTable } from '../db/schema/auth.js';
 import { AppError } from '../errors.js';
+import { invalidateHouseholdForUser } from '../db/householdDb.js';
 
 export interface BillingSyncResult {
   tier: string;
@@ -78,6 +79,8 @@ async function updateUserTier(
     .update(userTable)
     .set({ tier: newTier, updatedAt: new Date() })
     .where(eq(userTable.id, userId));
+
+  await invalidateHouseholdForUser(userId);
 }
 
 /**

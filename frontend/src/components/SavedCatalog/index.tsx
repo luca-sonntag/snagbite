@@ -14,6 +14,7 @@ import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
 import { sortIngredientsByCategory } from '../MealPlanner/mealPlannerUtils';
 import { apiUrl } from '../../api';
 import PremiumModal from '../PremiumModal';
+import { HouseholdPausedBanner } from '../Household';
 import PremiumHint from '../PremiumHint';
 import CollectionSheet from './CollectionSheet';
 import { FlagSheet } from './FlagSheet';
@@ -648,6 +649,7 @@ export default function SavedCatalog({
       )}
 
       {premiumBanner}
+      <HouseholdPausedBanner onOpenUpgrade={() => setIsPremiumModalOpen(true)} className="mb-3" />
 
       {!isListLevel ? (
         <CookbookHome

@@ -8,7 +8,8 @@ import { ShoppingStickyHeader } from './ShoppingStickyHeader';
 import { useShoppingSticky } from './useShoppingSticky';
 import { useState } from 'react';
 import { useSpotlightTour } from '../../hooks/useSpotlightTour';
-import { HouseholdInviteBanner, HouseholdSheet } from '../Household';
+import { HouseholdInviteBanner, HouseholdPausedBanner, HouseholdSheet } from '../Household';
+import PremiumModal from '../PremiumModal';
 
 interface ActiveShoppingRecipe {
   recipeId: string;
@@ -47,6 +48,7 @@ export default function ShoppingList(props: ShoppingListProps) {
   const toast = useToast();
   const { isCollapsed, setCollapseSentinel } = useShoppingSticky(props.isActive ?? true);
   const [isHouseholdOpen, setIsHouseholdOpen] = useState(false);
+  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
 
   const toBuyItems = props.aggregatedList.toBuy || props.aggregatedList.unchecked || [];
   const checkedCount = props.aggregatedList.checked.length;
@@ -125,12 +127,23 @@ export default function ShoppingList(props: ShoppingListProps) {
 
       {/* Main Content */}
       <HouseholdInviteBanner onOpenHousehold={() => setIsHouseholdOpen(true)} />
+      <HouseholdPausedBanner
+        onOpenUpgrade={() => setIsPremiumModalOpen(true)}
+        onOpenHousehold={() => setIsHouseholdOpen(true)}
+      />
 
       <ShoppingListView
         {...props}
         setCollapseSentinel={setCollapseSentinel}
       />
-      <HouseholdSheet isOpen={isHouseholdOpen} onOpenChange={setIsHouseholdOpen}
+      <HouseholdSheet
+        isOpen={isHouseholdOpen}
+        onOpenChange={setIsHouseholdOpen}
+        onOpenUpgrade={() => setIsPremiumModalOpen(true)}
+      />
+      <PremiumModal
+        isOpen={isPremiumModalOpen}
+        onOpenChange={setIsPremiumModalOpen}
       />
     </div>
   );

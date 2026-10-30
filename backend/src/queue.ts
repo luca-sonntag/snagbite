@@ -23,6 +23,7 @@ import { AppError, isAppError, serializeJobError } from './errors.js';
 import { detectPlatform } from './scrapers/providers/index.js';
 import { emitAlert, type JobSource } from './alerts/index.js';
 import { notificationTick } from './notifications/worker.js';
+import { checkAndNotifyHouseholdTrialStatus } from './push/householdTrialNotifications.js';
 import { enrichRecipeWithCanonicalIngredients } from './matching/ingredientMatcher.js';
 import { auditRecipe, applyRecipeAuditPatch } from './matching/recipeAuditor.js';
 import { isDevEnvironment, logExtractionDevSummary } from './matching/recipeAuditorDevLogger.js';
@@ -37,6 +38,7 @@ let reclaimInterval: NodeJS.Timeout | null = null;
 let sweepInterval: NodeJS.Timeout | null = null;
 let cleanupInterval: NodeJS.Timeout | null = null;
 let notificationInterval: NodeJS.Timeout | null = null;
+let householdTrialInterval: NodeJS.Timeout | null = null;
 
 const MIN_POLL_INTERVAL_MS = 2_000;
 const MAX_POLL_INTERVAL_MS = 30_000;
@@ -899,6 +901,15 @@ export function startQueue(pollIntervalMs = MIN_POLL_INTERVAL_MS): void {
     notificationInterval = setInterval(runNotifTick, notifMs);
     console.log(`Smart notification worker started (every ${config.NOTIFICATION_TICK_MINUTES} min).`);
   }
+
+  // Periodic check for household trial expiration & warnings (runs every 30 minutes)
+  const runTrialNotifTick = () => {
+    void checkAndNotifyHouseholdTrialStatus().catch((err) =>
+      console.error('[householdTrial] Periodic tick failed:', err)
+    );
+  };
+  setTimeout(runTrialNotifTick, 10_000);
+  householdTrialInterval = setInterval(runTrialNotifTick, 30 * 60 * 1000);
 }
 
 /**
@@ -911,5 +922,6 @@ export function stopQueue(): void {
   if (sweepInterval) { clearInterval(sweepInterval); sweepInterval = null; }
   if (cleanupInterval) { clearInterval(cleanupInterval); cleanupInterval = null; }
   if (notificationInterval) { clearInterval(notificationInterval); notificationInterval = null; }
+  if (householdTrialInterval) { clearInterval(householdTrialInterval); householdTrialInterval = null; }
   console.log('Background job queue worker stopped.');
 }

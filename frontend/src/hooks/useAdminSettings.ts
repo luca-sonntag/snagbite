@@ -14,7 +14,7 @@ import { clearAllBrowserData } from '../utils/browserDataCleaner';
 
 export function useAdminSettings() {
   const { t } = useI18n();
-  const { isPremium, user, getAccessToken, refreshSession } = useAuth();
+  const { isPremium, user, getAccessToken, refreshSession, refreshHousehold } = useAuth();
   const toast = useToast();
   const dialog = useDialog();
 
@@ -65,6 +65,7 @@ export function useAdminSettings() {
       }
 
       await refreshSession();
+      await refreshHousehold();
       toast.success(
         targetTier === 'premium'
           ? t('app.settings.admin.tierSuccessPro')

@@ -37,7 +37,7 @@ export default function AllRecipesShelf({
 }: AllRecipesShelfProps) {
   const { t, language } = useI18n();
   const { status: householdStatus } = useHousehold();
-  const isHouseholdConnected = householdStatus === 'active' || householdStatus === 'paused';
+  const isHouseholdConnected = householdStatus === 'active';
   const [showAll, setShowAll] = useState(false);
 
   const displayedItems = useMemo(() => {
@@ -77,6 +77,11 @@ export default function AllRecipesShelf({
               ? t('catalog.magazine.allShelfSubtitleHousehold')
               : t('catalog.magazine.allShelfSubtitle')}
           </p>
+          {householdStatus === 'paused' && (
+            <p className="text-[11px] text-rose-600 dark:text-rose-400 font-medium mt-1">
+              {t('household.pausedBanner.catalogNote')}
+            </p>
+          )}
         </div>
         <button
           type="button"

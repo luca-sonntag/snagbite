@@ -2143,6 +2143,14 @@ export const uiTranslations = {
       },
       status: {
         connected: 'Haushaltspartner verbunden',
+        pausedBadge: 'Pausiert',
+      },
+      pausedBanner: {
+        title: 'Gemeinsamer Haushalt pausiert',
+        desc: 'Eure Rezepte, der Wochenplaner und die Einkaufsliste werden nicht mehr synchronisiert, da die Testphase beendet ist.',
+        action: 'Snagbite PRO freischalten',
+        viewDetails: 'Haushalt ansehen',
+        catalogNote: 'Haushalt pausiert: Rezepte deines Partners sind vorübergehend ausgeblendet.',
       },
       cooldown: {
         title: 'Haushalts-Wechselsperre aktiv',
@@ -3935,6 +3943,14 @@ export const uiTranslations = {
       },
       status: {
         connected: 'Household partner connected',
+        pausedBadge: 'Paused',
+      },
+      pausedBanner: {
+        title: 'Household paused',
+        desc: 'Your recipes, meal planner, and shopping list are no longer syncing because the trial has ended.',
+        action: 'Unlock Snagbite PRO',
+        viewDetails: 'View household',
+        catalogNote: 'Household paused: Your partner\'s recipes are temporarily hidden.',
       },
       cooldown: {
         title: 'Household cooldown active',

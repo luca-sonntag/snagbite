@@ -96,6 +96,25 @@ export async function getRecentNotifications(
   }));
 }
 
+export async function hasRecentNotificationType(
+  userId: string,
+  type: string,
+  sinceDays: number
+): Promise<boolean> {
+  const cutoff = new Date(Date.now() - sinceDays * 24 * 60 * 60 * 1000);
+  const rows = await db
+    .select({ id: notificationLog.id })
+    .from(notificationLog)
+    .where(and(
+      eq(notificationLog.userId, userId),
+      eq(notificationLog.type, type),
+      gte(notificationLog.sentAt, cutoff)
+    ))
+    .limit(1);
+
+  return rows.length > 0;
+}
+
 export async function listNotificationUsers(): Promise<NotificationUser[]> {
   const rows = await db
     .select({

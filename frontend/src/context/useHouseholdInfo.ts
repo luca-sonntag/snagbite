@@ -71,6 +71,8 @@ export function useHouseholdInfo(session: AuthSession | null): HouseholdInfoStat
     }
   }, [session?.token]);
 
+  const userTier = session?.user?.tier;
+
   useEffect(() => {
     if (!session?.token) {
       setHousehold(null);
@@ -78,7 +80,7 @@ export function useHouseholdInfo(session: AuthSession | null): HouseholdInfoStat
       return;
     }
     refreshHousehold();
-  }, [session?.token, refreshHousehold]);
+  }, [session?.token, userTier, refreshHousehold]);
 
   return {
     household,
