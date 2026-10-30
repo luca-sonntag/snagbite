@@ -1,7 +1,7 @@
 import type { AggregatedShoppingItem, PantryItem, ParentIngredientInfo, ShoppingListItem } from '../../types';
 import { normalizeFoodBaseKey, normalizeUnit } from '../../utils/ingredientTaxonomy';
 import { formatQuantity } from '../../utils/formatQuantity';
-import { isPantryStockSufficient, getPantryStockStatus, type PantryStockStatus } from '@cookbook/shared';
+import { isPantryStockSufficient, getPantryStockStatus, convertToBaseMetric, type PantryStockStatus } from '@cookbook/shared';
 
 export interface PantryMatchableItem {
   name: string;
@@ -64,13 +64,32 @@ export function findPantryStock(item: PantryMatchableItem, pantryItems: PantryIt
   return match ? match.formattedStock : null;
 }
 
+function getContainerLabel(cleanPkgUnit: string, count: number): string {
+  if (cleanPkgUnit === 'glas' || cleanPkgUnit === 'jar' || cleanPkgUnit === 'gläser' || cleanPkgUnit === 'glaeser') {
+    return count > 1 ? `${count} Gläser` : '1 Glas';
+  }
+  if (cleanPkgUnit === 'dose' || cleanPkgUnit === 'can' || cleanPkgUnit === 'dosen') {
+    return count > 1 ? `${count} Dosen` : '1 Dose';
+  }
+  if (cleanPkgUnit === 'flasche' || cleanPkgUnit === 'bottle' || cleanPkgUnit === 'flaschen') {
+    return count > 1 ? `${count} Flaschen` : '1 Flasche';
+  }
+  if (cleanPkgUnit === 'becher' || cleanPkgUnit === 'cup') {
+    return count > 1 ? `${count} Becher` : '1 Becher';
+  }
+  if (cleanPkgUnit === 'bund' || cleanPkgUnit === 'bunch' || cleanPkgUnit === 'bünde') {
+    return count > 1 ? `${count} Bünde` : '1 Bund';
+  }
+  return count > 1 ? `${count} Pkg.` : '1 Pkg.';
+}
+
 export function getPackageRecommendation(
   amount: number,
   unit: string,
   pkgAmount?: number | null,
   pkgUnit?: string | null
 ): string | null {
-  if (!pkgAmount || pkgAmount <= 0) return null;
+  if (!pkgAmount || pkgAmount <= 0 || amount <= 0) return null;
   const cleanUnit = (unit || '').toLowerCase().trim();
   const cleanPkgUnit = (pkgUnit || '').toLowerCase().trim();
 
@@ -79,29 +98,42 @@ export function getPackageRecommendation(
     return null;
   }
 
-  if (cleanUnit === cleanPkgUnit && amount > 0) {
-    if (amount <= pkgAmount) {
-      return `1 Pkg. (${pkgAmount} ${pkgUnit})`;
-    }
-    const count = Math.ceil(amount / pkgAmount);
-    return `${count} Pkg. (${count * pkgAmount} ${pkgUnit})`;
+  const itemMetric = convertToBaseMetric(amount, cleanUnit);
+  const pkgMetric = convertToBaseMetric(pkgAmount, cleanPkgUnit);
+
+  // Incompatibility filter (Teil 3):
+  // Stück / Count vs. Volume (e.g. 1 Stück Zitrone -> 200 ml Zitronensaft) is an invalid mismatch
+  if (
+    (itemMetric?.type === 'count' && pkgMetric?.type === 'volume') ||
+    (itemMetric?.type === 'volume' && pkgMetric?.type === 'count')
+  ) {
+    return null;
   }
 
-  const containerName =
-    cleanPkgUnit === 'glas' || cleanPkgUnit === 'jar'
-      ? '1 Glas'
-      : cleanPkgUnit === 'dose' || cleanPkgUnit === 'can'
-      ? '1 Dose'
-      : cleanPkgUnit === 'flasche' || cleanPkgUnit === 'bottle'
-      ? '1 Flasche'
-      : cleanPkgUnit === 'becher' || cleanPkgUnit === 'cup'
-      ? '1 Becher'
-      : cleanPkgUnit === 'bund' || cleanPkgUnit === 'bunch'
-      ? '1 Bund'
-      : '1 Pkg.';
+  // Exact match in base metric (e.g. 1000 g vs 1 kg) -> redundant
+  if (
+    itemMetric &&
+    pkgMetric &&
+    itemMetric.type === pkgMetric.type &&
+    Math.abs(itemMetric.value - pkgMetric.value) < 0.001
+  ) {
+    return null;
+  }
 
-  const pkgUnitStr = pkgUnit ? ` (${pkgAmount} ${pkgUnit})` : ` (${pkgAmount})`;
-  return `${containerName}${pkgUnitStr}`;
+  let count = 1;
+  let totalPkgAmount = pkgAmount;
+
+  if (itemMetric && pkgMetric && itemMetric.type === pkgMetric.type) {
+    count = Math.max(1, Math.ceil(itemMetric.value / pkgMetric.value));
+    totalPkgAmount = count * pkgAmount;
+  } else if (cleanUnit === cleanPkgUnit && amount > 0) {
+    count = Math.max(1, Math.ceil(amount / pkgAmount));
+    totalPkgAmount = count * pkgAmount;
+  }
+
+  const containerLabel = getContainerLabel(cleanPkgUnit, count);
+  const pkgUnitStr = pkgUnit ? ` (${totalPkgAmount} ${pkgUnit})` : ` (${totalPkgAmount})`;
+  return `${containerLabel}${pkgUnitStr}`;
 }
 
 export function extractExtraNote(
