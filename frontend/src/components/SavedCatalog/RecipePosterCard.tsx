@@ -6,6 +6,7 @@ import { hapticLight } from '../../utils/haptics';
 import { getRecipeCalories, formatCalories } from '../../utils/formatNutrition';
 import { HealthScoreLetterBadge } from '../RecipeDetails/HealthScoreBadge';
 import { useI18n } from '../../context/I18nContext';
+import PartnerRecipeBadge from '../Household/PartnerRecipeBadge';
 
 interface RecipePosterCardProps {
   /** Provide either a full SavedRecipe job or a raw Recipe */
@@ -120,6 +121,7 @@ export default function RecipePosterCard({
               <Star className="w-4 h-4 fill-amber-500 text-amber-500 drop-shadow-[0_2px_5px_rgba(0,0,0,0.65)]" />
             </div>
           ) : null}
+          <PartnerRecipeBadge source={job?.source} className="absolute bottom-2.5 left-2.5" />
         </div>
 
         {/* Meta: Title & coupled punchy info pills directly on canvas */}
@@ -150,6 +152,7 @@ export default function RecipePosterCard({
                      {r.servings} Port.
                    </span>
                  ) : null}
+
 
                 <HealthScoreLetterBadge score={healthScoreNum} size="sm" />
               </div>

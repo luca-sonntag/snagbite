@@ -47,14 +47,14 @@ export default function CollectionStoryHub({
     <section className="flex flex-col gap-2 select-none">
       {/* Subtle Header */}
       <div className="flex items-center justify-between px-0.5">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+        <h2 className="text-xs font-medium text-gray-500 dark:text-gray-400 font-sans">
           {t('catalog.storyHub.title')}
-        </span>
+        </h2>
         {onManageCollections && collections.length > 0 && (
           <button
             type="button"
             onClick={onManageCollections}
-            className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer border-none bg-transparent"
+            className="text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer border-none bg-transparent"
           >
             {t('catalog.storyHub.manage')}
           </button>

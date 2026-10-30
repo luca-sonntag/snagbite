@@ -12,6 +12,9 @@ import { mealPlans } from './schema/mealPlans.js';
 import { recipes } from './schema/recipes.js';
 import { cookEvents } from './schema/gamification.js';
 import { eq, and, gte, lte, asc, inArray } from 'drizzle-orm';
+import { getHouseholdUserIds } from './householdDb.js';
+import { getProfilesByIds } from './socialDb.js';
+import { queueHouseholdDebouncedPush } from '../push/householdNotifications.js';
 
 export function rowToMealPlanEntry(row: any): MealPlanEntry {
   const mp = row.mealPlan ?? row;
@@ -58,7 +61,8 @@ export async function listMealPlans(
   startDate?: string,
   endDate?: string,
 ): Promise<MealPlanEntry[]> {
-  const conditions = [eq(mealPlans.userId, userId)];
+  const userIds = await getHouseholdUserIds(userId);
+  const conditions = [inArray(mealPlans.userId, userIds)];
   if (startDate) {
     conditions.push(gte(mealPlans.planDate, startDate));
   }
@@ -80,7 +84,7 @@ export async function listMealPlans(
 
   // Cross-reference with cook_events to catch any cooks on matching plan dates
   try {
-    const cookConditions = [eq(cookEvents.userId, userId)];
+    const cookConditions = [inArray(cookEvents.userId, userIds)];
     if (startDate) {
       const bufferStart = new Date(new Date(startDate).getTime() - 24 * 60 * 60 * 1000);
       cookConditions.push(gte(cookEvents.cookedAt, bufferStart));
@@ -144,6 +148,7 @@ export async function createMealPlan(
   userId: string,
   dto: CreateMealPlanDto,
 ): Promise<MealPlanEntry> {
+  const userIds = await getHouseholdUserIds(userId);
   let initialIsCooked = false;
   try {
     const bufferStart = new Date(new Date(dto.planDate).getTime() - 24 * 60 * 60 * 1000);
@@ -152,7 +157,7 @@ export async function createMealPlan(
       .select({ id: cookEvents.id })
       .from(cookEvents)
       .where(and(
-        eq(cookEvents.userId, userId),
+        inArray(cookEvents.userId, userIds),
         eq(cookEvents.recipeId, dto.recipeId),
         gte(cookEvents.cookedAt, bufferStart),
         lte(cookEvents.cookedAt, bufferEnd)
@@ -185,6 +190,23 @@ export async function createMealPlan(
     .where(eq(recipes.id, dto.recipeId))
     .limit(1);
 
+  void (async () => {
+    try {
+      const partnerId = userIds.find((id) => id !== userId);
+      if (!partnerId) return;
+      const profiles = await getProfilesByIds([userId]);
+      const myName = profiles.get(userId)?.displayName || 'Dein Partner';
+      queueHouseholdDebouncedPush(partnerId, myName, 'meal_planned', {
+        count: 1,
+        title: recipe?.title,
+        imageUrl: recipe?.imageUrl,
+        recipeId: dto.recipeId,
+      });
+    } catch (pushErr) {
+      console.warn('[createMealPlan] Failed to queue household notification:', pushErr);
+    }
+  })();
+
   return rowToMealPlanEntry({ mealPlan: inserted, recipe: recipe ?? null });
 }
 
@@ -193,6 +215,7 @@ export async function updateMealPlan(
   userId: string,
   dto: UpdateMealPlanDto,
 ): Promise<MealPlanEntry> {
+  const userIds = await getHouseholdUserIds(userId);
   const updates: Record<string, unknown> = {
     updatedAt: new Date(),
   };
@@ -206,7 +229,7 @@ export async function updateMealPlan(
   const [updated] = await db
     .update(mealPlans)
     .set(updates)
-    .where(and(eq(mealPlans.id, id), eq(mealPlans.userId, userId)))
+    .where(and(eq(mealPlans.id, id), inArray(mealPlans.userId, userIds)))
     .returning();
 
   if (!updated) {
@@ -223,9 +246,10 @@ export async function updateMealPlan(
 }
 
 export async function deleteMealPlan(id: string, userId: string): Promise<void> {
+  const userIds = await getHouseholdUserIds(userId);
   await db
     .delete(mealPlans)
-    .where(and(eq(mealPlans.id, id), eq(mealPlans.userId, userId)));
+    .where(and(eq(mealPlans.id, id), inArray(mealPlans.userId, userIds)));
 }
 
 export async function markMealPlansCookedForRecipe(
@@ -233,6 +257,7 @@ export async function markMealPlansCookedForRecipe(
   recipeId: string,
   dateStr?: string,
 ): Promise<number> {
+  const userIds = await getHouseholdUserIds(userId);
   const now = new Date();
   const utcToday = now.toISOString().split('T')[0];
   const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -247,7 +272,7 @@ export async function markMealPlansCookedForRecipe(
       updatedAt: new Date(),
     })
     .where(and(
-      eq(mealPlans.userId, userId),
+      inArray(mealPlans.userId, userIds),
       eq(mealPlans.recipeId, recipeId),
       inArray(mealPlans.planDate, candidateDates),
       eq(mealPlans.isCooked, false)

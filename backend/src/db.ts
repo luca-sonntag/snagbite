@@ -15,3 +15,4 @@ export * from './db/publicRecipesDb.js';
 export * from './db/appBundlesDb.js';
 export * from './db/socialFeedDb.js';
 export * from './db/pushNotificationDb.js';
+export * from './db/householdDb.js';

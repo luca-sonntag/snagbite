@@ -7,7 +7,8 @@ export type ProFeatureId =
   | 'cooking_mode'
   | 'recipe_copilot'
   | 'unlimited_extractions'
-  | 'collections_labels';
+  | 'collections_labels'
+  | 'household';
 
 export interface ProFeatureContent {
   id: ProFeatureId;

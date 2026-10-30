@@ -6,6 +6,17 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-29: Angleichung der Überschrift „Deine Sammlungen“ an subtilen Label-Stil
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Uppercase-Überschrift (`text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500`) und kleinerer Button (`text-[11px] font-bold`) in [`CollectionStoryHub.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CollectionStoryHub.tsx).
+* **Ersetzt durch:**
+  * **Konsistentes Typografie-Muster:** Subtile Headline (`text-xs font-medium text-gray-500 dark:text-gray-400 font-sans`) in normaler Groß-/Kleinschreibung („Deine Sammlungen“), identisch zu „Von Freunden empfohlen“ und den Sektionstiteln im Profil- und Freundebereich.
+  * Auch der Aktions-Button „Verwalten“ wurde typografisch auf `text-xs font-medium` angeglichen.
+* **Betroffene Dateien:** `frontend/src/components/SavedCatalog/CollectionStoryHub.tsx`, `docs/OBSOLETE.md`.
+
+---
+
 ### 2026-10-28: Angleichung der Überschrift „Von Freunden empfohlen“ & Entfernung des Subtitles
 
 * **Ersetzter Code / Veraltete Logik:**

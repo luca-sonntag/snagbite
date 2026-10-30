@@ -469,6 +469,10 @@ export const uiTranslations = {
           title: 'Kochen wie ein Profi',
           desc: 'Schritt-für-Schritt-Kochmodus, integrierte Timer und ein KI-Copilot, der Fragen beantwortet und Rezepte anpasst.',
         },
+        household: {
+          title: 'Zusammen kochen & planen',
+          desc: 'Verbinde dich mit deinem Partner: Teilt euer Kochbuch, Wochenplaner & Einkaufsliste nahtlos zu zweit – 1x PRO reicht für beide!',
+        },
       },
     },
     tour: {
@@ -1074,6 +1078,12 @@ export const uiTranslations = {
         REMIX_CONFIRM_FAILED: 'Der Remix konnte nicht bestätigt werden. Bitte versuche es später erneut.',
         CHAT_FAILED: 'Der Chat ist fehlgeschlagen. Bitte versuche es später erneut.',
         ACCOUNT_DELETE_FAILED: 'Dein Konto konnte nicht gelöscht werden. Bitte versuche es später erneut.',
+        HOUSEHOLD_NOT_FOUND: 'Kein aktiver Haushalt gefunden.',
+        HOUSEHOLD_INVITE_INVALID: 'Dieser Einladungscode ist ungültig oder abgelaufen.',
+        ALREADY_IN_HOUSEHOLD: 'Du bist bereits mit einem Haushalt verknüpft. Bitte trenne zuerst den bestehenden Haushalt.',
+        HOUSEHOLD_COOLDOWN: 'Du kannst einem neuen Haushalt erst wieder nach Ablauf der Schutzfrist beitreten.',
+        HOUSEHOLD_COOLDOWN_DATE: 'Du kannst einem neuen Haushalt erst wieder ab dem {date} beitreten.',
+        NUDGE_RATE_LIMITED: 'Du hast deinen Partner heute bereits angestupst.',
         INTERNAL_ERROR: 'Ein interner Serverfehler ist aufgetreten. Bitte versuche es später erneut.',
       },
       premium: {
@@ -1622,7 +1632,9 @@ export const uiTranslations = {
         rediscoveredSubtitle: 'Vor über {days} Tagen gespeichert & noch nicht probiert',
         savedOn: 'Gespeichert am {date}',
         allShelfTitle: 'Alle deine Rezepte',
+        allShelfTitleHousehold: 'Alle eure Rezepte',
         allShelfSubtitle: 'Deine vollständige Sammlung chronologisch sortiert',
+        allShelfSubtitleHousehold: 'Eure vollständige Sammlung chronologisch sortiert',
         allShelfButton: 'Alle {count} Rezepte durchsuchen & filtern',
         timelineToday: 'Heute',
         timelineYesterday: 'Gestern',
@@ -1993,6 +2005,10 @@ export const uiTranslations = {
             title: 'Sammlungen & Eigene Labels',
             desc: 'Eigene Ordner & benutzerdefinierte Rezept-Tags'
           },
+          household: {
+            title: 'Haushalt & 1 PRO für 2 Personen',
+            desc: 'Geteiltes Kochbuch, synchronisierter Wochenplaner & Einkaufsliste'
+          },
           nutrition: {
             title: 'Healthy Score & Nährwert-Deep-Dive',
             desc: '4-Säulen-Analyse, Makro-Verteilung, Nova-Klassifizierung & Insights'
@@ -2127,7 +2143,96 @@ export const uiTranslations = {
         apply: 'Jetzt neu laden',
         later: 'Später'
       }
-    }
+    },
+    household: {
+      partnerDefault: 'Dein Partner',
+      banner: {
+        title: 'Gemeinsamer Haushalt',
+        subtitle: 'Kochbuch, Wochenplaner & Einkaufsliste zu zweit nutzen.',
+        action: 'Einladen',
+        dismiss: 'Hinweis ausblenden',
+      },
+      modal: {
+        title: 'Gemeinsamer Haushalt',
+        subtitleActive: 'Mit Partner verbunden',
+        subtitleInvite: 'Zu zweit kochen & planen',
+      },
+      status: {
+        connected: 'Haushaltspartner verbunden',
+      },
+      cooldown: {
+        title: 'Haushalts-Wechselsperre aktiv',
+        desc: 'Nach dem Trennen eines Haushalts kannst du erst ab dem {date} einen neuen Haushalt erstellen oder einem beitreten.',
+      },
+      trial: {
+        activeTitle: '7 Tage Testphase aktiv',
+        activeDesc: 'Ihr nutzt alle Snagbite PRO Features gemeinsam.',
+      },
+      paused: {
+        title: 'Haushalt pausiert',
+        desc: 'Um euer gemeinsames Kochbuch und den Wochenplaner wieder zu synchronisieren, benötigt einer von euch Snagbite PRO.',
+        upgradeAction: 'Snagbite PRO freischalten',
+      },
+      nudge: {
+        button: 'Partner an PRO erinnern',
+        success: '{name} wurde benachrichtigt!',
+        cooldown: 'Du hast deinen Partner heute bereits erinnert.',
+      },
+      unlink: {
+        button: 'Haushalt trennen',
+        confirm: 'Möchtest du den gemeinsamen Haushalt mit {name} wirklich trennen? Beide behalten alle bisher gespeicherten Rezepte.',
+        success: 'Haushalt erfolgreich getrennt.',
+        error: 'Fehler beim Trennen des Haushalts.',
+      },
+      highlights: {
+        title: '1 PRO Abo für 2 Personen',
+        trialBadge: '7 Tage kostenlos',
+        desc: 'Verbindet euch zu einem Haushalt: Ihr teilt euer Kochbuch, Wochenplaner und Einkaufsliste. 7 Tage kostenlos testen – danach reicht 1 PRO Abo für beide!',
+        bullet1: 'Geteiltes Kochbuch für beide',
+        bullet2: 'Wochenplaner & Einkaufsliste synchronisiert',
+        bullet3: '1 PRO Abo reicht für 2 Personen',
+        orDivider: 'Oder Einladungscode eingeben',
+      },
+      invite: {
+        sectionTitle: 'Partner einladen',
+        share: 'Teilen',
+        shareHelp: 'Sende diesen Link oder Code an deinen Partner.',
+        createButton: 'Einladungscode erstellen',
+        createError: 'Fehler beim Erstellen des Codes.',
+        copyButton: 'Kopieren',
+        copiedButton: 'Kopiert',
+        copied: 'Einladungslink kopiert!',
+        copyError: 'Konnte Link nicht kopieren.',
+      },
+      share: {
+        title: 'Snagbite Haushaltseinladung',
+        text: 'Lass uns zusammen kochen! Verbinde dich mit meinem Snagbite-Haushalt:',
+      },
+      join: {
+        sectionTitle: 'Einladungscode eingeben',
+        placeholder: '8-stelliger Code',
+        action: 'Verbinden',
+        success: 'Erfolgreich mit Haushalt verbunden!',
+        error: 'Ungültiger Code oder bereits im Haushalt.',
+      },
+      propose: {
+        action: 'Kochen vorschlagen',
+        tooltip: 'Partner fragen, ob ihr dieses Rezept kochen wollt',
+        success: '{name} hat eine Benachrichtigung erhalten!',
+        cooldown: 'Du hast deinen Partner kürzlich schon nach diesem Gericht gefragt.',
+        error: 'Vorschlag konnte nicht gesendet werden.',
+      },
+      promo: {
+        title: 'Snagbite Haushalt-Modus',
+        subtitle: '1 Abo, 2 Personen – geteiltes Kochbuch & synchronisierte Einkaufsliste.',
+        benefit1: 'Nur 1 Person zahlt für Snagbite PRO',
+        benefit2: 'Automatisch synchronisiertes Kochbuch für beide',
+        benefit3: 'Gemeinsamer Wochenplaner & Einkaufsliste',
+        benefit4: '7 Tage unverbindliche Testphase',
+        ctaInvite: 'Partner einladen',
+        ctaUpgrade: 'PRO freischalten',
+      },
+    },
   },
   en: {
     ads: {
@@ -2171,6 +2276,10 @@ export const uiTranslations = {
         cooking: {
           title: 'Cook Like a Pro',
           desc: 'Step-by-step cooking mode, built-in timers and an AI copilot that answers questions and adapts recipes.',
+        },
+        household: {
+          title: 'Cook & Plan Together',
+          desc: 'Connect with your partner: Share your cookbook, meal planner & grocery list seamlessly together — 1x PRO covers both!',
         },
       },
     },
@@ -2777,6 +2886,12 @@ export const uiTranslations = {
         REMIX_CONFIRM_FAILED: 'Could not confirm the remix. Please try again later.',
         CHAT_FAILED: 'The chat failed. Please try again later.',
         ACCOUNT_DELETE_FAILED: 'Could not delete your account. Please try again later.',
+        HOUSEHOLD_NOT_FOUND: 'No active household found.',
+        HOUSEHOLD_INVITE_INVALID: 'This invite code is invalid or expired.',
+        ALREADY_IN_HOUSEHOLD: 'You are already linked to a household. Please unlink first.',
+        HOUSEHOLD_COOLDOWN: 'You can only join a new household after the cooldown expires.',
+        HOUSEHOLD_COOLDOWN_DATE: 'You can create or join a new household starting {date}.',
+        NUDGE_RATE_LIMITED: 'You have already nudged your partner today.',
         INTERNAL_ERROR: 'An internal server error occurred. Please try again later.',
       },
       premium: {
@@ -3324,7 +3439,9 @@ export const uiTranslations = {
         rediscoveredSubtitle: 'Saved over {days} days ago & untried',
         savedOn: 'Saved on {date}',
         allShelfTitle: 'All your recipes',
+        allShelfTitleHousehold: 'All your shared recipes',
         allShelfSubtitle: 'Your complete collection sorted chronologically',
+        allShelfSubtitleHousehold: 'Your shared collection sorted chronologically',
         allShelfButton: 'Browse & filter all {count} recipes',
         timelineToday: 'Today',
         timelineYesterday: 'Yesterday',
@@ -3695,6 +3812,10 @@ export const uiTranslations = {
             title: 'Collections & Custom Labels',
             desc: 'Custom folders & personalized recipe tags'
           },
+          household: {
+            title: 'Household & 1 PRO for 2 People',
+            desc: 'Shared cookbook, synchronized meal planner & shopping list'
+          },
           nutrition: {
             title: 'Healthy Score & Nutrition Deep-Dive',
             desc: '4-pillar analysis, macro distribution, NOVA classification & insights'
@@ -3829,7 +3950,97 @@ export const uiTranslations = {
         apply: 'Reload now',
         later: 'Later'
       }
-    }
+    },
+
+    household: {
+      partnerDefault: 'Your partner',
+      banner: {
+        title: 'Shared Household',
+        subtitle: 'Share your cookbook, meal planner & shopping list together.',
+        action: 'Invite',
+        dismiss: 'Dismiss banner',
+      },
+      modal: {
+        title: 'Shared Household',
+        subtitleActive: 'Connected with partner',
+        subtitleInvite: 'Cook and plan together',
+      },
+      status: {
+        connected: 'Household partner connected',
+      },
+      cooldown: {
+        title: 'Household cooldown active',
+        desc: 'After unlinking, you can create or join a new household starting {date}.',
+      },
+      trial: {
+        activeTitle: '7-day trial active',
+        activeDesc: 'You both enjoy all Snagbite PRO features together.',
+      },
+      paused: {
+        title: 'Household paused',
+        desc: 'To continue syncing your shared cookbook and meal planner, one of you needs Snagbite PRO.',
+        upgradeAction: 'Unlock Snagbite PRO',
+      },
+      nudge: {
+        button: 'Remind partner to get PRO',
+        success: '{name} has been notified!',
+        cooldown: 'You have already nudged your partner today.',
+      },
+      unlink: {
+        button: 'Unlink household',
+        confirm: 'Do you really want to unlink from {name}? Both of you keep all saved recipes.',
+        success: 'Household unlinked successfully.',
+        error: 'Error unlinking household.',
+      },
+      highlights: {
+        title: '1 PRO subscription for 2 people',
+        trialBadge: '7 days free trial',
+        desc: 'Link your accounts: share your cookbook, meal planner and shopping list. Try 7 days free – after that, 1 PRO subscription covers both!',
+        bullet1: 'Shared cookbook for both partners',
+        bullet2: 'Synced meal planner & grocery list',
+        bullet3: '1 PRO subscription covers 2 people',
+        orDivider: 'Or enter invite code',
+      },
+      invite: {
+        sectionTitle: 'Invite partner',
+        share: 'Share',
+        shareHelp: 'Send this link or code to your partner.',
+        createButton: 'Generate invite code',
+        createError: 'Failed to generate code.',
+        copyButton: 'Copy',
+        copiedButton: 'Copied',
+        copied: 'Invite link copied!',
+        copyError: 'Could not copy link.',
+      },
+      share: {
+        title: 'Snagbite Household Invite',
+        text: "Let's cook together! Join my Snagbite household:",
+      },
+      join: {
+        sectionTitle: 'Enter invite code',
+        placeholder: '8-character code',
+        action: 'Join',
+        success: 'Successfully joined household!',
+        error: 'Invalid code or already linked.',
+      },
+      propose: {
+        action: 'Suggest cooking',
+        tooltip: 'Ask partner if they want to cook this recipe',
+        success: '{name} has received a notification!',
+        cooldown: 'You recently suggested this dish already.',
+        error: 'Could not send suggestion.',
+      },
+      promo: {
+        title: 'Snagbite Household Mode',
+        subtitle: '1 subscription, 2 people – shared cookbook & synchronized shopping list.',
+        benefit1: 'Only 1 person pays for Snagbite PRO',
+        benefit2: 'Automatically synced cookbook for both',
+        benefit3: 'Shared meal planner & grocery list',
+        benefit4: '7-day free trial included',
+        ctaInvite: 'Invite partner',
+        ctaUpgrade: 'Unlock PRO',
+      },
+    },
   }
 } as const;
 
@@ -4224,6 +4435,27 @@ export function messageForCode(
       return getTranslation('error.codes.TOO_MANY_SCREENSHOTS', lang, { max: p.max ?? 6 });
     case 'ACTIVE_JOB_EXISTS':
       return getTranslation('error.codes.ACTIVE_JOB_EXISTS', lang, { count: p.count ?? 1 });
+    case 'HOUSEHOLD_COOLDOWN': {
+      const untilStr = typeof p.until === 'string' ? p.until : null;
+      let dateText = '';
+      if (untilStr) {
+        try {
+          const d = new Date(untilStr);
+          if (!isNaN(d.getTime())) {
+            dateText = d.toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-US', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            });
+          }
+        } catch {
+          // fallback
+        }
+      }
+      return dateText
+        ? getTranslation('error.codes.HOUSEHOLD_COOLDOWN_DATE', lang, { date: dateText })
+        : getTranslation('error.codes.HOUSEHOLD_COOLDOWN', lang);
+    }
     case 'PHOTO_NOT_MATCHING':
       return getTranslation('app.gamification.rejectionReason', lang);
     default:

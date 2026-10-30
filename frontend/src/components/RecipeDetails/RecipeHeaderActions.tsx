@@ -15,8 +15,10 @@ import { useI18n } from '../../context/I18nContext';
 import { useAuth } from '../../context/AuthContext';
 import { hapticLight, hapticNotification } from '../../utils/haptics';
 import { devReExtractRecipe } from '../../utils/dev';
+import ProposeCookButton from '../Household/ProposeCookButton';
 
 interface RecipeHeaderActionsProps {
+  recipeId?: string;
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
   isMenuOpen: boolean;
@@ -34,6 +36,7 @@ interface RecipeHeaderActionsProps {
 }
 
 export default function RecipeHeaderActions({
+  recipeId,
   isFavorite,
   onToggleFavorite,
   isMenuOpen,
@@ -55,6 +58,7 @@ export default function RecipeHeaderActions({
 
   return (
     <div className="flex items-center gap-2">
+      {recipeId && <ProposeCookButton recipeId={recipeId} />}
       {onShareWithFriends && (
         <Button
           isIconOnly

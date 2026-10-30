@@ -1,7 +1,7 @@
 import type { Recipe } from './recipes.js';
 import type { ParentIngredientInfo } from './recipes.js';
 
-export type UserRecipeSource = 'extraction' | 'photo' | 'remix' | 'share';
+export type UserRecipeSource = 'extraction' | 'photo' | 'remix' | 'share' | 'household';
 
 export interface SavedRecipe {
   recipeId: string;

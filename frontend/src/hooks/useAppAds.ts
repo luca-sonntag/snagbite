@@ -13,6 +13,7 @@ export function useAppAds({
   user,
   authLoading,
   isPremium,
+  requiresExtractionAds = false,
   isPending,
   progress,
   recipe,
@@ -65,7 +66,7 @@ export function useAppAds({
   // 1st ever extraction -> 100% ad-free & consent-free grace period (Wow-Moment first)
   // 2nd+ extraction -> PreAdTransparencySheet priming (if not seen) -> Interstitial -> MREC Ad
   useEffect(() => {
-    if (!isPending || isPremium) {
+    if (!isPending || (isPremium && !requiresExtractionAds)) {
       if (wasPendingRef.current && !isPending) {
         markFirstExtractionCompleted();
         isGraceExtractionRef.current = false;

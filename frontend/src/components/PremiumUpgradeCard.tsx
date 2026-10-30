@@ -83,8 +83,8 @@ export default function PremiumUpgradeCard({ onUpgradeClick, className = '' }: P
           {showTrial
             ? t('premium.modal.trialBanner.body')
             : language === 'de'
-              ? 'Unbegrenzte Extraktionen, 100% werbefrei, Recipe Copilot & Healthy-Score'
-              : 'Unlimited extractions, 100% ad-free, Recipe Copilot & Healthy Score'}
+              ? 'Unbegrenzte Extraktionen, 100% werbefrei, 1 PRO für 2 & Recipe Copilot'
+              : 'Unlimited extractions, 100% ad-free, 1 PRO for 2 & Recipe Copilot'}
         </p>
 
         <button
@@ -97,4 +97,3 @@ export default function PremiumUpgradeCard({ onUpgradeClick, className = '' }: P
     </div>
   );
 }
-

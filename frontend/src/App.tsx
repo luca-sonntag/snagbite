@@ -56,7 +56,7 @@ function ViewFallback() {
 }
 
 export default function App() {
-  const { user, isPremium, loading: authLoading, getAccessToken } = useAuth();
+  const { user, isPremium, requiresExtractionAds, loading: authLoading, getAccessToken } = useAuth();
   const toast = useToast();
   const { language } = useI18n();
   const { snapshot: gamificationSnapshot } = useGamification();
@@ -75,6 +75,12 @@ export default function App() {
       navigate('progress');
     }
   }, [activeView, subPath, navigate]);
+
+  useEffect(() => {
+    if (activeView === 'household-invite') {
+      navigate('settings');
+    }
+  }, [activeView, navigate]);
 
   const [isCatalogSelectMode, setIsCatalogSelectMode] = useState(false);
   const [isCatalogSheetOpen, setIsCatalogSheetOpen] = useState(false);
@@ -239,6 +245,7 @@ export default function App() {
     user,
     authLoading,
     isPremium,
+    requiresExtractionAds,
     isPending,
     progress,
     recipe,

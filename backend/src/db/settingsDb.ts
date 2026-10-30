@@ -85,6 +85,34 @@ export async function getRewardedAdBonusCredits(): Promise<number> {
   return getGlobalSetting('rewarded_ad_bonus_credits', 3);
 }
 
+export async function isHouseholdEnabled(): Promise<boolean> {
+  return getGlobalSetting('household_enabled', true);
+}
+
+export async function getHouseholdTrialHours(): Promise<number> {
+  return getGlobalSetting('household_trial_hours', 168);
+}
+
+export async function getHouseholdPartnerExtractionAds(): Promise<boolean> {
+  return getGlobalSetting('household_partner_extraction_ads', true);
+}
+
+export async function getHouseholdPartnerDailyCopilotLimit(): Promise<number> {
+  return getGlobalSetting('household_partner_daily_copilot_limit', 10);
+}
+
+export async function getHouseholdSwitchCooldownDays(): Promise<number> {
+  return getGlobalSetting('household_switch_cooldown_days', 30);
+}
+
+export async function getHouseholdPushDebounceSeconds(): Promise<number> {
+  return getGlobalSetting('household_push_debounce_seconds', 60);
+}
+
+export async function getHouseholdPushCooldownMinutes(): Promise<number> {
+  return getGlobalSetting('household_push_cooldown_minutes', 15);
+}
+
 export async function getAllGlobalSettings(): Promise<GlobalSetting[]> {
   const rows = await db
     .select()

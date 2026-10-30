@@ -44,6 +44,7 @@ export interface UseAppAdsProps {
   user: { id: string } | null;
   authLoading: boolean;
   isPremium: boolean;
+  requiresExtractionAds?: boolean;
   isPending: boolean;
   progress?: ProgressData | null;
   recipe: Recipe | null;

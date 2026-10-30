@@ -8,6 +8,7 @@ import { getTotalTime } from '../hooks/useSavedCatalog';
 import { getRecipeCalories, formatCalories } from '../utils/formatNutrition';
 import { HealthScoreLetterBadge } from './RecipeDetails/HealthScoreBadge';
 import { formatAuthorHandle } from '../utils/sourceLabel';
+import PartnerRecipeBadge from './Household/PartnerRecipeBadge';
 
 export interface RecipeListItemProps {
   job?: SavedRecipe;
@@ -157,6 +158,7 @@ export const RecipeListItem = React.memo<RecipeListItemProps>(({
           </div>
         )}
 
+        <PartnerRecipeBadge source={job?.source} size="sm" className="absolute bottom-1 left-1" />
         {thumbnailOverlay}
       </div>
 
