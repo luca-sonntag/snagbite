@@ -222,11 +222,18 @@ export default function SettingsView() {
             <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
               {t('household.modal.title')}
             </span>
-            <span className="text-sm font-bold text-gray-900 dark:text-white truncate">
-              {household?.status === 'active' || household?.status === 'paused'
-                ? (household.partnerProfile?.displayName || t('household.partnerDefault'))
-                : t('household.banner.subtitle')}
-            </span>
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                {household?.status === 'active' || household?.status === 'paused'
+                  ? (household.partnerProfile?.displayName || t('household.partnerDefault'))
+                  : t('household.banner.subtitle')}
+              </span>
+              {(household?.status === 'paused' || household?.isPauseLocked) && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-600 dark:text-rose-400 tracking-wide uppercase shrink-0">
+                  {t('household.status.pausedBadge')}
+                </span>
+              )}
+            </div>
           </div>
         </div>
         <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
