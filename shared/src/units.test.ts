@@ -1,6 +1,14 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeUnit, convertToBaseMetric, isPantryStockSufficient, getPantryStockStatus } from './units.js';
+import {
+  normalizeUnit,
+  convertToBaseMetric,
+  isPantryStockSufficient,
+  getPantryStockStatus,
+  getUnitDimension,
+  areUnitsDimensionallyCompatible,
+  isPackageUnitAppropriate,
+} from './units.js';
 
 describe('Shared Units & Pantry Stock Sufficiency', () => {
   it('normalizes various unit spellings', () => {
@@ -47,5 +55,40 @@ describe('Shared Units & Pantry Stock Sufficiency', () => {
     assert.equal(getPantryStockStatus(20, 'g', 80, 'g'), 'deficit'); // 25%
     assert.equal(getPantryStockStatus(50, 'g', 250, 'g'), 'deficit');
     assert.equal(getPantryStockStatus(1, 'Stück', 4, 'Stück'), 'deficit');
+  });
+
+  it('accurately resolves physical unit dimensions', () => {
+    assert.equal(getUnitDimension('g'), 'mass');
+    assert.equal(getUnitDimension('kg'), 'mass');
+    assert.equal(getUnitDimension('oz'), 'mass');
+    assert.equal(getUnitDimension('ml'), 'volume');
+    assert.equal(getUnitDimension('l'), 'volume');
+    assert.equal(getUnitDimension('EL'), 'volume');
+    assert.equal(getUnitDimension('Stück'), 'count');
+    assert.equal(getUnitDimension('Zehe'), 'count');
+    assert.equal(getUnitDimension('Dose'), 'count');
+    assert.equal(getUnitDimension(null), null);
+    assert.equal(getUnitDimension('unknown_unit'), 'count'); // default normalizeUnit fallback
+  });
+
+  it('checks dimensional compatibility between culinary units', () => {
+    assert.equal(areUnitsDimensionallyCompatible('g', 'kg'), true);
+    assert.equal(areUnitsDimensionallyCompatible('ml', 'l'), true);
+    assert.equal(areUnitsDimensionallyCompatible('g', 'ml'), true); // culinary density approx
+    assert.equal(areUnitsDimensionallyCompatible('Stück', 'Zehe'), true);
+  });
+
+  it('strictly protects against inappropriate package units (Zitrone fix)', () => {
+    // Piece / Count cannot have liquid volume package
+    assert.equal(isPackageUnitAppropriate('Stück', 'ml'), false);
+    assert.equal(isPackageUnitAppropriate('Stück', 'l'), false);
+    assert.equal(isPackageUnitAppropriate('Zehe', 'ml'), false);
+    assert.equal(isPackageUnitAppropriate('ml', 'Stück'), false);
+
+    // Appropriate combinations
+    assert.equal(isPackageUnitAppropriate('Stück', 'g'), true); // e.g. Apfel -> 1000g bag
+    assert.equal(isPackageUnitAppropriate('g', 'g'), true);     // e.g. Skyr -> 500g cup
+    assert.equal(isPackageUnitAppropriate('ml', 'l'), true);    // e.g. Milch -> 1l bottle
+    assert.equal(isPackageUnitAppropriate('Stück', 'Stück'), true);
   });
 });

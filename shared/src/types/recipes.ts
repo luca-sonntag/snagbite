@@ -1,3 +1,15 @@
+export type PackagingType =
+  | 'loose'
+  | 'piece'
+  | 'can'
+  | 'jar'
+  | 'bottle'
+  | 'tub'
+  | 'pack'
+  | 'bag'
+  | 'box'
+  | 'bunch';
+
 export interface ParentIngredientInfo {
   name: string;
   baseName: string;
@@ -36,6 +48,7 @@ export interface Ingredient {
   isVerified?: boolean | null;
   typicalPackageAmount?: number | null;
   typicalPackageUnit?: string | null;
+  packagingType?: PackagingType | null;
   shelfLifeDays?: number | null;
 }
 
@@ -121,7 +134,7 @@ export type RecipeOrigin = 'url' | 'photo' | 'remix';
  * Increment this integer whenever prompts, schemas, audit rules or normalizations change
  * in a way that affects recipe outputs.
  */
-export const CURRENT_RECIPE_PIPELINE_VERSION = 2;
+export const CURRENT_RECIPE_PIPELINE_VERSION = 3;
 
 export type RecipeCategory =
   | 'MAIN_COURSE'
