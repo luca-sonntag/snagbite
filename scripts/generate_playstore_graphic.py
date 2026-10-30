@@ -8,7 +8,7 @@ import argparse
 from PIL import Image, ImageDraw, ImageFont
 
 FRAME_PATH_DEFAULT = os.path.join(
-    os.path.dirname(__file__), "..", "images", "playstore", "playstore_emerald_frame_clean_1080x1920.png"
+    os.path.dirname(__file__), "..", "design", "playstore", "playstore_emerald_frame_clean_1080x1920.png"
 )
 
 # Coordinates for 1080 x 1920 frame
