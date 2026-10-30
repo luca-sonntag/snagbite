@@ -82,18 +82,19 @@ export default function ShoppingListGroup({
             </div>
             <ul className="flex flex-col gap-0.5">
               {group.items.map((item, itemIdx) => {
+                const itemKey = getItemKey(item);
                 const isItemChecked = Boolean(item.checked);
-                const displayKey = `${isItemChecked ? 'checked' : 'unchecked'}-${getItemKey(item)}`;
+                const displayKey = `${isItemChecked ? 'checked' : 'unchecked'}-${itemKey}`;
                 const pantryStockMatch = findPantryStockMatch(item, pantryItems);
                 const isFirstEverItem = index === 0 && itemIdx === 0;
 
                 const itemElement = (
                   <ShoppingListItem
-                    key={displayKey}
+                    key={itemKey}
                     item={item}
                     isChecked={isItemChecked}
-                    isCheckingOff={checkingKeys?.has(displayKey)}
-                    isCollapsing={collapsingKeys.has(displayKey)}
+                    isCheckingOff={checkingKeys?.has(displayKey) || checkingKeys?.has(itemKey)}
+                    isCollapsing={collapsingKeys.has(displayKey) || collapsingKeys.has(itemKey)}
                     pantryStockMatch={pantryStockMatch}
                     showPackageRecommendation={showPackageRecommendations}
                     onClick={() => onItemToggle(item)}
@@ -104,7 +105,7 @@ export default function ShoppingListGroup({
 
                 if (isFirstEverItem) {
                   return (
-                    <div key={displayKey} id="tour-shopping-item">
+                    <div key={itemKey} id="tour-shopping-item">
                       {itemElement}
                     </div>
                   );

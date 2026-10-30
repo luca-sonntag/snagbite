@@ -35,6 +35,7 @@ export function normalizeUnit(unit?: string | null): string {
     return 'pack';
   if (['dose', 'dosen', 'can', 'cans', 'tin'].includes(u)) return 'can';
   if (['glas', 'gläser', 'glaeser', 'jar', 'jars'].includes(u)) return 'jar';
+  if (['flasche', 'flaschen', 'bottle', 'bottles'].includes(u)) return 'bottle';
   if (['becher', 'tub', 'tubs'].includes(u)) return 'cup';
   if (['tasse', 'tassen', 'cup', 'cups'].includes(u)) return 'cup';
   if (['bund', 'bunch', 'bunches'].includes(u)) return 'bunch';
@@ -64,13 +65,26 @@ export function getUnitDimension(unit?: string | null): UnitDimension | null {
   if (['g', 'kg', 'mg', 'oz', 'lb'].includes(canonical)) return 'mass';
   if (['ml', 'l', 'cl', 'dl', 'fl_oz', 'tablespoon', 'teaspoon', 'dash'].includes(canonical)) return 'volume';
   if (
-    ['piece', 'slice', 'clove', 'leaf', 'head', 'stalk', 'bulb', 'sprig', 'pack', 'can', 'jar', 'cup', 'bunch'].includes(
+    ['piece', 'slice', 'clove', 'leaf', 'head', 'stalk', 'bulb', 'sprig', 'pack', 'can', 'jar', 'bottle', 'cup', 'bunch'].includes(
       canonical
     )
   ) {
     return 'count';
   }
   return null;
+}
+
+/**
+ * Returns true if a unit denotes a manufactured/commercial container or package
+ * (can/Dose, jar/Glas, bottle/Flasche, tub/Becher, pack/Packung, bunch/Bund)
+ * as opposed to loose pieces (Stück/piece, clove/Zehe, slice/Scheibe).
+ */
+export function isContainerUnit(unit?: string | null): boolean {
+  if (!unit) return false;
+  const canonical = normalizeUnit(unit);
+  if (['can', 'jar', 'bottle', 'pack', 'cup', 'bunch'].includes(canonical)) return true;
+  const u = unit.toLowerCase().trim();
+  return ['dose', 'dosen', 'glas', 'gläser', 'glaeser', 'flasche', 'flaschen', 'becher', 'packung', 'pkg', 'bund'].includes(u);
 }
 
 /**
@@ -125,7 +139,7 @@ export function convertToBaseMetric(amount: number, unit?: string | null): { val
   if (canonical === 'teaspoon') return { value: amount * 5, type: 'volume' };
 
   // Count / pieces
-  if (['piece', 'slice', 'clove', 'leaf', 'head', 'stalk', 'bulb', 'sprig', 'pack', 'can', 'jar', 'cup', 'bunch'].includes(canonical)) {
+  if (['piece', 'slice', 'clove', 'leaf', 'head', 'stalk', 'bulb', 'sprig', 'pack', 'can', 'jar', 'bottle', 'cup', 'bunch'].includes(canonical)) {
     return { value: amount, type: 'count' };
   }
 

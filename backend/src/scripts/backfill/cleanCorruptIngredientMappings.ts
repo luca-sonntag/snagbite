@@ -40,12 +40,13 @@ const FRESH_PRODUCE_CATEGORIES = new Set([
   'GEMÜSE', 'OBST', 'OBST & GEMÜSE',
 ]);
 
-function inferPackagingType(unit: string | null | undefined, category: string): PackagingType | null {
+function inferPackagingType(unit: string | null | undefined, category: string, key?: string): PackagingType | null {
   const normCat = category.toUpperCase().trim();
   const normUnit = (unit || '').toLowerCase().trim();
+  const normKey = (key || '').toLowerCase().trim();
 
-  if (normUnit === 'glas' || normUnit === 'jar') return 'jar';
-  if (normUnit === 'dose' || normUnit === 'can') return 'can';
+  if (normUnit === 'glas' || normUnit === 'jar' || normKey.includes('in glas')) return 'jar';
+  if (normUnit === 'dose' || normUnit === 'can' || normKey.includes('canned') || normKey.includes('dosentomate') || normKey.includes('konserve')) return 'can';
   if (normUnit === 'flasche' || normUnit === 'bottle') return 'bottle';
   if (normUnit === 'becher' || normUnit === 'tub') return 'tub';
   if (normUnit === 'bund' || normUnit === 'bunch') return 'bunch';
@@ -119,7 +120,7 @@ export async function runCleanMappings(): Promise<{
       packagingModified = true;
       packagingTypesBackfilled++;
     } else if (!targetPackagingType) {
-      const inferred = inferPackagingType(row.typicalPackageUnit, cat);
+      const inferred = inferPackagingType(row.typicalPackageUnit, cat, row.mappingKey);
       if (inferred) {
         targetPackagingType = inferred;
         packagingModified = true;

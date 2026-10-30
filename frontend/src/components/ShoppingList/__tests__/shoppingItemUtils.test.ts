@@ -64,4 +64,16 @@ describe('shoppingItemUtils - getPackageRecommendation', () => {
     assert.equal(getPackageRecommendation(1000, 'ml', 500, 'ml', 'bottle', 'en'), '2 bottles (1000 ml)');
     assert.equal(getPackageRecommendation(500, 'g', 250, 'g', 'tub', 'en'), '2 tubs (500 g)');
   });
+
+  it('correctly rounds up container fractions (e.g. 0.5 Dose Gehackte Tomaten -> 1 Dose)', () => {
+    // 0.5 Dose canned tomatoes with 400g package size -> must buy 1 whole can (400g)
+    assert.equal(getPackageRecommendation(0.5, 'Dose', 400, 'g', 'can'), '1 Dose (400 g)');
+    assert.equal(getPackageRecommendation(0.5, 'Dose', 400, 'g', null), '1 Dose (400 g)');
+    // 1.5 Dosen -> must buy 2 whole cans (800g)
+    assert.equal(getPackageRecommendation(1.5, 'Dose', 400, 'g', 'can'), '2 Dosen (800 g)');
+    // 0.5 Glas -> must buy 1 whole jar
+    assert.equal(getPackageRecommendation(0.5, 'Glas', 250, 'g', 'jar'), '1 Glas (250 g)');
+    // 0.5 Becher -> must buy 1 whole tub
+    assert.equal(getPackageRecommendation(0.5, 'Becher', 200, 'g', 'tub'), '1 Becher (200 g)');
+  });
 });
