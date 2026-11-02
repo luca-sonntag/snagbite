@@ -1,4 +1,4 @@
-﻿# ⚙️ Backend & Datenbank (Node.js & Railway PostgreSQL)
+# ⚙️ Backend & Datenbank (Node.js & Railway PostgreSQL)
 
 ## 1. Processing- & Database-Layer
 
@@ -101,7 +101,7 @@ tfy:
   * `EXTRACTION_LIMIT_WINDOW_DAYS` (Default: `1`): Größe des rollierenden Fensters in Tagen.
   * `FREE_MAX_EXTRACTIONS_PER_WINDOW` (Default: `3`): Maximale Anzahl an Extraktionen für Free-User.
   * `PREMIUM_MAX_EXTRACTIONS_PER_WINDOW` (Default: `50`): Maximale Anzahl an Extraktionen für Premium-User.
-* **Subscription Tiers:** Standardmäßig im `free` Tier. Sobald Premium gekauft wird, wird das Tier in `app_metadata.tier` auf `premium` gesetzt. Im Alpha-Modus werden Nutzer automatisch in `alpha` eingestuft.
+* **Subscription Tiers:** Standardmäßig im `free` Tier. Sobald Premium gekauft wird, wird das Tier in `app_metadata.tier` auf `premium` gesetzt. Alt-Nutzer mit `tier = 'alpha'` aus der Alpha-Phase fallen beim nächsten Session-Sync (`fetchAndSyncUser`) automatisch auf `free` zurück.
 * **Benutzerbezogene Overrides:** In `app_metadata` gesteuert (`custom_extraction_limit` bzw. `max_extractions_per_window`, z. B. `-1` für unbegrenzt).
 * **Rewarded Video Ad Bonus-Credits (`app_metadata.bonus_credits`):**
   * Nutzer können durch das Ansehen von Rewarded Video Ads verzehrbare Extraktions-Credits sammeln.
@@ -304,7 +304,47 @@ Zur Nachvollziehbarkeit des Erstellungsstandes und für zukünftige selektive Ne
   * Altdaten (vor Einführung der Versionierung) besitzen standardmäßig `pipeline_version = 0`.
   * Neue Rezepte (URL-Extraktion, Foto-Scan, Remixes) werden mit der aktuellen Konstante `CURRENT_RECIPE_PIPELINE_VERSION` (Start bei `1`) gestempelt.
   * Manuelle Nutzer-Bearbeitungen via `updateRecipe` (`PUT /api/recipes/:id`) überschreiben eine bestehende Version nicht.
-* **Governance (Agenten-Regel):** Jede Modifikation an Prompts, Schemas, Recipe-Audit, Normalisierung oder OFF-Matching, die das Rezept-JSON beeinflussen könnte, verpflichtet zur Inkrementierung von `CURRENT_RECIPE_PIPELINE_VERSION` in `@cookbook/shared` (`shared/src/types/recipes.ts`). Siehe Regel [`.agents/rules/recipe-pipeline-version.md`](file:///c:/Users/lucas/source/repos/cookbook/.agents/rules/recipe-pipeline-version.md).
+* **Governance (Agenten-Regel):** Jede Modifikation an Prompts, Schemas, Recipe-Audit, Normalisierung oder OFF-Matching, die das Rezept-JSON beeinflussen könnte, verpflichtet zur Inkrementierung von `CURRENT_RECIPE_PIPELINE_VERSION` in `@cookbook/shared` (`shared/src/types/recipes.ts`). Siehe Regel [`.agents/rules/recipe-pipeline-version.md`](file:///c:/Users/lucas/.agents/rules/recipe-pipeline-version.md).
+
+---
+
+## 👫 Haushalt-Modus (Household Mode 1:1)
+
+Der Haushalt-Modus ermöglicht es zwei Nutzern, einen 1:1 gemeinsamen Haushalt zu bilden.
+
+### 1. Datenmodell & Relationen (`households`)
+* **Tabelle `households`:**
+  * `id`: UUID (Primary Key)
+  * `userAId`: UUID (Ersteller/Inviter)
+  * `userBId`: UUID (Partner, nullable bis Beitritt)
+  * `inviteCode`: 8-stelliger Hex-Code (`randomBytes(4).toString('hex').toUpperCase()`)
+  * `status`: Enum (`pending`, `active`, `paused`, `unlinked`)
+  * `trialStartsAt`, `trialEndsAt`: Zeitstempel für 48h Testphase ohne Zahlungsmittel
+  * `lastNudgedAt`: Cooldown-Zeitstempel (24h) für Partner-Nudges
+  * `cooldownUntil`: Wechsel-Schutzfrist (default 14 Tage nach Trennung)
+  * `unlinkedAt`: Zeitstempel der Trennung
+
+### 2. Daten-Synchronisation & Zero-Join-Architektur
+* **Gemeinsames Kochbuch:** Bei Verknüpfung via `acceptHouseholdInvite` werden alle existierenden Rezepte beider Partner in `user_recipes` für den jeweils anderen mit `source = 'household'` gespiegelt. Neue Rezepte werden in `addToLibrary` automatisch an den Partner gespiegelt.
+* **Wochenplaner, Einkaufsliste & Vorrat:** Alle Listen- und Abfrage-Funktionen (`listMealPlans`, `listShoppingList`, `listPantryItems`, `listCollections`) verwenden `getHouseholdUserIds(userId)`. Wenn ein aktiver Haushalt mit PRO besteht, liefert diese Funktion `[userA, userB]` zurück. Dadurch sehen beide Partner den identischen Stand in Echtzeit.
+* **Trennungs-Garantie:** Bei Trennung (`unlinkHousehold`) verbleiben alle gespiegelten Rezepte im jeweiligen Nutzer-Kochbuch (`user_recipes`).
+
+### 3. Monetarisierungs- & Quota-Architektur
+* **1 Abo für beide:** Hat einer der beiden Partner `premium` (oder läuft die 48h Testphase), gilt für beide `hasHouseholdPro: true`. Beide erhalten unbegrenzte Rezepte, Wochenplaner, Einkaufsliste, Nährwerte und Kochmodus.
+* **PRO-Schutz & Nudge-Guard:** Wenn einer der Partner bezahltes PRO besitzt (`hasPaidPro: true`), blockiert `recordHouseholdNudge` serverseitig Nudges mit `HOUSEHOLD_ALREADY_PRO` (400), da das gemeinsame Abo bereits aktiv ist.
+* **Werbe-Finanzierung für Partner B:** Der nicht-zahlende Partner hat `requires_extraction_ads: true`. Dadurch werden bei Rezept-Extraktionen Fullscreen-Interstitial- und MREC-Banner ausgespielt, um die LLM-Extraktionskosten zu refinanzieren. App-Open Ads bleiben bei aktiver App deaktiviert.
+* **Copilot Chat-Limit:** Partner B unterliegt einem Tageslimit von 10 Chat-Nachrichten pro Tag (konfigurierbar in `global_settings`).
+
+### 4. Debounced Push-Benachrichtigungen
+* **Anti-Spam Schutz:**
+  * Debounce-Fenster: 60 Sekunden Sammelzeit vor Versand (`queueHouseholdDebouncedPush`).
+  * Cooldown: 15 Minuten pro Kategorie (`recipe_added`, `meal_planned`, `shopping_added`).
+  * Android Slot-Tags: `collapseTag` fasst aufeinanderfolgende Benachrichtigungen auf Systemebene zusammen.
+  * Koch-Vorschlag (`cook_proposal`): 2 Minuten Cooldown pro Rezept.
+* **Testphasen-Benachrichtigungen (`householdTrialNotifications.ts`):**
+  * `household_trial_ending`: Sendet 24 Stunden vor Ablauf der Testphase eine Warnung mit Deeplink zu den PRO-Abonnements (max. 1x pro 7 Tage).
+  * `household_trial_expired`: Benachrichtigt beide Partner, sobald die Testphase abgelaufen ist und der Haushalt pausiert wird (max. 1x pro 60 Tage).
+  * Werden periodisch alle 30 Minuten im Worker (`backend/src/queue.ts`) sowie on-demand bei Statusabfrage in `getHouseholdContext` (`backend/src/db/householdDb.ts`) geprüft.
 
 
 

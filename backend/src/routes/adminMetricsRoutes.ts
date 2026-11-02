@@ -137,7 +137,7 @@ adminMetricsRoutes.get(
         email: u.email,
         created_at: u.createdAt.toISOString(),
         last_sign_in_at: u.updatedAt.toISOString(),
-        tier: u.tier || 'free',
+        tier: u.tier === 'premium' ? 'premium' : 'free',
         custom_limit: u.customExtractionLimit ?? null,
         extractions_count: countsByUser[u.id] || 0,
       }));

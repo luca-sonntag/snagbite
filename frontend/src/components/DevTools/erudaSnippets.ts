@@ -17,7 +17,6 @@ export function registerErudaSnippets(eruda: unknown): void {
     snippets.add('Onboarding Guide', () => window.dev?.show('onboarding'), 'Show first-launch onboarding tutorial');
     snippets.add('Ad Transparency Notice', () => window.dev?.show('adNotice'), 'Show pre-ad explanation bottom sheet');
     snippets.add('Premium Modal', () => window.dev?.show('premium'), 'Show subscription paywall modal');
-    snippets.add('Alpha Welcome', () => window.dev?.show('alphaWelcome'), 'Show alpha tester greeting modal');
     snippets.add('Reward: Level-Up & Confetti', () => window.dev?.show('reward', { levelUp: true }), 'Show cook completion reward with level-up');
     snippets.add('Reward: Normal XP', () => window.dev?.show('reward'), 'Show cook completion reward without level-up');
     snippets.add('Feedback Drawer', () => window.dev?.show('feedback'), 'Open in-app bug report and feedback drawer');

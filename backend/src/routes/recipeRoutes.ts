@@ -28,11 +28,14 @@ import { recordCook } from '../gamification.js';
 import type { Recipe, RecipeOperation } from '../types.js';
 import { CURRENT_RECIPE_PIPELINE_VERSION } from '@cookbook/shared';
 import { fetchAndSyncUser, isPremiumUser, MAX_PHOTOS_TOTAL_CHARS } from './authUtils.js';
+import { getHouseholdPartnerDailyCopilotLimit } from '../db/settingsDb.js';
 import { triggerWorkerTick } from '../queue.js';
 import { subscribeRecipeEvents } from '../jobEvents.js';
 import { notifyFriendsOfCook } from '../push/socialNotifications.js';
 
 export const recipeRoutes = Router();
+
+const partnerChatDailyCounts = new Map<string, { count: number; date: string }>();
 
 export async function assertRecipeAccess(userId: string, recipeId: string): Promise<Recipe> {
   if (!recipeId) {
@@ -373,6 +376,21 @@ recipeRoutes.post('/recipes/:id/chat', async (req: Request, res: Response): Prom
 
     if (!isPremium) {
       throw new AppError('PREMIUM_REQUIRED', { params: { feature: 'chat' } });
+    }
+
+    if (user?.app_metadata?.requires_extraction_ads === true) {
+      const dailyLimit = await getHouseholdPartnerDailyCopilotLimit();
+      const today = new Date().toISOString().split('T')[0];
+      const record = partnerChatDailyCounts.get(req.userId!);
+      if (!record || record.date !== today) {
+        partnerChatDailyCounts.set(req.userId!, { count: 1, date: today });
+      } else if (record.count >= dailyLimit) {
+        throw new AppError('RATE_LIMIT_EXCEEDED', {
+          message: `Tägliches Copilot-Limit für Haushaltspartner erreicht (${dailyLimit}/Tag).`,
+        });
+      } else {
+        record.count += 1;
+      }
     }
 
     let userPrefs:

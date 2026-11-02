@@ -72,10 +72,8 @@ export interface TierDistributionMetrics {
   totalUsers: number;
   freeCount: number;
   premiumCount: number;
-  alphaCount: number;
   freePct: number;
   premiumPct: number;
-  alphaPct: number;
   usersWithBonusCredits: number;
   totalBonusCredits: number;
   customLimitUsers: number;

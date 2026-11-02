@@ -3,13 +3,15 @@ import type { Collection } from '../types.js';
 import { db } from './drizzle.js';
 import { collections, recipeCollections } from './schema/collections.js';
 import { userRecipes } from './schema/recipes.js';
-import { eq, and, asc } from 'drizzle-orm';
+import { eq, and, asc, inArray } from 'drizzle-orm';
+import { getHouseholdUserIds } from './householdDb.js';
 
 export async function listCollections(userId: string): Promise<Collection[]> {
+  const userIds = await getHouseholdUserIds(userId);
   const rows = await db
     .select()
     .from(collections)
-    .where(eq(collections.userId, userId))
+    .where(inArray(collections.userId, userIds))
     .orderBy(asc(collections.position), asc(collections.createdAt));
 
   return rows.map((row) => ({
@@ -54,6 +56,7 @@ export async function updateCollection(
   userId: string,
   col: Partial<Collection>
 ): Promise<Collection> {
+  const userIds = await getHouseholdUserIds(userId);
   const updates: Record<string, unknown> = { updatedAt: new Date() };
   if (col.name !== undefined) updates.name = col.name;
   if (col.position !== undefined) updates.position = col.position;
@@ -61,7 +64,7 @@ export async function updateCollection(
   const [row] = await db
     .update(collections)
     .set(updates)
-    .where(and(eq(collections.id, id), eq(collections.userId, userId)))
+    .where(and(eq(collections.id, id), inArray(collections.userId, userIds)))
     .returning();
 
   if (!row) throw new Error(`Failed to update collection ${id}: not found`);
@@ -77,9 +80,10 @@ export async function updateCollection(
 }
 
 export async function deleteCollection(id: string, userId: string): Promise<boolean> {
+  const userIds = await getHouseholdUserIds(userId);
   const deleted = await db
     .delete(collections)
-    .where(and(eq(collections.id, id), eq(collections.userId, userId)))
+    .where(and(eq(collections.id, id), inArray(collections.userId, userIds)))
     .returning({ id: collections.id });
 
   return deleted.length > 0;
@@ -88,6 +92,7 @@ export async function deleteCollection(id: string, userId: string): Promise<bool
 export async function getCollectionMembership(
   userId: string
 ): Promise<Record<string, string[]>> {
+  const userIds = await getHouseholdUserIds(userId);
   const rows = await db
     .select({
       collectionId: recipeCollections.collectionId,
@@ -95,7 +100,7 @@ export async function getCollectionMembership(
     })
     .from(recipeCollections)
     .innerJoin(userRecipes, eq(recipeCollections.userRecipeId, userRecipes.id))
-    .where(eq(recipeCollections.userId, userId));
+    .where(inArray(recipeCollections.userId, userIds));
 
   const mapping: Record<string, string[]> = {};
   for (const row of rows) {

@@ -2,7 +2,10 @@ import {
   type ShoppingListItem,
   type CreateShoppingListItemDto,
   type ParentIngredientInfo,
+  type PackagingType,
   getDefaultShelfLifeDays,
+  isPackageUnitAppropriate,
+  getUnitDimension,
 } from '@cookbook/shared';
 import { num } from './client.js';
 import { db } from './drizzle.js';
@@ -43,8 +46,13 @@ export async function enrichShoppingListItem(
   fallbackDto?: CreateShoppingListItemDto
 ): Promise<ShoppingListItem> {
   if (fallbackDto?.typicalPackageAmount && Number(fallbackDto.typicalPackageAmount) > 0) {
-    item.typicalPackageAmount = Number(fallbackDto.typicalPackageAmount);
-    item.typicalPackageUnit = fallbackDto.typicalPackageUnit || undefined;
+    if (!item.unit || isPackageUnitAppropriate(item.unit, fallbackDto.typicalPackageUnit || '')) {
+      item.typicalPackageAmount = Number(fallbackDto.typicalPackageAmount);
+      item.typicalPackageUnit = fallbackDto.typicalPackageUnit || undefined;
+    }
+  }
+  if (fallbackDto?.packagingType !== undefined) {
+    item.packagingType = fallbackDto.packagingType;
   }
 
   if (!item.typicalPackageAmount) {
@@ -52,9 +60,28 @@ export async function enrichShoppingListItem(
     if (keys.length > 0) {
       try {
         const mapping = await lookupMapping(keys, item.category || '');
-        if (mapping?.typicalPackageAmount && Number(mapping.typicalPackageAmount) > 0) {
-          item.typicalPackageAmount = Number(mapping.typicalPackageAmount);
-          item.typicalPackageUnit = mapping.typicalPackageUnit || undefined;
+        if (mapping) {
+          if (mapping.packagingType !== undefined && item.packagingType === undefined) {
+            item.packagingType = (mapping.packagingType as PackagingType) || undefined;
+          }
+          if (mapping.typicalPackageAmount && Number(mapping.typicalPackageAmount) > 0) {
+            const pkgAmt = Number(mapping.typicalPackageAmount);
+            const pkgUnit = mapping.typicalPackageUnit || '';
+            const cat = (item.category || '').toUpperCase().trim();
+            const isFreshProduce = ['FRUITS', 'VEGETABLES', 'PRODUCE', 'FRUITS_VEGETABLES', 'HERBS', 'OBST', 'GEMÜSE'].includes(cat);
+            const isCount = !item.unit || getUnitDimension(item.unit) === 'count';
+
+            // Guard: Single piece weight of fresh produce (e.g. 100g lemon, 150g banana, 40g garlic)
+            // is the weight of one piece, NOT a supermarket retail package!
+            const isPieceWeightMisidentifiedAsPackage = isFreshProduce && isCount && pkgUnit.toLowerCase() === 'g' && pkgAmt <= 250;
+
+            if (isPieceWeightMisidentifiedAsPackage) {
+              item.packagingType = 'loose';
+            } else if (!item.unit || isPackageUnitAppropriate(item.unit, pkgUnit)) {
+              item.typicalPackageAmount = pkgAmt;
+              item.typicalPackageUnit = mapping.typicalPackageUnit || undefined;
+            }
+          }
         }
       } catch {
         // Non-fatal

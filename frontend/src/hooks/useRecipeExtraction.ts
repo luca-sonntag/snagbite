@@ -13,13 +13,11 @@ import { useExtractionQueue } from '../context/ExtractionQueueContext';
 import {
   sendNativeNotification,
   sendRecipeReadyNotification,
-  requestNativeNotificationPermission,
-  isNative,
   registerAppStateListener,
   EXTRACTION_INTERRUPTED_NOTIFICATION_ID,
 } from '../native';
 import { handleClientFrameRequest } from '../utils/videoFrames';
-import { awaitPreAdConsentIfNeeded } from '../utils/ads';
+import { awaitPreAdConsentIfNeeded, isFullscreenAdActive } from '../utils/ads';
 
 // Tracks the currently in-flight extraction job across reloads/restarts, so a
 // still-running job can be resumed instead of the user re-submitting the same
@@ -95,7 +93,7 @@ export function useRecipeExtraction(
           rewardedAdBonusCredits: data.rewardedAdBonusCredits ?? 3,
         });
 
-        // Auto-refresh auth session on tier mismatch (e.g. after alpha auto-assignment)
+        // Auto-refresh auth session on tier mismatch (e.g. after server-side tier sync)
         if (user && data.tier && user.app_metadata?.tier !== data.tier) {
           console.log(`Tier mismatch detected: local is '${user.app_metadata?.tier}', server is '${data.tier}'. Refreshing session...`);
           refreshSession().catch(err => console.warn('Failed to refresh session on tier change:', err));
@@ -541,10 +539,6 @@ export function useRecipeExtraction(
       }
     }
 
-    // Proactively request local notification permissions on native startup of extraction
-    if (isNative()) {
-      requestNativeNotificationPermission().catch(err => console.warn('Failed to request notifications permission:', err));
-    }
 
     // Both free and premium flows immediately show RecipeDetails with skeleton animations
     setIsPending(true);
@@ -769,6 +763,10 @@ export function useRecipeExtraction(
     if (isPremium) return;
 
     const handleBackground = () => {
+      if (isFullscreenAdActive()) {
+        console.log('[useRecipeExtraction] App state changed while full-screen ad active — keeping extraction alive');
+        return;
+      }
       const pendingId = activePollingJobIdRef.current || localStorage.getItem(PENDING_JOB_STORAGE_KEY);
       if (pendingId) {
         console.log('[useRecipeExtraction] Free user backgrounded during extraction — cancelling job:', pendingId);

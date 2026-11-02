@@ -124,6 +124,11 @@ const ingredientItemSchemaProperties = {
     type: FunctionDeclarationSchemaType.STRING,
     description: 'The unit of measurement for standard retail package size (e.g. "g", "ml", "Stück", "Dose", "Packung", "Bund").',
   },
+  packagingType: {
+    type: FunctionDeclarationSchemaType.STRING,
+    description: 'The standard retail packaging type sold in supermarkets: "loose" (for fresh produce/vegetables/fruits bought loose/by weight/single piece), "piece" (for individually wrapped single pieces), "can" (Dose/tin), "jar" (Glas), "bottle" (Flasche), "tub" (Becher/Schale, e.g. yogurt, quark, cream), "pack" (standard retail Packung/Pkg), "bag" (Beutel/Tüte), "box" (Schachtel/Karton), "bunch" (Bund, e.g. fresh herbs, spring onions). Use "loose" for loose fruits, vegetables, and single produce items.',
+    enum: ['loose', 'piece', 'can', 'jar', 'bottle', 'tub', 'pack', 'bag', 'box', 'bunch'],
+  },
   shelfLifeDays: {
     type: FunctionDeclarationSchemaType.INTEGER,
     description: 'Estimated average shelf life in days when stored properly as standard unopened packaged retail supermarket goods (e.g. 4-5 for packaged raw minced meat/beef/poultry under modified atmosphere; 3-4 for packaged fresh fish/salmon; 14-21 for unopened dairy/yogurt/eggs/cheese; 7-10 for fresh produce/vegetables/potatoes; 180-365 for dry pantry staples, canned goods, fried onions/Röstzwiebeln, croutons, pasta, rice, oil, spices). Always assume standard unopened supermarket retail goods and never estimate 1 day for meat.',

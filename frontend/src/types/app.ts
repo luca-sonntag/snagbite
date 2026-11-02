@@ -1,5 +1,5 @@
 import type { MutableRefObject } from 'react';
-import type { Recipe, SavedRecipe, LimitStatus } from '../types';
+import type { Recipe, SavedRecipe, LimitStatus, ProgressData } from '../types';
 import type { AppTab } from '../hooks/useHashRouter';
 
 export interface AppBottomNavProps {
@@ -30,8 +30,6 @@ export interface AppOverlaysProps {
   setIsPremiumModalOpen: (open: boolean) => void;
   showOnboarding: boolean;
   onCompleteOnboarding: () => void;
-  showAlphaWelcome: boolean;
-  onCompleteAlphaWelcome: () => void;
   showPreAdNotice?: boolean;
   setShowPreAdNotice?: (open: boolean) => void;
   onConfirmPreAdNotice?: () => void;
@@ -44,7 +42,9 @@ export interface UseAppAdsProps {
   user: { id: string } | null;
   authLoading: boolean;
   isPremium: boolean;
+  requiresExtractionAds?: boolean;
   isPending: boolean;
+  progress?: ProgressData | null;
   recipe: Recipe | null;
   showOnboarding: boolean;
   savedRecipesCount?: number;

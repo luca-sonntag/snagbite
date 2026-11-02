@@ -14,6 +14,7 @@ import { getRecipeCategoryLabel, getRecipeCategoryEmoji } from '../../i18n';
 import { sortIngredientsByCategory } from '../MealPlanner/mealPlannerUtils';
 import { apiUrl } from '../../api';
 import PremiumModal from '../PremiumModal';
+import { HouseholdPausedBanner } from '../Household';
 import PremiumHint from '../PremiumHint';
 import CollectionSheet from './CollectionSheet';
 import { FlagSheet } from './FlagSheet';
@@ -58,7 +59,7 @@ interface SavedCatalogProps {
     used: number;
     remaining: number;
     windowDays: number;
-    tier: 'free' | 'alpha' | 'premium';
+    tier: 'free' | 'premium';
     savedRecipes: number;
     maxSavedRecipes: number;
     cookbookFull: boolean;
@@ -648,6 +649,7 @@ export default function SavedCatalog({
       )}
 
       {premiumBanner}
+      <HouseholdPausedBanner onOpenUpgrade={() => setIsPremiumModalOpen(true)} className="mb-3" />
 
       {!isListLevel ? (
         <CookbookHome

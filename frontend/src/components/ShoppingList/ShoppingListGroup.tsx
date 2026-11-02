@@ -15,12 +15,13 @@ interface ShoppingListGroupProps {
   formatItemAmount: (amount: number, unit: string) => string;
   collapsingKeys: Set<string>;
   checkingKeys?: Set<string>;
+  showPackageRecommendations?: boolean;
 }
 
 /**
- * Renders the active (still-to-buy) shopping list as aisle sections, ordered by
- * the supermarket category order. Checked items live in the separate "Erledigt"
- * drawer, so every item shown here is unchecked.
+ * Renders the active shopping list as aisle sections, ordered by
+ * the supermarket category order. Checked items belonging to an active aisle
+ * remain in their aisle section until the entire category is checked off.
  */
 export default function ShoppingListGroup({
   groupedCategories,
@@ -30,7 +31,8 @@ export default function ShoppingListGroup({
   onDelete,
   formatItemAmount,
   collapsingKeys,
-  checkingKeys
+  checkingKeys,
+  showPackageRecommendations = true,
 }: ShoppingListGroupProps) {
   const { t } = useI18n();
   const { pantryItems } = usePantry();
@@ -42,6 +44,7 @@ export default function ShoppingListGroup({
       {groupedCategories.map((group, index) => {
         const isGroupCollapsing = collapsingKeys.has(`group-${group.category}`);
         const theme = getCategoryTheme(group.category);
+        const openCount = group.items.filter((i) => !i.checked).length;
 
         return (
           <div
@@ -63,7 +66,7 @@ export default function ShoppingListGroup({
                   {translateCategory(group.category)}
                 </span>
                 <span className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
-                  {group.items.length}
+                  {openCount < group.items.length ? `${openCount}/${group.items.length}` : group.items.length}
                 </span>
               </div>
 
@@ -79,18 +82,21 @@ export default function ShoppingListGroup({
             </div>
             <ul className="flex flex-col gap-0.5">
               {group.items.map((item, itemIdx) => {
-                const displayKey = `unchecked-${getItemKey(item)}`;
+                const itemKey = getItemKey(item);
+                const isItemChecked = Boolean(item.checked);
+                const displayKey = `${isItemChecked ? 'checked' : 'unchecked'}-${itemKey}`;
                 const pantryStockMatch = findPantryStockMatch(item, pantryItems);
                 const isFirstEverItem = index === 0 && itemIdx === 0;
 
                 const itemElement = (
                   <ShoppingListItem
-                    key={displayKey}
+                    key={itemKey}
                     item={item}
-                    isChecked={false}
-                    isCheckingOff={checkingKeys?.has(displayKey)}
-                    isCollapsing={collapsingKeys.has(displayKey)}
+                    isChecked={isItemChecked}
+                    isCheckingOff={checkingKeys?.has(displayKey) || checkingKeys?.has(itemKey)}
+                    isCollapsing={collapsingKeys.has(displayKey) || collapsingKeys.has(itemKey)}
                     pantryStockMatch={pantryStockMatch}
+                    showPackageRecommendation={showPackageRecommendations}
                     onClick={() => onItemToggle(item)}
                     onDelete={() => onDelete(item)}
                     formatItemAmount={formatItemAmount}
@@ -99,7 +105,7 @@ export default function ShoppingListGroup({
 
                 if (isFirstEverItem) {
                   return (
-                    <div key={displayKey} id="tour-shopping-item">
+                    <div key={itemKey} id="tour-shopping-item">
                       {itemElement}
                     </div>
                   );

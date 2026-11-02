@@ -10,7 +10,8 @@
  *   npx tsx src/scripts/migrateFlattenIngredients.ts [--dry-run] [--prod|--dev]
  */
 
-import { getClient } from '../../db.js';
+// Archived script - stub for getClient so test can import pure helper functions
+const getClient = (): any => { throw new Error('Archived script: client no longer in use'); };
 import { initScriptEnv } from '../scriptEnv.js';
 
 interface RawIngredientItem {

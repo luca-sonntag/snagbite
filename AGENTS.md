@@ -1,4 +1,4 @@
-﻿# 🚀 Projekt: Instagram Reel Rezept-Extraktor (Google Antigravityx)
+# 🚀 Projekt: Instagram Reel Rezept-Extraktor (Google Antigravityx)
 
 > Wenn nur eine Frage gestellt wird, anstworte einfach, anstatt direkt Änderungen vorzunehmen. Ich werde dann sagen, ob ich die Änderung haben möchte oder nicht.
 >
@@ -46,7 +46,7 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
    * Express.js API, Node 22+ & Railway Managed Postgres (Drizzle ORM & Better-Auth)
    * Admin-Bereich (`/api/admin/*`), RLS-Bypass, Metriken & Failed Jobs Drilldown
    * Security Hardening (Helmet, Rate Limits, CORS) & Health Check (`/health`)
-   * Rolling Timeframe Rate Limiting & Subscription Tiers (`free`, `premium`, `alpha`)
+   * Rolling Timeframe Rate Limiting & Subscription Tiers (`free`, `premium`)
    * Rewarded Video Ad Credits (`app_metadata.bonus_credits`, `POST /api/me/rewarded-ad-claimed`, Quota-Verrechnung)
    * Health Check & Push Monitoring (`healthcheck/`, ntfy.sh / Telegram)
    * Operator-Alerts (ackend/src/alerts/, ntfy): Modulare Event-Benachrichtigungen (Signups, Abos, Feedback, Job-Failures)
@@ -71,7 +71,7 @@ Die detaillierte technische Dokumentation wurde modular in den Ordner [`docs/arc
    * In-App Koch-Timer (`TimerContext`, `TimerBanner`, `TimerConfirmSheet`) & Share Target Integration
    * In-App Bug-Reports & Feedback (`FeedbackDrawer.tsx` & Console Ring Buffer)
    * In-App DevTools & Overlay-Controller (`DevTools/`, `window.dev.show` / `dev.help`, 1-Klick Eruda Snippets, `DevOverlayHost`)
-   * AdMob Monetarisierung (MREC `ExtractionAdCard`, App-Open Interstitial beim Start, Rewarded Video Ads, UMP Consent, Patched Plugin)
+   * AdMob Monetarisierung (Zweistufiger Extraktions-Ad-Flow: Fullscreen-Interstitial + MREC-Handoff, App-Open Interstitial beim Start, Rewarded Video Ads, UMP Consent, Patched Plugin)
 
 5. 🚀 [**Deployment, Play Store & OTA Updates**](file:///c:/Users/lucas/source/repos/cookbook/docs/architecture/deployment-and-ota.md)
    * Play Store Build Pipeline (Fastlane in Docker, `version.properties`, `release.ps1`, `deploy-playstore.ps1`)

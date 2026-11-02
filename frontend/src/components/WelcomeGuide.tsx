@@ -1,94 +1,30 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import {
-  Sparkles,
-  ShoppingCart,
-  ChefHat,
-  Timer,
-  MessageCircle,
   Check,
   ChevronRight,
   ArrowLeft,
 } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useModalOverlay } from '../context/OverlayStackContext';
-import { ShareStep2Mockup } from './ShareMockups';
 import { hapticLight, hapticSelection, hapticMedium } from '../utils/haptics';
+import {
+  ExtractHeroArt,
+  ShoppingArt,
+  CookingArt,
+  HouseholdArt,
+} from './WelcomeArt';
 
 interface WelcomeGuideProps {
   /** Called on skip and on the final CTA. */
   onClose: () => void;
 }
 
-// ── Per-slide illustrations (purely decorative, no real data) ───────────────
-
-const ExtractHeroArt = () => (
-  <div className="flex items-center justify-center gap-3.5">
-    <div className="relative">
-      <div className="absolute inset-0 rounded-[2rem] bg-emerald-500/25 blur-2xl" />
-      <div className="relative w-24 h-24 rounded-[2rem] bg-white dark:bg-gray-900 border-none flex items-center justify-center shadow-xl">
-        <img src="/icon-512.png" alt="" className="w-14 h-14 object-contain rounded-2xl" />
-      </div>
-      <div className="absolute -top-1.5 -right-1.5 w-8 h-8 rounded-full bg-amber-400 flex items-center justify-center shadow-lg shadow-amber-500/30">
-        <Sparkles className="w-4 h-4 text-white fill-white" />
-      </div>
-    </div>
-    <ShareStep2Mockup />
-  </div>
-);
-
-const ShoppingArt = () => (
-  <div className="w-60 rounded-2xl bg-white dark:bg-gray-900 border-none shadow-sm p-3.5 flex flex-col gap-3">
-    <div className="flex items-center gap-2">
-      <ShoppingCart className="w-4 h-4 text-emerald-500" />
-      <div className="h-2 w-16 rounded bg-black/15 dark:bg-white/15" />
-    </div>
-    {[true, false, false].map((checked, i) => (
-      <div key={i} className="flex items-center gap-2.5">
-        <div
-          className={`w-4 h-4 rounded-md border-none flex items-center justify-center shrink-0 ${
-            checked ? 'bg-emerald-500' : 'bg-black/10 dark:bg-white/15'
-          }`}
-        >
-          {checked && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
-        </div>
-        <div
-          className={`h-2 rounded bg-black/10 dark:bg-white/10 ${
-            checked ? 'w-20 opacity-40' : i === 1 ? 'w-32' : 'w-24'
-          }`}
-        />
-      </div>
-    ))}
-  </div>
-);
-
-const CookingArt = () => {
-  const tiles = [
-    { icon: ChefHat, label: 'Mode' },
-    { icon: Timer, label: 'Timer' },
-    { icon: MessageCircle, label: 'Copilot' },
-  ];
-  return (
-    <div className="flex items-center justify-center gap-3">
-      {tiles.map(({ icon: Icon, label }) => (
-        <div
-          key={label}
-          className="w-20 h-24 rounded-2xl bg-white dark:bg-gray-900 border-none shadow-sm flex flex-col items-center justify-center gap-2"
-        >
-          <div className="w-11 h-11 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-            <Icon className="w-6 h-6 text-emerald-500" strokeWidth={1.75} />
-          </div>
-          <div className="h-1.5 w-10 rounded bg-black/10 dark:bg-white/10" />
-        </div>
-      ))}
-    </div>
-  );
-};
-
 const SLIDES = [
   { key: 'import', Art: ExtractHeroArt },
   { key: 'shopping', Art: ShoppingArt },
   { key: 'cooking', Art: CookingArt },
+  { key: 'household', Art: HouseholdArt },
 ] as const;
 
 export default function WelcomeGuide({ onClose }: WelcomeGuideProps) {

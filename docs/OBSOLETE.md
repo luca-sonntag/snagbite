@@ -6,6 +6,70 @@ Dieses Dokument protokolliert veralteten Code, ersetzte Heuristiken, alte Hilfsf
 
 ## 📜 Chronologische Übersicht
 
+### 2026-10-30: Ablösung fragiler Container-Stringheuristiken durch `PackagingType` & dimensionale Guards
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Raw-Stringheuristiken in `shoppingItemUtils.ts` (`cleanPkgUnit === 'glas' || cleanPkgUnit === 'jar' || cleanPkgUnit === 'dose' ...`).
+  * Ad-hoc `itemMetric?.type === 'count' && pkgMetric?.type === 'volume'` Checks im UI zur Unterdrückung von Mismatches.
+  * Fehlende Validierung im Gemini-Resolver-Tool (`submit_match`), wodurch flüssige Zitronensaft-Flaschen („200 ml“) als Alias für ganze Zitronen („1 Stück“) gelernt werden konnten.
+* **Ersetzt durch:**
+  * **Zentraler Datenvertrag & Enum:** `PackagingType = 'loose' | 'piece' | 'can' | 'jar' | 'bottle' | 'tub' | 'pack' | 'bag' | 'box' | 'bunch'` in `@cookbook/shared` (`recipes.ts`, `cookbook.ts`).
+  * **Physikalische Dimensionen-Matrix:** `isPackageUnitAppropriate()`, `getUnitDimension()` und `areUnitsDimensionallyCompatible()` in `shared/src/units.ts`.
+  * **Loose-Produce Schutz:** Frische Obst-/Gemüse-Artikel erhalten `packagingType = 'loose'` und werden nicht künstlich mit Packungsempfehlungen überladen.
+  * **Zentrales i18n Packaging-Dictionary:** `formatPackagingLabel(type, count, lang)` in `frontend/src/i18n.ts` mit voller Singular/Plural-Lokalisierung (DE/EN) ohne String-Matching im UI.
+  * **Defense-in-Depth:** Inkompatible Gebindeeinheiten werden bereits beim Gemini Tool-Call (`resolverTools.ts`), beim Matcher (`ingredientMatcher.ts`) und im Backend-Enricher (`shoppingListEnricher.ts`) abgewiesen.
+* **Betroffene Dateien:** `shared/src/types/recipes.ts`, `shared/src/types/cookbook.ts`, `shared/src/units.ts`, `backend/src/db/schema/ingredients.ts`, `backend/src/gemini.ts`, `backend/src/matching/resolverTools.ts`, `backend/src/matching/ingredientResolver.ts`, `backend/src/matching/ingredientMatcher.ts`, `backend/src/matching/mappingStore.ts`, `backend/src/db/shoppingListEnricher.ts`, `frontend/src/i18n.ts`, `frontend/src/components/ShoppingList/shoppingItemUtils.ts`, `frontend/src/components/ShoppingList/ShoppingListItem.tsx`, `docs/RELEASE_CHECKLIST.md`, `docs/OBSOLETE.md`.
+
+---
+
+### 2026-10-30: Vollständige Entfernung von Graphify und Claude-Artefakten
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Claude Code Anweisungsdatei [`CLAUDE.md`](file:///c:/Users/lucas/source/repos/cookbook/CLAUDE.md) und alter Git-Worktree `.claude/worktrees/` (~31.700 Dateien).
+  * Graphify Wissensgraph-Integration inkl. `.graphifyignore`, `graphify-out/`, `.codex/hooks.json`, `.gitattributes` (`merge=graphify`), `.mcp.json` (`graphify-mcp`) und Git-Hooks (`.git/hooks/post-commit`, `.git/hooks/post-checkout`).
+  * Workaround-Guards gegen Windows File Locks (`$env:GRAPHIFY_SKIP_HOOK`) in [`deploy.ps1`](file:///c:/Users/lucas/source/repos/cookbook/deploy.ps1) und [`frontend/scripts/git-utils.ps1`](file:///c:/Users/lucas/source/repos/cookbook/frontend/scripts/git-utils.ps1).
+* **Ersetzt durch:**
+  * Schlankes Repository ohne Hintergrund-Git-Hooks oder redundante Tool-Konfigurationen. Die Projekt- und Agenten-Richtlinien werden zentral in [`AGENTS.md`](file:///c:/Users/lucas/source/repos/cookbook/AGENTS.md) und `.agents/` gepflegt.
+* **Betroffene Dateien:** `CLAUDE.md` (gelöscht), `.codex/hooks.json` (gelöscht), `.graphifyignore` (gelöscht), `.gitattributes` (gelöscht), `.mcp.json` (gelöscht), `.gitignore`, `deploy.ps1`, `frontend/scripts/git-utils.ps1`, `docs/OBSOLETE.md`.
+
+---
+
+### 2026-10-30: Vollständige Entfernung des Alpha-Tiers und `AlphaWelcome`-Overlays (Post-Alpha Cleanup)
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Alpha-Tier-Konfiguration (`ALPHA_ACTIVE`, `ALPHA_MAX_EXTRACTIONS_PER_WINDOW`, `ALPHA_MAX_SAVED_RECIPES`) in [`backend/src/config.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/config.ts) und `backend/.env.example`.
+  * Global-Settings-Helper (`isAlphaActive()`, `getAlphaMaxExtractions()`, `getAlphaMaxSavedRecipes()`) in [`backend/src/db/settingsDb.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/settingsDb.ts).
+  * Automatische Alpha-Zuweisung und Alpha-Limits in [`authUtils.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/routes/authUtils.ts), [`extractionRoutes.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/routes/extractionRoutes.ts), [`billingService.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/services/billingService.ts), [`householdDb.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/householdDb.ts) und [`householdActions.ts`](file:///c:/Users/lucas/source/repos/cookbook/backend/src/db/householdActions.ts).
+  * `AlphaWelcome.tsx` Vollbild-Overlay und `useAlphaWelcome.ts` Hook im Frontend inkl. `alphaWelcome` DevTools-Overlay und Lokalisierungen (`i18n.ts`).
+  * `alpha`-Sonderbehandlung in `AuthContext.tsx`, `SettingsView.tsx`, `PremiumModal` (`isAlphaTier`) sowie `alphaCount`/`alphaPct` in den Admin-Metriken (`backend/src/db/adminGrowthAnalyticsDb.ts`, `website/src/components/AdminMetrics/`).
+* **Ersetzt durch:**
+  * **Zwei-Stufen-Modell (`free` | `premium`):** Alle Konten laufen regulär im `free`- oder `premium`-Tier (ggf. mit `isHouseholdPro`).
+  * **Nahtloser Fallback für Alt-Nutzer:** Bestehende Datenbank-Einträge mit `tier = 'alpha'` werden beim nächsten Login/Session-Abruf (`fetchAndSyncUser`, `requireAuth`, `normalizeUser`) automatisch und ohne Fehlermeldung auf `free` zurückgestuft.
+* **Betroffene Dateien:** `shared/src/types/extractions.ts`, `backend/src/config.ts`, `backend/.env.example`, `backend/src/db/settingsDb.ts`, `backend/src/auth.ts`, `backend/src/routes/authUtils.ts`, `backend/src/routes/extractionRoutes.ts`, `backend/src/services/billingService.ts`, `backend/src/db/householdDb.ts`, `backend/src/db/householdActions.ts`, `backend/src/db/adminAnalyticsTypes.ts`, `backend/src/db/adminGrowthAnalyticsDb.ts`, `frontend/src/components/AlphaWelcome.tsx` (gelöscht), `frontend/src/hooks/useAlphaWelcome.ts` (gelöscht), `frontend/src/App.tsx`, `frontend/src/components/AppOverlays.tsx`, `frontend/src/auth.ts`, `frontend/src/context/AuthContext.tsx`, `frontend/src/components/SettingsView.tsx`, `frontend/src/components/PremiumModal/*`, `frontend/src/i18n.ts`, `website/src/components/AdminMetrics/*`, `AGENTS.md`, `docs/OBSOLETE.md`.
+
+---
+
+### 2026-10-29: Angleichung der Überschrift „Deine Sammlungen“ an subtilen Label-Stil
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Uppercase-Überschrift (`text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500`) und kleinerer Button (`text-[11px] font-bold`) in [`CollectionStoryHub.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/SavedCatalog/CollectionStoryHub.tsx).
+* **Ersetzt durch:**
+  * **Konsistentes Typografie-Muster:** Subtile Headline (`text-xs font-medium text-gray-500 dark:text-gray-400 font-sans`) in normaler Groß-/Kleinschreibung („Deine Sammlungen“), identisch zu „Von Freunden empfohlen“ und den Sektionstiteln im Profil- und Freundebereich.
+  * Auch der Aktions-Button „Verwalten“ wurde typografisch auf `text-xs font-medium` angeglichen.
+* **Betroffene Dateien:** `frontend/src/components/SavedCatalog/CollectionStoryHub.tsx`, `docs/OBSOLETE.md`.
+
+---
+
+### 2026-10-28: Angleichung der Überschrift „Von Freunden empfohlen“ & Entfernung des Subtitles
+
+* **Ersetzter Code / Veraltete Logik:**
+  * Serif-Überschrift (`font-heading text-base font-bold`) und Beschreibungstext (`<p className="text-xs text-gray-500 ...">Direkt von deinen Freunden mit dir geteilt</p>`) in [`SharedRecipesSection.tsx`](file:///c:/Users/lucas/source/repos/cookbook/frontend/src/components/Social/SharedRecipesSection.tsx).
+* **Ersetzt durch:**
+  * **Konsistentes Typografie-Muster:** Einheitliche, subtile Sub-Headlines (`text-xs font-medium text-gray-500 dark:text-gray-400 font-sans px-0.5 mb-2`) identisch zu allen anderen Sektionen im Freunde- und Profilbereich („Dein Freundescode“, „Freunde hinzufügen“, „Deine Freunde“).
+  * **Entfernung redundanter Unterzeile:** Der beschreibende Text wurde entfernt, wodurch die Liste bündig und visuell aufgeräumt abschließt.
+* **Betroffene Dateien:** `frontend/src/components/Social/SharedRecipesSection.tsx`, `docs/OBSOLETE.md`.
+
+---
 ### 2026-10-27: Entfernung veralteter Vite-Boilerplate und AI-Slop-Kartenmuster in `website/` (Editorial Paper Overhaul)
 
 * **Ersetzter Code / Veraltete Logik:**

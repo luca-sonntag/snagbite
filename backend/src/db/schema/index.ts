@@ -8,3 +8,4 @@ export * from './gamification.js';
 export * from './social.js';
 export * from './system.js';
 export * from './auth.js';
+export * from './household.js';

@@ -3,6 +3,7 @@
  */
 
 import { FunctionDeclarationSchemaType, type FunctionDeclaration, type Tool } from '@google/generative-ai';
+import { isPackageUnitAppropriate, type PackagingType } from '@cookbook/shared';
 import type { CanonicalIngredient } from '../data/canonicalIngredients.js';
 import type { ResolverInput, ResolverResult, CatalogueAccess } from './ingredientResolver.js';
 import type { EstimatedNutrients } from './mappingStore.js';
@@ -92,6 +93,10 @@ export const RESOLVER_TOOLS: Tool[] = [
             typical_package_unit: {
               type: FunctionDeclarationSchemaType.STRING,
               description: 'Unit of standard retail package (e.g. "g", "ml", "Stück", "Dose", "Packung").',
+            },
+            packaging_type: {
+              type: FunctionDeclarationSchemaType.STRING,
+              description: 'Standard retail packaging type: "loose" (for fresh produce/vegetables/fruits bought unpackages/loose), "piece", "can", "jar", "bottle", "tub", "pack", "bag", "box", "bunch".',
             },
             shelf_life_days: {
               type: FunctionDeclarationSchemaType.INTEGER,
@@ -184,7 +189,8 @@ export const TOOLS = RESOLVER_TOOLS;
 export function readSubmission(
   call: FunctionCall,
   catalogue: CatalogueAccess,
-  model: string
+  model: string,
+  input?: ResolverInput
 ): ResolverResult | { rejected: string } {
   const args = (call.args ?? {}) as Record<string, unknown>;
   const rawCode = String(args.product_code ?? '').trim();
@@ -194,6 +200,16 @@ export function readSubmission(
   const typicalPackageAmount = typeof args.typical_package_amount === 'number' ? args.typical_package_amount : null;
   const typicalPackageUnit = typeof args.typical_package_unit === 'string' ? args.typical_package_unit : null;
   const shelfLifeDays = typeof args.shelf_life_days === 'number' ? Math.round(args.shelf_life_days) : null;
+  const rawPackagingType = typeof args.packaging_type === 'string' ? args.packaging_type.trim().toLowerCase() : null;
+  const validPackagingTypes: PackagingType[] = ['loose', 'piece', 'can', 'jar', 'bottle', 'tub', 'pack', 'bag', 'box', 'bunch'];
+  const packagingType = validPackagingTypes.includes(rawPackagingType as PackagingType) ? (rawPackagingType as PackagingType) : null;
+
+  // Dimensional Guard: If input has a unit and typical package unit is specified, they must be dimensionally compatible
+  if (input?.unit && typicalPackageUnit && !isPackageUnitAppropriate(input.unit, typicalPackageUnit)) {
+    return {
+      rejected: `The packaging unit "${typicalPackageUnit}" is physically incompatible with recipe ingredient unit "${input.unit}". Please choose an appropriate packaging unit or submit without package size.`,
+    };
+  }
 
   if (!rawCode) {
     const estimate: EstimatedNutrients = {
@@ -207,6 +223,7 @@ export function readSubmission(
       estimatedNutrients: estimate.calories > 0 ? estimate : null,
       typicalPackageAmount,
       typicalPackageUnit,
+      packagingType,
       shelfLifeDays,
       confidence,
       reasoning,
@@ -226,6 +243,7 @@ export function readSubmission(
     estimatedNutrients: null,
     typicalPackageAmount,
     typicalPackageUnit,
+    packagingType,
     shelfLifeDays,
     confidence,
     reasoning,

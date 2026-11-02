@@ -8,6 +8,7 @@
  *   #/history                       → cookbook home (shelves + collections)
  *   #/history/list                  → full recipe list, no preset
  *   #/history/list/favorites        → list, pre-filtered to favorites
+ *   #/history/list/partner          → list, pre-filtered to partner recipes
  *   #/history/list/quick            → list, pre-filtered to ≤ 30 min
  *   #/history/list/recent           → list, sorted by "recently opened"
  *   #/history/list/collection/<id>  → list, pre-filtered to one collection
@@ -27,6 +28,7 @@ export type CatalogPreset =
   | { kind: 'all' }
   | { kind: 'search' }
   | { kind: 'favorites' }
+  | { kind: 'partner' }
   | { kind: 'quick' }
   | { kind: 'recent' }
   | { kind: 'recommended' }
@@ -48,6 +50,8 @@ export function buildListRoute(preset: CatalogPreset): string {
       return `${LIST_SEGMENT}/search`;
     case 'favorites':
       return `${LIST_SEGMENT}/favorites`;
+    case 'partner':
+      return `${LIST_SEGMENT}/partner`;
     case 'quick':
       return `${LIST_SEGMENT}/quick`;
     case 'recent':
@@ -81,6 +85,8 @@ export function parseListRoute(subPath: string | null | undefined): CatalogPrese
       return { kind: 'search' };
     case 'favorites':
       return { kind: 'favorites' };
+    case 'partner':
+      return { kind: 'partner' };
     case 'quick':
       return { kind: 'quick' };
     case 'recent':
@@ -113,6 +119,8 @@ export function getBaseFiltersForPreset(preset: CatalogPreset): CatalogFilterSta
   switch (preset.kind) {
     case 'favorites':
       return { ...EMPTY_FILTERS, favoritesOnly: true };
+    case 'partner':
+      return { ...EMPTY_FILTERS, partnerOnly: true };
     case 'quick':
       return { ...EMPTY_FILTERS, maxTime: 30 };
     case 'recommended':
@@ -129,4 +137,3 @@ export function getBaseFiltersForPreset(preset: CatalogPreset): CatalogFilterSta
       return EMPTY_FILTERS;
   }
 }
-

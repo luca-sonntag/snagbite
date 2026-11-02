@@ -7,6 +7,9 @@ import { db } from './drizzle.js';
 import { recipes, userRecipes } from './schema/recipes.js';
 import { eq, and, desc, inArray, count } from 'drizzle-orm';
 import { getCollectionMembership } from './collectionsDb.js';
+import { getHouseholdUserIds } from './householdDb.js';
+import { getProfilesByIds } from './socialDb.js';
+import { queueHouseholdDebouncedPush } from '../push/householdNotifications.js';
 import {
   rowToRecipe,
   recipeToRow,
@@ -100,6 +103,43 @@ export async function addToLibrary(
     .onConflictDoNothing({
       target: [userRecipes.userId, userRecipes.recipeId],
     });
+
+  // If user has an active household partner, mirror the recipe to partner with source 'household'
+  try {
+    const householdUserIds = await getHouseholdUserIds(userId);
+    const partnerId = householdUserIds.find((id) => id !== userId);
+    if (partnerId) {
+      await db
+        .insert(userRecipes)
+        .values({
+          userId: partnerId,
+          recipeId,
+          source: 'household',
+          sourceJobId: null,
+        })
+        .onConflictDoNothing({
+          target: [userRecipes.userId, userRecipes.recipeId],
+        });
+
+      void (async () => {
+        try {
+          const profiles = await getProfilesByIds([userId]);
+          const myName = profiles.get(userId)?.displayName || 'Dein Partner';
+          const rec = await getRecipe(recipeId);
+          queueHouseholdDebouncedPush(partnerId, myName, 'recipe_added', {
+            count: 1,
+            title: rec?.title,
+            imageUrl: rec?.imageUrl,
+            recipeId,
+          });
+        } catch (pushErr) {
+          console.warn('[addToLibrary] Failed to queue household notification:', pushErr);
+        }
+      })();
+    }
+  } catch (err) {
+    console.warn('[addToLibrary] Failed to mirror recipe to household partner:', err);
+  }
 }
 
 export async function removeFromLibrary(userId: string, recipeId: string): Promise<boolean> {

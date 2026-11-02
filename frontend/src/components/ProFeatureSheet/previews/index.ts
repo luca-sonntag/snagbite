@@ -5,3 +5,4 @@ export { default as CookingModePreview } from './CookingModePreview';
 export { default as RecipeCopilotPreview } from './RecipeCopilotPreview';
 export { default as CollectionsPreview } from './CollectionsPreview';
 export { default as UnlimitedExtractionsPreview } from './UnlimitedExtractionsPreview';
+export { default as HouseholdPreview } from './HouseholdPreview';

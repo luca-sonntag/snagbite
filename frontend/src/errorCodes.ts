@@ -62,6 +62,12 @@ export type AppErrorCode =
   | 'REQUEST_EXISTS'
   | 'FRIENDSHIP_NOT_FOUND'
   | 'PROFILE_NAME_INVALID'
+  | 'HOUSEHOLD_NOT_FOUND'
+  | 'HOUSEHOLD_INVITE_INVALID'
+  | 'ALREADY_IN_HOUSEHOLD'
+  | 'HOUSEHOLD_COOLDOWN'
+  | 'HOUSEHOLD_ALREADY_PRO'
+  | 'NUDGE_RATE_LIMITED'
   | 'INTERNAL_ERROR';
 
 export type ErrorParams = Record<string, string | number>;
@@ -125,6 +131,12 @@ export const ALL_ERROR_CODES: readonly AppErrorCode[] = [
   'REQUEST_EXISTS',
   'FRIENDSHIP_NOT_FOUND',
   'PROFILE_NAME_INVALID',
+  'HOUSEHOLD_NOT_FOUND',
+  'HOUSEHOLD_INVITE_INVALID',
+  'ALREADY_IN_HOUSEHOLD',
+  'HOUSEHOLD_COOLDOWN',
+  'HOUSEHOLD_ALREADY_PRO',
+  'NUDGE_RATE_LIMITED',
   'INTERNAL_ERROR',
 ];
 
@@ -160,12 +172,16 @@ export const NON_RETRYABLE_ERROR_CODES: ReadonlySet<AppErrorCode> = new Set<AppE
   'NOT_A_RECIPE',
   'MULTIPLE_RECIPES',
   'WEBSITE_NO_RECIPE',
-  // Retrying the same photos would fail identically — the user needs to take
-  // better ones, so the UI hides the retry button.
   'PHOTO_UNREADABLE',
   'PHOTO_REQUIRED',
   'PHOTO_NOT_MATCHING',
   'UNRELATED_REMIX_REQUEST',
+  'HOUSEHOLD_NOT_FOUND',
+  'HOUSEHOLD_INVITE_INVALID',
+  'ALREADY_IN_HOUSEHOLD',
+  'HOUSEHOLD_COOLDOWN',
+  'HOUSEHOLD_ALREADY_PRO',
+  'NUDGE_RATE_LIMITED',
 ]);
 
 /**
@@ -217,4 +233,3 @@ export function parseSerializedError(raw: string): SerializedError | null {
   }
   return null;
 }
-

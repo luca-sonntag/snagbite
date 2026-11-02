@@ -1,5 +1,10 @@
 import { config } from '../config.js';
-import { getDefaultShelfLifeDays } from '@cookbook/shared';
+import {
+  getDefaultShelfLifeDays,
+  isPackageUnitAppropriate,
+  getUnitDimension,
+  type PackagingType,
+} from '@cookbook/shared';
 import type { CanonicalIngredient } from '../data/canonicalIngredients.js';
 import { canonicalizeBaseName, buildMappingKeys, toEnglishSingular } from './baseNameCanonical.js';
 import {
@@ -111,8 +116,30 @@ export async function resolveAndRemember(
     }
   }
 
-  const typicalPackageAmount = resolved?.typicalPackageAmount ?? input.typicalPackageAmount ?? null;
-  const typicalPackageUnit = resolved?.typicalPackageUnit ?? input.typicalPackageUnit ?? null;
+  let typicalPackageAmount = resolved?.typicalPackageAmount ?? input.typicalPackageAmount ?? null;
+  let typicalPackageUnit = resolved?.typicalPackageUnit ?? input.typicalPackageUnit ?? null;
+  let packagingType = (resolved?.packagingType ?? input.packagingType ?? null) as PackagingType | null;
+
+  // Guard against physically incompatible package units
+  if (input.unit && typicalPackageUnit && !isPackageUnitAppropriate(input.unit, typicalPackageUnit)) {
+    typicalPackageAmount = null;
+    typicalPackageUnit = null;
+  }
+
+  // Auto-default fresh produce bought loose / count
+  if (!packagingType) {
+    const isFreshProduce = category === 'FRUITS' || category === 'VEGETABLES' || category === 'HERBS';
+    const isCountOrUnspecified = !input.unit || getUnitDimension(input.unit) === 'count';
+    if (isFreshProduce && isCountOrUnspecified) {
+      packagingType = 'loose';
+    }
+  }
+
+  if (packagingType === 'loose') {
+    typicalPackageAmount = null;
+    typicalPackageUnit = null;
+  }
+
   const rawShelfLife =
     resolved?.shelfLifeDays ??
     input.shelfLifeDays ??
@@ -141,6 +168,7 @@ export async function resolveAndRemember(
         estimatedNutrients: effectiveItem ? null : estimatedNutrients,
         typicalPackageAmount,
         typicalPackageUnit,
+        packagingType,
         shelfLifeDays,
         source: 'agent',
         confidence: resolved?.confidence ?? 0.8,
@@ -179,6 +207,8 @@ export async function findCanonicalIngredient(
     category,
     synonyms,
     parentIngredient,
+    packagingType: _ingredientRef?.packagingType,
+    unit: _ingredientRef?.unit,
   });
   return match;
 }
@@ -274,6 +304,7 @@ export async function enrichRecipeWithCanonicalIngredients(
       parentIngredient: ing.parentIngredient,
       typicalPackageAmount: ing.typicalPackageAmount,
       typicalPackageUnit: ing.typicalPackageUnit,
+      packagingType: ing.packagingType,
       shelfLifeDays: ing.shelfLifeDays,
       calories: ing.calories,
       protein: ing.protein,

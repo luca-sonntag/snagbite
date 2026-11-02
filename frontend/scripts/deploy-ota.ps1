@@ -123,7 +123,7 @@ if ($Env -eq 'prod') {
         exit 1
     }
 
-    foreach ($checkEnv in @($prodEnvPath, "$frontendDir\.env")) {
+    foreach ($checkEnv in @($prodEnvPath, "$frontendDir\.env.production.local", "$frontendDir\.env.local", "$frontendDir\.env")) {
         if ((Read-DotEnvValue $checkEnv 'VITE_TEST_LOGIN') -eq 'true') {
             Write-Error "VITE_TEST_LOGIN=true is set in $checkEnv - refusing to build a test-login release."
             exit 1
@@ -152,14 +152,17 @@ if (-not (Test-Path $versionFile)) {
 $versionContent = Get-Content $versionFile -Raw
 $versionCode = [int]([regex]::Match($versionContent, 'VERSION_CODE=(\d+)').Groups[1].Value)
 $versionName = [regex]::Match($versionContent, 'VERSION_NAME=(.+)').Groups[1].Value.Trim()
-if ($MinVersionCode -le 0) { $MinVersionCode = $versionCode }
+$explicitMinVersionCode = $MinVersionCode -gt 0
+if (-not $explicitMinVersionCode) { $MinVersionCode = $versionCode }
 
-Write-Host "  Native version: $versionName ($versionCode) | minVersionCode: $MinVersionCode | env: $Env | channel: $Channel" -ForegroundColor White
+Write-Host "  Native version: $versionName ($versionCode) | env: $Env | channel: $Channel" -ForegroundColor White
 
 # ── 3. Build frontend ────────────────────────────────────────────────
 
-Write-Host "[2/7] Building frontend ($Env)..." -ForegroundColor Yellow
+Write-Host "[2/7] Building frontend ($Env -> $apiUrl)..." -ForegroundColor Yellow
 Push-Location $frontendDir
+$prevViteApiUrl = $env:VITE_API_BASE_URL
+$env:VITE_API_BASE_URL = $apiUrl
 try {
     if ($Env -eq 'dev') {
         npm run build:dev
@@ -168,9 +171,27 @@ try {
     }
     if ($LASTEXITCODE -ne 0) { throw "Frontend build failed" }
 } finally {
+    $env:VITE_API_BASE_URL = $prevViteApiUrl
     Pop-Location
 }
-Write-Host "  Frontend build complete." -ForegroundColor Green
+
+# Verify compiled bundle contains the expected API host and no cross-env leakage
+$apiChunks = Get-ChildItem -Path "$frontendDir\dist\assets\*.js" -ErrorAction SilentlyContinue
+if (-not $apiChunks) {
+    throw "No JS assets found in $frontendDir\dist\assets after build."
+}
+$expectedHost = $parsedUri.Host
+$matchedExpectedHost = Select-String -Path "$frontendDir\dist\assets\*.js" -SimpleMatch $expectedHost -Quiet
+if (-not $matchedExpectedHost) {
+    throw "Build verification failed: Expected API host '$expectedHost' was not found in compiled dist/assets/*.js!"
+}
+if ($Env -eq 'prod') {
+    $leakedDevHost = Select-String -Path "$frontendDir\dist\assets\*.js" -SimpleMatch "cookbook-development.up.railway.app" -Quiet
+    if ($leakedDevHost) {
+        throw "Build verification failed: Dev backend host 'cookbook-development.up.railway.app' leaked into production OTA build!"
+    }
+}
+Write-Host "  Frontend build complete and API host ($expectedHost) verified." -ForegroundColor Green
 
 # ── 4. Next bundle version from DB: {VERSION_NAME}-ota.{n} ───────────
 
@@ -197,6 +218,7 @@ if ($LASTEXITCODE -ne 0 -or $null -eq $existing) {
 
 
 $maxCounter = 0
+$seriesMinCode = $MinVersionCode
 foreach ($row in @($existing)) {
     if ($row.version -like "$versionName-ota.*") {
         $m = [regex]::Match($row.version, '-ota\.(\d+)$')
@@ -204,10 +226,17 @@ foreach ($row in @($existing)) {
             $n = [int]$m.Groups[1].Value
             if ($n -gt $maxCounter) { $maxCounter = $n }
         }
+        if (-not $explicitMinVersionCode -and $null -ne $row.min_version_code -and [int]$row.min_version_code -gt 0 -and [int]$row.min_version_code -lt $seriesMinCode) {
+            $seriesMinCode = [int]$row.min_version_code
+        }
     }
 }
+if (-not $explicitMinVersionCode -and $seriesMinCode -lt $MinVersionCode) {
+    Write-Host "  Preserving minVersionCode = $seriesMinCode from existing $versionName-ota.* series (so Play Store builds on vc$seriesMinCode stay covered)." -ForegroundColor Cyan
+    $MinVersionCode = $seriesMinCode
+}
 $bundleVersion = "$versionName-ota.$($maxCounter + 1)"
-Write-Host "  Bundle version: $bundleVersion" -ForegroundColor White
+Write-Host "  Bundle version: $bundleVersion (minVersionCode: $MinVersionCode)" -ForegroundColor White
 
 # ── 5. Zip dist + sha256 ─────────────────────────────────────────────
 

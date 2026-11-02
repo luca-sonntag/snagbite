@@ -50,6 +50,7 @@ export default function ShoppingCheckedDrawer({
                 key={displayKey}
                 item={item}
                 isChecked
+                showCategoryIndicator
                 isCollapsing={collapsingKeys.has(displayKey)}
                 onClick={() => onItemToggle(item)}
                 onDelete={() => onDelete(item)}

@@ -18,6 +18,7 @@ import {
   type Part,
 } from '@google/generative-ai';
 import { config } from '../config.js';
+import type { PackagingType } from '@cookbook/shared';
 import type { CanonicalIngredient } from '../data/canonicalIngredients.js';
 import type { EstimatedNutrients } from './mappingStore.js';
 import type { ParentIngredientInfo, GeminiUsageInfo } from '../types.js';
@@ -41,6 +42,7 @@ export interface ResolverInput {
   parentIngredient?: ParentIngredientInfo;
   typicalPackageAmount?: number | null;
   typicalPackageUnit?: string | null;
+  packagingType?: PackagingType | null;
   shelfLifeDays?: number | null;
   calories?: number | null;
   protein?: number | null;
@@ -59,6 +61,7 @@ export interface ResolverResult {
   estimatedNutrients: EstimatedNutrients | null;
   typicalPackageAmount?: number | null;
   typicalPackageUnit?: string | null;
+  packagingType?: PackagingType | null;
   shelfLifeDays?: number | null;
   confidence: number | null;
   reasoning: string | null;
@@ -206,7 +209,7 @@ export async function resolveIngredient(
       const submission = calls.find(c => c.name === 'submit_match');
       if (submission) {
         lastRawOutput = JSON.stringify(submission.args);
-        const result = readSubmission(submission as any, catalogue, modelName);
+        const result = readSubmission(submission as any, catalogue, modelName, input);
         if (!('rejected' in result)) {
           outcome = result;
           break;

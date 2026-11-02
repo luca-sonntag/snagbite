@@ -6,6 +6,7 @@ import {
   Bot,
   Timer,
   FolderHeart,
+  Users,
 } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import type { PremiumFeatureItem } from './types';
@@ -25,6 +26,12 @@ export function PremiumFeatures() {
       title: t('premium.modal.features.noAds.title') || '100% Werbefrei',
       desc: t('premium.modal.features.noAds.desc') || 'Keine Banner, keine Interstitials, keine Unterbrechungen',
       icon: <EyeOff className="w-4 h-4 text-amber-600" />,
+    },
+    {
+      id: 'household',
+      title: t('premium.modal.features.household.title') || 'Haushalt & 1 PRO für 2 Personen',
+      desc: t('premium.modal.features.household.desc') || 'Geteiltes Kochbuch, synchronisierter Wochenplaner & Einkaufsliste',
+      icon: <Users className="w-4 h-4 text-amber-600" />,
     },
     {
       id: 'healthScore',
@@ -60,7 +67,7 @@ export function PremiumFeatures() {
             {t('premium.modal.featuresTitle') || 'Alle PRO-Vorteile'}
           </p>
           <span className="text-[10px] font-bold text-amber-700 bg-amber-500/10 px-2 py-0.5 rounded-full">
-            6 Features
+            {featureItems.length} Features
           </span>
         </div>
         <div className="bg-white/60 backdrop-blur-md rounded-2xl shadow-[0_1px_4px_rgba(0,0,0,0.05)] border-none overflow-hidden divide-y divide-gray-100/80">

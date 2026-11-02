@@ -10,21 +10,34 @@
 ## 📌 Nächstes Release (v1.2.x / Upcoming Release)
 
 **Status:** Offen für neue Features auf `develop`  
-**Letztes Update:** 2026-10-20  
+**Letztes Update:** 2026-10-28  
 
 ### 🗄️ 1. Datenbank & Schema-Updates (Railway PostgreSQL)
-*Keine offenen DB-Aufgaben.*
+- [ ] **Tabelle `households` in Production bereitstellen:**
+  - **Befehl:** `npm run db:push:prod` im `backend/`-Verzeichnis ausführen.
+  * **Grund:** Neue Tabelle `households` für den Household-Modus (1:1 Partner-Verknüpfung, 7-Tage-Trial, Cooldowns & Partner-Anstupsen).
+  * **Dringlichkeit:** Zwingend vor oder zeitgleich mit dem Backend-Deploy.
+- [ ] **Spalte `packaging_type` in `ingredient_mappings` auf Production ausrollen:**
+  - **Befehl:** `npm run db:push:prod` im `backend/`-Verzeichnis ausführen.
+  * **Grund:** Neue `packaging_type: text('packaging_type')` Spalte auf Tabelle `ingredient_mappings` für strukturierte Gebindetypen (`loose`, `piece`, `can`, `jar`, `bottle`, `tub`, `pack`, `bag`, `box`, `bunch`) statt fragiler String-Heuristiken.
+  * **Dringlichkeit:** Zwingend vor oder zeitgleich mit dem Backend-Deploy.
+- [ ] **Poisoned Aliases & Bogus no_match Einträge auf Production bereinigen:**
+  - **Befehl:** `npm run clean:mappings:prod:apply` im `backend/`-Verzeichnis ausführen.
+  * **Grund:** Entfernt kontaminierte Aliase (z. B. Zitronensaft 200ml mit Alias "zitrone"), löscht ungültige `no_match` Zeilen auf bekannten Grundnahrungsmitteln und befüllt `packaging_type`.
+  * **Dringlichkeit:** Direkt nach `npm run db:push:prod`.
 
 ### 🔐 2. Umgebungsvariablen & Secrets (Railway & Frontend)
 - [ ] **Operator Alerts (ntfy) auf Railway konfigurieren (optional, Master-Switch standardmäßig aus):**
-  - ALERTS_ENABLED: auf 	rue setzen, um Benachrichtigungen zu aktivieren.
+  - ALERTS_ENABLED: auf true setzen, um Benachrichtigungen zu aktivieren.
   - NTFY_ALERTS_TOPIC: ein eigenes, geheimes Topic für Admin-Alerts eintragen (z. B. snagbite-admin-alerts-<random-uuid>).
   - NTFY_TOKEN: optionales Access-Token eintragen, falls ein reserviertes ntfy-Topic genutzt wird.
-  - ALERTS_INCLUDE_PII: optional auf 	rue, falls maskierte E-Mails und Feedback-Auszüge mitgeschickt werden sollen (standardmäßig alse zur DSGVO-Datenminimierung).
-  - Commits: d7a7c58b, ee8cea2f, 7df42e75, a174048, 5323b67e.
-- [ ] **Tigris S3 Endpoint & Credentials auf Railway prüfen:**
-  - `S3_ENDPOINT` muss auf `https://t3.storage.dev` zeigen (nicht `storageapi.dev`).
-  - Im Railway Dashboard prüfen, ob `S3_ACCESS_KEY_ID` und `S3_SECRET_ACCESS_KEY` im Backend-Service mit den aktiven Keys des Tigris-Storage-Plugins übereinstimmen. Alternativ können sie entfernt werden, damit das Backend automatisch auf die nativen Plugin-Variablen `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` und `BUCKET_NAME` zurückgreift.
+  - ALERTS_INCLUDE_PII: optional auf true, falls maskierte E-Mails und Feedback-Auszüge mitgeschickt werden sollen (standardmäßig false zur DSGVO-Datenminimierung).
+  - Commits: d7a7c58b, ee8cea2f, 7df42e75, a174048, 5323b67e.
+- [ ] **Tigris S3 Endpoint & Credentials auf Railway prüfen (Vereinheitlichung auf AWS_*):**
+  - Storage-Umgebungsvariablen wurden auf native `AWS_*`-Variablen vereinheitlicht (`AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `BUCKET_NAME`).
+  - `AWS_ENDPOINT_URL_S3` muss auf `https://t3.storage.dev` zeigen (nicht `storageapi.dev`).
+  - S3_*-Fallbacks wurden komplett entfernt; alle Storage-Variablen müssen als `AWS_*` bzw. `BUCKET_NAME` vorliegen.
+  - Redundante manuelle `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` / `S3_BUCKET_NAME` im Railway Dashboard können entfernt werden, da das Backend nun direkt die nativen Tigris-Plugin-Variablen verwendet.
   - Commits: `068b6859`, `5fde45c8`, `bff0f4dd`.
 
 ### ☁️ 3. Externe Dienste & Cloudflare
@@ -58,37 +71,3 @@ Sobald alle offenen Punkte abgearbeitet werden sollen:
    npm run deploy:ota
    ```
 3. **Checkliste archivieren:**
-   - Erledigte Punkte abhaken.
-   - Den Block unten in `## 📜 Archivierte Releases` verschieben.
-   - Einen neuen leeren Block für das nächste Release anlegen.
-
----
-
-## 📜 Archivierte Releases
-
-### 🏁 Release v1.2.0 (Code 33) – 2026-10-20 (Google Play Production & Railway Backend)
-
-- [x] **`npm run db:push:prod` ausgeführt:**
-  - Neue JSONB-Spalte `user.metadata` in `backend/src/db/schema/auth.ts`.
-  - Spalten `source_url_normalized`, `language` und Index `recipes_source_normalized_lang_idx` in `recipes.ts`.
-  - Spalte `language` in `jobs.ts`.
-  - Additive Tabellen `recipe_shares` und `cook_event_reactions` in `social.ts`.
-  - Dropped `collections.emoji`.
-- [x] **`npm run db:functions:prod` ausgeführt:**
-  - Aktualisierte Postgres Stored Procedure `complete_job` mit `pipeline_version := COALESCE(v_recipe.pipeline_version, 1)`.
-- [x] **Rezept-URLs & Sprache Backfill ausgeführt:**
-  - `npm run db:backfill-recipe-urls:prod -w backend` erfolgreich ausgeführt.
-- [x] **Legacy-Sektionen Backfill ausgeführt:**
-  - `npm run backfill:sections:prod -w backend` erfolgreich ausgeführt.
-- [x] **Tigris S3 Synchronisation:**
-  - Master-Icons via `npm run icons:sync:s3:prod` synchronisiert.
-  - Open Food Facts SQLite Dump via `npm run off:sync:s3:prod -w backend` synchronisiert.
-- [x] **Cloudflare Whisper-Proxy & Secrets:**
-  - Cloudflare Worker mit neuem Header aktualisiert.
-  - Secrets auf Railway und Cloudflare (`WHISPER_HMAC_SECRET`, etc.) abgeglichen.
-- [x] **Native Android Shell & Google Play Release:**
-  - `@capacitor/filesystem` hinzugefügt für Cover-Bild Übergabe beim WhatsApp/Messenger Rezept-Sharing.
-  - Release Notes für `de-DE` und `en-US` in Fastlane-Metadaten hinterlegt.
-  - AAB Version 1.2.0 (Code 33) in der Google Play Console zur Produktions-Überprüfung eingereicht.
-- [x] **Backend Deploy:**
-  - `develop` erfolgreich in `master` gemergt und auf Railway Production bereitgestellt.

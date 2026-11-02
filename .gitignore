@@ -14,14 +14,13 @@ temp-downloads/
 .agents/*
 !.agents/rules/
 !.agents/skills/
-.claude/
 *.afdesign*
 frontend/releases/
 *firebase-adminsdk*.json
 *firebase-key*.json
 fastlane/*firebase*.json
-# graphify knowledge graph (locally generated, rebuild with: graphify extract . --code-only)
-graphify-out/
+backend/.secrets/
+.secrets/
 # Ingredient icons: single zip archive in git, unpacked at runtime
 backend/generated-ingredient-images/
 backend/public/ingredient-icons/*
@@ -34,4 +33,4 @@ backend/src/data/*.sqlite
 backend/dist/data/*.sqlite
 backups/
 backend/backups/
-
+backend/data/

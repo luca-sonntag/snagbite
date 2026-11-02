@@ -10,7 +10,6 @@ import type { CookedResult } from '../../types';
 import { useGamification } from '../../context/GamificationContext';
 
 const WelcomeGuide = lazy(() => import('../WelcomeGuide'));
-const AlphaWelcome = lazy(() => import('../AlphaWelcome'));
 const PremiumModal = lazy(() => import('../PremiumModal'));
 const RewardOverlay = lazy(() => import('../RewardOverlay'));
 const FeedbackDrawer = lazy(() => import('../FeedbackDrawer').then((m) => ({ default: m.FeedbackDrawer })));
@@ -34,8 +33,6 @@ export const DevOverlayHost: React.FC<DevOverlayHostProps> = ({ activeOverlay, o
   return (
     <Suspense fallback={null}>
       {activeOverlay.name === 'onboarding' && <WelcomeGuide onClose={onClose} />}
-
-      {activeOverlay.name === 'alphaWelcome' && <AlphaWelcome onClose={onClose} />}
 
       {activeOverlay.name === 'premium' && (
         <PremiumModal isOpen={true} onOpenChange={(open) => !open && onClose()} />

@@ -32,10 +32,10 @@ export default function InstructionSectionDivider({
 
         <div
           className={`${
-            isLarge ? 'w-5.5 h-5.5' : 'w-5 h-5'
+            isLarge ? 'w-6 h-6' : 'w-5 h-5'
           } rounded-lg bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs my-0.5`}
         >
-          <Layers className={isLarge ? 'w-3 h-3' : 'w-2.5 h-2.5'} />
+          <Layers className={isLarge ? 'w-3.5 h-3.5' : 'w-2.5 h-2.5'} />
         </div>
 
         <div className={`${railBase} flex-1 min-h-2 ${railTone(prevChecked)}`} />
@@ -45,7 +45,7 @@ export default function InstructionSectionDivider({
       <div className="flex-1 flex items-center gap-2 min-w-0 py-1">
         <span
           className={`${
-            isLarge ? 'text-xs sm:text-sm' : 'text-[11px]'
+            isLarge ? 'text-sm sm:text-base' : 'text-[11px]'
           } font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 truncate`}
         >
           {sectionName}

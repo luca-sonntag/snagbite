@@ -16,6 +16,7 @@ import { notificationTick } from '../notifications/worker.js';
 import { adminMappingRoutes } from './adminMappingRoutes.js';
 import { adminMetricsRoutes } from './adminMetricsRoutes.js';
 import { AppError, sendAppError } from '../errors.js';
+import { invalidateHouseholdForUser } from '../db/householdDb.js';
 
 export const adminRoutes = Router();
 adminRoutes.use(adminMappingRoutes);
@@ -60,6 +61,8 @@ adminRoutes.post(
         .update(userTable)
         .set({ tier, metadata, updatedAt: new Date() })
         .where(eq(userTable.id, req.userId!));
+
+      await invalidateHouseholdForUser(req.userId!);
 
       res.json({ success: true, tier });
     } catch (error: unknown) {

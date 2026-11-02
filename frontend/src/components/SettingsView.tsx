@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Select, ListBox, Popover } from '@heroui/react';
-import { LogOut, Globe, Moon, Sun, Thermometer, Scale, Info, UserMinus, Sparkles, ChevronRight, HelpCircle, MessageSquare, Shield, ScrollText, Building2, ExternalLink, RefreshCw, Compass } from 'lucide-react';
+import { LogOut, Globe, Moon, Sun, Thermometer, Scale, Info, UserMinus, Sparkles, ChevronRight, HelpCircle, MessageSquare, Shield, ScrollText, Building2, ExternalLink, RefreshCw, Compass, Users, Package } from 'lucide-react';
+import { HouseholdSheet } from './Household';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -9,6 +10,7 @@ import { hapticLight, hapticMedium, hapticHeavy } from '../utils/haptics';
 import { isNative } from '../native';
 
 import { useTheme } from '../hooks/useTheme';
+import { useShoppingPreferences } from '../hooks/useShoppingPreferences';
 import { useDialog } from '../context/DialogContext';
 import PremiumModal from './PremiumModal';
 import ProBadge from './ProBadge';
@@ -20,6 +22,7 @@ import { LEGAL_URLS } from '../legal';
 import PremiumUpgradeCard from './PremiumUpgradeCard';
 import NotificationSettings from './NotificationSettings';
 import AdminSettingsSection from './AdminSettingsSection';
+import { SettingsToggle } from './AdminSettingsToggle';
 
 // Unit system is not yet ready to be user-configurable; keep the setting UI in place but hidden for now.
 const SHOW_UNIT_SYSTEM_SETTING = false;
@@ -54,11 +57,13 @@ const getInitials = (email?: string) => {
 
 export default function SettingsView() {
   const { t, language, setLanguage } = useI18n();
-  const { signOut, user, autoSignedIn, updateUserMetadata, deleteAccount, isAdmin } = useAuth();
+  const { signOut, user, autoSignedIn, updateUserMetadata, deleteAccount, isAdmin, household } = useAuth();
+  const [isHouseholdOpen, setIsHouseholdOpen] = useState(false);
   const dialog = useDialog();
   const toast = useToast();
   const { resetAllTours } = useSpotlightTourContext();
   const [theme, setTheme] = useTheme();
+  const { showPackageRecommendations, togglePackageRecommendations } = useShoppingPreferences();
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
@@ -180,11 +185,7 @@ export default function SettingsView() {
               {user?.email}
             </span>
             <div className="flex items-center gap-2 mt-1.5">
-              {user?.app_metadata?.tier === 'alpha' ? (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 uppercase tracking-wider border-none">
-                  {t('app.settings.alphaActive') || 'Alpha Access'}
-                </span>
-              ) : isRealPremium ? (
+              {isRealPremium ? (
                 <ProBadge variant="chip" />
               ) : (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-400 uppercase tracking-wider border-none">
@@ -195,14 +196,7 @@ export default function SettingsView() {
           </div>
         </div>
 
-        {user?.app_metadata?.tier === 'alpha' ? (
-          <div className="pt-3.5 border-t border-black/5 dark:border-white/5 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-            <span>
-              {t('app.settings.alphaActiveDesc') || (language === 'de' ? 'Du bist Alpha-Tester! Du hast kostenlosen Zugriff auf alle PRO-Funktionen während der Alpha.' : 'You are an alpha tester! You have free access to all PRO features during the alpha.')}
-            </span>
-          </div>
-        ) : isRealPremium ? (
+        {isRealPremium ? (
           <div className="pt-3.5 border-t border-black/5 dark:border-white/5 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
             <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
             <span>
@@ -212,8 +206,41 @@ export default function SettingsView() {
         ) : null}
       </div>
 
-      {/* Premium Upgrade Promotion (only for free members and alpha testers) */}
+      {/* Premium Upgrade Promotion (only for free members) */}
       <PremiumUpgradeCard onUpgradeClick={() => setIsPremiumModalOpen(true)} />
+
+      {/* Household Section */}
+      <div
+        onClick={() => {
+          hapticLight();
+          setIsHouseholdOpen(true);
+        }}
+        className="p-4 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] flex items-center justify-between gap-3 cursor-pointer active:scale-[0.99] transition-transform select-none"
+      >
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className="w-11 h-11 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+            <Users className="w-5 h-5" />
+          </div>
+          <div className="flex flex-col min-w-0 font-sans">
+            <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+              {t('household.modal.title')}
+            </span>
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                {household?.status === 'active' || household?.status === 'paused'
+                  ? (household.partnerProfile?.displayName || t('household.partnerDefault'))
+                  : t('household.banner.subtitle')}
+              </span>
+              {(household?.status === 'paused' || household?.isPauseLocked) && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-600 dark:text-rose-400 tracking-wide uppercase shrink-0">
+                  {t('household.status.pausedBadge')}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+        <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
+      </div>
 
       {/* Preferences Section */}
       <div className="flex flex-col gap-1">
@@ -384,6 +411,26 @@ export default function SettingsView() {
                 Dark
               </button>
             </div>
+          </div>
+
+          {/* Shopping Package Recommendations Option */}
+          <div className="p-4 flex items-center justify-between gap-3 border-t border-black/5 dark:border-white/5">
+            <div className="flex items-center gap-3 min-w-0 flex-1 pr-3">
+              <Package className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" />
+              <div>
+                <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                  {t('app.settings.shoppingPackageRecommendations')}
+                </p>
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-medium">
+                  {t('app.settings.shoppingPackageRecommendationsDesc')}
+                </p>
+              </div>
+            </div>
+            <SettingsToggle
+              on={showPackageRecommendations}
+              onClick={togglePackageRecommendations}
+              label={t('app.settings.shoppingPackageRecommendations')}
+            />
           </div>
 
         </div>
@@ -562,6 +609,13 @@ export default function SettingsView() {
 
       {/* Feedback / Bug Report */}
       <FeedbackDrawer isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
+
+      {/* Household Sheet */}
+      <HouseholdSheet
+        isOpen={isHouseholdOpen}
+        onOpenChange={setIsHouseholdOpen}
+        onOpenUpgrade={() => setIsPremiumModalOpen(true)}
+      />
     </div>
   );
 }

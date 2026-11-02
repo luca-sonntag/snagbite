@@ -1,5 +1,4 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { Plus } from 'lucide-react';
 import type { MealPlannerViewProps } from './types';
 import type { MealPlanEntry } from '../../types';
 import { useMealPlanner } from './useMealPlanner';
@@ -9,12 +8,11 @@ import { MealPlannerHeader } from './MealPlannerHeader';
 import { WeekNavigator } from './WeekNavigator';
 import { WeekDayPicker } from './WeekDayPicker';
 import { MealPlanWeekGroup } from './MealPlanWeekGroup';
-import { MealPlanShoppingSheets } from './MealPlanShoppingSheets';
-import { RecipePickerModal } from './RecipePickerModal';
-import CookedModal from '../CookedModal';
-import { useI18n } from '../../context/I18nContext';
+import { ExtendNextWeekButton } from './ExtendNextWeekButton';
+import { HouseholdPausedBanner } from '../Household';
+import { MealPlanModals, type CookedModalTargetState } from './MealPlanModals';
 import { useSpotlightTour } from '../../hooks/useSpotlightTour';
-import { formatDateIso, addDays, formatWeekRange } from './mealPlannerUtils';
+import { formatDateIso, addDays } from './mealPlannerUtils';
 
 export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
   history,
@@ -24,7 +22,6 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
   onNavigateToShoppingList,
   isActive = true,
 }) => {
-  const { t, language } = useI18n();
 
   const {
     currentWeekStart,
@@ -74,12 +71,9 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     onNavigateToShoppingList,
   });
 
-  const [cookedModalTarget, setCookedModalTarget] = useState<{
-    id: string;
-    title: string;
-    entry: MealPlanEntry;
-    pullToToday?: boolean;
-  } | null>(null);
+  const [isHouseholdOpen, setIsHouseholdOpen] = useState(false);
+  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  const [cookedModalTarget, setCookedModalTarget] = useState<CookedModalTargetState | null>(null);
 
   const todayStr = useMemo(() => formatDateIso(new Date()), []);
 
@@ -195,6 +189,11 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
         />
       </div>
 
+      <HouseholdPausedBanner
+        onOpenUpgrade={() => setIsPremiumModalOpen(true)}
+        onOpenHousehold={() => setIsHouseholdOpen(true)}
+      />
+
       {/* Unified Agenda Stream */}
       {isLoading && mealPlans.length === 0 ? (
         <div className="space-y-3 pt-2">
@@ -232,30 +231,21 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
             />
           ))}
 
-          {/* Progressive Week Extension Button */}
-          <div className="pt-2 pb-4 flex justify-center">
-            <button
-              onClick={extendNextWeek}
-              className="w-full sm:w-auto min-h-[48px] px-6 py-3.5 rounded-2xl bg-gray-100/90 dark:bg-gray-800/80 hover:bg-gray-200/90 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-150 active:scale-[0.98] cursor-pointer border-none shadow-2xs touch-manipulation"
-            >
-              <Plus className="w-4 h-4 text-gray-400 dark:text-gray-500 stroke-[2.25]" />
-              <span>
-                {t('mealPlanner.planNextWeek', {
-                  range: formatWeekRange(nextExtendWeekStart, nextExtendWeekEnd, language),
-                }) || `+ Nächste Woche planen (${formatWeekRange(nextExtendWeekStart, nextExtendWeekEnd, language)})`}
-              </span>
-            </button>
-          </div>
+          <ExtendNextWeekButton
+            onExtend={extendNextWeek}
+            nextWeekStart={nextExtendWeekStart}
+            nextWeekEnd={nextExtendWeekEnd}
+          />
         </div>
       )}
 
-      {/* Recipe Picker Modal */}
-      <RecipePickerModal
-        isOpen={!!pickerSlot}
-        mealType={pickerSlot?.mealType ?? null}
-        dateStr={pickerSlot?.date ?? selectedDate ?? todayStr}
+      {/* Modals and Drawers */}
+      <MealPlanModals
+        pickerSlot={pickerSlot}
+        selectedDate={selectedDate}
+        todayStr={todayStr}
         history={history}
-        onClose={() => setPickerSlot(null)}
+        onClosePicker={() => setPickerSlot(null)}
         onSelectRecipe={(saved, targetDate) => {
           const dateToUse = targetDate || pickerSlot?.date || selectedDate || todayStr;
           if (dateToUse) {
@@ -263,32 +253,26 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
           }
           setPickerSlot(null);
         }}
-      />
-
-      {/* Sequential Shopping Confirmation Sheet for Week Shopping */}
-      <MealPlanShoppingSheets
         currentBulkItem={currentBulkItem}
-        onConfirm={handleBulkShoppingConfirm}
-        onClose={handleBulkShoppingClose}
+        onConfirmBulkShopping={handleBulkShoppingConfirm}
+        onCloseBulkShopping={handleBulkShoppingClose}
+        cookedModalTarget={cookedModalTarget}
+        onSuccessCooked={() => {
+          if (!cookedModalTarget) return;
+          if (cookedModalTarget.pullToToday) {
+            pullToTodayAndMarkCooked(cookedModalTarget.entry);
+          } else {
+            toggleCooked(cookedModalTarget.entry);
+          }
+          setCookedModalTarget(null);
+        }}
+        onCloseCooked={() => setCookedModalTarget(null)}
+        isHouseholdOpen={isHouseholdOpen}
+        onOpenHouseholdChange={setIsHouseholdOpen}
+        onOpenUpgrade={() => setIsPremiumModalOpen(true)}
+        isPremiumModalOpen={isPremiumModalOpen}
+        onOpenPremiumModalChange={setIsPremiumModalOpen}
       />
-
-      {/* Gamification Cooked Verification Modal */}
-      {cookedModalTarget && (
-        <CookedModal
-          isOpen={!!cookedModalTarget}
-          recipeId={cookedModalTarget.id}
-          recipeTitle={cookedModalTarget.title}
-          onSuccess={() => {
-            if (cookedModalTarget.pullToToday) {
-              pullToTodayAndMarkCooked(cookedModalTarget.entry);
-            } else {
-              toggleCooked(cookedModalTarget.entry);
-            }
-            setCookedModalTarget(null);
-          }}
-          onClose={() => setCookedModalTarget(null)}
-        />
-      )}
     </div>
   );
 };

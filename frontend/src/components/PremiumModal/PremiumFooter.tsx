@@ -8,7 +8,6 @@ interface PremiumFooterProps {
   success: boolean;
   errorMsg: string | null;
   isPremium: boolean;
-  isAlphaTier: boolean;
   isLoadingPackages: boolean;
   selectedPackageId: string | null;
   hasSelectedTrial: boolean;
@@ -22,7 +21,6 @@ export function PremiumFooter({
   success,
   errorMsg,
   isPremium,
-  isAlphaTier,
   isLoadingPackages,
   selectedPackageId,
   hasSelectedTrial,
@@ -48,16 +46,7 @@ export function PremiumFooter({
         </div>
       )}
 
-      {isAlphaTier ? (
-        <button
-          type="button"
-          disabled
-          className="w-full h-[52px] min-h-[44px] rounded-2xl bg-gray-100 border-none text-gray-500 text-sm font-bold flex items-center justify-center gap-2 cursor-default"
-        >
-          <Check className="w-5 h-5 text-emerald-500" />
-          {t('premium.modal.alphaOwned') || 'Käufe während der Alpha deaktiviert'}
-        </button>
-      ) : isPremium ? (
+      {isPremium ? (
         <button
           type="button"
           disabled
@@ -98,7 +87,7 @@ export function PremiumFooter({
       )}
 
       {/* Restore purchases ghost button */}
-      {!isPremium && !isAlphaTier && (
+      {!isPremium && (
         <button
           type="button"
           onClick={onRestore}

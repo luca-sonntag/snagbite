@@ -30,8 +30,6 @@ const ALIAS_MAP: Record<string, DevOverlayName> = {
   premium: 'premium',
   pro: 'premium',
   paywall: 'premium',
-  alphawelcome: 'alphaWelcome',
-  alpha: 'alphaWelcome',
   reward: 'reward',
   rewardoverlay: 'reward',
   xp: 'reward',
@@ -72,7 +70,6 @@ const OVERLAY_CATALOG: Array<{
   { name: 'adNotice', aliases: 'preAd, adTransparency', description: 'Pre-ad transparency explanation sheet', example: "dev.show('adNotice')" },
   { name: 'extractionAd', aliases: 'adSheet, adOverlay', description: 'Extraction MREC ad overlay', example: "dev.show('extractionAd')" },
   { name: 'premium', aliases: 'pro, paywall', description: 'Premium membership & pricing modal', example: "dev.show('premium')" },
-  { name: 'alphaWelcome', aliases: 'alpha', description: 'Alpha tester welcome overlay', example: "dev.show('alphaWelcome')" },
   { name: 'reward', aliases: 'rewardOverlay, xp', description: 'Cook reward overlay (XP, level-up, badges)', example: "dev.show('reward', { levelUp: true })" },
   { name: 'feedback', aliases: 'bug, feedbackDrawer', description: 'In-app bug report & feedback drawer', example: "dev.show('feedback')" },
   { name: 'proFeature', aliases: 'proSheet', description: 'Pro feature spotlight bottom sheet', example: "dev.show('proFeature', 'recipe_copilot')" },
@@ -117,7 +114,6 @@ export function createDevToolsApi(): DevToolsApi {
   showFn.onboarding = () => showFn('onboarding');
   showFn.adNotice = () => showFn('adNotice');
   showFn.premium = () => showFn('premium');
-  showFn.alphaWelcome = () => showFn('alphaWelcome');
   showFn.reward = (opts?: DevRewardOptions) => showFn('reward', opts);
   showFn.feedback = () => showFn('feedback');
   showFn.proFeature = (featureId?: ProFeatureId) => showFn('proFeature', featureId);

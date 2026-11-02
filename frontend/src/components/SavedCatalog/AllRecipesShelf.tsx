@@ -5,6 +5,7 @@ import RecipePosterCard from './RecipePosterCard';
 import { useI18n } from '../../context/I18nContext';
 import { hapticLight } from '../../utils/haptics';
 import { groupRecipesByTimeline } from './recipeTimelineUtils';
+import { useHousehold } from '../Household';
 
 interface AllRecipesShelfProps {
   items: SavedRecipe[];
@@ -35,6 +36,8 @@ export default function AllRecipesShelf({
   bindLongPress,
 }: AllRecipesShelfProps) {
   const { t, language } = useI18n();
+  const { status: householdStatus } = useHousehold();
+  const isHouseholdConnected = householdStatus === 'active';
   const [showAll, setShowAll] = useState(false);
 
   const displayedItems = useMemo(() => {
@@ -65,11 +68,20 @@ export default function AllRecipesShelf({
       <div className="flex items-center justify-between px-0.5">
         <div>
           <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight font-heading">
-            {t('catalog.magazine.allShelfTitle')}
+            {isHouseholdConnected
+              ? t('catalog.magazine.allShelfTitleHousehold')
+              : t('catalog.magazine.allShelfTitle')}
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {t('catalog.magazine.allShelfSubtitle')}
+            {isHouseholdConnected
+              ? t('catalog.magazine.allShelfSubtitleHousehold')
+              : t('catalog.magazine.allShelfSubtitle')}
           </p>
+          {householdStatus === 'paused' && (
+            <p className="text-[11px] text-rose-600 dark:text-rose-400 font-medium mt-1">
+              {t('household.pausedBanner.catalogNote')}
+            </p>
+          )}
         </div>
         <button
           type="button"

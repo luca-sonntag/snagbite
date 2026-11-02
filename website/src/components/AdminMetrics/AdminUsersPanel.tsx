@@ -116,12 +116,10 @@ export function AdminUsersPanel({ isDe, users }: AdminUsersPanelProps) {
           ) : (
             <div className="flex flex-col gap-2.5">
               {filteredUsers.map((user) => {
-                const tierColor =
-                  user.tier === 'premium'
-                    ? 'bg-emerald-500/10 text-emerald-600'
-                    : user.tier === 'alpha'
-                      ? 'bg-amber-500/10 text-amber-600'
-                      : 'bg-gray-100 text-gray-600';
+                const isPremium = user.tier === 'premium';
+                const tierColor = isPremium
+                  ? 'bg-emerald-500/10 text-emerald-600'
+                  : 'bg-gray-100 text-gray-600';
 
                 return (
                   <div
@@ -130,11 +128,9 @@ export function AdminUsersPanel({ isDe, users }: AdminUsersPanelProps) {
                   >
                     <div
                       className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-sm shrink-0 border-none shadow-[0_1px_3px_rgba(0,0,0,0.02)] ${
-                        user.tier === 'premium'
+                        isPremium
                           ? 'bg-emerald-500/10 text-emerald-600'
-                          : user.tier === 'alpha'
-                            ? 'bg-amber-500/10 text-amber-600'
-                            : 'bg-gray-200/70 text-gray-700'
+                          : 'bg-gray-200/70 text-gray-700'
                       }`}
                     >
                       {user.email ? user.email.charAt(0).toUpperCase() : '?'}

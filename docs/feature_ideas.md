@@ -86,7 +86,7 @@
 - [x] extraction animation soll keine technischen schritte des erstellungsprozesses preisgeben, zb. cover image generieren oder video herunterladen, nichts davon soll der user sehen
 - [x] text in cooking mode soll mehr abstand innerhalb haben (behoben: Zeilenabstand auf leading-[1.8] erhöht, Innenabstand py-3.5 und Chip-Padding optimiert)
 
-![picture 0](../images/471caba0ddc884b4bc8bf0c61118e1f21d88a4f110980a04fd70820afead89df.png)
+![picture 0](./images/feature-ideas/471caba0ddc884b4bc8bf0c61118e1f21d88a4f110980a04fd70820afead89df.png)
 
 
 ## Findings
@@ -95,7 +95,7 @@
     - "Rezept ansehen" button nicht bei allen öffentlichen rezepten anzeigen, wiederholung
     - Rezept preview overlay etwas schmäler machen
 
-![picture 11](../images/8ac24aaa909f03719f5b4e1755b1bf468f420e5d3f6f3220cca1cb2a02fb33d5.png)
+![picture 11](./images/feature-ideas/8ac24aaa909f03719f5b4e1755b1bf468f420e5d3f6f3220cca1cb2a02fb33d5.png)
 
 - Wochenplaner
     - ich möchte keinen leeren screen wenn ich auf einen tag bin wo kein rezept geplant ist, grundsätzlich möchte ich immer alle zukünftig geplanten rezepte auf einen blick immer sichtbar haben.

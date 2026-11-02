@@ -44,7 +44,7 @@ export default function InstructionStepsList({
   }, [autoScrollActive, activeStepNum]);
 
   const railColumn = isLarge
-    ? 'w-6 sm:w-6.5 flex-shrink-0 flex flex-col items-center'
+    ? 'w-7 sm:w-8 flex-shrink-0 flex flex-col items-center'
     : 'w-9 flex-shrink-0 flex flex-col items-center';
   const railBase = 'w-px shrink-0 transition-colors duration-300';
   const railTone = (done: boolean) => (done ? 'bg-emerald-500/45' : 'bg-black/[0.08] dark:bg-white/10');
@@ -93,7 +93,7 @@ export default function InstructionStepsList({
               }}
               aria-pressed={isChecked}
               className={`flex items-stretch ${
-                isLarge ? 'gap-2.5 sm:gap-3 px-1' : 'gap-3.5 px-1.5'
+                isLarge ? 'gap-3 sm:gap-4 px-1' : 'gap-3.5 px-1.5'
               } rounded-2xl cursor-pointer transition-all duration-200 active:scale-[0.99] ${
                 isActive
                   ? 'bg-emerald-500/[0.08] dark:bg-emerald-500/[0.12]'
@@ -104,13 +104,13 @@ export default function InstructionStepsList({
               <div className={railColumn}>
                 <div
                   className={`${railBase} ${
-                    showSectionDivider ? 'h-2' : (isLarge ? 'h-4' : 'h-4')
+                    showSectionDivider ? 'h-2' : 'h-4'
                   } ${isFirst && !showSectionDivider ? 'invisible' : railTone(prevChecked)}`}
                 />
 
                 <div
                   className={`${
-                    isLarge ? 'w-6 h-6 text-xs' : 'w-7.5 h-7.5 text-xs'
+                    isLarge ? 'w-7 h-7 sm:w-8 sm:h-8 text-xs sm:text-sm' : 'w-7.5 h-7.5 text-xs'
                   } rounded-full flex items-center justify-center shrink-0 transition-all duration-200 ${
                     isChecked
                       ? 'bg-emerald-500 text-white shadow-xs'
@@ -120,7 +120,7 @@ export default function InstructionStepsList({
                   }`}
                 >
                   {isChecked ? (
-                    <Check className={isLarge ? 'w-3.5 h-3.5 stroke-[2.5]' : 'w-4 h-4 stroke-[2.5]'} />
+                    <Check className={isLarge ? 'w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2.5]' : 'w-4 h-4 stroke-[2.5]'} />
                   ) : (
                     <span className="font-bold tabular-nums">{step.step}</span>
                   )}
@@ -149,7 +149,7 @@ export default function InstructionStepsList({
                   {isActive && (
                     <span
                       className={`${
-                        isLarge ? 'text-xs sm:text-sm' : 'text-xs'
+                        isLarge ? 'text-sm sm:text-base' : 'text-xs'
                       } font-bold text-emerald-600 dark:text-emerald-400`}
                     >
                       {t('recipe.currentStep')}
@@ -158,7 +158,7 @@ export default function InstructionStepsList({
                   {currentSection && !isActive && !showSectionDivider && (
                     <span
                       className={`${
-                        isLarge ? 'text-xs sm:text-sm' : 'text-[11px]'
+                        isLarge ? 'text-sm sm:text-base' : 'text-[11px]'
                       } font-semibold text-gray-400 dark:text-gray-500`}
                     >
                       {currentSection}
@@ -168,7 +168,7 @@ export default function InstructionStepsList({
 
                 <span
                   className={`block select-none transition-colors ${
-                    isLarge ? 'text-lg sm:text-xl leading-[1.75]' : 'text-sm leading-relaxed'
+                    isLarge ? 'text-xl sm:text-2xl leading-[1.8]' : 'text-sm leading-relaxed'
                   } ${
                     isChecked
                       ? 'text-gray-400 dark:text-gray-500 line-through decoration-gray-300 dark:decoration-gray-600'
@@ -185,11 +185,11 @@ export default function InstructionStepsList({
 
                 {step.parallelPrepHint && !isChecked && (
                   <div
-                    className={`mt-3 pl-3 py-1.5 border-l-2 border-emerald-500/50 text-gray-700 dark:text-gray-300 flex items-start gap-2.5 ${
-                      isLarge ? 'text-sm sm:text-base' : 'text-xs'
+                    className={`mt-3 pl-3.5 py-2 border-l-2 border-emerald-500/50 text-gray-700 dark:text-gray-300 flex items-start gap-2.5 ${
+                      isLarge ? 'text-base sm:text-lg' : 'text-xs'
                     } font-medium leading-relaxed bg-black/[0.015] dark:bg-white/[0.02] rounded-r-xl`}
                   >
-                    <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                    <Sparkles className={isLarge ? 'w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5' : 'w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5'} />
                     <div className="flex-1 min-w-0">
                       <RecipeInstructionText
                         text={step.parallelPrepHint}
@@ -209,7 +209,7 @@ export default function InstructionStepsList({
       {recipe.tips && recipe.tips.length > 0 && (
         <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-black/[0.06] dark:border-white/[0.08] animate-fade-in">
           <div className="flex items-center justify-between gap-3">
-            <h3 className={`${isLarge ? 'text-lg' : 'text-base'} font-bold text-gray-900 dark:text-white`}>
+            <h3 className={`${isLarge ? 'text-xl sm:text-2xl' : 'text-base'} font-bold text-gray-900 dark:text-white`}>
               {t('recipe.tipsTitle')}
             </h3>
             <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 rounded-full px-2.5 py-1 tabular-nums select-none">
@@ -220,12 +220,12 @@ export default function InstructionStepsList({
           <div className="flex flex-col divide-y divide-black/[0.06] dark:divide-white/[0.08]">
             {recipe.tips.map((tip, idx) => (
               <div key={idx} className="py-3 px-0.5 flex items-start gap-3 transition-all">
-                <span className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 text-xs font-bold tabular-nums mt-0.5">
+                <span className={`${isLarge ? 'w-6 h-6 text-sm' : 'w-5 h-5 text-xs'} rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 font-bold tabular-nums mt-0.5`}>
                   {idx + 1}
                 </span>
                 <div
                   className={`${
-                    isLarge ? 'text-base sm:text-lg leading-relaxed' : 'text-xs sm:text-sm'
+                    isLarge ? 'text-lg sm:text-xl leading-relaxed' : 'text-xs sm:text-sm'
                   } text-gray-700 dark:text-gray-300 leading-relaxed min-w-0 flex-1`}
                 >
                   <RecipeInstructionText text={tip} recipe={recipe} formatAmount={formatAmount} />

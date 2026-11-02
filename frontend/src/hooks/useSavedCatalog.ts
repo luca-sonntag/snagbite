@@ -22,6 +22,7 @@ export interface CatalogFilterState {
   categories: RecipeCategory[];
   collectionIds: string[];
   flags: string[];
+  partnerOnly?: boolean;
 }
 
 export const EMPTY_FILTERS: CatalogFilterState = {
@@ -31,7 +32,8 @@ export const EMPTY_FILTERS: CatalogFilterState = {
   minHealthScore: 0,
   categories: [],
   collectionIds: [],
-  flags: []
+  flags: [],
+  partnerOnly: false
 };
 
 export const TIME_FILTER_OPTIONS = [15, 30, 60] as const;
@@ -62,7 +64,8 @@ export function countActiveFilters(filters: CatalogFilterState): number {
     ((filters.minHealthScore ?? 0) > 0 ? 1 : 0) +
     (filters.categories?.length ?? 0) +
     filters.collectionIds.length +
-    filters.flags.length
+    filters.flags.length +
+    (filters.partnerOnly ? 1 : 0)
   );
 }
 
@@ -304,6 +307,8 @@ export function useSavedCatalog({
       if (!matchesSearch(job, query)) return false;
 
       if (facets.favoritesOnly && job.isFavorite !== true) return false;
+
+      if (facets.partnerOnly && job.source !== 'household') return false;
 
       if (facets.recommendedOnly && !recommendedJobIds.has(job.recipeId)) return false;
 

@@ -36,7 +36,6 @@ import { useExtractionJobs } from './context/ExtractionJobsContext';
 import { useMobileNavigationBack } from './hooks/useMobileNavigationBack';
 import { useTimerManager } from './hooks/useTimerManager';
 import { useOnboarding } from './hooks/useOnboarding';
-import { useAlphaWelcome } from './hooks/useAlphaWelcome';
 import { useAppHistory } from './hooks/useAppHistory';
 import { useAppAds } from './hooks/useAppAds';
 import { useAppNativeListeners } from './hooks/useAppNativeListeners';
@@ -56,7 +55,7 @@ function ViewFallback() {
 }
 
 export default function App() {
-  const { user, isPremium, loading: authLoading, getAccessToken } = useAuth();
+  const { user, isPremium, requiresExtractionAds, loading: authLoading, getAccessToken } = useAuth();
   const toast = useToast();
   const { language } = useI18n();
   const { snapshot: gamificationSnapshot } = useGamification();
@@ -76,6 +75,12 @@ export default function App() {
     }
   }, [activeView, subPath, navigate]);
 
+  useEffect(() => {
+    if (activeView === 'household-invite') {
+      navigate('settings');
+    }
+  }, [activeView, navigate]);
+
   const [isCatalogSelectMode, setIsCatalogSelectMode] = useState(false);
   const [isCatalogSheetOpen, setIsCatalogSheetOpen] = useState(false);
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
@@ -87,7 +92,6 @@ export default function App() {
   }, [activeView]);
 
   const { shouldShow: showOnboarding, complete: completeOnboarding, replay: replayOnboarding } = useOnboarding();
-  const { shouldShow: showAlphaWelcome, complete: completeAlphaWelcome } = useAlphaWelcome();
 
   const isCatalogList = activeView === 'history' && isCatalogListRoute(subPath);
 
@@ -239,7 +243,9 @@ export default function App() {
     user,
     authLoading,
     isPremium,
+    requiresExtractionAds,
     isPending,
+    progress,
     recipe,
     showOnboarding,
     savedRecipesCount: history.length,
@@ -677,8 +683,6 @@ export default function App() {
           completeOnboarding();
           navigate('extract');
         }}
-        showAlphaWelcome={showAlphaWelcome}
-        onCompleteAlphaWelcome={completeAlphaWelcome}
         limitStatus={limitStatus}
         onAnalyzeUrl={(queueUrl) => {
           navigate('extract');

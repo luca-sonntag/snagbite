@@ -19,10 +19,22 @@ const configuredOrigins = (process.env.CORS_ORIGIN || '')
   .filter(Boolean);
 
 const isProduction = process.env.NODE_ENV === 'production';
+const isRailway = Boolean(
+  process.env.RAILWAY_ENVIRONMENT_NAME ||
+  process.env.RAILWAY_PROJECT_ID ||
+  process.env.RAILWAY_SERVICE_ID
+);
 const rawAppUrl = process.env.APP_URL || 'http://localhost:3000';
-// In local development, never force Better-Auth's baseURL or OAuth callbacks to the live domain
+// In local development (outside Railway cloud containers), never force Better-Auth's
+// baseURL or OAuth callbacks to remote domains (snagbite.app, railway.app, or any https URL).
+// Local dev must always use localhost so Google OAuth redirects to the local server.
+const isRemoteUrl =
+  rawAppUrl.startsWith('https://') ||
+  rawAppUrl.includes('snagbite.app') ||
+  rawAppUrl.includes('railway.app');
+
 const appUrl =
-  !isProduction && rawAppUrl.includes('snagbite.app')
+  !isProduction && !isRailway && isRemoteUrl
     ? `http://localhost:${process.env.PORT || 3000}`
     : rawAppUrl;
 const isSnagbiteDomain = isProduction && appUrl.includes('snagbite.app');
