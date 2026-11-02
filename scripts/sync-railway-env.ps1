@@ -135,6 +135,7 @@ if ($target -eq 'prod') {
     }
     if (-not $envMap.Contains('NODE_ENV')) { $envMap['NODE_ENV'] = 'development' }
 }
+if (-not $envMap.Contains('PORT')) { $envMap['PORT'] = '3000' }
 
 # 3. Inlining local JSON credential files
 if ($envMap.Contains('FCM_SERVICE_ACCOUNT_JSON')) {
