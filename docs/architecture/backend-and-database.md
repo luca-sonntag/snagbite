@@ -331,6 +331,7 @@ Der Haushalt-Modus ermöglicht es zwei Nutzern, einen 1:1 gemeinsamen Haushalt z
 
 ### 3. Monetarisierungs- & Quota-Architektur
 * **1 Abo für beide:** Hat einer der beiden Partner `premium` (oder läuft die 48h Testphase), gilt für beide `hasHouseholdPro: true`. Beide erhalten unbegrenzte Rezepte, Wochenplaner, Einkaufsliste, Nährwerte und Kochmodus.
+* **PRO-Schutz & Nudge-Guard:** Wenn einer der Partner bezahltes PRO besitzt (`hasPaidPro: true`), blockiert `recordHouseholdNudge` serverseitig Nudges mit `HOUSEHOLD_ALREADY_PRO` (400), da das gemeinsame Abo bereits aktiv ist.
 * **Werbe-Finanzierung für Partner B:** Der nicht-zahlende Partner hat `requires_extraction_ads: true`. Dadurch werden bei Rezept-Extraktionen Fullscreen-Interstitial- und MREC-Banner ausgespielt, um die LLM-Extraktionskosten zu refinanzieren. App-Open Ads bleiben bei aktiver App deaktiviert.
 * **Copilot Chat-Limit:** Partner B unterliegt einem Tageslimit von 10 Chat-Nachrichten pro Tag (konfigurierbar in `global_settings`).
 

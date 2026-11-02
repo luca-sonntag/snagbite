@@ -14,6 +14,7 @@ export interface HouseholdContextData {
   isTrialActive: boolean;
   trialEndsAt: string | null;
   hasHouseholdPro: boolean;
+  hasPaidPro: boolean;
   isPauseLocked: boolean;
   requiresExtractionAds: boolean;
   inviteCode: string | null;

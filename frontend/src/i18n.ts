@@ -1111,6 +1111,7 @@ export const uiTranslations = {
         ALREADY_IN_HOUSEHOLD: 'Du bist bereits mit einem Haushalt verknüpft. Bitte trenne zuerst den bestehenden Haushalt.',
         HOUSEHOLD_COOLDOWN: 'Du kannst einem neuen Haushalt erst wieder nach Ablauf der Schutzfrist beitreten.',
         HOUSEHOLD_COOLDOWN_DATE: 'Du kannst einem neuen Haushalt erst wieder ab dem {date} beitreten.',
+        HOUSEHOLD_ALREADY_PRO: 'Dein Haushalt nutzt bereits Snagbite PRO.',
         NUDGE_RATE_LIMITED: 'Du hast deinen Partner heute bereits angestupst.',
         INTERNAL_ERROR: 'Ein interner Serverfehler ist aufgetreten. Bitte versuche es später erneut.',
       },
@@ -2207,6 +2208,10 @@ export const uiTranslations = {
         title: 'Haushalts-Wechselsperre aktiv',
         desc: 'Nach dem Trennen eines Haushalts kannst du erst ab dem {date} einen neuen Haushalt erstellen oder einem beitreten.',
       },
+      pro: {
+        activeTitle: 'Snagbite PRO aktiv',
+        activeDesc: 'Euer Haushalt nutzt alle PRO-Vorteile gemeinsam.',
+      },
       trial: {
         activeTitle: '7 Tage Testphase aktiv',
         activeDesc: 'Ihr nutzt alle Snagbite PRO Features gemeinsam.',
@@ -2921,6 +2926,7 @@ export const uiTranslations = {
         ALREADY_IN_HOUSEHOLD: 'You are already linked to a household. Please unlink first.',
         HOUSEHOLD_COOLDOWN: 'You can only join a new household after the cooldown expires.',
         HOUSEHOLD_COOLDOWN_DATE: 'You can create or join a new household starting {date}.',
+        HOUSEHOLD_ALREADY_PRO: 'Your household already has Snagbite PRO.',
         NUDGE_RATE_LIMITED: 'You have already nudged your partner today.',
         INTERNAL_ERROR: 'An internal server error occurred. Please try again later.',
       },
@@ -4016,6 +4022,10 @@ export const uiTranslations = {
       cooldown: {
         title: 'Household cooldown active',
         desc: 'After unlinking, you can create or join a new household starting {date}.',
+      },
+      pro: {
+        activeTitle: 'Snagbite PRO active',
+        activeDesc: 'Your household shares all PRO features together.',
       },
       trial: {
         activeTitle: '7-day trial active',

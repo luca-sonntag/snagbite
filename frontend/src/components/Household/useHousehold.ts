@@ -117,6 +117,7 @@ export function useHousehold(): HouseholdState {
     isTrialActive: Boolean(household?.isTrialActive),
     trialEndsAt: household?.trialEndsAt ?? null,
     hasHouseholdPro: Boolean(household?.hasHouseholdPro),
+    hasPaidPro: Boolean(household?.hasPaidPro ?? (household?.hasHouseholdPro && !household?.isTrialActive)),
     isPauseLocked: Boolean(household?.isPauseLocked),
     requiresExtractionAds: Boolean(household?.requiresExtractionAds),
     inviteCode: household?.inviteCode ?? null,
