@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Select, ListBox, Popover } from '@heroui/react';
-import { LogOut, Globe, Moon, Sun, Thermometer, Scale, Info, UserMinus, Sparkles, ChevronRight, HelpCircle, MessageSquare, Shield, ScrollText, Building2, ExternalLink, RefreshCw, Compass, Users } from 'lucide-react';
+import { LogOut, Globe, Moon, Sun, Thermometer, Scale, Info, UserMinus, Sparkles, ChevronRight, HelpCircle, MessageSquare, Shield, ScrollText, Building2, ExternalLink, RefreshCw, Compass, Users, Package } from 'lucide-react';
 import { HouseholdSheet } from './Household';
 import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +10,7 @@ import { hapticLight, hapticMedium, hapticHeavy } from '../utils/haptics';
 import { isNative } from '../native';
 
 import { useTheme } from '../hooks/useTheme';
+import { useShoppingPreferences } from '../hooks/useShoppingPreferences';
 import { useDialog } from '../context/DialogContext';
 import PremiumModal from './PremiumModal';
 import ProBadge from './ProBadge';
@@ -21,6 +22,7 @@ import { LEGAL_URLS } from '../legal';
 import PremiumUpgradeCard from './PremiumUpgradeCard';
 import NotificationSettings from './NotificationSettings';
 import AdminSettingsSection from './AdminSettingsSection';
+import { SettingsToggle } from './AdminSettingsToggle';
 
 // Unit system is not yet ready to be user-configurable; keep the setting UI in place but hidden for now.
 const SHOW_UNIT_SYSTEM_SETTING = false;
@@ -61,6 +63,7 @@ export default function SettingsView() {
   const toast = useToast();
   const { resetAllTours } = useSpotlightTourContext();
   const [theme, setTheme] = useTheme();
+  const { showPackageRecommendations, togglePackageRecommendations } = useShoppingPreferences();
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
@@ -408,6 +411,26 @@ export default function SettingsView() {
                 Dark
               </button>
             </div>
+          </div>
+
+          {/* Shopping Package Recommendations Option */}
+          <div className="p-4 flex items-center justify-between gap-3 border-t border-black/5 dark:border-white/5">
+            <div className="flex items-center gap-3 min-w-0 flex-1 pr-3">
+              <Package className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" />
+              <div>
+                <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                  {t('app.settings.shoppingPackageRecommendations')}
+                </p>
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-medium">
+                  {t('app.settings.shoppingPackageRecommendationsDesc')}
+                </p>
+              </div>
+            </div>
+            <SettingsToggle
+              on={showPackageRecommendations}
+              onClick={togglePackageRecommendations}
+              label={t('app.settings.shoppingPackageRecommendations')}
+            />
           </div>
 
         </div>

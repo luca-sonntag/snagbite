@@ -27,6 +27,7 @@ export const ingredientMappings = pgTable(
     hitCount: integer('hit_count').notNull().default(0),
     typicalPackageAmount: numeric('typical_package_amount'),
     typicalPackageUnit: text('typical_package_unit'),
+    packagingType: text('packaging_type'),
     shelfLifeDays: integer('shelf_life_days'),
     mappingKeyDe: text('mapping_key_de'),
     aliases: text('aliases').array().default(sql`'{}'::text[]`),

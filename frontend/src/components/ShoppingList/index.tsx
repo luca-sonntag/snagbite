@@ -7,7 +7,10 @@ import { ShoppingListView } from './ShoppingListView';
 import { ShoppingStickyHeader } from './ShoppingStickyHeader';
 import { useShoppingSticky } from './useShoppingSticky';
 import { useState } from 'react';
+import { Package } from 'lucide-react';
 import { useSpotlightTour } from '../../hooks/useSpotlightTour';
+import { useShoppingPreferences } from '../../hooks/useShoppingPreferences';
+import { hapticLight } from '../../utils/haptics';
 import { HouseholdInviteBanner, HouseholdPausedBanner, HouseholdSheet } from '../Household';
 import PremiumModal from '../PremiumModal';
 
@@ -47,6 +50,7 @@ export default function ShoppingList(props: ShoppingListProps) {
   const dialog = useDialog();
   const toast = useToast();
   const { isCollapsed, setCollapseSentinel } = useShoppingSticky(props.isActive ?? true);
+  const { showPackageRecommendations, togglePackageRecommendations } = useShoppingPreferences();
   const [isHouseholdOpen, setIsHouseholdOpen] = useState(false);
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
 
@@ -105,10 +109,40 @@ export default function ShoppingList(props: ShoppingListProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Top Page Header with Title */}
+      {/* Top Page Header with Title & Package Preference Toggle */}
       <PageHeader
         title={t('shopping.title')}
         subtitle={t('shopping.subtitle')}
+        action={
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              hapticLight();
+              togglePackageRecommendations();
+            }}
+            aria-label={t('shopping.togglePackageRecommendation')}
+            title={
+              showPackageRecommendations
+                ? t('shopping.packageRecommendationActive')
+                : t('shopping.packageRecommendationInactive')
+            }
+            className={`inline-flex items-center gap-2 px-3.5 py-2 min-h-[44px] rounded-xl text-xs font-semibold transition-all cursor-pointer border-none shadow-xs active:scale-95 select-none touch-manipulation ${
+              showPackageRecommendations
+                ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 dark:bg-emerald-500/20 hover:bg-emerald-500/25'
+                : 'bg-black/5 text-gray-500 dark:bg-white/10 dark:text-gray-400 hover:bg-black/10 dark:hover:bg-white/15'
+            }`}
+          >
+            <Package className="w-4 h-4 shrink-0" />
+            <span>{t('shopping.packageSizes')}</span>
+            <span
+              className={`w-2 h-2 rounded-full transition-colors shrink-0 ${
+                showPackageRecommendations ? 'bg-emerald-500' : 'bg-gray-400 dark:bg-gray-500'
+              }`}
+            />
+          </button>
+        }
       />
 
       {/* Sticky Header with Progress */}
@@ -134,6 +168,7 @@ export default function ShoppingList(props: ShoppingListProps) {
 
       <ShoppingListView
         {...props}
+        showPackageRecommendations={showPackageRecommendations}
         setCollapseSentinel={setCollapseSentinel}
       />
       <HouseholdSheet

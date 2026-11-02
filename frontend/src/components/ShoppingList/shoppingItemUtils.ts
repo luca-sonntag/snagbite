@@ -1,7 +1,17 @@
 import type { AggregatedShoppingItem, PantryItem, ParentIngredientInfo, ShoppingListItem } from '../../types';
 import { normalizeFoodBaseKey, normalizeUnit } from '../../utils/ingredientTaxonomy';
 import { formatQuantity } from '../../utils/formatQuantity';
-import { isPantryStockSufficient, getPantryStockStatus, type PantryStockStatus } from '@cookbook/shared';
+import {
+  isPantryStockSufficient,
+  getPantryStockStatus,
+  convertToBaseMetric,
+  isPackageUnitAppropriate,
+  isContainerUnit,
+  normalizeUnit as normalizeCanonicalUnit,
+  type PantryStockStatus,
+  type PackagingType,
+} from '@cookbook/shared';
+import { formatPackagingLabel, type SupportedLanguage } from '../../i18n';
 
 export interface PantryMatchableItem {
   name: string;
@@ -68,9 +78,14 @@ export function getPackageRecommendation(
   amount: number,
   unit: string,
   pkgAmount?: number | null,
-  pkgUnit?: string | null
+  pkgUnit?: string | null,
+  packagingType?: PackagingType | null,
+  lang: SupportedLanguage = 'de'
 ): string | null {
-  if (!pkgAmount || pkgAmount <= 0) return null;
+  if (!pkgAmount || pkgAmount <= 0 || amount <= 0) return null;
+  // Loose produce never gets an artificial package recommendation
+  if (packagingType === 'loose') return null;
+
   const cleanUnit = (unit || '').toLowerCase().trim();
   const cleanPkgUnit = (pkgUnit || '').toLowerCase().trim();
 
@@ -79,29 +94,63 @@ export function getPackageRecommendation(
     return null;
   }
 
-  if (cleanUnit === cleanPkgUnit && amount > 0) {
-    if (amount <= pkgAmount) {
-      return `1 Pkg. (${pkgAmount} ${pkgUnit})`;
-    }
-    const count = Math.ceil(amount / pkgAmount);
-    return `${count} Pkg. (${count * pkgAmount} ${pkgUnit})`;
+  // Physical dimension guard from central shared matrix
+  if (cleanPkgUnit && !isPackageUnitAppropriate(cleanUnit, cleanPkgUnit)) {
+    return null;
   }
 
-  const containerName =
-    cleanPkgUnit === 'glas' || cleanPkgUnit === 'jar'
-      ? '1 Glas'
-      : cleanPkgUnit === 'dose' || cleanPkgUnit === 'can'
-      ? '1 Dose'
-      : cleanPkgUnit === 'flasche' || cleanPkgUnit === 'bottle'
-      ? '1 Flasche'
-      : cleanPkgUnit === 'becher' || cleanPkgUnit === 'cup'
-      ? '1 Becher'
-      : cleanPkgUnit === 'bund' || cleanPkgUnit === 'bunch'
-      ? '1 Bund'
-      : '1 Pkg.';
+  const itemMetric = convertToBaseMetric(amount, cleanUnit);
+  const pkgMetric = convertToBaseMetric(pkgAmount, cleanPkgUnit);
 
-  const pkgUnitStr = pkgUnit ? ` (${pkgAmount} ${pkgUnit})` : ` (${pkgAmount})`;
-  return `${containerName}${pkgUnitStr}`;
+  // Exact match in base metric (e.g. 1000 g vs 1 kg) -> redundant
+  if (
+    itemMetric &&
+    pkgMetric &&
+    itemMetric.type === pkgMetric.type &&
+    Math.abs(itemMetric.value - pkgMetric.value) < 0.001
+  ) {
+    return null;
+  }
+
+  const isContainer = isContainerUnit(unit);
+
+  // Fresh produce single piece guard: If someone needs only 1-2 pieces of fresh loose produce (e.g. 1 Stück Apfel, 1 Stück Zitrone),
+  // they buy loose fruit from the crate, not a 1 kg bulk bag / sack!
+  // Container units (e.g. "Dose", "Glas", "Flasche", "Becher") are manufactured packages, NOT loose produce.
+  if (!isContainer && itemMetric?.type === 'count' && pkgMetric?.type === 'mass' && amount <= 2) {
+    return null;
+  }
+
+  let count = 1;
+  let totalPkgAmount = pkgAmount;
+
+  if (isContainer) {
+    // When the recipe unit is already a container (e.g. 0.5 Dose, 1.5 Dosen):
+    // Shoppers must buy whole containers in the supermarket (ceil)
+    count = Math.max(1, Math.ceil(amount));
+    totalPkgAmount = count * pkgAmount;
+  } else if (itemMetric && pkgMetric && itemMetric.type === pkgMetric.type) {
+    count = Math.max(1, Math.ceil(itemMetric.value / pkgMetric.value));
+    totalPkgAmount = count * pkgAmount;
+  } else if (cleanUnit === cleanPkgUnit && amount > 0) {
+    count = Math.max(1, Math.ceil(amount / pkgAmount));
+    totalPkgAmount = count * pkgAmount;
+  }
+
+  // Determine structured packaging type without string heuristics
+  let effectivePackagingType: PackagingType = packagingType || 'pack';
+  if (isContainer) {
+    const norm = normalizeCanonicalUnit(unit);
+    if (norm === 'can') effectivePackagingType = 'can';
+    else if (norm === 'jar') effectivePackagingType = 'jar';
+    else if (norm === 'bottle') effectivePackagingType = 'bottle';
+    else if (norm === 'cup') effectivePackagingType = 'tub';
+    else if (norm === 'bunch') effectivePackagingType = 'bunch';
+  }
+
+  const containerLabel = formatPackagingLabel(effectivePackagingType, count, lang);
+  const pkgUnitStr = pkgUnit ? ` (${totalPkgAmount} ${pkgUnit})` : ` (${totalPkgAmount})`;
+  return `${containerLabel}${pkgUnitStr}`;
 }
 
 export function extractExtraNote(

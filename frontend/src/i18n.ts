@@ -4,6 +4,7 @@ import {
   isKnownErrorCode,
   parseSerializedError,
 } from './errorCodes';
+import type { PackagingType } from '@cookbook/shared';
 import { type RecipeCategory, RECIPE_CATEGORIES } from './types';
 export { RECIPE_CATEGORIES };
 
@@ -105,6 +106,46 @@ export const recipeCategoryEmojis: Record<RecipeCategory, string> = {
   BAKING: '🥖',
   OTHER: '🍽️',
 };
+
+export const packagingTranslations: Record<
+  SupportedLanguage,
+  Record<PackagingType, { singular: string; plural: string }>
+> = {
+  de: {
+    piece: { singular: 'Stück', plural: 'Stück' },
+    can: { singular: 'Dose', plural: 'Dosen' },
+    jar: { singular: 'Glas', plural: 'Gläser' },
+    bottle: { singular: 'Flasche', plural: 'Flaschen' },
+    tub: { singular: 'Becher', plural: 'Becher' },
+    pack: { singular: 'Pkg.', plural: 'Pkg.' },
+    bag: { singular: 'Beutel', plural: 'Beutel' },
+    box: { singular: 'Schachtel', plural: 'Schachteln' },
+    bunch: { singular: 'Bund', plural: 'Bünde' },
+    loose: { singular: '', plural: '' },
+  },
+  en: {
+    piece: { singular: 'pc.', plural: 'pcs.' },
+    can: { singular: 'can', plural: 'cans' },
+    jar: { singular: 'jar', plural: 'jars' },
+    bottle: { singular: 'bottle', plural: 'bottles' },
+    tub: { singular: 'tub', plural: 'tubs' },
+    pack: { singular: 'pack', plural: 'packs' },
+    bag: { singular: 'bag', plural: 'bags' },
+    box: { singular: 'box', plural: 'boxes' },
+    bunch: { singular: 'bunch', plural: 'bunches' },
+    loose: { singular: '', plural: '' },
+  },
+};
+
+export function formatPackagingLabel(
+  type: PackagingType,
+  count: number,
+  language: SupportedLanguage = 'de'
+): string {
+  const t = packagingTranslations[language]?.[type] ?? packagingTranslations.de[type] ?? packagingTranslations.de.pack;
+  const label = count > 1 ? t.plural : t.singular;
+  return `${count} ${label}`.trim();
+}
 
 export function getRecipeCategoryLabel(
   category: RecipeCategory | string | undefined | null,
@@ -835,6 +876,8 @@ export const uiTranslations = {
         unitSystemMetric: 'Metrisch (g, ml, kg)',
         unitSystemImperial: 'Imperial (oz, cups, lbs)',
         settingInfoTooltip: 'Diese Einstellung wirkt sich nur auf neu erstellte Rezepte aus.',
+        shoppingPackageRecommendations: 'Packungsgrößen auf der Einkaufsliste',
+        shoppingPackageRecommendationsDesc: 'Zeigt typische Kaufpackungen als Empfehlung (z.B. Kauf: 1 Pkg. 500 g).',
         saving: 'Speichern...',
         saved: 'Einstellungen gespeichert!',
         deleteAccount: 'Konto löschen',
@@ -1705,6 +1748,11 @@ export const uiTranslations = {
       manual: 'Manuell',
       deleteItem: 'Eintrag löschen',
       recipeNeed: '{amount}',
+      buyRecommendation: 'Kauf: {package}',
+      packageSizes: 'Packungen',
+      togglePackageRecommendation: 'Empfohlene Packungsgrößen ein- oder ausblenden',
+      packageRecommendationActive: 'Packungsempfehlungen aktiv',
+      packageRecommendationInactive: 'Nur Rezeptmengen anzeigen',
       recipeCount: '{count} Rezepte',
       recipesSectionTitle: 'Rezepte auf der Liste',
       recipesCount: '{count} Rezepte',
@@ -2638,6 +2686,8 @@ export const uiTranslations = {
         unitSystemMetric: 'Metric (g, ml, kg)',
         unitSystemImperial: 'Imperial (oz, cups, lbs)',
         settingInfoTooltip: 'This setting only affects newly created recipes.',
+        shoppingPackageRecommendations: 'Package sizes on shopping list',
+        shoppingPackageRecommendationsDesc: 'Shows typical retail packages as recommendations (e.g. Buy: 1 pkg. 500 g).',
         saving: 'Saving...',
         saved: 'Settings saved!',
         deleteAccount: 'Delete Account',
@@ -3507,6 +3557,11 @@ export const uiTranslations = {
       manual: 'Manual',
       deleteItem: 'Delete item',
       recipeNeed: '{amount}',
+      buyRecommendation: 'Buy: {package}',
+      packageSizes: 'Packages',
+      togglePackageRecommendation: 'Toggle package size recommendations',
+      packageRecommendationActive: 'Package recommendations active',
+      packageRecommendationInactive: 'Exact recipe amounts only',
       recipeCount: '{count} recipes',
       recipesSectionTitle: 'Recipes on list',
       recipesCount: '{count} recipes',

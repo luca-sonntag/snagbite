@@ -1,5 +1,4 @@
-import type { Recipe } from './recipes.js';
-import type { ParentIngredientInfo } from './recipes.js';
+import type { Recipe, ParentIngredientInfo, PackagingType } from './recipes.js';
 
 export type UserRecipeSource = 'extraction' | 'photo' | 'remix' | 'share' | 'household';
 
@@ -46,6 +45,7 @@ export interface ShoppingListItem {
   inPantryWarning?: boolean;
   typicalPackageAmount?: number | null;
   typicalPackageUnit?: string | null;
+  packagingType?: PackagingType | null;
 }
 
 export interface CreateShoppingListItemDto {
@@ -66,6 +66,7 @@ export interface CreateShoppingListItemDto {
   inPantryWarning?: boolean;
   typicalPackageAmount?: number | null;
   typicalPackageUnit?: string | null;
+  packagingType?: PackagingType | null;
 }
 
 export interface UpdateShoppingListItemDto {
@@ -82,6 +83,7 @@ export interface UpdateShoppingListItemDto {
   inPantryWarning?: boolean;
   typicalPackageAmount?: number | null;
   typicalPackageUnit?: string | null;
+  packagingType?: PackagingType | null;
 }
 
 export interface AggregatedShoppingItem {
@@ -99,6 +101,7 @@ export interface AggregatedShoppingItem {
   inPantryWarning?: boolean;
   typicalPackageAmount?: number | null;
   typicalPackageUnit?: string | null;
+  packagingType?: PackagingType | null;
   itemIds: string[];
   sources: { recipeId?: string; recipeTitle?: string; amount: number; unit: string }[];
   subItems?: {

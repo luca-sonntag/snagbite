@@ -4,34 +4,10 @@ import { useI18n } from '../context/I18nContext';
 import { useAuth } from '../context/AuthContext';
 import { enablePushNotifications, disablePushNotifications } from '../push';
 import { isNative } from '../native';
-import { hapticLight } from '../utils/haptics';
+import { SettingsToggle } from './AdminSettingsToggle';
 
 // The five opt-in groups. Ids match the backend NotificationCategory union.
 const CATEGORY_IDS = ['seasonal', 'reminders', 'timing', 'taste', 'motivation'] as const;
-
-function Toggle({ on, onClick, disabled, label }: { on: boolean; onClick: () => void; disabled?: boolean; label: string }) {
-  return (
-    <button
-      type="button"
-      onClick={() => {
-        hapticLight();
-        onClick();
-      }}
-      disabled={disabled}
-      aria-label={label}
-      aria-pressed={on}
-      className={`relative w-12 h-7 rounded-full transition-colors duration-200 focus:outline-none border-none shrink-0 disabled:opacity-50 disabled:pointer-events-none cursor-pointer flex items-center p-0.5 ${
-        on ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-700'
-      }`}
-    >
-      <span
-        className={`w-6 h-6 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-          on ? 'translate-x-5' : 'translate-x-0'
-        }`}
-      />
-    </button>
-  );
-}
 
 export default function NotificationSettings() {
   const { language } = useI18n();
@@ -97,7 +73,7 @@ export default function NotificationSettings() {
               </p>
             </div>
           </div>
-          <Toggle on={enabled} onClick={handleMasterToggle} disabled={busy} label="Toggle notifications" />
+          <SettingsToggle on={enabled} onClick={handleMasterToggle} disabled={busy} label="Toggle notifications" />
         </div>
       </div>
     </div>

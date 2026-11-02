@@ -35,6 +35,7 @@ export function normalizeUnit(unit?: string | null): string {
     return 'pack';
   if (['dose', 'dosen', 'can', 'cans', 'tin'].includes(u)) return 'can';
   if (['glas', 'gläser', 'glaeser', 'jar', 'jars'].includes(u)) return 'jar';
+  if (['flasche', 'flaschen', 'bottle', 'bottles'].includes(u)) return 'bottle';
   if (['becher', 'tub', 'tubs'].includes(u)) return 'cup';
   if (['tasse', 'tassen', 'cup', 'cups'].includes(u)) return 'cup';
   if (['bund', 'bunch', 'bunches'].includes(u)) return 'bunch';
@@ -51,6 +52,67 @@ export function normalizeUnit(unit?: string | null): string {
   if (['fl oz', 'fl. oz.', 'fluid ounce', 'fluid ounces', 'floz'].includes(u)) return 'fl_oz';
   if (['lb', 'lbs', 'pound', 'pounds', 'pfund'].includes(u)) return 'lb';
   return 'piece';
+}
+
+export type UnitDimension = 'mass' | 'volume' | 'count';
+
+/**
+ * Returns the physical SI dimension (mass, volume, count) for a culinary measurement unit.
+ */
+export function getUnitDimension(unit?: string | null): UnitDimension | null {
+  if (!unit) return null;
+  const canonical = normalizeUnit(unit);
+  if (['g', 'kg', 'mg', 'oz', 'lb'].includes(canonical)) return 'mass';
+  if (['ml', 'l', 'cl', 'dl', 'fl_oz', 'tablespoon', 'teaspoon', 'dash'].includes(canonical)) return 'volume';
+  if (
+    ['piece', 'slice', 'clove', 'leaf', 'head', 'stalk', 'bulb', 'sprig', 'pack', 'can', 'jar', 'bottle', 'cup', 'bunch'].includes(
+      canonical
+    )
+  ) {
+    return 'count';
+  }
+  return null;
+}
+
+/**
+ * Returns true if a unit denotes a manufactured/commercial container or package
+ * (can/Dose, jar/Glas, bottle/Flasche, tub/Becher, pack/Packung, bunch/Bund)
+ * as opposed to loose pieces (Stück/piece, clove/Zehe, slice/Scheibe).
+ */
+export function isContainerUnit(unit?: string | null): boolean {
+  if (!unit) return false;
+  const canonical = normalizeUnit(unit);
+  if (['can', 'jar', 'bottle', 'pack', 'cup', 'bunch'].includes(canonical)) return true;
+  const u = unit.toLowerCase().trim();
+  return ['dose', 'dosen', 'glas', 'gläser', 'glaeser', 'flasche', 'flaschen', 'becher', 'packung', 'pkg', 'bund'].includes(u);
+}
+
+/**
+ * Checks whether two units share the same dimension or can be culinarily approximated (mass <-> volume).
+ */
+export function areUnitsDimensionallyCompatible(unitA?: string | null, unitB?: string | null): boolean {
+  const dimA = getUnitDimension(unitA);
+  const dimB = getUnitDimension(unitB);
+  if (!dimA || !dimB) return true; // Defensive fallback
+  if (dimA === dimB) return true;
+  // Water-like density culinary equivalence (mass <-> volume)
+  if ((dimA === 'mass' && dimB === 'volume') || (dimA === 'volume' && dimB === 'mass')) return true;
+  return false;
+}
+
+/**
+ * Evaluates whether a package unit is physically appropriate for a recipe ingredient unit.
+ * Strictly prevents discrete pieces (count) from adopting liquid bottle volumes (volume), and vice-versa.
+ */
+export function isPackageUnitAppropriate(recipeUnit?: string | null, packageUnit?: string | null): boolean {
+  const recipeDim = getUnitDimension(recipeUnit);
+  const pkgDim = getUnitDimension(packageUnit);
+  if (!recipeDim || !pkgDim) return true;
+  // STRICT: Count (Stück, Scheibe, Zehe) must never receive liquid packaging (ml, l)
+  if (recipeDim === 'count' && pkgDim === 'volume') return false;
+  // Volume must never receive count packaging
+  if (recipeDim === 'volume' && pkgDim === 'count') return false;
+  return true;
 }
 
 /**
@@ -77,7 +139,7 @@ export function convertToBaseMetric(amount: number, unit?: string | null): { val
   if (canonical === 'teaspoon') return { value: amount * 5, type: 'volume' };
 
   // Count / pieces
-  if (['piece', 'slice', 'clove', 'leaf', 'head', 'stalk', 'bulb', 'sprig', 'pack', 'can', 'jar', 'cup', 'bunch'].includes(canonical)) {
+  if (['piece', 'slice', 'clove', 'leaf', 'head', 'stalk', 'bulb', 'sprig', 'pack', 'can', 'jar', 'bottle', 'cup', 'bunch'].includes(canonical)) {
     return { value: amount, type: 'count' };
   }
 
