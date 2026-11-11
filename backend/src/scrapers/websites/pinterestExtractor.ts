@@ -162,8 +162,9 @@ function collectPinImages(
     if (!candidate || typeof candidate !== 'string') return;
     const trimmed = candidate.trim();
     if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) return;
-    if (!seen.has(trimmed)) {
-      seen.add(trimmed);
+    const imageKey = trimmed.split('/').pop()?.split('?')[0] || trimmed;
+    if (!seen.has(imageKey)) {
+      seen.add(imageKey);
       urls.push(trimmed);
     }
   };
