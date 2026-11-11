@@ -12,6 +12,7 @@ export function formatSourceLabel(rawLabel: string): string {
       if (hostname.includes('tiktok.com')) return 'TikTok Video';
       if (hostname.includes('youtube.com') || hostname.includes('youtu.be')) return 'YouTube Shorts';
       if (hostname.includes('facebook.com')) return 'Facebook Video';
+      if (hostname === 'pin.it' || hostname.endsWith('.pin.it') || hostname.includes('pinterest.')) return 'Pinterest Pin';
       return hostname.replace(/^www\./, '');
     }
   } catch {
