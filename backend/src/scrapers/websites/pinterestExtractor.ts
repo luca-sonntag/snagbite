@@ -1,8 +1,8 @@
-import type { CheerioRoot } from './types.js';
 import * as cheerio from 'cheerio';
 import { formatAuthorHandle } from '@cookbook/shared';
 import type { ScrapingResult } from '../providers/types.js';
-import type { WebsiteExtractor, WebsiteScrapeContext } from './types.js';
+import { normalizeDurationToSeconds } from '../providers/types.js';
+import type { CheerioRoot, WebsiteExtractor, WebsiteScrapeContext } from './types.js';
 import { fetchWebsiteHtml, extractCleanWebsiteText, STANDARD_BROWSER_HEADERS } from './genericWebsiteExtractor.js';
 import { isSafeMediaUrl } from '../../routes/videoProxy.js';
 
@@ -46,6 +46,7 @@ interface PinterestRelayPin {
     }>;
   } | null;
   storyPinData?: {
+    totalVideoDuration?: number;
     pages?: Array<{
       image?: {
         images?: {
@@ -60,9 +61,8 @@ interface PinterestRelayPin {
             [key: string]: unknown;
           };
         };
-        video?: {
-          videoList?: Array<{ url?: string }>;
-        };
+        video?: Record<string, unknown>;
+        videoDataV2?: Record<string, unknown>;
       }>;
     }>;
   } | null;
@@ -76,9 +76,12 @@ interface PinterestRelayPin {
 
 /**
  * Extracts pin data from Pinterest Relay completed request script tags.
+ * Merges multiple completed fragments to ensure video and full story pin details are captured.
  */
 function extractRelayPinData($: CheerioRoot): PinterestRelayPin | null {
   const scripts = $('script');
+  let merged: PinterestRelayPin | null = null;
+
   for (let i = 0; i < scripts.length; i++) {
     const text = $(scripts[i]).html() || '';
     if (!text.includes('__PWS_RELAY_REGISTER_COMPLETED_REQUEST__') || !text.includes('v3GetPinQueryv2')) {
@@ -97,13 +100,34 @@ function extractRelayPinData($: CheerioRoot): PinterestRelayPin | null {
           };
         };
         const pinData = parsed.data?.v3GetPinQueryv2?.data;
-        if (pinData) return pinData;
+        if (pinData) {
+          if (!merged) {
+            merged = { ...pinData };
+          } else {
+            // Shallow merge missing fields
+            for (const key of Object.keys(pinData) as Array<keyof PinterestRelayPin>) {
+              const val = pinData[key];
+              if (val !== undefined && val !== null) {
+                if (!merged[key]) {
+                  (merged as Record<string, unknown>)[key] = val;
+                } else if (key === 'storyPinData' && typeof val === 'object') {
+                  // Prefer storyPinData that contains videoDataV2 or mp4 references
+                  const currentStr = JSON.stringify(merged.storyPinData || {});
+                  const newStr = JSON.stringify(val);
+                  if (newStr.includes('.mp4') && !currentStr.includes('.mp4')) {
+                    merged.storyPinData = val as PinterestRelayPin['storyPinData'];
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     } catch {
       // Continue searching next script if one fails parsing
     }
   }
-  return null;
+  return merged;
 }
 
 interface PinterestJsonLd {
@@ -149,6 +173,7 @@ function extractPinterestJsonLd($: CheerioRoot): PinterestJsonLd | null {
 
 /**
  * Collects all unique slide / infographic image URLs up to MAX_PIN_IMAGES.
+ * Deduplicates by filename to ensure multiple resolutions of the same image are not repeated.
  */
 function collectPinImages(
   relay: PinterestRelayPin | null,
@@ -200,35 +225,91 @@ function collectPinImages(
   return urls.slice(0, MAX_PIN_IMAGES);
 }
 
-/**
- * Checks for direct video stream URL in Relay data.
- */
-function findPinVideoUrl(relay: PinterestRelayPin | null): string | null {
-  if (!relay) return null;
+interface PinVideoInfo {
+  url: string;
+  durationSeconds?: number;
+}
 
-  if (Array.isArray(relay.videos?.videoList)) {
+/**
+ * Checks for direct video stream URL and duration in Relay data or page scripts.
+ */
+function findPinVideo(relay: PinterestRelayPin | null, $: CheerioRoot): PinVideoInfo | null {
+  // 1. Direct relay.videos.videoList
+  if (Array.isArray(relay?.videos?.videoList)) {
     const mp4Videos = relay.videos.videoList.filter(
-      (v) => typeof v.url === 'string' && v.url.includes('.mp4')
+      (v) => typeof v?.url === 'string' && v.url.includes('.mp4')
     );
     if (mp4Videos.length > 0) {
-      // Prefer highest resolution
       const sorted = [...mp4Videos].sort((a, b) => (b.height ?? 0) - (a.height ?? 0));
-      return sorted[0].url ?? null;
+      const best = sorted[0];
+      return {
+        url: best.url!,
+        durationSeconds: normalizeDurationToSeconds(best.duration),
+      };
     }
   }
 
-  if (Array.isArray(relay.storyPinData?.pages)) {
+  // 2. StoryPinData pages blocks with videoDataV2 or video
+  if (Array.isArray(relay?.storyPinData?.pages)) {
     for (const page of relay.storyPinData.pages) {
       if (Array.isArray(page.blocks)) {
         for (const block of page.blocks) {
-          const vList = block.video?.videoList;
-          if (Array.isArray(vList)) {
-            const mp4 = vList.find((v) => typeof v.url === 'string' && v.url.includes('.mp4'));
-            if (mp4?.url) return mp4.url;
+          const vData = (block.videoDataV2 || block.video) as Record<string, unknown> | undefined;
+          if (vData && typeof vData === 'object') {
+            const rawDuration =
+              (vData.videoList720P as { v720P?: { duration?: number } } | undefined)?.v720P?.duration ||
+              (vData.videoList as { vHLSV3MOBILE?: { duration?: number } } | undefined)?.vHLSV3MOBILE?.duration ||
+              relay.storyPinData?.totalVideoDuration;
+
+            const v720pUrl = (vData.videoList720P as { v720P?: { url?: string } } | undefined)?.v720P?.url;
+            if (typeof v720pUrl === 'string' && v720pUrl.includes('.mp4')) {
+              return {
+                url: v720pUrl,
+                durationSeconds: normalizeDurationToSeconds(rawDuration),
+              };
+            }
+
+            for (const key of Object.keys(vData)) {
+              const sub = vData[key];
+              if (sub && typeof sub === 'object') {
+                for (const subKey of Object.keys(sub as Record<string, unknown>)) {
+                  const entry = (sub as Record<string, unknown>)[subKey] as { url?: string; duration?: number } | undefined;
+                  if (typeof entry?.url === 'string' && entry.url.includes('.mp4')) {
+                    return {
+                      url: entry.url,
+                      durationSeconds: normalizeDurationToSeconds(entry.duration || rawDuration),
+                    };
+                  }
+                }
+              }
+            }
           }
         }
       }
     }
+  }
+
+  // 3. Fallback: scan scripts for direct pinimg mp4 video URL
+  let directMp4: string | null = null;
+  const rawDuration = relay?.storyPinData?.totalVideoDuration;
+  $('script').each((_, el) => {
+    const text = $(el).html() || '';
+    if (!directMp4 && text.includes('v1.pinimg.com/videos') && text.includes('.mp4')) {
+      const match = text.match(/https:\/\/v1\.pinimg\.com\/videos\/[^"'<>\s\\]+?\/(\d+p)\/[^"'<>\s\\]+?\.mp4/i);
+      if (match) {
+        directMp4 = match[0];
+      } else {
+        const anyMp4 = text.match(/https:\/\/v1\.pinimg\.com\/videos\/[^"'<>\s\\]+?\.mp4/i);
+        if (anyMp4) directMp4 = anyMp4[0];
+      }
+    }
+  });
+
+  if (directMp4) {
+    return {
+      url: directMp4,
+      durationSeconds: normalizeDurationToSeconds(rawDuration),
+    };
   }
 
   return null;
@@ -285,7 +366,7 @@ export const pinterestExtractor: WebsiteExtractor = {
     const primaryImageUrl = imageUrls[0] ?? undefined;
 
     // 5. Check for Video
-    const videoUrl = findPinVideoUrl(relay);
+    const video = findPinVideo(relay, $);
 
     // 6. External linked blog recipe resolution (if pin links to a food blog)
     let externalBlogContent = '';
@@ -319,14 +400,14 @@ export const pinterestExtractor: WebsiteExtractor = {
       .trim();
 
     // Determine media download kind:
-    // If it's a video pin -> client streaming
+    // If it's a video pin -> client streaming (video keyframe extraction + whisper)
     // If it has images -> images (OCR & full resolution carousel)
     // Else -> none
     let media: ScrapingResult['media'] = { kind: 'none' };
-    if (videoUrl) {
+    if (video) {
       media = {
         kind: 'client',
-        videoUrl,
+        videoUrl: video.url,
         headers: STANDARD_BROWSER_HEADERS,
       };
     } else if (imageUrls.length > 0) {
@@ -342,6 +423,7 @@ export const pinterestExtractor: WebsiteExtractor = {
       htmlContent: htmlContent || undefined,
       imageUrl: primaryImageUrl,
       authorHandle,
+      durationSeconds: video?.durationSeconds,
       media,
     };
   },
