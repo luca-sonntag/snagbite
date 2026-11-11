@@ -36,6 +36,7 @@ function formatSourceLabel(rawLabel: string): string {
       if (url.hostname.includes('tiktok.com')) return 'TikTok Video';
       if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) return 'YouTube Shorts';
       if (url.hostname.includes('facebook.com')) return 'Facebook Video';
+      if (url.hostname === 'pin.it' || url.hostname.endsWith('.pin.it') || url.hostname.includes('pinterest.')) return 'Pinterest Pin';
       return url.hostname.replace('www.', '');
     }
   } catch {

@@ -29,6 +29,9 @@ export function normalizeUrl(urlStr: string): string {
   // Harmonize YouTube Shorts (youtu.be/{id} -> youtube.com/shorts/{id})
   clean = clean.replace(/^youtu\.be\//, 'youtube.com/shorts/');
 
+  // Harmonize Pinterest pin URLs (regional domains, subdomains & subpaths -> pinterest.com/pin/{id})
+  clean = clean.replace(/^(?:[a-z0-9-]+\.)?pinterest\.[a-z.]+\/pin\/(\d+)(?:\/.*)?$/, 'pinterest.com/pin/$1');
+
   return clean;
 }
 
