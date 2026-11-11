@@ -47,6 +47,21 @@ describe('normalizeUrl for recipe reuse', () => {
     );
   });
 
+  it('harmonizes Pinterest pin URLs from regional domains and subpaths', () => {
+    assert.equal(
+      normalizeUrl('https://de.pinterest.com/pin/757941812334849840/sent/?invite_code=765a50d5d5b740b2827c3bfdfce8fe73&sender=996210517481787902&sfo=1'),
+      'pinterest.com/pin/757941812334849840'
+    );
+    assert.equal(
+      normalizeUrl('https://www.pinterest.de/pin/757941812334849840/'),
+      'pinterest.com/pin/757941812334849840'
+    );
+    assert.equal(
+      normalizeUrl('https://pinterest.com/pin/757941812334849840'),
+      'pinterest.com/pin/757941812334849840'
+    );
+  });
+
   it('preserves and normalizes TikTok video links', () => {
     assert.equal(
       normalizeUrl('https://www.tiktok.com/@chef/video/1234567890?is_from_webapp=1'),
