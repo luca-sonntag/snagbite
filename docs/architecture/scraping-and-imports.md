@@ -48,3 +48,21 @@ Der zweite Input-Kanal neben Social-Media-/Website-Links: Der Nutzer fotografier
 * **UI (`ExtractForm/index.tsx`):** Ruhige Action-Karten (`ExtractActionCards.tsx`) „Video & Link | Kochbuch scannen" im Kopf der Extract-Ansicht. Die Inputs öffnen sich jeweils in einem sauberen Bottom Sheet (`UrlExtractSheet.tsx` bzw. `PhotoExtractSheet.tsx`). Der Foto-Modus bietet „Foto aufnehmen" (versteckter `<input type="file" accept="image/*" capture="environment">`) und „Aus Galerie" (`multiple`), ein Thumbnail-Grid mit Entfernen-Button und Reihenfolge-Badge sowie einen 5er-Zähler. **Bewusst kein `@capacitor/camera`:** Plain File-Inputs öffnen im Android-WebView Kamera bzw. Picker, brauchen keine neue Manifest-Permission und bleiben damit **OTA-auslieferbar** — ein natives Plugin würde ein volles Play-Store-Release erzwingen.
 * **Bild-Kompression (`frontend/src/utils/imageCompression.ts`):** Die vorher in `feedbackContext.ts` und `useCachedImage.ts` duplizierte Canvas-Logik ist hier zentralisiert. `PREVIEW_PROFILE` (800 px / q0.75) bleibt für Screenshots und Thumbnails; Rezept-Fotos nutzen `RECIPE_PHOTO_PROFILE` (**1800 px / q0.82**), weil 800 px für das Lesen von Handschrift zu verlustbehaftet sind. Sprengt ein Foto-Set trotzdem das Client-Budget, wird der **ganze** Satz mit `RECIPE_PHOTO_FALLBACK_PROFILE` (1400 px / q0.7) neu kodiert, damit die Seiten relativ zueinander gleich lesbar bleiben.
 * **Quell-Link-Guards:** Drei Stellen rendern `job.url` als Link und müssen `photo://` überspringen — der Quell-Chip über dem Coverbild (`RecipeImageGallery.tsx`, zeigt stattdessen einen nicht-klickbaren „Foto-Import"-Chip), das Plattform-Icon der Kochbuch-Karte (`SavedCatalog/RecipeCard.tsx`, neue `photo`-Variante mit Kamera-Icon statt Globus) und die Failed-Jobs-Liste im Admin (`AdminView.tsx`). Gemeinsamer Helper: `frontend/src/utils/photoImport.ts` (`isPhotoImportUrl`), Spiegel von `backend/src/photoImport.ts`.
+
+
+---
+
+## 3. Website-Scraping & Pinterest-Layer
+
+* **Modulare Website-Extractor-Kette (`backend/src/scrapers/websites/`):**
+  Analog zu den Social-Media-Providern arbeitet der Website-Pfad über eine priorisierte Registry von `WebsiteExtractor`-Modulen (`types.ts`). Jedes Modul implementiert `canHandle(ctx)` und `extract(ctx)`.
+* **Pinterest Extractor (`pinterestExtractor.ts`):**
+  - **URL-Erkennung:** Unterstützt Shortlinks (`https://pin.it/...`) sowie länderspezifische Pinterest-Domains (`pinterest.de`, `de.pinterest.com`, etc.).
+  - **Relay- & JSON-LD-Parsing:** Liest strukturiertes JSON-LD (`SocialMediaPosting` / `Recipe`) und hydrierte Relay-State-Daten (`__PWS_RELAY_REGISTER_COMPLETED_REQUEST__` / `v3GetPinQueryv2`) für Titel, Beschreibung und Pinner-Handle (`@username`).
+  - **Infografik- & Karussell-OCR (`media: { kind: 'images' }`):** Da viele Pinterest-Pins Rezepte als Text auf Infografik-Bildern darstellen, extrahiert der Extractor die originale Bildauflösung (`images_orig.url`) bzw. Multi-Slide-Karussells und leitet sie als `media: { kind: 'images', imageUrls }` an die Bild-Download- und Gemini-Vision-OCR-Pipeline weiter.
+  - **Video-Pins (`media: { kind: 'client' }`):** Erkennt hinterlegte Video-Streams (`videos.videoList` / `storyPinData`) und delegiert diese an den regulären Client-Streaming- und Whisper-Pfad.
+  - **Externe Blog-Link-Auflösung:** Pins, die lediglich als Lesezeichen auf externe Food-Blogs verlinken (`pin.link`), werden nach SSRF-Prüfung (`isSafeMediaUrl`) automatisch geladen und ihr bereinigter Rezepttext in den Extraktions-Kontext (`htmlContent`) eingebunden.
+* **Generic Website Extractor (`genericWebsiteExtractor.ts`):**
+  - Universeller Fallback für beliebige Webseiten.
+  - Extrahiert neben bereinigtem Artikeltext auch vorhandenes `Schema.org/Recipe` JSON-LD und OpenGraph-/Twitter-Coverbilder (`og:image`).
+  - Resilientes Fetching mit 15-Sekunden-Timeout (`AbortSignal.timeout(15_000)`).
